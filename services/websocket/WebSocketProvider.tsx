@@ -18,7 +18,9 @@ import {
   setWebSocketMessageMetadata,
   WebSocketStatus,
   WEBSOCKET_RECOVERY_CAPABILITY,
+  type WebSocketConnectionInfo,
 } from "./WebSocketTypes";
+import { getSocketIdentityKey } from "./socketIdentity";
 import { publicEnv } from "@/config/env";
 import { applyDelayJitter } from "@/helpers/jitter.helpers";
 import { getClientBuildId } from "@/lib/version/versionPoll";
@@ -217,6 +219,14 @@ export function WebSocketProvider({
   const [status, setStatus] = useState<WebSocketStatus>(
     WebSocketStatus.DISCONNECTED
   );
+  const [connection, setConnection] = useState<WebSocketConnectionInfo | null>(
+    null
+  );
+  const statusRef = useRef(WebSocketStatus.DISCONNECTED);
+  // The identity of the last authenticated session, null before the first.
+  const sessionIdentityRef = useRef<string | null>(null);
+  // When the current socket opened or last delivered a frame.
+  const lastFrameAtRef = useRef(0);
 
   // WebSocket connection reference
   const wsRef = useRef<WebSocket | null>(null);
@@ -242,6 +252,30 @@ export function WebSocketProvider({
     }
   }, []);
 
+  const updateStatus = useCallback((next: WebSocketStatus) => {
+    statusRef.current = next;
+    setStatus(next);
+  }, []);
+
+  /** Records an authenticated session and how it came about. */
+  const markAuthenticated = useCallback(() => {
+    let kind: WebSocketConnectionInfo["kind"] = "reconnect";
+    if (statusRef.current === WebSocketStatus.CONNECTED) {
+      kind = "reauthenticated";
+    } else if (sessionIdentityRef.current === null) {
+      kind = "initial";
+    }
+    sessionIdentityRef.current = getSocketIdentityKey(
+      reconnectTokenRef.current
+    );
+    reconnectAttemptsRef.current = 0;
+    updateStatus(WebSocketStatus.CONNECTED);
+    setConnection((previous) => ({
+      revision: (previous?.revision ?? 0) + 1,
+      kind,
+    }));
+  }, [updateStatus]);
+
   /**
    * Parse and route incoming WebSocket messages
    */
@@ -265,8 +299,7 @@ export function WebSocketProvider({
 
       if (message.type === WEBSOCKET_AUTHENTICATED) {
         clearAuthenticationTimer();
-        setStatus(WebSocketStatus.CONNECTED);
-        reconnectAttemptsRef.current = 0;
+        markAuthenticated();
         return;
       }
 
@@ -275,7 +308,7 @@ export function WebSocketProvider({
         rejectedCredentialMarkerRef.current = reconnectTokenRef.current
           ? createCredentialMarker(reconnectTokenRef.current)
           : null;
-        setStatus(WebSocketStatus.DISCONNECTED);
+        updateStatus(WebSocketStatus.DISCONNECTED);
         isManualDisconnectRef.current = true;
         wsRef.current?.close(
           AUTHENTICATION_FAILED_CLOSE_CODE,
@@ -300,7 +333,7 @@ export function WebSocketProvider({
         );
       }
     },
-    [clearAuthenticationTimer]
+    [clearAuthenticationTimer, markAuthenticated, updateStatus]
   );
 
   /**
@@ -380,7 +413,7 @@ export function WebSocketProvider({
         isManualDisconnectRef.current = true;
         clearReconnectTimer();
         reconnectAttemptsRef.current = 0;
-        setStatus(WebSocketStatus.DISCONNECTED);
+        updateStatus(WebSocketStatus.DISCONNECTED);
         return;
       }
 
@@ -405,7 +438,7 @@ export function WebSocketProvider({
       clearReconnectTimer();
 
       // Update status to connecting
-      setStatus(WebSocketStatus.CONNECTING);
+      updateStatus(WebSocketStatus.CONNECTING);
 
       try {
         // Advertise reconnect safety on every connection, including anonymous sessions.
@@ -430,9 +463,10 @@ export function WebSocketProvider({
           if (wsRef.current !== ws) {
             return;
           }
+          lastFrameAtRef.current = Date.now();
 
           if (useMessageAuth) {
-            setStatus(WebSocketStatus.AUTHENTICATING);
+            updateStatus(WebSocketStatus.AUTHENTICATING);
             ws.send(
               JSON.stringify({
                 type: WEBSOCKET_AUTHENTICATE,
@@ -451,9 +485,7 @@ export function WebSocketProvider({
             return;
           }
 
-          setStatus(WebSocketStatus.CONNECTED);
-          // Reset reconnect attempts on successful connection
-          reconnectAttemptsRef.current = 0;
+          markAuthenticated();
         };
 
         ws.onmessage = (event) => {
@@ -461,6 +493,7 @@ export function WebSocketProvider({
             return;
           }
 
+          lastFrameAtRef.current = Date.now();
           handleMessage(event);
         };
 
@@ -472,7 +505,7 @@ export function WebSocketProvider({
           // Clean up WebSocket
           clearAuthenticationTimer();
           wsRef.current = null;
-          setStatus(WebSocketStatus.DISCONNECTED);
+          updateStatus(WebSocketStatus.DISCONNECTED);
 
           // API Gateway may close a slow listener with code 1000. Only a local
           // intentional disconnect should suppress normal authenticated recovery.
@@ -498,7 +531,7 @@ export function WebSocketProvider({
         wsRef.current = ws;
       } catch {
         clearAuthenticationTimer();
-        setStatus(WebSocketStatus.DISCONNECTED);
+        updateStatus(WebSocketStatus.DISCONNECTED);
 
         // Schedule reconnect even for connection errors
         attemptReconnect(connectSocket);
@@ -510,6 +543,8 @@ export function WebSocketProvider({
       clearReconnectTimer,
       clearAuthenticationTimer,
       attemptReconnect,
+      markAuthenticated,
+      updateStatus,
     ]
   );
 
@@ -532,9 +567,72 @@ export function WebSocketProvider({
     if (wsRef.current) {
       wsRef.current.close(1000, "Intentional disconnect");
       wsRef.current = null;
-      setStatus(WebSocketStatus.DISCONNECTED);
+      updateStatus(WebSocketStatus.DISCONNECTED);
     }
-  }, [clearReconnectTimer, clearAuthenticationTimer]);
+  }, [clearReconnectTimer, clearAuthenticationTimer, updateStatus]);
+
+  /** Replaces a socket that stopped answering, unless it was replaced already. */
+  const replaceUnresponsiveSocket = useCallback(
+    (ws: WebSocket) => {
+      if (wsRef.current === ws) {
+        connect(getAuthJwt() ?? reconnectTokenRef.current);
+      }
+    },
+    [connect]
+  );
+
+  const reauthenticate = useCallback(
+    (token: string) => {
+      const ws = wsRef.current;
+      const isOpenSession =
+        statusRef.current === WebSocketStatus.CONNECTED &&
+        ws?.readyState === WebSocket.OPEN;
+      if (isOpenSession && token === reconnectTokenRef.current) {
+        return;
+      }
+      if (
+        !ws ||
+        !isOpenSession ||
+        authenticationTimerRef.current !== null ||
+        sessionIdentityRef.current !== getSocketIdentityKey(token) ||
+        !isAuthJwtUsable(token)
+      ) {
+        // Another identity, or no settled session to update: start over.
+        connect(token);
+        return;
+      }
+      // The server swaps the token on this connection and keeps its open
+      // wave and delivery state, so nothing is missed.
+      reconnectTokenRef.current = token;
+      rejectedCredentialMarkerRef.current = null;
+      ws.send(
+        JSON.stringify({ type: WEBSOCKET_AUTHENTICATE, access_token: token })
+      );
+      authenticationTimerRef.current = setTimeout(() => {
+        authenticationTimerRef.current = null;
+        replaceUnresponsiveSocket(ws);
+      }, AUTHENTICATION_TIMEOUT_MS);
+    },
+    [connect, replaceUnresponsiveSocket]
+  );
+
+  // A socket that delivered a frame since `since` is alive. A quiet one may
+  // have died silently, and servers before PING/PONG cannot be asked, so it
+  // is replaced.
+  const ensureLive = useCallback(
+    (since: number) => {
+      const ws = wsRef.current;
+      if (
+        ws &&
+        statusRef.current === WebSocketStatus.CONNECTED &&
+        authenticationTimerRef.current === null &&
+        (ws.readyState !== WebSocket.OPEN || lastFrameAtRef.current < since)
+      ) {
+        replaceUnresponsiveSocket(ws);
+      }
+    },
+    [replaceUnresponsiveSocket]
+  );
 
   /**
    * Subscribe to a specific message type
@@ -611,13 +709,26 @@ export function WebSocketProvider({
   const contextValue: WebSocketContextValue = useMemo(
     () => ({
       status,
+      connection,
       connect,
       disconnect,
+      reauthenticate,
+      ensureLive,
       subscribe,
       send,
       config,
     }),
-    [status, connect, disconnect, subscribe, send, config]
+    [
+      status,
+      connection,
+      connect,
+      disconnect,
+      reauthenticate,
+      ensureLive,
+      subscribe,
+      send,
+      config,
+    ]
   );
 
   return (
