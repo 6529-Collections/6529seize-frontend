@@ -1,6 +1,7 @@
 "use client";
 
 import { getWebSocketUrl } from "@/services/api/api-endpoints";
+import { getSocketIdentityKey } from "@/services/websocket/socketIdentity";
 import { WsMessageType } from "@/helpers/Types";
 import { useMobileAppActivity } from "./useMobileAppActivity";
 import {
@@ -18,7 +19,7 @@ interface UseWaveWebSocketResult {
 
 interface WaveConnectionState {
   readonly waveId: string;
-  readonly token: string | null;
+  readonly identity: string | null;
   readonly socket: WebSocket | null;
   readonly readyState: number;
 }
@@ -82,6 +83,8 @@ function messageType(event: MessageEvent<unknown>): string | null {
 /** A wave-scoped listener, independent of the global feed/notification socket.
  * Signed-in listeners authenticate before subscribing so private-wave recipient
  * filtering and the typing sender's active-wave membership check can succeed.
+ * A rotated token for the same identity re-authenticates the open socket in
+ * place, which keeps its wave subscription; another identity gets a new socket.
  */
 export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
   const token = useSyncExternalStore(
@@ -91,12 +94,17 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
   );
   const isAppActive = useMobileAppActivity();
   const manuallyDisconnectedRef = useRef(false);
-  const activeScopeRef = useRef({ waveId, token });
+  const identity = getSocketIdentityKey(token);
+  const isTokenUsable = !token || isAuthJwtUsable(token);
+  // A manual disconnect lasts until the wave or the signed-in identity
+  // changes; a rotated token for the same identity keeps it.
+  const activeScopeRef = useRef({ waveId, identity });
   const socketRef = useRef<WebSocket | null>(null);
   const stopRef = useRef<() => void>(() => undefined);
+  const tokenChangedRef = useRef<() => void>(() => undefined);
   const [connection, setConnection] = useState<WaveConnectionState>({
     waveId: "",
-    token: null,
+    identity: null,
     socket: null,
     readyState: WebSocket.CLOSED,
   });
@@ -104,22 +112,21 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
   useEffect(() => {
     if (
       activeScopeRef.current.waveId !== waveId ||
-      activeScopeRef.current.token !== token
+      activeScopeRef.current.identity !== identity
     ) {
-      activeScopeRef.current = { waveId, token };
+      activeScopeRef.current = { waveId, identity };
       manuallyDisconnectedRef.current = false;
     }
-    if (
-      !waveId ||
-      !isAppActive ||
-      manuallyDisconnectedRef.current ||
-      (token && !isAuthJwtUsable(token))
-    )
-      return;
+    if (!waveId || !isAppActive || manuallyDisconnectedRef.current) return;
+    if (!isTokenUsable) return;
 
     let disposed = false;
     let shouldReconnect = true;
     let reconnectAttempts = 0;
+    // The token the server rejected; a newer one for this identity retries.
+    let rejectedToken: string | null = null;
+    // Re-authenticates the open socket with the latest token, if it changed.
+    let syncSocketToken: () => void = () => undefined;
     let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     let authenticationTimeout: ReturnType<typeof setTimeout> | null = null;
     const url = getTypingSocketUrl(getWebSocketUrl());
@@ -131,8 +138,10 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
       }
     };
     const publish = (socket: WebSocket | null, readyState: number) => {
-      setConnection({ waveId, token, socket, readyState });
+      setConnection({ waveId, identity, socket, readyState });
     };
+    const isSameIdentity = () =>
+      getSocketIdentityKey(getAuthJwt()) === identity;
     const stop = () => {
       shouldReconnect = false;
       if (reconnectTimeout !== null) clearTimeout(reconnectTimeout);
@@ -147,14 +156,43 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
     };
 
     function connect() {
-      if (disposed || !shouldReconnect || getAuthJwt() !== token) return;
-      if (token && !isAuthJwtUsable(token)) return;
+      if (disposed || !shouldReconnect || !isSameIdentity()) return;
+      const connectToken = getAuthJwt();
+      if (connectToken && !isAuthJwtUsable(connectToken)) return;
       const ws = new WebSocket(url);
       socketRef.current = ws;
       publish(null, WebSocket.CONNECTING);
       const isCurrent = () =>
-        !disposed && socketRef.current === ws && getAuthJwt() === token;
+        !disposed && socketRef.current === ws && isSameIdentity();
       let subscribed = false;
+      // The token of the AUTHENTICATE in flight or last accepted.
+      let sentToken: string | null = null;
+      let authenticating = false;
+      const authenticate = (accessToken: string) => {
+        sentToken = accessToken;
+        authenticating = true;
+        clearAuthenticationTimeout();
+        authenticationTimeout = setTimeout(() => {
+          if (isCurrent()) ws.close(4011, "Authentication timeout");
+        }, AUTHENTICATION_TIMEOUT_MS);
+        ws.send(
+          JSON.stringify({ type: "AUTHENTICATE", access_token: accessToken })
+        );
+      };
+      syncSocketToken = () => {
+        const latest = getAuthJwt();
+        if (
+          !isCurrent() ||
+          ws.readyState !== WebSocket.OPEN ||
+          authenticating ||
+          sentToken === null ||
+          !latest ||
+          latest === sentToken ||
+          !isAuthJwtUsable(latest)
+        )
+          return;
+        authenticate(latest);
+      };
       const subscribe = () => {
         if (!isCurrent() || subscribed || ws.readyState !== WebSocket.OPEN)
           return;
@@ -172,20 +210,27 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
 
       ws.onopen = () => {
         if (!isCurrent()) return;
-        if (!token) {
+        const openToken = getAuthJwt();
+        if (!openToken) {
           subscribe();
           return;
         }
-        authenticationTimeout = setTimeout(() => {
-          if (isCurrent()) ws.close(4011, "Authentication timeout");
-        }, AUTHENTICATION_TIMEOUT_MS);
-        ws.send(JSON.stringify({ type: "AUTHENTICATE", access_token: token }));
+        authenticate(openToken);
       };
       ws.onmessage = (event) => {
-        if (!isCurrent() || !token) return;
+        if (!isCurrent() || sentToken === null) return;
         const type = messageType(event);
-        if (type === "AUTHENTICATED") subscribe();
+        if (type === "AUTHENTICATED") {
+          authenticating = false;
+          clearAuthenticationTimeout();
+          subscribe();
+          // The token may have rotated while this one was in flight.
+          syncSocketToken();
+        }
         if (type === "AUTHENTICATION_FAILED") {
+          rejectedToken = sentToken;
+          // Frames that still arrive on the closing socket are ignored.
+          sentToken = null;
           shouldReconnect = false;
           clearAuthenticationTimeout();
           publish(null, WebSocket.CLOSED);
@@ -207,18 +252,41 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
       };
     }
 
+    tokenChangedRef.current = () => {
+      const latest = getAuthJwt();
+      if (disposed || !isSameIdentity()) return;
+      if (rejectedToken === null) {
+        syncSocketToken();
+      } else if (
+        latest &&
+        latest !== rejectedToken &&
+        isAuthJwtUsable(latest)
+      ) {
+        rejectedToken = null;
+        shouldReconnect = true;
+        reconnectAttempts = 0;
+        connect();
+      }
+    };
+
     connect();
     return () => {
       disposed = true;
       stop();
       stopRef.current = () => undefined;
+      tokenChangedRef.current = () => undefined;
     };
-  }, [waveId, token, isAppActive]);
+  }, [waveId, identity, isTokenUsable, isAppActive]);
+
+  // A new token for the same identity: the effect above keeps its socket.
+  useEffect(() => {
+    tokenChangedRef.current();
+  }, [token]);
 
   const isCurrent =
     isAppActive &&
     connection.waveId === waveId &&
-    connection.token === token;
+    connection.identity === identity;
   return {
     socket: isCurrent ? connection.socket : null,
     readyState: isCurrent ? connection.readyState : WebSocket.CLOSED,

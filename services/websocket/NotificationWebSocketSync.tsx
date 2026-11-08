@@ -76,7 +76,11 @@ const isIdentityNotificationsChangedData = (
 export function NotificationWebSocketSync() {
   const queryClient = useQueryClient();
   const { connectedAccounts } = useSeizeConnectContext();
-  const { send, status } = useWebSocket();
+  const { connection, send, status } = useWebSocket();
+  // Authenticating replaces the server's notification subscriptions with the
+  // primary identity's, including an in-place re-authentication that keeps
+  // the status connected, so every authentication re-syncs the identities.
+  const authenticationRevision = connection?.revision ?? 0;
   const [authRevision, setAuthRevision] = useState(0);
   const previousStatusRef = useRef(status);
   const hasConnectedRef = useRef(false);
@@ -148,7 +152,13 @@ export function NotificationWebSocketSync() {
       syncIdentities,
       WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS
     );
-  }, [authRevision, connectedAccountsRevision, send, status]);
+  }, [
+    authRevision,
+    authenticationRevision,
+    connectedAccountsRevision,
+    send,
+    status,
+  ]);
 
   // A notification event only adds recent entries, so a mounted list reloads
   // its first page instead of replaying every page the user has scrolled

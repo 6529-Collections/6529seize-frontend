@@ -756,6 +756,36 @@ describe("DmUnreadStateProvider", () => {
       }
     });
 
+    it("takes a staggered snapshot when the server sends a resync marker", async () => {
+      const rendered = await mountAfterFirstConnect();
+      try {
+        isConnected = true;
+        rendered.rerender(providerUi());
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(3_000);
+        });
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
+        // Past the recovery cooldown, as after a real delivery failure.
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(2_000);
+        });
+
+        act(() => {
+          websocketHandlers.get("RESYNC_REQUIRED")?.({});
+        });
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(1_499);
+        });
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(1);
+        });
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(4);
+      } finally {
+        rendered.unmount();
+      }
+    });
+
     it("cancels the pending reconnect snapshot on unmount", async () => {
       const rendered = await mountAfterFirstConnect();
       isConnected = true;

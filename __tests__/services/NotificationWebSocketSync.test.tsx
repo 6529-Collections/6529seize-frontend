@@ -13,7 +13,10 @@ import {
   useNotificationRealtimeState,
 } from "@/services/notifications/notification-realtime-state";
 import { NotificationWebSocketSync } from "@/services/websocket/NotificationWebSocketSync";
-import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import {
+  WebSocketStatus,
+  type WebSocketConnectionInfo,
+} from "@/services/websocket/WebSocketTypes";
 import type { TypedNotificationsResponse } from "@/types/feed.types";
 import { mockRandomUnit } from "../helpers/mockRandomUnit";
 
@@ -24,6 +27,7 @@ const getAuthJwtMock = jest.fn();
 const getConnectedWalletAccountsMock = jest.fn();
 const mockUseQueryClient = jest.fn();
 let webSocketStatus = WebSocketStatus.CONNECTED;
+let webSocketConnection: WebSocketConnectionInfo | null = null;
 
 jest.mock("@tanstack/react-query", () => ({
   ...jest.requireActual("@tanstack/react-query"),
@@ -57,6 +61,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
 
 jest.mock("@/services/websocket/useWebSocket", () => ({
   useWebSocket: () => ({
+    connection: webSocketConnection,
     send: sendMock,
     status: webSocketStatus,
   }),
@@ -130,6 +135,7 @@ describe("NotificationWebSocketSync", () => {
     });
     messageCallbacks.clear();
     webSocketStatus = WebSocketStatus.CONNECTED;
+    webSocketConnection = null;
     setNotificationRealtimeState(false);
     getAuthJwtMock.mockReturnValue("primary-jwt");
     getConnectedWalletAccountsMock.mockReturnValue([
@@ -174,6 +180,29 @@ describe("NotificationWebSocketSync", () => {
       {
         cancelRefetch: false,
       }
+    );
+    unmount();
+  });
+
+  it("re-syncs identities after an in-place re-authentication replaced them", () => {
+    webSocketConnection = {
+      revision: 1,
+      kind: "initial",
+    };
+    const { rerender, unmount } = render(<Subject />);
+    expect(sendMock).toHaveBeenCalledTimes(1);
+
+    // The status stays connected; only the session revision moves.
+    webSocketConnection = {
+      revision: 2,
+      kind: "reauthenticated",
+    };
+    rerender(<Subject />);
+
+    expect(sendMock).toHaveBeenCalledTimes(2);
+    expect(sendMock).toHaveBeenLastCalledWith(
+      WsMessageType.SYNC_NOTIFICATION_IDENTITIES,
+      { access_tokens: ["primary-jwt", "secondary-jwt"] }
     );
     unmount();
   });
@@ -514,18 +543,23 @@ describe("NotificationWebSocketSync", () => {
     queryClient.clear();
   });
 
-describe("mounted notification lists", () => {
+  describe("mounted notification lists", () => {
     const PAGE_SIZE = 3;
     let serverIds: number[];
     let listQueryFn: jest.Mock<
       Promise<TypedNotificationsResponse>,
       [{ readonly pageParam: number | null }]
     >;
-    let counterQueryFn: jest.Mock<Promise<{ readonly unread_count: number }>, []>;
+    let counterQueryFn: jest.Mock<
+      Promise<{ readonly unread_count: number }>,
+      []
+    >;
     let fetchNextPage: () => Promise<unknown>;
     let queryClient: QueryClient;
 
-    const readServerPage = (cursor: number | null): TypedNotificationsResponse => {
+    const readServerPage = (
+      cursor: number | null
+    ): TypedNotificationsResponse => {
       const start = cursor === null ? 0 : serverIds.indexOf(cursor) + 1;
       const ids = serverIds.slice(start, start + PAGE_SIZE);
       const hasMore = start + PAGE_SIZE < serverIds.length;
@@ -563,10 +597,9 @@ describe("mounted notification lists", () => {
 
     const cachedIds = () =>
       queryClient
-        .getQueryData<{ readonly pages: TypedNotificationsResponse[] }>([
-          QueryKey.IDENTITY_NOTIFICATIONS,
-          "list",
-        ])
+        .getQueryData<{
+          readonly pages: TypedNotificationsResponse[];
+        }>([QueryKey.IDENTITY_NOTIFICATIONS, "list"])
         ?.pages.map((page) => page.notifications.map(({ id }) => id));
 
     const renderLoadedLists = async () => {
