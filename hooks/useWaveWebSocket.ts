@@ -22,6 +22,8 @@ const getServerSnapshot = (): TypingSocketSnapshot => SERVER_SNAPSHOT;
  * filtering and the typing sender's active-wave membership check can succeed.
  * Switching waves re-subscribes the same socket; the newest wave asked for
  * wins, and the socket is returned only while it follows `waveId`.
+ * `disconnect()` turns typing off for this caller's wave until it moves to
+ * another wave; the shared socket stays for other callers.
  */
 export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
   const isAppActive = useMobileAppActivity();

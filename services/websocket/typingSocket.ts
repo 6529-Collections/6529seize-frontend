@@ -87,6 +87,9 @@ class TypingSocket {
   private openTimer: ReturnType<typeof setTimeout> | null = null;
   private closeTimer: ReturnType<typeof setTimeout> | null = null;
   private stopWatching: (() => void) | null = null;
+  // Sockets this tab closed itself. Their close events, which a browser
+  // delivers later, never schedule a reconnect.
+  private readonly closedByClient = new WeakSet<WebSocket>();
 
   readonly subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
@@ -150,11 +153,16 @@ class TypingSocket {
       this.rejectedToken = null;
     }
     if (!this.ws) {
-      if (this.rejectedToken !== null && token === this.rejectedToken) return;
+      if (this.isRejected(token)) return;
       if (!this.reconnectTimer) this.openWhenSettled();
       return;
     }
     this.subscribeTo(desired);
+  }
+
+  /** A rejected token is not retried until a newer one arrives. */
+  private isRejected(token: string | null): boolean {
+    return this.rejectedToken !== null && token === this.rejectedToken;
   }
 
   private openWhenSettled(): void {
@@ -216,10 +224,11 @@ class TypingSocket {
       }
     };
     ws.onclose = () => {
-      if (!isCurrent()) return;
+      if (!isCurrent() || this.closedByClient.has(ws)) return;
       this.dropSocket();
       if (
         this.desiredWaveId !== null &&
+        !this.isRejected(getAuthJwt()) &&
         this.reconnectAttempts < MAX_RECONNECT_ATTEMPTS
       ) {
         this.reconnectAttempts += 1;
@@ -357,6 +366,7 @@ class TypingSocket {
   /** Closes the socket and cancels its reconnect; consumers stay. */
   private close(code?: number, reason?: string): void {
     const ws = this.ws;
+    if (ws) this.closedByClient.add(ws);
     this.clearReconnectTimer();
     this.dropSocket();
     if (code === undefined) ws?.close();

@@ -1,6 +1,10 @@
+import { StrictMode } from "react";
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { useWaveWebSocket } from "@/hooks/useWaveWebSocket";
-import { getTypingSocketUrl } from "@/services/websocket/typingSocket";
+import {
+  getTypingSocketUrl,
+  typingSocket,
+} from "@/services/websocket/typingSocket";
 import { AUTH_TOKEN_CHANGED_EVENT } from "@/services/auth/auth.utils";
 import { fakeJwt } from "../helpers/fakeJwt";
 
@@ -23,6 +27,7 @@ jest.mock("@/config/env", () => ({
 class MockWebSocket extends EventTarget {
   static readonly CONNECTING = 0;
   static readonly OPEN = 1;
+  static readonly CLOSING = 2;
   static readonly CLOSED = 3;
   readyState = MockWebSocket.CONNECTING;
   onopen: (() => void) | null = null;
@@ -34,6 +39,16 @@ class MockWebSocket extends EventTarget {
     this.readyState = MockWebSocket.CLOSED;
     this.onclose?.();
   });
+  /** Makes `close()` deliver its close event later, as browsers do. */
+  deferClose(): () => void {
+    this.close.mockImplementationOnce(() => {
+      this.readyState = MockWebSocket.CLOSING;
+    });
+    return () => {
+      this.readyState = MockWebSocket.CLOSED;
+      this.onclose?.();
+    };
+  }
   constructor(readonly url: string) {
     super();
   }
@@ -271,6 +286,25 @@ it("waits for the tab to be visible before reconnecting", () => {
   expect(sockets).toHaveLength(2);
 });
 
+it("resumes a reconnect that came due while the tab was hidden", () => {
+  const { result } = renderHook(() => useWaveWebSocket("wave"));
+  openSocket();
+  act(() => socket().close());
+  act(() => jest.advanceTimersByTime(1_000));
+  act(() => setVisibility("hidden"));
+  // The reconnect comes due while hidden and waits.
+  act(() => jest.advanceTimersByTime(60_000));
+  expect(sockets).toHaveLength(1);
+
+  act(() => setVisibility("visible"));
+  act(() => jest.advanceTimersByTime(OPEN_AFTER_VISIBLE_MS - 1));
+  expect(sockets).toHaveLength(1);
+  act(() => jest.advanceTimersByTime(1));
+  expect(sockets).toHaveLength(2);
+  act(() => socket().open());
+  expect(result.current.socket).toBe(socket());
+});
+
 it("does not downgrade rejected credentials or retry them, and retries a newer token", () => {
   mockToken = "rejected";
   const { result } = renderHook(() => useWaveWebSocket("wave"));
@@ -287,6 +321,74 @@ it("does not downgrade rejected credentials or retry them, and retries a newer t
   expect(sockets).toHaveLength(2);
   act(() => socket().open());
   expect(socket().frames()).toEqual([authenticateFrame("replacement")]);
+});
+
+it("does not reconnect after a rejection whose close event arrives late", () => {
+  mockToken = "rejected-late";
+  const { result } = renderHook(() => useWaveWebSocket("wave"));
+  openSocket({ authenticate: false });
+  const deliverClose = socket().deferClose();
+  act(() => socket().message({ type: "AUTHENTICATION_FAILED" }));
+  expect(socket().close).toHaveBeenCalledWith(4008, "Authentication failed");
+
+  act(() => jest.advanceTimersByTime(1_000));
+  act(() => deliverClose());
+  act(() => jest.advanceTimersByTime(60_000));
+  expect(sockets).toHaveLength(1);
+  expect(result.current.socket).toBeNull();
+});
+
+it("keeps a replacement when a rejected socket's close event arrives after it", () => {
+  mockToken = "rejected-before-replacement";
+  const { result } = renderHook(() => useWaveWebSocket("wave"));
+  openSocket({ authenticate: false });
+  const deliverClose = socket().deferClose();
+  act(() => socket().message({ type: "AUTHENTICATION_FAILED" }));
+
+  act(() => changeToken("replacement"));
+  act(() => socket().open());
+  act(() => socket().message({ type: "AUTHENTICATED" }));
+  act(() => deliverClose());
+  act(() => jest.advanceTimersByTime(60_000));
+
+  expect(sockets).toHaveLength(2);
+  expect(socket().close).not.toHaveBeenCalled();
+  expect(result.current.socket).toBe(socket());
+});
+
+it("never reconnects a socket this tab closed, whenever its close event arrives", () => {
+  const view = renderHook(() => useWaveWebSocket("wave"));
+  openSocket();
+  const first = socket();
+  const deliverClose = first.deferClose();
+  mockAppActive = false;
+  view.rerender();
+  expect(first.close).toHaveBeenCalledTimes(1);
+
+  // A reader asks again before the old close event arrives.
+  mockAppActive = true;
+  view.rerender();
+  const pendingTimers = jest.getTimerCount();
+  act(() => deliverClose());
+  // The late close event schedules no reconnect.
+  expect(jest.getTimerCount()).toBe(pendingTimers);
+  act(() => jest.advanceTimersByTime(60_000));
+  expect(sockets).toHaveLength(2);
+});
+
+it("still reconnects a signed-out reader after an earlier rejection", () => {
+  mockToken = "rejected-before-sign-out";
+  renderHook(() => useWaveWebSocket("wave"));
+  openSocket({ authenticate: false });
+  act(() => socket().message({ type: "AUTHENTICATION_FAILED" }));
+
+  act(() => changeToken(null));
+  act(() => jest.advanceTimersByTime(OPEN_AFTER_VISIBLE_MS));
+  expect(sockets).toHaveLength(2);
+  act(() => socket().open());
+  act(() => socket().close());
+  act(() => jest.advanceTimersByTime(2_000));
+  expect(sockets).toHaveLength(3);
 });
 
 it("bounds retries when the authentication acknowledgement never arrives", () => {
@@ -358,6 +460,37 @@ it("keeps a manual disconnect across activity changes but permits a new wave", (
   act(() => socket().open());
   expect(socket().frames()).toContainEqual(subscribeFrame("second"));
   expect(result.current.socket).toBe(socket());
+});
+
+describe("readers", () => {
+  it("releases every reader under StrictMode remounts", () => {
+    const view = renderHook(() => useWaveWebSocket("wave"), {
+      wrapper: StrictMode,
+    });
+    openSocket();
+    const shared = socket();
+    view.unmount();
+
+    act(() => jest.advanceTimersByTime(CLOSE_AFTER_IDLE_MS));
+    expect(shared.close).toHaveBeenCalledTimes(1);
+    act(() => jest.advanceTimersByTime(60_000));
+    expect(sockets).toHaveLength(1);
+  });
+
+  it("ignores a repeated release", () => {
+    const view = renderHook(() => useWaveWebSocket("wave"));
+    openSocket();
+    const release = typingSocket.acquire("other");
+    act(() => release());
+    act(() => release());
+
+    expect(socket().frames()).toEqual([
+      subscribeFrame("wave"),
+      subscribeFrame("other"),
+      subscribeFrame("wave"),
+    ]);
+    expect(view.result.current.socket).toBe(socket());
+  });
 });
 
 describe("tokens", () => {
