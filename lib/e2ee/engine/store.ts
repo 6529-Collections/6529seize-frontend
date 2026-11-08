@@ -110,6 +110,8 @@ const isCountable = (message: StoredMessage, own: string): boolean =>
 export class EngineStore {
   status: E2eeEngineStatus = "loading";
   error: string | null = null;
+  /** Set while this device has moved off an earlier suite (getUpgrade). */
+  upgrade: { superseded: number } | null = null;
   thisDevice: E2eeDeviceInfo | null = null;
   devices: E2eeDeviceInfo[] = [];
   /** Server switch (GET /e2ee/me); false until the server has answered. */

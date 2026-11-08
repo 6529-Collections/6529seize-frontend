@@ -85,6 +85,30 @@ const metadata = (g) =>
   });
 const entryItem = (entry) => JSON.stringify({ ...entry, type: "entry" });
 
+/** Mean encrypt and decrypt + verify times of MESSAGES 200-byte messages. */
+function measureMessages(creator, joiner, g) {
+  const body = enc.encode("x".repeat(200));
+  let encMs = 0;
+  let decMs = 0;
+  let msgLen = 0;
+  for (let i = 0; i < MESSAGES; i++) {
+    let t = now();
+    const m = JSON.parse(creator.encryptMessage(g, body));
+    encMs += now() - t;
+    msgLen = b64Len(m.data);
+    const item = JSON.stringify({
+      type: "message",
+      epoch: m.epoch,
+      data: m.data,
+    });
+    t = now();
+    const d = JSON.parse(joiner.decryptMessage(g, item));
+    decMs += now() - t;
+    if (!d.sig_ok) throw new Error("sig");
+  }
+  return { encMs: encMs / MESSAGES, decMs: decMs / MESSAGES, msgLen };
+}
+
 function run(n, seed) {
   const g = `0x${seed.toString(16).padStart(2, "0").repeat(32)}`;
   const creator = device("creator");
@@ -114,29 +138,9 @@ function run(n, seed) {
     joinMs = now() - t;
   }
 
-  let encMs = 0;
-  let decMs = 0;
-  let msgLen = 0;
-  if (joiner) {
-    const body = enc.encode("x".repeat(200));
-    for (let i = 0; i < MESSAGES; i++) {
-      t = now();
-      const m = JSON.parse(creator.encryptMessage(g, body));
-      encMs += now() - t;
-      msgLen = b64Len(m.data);
-      const item = JSON.stringify({
-        type: "message",
-        epoch: m.epoch,
-        data: m.data,
-      });
-      t = now();
-      const d = JSON.parse(joiner.decryptMessage(g, item));
-      decMs += now() - t;
-      if (!d.sig_ok) throw new Error("sig");
-    }
-    encMs /= MESSAGES;
-    decMs /= MESSAGES;
-  }
+  const { encMs, decMs, msgLen } = joiner
+    ? measureMessages(creator, joiner, g)
+    : { encMs: 0, decMs: 0, msgLen: 0 };
 
   const summary = JSON.parse(creator.groupSummary(g));
   const victim = summary.members

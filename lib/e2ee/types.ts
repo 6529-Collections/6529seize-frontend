@@ -145,8 +145,20 @@ export interface E2eeConversation {
   createdBy: string;
   epoch: number;
   safetyCode: string; // "abcd efgh ijkl mnop"
-  /** "restored": from a history backup, read-only until this device joins. */
-  status: "active" | "invalid" | "left" | "removed" | "restored";
+  /**
+   * "restored": from a history backup, read-only until this device joins.
+   * "superseded": made under an earlier MLS ciphersuite (D172). Its history
+   * stays readable on this device; it is read-only (sends, edits, reactions
+   * and membership changes throw E2EE_SUPERSEDED) and continues through
+   * `restart(g)`.
+   */
+  status: "active" | "invalid" | "left" | "removed" | "restored" | "superseded";
+  /** The group's MLS ciphersuite (79 = 0x004F, 78 = 0x004E); informational. */
+  ciphersuite?: number;
+  /** The conversation that continues this one, when this device knows it. */
+  successor?: string | null;
+  /** The conversation this one continues (the reverse of `successor`). */
+  predecessor?: string | null;
   delayed: boolean; // 8.3 stall banner
   splitView: boolean; // 8.6 alarm
   /** Members' devices waiting for "Add device" or "Ignore". */
@@ -202,6 +214,14 @@ export interface E2eeEngine {
    * it settles on; a refused sign-in grant leaves "needs-enrollment".
    */
   enrollWithLoginGrant(): Promise<E2eeEngineStatus>;
+  /**
+   * Non-null while this device has moved off an earlier MLS ciphersuite and
+   * not enrolled again (status "needs-enrollment"): the UI shows upgrade
+   * copy instead of first-time copy. `superseded` counts the read-only
+   * conversations kept. Enrolling still asks for at most one signature
+   * (`needsNewDevice()` is true, so a combined sign-in can carry it).
+   */
+  getUpgrade(): { superseded: number } | null;
   sync(): Promise<void>; // pull inbox + all groups now
   dispose(): void;
 
@@ -244,7 +264,13 @@ export interface E2eeEngine {
   removeMember(g: string, profileId: string): Promise<void>;
   setAdmin(g: string, profileId: string, admin: boolean): Promise<void>;
   leave(g: string): Promise<void>;
-  restart(g: string): Promise<string>; // new group, same people
+  /**
+   * A new conversation with the same people (and name), returning its g. On
+   * a "superseded" conversation it creates the successor on the current
+   * suite once and returns the same g on later calls; people who cannot be
+   * reached yet are skipped (E2EE_NO_DEVICES when nobody can be).
+   */
+  restart(g: string): Promise<string>;
   /**
    * Reports the message as the reader sees it (its latest edit, signed);
    * `includeOriginal` also sends the original of an edited message.

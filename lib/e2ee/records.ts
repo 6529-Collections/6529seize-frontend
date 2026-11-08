@@ -77,13 +77,18 @@ export interface PendingCommitRecord {
   createdAt: number;
 }
 
-/** "restored": known only from a history backup, read-only until joined. */
+/**
+ * "restored": known only from a history backup, read-only until joined.
+ * "superseded": made under an earlier MLS ciphersuite; history kept, MLS
+ * state dropped, read-only (D172).
+ */
 export type StoredGroupStatus =
   | "active"
   | "invalid"
   | "left"
   | "removed"
-  | "restored";
+  | "restored"
+  | "superseded";
 
 export interface StoredGroup {
   g: string;
