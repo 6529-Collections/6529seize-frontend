@@ -115,7 +115,7 @@ function renderChallenge({ origin, address, signing, mls, issuedAtMs, nonce }) {
     `- urn:6529:device-grant:v1:ed25519:${stripHex(signing.deviceKeyHex)}:${signing.scopes.join(".")}:${signing.expiresAtSeconds}`,
     ...(mls
       ? [
-          `- urn:6529:mls-device-grant:v1:${mls.ciphersuite}:${stripHex(mls.deviceKeyHex)}:${mls.expiresAtSeconds}`,
+          `- urn:6529:mls-device-grant:v${mls.version}:${mls.ciphersuites.join(".")}:${stripHex(mls.deviceKeyHex)}:${mls.expiresAtSeconds}`,
         ]
       : []),
   ].join("\n");
@@ -146,14 +146,29 @@ function parseGrantRequest(query, nowMs) {
     return { address, signing, mls: null };
   }
   const mlsKey = String(query.mls_device_key).toLowerCase();
-  const ciphersuite = Number(query.mls_ciphersuite);
-  if (!HEX_KEY.test(mlsKey) || !Number.isInteger(ciphersuite)) {
+  // Grant v2 (D172) asks for a suite set ("78.79"); v1 for one suite.
+  const v2 = query.mls_ciphersuites !== undefined;
+  const ciphersuites = String(
+    v2 ? query.mls_ciphersuites : query.mls_ciphersuite
+  )
+    .split(".")
+    .map(Number);
+  if (
+    !HEX_KEY.test(mlsKey) ||
+    !ciphersuites.every((suite) => Number.isInteger(suite) && suite > 0) ||
+    (!v2 && ciphersuites.length !== 1)
+  ) {
     return { error: "mls device grant" };
   }
   return {
     address,
     signing,
-    mls: { deviceKeyHex: mlsKey, ciphersuite, expiresAtSeconds },
+    mls: {
+      version: v2 ? 2 : 1,
+      deviceKeyHex: mlsKey,
+      ciphersuites,
+      expiresAtSeconds,
+    },
   };
 }
 

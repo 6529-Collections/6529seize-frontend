@@ -95,6 +95,23 @@ describe("E2EE sandbox sign-in challenges", () => {
     });
   });
 
+  it("answers a grant v2 request (a suite set) with a v2 resource", () => {
+    const { mls_ciphersuite: _v1, ...query } = nonceQuery(account.address);
+    const { status, body } = signIn.issueNonce(
+      { ...query, mls_ciphersuites: "78.79" },
+      ORIGIN
+    );
+    expect(status).toBe(200);
+    const lastLine = body.signable_message.split("\n").at(-1);
+    expect(lastLine).toMatch(
+      new RegExp(
+        String.raw`^- urn:6529:mls-device-grant:v2:78\.79:` +
+          `${MLS_KEY.slice(2)}` +
+          String.raw`:\d+$`
+      )
+    );
+  });
+
   it("renders a signing-only challenge without an MLS key", () => {
     const message = renderChallenge({
       origin: ORIGIN,
