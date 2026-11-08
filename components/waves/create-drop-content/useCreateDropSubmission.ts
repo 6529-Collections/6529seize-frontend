@@ -32,7 +32,7 @@ import {
   hasMetadataContent,
 } from "./content-helpers";
 import { generateParts, toApiCreateDropParts } from "./part-builders";
-import { withClientDropId } from "@/services/api/idempotent-drop-create";
+import { withClientDropId } from "@/services/api/client-drop-ids";
 import {
   isReplyTargetUnavailableError,
   REPLY_TARGET_UNAVAILABLE_TOAST_ID,

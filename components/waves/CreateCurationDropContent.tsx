@@ -42,7 +42,7 @@ import {
   validateCurationDropInput,
 } from "./utils/validateCurationDropUrl";
 import { getOptimisticDrop } from "./utils/getOptimisticDrop";
-import { withClientDropId } from "@/services/api/idempotent-drop-create";
+import { withClientDropId } from "@/services/api/client-drop-ids";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(

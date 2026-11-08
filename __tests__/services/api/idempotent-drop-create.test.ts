@@ -2,10 +2,10 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import {
   clearClientDropIds,
-  postIdempotentDrop,
   withClientDropId,
   withoutClientDropId,
-} from "@/services/api/idempotent-drop-create";
+} from "@/services/api/client-drop-ids";
+import { postIdempotentDrop } from "@/services/api/idempotent-drop-create";
 import { postDrop } from "@/services/api/signed-drop-writes";
 
 jest.mock("@/services/api/signed-drop-writes", () => ({

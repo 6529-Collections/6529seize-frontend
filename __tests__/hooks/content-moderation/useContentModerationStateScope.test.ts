@@ -8,9 +8,9 @@ import {
   setDropHiddenOverride,
   setGlobalDropModerationOverride,
 } from "@/services/content-moderation/content-moderation-state";
-import { clearClientDropIds } from "@/services/api/idempotent-drop-create";
+import { clearClientDropIds } from "@/services/api/client-drop-ids";
 
-jest.mock("@/services/api/idempotent-drop-create", () => ({
+jest.mock("@/services/api/client-drop-ids", () => ({
   clearClientDropIds: jest.fn(),
 }));
 

@@ -1,8 +1,6 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import {
-  postIdempotentDrop,
-  withoutClientDropId,
-} from "@/services/api/idempotent-drop-create";
+import { withoutClientDropId } from "@/services/api/client-drop-ids";
+import { postIdempotentDrop } from "@/services/api/idempotent-drop-create";
 import type { QueuedDropMutationBody } from "./drop-submission.types";
 
 /** Sends one queued drop: a competition entry, or a drop create. */

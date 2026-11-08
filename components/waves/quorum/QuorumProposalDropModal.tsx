@@ -33,7 +33,7 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import { getOptimisticDrop } from "../utils/getOptimisticDrop";
-import { withClientDropId } from "@/services/api/idempotent-drop-create";
+import { withClientDropId } from "@/services/api/client-drop-ids";
 import {
   buildQuorumProposalMarkdown,
   EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
