@@ -66,15 +66,18 @@ export async function dismissNextDevTools(page: Page) {
  * diagnostics.
  */
 export async function hideNextDevOverlay(context: BrowserContext) {
+  // A stylesheet, so the overlay element's own inline styles cannot undo it.
   await context.addInitScript(() => {
-    const hide = (node: Node) => {
-      if (node instanceof HTMLElement && node.localName === "nextjs-portal") {
-        node.style.setProperty("display", "none", "important");
-      }
+    const add = () => {
+      const style = document.createElement("style");
+      style.textContent = "nextjs-portal{display:none!important}";
+      (document.head ?? document.documentElement).append(style);
     };
-    new MutationObserver((records) => {
-      for (const record of records) record.addedNodes.forEach(hide);
-    }).observe(document, { childList: true, subtree: true });
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", add, { once: true });
+    } else {
+      add();
+    }
   });
 }
 
