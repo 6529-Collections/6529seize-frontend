@@ -28,6 +28,7 @@ import {
 jest.setTimeout(180_000);
 
 const DAY = 86_400_000;
+const SEND_PATH = /^e2ee\/groups\/0x[0-9a-f]+\/messages$/;
 
 /** Lets virtual time run until `done()` or the clock reaches `until`. */
 async function runUntil(
@@ -390,11 +391,17 @@ describe("E2EE engine: features", () => {
     const start = world.clock.now();
     await b.send(g, { text: "blocked until the change goes through" });
     expect(world.clock.now() - start).toBeGreaterThanOrEqual(20_000);
-    expect(b.getConversation(g)?.delayed).toBe(true);
+    expect(b.getConversation(g)).toMatchObject({
+      delayed: true,
+      delayedReason: "commit",
+    });
     expect(b.getMessages(g).at(-1)).toMatchObject({ pending: true });
     removeFault();
     await settle(world);
-    expect(b.getConversation(g)?.delayed).toBe(false);
+    expect(b.getConversation(g)).toMatchObject({
+      delayed: false,
+      delayedReason: null,
+    });
     expect(texts(c.getMessages(g))).toEqual([
       "blocked until the change goes through",
     ]);
@@ -414,7 +421,7 @@ describe("E2EE engine: features", () => {
     // Only the send fails; catch-up and commits keep working.
     const removeFault = world.ds.addFault({
       method: "POST",
-      path: /^e2ee\/groups\/0x[0-9a-f]+\/messages$/,
+      path: SEND_PATH,
       status: 503,
       times: -1,
     });
@@ -442,7 +449,10 @@ describe("E2EE engine: features", () => {
     expect(stop.at - start).toBeLessThan(20_000 + 2 * STALL_RETRY_MS);
     expect(stop.sends).toBeGreaterThan(1);
     expect(commits()).toBe(commitsBefore);
-    expect(b.getConversation(g)?.delayed).toBe(true);
+    expect(b.getConversation(g)).toMatchObject({
+      delayed: true,
+      delayedReason: "send",
+    });
     expect(b.getMessages(g).at(-1)).toMatchObject({ pending: true });
 
     // The armed retry takes over: each one runs maintenance (an empty commit)
@@ -458,17 +468,77 @@ describe("E2EE engine: features", () => {
 
     removeFault();
     await settle(world);
-    expect(b.getConversation(g)?.delayed).toBe(false);
+    expect(b.getConversation(g)).toMatchObject({
+      delayed: false,
+      delayedReason: null,
+    });
     expect(b.getMessages(g).at(-1)).toMatchObject({ pending: false });
     expect(texts(c.getMessages(g))).toEqual(["held by a failing send"]);
     expect(texts(a.getMessages(g))).toEqual(["held by a failing send"]);
+  });
+
+  it("reports a stuck commit over a failing send, then the send once the commit goes through", async () => {
+    const { world, alice, b, c, g } = await trio();
+    const laptop = await startDevice(world, "alice", alice.account);
+    alice.devices.push(laptop);
+    await settle(world);
+    const removeSendFault = world.ds.addFault({
+      method: "POST",
+      path: SEND_PATH,
+      status: 503,
+      times: -1,
+    });
+    await b.send(g, { text: "held by both" });
+    expect(b.getConversation(g)).toMatchObject({
+      delayed: true,
+      delayedReason: "send",
+    });
+
+    // A required change (removing a revoked device) now cannot commit either.
+    const removeCommitFault = world.ds.addFault({
+      method: "POST",
+      path: /\/entries$/,
+      status: 500,
+      times: -1,
+    });
+    await laptop.engine.revokeDevice(laptop.engine.getThisDevice()!.deviceKey);
+    const reason = () => b.getConversation(g)?.delayedReason;
+    await runUntil(
+      world,
+      world.clock.now() + 60_000,
+      () => reason() === "commit"
+    );
+    expect(b.getConversation(g)).toMatchObject({
+      delayed: true,
+      delayedReason: "commit",
+    });
+
+    // The change goes through; only the send still fails.
+    removeCommitFault();
+    await runUntil(
+      world,
+      world.clock.now() + 60_000,
+      () => reason() === "send"
+    );
+    expect(b.getConversation(g)).toMatchObject({
+      delayed: true,
+      delayedReason: "send",
+    });
+
+    removeSendFault();
+    await settle(world);
+    expect(b.getConversation(g)).toMatchObject({
+      delayed: false,
+      delayedReason: null,
+    });
+    expect(texts(c.getMessages(g))).toEqual(["held by both"]);
   });
 
   it("clears the delayed banner when a failing send turns out to have landed", async () => {
     const { world, a, b, c, g } = await trio();
     const removeFault = world.ds.addFault({
       method: "POST",
-      path: /^e2ee\/groups\/0x[0-9a-f]+\/messages$/,
+      path: SEND_PATH,
       status: 503,
       times: -1,
     });

@@ -244,6 +244,21 @@ export function clearStallFor(
   }
 }
 
+/** Tracks whether commits are failing; refreshes a delayed reason it moves. */
+function setCommitFailing(
+  ctx: EngineContext,
+  runtime: GroupRuntime | undefined,
+  failing: boolean
+): void {
+  if (!runtime || runtime.commitFailing === failing) {
+    return;
+  }
+  runtime.commitFailing = failing;
+  if (runtime.record.delayed) {
+    ctx.store.touch(runtime.record.g);
+  }
+}
+
 type AttemptOutcome = CommitOutcome | { kind: "noop" };
 
 async function commitAttempt(
@@ -313,10 +328,12 @@ export async function runGroupCommit(
     const outcome = await commitAttempt(ctx, g, planner);
     const runtime = ctx.store.groups.get(g);
     if (outcome.kind === "ok" || outcome.kind === "noop") {
+      setCommitFailing(ctx, runtime, false);
       clearStallFor(ctx, runtime);
       return { kind: "done", seq: outcome.kind === "ok" ? outcome.seq : null };
     }
     if (outcome.kind === "rejected") {
+      setCommitFailing(ctx, runtime, false);
       clearStallFor(ctx, runtime);
       return { kind: "rejected", code: outcome.code };
     }
@@ -326,6 +343,7 @@ export async function runGroupCommit(
         continue; // First 409: catch up and retry at once.
       }
     }
+    setCommitFailing(ctx, runtime, true);
     if (noteStallFor(ctx, runtime)) {
       onDelayed();
       return { kind: "delayed" };

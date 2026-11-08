@@ -28,6 +28,7 @@ export function newRuntime(record: StoredGroup): GroupRuntime {
     outbox: new Map(),
     stallSince: null,
     sendFailingSince: null,
+    commitFailing: false,
   };
 }
 
