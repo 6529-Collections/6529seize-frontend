@@ -44,21 +44,22 @@ async function unsentEchoes(
   outbox: readonly { id: string; g: string; payload: { t: string } }[],
   nowMs: number
 ): Promise<StoredMessage[]> {
-  const echoes: StoredMessage[] = [];
-  for (const item of outbox) {
-    if (item.payload.t !== "msg") {
-      continue;
-    }
-    const echo = await storage.getMessage(profileId, item.g, item.id);
-    if (echo?.pending === true && !echo.unsent) {
-      echoes.push({
-        ...echo,
-        pending: false,
-        unsent: { reason: "suite_upgrade", at: nowMs },
-      });
-    }
-  }
-  return echoes;
+  // Independent reads; the marked echoes are written in the caller's one
+  // atomic batch with the rest of the retirement.
+  const echoes = await Promise.all(
+    outbox
+      .filter((item) => item.payload.t === "msg")
+      .map((item) => storage.getMessage(profileId, item.g, item.id))
+  );
+  return echoes
+    .filter(
+      (echo): echo is StoredMessage => echo?.pending === true && !echo.unsent
+    )
+    .map((echo) => ({
+      ...echo,
+      pending: false,
+      unsent: { reason: "suite_upgrade" as const, at: nowMs },
+    }));
 }
 
 /**
