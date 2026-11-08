@@ -38,6 +38,15 @@ export interface E2eeMessageActions {
     on: boolean
   ) => void;
   readonly onJumpTo: (id: string) => void;
+  /**
+   * D172: resend an own unsent message in the upgraded chat (rejects with
+   * the engine error so the row can explain it).
+   */
+  readonly onResendUnsent?:
+    | ((message: E2eeMessage) => Promise<void>)
+    | undefined;
+  /** D172: ask to delete an own unsent message from this device. */
+  readonly onDiscardUnsent?: ((message: E2eeMessage) => void) | undefined;
 }
 
 function ActionMenuItem({

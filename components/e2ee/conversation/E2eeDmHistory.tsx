@@ -40,7 +40,9 @@ export function E2eeDmHistory({
   const current = isUsableDm(thread.current, selfProfileId)
     ? thread.current
     : null;
-  if (thread.sessions.length === 1 && usable) return null;
+  // A superseded session continues from its composer area (D172).
+  const offersNext = !usable && conversation.status !== "superseded";
+  if (thread.sessions.length === 1 && !offersNext) return null;
 
   const restart = async () => {
     setRestarting(true);
@@ -100,7 +102,7 @@ export function E2eeDmHistory({
           </p>
         </>
       ) : null}
-      {!usable && current ? (
+      {offersNext && current ? (
         <Link
           href={getEncryptedConversationRoute(current.g)}
           className="tw-inline-flex tw-min-h-8 tw-items-center tw-self-start tw-rounded-lg tw-text-sm tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
@@ -108,7 +110,7 @@ export function E2eeDmHistory({
           {t(locale, "e2ee.dm.history.openCurrent")}
         </Link>
       ) : null}
-      {!usable && !current && conversation.status !== "invalid" ? (
+      {offersNext && !current && conversation.status !== "invalid" ? (
         <Button
           variant="secondary"
           size="sm"

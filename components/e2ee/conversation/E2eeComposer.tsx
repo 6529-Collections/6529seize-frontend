@@ -402,7 +402,7 @@ interface E2eeComposerProps {
     | undefined;
 }
 
-function getComposerContainerClassName(isApp: boolean): string {
+export function getComposerContainerClassName(isApp: boolean): string {
   const bottomPadding = isApp ? "" : "tw-pb-[env(safe-area-inset-bottom,0px)]";
   return `tw-flex-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${bottomPadding}`;
 }

@@ -223,6 +223,63 @@ export function stopDevice(world: World, device: TestDevice): void {
   }
 }
 
+/**
+ * D172 seed: turns an enrolled device into one from before grant v2, with
+ * its history kept. The stored device gets a v1 grant for 0x004F, its groups
+ * lose their suite (as records written before D172) and the server record
+ * gets the same v1 grant. The engine is restarted on the same storage, so it
+ * finds an earlier-suite device and retires it. Returns the restarted device.
+ */
+export async function seedLegacySuiteDevice(
+  world: World,
+  user: TestUser,
+  device: TestDevice,
+  options: {
+    enroll?: boolean;
+    /**
+     * false: do not wait for the engine to settle first (it never does
+     * while every send fails); writes already made are what is seeded.
+     */
+    waitIdle?: boolean;
+  } = {}
+): Promise<TestDevice> {
+  if (options.waitIdle === false) {
+    stopDevice(world, device);
+    // Let a write that was in flight at the stop land first.
+    await realSleep(50);
+  } else {
+    await device.engine.idle();
+    stopDevice(world, device);
+  }
+  const stored = await device.storage.getDevice(device.profileId);
+  if (!stored) {
+    throw new Error("seedLegacySuiteDevice: the device is not enrolled");
+  }
+  const {
+    version: _version,
+    ciphersuites: _ciphersuites,
+    ...grant
+  } = stored.grant;
+  const groups = (await device.storage.listGroups(device.profileId)).map(
+    ({ ciphersuite: _suite, ...group }) => group
+  );
+  await device.storage.writeBatch(device.profileId, {
+    expectedVersion: await device.storage.getStateVersion(device.profileId),
+    device: { ...stored, grant: { ...grant, ciphersuite: 0x004f } },
+    groups,
+  });
+  world.ds.markLegacySuiteDevice(stored.deviceKey);
+  const restarted = await startDevice(world, user.profileId, user.account, {
+    storage: device.storage,
+    enroll: options.enroll ?? false,
+  });
+  user.devices.push(restarted);
+  if (user.primary === device) {
+    user.primary = restarted;
+  }
+  return restarted;
+}
+
 export const realSleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
 

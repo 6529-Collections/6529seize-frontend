@@ -3925,7 +3925,11 @@
         "desktop encrypted message notification",
         "paste image in encrypted chat",
         "emoji board in encrypted chat",
-        "custom emojis in encrypted messages"
+        "custom emojis in encrypted messages",
+        "upgrade encrypted messages",
+        "stronger encryption",
+        "read-only encrypted chat",
+        "continue the conversation"
       ],
       "keywords": [
         "encrypted",
@@ -3939,9 +3943,16 @@
         "backup",
         "restore",
         "recovery code",
-        "paste"
+        "paste",
+        "emoji",
+        "custom emojis",
+        "reactions",
+        "upgrade",
+        "read-only",
+        "ciphersuite"
       ],
       "facts": [
+        "Encrypted chats are moving from MLS ciphersuite 0x004F (AES-128-GCM) to 0x004E (AES-256-GCM); until the move reaches 6529.io, chats keep using 0x004F and no upgrade prompt appears. After it, a device that used the earlier encryption shows Upgrade encrypted messages instead of first-time setup and asks for one wallet signature (Sign to upgrade Encrypted DMs, or Sign to enable both when Signed Posts are also off); decrypted history stays on the device. Earlier chats become read-only and are labelled Read-only in the list: messages stay readable, but sending, editing, reactions, renaming and member changes are off. In a direct message, Continue the conversation opens or starts a session on the new encryption in the same list entry, with Chat history switching between sessions. In a group, Start again with the same members creates the new group once (then Open the new conversation); members who have not confirmed the upgrade are named and left out, to be added later from Chat info. If nobody can be reached yet, the page says they will be reachable once they open 6529.io and confirm the upgrade. The new conversation opens with This conversation moved to stronger encryption and View earlier messages. A message of yours that had not gone out when the chat moved shows Not sent: this chat was upgraded; it is never sent by itself. Resend in the upgraded chat sends a copy (text, mentions and attachments, not the reply) in the continuing conversation, and Delete removes it from this device after confirmation.",
         "If sending an encrypted message keeps failing for about 20 seconds while the chat itself is fine, the chat shows Messages aren’t sending right now. We’ll keep retrying, and you can keep writing. The message box stays available and keeps your draft; new messages stay pending and send in order once a retry succeeds. When a required group change cannot go through, the chat instead shows Group changes are delayed and the message box reads Sending is paused until the group change goes through.",
         "Connect only creates an additional signed-in app session. Connect with Post Signing & DM Encryption requests a browser-wallet signature first, then one private link both signs in and enrolls the receiving app without connecting a wallet there. The source session remains connected and the source browser need not enable encryption itself. The 6529 Desktop secure option is currently visible but disabled with a Coming soon tooltip. Connect only remains available. This is a release gate, not an automatic version check. Working receiver keys/history are preserved; source history is not copied.",
         "The Encrypted DMs composer keeps attachments to the left and the emoji button inside the message input. The emoji picker opens beside its button on desktop and in the regular mobile slide panel. Emoji selections preserve the draft and caret and do not update ordinary reaction history. Desktop Enter sends and Shift+Enter adds a line. On mobile web and in the app, Return does not submit; use Send. Arrow Up from an empty composer with no reply, edit or attachment in progress edits your latest eligible message. On mobile web and in the app, an accepted send removes input focus and dismisses the keyboard. A failed send restores the draft without deliberately dismissing the keyboard, and a delayed send leaves a newly started draft alone. Dismissing the native keyboard also removes input focus.",
@@ -3960,7 +3971,7 @@
         "In encrypted DMs, the person’s name and avatar in the header and introduction open their profile. Message authors have ordinary profile links, desktop profile hover cards, levels, artist badges and profile-wave badges where applicable. Highlighted member mentions also open profiles. Public profile details use ordinary profile data; message contents stay encrypted. Unavailable profile details are omitted without hiding local messages.",
         "You can attach up to 10 files of up to 25 MB each; they are encrypted on your device like messages. Drop files over the chat or its message input to add them to the draft with the regular drop overlay, then choose Send. The same limits apply; drops are blocked while editing, while the chat is paused or when attachments are switched off. Tap or click an image for the regular popup with zoom and download. Desktop hover reveals full-screen, open-in-new-tab and download controls. In the app, use Download in the popup to save or share; local image links cannot open in an external browser. Decrypted images stay local and never pass through a public image proxy. To attach images you can also paste them (Ctrl+V or Cmd+V) into the encrypted message box; the same limits apply, and text copied with an image is pasted too. If attachments are switched off, the attach control is disabled and pasted images are not attached.",
         "Add emoji beside the encrypted message box opens a searchable board with standard emojis, skin tones and the 6529 custom collection. A selection goes at the cursor or replaces selected text, including while editing. Encrypted and ordinary messages share a rich-text editor. Custom emojis render as images while composing, editing and after sending; encrypted messages still have no GIF, Poll or Storm actions. In a message menu choose More reactions for the same full board; select an existing reaction to toggle yours. Encrypted emoji choices are not added to ordinary chats' frequently-used history. Custom assets load as one collection independent of message contents; if they fail, standard emojis remain available, Try again reloads the collection, and custom emojis remain readable as shortcodes.",
-        "Keys are agreed with a hybrid post-quantum method (MLS ciphersuite 0x004F, X-Wing: ML-KEM-768 combined with X25519), so messages stay confidential even if one of the two is broken, for example by a future quantum computer.",
+        "Keys are agreed with a hybrid post-quantum method (X-Wing: ML-KEM-768 combined with X25519), so messages stay confidential even if one of the two is broken, for example by a future quantum computer. Chats have used MLS ciphersuite 0x004F (AES-128-GCM). Once a device confirms the upgrade to 0x004E (AES-256-GCM), the chats it starts use 0x004E, and earlier chats stay readable but read-only.",
         "Encrypted messages trust each person's wallets the first time your device sees them (trust on first use). A member's later device is added automatically only when one of those wallets signed it. A device signed by a new wallet, or by a contract wallet whose signature could not be checked, is not added: the chat shows a notice naming the wallet with Add device and Ignore. Add it only if you know whose wallet it is. Chat info shows the wallet that signed each member's device.",
         "Open a message's menu to mute the chat on this device, block its sender (they cannot start new chats with you or add you to encrypted chats), or choose who can message you in Preferences.",
         "Reporting is for illegal or severe harm only: child sexual abuse material, a credible threat of violence, intimate images shared without consent, or doxxing. Only the selected message is shared, with proof its sender sent it, and it goes to 6529's moderators, who review it in WatchTower's Encrypted reports tab, not to wave moderators. The dialog shows the text and attachment names that will be sent. An edited message is reported as the edited version you see; the original is sent too only if you tick Also send the original message. Nothing else in the conversation is revealed.",
@@ -3983,7 +3994,8 @@
         "components/e2ee/conversation/E2eeComposer.tsx",
         "components/e2ee/conversation/E2eeReportDialog.tsx",
         "components/e2ee/backup/E2eeBackupPanel.tsx",
-        "components/e2ee/conversation/E2eeUntrustedDeviceBanners.tsx"
+        "components/e2ee/conversation/E2eeUntrustedDeviceBanners.tsx",
+        "components/e2ee/conversation/E2eeSupersededComposer.tsx"
       ]
     },
     {

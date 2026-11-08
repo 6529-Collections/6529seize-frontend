@@ -173,6 +173,11 @@ export async function resolveProfiles(
 export async function restore(ctx: EngineContext): Promise<boolean> {
   const device = await loadCurrentSuiteDevice(ctx);
   if (!device?.registered || !device.provisioned) {
+    if (ctx.store.upgrade !== null) {
+      // Moved off an earlier suite: its conversations stay readable while
+      // this device waits for the one signature (D172).
+      await loadGroups(ctx);
+    }
     return false;
   }
   const state = await ctx.storage.getWasmState(ctx.profileId);

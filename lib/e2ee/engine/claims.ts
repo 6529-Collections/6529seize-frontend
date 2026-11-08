@@ -1,3 +1,4 @@
+import { E2EE_CIPHERSUITE } from "../grant";
 import type {
   ApiE2eeClaimTarget,
   ApiE2eeDevice,
@@ -55,6 +56,8 @@ async function claimBatch(
   const response = await ctx.api.claimKeyPackages({
     targets,
     claimer_device_key: ownDeviceKey(ctx),
+    // Only current-suite groups take adds; superseded ones are read-only.
+    ciphersuite: E2EE_CIPHERSUITE,
     ...(group ? { group } : {}),
   });
   const own = ownDeviceKey(ctx);

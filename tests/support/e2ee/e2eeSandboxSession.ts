@@ -158,6 +158,15 @@ export const e2eeSandboxControls = {
       found: string[];
       foundInReports: string[];
     }>(baseURL, "plaintext-scan", { needles }),
+  /**
+   * D172: the server half of an earlier-suite device. Every registered
+   * device of `user` gets a v1 grant for 0x004F and loses its KeyPackages.
+   */
+  legacySuiteDevices: (baseURL: string | undefined, user: E2eeUserKey) =>
+    control<{ devices: number }>(baseURL, "legacy-suite-devices", { user }),
+  /** D172: closes (false) or reopens the v1-grant transition window. */
+  suiteWindow: (baseURL: string | undefined, open: boolean) =>
+    control(baseURL, "suite-window", { open }),
 };
 
 export interface E2eeSandboxState {
@@ -293,6 +302,76 @@ export async function closeE2eeUsers(
   if (errors.length > 0) {
     throw errors[0];
   }
+}
+
+/** IndexedDB names of the engine's storage (lib/e2ee/storage.ts). */
+const E2EE_DB = { name: "6529-e2ee", devices: "devices" } as const;
+
+/**
+ * D172 seed: makes this browser's enrolled device one from before grant v2,
+ * on the server and in IndexedDB, then reloads. On start the engine retires
+ * it: its conversations turn read-only ("superseded"), `getUpgrade()` counts
+ * them and the device needs one signature. Call it after the user enrolled,
+ * with no other tab of this browser open.
+ */
+export async function seedLegacySuiteBrowser(
+  session: E2eeUserSession,
+  baseURL: string | undefined
+): Promise<void> {
+  const { devices } = await e2eeSandboxControls.legacySuiteDevices(
+    baseURL,
+    session.user.key
+  );
+  expect(
+    devices,
+    `${session.label}: registered devices to mark`
+  ).toBeGreaterThan(0);
+  const rewritten = await session.page.evaluate(
+    async ({ db: names, profileId }) => {
+      const db = await new Promise<IDBDatabase>((resolve, reject) => {
+        const request = indexedDB.open(names.name);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () =>
+          reject(new Error(`IndexedDB open: ${String(request.error)}`));
+      });
+      try {
+        return await new Promise<boolean>((resolve, reject) => {
+          const tx = db.transaction(names.devices, "readwrite");
+          const store = tx.objectStore(names.devices);
+          const read = store.get(profileId);
+          let found = false;
+          read.onsuccess = () => {
+            const device = read.result as
+              | { grant: Record<string, unknown> }
+              | undefined;
+            if (!device) {
+              return;
+            }
+            // The v1 shape: no version or suite set, ciphersuite 0x004F.
+            const grant: Record<string, unknown> = {
+              ...device.grant,
+              ciphersuite: 0x004f,
+            };
+            delete grant["version"];
+            delete grant["ciphersuites"];
+            store.put({ ...device, grant });
+            found = true;
+          };
+          tx.oncomplete = () => resolve(found);
+          tx.onerror = () =>
+            reject(new Error(`IndexedDB write: ${String(tx.error)}`));
+        });
+      } finally {
+        db.close();
+      }
+    },
+    { db: E2EE_DB, profileId: session.user.profileId }
+  );
+  expect(rewritten, `${session.label}: stored encrypted-messages device`).toBe(
+    true
+  );
+  await session.page.reload({ waitUntil: "domcontentloaded" });
+  await dismissNextDevTools(session.page);
 }
 
 export async function gotoEncrypted(page: Page, path = "/messages/encrypted") {

@@ -35,6 +35,11 @@ export interface StoredDevice {
   lastResortAt: number | null;
   /** Which wallets this profile trusts for each person (engine/trust.ts). */
   trust?: StoredTrust;
+  /**
+   * A device of an earlier MLS suite, retired with its history kept (D172):
+   * kept only for its trust pins until the next device replaces it.
+   */
+  retired?: boolean;
 }
 
 /**
@@ -77,13 +82,18 @@ export interface PendingCommitRecord {
   createdAt: number;
 }
 
-/** "restored": known only from a history backup, read-only until joined. */
+/**
+ * "restored": known only from a history backup, read-only until joined.
+ * "superseded": made under an earlier MLS ciphersuite; history kept, MLS
+ * state dropped, read-only (D172).
+ */
 export type StoredGroupStatus =
   | "active"
   | "invalid"
   | "left"
   | "removed"
-  | "restored";
+  | "restored"
+  | "superseded";
 
 export interface StoredGroup {
   g: string;
@@ -117,6 +127,18 @@ export interface StoredGroup {
   joinedAt: number;
   updatedAt: number;
   pendingCommit: PendingCommitRecord | null;
+  /** The MLS ciphersuite (absent: groups made before D172, 0x004F). */
+  ciphersuite?: number;
+  /** The conversation that continues this superseded one (this device). */
+  successor?: string | null;
+  /**
+   * True while that successor is still being set up (members not added
+   * yet): it is stored with the new group, but not reused or shown until
+   * the creation finished.
+   */
+  successorPending?: boolean;
+  /** The superseded conversation this one continues (this device). */
+  predecessor?: string | null;
 }
 
 export interface StoredNotice {
@@ -168,7 +190,17 @@ export interface StoredMessage {
   latestEdit?: SignedVersion | null;
   /** Set when the message was moved from an unencrypted DM (D146). */
   imported?: ImportedPayload;
+  /**
+   * Set on an own message that was never sent and no longer will be from
+   * here (D172: its conversation was superseded while it was still queued).
+   * Local only; `pending` is false. The text stays until the user resends
+   * it in the conversation that continues this one, or deletes it.
+   */
+  unsent?: { reason: StoredUnsentReason; at: number };
 }
+
+/** Why an own message stayed unsent (see StoredMessage.unsent). */
+export type StoredUnsentReason = "suite_upgrade";
 
 export interface SealedOutboxMessage {
   epoch: number;
