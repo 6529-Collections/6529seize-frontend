@@ -76,17 +76,30 @@ function waitWhileEnrolling(
 /**
  * Registers the key the sign-in granted and returns where that left the
  * engine. Adopting the key also wakes the encrypted-messages provider, which
- * starts the same registration; the engine then answers this second call
- * with "enrolling" while the first one is still running. That is not a
- * failure, so wait for the registration already in flight to settle.
+ * starts the same registration. The engine either answers this second call
+ * with "enrolling" while the first one runs, or (single-flight) waits for it
+ * inside the call. Neither is a failure, so both are bounded by the same
+ * deadline; past it the status still reads "enrolling" (pending).
  */
 async function enrollGrantedDevice(
   engine: E2eeEngine
 ): Promise<E2eeEngineStatus> {
-  const status = await engine.enrollWithLoginGrant();
-  return status === "enrolling"
-    ? await waitWhileEnrolling(engine, ENROLLMENT_SETTLE_TIMEOUT_MS)
-    : status;
+  const deadline = Date.now() + ENROLLMENT_SETTLE_TIMEOUT_MS;
+  const enrolling = engine.enrollWithLoginGrant();
+  // A late failure after the deadline is reported through the status.
+  enrolling.catch(() => undefined);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<null>((resolve) => {
+    timer = setTimeout(() => resolve(null), ENROLLMENT_SETTLE_TIMEOUT_MS);
+  });
+  try {
+    const status = await Promise.race([enrolling, timedOut]);
+    if (status === null) return "enrolling";
+    if (status !== "enrolling") return status;
+  } finally {
+    clearTimeout(timer);
+  }
+  return await waitWhileEnrolling(engine, Math.max(0, deadline - Date.now()));
 }
 
 /** This browser's usable signing grant, which the combined grant replaces. */

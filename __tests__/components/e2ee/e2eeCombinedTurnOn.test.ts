@@ -313,6 +313,29 @@ describe("turn on encrypted messages with one combined sign-in (NC8)", () => {
       expect(listenerCount()).toBe(0);
     });
 
+    it("bounds the wait when the engine's own call waits for a run in flight", async () => {
+      // Single-flight engines make the second caller wait inside
+      // enrollWithLoginGrant() instead of answering "enrolling"; a stuck
+      // registration must still end in a neutral pending state.
+      jest.useFakeTimers();
+      const { engine, asEngine } = createEngine();
+      let enrolling = true;
+      Object.assign(engine, {
+        getStatus: () => (enrolling ? "enrolling" : "ready"),
+        subscribe: () => () => undefined,
+      });
+      engine.enrollWithLoginGrant.mockImplementation(
+        () => new Promise<E2eeEngineStatus>(() => undefined)
+      );
+
+      const outcome = run(asEngine, async () => combined());
+      await waitUntil(() => engine.enrollWithLoginGrant.mock.calls.length > 0);
+      await jest.advanceTimersByTimeAsync(20_000);
+
+      await expect(outcome).resolves.toBe("pending");
+      enrolling = false;
+    });
+
     it("offers separate setup when the grant was not kept and registration is still running", async () => {
       jest.useFakeTimers();
       const { asEngine, listenerCount } = createRegisteringEngine();
