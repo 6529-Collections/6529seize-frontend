@@ -42,6 +42,29 @@ export function isLocalDevAuthTestSeamEnabled(): boolean {
   }
 }
 
+/**
+ * A function a local browser test installed on the page under `name`, or
+ * null when the seam is off or nothing is installed. Production builds never
+ * enable the seam, so a page global of that name changes nothing there.
+ */
+export function getLocalTestSeamFunction(
+  name: string
+): ((...args: readonly unknown[]) => Promise<unknown>) | null {
+  if (!isLocalDevAuthTestSeamEnabled()) {
+    return null;
+  }
+  const candidate: unknown = Reflect.get(globalThis, name);
+  if (typeof candidate !== "function") {
+    return null;
+  }
+  return async (...args) => {
+    const result: unknown = await Reflect.apply(candidate, globalThis, [
+      ...args,
+    ]);
+    return result;
+  };
+}
+
 const readItem = (key: string): string | null => {
   try {
     const value = browserWindow()?.localStorage.getItem(key);

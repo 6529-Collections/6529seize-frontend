@@ -1,4 +1,4 @@
-import { isLocalDevAuthTestSeamEnabled } from "@/services/auth/devAuthTestOverride";
+import { getLocalTestSeamFunction } from "@/services/auth/devAuthTestOverride";
 
 type TypedDataInput = {
   readonly domain: object;
@@ -21,17 +21,12 @@ export const E2EE_TEST_SIGNER_GLOBAL = "__e2eeTestSignTypedData";
  * the real wallet signs.
  */
 export function getE2eeTestSigner(): E2eeTestSigner | null {
-  if (!isLocalDevAuthTestSeamEnabled()) {
-    return null;
-  }
-  const candidate: unknown = Reflect.get(globalThis, E2EE_TEST_SIGNER_GLOBAL);
-  if (typeof candidate !== "function") {
+  const signer = getLocalTestSeamFunction(E2EE_TEST_SIGNER_GLOBAL);
+  if (!signer) {
     return null;
   }
   return async (typedData) => {
-    const signature: unknown = await Reflect.apply(candidate, globalThis, [
-      typedData,
-    ]);
+    const signature = await signer(typedData);
     if (typeof signature !== "string") {
       throw new TypeError("E2EE test signer returned no signature");
     }

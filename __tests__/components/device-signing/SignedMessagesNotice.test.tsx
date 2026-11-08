@@ -40,13 +40,20 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 }));
 
 let mockIsRemoteWallet = false;
+let mockNetworkSupported = true;
 jest.mock("@/hooks/device-signing/useSignedMessagesWallet", () => ({
   useSignedMessagesWallet: () => ({
     isRemoteWallet: mockIsRemoteWallet,
     networkName: "Ethereum",
-    isNetworkSupported: () => true,
+    isNetworkSupported: () => mockNetworkSupported,
     switchNetwork: async () => "switched",
   }),
+}));
+
+// Local dev-auth browser tests only; off everywhere else.
+let mockHasLocalTestSigner = false;
+jest.mock("@/components/auth/signedMessagesTestSigner", () => ({
+  hasLocalTestSigner: () => mockHasLocalTestSigner,
 }));
 
 const mockReport = jest.fn();
@@ -223,6 +230,21 @@ describe("SignedMessagesNotice", () => {
 
     afterEach(() => {
       jest.useRealTimers();
+    });
+
+    it("treats a local test signer as the live wallet on a supported network", async () => {
+      mockHasLocalTestSigner = true;
+      mockNetworkSupported = false;
+      mockConnection = { ...mockConnection, canSignActiveWallet: false };
+      try {
+        renderNotice();
+        await turnOn();
+        await waitFor(() => expect(mockRequestGrant).toHaveBeenCalledTimes(1));
+        expect(mockSeizeConnectFresh).not.toHaveBeenCalled();
+      } finally {
+        mockHasLocalTestSigner = false;
+        mockNetworkSupported = true;
+      }
     });
 
     it("opens the wallet connection when no wallet is live, then signs without a second click", async () => {
