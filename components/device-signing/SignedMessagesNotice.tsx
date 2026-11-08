@@ -115,14 +115,14 @@ function SignedMessagesNoticeContent({
       data-testid="signed-messages-notice"
       className={`tw-mb-2 tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-2 sm:tw-px-2.5 ${
         isAlert
-          ? "tw-border-red/30 tw-bg-red/10"
+          ? "tw-border-amber-500/25 tw-bg-amber-500/5"
           : "tw-border-white/10 tw-bg-iron-950"
       }`}
     >
       {isAlert ? (
         <ExclamationTriangleIcon
           aria-hidden="true"
-          className={`${iconClass} tw-text-red`}
+          className={`${iconClass} tw-text-amber-300`}
         />
       ) : (
         <FontAwesomeIcon
@@ -154,7 +154,7 @@ function SignedMessagesNoticeContent({
       <div className="tw-col-start-3 tw-row-start-1 tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-1">
         <Button
           size="sm"
-          variant={isAlert ? "destructive" : "secondary"}
+          variant="secondary"
           onClick={onAction}
           loading={isAlert ? isRevoking : isEnabling}
         >

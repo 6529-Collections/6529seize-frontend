@@ -182,7 +182,7 @@ encrypted backup. See [Encrypted messages](../../encrypted-messages.md#renewal-a
 The browser checks the profile's grants when a wave opens and at most every
 10 minutes while the tab is visible. When an active grant appears that this
 browser has not seen and that is not one of its own keys, the composer notice
-shows **{label} can now post as you. Not you?** with **Revoke** and a dismiss
+shows **{label} is now authorized for Signed Posts. If this wasn’t you, revoke it.** with **Revoke** and a dismiss
 control. The first list a browser sees for a wallet is its baseline, so a
 grant that already exists then never raises the alert; review **Device Permissions** for existing grants.
 
@@ -404,10 +404,9 @@ connection/signing flow. Progress appears below the relevant action.
 ## Connection sharing and status
 
 The Connect Device modal offers source-browser approval for receiving-app signing
-and encryption keys. Its **6529 Desktop** secure option is visible but disabled
-with **Coming soon**; there is no automatic release-version check. Connect-only
-Desktop handoff remains available. The compatible Mobile flow uses one QR for
-sign-in and setup, with no receiving-wallet connection. Working receiver keys and
+and encryption keys. A compatible Desktop build uses a private app link and
+Mobile uses a QR code. Both sign in and set up permissions without connecting
+the receiving wallet. Working receiver keys and
 history are preserved; source history is not copied. See
 [Encrypted messages](../../encrypted-messages.md#setup-through-connection-sharing).
 

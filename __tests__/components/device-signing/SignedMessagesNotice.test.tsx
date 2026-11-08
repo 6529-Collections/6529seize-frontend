@@ -477,7 +477,9 @@ describe("SignedMessagesNotice", () => {
       rerender(<SignedMessagesNotice composerEmpty={false} />);
 
       expect(
-        screen.getByText("Safari on iPhone can now post as you. Not you?")
+        screen.getByText(
+          "Safari on iPhone is now authorized for Signed Posts. If this wasn’t you, revoke it."
+        )
       ).toBeVisible();
       expect(screen.getByRole("button", { name: "Revoke" })).toBeVisible();
     });
@@ -495,7 +497,9 @@ describe("SignedMessagesNotice", () => {
         }),
       ];
       rerender(<SignedMessagesNotice composerEmpty />);
-      expect(screen.queryByText(/can now post as you/)).toBeNull();
+      expect(
+        screen.queryByText(/is now authorized for Signed Posts/)
+      ).toBeNull();
     });
 
     it("revokes the new device and confirms it", async () => {
@@ -510,7 +514,9 @@ describe("SignedMessagesNotice", () => {
       });
 
       expect(mockRevoke).toHaveBeenCalledWith(otherDevice);
-      expect(screen.queryByText(/can now post as you/)).toBeNull();
+      expect(
+        screen.queryByText(/is now authorized for Signed Posts/)
+      ).toBeNull();
     });
 
     it("keeps the alert when revoking fails and can be dismissed", async () => {
@@ -523,10 +529,14 @@ describe("SignedMessagesNotice", () => {
       await act(async () => {
         fireEvent.click(screen.getByRole("button", { name: "Revoke" }));
       });
-      expect(screen.getByText(/can now post as you/)).toBeVisible();
+      expect(
+        screen.getByText(/is now authorized for Signed Posts/)
+      ).toBeVisible();
 
       fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
-      expect(screen.queryByText(/can now post as you/)).toBeNull();
+      expect(
+        screen.queryByText(/is now authorized for Signed Posts/)
+      ).toBeNull();
     });
   });
 });

@@ -11,10 +11,11 @@ import {
   NoSymbolIcon,
   PencilSquareIcon,
   FaceSmileIcon,
+  ShieldCheckIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { E2eeMessage } from "@/lib/e2ee/types";
@@ -144,6 +145,13 @@ export function E2eeMessageActionsMenu({
   readonly actions: E2eeMessageActions;
 }) {
   const locale = useBrowserLocale();
+  const signatureStatusId = useId();
+  const showVerifiedSignature =
+    message.sigOk &&
+    !message.pending &&
+    !message.undecryptable &&
+    !message.imported &&
+    !message.deleted;
   const [emojiOpen, setEmojiOpen] = useState(false);
   const iconClass = "tw-size-4 tw-flex-shrink-0";
   return (
@@ -171,6 +179,9 @@ export function E2eeMessageActionsMenu({
         </MenuButton>
         <MenuItems
           anchor="bottom end"
+          aria-describedby={
+            showVerifiedSignature ? signatureStatusId : undefined
+          }
           className="tailwind-scope tw-z-[1001] tw-mt-1 tw-w-56 tw-rounded-xl tw-bg-iron-950 tw-p-1.5 tw-shadow-2xl tw-ring-1 tw-ring-iron-700/80 focus:tw-outline-none"
         >
           {canAct && (
@@ -248,6 +259,16 @@ export function E2eeMessageActionsMenu({
               actions={actions}
               iconClass={iconClass}
             />
+          )}
+          {showVerifiedSignature && (
+            <div
+              id={signatureStatusId}
+              role="presentation"
+              className="tw-mt-1 tw-flex tw-items-center tw-gap-2 tw-border-t tw-border-solid tw-border-white/10 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-300"
+            >
+              <ShieldCheckIcon aria-hidden="true" className={iconClass} />
+              {t(locale, "e2ee.message.signatureVerified")}
+            </div>
           )}
         </MenuItems>
       </Menu>

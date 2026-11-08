@@ -72,6 +72,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   private readonly ctx: EngineContext;
   private readonly controller: EngineController;
   private readonly conversationCreator: ConversationCreator;
+  private loginGrantEnrollment: Promise<void> | null = null;
 
   constructor(ctx: EngineContext) {
     this.ctx = ctx;
@@ -160,6 +161,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
       (await this.takeLoginGrantDevice())
     ) {
       await this.enrollFromLoginGrant();
+    } else {
+      // The storage event or startup may already be enrolling this grant.
+      await this.loginGrantEnrollment;
     }
     return this.ctx.store.status;
   }
@@ -168,7 +172,16 @@ class E2eeEngineImpl implements E2eeEngineExt {
     return this.ctx.queue.run(() => needsNewDevice(this.ctx));
   }
 
-  private async enrollFromLoginGrant(): Promise<void> {
+  private enrollFromLoginGrant(): Promise<void> {
+    this.loginGrantEnrollment ??= this.finishLoginGrantEnrollment().finally(
+      () => {
+        this.loginGrantEnrollment = null;
+      }
+    );
+    return this.loginGrantEnrollment;
+  }
+
+  private async finishLoginGrantEnrollment(): Promise<void> {
     try {
       await this.runEnrollment(false);
     } catch {

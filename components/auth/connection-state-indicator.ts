@@ -32,20 +32,20 @@ export function getConnectionProfileIndicator({
   if (isConnected) {
     return {
       state: "authorized_connected",
-      avatarClassName: `tw-bg-emerald-900/10 tw-ring-2 tw-ring-emerald-700/30`,
+      avatarClassName: `tw-bg-emerald-900/10 tw-ring-2 tw-ring-emerald-600/50`,
       overlayClassName: "tw-bg-emerald-950/10",
       buttonClassName:
-        "tw-border-emerald-700/25 tw-bg-emerald-900/10 tw-ring-2 tw-ring-inset tw-ring-emerald-800/25",
+        "tw-border-emerald-600/50 tw-bg-emerald-900/10 tw-ring-2 tw-ring-inset tw-ring-emerald-700/50",
       title: "Authorized and Connected",
     };
   }
 
   return {
     state: "authorized_only",
-    avatarClassName: `tw-bg-amber-900/10 tw-ring-2 tw-ring-amber-700/30`,
+    avatarClassName: `tw-bg-amber-900/10 tw-ring-2 tw-ring-amber-600/50`,
     overlayClassName: "tw-bg-amber-950/10",
     buttonClassName:
-      "tw-border-amber-700/25 tw-bg-amber-900/10 tw-ring-2 tw-ring-inset tw-ring-amber-800/25",
+      "tw-border-amber-600/50 tw-bg-amber-900/10 tw-ring-2 tw-ring-inset tw-ring-amber-700/50",
     title: "Authorized only (wallet not connected)",
   };
 }

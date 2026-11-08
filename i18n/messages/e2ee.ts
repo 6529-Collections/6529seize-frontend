@@ -339,6 +339,7 @@ export const E2EE_MESSAGES = {
   "e2ee.message.unverified": "Signature not verified",
   "e2ee.message.replyTo": "Reply to {name}",
   "e2ee.message.replyUnavailable": "Original message unavailable",
+  "e2ee.message.signatureVerified": "Sender’s device signature verified",
   "e2ee.message.actions": "Message actions",
   "e2ee.message.reactions": "Reactions",
   "e2ee.message.reactWith": "React with {reaction}",

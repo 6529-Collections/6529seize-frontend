@@ -59,7 +59,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.notice.expired.body":
     "Your messages are sent unsigned until you renew with one signature.",
   "signedMessages.notice.newDevice.message":
-    "{label} can now post as you. Not you?",
+    "{label} is now authorized for Signed Posts. If this wasn’t you, revoke it.",
   "signedMessages.notice.newDevice.revoke": "Revoke",
   "signedMessages.notice.enabled": "Signed posts are on in this browser.",
   "signedMessages.revoke.success": "{label} can no longer post as you.",

@@ -351,6 +351,8 @@ time your device sees someone. Compare safety codes and check the wallets in
 - **Couldn’t decrypt this message**: this device could not read it; ask the
   sender to send it again.
 - **Signature not verified**: the sender's signature did not check out.
+- **Sender’s device signature verified** appears in the message actions menu
+  for verified messages sent in the encrypted chat.
 
 ## Devices
 
@@ -452,10 +454,8 @@ encrypted copy of your message history so you can restore it on a new device.
   supported; encryption-only setup uses its own encryption grant. Alternatively,
   source-browser-approved [connection sharing](#setup-through-connection-sharing)
   signs in and enrolls the receiving app without connecting a wallet there.
-  Ordinary app sign-in alone does not grant these permissions. The web
-  **6529 Desktop** connection option currently allows **Connect only**; its
-  secure setup button is disabled with **Coming soon** until that app release.
-  Availability inside an app also depends on its build and cryptographic support.
+  Ordinary app sign-in alone does not grant these permissions. Secure setup
+  requires a compatible Desktop or Mobile build with cryptographic support.
 
 - **Phones.** 6529 Mobile needs iOS 16.4 or later (earlier iOS versions cannot
   run the current site at all) or a current Android System WebView. Signed
@@ -580,9 +580,8 @@ Choose **Connect only** for an additional signed-in app session, or
 The source browser does not need encryption enabled on itself to approve the
 receiving app. Proxy sessions cannot authorize secure setup.
 
-**6529 Desktop** currently keeps the secure option visible but disabled, with a
-**Coming soon** tooltip. **Connect only** remains available. This is a release
-gate, not an automatic check of the installed app version.
+For Desktop secure setup, approve the wallet signature in the browser, then
+select **Open in 6529 Desktop** to open the private link in a compatible build.
 
 For Mobile secure setup, approve the wallet signature in the browser, then scan
 one QR or open its private link in the receiving app. The regular **Scan QR Code**
