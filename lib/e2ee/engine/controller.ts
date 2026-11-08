@@ -6,6 +6,7 @@ import {
   groupChanges,
   noteStallFor,
   clearStallFor,
+  releaseSendStallIfIdle,
   otherAddDelayMs,
   repairRoster,
   requiredChangesPlanner,
@@ -356,6 +357,7 @@ export class EngineController {
     while (this.isReady()) {
       const runtime = this.ctx.store.groups.get(g);
       if (!isActive(runtime) || runtime.outbox.size === 0) {
+        releaseSendStallIfIdle(this.ctx, runtime);
         return;
       }
       const commit = await runGroupCommit(
@@ -375,6 +377,7 @@ export class EngineController {
       }
       const step = await this.ctx.queue.run(() => sendNext(this.ctx, runtime));
       if (step === "failed") {
+        runtime.sendFailingSince ??= this.ctx.now();
         if (noteStallFor(this.ctx, runtime)) {
           this.armRetry(g);
           return;
@@ -386,6 +389,7 @@ export class EngineController {
         attempt += 1;
         continue;
       }
+      runtime.sendFailingSince = null;
       clearStallFor(this.ctx, runtime);
       attempt = 0;
       if (step === "empty" || step === "inactive") {

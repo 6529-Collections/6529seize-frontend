@@ -134,6 +134,9 @@ export interface E2eeReportPreview {
   original: E2eeReportVersion | null;
 }
 
+/** What keeps a delayed conversation waiting (8.3). */
+export type E2eeDelayedReason = "send" | "commit";
+
 export interface E2eeConversation {
   /** Original DM peer, retained for titles after leaving; not a current member. */
   dmPeer?: E2eeMember | null;
@@ -148,6 +151,12 @@ export interface E2eeConversation {
   /** "restored": from a history backup, read-only until this device joins. */
   status: "active" | "invalid" | "left" | "removed" | "restored";
   delayed: boolean; // 8.3 stall banner
+  /**
+   * What keeps a delayed conversation waiting (8.3), null when not delayed:
+   * "commit" while a required group change cannot go through, "send" while
+   * only sending keeps failing. A stuck commit wins when both apply.
+   */
+  delayedReason: E2eeDelayedReason | null;
   splitView: boolean; // 8.6 alarm
   /** Members' devices waiting for "Add device" or "Ignore". */
   untrustedDevices: E2eeUntrustedDevice[];
