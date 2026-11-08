@@ -18,8 +18,12 @@ export class UnsentMessages {
 
   constructor(
     private readonly ctx: EngineContext,
-    /** `restart(g)`: the successor of a superseded conversation. */
-    private readonly successorOf: (g: string) => Promise<string>
+    private readonly hooks: {
+      /** `restart(g)`: the successor of a superseded conversation. */
+      readonly successorOf: (g: string) => Promise<string>;
+      /** Starts sending `g`'s outbox now, in the background. */
+      readonly requestFlush: (g: string) => void;
+    }
   ) {}
 
   resend(g: string, id: string): Promise<{ g: string; id: string }> {
@@ -52,9 +56,10 @@ export class UnsentMessages {
     if (!source) {
       throw new E2eeError("E2EE_NO_MESSAGE");
     }
-    const target = await this.successorOf(g);
+    const target = await this.hooks.successorOf(g);
     const copy = await queueUnsentCopy(this.ctx, target, source);
     await this.remove(requireGroup(this.ctx, g), id);
+    this.hooks.requestFlush(target);
     return { g: target, id: copy };
   }
 

@@ -88,7 +88,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
       this.onDelayed
     );
     this.restarter = new ConversationRestarter(ctx, this.conversationCreator);
-    this.unsent = new UnsentMessages(ctx, (g) => this.restart(g));
+    this.unsent = new UnsentMessages(ctx, {
+      successorOf: (g) => this.restart(g),
+      // Like send(), without letting a flush error fail the resend.
+      requestFlush: (g) => this.background(() => this.controller.flush(g)),
+    });
     this.enrollment = new EnrollmentFlight(ctx, {
       renew: () => this.renew(),
       loadDevicesAtLimit: () => this.loadDevicesAtLimit(),

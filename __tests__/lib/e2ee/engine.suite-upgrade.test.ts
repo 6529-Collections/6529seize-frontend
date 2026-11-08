@@ -391,6 +391,17 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
     ]);
     expect(second).toEqual(first);
     await expect(a.restart(old)).resolves.toBe(first.g);
+    // The resend flushes by itself: delivered once its background work is
+    // done, without a sync, a settle or a timer.
+    await a.idle();
+    expect(
+      world.ds.state.requests.some(
+        (r) =>
+          r.method === "POST" &&
+          r.path === `e2ee/groups/${first.g}/messages` &&
+          r.status === 200
+      )
+    ).toBe(true);
     await settle(world);
     const b = bob.primary.engine;
     expect(texts(b.getMessages(first.g))).toEqual(["typed while offline"]);
