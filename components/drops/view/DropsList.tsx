@@ -12,7 +12,7 @@ import type {
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { RefObject } from "react";
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import BoostedDropCardHome from "@/components/home/boosted/BoostedDropCardHome";
 import BoostedDropCompactChatItem from "@/components/home/boosted/BoostedDropCompactChatItem";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
@@ -123,6 +123,13 @@ const DropsListRow = memo(
     virtualScrollRootMargin,
   }: DropsListRowProps) => {
     const isTarget = itemData.serialNo === drop.serial_no;
+    // DEBUG: row mounts for the shared-post fixture target.
+    useEffect(() => {
+      if (drop.serial_no !== 20) return;
+      console.warn(`[serialdbg] row20 mount type=${drop.type} key=${drop.stableKey.slice(0, 24)} t=${Math.round(performance.now())}`);
+      return () => console.warn(`[serialdbg] row20 unmount t=${Math.round(performance.now())}`);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
     const dropContent =
       drop.type === DropSize.FULL ? (
         <MemoizedDrop
