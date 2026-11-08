@@ -89,7 +89,7 @@ export interface FakeDeliveryService {
   setTamper(fn: ((item: any, context: FakeLogItemContext) => any) | null): void;
   group(g: string): any;
   devicesOf(profileId: string): any[];
-  /** D172: closes (false) or reopens the v1-grant transition window. */
+  /** D172: closes (false: v1 grants and 0x004F refused) or reopens the transition window. */
   setV1GrantsAccepted(accepted: boolean): void;
   /** D172 seed: a v1 (0x004F) grant on a registered device, no KeyPackages. */
   markLegacySuiteDevice(deviceKey: string): any;
