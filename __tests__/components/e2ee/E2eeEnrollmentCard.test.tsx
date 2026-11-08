@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { SeizeConnectContext } from "@/components/auth/seizeConnectContextValue";
 import type { SeizeConnectContextType } from "@/components/auth/seizeConnectTypes";
 import type { turnOnWithCombinedSignIn } from "@/components/e2ee/gate/e2eeCombinedTurnOn";
@@ -197,5 +203,138 @@ describe("E2eeEnrollmentCard turn-on", () => {
     engine.rerenderCard();
     await waitFor(() => expect(mockTurnOn).toHaveBeenCalledTimes(1));
     expect(engine.enroll).not.toHaveBeenCalled();
+  });
+});
+
+describe("E2eeEnrollmentCard upgrade copy (D172)", () => {
+  const renderScoped = (
+    scope: "dms" | "both",
+    upgrade: { superseded: number } | null
+  ) => {
+    const engine = createFakeE2eeEngine({
+      status: "needs-enrollment",
+      upgrade,
+    });
+    render(
+      <SeizeConnectContext.Provider
+        value={
+          {
+            address: ADDRESS,
+            canSignActiveWallet: true,
+            connectedAccounts: [],
+            seizeConnectFresh: mockConnect,
+          } as unknown as SeizeConnectContextType
+        }
+      >
+        <E2eeEnrollmentCard
+          scope={scope}
+          engine={engine}
+          enrolling={false}
+          engineError={null}
+        />
+      </SeizeConnectContext.Provider>
+    );
+    return engine;
+  };
+
+  beforeEach(() => {
+    mockTurnOn.mockReset();
+    mockCanSign = true;
+  });
+
+  it("shows first-time copy to a device that never enrolled", () => {
+    renderScoped("dms", null);
+
+    expect(
+      screen.getByRole("heading", { name: "Enable Encrypted DMs" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Encrypted chats can be read only by the people in them."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/moving to stronger encryption/u)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Sign to enable Encrypted DMs" })
+    ).toBeEnabled();
+  });
+
+  it("shows upgrade copy and asks for one signature through enroll()", async () => {
+    const engine = renderScoped("dms", { superseded: 3 });
+
+    expect(
+      screen.getByRole("heading", { name: "Upgrade encrypted messages" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Encrypted messages are moving to stronger encryption. Confirm once in your wallet to continue; your messages stay on this device."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Your 3 existing conversations stay readable. Open one to continue it with the new encryption."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "Encrypted chats can be read only by the people in them."
+      )
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign to upgrade Encrypted DMs" })
+    );
+
+    await waitFor(() => expect(engine.enroll).toHaveBeenCalledTimes(1));
+    expect(mockTurnOn).not.toHaveBeenCalled();
+  });
+
+  it("keeps the combined sign-in when signing is also off", async () => {
+    mockTurnOn.mockResolvedValue("done");
+    const engine = renderScoped("both", { superseded: 1 });
+
+    expect(
+      screen.getByText(/moving to stronger encryption/u)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Your 1 existing conversation stays readable. Open it to continue it with the new encryption."
+      )
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", BUTTON));
+
+    await waitFor(() => expect(mockTurnOn).toHaveBeenCalledTimes(1));
+    expect(engine.enroll).not.toHaveBeenCalled();
+  });
+
+  it("follows the engine when the upgrade clears", () => {
+    const engine = renderScoped("dms", { superseded: 0 });
+    expect(
+      screen.getByRole("heading", { name: "Upgrade encrypted messages" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/existing conversation/u)
+    ).not.toBeInTheDocument();
+
+    act(() => engine.update({ upgrade: null }));
+
+    expect(
+      screen.getByRole("heading", { name: "Enable Encrypted DMs" })
+    ).toBeInTheDocument();
+  });
+
+  it("reports a failed upgrade with upgrade wording", async () => {
+    const engine = renderScoped("dms", { superseded: 2 });
+    jest.mocked(engine.enroll).mockRejectedValueOnce(new Error("storage"));
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign to upgrade Encrypted DMs" })
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Couldn’t upgrade encrypted messages. Try again."
+    );
   });
 });
