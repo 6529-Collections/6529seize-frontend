@@ -38,10 +38,11 @@ export function getDownloadFilenameFromUrl(url: string, fallback = "media") {
 }
 
 /**
- * Where the temporary download link goes: inside the topmost open dialog
- * when there is one. A modal's focus trap cancels clicks outside it (and
- * inert content ignores them), which silently drops the download, as in the
- * media preview's Download button.
+ * Where the temporary download link goes: inside the last open dialog in
+ * document order when there is one (a modal preview is portaled to the end
+ * of `body` when it opens). A modal's focus trap cancels clicks outside it
+ * (and inert content ignores them), which silently drops the download, as in
+ * the media preview's Download button.
  */
 function getDownloadLinkContainer(): HTMLElement {
   const dialogs = document.querySelectorAll<HTMLElement>(
@@ -57,6 +58,12 @@ export function triggerDirectDownload(url: string, fileName: string) {
   anchor.download = fileName;
   anchor.target = "_blank";
   anchor.rel = "noopener noreferrer";
+  // React bubbles a click inside a portaled dialog up to the components that
+  // rendered it, such as a drop that opens when clicked. The link's click
+  // stays with the link; its default action, the download, still runs.
+  anchor.addEventListener("click", (event) => event.stopPropagation(), {
+    once: true,
+  });
   getDownloadLinkContainer().append(anchor);
   anchor.click();
   anchor.remove();

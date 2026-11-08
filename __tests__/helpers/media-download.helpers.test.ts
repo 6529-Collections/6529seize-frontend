@@ -1,5 +1,8 @@
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
+import { render } from "@testing-library/react";
+import { createElement } from "react";
+import { createPortal } from "react-dom";
 import {
   downloadMediaUrl,
   getDownloadFilenameFromUrl,
@@ -78,22 +81,26 @@ describe("triggerDirectDownload", () => {
     return () => document.removeEventListener("click", trap, true);
   };
 
+  /**
+   * Records each download click right after the trap has seen it: a capture
+   * listener on `document` registered after the trap's. The link's own click
+   * no longer bubbles, so a bubbling listener would never see it.
+   */
   const recordDownloadClicks = () => {
     const clicks: { parent: Element | null; cancelled: boolean }[] = [];
     const listener = (event: MouseEvent) => {
       const anchor = event.target as HTMLAnchorElement;
       if (anchor.download) {
-        // Bubbling to window comes after the trap's capture listener.
         clicks.push({
           parent: anchor.parentElement,
           cancelled: event.defaultPrevented,
         });
       }
     };
-    globalThis.addEventListener("click", listener);
+    document.addEventListener("click", listener, true);
     return {
       clicks,
-      stop: () => globalThis.removeEventListener("click", listener),
+      stop: () => document.removeEventListener("click", listener, true),
     };
   };
 
@@ -116,6 +123,29 @@ describe("triggerDirectDownload", () => {
     }
     expect(recorder.clicks).toEqual([{ parent: dialog, cancelled: false }]);
     expect(dialog.querySelector("a")).toBeNull();
+  });
+
+  it("keeps the link's click from reaching what rendered a portaled dialog", async () => {
+    const onClick = jest.fn();
+    const { unmount } = render(
+      createElement(
+        "div",
+        { onClick },
+        createPortal(createElement("dialog", { open: true }), document.body)
+      )
+    );
+    const recorder = recordDownloadClicks();
+    try {
+      triggerDirectDownload("blob:http://localhost/image", "pixel.png");
+      await Promise.resolve();
+    } finally {
+      recorder.stop();
+    }
+    expect(recorder.clicks).toEqual([
+      { parent: document.querySelector("dialog"), cancelled: false },
+    ]);
+    expect(onClick).not.toHaveBeenCalled();
+    unmount();
   });
 
   it("uses the page when no dialog is open", async () => {
