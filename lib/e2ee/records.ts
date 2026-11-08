@@ -190,7 +190,17 @@ export interface StoredMessage {
   latestEdit?: SignedVersion | null;
   /** Set when the message was moved from an unencrypted DM (D146). */
   imported?: ImportedPayload;
+  /**
+   * Set on an own message that was never sent and no longer will be from
+   * here (D172: its conversation was superseded while it was still queued).
+   * Local only; `pending` is false. The text stays until the user resends
+   * it in the conversation that continues this one, or deletes it.
+   */
+  unsent?: { reason: StoredUnsentReason; at: number };
 }
+
+/** Why an own message stayed unsent (see StoredMessage.unsent). */
+export type StoredUnsentReason = "suite_upgrade";
 
 export interface SealedOutboxMessage {
   epoch: number;

@@ -8,6 +8,7 @@
  * WASM, fake delivery service, memory storage.
  */
 import { E2EE_CIPHERSUITE } from "@/lib/e2ee/grant";
+import { retireOldSuiteDevice } from "@/lib/e2ee/suite-retirement";
 import {
   addUser,
   createWorld,
@@ -48,6 +49,25 @@ async function legacyDm(world: World): Promise<{
   await seedLegacySuiteDevice(world, alice, alice.primary);
   await seedLegacySuiteDevice(world, bob, bob.primary);
   return { alice, bob, old };
+}
+
+/**
+ * Sends while every send fails, without waiting for the send (it keeps
+ * retrying), until the message is in the stored outbox.
+ */
+async function queueWhileFailing(
+  user: TestUser,
+  g: string,
+  text: string
+): Promise<void> {
+  const sending = user.primary.engine.send(g, { text });
+  sending.catch(() => undefined);
+  for (let tries = 0; tries < 2_000; tries += 1) {
+    const outbox = await user.primary.storage.listOutbox(user.profileId);
+    if (outbox.length > 0) break;
+    await realSleep(5);
+  }
+  expect(await user.primary.storage.listOutbox(user.profileId)).toHaveLength(1);
 }
 
 async function upgrade(world: World, user: TestUser): Promise<void> {
@@ -297,6 +317,130 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
     await expect(again.engine.restart(old)).resolves.toBe(fresh);
     expect(again.engine.getConversation(old)?.successor).toBe(fresh);
     expect(ids(again)).toEqual([fresh, old].sort());
+  });
+
+  it("keeps a message queued at the move as unsent, and resends it in the upgraded chat", async () => {
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    const old = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await settle(world);
+    // Every send fails, so the message stays queued; the tab then closes.
+    world.ds.addFault({
+      method: "POST",
+      path: /^e2ee\/groups\/0x[0-9a-f]+\/messages$/,
+      status: 503,
+      times: -1,
+    });
+    await queueWhileFailing(alice, old, "typed while offline");
+    await seedLegacySuiteDevice(world, alice, alice.primary, {
+      waitIdle: false,
+    });
+    world.ds.clearFaults();
+    await seedLegacySuiteDevice(world, bob, bob.primary);
+    let a = alice.primary.engine;
+    const storage = alice.primary.storage;
+
+    // Retired: the outbox is empty and the message is kept, not pending.
+    expect(await storage.listOutbox("alice")).toEqual([]);
+    await a.loadHistory?.(old);
+    const unsent = a
+      .getMessages(old)
+      .find((m) => m.text === "typed while offline");
+    expect(unsent).toMatchObject({
+      pending: false,
+      unsent: "suite_upgrade",
+      senderProfileId: "alice",
+    });
+    const stored = await storage.getMessage("alice", old, unsent!.id);
+    expect(stored?.unsent).toEqual({
+      reason: "suite_upgrade",
+      at: expect.any(Number),
+    });
+
+    // Retiring again (another tab, a second start) changes nothing. The
+    // write moves the state version, so this tab stops and starts again.
+    stopDevice(world, alice.primary);
+    const before = await storage.listMessages("alice", old);
+    const retired = (await storage.getDevice("alice"))!;
+    await retireOldSuiteDevice(
+      storage,
+      "alice",
+      retired,
+      await storage.getStateVersion("alice"),
+      world.clock.now() + 1
+    );
+    expect(await storage.listMessages("alice", old)).toEqual(before);
+    expect(await storage.listOutbox("alice")).toEqual([]);
+    const again = await startDevice(world, "alice", alice.account, {
+      storage,
+      enroll: false,
+    });
+    alice.devices.push(again);
+    alice.primary = again;
+    a = again.engine;
+    expect(a.getUpgrade()).toEqual({ superseded: 1 });
+
+    await upgrade(world, alice);
+    await upgrade(world, bob);
+    const [first, second] = await Promise.all([
+      a.resendUnsent(old, unsent!.id),
+      a.resendUnsent(old, unsent!.id),
+    ]);
+    expect(second).toEqual(first);
+    await expect(a.restart(old)).resolves.toBe(first.g);
+    await settle(world);
+    const b = bob.primary.engine;
+    expect(texts(b.getMessages(first.g))).toEqual(["typed while offline"]);
+    // Sent once, and gone from the old chat; it cannot be sent again.
+    expect(
+      texts(a.getMessages(first.g)).filter((t) => t === "typed while offline")
+    ).toHaveLength(1);
+    expect(await storage.getMessage("alice", old, unsent!.id)).toBeNull();
+    await expect(a.resendUnsent(old, unsent!.id)).rejects.toMatchObject({
+      code: "E2EE_NO_MESSAGE",
+    });
+  });
+
+  it("deletes an unsent message on request, and never sends it", async () => {
+    const alice = await addUser(world, "alice");
+    await addUser(world, "bob");
+    const old = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await settle(world);
+    world.ds.addFault({
+      method: "POST",
+      path: /^e2ee\/groups\/0x[0-9a-f]+\/messages$/,
+      status: 503,
+      times: -1,
+    });
+    await queueWhileFailing(alice, old, "never mind");
+    await seedLegacySuiteDevice(world, alice, alice.primary, {
+      waitIdle: false,
+    });
+    world.ds.clearFaults();
+    const a = alice.primary.engine;
+    await a.loadHistory?.(old);
+    const unsent = a.getMessages(old).find((m) => m.text === "never mind")!;
+    expect(unsent.unsent).toBe("suite_upgrade");
+    const sends = () =>
+      world.ds.state.requests.filter(
+        (r) => r.method === "POST" && r.path.endsWith("/messages")
+      ).length;
+    const sentBefore = sends();
+
+    await a.discardUnsent(old, unsent.id);
+    expect(a.getMessages(old).some((m) => m.id === unsent.id)).toBe(false);
+    expect(
+      await alice.primary.storage.getMessage("alice", old, unsent.id)
+    ).toBeNull();
+    // Deleting again is a no-op; nothing was sent meanwhile.
+    await a.discardUnsent(old, unsent.id);
+    expect(sends()).toBe(sentBefore);
   });
 
   it("refuses to start again until the other person has moved too", async () => {

@@ -18,9 +18,10 @@ type CombinedTurnOnOutcome = Awaited<
 const mockRequestGrant = jest.fn();
 const mockConnect = jest.fn();
 let mockCanSign = true;
+let mockIsRemoteWallet = false;
 jest.mock("@/hooks/device-signing/useSignedMessagesWallet", () => ({
   useSignedMessagesWallet: () => ({
-    isRemoteWallet: false,
+    isRemoteWallet: mockIsRemoteWallet,
     networkName: "Ethereum",
     isNetworkSupported: () => true,
     switchNetwork: jest.fn(),
@@ -88,6 +89,7 @@ describe("E2eeEnrollmentCard turn-on", () => {
   beforeEach(() => {
     mockTurnOn.mockReset();
     mockCanSign = true;
+    mockIsRemoteWallet = false;
     mockConnect.mockReset();
   });
 
@@ -102,6 +104,7 @@ describe("E2eeEnrollmentCard turn-on", () => {
         engine,
         address: ADDRESS,
         requestGrant: expect.any(Function),
+        onRegistering: expect.any(Function),
       })
     );
     await waitFor(() =>
@@ -178,6 +181,174 @@ describe("E2eeEnrollmentCard turn-on", () => {
 
     await waitFor(() => expect(mockTurnOn).toHaveBeenCalled());
     expect(engine.enroll).not.toHaveBeenCalled();
+  });
+
+  describe("when encryption is still registering after the sign-in", () => {
+    const FINISHING =
+      "Signed posts are on. Encrypted DMs are still finishing setup in this browser and will turn on by themselves. You can close this window.";
+    const FINISHING_INLINE =
+      "Signed posts are on. Encrypted DMs are still finishing setup in this browser and will turn on by themselves.";
+    const PARTIAL =
+      "Signed posts are on. Encrypted DMs could not finish setup. You can try enabling them separately.";
+
+    const renderSetupCard = (
+      statusAtPending: "enrolling" | "ready" = "enrolling"
+    ) => {
+      const engine = createFakeE2eeEngine({ status: "needs-enrollment" });
+      const onClose = jest.fn();
+      mockTurnOn.mockImplementation(async () => {
+        engine.update({ status: statusAtPending });
+        return "pending";
+      });
+      render(
+        <SeizeConnectContext.Provider
+          value={
+            {
+              address: ADDRESS,
+              canSignActiveWallet: true,
+              connectedAccounts: [],
+              seizeConnectFresh: mockConnect,
+            } as unknown as SeizeConnectContextType
+          }
+        >
+          <E2eeEnrollmentCard
+            scope="both"
+            engine={engine}
+            enrolling={false}
+            engineError={null}
+            onClose={onClose}
+          />
+        </SeizeConnectContext.Provider>
+      );
+      fireEvent.click(screen.getByRole("button", BUTTON));
+      return { engine, onClose };
+    };
+
+    it("says it is still finishing, without an alert, and closes once it is on", async () => {
+      const { engine, onClose } = renderSetupCard();
+
+      const notice = await screen.findByText(FINISHING);
+      expect(notice.tagName).toBe("OUTPUT");
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+
+      act(() => engine.update({ status: "ready" }));
+      expect(onClose).toHaveBeenCalled();
+    });
+
+    it("closes exactly once on repeated notifications and ignores later changes", async () => {
+      const { engine, onClose } = renderSetupCard();
+      await screen.findByText(FINISHING);
+
+      act(() => {
+        engine.update({ status: "ready" });
+        engine.update({ status: "ready" });
+      });
+      act(() => engine.update({ status: "needs-enrollment" }));
+
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByText(FINISHING)).not.toBeInTheDocument();
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("closes once when encryption settles before the sign-in flow finishes", async () => {
+      // Registration ended right at the wait's limit: the watch settles at
+      // once, and the flow's own success callback must not close again.
+      const { onClose } = renderSetupCard("ready");
+
+      await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+      // The sign-in flow has finished (and called onEnabled) by now.
+      await waitFor(() =>
+        expect(screen.getByRole("button", BUTTON)).toHaveAttribute(
+          "aria-busy",
+          "false"
+        )
+      );
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(screen.queryByText(FINISHING)).not.toBeInTheDocument();
+    });
+
+    it("replaces the wallet prompts once signed, with no Reconnect during the wait", async () => {
+      jest.useFakeTimers();
+      try {
+        mockIsRemoteWallet = true;
+        mockRequestGrant.mockImplementation(
+          async (options?: { onSignatureRequested?: () => void }) => {
+            options?.onSignatureRequested?.();
+            return { success: true };
+          }
+        );
+        const engine = createFakeE2eeEngine({ status: "needs-enrollment" });
+        let finishRegistration: () => void = () => undefined;
+        mockTurnOn.mockImplementation(async (input: unknown) => {
+          const turnOn = input as {
+            requestGrant: (options: object) => Promise<unknown>;
+            onRegistering: () => void;
+          };
+          await turnOn.requestGrant({ silent: true, encryptedMessages: true });
+          engine.update({ status: "enrolling" });
+          turnOn.onRegistering();
+          await new Promise<void>((resolve) => {
+            finishRegistration = resolve;
+          });
+          return "done";
+        });
+        render(
+          <SeizeConnectContext.Provider
+            value={
+              {
+                address: ADDRESS,
+                canSignActiveWallet: true,
+                connectedAccounts: [],
+                seizeConnectFresh: mockConnect,
+              } as unknown as SeizeConnectContextType
+            }
+          >
+            <E2eeEnrollmentCard
+              scope="both"
+              engine={engine}
+              enrolling={false}
+              engineError={null}
+            />
+          </SeizeConnectContext.Provider>
+        );
+        fireEvent.click(screen.getByRole("button", BUTTON));
+        await act(async () => {
+          await Promise.resolve();
+        });
+        expect(screen.getByText(FINISHING_INLINE)).toBeInTheDocument();
+
+        // Past the slow-wallet hint (8 s) and the WalletConnect stall (20 s).
+        act(() => {
+          jest.advanceTimersByTime(21_000);
+        });
+        expect(screen.getByText(FINISHING_INLINE)).toBeInTheDocument();
+        expect(screen.queryByText(/your wallet|your phone/iu)).toBeNull();
+        expect(
+          screen.queryByRole("button", { name: "Reconnect wallet" })
+        ).toBeNull();
+
+        await act(async () => {
+          finishRegistration();
+          await Promise.resolve();
+        });
+        expect(screen.queryByText(FINISHING_INLINE)).toBeNull();
+      } finally {
+        mockRequestGrant.mockReset();
+        jest.useRealTimers();
+      }
+    });
+
+    it("explains a partial setup only if the registration then fails", async () => {
+      const { engine, onClose } = renderSetupCard();
+      await screen.findByText(FINISHING);
+
+      act(() => engine.update({ status: "needs-enrollment" }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(PARTIAL);
+      expect(screen.queryByText(FINISHING)).not.toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    });
   });
 
   it("reports a failure as an alert", async () => {

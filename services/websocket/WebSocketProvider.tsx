@@ -21,6 +21,7 @@ import {
   type WebSocketConnectionInfo,
 } from "./WebSocketTypes";
 import { getSocketIdentityKey } from "./socketIdentity";
+import { isPongFrame, isWsPingEnabled, SocketPinger } from "./socketPing";
 import { publicEnv } from "@/config/env";
 import { applyDelayJitter } from "@/helpers/jitter.helpers";
 import { getClientBuildId } from "@/lib/version/versionPoll";
@@ -227,6 +228,8 @@ export function WebSocketProvider({
   const sessionIdentityRef = useRef<string | null>(null);
   // When the current socket opened or last delivered a frame.
   const lastFrameAtRef = useRef(0);
+  // Keepalive and liveness checks for the current socket, when enabled.
+  const pingerRef = useRef<SocketPinger | null>(null);
 
   // WebSocket connection reference
   const wsRef = useRef<WebSocket | null>(null);
@@ -250,6 +253,11 @@ export function WebSocketProvider({
       clearTimeout(authenticationTimerRef.current);
       authenticationTimerRef.current = null;
     }
+  }, []);
+
+  const stopPinger = useCallback(() => {
+    pingerRef.current?.stop();
+    pingerRef.current = null;
   }, []);
 
   const updateStatus = useCallback((next: WebSocketStatus) => {
@@ -292,6 +300,8 @@ export function WebSocketProvider({
         return;
       }
 
+      // A PONG only proves the socket is alive; receiving it did that.
+      if (isPongFrame(parsed)) return;
       const message = normalizeIncomingMessage(parsed);
       if (!message) {
         return;
@@ -430,6 +440,7 @@ export function WebSocketProvider({
       // Close existing connection if any
       if (wsRef.current) {
         clearAuthenticationTimer();
+        stopPinger();
         wsRef.current.close();
         wsRef.current = null;
       }
@@ -464,6 +475,15 @@ export function WebSocketProvider({
             return;
           }
           lastFrameAtRef.current = Date.now();
+          if (isWsPingEnabled()) {
+            // A socket that stops answering PINGs is replaced: a new
+            // session, with the reconnect resync that follows one.
+            pingerRef.current = new SocketPinger(ws, () => {
+              if (wsRef.current === ws) {
+                connectSocket(getAuthJwt() ?? reconnectTokenRef.current);
+              }
+            });
+          }
 
           if (useMessageAuth) {
             updateStatus(WebSocketStatus.AUTHENTICATING);
@@ -494,6 +514,7 @@ export function WebSocketProvider({
           }
 
           lastFrameAtRef.current = Date.now();
+          pingerRef.current?.noteReceived();
           handleMessage(event);
         };
 
@@ -504,6 +525,7 @@ export function WebSocketProvider({
 
           // Clean up WebSocket
           clearAuthenticationTimer();
+          stopPinger();
           wsRef.current = null;
           updateStatus(WebSocketStatus.DISCONNECTED);
 
@@ -542,6 +564,7 @@ export function WebSocketProvider({
       handleMessage,
       clearReconnectTimer,
       clearAuthenticationTimer,
+      stopPinger,
       attemptReconnect,
       markAuthenticated,
       updateStatus,
@@ -559,6 +582,7 @@ export function WebSocketProvider({
     // Clear any pending reconnect
     clearReconnectTimer();
     clearAuthenticationTimer();
+    stopPinger();
 
     // Reset reconnect attempts
     reconnectAttemptsRef.current = 0;
@@ -569,7 +593,7 @@ export function WebSocketProvider({
       wsRef.current = null;
       updateStatus(WebSocketStatus.DISCONNECTED);
     }
-  }, [clearReconnectTimer, clearAuthenticationTimer, updateStatus]);
+  }, [clearReconnectTimer, clearAuthenticationTimer, stopPinger, updateStatus]);
 
   /** Replaces a socket that stopped answering, unless it was replaced already. */
   const replaceUnresponsiveSocket = useCallback(
@@ -617,8 +641,8 @@ export function WebSocketProvider({
   );
 
   // A socket that delivered a frame since `since` is alive. A quiet one may
-  // have died silently, and servers before PING/PONG cannot be asked, so it
-  // is replaced.
+  // have died silently: with PING enabled it is asked and replaced only if it
+  // does not answer; without, it is replaced.
   const ensureLive = useCallback(
     (since: number) => {
       const ws = wsRef.current;
@@ -628,7 +652,12 @@ export function WebSocketProvider({
         authenticationTimerRef.current === null &&
         (ws.readyState !== WebSocket.OPEN || lastFrameAtRef.current < since)
       ) {
-        replaceUnresponsiveSocket(ws);
+        const pinger = pingerRef.current;
+        if (ws.readyState === WebSocket.OPEN && pinger?.ws === ws) {
+          pinger.probe();
+        } else {
+          replaceUnresponsiveSocket(ws);
+        }
       }
     },
     [replaceUnresponsiveSocket]
@@ -685,6 +714,7 @@ export function WebSocketProvider({
         ...data,
       };
       ws.send(JSON.stringify(message));
+      pingerRef.current?.noteSent();
     },
     []
   );
@@ -696,6 +726,7 @@ export function WebSocketProvider({
       // Clear any pending reconnect
       clearReconnectTimer();
       clearAuthenticationTimer();
+      stopPinger();
 
       // Close the connection
       if (wsRef.current) {
@@ -703,7 +734,7 @@ export function WebSocketProvider({
         wsRef.current = null;
       }
     };
-  }, [clearReconnectTimer, clearAuthenticationTimer]);
+  }, [clearReconnectTimer, clearAuthenticationTimer, stopPinger]);
 
   // Create context value
   const contextValue: WebSocketContextValue = useMemo(

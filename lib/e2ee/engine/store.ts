@@ -81,6 +81,7 @@ export function toE2eeMessage(stored: StoredMessage): E2eeMessage {
     sigOk: stored.sigOk,
     undecryptable: stored.undecryptable,
     pending: stored.pending,
+    ...(stored.unsent ? { unsent: stored.unsent.reason } : {}),
   };
   if (stored.imported) {
     message.imported = fromImportedPayload(stored.imported, stored.serverTs);

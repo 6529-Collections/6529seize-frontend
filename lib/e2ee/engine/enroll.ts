@@ -73,7 +73,8 @@ export async function loadCurrentSuiteDevice(
         ctx.storage,
         ctx.profileId,
         stored,
-        expectedVersion
+        expectedVersion,
+        ctx.now()
       );
     });
   }

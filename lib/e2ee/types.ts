@@ -72,6 +72,9 @@ export interface E2eeAttachment {
   height?: number; // key material stays inside the engine
 }
 
+/** Why an own message stayed unsent (E2eeMessage.unsent). */
+export type E2eeUnsentReason = "suite_upgrade";
+
 export interface E2eeMessage {
   id: string;
   g: string;
@@ -91,6 +94,14 @@ export interface E2eeMessage {
   sigOk: boolean;
   undecryptable: boolean;
   pending: boolean; // in the outbox, not yet sequenced
+  /**
+   * An own message that was never sent and no longer sends (`pending` is
+   * false). "suite_upgrade": its conversation was superseded (D172) while
+   * the message was still queued. Its text is kept on this device only; the
+   * user may resend it in the conversation that continues this one
+   * (`resendUnsent`) or delete it (`discardUnsent`). Absent otherwise.
+   */
+  unsent?: E2eeUnsentReason;
   notice?: {
     type: E2eeNoticeType;
     actorProfileId: string | null;
@@ -271,6 +282,17 @@ export interface E2eeEngine {
    * reached yet are skipped (E2EE_NO_DEVICES when nobody can be).
    */
   restart(g: string): Promise<string>;
+  /**
+   * Sends a copy of an unsent message (E2eeMessage.unsent) in the
+   * conversation that continues `g` (as `restart(g)` returns it: the linked
+   * successor, or a new one), then deletes the unsent copy. Text, mentions
+   * and attachments are kept; a reply is not (it points into `g`). Returns
+   * where the copy went. Concurrent calls share one send; a message that is
+   * not unsent fails with E2EE_NO_MESSAGE.
+   */
+  resendUnsent(g: string, id: string): Promise<{ g: string; id: string }>;
+  /** Deletes an unsent message from this device; nothing was ever sent. */
+  discardUnsent(g: string, id: string): Promise<void>;
   /**
    * Reports the message as the reader sees it (its latest edit, signed);
    * `includeOriginal` also sends the original of an edited message.

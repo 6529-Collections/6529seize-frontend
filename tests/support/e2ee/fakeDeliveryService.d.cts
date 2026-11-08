@@ -80,7 +80,12 @@ export interface FakeDeliveryService {
   ): () => void;
   addFault(fault: FakeFault): () => void;
   clearFaults(): void;
-  hold(path: RegExp): { waiting(): number; release(): void };
+  hold(path: RegExp): {
+    waiting(): number;
+    /** Resolves once a matching POST is being held. */
+    arrived(): Promise<void>;
+    release(): void;
+  };
   setTamper(fn: ((item: any, context: FakeLogItemContext) => any) | null): void;
   group(g: string): any;
   devicesOf(profileId: string): any[];

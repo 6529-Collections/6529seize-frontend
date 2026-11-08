@@ -9,7 +9,9 @@ import {
 import {
   type ReactNode,
   useCallback,
+  useEffect,
   useId,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -28,7 +30,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import type { E2eeEngine } from "@/lib/e2ee/types";
+import type { E2eeEngine, E2eeEngineStatus } from "@/lib/e2ee/types";
 import {
   E2EE_SIGNATURE_REJECTED,
   getE2eeErrorCode,
@@ -233,6 +235,68 @@ export function E2eeEnrollmentCard({
   const { address } = useSeizeConnectContext();
   const [pending, setPending] = useState(false);
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
+  const [noticeKey, setNoticeKey] = useState<MessageKey | null>(null);
+  // Unsubscribes the engine watch while encryption is still finishing.
+  const finishingWatch = useRef<(() => void) | null>(null);
+  // A "pending" success hands closing to that watch, not to onEnabled.
+  const closeOnEnabled = useRef(true);
+  const closed = useRef(false);
+  useEffect(() => () => finishingWatch.current?.(), []);
+  /** Closes the dialog at most once per attempt. */
+  const close = useCallback(() => {
+    if (closed.current) return;
+    closed.current = true;
+    onClose?.();
+  }, [onClose]);
+  // The wallet step is over: a neutral status replaces its prompts.
+  const finishingKey: MessageKey = onClose
+    ? "e2ee.enroll.combinedFinishingDialog"
+    : "e2ee.enroll.combinedFinishing";
+  const showPartial = useCallback(() => {
+    setAlternateScope("dms");
+    onScopeChange?.("dms");
+    setErrorKey("e2ee.enroll.combinedPartial");
+  }, [onScopeChange]);
+  /**
+   * Signed posts are on and encryption is still registering in the
+   * background: say so, then act once on the first settled status. It
+   * closes when encryption is on and explains a failure only if
+   * registration actually fails. One-shot by design: once settled, later or
+   * re-entrant store notifications do nothing, and the "pending" success
+   * never also closes through onEnabled, so the card closes exactly once.
+   */
+  const watchFinishing = useCallback(
+    (target: E2eeEngine) => {
+      finishingWatch.current?.();
+      let settled = false;
+      let unsubscribe: (() => void) | null = null;
+      const stop = () => {
+        unsubscribe?.();
+        unsubscribe = null;
+        if (finishingWatch.current === stop) finishingWatch.current = null;
+      };
+      const settle = (status: E2eeEngineStatus) => {
+        if (settled || status === "enrolling") return;
+        settled = true;
+        stop();
+        setNoticeKey(null);
+        if (status === "ready" || status === "device-limit") {
+          close();
+          return;
+        }
+        showPartial();
+      };
+      finishingWatch.current = stop;
+      setNoticeKey(finishingKey);
+      const current = target.getStatus();
+      if (current !== "enrolling") {
+        settle(current);
+        return;
+      }
+      unsubscribe = target.subscribe(() => settle(target.getStatus()));
+    },
+    [close, finishingKey, showPartial]
+  );
   const isSafari = useSyncExternalStore(
     subscribeNever,
     isSafariBrowser,
@@ -251,6 +315,10 @@ export function E2eeEnrollmentCard({
       if (!engine) return { success: false, reason: "unavailable" };
       setPending(true);
       setErrorKey(null);
+      setNoticeKey(null);
+      finishingWatch.current?.();
+      closeOnEnabled.current = true;
+      closed.current = false;
       try {
         if (selectedScope === "dms") {
           await engine.enroll();
@@ -266,17 +334,22 @@ export function E2eeEnrollmentCard({
                   onSignatureRequested: options?.onSignatureRequested,
                 })
             : undefined,
+          onRegistering: () => setNoticeKey(finishingKey),
         });
+        if (outcome !== "pending") setNoticeKey(null);
         switch (outcome) {
           case "declined":
             setErrorKey(ENROLL_REJECTED_KEY);
             return { success: false, reason: "rejected" };
           case "stopped":
             return { success: false, reason: "context-changed" };
+          case "pending":
+            // The signing grant is saved; encryption is not refused.
+            closeOnEnabled.current = false;
+            watchFinishing(engine);
+            return { success: true };
           case "partial":
-            setAlternateScope("dms");
-            onScopeChange?.("dms");
-            setErrorKey("e2ee.enroll.combinedPartial");
+            showPartial();
             return { success: false, reason: "unavailable" };
           case "fallback":
             setOfferSeparateSetup(true);
@@ -286,6 +359,7 @@ export function E2eeEnrollmentCard({
             return { success: true };
         }
       } catch (error) {
+        setNoticeKey(null);
         setErrorKey(getEnrollErrorKey(error, upgrading));
         return {
           success: false,
@@ -300,13 +374,18 @@ export function E2eeEnrollmentCard({
     [
       address,
       engine,
-      onScopeChange,
+      finishingKey,
       requestSignedMessagesGrant,
       selectedScope,
+      showPartial,
       upgrading,
+      watchFinishing,
     ]
   );
-  const onEnabled = useCallback(() => onClose?.(), [onClose]);
+  const onEnabled = useCallback(() => {
+    // After a "pending" success the finishing watch closes the card.
+    if (closeOnEnabled.current) close();
+  }, [close]);
   const flow = useEnableSignedMessages({
     requestGrant: requestEnrollment,
     onEnabled,
@@ -422,6 +501,7 @@ export function E2eeEnrollmentCard({
           )}
           <EnrollmentFeedback
             errorKey={errorKey}
+            noticeKey={noticeKey}
             engineError={engineError}
             waiting={waiting}
             flow={flow}
@@ -434,11 +514,14 @@ export function E2eeEnrollmentCard({
 
 function EnrollmentFeedback({
   errorKey,
+  noticeKey,
   engineError,
   waiting,
   flow,
 }: {
   readonly errorKey: MessageKey | null;
+  /** A neutral status, such as encryption still finishing setup. */
+  readonly noticeKey: MessageKey | null;
   readonly engineError: string | null;
   readonly waiting: boolean;
   readonly flow: Pick<
@@ -456,11 +539,13 @@ function EnrollmentFeedback({
   const failureKey = declined ? null : visibleErrorKey;
   let statusKey: MessageKey | null = null;
   if (declined) statusKey = ENROLL_REJECTED_KEY;
+  else if (noticeKey) statusKey = noticeKey;
   else if (waiting && flow.status === null) statusKey = "e2ee.enroll.waiting";
 
   return (
     <>
-      {!visibleErrorKey ? (
+      {/* Once the wallet has signed, its prompts (and Reconnect) are over. */}
+      {!visibleErrorKey && !noticeKey ? (
         <SignedMessagesEnableStatus
           status={flow.status}
           onReconnect={flow.reconnect}

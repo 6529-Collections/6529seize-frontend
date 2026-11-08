@@ -1,5 +1,10 @@
 import { E2EE_CIPHERSUITE, grantCoversSuite } from "./grant";
-import type { StoredDevice, StoredGroup, StoredGroupStatus } from "./records";
+import type {
+  StoredDevice,
+  StoredGroup,
+  StoredGroupStatus,
+  StoredMessage,
+} from "./records";
 import type { E2eeStorage } from "./storage";
 
 /**
@@ -29,19 +34,51 @@ export const countSuperseded = (groups: readonly StoredGroup[]): number =>
   groups.filter((group) => group.status === "superseded").length;
 
 /**
+ * Own messages still queued when their conversation is superseded can no
+ * longer be sent from it: they become "unsent" (kept, not pending) so the
+ * user can resend them in the successor or delete them.
+ */
+async function unsentEchoes(
+  storage: E2eeStorage,
+  profileId: string,
+  outbox: readonly { id: string; g: string; payload: { t: string } }[],
+  nowMs: number
+): Promise<StoredMessage[]> {
+  const echoes: StoredMessage[] = [];
+  for (const item of outbox) {
+    if (item.payload.t !== "msg") {
+      continue;
+    }
+    const echo = await storage.getMessage(profileId, item.g, item.id);
+    if (echo?.pending === true && !echo.unsent) {
+      echoes.push({
+        ...echo,
+        pending: false,
+        unsent: { reason: "suite_upgrade", at: nowMs },
+      });
+    }
+  }
+  return echoes;
+}
+
+/**
  * Retires the profile's old-suite device in one atomic write and returns how
  * many conversations are now read-only. `expectedVersion` is the caller's
  * state version (the write bumps it, so a tab still running the old device
- * stops instead of writing it back).
+ * stops instead of writing it back). Queued messages become "unsent", never
+ * sent and never lost. Running it again changes nothing: the outbox is
+ * empty, the groups are superseded and the device is retired.
  */
 export async function retireOldSuiteDevice(
   storage: E2eeStorage,
   profileId: string,
   device: StoredDevice,
-  expectedVersion: number
+  expectedVersion: number,
+  nowMs: number
 ): Promise<number> {
   const groups = await storage.listGroups(profileId);
   const outbox = await storage.listOutbox(profileId);
+  const unsent = await unsentEchoes(storage, profileId, outbox, nowMs);
   // Every group the device was in: its MLS state goes with the device.
   const superseded: StoredGroup[] = groups
     .filter((group) => !KEEP_STATUS.has(group.status))
@@ -63,6 +100,7 @@ export async function retireOldSuiteDevice(
     device: retired,
     dropWasmState: true,
     groups: superseded,
+    messages: unsent,
     deleteOutbox: outbox.map((item) => item.id),
   });
   return countSuperseded(groups) + superseded.length;

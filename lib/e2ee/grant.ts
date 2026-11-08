@@ -381,11 +381,6 @@ interface VerifyGrantOptions {
 }
 
 /**
- * The grant must cover the current suite (0x004E): a v1 grant (0x004F only)
- * or a v2 set without it is a device of an earlier suite, not usable in
- * current groups. A v2 set must be canonical with `ciphersuite` its lowest.
- */
-/**
  * Whether a grant's suite terms are well formed: v1 names 0x004F, v2 a
  * canonical set whose lowest entry is `ciphersuite`. This is about the
  * grant's authenticity only; which groups a device may join is enforced
