@@ -33,6 +33,11 @@ export interface GroupRuntime {
   outbox: Map<string, StoredOutboxItem>;
   /** First failure time of the current stall (8.3), null when healthy. */
   stallSince: number | null;
+  /**
+   * First failure time of the current run of failed sends, null once a send
+   * step ends any other way. Commit paths keep the stall it owns (8.3).
+   */
+  sendFailingSince: number | null;
 }
 
 interface ProfileInfo {

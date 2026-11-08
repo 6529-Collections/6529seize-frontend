@@ -11,20 +11,34 @@ import {
 } from "@/tests/support/e2ee/fakeDeliveryService.cjs";
 
 import { base64ToBytes } from "@/lib/e2ee/bytes";
+import { STALL_RETRY_MS } from "@/lib/e2ee/engine/maintenance";
 
 import {
   addUser,
   createWorld,
   notices,
+  realSleep,
   settle,
   startDevice,
   stopDevice,
   texts,
+  type World,
 } from "./support/harness";
 
 jest.setTimeout(180_000);
 
 const DAY = 86_400_000;
+
+/** Lets virtual time run until `done()` or the clock reaches `until`. */
+async function runUntil(
+  world: World,
+  until: number,
+  done: () => boolean = () => false
+): Promise<void> {
+  for (let i = 0; i < 4_000 && !done() && world.clock.now() < until; i += 1) {
+    await realSleep(5);
+  }
+}
 
 async function trio() {
   const world = await createWorld();
@@ -387,6 +401,67 @@ describe("E2EE engine: features", () => {
     expect(texts(a.getMessages(g))).toEqual([
       "blocked until the change goes through",
     ]);
+  });
+
+  it("raises the delayed banner after 20 s of failing sends with nothing to commit, then recovers", async () => {
+    const { world, a, b, c, g } = await trio();
+    const bobCalls = (method: string, tail: RegExp) =>
+      world.ds.state.requests.filter(
+        (r) => r.profileId === "bob" && r.method === method && tail.test(r.path)
+      ).length;
+    const sends = () => bobCalls("POST", /\/messages$/);
+    const commits = () => bobCalls("POST", /\/entries$/);
+    // Only the send fails; catch-up and commits keep working.
+    const removeFault = world.ds.addFault({
+      method: "POST",
+      path: /^e2ee\/groups\/0x[0-9a-f]+\/messages$/,
+      status: 503,
+      times: -1,
+    });
+    const commitsBefore = commits();
+    const start = world.clock.now();
+    const stop = { done: false, at: 0, sends: 0 };
+    const sending = b.send(g, { text: "held by a failing send" }).then(() => {
+      Object.assign(stop, {
+        done: true,
+        at: world.clock.now(),
+        sends: sends(),
+      });
+    });
+    // Every retry runs an empty commit pass before the send. That pass used
+    // to reset the stall clock, so this flush retried forever.
+    await runUntil(world, start + 60_000, () => stop.done);
+    const stoppedInTime = stop.done;
+    if (!stoppedInTime) {
+      // Release the endless loop so the failure below does not leak it.
+      removeFault();
+      await sending;
+    }
+    expect(stoppedInTime).toBe(true);
+    expect(stop.at - start).toBeGreaterThanOrEqual(20_000);
+    expect(stop.at - start).toBeLessThan(20_000 + 2 * STALL_RETRY_MS);
+    expect(stop.sends).toBeGreaterThan(1);
+    expect(commits()).toBe(commitsBefore);
+    expect(b.getConversation(g)?.delayed).toBe(true);
+    expect(b.getMessages(g).at(-1)).toMatchObject({ pending: true });
+
+    // The armed retry takes over: each one runs maintenance (an empty commit)
+    // and then a single send, without restarting the 20 s clock.
+    await runUntil(world, stop.at + 3 * STALL_RETRY_MS);
+    const retries = Math.floor((world.clock.now() - stop.at) / STALL_RETRY_MS);
+    const retrySends = sends() - stop.sends;
+    expect(retries).toBeGreaterThanOrEqual(3);
+    expect(retrySends).toBeGreaterThanOrEqual(retries - 1);
+    expect(retrySends).toBeLessThanOrEqual(retries);
+    expect(commits()).toBe(commitsBefore);
+    expect(b.getConversation(g)?.delayed).toBe(true);
+
+    removeFault();
+    await settle(world);
+    expect(b.getConversation(g)?.delayed).toBe(false);
+    expect(b.getMessages(g).at(-1)).toMatchObject({ pending: false });
+    expect(texts(c.getMessages(g))).toEqual(["held by a failing send"]);
+    expect(texts(a.getMessages(g))).toEqual(["held by a failing send"]);
   });
 
   it("raises the split-view alarm for a forged epoch_fp", async () => {

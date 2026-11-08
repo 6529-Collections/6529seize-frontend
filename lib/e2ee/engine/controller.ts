@@ -375,6 +375,7 @@ export class EngineController {
       }
       const step = await this.ctx.queue.run(() => sendNext(this.ctx, runtime));
       if (step === "failed") {
+        runtime.sendFailingSince ??= this.ctx.now();
         if (noteStallFor(this.ctx, runtime)) {
           this.armRetry(g);
           return;
@@ -386,6 +387,7 @@ export class EngineController {
         attempt += 1;
         continue;
       }
+      runtime.sendFailingSince = null;
       clearStallFor(this.ctx, runtime);
       attempt = 0;
       if (step === "empty" || step === "inactive") {

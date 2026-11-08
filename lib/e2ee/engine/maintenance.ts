@@ -231,8 +231,9 @@ export function clearStallFor(
   if (!runtime) {
     return;
   }
-  runtime.stallSince = null;
-  if (runtime.record.delayed) {
+  // A failing send owns its stall: only the send loop (flushOnce) clears it.
+  runtime.stallSince = runtime.sendFailingSince;
+  if (runtime.sendFailingSince === null && runtime.record.delayed) {
     runtime.record.delayed = false;
     ctx.store.touch(runtime.record.g);
   }
