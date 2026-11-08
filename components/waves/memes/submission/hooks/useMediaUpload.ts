@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 
 export interface MediaUploadItem {
   id: string;
@@ -67,14 +68,15 @@ export function useMediaUpload(maxFiles: number = 4): UseMediaUploadReturn {
       // Upload each file
       for (const item of newItems) {
         try {
+          // Supporting, preview and promo media belong to a decision entry,
+          // which keeps the artist's original files.
           const result = await multiPartUpload({
             file: item.file,
             path: "drop",
+            purpose: ApiMediaUploadPurpose.DecisionEntry,
             onProgress: (progress) => {
               setItems((prev) =>
-                prev.map((i) =>
-                  i.id === item.id ? { ...i, progress } : i
-                )
+                prev.map((i) => (i.id === item.id ? { ...i, progress } : i))
               );
             },
           });
@@ -82,12 +84,18 @@ export function useMediaUpload(maxFiles: number = 4): UseMediaUploadReturn {
           setItems((prev) =>
             prev.map((i) =>
               i.id === item.id
-                ? { ...i, serverUrl: result.url, status: "done" as const, progress: 100 }
+                ? {
+                    ...i,
+                    serverUrl: result.url,
+                    status: "done" as const,
+                    progress: 100,
+                  }
                 : i
             )
           );
         } catch (error) {
-          const errorMsg = error instanceof Error ? error.message : "Upload failed";
+          const errorMsg =
+            error instanceof Error ? error.message : "Upload failed";
           if (item.previewUrl) {
             URL.revokeObjectURL(item.previewUrl);
             previewUrlsRef.current.delete(item.previewUrl);
@@ -95,7 +103,12 @@ export function useMediaUpload(maxFiles: number = 4): UseMediaUploadReturn {
           setItems((prev) =>
             prev.map((i) =>
               i.id === item.id
-                ? { ...i, previewUrl: "", status: "error" as const, error: errorMsg }
+                ? {
+                    ...i,
+                    previewUrl: "",
+                    status: "error" as const,
+                    error: errorMsg,
+                  }
                 : i
             )
           );

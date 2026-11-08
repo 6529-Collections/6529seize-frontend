@@ -86,6 +86,8 @@ The editor has two modes:
 - Profile editing is hidden while acting through an active profile proxy.
 - Banner uploads are capped at `2MB`.
 - Accepted upload formats are `JPEG`, `JPG`, `PNG`, `GIF`, and `WEBP`.
+- Uploaded banner images are published without identifying metadata such as
+  location, camera details and capture time, and with a neutral file name.
 - Image mode does not include crop or transform tools.
 - Saving in `Image` mode clears `banner_2`; gradient second color is used only
   in `Gradient` mode.

@@ -3,6 +3,7 @@
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import type { CreateDropConfig } from "@/entities/IDrop";
+import type { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useRef } from "react";
 import { useDropFilePreparation } from "./useDropFilePreparation";
@@ -14,6 +15,7 @@ export const useCreateDropFileHandlers = ({
   files,
   keepOptionsVisible,
   waveId,
+  mediaUploadPurpose,
   externalAttachmentDrop,
   onExternalAttachmentDropConsumed,
   setToast,
@@ -28,6 +30,7 @@ export const useCreateDropFileHandlers = ({
   readonly files: File[];
   readonly keepOptionsVisible: boolean;
   readonly waveId: string;
+  readonly mediaUploadPurpose: ApiMediaUploadPurpose;
   readonly externalAttachmentDrop:
     | {
         readonly token: number;
@@ -65,6 +68,7 @@ export const useCreateDropFileHandlers = ({
   const { handleFileChange, isPreparingFiles, preparingFiles } =
     useDropFilePreparation({
       scopeKey: waveId,
+      purpose: mediaUploadPurpose,
       existingFiles: [
         ...(drop?.parts.flatMap((part) => part.media) ?? []),
         ...files,

@@ -47,6 +47,17 @@ draft.
 - AVIF images must contain a single still image, with at most **64 million
   pixels** and no side longer than **16,383 pixels**.
 
+## Photo Privacy
+
+- Images posted in chat, replies, and direct messages are published without
+  identifying metadata: location, camera details and serial numbers, owner and
+  artist names, capture date and time, embedded thumbnails, and XMP and IPTC
+  data. Every chat upload also gets a neutral public file name.
+- Decision entries are the exception. Media attached to a decision entry keeps
+  the artist's original file, including its embedded details and file name.
+  Check those details before submitting if you do not want them public. Images
+  pasted into an entry's text are treated like chat images.
+
 ## Common Scenarios
 
 - **Saved an AVIF from a website:** upload the `.avif` file normally. It is

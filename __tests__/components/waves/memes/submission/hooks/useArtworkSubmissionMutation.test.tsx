@@ -11,11 +11,16 @@ import type { ReactNode } from "react";
 import { prepareProposalCard } from "@/components/waves/memes/submission/utils/prepareProposalCard";
 import { createInitialState } from "@/components/waves/memes/submission/hooks/artworkSubmissionFormState";
 import { ApiProposalFrameResponseMimeTypeEnum } from "@/generated/models/ApiProposalFrameResponse";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
+import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 
 jest.mock(
   "@/components/waves/memes/submission/utils/prepareProposalCard",
   () => ({ prepareProposalCard: jest.fn() })
 );
+jest.mock("@/components/waves/create-wave/services/multiPartUpload", () => ({
+  multiPartUpload: jest.fn(),
+}));
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
@@ -260,6 +265,38 @@ describe("useArtworkSubmissionMutation", () => {
       type: "error",
       message: "Frame publication failed.",
     });
+  });
+
+  it("uploads the artwork file as a decision entry, keeping the original", async () => {
+    const uploaded = {
+      url: "https://cdn.example/artwork.png",
+      mime_type: "image/png",
+    };
+    jest.mocked(multiPartUpload).mockResolvedValue(uploaded);
+    const imageFile = new File(["art"], "artwork.png", { type: "image/png" });
+    const { result } = setupHook();
+    await act(async () => {
+      await result.current.submitArtwork(
+        { ...submissionData, externalMedia: undefined, imageFile },
+        "0xabc",
+        false,
+        submitOptions
+      );
+    });
+    expect(multiPartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        file: imageFile,
+        path: "drop",
+        purpose: ApiMediaUploadPurpose.DecisionEntry,
+      })
+    );
+    expect(mockNativeEntry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        parts: expect.arrayContaining([
+          expect.objectContaining({ media: [uploaded] }),
+        ]),
+      })
+    );
   });
 });
 
