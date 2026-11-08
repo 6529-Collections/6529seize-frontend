@@ -67,9 +67,9 @@ messages.
 - [ ] The C+ browser gate passes on the final #4748 head together with #4757.
       The only failures allowed are the four known product ones on `main`.
 - [ ] Staging passes every step below.
-- [ ] Before about 20 November: the Desktop renderer (6529-core pull-web) and
-      the native 0x004E switch are released, well ahead of the December 1
-      deadline.
+
+The native and Desktop releases are not a gate. They follow once the web is
+live, with a deadline of about 20 November (section 2.3).
 
 ## 1. Staging
 
@@ -107,9 +107,10 @@ Backend smoke, before any frontend change reaches staging:
 2. Merge the #4749 branch into `1a-staging` and push.
 3. `Web Deploy - STAGING` starts on the push. Wait for its build, artifact,
    version and health checks.
-4. Staging E2E starts by itself. Check that the `e2ee-staging` pack ran. If not,
-   dispatch Staging E2E on `main` with the deploy run ID. E2E reports separately
-   and does not gate the deployment.
+4. Staging E2E starts by itself, but its default `all` selection excludes the
+   encrypted-messages pack. Dispatch Staging E2E on `main` with the deploy run
+   ID and `pack=e2ee-staging`. E2E reports separately and does not gate the
+   deployment.
 
 Frontend smoke, with a browser that already had a 0x004F device on staging:
 
@@ -149,16 +150,16 @@ Frontend smoke, with a browser that already had a 0x004F device on staging:
    separately.
 4. Run the frontend smoke from 1.2 on 6529.io with a team device.
 
-### 2.3 Native (must-do before the deadline)
+### 2.3 Native and Desktop (after the web; deadline about 20 November)
 
-Once the web is live, and released well before 1 December (target: about
-20 November):
+These are not gates for the web release. They follow once the web is live, and
+must be released well before 1 December.
 
-- 6529-client: merge the 0x004E switch PR.
-- 6529-core: merge the pull-web PR built from #4748's merge commit.
-
-The native client follows the same policy and re-vendors the WASM module from
-#4748's merge commit.
+- 6529-client: merge the 0x004E switch, 6529-Collections/6529-client#47 (draft).
+- 6529-core: the pull-web PR, built from a `main` commit that contains both
+  #4748 and #4749 (the engine and its UI), never #4748 alone.
+- The native client follows the same policy and re-vendors the WASM module from
+  #4748's merge commit.
 
 ## 3. The alarm (release step, owner-authorized)
 
@@ -197,13 +198,29 @@ Set both keys on prod `seizeAPI` (us-east-1), only once the alarm exists:
 The window then ends at 2026-12-02T00:00:00Z.
 
 1. Add the two keys without disturbing the other variables. The API deploy
-   keeps the Lambda's environment.
-   - Read the current variables into a local file and do not print them; they
-     include secrets.
-   - Add the two keys with `jq`.
-   - Write the result back with
-     `aws lambda update-function-configuration --environment file://…`.
-   - Delete the local file.
+   keeps the Lambda's environment. The variables include secrets, so no
+   command prints a value: the reads list key names only, and the update
+   shows only status fields.
+
+   ```bash
+   fn=<prod seizeAPI function name>
+   env_file="$(mktemp)"
+   aws lambda get-function-configuration --region us-east-1 \
+     --function-name "$fn" --query 'Environment.Variables' \
+     --output json > "$env_file"
+   jq -r 'keys[]' "$env_file"   # names only
+   jq '{Variables: (. + {
+     E2EE_SUITE_TRANSITION_START: "2026-11-09T00:00:00Z",
+     E2EE_SUITE_TRANSITION_DAYS: "23"})}' "$env_file" > "$env_file.new"
+   aws lambda update-function-configuration --region us-east-1 \
+     --function-name "$fn" --environment "file://$env_file.new" \
+     --query '{State: State, LastUpdateStatus: LastUpdateStatus}'
+   aws lambda wait function-updated --region us-east-1 --function-name "$fn"
+   aws lambda get-function-configuration --region us-east-1 \
+     --function-name "$fn" --query 'keys(Environment.Variables)'
+   rm -f "$env_file" "$env_file.new"
+   ```
+
 2. Confirm that new cold starts log exactly
    `[E2EE SUITE WINDOW START 2026-11-09T00:00:00.000Z] [END 2026-12-02T00:00:00.000Z] [DAYS 23]`,
    that no `[E2EE SUITE WINDOW CONFIG INVALID]` line appears, and that the alarm
