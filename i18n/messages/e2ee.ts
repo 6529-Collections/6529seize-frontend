@@ -302,6 +302,8 @@ export const E2EE_MESSAGES = {
 
   "e2ee.banner.delayed":
     "Group changes are delayed. Messages will send once the change goes through.",
+  "e2ee.banner.sendDelayed":
+    "Messages aren’t sending right now. We’ll keep retrying, and you can keep writing.",
   "e2ee.banner.splitView":
     "Security check needed: this device may not see the same chat as everyone else. Compare safety codes before sharing anything sensitive.",
   "e2ee.banner.splitViewAction": "Compare safety codes",
