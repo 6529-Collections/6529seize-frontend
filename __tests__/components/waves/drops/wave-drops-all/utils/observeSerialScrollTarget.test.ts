@@ -3,12 +3,9 @@ import { observeSerialScrollTarget } from "@/components/waves/drops/wave-drops-a
 type Callback = () => void;
 
 class FakeObserver {
-  static readonly instances: FakeObserver[] = [];
   readonly observed = new Set<Element>();
   disconnected = false;
-  constructor(readonly callback: Callback) {
-    FakeObserver.instances.push(this);
-  }
+  constructor(readonly callback: Callback) {}
   observe(element: Element) {
     this.observed.add(element);
   }
@@ -41,7 +38,7 @@ class FakeResizeObserver extends FakeObserver {
 const originalIntersectionObserver = globalThis.IntersectionObserver;
 const originalResizeObserver = globalThis.ResizeObserver;
 
-function setup() {
+function setup(onTarget = jest.fn()) {
   const parent = document.createElement("div");
   const container = document.createElement("div");
   const content = document.createElement("div");
@@ -51,7 +48,6 @@ function setup() {
   container.appendChild(content);
   parent.appendChild(container);
   document.body.appendChild(parent);
-  const onTarget = jest.fn();
   const onRelease = jest.fn();
   const anchor = observeSerialScrollTarget({
     container,
@@ -91,6 +87,8 @@ beforeEach(() => {
 
 afterEach(() => {
   document.body.innerHTML = "";
+  // A pending settle check must not leak into the next test.
+  jest.clearAllTimers();
   jest.useRealTimers();
   Object.defineProperty(globalThis, "IntersectionObserver", {
     configurable: true,
@@ -132,6 +130,31 @@ it("re-checks the row once a scroll settles", () => {
   jest.advanceTimersByTime(1);
   expect(onTarget).toHaveBeenCalledTimes(1);
   expect(onTarget).toHaveBeenCalledWith(target);
+});
+
+it("re-centres once when a settled scroll finds the row out of view, then rests", () => {
+  let inView = false;
+  let scrolls = 0;
+  // Like the hook's handler: scroll only while the row is out of view. The
+  // re-centring scroll is a real scroll event, so it settles into a check.
+  const onTarget = jest.fn(() => {
+    if (inView) return;
+    inView = true;
+    scrolls += 1;
+    container.dispatchEvent(new Event("scroll"));
+  });
+  const { container } = setup(onTarget);
+
+  container.dispatchEvent(new Event("scroll"));
+  jest.advanceTimersByTime(120);
+  expect(onTarget).toHaveBeenCalledTimes(1);
+  expect(scrolls).toBe(1);
+
+  jest.advanceTimersByTime(120);
+  expect(onTarget).toHaveBeenCalledTimes(2);
+  jest.advanceTimersByTime(10_000);
+  expect(onTarget).toHaveBeenCalledTimes(2);
+  expect(scrolls).toBe(1);
 });
 
 it("observes list content added after the jump", async () => {

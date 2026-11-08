@@ -27,6 +27,12 @@ export const observeSerialScrollTarget = ({
 }: {
   readonly container: HTMLDivElement;
   readonly target: HTMLDivElement;
+  /**
+   * Called whenever the row may have moved: an edge crossing, a content
+   * resize or a settled scroll. It must scroll only when the row is out of
+   * view. Its own scroll settles into another check, so an unconditional
+   * scroll would re-centre without end.
+   */
   readonly onTarget: (target: HTMLDivElement) => void;
   readonly onRelease: () => void;
 }): SerialScrollAnchor => {
