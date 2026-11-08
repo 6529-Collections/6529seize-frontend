@@ -1032,6 +1032,10 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       kind: "allowed-sandbox-mutation",
       body: expect.objectContaining({
         wave_id: SANDBOX_WAVE_ID,
+        // Makes a retried create return the first drop instead of a second.
+        client_drop_id: expect.stringMatching(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+        ),
         drop_type: "CHAT",
         content: SANDBOX_CHAT_DROP_CONTENT,
         part_count: 1,
@@ -1684,6 +1688,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 function buildExactChatDropBody() {
   return {
     wave_id: SANDBOX_WAVE_ID,
+    client_drop_id: "00000000-0000-4000-8000-0000000000d1",
     drop_type: "CHAT",
     title: null,
     parts: [

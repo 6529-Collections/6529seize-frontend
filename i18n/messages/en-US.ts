@@ -2330,6 +2330,9 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   "replyTargetUnavailableToast.detailsKept":
     "Your current draft was not changed.",
   "replyTargetUnavailableToast.actionReviewDraft": "Review draft",
+  "savedDropToast.title": "Your drop was posted.",
+  "savedDropToast.description":
+    "It will appear in a moment. If it doesn't, refresh the page.",
   repliesOnlyPlaceholder:
     "Only chat members can start new drops here. You can reply to any drop.",
   "replyThread.showOne": "Show 1 reply",

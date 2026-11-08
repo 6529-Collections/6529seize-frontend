@@ -76,6 +76,10 @@ export const getOptimisticDrop = (
 
   return {
     id: getOptimisticDropId(),
+    // The server copy echoes it, which settles this pending send exactly.
+    ...(dropRequest.client_drop_id
+      ? { client_drop_id: dropRequest.client_drop_id }
+      : {}),
     serial_no: Date.now(),
     ...replyToObj,
     wave: {

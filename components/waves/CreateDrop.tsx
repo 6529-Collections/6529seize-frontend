@@ -19,7 +19,8 @@ import {
   getStructuredApiErrorCode,
   getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
-import { postDrop } from "@/services/api/signed-drop-writes";
+import { submitQueuedDrop } from "./create-drop-content/submit-queued-drop";
+import { useSavedDropRecovery } from "./create-drop-content/useSavedDropRecovery";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiContentModerationProfileStatusResponse } from "@/generated/models/ApiContentModerationProfileStatusResponse";
@@ -111,6 +112,7 @@ export default function CreateDrop({
     useState<string | null>(null);
   const { applyOptimisticDropUpdate, processDropRemoved, processIncomingDrop } =
     useMyStreamActions();
+  const savedDrop = useSavedDropRecovery(wave);
   const retainModerationRejectedDrop = useModerationRejectedDropDelivery({
     applyOptimisticDropUpdate,
     processDropRemoved,
@@ -449,10 +451,7 @@ export default function CreateDrop({
   );
 
   const addDropMutation = useMutation({
-    mutationFn: async (body: QueuedDropMutationBody) => {
-      if (body.nativeEntrySubmit) return body.nativeEntrySubmit(body.drop);
-      return await postDrop(body.drop, { errorMode: "structured" });
-    },
+    mutationFn: submitQueuedDrop,
     onSuccess: (serverDrop, body) => {
       if (body.dropId) {
         if (isWaveRepliesCollapsed(wave))
@@ -480,6 +479,10 @@ export default function CreateDrop({
       }
     },
     onError: (error, body) => {
+      if (savedDrop.recover(error, body)) {
+        startLocalSlowModeCooldown(body);
+        return;
+      }
       reportDropSubmissionFailure(error);
       clearSlowModeChatPending(body.slowModeChatReservation);
       const isContentModerationRejection =
@@ -576,6 +579,7 @@ export default function CreateDrop({
         const serverDrop = await addDropMutation.mutateAsync(dropRequest);
         await handleServerDropCreated(serverDrop);
       } catch (error) {
+        if (savedDrop.isSaved(error)) continue;
         hasBatchErrorsRef.current = true;
         console.error("Error processing drop:", error);
       }
@@ -596,6 +600,7 @@ export default function CreateDrop({
     addDropMutation,
     handleServerDropCreated,
     onAllDropsAdded,
+    savedDrop,
     waitAndInvalidateDrops,
   ]);
 

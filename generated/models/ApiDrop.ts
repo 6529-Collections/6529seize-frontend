@@ -48,6 +48,10 @@ export class ApiDrop {
     'voters_count_available'?: boolean;
     'id': string;
     /**
+    * The client_drop_id sent when the drop was created. Present on the create response (including a retried create) and on the DROP_UPDATE broadcast for that creation, so the author\'s client can match its pending send. Omitted on other reads.
+    */
+    'client_drop_id'?: string | null;
+    /**
     * Sequence number of the drop in Seize
     */
     'serial_no': number;
@@ -125,6 +129,12 @@ export class ApiDrop {
             "baseName": "id",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "client_drop_id",
+            "baseName": "client_drop_id",
+            "type": "string",
+            "format": "uuid"
         },
         {
             "name": "serial_no",

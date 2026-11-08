@@ -8590,13 +8590,19 @@ paths:
               $ref: "#/components/schemas/ApiCreateDropRequest"
       responses:
         "201":
-          description: successful operation
+          description: >-
+            The created drop. A retry carrying an already used client_drop_id
+            returns the drop created the first time.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDrop"
         "400":
           description: Invalid request
+        "409":
+          description: >-
+            client_drop_id was already used by this author for a different wave
+            or content.
   /drop-ids:
     get:
       tags:
@@ -30840,6 +30846,20 @@ components:
             hidden. Omit or set to false to leave previews visible.
             Signature-required drops must include this field in the signed
             payload when present.
+        client_drop_id:
+          type: string
+          format: uuid
+          description: >-
+            Optional client-generated UUID that makes the create idempotent.
+            When the same author sends the same client_drop_id again with the
+            same wave and content (a retry), the drop created the first time is
+            returned instead of a new one. The same id with a different wave or
+            content is rejected with 409. Without it, every create makes a new
+            drop. Use the plain 8-4-4-4-12 UUID form. A retry is matched on wave
+            and content only, so a retry carrying a fresh signature for the same
+            content is answered too. Like every other body field, client_drop_id
+            is part of the signed payload when present: adding it to a body that
+            was signed without it fails the signature check.
         device_signature:
           $ref: "#/components/schemas/ApiDeviceSignature"
     ApiCreateGroup:
@@ -32090,6 +32110,15 @@ components:
             voter count is then unknown, not zero. Omitted by older servers.
         id:
           type: string
+        client_drop_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: >-
+            The client_drop_id sent when the drop was created. Present on the
+            create response (including a retried create) and on the DROP_UPDATE
+            broadcast for that creation, so the author's client can match its
+            pending send. Omitted on other reads.
         serial_no:
           description: Sequence number of the drop in Seize
           type: number
