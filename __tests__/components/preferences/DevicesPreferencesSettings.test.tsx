@@ -8,6 +8,7 @@ import {
   waitFor,
   within,
 } from "@testing-library/react";
+import type { ReactNode } from "react";
 
 const mockRenameDevice = jest.fn();
 jest.mock("@/services/api/common-api", () => ({
@@ -61,11 +62,16 @@ jest.mock("@/hooks/device-signing/useMinuteClock", () => ({
 }));
 
 let mockLocalGrant: ApiDeviceGrant | null = null;
+let mockLocalState: { loaded: boolean; failed: boolean } = {
+  loaded: true,
+  failed: false,
+};
 jest.mock("@/hooks/device-signing/useLocalDeviceKeys", () => ({
   useLocalDeviceKeys: () => ({
-    loaded: true,
+    ...mockLocalState,
     grant: mockLocalGrant,
-    publicKeys: [OWN_KEY],
+    // An unreadable key store reports no keys (see useLocalDeviceKeys).
+    publicKeys: mockLocalState.failed || !mockLocalState.loaded ? [] : [OWN_KEY],
   }),
 }));
 
@@ -91,6 +97,7 @@ jest.mock(
       cancelText,
       onConfirm,
       onClose,
+      children,
     }: {
       readonly isOpen: boolean;
       readonly title: string;
@@ -99,10 +106,12 @@ jest.mock(
       readonly cancelText: string;
       readonly onConfirm: () => void;
       readonly onClose: () => void;
+      readonly children?: ReactNode;
     }) {
       return isOpen ? (
         <div role="dialog" aria-label={title}>
           <p>{message}</p>
+          {children}
           <button type="button" onClick={onClose}>
             {cancelText}
           </button>
@@ -144,6 +153,7 @@ describe("DevicesPreferencesSettings", () => {
     mockEncryptionQuery.mockReset().mockReturnValue({});
     mockAccount = ADDRESS;
     mockLocalGrant = null;
+    mockLocalState = { loaded: true, failed: false };
     mockGrantsAddress = undefined;
     mockAuth = {
       activeProfileProxy: null,
@@ -347,6 +357,50 @@ describe("DevicesPreferencesSettings", () => {
         name: "Enable Signed Posts",
       })
     ).toBeNull();
+  });
+
+  describe("when this browser's keys cannot be read", () => {
+    const UNREADABLE =
+      "This browser couldn't read its own keys, so it can't mark which device below is this one. Check a device's name and dates before you revoke it.";
+    const MAYBE_THIS =
+      "This browser couldn't read its own keys, so this may be the permission this browser uses.";
+
+    it("says so politely and warns before any revocation", async () => {
+      mockLocalState = { loaded: true, failed: true };
+      mockQuery = { ...mockQuery, data: [grant(), phone] };
+      render(<DevicesPreferencesSettings />);
+
+      const note = screen.getByText(UNREADABLE);
+      expect(note).toHaveAttribute("role", "status");
+      expect(screen.queryByText("This device")).toBeNull();
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Chrome on macOS" })
+      );
+      const dialog = await screen.findByRole("dialog");
+      expect(within(dialog).getByText(MAYBE_THIS)).toBeVisible();
+    });
+
+    it("shows neither once the keys were read", async () => {
+      mockQuery = { ...mockQuery, data: [grant(), phone] };
+      render(<DevicesPreferencesSettings />);
+
+      expect(screen.queryByText(UNREADABLE)).toBeNull();
+      expect(screen.getByText("This device")).toBeVisible();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Safari on iPhone" })
+      );
+      const dialog = await screen.findByRole("dialog");
+      expect(within(dialog).queryByText(MAYBE_THIS)).toBeNull();
+    });
+
+    it("says nothing while the keys are still loading", () => {
+      mockLocalState = { loaded: false, failed: false };
+      mockQuery = { ...mockQuery, data: [grant(), phone] };
+      render(<DevicesPreferencesSettings />);
+
+      expect(screen.queryByText(UNREADABLE)).toBeNull();
+    });
   });
 
   it("shows a recoverable error", () => {

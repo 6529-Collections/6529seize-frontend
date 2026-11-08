@@ -16,6 +16,7 @@ import {
   assertLocalSandboxBaseURL,
   dismissNextDevTools,
   getSandboxApiOrigin,
+  hideNextDevOverlay,
   installLocalSandboxBrowserMutationGuard,
   type LocalSandboxBrowserMutationGuard,
 } from "../localSandbox";
@@ -255,6 +256,7 @@ export async function openE2eeUser(
       return user.account.signMessage({ message });
     }
   );
+  await hideNextDevOverlay(context);
   const guard: LocalSandboxBrowserMutationGuard =
     await installLocalSandboxBrowserMutationGuard(context, baseURL);
   const page = await context.newPage();

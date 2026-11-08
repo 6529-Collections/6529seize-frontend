@@ -9,6 +9,8 @@ import { revokeDeviceGrant } from "@/services/api/device-grants-api";
  * - done: this device is on, or at the device limit (the gate shows it)
  * - declined: the user cancelled the signature; nothing changed
  * - stopped: the wallet or network changed mid-way; nothing more is asked
+ * - pending: the signing grant was saved and encryption is still registering
+ *   in the background; it was neither confirmed nor refused in time
  * - partial: the signing grant was saved, but encryption did not complete
  * - fallback: no combined grant was saved; offer separate setup
  */
@@ -16,6 +18,7 @@ type CombinedTurnOnOutcome =
   | "done"
   | "declined"
   | "stopped"
+  | "pending"
   | "partial"
   | "fallback";
 
@@ -25,9 +28,79 @@ interface CombinedTurnOnInput {
   readonly address: string | undefined;
   /** "Turn on signed messages", undefined outside the auth provider. */
   readonly requestGrant: RequestSignedMessagesGrant | undefined;
+  /**
+   * The wallet has signed and the signing grant is stored; only the
+   * encryption key's registration remains, with no wallet involved.
+   */
+  readonly onRegistering?: (() => void) | undefined;
 }
 
 const SETTLED_STATUSES: readonly E2eeEngineStatus[] = ["ready", "device-limit"];
+
+/**
+ * How long the turn-on waits for a registration that another caller already
+ * started. Registration is a few requests (device, then KeyPackages), so this
+ * only bounds a slow network; past it the outcome is "pending", not a failure.
+ */
+const ENROLLMENT_SETTLE_TIMEOUT_MS = 20_000;
+
+/**
+ * Resolves with the engine's status once it has left "enrolling", or with
+ * "enrolling" when it is still registering after `timeoutMs`.
+ */
+function waitWhileEnrolling(
+  engine: E2eeEngine,
+  timeoutMs: number
+): Promise<E2eeEngineStatus> {
+  return new Promise((resolve) => {
+    let unsubscribe: (() => void) | null = null;
+    const finish = (status: E2eeEngineStatus) => {
+      clearTimeout(timer);
+      unsubscribe?.();
+      unsubscribe = null;
+      resolve(status);
+    };
+    const timer = setTimeout(() => finish("enrolling"), timeoutMs);
+    const current = engine.getStatus();
+    if (current !== "enrolling") {
+      finish(current);
+      return;
+    }
+    unsubscribe = engine.subscribe(() => {
+      const status = engine.getStatus();
+      if (status !== "enrolling") finish(status);
+    });
+  });
+}
+
+/**
+ * Registers the key the sign-in granted and returns where that left the
+ * engine. Adopting the key also wakes the encrypted-messages provider, which
+ * starts the same registration. The engine either answers this second call
+ * with "enrolling" while the first one runs, or (single-flight) waits for it
+ * inside the call. Neither is a failure, so both are bounded by the same
+ * deadline; past it the status still reads "enrolling" (pending).
+ */
+async function enrollGrantedDevice(
+  engine: E2eeEngine
+): Promise<E2eeEngineStatus> {
+  const deadline = Date.now() + ENROLLMENT_SETTLE_TIMEOUT_MS;
+  const enrolling = engine.enrollWithLoginGrant();
+  // A late failure after the deadline is reported through the status.
+  enrolling.catch(() => undefined);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<null>((resolve) => {
+    timer = setTimeout(() => resolve(null), ENROLLMENT_SETTLE_TIMEOUT_MS);
+  });
+  try {
+    const status = await Promise.race([enrolling, timedOut]);
+    if (status === null) return "enrolling";
+    if (status !== "enrolling") return status;
+  } finally {
+    clearTimeout(timer);
+  }
+  return await waitWhileEnrolling(engine, Math.max(0, deadline - Date.now()));
+}
 
 /** This browser's usable signing grant, which the combined grant replaces. */
 async function readReplacedGrantId(address: string): Promise<string | null> {
@@ -90,6 +163,7 @@ export async function turnOnWithCombinedSignIn({
   engine,
   address,
   requestGrant,
+  onRegistering,
 }: CombinedTurnOnInput): Promise<CombinedTurnOnOutcome> {
   if (
     !address ||
@@ -115,8 +189,10 @@ export async function turnOnWithCombinedSignIn({
     return "fallback";
   }
   const revoked = revokeReplacedGrant(replacedGrantId, e2ee);
-  const status = e2ee.adopted ? await engine.enrollWithLoginGrant() : null;
+  if (e2ee.adopted && e2ee.grantSaved) onRegistering?.();
+  const status = e2ee.adopted ? await enrollGrantedDevice(engine) : null;
   await revoked;
   if (status !== null && SETTLED_STATUSES.includes(status)) return "done";
-  return e2ee.grantSaved ? "partial" : "fallback";
+  if (!e2ee.grantSaved) return "fallback";
+  return status === "enrolling" ? "pending" : "partial";
 }

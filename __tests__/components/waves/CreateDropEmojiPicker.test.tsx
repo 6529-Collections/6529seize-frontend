@@ -166,6 +166,16 @@ describe("CreateDropEmojiPicker", () => {
     }
   );
 
+  it("keeps the picker open for Escape that ends an IME composition", async () => {
+    render(<CreateDropEmojiPicker />);
+    fireEvent.click(screen.getByRole("button", { hidden: true }));
+    const picker = await screen.findByTestId("picker");
+
+    fireEvent.keyDown(picker, { key: "Escape", isComposing: true });
+
+    expect(screen.getByTestId("picker")).toBeInTheDocument();
+  });
+
   it("closes picker when clicking outside", async () => {
     render(<CreateDropEmojiPicker />);
     const toggleButton = screen.getByRole("button", { hidden: true });

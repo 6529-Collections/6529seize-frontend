@@ -6,7 +6,6 @@ import type { BrowserContext } from "@playwright/test";
 import { ApiNotificationCause } from "../../generated/models/ApiNotificationCause";
 import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotificationsResponseV2";
 import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
-import { hideNextDevOverlay } from "../support/localSandbox";
 import { expect, test } from "../testHelpers";
 import {
   closeE2eeUsers,
@@ -152,7 +151,6 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       const account = alice.page.getByRole("button", {
         name: "Open account and profiles menu",
       });
-      await hideNextDevOverlay(alice.page);
       await account.hover();
       const tooltip = alice.page
         .getByRole("tooltip")

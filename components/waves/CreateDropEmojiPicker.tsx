@@ -109,7 +109,8 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
     };
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      // Escape during IME composition cancels the composition, not the picker.
+      if (event.key === "Escape" && !event.isComposing) {
         setShowPicker(false);
         buttonRef.current?.focus();
       }
