@@ -28,6 +28,11 @@ const browserWindow = (): Window | null =>
 
 /** True only for dev auth in a development-like build on a local host. */
 export function isLocalDevAuthTestSeamEnabled(): boolean {
+  // A build-time constant: production bundles compile every test seam out.
+  // eslint-disable-next-line no-restricted-syntax -- inlined by the bundler
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
   if (publicEnv.USE_DEV_AUTH !== "true") {
     return false;
   }
@@ -40,6 +45,29 @@ export function isLocalDevAuthTestSeamEnabled(): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * A function a local browser test installed on the page under `name`, or
+ * null when the seam is off or nothing is installed. Production builds never
+ * enable the seam, so a page global of that name changes nothing there.
+ */
+export function getLocalTestSeamFunction(
+  name: string
+): ((...args: readonly unknown[]) => Promise<unknown>) | null {
+  if (!isLocalDevAuthTestSeamEnabled()) {
+    return null;
+  }
+  const candidate: unknown = Reflect.get(globalThis, name);
+  if (typeof candidate !== "function") {
+    return null;
+  }
+  return async (...args) => {
+    const result: unknown = await Reflect.apply(candidate, globalThis, [
+      ...args,
+    ]);
+    return result;
+  };
 }
 
 const readItem = (key: string): string | null => {

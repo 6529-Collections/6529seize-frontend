@@ -37,6 +37,8 @@ jest.mock("@emoji-mart/react", () => ({
       data-testid="picker"
       data-auto-focus={String(autoFocus)}
       onClick={() => onEmojiSelect({ native: "😊", id: "smile" })}
+      // Like Emoji Mart's search field, which stops every key it handles.
+      onKeyDown={(event) => event.nativeEvent.stopImmediatePropagation()}
     >
       Pick Emoji
     </button>
@@ -142,6 +144,36 @@ describe("CreateDropEmojiPicker", () => {
 
     // Picker should close after selection
     await waitFor(() => expect(screen.queryByTestId("picker")).toBeNull());
+  });
+
+  it.each([
+    ["desktop", false],
+    ["mobile", true],
+  ])(
+    "closes on Escape from inside the picker and returns focus to the trigger (%s)",
+    async (_label, isMobile) => {
+      mockUseIsMobile.mockReturnValue(isMobile);
+      render(<CreateDropEmojiPicker />);
+      const toggleButton = screen.getByRole("button", { hidden: true });
+      fireEvent.click(toggleButton);
+      const picker = await screen.findByTestId("picker");
+      picker.focus();
+
+      fireEvent.keyDown(picker, { key: "Escape" });
+
+      await waitFor(() => expect(screen.queryByTestId("picker")).toBeNull());
+      expect(toggleButton).toHaveFocus();
+    }
+  );
+
+  it("keeps the picker open for Escape that ends an IME composition", async () => {
+    render(<CreateDropEmojiPicker />);
+    fireEvent.click(screen.getByRole("button", { hidden: true }));
+    const picker = await screen.findByTestId("picker");
+
+    fireEvent.keyDown(picker, { key: "Escape", isComposing: true });
+
+    expect(screen.getByTestId("picker")).toBeInTheDocument();
   });
 
   it("closes picker when clicking outside", async () => {
