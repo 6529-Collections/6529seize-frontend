@@ -28,12 +28,12 @@ import { EngineController } from "./controller";
 import {
   confirmOwnRejection,
   enrollDevice,
-  hasLoginGrant,
   needsNewDevice,
   refreshMe,
   renewalDue,
   renewGrant,
   submitRevocation,
+  takeLoginGrantDevice,
 } from "./enroll";
 import { backupHistory, importBackupHistory } from "./backup";
 import { E2eeError, errorMessage } from "./errors";
@@ -120,33 +120,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
    * separate grant prompt with a fresh key.
    */
   private async startEnrollmentFromLoginGrant(): Promise<void> {
-    if (!(await this.takeLoginGrantDevice())) {
+    if (!(await takeLoginGrantDevice(this.ctx))) {
       return;
     }
     // Runs in the background so engine start never waits on the network;
     // the status is "enrolling" from here until it settles.
     void this.ctx.tasks.track(this.enrollFromLoginGrant());
-  }
-
-  /**
-   * Whether storage holds an unregistered device a combined sign-in stored.
-   * Any key this engine still holds from an earlier attempt is released,
-   * so enrollment loads the stored device's own key state.
-   */
-  private takeLoginGrantDevice(): Promise<boolean> {
-    return this.ctx.queue.run(async () => {
-      const stored = await this.ctx.storage.getDevice(this.ctx.profileId);
-      if (!hasLoginGrant(stored) || stored.registered) {
-        return false;
-      }
-      if (this.ctx.device?.deviceKey !== stored.deviceKey) {
-        this.ctx.mls?.dispose();
-        this.ctx.mls = null;
-        this.ctx.device = null;
-        this.ctx.lastState = null;
-      }
-      return true;
-    });
   }
 
   /**
@@ -158,7 +137,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   async enrollWithLoginGrant(): Promise<E2eeEngineStatus> {
     if (
       this.ctx.store.status === NEEDS_ENROLLMENT &&
-      (await this.takeLoginGrantDevice())
+      (await takeLoginGrantDevice(this.ctx))
     ) {
       await this.enrollFromLoginGrant();
     } else {

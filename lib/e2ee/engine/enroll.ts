@@ -224,6 +224,23 @@ export const hasLoginGrant = (
 ): device is StoredDevice & { loginGrantId: string } =>
   typeof device?.loginGrantId === "string";
 
+/** Selects the pending login-grant device and releases any earlier MLS state. */
+export function takeLoginGrantDevice(ctx: EngineContext): Promise<boolean> {
+  return ctx.queue.run(async () => {
+    const stored = await ctx.storage.getDevice(ctx.profileId);
+    if (!hasLoginGrant(stored) || stored.registered) {
+      return false;
+    }
+    if (ctx.device?.deviceKey !== stored.deviceKey) {
+      ctx.mls?.dispose();
+      ctx.mls = null;
+      ctx.device = null;
+      ctx.lastState = null;
+    }
+    return true;
+  });
+}
+
 const submitRegistration = async (
   ctx: EngineContext,
   device: StoredDevice

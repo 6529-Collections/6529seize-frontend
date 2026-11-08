@@ -46,8 +46,11 @@ export function subscribeToDeviceGrantChanges(
 ): () => void {
   const onChange = (event: Event) => {
     const { detail } = event as CustomEvent<DeviceGrantChange | null>;
-    if (detail) {
-      listener(detail);
+    if (typeof detail?.address === "string" && detail.address.length > 0) {
+      listener({
+        address: normalizeAddress(detail.address),
+        saved: detail.saved === true,
+      });
     }
   };
   globalThis.addEventListener(DEVICE_GRANT_CHANGED_EVENT, onChange);
@@ -232,13 +235,14 @@ export async function installSharedDeviceKey(
   record: StoredDeviceKey
 ): Promise<void> {
   const address = normalizeAddress(record.address);
-  await withDeviceKeyLock(address, async () => {
+  const saved = await withDeviceKeyLock(address, async () => {
     const existing = await deviceKeyStorage.read(address);
-    if (existing && getUsableGrant(existing, Date.now())) return;
+    if (existing && getUsableGrant(existing, Date.now())) return false;
     if (!record.grant || !getUsableGrant(record, Date.now()))
       throw new Error("Invalid shared signing grant");
     await deviceKeyStorage.write({ ...record, address });
     writeDeviceGrantHint(address, record.grant, record.ownProfileId);
+    return true;
   });
-  notifyDeviceGrantChanged(address);
+  notifyDeviceGrantChanged(address, saved);
 }

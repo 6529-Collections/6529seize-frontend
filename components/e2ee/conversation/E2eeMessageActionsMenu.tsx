@@ -147,6 +147,7 @@ export function E2eeMessageActionsMenu({
   const locale = useBrowserLocale();
   const signatureStatusId = useId();
   const showVerifiedSignature =
+    !isOwn &&
     message.sigOk &&
     !message.pending &&
     !message.undecryptable &&
@@ -263,7 +264,6 @@ export function E2eeMessageActionsMenu({
           {showVerifiedSignature && (
             <div
               id={signatureStatusId}
-              role="presentation"
               className="tw-mt-1 tw-flex tw-items-center tw-gap-2 tw-border-t tw-border-solid tw-border-white/10 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-300"
             >
               <ShieldCheckIcon aria-hidden="true" className={iconClass} />

@@ -21,7 +21,7 @@ import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { useContentModerationStateScope } from "@/hooks/content-moderation/useContentModerationStateScope";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useSecureSign } from "@/hooks/useSecureSign";
-import { subscribeToDeviceGrantChanges } from "@/lib/device-signing/device-key-store";
+import { useDeviceGrantChangeInvalidation } from "@/hooks/device-signing/useDeviceGrantChangeInvalidation";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
   getAuthJwt,
@@ -93,18 +93,7 @@ export default function Auth({
     ReactQueryWrapperContext
   );
   const queryClient = useQueryClient();
-  useEffect(
-    () =>
-      subscribeToDeviceGrantChanges(({ address: wallet, saved }) => {
-        if (saved) {
-          void queryClient.invalidateQueries({
-            queryKey: [QueryKey.DEVICE_GRANTS, wallet],
-            exact: true,
-          });
-        }
-      }),
-    [queryClient]
-  );
+  useDeviceGrantChangeInvalidation(queryClient);
   const pathname = usePathname();
   const router = useRouter();
   const seizeSettingsContext = useSeizeSettingsOptional();

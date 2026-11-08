@@ -31833,6 +31833,16 @@ components:
           nullable: true
     ApiDeviceGrant:
       type: object
+      allOf:
+        - $ref: "#/components/schemas/ApiDeviceGrantFields"
+      properties:
+        notice_acknowledged:
+          type: boolean
+          description: >-
+            Whether the owner acknowledged the new-device notice. Returned only
+            to the owner.
+    ApiDeviceGrantFields:
+      type: object
       description: >-
         A wallet signed grant that lets a browser-held Ed25519 device key sign
         drop writes. Its id is the EIP-191 hash of the exact SIWE message the
@@ -31894,15 +31904,10 @@ components:
           type: integer
           format: int64
           nullable: true
-        notice_acknowledged:
-          type: boolean
-          description: >-
-            Whether the owner acknowledged the new-device notice. Returned only
-            to the owner.
     ApiDeviceGrantProof:
       type: object
       allOf:
-        - $ref: "#/components/schemas/ApiDeviceGrant"
+        - $ref: "#/components/schemas/ApiDeviceGrantFields"
       required:
         - message
         - wallet_signature

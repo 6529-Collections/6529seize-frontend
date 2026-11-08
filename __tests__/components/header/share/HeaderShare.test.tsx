@@ -1041,7 +1041,7 @@ describe("HeaderShare", () => {
             ).toHaveAttribute(
               "href",
               expect.stringMatching(
-                /accept-connection-sharing.*#device_setup_key=setup-secret$/
+                /^testcore6529:\/\/navigate\/accept-connection-sharing.*#device_setup_key=setup-secret$/
               )
             );
           } else {

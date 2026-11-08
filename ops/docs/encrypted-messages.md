@@ -352,7 +352,7 @@ time your device sees someone. Compare safety codes and check the wallets in
   sender to send it again.
 - **Signature not verified**: the sender's signature did not check out.
 - **Sender’s device signature verified** appears in the message actions menu
-  for verified messages sent in the encrypted chat.
+  for verified messages received from other participants.
 
 ## Devices
 

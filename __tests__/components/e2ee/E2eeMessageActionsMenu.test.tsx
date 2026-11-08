@@ -105,3 +105,33 @@ it("closes an open emoji board when the history becomes inactive", async () => {
   ).not.toBeInTheDocument();
   expect(actions.onReact).not.toHaveBeenCalled();
 });
+
+it.each([
+  { isOwn: false, sigOk: true, showsVerification: true },
+  { isOwn: false, sigOk: false, showsVerification: false },
+  { isOwn: true, sigOk: true, showsVerification: false },
+])(
+  "describes verified incoming signatures only (%j)",
+  async ({ isOwn, sigOk, showsVerification }) => {
+    const user = userEvent.setup();
+    render(
+      <E2eeMessageActionsMenu
+        message={message({ sigOk, senderProfileId: isOwn ? SELF_ID : "alice" })}
+        isOwn={isOwn}
+        selfProfileId={SELF_ID}
+        senderName="Alice"
+        actions={makeActions()}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "Message actions" }));
+
+    const menu = screen.getByRole("menu");
+    if (showsVerification) {
+      expect(menu).toHaveAccessibleDescription(
+        "Sender’s device signature verified"
+      );
+    } else {
+      expect(menu).not.toHaveAttribute("aria-describedby");
+    }
+  }
+);

@@ -18,6 +18,7 @@ import {
   ensureDeviceKey,
   forgetDeviceGrant,
   getDeviceGrantStatus,
+  installSharedDeviceKey,
   listLocalDevicePublicKeys,
   saveDeviceGrant,
   subscribeToDeviceGrantChanges,
@@ -87,6 +88,30 @@ describe("device key store", () => {
     ).resolves.toBe(true);
     expect(listener).toHaveBeenCalledTimes(1);
     unsubscribe();
+  });
+
+  it("announces when importing a shared key installs a new grant", async () => {
+    const record = await ensureDeviceKey(ADDRESS);
+    const grant = grantFor(record.publicKeyHex, {
+      expires_at: Date.now() + DAY,
+    });
+    const listener = jest.fn();
+    const unsubscribe = subscribeToDeviceGrantChanges(listener);
+
+    try {
+      await installSharedDeviceKey({ ...record, grant });
+      expect(listener).toHaveBeenLastCalledWith({
+        address: ADDRESS.toLowerCase(),
+        saved: true,
+      });
+      await installSharedDeviceKey({ ...record, grant });
+      expect(listener).toHaveBeenLastCalledWith({
+        address: ADDRESS.toLowerCase(),
+        saved: false,
+      });
+    } finally {
+      unsubscribe();
+    }
   });
 
   it("allocates max(lastSeq + 1, now) and persists it before signing", async () => {
