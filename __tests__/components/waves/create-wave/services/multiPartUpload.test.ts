@@ -4,6 +4,7 @@ import pRetry from "p-retry";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import { commonApiPost } from "@/services/api/common-api";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import {
   getDropUploadOwner,
   rememberPreparedDropImage,
@@ -128,7 +129,8 @@ describe("multiPartUpload", () => {
           url: "https://cdn.example.com/prepared.webp",
           mime_type: "image/webp",
         },
-        getDropUploadOwner()
+        getDropUploadOwner(),
+        ApiMediaUploadPurpose.Chat
       );
       const controller = new AbortController();
       controller.abort();
@@ -255,6 +257,106 @@ describe("multiPartUpload", () => {
         mime_type: "image/png",
         media_upload_id: "media-upload-1",
         media_status: ApiDropMediaStatus.Processing,
+      });
+    });
+  });
+
+  describe("Upload purpose", () => {
+    it("leaves chat, the API default, out of the start request", async () => {
+      await multiPartUpload({
+        file: mockFile,
+        path: "drop",
+        purpose: ApiMediaUploadPurpose.Chat,
+      });
+
+      expect(mockCommonApiPost).toHaveBeenNthCalledWith(1, {
+        endpoint: "drop-media/multipart-upload",
+        body: {
+          file_name: "test.png",
+          content_type: "image/png",
+        },
+      });
+    });
+
+    it("names a decision entry in the start request", async () => {
+      await multiPartUpload({
+        file: mockFile,
+        path: "drop",
+        purpose: ApiMediaUploadPurpose.DecisionEntry,
+      });
+
+      expect(mockCommonApiPost).toHaveBeenNthCalledWith(1, {
+        endpoint: "drop-media/multipart-upload",
+        body: {
+          file_name: "test.png",
+          content_type: "image/png",
+          purpose: "decision_entry",
+        },
+      });
+      expect(mockCommonApiPost).toHaveBeenCalledTimes(3);
+    });
+
+    it("reuses a chat-prepared upload for chat only", async () => {
+      const file = new File(["avif"], "prepared-chat.avif", {
+        type: "image/avif",
+      });
+      const prepared = {
+        url: "https://cdn.example.com/prepared-chat.webp",
+        mime_type: "image/webp",
+      };
+      rememberPreparedDropImage(
+        file,
+        prepared,
+        getDropUploadOwner(),
+        ApiMediaUploadPurpose.Chat
+      );
+
+      await expect(
+        multiPartUpload({ file, path: "drop", onProgress: mockOnProgress })
+      ).resolves.toBe(prepared);
+      expect(mockOnProgress).toHaveBeenCalledWith(100);
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
+
+      const entryMedia = await multiPartUpload({
+        file,
+        path: "drop",
+        purpose: ApiMediaUploadPurpose.DecisionEntry,
+      });
+
+      expect(entryMedia.url).toBe("https://cdn.example.com/final-url");
+      expect(mockCommonApiPost).toHaveBeenNthCalledWith(1, {
+        endpoint: "drop-media/multipart-upload",
+        body: {
+          file_name: "prepared-chat.avif",
+          content_type: "image/avif",
+          purpose: "decision_entry",
+        },
+      });
+    });
+
+    it("does not reuse a decision-entry-prepared upload for chat", async () => {
+      const file = new File(["avif"], "prepared-entry.avif", {
+        type: "image/avif",
+      });
+      rememberPreparedDropImage(
+        file,
+        {
+          url: "https://cdn.example.com/prepared-entry.webp",
+          mime_type: "image/webp",
+        },
+        getDropUploadOwner(),
+        ApiMediaUploadPurpose.DecisionEntry
+      );
+
+      const chatMedia = await multiPartUpload({ file, path: "drop" });
+
+      expect(chatMedia.url).toBe("https://cdn.example.com/final-url");
+      expect(mockCommonApiPost).toHaveBeenNthCalledWith(1, {
+        endpoint: "drop-media/multipart-upload",
+        body: {
+          file_name: "prepared-entry.avif",
+          content_type: "image/avif",
+        },
       });
     });
   });

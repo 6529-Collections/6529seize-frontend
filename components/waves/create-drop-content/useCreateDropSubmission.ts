@@ -33,6 +33,7 @@ import {
 } from "./content-helpers";
 import { generateParts, toApiCreateDropParts } from "./part-builders";
 import { withClientDropId } from "@/services/api/client-drop-ids";
+import { getDropMediaUploadPurpose } from "@/services/uploads/mediaUploadPurpose";
 import {
   isReplyTargetUnavailableError,
   REPLY_TARGET_UNAVAILABLE_TOAST_ID,
@@ -544,7 +545,8 @@ export const useCreateDropSubmission = ({
 
       const generatedParts = await generateParts(
         dropRequest.parts,
-        setUploadingFiles
+        setUploadingFiles,
+        getDropMediaUploadPurpose(dropRequest)
       );
       if (!generatedParts.length) {
         setSubmitting(false);

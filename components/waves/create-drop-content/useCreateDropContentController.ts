@@ -51,6 +51,7 @@ import {
   canSubmitComposerAction,
   canSubmitDrop,
   createMetadataHandlers,
+  getComposerMediaUploadPurpose,
   hasMetadataContent,
   isDuplicateIdentitySubmissionError,
 } from "./content-helpers";
@@ -322,6 +323,7 @@ export function useCreateDropContentController({
       files,
       keepOptionsVisible: keepDesktopOptionsVisible,
       waveId: wave.id,
+      mediaUploadPurpose: getComposerMediaUploadPurpose(isDropMode, activeDrop),
       externalAttachmentDrop,
       onExternalAttachmentDropConsumed,
       setToast,
