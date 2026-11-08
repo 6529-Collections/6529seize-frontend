@@ -160,6 +160,11 @@ it("selects every core browser lane when their shared workflow changes", () => {
         label: "Drop editing desktop and mobile",
         runner: "ubuntu-latest",
       },
+      {
+        lane: "playwright-e2ee",
+        label: "Encrypted messages desktop and mobile",
+        runner: "ubuntu-latest",
+      },
     ],
   });
 });

@@ -287,6 +287,12 @@ jobs:
           if (dropEditingBrowserRequired) {
             corePlaywrightLanes.push({ lane: "playwright-drop-editing", label: "Drop editing desktop and mobile", runner: defaultRunner });
           }
+          const e2eeBrowserRequired = plan.changed_files.some((file) =>
+            /^(?:(?:lib|components|hooks)\/(?:e2ee|device-signing)\/|native\/mls-wasm\/|app\/messages\/encrypted\/|tests\/(?:support\/)?e2ee\/|i18n\/messages\/e2ee\.ts$|components\/auth\/(?:authActions|authRequestSignIn|authSignedMessagesGrant|authLoginE2eeDevice|signedMessagesTestSigner)\.ts$|services\/auth\/devAuthTestOverride\.ts$|tests\/support\/composerSandboxServer\.cjs$|\.github\/workflows\/app-pr-ci\.yml$)/.test(file)
+          );
+          if (e2eeBrowserRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-e2ee", label: "Encrypted messages desktop and mobile", runner: defaultRunner });
+          }
           if (plan.checks.playwright_critical_shell.required) {
             corePlaywrightLanes.push({
               lane: "playwright-critical-shell",
@@ -379,7 +385,7 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
     # Allow full native and profile coverage to finish after dev-server bootstrap.
-    timeout-minutes: ${{ (matrix.lane == 'playwright-native-competition' || matrix.lane == 'playwright-critical-shell') && 30 || 20 }}
+    timeout-minutes: ${{ (matrix.lane == 'playwright-native-competition' || matrix.lane == 'playwright-critical-shell' || matrix.lane == 'playwright-e2ee') && 30 || 20 }}
     permissions:
       contents: read
       issues: read
@@ -549,6 +555,13 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/drop-editing"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/drop-editing"
         run: ./bin/6529 run test:e2e:edit-drop-sandbox
+
+      - name: Run encrypted messages browser pack
+        if: matrix.lane == 'playwright-e2ee'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/e2ee"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/e2ee"
+        run: ./bin/6529 run test:e2e:e2ee-sandbox
 
       # One `next dev` session that compiles every critical-shell route grows
       # Turbopack's native memory past the 16 GB runner, and the OOM killer

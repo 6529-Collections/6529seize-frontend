@@ -648,7 +648,7 @@ describe("testing strategy CI plan", () => {
       if: "needs.plan.outputs.core_playwright_required == 'true' && github.event.pull_request.head.repo.full_name == github.repository",
       "runs-on": "${{ matrix.runner }}",
       "timeout-minutes":
-        "${{ (matrix.lane == 'playwright-native-competition' || matrix.lane == 'playwright-critical-shell') && 30 || 20 }}",
+        "${{ (matrix.lane == 'playwright-native-competition' || matrix.lane == 'playwright-critical-shell' || matrix.lane == 'playwright-e2ee') && 30 || 20 }}",
       container: {
         image:
           "mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48",
