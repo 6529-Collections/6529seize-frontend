@@ -187,9 +187,9 @@ describe("useUnreadNotifications", () => {
     renderHook(() => useUnreadNotifications("bob", { profileId: "profile-1" }));
 
     const queryOptions = useQueryMock.mock.calls[0]?.[0];
-    await expect(
-      queryOptions.queryFn(createQueryContext())
-    ).resolves.toEqual({ unread_count: 3 });
+    await expect(queryOptions.queryFn(createQueryContext())).resolves.toEqual({
+      unread_count: 3,
+    });
     expect(commonApiFetchMock).toHaveBeenCalledWith(
       expect.objectContaining({
         endpoint: "v2/notifications/unread-count",
