@@ -179,12 +179,12 @@ encrypted backup. See [Encrypted messages](../../encrypted-messages.md#renewal-a
 
 ## New-Device Alert
 
-The browser checks the profile's grants when a wave opens and at most every
-10 minutes while the tab is visible. When an active grant appears that this
-browser has not seen and that is not one of its own keys, the composer notice
-shows **{label} is now authorized for Signed Posts. If this wasn’t you, revoke it.** with **Revoke** and a dismiss
-control. The first list a browser sees for a wallet is its baseline, so a
-grant that already exists then never raises the alert; review **Device Permissions** for existing grants.
+The browser checks the profile's grants when a wave opens, when the app
+returns to focus, and every 10 minutes while visible. An active grant for
+another device can raise a notice above the composer. Choose **This was me**
+to clear that notice across devices as their grant lists refresh. Choose
+**Revoke** to remove the device's permission. The first list a browser sees
+for a wallet is its baseline. Review existing grants in **Device Permissions**.
 
 ## Checking a Drop's Signature
 

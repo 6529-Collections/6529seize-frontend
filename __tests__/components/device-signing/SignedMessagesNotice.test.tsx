@@ -69,8 +69,13 @@ jest.mock("@/hooks/device-signing/useLocalDeviceKeys", () => ({
 
 let mockGrants: ApiDeviceGrant[] | undefined;
 const mockRevoke = jest.fn();
+const mockAcknowledge = jest.fn();
 jest.mock("@/hooks/device-signing/useDeviceGrants", () => ({
   useDeviceGrants: () => ({ data: mockGrants }),
+  useAcknowledgeDeviceGrant: () => ({
+    acknowledge: mockAcknowledge,
+    isAcknowledging: false,
+  }),
   useRevokeDeviceGrant: () => ({ revoke: mockRevoke, isRevoking: false }),
 }));
 
@@ -106,6 +111,7 @@ describe("SignedMessagesNotice", () => {
     mockGrants = [];
     mockRequestGrant.mockReset().mockResolvedValue({ success: true });
     mockRevoke.mockReset();
+    mockAcknowledge.mockReset();
     mockSetToast.mockReset();
     mockReport.mockReset();
     mockSeizeConnectFresh.mockClear();
@@ -519,7 +525,7 @@ describe("SignedMessagesNotice", () => {
       ).toBeNull();
     });
 
-    it("keeps the alert when revoking fails and can be dismissed", async () => {
+    it("acknowledges an alert explicitly after a failed revoke", async () => {
       mockGrants = [];
       const { rerender } = render(<SignedMessagesNotice composerEmpty />);
       mockGrants = [otherDevice];
@@ -533,10 +539,33 @@ describe("SignedMessagesNotice", () => {
         screen.getByText(/is now authorized for Signed Posts/)
       ).toBeVisible();
 
-      fireEvent.click(screen.getByRole("button", { name: "Dismiss" }));
+      expect(screen.queryByRole("button", { name: "Dismiss" })).toBeNull();
+      mockAcknowledge.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "This was me" }));
+      });
+      expect(screen.getByRole("button", { name: "This was me" })).toBeVisible();
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "This was me" }));
+      });
+      expect(mockAcknowledge).toHaveBeenCalledWith(otherDevice.id);
       expect(
         screen.queryByText(/is now authorized for Signed Posts/)
       ).toBeNull();
+    });
+
+    it("clears an alert acknowledged on another device when the grant list refreshes", () => {
+      mockGrants = [];
+      const { rerender } = render(<SignedMessagesNotice composerEmpty />);
+      mockGrants = [otherDevice];
+      rerender(<SignedMessagesNotice composerEmpty />);
+      expect(screen.getByRole("button", { name: "This was me" })).toBeVisible();
+
+      mockGrants = [{ ...otherDevice, notice_acknowledged: true }];
+      rerender(<SignedMessagesNotice composerEmpty />);
+      expect(screen.queryByRole("button", { name: "This was me" })).toBeNull();
+      expect(mockAcknowledge).not.toHaveBeenCalled();
+      expect(mockRevoke).not.toHaveBeenCalled();
     });
   });
 });

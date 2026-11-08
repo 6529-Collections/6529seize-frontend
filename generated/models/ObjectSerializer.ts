@@ -1372,7 +1372,7 @@ import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropHiddenState } from '../models/ApiDropHiddenState';
 import { ApiDropId } from '../models/ApiDropId';
 import { ApiDropMainType } from '../models/ApiDropMainType';
-import { ApiDropMedia      } from '../models/ApiDropMedia';
+import { ApiDropMedia         } from '../models/ApiDropMedia';
 import { ApiDropMediaStatus } from '../models/ApiDropMediaStatus';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';

@@ -3431,6 +3431,46 @@ paths:
           description: Not available to proxies
         "404":
           description: Grant is missing, revoked or belongs to another profile
+  /device-grants/{grantId}/acknowledge:
+    post:
+      tags:
+        - Authentication
+      summary: Acknowledge a new-device notice for a signing grant
+      description: >-
+        Records the caller's acknowledgment of an active grant they own. The
+        notice is cleared across devices. Acknowledgment is idempotent and does
+        not change any signing or encryption permissions.
+      operationId: acknowledgeDeviceGrant
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleAcknowledgeDeviceGrant
+      parameters:
+        - name: grantId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: Acknowledged grant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeviceGrant"
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies
+        "404":
+          description: Grant is missing, inactive or belongs to another profile
   /device-grants/{grantId}/revoke:
     post:
       tags:
@@ -31854,6 +31894,11 @@ components:
           type: integer
           format: int64
           nullable: true
+        notice_acknowledged:
+          type: boolean
+          description: >-
+            Whether the owner acknowledged the new-device notice. Returned only
+            to the owner.
     ApiDeviceGrantProof:
       type: object
       allOf:
@@ -32444,6 +32489,28 @@ components:
         media_error:
           type: string
           nullable: true
+        width:
+          type: integer
+          nullable: true
+          minimum: 1
+          description: >-
+            Displayed pixel width (after EXIF orientation), for reserving layout
+            space before the media loads. Omitted or null when unknown.
+        height:
+          type: integer
+          nullable: true
+          minimum: 1
+          description: >-
+            Displayed pixel height (after EXIF orientation). Omitted or null
+            when unknown.
+        thumbhash:
+          type: string
+          nullable: true
+          maxLength: 64
+          description: >-
+            Base64 ThumbHash placeholder (https://evanw.github.io/thumbhash/),
+            decodable with the thumbhash npm package. Omitted or null when
+            unknown.
     ApiDropMediaStatus:
       type: string
       enum:
