@@ -389,9 +389,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         onFocus={handoff.onFocus}
         onBlur={handoff.onBlur}
       >
-        <p role="status" className="tw-sr-only">
-          {handoff.announcement}
-        </p>
+        <output className="tw-sr-only">{handoff.announcement}</output>
         {superseded ? (
           <E2eeSupersededComposer
             conversation={conversation}

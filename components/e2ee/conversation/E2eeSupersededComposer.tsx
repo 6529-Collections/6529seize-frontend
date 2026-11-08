@@ -222,12 +222,14 @@ export function E2eeSupersededComposer({
           );
       if (skipped.length > 0) {
         setStarted({ g, skipped: formatList(locale, skipped) });
-        setPending(false);
         return;
       }
       router.push(getEncryptedConversationRoute(g));
-    } catch (caught) {
-      setError(getRestartError(locale, caught, conversation, selfProfileId));
+    } catch (error_) {
+      setError(getRestartError(locale, error_, conversation, selfProfileId));
+    } finally {
+      // A slow or blocked navigation must not leave the action stuck;
+      // restart is idempotent, so another press opens the same chat.
       setPending(false);
     }
   };
@@ -292,18 +294,17 @@ export function E2eeSupersededComposer({
           {t(locale, error.key, error.params)}
         </p>
       ) : null}
-      <p
-        role="status"
+      <output
         className={
           started
-            ? "tw-m-0 tw-px-4 tw-pb-3 tw-text-sm tw-leading-5 tw-text-amber-100"
+            ? "tw-block tw-px-4 tw-pb-3 tw-text-sm tw-leading-5 tw-text-amber-100"
             : "tw-sr-only"
         }
       >
         {started
           ? t(locale, "e2ee.superseded.skipped", { names: started.skipped })
           : null}
-      </p>
+      </output>
     </div>
   );
 }

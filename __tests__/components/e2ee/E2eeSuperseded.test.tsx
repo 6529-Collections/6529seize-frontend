@@ -14,6 +14,7 @@ import type { E2eeConversation } from "@/lib/e2ee/types";
 import { E2EE_MESSAGES } from "@/i18n/messages/e2ee";
 import {
   ALICE_ID,
+  BOB_ID,
   contextFor,
   conversation,
   createFakeE2eeEngine,
@@ -66,6 +67,25 @@ const COPY = {
 
 const e2eeError = (code: string) =>
   Object.assign(new Error(code), { name: "E2eeError", code });
+
+/** The en-US template with its `{param}` placeholders filled in. */
+const copy = (
+  key: keyof typeof E2EE_MESSAGES,
+  params: Record<string, string>
+): string =>
+  Object.entries(params).reduce(
+    (text, [name, value]) => text.replace(`{${name}}`, value),
+    String(E2EE_MESSAGES[key])
+  );
+
+/** The handle the conversation factory gives a member. */
+const handleOf = (item: E2eeConversation, profileId: string): string => {
+  const handle = item.members.find(
+    (person) => person.profileId === profileId
+  )?.handle;
+  if (!handle) throw new Error(`No handle for ${profileId}`);
+  return handle;
+};
 
 const dm = (
   g: string,
@@ -142,8 +162,25 @@ describe("a superseded DM", () => {
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
-  it("says the person is reachable once they upgrade when they have no device yet", async () => {
+  it("re-enables the action when navigation leaves the view mounted", async () => {
     const engine = renderView(OLD_DM, [dm(OLD_DM, "superseded")]);
+    jest.mocked(engine.restart).mockResolvedValue(NEW_DM);
+    const action = screen.getByRole("button", { name: COPY.continueDm });
+
+    fireEvent.click(action);
+
+    await waitFor(() => expect(mockPush).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(action).toBeEnabled());
+    expect(action).not.toHaveAttribute("aria-busy", "true");
+    // Restart is idempotent: pressing again opens the same chat.
+    fireEvent.click(action);
+    await waitFor(() => expect(mockPush).toHaveBeenCalledTimes(2));
+    expect(mockPush).toHaveBeenLastCalledWith(`/messages/encrypted/${NEW_DM}`);
+  });
+
+  it("says the person is reachable once they upgrade when they have no device yet", async () => {
+    const old = dm(OLD_DM, "superseded");
+    const engine = renderView(OLD_DM, [old]);
     jest
       .mocked(engine.restart)
       .mockRejectedValueOnce(e2eeError("E2EE_NO_DEVICES"));
@@ -151,7 +188,7 @@ describe("a superseded DM", () => {
     fireEvent.click(screen.getByRole("button", { name: COPY.continueDm }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "alice will be reachable once they open 6529.io and confirm the upgrade."
+      copy("e2ee.superseded.noDevices.dm", { name: handleOf(old, ALICE_ID) })
     );
     expect(mockPush).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: COPY.continueDm })).toBeEnabled();
@@ -228,7 +265,8 @@ describe("a superseded group", () => {
   });
 
   it("names the people skipped and links to the new group", async () => {
-    const engine = renderView(GROUP_G, [group()]);
+    const old = group();
+    const engine = renderView(GROUP_G, [old]);
     jest.mocked(engine.restart).mockImplementationOnce(async () => {
       engine.update({
         conversations: [
@@ -236,10 +274,9 @@ describe("a superseded group", () => {
           conversation({
             g: NEW_GROUP,
             predecessor: GROUP_G,
-            members: [
-              member(SELF_ID, "me", { isAdmin: true }),
-              member(ALICE_ID, "alice"),
-            ],
+            members: old.members.filter(
+              (person) => person.profileId !== BOB_ID
+            ),
           }),
         ],
       });
@@ -252,11 +289,11 @@ describe("a superseded group", () => {
 
     const link = await screen.findByRole("link", { name: COPY.openSuccessor });
     expect(link).toHaveAttribute("href", `/messages/encrypted/${NEW_GROUP}`);
-    expect(
-      screen.getByText(
-        "The new conversation started without bob. Add them from Chat info once they open 6529.io and confirm the upgrade."
-      )
-    ).toHaveAttribute("role", "status");
+    const skipped = screen.getByText(
+      copy("e2ee.superseded.skipped", { names: handleOf(old, BOB_ID) })
+    );
+    expect(skipped.tagName).toBe("OUTPUT");
+    expect(skipped).toBeVisible();
     expect(link).toHaveFocus();
     expect(mockPush).not.toHaveBeenCalled();
   });
@@ -308,7 +345,7 @@ describe("turning read-only while open", () => {
 
     goSuperseded(engine);
 
-    expect(screen.getByText(COPY.announce)).toHaveAttribute("role", "status");
+    expect(screen.getByText(COPY.announce).tagName).toBe("OUTPUT");
     expect(
       screen.getByRole("button", { name: COPY.restartGroup })
     ).not.toHaveFocus();

@@ -309,6 +309,25 @@ describe("E2eeEnrollmentCard upgrade copy (D172)", () => {
     expect(engine.enroll).not.toHaveBeenCalled();
   });
 
+  it("keeps the combined copy and omits the kept count when nothing was kept", async () => {
+    mockTurnOn.mockResolvedValue("done");
+    const engine = renderScoped("both", { superseded: 0 });
+
+    expect(
+      screen.getByRole("heading", { name: "Post Signing & DM Encryption" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/moving to stronger encryption/u)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/existing conversation/u)
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", BUTTON));
+
+    await waitFor(() => expect(mockTurnOn).toHaveBeenCalledTimes(1));
+    expect(engine.enroll).not.toHaveBeenCalled();
+  });
+
   it("follows the engine when the upgrade clears", () => {
     const engine = renderScoped("dms", { superseded: 0 });
     expect(
