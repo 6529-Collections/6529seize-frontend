@@ -25,6 +25,7 @@ import {
 } from "./context";
 import { ConversationCreator } from "./conversation-creation";
 import { ConversationRestarter } from "./conversation-restart";
+import { UnsentMessages } from "./unsent";
 import { EngineController } from "./controller";
 import {
   confirmOwnRejection,
@@ -73,6 +74,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   private readonly controller: EngineController;
   private readonly conversationCreator: ConversationCreator;
   private readonly restarter: ConversationRestarter;
+  private readonly unsent: UnsentMessages;
 
   constructor(ctx: EngineContext) {
     this.ctx = ctx;
@@ -88,6 +90,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       this.onDelayed
     );
     this.restarter = new ConversationRestarter(ctx, this.conversationCreator);
+    this.unsent = new UnsentMessages(ctx, (g) => this.restart(g));
   }
 
   async init(): Promise<void> {
@@ -605,6 +608,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
     this.requireReady();
     await leave(this.ctx, g.toLowerCase(), this.delayedFor(g.toLowerCase()));
   }
+
+  resendUnsent = (g: string, id: string) => this.unsent.resend(g, id);
+  discardUnsent = (g: string, id: string) => this.unsent.discard(g, id);
 
   async restart(g: string): Promise<string> {
     this.requireReady();

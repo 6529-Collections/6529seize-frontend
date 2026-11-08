@@ -92,7 +92,8 @@ export async function createLoginE2eeDevice(
           storage,
           input.profileId,
           existing,
-          await storage.getStateVersion(input.profileId)
+          await storage.getStateVersion(input.profileId),
+          (deps.now ?? Date.now)()
         );
         existing = await storage.getDevice(input.profileId);
       }

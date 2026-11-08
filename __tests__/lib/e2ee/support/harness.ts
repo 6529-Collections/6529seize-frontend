@@ -234,9 +234,23 @@ export async function seedLegacySuiteDevice(
   world: World,
   user: TestUser,
   device: TestDevice,
-  options: { enroll?: boolean } = {}
+  options: {
+    enroll?: boolean;
+    /**
+     * false: do not wait for the engine to settle first (it never does
+     * while every send fails); writes already made are what is seeded.
+     */
+    waitIdle?: boolean;
+  } = {}
 ): Promise<TestDevice> {
-  await device.engine.idle();
+  if (options.waitIdle === false) {
+    stopDevice(world, device);
+    // Let a write that was in flight at the stop land first.
+    await realSleep(50);
+  } else {
+    await device.engine.idle();
+    stopDevice(world, device);
+  }
   const stored = await device.storage.getDevice(device.profileId);
   if (!stored) {
     throw new Error("seedLegacySuiteDevice: the device is not enrolled");
@@ -249,7 +263,6 @@ export async function seedLegacySuiteDevice(
   const groups = (await device.storage.listGroups(device.profileId)).map(
     ({ ciphersuite: _suite, ...group }) => group
   );
-  stopDevice(world, device);
   await device.storage.writeBatch(device.profileId, {
     expectedVersion: await device.storage.getStateVersion(device.profileId),
     device: { ...stored, grant: { ...grant, ciphersuite: 0x004f } },
