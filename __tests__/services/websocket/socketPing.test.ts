@@ -175,6 +175,20 @@ describe("liveness", () => {
     expect(sent).toHaveLength(1);
   });
 
+  it("keeps a probe's own timeout when a frame is sent meanwhile", () => {
+    const { ws, sent } = fakeSocket();
+    const onDead = jest.fn();
+    const keepalive = pinger(ws, onDead);
+
+    keepalive.probe();
+    keepalive.noteSent();
+    jest.advanceTimersByTime(PONG_TIMEOUT_MS * MAX_MISSED_PONGS);
+
+    // Only the probe and its one retry: sending proves nothing.
+    expect(sent.map((frame) => frame.type)).toEqual(["PING", "PING"]);
+    expect(onDead).toHaveBeenCalledTimes(1);
+  });
+
   it("reports a socket dead once after two unanswered PINGs", () => {
     const { ws, sent } = fakeSocket();
     const onDead = jest.fn();

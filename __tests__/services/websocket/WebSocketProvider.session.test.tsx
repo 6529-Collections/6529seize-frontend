@@ -361,6 +361,8 @@ describe("WebSocketProvider sessions", () => {
         jest.advanceTimersByTime(PONG_TIMEOUT_MS * 4);
       });
 
+      // The PONG alone settles the PING: no second PING, no replacement.
+      expect(sentTypes(ws)).toEqual(["AUTHENTICATE", "PING"]);
       expect(sockets).toHaveLength(1);
       expect(ws.close).not.toHaveBeenCalled();
       expect(result.current.connection?.revision).toBe(revision);
