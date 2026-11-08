@@ -9,6 +9,7 @@ import { useWebSocketHealth } from "./useWebSocketHealth";
 import { MarketplacePreviewWebSocketSync } from "./MarketplacePreviewWebSocketSync";
 import { NotificationWebSocketSync } from "./NotificationWebSocketSync";
 import { WebSocketRecoverySync } from "./WebSocketRecoverySync";
+import { WavesChangedWebSocketSync } from "./WavesChangedWebSocketSync";
 import { DmUnreadStateProvider } from "@/services/dm-unread/DmUnreadStateProvider";
 
 /**
@@ -58,6 +59,7 @@ export function AppWebSocketProvider({
       <WebSocketInitializer />
       <MarketplacePreviewWebSocketSync />
       <NotificationWebSocketSync />
+      <WavesChangedWebSocketSync />
       <WebSocketRecoverySync />
       <DmUnreadStateProvider>{children}</DmUnreadStateProvider>
     </WebSocketProvider>

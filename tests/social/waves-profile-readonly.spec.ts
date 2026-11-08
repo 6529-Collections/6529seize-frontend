@@ -1507,12 +1507,17 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       contentType: "image/png",
     });
     const competitionPath = new URL(page.url()).pathname;
-    expect(competitionPath).toMatch(/\/competitions\/[^/]+$/);
+    expect(competitionPath).toMatch(/\/decisions\/[^/]+$/);
+    // The page route says "decisions"; the public API keeps "competitions".
+    const competitionApiPath = competitionPath.replace(
+      /\/decisions\/([^/]+)$/,
+      "/competitions/$1"
+    );
     const activityResponse = await gotoReadyWithApiResponse(
       page,
       `${competitionPath}?tab=votes&voteTab=activity`,
       (url) =>
-        url.pathname === `/api/v3${competitionPath}/activity` &&
+        url.pathname === `/api/v3${competitionApiPath}/activity` &&
         url.searchParams.get("offset") === "0"
     );
     const logs: readonly unknown[] = await activityResponse.json();
@@ -1590,7 +1595,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         await expect(chat).toHaveCount(0);
         await expect(
           page.getByText(
-            "This competition could not be loaded. It may be unavailable or you may not have access.",
+            "This decision could not be loaded. It may be unavailable or you may not have access.",
             { exact: true }
           )
         ).toHaveCount(0);
@@ -1827,7 +1832,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .getByRole("tab", { name: "Leaderboard", exact: true })
       .click();
     await expect(
-      page.getByRole("button", { name: "Toggle decision timeline" })
+      page.getByRole("button", { name: "Toggle results timeline" })
     ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(waveTabs.filter({ visible: true })).toHaveCount(1);
     await expect(

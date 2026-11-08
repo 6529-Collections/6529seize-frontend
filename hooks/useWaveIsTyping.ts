@@ -1,15 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { useWaveWebSocket } from "./useWaveWebSocket";
 import { useMobileAppActivity } from "./useMobileAppActivity";
-import type {
-  WsDropUpdateMessage,
-  WsDropUpdateRefMessage,
-  WsTypingMessage,
-} from "@/helpers/Types";
+import type { WsTypingMessage } from "@/helpers/Types";
 import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
+import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
@@ -89,28 +86,41 @@ const isWsTypingMessage = (value: unknown): value is ValidWsTypingMessage => {
   );
 };
 
-const isWsDropUpdateMessage = (
-  value: unknown
-): value is WsDropUpdateMessage => {
-  if (!isRecord(value) || value["type"] !== WsMessageType.DROP_UPDATE) {
-    return false;
-  }
+/**
+ * Which typers a drop frame on the app socket ends, for one wave:
+ * - `DROP_UPDATE` carries the whole drop (`{ wave: { id }, author: { handle } }`)
+ *   and ends its author's typing;
+ * - `DROP_UPDATE_REF` for a new or edited drop carries only `wave_id` and no
+ *   author, so it ends everyone's typing in that wave.
+ * Anything else, or a frame for another wave, ends nobody's.
+ */
+type TypingDropSignal =
+  | { readonly kind: "author"; readonly handle: string }
+  | { readonly kind: "everyone" };
 
-  const data = value["data"];
-  if (!isRecord(data)) {
-    return false;
+const getTypingDropSignal = (
+  type: WsMessageType,
+  data: unknown,
+  waveId: string
+): TypingDropSignal | null => {
+  if (type === WsMessageType.DROP_UPDATE_REF) {
+    return isWsDropUpdateRefData(data) &&
+      data.update_type === WsMessageType.DROP_UPDATE &&
+      data.wave_id === waveId
+      ? { kind: "everyone" }
+      : null;
   }
-
+  if (type !== WsMessageType.DROP_UPDATE || !isRecord(data)) return null;
+  const wave = data["wave"];
   const author = data["author"];
-  return isRecord(author) && typeof author["handle"] === "string";
+  if (!isRecord(wave) || wave["id"] !== waveId || !isRecord(author)) {
+    return null;
+  }
+  const handle = author["handle"];
+  return typeof handle === "string" && handle.length > 0
+    ? { kind: "author", handle }
+    : null;
 };
-
-const isWsDropUpdateRefMessage = (
-  value: unknown
-): value is WsDropUpdateRefMessage =>
-  isRecord(value) &&
-  value["type"] === WsMessageType.DROP_UPDATE_REF &&
-  isWsDropUpdateRefData(value["data"]);
 
 /* ------------------------------------------------------------------ */
 /*  Hook                                                              */
@@ -149,6 +159,35 @@ export function useWaveIsTyping(
   }
 
   const typersRef = useRef<Map<string, TypingEntry>>(new Map());
+  // Redraws the label; null while the typing socket connects or reconnects,
+  // which redraws from typersRef when it opens.
+  const refreshTypingRef = useRef<(() => void) | null>(null);
+  // Socket callbacks can run after a render paused the hook; they read this.
+  const shouldSubscribeRef = useRef(shouldSubscribe);
+  useLayoutEffect(() => {
+    shouldSubscribeRef.current = shouldSubscribe;
+  }, [shouldSubscribe]);
+
+  // A typer stops typing when their drop arrives. Drops come on the app
+  // socket: the typing socket (purpose=typing) no longer receives them once
+  // the server supports it, and with it each drop is parsed once, not twice.
+  const onAppSocketDrop = (type: WsMessageType, data: unknown) => {
+    if (!shouldSubscribeRef.current) return;
+    const signal = getTypingDropSignal(type, data, waveId);
+    if (signal === null) return;
+    const changed =
+      signal.kind === "author"
+        ? typersRef.current.delete(signal.handle)
+        : typersRef.current.size > 0;
+    if (signal.kind === "everyone") typersRef.current.clear();
+    if (changed) refreshTypingRef.current?.();
+  };
+  useWebSocketMessage<unknown>(WsMessageType.DROP_UPDATE, (data) =>
+    onAppSocketDrop(WsMessageType.DROP_UPDATE, data)
+  );
+  useWebSocketMessage<unknown>(WsMessageType.DROP_UPDATE_REF, (data) =>
+    onAppSocketDrop(WsMessageType.DROP_UPDATE_REF, data)
+  );
 
   useEffect(() => {
     typersRef.current.clear();
@@ -196,29 +235,16 @@ export function useWaveIsTyping(
     };
 
     const onMessage = (event: MessageEvent) => {
+      // A fast-path hint only: servers without typing-purpose sockets still
+      // send every drop here, and a frame without the type name cannot be a
+      // typing event. Frames that pass are still parsed and validated.
+      const raw = String(event.data);
+      if (!raw.includes(WsMessageType.USER_IS_TYPING)) return;
       let msg: unknown;
       try {
-        msg = JSON.parse(String(event.data)) as unknown;
+        msg = JSON.parse(raw) as unknown;
       } catch {
         return;
-      }
-      if (isWsDropUpdateMessage(msg)) {
-        const authorHandle = msg.data.author.handle;
-        if (authorHandle) {
-          typersRef.current.delete(authorHandle);
-          updateTypingMessage();
-        }
-      }
-      if (
-        isWsDropUpdateRefMessage(msg) &&
-        msg.data.update_type === WsMessageType.DROP_UPDATE &&
-        msg.data.wave_id === waveId
-      ) {
-        // Compact refs deliberately omit author data. Clear the subscribed
-        // Wave's typing state so a completed large post cannot leave a stale
-        // indicator behind.
-        typersRef.current.clear();
-        updateTypingMessage();
       }
       if (!isWsTypingMessage(msg)) return;
       const data = msg.data;
@@ -234,9 +260,13 @@ export function useWaveIsTyping(
 
     const currentSocket = socket;
     updateTypingMessage();
+    refreshTypingRef.current = updateTypingMessage;
     currentSocket.addEventListener("message", onMessage);
     return () => {
       clearTimeout(expiryTimer);
+      if (refreshTypingRef.current === updateTypingMessage) {
+        refreshTypingRef.current = null;
+      }
       currentSocket.removeEventListener("message", onMessage);
     };
   }, [socket, waveId, myHandle, shouldSubscribe, scopeKey]);

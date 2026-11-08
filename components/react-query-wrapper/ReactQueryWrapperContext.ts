@@ -102,7 +102,13 @@ export type ReactQueryWrapperContextType = {
   }) => void;
   invalidateAll: () => void;
   invalidateAuthSensitiveQueries: () => void;
-  invalidateNotifications: () => void;
+  /**
+   * Refreshes notification queries and, unless `refreshWaveLists` is false,
+   * the wave lists whose unread counts a read can change.
+   */
+  invalidateNotifications: (options?: {
+    readonly refreshWaveLists?: boolean;
+  }) => void;
   invalidateIdentityTdhStats: (params: { identity: string }) => void;
 };
 

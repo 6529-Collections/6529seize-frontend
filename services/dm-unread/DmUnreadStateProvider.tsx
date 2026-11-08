@@ -4,7 +4,8 @@ import { useAuth } from "@/components/auth/Auth";
 import { getQueryErrorStatus } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiDmUnreadConversationState } from "@/generated/models/ApiDmUnreadConversationState";
 import type { ApiDmUnreadSnapshot } from "@/generated/models/ApiDmUnreadSnapshot";
-import { applyDelayJitter, scheduleStaggered } from "@/helpers/jitter.helpers";
+import { applyDelayJitter } from "@/helpers/jitter.helpers";
+import { shouldResyncOnResume } from "@/helpers/resumeSync.helpers";
 import { WsMessageType } from "@/helpers/Types";
 import useCapacitor from "@/hooks/useCapacitor";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -16,14 +17,13 @@ import {
   PROFILE_SWITCHED_EVENT,
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
+import { ReconnectResyncSchedule } from "@/services/websocket/reconnectResync";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
-import {
-  WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS,
-  WebSocketStatus,
-} from "@/services/websocket/WebSocketTypes";
+import { QueryClientContext } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import {
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -35,8 +35,13 @@ import {
   type DmUnreadContextValue,
 } from "./dm-unread-context";
 import { DmUnreadStore, type DmUnreadReadOperation } from "./dm-unread-store";
+import {
+  DmDropRecoveryPolicy,
+  isIncomingDropUpdate,
+  isIncomingDropUpdateRef,
+  isRecord,
+} from "./dm-unread-drop-recovery";
 const RECOVERY_SNAPSHOT_COOLDOWN_MS = 1_500;
-const DROP_UPDATE_RECOVERY_GRACE_MS = 1_500;
 const SNAPSHOT_RECONCILIATION_INTERVAL_MS = 5 * 60 * 1_000;
 const SNAPSHOT_RETRY_BASE_DELAYS_MS = [
   5_000,
@@ -63,22 +68,6 @@ interface PendingDropRecovery {
   readonly minimumSnapshotRequestId: number;
   readonly serialNo: number;
 }
-
-interface IncomingDropUpdate {
-  readonly author: { readonly id: string };
-  readonly serial_no: number;
-  readonly wave: { readonly id: string };
-}
-
-interface IncomingDropUpdateRef {
-  readonly author_id: string;
-  readonly serial_no: number;
-  readonly update_type: string;
-  readonly wave_id: string;
-}
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
 
 const isDmUnreadConversationState = (
   value: unknown
@@ -109,32 +98,6 @@ const isDmUnreadSnapshot = (value: unknown): value is ApiDmUnreadSnapshot => {
     value["conversations"].every(isDmUnreadConversationState)
   );
 };
-
-const isIncomingDropUpdate = (value: unknown): value is IncomingDropUpdate => {
-  if (!isRecord(value)) {
-    return false;
-  }
-  const author = value["author"];
-  const wave = value["wave"];
-  return (
-    typeof value["serial_no"] === "number" &&
-    Number.isFinite(value["serial_no"]) &&
-    isRecord(author) &&
-    typeof author["id"] === "string" &&
-    isRecord(wave) &&
-    typeof wave["id"] === "string"
-  );
-};
-
-const isIncomingDropUpdateRef = (
-  value: unknown
-): value is IncomingDropUpdateRef =>
-  isRecord(value) &&
-  typeof value["author_id"] === "string" &&
-  typeof value["serial_no"] === "number" &&
-  Number.isFinite(value["serial_no"]) &&
-  value["update_type"] === WsMessageType.DROP_UPDATE &&
-  typeof value["wave_id"] === "string";
 
 interface SnapshotSynchronizationRequest {
   readonly expectedProfileId: string;
@@ -194,6 +157,7 @@ export function DmUnreadStateProvider({
   const { isActive, isCapacitor } = useCapacitor();
   const [authRevision, setAuthRevision] = useState(0);
   const [store] = useState(() => new DmUnreadStore());
+  const [reconnectResync] = useState(() => new ReconnectResyncSchedule());
   const activeProfileId =
     activeProfileProxy?.created_by.id ?? connectedProfile?.id ?? null;
   const profileActivation = useMemo(
@@ -213,13 +177,12 @@ export function DmUnreadStateProvider({
   );
   const nextSnapshotRequestIdRef = useRef(1);
   const lastRecoverySnapshotAtRef = useRef(0);
+  // When any snapshot last started, for the focus and visibility rule.
+  const lastSnapshotStartedAtRef = useRef(0);
   const terminalSnapshotFailureActivationIdsRef = useRef(new Set<number>());
   const nextSnapshotAllowedAtByActivationRef = useRef(
     new Map<number, number>()
   );
-  const previousWebSocketStatusRef = useRef<WebSocketStatus | null>(null);
-  const hasConnectedWebSocketRef = useRef(false);
-  const cancelReconnectResyncRef = useRef<(() => void) | null>(null);
   const previousMobileActiveRef = useRef(isActive);
   const pendingDropRecoveryByWaveRef = useRef(
     new Map<string, PendingDropRecovery>()
@@ -227,6 +190,10 @@ export function DmUnreadStateProvider({
   const dropRecoveryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null
   );
+  const dropRecoveryDueAtRef = useRef(0);
+  const [dropRecoveryPolicy] = useState(() => new DmDropRecoveryPolicy());
+  // Optional so the provider also works outside a QueryClientProvider.
+  const queryClient = useContext(QueryClientContext);
   const authJwt = getAuthJwt();
   const authFingerprint = getAuthTokenFingerprint(authJwt);
 
@@ -256,10 +223,9 @@ export function DmUnreadStateProvider({
       if (dropRecoveryTimerRef.current !== null) {
         clearTimeout(dropRecoveryTimerRef.current);
       }
-      cancelReconnectResyncRef.current?.();
-      cancelReconnectResyncRef.current = null;
+      reconnectResync.cancel();
     };
-  }, []);
+  }, [reconnectResync]);
 
   useEffect(() => {
     const handleAuthChanged = () =>
@@ -316,6 +282,7 @@ export function DmUnreadStateProvider({
         }
       }
       const requestId = nextSnapshotRequestIdRef.current++;
+      lastSnapshotStartedAtRef.current = Date.now();
       const startedAtSequence = store.beginSnapshot();
       latestSnapshotRequestByProfileRef.current.set(
         expectedProfileId,
@@ -567,13 +534,27 @@ export function DmUnreadStateProvider({
   );
 
   const scheduleDropRecovery = useCallback(
-    (authorId: string, serialNo: number, waveId: string) => {
+    (
+      authorId: string,
+      serialNo: number,
+      waveId: string,
+      isDirectMessage: unknown
+    ) => {
       const activation = activeActivationRef.current;
       const profileId = activation.profileId;
       if (!profileId || authorId === profileId) {
         return;
       }
       if (!store.needsIncomingDropRecovery(profileId, waveId, serialNo)) {
+        return;
+      }
+      const delayMs = dropRecoveryPolicy.getDelay({
+        waveId,
+        isDirectMessage,
+        hasConversation: store.hasConversation(profileId, waveId),
+        queryClient,
+      });
+      if (delayMs === null) {
         return;
       }
       const previousPending = pendingDropRecoveryByWaveRef.current.get(waveId);
@@ -587,9 +568,13 @@ export function DmUnreadStateProvider({
           Math.floor(serialNo)
         ),
       });
+      // One timer per tab; a direct message can pull a later check earlier.
+      const dueAt = Date.now() + delayMs;
       if (dropRecoveryTimerRef.current !== null) {
-        return;
+        if (dropRecoveryDueAtRef.current <= dueAt) return;
+        clearTimeout(dropRecoveryTimerRef.current);
       }
+      dropRecoveryDueAtRef.current = dueAt;
       const expectedActivationId = activation.id;
       dropRecoveryTimerRef.current = setTimeout(() => {
         dropRecoveryTimerRef.current = null;
@@ -620,15 +605,20 @@ export function DmUnreadStateProvider({
           );
           void requestDropRecoverySnapshot(minimumRequestId);
         }
-      }, DROP_UPDATE_RECOVERY_GRACE_MS);
+      }, delayMs);
     },
-    [requestDropRecoverySnapshot, store]
+    [dropRecoveryPolicy, queryClient, requestDropRecoverySnapshot, store]
   );
 
   const handleDropUpdate = useCallback(
     (value: unknown) => {
       if (isIncomingDropUpdate(value)) {
-        scheduleDropRecovery(value.author.id, value.serial_no, value.wave.id);
+        scheduleDropRecovery(
+          value.author.id,
+          value.serial_no,
+          value.wave.id,
+          value.wave.is_direct_message
+        );
       }
     },
     [scheduleDropRecovery]
@@ -637,7 +627,12 @@ export function DmUnreadStateProvider({
   const handleDropUpdateRef = useCallback(
     (value: unknown) => {
       if (isIncomingDropUpdateRef(value)) {
-        scheduleDropRecovery(value.author_id, value.serial_no, value.wave_id);
+        scheduleDropRecovery(
+          value.author_id,
+          value.serial_no,
+          value.wave_id,
+          undefined
+        );
       }
     },
     [scheduleDropRecovery]
@@ -649,41 +644,14 @@ export function DmUnreadStateProvider({
     handleDropUpdateRef
   );
 
-  const syncOnWebSocketStatus = useCallback(
-    (connected: boolean) => {
-      const previousStatus = previousWebSocketStatusRef.current;
-      const currentStatus = connected
-        ? WebSocketStatus.CONNECTED
-        : WebSocketStatus.DISCONNECTED;
-      previousWebSocketStatusRef.current = currentStatus;
-      if (currentStatus !== WebSocketStatus.CONNECTED) {
-        cancelReconnectResyncRef.current?.();
-        cancelReconnectResyncRef.current = null;
-        return;
-      }
-      // The websocket hook exposes connection state, not a reconnect callback.
-      if (previousStatus === WebSocketStatus.CONNECTED) {
-        return;
-      }
-      const isReconnect = hasConnectedWebSocketRef.current;
-      hasConnectedWebSocketRef.current = true;
-      if (!isReconnect) {
-        void requestActiveSnapshot();
-        return;
-      }
-      // Every client reconnects together after a deploy; stagger the resync.
-      cancelReconnectResyncRef.current?.();
-      cancelReconnectResyncRef.current = scheduleStaggered(() => {
-        cancelReconnectResyncRef.current = null;
-        void requestActiveSnapshot();
-      }, WEBSOCKET_RECONNECT_RESYNC_STAGGER_MAX_MS);
-    },
-    [requestActiveSnapshot]
+  // Snapshot on the first connection, after reconnects and on the server's
+  // resync marker, which means DM frames may not have arrived.
+  useWebSocketMessage<unknown>(WsMessageType.RESYNC_REQUIRED, () =>
+    reconnectResync.schedule(requestActiveSnapshot)
   );
-
   useEffect(() => {
-    syncOnWebSocketStatus(isConnected);
-  }, [isConnected, syncOnWebSocketStatus]);
+    reconnectResync.update(isConnected, requestActiveSnapshot);
+  }, [isConnected, reconnectResync, requestActiveSnapshot]);
 
   useEffect(() => {
     if (!isCapacitor) {
@@ -699,10 +667,25 @@ export function DmUnreadStateProvider({
     if (isCapacitor) {
       return;
     }
-    const synchronizeIfVisible = () => {
-      if (document.visibilityState === "visible") {
-        void requestActiveSnapshot();
+    // Focus and visibility fire often on desktop; a snapshot runs only after
+    // the tab was hidden 30 s or more, or 60 s after the last snapshot.
+    // Coming back online follows a real connectivity gap and always syncs.
+    let hiddenSince: number | null =
+      document.visibilityState === "visible" ? null : Date.now();
+    const synchronizeIfVisible = (event: Event) => {
+      if (document.visibilityState !== "visible") {
+        if (event.type === "visibilitychange") hiddenSince ??= Date.now();
+        return;
       }
+      const shouldSync =
+        event.type === "online" ||
+        shouldResyncOnResume({
+          now: Date.now(),
+          hiddenSince,
+          lastSyncAt: lastSnapshotStartedAtRef.current,
+        });
+      hiddenSince = null;
+      if (shouldSync) void requestActiveSnapshot();
     };
     document.addEventListener("visibilitychange", synchronizeIfVisible);
     window.addEventListener("focus", synchronizeIfVisible);

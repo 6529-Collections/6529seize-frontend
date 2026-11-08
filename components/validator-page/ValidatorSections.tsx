@@ -60,7 +60,7 @@ export function ValidatorUpgrade({ newest }: NewestProps) {
   return <ReleaseNote note={VALIDATOR_UPGRADE} newest={newest} />;
 }
 
-/** rc.9's switch on Sunday, at the top of the guide. */
+/** Sunday's switch, above the upgrade note on the download page and the guide. */
 export function ValidatorSwitch({ newest }: NewestProps) {
   return <ReleaseNote note={VALIDATOR_SWITCH} newest={newest} />;
 }

@@ -51,22 +51,89 @@ export const DEVICE_ADD_TIMEOUT_MS = 30_000 + 2 * SYNC_TIMEOUT_MS;
 const SIGN_IN_TIMEOUT_MS = 120_000;
 
 /** Opt-in: set only by the `e2ee-staging` pack. */
-export function stagingE2eeOptInProblem(
+export function stagingJourneyOptInProblem(
+  journey: string,
   baseURL: string | undefined
 ): string | null {
   if (process.env["PLAYWRIGHT_E2EE_STAGING"] !== "1") {
-    return "Encrypted DM staging journey is opt-in: run the e2ee-staging pack (PLAYWRIGHT_E2EE_STAGING=1).";
+    return `${journey} is opt-in: run the e2ee-staging pack (PLAYWRIGHT_E2EE_STAGING=1).`;
   }
   if (baseURL !== STAGING_ORIGIN) {
-    return `Encrypted DM staging journey runs only against ${STAGING_ORIGIN}, not ${baseURL ?? "an unset base URL"}.`;
+    return `${journey} runs only against ${STAGING_ORIGIN}, not ${baseURL ?? "an unset base URL"}.`;
   }
   return null;
+}
+
+export function stagingE2eeOptInProblem(
+  baseURL: string | undefined
+): string | null {
+  return stagingJourneyOptInProblem("Encrypted DM staging journey", baseURL);
 }
 
 export function hasStagingAccessCode(): boolean {
   return Boolean(
     process.env["PLAYWRIGHT_STAGING_ACCESS_CODE"] || process.env["STAGING_AUTH"]
   );
+}
+
+/** The parts of the spec's `test` object a staging journey configures. */
+interface StagingJourneyTest {
+  readonly describe: {
+    configure(options: {
+      mode: "default" | "serial";
+      retries: number;
+      timeout: number;
+    }): void;
+  };
+  skip(condition: boolean, description: string): void;
+}
+
+/**
+ * Describe-level set-up shared by the staging journeys: one worker in order,
+ * nothing retried (a retry would only add more staging data), and skipped
+ * unless the pack opted in.
+ */
+export function configureStagingJourney(
+  journeyTest: StagingJourneyTest,
+  options: {
+    readonly mode: "default" | "serial";
+    readonly testTimeoutMs: number;
+    readonly optInProblem: string | null;
+  }
+): void {
+  journeyTest.describe.configure({
+    mode: options.mode,
+    retries: 0,
+    timeout: options.testTimeoutMs,
+  });
+  journeyTest.skip(options.optInProblem !== null, options.optInProblem ?? "");
+}
+
+/**
+ * The start of a staging journey's `beforeAll`: its set-up timeout, the one
+ * project it runs on, and the staging access code it needs.
+ */
+export function startStagingJourneySetup(
+  testInfo: TestInfo,
+  options: {
+    readonly setupTimeoutMs: number;
+    readonly project: string;
+    /** "The staging E2EE journey", for the skip reason. */
+    readonly journey: string;
+    /** "The staging E2EE pack", for the missing access code error. */
+    readonly pack: string;
+  }
+): void {
+  testInfo.setTimeout(options.setupTimeoutMs);
+  testInfo.skip(
+    testInfo.project.name !== options.project,
+    `${options.journey} runs on ${options.project} only.`
+  );
+  if (!hasStagingAccessCode()) {
+    throw new Error(
+      `${options.pack} needs PLAYWRIGHT_STAGING_ACCESS_CODE or STAGING_AUTH.`
+    );
+  }
 }
 
 export interface StagingE2eeUser {
@@ -431,25 +498,26 @@ export async function signInThroughWalletModal(session: StagingE2eeSession) {
     .toBe(wallet.address.toLowerCase());
 }
 
-interface ProfileApiResult {
-  readonly step: "token" | "availability" | "create";
+export interface StagingApiResponse {
   readonly ok: boolean;
+  /** 0 when the browser has no session token. */
   readonly status: number;
-  readonly profileId: string | null;
-  readonly handle: string | null;
-  readonly error: string | null;
+  readonly json: unknown;
 }
 
 /**
- * Creates the user's throwaway profile with the browser's own session, the
- * same request the profile set-up form sends. Runs in the page so the access
- * token and staging access code never reach the test process.
+ * One staging API request with the browser's own session, the same headers
+ * the app sends. Runs in the page so the access token and the staging access
+ * code never reach the test process.
  */
-export async function createThrowawayProfile(session: StagingE2eeSession) {
-  const { page, user } = session;
-  const apiOrigin = STAGING_API_ORIGIN;
-  const result = await page.evaluate(
-    async ({ apiOrigin: api, handle, address }): Promise<ProfileApiResult> => {
+export async function stagingApiRequest(
+  session: StagingE2eeSession,
+  method: "GET" | "POST",
+  endpoint: string,
+  body?: object
+): Promise<StagingApiResponse> {
+  return await session.page.evaluate(
+    async ({ api, verb, path, payload, address }) => {
       const cookie = (name: string) => {
         const entry = document.cookie
           .split("; ")
@@ -467,62 +535,86 @@ export async function createThrowawayProfile(session: StagingE2eeSession) {
               account.address?.toLowerCase() === address.toLowerCase()
           )?.jwt ?? null;
       }
-      const empty = { profileId: null, handle: null, error: null };
       if (!token) {
-        return { step: "token", ok: false, status: 0, ...empty };
+        return { ok: false, status: 0, json: null };
       }
       const staging = cookie("x-6529-auth");
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        ...(staging ? { "x-6529-auth": staging } : {}),
-      };
-      const availability = await fetch(
-        `${api}/api/profiles/${encodeURIComponent(handle)}/availability`,
-        { headers }
-      );
-      const available = (await availability.json().catch(() => null)) as {
-        available?: boolean;
-        message?: string;
-      } | null;
-      if (!availability.ok || available?.available !== true) {
-        return {
-          step: "availability",
-          ok: false,
-          status: availability.status,
-          ...empty,
-          error: available?.message ?? null,
-        };
-      }
-      const created = await fetch(`${api}/api/profiles`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ handle, classification: "PSEUDONYM" }),
+      const response = await fetch(`${api}/api/${path}`, {
+        method: verb,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          ...(staging ? { "x-6529-auth": staging } : {}),
+        },
+        ...(payload === null ? {} : { body: JSON.stringify(payload) }),
       });
-      const body = (await created.json().catch(() => null)) as {
-        id?: string;
-        handle?: string;
-        error?: string;
-      } | null;
       return {
-        step: "create",
-        ok: created.ok,
-        status: created.status,
-        profileId: body?.id ?? null,
-        handle: body?.handle ?? null,
-        error: created.ok ? null : (body?.error ?? null),
+        ok: response.ok,
+        status: response.status,
+        json: (await response.json().catch(() => null)) as unknown,
       };
     },
-    { apiOrigin, handle: user.handle, address: session.wallet.address }
+    {
+      api: STAGING_API_ORIGIN,
+      verb: method,
+      path: endpoint,
+      payload: body ?? null,
+      address: session.wallet.address,
+    }
+  );
+}
+
+/** The API's error text, if the response body carries one. */
+export function stagingApiError(json: unknown): string | null {
+  if (typeof json !== "object" || json === null) return null;
+  const record = json as { error?: unknown; message?: unknown };
+  const error = record.error ?? record.message ?? null;
+  return typeof error === "string" ? error : null;
+}
+
+/**
+ * Creates the user's throwaway profile with the browser's own session, the
+ * same request the profile set-up form sends.
+ */
+export async function createThrowawayProfile(session: StagingE2eeSession) {
+  const { user } = session;
+  const failure = (step: string, status: number, error: string | null) =>
+    `${session.label}: creating throwaway profile ${user.handle} failed at ${step} (HTTP ${status}${error ? `: ${error}` : ""})`;
+  const availability = await stagingApiRequest(
+    session,
+    "GET",
+    `profiles/${encodeURIComponent(user.handle)}/availability`
   );
   expect(
-    result.ok,
-    `${session.label}: creating throwaway profile ${user.handle} failed at ${result.step} (HTTP ${result.status}${result.error ? `: ${result.error}` : ""})`
+    availability.status,
+    failure("token", availability.status, null)
+  ).not.toBe(0);
+  const available = availability.json as { available?: boolean } | null;
+  expect(
+    availability.ok && available?.available === true,
+    failure(
+      "availability",
+      availability.status,
+      stagingApiError(availability.json)
+    )
   ).toBe(true);
-  expect(result.handle?.toLowerCase()).toBe(user.handle.toLowerCase());
-  user.profileId = result.profileId;
+  const created = await stagingApiRequest(session, "POST", "profiles", {
+    handle: user.handle,
+    classification: "PSEUDONYM",
+  });
+  const body = created.json as { id?: string; handle?: string } | null;
+  expect(
+    created.ok,
+    failure(
+      "create",
+      created.status,
+      created.ok ? null : stagingApiError(created.json)
+    )
+  ).toBe(true);
+  expect(body?.handle?.toLowerCase()).toBe(user.handle.toLowerCase());
+  user.profileId = body?.id ?? null;
   // The app caches the profileless identity; reload to pick up the profile.
-  await page.reload({ waitUntil: "domcontentloaded" });
+  await session.page.reload({ waitUntil: "domcontentloaded" });
 }
 
 function enrollmentHeading(page: Page) {
@@ -846,19 +938,24 @@ interface PrepareSessionOptions {
 }
 
 /** Signs in, creates the throwaway profile when needed, then enrolls. */
-export async function prepareEnrolledSession(
+/**
+ * A signed-in session for `user` with a profile: signs in, creates the
+ * profile if the user has none, and optionally signs in again on a fresh
+ * device as a returning user does. Closes the session on failure.
+ */
+export async function prepareProfileSession(
   browser: Browser,
   testInfo: TestInfo,
   user: StagingE2eeUser,
   label: string,
-  options: PrepareSessionOptions = {}
+  { signInAgainWithProfile = false }: { signInAgainWithProfile?: boolean } = {}
 ): Promise<StagingE2eeSession> {
   let session = await openStagingSession(browser, testInfo, user, label);
   try {
     await signInThroughWalletModal(session);
     if (!user.profileId) {
       await createThrowawayProfile(session);
-      if (options.signInAgainWithProfile) {
+      if (signInAgainWithProfile) {
         // The first device is closed here, so its guard evidence is checked
         // now; the run's hygiene checks see only the second device.
         expect(
@@ -870,6 +967,25 @@ export async function prepareEnrolledSession(
         await signInThroughWalletModal(session);
       }
     }
+    return session;
+  } catch (error) {
+    await attachSessionEvidence(testInfo, [session]);
+    await session.close();
+    throw error;
+  }
+}
+
+export async function prepareEnrolledSession(
+  browser: Browser,
+  testInfo: TestInfo,
+  user: StagingE2eeUser,
+  label: string,
+  options: PrepareSessionOptions = {}
+): Promise<StagingE2eeSession> {
+  const session = await prepareProfileSession(browser, testInfo, user, label, {
+    signInAgainWithProfile: options.signInAgainWithProfile === true,
+  });
+  try {
     if (options.signedPostsFirst && !session.signInGrantId) {
       await prepareSignedPosts(session);
     }

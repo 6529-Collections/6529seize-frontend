@@ -33,7 +33,7 @@ describe("TimelineToggleHeader", () => {
     jest.restoreAllMocks();
   });
 
-  it("renders Decision Timeline when next decision time provided", () => {
+  it("renders Results timeline when next decision time provided", () => {
     const setIsOpen = jest.fn();
     render(
       <SeizeSettingsProvider>
@@ -45,13 +45,13 @@ describe("TimelineToggleHeader", () => {
         />
       </SeizeSettingsProvider>
     );
-    expect(screen.getByText("Decision Timeline")).toBeInTheDocument();
+    expect(screen.getByText("Results timeline")).toBeInTheDocument();
     expect(screen.getByText("Next winner")).toBeInTheDocument();
     expect(screen.getByText("Next winner").parentElement).toHaveClass(
       "tw-text-xs"
     );
     const toggle = screen.getByRole("button", {
-      name: "Toggle decision timeline",
+      name: "Toggle results timeline",
     });
     expect(toggle).toHaveAccessibleDescription(
       "Next winner in 1 hour, 2 minutes, 3 seconds"
@@ -89,13 +89,13 @@ describe("TimelineToggleHeader", () => {
     );
 
     expect(
-      screen.getByText(`Next decision after ${formattedDate}`)
+      screen.getByText(`Next result after ${formattedDate}`)
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Toggle decision timeline" })
-    ).toHaveAccessibleDescription(`Paused Next decision after ${formattedDate}`);
+      screen.getByRole("button", { name: "Toggle results timeline" })
+    ).toHaveAccessibleDescription(`Paused Next result after ${formattedDate}`);
     expect(
-      screen.queryByText(`Next decision after ${pauseEndDate}`)
+      screen.queryByText(`Next result after ${pauseEndDate}`)
     ).not.toBeInTheDocument();
   });
 
@@ -118,9 +118,9 @@ describe("TimelineToggleHeader", () => {
       </SeizeSettingsProvider>
     );
 
-    expect(screen.getByText("No decision scheduled")).toBeInTheDocument();
+    expect(screen.getByText("No result scheduled")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Toggle decision timeline" })
-    ).toHaveAccessibleDescription("Paused No decision scheduled");
+      screen.getByRole("button", { name: "Toggle results timeline" })
+    ).toHaveAccessibleDescription("Paused No result scheduled");
   });
 });

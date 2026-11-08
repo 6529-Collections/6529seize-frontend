@@ -39,7 +39,7 @@ interface CookieStoreWithEvents {
   onchange?: ((event: CookieChangeEventLike) => void) | null | undefined;
 }
 
-type HealthCheckAction = "none" | "connect" | "disconnect";
+type HealthCheckAction = "none" | "connect" | "reauthenticate" | "disconnect";
 
 const isAuthCookieChange = (event: CookieChangeEventLike): boolean => {
   const matchChanged = event.changed?.some(
@@ -55,9 +55,10 @@ const isAuthCookieChange = (event: CookieChangeEventLike): boolean => {
  * WebSocket health monitoring hook
  *
  * ARCHITECTURE:
- * - Desired State Only: Auth token changes decide whether we should connect or disconnect
- * - Resume Checks: Visibility/focus trigger a deduped health check and can force a reconnect
- *   after long hidden periods to recover silently dropped sockets
+ * - Desired State Only: Auth token changes decide whether we should connect or disconnect;
+ *   a rotated token for the same identity re-authenticates the open socket in place
+ * - Resume Checks: Visibility/focus trigger a deduped health check. After a long hidden
+ *   period, a socket that is not open or delivered no frame while hidden is replaced
  * - Periodic Health Checks: Stable 10-second interval for ongoing monitoring
  * - Memory Safe: Single interval prevents leaks during status transitions
  * - Fresh References: Checks use current WebSocket context to avoid stale closures
@@ -96,6 +97,7 @@ export function useWebSocketHealth() {
       status: currentStatus,
       connect: currentConnect,
       disconnect: currentDisconnect,
+      reauthenticate: currentReauthenticate,
     } = webSocketStateRef.current;
 
     let action: HealthCheckAction = "none";
@@ -114,8 +116,10 @@ export function useWebSocketHealth() {
       currentStatus !== WebSocketStatus.DISCONNECTED &&
       currentToken !== previousToken
     ) {
-      currentConnect(currentToken);
-      action = "connect";
+      // The provider keeps the socket for the same identity and replaces it
+      // for any other (a profile switch) or while no session is settled.
+      currentReauthenticate(currentToken);
+      action = "reauthenticate";
       reason = "token-changed";
     }
 
@@ -155,12 +159,13 @@ export function useWebSocketHealth() {
 
     const { action, token: currentToken } = performHealthCheck();
 
-    // Avoid a second reconnect when the health check already replaced the socket.
-    if (action === "connect") {
+    // The health check already replaced or re-authenticated the socket; a
+    // re-authentication that gets no answer replaces it on its own.
+    if (action !== "none") {
       return;
     }
 
-    if (!currentToken || hiddenDurationMs === null) {
+    if (!currentToken || hiddenAt === null || hiddenDurationMs === null) {
       return;
     }
 
@@ -168,13 +173,20 @@ export function useWebSocketHealth() {
       return;
     }
 
-    const { status: currentStatus, connect: currentConnect } =
-      webSocketStateRef.current;
-    if (
-      currentStatus === WebSocketStatus.CONNECTED ||
+    const {
+      status: currentStatus,
+      connect: currentConnect,
+      ensureLive: currentEnsureLive,
+    } = webSocketStateRef.current;
+    if (currentStatus === WebSocketStatus.CONNECTED) {
+      // A socket that delivered frames while hidden is still live; reconnecting
+      // it would only cost a new session and the resyncs that follow one.
+      currentEnsureLive(hiddenAt);
+    } else if (
       currentStatus === WebSocketStatus.CONNECTING ||
       currentStatus === WebSocketStatus.AUTHENTICATING
     ) {
+      // A handshake that outlived the hidden period is stuck.
       currentConnect(currentToken);
     }
   }, [performHealthCheck]);

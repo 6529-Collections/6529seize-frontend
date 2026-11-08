@@ -15,13 +15,9 @@ import { act, renderHook } from "@testing-library/react";
 import { useContext, type ReactNode } from "react";
 
 const mockReplace = jest.fn();
-const mockAddFile = jest.fn();
 jest.mock("next/navigation", () => ({
   usePathname: () => "/owner/identity",
   useRouter: () => ({ replace: mockReplace }),
-}));
-jest.mock("@/components/ipfs/IPFSContext", () => ({
-  addFileToIpfs: (file: File) => mockAddFile(file),
 }));
 jest.mock("@/components/waves/create-wave/services/multiPartUpload", () => ({
   multiPartUpload: jest.fn(),
@@ -242,17 +238,24 @@ it("keeps a confirmed About save when stale statement data arrives", async () =>
   expect(post).toHaveBeenCalledTimes(1);
 });
 
-it("uploads a changed picture through the shared lazy upload helper", async () => {
+it("uploads a changed picture through the API before saving the profile", async () => {
   const { result } = setup();
   const file = new File(["test image"], "profile.png", { type: "image/png" });
-  mockAddFile.mockResolvedValue("uploaded-picture");
+  postForm.mockResolvedValue({ pfp_url: "ipfs://uploaded-picture" });
   post.mockResolvedValue({ ...profile, pfp: "ipfs://uploaded-picture" });
-  expect(mockAddFile).not.toHaveBeenCalled();
   act(() => result.current.updateDraft({ pictureFile: file }));
+  expect(postForm).not.toHaveBeenCalled();
   await act(async () => {
     expect(await result.current.save()).toBe(true);
   });
-  expect(mockAddFile).toHaveBeenCalledWith(file);
+  expect(postForm).toHaveBeenCalledWith({
+    endpoint: "profiles/pfp/ipfs",
+    body: expect.any(FormData),
+  });
+  expect((postForm.mock.calls[0]![0].body as FormData).get("pfp")).toBe(file);
+  expect(postForm.mock.invocationCallOrder[0]).toBeLessThan(
+    post.mock.invocationCallOrder[0]!
+  );
   expect(post).toHaveBeenCalledWith({
     endpoint: "profiles",
     body: expect.objectContaining({ pfp_url: "ipfs://uploaded-picture" }),
