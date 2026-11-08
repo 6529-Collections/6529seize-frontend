@@ -7,8 +7,11 @@ captain executes from this file.
 - Backend: 6529-Collections/6529seize-backend#2396.
 - Frontend engine: 6529-Collections/6529seize-frontend#4748.
 - Frontend UI: 6529-Collections/6529seize-frontend#4749, stacked on #4748.
-- Native: 6529-Collections/6529-client (the 0x004E switch) and 6529-core
-  (pull-web). Merge these within 1 day of web live, not before.
+- Desktop: 6529-core pull-web, with Core #286 on top. Release within 1 day of
+  web live, not before.
+- Rust client: 6529-Collections/6529-client#47 (the 0x004E switch) is merged
+  in code. The Rust client isn't user-facing yet; the owner decides when it is
+  introduced.
 
 Live code, the PRs, current GitHub state and
 [`ops/skills/deploy-6529/SKILL.md`](../../skills/deploy-6529/SKILL.md) override
@@ -38,11 +41,11 @@ deadline.
   - on the backend, in `src/e2ee/e2ee-suite-policy.ts`, plus `<final>` in
     `E2EE_CIPHERSUITES`;
   - on the frontend, in `lib/e2ee/grant.ts`.
-- **Desktop and native clients follow the web within 1 day of web live.**
-  There is no multi-week gap. After the deadline, a client still on the 0x004F
-  build can no longer start or join new encrypted chats.
-  - 6529-client #47 (the 0x004E switch) merges the same day the web C+ is
-    live, once its CI is green.
+- **Desktop and phone follow the web within 1 day of web live.** There is no
+  multi-week gap. After the deadline, a client still on the 0x004F build can
+  no longer start or join new encrypted chats.
+  - **Rust client:** 6529-client #47 (the 0x004E switch) is merged. The Rust
+    client isn't user-facing yet; the owner decides its introduction.
   - **Desktop:** the app's messaging flags are off today, and its wallet
     connectors cannot approve EIP-712 device grants. So no Desktop device is on
     0x004F, there is nothing to upgrade, and Desktop is not at risk from the
@@ -160,13 +163,12 @@ Frontend smoke, with a browser that already had a 0x004F device on staging:
    separately.
 4. Run the frontend smoke from 1.2 on 6529.io with a team device.
 
-### 2.3 Native, Desktop and phone (within 1 day of web live)
+### 2.3 Desktop and phone (within 1 day of web live)
 
 These are not gates for the web release. They follow within 1 day of web live.
 
-- **6529-client:** merge the 0x004E switch, 6529-Collections/6529-client#47,
-  the same day the web C+ is live, once its CI is green. The native client
-  re-vendors the WASM module from #4748's merge commit.
+- **Rust client (6529-client #47):** merged. The Rust client isn't user-facing
+  yet; the owner decides its introduction.
 - **Desktop: the 6529-core pull-web (C+) first, then Core #286 on top.**
   Desktop launches encrypted DMs directly on 0x004E. No Desktop device is on
   0x004F today: its messaging flags are off.
@@ -222,25 +224,32 @@ The window then ends at 2026-12-02T00:00:00Z.
 1. Add the two keys without disturbing the other variables. The API deploy
    keeps the Lambda's environment. The variables include secrets, so no
    command prints a value: the reads list key names only, and the update
-   shows only status fields.
+   shows only status fields. The copies on disk live in a private (0700)
+   directory that the subshell removes on exit, error, Ctrl-C or TERM.
 
    ```bash
    fn=<prod seizeAPI function name>
-   env_file="$(mktemp)"
-   aws lambda get-function-configuration --region us-east-1 \
-     --function-name "$fn" --query 'Environment.Variables' \
-     --output json > "$env_file"
-   jq -r 'keys[]' "$env_file"   # names only
-   jq '{Variables: (. + {
-     E2EE_SUITE_TRANSITION_START: "2026-11-09T00:00:00Z",
-     E2EE_SUITE_TRANSITION_DAYS: "23"})}' "$env_file" > "$env_file.new"
-   aws lambda update-function-configuration --region us-east-1 \
-     --function-name "$fn" --environment "file://$env_file.new" \
-     --query '{State: State, LastUpdateStatus: LastUpdateStatus}'
-   aws lambda wait function-updated --region us-east-1 --function-name "$fn"
-   aws lambda get-function-configuration --region us-east-1 \
-     --function-name "$fn" --query 'keys(Environment.Variables)'
-   rm -f "$env_file" "$env_file.new"
+   (
+     set -euo pipefail
+     umask 077
+     env_dir="$(mktemp -d)"
+     trap 'rm -rf "$env_dir"' EXIT
+     trap 'exit 130' INT TERM   # exits through the EXIT cleanup
+     aws lambda get-function-configuration --region us-east-1 \
+       --function-name "$fn" --query 'Environment.Variables' \
+       --output json > "$env_dir/current.json"
+     jq -r 'keys[]' "$env_dir/current.json"   # names only
+     jq '{Variables: (. + {
+       E2EE_SUITE_TRANSITION_START: "2026-11-09T00:00:00Z",
+       E2EE_SUITE_TRANSITION_DAYS: "23"})}' \
+       "$env_dir/current.json" > "$env_dir/update.json"
+     aws lambda update-function-configuration --region us-east-1 \
+       --function-name "$fn" --environment "file://$env_dir/update.json" \
+       --query '{State: State, LastUpdateStatus: LastUpdateStatus}'
+     aws lambda wait function-updated --region us-east-1 --function-name "$fn"
+     aws lambda get-function-configuration --region us-east-1 \
+       --function-name "$fn" --query 'keys(Environment.Variables)'
+   )
    ```
 
 2. Confirm that new cold starts log exactly
