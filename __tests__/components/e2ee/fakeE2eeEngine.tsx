@@ -84,6 +84,8 @@ export const conversation = (
   safetyCode: "abcd ef01 2345 6789",
   status: "active",
   delayed: false,
+  // A bare `delayed: true` keeps its historical meaning: a stuck commit.
+  delayedReason: overrides.delayed === true ? "commit" : null,
   splitView: false,
   untrustedDevices: [],
   lastMessage: null,
@@ -123,6 +125,11 @@ export type FakeE2eeEngine = E2eeEngine & {
   readonly state: FakeEngineState;
   /** Mutate state and notify subscribers, like a real engine change. */
   readonly update: (change: Partial<FakeEngineState>) => void;
+  /** Sets a conversation's 8.3 delay (null: not delayed) and notifies. */
+  readonly setDelayed: (
+    g: string,
+    reason: E2eeConversation["delayedReason"]
+  ) => void;
 };
 
 /** In-memory engine implementing the contract section 12 interface. */
@@ -150,6 +157,14 @@ export function createFakeE2eeEngine(
     state,
     update: (change) => {
       Object.assign(state, change);
+      notify();
+    },
+    setDelayed: (g, reason) => {
+      state.conversations = state.conversations.map((item) =>
+        item.g === g
+          ? { ...item, delayed: reason !== null, delayedReason: reason }
+          : item
+      );
       notify();
     },
     getStatus: () => state.status,

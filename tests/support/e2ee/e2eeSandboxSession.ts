@@ -16,6 +16,7 @@ import {
   assertLocalSandboxBaseURL,
   dismissNextDevTools,
   getSandboxApiOrigin,
+  hideNextDevOverlay,
   installLocalSandboxBrowserMutationGuard,
   type LocalSandboxBrowserMutationGuard,
 } from "../localSandbox";
@@ -49,12 +50,13 @@ export const E2EE_SYNC_TIMEOUT_MS = 75_000;
 export const E2EE_UI_TIMEOUT_MS = 30_000;
 
 const USER_KEYS: readonly E2eeUserKey[] = ["alice", "bob", "carol", "dave"];
-// Mirror services/auth/devAuthTestOverride.ts and components/e2ee/
-// e2eeTestSigner.ts; kept literal so the test process never loads the app's
-// runtime env config.
+// Mirror services/auth/devAuthTestOverride.ts, components/e2ee/
+// e2eeTestSigner.ts and components/auth/signedMessagesTestSigner.ts; kept
+// literal so the test process never loads the app's runtime env config.
 const DEV_AUTH_TEST_WALLET_KEY = "6529-dev-auth-test-wallet";
 const DEV_AUTH_TEST_JWT_KEY = "6529-dev-auth-test-jwt";
 const TEST_SIGNER_GLOBAL = "__e2eeTestSignTypedData";
+const SIGNED_MESSAGES_TEST_SIGNER_GLOBAL = "__signedMessagesTestSignMessage";
 
 const encodeJwtPart = (value: unknown) =>
   Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -212,7 +214,10 @@ export interface E2eeUserSession {
   readonly label: string;
   readonly context: BrowserContext;
   readonly page: Page;
-  /** Wallet signature prompts answered in this browser (enrollment). */
+  /**
+   * Wallet signature prompts answered in this browser: the combined sign-in
+   * (personal_sign) or a separate encryption grant (typed data).
+   */
   signatureCount(): number;
   close(): Promise<void>;
 }
@@ -253,6 +258,14 @@ export async function openE2eeUser(
       return user.account.signTypedData(typedData);
     }
   );
+  await context.exposeFunction(
+    SIGNED_MESSAGES_TEST_SIGNER_GLOBAL,
+    async (message: string) => {
+      signatures += 1;
+      return user.account.signMessage({ message });
+    }
+  );
+  await hideNextDevOverlay(context);
   const guard: LocalSandboxBrowserMutationGuard =
     await installLocalSandboxBrowserMutationGuard(context, baseURL);
   const page = await context.newPage();

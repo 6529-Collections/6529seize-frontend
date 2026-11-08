@@ -12,6 +12,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { reportSignedMessagesEnable } from "@/utils/monitoring/signedMessagesEnableMonitoring";
 import { useEffect, useMemo, useState } from "react";
+import { hasLocalTestSigner } from "@/components/auth/signedMessagesTestSigner";
 import { useSignedMessagesWallet } from "./useSignedMessagesWallet";
 
 /**
@@ -52,19 +53,21 @@ export function useEnableSignedMessages(
   const hasOtherLiveAccount = connectedAccounts.some(
     (account) => account.isConnected && !account.isActive
   );
+  // Local dev-auth browser tests only: a test signer is the live wallet.
+  const hasTestSigner = hasLocalTestSigner();
 
   const snapshot = useMemo(
     (): SignedMessagesEnableSnapshot => ({
       address,
-      canSignActiveWallet: canSignActiveWallet === true,
+      canSignActiveWallet: canSignActiveWallet === true || hasTestSigner,
       isWalletConnectionPending: isWalletConnectionPending === true,
       isConnectOpen: seizeConnectOpen === true,
       hasOtherLiveAccount,
-      isRemoteWallet,
+      isRemoteWallet: isRemoteWallet && !hasTestSigner,
       requestGrant: options.requestGrant ?? requestSignedMessagesGrant,
       connectWallet: seizeConnectFresh,
       networkName,
-      isNetworkSupported,
+      isNetworkSupported: hasTestSigner ? () => true : isNetworkSupported,
       switchNetwork,
       onEnabled:
         options.onEnabled ??
@@ -78,6 +81,7 @@ export function useEnableSignedMessages(
       address,
       canSignActiveWallet,
       hasOtherLiveAccount,
+      hasTestSigner,
       isNetworkSupported,
       isRemoteWallet,
       isWalletConnectionPending,

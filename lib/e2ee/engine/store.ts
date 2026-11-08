@@ -7,6 +7,7 @@ import type { StoredGroup, StoredMessage, StoredOutboxItem } from "../records";
 import type {
   E2eeAttachment,
   E2eeConversation,
+  E2eeDelayedReason,
   E2eeDeviceInfo,
   E2eeEngineStatus,
   E2eeMember,
@@ -33,6 +34,17 @@ export interface GroupRuntime {
   outbox: Map<string, StoredOutboxItem>;
   /** First failure time of the current stall (8.3), null when healthy. */
   stallSince: number | null;
+  /**
+   * First failure time of the current run of failed sends, null once a send
+   * step ends any other way or the outbox is empty. Commit paths keep the
+   * stall it owns (8.3).
+   */
+  sendFailingSince: number | null;
+  /**
+   * The latest commit attempt failed; false once one goes through or finds
+   * nothing to do. A stuck commit owns the delayed reason (8.3).
+   */
+  commitFailing: boolean;
 }
 
 interface ProfileInfo {
@@ -101,6 +113,19 @@ export function toE2eeMessage(stored: StoredMessage): E2eeMessage {
 
 /** Ascending seq; notices of one commit keep their order; pending last. */
 export const compareMessages = compareHistory;
+
+/**
+ * 8.3: a stuck commit wins over a failing send. A delay restored from storage
+ * has no owner yet and keeps the commit meaning until a pass settles it.
+ */
+const delayedReason = (runtime: GroupRuntime): E2eeDelayedReason | null => {
+  if (!runtime.record.delayed) {
+    return null;
+  }
+  return runtime.sendFailingSince !== null && !runtime.commitFailing
+    ? "send"
+    : "commit";
+};
 
 const isCountable = (message: StoredMessage, own: string): boolean =>
   message.kind === "message" &&
@@ -418,6 +443,7 @@ export class EngineStore {
       successor: record.successorPending ? null : (record.successor ?? null),
       predecessor: record.predecessor ?? null,
       delayed: record.delayed,
+      delayedReason: delayedReason(runtime),
       splitView: record.splitView,
       untrustedDevices: this.untrustedFor(record),
       lastMessage: last ? toE2eeMessage(last) : null,
