@@ -14,8 +14,10 @@ export class ReconnectResyncSchedule {
   private readonly onNextConnect = new Set<() => void>();
 
   /**
-   * Runs `task` when the socket next connects, before that connection's own
-   * resync, so the resync can join what it starts. Returns a cancel.
+   * Runs `task` on the socket's next transition to connected, before that
+   * connection's own resync, so the resync can join what it starts. A socket
+   * that is already connected runs it only after its next reconnect, so
+   * callers register only while the socket is connecting. Returns a cancel.
    */
   runOnNextConnect(task: () => void): () => void {
     this.onNextConnect.add(task);

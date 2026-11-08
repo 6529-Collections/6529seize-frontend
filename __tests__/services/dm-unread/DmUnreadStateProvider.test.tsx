@@ -832,18 +832,44 @@ describe("DmUnreadStateProvider", () => {
       jest.useRealTimers();
     });
 
-    it("waits for a connecting socket and takes one snapshot when it connects", async () => {
+    it.each([WebSocketStatus.CONNECTING, WebSocketStatus.AUTHENTICATING])(
+      "waits while the socket is %s and takes one snapshot when it connects",
+      async (status) => {
+        socketStatus = status;
+        const rendered = render(providerUi());
+        await flush(1_000);
+        expect(commonApiFetchMock).not.toHaveBeenCalled();
+
+        socketStatus = WebSocketStatus.CONNECTED;
+        isConnected = true;
+        rendered.rerender(providerUi());
+        await flush(5_000);
+
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+        rendered.unmount();
+      }
+    );
+
+    it("retries with the rotated token when the old one is rejected mid-request", async () => {
+      socketStatus = undefined;
+      jwt = fakeJwt({ id: "first", sub: "0xprofile1" });
+      const rotated = fakeJwt({ id: "rotated", sub: "0xprofile1" });
+      commonApiFetchMock.mockImplementationOnce(async () => {
+        jwt = rotated;
+        throw Object.assign(new Error("Unauthorized"), { status: 401 });
+      });
       const rendered = render(providerUi());
-      await flush(1_000);
-      expect(commonApiFetchMock).not.toHaveBeenCalled();
-
-      socketStatus = WebSocketStatus.CONNECTED;
-      isConnected = true;
-      rendered.rerender(providerUi());
-      await flush(5_000);
-
-      // The connect resync joins the snapshot the connect started.
+      await flush(0);
       expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+
+      await flush(10_000);
+
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+      expect(commonApiFetchMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          headers: { Authorization: `Bearer ${rotated}` },
+        })
+      );
       rendered.unmount();
     });
 

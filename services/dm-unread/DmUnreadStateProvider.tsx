@@ -232,6 +232,12 @@ export function DmUnreadStateProvider({
               expectedActivationId
             );
           } else if (result === "terminal-failure") {
+            // A token that rotated while this request ran was not the one
+            // rejected; the loop retries with the current one.
+            const currentJwt = getAuthJwt();
+            if (currentJwt !== jwt && isAuthJwtUsable(currentJwt)) {
+              return "retryable-failure";
+            }
             terminalSnapshotFailureActivationIdsRef.current.add(
               expectedActivationId
             );
@@ -314,6 +320,8 @@ export function DmUnreadStateProvider({
     [requestSnapshot]
   );
 
+  // Layout effects run before passive ones in a commit, so the snapshot
+  // effect below reads this commit's socket status.
   useLayoutEffect(() => {
     socketStatusRef.current = socketStatus;
   }, [socketStatus]);
