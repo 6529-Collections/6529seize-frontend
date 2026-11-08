@@ -58,16 +58,19 @@ async function legacyDm(world: World): Promise<{
 async function queueWhileFailing(
   user: TestUser,
   g: string,
-  text: string
+  text: string,
+  queued = 1
 ): Promise<void> {
   const sending = user.primary.engine.send(g, { text });
   sending.catch(() => undefined);
   for (let tries = 0; tries < 2_000; tries += 1) {
     const outbox = await user.primary.storage.listOutbox(user.profileId);
-    if (outbox.length > 0) break;
+    if (outbox.length >= queued) break;
     await realSleep(5);
   }
-  expect(await user.primary.storage.listOutbox(user.profileId)).toHaveLength(1);
+  expect(await user.primary.storage.listOutbox(user.profileId)).toHaveLength(
+    queued
+  );
 }
 
 async function upgrade(world: World, user: TestUser): Promise<void> {
@@ -391,6 +394,17 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
     ]);
     expect(second).toEqual(first);
     await expect(a.restart(old)).resolves.toBe(first.g);
+    // The resend flushes by itself: delivered once its background work is
+    // done, without a sync, a settle or a timer.
+    await a.idle();
+    expect(
+      world.ds.state.requests.some(
+        (r) =>
+          r.method === "POST" &&
+          r.path === `e2ee/groups/${first.g}/messages` &&
+          r.status === 200
+      )
+    ).toBe(true);
     await settle(world);
     const b = bob.primary.engine;
     expect(texts(b.getMessages(first.g))).toEqual(["typed while offline"]);
@@ -402,6 +416,68 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
     await expect(a.resendUnsent(old, unsent!.id)).rejects.toMatchObject({
       code: "E2EE_NO_MESSAGE",
     });
+  });
+
+  it("lets exactly one of a discard and a resend of the same message happen", async () => {
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    const old = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await settle(world);
+    world.ds.addFault({
+      method: "POST",
+      path: /^e2ee\/groups\/0x[0-9a-f]+\/messages$/,
+      status: 503,
+      times: -1,
+    });
+    await queueWhileFailing(alice, old, "discard wins");
+    await queueWhileFailing(alice, old, "resend wins", 2);
+    await seedLegacySuiteDevice(world, alice, alice.primary, {
+      waitIdle: false,
+    });
+    world.ds.clearFaults();
+    await seedLegacySuiteDevice(world, bob, bob.primary);
+    await upgrade(world, alice);
+    await upgrade(world, bob);
+    const a = alice.primary.engine;
+    await a.loadHistory?.(old);
+    const unsent = (text: string) =>
+      a.getMessages(old).find((m) => m.text === text)!;
+    const first = unsent("discard wins");
+    const second = unsent("resend wins");
+    expect([first.unsent, second.unsent]).toEqual([
+      "suite_upgrade",
+      "suite_upgrade",
+    ]);
+
+    // A discard that starts first: the resend is refused.
+    const [discarded, refused] = await Promise.allSettled([
+      a.discardUnsent(old, first.id),
+      a.resendUnsent(old, first.id),
+    ]);
+    expect(discarded.status).toBe("fulfilled");
+    expect(refused).toMatchObject({
+      status: "rejected",
+      reason: { code: "E2EE_NO_MESSAGE" },
+    });
+    // A resend that starts first: the discard waits and has nothing left.
+    const [resent, joined] = await Promise.allSettled([
+      a.resendUnsent(old, second.id),
+      a.discardUnsent(old, second.id),
+    ]);
+    expect(resent.status).toBe("fulfilled");
+    expect(joined.status).toBe("fulfilled");
+
+    await settle(world);
+    const target = await a.restart(old);
+    expect(texts(bob.primary.engine.getMessages(target))).toEqual([
+      "resend wins",
+    ]);
+    const storage = alice.primary.storage;
+    expect(await storage.getMessage("alice", old, first.id)).toBeNull();
+    expect(await storage.getMessage("alice", old, second.id)).toBeNull();
   });
 
   it("deletes an unsent message on request, and never sends it", async () => {

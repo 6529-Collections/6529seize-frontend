@@ -10517,12 +10517,13 @@ paths:
         Registers the MLS device key that a combined sign-in grant (NC8) also
         granted, without a separate wallet signature. The grant must be one this
         server stored at a Sign-In with Ethereum login (carrying an
-        urn:6529:mls-device-grant:v1 resource for an accepted ciphersuite) or an
-        app device grant (POST /device-grants) with an mls_device_key, unrevoked
-        and unexpired, and its wallet must belong to the caller's profile. Same
-        device limit and renewal rules as POST /e2ee/devices. Requires a
-        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
-        is off.
+        urn:6529:mls-device-grant:v1 resource for 0x004F while v1 grants are
+        honoured, or a v2 resource for a suite set naming an accepted suite,
+        D172) or an app device grant (POST /device-grants) with an
+        mls_device_key, unrevoked and unexpired, and its wallet must belong to
+        the caller's profile. Same device limit and renewal rules as POST
+        /e2ee/devices. Requires a profile; proxies are rejected; 404
+        E2EE_DISABLED while the feature flag is off.
       operationId: e2eeRegisterLoginGrantDevice
       security:
         - bearerAuth: []
@@ -33819,10 +33820,11 @@ components:
             encrypted-messages key. For a combined sign-in grant, this is the
             exact SIWE message the wallet signed; wallet_signature is its
             EIP-191 signature, grant_id its EIP-191 hash, and grant holds the
-            terms of its urn:6529:mls-device-grant:v1 resource (origin = the
-            SIWE domain, issued_at = its Issued At). For an app device grant,
-            this is the signed EIP-712 DeviceGrant message as JSON;
-            wallet_signature is its typed-data signature and grant_id its
+            terms of its urn:6529:mls-device-grant resource: v1 (one
+            ciphersuite) or v2 (version 2 and the ciphersuites set, D172), with
+            origin = the SIWE domain and issued_at = its Issued At. For an app
+            device grant, this is the signed EIP-712 DeviceGrant message as
+            JSON; wallet_signature is its typed-data signature and grant_id its
             EIP-712 digest. Null for direct EIP-712 MlsDeviceGrant
             registrations.
     ApiE2eeDeviceGrant:

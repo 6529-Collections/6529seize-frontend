@@ -401,7 +401,14 @@ time your device sees someone. Compare safety codes and check the wallets in
 
 - **Group changes are delayed. Messages will send once the change goes
   through.** A required change (for example removing a revoked device) has not
-  been accepted yet. Sending resumes on its own.
+  been accepted yet. The composer reads "Sending is paused until the group
+  change goes through." Sending resumes on its own.
+- **Messages aren’t sending right now. We’ll keep retrying, and you can keep
+  writing.** Sending has failed for about 20 seconds while the chat itself is
+  fine (for example the delivery service is overloaded). The composer stays
+  available, and what you type is kept. New messages stay pending (see
+  [Message states](#message-states)) and go out in order once a retry
+  succeeds; retries continue every few seconds.
 - **Security check needed: this device may not see the same chat as everyone
   else.** Members may be seeing different versions of the chat. Compare
   safety codes before sharing anything sensitive.

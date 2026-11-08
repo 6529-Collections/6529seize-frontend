@@ -316,6 +316,15 @@ export default function DevicesPreferencesSettings() {
       ) : (
         <EnableSignedMessagesButton />
       )}
+      {local.failed && (
+        // Unknown, not "none": no row can be marked as this device.
+        <p
+          role="status"
+          className="tw-mb-0 tw-mt-4 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-200"
+        >
+          {t(locale, "signedMessages.devices.localUnreadable")}
+        </p>
+      )}
       {(query.isLoading ||
         (encryptionEnabled && encryptionDevices.isLoading)) && (
         <output
@@ -448,7 +457,13 @@ export default function DevicesPreferencesSettings() {
         cancelText={t(locale, "signedMessages.devices.cancel")}
         isConfirming={isRevoking}
         confirmVariant="destructive"
-      />
+      >
+        {local.failed ? (
+          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-200">
+            {t(locale, "signedMessages.devices.revokeMaybeThisDevice")}
+          </p>
+        ) : null}
+      </MobileWrapperConfirmationDialog>
     </section>
   );
 }

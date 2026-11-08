@@ -27,6 +27,8 @@ export function newRuntime(record: StoredGroup): GroupRuntime {
     deleted: new Set(),
     outbox: new Map(),
     stallSince: null,
+    sendFailingSince: null,
+    commitFailing: false,
   };
 }
 

@@ -121,7 +121,9 @@ const getDisabledReasonKey = (
   ) {
     return "e2ee.composer.unavailable";
   }
-  if (conversation.delayed) {
+  // A group change that has not gone through holds sending back; a send
+  // that keeps failing does not, so writing (and focus) carries on (8.3).
+  if (conversation.delayed && conversation.delayedReason !== "send") {
     return "e2ee.composer.blocked";
   }
   return null;
