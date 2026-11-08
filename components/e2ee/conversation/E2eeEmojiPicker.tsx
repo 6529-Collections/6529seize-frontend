@@ -85,9 +85,12 @@ export function E2eeEmojiPicker({
 export function E2eeComposerEmojiPicker({
   onOpen,
   onSelect,
+  onClosedAfterSelect,
 }: {
   readonly onOpen: () => void;
   readonly onSelect: (text: string) => void;
+  /** The mobile panel closed after a selection: restore the caret. */
+  readonly onClosedAfterSelect?: (() => void) | undefined;
 }) {
   const locale = useBrowserLocale();
   const { categories, failed, retry } = useE2eeEmojis();
@@ -96,6 +99,7 @@ export function E2eeComposerEmojiPicker({
       verticalAlignment="center"
       label={t(locale, "e2ee.emoji.insert")}
       onOpen={onOpen}
+      onClosedAfterSelect={onClosedAfterSelect}
       onEmojiSelect={(emoji) => {
         const text = emojiSelectionText(emoji);
         if (text) onSelect(text);

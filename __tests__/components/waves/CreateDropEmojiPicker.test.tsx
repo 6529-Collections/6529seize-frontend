@@ -1,6 +1,6 @@
 // __tests__/components/waves/CreateDropEmojiPicker.test.tsx
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 jest.mock("@/components/waves/prepareEmojiMartData", () => ({
   prepareEmojiMartData: jest.fn(),
 }));
@@ -43,18 +43,23 @@ jest.mock("@emoji-mart/react", () => ({
   ),
 }));
 jest.mock("@emoji-mart/data", () => ({ __esModule: true, default: {} }));
+let mockAfterLeave: (() => void) | undefined;
 jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
   __esModule: true,
-  default: ({ isOpen, children, zIndexClassName }: any) =>
-    isOpen ? (
+  default: ({ isOpen, children, zIndexClassName, onAfterLeave }: any) => {
+    mockAfterLeave = onAfterLeave;
+    return isOpen ? (
       <div data-testid="mobile-dialog" data-z-index-class={zIndexClassName}>
         {children}
       </div>
-    ) : null,
+    ) : null;
+  },
 }));
 
 // 3. Now import under test
-import CreateDropEmojiPicker from "@/components/waves/CreateDropEmojiPicker";
+import CreateDropEmojiPicker, {
+  EmojiPickerControl,
+} from "@/components/waves/CreateDropEmojiPicker";
 import { CreateDropEmojiPickerLayerProvider } from "@/components/waves/CreateDropEmojiPickerLayerContext";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useEmoji } from "@/contexts/EmojiContext";
@@ -142,6 +147,31 @@ describe("CreateDropEmojiPicker", () => {
 
     // Picker should close after selection
     await waitFor(() => expect(screen.queryByTestId("picker")).toBeNull());
+  });
+
+  it("tells the composer once the mobile panel has left after a selection", async () => {
+    mockUseIsMobile.mockReturnValue(true);
+    const onClosedAfterSelect = jest.fn();
+    render(
+      <EmojiPickerControl
+        onEmojiSelect={jest.fn()}
+        onClosedAfterSelect={onClosedAfterSelect}
+      />
+    );
+    fireEvent.click(screen.getByRole("button", { hidden: true }));
+    fireEvent.click(await screen.findByTestId("picker"));
+    await waitFor(() => expect(screen.queryByTestId("picker")).toBeNull());
+    expect(onClosedAfterSelect).not.toHaveBeenCalled();
+
+    act(() => mockAfterLeave?.());
+    await waitFor(() => expect(onClosedAfterSelect).toHaveBeenCalledTimes(1));
+
+    // Closing without a selection does not move the caret.
+    fireEvent.click(screen.getByRole("button", { hidden: true }));
+    await screen.findByTestId("picker");
+    act(() => mockAfterLeave?.());
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+    expect(onClosedAfterSelect).toHaveBeenCalledTimes(1);
   });
 
   it("closes picker when clicking outside", async () => {

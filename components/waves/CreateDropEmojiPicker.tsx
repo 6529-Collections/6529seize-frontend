@@ -27,6 +27,11 @@ interface EmojiPickerControlProps extends CreateDropEmojiPickerProps {
     | Omit<ComponentProps<typeof LazyEmojiPicker>, "onEmojiSelect">
     | undefined;
   readonly pickerNotice?: ReactNode;
+  /**
+   * The mobile panel has closed after a selection and returned focus to its
+   * trigger; the composer can put the caret back now.
+   */
+  readonly onClosedAfterSelect?: (() => void) | undefined;
 }
 
 /** Shared composer control: anchored on desktop and a slide panel on mobile. */
@@ -39,8 +44,10 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
   label,
   pickerProps,
   pickerNotice,
+  onClosedAfterSelect,
 }) => {
   const isMobile = useIsMobileScreen();
+  const selectedBeforeClose = useRef(false);
   const locale = useBrowserLocale();
   const pickerLabel = label ?? t(locale, "emoji.picker.label");
   const { desktopZIndex, mobileZIndexClassName } =
@@ -93,7 +100,17 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
 
   const addEmoji = (emoji: EmojiPickerSelection) => {
     if (!disabled) onEmojiSelect(emoji);
+    selectedBeforeClose.current = true;
     setShowPicker(false);
+  };
+
+  // The panel hands focus back to its trigger once it has left, after any
+  // focus the composer set on selection; give the caret back after that.
+  const handleMobileAfterLeave = () => {
+    if (!selectedBeforeClose.current) return;
+    selectedBeforeClose.current = false;
+    if (!onClosedAfterSelect) return;
+    requestAnimationFrame(() => onClosedAfterSelect());
   };
 
   useEffect(() => {
@@ -200,6 +217,7 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
           isOpen={isPickerOpen}
           ariaLabel={pickerLabel}
           onClose={() => setShowPicker(false)}
+          onAfterLeave={handleMobileAfterLeave}
           zIndexClassName={mobileZIndexClassName}
           showHeaderCloseButton={false}
           enableDragToClose
