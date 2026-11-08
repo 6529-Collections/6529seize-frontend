@@ -106,16 +106,18 @@ export const EmojiPickerControl: FC<EmojiPickerControlProps> = ({
     const button = buttonRef.current;
     if (!onClosedAfterSelect || !button) return;
     let done = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
     const finish = () => {
       if (done) return;
       done = true;
       button.removeEventListener("focus", finish);
       clearTimeout(timer);
+      // Never pull focus back from something the user moved on to.
+      const active = document.activeElement;
+      if (active && active !== button && active !== document.body) return;
       requestAnimationFrame(() => onClosedAfterSelect());
     };
     button.addEventListener("focus", finish);
-    timer = setTimeout(finish, 1000);
+    const timer = setTimeout(finish, 1000);
   };
 
   const addEmoji = (emoji: EmojiPickerSelection) => {
