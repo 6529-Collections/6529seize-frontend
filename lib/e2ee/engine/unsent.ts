@@ -73,7 +73,8 @@ export class UnsentMessages {
         this.inFlight.delete(key);
       }
     };
-    operation.run.then(forget, forget);
+    // The caller handles the outcome; this only clears the slot.
+    operation.run.finally(forget).catch(() => undefined);
   }
 
   private async discardOnce(g: string, id: string): Promise<void> {
