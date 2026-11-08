@@ -137,6 +137,15 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.waiting": "Waiting for your wallet signature…",
   "e2ee.enroll.rejected": "Signature cancelled.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
+  "e2ee.upgrade.title": "Upgrade encrypted messages",
+  "e2ee.upgrade.intro":
+    "Encrypted messages are moving to stronger encryption. Confirm once in your wallet to continue; your messages stay on this device.",
+  "e2ee.upgrade.kept.one":
+    "Your {count} existing conversation stays readable. Open it to continue it with the new encryption.",
+  "e2ee.upgrade.kept.other":
+    "Your {count} existing conversations stay readable. Open one to continue it with the new encryption.",
+  "e2ee.upgrade.sign": "Sign to upgrade Encrypted DMs",
+  "e2ee.upgrade.failed": "Couldn’t upgrade encrypted messages. Try again.",
 
   "e2ee.deviceLimit.title": "Too many devices",
   "e2ee.deviceLimit.body":
@@ -221,6 +230,7 @@ export const E2EE_MESSAGES = {
   "e2ee.list.status.left": "You left",
   "e2ee.list.status.removed": "Removed",
   "e2ee.list.status.restored": "From backup",
+  "e2ee.list.status.superseded": "Read-only",
   "e2ee.list.entry": "Encrypted messages",
   "e2ee.list.entryHint": "End-to-end encrypted chats",
   "e2ee.list.viewAll": "All encrypted chats",
@@ -327,6 +337,24 @@ export const E2EE_MESSAGES = {
   "e2ee.banner.removed": "You were removed from this chat.",
   "e2ee.banner.restored":
     "Restored from your backup. New messages appear here once someone in this chat adds this device.",
+
+  "e2ee.superseded.body":
+    "This conversation moved to stronger encryption. Its messages stay readable here, but you can’t send new ones.",
+  "e2ee.superseded.announce":
+    "This conversation moved to stronger encryption and is now read-only.",
+  "e2ee.superseded.continueDm": "Continue the conversation",
+  "e2ee.superseded.restartGroup": "Start again with the same members",
+  "e2ee.superseded.openSuccessor": "Open the new conversation",
+  "e2ee.superseded.noDevices.dm":
+    "{name} will be reachable once they open 6529.io and confirm the upgrade.",
+  "e2ee.superseded.noDevices.group":
+    "The other members will be reachable once they open 6529.io and confirm the upgrade.",
+  "e2ee.superseded.skipped":
+    "The new conversation started without {names}. Add them from Chat info once they open 6529.io and confirm the upgrade.",
+  "e2ee.superseded.skipToAction": "Skip to the end of this conversation",
+  "e2ee.superseded.notice":
+    "This conversation moved to stronger encryption. Earlier messages are kept in the previous conversation.",
+  "e2ee.superseded.noticeLink": "View earlier messages",
 
   "e2ee.message.undecryptable": "Couldn’t decrypt this message",
   "e2ee.message.undecryptableHint":
