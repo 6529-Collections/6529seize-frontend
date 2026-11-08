@@ -119,6 +119,34 @@ async function combinedSignIn(
   return { storage, grantId, deviceKey: prepared.deviceKeyHex, adopted };
 }
 
+const REGISTER = /^e2ee\/devices\/login-grant$/;
+
+const registrations = (world: World): number =>
+  world.ds.state.requests.filter(
+    (r) => r.method === "POST" && REGISTER.test(r.path)
+  ).length;
+
+/**
+ * The setup page's storage-event resume and the combined turn-on both call
+ * enrollWithLoginGrant(): two together, then a third while the held
+ * registration keeps the engine "enrolling".
+ */
+async function concurrentLoginGrantEnrollments(
+  world: World,
+  engine: { enrollWithLoginGrant(): Promise<string>; getStatus(): string }
+): Promise<string[]> {
+  const gate = world.ds.hold(REGISTER);
+  const calls = [engine.enrollWithLoginGrant(), engine.enrollWithLoginGrant()];
+  for (let attempt = 0; attempt < 400 && gate.waiting() === 0; attempt += 1) {
+    await realSleep(10);
+  }
+  expect(gate.waiting()).toBe(1);
+  expect(engine.getStatus()).toBe("enrolling");
+  calls.push(engine.enrollWithLoginGrant());
+  gate.release();
+  return Promise.all(calls);
+}
+
 describe("E2EE engine: combined sign-in grant (NC8)", () => {
   it("enrolls from the sign-in grant with no wallet prompt and chats with an EIP-712 device", async () => {
     const world = await createWorld();
@@ -284,5 +312,61 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
     await alice.engine.enroll();
     expect(alice.engine.getStatus()).toBe("ready");
     expect(alice.signCalls).toBe(1);
+  });
+
+  it("gives concurrent sign-in enrollments one registration and its final status", async () => {
+    const world = await createWorld();
+    const account = privateKeyToAccount(generatePrivateKey());
+    world.ds.setWallets("alice", [account.address]);
+    const storage = createMemoryE2eeStorage();
+    const alice = await startDevice(world, "alice", account, {
+      storage,
+      enroll: false,
+      extra: { origin: ORIGIN },
+    });
+    const signIn = await combinedSignIn(world, "alice", account, storage);
+
+    await expect(
+      concurrentLoginGrantEnrollments(world, alice.engine)
+    ).resolves.toEqual(["ready", "ready", "ready"]);
+    expect(registrations(world)).toBe(1);
+    expect(world.ds.devicesOf("alice")).toEqual([
+      expect.objectContaining({ device_key: signIn.deviceKey }),
+    ]);
+    expect(alice.signCalls).toBe(0);
+  });
+
+  it("gives concurrent callers needs-enrollment for a refused sign-in grant, then enrolls later", async () => {
+    const world = await createWorld();
+    const account = privateKeyToAccount(generatePrivateKey());
+    world.ds.setWallets("alice", [account.address]);
+    const storage = createMemoryE2eeStorage();
+    const alice = await startDevice(world, "alice", account, {
+      storage,
+      enroll: false,
+      extra: { origin: ORIGIN },
+    });
+    const refused = await combinedSignIn(world, "alice", account, storage);
+    world.ds.revokeLoginGrant(refused.grantId);
+
+    await expect(
+      concurrentLoginGrantEnrollments(world, alice.engine)
+    ).resolves.toEqual([
+      "needs-enrollment",
+      "needs-enrollment",
+      "needs-enrollment",
+    ]);
+    expect(registrations(world)).toBe(1);
+    expect(alice.engine.getError()).toBe("E2EE_LOGIN_GRANT_REJECTED");
+    expect(world.ds.devicesOf("alice")).toEqual([]);
+
+    // The next combined sign-in enrolls: nothing is left in flight.
+    const signIn = await combinedSignIn(world, "alice", account, storage);
+    await expect(alice.engine.enrollWithLoginGrant()).resolves.toBe("ready");
+    expect(registrations(world)).toBe(2);
+    expect(world.ds.devicesOf("alice")).toEqual([
+      expect.objectContaining({ device_key: signIn.deviceKey }),
+    ]);
+    expect(alice.signCalls).toBe(0);
   });
 });

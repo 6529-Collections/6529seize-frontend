@@ -72,6 +72,8 @@ class E2eeEngineImpl implements E2eeEngineExt {
   private readonly ctx: EngineContext;
   private readonly controller: EngineController;
   private readonly conversationCreator: ConversationCreator;
+  /** The enrollment in progress; concurrent callers share its outcome. */
+  private enrollment: Promise<void> | null = null;
 
   constructor(ctx: EngineContext) {
     this.ctx = ctx;
@@ -155,7 +157,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
    * write still passes its version check.
    */
   async enrollWithLoginGrant(): Promise<E2eeEngineStatus> {
-    if (
+    if (this.enrollment) {
+      // Another caller is already enrolling: report its final status, not
+      // "enrolling".
+      await this.enrollment.catch(() => undefined);
+    } else if (
       this.ctx.store.status === NEEDS_ENROLLMENT &&
       (await this.takeLoginGrantDevice())
     ) {
@@ -310,7 +316,23 @@ class E2eeEngineImpl implements E2eeEngineExt {
     await this.runEnrollment(true);
   }
 
-  private async runEnrollment(allowPrompt: boolean): Promise<void> {
+  /**
+   * Single flight: a caller that arrives during an enrollment waits for it
+   * and reads the outcome from the status; only the starting caller sees
+   * its error.
+   */
+  private runEnrollment(allowPrompt: boolean): Promise<void> {
+    if (this.enrollment) {
+      return this.enrollment.catch(() => undefined);
+    }
+    const run = this.enrollOnce(allowPrompt).finally(() => {
+      this.enrollment = null;
+    });
+    this.enrollment = run;
+    return run;
+  }
+
+  private async enrollOnce(allowPrompt: boolean): Promise<void> {
     const status = this.ctx.store.status;
     if (status === "ready") {
       if (allowPrompt) {
