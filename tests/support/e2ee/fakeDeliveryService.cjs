@@ -91,14 +91,25 @@ const isCanonicalSuites = (suites) =>
   );
 
 /**
+ * The suites the server accepts (backend e2eeAcceptedSuites): both while the
+ * transition window is open, then 0x004E only (D172).
+ */
+function acceptedSuites(windowOpen) {
+  return windowOpen
+    ? E2EE_ACCEPTED_SUITES
+    : new Set([...E2EE_ACCEPTED_SUITES].filter((s) => s !== E2EE_CIPHERSUITE));
+}
+
+/**
  * What is wrong with a grant's suite terms, or null (the backend's
  * findE2eeGrantSuiteProblem plus the transition window).
  */
 function grantSuiteProblem(grant, v1Accepted) {
   if (grant.version === 2) {
+    const accepted = acceptedSuites(v1Accepted);
     if (
       !isCanonicalSuites(grant.ciphersuites) ||
-      !grant.ciphersuites.some((suite) => E2EE_ACCEPTED_SUITES.has(suite))
+      !grant.ciphersuites.some((suite) => accepted.has(suite))
     ) {
       return "ciphersuites";
     }
@@ -334,9 +345,8 @@ function createFakeDeliveryService(options = {}) {
   /** Signed and accepted suites (no aliases), as e2eeDeviceSuites. */
   const deviceSuites = (device) => {
     if (device.grant.version === 2) {
-      return device.grant.ciphersuites.filter((suite) =>
-        E2EE_ACCEPTED_SUITES.has(suite)
-      );
+      const accepted = acceptedSuites(s.v1GrantsAccepted);
+      return device.grant.ciphersuites.filter((suite) => accepted.has(suite));
     }
     return s.v1GrantsAccepted && device.grant.ciphersuite === E2EE_CIPHERSUITE
       ? [E2EE_CIPHERSUITE]
@@ -1712,7 +1722,7 @@ function createFakeDeliveryService(options = {}) {
     group(g) {
       return s.groups.get(lower(g)) || null;
     },
-    /** D172: closes (false) or reopens the v1-grant transition window. */
+    /** D172: closes (false: v1 grants and 0x004F refused) or reopens the transition window. */
     setV1GrantsAccepted(accepted) {
       s.v1GrantsAccepted = accepted;
     },
