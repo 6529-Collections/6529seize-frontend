@@ -144,6 +144,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const synced = useInitialSync(engine, conversation === null);
   const superseded = conversation?.status === "superseded";
   const handoff = useSupersededHandoff(conversation !== null && !superseded);
+  const { announce } = handoff;
 
   const [jumpTarget, setJump] = useState<{
     id: string;
@@ -153,6 +154,10 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<E2eeMessage | null>(null);
   const [reportTarget, setReportTarget] = useState<E2eeMessage | null>(null);
+  const [discardTarget, setDiscardTarget] = useState<E2eeMessage | null>(null);
+  // Set when a discard succeeded: the outcome is announced and focus goes
+  // to the continue action once the dialog has closed.
+  const focusActionAfterDialog = useRef(false);
   const [blockSender, setBlockSender] = useState<E2eeMessage | null>(null);
   const { setToast } = useAuth();
   const { dropped, dismiss: dismissDropped } = useE2eeDroppedMessage(
@@ -229,8 +234,16 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         };
         void jump();
       },
+      // D172: an unsent message leaves this read-only chat either way, so
+      // the outcome is announced here and focus moves to the continue action.
+      onResendUnsent: async (message) => {
+        await engine.resendUnsent(message.g, message.id);
+        announce(t(locale, "e2ee.unsent.resent"));
+        document.getElementById(composerInputId)?.focus();
+      },
+      onDiscardUnsent: (message) => setDiscardTarget(message),
     };
-  }, [engine, g, muted, profileId]);
+  }, [announce, composerInputId, engine, g, locale, muted, profileId]);
 
   if (!conversation) {
     return (
@@ -487,6 +500,31 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
           }
         }}
         onClose={() => setDeleteTarget(null)}
+      />
+      <E2eeConfirmDialog
+        open={discardTarget !== null}
+        title={t(locale, "e2ee.unsent.deleteConfirmTitle")}
+        body={t(locale, "e2ee.unsent.deleteConfirmBody")}
+        confirmLabel={t(locale, "e2ee.unsent.delete")}
+        errorFallbackKey="e2ee.unsent.deleteFailed"
+        onConfirm={async () => {
+          if (discardTarget) {
+            await engine.discardUnsent(discardTarget.g, discardTarget.id);
+            focusActionAfterDialog.current = true;
+          }
+        }}
+        onClose={() => {
+          setDiscardTarget(null);
+          if (focusActionAfterDialog.current) {
+            focusActionAfterDialog.current = false;
+            // Once the dialog has closed (the page is no longer inert and
+            // its focus return had nothing to go to): say so, move focus on.
+            globalThis.requestAnimationFrame(() => {
+              announce(t(locale, "e2ee.unsent.deleted"));
+              document.getElementById(composerInputId)?.focus();
+            });
+          }
+        }}
       />
     </section>
   );

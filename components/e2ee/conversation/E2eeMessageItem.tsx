@@ -38,6 +38,7 @@ import {
   type E2eeMessageActions,
 } from "./E2eeMessageActionsMenu";
 import { E2eeEmojiText } from "./E2eeEmojiText";
+import { E2eeUnsentNotice } from "./E2eeUnsentNotice";
 
 export type { E2eeMessageActions } from "./E2eeMessageActionsMenu";
 
@@ -499,7 +500,8 @@ function E2eeMessageItemComponent({
     (canAct || !isOwn) &&
     !message.deleted &&
     !message.undecryptable &&
-    !message.pending;
+    !message.pending &&
+    !message.unsent;
 
   const Container = inViewportRow ? "div" : "li";
   return (
@@ -560,6 +562,14 @@ function E2eeMessageItemComponent({
               ))}
             </div>
           </E2eeImageGallery>
+        ) : null}
+        {message.unsent && isOwn ? (
+          <E2eeUnsentNotice
+            message={message}
+            conversation={conversation}
+            selfProfileId={selfProfileId}
+            actions={actions}
+          />
         ) : null}
         {compact && hasMarkers(message) ? (
           <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">

@@ -26,9 +26,12 @@ import {
   isUsableDm,
 } from "@/lib/e2ee/dm-conversations";
 import type { E2eeConversation, E2eeEngine } from "@/lib/e2ee/types";
-import { getE2eeActionErrorKey, getE2eeErrorCode } from "../e2eeErrors";
-import { getConversationTitle, getMemberName } from "../e2eeFormat";
+import { getMemberName } from "../e2eeFormat";
 import { getComposerContainerClassName } from "./E2eeComposer";
+import { getRestartError, type RestartError } from "./e2eeRestartError";
+
+/** Zero-width space: makes a repeated announcement new text. */
+const REPEAT_MARK = String.fromCodePoint(0x200b);
 
 const isFocusLost = (): boolean => {
   const active = document.activeElement;
@@ -44,7 +47,8 @@ export function useSupersededHandoff(composerShown: boolean) {
   const locale = useBrowserLocale();
   const composerShownRef = useRef(false);
   const focusedRef = useRef(false);
-  const [announcement, setAnnouncement] = useState("");
+  // The count makes a repeated message (two resends in a row) new text.
+  const [announcement, setAnnouncement] = useState({ text: "", count: 0 });
 
   useEffect(() => {
     if (composerShown) {
@@ -73,12 +77,28 @@ export function useSupersededHandoff(composerShown: boolean) {
     const take = focusedRef.current && isFocusLost();
     focusedRef.current = false;
     if (!take) {
-      setAnnouncement(t(locale, "e2ee.superseded.announce"));
+      setAnnouncement((current) => ({
+        text: t(locale, "e2ee.superseded.announce"),
+        count: current.count + 1,
+      }));
     }
     return take;
   }, [locale]);
 
-  return { onFocus, onBlur, takeFocus, announcement };
+  /** One polite status for this read-only conversation's outcomes. */
+  const announce = useCallback((text: string) => {
+    setAnnouncement((current) => ({ text, count: current.count + 1 }));
+  }, []);
+
+  // An invisible mark alternates so the same words are announced again.
+  const mark = announcement.count % 2 === 0 ? REPEAT_MARK : "";
+  return {
+    onFocus,
+    onBlur,
+    takeFocus,
+    announce,
+    announcement: announcement.text ? `${announcement.text}${mark}` : "",
+  };
 }
 
 /** The conversation to continue in, when this device already has it. */
@@ -103,33 +123,6 @@ function getContinuationG(
     conversations.some((item) => item.g === successor)
     ? successor
     : null;
-}
-
-interface RestartError {
-  readonly key: MessageKey;
-  readonly params: Record<string, string>;
-}
-
-function getRestartError(
-  locale: SupportedLocale,
-  error: unknown,
-  conversation: E2eeConversation,
-  selfProfileId: string | null
-): RestartError {
-  if (getE2eeErrorCode(error) === "E2EE_NO_DEVICES") {
-    return conversation.kind === "dm"
-      ? {
-          key: "e2ee.superseded.noDevices.dm",
-          params: {
-            name: getConversationTitle(locale, conversation, selfProfileId),
-          },
-        }
-      : { key: "e2ee.superseded.noDevices.group", params: {} };
-  }
-  return {
-    key: getE2eeActionErrorKey(error, "e2ee.banner.restartFailed"),
-    params: {},
-  };
 }
 
 /** Members of `previous` (but not you) missing from the new conversation. */

@@ -263,6 +263,15 @@ appear.
   to stronger encryption. Earlier messages are kept in the previous
   conversation." and **View earlier messages**, which opens the read-only
   chat when this device has it.
+- **Messages that had not gone out yet.** A message of yours that was still
+  waiting to send when the chat moved stays in the read-only chat, marked "Not
+  sent: this chat was upgraded". It is kept on this device only and is never
+  sent by itself. **Resend in the upgraded chat** sends a copy (text, mentions
+  and attachments; not the reply it answered) in the conversation that
+  continues it, starting that conversation if needed. **Delete** removes it
+  from this device after you confirm. Either way the page says what happened
+  and moves focus to the continue action. If the other person hasn’t
+  confirmed the upgrade yet, resending says so and keeps the message.
 
 ## In a chat
 

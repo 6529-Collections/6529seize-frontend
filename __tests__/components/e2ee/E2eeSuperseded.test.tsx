@@ -10,7 +10,7 @@ import {
 import type { ReactNode } from "react";
 import { E2eeConversationView } from "@/components/e2ee/conversation/E2eeConversationView";
 import { E2eeConversationList } from "@/components/e2ee/list/E2eeConversationList";
-import type { E2eeConversation } from "@/lib/e2ee/types";
+import type { E2eeConversation, E2eeMessage } from "@/lib/e2ee/types";
 import { E2EE_MESSAGES } from "@/i18n/messages/e2ee";
 import {
   ALICE_ID,
@@ -349,6 +349,127 @@ describe("turning read-only while open", () => {
     expect(
       screen.getByRole("button", { name: COPY.restartGroup })
     ).not.toHaveFocus();
+  });
+});
+
+describe("an unsent message in a superseded chat", () => {
+  const UNSENT = {
+    label: E2EE_MESSAGES["e2ee.unsent.label"],
+    resend: E2EE_MESSAGES["e2ee.unsent.resend"],
+    deleteLabel: E2EE_MESSAGES["e2ee.unsent.deleteLabel"],
+    resent: E2EE_MESSAGES["e2ee.unsent.resent"],
+    deleted: E2EE_MESSAGES["e2ee.unsent.deleted"],
+    confirmTitle: E2EE_MESSAGES["e2ee.unsent.deleteConfirmTitle"],
+  };
+
+  const renderUnsent = (
+    unsent: Partial<E2eeMessage> = {},
+    convo: E2eeConversation = dm(OLD_DM, "superseded")
+  ) => {
+    const engine = createFakeE2eeEngine({
+      conversations: [convo],
+      messages: {
+        [convo.g]: [
+          message({ id: "m1", g: convo.g, seq: 1, text: "kept message" }),
+          message({
+            id: "u1",
+            g: convo.g,
+            seq: 2,
+            senderProfileId: SELF_ID,
+            text: "typed while offline",
+            pending: false,
+            unsent: "suite_upgrade",
+            ...unsent,
+          }),
+        ],
+      },
+    });
+    render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeConversationView g={convo.g} />
+      </E2eeTestProvider>
+    );
+    return engine;
+  };
+
+  it("says in text that it was not sent and offers resend and delete", () => {
+    renderUnsent();
+    expect(screen.getByText("typed while offline")).toBeInTheDocument();
+    expect(screen.getByText(UNSENT.label)).toBeInTheDocument();
+    expect(screen.queryByText(/Sending…|Waiting for connection/u)).toBeNull();
+    const resend = screen.getByRole("button", { name: UNSENT.resend });
+    const remove = screen.getByRole("button", { name: UNSENT.deleteLabel });
+    expect(resend).toHaveAccessibleDescription(UNSENT.label);
+    expect(remove).toHaveAccessibleDescription(UNSENT.label);
+    // Only the received message has a menu: the unsent one never left
+    // the device, so there is nothing to react to, edit or report.
+    expect(
+      screen.getAllByRole("button", { name: "Message actions" })
+    ).toHaveLength(1);
+  });
+
+  it("shows no controls on someone else's message", () => {
+    renderUnsent({ senderProfileId: ALICE_ID });
+    expect(screen.queryByText(UNSENT.label)).toBeNull();
+    expect(screen.queryByRole("button", { name: UNSENT.resend })).toBeNull();
+  });
+
+  it("resends in the upgraded chat, announces it and moves focus on", async () => {
+    const engine = renderUnsent();
+
+    fireEvent.click(screen.getByRole("button", { name: UNSENT.resend }));
+
+    await waitFor(() =>
+      expect(engine.resendUnsent).toHaveBeenCalledWith(OLD_DM, "u1")
+    );
+    await waitFor(() =>
+      expect(screen.queryByText("typed while offline")).toBeNull()
+    );
+    expect(screen.getByText(UNSENT.resent).tagName).toBe("OUTPUT");
+    expect(screen.getByRole("button", { name: COPY.continueDm })).toHaveFocus();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("keeps the message and explains when the person has not upgraded yet", async () => {
+    const old = dm(OLD_DM, "superseded");
+    const engine = renderUnsent({}, old);
+    jest
+      .mocked(engine.resendUnsent)
+      .mockRejectedValueOnce(e2eeError("E2EE_NO_DEVICES"));
+
+    fireEvent.click(screen.getByRole("button", { name: UNSENT.resend }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      copy("e2ee.superseded.noDevices.dm", { name: handleOf(old, ALICE_ID) })
+    );
+    expect(screen.getByText("typed while offline")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: UNSENT.resend })).toBeEnabled();
+  });
+
+  it("deletes it after confirmation, then announces it and moves focus on", async () => {
+    const engine = renderUnsent();
+
+    fireEvent.click(screen.getByRole("button", { name: UNSENT.deleteLabel }));
+    const dialog = await screen.findByRole("dialog", {
+      name: UNSENT.confirmTitle,
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+
+    await waitFor(() =>
+      expect(engine.discardUnsent).toHaveBeenCalledWith(OLD_DM, "u1")
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(screen.queryByText("typed while offline")).toBeNull();
+    await waitFor(() =>
+      expect(screen.getByText(UNSENT.deleted).tagName).toBe("OUTPUT")
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole("button", { name: COPY.continueDm })
+      ).toHaveFocus()
+    );
   });
 });
 

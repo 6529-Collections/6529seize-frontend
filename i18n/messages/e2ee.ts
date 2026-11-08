@@ -359,6 +359,17 @@ export const E2EE_MESSAGES = {
   "e2ee.superseded.notice":
     "This conversation moved to stronger encryption. Earlier messages are kept in the previous conversation.",
   "e2ee.superseded.noticeLink": "View earlier messages",
+  "e2ee.unsent.label": "Not sent: this chat was upgraded",
+  "e2ee.unsent.resend": "Resend in the upgraded chat",
+  "e2ee.unsent.delete": "Delete",
+  "e2ee.unsent.deleteLabel": "Delete unsent message",
+  "e2ee.unsent.resent": "Sent in the upgraded chat.",
+  "e2ee.unsent.deleted": "Unsent message deleted.",
+  "e2ee.unsent.resendFailed": "Couldn’t resend. Try again.",
+  "e2ee.unsent.deleteConfirmTitle": "Delete this unsent message?",
+  "e2ee.unsent.deleteConfirmBody":
+    "It was never sent. Its text will be removed from this device.",
+  "e2ee.unsent.deleteFailed": "Couldn’t delete. Try again.",
 
   "e2ee.message.undecryptable": "Couldn’t decrypt this message",
   "e2ee.message.undecryptableHint":
