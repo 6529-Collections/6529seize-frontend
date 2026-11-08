@@ -89,7 +89,7 @@ export function useDeviceSecurityState() {
   const proof = getProofStatus(
     address,
     local.loaded && now > 0 && !remote.isPending,
-    remote.isError,
+    remote.isError || local.failed,
     grantStatus
   );
   const encryptionDevice = encryption.thisDevice;
