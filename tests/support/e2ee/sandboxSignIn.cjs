@@ -12,7 +12,7 @@
  * - `GET /api/device-grants` lists the caller's grants.
  *
  * The statement mirrors lib/device-signing/grant-message.ts byte for byte;
- * __tests__/tests/sandboxSignIn.test.ts checks every challenge it renders
+ * __tests__/lib/e2ee/sandboxSignIn.test.ts checks every challenge it renders
  * with the app's own parser. Test-only: loopback sandbox, throwaway keys.
  */
 

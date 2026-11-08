@@ -84,7 +84,7 @@ function parseJson(raw) {
 }
 
 function decodeJwtSubject(authorization) {
-  const match = /^Bearer\s+(.+)$/iu.exec(authorization || "");
+  const match = /^Bearer\s+(\S+)$/iu.exec(authorization || "");
   if (!match) {
     return null;
   }
