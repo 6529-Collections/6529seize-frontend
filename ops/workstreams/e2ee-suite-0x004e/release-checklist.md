@@ -35,7 +35,7 @@ messages.
       window is open and v1 grants are honoured.
 2. **Check the backend** before any frontend reaches that environment:
    - The `api` start-up log shows
-     `[E2EE SUITE WINDOW NOT STARTED] [V1 GRANTS HONOURED]`.
+     `[E2EE SUITE WINDOW NOT STARTED] [BOTH SUITES ACCEPTED]`.
    - Today's clients still list, claim and send. Requests that name no suite
      mean 0x004F.
 3. **Frontend** (#4748 together with #4749). It must never reach an
