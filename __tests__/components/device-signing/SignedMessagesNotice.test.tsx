@@ -542,11 +542,11 @@ describe("SignedMessagesNotice", () => {
       expect(screen.queryByRole("button", { name: "Dismiss" })).toBeNull();
       mockAcknowledge.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "This was me" }));
+        fireEvent.click(screen.getByRole("button", { name: "Got it" }));
       });
-      expect(screen.getByRole("button", { name: "This was me" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "Got it" })).toBeVisible();
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "This was me" }));
+        fireEvent.click(screen.getByRole("button", { name: "Got it" }));
       });
       expect(mockAcknowledge).toHaveBeenCalledWith(otherDevice.id);
       expect(
@@ -559,11 +559,11 @@ describe("SignedMessagesNotice", () => {
       const { rerender } = render(<SignedMessagesNotice composerEmpty />);
       mockGrants = [otherDevice];
       rerender(<SignedMessagesNotice composerEmpty />);
-      expect(screen.getByRole("button", { name: "This was me" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "Got it" })).toBeVisible();
 
       mockGrants = [{ ...otherDevice, notice_acknowledged: true }];
       rerender(<SignedMessagesNotice composerEmpty />);
-      expect(screen.queryByRole("button", { name: "This was me" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Got it" })).toBeNull();
       expect(mockAcknowledge).not.toHaveBeenCalled();
       expect(mockRevoke).not.toHaveBeenCalled();
     });

@@ -61,7 +61,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.notice.newDevice.message":
     "{label} is now authorized for Signed Posts. If this wasn’t you, revoke it.",
   "signedMessages.notice.newDevice.revoke": "Revoke",
-  "signedMessages.notice.newDevice.acknowledge": "This was me",
+  "signedMessages.notice.newDevice.acknowledge": "Got it",
   "signedMessages.notice.newDevice.acknowledgeError":
     "Couldn’t acknowledge this device. Try again.",
   "signedMessages.notice.enabled": "Signed posts are on in this browser.",

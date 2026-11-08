@@ -181,7 +181,7 @@ encrypted backup. See [Encrypted messages](../../encrypted-messages.md#renewal-a
 
 The browser checks the profile's grants when a wave opens, when the app
 returns to focus, and every 10 minutes while visible. An active grant for
-another device can raise a notice above the composer. Choose **This was me**
+another device can raise a notice above the composer. Choose **Got it**
 to clear that notice across devices as their grant lists refresh. Choose
 **Revoke** to remove the device's permission. The first list a browser sees
 for a wallet is its baseline. Review existing grants in **Device Permissions**.
