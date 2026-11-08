@@ -1,5 +1,6 @@
 import type { ApiE2eeDeviceGrant } from "./api-types";
-import { E2EE_CIPHERSUITE } from "./grant";
+import { E2EE_GRANT_SUITES } from "./grant";
+import { isOldSuiteDevice, retireOldSuiteDevice } from "./suite-retirement";
 import { MlsClient } from "./mls-adapter";
 import type { StoredDevice } from "./records";
 import { type E2eeStorage, getDefaultE2eeStorage } from "./storage";
@@ -33,7 +34,8 @@ export interface LoginE2eeAdoption {
 export interface PreparedLoginE2eeDevice {
   /** 0x-prefixed lowercase MLS signature key, granted in the challenge. */
   readonly deviceKeyHex: string;
-  readonly ciphersuite: number;
+  /** The suite set the combined grant (v2) names for this key. */
+  readonly ciphersuites: readonly number[];
   /**
    * Hands the key to the engine's storage for the profile once the combined
    * grant is stored; the engine then registers it without a prompt. Keeps an
@@ -82,14 +84,28 @@ export async function createLoginE2eeDevice(
     }
     try {
       const storage = deps.storage ?? getDefaultE2eeStorage();
-      const existing = await storage.getDevice(input.profileId);
+      let existing = await storage.getDevice(input.profileId);
+      if (existing && isOldSuiteDevice(existing) && !existing.retired) {
+        // An earlier-suite device: retire it keeping its history (D172),
+        // so this key can replace it without the engine running first.
+        await retireOldSuiteDevice(
+          storage,
+          input.profileId,
+          existing,
+          await storage.getStateVersion(input.profileId)
+        );
+        existing = await storage.getDevice(input.profileId);
+      }
       if (existing?.registered) {
         return false;
       }
+      const ciphersuites = [...E2EE_GRANT_SUITES];
       const grant: ApiE2eeDeviceGrant = {
+        version: 2,
         wallet: input.wallet.toLowerCase(),
         device_key: deviceKeyHex,
-        ciphersuite: E2EE_CIPHERSUITE,
+        ciphersuite: ciphersuites[0] ?? 0,
+        ciphersuites,
         issued_at: input.issuedAtSeconds,
         expires_at: input.expiresAtSeconds,
         origin: input.origin,
@@ -108,6 +124,9 @@ export async function createLoginE2eeDevice(
         createdAt: (deps.now ?? Date.now)(),
         lastResortAt: null,
         loginGrantId: input.grantId.toLowerCase(),
+        ...(existing?.retired && existing.trust
+          ? { trust: existing.trust }
+          : {}),
       };
       // The key's private half lands with the device record atomically.
       await storage.writeBatch(input.profileId, {
@@ -124,7 +143,7 @@ export async function createLoginE2eeDevice(
 
   return {
     deviceKeyHex,
-    ciphersuite: E2EE_CIPHERSUITE,
+    ciphersuites: [...E2EE_GRANT_SUITES],
     adopt,
     dispose: release,
   };

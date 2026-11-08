@@ -10,7 +10,7 @@ import {
   randomBytes,
   toArrayBuffer,
 } from "@/lib/e2ee/bytes";
-import { E2EE_CIPHERSUITE } from "@/lib/e2ee/grant";
+import { E2EE_GRANT_SUITES } from "@/lib/e2ee/grant";
 import { createLoginE2eeDevice } from "@/lib/e2ee/login-device";
 import { getDefaultE2eeStorage } from "@/lib/e2ee/storage";
 import { MlsClient } from "@/lib/e2ee/mls-adapter";
@@ -60,7 +60,7 @@ export async function prepareConnectionDeviceSetup(input: {
         new Uint8Array(await crypto.subtle.exportKey("raw", pair.publicKey))
       ),
       scopes: DEFAULT_DEVICE_SCOPES,
-      mls: { deviceKeyHex: mls.deviceKey(), ciphersuite: E2EE_CIPHERSUITE },
+      mls: { deviceKeyHex: mls.deviceKey(), ciphersuites: E2EE_GRANT_SUITES },
       ...appGrantTimes(Date.now()),
       origin:
         input.target === "desktop" ? "6529 Desktop" : globalThis.location.host,
@@ -90,7 +90,9 @@ export async function prepareConnectionDeviceSetup(input: {
           grant: {
             ...request.grant,
             mls_device_key: fields.mls.deviceKeyHex,
-            ciphersuite: E2EE_CIPHERSUITE,
+            version: 2,
+            ciphersuite: E2EE_GRANT_SUITES[0] ?? 0,
+            ciphersuites: [...E2EE_GRANT_SUITES],
           },
         },
       },
@@ -179,9 +181,13 @@ export async function acceptConnectionDeviceSetup(input: {
       wallet: terms.wallet,
       deviceKeyHex: terms.device_key,
       scopes: terms.scopes,
+      ...(terms.version === 2 ? {} : { version: 1 as const }),
       mls: {
         deviceKeyHex: terms.mls_device_key,
-        ciphersuite: terms.ciphersuite,
+        ciphersuites:
+          terms.version === 2
+            ? (terms.ciphersuites ?? [])
+            : [terms.ciphersuite],
       },
       issuedAtSeconds: terms.issued_at,
       expiresAtSeconds: terms.expires_at,

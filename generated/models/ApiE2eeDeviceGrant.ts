@@ -26,9 +26,17 @@ export class ApiE2eeDeviceGrant {
     */
     'device_key': string;
     /**
-    * 79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519) or 78 (0x004E, MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519), both draft code points. The device joins only groups of this suite.
+    * The grant version (D172). 1 (or absent): MlsDeviceGrant domain version \"1\" with one `uint16 ciphersuite`, honoured only for 79 (0x004F) while v1 grants are accepted. 2: domain version \"2\" with `uint16[] ciphersuites`.
+    */
+    'version'?: number;
+    /**
+    * v1: the signed suite, 79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519). v2: the lowest entry of ciphersuites.
     */
     'ciphersuite': number;
+    /**
+    * v2: the signed suites, 1 to 4 code points in strictly ascending order, at least one accepted by the server (79 or 78, 0x004E is MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519). The device may join groups of the accepted ones. Responses give v1 grants as their one suite.
+    */
+    'ciphersuites'?: Array<number>;
     /**
     * Unix seconds
     */
@@ -57,9 +65,21 @@ export class ApiE2eeDeviceGrant {
             "format": ""
         },
         {
+            "name": "version",
+            "baseName": "version",
+            "type": "number",
+            "format": ""
+        },
+        {
             "name": "ciphersuite",
             "baseName": "ciphersuite",
             "type": "number",
+            "format": ""
+        },
+        {
+            "name": "ciphersuites",
+            "baseName": "ciphersuites",
+            "type": "Array<number>",
             "format": ""
         },
         {

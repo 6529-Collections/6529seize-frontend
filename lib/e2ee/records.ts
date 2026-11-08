@@ -35,6 +35,11 @@ export interface StoredDevice {
   lastResortAt: number | null;
   /** Which wallets this profile trusts for each person (engine/trust.ts). */
   trust?: StoredTrust;
+  /**
+   * A device of an earlier MLS suite, retired with its history kept (D172):
+   * kept only for its trust pins until the next device replaces it.
+   */
+  retired?: boolean;
 }
 
 /**
@@ -122,6 +127,12 @@ export interface StoredGroup {
   joinedAt: number;
   updatedAt: number;
   pendingCommit: PendingCommitRecord | null;
+  /** The MLS ciphersuite (absent: groups made before D172, 0x004F). */
+  ciphersuite?: number;
+  /** The conversation that continues this superseded one (this device). */
+  successor?: string | null;
+  /** The superseded conversation this one continues (this device). */
+  predecessor?: string | null;
 }
 
 export interface StoredNotice {

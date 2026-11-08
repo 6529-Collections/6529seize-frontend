@@ -25,6 +25,13 @@ export const connectionSetupSchema = z
             scopes: z.array(z.string()).max(4),
             mls_device_key: hexKey,
             ciphersuite: z.number().int().positive(),
+            // Grant v2 (D172): the signed suite set.
+            version: z.literal(2).optional(),
+            ciphersuites: z
+              .array(z.number().int().positive())
+              .min(1)
+              .max(4)
+              .optional(),
             issued_at: z.number().int().positive(),
             expires_at: z.number().int().positive(),
             origin: z.string().max(64),

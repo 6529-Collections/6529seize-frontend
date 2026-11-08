@@ -60,8 +60,9 @@ async function signCombinedSignIn(
     expiresAtSeconds,
   };
   const mls = {
+    version: 2 as const,
     deviceKeyHex: mlsKey,
-    ciphersuite: E2EE_CIPHERSUITE,
+    ciphersuites: [E2EE_CIPHERSUITE],
     expiresAtSeconds,
   };
   const issuedAt = new Date(issuedAtSeconds * 1000).toISOString();

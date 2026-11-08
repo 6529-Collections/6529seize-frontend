@@ -1,7 +1,7 @@
 import { getDmPeerId } from "../dm-conversations";
 import { compareHistory } from "../history-order";
 import { safetyCodeFromFp } from "../digests";
-import { parseCredentialIdentity } from "../grant";
+import { E2EE_LEGACY_CIPHERSUITE, parseCredentialIdentity } from "../grant";
 import type { PayloadAttachment } from "../payload";
 import type { StoredGroup, StoredMessage, StoredOutboxItem } from "../records";
 import type {
@@ -412,6 +412,9 @@ export class EngineStore {
       epoch: record.epoch,
       safetyCode: safetyCodeFromFp(record.epochFp),
       status: record.status,
+      ciphersuite: record.ciphersuite ?? E2EE_LEGACY_CIPHERSUITE,
+      successor: record.successor ?? null,
+      predecessor: record.predecessor ?? null,
       delayed: record.delayed,
       splitView: record.splitView,
       untrustedDevices: this.untrustedFor(record),

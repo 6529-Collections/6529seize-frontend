@@ -2,10 +2,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { MLS_WASM_MANIFEST } from "@/lib/e2ee/wasm/manifest";
 
-// The Device Farm E2EE probe ships in its own bundle with the module's path,
+// The Device Farm probe ships in its own bundle with the module's path,
 // hash and size as defaults; a module rebuild must update them too.
 describe("Device Farm E2EE probe module defaults", () => {
-  it("match lib/e2ee/wasm/manifest.ts", () => {
+  it("equal lib/e2ee/wasm/manifest.ts", () => {
     const probe = readFileSync(
       join(
         process.cwd(),
@@ -13,12 +13,15 @@ describe("Device Farm E2EE probe module defaults", () => {
       ),
       "utf8"
     );
-    expect(probe).toContain(
-      `process.env.E2EE_WASM_PATH || "${MLS_WASM_MANIFEST.file}"`
-    );
-    expect(probe).toContain(`"${MLS_WASM_MANIFEST.sha256}"`);
-    expect(probe).toContain(
-      `process.env.E2EE_WASM_BYTES || ${MLS_WASM_MANIFEST.bytes}`
-    );
+    const defaults = {
+      file: /E2EE_WASM_PATH \|\|\s*"([^"]+)"/.exec(probe)?.[1],
+      sha256: /E2EE_WASM_SHA256 \|\|\s*"([0-9a-f]+)"/.exec(probe)?.[1],
+      bytes: Number(/E2EE_WASM_BYTES \|\|\s*(\d+)/.exec(probe)?.[1]),
+    };
+    expect(defaults).toEqual({
+      file: MLS_WASM_MANIFEST.file,
+      sha256: MLS_WASM_MANIFEST.sha256,
+      bytes: MLS_WASM_MANIFEST.bytes,
+    });
   });
 });
