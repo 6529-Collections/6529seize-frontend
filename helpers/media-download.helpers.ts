@@ -37,6 +37,19 @@ export function getDownloadFilenameFromUrl(url: string, fallback = "media") {
   }
 }
 
+/**
+ * Where the temporary download link goes: inside the topmost open dialog
+ * when there is one. A modal's focus trap cancels clicks outside it (and
+ * inert content ignores them), which silently drops the download, as in the
+ * media preview's Download button.
+ */
+function getDownloadLinkContainer(): HTMLElement {
+  const dialogs = document.querySelectorAll<HTMLElement>(
+    'dialog[open], [role="dialog"][aria-modal="true"]'
+  );
+  return dialogs[dialogs.length - 1] ?? document.body;
+}
+
 export function triggerDirectDownload(url: string, fileName: string) {
   const safeUrl = getSafeDownloadUrl(url);
   const anchor = document.createElement("a");
@@ -44,7 +57,7 @@ export function triggerDirectDownload(url: string, fileName: string) {
   anchor.download = fileName;
   anchor.target = "_blank";
   anchor.rel = "noopener noreferrer";
-  document.body.append(anchor);
+  getDownloadLinkContainer().append(anchor);
   anchor.click();
   anchor.remove();
 }

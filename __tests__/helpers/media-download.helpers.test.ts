@@ -3,6 +3,7 @@ import { Share } from "@capacitor/share";
 import {
   downloadMediaUrl,
   getDownloadFilenameFromUrl,
+  triggerDirectDownload,
 } from "@/helpers/media-download.helpers";
 
 jest.mock("@capacitor/filesystem", () => ({
@@ -65,4 +66,68 @@ it("keeps the original filename for a local decrypted object URL", () => {
   expect(
     getDownloadFilenameFromUrl("blob:https://6529.io/generated-id", "photo.png")
   ).toBe("photo.png");
+});
+
+describe("triggerDirectDownload", () => {
+  /** Like a modal's focus trap: clicks outside the dialog are cancelled. */
+  const trapClicksOutside = (dialog: HTMLElement) => {
+    const trap = (event: MouseEvent) => {
+      if (!dialog.contains(event.target as Node)) event.preventDefault();
+    };
+    document.addEventListener("click", trap, true);
+    return () => document.removeEventListener("click", trap, true);
+  };
+
+  const recordDownloadClicks = () => {
+    const clicks: { parent: Element | null; cancelled: boolean }[] = [];
+    const listener = (event: MouseEvent) => {
+      const anchor = event.target as HTMLAnchorElement;
+      if (anchor.download) {
+        // Bubbling to window comes after the trap's capture listener.
+        clicks.push({
+          parent: anchor.parentElement,
+          cancelled: event.defaultPrevented,
+        });
+      }
+    };
+    globalThis.addEventListener("click", listener);
+    return {
+      clicks,
+      stop: () => globalThis.removeEventListener("click", listener),
+    };
+  };
+
+  afterEach(() => {
+    document.body.innerHTML = "";
+  });
+
+  it("clicks the link inside an open dialog, where its focus trap allows it", async () => {
+    const dialog = document.createElement("dialog");
+    dialog.setAttribute("open", "");
+    document.body.append(dialog);
+    const untrap = trapClicksOutside(dialog);
+    const recorder = recordDownloadClicks();
+    try {
+      triggerDirectDownload("blob:http://localhost/image", "pixel.png");
+      await Promise.resolve();
+    } finally {
+      untrap();
+      recorder.stop();
+    }
+    expect(recorder.clicks).toEqual([{ parent: dialog, cancelled: false }]);
+    expect(dialog.querySelector("a")).toBeNull();
+  });
+
+  it("uses the page when no dialog is open", async () => {
+    const recorder = recordDownloadClicks();
+    try {
+      triggerDirectDownload("blob:http://localhost/image", "pixel.png");
+      await Promise.resolve();
+    } finally {
+      recorder.stop();
+    }
+    expect(recorder.clicks).toEqual([
+      { parent: document.body, cancelled: false },
+    ]);
+  });
 });
