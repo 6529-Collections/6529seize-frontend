@@ -57,6 +57,8 @@ jobs:
       NEXT_PUBLIC_E2EE_DM_ENABLED: "true"
       # Gap-only chat sync (WAVES-PLAN 0.7/0.8): on in staging, off in production.
       NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC: "true"
+      # App-socket PING keepalive (needs API #2354): on in staging, off in production.
+      NEXT_PUBLIC_FEATURE_WS_PING: "true"
       NEXTGEN_CHAIN_ID: ${{ vars.STAGING_NEXTGEN_CHAIN_ID || '1' }}
       ASSETS_FROM_S3: "false"
 

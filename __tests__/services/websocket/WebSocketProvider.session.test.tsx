@@ -3,6 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 import { WebSocketProvider } from "@/services/websocket/WebSocketProvider";
 import { WebSocketContext } from "@/services/websocket/WebSocketContext";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import type { WsMessageType } from "@/helpers/Types";
 import * as authUtils from "@/services/auth/auth.utils";
 import { fakeJwt } from "../../helpers/fakeJwt";
 import { mockRandomUnit } from "../../helpers/mockRandomUnit";
@@ -13,6 +14,11 @@ jest.mock("@/services/auth/session-readiness", () => ({
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
   isAuthJwtUsable: jest.fn(() => true),
+}));
+let mockPingEnabled = false;
+jest.mock("@/services/websocket/socketPing", () => ({
+  ...jest.requireActual("@/services/websocket/socketPing"),
+  isWsPingEnabled: () => mockPingEnabled,
 }));
 
 class MockWebSocket {
@@ -107,6 +113,7 @@ beforeEach(() => {
     value: factory,
   });
   mockGetAuthJwt.mockReset();
+  mockPingEnabled = false;
   restoreRandom = mockRandomUnit(0.5);
 });
 
@@ -310,6 +317,121 @@ describe("WebSocketProvider sessions", () => {
       });
 
       expect(sockets).toHaveLength(1);
+    });
+  });
+
+  describe("with PING enabled", () => {
+    const PONG_TIMEOUT_MS = 5_000;
+    const KEEPALIVE_IDLE_MS = 8 * 60_000;
+    const sentTypes = (ws: MockWebSocket) => ws.sent.map((frame) => frame.type);
+    const lastPingId = (ws: MockWebSocket): unknown =>
+      (ws.sent.at(-1) as { readonly id?: unknown } | undefined)?.id;
+
+    beforeEach(() => {
+      mockPingEnabled = true;
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "visible",
+      });
+    });
+
+    const quietSince = (result: ProviderResult, ws: MockWebSocket) => {
+      act(() => {
+        jest.advanceTimersByTime(5_000);
+      });
+      const hiddenAt = Date.now();
+      act(() => {
+        jest.advanceTimersByTime(120_000);
+      });
+      act(() => {
+        result.current.ensureLive(hiddenAt);
+      });
+      return ws;
+    };
+
+    it("asks a quiet socket and keeps it when it answers", () => {
+      const { result } = renderProvider();
+      const ws = quietSince(result, connectAs(result, ALICE));
+      const revision = result.current.connection?.revision;
+
+      expect(sentTypes(ws)).toEqual(["AUTHENTICATE", "PING"]);
+      expect(lastPingId(ws)).toMatch(/^[A-Za-z0-9_.:-]{1,32}$/);
+      act(() => {
+        ws.frame({ type: "PONG", id: lastPingId(ws) });
+        jest.advanceTimersByTime(PONG_TIMEOUT_MS * 4);
+      });
+
+      // The PONG alone settles the PING: no second PING, no replacement.
+      expect(sentTypes(ws)).toEqual(["AUTHENTICATE", "PING"]);
+      expect(sockets).toHaveLength(1);
+      expect(ws.close).not.toHaveBeenCalled();
+      expect(result.current.connection?.revision).toBe(revision);
+    });
+
+    it("replaces a quiet socket that leaves two PINGs unanswered, with a reconnect resync", () => {
+      const { result } = renderProvider();
+      const ws = quietSince(result, connectAs(result, ALICE));
+
+      act(() => {
+        jest.advanceTimersByTime(PONG_TIMEOUT_MS);
+      });
+      expect(sentTypes(ws)).toEqual(["AUTHENTICATE", "PING", "PING"]);
+      expect(sockets).toHaveLength(1);
+      act(() => {
+        jest.advanceTimersByTime(PONG_TIMEOUT_MS);
+      });
+
+      expect(ws.close).toHaveBeenCalled();
+      expect(sockets).toHaveLength(2);
+      authenticate(latestSocket());
+      expect(result.current.connection).toMatchObject({ kind: "reconnect" });
+    });
+
+    it("keeps a visible tab's quiet socket alive under the gateway's idle timeout", () => {
+      const { result } = renderProvider();
+      const ws = connectAs(result, ALICE);
+
+      act(() => {
+        jest.advanceTimersByTime(KEEPALIVE_IDLE_MS - 1);
+      });
+      expect(sentTypes(ws)).toEqual(["AUTHENTICATE"]);
+      act(() => {
+        jest.advanceTimersByTime(1);
+      });
+      expect(sentTypes(ws)).toEqual(["AUTHENTICATE", "PING"]);
+      act(() => {
+        ws.frame({ type: "PONG", id: lastPingId(ws) });
+        jest.advanceTimersByTime(KEEPALIVE_IDLE_MS);
+      });
+
+      expect(sentTypes(ws)).toEqual(["AUTHENTICATE", "PING", "PING"]);
+      expect(sockets).toHaveLength(1);
+    });
+
+    it("does not hand PONG frames to subscribers", () => {
+      const { result } = renderProvider();
+      const ws = connectAs(result, ALICE);
+      const onPong = jest.fn();
+      act(() => {
+        result.current.subscribe("PONG" as WsMessageType, onPong);
+      });
+
+      act(() => {
+        ws.frame({ type: "PONG", id: "p1" });
+      });
+
+      expect(onPong).not.toHaveBeenCalled();
+    });
+
+    it("stops pinging a socket after disconnect", () => {
+      const { result } = renderProvider();
+      const ws = connectAs(result, ALICE);
+      act(() => {
+        result.current.disconnect();
+        jest.advanceTimersByTime(KEEPALIVE_IDLE_MS * 2);
+      });
+
+      expect(sentTypes(ws)).toEqual(["AUTHENTICATE"]);
     });
   });
 });
