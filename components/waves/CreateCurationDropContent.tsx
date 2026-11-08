@@ -42,6 +42,7 @@ import {
   validateCurationDropInput,
 } from "./utils/validateCurationDropUrl";
 import { getOptimisticDrop } from "./utils/getOptimisticDrop";
+import { withClientDropId } from "@/services/api/idempotent-drop-create";
 
 // Use next/dynamic for lazy loading with SSR support
 const TermsSignatureFlow = dynamic(
@@ -257,7 +258,8 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
             }
           : undefined;
 
-      const requestBody: ApiCreateDropRequest = {
+      // The client_drop_id is part of the signed payload.
+      const requestBody = withClientDropId({
         wave_id: wave.id,
         ...(replyTo ? { reply_to: replyTo } : {}),
         drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
@@ -276,7 +278,7 @@ const CreateCurationDropContent: React.FC<CreateCurationDropContentProps> = ({
         signature: null,
         is_safe_signature: isSafeWallet,
         signer_address: address ?? "",
-      };
+      });
 
       const updatedDropRequest = await getUpdatedDropRequest(requestBody);
       if (!updatedDropRequest || latestTermsKey.current !== termsKey) {

@@ -604,6 +604,10 @@ describe("CreateDropContent identity picker flow", () => {
     await waitFor(() => {
       expect(submitDrop).toHaveBeenCalledTimes(1);
     });
+    // Each new drop carries its own client_drop_id.
+    expect(submitDrop.mock.calls[0]?.[0].drop.client_drop_id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId("identity-field")).toHaveTextContent("none");

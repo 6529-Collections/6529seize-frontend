@@ -33,6 +33,7 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import { getOptimisticDrop } from "../utils/getOptimisticDrop";
+import { withClientDropId } from "@/services/api/idempotent-drop-create";
 import {
   buildQuorumProposalMarkdown,
   EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
@@ -443,7 +444,8 @@ export default function QuorumProposalDropModal({
             }
           : undefined;
 
-      const requestBody: ApiCreateDropRequest = {
+      // The client_drop_id is part of the signed payload.
+      const requestBody = withClientDropId({
         wave_id: wave.id,
         ...(replyTo ? { reply_to: replyTo } : {}),
         drop_type: ApiDropType.Participatory,
@@ -462,7 +464,7 @@ export default function QuorumProposalDropModal({
         signature: null,
         is_safe_signature: isSafeWallet,
         signer_address: address ?? "",
-      };
+      });
 
       const updatedDropRequest = await getUpdatedDropRequest(requestBody);
       if (!updatedDropRequest) {

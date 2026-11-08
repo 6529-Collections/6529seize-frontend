@@ -32,6 +32,7 @@ import {
   hasMetadataContent,
 } from "./content-helpers";
 import { generateParts, toApiCreateDropParts } from "./part-builders";
+import { withClientDropId } from "@/services/api/idempotent-drop-create";
 import {
   isReplyTargetUnavailableError,
   REPLY_TARGET_UNAVAILABLE_TOAST_ID,
@@ -549,12 +550,15 @@ export const useCreateDropSubmission = ({
         setSubmitting(false);
         return;
       }
-      const requestBody = buildCreateDropRequest({
-        dropRequest,
-        generatedParts,
-        canMentionAll,
-        waveId: wave.id,
-      });
+      // The client_drop_id is part of the signed payload.
+      const requestBody = withClientDropId(
+        buildCreateDropRequest({
+          dropRequest,
+          generatedParts,
+          canMentionAll,
+          waveId: wave.id,
+        })
+      );
       const updatedDropRequest = await getUpdatedDropRequest(requestBody);
       if (!updatedDropRequest) {
         setSubmitting(false);
