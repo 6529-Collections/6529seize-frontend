@@ -79,6 +79,29 @@ context-aware `Back`).
 - In-wave search jump: switch to `In this Wave`, type at least 2 characters,
   then jump to a matching message.
 
+## Touch Navigation in the Native App
+
+- In an open wave or direct message, drag right across ordinary conversation
+  content to return to its list. The view follows your finger. Reverse below the
+  gesture threshold before releasing to cancel. A slow, short drag also stays
+  in the conversation; a longer drag or quick flick completes the return.
+- Encrypted conversations support the same rightward return to the encrypted
+  messages list. The visible Back control remains available.
+- Inputs, links, buttons, voting sliders, media controls, selected text and
+  horizontal carousels keep their own interactions. Vertical scrolling and
+  multi-touch do not trigger conversation navigation. Screen edges remain
+  available to the system or browser.
+- Android system Back first dismisses an open keyboard, then the topmost
+  dismissible sheet, menu or dialog. A reaction picker returns to its action
+  sheet before the sheet closes. Single-drop details close before the wave;
+  a wave returns to Waves, and a direct message returns to Messages.
+- Deeper pages return through app history or to an in-app destination. Only
+  a main-section root with no earlier app destination can minimize the app.
+  A dialog awaiting a required decision keeps its visible actions and does not
+  let Back navigate the page underneath it.
+- Reduced motion removes the added settling animation. Desktop mouse and
+  trackpad navigation keep their existing behavior.
+
 ## Edge Cases
 
 - App top-left control switches between menu/avatar and `Back`; when `Back` is

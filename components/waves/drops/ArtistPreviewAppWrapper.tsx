@@ -9,7 +9,8 @@ import {
 } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { CSSProperties, ReactNode } from "react";
-import { Fragment, useCallback } from "react";
+import { Fragment, useCallback, useRef } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 
 const KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
 const KEYBOARD_TRANSITION =
@@ -30,6 +31,8 @@ export default function ArtistPreviewAppWrapper({
   readonly onClose: () => void;
   readonly children: ReactNode;
 }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(isOpen, dialogRef, onClose);
   const contentRef = useCallback((container: HTMLDivElement | null) => {
     if (!container) return;
     const focusedField = observeFocusedField(container);
@@ -48,6 +51,7 @@ export default function ArtistPreviewAppWrapper({
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
+        ref={dialogRef}
         as="div"
         className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden"
         onClose={onClose}

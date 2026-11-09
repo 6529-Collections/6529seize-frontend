@@ -7,6 +7,8 @@ import { ErrorBoundary } from "react-error-boundary";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import PdfOriginalLink from "./PdfOriginalLink";
+import { useRef } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 
 const PdfAttachmentReader = dynamic(() => import("./PdfAttachmentReader"), {
   ssr: false,
@@ -28,8 +30,15 @@ export default function PdfAttachmentPreview({
   readonly open: boolean;
   readonly onClose: () => void;
 }) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(open, dialogRef, onClose);
   return (
-    <Dialog open={open} onClose={onClose} className="tw-relative tw-z-[1100]">
+    <Dialog
+      ref={dialogRef}
+      open={open}
+      onClose={onClose}
+      className="tw-relative tw-z-[1100]"
+    >
       <DialogPanel
         className="tw-fixed tw-inset-0 tw-flex tw-flex-col tw-bg-iron-950 tw-text-iron-100"
         style={{

@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -157,6 +158,8 @@ export function E2eeTimeline({
   notice,
 }: E2eeTimelineProps) {
   const locale = useBrowserLocale();
+  // Day separators change at midnight in the display time zone.
+  const zone = useDisplayTimeZone();
   // Your own device changes live in the new-device notice and Devices page.
   const messages = useMemo(
     () =>
@@ -385,14 +388,14 @@ export function E2eeTimeline({
   const items: ReactNode[] = [];
   let previousDay: string | null = null;
   messages.forEach((message, index) => {
-    const day = getE2eeDayKey(message.ts);
+    const day = getE2eeDayKey(message.ts, zone);
     const newDay = day !== previousDay;
     if (newDay) {
       previousDay = day;
       items.push(
         <DaySeparator
           key={`day-${day}`}
-          label={getE2eeDayLabel(locale, message.ts)}
+          label={getE2eeDayLabel(locale, message.ts, { zone })}
         />
       );
     }

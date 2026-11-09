@@ -1,10 +1,10 @@
+import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import Link from "next/link";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import WaveDropAuthorPfp from "@/components/waves/drops/WaveDropAuthorPfp";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { getTimeAgoShort } from "@/helpers/Helpers";
 import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import WinnerDropBadge from "@/components/waves/drops/winner/WinnerDropBadge";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
@@ -20,6 +20,7 @@ export default function MemeWinnerArtistInfo({
   drop,
   showWaveInfo = true,
 }: MemeWinnerArtistInfoProps) {
+  const timeAgoShort = useTimeAgoShort();
   // Get the decision time from the winning context
   const decisionTime = drop.winning_context?.decision_time;
 
@@ -65,7 +66,7 @@ export default function MemeWinnerArtistInfo({
             />
             <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
               <WithDropAuthorSignedMarker drop={drop}>
-                {getTimeAgoShort(drop.created_at)}
+                {timeAgoShort(drop.created_at)}
               </WithDropAuthorSignedMarker>
             </p>
           </div>

@@ -6,7 +6,7 @@ import WaveDropTime from "./time/WaveDropTime";
 import { GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX } from "./WaveDrop.helpers";
 
 const getGroupedTimestampOpacityStyle = (offset: number): CSSProperties => ({
-  opacity: Math.min(1, offset / GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX),
+  opacity: `var(--message-swipe-time-opacity, ${Math.min(1, offset / GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX)})`,
 });
 
 const GroupedDropTimestamp = ({
@@ -38,7 +38,7 @@ const GroupedDropTimestamp = ({
 
   return (
     <div
-      className={`tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-z-0 tw-flex tw-w-[9.25rem] -tw-translate-y-1/2 tw-justify-end tw-overflow-visible tw-text-right tw-transition-opacity tw-duration-150 ${
+      className={`tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-z-0 tw-flex tw-w-[9.25rem] -tw-translate-y-1/2 tw-justify-end tw-overflow-visible tw-text-right tw-transition-opacity tw-duration-150 motion-reduce:tw-transition-none [[data-reply-enabled=true]_&]:tw-right-14 ${
         isHoverVariant
           ? "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100"
           : ""

@@ -29,6 +29,7 @@ import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent
 import { useWaveData } from "@/hooks/useWaveData";
 import { useDrop } from "@/hooks/useDrop";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { t } from "@/i18n/messages";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
 import MyStreamWaveDesktopTabs from "./MyStreamWaveDesktopTabs";
@@ -121,6 +122,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const viewMobileSubmissionRules = useBrainMobileSubmissionRules();
   const queryClient = useQueryClient();
   const locale = useBrowserLocale();
+  const displayTimeZone = useDisplayTimeZone();
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const {
     setWaveDropAction,
@@ -428,8 +430,10 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
           status: participationStatus,
         },
         isApprovalVotingControlsLocked,
+        zone: displayTimeZone,
       }),
     [
+      displayTimeZone,
       isApprovalVotingControlsLocked,
       participationCanSubmitNow,
       participationEndTime,

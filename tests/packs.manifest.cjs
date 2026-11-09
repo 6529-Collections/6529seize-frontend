@@ -477,6 +477,9 @@ const PACKS = [
         "tests/social/chat-render-budget-sandbox.spec.ts",
         "tests/social/wave-live-unread-sandbox.spec.ts",
         "tests/social/wave-media-processing-sandbox.spec.ts",
+        "tests/social/wave-time-zone-sandbox.spec.ts",
+        "tests/social/android-back-sandbox.spec.ts",
+        "tests/social/mobile-gestures-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,

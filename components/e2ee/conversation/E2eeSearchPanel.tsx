@@ -4,6 +4,7 @@ import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { t } from "@/i18n/messages";
 import type {
   E2eeConversation,
@@ -57,6 +58,7 @@ export function E2eeSearchPanel({
   onJumpTo,
 }: E2eeSearchPanelProps) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
@@ -175,7 +177,7 @@ export function E2eeSearchPanel({
                     )}
                   </span>
                   <span className="tw-text-iron-500">
-                    {formatE2eeTimestamp(locale, message.ts)}
+                    {formatE2eeTimestamp(locale, message.ts, { zone })}
                   </span>
                 </span>
                 <span className="tw-line-clamp-2 tw-w-full tw-text-sm tw-text-iron-300">
