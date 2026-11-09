@@ -26,7 +26,7 @@ type LostGrantRevokeResult = "revoked" | "failed" | "none";
  * wallet's profile. A loss is processed or discarded only for this account,
  * since the server answers with the signed-in profile's grants and devices.
  */
-export interface SignedInAccount {
+interface SignedInAccount {
   readonly wallet: string;
   readonly profileId: string;
 }
@@ -134,10 +134,10 @@ function recordFailure(
   wallet: string,
   loss: DeviceKeyLoss,
   error: unknown
-): LostGrantRevokeResult {
+): void {
   if (error instanceof AccountChangedError) {
     // The session moved to another profile mid-check: leave it pending.
-    return "failed";
+    return;
   }
   const attempts = (loss.revokeAttempts ?? 0) + 1;
   if (
@@ -149,7 +149,6 @@ function recordFailure(
   } else {
     noteLostGrantRevokeFailure(wallet);
   }
-  return "failed";
 }
 
 /**
@@ -188,7 +187,8 @@ export async function revokeLostDeviceGrant(
       try {
         revocable = await isRevocable(loss, account);
       } catch (error) {
-        return recordFailure(wallet, loss, error);
+        recordFailure(wallet, loss, error);
+        return "failed";
       }
       if (!revocable) {
         clearDeviceKeyLoss(wallet);
@@ -197,7 +197,8 @@ export async function revokeLostDeviceGrant(
       try {
         await revokeDeviceGrant(loss.grantId);
       } catch (error) {
-        return recordFailure(wallet, loss, error);
+        recordFailure(wallet, loss, error);
+        return "failed";
       }
       clearDeviceKeyLoss(wallet);
       return "revoked";

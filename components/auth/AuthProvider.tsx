@@ -267,14 +267,11 @@ export default function Auth({
     activeProfileProxy?.id,
     isDirectProfileSession
   );
-  // A lost signing grant is cleaned up only for the signed-in wallet's own
-  // profile, never through a proxy and never for another account.
-  const lostGrantAccountReady =
-    isDirectProfileSession && isAddressAuthorized && Boolean(address);
+  // Lost grants are cleaned up only for the signed-in wallet's own profile.
   useLostDeviceGrantCleanup(
     queryClient,
-    lostGrantAccountReady ? (address ?? null) : null,
-    lostGrantAccountReady ? (connectedProfile?.id ?? null) : null
+    isDirectProfileSession && isAddressAuthorized ? (address ?? null) : null,
+    connectedProfile?.id ?? null
   );
 
   useEffect(() => {
