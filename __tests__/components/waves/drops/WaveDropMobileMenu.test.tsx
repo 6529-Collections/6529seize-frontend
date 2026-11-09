@@ -261,9 +261,7 @@ test("releases the native modal before handing reply focus to the composer", asy
   }
   render(<Menu />);
   for (let opening = 1; opening <= 3; opening++) {
-    await userEvent.click(
-      screen.getByRole("button", { name: "Reply", exact: true })
-    );
+    await userEvent.click(screen.getByRole("button", { name: /^Reply$/ }));
     expect(onReply).toHaveBeenCalledTimes(opening);
     await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
     expect(screen.getByTestId("wrapper")).toBeInTheDocument();

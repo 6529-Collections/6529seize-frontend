@@ -192,7 +192,10 @@ it.each(["touchCancel", "blur", "second finger"])(
     start(target);
     move(target, 60);
     if (reason === "touchCancel") fireEvent.touchCancel(target);
-    else if (reason === "blur") fireEvent(globalThis, new Event("blur"));
+    else if (reason === "blur")
+      act(() => {
+        globalThis.dispatchEvent(new Event("blur"));
+      });
     else
       fireEvent.touchStart(target, { touches: [touch(60), touch(80, 110, 2)] });
     end(target, 60);
