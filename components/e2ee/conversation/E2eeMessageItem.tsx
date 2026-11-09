@@ -5,6 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { memo, useEffect, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useSwipeToReply } from "@/hooks/useSwipeToReply";
+import { SwipeReplyHint } from "@/components/waves/drops/SwipeReplyHint";
 import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -480,6 +482,20 @@ function E2eeMessageItemComponent({
   });
   const resolvedReply = replyTarget ?? storedReply ?? null;
   const locale = useBrowserLocale();
+  const canSwipeReply =
+    canAct &&
+    selfProfileId !== null &&
+    message.kind !== "notice" &&
+    !message.deleted &&
+    !message.undecryptable &&
+    !message.pending &&
+    !message.unsent;
+  const { rootRef, contentRef, onTouchStart } = useSwipeToReply({
+    enabled: canSwipeReply,
+    canReply: canSwipeReply,
+    scope: `${message.g}:${message.id}`,
+    onReply: () => actions.onReply(message),
+  });
   if (message.kind === "notice") {
     return (
       <NoticeItem
@@ -513,79 +529,92 @@ function E2eeMessageItemComponent({
       tabIndex={inViewportRow ? undefined : -1}
       className={getMessageRowClassName(compact, message.pending, appear)}
     >
-      <div className="tw-w-10 tw-flex-shrink-0">
-        {compact ? null : (
-          <E2eeMessageAvatar member={sender} fallbackName={shownName} />
-        )}
-      </div>
       <div
-        className={`tw-min-w-0 tw-flex-1 ${showActions ? "touch-only:tw-pr-8" : ""}`}
+        ref={rootRef}
+        onTouchStart={onTouchStart}
+        className="tw-relative tw-min-w-0 tw-flex-1"
       >
-        <MessageMeta
-          message={message}
-          name={shownName}
-          member={sender}
-          compact={compact}
-        />
-        {message.reply && !(replyLoading && !resolvedReply) ? (
-          <ReplyPreview
-            replyId={message.reply}
-            target={resolvedReply}
-            conversation={conversation}
-            selfProfileId={selfProfileId}
-            onJumpTo={actions.onJumpTo}
-          />
-        ) : null}
-        <MessageBody
-          message={message}
-          conversation={conversation}
-          selfProfileId={selfProfileId}
-          senderName={shownName}
-        />
-        {message.imported && !message.deleted ? (
-          <E2eeImportedNote
-            imported={message.imported}
-            importerName={importerName}
-            showDetail={!compact}
-          />
-        ) : null}
-        {!message.deleted &&
-        !message.undecryptable &&
-        message.attachments.length > 0 ? (
-          <E2eeImageGallery attachments={message.attachments}>
-            <div className="tw-mt-1 tw-space-y-2">
-              {message.attachments.map((attachment) => (
-                <E2eeAttachmentView
-                  key={attachment.blob}
-                  engine={engine}
-                  g={message.g}
-                  messageId={message.id}
-                  attachment={attachment}
-                />
-              ))}
-            </div>
-          </E2eeImageGallery>
-        ) : null}
-        {message.unsent && isOwn ? (
-          <E2eeUnsentNotice
-            message={message}
-            conversation={conversation}
-            selfProfileId={selfProfileId}
-            actions={actions}
-          />
-        ) : null}
-        {compact && hasMarkers(message) ? (
-          <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
-            <MessageMarkers message={message} />
+        {canSwipeReply && <SwipeReplyHint />}
+        <div
+          ref={contentRef}
+          className="tw-relative tw-flex tw-gap-3 [[data-reply-swiping=true]_&]:tw-z-10"
+          style={{ transform: "var(--message-swipe-transform, none)" }}
+        >
+          <div className="tw-w-10 tw-flex-shrink-0">
+            {compact ? null : (
+              <E2eeMessageAvatar member={sender} fallbackName={shownName} />
+            )}
           </div>
-        ) : null}
-        <Reactions
-          message={message}
-          conversation={conversation}
-          selfProfileId={selfProfileId}
-          canAct={canAct && showActions}
-          onReact={(reaction, on) => actions.onReact(message, reaction, on)}
-        />
+          <div
+            className={`tw-min-w-0 tw-flex-1 ${showActions ? "touch-only:tw-pr-8" : ""}`}
+          >
+            <MessageMeta
+              message={message}
+              name={shownName}
+              member={sender}
+              compact={compact}
+            />
+            {message.reply && !(replyLoading && !resolvedReply) ? (
+              <ReplyPreview
+                replyId={message.reply}
+                target={resolvedReply}
+                conversation={conversation}
+                selfProfileId={selfProfileId}
+                onJumpTo={actions.onJumpTo}
+              />
+            ) : null}
+            <MessageBody
+              message={message}
+              conversation={conversation}
+              selfProfileId={selfProfileId}
+              senderName={shownName}
+            />
+            {message.imported && !message.deleted ? (
+              <E2eeImportedNote
+                imported={message.imported}
+                importerName={importerName}
+                showDetail={!compact}
+              />
+            ) : null}
+            {!message.deleted &&
+            !message.undecryptable &&
+            message.attachments.length > 0 ? (
+              <E2eeImageGallery attachments={message.attachments}>
+                <div className="tw-mt-1 tw-space-y-2">
+                  {message.attachments.map((attachment) => (
+                    <E2eeAttachmentView
+                      key={attachment.blob}
+                      engine={engine}
+                      g={message.g}
+                      messageId={message.id}
+                      attachment={attachment}
+                    />
+                  ))}
+                </div>
+              </E2eeImageGallery>
+            ) : null}
+            {message.unsent && isOwn ? (
+              <E2eeUnsentNotice
+                message={message}
+                conversation={conversation}
+                selfProfileId={selfProfileId}
+                actions={actions}
+              />
+            ) : null}
+            {compact && hasMarkers(message) ? (
+              <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
+                <MessageMarkers message={message} />
+              </div>
+            ) : null}
+            <Reactions
+              message={message}
+              conversation={conversation}
+              selfProfileId={selfProfileId}
+              canAct={canAct && showActions}
+              onReact={(reaction, on) => actions.onReact(message, reaction, on)}
+            />
+          </div>
+        </div>
       </div>
       {showActions ? (
         <div className="tw-absolute tw-right-3 tw-top-1">

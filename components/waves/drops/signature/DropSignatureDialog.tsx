@@ -36,6 +36,8 @@ import {
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useQuery } from "@tanstack/react-query";
 import type { KeyboardEvent, ReactNode, SyntheticEvent } from "react";
+import { useRef } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { usePublicClient } from "wagmi";
 
 interface DropSignatureDialogProps {
@@ -271,8 +273,11 @@ export function SignatureDialogFrame({
   readonly children: ReactNode;
 }) {
   const locale = useBrowserLocale();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(isOpen, dialogRef, onClose);
   return (
     <Dialog
+      ref={dialogRef}
       open={isOpen}
       onClose={onClose}
       // Above the dialogs a seal can appear in, such as the single-drop view.
