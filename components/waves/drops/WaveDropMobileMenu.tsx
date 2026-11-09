@@ -47,6 +47,7 @@ import WaveDropMobileMenuReactionPicker from "./WaveDropMobileMenuReactionPicker
 import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
 import DropSignatureDialog from "./signature/DropSignatureDialog";
 import DropSignatureMenuItem from "./signature/DropSignatureMenuItem";
+import DisplayTimeZoneMobileMenuItem from "@/components/display-time-zone/DisplayTimeZoneMobileMenuItem";
 
 export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -279,6 +280,8 @@ function WaveDropMobileMenuAuthenticatedActions({
           <WaveDropMobileMenuCopyLink drop={drop} onCopy={closeMenu} />
         </>
       )}
+
+      <DisplayTimeZoneMobileMenuItem onSelected={closeMenu} />
 
       <WaveDropBookmarkAction dropId={drop.id} onSelected={closeMenu} mobile />
       <WaveDropDocumentationAction drop={drop} onSelected={closeMenu} mobile />

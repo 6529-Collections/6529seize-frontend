@@ -30,9 +30,6 @@ import {
 const HEADER_BUTTON_CLASSES =
   "tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 data-[open]:tw-bg-iron-800 data-[open]:tw-text-white desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-ring-white/10";
 
-const APP_BUTTON_CLASSES =
-  "tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 data-[open]:tw-text-iron-50 hover:tw-text-iron-50";
-
 const CHIP_CLASSES =
   "tw-flex tw-h-8 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/15 tw-text-xs tw-font-semibold tw-text-primary-300";
 
@@ -132,16 +129,15 @@ function SwitchOption({
 /**
  * The wave header time switch. It shows times in UTC (or back in local time)
  * for this tab only, and turns into a "Times in UTC" chip with an undo button
- * while it is on. Variants: `header` for the wave header, `app` for the
- * mobile app header (short chip), and `compact` for compact wave headers,
- * where only the chip renders and the switch itself lives in the overflow
- * menu (see `useDisplayTimeZoneMenuItem`).
+ * while it is on. Variants: `header` for the wave header, and `compact` for
+ * compact wave headers, where only a short chip renders and the switch itself
+ * lives in the overflow menu (see `useDisplayTimeZoneMenuItem`).
  */
 export default function DisplayTimeZoneSwitch({
   variant = "header",
   tooltipId,
 }: {
-  readonly variant?: "header" | "app" | "compact" | undefined;
+  readonly variant?: "header" | "compact" | undefined;
   readonly tooltipId?: string | undefined;
 }) {
   const locale = useBrowserLocale();
@@ -175,12 +171,6 @@ export default function DisplayTimeZoneSwitch({
     variant === "header"
       ? t(locale, "displayTimeZone.chip.label", { zone: current.name })
       : current.name;
-  const buttonClasses =
-    variant === "app" ? APP_BUTTON_CLASSES : HEADER_BUTTON_CLASSES;
-  const iconClasses =
-    variant === "app"
-      ? "tw-size-5 tw-flex-shrink-0"
-      : "tw-h-4 tw-w-4 tw-flex-shrink-0";
   const isNamedZoneSetting =
     state.preference !== LOCAL_TIME_ZONE_PREFERENCE &&
     state.preference !== UTC_TIME_ZONE_PREFERENCE;
@@ -220,9 +210,12 @@ export default function DisplayTimeZoneSwitch({
                   "data-tooltip-content": switchLabel,
                 }
               : {})}
-            className={buttonClasses}
+            className={HEADER_BUTTON_CLASSES}
           >
-            <ClockIcon aria-hidden="true" className={iconClasses} />
+            <ClockIcon
+              aria-hidden="true"
+              className="tw-h-4 tw-w-4 tw-flex-shrink-0"
+            />
           </PopoverButton>
         )}
         <PopoverPanel
@@ -286,8 +279,9 @@ function AnnouncementRegion({ text }: { readonly text: string }) {
 }
 
 /**
- * The overflow-menu entry for compact headers and the app header: one tap
- * switches to UTC (or local time) for this tab, a second tap switches back.
+ * The menu entry for compact wave headers and the post menu on phones: one
+ * tap switches to UTC (or local time) for this tab, a second tap switches
+ * back.
  */
 export function useDisplayTimeZoneMenuItem(): CompactMenuItem {
   const locale = useBrowserLocale();

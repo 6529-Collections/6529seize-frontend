@@ -18,8 +18,8 @@ misled. Relative times such as `4m` or `3h` are unchanged.
   signed out because the choice is saved on the device.
 - Wave switch: the clock button in the wave conversation header, next to the
   gallery-view toggle. On compact wave headers it is an item in the header's
-  overflow menu. In the native app it is the clock button in the app header
-  inside a wave or direct message.
+  overflow menu. On phones, including the native app, it is an item in the
+  menu that opens when you press and hold a post.
 
 ## Setting
 
@@ -50,8 +50,10 @@ saved setting. It applies to every wave, direct message and decision in that
 tab. Choosing an option announces `Times now shown in {zone}` to screen
 readers.
 
-On compact headers, the overflow menu offers `Show times in UTC for now` and,
-while on, `Show times in {setting} again`.
+On compact headers and in the press-and-hold post menu on phones, the menu
+offers `Show times in UTC for now` and, while on, `Show times in {setting}
+again`. Phones show no chip in the header; converted times carry their zone
+name, such as `UTC`.
 
 ## What Follows the Display Zone
 

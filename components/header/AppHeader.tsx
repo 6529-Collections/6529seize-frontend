@@ -10,7 +10,6 @@ import clsx from "clsx";
 import Image from "next/image";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import DisplayTimeZoneSwitch from "@/components/display-time-zone/DisplayTimeZoneSwitch";
 import { CompactMenu } from "@/components/compact-menu";
 import DeviceSecurityStatus from "@/components/device-signing/DeviceSecurityStatus";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -684,9 +683,6 @@ export default function AppHeader() {
               />
             )}
             <HeaderDropActionButton action={headerDropAction} />
-            {isInsideWave && (isWavesRoute || isMessagesRoute) && (
-              <DisplayTimeZoneSwitch variant="app" />
-            )}
             {isHomeRoute && (
               <NetworkHealthCTA
                 className={isCapacitor ? undefined : "md:tw-hidden"}
