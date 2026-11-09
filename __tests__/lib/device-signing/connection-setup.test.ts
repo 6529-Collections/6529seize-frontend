@@ -241,9 +241,10 @@ async function prepareNativeShare(account: PrivateKeyAccount) {
     sign: async (data) => {
       mockGrantId = computeAppGrantId(data.message);
       return {
-        signature: await account.signTypedData(
-          data as Parameters<PrivateKeyAccount["signTypedData"]>[0]
-        ),
+        signature: await account.signTypedData<Record<string, unknown>>({
+          ...data,
+          message: { ...data.message },
+        }),
       };
     },
     isCurrent: () => true,
