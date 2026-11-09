@@ -29,6 +29,17 @@ it("lets navigation continue when no surface is open", () => {
   expect(dismissAndroidBackLayer()).toBe(false);
 });
 
+it("lets navigation pass the inline time-zone map while retaining other listboxes", () => {
+  const map = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  map.setAttribute("role", "listbox");
+  map.setAttribute("aria-labelledby", "world-time-zones-map-heading");
+  document.body.append(map);
+  expect(dismissAndroidBackLayer()).toBe(false);
+
+  overlay("listbox");
+  expect(dismissAndroidBackLayer()).toBe(true);
+});
+
 it("closes only the lightbox above a sheet and single-drop content", () => {
   const sheet = register(overlay());
   const image = register(overlay("dialog", 1100));

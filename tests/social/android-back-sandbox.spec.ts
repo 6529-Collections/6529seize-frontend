@@ -231,3 +231,18 @@ test("Android Back keeps a direct profile link inside the app before root exit",
   expect(await nativeCalls(page)).not.toContain("App.minimizeApp");
   await expectNoUnsafeSandboxMutations(baseURL);
 });
+
+test("Android Back leaves the time-zone page when its inline map is visible", async ({
+  page,
+  baseURL,
+}) => {
+  await page.goto("/tools/time-zones", { waitUntil: "domcontentloaded" });
+  await waitForRouteReady(page);
+  await expect(
+    page.getByRole("listbox", { name: "Time zone map", exact: true })
+  ).toBeVisible();
+  await back(page);
+  await expect(page).toHaveURL(new URL("/", baseURL).toString());
+  expect(await nativeCalls(page)).not.toContain("App.minimizeApp");
+  await expectNoUnsafeSandboxMutations(baseURL);
+});
