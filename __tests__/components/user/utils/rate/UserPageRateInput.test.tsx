@@ -9,7 +9,8 @@ function Harness({
   minMax = { min: -2, max: 2 },
   isProxy = false,
   variant = "form",
-}: Partial<Pick<InputProps, "minMax" | "isProxy" | "variant">> & {
+  clampOnBlur = true,
+}: Partial<Pick<InputProps, "minMax" | "isProxy" | "variant" | "clampOnBlur">> & {
   readonly initialValue?: string;
 }) {
   const [value, setValue] = useState(initialValue);
@@ -22,6 +23,7 @@ function Harness({
         minMax={minMax}
         isProxy={isProxy}
         variant={variant}
+        clampOnBlur={clampOnBlur}
         inputId="test-rating"
       />
     </>
@@ -55,6 +57,23 @@ it("retains proxy typing without clamping on blur", async () => {
   await user.type(amount(), "12");
   await user.tab();
   expect(amount()).toHaveValue("12");
+});
+
+it("keeps a draft on blur until its bounds are available", async () => {
+  const user = userEvent.setup();
+  const { rerender } = render(
+    <Harness clampOnBlur={false} minMax={{ min: 0, max: 0 }} />
+  );
+  await user.clear(amount());
+  await user.type(amount(), "12");
+  await user.tab();
+  expect(amount()).toHaveValue("12");
+
+  rerender(<Harness minMax={{ min: -10, max: 10 }} />);
+  expect(amount()).toHaveValue("12");
+  await user.click(amount());
+  await user.tab();
+  expect(amount()).toHaveValue("10");
 });
 
 it.each([

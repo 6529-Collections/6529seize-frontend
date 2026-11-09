@@ -161,12 +161,12 @@ function RepContributorRow({
             )}
           </div>
         )}
-        <p className="tw-mb-0 tw-mt-0 tw-whitespace-nowrap tw-text-left tw-text-sm tw-font-medium tw-text-white">
+        <p className="tw-mb-0 tw-mt-0 tw-whitespace-nowrap tw-text-left tw-text-sm tw-font-medium tw-text-iron-100">
           {contributor.display}
         </p>
       </div>
 
-      <span className="tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors">
+      <span className="tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-300 tw-transition-colors">
         {formatNumberWithCommas(contributor.contribution)}
       </span>
     </Link>
@@ -302,10 +302,9 @@ export default function RepContributorsDialog({
       title={title}
       isOpen={isOpen}
       onClose={onClose}
-      tall
-      fixedHeight
       tabletModal
       noPadding
+      fitVisualViewport
       maxWidthClass="md:tw-max-w-xl"
       showScrollbar
       showHeaderCloseButton
