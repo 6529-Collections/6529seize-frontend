@@ -189,8 +189,11 @@ encrypted backup. See [Encrypted messages](../../encrypted-messages.md#renewal-a
 
 The browser checks the profile's grants when a wave opens, when the app
 returns to focus, and every 10 minutes while visible. An active grant for
-another device can raise a notice above the composer. Choose **Got it**
-to clear that notice across devices as their grant lists refresh. Choose
+another device can raise a notice above the composer, **New device: {name}**,
+that says what it can now do and when it was set up. A device that also has
+encrypted DMs is named for both, in the same words as the encrypted inbox's
+alert for it. Choose **It was me** to clear the notice across devices as their
+grant lists refresh; answering the inbox alert clears this one too. Choose
 **Revoke** to remove the device's permission. The first list a browser sees
 for a wallet is its baseline. If the browser loses its local signing key but
 still remembers its grant, that grant does not trigger a new-device notice.

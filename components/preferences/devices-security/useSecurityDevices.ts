@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import {
@@ -14,9 +13,9 @@ import {
 import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
-import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
+import type { ApiE2eeDevice } from "@/lib/e2ee/api-types";
 import type { E2eeDeviceInfo } from "@/lib/e2ee/types";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { commonApiPost } from "@/services/api/common-api";
 import {
   classifyDevices,
   type ClassifiedDevices,
@@ -24,6 +23,10 @@ import {
   type EncryptedDeviceInput,
   type SecurityDevice,
 } from "./classifyDevices";
+import {
+  fetchOwnE2eeDevices,
+  ownE2eeDevicesQueryKey,
+} from "./ownE2eeDevicesQuery";
 
 const fromEngine = (device: E2eeDeviceInfo): EncryptedDeviceInput => ({
   deviceKey: device.deviceKey,
@@ -178,18 +181,9 @@ export function useSecurityDevices(): SecurityDevicesState {
   const engineCanAct = engine !== null && e2ee.status === "ready";
   const encryptionEnabled = isE2eeEnabled() && profileId !== null;
   const apiDevicesQuery = useQuery({
-    queryKey: [QueryKey.E2EE_PROFILE_DEVICES, profileId, listAddress],
+    queryKey: ownE2eeDevicesQueryKey(profileId, listAddress),
     enabled: encryptionEnabled && listAddress !== null && !engineReady,
-    queryFn: async ({ signal }) => {
-      const data = await commonApiFetch<ApiE2eeMe>({
-        endpoint: "e2ee/me",
-        signal,
-      });
-      if (data.profile_id !== profileId) {
-        throw new Error("Device profile changed");
-      }
-      return data.devices;
-    },
+    queryFn: ({ signal }) => fetchOwnE2eeDevices(profileId, signal),
   });
   const local = useLocalDeviceKeys(listAddress);
   const now = useMinuteClock();

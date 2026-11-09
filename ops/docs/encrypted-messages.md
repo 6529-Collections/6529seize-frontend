@@ -458,8 +458,9 @@ time your device sees someone. Compare safety codes and check the wallets in
 Preferences → **Devices & security** (`/preferences?tab=security`; the old
 `/messages/encrypted/devices` and `?tab=devices` links lead there) lists every
 device of your profile once, whether it can sign posts, read encrypted DMs or
-both. The encrypted inbox header's **Devices & security** button opens it, and
-opening the tab starts encrypted messages in that browser so backup can show.
+both. The encrypted inbox header's **Devices & security** button (**Security**
+on phones) opens it, and opening the tab starts encrypted messages in that
+browser so backup can show.
 
 - **This device** is pinned first, with its permissions as chips (a missing one
   shows dashed, for example **Encrypted DMs off**, next to a **Turn on…**
@@ -490,9 +491,13 @@ iPhone"); devices added earlier keep their name. A profile can have up to 10
 active devices; at the limit, the new device lists the profile's devices and
 asks you to revoke one from a device you already use, then turn it on.
 
-When another device of yours is turned on, your other devices show which
-device was added and when, that it can read your encrypted messages, and
-**Revoke** or **This was me**. Devices that already existed when this device
+When another device of yours is turned on, your other devices show one alert
+for it, **New device: {name}**, at the top of **Devices & security**, in the
+encrypted inbox and in open encrypted chats. It says everything the device can
+now do (post as you, read your encrypted DMs, or both) and when it was set up,
+with **Revoke** (confirmed first) and **It was me**. The signed-posts alert
+above a wave's composer uses the same words for the same device, and answering
+either one clears the other. Devices that already existed when this device
 was set up, such as an earlier setup of this browser found again after its
 data was cleared, are never announced as new. Your own device changes are not repeated in
 each chat's timeline.
