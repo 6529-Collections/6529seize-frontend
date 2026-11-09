@@ -151,6 +151,7 @@ const useCanonicalDropUpdateForExistingDrop = ({
 interface UseProcessIncomingDropParams extends Pick<
   UseWaveRealtimeUpdaterProps,
   | "activeWaveId"
+  | "activeReadWaveId"
   | "getData"
   | "hasServerFeedSeed"
   | "isWaveInUse"
@@ -248,6 +249,7 @@ const useApplyIncomingInsert = ({
 
 const useProcessIncomingDrop = ({
   activeWaveId,
+  activeReadWaveId = activeWaveId,
   getData,
   hasServerFeedSeed,
   isWaveInUse,
@@ -269,9 +271,10 @@ const useProcessIncomingDrop = ({
     syncNewestMessages,
   });
   const activeWaveIdRef = useLatestActiveWaveIdRef(activeWaveId);
+  const activeReadWaveIdRef = useLatestActiveWaveIdRef(activeReadWaveId);
   const markActiveWaveAsRead = useActiveWaveReadMarker({
-    activeWaveId,
-    activeWaveIdRef,
+    activeWaveId: activeReadWaveId,
+    activeWaveIdRef: activeReadWaveIdRef,
     batchReads: gapSyncEnabled,
     removeWaveDeliveredNotifications,
   });
@@ -593,6 +596,7 @@ const useDropDeleteMessages = (
 
 export function useWaveRealtimeUpdater({
   activeWaveId,
+  activeReadWaveId,
   getData,
   hasServerFeedSeed,
   isWaveInUse,
@@ -611,6 +615,7 @@ export function useWaveRealtimeUpdater({
   const { processIncomingDrop, processDropUpdateRef, gapSync } =
     useProcessIncomingDrop({
       activeWaveId,
+      activeReadWaveId,
       getData,
       hasServerFeedSeed,
       isWaveInUse,

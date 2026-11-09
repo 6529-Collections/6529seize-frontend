@@ -26,15 +26,14 @@ export default function DeviceSetupHost() {
     setRequest(null);
   }
   useEffect(() => {
-    const open = (event: Event) => {
+    const updateRequest = (event: Event) => {
       if (session) {
-        setRequest({
-          scope: (event as CustomEvent<DeviceSetupScope>).detail,
-        });
+        const scope = (event as CustomEvent<DeviceSetupScope | null>).detail;
+        setRequest(scope === null ? null : { scope });
       }
     };
-    window.addEventListener(DEVICE_SETUP_EVENT, open);
-    return () => window.removeEventListener(DEVICE_SETUP_EVENT, open);
+    window.addEventListener(DEVICE_SETUP_EVENT, updateRequest);
+    return () => window.removeEventListener(DEVICE_SETUP_EVENT, updateRequest);
   }, [session]);
   if (!session || !request) return null;
   return (

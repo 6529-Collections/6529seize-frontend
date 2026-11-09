@@ -134,6 +134,11 @@ tabs. The collection lets you choose a different decision at any time.
   anonymous, including through later draws. You can still find your own entries
   in **My submissions**. Content and metadata remain visible as submitted, so
   avoid including identifying information if you want to stay anonymous.
+- Media attached to an entry keeps the artist's original file, including
+  embedded details such as location, camera details, capture time and the
+  file name. Photos posted in chat and on profiles have those details removed.
+  Remove anything you do not want public from the file before submitting,
+  especially for an anonymous submission.
 - Unrevealed anonymous submissions remain visible even when you have blocked
   their author's account, so blocking cannot identify the author. Hiding a
   specific drop and platform moderation still apply. Related author

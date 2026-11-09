@@ -19,7 +19,9 @@ import CreateDropPollDialog from "./CreateDropPollDialog";
 interface CreateDropComposerProps extends CreateDropLayoutProps {
   readonly initialDraftJson: string | null;
   readonly locale: SupportedLocale;
-  readonly submitWithResolvedAliases: () => Promise<void>;
+  readonly submitWithResolvedAliases: (
+    restoreFocusAfterSubmit?: boolean
+  ) => Promise<void>;
 }
 
 export default function CreateDropComposer({
@@ -195,7 +197,7 @@ export default function CreateDropComposer({
           hasValidationError={pollQuestionError !== null}
           validationHelperText={pollQuestionError}
           validationHelperClassName="tw-col-start-2 tw-row-start-3 tw-mb-0 tw-mt-2 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-amber-200/90"
-          onDrop={submitWithResolvedAliases}
+          onDrop={() => submitWithResolvedAliases(true)}
         />
         <div
           className={`tw-col-start-3 tw-row-start-2 tw-self-end ${
@@ -205,7 +207,7 @@ export default function CreateDropComposer({
           <CreateDropSubmit
             submitting={submitting}
             canSubmit={canSubmit}
-            onDrop={submitWithResolvedAliases}
+            onDrop={() => submitWithResolvedAliases()}
             isDropMode={isDropMode}
             label={submitLabel}
             disabledTooltip={

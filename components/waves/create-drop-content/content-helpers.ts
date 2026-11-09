@@ -1,4 +1,5 @@
 import { filterValidDropUploadFiles } from "@/services/uploads/dropUploadValidation";
+import { getDropMediaUploadPurpose } from "@/services/uploads/mediaUploadPurpose";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -13,6 +14,7 @@ import type { ApiCreateDropPollRequest } from "@/generated/models/ApiCreateDropP
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import type { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
@@ -325,6 +327,22 @@ export const getReplyTo = (activeDrop: ActiveDropState | null) => {
   }
   return undefined;
 };
+
+/**
+ * The purpose of media added to the composer in its current mode. It is fixed
+ * when a file is prepared (drop mode, reply or not), while submission works
+ * the purpose out again from the final drop request. If the user switches
+ * between drop mode and a reply after adding a file, the prepared upload no
+ * longer matches and is deliberately uploaded again with the right purpose.
+ */
+export const getComposerMediaUploadPurpose = (
+  isDropMode: boolean,
+  activeDrop: ActiveDropState | null
+): ApiMediaUploadPurpose =>
+  getDropMediaUploadPurpose({
+    drop_type: isDropMode ? ApiDropType.Participatory : ApiDropType.Chat,
+    reply_to: getReplyTo(activeDrop),
+  });
 
 export const buildInitialDrop = ({
   markdown,

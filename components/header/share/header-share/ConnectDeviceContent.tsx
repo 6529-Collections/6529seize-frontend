@@ -149,6 +149,8 @@ export function ConnectDeviceChoices({
               <Tooltip
                 id={tooltipId}
                 content={comingSoon}
+                variant="light"
+                opacity={1}
                 positionStrategy="fixed"
                 place="top"
               />

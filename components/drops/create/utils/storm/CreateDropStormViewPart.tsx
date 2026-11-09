@@ -10,7 +10,7 @@ import DropPart from "@/components/drops/view/part/DropPart";
 import CreateDropStormViewPartQuote from "./CreateDropStormViewPartQuote";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
 import { useObjectUrls } from "@/hooks/useObjectUrl";
-import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+import { getPreparedDropImagePreview } from "@/services/uploads/prepareDropImage";
 import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 
 interface CreateDropStormViewPartWaveProps {
@@ -51,7 +51,7 @@ const CreateDropStormViewPart = memo(
   }: CreateDropStormViewPartProps) => {
     const mediaUrls = useObjectUrls(part.media);
     const partMedias = part.media.flatMap((media, index) => {
-      const prepared = getPreparedDropImage(media);
+      const prepared = getPreparedDropImagePreview(media);
       const mediaSrc = prepared?.url ?? mediaUrls[index];
 
       return mediaSrc

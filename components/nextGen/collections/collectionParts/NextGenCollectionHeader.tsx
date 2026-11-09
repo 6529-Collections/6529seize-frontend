@@ -1,6 +1,5 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import DateCountdown from "@/components/date-countdown/DateCountdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import ButtonLink from "@/components/utils/button/ButtonLink";
@@ -18,7 +17,6 @@ import {
 import { apiUrl } from "@/services/api/api-endpoints";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
@@ -237,8 +235,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
 }
 
 export default function NextGenCollectionHeader(props: Readonly<Props>) {
-  const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const collectionMintCount = useCollectionMintCount(
     props.collection.id,
     true,
@@ -298,7 +295,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             </span>
           )}
         </div>
-        {props.show_links && (!capacitor.isIos || country === "US") && (
+        {props.show_links && !hideNftPurchasing && (
           <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-py-2">
             <Link
               href={

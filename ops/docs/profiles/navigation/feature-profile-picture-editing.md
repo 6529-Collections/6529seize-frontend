@@ -107,6 +107,8 @@ keep the individual picture editor.
   pins the image on IPFS. A file whose contents are not a PNG, JPEG, GIF or
   WebP image is rejected whatever its name, and the editor shows the server's
   message.
+- Identifying metadata such as location, camera details and capture time is
+  removed from an uploaded picture before it is pinned.
 
 ## Related Pages
 

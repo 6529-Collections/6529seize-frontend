@@ -1,3 +1,4 @@
+import { lookupRetryAfterMs } from "./lookup-reads";
 import { E2eeApiError, asE2eeApiError } from "./api-errors";
 import { buildE2eeApiClient } from "./api-client";
 import {
@@ -47,8 +48,12 @@ export interface E2eeApiClient {
   registerLoginGrantDevice(
     body: ApiE2eeRegisterLoginGrantDeviceRequest
   ): Promise<ApiE2eeDevice>;
-  getDevice(deviceKey: string): Promise<ApiE2eeDevice>;
-  getProfileDevices(profileId: string): Promise<ApiE2eeDevice[]>;
+  getDevice(deviceKey: string, signal?: AbortSignal): Promise<ApiE2eeDevice>;
+  /** `ciphersuite`: only devices that can join groups of it (D172). */
+  getProfileDevices(
+    profileId: string,
+    ciphersuite?: number
+  ): Promise<ApiE2eeDevice[]>;
   revokeDevice(
     deviceKey: string,
     body: ApiE2eeRevokeDeviceRequest
@@ -135,6 +140,7 @@ export function toE2eeApiError(error: unknown): unknown {
     status: status ?? 0,
     code: getStructuredApiErrorCode(error) ?? null,
     currentEpoch: readCurrentEpoch(error),
+    retryAfterMs: lookupRetryAfterMs(error, Date.now()),
   });
 }
 

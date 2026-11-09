@@ -32,6 +32,7 @@ import { profileAndConsolidationsToProfileMin } from "@/helpers/ProfileHelpers";
 import { hasPendingInlineImageUploadDrop } from "@/helpers/waves/inline-image-upload.helpers";
 import { getCreateWaveDropRequest } from "@/components/waves/create-wave/services/createWaveDropRequest";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import type { ApiCreateCompetitionEntryRequest } from "@/generated/models/ApiCreateCompetitionEntryRequest";
 import {
   createCompetitionEntry,
@@ -182,7 +183,10 @@ export default function CompetitionEntryForm({
           ? pending.current.request
           : null;
       if (!request) {
-        const content = await getCreateWaveDropRequest(snapshot);
+        const content = await getCreateWaveDropRequest(
+          snapshot,
+          ApiMediaUploadPurpose.DecisionEntry
+        );
         const drop = {
           ...content,
           ...getEntryReferences(
@@ -310,6 +314,7 @@ export default function CompetitionEntryForm({
             wave={{ name: competition.title, image: wave.picture, id: wave.id }}
             waveId={wave.id}
             forceScreenType={CreateDropScreenType.DESKTOP}
+            mediaUploadPurpose={ApiMediaUploadPurpose.DecisionEntry}
             onSubmitDrop={() => undefined}
             onCanSubmitChange={setCanSubmit}
           />

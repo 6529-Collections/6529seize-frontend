@@ -127,6 +127,9 @@ export class EnrollmentFlight {
     }
     setStatus(this.ctx, "enrolling");
     try {
+      // enrollDevice first checks the stored device's suite and retires an
+      // earlier-suite device (D172): inside this single flight and the
+      // queue, so concurrent callers never retire or enroll twice.
       const ready = await this.ctx.queue.run(() =>
         enrollDevice(this.ctx, { allowPrompt })
       );
@@ -141,6 +144,8 @@ export class EnrollmentFlight {
         return;
       }
       await loadGroups(this.ctx);
+      // The new device is on the current suite: the move is done (D172).
+      this.ctx.store.upgrade = null;
       setStatus(this.ctx, "ready");
       try {
         await this.hooks.refreshMe();

@@ -44,6 +44,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiWaveRequiredMetadata } from "@/generated/models/ApiWaveRequiredMetadata";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { IMAGE_TRANSFORMER } from "../lexical/transformers/ImageTransformer";
 import { SAFE_MARKDOWN_TRANSFORMERS } from "../lexical/transformers/markdownTransformers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -97,6 +98,8 @@ interface CreateDropWrapperProps {
    * MOBILE branch is a modal sheet that cannot host a page-flow step.
    */
   readonly forceScreenType?: CreateDropScreenType | undefined;
+  /** What the drop's media is for; defaults to chat. */
+  readonly mediaUploadPurpose?: ApiMediaUploadPurpose | undefined;
   readonly children: React.ReactNode;
   readonly setIsStormMode: (isStormMode: boolean) => void;
   readonly setViewType: (newV: CreateDropViewType) => void;
@@ -157,6 +160,7 @@ const CreateDropWrapper = forwardRef<
       wave: waveProps,
       waveId,
       forceScreenType,
+      mediaUploadPurpose = ApiMediaUploadPurpose.Chat,
       children,
       setIsStormMode,
       setViewType,
@@ -226,6 +230,7 @@ const CreateDropWrapper = forwardRef<
     const { handleFileChange: setFilesWhenUnlocked, isPreparingFiles } =
       useDropFilePreparation({
         scopeKey: waveId ?? "new-wave",
+        purpose: mediaUploadPurpose,
         existingFiles: [
           ...(drop?.parts.flatMap((part) => part.media) ?? []),
           ...files,

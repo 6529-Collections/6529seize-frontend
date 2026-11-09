@@ -8,6 +8,7 @@ use std::collections::HashMap;
 
 use mls_wasm::codec::{self, ENTRY_BUCKETS, MESSAGE_BUCKETS};
 use mls_wasm::{Code, Device};
+use openmls::prelude::Ciphersuite;
 use serde_json::{json, Value};
 
 pub const DAY: u64 = 24 * 3600;
@@ -188,6 +189,17 @@ impl Client {
         list[0]["data"].as_str().unwrap().to_string()
     }
 
+    /// One KeyPackage on `suite`.
+    pub fn key_package_on(&self, suite: Ciphersuite) -> String {
+        let list = parse(
+            &self
+                .dev
+                .create_key_packages_for(suite, 1, false, 30 * DAY)
+                .unwrap(),
+        );
+        list[0]["data"].as_str().unwrap().to_string()
+    }
+
     pub fn summary(&self, g: &str) -> Value {
         parse(&self.dev.group_summary(g).unwrap())
     }
@@ -195,6 +207,25 @@ impl Client {
     /// Create a group and register it with the DS.
     pub fn create_group(&mut self, ds: &mut Ds, g: &str, kind: &str) -> Value {
         let s = parse(&self.dev.create_group(g, &metadata(g, kind, None)).unwrap());
+        ds.create_group(g, s["commit_key"].as_str().unwrap());
+        self.cursor.insert(g.to_string(), 0);
+        s
+    }
+
+    /// Create a group on `suite` and register it with the DS.
+    pub fn create_group_on(
+        &mut self,
+        ds: &mut Ds,
+        g: &str,
+        kind: &str,
+        suite: Ciphersuite,
+    ) -> Value {
+        let s = parse(
+            &self
+                .dev
+                .create_group_for(suite, g, &metadata(g, kind, None))
+                .unwrap(),
+        );
         ds.create_group(g, s["commit_key"].as_str().unwrap());
         self.cursor.insert(g.to_string(), 0);
         s

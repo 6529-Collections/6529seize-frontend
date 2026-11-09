@@ -1,3 +1,4 @@
+import { recoverLoadedIdentities } from "./identity-recovery";
 import {
   findSavedImport,
   getSavedMessage,
@@ -24,6 +25,8 @@ import {
   type EngineContext,
 } from "./context";
 import { ConversationCreator } from "./conversation-creation";
+import { ConversationRestarter } from "./conversation-restart";
+import { UnsentMessages } from "./unsent";
 import { EngineController } from "./controller";
 import {
   confirmOwnRejection,
@@ -43,7 +46,6 @@ import {
   leave,
   removeMember,
   rename,
-  restartTargets,
   setAdmin,
 } from "./membership";
 import { searchHistory } from "./history-search";
@@ -69,6 +71,8 @@ class E2eeEngineImpl implements E2eeEngineExt {
   private readonly ctx: EngineContext;
   private readonly controller: EngineController;
   private readonly conversationCreator: ConversationCreator;
+  private readonly restarter: ConversationRestarter;
+  private readonly unsent: UnsentMessages;
   private readonly enrollment: EnrollmentFlight;
 
   constructor(ctx: EngineContext) {
@@ -76,7 +80,15 @@ class E2eeEngineImpl implements E2eeEngineExt {
     this.controller = new EngineController(ctx, {
       refreshMe: () => this.refreshMe(),
       onOwnRevoked: () => this.onOwnRejected(),
-      afterSync: () => resolveProfiles(this.ctx, memberProfileIds(this.ctx)),
+      resumeLookups: async () => {
+        this.ctx.lookupReads.resume();
+        await this.ctx.queue.run(() => recoverLoadedIdentities(this.ctx));
+        await resolveProfiles(this.ctx, memberProfileIds(this.ctx), true);
+      },
+      afterSync: async () => {
+        await this.ctx.queue.run(() => recoverLoadedIdentities(this.ctx));
+        await resolveProfiles(this.ctx, memberProfileIds(this.ctx));
+      },
     });
     this.conversationCreator = new ConversationCreator(
       ctx,
@@ -84,6 +96,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
       () => this.requireReady(),
       this.onDelayed
     );
+    this.restarter = new ConversationRestarter(ctx, this.conversationCreator);
+    this.unsent = new UnsentMessages(ctx, {
+      successorOf: (g) => this.restart(g),
+      // Like send(), without letting a flush error fail the resend.
+      requestFlush: (g) => this.background(() => this.controller.flush(g)),
+    });
     this.enrollment = new EnrollmentFlight(ctx, {
       renew: () => this.renew(),
       loadDevicesAtLimit: () => this.loadDevicesAtLimit(),
@@ -209,6 +227,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       this.ctx.device = null;
       this.ctx.lastState = null;
       this.ctx.store.groups.clear();
+      this.ctx.knownDeviceProfiles.clear();
       this.ctx.store.thisDevice = null;
       await clearStoredState(this.ctx);
       try {
@@ -239,6 +258,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   getStatus = () => this.ctx.store.status;
   getError = () => this.ctx.store.error;
+  getUpgrade = () => this.ctx.store.upgrade;
   getThisDevice = () => this.ctx.store.thisDevice;
   getAttachmentsEnabled = () => this.ctx.store.attachmentsEnabled;
   getDevices = () => this.ctx.store.devices;
@@ -498,14 +518,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
     await leave(this.ctx, g.toLowerCase(), this.delayedFor(g.toLowerCase()));
   }
 
+  resendUnsent = (g: string, id: string) => this.unsent.resend(g, id);
+  discardUnsent = (g: string, id: string) => this.unsent.discard(g, id);
+
   async restart(g: string): Promise<string> {
     this.requireReady();
-    const runtime = requireGroup(this.ctx, g);
-    return this.createConversation({
-      profileIds: restartTargets(this.ctx, runtime),
-      kind: runtime.record.metadata.kind,
-      name: runtime.record.metadata.name,
-    });
+    return this.restarter.restart(g);
   }
 
   async report(

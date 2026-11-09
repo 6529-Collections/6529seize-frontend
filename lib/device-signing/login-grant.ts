@@ -155,7 +155,7 @@ export const isDeviceGrantChallenge = (
   grant: LoginDeviceGrant,
   mls: {
     readonly deviceKeyHex: string;
-    readonly ciphersuite: number;
+    readonly ciphersuites: readonly number[];
   } | null = null
 ): boolean =>
   isExpectedDeviceGrantMessage({

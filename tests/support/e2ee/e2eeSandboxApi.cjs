@@ -393,9 +393,30 @@ function createE2eeSandboxApi({ corsHeaders }) {
       return { ok: true };
     },
     "plaintext-scan": (body) => plaintextScan(body),
+    // D172: gives one of a user's registered devices the record of a device
+    // enrolled before grant v2: a v1 grant for 0x004F on the same key, signed
+    // by the user's wallet and verified (no KeyPackages). The browser's own
+    // stored device must get the same grant for the upgrade path to start.
+    "legacy-suite-device": async (body) => {
+      const profileId = requireUser(body.user).profileId;
+      const deviceKey = String(body.grant?.device_key ?? "").toLowerCase();
+      if (!ds.devicesOf(profileId).some((d) => d.device_key === deviceKey)) {
+        throw new Error("Not a registered device of this user.");
+      }
+      const device = await ds.markLegacySuiteDevice(deviceKey, {
+        grant: body.grant,
+        wallet_signature: body.wallet_signature,
+      });
+      return { ok: true, grant_id: device.grant_id };
+    },
+    // D172: closes (open: false) or reopens the v1-grant transition window.
+    "suite-window": (body) => {
+      ds.setV1GrantsAccepted(body.open !== false);
+      return { ok: true };
+    },
   };
 
-  function handleControl(method, pathname, body, res) {
+  async function handleControl(method, pathname, body, res) {
     const name = pathname.slice(CONTROL_PREFIX.length);
     if (method === "GET" && name === "state") {
       reply(res, 200, stateSummary());
@@ -407,7 +428,7 @@ function createE2eeSandboxApi({ corsHeaders }) {
       return;
     }
     try {
-      reply(res, 200, control(body || {}));
+      reply(res, 200, await control(body || {}));
     } catch (error) {
       reply(res, 400, { error: error.message });
     }
@@ -578,7 +599,7 @@ function createE2eeSandboxApi({ corsHeaders }) {
   async function handle(req, res, { method, url, pathname }) {
     if (pathname.startsWith(CONTROL_PREFIX)) {
       const raw = method === "GET" ? "" : await readBody(req);
-      handleControl(method, pathname, parseJson(raw), res);
+      await handleControl(method, pathname, parseJson(raw), res);
       return true;
     }
     if (await handleSignIn(req, res, { method, url, pathname })) {

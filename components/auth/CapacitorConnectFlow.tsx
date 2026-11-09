@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useConnect } from "wagmi";
 import { CreateAppWalletModal } from "@/components/app-wallets/AppWalletModal";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
+import { closeDeviceSetup } from "@/components/device-signing/deviceSetup";
 import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
 import { getConnectionShareRoute } from "@/components/header/share/connectionShareQr";
 import {
@@ -271,6 +272,9 @@ export default function CapacitorConnectFlow({
 
           try {
             router.push(route);
+            // The incoming connection now owns approval and may never connect
+            // a live wallet in this app.
+            closeDeviceSetup();
           } catch (error) {
             logError(
               "capacitorConnectionShareNavigation",

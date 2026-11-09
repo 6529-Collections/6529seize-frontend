@@ -1,6 +1,6 @@
 "use client";
 
-import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+import { getPreparedDropImagePreview } from "@/services/uploads/prepareDropImage";
 import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
@@ -64,7 +64,7 @@ const StormPartMedia: React.FC<{
           >
             {getContentType(file).startsWith("image/") && mediaUrl ? (
               <img
-                src={getPreparedDropImage(file)?.url ?? mediaUrl}
+                src={getPreparedDropImagePreview(file)?.url ?? mediaUrl}
                 alt={file.name}
                 className="tw-h-full tw-w-14 tw-flex-none tw-object-cover"
               />
@@ -85,10 +85,7 @@ const StormPartMedia: React.FC<{
               </svg>
             )}
             <span
-              {...getTooltipTargetProps(
-                showDesktopTooltips,
-                filenameTooltipId
-              )}
+              {...getTooltipTargetProps(showDesktopTooltips, filenameTooltipId)}
               className="tw-min-w-0 tw-truncate tw-px-3 tw-text-xs tw-font-medium tw-text-iron-300"
             >
               {file.name}
@@ -212,9 +209,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
             }}
             aria-disabled={editDisabled}
             aria-label={editTitle}
-            aria-describedby={
-              !canEdit ? editDisabledDescriptionId : undefined
-            }
+            aria-describedby={!canEdit ? editDisabledDescriptionId : undefined}
             {...getTooltipTargetProps(
               !isMobileScreen && !canEdit,
               editTooltipId
@@ -257,10 +252,7 @@ const CreateDropStormPart: React.FC<CreateDropStormPartProps> = ({
               aria-label={t(locale, "waves.stormComposer.movePartEarlier", {
                 number: partNumber,
               })}
-              {...getTooltipTargetProps(
-                !isMobileScreen,
-                moveEarlierTooltipId
-              )}
+              {...getTooltipTargetProps(!isMobileScreen, moveEarlierTooltipId)}
               className={moveIconButtonClass}
             >
               <svg

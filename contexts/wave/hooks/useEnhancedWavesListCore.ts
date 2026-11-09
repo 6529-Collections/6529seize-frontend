@@ -309,10 +309,18 @@ function useEnhancedWavesListCore(
   );
 
   useEffect(() => {
-    if (!isEnabled || usesCanonicalUnread || !activeWaveId) return;
+    if (
+      !isEnabled ||
+      usesCanonicalUnread ||
+      !activeWaveId ||
+      document.visibilityState !== "visible"
+    )
+      return;
     unreadStore.setForcedCount(activeWaveId, undefined);
     const timeout = setTimeout(() => {
-      resetWaveUnreadCount(activeWaveId);
+      if (document.visibilityState === "visible") {
+        resetWaveUnreadCount(activeWaveId);
+      }
     }, UNREAD_CLEAR_DELAY_MS);
     return () => clearTimeout(timeout);
   }, [

@@ -92,21 +92,35 @@ export class MlsClient {
     return guard(() => this.handle.signDigest(digest32));
   }
 
+  /** `ciphersuite` defaults to the module's default suite (0x004F). */
   createKeyPackages(
     count: number,
     lastResort: boolean,
-    lifetimeSecs: number
+    lifetimeSecs: number,
+    ciphersuite?: number
   ): WasmKeyPackage[] {
     return parse(
       guard(() =>
-        this.handle.createKeyPackages(count, lastResort, lifetimeSecs)
+        this.handle.createKeyPackages(
+          count,
+          lastResort,
+          lifetimeSecs,
+          ciphersuite
+        )
       )
     ) as WasmKeyPackage[];
   }
 
-  createGroup(g: string, metadata: GroupMetadata): WasmGroupSummary {
+  /** `ciphersuite` defaults to the module's default suite (0x004F). */
+  createGroup(
+    g: string,
+    metadata: GroupMetadata,
+    ciphersuite?: number
+  ): WasmGroupSummary {
     return parse(
-      guard(() => this.handle.createGroup(g, JSON.stringify(metadata)))
+      guard(() =>
+        this.handle.createGroup(g, JSON.stringify(metadata), ciphersuite)
+      )
     ) as WasmGroupSummary;
   }
 

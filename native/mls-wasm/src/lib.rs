@@ -16,12 +16,14 @@ mod wasm;
 pub use device::Device;
 pub use error::{Code, MlsError};
 
-/// Module facts as JSON (versions, suite, extension type, state format).
+/// Module facts as JSON (versions, default and supported suites, extension
+/// type, state format).
 pub fn module_info() -> String {
     serde_json::json!({
         "crate": env!("CARGO_PKG_VERSION"),
         "openmls": "0.9.1",
         "ciphersuite": u16::from(device::CIPHERSUITE),
+        "ciphersuites": device::SUPPORTED_CIPHERSUITES.map(u16::from),
         "metadata_extension": device::METADATA_EXTENSION,
         "state_format": "6529MLS1",
         "max_past_epochs": device::MAX_PAST_EPOCHS,

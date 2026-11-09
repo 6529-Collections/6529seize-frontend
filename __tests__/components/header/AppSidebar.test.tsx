@@ -41,9 +41,10 @@ jest.mock("@/hooks/useDropForgePermissions", () => ({
 jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
   useContentModeratorAccess: () => mockModeratorAccess,
 }));
+let mockIsIos = false;
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => ({ isIos: true }),
+  default: () => ({ isIos: mockIsIos }),
 }));
 
 let optionalCookieConsentCountry: string | undefined = "US";
@@ -121,6 +122,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
           needs_review_count: 0,
         },
       };
+      mockIsIos = false;
       setCookieCountry("US");
     });
 
@@ -354,6 +356,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
     });
 
     it("hides subscriptions in the About submenu for restricted iOS users", () => {
+      mockIsIos = true;
       setCookieCountry("DE");
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,
@@ -375,7 +378,8 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       );
     });
 
-    it("keeps subscriptions visible when the optional consent provider is absent", () => {
+    it("hides purchase navigation on iOS without the optional consent provider", () => {
+      mockIsIos = true;
       clearOptionalCookieConsent();
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,
@@ -383,8 +387,12 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
       render(<AppSidebar open={true} onClose={() => {}} />);
 
+      expect(getMenuChildren("NFTs")).not.toContainEqual({
+        label: "Collect",
+        path: "/collect",
+      });
       expect(flattenMenuChildren(getMenuChildren("About"))).toEqual(
-        expect.arrayContaining([
+        expect.not.arrayContaining([
           expect.objectContaining({ label: "Subscription Minting" }),
         ])
       );

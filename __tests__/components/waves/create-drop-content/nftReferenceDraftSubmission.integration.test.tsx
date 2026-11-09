@@ -11,6 +11,7 @@ describe("restored NFT reference submission", () => {
         selectedIdentity: null,
         isIdentitySubmissionExperience: false,
         isDropMode: false,
+        submitting: false,
         canCreatePoll: false,
         pollRequest: null,
         getMarkdown: "look at $[Test NFT]",
