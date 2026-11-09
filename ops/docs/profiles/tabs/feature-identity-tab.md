@@ -7,7 +7,7 @@ It combines `Rep` and `NIC` on one route.
 
 - Desktop shows both surfaces at the same time.
 - Rep and NIC support direction toggles: `Received` and `Given`.
-- Mobile switches between `Total Rep`, `NIC`, and `ID Statements` subviews
+- Mobile switches between `REP`, `NIC`, and `ID Statements` subviews
   inside the same URL.
 
 ## Location in the Site
@@ -25,15 +25,16 @@ Desktop (`>= lg`):
 
 Mobile (`< lg`):
 
-- Top segmented control: direction-aware `Total Rep`, `NIC`, and
-  `ID Statements`
-- `Total Rep` subview: contributor summary, rep direction toggle, categories,
+- Grouped text-only section buttons: `REP`, `NIC`, and `ID Statements`.
+  The buttons have no numbers.
+- `REP` subview: `Total REP` with Received/Given beside the heading, the active
+  direction's total in the content, contributor summary, categories,
   received-only `Grant Rep`, and REP activity log
-- `NIC` subview: NIC explanation, status, top-rater avatars, `Rate NIC`, and NIC
-  activity log
+- `NIC` subview: inline Received/Given, the selected total, received status,
+  top-rater avatars, `Rate NIC`, and NIC activity log
 - `ID Statements` subview: a possessive profile heading, short public-data
   description, statement card, and the statement add action beside the heading
-  when editing is allowed
+  when editing is allowed. The statement count appears inside this view.
 
 ## Entry Points
 
@@ -52,7 +53,7 @@ Mobile (`< lg`):
 5. If actions are available, open `Grant Rep` (received only) or `Rate NIC`.
 6. `Rate NIC` opens a modal; submit to save or select `Cancel` to close.
 7. Review activity logs and apply filters.
-8. On mobile, switch between `Total Rep`, `NIC`, and `ID Statements` as
+8. On mobile, switch between `REP`, `NIC`, and `ID Statements` as
    needed.
 
 ## Rep Behavior
@@ -108,12 +109,16 @@ Mobile (`< lg`):
   instead shows an amber informational note explaining that the categories are
   separate and only exact `MemesNominee` counts toward the requirement. All
   other category pills keep their existing behavior.
-- Selecting an option validates availability before enabling the REP amount.
+- Selecting an option validates availability. You can type an amount while
+  rating data loads; submitting stays disabled until the current contribution
+  and allowance are available.
 - If availability fails, inline error is shown.
 - Editing text after category selection clears selected category and amount.
 - Amount accepts integers. Type the desired amount in Grant REP and Rate NIC.
   The plus/minus symbols indicate signed amounts and are not buttons.
 - Enter the desired total, including any existing contribution.
+- The saved contribution prefills an untouched amount. Once you type, your
+  draft stays in place through delayed responses and background refreshes.
 - In non-proxy mode, amount clamps to allowed min/max on blur.
 - `Grant Rep` stays disabled until category is selected, amount changed, amount
   is valid, and submit is idle.
@@ -128,7 +133,7 @@ Mobile (`< lg`):
 - Allowance loading keeps the panel size stable. The amount becomes editable
   when the current contribution and allowance load. If loading fails, use
   `Try again`; `Save` stays disabled until the allowance is available.
-- `Remove rating` prepares zero; select `Save` to remove it.
+- Enter zero and select `Save` to remove an existing rating.
 - `Save` updates the total contribution and refreshes the profile. `Cancel`,
   the close button, and Escape dismiss the editor and return focus to the pencil.
 
@@ -141,8 +146,9 @@ Mobile (`< lg`):
   messages in untranslated locales.
 - Current fallback: `rep.categories.grant.*` messages use the canonical `en-US`
   source copy in locales without translated entries, including the REP amount
-  label. New management lists and save/remove controls use canonical en-US
-  fallback messages and locale-aware numbers. Outside these surfaces, dialog titles, NIC labels and actions,
+  label. New management lists, sort options and save controls use canonical
+  en-US fallback messages and locale-aware numbers. Outside these surfaces,
+  dialog titles, NIC labels and actions,
   unavailable-state Cancel buttons, proxy labels, and rating feedback retain
   existing English strings. Shared adjustment summaries also retain English
   strings. Rating summaries retain the existing comma-separated number formatting.
@@ -155,10 +161,19 @@ Mobile (`< lg`):
 ## NIC and Statements Behavior
 
 - NIC has `Received` and `Given` views on desktop and mobile.
+- Both directions use a compact summary with a score and a borderless
+  avatars-and-count button with a chevron, matching REP. Select the button
+  to open the full list.
+- On desktop, the NIC total is green, the received status sits beside its
+  label, and the avatars, count and chevron appear below the total.
 - `Received` shows the viewed profile's incoming NIC, status and raters.
-  Select the rater count to inspect the full list.
+  Select the raters and avatars to inspect the full list.
 - `Given` shows outgoing NIC and receivers. It does not assign an identity
-  status to an outgoing total. The mobile top NIC card keeps its received score.
+  status to an outgoing total. On mobile, Received/Given sits beside the NIC
+  heading, and the selected total appears below it in the content. A dash appears while the
+  selected total is loading or unavailable.
+  Owners see `Manage given` beside the receiver count; visitors see the
+  receiver count and chevron.
 - `Rate NIC` is available only in `Received` when the viewer can rate the target.
 - The NIC editor loads the current total and allowance before enabling Save.
   If loading fails, select `Retry`. A background refresh keeps an entered draft.
@@ -168,21 +183,36 @@ Mobile (`< lg`):
 ## Manage Given REP and NIC
 
 1. Open your own profile, choose REP or NIC, and select `Given`.
-2. Open `Manage given` beside the receiver count. Recipients are ordered by
-   their most recent rating adjustment, with adjustment controls on the right.
+2. Open `Manage given` in the summary. On mobile a dot separates
+   the receiver count from the `Manage given` button; only that button opens
+   management. Recipients default to `Highest total first`, with adjustment
+   controls on the right. Owners can use `Sort by` to choose `Most recently
+   adjusted`. Changing order returns to the start of that list; `Load more`
+   continues in the selected order. Back preserves the choice while
+   the dialog stays open; reopening management defaults to highest total first.
    Overview category ordering stays unchanged, by rating magnitude.
-3. Select `Adjust` beside a recipient. For REP, choose the category first:
+3. Select `Adjust` beside a recipient. Mobile rows show the rating amount and
+   REP/NIC below the person's name, with Adjust on the right. For REP, choose
+   the category first:
    a recipient total can combine several separate category ratings. A list
-   opened from a category skips that selection.
-4. Enter the new total. To remove an existing rating, select `Remove rating`;
-   this prepares a zero total and does not submit yet.
+   opened from a category skips that selection. The list, category choice, and
+   editor share one dialog: a sheet on mobile and a centered dialog on desktop.
+4. Enter the new total. To remove an existing rating, enter zero.
 5. Select `Save`. Successful updates return to the first page of the same
    receiver list, with refreshed values; removed ratings disappear. Use
-   `Load more` to view older recipients again. A failed save keeps the draft
-   and loaded pages so you can retry. Cancel and Back return without submitting.
+   `Load more` to view additional recipients. A failed save keeps the draft
+   and loaded pages so you can retry. Back returns one step without submitting;
+   returning to the list restores its scroll position and loaded pages. Cancel
+   and Close discard the unsaved draft and exit the entire management flow.
+   Navigation is unavailable while a save is in progress. Cancel and Save sit
+   side by side on the right,
+   with Cancel on the left. Standalone profile rating dialogs keep their own
+   entry points.
 
 The lists include loading, empty and retry states, and `Load more` when more
-recipients exist. Visitors see the same public ratings without owner controls.
+recipients exist. Received and Given lists fit their contents up to the same
+maximum height; longer lists scroll within the dialog. Visitors see the same
+public ratings without owner controls.
 Management is available to the connected owner outside proxy mode; existing
 proxy allocation entry points and permissions are unchanged.
 
@@ -195,7 +225,7 @@ proxy allocation entry points and permissions are unchanged.
   - direction tabs: `All`, `Incoming`, `Outgoing`
   - NIC-only log-type filter when matter is `NIC`
 - Mobile:
-  - `Total Rep` subview uses REP log with direction tabs
+  - `REP` subview uses REP log with direction tabs
   - `NIC` subview uses NIC log with direction tabs and NIC log-type filter
 - Loading uses three compact row placeholders before the activity entries appear.
 - Changing the window between mobile and desktop layouts may briefly show the
@@ -214,12 +244,12 @@ proxy allocation entry points and permissions are unchanged.
   - Rep actions require `AllocateRep`
   - NIC actions require `AllocateCic`
   - proxy grantor profile cannot be the target
-- Mobile `Total Rep`/`NIC`/`ID Statements` switching does not change URL state.
+- Mobile `REP`/`NIC`/`ID Statements` switching does not change URL state.
 
 ## Common Scenarios
 
 - Desktop viewers compare `Rep` and `NIC` side by side on the same route.
-- Mobile viewers switch between `Total Rep`, `NIC`, and `ID Statements`
+- Mobile viewers switch between `REP`, `NIC`, and `ID Statements`
   without leaving `/{user}`.
 - Profiles with many rep categories use `+N more`, then `Load more`, to reveal
   additional categories incrementally.
@@ -261,7 +291,7 @@ proxy allocation entry points and permissions are unchanged.
 - Action availability still depends on wallet, profile-handle, and proxy
   permission context at runtime.
 - Mobile subview switching is local UI state and does not create a distinct URL
-  for `Total Rep`, `NIC`, or `ID Statements`.
+  for `REP`, `NIC`, or `ID Statements`.
 
 ## Related Pages
 

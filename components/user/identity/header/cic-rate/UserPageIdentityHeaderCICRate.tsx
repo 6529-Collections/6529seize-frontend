@@ -2,16 +2,12 @@
 
 import type { FormEvent } from "react";
 import { useContext, useEffect, useId, useRef, useState } from "react";
-import type { ApiProfileRaterCicState } from "@/entities/IProfile";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { AuthContext } from "@/components/auth/Auth";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { commonApiPost } from "@/services/api/common-api";
+import { useMutation } from "@tanstack/react-query";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
@@ -25,20 +21,29 @@ import { t, tRich } from "@/i18n/messages";
 
 import { isRatingValue } from "@/components/user/rep/ratingsManagement";
 
+import { useNicRatingState } from "./useNicRatingState";
+
 const CIC_FOCUS_RING_CLASS_NAME = "focus:tw-ring-primary-400";
 
-export default function UserPageIdentityHeaderCICRate({
-  profile,
-  isTooltip,
-  onSuccess,
-  onCancel,
-  locale = DEFAULT_LOCALE,
-}: {
+type NicRateProps = {
   readonly profile: ApiIdentity;
   readonly isTooltip: boolean;
   readonly onSuccess?: () => void;
   readonly onCancel?: () => void;
+  readonly onBusyChange?: (busy: boolean) => void;
   readonly locale?: SupportedLocale;
+};
+
+export function UserPageIdentityHeaderCICRateForm({
+  profile,
+  isTooltip,
+  onSuccess,
+  onCancel,
+  onBusyChange,
+  ratingState,
+  locale = DEFAULT_LOCALE,
+}: NicRateProps & {
+  readonly ratingState: ReturnType<typeof useNicRatingState>;
 }) {
   const { address } = useSeizeConnectContext();
   const inputId = useId();
@@ -47,42 +52,26 @@ export default function UserPageIdentityHeaderCICRate({
     mounted.current = true;
     return () => {
       mounted.current = false;
+      onBusyChange?.(false);
     };
-  }, []);
+  }, [onBusyChange]);
   const profileIdentity = profile.query ?? profile.handle ?? profile.display;
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
 
   const { onProfileCICModify } = useContext(ReactQueryWrapperContext);
 
-  const {
-    data: currentCICState,
-    isError,
-    isFetching,
-    refetch,
-  } = useQuery<ApiProfileRaterCicState>({
-    queryKey: [
-      QueryKey.PROFILE_RATER_CIC_STATE,
-      {
-        handle: profileIdentity.toLowerCase(),
-        rater: activeProfileProxy?.created_by.handle ?? address?.toLowerCase(),
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<ApiProfileRaterCicState>({
-        endpoint: `profiles/${encodeURIComponent(profileIdentity)}/cic/rating/${
-          activeProfileProxy?.created_by.handle ?? address?.toLowerCase()
-        }`,
-      }),
-    enabled: !!address,
-    staleTime: 0,
-  });
+  const { data: currentCICState, isError, isFetching, refetch } = ratingState;
 
   const [mutating, setMutating] = useState<boolean>(false);
+  const setBusy = (busy: boolean) => {
+    setMutating(busy);
+    onBusyChange?.(busy);
+  };
 
   const updateCICMutation = useMutation({
     mutationFn: async (amount: number) => {
-      setMutating(true);
+      setBusy(true);
       return await commonApiPost({
         endpoint: `profiles/${encodeURIComponent(profileIdentity)}/cic/rating`,
         body: {
@@ -107,7 +96,7 @@ export default function UserPageIdentityHeaderCICRate({
       onSuccess?.();
     },
     onSettled: () => {
-      setMutating(false);
+      setBusy(false);
     },
   });
 
@@ -196,7 +185,7 @@ export default function UserPageIdentityHeaderCICRate({
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (mutating || isSaveDisabled) return;
-    setMutating(true);
+    setBusy(true);
     try {
       const { success } = await requestAuth();
       if (!mounted.current) return;
@@ -216,7 +205,7 @@ export default function UserPageIdentityHeaderCICRate({
         details: getToastErrorDetails(error),
       });
     } finally {
-      setMutating(false);
+      setBusy(false);
     }
   };
 
@@ -327,48 +316,39 @@ export default function UserPageIdentityHeaderCICRate({
 
             {adjustmentHelper}
 
-            <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1">
-              {originalRating !== 0 && (
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  fullWidth
-                  disabled={mutating || isUnavailable}
-                  onClick={() => setDraftRating("0")}
-                >
-                  {t(locale, "user.rate.remove")}
-                </Button>
-              )}
-              {originalRating !== 0 && draftRating === "0" && (
-                <output className="tw-text-center tw-text-xs tw-text-iron-400">
-                  {t(locale, "user.rate.removeHint")}
-                </output>
-              )}
-              <Button
-                type="submit"
-                disabled={isSaveDisabled}
-                loading={mutating}
-                variant="success"
-                size="xl"
-                fullWidth
-              >
-                {t(locale, "user.rate.save")}
-              </Button>
+            <div className="tw-mt-7 tw-flex tw-justify-end tw-gap-3">
               {onCancel && (
                 <Button
                   onClick={onCancel}
                   disabled={mutating}
                   variant="ghost"
                   size="lg"
-                  fullWidth
                 >
                   {t(locale, "user.rate.cancel")}
                 </Button>
               )}
+              <Button
+                type="submit"
+                disabled={isSaveDisabled}
+                loading={mutating}
+                variant="success"
+                size="lg"
+              >
+                {t(locale, "user.rate.save")}
+              </Button>
             </div>
           </>
         )}
       </form>
     </div>
+  );
+}
+
+export default function UserPageIdentityHeaderCICRate(props: NicRateProps) {
+  const identity =
+    props.profile.query ?? props.profile.handle ?? props.profile.display;
+  const ratingState = useNicRatingState(identity);
+  return (
+    <UserPageIdentityHeaderCICRateForm {...props} ratingState={ratingState} />
   );
 }

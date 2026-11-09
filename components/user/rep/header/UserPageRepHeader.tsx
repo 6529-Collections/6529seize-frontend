@@ -8,20 +8,13 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { useContext, useMemo, useState } from "react";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
 import { canManageGivenRatings } from "../ratingsManagement";
-import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import RepCategoryPill from "../RepCategoryPill";
 import RepDirectionToggle from "../RepDirectionToggle";
-import { buildRepAvatarItems } from "../buildRepAvatarItems";
+import RatingContributorsControl from "../RatingContributorsControl";
 import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
-import {
-  getCanEditRep,
-  getContributorLabel,
-  type RepDirection,
-} from "../UserPageRep.helpers";
+import { getCanEditRep, type RepDirection } from "../UserPageRep.helpers";
 
 export default function UserPageRepHeader({
   overview,
@@ -53,7 +46,6 @@ export default function UserPageRepHeader({
   readonly isFetchingNextPage: boolean;
 }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const locale = useBrowserLocale();
   const canManage =
     repDirection === "given" &&
     canManageGivenRatings(profile, connectedProfile, activeProfileProxy);
@@ -81,17 +73,6 @@ export default function UserPageRepHeader({
         activeProfileProxy,
       }),
     [connectedProfile, profile, activeProfileProxy]
-  );
-
-  const TOP_CONTRIBUTORS_COUNT = 5;
-
-  const avatarItems = useMemo(
-    () =>
-      buildRepAvatarItems(
-        overview?.contributors.data ?? [],
-        TOP_CONTRIBUTORS_COUNT
-      ),
-    [overview?.contributors.data]
   );
 
   const [editCategory, setEditCategory] = useState<string | null>(null);
@@ -132,45 +113,15 @@ export default function UserPageRepHeader({
               <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
                 {overview ? formatNumberWithCommas(overview.total_rep) : "—"}
               </div>
-              {overview && (
-                <div className="tw-mt-3 tw-flex tw-items-center tw-gap-2">
-                  {avatarItems.length > 0 && (
-                    <OverlappingAvatars
-                      items={avatarItems}
-                      size="md"
-                      maxCount={TOP_CONTRIBUTORS_COUNT}
-                    />
-                  )}
-                  {overview.contributor_count > 0 ? (
-                    <button
-                      type="button"
-                      onClick={onOpenOverviewContributors}
-                      aria-label={`View all ${getContributorLabel(
-                        repDirection,
-                        overview.contributor_count
-                      )}`}
-                      className="tw-inline-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 tw-text-sm tw-font-normal tw-text-iron-400 tw-underline tw-decoration-white/10 tw-underline-offset-4 tw-transition-[text-decoration-color] hover:tw-text-iron-200 hover:tw-decoration-white/50"
-                    >
-                      {canManage && (
-                        <>{t(locale, "user.rate.manageGiven")} · </>
-                      )}
-                      {formatNumberWithCommas(overview.contributor_count)}{" "}
-                      {getContributorLabel(
-                        repDirection,
-                        overview.contributor_count
-                      )}
-                    </button>
-                  ) : (
-                    <span className="tw-text-meta/5 tw-font-normal tw-text-iron-500">
-                      {formatNumberWithCommas(overview.contributor_count)}{" "}
-                      {getContributorLabel(
-                        repDirection,
-                        overview.contributor_count
-                      )}
-                    </span>
-                  )}
-                </div>
-              )}
+              <div className="tw-mt-3">
+                <RatingContributorsControl
+                  overview={overview}
+                  direction={repDirection}
+                  matter="REP"
+                  canManage={canManage}
+                  onClick={onOpenOverviewContributors}
+                />
+              </div>
             </div>
           </div>
 

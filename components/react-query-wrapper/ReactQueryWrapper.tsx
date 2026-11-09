@@ -21,12 +21,12 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { invalidateRepCategoryAnalytics } from "./utils/invalidateRepCategoryAnalytics";
 import { refreshProfileRatingLists } from "./utils/refreshProfileRatingLists";
 import type { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
 import { QueryKey } from "./query-keys";
 import { addDropToDrops } from "./utils/addDropsToDrops";
 import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
+import { invalidateRepCategoryAnalytics } from "./utils/invalidateRepCategoryAnalytics";
 import {
   WAVE_DROPS_PARAMS,
   WAVE_FOLLOWING_WAVES_PARAMS,
@@ -358,7 +358,12 @@ const createReactQueryContextValue = (
   }) => {
     invalidateProfile(targetProfile);
     invalidateLogs();
-    void refreshProfileRatingLists(queryClient, "NIC");
+    void refreshProfileRatingLists(queryClient, "NIC", {
+      targetProfile,
+      connectedProfile,
+      profileProxy,
+      rater,
+    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.CIC_OVERVIEW],
     });
@@ -447,7 +452,11 @@ const createReactQueryContextValue = (
     invalidateProfile(targetProfile);
     invalidateProfileRepRatings(targetProfile);
     invalidateLogs();
-    void refreshProfileRatingLists(queryClient, "REP");
+    void refreshProfileRatingLists(queryClient, "REP", {
+      targetProfile,
+      connectedProfile,
+      profileProxy,
+    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.REP_OVERVIEW],
     });

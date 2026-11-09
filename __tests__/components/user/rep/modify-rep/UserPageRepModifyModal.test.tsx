@@ -1,6 +1,7 @@
 import { AuthContext, type AuthContextType } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Modal from "@/components/user/rep/modify-rep/UserPageRepModifyModal";
+import UserPageRepModifyForm from "@/components/user/rep/modify-rep/UserPageRepModifyForm";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
@@ -275,16 +276,15 @@ it("does not overwrite an edited amount when the allowance refreshes", async () 
   expect(input).toHaveValue("30");
 });
 
-it("stages removal as zero and only submits after Save", async () => {
+it("saves a manually entered zero without a separate removal control", async () => {
   renderModal();
-  await userEvent.click(
-    await screen.findByRole("button", { name: "Remove rating" })
-  );
-  expect(screen.getByRole("textbox")).toHaveValue("0");
+  fireEvent.change(await screen.findByRole("textbox"), {
+    target: { value: "0" },
+  });
+  expect(
+    screen.queryByRole("button", { name: "Remove rating" })
+  ).not.toBeInTheDocument();
   expect(post).not.toHaveBeenCalled();
-  expect(screen.getByRole("status")).toHaveTextContent(
-    "Save to remove this rating."
-  );
   await userEvent.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() =>
     expect(post).toHaveBeenCalledWith({
@@ -315,6 +315,35 @@ it("does not submit after the editor leaves during authentication", async () => 
   await userEvent.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() => expect(requestAuth).toHaveBeenCalledTimes(1));
   unmount();
+  finishAuth({ success: true });
+  await waitFor(() => expect(post).not.toHaveBeenCalled());
+});
+
+it("releases the host's busy state when an embedded editor leaves during authentication", async () => {
+  let finishAuth: (value: { success: boolean }) => void = () => undefined;
+  requestAuth.mockReturnValue(
+    new Promise((resolve) => {
+      finishAuth = resolve;
+    })
+  );
+  const onBusyChange = jest.fn();
+  const { unmount } = render(
+    <UserPageRepModifyForm
+      profile={profile}
+      category="Artist"
+      onCancel={onClose}
+      onSuccess={onClose}
+      onBusyChange={onBusyChange}
+    />,
+    { wrapper: Wrapper }
+  );
+  fireEvent.change(await screen.findByRole("textbox"), {
+    target: { value: "30" },
+  });
+  await userEvent.click(screen.getByRole("button", { name: "Save" }));
+  expect(onBusyChange).toHaveBeenLastCalledWith(true);
+  unmount();
+  expect(onBusyChange).toHaveBeenLastCalledWith(false);
   finishAuth({ success: true });
   await waitFor(() => expect(post).not.toHaveBeenCalled());
 });
