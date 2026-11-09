@@ -1,3 +1,4 @@
+import { lookupRetryAfterMs } from "./lookup-reads";
 import { E2eeApiError, asE2eeApiError } from "./api-errors";
 import { buildE2eeApiClient } from "./api-client";
 import {
@@ -139,6 +140,7 @@ export function toE2eeApiError(error: unknown): unknown {
     status: status ?? 0,
     code: getStructuredApiErrorCode(error) ?? null,
     currentEpoch: readCurrentEpoch(error),
+    retryAfterMs: lookupRetryAfterMs(error, Date.now()),
   });
 }
 

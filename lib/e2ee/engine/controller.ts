@@ -54,6 +54,7 @@ interface ControllerHooks {
   onOwnRevoked: () => Promise<void>;
   /** Called after every sync pass (e.g. resolve new members' profiles). */
   afterSync: () => Promise<void>;
+  resumeLookups?: () => Promise<void>;
 }
 
 export class EngineController {
@@ -493,6 +494,12 @@ export class EngineController {
         ? data["device_key"].toLowerCase()
         : null;
     switch (event.type) {
+      case "E2EE_LOOKUP_RESUME":
+        this.debounce(
+          "lookup-resume",
+          () => this.hooks.resumeLookups?.() ?? Promise.resolve()
+        );
+        break;
       case "E2EE_GROUP_EVENT":
       case "E2EE_ROSTER_CHANGED":
         if (group) {

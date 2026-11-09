@@ -155,6 +155,16 @@ describe("E2EE REST client (contract 4.2)", () => {
     expect(e2eeErrorCode(error)).toBe("E2EE_EPOCH_CONFLICT");
   });
 
+  it("preserves Retry-After when converting a rate-limited device lookup error", () => {
+    const error = Object.assign(new Error("limited"), {
+      status: 429,
+      response: { headers: new Headers({ "Retry-After": "120" }) },
+    });
+    const converted = toE2eeApiError(error);
+    expect(converted).toMatchObject({ status: 429, retryAfterMs: 120_000 });
+    expect(asE2eeApiError(converted)).toMatchObject({ retryAfterMs: 120_000 });
+  });
+
   it("treats network failures as status 0 and keeps aborts", () => {
     expect(toE2eeApiError(new Error("Network request failed"))).toMatchObject({
       status: 0,
