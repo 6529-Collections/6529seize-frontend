@@ -237,6 +237,7 @@ const announcementWave = createSidebarWave({
   latestDropTimestamp: 300,
 });
 const legacyAnnouncementWave = createLegacyApiWave("4", 300);
+const ANNOUNCEMENT_WAVE_STALE_TIME_MS = 10 * 60 * 1000;
 let announcementRefetchMock: jest.Mock;
 
 beforeEach(() => {
@@ -322,7 +323,10 @@ test("pauses all main wave sources when explicitly disabled", () => {
   expect(
     useWavesV2Mock.mock.calls.every(([args]) => args.enabled === false)
   ).toBe(true);
-  expect(useWaveByIdMock).toHaveBeenCalledWith(null, { enabled: false });
+  expect(useWaveByIdMock).toHaveBeenCalledWith(null, {
+    enabled: false,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
   expect(useWaveSubwavesMapMock).toHaveBeenCalledWith({
     parentWaveIds: [],
     viewerIdentityKey: null,
@@ -476,7 +480,8 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
         pinned: ApiWavesPinFilter.NotPinned,
         scoreSort: ApiWaveScoreSort.Quality,
         enabled: true,
-        refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+        // The discovery list refreshes every 5 minutes, not every minute.
+        refetchInterval: 5 * 60_000,
         refetchIntervalInBackground: false,
       }),
       expect.objectContaining({
@@ -524,7 +529,7 @@ test("keeps highly rated visible and polls followed activity when the bottom lis
         excludeFollowed: true,
         pinned: ApiWavesPinFilter.NotPinned,
         scoreSort: ApiWaveScoreSort.Quality,
-        refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+        refetchInterval: 5 * 60_000,
       }),
       expect.objectContaining({
         overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
@@ -1875,6 +1880,73 @@ test("refreshes only stale sidebar sources on resync without forcing refetches",
   );
 });
 
+test("forces the lists but refreshes the announcement wave only once stale", () => {
+  const sources = mockStaleRefreshSources();
+  const refetchQueriesSpy = jest
+    .spyOn(queryClient, "refetchQueries")
+    .mockResolvedValue(undefined);
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  act(() => {
+    result.current.refetchAllWaves();
+  });
+
+  // All activity, highly rated and pinned.
+  expect(sources.forcedRefetch).toHaveBeenCalledTimes(3);
+  expect(announcementRefetchMock).not.toHaveBeenCalled();
+  expect(refetchQueriesSpy).toHaveBeenCalledTimes(1);
+  expect(refetchQueriesSpy).toHaveBeenCalledWith(
+    {
+      queryKey: ["WAVE", { wave_id: "4" }],
+      exact: true,
+      type: "active",
+      stale: true,
+    },
+    { cancelRefetch: false }
+  );
+});
+
+test("refreshes only the activity list for drops in unknown waves", () => {
+  const sources = mockStaleRefreshSources();
+  const subwaveRefetch = jest.fn();
+  useWaveSubwavesMapMock.mockReturnValue({
+    subwaves: [],
+    subwavesByParentId: new Map(),
+    isFetching: false,
+    refetch: subwaveRefetch,
+  });
+  const allActivityRefetch = jest.fn();
+  const otherRefetch = jest.fn();
+  useWavesV2Mock.mockImplementation(({ following, overviewType }) => ({
+    waves: [mainWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo && !following
+        ? allActivityRefetch
+        : otherRefetch,
+    refetchIfStale: jest.fn(),
+  }));
+  const refetchQueriesSpy = jest.spyOn(queryClient, "refetchQueries");
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+  act(() => {
+    result.current.refreshActivityList();
+  });
+
+  expect(allActivityRefetch).toHaveBeenCalledTimes(1);
+  // Not highly rated, pinned, subwaves or the announcement wave.
+  expect(otherRefetch).not.toHaveBeenCalled();
+  expect(sources.forcedRefetch).not.toHaveBeenCalled();
+  expect(subwaveRefetch).not.toHaveBeenCalled();
+  expect(announcementRefetchMock).not.toHaveBeenCalled();
+  expect(refetchQueriesSpy).not.toHaveBeenCalled();
+});
+
 test("does not refresh any sidebar source while the list is disabled", () => {
   const sources = mockStaleRefreshSources();
   const refetchQueriesSpy = jest.spyOn(queryClient, "refetchQueries");
@@ -1937,7 +2009,10 @@ test("injects the announcement wave once and excludes it from pinned metadata", 
     )
   ).toBe(false);
   expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: true,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("preserves pin state for a legacy pinned announcement wave", () => {
@@ -1971,7 +2046,10 @@ test("preserves pin state for a legacy pinned announcement wave", () => {
   expect(result.current.announcementQueryError).toBeNull();
   expect(result.current.announcementRefetch).toBe(announcementRefetchMock);
   expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: false });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: false,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("reuses an overview announcement wave without enabling the fallback fetch", () => {
@@ -2015,7 +2093,10 @@ test("reuses an overview announcement wave without enabling the fallback fetch",
   expect(result.current.announcementQueryLoading).toBe(false);
   expect(result.current.announcementQueryError).toBeNull();
   expect(result.current.announcementRefetch).toBe(announcementRefetchMock);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: false });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: false,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("exposes fallback announcement query loading state when unresolved", () => {
@@ -2046,7 +2127,10 @@ test("exposes fallback announcement query loading state when unresolved", () => 
   expect(result.current.isAnnouncementsLoading).toBe(true);
   expect(result.current.announcementQueryError).toBeNull();
   expect(result.current.announcementRefetch).toBe(loadingAnnouncementRefetch);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: true,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("exposes fallback announcement query error when unresolved", () => {
@@ -2078,7 +2162,10 @@ test("exposes fallback announcement query error when unresolved", () => {
   expect(result.current.announcementQueryError).toBe(announcementQueryError);
   expect(result.current.isAnnouncementsLoading).toBe(false);
   expect(result.current.announcementRefetch).toBe(failedAnnouncementRefetch);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: true,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("indicates loading when pinned wave is still loading", () => {

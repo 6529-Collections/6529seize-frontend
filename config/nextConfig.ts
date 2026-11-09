@@ -2,6 +2,7 @@ import { createSecurityHeaders } from "./securityHeaders";
 import { e2eeAssetCacheHeaders } from "./e2eeAssetCacheHeaders";
 import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
+import { profileCmsAssetProxyHeaders } from "./profileCmsAssetProxyHeaders";
 import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
 import {
   versionReloadImageHeaders,
@@ -168,6 +169,13 @@ export function sharedConfig(
           destination: "/safe-collecting",
           permanent: true,
         },
+        // Competitions are now called decisions. `:path*` also matches the
+        // bare collection route, and query strings carry over.
+        {
+          source: "/waves/:wave/competitions/:path*",
+          destination: "/waves/:wave/decisions/:path*",
+          permanent: true,
+        },
         // The 6529 Stream public contract review was removed; its section is
         // being rebuilt at /stream.
         {
@@ -222,6 +230,7 @@ export function sharedConfig(
           ],
         },
         meebits445Headers,
+        profileCmsAssetProxyHeaders,
         versionReloadImageHeaders,
         versionUpdateRocketImageHeaders,
         e2eeAssetCacheHeaders,

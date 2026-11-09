@@ -231,9 +231,48 @@ export function clearStallFor(
   if (!runtime) {
     return;
   }
-  runtime.stallSince = null;
-  if (runtime.record.delayed) {
+  // A failing send owns its stall while something is left to send: only the
+  // send loop (flushOnce) clears it. An outbox emptied by catch-up (the send
+  // landed after all) releases it here.
+  if (runtime.outbox.size === 0) {
+    runtime.sendFailingSince = null;
+  }
+  runtime.stallSince = runtime.sendFailingSince;
+  if (runtime.sendFailingSince === null && runtime.record.delayed) {
     runtime.record.delayed = false;
+    ctx.store.touch(runtime.record.g);
+  }
+}
+
+/**
+ * The send loop found nothing to send: catch-up can empty the outbox while
+ * it sleeps, so a failing send no longer holds the stall (a stuck commit
+ * still does).
+ */
+export function releaseSendStallIfIdle(
+  ctx: EngineContext,
+  runtime: GroupRuntime | undefined
+): void {
+  if (
+    runtime?.outbox.size === 0 &&
+    runtime.sendFailingSince !== null &&
+    !runtime.commitFailing
+  ) {
+    clearStallFor(ctx, runtime);
+  }
+}
+
+/** Tracks whether commits are failing; refreshes a delayed reason it moves. */
+function setCommitFailing(
+  ctx: EngineContext,
+  runtime: GroupRuntime | undefined,
+  failing: boolean
+): void {
+  if (!runtime || runtime.commitFailing === failing) {
+    return;
+  }
+  runtime.commitFailing = failing;
+  if (runtime.record.delayed) {
     ctx.store.touch(runtime.record.g);
   }
 }
@@ -307,10 +346,12 @@ export async function runGroupCommit(
     const outcome = await commitAttempt(ctx, g, planner);
     const runtime = ctx.store.groups.get(g);
     if (outcome.kind === "ok" || outcome.kind === "noop") {
+      setCommitFailing(ctx, runtime, false);
       clearStallFor(ctx, runtime);
       return { kind: "done", seq: outcome.kind === "ok" ? outcome.seq : null };
     }
     if (outcome.kind === "rejected") {
+      setCommitFailing(ctx, runtime, false);
       clearStallFor(ctx, runtime);
       return { kind: "rejected", code: outcome.code };
     }
@@ -320,6 +361,7 @@ export async function runGroupCommit(
         continue; // First 409: catch up and retry at once.
       }
     }
+    setCommitFailing(ctx, runtime, true);
     if (noteStallFor(ctx, runtime)) {
       onDelayed();
       return { kind: "delayed" };

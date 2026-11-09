@@ -25,7 +25,7 @@ it("keeps the wave loader for ordinary wave navigation", () => {
   expect(screen.queryByTestId("single-drop-loading")).not.toBeInTheDocument();
 });
 
-it.each(["/waves", "/waves/create", "/waves/wave-1/competitions"])(
+it.each(["/waves", "/waves/create", "/waves/wave-1/decisions"])(
   "keeps %s on its own loading surface",
   (pathname) => {
     mockPathname = pathname;

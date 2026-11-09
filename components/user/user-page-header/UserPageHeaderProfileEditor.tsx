@@ -34,7 +34,6 @@ export default function UserPageHeaderProfileEditor({
 }) {
   const [nameAvailable, setNameAvailable] = useState(false);
   const [checkingName, setCheckingName] = useState(false);
-  const [showMemes, setShowMemes] = useState(false);
   const aboutInputId = useId();
   const errorRef = useRef<HTMLDivElement>(null);
   const coverObjectUrl = useObjectUrl(editor.coverFile);
@@ -64,7 +63,6 @@ export default function UserPageHeaderProfileEditor({
     queryFn: async () =>
       (await commonApiFetch<{ data: NFTLite[] }>({ endpoint: "memes_lite" }))
         .data,
-    enabled: showMemes,
   });
 
   useEffect(() => {
@@ -82,36 +80,43 @@ export default function UserPageHeaderProfileEditor({
     >
       <fieldset
         disabled={editor.saving}
-        className="tw-m-0 tw-min-w-0 tw-space-y-5 tw-border-0 tw-px-4 tw-pb-5 tw-pt-4 sm:tw-px-6"
+        className="tw-m-0 tw-min-w-0 tw-space-y-6 tw-border-0 tw-px-4 tw-pb-6 tw-pt-4 sm:tw-px-6"
       >
         <section
           aria-labelledby="profile-editor-cover"
           className="tw-space-y-3"
         >
-          <h3
-            id="profile-editor-cover"
-            className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200"
-          >
-            {message("user.profileHeader.edit.banner")}
-          </h3>
-          <CommonTabs<"gradient" | "image">
-            items={[
-              {
-                key: "gradient",
-                label: message("user.profileHeader.edit.gradient"),
-                value: "gradient",
-              },
-              {
-                key: "image",
-                label: message("user.profileHeader.edit.image"),
-                value: "image",
-              },
-            ]}
-            activeItem={editor.coverMode}
-            setSelected={(value) => editor.updateDraft({ coverMode: value })}
-            filterLabel={message("user.profileHeader.edit.banner")}
-            fill={false}
-          />
+          <div className="tw-flex tw-flex-col tw-items-start tw-gap-2">
+            <h3
+              id="profile-editor-cover"
+              className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
+            >
+              {message("user.profileHeader.edit.banner")}
+            </h3>
+            <div className="tw-w-fit tw-shrink-0">
+              <CommonTabs<"gradient" | "image">
+                items={[
+                  {
+                    key: "gradient",
+                    label: message("user.profileHeader.edit.gradient"),
+                    value: "gradient",
+                  },
+                  {
+                    key: "image",
+                    label: message("user.profileHeader.edit.image"),
+                    value: "image",
+                  },
+                ]}
+                activeItem={editor.coverMode}
+                setSelected={(value) =>
+                  editor.updateDraft({ coverMode: value })
+                }
+                filterLabel={message("user.profileHeader.edit.banner")}
+                variant="sub-view"
+                fill={false}
+              />
+            </div>
+          </div>
           {editor.coverMode === "gradient" ? (
             <UserSettingsBackground
               compact
@@ -132,53 +137,51 @@ export default function UserPageHeaderProfileEditor({
           aria-labelledby="profile-editor-picture"
           className="tw-space-y-3"
         >
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-2">
+          <div className="tw-flex tw-min-h-5 tw-items-center tw-justify-between tw-gap-3">
             <h3
               id="profile-editor-picture"
-              className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200"
+              className="tw-m-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
             >
               {message("user.profileHeader.edit.pfp")}
             </h3>
-            <Button
-              variant="ghost"
-              size="lg"
-              className="!tw-px-2"
-              onClick={() => setShowMemes(!showMemes)}
-              aria-expanded={showMemes}
-              aria-controls="profile-editor-memes"
-            >
-              {message("user.profileHeader.edit.chooseMeme")}
-            </Button>
+            {loadingMemes && (
+              <output className="tw-text-xs tw-text-iron-400">
+                {message("user.profileHeader.edit.loadingMemes")}
+              </output>
+            )}
           </div>
-          {showMemes && (
-            <div id="profile-editor-memes">
-              {loadingMemes && (
-                <output className="tw-block tw-text-sm tw-text-iron-400">
-                  {message("user.profileHeader.edit.loadingMemes")}
-                </output>
-              )}
-              {memesError && (
-                <p role="alert" className="tw-text-sm tw-text-error">
-                  {message("user.profileHeader.edit.memesError")}{" "}
-                  <Button
-                    variant="ghost"
-                    size="lg"
-                    onClick={() => void retryMemes()}
-                  >
-                    {message("user.profileHeader.edit.retry")}
-                  </Button>
-                </p>
-              )}
-              {memes && (
-                <UserSettingsImgSelectMeme
-                  memes={memes}
-                  onMeme={(meme) =>
-                    editor.updateDraft({ meme, pictureFile: null })
-                  }
-                />
-              )}
-            </div>
-          )}
+          <div className="tw-space-y-2">
+            <UserSettingsImgSelectMeme
+              compact
+              memes={memes ?? []}
+              onMeme={(meme) => editor.updateDraft({ meme, pictureFile: null })}
+            />
+            {memesError && (
+              <p role="alert" className="tw-text-sm tw-text-error">
+                {message("user.profileHeader.edit.memesError")}{" "}
+                <Button
+                  variant="ghost"
+                  size="lg"
+                  onClick={() => void retryMemes()}
+                >
+                  {message("user.profileHeader.edit.retry")}
+                </Button>
+              </p>
+            )}
+          </div>
+          <div className="tw-flex tw-w-full tw-items-center tw-gap-3">
+            <span
+              aria-hidden="true"
+              className="tw-h-px tw-flex-1 tw-bg-white/5"
+            />
+            <span className="tw-text-xs tw-text-iron-400">
+              {message("user.profileHeader.edit.pictureSourceAlternative")}
+            </span>
+            <span
+              aria-hidden="true"
+              className="tw-h-px tw-flex-1 tw-bg-white/5"
+            />
+          </div>
           <UserSettingsImgSelectFile
             compact
             imageToShow={picturePreview}
@@ -187,27 +190,31 @@ export default function UserPageHeaderProfileEditor({
             }
           />
         </section>
-        <UserSettingsUsername
-          label={message("user.profileHeader.edit.name")}
-          userName={editor.name}
-          originalUsername={editor.savedProfile.handle ?? ""}
-          setUserName={(value) => editor.updateDraft({ name: value })}
-          setIsAvailable={setNameAvailable}
-          setIsLoading={setCheckingName}
-        />
-        <UserSettingsClassification
-          selected={editor.classification}
-          onSelect={(value) => editor.updateDraft({ classification: value })}
-          inlineOptions
-        />
+        <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+          <UserSettingsUsername
+            compact
+            label={message("user.profileHeader.edit.name")}
+            userName={editor.name}
+            originalUsername={editor.savedProfile.handle ?? ""}
+            setUserName={(value) => editor.updateDraft({ name: value })}
+            setIsAvailable={setNameAvailable}
+            setIsLoading={setCheckingName}
+          />
+          <UserSettingsClassification
+            compact
+            selected={editor.classification}
+            onSelect={(value) => editor.updateDraft({ classification: value })}
+          />
+        </div>
         <div className="tw-space-y-2">
           <label
             htmlFor={aboutInputId}
-            className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200"
+            className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
           >
             {message("user.profileHeader.aboutEdit.textareaLabel")}
           </label>
           <UserPageHeaderAboutInput
+            compact
             id={aboutInputId}
             value={editor.about}
             onChange={(value) => {
@@ -240,11 +247,10 @@ export default function UserPageHeaderProfileEditor({
           )}
         </div>
       )}
-      <div className="tw-sticky tw-bottom-0 tw-z-10 tw-flex tw-justify-end tw-gap-3 tw-bg-iron-950 tw-px-4 tw-py-4 sm:tw-px-6">
+      <div className="tw-sticky tw-bottom-0 tw-z-10 tw-flex tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-4 tw-py-3 sm:tw-px-6">
         <Button
-          variant="secondary"
-          size="lg"
-          className="!tw-border-0"
+          variant="ghost"
+          size="md"
           disabled={editor.saving}
           onClick={onCancel}
         >
@@ -253,8 +259,8 @@ export default function UserPageHeaderProfileEditor({
         <Button
           type="submit"
           variant="primary"
-          size="lg"
-          className="tw-min-w-24 !tw-border-0"
+          size="md"
+          className="tw-min-w-20 !tw-border-0 !tw-shadow-none"
           loading={editor.saving}
           disabled={
             !editor.dirty ||

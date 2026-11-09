@@ -180,7 +180,8 @@ describe("effective App PR CI plan", () => {
     "components/competitions/CompetitionVote.tsx",
     "hooks/competitions/useCompetitionQueries.ts",
     "__tests__/competitions/competition-api.test.ts",
-    "app/waves/[wave]/competitions/[competition]/page.tsx",
+    "app/waves/[wave]/decisions/page.tsx",
+    "app/waves/[wave]/decisions/[decision]/page.tsx",
     "components/waves/create-wave/hooks/useCreateWaveSubmission.ts",
     "generated/models/ApiCompetition.ts",
     "contexts/CompetitionContext.tsx",
@@ -291,6 +292,65 @@ describe("effective App PR CI plan", () => {
       ).toBe(true);
     }
   );
+
+  it.each([
+    "contexts/wave/hooks/useWaveRealtimeUpdater.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.gapSync.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.flags.ts",
+    "contexts/wave/hooks/useDropUpdateRefMessages.ts",
+    "hooks/useMarkWaveNotificationsRead.ts",
+    "hooks/useMarkWaveNotificationsRead.debounce.ts",
+    "__tests__/contexts/wave/hooks/useWaveRealtimeUpdater.gapSync.test.ts",
+    "__tests__/useWaveRealtimeUpdater.test.ts",
+  ])("selects the live chat browser evidence for %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(true);
+  });
+
+  it.each([
+    "contexts/wave/hooks/useNewDropCounter.ts",
+    "contexts/wave/hooks/useEnhancedWavesListCore.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.ts",
+    "contexts/wave/hooks/useWaveRealtimeUpdater.helpers.ts",
+    "contexts/wave/hooks/useWaveMessagesStore.ts",
+    "contexts/wave/hooks/useWaveDataManager.ts",
+    "contexts/wave/hooks/useDropUpdateRefMessages.ts",
+    "contexts/wave/utils/wave-messages-utils.ts",
+    "lib/chat-store/store.ts",
+    "hooks/useWaveWebSocket.ts",
+    "hooks/useWaveIsTyping.ts",
+    "hooks/useMarkWaveNotificationsRead.ts",
+    "helpers/waves/drop.helpers.ts",
+    "components/waves/drops/WaveDrop.tsx",
+    "components/drops/view/DropsList.tsx",
+    "components/drops/view/part/DropPartMarkdown.tsx",
+    "components/brain/left-sidebar/waves/BrainLeftSidebarWave.tsx",
+    "components/brain/left-sidebar/web/WebBrainLeftSidebarWave/index.tsx",
+    "tests/support/chatPerf.ts",
+    "tests/support/chatPerfFixture.ts",
+    "tests/social/chat-render-budget-sandbox.spec.ts",
+    "tests/social/wave-live-unread-sandbox.spec.ts",
+  ])("selects the chat render budget for chat hot path %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(true);
+  });
+
+  it.each([
+    "components/waves/drops/WaveDropActions.tsx",
+    "components/drops/view/part/DropPartMarkdownImage.tsx",
+    "contexts/wave/hooks/useActiveWaveManager.ts",
+    // Sibling paths of the hot-path files stay out.
+    "helpers/waves/drop-signature.helpers.ts",
+    "components/waves/drops/WaveDropTime.tsx",
+    "components/drops/view/DropsListItem.tsx",
+    "tests/support/composerSandboxConstants.json",
+  ])("keeps chat-adjacent path %s out of the render budget lane", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(false);
+  });
 
   it("selects the shared surface browser lane in a mixed change set", () => {
     expect(
@@ -580,6 +640,56 @@ function runWorkflowScript(
   }
 }
 
+describe("Wave link-preview browser lane selection", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(".github/workflows/app-pr-ci.yml", "utf8")
+  );
+  const publish = requireRunStep(
+    workflow.jobs.plan.steps as WorkflowStep[],
+    ({ id }) => id === "plan_outputs",
+    "Publish CI plan outputs"
+  );
+
+  it.each([
+    ["components/waves/list/WaveItemWide.tsx", true],
+    ["components/waves/list/WaveItemChat.tsx", true],
+    ["components/waves/list/WaveItemFollow.tsx", true],
+    ["tests/social/wave-link-preview-sandbox.spec.ts", true],
+    ["README.md", false],
+  ] as const)("selects the preview lane for %s: %s", (file, selected) => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "wave-preview-plan-"));
+    const planDir = path.join(root, "test-results/app-pr-ci");
+    try {
+      fs.mkdirSync(planDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(planDir, "ci-plan.json"),
+        JSON.stringify({ ...executePlan([file]), risk: { computed_floor: 2 } })
+      );
+      const result = runWorkflowScript(publish.run, root, {
+        DEFAULT_CI_RUNNER: "ubuntu-latest",
+        BUILD_CI_RUNNER: "ubuntu-latest",
+      });
+      expect(result.status).toBe(0);
+      const matrixLine = result.output
+        .split("\n")
+        .find((line) => line.startsWith("core_playwright_matrix="));
+      expect(matrixLine).toBeDefined();
+      const matrix = JSON.parse(
+        matrixLine!.slice("core_playwright_matrix=".length)
+      ) as {
+        include: { lane: string }[];
+      };
+      expect(
+        matrix.include.some(
+          ({ lane }) => lane === "playwright-wave-link-preview"
+        )
+      ).toBe(selected);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("App PR CI merge-tree base", () => {
   const workflowPath = path.join(
     process.cwd(),
@@ -649,7 +759,8 @@ describe("App PR CI merge-tree base", () => {
       "core-playwright-checks",
     ]);
     const gate = aggregate.steps.find(
-      ({ name }: WorkflowStep) => name === "Require successful parallel app checks"
+      ({ name }: WorkflowStep) =>
+        name === "Require successful parallel app checks"
     );
     expect(gate?.run).toContain('test "$APP_CHECKS_RESULT" = "success"');
   });

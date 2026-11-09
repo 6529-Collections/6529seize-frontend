@@ -12,6 +12,7 @@ import type { ApiE2eeDevice } from "@/lib/e2ee/api-types";
 import {
   credentialIdentity,
   E2EE_CIPHERSUITE,
+  E2EE_LEGACY_CIPHERSUITE,
   verifyGrant,
 } from "@/lib/e2ee/grant";
 
@@ -29,11 +30,13 @@ const atMs = (ISSUED_AT + 3600) * 1000;
 
 const buildMessage = ({
   mlsKey = MLS_KEY,
-  ciphersuite = E2EE_CIPHERSUITE,
+  version = 2,
+  ciphersuites = [E2EE_CIPHERSUITE],
   expiresAt = EXPIRES_AT,
 }: {
   mlsKey?: string;
-  ciphersuite?: number;
+  version?: 1 | 2;
+  ciphersuites?: number[];
   expiresAt?: number;
 } = {}): string => {
   const signing = {
@@ -42,8 +45,9 @@ const buildMessage = ({
     expiresAtSeconds: expiresAt,
   };
   const mls = {
+    version,
     deviceKeyHex: mlsKey,
-    ciphersuite,
+    ciphersuites,
     expiresAtSeconds: expiresAt,
   };
   return [
@@ -71,9 +75,11 @@ const recordFor = async (
   device_key: MLS_KEY,
   profile_id: "profile-1",
   grant: {
+    version: 2,
     wallet: account.address.toLowerCase(),
     device_key: MLS_KEY,
     ciphersuite: E2EE_CIPHERSUITE,
+    ciphersuites: [E2EE_CIPHERSUITE],
     issued_at: ISSUED_AT,
     expires_at: EXPIRES_AT,
     origin: "staging.6529.io",
@@ -176,13 +182,35 @@ describe("verifyGrant: combined sign-in grants (NC8)", () => {
 
   it("rejects a sign-in message for another ciphersuite", async () => {
     // The classical suite 0x0001 the launch moved away from.
-    const message = buildMessage({ ciphersuite: 1 });
+    const message = buildMessage({ version: 1, ciphersuites: [1] });
     const base = await recordFor(message);
+    const { version: _v, ciphersuites: _s, ...v1 } = base.grant;
     const result = await verifyGrant(
-      { ...base, grant: { ...base.grant, ciphersuite: 1 } },
+      { ...base, grant: { ...v1, ciphersuite: 1 } },
       { atMs }
     );
     expect(result).toMatchObject({ ok: false, reason: "ciphersuite" });
+  });
+
+  it("still verifies a v1 sign-in grant for 0x004F (D172 transition)", async () => {
+    const message = buildMessage({
+      version: 1,
+      ciphersuites: [E2EE_LEGACY_CIPHERSUITE],
+    });
+    const base = await recordFor(message);
+    const { version: _v, ciphersuites: _s, ...v1 } = base.grant;
+    await expect(
+      verifyGrant(
+        { ...base, grant: { ...v1, ciphersuite: E2EE_LEGACY_CIPHERSUITE } },
+        { atMs }
+      )
+    ).resolves.toEqual({ ok: true, verified: true, via: "eoa", reason: null });
+  });
+
+  it("rejects a record whose suites differ from the signed v2 set", async () => {
+    const message = buildMessage({ ciphersuites: [78, 79] });
+    const result = await verifyGrant(await recordFor(message), { atMs });
+    expect(result).toMatchObject({ ok: false });
   });
 
   it("rejects an expired sign-in grant", async () => {

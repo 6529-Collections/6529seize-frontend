@@ -7,7 +7,10 @@ import type {
 } from "./WebSocketContext";
 import { WebSocketContext } from "./WebSocketContext";
 import type {
+  FrameMetadataCallback,
   MessageCallback,
+  SubscribeFn,
+  SubscribeOptions,
   SubscriberMap,
   WebSocketMessage,
 } from "./WebSocketTypes";
@@ -15,8 +18,13 @@ import {
   setWebSocketMessageMetadata,
   WebSocketStatus,
   WEBSOCKET_RECOVERY_CAPABILITY,
+  type WebSocketConnectionInfo,
 } from "./WebSocketTypes";
+import { getSocketIdentityKey } from "./socketIdentity";
+import { isPongFrame, isWsPingEnabled, SocketPinger } from "./socketPing";
+import { publicEnv } from "@/config/env";
 import { applyDelayJitter } from "@/helpers/jitter.helpers";
+import { getClientBuildId } from "@/lib/version/versionPoll";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
 import { ensureActiveSession } from "../auth/session-readiness";
 import { getAuthJwt, isAuthJwtUsable } from "../auth/auth.utils";
@@ -34,11 +42,40 @@ type WebSocketMessagePayload = {
   readonly type?: unknown;
   readonly data?: unknown;
   readonly reason?: unknown;
+  readonly server_received_at?: unknown;
+  readonly sent_at?: unknown;
+  readonly prev_serial_no?: unknown;
   readonly message?: {
     readonly type?: unknown;
     readonly data?: unknown;
     readonly reason?: unknown;
   };
+};
+
+interface NormalizedIncomingMessage {
+  readonly type: string;
+  readonly data: unknown;
+  readonly reason?: string;
+  readonly serverReceivedAt?: number;
+  readonly sentAt?: number;
+  readonly prevSerialNo?: number | null;
+}
+
+const WEBSOCKET_AUTHENTICATE = "AUTHENTICATE";
+const WEBSOCKET_AUTHENTICATED = "AUTHENTICATED";
+const WEBSOCKET_AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED";
+const WEBSOCKET_BATCH = "BATCH";
+
+const asEpochMs = (value: unknown): number | undefined =>
+  typeof value === "number" && Number.isFinite(value) && value > 0
+    ? value
+    : undefined;
+
+const asPrevSerialNo = (value: unknown): number | null | undefined => {
+  if (value === null) return null;
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
+    ? value
+    : undefined;
 };
 
 const asWebSocketMessagePayload = (
@@ -53,9 +90,7 @@ const asWebSocketMessagePayload = (
 
 const normalizeIncomingMessage = (
   value: unknown
-):
-  | { readonly type: string; readonly data: unknown; readonly reason?: string }
-  | undefined => {
+): NormalizedIncomingMessage | undefined => {
   const payload = asWebSocketMessagePayload(value);
   if (!payload) {
     return undefined;
@@ -71,17 +106,42 @@ const normalizeIncomingMessage = (
 
   const reason =
     asNonEmptyString(payload.reason) ?? asNonEmptyString(nestedPayload?.reason);
+  const serverReceivedAt = asEpochMs(payload.server_received_at);
+  const sentAt = asEpochMs(payload.sent_at);
+  const prevSerialNo = asPrevSerialNo(payload.prev_serial_no);
 
   return {
     type,
     data: payload.data ?? nestedPayload?.data,
     ...(reason ? { reason } : {}),
+    ...(serverReceivedAt === undefined ? {} : { serverReceivedAt }),
+    ...(sentAt === undefined ? {} : { sentAt }),
+    ...(prevSerialNo === undefined ? {} : { prevSerialNo }),
   };
 };
 
-const WEBSOCKET_AUTHENTICATE = "AUTHENTICATE";
-const WEBSOCKET_AUTHENTICATED = "AUTHENTICATED";
-const WEBSOCKET_AUTHENTICATION_FAILED = "AUTHENTICATION_FAILED";
+/**
+ * The inner frames of a `BATCH` frame, in server order. A batch never holds
+ * auth or sync frames, so those inner types are dropped rather than trusted.
+ */
+// A batch stays under 28 KiB, so far fewer frames than this fit in one.
+const MAX_BATCHED_FRAMES = 500;
+
+const getBatchedMessages = (data: unknown): NormalizedIncomingMessage[] => {
+  const batch = asWebSocketMessagePayload(data);
+  const messages: unknown =
+    batch === undefined ? undefined : Reflect.get(batch, "messages");
+  if (!Array.isArray(messages)) return [];
+  return messages.slice(0, MAX_BATCHED_FRAMES).flatMap((inner: unknown) => {
+    const message = normalizeIncomingMessage(inner);
+    return message &&
+      message.type !== WEBSOCKET_BATCH &&
+      message.type !== WEBSOCKET_AUTHENTICATED &&
+      message.type !== WEBSOCKET_AUTHENTICATION_FAILED
+      ? [message]
+      : [];
+  });
+};
 
 const createCredentialMarker = (credential: string): string => {
   let primary = 0;
@@ -94,6 +154,42 @@ const createCredentialMarker = (credential: string): string => {
   }
 
   return `${credential.length}:${primary}:${secondary}`;
+};
+
+type AnySubscriber = MessageCallback | FrameMetadataCallback;
+
+const dispatchMessage = (
+  subscriberMap: SubscriberMap,
+  metadataSubscribers: WeakSet<AnySubscriber>,
+  message: NormalizedIncomingMessage,
+  receivedAt: number
+): void => {
+  const subscribers = subscriberMap.get(message.type);
+  if (!subscribers) {
+    return;
+  }
+
+  setWebSocketMessageMetadata(message.data, { reason: message.reason });
+  const metadata = {
+    reason: message.reason,
+    serverReceivedAt: message.serverReceivedAt,
+    sentAt: message.sentAt,
+    receivedAt,
+    ...(message.prevSerialNo === undefined
+      ? {}
+      : { prevSerialNo: message.prevSerialNo }),
+  };
+  for (const subscriber of subscribers) {
+    try {
+      if (metadataSubscribers.has(subscriber)) {
+        (subscriber as FrameMetadataCallback)(message.data, metadata);
+      } else {
+        (subscriber as MessageCallback)(message.data);
+      }
+    } catch {
+      // Keep one subscriber failure from blocking the remaining handlers.
+    }
+  }
 };
 
 /**
@@ -124,12 +220,24 @@ export function WebSocketProvider({
   const [status, setStatus] = useState<WebSocketStatus>(
     WebSocketStatus.DISCONNECTED
   );
+  const [connection, setConnection] = useState<WebSocketConnectionInfo | null>(
+    null
+  );
+  const statusRef = useRef(WebSocketStatus.DISCONNECTED);
+  // The identity of the last authenticated session, null before the first.
+  const sessionIdentityRef = useRef<string | null>(null);
+  // When the current socket opened or last delivered a frame.
+  const lastFrameAtRef = useRef(0);
+  // Keepalive and liveness checks for the current socket, when enabled.
+  const pingerRef = useRef<SocketPinger | null>(null);
 
   // WebSocket connection reference
   const wsRef = useRef<WebSocket | null>(null);
 
   // Subscriber map for message routing
   const subscribersRef = useRef<SubscriberMap>(new Map());
+  // Subscribers that asked for each frame's metadata as a second argument
+  const metadataSubscribersRef = useRef(new WeakSet<AnySubscriber>());
 
   // Reconnection tracking
   const reconnectAttemptsRef = useRef(0);
@@ -147,6 +255,35 @@ export function WebSocketProvider({
     }
   }, []);
 
+  const stopPinger = useCallback(() => {
+    pingerRef.current?.stop();
+    pingerRef.current = null;
+  }, []);
+
+  const updateStatus = useCallback((next: WebSocketStatus) => {
+    statusRef.current = next;
+    setStatus(next);
+  }, []);
+
+  /** Records an authenticated session and how it came about. */
+  const markAuthenticated = useCallback(() => {
+    let kind: WebSocketConnectionInfo["kind"] = "reconnect";
+    if (statusRef.current === WebSocketStatus.CONNECTED) {
+      kind = "reauthenticated";
+    } else if (sessionIdentityRef.current === null) {
+      kind = "initial";
+    }
+    sessionIdentityRef.current = getSocketIdentityKey(
+      reconnectTokenRef.current
+    );
+    reconnectAttemptsRef.current = 0;
+    updateStatus(WebSocketStatus.CONNECTED);
+    setConnection((previous) => ({
+      revision: (previous?.revision ?? 0) + 1,
+      kind,
+    }));
+  }, [updateStatus]);
+
   /**
    * Parse and route incoming WebSocket messages
    */
@@ -163,6 +300,8 @@ export function WebSocketProvider({
         return;
       }
 
+      // A PONG only proves the socket is alive; receiving it did that.
+      if (isPongFrame(parsed)) return;
       const message = normalizeIncomingMessage(parsed);
       if (!message) {
         return;
@@ -170,8 +309,7 @@ export function WebSocketProvider({
 
       if (message.type === WEBSOCKET_AUTHENTICATED) {
         clearAuthenticationTimer();
-        setStatus(WebSocketStatus.CONNECTED);
-        reconnectAttemptsRef.current = 0;
+        markAuthenticated();
         return;
       }
 
@@ -180,7 +318,7 @@ export function WebSocketProvider({
         rejectedCredentialMarkerRef.current = reconnectTokenRef.current
           ? createCredentialMarker(reconnectTokenRef.current)
           : null;
-        setStatus(WebSocketStatus.DISCONNECTED);
+        updateStatus(WebSocketStatus.DISCONNECTED);
         isManualDisconnectRef.current = true;
         wsRef.current?.close(
           AUTHENTICATION_FAILED_CLOSE_CODE,
@@ -189,25 +327,23 @@ export function WebSocketProvider({
         return;
       }
 
-      // Get subscribers for this message type
-      const subscribers = subscribersRef.current.get(message.type);
-
-      if (!subscribers) {
-        return;
-      }
-
-      setWebSocketMessageMetadata(message.data, {
-        reason: message.reason,
-      });
-      for (const subscriber of subscribers) {
-        try {
-          subscriber(message.data);
-        } catch {
-          // Keep one subscriber failure from blocking the remaining handlers.
-        }
+      const receivedAt = Date.now();
+      // A batch carries whole frames in server order; each is handled as if
+      // it had arrived on its own.
+      const messages =
+        message.type === WEBSOCKET_BATCH
+          ? getBatchedMessages(message.data)
+          : [message];
+      for (const routed of messages) {
+        dispatchMessage(
+          subscribersRef.current,
+          metadataSubscribersRef.current,
+          routed,
+          receivedAt
+        );
       }
     },
-    [clearAuthenticationTimer]
+    [clearAuthenticationTimer, markAuthenticated, updateStatus]
   );
 
   /**
@@ -287,7 +423,7 @@ export function WebSocketProvider({
         isManualDisconnectRef.current = true;
         clearReconnectTimer();
         reconnectAttemptsRef.current = 0;
-        setStatus(WebSocketStatus.DISCONNECTED);
+        updateStatus(WebSocketStatus.DISCONNECTED);
         return;
       }
 
@@ -304,6 +440,7 @@ export function WebSocketProvider({
       // Close existing connection if any
       if (wsRef.current) {
         clearAuthenticationTimer();
+        stopPinger();
         wsRef.current.close();
         wsRef.current = null;
       }
@@ -312,7 +449,7 @@ export function WebSocketProvider({
       clearReconnectTimer();
 
       // Update status to connecting
-      setStatus(WebSocketStatus.CONNECTING);
+      updateStatus(WebSocketStatus.CONNECTING);
 
       try {
         // Advertise reconnect safety on every connection, including anonymous sessions.
@@ -324,6 +461,11 @@ export function WebSocketProvider({
         if (token && !useMessageAuth) {
           url.searchParams.set("token", token);
         }
+        // Adoption telemetry: the page's build, as reported to /api/version.
+        const clientVersion = getClientBuildId(publicEnv.VERSION);
+        if (clientVersion) {
+          url.searchParams.set("client_version", clientVersion);
+        }
         // Create new WebSocket connection
         const ws = new WebSocket(url.toString());
 
@@ -332,9 +474,19 @@ export function WebSocketProvider({
           if (wsRef.current !== ws) {
             return;
           }
+          lastFrameAtRef.current = Date.now();
+          if (isWsPingEnabled()) {
+            // A socket that stops answering PINGs is replaced: a new
+            // session, with the reconnect resync that follows one.
+            pingerRef.current = new SocketPinger(ws, () => {
+              if (wsRef.current === ws) {
+                connectSocket(getAuthJwt() ?? reconnectTokenRef.current);
+              }
+            });
+          }
 
           if (useMessageAuth) {
-            setStatus(WebSocketStatus.AUTHENTICATING);
+            updateStatus(WebSocketStatus.AUTHENTICATING);
             ws.send(
               JSON.stringify({
                 type: WEBSOCKET_AUTHENTICATE,
@@ -353,9 +505,7 @@ export function WebSocketProvider({
             return;
           }
 
-          setStatus(WebSocketStatus.CONNECTED);
-          // Reset reconnect attempts on successful connection
-          reconnectAttemptsRef.current = 0;
+          markAuthenticated();
         };
 
         ws.onmessage = (event) => {
@@ -363,6 +513,8 @@ export function WebSocketProvider({
             return;
           }
 
+          lastFrameAtRef.current = Date.now();
+          pingerRef.current?.noteReceived();
           handleMessage(event);
         };
 
@@ -373,8 +525,9 @@ export function WebSocketProvider({
 
           // Clean up WebSocket
           clearAuthenticationTimer();
+          stopPinger();
           wsRef.current = null;
-          setStatus(WebSocketStatus.DISCONNECTED);
+          updateStatus(WebSocketStatus.DISCONNECTED);
 
           // API Gateway may close a slow listener with code 1000. Only a local
           // intentional disconnect should suppress normal authenticated recovery.
@@ -400,7 +553,7 @@ export function WebSocketProvider({
         wsRef.current = ws;
       } catch {
         clearAuthenticationTimer();
-        setStatus(WebSocketStatus.DISCONNECTED);
+        updateStatus(WebSocketStatus.DISCONNECTED);
 
         // Schedule reconnect even for connection errors
         attemptReconnect(connectSocket);
@@ -411,7 +564,10 @@ export function WebSocketProvider({
       handleMessage,
       clearReconnectTimer,
       clearAuthenticationTimer,
+      stopPinger,
       attemptReconnect,
+      markAuthenticated,
+      updateStatus,
     ]
   );
 
@@ -426,6 +582,7 @@ export function WebSocketProvider({
     // Clear any pending reconnect
     clearReconnectTimer();
     clearAuthenticationTimer();
+    stopPinger();
 
     // Reset reconnect attempts
     reconnectAttemptsRef.current = 0;
@@ -434,15 +591,91 @@ export function WebSocketProvider({
     if (wsRef.current) {
       wsRef.current.close(1000, "Intentional disconnect");
       wsRef.current = null;
-      setStatus(WebSocketStatus.DISCONNECTED);
+      updateStatus(WebSocketStatus.DISCONNECTED);
     }
-  }, [clearReconnectTimer, clearAuthenticationTimer]);
+  }, [clearReconnectTimer, clearAuthenticationTimer, stopPinger, updateStatus]);
+
+  /** Replaces a socket that stopped answering, unless it was replaced already. */
+  const replaceUnresponsiveSocket = useCallback(
+    (ws: WebSocket) => {
+      if (wsRef.current === ws) {
+        connect(getAuthJwt() ?? reconnectTokenRef.current);
+      }
+    },
+    [connect]
+  );
+
+  const reauthenticate = useCallback(
+    (token: string) => {
+      const ws = wsRef.current;
+      const isOpenSession =
+        statusRef.current === WebSocketStatus.CONNECTED &&
+        ws?.readyState === WebSocket.OPEN;
+      if (isOpenSession && token === reconnectTokenRef.current) {
+        return;
+      }
+      if (
+        !ws ||
+        !isOpenSession ||
+        authenticationTimerRef.current !== null ||
+        sessionIdentityRef.current !== getSocketIdentityKey(token) ||
+        !isAuthJwtUsable(token)
+      ) {
+        // Another identity, or no settled session to update: start over.
+        connect(token);
+        return;
+      }
+      // The server swaps the token on this connection and keeps its open
+      // wave and delivery state, so nothing is missed.
+      reconnectTokenRef.current = token;
+      rejectedCredentialMarkerRef.current = null;
+      ws.send(
+        JSON.stringify({ type: WEBSOCKET_AUTHENTICATE, access_token: token })
+      );
+      authenticationTimerRef.current = setTimeout(() => {
+        authenticationTimerRef.current = null;
+        replaceUnresponsiveSocket(ws);
+      }, AUTHENTICATION_TIMEOUT_MS);
+    },
+    [connect, replaceUnresponsiveSocket]
+  );
+
+  // A socket that delivered a frame since `since` is alive. A quiet one may
+  // have died silently: with PING enabled it is asked and replaced only if it
+  // does not answer; without, it is replaced.
+  const ensureLive = useCallback(
+    (since: number) => {
+      const ws = wsRef.current;
+      if (
+        ws &&
+        statusRef.current === WebSocketStatus.CONNECTED &&
+        authenticationTimerRef.current === null &&
+        (ws.readyState !== WebSocket.OPEN || lastFrameAtRef.current < since)
+      ) {
+        const pinger = pingerRef.current;
+        if (ws.readyState === WebSocket.OPEN && pinger?.ws === ws) {
+          pinger.probe();
+        } else {
+          replaceUnresponsiveSocket(ws);
+        }
+      }
+    },
+    [replaceUnresponsiveSocket]
+  );
 
   /**
    * Subscribe to a specific message type
    */
-  const subscribe = useCallback(
-    <T,>(messageType: string, subscriber: MessageCallback<T>) => {
+  const subscribe = useCallback<SubscribeFn>(
+    <T,>(
+      messageType: string,
+      subscriber: MessageCallback<T> | FrameMetadataCallback<T>,
+      options?: SubscribeOptions
+    ) => {
+      const registered = subscriber as AnySubscriber;
+      if (options?.withMetadata) {
+        metadataSubscribersRef.current.add(registered);
+      }
       // Get or create subscriber set for this message type
       if (!subscribersRef.current.has(messageType)) {
         subscribersRef.current.set(messageType, new Set());
@@ -450,11 +683,11 @@ export function WebSocketProvider({
 
       // Add the subscriber handler
       const subscribers = subscribersRef.current.get(messageType)!;
-      subscribers.add(subscriber as MessageCallback);
+      subscribers.add(registered);
 
       // Return unsubscribe function
       return () => {
-        subscribers.delete(subscriber as MessageCallback);
+        subscribers.delete(registered);
 
         // Clean up empty subscriber sets
         if (subscribers.size === 0) {
@@ -481,6 +714,7 @@ export function WebSocketProvider({
         ...data,
       };
       ws.send(JSON.stringify(message));
+      pingerRef.current?.noteSent();
     },
     []
   );
@@ -492,6 +726,7 @@ export function WebSocketProvider({
       // Clear any pending reconnect
       clearReconnectTimer();
       clearAuthenticationTimer();
+      stopPinger();
 
       // Close the connection
       if (wsRef.current) {
@@ -499,19 +734,32 @@ export function WebSocketProvider({
         wsRef.current = null;
       }
     };
-  }, [clearReconnectTimer, clearAuthenticationTimer]);
+  }, [clearReconnectTimer, clearAuthenticationTimer, stopPinger]);
 
   // Create context value
   const contextValue: WebSocketContextValue = useMemo(
     () => ({
       status,
+      connection,
       connect,
       disconnect,
+      reauthenticate,
+      ensureLive,
       subscribe,
       send,
       config,
     }),
-    [status, connect, disconnect, subscribe, send, config]
+    [
+      status,
+      connection,
+      connect,
+      disconnect,
+      reauthenticate,
+      ensureLive,
+      subscribe,
+      send,
+      config,
+    ]
   );
 
   return (

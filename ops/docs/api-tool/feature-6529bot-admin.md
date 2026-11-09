@@ -49,7 +49,7 @@ variables are optional and default to the bot backend production contract:
 
 ## Auth Flow
 
-1. The server reads the existing 6529 wallet-auth cookie.
+1. The server reads the existing 6529 session cookie (`__Host-wallet-auth`).
 2. The wallet JWT must decode to an unexpired wallet subject.
 3. The wallet subject must be present in
    `REVIEWBOT_USAGE_ADMIN_ALLOWED_WALLETS`.

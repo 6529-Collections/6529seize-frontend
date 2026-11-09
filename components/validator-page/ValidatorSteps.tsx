@@ -76,8 +76,9 @@ const TODAY: Picture = {
   drawing: false,
 };
 
+// Step 2, from TESTERS.md; from rc.10 a wallet on a phone signs from a code.
 const SIGN_ONCE =
-  "It makes this computer's key and asks your wallet to sign once. That sends no transaction and costs nothing. If your wallet is in another browser, press Copy sign-in link and open the link there.";
+  "It makes this computer's key and asks your wallet to sign once. That sends no transaction and costs nothing. If your wallet is in another browser, press Copy sign-in link and open the link there. If it's on your phone, choose Your phone (Use your phone in the app's window), paste the wallet's address and scan the code.";
 
 // The app's Starting screen and its stuck step (rc.8, crates/app pages.rs).
 const WHILE_IT_STARTS =

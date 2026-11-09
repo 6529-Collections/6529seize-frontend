@@ -134,6 +134,8 @@ interface E2eeTimelineProps {
   readonly actions: E2eeMessageActions;
   readonly jumpToId?: string | null;
   readonly jumpRequest?: number;
+  /** Shown under the intro, before the messages (a continued chat). */
+  readonly notice?: ReactNode;
 }
 
 /**
@@ -152,6 +154,7 @@ export function E2eeTimeline({
   actions,
   jumpToId,
   jumpRequest = 0,
+  notice,
 }: E2eeTimelineProps) {
   const locale = useBrowserLocale();
   // Your own device changes live in the new-device notice and Devices page.
@@ -434,6 +437,7 @@ export function E2eeTimeline({
             selfProfileId={selfProfileId}
             empty={!messages.some((message) => message.kind === "message")}
           />
+          {notice}
           {engine.loadHistory &&
           (messages.length > 0 || conversation.historyError) ? (
             <button

@@ -16,7 +16,6 @@ const mockCompetition = {
   permissions: {
     administer: true,
     edit_rules_after_activity: false,
-    archive_requires_reason: true as boolean | undefined,
   },
 };
 const mockPush = jest.fn();
@@ -62,7 +61,7 @@ jest.mock("@/helpers/competition.helpers", () => ({
   isMultiCompetitionEnabled: () => true,
   newCompetitionRequestKey: () => "request-key",
   getCompetitionRoute: jest.fn(),
-  getCompetitionsRoute: () => "/waves/wave/competitions",
+  getCompetitionsRoute: () => "/waves/wave/decisions",
 }));
 jest.mock("@/services/api/competitions-api", () => ({
   performCompetitionAction: jest.fn(),
@@ -105,8 +104,8 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockCompetition.permissions.administer = true;
   mockCompetition.permissions.edit_rules_after_activity = false;
-  mockCompetition.permissions.archive_requires_reason = true;
   mockCompetition.lifecycle = "PUBLISHED";
+  mockCompetition.title = "Test competition";
   mockCompetition.config_version = 4;
   mockQuery.hasNextPage = false;
   jest
@@ -123,13 +122,13 @@ it("offers the original rule editor only with the server permission", () => {
     </QueryClientProvider>
   );
   fireEvent.click(
-    screen.getByRole("button", { name: "Edit competition rules" })
+    screen.getByRole("button", { name: "Edit decision rules" })
   );
   expect(onEdit).toHaveBeenCalledTimes(1);
 });
-it("puts Pause outside Manage competition and requires a non-blank reason in its modal", async () => {
+it("puts Pause outside Manage decision and requires a non-blank reason in its modal", async () => {
   setup();
-  const pause = screen.getByRole("button", { name: "Pause decisions" });
+  const pause = screen.getByRole("button", { name: "Pause results" });
   expect(pause.closest("details")).toBeNull();
   expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   fireEvent.click(pause);
@@ -165,20 +164,20 @@ it("shows active and past pause reasons to non-administrators", () => {
   expect(screen.getByText("Paused")).toBeInTheDocument();
   expect(screen.getByText("Resumed")).toBeInTheDocument();
   expect(
-    screen.queryByRole("button", { name: "Pause decisions" })
+    screen.queryByRole("button", { name: "Pause results" })
   ).not.toBeInTheDocument();
-  expect(screen.queryByText("Manage competition")).not.toBeInTheDocument();
+  expect(screen.queryByText("Manage decision")).not.toBeInTheDocument();
 });
 it("resumes without requiring a new reason", async () => {
   setup(true);
-  fireEvent.click(screen.getByRole("button", { name: "Resume decisions" }));
+  fireEvent.click(screen.getByRole("button", { name: "Resume results" }));
   expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
   await waitFor(() =>
     expect(performCompetitionAction).toHaveBeenCalledWith(
       expect.anything(),
       "resume",
-      expect.objectContaining({ reason: "" })
+      { idempotency_key: "request-key", config_version: 4 }
     )
   );
 });
@@ -187,7 +186,7 @@ it("retains the reason and original request for a retry even if refreshed compet
     .mocked(performCompetitionAction)
     .mockRejectedValueOnce(new Error("Connection lost"));
   setup();
-  fireEvent.click(screen.getByRole("button", { name: "Pause decisions" }));
+  fireEvent.click(screen.getByRole("button", { name: "Pause results" }));
   fireEvent.change(screen.getByRole("textbox"), {
     target: { value: "Reviewing" },
   });
@@ -211,57 +210,100 @@ it("loads older pauses without losing the visible history", () => {
   expect(screen.getByText("Reviewing eligibility")).toBeInTheDocument();
 });
 
-it.each([true, undefined])(
-  "requires an archive reason for activity or unknown requirements (%p)",
-  async (requirement) => {
-    mockCompetition.permissions.archive_requires_reason = requirement;
+it.each(["PUBLISHED", "DRAFT", "ENDED", "CANCELLED"])(
+  "requires the exact full name to archive a %s competition without a reason",
+  async (lifecycle) => {
+    mockCompetition.lifecycle = lifecycle;
     setup();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Archive and stop competition" })
-    );
-    expect(screen.getByText(/permanently stops new submissions/)).toBeVisible();
-    const reason = screen.getByRole("textbox", { name: "Reason (required)" });
-    expect(reason).toHaveAccessibleDescription(
-      "A reason is required because this competition has entries or votes. It will be recorded in the competition's audit history."
-    );
-    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
-    fireEvent.change(reason, {
-      target: { value: "  Replacing the competition  " },
+    const archive = screen.getByRole("button", {
+      name:
+        lifecycle === "PUBLISHED" ? "Archive and stop decision" : "Archive",
     });
-    fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+    expect(archive).toHaveClass("tw-border-red");
+    fireEvent.click(archive);
+    expect(
+      screen.getByText(/This action is permanent and cannot be undone/)
+    ).toBeVisible();
+    expect(screen.queryByLabelText(/Reason/)).not.toBeInTheDocument();
+    const name = screen.getByRole("textbox", {
+      name: "Decision name to confirm archival",
+    });
+    expect(name).toBeRequired();
+    expect(name).toHaveAccessibleDescription(
+      /Type the full decision name below exactly/
+    );
+    const confirm = screen.getByRole("button", { name: "Confirm" });
+    expect(confirm).toBeDisabled();
+    for (const mismatch of [
+      "Test",
+      "test competition",
+      "Test Competition",
+      " Test competition",
+      "Test competition ",
+      "Test competition!",
+    ]) {
+      fireEvent.change(name, { target: { value: mismatch } });
+      expect(confirm).toBeDisabled();
+      fireEvent.click(confirm);
+      expect(performCompetitionAction).not.toHaveBeenCalled();
+    }
+    fireEvent.change(name, { target: { value: mockCompetition.title } });
+    expect(confirm).toBeEnabled();
+    fireEvent.change(name, { target: { value: "" } });
+    expect(confirm).toBeDisabled();
+    fireEvent.change(name, { target: { value: mockCompetition.title } });
+    fireEvent.click(confirm);
     await waitFor(() =>
       expect(performCompetitionAction).toHaveBeenCalledWith(
         { waveId: "wave", competitionId: "competition" },
         "archive",
-        {
-          idempotency_key: "request-key",
-          config_version: 4,
-          reason: "Replacing the competition",
-        }
+        { idempotency_key: "request-key", config_version: 4 }
       )
     );
   }
 );
 
-it("allows archiving an unused published competition without a reason", async () => {
-  mockCompetition.permissions.archive_requires_reason = false;
+it("clears the typed name when the archive dialog is reopened", () => {
   setup();
-  fireEvent.click(
-    screen.getByRole("button", { name: "Archive and stop competition" })
-  );
-  expect(
-    screen.getByRole("textbox", { name: "Reason (optional)" })
-  ).not.toBeRequired();
+  const archive = screen.getByRole("button", {
+    name: "Archive and stop decision",
+  });
+  fireEvent.click(archive);
+  fireEvent.change(screen.getByRole("textbox"), {
+    target: { value: mockCompetition.title },
+  });
   expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
-  fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
-  await waitFor(() =>
-    expect(performCompetitionAction).toHaveBeenCalledWith(
-      { waveId: "wave", competitionId: "competition" },
-      "archive",
-      { idempotency_key: "request-key", config_version: 4, reason: "" }
-    )
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Go back" }));
+  fireEvent.click(archive);
+  expect(screen.getByRole("textbox")).toHaveValue("");
+  expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
 });
+
+it.each([
+  "Art  competition",
+  "Art\ncompetition",
+  "Art\r\ncompetition",
+  "Art\rcompetition",
+])(
+  "preserves exact whitespace in the displayed and typed name (%p)",
+  (title) => {
+    mockCompetition.title = title;
+    setup();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Archive and stop decision" })
+    );
+    const exactName = document.getElementById("competition-archive-exact-name");
+    const browserTitle = title.replace(/\r\n?/g, "\n");
+    expect(exactName?.textContent).toBe(browserTitle);
+    expect(exactName).toHaveClass("tw-whitespace-pre-wrap");
+    const name = screen.getByRole("textbox");
+    fireEvent.change(name, { target: { value: "Art competition" } });
+    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+    fireEvent.change(name, { target: { value: title } });
+    expect(name).toHaveValue(browserTitle);
+    expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
+  }
+);
 
 it("exposes only Archive beside draft setup and hides it from non-administrators", () => {
   mockCompetition.lifecycle = "DRAFT";
@@ -270,9 +312,7 @@ it("exposes only Archive beside draft setup and hides it from non-administrators
       <CompetitionAdmin archiveOnly />
     </QueryClientProvider>
   );
-  expect(
-    screen.getByRole("button", { name: "Archive" })
-  ).toBeVisible();
+  expect(screen.getByRole("button", { name: "Archive" })).toBeVisible();
   expect(
     screen.queryByRole("button", { name: "Publish" })
   ).not.toBeInTheDocument();
@@ -299,8 +339,11 @@ it("returns an archived draft to the collection even if invalidation updates its
     </QueryClientProvider>
   );
   fireEvent.click(screen.getByRole("button", { name: "Archive" }));
+  fireEvent.change(screen.getByRole("textbox"), {
+    target: { value: mockCompetition.title },
+  });
   fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
   await waitFor(() =>
-    expect(mockPush).toHaveBeenCalledWith("/waves/wave/competitions")
+    expect(mockPush).toHaveBeenCalledWith("/waves/wave/decisions")
   );
 });

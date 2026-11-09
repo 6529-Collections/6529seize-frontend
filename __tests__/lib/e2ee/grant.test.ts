@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { privateKeyToAccount } from "viem/accounts";
+import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
 
 import type { ApiE2eeDevice } from "@/lib/e2ee/api-types";
 import {
@@ -10,12 +10,21 @@ import {
   computeGrantId,
   credentialIdentity,
   E2EE_CIPHERSUITE,
+  E2EE_LEGACY_CIPHERSUITE,
   E2EE_SALT,
+  grantCoversSuite,
   grantExpiresAt,
+  grantSuites,
   parseCredentialIdentity,
   renderGrantStatement,
   verifyGrant,
 } from "@/lib/e2ee/grant";
+
+/** viem's overloads do not take the grant v1 | v2 typed-data union (D172). */
+const signTyped = (signer: PrivateKeyAccount, typedData: unknown) =>
+  signer.signTypedData(
+    typedData as Parameters<PrivateKeyAccount["signTypedData"]>[0]
+  );
 
 // Copied verbatim from the backend's shared vector file (e2ee-grant-vectors.json).
 const VECTOR = {
@@ -40,6 +49,33 @@ const VECTOR = {
     "0xfda409a1ca8e0464eeda29d07ffa05abd066f75999672156ed7f03d1e790bce9540fa06de1640e708841c8a635e66da45ef270e39a615f79599afc26c1f039091b",
   verify_at_seconds: 1760274000,
 } as const;
+
+// Grant v2 (D172) of the same wallet, key and times, signed for {0x004E}.
+// Computed with ethers from the typed data alone (backend e2ee-grant-v2.test).
+const VECTOR_V2 = {
+  grant: {
+    version: 2,
+    wallet: VECTOR.grant.wallet,
+    device_key: VECTOR.grant.device_key,
+    ciphersuite: 78,
+    ciphersuites: [78],
+    issued_at: VECTOR.grant.issued_at,
+    expires_at: VECTOR.grant.expires_at,
+    origin: VECTOR.grant.origin,
+  },
+  grant_id:
+    "0x644ebe12cda087010bf3e47ed0d4d495867f9b5add5247156cc6e7f0cb7b2a88",
+  signature:
+    "0x130adfb724a264fed9bebd65c0a4e379fb18f86f1a8239874fb2c68e7a2d3b5d66004f3537b6a8a516eca4476e8c38450a74fb0b714fe6b1619e8382bb8b8b1f1c",
+} as const;
+
+const v2Grant = (
+  change: Partial<ApiE2eeDevice["grant"]> = {}
+): ApiE2eeDevice["grant"] => ({
+  ...VECTOR_V2.grant,
+  ciphersuites: [...VECTOR_V2.grant.ciphersuites],
+  ...change,
+});
 
 const deviceRecord = (
   overrides: Partial<ApiE2eeDevice> = {}
@@ -66,9 +102,10 @@ describe("grant (contract 2.1)", () => {
     expect(E2EE_SALT).toBe(VECTOR.salt);
   });
 
-  it("pins the X-Wing ciphersuite 0x004F", () => {
-    expect(E2EE_CIPHERSUITE).toBe(0x004f);
-    expect(VECTOR.grant.ciphersuite).toBe(E2EE_CIPHERSUITE);
+  it("grants 0x004E to new devices; v1 grants named 0x004F (D172)", () => {
+    expect(E2EE_CIPHERSUITE).toBe(0x004e);
+    expect(E2EE_LEGACY_CIPHERSUITE).toBe(0x004f);
+    expect(VECTOR.grant.ciphersuite).toBe(E2EE_LEGACY_CIPHERSUITE);
   });
 
   it("computes the 180-day minute-aligned expiry", () => {
@@ -86,14 +123,36 @@ describe("grant (contract 2.1)", () => {
     ).toBe(VECTOR.statement);
   });
 
-  it("builds the grant and typed data of the vector", () => {
+  it("builds a v2 grant of the v2 vector, its typed data, id and signature", async () => {
     const grant = buildGrant({
       wallet: VECTOR.checksummed_wallet,
       deviceKey: VECTOR.grant.device_key,
       issuedAtSeconds: VECTOR.grant.issued_at,
       origin: VECTOR.grant.origin,
     });
-    expect(grant).toEqual(VECTOR.grant);
+    expect(grant).toEqual(VECTOR_V2.grant);
+    const typed = buildGrantTypedData(grant);
+    expect(typed.domain).toEqual({
+      name: "6529 Encrypted Messages",
+      version: "2",
+      salt: VECTOR.salt,
+    });
+    expect(typed.message).toEqual({
+      statement: VECTOR.statement,
+      wallet: VECTOR.checksummed_wallet,
+      deviceKey: VECTOR.grant.device_key,
+      ciphersuites: [78],
+      issuedAt: BigInt(VECTOR.grant.issued_at),
+      expiresAt: BigInt(VECTOR.grant.expires_at),
+      origin: VECTOR.grant.origin,
+    });
+    expect(computeGrantId(grant)).toBe(VECTOR_V2.grant_id);
+    const account = privateKeyToAccount(VECTOR.wallet_private_key);
+    await expect(signTyped(account, typed)).resolves.toBe(VECTOR_V2.signature);
+  });
+
+  it("builds the v1 typed data of the v1 vector", () => {
+    const grant = { ...VECTOR.grant };
     const typed = buildGrantTypedData(grant);
     expect(typed.primaryType).toBe("MlsDeviceGrant");
     expect(typed.domain).toEqual({
@@ -120,7 +179,8 @@ describe("grant (contract 2.1)", () => {
   it("signs exactly the vector signature with viem", async () => {
     const account = privateKeyToAccount(VECTOR.wallet_private_key);
     expect(account.address.toLowerCase()).toBe(VECTOR.grant.wallet);
-    const signature = await account.signTypedData(
+    const signature = await signTyped(
+      account,
       buildGrantTypedData(VECTOR.grant)
     );
     expect(signature).toBe(VECTOR.signature);
@@ -192,6 +252,70 @@ describe("verifyGrant (contract 2.2)", () => {
     });
   });
 
+  it("accepts the v2 vector (D172)", async () => {
+    const record = deviceRecord({
+      grant: v2Grant(),
+      grant_id: VECTOR_V2.grant_id,
+      wallet_signature: VECTOR_V2.signature,
+    });
+    await expect(verifyGrant(record, { atMs })).resolves.toEqual({
+      ok: true,
+      verified: true,
+      via: "eoa",
+      reason: null,
+    });
+  });
+
+  it.each([
+    ["an empty set", { ciphersuites: [] }, "ciphersuites"],
+    ["an unordered set", { ciphersuites: [79, 78] }, "ciphersuites"],
+    ["a repeated suite", { ciphersuites: [78, 78] }, "ciphersuites"],
+    ["five suites", { ciphersuites: [1, 2, 3, 4, 78] }, "ciphersuites"],
+    ["a ciphersuite other than the lowest", { ciphersuite: 79 }, "ciphersuite"],
+  ])("rejects a v2 grant with %s", async (_label, change, reason) => {
+    const record = deviceRecord({
+      grant: v2Grant(change),
+      grant_id: VECTOR_V2.grant_id,
+      wallet_signature: VECTOR_V2.signature,
+    });
+    await expect(verifyGrant(record, { atMs })).resolves.toMatchObject({
+      ok: false,
+      reason,
+    });
+  });
+
+  it("covers a suite through an alias only when the signed set names its source", () => {
+    const aliases = [{ from: 0x004e, to: 0x0050 }];
+    expect(grantSuites(v2Grant())).toEqual([0x004e]);
+    expect(grantSuites(v2Grant(), aliases)).toEqual([0x004e, 0x0050]);
+    expect(grantSuites({ ...VECTOR.grant }, aliases)).toEqual([0x004f]);
+    expect(grantCoversSuite(v2Grant(), E2EE_CIPHERSUITE)).toBe(true);
+    expect(grantCoversSuite({ ...VECTOR.grant }, E2EE_CIPHERSUITE)).toBe(false);
+    // A v1 grant for any suite other than 0x004F covers nothing.
+    expect(grantSuites({ ...VECTOR.grant, ciphersuite: 0x004e })).toEqual([]);
+  });
+
+  it("rejects an unknown grant version", async () => {
+    const record = deviceRecord({
+      grant: { ...VECTOR.grant, version: 3 as unknown as 2 },
+    });
+    await expect(verifyGrant(record, { atMs })).resolves.toMatchObject({
+      ok: false,
+      reason: "version",
+    });
+  });
+
+  it("does not take a v2 signature for the v1 grant with the same terms", async () => {
+    const record = deviceRecord({
+      grant: { ...VECTOR.grant, ciphersuite: 78 },
+      grant_id: VECTOR_V2.grant_id,
+      wallet_signature: VECTOR_V2.signature,
+    });
+    await expect(verifyGrant(record, { atMs })).resolves.toMatchObject({
+      ok: false,
+    });
+  });
+
   it("rejects a changed field (statement rebuilt, grant_id differs)", async () => {
     const changed = deviceRecord({
       grant: { ...VECTOR.grant, origin: "6529.io" },
@@ -206,9 +330,7 @@ describe("verifyGrant (contract 2.2)", () => {
     const other = privateKeyToAccount(
       "0x8b3a350cf5c34c9194ca85829a2df0ec3153be0318b5e2d3348e872092edffba"
     );
-    const signature = await other.signTypedData(
-      buildGrantTypedData(VECTOR.grant)
-    );
+    const signature = await signTyped(other, buildGrantTypedData(VECTOR.grant));
     await expect(
       verifyGrant(deviceRecord({ wallet_signature: signature }), { atMs })
     ).resolves.toMatchObject({ ok: false, reason: "bad-signature" });

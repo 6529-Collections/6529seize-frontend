@@ -41,6 +41,12 @@ Rules:
 
 ## Common Scenarios
 
+- A direct `/waves/{waveId}` link without a serial number can show a wave
+  preview with its name, author, activity counts, and Follow or Following
+  action. Narrow cards place that action below the wave details so the name
+  has room to read. Long names end with an ellipsis instead of wrapping inside
+  words. Wider cards keep the action beside the name.
+
 - Path-style and legacy query-style wave serial links both render as quote cards.
 - Same-thread quote-card clicks jump in place.
 - Cross-thread quote-card clicks navigate first, then jump by `serialNo`.

@@ -25,8 +25,13 @@ export function buildE2eeApiClient({
     registerDevice: (body) => post(`e2ee/devices`, body),
     registerLoginGrantDevice: (body) => post(`e2ee/devices/login-grant`, body),
     getDevice: (deviceKey) => get(`e2ee/devices/${enc(deviceKey)}`),
-    getProfileDevices: (profileId) =>
-      get(`e2ee/profiles/${enc(profileId)}/devices`),
+    getProfileDevices: (profileId, ciphersuite) =>
+      get(
+        `e2ee/profiles/${enc(profileId)}/devices`,
+        ciphersuite === undefined
+          ? undefined
+          : { ciphersuite: String(ciphersuite) }
+      ),
     revokeDevice: (deviceKey, body) =>
       post(`e2ee/devices/${enc(deviceKey)}/revoke`, body),
     uploadKeyPackages: (deviceKey, body) =>

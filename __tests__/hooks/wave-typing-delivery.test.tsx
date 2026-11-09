@@ -1,4 +1,6 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, cleanup, renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { WebSocketProvider } from "@/services/websocket/WebSocketProvider";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import { useCreateDropTyping } from "@/components/waves/create-drop-content/useCreateDropTyping";
 import { WsMessageType } from "@/helpers/Types";
@@ -56,6 +58,15 @@ class WaveSocket extends EventTarget {
   }
 }
 
+// Production mounts the hook under the app WebSocketProvider (Providers.tsx),
+// which delivers drops to the typing listener. The provider opens no socket
+// until something connects it, so the wave sockets below are the only ones.
+const withAppSocket = ({ children }: { readonly children: ReactNode }) => (
+  <WebSocketProvider config={{ url: "wss://waves.example" }}>
+    {children}
+  </WebSocketProvider>
+);
+
 let sockets: WaveSocket[];
 const originalWebSocket = globalThis.WebSocket;
 function socket(): WaveSocket {
@@ -81,6 +92,9 @@ beforeEach(() => {
   });
 });
 afterEach(() => {
+  // The typing socket is shared by the tab: release it and let it close.
+  cleanup();
+  act(() => jest.advanceTimersByTime(30_001));
   Object.defineProperty(globalThis, "WebSocket", {
     configurable: true,
     value: originalWebSocket,
@@ -133,8 +147,10 @@ it.each([false, true])(
         useCreateDropTyping({ markdown, waveId: wave });
         return useWaveIsTyping(wave, "alice");
       },
-      { initialProps: { markdown: "" } }
+      { initialProps: { markdown: "" }, wrapper: withAppSocket }
     );
+    // The typing socket opens once the tab has been visible for 2 s.
+    act(() => jest.advanceTimersByTime(2000));
     act(() => socket().open());
     expect(socket().connection.wave).toBeNull();
     rerender({ markdown: "before authentication" });
@@ -166,7 +182,11 @@ it.each([false, true])(
 );
 
 it("clears private typing on logout and ignores the closed account's messages", () => {
-  const { result } = renderHook(() => useWaveIsTyping("private-wave", "alice"));
+  const { result } = renderHook(
+    () => useWaveIsTyping("private-wave", "alice"),
+    { wrapper: withAppSocket }
+  );
+  act(() => jest.advanceTimersByTime(2000));
   const previous = socket();
   act(() => {
     previous.open();

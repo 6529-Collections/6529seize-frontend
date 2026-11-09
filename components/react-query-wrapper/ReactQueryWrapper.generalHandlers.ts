@@ -63,11 +63,16 @@ export const createGeneralQueryHandlers = (
       },
     });
   };
-  const invalidateNotifications = () => {
-    queryClient
-      .invalidateQueries({ queryKey: [QueryKey.IDENTITY_NOTIFICATIONS] })
-      .catch(() => undefined);
-    invalidateWavesV2();
+  const invalidateNotifications = (options?: {
+    readonly refreshWaveLists?: boolean;
+    readonly refreshNotifications?: boolean;
+  }) => {
+    if (options?.refreshNotifications !== false) {
+      queryClient
+        .invalidateQueries({ queryKey: [QueryKey.IDENTITY_NOTIFICATIONS] })
+        .catch(() => undefined);
+    }
+    if (options?.refreshWaveLists !== false) invalidateWavesV2();
   };
   const invalidateIdentityTdhStats = ({ identity }: { identity: string }) => {
     queryClient.invalidateQueries({

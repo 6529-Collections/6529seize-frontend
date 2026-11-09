@@ -62,6 +62,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     page,
   }, testInfo) => {
     const pageErrors: string[] = [];
+    const longHandle = "alicewithaverylongprofilehandle";
     page.on("pageerror", (error) => pageErrors.push(error.message));
     await page.route(
       `**/v2/waves/${SANDBOX_WAVE_ID}/mention-search?**`,
@@ -72,21 +73,31 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
               id: "profile-alice",
               handle: "alicelonghandle",
               display: "A long display name for the mention suggestion",
-              pfp: null,
+              pfp: `${baseURL}/6529bgwhite.svg`,
               level: 42,
             },
             {
               id: "profile-new",
               handle: "alicenew",
               display: null,
-              pfp: null,
+              pfp: `${baseURL}/6529bgwhite.svg`,
               level: 0,
+            },
+            {
+              id: "profile-long",
+              handle: longHandle,
+              display: "Another long display name that stays within its row",
+              pfp: null,
+              level: 100,
             },
           ],
         });
       }
     );
     await gotoSandboxWave(page);
+    if (testInfo.project.name === "web-mobile-chromium") {
+      await page.setViewportSize({ width: 375, height: 844 });
+    }
     const composer = page
       .getByRole("textbox", { name: "Write a chat message" })
       .last();
@@ -102,13 +113,94 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(
       experienced.getByRole("button", { includeHidden: true })
     ).toHaveCount(0);
+    const list = page.getByRole("list").filter({ has: experienced });
+    await expect(list.getByRole("button")).toHaveText([
+      /alicelonghandle/,
+      /alicenew/,
+      new RegExp(longHandle),
+    ]);
+    const layout = await list.evaluate((element) => {
+      const card = element.parentElement!;
+      const style = getComputedStyle(element);
+      return {
+        width: card.getBoundingClientRect().width,
+        padding: getComputedStyle(card).padding,
+        listMargin: style.margin,
+        listPadding: style.padding,
+        gap: style.rowGap,
+        rowHeights: Array.from(
+          element.querySelectorAll("button"),
+          (row) => row.getBoundingClientRect().height
+        ),
+      };
+    });
+    expect(layout).toMatchObject({
+      width: 288,
+      padding: "8px",
+      listMargin: "0px",
+      listPadding: "0px",
+      gap: "2px",
+    });
+    expect(layout.rowHeights.every((height) => height >= 44)).toBe(true);
+    const badge = await experienced
+      .getByText("42", { exact: true })
+      .evaluate((element) => {
+        const circle = element.parentElement!;
+        const { width, height } = circle.getBoundingClientRect();
+        return {
+          width,
+          height,
+          radius: Number.parseFloat(getComputedStyle(circle).borderRadius),
+        };
+      });
+    expect(badge.width).toBe(20);
+    expect(badge.height).toBe(20);
+    expect(badge.radius).toBeGreaterThanOrEqual(10);
+    await expect(experienced.getByRole("img")).toBeVisible();
+    await expect(experienced).toHaveCSS("background-color", "rgb(38, 39, 43)");
+    const longTitle = list.getByText(longHandle, { exact: true });
+    expect(
+      await longTitle.evaluate(
+        (element) => element.scrollWidth > element.clientWidth
+      )
+    ).toBe(true);
     await expectNoHorizontalOverflow(page);
-    await page.screenshot({ path: testInfo.outputPath("mention-levels.png") });
-    await composer.press("ArrowDown");
+    for (const option of [experienced, newcomer]) {
+      await expect(option).toHaveCSS("background-color", "rgb(38, 39, 43)");
+      const check = await option.evaluate((button) => {
+        const icon = button.querySelector("svg")!.getBoundingClientRect();
+        const handle = button.querySelector("span")!.getBoundingClientRect();
+        return {
+          width: icon.width,
+          height: icon.height,
+          offset: icon.y + icon.height / 2 - handle.y - handle.height / 2,
+        };
+      });
+      expect(check.width).toBe(16);
+      expect(check.height).toBe(16);
+      expect(Math.abs(check.offset)).toBeLessThanOrEqual(0.5);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `mention-${option === experienced ? "display" : "no-display"}.png`
+        ),
+      });
+      if (option === experienced) await composer.press("ArrowDown");
+    }
     await composer.press("ArrowUp");
     await composer.press("Enter");
     await expect(composer).toContainText("@alicelonghandle");
     await expect(experienced).toBeHidden();
+    await composer.fill("@ali");
+    await expect(newcomer).toBeVisible();
+    if (testInfo.project.name === "web-mobile-chromium") {
+      await newcomer.tap();
+    } else {
+      await newcomer.hover();
+      await expect(newcomer).toHaveCSS("background-color", "rgb(38, 39, 43)");
+      await newcomer.click();
+    }
+    await expect(composer).toContainText("@alicenew");
+    await expect(newcomer).toBeHidden();
     expect(pageErrors).toEqual([]);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
@@ -881,6 +973,39 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("keeps desktop keyboard focus after Enter sends a chat message", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    // Desktop Enter submits; mobile uses Send, whose dismissal is covered below.
+    test.skip(Boolean(testInfo.project.use.isMobile), "Desktop Enter shortcut");
+    await gotoSandboxWave(page);
+    const composer = page
+      .getByRole("textbox", { name: "Write a message" })
+      .last();
+    await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
+    await expect(
+      page.getByRole("button", { name: "Post" }).last()
+    ).toBeEnabled();
+    await composer.press("Enter");
+
+    await expect(
+      page.getByRole("main").locator('[data-serial-no="2"]')
+    ).toContainText(SANDBOX_CHAT_DROP_CONTENT);
+    await expect(composer).toHaveText("");
+    await expect(composer).toBeFocused();
+    // Use the keyboard directly: locator.fill/press would refocus a broken editor.
+    await page.keyboard.type("The next message starts without clicking.");
+    await expect(composer).toHaveText(
+      "The next message starts without clicking."
+    );
+    const sentMessages = (await fetchSandboxRequests(baseURL)).filter(
+      (request) => request.method === "POST" && request.path === "/api/drops"
+    );
+    expect(sentMessages).toHaveLength(1);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("submits one exact-shape synthetic chat drop without uploads", async ({
     baseURL,
     page,
@@ -940,6 +1065,10 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       kind: "allowed-sandbox-mutation",
       body: expect.objectContaining({
         wave_id: SANDBOX_WAVE_ID,
+        // Makes a retried create return the first drop instead of a second.
+        client_drop_id: expect.stringMatching(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+        ),
         drop_type: "CHAT",
         content: SANDBOX_CHAT_DROP_CONTENT,
         part_count: 1,
@@ -1592,6 +1721,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 function buildExactChatDropBody() {
   return {
     wave_id: SANDBOX_WAVE_ID,
+    client_drop_id: "00000000-0000-4000-8000-0000000000d1",
     drop_type: "CHAT",
     title: null,
     parts: [

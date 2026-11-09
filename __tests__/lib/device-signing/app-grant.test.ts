@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 import { keccak256, toBytes } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
+import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
 import type { ApiDeviceGrantProof } from "@/generated/models/ApiDeviceGrantProof";
 import {
   APP_GRANT_DOMAIN,
@@ -25,6 +25,12 @@ import {
   installNodeWebCrypto,
   VECTORS,
 } from "./device-signing-test-utils";
+
+/** viem's overloads do not take the grant v1 | v2 typed-data union (D172). */
+const signTyped = (signer: PrivateKeyAccount, typedData: unknown) =>
+  signer.signTypedData(
+    typedData as Parameters<PrivateKeyAccount["signTypedData"]>[0]
+  );
 
 // Shared app-grant vectors. The backend pins the same values in
 // src/api-serverless/src/device-signing/app-device-grant.test.ts; keep them
@@ -53,9 +59,23 @@ const COMBINED_SIGNATURE =
 // The backend's stored message for the signing-only vector.
 const SIGNING_STORED_MESSAGE = `{"statement":"${SIGNING_STATEMENT}","wallet":"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266","deviceKey":"${SIGNING_KEY}","scopes":"post,edit,delete,react","mlsDeviceKey":"0x${"0".repeat(64)}","ciphersuite":0,"issuedAt":${ISSUED_AT},"expiresAt":${EXPIRES_AT},"origin":"6529 Desktop"}`;
 
+// Grant v2 (D172): the same terms signing a suite set (domain version "2").
+// Computed with ethers from the typed data alone; the backend pins them in
+// app-device-grant-v2.test.ts.
+const V2_SIGNING_GRANT_ID =
+  "0x9c049140e722cb25940749c8b9ba5167b4fa79c56d97aad08a3fa8bf9d98d29f";
+const V2_SIGNING_SIGNATURE =
+  "0xd63015f9778f55b14b90f9aefc091394a5e2a5c2e934d1f3d14ab0a029ea86390f299641867af17663b26ce4d367e2265ce78f1e226dd1edfce984fd6d34b2eb1c";
+const V2_COMBINED_GRANT_ID =
+  "0x512beaf4b8e41c4e3ed31526432e8c8ec44215f2157244750c8395b1bb06acb3";
+const V2_COMBINED_SIGNATURE =
+  "0xd48f0e4508c1c479fd8c746c7f1db8324a11daf65069ca1e71b849f6951770837abb735d30bffe543153fff9591be95ab2a8731e3b580be8dd113a5d51211e811c";
+
 const account = privateKeyToAccount(PRIVATE_KEY);
 
+/** The v1 vectors' terms (a grant from before D172). */
 const fields = (overrides: Partial<AppGrantFields> = {}): AppGrantFields => ({
+  version: 1,
   wallet: WALLET,
   deviceKeyHex: SIGNING_KEY,
   scopes: ["post", "edit", "delete", "react"],
@@ -67,7 +87,19 @@ const fields = (overrides: Partial<AppGrantFields> = {}): AppGrantFields => ({
 });
 
 const combined = (overrides: Partial<AppGrantFields> = {}) =>
-  fields({ mls: { deviceKeyHex: MLS_KEY, ciphersuite: 0x004f }, ...overrides });
+  fields({
+    mls: { deviceKeyHex: MLS_KEY, ciphersuites: [0x004f] },
+    ...overrides,
+  });
+
+/** New grants: v2, the encrypted-messages key for {0x004E}. */
+const fieldsV2 = (overrides: Partial<AppGrantFields> = {}): AppGrantFields =>
+  fields({ version: 2, ...overrides });
+const combinedV2 = (overrides: Partial<AppGrantFields> = {}) =>
+  fieldsV2({
+    mls: { deviceKeyHex: MLS_KEY, ciphersuites: [0x004e] },
+    ...overrides,
+  });
 
 /** What the backend stores: the signed typed message as JSON. */
 const storedMessage = (grant: AppGrantFields): string => {
@@ -86,7 +118,7 @@ describe("app device grant (EIP-712)", () => {
       expect(message.statement).toBe(SIGNING_STATEMENT);
       expect(computeAppGrantId(message)).toBe(SIGNING_GRANT_ID);
       await expect(
-        account.signTypedData(buildAppGrantTypedData(fields()))
+        signTyped(account, buildAppGrantTypedData(fields()))
       ).resolves.toBe(SIGNING_SIGNATURE);
     });
 
@@ -94,7 +126,7 @@ describe("app device grant (EIP-712)", () => {
       const typedData = buildAppGrantTypedData(combined());
       expect(typedData.message.statement).toBe(COMBINED_STATEMENT);
       expect(computeAppGrantId(typedData.message)).toBe(COMBINED_GRANT_ID);
-      await expect(account.signTypedData(typedData)).resolves.toBe(
+      await expect(signTyped(account, typedData)).resolves.toBe(
         COMBINED_SIGNATURE
       );
       await expect(
@@ -107,6 +139,57 @@ describe("app device grant (EIP-712)", () => {
       const parsed = parseAppGrantMessage(SIGNING_STORED_MESSAGE);
       expect(parsed?.fields).toEqual(fields());
       expect(computeAppGrantId(parsed!.message)).toBe(SIGNING_GRANT_ID);
+    });
+  });
+
+  describe("shared v2 vectors (D172)", () => {
+    it("matches the v2 signing-only digest and signature (no suites)", async () => {
+      const typedData = buildAppGrantTypedData(fieldsV2());
+      expect(typedData.domain.version).toBe("2");
+      expect(typedData.message).toMatchObject({
+        statement: SIGNING_STATEMENT,
+        mlsDeviceKey: `0x${"0".repeat(64)}`,
+        ciphersuites: [],
+      });
+      expect(computeAppGrantId(typedData.message)).toBe(V2_SIGNING_GRANT_ID);
+      await expect(signTyped(account, typedData)).resolves.toBe(
+        V2_SIGNING_SIGNATURE
+      );
+    });
+
+    it("matches the v2 combined digest and signature for {0x004E}", async () => {
+      const typedData = buildAppGrantTypedData(combinedV2());
+      expect(typedData.message).toMatchObject({
+        statement: COMBINED_STATEMENT,
+        mlsDeviceKey: MLS_KEY,
+        ciphersuites: [0x004e],
+      });
+      expect(computeAppGrantId(typedData.message)).toBe(V2_COMBINED_GRANT_ID);
+      await expect(signTyped(account, typedData)).resolves.toBe(
+        V2_COMBINED_SIGNATURE
+      );
+      await expect(
+        recoverAppGrantSigner(typedData.message, V2_COMBINED_SIGNATURE)
+      ).resolves.toBe(WALLET);
+    });
+
+    it("round-trips v2 stored messages, signing-only and combined", () => {
+      for (const grant of [fieldsV2(), combinedV2()]) {
+        const parsed = parseAppGrantMessage(storedMessage(grant));
+        expect(parsed?.fields).toEqual(grant);
+      }
+    });
+
+    it.each([
+      ["an unordered suite set", { ciphersuites: [79, 78] }],
+      ["a repeated suite", { ciphersuites: [78, 78] }],
+      ["five suites", { ciphersuites: [1, 2, 3, 4, 78] }],
+      ["suites without a key", { mlsDeviceKey: `0x${"0".repeat(64)}` }],
+    ])("rejects a v2 message with %s", (_name, override) => {
+      const message = JSON.parse(storedMessage(combinedV2())) as object;
+      expect(
+        parseAppGrantMessage(JSON.stringify({ ...message, ...override }))
+      ).toBeNull();
     });
   });
 
@@ -182,7 +265,7 @@ describe("signed drops under an app grant", () => {
       revoked_at: null,
       last_used_at: null,
       message: storedMessage(grant),
-      wallet_signature: await account.signTypedData(typedData),
+      wallet_signature: await signTyped(account, typedData),
       chain_id: 1,
       ...overrides,
     } as ApiDeviceGrantProof;
@@ -273,7 +356,8 @@ describe("signed drops under an app grant", () => {
     const grant = await grantProof(appGrant());
     const proof = {
       ...grant,
-      wallet_signature: await other.signTypedData(
+      wallet_signature: await signTyped(
+        other,
         buildAppGrantTypedData(appGrant())
       ),
     };

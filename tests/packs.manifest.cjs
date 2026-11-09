@@ -474,6 +474,8 @@ const PACKS = [
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
         "tests/social/wave-loading-sandbox.spec.ts",
+        "tests/social/chat-render-budget-sandbox.spec.ts",
+        "tests/social/wave-live-unread-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,
@@ -536,6 +538,22 @@ const PACKS = [
     ],
     AUTH_SANDBOX_ENV
   ),
+  {
+    ...sandboxPack(
+      "test:e2e:wave-link-preview-sandbox",
+      "Embedded wave preview readability in the sidebar and responsive chat.",
+      ["tests/social/wave-link-preview-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        NEXT_DEV_DIST_DIR: ".next-playwright-wave-link-preview",
+        PLAYWRIGHT_BASE_URL: "http://localhost:3316",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3316",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4316",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
   sandboxPack(
     "test:e2e:notifications-inbox-sandbox",
     "Desktop notification preview, explicit read actions, and mobile navigation.",
@@ -812,22 +830,26 @@ const PACKS = [
     )
   ),
   // Opt-in and stateful: throwaway QA wallets sign in, create test-only
-  // profiles and exchange encrypted messages (D109). Manual trigger only, so
+  // profiles and exchange encrypted messages (D109), or create a wave and post
+  // in it to check live unread badges. Manual trigger only, so
   // the post-deploy `all` selection never runs it; dispatch it by alias.
   {
     scriptKey: "test:e2e:staging:e2ee",
     alias: "e2ee-staging",
     description:
-      "Encrypted DMs, attachments, groups and device revocation between throwaway users (writes QA data).",
+      "Encrypted DMs, device revocation and live wave unread badges for throwaway users (writes QA data).",
     safety: "stateful",
     environments: ["staging"],
     triggers: ["manual"],
     env: { ...STAGING_STATEFUL_ENV, PLAYWRIGHT_E2EE_STAGING: "1" },
-    specs: ["tests/staging-e2ee/encrypted-dm-staging.spec.ts"],
+    specs: [
+      "tests/staging-e2ee/encrypted-dm-staging.spec.ts",
+      "tests/staging-e2ee/wave-unread-staging.spec.ts",
+    ],
     projects: [DESKTOP],
     workers: 1,
     traceOff: true,
-    timeoutMinutes: 60,
+    timeoutMinutes: 75,
   },
 
   productionPack(

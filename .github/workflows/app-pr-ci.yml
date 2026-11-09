@@ -267,6 +267,12 @@ jobs:
           if (notificationsInboxRequired) {
             corePlaywrightLanes.push({ lane: "playwright-notifications-inbox", label: "Notifications inbox desktop and mobile", runner: defaultRunner });
           }
+          const waveLinkPreviewRequired = plan.changed_files.some((file) =>
+            /^(?:components\/waves\/list\/WaveItem(?:Wide|Chat|Follow)\.tsx$|tests\/social\/wave-link-preview-sandbox\.spec\.ts$)/.test(file)
+          );
+          if (waveLinkPreviewRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-wave-link-preview", label: "Wave link previews desktop and mobile", runner: defaultRunner });
+          }
           const waveCreationBrowserRequired = plan.changed_files.some((file) =>
             /^(?:app\/waves\/create\/|components\/waves\/create-wave\/|components\/drops\/create\/|helpers\/waves\/create-wave|tests\/social\/create-wave-sandbox)/.test(file) ||
             ["components/brain/left-sidebar/web/WebUnifiedWavesListWaves.tsx", "components/shared/WavesMessagesWrapper.tsx", "components/user/utils/set-up-profile/UserPageSetUpProfile.tsx", "components/header/header-search/header-search-modal/constants.ts", "components/header/header-search/header-search-modal/pageSearch.ts", "i18n/messages/en-US.ts", "i18n/messages/wave-creation.en-US.json", ".github/workflows/app-pr-ci.yml"].includes(file)
@@ -398,7 +404,6 @@ jobs:
       NEXTGEN_CHAIN_ID: "1"
       MOBILE_APP_SCHEME: "mobile6529"
       CORE_SCHEME: "core6529"
-      IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
       IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
       GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}
       ASSETS_FROM_S3: "false"
@@ -453,13 +458,13 @@ jobs:
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:smoke
 
-      - name: Run all mention confirmation browser checks
+      - name: Run composer mention and send focus browser checks
         if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.all_mention_confirmation_required == 'true'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-all-mention"
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/all-mention"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/all-mention"
-        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention'
+        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention|keeps desktop keyboard focus|submits one exact-shape'
 
       - name: Run Collect public browser pack
         if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.playwright_collect_required == 'true'
@@ -485,6 +490,7 @@ jobs:
       - name: Run native competition browser regression pack
         if: matrix.lane == 'playwright-native-competition'
         env:
+          NEXT_DEV_TURBOPACK_FS_CACHE: "0"
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
           NATIVE_COMPETITION_SHARD: "${{ matrix.shard }}/2"
@@ -511,6 +517,10 @@ jobs:
       - name: Run notifications inbox browser pack
         if: matrix.lane == 'playwright-notifications-inbox'
         run: ./bin/6529 run test:e2e:notifications-inbox-sandbox
+
+      - name: Run wave link preview browser pack
+        if: matrix.lane == 'playwright-wave-link-preview'
+        run: ./bin/6529 run test:e2e:wave-link-preview-sandbox
 
       - name: Run isolated Wave feature tracking browser pack
         if: matrix.lane == 'playwright-wave-feature-usage'
@@ -640,7 +650,6 @@ jobs:
       NEXTGEN_CHAIN_ID: "1"
       MOBILE_APP_SCHEME: "mobile6529"
       CORE_SCHEME: "core6529"
-      IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
       IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
       GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}
       ASSETS_FROM_S3: "false"

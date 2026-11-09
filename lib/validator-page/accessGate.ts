@@ -1,6 +1,7 @@
 import { createHmac, scryptSync, timingSafeEqual } from "node:crypto";
 
 import { getValidatorPageServerEnv } from "@/config/serverEnv";
+import { VALIDATOR_AUTHORIZE_PATH } from "./authorize/paths";
 
 export const VALIDATOR_ACCESS_COOKIE = "validator_access";
 export const VALIDATOR_BASE_PATH = "/validator";
@@ -13,10 +14,13 @@ export const VALIDATOR_NEXT_PATH_HEADER = "x-6529-validator-next";
 /**
  * The signed release feed. Validators fetch it to find updates and cannot
  * pass the password, so it stays public. It holds versions, hashes and notes.
+ * The authorize page is public too: a validator's QR code opens it on a
+ * phone that has never seen the password.
  */
 export const VALIDATOR_PUBLIC_PATHS: ReadonlySet<string> = new Set([
   "/validator/releases.json",
   "/validator/releases.json.sig",
+  VALIDATOR_AUTHORIZE_PATH,
 ]);
 
 const ACCESS_TTL_SECONDS = 30 * 24 * 60 * 60;

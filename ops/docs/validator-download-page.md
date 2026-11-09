@@ -19,6 +19,7 @@ validators fetch to find updates.
 | `/validator/download/<file>` | The same, for the newest release | Password |
 | `/validator/releases.json` | The signed release feed, byte for byte | Public |
 | `/validator/releases.json.sig` | The feed's signature, byte for byte | Public |
+| `/validator/authorize` | A phone signs a validator's authorization from its link (see [Authorize from a phone](#authorize-from-a-phone)) | Public |
 
 The pages send `noindex, nofollow`, and the sitemap leaves them out.
 `robots.txt` does not name them.
@@ -67,6 +68,22 @@ open the pages without a deploy, set that property on the environment
 directly; Elastic Beanstalk restarts the app with it. Remove the
 `/validator` entries from the sitemap exclusions once the pages should be
 found by search engines.
+
+## Authorize from a phone
+
+From rc.10, a validator's Authorize step shows a QR code and a link,
+`/validator/authorize#<draft>`. The fragment holds the validator's draft
+grant (the draft link, v1), so no server ever sees it. The page:
+
+- rebuilds the typed data from the link, checks it, and shows the account,
+  the keys with their shares, and the authorization number;
+- asks the account's own wallet to sign, through the site's AppKit and
+  without the site's sign-in prompt (`components/providers/Providers.tsx`);
+- shows the signature to copy into the validator, which checks it against
+  its own draft.
+
+Nothing is stored or sent. The page is public, so the password gate never
+locks it. The code is in `lib/validator-page/authorize/`.
 
 ## Releases
 
@@ -145,15 +162,15 @@ dialogs, and screenshots of the release's app. The guide's closed sections
 and the known issues are Markdown in `lib/validator-page/content/`, built
 from the tester package's TESTERS.md (its "More" sections) and
 KNOWN-ISSUES.md. The note for testers on the last release ("Upgrading
-from rc.8", `VALIDATOR_UPGRADE` in `guideMarkdown.ts`) shows under the
-download button and at the top of the guide, and rc.9's section on
-Sunday's switch (`VALIDATOR_SWITCH`) above it on the guide. Each shows only
+from rc.9", `VALIDATOR_UPGRADE` in `guideMarkdown.ts`) shows under the
+download button and at the top of the guide, with the section on Sunday's
+switch (`VALIDATOR_SWITCH`) above it on both. Each shows only
 while the release the pages offer is the one it names (`forVersion`). The hardware page's text and
 numbers are in `hardwareText.ts` there, each checked against the release it
 names.
 
 A release fact that is not known when the text is written, such as the
-day of a release's join tests, is written `{{RC9_JOIN_DATE}}` and the like.
+day of a release's join tests, is written `{{RC10_JOIN_DATE}}` and the like.
 The page tests allow only the placeholders `STILL_TO_FILL` in
 `content.test.ts` names, so fill each one, everywhere it appears (the tests
 too), before merging. Testers

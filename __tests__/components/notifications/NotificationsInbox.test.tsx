@@ -156,6 +156,9 @@ describe("NotificationsInbox automatic read", () => {
         await jest.runOnlyPendingTimersAsync();
       });
       expect(postRead).not.toHaveBeenCalled();
+      expect(
+        screen.getByRole("button", { name: "Close notifications" })
+      ).toBeEnabled();
     }
   );
 

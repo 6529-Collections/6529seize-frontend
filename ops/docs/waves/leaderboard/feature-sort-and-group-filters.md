@@ -113,6 +113,6 @@ UI state.
 - [Wave Leaderboard Drop Entry and Eligibility](feature-drop-entry-and-eligibility.md)
 - [Wave Leaderboard Drop States](feature-drop-states.md)
 - [Wave Leaderboard Gallery Cards](feature-gallery-cards.md)
-- [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
+- [Wave Leaderboard Results Timeline](feature-decision-timeline.md)
 - [Wave Drop Vote Slider](../drop-actions/feature-vote-slider.md)
 - [Docs Home](../../README.md)

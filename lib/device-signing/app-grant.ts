@@ -30,6 +30,12 @@ export const APP_GRANT_DOMAIN = {
   salt: "0x4887f15a22b96f574a9f835b87e01e293dc7587acbfc13b5f224b89cd2d8c8aa",
 } as const;
 
+/** Grant v2 (D172): `uint16[] ciphersuites` in place of `uint16 ciphersuite`. */
+const APP_GRANT_DOMAIN_V2 = {
+  ...APP_GRANT_DOMAIN,
+  version: "2",
+} as const;
+
 const APP_GRANT_PRIMARY_TYPE = "DeviceGrant";
 
 const APP_GRANT_TYPES = {
@@ -40,6 +46,20 @@ const APP_GRANT_TYPES = {
     { name: "scopes", type: "string" },
     { name: "mlsDeviceKey", type: "bytes32" },
     { name: "ciphersuite", type: "uint16" },
+    { name: "issuedAt", type: "uint64" },
+    { name: "expiresAt", type: "uint64" },
+    { name: "origin", type: "string" },
+  ],
+} as const;
+
+const APP_GRANT_TYPES_V2 = {
+  DeviceGrant: [
+    { name: "statement", type: "string" },
+    { name: "wallet", type: "address" },
+    { name: "deviceKey", type: "bytes32" },
+    { name: "scopes", type: "string" },
+    { name: "mlsDeviceKey", type: "bytes32" },
+    { name: "ciphersuites", type: "uint16[]" },
     { name: "issuedAt", type: "uint64" },
     { name: "expiresAt", type: "uint64" },
     { name: "origin", type: "string" },
@@ -61,10 +81,18 @@ export interface AppGrantFields {
   readonly deviceKeyHex: string;
   /** Canonical order, includes "post". */
   readonly scopes: readonly string[];
-  /** The encrypted-messages key, or null for a signing-only grant. */
+  /**
+   * 2 (new grants): signs `ciphersuites`; 1: an earlier grant that signed one
+   * `ciphersuite` (0x004F). Absent means 2.
+   */
+  readonly version?: 1 | 2;
+  /**
+   * The encrypted-messages key and its suites (v1: the one suite), or null
+   * for a signing-only grant.
+   */
   readonly mls: {
     readonly deviceKeyHex: string;
-    readonly ciphersuite: number;
+    readonly ciphersuites: readonly number[];
   } | null;
   readonly issuedAtSeconds: number;
   readonly expiresAtSeconds: number;
@@ -72,17 +100,35 @@ export interface AppGrantFields {
   readonly origin: string;
 }
 
-interface AppGrantTypedMessage {
+interface AppGrantTypedFields {
   readonly statement: string;
   readonly wallet: Hex;
   readonly deviceKey: Hex;
   readonly scopes: string;
   readonly mlsDeviceKey: Hex;
-  readonly ciphersuite: number;
   readonly issuedAt: bigint;
   readonly expiresAt: bigint;
   readonly origin: string;
 }
+
+/** v1 signs `ciphersuite`, v2 `ciphersuites`. */
+type AppGrantTypedMessage = AppGrantTypedFields &
+  (
+    | { readonly ciphersuite: number; readonly ciphersuites?: undefined }
+    | {
+        readonly ciphersuites: readonly number[];
+        readonly ciphersuite?: undefined;
+      }
+  );
+
+const isV2 = (fields: Pick<AppGrantFields, "version">): boolean =>
+  fields.version !== 1;
+
+/** The EIP-712 domain and types of a typed message's version. */
+const typingOf = (message: AppGrantTypedMessage) =>
+  message.ciphersuites === undefined
+    ? { domain: APP_GRANT_DOMAIN, types: APP_GRANT_TYPES }
+    : { domain: APP_GRANT_DOMAIN_V2, types: APP_GRANT_TYPES_V2 };
 
 type StatementRenderer = (fields: AppGrantFields) => string;
 
@@ -138,37 +184,50 @@ export function appGrantTimes(nowMs: number): {
   };
 }
 
-const toTypedMessage = (
+function toTypedMessage(
   fields: AppGrantFields,
   statement: string
-): AppGrantTypedMessage => ({
-  statement,
-  wallet: getAddress(fields.wallet),
-  deviceKey: fields.deviceKeyHex as Hex,
-  scopes: fields.scopes.join(","),
-  mlsDeviceKey: (fields.mls?.deviceKeyHex ?? zeroHash) as Hex,
-  ciphersuite: fields.mls?.ciphersuite ?? 0,
-  issuedAt: BigInt(fields.issuedAtSeconds),
-  expiresAt: BigInt(fields.expiresAtSeconds),
-  origin: fields.origin,
-});
+): AppGrantTypedMessage {
+  // Keys in the order of the typed fields, so the stored JSON matches the
+  // backend's byte for byte.
+  const head = {
+    statement,
+    wallet: getAddress(fields.wallet),
+    deviceKey: fields.deviceKeyHex as Hex,
+    scopes: fields.scopes.join(","),
+    mlsDeviceKey: (fields.mls?.deviceKeyHex ?? zeroHash) as Hex,
+  };
+  const tail = {
+    issuedAt: BigInt(fields.issuedAtSeconds),
+    expiresAt: BigInt(fields.expiresAtSeconds),
+    origin: fields.origin,
+  };
+  return isV2(fields)
+    ? {
+        ...head,
+        ciphersuites: [...(fields.mls?.ciphersuites ?? [])],
+        ...tail,
+      }
+    : { ...head, ciphersuite: fields.mls?.ciphersuites[0] ?? 0, ...tail };
+}
 
-/** The exact typed data the wallet signs for a new grant. */
-export const buildAppGrantTypedData = (fields: AppGrantFields) => ({
-  domain: APP_GRANT_DOMAIN,
-  types: APP_GRANT_TYPES,
-  primaryType: APP_GRANT_PRIMARY_TYPE as typeof APP_GRANT_PRIMARY_TYPE,
-  message: toTypedMessage(fields, renderAppGrantStatement(fields)),
-});
+/** The exact typed data the wallet signs for a new grant (v2 unless set). */
+export const buildAppGrantTypedData = (fields: AppGrantFields) => {
+  const message = toTypedMessage(fields, renderAppGrantStatement(fields));
+  return {
+    ...typingOf(message),
+    primaryType: APP_GRANT_PRIMARY_TYPE as typeof APP_GRANT_PRIMARY_TYPE,
+    message,
+  };
+};
 
 /** The grant id of a typed message: its EIP-712 digest, lowercase. */
 export const computeAppGrantId = (message: AppGrantTypedMessage): Hex =>
   hashTypedData({
-    domain: APP_GRANT_DOMAIN,
-    types: APP_GRANT_TYPES,
+    ...typingOf(message),
     primaryType: APP_GRANT_PRIMARY_TYPE,
     message,
-  }).toLowerCase() as Hex;
+  } as unknown as Parameters<typeof hashTypedData>[0]).toLowerCase() as Hex;
 
 /** The recovered signer of a typed message, lowercase, or null. */
 export async function recoverAppGrantSigner(
@@ -177,12 +236,11 @@ export async function recoverAppGrantSigner(
 ): Promise<string | null> {
   try {
     const signer = await recoverTypedDataAddress({
-      domain: APP_GRANT_DOMAIN,
-      types: APP_GRANT_TYPES,
+      ...typingOf(message),
       primaryType: APP_GRANT_PRIMARY_TYPE,
       message,
       signature: signature as Hex,
-    });
+    } as unknown as Parameters<typeof recoverTypedDataAddress>[0]);
     return signer.toLowerCase();
   } catch {
     return null;
@@ -199,13 +257,45 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isSafeSeconds = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value > 0;
 
+const isUint16 = (value: unknown): value is number =>
+  Number.isInteger(value) &&
+  (value as number) >= 1 &&
+  (value as number) <= 0xffff;
+
+/**
+ * The signed suites: v1 `ciphersuite` (0 without a key) or v2
+ * `ciphersuites` ([] without a key), never both.
+ */
+const MAX_GRANT_SUITES = 4;
+
+/** v2: 1 to 4 suites, strictly ascending (one encoding per set, D172). */
+const isCanonicalSuites = (suites: readonly number[]): boolean =>
+  suites.length <= MAX_GRANT_SUITES &&
+  suites.every(
+    (suite, index) => index === 0 || suite > (suites[index - 1] ?? 0)
+  );
+
+function readSuites(
+  value: Record<string, unknown>
+): { version: 1 | 2; suites: number[] } | null {
+  const { ciphersuite, ciphersuites } = value;
+  if (typeof ciphersuite === "number" && ciphersuites === undefined) {
+    return { version: 1, suites: ciphersuite === 0 ? [] : [ciphersuite] };
+  }
+  if (ciphersuite === undefined && Array.isArray(ciphersuites)) {
+    return { version: 2, suites: ciphersuites as number[] };
+  }
+  return null;
+}
+
 function readFields(
   value: Record<string, unknown>
 ): { fields: AppGrantFields; statement: string } | null {
-  const { statement, wallet, deviceKey, scopes, mlsDeviceKey, ciphersuite } =
-    value;
+  const { statement, wallet, deviceKey, scopes, mlsDeviceKey } = value;
   const { issuedAt, expiresAt, origin } = value;
+  const read = readSuites(value);
   if (
+    read === null ||
     typeof statement !== "string" ||
     typeof wallet !== "string" ||
     !isAddress(wallet, { strict: false }) ||
@@ -213,31 +303,35 @@ function readFields(
     !KEY_PATTERN.test(deviceKey) ||
     typeof scopes !== "string" ||
     typeof mlsDeviceKey !== "string" ||
-    typeof ciphersuite !== "number" ||
     !isSafeSeconds(issuedAt) ||
     !isSafeSeconds(expiresAt) ||
     typeof origin !== "string"
   ) {
     return null;
   }
-  const withoutMls = mlsDeviceKey === zeroHash && ciphersuite === 0;
+  const withoutMls = mlsDeviceKey === zeroHash && read.suites.length === 0;
   if (
     !withoutMls &&
     (!KEY_PATTERN.test(mlsDeviceKey) ||
+      mlsDeviceKey === zeroHash ||
       mlsDeviceKey === deviceKey ||
-      !Number.isInteger(ciphersuite) ||
-      ciphersuite < 1 ||
-      ciphersuite > 0xffff)
+      read.suites.length === 0 ||
+      !read.suites.every(isUint16) ||
+      (read.version === 1 && read.suites.length !== 1) ||
+      (read.version === 2 && !isCanonicalSuites(read.suites)))
   ) {
     return null;
   }
   return {
     statement,
     fields: {
+      version: read.version,
       wallet: wallet.toLowerCase(),
       deviceKeyHex: deviceKey,
       scopes: scopes.split(","),
-      mls: withoutMls ? null : { deviceKeyHex: mlsDeviceKey, ciphersuite },
+      mls: withoutMls
+        ? null
+        : { deviceKeyHex: mlsDeviceKey, ciphersuites: read.suites },
       issuedAtSeconds: issuedAt,
       expiresAtSeconds: expiresAt,
       origin,

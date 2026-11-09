@@ -213,6 +213,9 @@ it("partitions the full native competition pack across two uniquely identified j
     './bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"'
   );
   expect(step.env?.["NATIVE_COMPETITION_SHARD"]).toBe("${{ matrix.shard }}/2");
+  // Fresh CI checkouts never reuse Turbopack's dev filesystem cache; its
+  // restore can panic and stop the dev server mid-pack.
+  expect(step.env?.["NEXT_DEV_TURBOPACK_FS_CACHE"]).toBe("0");
   const upload = job.steps.find(
     (item) => item.name === "Upload app check artifacts"
   )!;

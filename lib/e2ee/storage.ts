@@ -41,6 +41,8 @@ export interface E2eeStorageBatch {
   expectedVersion?: number;
   device?: StoredDevice;
   wasmState?: Uint8Array;
+  /** Drop the stored WASM (MLS) state; ignored with `wasmState`. */
+  dropWasmState?: boolean;
   groups?: StoredGroup[];
   deleteGroups?: string[];
   messages?: StoredMessage[];
@@ -491,7 +493,8 @@ class IndexedDbE2eeStorage implements E2eeStorage {
       db,
       profileId,
       (stored) => ({
-        ...stored,
+        // Without new state, dropWasmState keeps only the version.
+        ...(batch.dropWasmState && !sealed ? {} : stored),
         ...sealed,
         profileId,
         version: nextVersion(versionOf(stored), batch.expectedVersion, false),

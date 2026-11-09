@@ -4,7 +4,7 @@
 
 Edit-eligible users can change a non-DM wave picture from the `About` avatar.
 Selecting the avatar pencil opens `Update wave picture`.
-Changing a wave picture leaves every competition’s rules and submission settings unchanged.
+Changing a wave picture leaves every decision’s rules and submission settings unchanged.
 
 ## Location in the Site
 

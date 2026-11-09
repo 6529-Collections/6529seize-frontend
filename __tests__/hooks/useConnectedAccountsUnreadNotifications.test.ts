@@ -147,11 +147,11 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     ).toEqual([
       [
         QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
-        { account: ADDRESS_A, version: "v2-native-competitions" },
+        { account: ADDRESS_A, version: "v2-unread-count" },
       ],
       [
         QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
-        { account: ADDRESS_B, version: "v2-native-competitions" },
+        { account: ADDRESS_B, version: "v2-unread-count" },
       ],
     ]);
     expect(
@@ -227,8 +227,8 @@ describe("useConnectedAccountsUnreadNotifications", () => {
     expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
     expect(requestA).toEqual(
       expect.objectContaining({
-        endpoint: "v2/notifications",
-        params: { limit: "1", include_competitions: "true" },
+        endpoint: "v2/notifications/unread-count",
+        params: { include_competitions: "true" },
         cache: "no-store",
       })
     );

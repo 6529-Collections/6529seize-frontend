@@ -15,7 +15,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiE2eeKeyPackageUpload {
     /**
-    * Standard base64 TLS-serialized KeyPackage (at most 4 KiB)
+    * Standard base64 TLS-serialized MLS 1.0 KeyPackage (at most 8 KiB). Its cipher_suite must be one the device\'s grant admits (today the grant\'s own suite), else 400.
     */
     'data': string;
     'last_resort': boolean;
