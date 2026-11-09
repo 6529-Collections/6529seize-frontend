@@ -659,6 +659,7 @@ describe("testing strategy CI plan", () => {
       },
       defaults: { run: { shell: "bash" } },
       strategy: {
+        "fail-fast": false,
         matrix: "${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}",
       },
     });

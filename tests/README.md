@@ -412,7 +412,8 @@ false` because CI dev servers always start cold.
   About coverage on desktop, mobile, simulated iOS and Android. The two jobs
   have independent 30-minute limits, so profile tests do not consume the shell
   and session-recovery budget. Selection, pack contents, assertions and retries
-  are unchanged; both jobs must pass `Installed app checks`.
+  are unchanged; both jobs must pass `Installed app checks`. Browser matrix
+  jobs do not cancel their siblings on failure, preserving each job's results.
 - Museum selection: `scripts/museum-release-selection.cjs` maps each changed
   file to Museum page surfaces through the surface registry and import graph
   (copy keys and `public/museum` assets map through the sources that name
