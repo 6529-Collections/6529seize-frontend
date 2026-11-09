@@ -6,6 +6,7 @@ import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails
 import { useContext, useEffect, useState } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import SubscriptionTopUpButton from "./coverage/SubscriptionTopUpButton";
 import {
   getCardsRemainingUntilEndOf,
@@ -58,9 +59,10 @@ export default function UserPageSubscriptions(
   const isConnectedAccount = !!profileKey && connectedProfileKey === profileKey;
   const coverageQuery = useSubscriptionCoverage({ profileKey });
   const history = useSubscriptionHistory(profileKey);
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const topUp = useSubscriptionDisclosure(
     "profile-subscriptions-top-up",
-    isConnectedAccount && !coverageQuery.isLoading,
+    !hideNftPurchasing && isConnectedAccount && !coverageQuery.isLoading,
     "profile-subscriptions-top-up"
   );
   useScrollToHashOnMount("profile-subscriptions-overview", {
@@ -229,13 +231,15 @@ export default function UserPageSubscriptions(
             title={t(locale, "subscriptions.page.title")}
             headerClassName="tw-min-h-11 max-sm:!tw-mb-1"
             action={
-              <Link
-                href="/about/subscriptions"
-                className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-400 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:hover:tw-text-iron-100"
-              >
-                {t(locale, "subscriptions.page.learnMore")}
-                <ArrowRightIcon className="tw-size-3" aria-hidden="true" />
-              </Link>
+              !hideNftPurchasing && (
+                <Link
+                  href="/about/subscriptions"
+                  className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-400 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:hover:tw-text-iron-100"
+                >
+                  {t(locale, "subscriptions.page.learnMore")}
+                  <ArrowRightIcon className="tw-size-3" aria-hidden="true" />
+                </Link>
+              )
             }
           >
             <section
@@ -252,6 +256,7 @@ export default function UserPageSubscriptions(
                   coverage={coverageQuery.data}
                   isLoading={coverageQuery.isLoading}
                   isOwner={isConnectedAccount}
+                  showFundingPrompt={!hideNftPurchasing}
                   action={
                     <UserPageSubscriptionsBalance
                       coverage={coverageQuery.data}
@@ -262,6 +267,7 @@ export default function UserPageSubscriptions(
                     />
                   }
                   topUpAction={
+                    !hideNftPurchasing &&
                     isConnectedAccount &&
                     !coverageQuery.isLoading && (
                       <SubscriptionTopUpButton
@@ -275,7 +281,7 @@ export default function UserPageSubscriptions(
               </div>
             </section>
           </UserPageSubscriptionsSection>
-          {isConnectedAccount && (
+          {!hideNftPurchasing && isConnectedAccount && (
             <UserPageSubscriptionsTopUp
               expanded={topUp.expanded}
               coverage={coverageQuery.data}

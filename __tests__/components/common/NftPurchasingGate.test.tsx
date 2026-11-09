@@ -8,6 +8,7 @@ let mockCountry: string | undefined = "US";
 let mockIsCountryPending = false;
 let mockUsCountryHint = false;
 const mockReplace = jest.fn();
+const mockRouter = { replace: mockReplace };
 const mockMount = jest.fn();
 
 jest.mock("@/hooks/useCapacitor", () => ({
@@ -24,7 +25,7 @@ jest.mock("@/components/cookies/usCountryHint", () => ({
   readUsCountryHint: () => mockUsCountryHint,
 }));
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: mockReplace }),
+  useRouter: () => mockRouter,
 }));
 
 function PurchasingContent() {
@@ -59,8 +60,6 @@ it.each(["CY", "CA", "", undefined])(
 );
 
 it.each([
-  ["US iOS", true, "US"],
-  ["normalized US iOS", true, " us "],
   ["web", false, "CY"],
   ["Android", false, "CA"],
 ] as const)("preserves purchasing content on %s", (_label, isIos, country) => {
@@ -130,21 +129,29 @@ describe("after hydration on web and Android", () => {
     });
 
     expect(errors).toEqual([]);
-    expect(container.querySelector('[data-testid="purchasing-space"]')).toBeNull();
+    expect(
+      container.querySelector('[data-testid="purchasing-space"]')
+    ).toBeNull();
     expect(container.querySelector("button")?.textContent).toBe("Mint");
     expect(mockReplace).not.toHaveBeenCalled();
   });
 });
 
-it("can leave an existing layout in charge of the profile redirect", () => {
+it("hides an inline purchase link without redirecting the surrounding page on iOS", () => {
   mockIsIos = true;
-  mockCountry = "CY";
   render(
-    <NftPurchasingGate>
-      <PurchasingContent />
-    </NftPurchasingGate>
+    <>
+      <h1>Collection details</h1>
+      <NftPurchasingGate>
+        <a href="https://example.com/purchase">Buy NFT</a>
+      </NftPurchasingGate>
+    </>
   );
-  expect(mockMount).not.toHaveBeenCalled();
+
+  expect(
+    screen.getByRole("heading", { name: "Collection details" })
+  ).toBeVisible();
+  expect(screen.queryByRole("link", { name: "Buy NFT" })).not.toBeInTheDocument();
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
@@ -163,50 +170,25 @@ describe("while the iOS country check is pending", () => {
     mockIsCountryPending = true;
   });
 
-  it("keeps a US cold deep link in place and renders once US resolves", () => {
-    const { container, rerender } = render(gate());
-    expect(container).toBeEmptyDOMElement();
-    expect(mockMount).not.toHaveBeenCalled();
-    expect(mockReplace).not.toHaveBeenCalled();
+  it.each(["US", "FR", ""])(
+    "redirects immediately and ignores the settled country %s",
+    (country) => {
+      mockUsCountryHint = true;
+      const { container, rerender } = render(gate());
 
-    mockCountry = "US";
-    mockIsCountryPending = false;
-    rerender(gate());
+      expect(container).toBeEmptyDOMElement();
+      expect(mockMount).not.toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledWith("/about");
 
-    expect(screen.getByRole("button", { name: "Mint" })).toBeInTheDocument();
-    expect(mockReplace).not.toHaveBeenCalled();
-  });
+      mockCountry = country;
+      mockIsCountryPending = false;
+      rerender(gate());
 
-  it("keeps the reserved space on a device whose last check was US", () => {
-    mockUsCountryHint = true;
-    const { rerender } = render(gate());
-    expect(screen.getByTestId("purchasing-space")).toBeInTheDocument();
-    expect(mockMount).not.toHaveBeenCalled();
-
-    mockCountry = "FR";
-    mockIsCountryPending = false;
-    rerender(gate());
-
-    expect(screen.queryByTestId("purchasing-space")).toBeNull();
-    expect(mockMount).not.toHaveBeenCalled();
-    expect(mockReplace).toHaveBeenCalledWith("/about");
-  });
-
-  it.each([
-    ["a non-US country", "FR"],
-    ["a failed or empty lookup", ""],
-  ])("redirects once the check resolves to %s", (_label, country) => {
-    const { container, rerender } = render(gate());
-    expect(mockReplace).not.toHaveBeenCalled();
-
-    mockCountry = country;
-    mockIsCountryPending = false;
-    rerender(gate());
-
-    expect(container).toBeEmptyDOMElement();
-    expect(mockMount).not.toHaveBeenCalled();
-    expect(mockReplace).toHaveBeenCalledWith("/about");
-  });
+      expect(container).toBeEmptyDOMElement();
+      expect(mockMount).not.toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it("does not make Android or web wait for the country", () => {
     mockIsIos = false;

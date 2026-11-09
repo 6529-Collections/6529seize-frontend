@@ -1,7 +1,7 @@
 "use client";
 
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useAuth } from "@/components/auth/Auth";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { getActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import { getMemeLabRouteHrefWithLocale } from "@/components/memelab/memeLabRouteParams";
 import { MemeLabCardVolumes } from "@/components/memelab/MemeLabCardHeader";
@@ -77,7 +77,7 @@ export default function MemeLabPageComponent({
   const capacitor = useCapacitor();
 
   const { connectedProfile } = useAuth();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { setTitle } = useTitle();
 
   const focusParam = searchParams.get("focus");
@@ -635,7 +635,7 @@ export default function MemeLabPageComponent({
             <MemeLabStaticHeader
               nft={nft}
               nftMeta={nftMeta}
-              showMarketplaceLinks={!capacitor.isIos || country === "US"}
+              showMarketplaceLinks={!hideNftPurchasing}
               locale={locale}
               hasOwnershipContext={hasOwnershipContext}
               nftBalance={nftBalance}

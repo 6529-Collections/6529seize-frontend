@@ -302,11 +302,10 @@ function setup(options: SetupOptions = {}) {
   capacitorMock.mockReturnValue({ isIos: false });
   if (useActualSidebarSections) {
     useSidebarSectionsMock.mockImplementation(
-      (appWalletsSupported: boolean, isIos: boolean, country: string | null) =>
+      (appWalletsSupported: boolean, hideNftPurchasing: boolean) =>
         actualSidebarHooks.useSidebarSections(
           appWalletsSupported,
-          isIos,
-          country
+          hideNftPurchasing
         )
     );
   } else {
