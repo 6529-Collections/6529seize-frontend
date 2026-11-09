@@ -49,5 +49,9 @@
   "shareImage.status.making": "Creando imagen...",
   "shareImage.card.countOne": "1 post",
   "shareImage.card.countOther": "{count} posts",
-  "shareImage.card.mediaNotShown": "Video o archivo no mostrado"
+  "shareImage.card.mediaNotShown": "Video o archivo no mostrado",
+  "shareImage.select.postUnknown": "Seleccionar post",
+  "shareImage.time.elapsedMinutes": "+{minutes} min",
+  "shareImage.time.elapsedHours": "+{hours} h",
+  "shareImage.time.elapsedHoursMinutes": "+{hours} h {minutes} min"
 }

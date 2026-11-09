@@ -39,14 +39,16 @@ export default function ShareDropsSelectionBar({
       : t(locale, "shareImage.select.countOther", { count });
 
   return (
-    <div
-      role="region"
+    <section
       aria-label={t(locale, "shareImage.title")}
       aria-describedby={hintId}
       className="tailwind-scope tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-40 tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-primary-400/35 tw-bg-[#0b0f1d] tw-px-4 tw-py-3 tw-pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] md:tw-bottom-auto md:tw-top-0 md:tw-border-b md:tw-border-t-0"
     >
       <div className="tw-min-w-0 tw-flex-1">
-        <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50">
+        <p
+          aria-live="polite"
+          className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-50"
+        >
           <span className="tw-hidden md:tw-inline">
             {t(locale, "shareImage.title")} ·{" "}
           </span>
@@ -82,6 +84,6 @@ export default function ShareDropsSelectionBar({
         {t(locale, "shareImage.next")}
         <ChevronRightIcon aria-hidden="true" className="tw-size-4" />
       </button>
-    </div>
+    </section>
   );
 }

@@ -49,5 +49,9 @@
   "shareImage.status.making": "Bild wird erstellt ...",
   "shareImage.card.countOne": "1 Beitrag",
   "shareImage.card.countOther": "{count} Beitraege",
-  "shareImage.card.mediaNotShown": "Video oder Datei nicht angezeigt"
+  "shareImage.card.mediaNotShown": "Video oder Datei nicht angezeigt",
+  "shareImage.select.postUnknown": "Beitrag auswaehlen",
+  "shareImage.time.elapsedMinutes": "+{minutes} Min.",
+  "shareImage.time.elapsedHours": "+{hours} Std.",
+  "shareImage.time.elapsedHoursMinutes": "+{hours} Std. {minutes} Min."
 }

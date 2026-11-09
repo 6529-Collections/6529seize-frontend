@@ -35,6 +35,7 @@ import {
   formatShareImageDateLine,
   formatShareImagePostTime,
   getShareImageFileName,
+  getShareImageTimeSpan,
   type ShareImageTimeMode,
   type ShareImageTimeOption,
 } from "@/lib/share-drops-image/shareDropsImageFormat";
@@ -87,6 +88,7 @@ export default function ShareDropsImageDialog({
   const cardRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const zoneSelectId = useId();
+  const timeDescriptionId = useId();
   const [time, setTime] = useState<ShareImageTimeOption>(
     DEFAULT_SHARE_IMAGE_TIME
   );
@@ -102,7 +104,9 @@ export default function ShareDropsImageDialog({
   const deviceTimeZone = useMemo(() => getDeviceTimeZone(), []);
   const zones = useMemo(() => getSupportedTimeZones(), []);
   const isPrivate = isPrivateWave(wave);
-  const firstAt = drops[0]?.created_at ?? Date.now();
+  const { first: firstAt, last: lastAt } = getShareImageTimeSpan(
+    drops.map((drop) => drop.created_at)
+  );
   const fileName = getShareImageFileName(wave.name, firstAt, isPrivate);
   const showsDeviceZone =
     time.mode === "zone" &&
@@ -142,16 +146,7 @@ export default function ShareDropsImageDialog({
     const lines: string[] = [];
     if (include.waveHeader) {
       lines.push(
-        `${wave.name} · ${formatShareImageDateLine(
-          firstAt,
-          drops.at(-1)?.created_at ?? firstAt,
-          time,
-          locale,
-          {
-            elapsed: t(locale, "shareImage.time.elapsedLabel"),
-            hidden: t(locale, "shareImage.time.hiddenLabel"),
-          }
-        )}`,
+        `${wave.name} · ${formatShareImageDateLine(firstAt, lastAt, time, locale)}`,
         ""
       );
     }
@@ -164,7 +159,7 @@ export default function ShareDropsImageDialog({
         locale
       );
       lines.push(when ? `${author} · ${when}` : author);
-      const content = messages[index]?.plainContent.trim();
+      const content = messages[index]?.plainContent?.trim();
       if (content) lines.push(content);
       lines.push("");
     });
@@ -177,6 +172,8 @@ export default function ShareDropsImageDialog({
   };
 
   const statusText = (() => {
+    if (exporter.status === "working")
+      return t(locale, "shareImage.status.making");
     if (exporter.status === "copied")
       return t(locale, "shareImage.status.copied");
     if (exporter.status === "downloaded")
@@ -289,6 +286,8 @@ export default function ShareDropsImageDialog({
                     type="radio"
                     name="share-image-time"
                     value={mode}
+                    aria-label={t(locale, `shareImage.time.${mode}`)}
+                    aria-describedby={`${timeDescriptionId}-${mode}`}
                     checked={time.mode === mode}
                     onChange={() =>
                       setTime(
@@ -307,7 +306,10 @@ export default function ShareDropsImageDialog({
                     <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-50">
                       {t(locale, `shareImage.time.${mode}`)}
                     </span>
-                    <span className="tw-block tw-text-xs tw-text-iron-400">
+                    <span
+                      id={`${timeDescriptionId}-${mode}`}
+                      className="tw-block tw-text-xs tw-text-iron-400"
+                    >
                       {t(locale, `shareImage.time.${mode}.description`)}
                     </span>
                   </span>
@@ -470,12 +472,9 @@ export default function ShareDropsImageDialog({
               : t(locale, "shareImage.copyImage")}
           </button>
         )}
-        <p
-          role="status"
-          className="tw-m-0 tw-w-full tw-text-xs tw-text-iron-300 empty:tw-hidden"
-        >
+        <output className="tw-m-0 tw-block tw-w-full tw-text-xs tw-text-iron-300 empty:tw-hidden">
           {statusText}
-        </p>
+        </output>
       </footer>
     </dialog>,
     document.body

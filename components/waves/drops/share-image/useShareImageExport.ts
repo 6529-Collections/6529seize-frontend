@@ -110,12 +110,16 @@ export function useShareImageExport({
   }, [cardRef, refreshKey]);
 
   const run = useCallback(
-    async (action: (blob: Blob) => Promise<ShareImageActionStatus>) => {
+    async (
+      action: (blob: Blob) => Promise<void>,
+      success: ShareImageActionStatus
+    ) => {
       const node = cardRef.current;
       if (!node) return;
       setStatus("working");
       try {
-        setStatus(await action(await renderPng(node)));
+        await action(await renderPng(node));
+        setStatus(success);
       } catch (error) {
         setStatus(
           error instanceof DOMException && error.name === "AbortError"
@@ -140,44 +144,40 @@ export function useShareImageExport({
       .catch(() => setStatus("failed"));
   }, [cardRef]);
 
-  const download = useCallback(
-    () =>
-      run(async (blob) => {
-        if (isNativeApp) {
-          await shareFetchedBlobInNativeApp(blob, fileName, {
-            dialogTitle: nativeDialogTitle,
-          });
-          return "shared";
-        }
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = fileName;
-        link.rel = "noopener";
-        document.body.append(link);
-        link.click();
-        link.remove();
-        globalThis.setTimeout(() => URL.revokeObjectURL(url), 10_000);
-        return "downloaded";
+  const shareNative = useCallback(
+    (blob: Blob) =>
+      shareFetchedBlobInNativeApp(blob, fileName, {
+        dialogTitle: nativeDialogTitle,
       }),
-    [fileName, isNativeApp, nativeDialogTitle, run]
+    [fileName, nativeDialogTitle]
   );
 
-  const share = useCallback(
-    () =>
-      run(async (blob) => {
-        if (isNativeApp) {
-          await shareFetchedBlobInNativeApp(blob, fileName, {
-            dialogTitle: nativeDialogTitle,
-          });
-          return "shared";
-        }
-        const file = new File([blob], fileName, { type: "image/png" });
-        await navigator.share({ files: [file] });
-        return "shared";
-      }),
-    [fileName, isNativeApp, nativeDialogTitle, run]
-  );
+  const download = useCallback(() => {
+    if (isNativeApp) {
+      return run(shareNative, "shared");
+    }
+    return run(async (blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      link.rel = "noopener";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      globalThis.setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    }, "downloaded");
+  }, [fileName, isNativeApp, run, shareNative]);
 
-  return { status, setStatus, unreadableImages, copyImage, download, share };
+  const share = useCallback(() => {
+    if (isNativeApp) {
+      return run(shareNative, "shared");
+    }
+    return run(async (blob) => {
+      const file = new File([blob], fileName, { type: "image/png" });
+      await navigator.share({ files: [file] });
+    }, "shared");
+  }, [fileName, isNativeApp, run, shareNative]);
+
+  return { status, unreadableImages, copyImage, download, share };
 }

@@ -1,3 +1,6 @@
+import { formatDate, formatTime } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   getTimeZoneShortName,
   UTC_TIME_ZONE_PREFERENCE,
@@ -23,15 +26,40 @@ export const DEFAULT_SHARE_IMAGE_TIME: ShareImageTimeOption = {
 /** One image holds at most this many posts (mobile canvas size limits). */
 export const MAX_SHARE_IMAGE_POSTS = 20;
 
-const CLOCK: Intl.DateTimeFormatOptions = {
-  hour: "2-digit",
-  minute: "2-digit",
-};
-
 function zoneFor(option: ShareImageTimeOption): string {
   return option.mode === "zone" && option.timeZone
     ? option.timeZone
     : UTC_TIME_ZONE_PREFERENCE;
+}
+
+/**
+ * The earliest and latest post times. Posts are ordered by serial number,
+ * which is usually but not always chronological, so the span is computed.
+ */
+export function getShareImageTimeSpan(createdAts: readonly number[]): {
+  readonly first: number;
+  readonly last: number;
+} {
+  if (createdAts.length === 0) {
+    const now = Date.now();
+    return { first: now, last: now };
+  }
+  return { first: Math.min(...createdAts), last: Math.max(...createdAts) };
+}
+
+function formatElapsed(locale: SupportedLocale, milliseconds: number): string {
+  const minutes = Math.max(0, Math.round(milliseconds / 60_000));
+  if (minutes < 60) {
+    return t(locale, "shareImage.time.elapsedMinutes", { minutes });
+  }
+  const hours = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest === 0
+    ? t(locale, "shareImage.time.elapsedHours", { hours })
+    : t(locale, "shareImage.time.elapsedHoursMinutes", {
+        hours,
+        minutes: rest,
+      });
 }
 
 /** The time shown next to a post, or null when times are hidden. */
@@ -39,28 +67,20 @@ export function formatShareImagePostTime(
   createdAt: number,
   firstCreatedAt: number,
   option: ShareImageTimeOption,
-  formatLocale: Intl.LocalesArgument
+  locale: SupportedLocale
 ): string | null {
   if (option.mode === "hidden") {
     return null;
   }
   if (option.mode === "elapsed") {
-    const minutes = Math.max(
-      0,
-      Math.round((createdAt - firstCreatedAt) / 60_000)
-    );
-    if (minutes < 60) {
-      return `+${minutes} min`;
-    }
-    const hours = Math.floor(minutes / 60);
-    const rest = minutes % 60;
-    return rest === 0 ? `+${hours} h` : `+${hours} h ${rest} min`;
+    return formatElapsed(locale, createdAt - firstCreatedAt);
   }
-  return new Intl.DateTimeFormat(formatLocale, {
-    ...CLOCK,
+  return formatTime(locale, createdAt, {
+    hour: "2-digit",
+    minute: "2-digit",
     timeZone: zoneFor(option),
     timeZoneName: "short",
-  }).format(createdAt);
+  });
 }
 
 /** "Nov 9, 2026 · UTC" style subtitle under the wave name. */
@@ -68,37 +88,39 @@ export function formatShareImageDateLine(
   firstCreatedAt: number,
   lastCreatedAt: number,
   option: ShareImageTimeOption,
-  formatLocale: Intl.LocalesArgument,
-  labels: { readonly elapsed: string; readonly hidden: string }
+  locale: SupportedLocale
 ): string {
   const timeZone = zoneFor(option);
-  const dateFormat = new Intl.DateTimeFormat(formatLocale, {
+  const dateOptions: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "short",
     day: "numeric",
     timeZone,
-  });
-  const first = dateFormat.format(firstCreatedAt);
-  const last = dateFormat.format(lastCreatedAt);
+  };
+  const first = formatDate(locale, firstCreatedAt, dateOptions);
+  const last = formatDate(locale, lastCreatedAt, dateOptions);
   const dates = first === last ? first : `${first} – ${last}`;
-  const zoneName = getTimeZoneShortName(
-    formatLocale,
-    timeZone,
-    new Date(firstCreatedAt)
-  );
-  const parts = [dates, zoneName];
-  if (option.mode === "elapsed") parts.push(labels.elapsed);
-  if (option.mode === "hidden") parts.push(labels.hidden);
+  const parts = [
+    dates,
+    getTimeZoneShortName(locale, timeZone, new Date(firstCreatedAt)),
+  ];
+  if (option.mode === "elapsed") {
+    parts.push(t(locale, "shareImage.time.elapsedLabel"));
+  }
+  if (option.mode === "hidden") {
+    parts.push(t(locale, "shareImage.time.hiddenLabel"));
+  }
   return parts.join(" · ");
 }
 
 function slugify(value: string): string {
   return value
     .normalize("NFD")
-    .replaceAll(/[̀-ͯ]/g, "")
+    .replaceAll(/\p{M}/gu, "")
     .toLowerCase()
-    .replaceAll(/[^a-z0-9]+/g, "-")
-    .replaceAll(/^-+|-+$/g, "")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)
+    .join("-")
     .slice(0, 48);
 }
 

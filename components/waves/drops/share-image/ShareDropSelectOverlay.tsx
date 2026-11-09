@@ -28,7 +28,11 @@ export default function ShareDropSelectOverlay({
     <button
       type="button"
       aria-pressed={selected}
-      aria-label={t(locale, "shareImage.select.post", { author })}
+      aria-label={
+        author
+          ? t(locale, "shareImage.select.post", { author })
+          : t(locale, "shareImage.select.postUnknown")
+      }
       onPointerDown={(event) => event.stopPropagation()}
       onTouchStart={(event) => event.stopPropagation()}
       onClick={(event) => {

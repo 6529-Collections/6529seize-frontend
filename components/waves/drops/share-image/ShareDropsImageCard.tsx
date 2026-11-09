@@ -12,6 +12,7 @@ import { t } from "@/i18n/messages";
 import {
   formatShareImageDateLine,
   formatShareImagePostTime,
+  getShareImageTimeSpan,
   type ShareImageTimeOption,
 } from "@/lib/share-drops-image/shareDropsImageFormat";
 
@@ -70,12 +71,10 @@ const ShareDropsImageCard = forwardRef<
     void loadEmojiData();
   }, [loadEmojiData]);
 
-  const firstAt = drops[0]?.created_at ?? 0;
-  const lastAt = drops.at(-1)?.created_at ?? firstAt;
-  const dateLine = formatShareImageDateLine(firstAt, lastAt, time, locale, {
-    elapsed: t(locale, "shareImage.time.elapsedLabel"),
-    hidden: t(locale, "shareImage.time.hiddenLabel"),
-  });
+  const { first: firstAt, last: lastAt } = getShareImageTimeSpan(
+    drops.map((drop) => drop.created_at)
+  );
+  const dateLine = formatShareImageDateLine(firstAt, lastAt, time, locale);
 
   return (
     <div
