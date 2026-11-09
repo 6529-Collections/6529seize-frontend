@@ -38,15 +38,28 @@ async function expectCenteredCloseControl(inbox: Locator) {
 }
 
 test.describe("Notifications inbox sandbox @auth @local-only", () => {
-  test.beforeEach(async ({ page }) => {
-    await installArtworkNotificationImage(page);
-  });
   useLocalSandboxMutationGuard(
     test,
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Notifications inbox requires the local mock API runner."
   );
-
+  test.beforeEach(async ({ page }) => {
+    await installArtworkNotificationImage(page);
+    await page.route("**/api/profile-cms/assets?*", async (route) => {
+      const source =
+        new URL(route.request().url()).searchParams.get("url") ?? "";
+      if (source.endsWith("/6529-emoji/emoji-list.json")) {
+        await route.fulfill({ json: ["6529"] });
+      } else if (source.endsWith("/6529-emoji/6529.webp")) {
+        await route.fulfill({
+          path: "public/favicon.png",
+          contentType: "image/png",
+        });
+      } else {
+        await route.fallback();
+      }
+    });
+  });
   test("desktop preview marks notifications read, preserves the route, restores focus, and opens a destination", async ({
     page,
     baseURL,
@@ -69,6 +82,19 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
         ...notification,
         related_wave: wave,
       }));
+      const customReaction = data.notifications.find(
+        (notification) =>
+          notification.cause === ApiNotificationCause.DropReacted
+      );
+      if (!customReaction) throw new Error("Sandbox needs a reaction");
+      data.notifications.push({
+        ...customReaction,
+        id: 2000,
+        additional_context: {
+          ...customReaction.additional_context,
+          reaction: ":6529:",
+        },
+      });
       data.notifications.push({
         id:
           Math.max(
@@ -118,6 +144,25 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect(
       inbox.getByText("New reactions to your drop", { exact: true })
     ).toHaveCount(1);
+    const reactionRow = inbox.getByRole("link").filter({
+      hasText: "New reactions to your drop",
+    });
+    await expect(
+      reactionRow.getByRole("img", { name: "Thumbs Up", exact: true })
+    ).toHaveCount(1);
+    await expect(reactionRow.getByText("👍", { exact: true })).toBeVisible();
+    const customEmoji = reactionRow.getByRole("img", {
+      name: "6529",
+      exact: true,
+    });
+    await expect(customEmoji).toBeVisible();
+    await expect
+      .poll(() =>
+        customEmoji
+          .getByAltText("6529")
+          .evaluate((img: HTMLImageElement) => img.naturalWidth)
+      )
+      .toBeGreaterThan(0);
     for (const summary of [
       "New reactions to your drop",
       "10 voting credits returned in Sandbox Main Stage",
@@ -216,9 +261,26 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await trigger.press("ArrowDown");
     await inbox.getByRole("button", { name: "Close notifications" }).click();
     await expect(inbox).not.toBeVisible();
+    const readsBeforeKeyboardOpen = (
+      await fetchSandboxRequests(baseURL)
+    ).filter(
+      (request) =>
+        request.method === "POST" && request.path === "/api/notifications/read"
+    ).length;
     await trigger.focus();
     await page.keyboard.press("ArrowDown");
     await expect(inbox).toBeFocused();
+    // Each opening marks the inbox read; let that request settle before Tab.
+    await expect
+      .poll(
+        async () =>
+          (await fetchSandboxRequests(baseURL)).filter(
+            (request) =>
+              request.method === "POST" &&
+              request.path === "/api/notifications/read"
+          ).length
+      )
+      .toBe(readsBeforeKeyboardOpen + 1);
     await expect(
       inbox.getByRole("button", { name: "Mark all as read" })
     ).toBeEnabled();
