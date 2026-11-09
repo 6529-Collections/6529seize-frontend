@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, type RefObject } from "react";
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
 
-export type ShareImageActionStatus =
+type ShareImageActionStatus =
   | "idle"
   | "working"
   | "copied"
