@@ -48,7 +48,7 @@ export interface E2eeApiClient {
   registerLoginGrantDevice(
     body: ApiE2eeRegisterLoginGrantDeviceRequest
   ): Promise<ApiE2eeDevice>;
-  getDevice(deviceKey: string): Promise<ApiE2eeDevice>;
+  getDevice(deviceKey: string, signal?: AbortSignal): Promise<ApiE2eeDevice>;
   /** `ciphersuite`: only devices that can join groups of it (D172). */
   getProfileDevices(
     profileId: string,

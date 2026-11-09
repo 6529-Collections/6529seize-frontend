@@ -35,16 +35,19 @@ export async function profileOfLeaf(
   const known = knownDeviceProfile(ctx, key);
   if (known || ctx.knownDeviceProfiles.has(key)) return known;
   try {
-    const record = await ctx.lookupReads.read(`device:${key}`, async () => {
-      const result = await ctx.api.getDevice(key);
-      if (result.device_key.toLowerCase() !== key || !result.profile_id) {
-        throw new E2eeApiError({
-          status: 404,
-          message: "Device identity unavailable",
-        });
+    const record = await ctx.lookupReads.read(
+      `device:${key}`,
+      async (signal) => {
+        const result = await ctx.api.getDevice(key, signal);
+        if (result.device_key.toLowerCase() !== key || !result.profile_id) {
+          throw new E2eeApiError({
+            status: 404,
+            message: "Device identity unavailable",
+          });
+        }
+        return result;
       }
-      return result;
-    });
+    );
     if (ctx.disposed) return null;
     ctx.directory.seed([record]);
     rememberDeviceProfile(ctx, key, record.profile_id);

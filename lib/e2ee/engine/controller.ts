@@ -481,6 +481,13 @@ export class EngineController {
     if (!this.isReady()) {
       return;
     }
+    if (event.type === "E2EE_LOOKUP_RESUME") {
+      this.debounce(
+        "lookup-resume",
+        () => this.hooks.resumeLookups?.() ?? Promise.resolve()
+      );
+      return;
+    }
     this.ctx.lastWakeAt = this.ctx.now();
     const data = (
       typeof event.data === "object" && event.data !== null ? event.data : {}
@@ -494,12 +501,6 @@ export class EngineController {
         ? data["device_key"].toLowerCase()
         : null;
     switch (event.type) {
-      case "E2EE_LOOKUP_RESUME":
-        this.debounce(
-          "lookup-resume",
-          () => this.hooks.resumeLookups?.() ?? Promise.resolve()
-        );
-        break;
       case "E2EE_GROUP_EVENT":
       case "E2EE_ROSTER_CHANGED":
         if (group) {

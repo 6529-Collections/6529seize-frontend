@@ -1,7 +1,10 @@
 /** @jest-environment node */
 import { E2eeApiError } from "@/lib/e2ee/api-errors";
 import { createContext, loadGroups } from "@/lib/e2ee/engine/setup";
-import { loadSavedHistory } from "@/lib/e2ee/engine/history-read";
+import {
+  getSavedMessage,
+  loadSavedHistory,
+} from "@/lib/e2ee/engine/history-read";
 import { recoverLoadedIdentities } from "@/lib/e2ee/engine/identity-recovery";
 import {
   profileOfLeaf,
@@ -36,6 +39,40 @@ async function savedConversation() {
 }
 
 describe("encrypted author identity recovery", () => {
+  it.each(["history", "message"])(
+    "keeps %s readable when a cosmetic repair write fails",
+    async (read) => {
+      const { ctx, g } = await savedConversation();
+      const message = (await ctx.storage.listMessages("bob", g)).find(
+        (item) => item.text === "keep this history"
+      )!;
+      message.senderProfileId = null;
+      await ctx.storage.writeBatch("bob", {
+        expectedVersion: ctx.stateVersion,
+        messages: [message],
+      });
+      ctx.stateVersion += 1;
+      await loadGroups(ctx);
+      const write = jest
+        .spyOn(ctx.storage, "writeBatch")
+        .mockRejectedValue(new Error("storage unavailable"));
+      if (read === "history") {
+        await expect(loadSavedHistory(ctx, g)).resolves.toBeUndefined();
+        expect(ctx.store.groups.get(g)?.historyError).toBe(false);
+      } else {
+        await expect(
+          getSavedMessage(ctx, g, message.id)
+        ).resolves.toMatchObject({
+          text: "keep this history",
+        });
+      }
+      expect(write).toHaveBeenCalledTimes(1);
+      expect((await ctx.storage.getMessage("bob", g, message.id))?.text).toBe(
+        "keep this history"
+      );
+    }
+  );
+
   it("reuses a saved device owner after restart without another directory read", async () => {
     const { alice, ctx } = await savedConversation();
     await loadGroups(ctx);

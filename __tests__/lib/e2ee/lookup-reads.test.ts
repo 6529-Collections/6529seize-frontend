@@ -10,6 +10,59 @@ const unavailable = () =>
   new E2eeApiError({ status: 503, message: "unavailable" });
 
 describe("identity lookup request budget", () => {
+  it("aborts stalled requests, releases queued reads, and backs off timeouts", async () => {
+    jest.useFakeTimers();
+    try {
+      const reads = new LookupReads(() => 0);
+      const signals: AbortSignal[] = [];
+      const stalled = Array.from({ length: 8 }, (_, n) =>
+        reads.read(String(n), (signal) => {
+          signals.push(signal);
+          return new Promise<never>(() => undefined);
+        })
+      );
+      const settled = Promise.allSettled(stalled);
+      const queued = reads.read("queued", async () => "done");
+      await jest.advanceTimersByTimeAsync(10_000);
+      expect(await settled).toEqual(
+        Array.from({ length: 8 }, () => ({
+          status: "rejected",
+          reason: expect.objectContaining({ status: 408 }),
+        }))
+      );
+      expect(signals.every((signal) => signal.aborted)).toBe(true);
+      await expect(queued).resolves.toBe("done");
+      expect(reads.canRead("0")).toBe(false);
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("forwards caller cancellation without consuming the retry budget", async () => {
+    const reads = new LookupReads(() => 0);
+    const caller = new AbortController();
+    let requestSignal: AbortSignal | undefined;
+    const request = reads.read(
+      "alice",
+      (signal) => {
+        requestSignal = signal;
+        return new Promise<never>(() => undefined);
+      },
+      caller.signal
+    );
+    const rejected = expect(request).rejects.toMatchObject({
+      name: "AbortError",
+    });
+    await Promise.resolve();
+    caller.abort();
+    await rejected;
+    expect(requestSignal?.aborted).toBe(true);
+    await expect(reads.read("alice", async () => "Alice")).resolves.toBe(
+      "Alice"
+    );
+  });
+
   it("does not send requests on repeated syncs before a retry deadline", async () => {
     let now = 0;
     const reads = new LookupReads(() => now);

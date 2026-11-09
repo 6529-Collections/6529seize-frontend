@@ -64,6 +64,14 @@ describe("E2EE REST client (contract 4.2)", () => {
     roleMock.mockReset().mockReturnValue(null);
   });
 
+  it("forwards the cosmetic device lookup abort signal to the transport", async () => {
+    const signal = new AbortController().signal;
+    await createE2eeApiClient(ACCOUNT).getDevice(KEY, signal);
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: `e2ee/devices/${KEY}`, signal })
+    );
+  });
+
   it("maps every endpoint with structured errors", async () => {
     const api = createE2eeApiClient(ACCOUNT);
     await api.getMe();

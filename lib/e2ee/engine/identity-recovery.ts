@@ -49,11 +49,15 @@ export async function recoverIdentities(
     ]);
   }
   const resolved = new Map<string, string>();
-  for (const key of keys) {
-    const profileId = await recoverProfile(ctx, key, budget);
-    if (isDisposed(ctx)) return;
-    if (profileId) resolved.set(key.toLowerCase(), profileId);
-  }
+  // Share the request deadline instead of serially waiting once per member.
+  await Promise.all(
+    [...keys].map(async (key) => {
+      const profileId = await recoverProfile(ctx, key, budget);
+      if (profileId && !isDisposed(ctx))
+        resolved.set(key.toLowerCase(), profileId);
+    })
+  );
+  if (isDisposed(ctx)) return;
   if (applyRecoveredProfiles(runtime, candidates, resolved)) {
     await checkpoint(ctx, { groups: [runtime], skipWasm: true });
   }

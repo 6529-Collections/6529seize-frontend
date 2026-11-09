@@ -84,19 +84,23 @@ export const getE2eeProfileQueryOptions = (profileId: string) => ({
     readonly signal: AbortSignal;
     readonly client: QueryClient;
   }) =>
-    getE2eeLookupReads(client).read(`profile:${profileId}`, async () => {
-      const identity = await commonApiFetch<ApiIdentity>({
-        endpoint: `identities/${encodeURIComponent(profileId)}`,
-        signal,
-        errorMode: "structured",
-      });
-      if (identity.id !== profileId) {
-        throw Object.assign(new Error("Identity lookup mismatch"), {
-          status: 404,
+    getE2eeLookupReads(client).read(
+      `profile:${profileId}`,
+      async (lookupSignal) => {
+        const identity = await commonApiFetch<ApiIdentity>({
+          endpoint: `identities/${encodeURIComponent(profileId)}`,
+          signal: lookupSignal,
+          errorMode: "structured",
         });
-      }
-      return identity;
-    }),
+        if (identity.id !== profileId) {
+          throw Object.assign(new Error("Identity lookup mismatch"), {
+            status: 404,
+          });
+        }
+        return identity;
+      },
+      signal
+    ),
   retry: false,
   retryOnMount: false,
   refetchOnWindowFocus: false,

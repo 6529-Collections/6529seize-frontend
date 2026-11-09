@@ -1,7 +1,40 @@
-/** Cosmetic identity reads: one flight per key, bounded retries, no timers. */
+/** Cosmetic identity reads: one flight per key, bounded retries, no retry timers. */
 const RETRY_DELAYS = [30_000, 120_000, 600_000] as const;
 const NEGATIVE_CACHE_MS = 300_000;
 const MAX_CONCURRENT = 8;
+const REQUEST_TIMEOUT_MS = 10_000;
+
+async function requestWithTimeout<T>(
+  fetch: (signal: AbortSignal) => Promise<T>,
+  signal?: AbortSignal
+): Promise<T> {
+  const abortError = () => new DOMException("Lookup cancelled", "AbortError");
+  if (signal?.aborted) throw abortError();
+  const controller = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let onAbort: (() => void) | undefined;
+  const interrupted = new Promise<never>((_resolve, reject) => {
+    onAbort = () => {
+      reject(abortError());
+      controller.abort();
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
+    timer = setTimeout(() => {
+      const error = Object.assign(new Error("Identity lookup timed out"), {
+        status: 408,
+      });
+      // Reject first: transport abort errors must not erase the timeout budget.
+      reject(error);
+      controller.abort(error);
+    }, REQUEST_TIMEOUT_MS);
+  });
+  try {
+    return await Promise.race([fetch(controller.signal), interrupted]);
+  } finally {
+    clearTimeout(timer);
+    if (onAbort) signal?.removeEventListener("abort", onAbort);
+  }
+}
 
 interface Failure {
   attempts: number;
@@ -81,10 +114,16 @@ export class LookupReads {
     }
   }
 
-  read<T>(key: string, fetch: () => Promise<T>): Promise<T> {
+  read<T>(
+    key: string,
+    fetch: (signal: AbortSignal) => Promise<T>,
+    signal?: AbortSignal
+  ): Promise<T> {
     const existing = this.flights.get(key);
     if (existing) return existing as Promise<T>;
-    const run = this.run(key, fetch).finally(() => this.flights.delete(key));
+    const run = this.run(key, fetch, signal).finally(() =>
+      this.flights.delete(key)
+    );
     this.flights.set(key, run);
     return run;
   }
@@ -149,13 +188,17 @@ export class LookupReads {
       this.cooldownUntil = Math.max(this.cooldownUntil, retryAt);
   }
 
-  private async run<T>(key: string, fetch: () => Promise<T>): Promise<T> {
+  private async run<T>(
+    key: string,
+    fetch: (signal: AbortSignal) => Promise<T>,
+    signal?: AbortSignal
+  ): Promise<T> {
     this.check(key);
     await this.acquire();
     try {
       // Another lookup can rate-limit the shared budget while this one queues.
       this.check(key);
-      const result = await fetch();
+      const result = await requestWithTimeout(fetch, signal);
       this.failures.delete(key);
       return result;
     } catch (error) {
