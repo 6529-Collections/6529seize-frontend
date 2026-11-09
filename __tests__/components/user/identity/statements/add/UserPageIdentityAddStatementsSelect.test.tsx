@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import React from "react";
 import UserPageIdentityAddStatementsSelect from "@/components/user/identity/statements/add/UserPageIdentityAddStatementsSelect";
 import { STATEMENT_ADD_VIEW } from "@/components/user/identity/statements/add/UserPageIdentityAddStatements.constants";
@@ -21,27 +21,41 @@ describe("UserPageIdentityAddStatementsSelect", () => {
     );
   });
 
-  it("keeps the social disclaimer in a mobile disclosure", () => {
+  it("keeps the public and verification notices visible in the information footer", () => {
     render(<UserPageIdentityAddStatementsSelect onViewChange={jest.fn()} />);
 
-    expect(screen.getByText("About identity statements")).toBeInTheDocument();
-    const disclaimers = screen.getAllByText(
-      "6529 does not connect to social media accounts or verify posts."
-    );
-    expect(disclaimers).toHaveLength(2);
-    expect(disclaimers[0]?.closest("details")).not.toBeNull();
+    const footer = screen.getByRole("complementary", {
+      name: "About identity statements",
+    });
+    expect(
+      within(footer).getByText(
+        "Statements are optional and fully and permanently public."
+      )
+    ).toBeVisible();
+    expect(
+      within(footer).getByText(
+        "6529 does not connect to social media accounts or verify posts."
+      )
+    ).toBeVisible();
+    expect(footer.querySelector("details")).toBeNull();
   });
 
-  it("uses compact mobile typography while preserving desktop sizing", () => {
+  it("describes each of the four available statement groups", () => {
     render(<UserPageIdentityAddStatementsSelect onViewChange={jest.fn()} />);
 
-    expect(screen.getByText("Social Media Accounts")).toHaveClass(
-      "tw-text-sm",
-      "tw-leading-4",
-      "tw-tracking-tight",
-      "md:tw-text-[15px]",
-      "md:tw-leading-5",
-      "md:tw-tracking-normal"
-    );
+    expect(
+      screen.getByText(
+        "6529 users can make statements asserting their identity (eponymous, pseudonymous or organizational)."
+      )
+    ).toBeVisible();
+    expect(screen.getAllByRole("button")).toHaveLength(4);
+    for (const description of [
+      "Your handle on social media platforms.",
+      "Your handle on NFT platforms.",
+      "Your handle on messaging platforms.",
+      "Your posts verifying your profile here.",
+    ]) {
+      expect(screen.getByText(description)).toBeVisible();
+    }
   });
 });
