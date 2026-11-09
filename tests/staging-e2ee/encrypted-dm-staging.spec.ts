@@ -297,13 +297,16 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await expectDecrypted(b, hello);
 
     await gotoStaging(b.page, "/notifications");
+    const notificationLabel = `New encrypted message ${hello}`;
     const notice = b.page.getByRole("article").filter({
-      has: b.page.getByRole("link", { name: hello, exact: true }),
+      has: b.page.getByRole("link", { name: notificationLabel, exact: true }),
     });
     await expect(
       notice.getByRole("link", { name: a.user.handle, exact: true })
     ).toHaveAttribute("href", `/${a.user.handle}`, { timeout: UI_TIMEOUT_MS });
-    await notice.getByRole("link", { name: hello, exact: true }).click();
+    await notice
+      .getByRole("link", { name: notificationLabel, exact: true })
+      .click();
     await expectDecrypted(b, hello);
 
     await sendEncrypted(b, reply);
@@ -584,6 +587,20 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const dm = await ensureDm(current);
     if (!a.user.profileId) throw new Error("Missing QA profile");
     await openChat(a, dm);
+    // Each worker may start here after an earlier failure; create our own real
+    // delivered text and photo instead of depending on another test's history.
+    const historySeed = qaMessage(current.runId, "history seed");
+    await sendEncrypted(a, historySeed);
+    const image = createQaImage(current.runId);
+    await attachFile(a, {
+      name: image.name,
+      mimeType: "image/png",
+      buffer: image.buffer,
+    });
+    const photoCaption = qaMessage(current.runId, "history photo seed");
+    await sendEncrypted(a, photoCaption);
+    await openChat(b, dm);
+    await expectDecrypted(b, photoCaption);
     const preparing = performance.now();
     const fixture = await seedProcessedHistory(a.page, dm, a.user.profileId);
     await testInfo.attach("long-history-fixture.json", {
@@ -743,7 +760,10 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       contentType: "application/json",
     });
     await a.page.screenshot({ path: testInfo.outputPath("long-history.png") });
-    expectPrivateAndClean([a, b], new Map());
+    expectPrivateAndClean(
+      [a, b],
+      needles({ historySeed, photoCaption, imageBytes: image.buffer })
+    );
   });
 
   test("a receiver catches up with a real imported staging backlog", async ({}, testInfo) => {
