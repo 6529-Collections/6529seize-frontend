@@ -246,6 +246,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       : undefined;
 
   const replyThreads = useWaveReplyThreads();
+  const replyThreadStore = replyThreads?.store;
+  const collapseAll = replyThreads?.collapseAll;
   const replyTargetRequest = useRef<AbortController | null>(null);
 
   const {
@@ -258,7 +260,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     waveId,
     dropId,
     initialDrop: initialThreadReply?.parentSerialNo ?? initialDrop,
-    replyThreadStore: replyThreads?.store,
+    replyThreadStore,
     waveMessages,
     fetchNextPage,
     waitAndRevealDrop,
@@ -268,12 +270,12 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   });
 
   useEffect(() => {
-    if (!replyThreads) return;
-    replyThreads.store.setLinkedReply(initialThreadReply ?? null);
+    if (!replyThreadStore) return;
+    replyThreadStore.setLinkedReply(initialThreadReply ?? null);
     if (initialThreadReply) {
-      replyThreads.store.setExpanded(initialThreadReply.parentDropId, true);
+      replyThreadStore.setExpanded(initialThreadReply.parentDropId, true);
     }
-  }, [initialThreadReply, replyThreads]);
+  }, [collapseAll, initialThreadReply, replyThreadStore]);
 
   const scrollToBottom = useCallback(() => {
     replyTargetRequest.current?.abort();
@@ -291,8 +293,12 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   }, [dropsForClipboard]);
   useEffect(
     () => () => replyTargetRequest.current?.abort(),
-    [initialDrop, replyThreads, waveId]
+    [collapseAll, replyThreadStore, waveId]
   );
+  useEffect(() => {
+    // A new link supersedes the lookup. Clearing the URL after reading it does not.
+    if (initialDrop !== null) replyTargetRequest.current?.abort();
+  }, [initialDrop]);
   const queueVisibleSerialTarget = useCallback(
     (serialNo: number) => {
       replyTargetRequest.current?.abort();
