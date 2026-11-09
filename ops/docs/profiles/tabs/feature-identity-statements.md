@@ -157,10 +157,11 @@ OpenSea` actions. Desktop retains compact external-link actions.
 - On mobile web and Capacitor, the add flow uses a scrollable, keyboard-aware
   sheet so the focused field and Save/Cancel actions remain reachable above the
   software keyboard as it opens and closes.
-- The mobile statement-group picker is content-sized at common phone heights,
-  keeps its close action in the sheet header, and supports swipe-down dismissal
-  without a decorative drag-handle stripe. Tablet and desktop keep the centered
-  modal and multi-column card presentation.
+- The statement-group picker shows one list of four rows with icons,
+  descriptions, and chevrons on all screen sizes. On mobile, it is content-sized
+  at common phone heights, keeps its close action in the sheet header, and
+  supports swipe-down dismissal without a decorative drag-handle stripe.
+  Tablet and desktop use a centered modal.
 - Empty statement groups are omitted after loading without showing a separate
   overall placeholder.
 
