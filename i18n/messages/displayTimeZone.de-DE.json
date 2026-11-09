@@ -12,7 +12,7 @@
   "displayTimeZone.option.other.description": "Waehle eine Stadt oder Zone.",
   "displayTimeZone.option.other.selected": "{zone} · jetzt {time}",
   "displayTimeZone.search.label": "Zeitzonen suchen",
-  "displayTimeZone.search.placeholder": "Stadt oder Zone, z. B. Lissabon",
+  "displayTimeZone.search.placeholder": "Stadt oder Zone, z. B. Lisbon",
   "displayTimeZone.search.empty": "Keine Zeitzone passt zu \"{query}\". Versuche eine Stadt wie Lisbon oder eine Zone wie Europe/Lisbon.",
   "displayTimeZone.preview.label": "Vorschau",
   "displayTimeZone.footnote": "Nur auf diesem Geraet gespeichert, nicht in deinem Profil. Zeiten ausserhalb deiner lokalen Zone zeigen immer den Zonennamen. Ein Screenshot kann trotzdem die Uhr deines Geraets zeigen. Fuer einen einzelnen Screenshot nutze stattdessen die Uhr-Schaltflaeche in einer Wave.",
