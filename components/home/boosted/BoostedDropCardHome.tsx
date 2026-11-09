@@ -1,12 +1,12 @@
 "use client";
 
+import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import { AuthContext } from "@/components/auth/Auth";
 import BoostIcon from "@/components/common/icons/BoostIcon";
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { getTimeAgoShort } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { convertApiDropToExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -147,6 +147,7 @@ const BoostedDropCardHeader = memo(
     readonly remainingBoosts: number;
     readonly totalBoosts: number;
   }) => {
+    const timeAgoShort = useTimeAgoShort();
     if (isChatVariant) {
       return (
         <div className={CHAT_HEADER_CLASSES}>
@@ -175,7 +176,7 @@ const BoostedDropCardHeader = memo(
         <div className={HEADER_LEFT_CLASSES}>
           <div className={PILL_CLASSES}>
             <span className="tw-text-[10px] tw-font-semibold tw-leading-4 tw-tracking-wide tw-text-iron-300">
-              {getTimeAgoShort(createdAt)}
+              {timeAgoShort(createdAt)}
             </span>
           </div>
         </div>

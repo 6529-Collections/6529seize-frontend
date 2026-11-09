@@ -11,6 +11,7 @@ import {
 import WavePicture from "@/components/waves/WavePicture";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { getActiveWaveVoteDeadlineLabel } from "./active-wave-vote.helpers";
 
 export function ActiveWaveVoteRow({
@@ -28,9 +29,10 @@ export function ActiveWaveVoteRow({
 }) {
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const { wave } = vote;
   const hasScore = hasWaveTrustSummaryScore(wave.wave_score);
-  const deadlineLabel = getActiveWaveVoteDeadlineLabel(vote, locale);
+  const deadlineLabel = getActiveWaveVoteDeadlineLabel(vote, locale, zone);
   return (
     <div
       className={`${compact ? "tw-h-12 tw-px-2 tw-py-1" : "tw-p-2"} tw-group/vote tw-relative tw-flex tw-min-w-0 tw-items-center tw-rounded-lg ${isActive ? "tw-bg-iron-800/70 desktop-hover:hover:tw-bg-iron-800" : "desktop-hover:hover:tw-bg-iron-900"}`}

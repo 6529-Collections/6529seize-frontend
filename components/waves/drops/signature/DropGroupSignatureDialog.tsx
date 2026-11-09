@@ -3,6 +3,11 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate } from "@/i18n/format";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import {
+  withDisplayTimeZone,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
@@ -81,11 +86,13 @@ function getDropExcerpt(drop: GroupSignatureDrop): string | null {
 function GroupSignatureRow({
   drop,
   locale,
+  zone,
   expanded,
   onToggle,
 }: {
   readonly drop: GroupSignatureDrop;
   readonly locale: SupportedLocale;
+  readonly zone: DisplayTimeZone;
   readonly expanded: boolean;
   readonly onToggle: () => void;
 }) {
@@ -111,7 +118,11 @@ function GroupSignatureRow({
       >
         {drop.created_at !== undefined && (
           <span className="tw-flex-shrink-0 tw-text-xs tw-tabular-nums tw-text-iron-400">
-            {formatDate(locale, drop.created_at, TIME_FORMAT)}
+            {formatDate(
+              locale,
+              drop.created_at,
+              withDisplayTimeZone(zone, TIME_FORMAT)
+            )}
           </span>
         )}
         <span className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-text-iron-100">
@@ -141,6 +152,7 @@ function DropGroupSignatureDialogContent({
   onClose,
 }: DropGroupSignatureDialogProps) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const [expandedIds, setExpandedIds] = useState<ReadonlySet<string>>(
     () => new Set()
   );
@@ -170,6 +182,7 @@ function DropGroupSignatureDialogContent({
             key={drop.id}
             drop={drop}
             locale={locale}
+            zone={zone}
             expanded={expandedIds.has(drop.id)}
             onToggle={() => toggle(drop.id)}
           />

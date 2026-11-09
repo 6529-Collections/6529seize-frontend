@@ -4,7 +4,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { formatWaveMessages, maxOrNull } from "../utils/wave-messages-utils";
 import type { ServerWaveFeedSeedResult } from "../server-wave-feed-seed";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { Drop } from "@/helpers/waves/drop.helpers";
+import { DropSize, type Drop } from "@/helpers/waves/drop.helpers";
 import { ChatStore } from "@/lib/chat-store";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import type { WaveMessages, WaveMessagesUpdate } from "./types";
@@ -38,6 +38,21 @@ type PendingServerFeedSeed = {
   readonly generation: number;
   readonly promise: Promise<ServerWaveFeedSeedResult>;
 };
+
+/** Settle a single accepted full row before merging its stream update. */
+function settleAcceptedPendingDrop(
+  chatStore: ChatStore,
+  update: WaveMessagesUpdate
+): void {
+  const acceptedDrop = update.drops?.[0];
+  if (
+    update.pendingDropId &&
+    update.drops?.length === 1 &&
+    acceptedDrop?.type === DropSize.FULL
+  ) {
+    chatStore.settlePendingSend(update.pendingDropId, acceptedDrop);
+  }
+}
 
 function useWaveMessagesStore() {
   const [, forceRender] = useReducer((version: number) => version + 1, 0);
@@ -362,6 +377,7 @@ function useWaveMessagesStore() {
       }
       if (update.drops !== undefined) {
         const chatStore = getChatStore();
+        settleAcceptedPendingDrop(chatStore, update);
         chatStore.merge(update.key, update.drops, mergePolicy);
         // The store holds every drop the wave shows; without a store wave
         // (nothing merged yet, or every copy tombstoned) the wave keeps

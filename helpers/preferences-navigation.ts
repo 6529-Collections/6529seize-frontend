@@ -2,7 +2,11 @@ export const PREFERENCES_ENTRY_SOURCE_PARAM = "from";
 
 const PREFERENCES_PROFILE_ENTRY_SOURCE = "profile";
 
-export type PreferencesRouteTab = "blocked-profiles" | "reports" | "security";
+export type PreferencesRouteTab =
+  | "blocked-profiles"
+  | "reports"
+  | "security"
+  | "time-zone";
 
 export const getPreferencesHref = ({
   tab,

@@ -345,6 +345,18 @@ describe("MyStreamProvider actions context", () => {
       incoming,
       ProcessIncomingDropType.DROP_INSERT
     );
+    await act(async () => {
+      await actions.processIncomingDrop(
+        incoming,
+        ProcessIncomingDropType.DROP_INSERT,
+        { pendingDropId: "temp-pending" }
+      );
+    });
+    expect(latestImpl).toHaveBeenLastCalledWith(
+      incoming,
+      ProcessIncomingDropType.DROP_INSERT,
+      { pendingDropId: "temp-pending" }
+    );
     for (const staleImpl of mockProcessIncomingDropImpls.slice(0, -1)) {
       expect(staleImpl).not.toHaveBeenCalled();
     }

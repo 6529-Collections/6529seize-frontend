@@ -71,10 +71,29 @@ describe.each([false, true])(
           screen.getByLabelText("Your total NIC Rating of bob:")
         ).toBeInTheDocument();
         expect(
-          screen.getByRole("button", { name: "Rate" })
+          screen.getByRole("button", { name: isTooltip ? "Rate" : "Save" })
         ).toBeDisabled();
       }
     );
+
+    it("blocks saving an unavailable rating and offers retry", async () => {
+      const retry = jest.fn();
+      useQueryMock.mockReturnValue({
+        data: undefined,
+        isError: true,
+        isFetching: false,
+        refetch: retry,
+      });
+      setup();
+      expect(screen.getByLabelText(/Your total NIC Rating/)).toHaveAttribute(
+        "readonly"
+      );
+      expect(
+        screen.getByRole("button", { name: isTooltip ? "Rate" : "Save" })
+      ).toBeDisabled();
+      await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+      expect(retry).toHaveBeenCalledTimes(1);
+    });
 
     it("allows manual NIC entry without starting authentication or saving", async () => {
       const user = userEvent.setup();
@@ -83,14 +102,18 @@ describe.each([false, true])(
       await user.type(screen.getByLabelText(/Your total NIC Rating/), "-1");
       expect(screen.getByLabelText(/Your total NIC Rating/)).toHaveValue("-1");
       expect(authValue.requestAuth).not.toHaveBeenCalled();
-      expect(screen.getByRole("button", { name: "Rate" })).toBeEnabled();
+      expect(
+        screen.getByRole("button", { name: isTooltip ? "Rate" : "Save" })
+      ).toBeEnabled();
     });
 
     it("submits rating when authenticated", async () => {
       const user = userEvent.setup();
       const { authValue } = setup();
       await user.type(screen.getByLabelText(/Your total NIC Rating/), "3");
-      await user.click(screen.getByRole("button", { name: "Rate" }));
+      await user.click(
+        screen.getByRole("button", { name: isTooltip ? "Rate" : "Save" })
+      );
       expect(authValue.requestAuth).toHaveBeenCalled();
     });
 
@@ -100,7 +123,9 @@ describe.each([false, true])(
         requestAuth: jest.fn().mockResolvedValue({ success: false }),
       });
       await user.type(screen.getByLabelText(/Your total NIC Rating/), "1");
-      await user.click(screen.getByRole("button", { name: "Rate" }));
+      await user.click(
+        screen.getByRole("button", { name: isTooltip ? "Rate" : "Save" })
+      );
       expect(authValue.setToast).toHaveBeenCalled();
     });
   }

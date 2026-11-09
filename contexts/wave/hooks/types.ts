@@ -31,4 +31,6 @@ export interface WaveHistoryGap {
 
 export type WaveMessagesUpdate = Partial<WaveMessages> & {
   key: string;
+  /** Atomically settle this pending send with the single full drop in drops. */
+  readonly pendingDropId?: string | undefined;
 };
