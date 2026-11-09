@@ -477,6 +477,7 @@ const PACKS = [
         "tests/social/chat-render-budget-sandbox.spec.ts",
         "tests/social/wave-live-unread-sandbox.spec.ts",
         "tests/social/wave-media-processing-sandbox.spec.ts",
+        "tests/social/wave-time-zone-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,

@@ -34,6 +34,8 @@ export default async function PreferencesPage({
     activeTab = "reports";
   } else if (requestedTab === "devices" && isSignedMessagesEnabled()) {
     activeTab = "devices";
+  } else if (requestedTab === "time-zone") {
+    activeTab = "time-zone";
   }
   return (
     <PreferencesPageClient

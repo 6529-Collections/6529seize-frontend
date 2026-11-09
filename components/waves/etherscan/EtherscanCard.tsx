@@ -1,5 +1,11 @@
 "use client";
 
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import {
+  withDisplayTimeZone,
+  withDisplayTimeZoneDate,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import {
   ArchiveBoxIcon,
   CheckCircleIcon,
@@ -131,13 +137,26 @@ function formatEth(
 
 function formatTimestamp(
   locale: ReturnType<typeof useBrowserLocale>,
-  value: string | undefined
+  value: string | undefined,
+  zone: DisplayTimeZone
 ): string | undefined {
   if (!value) {
     return undefined;
   }
-  const date = formatDate(locale, value);
-  const time = formatTime(locale, value);
+  const date = formatDate(
+    locale,
+    value,
+    withDisplayTimeZoneDate(zone, {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })
+  );
+  const time = formatTime(
+    locale,
+    value,
+    withDisplayTimeZone(zone, { hour: "2-digit", minute: "2-digit" })
+  );
   return time ? `${date} ${time}` : date;
 }
 
@@ -256,7 +275,8 @@ function getAddressTypeKey(
 
 function getFacts(
   locale: ReturnType<typeof useBrowserLocale>,
-  preview: EtherscanPreview
+  preview: EtherscanPreview,
+  zone: DisplayTimeZone
 ): readonly Fact[] {
   switch (preview.type) {
     case TRANSACTION_PREVIEW_TYPE:
@@ -292,7 +312,7 @@ function getFacts(
         },
         {
           labelKey: "linkPreview.etherscan.fact.timestamp",
-          value: formatTimestamp(locale, preview.transaction.timestamp),
+          value: formatTimestamp(locale, preview.transaction.timestamp, zone),
         },
       ];
     case "etherscan.address":
@@ -348,7 +368,7 @@ function getFacts(
       return [
         {
           labelKey: "linkPreview.etherscan.fact.timestamp",
-          value: formatTimestamp(locale, preview.block.timestamp),
+          value: formatTimestamp(locale, preview.block.timestamp, zone),
         },
         {
           labelKey: "linkPreview.etherscan.fact.transactions",
@@ -487,11 +507,12 @@ export default function EtherscanCard({
   readonly preview: EtherscanPreview;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const variant = useLinkPreviewVariant();
   const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle");
   const kind = t(locale, getKindKey(preview));
   const headline = getHeadline(locale, preview);
-  const facts = getFacts(locale, preview)
+  const facts = getFacts(locale, preview, zone)
     .filter(
       (fact): fact is Fact & { readonly value: string } =>
         fact.value !== undefined

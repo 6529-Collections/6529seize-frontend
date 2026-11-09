@@ -1,3 +1,4 @@
+import type { DisplayTimeZone } from "@/lib/display-time-zone/displayTimeZone";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
 import type { ApiWaveScoreFormula } from "@/generated/models/ApiWaveScoreFormula";
@@ -102,6 +103,7 @@ export function buildWaveScoreMarkdown({
   waveRepTotal,
   formulaSource,
   scoreMismatchDetail,
+  zone,
 }: {
   readonly wave: ApiWave;
   readonly waveHref: string;
@@ -118,6 +120,7 @@ export function buildWaveScoreMarkdown({
   readonly waveRepTotal: number;
   readonly formulaSource: string;
   readonly scoreMismatchDetail: string;
+  readonly zone?: DisplayTimeZone | undefined;
 }): string {
   const qualityLines = qualityRows.map((row) => {
     const contribution = row.score * row.weight;
@@ -134,7 +137,7 @@ export function buildWaveScoreMarkdown({
     "",
     `Wave: ${getCurrentOrigin()}${waveHref}`,
     `Creator: ${getWaveDisplayHandle(wave)}`,
-    `Calculated: ${formatTimestamp(score.calculated_at)}`,
+    `Calculated: ${formatTimestamp(score.calculated_at, zone)}`,
     `Version: ${score.score_version}`,
     `Formula source: ${formulaSource}`,
     "",

@@ -1,5 +1,10 @@
 "use client";
 
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import {
+  withDisplayTimeZone,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -25,7 +30,10 @@ const RECORD_LABELS: Readonly<Record<RecordKey, string>> = {
   description: "Description",
 };
 
-const formatTimestamp = (value: number | null): string | null => {
+const formatTimestamp = (
+  value: number | null,
+  zone: DisplayTimeZone
+): string | null => {
   if (!value) {
     return null;
   }
@@ -35,13 +43,16 @@ const formatTimestamp = (value: number | null): string | null => {
     return null;
   }
 
-  return new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
+  return new Intl.DateTimeFormat(
+    undefined,
+    withDisplayTimeZone(zone, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+  ).format(date);
 };
 
 const renderAvatar = (url: string | null, alt: string): ReactElement | null => {
@@ -77,7 +88,8 @@ const renderLink = (
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100">
+      className="hover:tw-text-primary-100 tw-text-sm tw-font-semibold tw-text-primary-300 tw-transition-colors"
+    >
       {label}
     </Link>
   );
@@ -131,7 +143,8 @@ const renderRecords = (
               href={value}
               target="_blank"
               rel="noopener noreferrer"
-              className="tw-break-all tw-text-sm tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100">
+              className="hover:tw-text-primary-100 tw-break-all tw-text-sm tw-text-primary-300 tw-transition-colors"
+            >
               {value}
             </Link>
           </li>
@@ -159,7 +172,8 @@ const renderRecords = (
 };
 
 const renderOwnership = (
-  ownership: EnsNamePreview["ownership"]
+  ownership: EnsNamePreview["ownership"],
+  zone: DisplayTimeZone
 ): ReactElement | null => {
   const { registryOwner, registrant, isWrapped, expiry, gracePeriodEnds } =
     ownership;
@@ -180,12 +194,12 @@ const renderOwnership = (
     rows.push({ label: "Registrant", value: formatAddress(registrant) });
   }
 
-  const expiryDisplay = formatTimestamp(expiry);
+  const expiryDisplay = formatTimestamp(expiry, zone);
   if (expiryDisplay) {
     rows.push({ label: "Expiry", value: expiryDisplay });
   }
 
-  const graceDisplay = formatTimestamp(gracePeriodEnds ?? null);
+  const graceDisplay = formatTimestamp(gracePeriodEnds ?? null, zone);
   if (graceDisplay) {
     rows.push({ label: "Grace period ends", value: graceDisplay });
   }
@@ -210,6 +224,7 @@ const renderOwnership = (
 };
 
 const NameCard = ({ preview }: { readonly preview: EnsNamePreview }) => {
+  const zone = useDisplayTimeZone();
   const {
     name,
     normalized,
@@ -244,7 +259,8 @@ const NameCard = ({ preview }: { readonly preview: EnsNamePreview }) => {
                   href={links.etherscan}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100">
+                  className="hover:tw-text-primary-100 tw-text-primary-300 tw-transition-colors"
+                >
                   {formattedAddress}
                 </Link>
               ) : (
@@ -257,7 +273,7 @@ const NameCard = ({ preview }: { readonly preview: EnsNamePreview }) => {
 
       {renderRecords(records)}
       {renderContenthash(contenthash, links)}
-      {renderOwnership(ownership)}
+      {renderOwnership(ownership, zone)}
 
       <div className="tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-2">
         {renderLink(links.app, "View in ENS App")}
@@ -274,7 +290,8 @@ const AddressCard = ({ preview }: { readonly preview: EnsAddressPreview }) => {
   return (
     <div
       className="tw-flex tw-flex-col tw-gap-5"
-      data-testid="ens-address-card">
+      data-testid="ens-address-card"
+    >
       <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-start">
         {renderAvatar(avatarUrl, `${address} avatar`)}
         <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-1">
@@ -291,7 +308,8 @@ const AddressCard = ({ preview }: { readonly preview: EnsAddressPreview }) => {
                   href={links.app}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="tw-text-primary-300 tw-transition-colors hover:tw-text-primary-100">
+                  className="hover:tw-text-primary-100 tw-text-primary-300 tw-transition-colors"
+                >
                   {primaryName}
                 </Link>
               ) : (
@@ -321,7 +339,8 @@ const ContentCard = ({ preview }: { readonly preview: EnsContentPreview }) => {
   return (
     <div
       className="tw-flex tw-flex-col tw-gap-5"
-      data-testid="ens-content-card">
+      data-testid="ens-content-card"
+    >
       <div className="tw-flex tw-flex-col tw-gap-1">
         <span className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
           ENS Contenthash

@@ -23,6 +23,9 @@ Use this area for wave-header behavior in `About` surfaces:
   update flow, file rules, and error handling for editable non-DM waves.
 - [Chat and Gallery View Toggle](feature-chat-gallery-toggle.md): switch chat
   content between `Chat` and `Gallery` in supported waves.
+- [Display Time Zone](feature-display-time-zone.md): show wave times in local
+  time, UTC or another zone, saved in Preferences or switched for one tab from
+  the wave header.
 
 ## Flows
 

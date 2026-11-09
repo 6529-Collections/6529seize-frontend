@@ -3,6 +3,7 @@
 import React, { useEffect, useRef } from "react";
 import type { DecisionPoint } from "@/helpers/waves/time.types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { HorizontalTimelineItem } from "./HorizontalTimelineItem";
 
 interface HorizontalTimelineProps {
@@ -24,6 +25,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
   onFocusHandled,
 }) => {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   // Calculate whether we should use flex-grow or fixed width
   // If we have few items (less than would cause scrolling), we want them to spread out
   const shouldSpread = decisions.length <= 5; // Adjust this number as needed
@@ -175,7 +177,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
       <div className="tw-relative">
         <div
           ref={scrollContainerRef}
-          className="tw-overflow-x-auto tw-pb-2 tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+          className="tw-overflow-x-auto tw-pb-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
         >
           <div
             className={`tw-relative tw-flex tw-gap-2 @[24rem]/timeline:tw-gap-3 ${
@@ -198,6 +200,7 @@ export const HorizontalTimeline: React.FC<HorizontalTimelineProps> = ({
                     isNext={isNext}
                     flexGrow={shouldSpread}
                     locale={locale}
+                    zone={zone}
                   />
                 </div>
               );

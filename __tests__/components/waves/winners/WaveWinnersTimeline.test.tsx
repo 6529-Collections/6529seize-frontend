@@ -1,5 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { WaveWinnersTimeline } from "@/components/waves/winners/WaveWinnersTimeline";
+import { mockDefaultTimeZone } from "../../../utils/timeZoneHydration";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
+
+let mockDisplayTimeZone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
+jest.mock("@/hooks/useDisplayTimeZone", () => ({
+  ...jest.requireActual("@/hooks/useDisplayTimeZone"),
+  useDisplayTimeZone: () => mockDisplayTimeZone,
+}));
 
 jest.mock("@/components/waves/winners/WaveWinnersTimelineLoading", () => ({
   WaveWinnersTimelineLoading: () => <div data-testid="loading" />,
@@ -26,6 +37,7 @@ const makePoint = (id: string, date: string) => ({
 beforeEach(() => {
   dropsOrder.length = 0;
   dropsProps.length = 0;
+  mockDisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
 });
 
 it("shows loading and empty states", () => {
@@ -118,4 +130,50 @@ it("passes content presentation to rendered drops", () => {
     "quorumCompact",
     "quorumCompact",
   ]);
+});
+
+describe("display time zone", () => {
+  // Friday 00:30 UTC is Thursday 16:30 in Los Angeles.
+  const points = [
+    {
+      decision_time: Date.UTC(2026, 0, 2, 0, 30),
+      winners: [{ drop: { id: "1" } }],
+    },
+  ] as any;
+  let restoreZone: () => void;
+
+  beforeEach(() => {
+    restoreZone = mockDefaultTimeZone("America/Los_Angeles");
+  });
+
+  afterEach(() => {
+    restoreZone();
+  });
+
+  it("keeps the device-zone day and time when local", () => {
+    render(
+      <WaveWinnersTimeline
+        decisionPoints={points}
+        wave={wave}
+        onDropClick={jest.fn()}
+        isLoading={false}
+      />
+    );
+    expect(screen.getByText("Thu, Jan 1, 2026")).toBeInTheDocument();
+    expect(screen.getByText(/^4:30\sPM$/)).toBeInTheDocument();
+  });
+
+  it("dates each decision in the display zone and names it on the time", () => {
+    mockDisplayTimeZone = { timeZone: "UTC", isLocal: false };
+    render(
+      <WaveWinnersTimeline
+        decisionPoints={points}
+        wave={wave}
+        onDropClick={jest.fn()}
+        isLoading={false}
+      />
+    );
+    expect(screen.getByText("Fri, Jan 2, 2026")).toBeInTheDocument();
+    expect(screen.getByText(/^12:30\sAM UTC$/)).toBeInTheDocument();
+  });
 });

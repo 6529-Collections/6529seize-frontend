@@ -6157,6 +6157,50 @@
       ]
     },
     {
+      "id": "preferences.time-zone",
+      "kind": "ui_affordance",
+      "title": "Show times in UTC or another time zone",
+      "aliases": [
+        "time zone",
+        "timezone",
+        "show times in UTC",
+        "hide my time zone",
+        "screenshots reveal my time zone",
+        "screenshot doxxes timezone",
+        "change time zone",
+        "times in UTC for now",
+        "24 hour clock"
+      ],
+      "keywords": [
+        "time zone",
+        "UTC",
+        "local time",
+        "screenshot",
+        "privacy",
+        "preferences",
+        "wave header",
+        "clock"
+      ],
+      "summary": "Times can show in local time, UTC or another zone, saved in Preferences > Time Zone or switched for one tab from the wave header clock button.",
+      "facts": [
+        "By default, times in waves, direct messages, decisions and notifications show in the device's own time zone. Because post times are public, a screenshot with local clock times can reveal the viewer's UTC offset.",
+        "Preferences > Time Zone (/preferences?tab=time-zone) offers Local time, UTC, or Another time zone with a search by city or zone name such as Lisbon or Europe/Lisbon. It is saved on this device only, not with the profile, and works signed out.",
+        "The clock button in a wave header switches times to UTC (or back to local time when the setting is UTC) until the tab or the app is closed. While it is on, a Times in UTC chip replaces the button; its x button shows times in the saved setting again. On compact wave headers the same switch is in the header's overflow menu; on phones, including the native app, press and hold a post and choose Show times in UTC for now.",
+        "Any time not shown in the device's own zone carries its zone name, such as 05:06 PM UTC. Yesterday and short dates flip at the chosen zone's midnight. Copy text uses the same zone. Relative times such as 4m are unchanged.",
+        "The setting cannot hide the phone status bar or desktop clock in an ordinary screenshot.",
+        "There is no separate 24-hour clock setting; clock style and date order follow the browser's language settings."
+      ],
+      "canonical_path": "/preferences",
+      "related_paths": ["/waves", "/messages"],
+      "tags": ["preferences", "privacy", "waves", "time"],
+      "source_refs": [
+        "components/preferences/TimeZonePreferencesSettings.tsx",
+        "components/display-time-zone/DisplayTimeZoneSwitch.tsx",
+        "lib/display-time-zone/displayTimeZone.ts",
+        "ops/docs/waves/header/feature-display-time-zone.md"
+      ]
+    },
+    {
       "id": "notifications.mobile-push",
       "kind": "workflow",
       "title": "Mobile push notifications",
