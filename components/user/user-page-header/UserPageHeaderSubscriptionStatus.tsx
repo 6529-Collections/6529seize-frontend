@@ -112,7 +112,7 @@ function SubscriptionLoading({
 }
 
 // Blank space with SubscriptionLoading's footprint while the status may still
-// appear (server HTML, hydration, a pending iOS check expected to be US), so it
+// appear (server HTML and hydration), so it
 // replaces the space without moving the header. Never shows purchasing UI.
 function SubscriptionSpace({
   layout,
@@ -321,8 +321,7 @@ export default function UserPageHeaderSubscriptionStatus({
   layout?: SubscriptionStatusLayout;
 }>) {
   const locale = useBrowserLocale();
-  // Omitted from the server HTML and the first hydration render, and on iOS
-  // until the country check allows purchasing, so no request starts earlier.
+  // Start the coverage request only where the promotional row can be shown.
   const { hideNftPurchasing, reservesNftPurchasingSpace } =
     useNftPurchasingVisibility();
   const profileKey = profile.consolidation_key.trim();

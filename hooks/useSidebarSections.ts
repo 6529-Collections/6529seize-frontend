@@ -1,7 +1,6 @@
 import CollectionsMenuIcon from "@/components/common/icons/CollectionsMenuIcon";
 import WavesIcon from "@/components/common/icons/WavesIcon";
 import type { SidebarSection } from "@/components/navigation/navTypes";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import {
   getAboutNavItemActivePathPrefixes,
   getAboutNavItemHref,
@@ -89,13 +88,15 @@ const NFT_SECTION_ROUTES: ReadonlyArray<readonly [MessageKey, string]> = [
   ["navigation.nfts.stream", "/stream"],
 ];
 
-function getNftsSection(): SidebarSection {
+function getNftsSection(hideNftPurchasing: boolean): SidebarSection {
   return {
     key: "nfts",
     name: t(DEFAULT_LOCALE, "navigation.primary.nfts"),
     icon: CollectionsMenuIcon,
     items: [
-      ...NFT_SECTION_ROUTES.map(([nameKey, href]) => ({
+      ...NFT_SECTION_ROUTES.filter(
+        ([, href]) => !hideNftPurchasing || href !== "/collect"
+      ).map(([nameKey, href]) => ({
         name: t(DEFAULT_LOCALE, nameKey),
         href,
         activePathPrefixes: [`${href}/`],
@@ -115,10 +116,12 @@ function getNftsSection(): SidebarSection {
 
 function getAboutSection(
   appWalletsSupported: boolean,
-  hideSubscriptions: boolean
+  hideSubscriptions: boolean,
+  hideSubscriptionReports: boolean
 ): SidebarSection {
   const aboutGroups = getVisibleAboutNavGroups({
     hideSubscriptions,
+    hideSubscriptionReports,
     appWalletsSupported,
   });
 
@@ -139,30 +142,34 @@ function getAboutSection(
 
 function buildSidebarSections(
   appWalletsSupported: boolean,
-  hideSubscriptions: boolean
+  hideSubscriptions: boolean,
+  hideSubscriptionReports: boolean
 ): SidebarSection[] {
   return [
-    getNftsSection(),
+    getNftsSection(hideSubscriptions),
     getMuseumSection(),
     getWavesSection(),
-    getAboutSection(appWalletsSupported, hideSubscriptions),
+    getAboutSection(
+      appWalletsSupported,
+      hideSubscriptions,
+      hideSubscriptionReports
+    ),
   ];
 }
 
 export function useSidebarSections(
   appWalletsSupported: boolean,
-  isIos: boolean,
-  country: string | null
+  hideSubscriptions: boolean,
+  hideSubscriptionReports = hideSubscriptions
 ): SidebarSection[] {
-  const hideSubscriptions = shouldHideSubscriptions({
-    capacitorIsIos: isIos,
-    country,
-  });
-
   return useMemo(
     () =>
-      buildSidebarSections(appWalletsSupported, hideSubscriptions),
-    [appWalletsSupported, hideSubscriptions]
+      buildSidebarSections(
+        appWalletsSupported,
+        hideSubscriptions,
+        hideSubscriptionReports
+      ),
+    [appWalletsSupported, hideSubscriptions, hideSubscriptionReports]
   );
 }
 

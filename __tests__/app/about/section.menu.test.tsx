@@ -30,9 +30,10 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   }),
 }));
 
+let mockIsIos = false;
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => ({ isIos: true }),
+  default: () => ({ isIos: mockIsIos, isCapacitor: true }),
 }));
 
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
@@ -100,6 +101,7 @@ describe("About contents dropdown", () => {
   };
 
   beforeEach(() => {
+    mockIsIos = false;
     setCookieCountry("DE");
     mockRouterPush.mockClear();
     mockSeizeConnectFresh.mockClear();
@@ -114,6 +116,7 @@ describe("About contents dropdown", () => {
   });
 
   it("hides subscriptions row when iOS users are not in the US", async () => {
+    mockIsIos = true;
     await renderAboutSection(AboutSection.MEMES);
 
     openContentsMenu();
@@ -124,15 +127,14 @@ describe("About contents dropdown", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows subscriptions row for iOS users in the US", async () => {
+  it("hides subscriptions row for iOS users in the US", async () => {
+    mockIsIos = true;
     setCookieCountry("US");
     await renderAboutSection(AboutSection.MEMES);
 
     openContentsMenu();
 
-    expect(screen.getAllByText("Subscription Minting").length).toBeGreaterThan(
-      0
-    );
+    expect(screen.queryByText("Subscription Minting")).toBeNull();
   });
 
   it("shows only the current page in the sticky trigger", async () => {

@@ -1,3 +1,4 @@
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import CollectPageClient from "@/components/collect/CollectPageClient";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -14,7 +15,7 @@ type CollectSearchParams = Record<string, string | string[] | undefined>;
 
 function legacyCollectionDestination(
   params: CollectSearchParams
-): string | null {
+): `/${string}` | null {
   const intent = params["intent"];
   if (intent !== undefined && intent !== "explore" && intent !== "specific") {
     return null;
@@ -49,7 +50,8 @@ export default async function CollectPage({
 }: {
   readonly searchParams: Promise<CollectSearchParams>;
 }) {
-  const destination = legacyCollectionDestination(await searchParams);
+  const params = await searchParams;
+  const destination = legacyCollectionDestination(params);
   if (destination !== null) {
     redirect(destination);
   }
@@ -62,7 +64,16 @@ export default async function CollectPage({
         </div>
       }
     >
-      <CollectPageClient />
+      <NftPurchasingGate
+        redirectTo={
+          legacyCollectionDestination({
+            ...params,
+            intent: "specific",
+          }) ?? "/the-memes"
+        }
+      >
+        <CollectPageClient />
+      </NftPurchasingGate>
     </Suspense>
   );
 }

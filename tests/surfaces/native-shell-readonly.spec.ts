@@ -298,7 +298,10 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       // A document navigation starts a fresh app history for each deep link.
       await gotoReady(page, path);
       await expect(
-        page.getByRole("navigation", { name: "Primary navigation", exact: true })
+        page.getByRole("navigation", {
+          name: "Primary navigation",
+          exact: true,
+        })
       ).toBeVisible();
       await expect(
         page.getByRole("button", { name: "Back", exact: true })
@@ -990,6 +993,29 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await filter.getByRole("button", { name: "Close", exact: true }).click();
     await expect(openFilters).toBeFocused();
     await expect(page).toHaveURL((url) => !url.searchParams.has("group"));
+  });
+
+  test("iOS redirects direct Collect links and omits the collection shortcut on a US IP", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "capacitor-ios-sim",
+      "Collect visibility is covered on the iOS Capacitor simulation"
+    );
+
+    await mockCountryCheck(page, "US");
+    await page.goto("/collect?collection=memes&intent=full_set");
+
+    await expect(page).toHaveURL((url) => url.pathname === "/the-memes");
+    await expect(
+      page.getByRole("button", { name: "Collection: The Memes" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Complete my set" })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Review purchase" })
+    ).toHaveCount(0);
   });
 
   test("iOS native simulation hides non-US subscription downloads", async ({

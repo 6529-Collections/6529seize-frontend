@@ -1,5 +1,6 @@
 "use client";
 
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import Button from "@/components/utils/button/Button";
 import { apiUrl } from "@/services/api/api-endpoints";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
@@ -398,20 +399,22 @@ export default function RememeAddComponent({
                           <span className="tw-inline-flex tw-items-center tw-gap-2">
                             #{nft.tokenId}
                             {nft.name && ` - ${nft.name}`}
-                            <Link
-                              className="tw-inline-flex focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                              href={`https://opensea.io/assets/ethereum/${contract}/${nft.tokenId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <Image
-                                unoptimized
-                                src="/opensea.png"
-                                alt="opensea"
-                                width={20}
-                                height={20}
-                              />
-                            </Link>
+                            <NftPurchasingGate>
+                              <Link
+                                className="tw-inline-flex focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                                href={`https://opensea.io/assets/ethereum/${contract}/${nft.tokenId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Image
+                                  unoptimized
+                                  src="/opensea.png"
+                                  alt="opensea"
+                                  width={20}
+                                  height={20}
+                                />
+                              </Link>
+                            </NftPurchasingGate>
                           </span>
                         )}
                       </li>

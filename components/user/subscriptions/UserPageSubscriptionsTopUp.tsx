@@ -19,12 +19,9 @@ import CardCountOption from "./SubscriptionTopUpOption";
 import { formatEther, parseEther } from "viem";
 import { useSendTransaction, useWaitForTransactionReceipt } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import OnchainTransactionModal, {
   type OnchainTransactionModalStatus,
 } from "@/components/common/OnchainTransactionModal";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import ButtonLink from "@/components/utils/button/ButtonLink";
 import Button from "@/components/utils/button/Button";
 import {
   displayedEonNumberFromIndex,
@@ -45,7 +42,7 @@ import {
 } from "@/constants/constants";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import { formatAddress } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -253,25 +250,29 @@ function CoverageTopUpOptions({
   );
 }
 
-export default function UserPageSubscriptionsTopUp({
-  coverage,
-  onTransactionConfirmed,
-  onCancel,
-  expanded = true,
-}: Readonly<{
+type TopUpProps = Readonly<{
   coverage?: ApiSubscriptionCoverage | undefined;
   onTransactionConfirmed?: (() => void) | undefined;
   onCancel?: (() => void) | undefined;
   expanded?: boolean;
-}>) {
-  const { isIos } = useCapacitor();
+}>;
+
+export default function UserPageSubscriptionsTopUp(props: TopUpProps) {
+  return (
+    <NftPurchasingGate>
+      <SubscriptionTopUpForm {...props} />
+    </NftPurchasingGate>
+  );
+}
+
+function SubscriptionTopUpForm({
+  coverage,
+  onTransactionConfirmed,
+  onCancel,
+  expanded = true,
+}: TopUpProps) {
   const locale = useBrowserLocale();
   const selectionDescriptionId = useId();
-  const { country } = useCookieConsent();
-  const hideSubscriptions = shouldHideSubscriptions({
-    capacitorIsIos: isIos,
-    country,
-  });
   const [memeCount, setMemeCount] = useState<string>("");
   const sendTransaction = useSendTransaction();
 
@@ -409,10 +410,6 @@ export default function UserPageSubscriptionsTopUp({
     });
   }
 
-  if (hideSubscriptions) {
-    return <></>;
-  }
-
   const isSending = sendTransaction.isPending || waitSendTransaction.isLoading;
   const selectedAmount = selectedTopUp?.amountEth ?? null;
   const isSendDisabled = selectedTopUp === null;
@@ -427,19 +424,6 @@ export default function UserPageSubscriptionsTopUp({
     setMemeCount("");
     setError("");
   };
-
-  const iOsContent = mounted ? (
-    <ButtonLink
-      href={window.location.href}
-      variant="primary"
-      size="lg"
-      fullWidth
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {t(locale, "subscriptions.topUp.ios")}
-    </ButtonLink>
-  ) : null;
 
   const printRemainingMints = (
     count: number,
@@ -589,41 +573,21 @@ export default function UserPageSubscriptionsTopUp({
       <p className="tw-mb-4 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(locale, "subscriptions.topUp.chooseAmount")}
       </p>
-      {isIos && coverage?.recommended_top_up && (
-        <p className="tw-mb-4 tw-mt-0 tw-text-pretty tw-text-sm tw-text-iron-400">
-          {t(locale, "subscriptions.coverage.recommendedThrough", {
-            amount: formatSubscriptionEth(
-              locale,
-              coverage.recommended_top_up.amount_eth
-            ),
-            count: formatInteger(
-              locale,
-              coverage.recommended_top_up.target_fully_funded_drops
-            ),
-            token: formatInteger(
-              locale,
-              coverage.recommended_top_up.projected_through.token_id
-            ),
-          })}
-        </p>
-      )}
-      {isIos ? iOsContent : topUpContent}
-      {!isIos && (
-        <Button
-          type="button"
-          variant="primary"
-          size="lg"
-          loading={isSending}
-          disabled={isSendDisabled}
-          onClick={handleSend}
-          aria-label={submitLabel}
-          fullWidth
-          className="tw-mt-5 !tw-text-[15px] md:!tw-text-sm"
-        >
-          <BoltIcon className="tw-size-4" aria-hidden="true" />
-          {submitLabel}
-        </Button>
-      )}
+      {topUpContent}
+      <Button
+        type="button"
+        variant="primary"
+        size="lg"
+        loading={isSending}
+        disabled={isSendDisabled}
+        onClick={handleSend}
+        aria-label={submitLabel}
+        fullWidth
+        className="tw-mt-5 !tw-text-[15px] md:!tw-text-sm"
+      >
+        <BoltIcon className="tw-size-4" aria-hidden="true" />
+        {submitLabel}
+      </Button>
       <div className="tw-mb-0 tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-1 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
         {t(locale, "subscriptions.topUp.sendingTo")}{" "}
         <span className="tw-font-semibold tw-text-iron-300">

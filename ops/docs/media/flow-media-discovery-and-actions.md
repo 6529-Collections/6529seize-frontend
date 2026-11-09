@@ -82,8 +82,8 @@ This flow covers cross-route media tasks:
   actually complete and a next drop exists.
 - The current mint can stay in countdown mode between scheduled phases even
   after one phase window has ended.
-- On iOS outside `US`, mint controls are hidden. On iOS in `US`, minting uses
-  `Mint on 6529.io`.
+- The iOS app shows drop artwork and countdowns. Minting is available in the
+  browser and on Android.
 - `/the-memes/{id}` ignores unsupported `focus` values and falls back to
   `Live`.
 - Upcoming numeric `/the-memes/{id}` routes can show the next-mint fallback

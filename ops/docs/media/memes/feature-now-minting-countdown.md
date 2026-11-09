@@ -36,7 +36,7 @@ the card has an explicit mapping, a `Main Stage Submission` action.
    card stays in countdown mode and switches to the next phase instead of
    immediately finalizing the whole mint.
 6. In countdown mode, the card can show a `Mint` button (depending on surface
-   settings and platform/country rules) that links to `/the-memes/mint`.
+   settings and platform rules) that links to `/the-memes/mint`.
 7. In the `Edition Details` accordion, users can open the card’s distribution
    page directly via `Distribution Plan` → `View`.
 8. For mapped cards, the same accordion ends with `Main Stage Submission` →
