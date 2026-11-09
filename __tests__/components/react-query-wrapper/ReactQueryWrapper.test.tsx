@@ -45,6 +45,7 @@ type ContextType = {
 const createTestSetup = () => {
   const client = new QueryClient();
   jest.spyOn(client, "invalidateQueries");
+  jest.spyOn(client, "resetQueries");
   jest.spyOn(client, "setQueryData");
   let ctx: ContextType;
   function Child() {
@@ -77,6 +78,23 @@ describe("ReactQueryWrapper context", () => {
       })
     );
     expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    expect(client.resetQueries).toHaveBeenCalledWith({
+      predicate: expect.any(Function),
+      queryKey: [
+        QueryKey.PROFILE_RATING_LIST,
+        { matter: "REP", direction: "given" },
+      ],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [
+        QueryKey.PROFILE_RATING_LIST,
+        { matter: "REP", direction: "received" },
+      ],
+      predicate: expect.any(Function),
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.GLOBAL_REP_CATEGORY_OVERVIEW],
+    });
   });
 
   it("sets profile data in query cache", () => {

@@ -25,7 +25,6 @@ import CompetitionEntryCard from "./CompetitionEntryCard";
 import CompetitionLeaderboard from "./CompetitionLeaderboard";
 import CompetitionVotes from "./CompetitionVotes";
 import CompetitionWinners from "./CompetitionWinners";
-import CompetitionOutcomes from "./CompetitionOutcomes";
 import CompetitionRules from "./CompetitionRules";
 
 const useIdentity = () => {
@@ -151,8 +150,6 @@ export default function CompetitionResources({
       );
     case "decisions":
       return <CompetitionWinners />;
-    case "outcomes":
-      return <CompetitionOutcomes />;
     case "rules":
       return <CompetitionRules />;
   }

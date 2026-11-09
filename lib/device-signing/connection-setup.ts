@@ -10,9 +10,11 @@ import {
   randomBytes,
   toArrayBuffer,
 } from "@/lib/e2ee/bytes";
-import { E2EE_GRANT_SUITES } from "@/lib/e2ee/grant";
+import { E2EE_CIPHERSUITE, E2EE_GRANT_SUITES } from "@/lib/e2ee/grant";
 import { createLoginE2eeDevice } from "@/lib/e2ee/login-device";
+import type { StoredDevice } from "@/lib/e2ee/records";
 import { getDefaultE2eeStorage } from "@/lib/e2ee/storage";
+import { isOldSuiteDevice } from "@/lib/e2ee/suite-retirement";
 import { MlsClient } from "@/lib/e2ee/mls-adapter";
 import { loadDefaultWasm } from "@/lib/e2ee/wasm-loader";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
@@ -206,9 +208,16 @@ export async function acceptConnectionDeviceSetup(input: {
   try {
     if (device.deviceKeyHex !== terms.mls_device_key)
       throw new Error("Device setup encryption key mismatch");
-    const existing = await getDefaultE2eeStorage().getDevice(identity.id);
+    // A share for the current suite can upgrade the receiver even if signing is already enabled.
+    const canUpgradeSuite =
+      terms.version === 2 && terms.ciphersuites?.includes(E2EE_CIPHERSUITE);
+    /** Keeps a registered device unless this share can upgrade its legacy suite. */
+    const canReuseDevice = (stored: StoredDevice | null) =>
+      stored?.registered === true &&
+      (!canUpgradeSuite || !isOldSuiteDevice(stored));
+    const storage = getDefaultE2eeStorage();
     if (
-      existing?.registered &&
+      canReuseDevice(await storage.getDevice(identity.id)) &&
       (!pair || (await readUsableDeviceGrant(input.wallet, Date.now())))
     )
       return;
@@ -239,10 +248,7 @@ export async function acceptConnectionDeviceSetup(input: {
         expiresAtSeconds: bundle.request.grant.expires_at,
         platform: input.target === "desktop" ? "desktop" : "phone",
       });
-      if (
-        !adopted &&
-        !(await getDefaultE2eeStorage().getDevice(identity.id))?.registered
-      )
+      if (!adopted && !canReuseDevice(await storage.getDevice(identity.id)))
         throw new Error("Device setup could not be saved");
       if (pair)
         await installSharedDeviceKey({
@@ -262,7 +268,6 @@ export async function acceptConnectionDeviceSetup(input: {
       }).catch(() => undefined);
       throw error;
     }
-    // Keeping an already registered MLS device is intentional: never replace its history.
     if (adopted) {
       setE2eeEnrollmentMarker(identity.id, true);
       if (typeof globalThis.dispatchEvent === "function")

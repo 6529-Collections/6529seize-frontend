@@ -59,7 +59,6 @@ type WaveTabParams = {
   isMemesWave: boolean;
   isCurationWave: boolean;
   isApproveWave?: boolean | undefined;
-  showOutcomeTab?: boolean | undefined;
   votingState: WaveVotingState;
   hasFirstDecisionPassed: boolean;
   transientPreferredTab?: MyStreamWaveTab | null;
@@ -84,8 +83,7 @@ interface ContentTabContextType {
 const buildMemesTabs = (
   votingState: WaveVotingState,
   hasFirstDecisionPassed: boolean,
-  hasPolls: boolean,
-  showOutcomeTab: boolean
+  hasPolls: boolean
 ) => {
   const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
   if (votingState === WaveVotingState.ENDED) {
@@ -100,9 +98,6 @@ const buildMemesTabs = (
   if (hasPolls) {
     tabs.push(MyStreamWaveTab.POLLS);
   }
-  if (showOutcomeTab) {
-    tabs.push(MyStreamWaveTab.OUTCOME);
-  }
   tabs.push(MyStreamWaveTab.FAQ);
   return tabs;
 };
@@ -111,8 +106,7 @@ const buildDefaultTabs = (
   votingState: WaveVotingState,
   hasFirstDecisionPassed: boolean,
   isCurationWave: boolean,
-  hasPolls: boolean,
-  showOutcomeTab: boolean
+  hasPolls: boolean
 ) => {
   const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
   if (votingState === WaveVotingState.ENDED) {
@@ -126,9 +120,6 @@ const buildDefaultTabs = (
   if (hasFirstDecisionPassed) {
     tabs.push(MyStreamWaveTab.WINNERS);
   }
-  if (!isCurationWave && showOutcomeTab) {
-    tabs.push(MyStreamWaveTab.OUTCOME);
-  }
   tabs.push(MyStreamWaveTab.MY_VOTES);
   if (hasPolls) {
     tabs.push(MyStreamWaveTab.POLLS);
@@ -136,11 +127,7 @@ const buildDefaultTabs = (
   return tabs;
 };
 
-const buildApproveTabs = (
-  isCurationWave: boolean,
-  hasPolls: boolean,
-  showOutcomeTab: boolean
-) => {
+const buildApproveTabs = (isCurationWave: boolean, hasPolls: boolean) => {
   const tabs: MyStreamWaveTab[] = [
     MyStreamWaveTab.CHAT,
     MyStreamWaveTab.LEADERBOARD,
@@ -151,10 +138,6 @@ const buildApproveTabs = (
   }
 
   tabs.push(MyStreamWaveTab.WINNERS);
-
-  if (!isCurationWave && showOutcomeTab) {
-    tabs.push(MyStreamWaveTab.OUTCOME);
-  }
 
   tabs.push(MyStreamWaveTab.MY_VOTES);
 
@@ -218,11 +201,13 @@ export const ContentTabProvider: React.FC<{
       ? (getHistoryWaveTab(routeWaveId) ?? rememberedTabs[routeWaveId])
       : undefined;
   const rememberedTab = getRememberedTab(remembered);
-  const requestedTab = competitionOnly
+  const outcomeLink = ["outcome", "outcomes"].includes(search.get("tab") ?? "");
+  const routeTab = competitionOnly
     ? getLegacyCompetitionTab(search.get("tab"))
     : Object.values(MyStreamWaveTab).find(
         (tab) => tab.toLowerCase() === search.get("tab")
       );
+  const requestedTab = outcomeLink ? MyStreamWaveTab.CONFIGURATION : routeTab;
   let initialTab = requestedTab ?? rememberedTab ?? MyStreamWaveTab.CHAT;
   if (competitionOnly) initialTab = requestedTab ?? MyStreamWaveTab.LEADERBOARD;
   else if (search.has("serialNo")) initialTab = MyStreamWaveTab.CHAT;
@@ -289,7 +274,6 @@ export const ContentTabProvider: React.FC<{
         isMemesWave,
         isCurationWave,
         isApproveWave = false,
-        showOutcomeTab = true,
         votingState,
         hasFirstDecisionPassed,
         transientPreferredTab,
@@ -302,21 +286,15 @@ export const ContentTabProvider: React.FC<{
           tabs.push(MyStreamWaveTab.POLLS);
         }
       } else if (isApproveWave) {
-        tabs = buildApproveTabs(isCurationWave, hasPolls, showOutcomeTab);
+        tabs = buildApproveTabs(isCurationWave, hasPolls);
       } else if (isMemesWave) {
-        tabs = buildMemesTabs(
-          votingState,
-          hasFirstDecisionPassed,
-          hasPolls,
-          showOutcomeTab
-        );
+        tabs = buildMemesTabs(votingState, hasFirstDecisionPassed, hasPolls);
       } else {
         tabs = buildDefaultTabs(
           votingState,
           hasFirstDecisionPassed,
           isCurationWave,
-          hasPolls,
-          showOutcomeTab
+          hasPolls
         );
       }
 
@@ -328,7 +306,6 @@ export const ContentTabProvider: React.FC<{
         tabs.push(
           MyStreamWaveTab.LEADERBOARD,
           MyStreamWaveTab.WINNERS,
-          MyStreamWaveTab.OUTCOME,
           MyStreamWaveTab.MY_VOTES
         );
       }

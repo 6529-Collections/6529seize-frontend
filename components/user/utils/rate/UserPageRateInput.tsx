@@ -31,6 +31,7 @@ export default function UserPageRateInput({
   required = false,
   readOnly = false,
   autoFocus = false,
+  clampOnBlur = true,
 }: {
   readonly value: string;
   readonly onChange: (value: string) => void;
@@ -43,6 +44,7 @@ export default function UserPageRateInput({
   readonly required?: boolean;
   readonly readOnly?: boolean;
   readonly autoFocus?: boolean;
+  readonly clampOnBlur?: boolean;
 }) {
   const valueAsNumber = getStringAsNumberOrZero(value);
   const isValidValue =
@@ -57,7 +59,7 @@ export default function UserPageRateInput({
   };
 
   const handleBlur = () => {
-    if (isProxy) return;
+    if (isProxy || !clampOnBlur) return;
     const { min, max } = minMax;
     const valueAsNumber = getStringAsNumberOrZero(value);
     if (valueAsNumber > max) {

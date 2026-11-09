@@ -1,5 +1,5 @@
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
-import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { CreateWaveOutcomeConfig } from "@/types/waves.types";
@@ -7,7 +7,6 @@ import CreateWaveOutcomesRow from "./CreateWaveOutcomesRow";
 
 export default function CreateWaveOutcomesRows({
   waveType,
-  errors,
   outcomes,
   setOutcomes,
 }: {
@@ -20,9 +19,6 @@ export default function CreateWaveOutcomesRows({
     setOutcomes(outcomes.filter((_, i) => i !== index));
   };
 
-  const showNoOutcomesError = errors.includes(
-    CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED
-  );
   return (
     <div className="tw-flex tw-flex-col tw-gap-x-4 tw-gap-y-4">
       {outcomes.length ? (
@@ -35,17 +31,8 @@ export default function CreateWaveOutcomesRows({
           />
         ))
       ) : (
-        <div
-          className={`${
-            showNoOutcomesError ? "tw-border-error/40" : "tw-border-iron-800"
-          } tw-rounded-lg tw-border tw-border-dashed tw-bg-iron-900/40 tw-px-4 tw-py-5 tw-transition tw-duration-300 tw-ease-out`}
-          role={showNoOutcomesError ? "alert" : undefined}
-        >
-          <p
-            className={`${
-              showNoOutcomesError ? "tw-text-error" : "tw-text-iron-200"
-            } tw-mb-0 tw-mt-0 tw-text-sm tw-font-semibold`}
-          >
+        <div className="tw-rounded-lg tw-border tw-border-dashed tw-border-iron-800 tw-bg-iron-900/40 tw-px-4 tw-py-5">
+          <p className="tw-mb-0 tw-mt-0 tw-text-sm tw-font-semibold tw-text-iron-200">
             {t(DEFAULT_LOCALE, "waves.create.outcomes.empty.title")}
           </p>
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
