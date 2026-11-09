@@ -176,6 +176,12 @@
   values. Headers work with Enter or Space and announce the next sort direction.
   The table scrolls horizontally when its columns need more room. Sorting and
   paging keep the previous rows visible while the next results load.
+- On desktop, section headings use a consistent compact style, and artwork,
+  supply, properties, and market values use the same text size as their labels.
+  In `History` > `Timeline`, changes use the full section width with a thin
+  vertical line, small markers, and horizontal dividers. Dates and metadata
+  links are quieter than the change names. Smaller screens keep their existing
+  typography and timeline cards.
 - In Overview, explore `More by {artist}` for up to four other published Meme
   Cards per credited artist directly after the description, before detailed metadata.
   Cards are ordered by newest card number first. Each preview

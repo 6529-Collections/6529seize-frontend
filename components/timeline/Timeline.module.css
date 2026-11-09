@@ -153,3 +153,72 @@
   overflow-wrap: anywhere;
   white-space: pre-line;
 }
+
+/* Keep the shared timeline and its phone layout intact outside this card surface. */
+@media (min-width: 768px) {
+  :global([data-meme-card-page]) .timeline::after {
+    left: 4px;
+    width: 1px;
+    margin-left: 0;
+    @apply tw-bg-iron-800;
+  }
+
+  :global([data-meme-card-page]) .timelineContainer {
+    padding-right: 0;
+    padding-left: 32px;
+  }
+
+  :global([data-meme-card-page]) .timelineContainer::before {
+    display: none;
+  }
+
+  :global([data-meme-card-page]) .timelineContainer::after {
+    top: 27px;
+    left: 0;
+    width: 9px;
+    height: 9px;
+    border: 0;
+    box-shadow: 0 0 0 4px black;
+    @apply tw-bg-iron-400;
+  }
+
+  :global([data-meme-card-page]) .timelineContainer:first-child::after {
+    @apply tw-bg-primary-400;
+  }
+
+  :global([data-meme-card-page]) .content {
+    @apply tw-rounded-none tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-bg-transparent tw-px-0 tw-pb-5 tw-pt-0 tw-text-sm tw-leading-5 tw-text-iron-300;
+  }
+
+  :global([data-meme-card-page]) .content h4,
+  :global([data-meme-card-page]) .content p {
+    color: inherit !important;
+  }
+
+  :global([data-meme-card-page]) .content h5 {
+    @apply tw-mb-1 tw-text-xs tw-font-normal tw-leading-4;
+    color: theme("colors.iron.500") !important;
+  }
+
+  :global([data-meme-card-page]) .content b {
+    @apply tw-text-sm tw-font-semibold tw-text-iron-100;
+  }
+
+  :global([data-meme-card-page]) .content a {
+    @apply tw-text-xs tw-font-medium tw-leading-4;
+    color: theme("colors.iron.400") !important;
+  }
+
+  :global([data-meme-card-page]) .content a:hover {
+    color: theme("colors.iron.100") !important;
+    opacity: 1;
+  }
+
+  :global([data-meme-card-page]) .changesUl li::marker {
+    @apply tw-text-iron-500;
+  }
+
+  :global([data-meme-card-page]) .linkIcon {
+    @apply tw-size-[11px] tw-text-iron-500;
+  }
+}

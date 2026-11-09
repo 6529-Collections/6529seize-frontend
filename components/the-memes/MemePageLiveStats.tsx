@@ -35,17 +35,17 @@ import MemeSupplyStats from "./MemeSupplyStats";
 const ARTWORK_LABEL_CLASS =
   "tw-mb-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 md:tw-mb-2";
 const CREATOR_NAME_CLASS =
-  "tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline md:tw-text-lg";
+  "tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline md:tw-text-lg md:[[data-meme-card-page]_&]:tw-text-sm md:[[data-meme-card-page]_&]:tw-text-iron-100";
 const INLINE_METRIC_LABEL_CLASS =
   "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400";
 const MARKET_METRIC_LABEL_BASE_CLASS =
   "tw-mb-1 md:tw-mb-2 tw-text-[13px] sm:tw-text-sm tw-font-medium tw-leading-5";
 const MARKET_METRIC_VALUE_CLASS =
-  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
+  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-iron-100";
 const COLLECTOR_METRIC_VALUE_CLASS =
-  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
+  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-iron-100";
 const RANK_BADGE_CLASS =
-  "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-2 tw-py-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-400 md:tw-py-0.5 md:tw-text-[11px] md:tw-leading-4";
+  "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-2 tw-py-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-400 md:tw-py-0.5 md:tw-text-xs md:tw-font-medium md:tw-leading-4";
 const INLINE_STATS_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-14";
 const DETAIL_STATS_GRID_CLASS =
@@ -355,7 +355,7 @@ export function MemeArtworkDetails({
                     </span>
                   )}
                   {showComma && (
-                    <span className="tw-whitespace-pre tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-500 md:tw-text-lg">
+                    <span className="tw-whitespace-pre tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-500 md:tw-text-lg md:[[data-meme-card-page]_&]:tw-text-sm">
                       {" , "}
                     </span>
                   )}
@@ -371,7 +371,7 @@ export function MemeArtworkDetails({
             {t(locale, "theMemes.detail.live.artwork.mintDate")}
           </div>
           <div className={mintDateClassName}>
-            <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white md:tw-text-lg">
+            <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white md:tw-text-lg md:[[data-meme-card-page]_&]:tw-text-sm md:[[data-meme-card-page]_&]:tw-text-iron-100">
               {mintDate.date}
             </span>
           </div>

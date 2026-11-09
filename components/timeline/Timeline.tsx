@@ -100,7 +100,12 @@ export default function Timeline(props: Readonly<Props>) {
     return (
       <div className={FULL_WIDTH_COLUMN_CLASS_NAME}>
         <b>{label}:</b>{" "}
-        <a href={value} target="_blank" rel="noopener noreferrer">
+        <a
+          href={value}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="md:[[data-meme-card-page]_&]:tw-font-mono"
+        >
           {value}
         </a>
       </div>

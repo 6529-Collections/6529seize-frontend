@@ -813,6 +813,40 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
 
   defineCollectorsLeaderboardTests();
   defineNftMarketActivityTests();
+  test("keeps desktop card typography scoped to The Memes", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/the-memes/1");
+    const properties = page.getByRole("heading", {
+      name: "Properties",
+      exact: true,
+    });
+    const editionSize = page
+      .getByText("Edition size", { exact: true })
+      .locator("..")
+      .getByRole("definition");
+    for (const width of [390, 767, 768, 1600]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await expect(properties).toHaveCSS(
+        "font-size",
+        width >= 768 ? "16px" : "12px"
+      );
+      await expect(properties).toHaveCSS(
+        "text-transform",
+        width >= 768 ? "none" : "uppercase"
+      );
+      await expect(editionSize).toHaveCSS("font-size", "14px");
+      await expectNoHorizontalOverflow(page);
+    }
+    await gotoReady(page, "/meme-lab/1");
+    await expect(
+      page.getByRole("heading", { name: "Properties", exact: true })
+    ).toHaveCSS("font-size", "12px");
+    await expect(
+      page.getByRole("heading", { name: "Properties", exact: true })
+    ).toHaveCSS("text-transform", "uppercase");
+  });
+
   test("renders The Memes card detail shell", async ({ page }) => {
     await gotoReady(page, "/the-memes/1");
 
@@ -906,7 +940,27 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await expect(
       timeline.getByRole("link", { name: "Open metadata URI" })
     ).toHaveAttribute("href", `https://arweave.net/${tx}`);
+    const date = timeline.getByRole("heading", { level: 5 });
+    const desktop = (page.viewportSize()?.width ?? 1280) >= 768;
+    await expect(
+      timeline.getByRole("heading", { level: 5 }).locator("..")
+    ).toHaveCSS(
+      "background-color",
+      desktop ? "rgba(0, 0, 0, 0)" : "rgb(255, 255, 255)"
+    );
+    if (desktop) {
+      await expect(date).toHaveCSS("font-size", "12px");
+      await expect(date).toHaveCSS("font-weight", "400");
+      await expect(timeline.getByText("Edit", { exact: true })).toHaveCSS(
+        "font-weight",
+        "600"
+      );
+    }
     await expectNoHorizontalOverflow(page);
+    await gotoReady(page, "/meme-lab/1?focus=timeline");
+    await expect(
+      page.getByRole("heading", { level: 5 }).locator("..")
+    ).toHaveCSS("background-color", "rgb(255, 255, 255)");
   });
 
   for (const recordedFormat of [true, false]) {

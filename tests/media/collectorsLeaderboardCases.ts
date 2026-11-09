@@ -176,6 +176,20 @@ async function expectDesktopCollectorLayout(page: Page, section: Locator) {
     });
     const header = table.getByRole("columnheader").nth(index + 4);
     await expect(header).toHaveAttribute("aria-sort", "descending");
+    const indicatorBeforeLabel = await ascending.evaluate((button) => {
+      const icon = button.querySelector("svg");
+      const label = Array.from(button.childNodes).find(
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim()
+      );
+      if (!icon || !label)
+        throw new Error("The sort icon and label must be visible");
+      const range = document.createRange();
+      range.selectNodeContents(label);
+      return (
+        icon.getBoundingClientRect().right <= range.getBoundingClientRect().left
+      );
+    });
+    expect(indicatorBeforeLabel).toBe(true);
     await ascending.focus();
     await page.keyboard.press("Enter");
     await expect(header).toHaveAttribute("aria-sort", "ascending");
@@ -190,6 +204,10 @@ async function expectDesktopCollectorLayout(page: Page, section: Locator) {
     await expect(header).toHaveAttribute("aria-sort", "descending");
   }
   const collector = table.getByRole("row").nth(2).getByRole("link");
+  // Finish the card tab's smooth navigation scroll before checking pointer state.
+  await collector.evaluate((element) =>
+    element.scrollIntoView({ behavior: "instant", block: "center" })
+  );
   await collector.hover();
   await expect(collector).toHaveCSS("color", "rgb(239, 239, 241)");
   await page.mouse.move(0, 0);

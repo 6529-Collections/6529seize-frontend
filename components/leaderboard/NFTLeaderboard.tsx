@@ -45,7 +45,7 @@ import {
 export { buildNftCollectorsCsv } from "./nftCollectorsCsv";
 
 const tableHeaderClassName =
-  "tw-whitespace-nowrap tw-border-0 tw-px-3 tw-py-3 tw-text-left tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500 first:tw-pl-0";
+  "tw-whitespace-nowrap tw-border-0 tw-px-3 tw-pb-2.5 tw-pt-3 tw-text-left tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500 first:tw-pl-0";
 
 const tableCellClassName =
   "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-100 md:tw-border-b-0 md:tw-px-3 md:tw-py-3.5 md:tw-text-right md:tw-text-sm md:tw-tabular-nums md:last:tw-pr-0";
@@ -227,10 +227,10 @@ export function NftLeaderboardCollectorRow({
     <tr
       className={`${LEADERBOARD_ROW_CLASS_NAME} md:tw-border-0 md:tw-border-b md:tw-border-solid md:tw-border-iron-800 md:last:tw-border-b-0 md:even:tw-bg-transparent md:focus-within:tw-bg-iron-950 md:hover:tw-bg-iron-950`}
     >
-      <td className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-100 md:tw-border-b-0 md:tw-py-3.5 md:tw-pl-0 md:tw-pr-3 md:tw-text-left md:tw-text-sm md:tw-font-normal md:tw-tabular-nums md:tw-text-iron-500">
+      <td className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-100 md:tw-w-14 md:tw-border-b-0 md:tw-py-3.5 md:tw-pl-0 md:tw-pr-3 md:tw-text-left md:tw-text-sm md:tw-font-normal md:tw-tabular-nums md:tw-text-iron-500">
         {numberWithCommas(lead.rank)}
       </td>
-      <td className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 md:tw-border-b-0 md:tw-px-3 md:tw-py-3.5 md:[&_a:focus-visible]:tw-outline md:[&_a:focus-visible]:tw-outline-2 md:[&_a:focus-visible]:tw-outline-primary-400 md:[&_a>div:first-child]:tw-size-8 md:[&_a>div:first-child]:tw-border-iron-800 md:[&_a]:tw-text-sm md:[&_a]:tw-font-normal md:[&_a]:tw-text-iron-300 md:group-focus-within:[&_a]:tw-text-iron-100 md:group-hover:[&_a]:tw-text-iron-100">
+      <td className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 md:tw-border-b-0 md:tw-px-3 md:tw-py-3.5 md:[&_a:focus-visible]:tw-outline md:[&_a:focus-visible]:tw-outline-2 md:[&_a:focus-visible]:tw-outline-primary-400 md:[&_a>div:first-child]:tw-size-8 md:[&_a>div:first-child]:tw-border-white/5 md:[&_a]:tw-text-sm md:[&_a]:tw-font-normal md:[&_a]:tw-text-iron-300 md:group-focus-within:[&_a]:tw-text-iron-100 md:group-hover:[&_a]:tw-text-iron-100">
         <LeaderboardCollector
           handle={lead.handle}
           consolidationKey={lead.consolidation_key}
@@ -538,7 +538,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       id="nft-leaderboard"
     >
       <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 max-md:tw-gap-x-2 max-md:tw-gap-y-1 md:tw-mb-4">
-        <h3 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-[17px] tw-font-semibold tw-leading-[22px] tw-text-iron-50 md:tw-flex-none md:tw-text-lg md:tw-leading-7 md:tw-text-iron-100">
+        <h3 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-[17px] tw-font-semibold tw-leading-[22px] tw-text-iron-50 md:tw-flex-none md:tw-text-base md:tw-leading-6 md:tw-text-iron-100">
           {t(locale, "theMemes.detail.collectors.leaderboardTitle")}
         </h3>
         <CollectorsCsvDownloadControls
@@ -604,24 +604,20 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
               <th
                 colSpan={3}
                 scope="colgroup"
-                className="tw-border-0 tw-py-0 tw-pl-10 tw-pr-3 tw-text-center tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400"
+                className="tw-relative tw-border-0 tw-pb-2 tw-pl-10 tw-pr-3 tw-pt-1 tw-text-center tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400 after:tw-absolute after:tw-bottom-0 after:tw-left-10 after:tw-right-0 after:tw-h-px after:tw-bg-iron-800 after:tw-content-['']"
               >
-                <span className="tw-block tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-2">
-                  {t(locale, "theMemes.detail.collectors.thisCard")}
-                </span>
+                {t(locale, "theMemes.detail.collectors.thisCard")}
               </th>
               <th
                 colSpan={3}
                 scope="colgroup"
-                className="tw-border-0 tw-py-0 tw-pl-10 tw-pr-0 tw-text-center tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400"
+                className="tw-relative tw-border-0 tw-pb-2 tw-pl-10 tw-pr-0 tw-pt-1 tw-text-center tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400 after:tw-absolute after:tw-bottom-0 after:tw-left-10 after:tw-right-0 after:tw-h-px after:tw-bg-iron-800 after:tw-content-['']"
               >
-                <span className="tw-block tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-2">
-                  {t(locale, "theMemes.detail.collectors.total")}
-                </span>
+                {t(locale, "theMemes.detail.collectors.total")}
               </th>
             </tr>
             <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800">
-              <th scope="col" className={`${tableHeaderClassName} tw-w-12`}>
+              <th scope="col" className={`${tableHeaderClassName} tw-w-14`}>
                 {t(locale, "theMemes.detail.collectors.rank")}
               </th>
               <th
@@ -721,7 +717,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
         </div>
       )}
       {totalResults > 0 && (
-        <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4 max-md:[&>span>button:first-child]:tw-size-9 max-md:[&>span>button:first-child]:tw-rounded-lg max-md:[&>span>button:first-child]:tw-border max-md:[&>span>button:first-child]:tw-border-solid max-md:[&>span>button:first-child]:tw-border-iron-800 max-md:[&>span>button:first-child]:tw-bg-iron-950 max-md:[&>span>button:first-child]:tw-text-iron-200 max-md:[&>span>button:last-child]:tw-size-9 max-md:[&>span>button:last-child]:tw-rounded-lg max-md:[&>span>button:last-child]:tw-border max-md:[&>span>button:last-child]:tw-border-solid max-md:[&>span>button:last-child]:tw-border-iron-800 max-md:[&>span>button:last-child]:tw-bg-iron-950 max-md:[&>span>button:last-child]:tw-text-iron-200 max-md:[&>span>button]:tw-text-sm max-md:[&>span>span]:tw-text-sm max-md:[&>span]:tw-gap-2 max-md:[&>span]:tw-text-sm max-md:[&>span]:tw-text-iron-400 max-md:[&_input]:tw-h-9 max-md:[&_input]:tw-w-12 max-md:[&_input]:tw-rounded-lg max-md:[&_input]:tw-border max-md:[&_input]:tw-border-solid max-md:[&_input]:tw-border-iron-800 max-md:[&_input]:tw-bg-iron-950 max-md:[&_input]:tw-text-center max-md:[&_input]:tw-text-sm max-md:[&_input]:tw-text-iron-100 max-md:[&_svg]:tw-w-3.5">
+        <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4 max-md:[&>span>button:first-child]:tw-size-9 max-md:[&>span>button:first-child]:tw-rounded-lg max-md:[&>span>button:first-child]:tw-border max-md:[&>span>button:first-child]:tw-border-solid max-md:[&>span>button:first-child]:tw-border-iron-800 max-md:[&>span>button:first-child]:tw-bg-iron-950 max-md:[&>span>button:first-child]:tw-text-iron-200 max-md:[&>span>button:last-child]:tw-size-9 max-md:[&>span>button:last-child]:tw-rounded-lg max-md:[&>span>button:last-child]:tw-border max-md:[&>span>button:last-child]:tw-border-solid max-md:[&>span>button:last-child]:tw-border-iron-800 max-md:[&>span>button:last-child]:tw-bg-iron-950 max-md:[&>span>button:last-child]:tw-text-iron-200 max-md:[&>span>button]:tw-text-sm max-md:[&>span>span]:tw-text-sm max-md:[&>span]:tw-gap-2 max-md:[&>span]:tw-text-sm max-md:[&>span]:tw-text-iron-400 md:[&>span]:tw-text-sm md:[&>span]:tw-text-iron-400 max-md:[&_input]:tw-h-9 max-md:[&_input]:tw-w-12 max-md:[&_input]:tw-rounded-lg max-md:[&_input]:tw-border max-md:[&_input]:tw-border-solid max-md:[&_input]:tw-border-iron-800 max-md:[&_input]:tw-bg-iron-950 max-md:[&_input]:tw-text-center max-md:[&_input]:tw-text-sm max-md:[&_input]:tw-text-iron-100 max-md:[&_svg]:tw-w-3.5">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}

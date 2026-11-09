@@ -47,7 +47,7 @@ export default function MemeSupplyStats({
             <dt className="tw-mb-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 md:tw-mb-2">
               {row.label}
             </dt>
-            <dd className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6">
+            <dd className="tw-m-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-iron-100">
               {count(row.value)}
             </dd>
           </div>
