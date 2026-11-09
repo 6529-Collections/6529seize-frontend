@@ -719,8 +719,13 @@ export function useWaveRealtimeUpdater({
       }
       if (!refreshWaveMessages || (!wave && waveId !== activeWaveId))
         return false;
-      await refreshWaveMessages(waveId);
-      return true;
+      try {
+        await refreshWaveMessages(waveId);
+        return true;
+      } catch (error) {
+        reportBackgroundTaskError("Failed to refresh reply placement:", error);
+        return false;
+      }
     },
     [activeWaveId, getData, queryClient, refreshWaveMessages, updateData]
   );

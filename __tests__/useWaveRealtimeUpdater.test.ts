@@ -229,6 +229,38 @@ describe("useWaveRealtimeUpdater", () => {
     }
   );
 
+  it("reports a failed reply placement refresh and allows a later refresh", async () => {
+    const error = new Error("Wave refresh failed");
+    const report = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    try {
+      const refreshWaveMessages = jest
+        .fn()
+        .mockRejectedValueOnce(error)
+        .mockResolvedValue(undefined);
+      const props = {
+        ...baseProps({ wave1: { drops: [], latestFetchedSerialNo: 10 } }),
+        refreshWaveMessages,
+      };
+      const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+      const change = { waveId: "wave1", dropId: "root", hasReplies: true };
+
+      await expect(result.current.applyReplyPlacement(change)).resolves.toBe(
+        false
+      );
+      expect(report).toHaveBeenCalledWith(
+        "Failed to refresh reply placement:",
+        error
+      );
+      await expect(result.current.applyReplyPlacement(change)).resolves.toBe(
+        true
+      );
+    } finally {
+      report.mockRestore();
+    }
+  });
+
   it.each([WsMessageType.DROP_UPDATE, WsMessageType.DROP_UPDATE_REF])(
     "updates an empty thread in place on a placement event (%s)",
     (messageType) => {
