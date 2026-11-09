@@ -3,6 +3,7 @@
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
+import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiSetDropReplyCollapseRequest } from "@/generated/models/ApiSetDropReplyCollapseRequest";
@@ -26,6 +27,7 @@ export default function WaveDropReplyCollapseAction({
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const threads = useWaveReplyThreads();
   const stream = useMyStreamActionsOptional();
+  const chatScroll = useWaveChatScrollOptional();
   const queryClient = useQueryClient();
   const waveId = drop.wave.id;
   const mutation = useMutation({
@@ -37,6 +39,7 @@ export default function WaveDropReplyCollapseAction({
     onSuccess: () => {
       onSelected();
       stream?.refreshWaveMessages(waveId);
+      chatScroll?.requestScrollToSerialNo({ waveId, serialNo: drop.serial_no });
       void queryClient.invalidateQueries({
         queryKey: [QueryKey.DROP_REPLY_THREAD_TARGET, { wave_id: waveId }],
       });
