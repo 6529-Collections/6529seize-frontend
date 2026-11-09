@@ -13,15 +13,28 @@ import {
   redeemConnectionShare,
 } from "@/services/auth/session-v2.utils";
 import { commonApiPost } from "@/services/api/common-api";
+import type {
+  acceptConnectionDeviceSetup,
+  ConnectionDeviceSetupOutcome,
+} from "@/lib/device-signing/connection-setup";
+import { reportConnectionShareSetup } from "@/utils/monitoring/connectionShareSetupMonitoring";
 import {
   canStoreAnotherWalletAccount,
   getConnectedWalletAccounts,
   setAuthJwt,
 } from "@/services/auth/auth.utils";
 
-const mockAcceptDeviceSetup = jest.fn(async (_input: unknown) => undefined);
+type DeviceSetupInput = Parameters<typeof acceptConnectionDeviceSetup>[0];
+const mockAcceptDeviceSetup = jest.fn(
+  async (_input: DeviceSetupInput): Promise<ConnectionDeviceSetupOutcome> =>
+    "reused"
+);
 jest.mock("@/lib/device-signing/connection-setup", () => ({
-  acceptConnectionDeviceSetup: (input: unknown) => mockAcceptDeviceSetup(input),
+  acceptConnectionDeviceSetup: (input: DeviceSetupInput) =>
+    mockAcceptDeviceSetup(input),
+}));
+jest.mock("@/utils/monitoring/connectionShareSetupMonitoring", () => ({
+  reportConnectionShareSetup: jest.fn(),
 }));
 
 // Mock TitleContext
@@ -130,7 +143,8 @@ describe("AcceptConnectionSharing page", () => {
 
   beforeEach(() => {
     mockAcceptDeviceSetup.mockReset();
-    mockAcceptDeviceSetup.mockResolvedValue(undefined);
+    mockAcceptDeviceSetup.mockResolvedValue("reused");
+    jest.mocked(reportConnectionShareSetup).mockClear();
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
@@ -709,6 +723,7 @@ describe("AcceptConnectionSharing page", () => {
           wallet: "0x123",
           accessToken: "access-token",
           target,
+          onStage: expect.any(Function),
         })
       );
       await waitFor(() => expect(push).toHaveBeenCalledWith("/"));
@@ -716,4 +731,133 @@ describe("AcceptConnectionSharing page", () => {
       expect(connect).not.toHaveBeenCalled();
     }
   );
+
+  it.each([
+    {
+      description: "the redeem response omits the setup",
+      envelope: null,
+      stage: "missing-envelope",
+      result: "failed",
+    },
+    {
+      description: "the encrypted setup cannot be opened",
+      envelope: "v1.ciphertext",
+      stage: "open-envelope",
+      result: "failed",
+    },
+    {
+      description: "setup reuses an earlier-suite device",
+      envelope: "v1.ciphertext",
+      stage: "read-local-device",
+      result: "legacy-device",
+    },
+  ] as const)(
+    "keeps the failure visible after sign-in when $description",
+    async ({ envelope, stage, result }) => {
+      const push = jest.fn();
+      const accept = jest.fn();
+      (useRouter as jest.Mock).mockReturnValue({ push });
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+      (useSeizeConnectContext as jest.Mock).mockReturnValue({
+        seizeAcceptConnection: accept,
+      });
+      openConnectionLink("connection_share_code=abc12345&address=0x123");
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.href}#device_setup_key=private-unlock-secret`
+      );
+      (redeemConnectionShare as jest.Mock).mockResolvedValue({
+        address: "0x123",
+        access_token: "access-token",
+        role: null,
+        client_type: "native",
+        encrypted_device_setup: envelope,
+      });
+      mockAcceptDeviceSetup.mockImplementationOnce(async ({ onStage }) => {
+        if (stage !== "missing-envelope") onStage?.(stage);
+        if (result === "failed") throw new Error("Setup failed");
+        return result;
+      });
+
+      render(
+        <TestProvider>
+          <AcceptConnectionSharingPage />
+        </TestProvider>
+      );
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Accept and enable both" })
+      );
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        /Signed in, but device setup could not finish.*new setup link/i
+      );
+      expect(
+        screen.getByRole("link", { name: "Take me home" })
+      ).toHaveAttribute("href", "/");
+      expect(
+        screen.queryByRole("button", { name: "Accept and enable both" })
+      ).not.toBeInTheDocument();
+      expect(persistSessionResponse).toHaveBeenCalledTimes(1);
+      expect(accept).toHaveBeenCalledWith("0x123");
+      expect(push).not.toHaveBeenCalled();
+      expect(mockAcceptDeviceSetup).toHaveBeenCalledTimes(envelope ? 1 : 0);
+      expect(reportConnectionShareSetup).toHaveBeenCalledWith(
+        result,
+        stage,
+        "native"
+      );
+    }
+  );
+
+  it("keeps the accepted link's key across redemption and reports pending enrollment", async () => {
+    const push = jest.fn();
+    const setToast = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push });
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    openConnectionLink("connection_share_code=abc12345&address=0x123&_t=1");
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.href}#device_setup_key=private-unlock-secret`
+    );
+    const response = {
+      address: "0x123",
+      access_token: "access-token",
+      role: null,
+      client_type: "native",
+      encrypted_device_setup: "v1.ciphertext",
+    };
+    const redemption = Promise.withResolvers<typeof response>();
+    (redeemConnectionShare as jest.Mock).mockReturnValue(redemption.promise);
+    mockAcceptDeviceSetup.mockResolvedValueOnce("pending-enrollment");
+
+    const { rerender } = render(
+      <TestProvider setToast={setToast}>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Accept and enable both" })
+    );
+    expect(redeemConnectionShare).toHaveBeenCalledTimes(1);
+
+    openConnectionLink("connection_share_code=abc12345&address=0x123&_t=2");
+    rerender(
+      <TestProvider setToast={setToast}>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+    redemption.resolve(response);
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/"));
+    expect(mockAcceptDeviceSetup).toHaveBeenCalledWith(
+      expect.objectContaining({ secret: "private-unlock-secret" })
+    );
+    expect(setToast).toHaveBeenCalledWith({
+      type: "info",
+      message:
+        "Signed in. Encrypted DMs are still being set up on this device.",
+    });
+  });
 });

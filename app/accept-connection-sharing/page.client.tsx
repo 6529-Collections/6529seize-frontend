@@ -28,12 +28,13 @@ import {
   getConnectedWalletAccounts,
   setAuthJwt,
 } from "@/services/auth/auth.utils";
-import {
-  persistSessionResponse,
-  redeemConnectionShare,
-} from "@/services/auth/session-v2.utils";
 import TransferModalPfp from "@/components/nft-transfer/TransferModalPfp";
 import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
+import {
+  acceptConnectionShare,
+  CONNECTION_SETUP_FAILED,
+  type SetupKeyRef,
+} from "./accept-connection-share";
 
 const ACCEPT_CONNECTION_LOCALE = DEFAULT_LOCALE;
 const SETUP_SECRET_PARAM = "device_setup_key";
@@ -48,7 +49,7 @@ interface AcceptConnectionSharingProps {
   token: string;
   address: string;
   role: string | undefined;
-  setupSecret: { current: string };
+  setupSecret: SetupKeyRef;
   includesDeviceSetup: boolean;
 }
 
@@ -158,10 +159,18 @@ function getSharedProfileName(profile: SharedProfile, address: string): string {
   );
 }
 
-function HomeLinkCard({ message }: Readonly<{ message: string }>) {
+function HomeLinkCard({
+  message,
+  isError = false,
+}: Readonly<{ message: string; isError?: boolean }>) {
   return (
     <div className="tw-rounded-lg tw-bg-white/5 tw-p-6">
-      <p className="tw-text-base tw-text-neutral-300">{message}</p>
+      <p
+        className="tw-text-base tw-text-neutral-300"
+        role={isError ? "alert" : undefined}
+      >
+        {message}
+      </p>
       <p className="tw-mt-4">
         <Link
           href="/"
@@ -377,108 +386,6 @@ function isAddressInConnectedAccounts(address: string): boolean {
   );
 }
 
-async function acceptConnectionShare({
-  address,
-  connectionShareCode,
-  setupSecret,
-  target,
-  setToast,
-  seizeAcceptConnection,
-  routerPush,
-}: {
-  readonly address: string;
-  readonly connectionShareCode: string;
-  readonly setupSecret: { current: string };
-  readonly target: "native" | "desktop";
-  readonly setToast: SetToast;
-  readonly seizeAcceptConnection: (address: string) => void;
-  readonly routerPush: (path: string) => void;
-}): Promise<boolean> {
-  if (address && canStoreAnotherWalletAccount(address) === false) {
-    setToast({
-      message: t(
-        ACCEPT_CONNECTION_LOCALE,
-        "acceptConnection.toast.maxProfiles"
-      ),
-      type: "error",
-    });
-    return false;
-  }
-
-  const redeemResponse = await redeemConnectionShare(
-    connectionShareCode,
-    target
-  );
-  const hasValidRedeemResponse =
-    !!redeemResponse.address &&
-    !!redeemResponse.access_token &&
-    (!address || areEqualAddresses(redeemResponse.address, address));
-  if (hasValidRedeemResponse === false) {
-    setToast({
-      message: t(
-        ACCEPT_CONNECTION_LOCALE,
-        "acceptConnection.toast.invalidResponse"
-      ),
-      type: "error",
-    });
-    return false;
-  }
-
-  if (canStoreAnotherWalletAccount(redeemResponse.address) === false) {
-    setToast({
-      message: t(
-        ACCEPT_CONNECTION_LOCALE,
-        "acceptConnection.toast.maxProfiles"
-      ),
-      type: "error",
-    });
-    return false;
-  }
-
-  const didPersistJwt = await persistSessionResponse(redeemResponse);
-  if (didPersistJwt === false) {
-    setToast({
-      message: t(
-        ACCEPT_CONNECTION_LOCALE,
-        "acceptConnection.toast.persistFailed"
-      ),
-      type: "error",
-    });
-    return false;
-  }
-
-  const hasDeviceSetup =
-    Boolean(redeemResponse.encrypted_device_setup) ||
-    Boolean(setupSecret.current);
-  if (hasDeviceSetup) {
-    try {
-      if (!redeemResponse.encrypted_device_setup)
-        throw new Error("Missing device setup");
-      if (redeemResponse.role)
-        throw new Error("Proxy device setup is unavailable");
-      const { acceptConnectionDeviceSetup } =
-        await import("@/lib/device-signing/connection-setup");
-      await acceptConnectionDeviceSetup({
-        envelope: redeemResponse.encrypted_device_setup,
-        secret: setupSecret.current,
-        wallet: redeemResponse.address,
-        accessToken: redeemResponse.access_token,
-        target,
-      });
-    } catch {
-      setToast({
-        message: t(ACCEPT_CONNECTION_LOCALE, "e2ee.connectionSetup.failed"),
-        type: "error",
-      });
-    } finally {
-      setupSecret.current = "";
-    }
-  }
-  seizeAcceptConnection(redeemResponse.address);
-  routerPush("/");
-  return true;
-}
-
 async function acceptLegacyDesktopConnection({
   address,
   token,
@@ -647,6 +554,7 @@ function AcceptConnectionSharing(
 
   const { connectionShareCode, token, address, role } = props;
   const [acceptingConnection, setAcceptingConnection] = useState(false);
+  const [failedSetupCode, setFailedSetupCode] = useState<string | null>(null);
   const shell = useConnectionShell();
   const flow = getConnectionFlow({
     connectionShareCode,
@@ -671,18 +579,31 @@ function AcceptConnectionSharing(
   const acceptConnection = async () => {
     try {
       if (flow === "native-share") {
-        const accepted = await acceptConnectionShare({
+        const outcome = await acceptConnectionShare({
           address,
           connectionShareCode,
           setupSecret: props.setupSecret,
+          includesDeviceSetup: props.includesDeviceSetup,
           target: shell === "desktop-app" ? "desktop" : "native",
           setToast,
           seizeAcceptConnection,
-          routerPush: (path) => router.push(path),
         });
-        if (!accepted) {
+        if (outcome === CONNECTION_SETUP_FAILED)
+          setFailedSetupCode(connectionShareCode);
+        if (outcome === "rejected" || outcome === CONNECTION_SETUP_FAILED) {
           setAcceptingConnection(false);
+          return;
         }
+        if (outcome === "pending-enrollment") {
+          setToast({
+            message: t(
+              ACCEPT_CONNECTION_LOCALE,
+              "e2ee.connectionSetup.pending"
+            ),
+            type: "info",
+          });
+        }
+        router.push("/");
         return;
       }
       if (flow === "legacy-desktop") {
@@ -698,8 +619,7 @@ function AcceptConnectionSharing(
           setAcceptingConnection(false);
         }
       }
-    } catch (error) {
-      console.error(error);
+    } catch {
       setToast({
         message: t(
           ACCEPT_CONNECTION_LOCALE,
@@ -720,25 +640,34 @@ function AcceptConnectionSharing(
           </h1>
         </header>
 
-        <ConnectionSharingContent
-          flow={flow}
-          profile={profile}
-          profileLoading={profileLoading}
-          address={address}
-          connectedAddress={connectedAddress}
-          connectedProfile={connectedProfile}
-          acceptingConnection={acceptingConnection}
-          includesDeviceSetup={
-            flow === "native-share" && props.includesDeviceSetup
-          }
-          isIncomingConnectionAlreadyStored={isIncomingConnectionAlreadyStored}
-          isStorageLimitReached={isStorageLimitReached}
-          onAccept={() => {
-            if (acceptingConnection || isStorageLimitReached) return;
-            setAcceptingConnection(true);
-            void acceptConnection();
-          }}
-        />
+        {failedSetupCode === connectionShareCode ? (
+          <HomeLinkCard
+            isError
+            message={t(ACCEPT_CONNECTION_LOCALE, "e2ee.connectionSetup.failed")}
+          />
+        ) : (
+          <ConnectionSharingContent
+            flow={flow}
+            profile={profile}
+            profileLoading={profileLoading}
+            address={address}
+            connectedAddress={connectedAddress}
+            connectedProfile={connectedProfile}
+            acceptingConnection={acceptingConnection}
+            includesDeviceSetup={
+              flow === "native-share" && props.includesDeviceSetup
+            }
+            isIncomingConnectionAlreadyStored={
+              isIncomingConnectionAlreadyStored
+            }
+            isStorageLimitReached={isStorageLimitReached}
+            onAccept={() => {
+              if (acceptingConnection || isStorageLimitReached) return;
+              setAcceptingConnection(true);
+              void acceptConnection();
+            }}
+          />
+        )}
       </div>
     </main>
   );
@@ -754,7 +683,7 @@ export default function AcceptConnectionSharingPage() {
   // The whole query identifies a link visit, so reopening the same link (with
   // a new `_t`) on the mounted page is cleaned again.
   const linkQuery = searchParams.toString();
-  const setupSecret = useRef("");
+  const setupSecret = useRef<SetupKeyRef["current"]>(null);
   const [setupLinkQuery, setSetupLinkQuery] = useState<string | null>(null);
   const capturedQuery = useRef<string | null>(null);
 
@@ -764,10 +693,10 @@ export default function AcceptConnectionSharingPage() {
   // from the router values the accept action uses.
   useLayoutEffect(() => {
     const fragment = new URLSearchParams(globalThis.location.hash.slice(1));
-    if (capturedQuery.current !== linkQuery) setupSecret.current = "";
+    if (capturedQuery.current !== linkQuery) setupSecret.current = null;
     capturedQuery.current = linkQuery;
     const unlockKey = fragment.get(SETUP_SECRET_PARAM);
-    if (unlockKey) setupSecret.current = unlockKey;
+    if (unlockKey) setupSecret.current = { key: unlockKey };
     removeConnectionSecretsFromAddressBar();
     // Publish the link type after scrubbing the URL. Strict Mode may replay
     // this effect after the fragment has already been removed.
