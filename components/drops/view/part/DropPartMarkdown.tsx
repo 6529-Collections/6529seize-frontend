@@ -1,8 +1,10 @@
 "use client";
 
 import {
+  createContext,
   createElement,
   memo,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -105,12 +107,30 @@ type MarkdownCodeProps = MarkdownRendererProps<"code"> & {
   inline?: boolean | undefined;
 };
 
-type MarkdownComponentsOptions = {
-  customRenderer: (content: ReactNode | undefined) => ReactNode;
-  renderParagraph: Components["p"];
-  renderAnchor: Components["a"];
-  renderImage: Components["img"];
-};
+type MarkdownComponentsOptions = Pick<
+  ReturnType<typeof createMarkdownContentRenderers>,
+  "customRenderer" | "renderParagraph"
+> &
+  Pick<ReturnType<typeof createLinkRenderer>, "renderAnchor" | "renderImage">;
+
+const MarkdownRenderersContext =
+  createContext<MarkdownComponentsOptions | null>(null);
+
+function useMarkdownRenderers() {
+  const renderers = useContext(MarkdownRenderersContext);
+  if (!renderers) throw new Error("Markdown renderers are unavailable");
+  return renderers;
+}
+
+const ParagraphRenderer = (
+  props: Parameters<MarkdownComponentsOptions["renderParagraph"]>[0]
+) => useMarkdownRenderers().renderParagraph(props);
+const AnchorRenderer = (
+  props: Parameters<MarkdownComponentsOptions["renderAnchor"]>[0]
+) => useMarkdownRenderers().renderAnchor(props);
+const ImageRenderer = (
+  props: Parameters<MarkdownComponentsOptions["renderImage"]>[0]
+) => useMarkdownRenderers().renderImage(props);
 
 const InlineCodeRenderer = ({
   children,
@@ -181,18 +201,14 @@ const CodeBlockRenderer = ({
 const CodeRenderer = ({ inline, ...props }: MarkdownCodeProps) =>
   inline ? <InlineCodeRenderer {...props} /> : <CodeBlockRenderer {...props} />;
 
-const createMarkdownComponents = ({
-  customRenderer,
-  renderParagraph,
-  renderAnchor,
-  renderImage,
-}: MarkdownComponentsOptions): Components => {
+const createMarkdownComponents = (): Components => {
   const createHeadingRenderer = <T extends ElementType>(Tag: T) => {
     const HeadingRenderer = ({
       children,
       className,
       ...props
     }: MarkdownRendererProps<T>) => {
+      const { customRenderer } = useMarkdownRenderers();
       const TagComponent = Tag;
       const mergedProps = {
         ...(props as Record<string, unknown>),
@@ -214,33 +230,39 @@ const createMarkdownComponents = ({
     className,
     node: _node,
     ...props
-  }: MarkdownRendererProps<"li">) => (
-    <li
-      {...props}
-      className={mergeClassNames(
-        "word-break tw-break-words tw-text-md tw-text-iron-200",
-        className
-      )}
-    >
-      {customRenderer(children)}
-    </li>
-  );
+  }: MarkdownRendererProps<"li">) => {
+    const { customRenderer } = useMarkdownRenderers();
+    return (
+      <li
+        {...props}
+        className={mergeClassNames(
+          "word-break tw-break-words tw-text-md tw-text-iron-200",
+          className
+        )}
+      >
+        {customRenderer(children)}
+      </li>
+    );
+  };
 
   const BlockQuoteRenderer = ({
     children,
     className,
     ...props
-  }: MarkdownRendererProps<"blockquote">) => (
-    <blockquote
-      {...props}
-      className={mergeClassNames(
-        "word-break tw-break-words tw-border-b-0 tw-border-l-4 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-l-iron-500 tw-pl-4 tw-text-iron-200",
-        className
-      )}
-    >
-      {customRenderer(children)}
-    </blockquote>
-  );
+  }: MarkdownRendererProps<"blockquote">) => {
+    const { customRenderer } = useMarkdownRenderers();
+    return (
+      <blockquote
+        {...props}
+        className={mergeClassNames(
+          "word-break tw-break-words tw-border-b-0 tw-border-l-4 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-l-iron-500 tw-pl-4 tw-text-iron-200",
+          className
+        )}
+      >
+        {customRenderer(children)}
+      </blockquote>
+    );
+  };
 
   return {
     h1: createHeadingRenderer("h1"),
@@ -248,15 +270,19 @@ const createMarkdownComponents = ({
     h3: createHeadingRenderer("h3"),
     h4: createHeadingRenderer("h4"),
     h5: createHeadingRenderer("h5"),
-    ...(renderParagraph !== undefined ? { p: renderParagraph } : {}),
+    p: ParagraphRenderer,
     li: ListItemRenderer,
     code: CodeRenderer,
-    ...(renderAnchor !== undefined ? { a: renderAnchor } : {}),
-    ...(renderImage !== undefined ? { img: renderImage } : {}),
+    a: AnchorRenderer,
+    img: ImageRenderer,
     br: BreakComponent,
     blockquote: BlockQuoteRenderer,
   } satisfies Components;
 };
+
+// Keep component types stable when emoji data, settings or callbacks change.
+// Replacing a touched paragraph breaks its native touch sequence and selection.
+const MARKDOWN_COMPONENTS = createMarkdownComponents();
 
 export interface DropPartMarkdownProps {
   readonly mentionedUsers: Array<ApiDropMentionedUser>;
@@ -428,14 +454,13 @@ function DropPartMarkdown({
 
   const remarkPlugins = useMemo<PluggableList>(() => [remarkGfm], []);
 
-  const markdownComponents = useMemo<Components>(
-    () =>
-      createMarkdownComponents({
-        customRenderer,
-        renderParagraph,
-        renderAnchor,
-        renderImage,
-      }),
+  const markdownRenderers = useMemo<MarkdownComponentsOptions>(
+    () => ({
+      customRenderer,
+      renderParagraph,
+      renderAnchor,
+      renderImage,
+    }),
     [customRenderer, renderAnchor, renderImage, renderParagraph]
   );
 
@@ -445,25 +470,27 @@ function DropPartMarkdown({
       previewToggle={linkPreviewToggleControl}
       onCardActionsActiveChange={onLinkCardActionsActiveChange}
     >
-      <Markdown
-        rehypePlugins={rehypePlugins}
-        remarkPlugins={remarkPlugins}
-        className="tw-w-full"
-        components={markdownComponents}
-        urlTransform={(url, key, node) => {
-          if (
-            key === "src" &&
-            node.tagName === "img" &&
-            isSafeMarkdownImageSrc(url)
-          ) {
-            return url;
-          }
+      <MarkdownRenderersContext.Provider value={markdownRenderers}>
+        <Markdown
+          rehypePlugins={rehypePlugins}
+          remarkPlugins={remarkPlugins}
+          className="tw-w-full"
+          components={MARKDOWN_COMPONENTS}
+          urlTransform={(url, key, node) => {
+            if (
+              key === "src" &&
+              node.tagName === "img" &&
+              isSafeMarkdownImageSrc(url)
+            ) {
+              return url;
+            }
 
-          return defaultUrlTransform(url);
-        }}
-      >
-        {processedContent}
-      </Markdown>
+            return defaultUrlTransform(url);
+          }}
+        >
+          {processedContent}
+        </Markdown>
+      </MarkdownRenderersContext.Provider>
     </LinkPreviewProvider>
   );
 }

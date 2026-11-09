@@ -499,6 +499,44 @@ describe("DropPartMarkdown", () => {
     expect(group?.querySelector(".tw-mt-2")).toBeNull();
   });
 
+  it("preserves the paragraph and selected text across an incidental rerender", () => {
+    const props = {
+      mentionedUsers: [],
+      mentionedWaves: [],
+      referencedNfts: [],
+      partContent: "Keep this message selectable",
+      onQuoteClick: jest.fn(),
+    };
+    const { rerender } = render(
+      <DropPartMarkdown {...props} onLinkCardActionsActiveChange={jest.fn()} />
+    );
+    const original = screen.getByText(props.partContent);
+    const paragraph = original.closest("p");
+    const text = original.firstChild;
+    const selection = globalThis.getSelection();
+    if (!text || !selection)
+      throw new Error("Expected selectable message text");
+    const range = document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, 4);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    rerender(
+      <DropPartMarkdown
+        {...props}
+        onQuoteClick={jest.fn()}
+        onLinkCardActionsActiveChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText(props.partContent)).toBe(original);
+    expect(original.closest("p")).toBe(paragraph);
+    expect(original.firstChild).toBe(text);
+    expect(selection.toString()).toBe("Keep");
+    selection.removeAllRanges();
+  });
+
   it("keeps grouped markdown images mounted across parent rerenders", () => {
     const content = "![Seize](/one.png)![Seize](/two.png)";
     const mentionedUsers: never[] = [];

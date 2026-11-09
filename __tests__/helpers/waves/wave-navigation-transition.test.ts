@@ -1,5 +1,7 @@
 import {
   commitWaveNavigationTransition,
+  navigateAfterWaveSwipe,
+  consumeWaveSwipeHandoff,
   runWaveNavigationTransition,
   skipWaveNavigationTransition,
 } from "@/helpers/waves/wave-navigation-transition";
@@ -145,4 +147,14 @@ it("cancels only once across repeated interruption and motion preference events"
   preferenceChanged();
   expect(skip).toHaveBeenCalledTimes(1);
   expect(commitWaveNavigationTransition("wave")).toBe(false);
+});
+
+it("hands an already animated swipe directly to navigation without a second transition", () => {
+  const navigate = jest.fn();
+  document.body.innerHTML = '<div data-wave-navigation-screen="wave"></div>';
+  navigateAfterWaveSwipe(() => runWaveNavigationTransition("list", navigate));
+  expect(navigate).toHaveBeenCalledTimes(1);
+  expect(start).not.toHaveBeenCalled();
+  expect(consumeWaveSwipeHandoff()).toBe(true);
+  expect(consumeWaveSwipeHandoff()).toBe(false);
 });

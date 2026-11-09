@@ -6,6 +6,26 @@ let activeTransition: {
   readonly committed: () => void;
   readonly skip: () => void;
 } | null = null;
+let navigatingFromSwipe = false;
+let swipeHandoffUntil = 0;
+
+/** The interactive gesture already animated the outgoing screen. */
+export function navigateAfterWaveSwipe(navigate: () => void) {
+  skipWaveNavigationTransition();
+  swipeHandoffUntil = performance.now() + 1000;
+  navigatingFromSwipe = true;
+  try {
+    navigate();
+  } finally {
+    navigatingFromSwipe = false;
+  }
+}
+
+export function consumeWaveSwipeHandoff() {
+  const pending = performance.now() < swipeHandoffUntil;
+  swipeHandoffUntil = 0;
+  return pending;
+}
 
 export function commitWaveNavigationTransition(
   screen: WaveScreen | null
@@ -24,6 +44,10 @@ export function runWaveNavigationTransition(
   screen: WaveScreen,
   navigate: () => void
 ) {
+  if (navigatingFromSwipe) {
+    navigate();
+    return;
+  }
   const surface = document.querySelector<HTMLElement>(
     "[data-wave-navigation-screen]"
   );

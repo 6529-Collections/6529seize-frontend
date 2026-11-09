@@ -3701,7 +3701,8 @@
         "Compatible apps can use direct app-wallet or WalletConnect setup, or one source-browser-approved secure connection link. iOS 16.4 is the Mobile minimum for encryption and iOS 17 is required for Signed Posts. The Desktop secure setup option shows Coming soon. Encrypted phone message pushes use title New encrypted message and body Open 6529 Mobile to view in production or Open 6529 Staging to view on staging, without sender or text. An e2ee push opens and refreshes the encrypted inbox. The recipient chooses which chat to open.",
         "Permissions normally last 180 days. During the last 14 days, the shield status shows expiry and dismissible renewal reminders appear for signing-only in Waves, encryption-only in Messages (inbox and selected chats), and combined grants in both. Renewing an existing encryption device preserves keys/history; expiry alone does not erase saved history. showRenewal=true previews only Waves/Messages and uses preview wording and disabled actions if nothing is actually due.",
         "Preferences > Device Permissions lists signing, encryption and combined grants. Rename any owned unrevoked device from an authenticated browser or app; the existing server name is reflected on other devices and linked signing/encryption entries. Revoke confirms its scope: a combined grant disables both permissions, a separate grant only its own. Revoking this encryption device clears its local history/keys, which reauthorizing alone cannot restore.",
-        "A new device with encryption on still cannot read earlier history it never received. Restore an encrypted backup and join the chat for future messages. An old notification can stay generic or open Chat not found on this device even while the browser that holds the history reads it normally."
+        "A new device with encryption on still cannot read earlier history it never received. Restore an encrypted backup and join the chat for future messages. An old notification can stay generic or open Chat not found on this device even while the browser that holds the history reads it normally.",
+        "On touch layouts, swipe left on an available message to start a reply on release; reversing below the reply threshold before release, or releasing a short drag, cancels. Timestamps and message actions stay available. Read-only chats, notices and pending, unsent, deleted or unreadable messages cannot swipe to reply. In the native app, swipe right across content to return to the encrypted messages list, or use Back. Scrolling, multi-touch, controls and text selection do not start these gestures."
       ],
       "canonical_path": "/messages/encrypted",
       "related_paths": [
@@ -5779,19 +5780,32 @@
       "kind": "ui_affordance",
       "title": "App header context",
       "aliases": ["app header", "top bar", "header controls", "page header"],
-      "keywords": ["header", "context", "top", "bar", "controls", "navigation"],
+      "keywords": [
+        "header",
+        "context",
+        "top",
+        "bar",
+        "controls",
+        "navigation",
+        "swipe",
+        "Android back"
+      ],
       "facts": [
         "The app header provides route context and shared controls for the current surface.",
         "On iOS and Android app launch, a dark native loading shell appears until the app layout is ready, without flashing the desktop sidebar. Public content can appear before wallet startup finishes.",
         "On phones and touch-first tablets, the mobile browser header and full-width content appear before hydration without flashing the desktop sidebar; touch laptops retain their desktop layout.",
         "Header behavior changes with route, viewport, and whether the user is inside an app-like layout.",
         "Mobile-web and native-app page sharing appears next to Search on supported routes and opens the platform system share sheet directly.",
-        "Use wave header records for wave-specific controls such as wave sharing or wave picture editing."
+        "Use wave header records for wave-specific controls such as wave sharing or wave picture editing.",
+        "In the native app, swipe right across ordinary wave or direct-message content to return to its list; the view follows the finger. Reverse below the gesture threshold before release to cancel. Back stays visible. Android system Back dismisses the keyboard first, then the topmost dismissible sheet/menu/dialog, then single-drop detail before its wave and the wave before its list. In-app history or a safe parent comes before minimizing at a main-section root. Dialogs awaiting a required decision keep the page in place. Desktop and browser edge navigation retain their own behavior; reduced motion removes added settling."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves", "/network"],
       "tags": ["navigation", "header"],
-      "source_refs": ["ops/docs/navigation/feature-app-header-context.md"]
+      "source_refs": [
+        "ops/docs/navigation/feature-app-header-context.md",
+        "ops/docs/navigation/flow-navigation-entry-and-switching.md"
+      ]
     },
     {
       "id": "navigation.mobile-bottom-navigation",
@@ -5943,11 +5957,11 @@
       "facts": [
         "Back button behavior is documented as shared navigation behavior.",
         "It depends on route history and app shell context.",
-        "In the native app, opening a wave from the Waves list uses a brief fade and slight scale into the content. The header and bottom navigation do not move. Supported app browsers briefly preserve the outgoing list as the wave appears, and the app Back button reverses this handoff. Older app browsers use a simpler entry transition. Reduced Motion disables this animation. Swiping right from the left edge of a standard wave detail returns to the Waves list; the shortcut is disabled for direct messages and focused drop or create overlays.",
+        "In the native app, opening a wave from the Waves list uses a brief fade and slight scale into the content. The header and bottom navigation do not move. Supported app browsers briefly preserve the outgoing list as the wave appears, and the app Back button reverses this handoff. Older app browsers use a simpler entry transition. Reduced Motion disables this animation. In a native-app wave or direct-message detail, swipe right across conversation content to return to its list. Reverse below the gesture threshold before release to cancel; the shortcut is disabled while a focused drop or create overlay is active. Screen edges remain available to the system or browser.",
         "Use it when users ask why a back control returns to a prior app surface."
       ],
       "canonical_path": "/waves",
-      "related_paths": ["/waves"],
+      "related_paths": ["/waves", "/messages"],
       "tags": ["navigation", "back"],
       "source_refs": ["ops/docs/navigation/feature-back-button.md"]
     },
@@ -7678,14 +7692,26 @@
         "mobile drop menu",
         "drop actions menu"
       ],
-      "keywords": ["waves", "drop", "touch", "long", "press", "menu", "mobile"],
+      "keywords": [
+        "waves",
+        "drop",
+        "touch",
+        "long",
+        "press",
+        "menu",
+        "mobile",
+        "swipe",
+        "reply",
+        "timestamp"
+      ],
       "facts": [
         "Wave drop touch menu behavior covers long-press and touch action button entry points.",
         "While editing a chat drop in a wave or direct message, pressing and holding inside the editor keeps the edit open and preserves unsaved text. Use normal cursor placement, text selection and paste gestures; the drop actions sheet stays closed. This also applies to the active part of a storm drop.",
         "In the native mobile app on a touchscreen, a short tap on a Memes leaderboard List or artwork Grid card opens the drop, including taps on its media. The List username opens the author's profile, while the List avatar and author badges open the submission; the Grid username opens the submission. A long press still opens the action sheet without also opening the drop on release. Explicit vote, rating, and other action buttons stay independent.",
         "Scrolling gestures, cancelled touches, and touches that stop ongoing scrolling do not open native-app leaderboard cards; tap normally once scrolling settles. Browser views, including mobile browsers, retain their own profile-link and media behavior.",
         "Menu entries depend on device, drop state, and available actions.",
-        "Use this when mobile users ask where drop actions went."
+        "Use this when mobile users ask where drop actions went.",
+        "On touch layouts, swipe a chat message left and release after the reply indicator changes to start the existing reply. Reverse below the reply threshold before releasing, or release a short swipe, to cancel. A short swipe on a grouped message reveals its timestamp. Press and hold a message to open the bottom sheet, where Reply remains available. Releasing the hold does not select a sheet action; tap the action afterward. Replies require a profile and reply eligibility; open replies still work outside the chat group. Temporary and failed messages cannot be replied to. Long-press, scrolling, selected text, controls and carousels retain their own interactions."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
