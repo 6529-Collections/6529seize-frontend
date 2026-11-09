@@ -64,9 +64,11 @@ jest.mock("@/components/e2ee/conversation/E2eeEmojiPicker", () => ({
   E2eeComposerEmojiPicker: ({
     onSelect,
     onOpen,
+    onClosedAfterSelect,
   }: {
     onSelect: (text: string) => void;
     onOpen: () => void;
+    onClosedAfterSelect?: () => void;
   }) => {
     const React = jest.requireActual<typeof import("react")>("react");
     const [open, setOpen] = React.useState(false);
@@ -80,6 +82,7 @@ jest.mock("@/components/e2ee/conversation/E2eeEmojiPicker", () => ({
         >
           Add emoji
         </button>
+        <button onClick={() => onClosedAfterSelect?.()}>Panel closed</button>
         {open && (
           <>
             <button
@@ -161,6 +164,27 @@ it("replaces the selected text with a native emoji, restores the caret and sends
       expect.objectContaining({ text: "Hello 😀!" })
     )
   );
+});
+
+it("takes focus back after the mobile emoji panel gives it to its trigger", async () => {
+  const { input } = setup();
+  setComposerText(input, "Hello Bob");
+  selectComposerText(input, 6, 9);
+  const trigger = screen.getByRole("button", { name: "Add emoji" });
+  fireEvent.click(trigger);
+  fireEvent.click(screen.getByRole("button", { name: "Choose smile" }));
+  expect(composerText(input)).toBe("Hello 😀");
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  );
+  // The panel's exit then gives its trigger focus. (jsdom also moves the
+  // document selection on focus, so the caret's place is checked in the
+  // browser story, not here.)
+  act(() => trigger.focus());
+  expect(input).not.toHaveFocus();
+  fireEvent.click(screen.getByRole("button", { name: "Panel closed" }));
+  await waitFor(() => expect(input).toHaveFocus());
+  expect(composerText(input)).toBe("Hello 😀");
 });
 
 const convoGroup = (engine: ReturnType<typeof createFakeE2eeEngine>) =>
