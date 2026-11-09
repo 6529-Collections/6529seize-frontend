@@ -211,6 +211,24 @@ describe("SignedMessagesNotice", () => {
       expect(screen.queryByRole("button", { name: "Turn on again" })).toBeNull();
     });
 
+    it("keeps the expired notice for an expired grant on a key that is still here", () => {
+      mockLocal = {
+        loaded: true,
+        grant: grant({ expires_at: NOW - DAY }),
+        publicKeys: [OWN_KEY],
+      };
+      localStorage.setItem(
+        "6529-signed-messages-notice",
+        JSON.stringify({ [ADDRESS]: { localGrantIds: [grant().id] } })
+      );
+      render(<SignedMessagesNotice composerEmpty />);
+
+      expect(
+        screen.getByText("Signed posts have ended in this browser")
+      ).toBeVisible();
+      expect(screen.queryByRole("button", { name: "Turn on again" })).toBeNull();
+    });
+
     it("shows nothing once the new grant is in place", () => {
       mockLocal = { loaded: true, grant: grant(), publicKeys: [OWN_KEY] };
       recordLoss();

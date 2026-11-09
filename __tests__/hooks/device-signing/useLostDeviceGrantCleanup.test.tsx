@@ -22,17 +22,23 @@ const announce = (saved: boolean) =>
     })
   );
 
+const setup = () => {
+  const queryClient = new QueryClient();
+  const invalidate = jest.spyOn(queryClient, "invalidateQueries");
+  renderHook(() => useLostDeviceGrantCleanup(queryClient));
+  return invalidate;
+};
+
 describe("useLostDeviceGrantCleanup", () => {
   beforeEach(() => {
-    mockRevokeLost.mockReset();
+    localStorage.clear();
+    mockRevokeLost.mockReset().mockResolvedValue("none");
     mockShowToast.mockReset();
   });
 
   it("revokes the lost grant once a new one is saved, then says so", async () => {
-    mockRevokeLost.mockResolvedValue(true);
-    const queryClient = new QueryClient();
-    const invalidate = jest.spyOn(queryClient, "invalidateQueries");
-    renderHook(() => useLostDeviceGrantCleanup(queryClient));
+    const invalidate = setup();
+    mockRevokeLost.mockResolvedValue("revoked");
 
     announce(false);
     expect(mockRevokeLost).not.toHaveBeenCalled();
@@ -48,13 +54,28 @@ describe("useLostDeviceGrantCleanup", () => {
     expect(invalidate).toHaveBeenCalled();
   });
 
+  it("refreshes the list without a toast when the revoke failed", async () => {
+    const invalidate = setup();
+    mockRevokeLost.mockResolvedValue("failed");
+
+    announce(true);
+    await waitFor(() => expect(invalidate).toHaveBeenCalled());
+    expect(mockShowToast).not.toHaveBeenCalled();
+  });
+
   it("stays quiet when there was nothing to revoke", async () => {
-    mockRevokeLost.mockResolvedValue(false);
-    renderHook(() => useLostDeviceGrantCleanup(new QueryClient()));
+    const invalidate = setup();
 
     announce(true);
     await waitFor(() => expect(mockRevokeLost).toHaveBeenCalled());
     await Promise.resolve();
     expect(mockShowToast).not.toHaveBeenCalled();
+    expect(invalidate).not.toHaveBeenCalled();
+  });
+
+  it("retries a recorded loss when the page loads", async () => {
+    localStorage.setItem(`6529-device-key-loss:${ADDRESS}`, "{}");
+    setup();
+    await waitFor(() => expect(mockRevokeLost).toHaveBeenCalledWith(ADDRESS));
   });
 });

@@ -17,9 +17,13 @@ export interface DeviceKeyLoss {
   readonly grantId: string;
   /** The wallet's own profile, when the note recorded it. */
   readonly ownProfileId: string | null;
+  /** The lost grant's device public key, when the note recorded it. */
+  readonly deviceKey?: string | null | undefined;
   readonly detectedAt: number;
   /** Whole hours from the note's last write to the detection, when known. */
   readonly hintAgeHours: number | null;
+  /** Failed attempts to revoke the lost grant so far (absent: none). */
+  readonly revokeAttempts?: number | undefined;
 }
 
 const LOSS_KEY_PREFIX = "6529-device-key-loss:";
@@ -40,7 +44,12 @@ const isLoss = (value: unknown): value is DeviceKeyLoss => {
     (candidate["ownProfileId"] === null ||
       typeof candidate["ownProfileId"] === "string") &&
     (candidate["hintAgeHours"] === null ||
-      typeof candidate["hintAgeHours"] === "number")
+      typeof candidate["hintAgeHours"] === "number") &&
+    (candidate["revokeAttempts"] === undefined ||
+      typeof candidate["revokeAttempts"] === "number") &&
+    (candidate["deviceKey"] === undefined ||
+      candidate["deviceKey"] === null ||
+      typeof candidate["deviceKey"] === "string")
   );
 };
 
@@ -92,6 +101,39 @@ export function clearDeviceKeyLoss(address: string): void {
   notifyChange(address);
 }
 
+/** Counts one failed attempt to revoke the lost grant; the record stays. */
+export function noteLostGrantRevokeFailure(address: string): void {
+  const loss = readDeviceKeyLoss(address);
+  if (!loss) {
+    return;
+  }
+  try {
+    safeLocalStorage.setItem(
+      lossKey(address),
+      JSON.stringify({ ...loss, revokeAttempts: (loss.revokeAttempts ?? 0) + 1 })
+    );
+  } catch {
+    // Without the count the next attempt simply runs again.
+  }
+}
+
+/** Wallets with a recorded loss in this browser. */
+export function listDeviceKeyLossAddresses(): string[] {
+  try {
+    const storage = globalThis.localStorage;
+    const addresses: string[] = [];
+    for (let index = 0; index < storage.length; index += 1) {
+      const key = storage.key(index);
+      if (key?.startsWith(LOSS_KEY_PREFIX)) {
+        addresses.push(key.slice(LOSS_KEY_PREFIX.length));
+      }
+    }
+    return addresses;
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Called when this browser holds no key record at all for the wallet. When
  * its grant note says it held a grant, records the loss once and returns it;
@@ -108,6 +150,7 @@ export function recordMissingDeviceKey(
   const loss: DeviceKeyLoss = {
     grantId: hint.grantId,
     ownProfileId: hint.ownProfileId,
+    deviceKey: hint.deviceKey ?? null,
     detectedAt: nowMs,
     hintAgeHours:
       hint.writtenAt === undefined

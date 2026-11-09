@@ -97,6 +97,20 @@ describe("device key store", () => {
       expect(mockReportDeviceKeyLoss).toHaveBeenCalledTimes(1);
     });
 
+    it("never counts an expired grant on a key that is still here as a loss", async () => {
+      const record = await ensureDeviceKey(ADDRESS);
+      const expired = grantFor(record.publicKeyHex, { expires_at: NOW - DAY });
+      await saveDeviceGrant(ADDRESS, expired);
+      writeDeviceGrantHint(ADDRESS.toLowerCase(), expired, null);
+
+      await expect(readUsableDeviceGrant(ADDRESS, NOW)).resolves.toBeNull();
+      await readDeviceKey(ADDRESS);
+
+      expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
+      expect(mockReportDeviceKeyLoss).not.toHaveBeenCalled();
+      expect(getDeviceGrantStatus(expired, NOW)).toBe("expired");
+    });
+
     it("records nothing for a wallet this browser never held a grant for", async () => {
       await expect(readDeviceKey(ADDRESS)).resolves.toBeNull();
       await ensureDeviceKey(ADDRESS);

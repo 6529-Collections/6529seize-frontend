@@ -147,8 +147,13 @@ export function useSignedMessagesNotice({
     if (!composerEmpty || (dismissedUntil ?? 0) > nowMs) {
       return null;
     }
-    // This browser held a key for the wallet that is now gone: its own grant
-    // note says so, or it once matched a grant to a key it no longer holds.
+    // Either sign is enough that this browser held a key for the wallet that
+    // is now gone. keyLoss: its own grant note named a grant when the key
+    // record was found missing; it also drives the telemetry and the revoke
+    // on re-enable. The fallback: #4747's remembered local grants with no key
+    // left at all; copy only, as there is no note naming a grant to revoke.
+    // Either way it only changes the "none" case: an expired or renewable
+    // grant on a record that still exists keeps its own notice.
     const keysLost =
       keyLoss !== null ||
       (local.publicKeys.length === 0 && (localGrantIds?.length ?? 0) > 0);

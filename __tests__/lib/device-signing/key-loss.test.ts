@@ -8,13 +8,22 @@ import {
 } from "@/lib/device-signing/key-loss";
 
 const mockReadDeviceKey = jest.fn();
+const mockListLocalKeys = jest.fn();
 jest.mock("@/lib/device-signing/device-key-store", () => ({
   readDeviceKey: (...args: unknown[]) => mockReadDeviceKey(...args),
+  listLocalDevicePublicKeys: () => mockListLocalKeys(),
 }));
 
 const mockRevokeDeviceGrant = jest.fn();
+const mockFetchDeviceGrants = jest.fn();
 jest.mock("@/services/api/device-grants-api", () => ({
   revokeDeviceGrant: (...args: unknown[]) => mockRevokeDeviceGrant(...args),
+  fetchDeviceGrants: () => mockFetchDeviceGrants(),
+}));
+
+jest.mock("@/services/api/common-api", () => ({
+  getStructuredApiErrorStatus: (error: unknown) =>
+    (error as { status?: number }).status,
 }));
 
 const mockReportDeviceKeyStoreLoss = jest.fn();
@@ -40,7 +49,10 @@ import {
   bucketHours,
   reportDeviceKeyLoss,
 } from "@/lib/device-signing/key-loss-report";
-import { revokeLostDeviceGrant } from "@/lib/device-signing/replace-lost-grant";
+import {
+  MAX_LOST_GRANT_REVOKE_ATTEMPTS,
+  revokeLostDeviceGrant,
+} from "@/lib/device-signing/replace-lost-grant";
 
 const ADDRESS = "0xabcdef0000000000000000000000000000000001";
 const NOW = 1_800_000_000_000;
@@ -48,11 +60,14 @@ const HOUR = 3_600_000;
 const LOST_ID = `0x${"9".repeat(64)}`;
 const NEW_ID = `0x${"8".repeat(64)}`;
 
-const grant = (id: string): ApiDeviceGrant =>
+const LOST_KEY = `0x${"cd".repeat(32)}`;
+const NEW_KEY = `0x${"ef".repeat(32)}`;
+
+const grant = (id: string, deviceKey = LOST_KEY): ApiDeviceGrant =>
   ({
     id,
     wallet: ADDRESS,
-    device_key: `0x${"cd".repeat(32)}`,
+    device_key: deviceKey,
     scopes: ["post", "edit", "delete", "react"],
     expires_at: NOW + 100 * 24 * HOUR,
     revoked_at: null,
@@ -68,6 +83,10 @@ describe("device key loss", () => {
   beforeEach(() => {
     localStorage.clear();
     mockReadDeviceKey.mockReset();
+    mockListLocalKeys.mockReset().mockResolvedValue([NEW_KEY]);
+    mockFetchDeviceGrants
+      .mockReset()
+      .mockResolvedValue([grant(NEW_ID, NEW_KEY), grant(LOST_ID)]);
     mockRevokeDeviceGrant.mockReset();
     mockReportDeviceKeyStoreLoss.mockReset();
     mockEnrolled = false;
@@ -82,6 +101,7 @@ describe("device key loss", () => {
     expect(recordMissingDeviceKey(ADDRESS, NOW)).toEqual({
       grantId: LOST_ID,
       ownProfileId: "profile-1",
+      deviceKey: LOST_KEY,
       detectedAt: NOW,
       hintAgeHours: 5,
     });
@@ -117,16 +137,16 @@ describe("device key loss", () => {
     });
 
     it("revokes exactly the grant this browser lost, then forgets it", async () => {
-      mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID) });
+      mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
       mockRevokeDeviceGrant.mockResolvedValue(grant(LOST_ID));
 
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe(true);
+      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("revoked");
 
       expect(mockRevokeDeviceGrant).toHaveBeenCalledTimes(1);
       expect(mockRevokeDeviceGrant).toHaveBeenCalledWith(LOST_ID);
       expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
       // Nothing is left to revoke on a later grant.
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe(false);
+      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("none");
       expect(mockRevokeDeviceGrant).toHaveBeenCalledTimes(1);
     });
 
@@ -137,17 +157,139 @@ describe("device key loss", () => {
     ])("revokes nothing with %s and keeps the loss", async (_label, record) => {
       mockReadDeviceKey.mockResolvedValue(record);
 
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe(false);
+      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("none");
 
       expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
       expect(readDeviceKeyLoss(ADDRESS)?.grantId).toBe(LOST_ID);
     });
 
-    it("never throws when the revoke fails", async () => {
-      mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID) });
+    describe("revokes nothing, and drops the loss, unless the grant is verifiably this browser's lost one", () => {
+      beforeEach(() => {
+        mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
+      });
+
+      const expectDroppedWithoutRevoke = async () => {
+        await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("none");
+        expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
+        expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
+      };
+
+      it("when the server lists that grant for another key", async () => {
+        mockFetchDeviceGrants.mockResolvedValue([
+          grant(NEW_ID, NEW_KEY),
+          grant(LOST_ID, `0x${"aa".repeat(32)}`),
+        ]);
+        await expectDroppedWithoutRevoke();
+      });
+
+      it("when the server no longer lists that grant", async () => {
+        mockFetchDeviceGrants.mockResolvedValue([grant(NEW_ID, NEW_KEY)]);
+        await expectDroppedWithoutRevoke();
+      });
+
+      it("when that grant is already revoked", async () => {
+        mockFetchDeviceGrants.mockResolvedValue([
+          grant(NEW_ID, NEW_KEY),
+          { ...grant(LOST_ID), revoked_at: NOW },
+        ]);
+        await expectDroppedWithoutRevoke();
+      });
+
+      it("when another tab put that key back in this browser (a stale note)", async () => {
+        mockListLocalKeys.mockResolvedValue([
+          NEW_KEY,
+          `0x${LOST_KEY.slice(2).toUpperCase()}`,
+        ]);
+        await expectDroppedWithoutRevoke();
+      });
+
+      it("when the note is older than the key it now records", async () => {
+        localStorage.setItem(
+          `6529-device-key-loss:${ADDRESS}`,
+          JSON.stringify({
+            grantId: LOST_ID,
+            ownProfileId: null,
+            detectedAt: NOW,
+            hintAgeHours: null,
+          })
+        );
+        await expectDroppedWithoutRevoke();
+      });
+    });
+
+    it("counts a failed grant list as an attempt and keeps the loss", async () => {
+      mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
+      mockFetchDeviceGrants.mockRejectedValue({ status: 503 });
+
+      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("failed");
+      expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
+      expect(readDeviceKeyLoss(ADDRESS)?.revokeAttempts).toBe(1);
+    });
+
+    it("keeps the loss after a transient failure and gives up after the cap", async () => {
+      mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
       mockRevokeDeviceGrant.mockRejectedValue(new Error("offline"));
 
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe(false);
+      for (let attempt = 1; attempt < MAX_LOST_GRANT_REVOKE_ATTEMPTS; attempt++) {
+        await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("failed");
+        expect(readDeviceKeyLoss(ADDRESS)?.revokeAttempts).toBe(attempt);
+      }
+      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("failed");
+      expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
+      expect(mockRevokeDeviceGrant).toHaveBeenCalledTimes(
+        MAX_LOST_GRANT_REVOKE_ATTEMPTS
+      );
+    });
+
+    it("retries a transient failure, then forgets the loss once revoked", async () => {
+      mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
+      mockRevokeDeviceGrant
+        .mockRejectedValueOnce({ status: 503 })
+        .mockResolvedValueOnce(grant(LOST_ID));
+
+      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("failed");
+      expect(readDeviceKeyLoss(ADDRESS)?.grantId).toBe(LOST_ID);
+      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("revoked");
+      expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
+    });
+
+    it("stops at once on a permanent 4xx", async () => {
+      mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
+      mockRevokeDeviceGrant.mockRejectedValue({ status: 404 });
+
+      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("failed");
+      expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
+      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("none");
+      expect(mockRevokeDeviceGrant).toHaveBeenCalledTimes(1);
+    });
+
+    it("revokes once when two tabs try at the same time", async () => {
+      // Web Locks, as in the browser: one holder per name at a time.
+      const queues = new Map<string, Promise<unknown>>();
+      Object.defineProperty(globalThis.navigator, "locks", {
+        configurable: true,
+        value: {
+          request: (name: string, task: () => Promise<unknown>) => {
+            const run = (queues.get(name) ?? Promise.resolve()).then(task);
+            queues.set(name, run.catch(() => undefined));
+            return run;
+          },
+        },
+      });
+      try {
+        mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
+        mockRevokeDeviceGrant.mockResolvedValue(grant(LOST_ID));
+
+        const results = await Promise.all([
+          revokeLostDeviceGrant(ADDRESS),
+          revokeLostDeviceGrant(ADDRESS.toUpperCase().replace("0X", "0x")),
+        ]);
+
+        expect(results.sort()).toEqual(["none", "revoked"]);
+        expect(mockRevokeDeviceGrant).toHaveBeenCalledTimes(1);
+      } finally {
+        delete (globalThis.navigator as { locks?: unknown }).locks;
+      }
     });
   });
 
