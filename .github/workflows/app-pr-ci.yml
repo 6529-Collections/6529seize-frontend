@@ -464,7 +464,7 @@ jobs:
           NEXT_DEV_DIST_DIR: ".next-playwright-all-mention"
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/all-mention"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/all-mention"
-        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention|keeps desktop keyboard focus|submits one exact-shape|collapses a single reply thread'
+        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention|keeps desktop keyboard focus|submits one exact-shape|collapses a single reply thread|opens an older nested reply link'
 
       - name: Run Collect public browser pack
         if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.playwright_collect_required == 'true'
