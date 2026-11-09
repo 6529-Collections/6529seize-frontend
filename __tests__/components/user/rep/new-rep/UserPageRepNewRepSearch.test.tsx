@@ -93,7 +93,7 @@ describe("UserPageRepNewRepSearch", () => {
       "Art"
     );
     await user.click(
-      await screen.findByRole("button", { name: "Art", exact: true })
+      await screen.findByRole("button", { name: "Art" })
     );
     await user.clear(amount);
     await user.type(amount, "25");
@@ -178,7 +178,7 @@ describe("UserPageRepNewRepSearch", () => {
     });
     await user.type(search, "Art");
     await user.click(
-      await screen.findByRole("button", { name: "Art", exact: true })
+      await screen.findByRole("button", { name: "Art" })
     );
     await waitFor(() => expect(amount).toHaveValue("20"));
     await user.clear(amount);
@@ -186,7 +186,7 @@ describe("UserPageRepNewRepSearch", () => {
     await user.clear(search);
     await user.type(search, "Research");
     await user.click(
-      await screen.findByRole("button", { name: "Research", exact: true })
+      await screen.findByRole("button", { name: "Research" })
     );
     await waitFor(() => expect(amount).toHaveValue("7"));
   });
