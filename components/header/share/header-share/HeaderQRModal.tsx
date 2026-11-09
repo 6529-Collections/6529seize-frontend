@@ -26,6 +26,7 @@ import {
 import {
   bodyScrollLock,
   buildConnectionShareFailureKey,
+  buildDesktopConnectionShareLink,
   buildNavigateDeepLinkUrl,
   buildNativeConnectionShareUrls,
   buildRouterPath,
@@ -486,32 +487,21 @@ function HeaderQRModal({
         return "";
       }
 
-      const expiresAt = Date.parse(share.expires_at);
-      if (
-        share.target_client_type !== "desktop" ||
-        share.address.toLowerCase() !== addressKey ||
-        !share.connection_share_code ||
-        !Number.isFinite(expiresAt) ||
-        expiresAt <= Date.now()
-      ) {
+      const link = buildDesktopConnectionShareLink(
+        share,
+        addressKey,
+        coreScheme
+      );
+      if (!link) {
         setUnavailableDesktopConnectionShare("error");
         return "";
       }
 
-      const params = new URLSearchParams({
-        connection_share_code: share.connection_share_code,
-        address: share.address,
-      });
-      const coreUrl = buildNavigateDeepLinkUrl({
-        scheme: coreScheme,
-        routerPath: `/accept-connection-sharing?${params}`,
-      });
-
       terminalConnectionShareFailuresRef.current.delete(failureKey);
-      setDesktopShareExpiresAt(expiresAt);
+      setDesktopShareExpiresAt(link.expiresAt);
       setDesktopConnectionShareStatus("ready");
-      setShareConnectionCoreUrl(coreUrl);
-      return coreUrl;
+      setShareConnectionCoreUrl(link.url);
+      return link.url;
     } catch (error: unknown) {
       if (isStaleGeneration() || isAbortError(error, signal)) {
         return "";
@@ -585,7 +575,8 @@ function HeaderQRModal({
   };
 
   useEffect(() => {
-    if (!show || desktopShareExpiresAt === null) return;
+    if (!show || !shareConnectionCoreUrl || desktopShareExpiresAt === null)
+      return;
     const timer = setTimeout(
       () => {
         setDesktopConnectionShareStatus("error");
@@ -595,7 +586,7 @@ function HeaderQRModal({
       Math.max(0, desktopShareExpiresAt - Date.now())
     );
     return () => clearTimeout(timer);
-  }, [show, desktopShareExpiresAt]);
+  }, [show, shareConnectionCoreUrl, desktopShareExpiresAt]);
 
   useEffect(() => {
     terminalConnectionShareFailuresRef.current.clear();
@@ -615,7 +606,6 @@ function HeaderQRModal({
           : "unauthenticated";
       setMobileConnectionShareStatus(nextStatus);
       setDesktopConnectionShareStatus(nextStatus);
-      setDesktopShareExpiresAt(null);
       setShareConnectionAppUrl("");
       setShareConnectionCoreUrl("");
       setShareConnectionSrc("");

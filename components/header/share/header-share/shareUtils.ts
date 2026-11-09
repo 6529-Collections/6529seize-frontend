@@ -245,6 +245,35 @@ export function buildNativeConnectionShareUrls({
   };
 }
 
+export function buildDesktopConnectionShareLink(
+  share: NativeConnectionShare,
+  addressKey: string,
+  coreScheme: string
+): { readonly url: string; readonly expiresAt: number } | null {
+  const expiresAt = Date.parse(share.expires_at);
+  if (
+    share.target_client_type !== "desktop" ||
+    share.address.toLowerCase() !== addressKey ||
+    !share.connection_share_code ||
+    !Number.isFinite(expiresAt) ||
+    expiresAt <= Date.now()
+  ) {
+    return null;
+  }
+
+  const params = new URLSearchParams({
+    connection_share_code: share.connection_share_code,
+    address: share.address,
+  });
+  return {
+    expiresAt,
+    url: buildNavigateDeepLinkUrl({
+      scheme: coreScheme,
+      routerPath: `/accept-connection-sharing?${params}`,
+    }),
+  };
+}
+
 export function buildNavigateDeepLinkUrl({
   scheme,
   routerPath,
