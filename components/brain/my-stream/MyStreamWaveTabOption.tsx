@@ -10,6 +10,7 @@ export interface TabOption {
   readonly label: string;
   readonly panelId: string;
   readonly badgeCount?: number | null | undefined;
+  readonly badge?: React.ReactNode;
   readonly leadingIcon?: React.ReactNode | undefined;
   readonly leadingIconTooltipId?: string | undefined;
   readonly hasIndicator?: boolean | undefined;
@@ -45,7 +46,7 @@ export function DesktopTabButton({
     >
       <span className="tw-inline-flex tw-h-5 tw-items-center tw-gap-1 tw-align-middle tw-leading-5">
         <span className="tw-leading-5">{option.label}</span>
-        <TabCountBadge count={option.badgeCount} />
+        {option.badge ?? <TabCountBadge count={option.badgeCount} />}
         {option.leadingIcon}
       </span>
       {option.hasIndicator && (

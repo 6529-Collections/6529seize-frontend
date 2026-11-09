@@ -35,6 +35,7 @@ import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
 import { useDmUnreadConversations } from "@/services/dm-unread/DmUnreadStateProvider";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
 import { WaveUnreadProvider } from "./WaveUnreadContext";
+import { WaveChatReadContext } from "./WaveChatReadContext";
 
 import type {
   ActiveWaveContextData,
@@ -111,6 +112,19 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const pathname = usePathname() as string | null;
   const { activeWaveId, hasActiveWaveDropTarget, setActiveWave } =
     useActiveWaveManager();
+  const [displayedChatWaveId, setDisplayedChatWaveId] = useState<string | null>(
+    null
+  );
+  const activeReadWaveId =
+    displayedChatWaveId === activeWaveId ? displayedChatWaveId : null;
+  const registerChat = useCallback((waveId: string) => {
+    setDisplayedChatWaveId(waveId);
+    return () => {
+      setDisplayedChatWaveId((current) =>
+        current === waveId ? null : current
+      );
+    };
+  }, []);
   const [
     directMessagesListActivationCount,
     setDirectMessagesListActivationCount,
@@ -157,12 +171,17 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     () => new Set(dmWavesData.waves.map((wave) => wave.id)),
     [dmWavesData.waves]
   );
-  const wavesHookData = useEnhancedWavesListCore(activeWaveId, mainWavesData, {
-    enabled: isMainWavesListEnabled,
-    supportsPinning: true,
-    otherListWaveIds: dmWaveIds,
-    preserveBackendWaveOrder: true,
-  });
+  // Keep the selected wave live, but only its displayed Chat panel can read it.
+  const wavesHookData = useEnhancedWavesListCore(
+    activeReadWaveId,
+    mainWavesData,
+    {
+      enabled: isMainWavesListEnabled,
+      supportsPinning: true,
+      otherListWaveIds: dmWaveIds,
+      preserveBackendWaveOrder: true,
+    }
+  );
   const dmWavesHookData = useEnhancedWavesListCore(activeWaveId, dmWavesData, {
     enabled: isDirectMessagesListEnabled,
     supportsPinning: false,
@@ -298,6 +317,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   // Instantiate the real-time updater hook
   const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
     activeWaveId,
+    activeReadWaveId,
     getData: waveMessagesStore.getData,
     hasServerFeedSeed: waveMessagesStore.hasServerFeedSeed,
     isWaveInUse: waveMessagesStore.isWaveInUse,
@@ -667,7 +687,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     <MyStreamActionsContext.Provider value={actionsValue}>
       <WaveUnreadProvider value={wavesHookData.unreadSource}>
         <MyStreamContext.Provider value={contextValue}>
-          {children}
+          <WaveChatReadContext.Provider value={registerChat}>
+            {children}
+          </WaveChatReadContext.Provider>
         </MyStreamContext.Provider>
       </WaveUnreadProvider>
     </MyStreamActionsContext.Provider>
