@@ -75,6 +75,25 @@ export function removeTemporaryThreadReply(
   waveId: string,
   dropId: string
 ): void {
+  updateTemporaryThreadReply(queryClient, waveId, dropId);
+}
+
+/** Swap a successful send in the query cache without publishing a missing row. */
+export function settleTemporaryThreadReply(
+  queryClient: QueryClient,
+  waveId: string,
+  dropId: string,
+  acceptedDrop: ApiDropWithoutWave
+): void {
+  updateTemporaryThreadReply(queryClient, waveId, dropId, acceptedDrop);
+}
+
+function updateTemporaryThreadReply(
+  queryClient: QueryClient,
+  waveId: string,
+  dropId: string,
+  acceptedDrop?: ApiDropWithoutWave
+): void {
   queryClient
     .getQueriesData<{
       pages: ApiWaveDropsFeed[];
@@ -102,7 +121,13 @@ export function removeTemporaryThreadReply(
         ...data,
         pages: data.pages.map((page) => ({
           ...page,
-          drops: page.drops.filter((drop) => drop.id !== dropId),
+          drops: page.drops.flatMap((drop) => {
+            if (drop.id !== dropId) return [drop];
+            const alreadyPresent = data.pages.some((item) =>
+              item.drops.some((row) => row.id === acceptedDrop?.id)
+            );
+            return acceptedDrop && !alreadyPresent ? [acceptedDrop] : [];
+          }),
         })),
       });
     });

@@ -169,6 +169,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "services/wallet-signatures/competition-signature.ts",
         "i18n/messages/competitions.ts",
         "tests/social/native-competition-sandbox.spec.ts",
+        "tests/social/wave-media-processing-sandbox.spec.ts",
         "tests/media/waveImagePreviewCases.ts",
         "components/waves/drop/MemesDropArtworkHero.tsx",
         "components/drops/view/item/content/media/DropImagePreview.tsx",

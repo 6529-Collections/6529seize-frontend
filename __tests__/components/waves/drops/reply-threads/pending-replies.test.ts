@@ -11,6 +11,7 @@ import {
 import {
   getVisibleThreadReplies,
   removeTemporaryThreadReply,
+  settleTemporaryThreadReply,
 } from "@/components/waves/drops/reply-threads/pending-replies";
 
 const makeDrop = (id: string, parent = "root"): ApiDrop =>
@@ -50,6 +51,26 @@ const visible = (stream: ApiDrop[], pages?: ApiWaveDropsFeed[]) =>
   });
 
 describe("collapsed reply thread data", () => {
+  it.each([false, true])(
+    "swaps a successful reply without a gap or duplicate (echo=%s)",
+    (echoFirst) => {
+      const client = new QueryClient();
+      const key = [QueryKey.DROPS, { waveId: "wave", dropId: "root" }];
+      const accepted = makeDrop("accepted");
+      client.setQueryData(key, {
+        pages: [
+          page([makeDrop("temp-pending"), ...(echoFirst ? [accepted] : [])]),
+        ],
+        pageParams: [null],
+      });
+      settleTemporaryThreadReply(client, "wave", "temp-pending", accepted);
+      expect(client.getQueryData(key)).toMatchObject({
+        pages: [{ drops: [accepted] }],
+        pageParams: [null],
+      });
+      client.clear();
+    }
+  );
   it("shows the sender's first optimistic reply without a reply-query cache", () => {
     expect(visible([makeDrop("temp-first")]).map((drop) => drop.id)).toEqual([
       "temp-first",

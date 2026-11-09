@@ -57,7 +57,10 @@ import type {
 import { getDropSubmissionErrorContent } from "./create-drop-content/drop-submission-error.helpers";
 import type { CreateDropProps } from "./create-drop-content/create-drop.types";
 import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMonitoring";
-import { removeTemporaryThreadReply } from "./drops/reply-threads/pending-replies";
+import {
+  removeTemporaryThreadReply,
+  settleTemporaryThreadReply,
+} from "./drops/reply-threads/pending-replies";
 import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
 import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
 
@@ -453,19 +456,20 @@ export default function CreateDrop({
   const addDropMutation = useMutation({
     mutationFn: submitQueuedDrop,
     onSuccess: (serverDrop, body) => {
-      if (body.dropId) {
-        if (isWaveRepliesCollapsed(wave))
-          removeTemporaryThreadReply(
-            queryClient,
-            body.drop.wave_id,
-            body.dropId
-          );
-        processDropRemoved(body.drop.wave_id, body.dropId);
-      }
       startLocalSlowModeCooldown(body);
       void Promise.resolve(
-        processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT)
+        processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT, {
+          pendingDropId: body.dropId,
+        })
       ).catch(() => undefined);
+      if (body.dropId && isWaveRepliesCollapsed(wave)) {
+        settleTemporaryThreadReply(
+          queryClient,
+          body.drop.wave_id,
+          body.dropId,
+          serverDrop
+        );
+      }
       body.onSuccess?.();
 
       if (
