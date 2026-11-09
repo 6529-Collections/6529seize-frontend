@@ -68,7 +68,8 @@ export function useSwipeToReply({
         );
         const readyValue = String(ready && canReply);
         if (root.dataset["replyReady"] !== readyValue) {
-          root.dataset["replyReady"] = readyValue;
+          // The React Compiler rejects assigning through the dataset getter.
+          root.setAttribute("data-reply-ready", readyValue);
         }
       },
       onEnd: (committed, distance) => {
