@@ -33,7 +33,7 @@ it("centers the exact reply when it mounts after its thread opened", () => {
       dropId: null,
       initialDrop: null,
       replyThreadStore,
-      waveMessages: null,
+      waveMessages: undefined,
       fetchNextPage: jest.fn(),
       waitAndRevealDrop: jest.fn(),
       scrollContainerRef,
