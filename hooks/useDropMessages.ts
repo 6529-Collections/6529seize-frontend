@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import {
   keepPreviousData,
+  type InfiniteData,
   useInfiniteQuery,
   useQueryClient,
 } from "@tanstack/react-query";
@@ -84,15 +85,15 @@ export function useDropMessages(
     isFetchingNextPage,
     isError,
     refetch,
-  } = useInfiniteQuery({
+  } = useInfiniteQuery<
+    DropMessagesPage,
+    Error,
+    InfiniteData<DropMessagesPage, DropMessagesPageParam>,
+    typeof queryKey,
+    DropMessagesPageParam
+  >({
     queryKey,
-    queryFn: ({
-      pageParam,
-      signal,
-    }: {
-      pageParam: DropMessagesPageParam;
-      signal: AbortSignal;
-    }): Promise<DropMessagesPage> =>
+    queryFn: ({ pageParam, signal }) =>
       pageParam && "serialNo" in pageParam
         ? fetchDropReplyWindowV2({
             parentDropId: dropId ?? "",
@@ -113,7 +114,7 @@ export function useDropMessages(
       replySerialNo === undefined
         ? null
         : { serialNo: replySerialNo, strategy: ApiDropSearchStrategy.Both },
-    getNextPageParam: (lastPage): DropMessagesPageParam | null => {
+    getNextPageParam: (lastPage): DropMessagesPageParam => {
       if ("older" in lastPage) {
         return lastPage.older === null
           ? null
@@ -121,7 +122,7 @@ export function useDropMessages(
       }
       return lastPage.next ? { page: lastPage.page + 1 } : null;
     },
-    getPreviousPageParam: (firstPage): DropMessagesPageParam | null =>
+    getPreviousPageParam: (firstPage): DropMessagesPageParam =>
       "newer" in firstPage && firstPage.newer !== null
         ? { serialNo: firstPage.newer, strategy: ApiDropSearchStrategy.Newer }
         : null,
