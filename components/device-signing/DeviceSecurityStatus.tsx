@@ -119,14 +119,14 @@ export function useDeviceSecurityState() {
     encryption.status === "idle" || encryption.status === "needs-enrollment";
   // Backup only matters where encrypted DMs are on; unknown until it loads.
   const backupPhase = backupSnapshot?.phase;
-  let backup: "on" | "off" | null = null;
+  // "elsewhere": a backup exists, but this browser isn't in it yet.
+  let backup: "on" | "off" | "elsewhere" | null = null;
   if (encrypted === "on" && backupPhase === "on") {
     backup = "on";
-  } else if (
-    encrypted === "on" &&
-    (backupPhase === "off" || backupPhase === "available")
-  ) {
+  } else if (encrypted === "on" && backupPhase === "off") {
     backup = "off";
+  } else if (encrypted === "on" && backupPhase === "available") {
+    backup = "elsewhere";
   }
   return {
     proof,
@@ -197,7 +197,10 @@ export function DeviceSecurityDetails({
       {backup === null ? null : (
         <span>
           {tRich(locale, "e2ee.deviceStatus.backupLine", {
-            status: formatStatus(backup),
+            status:
+              backup === "elsewhere"
+                ? t(locale, "e2ee.deviceStatus.backupElsewhere")
+                : formatStatus(backup),
           })}
         </span>
       )}
@@ -277,7 +280,8 @@ function ShieldIcon({
   const partial = proof === "on" || encrypted === "on";
   const renewalDue = proofRenewal !== null || encryptionRenewal !== null;
   // Encrypted DMs without a backup are one browser wipe from being lost.
-  const backupOff = backup === "off";
+  // Either way this browser's chats aren't backed up.
+  const backupOff = backup === "off" || backup === "elsewhere";
   const healthy = complete && !renewalDue && !backupOff;
   const attention = renewalDue || (partial && !complete) || backupOff;
   let statusColor = "tw-text-iron-400";

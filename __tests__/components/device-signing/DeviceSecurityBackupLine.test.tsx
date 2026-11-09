@@ -23,6 +23,13 @@ describe("security status backup line", () => {
     );
   });
 
+  it("says when a backup exists but this browser isn't in it", () => {
+    render(<DeviceSecurityDetails {...details} backup="elsewhere" />);
+    expect(screen.getByText(/^Encrypted backup:/)).toHaveTextContent(
+      "Encrypted backup: not restored here"
+    );
+  });
+
   it("leaves it out while unknown or without encrypted DMs", () => {
     render(<DeviceSecurityDetails {...details} backup={null} />);
     expect(screen.queryByText(/Encrypted backup/)).toBeNull();

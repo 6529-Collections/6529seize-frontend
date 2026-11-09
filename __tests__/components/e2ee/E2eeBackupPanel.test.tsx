@@ -175,10 +175,7 @@ describe("E2eeBackupPanel", () => {
         })
       )
     );
-    expect(screen.getByRole("progressbar")).toHaveAttribute(
-      "aria-valuenow",
-      "75"
-    );
+    expect(screen.getByRole("progressbar")).toHaveAttribute("value", "75");
     expect(
       screen.getByText("Keep 6529 open in this tab until it finishes.")
     ).toBeInTheDocument();
@@ -438,6 +435,35 @@ describe("E2eeBackupPanel", () => {
     unmount();
     renderPanel(fakeManager(snapshot()));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("keeps a request made while backup loads until the phase is known, then opens setup once", async () => {
+    const manager = fakeManager(snapshot({ phase: "loading" }));
+    requestE2eeBackupSetup();
+    renderPanel(manager);
+    // Still loading, in two steps: nothing opens and nothing is taken.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    act(() => manager.set(snapshot({ phase: "loading", busy: true })));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(manager.prepareBackup).not.toHaveBeenCalled();
+
+    act(() => manager.set(snapshot({ phase: "off" })));
+    expect(
+      await screen.findByRole("dialog", {
+        name: "Back up your encrypted messages",
+      })
+    ).toBeInTheDocument();
+    // The event listener and the phase check never both act on it.
+    act(() => manager.set(snapshot({ phase: "off", busy: false })));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(manager.prepareBackup).toHaveBeenCalledTimes(1);
   });
 
   it("opens restore for a setup request while a backup from another device exists", async () => {

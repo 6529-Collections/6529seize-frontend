@@ -145,9 +145,11 @@ describe("BackupSetupDialog", () => {
     const alert = within(dialog()).getByRole("alert");
     expect(alert).toHaveTextContent("That doesn’t match group 11.");
     expect(alert).toHaveTextContent("Can’t find it? Go back and save the code again.");
-    expect(screen.getByLabelText("Group 11")).toHaveAttribute(
-      "aria-invalid",
-      "true"
+    const group11 = screen.getByLabelText("Group 11");
+    expect(group11).toHaveAttribute("aria-invalid", "true");
+    expect(group11).toHaveAttribute("aria-describedby", alert.id);
+    expect(screen.getByLabelText("Group 4")).not.toHaveAttribute(
+      "aria-describedby"
     );
     expect(manager.confirmBackup).not.toHaveBeenCalled();
     fireEvent.click(button("See the code again"));
@@ -185,12 +187,16 @@ describe("BackupSetupDialog", () => {
     expect(within(upload).getByRole("progressbar")).toBeInTheDocument();
     act(() => manager.set({ progress: { done: 1, total: 4 } }));
     expect(within(upload).getByRole("progressbar")).toHaveAttribute(
-      "aria-valuenow",
+      "value",
       "25"
     );
     manager.finish();
     const done = await screen.findByRole("dialog", { name: "Backup is on" });
     expect(done).toHaveTextContent("38 chats, 1,240 messages");
+    // The title changes in place, so the outcome is also announced.
+    expect(
+      within(done).getByText("Backup is on", { selector: "output" })
+    ).toBeInTheDocument();
     fireEvent.click(button("Done"));
     expect(onClose).toHaveBeenCalled();
   });

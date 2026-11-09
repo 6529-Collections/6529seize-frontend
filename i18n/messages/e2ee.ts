@@ -612,6 +612,7 @@ export const E2EE_MESSAGES = {
     "You have an encrypted backup from another device. Enter its recovery code to bring your chats to this browser.",
   "e2ee.setupDone.later": "Later",
   "e2ee.deviceStatus.backupLine": "Encrypted backup: {status}",
+  "e2ee.deviceStatus.backupElsewhere": "not restored here",
   "e2ee.signOut.backupOff":
     "Encrypted backup is off, so chats removed from this browser can’t be restored.",
   "e2ee.signOut.setUpBackup": "Set up backup first",

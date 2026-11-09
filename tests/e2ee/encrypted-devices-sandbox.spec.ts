@@ -210,7 +210,12 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
       alice.page,
       e2eeMessage("e2ee.backup.setup.why.title")
     );
-    await expect(why).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    // The dialog root is a zero-size wrapper; its title is what renders.
+    await expect(
+      why.getByRole("heading", {
+        name: e2eeMessage("e2ee.backup.setup.why.title"),
+      })
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
     await why
       .getByRole("button", { name: e2eeMessage("e2ee.backup.setup.notNow") })
       .click();
