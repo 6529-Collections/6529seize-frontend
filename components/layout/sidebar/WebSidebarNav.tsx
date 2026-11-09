@@ -1,5 +1,9 @@
 "use client";
 
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import {
   SIDEBAR_HOVER_CLOSE_DELAY_MS,
   SIDEBAR_HOVER_OPEN_DELAY_MS,
@@ -10,13 +14,11 @@ import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import Join6529Icon from "@/components/common/icons/Join6529Icon";
 import WatchTowerIcon from "@/components/common/icons/WatchTowerIcon";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
 import type { SidebarSection } from "@/components/navigation/navTypes";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
@@ -56,8 +58,6 @@ const WebSidebarNav = React.forwardRef<
 >(({ isCollapsed = false }, ref) => {
   const pathname = usePathname();
   const safePathname = getSafePathname(pathname);
-  const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
   const { appWalletsSupported } = useAppWallets();
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
@@ -89,10 +89,16 @@ const WebSidebarNav = React.forwardRef<
     undefined
   );
 
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const capacitor = useCapacitor();
+  const consent = useCookieConsent();
   const sections = useSidebarSections(
     appWalletsSupported,
-    capacitor.isIos,
-    country
+    hideNftPurchasing,
+    shouldHideSubscriptions({
+      capacitorIsIos: capacitor.isIos,
+      country: consent.country,
+    })
   );
   const sectionMap = useSectionMap(sections);
   const nftsSection = sectionMap.get("nfts");

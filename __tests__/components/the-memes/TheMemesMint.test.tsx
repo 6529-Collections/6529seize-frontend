@@ -70,6 +70,7 @@ beforeEach(() => {
 
 describe("TheMemesMint purchasing visibility", () => {
   it.each([
+    ["US", "US"],
     ["non-US", "CY"],
     ["empty", ""],
     ["unknown", undefined],
@@ -90,7 +91,6 @@ describe("TheMemesMint purchasing visibility", () => {
   );
 
   it.each([
-    ["US iOS", "ios", "US"],
     ["Android", "android", "CY"],
     ["web", "web", "CY"],
   ] as const)("keeps the mint flow on %s", (_label, platform, country) => {
@@ -104,26 +104,6 @@ describe("TheMemesMint purchasing visibility", () => {
     expect(mockSetTitle).toHaveBeenCalledWith(
       "Mint #123 | First film | The Memes"
     );
-    expect(mockReplace).not.toHaveBeenCalled();
-  });
-
-  it("holds a US iOS cold deep link until the country check returns US", () => {
-    mockPlatform = "ios";
-    mockCountry = "";
-    mockIsCountryPending = true;
-
-    const { container, rerender } = render(<TheMemesMint nft={nft} />);
-
-    expect(container).toBeEmptyDOMElement();
-    expect(mockReplace).not.toHaveBeenCalled();
-    expect(mockManifoldMinting).not.toHaveBeenCalled();
-    expect(mockUseDropForgeMintingConfig).not.toHaveBeenCalled();
-
-    mockCountry = "US";
-    mockIsCountryPending = false;
-    rerender(<TheMemesMint nft={nft} />);
-
-    expect(screen.getByTestId("mint-artwork")).toBeInTheDocument();
     expect(mockReplace).not.toHaveBeenCalled();
   });
 

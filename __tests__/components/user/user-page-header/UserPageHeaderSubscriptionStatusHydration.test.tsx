@@ -108,22 +108,8 @@ describe("profile header subscription status around hydration", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("starts the coverage request once iOS resolves to US", async () => {
-    await hydrateFromServerHtml();
-    expect(fetchMock).not.toHaveBeenCalled();
-
-    await settleCountry("US");
-
-    expect(container).not.toBeEmptyDOMElement();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        endpoint: "subscriptions/consolidation/coverage/profile-key",
-      })
-    );
-  });
-
   it.each([
+    ["the US", "US"],
     ["a non-US country", "FR"],
     ["an unknown country", ""],
   ])(

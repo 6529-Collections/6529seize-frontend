@@ -1,4 +1,8 @@
 "use client";
+import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import {
   Dialog,
   DialogPanel,
@@ -7,14 +11,12 @@ import {
 } from "@headlessui/react";
 import { Fragment, useCallback, useEffect, useMemo } from "react";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
-import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -72,12 +74,17 @@ export default function AppSidebar({
   const showModeration = moderatorAccess.data?.moderator === true;
   const hasPendingModerationCases =
     (moderatorAccess.data?.needs_review_count ?? 0) > 0;
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const capacitor = useCapacitor();
-  const cookieConsent = useOptionalCookieConsent();
+  const consent = useOptionalCookieConsent();
   const sections = useSidebarSections(
     appWalletsSupported,
-    capacitor.isIos,
-    cookieConsent === undefined ? "US" : cookieConsent.country
+    hideNftPurchasing,
+    consent !== undefined &&
+      shouldHideSubscriptions({
+        capacitorIsIos: capacitor.isIos,
+        country: consent.country,
+      })
   );
   const handleClose = useCallback(() => onClose(), [onClose]);
 

@@ -11,6 +11,7 @@ let mockNativePlatform: Platform = "web";
 let mockCountry: string | undefined;
 let mockIsCountryPending = true;
 const mockReplace = jest.fn();
+const mockRouter = { replace: mockReplace };
 const mockMount = jest.fn();
 
 jest.mock("@capacitor/core", () => {
@@ -37,7 +38,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
   }),
 }));
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: mockReplace }),
+  useRouter: () => mockRouter,
 }));
 
 function PurchasingContent() {
@@ -129,49 +130,24 @@ describe("in the iOS app while the country check is pending", () => {
     mockNativePlatform = "ios";
   });
 
-  it("keeps the space through hydration on a device whose last check was US", async () => {
-    rememberCountryHint("US");
-
-    await hydrate();
-
-    expect(recoverableErrors).toEqual([]);
-    expect(space()).not.toBeNull();
-    expect(mockMount).not.toHaveBeenCalled();
-    expect(mockReplace).not.toHaveBeenCalled();
-
-    await settleCountry("US");
-
-    expect(space()).toBeNull();
-    expect(container.querySelector("button")?.textContent).toBe("Mint");
-    expect(mockReplace).not.toHaveBeenCalled();
-  });
-
-  it.each([
-    ["outside the US", "FR"],
-    ["with an unknown country", ""],
-  ])(
-    "collapses the space and redirects without mounting %s",
-    async (_label, country) => {
+  it.each(["US", "FR", ""])(
+    "redirects through hydration even if the country later resolves to %s",
+    async (country) => {
       rememberCountryHint("US");
       await hydrate();
 
-      await settleCountry(country);
-
       expect(recoverableErrors).toEqual([]);
-      expect(container.querySelector("main")).toBeEmptyDOMElement();
+      expect(space()).toBeNull();
       expect(mockMount).not.toHaveBeenCalled();
       expect(mockReplace).toHaveBeenCalledWith("/about");
+
+      await settleCountry(country);
+
+      expect(container.querySelector("main")).toBeEmptyDOMElement();
+      expect(mockMount).not.toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledTimes(1);
     }
   );
-
-  it("drops the space after hydration on a device without a US hint", async () => {
-    await hydrate();
-
-    expect(recoverableErrors).toEqual([]);
-    expect(container.querySelector("main")).toBeEmptyDOMElement();
-    expect(mockMount).not.toHaveBeenCalled();
-    expect(mockReplace).not.toHaveBeenCalled();
-  });
 });
 
 it.each([

@@ -1,4 +1,6 @@
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import CollectPageClient from "@/components/collect/CollectPageClient";
+import { collectLocation } from "@/components/collect/collect-navigation";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -14,7 +16,7 @@ type CollectSearchParams = Record<string, string | string[] | undefined>;
 
 function legacyCollectionDestination(
   params: CollectSearchParams
-): string | null {
+): `/${string}` | null {
   const intent = params["intent"];
   if (intent !== undefined && intent !== "explore" && intent !== "specific") {
     return null;
@@ -44,12 +46,28 @@ function legacyCollectionDestination(
   return `/the-memes${tokenSuffix}`;
 }
 
+/** Match the planner's collection while keeping valid artwork links intact. */
+function iosCollectionDestination(params: CollectSearchParams): `/${string}` {
+  const query = new URLSearchParams();
+  for (const key of ["collection", "intent", "definition"] as const) {
+    const value = params[key];
+    const firstValue = Array.isArray(value) ? value[0] : value;
+    if (firstValue !== undefined) query.set(key, firstValue);
+  }
+  const { collection } = collectLocation(query.toString());
+  return (
+    legacyCollectionDestination({ ...params, collection, intent: "specific" }) ??
+    "/the-memes"
+  );
+}
+
 export default async function CollectPage({
   searchParams,
 }: {
   readonly searchParams: Promise<CollectSearchParams>;
 }) {
-  const destination = legacyCollectionDestination(await searchParams);
+  const params = await searchParams;
+  const destination = legacyCollectionDestination(params);
   if (destination !== null) {
     redirect(destination);
   }
@@ -62,7 +80,9 @@ export default async function CollectPage({
         </div>
       }
     >
-      <CollectPageClient />
+      <NftPurchasingGate redirectTo={iosCollectionDestination(params)}>
+        <CollectPageClient />
+      </NftPurchasingGate>
     </Suspense>
   );
 }

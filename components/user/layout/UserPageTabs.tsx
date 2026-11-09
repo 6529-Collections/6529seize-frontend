@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import { useSubscriptionPageVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
@@ -57,7 +57,7 @@ export default function UserPageTabs({
   // render (the server cannot identify the native shell), and on iOS until the
   // country check allows purchasing.
   const { hideNftPurchasing, shouldRedirect: mayRedirectFromHiddenTab } =
-    useNftPurchasingVisibility();
+    useSubscriptionPageVisibility();
   const { showWaves, connectedProfile, fetchingProfile } = useAuth();
   const { address, connectionState } = useSeizeConnectContext();
   const { profile: viewedProfile } = useIdentity({

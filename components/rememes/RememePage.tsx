@@ -1,6 +1,6 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import RememeImage from "@/components/nft-image/RememeImage";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import { RememeReferencesGrid } from "@/components/rememes/RememeReferences";
@@ -23,7 +23,6 @@ import {
   parseIpfsUrl,
   parseNftDescriptionToHtml,
 } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -68,8 +67,7 @@ interface Props {
 export default function RememePage(props: Readonly<Props>) {
   const locale = props.locale ?? DEFAULT_LOCALE;
   const { setTitle } = useTitle();
-  const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const [rememe, setRememe] = useState<Rememe>();
 
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.LIVE);
@@ -340,7 +338,7 @@ export default function RememePage(props: Readonly<Props>) {
                   </div>
                 )}
               </div>
-              {(!capacitor.isIos || country === "US") && (
+              {!hideNftPurchasing && (
                 <div className="tw-w-fit tw-max-w-full">
                   <NFTMarketplaceLinks
                     contract={rememe.contract}

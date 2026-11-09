@@ -6,7 +6,6 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -15,7 +14,6 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import RecipientSelector from "../common/RecipientSelector";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import TransferModalPfp from "../nft-transfer/TransferModalPfp";
-import ButtonLink from "../utils/button/ButtonLink";
 
 const noopProfileSelection = (_: CommunityMemberMinimal | null) => undefined;
 
@@ -29,7 +27,6 @@ export default function ManifoldMintingConnect(
   const account = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
   const locale = useBrowserLocale();
-  const { isIos } = useCapacitor();
   const { hideNftPurchasing } = useNftPurchasingVisibility();
 
   const [mintForFren, setMintForFren] = useState<boolean>(false);
@@ -192,26 +189,7 @@ export default function ManifoldMintingConnect(
     return <>{mintForFren ? printMintForFren() : printMintForMe()}</>;
   }
 
-  const mintOn6529Href = globalThis.window?.location?.href ?? "https://6529.io";
-
-  if (hideNftPurchasing) {
-    return null;
-  }
-
-  if (isIos) {
-    return (
-      <ButtonLink
-        href={mintOn6529Href}
-        variant="primary"
-        size="lg"
-        fullWidth
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {t(locale, "theMemes.mint.openWebMint")}
-      </ButtonLink>
-    );
-  }
+  if (hideNftPurchasing) return null;
 
   if (isWalletConnectionResolving(account))
     return hideConnect ? null : <AuthLoadingPlaceholder compact />;

@@ -1,12 +1,13 @@
 "use client";
 
+import useCapacitor from "@/hooks/useCapacitor";
+import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
-import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { useOptionalHeaderContext } from "@/contexts/HeaderContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -54,7 +55,6 @@ export function AboutContentsDropdown({
   const capacitor = useCapacitor();
   const hasHydrated = useHasHydrated();
   const hasLeadingAction = Boolean(leadingAction);
-  const cookieConsent = useOptionalCookieConsent();
   const headerContext = useOptionalHeaderContext();
   const { appWalletsSupported } = useAppWallets();
   const { spaces } = useLayout();
@@ -62,15 +62,16 @@ export function AboutContentsDropdown({
   const stickyStyle: AboutContentsDropdownStyle = {
     "--about-contents-sticky-top": `${stickyTop}px`,
   };
-  const hideSubscriptions =
-    cookieConsent === undefined
-      ? false
-      : shouldHideSubscriptions({
-          capacitorIsIos: capacitor.isIos,
-          country: cookieConsent.country,
-        });
+  const { hideNftPurchasing: hideSubscriptions } = useNftPurchasingVisibility();
+  const consent = useOptionalCookieConsent();
   const groups = getVisibleAboutNavGroups({
     hideSubscriptions,
+    hideSubscriptionReports:
+      consent !== undefined &&
+      shouldHideSubscriptions({
+        capacitorIsIos: capacitor.isIos,
+        country: consent.country,
+      }),
     appWalletsSupported,
   });
   const normalizedCurrentHref = normalizeAboutHref(currentHref);
