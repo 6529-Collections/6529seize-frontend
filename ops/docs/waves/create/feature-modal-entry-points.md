@@ -18,8 +18,9 @@ mobile viewports.
 
 ## Entry Points
 
-- `/waves` and `/waves/{waveId}`: click the labeled Create wave button in the
-  Waves panel, including the mobile Waves list. Collapsed sidebars keep the plus icon.
+- `/waves` and `/waves/{waveId}`: click the plus icon in the desktop Waves
+  panel, named `Create wave`, in either expanded or collapsed mode. The mobile
+  Waves list keeps its labeled Create wave button.
 - Global Search: find Create wave, New wave, or Start a wave. Search opens
   `/waves/create`, which is also a direct link on web and in the app.
 - `/waves`: click `Create Wave` in the empty-content placeholder.
@@ -65,8 +66,8 @@ mobile viewports.
 - Existing query parameters (for example `wave` or `drop`) are preserved while
   opening and closing create-wave mode.
 - If the URL mode is `create=dm`, direct-message creation opens instead.
-- In collapsed sidebar mode, the create control remains icon-first; tooltip
-  labels appear only on hover-capable devices.
+- In both desktop sidebar modes, the create control uses a plus icon with an
+  accessible `Create wave` name; its tooltip appears on hover-capable devices.
 - On non-hover devices, tooltip labels are not shown for the create icon.
 - If an authenticated identity has no profile handle, create-wave controls stay
   available but open the profile-required dialog instead of the multi-step

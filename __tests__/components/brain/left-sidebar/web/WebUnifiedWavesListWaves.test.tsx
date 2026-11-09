@@ -16,6 +16,7 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
+const mockOpenWave = jest.fn();
 let mockIsTouchDevice = false;
 let mockAuthResult = {
   connectedProfile: { handle: "alice" } as { readonly handle: string } | null,
@@ -27,7 +28,7 @@ jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
 ));
 jest.mock("@/hooks/useCreateModalState", () => ({
   __esModule: true,
-  default: () => ({ openWave: jest.fn(), isApp: false }),
+  default: () => ({ openWave: mockOpenWave, isApp: false }),
 }));
 jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
@@ -172,6 +173,21 @@ jest.mock(
       data-score-details-disabled={String(props.scoreDetailsDisabled)}
     ></div>
   )
+);
+
+it.each([false, true])(
+  "keeps the create action named and operable with isCollapsed=%s",
+  (isCollapsed) => {
+    renderWebWaves({ isCollapsed });
+
+    const createButton = screen.getByRole("button", {
+      name: "Create wave",
+      exact: true,
+    });
+    expect(createButton).toHaveAttribute("data-tooltip-content", "Create wave");
+    fireEvent.click(createButton);
+    expect(mockOpenWave).toHaveBeenCalledTimes(1);
+  }
 );
 
 it("suppresses announcement and wave-row score details during an empty search", () => {

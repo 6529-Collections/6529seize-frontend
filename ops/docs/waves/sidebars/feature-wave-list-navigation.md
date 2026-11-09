@@ -54,10 +54,10 @@ Wave and DM rows in the left list control which thread is open.
 - Select the feed icon to open Profile Waves Feed. On desktop, it clears the
   selected wave; on mobile web and in the native app, it opens
   `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
-- The feed tooltip reads `Profile Waves Feed`. Create keeps a compact white
-  button with a dark plus. Both have visible keyboard focus and larger touch
-  targets. The feed content header has a `Discover Waves` link with a compass
-  to `/discover`; the sidebar keeps the two section-specific `View all` links.
+- The feed tooltip reads `Profile Waves Feed`. Create uses a transparent plus
+  icon button named `Create wave` in both desktop sidebar modes. Both have
+  visible keyboard focus and larger touch targets. The feed content header has a
+  `Discover Waves` link with a compass to `/discover`; the sidebar keeps the two section-specific `View all` links.
   The collapsed rail retains its icon-only feed link.
 - Browser back/forward keeps the active row and URL in sync.
 - Joined waves load in batches without skipping a wave when new activity moves
@@ -112,7 +112,9 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
   with score shields overlapping the bottom-right corner of each avatar.
   The section keeps its own compact height independently of the vote list.
-- Create wave has a visible label in the expanded desktop Waves panel and mobile Waves list, including signed-out visits. The collapsed sidebar keeps the plus icon and accessible Create wave name.
+- Create wave uses a transparent plus icon button in both expanded and collapsed
+  desktop Waves panels, including signed-out visits. Its accessible name and
+  hover tooltip read `Create wave`. The mobile Waves list keeps its visible label.
 - Each heading has a separate `View all` link aligned to the right, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.

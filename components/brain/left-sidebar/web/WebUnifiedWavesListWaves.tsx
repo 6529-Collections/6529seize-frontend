@@ -140,7 +140,7 @@ function CreateWaveButton({
   const label = t(locale, "waves.sidebar.createWave");
   return (
     <Button
-      variant="primary"
+      variant={compact ? "ghost" : "primary"}
       size={null}
       onClick={onClick}
       aria-label={label}
@@ -148,16 +148,16 @@ function CreateWaveButton({
       data-tooltip-content={label}
       className={
         compact
-          ? "tw-size-8 tw-rounded-lg tw-p-0 touch-only:tw-size-11"
-          : "tw-h-8 tw-gap-2 tw-rounded-lg tw-px-3 tw-py-0 tw-text-xs touch-only:tw-h-11"
+          ? "tw-size-8 tw-rounded-lg tw-p-0 !tw-text-iron-300 enabled:desktop-hover:hover:!tw-bg-iron-900 enabled:desktop-hover:hover:!tw-text-white touch-only:tw-size-11"
+          : "tw-h-8 tw-gap-2 tw-rounded-lg tw-px-3 tw-py-0 tw-text-xs touch-only:tw-h-11 lg:tw-size-8 lg:tw-border-0 lg:tw-bg-transparent lg:tw-p-0 lg:tw-text-iron-300 lg:tw-shadow-none lg:active:tw-bg-iron-900 lg:desktop-hover:hover:tw-bg-iron-900 lg:desktop-hover:hover:tw-text-white lg:touch-only:tw-size-11"
       }
     >
       <FontAwesomeIcon
         icon={faPlus}
-        className={compact ? "tw-size-4" : "-tw-ml-1 tw-size-4"}
+        className={compact ? "tw-size-4" : "-tw-ml-1 tw-size-4 lg:tw-ml-0"}
         aria-hidden="true"
       />
-      {!compact && <span>{label}</span>}
+      {!compact && <span className="lg:tw-hidden">{label}</span>}
     </Button>
   );
 }
