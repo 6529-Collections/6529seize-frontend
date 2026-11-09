@@ -15,7 +15,7 @@ import {
 export const MAX_LOST_GRANT_REVOKE_ATTEMPTS = 3;
 
 /** Whether the lost grant was revoked now, the attempt failed, or there was nothing to do. */
-export type LostGrantRevokeResult = "revoked" | "failed" | "none";
+type LostGrantRevokeResult = "revoked" | "failed" | "none";
 
 /** Failures worth another attempt later; any other 4xx never succeeds. */
 const isTransient = (status: number | undefined): boolean =>
