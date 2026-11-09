@@ -1034,25 +1034,12 @@ describe("HeaderShare", () => {
             await userEvent.click(
               screen.getByRole("button", { name: "6529 Desktop" })
             );
-            const secureButton = screen.getByRole("button", {
-              name: "Connect with Post Signing & DM Encryption",
-            });
-            expect(secureButton).toHaveAttribute("aria-disabled", "true");
-            expect(secureButton).toHaveAttribute(
-              "aria-description",
-              "Coming soon"
-            );
-            expect(
-              screen.getByRole("button", { name: "Connect only" })
-            ).toBeEnabled();
-            await userEvent.hover(secureButton);
-            expect(await screen.findByRole("tooltip")).toHaveTextContent(
-              "Coming soon"
-            );
-            await userEvent.click(secureButton);
-            expect(setup.prepareConnectionDeviceSetup).not.toHaveBeenCalled();
-            return;
           }
+          const desktopMinimumVersion =
+            "Requires 6529 Desktop v0.4.0 or later.";
+          expect(
+            screen.queryByText(desktopMinimumVersion)
+          ).not.toBeInTheDocument();
           expect(setup.prepareConnectionDeviceSetup).not.toHaveBeenCalled();
           await userEvent.click(
             screen.getByRole("button", {
@@ -1065,9 +1052,22 @@ describe("HeaderShare", () => {
             })
           ).toBeVisible();
           expect(setup.prepareConnectionDeviceSetup).toHaveBeenCalledTimes(1);
-          expect(
-            screen.getByAltText("Private device setup QR code")
-          ).toBeVisible();
+          if (target === "desktop") {
+            expect(
+              screen.getByTestId("desktop-connection-panel")
+            ).toHaveAttribute(
+              "href",
+              `testcore6529://navigate/accept-connection-sharing?connection_share_code=combined-1&address=${address}#device_setup_key=setup-secret`
+            );
+            expect(screen.getByText(desktopMinimumVersion)).toBeVisible();
+          } else {
+            expect(
+              screen.queryByText(desktopMinimumVersion)
+            ).not.toBeInTheDocument();
+            expect(
+              screen.getByAltText("Private device setup QR code")
+            ).toBeVisible();
+          }
           await userEvent.click(
             screen.getByRole("button", { name: "Generate new code" })
           );
@@ -1078,7 +1078,7 @@ describe("HeaderShare", () => {
           await userEvent.click(screen.getByRole("button", { name: "Back" }));
           expect(
             screen.getByRole("button", {
-              name: "6529 Mobile",
+              name: target === "desktop" ? "6529 Desktop" : "6529 Mobile",
             })
           ).toHaveAttribute("aria-pressed", "true");
         } finally {
@@ -2033,6 +2033,9 @@ describe("HeaderShare", () => {
         screen.queryByText("Continue in the 6529 Desktop app.")
       ).not.toBeInTheDocument();
       expect(desktopPanel).toHaveTextContent("Open in 6529 Desktop");
+      expect(
+        screen.queryByText("Requires 6529 Desktop v0.4.0 or later.")
+      ).not.toBeInTheDocument();
       expect(mockDesktopConnectionShare).toHaveBeenCalledWith({
         targetClientType: "desktop",
         signal: expect.objectContaining({ aborted: false }),

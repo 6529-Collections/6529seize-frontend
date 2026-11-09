@@ -3779,10 +3779,11 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.connectModal.only": "Connect only",
   "headerShare.connectModal.secure":
     "Connect with Post Signing & DM Encryption",
-  "headerShare.connectModal.desktopComingSoon": "Coming soon",
   "headerShare.connectModal.as": "Connect as {name}",
   "headerShare.connectModal.asSecure":
     "Connect as {name} with Post Signing & DM Encryption",
+  "headerShare.connectModal.desktopMinimumVersion":
+    "Requires 6529 Desktop v0.4.0 or later.",
   "headerShare.connectModal.back": "Back",
   "headerShare.connectModal.oneTime":
     "Use only on a device you own. This code works once.",
