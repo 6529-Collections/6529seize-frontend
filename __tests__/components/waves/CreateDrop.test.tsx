@@ -614,10 +614,34 @@ describe("CreateDrop", () => {
     expect(mockProcessIncomingDrop).toHaveBeenCalledTimes(1);
     expect(mockProcessIncomingDrop).toHaveBeenCalledWith(
       expect.objectContaining({ id: "server-drop", client_drop_id: first }),
-      "DROP_INSERT"
+      "DROP_INSERT",
+      { pendingDropId: null }
     );
     expect(mockReportDropSubmissionFailure).not.toHaveBeenCalled();
     expect(setToast).not.toHaveBeenCalled();
+  });
+
+  it("hands a successful send to the stream without removing its pending row", async () => {
+    render(
+      <CreateDrop
+        activeDrop={null}
+        onCancelReplyQuote={jest.fn()}
+        onDropAddedToQueue={jest.fn()}
+        wave={wave}
+        dropId={null}
+        fixedDropMode={DropMode.CHAT}
+        privileges={{ chatRestriction: null, submissionRestriction: null }}
+      />
+    );
+    await userEvent.click(screen.getByText("submit optimistic drop"));
+    await waitFor(() =>
+      expect(mockProcessIncomingDrop).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "server-drop" }),
+        "DROP_INSERT",
+        { pendingDropId: "temp-rejected-drop" }
+      )
+    );
+    expect(mockProcessDropRemoved).not.toHaveBeenCalled();
   });
 
   it("shows a drop the API saved but could not return, without retrying", async () => {

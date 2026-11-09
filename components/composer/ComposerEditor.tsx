@@ -24,6 +24,7 @@ import { TableNode, TableCellNode, TableRowNode } from "@lexical/table";
 import { EmojiNode } from "@/components/drops/create/lexical/nodes/EmojiNode";
 import EmojiPlugin from "@/components/drops/create/lexical/plugins/emoji/EmojiPlugin";
 import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
+import SelectAllContentsPlugin from "@/components/drops/create/lexical/plugins/SelectAllContentsPlugin";
 import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import { MarkdownShortcutPlugin } from "@/components/drops/create/lexical/plugins/MarkdownShortcutPlugin";
 import { COMPOSER_INPUT_CLASS_NAME } from "@/components/waves/composerPresentation";
@@ -96,6 +97,7 @@ export function ComposerEditor({
           ignoreHistoryMergeTagChange={false}
         />
         <RootBlockGuardPlugin />
+        <SelectAllContentsPlugin />
         <ListPlugin />
         <PlainTextPastePlugin />
         <MarkdownShortcutPlugin transformers={transformers} />
