@@ -26,6 +26,7 @@ import React, {
 } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import SingleWaveDropShare from "./SingleWaveDropShare";
 import { SingleWaveDropChat } from "./SingleWaveDropChat";
 
@@ -60,6 +61,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   const [isChatOpen, setIsChatOpen] = useState(false);
   const isCompactLayout = useIsMobileLayoutViewport();
   const readyKeyRef = useRef<string | null>(null);
+  const chatDialogRef = useRef<HTMLDivElement>(null);
 
   const toggleChat = useCallback(() => {
     setIsChatOpen((prev) => !prev);
@@ -68,6 +70,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   const closeChat = useCallback(() => {
     setIsChatOpen(false);
   }, []);
+  useAndroidBackLayer(isChatOpen && isCompactLayout, chatDialogRef, closeChat);
 
   useEffect(() => {
     globalThis.window.addEventListener("single-drop:close-chat", closeChat);
@@ -188,6 +191,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
       <CompactModeProvider compact={true}>
         <Transition show={isChatOpen && isCompactLayout} as={Fragment}>
           <Dialog
+            ref={chatDialogRef}
             as="div"
             className="tw-relative tw-z-[1020] lg:tw-hidden"
             onClose={closeChat}

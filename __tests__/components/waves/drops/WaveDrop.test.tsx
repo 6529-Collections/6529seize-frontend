@@ -893,23 +893,29 @@ describe("WaveDrop", () => {
     ).parentElement!;
     act(() => {
       fireEvent.touchStart(dropRoot, {
-        changedTouches: [{ clientX: 220, clientY: 40 }],
-        targetTouches: [{ clientX: 220, clientY: 40 }],
-        touches: [{ clientX: 220, clientY: 40 }],
+        changedTouches: [{ identifier: 1, clientX: 220, clientY: 40 }],
+        targetTouches: [{ identifier: 1, clientX: 220, clientY: 40 }],
+        touches: [{ identifier: 1, clientX: 220, clientY: 40 }],
       });
       fireEvent.touchMove(dropRoot, {
-        changedTouches: [{ clientX: 48, clientY: 44 }],
-        targetTouches: [{ clientX: 48, clientY: 44 }],
-        touches: [{ clientX: 48, clientY: 44 }],
+        changedTouches: [{ identifier: 1, clientX: 48, clientY: 44 }],
+        targetTouches: [{ identifier: 1, clientX: 48, clientY: 44 }],
+        touches: [{ identifier: 1, clientX: 48, clientY: 44 }],
       });
     });
 
+    act(() => {
+      jest.advanceTimersByTime(20);
+    });
+    expect(dropRoot.style.getPropertyValue("--message-swipe-transform")).toBe(
+      "translate3d(-148px, 0, 0)"
+    );
     expect(
-      screen.getByTestId("grouped-drop-swipeable-content").style.transform
-    ).toBe("translateX(-148px)");
-    expect(
-      screen.getByTestId("grouped-drop-swipe-timestamp").style.opacity
+      dropRoot.style.getPropertyValue("--message-swipe-time-opacity")
     ).toBe("1");
+    expect(
+      screen.getByTestId("grouped-drop-swipe-timestamp")
+    ).toBeInTheDocument();
 
     act(() => {
       jest.advanceTimersByTime(600);
@@ -917,7 +923,7 @@ describe("WaveDrop", () => {
     expect(mobileMenuProps).toBeUndefined();
 
     fireEvent.touchEnd(dropRoot);
-    fireEvent.click(content);
+    fireEvent.click(content, { detail: 1 });
 
     expect(onDropContentClick).not.toHaveBeenCalled();
   });

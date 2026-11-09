@@ -26,11 +26,16 @@ import CreateDropInput, {
 
 jest.unmock("lexical");
 
+let mockIsCapacitor = false;
 jest.mock("@/components/waves/CreateDropEmojiPicker", () => () => null);
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => ({ isCapacitor: false }),
+  default: () => ({ isCapacitor: mockIsCapacitor }),
 }));
+
+afterEach(() => {
+  mockIsCapacitor = false;
+});
 
 function createNoopPluginMock() {
   const { forwardRef } = jest.requireActual<typeof React>("react");
@@ -163,6 +168,20 @@ it("keeps an empty-selection click inside a Lexical block", async () => {
     expect(anchorNode).not.toBe(editor);
     expect(editor.contains(anchorNode)).toBe(true);
   });
+});
+
+it("focuses the native editor synchronously before Lexical commits selection", async () => {
+  mockIsCapacitor = true;
+  const ref = createRef<CreateDropInputHandles>();
+  renderInput(ref);
+  const editor = screen.getByRole("textbox");
+  await waitFor(() => expect(editor.querySelector("p")).not.toBeNull());
+  act(() => {
+    ref.current?.focus();
+    expect(document.activeElement).toBe(editor);
+  });
+  await act(async () => Promise.resolve());
+  expect(editor.contains(window.getSelection()?.anchorNode ?? null)).toBe(true);
 });
 
 it("imports global mention tokens for ordinary chat authors", async () => {
