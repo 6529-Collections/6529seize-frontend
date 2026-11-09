@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Menu, MenuItems } from "@headlessui/react";
 import clsx from "clsx";
 import { CompactMenuTrigger } from "./subcomponents/CompactMenuTrigger";
@@ -8,6 +8,7 @@ import { CompactMenuItemsPanel } from "./subcomponents/CompactMenuItemsPanel";
 import { useCompactMenuFocus } from "./hooks/useCompactMenuFocus";
 import { DEFAULT_ANCHOR, DEFAULT_MENU_CLASSES } from "./constants";
 import type { CompactMenuProps } from "./types";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 
 export function CompactMenu({
   trigger,
@@ -127,6 +128,15 @@ function CompactMenuContent({
   const { menuItemsRef } = useCompactMenuFocus(
     autoFocusItem || keyboardNavigation
   );
+  const nativeMenuRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(isOpen, nativeMenuRef, close);
+  const setMenuRef = useCallback(
+    (element: HTMLDivElement | null) => {
+      nativeMenuRef.current = element;
+      menuItemsRef(element);
+    },
+    [menuItemsRef]
+  );
   const menuAnchor = anchor ?? DEFAULT_ANCHOR;
 
   return (
@@ -142,7 +152,7 @@ function CompactMenuContent({
         close={close}
       />
       <MenuItems
-        ref={menuItemsRef}
+        ref={setMenuRef}
         data-keyboard-navigation={keyboardNavigation}
         anchor={menuAnchor}
         className={clsx(

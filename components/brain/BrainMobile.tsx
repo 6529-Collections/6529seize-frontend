@@ -381,20 +381,24 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     drop.id.toLowerCase() === effectiveDropId.toLowerCase();
 
   const hasWave = Boolean(waveId);
+  const isDirectMessage = pathname.startsWith("/messages/");
   const canSwipeBackToWaves =
     isApp &&
     hasWave &&
-    pathname.startsWith("/waves/") &&
+    (pathname.startsWith("/waves/") || isDirectMessage) &&
     dropId === undefined &&
     searchParams.get("create") === null;
   const handleSwipeBackIntent = useCallback(() => {
-    requestMainWavesList?.();
-  }, [requestMainWavesList]);
+    if (!isDirectMessage) requestMainWavesList?.();
+  }, [isDirectMessage, requestMainWavesList]);
   const handleSwipeBackToWaves = useCallback(() => {
-    exitActiveWave(false);
-  }, [exitActiveWave]);
+    const input = document.activeElement;
+    if (input instanceof HTMLElement) input.blur();
+    exitActiveWave(isDirectMessage);
+  }, [exitActiveWave, isDirectMessage]);
   const swipeBackHandlers = useWaveListSwipeBack({
     enabled: canSwipeBackToWaves,
+    scope: waveId ?? "root",
     onIntentStart: handleSwipeBackIntent,
     onSwipeBack: handleSwipeBackToWaves,
   });
@@ -447,7 +451,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   return (
     <div
       className={`tw-relative tw-flex tw-h-full tw-flex-col ${
-        isApp ? "tw-bg-[#0d0d0e]" : ""
+        isApp ? "tw-overflow-x-clip tw-bg-[#0d0d0e]" : ""
       }`}
     >
       {createOverlay}
@@ -474,8 +478,18 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           )}
         </div>
       )}
+      {canSwipeBackToWaves && (
+        <div
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-flex tw-items-center tw-bg-iron-950 tw-pl-6 tw-text-iron-400"
+        >
+          <span className="tw-text-4xl">‹</span>
+        </div>
+      )}
       <div
-        className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"
+        {...swipeBackHandlers}
+        data-testid="wave-swipe-surface"
+        className={`tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col ${isApp ? "tw-bg-[#0d0d0e]" : ""}`}
         aria-hidden={!!effectiveDropId}
         inert={effectiveDropId ? true : undefined}
       >
@@ -528,7 +542,6 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         <LazyMotion features={domAnimation}>
           <m.div
             key={waveId ?? "root"}
-            {...swipeBackHandlers}
             initial={shouldReduceMotion ? false : { opacity: 0.92 }}
             animate={viewAnimation}
             transition={

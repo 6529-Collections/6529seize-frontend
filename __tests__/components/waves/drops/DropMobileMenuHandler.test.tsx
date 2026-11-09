@@ -81,7 +81,7 @@ const setHoverSupport = (hasHover: boolean) => {
 };
 
 const getHandlerRoot = (child: HTMLElement) => {
-  const root = child.parentElement;
+  const root = child.parentElement?.parentElement;
   if (!root) {
     throw new Error("DropMobileMenuHandler root not found");
   }

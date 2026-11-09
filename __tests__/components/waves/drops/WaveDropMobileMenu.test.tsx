@@ -10,7 +10,7 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useCapacitor from "@/hooks/useCapacitor";
 import { render, screen } from "@testing-library/react";
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
 
 jest.mock(
@@ -32,6 +32,7 @@ const addReactionMock = jest.fn((props: any) => (
 const mobileWrapperMock = jest.fn((props: any) =>
   props.isOpen ? (
     <div data-testid="wrapper" data-z-index={props.zIndexClassName}>
+      {props.titleActions}
       {props.children}
     </div>
   ) : null
@@ -228,6 +229,43 @@ beforeEach(() => {
     isWinner: false,
     isVotingEnded: false,
   });
+});
+
+test("releases the native modal before handing reply focus to the composer", async () => {
+  mockedUseCapacitor.mockReturnValue({ isCapacitor: true } as ReturnType<
+    typeof useCapacitor
+  >);
+  const onReply = jest.fn(() => {
+    expect(screen.queryByTestId("wrapper")).not.toBeInTheDocument();
+  });
+  function Menu() {
+    const [open, setOpen] = useState(true);
+    return (
+      <AuthContext.Provider
+        value={{ connectedProfile: { handle: "alice" } } as AuthProviderValue}
+      >
+        <button type="button" onClick={() => setOpen(true)}>
+          Open actions
+        </button>
+        <WaveDropMobileMenu
+          drop={dropFixture}
+          isOpen={open}
+          showReplyAndQuote
+          longPressTriggered={false}
+          setOpen={setOpen}
+          onReply={onReply}
+          onAddReaction={jest.fn()}
+        />
+      </AuthContext.Provider>
+    );
+  }
+  render(<Menu />);
+  for (let opening = 1; opening <= 3; opening++) {
+    await userEvent.click(screen.getByRole("button", { name: /^Reply$/ }));
+    expect(onReply).toHaveBeenCalledTimes(opening);
+    await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
+    expect(screen.getByTestId("wrapper")).toBeInTheDocument();
+  }
 });
 
 test("never opens an empty curation-only sheet when no removal is available", () => {

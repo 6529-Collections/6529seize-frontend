@@ -742,3 +742,16 @@ sized shields. A disconnected wallet does not by itself disable stored grants.
 
 See [Wallet and Account Controls](navigation/feature-wallet-account-controls.md)
 and [Notifications Feed](notifications/feature-notifications-feed.md).
+
+## Touch shortcuts
+
+On a touch layout, swipe left on an available message to start a reply on release.
+A short or reversed swipe leaves the composer unchanged. Message timestamps and
+the visible message-actions menu remain available. Pending, unsent, deleted and
+unreadable messages, notices, and read-only conversations do not offer swipe to
+reply. Links, media controls and text selection keep their own interactions.
+
+In the native app, swipe right across conversation content to return to the
+Encrypted messages list, or use the existing Back control. Vertical scrolling
+and multi-touch do not trigger the shortcut. Reduced motion removes the added
+settling animation.

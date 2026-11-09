@@ -47,6 +47,25 @@ actions` in the drop header.
   without closing the editor or losing unsaved changes. This also applies to
   direct messages and the active part of a storm drop.
 
+## Swipe to Reply
+
+On touch layouts, drag a chat message from right to left. The message follows
+your finger and the reply indicator changes appearance when the reply is ready.
+Release past that point to open the existing reply composer. Reverse below the
+threshold, cancel the touch, or scroll vertically to leave the composer unchanged.
+
+A short left drag on a grouped message reveals its timestamp without starting a
+reply. Long-press keeps its action sheet and does not turn into a reply or
+navigation swipe if the same finger then moves.
+Releasing the hold does not select an action in the sheet; tap the action you
+want after the sheet opens.
+
+Reply requires a connected profile and the wave's reply permissions. Open replies
+remain available when starting a new chat message is restricted. Temporary or
+failed messages cannot be replied to. Links, media controls, sliders, editors and
+selected text keep their own touch behavior. `Reply` in the action sheet remains
+available in the long-press menu.
+
 ## What the Menu Can Show
 
 - quick react buttons

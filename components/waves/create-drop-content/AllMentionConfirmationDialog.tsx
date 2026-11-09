@@ -14,6 +14,8 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import type { AllMentionConfirmationState } from "./useAllMentionConfirmation";
+import { useRef } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 
 function getDescription(
   locale: SupportedLocale,
@@ -45,10 +47,13 @@ export default function AllMentionConfirmationDialog({
   readonly onRetry: () => void;
 }) {
   const locale = useBrowserLocale();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(state !== null, dialogRef, onCancel);
   if (!state || typeof document === "undefined") return null;
   const ready = state.status === "ready";
   return createPortal(
     <Dialog
+      ref={dialogRef}
       open
       onClose={onCancel}
       className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000001]"

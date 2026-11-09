@@ -8,7 +8,8 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { hasContent } from "./hasContent";
 
 interface E2eeDialogProps {
@@ -41,9 +42,12 @@ export function E2eeDialog({
   hideCloseButton = false,
   scrollBody = false,
 }: E2eeDialogProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(open, dialogRef, onClose);
   const widthClass = size === "md" ? "tw-max-w-xl" : "tw-max-w-md";
   return (
     <Dialog
+      ref={dialogRef}
       open={open}
       onClose={onClose}
       className="tailwind-scope tw-relative tw-z-[1000]"
