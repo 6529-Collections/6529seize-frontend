@@ -127,6 +127,25 @@ export function formatE2eeDateTime(
   return formatDate(locale, ms, { dateStyle: "medium", timeStyle: "short" });
 }
 
+/**
+ * The one "last active" line of every device list: "Active now" for the
+ * browser in use, else the latest activity of either permission.
+ */
+export function formatE2eeLastActive(
+  locale: SupportedLocale,
+  activeNow: boolean,
+  lastActiveAt: number | null
+): string {
+  if (activeNow) {
+    return t(locale, "e2ee.devices.activeNow");
+  }
+  return lastActiveAt === null
+    ? t(locale, "e2ee.devices.lastActiveNever")
+    : t(locale, "e2ee.devices.lastActive", {
+        date: formatE2eeDateTime(locale, lastActiveAt),
+      });
+}
+
 export function findMember(
   members: readonly E2eeMember[],
   profileId: string | null

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import { getE2eeActionErrorKey } from "../e2eeErrors";
 import { E2eeDialog } from "./E2eeDialog";
+import { hasContent } from "./hasContent";
 
 interface E2eeConfirmDialogProps {
   readonly open: boolean;
@@ -16,6 +17,8 @@ interface E2eeConfirmDialogProps {
   readonly errorFallbackKey?: MessageKey | undefined;
   readonly onConfirm: () => Promise<void>;
   readonly onClose: () => void;
+  /** Extra detail between the body and the buttons. */
+  readonly children?: ReactNode | undefined;
 }
 
 /** Confirmation for irreversible encrypted-chat actions (revoke, leave…). */
@@ -28,6 +31,7 @@ export function E2eeConfirmDialog({
   errorFallbackKey = "e2ee.info.actionFailed",
   onConfirm,
   onClose,
+  children,
 }: E2eeConfirmDialogProps) {
   const locale = useBrowserLocale();
   const [pending, setPending] = useState(false);
@@ -82,10 +86,15 @@ export function E2eeConfirmDialog({
         </>
       }
     >
-      {errorKey ? (
-        <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
-          {t(locale, errorKey)}
-        </p>
+      {hasContent(children) || errorKey ? (
+        <div className="tw-flex tw-flex-col tw-gap-3">
+          {children}
+          {errorKey ? (
+            <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
+              {t(locale, errorKey)}
+            </p>
+          ) : null}
+        </div>
       ) : null}
     </E2eeDialog>
   );

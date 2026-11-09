@@ -32,6 +32,11 @@ import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { getEncryptedDevicesRoute } from "@/helpers/navigation.helpers";
 import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
 import { RenameDevice } from "@/components/e2ee/devices/RenameDevice";
+import { RevokeThisBrowserDetails } from "@/components/e2ee/devices/RevokeThisBrowserDetails";
+import {
+  formatE2eeLastActive,
+  formatE2eeWallet,
+} from "@/components/e2ee/e2eeFormat";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
 type GrantStatus = "active" | "expired" | "revoked";
@@ -69,18 +74,24 @@ const formatScopes = (
     })
   );
 
+/** The later activity of the grant's two permissions, if either was used. */
+const getLastActiveAt = (
+  grant: ApiDeviceGrant,
+  linkedDevice: ApiE2eeDevice | undefined
+): number | null => {
+  const times = [grant.last_used_at, linkedDevice?.last_seen_at].filter(
+    (value): value is number => typeof value === "number"
+  );
+  return times.length > 0 ? Math.max(...times) : null;
+};
+
 function getGrantDates(
   locale: SupportedLocale,
   grant: ApiDeviceGrant,
-  status: GrantStatus
+  status: GrantStatus,
+  lastActive: string
 ): string[] {
   const date = (value: number) => formatDate(locale, value);
-  const lastUsed =
-    grant.last_used_at === null
-      ? t(locale, "signedMessages.devices.neverUsed")
-      : t(locale, "signedMessages.devices.lastUsed", {
-          date: date(grant.last_used_at),
-        });
   const endingKey: MessageKey =
     status === "expired"
       ? "signedMessages.devices.expiredOn"
@@ -99,8 +110,49 @@ function getGrantDates(
       }),
     }),
     ending,
-    lastUsed,
+    lastActive,
   ];
+}
+
+/**
+ * Revoke confirmation copy. The browser in use gets its own title, since
+ * revoking it can delete the encrypted chats saved here.
+ */
+function getRevokeDialogCopy(
+  locale: SupportedLocale,
+  {
+    label,
+    linked,
+    thisBrowser,
+  }: {
+    readonly label: string;
+    readonly linked: boolean;
+    readonly thisBrowser: boolean;
+  }
+): { title: string; message: string; confirmText: string } {
+  if (thisBrowser) {
+    return {
+      title: t(locale, "e2ee.devices.revokeThisTitle"),
+      message: t(locale, "e2ee.devices.revokeThisConfirmBody", { label }),
+      confirmText: t(locale, "e2ee.devices.revokeThisConfirm"),
+    };
+  }
+  return {
+    title: t(
+      locale,
+      linked
+        ? "e2ee.devices.revokeCombinedTitle"
+        : "signedMessages.devices.revokeProofTitle",
+      { label }
+    ),
+    message: t(
+      locale,
+      linked
+        ? "e2ee.devices.revokeHistory"
+        : "signedMessages.devices.revokeConfirm"
+    ),
+    confirmText: t(locale, "signedMessages.devices.revoke"),
+  };
 }
 
 function DeviceGrantRow({
@@ -159,9 +211,19 @@ function DeviceGrantRow({
         <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
           {[
             t(locale, "signedMessages.devices.wallet", {
-              address: shortenAddress(grant.wallet),
+              address:
+                formatE2eeWallet(grant.wallet) || shortenAddress(grant.wallet),
             }),
-            ...getGrantDates(locale, grant, status),
+            ...getGrantDates(
+              locale,
+              grant,
+              status,
+              formatE2eeLastActive(
+                locale,
+                isThisDevice && status === "active",
+                getLastActiveAt(grant, linkedDevice)
+              )
+            ),
           ].join(" · ")}
         </p>
       </div>
@@ -287,6 +349,9 @@ export default function DevicesPreferencesSettings() {
     ? linkedDevices.get(pendingRevoke.id)
     : undefined;
   const ownKeys = new Set(local.publicKeys);
+  const revokingThisBrowser =
+    pendingRevoke !== null &&
+    ownKeys.has(pendingRevoke.device_key.toLowerCase());
 
   const confirmRevoke = async () => {
     if (canVerifyRevocation && pendingRevoke && (await revoke(pendingRevoke))) {
@@ -437,27 +502,25 @@ export default function DevicesPreferencesSettings() {
         isOpen={pendingRevoke !== null && canVerifyRevocation}
         onClose={() => !isRevoking && setPendingRevoke(null)}
         onConfirm={() => void confirmRevoke()}
-        title={t(
-          locale,
-          pendingLinkedDevice
-            ? "e2ee.devices.revokeCombinedTitle"
-            : "signedMessages.devices.revokeProofTitle",
-          {
-            label:
-              pendingLinkedDevice?.label ?? pendingRevoke?.device_label ?? "",
-          }
-        )}
-        message={t(
-          locale,
-          pendingLinkedDevice
-            ? "e2ee.devices.revokeHistory"
-            : "signedMessages.devices.revokeConfirm"
-        )}
-        confirmText={t(locale, "signedMessages.devices.revoke")}
+        {...getRevokeDialogCopy(locale, {
+          label:
+            pendingLinkedDevice?.label ?? pendingRevoke?.device_label ?? "",
+          linked: pendingLinkedDevice !== undefined,
+          thisBrowser: revokingThisBrowser,
+        })}
         cancelText={t(locale, "signedMessages.devices.cancel")}
         isConfirming={isRevoking}
         confirmVariant="destructive"
       >
+        {revokingThisBrowser ? (
+          <div className="tw-mt-3">
+            <RevokeThisBrowserDetails
+              signedPosts
+              encryptedDms={pendingLinkedDevice?.revoked_at === null}
+              setUpBackup={{ href: getEncryptedDevicesRoute() }}
+            />
+          </div>
+        ) : null}
         {local.failed ? (
           <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-200">
             {t(locale, "signedMessages.devices.revokeMaybeThisDevice")}

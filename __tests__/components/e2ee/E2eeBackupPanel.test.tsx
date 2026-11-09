@@ -1,7 +1,17 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { requestE2eeBackupSetup } from "@/components/e2ee/backup/backupSetupRequest";
 import { E2eeBackupPanel } from "@/components/e2ee/backup/E2eeBackupPanel";
 import type { E2eeBackupManager, E2eeBackupSnapshot } from "@/lib/e2ee/backup";
 import { BackupError } from "@/lib/e2ee/backup/errors";
+import type { E2eeDeviceInfo } from "@/lib/e2ee/types";
 import {
   contextFor,
   createFakeE2eeEngine,
@@ -146,31 +156,201 @@ describe("E2eeBackupPanel", () => {
     ).toBeInTheDocument();
   });
 
-  it("warns after a device was revoked since the backup was set up and can turn backup off", async () => {
-    const manager = fakeManager(
-      snapshot({ phase: "on", backupCreatedAt: 1000, lastBackupAt: 2000 })
-    );
-    renderPanel(manager, [
-      THIS_DEVICE,
+  describe("rotation warning (F-03)", () => {
+    const BACKUP_CREATED = Date.UTC(2026, 10, 9, 14, 46);
+    const HOUR_MS = 60 * 60 * 1000;
+    const revoked = (patch: Partial<E2eeDeviceInfo>) =>
       device({
         deviceKey: `0x${"9".repeat(64)}`,
-        isThisDevice: false,
-        revokedAt: 5000,
-      }),
-    ]);
+        label: "Old iPhone",
+        revokedAt: BACKUP_CREATED + 2 * HOUR_MS,
+        ...patch,
+      });
+
+    it("stays quiet for devices last active before the backup existed", () => {
+      renderPanel(
+        fakeManager(
+          snapshot({
+            phase: "on",
+            backupCreatedAt: BACKUP_CREATED,
+            lastBackupAt: BACKUP_CREATED,
+          })
+        ),
+        [
+          THIS_DEVICE,
+          revoked({ lastSeenAt: BACKUP_CREATED - HOUR_MS }),
+          revoked({ deviceKey: `0x${"8".repeat(64)}`, lastSeenAt: null }),
+        ]
+      );
+      expect(
+        screen.queryByText("Replace your recovery code")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getAllByRole("button", { name: "Replace recovery code" })
+      ).toHaveLength(1);
+    });
+
+    it("names a revoked device that could hold the key and offers one replace action", async () => {
+      const manager = fakeManager(
+        snapshot({
+          phase: "on",
+          backupCreatedAt: BACKUP_CREATED,
+          lastBackupAt: BACKUP_CREATED,
+        })
+      );
+      renderPanel(manager, [
+        THIS_DEVICE,
+        revoked({ lastSeenAt: BACKUP_CREATED + HOUR_MS }),
+      ]);
+      expect(screen.getByText("Replace your recovery code")).toBeVisible();
+      expect(
+        screen.getByText(
+          /^Old iPhone was active after this backup was set up, so it may still hold the backup key\. You revoked it \w{3} \d{1,2}, 2026\./
+        )
+      ).toBeVisible();
+      const replace = screen.getAllByRole("button", {
+        name: "Replace recovery code",
+      });
+      expect(replace).toHaveLength(1);
+      fireEvent.click(replace[0]!);
+      expect(
+        await screen.findByRole("dialog", {
+          name: "Save your new recovery code",
+        })
+      ).toBeInTheDocument();
+    });
+
+    it("lists every revoked device that could hold the key", () => {
+      renderPanel(
+        fakeManager(
+          snapshot({
+            phase: "on",
+            backupCreatedAt: BACKUP_CREATED,
+            lastBackupAt: BACKUP_CREATED,
+          })
+        ),
+        [
+          THIS_DEVICE,
+          revoked({ lastSeenAt: BACKUP_CREATED + HOUR_MS }),
+          revoked({
+            deviceKey: `0x${"8".repeat(64)}`,
+            label: "Firefox on Linux",
+            lastSeenAt: BACKUP_CREATED + HOUR_MS,
+          }),
+        ]
+      );
+      expect(
+        screen.getByText(/^Old iPhone and Firefox on Linux were active after/)
+      ).toBeVisible();
+    });
+  });
+
+  it("turns backup off only through the More menu and its confirmation (F-09)", async () => {
+    const user = userEvent.setup();
+    const manager = fakeManager(snapshot({ phase: "on", lastBackupAt: 2000 }));
+    renderPanel(manager);
     expect(
-      screen.getByText(/Create a new recovery code so the backup key/)
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Turn off backup" }));
+      screen.queryByRole("button", { name: /Turn off backup/ })
+    ).not.toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: "More backup options" })
+    );
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Turn off backup…" })
+    );
     const dialog = await screen.findByRole("dialog", {
       name: "Turn off backup?",
     });
-    const confirm = screen
-      .getAllByRole("button", { name: "Turn off backup" })
-      .find((button) => dialog.contains(button))!;
-    fireEvent.click(confirm);
+    expect(dialog).toHaveTextContent(
+      "If this browser clears its data later, those messages can’t be restored."
+    );
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Turn off backup" })
+    );
     await waitFor(() => expect(manager.turnOff).toHaveBeenCalledTimes(1));
     expect(await screen.findByText(/Backup is off/)).toBeInTheDocument();
+  });
+
+  it.each([
+    [0, "0 kB of 256 MB used"],
+    [3000, "3 kB of 256 MB used"],
+    [1536 * 1024, "1.5 MB of 256 MB used"],
+  ])(
+    "shows %d bytes in sensible units (F-08)",
+    (usedBytes: number, text: string) => {
+      renderPanel(
+        fakeManager(snapshot({ phase: "on", lastBackupAt: 2000, usedBytes }))
+      );
+      expect(screen.getByText(text)).toBeInTheDocument();
+    }
+  );
+
+  it("folds the back-up-now result into the status line and clears it (F-08)", async () => {
+    jest.useFakeTimers();
+    try {
+      const manager = fakeManager(
+        snapshot({ phase: "on", lastBackupAt: 2000 })
+      );
+      renderPanel(manager);
+      fireEvent.click(screen.getByRole("button", { name: "Back up now" }));
+      const status = await screen.findByRole("status");
+      await waitFor(() =>
+        expect(status).toHaveTextContent("Backup is up to date.")
+      );
+      expect(screen.queryByText("Backed up")).not.toBeInTheDocument();
+      act(() => {
+        jest.advanceTimersByTime(6000);
+      });
+      expect(status).toHaveTextContent("");
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("asks before starting over without restoring, naming the data loss (F-05)", async () => {
+    const manager = fakeManager(snapshot({ phase: "available" }));
+    renderPanel(manager);
+    expect(
+      screen.queryByRole("button", { name: "Start a new backup" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Lost your recovery code?" })
+    );
+    const dialog = await screen.findByRole("dialog", {
+      name: "Start a new backup without restoring?",
+    });
+    expect(dialog).toHaveTextContent(
+      "Starting over deletes it, including messages that aren’t on this browser. You can’t undo this."
+    );
+    expect(manager.prepareBackup).not.toHaveBeenCalled();
+    fireEvent.click(
+      within(dialog).getByRole("button", {
+        name: "Delete old backup and start over",
+      })
+    );
+    const code = await screen.findByRole("dialog", {
+      name: "Save your new recovery code",
+    });
+    expect(manager.prepareBackup).toHaveBeenCalledTimes(1);
+    expect(code).toHaveTextContent(
+      "Messages that are in your backup but not on this browser won’t be in the new backup."
+    );
+  });
+
+  it("starts setup when another part of the page asks while backup is off", async () => {
+    const manager = fakeManager(snapshot());
+    renderPanel(manager);
+    act(() => requestE2eeBackupSetup());
+    expect(
+      await screen.findByRole("dialog", { name: "Save your recovery code" })
+    ).toBeInTheDocument();
+  });
+
+  it("ignores a setup request while backup is on", () => {
+    const manager = fakeManager(snapshot({ phase: "on", lastBackupAt: 2000 }));
+    renderPanel(manager);
+    act(() => requestE2eeBackupSetup());
+    expect(manager.prepareBackup).not.toHaveBeenCalled();
   });
   it.each([
     ["E2EE_BACKUP_QUOTA", "Your backup storage is full."],

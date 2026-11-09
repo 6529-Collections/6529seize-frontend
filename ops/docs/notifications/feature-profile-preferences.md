@@ -103,11 +103,16 @@ profile preferences cannot trigger a push.
 ### Device Permissions
 
 **Authorized devices** lists signing and encrypted-DM permissions, including
-combined grants, with their status, wallet, added/expiry dates, last use and
-**This device** where applicable. You can rename any unrevoked device you own
-from a browser or app; the server name is shared across your devices.
-**Revoke** explains whether signing, encryption or both will stop before you
-confirm. Revoking this encryption device also clears its local encrypted history.
+combined grants, with their status, wallet, added date, expiry date, one
+**Last active** time (the later use of either permission; **Active now** for
+this browser) and **This device** where applicable. Signing and encrypted DMs
+name a browser the same way (for example "Brave on Windows"). You can rename
+any unrevoked device you own from a browser or app; the server name is shared
+across your devices. **Revoke** explains whether signing, encryption or both
+will stop before you confirm. Revoking this browser opens **Revoke this
+browser?**, which names it as the browser in use; for a combined grant it
+also says the encrypted chats saved here are deleted, says whether a backup
+keeps a copy, and links to the backup section first.
 
 The setup action names whichever permissions this device is missing and opens
 the shared consent dialog before a wallet request. It is omitted when both are

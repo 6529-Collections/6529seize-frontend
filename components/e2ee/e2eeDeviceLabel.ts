@@ -38,6 +38,7 @@ const BRAND_NAMES: readonly (readonly [RegExp, string])[] = [
 const UA_BROWSERS: readonly (readonly [RegExp, string])[] = [
   [/\bEdg(?:e|A|iOS)?\//u, "Edge"],
   [/\b(?:OPR|Opera)\//u, "Opera"],
+  [/\bSamsungBrowser\//u, "Samsung Internet"],
   [/\b(?:Firefox|FxiOS)\//u, "Firefox"],
   [/\b(?:CriOS|Chrome|Chromium)\//u, "Chrome"],
   // Every browser above also says "Safari/", so this only matches when none

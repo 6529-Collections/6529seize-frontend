@@ -27,9 +27,14 @@ interface NoticeCopy {
   readonly action: string;
 }
 
+/**
+ * `withEncryption`: the action opens setup for signed posts and encrypted DMs
+ * together, so the banner names both, as the setup dialog does.
+ */
 function getNoticeCopy(
   locale: SupportedLocale,
-  model: SignedMessagesNoticeModel
+  model: SignedMessagesNoticeModel,
+  withEncryption: boolean
 ): NoticeCopy {
   switch (model.kind) {
     case "new-device":
@@ -51,13 +56,28 @@ function getNoticeCopy(
     case "expired":
       return {
         title: t(locale, "signedMessages.notice.expired.title"),
-        body: t(locale, "signedMessages.notice.expired.body"),
+        body: t(
+          locale,
+          withEncryption
+            ? "signedMessages.notice.expired.bodyBoth"
+            : "signedMessages.notice.expired.body"
+        ),
         action: t(locale, "signedMessages.notice.renew.action"),
       };
     case "enable":
       return {
-        title: t(locale, "signedMessages.notice.enable.title"),
-        body: t(locale, "signedMessages.notice.enable.body"),
+        title: t(
+          locale,
+          withEncryption
+            ? "signedMessages.notice.enableBoth.title"
+            : "signedMessages.notice.enable.title"
+        ),
+        body: t(
+          locale,
+          withEncryption
+            ? "signedMessages.notice.enableBoth.body"
+            : "signedMessages.notice.enable.body"
+        ),
         action: t(locale, "signedMessages.notice.enable.action"),
       };
   }
@@ -97,7 +117,7 @@ function SignedMessagesNoticeContent({
   if (!isAlert && !canEnable) {
     return null;
   }
-  const copy = getNoticeCopy(locale, model);
+  const copy = getNoticeCopy(locale, model, canEnableEncryption);
   const iconClass = "tw-col-start-1 tw-row-start-1 tw-size-5 tw-shrink-0";
   const onAction = () => {
     if (model.kind === "new-device") {

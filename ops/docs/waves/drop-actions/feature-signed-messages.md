@@ -63,14 +63,17 @@ soon**, while retaining **Connect only** (see
   and encrypted messages keep their own one-signature prompt. Revoking the
   combined grant here also turns off its encrypted messages. Separate grants
   retain separate revocation.
-- **Turn on signed posts (one signature).** A signed-in user without a grant
-  sees the notice above an empty composer. **Turn on** opens the shared
-  permission dialog before any wallet request. Dismissing the setup notice
+- **Turn on signed posts.** A signed-in user without a grant sees the notice
+  above an empty composer. When encrypted DMs can be turned on in the same
+  signature, it reads **Turn on signed posts and encrypted DMs** ("One wallet
+  signature, no gas. Lasts 180 days in this browser."), matching the dialog it
+  opens. **Turn on** opens the shared permission dialog before any wallet
+  request. Dismissing the setup notice
   hides it for 30 days per wallet; it does not revoke anything.
 - **Account menu and Device Permissions.** When both permissions are missing,
-  **Post Signing & DM Encryption** opens a dialog with Signed Posts first and
-  the full Encrypted DMs explanation second. If only one is missing, it shows
-  **Enable Signed Posts** or **Enable Encrypted DMs**. The **Sign** button
+  **Turn on signed posts and encrypted DMs** opens a dialog with Signed Posts
+  first and the full Encrypted DMs explanation second. If only one is missing,
+  it shows **Turn on signed posts** or **Turn on encrypted DMs**. The **Sign** button
   explicitly names both or the remaining permission. The action is absent when
   both are on. `/messages/encrypted` uses the same consent content inline.
   No device-setup popup opens automatically after sign-in.

@@ -10,11 +10,14 @@ import {
 import { useState } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatDate } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
-import { formatE2eeDateTime } from "../e2eeFormat";
+import { formatE2eeDateTime, formatE2eeLastActive } from "../e2eeFormat";
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
 import { useE2eeNow } from "../useE2eeNow";
+import { RevokeThisBrowserDetails } from "./RevokeThisBrowserDetails";
 
 const PLATFORM_KEYS: Record<E2eeDeviceInfo["platform"], MessageKey> = {
   web: "e2ee.devices.platform.web",
@@ -31,24 +34,19 @@ const PLATFORM_ICONS = {
 function DeviceDates({ device }: { readonly device: E2eeDeviceInfo }) {
   const locale = useBrowserLocale();
   const now = useE2eeNow();
-  const lastSeen =
-    device.lastSeenAt === null
-      ? t(locale, "e2ee.devices.lastSeenNever")
-      : t(locale, "e2ee.devices.lastSeen", {
-          date: formatE2eeDateTime(locale, device.lastSeenAt),
-        });
+  // Endings are dates only, as on the Device Permissions page.
   let ending: string;
   if (device.revokedAt !== null) {
     ending = t(locale, "e2ee.devices.revokedOn", {
-      date: formatE2eeDateTime(locale, device.revokedAt),
+      date: formatDate(locale, device.revokedAt),
     });
   } else if (device.expiresAt <= now) {
     ending = t(locale, "e2ee.devices.expired", {
-      date: formatE2eeDateTime(locale, device.expiresAt),
+      date: formatDate(locale, device.expiresAt),
     });
   } else {
     ending = t(locale, "e2ee.devices.expires", {
-      date: formatE2eeDateTime(locale, device.expiresAt),
+      date: formatDate(locale, device.expiresAt),
     });
   }
   return (
@@ -58,7 +56,13 @@ function DeviceDates({ device }: { readonly device: E2eeDeviceInfo }) {
           date: formatE2eeDateTime(locale, device.createdAt),
         })}
       </li>
-      <li>{lastSeen}</li>
+      <li>
+        {formatE2eeLastActive(
+          locale,
+          device.isThisDevice && device.revokedAt === null,
+          device.lastSeenAt
+        )}
+      </li>
       <li>{ending}</li>
     </ul>
   );
@@ -154,6 +158,40 @@ interface E2eeDeviceListProps {
   readonly devices: readonly E2eeDeviceInfo[];
   readonly engine: E2eeEngine | null;
   readonly onRevoked?: ((device: E2eeDeviceInfo) => void) | undefined;
+  /** "Set up backup first" when revoking this browser with backup off. */
+  readonly onSetUpBackup?: (() => void) | undefined;
+}
+
+interface RevokeCopy {
+  readonly title: string;
+  readonly body: string;
+  readonly confirm: string;
+}
+
+/** The browser in use gets its own wording: it is the one you're using now. */
+function getRevokeCopy(
+  locale: SupportedLocale,
+  target: E2eeDeviceInfo | null
+): RevokeCopy {
+  const label = target?.label ?? "";
+  if (target?.isThisDevice) {
+    return {
+      title: t(locale, "e2ee.devices.revokeThisTitle"),
+      body: t(locale, "e2ee.devices.revokeThisConfirmBody", { label }),
+      confirm: t(locale, "e2ee.devices.revokeThisConfirm"),
+    };
+  }
+  return {
+    title: t(
+      locale,
+      target?.linkedAuthorProof
+        ? "e2ee.devices.revokeCombinedTitle"
+        : "e2ee.devices.revokeEncryptionTitle",
+      { label }
+    ),
+    body: t(locale, "e2ee.devices.revokeHistory"),
+    confirm: t(locale, "e2ee.devices.revokeConfirm"),
+  };
 }
 
 /** Active devices first (this device on top), then revoked ones. */
@@ -161,6 +199,7 @@ export function E2eeDeviceList({
   devices,
   engine,
   onRevoked,
+  onSetUpBackup,
 }: E2eeDeviceListProps) {
   const locale = useBrowserLocale();
   const [target, setTarget] = useState<E2eeDeviceInfo | null>(null);
@@ -172,6 +211,7 @@ export function E2eeDeviceList({
         b.createdAt - a.createdAt
     );
   const revoked = devices.filter((device) => device.revokedAt !== null);
+  const revokeCopy = getRevokeCopy(locale, target);
 
   if (devices.length === 0) {
     return (
@@ -206,17 +246,9 @@ export function E2eeDeviceList({
       ) : null}
       <E2eeConfirmDialog
         open={target !== null}
-        title={t(
-          locale,
-          target?.linkedAuthorProof
-            ? "e2ee.devices.revokeCombinedTitle"
-            : "e2ee.devices.revokeEncryptionTitle",
-          {
-            label: target?.label ?? "",
-          }
-        )}
-        body={t(locale, "e2ee.devices.revokeHistory")}
-        confirmLabel={t(locale, "e2ee.devices.revokeConfirm")}
+        title={revokeCopy.title}
+        body={revokeCopy.body}
+        confirmLabel={revokeCopy.confirm}
         errorFallbackKey="e2ee.devices.revokeFailed"
         onConfirm={async () => {
           if (!engine || !target) {
@@ -226,7 +258,24 @@ export function E2eeDeviceList({
           onRevoked?.(target);
         }}
         onClose={() => setTarget(null)}
-      />
+      >
+        {target?.isThisDevice ? (
+          <RevokeThisBrowserDetails
+            signedPosts={target.linkedAuthorProof === true}
+            encryptedDms
+            setUpBackup={
+              onSetUpBackup
+                ? {
+                    onClick: () => {
+                      setTarget(null);
+                      onSetUpBackup();
+                    },
+                  }
+                : null
+            }
+          />
+        ) : null}
+      </E2eeConfirmDialog>
     </>
   );
 }
