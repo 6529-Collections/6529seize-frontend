@@ -159,7 +159,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect
       .poll(() =>
         customEmoji
-          .locator("img")
+          .getByAltText("6529")
           .evaluate((img: HTMLImageElement) => img.naturalWidth)
       )
       .toBeGreaterThan(0);

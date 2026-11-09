@@ -4,15 +4,15 @@ import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ProfileAvatar from "@/components/common/profile/ProfileAvatar";
 import ArtworkNotificationThumbnail from "@/components/notifications/ArtworkNotificationThumbnail";
-import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import LocalDateTime from "@/components/utils/time/LocalDateTime";
-import NotificationInboxReactions from "./NotificationInboxReactions";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
   isGroupedReactionsItem,
   type NotificationDisplayItem,
 } from "@/types/feed.types";
+import NotificationInboxReactions from "./NotificationInboxReactions";
 import {
   getInboxDestination,
   getInboxPreview,

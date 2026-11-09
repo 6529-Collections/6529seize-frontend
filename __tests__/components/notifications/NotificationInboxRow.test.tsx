@@ -193,6 +193,73 @@ it("keeps an unavailable custom reaction readable", () => {
   );
 });
 
+it("shows raw Unicode reactions without adding shortcode delimiters", () => {
+  const notification = reaction(1, "alice", null);
+  notification.additional_context.reaction = "👍";
+  render(
+    <NotificationInboxRow
+      notification={notification}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.getByText("👍")).toBeInTheDocument();
+  expect(screen.queryByText(":👍:")).not.toBeInTheDocument();
+});
+
+it("bounds grouped emoji previews and counts only additional distinct reactions", () => {
+  const notifications = [
+    "fire",
+    "one",
+    "two",
+    "three",
+    "four",
+    "five",
+    "six",
+    "six",
+    "seven",
+    "",
+  ].map((code, index) => ({
+    ...reaction(index, `user-${index}`, null),
+    additional_context: { reaction: code ? `:${code}:` : "" },
+  }));
+  const group = groupReactionNotifications(notifications)[0]!;
+  render(
+    <NotificationInboxRow
+      notification={group}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.getByRole("img", { name: "Fire" })).toBeInTheDocument();
+  expect(screen.getByText(":five:")).toBeInTheDocument();
+  expect(screen.queryByText(":six:")).not.toBeInTheDocument();
+  expect(screen.queryByText(":seven:")).not.toBeInTheDocument();
+  expect(screen.queryByText("::")).not.toBeInTheDocument();
+  expect(screen.getByText("+2 more")).toBeInTheDocument();
+});
+
+it.each([undefined, null, "", "::"])(
+  "keeps notifications usable when reaction data is missing or empty (%s)",
+  (value) => {
+    const notification = reaction(1, "alice", null);
+    Reflect.set(notification.additional_context, "reaction", value);
+    render(
+      <NotificationInboxRow
+        notification={notification}
+        handle="viewer"
+        onOpen={jest.fn()}
+      />
+    );
+    expect(screen.getByText("alice reacted to your drop")).toBeInTheDocument();
+    expect(screen.queryByText("::")).not.toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "/waves/wave?serialNo=42"
+    );
+  }
+);
+
 it("keeps the bell fallback for grouped reactions without a wave picture", () => {
   const group = groupReactionNotifications([
     reaction(1, "alice", null),

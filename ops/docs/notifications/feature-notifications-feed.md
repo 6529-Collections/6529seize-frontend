@@ -34,8 +34,9 @@ directly, including while the preview is open. Compact rows show the actor, acti
 preview when available, a timestamp, and an `Unread` indicator. The newest
 notifications appear first; `Load more` retrieves older rows.
 Reaction previews show the actual native or custom emoji. Reactions to the same
-drop share one row with each distinct reaction emoji, reactor avatars, and one drop
-preview, including reactions loaded through `Load more`. Unavailable emojis show
+drop share one row with up to six distinct reaction emojis, reactor avatars, and
+one drop preview, including reactions loaded through `Load more`. Additional
+reaction types show a `+N more` count. Unavailable emojis show
 their text code instead. Mentions and wave tags
 in previews appear as `@handle` and `#wave`, without storage brackets.
 
