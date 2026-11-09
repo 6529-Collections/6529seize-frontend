@@ -501,7 +501,6 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
               searchParams.get("competition") ?? defaultCompetitionId
             )}
             activeCompetitionCount={activeCompetitionCount}
-            outcomesVisible={outcomesVisible}
             waveNavigationReady={waveNavigationReady}
             showWavesTab={hydrated}
             showStreamBack={hydrated}
@@ -548,7 +547,6 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
               isMemesWave={isMemesWave}
               isRankWave={isRankWave}
               isApproveWave={isApproveWave}
-              outcomesVisible={outcomesVisible}
               hasPolls={hasPolls}
               onDropClick={onDropClick}
               onOpenQuickVote={quickVote.openQuickVote}

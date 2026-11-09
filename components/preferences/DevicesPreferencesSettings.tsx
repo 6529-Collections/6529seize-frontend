@@ -21,6 +21,7 @@ import {
 import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatDate, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -175,6 +176,7 @@ function DeviceGrantRow({
   readonly onRevoke: (grant: ApiDeviceGrant) => void;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const status = getStatus(grant, nowMs);
   const label = linkedDevice?.label ?? grant.device_label;
   const statusKey: MessageKey = `signedMessages.devices.status.${status}`;
@@ -221,7 +223,8 @@ function DeviceGrantRow({
               formatE2eeLastActive(
                 locale,
                 isThisDevice && status === "active",
-                getLastActiveAt(grant, linkedDevice)
+                getLastActiveAt(grant, linkedDevice),
+                zone
               )
             ),
           ].join(" · ")}

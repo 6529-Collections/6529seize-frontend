@@ -239,3 +239,29 @@ it("offers original playback for an IPFS GIF pathname", () => {
     "https://ipfs-gateway.test/ipfs/bafyexample/art.gif"
   );
 });
+
+it("keeps closing and retry clicks from reaching what opened the preview", () => {
+  const opened = jest.fn();
+  const onClose = jest.fn();
+  render(
+    <div onClick={opened}>
+      <ImageMediaModal
+        {...props}
+        src="https://d3lqz0a4bldqgf.cloudfront.net/drops/author/photo.jpg"
+        onClose={onClose}
+      />
+    </div>
+  );
+  // Fail every preview source until the preview offers a retry.
+  for (
+    let attempt = 0;
+    attempt < 10 && !screen.queryByRole("button", { name: "Retry preview" });
+    attempt += 1
+  ) {
+    fireEvent.error(screen.getByAltText("Expanded image preview"));
+  }
+  fireEvent.click(screen.getByRole("button", { name: "Retry preview" }));
+  fireEvent.click(screen.getByTestId("modal-backdrop"));
+  expect(onClose).toHaveBeenCalledTimes(1);
+  expect(opened).not.toHaveBeenCalled();
+});

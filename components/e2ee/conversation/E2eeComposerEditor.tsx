@@ -54,7 +54,8 @@ function restoreEmojiCaret(
   editor.focus(() =>
     editor.update(
       () => {
-        if (isSelectionAttached(caret)) $setSelection(caret);
+        // A selection is frozen once committed: set a fresh copy each time.
+        if (caret && isSelectionAttached(caret)) $setSelection(caret.clone());
       },
       { discrete: true }
     )
@@ -80,6 +81,7 @@ export const E2eeComposerEditor = forwardRef<
 >((props, ref) => {
   const editorRef = useRef<LexicalEditor | null>(null);
   const savedSelection = useRef<RangeSelection | null>(null);
+  const insertedCaret = useRef<RangeSelection | null>(null);
   const { sources } = useE2eeEmojis();
   const emojis = useMemo(
     () => ({
@@ -163,6 +165,7 @@ export const E2eeComposerEditor = forwardRef<
       const selection = $getSelection();
       return $isRangeSelection(selection) ? selection.clone() : null;
     });
+    insertedCaret.current = caret;
     // Restore the insertion caret after the picker has restored its trigger focus.
     requestAnimationFrame(() =>
       requestAnimationFrame(() => {
@@ -170,6 +173,14 @@ export const E2eeComposerEditor = forwardRef<
         restoreEmojiCaret(editor, caret);
       })
     );
+  };
+
+  // The mobile panel hands focus back to its trigger after its exit
+  // animation: restore the caret then.
+  const restoreCaretAfterPanel = () => {
+    const editor = editorRef.current;
+    if (!editor) return;
+    restoreEmojiCaret(editor, insertedCaret.current);
   };
 
   return (
@@ -193,6 +204,7 @@ export const E2eeComposerEditor = forwardRef<
           <E2eeComposerEmojiPicker
             onOpen={rememberSelection}
             onSelect={insertEmoji}
+            onClosedAfterSelect={restoreCaretAfterPanel}
           />
         }
       >

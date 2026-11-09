@@ -41,6 +41,7 @@ import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
+import displayTimeZoneMessages from "@/i18n/messages/displayTimeZone.en-US.json";
 import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -287,7 +288,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
     "Memes submissions require {amount} REP in {category}.",
   "grant.submissionLookalikeInfo":
     '"{category}" is a separate category. Only {submissionCategory} counts for submissions.',
-  "grant.amountLabel": "REP amount",
+  "grant.amountLabel": "Your total REP for this category",
   "grant.availableRepLabel": "Your available REP:",
   "grant.assignedRepLabel": "Your REP assigned to {name}:",
   "grant.availableRep": "Your available REP: {amount}",
@@ -1111,7 +1112,11 @@ const USER_PROFILE_TABS_MESSAGES = objectMessages("user.profile.tabs", {
 const USER_PROFILE_IDENTITY_MOBILE_TABS_MESSAGES = objectMessages(
   "user.profile.identity.mobileTabs",
   {
+    label: "Identity sections",
+    rep: "REP",
     totalRep: "Total REP",
+    "statementCount.one": "{count} statement",
+    "statementCount.other": "{count} statements",
     nic: "NIC",
     idStatements: "ID Statements",
   } as const
@@ -2113,6 +2118,9 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   rankAdvancedSummary: "Outcome visibility",
   approveAdvancedSummary: "Winner limits",
   chooseType: "Choose outcome type",
+  addOutcome: "Add outcome",
+  optionalDescription:
+    "Optionally describe what winners receive or what happens after approval. The organizer fulfills these outcomes manually. A scheduled Rank decision without outcomes selects one winner.",
   showOutcomes: "Show outcomes menu section",
   showOutcomesDescription:
     "Shows the Outcomes tab and reward details on leaderboard and winner cards. Rewards still apply when hidden.",
@@ -2120,10 +2128,10 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   repPositiveError: "Rep must be a positive number",
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
-    "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
-  "empty.title": "No outcomes yet — add at least one to continue",
+    "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The live leaderboard is the outcome.",
+  "empty.title": "No outcomes added",
   "empty.description":
-    "Outcomes define what winners receive when results are announced: a manual award you fulfill yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
+    "Continue without an outcome, or add a reward or action that the organizer will fulfill.",
   "warning.unlimited.title": "Warning: Unlimited Awards",
   "warning.unlimited.description":
     "You have not set a maximum number of winners for this challenge. Everyone who meets the threshold will be awarded.",
@@ -2710,6 +2718,38 @@ const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
 } as const);
 
 const USER_RATE_MESSAGES = objectMessages("user.rate", {
+  repRegion: "REP",
+  nicRegion: "NIC",
+  adjustCategoryFor: "Adjust REP ({category}) for {name}",
+  received: "Received",
+  given: "Given",
+  direction: "{matter} direction",
+  listTitle: "{matter} {direction}",
+  manageGiven: "Manage given",
+  manageGivenMatter: "Manage given {matter}",
+  manageRatingContributors: "Manage given {matter}: {contributors}",
+  viewRatingContributors: "View {matter} {direction}: {contributors}",
+  highestFirst: "Highest total first",
+  recentFirst: "Most recently adjusted",
+  sortBy: "Sort by",
+  sortGiven: "Sort given {matter}",
+  ratingAmount: "{value} {matter}",
+  adjust: "Adjust",
+  adjustFor: "Adjust {matter} for {name}",
+  categoriesFor: "REP given to {name}",
+  empty: "No ratings found.",
+  loadError: "Could not load ratings.",
+  retry: "Retry",
+  loadMore: "Load more",
+  loading: "Loading ratings…",
+  save: "Save",
+  cancel: "Cancel",
+  totalHelp: "Enter the total you want to give, including any existing rating.",
+  viewRatings: "View {matter} {direction}",
+  updated: "{matter} rating updated.",
+  updateError: "Could not update this rating.",
+  tryAgain: "Please try again.",
+  loginRequired: "Log in to continue.",
   "subtitle.waveRep": "give Wave REP for",
   "nic.label": "Your total NIC Rating of {profile}:",
   submit: "Rate",
@@ -3250,6 +3290,8 @@ export const EN_US_ROOT_MESSAGES = {
     "{artist} submitted {artwork} to {competition}.",
   "artworkAlerts.untitled": "untitled artwork",
   "emoji.picker.label": "Emoji picker",
+  "emoji.picker.openLabel": "Open emoji picker",
+  "emoji.picker.closeLabel": "Close emoji picker",
   "emoji.picker.loading": "Loading emoji picker...",
   "emoji.picker.unavailable": "Emoji picker is unavailable.",
   "waves.historyGap.load": "Load missed messages",
@@ -4924,6 +4966,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...pageMetadataMessages,
   ...toolsMessages,
   ...utcScheduleMessages,
+  ...displayTimeZoneMessages,
   ...worldTimeZonesMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REVIEWBOT_USAGE_MESSAGES,
