@@ -25,6 +25,7 @@ import {
   sendMessage,
   startChat,
 } from "../support/e2ee/e2eeUi";
+import { DEVICES_SECURITY_MESSAGES } from "../../i18n/messages/devices-security";
 import { e2eeMessage, NEW_DEVICE_NOTICE } from "../support/e2ee/e2eeCopy";
 import { isMobileWebProject } from "../support/surfaceSimulation";
 
@@ -108,16 +109,18 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     await expectMessage(bobPhone.page, "Both of your devices get this.");
     await expectMessage(bobLaptop.page, "Both of your devices get this.");
 
-    // The devices page lists both; the laptop revokes the phone.
+    // The former devices page opens Devices & security, which lists both:
+    // this browser pinned, the phone as another device. The laptop revokes
+    // the phone.
     await gotoPath(bobLaptop.page, `${ENCRYPTED_ROUTE}/devices`);
-    const active = activeDeviceRows(bobLaptop.page);
-    await expect(active).toHaveCount(2, { timeout: E2EE_UI_TIMEOUT_MS });
-    // Exact: the verified hint also says "…checked on this device."
-    const thisDeviceBadge = bobLaptop.page.getByText("This device", {
-      exact: true,
+    await expect(bobLaptop.page).toHaveURL(/\/preferences\?tab=security$/u, {
+      timeout: E2EE_UI_TIMEOUT_MS,
     });
-    await expect(active.filter({ has: thisDeviceBadge })).toHaveCount(1);
-    const phoneRow = active.filter({ hasNot: thisDeviceBadge });
+    await expect(thisDeviceCard(bobLaptop.page)).toHaveCount(1, {
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    const phoneRow = revocableDeviceRows(bobLaptop.page);
+    await expect(phoneRow).toHaveCount(1, { timeout: E2EE_UI_TIMEOUT_MS });
     const revokePhone = phoneRow.getByRole("button", { name: /^Revoke /u });
     const revokeLabel = await revokePhone.getAttribute("aria-label");
     const phoneLabel = revokeLabel?.replace(/^Revoke /u, "") ?? "";
@@ -125,17 +128,29 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     await revokePhone.click();
     // The combined sign-in granted the phone both permissions, so revoking
     // it ends both.
-    await confirmDialog(
+    const dialog = confirmDialog(
       bobLaptop.page,
-      e2eeMessage("e2ee.devices.revokeCombinedTitle", { label: phoneLabel })
-    )
+      DEVICES_SECURITY_MESSAGES["devicesSecurity.revoke.title"].replace(
+        "{label}",
+        phoneLabel
+      )
+    );
+    await expect(dialog).toContainText(
+      DEVICES_SECURITY_MESSAGES["devicesSecurity.revoke.both"]
+    );
+    await dialog
       .getByRole("button", { name: e2eeMessage("e2ee.devices.revokeConfirm") })
       .click();
-    await expect(activeDeviceRows(bobLaptop.page)).toHaveCount(1, {
+    await expect(revocableDeviceRows(bobLaptop.page)).toHaveCount(0, {
       timeout: E2EE_UI_TIMEOUT_MS,
     });
     await expect(
-      bobLaptop.page.getByRole("heading", { name: "Revoked devices" })
+      bobLaptop.page.getByRole("button", {
+        name: new RegExp(
+          `^${DEVICES_SECURITY_MESSAGES["devicesSecurity.history.title"]}`,
+          "u"
+        ),
+      })
     ).toBeVisible();
 
     // The revoked phone falls back to enrollment; the others see the removal.
@@ -203,8 +218,16 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
   });
 });
 
-function activeDeviceRows(page: Page) {
-  // The active list is the first list on the devices page.
+/** This browser's pinned card on Devices & security. */
+function thisDeviceCard(page: Page) {
+  return page
+    .getByRole("main")
+    .getByRole("region")
+    .filter({ has: page.getByText("This device", { exact: true }) });
+}
+
+/** Other active devices (incl. earlier setups): rows with a Revoke button. */
+function revocableDeviceRows(page: Page) {
   return page
     .getByRole("main")
     .getByRole("listitem")

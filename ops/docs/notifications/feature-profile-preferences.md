@@ -9,7 +9,8 @@ profiles, and submitted report history.
 ## Location in the Site
 
 Preferences is a dedicated page at `/preferences`. It contains four tabs: **Notifications & Messages**, **Blocked Profiles**,
-**Reports**, and **Device Permissions** (`/preferences?tab=devices`). Desktop
+**Reports**, and **Devices & security** (`/preferences?tab=security`; the
+older `?tab=devices` still opens it). Desktop
 uses the underlined tab row; narrow layouts use a two-by-two grid without
 horizontal scrolling.
 
@@ -32,7 +33,7 @@ The profile-header action is hidden while an active profile proxy is in use.
 
 1. Open your own profile and select **Preferences**.
 2. Choose **Notifications & Messages**, **Blocked Profiles**, **Reports**, or
-   **Device Permissions**.
+   **Devices & security**.
 3. Review or change the available settings for the active profile.
 4. When Preferences was opened from the profile header, return to the active
    profile with **Back to profile** on desktop or the standard back arrow in
@@ -100,19 +101,23 @@ Device-level push settings remain separate. Push delivery can only happen after
 an in-app notification is created, so a notification suppressed by these
 profile preferences cannot trigger a push.
 
-### Device Permissions
+### Devices & security
 
-**Authorized devices** lists signing and encrypted-DM permissions, including
-combined grants, with their status, wallet, added date, expiry date, one
+The tab exists while signed posts or encrypted DMs are enabled, and shows an
+amber dot while encrypted backup is off. It starts with the **Encrypted
+backup** card, then **Devices**: this browser pinned, **Other devices**,
+**Earlier setups of this browser** with **Clean up…**, and **Revoked or
+expired in the last 30 days**, collapsed. Each device appears once with its
+permissions as chips (signed posts, encrypted DMs), when it was set up, one
 **Last active** time (the later use of either permission; **Active now** for
-this browser) and **This device** where applicable. Signing and encrypted DMs
-name a browser the same way (for example "Brave on Windows"). You can rename
-any unrevoked device you own from a browser or app; the server name is shared
-across your devices. **Revoke** explains whether signing, encryption or both
-will stop before you confirm. Revoking this browser opens **Revoke this
-browser?**, which names it as the browser in use; for a combined grant it
-also says the encrypted chats saved here are deleted, says whether a backup
-keeps a copy, and links to the backup section first.
+this browser) and the date it expires. Signing and encrypted DMs name a browser
+the same way (for example "Brave on Windows"). **Rename** on this browser's
+card changes its name on the server. **Revoke** names the device and what
+stops before you confirm. Revoking this browser is in its **More** menu and
+opens **Revoke this browser?**, which names it as the browser in use, says
+whether a backup keeps the encrypted chats saved here, and offers **Set up
+backup first** when backup is off. Proxies see a note instead. See
+[Encrypted messages](../encrypted-messages.md#devices).
 
 The setup action names whichever permissions this device is missing and opens
 the shared consent dialog before a wallet request. It is omitted when both are

@@ -98,7 +98,8 @@ stay saved in this browser for the next sign-in.
 - `/messages/encrypted`: your encrypted chats on this device.
 - `/messages/encrypted/new`: start a direct message or a group.
 - `/messages/encrypted/{chat}`: one chat. The address is a random chat handle.
-- `/messages/encrypted/devices`: devices that can read your encrypted messages.
+- `/messages/encrypted/devices`: redirects to Preferences → **Devices & security**
+  (`/preferences?tab=security`), where devices and encrypted backup live.
 - The **Encrypted** section sits above **Direct messages** in the messages
   side pane on the web and on the app's Messages screen. Select the open chat
   again in the side pane to return to the encrypted inbox.
@@ -108,7 +109,7 @@ stay saved in this browser for the next sign-in.
 
 ## Turning it on
 
-Open the setup action in the account menu, Preferences → **Device Permissions**,
+Open the setup action in the account menu, Preferences → **Devices & security**,
 or the composer notice. Each opens the same permission dialog. The initial
 `/messages/encrypted` page presents the same explanation inline, without the
 **Encrypted messages / End-to-end encrypted** header until encryption is ready.
@@ -138,7 +139,7 @@ When encryption is included, the card explains all of the following:
 - History lives on your devices. Losing every copy, or clearing the last
   device's data, loses that history unless you have an
   [encrypted backup](#encrypted-backup) and its recovery code.
-- Permissions can be revoked in Preferences → **Device Permissions**.
+- Permissions can be revoked in Preferences → **Devices & security**.
 
 Selecting a setup entry does not immediately open the wallet. Review the card,
 then select its **Sign** button. A disconnected wallet is connected first and
@@ -179,7 +180,7 @@ existing encryption device keeps its keys and saved history. Expiry stops its
 authorization; it does not erase saved history by itself. If local keys/data
 were removed, renewal cannot recreate them: restore a backup where available.
 
-Preferences → **Device Permissions** identifies each grant's permissions and
+Preferences → **Devices & security** identifies each grant's permissions and
 explains what **Revoke** will disable. Revoking a combined grant disables both
 Signed Posts and Encrypted DMs; a separate grant disables only its own permission.
 These are not separate revoke switches within a combined grant. Revoking this
@@ -247,7 +248,7 @@ appear.
   **Sign to enable both**, and a combined sign-in can carry the upgrade
   without another prompt. The card shows "Couldn’t upgrade encrypted messages.
   Try again." if the upgrade fails. The setup dialog, the account-menu entry
-  and the Preferences → **Device Permissions** button also read **Upgrade
+  and the Preferences → **Devices & security** button also read **Upgrade
   encrypted messages** while the upgrade is pending.
 - **Earlier conversations.** Chats started before the move are read-only:
   their messages stay readable and searchable, but you can’t send, edit, react,
@@ -450,15 +451,29 @@ time your device sees someone. Compare safety codes and check the wallets in
 
 ## Devices
 
-`/messages/encrypted/devices` lists every device of your profile that can read
-your encrypted messages, marks **This device**, and shows each device's
-platform, when it was added, when it was last active (**Active now** for this
-device), the date it expires, and whether its wallet signature was verified on
-this device. You can rename any unrevoked
-device belonging to your profile from any authenticated browser or app. The name
-is saved on the server and appears on your other devices after their lists refresh;
-linked signing and encryption entries share that name. You can also revoke any
-device, including this one. Revoking this device opens its own
+Preferences → **Devices & security** (`/preferences?tab=security`; the old
+`/messages/encrypted/devices` and `?tab=devices` links lead there) lists every
+device of your profile once, whether it can sign posts, read encrypted DMs or
+both. The encrypted inbox header's **Devices & security** button opens it, and
+opening the tab starts encrypted messages in that browser so backup can show.
+
+- **This device** is pinned first, with its permissions as chips (a missing one
+  shows dashed, for example **Encrypted DMs off**, next to a **Turn on…**
+  button), **Active now**, the date it expires and its wallet. **Rename**
+  changes its name on the server for all your devices.
+- **Other devices** lists the rest, each with its permissions, when it was set
+  up, when it was last active and when it expires, and **Revoke**. A device
+  whose wallet signature couldn't be checked says so.
+- **Earlier setups of this browser** groups devices with the same name as this
+  browser that haven't been active since it was set up, usually this browser
+  before it lost its saved keys. **Clean up…** lists them with their dates,
+  all selected, and revokes the ones that stay selected.
+- **Revoked or expired in the last 30 days** stays collapsed to one line;
+  expanded, each ended device is one row.
+- **What these permissions mean** explains both permissions.
+
+**Revoke** asks first, naming the device and what stops; posts it signed stay
+verifiable. Revoking this device opens its own
 **Revoke this browser?** dialog: it names the browser you're using, says what
 stops, and says whether your backup keeps a copy. With backup off it warns
 that the encrypted chats in this browser can't be restored afterwards and
@@ -479,10 +494,17 @@ each chat's timeline.
 
 ## Encrypted backup
 
-The **Encrypted backup** section on `/messages/encrypted/devices` keeps an
-encrypted copy of your message history so you can restore it on a new device.
+The **Encrypted backup** card comes first on **Devices & security**. Its pill
+reads **On**, **Off**, **Backing up**, **Not on this device** (a backup from
+another device exists), **Unknown** or **Not available**, and the tab shows an
+amber dot while backup is off. With backup off the card explains the risk and
+the three steps, with **Set up backup**. Until encrypted messages run in this
+browser it says why instead: loading, open in another tab (**Use here**),
+couldn't start (**Try again**), unsupported browser, or **Turn on encrypted
+DMs** first. Backup keeps an encrypted copy of your message history so you can
+restore it on a new device.
 
-- **Turn on backup** shows a recovery code once: 14 groups of 4 letters and
+- **Set up backup** shows a recovery code once: 14 groups of 4 letters and
   numbers. Select **Copy code** or **Download as text file**, store it
   somewhere safe (for example a password manager), tick **I saved my recovery
   code somewhere safe**, then select **Turn on backup**. Closing the dialog

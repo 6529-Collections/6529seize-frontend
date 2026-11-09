@@ -34,7 +34,8 @@ soon**, while retaining **Connect only** (see
   the seal by the timestamp.
 - Any page with a pending signed write: the **Couldn't sign this ...**
   prompt.
-- Preferences: `/preferences?tab=devices` (the **Device Permissions** tab).
+- Preferences: `/preferences?tab=security` (the **Devices & security** tab;
+  `?tab=devices` still opens it).
 
 ## Entry Points
 
@@ -70,7 +71,7 @@ soon**, while retaining **Connect only** (see
   opens. **Turn on** opens the shared permission dialog before any wallet
   request. Dismissing the setup notice
   hides it for 30 days per wallet; it does not revoke anything.
-- **Account menu and Device Permissions.** When both permissions are missing,
+- **Account menu and Devices & security.** When both permissions are missing,
   **Turn on signed posts and encrypted DMs** opens a dialog with Signed Posts
   first and the full Encrypted DMs explanation second. If only one is missing,
   it shows **Turn on signed posts** or **Turn on encrypted DMs**. The **Sign** button
@@ -159,21 +160,21 @@ Ed25519, writes are sent unsigned exactly as before.
 - `?showRenewal=true` previews reminder layout only in Waves or Messages. When
   no permission is due, preview copy and disabled renewal actions make that clear.
 
-## Device Permissions
+## Devices & security
 
-Preferences → **Device Permissions** lists **Authorized devices** with signing,
-encryption or combined permissions. It shows device names, **This device**,
-wallets, added/expiry/last-used dates and **Active**, **Expired** or **Revoked**
-status. Signing history includes at most the newest 100 grants, so older grants
+Preferences → **Devices & security** lists every device once, with signing,
+encryption or both as chips. It shows device names, **This device**, the
+wallet on this browser's card, set-up, last-active and expiry dates, and
+groups ended devices under **Revoked or expired in the last 30 days**. Signing history includes at most the newest 100 grants, so older grants
 can be absent from a long list. Proxies cannot manage devices.
 
 If this browser cannot read its own keys (for example when its site storage is
 unavailable), no entry is marked **This device**: the page says so, and the
 revoke confirmation warns that the permission may be this browser's own.
 
-Rename any unrevoked device you own from an authenticated browser or app. This
-updates the existing server name, reflected on other devices when their lists
-refresh; linked signing and encryption entries share it. It is not a local nickname.
+**Rename** on this browser's card updates its server name, reflected on other
+devices when their lists refresh; linked signing and encryption entries share
+it. It is not a local nickname.
 Generating a secure connection QR alone creates no active device entry: the
 receiving app must accept and register it.
 
@@ -194,7 +195,7 @@ to clear that notice across devices as their grant lists refresh. Choose
 for a wallet is its baseline. If the browser loses its local signing key but
 still remembers its grant, that grant does not trigger a new-device notice.
 Set up Signed Posts again to sign from that browser. Review existing grants in
-**Device Permissions**.
+**Devices & security**.
 
 ## Checking a Drop's Signature
 
@@ -305,7 +306,7 @@ that the wallet shows as structured fields with this statement:
 
 The existing wallet wording is retained for this rollout. The grant's origin is
 "6529 Desktop" in the desktop app and the site host (6529.io) in the phone
-app. App grants last 180 days, appear under **Device Permissions**
+app. App grants last 180 days, appear under **Devices & security**
 like any other grant (labelled, for example, "6529 Mobile on iPhone"), sign
 writes exactly as above, and anyone can verify them: the drop's
 **Signature** dialog checks the wallet's typed-data signature, or a contract
@@ -336,7 +337,7 @@ implementation is not evidence that a released app supports it. Encrypted messag
 
 ## Turning On When the Wallet Is Not Ready
 
-**Turn on** and the Device Permissions setup action first open the consent
+**Turn on** and the Devices & security setup action first open the consent
 dialog. After you choose its **Sign** button, setup connects the matching wallet
 if needed and continues automatically to signing. **Renew** also uses that wallet
 connection/signing flow. Progress appears below the relevant action.
@@ -397,8 +398,8 @@ connection/signing flow. Progress appears below the relevant action.
 
 | Field                     | Current exception                                                                                                                                                                                                                                                                                                                                                          |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route or component        | `components/device-signing/SignedMessagesNotice.tsx`, `components/device-signing/SignedWriteDecisionHost.tsx`, Preferences Device Permissions tab (`/preferences?tab=devices`), `components/waves/drops/signature/DropSignatureDialog.tsx`, `components/waves/drops/signature/DropGroupSignatureDialog.tsx`, `components/waves/drops/signature/DropAuthorSignedMarker.tsx` |
-| Untranslated surface      | All copy in `i18n/messages/signed-messages.ts` (notice, Device Permissions tab, signature dialogs, signed-by-author seals, "Couldn't sign" prompts); plural forms use `.one` and `.other` keys                                                                                                                                                                             |
+| Route or component        | `components/device-signing/SignedMessagesNotice.tsx`, `components/device-signing/SignedWriteDecisionHost.tsx`, Preferences Devices & security tab (`/preferences?tab=security`, copy in `i18n/messages/devices-security.ts`), `components/waves/drops/signature/DropSignatureDialog.tsx`, `components/waves/drops/signature/DropGroupSignatureDialog.tsx`, `components/waves/drops/signature/DropAuthorSignedMarker.tsx` |
+| Untranslated surface      | All copy in `i18n/messages/signed-messages.ts` (notice, signature dialogs, signed-by-author seals, "Couldn't sign" prompts); plural forms use `.one` and `.other` keys                                                                                                                                                                             |
 | Current fallback behavior | Keys exist only in `en-US`; other locales fall back to `en-US`. Dates and lists already use `formatDate` and `formatList`                                                                                                                                                                                                                                                  |
 | User impact               | Users of other locales see English copy for this feature                                                                                                                                                                                                                                                                                                                   |
 | Owner or follow-up        | Frontend localization maintainers; translations are outstanding now that the feature is on in production                                                                                                                                                                                                                                                                   |

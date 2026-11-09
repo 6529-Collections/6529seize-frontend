@@ -1,7 +1,6 @@
 // en-US source strings for signed posts (device-key signed drop writes).
 // Other locales fall back to en-US while the feature is staged.
 export const SIGNED_MESSAGES_MESSAGES = {
-  "preferences.tabs.devices": "Device Permissions",
   "signedMessages.enable.unavailable":
     "Couldn't turn on signed posts. Please try again.",
   "signedMessages.enable.reconnectWallet":

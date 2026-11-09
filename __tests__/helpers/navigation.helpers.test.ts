@@ -220,7 +220,7 @@ describe("navigation.helpers", () => {
     it("builds the encrypted routes", () => {
       expect(getEncryptedMessagesRoute()).toBe("/messages/encrypted");
       expect(getNewEncryptedChatRoute()).toBe("/messages/encrypted/new");
-      expect(getEncryptedDevicesRoute()).toBe("/messages/encrypted/devices");
+      expect(getEncryptedDevicesRoute()).toBe("/preferences?tab=security");
       expect(getEncryptedConversationRoute(group)).toBe(
         `/messages/encrypted/${group}`
       );

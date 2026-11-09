@@ -3,6 +3,7 @@ import { expect, type Locator, type Page } from "@playwright/test";
 import { dismissNextDevTools } from "../localSandbox";
 import {
   e2eeExactMessages,
+  e2eeMessage,
   NO_BACKUP_WARNING,
   NO_BACKUP_WARNING_APP,
 } from "./e2eeCopy";
@@ -88,7 +89,7 @@ export async function enroll(
     timeout: E2EE_UI_TIMEOUT_MS,
   });
   await expect(
-    page.getByRole("link", { name: "Devices for encrypted messages" })
+    page.getByRole("link", { name: e2eeMessage("e2ee.devices.open") })
   ).toBeVisible();
   expect(session.signatureCount()).toBe(before + 1);
 }

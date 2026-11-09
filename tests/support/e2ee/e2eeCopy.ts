@@ -39,7 +39,7 @@ export const SPLIT_VIEW_BANNER = E2EE_MESSAGES["e2ee.banner.splitView"];
 
 /** The setup card point about history living on devices (and backup). */
 export const NO_BACKUP_WARNING = E2EE_MESSAGES["e2ee.enroll.point.noBackup"];
-/** The same point in the 6529 app (Encrypted messages → Devices). */
+/** The same point in the 6529 app. */
 export const NO_BACKUP_WARNING_APP =
   E2EE_MESSAGES["e2ee.enroll.point.noBackupApp"];
 export const NEW_DEVICE_NOTICE = e2eeMessagePattern("e2ee.devices.newDevice");

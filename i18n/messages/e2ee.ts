@@ -42,7 +42,7 @@ export const E2EE_MESSAGES = {
   "e2ee.section.encrypted": "Encrypted",
   "e2ee.section.plaintext": "Direct messages",
   "e2ee.action.newChat": "New encrypted chat",
-  "e2ee.action.devices": "Devices",
+  "e2ee.action.devices": "Devices & security",
   "e2ee.action.retry": "Try again",
   "e2ee.action.cancel": "Cancel",
   "e2ee.action.close": "Close",
@@ -109,9 +109,9 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.point.privacy":
     "6529 cannot read your encrypted messages. It only delivers them.",
   "e2ee.enroll.point.noBackup":
-    "Your history is stored on your devices. If you lose all of them or clear this browser’s data, you lose it, unless you turn on encrypted backup in Devices.",
+    "Your history is stored on your devices. If you lose all of them or clear this browser’s data, you lose it, unless you turn on encrypted backup in Preferences → Devices & security.",
   "e2ee.enroll.point.noBackupApp":
-    "Your history is stored on your devices. If you lose all of them or clear the app data on the last device that holds your history, you lose it unless you turn on encrypted backup in Encrypted messages → Devices.",
+    "Your history is stored on your devices. If you lose all of them or clear the app data on the last device that holds your history, you lose it unless you turn on encrypted backup in Preferences → Devices & security.",
   "e2ee.enroll.safari":
     "Safari can delete this site’s data if you don’t open 6529 for 7 days. Visit regularly, or use another browser or the 6529 app, to keep your history.",
   "e2ee.enroll.button": "Enable encryption (one\u00a0signature)",
@@ -174,7 +174,6 @@ export const E2EE_MESSAGES = {
     "You cancelled the signature. This device keeps access until {date}.",
   "e2ee.renew.failed": "Couldn’t renew access. Try again.",
 
-  "e2ee.devices.title": "Devices for encrypted messages",
   "e2ee.devices.description":
     "Every active device listed here can read your encrypted messages. Revoke any device you don’t recognize.",
   "e2ee.devices.thisDevice": "This device",
@@ -229,7 +228,7 @@ export const E2EE_MESSAGES = {
     "New device added {date}: {label} ({platform}). It can read your encrypted messages. If this wasn’t you, revoke it.",
   "e2ee.devices.newDeviceConfirm": "This was me",
   "e2ee.devices.newDeviceRevoke": "Revoke {label}",
-  "e2ee.devices.open": "Devices for encrypted messages",
+  "e2ee.devices.open": "Devices & security",
 
   "e2ee.list.subtitle": "End-to-end encrypted chats on this device.",
   "e2ee.list.empty.title": "No encrypted chats yet",
@@ -582,7 +581,7 @@ export const E2EE_MESSAGES = {
   "e2ee.backup.status.lastBackup": "Last backed up {time}.",
   "e2ee.backup.status.usage": "{used} of {quota} used",
   "e2ee.backup.status.error": "Couldn’t check your backup.",
-  "e2ee.backup.action.turnOn": "Turn on backup",
+  "e2ee.backup.action.turnOn": "Set up backup",
   "e2ee.backup.action.restore": "Restore messages",
   "e2ee.backup.action.lostCode": "Lost your recovery code?",
   "e2ee.backup.action.backupNow": "Back up now",

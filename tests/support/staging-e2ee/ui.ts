@@ -248,7 +248,10 @@ export async function imagePixels(image: Locator): Promise<number[]> {
   });
 }
 
-/** Active rows on `/messages/encrypted/devices`. */
+/**
+ * Rows of this person's other active devices on Devices & security (each
+ * has a Revoke button; this browser's pinned card does not).
+ */
 export function activeDeviceRows(page: Page): Locator {
   return page
     .getByRole("main")
@@ -256,29 +259,33 @@ export function activeDeviceRows(page: Page): Locator {
     .filter({ has: page.getByRole("button", { name: /^Revoke / }) });
 }
 
-/** From the devices page, revokes this person's other active device. */
+/** From Devices & security, revokes this person's other active device. */
 export async function revokeOtherDevice(session: StagingE2eeSession) {
   const { page } = session;
+  // The former devices page redirects to Preferences → Devices & security.
   await gotoStaging(page, `${ENCRYPTED_ROUTE}/devices`);
-  const active = activeDeviceRows(page);
   await expect(
-    active,
-    `${session.label} should list both of this person's devices`
-  ).toHaveCount(2, { timeout: UI_TIMEOUT_MS });
-  const thisDevice = page.getByText("This device", { exact: true });
-  await expect(active.filter({ has: thisDevice })).toHaveCount(1);
-  await active
-    .filter({ hasNot: thisDevice })
-    .getByRole("button", { name: /^Revoke / })
-    .click();
+    page.getByRole("main").getByRole("region").filter({
+      has: page.getByText("This device", { exact: true }),
+    }),
+    `${session.label} should pin this browser`
+  ).toHaveCount(1, { timeout: UI_TIMEOUT_MS });
+  const others = activeDeviceRows(page);
+  await expect(
+    others,
+    `${session.label} should list this person's other device`
+  ).toHaveCount(1, { timeout: UI_TIMEOUT_MS });
+  await others.getByRole("button", { name: /^Revoke / }).click();
   await page
     .getByRole("dialog", { name: /^Revoke .+\?$/u })
     .getByRole("button", { name: "Revoke device" })
     .click();
-  await expect(activeDeviceRows(page)).toHaveCount(1, {
+  await expect(activeDeviceRows(page)).toHaveCount(0, {
     timeout: UI_TIMEOUT_MS,
   });
   await expect(
-    page.getByRole("heading", { name: "Revoked devices" })
+    page.getByRole("button", {
+      name: /^Revoked or expired in the last 30 days/u,
+    })
   ).toBeVisible({ timeout: UI_TIMEOUT_MS });
 }

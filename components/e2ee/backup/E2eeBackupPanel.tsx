@@ -22,6 +22,7 @@ import { formatE2eeDateTime, tCount } from "../e2eeFormat";
 import { E2eeBanner } from "../ui/E2eeBanner";
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
 import { E2EE_BACKUP_SETUP_EVENT } from "./backupSetupRequest";
+import { BackupStatusPill, type BackupPillState } from "./BackupStatusPill";
 import { getBackupErrorKey } from "./e2eeBackupErrors";
 import { E2eeRecoveryCodeDialog } from "./E2eeRecoveryCodeDialog";
 import { E2eeRestoreDialog } from "./E2eeRestoreDialog";
@@ -98,6 +99,73 @@ interface BackupResult {
   readonly text: string;
   /** A repeated result still restarts its timer. */
   readonly id: number;
+}
+
+function getPillState(snapshot: E2eeBackupSnapshot): BackupPillState | null {
+  switch (snapshot.phase) {
+    case "on":
+      return snapshot.uploading ? "uploading" : "on";
+    case "off":
+      return "off";
+    case "available":
+      return "available";
+    case "error":
+      return "unknown";
+    case "loading":
+      return null;
+  }
+}
+
+const OFF_STEPS = [
+  {
+    title: "devicesSecurity.backup.off.step1.title",
+    body: "devicesSecurity.backup.off.step1.body",
+  },
+  {
+    title: "devicesSecurity.backup.off.step2.title",
+    body: "devicesSecurity.backup.off.step2.body",
+  },
+  {
+    title: "devicesSecurity.backup.off.step3.title",
+    body: "devicesSecurity.backup.off.step3.body",
+  },
+] as const satisfies readonly { title: MessageKey; body: MessageKey }[];
+
+/** Backup off: the risk in plain words and what setting it up involves. */
+function OffExplainer({ locale }: { readonly locale: Locale }) {
+  return (
+    <>
+      <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-200">
+        {t(locale, "devicesSecurity.backup.off.body")}
+      </p>
+      <ol
+        aria-label={t(locale, "devicesSecurity.backup.off.stepsLabel")}
+        className="tw-m-0 tw-grid tw-list-none tw-gap-2 tw-p-0 sm:tw-grid-cols-3"
+      >
+        {OFF_STEPS.map((step, index) => (
+          <li
+            key={step.title}
+            className="tw-flex tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-3"
+          >
+            <span
+              aria-hidden="true"
+              className="tw-flex tw-size-5 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-xs tw-font-semibold tw-text-iron-200"
+            >
+              {formatNumber(locale, index + 1)}
+            </span>
+            <span className="tw-min-w-0">
+              <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
+                {t(locale, step.title)}
+              </span>
+              <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+                {t(locale, step.body)}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ol>
+    </>
+  );
 }
 
 function StatusDetails({
@@ -445,6 +513,7 @@ export function E2eeBackupPanel() {
 
   const busy = snapshot.busy || preparing;
   const holders = getRevokedKeyHolders(snapshot, devices);
+  const pill = getPillState(snapshot);
   const errorKey =
     actionErrorKey ??
     (snapshot.lastError ? getBackupErrorKey(snapshot.lastError) : null);
@@ -455,12 +524,15 @@ export function E2eeBackupPanel() {
       className="tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4"
     >
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-        <h2
-          id={titleId}
-          className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50"
-        >
-          {t(locale, "e2ee.backup.title")}
-        </h2>
+        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
+          <h2
+            id={titleId}
+            className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50"
+          >
+            {t(locale, "e2ee.backup.title")}
+          </h2>
+          {pill ? <BackupStatusPill locale={locale} state={pill} /> : null}
+        </div>
         {snapshot.phase === "on" ? (
           <MoreMenu
             locale={locale}
@@ -469,17 +541,19 @@ export function E2eeBackupPanel() {
           />
         ) : null}
       </div>
-      <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-        {t(locale, "e2ee.backup.description")}
-      </p>
-      <div className="tw-flex tw-flex-col tw-gap-1">
-        <p
-          className={`tw-m-0 tw-text-sm tw-font-medium ${
-            snapshot.phase === "off" ? "tw-text-amber-200" : "tw-text-iron-100"
-          }`}
-        >
-          {t(locale, STATUS_KEYS[snapshot.phase])}
+      {snapshot.phase === "off" ? (
+        <OffExplainer locale={locale} />
+      ) : (
+        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(locale, "e2ee.backup.description")}
         </p>
+      )}
+      <div className="tw-flex tw-flex-col tw-gap-1">
+        {snapshot.phase === "off" ? null : (
+          <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
+            {t(locale, STATUS_KEYS[snapshot.phase])}
+          </p>
+        )}
         <StatusDetails snapshot={snapshot} locale={locale} />
         {/* Results join the status line briefly, then clear themselves. */}
         <output className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-emerald-300">
@@ -520,6 +594,11 @@ export function E2eeBackupPanel() {
           onRetry={() => void run(() => manager.refresh())}
         />
       </div>
+      {snapshot.phase === "off" ? (
+        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          {t(locale, "devicesSecurity.backup.off.note")}
+        </p>
+      ) : null}
       {errorKey ? (
         <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
           {t(locale, errorKey)}

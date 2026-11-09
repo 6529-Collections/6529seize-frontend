@@ -748,7 +748,7 @@ async function expectEnrolledBySignIn(session: StagingE2eeSession) {
   // The engine may have registered before this navigation; the device link
   // and the absent card are the contract, the response is extra evidence.
   await expect(
-    page.getByRole("link", { name: "Devices for encrypted messages" }).first()
+    page.getByRole("link", { name: e2eeMessage("e2ee.devices.open") }).first()
   ).toBeVisible({ timeout: FIRST_LOAD_TIMEOUT_MS });
   await expect(enrollmentHeading(page)).toHaveCount(0);
   const response = await registration.catch(() => null);
@@ -820,7 +820,7 @@ async function enrollWithEncryptionOnly(
     timeout: UI_TIMEOUT_MS,
   });
   await expect(
-    page.getByRole("link", { name: "Devices for encrypted messages" }).first()
+    page.getByRole("link", { name: e2eeMessage("e2ee.devices.open") }).first()
   ).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
   expect(wallet.count("personal_sign")).toBe(signInsBefore);
@@ -922,7 +922,7 @@ async function enrollWithCombinedTurnOn(session: StagingE2eeSession) {
     timeout: UI_TIMEOUT_MS,
   });
   await expect(
-    page.getByRole("link", { name: "Devices for encrypted messages" }).first()
+    page.getByRole("link", { name: e2eeMessage("e2ee.devices.open") }).first()
   ).toBeVisible({ timeout: UI_TIMEOUT_MS });
 
   expect(

@@ -293,7 +293,7 @@ export const CONTENT_MODERATION_MESSAGES = {
   "preferences.metaDescription":
     "Manage notification, messaging, and content preferences.",
   "preferences.description":
-    "Manage notifications, messages, and the content you see.",
+    "Manage notifications, messages, devices, and the content you see.",
   "preferences.backToProfile": "Back to profile",
   "preferences.signIn":
     "Connect an authenticated profile to manage preferences.",

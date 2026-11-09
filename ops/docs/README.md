@@ -77,7 +77,8 @@ March 19, 2026.
   `/content-preferences`, and authorized `/content-moderation`
 - [Encrypted Messages](encrypted-messages.md): staging-only
   `/messages/encrypted`, `/messages/encrypted/new`,
-  `/messages/encrypted/devices`, `/messages/encrypted/{chat}`
+  `/messages/encrypted/{chat}`; `/messages/encrypted/devices` redirects to
+  `/preferences?tab=security`
 - [Realtime](realtime/README.md): `/nft-activity`
 - [Validator Download Page](validator-download-page.md): password-protected
   `/validator`, `/validator/guide`, `/validator/known-issues`,
@@ -132,7 +133,8 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   links redirect there.
 - Encrypted messages, on builds with the encrypted-messages flag (on in
   staging and production): `/messages/encrypted`, `/messages/encrypted/new`,
-  `/messages/encrypted/devices`, `/messages/encrypted/{chat}`
+  `/messages/encrypted/{chat}`; `/messages/encrypted/devices` redirects to
+  `/preferences?tab=security`
 - Drop Forge:
   `/drop-forge`, `/drop-forge/craft`, `/drop-forge/craft/{id}`,
   `/drop-forge/launch`, `/drop-forge/launch/{id}`
