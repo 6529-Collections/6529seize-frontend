@@ -547,7 +547,6 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
               isMemesWave={isMemesWave}
               isRankWave={isRankWave}
               isApproveWave={isApproveWave}
-              outcomesVisible={outcomesVisible}
               hasPolls={hasPolls}
               onDropClick={onDropClick}
               onOpenQuickVote={quickVote.openQuickVote}
