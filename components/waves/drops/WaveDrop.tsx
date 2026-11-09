@@ -65,6 +65,8 @@ import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliverySt
 import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresentation";
 import { isDropAuthorSigned } from "./signature/dropAuthorSigned";
 import GroupedDropTimestamp from "./GroupedDropTimestamp";
+import ShareDropSelectOverlay from "./share-image/ShareDropSelectOverlay";
+import { useShareDropsSelection } from "./share-image/ShareDropsSelectionContext";
 import { SwipeReplyHint } from "./SwipeReplyHint";
 
 const WaveDropInner = ({
@@ -580,14 +582,15 @@ const WaveDropInner = ({
     standaloneQuickRemoveCuration,
   });
 
-  const dropClasses = getDropClasses(
+  const isChoosingSharePosts = useShareDropsSelection()?.isSelecting ?? false;
+  const dropClasses = `${getDropClasses(
     isActiveDrop,
     groupingClass,
     location,
     drop.rank,
     isDrop,
     isModerationRejected
-  );
+  )}${isChoosingSharePosts ? " tw-relative" : ""}`;
 
   const contentBlock = getContentBlock({
     shouldShowReplyHeader,
@@ -685,6 +688,7 @@ const WaveDropInner = ({
         onPointerOut={handleRowPointerOut}
         onClickCapture={handleClickCapture}
       >
+        {isChoosingSharePosts && <ShareDropSelectOverlay drop={drop} />}
         {canSwipeReply && <SwipeReplyHint />}
         {showGroupedTimestamp && (
           <GroupedDropTimestamp
@@ -706,6 +710,7 @@ const WaveDropInner = ({
           {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
           {moderationRejectedStatus}
           {canUseDesktopHoverActions &&
+            !isChoosingSharePosts &&
             effectiveShowInteractions &&
             showReplyAndQuote &&
             !showStandaloneActionsButton &&

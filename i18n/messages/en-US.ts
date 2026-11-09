@@ -42,6 +42,7 @@ import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import utcScheduleMessages from "@/i18n/messages/utcSchedule.en-US.json";
 import displayTimeZoneMessages from "@/i18n/messages/displayTimeZone.en-US.json";
+import shareDropsImageMessages from "@/i18n/messages/shareDropsImage.en-US.json";
 import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -4970,6 +4971,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...toolsMessages,
   ...utcScheduleMessages,
   ...displayTimeZoneMessages,
+  ...shareDropsImageMessages,
   ...worldTimeZonesMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REVIEWBOT_USAGE_MESSAGES,
