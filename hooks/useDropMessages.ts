@@ -126,7 +126,9 @@ export function useDropMessages(
       "newer" in firstPage && firstPage.newer !== null
         ? { serialNo: firstPage.newer, strategy: ApiDropSearchStrategy.Newer }
         : null,
-    placeholderData: replySerialNo === undefined ? keepPreviousData : undefined,
+    ...(replySerialNo === undefined
+      ? { placeholderData: keepPreviousData }
+      : {}),
     staleTime: 60000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
