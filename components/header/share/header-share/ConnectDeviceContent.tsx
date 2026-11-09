@@ -9,8 +9,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
 import Image from "next/image";
-import { type ReactNode, useId, useLayoutEffect, useRef } from "react";
-import { Tooltip } from "react-tooltip";
+import { type ReactNode, useLayoutEffect, useRef } from "react";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { HeaderShareModalViewProps } from "./HeaderShareModalView.types";
 
@@ -102,13 +101,6 @@ export function ConnectDeviceChoices({
   readonly canSetUp: boolean;
   readonly setConnectionMode: (mode: "only" | "secure") => void;
 }) {
-  const tooltipId = useId();
-  const desktopSetupUnavailable = activeSubTab === SubMode.DESKTOP;
-  const comingSoon = t(
-    HEADER_SHARE_LOCALE,
-    "headerShare.connectModal.desktopComingSoon"
-  );
-
   return (
     <>
       <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
@@ -130,32 +122,14 @@ export function ConnectDeviceChoices({
         isAppDeviceGrantsEnabled() &&
         isSignedMessagesEnabled() &&
         isE2eeEnabled() && (
-          <>
-            <Button
-              variant="primary"
-              size="md"
-              className="!tw-h-auto tw-min-h-10 !tw-whitespace-normal tw-py-2 aria-disabled:!tw-cursor-not-allowed aria-disabled:tw-opacity-50"
-              {...(desktopSetupUnavailable
-                ? {
-                    "aria-disabled": true,
-                    "aria-description": comingSoon,
-                    "data-tooltip-id": tooltipId,
-                  }
-                : { onClick: () => setConnectionMode("secure") })}
-            >
-              {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.secure")}
-            </Button>
-            {desktopSetupUnavailable && (
-              <Tooltip
-                id={tooltipId}
-                content={comingSoon}
-                variant="light"
-                opacity={1}
-                positionStrategy="fixed"
-                place="top"
-              />
-            )}
-          </>
+          <Button
+            variant="primary"
+            size="md"
+            className="!tw-h-auto tw-min-h-10 !tw-whitespace-normal tw-py-2"
+            onClick={() => setConnectionMode("secure")}
+          >
+            {t(HEADER_SHARE_LOCALE, "headerShare.connectModal.secure")}
+          </Button>
         )}
     </>
   );

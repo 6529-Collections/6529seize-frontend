@@ -533,9 +533,7 @@ encrypted copy of your message history so you can restore it on a new device.
   source-browser-approved [connection sharing](#setup-through-connection-sharing)
   signs in and enrolls the receiving app without connecting a wallet there.
   Ordinary app sign-in alone does not grant these permissions. Secure setup
-  requires a compatible app build with cryptographic support. The web
-  **6529 Desktop** secure setup button shows **Coming soon**. Desktop users
-  can choose **Connect only**.
+  requires a compatible Desktop or Mobile build with cryptographic support.
 
 - **Phones.** 6529 Mobile needs iOS 16.4 or later (earlier iOS versions cannot
   run the current site at all) or a current Android System WebView. Signed
@@ -664,8 +662,8 @@ Choose **Connect only** for an additional signed-in app session, or
 The source browser does not need encryption enabled on itself to approve the
 receiving app. Proxy sessions cannot authorize secure setup.
 
-The **6529 Desktop** secure option is disabled and shows **Coming soon**.
-Choose **Connect only** to sign in on Desktop.
+For Desktop secure setup, approve the wallet signature in the browser, then
+select **Open in 6529 Desktop** to open the private link in a compatible build.
 
 For Mobile secure setup, approve the wallet signature in the browser, then scan
 one QR or open its private link in the receiving app. The regular **Scan QR Code**

@@ -411,9 +411,9 @@ connection/signing flow. Progress appears below the relevant action.
 ## Connection sharing and status
 
 The Connect Device modal offers source-browser approval for receiving-app signing
-and encryption keys. The **6529 Desktop** secure option shows **Coming soon**.
-Desktop can use **Connect only**. Compatible Mobile builds use one QR for sign-in
-and secure setup without connecting the receiving wallet. Working receiver keys and
+and encryption keys. A compatible Desktop build uses a private app link and
+Mobile uses a QR code. Both sign in and set up permissions without connecting
+the receiving wallet. Working receiver keys and
 history are preserved; source history is not copied. See
 [Encrypted messages](../../encrypted-messages.md#setup-through-connection-sharing).
 
