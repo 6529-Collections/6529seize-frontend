@@ -109,7 +109,6 @@ describe("wave-rules.helpers", () => {
         ["Required metadata", "artist (Text)"],
         ["Negative voting", "Blocked"],
         ["Approval threshold", "25 Rep"],
-        ["Outcomes visibility", "Hidden"],
       ])
     );
   });
@@ -271,7 +270,6 @@ describe("wave-rules.helpers", () => {
       expect.arrayContaining([
         ["Winner announcements", "None (ongoing ranking, no end date)"],
         ["Type", "Rank — Perpetual Ranking"],
-        ["Outcomes visibility", "Hidden"],
         ["Configured outcomes", "Not available (perpetual wave)"],
       ])
     );

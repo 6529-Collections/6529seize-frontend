@@ -1477,7 +1477,7 @@ describe("CreateWave", () => {
       );
     });
 
-    it("saves hidden outcome display metadata for rank waves", async () => {
+    it("ignores retired hidden outcome metadata for rank waves", async () => {
       const configOnDescriptionStep = {
         ...mockWaveConfig,
         config: {
@@ -1505,17 +1505,18 @@ describe("CreateWave", () => {
       fireEvent.click(screen.getByRole("button", { name: /complete/i }));
 
       await waitFor(() => {
-        expect(mockedCreateWaveMetadata).toHaveBeenCalledWith({
-          waveId: "new-wave-id",
-          body: {
-            data_key: "wave_display.outcomes.visible",
-            data_value: "false",
-          },
-        });
+        expect(mockRouter.push).toHaveBeenCalledWith("/waves/new-wave-id");
+      });
+      expect(mockedCreateWaveMetadata).not.toHaveBeenCalledWith({
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.outcomes.visible",
+          data_value: "false",
+        },
       });
     });
 
-    it("saves hidden outcome display metadata for approve waves", async () => {
+    it("ignores retired hidden outcome metadata for approve waves", async () => {
       const configOnDescriptionStep = {
         ...mockWaveConfig,
         config: {
@@ -1538,13 +1539,14 @@ describe("CreateWave", () => {
       fireEvent.click(screen.getByRole("button", { name: /complete/i }));
 
       await waitFor(() => {
-        expect(mockedCreateWaveMetadata).toHaveBeenCalledWith({
-          waveId: "new-wave-id",
-          body: {
-            data_key: "wave_display.outcomes.visible",
-            data_value: "false",
-          },
-        });
+        expect(mockRouter.push).toHaveBeenCalledWith("/waves/new-wave-id");
+      });
+      expect(mockedCreateWaveMetadata).not.toHaveBeenCalledWith({
+        waveId: "new-wave-id",
+        body: {
+          data_key: "wave_display.outcomes.visible",
+          data_value: "false",
+        },
       });
     });
 

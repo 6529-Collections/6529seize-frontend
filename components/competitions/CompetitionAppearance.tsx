@@ -35,7 +35,6 @@ const APPEARANCE_KEYS: ReadonlySet<string> = new Set(
 
 function AppearanceForm({ onClose }: { readonly onClose: () => void }) {
   const { competition } = useCompetition();
-  const locale = useBrowserLocale();
   const metadata = (competition.presentation ?? []).map((item, id) => ({
     ...item,
     id,
@@ -99,22 +98,6 @@ function AppearanceForm({ onClose }: { readonly onClose: () => void }) {
           errors={errors}
           onChange={setDisplay}
         />
-        {!ongoingRanking && (
-          <label className="tw-mx-5 tw-mb-5 tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-3 tw-text-sm tw-font-medium tw-text-iron-200">
-            {t(locale, "waves.create.outcomes.showOutcomes")}
-            <input
-              type="checkbox"
-              checked={display.outcomesVisible}
-              onChange={(event) =>
-                setDisplay({
-                  ...display,
-                  outcomesVisible: event.target.checked,
-                })
-              }
-              className="tw-form-checkbox tw-size-5 tw-rounded tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
-            />
-          </label>
-        )}
       </fieldset>
       <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-4 sm:tw-p-5">
         <CompetitionConfigSaveActions
