@@ -561,6 +561,8 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
                       />
                     </>
                   )}
+                  {/* The time setting is on the device; no sign-in needed. */}
+                  <DisplayTimeZoneMobileMenuItem onSelected={closeMenu} />
                   {/* Anyone can check a signature; reading needs no sign-in. */}
                   <DropSignatureMenuItem
                     dropId={drop.id}
