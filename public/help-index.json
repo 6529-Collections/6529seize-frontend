@@ -11387,6 +11387,54 @@
         "components/legacy-browser/LegacyBrowserNotice.tsx",
         "components/legacy-browser/legacyBrowserGate.ts"
       ]
+    },
+    {
+      "id": "sanctions.policy",
+      "kind": "route",
+      "title": "Sanctions page",
+      "aliases": [
+        "sanctions",
+        "sanctions policy",
+        "sanctioned wallets",
+        "sanctioned countries",
+        "blocked country",
+        "blocked wallet",
+        "OFAC",
+        "SDN list",
+        "why can't I sign in sanctions",
+        "site not available in my country"
+      ],
+      "keywords": [
+        "sanctions",
+        "ofac",
+        "sdn",
+        "wallet",
+        "address",
+        "country",
+        "blocked",
+        "list",
+        "appeal",
+        "delegation",
+        "vpn"
+      ],
+      "facts": [
+        "The sanctions page lives at /sanctions and explains how 6529 follows sanctions laws by place and by wallet address.",
+        "6529.io is not available in Cuba, Iran, North Korea, or the Crimea (including Sevastopol), Donetsk and Luhansk regions of Ukraine; location is estimated from the IP address and network, so a VPN or travel can affect it.",
+        "Wallet addresses are checked against official lists from the United States (OFAC SDN), the United Kingdom, the European Union, Switzerland, Japan, South Korea and Israel (seizure orders still in force); Canada's list currently has no wallet addresses.",
+        "A listing on any one list is enough. A listed wallet affects its whole consolidated profile, and a delegation to or from a listed wallet carries no rights without blocking the other wallet.",
+        "A listed profile can browse while signed out but cannot sign in or take actions such as posting, voting, giving rep or NIC, delegating, minting, subscribing or paying.",
+        "The list is rebuilt daily from the official sources. The page shows the list grouped by authority with counts, source update dates, source links, its SHA-256 and IPFS CID, and a download of the exact bytes.",
+        "People who think a match is wrong can email support@6529.io; a genuine listing can only be removed by the authority that made it, and the page links to OFAC's removal process.",
+        "The page never shows which 6529 profiles or wallets matched a list."
+      ],
+      "canonical_path": "/sanctions",
+      "related_paths": ["/about/terms-of-service"],
+      "tags": ["sanctions", "policy", "wallets"],
+      "source_refs": [
+        "ops/docs/sanctions.md",
+        "app/sanctions/page.tsx",
+        "components/sanctions/SanctionsPolicyPage.tsx"
+      ]
     }
   ]
 }
