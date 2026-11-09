@@ -9,7 +9,7 @@ import {
 import type { GroupRuntime } from "./store";
 
 /** One sync pass recovers at most eight uncached device owners across all chats. */
-export interface RecoveryBudget {
+interface RecoveryBudget {
   remaining: number;
 }
 

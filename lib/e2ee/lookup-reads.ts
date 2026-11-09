@@ -16,7 +16,7 @@ export class LookupDeferred extends Error {
   }
 }
 
-export function lookupStatus(error: unknown): number | null {
+function lookupStatus(error: unknown): number | null {
   if (typeof error !== "object" || error === null || !("status" in error)) {
     return null;
   }
@@ -118,6 +118,7 @@ export class LookupReads {
 
   private release(): void {
     const next = this.waiting.shift();
+    // Transfer the occupied slot to a waiter without increasing concurrency.
     if (next) next();
     else this.active -= 1;
   }

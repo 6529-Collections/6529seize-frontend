@@ -2,6 +2,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { LookupReads } from "@/lib/e2ee/lookup-reads";
+import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
 import { commonApiFetch } from "@/services/api/common-api";
 
 interface E2eeResolvedProfile {
@@ -19,9 +20,19 @@ const UNKNOWN_PROFILE: E2eeResolvedProfile = {
   wallets: [],
 };
 
-const readers = new WeakMap<QueryClient, LookupReads>();
+const readers = new WeakMap<QueryClient, Map<string, LookupReads>>();
 export function getE2eeLookupReads(client: QueryClient): LookupReads {
-  let reads = readers.get(client);
+  let scopes = readers.get(client);
+  if (!scopes) {
+    scopes = new Map();
+    readers.set(client, scopes);
+  }
+  // A previous account's 429 must not consume the active account's read budget.
+  const scope = JSON.stringify([
+    getWalletAddress()?.toLowerCase() ?? null,
+    getWalletRole() ?? null,
+  ]);
+  let reads = scopes.get(scope);
   if (!reads) {
     reads = new LookupReads(
       Date.now,
@@ -30,7 +41,7 @@ export function getE2eeLookupReads(client: QueryClient): LookupReads {
         (typeof document === "undefined" ||
           document.visibilityState !== "hidden")
     );
-    readers.set(client, reads);
+    scopes.set(scope, reads);
   }
   return reads;
 }

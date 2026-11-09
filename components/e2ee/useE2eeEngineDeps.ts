@@ -71,15 +71,17 @@ export function subscribeE2eeWakes(
       listener({ type, data });
     })
   );
+  const browserWindow = typeof window === "undefined" ? null : window;
+  const browserDocument = typeof document === "undefined" ? null : document;
   const resume = () => {
-    if (document.visibilityState !== "hidden")
+    if (browserDocument?.visibilityState !== "hidden")
       listener({ type: "E2EE_LOOKUP_RESUME", data: null });
   };
-  window.addEventListener("online", resume);
-  document.addEventListener("visibilitychange", resume);
+  browserWindow?.addEventListener("online", resume);
+  browserDocument?.addEventListener("visibilitychange", resume);
   return () => {
-    window.removeEventListener("online", resume);
-    document.removeEventListener("visibilitychange", resume);
+    browserWindow?.removeEventListener("online", resume);
+    browserDocument?.removeEventListener("visibilitychange", resume);
     for (const unsubscribe of unsubscribers) {
       unsubscribe();
     }
