@@ -5,7 +5,6 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { getWaveChatRepliesSettings } from "@/helpers/waves/wave-chat-replies.helpers";
 import {
   getWaveCustomRulesFromMetadata,
-  getWaveOutcomeVisibilityFromMetadata,
   normalizeWaveCustomRules,
 } from "@/helpers/waves/wave-metadata.helpers";
 import {
@@ -295,22 +294,6 @@ const getWaveApprovalSection = ({
   ],
 });
 
-const getWaveOutcomesSection = ({
-  metadata,
-}: WaveRulesContext): WaveRuleSection => ({
-  id: "outcomes",
-  title: "Outcomes",
-  rows: [
-    {
-      id: "outcomes-visible",
-      label: "Outcomes visibility",
-      value: getWaveOutcomeVisibilityFromMetadata(metadata)
-        ? "Shown"
-        : "Hidden",
-    },
-  ],
-});
-
 const getWaveAutomaticSections = (
   context: WaveRulesContext
 ): WaveRuleSection[] => {
@@ -340,7 +323,6 @@ const getWaveAutomaticSections = (
     sections.push(getWaveApprovalSection(context));
   }
 
-  sections.push(getWaveOutcomesSection(context));
   return sections;
 };
 

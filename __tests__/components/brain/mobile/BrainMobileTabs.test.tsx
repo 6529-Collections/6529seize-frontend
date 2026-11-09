@@ -143,7 +143,7 @@ describe("BrainMobileTabs", () => {
           hasDefaultCompetition={hasDefaultCompetition}
         />
       );
-      for (const name of ["Outcome", "Votes"]) {
+      for (const name of ["Votes"]) {
         const tab = screen.queryByRole("button", { name });
         if (hasDefaultCompetition) expect(tab).toBeInTheDocument();
         else expect(tab).not.toBeInTheDocument();
@@ -426,7 +426,7 @@ describe("BrainMobileTabs", () => {
       })
     );
     expect(screen.getByText("Votes")).toBeInTheDocument();
-    expect(screen.getByText("Outcome")).toBeInTheDocument();
+    expect(screen.queryByText("Outcome")).not.toBeInTheDocument();
     expect(screen.getByText("FAQ")).toBeInTheDocument();
   });
 
@@ -498,10 +498,10 @@ describe("BrainMobileTabs", () => {
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
     expect(screen.getByText("Votes")).toBeInTheDocument();
-    expect(screen.getByText("Outcome")).toBeInTheDocument();
+    expect(screen.queryByText("Outcome")).not.toBeInTheDocument();
   });
 
-  it("hides Outcome when outcomes are hidden for rank waves", () => {
+  it("omits the retired Outcome tab regardless of rank visibility metadata", () => {
     (useWave as jest.Mock).mockReturnValue({
       isMemesWave: false,
       isCurationWave: false,
@@ -518,7 +518,6 @@ describe("BrainMobileTabs", () => {
         showStreamBack={false}
         isApp={false}
         wave={createWave()}
-        outcomesVisible={false}
       />
     );
 
@@ -552,7 +551,7 @@ describe("BrainMobileTabs", () => {
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
     expect(screen.getByText("Votes")).toBeVisible();
-    expect(screen.getByText("Outcome")).toBeInTheDocument();
+    expect(screen.queryByText("Outcome")).not.toBeInTheDocument();
   });
 
   it("shows Votes for guests on memes rank wave", () => {
@@ -579,7 +578,7 @@ describe("BrainMobileTabs", () => {
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
     expect(screen.getByText("Votes")).toBeVisible();
-    expect(screen.getByText("Outcome")).toBeInTheDocument();
+    expect(screen.queryByText("Outcome")).not.toBeInTheDocument();
     expect(screen.getByText("FAQ")).toBeInTheDocument();
   });
 
@@ -627,7 +626,7 @@ describe("BrainMobileTabs", () => {
     );
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
-    expect(screen.getByText("Outcome")).toBeInTheDocument();
+    expect(screen.queryByText("Outcome")).not.toBeInTheDocument();
     expect(screen.getByText("Votes")).toBeInTheDocument();
     expect(leaderboardMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -662,7 +661,7 @@ describe("BrainMobileTabs", () => {
 
     expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
     expect(screen.getByText("Votes")).toBeVisible();
-    expect(screen.getByText("Outcome")).toBeInTheDocument();
+    expect(screen.queryByText("Outcome")).not.toBeInTheDocument();
   });
 
   it("renders curation tabs without Outcome for approve curation waves", () => {

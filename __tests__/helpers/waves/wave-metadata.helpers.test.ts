@@ -10,7 +10,6 @@ import {
   getWaveCustomRulesFromMetadata,
   getWaveCustomRulesMetadataUpdate,
   getWaveOutcomeVisibilityFromMetadata,
-  getWaveOutcomeVisibilityMetadataUpdate,
   getWaveProposalCardConfigFromMetadata,
   getWaveProposalCardMetadataRequest,
   getWaveProposalCardMetadataUpdate,
@@ -84,7 +83,7 @@ describe("wave-metadata.helpers", () => {
     ]);
   });
 
-  it("creates hidden outcome metadata for rank waves only when hidden", () => {
+  it("omits retired visibility metadata for scheduled Rank decisions", () => {
     expect(
       getCreateWaveDisplayMetadataRequests({
         waveType: ApiWaveType.Rank,
@@ -93,15 +92,10 @@ describe("wave-metadata.helpers", () => {
           outcomesVisible: false,
         },
       })
-    ).toEqual([
-      {
-        data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-        data_value: "false",
-      },
-    ]);
+    ).toEqual([]);
   });
 
-  it("always hides outcomes for perpetual rank waves", () => {
+  it("omits retired visibility metadata for perpetual Rank decisions", () => {
     expect(
       getCreateWaveDisplayMetadataRequests({
         waveType: ApiWaveType.Rank,
@@ -113,15 +107,10 @@ describe("wave-metadata.helpers", () => {
           outcomesVisible: true,
         },
       })
-    ).toEqual([
-      {
-        data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-        data_value: "false",
-      },
-    ]);
+    ).toEqual([]);
   });
 
-  it("still hides outcomes for approve waves with a stray ongoing flag", () => {
+  it("omits retired visibility metadata for Approve decisions", () => {
     expect(
       getCreateWaveDisplayMetadataRequests({
         waveType: ApiWaveType.Approve,
@@ -131,12 +120,7 @@ describe("wave-metadata.helpers", () => {
           outcomesVisible: false,
         },
       })
-    ).toEqual([
-      {
-        data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-        data_value: "false",
-      },
-    ]);
+    ).toEqual([]);
   });
 
   it("creates custom rules metadata for rank and approve waves", () => {
@@ -840,7 +824,7 @@ describe("wave-metadata.helpers", () => {
     expect(getWaveOutcomeVisibilityFromMetadata([])).toBe(true);
   });
 
-  it("hides outcomes when latest metadata value is false", () => {
+  it("shows reward details even when retired visibility metadata is false", () => {
     expect(
       getWaveOutcomeVisibilityFromMetadata([
         {
@@ -854,7 +838,7 @@ describe("wave-metadata.helpers", () => {
           data_value: "false",
         },
       ])
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it("defaults outcome visibility to shown for invalid metadata values", () => {
@@ -884,43 +868,5 @@ describe("wave-metadata.helpers", () => {
         },
       ])
     ).toBe(true);
-  });
-
-  it("creates hidden outcome metadata and deletes rows when reset to shown", () => {
-    expect(
-      getWaveOutcomeVisibilityMetadataUpdate({
-        metadata: [],
-        outcomesVisible: false,
-      })
-    ).toEqual({
-      create: [
-        {
-          data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-          data_value: "false",
-        },
-      ],
-      deleteIds: [],
-    });
-
-    expect(
-      getWaveOutcomeVisibilityMetadataUpdate({
-        metadata: [
-          {
-            id: 1,
-            data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-            data_value: "false",
-          },
-          {
-            id: 2,
-            data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-            data_value: "hidden",
-          },
-        ],
-        outcomesVisible: true,
-      })
-    ).toEqual({
-      create: [],
-      deleteIds: [1, 2],
-    });
   });
 });

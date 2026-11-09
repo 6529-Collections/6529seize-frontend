@@ -306,9 +306,6 @@ const getCreateOutcomesSection = ({
   const isPerpetualRank =
     config.overview.type === ApiWaveType.Rank &&
     Boolean(config.dates.ongoingRanking);
-  const outcomesVisible = isPerpetualRank
-    ? false
-    : config.display.outcomesVisible;
   // "None yet" would imply outcomes are still coming; a perpetual wave never
   // has any.
   const outcomesCountLabel = isPerpetualRank
@@ -319,11 +316,6 @@ const getCreateOutcomesSection = ({
     id: "outcomes",
     title: "Outcomes",
     rows: [
-      {
-        id: "outcomes-visible",
-        label: "Outcomes visibility",
-        value: outcomesVisible ? "Shown" : "Hidden",
-      },
       {
         id: "outcomes-count",
         label: "Configured outcomes",
