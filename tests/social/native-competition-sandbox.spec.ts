@@ -227,8 +227,10 @@ async function expectLegacySectionContent(page: Page, tab: string) {
   }
 }
 
-async function expectFamiliarWaveTabs(page: Page) {
-  for (const name of ["Chat", "Leaderboard", "Winners", "Votes", "Settings"]) {
+async function expectFamiliarWaveTabs(page: Page, hasSelectedDecision = true) {
+  const names = ["Chat", "Leaderboard", "Winners", "Votes"];
+  if (hasSelectedDecision) names.push("Settings");
+  for (const name of names) {
     await expect(
       waveTabStrip(page).getByRole("tab", { name, exact: true })
     ).toBeVisible();
@@ -9401,7 +9403,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       .getByRole("tab", { name: /^Decisions(?:\s+\d+\+?)?$/ })
       .click();
     await expect(page).toHaveURL(ROOT, { timeout: 30000 });
-    await expectFamiliarWaveTabs(page);
+    // The collection has no selected decision whose Settings could be shown.
+    await expectFamiliarWaveTabs(page, false);
+    await expect(
+      waveTabStrip(page).getByRole("tab", { name: "Settings", exact: true })
+    ).toHaveCount(0);
     await page.getByRole("link", { name: /Parallel Alpha/ }).click();
     await expect(page).toHaveURL(`${ROOT}/alpha`);
     await expect(
