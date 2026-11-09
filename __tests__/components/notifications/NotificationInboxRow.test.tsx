@@ -63,7 +63,8 @@ const drop = {
 function reaction(
   id: number,
   handle: string,
-  readAt: number | null
+  readAt: number | null,
+  reactionCode = ":fire:"
 ): INotificationDropReacted {
   return {
     id,
@@ -76,7 +77,7 @@ function reaction(
       pfp: `${handle}.png`,
     } as ApiProfileMin,
     related_drops: [drop],
-    additional_context: { reaction: ":fire:" },
+    additional_context: { reaction: reactionCode },
   };
 }
 
@@ -130,8 +131,7 @@ it("shows each distinct native and custom emoji in a grouped preview", () => {
   mockFindCustomEmoji.mockImplementation((id: string) =>
     id === "6529" ? { name: "6529", skins: [{ src: "6529.webp" }] } : null
   );
-  const custom = reaction(3, "carol", null);
-  custom.additional_context.reaction = ":6529:";
+  const custom = reaction(3, "carol", null, ":6529:");
   const group = groupReactionNotifications([
     reaction(1, "alice", null),
     reaction(2, "bob", null),
@@ -177,8 +177,7 @@ it("keeps a text fallback until emoji data loads without hiding the notification
 });
 
 it("keeps an unavailable custom reaction readable", () => {
-  const notification = reaction(1, "alice", null);
-  notification.additional_context.reaction = ":removed_emoji:";
+  const notification = reaction(1, "alice", null, ":removed_emoji:");
   render(
     <NotificationInboxRow
       notification={notification}
@@ -194,8 +193,7 @@ it("keeps an unavailable custom reaction readable", () => {
 });
 
 it("shows raw Unicode reactions without adding shortcode delimiters", () => {
-  const notification = reaction(1, "alice", null);
-  notification.additional_context.reaction = "👍";
+  const notification = reaction(1, "alice", null, "👍");
   render(
     <NotificationInboxRow
       notification={notification}
