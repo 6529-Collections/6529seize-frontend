@@ -37,3 +37,9 @@ export function openDeviceSetup(scope: DeviceSetupScope) {
     new CustomEvent<DeviceSetupScope>(DEVICE_SETUP_EVENT, { detail: scope })
   );
 }
+
+export function closeDeviceSetup() {
+  window.dispatchEvent(
+    new CustomEvent<null>(DEVICE_SETUP_EVENT, { detail: null })
+  );
+}
