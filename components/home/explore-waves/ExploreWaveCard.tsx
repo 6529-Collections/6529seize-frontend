@@ -1,12 +1,13 @@
 "use client";
 
+import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import ContentDisplay from "@/components/waves/drops/ContentDisplay";
 import {
   buildProcessedContent,
   type ContentSegment,
   type ProcessedContent,
 } from "@/components/waves/drops/media-utils";
-import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
+import { getRandomColorWithSeed } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
@@ -257,7 +258,8 @@ function getWaveCardClassNames(
     return {
       cardInteractionClassName,
       imageInteractionClassName,
-      cardDirectionClassName: "tw-min-h-72 tw-w-full tw-min-w-0 tw-aspect-square tw-flex-col tw-justify-end md:tw-min-h-0",
+      cardDirectionClassName:
+        "tw-min-h-72 tw-w-full tw-min-w-0 tw-aspect-square tw-flex-col tw-justify-end md:tw-min-h-0",
       cardSurfaceClassName:
         "tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.05)]",
       titleClassName:
@@ -302,6 +304,7 @@ export function ExploreWaveCard({
   subtleHover = false,
   artworkOverlay = false,
 }: ExploreWaveCardProps) {
+  const timeAgoShort = useTimeAgoShort();
   const showArtworkOverlay = artworkOverlay && !compact;
   const imageRef = useRef<HTMLImageElement>(null);
   const detailsRef = useRef<HTMLDivElement>(null);
@@ -370,7 +373,7 @@ export function ExploreWaveCard({
     EXPLORE_WAVE_CARD_LOCALE,
     wave.totalDropsCount
   );
-  const timeAgoLabel = hasDrops ? getTimeAgoShort(lastMessageTime) : "";
+  const timeAgoLabel = hasDrops ? timeAgoShort(lastMessageTime) : "";
   const shouldAppendAgo = /^\d+[hm]$/.test(timeAgoLabel);
   const dropsCountLabel = hasDrops
     ? t(

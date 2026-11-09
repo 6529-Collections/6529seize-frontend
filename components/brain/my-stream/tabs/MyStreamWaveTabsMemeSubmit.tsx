@@ -12,6 +12,8 @@ import MainStageNominationPopover from "./MainStageNominationPopover";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave, SubmissionStatus } from "@/hooks/useWave";
 import { useCountdown } from "@/hooks/useCountdown";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import { formatSubmissionWindowTime } from "../waveDropAction.helpers";
 
 interface MyStreamWaveTabsMemeSubmitProps {
   readonly wave: ApiWave;
@@ -91,6 +93,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 }) => {
   // Get wave information including participation status
   const waveInfo = useWave(wave);
+  const zone = useDisplayTimeZone();
 
   // Get end time for ending soon countdown - must be called before any returns
   const endTimeForCountdown = waveInfo?.participation.endTime ?? null;
@@ -118,7 +121,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   // Closed state - submissions have ended
   if (isClosed) {
     const tooltipText = closingTime
-      ? `Submissions closed on ${new Date(closingTime).toLocaleString()}`
+      ? `Submissions closed on ${formatSubmissionWindowTime(closingTime, zone)}`
       : "Submissions are closed";
 
     return (
@@ -137,7 +140,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   // Coming soon state - submissions haven't started
   if (isComingSoon) {
     const tooltipText = openingTime
-      ? `Submissions open on ${new Date(openingTime).toLocaleString()}`
+      ? `Submissions open on ${formatSubmissionWindowTime(openingTime, zone)}`
       : "Submissions will open soon";
 
     return (
@@ -237,11 +240,11 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       remainingSubmissionCount === 1 ? "" : "s"
     } remaining`;
   } else if (isEndingVerySoon) {
-    tooltipText = `URGENT: Submissions closing in less than an hour! Ends at ${new Date(endTime).toLocaleString()}`;
+    tooltipText = `URGENT: Submissions closing in less than an hour! Ends at ${formatSubmissionWindowTime(endTime, zone)}`;
   } else if (isEndingHighlyUrgent) {
-    tooltipText = `Submissions closing in a few hours! Ends at ${new Date(endTime).toLocaleString()}`;
+    tooltipText = `Submissions closing in a few hours! Ends at ${formatSubmissionWindowTime(endTime, zone)}`;
   } else if (isEndingSoon) {
-    tooltipText = `Submissions closing soon! Ends on ${new Date(endTime).toLocaleString()}`;
+    tooltipText = `Submissions closing soon! Ends on ${formatSubmissionWindowTime(endTime, zone)}`;
   }
   const { activeLabelFull, activeLabelCompact } = getActiveLabels({
     canSubmit,

@@ -1,5 +1,7 @@
 "use client";
 
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import { withDisplayTimeZoneDate } from "@/lib/display-time-zone/displayTimeZone";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import DropVoteProgressing from "@/components/drops/view/utils/DropVoteProgressing";
@@ -48,17 +50,21 @@ export const ArtistActiveSubmissionContent: React.FC<
   const isSmallScreen = useMediaQuery("(max-width: 1023px)");
 
   // Memoize expensive operations - must be before any conditional returns
+  const zone = useDisplayTimeZone();
   const formatDate = useMemo(
     () => (timestamp: number) => {
       const date = new Date(timestamp);
       const currentYear = new Date().getFullYear();
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: date.getFullYear() !== currentYear ? "numeric" : undefined,
-      });
+      return new Intl.DateTimeFormat(
+        "en-US",
+        withDisplayTimeZoneDate(zone, {
+          month: "short",
+          day: "numeric",
+          ...(date.getFullYear() === currentYear ? {} : { year: "numeric" }),
+        })
+      ).format(date);
     },
-    []
+    [zone]
   );
 
   const handleDropClick = useCallback(

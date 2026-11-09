@@ -9,6 +9,10 @@ import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { buildWaveRules } from "@/helpers/waves/wave-rules.helpers";
 import { getScopeRuleValue } from "@/helpers/waves/wave-rules.shared";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import type { CreateWaveConfig } from "@/types/waves.types";
 
 const createConfig = (): CreateWaveConfig => ({
@@ -726,4 +730,110 @@ describe("create-wave final review", () => {
       ).toBe(false);
     }
   );
+
+  describe("schedule times in the display time zone", () => {
+    // 23:30 UTC on Jan 1 to 00:30 UTC on Jan 2: one UTC midnight in between.
+    const OPENS = Date.UTC(2026, 0, 1, 23, 30);
+    const CLOSES = Date.UTC(2026, 0, 2, 0, 30);
+    const makeWave = (opens: number, closes: number) =>
+      ({
+        wave: {
+          type: ApiWaveType.Approve,
+          admin_group: { group: null },
+          admin_drop_deletion_enabled: false,
+          max_votes_per_identity_to_drop: null,
+          time_lock_ms: null,
+          winning_threshold: null,
+          winning_threshold_min_duration_ms: null,
+          max_winners: null,
+          decisions_strategy: {
+            first_decision_time: closes,
+            subsequent_decisions: [],
+            is_rolling: false,
+          },
+        },
+        visibility: { scope: { group: null } },
+        participation: {
+          scope: { group: null },
+          period: { min: opens, max: closes },
+          required_media: [],
+          required_metadata: [],
+          no_of_applications_allowed_per_participant: null,
+          signature_required: false,
+          terms: null,
+          submission_strategy: null,
+        },
+        voting: {
+          scope: { group: null },
+          period: { min: opens, max: closes },
+          credit_type: ApiWaveCreditType.Rep,
+          credit_scope: ApiWaveCreditScope.Wave,
+          credit_category: null,
+          creditor: null,
+          credit_nfts: null,
+          forbid_negative_votes: false,
+        },
+        chat: { enabled: true, scope: { group: null } },
+      }) as any;
+
+    const scheduleRows = (
+      zone?: DisplayTimeZone,
+      wave = makeWave(OPENS, CLOSES)
+    ) =>
+      Object.fromEntries(
+        buildWaveRules({ wave, metadata: [], zone })
+          .automatic.flatMap((section) => section.rows)
+          .filter((row) =>
+            [
+              "submission-window",
+              "voting-window",
+              "first-decision",
+              "approval-window",
+            ].includes(row.id)
+          )
+          .map((row) => [row.id, row.value])
+      );
+
+    it("keeps the device-zone schedule unchanged when local", () => {
+      // Built from local parts: the device zone prints this wall clock in
+      // every zone the suite runs in.
+      const localWave = makeWave(
+        new Date(2026, 0, 1, 23, 30).getTime(),
+        new Date(2026, 0, 2, 0, 30).getTime()
+      );
+      const expected = {
+        "submission-window": "2026-01-01 23:30 to 2026-01-02 00:30",
+        "voting-window": "2026-01-01 23:30 to 2026-01-02 00:30",
+        "first-decision": "2026-01-02 00:30",
+        "approval-window": "2026-01-01 23:30 to 2026-01-02 00:30",
+      };
+      expect(scheduleRows(undefined, localWave)).toEqual(expected);
+      expect(scheduleRows(LOCAL_DISPLAY_TIME_ZONE, localWave)).toEqual(
+        expected
+      );
+    });
+
+    it("names UTC on every schedule time when displaying UTC", () => {
+      expect(scheduleRows({ timeZone: "UTC", isLocal: false })).toEqual({
+        "submission-window": "2026-01-01 23:30 UTC to 2026-01-02 00:30 UTC",
+        "voting-window": "2026-01-01 23:30 UTC to 2026-01-02 00:30 UTC",
+        "first-decision": "2026-01-02 00:30 UTC",
+        "approval-window": "2026-01-01 23:30 UTC to 2026-01-02 00:30 UTC",
+      });
+    });
+
+    it("moves the dates to the display zone's calendar", () => {
+      expect(scheduleRows({ timeZone: "Asia/Dubai", isLocal: false })).toEqual({
+        "submission-window": "2026-01-02 03:30 GMT+4 to 2026-01-02 04:30 GMT+4",
+        "voting-window": "2026-01-02 03:30 GMT+4 to 2026-01-02 04:30 GMT+4",
+        "first-decision": "2026-01-02 04:30 GMT+4",
+        "approval-window": "2026-01-02 03:30 GMT+4 to 2026-01-02 04:30 GMT+4",
+      });
+      expect(
+        scheduleRows({ timeZone: "America/Los_Angeles", isLocal: false })[
+          "first-decision"
+        ]
+      ).toBe("2026-01-01 16:30 PST");
+    });
+  });
 });

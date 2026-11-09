@@ -1,3 +1,5 @@
+import { withDisplayTimeZoneDate } from "@/lib/display-time-zone/displayTimeZone";
+import { getCurrentDisplayTimeZone } from "@/lib/display-time-zone/displayTimeZoneStore";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -55,11 +57,14 @@ const formatDate = (value: string | null | undefined): string | null => {
     return null;
   }
 
-  return new Intl.DateTimeFormat(GITHUB_PREVIEW_LOCALE, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(date);
+  return new Intl.DateTimeFormat(
+    GITHUB_PREVIEW_LOCALE,
+    withDisplayTimeZoneDate(getCurrentDisplayTimeZone(), {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
+  ).format(date);
 };
 
 const formatCount = (

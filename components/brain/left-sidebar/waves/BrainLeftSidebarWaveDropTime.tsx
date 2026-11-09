@@ -1,7 +1,7 @@
 "use client";
 
+import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import React, { useEffect, useState } from "react";
-import { getTimeAgoShort } from "@/helpers/Helpers";
 
 interface BrainLeftSidebarWaveDropTimeProps {
   readonly time: number;
@@ -10,6 +10,7 @@ interface BrainLeftSidebarWaveDropTimeProps {
 const BrainLeftSidebarWaveDropTime: React.FC<
   BrainLeftSidebarWaveDropTimeProps
 > = ({ time }) => {
+  const timeAgoShort = useTimeAgoShort();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -42,7 +43,7 @@ const BrainLeftSidebarWaveDropTime: React.FC<
     };
   }, []);
 
-  const label = getTimeAgoShort(time, now);
+  const label = timeAgoShort(time, now);
 
   return <span>{label}</span>;
 };
