@@ -4,7 +4,9 @@ import { t } from "@/i18n/messages";
 import { COMPETITION_BUTTON } from "./CompetitionState";
 export function CompetitionLoadMore({
   query,
+  label,
 }: {
+  readonly label?: string;
   readonly query: {
     hasNextPage: boolean;
     isFetchingNextPage: boolean;
@@ -19,7 +21,7 @@ export function CompetitionLoadMore({
       disabled={query.isFetchingNextPage}
       onClick={() => void query.fetchNextPage()}
     >
-      {t(locale, "competitions.more")}
+      {label ?? t(locale, "competitions.more")}
     </button>
   ) : null;
 }

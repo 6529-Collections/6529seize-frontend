@@ -2118,6 +2118,9 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   rankAdvancedSummary: "Outcome visibility",
   approveAdvancedSummary: "Winner limits",
   chooseType: "Choose outcome type",
+  addOutcome: "Add outcome",
+  optionalDescription:
+    "Optionally describe what winners receive or what happens after approval. The organizer fulfills these outcomes manually. A scheduled Rank decision without outcomes selects one winner.",
   showOutcomes: "Show outcomes menu section",
   showOutcomesDescription:
     "Shows the Outcomes tab and reward details on leaderboard and winner cards. Rewards still apply when hidden.",
@@ -2125,10 +2128,10 @@ const WAVE_CREATE_OUTCOMES_MESSAGES = objectMessages("waves.create.outcomes", {
   repPositiveError: "Rep must be a positive number",
   "perpetual.title": "Outcome is leaderboard position",
   "perpetual.description":
-    "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The outcomes tab stays hidden; the live leaderboard is the outcome.",
-  "empty.title": "No outcomes yet — add at least one to continue",
+    "This wave ranks continuously — no winners are announced and the wave never ends, so there are no outcome awards to configure or show. The live leaderboard is the outcome.",
+  "empty.title": "No outcomes added",
   "empty.description":
-    "Outcomes define what winners receive when results are announced: a manual award you fulfill yourself, or automatic Rep or NIC distributed by the platform. Pick a type above to configure one.",
+    "Continue without an outcome, or add a reward or action that the organizer will fulfill.",
   "warning.unlimited.title": "Warning: Unlimited Awards",
   "warning.unlimited.description":
     "You have not set a maximum number of winners for this challenge. Everyone who meets the threshold will be awarded.",
@@ -3287,6 +3290,8 @@ export const EN_US_ROOT_MESSAGES = {
     "{artist} submitted {artwork} to {competition}.",
   "artworkAlerts.untitled": "untitled artwork",
   "emoji.picker.label": "Emoji picker",
+  "emoji.picker.openLabel": "Open emoji picker",
+  "emoji.picker.closeLabel": "Close emoji picker",
   "emoji.picker.loading": "Loading emoji picker...",
   "emoji.picker.unavailable": "Emoji picker is unavailable.",
   "waves.historyGap.load": "Load missed messages",
