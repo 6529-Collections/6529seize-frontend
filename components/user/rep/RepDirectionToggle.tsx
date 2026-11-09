@@ -1,24 +1,48 @@
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { ArrowDownLeftIcon, ArrowUpRightIcon } from "@heroicons/react/24/solid";
 import type { RepDirection } from "./UserPageRep.helpers";
-
-const REP_DIRECTION_ITEMS: CommonSelectItem<RepDirection>[] = [
-  { label: "Received", value: "received", key: "received" },
-  { label: "Given", value: "given", key: "given" },
-];
 
 export default function RepDirectionToggle({
   repDirection,
   onRepDirectionChange,
   variant = "text",
   fill = false,
+  matter = "REP",
 }: {
   readonly repDirection: RepDirection;
   readonly onRepDirectionChange: (direction: RepDirection) => void;
   readonly variant?: "text" | "tabs";
   readonly fill?: boolean;
+  readonly matter?: "REP" | "NIC";
 }) {
+  const locale = useBrowserLocale();
+  const items: CommonSelectItem<RepDirection>[] = [
+    {
+      label: t(locale, "user.rate.received"),
+      value: "received",
+      key: "received",
+      icon: (
+        <ArrowDownLeftIcon
+          className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
+          aria-hidden="true"
+        />
+      ),
+    },
+    {
+      label: t(locale, "user.rate.given"),
+      value: "given",
+      key: "given",
+      icon: (
+        <ArrowUpRightIcon
+          className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
+          aria-hidden="true"
+        />
+      ),
+    },
+  ];
   if (variant === "text") {
     return (
       <div className="tw-flex tw-items-center tw-gap-4">
@@ -26,7 +50,7 @@ export default function RepDirectionToggle({
           type="button"
           aria-pressed={repDirection === "received"}
           onClick={() => onRepDirectionChange("received")}
-          className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-medium tw-transition-colors tw-duration-200 ${
+          className={`tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-medium tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
             repDirection === "received"
               ? "tw-text-iron-100"
               : "tw-text-iron-500 hover:tw-text-iron-300"
@@ -36,13 +60,13 @@ export default function RepDirectionToggle({
             className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
             aria-hidden="true"
           />
-          Received
+          {t(locale, "user.rate.received")}
         </button>
         <button
           type="button"
           aria-pressed={repDirection === "given"}
           onClick={() => onRepDirectionChange("given")}
-          className={`tw-inline-flex tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-medium tw-transition-colors tw-duration-200 ${
+          className={`tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-[13px] tw-font-medium tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
             repDirection === "given"
               ? "tw-text-iron-100"
               : "tw-text-iron-500 hover:tw-text-iron-300"
@@ -52,7 +76,7 @@ export default function RepDirectionToggle({
             className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
             aria-hidden="true"
           />
-          Given
+          {t(locale, "user.rate.given")}
         </button>
       </div>
     );
@@ -60,9 +84,9 @@ export default function RepDirectionToggle({
 
   return (
     <CommonTabs
-      items={REP_DIRECTION_ITEMS}
+      items={items}
       activeItem={repDirection}
-      filterLabel="REP direction"
+      filterLabel={t(locale, "user.rate.direction", { matter })}
       setSelected={onRepDirectionChange}
       size="sm"
       fill={fill}
