@@ -668,7 +668,7 @@ export function useWaveRealtimeUpdater({
 
   useDropUpdateMessages(processIncomingDrop, processDropUpdateRef, (waveId) => {
     if (waveId === activeWaveId || getData(waveId))
-      refreshWaveMessages?.(waveId);
+      void refreshWaveMessages?.(waveId);
     void queryClient.invalidateQueries({
       queryKey: [QueryKey.DROP_REPLY_THREAD_TARGET, { wave_id: waveId }],
     });

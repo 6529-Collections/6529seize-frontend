@@ -52,8 +52,9 @@ export default function WaveDropReplyCollapseAction({
     },
   });
 
+  if (threads === null) return null;
+
   if (
-    !threads ||
     threads.waveId !== waveId ||
     threads.collapseAll ||
     activeProfileProxy ||
