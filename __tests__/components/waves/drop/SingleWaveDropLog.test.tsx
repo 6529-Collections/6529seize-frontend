@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import React from "react";
 import { SingleWaveDropLog } from "@/components/waves/drop/SingleWaveDropLog";
 import type { ApiDropVoteEditLog } from "@/generated/models/ApiDropVoteEditLog";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 jest.mock("next/link", () => ({
@@ -95,18 +96,19 @@ describe("SingleWaveDropLog", () => {
 });
 
 test("renders a native Decision vote change with a wallet fallback for the voter", () => {
-  const log = {
+  const log: ApiDropVoteEditLog = {
     id: "native-change",
     old_vote: 7,
     new_vote: -3,
     created_at: 1,
     voter: {
       id: "native-voter",
-      handle: null,
-      pfp: null,
+      level: 0,
+      classification: ApiProfileClassification.Pseudonym,
+      badges: { artist_of_main_stage_submissions: 0, artist_of_memes: 0 },
       primary_address: "0x1111111111111111111111111111111111111111",
     },
-  } as ApiDropVoteEditLog;
+  };
   render(<SingleWaveDropLog log={log} creditType={ApiWaveCreditType.Rep} />);
   expect(
     screen.getByRole("link", {

@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import { SingleWaveDropVoter } from "@/components/waves/drop/SingleWaveDropVoter";
 import type { ApiDropVoter } from "@/generated/models/ApiDropVoter";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ImageScale } from "@/helpers/image.helpers";
 import {
@@ -74,10 +75,17 @@ describe("SingleWaveDropVoter", () => {
 test.each([9, -9])(
   "renders a signed native Decision allocation of %s",
   (vote) => {
-    const voter = {
+    const voter: ApiDropVoter = {
       vote,
-      voter: { id: "native-voter", handle: "native-voter", pfp: null },
-    } as ApiDropVoter;
+      voter: {
+        id: "native-voter",
+        handle: "native-voter",
+        primary_address: "0x1111111111111111111111111111111111111111",
+        level: 0,
+        classification: ApiProfileClassification.Pseudonym,
+        badges: { artist_of_main_stage_submissions: 0, artist_of_memes: 0 },
+      },
+    };
     render(
       <SingleWaveDropVoter
         voter={voter}
@@ -100,15 +108,16 @@ test.each([9, -9])(
 
 test("uses the wallet address when a native voter has no handle", () => {
   const address = "0x1111111111111111111111111111111111111111";
-  const voter = {
+  const voter: ApiDropVoter = {
     vote: 9,
     voter: {
       id: "native-id",
-      handle: null,
       primary_address: address,
-      pfp: null,
+      level: 0,
+      classification: ApiProfileClassification.Pseudonym,
+      badges: { artist_of_main_stage_submissions: 0, artist_of_memes: 0 },
     },
-  } as ApiDropVoter;
+  };
   render(
     <SingleWaveDropVoter
       voter={voter}
