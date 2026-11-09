@@ -348,7 +348,9 @@ export default function DevicesPreferencesSettings() {
   const pendingLinkedDevice = pendingRevoke
     ? linkedDevices.get(pendingRevoke.id)
     : undefined;
-  const ownKeys = new Set(local.publicKeys);
+  // Both sides lowercase: missing this browser would skip the stricter
+  // "Revoke this browser?" dialog and its encrypted-chats warning.
+  const ownKeys = new Set(local.publicKeys.map((key) => key.toLowerCase()));
   const revokingThisBrowser =
     pendingRevoke !== null &&
     ownKeys.has(pendingRevoke.device_key.toLowerCase());

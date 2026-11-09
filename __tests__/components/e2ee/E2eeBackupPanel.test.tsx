@@ -337,6 +337,37 @@ describe("E2eeBackupPanel", () => {
     );
   });
 
+  it("keeps the start-over dialog open with the backup's own error when preparing fails", async () => {
+    const manager = fakeManager(snapshot({ phase: "available" }));
+    manager.prepareBackup.mockRejectedValueOnce(
+      new BackupError("E2EE_RATE_LIMITED")
+    );
+    renderPanel(manager);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Lost your recovery code?" })
+    );
+    const dialog = await screen.findByRole("dialog", {
+      name: "Start a new backup without restoring?",
+    });
+    const confirm = within(dialog).getByRole("button", {
+      name: "Delete old backup and start over",
+    });
+    fireEvent.click(confirm);
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "Too many backup requests. Try again later."
+    );
+    expect(confirm).toBeEnabled();
+    expect(
+      screen.queryByRole("dialog", { name: "Save your new recovery code" })
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(confirm);
+    expect(
+      await screen.findByRole("dialog", { name: "Save your new recovery code" })
+    ).toBeInTheDocument();
+    expect(manager.prepareBackup).toHaveBeenCalledTimes(2);
+  });
+
   it("starts setup when another part of the page asks while backup is off", async () => {
     const manager = fakeManager(snapshot());
     renderPanel(manager);
