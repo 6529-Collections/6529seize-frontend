@@ -194,7 +194,7 @@ when it is still available, ahead of the wave's latest remembered choice.
 - Memes wave tabs start with `Chat`, then `Leaderboard` (or `Submissions` after
   voting ends), `Winners` when available, and `Votes`.
   Other available sections follow these tabs.
-- Curation waves do not expose an `Outcome` tab; `Sales` fills that dedicated
+- Configured decision outcomes appear in Settings. Curation waves use `Sales` for their dedicated
   results-slot instead.
 - In `My Votes`, non-image rows suppress inline media interaction even when the row
   includes video, audio, or HTML media.
