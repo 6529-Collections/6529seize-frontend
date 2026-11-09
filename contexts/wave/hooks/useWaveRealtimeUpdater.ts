@@ -8,7 +8,13 @@ import type {
   WsDropUpdateRefMessage,
   WsDropUpdateMessage,
 } from "@/helpers/Types";
-import { WsMessageType } from "@/helpers/Types";
+import {
+  isWsDropUpdateRefData,
+  WS_DROP_UPDATE_REASON_REPLY_COLLAPSE,
+  WsMessageType,
+} from "@/helpers/Types";
+import { getWebSocketMessageReason } from "@/services/websocket/WebSocketTypes";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
@@ -512,18 +518,36 @@ const useAttachmentStatusUpdate = ({
 
 const useDropUpdateMessages = (
   processIncomingDrop: ProcessIncomingDropFn,
-  processDropUpdateRef: (messageData: unknown) => void
+  processDropUpdateRef: (messageData: unknown) => void,
+  onReplyPlacementChanged: (waveId: string) => void
 ): void => {
   const pendingDropUpdateRef = useRef<Promise<void> | null>(null);
 
   useWebSocketMessage<WsDropUpdateRefMessage["data"]>(
     WsMessageType.DROP_UPDATE_REF,
-    processDropUpdateRef
+    (messageData) => {
+      if (
+        isWsDropUpdateRefData(messageData) &&
+        messageData.reason === WS_DROP_UPDATE_REASON_REPLY_COLLAPSE
+      ) {
+        onReplyPlacementChanged(messageData.wave_id);
+        return;
+      }
+      processDropUpdateRef(messageData);
+    }
   );
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
     (messageData) => {
+      if (
+        getWebSocketMessageReason(messageData) ===
+        WS_DROP_UPDATE_REASON_REPLY_COLLAPSE
+      ) {
+        const waveId = getIncomingWaveId(messageData);
+        if (waveId) onReplyPlacementChanged(waveId);
+        return;
+      }
       pendingDropUpdateRef.current = processIncomingDrop(
         messageData,
         ProcessIncomingDropType.DROP_INSERT,
@@ -607,6 +631,7 @@ export function useWaveRealtimeUpdater({
   removeDrops,
   removeWaveDeliveredNotifications,
   isWaveMuted,
+  refreshWaveMessages,
 }: UseWaveRealtimeUpdaterProps): {
   processIncomingDrop: ProcessIncomingDropFn;
   processDropRemoved: (waveId: string, dropId: string) => void;
@@ -641,7 +666,13 @@ export function useWaveRealtimeUpdater({
     queryClient,
   });
 
-  useDropUpdateMessages(processIncomingDrop, processDropUpdateRef);
+  useDropUpdateMessages(processIncomingDrop, processDropUpdateRef, (waveId) => {
+    if (waveId === activeWaveId || getData(waveId))
+      refreshWaveMessages?.(waveId);
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.DROP_REPLY_THREAD_TARGET, { wave_id: waveId }],
+    });
+  });
   useDropDeleteMessages(removeDrops);
 
   // React Query state has its own resync (WebSocketRecoverySync); the message

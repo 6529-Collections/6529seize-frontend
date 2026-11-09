@@ -16,10 +16,12 @@ import { useState } from "react";
  */
 export function useCollapsedReplyThreadTarget({
   enabled,
+  collapseAll = true,
   waveId,
   serialNo,
 }: {
   readonly enabled: boolean;
+  readonly collapseAll?: boolean;
   readonly waveId: string;
   readonly serialNo: number | null;
 }): DropReplyThreadTarget | null {
@@ -40,11 +42,12 @@ export function useCollapsedReplyThreadTarget({
   const { data } = useQuery({
     queryKey: [
       QueryKey.DROP_REPLY_THREAD_TARGET,
-      { wave_id: waveId, serial_no: requestedSerialNo },
+      { wave_id: waveId, serial_no: requestedSerialNo, collapseAll },
     ],
     queryFn: ({ signal }) =>
       fetchDropReplyThreadTarget({
         serialNo: requestedSerialNo ?? 0,
+        collapseAll,
         signal,
       }),
     enabled: enabled && requestedSerialNo !== null,

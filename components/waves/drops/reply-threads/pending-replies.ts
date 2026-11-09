@@ -39,7 +39,8 @@ export function getVisibleThreadReplies({
   const localReplies = streamDrops.filter(
     (drop): drop is ExtendedDrop =>
       drop.type === DropSize.FULL &&
-      getReplyAncestorIds(drop).includes(parentDropId)
+      (drop.collapsed_reply_thread?.id === parentDropId ||
+        getReplyAncestorIds(drop).includes(parentDropId))
   );
   const history = [...previous, ...localReplies];
   const queried = pages

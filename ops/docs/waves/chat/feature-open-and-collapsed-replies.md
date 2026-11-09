@@ -3,6 +3,8 @@
 ## Overview
 
 Wave admins can choose who may reply in a wave and where replies appear.
+When a wave uses inline replies, authors can also collapse replies to their own
+top-level chat drops.
 
 - **Open replies**: everyone who can see the wave can reply to its drops,
   even if they are not in the wave's chat group. Starting a new drop still
@@ -27,6 +29,10 @@ main chat.
 - Wave admins and the wave creator select the gear on the `Replies` row and
   set `Anyone who can see this wave can reply` and
   `Collapse replies under each drop`, then select `Save`.
+- In an inline wave, open the actions menu on your own top-level chat drop and
+  select `Collapse replies`. Existing and future replies, including replies to
+  replies, move into the thread for everyone. Select `Show replies inline` in
+  the same menu to put them back in the chat feed.
 - Viewers who may reply use the drop's `Reply` action (hover actions on
   desktop, long-press menu on touch devices).
 - Wave admins and chat members remove unwanted replies with the reply's
@@ -39,7 +45,7 @@ main chat.
    `Only chat members can start new drops here. You can reply to any drop.`
 2. They select `Reply` on a drop. The composer opens with the reply target.
 3. After sending, the composer returns to the reply-only message.
-4. In a wave with collapsed replies, the drop shows `Show N replies`. Selecting it
+4. A drop with collapsed replies shows `Show N replies`. Selecting it
    opens the thread under the drop, oldest reply first. A new reply opens its
    parent's thread automatically for the person who sent it.
    The sender's pending reply stays visible while saving and loading the thread;
@@ -63,10 +69,10 @@ main chat.
 
 ## Edge Cases
 
-- Collapsed replies do not count toward the wave's unread count or
-  `New Messages` divider, and they do not notify followers who subscribed to
-  every drop. The author of the replied-to drop and mentioned profiles are
-  still notified.
+- Collapsed replies stay out of the wave’s unread count and
+  `New Messages` divider. Wave-wide collapse also skips notifications for
+  followers subscribed to every drop. Individual collapse keeps the wave’s
+  notification rules, including direct replies and mentions.
 - Curated views of a wave keep showing curated replies.
 - The reply count includes replies to replies anywhere in the thread. Live
   updates refresh the original drop's count from the server for both direct

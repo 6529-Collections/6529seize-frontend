@@ -458,13 +458,13 @@ jobs:
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:smoke
 
-      - name: Run composer mention and send focus browser checks
+      - name: Run composer mention, send focus, and reply thread browser checks
         if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.all_mention_confirmation_required == 'true'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-all-mention"
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/all-mention"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/all-mention"
-        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention|keeps desktop keyboard focus|submits one exact-shape'
+        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention|keeps desktop keyboard focus|submits one exact-shape|collapses a single reply thread'
 
       - name: Run Collect public browser pack
         if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.playwright_collect_required == 'true'

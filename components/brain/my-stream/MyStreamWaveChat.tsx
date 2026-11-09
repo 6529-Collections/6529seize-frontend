@@ -14,7 +14,10 @@ import {
   WaveReplyThreadsProvider,
 } from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
 import { useCollapsedReplyThreadTarget } from "@/components/waves/drops/reply-threads/useCollapsedReplyThreadTarget";
-import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
+import {
+  getIndividuallyCollapsedThread,
+  isWaveRepliesCollapsed,
+} from "@/helpers/waves/collapsed-replies.helpers";
 import { DropMode } from "@/components/waves/dropComposer.types";
 import {
   UnreadDividerProvider,
@@ -301,7 +304,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const replyThreadsStore = useExpandedReplyThreadsStore();
   // A link to a collapsed reply opens its parent's thread instead.
   const replyThreadTarget = useCollapsedReplyThreadTarget({
-    enabled: collapseReplies && viewMode !== "gallery",
+    enabled:
+      viewMode !== "gallery" && (collapseReplies || !isWaveDirectMessage(wave)),
+    collapseAll: collapseReplies,
     waveId: wave.id,
     serialNo: requestedScrollTarget,
   });
@@ -414,12 +419,13 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onDropAddedToQueue = useCallback(() => {
     // Show a new reply where it lands: in its parent's thread.
     const replyTarget = activeDropRef.current;
-    if (
-      collapseReplies &&
-      replyTarget?.action === ActiveDropAction.REPLY &&
-      !replyTarget.drop.reply_to
-    ) {
-      replyThreadsStore.setExpanded(replyTarget.drop.id, true);
+    if (replyTarget?.action === ActiveDropAction.REPLY) {
+      const thread = getIndividuallyCollapsedThread(replyTarget.drop);
+      if (thread) {
+        replyThreadsStore.setExpanded(thread.id, true);
+      } else if (collapseReplies && !replyTarget.drop.reply_to) {
+        replyThreadsStore.setExpanded(replyTarget.drop.id, true);
+      }
     }
     setActiveDropForWave(null);
   }, [collapseReplies, replyThreadsStore, setActiveDropForWave]);
@@ -558,7 +564,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           <ChatFileDropOverlay description={getAcceptedUploadFormats(locale)} />
         )}
         <WaveReplyThreadsProvider
-          enabled={collapseReplies}
+          enabled={
+            viewMode !== "gallery" &&
+            (collapseReplies || !isWaveDirectMessage(wave))
+          }
           wave={wave}
           store={replyThreadsStore}
         >

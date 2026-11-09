@@ -2326,6 +2326,10 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   "replyThread.showOne": "Show 1 reply",
   "replyThread.showMany": "Show {count} replies",
   "replyThread.hide": "Hide replies",
+  "replyThread.collapse": "Collapse replies",
+  "replyThread.inline": "Show replies inline",
+  "replyThread.placementError":
+    "Couldn't change where replies appear. Try again.",
   "replyThread.regionLabel": "Replies to this drop",
   "replyThread.loading": "Loading replies…",
   "replyThread.loadEarlier": "Show earlier replies",

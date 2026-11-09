@@ -8693,6 +8693,15 @@ paths:
             minimum: 1
             maximum: 5000
             default: 100
+        - name: respect_drop_reply_collapse
+          in: query
+          required: false
+          description: >-
+            Exclude replies to individually collapsed drops from timeline
+            pagination.
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: successful operation
@@ -9372,6 +9381,44 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden - profile required
+  /drops/{id}/collapse-replies:
+    post:
+      tags:
+        - Drops
+      summary: Set reply placement for a top-level chat drop
+      description: Only the author can change this setting in a wave with inline replies.
+      operationId: setDropReplyCollapse
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drops/drop-reply-collapse.handler"
+          name: handleSetDropReplyCollapse
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiSetDropReplyCollapseRequest"
+      responses:
+        "200":
+          description: Reply placement saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDrop"
+        "400":
+          description: Drop or wave does not support per-message reply collapse
+        "403":
+          description: Only the author can change reply placement
+        "404":
+          description: Drop not found
   /drops/{dropId}/toggle-hide-link-preview:
     post:
       tags:
@@ -21590,6 +21637,13 @@ paths:
           required: false
           schema:
             $ref: "#/components/schemas/ApiDropType"
+        - name: respect_drop_reply_collapse
+          in: query
+          required: false
+          description: Keep replies to individually collapsed drops in their threads.
+          schema:
+            type: boolean
+            default: false
       responses:
         "200":
           description: successful operation
@@ -26069,6 +26123,18 @@ components:
         pinned:
           type: boolean
       additionalProperties: true
+    ApiCollapsedReplyThread:
+      type: object
+      description: Top-level drop of an individually collapsed reply thread.
+      required:
+        - id
+        - serial_no
+      properties:
+        id:
+          type: string
+        serial_no:
+          type: integer
+          format: int64
     ApiCollectAccount:
       type: object
       additionalProperties: false
@@ -32329,6 +32395,11 @@ components:
         is_additional_action_promised:
           type: boolean
           nullable: true
+        collapse_replies:
+          type: boolean
+          description: Author-selected reply placement on a top-level chat drop.
+        collapsed_reply_thread:
+          $ref: "#/components/schemas/ApiCollapsedReplyThread"
         hide_link_preview:
           type: boolean
         poll:
@@ -33080,6 +33151,11 @@ components:
             current_event_id from GET /drops/{dropId}/signed-events. False
             otherwise, including when the viewer cannot see the drop's content
             or its author is anonymous. Treat a missing value as false.
+        collapse_replies:
+          type: boolean
+          description: Author-selected reply placement on a top-level chat drop.
+        collapsed_reply_thread:
+          $ref: "#/components/schemas/ApiCollapsedReplyThread"
         hide_link_preview:
           type: boolean
         title:
@@ -33134,8 +33210,8 @@ components:
           format: int64
         replies_count:
           description: >-
-            Number of replies in this drop's thread. Only provided for drops in
-            waves with collapsed replies, and omitted when there are none.
+            Number of replies in this drop's collapsed thread. Omitted when
+            there are none.
           type: integer
           format: int64
         reply_to_drop:
@@ -33485,6 +33561,11 @@ components:
         is_additional_action_promised:
           type: boolean
           nullable: true
+        collapse_replies:
+          type: boolean
+          description: Author-selected reply placement on a top-level chat drop.
+        collapsed_reply_thread:
+          $ref: "#/components/schemas/ApiCollapsedReplyThread"
         hide_link_preview:
           type: boolean
         poll:
@@ -42137,6 +42218,13 @@ components:
             competition credit budget applies an additional limit.
         signature:
           $ref: "#/components/schemas/ApiCompetitionSignature"
+    ApiSetDropReplyCollapseRequest:
+      type: object
+      required:
+        - collapse_replies
+      properties:
+        collapse_replies:
+          type: boolean
     ApiSetPinnedDropRequest:
       type: object
       required:

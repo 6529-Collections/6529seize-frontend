@@ -329,6 +329,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     removeDrops: waveMessagesStore.removeDrops,
     removeWaveDeliveredNotifications,
     isWaveMuted,
+    refreshWaveMessages,
   });
 
   // processIncomingDrop is rebuilt when the active wave, its mute state or

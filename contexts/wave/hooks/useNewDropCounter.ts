@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import {
   WS_DROP_UPDATE_REASON_POLL_RESPONSE,
+  WS_DROP_UPDATE_REASON_REPLY_COLLAPSE,
   isWsDropUpdateRefData,
   WsMessageType,
 } from "@/helpers/Types";
@@ -55,11 +56,6 @@ export function getNewestTimestamp(
 
   return Math.max(cached, server);
 }
-
-const isPollResponseDropUpdate = (
-  message: WsDropUpdateMessage["data"]
-): boolean =>
-  getWebSocketMessageReason(message) === WS_DROP_UPDATE_REASON_POLL_RESPONSE;
 
 const updateLatestDropTimestamp = ({
   createdAt,
@@ -351,8 +347,14 @@ function useNewDropCounter(
 
   const handleDropUpdate = useCallback(
     (message: ApiDrop) => {
-      if (!enabled || !message.wave.id || isPollResponseDropUpdate(message))
+      if (!enabled || !message.wave.id) return;
+      const reason = getWebSocketMessageReason(message);
+      if (reason === WS_DROP_UPDATE_REASON_POLL_RESPONSE) return;
+      if (reason === WS_DROP_UPDATE_REASON_REPLY_COLLAPSE) {
+        if (!otherListWaveIds.has(message.wave.id)) requestWaveListRefresh();
         return;
+      }
+      if (message.collapsed_reply_thread) return;
       const wave = waves.find((candidate) => candidate.id === message.wave.id);
       if (!wave) {
         handleUnknownDrop(message);
@@ -361,7 +363,14 @@ function useNewDropCounter(
       if (wave.repliesCollapsed && message.reply_to) return;
       recordFullDrop(message, wave.muted);
     },
-    [enabled, waves, handleUnknownDrop, recordFullDrop]
+    [
+      enabled,
+      waves,
+      handleUnknownDrop,
+      recordFullDrop,
+      otherListWaveIds,
+      requestWaveListRefresh,
+    ]
   );
 
   const currentProfileId = useRef(connectedProfile?.id);
@@ -402,6 +411,11 @@ function useNewDropCounter(
         }
 
         const { serial_no: serialNo, wave_id: waveId } = message;
+        if (message.reason === WS_DROP_UPDATE_REASON_REPLY_COLLAPSE) {
+          if (!otherListWaveIds.has(waveId)) requestWaveListRefresh();
+          return;
+        }
+        if (message.collapsed_reply_thread_id) return;
         const now = Date.now();
         const wave = waves.find((candidate) => candidate.id === waveId);
         if (!wave || wave.repliesCollapsed) {
@@ -425,6 +439,7 @@ function useNewDropCounter(
         waves,
         resolveDropUpdateRef,
         recordDropActivity,
+        requestWaveListRefresh,
       ]
     )
   );

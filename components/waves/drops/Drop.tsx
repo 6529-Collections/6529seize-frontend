@@ -227,11 +227,11 @@ function DropContent({
     [drop, location, reserveMediaHeight, showVideoFullscreen]
   );
 
-  // Collapsed-reply waves show a drop's replies as a thread under it in the
-  // main stream; the thread itself never nests further threads.
+  // Each collapsed conversation has one thread under its top-level drop.
   const replyThreads = useWaveReplyThreads();
   const showReplyThread =
     replyThreads !== null &&
+    (replyThreads.collapseAll || drop.collapse_replies === true) &&
     location === DropLocation.WAVE &&
     dropViewDropId === null &&
     drop.drop_type === ApiDropType.Chat &&

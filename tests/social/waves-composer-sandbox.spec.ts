@@ -441,6 +441,120 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("collapses a single reply thread and restores it inline", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    test.skip(
+      Boolean(testInfo.project.use.isMobile),
+      "Exercises desktop keyboard navigation"
+    );
+    const { payload, sourceDrop } = await loadSandboxDropFixture(page, baseURL);
+    const root = { id: String(sourceDrop["id"]), serial_no: 1 };
+    const directReply = {
+      ...sourceDrop,
+      id: "00000000-0000-4000-8000-000000000546",
+      serial_no: 2,
+      content: "Direct thread reply",
+      reply_to_drop: root,
+    };
+    const nestedReply = {
+      ...sourceDrop,
+      id: "00000000-0000-4000-8000-000000000547",
+      serial_no: 3,
+      content: "Nested thread reply",
+      reply_to_drop: { id: directReply.id, serial_no: 2 },
+    };
+    let collapsed = false;
+    await page.route(
+      `**/api/drops/${root.id}/collapse-replies`,
+      async (route) => {
+        expect(route.request().method()).toBe("POST");
+        const body = route.request().postDataJSON() as {
+          collapse_replies: boolean;
+        };
+        expect(body.collapse_replies).toBe(!collapsed);
+        collapsed = body.collapse_replies;
+        await route.fulfill({
+          json: { id: root.id, collapse_replies: collapsed },
+        });
+      }
+    );
+    await page.route(
+      `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
+      async (route) => {
+        await route.fulfill({
+          json: {
+            ...payload,
+            drops: [
+              {
+                ...sourceDrop,
+                collapse_replies: collapsed,
+                replies_count: collapsed ? 2 : 0,
+              },
+              ...(collapsed ? [] : [directReply, nestedReply]),
+            ],
+          },
+        });
+      }
+    );
+    await page.route("**/api/v2/drops?**", async (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      if (params.get("parent_drop_id") !== root.id) {
+        await route.fallback();
+        return;
+      }
+      await route.fulfill({
+        json: {
+          count: 2,
+          page: 1,
+          next: false,
+          data: [nestedReply, directReply].map((reply) => ({
+            ...reply,
+            collapsed_reply_thread: root,
+          })),
+        },
+      });
+    });
+    await gotoSandboxWave(page);
+    const openActions = async () => {
+      const rootRow = page
+        .getByRole("main")
+        .locator('[data-serial-no="1"]')
+        .first();
+      await rootRow.hover();
+      await rootRow
+        .getByRole("button", { name: "More actions" })
+        .press("Enter");
+    };
+
+    await openActions();
+    await page
+      .getByRole("button", { name: "Collapse replies", exact: true })
+      .press("Enter");
+    await expect(
+      page.getByText("Nested thread reply", { exact: true })
+    ).toHaveCount(0);
+    await page.getByRole("button", { name: "Show 2 replies" }).press("Enter");
+    const thread = page.getByRole("list", { name: "Replies to this drop" });
+    await expect(
+      thread.getByText("Direct thread reply", { exact: true })
+    ).toBeVisible();
+    await expect(
+      thread.getByText("Nested thread reply", { exact: true })
+    ).toBeVisible();
+
+    await openActions();
+    await page
+      .getByRole("button", { name: "Show replies inline", exact: true })
+      .press("Enter");
+    await expect(thread).toHaveCount(0);
+    await expect(
+      page.getByText("Nested thread reply", { exact: true })
+    ).toBeVisible();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("expands and collapses a long chat drop without leaving the latest position", async ({
     baseURL,
     page,
