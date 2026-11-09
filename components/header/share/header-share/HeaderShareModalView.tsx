@@ -58,6 +58,7 @@ const TOOLTIP_STYLE = {
   padding: "4px 8px",
 };
 
+/** Show the share flow, including the secure Desktop link or Mobile QR code. */
 export function HeaderShareModalView({
   open,
   shouldRender,
