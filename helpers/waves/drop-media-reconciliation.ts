@@ -42,16 +42,11 @@ function reconcileMedia(
   const error = retainStatus ? existing.media_error : incoming.media_error;
   if (status !== undefined) result.media_status = status;
   if (error !== undefined) result.media_error = error;
-  for (const key of [
-    "media_upload_id",
-    "width",
-    "height",
-    "thumbhash",
-  ] as const) {
-    if (
-      (result[key] === null || result[key] === undefined) &&
-      existing[key] !== undefined
-    ) {
+  const uploadId = incoming.media_upload_id ?? existing.media_upload_id;
+  if (uploadId !== undefined) result.media_upload_id = uploadId;
+  for (const key of ["width", "height", "thumbhash"] as const) {
+    // Explicit null clears a hint; only omitted fields need backfilling.
+    if (result[key] === undefined && existing[key] !== undefined) {
       Object.assign(result, { [key]: existing[key] });
     }
   }

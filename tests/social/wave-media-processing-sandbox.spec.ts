@@ -148,7 +148,7 @@ test.describe("Wave media lifecycle @auth @local-only", () => {
     await expect.poll(() => subscribed.size).toBeGreaterThan(0);
     published = true;
     send(processing);
-    const row = page.locator(`#drop-${serial}`);
+    const row = page.getByRole("tabpanel").locator(`#drop-${serial}`);
     await expect(row).toBeVisible();
     await expect(row).toContainText(content);
     await expect(row).toContainText("Processing image");

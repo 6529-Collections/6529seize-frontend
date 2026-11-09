@@ -31,7 +31,6 @@ import { useKeyPressEvent } from "react-use";
 import { DropMode } from "./dropComposer.types";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
-import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import { useWave } from "@/hooks/useWave";
 import {
@@ -57,10 +56,8 @@ import type {
 import { getDropSubmissionErrorContent } from "./create-drop-content/drop-submission-error.helpers";
 import type { CreateDropProps } from "./create-drop-content/create-drop.types";
 import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMonitoring";
-import {
-  removeTemporaryThreadReply,
-  settleTemporaryThreadReply,
-} from "./drops/reply-threads/pending-replies";
+import { removeTemporaryThreadReply } from "./drops/reply-threads/pending-replies";
+import { acceptCreatedDrop } from "./create-drop-content/accept-created-drop";
 import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
 import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
 
@@ -457,19 +454,13 @@ export default function CreateDrop({
     mutationFn: submitQueuedDrop,
     onSuccess: (serverDrop, body) => {
       startLocalSlowModeCooldown(body);
-      void Promise.resolve(
-        processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT, {
-          pendingDropId: body.dropId,
-        })
-      ).catch(() => undefined);
-      if (body.dropId && isWaveRepliesCollapsed(wave)) {
-        settleTemporaryThreadReply(
-          queryClient,
-          body.drop.wave_id,
-          body.dropId,
-          serverDrop
-        );
-      }
+      acceptCreatedDrop({
+        serverDrop,
+        body,
+        wave,
+        queryClient,
+        processIncomingDrop,
+      });
       body.onSuccess?.();
 
       if (

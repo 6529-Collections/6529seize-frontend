@@ -89,6 +89,24 @@ describe("drop media lifecycle reconciliation", () => {
     });
   });
 
+  it("respects explicit removal of layout hints in a terminal failure", () => {
+    const failed = media({
+      media_status: Status.Failed,
+      media_error: "sanitization_failed",
+      width: null,
+      height: null,
+      thumbhash: null,
+    });
+    expect(
+      reconcileDropMedia(drop([failed]), drop([ready()])).parts[0]?.media[0]
+    ).toMatchObject({
+      media_status: Status.Failed,
+      width: null,
+      height: null,
+      thumbhash: null,
+    });
+  });
+
   it.each([
     media({
       url: "https://example.com/replacement.png",

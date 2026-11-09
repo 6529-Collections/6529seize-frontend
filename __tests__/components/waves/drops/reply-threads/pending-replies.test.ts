@@ -51,6 +51,44 @@ const visible = (stream: ApiDrop[], pages?: ApiWaveDropsFeed[]) =>
   });
 
 describe("collapsed reply thread data", () => {
+  it("settles one canonical reply across overlapping pending pages", () => {
+    const client = new QueryClient();
+    const key = [QueryKey.DROPS, { waveId: "wave", dropId: "root" }];
+    const accepted = makeDrop("accepted");
+    client.setQueryData(key, {
+      pages: [
+        page([makeDrop("temp-pending")]),
+        page([makeDrop("temp-pending")]),
+      ],
+      pageParams: [null, 10],
+    });
+    settleTemporaryThreadReply(client, "wave", "temp-pending", accepted);
+    expect(client.getQueryData(key)).toMatchObject({
+      pages: [{ drops: [accepted] }, { drops: [] }],
+      pageParams: [null, 10],
+    });
+    client.clear();
+  });
+
+  it("deduplicates stream and query copies by accepted ID despite different rendering hashes", () => {
+    const accepted = makeDrop("accepted");
+    const stream = {
+      ...convertApiDropToExtendedDrop(accepted),
+      parts: accepted.parts.map((part) => ({
+        ...part,
+        content: "Server-normalized stream reply",
+      })),
+      stableHash: "pending-row-hash",
+      stableKey: "pending-row-key",
+    };
+    const result = getVisibleThreadReplies({
+      pages: [page([accepted])],
+      previous: [],
+      streamDrops: [stream],
+      parentDropId: "root",
+    });
+    expect(result.map((drop) => drop.id)).toEqual([accepted.id]);
+  });
   it.each([false, true])(
     "swaps a successful reply without a gap or duplicate (echo=%s)",
     (echoFirst) => {
