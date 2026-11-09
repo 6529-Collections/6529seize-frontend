@@ -2,9 +2,8 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { MEMES_MANIFOLD_PROXY_ABI } from "@/abis/abis";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { MANIFOLD_LAZY_CLAIM_CONTRACT } from "@/constants/constants";
-import useCapacitor from "@/hooks/useCapacitor";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useVisibleInterval } from "@/hooks/usePageVisibility";
 import {
   ManifoldClaimStatus,
@@ -72,11 +71,10 @@ export function useMintCountdownState(
   const isError =
     errorFromCallback && (!manifoldClaim || manifoldClaim.isError);
 
-  const { isIos } = useCapacitor();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const [now, setNow] = useState(() => Time.now());
 
-  const showMintBtn = !hideMintBtn && !(isIos && country !== "US");
+  const showMintBtn = !hideMintBtn && !hideNftPurchasing;
 
   useVisibleInterval(() => setNow(Time.now()), 1000);
 

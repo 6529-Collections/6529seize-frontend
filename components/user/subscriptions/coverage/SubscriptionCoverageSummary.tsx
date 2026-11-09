@@ -101,6 +101,7 @@ export default function SubscriptionCoverageSummary({
   coverage,
   isLoading,
   isOwner,
+  showFundingPrompt = true,
   action,
   topUpAction,
   children,
@@ -108,6 +109,7 @@ export default function SubscriptionCoverageSummary({
   coverage: ApiSubscriptionCoverage | undefined;
   isLoading: boolean;
   isOwner: boolean;
+  showFundingPrompt?: boolean;
   action?: ReactNode;
   topUpAction?: ReactNode;
   children?: ReactNode;
@@ -130,7 +132,9 @@ export default function SubscriptionCoverageSummary({
     status === Status.RunningLow ||
     status === Status.ActionRequired;
   const deadline =
-    isOwner && warningState ? coverage?.next_unfunded?.top_up_deadline : null;
+    showFundingPrompt && isOwner && warningState
+      ? coverage?.next_unfunded?.top_up_deadline
+      : null;
   const showNextUnfunded = !!coverage?.next_unfunded && !deadline;
   const showChooseDrops =
     isOwner && presentation.action === "choose_drops" && !pending;
@@ -193,7 +197,7 @@ export default function SubscriptionCoverageSummary({
               })}
             </p>
           )}
-          {!showFundedCount && !pending && (
+          {showFundingPrompt && !showFundedCount && !pending && (
             <p className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
               {coverage
                 ? description

@@ -1,7 +1,7 @@
 "use client";
 
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useAuth } from "@/components/auth/Auth";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import {
   formatNameForUrl,
@@ -23,7 +23,6 @@ import {
   numberWithCommas,
   printMintDate,
 } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { faFire } from "@fortawesome/free-solid-svg-icons";
@@ -66,8 +65,7 @@ function DetailRow(
 }
 
 export default function NextgenTokenAbout(props: Readonly<Props>) {
-  const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { connectedProfile } = useAuth();
   const [tdh, setTdh] = useState<number>(0);
   const { profile } = useIdentity({
@@ -164,7 +162,7 @@ export default function NextgenTokenAbout(props: Readonly<Props>) {
         <DetailRow label="Collector TDH">
           {numberWithCommas(Math.round((profile?.tdh ?? 0) * 100) / 100)}
         </DetailRow>
-        {(!capacitor.isIos || country === "US") && (
+        {!hideNftPurchasing && (
           <DetailRow label="Listed" stacked>
             <div className="tw-mt-2 tw-grid tw-grid-cols-1 tw-gap-2 sm:tw-grid-cols-3">
               <Link

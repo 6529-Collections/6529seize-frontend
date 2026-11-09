@@ -162,6 +162,8 @@ async function upload(
   if (!file) return uploadError("invalid_file");
   options.onState?.("uploading");
   let sent = 0;
+  // No purpose: studio images upload as chat, so identifying metadata is
+  // removed. verifyImage hashes the published bytes, not the local file.
   return await multipartUploadCore({
     file,
     endpoints: {

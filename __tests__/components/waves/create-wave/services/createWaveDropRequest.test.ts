@@ -2,6 +2,7 @@ import type { CreateDropConfig } from "@/entities/IDrop";
 import { getCreateWaveDropRequest } from "@/components/waves/create-wave/services/createWaveDropRequest";
 import { generateDropPart } from "@/components/waves/create-wave/services/waveMediaService";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 
 jest.mock("@/components/waves/create-wave/services/waveMediaService", () => ({
   generateDropPart: jest.fn(),
@@ -37,7 +38,10 @@ describe("getCreateWaveDropRequest", () => {
       media: [],
     });
 
-    const result = await getCreateWaveDropRequest(buildDrop());
+    const result = await getCreateWaveDropRequest(
+      buildDrop(),
+      ApiMediaUploadPurpose.Chat
+    );
 
     expect(result.parts[0]).toEqual({
       content: "Generated part",
@@ -46,6 +50,24 @@ describe("getCreateWaveDropRequest", () => {
     });
     expect(result.parts[0]).not.toHaveProperty("attachments");
   });
+
+  it.each([ApiMediaUploadPurpose.Chat, ApiMediaUploadPurpose.DecisionEntry])(
+    "uploads each part's media with the %s purpose",
+    async (purpose) => {
+      mockedGenerateDropPart.mockResolvedValueOnce({
+        content: "Generated part",
+        quoted_drop: null,
+        media: [],
+      });
+
+      await getCreateWaveDropRequest(buildDrop(), purpose);
+
+      expect(mockedGenerateDropPart).toHaveBeenCalledWith(
+        expect.objectContaining({ content: "Source part" }),
+        purpose
+      );
+    }
+  );
 
   it("copies attachments from generated drop parts", async () => {
     mockedGenerateDropPart.mockResolvedValueOnce({
@@ -63,7 +85,10 @@ describe("getCreateWaveDropRequest", () => {
       attachments: [{ attachment_id: "attachment-1" }],
     });
 
-    const result = await getCreateWaveDropRequest(buildDrop());
+    const result = await getCreateWaveDropRequest(
+      buildDrop(),
+      ApiMediaUploadPurpose.Chat
+    );
 
     expect(result.parts[0]).toEqual({
       content: "Generated part",

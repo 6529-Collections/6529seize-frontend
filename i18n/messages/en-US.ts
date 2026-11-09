@@ -500,6 +500,8 @@ const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
 
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   chat: "Chat",
+  "unreadMessages.one": "{count} unread message",
+  "unreadMessages.other": "{count} unread messages",
   sales: "Sales",
   myStream: "My Stream",
   polls: "Polls",

@@ -57,8 +57,10 @@ and content stay hidden while it loads, a US deep link then opens the
 `Subscriptions` tab in place, and a non-US, unknown, failed, or slow (over five
 seconds) check redirects. Web and Android never wait for the country check.
 
-On every platform the `Subscriptions` tab, the profile-header subscription
-status, and their requests are left out of the server HTML and the first
+In the iOS app, the profile tab can show existing subscriptions, without
+funding actions. The promotional subscription card is omitted from the
+profile header. On every platform the `Subscriptions` tab and its requests
+are left out of the server HTML and the first
 render, because the page cannot yet tell whether it is the iOS app. They appear
 right after the page loads where subscriptions are allowed. A direct
 `/{user}/subscriptions` link stays selected and does not redirect during that
@@ -265,8 +267,7 @@ first render.
   - uses exact backend-provided ETH for recommended and minimum options,
     including partially funded next drops
   - refreshes coverage and the existing subscription data after confirmation
-  - on iOS with consent country `US`, shows `Top-up on 6529.io` instead of
-    in-page send controls
+  - is available on web and Android
   - shows modal states for wallet confirm, pending confirmation, success, and
     error
   - can show `View Tx` while pending or after success

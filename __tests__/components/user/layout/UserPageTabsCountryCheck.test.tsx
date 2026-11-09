@@ -1,4 +1,4 @@
-import NftPurchasingGate from "@/components/common/NftPurchasingGate";
+import { SubscriptionPageGate } from "@/components/common/NftPurchasingGate";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import UserPageTabs from "@/components/user/layout/UserPageTabs";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
@@ -66,7 +66,7 @@ const initialProfile = Object.assign(new ApiIdentity(), {
 
 function SubscriptionsPanel() {
   mockMount();
-  return <button>Top up</button>;
+  return <p>Subscription history</p>;
 }
 
 // Mirrors the profile layout: the tab bar above the gated subscriptions panel,
@@ -75,9 +75,9 @@ function renderSubscriptionsDeepLink() {
   return render(
     <CookieConsentProvider>
       <UserPageTabs initialProfile={initialProfile} />
-      <NftPurchasingGate>
+      <SubscriptionPageGate placeholder={null}>
         <SubscriptionsPanel />
-      </NftPurchasingGate>
+      </SubscriptionPageGate>
     </CookieConsentProvider>
   );
 }
@@ -111,9 +111,7 @@ describe("profile subscriptions deep link with the country check", () => {
 
     resolveCountry("US");
 
-    expect(
-      await screen.findByRole("button", { name: "Top up" })
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Subscription history")).toBeInTheDocument();
     expect(getTabIds()).toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
     expect(mockReplace).not.toHaveBeenCalled();
   });
@@ -150,7 +148,7 @@ describe("profile subscriptions deep link with the country check", () => {
     renderSubscriptionsDeepLink();
 
     expect(getTabIds()).toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
-    expect(screen.getByRole("button", { name: "Top up" })).toBeInTheDocument();
+    expect(screen.getByText("Subscription history")).toBeInTheDocument();
     expect(mockReplace).not.toHaveBeenCalled();
   });
 });

@@ -20,13 +20,17 @@
       ],
       "summary": "Returning to an open wave refreshes its latest messages together while preserving the conversation and unsent draft.",
       "facts": [
+        "On desktop and mobile web, Chat shows a blue unread-message badge capped at 99+, except for muted waves. Leaderboard, Decisions, Settings and curations preserve unread chat messages even after returning to the browser tab. Incoming chat messages add a new-message count to the browser title only while Chat is selected. Open Chat in a visible browser tab to use the conversation's normal read acknowledgement.",
         "If you were at the bottom, the conversation follows the latest messages. If you were reading older messages, it keeps your place; use the bottom control to return to latest.",
         "After a long absence, Load missed messages marks a gap between cached history and the latest page. It loads a page when approached or selected, without delaying current messages.",
         "If missed history fails to load, select Could not load missed messages. Try again. Already loaded messages remain available."
       ],
       "canonical_path": "/waves",
       "tags": ["waves", "chat", "recovery"],
-      "source_refs": ["ops/docs/waves/chat/feature-scroll-behavior.md"]
+      "source_refs": [
+        "ops/docs/waves/chat/feature-scroll-behavior.md",
+        "ops/docs/waves/chat/feature-content-tabs.md"
+      ]
     },
     {
       "id": "waves.selected-post-preview",
@@ -152,6 +156,7 @@
         "Competitions are now called decisions. The Competitions tab is now Decisions, + Competition is now + Decision, and the scheduled winner-selection moments formerly called decisions are now results (Pause results, Resume results, Next result). Older /competitions links still open the same decision.",
         "Where the decision experience is available, use Decisions in a wave to browse its active decisions and history. Each decision opens on Leaderboard and has its own entries, votes, rules, budget and results while Shared chat returns to the wave conversation. There is no separate Entries tab.",
         "Anonymous submissions is an optional decision setup setting and is off by default. It is fixed after publication. Other users see each entry without its author identity until that entry wins; the author's other submissions remain anonymous, including across later draws. You can manage your own entries through My submissions. Your identity is revealed automatically if your submission wins. Unrevealed anonymous entries remain visible despite account blocks so blocking cannot identify their author; hiding a specific drop and platform moderation still apply. Related author notifications remain visible despite account blocks and identity mutes until that entry wins; ordinary notifications retain their existing filters. Content and metadata remain visible as submitted, so self-disclosure there is the submitter's responsibility. If an older upload cannot be used anonymously, upload the media again and retry; the submission form keeps your other input.",
+        "Media attached to a decision entry keeps the artist's original file, including embedded details such as location, camera details, capture time and file name; chat and profile photos have those details removed. Remove anything you do not want public from the file before submitting.",
         "Decision links use /waves/{waveId}/decisions/{decisionId}; an entry link adds ?entry={entryId}. Older /waves/{waveId}/competitions links redirect permanently to the matching /decisions page with their query intact. Explicit decision and entry links preserve that decision across tabs, reload and Back/Forward even when another decision becomes the default.",
         "In decision setup, Decision type offers Rank and Approve in a desktop dropdown or a bottom sheet on smaller screens, including the app. The current choice is marked. Selecting a type closes the picker; dismissing it leaves the choice unchanged.",
         "In the app, the decision setup editor keeps the focused name or description field above the keyboard and action bar. Closing the keyboard restores the editor's full height.",
@@ -1139,7 +1144,7 @@
       ],
       "facts": [
         "The Join 6529 page lives at /join-6529.",
-        "On native iOS when the detected country is not US or is unknown, the Collect step, subscription promotions/actions, and purchasing FAQs are absent; progress counts four visible steps and there is no unavailable banner.",
+        "In the iOS app, the Collect step, subscription promotions/actions, and purchasing FAQs are absent; progress counts four visible steps and there is no unavailable banner.",
         "/join redirects to /join-6529 for compatibility.",
         "It is a state-aware onboarding hub that adapts to wallet connection, wallet auth, and profile setup.",
         "The journey covers connecting a wallet, setting up a profile, joining a Wave, participating, and collecting.",
@@ -1565,7 +1570,7 @@
       ],
       "facts": [
         "The Minting The Memes guide lives at /about/minting.",
-        "On native iOS when the detected country is not US or is unknown, About Minting and Subscriptions links are hidden and direct visits return to /about without rendering the guides.",
+        "In the iOS app, About Minting and Subscriptions links are hidden and direct visits return to /about without rendering the guides.",
         "The guide links to the current in-app mint at /the-memes/mint and the official standalone mint page at https://thememes.6529.io/.",
         "Users can choose regular minting or subscription minting; a subscription does not create eligibility and can mint only in a phase the destination wallet already qualifies for.",
         "The current mint flow can move through Phase 0, Phase 1, Phase 2, and a public phase for a card.",
@@ -1890,7 +1895,7 @@
         "In the app sidebar, selecting another connected profile switches to it and closes the drawer; the add-profile button closes the drawer as the wallet connection flow opens.",
         "In Capacitor, Connect and add-profile open a shared Connect sheet with App Wallets, External Wallets, and Scan Connection QR options.",
         "The Capacitor App Wallets view supports Back, Create App Wallet, and direct app-wallet unlock/connect; app wallets are omitted from the Reown external-wallet browser.",
-        "Scan Connection QR accepts only canonical 6529 connection-share links; the separate app-sidebar scanner remains general-purpose.",
+        "Scan Connection QR accepts canonical 6529 connection-share links. If you scan one from the encrypted messages upgrade prompt, the incoming connection opens for approval and the upgrade prompt closes. The separate app-sidebar scanner is general-purpose.",
         "My artwork documentation availability is checked independently of opening the account dropdown. When access is already known, the item is present from the start. If access resolves while the menu is open, the item appears immediately without needing to reopen the menu.",
         "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
@@ -1954,7 +1959,7 @@
       "facts": [
         "Open Connect Device from the desktop account menu, confirm the avatar, handle and full wallet address, and choose 6529 Mobile or 6529 Desktop.",
         "Connect only creates an additional signed-in app session. Connect with Post Signing & DM Encryption requests a browser-wallet signature first, then one private link both signs in and enrolls the receiving app without connecting a wallet there. The source session remains connected and the source browser need not enable encryption itself.",
-        "The 6529 Desktop secure option is currently visible but disabled with a Coming soon tooltip. Connect only remains available. This is a release gate, not an automatic version check.",
+        "The Desktop secure setup option shows Coming soon. Connect only remains available on Desktop.",
         "Mobile shows a full-width QR; Desktop uses the 6529 logo and Open in 6529 Desktop launch control instead of a QR. The link field includes a copy icon with refresh beside it. Back returns to the app and connection choices.",
         "Connect-only refresh generates a new code directly. Secure refresh removes the displayed link and returns to the wallet-signing state for a fresh signature. Copy and refresh are unavailable during preparation; preparation failures can be retried.",
         "The regular app QR scanner accepts secure and Connect-only connection links. A device camera can open a link when its app link handler supports that URL. Secure acceptance lists Signed Posts and Encrypted DMs with Accept and enable both; Connect-only acceptance uses Accept connection without granting those permissions. Both connection types open Home after acceptance; secure setup completes before navigation.",
@@ -2132,7 +2137,7 @@
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
-        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and then keep the Subscriptions tab, and web and Android never wait for the country check. On every platform the Subscriptions tab and the profile-header subscription status are added just after the page loads rather than in the first render.",
+        "On iOS the profile Subscriptions tab can show history once the country check returns US. Other results return to Identity. Top up and the promotional profile header card are omitted throughout iOS.",
         "The coverage card separates the answer from the supporting facts. Small status text sits above the funded-drop headline: Covered green, Plan a top up neutral, Running low amber and Action required red. Visitors see neutral status text except Covered. Funded through appears for at least one funded drop. Plan a top up, Running low and Action required show the authoritative Top up by cutoff once for owners when supplied, without repeated zero- or one-funded-drop explanations. States without a status keep their existing explanation for both perspectives. The original gradient, all state data and thresholds remain unchanged. Summary dates retain their original full-year format, including UTC deadline times.",
         "Subscription balance and Forecast use stay visible in the quiet facts zone. Desktop facts are inline at 14px. Phones place the facts side by side, with 14px labels above 16px values and N mints available below the balance without parentheses; they stack below 384px. The owner refresh sits beside the balance label on phones and at the end of the balance row on desktop. Next unfunded stays in the facts when no deadline line already names the drop. Forecast use keeps its shared explanation tooltip. Real zero and empty results retain their normal display; failed reads show Unavailable and existing Retry recovery. Loading uses skeleton values and controls without guessed zero balances, off switches or an enabled Top up action.",
         "Minting settings remains inline from 1024px and opens from its compact phone row below that width. The phone sheet fits its content and uses the shared dimmed backdrop. Mode, Edition Preference and Airdrop Address retain their saved values, date, eligibility, address tooltip and owner controls. Only owners can change settings. Switches retain their original emerald styling. Subscription History remains a separate inline desktop section and compact phone sheet row. Learn more stays beside Subscription minting.",
@@ -3665,11 +3670,11 @@
       "facts": [
         "Encrypted chats are moving from MLS ciphersuite 0x004F (AES-128-GCM) to 0x004E (AES-256-GCM); until the move reaches 6529.io, chats keep using 0x004F and no upgrade prompt appears. After it, a device that used the earlier encryption shows Upgrade encrypted messages instead of first-time setup and asks for one wallet signature (Sign to upgrade Encrypted DMs, or Sign to enable both when Signed Posts are also off); decrypted history stays on the device. Earlier chats become read-only and are labelled Read-only in the list: messages stay readable, but sending, editing, reactions, renaming and member changes are off. In a direct message, Continue the conversation opens or starts a session on the new encryption in the same list entry, with Chat history switching between sessions. In a group, Start again with the same members creates the new group once (then Open the new conversation); members who have not confirmed the upgrade are named and left out, to be added later from Chat info. If nobody can be reached yet, the page says they will be reachable once they open 6529.io and confirm the upgrade. The new conversation opens with This conversation moved to stronger encryption and View earlier messages. A message of yours that had not gone out when the chat moved shows Not sent: this chat was upgraded; it is never sent by itself. Resend in the upgraded chat sends a copy (text, mentions and attachments, not the reply) in the continuing conversation, and Delete removes it from this device after confirmation.",
         "If sending an encrypted message keeps failing for about 20 seconds while the chat itself is fine, the chat shows Messages aren’t sending right now. We’ll keep retrying, and you can keep writing. The message box stays available and keeps your draft; new messages stay pending and send in order once a retry succeeds. When a required group change cannot go through, the chat instead shows Group changes are delayed and the message box reads Sending is paused until the group change goes through.",
-        "Connect only creates an additional signed-in app session. Connect with Post Signing & DM Encryption requests a browser-wallet signature first, then one private link both signs in and enrolls the receiving app without connecting a wallet there. The source session remains connected and the source browser need not enable encryption itself. The 6529 Desktop secure option is currently visible but disabled with a Coming soon tooltip. Connect only remains available. This is a release gate, not an automatic version check. Working receiver keys/history are preserved; source history is not copied.",
+        "Connect only creates an additional signed-in app session. Connect with Post Signing & DM Encryption requests a browser-wallet signature first, then one private link both signs in and enrolls the receiving app without connecting a wallet there. The source session remains connected and the source browser need not enable encryption itself. The Desktop secure setup option shows Coming soon. Connect only remains available on Desktop. Working receiver keys/history are preserved; source history is not copied.",
         "The Encrypted DMs composer keeps attachments to the left and the emoji button inside the message input. The emoji picker opens beside its button on desktop and in the regular mobile slide panel. Emoji selections preserve the draft and caret and do not update ordinary reaction history. Desktop Enter sends and Shift+Enter adds a line. On mobile web and in the app, Return does not submit; use Send. Arrow Up from an empty composer with no reply, edit or attachment in progress edits your latest eligible message. On mobile web and in the app, an accepted send removes input focus and dismisses the keyboard. A failed send restores the draft without deliberately dismissing the keyboard, and a delayed send leaves a newly started draft alone. Dismissing the native keyboard also removes input focus.",
         "Encrypted messages appear in the bell inbox and All notifications feed even without local keys. Known senders use the normal clickable avatar, handle, level and badges; older entries without sender details use a lock and New encrypted message. The server stores sender identity and opaque chat/message references, never plaintext. A ready device previews only the exact referenced message readable in its local history, with a lock indicator. Missing history or old entries without a sequence stay generic. Without setup the action is Set up Encrypted DMs; otherwise Open encrypted chat. Direct messages and wave activity preferences apply. In-app creation has no 60-second cooldown; pushes are separate. Missing historical notifications are not backfilled.",
         "The shared desktop avatar tooltip combines wallet connection status with Signed Posts and Encrypted DMs states and expiry detail when due, with bold on/off and a short hover delay. The mobile sidepanel prints connection status on one row and a shield beside permission states on the next, above TDH. Green means both ready without renewal due; amber means partial setup or renewal due; neutral covers off, unavailable or unresolved states. Connected-profile avatars also show smaller shields. Disconnecting a wallet does not revoke local grants.",
-        "Encrypted chats are rolling out. Where they are available they appear under Messages as an Encrypted section at /messages/encrypted, with new chats at /messages/encrypted/new and this browser's devices at /messages/encrypted/devices.",
+        "Encrypted chats are rolling out. Where they are available they appear under Messages as an Encrypted section at /messages/encrypted, with new chats at /messages/encrypted/new and this browser's devices at /messages/encrypted/devices. Select the open chat again in the messages side pane to return to the encrypted inbox.",
         "Encrypted direct messages show one list and sidebar entry per person. If a chat was left or replaced, Chat history above the timeline opens earlier histories, including messages imported into them. Search and messages belong to the selected history. Open current chat returns to the active chat; Continue encrypted chat starts a replacement if no usable chat remains, subject to current message preferences and device availability. Old links still open their original history. Histories are not deleted or copied together. Group chats remain separate.",
         "To start an encrypted chat, search for a person and tap or click their search result. The search clears and the person appears in the selected list with their encrypted-message eligibility. A new chat requires everyone selected to be eligible. If the encrypted direct message already exists, choose Open chat instead.",
         "In the 6529 app, the back arrow to the left of the encrypted chat avatar returns to the encrypted messages list. It remains visible on iPad in portrait and landscape.",
@@ -3688,7 +3693,7 @@
         "Reporting is for illegal or severe harm only: child sexual abuse material, a credible threat of violence, intimate images shared without consent, or doxxing. Only the selected message is shared, with proof its sender sent it, and it goes to 6529's moderators, who review it in WatchTower's Encrypted reports tab, not to wave moderators. The dialog shows the text and attachment names that will be sent. An edited message is reported as the edited version you see; the original is sent too only if you tick Also send the original message. Nothing else in the conversation is revealed.",
         "Encrypted messages run in one browser tab at a time per profile. Other tabs show Encrypted messages are open in another tab. with Use here, which moves them to that tab and pauses the first one.",
         "When this browser holds encrypted messages, Sign out and Sign Out All Profiles offer Remove encrypted messages from this browser (on by default for Sign Out All Profiles). It deletes the chats, attachment keys, unsent messages and encryption keys saved in this browser; without encrypted backup that history cannot be recovered.",
-        "Compatible apps can use direct app-wallet or WalletConnect setup, or one source-browser-approved secure connection link. iOS 16.4 is the Mobile minimum for encryption and iOS 17 is required for Signed Posts. Released Desktop support must not be inferred from the pending implementation; its secure Connect Device button is currently Coming soon. Encrypted phone message pushes use title New encrypted message and body Open 6529 Mobile to view in production or Open 6529 Staging to view on staging, without sender or text. An e2ee push opens the encrypted inbox and syncs; it opens a chat only when exactly one active unmuted local chat has unread messages, otherwise it stays on the list.",
+        "Compatible apps can use direct app-wallet or WalletConnect setup, or one source-browser-approved secure connection link. iOS 16.4 is the Mobile minimum for encryption and iOS 17 is required for Signed Posts. The Desktop secure setup option shows Coming soon. Encrypted phone message pushes use title New encrypted message and body Open 6529 Mobile to view in production or Open 6529 Staging to view on staging, without sender or text. An e2ee push opens and refreshes the encrypted inbox. The recipient chooses which chat to open.",
         "Permissions normally last 180 days. During the last 14 days, the shield status shows expiry and dismissible renewal reminders appear for signing-only in Waves, encryption-only in Messages (inbox and selected chats), and combined grants in both. Renewing an existing encryption device preserves keys/history; expiry alone does not erase saved history. showRenewal=true previews only Waves/Messages and uses preview wording and disabled actions if nothing is actually due.",
         "Preferences > Device Permissions lists signing, encryption and combined grants. Rename any owned unrevoked device from an authenticated browser or app; the existing server name is reflected on other devices and linked signing/encryption entries. Revoke confirms its scope: a combined grant disables both permissions, a separate grant only its own. Revoking this encryption device clears its local history/keys, which reauthorizing alone cannot restore.",
         "A new device with encryption on still cannot read earlier history it never received. Restore an encrypted backup and join the chat for future messages. An old notification can stay generic or open Chat not found on this device even while the browser that holds the history reads it normally."
@@ -4284,6 +4289,7 @@
       ],
       "facts": [
         "Memes wave docs cover submission, preview/submit states, additional info fields, and quick voting.",
+        "A Memes submission is a decision entry, so uploaded artwork, supporting media, preview images and promo videos keep the artist's original files, including embedded details such as location, camera details and capture time.",
         "In Artwork Details, checking Additional Action opens Your plan (optional). Describe what you will do if selected, who receives it, timing, and any costs or conditions. The plan is public with the submission and supports up to 5000 characters; a blank plan is allowed.",
         "Unchecking Additional Action keeps the plan draft during the current modal session but excludes it from the submitted metadata. Rechecking restores it. Closing the modal discards the unsaved draft.",
         "Additional Information and optional Preview both show the Additional Action summary before submission. Use Back to edit the action and plan in Artwork. A marked action with no plan says no separate plan was provided.",
@@ -6075,7 +6081,7 @@
         "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
         "The Subscriptions filter includes transition-based coverage alerts with runway, Meme context, authoritative deadline when available, and exact minimum top-up action.",
-        "On native iOS when the detected country is not US or is unknown, subscription coverage feed items, their filter and the device settings entry are hidden; social follow notifications remain available.",
+        "In the iOS app, subscription coverage feed items, their filter and the device settings entry are hidden; social follow notifications remain available.",
         "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted.",
         "Unread-count polling pauses in backgrounded Capacitor apps and hidden mobile browser tabs, preserving cached counts and refreshing on return. Browser realtime notification delivery stays connected.",
         "Route preparation, wallet restoration, profile loading and the first notifications fetch use one consistent Loading notifications indicator, without a separate route shimmer."
@@ -6750,6 +6756,7 @@
         "To change profile media on desktop, choose Edit beside Preferences and use Profile cover or Profile picture in the combined editor. Smaller layouts keep Edit profile > Profile cover or Profile picture.",
         "Editing requires a confirmed direct owner session and is hidden for visitors, signed-out users and active proxies. Desktop saves all changed profile fields with Save; the smaller picture editor retains Save PFP. Both editors show Select Meme search immediately, separated from file upload by or. Desktop lets you type while Memes load and keeps loading and retry states. Both layouts use compact field styling. Cover editing supports left-aligned Gradient and Image modes.",
         "In profile picture editors, saved or selected images show their preview inside the Upload image area, below Meme search, with no separate preview row. Select Meme search and Upload image remain available to choose a different Meme or file; drag and drop still works.",
+        "Uploaded profile pictures and banner images are published without identifying metadata such as location, camera details and capture time.",
         "Use these records when users ask how to change profile media."
       ],
       "canonical_path": "/{user}",
@@ -7023,6 +7030,7 @@
         "Remove an inline image with its Remove image X, or select it and press Backspace or Delete. Undo restores it in place. Drafts with inline images are not saved when leaving the composer.",
         "Unsupported files are reported immediately by name with the supported formats. Existing text and valid files remain in the draft, including valid files from mixed batches.",
         "AVIF still images are converted to WebP with orientation applied and metadata removed for compatibility with older supported apps. Wait for preparation before sending or continuing a Storm. Animated AVIF is unsupported; use a still image or GIF.",
+        "Images posted in chat, replies and DMs are published without location, camera details, capture time or other identifying metadata, under a neutral file name. Media attached to a decision entry keeps the artist's original file.",
         "Media must be non-empty and at most 500 MB. PDF limits are 25 MB and 100 pages; CSV is limited to 50 MB. The file tray supports eight files across all Storm parts and skips excess files without removing existing selections.",
         "AVIF limits are 64 million pixels and 16,383 pixels per side. Corrupt files and AVIF content with a mismatched filename are rejected. Uppercase .AVIF and empty or generic browser MIME types work.",
         "HEIC/HEIF, SVG, BMP, TIFF and JPEG XL images are unsupported. Renaming a file does not convert its format. Other upload surfaces have their own format rules.",
@@ -7034,6 +7042,48 @@
       "source_refs": [
         "ops/docs/waves/composer/feature-wave-drop-drag-paste-image-uploads.md",
         "ops/docs/waves/drop-actions/feature-image-viewer-and-scaling.md"
+      ]
+    },
+    {
+      "id": "media.photo-metadata-privacy",
+      "kind": "business_rule",
+      "title": "Photo metadata removed in chat and on profiles",
+      "aliases": [
+        "photo location",
+        "remove GPS from photos",
+        "EXIF data",
+        "image metadata",
+        "camera metadata",
+        "does 6529 strip metadata",
+        "photo privacy"
+      ],
+      "keywords": [
+        "metadata",
+        "EXIF",
+        "GPS",
+        "location",
+        "camera",
+        "capture time",
+        "privacy",
+        "decision entry",
+        "original file"
+      ],
+      "facts": [
+        "Images posted in chat, replies and direct messages are published without identifying metadata: location, camera details and serial numbers, owner and artist names, capture date and time, embedded thumbnails, and XMP and IPTC data. Every chat upload also gets a neutral public file name.",
+        "Profile pictures, profile banners and wave pictures have the same identifying metadata removed.",
+        "Decision entries are the exception: media attached to an entry, including Memes submission artwork and its supporting media, keeps the artist's original file, embedded details and file name. Check the file before submitting if you do not want those details public, especially for an anonymous submission.",
+        "Images pasted into the text of a decision entry are treated like chat images."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "media", "privacy", "profiles"],
+      "source_refs": [
+        "ops/docs/waves/composer/feature-wave-drop-drag-paste-image-uploads.md",
+        "ops/docs/waves/competitions/feature-competitions.md",
+        "ops/docs/waves/memes/feature-memes-submission.md",
+        "ops/docs/profiles/navigation/feature-profile-picture-editing.md",
+        "ops/docs/profiles/navigation/feature-banner-editing.md",
+        "ops/docs/waves/header/feature-wave-picture-edit.md"
       ]
     },
     {
@@ -8137,7 +8187,7 @@
       ],
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
-        "On native iOS when the detected country is not US or is unknown, the mint page, recipient selection, mint count and SEIZE controls are absent and direct or deep-linked visits to /the-memes/mint return to /the-memes without an unavailable message once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and keep the Mint on 6529.io handoff, and web and Android keep the mint page.",
+        "In the iOS app, direct links to /the-memes/mint return to The Memes collection. Web and Android offer minting.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
         "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
         "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",
@@ -8436,7 +8486,7 @@
       "keywords": ["nextgen", "mint", "distribution", "plan", "collection"],
       "facts": [
         "NextGen mint and distribution-plan behavior is documented under NextGen docs.",
-        "On native iOS when the detected country is not US or is unknown, mint and burn-to-mint buttons are absent and direct mint routes return to the collection without displaying mint controls; countdown information and distribution data remain available.",
+        "In the iOS app, direct NextGen mint links return to the collection. Countdown and distribution information stay available.",
         "Mint routes live under /nextgen/collection/{collection}/mint.",
         "Distribution plan routes live under /nextgen/collection/{collection}/distribution-plan.",
         "The distribution-plan allowlist shows a loading state while entries are fetched and a no-match state when active filters return no entries."
@@ -9445,7 +9495,8 @@
         "Saved rules freeze exact targets, funding wallet, recipient, unit and total review limits, gas reserve, expiry and action count. They prepare one ETH purchase at a time for wallet approval. Pause and expiry retain unresolved operations, and confirmed acquisitions count permanently even if the NFT is later sold or transferred. Rules do not grant unattended wallet execution authority.",
         "Offers and listings support 1, 7 or 30 days or Custom… with an exact local date and time. The displayed time zone applies. Custom times must be at least five minutes away and within the supported 30-day window; invalid, missing or repeated daylight-saving times require a different time. Quote refresh does not extend a signed order. Eligible collection-wide or verified trait offers can be accepted through Sell or Accept offer for the NFT on the current artwork page. The holding wallet signs and receives sale proceeds; profile consolidation does not transfer signing authority.",
         "Meme Lab cards at /meme-lab/{id} share the Memes trading controls, edition quantities and purchase review. This card-level trading support does not add Meme Lab to the set planner, Lowest listings or TDH tools.",
-        "Selection purchase review fills the screen with artwork rows, a purchase summary and Back to collecting at the top. Deliver all to prepares one destination for every item, while Change delivery for this artwork retains exceptions or split deliveries. Applying a common destination combines each item’s copies at that address. Remove beside an artwork checks the existing unsigned review and prepares a new quote for the remaining exact orders, quantities and allocations. A failed update retains the original review. Removing the last item closes only after pending-purchase checks. Confirmation and removal remain unavailable during destination editing; preparation, wallet steps and unresolved transactions preserve their recovery state."
+        "Selection purchase review fills the screen with artwork rows, a purchase summary and Back to collecting at the top. Deliver all to prepares one destination for every item, while Change delivery for this artwork retains exceptions or split deliveries. Applying a common destination combines each item’s copies at that address. Remove beside an artwork checks the existing unsigned review and prepares a new quote for the remaining exact orders, quantities and allocations. A failed update retains the original review. Removing the last item closes only after pending-purchase checks. Confirmation and removal remain unavailable during destination editing; preparation, wallet steps and unresolved transactions preserve their recovery state.",
+        "The iOS app offers NFT browsing and order history. Collect shortcuts are hidden, and direct Collect links return to the collection."
       ],
       "canonical_path": "/collect",
       "link_label": "Open collecting tools",
@@ -11212,11 +11263,11 @@
         "Web sign-in can include a signing or combined grant. Manual Turn on, account-menu and Device Permissions entries instead open the shared consent card before requesting a signature. It names both permissions when both are missing or only the missing permission otherwise. No setup popup automatically follows sign-in. The empty-composer notice says Turn on signed posts (one signature) and can be dismissed for 30 days per wallet. Renewal reminders begin in the last 14 days; signing-only appears in Waves, encryption-only in Messages, and combined grants in both.",
         "With a grant in this browser, a write is never sent unsigned without your choice. The key is loaded ahead of time so signing is normally instant; a write waits up to 10 seconds while its pending drop stays visible. If signing fails or times out, or 6529.io rejects the signature, the write stays pending and Couldn't sign this post (or edit, reaction, deletion) offers Try again or Send unsigned (Save unsigned for edits, Do it unsigned plus Cancel for reactions and deletes). If the grant was revoked or expired, the prompt offers Turn on signed messages (one signature) or Send unsigned. A backend that does not accept device signatures gets the same prompt, never an automatic unsigned resend. Without a grant, writes are sent unsigned as before.",
         "Preferences > Device Permissions lists signing, encryption and combined grants. Rename any owned unrevoked device from an authenticated browser or app; the existing server name is reflected on other devices and linked signing/encryption entries. Revoke confirms its scope: a combined grant disables both permissions, a separate grant only its own. Revoking this encryption device clears its local history/keys, which reauthorizing alone cannot restore.",
-        "When a new browser gains a grant for your profile, other browsers show {label} can now post as you. Not you? with Revoke above the composer. The check runs when a wave opens and at most every 10 minutes while the tab is visible. The first grant list a browser loads is its baseline, so a grant that already exists then raises no alert; check Preferences > Device Permissions for existing grants.",
+        "When a new device gains a grant for your profile, other devices can show a Signed Posts authorization notice above the composer. Got it acknowledges the notice across devices as their grant lists refresh and keeps the grant active. Revoke removes its permission. The list refreshes on focus and every 10 minutes while visible. The first list a client loads is its baseline. If the browser loses its local signing key but still remembers its grant, that grant does not trigger a new-device notice. Set up Signed Posts again to sign from that browser. Check Preferences > Device Permissions for existing grants.",
         "The Signature item in a drop's More menu (or touch menu) verifies the drop in your browser and reports Signed by its author, Not signed by its author, or The signature could not be verified, with wallet, device key fingerprint, grant expiry and whether the current content is the signed version. A contract wallet counts only when it has contract code on Ethereum and its EIP-1271 check accepts the sign-in signature (Contract wallet: verified on Ethereum in your browser); when that Ethereum check cannot run it shows Couldn't verify this signature right now, never signed. Sign-in grants signed anywhere but 6529.io or staging.6529.io read The signature could not be verified; app grants from 6529 Mobile and 6529 Desktop are verified from their typed-data signature. If the signed events cannot be loaded right now it shows Couldn't check the signature right now. with Try again, never an invalid verdict. Drops hidden by moderation and anonymous decision entries read Not signed by its author.",
         "A drop whose current content is the version its author signed shows a small shield-check seal named Signed by its author right after its timestamp, in chat rows, feed cards, participation drops, the single-drop view, link previews of 6529 drop links, quoted drops, and leaderboard, winner, Memes and quick-vote cards. Clicking it or pressing Enter opens the same Signature dialog without opening the linked drop. Search results and decision entry cards show a static seal. Unsigned drops show nothing, so app posts made without a signing grant, older posts and drops edited without a signature look as before. An unsigned edit or a delete removes the seal, and it is hidden for moderated content and anonymous authors. Signed live edits update the recipient author-signature status together with the content; no reload is needed.",
         "When consecutive chat posts by the same author share one header, its seal covers the group: a full seal named for example All 3 posts signed by their author, an outlined seal for 2 of 3 posts signed by their author, and none when no post is signed. It opens Signatures in this group, which lists each post's time, first line and status and checks a post's signature when its row is opened. Each grouped row keeps a static seal beside its hover or swipe timestamp, and the count updates when posts join or are edited.",
-        "Ordinary app sign-in does not enable Signed Posts. Compatible apps can request an EIP-712 device grant directly or enroll through a source-browser-approved secure link without a receiving-wallet connection. The Desktop secure-sharing button remains disabled with Coming soon until its release. iOS 17 or recent Android WebView Ed25519 support is required for app signing. Proxy sessions and devices without signing support post unsigned. Votes and ratings are not signed."
+        "Ordinary app sign-in does not enable Signed Posts. Compatible apps can request an EIP-712 device grant directly or enroll through a source-browser-approved secure link without a receiving-wallet connection. The Desktop secure-sharing button shows Coming soon. iOS 17 or recent Android WebView Ed25519 support is required for app signing. Proxy sessions and devices without signing support post unsigned. Votes and ratings are not signed."
       ],
       "canonical_path": "/preferences?tab=devices",
       "link_label": "Device Permissions",
