@@ -7,7 +7,7 @@ import {
   type DisplayTimeZone,
 } from "@/lib/display-time-zone/displayTimeZone";
 
-export interface ZonedTimestampOptions {
+interface ZonedTimestampOptions {
   readonly zone: DisplayTimeZone;
   /** App locale, for words such as "Yesterday". */
   readonly locale: SupportedLocale;
@@ -52,7 +52,7 @@ export function getZonedDaysAgo(
   );
 }
 
-export function getYesterdayLabel(locale: SupportedLocale): string {
+function getYesterdayLabel(locale: SupportedLocale): string {
   const word = formatRelativeTime(locale, -1, "day");
   return word.charAt(0).toLocaleUpperCase(locale) + word.slice(1);
 }

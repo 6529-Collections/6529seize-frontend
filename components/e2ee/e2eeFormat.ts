@@ -67,7 +67,7 @@ function formatNoticeWallets(
   return wallets.length > 0 ? formatList(locale, wallets) : "";
 }
 
-export interface E2eeTimeOptions {
+interface E2eeTimeOptions {
   /** The display time zone; the device zone when omitted. */
   readonly zone?: DisplayTimeZone | undefined;
   /** Reference time for "today"; defaults to now. */
