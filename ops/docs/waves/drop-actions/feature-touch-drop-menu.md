@@ -52,7 +52,8 @@ actions` in the drop header.
 On touch layouts, drag a chat message from right to left. The message follows
 your finger and the reply indicator changes appearance when the reply is ready.
 Release past that point to open the existing reply composer. Reverse below the
-threshold, cancel the touch, or scroll vertically to leave the composer unchanged.
+threshold before releasing, or cancel the touch, to leave the composer unchanged.
+Vertical scrolling does not start a reply.
 
 A short left drag on a grouped message reveals its timestamp without starting a
 reply. Long-press keeps its action sheet and does not turn into a reply or

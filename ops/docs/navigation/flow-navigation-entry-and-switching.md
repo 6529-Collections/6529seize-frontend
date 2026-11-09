@@ -82,8 +82,9 @@ context-aware `Back`).
 ## Touch Navigation in the Native App
 
 - In an open wave or direct message, drag right across ordinary conversation
-  content to return to its list. The view follows your finger. Reverse or release
-  a short drag to stay; a longer drag or quick flick completes the return.
+  content to return to its list. The view follows your finger. Reverse below the
+  gesture threshold before releasing to cancel. A slow, short drag also stays
+  in the conversation; a longer drag or quick flick completes the return.
 - Encrypted conversations support the same rightward return to the encrypted
   messages list. The visible Back control remains available.
 - Inputs, links, buttons, voting sliders, media controls, selected text and
