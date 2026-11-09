@@ -29,10 +29,12 @@ import { WsMessageType } from "@/helpers/Types";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import {
   fetchDropRepliesV2,
-  fetchDropReplyWindowV2,
-  type DropReplyWindow,
   type ApiWaveDropsV2PageFeed,
 } from "@/services/api/wave-drops-v2-api";
+import {
+  fetchDropReplyWindowV2,
+  type DropReplyWindow,
+} from "@/services/api/drop-reply-window-api";
 import { useInfiniteHeadRefetch } from "./useInfiniteHeadRefetch";
 import { useWaveDropUpdateRefetch } from "./useWaveDropUpdateRefetch";
 import type { InfinitePageAdapter } from "@/components/react-query-wrapper/utils/refreshInfiniteQueryHead";

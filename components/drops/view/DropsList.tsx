@@ -78,6 +78,7 @@ const MemoizedDrop = memo(Drop);
 const MemoizedLightDrop = memo(LightDrop);
 
 interface DropsListItemData {
+  readonly supportsReplyThreads: boolean;
   readonly showWaveInfo: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly handleReply: DropActionHandler;
@@ -125,14 +126,13 @@ const DropsListRow = memo(
     virtualScrollRootMargin,
   }: DropsListRowProps) => {
     const isTarget = itemData.serialNo === drop.serial_no;
-    const replyThreads = useWaveReplyThreads();
     const highlightMessageOnly =
       location === DropLocation.WAVE &&
       itemData.dropViewDropId === null &&
       drop.type === DropSize.FULL &&
       drop.drop_type === ApiDropType.Chat &&
       !drop.reply_to &&
-      replyThreads !== null;
+      itemData.supportsReplyThreads;
     const dropContent =
       drop.type === DropSize.FULL ? (
         <MemoizedDrop
@@ -272,9 +272,12 @@ const DropsList = memo(
       [location, orderedDrops]
     );
 
+    const supportsReplyThreads = useWaveReplyThreads() !== null;
+
     // Memoize the props passed to each MemoizedDrop to prevent unnecessary renders
     const getItemData = useMemo((): DropsListItemData => {
       return {
+        supportsReplyThreads,
         showWaveInfo,
         activeDrop,
         handleReply,
@@ -293,6 +296,7 @@ const DropsList = memo(
         isVotingControlsLocked,
       };
     }, [
+      supportsReplyThreads,
       showWaveInfo,
       activeDrop,
       handleReply,

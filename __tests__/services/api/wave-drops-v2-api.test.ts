@@ -1,3 +1,4 @@
+import { fetchDropReplyWindowV2 } from "@/services/api/drop-reply-window-api";
 import { fetchGlobalDropsSearchV2 } from "@/services/api/global-drops-search-api";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
@@ -15,7 +16,6 @@ import {
   fetchDropReactionDetailsV2,
   fetchDropMetadataByIdV2,
   fetchDropRepliesV2,
-  fetchDropReplyWindowV2,
   fetchDropsV2ByIds,
   fetchDropV2ById,
   fetchGlobalBoostedDropsV2,
@@ -956,6 +956,29 @@ describe("fetchDropReplyWindowV2", () => {
     expect(result.newer).toBe(51);
     expect(result.older).toBe(50);
   });
+  it.each([ApiDropSearchStrategy.Older, ApiDropSearchStrategy.Newer])(
+    "stops pagination in the requested direction when %s repeats its boundary",
+    async (strategy) => {
+      commonApiFetchMock.mockResolvedValueOnce({
+        wave,
+        drops: [40, 40, 40].map(makeReply),
+      });
+
+      const result = await fetchDropReplyWindowV2({
+        parentDropId: "parent-drop",
+        serialNo: 40,
+        strategy,
+        limit: 2,
+        signal,
+      });
+
+      expect(result.drops).toEqual([]);
+      expect(result.newer).toBeNull();
+      expect(result.older).toBe(
+        strategy === ApiDropSearchStrategy.Newer ? 41 : null
+      );
+    }
+  );
 });
 
 describe("fetchBoostedDropsV2", () => {

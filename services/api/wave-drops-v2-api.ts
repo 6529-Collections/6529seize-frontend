@@ -8,7 +8,6 @@ import type { ApiDropPartV2 } from "@/generated/models/ApiDropPartV2";
 import type { ApiDropPollVoteRequest } from "@/generated/models/ApiDropPollVoteRequest";
 import type { ApiDropPollVotersPage } from "@/generated/models/ApiDropPollVotersPage";
 import type { ApiDropRater } from "@/generated/models/ApiDropRater";
-import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiDropV2Page } from "@/generated/models/ApiDropV2Page";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
@@ -313,7 +312,7 @@ export const mapLeaderboardDropV2 = ({
   };
 };
 
-const hydrateDropsV2 = async ({
+export const hydrateDropsV2 = async ({
   drops,
   headers,
   wave,
@@ -668,63 +667,6 @@ export async function fetchDropsV2ByIds({
     includeFullMetadata,
     includeTopRaters,
   });
-}
-
-export interface DropReplyWindow extends ApiWaveDropsFeed {
-  readonly older: number | null;
-  readonly newer: number | null;
-}
-
-export async function fetchDropReplyWindowV2({
-  parentDropId,
-  serialNo,
-  strategy,
-  limit,
-  signal,
-}: {
-  readonly parentDropId: string;
-  readonly serialNo: number;
-  readonly strategy: ApiDropSearchStrategy;
-  readonly limit: number;
-  readonly signal: AbortSignal;
-}): Promise<DropReplyWindow> {
-  const data = await commonApiFetch<ApiWaveDropsFeedV2>({
-    endpoint: `v2/drops/${getDropEndpointId(parentDropId)}/replies`,
-    params: {
-      limit: (limit + 1).toString(),
-      serial_no_limit: serialNo.toString(),
-      search_strategy: strategy,
-    },
-    signal,
-  });
-
-  // All responses arrive newest first. For a link, keep the target and its
-  // earlier neighbors in the first page, with a cursor for newer replies.
-  const newerPage = strategy === ApiDropSearchStrategy.Newer;
-  const initialPage = strategy === ApiDropSearchStrategy.Both;
-  const candidates = initialPage
-    ? data.drops.filter((drop) => drop.serial_no <= serialNo)
-    : data.drops;
-  const page = newerPage
-    ? candidates.slice(-limit)
-    : candidates.slice(0, limit);
-  const wave = mapApiWaveOverviewToApiWaveMin(data.wave);
-  return {
-    wave,
-    drops: await hydrateDropsV2({ drops: page, wave, signal }),
-    older: newerPage
-      ? (page.at(-1)?.serial_no ?? serialNo + 1)
-      : candidates.length > limit
-        ? (page.at(-1)?.serial_no ?? null)
-        : null,
-    newer: initialPage
-      ? data.drops.some((drop) => drop.serial_no > serialNo)
-        ? serialNo
-        : null
-      : !newerPage || candidates.length > limit
-        ? (page[0]?.serial_no ?? null)
-        : null,
-  };
 }
 
 export async function fetchDropRepliesV2({

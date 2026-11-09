@@ -565,11 +565,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           store={replyThreadsStore}
         >
           <WaveDropsAllWithoutProvider
-            key={
-              replyThreadTarget
-                ? `${wave.id}-thread-${replyThreadTarget.replySerialNo}`
-                : wave.id
-            }
+            key={[wave.id, replyThreadTarget?.replySerialNo].join(":")}
             waveId={wave.id}
             wave={wave}
             onReply={handleReply}

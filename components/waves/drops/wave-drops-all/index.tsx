@@ -305,12 +305,12 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const queueVisibleSerialTarget = useCallback(
     (serialNo: number) => {
       replyTargetRequest.current?.abort();
-      replyThreads?.store.setLinkedReply(null);
       if (
         !replyThreads ||
         dropId !== null ||
         latestDropsRef.current.some((drop) => drop.serial_no === serialNo)
       ) {
+        replyThreads?.store.setLinkedReply(null);
         queueSerialTarget(serialNo);
         return;
       }
@@ -326,10 +326,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         .catch(() => null)
         .then((thread) => {
           if (controller.signal.aborted) return;
-          if (thread) {
-            replyThreads.store.setLinkedReply(thread);
-            replyThreads.store.setExpanded(thread.parentDropId, true);
-          }
+          replyThreads.store.setLinkedReply(thread);
+          if (thread) replyThreads.store.setExpanded(thread.parentDropId, true);
           queueSerialTarget(thread?.parentSerialNo ?? serialNo);
         });
     },
