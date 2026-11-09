@@ -1,6 +1,10 @@
 import {
+  getDeviceTimeZone,
+  LOCAL_DISPLAY_TIME_ZONE,
   LOCAL_TIME_ZONE_PREFERENCE,
   normalizeDisplayTimeZonePreference,
+  resolveDisplayTimeZone,
+  type DisplayTimeZone,
   type DisplayTimeZonePreference,
 } from "@/lib/display-time-zone/displayTimeZone";
 
@@ -139,4 +143,17 @@ export function setDisplayTimeZoneOverride(
 /** Test hook: forget the cached snapshot so the next read hits storage. */
 export function resetDisplayTimeZoneSnapshotForTests(): void {
   cachedSnapshot = null;
+}
+
+/**
+ * The display zone right now, for code outside React (for example preview
+ * models built from fetched data). Components should use the
+ * `useDisplayTimeZone` hook, which also re-renders on changes.
+ */
+export function getCurrentDisplayTimeZone(): DisplayTimeZone {
+  if (typeof window === "undefined") {
+    return LOCAL_DISPLAY_TIME_ZONE;
+  }
+  const { preference, override } = getDisplayTimeZoneSnapshot();
+  return resolveDisplayTimeZone(override ?? preference, getDeviceTimeZone());
 }
