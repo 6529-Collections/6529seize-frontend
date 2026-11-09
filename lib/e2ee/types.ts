@@ -1,3 +1,4 @@
+import type { LookupReads } from "./lookup-reads";
 import type { HistoryPageOptions } from "./history-order";
 import type { E2eeApiClient } from "./api";
 import type { BackupHistory } from "./backup/format";
@@ -365,8 +366,10 @@ export interface E2eeEngineDeps {
     message: object;
   }) => Promise<string>;
   api: E2eeApiClient; // REST client (section 4)
+  lookupReads?: LookupReads;
   resolveProfiles: (
-    profileIds: string[]
+    profileIds: string[],
+    resume?: boolean
   ) => Promise<
     Record<
       string,

@@ -1,6 +1,8 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { LookupReads } from "@/lib/e2ee/lookup-reads";
+import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
 import { commonApiFetch } from "@/services/api/common-api";
 
 interface E2eeResolvedProfile {
@@ -17,6 +19,32 @@ const UNKNOWN_PROFILE: E2eeResolvedProfile = {
   pfp: null,
   wallets: [],
 };
+
+const readers = new WeakMap<QueryClient, Map<string, LookupReads>>();
+export function getE2eeLookupReads(client: QueryClient): LookupReads {
+  let scopes = readers.get(client);
+  if (!scopes) {
+    scopes = new Map();
+    readers.set(client, scopes);
+  }
+  // A previous account's 429 must not consume the active account's read budget.
+  const scope = JSON.stringify([
+    getWalletAddress()?.toLowerCase() ?? null,
+    getWalletRole() ?? null,
+  ]);
+  let reads = scopes.get(scope);
+  if (!reads) {
+    reads = new LookupReads(
+      Date.now,
+      () =>
+        (typeof navigator === "undefined" || navigator.onLine !== false) &&
+        (typeof document === "undefined" ||
+          document.visibilityState !== "hidden")
+    );
+    scopes.set(scope, reads);
+  }
+  return reads;
+}
 
 const getE2eeProfileQueryKey = (profileId: string) =>
   [QueryKey.PROFILE, "e2ee-profile-id", profileId] as const;
@@ -49,11 +77,34 @@ export const toResolvedProfile = (
 /** Shared by the engine's resolver and UI lookups, so both hit one cache. */
 export const getE2eeProfileQueryOptions = (profileId: string) => ({
   queryKey: getE2eeProfileQueryKey(profileId),
-  queryFn: ({ signal }: { readonly signal: AbortSignal }) =>
-    commonApiFetch<ApiIdentity>({
-      endpoint: `identities/${encodeURIComponent(profileId)}`,
-      signal,
-    }),
+  queryFn: ({
+    signal,
+    client,
+  }: {
+    readonly signal: AbortSignal;
+    readonly client: QueryClient;
+  }) =>
+    getE2eeLookupReads(client).read(
+      `profile:${profileId}`,
+      async (lookupSignal) => {
+        const identity = await commonApiFetch<ApiIdentity>({
+          endpoint: `identities/${encodeURIComponent(profileId)}`,
+          signal: lookupSignal,
+          errorMode: "structured",
+        });
+        if (identity.id !== profileId) {
+          throw Object.assign(new Error("Identity lookup mismatch"), {
+            status: 404,
+          });
+        }
+        return identity;
+      },
+      signal
+    ),
+  retry: false,
+  retryOnMount: false,
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: false,
   staleTime: PROFILE_STALE_TIME_MS,
 });
 
@@ -67,9 +118,12 @@ const fetchProfile = (queryClient: QueryClient, profileId: string) =>
  */
 export async function resolveE2eeProfiles(
   queryClient: QueryClient,
-  profileIds: readonly string[]
+  profileIds: readonly string[],
+  resume = false
 ): Promise<Record<string, E2eeResolvedProfile>> {
   const unique = [...new Set(profileIds.filter((id) => id.length > 0))];
+  if (resume)
+    getE2eeLookupReads(queryClient).resume(unique.map((id) => `profile:${id}`));
   const resolved: Record<string, E2eeResolvedProfile> = {};
   for (let offset = 0; offset < unique.length; offset += RESOLVE_CONCURRENCY) {
     const batch = unique.slice(offset, offset + RESOLVE_CONCURRENCY);
@@ -81,10 +135,9 @@ export async function resolveE2eeProfiles(
       if (profileId === undefined) {
         return;
       }
-      resolved[profileId] =
-        result.status === "fulfilled"
-          ? toResolvedProfile(profileId, result.value)
-          : UNKNOWN_PROFILE;
+      if (result.status === "fulfilled" && result.value.id === profileId) {
+        resolved[profileId] = toResolvedProfile(profileId, result.value);
+      }
     });
   }
   return resolved;
