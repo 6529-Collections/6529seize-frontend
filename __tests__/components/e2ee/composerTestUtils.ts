@@ -52,6 +52,22 @@ export function selectComposerText(
   );
 }
 
+/** The text of the caret's node up to the caret, or null without a caret. */
+export function composerTextBeforeCaret(input: HTMLElement): string | null {
+  const editor = getNearestEditorFromDOMNode(input);
+  if (!editor) throw new Error("Composer editor is not mounted");
+  return editor.getEditorState().read(() => {
+    const selection = $getSelection();
+    if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
+      return null;
+    }
+    return selection.anchor
+      .getNode()
+      .getTextContent()
+      .slice(0, selection.anchor.offset);
+  });
+}
+
 export function typeAtComposerSelection(input: HTMLElement, text: string) {
   const editor = getNearestEditorFromDOMNode(input);
   if (!editor) throw new Error("Composer editor is not mounted");
