@@ -10,7 +10,9 @@ created: 2026-06-19
 The touch-menu, header-navigation and encrypted-chat records cover touch reply,
 timestamp access, cancellable native conversation return and Android Back layer
 ordering. They retain visible tap alternatives, permission and delivery-state
-restrictions, system-edge gestures and reduced-motion behavior.
+restrictions, system-edge gestures and reduced-motion behavior. Reversal
+instructions require moving below the commit threshold before release. The shared
+Back record includes wave and direct-message detail routes.
 
 The signing, encrypted-messages and connection-sharing records cover the shared
 permission consent flow, separate or combined grants, shared server device names,
