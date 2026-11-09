@@ -2,11 +2,7 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
-import {
-  useLinkedReply,
-  useLinkedReplyElement,
-  useWaveReplyThreads,
-} from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
+import { useWaveReplyThreads } from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
 import {
   fetchDropReplyThreadTarget,
   type DropReplyThreadTarget,
@@ -251,8 +247,6 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
 
   const replyThreads = useWaveReplyThreads();
   const replyTargetRequest = useRef<AbortController | null>(null);
-  const linkedReply = useLinkedReply(replyThreads);
-  const linkedReplyElement = useLinkedReplyElement(replyThreads, linkedReply);
 
   const {
     serialTarget,
@@ -263,10 +257,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   } = useWaveDropsSerialScroll({
     waveId,
     dropId,
-    initialDrop,
-    linkedReply,
-    linkedReplyElement,
-    getLinkedReplyElement: replyThreads?.store.getLinkedReplyElement,
+    initialDrop: initialThreadReply?.parentSerialNo ?? initialDrop,
+    replyThreadStore: replyThreads?.store,
     waveMessages,
     fetchNextPage,
     waitAndRevealDrop,
@@ -280,9 +272,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     replyThreads.store.setLinkedReply(initialThreadReply ?? null);
     if (initialThreadReply) {
       replyThreads.store.setExpanded(initialThreadReply.parentDropId, true);
-      queueSerialTarget(initialThreadReply.parentSerialNo);
     }
-  }, [initialThreadReply, queueSerialTarget, replyThreads]);
+  }, [initialThreadReply, replyThreads]);
 
   const scrollToBottom = useCallback(() => {
     replyTargetRequest.current?.abort();

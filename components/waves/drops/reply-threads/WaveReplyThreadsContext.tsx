@@ -22,7 +22,7 @@ import {
   type ReactNode,
 } from "react";
 
-interface ExpandedReplyThreadsStore {
+export interface ExpandedReplyThreadsStore {
   readonly isExpanded: (dropId: string) => boolean;
   readonly setExpanded: (dropId: string, expanded: boolean) => void;
   readonly subscribe: (listener: () => void) => () => void;
@@ -237,20 +237,6 @@ export function useLinkedReply(
         ? target
         : null;
     },
-    () => null
-  );
-}
-
-export function useLinkedReplyElement(
-  threads: WaveReplyThreadsContextValue | null,
-  target: DropReplyThreadTarget | null
-): HTMLDivElement | null {
-  return useSyncExternalStore(
-    threads?.store.subscribe ?? noopSubscribe,
-    () =>
-      target
-        ? (threads?.store.getLinkedReplyElement(target.parentSerialNo) ?? null)
-        : null,
     () => null
   );
 }
