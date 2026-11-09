@@ -20,6 +20,18 @@ export class ApiDropMedia {
     'media_upload_id'?: string | null;
     'media_status'?: ApiDropMediaStatus;
     'media_error'?: string | null;
+    /**
+    * Displayed pixel width (after EXIF orientation), for reserving layout space before the media loads. Omitted or null when unknown.
+    */
+    'width'?: number | null;
+    /**
+    * Displayed pixel height (after EXIF orientation). Omitted or null when unknown.
+    */
+    'height'?: number | null;
+    /**
+    * Base64 ThumbHash placeholder (https://evanw.github.io/thumbhash/), decodable with the thumbhash npm package. Omitted or null when unknown.
+    */
+    'thumbhash'?: string | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -53,6 +65,24 @@ export class ApiDropMedia {
         {
             "name": "media_error",
             "baseName": "media_error",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "width",
+            "baseName": "width",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "height",
+            "baseName": "height",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "thumbhash",
+            "baseName": "thumbhash",
             "type": "string",
             "format": ""
         }    ];

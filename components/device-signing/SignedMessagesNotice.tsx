@@ -84,6 +84,8 @@ function SignedMessagesNoticeContent({
     reconnect,
     isEnabling,
     dismiss,
+    acknowledge,
+    isAcknowledging,
     revoke,
     isRevoking,
   } = useSignedMessagesNotice({ composerEmpty });
@@ -115,14 +117,14 @@ function SignedMessagesNoticeContent({
       data-testid="signed-messages-notice"
       className={`tw-mb-2 tw-grid tw-grid-cols-[1.25rem_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-2 sm:tw-px-2.5 ${
         isAlert
-          ? "tw-border-red/30 tw-bg-red/10"
+          ? "tw-border-amber-500/25 tw-bg-amber-500/5"
           : "tw-border-white/10 tw-bg-iron-950"
       }`}
     >
       {isAlert ? (
         <ExclamationTriangleIcon
           aria-hidden="true"
-          className={`${iconClass} tw-text-red`}
+          className={`${iconClass} tw-text-amber-300`}
         />
       ) : (
         <FontAwesomeIcon
@@ -134,7 +136,9 @@ function SignedMessagesNoticeContent({
       <div className="tw-contents">
         <p
           id={titleId}
-          className="tw-col-start-2 tw-row-start-1 tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100"
+          className={`tw-col-start-2 tw-row-start-1 tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100 ${
+            isAlert ? "tw-col-span-2 sm:tw-col-span-1" : ""
+          }`}
         >
           {copy.title}
         </p>
@@ -151,23 +155,43 @@ function SignedMessagesNoticeContent({
           />
         )}
       </div>
-      <div className="tw-col-start-3 tw-row-start-1 tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-1">
+      <div
+        className={`tw-flex tw-flex-wrap tw-items-center tw-gap-1 ${
+          isAlert
+            ? "tw-col-span-2 tw-col-start-2 tw-row-start-2 sm:tw-col-span-1 sm:tw-col-start-3 sm:tw-row-start-1"
+            : "tw-col-start-3 tw-row-start-1"
+        }`}
+      >
+        {model.kind === "new-device" && (
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => void acknowledge(model.grant)}
+            loading={isAcknowledging}
+            disabled={isRevoking}
+          >
+            {t(locale, "signedMessages.notice.newDevice.acknowledge")}
+          </Button>
+        )}
         <Button
           size="sm"
-          variant={isAlert ? "destructive" : "secondary"}
+          variant="secondary"
           onClick={onAction}
           loading={isAlert ? isRevoking : isEnabling}
+          disabled={isAlert && isAcknowledging}
         >
           {copy.action}
         </Button>
-        <button
-          type="button"
-          onClick={dismiss}
-          aria-label={t(locale, "signedMessages.notice.dismiss")}
-          className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
-        >
-          <XMarkIcon aria-hidden="true" className="tw-size-5" />
-        </button>
+        {!isAlert && (
+          <button
+            type="button"
+            onClick={dismiss}
+            aria-label={t(locale, "signedMessages.notice.dismiss")}
+            className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+          >
+            <XMarkIcon aria-hidden="true" className="tw-size-5" />
+          </button>
+        )}
       </div>
     </section>
   );

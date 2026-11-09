@@ -1,6 +1,7 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import {
+  useAcknowledgeDeviceGrant,
   useDeviceGrants,
   useRevokeDeviceGrant,
 } from "@/hooks/device-signing/useDeviceGrants";
@@ -15,7 +16,9 @@ jest.mock("@/components/auth/Auth", () => ({
 
 const mockFetchGrants = jest.fn();
 const mockRevokeGrant = jest.fn();
+const mockAcknowledgeGrant = jest.fn();
 jest.mock("@/services/api/device-grants-api", () => ({
+  acknowledgeDeviceGrant: (...args: unknown[]) => mockAcknowledgeGrant(...args),
   fetchDeviceGrants: (...args: unknown[]) => mockFetchGrants(...args),
   revokeDeviceGrant: (...args: unknown[]) => mockRevokeGrant(...args),
 }));
@@ -57,6 +60,7 @@ describe("device grant hooks", () => {
     client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     mockFetchGrants.mockReset();
     mockRevokeGrant.mockReset();
+    mockAcknowledgeGrant.mockReset();
     mockForget.mockReset().mockResolvedValue(undefined);
     mockSetToast.mockReset();
   });
@@ -80,6 +84,32 @@ describe("device grant hooks", () => {
       expect(mockForget).toHaveBeenCalledWith(ADDRESS, revoked.id)
     );
     expect(mockForget).toHaveBeenCalledTimes(1);
+  });
+
+  it("updates only the acknowledgment after the server accepts it", async () => {
+    const active = grant({ notice_acknowledged: false });
+    const unrelated = grant({ id: `0x${"2".repeat(64)}` });
+    const queryKey = [QueryKey.DEVICE_GRANTS, ADDRESS];
+    client.setQueryData(queryKey, [active, unrelated]);
+    mockAcknowledgeGrant.mockResolvedValue({
+      ...active,
+      notice_acknowledged: true,
+    });
+
+    const { result } = renderHook(() => useAcknowledgeDeviceGrant(), {
+      wrapper: createWrapper(client),
+    });
+    await act(async () => {
+      await expect(result.current.acknowledge(active.id)).resolves.toBe(true);
+    });
+
+    expect(mockAcknowledgeGrant).toHaveBeenCalledWith(active.id);
+    expect(client.getQueryData(queryKey)).toEqual([
+      { ...active, notice_acknowledged: true },
+      unrelated,
+    ]);
+    expect(mockRevokeGrant).not.toHaveBeenCalled();
+    expect(mockForget).not.toHaveBeenCalled();
   });
 
   it("revokes, updates the cached list and confirms", async () => {

@@ -7,13 +7,14 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { forgetDeviceGrant } from "@/lib/device-signing/device-key-store";
 import {
+  acknowledgeDeviceGrant,
   fetchDeviceGrants,
   revokeDeviceGrant,
 } from "@/services/api/device-grants-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
 
-/** Fetched on mount and at most every 10 minutes while the tab is visible. */
+/** Refreshes while visible and immediately when the client returns to focus. */
 const DEVICE_GRANTS_REFRESH_MS = 10 * 60 * 1000;
 
 const forgetRevokedLocalGrants = async (
@@ -34,6 +35,7 @@ export function useDeviceGrants(address: string | null) {
     queryFn: ({ signal }) => fetchDeviceGrants(signal),
     enabled: address !== null,
     staleTime: DEVICE_GRANTS_REFRESH_MS,
+    refetchOnWindowFocus: "always",
     refetchInterval: DEVICE_GRANTS_REFRESH_MS,
     refetchIntervalInBackground: false,
     retry: 1,
@@ -47,6 +49,48 @@ export function useDeviceGrants(address: string | null) {
   }, [grants]);
 
   return query;
+}
+
+/** Acknowledges a device notice without changing the grant's permissions. */
+export function useAcknowledgeDeviceGrant() {
+  const locale = useBrowserLocale();
+  const { setToast } = useAuth();
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (grantId: string) => acknowledgeDeviceGrant(grantId),
+    onSuccess: (acknowledged) => {
+      queryClient.setQueriesData<ApiDeviceGrant[]>(
+        { queryKey: [QueryKey.DEVICE_GRANTS] },
+        (grants) =>
+          grants?.map((grant) =>
+            grant.id === acknowledged.id
+              ? { ...grant, notice_acknowledged: true }
+              : grant
+          )
+      );
+    },
+  });
+
+  const acknowledge = useCallback(
+    async (grantId: string): Promise<boolean> => {
+      try {
+        await mutateAsync(grantId);
+        return true;
+      } catch {
+        setToast({
+          message: t(
+            locale,
+            "signedMessages.notice.newDevice.acknowledgeError"
+          ),
+          type: "error",
+        });
+        return false;
+      }
+    },
+    [locale, mutateAsync, setToast]
+  );
+
+  return { acknowledge, isAcknowledging: isPending };
 }
 
 /** Revokes a grant, updates the cached list and reports the outcome. */
