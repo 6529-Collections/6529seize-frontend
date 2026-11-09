@@ -74,12 +74,12 @@ test("changes active view when child triggers", async () => {
 
   expect(contentRef?.current).toContainElement(div);
   expect(
-    screen.getByText(
-      "Statements are optional and fully and permanently public."
-    )
+    screen.getByRole("heading", { name: "Add Statements About Your Identity" })
   ).toBeVisible();
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.SELECT);
-  expect(div.parentElement).toHaveClass("lg:tw-py-8");
+  expect(
+    screen.queryByRole("button", { name: "Back" })
+  ).not.toBeInTheDocument();
   await userEvent.click(div);
   expect(
     screen.getByText(
@@ -87,8 +87,6 @@ test("changes active view when child triggers", async () => {
     )
   ).toBeVisible();
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.CONTACT);
-  expect(div.parentElement).toHaveClass("md:tw-pt-6", "lg:tw-pb-8");
-  expect(div.parentElement).not.toHaveClass("lg:tw-py-8");
 
   const backButton = screen.getByRole("button", { name: "Back" });
   const detailHeader = backButton.parentElement?.parentElement?.parentElement;
@@ -96,4 +94,7 @@ test("changes active view when child triggers", async () => {
 
   await userEvent.click(backButton);
   expect(div.textContent).toBe(STATEMENT_ADD_VIEW.SELECT);
+  expect(
+    screen.queryByRole("button", { name: "Back" })
+  ).not.toBeInTheDocument();
 });
