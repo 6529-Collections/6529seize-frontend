@@ -352,7 +352,7 @@ function BackupDialogs({
         title={t(locale, "e2ee.backup.turnOff.title")}
         body={t(locale, "e2ee.backup.turnOff.body")}
         confirmLabel={t(locale, "e2ee.backup.action.turnOff")}
-        errorFallbackKey="e2ee.backup.error.generic"
+        errorKeyFor={getBackupErrorKey}
         onConfirm={() => manager.turnOff()}
         onClose={() => onClose("turn-off")}
       />
@@ -361,7 +361,7 @@ function BackupDialogs({
         title={t(locale, "e2ee.backup.startOver.title")}
         body={t(locale, "e2ee.backup.startOver.body")}
         confirmLabel={t(locale, "e2ee.backup.startOver.confirm")}
-        errorFallbackKey="e2ee.backup.error.generic"
+        errorKeyFor={getBackupErrorKey}
         onConfirm={onStartOver}
         onClose={() => onClose("start-over")}
       />

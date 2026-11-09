@@ -15,6 +15,8 @@ interface E2eeConfirmDialogProps {
   readonly confirmLabel: string;
   readonly destructive?: boolean | undefined;
   readonly errorFallbackKey?: MessageKey | undefined;
+  /** Copy for a failed confirm; default: the encrypted-chat action errors. */
+  readonly errorKeyFor?: ((error: unknown) => MessageKey) | undefined;
   readonly onConfirm: () => Promise<void>;
   readonly onClose: () => void;
   /** Extra detail between the body and the buttons. */
@@ -29,6 +31,7 @@ export function E2eeConfirmDialog({
   confirmLabel,
   destructive = true,
   errorFallbackKey = "e2ee.info.actionFailed",
+  errorKeyFor,
   onConfirm,
   onClose,
   children,
@@ -54,7 +57,11 @@ export function E2eeConfirmDialog({
       onClose();
     } catch (error) {
       setPending(false);
-      setErrorKey(getE2eeActionErrorKey(error, errorFallbackKey));
+      setErrorKey(
+        errorKeyFor
+          ? errorKeyFor(error)
+          : getE2eeActionErrorKey(error, errorFallbackKey)
+      );
     }
   };
 

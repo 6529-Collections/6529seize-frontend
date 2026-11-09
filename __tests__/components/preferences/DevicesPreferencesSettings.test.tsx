@@ -62,6 +62,7 @@ jest.mock("@/hooks/device-signing/useMinuteClock", () => ({
 }));
 
 let mockLocalGrant: ApiDeviceGrant | null = null;
+let mockOwnKey = OWN_KEY;
 let mockLocalState: { loaded: boolean; failed: boolean } = {
   loaded: true,
   failed: false,
@@ -71,7 +72,8 @@ jest.mock("@/hooks/device-signing/useLocalDeviceKeys", () => ({
     ...mockLocalState,
     grant: mockLocalGrant,
     // An unreadable key store reports no keys (see useLocalDeviceKeys).
-    publicKeys: mockLocalState.failed || !mockLocalState.loaded ? [] : [OWN_KEY],
+    publicKeys:
+      mockLocalState.failed || !mockLocalState.loaded ? [] : [mockOwnKey],
   }),
 }));
 
@@ -154,6 +156,7 @@ describe("DevicesPreferencesSettings", () => {
     mockAccount = ADDRESS;
     mockLocalGrant = null;
     mockLocalState = { loaded: true, failed: false };
+    mockOwnKey = OWN_KEY;
     mockGrantsAddress = undefined;
     mockAuth = {
       activeProfileProxy: null,
@@ -313,6 +316,23 @@ describe("DevicesPreferencesSettings", () => {
       expect(dialog).not.toHaveTextContent("encrypted chats");
       expect(
         within(dialog).getByRole("button", { name: "Revoke this browser" })
+      ).toBeInTheDocument();
+    });
+
+    it("recognises this browser whatever the case of either key", () => {
+      mockOwnKey = OWN_KEY.toUpperCase().replace("0X", "0x");
+      mockQuery = {
+        ...mockQuery,
+        data: [grant({ device_key: `0x${"aA".repeat(32)}` })],
+      };
+      render(<DevicesPreferencesSettings />);
+
+      expect(screen.getByText("This device")).toBeVisible();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Chrome on macOS" })
+      );
+      expect(
+        screen.getByRole("dialog", { name: "Revoke this browser?" })
       ).toBeInTheDocument();
     });
 
