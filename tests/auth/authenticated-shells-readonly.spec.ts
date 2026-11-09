@@ -314,10 +314,10 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       statementHeadingBox!.x + statementHeadingBox!.width
     ).toBeLessThanOrEqual(helpBox!.x);
     expect(helpBox!.x + helpBox!.width).toBeLessThanOrEqual(addStatementBox!.x);
-    const walletActionSizes = await walletChecker
-      .locator("..")
-      .locator("..")
-      .getByRole("link")
+    const walletActionSizes = await page
+      .getByRole("link", {
+        name: /^(Wallet Checker|Safe Collecting|Add another wallet)$/,
+      })
       .evaluateAll((links) =>
         links.map((link) => {
           const label = document.createRange();

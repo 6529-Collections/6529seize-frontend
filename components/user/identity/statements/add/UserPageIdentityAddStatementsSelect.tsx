@@ -58,7 +58,7 @@ export default function UserPageIdentityAddStatementsSelect({
               key={view}
               type="button"
               onClick={() => onViewChange(view)}
-              className="tw-group -tw-mx-3 tw-flex tw-w-[calc(100%_+_1.5rem)] tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-3 tw-text-left tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 active:tw-bg-white/[0.05] desktop-hover:hover:tw-bg-white/[0.03] motion-reduce:tw-transition-none"
+              className="tw-group -tw-mx-3 tw-flex tw-w-[calc(100%_+_1.5rem)] tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-3 tw-text-left tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 active:tw-bg-white/[0.04] desktop-hover:hover:tw-bg-white/[0.03] motion-reduce:tw-transition-none"
             >
               <span
                 aria-hidden="true"
