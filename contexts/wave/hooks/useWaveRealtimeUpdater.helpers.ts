@@ -32,6 +32,7 @@ type ApiDropWithUnknownSerialNo = Omit<ApiDrop, "serial_no"> & {
 };
 
 export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
+  readonly refreshWaveMessages?: (waveId: string) => Promise<void>;
   readonly removeDrops: (waveId: string, dropIds: readonly string[]) => void;
   readonly activeWaveId: string | null;
   /** Only the displayed Chat panel may acknowledge incoming messages. */

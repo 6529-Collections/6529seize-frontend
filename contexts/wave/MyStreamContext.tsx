@@ -218,6 +218,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const {
     registerWave,
+    activateWave,
     prefetchWave,
     syncNewestMessages,
     fetchNextPage,
@@ -234,13 +235,13 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const { clearWave } = waveMessagesStore;
   const refreshWaveMessages = useCallback(
-    (waveId: string) => {
+    async (waveId: string) => {
       if (!clearWave(waveId)) return;
       cancelWaveDataFetch(waveId);
       cancelPaginationFetch(waveId);
-      registerWave(waveId);
+      await activateWave(waveId);
     },
-    [cancelWaveDataFetch, cancelPaginationFetch, clearWave, registerWave]
+    [activateWave, cancelWaveDataFetch, cancelPaginationFetch, clearWave]
   );
   const refetchAllMainWaves = wavesHookData.refetchAllWaves;
   const refetchAllDmWaves = dmWavesHookData.refetchAllWaves;
@@ -329,6 +330,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     removeDrops: waveMessagesStore.removeDrops,
     removeWaveDeliveredNotifications,
     isWaveMuted,
+    refreshWaveMessages,
   });
 
   // processIncomingDrop is rebuilt when the active wave, its mute state or

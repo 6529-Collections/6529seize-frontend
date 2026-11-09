@@ -13,9 +13,11 @@ export interface DropReplyThreadTarget {
  */
 export async function fetchDropReplyThreadTarget({
   serialNo,
+  collapseAll = true,
   signal,
 }: {
   readonly serialNo: number;
+  readonly collapseAll?: boolean;
   readonly signal?: AbortSignal | undefined;
 }): Promise<DropReplyThreadTarget | null> {
   const response = await commonApiFetch<ApiDropV2PageWithoutCount>({
@@ -26,7 +28,10 @@ export async function fetchDropReplyThreadTarget({
     },
     signal,
   });
-  const replyTo = response.data[0]?.reply_to_drop;
+  const reply = response.data[0];
+  const root = reply?.collapsed_reply_thread;
+  if (root) return { parentDropId: root.id, parentSerialNo: root.serial_no };
+  const replyTo = collapseAll ? reply?.reply_to_drop : undefined;
   if (replyTo?.serial_no === undefined) {
     return null;
   }

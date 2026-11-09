@@ -30,6 +30,7 @@ import WaveDropCurationsDialog from "./WaveDropCurationsDialog";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
 import WaveDropActionsOpen from "./WaveDropActionsOpen";
 import WaveDropActionsOptions from "./WaveDropActionsOptions";
+import WaveDropReplyCollapseAction from "./WaveDropReplyCollapseAction";
 import WaveDropActionsRestoreLinkPreviews from "./WaveDropActionsRestoreLinkPreviews";
 import WaveDropActionsSetPinnedDrop from "./WaveDropActionsSetPinnedDrop";
 import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
@@ -247,6 +248,10 @@ export default function WaveDropActionsMore({
             )}
             {!showOnlyQuickRemove && (
               <>
+                <WaveDropReplyCollapseAction
+                  drop={drop}
+                  onSelected={closeDropdown}
+                />
                 <WaveDropActionsRestoreLinkPreviews
                   drop={drop}
                   onRestored={closeDropdown}

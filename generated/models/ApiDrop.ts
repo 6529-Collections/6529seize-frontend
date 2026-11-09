@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiCollapsedReplyThread } from '../models/ApiCollapsedReplyThread';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
@@ -97,6 +98,11 @@ export class ApiDrop {
     'reactions': Array<ApiDropReaction>;
     'boosts': number;
     'is_additional_action_promised': boolean | null;
+    /**
+    * Author-selected reply placement on a top-level chat drop.
+    */
+    'collapse_replies'?: boolean;
+    'collapsed_reply_thread'?: ApiCollapsedReplyThread;
     'hide_link_preview': boolean;
     'poll'?: ApiDropPoll;
     'nft_links'?: Array<ApiDropNftLink>;
@@ -320,6 +326,18 @@ export class ApiDrop {
             "name": "is_additional_action_promised",
             "baseName": "is_additional_action_promised",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "collapse_replies",
+            "baseName": "collapse_replies",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "collapsed_reply_thread",
+            "baseName": "collapsed_reply_thread",
+            "type": "ApiCollapsedReplyThread",
             "format": ""
         },
         {
