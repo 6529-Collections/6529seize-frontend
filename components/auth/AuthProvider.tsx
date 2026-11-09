@@ -22,6 +22,7 @@ import { useContentModerationStateScope } from "@/hooks/content-moderation/useCo
 import { useIdentity } from "@/hooks/useIdentity";
 import { useSecureSign } from "@/hooks/useSecureSign";
 import { useDeviceGrantChangeInvalidation } from "@/hooks/device-signing/useDeviceGrantChangeInvalidation";
+import { useLostDeviceGrantCleanup } from "@/hooks/device-signing/useLostDeviceGrantCleanup";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
   getAuthJwt,
@@ -94,6 +95,7 @@ export default function Auth({
   );
   const queryClient = useQueryClient();
   useDeviceGrantChangeInvalidation(queryClient);
+  useLostDeviceGrantCleanup(queryClient);
   const pathname = usePathname();
   const router = useRouter();
   const seizeSettingsContext = useSeizeSettingsOptional();

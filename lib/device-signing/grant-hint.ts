@@ -13,6 +13,8 @@ interface DeviceGrantHint {
   readonly expiresAt: number;
   readonly scopes: readonly string[];
   readonly ownProfileId: string | null;
+  /** When this browser last wrote the note (ms); absent on older notes. */
+  readonly writtenAt?: number | undefined;
 }
 
 const HINT_KEY_PREFIX = "6529-device-grant-hint:";
@@ -30,7 +32,9 @@ const isHint = (value: unknown): value is DeviceGrantHint => {
     typeof candidate["expiresAt"] === "number" &&
     Array.isArray(candidate["scopes"]) &&
     (candidate["ownProfileId"] === null ||
-      typeof candidate["ownProfileId"] === "string")
+      typeof candidate["ownProfileId"] === "string") &&
+    (candidate["writtenAt"] === undefined ||
+      typeof candidate["writtenAt"] === "number")
   );
 };
 
@@ -62,6 +66,7 @@ export function writeDeviceGrantHint(
       expiresAt: grant.expires_at,
       scopes: [...grant.scopes],
       ownProfileId: ownProfileId ?? null,
+      writtenAt: Date.now(),
     };
     safeLocalStorage.setItem(hintKey(address), JSON.stringify(hint));
   } catch {

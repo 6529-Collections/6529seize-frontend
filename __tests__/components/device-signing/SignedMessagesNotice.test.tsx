@@ -152,6 +152,73 @@ describe("SignedMessagesNotice", () => {
     expect(mockRequestGrant).not.toHaveBeenCalled();
   });
 
+  describe("after the browser cleared this site's saved keys", () => {
+    const recordLoss = () =>
+      localStorage.setItem(
+        `6529-device-key-loss:${ADDRESS}`,
+        JSON.stringify({
+          grantId: `0x${"9".repeat(64)}`,
+          ownProfileId: null,
+          detectedAt: NOW,
+          hintAgeHours: 3,
+        })
+      );
+
+    it("explains the cleared keys and offers to turn on again", () => {
+      mockLocal = { loaded: true, grant: null, publicKeys: [] };
+      recordLoss();
+      const setup = jest.fn();
+      window.addEventListener("6529:device-setup", setup, { once: true });
+      render(<SignedMessagesNotice composerEmpty />);
+
+      expect(
+        screen.getByRole("region", {
+          name: "Your browser cleared this site's saved keys",
+        })
+      ).toBeVisible();
+      expect(
+        screen.getByText(/^This browser can no longer sign your posts\./)
+      ).toBeVisible();
+      fireEvent.click(screen.getByRole("button", { name: "Turn on again" }));
+      expect(setup).toHaveBeenCalledWith(
+        expect.objectContaining({ detail: "posts" })
+      );
+    });
+
+    it("follows a loss recorded while the notice is open", () => {
+      mockLocal = { loaded: true, grant: null, publicKeys: [] };
+      render(<SignedMessagesNotice composerEmpty />);
+      expect(screen.getByRole("button", { name: "Turn on" })).toBeVisible();
+
+      act(() => {
+        recordLoss();
+        window.dispatchEvent(new Event("6529-device-key-loss-change"));
+      });
+      expect(
+        screen.getByRole("button", { name: "Turn on again" })
+      ).toBeVisible();
+    });
+
+    it("keeps the first turn-on for a browser with no sign of an earlier key", () => {
+      mockLocal = { loaded: true, grant: null, publicKeys: [] };
+      render(<SignedMessagesNotice composerEmpty />);
+
+      expect(
+        screen.getByRole("region", {
+          name: "Turn on Signed Posts (one signature)",
+        })
+      ).toBeVisible();
+      expect(screen.queryByRole("button", { name: "Turn on again" })).toBeNull();
+    });
+
+    it("shows nothing once the new grant is in place", () => {
+      mockLocal = { loaded: true, grant: grant(), publicKeys: [OWN_KEY] };
+      recordLoss();
+      render(<SignedMessagesNotice composerEmpty />);
+      expect(screen.queryByTestId("signed-messages-notice")).toBeNull();
+    });
+  });
+
   it("stays out of the way while the user is typing", () => {
     render(<SignedMessagesNotice composerEmpty={false} />);
     expect(screen.queryByTestId("signed-messages-notice")).toBeNull();
@@ -545,7 +612,10 @@ describe("SignedMessagesNotice", () => {
         <SignedMessagesNotice composerEmpty />
       );
       expect(screen.queryByRole("button", { name: "Revoke" })).toBeNull();
-      expect(screen.getByRole("button", { name: "Turn on" })).toBeVisible();
+      // The remembered grant also shows the keys are gone, not a first turn-on.
+      expect(
+        screen.getByRole("button", { name: "Turn on again" })
+      ).toBeVisible();
 
       mockGrants = [ownGrant, otherDevice];
       rerenderAfterKeyLoss(<SignedMessagesNotice composerEmpty />);

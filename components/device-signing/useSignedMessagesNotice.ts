@@ -6,6 +6,7 @@ import {
   useDeviceGrants,
   useRevokeDeviceGrant,
 } from "@/hooks/device-signing/useDeviceGrants";
+import { useDeviceKeyLoss } from "@/hooks/device-signing/useDeviceKeyLoss";
 import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
 import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
@@ -21,7 +22,7 @@ import {
 
 export type SignedMessagesNoticeModel =
   | { readonly kind: "new-device"; readonly grant: ApiDeviceGrant }
-  | { readonly kind: "enable" | "expired" }
+  | { readonly kind: "enable" | "expired" | "restore" }
   | { readonly kind: "renew"; readonly expiresAt: number };
 
 interface UnseenGrantInput {
@@ -59,11 +60,13 @@ function findUnseenGrant({
 
 function getLocalNotice(
   grant: ApiDeviceGrant | null,
-  nowMs: number
+  nowMs: number,
+  keysLost: boolean
 ): SignedMessagesNoticeModel | null {
   switch (getDeviceGrantStatus(grant, nowMs)) {
     case "none":
-      return { kind: "enable" };
+      // The browser dropped the key it held: say so instead of a first turn-on.
+      return { kind: keysLost ? "restore" : "enable" };
     case "renewal":
       return grant ? { kind: "renew", expiresAt: grant.expires_at } : null;
     case "expired":
@@ -86,6 +89,7 @@ export function useSignedMessagesNotice({
   const address = useSignedMessagesAccount();
   const nowMs = useMinuteClock();
   const local = useLocalDeviceKeys(address);
+  const keyLoss = useDeviceKeyLoss(address);
   const { data: grants } = useDeviceGrants(address);
   const { dismissedUntil, seenGrantIds, localGrantIds } =
     useSignedMessagesNoticeState(address);
@@ -143,12 +147,18 @@ export function useSignedMessagesNotice({
     if (!composerEmpty || (dismissedUntil ?? 0) > nowMs) {
       return null;
     }
-    return getLocalNotice(local.grant, nowMs);
+    // This browser held a key for the wallet that is now gone: its own grant
+    // note says so, or it once matched a grant to a key it no longer holds.
+    const keysLost =
+      keyLoss !== null ||
+      (local.publicKeys.length === 0 && (localGrantIds?.length ?? 0) > 0);
+    return getLocalNotice(local.grant, nowMs, keysLost);
   }, [
     address,
     composerEmpty,
     dismissedUntil,
     grants,
+    keyLoss,
     local,
     localGrantIds,
     nowMs,
