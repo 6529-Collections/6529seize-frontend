@@ -1,4 +1,4 @@
-import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+import { getPreparedDropImagePreview } from "@/services/uploads/prepareDropImage";
 import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 import type { JSX } from "react";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
@@ -32,7 +32,7 @@ export default function CreateDropSelectedFilePreview({
   const fileType = getFileType(file);
   const previewFile = fileType === FILE_TYPES.UNKNOWN ? null : file;
   const objectUrl = useObjectUrl(previewFile);
-  const previewUrl = getPreparedDropImage(file)?.url ?? objectUrl;
+  const previewUrl = getPreparedDropImagePreview(file)?.url ?? objectUrl;
 
   const components: Record<FILE_TYPES, JSX.Element> = {
     [FILE_TYPES.IMAGE]: previewUrl ? (

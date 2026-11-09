@@ -102,6 +102,8 @@ export const useActiveWaveVotes = () => ({
 });
 export const useMyStream = () => ({
   activeWave: { id: null, set: () => undefined },
+  waves: { list: [] },
+  directMessages: { list: [] },
 });
 export const useWaveDiscoveryViewer = () => ({ canUseCollections: false });
 const ContentTabsContext = createContext(tabs);

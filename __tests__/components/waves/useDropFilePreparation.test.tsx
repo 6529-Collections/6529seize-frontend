@@ -7,6 +7,7 @@ import {
   validateDropImageSignature,
 } from "@/services/uploads/prepareDropImage";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 
 jest.mock("@/components/auth/Auth", () => ({ useAuth: () => ({}) }));
 jest.mock("@/services/uploads/prepareDropImage", () => ({
@@ -29,10 +30,15 @@ function deferred<T>() {
   });
   return { promise, resolve, reject };
 }
-function useComposer(scope: string, initialFiles: File[] = []) {
+function useComposer(
+  scope: string,
+  initialFiles: File[] = [],
+  purpose: ApiMediaUploadPurpose = ApiMediaUploadPurpose.Chat
+) {
   const [files, setFiles] = useState(initialFiles);
   const preparation = useDropFilePreparation({
     scopeKey: scope,
+    purpose,
     existingFiles: files,
     disabled: false,
     setToast: toast,
@@ -63,10 +69,35 @@ it("keeps Send pending through validation, upload and processing, then retains t
   await act(async () => pending.resolve(ready));
   expect(result.current.isPreparingFiles).toBe(false);
   expect(result.current.files).toEqual([file]);
+  expect(multiPartUpload).toHaveBeenCalledWith(
+    expect.objectContaining({ purpose: ApiMediaUploadPurpose.Chat })
+  );
   expect(rememberPreparedDropImage).toHaveBeenCalledWith(
     file,
     ready,
-    "test-account"
+    "test-account",
+    ApiMediaUploadPurpose.Chat
+  );
+});
+it("prepares and remembers a decision entry's file as a decision entry", async () => {
+  const file = image("entry.avif");
+  const { result } = renderHook(() =>
+    useComposer("wave", [], ApiMediaUploadPurpose.DecisionEntry)
+  );
+  await act(async () => result.current.handleFileChange([file]));
+  expect(result.current.files).toEqual([file]);
+  expect(multiPartUpload).toHaveBeenCalledWith(
+    expect.objectContaining({
+      file,
+      path: "drop",
+      purpose: ApiMediaUploadPurpose.DecisionEntry,
+    })
+  );
+  expect(rememberPreparedDropImage).toHaveBeenCalledWith(
+    file,
+    ready,
+    "test-account",
+    ApiMediaUploadPurpose.DecisionEntry
   );
 });
 it("preserves valid selections when another file fails", async () => {

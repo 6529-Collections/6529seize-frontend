@@ -64,6 +64,14 @@ describe("E2EE REST client (contract 4.2)", () => {
     roleMock.mockReset().mockReturnValue(null);
   });
 
+  it("forwards the cosmetic device lookup abort signal to the transport", async () => {
+    const signal = new AbortController().signal;
+    await createE2eeApiClient(ACCOUNT).getDevice(KEY, signal);
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: `e2ee/devices/${KEY}`, signal })
+    );
+  });
+
   it("maps every endpoint with structured errors", async () => {
     const api = createE2eeApiClient(ACCOUNT);
     await api.getMe();
@@ -153,6 +161,16 @@ describe("E2EE REST client (contract 4.2)", () => {
       currentEpoch: 7,
     });
     expect(e2eeErrorCode(error)).toBe("E2EE_EPOCH_CONFLICT");
+  });
+
+  it("preserves Retry-After when converting a rate-limited device lookup error", () => {
+    const error = Object.assign(new Error("limited"), {
+      status: 429,
+      response: { headers: new Headers({ "Retry-After": "120" }) },
+    });
+    const converted = toE2eeApiError(error);
+    expect(converted).toMatchObject({ status: 429, retryAfterMs: 120_000 });
+    expect(asE2eeApiError(converted)).toMatchObject({ retryAfterMs: 120_000 });
   });
 
   it("treats network failures as status 0 and keeps aborts", () => {

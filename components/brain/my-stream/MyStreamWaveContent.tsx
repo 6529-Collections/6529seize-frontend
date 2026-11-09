@@ -14,7 +14,6 @@ import React, {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
-import { useSetWaveData } from "@/contexts/TitleContext";
 import {
   type HeaderWaveDropAction,
   useHeaderContext,
@@ -22,7 +21,8 @@ import {
 import { useContentTab } from "../ContentTabContext";
 import { useBrainMobileSubmissionRules } from "../mobile/BrainMobileSubmissionRulesContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import MyStreamWaveChat from "./MyStreamWaveChat";
+import { WaveChatTitle } from "./WaveChatTitle";
+import { WaveChatWithUnread } from "./WaveChatWithUnread";
 import WaveChatActivity from "./WaveChatActivity";
 import MyStreamWavePending from "./MyStreamWavePending";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
@@ -51,7 +51,6 @@ import {
   useWaveSubmissionButtonLabelOverride,
 } from "@/hooks/waves/useWaveMetadata";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { useWaveUnread } from "@/contexts/wave/WaveUnreadContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
 import {
@@ -130,8 +129,6 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   } = useHeaderContext();
   const contentRef = useRef<HTMLDivElement>(null);
   const {
-    waves,
-    directMessages,
     registerWave,
     serverFeedSeed: { completeInitialRegistration },
   } = useMyStream();
@@ -199,33 +196,6 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       authenticated_user_admin: wave.wave.authenticated_user_eligible_for_admin,
     });
   }, [updateEligibility, wave]);
-
-  // The list row's live unread values (socket counts on top of the server's).
-  // Direct messages come back unchanged: they use the server's DM unread state.
-  const waveFromList = useMemo(
-    () =>
-      waves.list.find((w) => w.id === waveId) ??
-      directMessages.list.find((w) => w.id === waveId),
-    [waves.list, directMessages.list, waveId]
-  );
-  const liveWaveFromList = useWaveUnread(waveFromList);
-  const newDropsCount = liveWaveFromList?.newDropsCount.count ?? 0;
-  const currentWaveId = wave?.id ?? null;
-  const currentWaveName = wave?.name ?? null;
-
-  // Update wave data in title context
-  const waveTitleData = useMemo(
-    () =>
-      currentWaveId === waveId && currentWaveName !== null
-        ? {
-            id: currentWaveId,
-            name: currentWaveName,
-            newItemsCount: newDropsCount,
-          }
-        : null,
-    [currentWaveId, currentWaveName, newDropsCount, waveId]
-  );
-  useSetWaveData(waveTitleData);
 
   // Create a stable key for proper remounting
   const stableWaveKey = `wave-${waveId}`;
@@ -666,9 +636,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       <CompetitionHub waveId={wave.id} embedded />
     ),
     [MyStreamWaveTab.CHAT]: (
-      <MyStreamWaveChat
+      <WaveChatWithUnread
         wave={submissionWave ?? wave}
-        firstUnreadSerialNo={liveWaveFromList?.firstUnreadDropSerialNo ?? null}
         viewMode={showGalleryToggle ? viewMode : "chat"}
         onDropClick={onDropClick}
         chatSubmitDrop={activeChatSubmitDropState}
@@ -737,6 +706,11 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       key={stableWaveKey}
       data-testid="wave-content"
     >
+      <WaveChatTitle
+        waveId={wave.id}
+        waveName={wave.name}
+        chatActive={activeTabContent === components[MyStreamWaveTab.CHAT]}
+      />
       {competitionOnly ? (
         <div className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950">
           <MyStreamWaveDesktopTabs
@@ -780,6 +754,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         }
       >
         <WaveChatActivity
+          waveId={wave.id}
           active={activeTabContent === components[MyStreamWaveTab.CHAT]}
           chat={components[MyStreamWaveTab.CHAT]}
         >

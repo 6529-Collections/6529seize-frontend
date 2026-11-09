@@ -1,5 +1,9 @@
 "use client";
 
+import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
 import { FocusTrap } from "focus-trap-react";
@@ -27,7 +31,6 @@ import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import DropForgeCraftIcon from "@/components/common/icons/DropForgeCraftIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
   DROP_FORGE_SECTIONS,
@@ -37,7 +40,6 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
@@ -299,12 +301,16 @@ function ScopedHeaderSearchModal({
   const isAwaitingDebouncedSearch =
     !isMessagesCategory && isLiveSearchEligible && !isQuerySettled;
   const { appWalletsSupported } = useAppWallets();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const capacitor = useCapacitor();
+  const consent = useCookieConsent();
   const sections = useSidebarSections(
     appWalletsSupported,
-    capacitor.isIos,
-    country
+    hideNftPurchasing,
+    shouldHideSubscriptions({
+      capacitorIsIos: capacitor.isIos,
+      country: consent.country,
+    })
   );
   const sidebarPages = useMemo(
     () => mapSidebarSectionsToPages(sections),

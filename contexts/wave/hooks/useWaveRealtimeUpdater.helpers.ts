@@ -34,6 +34,8 @@ type ApiDropWithUnknownSerialNo = Omit<ApiDrop, "serial_no"> & {
 export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly removeDrops: (waveId: string, dropIds: readonly string[]) => void;
   readonly activeWaveId: string | null;
+  /** Only the displayed Chat panel may acknowledge incoming messages. */
+  readonly activeReadWaveId?: string | null | undefined;
   readonly hasServerFeedSeed: (waveId: string) => boolean;
   /** Whether the wave is active or has a mounted message subscriber. */
   readonly isWaveInUse: (waveId: string) => boolean;

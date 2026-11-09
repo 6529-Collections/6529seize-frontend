@@ -499,6 +499,8 @@ const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
 
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   chat: "Chat",
+  "unreadMessages.one": "{count} unread message",
+  "unreadMessages.other": "{count} unread messages",
   sales: "Sales",
   myStream: "My Stream",
   polls: "Polls",
@@ -894,6 +896,9 @@ const WAVE_VOTE_MESSAGES = objectMessages("waves.vote", {
 
 const WAVE_VOTE_INSIGHTS_MESSAGES = objectMessages("waves.voteInsights", {
   topVoters: "Top voters",
+  activityLog: "Activity log",
+  votePlaced: "voted",
+  voteChanged: "changed from",
   viewVoters: "View voters",
   hideVoters: "Hide voters",
   emptyVotersTitle: "Be the First to Make a Vote",

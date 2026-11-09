@@ -1,10 +1,10 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import FilePreview from "@/components/waves/FilePreview";
-import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+import { getPreparedDropImagePreview } from "@/services/uploads/prepareDropImage";
 
 jest.mock("@/services/uploads/prepareDropImage", () => ({
-  getPreparedDropImage: jest.fn(),
+  getPreparedDropImagePreview: jest.fn(),
 }));
 
 jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => ({
@@ -17,7 +17,7 @@ let createObjectURLMock: jest.Mock;
 let revokeObjectURLMock: jest.Mock;
 
 beforeEach(() => {
-  jest.mocked(getPreparedDropImage).mockReset();
+  jest.mocked(getPreparedDropImagePreview).mockReset();
   createObjectURLMock = jest.fn(() => "blob:url");
   revokeObjectURLMock = jest.fn();
 
@@ -52,10 +52,10 @@ describe("FilePreview", () => {
       />
     );
     expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(getPreparedDropImage).not.toHaveBeenCalled();
+    expect(getPreparedDropImagePreview).not.toHaveBeenCalled();
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
 
-    jest.mocked(getPreparedDropImage).mockReturnValue({
+    jest.mocked(getPreparedDropImagePreview).mockReturnValue({
       url: "https://media.example/photo.webp",
       mime_type: "image/webp",
     });

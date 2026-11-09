@@ -131,7 +131,7 @@ const addUnreadDropCount = ({
 /**
  * Hook to manage new drop counts via WebSockets
  *
- * @param activeWaveId - The ID of the currently active wave
+ * @param activeWaveId - The displayed Chat panel's wave, or null outside Chat
  * @param waves - List of waves for which to track new drops
  * @param refetchWaves - Refreshes the list a newly active wave can join;
  *   called coalesced and jittered for drops in waves the list doesn't have
@@ -277,7 +277,7 @@ function useNewDropCounter(
 
   // Reset active wave counts whenever activeWaveId changes
   useEffect(() => {
-    if (enabled && activeWaveId) {
+    if (enabled && activeWaveId && document.visibilityState === "visible") {
       resetWaveNewDropsCount(activeWaveId);
     }
   }, [activeWaveId, enabled, resetWaveNewDropsCount]);

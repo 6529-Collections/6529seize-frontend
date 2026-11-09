@@ -1,6 +1,8 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { SingleWaveDropVoter } from "@/components/waves/drop/SingleWaveDropVoter";
+import type { ApiDropVoter } from "@/generated/models/ApiDropVoter";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ImageScale } from "@/helpers/image.helpers";
 import {
@@ -68,4 +70,63 @@ describe("SingleWaveDropVoter", () => {
     expect(handleSpan.className).toContain("tw-inline-block");
     expect(handleSpan.className).toContain("tw-truncate");
   });
+});
+
+test.each([9, -9])(
+  "renders a signed native Decision allocation of %s",
+  (vote) => {
+    const voter: ApiDropVoter = {
+      vote,
+      voter: {
+        id: "native-voter",
+        handle: "native-voter",
+        primary_address: "0x1111111111111111111111111111111111111111",
+        level: 0,
+        classification: ApiProfileClassification.Pseudonym,
+        badges: { artist_of_main_stage_submissions: 0, artist_of_memes: 0 },
+      },
+    };
+    render(
+      <SingleWaveDropVoter
+        voter={voter}
+        position={1}
+        creditType={ApiWaveCreditType.Rep}
+      />
+    );
+    expect(
+      screen.getByRole("img", {
+        name: `native-voter: ${vote > 0 ? "+" : "-"}9 Rep`,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        (_, element) => element?.textContent === "9 Rep Total"
+      ).length
+    ).toBeGreaterThan(0);
+  }
+);
+
+test("uses the wallet address when a native voter has no handle", () => {
+  const address = "0x1111111111111111111111111111111111111111";
+  const voter: ApiDropVoter = {
+    vote: 9,
+    voter: {
+      id: "native-id",
+      primary_address: address,
+      level: 0,
+      classification: ApiProfileClassification.Pseudonym,
+      badges: { artist_of_main_stage_submissions: 0, artist_of_memes: 0 },
+    },
+  };
+  render(
+    <SingleWaveDropVoter
+      voter={voter}
+      position={1}
+      creditType={ApiWaveCreditType.Rep}
+    />
+  );
+  expect(screen.getByRole("link", { name: address })).toHaveAttribute(
+    "href",
+    `/${address}`
+  );
 });

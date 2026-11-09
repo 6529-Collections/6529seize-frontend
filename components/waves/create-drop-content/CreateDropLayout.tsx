@@ -106,7 +106,10 @@ export interface CreateDropLayoutProps {
   readonly handleRequestEditLastDrop: () => boolean;
   readonly initialMarkdown: string | null;
   readonly initialMarkdownKey: string | null;
-  readonly onDrop: (resolvedMarkdown?: string) => Promise<void>;
+  readonly onDrop: (
+    resolvedMarkdown?: string,
+    restoreFocusAfterSubmit?: boolean
+  ) => Promise<void>;
   readonly pollDraft: CreateDropPollDraft | null;
   readonly pollQuestionError: string | null;
   readonly pollValidationError: string | null;
@@ -174,7 +177,7 @@ export default function CreateDropLayout(props: CreateDropLayoutProps) {
     dropEditorRefreshKey: props.dropEditorRefreshKey,
   });
   const locale = useBrowserLocale();
-  const submitWithResolvedAliases = async () => {
+  const submitWithResolvedAliases = async (restoreFocusAfterSubmit = false) => {
     let expansion: Awaited<
       ReturnType<CreateDropInputHandles["expandMentionAliases"]>
     >;
@@ -194,7 +197,10 @@ export default function CreateDropLayout(props: CreateDropLayoutProps) {
       return;
     }
     if (!expansion.completed) return;
-    await props.onDrop(exportComposerMarkdown(expansion.editorState));
+    await props.onDrop(
+      exportComposerMarkdown(expansion.editorState),
+      restoreFocusAfterSubmit
+    );
   };
   const isChatClosed =
     wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;

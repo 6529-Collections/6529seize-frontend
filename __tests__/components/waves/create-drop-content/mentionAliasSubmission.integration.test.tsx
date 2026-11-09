@@ -47,6 +47,7 @@ describe("mention alias submission", () => {
         selectedIdentity: null,
         isIdentitySubmissionExperience: false,
         isDropMode: false,
+        submitting: false,
         canCreatePoll: false,
         pollRequest: null,
         getMarkdown: "@frens",

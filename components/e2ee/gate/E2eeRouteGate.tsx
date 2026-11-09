@@ -133,10 +133,12 @@ function InlineDeviceSetup(
   const { proof } = useDeviceSecurityState();
   const scope = proof === "off" || proof === "expired" ? "both" : "dms";
   return (
-    <E2eeEnrollmentCard
-      {...props}
-      scope={scope}
-      details={<E2eeEnrollmentIdentity />}
-    />
+    <div className="tw-flex tw-min-h-full tw-flex-col tw-justify-center">
+      <E2eeEnrollmentCard
+        {...props}
+        scope={scope}
+        details={<E2eeEnrollmentIdentity />}
+      />
+    </div>
   );
 }

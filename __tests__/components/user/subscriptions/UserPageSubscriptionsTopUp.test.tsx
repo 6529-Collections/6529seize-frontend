@@ -662,7 +662,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     expect(document.body).toHaveFocus();
   });
 
-  it("keeps the gated page unmounted and unscrolled until iOS proves a US country", async () => {
+  it("keeps the gated page unmounted and unscrolled before a non-US lookup settles", async () => {
     setEnvironment({ isIos: true, country: "", isCountryPending: true });
     setHash(`#${TOP_UP_ID}`);
     const { rerender } = render(renderGated());
@@ -680,7 +680,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     expect(document.body).toHaveFocus();
   });
 
-  it("opens the dialog once the country check resolves to US on iOS", async () => {
+  it("keeps the dialog closed when the country check resolves to US on iOS", async () => {
     setEnvironment({ isIos: true, country: "", isCountryPending: true });
     setHash(`#${TOP_UP_ID}`);
     const { rerender } = render(renderGated());
@@ -690,16 +690,17 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     setEnvironment({ isIos: true, country: "US" });
     rerender(renderGated());
 
-    expect(await screen.findByRole("dialog", { name: "Top up" })).toBeVisible();
+    await settleFrames();
+    expect(screen.queryByRole("dialog", { name: "Top up" })).toBeNull();
     expect(
-      screen.getByRole("link", { name: "Top-up on 6529.io" })
-    ).toBeVisible();
+      screen.queryByRole("link", { name: "Top-up on 6529.io" })
+    ).toBeNull();
     expect(screen.queryByRole("radio")).not.toBeInTheDocument();
     expect(scrollIntoView).not.toHaveBeenCalled();
   });
 
   it.each(["US", "FR", ""])(
-    "preserves the recommendation without exposing iOS amount controls (country: %s)",
+    "omits the recommendation and payment controls on iOS (country: %s)",
     async (country) => {
       setEnvironment({ isIos: true, country });
       const coverage = {
@@ -718,19 +719,8 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
           <UserPageSubscriptionsTopUp expanded coverage={coverage} />
         </NftPurchasingGate>
       );
-      if (country === "US") {
-        expect(
-          await screen.findByText(
-            "Recommended: add 0.78348 ETH for 7 funded drops through The Memes #577."
-          )
-        ).toBeVisible();
-        expect(
-          screen.getByRole("link", { name: "Top-up on 6529.io" })
-        ).toBeVisible();
-      } else {
-        expect(screen.queryByText(/Recommended:/)).not.toBeInTheDocument();
-        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-      }
+      expect(screen.queryByText(/Recommended:/)).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
       expect(screen.queryByRole("radio")).not.toBeInTheDocument();
       expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
     }

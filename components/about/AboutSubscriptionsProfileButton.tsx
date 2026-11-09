@@ -1,12 +1,10 @@
 "use client";
 
-import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useProfileSubscriptionsNavigation } from "@/components/user/subscriptions/useProfileSubscriptionsNavigation";
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import useCapacitor from "@/hooks/useCapacitor";
 import { t } from "@/i18n/messages";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 
@@ -17,8 +15,6 @@ export default function AboutSubscriptionsProfileButton({
 }: {
   readonly variant?: SubscriptionActionVariant;
 }) {
-  const capacitor = useCapacitor();
-  const cookieConsent = useOptionalCookieConsent();
   const locale = useBrowserLocale();
   const {
     canNavigateToProfileSubscriptionsDirectly,
@@ -26,13 +22,7 @@ export default function AboutSubscriptionsProfileButton({
     openProfileSubscriptions,
     profileSubscriptionsHref,
   } = useProfileSubscriptionsNavigation();
-  const hideSubscriptions =
-    cookieConsent === undefined
-      ? false
-      : shouldHideSubscriptions({
-          capacitorIsIos: capacitor.isIos,
-          country: cookieConsent.country,
-        });
+  const { hideNftPurchasing: hideSubscriptions } = useNftPurchasingVisibility();
 
   if (hideSubscriptions) {
     return null;

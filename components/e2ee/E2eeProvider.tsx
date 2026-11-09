@@ -177,7 +177,8 @@ function E2eeProviderEnabled({
   const [setupSession, setSetupSession] = useState<string | null>(null);
   useEffect(() => {
     const start = (event: Event) => {
-      if ((event as CustomEvent<DeviceSetupScope>).detail !== "posts") {
+      const scope = (event as CustomEvent<DeviceSetupScope | null>).detail;
+      if (scope === "both" || scope === "dms") {
         setSetupSession(sessionKey);
       }
     };
