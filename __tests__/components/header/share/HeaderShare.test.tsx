@@ -1057,9 +1057,7 @@ describe("HeaderShare", () => {
               screen.getByTestId("desktop-connection-panel")
             ).toHaveAttribute(
               "href",
-              expect.stringMatching(
-                /^testcore6529:\/\/navigate\/accept-connection-sharing.*#device_setup_key=setup-secret$/
-              )
+              `testcore6529://navigate/accept-connection-sharing?connection_share_code=combined-1&address=${address}#device_setup_key=setup-secret`
             );
             expect(screen.getByText(desktopMinimumVersion)).toBeVisible();
           } else {
