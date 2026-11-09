@@ -185,6 +185,31 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
     expect(again.engine.getConversation(old)?.status).toBe("superseded");
   });
 
+  it("keeps the upgrade retryable after wallet failure or cancellation", async () => {
+    const alice = await addEarlierUser(world, "alice");
+    const device = await moveToCurrentSuite(world, alice, alice.primary);
+    const sign = jest.spyOn(device.options, "signTypedData");
+    const sessionError = new Error("Session topic doesn't exist");
+    sign.mockRejectedValueOnce(sessionError);
+    await expect(device.engine.enroll()).rejects.toMatchObject({
+      code: "E2EE_SIGNATURE_FAILED",
+      cause: sessionError,
+    });
+    expect(device.engine.getStatus()).toBe("needs-enrollment");
+    expect(device.engine.getUpgrade()).toEqual({ superseded: 0 });
+
+    sign.mockRejectedValueOnce(
+      new Error("Signing failed", { cause: { code: 4001 } })
+    );
+    await expect(device.engine.enroll()).rejects.toMatchObject({
+      code: "E2EE_SIGNATURE_REJECTED",
+    });
+    expect(device.engine.getStatus()).toBe("needs-enrollment");
+
+    await upgrade(world, alice);
+    expect(device.engine.getStatus()).toBe("ready");
+  });
+
   it("continues a superseded DM exactly once, also when called twice in a row", async () => {
     const { alice, bob, old } = await legacyDm(world);
     await upgrade(world, alice);

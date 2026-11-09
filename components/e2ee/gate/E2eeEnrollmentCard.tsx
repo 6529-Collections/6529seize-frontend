@@ -28,6 +28,7 @@ import { faSignature } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useCapacitor from "@/hooks/useCapacitor";
 import Button from "@/components/utils/button/Button";
+import { isWalletConnectSessionError } from "@/helpers/wallet-error.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeEngine, E2eeEngineStatus } from "@/lib/e2ee/types";
@@ -71,16 +72,6 @@ function getPermissionPointKey(
 const ENROLL_REJECTED_KEY: MessageKey = "e2ee.enroll.rejected";
 
 const subscribeNever = () => () => undefined;
-
-const getEnrollErrorKey = (error: unknown, upgrading: boolean): MessageKey => {
-  if (
-    isE2eeSignatureRejection(error) ||
-    getE2eeErrorCode(error) === E2EE_SIGNATURE_REJECTED
-  ) {
-    return ENROLL_REJECTED_KEY;
-  }
-  return upgrading ? "e2ee.upgrade.failed" : "e2ee.enroll.failed";
-};
 
 /** Upgrade copy (D172) replaces first-time copy for encrypted DMs alone. */
 const getSignLabelKey = (
@@ -360,13 +351,18 @@ export function E2eeEnrollmentCard({
         }
       } catch (error) {
         setNoticeKey(null);
-        setErrorKey(getEnrollErrorKey(error, upgrading));
-        return {
-          success: false,
-          reason: isE2eeSignatureRejection(error)
-            ? "rejected"
-            : "signature-failed",
-        };
+        if (isE2eeSignatureRejection(error)) {
+          setErrorKey(ENROLL_REJECTED_KEY);
+          return { success: false, reason: "rejected" };
+        }
+        if (
+          getE2eeErrorCode(error) === "E2EE_SIGNATURE_FAILED" &&
+          isWalletConnectSessionError(error)
+        ) {
+          return { success: false, reason: "walletconnect-session" };
+        }
+        setErrorKey(upgrading ? "e2ee.upgrade.failed" : "e2ee.enroll.failed");
+        return { success: false, reason: "signature-failed" };
       } finally {
         setPending(false);
       }

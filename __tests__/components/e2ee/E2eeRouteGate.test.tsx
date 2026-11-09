@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { E2eeRouteGate } from "@/components/e2ee/gate/E2eeRouteGate";
+import { E2eeError } from "@/lib/e2ee/engine/errors";
 import {
   contextFor,
   createFakeE2eeEngine,
@@ -14,9 +15,11 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
     connectedAccounts: [],
   }),
 }));
+const mockIsRemoteWallet = jest.fn(() => false);
+
 jest.mock("@/hooks/device-signing/useSignedMessagesWallet", () => ({
   useSignedMessagesWallet: () => ({
-    isRemoteWallet: false,
+    isRemoteWallet: mockIsRemoteWallet(),
     networkName: "Ethereum",
     isNetworkSupported: () => true,
     switchNetwork: jest.fn(),
@@ -31,6 +34,10 @@ const renderGate = (value: ReturnType<typeof contextFor>) =>
   );
 
 describe("E2eeRouteGate", () => {
+  afterEach(() => {
+    mockIsRemoteWallet.mockReturnValue(false);
+  });
+
   it("renders nothing when encrypted messages are disabled", () => {
     const { container } = renderGate(
       contextFor(null, { availability: "disabled", profileId: null })
@@ -113,6 +120,28 @@ describe("E2eeRouteGate", () => {
     // Declining is a choice: announced politely, never as an alert.
     expect(declined.tagName).toBe("OUTPUT");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("offers to reconnect when WalletConnect cannot deliver the upgrade signature", async () => {
+    mockIsRemoteWallet.mockReturnValue(true);
+    const engine = createFakeE2eeEngine({
+      status: "needs-enrollment",
+      upgrade: { superseded: 1 },
+    });
+    jest.mocked(engine.enroll).mockRejectedValueOnce(
+      new E2eeError("E2EE_SIGNATURE_FAILED", undefined, {
+        cause: new Error("Session topic doesn't exist"),
+      })
+    );
+    renderGate(contextFor(engine));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign to upgrade Encrypted DMs" })
+    );
+
+    expect(
+      await screen.findByRole("button", { name: "Reconnect wallet" })
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Signature cancelled.")).not.toBeInTheDocument();
   });
 
   it("lists the profile's devices at the device limit, revoked from an active device", () => {

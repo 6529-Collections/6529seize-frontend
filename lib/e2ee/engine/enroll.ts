@@ -30,7 +30,11 @@ import {
   requireMls,
   type EngineContext,
 } from "./context";
-import { E2eeError } from "./errors";
+import {
+  E2EE_SIGNATURE_REJECTED,
+  E2eeError,
+  isE2eeSignatureRejection,
+} from "./errors";
 
 /** Contract 2 + 8.8: one wallet prompt per device; KeyPackage pool upkeep. */
 
@@ -114,14 +118,17 @@ async function signGrant(
     issuedAtSeconds: Math.floor(ctx.now() / 1000),
     origin: ctx.options.origin,
   });
+  const typedData = buildGrantTypedData(grant);
+  let signature: string;
   try {
-    const signature = await ctx.options.signTypedData(
-      buildGrantTypedData(grant)
-    );
-    return { grant, signature: signature.toLowerCase() };
-  } catch {
-    throw new E2eeError("E2EE_SIGNATURE_REJECTED");
+    signature = await ctx.options.signTypedData(typedData);
+  } catch (error) {
+    const code = isE2eeSignatureRejection(error)
+      ? E2EE_SIGNATURE_REJECTED
+      : "E2EE_SIGNATURE_FAILED";
+    throw new E2eeError(code, undefined, { cause: error });
   }
+  return { grant, signature: signature.toLowerCase() };
 }
 
 /**
