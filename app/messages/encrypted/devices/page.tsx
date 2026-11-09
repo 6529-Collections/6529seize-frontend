@@ -4,7 +4,8 @@ import { getEncryptedDevicesRoute } from "@/helpers/navigation.helpers";
 
 /**
  * Devices and encrypted backup moved to Preferences → Devices & security.
- * Old links and bookmarks land there (308).
+ * The config redirect (config/nextConfig.ts) answers first with a 308; this
+ * page only covers a request that reaches rendering anyway.
  */
 export default function EncryptedMessagesDevicesPage() {
   if (!isE2eeEnabled()) {

@@ -18,6 +18,14 @@ describe("shared Next config", () => {
     });
   });
 
+  it("permanently redirects the former encrypted devices page to Devices & security", async () => {
+    expect(await sharedConfig(publicEnv, "").redirects?.()).toContainEqual({
+      source: "/messages/encrypted/devices",
+      destination: "/preferences?tab=security",
+      permanent: true,
+    });
+  });
+
   it("keeps React Strict Mode disabled by explicit migration policy", () => {
     expect(sharedConfig(publicEnv, "").reactStrictMode).toBe(false);
   });

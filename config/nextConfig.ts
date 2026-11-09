@@ -176,6 +176,15 @@ export function sharedConfig(
           destination: "/waves/:wave/decisions/:path*",
           permanent: true,
         },
+        // Devices and encrypted backup moved to Preferences → Devices &
+        // security. A config redirect is a real 308 before rendering; the
+        // page's own redirect would stream as a meta refresh under the
+        // messages loading boundary.
+        {
+          source: "/messages/encrypted/devices",
+          destination: "/preferences?tab=security",
+          permanent: true,
+        },
         // The 6529 Stream public contract review was removed; its section is
         // being rebuilt at /stream.
         {
