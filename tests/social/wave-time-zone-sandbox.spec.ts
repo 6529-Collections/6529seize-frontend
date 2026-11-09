@@ -1,3 +1,4 @@
+import type { Page } from "@playwright/test";
 import { DEFAULT_LONG_PRESS_DURATION_MS } from "../../hooks/useLongPressInteraction";
 import { expect, test } from "../testHelpers";
 import { useLocalSandboxMutationGuard } from "../support/localSandbox";
@@ -19,6 +20,14 @@ const SEED_INSTANT = "2024-04-22T00:00:00.000Z";
  * after hydration without errors, the switch surviving a reload in the tab,
  * and a phone header that keeps the wave title visible.
  */
+/** The seeded post's time, found by its machine-readable UTC instant. */
+function seededPostTime(page: Page) {
+  return page
+    .getByRole("main")
+    .locator(`time[datetime="${SEED_INSTANT}"]`)
+    .first();
+}
+
 test.describe("Display time zone @auth @local-only", () => {
   useLocalSandboxMutationGuard(
     test,
@@ -41,7 +50,7 @@ test.describe("Display time zone @auth @local-only", () => {
       "The wide wave header holds the clock button; compact headers use the overflow menu."
     );
     await page.goto(`/waves/${WAVE}`);
-    const seededTime = page.locator(`time[datetime="${SEED_INSTANT}"]`).first();
+    const seededTime = seededPostTime(page);
     await expect(seededTime).toHaveText("Apr 21, 2024 - 08:00 PM");
 
     await page
@@ -80,7 +89,7 @@ test.describe("Display time zone @auth @local-only", () => {
       route.fulfill({ json: [] })
     );
     await page.goto(`/waves/${WAVE}`);
-    const seededTime = page.locator(`time[datetime="${SEED_INSTANT}"]`).first();
+    const seededTime = seededPostTime(page);
     // Narrow screens show the date only for older posts.
     await expect(seededTime).toHaveText("Apr 21, 2024");
 
@@ -110,7 +119,7 @@ test.describe("Display time zone @auth @local-only", () => {
     await expect(page.getByRole("radio", { name: "UTC" })).toBeChecked();
 
     await page.goto(`/waves/${WAVE}`);
-    const seededTime = page.locator(`time[datetime="${SEED_INSTANT}"]`).first();
+    const seededTime = seededPostTime(page);
     const isPhone = testInfo.project.name === "web-mobile-chromium";
     await expect(seededTime).toHaveText(
       isPhone ? "Apr 22, 2024" : "Apr 22, 2024 - 12:00 AM UTC"
