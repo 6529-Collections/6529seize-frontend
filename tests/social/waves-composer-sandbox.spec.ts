@@ -441,6 +441,146 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("collapses a single reply thread and restores it inline", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    const isMobile = Boolean(testInfo.project.use.isMobile);
+    const { payload, sourceDrop } = await loadSandboxDropFixture(page, baseURL);
+    const root = { id: String(sourceDrop["id"]), serial_no: 1 };
+    const directReply = {
+      ...sourceDrop,
+      id: "00000000-0000-4000-8000-000000000546",
+      serial_no: 2,
+      content: "Direct thread reply",
+      reply_to_drop: root,
+    };
+    const nestedReply = {
+      ...sourceDrop,
+      id: "00000000-0000-4000-8000-000000000547",
+      serial_no: 3,
+      content: "Nested thread reply",
+      reply_to_drop: { id: directReply.id, serial_no: 2 },
+    };
+    // Both action menus read memberships. The sandbox has no curations.
+    await page.route(`**/api/drops/${root.id}/curations`, async (route) => {
+      await route.fulfill({ json: [] });
+    });
+    let collapsed = false;
+    await page.route(
+      `**/api/drops/${root.id}/collapse-replies`,
+      async (route) => {
+        expect(route.request().method()).toBe("POST");
+        const body = route.request().postDataJSON() as {
+          collapse_replies: boolean;
+        };
+        expect(body.collapse_replies).toBe(!collapsed);
+        collapsed = body.collapse_replies;
+        await route.fulfill({
+          json: { id: root.id, collapse_replies: collapsed },
+        });
+      }
+    );
+    await page.route(
+      `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
+      async (route) => {
+        const params = new URL(route.request().url()).searchParams;
+        const hideReplies =
+          collapsed && params.get("respect_drop_reply_collapse") === "true";
+        await route.fulfill({
+          json: {
+            ...payload,
+            drops: [
+              {
+                ...sourceDrop,
+                collapse_replies: collapsed,
+                replies_count: collapsed ? 2 : 0,
+              },
+              ...(hideReplies ? [] : [directReply, nestedReply]),
+            ],
+          },
+        });
+      }
+    );
+    await page.route("**/api/v2/drops?**", async (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      if (params.get("parent_drop_id") !== root.id) {
+        await route.fallback();
+        return;
+      }
+      await route.fulfill({
+        json: {
+          count: 2,
+          page: 1,
+          next: false,
+          data: [nestedReply, directReply].map((reply) => ({
+            ...reply,
+            collapsed_reply_thread: root,
+          })),
+        },
+      });
+    });
+    await gotoSandboxWave(page);
+    const inlineReply = page.getByText("Nested thread reply", { exact: true });
+    await expect(inlineReply).toBeVisible();
+    const selectReplyPlacement = async (label: string) => {
+      const rootRow = page
+        .getByRole("main")
+        .locator('[data-serial-no="1"]')
+        .first();
+      if (isMobile) {
+        await rootRow.tap({ trial: true });
+        const box = await rootRow.boundingBox();
+        if (!box)
+          throw new Error("The top-level drop is outside the viewport.");
+        const session = await page.context().newCDPSession(page);
+        try {
+          await session.send("Input.dispatchTouchEvent", {
+            type: "touchStart",
+            touchPoints: [{ x: box.x + 24, y: box.y + 18 }],
+          });
+          const action = page
+            .getByRole("dialog")
+            .getByRole("button", { name: label, exact: true });
+          await expect(action).toBeVisible();
+          await session.send("Input.dispatchTouchEvent", {
+            type: "touchCancel",
+            touchPoints: [],
+          });
+          await action.tap();
+        } finally {
+          await session.detach();
+        }
+        return;
+      }
+      await rootRow.hover();
+      const trigger = rootRow.getByRole("button", { name: "More actions" });
+      await trigger.click();
+      await page
+        .getByRole("menu")
+        .getByRole("button", { name: label, exact: true })
+        .click();
+    };
+
+    await selectReplyPlacement("Collapse replies");
+    await expect(inlineReply).toHaveCount(0);
+    const showReplies = page.getByRole("button", { name: "Show 2 replies" });
+    if (isMobile) await showReplies.tap();
+    else await showReplies.press("Enter");
+    const thread = page.getByRole("list", { name: "Replies to this drop" });
+    await expect(
+      thread.getByText("Direct thread reply", { exact: true })
+    ).toBeVisible();
+    await expect(
+      thread.getByText("Nested thread reply", { exact: true })
+    ).toBeVisible();
+
+    await selectReplyPlacement("Show replies inline");
+    await expect(thread).toHaveCount(0);
+    await expect(inlineReply).toBeVisible();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("expands and collapses a long chat drop without leaving the latest position", async ({
     baseURL,
     page,

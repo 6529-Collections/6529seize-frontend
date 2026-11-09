@@ -381,6 +381,7 @@ const buildDropIdsRequestParams = ({
     wave_id: apiParams.wave_id,
     min_serial_no: apiParams.min_serial_no.toString(),
     limit: itemsPerRequest.toString(),
+    respect_drop_reply_collapse: "true",
   };
 
   if (currentMaxSerialForNextCall !== null) {

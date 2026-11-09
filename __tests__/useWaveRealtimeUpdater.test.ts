@@ -200,6 +200,35 @@ describe("useWaveRealtimeUpdater", () => {
     );
   });
 
+  it.each([WsMessageType.DROP_UPDATE, WsMessageType.DROP_UPDATE_REF])(
+    "reloads the wave without inserting the placement event (%s)",
+    (messageType) => {
+      const refreshWaveMessages = jest.fn();
+      const props = {
+        ...baseProps({ wave1: { drops: [], latestFetchedSerialNo: 10 } }),
+        refreshWaveMessages,
+      };
+      renderHook(() => useWaveRealtimeUpdater(props));
+      emitWebSocketMessage(
+        messageType,
+        messageType === WsMessageType.DROP_UPDATE
+          ? {
+              ...makeRealtimeDrop("root", "wave1", 9),
+              reason: "REPLY_COLLAPSE",
+            }
+          : {
+              drop_id: "root",
+              wave_id: "wave1",
+              serial_no: 9,
+              update_type: WsMessageType.DROP_UPDATE,
+              reason: "REPLY_COLLAPSE",
+            }
+      );
+      expect(refreshWaveMessages).toHaveBeenCalledWith("wave1");
+      expect(props.updateData).not.toHaveBeenCalled();
+    }
+  );
+
   it("keeps a collapsed thread's reply count when an update omits it", async () => {
     const store = {
       wave1: {
@@ -792,6 +821,41 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.updateData).toHaveBeenCalled();
     expect(props.syncNewestMessages).toHaveBeenCalled();
   });
+
+  it.each([false, true])(
+    "settles a POST before deferred processing when muted=%s",
+    async (muted) => {
+      const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
+      const props = baseProps(store);
+      props.isWaveMuted.mockReturnValue(muted);
+      let release!: () => void;
+      const refresh = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      mockRefreshEligibility.mockReturnValue(refresh);
+      const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+      const accepted = makeRealtimeDrop("accepted", "wave1", 11);
+      let completion!: Promise<void>;
+      act(() => {
+        completion = result.current.processIncomingDrop(
+          accepted,
+          ProcessIncomingDropType.DROP_INSERT,
+          { pendingDropId: "temp-pending" }
+        );
+      });
+      expect(props.updateData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: "wave1",
+          pendingDropId: "temp-pending",
+          drops: [expect.objectContaining({ id: "accepted" })],
+        })
+      );
+      await act(async () => {
+        release();
+        await completion;
+      });
+    }
+  );
 
   it("normalizes string serial numbers before inserting realtime drops", async () => {
     const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };

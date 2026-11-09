@@ -451,45 +451,48 @@ describe("MyStreamWaveChat", () => {
     }
   });
 
-  it("opens the parent thread when a link targets a collapsed reply", async () => {
-    searchParamsMock.get.mockImplementation((key: string) =>
-      key === "serialNo" ? "5" : null
-    );
-    searchParamsMock.toString.mockReturnValue("serialNo=5");
-    mockFetchDropReplyThreadTarget.mockResolvedValue({
-      parentDropId: "parent-drop",
-      parentSerialNo: 4,
-    });
-    const collapsedWave = {
-      ...wave,
-      chat: {
-        replies: {
-          open: true,
-          collapsed: true,
-          authenticated_user_eligible: true,
-        },
-      },
-    };
-
-    await act(async () => {
-      renderWithProvider(
-        <MyStreamWaveChat
-          wave={collapsedWave}
-          firstUnreadSerialNo={null}
-          viewMode="chat"
-          onDropClick={mockOnDropClick}
-        />
+  it.each([false, true])(
+    "opens the parent thread for a collapsed reply when wave collapse is %s",
+    async (collapsed) => {
+      searchParamsMock.get.mockImplementation((key: string) =>
+        key === "serialNo" ? "5" : null
       );
-    });
+      searchParamsMock.toString.mockReturnValue("serialNo=5");
+      mockFetchDropReplyThreadTarget.mockResolvedValue({
+        parentDropId: "parent-drop",
+        parentSerialNo: 4,
+      });
+      const collapsedWave = {
+        ...wave,
+        chat: {
+          replies: {
+            open: true,
+            collapsed,
+            authenticated_user_eligible: true,
+          },
+        },
+      };
 
-    await waitFor(() => {
-      expect(capturedPropsHolder.current.initialDrop).toBe(4);
-    });
-    expect(mockFetchDropReplyThreadTarget).toHaveBeenCalledWith(
-      expect.objectContaining({ serialNo: 5 })
-    );
-    expect(mockFetchAroundSerialNo).toHaveBeenCalledWith("10", 4);
-  });
+      await act(async () => {
+        renderWithProvider(
+          <MyStreamWaveChat
+            wave={collapsedWave}
+            firstUnreadSerialNo={null}
+            viewMode="chat"
+            onDropClick={mockOnDropClick}
+          />
+        );
+      });
+
+      await waitFor(() => {
+        expect(capturedPropsHolder.current.initialDrop).toBe(4);
+      });
+      expect(mockFetchDropReplyThreadTarget).toHaveBeenCalledWith(
+        expect.objectContaining({ serialNo: 5, collapseAll: collapsed })
+      );
+      expect(mockFetchAroundSerialNo).toHaveBeenCalledWith("10", 4);
+    }
+  );
 
   it("keeps the original target when a collapsed-wave link is not a reply", async () => {
     searchParamsMock.get.mockImplementation((key: string) =>
@@ -526,11 +529,12 @@ describe("MyStreamWaveChat", () => {
     expect(mockFetchAroundSerialNo).not.toHaveBeenCalledWith("10", 4);
   });
 
-  it("does not resolve reply targets in waves that keep replies inline", async () => {
+  it("keeps links to ordinary replies inline in a mixed wave", async () => {
     searchParamsMock.get.mockImplementation((key: string) =>
       key === "serialNo" ? "5" : null
     );
     searchParamsMock.toString.mockReturnValue("serialNo=5");
+    mockFetchDropReplyThreadTarget.mockResolvedValue(null);
 
     await act(async () => {
       renderWithProvider(
@@ -544,7 +548,9 @@ describe("MyStreamWaveChat", () => {
     });
 
     expect(capturedPropsHolder.current.initialDrop).toBe(5);
-    expect(mockFetchDropReplyThreadTarget).not.toHaveBeenCalled();
+    expect(mockFetchDropReplyThreadTarget).toHaveBeenCalledWith(
+      expect.objectContaining({ serialNo: 5, collapseAll: false })
+    );
   });
 
   it("sets initialDrop null when no param", async () => {

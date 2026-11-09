@@ -39,7 +39,7 @@ export function useWaveChatHistoryPurge({
       controller.current?.abort();
     };
     // A recovered operation may contain commits whose responses were lost.
-    if (getChatHistoryPurge(key).token) refreshWaveMessages(waveId);
+    if (getChatHistoryPurge(key).token) void refreshWaveMessages(waveId);
     globalThis.addEventListener(PROFILE_SWITCHED_EVENT, stop);
     return () => {
       stop();
@@ -66,7 +66,7 @@ export function useWaveChatHistoryPurge({
       },
       onSettled: (completed, count) => {
         if (!ownsRun()) return;
-        refreshWaveMessages(waveId);
+        void refreshWaveMessages(waveId);
         onSettled(completed, count);
       },
     });

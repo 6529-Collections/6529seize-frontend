@@ -1,5 +1,6 @@
 "use client";
 
+import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
@@ -59,6 +60,7 @@ interface WaveReplyThreadsContextValue {
   readonly waveId: string;
   readonly store: ExpandedReplyThreadsStore;
   readonly getWave: () => ApiWave;
+  readonly collapseAll: boolean;
 }
 
 const WaveReplyThreadsContext =
@@ -68,7 +70,11 @@ const WaveReplyThreadsContext =
  * Reconcile the original thread as well as the immediate parent when replies
  * change. Compact events use the same API-backed ancestry traversal.
  */
-function useLiveReplyCounts(waveId: string, enabled: boolean) {
+function useLiveReplyCounts(
+  waveId: string,
+  enabled: boolean,
+  collapseAll: boolean
+) {
   const { applyOptimisticDropUpdate } = useMyStreamActions();
   const reconciliationRef = useRef<ReturnType<
     typeof createReplyCountReconciliation
@@ -103,13 +109,15 @@ function useLiveReplyCounts(waveId: string, enabled: boolean) {
     WsMessageType.DROP_UPDATE,
     useCallback(
       (drop) => {
-        const parentDropId = drop.reply_to?.drop_id;
+        const parentDropId =
+          drop.collapsed_reply_thread?.id ??
+          (collapseAll ? drop.reply_to?.drop_id : undefined);
         if (!enabled || drop.wave.id !== waveId || !parentDropId) {
           return;
         }
         reconciliationRef.current?.request(parentDropId);
       },
-      [enabled, waveId]
+      [collapseAll, enabled, waveId]
     )
   );
 
@@ -123,10 +131,13 @@ function useLiveReplyCounts(waveId: string, enabled: boolean) {
           message.wave_id === waveId &&
           message.update_type === WsMessageType.DROP_UPDATE
         ) {
-          reconciliationRef.current?.request(message.drop_id);
+          const rootId = message.collapsed_reply_thread_id;
+          if (rootId || collapseAll) {
+            reconciliationRef.current?.request(rootId ?? message.drop_id);
+          }
         }
       },
-      [enabled, waveId]
+      [collapseAll, enabled, waveId]
     )
   );
 }
@@ -152,12 +163,13 @@ export function WaveReplyThreadsProvider({
   useEffect(() => {
     waveRef.current = wave;
   }, [wave]);
-  useLiveReplyCounts(wave.id, enabled);
+  const collapseAll = isWaveRepliesCollapsed(wave);
+  useLiveReplyCounts(wave.id, enabled, collapseAll);
 
   const getWave = useCallback(() => waveRef.current, []);
   const value = useMemo(
-    () => (enabled ? { waveId: wave.id, store, getWave } : null),
-    [enabled, wave.id, store, getWave]
+    () => (enabled ? { waveId: wave.id, store, getWave, collapseAll } : null),
+    [enabled, wave.id, store, getWave, collapseAll]
   );
 
   return (
@@ -167,7 +179,7 @@ export function WaveReplyThreadsProvider({
   );
 }
 
-/** Null outside the main stream of a collapsed-reply wave. */
+/** Null outside a wave stream with reply threads. */
 export const useWaveReplyThreads = (): WaveReplyThreadsContextValue | null =>
   useContext(WaveReplyThreadsContext);
 

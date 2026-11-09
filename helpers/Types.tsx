@@ -377,7 +377,11 @@ export enum WsMessageType {
 
 export const WS_DROP_UPDATE_REASON_POLL_RESPONSE = "POLL_RESPONSE" as const;
 
-export type WsDropUpdateReason = typeof WS_DROP_UPDATE_REASON_POLL_RESPONSE;
+export const WS_DROP_UPDATE_REASON_REPLY_COLLAPSE = "REPLY_COLLAPSE" as const;
+
+export type WsDropUpdateReason =
+  | typeof WS_DROP_UPDATE_REASON_POLL_RESPONSE
+  | typeof WS_DROP_UPDATE_REASON_REPLY_COLLAPSE;
 
 export interface WsTypingMessage {
   readonly type: WsMessageType.USER_IS_TYPING;
@@ -405,6 +409,7 @@ export interface WsDropUpdateRefData {
   readonly author_id: string;
   readonly serial_no: number;
   readonly update_type: WsDropUpdateRefUpdateType;
+  readonly collapsed_reply_thread_id?: string;
   readonly reason?: string;
 }
 
@@ -449,6 +454,8 @@ export const isWsDropUpdateRefData = (
     Number.isSafeInteger(candidate.serial_no) &&
     candidate.serial_no >= 0 &&
     isWsDropUpdateRefUpdateType(candidate.update_type) &&
+    (candidate.collapsed_reply_thread_id === undefined ||
+      isNonEmptyWebSocketId(candidate.collapsed_reply_thread_id)) &&
     (candidate.reason === undefined || isNonEmptyWebSocketId(candidate.reason))
   );
 };

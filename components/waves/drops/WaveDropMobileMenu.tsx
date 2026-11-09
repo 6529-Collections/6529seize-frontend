@@ -29,6 +29,7 @@ import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropMobileMenuBoost from "./WaveDropMobileMenuBoost";
 import WaveDropMobileMenuDelete from "./WaveDropMobileMenuDelete";
+import WaveDropReplyCollapseAction from "./WaveDropReplyCollapseAction";
 import WaveDropMobileMenuEdit from "./WaveDropMobileMenuEdit";
 import WaveDropMobileMenuSetPinnedDrop from "./WaveDropMobileMenuSetPinnedDrop";
 import WaveDropMobileMenuOpen from "./WaveDropMobileMenuOpen";
@@ -244,6 +245,7 @@ function WaveDropMobileMenuAuthenticatedActions({
         </>
       )}
 
+      <WaveDropReplyCollapseAction drop={drop} onSelected={closeMenu} mobile />
       <WaveDropBookmarkAction dropId={drop.id} onSelected={closeMenu} mobile />
       <WaveDropDocumentationAction drop={drop} onSelected={closeMenu} mobile />
 
