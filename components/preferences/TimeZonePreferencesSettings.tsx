@@ -206,7 +206,7 @@ function TimeZonePreferencesCard() {
                 <ComboboxOptions
                   anchor="bottom start"
                   modal={false}
-                  className="tailwind-scope tw-z-50 tw-max-h-72 tw-w-[var(--input-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] focus:tw-outline-none"
+                  className="tailwind-scope tw-z-50 tw-max-h-72 tw-w-[var(--input-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem]"
                 >
                   {results.length === 0 ? (
                     <div className="tw-px-3 tw-py-3 tw-text-sm tw-text-iron-300">
