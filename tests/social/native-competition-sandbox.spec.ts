@@ -1093,8 +1093,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       pfp: null,
     };
     const reads: string[] = [];
+    const detailPaths = new Set([
+      `/api/v2/drops/${dropId}/votes`,
+      `/api/v2/drops/${dropId}/votes/logs`,
+      `/api/v2/drops/${dropId}/vote-summary`,
+    ]);
     await page.route(
-      (url) => url.pathname.startsWith(`/api/v2/drops/${dropId}/vote`),
+      (url) => detailPaths.has(url.pathname),
       async (route) => {
         const path = new URL(route.request().url()).pathname;
         reads.push(path);

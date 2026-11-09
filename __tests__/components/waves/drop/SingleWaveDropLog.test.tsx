@@ -94,21 +94,51 @@ describe("SingleWaveDropLog", () => {
   });
 });
 
-test("renders a native Decision vote change with an ID fallback for the voter", () => {
+test("renders a native Decision vote change with a wallet fallback for the voter", () => {
   const log = {
     id: "native-change",
     old_vote: 7,
     new_vote: -3,
     created_at: 1,
-    voter: { id: "native-voter", handle: null, pfp: null },
+    voter: {
+      id: "native-voter",
+      handle: null,
+      pfp: null,
+      primary_address: "0x1111111111111111111111111111111111111111",
+    },
   } as ApiDropVoteEditLog;
   render(<SingleWaveDropLog log={log} creditType={ApiWaveCreditType.Rep} />);
-  expect(screen.getByRole("link", { name: "native-voter" })).toHaveAttribute(
-    "href",
-    "/native-voter"
-  );
+  expect(
+    screen.getByRole("link", {
+      name: "0x1111111111111111111111111111111111111111",
+    })
+  ).toHaveAttribute("href", "/0x1111111111111111111111111111111111111111");
   expect(screen.getByText("changed from")).toBeInTheDocument();
   expect(
     screen.getByText((_, element) => element?.textContent === "-3 Rep")
   ).toBeInTheDocument();
 });
+
+test.each([undefined, "not-a-number", Number.POSITIVE_INFINITY])(
+  "does not render malformed legacy vote values as NaN: %s",
+  (invalid) => {
+    render(
+      <SingleWaveDropLog
+        log={
+          {
+            id: "legacy",
+            created_at: 1,
+            invoker: { id: "legacy-voter", handle: "legacy-voter", pfp: null },
+            contents: { oldVote: invalid, newVote: invalid },
+          } as unknown as import("@/generated/models/ApiWaveLog").ApiWaveLog
+        }
+        creditType={ApiWaveCreditType.Rep}
+      />
+    );
+    expect(screen.getByText("voted")).toBeInTheDocument();
+    expect(screen.queryByText(/NaN/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText((_, element) => element?.textContent === "0 Rep")
+    ).toBeInTheDocument();
+  }
+);

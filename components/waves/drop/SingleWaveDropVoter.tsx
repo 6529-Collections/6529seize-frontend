@@ -46,7 +46,7 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
     "tw-size-7 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0 tw-object-contain";
   const directionClasses = "tw-text-sm tw-font-medium tw-leading-none";
 
-  const voterIdentity = voter.voter.handle ?? voter.voter.id;
+  const voterIdentity = voter.voter.handle ?? voter.voter.primary_address;
   const describeVote = (vote: number) =>
     t(locale, "waves.voteInsights.voteByName", {
       name: voterIdentity,

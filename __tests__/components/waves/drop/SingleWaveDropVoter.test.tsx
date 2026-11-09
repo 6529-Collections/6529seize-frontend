@@ -97,3 +97,27 @@ test.each([9, -9])(
     ).toBeGreaterThan(0);
   }
 );
+
+test("uses the wallet address when a native voter has no handle", () => {
+  const address = "0x1111111111111111111111111111111111111111";
+  const voter = {
+    vote: 9,
+    voter: {
+      id: "native-id",
+      handle: null,
+      primary_address: address,
+      pfp: null,
+    },
+  } as ApiDropVoter;
+  render(
+    <SingleWaveDropVoter
+      voter={voter}
+      position={1}
+      creditType={ApiWaveCreditType.Rep}
+    />
+  );
+  expect(screen.getByRole("link", { name: address })).toHaveAttribute(
+    "href",
+    `/${address}`
+  );
+});
