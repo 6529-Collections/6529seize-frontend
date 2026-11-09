@@ -106,8 +106,9 @@ const combinedMessage = (deviceKeyHex: string, mlsKey: string): string => {
     expiresAtSeconds: expiresAt(),
   };
   const mls = {
+    version: 2 as const,
     deviceKeyHex: mlsKey,
-    ciphersuite: 1,
+    ciphersuites: [0x004e],
     expiresAtSeconds: signing.expiresAtSeconds,
   };
   return [
@@ -126,7 +127,7 @@ type NonceParams = {
     | {
         readonly device_key: string;
         readonly mls_device_key?: string;
-        readonly mls_ciphersuite?: string;
+        readonly mls_ciphersuites?: string;
       }
     | undefined;
 };
@@ -168,7 +169,7 @@ const createSubject = (
 const preparedE2eeDevice = (deviceKeyHex = MLS_KEY) => {
   const device = {
     deviceKeyHex,
-    ciphersuite: 1,
+    ciphersuites: [0x004e],
     adopt: jest.fn(async () => true),
     dispose: jest.fn(),
   };
@@ -229,7 +230,7 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
         device_key_type: "ed25519",
         device_scopes: SCOPES.join(","),
         mls_device_key: MLS_KEY,
-        mls_ciphersuite: "1",
+        mls_ciphersuites: "78",
       },
     });
     expect(getSignature).toHaveBeenCalledTimes(1);

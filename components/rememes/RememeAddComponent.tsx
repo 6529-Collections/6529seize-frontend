@@ -1,5 +1,6 @@
 "use client";
 
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import Button from "@/components/utils/button/Button";
 import { apiUrl } from "@/services/api/api-endpoints";
 import { OPENSEA_STORE_FRONT_CONTRACT } from "@/constants/constants";
@@ -29,7 +30,6 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import Link from "next/link";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { useEnsName } from "wagmi";
 import type { Nft, NftContract } from "./alchemy-sdk-types";
@@ -398,20 +398,22 @@ export default function RememeAddComponent({
                           <span className="tw-inline-flex tw-items-center tw-gap-2">
                             #{nft.tokenId}
                             {nft.name && ` - ${nft.name}`}
-                            <Link
-                              className="tw-inline-flex focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                              href={`https://opensea.io/assets/ethereum/${contract}/${nft.tokenId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <Image
-                                unoptimized
-                                src="/opensea.png"
-                                alt="opensea"
-                                width={20}
-                                height={20}
-                              />
-                            </Link>
+                            <NftPurchasingGate>
+                              <a
+                                className="tw-inline-flex focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                                href={`https://opensea.io/assets/ethereum/${encodeURIComponent(contract)}/${encodeURIComponent(nft.tokenId)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Image
+                                  unoptimized
+                                  src="/opensea.png"
+                                  alt="opensea"
+                                  width={20}
+                                  height={20}
+                                />
+                              </a>
+                            </NftPurchasingGate>
                           </span>
                         )}
                       </li>

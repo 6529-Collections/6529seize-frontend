@@ -10,7 +10,7 @@ import { join } from "node:path";
 
 import { encodeAbiParameters, keccak256, toBytes } from "viem";
 
-import { E2EE_CIPHERSUITE } from "@/lib/e2ee/grant";
+import { E2EE_CIPHERSUITE, E2EE_LEGACY_CIPHERSUITE } from "@/lib/e2ee/grant";
 import type { MsgPayload } from "@/lib/e2ee/payload";
 import type {
   GroupMetadata,
@@ -52,6 +52,7 @@ type SyncResult = WasmProcessResult | WasmDecrypted;
 interface ModuleInfo {
   openmls: string;
   ciphersuite: number;
+  ciphersuites: number[];
   metadata_extension: number;
 }
 
@@ -193,9 +194,9 @@ class Client {
     );
   }
 
-  keyPackage(): string {
+  keyPackage(ciphersuite?: number): string {
     return parse<WasmKeyPackage[]>(
-      this.device.createKeyPackages(1, false, 30 * DAY)
+      this.device.createKeyPackages(1, false, 30 * DAY, ciphersuite)
     )[0]!.data;
   }
 
@@ -206,10 +207,11 @@ class Client {
   createGroup(
     ds: DeliveryService,
     g: string,
-    kind: "dm" | "group"
+    kind: "dm" | "group",
+    ciphersuite?: number
   ): GroupSummary {
     const summary = parse<GroupSummary>(
-      this.device.createGroup(g, metadata(g, kind))
+      this.device.createGroup(g, metadata(g, kind), ciphersuite)
     );
     ds.create(g, summary.commit_key);
     this.cursor.set(g, 0);
@@ -227,13 +229,21 @@ class Client {
     return result;
   }
 
-  join(ds: DeliveryService, g: string, welcomeB64: string): GroupSummary {
+  join(
+    ds: DeliveryService,
+    g: string,
+    welcomeB64: string,
+    ciphersuite = 0x004f
+  ): GroupSummary {
     const staged = parse<WasmWelcomeSummary>(
       this.device.joinWelcome(g, b64ToBytes(welcomeB64))
     );
     expect(staged.g).toBe(g);
     const summary = parse<GroupSummary>(this.device.acceptWelcome(g));
     expect(summary.commit_key).toBe(staged.commit_key);
+    // The suite is known before accepting, and is the group's.
+    expect(staged.ciphersuite).toBe(ciphersuite);
+    expect(summary.ciphersuite).toBe(ciphersuite);
     this.cursor.set(g, ds.length(g));
     return summary;
   }
@@ -292,9 +302,12 @@ describe("mls wasm module", () => {
     expect(typeof asEngineModule.MlsDevice.create).toBe("function");
     const info = parse<ModuleInfo>(mls.moduleInfo());
     expect(info.openmls).toBe("0.9.1");
-    // The module and the grant must agree on the one suite (0x004F, X-Wing).
-    expect(info.ciphersuite).toBe(E2EE_CIPHERSUITE);
+    // The module's default suite (no suite argument) stays 0x004F, what v1
+    // grants name; the engine passes 0x004E (AES-256-GCM, SHA-384, D172)
+    // explicitly. Both run on the same device key.
+    expect(info.ciphersuite).toBe(E2EE_LEGACY_CIPHERSUITE);
     expect(info.ciphersuite).toBe(0x004f);
+    expect(info.ciphersuites).toEqual([0x004f, E2EE_CIPHERSUITE]);
     expect(info.metadata_extension).toBe(0xf529);
   });
 
@@ -400,6 +413,46 @@ describe("mls wasm module", () => {
       alice.device.createCommit(g, JSON.stringify({ self_update: true }))
     ).toThrow(/^E2EE_WASM:PENDING_EXISTS:/);
     alice.device.discardPending(g);
+  });
+
+  it("runs a DM on 0x004E and keeps each group on its own suite", () => {
+    const ds = new DeliveryService();
+    const g = handle("dm-004e");
+    const alice = new Client("alice");
+    const bob = new Client("bob");
+    expect(alice.createGroup(ds, g, "dm", 0x004e).ciphersuite).toBe(0x004e);
+    expect(() =>
+      alice.device.createCommit(
+        g,
+        JSON.stringify({ add_key_packages: [bob.keyPackage()] })
+      )
+    ).toThrow(/^E2EE_WASM:BAD_KEY_PACKAGE:.*wrong ciphersuite/);
+    const result = alice.commit(ds, g, {
+      add_key_packages: [bob.keyPackage(0x004e)],
+    });
+    expect(
+      bob.join(ds, g, defined(result.welcome, "welcome"), 0x004e).ciphersuite
+    ).toBe(0x004e);
+    alice.send(ds, g, "hello on 0x004e");
+    const fromAlice = asMessage(bob.sync(ds, g)[0]);
+    expect(text(fromAlice)).toBe("hello on 0x004e");
+    expect(fromAlice.sig_ok).toBe(true);
+
+    const old = handle("dm-004f");
+    expect(alice.createGroup(ds, old, "dm").ciphersuite).toBe(0x004f);
+    expect(() => alice.device.createGroup(handle("x"), "{}", 0x0052)).toThrow(
+      /^E2EE_WASM:BAD_INPUT:.*unsupported ciphersuite/
+    );
+
+    // One device holds groups of both suites, and each keeps its suite
+    // across export and reload.
+    const state = alice.device.exportState();
+    alice.device.free();
+    alice.device = mls.MlsDevice.load(state);
+    expect(alice.summary(g).ciphersuite).toBe(0x004e);
+    expect(alice.summary(old).ciphersuite).toBe(0x004f);
+    alice.send(ds, g, "after reload");
+    expect(text(asMessage(bob.sync(ds, g)[0]))).toBe("after reload");
   });
 
   it("runs a three-person group with a removal and survives a reload", () => {

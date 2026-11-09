@@ -2,9 +2,11 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
+import { useDropVoters } from "@/hooks/useDropVoters";
 import { t } from "@/i18n/messages";
 import { UserGroupIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
@@ -19,9 +21,10 @@ import React, { useId, useState } from "react";
 import { SingleWaveDropEmptyState } from "./SingleWaveDropEmptyState";
 import { SingleWaveDropVoter } from "./SingleWaveDropVoter";
 import { SingleWaveDropVotersDownload } from "./SingleWaveDropVotersDownload";
+import { DropVoteLoadError } from "./DropVoteLoadError";
 
 interface SingleWaveDropVotersProps {
-  readonly drop: ApiDrop;
+  readonly drop: ApiDrop & Pick<ExtendedDrop, "competition_id">;
   readonly summary?: React.ReactNode;
 }
 
@@ -36,18 +39,27 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
   const panelId = useId();
   const headingId = `${panelId}-heading`;
   const indicatorId = `${panelId}-indicator`;
+  const isDecisionEntry = !!drop.competition_id;
+  const decisionVoters = useDropVoters({
+    dropId: drop.id,
+    enabled: isDecisionEntry && isVotersOpen,
+  });
+  const waveVoters = useWaveTopVoters({
+    waveId: drop.wave.id,
+    connectedProfileHandle: connectedProfile?.handle ?? undefined,
+    reverse: false,
+    dropId: drop.id,
+    sortDirection: "DESC",
+    sort: "ABSOLUTE",
+    enabled: !isDecisionEntry && isVotersOpen,
+  });
   const { voters, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
-    useWaveTopVoters({
-      waveId: drop.wave.id,
-      connectedProfileHandle: connectedProfile?.handle ?? undefined,
-      reverse: false,
-      dropId: drop.id,
-      sortDirection: "DESC",
-      sort: "ABSOLUTE",
-      enabled: isVotersOpen,
-    });
+    isDecisionEntry ? decisionVoters : waveVoters;
 
   const toggleVoters = () => setIsVotersOpen((current) => !current);
+
+  const hasLoadError =
+    isDecisionEntry && decisionVoters.isError && voters.length === 0;
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isLoading && !isFetchingNextPage) {
@@ -112,35 +124,42 @@ export const SingleWaveDropVoters: React.FC<SingleWaveDropVotersProps> = ({
               className="tw-overflow-hidden tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10"
             >
               <div className="tw-max-h-[19.75rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-                {voters.length > 0 || isLoading ? (
-                  <>
-                    <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
-                      {voters.map((voter, index) => (
-                        <SingleWaveDropVoter
-                          voter={voter}
-                          key={voter.voter.id}
-                          position={index + 1}
-                          creditType={drop.wave.voting_credit_type}
-                        />
-                      ))}
-                    </div>
-                    {(isFetchingNextPage || isLoading) && (
-                      <div className="tw-h-0.5 tw-w-full tw-overflow-hidden tw-bg-iron-800">
-                        <div className="tw-h-full tw-w-full tw-animate-loading-bar tw-bg-indigo-400 motion-reduce:tw-animate-none"></div>
-                      </div>
-                    )}
-                    <div ref={intersectionElementRef}></div>
-                  </>
-                ) : (
-                  <SingleWaveDropEmptyState
-                    icon={<UserGroupIcon className="tw-size-6" />}
-                    title={t(locale, "waves.voteInsights.emptyVotersTitle")}
-                    description={t(
-                      locale,
-                      "waves.voteInsights.emptyVotersDescription"
-                    )}
+                {hasLoadError && (
+                  <DropVoteLoadError
+                    kind="voters"
+                    onRetry={() => void decisionVoters.refetch()}
                   />
                 )}
+                {!hasLoadError &&
+                  (voters.length > 0 || isLoading ? (
+                    <>
+                      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+                        {voters.map((voter, index) => (
+                          <SingleWaveDropVoter
+                            voter={voter}
+                            key={voter.voter.id}
+                            position={index + 1}
+                            creditType={drop.wave.voting_credit_type}
+                          />
+                        ))}
+                      </div>
+                      {(isFetchingNextPage || isLoading) && (
+                        <div className="tw-h-0.5 tw-w-full tw-overflow-hidden tw-bg-iron-800">
+                          <div className="tw-h-full tw-w-full tw-animate-loading-bar tw-bg-indigo-400 motion-reduce:tw-animate-none"></div>
+                        </div>
+                      )}
+                      <div ref={intersectionElementRef}></div>
+                    </>
+                  ) : (
+                    <SingleWaveDropEmptyState
+                      icon={<UserGroupIcon className="tw-size-6" />}
+                      title={t(locale, "waves.voteInsights.emptyVotersTitle")}
+                      description={t(
+                        locale,
+                        "waves.voteInsights.emptyVotersDescription"
+                      )}
+                    />
+                  ))}
               </div>
             </m.div>
           )}

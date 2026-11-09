@@ -33,8 +33,11 @@ the inbox; Tab reaches its actions. Clicking the bell opens `/notifications`
 directly, including while the preview is open. Compact rows show the actor, activity, a short drop
 preview when available, a timestamp, and an `Unread` indicator. The newest
 notifications appear first; `Load more` retrieves older rows.
-Reactions to the same drop share one row with reactor avatars and one drop
-preview, including reactions loaded through `Load more`. Mentions and wave tags
+Reaction previews show the actual native or custom emoji. Reactions to the same
+drop share one row with up to six distinct reaction emojis, reactor avatars, and
+one drop preview, including reactions loaded through `Load more`. Additional
+reaction types show a `+N more` count. Unavailable emojis show
+their text code instead. Mentions and wave tags
 in previews appear as `@handle` and `#wave`, without storage brackets.
 
 Grouped reactions and returned voting credits use the wave picture as their
@@ -86,7 +89,7 @@ Unread counts keep their cached values while the Capacitor app is backgrounded
 or a mobile browser tab is hidden. Periodic count refreshes resume on return.
 Browser realtime notification delivery remains connected while the tab is hidden.
 
-- On native iOS when the detected country is not `US` or is unknown, subscription
+- In the iOS app, subscription
   coverage alerts, the Subscriptions filter, and the device's Subscription
   Coverage settings entry are hidden. Social follow notifications remain
   available. This concerns the app feed and controls, not previously delivered

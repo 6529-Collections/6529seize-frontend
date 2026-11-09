@@ -706,7 +706,8 @@ export async function expectEnrollmentCard(session: StagingE2eeSession) {
   });
 }
 
-const COMBINED_GRANT_RESOURCE = "- urn:6529:mls-device-grant:v1:";
+// Grant v2 (D172): clients ask for, and only sign, a suite-set resource.
+const COMBINED_GRANT_RESOURCE = "- urn:6529:mls-device-grant:v2:";
 
 /** NC8: the sign-in challenge also granted an encrypted-messages key. */
 const signedInWithCombinedGrant = (session: StagingE2eeSession): boolean =>

@@ -42,7 +42,7 @@ describe("UserPageIdentityAddStatementsNFTAccountItems", () => {
     const buttons = screen.getAllByTestId("btn");
     expect(buttons).toHaveLength(NFT_ACCOUNTS_STATEMENT_TYPES.length);
     const picker = screen.getByRole("group", { name: "Choose a platform" });
-    const rows = Array.from(picker.querySelectorAll(":scope > span"));
+    const rows = Array.from(picker.querySelectorAll(":scope > div > span"));
     expect(rows).toHaveLength(2);
     expect(rows.map((row) => row.querySelectorAll("button").length)).toEqual([
       7, 7,

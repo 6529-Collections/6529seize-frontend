@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CapacitorConnectFlow from "@/components/auth/CapacitorConnectFlow";
 import type { CapacitorConnectDialogView } from "@/components/auth/CapacitorConnectDialog";
+import DeviceSetupHost from "@/components/device-signing/DeviceSetupHost";
+import { openDeviceSetup } from "@/components/device-signing/deviceSetup";
 
 const mockAppWalletAddress = "0x00000000000000000000000000000000000000AA";
 const mockConnectAsync = jest.fn();
@@ -44,6 +46,22 @@ jest.mock("@/hooks/useCapacitor", () => ({
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
+}));
+
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({
+    isAuthenticated: true,
+    connectedProfile: { id: "test-profile" },
+  }),
+}));
+
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({ address: mockAppWalletAddress }),
+}));
+
+jest.mock("@/components/device-signing/DeviceSetupDialog", () => ({
+  __esModule: true,
+  default: () => <div role="dialog" aria-label="Upgrade encrypted messages" />,
 }));
 
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
@@ -139,6 +157,19 @@ function FlowHarness({
   );
 }
 
+async function renderWithUpgradeDialog(
+  onHandoffStateChange?: (isPending: boolean) => void
+) {
+  render(
+    <>
+      <DeviceSetupHost />
+      <FlowHarness onHandoffStateChange={onHandoffStateChange} />
+    </>
+  );
+  act(() => openDeviceSetup("dms"));
+  return screen.findByRole("dialog", { name: "Upgrade encrypted messages" });
+}
+
 describe("CapacitorConnectFlow", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -197,11 +228,11 @@ describe("CapacitorConnectFlow", () => {
     expect(onHandoffStateChange).toHaveBeenLastCalledWith(false);
   });
 
-  it("routes only a valid connection-share scan", async () => {
+  it("dismisses device setup when a valid connection QR hands off to approval", async () => {
     mockScanQrCode.mockResolvedValue(
       `mobile6529://share-connection?connection_share_code=code&address=${mockAppWalletAddress}`
     );
-    render(<FlowHarness />);
+    const upgradeDialog = await renderWithUpgradeDialog();
 
     await userEvent.click(
       screen.getByRole("button", { name: "Scan Connection QR" })
@@ -214,12 +245,13 @@ describe("CapacitorConnectFlow", () => {
         )
       )
     );
+    expect(upgradeDialog).not.toBeInTheDocument();
   });
 
   it("restores the chooser with a scoped error for an invalid scan", async () => {
     const onHandoffStateChange = jest.fn();
     mockScanQrCode.mockResolvedValue("https://6529.io/profile");
-    render(<FlowHarness onHandoffStateChange={onHandoffStateChange} />);
+    const upgradeDialog = await renderWithUpgradeDialog(onHandoffStateChange);
 
     await userEvent.click(
       screen.getByRole("button", { name: "Scan Connection QR" })
@@ -230,12 +262,13 @@ describe("CapacitorConnectFlow", () => {
     );
     expect(onHandoffStateChange).toHaveBeenNthCalledWith(1, true);
     expect(onHandoffStateChange).toHaveBeenLastCalledWith(false);
+    expect(upgradeDialog).toBeInTheDocument();
   });
 
   it("restores the chooser without an error when scanning is cancelled", async () => {
     mockScanQrCode.mockRejectedValue(new Error("cancelled"));
     mockIsQRScannerCancellation.mockReturnValue(true);
-    render(<FlowHarness />);
+    const upgradeDialog = await renderWithUpgradeDialog();
 
     await userEvent.click(
       screen.getByRole("button", { name: "Scan Connection QR" })
@@ -245,6 +278,7 @@ describe("CapacitorConnectFlow", () => {
       await screen.findByRole("button", { name: "Scan Connection QR" })
     ).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(upgradeDialog).toBeInTheDocument();
   });
 
   it("reports navigation failures separately from scan failures", async () => {
@@ -254,7 +288,7 @@ describe("CapacitorConnectFlow", () => {
     mockPush.mockImplementation(() => {
       throw new Error("navigation failed");
     });
-    render(<FlowHarness />);
+    const upgradeDialog = await renderWithUpgradeDialog();
 
     await userEvent.click(
       screen.getByRole("button", { name: "Scan Connection QR" })
@@ -263,6 +297,7 @@ describe("CapacitorConnectFlow", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Unable to open the shared connection. Please try again."
     );
+    expect(upgradeDialog).toBeInTheDocument();
   });
 
   it("waits for the wallet stack before connecting an app wallet", async () => {

@@ -1,3 +1,4 @@
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -344,16 +345,18 @@ export default function AboutFAQ() {
                 decentralization mission, and we value having them participate
                 in the network.
               </p>
-              <p>
-                Secondary market for the collection can be found here:{" "}
-                <a
-                  href="https://opensea.io/collection/6529-gradient"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Gradients.
-                </a>
-              </p>
+              <NftPurchasingGate>
+                <p>
+                  Secondary market for the collection can be found here:{" "}
+                  <a
+                    href="https://opensea.io/collection/6529-gradient"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Gradients.
+                  </a>
+                </p>
+              </NftPurchasingGate>
             </FAQQuestion>
 
             <FAQQuestion title="What is NextGen?">

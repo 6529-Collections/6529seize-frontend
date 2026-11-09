@@ -1,14 +1,28 @@
 /**
  * @jest-environment node
  */
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+import {
+  generatePrivateKey,
+  privateKeyToAccount,
+  type PrivateKeyAccount,
+} from "viem/accounts";
 import {
   type AppGrantFields,
   buildAppGrantTypedData,
   computeAppGrantId,
 } from "@/lib/device-signing/app-grant";
 import type { ApiE2eeDevice } from "@/lib/e2ee/api-types";
-import { E2EE_CIPHERSUITE, verifyGrant } from "@/lib/e2ee/grant";
+import {
+  E2EE_CIPHERSUITE,
+  E2EE_LEGACY_CIPHERSUITE,
+  verifyGrant,
+} from "@/lib/e2ee/grant";
+
+/** viem's overloads do not take the grant v1 | v2 typed-data union (D172). */
+const signTyped = (signer: PrivateKeyAccount, typedData: unknown) =>
+  signer.signTypedData(
+    typedData as Parameters<PrivateKeyAccount["signTypedData"]>[0]
+  );
 
 // A device enrolled by an app grant (6529 Mobile or Desktop): one EIP-712
 // signature for the signing key and this encrypted-messages key.
@@ -27,7 +41,7 @@ const appGrant = (overrides: Partial<AppGrantFields> = {}): AppGrantFields => ({
   wallet: account.address.toLowerCase(),
   deviceKeyHex: SIGNING_KEY,
   scopes: ["post", "edit", "delete", "react"],
-  mls: { deviceKeyHex: MLS_KEY, ciphersuite: E2EE_CIPHERSUITE },
+  mls: { deviceKeyHex: MLS_KEY, ciphersuites: [E2EE_CIPHERSUITE] },
   issuedAtSeconds: ISSUED_AT,
   expiresAtSeconds: EXPIRES_AT,
   origin: "6529 Desktop",
@@ -49,19 +63,23 @@ const recordFor = async (
   signer = account
 ): Promise<ApiE2eeDevice> => {
   const typedData = buildAppGrantTypedData(grant);
+  const suites = grant.mls?.ciphersuites ?? [E2EE_CIPHERSUITE];
   return {
     device_key: MLS_KEY,
     profile_id: "profile-1",
     grant: {
+      ...(grant.version === 1
+        ? {}
+        : { version: 2 as const, ciphersuites: [...suites] }),
       wallet: account.address.toLowerCase(),
       device_key: MLS_KEY,
-      ciphersuite: E2EE_CIPHERSUITE,
+      ciphersuite: suites[0] ?? E2EE_CIPHERSUITE,
       issued_at: ISSUED_AT,
       expires_at: EXPIRES_AT,
       origin: "6529 Desktop",
     },
     grant_id: computeAppGrantId(typedData.message),
-    wallet_signature: await signer.signTypedData(typedData),
+    wallet_signature: await signTyped(signer, typedData),
     verified_via: "eoa",
     label: "6529 Desktop on Windows",
     platform: "desktop",
@@ -97,6 +115,28 @@ describe("verifyGrant: app grants (6529 Mobile and Desktop)", () => {
       { atMs }
     );
     expect(result.ok).toBe(false);
+  });
+
+  it("still verifies a v1 app grant for 0x004F (D172 transition)", async () => {
+    const v1 = appGrant({
+      version: 1,
+      mls: { deviceKeyHex: MLS_KEY, ciphersuites: [E2EE_LEGACY_CIPHERSUITE] },
+    });
+    await expect(
+      verifyGrant(await recordFor(v1), { atMs })
+    ).resolves.toMatchObject({ ok: true, verified: true });
+  });
+
+  it("rejects a record whose suites differ from the signed set", async () => {
+    const base = await recordFor();
+    const result = await verifyGrant(
+      {
+        ...base,
+        grant: { ...base.grant, ciphersuite: 78, ciphersuites: [78, 79] },
+      },
+      { atMs }
+    );
+    expect(result).toMatchObject({ ok: false, reason: "app-grant-mismatch" });
   });
 
   it("rejects a signing-only app grant", async () => {

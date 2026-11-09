@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { privateKeyToAccount } from "viem/accounts";
+import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import type { ApiRegisterDeviceGrantRequest } from "@/generated/models/ApiRegisterDeviceGrantRequest";
 import {
@@ -13,6 +13,12 @@ import {
   computeAppGrantId,
 } from "@/lib/device-signing/app-grant";
 import type { LoginE2eeDevice } from "@/lib/device-signing/login-e2ee";
+
+/** viem's overloads do not take the grant v1 | v2 typed-data union (D172). */
+const signTyped = (signer: PrivateKeyAccount, typedData: unknown) =>
+  signer.signTypedData(
+    typedData as Parameters<PrivateKeyAccount["signTypedData"]>[0]
+  );
 
 const mockEnsureDeviceKey = jest.fn();
 const mockSaveDeviceGrant = jest.fn();
@@ -29,7 +35,7 @@ const NOW = 1_792_324_800_000;
 
 const e2eeDevice = (): jest.Mocked<LoginE2eeDevice> => ({
   deviceKeyHex: MLS_KEY,
-  ciphersuite: 0x004f,
+  ciphersuites: [0x004e],
   adopt: jest.fn().mockResolvedValue(true),
   dispose: jest.fn(),
 });
@@ -38,16 +44,20 @@ const e2eeDevice = (): jest.Mocked<LoginE2eeDevice> => ({
 const storingServer = () =>
   jest.fn(async (request: ApiRegisterDeviceGrantRequest) => {
     const { grant } = request;
+    const v2 = grant.version === 2;
+    const suites = v2
+      ? (grant.ciphersuites ?? [])
+      : grant.ciphersuite
+        ? [grant.ciphersuite]
+        : [];
     const { message } = buildAppGrantTypedData({
+      version: v2 ? 2 : 1,
       wallet: grant.wallet,
       deviceKeyHex: grant.device_key,
       scopes: grant.scopes,
       mls:
-        grant.mls_device_key && grant.ciphersuite
-          ? {
-              deviceKeyHex: grant.mls_device_key,
-              ciphersuite: grant.ciphersuite,
-            }
+        grant.mls_device_key && suites.length > 0
+          ? { deviceKeyHex: grant.mls_device_key, ciphersuites: suites }
           : null,
       issuedAtSeconds: grant.issued_at,
       expiresAtSeconds: grant.expires_at,
@@ -80,7 +90,7 @@ const baseRequest = (
   e2eeDevice: null,
   now: () => NOW,
   signTypedData: async (typedData) => ({
-    signature: await account.signTypedData(typedData),
+    signature: await signTyped(account, typedData),
   }),
   registerGrant: storingServer(),
   ...overrides,
@@ -118,7 +128,9 @@ describe("requestAppDeviceGrant", () => {
         device_key: SIGNING_KEY,
         scopes: ["post", "edit", "delete", "react"],
         mls_device_key: null,
+        version: 2,
         ciphersuite: null,
+        ciphersuites: [],
         issued_at: NOW / 1000,
         expires_at: NOW / 1000 + 180 * 86_400,
         origin: "6529.io",
@@ -140,9 +152,12 @@ describe("requestAppDeviceGrant", () => {
     );
 
     expect(signTypedData).toHaveBeenCalledTimes(1);
+    expect(signTypedData.mock.calls[0]![0].domain).toMatchObject({
+      version: "2",
+    });
     expect(signTypedData.mock.calls[0]![0].message).toMatchObject({
       mlsDeviceKey: MLS_KEY,
-      ciphersuite: 0x004f,
+      ciphersuites: [0x004e],
     });
     expect(result).toMatchObject({ success: true, e2eeAdopted: true });
     expect(device.adopt).toHaveBeenCalledWith(

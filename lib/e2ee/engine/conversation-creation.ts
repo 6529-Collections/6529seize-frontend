@@ -16,19 +16,26 @@ export class ConversationCreator {
     private readonly onDelayed: (g: string) => void
   ) {}
 
-  async create(input: ConversationInput): Promise<string> {
+  /**
+   * `predecessor`: the superseded conversation a new one continues (D172);
+   * an existing DM with the peer is returned as is (the caller links it).
+   */
+  async create(
+    input: ConversationInput,
+    predecessor?: string
+  ): Promise<string> {
     this.requireReady();
     const targets = [...new Set(input.profileIds)].filter(
       (id) => id !== this.ctx.profileId
     );
     const peer =
       input.kind === "dm" && targets.length === 1 ? targets[0] : undefined;
-    if (peer === undefined) return this.createNew(input);
+    if (peer === undefined) return this.createNew(input, predecessor);
     const pending = this.pending.get(peer);
     if (pending) return pending;
     const existing = findDm(this.ctx, peer);
     if (existing) return existing;
-    const creation = this.createAfterSync(input);
+    const creation = this.createAfterSync(input, predecessor);
     this.pending.set(peer, creation);
     try {
       return await creation;
@@ -38,15 +45,26 @@ export class ConversationCreator {
     }
   }
 
-  private async createAfterSync(input: ConversationInput): Promise<string> {
+  private async createAfterSync(
+    input: ConversationInput,
+    predecessor?: string
+  ): Promise<string> {
     // Discover invitations before creation. This is not a server pair lock.
     await this.sync();
     this.requireReady();
-    return this.createNew(input);
+    return this.createNew(input, predecessor);
   }
 
-  private async createNew(input: ConversationInput): Promise<string> {
-    const g = await createConversation(this.ctx, input, this.onDelayed);
+  private async createNew(
+    input: ConversationInput,
+    predecessor?: string
+  ): Promise<string> {
+    const g = await createConversation(
+      this.ctx,
+      input,
+      this.onDelayed,
+      predecessor
+    );
     await resolveProfiles(this.ctx, input.profileIds);
     return g;
   }

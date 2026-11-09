@@ -37,20 +37,6 @@ export function getDownloadFilenameFromUrl(url: string, fallback = "media") {
   }
 }
 
-/**
- * Where the temporary download link goes: inside the last open dialog in
- * document order when there is one (a modal preview is portaled to the end
- * of `body` when it opens). A modal's focus trap cancels clicks outside it
- * (and inert content ignores them), which silently drops the download, as in
- * the media preview's Download button.
- */
-function getDownloadLinkContainer(): HTMLElement {
-  const dialogs = document.querySelectorAll<HTMLElement>(
-    'dialog[open], [role="dialog"][aria-modal="true"]'
-  );
-  return dialogs[dialogs.length - 1] ?? document.body;
-}
-
 export function triggerDirectDownload(url: string, fileName: string) {
   const safeUrl = getSafeDownloadUrl(url);
   const anchor = document.createElement("a");
@@ -58,13 +44,18 @@ export function triggerDirectDownload(url: string, fileName: string) {
   anchor.download = fileName;
   anchor.target = "_blank";
   anchor.rel = "noopener noreferrer";
-  // React bubbles a click inside a portaled dialog up to the components that
-  // rendered it, such as a drop that opens when clicked. The link's click
-  // stays with the link; its default action, the download, still runs.
-  anchor.addEventListener("click", (event) => event.stopPropagation(), {
-    once: true,
-  });
-  getDownloadLinkContainer().append(anchor);
+  // A modal's focus trap blocks clicks outside it, including synthetic links.
+  const container =
+    document.activeElement?.closest("dialog[open], [role='dialog']") ??
+    // A disabled download button can lose focus while the fetch completes.
+    [
+      ...document.querySelectorAll(
+        "dialog[open], [role='dialog'][aria-modal='true']"
+      ),
+    ].at(-1) ??
+    document.body;
+  anchor.addEventListener("click", (event) => event.stopPropagation());
+  container.append(anchor);
   anchor.click();
   anchor.remove();
 }

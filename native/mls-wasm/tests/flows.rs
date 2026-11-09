@@ -882,11 +882,14 @@ fn last_resort_key_package_reusable() {
 }
 
 #[test]
-fn uses_only_the_x_wing_ciphersuite() {
-    // 0x004F: MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519 (contract 3.6).
+fn uses_only_the_x_wing_ciphersuites() {
+    // Default 0x004F: MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519
+    // (contract 3.6); also 0x004E, its AES-256-GCM / SHA-384 sibling.
     assert_eq!(u16::from(mls_wasm::device::CIPHERSUITE), 0x004F);
+    assert_eq!(u16::from(mls_wasm::device::CIPHERSUITE_AES256), 0x004E);
     let info: Value = serde_json::from_str(&mls_wasm::module_info()).unwrap();
     assert_eq!(info["ciphersuite"], 0x004F);
+    assert_eq!(info["ciphersuites"], json!([0x004F, 0x004E]));
 }
 
 #[test]

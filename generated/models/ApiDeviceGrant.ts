@@ -13,10 +13,11 @@
 
 import { HttpFile } from '../http/http';
 
-/**
-* A wallet signed grant that lets a browser-held Ed25519 device key sign drop writes. Its id is the EIP-191 hash of the exact SIWE message the wallet signed at sign-in, or the EIP-712 digest of an app device grant.
-*/
 export class ApiDeviceGrant {
+    /**
+    * Whether the owner acknowledged the new-device notice. Returned only to the owner.
+    */
+    'notice_acknowledged'?: boolean;
     'id': string;
     /**
     * Lowercase 0x address that signed the grant.
@@ -50,6 +51,12 @@ export class ApiDeviceGrant {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "notice_acknowledged",
+            "baseName": "notice_acknowledged",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",

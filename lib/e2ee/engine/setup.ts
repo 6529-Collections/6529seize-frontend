@@ -1,3 +1,7 @@
+import { referencedProfileIds } from "../profile-references";
+import { isDisposed } from "./context";
+import { rememberDeviceProfile } from "./member-identity";
+import { LookupReads } from "../lookup-reads";
 import { MlsClient } from "../mls-adapter";
 import { getDefaultE2eeStorage, isIndexedDbAvailable } from "../storage";
 import type { E2eeEngineOptions, E2eeEngineStatus } from "../types";
@@ -63,6 +67,8 @@ export function createContext(options: E2eeEngineOptions): EngineContext {
     timers: new TimerSet(scheduler),
     store: new EngineStore(options.profileId, directory),
     directory,
+    lookupReads: options.lookupReads ?? new LookupReads(now),
+    knownDeviceProfiles: new Map(),
     wasm: null,
     mls: null,
     device: null,
@@ -118,6 +124,8 @@ export async function loadGroups(ctx: EngineContext): Promise<void> {
       runtime.outbox.set(item.id, item);
     }
     ctx.store.groups.set(record.g, runtime);
+    for (const member of record.members)
+      rememberDeviceProfile(ctx, member.deviceKey, member.profileId);
   }
   const names = new Set(
     groups.flatMap((record) => [
@@ -142,20 +150,27 @@ export function memberProfileIds(ctx: EngineContext): string[] {
         ids.add(member.profileId);
       }
     }
+    for (const id of referencedProfileIds(runtime.messages.values()))
+      ids.add(id);
+    const preview = runtime.record.history?.last?.senderProfileId;
+    if (preview) ids.add(preview);
   }
   return [...ids];
 }
 
 export async function resolveProfiles(
   ctx: EngineContext,
-  profileIds: string[]
+  profileIds: string[],
+  resume = false
 ): Promise<void> {
+  if (ctx.disposed) return;
   const missing = profileIds.filter((id) => !ctx.store.profiles.has(id));
   if (missing.length === 0) {
     return;
   }
   try {
-    const resolved = await ctx.options.resolveProfiles(missing);
+    const resolved = await ctx.options.resolveProfiles(missing, resume);
+    if (isDisposed(ctx)) return;
     for (const [id, info] of Object.entries(resolved)) {
       ctx.store.profiles.set(id, {
         handle: info.handle,
@@ -173,6 +188,11 @@ export async function resolveProfiles(
 export async function restore(ctx: EngineContext): Promise<boolean> {
   const device = await loadCurrentSuiteDevice(ctx);
   if (!device?.registered || !device.provisioned) {
+    if (ctx.store.upgrade !== null) {
+      // Moved off an earlier suite: its conversations stay readable while
+      // this device waits for the one signature (D172).
+      await loadGroups(ctx);
+    }
     return false;
   }
   const state = await ctx.storage.getWasmState(ctx.profileId);

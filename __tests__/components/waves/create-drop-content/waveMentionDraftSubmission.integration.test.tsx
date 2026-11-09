@@ -11,6 +11,7 @@ describe("restored wave mention submission", () => {
         selectedIdentity: null,
         isIdentitySubmissionExperience: false,
         isDropMode: false,
+        submitting: false,
         canCreatePoll: false,
         pollRequest: null,
         getMarkdown: "check out #[test from desktop-web]",

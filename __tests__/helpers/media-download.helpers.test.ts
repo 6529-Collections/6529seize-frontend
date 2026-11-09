@@ -108,10 +108,16 @@ describe("triggerDirectDownload", () => {
     document.body.innerHTML = "";
   });
 
-  it("clicks the link inside an open dialog, where its focus trap allows it", async () => {
+  it("clicks the link inside the focused dialog, where its focus trap allows it", async () => {
     const dialog = document.createElement("dialog");
     dialog.setAttribute("open", "");
-    document.body.append(dialog);
+    const downloadButton = document.createElement("button");
+    dialog.append(downloadButton);
+    // A dialog opened later doesn't take the link from the focused one.
+    const laterDialog = document.createElement("dialog");
+    laterDialog.setAttribute("open", "");
+    document.body.append(dialog, laterDialog);
+    downloadButton.focus();
     const untrap = trapClicksOutside(dialog);
     const recorder = recordDownloadClicks();
     try {
@@ -125,7 +131,7 @@ describe("triggerDirectDownload", () => {
     expect(dialog.querySelector("a")).toBeNull();
   });
 
-  it("keeps the link's click from reaching what rendered a portaled dialog", async () => {
+  it("uses the last open dialog without focus and keeps the link's click from reaching what rendered it", async () => {
     const onClick = jest.fn();
     const { unmount } = render(
       createElement(

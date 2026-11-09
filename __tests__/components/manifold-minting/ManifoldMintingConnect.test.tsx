@@ -274,7 +274,7 @@ describe("ManifoldMintingConnect purchasing visibility", () => {
     mockIsCountryPending = false;
   });
 
-  it("shows the US iOS handoff once a pending country check returns US", () => {
+  it("keeps the mint handoff hidden when the iOS country resolves to US", () => {
     const address = "0xabc000000000000000000000000000000000abcd";
     mockedConnect.mockReturnValue({ address, isConnected: true });
     mockPlatform = "ios";
@@ -296,12 +296,13 @@ describe("ManifoldMintingConnect purchasing visibility", () => {
     rerender(<ManifoldMintingConnect onMintFor={onMintFor} />);
 
     expect(
-      screen.getByRole("link", { name: "Mint on 6529.io" })
-    ).toBeInTheDocument();
-    expect(onMintFor).toHaveBeenLastCalledWith(address);
+      screen.queryByRole("link", { name: "Mint on 6529.io" })
+    ).not.toBeInTheDocument();
+    expect(onMintFor).not.toHaveBeenCalledWith(address);
   });
 
   it.each([
+    ["US", "US"],
     ["non-US", "CY"],
     ["empty", ""],
     ["unknown", undefined],
@@ -324,21 +325,6 @@ describe("ManifoldMintingConnect purchasing visibility", () => {
       expect(screen.queryByTestId("transfer-pfp")).not.toBeInTheDocument();
     }
   );
-
-  it("keeps the US iOS web mint handoff and connected recipient", () => {
-    mockPlatform = "ios";
-    mockCountry = "US";
-
-    const { onMintFor, seizeCtx } = renderConnected();
-
-    const handoff = screen.getByRole("link", { name: "Mint on 6529.io" });
-    expect(handoff).toHaveAttribute("target", "_blank");
-    expect(handoff).toHaveAttribute("rel", "noopener noreferrer");
-    expect(onMintFor).toHaveBeenCalledWith(seizeCtx.address);
-    expect(
-      screen.queryByRole("button", { name: /Mint for me/i })
-    ).not.toBeInTheDocument();
-  });
 
   it.each([
     ["Android", "android"],

@@ -1,6 +1,9 @@
 "use client";
 
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import {
+  useNftPurchasingVisibility,
+  useSubscriptionPageVisibility,
+} from "@/hooks/useNftPurchasingVisibility";
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
@@ -13,9 +16,7 @@ export default function NftPurchasingGate({
   // App-internal path only.
   readonly redirectTo?: `/${string}`;
   // Blank, aria-hidden space with the content's first-render size, never
-  // purchasing UI. It holds the slot while the content may still appear
-  // (server HTML, hydration, a pending iOS country check expected to be US),
-  // so mounting the content does not move the page.
+  // purchasing UI. It holds the slot during server rendering and hydration.
   readonly placeholder?: ReactNode;
 }) {
   const { hideNftPurchasing, shouldRedirect, reservesNftPurchasingSpace } =
@@ -27,6 +28,19 @@ export default function NftPurchasingGate({
     return reservesNftPurchasingSpace ? placeholder : null;
   }
   return children;
+}
+
+export function SubscriptionPageGate({
+  children,
+  placeholder,
+}: {
+  readonly children: ReactNode;
+  readonly placeholder: ReactNode;
+}) {
+  const { hideNftPurchasing, reservesNftPurchasingSpace } =
+    useSubscriptionPageVisibility();
+  if (!hideNftPurchasing) return children;
+  return reservesNftPurchasingSpace ? placeholder : null;
 }
 
 function PurchasingRedirect({ href }: { readonly href: string }) {

@@ -129,18 +129,8 @@ describe("Home subscription row requests around hydration", () => {
     expect(requestedEndpoints()).toEqual([]);
   });
 
-  it("requests subscription status once iOS resolves to US", async () => {
-    await hydrateFromServerHtml();
-    expect(requestedEndpoints()).toEqual([]);
-
-    await settleCountry("US");
-
-    expect(requestedEndpoints().sort()).toEqual(
-      [...REQUESTED_ENDPOINTS].sort()
-    );
-  });
-
   it.each([
+    ["the US", "US"],
     ["a non-US country", "FR"],
     ["an unknown country", ""],
   ])(
@@ -219,17 +209,8 @@ describe("Home subscription row visibility around hydration", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("inserts the row once iOS resolves to US", async () => {
-    await hydrateFromServerHtml();
-    expect(container).toBeEmptyDOMElement();
-
-    await settleCountry("US");
-
-    expect(container).toHaveTextContent(ROW_LABEL);
-    expect(spaceElement()).toBeNull();
-  });
-
   it.each([
+    ["the US", "US"],
     ["a non-US country", "FR"],
     ["an unknown country", ""],
   ])(
@@ -248,44 +229,14 @@ describe("Home subscription row visibility around hydration", () => {
 describe("Home subscription row with a remembered US country", () => {
   const HINT_KEY = "6529:us-country-hint";
   const rememberUs = () => window.localStorage.setItem(HINT_KEY, "US");
-  const expectOnlyBlankSpace = () => {
-    expect(spaceElement()).not.toBeNull();
-    expect(container).not.toHaveTextContent(ROW_LABEL);
-    expect(container.querySelector("a, button, svg, img")).toBeNull();
-  };
-
-  it("keeps blank space on iOS through the pending window and shows no purchasing UI or requests", async () => {
-    rememberUs();
-
-    await hydrateFromServerHtml();
-
-    expectOnlyBlankSpace();
-    expect(requestedEndpoints()).toEqual([]);
-  });
-
-  it("swaps the blank space for the row, and only then requests, once iOS resolves to US", async () => {
-    rememberUs();
-    await hydrateFromServerHtml();
-    expectOnlyBlankSpace();
-
-    await settleCountry("US");
-
-    expect(container).toHaveTextContent(ROW_LABEL);
-    expect(spaceElement()).toBeNull();
-    expect(requestedEndpoints().sort()).toEqual(
-      [...REQUESTED_ENDPOINTS].sort()
-    );
-  });
-
-  it.each([
-    ["a non-US country", "FR"],
-    ["an unknown country", ""],
-  ])(
-    "collapses once and never requests when iOS resolves to %s",
-    async (_label, country) => {
+  it.each(["US", "FR", ""])(
+    "ignores the remembered country on iOS when the lookup resolves to %s",
+    async (country) => {
       rememberUs();
       await hydrateFromServerHtml();
-      expectOnlyBlankSpace();
+
+      expect(container).toBeEmptyDOMElement();
+      expect(requestedEndpoints()).toEqual([]);
 
       await settleCountry(country);
 
@@ -330,7 +281,7 @@ describe("Home subscription row with a remembered US country", () => {
 
     await settleCountry("US");
 
-    expect(container).toHaveTextContent(ROW_LABEL);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it.each(["web", "android"] as const)(

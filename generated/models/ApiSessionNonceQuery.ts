@@ -40,9 +40,13 @@ export class ApiSessionNonceQuery {
     */
     'mls_device_key'?: string;
     /**
-    * Required when mls_device_key is present.
+    * Grant v1: the one suite of mls_device_key (79 only, while v1 grants are accepted). Give this or mls_ciphersuites with mls_device_key.
     */
     'mls_ciphersuite'?: number;
+    /**
+    * Grant v2: the suites of mls_device_key, ascending, joined by \".\" (for example \"78\").
+    */
+    'mls_ciphersuites'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -95,6 +99,12 @@ export class ApiSessionNonceQuery {
             "name": "mls_ciphersuite",
             "baseName": "mls_ciphersuite",
             "type": "number",
+            "format": ""
+        },
+        {
+            "name": "mls_ciphersuites",
+            "baseName": "mls_ciphersuites",
+            "type": "string",
             "format": ""
         }    ];
 

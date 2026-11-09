@@ -8,6 +8,7 @@ import { ApiCollectRuleStateEnum } from "@/generated/models/ApiCollectRule";
 import type { ApiCollectRuleTarget } from "@/generated/models/ApiCollectRuleTarget";
 import type { ApiCollectRulePrepare } from "@/generated/models/ApiCollectRulePrepare";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { formatDate } from "@/i18n/format";
@@ -41,6 +42,7 @@ export default function CollectRuleCard({
   readonly onOperation: (operation: ApiMarketOperation) => void;
 }) {
   const locale = useBrowserLocale();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const externalDescriptionId = useId();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const connection = useSeizeConnectContext();
@@ -77,7 +79,7 @@ export default function CollectRuleCard({
   });
   const prepare = useMutation({
     mutationFn: async (target: ApiCollectRuleTarget) => {
-      if (!canMutate || (external && !acknowledged))
+      if (hideNftPurchasing || !canMutate || (external && !acknowledged))
         throw new Error("RULE_WALLET_CHANGED");
       let pending = pendingPrepare.current;
       if (
@@ -178,7 +180,7 @@ export default function CollectRuleCard({
           }),
         })}
       </p>
-      {external && (
+      {!hideNftPurchasing && external && (
         <div className="tw-space-y-2">
           <p
             id={externalDescriptionId}
@@ -216,20 +218,22 @@ export default function CollectRuleCard({
               · {marketAmount(target.maximum_unit_price_wei, MARKET_ZERO)}{" "}
               {t(locale, "collect.rules.perItem")}
             </p>
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled={
-                !canMutate ||
-                !active ||
-                busy ||
-                (external && !acknowledged) ||
-                collectRuleRemaining(rule, target) === 0n
-              }
-              onClick={() => prepare.mutate(target)}
-            >
-              {t(locale, "collect.rules.prepare")}
-            </Button>
+            {!hideNftPurchasing && (
+              <Button
+                variant="secondary"
+                size="sm"
+                disabled={
+                  !canMutate ||
+                  !active ||
+                  busy ||
+                  (external && !acknowledged) ||
+                  collectRuleRemaining(rule, target) === 0n
+                }
+                onClick={() => prepare.mutate(target)}
+              >
+                {t(locale, "collect.rules.prepare")}
+              </Button>
+            )}
           </li>
         ))}
       </ul>

@@ -1,5 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import CompetitionEntryForm from "@/components/competitions/CompetitionEntryForm";
+import { getCreateWaveDropRequest } from "@/components/waves/create-wave/services/createWaveDropRequest";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { createCompetitionEntry } from "@/services/api/competitions-api";
 
 let mockRequiredMetadata: Array<{ name: string; type: string }> = [];
@@ -26,6 +28,7 @@ const mockSnapshot = {
   is_safe_signature: true,
 };
 const mockSaveReceipt = jest.fn();
+const mockDropEditorProps = jest.fn();
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
@@ -106,9 +109,13 @@ jest.mock("@/components/drops/create/DropEditor", () => {
     __esModule: true,
     default: React.forwardRef(
       (
-        props: { onCanSubmitChange: (ready: boolean) => void },
+        props: {
+          onCanSubmitChange: (ready: boolean) => void;
+          mediaUploadPurpose?: ApiMediaUploadPurpose;
+        },
         ref: React.Ref<unknown>
       ) => {
+        mockDropEditorProps(props);
         React.useImperativeHandle(ref, () => ({
           getDropSnapshot: () => mockSnapshot,
         }));
@@ -123,14 +130,14 @@ jest.mock("@/components/drops/create/DropEditor", () => {
 jest.mock(
   "@/components/waves/create-wave/services/createWaveDropRequest",
   () => ({
-    getCreateWaveDropRequest: async () => ({
+    getCreateWaveDropRequest: jest.fn(async () => ({
       title: null,
       parts: mockSnapshot.parts,
       metadata: [],
       referenced_nfts: [],
       mentioned_users: [],
       signature: null,
-    }),
+    })),
   })
 );
 jest.mock("@/services/api/competitions-api", () => ({
@@ -187,6 +194,28 @@ it("preserves wave and group mentions in the competition submission command and 
     expect.arrayContaining(["submission-receipt", "entry"]),
     { id: "entry" }
   );
+});
+
+it("uploads the entry's media as a decision entry, which keeps the original file", async () => {
+  // Mocks are not cleared between tests in this file, so only calls made by
+  // this test count.
+  mockDropEditorProps.mockClear();
+  jest.mocked(getCreateWaveDropRequest).mockClear();
+  render(<CompetitionEntryForm onClose={jest.fn()} />);
+  expect(mockDropEditorProps).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      mediaUploadPurpose: ApiMediaUploadPurpose.DecisionEntry,
+    })
+  );
+  expect(getCreateWaveDropRequest).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+  await waitFor(() =>
+    expect(getCreateWaveDropRequest).toHaveBeenCalledTimes(1)
+  );
+  expect(jest.mocked(getCreateWaveDropRequest).mock.lastCall).toEqual([
+    mockSnapshot,
+    ApiMediaUploadPurpose.DecisionEntry,
+  ]);
 });
 
 afterEach(() => {

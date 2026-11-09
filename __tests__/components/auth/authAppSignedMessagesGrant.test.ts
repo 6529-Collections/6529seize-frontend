@@ -26,7 +26,10 @@ jest.mock("@capacitor/core", () => ({
 
 const ADDRESS = "0x1111111111111111111111111111111111111111";
 const GRANT_ID = `0x${"7".repeat(64)}`;
-const E2EE_DEVICE = { deviceKeyHex: `0x${"3d".repeat(32)}`, ciphersuite: 79 };
+const E2EE_DEVICE = {
+  deviceKeyHex: `0x${"3d".repeat(32)}`,
+  ciphersuites: [0x004e],
+};
 
 const params = (overrides: object = {}) => ({
   address: ADDRESS,

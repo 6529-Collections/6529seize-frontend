@@ -1,7 +1,11 @@
 /**
  * @jest-environment node
  */
-import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+import {
+  generatePrivateKey,
+  privateKeyToAccount,
+  type PrivateKeyAccount,
+} from "viem/accounts";
 import type { E2eeApiClient } from "@/lib/e2ee/api";
 import type { ApiE2eeDevice } from "@/lib/e2ee/api-types";
 import { DeviceDirectory } from "@/lib/e2ee/engine/directory";
@@ -10,6 +14,12 @@ import {
   buildGrantTypedData,
   computeGrantId,
 } from "@/lib/e2ee/grant";
+
+/** viem's overloads do not take the grant v1 | v2 typed-data union (D172). */
+const signTyped = (signer: PrivateKeyAccount, typedData: unknown) =>
+  signer.signTypedData(
+    typedData as Parameters<PrivateKeyAccount["signTypedData"]>[0]
+  );
 
 const NOW_SECONDS = 1_790_000_000;
 const NOW_MS = NOW_SECONDS * 1000;
@@ -27,7 +37,7 @@ async function signedDevice(
     issuedAtSeconds: NOW_SECONDS - 3600,
     origin: "6529.io",
   });
-  const signature = await account.signTypedData(buildGrantTypedData(grant));
+  const signature = await signTyped(account, buildGrantTypedData(grant));
   return {
     wallet: account.address.toLowerCase(),
     record: {
