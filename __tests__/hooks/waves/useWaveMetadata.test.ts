@@ -50,7 +50,7 @@ describe("useWaveOutcomeVisibility", () => {
     }
   );
 
-  it("hides outcomes when loaded metadata says outcomes are hidden", () => {
+  it("ignores the retired hidden outcomes metadata flag", () => {
     useQueryMock.mockReturnValue({
       data: [
         {
@@ -67,7 +67,7 @@ describe("useWaveOutcomeVisibility", () => {
       useWaveOutcomeVisibility(createWave(ApiWaveType.Rank))
     );
 
-    expect(result.current).toBe(false);
+    expect(result.current).toBe(true);
   });
 
   it("shows outcomes when loaded metadata has no visibility row", () => {
@@ -115,7 +115,7 @@ describe("useWaveOutcomeVisibility", () => {
     }
   );
 
-  it("uses existing metadata data when a background refetch errors", () => {
+  it("keeps outcomes available when historical metadata refetch errors", () => {
     useQueryMock.mockReturnValue({
       data: [
         {
@@ -132,7 +132,7 @@ describe("useWaveOutcomeVisibility", () => {
       useWaveOutcomeVisibility(createWave(ApiWaveType.Rank))
     );
 
-    expect(result.current).toBe(false);
+    expect(result.current).toBe(true);
   });
 });
 
@@ -189,7 +189,7 @@ describe("competition appearance scope", () => {
     );
   });
 
-  it("uses native Approve labels and outcome visibility", () => {
+  it("uses native Approve labels while ignoring retired outcome visibility", () => {
     metadata = [
       {
         id: 1,
@@ -216,7 +216,7 @@ describe("competition appearance scope", () => {
     );
     expect(result.current).toEqual({
       labels: { approvals: "Candidates", approved: "Selected" },
-      outcomes: false,
+      outcomes: true,
     });
   });
 });

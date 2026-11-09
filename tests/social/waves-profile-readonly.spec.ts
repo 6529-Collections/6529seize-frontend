@@ -1792,11 +1792,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const waveTabs = page.getByRole("tablist").filter({
       has: page.getByRole("tab", { name: "Chat", exact: true }),
     });
-    for (const name of ["Chat", "Leaderboard", "Winners", "Outcome", "FAQ"]) {
+    for (const name of ["Chat", "Leaderboard", "Winners", "FAQ"]) {
       await expect(
         waveTabs.getByRole("tab", { name, exact: true })
       ).toBeAttached();
     }
+    await expect(
+      waveTabs.getByRole("tab", { name: /^Outcomes?$/, exact: true })
+    ).toHaveCount(0);
     await expect(waveTabs.getByRole("tab").nth(0)).toHaveText("Chat");
     await expect(waveTabs.getByRole("tab").nth(1)).toHaveText("Leaderboard");
     await expect(waveTabs.getByRole("tab").nth(2)).toHaveText("Winners");

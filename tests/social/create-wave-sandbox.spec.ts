@@ -1131,12 +1131,10 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
         .filter({ hasText: "only the submission group can submit" })
     ).toBeVisible();
     await expect(
-      page
-        .getByRole("status")
-        .filter({
-          hasText:
-            "People with wave access can chat, but only the submission group can submit.",
-        })
+      page.getByRole("status").filter({
+        hasText:
+          "People with wave access can chat, but only the submission group can submit.",
+      })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await nextStepButton(page).click();
@@ -1338,7 +1336,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("defaults the announcement a week out and enforces outcomes with a11y feedback", async ({
+  test("defaults the announcement a week out and allows optional outcomes", async ({
     page,
   }) => {
     await gotoCreateWave(page);
@@ -1389,29 +1387,17 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     // Voting keeps defaults; proceed to Outcomes.
     await nextStepButton(page).click();
 
-    // The empty state explains what outcomes are before any error fires.
     await expect(
-      page.getByText("No outcomes yet — add at least one to continue")
+      page.getByText(/Optionally describe what winners receive/)
     ).toBeVisible();
     await expect(
-      page.getByText(/Outcomes define what winners receive/)
+      page.getByRole("button", { name: "Add outcome", exact: true })
     ).toBeVisible();
-    const outcomesAlert = page
-      .getByRole("alert")
-      .filter({ hasText: "No outcomes yet" });
-    expect(await outcomesAlert.count()).toBe(0);
+    await expect(page.getByRole("radio", { name: /^(Rep|NIC)$/ })).toHaveCount(
+      0
+    );
 
-    // Trying to advance without an outcome announces the requirement.
-    await nextStepButton(page).click();
-    await expect(outcomesAlert).toBeVisible();
-
-    // Configuring an outcome clears the announcement and unblocks Next.
-    await page.getByText("Manual", { exact: true }).click();
-    await page.getByLabel("Manual action").fill("Coverage outcome");
-    await page.getByLabel(/Winning Positions/).fill("1");
-    await page.getByRole("button", { name: "Save" }).click();
-    await expect(page.getByText("Coverage outcome").first()).toBeVisible();
-    expect(await outcomesAlert.count()).toBe(0);
+    // Scheduled decisions can advance without promising a reward.
     await nextStepButton(page).click();
 
     await expect(
@@ -1475,7 +1461,9 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       page.getByRole("heading", { name: "Outcomes", level: 2 })
     ).toBeVisible();
 
-    await page.getByText("Manual", { exact: true }).click();
+    await page
+      .getByRole("button", { name: "Add outcome", exact: true })
+      .click();
     await page
       .getByLabel("Manual action")
       .fill(SANDBOX_SCHEDULED_OUTCOME_TITLE);
@@ -1808,7 +1796,10 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
 
     // Outcomes: the saved row's type label and entered name used to overlap
     // at phone width, hiding what was entered.
-    const manualOption = page.getByText("Manual", { exact: true });
+    const manualOption = page.getByRole("button", {
+      name: "Add outcome",
+      exact: true,
+    });
     await expect(manualOption).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
@@ -1863,9 +1854,9 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await page.reload({ waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     await dismissNextDevTools(page);
-    await expect(
-      page.getByLabel("Decision name", { exact: true })
-    ).toHaveValue(draftName);
+    await expect(page.getByLabel("Decision name", { exact: true })).toHaveValue(
+      draftName
+    );
     await expect(appearance).toHaveAttribute("aria-expanded", "false");
     await expect(appearance).toContainText("Customized");
     await appearance.click();
@@ -1888,9 +1879,9 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
         has: page.getByRole("heading", { name: draftName, exact: true }),
       })
       .click();
-    await expect(
-      page.getByLabel("Decision name", { exact: true })
-    ).toHaveValue(draftName);
+    await expect(page.getByLabel("Decision name", { exact: true })).toHaveValue(
+      draftName
+    );
     await appearance.click();
     await expect(page.getByLabel("Submission button label")).toHaveValue(
       "Saved entry label"
