@@ -16,6 +16,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { E2eeNewDeviceNotice } from "../devices/E2eeNewDeviceNotice";
 import { E2eeRenewalBanner } from "../gate/E2eeRenewalBanner";
+import { BackupNudgeBanner } from "../backup/BackupNudgeBanner";
 import { E2eeRouteGate } from "../gate/E2eeRouteGate";
 import { E2eeBadge } from "../ui/E2eeBadge";
 import { E2eeCenteredMessage, E2eePageShell } from "../ui/E2eePageShell";
@@ -103,6 +104,7 @@ export function E2eeConversationListPage() {
           <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 tw-px-2 tw-py-4 sm:tw-px-4">
             <E2eeNewDeviceNotice className="tw-px-2" />
             <E2eeRenewalBanner className="tw-mx-2" />
+            <BackupNudgeBanner className="tw-mx-2" />
             {conversations.length === 0 ? (
               <E2eeCenteredMessage
                 icon={<LockClosedIcon className="tw-size-6" />}

@@ -12,6 +12,7 @@ import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessagesAccount";
 import { useE2ee, type E2eeUiStatus } from "@/hooks/e2ee/useE2ee";
+import { useE2eeBackup } from "@/hooks/e2ee/useE2eeBackup";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { formatRelativeTime } from "@/i18n/format";
@@ -79,6 +80,7 @@ export function useDeviceSecurityState() {
   const remote = useDeviceGrants(address);
   const now = useMinuteClock();
   const encryption = useE2ee();
+  const { snapshot: backupSnapshot } = useE2eeBackup();
   const grant =
     remote.data?.find((item) => item.id === local.grant?.id) ?? null;
   const matchesLocalKey =
@@ -115,9 +117,21 @@ export function useDeviceSecurityState() {
       : null;
   const canEnableEncryption =
     encryption.status === "idle" || encryption.status === "needs-enrollment";
+  // Backup only matters where encrypted DMs are on; unknown until it loads.
+  const backupPhase = backupSnapshot?.phase;
+  let backup: "on" | "off" | null = null;
+  if (encrypted === "on" && backupPhase === "on") {
+    backup = "on";
+  } else if (
+    encrypted === "on" &&
+    (backupPhase === "off" || backupPhase === "available")
+  ) {
+    backup = "off";
+  }
   return {
     proof,
     encrypted,
+    backup,
     canEnableEncryption,
     proofRenewal,
     encryptionRenewal,
@@ -128,6 +142,7 @@ export function useDeviceSecurityState() {
 export function DeviceSecurityDetails({
   proof,
   encrypted,
+  backup,
   proofRenewal,
   encryptionRenewal,
   inline = false,
@@ -179,6 +194,13 @@ export function DeviceSecurityDetails({
         })}
         {formatExpiry(encryptionRenewal)}
       </span>
+      {backup === null ? null : (
+        <span>
+          {tRich(locale, "e2ee.deviceStatus.backupLine", {
+            status: formatStatus(backup),
+          })}
+        </span>
+      )}
     </span>
   );
 }
@@ -249,12 +271,15 @@ function ShieldIcon({
   readonly details: SecurityDetails;
   readonly size?: "inline" | "badge" | "compact";
 }) {
-  const { proof, encrypted, proofRenewal, encryptionRenewal } = details;
+  const { proof, encrypted, backup, proofRenewal, encryptionRenewal } =
+    details;
   const complete = proof === "on" && encrypted === "on";
   const partial = proof === "on" || encrypted === "on";
   const renewalDue = proofRenewal !== null || encryptionRenewal !== null;
-  const healthy = complete && !renewalDue;
-  const attention = renewalDue || (partial && !complete);
+  // Encrypted DMs without a backup are one browser wipe from being lost.
+  const backupOff = backup === "off";
+  const healthy = complete && !renewalDue && !backupOff;
+  const attention = renewalDue || (partial && !complete) || backupOff;
   let statusColor = "tw-text-iron-400";
   if (healthy) statusColor = "tw-text-green";
   if (attention) statusColor = "tw-text-amber-300";
@@ -398,6 +423,8 @@ function InactiveProfileBadge({
       details={{
         proof,
         encrypted,
+        // Another profile's backup isn't known in this browser.
+        backup: null,
         proofRenewal:
           grant && grantStatus === "renewal" ? grant.expires_at - now : null,
         encryptionRenewal: null,

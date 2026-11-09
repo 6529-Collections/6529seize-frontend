@@ -41,6 +41,7 @@ import {
   startNewChain,
 } from "./local-chain";
 import type {
+  BackupCounts,
   BackupScheduler,
   E2eeBackupManagerDeps,
   E2eeBackupPhase,
@@ -85,6 +86,15 @@ export type {
 
 const DEFAULT_DEBOUNCE_MS = 30_000;
 const RETRY_MS = 5 * 60_000;
+
+/** Chats and messages this device has put in (or restored from) the backup. */
+const countsOf = (local: BackupLocalState | null): BackupCounts | null =>
+  local
+    ? {
+        chats: Object.keys(local.groupPrints).length,
+        messages: Object.keys(local.messagePrints).length,
+      }
+    : null;
 const DEFAULT_COMPACT_AT = 1000;
 const LIST_PAGE = 500;
 /** Appends retried after a 409 before falling back to the fork repair. */
@@ -257,6 +267,7 @@ export class E2eeBackupManager {
       quotaBytes: status.quota_bytes,
       lastBackupAt: local?.lastBackupAt ?? null,
       uploading: local !== null && !local.activated,
+      counts: countsOf(local),
     });
     return active;
   }
@@ -309,7 +320,19 @@ export class E2eeBackupManager {
       await this.deps.state.put(local);
       this.local = local;
       this.update({ phase: "on", uploading: true, lastError: null });
-      await this.runIncremental();
+      try {
+        await this.runIncremental();
+      } catch (error) {
+        // The generation exists: like backupNow, record the failure and
+        // retry; the same recovery code keeps working and the upload
+        // carries on from where it stopped.
+        const failure = toBackupError(error);
+        this.update({ lastError: failure.code });
+        if (failure.code !== "E2EE_BACKUP_REPLACED") {
+          this.schedule(RETRY_MS);
+        }
+        throw failure;
+      }
     });
   }
 
@@ -343,7 +366,8 @@ export class E2eeBackupManager {
     this.update({ busy: true });
     try {
       const segments = await this.pendingSegments(local);
-      for (const segment of segments) {
+      for (const [index, segment] of segments.entries()) {
+        this.update({ progress: { done: index, total: segments.length } });
         if (await this.appendSegment(local, deviceKey, segment)) {
           // The chain forked (a server without the append precondition) or
           // other devices kept appending first: the next run starts a new
@@ -402,9 +426,10 @@ export class E2eeBackupManager {
         quotaBytes: status.quota_bytes,
         backupCreatedAt: active.created_at,
         backupUpdatedAt: active.updated_at,
+        counts: countsOf(local),
       });
     } finally {
-      this.update({ busy: false });
+      this.update({ busy: false, progress: null });
     }
   }
 
@@ -673,6 +698,7 @@ export class E2eeBackupManager {
           phase: "on",
           lastBackupAt: local.lastBackupAt,
           lastError: null,
+          counts: countsOf(local),
         });
         this.schedule(this.deps.debounceMs ?? DEFAULT_DEBOUNCE_MS);
         return result;

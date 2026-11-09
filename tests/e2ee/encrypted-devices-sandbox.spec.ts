@@ -194,7 +194,27 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     );
     await backup.getByRole("button", { name: /^Turn on/u }).click();
     await enrollButton(alice.page).click();
-    // After the one signature, the card is the backup itself, off.
+    // Setup ends with backup's one more step, which starts the backup steps.
+    const nextStep = confirmDialog(
+      alice.page,
+      e2eeMessage("e2ee.setupDone.titleBoth")
+    );
+    await expect(nextStep).toContainText(
+      e2eeMessage("e2ee.setupDone.backupTitle"),
+      { timeout: E2EE_UI_TIMEOUT_MS }
+    );
+    await nextStep
+      .getByRole("link", { name: e2eeMessage("e2ee.backup.action.turnOn") })
+      .click();
+    const why = confirmDialog(
+      alice.page,
+      e2eeMessage("e2ee.backup.setup.why.title")
+    );
+    await expect(why).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await why
+      .getByRole("button", { name: e2eeMessage("e2ee.backup.setup.notNow") })
+      .click();
+    // Not now: the card is the backup itself, off.
     await expect(
       backup.getByRole("button", {
         name: e2eeMessage("e2ee.backup.action.turnOn"),

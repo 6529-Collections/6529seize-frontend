@@ -21,10 +21,18 @@ import type { E2eeDeviceInfo } from "@/lib/e2ee/types";
 import { formatE2eeDateTime, tCount } from "../e2eeFormat";
 import { E2eeBanner } from "../ui/E2eeBanner";
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
-import { E2EE_BACKUP_SETUP_EVENT } from "./backupSetupRequest";
+import {
+  E2EE_BACKUP_SETUP_EVENT,
+  takeE2eeBackupSetupRequest,
+} from "./backupSetupRequest";
 import { BackupStatusPill, type BackupPillState } from "./BackupStatusPill";
 import { getBackupErrorKey } from "./e2eeBackupErrors";
-import { E2eeRecoveryCodeDialog } from "./E2eeRecoveryCodeDialog";
+import {
+  BackupProgressBar,
+  BackupSetupDialog,
+  formatBackupCounts,
+  getBackupPercent,
+} from "./BackupSetupDialog";
 import { E2eeRestoreDialog } from "./E2eeRestoreDialog";
 
 type Locale = ReturnType<typeof useBrowserLocale>;
@@ -178,24 +186,43 @@ function StatusDetails({
   if (snapshot.phase !== "on") {
     return null;
   }
+  // Null while the first upload (or a replacement) is still running.
+  const lastBackupAt = snapshot.uploading ? null : snapshot.lastBackupAt;
+  const running = lastBackupAt === null;
+  const counts = formatBackupCounts(locale, snapshot);
   return (
-    <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0 tw-text-xs tw-text-iron-400">
-      <li>
-        {snapshot.uploading || snapshot.lastBackupAt === null
-          ? t(locale, "e2ee.backup.status.uploading")
-          : t(locale, "e2ee.backup.status.lastBackup", {
-              time: formatE2eeDateTime(locale, snapshot.lastBackupAt),
-            })}
-      </li>
-      {snapshot.quotaBytes > 0 ? (
-        <li>
-          {t(locale, "e2ee.backup.status.usage", {
-            used: formatBackupSize(locale, snapshot.usedBytes),
-            quota: formatBackupSize(locale, snapshot.quotaBytes),
-          })}
-        </li>
+    <div className="tw-flex tw-flex-col tw-gap-2">
+      {running ? (
+        <BackupProgressBar
+          locale={locale}
+          percent={getBackupPercent(snapshot)}
+          label={t(locale, "e2ee.backup.status.uploading")}
+        />
       ) : null}
-    </ul>
+      <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-text-xs tw-text-iron-400">
+        {lastBackupAt === null ? null : (
+          <li>
+            {t(locale, "e2ee.backup.status.lastBackup", {
+              time: formatE2eeDateTime(locale, lastBackupAt),
+            })}
+          </li>
+        )}
+        {counts ? <li>{counts}</li> : null}
+        {snapshot.quotaBytes > 0 ? (
+          <li>
+            {t(locale, "e2ee.backup.status.usage", {
+              used: formatBackupSize(locale, snapshot.usedBytes),
+              quota: formatBackupSize(locale, snapshot.quotaBytes),
+            })}
+          </li>
+        ) : null}
+      </ul>
+      {running ? (
+        <p className="tw-m-0 tw-text-xs tw-text-iron-400">
+          {t(locale, "e2ee.backup.status.keepOpen")}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -378,15 +405,11 @@ function BackupDialogs({
   const locale = useBrowserLocale();
   if (dialog?.kind === "code") {
     return (
-      <E2eeRecoveryCodeDialog
+      <BackupSetupDialog
         manager={manager}
         prepared={dialog.prepared}
         replacing={dialog.replacing}
         onClose={() => onClose("code")}
-        onDone={() => {
-          onClose("code");
-          onResult(t(locale, "e2ee.backup.upToDate"));
-        }}
       />
     );
   }
@@ -491,9 +514,21 @@ export function E2eeBackupPanel() {
     });
   };
 
+  // "Set up backup" from elsewhere (revoke dialog, setup's last step, the
+  // inbox reminder): start setup, or restore when a backup exists. A request
+  // waits while backup is still loading.
+  const phase = snapshot?.phase ?? null;
   const onSetupRequest = useEffectEvent(() => {
-    if (snapshot?.phase === "off") {
+    if (phase !== "off" && phase !== "available" && phase !== "on") {
+      return;
+    }
+    if (!takeE2eeBackupSetupRequest()) {
+      return;
+    }
+    if (phase === "off") {
       turnOn();
+    } else if (phase === "available") {
+      setDialog({ kind: "restore" });
     }
   });
   useEffect(() => {
@@ -502,6 +537,12 @@ export function E2eeBackupPanel() {
     return () =>
       globalThis.removeEventListener(E2EE_BACKUP_SETUP_EVENT, listener);
   }, []);
+  // A request made before this card mounted or before backup had loaded,
+  // taken on the next tick (the request store is external to React).
+  useEffect(() => {
+    const timer = globalThis.setTimeout(() => onSetupRequest(), 0);
+    return () => globalThis.clearTimeout(timer);
+  }, [phase]);
 
   if (!manager || !snapshot) {
     return (

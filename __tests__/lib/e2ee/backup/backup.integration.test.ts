@@ -100,12 +100,27 @@ describe("E2EE encrypted history backup", () => {
     expect(backupA.getSnapshot().phase).toBe("off");
     const prepared = await backupA.prepareBackup();
     expect(server.requests.filter((r) => r.method !== "GET")).toHaveLength(0);
+    const progress: { done: number; total: number }[] = [];
+    const stopWatching = backupA.subscribe(() => {
+      const current = backupA.getSnapshot().progress;
+      if (current) {
+        progress.push(current);
+      }
+    });
     await backupA.confirmBackup(prepared);
+    stopWatching();
     expect(backupA.getSnapshot()).toMatchObject({
       phase: "on",
       uploading: false,
       lastError: null,
+      progress: null,
+      // One DM, its notices and the three messages (one of them edited).
+      counts: { chats: 1 },
     });
+    expect(progress.length).toBeGreaterThanOrEqual(1);
+    expect(progress[0]).toMatchObject({ done: 0 });
+    const messagesBackedUp = backupA.getSnapshot().counts?.messages ?? 0;
+    expect(messagesBackedUp).toBeGreaterThanOrEqual(2);
     const [generation] = server.generations("alice");
     expect(generation).toMatchObject({ active: true });
     const firstChunks = generation!.chunk_count;
@@ -116,6 +131,7 @@ describe("E2EE encrypted history backup", () => {
     await settle(world);
     await backupA.backupNow();
     expect(server.generations("alice")[0]!.chunk_count).toBe(firstChunks + 1);
+    expect(backupA.getSnapshot().counts?.messages).toBe(messagesBackedUp + 1);
     await backupA.backupNow();
     expect(server.generations("alice")[0]!.chunk_count).toBe(firstChunks + 1);
 
@@ -259,5 +275,46 @@ describe("E2EE encrypted history backup", () => {
     await expect(errorCode(backupC.restore(rotated.code))).resolves.toBe(
       "E2EE_BACKUP_NONE"
     );
+  });
+
+  it("keeps a first upload that failed in the background, with the same code", async () => {
+    const world = await createWorld();
+    const server = createFakeBackupServer(world.clock.now);
+    const alice = await addUser(world, "alice");
+    await addUser(world, "bobbackupretry");
+    const g = await alice.primary.engine.createConversation({
+      profileIds: ["bobbackupretry"],
+      kind: "dm",
+    });
+    await settle(world);
+    await alice.primary.engine.send(g, { text: "kept for later" });
+    await settle(world);
+
+    const backup = managerFor(world, server, alice.primary);
+    await backup.start();
+    const prepared = await backup.prepareBackup();
+    // The generation is created, then the first upload fails.
+    server.quotaBytes = 1;
+    expect(await errorCode(backup.confirmBackup(prepared))).toBe(
+      "E2EE_BACKUP_QUOTA"
+    );
+    expect(backup.getSnapshot()).toMatchObject({
+      phase: "on",
+      uploading: true,
+      busy: false,
+      lastError: "E2EE_BACKUP_QUOTA",
+      progress: null,
+    });
+
+    // It carries on from there, with no new code.
+    server.quotaBytes = 256 * 1024 * 1024;
+    await backup.backupNow();
+    expect(backup.getSnapshot()).toMatchObject({
+      phase: "on",
+      uploading: false,
+      lastError: null,
+      counts: { chats: 1 },
+    });
+    expect(server.generations("alice")).toHaveLength(1);
   });
 });
