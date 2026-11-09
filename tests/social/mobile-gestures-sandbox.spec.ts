@@ -143,6 +143,15 @@ for (const platform of ["ios", "android"] as const) {
       baseURL,
     }, testInfo) => {
       await openWave(page);
+      const visibleBack = page.getByRole("button", {
+        name: "Back",
+        exact: true,
+      });
+      await visibleBack.focus();
+      await expect(visibleBack).toBeFocused();
+      await visibleBack.press("Enter");
+      await expect(page).toHaveURL(/\/waves$/);
+      await openWave(page);
       const row = page
         .getByTestId("wave-swipe-surface")
         .locator("[data-wave-drop-id][data-reply-enabled=true]")
@@ -287,6 +296,10 @@ test.describe("web message gesture regression", () => {
       .getByRole("tabpanel")
       .locator("[data-wave-drop-id][data-serial-no]")
       .filter({ has: message });
+    await row.hover();
+    await expect(
+      row.getByRole("button", { name: "Reply to drop", exact: true })
+    ).toBeVisible();
     await message.click({ trial: true });
     const box = await message.boundingBox();
     if (!box) throw new Error("Desktop message must be visible");

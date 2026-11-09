@@ -4,7 +4,7 @@ import { useLayoutEffect, useRef } from "react";
 import type { RefObject } from "react";
 import { useHorizontalSwipe } from "./useHorizontalSwipe";
 
-export const SWIPE_REPLY_DISTANCE = 96;
+const SWIPE_REPLY_DISTANCE = 96;
 
 interface SwipeToReplyOptions {
   readonly enabled: boolean;
@@ -67,8 +67,8 @@ export function useSwipeToReply({
           String(Math.min(1, distance / 64))
         );
         const readyValue = String(ready && canReply);
-        if (root.getAttribute("data-reply-ready") !== readyValue) {
-          root.setAttribute("data-reply-ready", readyValue);
+        if (root.dataset["replyReady"] !== readyValue) {
+          root.dataset["replyReady"] = readyValue;
         }
       },
       onEnd: (committed, distance) => {

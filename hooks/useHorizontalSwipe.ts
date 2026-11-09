@@ -8,6 +8,7 @@ const AXIS_RATIO = 1.5;
 const EDGE_RESERVE = 20;
 const FLICK_DISTANCE = 24;
 const FLICK_VELOCITY = 0.5;
+const RELEASE_JITTER_PX = 1;
 
 interface HorizontalSwipeOptions {
   readonly enabled: boolean;
@@ -36,8 +37,9 @@ interface Gesture {
   frame: number | null;
 }
 
-// Row reply and its containing wave navigation share one touch session. There
-// are no document listeners or animation frames while the user isn't touching.
+// One active finger across the app: row reply and containing navigation arbitrate
+// the same touch, and a second finger cancels it even across separate roots.
+// There are no document listeners or animation frames while idle.
 let gesture: Gesture | null = null;
 let releaseClickSuppression: (() => void) | null = null;
 let clickExpiry: ReturnType<typeof setTimeout> | null = null;
@@ -52,7 +54,11 @@ function ignoreTarget(element: HTMLElement, target: EventTarget | null) {
   ) {
     return true;
   }
-  for (let node = target; node !== element; node = node.parentElement!) {
+  for (
+    let node: Element | null = target;
+    node && node !== element;
+    node = node.parentElement
+  ) {
     if (node.scrollWidth <= node.clientWidth) continue;
     const overflow =
       (node instanceof HTMLElement && node.style.overflowX) ||
@@ -123,7 +129,7 @@ function additionalTouch(event: TouchEvent) {
   if (event.touches.length !== 1) cancel();
 }
 
-function track(current: Gesture, touch: Touch) {
+function track(current: Gesture, touch: Touch, isRelease = false) {
   const deltaX = touch.clientX - current.x;
   const deltaY = Math.abs(touch.clientY - current.y);
   if (!current.owner) {
@@ -154,10 +160,17 @@ function track(current: Gesture, touch: Touch) {
     deltaX * current.owner.options.current.direction
   );
   if (distance !== current.distance) {
-    const now = performance.now();
-    current.velocity =
-      (distance - current.distance) / Math.max(1, now - current.movedAt);
-    current.movedAt = now;
+    // Native WebViews can round the release coordinate back by a fraction of
+    // a CSS pixel. Keep that from replacing a forward drag with reverse speed.
+    if (
+      !isRelease ||
+      Math.abs(distance - current.distance) >= RELEASE_JITTER_PX
+    ) {
+      const now = performance.now();
+      current.velocity =
+        (distance - current.distance) / Math.max(1, now - current.movedAt);
+      current.movedAt = now;
+    }
     current.distance = distance;
   }
 }
@@ -197,7 +210,7 @@ function end(event: TouchEvent) {
   }
   // An end event cannot acquire a gesture: vertical scrolling or a tap must
   // have demonstrated horizontal intent while the finger was down.
-  if (current.owner) track(current, touch);
+  if (current.owner) track(current, touch, true);
   finish(true);
 }
 

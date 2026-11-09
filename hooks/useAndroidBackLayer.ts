@@ -4,7 +4,11 @@ import { Capacitor } from "@capacitor/core";
 import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 import { registerAndroidBackLayer } from "@/services/capacitor/android-back-layers";
 
-/** Android-only ownership for an open modal, menu, lightbox or drawer. */
+/**
+ * Register every owned Android modal, menu, lightbox or drawer while open.
+ * Keep pending/non-dismissable guards in onBack, as in its normal close action.
+ * Unknown layers block navigation but are never force-dismissed.
+ */
 export function useAndroidBackLayer(
   enabled: boolean,
   element: RefObject<HTMLElement | null>,

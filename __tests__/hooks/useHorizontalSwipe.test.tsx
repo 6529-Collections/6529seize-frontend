@@ -165,6 +165,26 @@ it("cancels a back gesture when released while reversing even beyond the distanc
   expect(onBack).toHaveBeenCalledWith(false, 110);
 });
 
+it("keeps a committed back drag when the release rounds backward by a subpixel", () => {
+  const { target, onBack } = setup();
+  start(target);
+  act(() => jest.advanceTimersByTime(40));
+  move(target, 300);
+  act(() => jest.advanceTimersByTime(1));
+  end(target, 299.6);
+  expect(onBack).toHaveBeenCalledWith(true, expect.closeTo(119.6));
+});
+
+it("keeps a reply when its release rounds backward by a subpixel", () => {
+  const { target, onReply } = setup();
+  start(target);
+  act(() => jest.advanceTimersByTime(40));
+  move(target, 60);
+  act(() => jest.advanceTimersByTime(1));
+  end(target, 60.4);
+  expect(onReply).toHaveBeenCalledWith(true, expect.closeTo(119.6));
+});
+
 it.each(["touchCancel", "blur", "second finger"])(
   "cancels on %s and removes the active session",
   (reason) => {

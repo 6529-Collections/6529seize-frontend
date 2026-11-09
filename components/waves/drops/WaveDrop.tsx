@@ -39,6 +39,7 @@ import {
   getAuthorHeader,
   getContentBlock,
   getGroupedTimestampActionStyle,
+  getGroupedTimestampContentClass,
   getGroupedTimestampContentStyle,
   getGroupingClass,
   getContentOffsetClass,
@@ -655,21 +656,14 @@ const WaveDropInner = ({
     location,
     isProfileView,
   });
-  const groupedTimestampTransitionClass = isTimestampSwipeDragging
-    ? "tw-will-change-transform"
-    : "tw-transition-transform tw-duration-150 tw-ease-out";
-  const swipeableContentClass = `tw-relative tw-z-10 ${
-    showGroupedTimestamp ? groupedTimestampTransitionClass : ""
-  }`;
-  const restingTransform =
-    timestampSwipeOffset > 0
-      ? `translateX(-${timestampSwipeOffset}px)`
-      : "none";
-  const swipeableContentStyle = canUseTouchActionSheet
-    ? {
-        transform: `var(--message-swipe-transform, ${restingTransform})`,
-      }
-    : getGroupedTimestampContentStyle(timestampSwipeOffset);
+  const swipeableContentClass = getGroupedTimestampContentClass(
+    showGroupedTimestamp,
+    isTimestampSwipeDragging
+  );
+  const swipeableContentStyle = getGroupedTimestampContentStyle(
+    timestampSwipeOffset,
+    canUseTouchActionSheet
+  );
 
   return (
     <div className={outerClass}>

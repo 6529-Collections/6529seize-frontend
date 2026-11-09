@@ -260,12 +260,14 @@ test("releases the native modal before handing reply focus to the composer", asy
     );
   }
   render(<Menu />);
-  await userEvent.click(
-    screen.getByRole("button", { name: "Reply", exact: true })
-  );
-  expect(onReply).toHaveBeenCalledTimes(1);
-  await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
-  expect(screen.getByTestId("wrapper")).toBeInTheDocument();
+  for (let opening = 1; opening <= 3; opening++) {
+    await userEvent.click(
+      screen.getByRole("button", { name: "Reply", exact: true })
+    );
+    expect(onReply).toHaveBeenCalledTimes(opening);
+    await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
+    expect(screen.getByTestId("wrapper")).toBeInTheDocument();
+  }
 });
 
 test("never opens an empty curation-only sheet when no removal is available", () => {
