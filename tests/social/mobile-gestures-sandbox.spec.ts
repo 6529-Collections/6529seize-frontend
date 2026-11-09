@@ -14,6 +14,7 @@ import {
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
+import { longPressMessage } from "../support/longPressMessage";
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
 useLocalSandboxMutationGuard(
@@ -212,10 +213,10 @@ for (const platform of ["ios", "android"] as const) {
       await page
         .getByRole("button", { name: "Cancel reply", exact: true })
         .click();
-      await page
-        .getByRole("button", { name: "Open drop actions", exact: true })
-        .first()
-        .click();
+      await expect(
+        row.getByRole("button", { name: "Open drop actions", exact: true })
+      ).toHaveCount(0);
+      await longPressMessage(page, row);
       const sheet = page.getByRole("dialog", {
         name: "Drop actions",
         exact: true,
@@ -286,13 +287,20 @@ test.describe("web message gesture regression", () => {
       .getByRole("tabpanel")
       .locator("[data-wave-drop-id][data-serial-no]")
       .filter({ has: message });
-    await row.click({ trial: true });
-    const box = await row.boundingBox();
+    await message.click({ trial: true });
+    const box = await message.boundingBox();
     if (!box) throw new Error("Desktop message must be visible");
-    await page.mouse.move(box.x + 85, box.y + box.height / 2);
+    await page.mouse.move(box.x + 8, box.y + box.height / 2);
     await page.mouse.down();
-    await page.mouse.move(box.x + 220, box.y + box.height / 2, { steps: 8 });
+    await page.mouse.move(
+      box.x + Math.min(box.width - 8, 180),
+      box.y + box.height / 2,
+      { steps: 8 }
+    );
     await page.mouse.up();
+    await page.screenshot({
+      path: testInfo.outputPath("desktop-selection.png"),
+    });
     await expect
       .poll(() => page.evaluate(() => getSelection()?.toString().length ?? 0))
       .toBeGreaterThan(0);
@@ -319,7 +327,7 @@ test.describe("web message gesture regression", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test("mobile web keeps right drags in the wave and supports left reply with visible actions", async ({
+  test("mobile web keeps right drags in the wave and supports swipe and long-press Reply", async ({
     page,
     baseURL,
   }, testInfo) => {
@@ -340,10 +348,19 @@ test.describe("web message gesture regression", () => {
     await expect(
       page.getByRole("button", { name: "Cancel reply", exact: true })
     ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Cancel reply", exact: true })
+      .click();
     await expect(
-      page
-        .getByRole("button", { name: "Open drop actions", exact: true })
-        .last()
+      row.getByRole("button", { name: "Open drop actions", exact: true })
+    ).toHaveCount(0);
+    await longPressMessage(page, row);
+    await page
+      .getByRole("dialog", { name: "Drop actions", exact: true })
+      .getByRole("button", { name: "Reply", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Cancel reply", exact: true })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);

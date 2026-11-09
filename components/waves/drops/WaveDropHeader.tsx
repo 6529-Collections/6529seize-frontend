@@ -18,8 +18,6 @@ import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { DropTimestampLayout } from "./drop.types";
 import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
 import { AnonymousAuthorName } from "./AnonymousDropAuthor";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -54,7 +52,6 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
   timestampLayout = "inline",
 }) => {
   const router = useRouter();
-  const locale = useBrowserLocale();
   const compact = useCompactMode();
   const identityRowHeightClass = compact ? "tw-min-h-8" : "tw-min-h-10";
   const authorIdentity = drop.author.handle ?? drop.author.primary_address;
@@ -139,13 +136,11 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             <button
               type="button"
               data-curation-card-actions
-              aria-label={t(locale, "waves.drop.actions.openMenu")}
+              aria-label="Open drop actions"
               onClick={onOpenActions}
               className={`${
-                showActionsButtonOnMobile
-                  ? "tw-flex tw-size-12"
-                  : "tw-hidden tw-size-8 md:tw-flex"
-              } tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100`}
+                showActionsButtonOnMobile ? "tw-flex" : "tw-hidden md:tw-flex"
+              } tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 active:tw-bg-iron-800 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100`}
             >
               <EllipsisVerticalIcon className="tw-h-5 tw-w-5" />
             </button>

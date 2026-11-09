@@ -190,6 +190,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/social/mobile-gestures-sandbox.spec.ts",
         "hooks/useAndroidBackLayer.ts",
         "hooks/useHorizontalSwipe.ts",
+        "hooks/useLongPressClickSuppression.ts",
         "hooks/useSwipeToReply.ts",
         "helpers/waves/drop-reply-eligibility.ts",
         "components/waves/drops/SwipeReplyHint.tsx",
@@ -202,6 +203,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
         "hooks/useNativeKeyboard.ts",
         "tests/support/surfaceSimulation.ts",
+        "tests/support/longPressMessage.ts",
         "components/waves/drops/wave-drops-all/utils/observeSerialScrollTarget.ts",
         // The chat render window; this pack runs wave-loading-sandbox.spec.ts.
         "hooks/useVirtualizedWaveMessages.ts",

@@ -37,7 +37,7 @@ export const getWaveDropActionPresentation = ({
         isEditing,
         identityMode,
       }),
-      showActionsButtonOnMobile: canUseTouchActionSheet,
+      showActionsButtonOnMobile: false,
       desktopActions: undefined,
     };
   }

@@ -12,6 +12,7 @@ import {
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
+import { longPressMessage } from "../support/longPressMessage";
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
 const DROP = "00000000-0000-4000-8000-000000000530";
@@ -101,10 +102,10 @@ async function openWave(page: Page, path = `/waves/${WAVE}`) {
 }
 
 async function openActions(page: Page) {
-  await page
-    .getByRole("button", { name: "Open drop actions", exact: true })
-    .first()
-    .click();
+  await longPressMessage(
+    page,
+    page.getByRole("tabpanel").locator("[data-wave-drop-id]").first()
+  );
   await expect(
     page
       .getByRole("dialog", { name: "Drop actions", exact: true })

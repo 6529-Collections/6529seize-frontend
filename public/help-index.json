@@ -7619,7 +7619,7 @@
         "Scrolling gestures, cancelled touches, and touches that stop ongoing scrolling do not open native-app leaderboard cards; tap normally once scrolling settles. Browser views, including mobile browsers, retain their own profile-link and media behavior.",
         "Menu entries depend on device, drop state, and available actions.",
         "Use this when mobile users ask where drop actions went.",
-        "On touch layouts, swipe a chat message left and release after the reply indicator changes to start the existing reply. Reverse or release a short swipe to cancel. A short swipe on a grouped message reveals its timestamp. The visible action control remains available on grouped messages. Replies require a profile and reply eligibility; open replies still work outside the chat group. Temporary and failed messages cannot be replied to. Long-press, scrolling, selected text, controls and carousels retain their own interactions."
+        "On touch layouts, swipe a chat message left and release after the reply indicator changes to start the existing reply. Reverse or release a short swipe to cancel. A short swipe on a grouped message reveals its timestamp. Press and hold a message to open the bottom sheet, where Reply remains available. Releasing the hold does not select a sheet action; tap the action afterward. Replies require a profile and reply eligibility; open replies still work outside the chat group. Temporary and failed messages cannot be replied to. Long-press, scrolling, selected text, controls and carousels retain their own interactions."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

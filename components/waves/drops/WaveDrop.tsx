@@ -65,9 +65,6 @@ import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresen
 import { isDropAuthorSigned } from "./signature/dropAuthorSigned";
 import GroupedDropTimestamp from "./GroupedDropTimestamp";
 import { SwipeReplyHint } from "./SwipeReplyHint";
-import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
 
 const WaveDropInner = ({
   drop,
@@ -99,7 +96,6 @@ const WaveDropInner = ({
   maxEmbedDepth,
   signatureGroup,
 }: WaveDropProps) => {
-  const locale = useBrowserLocale();
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
@@ -662,9 +658,7 @@ const WaveDropInner = ({
   const groupedTimestampTransitionClass = isTimestampSwipeDragging
     ? "tw-will-change-transform"
     : "tw-transition-transform tw-duration-150 tw-ease-out";
-  const showGroupedActionsButton =
-    showActionsButton && canUseTouchActionSheet && !showAuthorInfo;
-  const swipeableContentClass = `tw-relative tw-z-10 ${showGroupedActionsButton ? "tw-min-h-12 tw-pr-12" : ""} ${
+  const swipeableContentClass = `tw-relative tw-z-10 ${
     showGroupedTimestamp ? groupedTimestampTransitionClass : ""
   }`;
   const restingTransform =
@@ -715,16 +709,6 @@ const WaveDropInner = ({
           }
           style={swipeableContentStyle}
         >
-          {showGroupedActionsButton && (
-            <button
-              type="button"
-              onClick={handleOpenTouchActions}
-              aria-label={t(locale, "waves.drop.actions.openMenu")}
-              className="tw-absolute tw-right-0 tw-top-0 tw-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800"
-            >
-              <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
-            </button>
-          )}
           {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
           {moderationRejectedStatus}
           {canUseDesktopHoverActions &&
