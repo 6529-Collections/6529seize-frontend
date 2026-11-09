@@ -107,7 +107,7 @@ Use this area for wave and direct-message tasks:
   top-voter views, and curation `Drop Art` / price-filter controls.
 - [Memes](memes/README.md): memes quick vote, submission flow,
   preview/submit states, and single-drop additional-info rendering.
-- [Outcome Lists](feature-outcome-lists.md): `Outcome` tab cards plus ranked-drop
+- [Outcome Lists](feature-outcome-lists.md): the Settings Outcomes block plus ranked-drop
   reward summaries in leaderboard and winners surfaces.
 
 ## Flows
