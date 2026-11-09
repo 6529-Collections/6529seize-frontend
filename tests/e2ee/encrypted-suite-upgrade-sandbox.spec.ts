@@ -36,6 +36,24 @@ async function upgrade(session: E2eeUserSession) {
   await expect(page.getByText(UPGRADE_INTRO)).toBeVisible({
     timeout: E2EE_SYNC_TIMEOUT_MS,
   });
+  const card = page.getByRole("region", {
+    name: E2EE_MESSAGES["e2ee.upgrade.title"],
+  });
+  await expect
+    .poll(() =>
+      card.evaluate((element) => {
+        const pane = element.closest(".tw-overflow-y-auto");
+        if (!pane) {
+          throw new Error("Missing encrypted messages scroll pane");
+        }
+        const cardBounds = element.getBoundingClientRect();
+        const paneBounds = pane.getBoundingClientRect();
+        const cardCenter = cardBounds.top + cardBounds.height / 2;
+        const paneCenter = paneBounds.top + paneBounds.height / 2;
+        return Math.abs(cardCenter - paneCenter);
+      })
+    )
+    .toBeLessThan(2);
   const before = session.signatureCount();
   // Signed Posts may still be on (DMs only) or off (the combined sign-in).
   await page
@@ -103,6 +121,8 @@ test.describe("Encrypted DMs: moving to stronger encryption @medium @local-only 
     // or he has nothing on the new suite to join.
     await seedLegacySuiteBrowser(bob, baseURL);
     await seedLegacySuiteBrowser(alice, baseURL);
+    await bob.page.setViewportSize({ width: 1280, height: 1000 });
+    await alice.page.setViewportSize({ width: 1280, height: 1000 });
     await upgrade(bob);
     await upgrade(alice);
 
@@ -153,6 +173,16 @@ test.describe("Encrypted DMs: moving to stronger encryption @medium @local-only 
         .getByRole("combobox", { name: "Chat history", exact: true })
         .getByRole("option")
     ).toHaveCount(2);
+
+    const activeChat = bob.page
+      .getByRole("list", { name: "Encrypted chats" })
+      .first()
+      .getByRole("link", { name: /alice/u });
+    await expect(activeChat).toHaveAttribute("aria-current", "page");
+    await activeChat.click();
+    await expect(bob.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
+    await expect(activeChat).not.toHaveAttribute("aria-current", "page");
+    await expect(composer(bob.page)).toHaveCount(0);
 
     expect(
       await alice.page.evaluate(

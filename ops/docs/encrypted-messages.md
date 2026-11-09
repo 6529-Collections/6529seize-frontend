@@ -89,7 +89,8 @@ stay saved in this browser for the next sign-in.
 - `/messages/encrypted/{chat}`: one chat. The address is a random chat handle.
 - `/messages/encrypted/devices`: devices that can read your encrypted messages.
 - The **Encrypted** section sits above **Direct messages** in the messages
-  side pane on the web and on the app's Messages screen.
+  side pane on the web and on the app's Messages screen. Select the open chat
+  again in the side pane to return to the encrypted inbox.
 - A plaintext direct message shows **Not end-to-end encrypted** in its header
   with **Start encrypted chat**. In the app, tap the open-lock button next to
   the chat name.
@@ -431,6 +432,8 @@ time your device sees someone. Compare safety codes and check the wallets in
 - **Couldn’t decrypt this message**: this device could not read it; ask the
   sender to send it again.
 - **Signature not verified**: the sender's signature did not check out.
+- **Sender’s device signature verified** appears in the message actions menu
+  for verified messages received from other participants.
 
 ## Devices
 
@@ -511,11 +514,8 @@ encrypted copy of your message history so you can restore it on a new device.
   **Open 6529 Mobile to view** in production or **Open 6529 Staging to view**
   on staging. Invitation pushes say that you were added to an encrypted chat.
   Pushes carry no sender, chat name or message text, and open
-  `/messages/encrypted`. The phone attempts a sync, then checks its local
-  chats even if that sync fails. It opens exactly one active, unmuted chat
-  with unread messages; otherwise the list stays open and shows which chats
-  changed. Leaving the wake visit cancels pending navigation. The phone
-  decides this itself.
+  `/messages/encrypted`. The phone refreshes the encrypted chat list and
+  stays there so the recipient can choose which chat to open.
 - 6529 Desktop shows a local notification, "New encrypted message", when a
   chat gets a message from someone else, unless the chat is muted or open in
   the focused window. Like phone push it names no sender, chat or text.
@@ -532,10 +532,10 @@ encrypted copy of your message history so you can restore it on a new device.
   supported; encryption-only setup uses its own encryption grant. Alternatively,
   source-browser-approved [connection sharing](#setup-through-connection-sharing)
   signs in and enrolls the receiving app without connecting a wallet there.
-  Ordinary app sign-in alone does not grant these permissions. The web
-  **6529 Desktop** connection option currently allows **Connect only**; its
-  secure setup button is disabled with **Coming soon** until that app release.
-  Availability inside an app also depends on its build and cryptographic support.
+  Ordinary app sign-in alone does not grant these permissions. Secure setup
+  requires a compatible app build with cryptographic support. The web
+  **6529 Desktop** secure setup button shows **Coming soon**. Desktop users
+  can choose **Connect only**.
 
 - **Phones.** 6529 Mobile needs iOS 16.4 or later (earlier iOS versions cannot
   run the current site at all) or a current Android System WebView. Signed
@@ -664,14 +664,15 @@ Choose **Connect only** for an additional signed-in app session, or
 The source browser does not need encryption enabled on itself to approve the
 receiving app. Proxy sessions cannot authorize secure setup.
 
-**6529 Desktop** currently keeps the secure option visible but disabled, with a
-**Coming soon** tooltip. **Connect only** remains available. This is a release
-gate, not an automatic check of the installed app version.
+The **6529 Desktop** secure option is disabled and shows **Coming soon**.
+Choose **Connect only** to sign in on Desktop.
 
 For Mobile secure setup, approve the wallet signature in the browser, then scan
 one QR or open its private link in the receiving app. The regular **Scan QR Code**
 flow accepts it; you do not have to start from the encryption page. A device
 camera can hand the link to the app when its link handler supports that URL.
+If you use **Scan Connection QR** from the upgrade prompt, a valid scan closes
+the prompt and opens the incoming connection for approval.
 The receiving screen identifies the account and lists **Signed Posts** and
 **Encrypted DMs** above **Accept and enable both**. A Connect-only link keeps
 **Accept connection** and does not list or enable these permissions.

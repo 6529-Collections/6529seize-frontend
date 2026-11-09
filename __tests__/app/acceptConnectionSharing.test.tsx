@@ -209,55 +209,65 @@ describe("AcceptConnectionSharing page", () => {
     expect(screen.getByText("Accept connection")).toBeInTheDocument();
   });
 
-  it("redeems and persists a native connection share session", async () => {
-    const push = jest.fn();
-    const seizeAcceptConnection = jest.fn();
-    (useRouter as jest.Mock).mockReturnValue({ push });
-    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
-    (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("connection_share_code=abc12345&address=0x123")
-    );
-    (useSeizeConnectContext as jest.Mock).mockReturnValue({
-      address: undefined,
-      seizeDisconnectAndLogout: jest.fn(),
-      seizeAcceptConnection,
-    });
-    (redeemConnectionShare as jest.Mock).mockResolvedValue({
-      client_type: "native",
-      address: "0x123",
-      role: "server-role",
-      access_token: "access-token",
-      access_token_expires_at: "2026-06-10T00:00:00.000Z",
-      native_refresh_token: "native-refresh-token",
-      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
-    });
-
-    render(
-      <TestProvider>
-        <AcceptConnectionSharingPage />
-      </TestProvider>
-    );
-
-    expect(
-      screen.queryByText(/Open this connection link in the 6529 mobile app/)
-    ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText("Accept connection"));
-
-    await waitFor(() =>
-      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", "native")
-    );
-    expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith("0x123");
-    expect(persistSessionResponse).toHaveBeenCalledWith(
-      expect.objectContaining({
-        client_type: "native",
+  it.each(["native", "desktop"])(
+    "redeems and persists a %s connection-only session",
+    async (target) => {
+      const push = jest.fn();
+      const seizeAcceptConnection = jest.fn();
+      const seizeConnect = jest.fn();
+      (useRouter as jest.Mock).mockReturnValue({ push });
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(
+        target === "native"
+      );
+      if (target === "desktop") setUserAgent(DESKTOP_APP_USER_AGENT);
+      (useSearchParams as jest.Mock).mockReturnValue(
+        new URLSearchParams("connection_share_code=abc12345&address=0x123")
+      );
+      (useSeizeConnectContext as jest.Mock).mockReturnValue({
+        address: undefined,
+        seizeDisconnectAndLogout: jest.fn(),
+        seizeAcceptConnection,
+        seizeConnect,
+      });
+      (redeemConnectionShare as jest.Mock).mockResolvedValue({
+        client_type: target,
         address: "0x123",
         role: "server-role",
+        access_token: "access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
         native_refresh_token: "native-refresh-token",
-      })
-    );
-    expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
-    expect(push).toHaveBeenCalledWith("/");
-  });
+        refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+      });
+
+      render(
+        <TestProvider>
+          <AcceptConnectionSharingPage />
+        </TestProvider>
+      );
+
+      expect(
+        screen.queryByText(/Open this connection link in the 6529 mobile app/)
+      ).not.toBeInTheDocument();
+      fireEvent.click(screen.getByText("Accept connection"));
+
+      await waitFor(() =>
+        expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", target)
+      );
+      expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith("0x123");
+      expect(persistSessionResponse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          client_type: target,
+          address: "0x123",
+          role: "server-role",
+          native_refresh_token: "native-refresh-token",
+        })
+      );
+      expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
+      expect(push).toHaveBeenCalledWith("/");
+      expect(seizeConnect).not.toHaveBeenCalled();
+      expect(mockAcceptDeviceSetup).not.toHaveBeenCalled();
+    }
+  );
 
   it("redeems a legacy desktop token connection share in the 6529 Desktop app", async () => {
     const push = jest.fn();
