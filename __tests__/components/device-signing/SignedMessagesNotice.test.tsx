@@ -527,6 +527,36 @@ describe("SignedMessagesNotice", () => {
       expect(screen.queryByRole("button", { name: "Turn on" })).toBeNull();
     });
 
+    it("remembers a local grant after key loss and still alerts for a new device", () => {
+      mockLocal = { ...mockLocal, grant: null };
+      const { rerender, unmount } = render(
+        <SignedMessagesNotice composerEmpty />
+      );
+
+      const ownGrant = grant();
+      mockLocal = { ...mockLocal, grant: ownGrant };
+      mockGrants = [ownGrant];
+      rerender(<SignedMessagesNotice composerEmpty />);
+      expect(screen.queryByRole("button", { name: "Revoke" })).toBeNull();
+
+      unmount();
+      mockLocal = { loaded: true, grant: null, publicKeys: [] };
+      const { rerender: rerenderAfterKeyLoss } = render(
+        <SignedMessagesNotice composerEmpty />
+      );
+      expect(screen.queryByRole("button", { name: "Revoke" })).toBeNull();
+      expect(screen.getByRole("button", { name: "Turn on" })).toBeVisible();
+
+      mockGrants = [ownGrant, otherDevice];
+      rerenderAfterKeyLoss(<SignedMessagesNotice composerEmpty />);
+      expect(
+        screen.getByText(
+          /^Firefox on Windows is now authorized for Signed Posts/
+        )
+      ).toBeVisible();
+      expect(screen.getByRole("button", { name: "Revoke" })).toBeVisible();
+    });
+
     it("never alerts for this browser's own keys, revoked or expired grants", () => {
       mockGrants = [];
       const { rerender } = render(<SignedMessagesNotice composerEmpty />);
