@@ -43,7 +43,7 @@ export function useSavedDropRecovery() {
         }
         processDropRemoved(waveId, body.dropId);
       }
-      refreshWaveMessages(waveId);
+      void refreshWaveMessages(waveId);
       body.onSuccess?.();
       setToast({
         type: "success",

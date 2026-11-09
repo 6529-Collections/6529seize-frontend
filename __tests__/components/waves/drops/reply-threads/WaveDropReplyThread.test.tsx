@@ -449,6 +449,28 @@ describe("WaveDropReplyThread", () => {
       await screen.findByRole("button", { name: "Show 2 replies" });
     });
 
+    it("uses the compact event's root in waves with inline replies", async () => {
+      fetchDropMock.mockResolvedValue(
+        makeDrop("root", 10, { replies_count: 2 })
+      );
+      render(<LiveHarness waveConfig={inlineWave} />);
+
+      act(() =>
+        getHandler(WsMessageType.DROP_UPDATE_REF)({
+          drop_id: "new-reply",
+          wave_id: "wave-1",
+          author_id: "author",
+          serial_no: 12,
+          update_type: WsMessageType.DROP_UPDATE,
+          collapsed_reply_thread_id: "root",
+        })
+      );
+
+      await screen.findByRole("button", { name: "Show 2 replies" });
+      expect(fetchDropMock).toHaveBeenCalledWith("root");
+      expect(fetchDropMock).not.toHaveBeenCalledWith("new-reply");
+    });
+
     it("reconciles delayed or edited replies without adding to the count", async () => {
       fetchDropMock.mockResolvedValue(
         makeDrop("root", 10, { replies_count: 2 })

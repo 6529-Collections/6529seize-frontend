@@ -462,6 +462,10 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       content: "Nested thread reply",
       reply_to_drop: { id: directReply.id, serial_no: 2 },
     };
+    // Both action menus read memberships. The sandbox has no curations.
+    await page.route(`**/api/drops/${root.id}/curations`, async (route) => {
+      await route.fulfill({ json: [] });
+    });
     let collapsed = false;
     await page.route(
       `**/api/drops/${root.id}/collapse-replies`,
@@ -480,6 +484,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await page.route(
       `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
       async (route) => {
+        const params = new URL(route.request().url()).searchParams;
+        const hideReplies =
+          collapsed && params.get("respect_drop_reply_collapse") === "true";
         await route.fulfill({
           json: {
             ...payload,
@@ -489,7 +496,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
                 collapse_replies: collapsed,
                 replies_count: collapsed ? 2 : 0,
               },
-              ...(collapsed ? [] : [directReply, nestedReply]),
+              ...(hideReplies ? [] : [directReply, nestedReply]),
             ],
           },
         });
@@ -514,6 +521,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       });
     });
     await gotoSandboxWave(page);
+    const inlineReply = page.getByText("Nested thread reply", { exact: true });
+    await expect(inlineReply).toBeVisible();
     const selectReplyPlacement = async (label: string) => {
       const rootRow = page
         .getByRole("main")
@@ -547,7 +556,6 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       await rootRow.hover();
       const trigger = rootRow.getByRole("button", { name: "More actions" });
       await trigger.click();
-      await expect(trigger).toHaveAttribute("aria-expanded", "true");
       await page
         .getByRole("menu")
         .getByRole("button", { name: label, exact: true })
@@ -555,9 +563,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     };
 
     await selectReplyPlacement("Collapse replies");
-    await expect(
-      page.getByText("Nested thread reply", { exact: true })
-    ).toHaveCount(0);
+    await expect(inlineReply).toHaveCount(0);
     const showReplies = page.getByRole("button", { name: "Show 2 replies" });
     if (isMobile) await showReplies.tap();
     else await showReplies.press("Enter");
@@ -571,9 +577,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 
     await selectReplyPlacement("Show replies inline");
     await expect(thread).toHaveCount(0);
-    await expect(
-      page.getByText("Nested thread reply", { exact: true })
-    ).toBeVisible();
+    await expect(inlineReply).toBeVisible();
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 

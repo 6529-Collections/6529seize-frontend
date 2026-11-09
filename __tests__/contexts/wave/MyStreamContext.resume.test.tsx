@@ -6,6 +6,7 @@ import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 
 const mockSetActiveWave = jest.fn();
 const mockRegisterWave = jest.fn();
+const mockActivateWave = jest.fn();
 const mockPrefetchWave = jest.fn();
 const mockRecentDmPrefetch = jest.fn();
 jest.mock("@/contexts/wave/hooks/useRecentDirectMessagePrefetch", () => ({
@@ -83,6 +84,7 @@ jest.mock("@/contexts/wave/hooks/useActiveWaveManager", () => ({
 jest.mock("@/contexts/wave/hooks/useWaveDataManager", () => ({
   useWaveDataManager: jest.fn(() => ({
     registerWave: mockRegisterWave,
+    activateWave: mockActivateWave,
     prefetchWave: mockPrefetchWave,
     syncNewestMessages: mockSyncNewestMessages,
     fetchNextPage: mockFetchNextPage,
@@ -357,19 +359,19 @@ describe("MyStreamProvider resume sync", () => {
     act(() =>
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT))
     );
-    mockRegisterWave.mockClear();
+    mockActivateWave.mockClear();
     mockCancelWaveDataFetch.mockClear();
     mockCancelPaginationFetch.mockClear();
 
     await act(() => staleRefresh("wave-1"));
     expect(mockCancelWaveDataFetch).not.toHaveBeenCalled();
     expect(mockCancelPaginationFetch).not.toHaveBeenCalled();
-    expect(mockRegisterWave).not.toHaveBeenCalled();
+    expect(mockActivateWave).not.toHaveBeenCalled();
 
     await act(() => context!.refreshWaveMessages("wave-1"));
     expect(mockCancelWaveDataFetch).toHaveBeenCalledWith("wave-1");
     expect(mockCancelPaginationFetch).toHaveBeenCalledWith("wave-1");
-    expect(mockRegisterWave).toHaveBeenCalledWith("wave-1");
+    expect(mockActivateWave).toHaveBeenCalledWith("wave-1");
   });
 
   it("registers selected waves before delegating active wave navigation", () => {
