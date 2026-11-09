@@ -44,7 +44,7 @@ const WaveDropActionsCopyText: React.FC<WaveDropActionsCopyTextProps> = ({
     // The dropdown closes (via onCopy) only after a confirmed clipboard
     // write; on failure it stays open and shows transient "Copy failed"
     // feedback instead of silently closing as if the copy succeeded.
-    copyToClipboard(
+    void copyToClipboard(
       () => buildDropClipboardText(drop, locale, "plain", zone),
       onCopy
     );

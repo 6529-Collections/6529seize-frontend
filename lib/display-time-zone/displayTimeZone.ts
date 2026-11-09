@@ -8,7 +8,8 @@
  */
 
 /** Stored preference: the device zone, UTC, or an IANA zone name. */
-export type DisplayTimeZonePreference = string;
+// `string & {}` keeps editor hints for the two named values.
+export type DisplayTimeZonePreference = "local" | "UTC" | (string & {});
 
 export const LOCAL_TIME_ZONE_PREFERENCE = "local";
 export const UTC_TIME_ZONE_PREFERENCE = "UTC";

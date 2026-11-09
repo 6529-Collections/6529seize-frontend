@@ -28,8 +28,16 @@ jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
   useE2eeEmojis: () => ({ sources: new Map() }),
 }));
 
-Element.prototype.scrollTo = jest.fn();
-Element.prototype.scrollIntoView = jest.fn();
+const originalScrollTo = Element.prototype.scrollTo;
+const originalScrollIntoView = Element.prototype.scrollIntoView;
+beforeAll(() => {
+  Element.prototype.scrollTo = jest.fn();
+  Element.prototype.scrollIntoView = jest.fn();
+});
+afterAll(() => {
+  Element.prototype.scrollTo = originalScrollTo;
+  Element.prototype.scrollIntoView = originalScrollIntoView;
+});
 
 const mockZone = useDisplayTimeZone as jest.MockedFunction<
   typeof useDisplayTimeZone
