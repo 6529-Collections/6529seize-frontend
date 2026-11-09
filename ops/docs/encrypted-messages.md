@@ -673,8 +673,9 @@ Choose **Connect only** for an additional signed-in app session, or
 The source browser does not need encryption enabled on itself to approve the
 receiving app. Proxy sessions cannot authorize secure setup.
 
-For Desktop secure setup, approve the wallet signature in the browser, then
-select **Open in 6529 Desktop** to open the private link in a compatible build.
+Desktop secure setup requires 6529 Desktop v0.4.0 or later. Approve the wallet
+signature in the browser, then select **Open in 6529 Desktop** to open the
+private link.
 
 For Mobile secure setup, approve the wallet signature in the browser, then scan
 one QR or open its private link in the receiving app. The regular **Scan QR Code**
