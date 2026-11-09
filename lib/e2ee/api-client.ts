@@ -24,7 +24,8 @@ export function buildE2eeApiClient({
     getMe: () => get<ApiE2eeMe>("e2ee/me"),
     registerDevice: (body) => post(`e2ee/devices`, body),
     registerLoginGrantDevice: (body) => post(`e2ee/devices/login-grant`, body),
-    getDevice: (deviceKey) => get(`e2ee/devices/${enc(deviceKey)}`),
+    getDevice: (deviceKey, signal) =>
+      get(`e2ee/devices/${enc(deviceKey)}`, undefined, signal),
     getProfileDevices: (profileId, ciphersuite) =>
       get(
         `e2ee/profiles/${enc(profileId)}/devices`,
