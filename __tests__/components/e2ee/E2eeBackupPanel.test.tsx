@@ -211,21 +211,35 @@ describe("E2eeBackupPanel", () => {
         ...patch,
       });
 
-    it("stays quiet for devices last active before the backup existed", () => {
-      renderPanel(
-        fakeManager(
-          snapshot({
-            phase: "on",
-            backupCreatedAt: BACKUP_CREATED,
-            lastBackupAt: BACKUP_CREATED,
-          })
-        ),
-        [
-          THIS_DEVICE,
-          revoked({ lastSeenAt: BACKUP_CREATED - HOUR_MS }),
-          revoked({ deviceKey: `0x${"8".repeat(64)}`, lastSeenAt: null }),
-        ]
+    const backupOn = () =>
+      fakeManager(
+        snapshot({
+          phase: "on",
+          backupCreatedAt: BACKUP_CREATED,
+          lastBackupAt: BACKUP_CREATED,
+        })
       );
+
+    it("warns for a device revoked after the backup was created, even if last seen before it", () => {
+      // A device can restore the backup and keep its key without its
+      // last-seen time moving, so that time can't rule it out.
+      renderPanel(backupOn(), [
+        THIS_DEVICE,
+        revoked({ lastSeenAt: BACKUP_CREATED - HOUR_MS }),
+      ]);
+      expect(screen.getByText("Replace your recovery code")).toBeVisible();
+      expect(
+        screen.getByText(
+          /^You revoked Old iPhone on \w{3} \d{1,2}, 2026, after this backup was set up\./
+        )
+      ).toBeVisible();
+    });
+
+    it("stays quiet for devices revoked before the backup was created", () => {
+      renderPanel(backupOn(), [
+        THIS_DEVICE,
+        revoked({ revokedAt: BACKUP_CREATED - HOUR_MS }),
+      ]);
       expect(
         screen.queryByText("Replace your recovery code")
       ).not.toBeInTheDocument();
@@ -234,24 +248,11 @@ describe("E2eeBackupPanel", () => {
       ).toHaveLength(1);
     });
 
-    it("names a revoked device that could hold the key and offers one replace action", async () => {
-      const manager = fakeManager(
-        snapshot({
-          phase: "on",
-          backupCreatedAt: BACKUP_CREATED,
-          lastBackupAt: BACKUP_CREATED,
-        })
-      );
-      renderPanel(manager, [
+    it("names the revoked device and offers one replace action", async () => {
+      renderPanel(backupOn(), [
         THIS_DEVICE,
         revoked({ lastSeenAt: BACKUP_CREATED + HOUR_MS }),
       ]);
-      expect(screen.getByText("Replace your recovery code")).toBeVisible();
-      expect(
-        screen.getByText(
-          /^Old iPhone was active after this backup was set up, so it may still hold the backup key\. You revoked it \w{3} \d{1,2}, 2026\./
-        )
-      ).toBeVisible();
       const replace = screen.getAllByRole("button", {
         name: "Replace recovery code",
       });
@@ -264,28 +265,28 @@ describe("E2eeBackupPanel", () => {
       ).toBeInTheDocument();
     });
 
-    it("lists every revoked device that could hold the key", () => {
-      renderPanel(
-        fakeManager(
-          snapshot({
-            phase: "on",
-            backupCreatedAt: BACKUP_CREATED,
-            lastBackupAt: BACKUP_CREATED,
-          })
-        ),
-        [
-          THIS_DEVICE,
-          revoked({ lastSeenAt: BACKUP_CREATED + HOUR_MS }),
-          revoked({
-            deviceKey: `0x${"8".repeat(64)}`,
-            label: "Firefox on Linux",
-            lastSeenAt: BACKUP_CREATED + HOUR_MS,
-          }),
-        ]
-      );
+    it("folds several revoked devices into one warning with their count", () => {
+      renderPanel(backupOn(), [
+        THIS_DEVICE,
+        revoked({ lastSeenAt: BACKUP_CREATED - HOUR_MS }),
+        revoked({
+          deviceKey: `0x${"8".repeat(64)}`,
+          label: "Firefox on Linux",
+          lastSeenAt: null,
+        }),
+        revoked({
+          deviceKey: `0x${"7".repeat(64)}`,
+          label: "Brave on Windows",
+          lastSeenAt: BACKUP_CREATED + HOUR_MS,
+        }),
+      ]);
+      expect(screen.getAllByText("Replace your recovery code")).toHaveLength(1);
       expect(
-        screen.getByText(/^Old iPhone and Firefox on Linux were active after/)
+        screen.getByText(/^You revoked 3 devices after this backup was set up\./)
       ).toBeVisible();
+      expect(
+        screen.getAllByRole("button", { name: "Replace recovery code" })
+      ).toHaveLength(1);
     });
   });
 

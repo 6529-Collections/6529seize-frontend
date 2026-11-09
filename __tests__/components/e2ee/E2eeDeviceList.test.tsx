@@ -123,7 +123,7 @@ describe("E2eeDeviceList", () => {
       name: "Revoke this browser?",
     });
     expect(dialog).toHaveTextContent(
-      "Your backup keeps a copy. Restore it here later with your recovery code."
+      "Only messages included in your last backup can be restored."
     );
     expect(
       within(dialog).queryByRole("button", { name: "Set up backup first" })
