@@ -4,7 +4,6 @@ import { getSafeCollectingSectionPath } from "@/components/delegation/safe-colle
 
 import type { WalletConsolidationState } from "@/entities/IProfile";
 import { useContext, useMemo, useState } from "react";
-import clsx from "clsx";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -25,7 +24,7 @@ import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
 
 const WALLET_ACTION_CLASSES =
-  "tw-min-h-10 tw-min-w-0 !tw-whitespace-normal tw-px-2.5 tw-py-2 tw-text-xs";
+  "!tw-h-auto tw-min-h-8 tw-min-w-0 tw-max-w-full !tw-whitespace-normal tw-py-1";
 
 /** Returns the primary wallet, falling back to the highest-TDH wallet. */
 function getPrimaryAddress(profile: ApiIdentity): string | null {
@@ -158,47 +157,46 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
         ))}
       </ul>
       {(primaryAddress !== null || showDelegationCenter) && (
-        <div className="tw-grid tw-grid-cols-2 tw-gap-2 tw-pt-4">
-          {primaryAddress && (
-            <ButtonLink
-              href={`/safe-collecting/wallet-checker?address=${primaryAddress}`}
-              variant="secondary"
-              size={null}
-              fullWidth
-              className={clsx(
-                WALLET_ACTION_CLASSES,
-                !showAddWallet && "tw-col-span-2"
+        <div className="tw-flex tw-flex-wrap tw-gap-2 tw-pt-4">
+          <div className="tw-flex tw-max-w-full tw-flex-wrap tw-gap-2">
+            {primaryAddress && (
+              <ButtonLink
+                href={`/safe-collecting/wallet-checker?address=${primaryAddress}`}
+                variant="secondary"
+                size="xs"
+                className={WALLET_ACTION_CLASSES}
+              >
+                {t(locale, "user.profile.identity.statements.walletChecker")}
+              </ButtonLink>
+            )}
+            <AnimatePresence mode="wait" initial={false}>
+              {showDelegationCenter && (
+                <ButtonLink
+                  href="/safe-collecting"
+                  variant="secondary"
+                  size="xs"
+                  className={WALLET_ACTION_CLASSES}
+                >
+                  {t(
+                    locale,
+                    "user.profile.identity.statements.delegationCenter"
+                  )}
+                </ButtonLink>
               )}
-            >
-              {t(locale, "user.profile.identity.statements.walletChecker")}
-            </ButtonLink>
-          )}
+            </AnimatePresence>
+          </div>
           {showAddWallet && (
             <ButtonLink
               href={getSafeCollectingSectionPath(
                 DelegationCenterSection.BUILD_CONSOLIDATION
               )}
               variant="primary"
-              size={null}
-              fullWidth
+              size="xs"
               className={WALLET_ACTION_CLASSES}
             >
               {t(locale, "user.profile.identity.statements.addWallet")}
             </ButtonLink>
           )}
-          <AnimatePresence mode="wait" initial={false}>
-            {showDelegationCenter && (
-              <ButtonLink
-                href="/safe-collecting"
-                variant="secondary"
-                size={null}
-                fullWidth
-                className={clsx(WALLET_ACTION_CLASSES, "tw-col-span-2")}
-              >
-                {t(locale, "user.profile.identity.statements.delegationCenter")}
-              </ButtonLink>
-            )}
-          </AnimatePresence>
         </div>
       )}
       {showAddWallet && (
