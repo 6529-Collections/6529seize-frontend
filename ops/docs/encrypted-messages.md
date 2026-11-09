@@ -671,6 +671,8 @@ For Mobile secure setup, approve the wallet signature in the browser, then scan
 one QR or open its private link in the receiving app. The regular **Scan QR Code**
 flow accepts it; you do not have to start from the encryption page. A device
 camera can hand the link to the app when its link handler supports that URL.
+If you use **Scan Connection QR** from the upgrade prompt, a valid scan closes
+the prompt and opens the incoming connection for approval.
 The receiving screen identifies the account and lists **Signed Posts** and
 **Encrypted DMs** above **Accept and enable both**. A Connect-only link keeps
 **Accept connection** and does not list or enable these permissions.
