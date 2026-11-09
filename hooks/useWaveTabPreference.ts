@@ -11,8 +11,10 @@ type RememberedWaveTab =
   | { readonly tab: MyStreamWaveTab; readonly competitionId: string };
 type WaveTabs = Record<string, RememberedWaveTab>;
 
-export const getRememberedTab = (value: RememberedWaveTab | undefined) =>
-  typeof value === "object" ? value.tab : value;
+export const getRememberedTab = (value: RememberedWaveTab | undefined) => {
+  const tab = typeof value === "object" ? value.tab : value;
+  return tab === MyStreamWaveTab.OUTCOME ? MyStreamWaveTab.CONFIGURATION : tab;
+};
 
 const isWaveTab = (value: unknown): value is MyStreamWaveTab =>
   Object.values(MyStreamWaveTab).includes(value as MyStreamWaveTab);
