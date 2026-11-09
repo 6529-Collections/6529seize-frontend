@@ -259,6 +259,13 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       });
       const source = new URL(page.url());
       const link = page.getByRole("link", { name: action, exact: true });
+      if (
+        testInfo.project.name === "capacitor-ios-sim" &&
+        action === "Complete my set"
+      ) {
+        await expect(link).toHaveCount(0);
+        continue;
+      }
       await link.scrollIntoViewIfNeeded();
       const destination = new URL(
         (await link.getAttribute("href"))!,
@@ -297,6 +304,11 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       );
       // A document navigation starts a fresh app history for each deep link.
       await gotoReady(page, path);
+      const expectedPath =
+        testInfo.project.name === "capacitor-ios-sim" && path === "/collect"
+          ? "/the-memes"
+          : path;
+      await expect(page).toHaveURL((url) => url.pathname === expectedPath);
       await expect(
         page.getByRole("navigation", {
           name: "Primary navigation",
@@ -995,16 +1007,23 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(page).toHaveURL((url) => !url.searchParams.has("group"));
   });
 
-  test("iOS redirects direct Collect links and omits the collection shortcut on a US IP", async ({
+  test("a US IP leaves Collect available outside iOS only", async ({
     page,
   }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "capacitor-ios-sim",
-      "Collect visibility is covered on the iOS Capacitor simulation"
-    );
-
     await mockCountryCheck(page, "US");
-    await page.goto("/collect?collection=memes&intent=full_set");
+    await gotoReady(page, "/collect?collection=memes&intent=full_set");
+
+    if (testInfo.project.name !== "capacitor-ios-sim") {
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === "/collect" &&
+          url.searchParams.get("intent") === "full_set"
+      );
+      await expect(
+        page.getByRole("form", { name: "Complete a full set", exact: true })
+      ).toBeVisible();
+      return;
+    }
 
     await expect(page).toHaveURL((url) => url.pathname === "/the-memes");
     await expect(

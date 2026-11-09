@@ -137,15 +137,21 @@ describe("after hydration on web and Android", () => {
   });
 });
 
-it("can leave an existing layout in charge of the profile redirect", () => {
+it("hides an inline purchase link without redirecting the surrounding page on iOS", () => {
   mockIsIos = true;
-  mockCountry = "CY";
   render(
-    <NftPurchasingGate>
-      <PurchasingContent />
-    </NftPurchasingGate>
+    <>
+      <h1>Collection details</h1>
+      <NftPurchasingGate>
+        <a href="https://example.com/purchase">Buy NFT</a>
+      </NftPurchasingGate>
+    </>
   );
-  expect(mockMount).not.toHaveBeenCalled();
+
+  expect(
+    screen.getByRole("heading", { name: "Collection details" })
+  ).toBeVisible();
+  expect(screen.queryByRole("link", { name: "Buy NFT" })).not.toBeInTheDocument();
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
