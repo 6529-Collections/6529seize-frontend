@@ -477,7 +477,11 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
         expect(body.collapse_replies).toBe(!collapsed);
         collapsed = body.collapse_replies;
         await route.fulfill({
-          json: { id: root.id, collapse_replies: collapsed },
+          json: {
+            id: root.id,
+            collapse_replies: collapsed,
+            reply_placement_has_replies: true,
+          },
         });
       }
     );

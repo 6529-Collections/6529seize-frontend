@@ -410,6 +410,8 @@ export interface WsDropUpdateRefData {
   readonly serial_no: number;
   readonly update_type: WsDropUpdateRefUpdateType;
   readonly collapsed_reply_thread_id?: string;
+  readonly collapse_replies?: boolean;
+  readonly reply_placement_has_replies?: boolean;
   readonly reason?: string;
 }
 
@@ -456,6 +458,10 @@ export const isWsDropUpdateRefData = (
     isWsDropUpdateRefUpdateType(candidate.update_type) &&
     (candidate.collapsed_reply_thread_id === undefined ||
       isNonEmptyWebSocketId(candidate.collapsed_reply_thread_id)) &&
+    (candidate.collapse_replies === undefined ||
+      typeof candidate.collapse_replies === "boolean") &&
+    (candidate.reply_placement_has_replies === undefined ||
+      typeof candidate.reply_placement_has_replies === "boolean") &&
     (candidate.reason === undefined || isNonEmptyWebSocketId(candidate.reason))
   );
 };

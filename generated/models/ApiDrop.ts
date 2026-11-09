@@ -102,6 +102,10 @@ export class ApiDrop {
     * Author-selected reply placement on a top-level chat drop.
     */
     'collapse_replies'?: boolean;
+    /**
+    * Whether any replies were present when the reply placement was saved. Included in reply placement updates.
+    */
+    'reply_placement_has_replies'?: boolean;
     'collapsed_reply_thread'?: ApiCollapsedReplyThread;
     'hide_link_preview': boolean;
     'poll'?: ApiDropPoll;
@@ -331,6 +335,12 @@ export class ApiDrop {
         {
             "name": "collapse_replies",
             "baseName": "collapse_replies",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "reply_placement_has_replies",
+            "baseName": "reply_placement_has_replies",
             "type": "boolean",
             "format": ""
         },

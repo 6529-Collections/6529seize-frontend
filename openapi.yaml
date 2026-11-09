@@ -32398,6 +32398,11 @@ components:
         collapse_replies:
           type: boolean
           description: Author-selected reply placement on a top-level chat drop.
+        reply_placement_has_replies:
+          type: boolean
+          description: >-
+            Whether any replies were present when the reply placement was saved.
+            Included in reply placement updates.
         collapsed_reply_thread:
           $ref: "#/components/schemas/ApiCollapsedReplyThread"
         hide_link_preview:

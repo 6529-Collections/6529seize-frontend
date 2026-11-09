@@ -55,6 +55,13 @@ export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly isWaveMuted: (waveId: string) => boolean;
 }
 
+export interface ReplyPlacementChange {
+  readonly waveId: string;
+  readonly dropId: string;
+  readonly collapseReplies?: boolean | undefined;
+  readonly hasReplies?: boolean | undefined;
+}
+
 export enum ProcessIncomingDropType {
   DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
   DROP_INSERT = "DROP_INSERT",
