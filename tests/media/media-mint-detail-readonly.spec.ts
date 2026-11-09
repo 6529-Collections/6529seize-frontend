@@ -1277,6 +1277,10 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
         await gotoReady(page, `/the-memes/${fixture.id}`);
         const video = page.getByLabel("Video player", { exact: true });
         await expect(video).toBeVisible();
+        // Offscreen artwork defers its source. Bring it into view before
+        // waiting for metadata; CSS visibility alone does not guarantee this.
+        await video.scrollIntoViewIfNeeded();
+        await expect(video).toBeInViewport();
         await expect
           .poll(() =>
             video.evaluate((element: HTMLVideoElement) => element.videoWidth)
