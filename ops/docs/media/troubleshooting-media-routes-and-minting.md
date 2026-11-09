@@ -38,7 +38,8 @@ interactive previews, or marketplace shortcuts fail.
 2. Recheck route parameters and query values (`id`, `contract`, `collection`,
    `focus`, `sort`, `sort_dir`, `meme_id`).
 3. Recheck wallet and profile state for minting or owner-only actions.
-4. Recheck iOS + country gating before troubleshooting missing actions.
+4. Check whether you are using the iOS app. It hides mint controls and
+   marketplace links in every country.
 5. Retry the action from the parent list route with minimal query state.
 
 ## Common Scenarios
@@ -88,7 +89,8 @@ interactive previews, or marketplace shortcuts fail.
   `ardrive.net`, `gateway.arweave.net`, `gateway.ar.io`, and valid
   `*.arweave.net` tx subdomains), with root CID/tx IDs only.
 - Marketplace icons are missing:
-  the iOS app omits marketplace links. The Blur link is for Gradient contracts.
+  the iOS app omits marketplace links in every country. The Blur link is for
+  Gradient contracts.
 
 ## Edge Cases
 

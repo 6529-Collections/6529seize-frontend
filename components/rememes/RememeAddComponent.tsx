@@ -30,7 +30,6 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Image from "next/image";
-import Link from "next/link";
 import { useMemo, useRef, useState, type ReactNode } from "react";
 import { useEnsName } from "wagmi";
 import type { Nft, NftContract } from "./alchemy-sdk-types";
@@ -400,9 +399,9 @@ export default function RememeAddComponent({
                             #{nft.tokenId}
                             {nft.name && ` - ${nft.name}`}
                             <NftPurchasingGate>
-                              <Link
+                              <a
                                 className="tw-inline-flex focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                                href={`https://opensea.io/assets/ethereum/${contract}/${nft.tokenId}`}
+                                href={`https://opensea.io/assets/ethereum/${encodeURIComponent(contract)}/${encodeURIComponent(nft.tokenId)}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
@@ -413,7 +412,7 @@ export default function RememeAddComponent({
                                   width={20}
                                   height={20}
                                 />
-                              </Link>
+                              </a>
                             </NftPurchasingGate>
                           </span>
                         )}

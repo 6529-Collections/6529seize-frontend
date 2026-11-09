@@ -105,7 +105,7 @@ the card has an explicit mapping, a `Main Stage Submission` action.
   message.
 - On `/the-memes/mint`, the countdown card hides its own `Mint` button because
   the page already includes the mint widget/action flow.
-- On iOS outside the US, the countdown card hides the `Mint` button.
+- The countdown card hides the `Mint` button in the iOS app in every country.
 - On home, if the current mint is ended and next-drop data exists, the latest
   section switches to a `Next Drop` panel only after the drop is actually
   complete. If another phase still exists, home keeps the latest-drop countdown

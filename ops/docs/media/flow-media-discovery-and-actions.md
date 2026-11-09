@@ -98,8 +98,7 @@ This flow covers cross-route media tasks:
   on reload.
 - `/6529-gradient` normalizes unsupported `sort` to `id` and `sort_dir` to
   `asc`.
-- Marketplace shortcut icons are hidden on iOS unless detected country is
-  `US`.
+- The iOS app hides marketplace shortcut icons in every country.
 
 ## Failure and Recovery
 
