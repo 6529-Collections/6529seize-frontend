@@ -54,6 +54,7 @@ interface ControllerHooks {
   onOwnRevoked: () => Promise<void>;
   /** Called after every sync pass (e.g. resolve new members' profiles). */
   afterSync: () => Promise<void>;
+  resumeLookups?: () => Promise<void>;
 }
 
 export class EngineController {
@@ -478,6 +479,13 @@ export class EngineController {
 
   onWake(event: { type: string; data: unknown }): void {
     if (!this.isReady()) {
+      return;
+    }
+    if (event.type === "E2EE_LOOKUP_RESUME") {
+      this.debounce(
+        "lookup-resume",
+        () => this.hooks.resumeLookups?.() ?? Promise.resolve()
+      );
       return;
     }
     this.ctx.lastWakeAt = this.ctx.now();
