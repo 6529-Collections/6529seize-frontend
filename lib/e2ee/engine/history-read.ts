@@ -1,3 +1,5 @@
+import { recoverIdentities } from "./identity-recovery";
+import { memberProfileIds, resolveProfiles } from "./setup";
 import { E2eeError } from "./errors";
 import type { ImportedPayload } from "../imported-payload";
 import type { HistoryPageOptions } from "../history-order";
@@ -19,6 +21,8 @@ export async function getSavedMessage(
   return ctx.queue.run(async () => {
     const runtime = requireGroup(ctx, g);
     const message = await loadMessage(ctx, runtime, id);
+    // Cosmetic repair failures must not prevent reading already loaded history.
+    await recoverIdentities(ctx, runtime).catch(() => undefined);
     const snapshot = message ? toE2eeMessage(message) : null;
     trimHistory(runtime, ctx.openConversation === runtime.record.g);
     return snapshot;
@@ -30,11 +34,14 @@ export async function loadSavedHistory(
   g: string,
   options: HistoryPageOptions & { around?: string } = {}
 ): Promise<void> {
-  return ctx.queue.run(async () => {
+  await ctx.queue.run(async () => {
     const runtime = requireGroup(ctx, g);
     try {
       if (options.around) await historyAround(ctx, runtime, options.around);
       else await loadHistoryPage(ctx, runtime, options);
+      await recoverIdentities(ctx, runtime, { remaining: 8 }, true).catch(
+        () => undefined
+      );
       runtime.historyError = false;
     } catch (error) {
       runtime.historyError = true;
@@ -43,6 +50,7 @@ export async function loadSavedHistory(
       ctx.store.touch(runtime.record.g);
     }
   });
+  await resolveProfiles(ctx, memberProfileIds(ctx), true);
 }
 
 export async function findSavedImport(

@@ -1,3 +1,4 @@
+import type { LookupReads } from "../lookup-reads";
 import { trimHistory, updateHistorySummary, cacheMessage } from "./history";
 import type { E2eeApiClient } from "../api";
 import { MlsClient } from "../mls-adapter";
@@ -33,6 +34,8 @@ export interface EngineContext {
   readonly timers: TimerSet;
   readonly store: EngineStore;
   readonly directory: DeviceDirectory;
+  readonly lookupReads: LookupReads;
+  readonly knownDeviceProfiles: Map<string, string | null>;
   wasm: WasmModule | null;
   mls: MlsClient | null;
   device: StoredDevice | null;
@@ -52,6 +55,9 @@ export interface EngineContext {
   openConversation: string | null;
   openUntil: number;
 }
+
+/** Read afresh after awaits; disposal can happen while a read is in flight. */
+export const isDisposed = (ctx: EngineContext): boolean => ctx.disposed;
 
 export function requireMls(ctx: EngineContext): MlsClient {
   if (!ctx.mls || ctx.disposed) {

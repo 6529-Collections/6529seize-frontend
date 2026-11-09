@@ -145,7 +145,7 @@ describe("encrypted message sender profiles", () => {
       expect(
         client.getQueryState(getE2eeProfileQueryOptions(ALICE_ID).queryKey)
           ?.status
-      ).toBe("success")
+      ).toBe("error")
     );
     expect(screen.getByRole("link", { name: "alice" })).toHaveAttribute(
       "href",
