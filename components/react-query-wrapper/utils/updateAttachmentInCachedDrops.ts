@@ -4,6 +4,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
+import { reconcileDropMedia } from "@/helpers/waves/drop-media-reconciliation";
 import { QueryKey } from "../ReactQueryWrapper";
 import {
   reconcileAttachmentStatusUpdate,
@@ -125,8 +126,8 @@ function replaceMatchingDrop(
   drop: ApiDrop,
   options: DropReplacementOptions
 ): ApiDropV2View {
-  const dropWithFinalizedAttachments = reconcileFinalizedDropAttachments(
-    drop,
+  const dropWithFinalizedAttachments = reconcileDropMedia(
+    reconcileFinalizedDropAttachments(drop, value),
     value
   );
   const dropForReconciliation = options.mergeWithExisting

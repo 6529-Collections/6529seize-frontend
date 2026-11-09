@@ -861,6 +861,41 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.syncNewestMessages).toHaveBeenCalled();
   });
 
+  it.each([false, true])(
+    "settles a POST before deferred processing when muted=%s",
+    async (muted) => {
+      const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
+      const props = baseProps(store);
+      props.isWaveMuted.mockReturnValue(muted);
+      let release!: () => void;
+      const refresh = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      mockRefreshEligibility.mockReturnValue(refresh);
+      const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+      const accepted = makeRealtimeDrop("accepted", "wave1", 11);
+      let completion!: Promise<void>;
+      act(() => {
+        completion = result.current.processIncomingDrop(
+          accepted,
+          ProcessIncomingDropType.DROP_INSERT,
+          { pendingDropId: "temp-pending" }
+        );
+      });
+      expect(props.updateData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: "wave1",
+          pendingDropId: "temp-pending",
+          drops: [expect.objectContaining({ id: "accepted" })],
+        })
+      );
+      await act(async () => {
+        release();
+        await completion;
+      });
+    }
+  );
+
   it("normalizes string serial numbers before inserting realtime drops", async () => {
     const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
     const props = baseProps(store);

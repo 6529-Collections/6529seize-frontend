@@ -344,7 +344,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   }, [processIncomingDrop]);
   const stableProcessIncomingDrop = useCallback<
     MyStreamActionsContextType["processIncomingDrop"]
-  >((drop, type) => processIncomingDropRef.current(drop, type), []);
+  >((...args) => processIncomingDropRef.current(...args), []);
 
   const setActiveWaveAndRegister = useCallback<ActiveWaveContextData["set"]>(
     (waveId, options) => {

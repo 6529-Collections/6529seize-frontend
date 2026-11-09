@@ -38,6 +38,7 @@ import {
 } from "./order";
 import { isOlderRevision } from "./revision";
 import { isSameRecord } from "./same-record";
+import { reconcileDropMedia } from "@/helpers/waves/drop-media-reconciliation";
 import { SortedIndex } from "./sorted-index";
 import {
   findPendingMatch,
@@ -590,10 +591,11 @@ export class ChatStore {
       context.stale++;
       return;
     }
+    const reconciledDrop = reconcileDropMedia(drop, existing);
     // A copy with nothing new keeps the stored object, so rows showing it
     // stay memoized.
-    if (!isSameRecord(existing, drop)) {
-      this.replaceFull(wave, key, existing, drop);
+    if (!isSameRecord(existing, reconciledDrop)) {
+      this.replaceFull(wave, key, existing, reconciledDrop);
       context.changed = true;
     }
     // A creation frame can follow a feed copy of the same drop.

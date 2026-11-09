@@ -443,6 +443,16 @@ const useProcessIncomingDrop = ({
         return;
       }
 
+      // Settle our POST response before eligibility refreshes or muted-wave
+      // filtering can defer it. The pending row never disappears in between.
+      if (options.pendingDropId && getData(waveId)) {
+        updateData({
+          key: waveId,
+          drops: [buildOptimisticDrop({ drop, existingDrop: null, options })],
+          pendingDropId: options.pendingDropId,
+        });
+      }
+
       const signal = await applyIncomingDrop(drop, waveId, type, options);
 
       // One rule for every socket message that changed a stored wave,
@@ -462,7 +472,7 @@ const useProcessIncomingDrop = ({
         gapSync.noteRealtimeFrame(waveId);
       }
     },
-    [applyIncomingDrop, gapSync, gapSyncEnabled]
+    [applyIncomingDrop, gapSync, gapSyncEnabled, getData, updateData]
   );
 
   const processDropUpdateRef = useDropUpdateRefMessages({

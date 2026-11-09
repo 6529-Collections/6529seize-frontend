@@ -76,6 +76,25 @@ export function removeTemporaryThreadReply(
   waveId: string,
   dropId: string
 ): void {
+  updateTemporaryThreadReply(queryClient, waveId, dropId);
+}
+
+/** Swap a successful send in the query cache without publishing a missing row. */
+export function settleTemporaryThreadReply(
+  queryClient: QueryClient,
+  waveId: string,
+  dropId: string,
+  acceptedDrop: ApiDropWithoutWave
+): void {
+  updateTemporaryThreadReply(queryClient, waveId, dropId, acceptedDrop);
+}
+
+function updateTemporaryThreadReply(
+  queryClient: QueryClient,
+  waveId: string,
+  dropId: string,
+  acceptedDrop?: ApiDropWithoutWave
+): void {
   queryClient
     .getQueriesData<{
       pages: ApiWaveDropsFeed[];
@@ -101,10 +120,27 @@ export function removeTemporaryThreadReply(
         return;
       queryClient.setQueryData(key, {
         ...data,
-        pages: data.pages.map((page) => ({
-          ...page,
-          drops: page.drops.filter((drop) => drop.id !== dropId),
-        })),
+        pages: replaceTemporaryReplyPages(data.pages, dropId, acceptedDrop),
       });
     });
+}
+
+function replaceTemporaryReplyPages(
+  pages: ApiWaveDropsFeed[],
+  dropId: string,
+  acceptedDrop: ApiDropWithoutWave | undefined
+): ApiWaveDropsFeed[] {
+  let acceptedPresent = pages.some((page) =>
+    page.drops.some((drop) => drop.id === acceptedDrop?.id)
+  );
+  return pages.map((page) => ({
+    ...page,
+    drops: page.drops.flatMap((drop) => {
+      if (drop.id !== dropId) return [drop];
+      if (!acceptedDrop || acceptedPresent) return [];
+      // Overlapping pages may contain the same pending ID more than once.
+      acceptedPresent = true;
+      return [acceptedDrop];
+    }),
+  }));
 }
