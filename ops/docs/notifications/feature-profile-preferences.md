@@ -111,8 +111,8 @@ any unrevoked device you own from a browser or app; the server name is shared
 across your devices. **Revoke** explains whether signing, encryption or both
 will stop before you confirm. Revoking this browser opens **Revoke this
 browser?**, which names it as the browser in use; for a combined grant it
-also says the encrypted chats saved here are deleted, says whether a backup
-keeps a copy, and links to the backup section first.
+also says the encrypted chats saved here are deleted and that only messages
+in the last backup can be restored, and links to the backup section first.
 
 The setup action names whichever permissions this device is missing and opens
 the shared consent dialog before a wallet request. It is omitted when both are

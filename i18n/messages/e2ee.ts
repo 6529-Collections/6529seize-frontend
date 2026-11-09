@@ -207,7 +207,7 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.revokeThisDms":
     "This browser stops receiving encrypted DMs, and the encrypted chats saved here are deleted.",
   "e2ee.devices.revokeThisBackupOn":
-    "Your backup keeps a copy. Restore it here later with your recovery code.",
+    "Only messages included in your last backup can be restored.",
   "e2ee.devices.revokeThisBackupOff":
     "Backup is off. The encrypted chats in this browser can’t be restored after this.",
   "e2ee.devices.revokeThisBackupUnknown":
@@ -598,9 +598,11 @@ export const E2EE_MESSAGES = {
   "e2ee.backup.startOver.confirm": "Delete old backup and start over",
   "e2ee.backup.rotate.title": "Replace your recovery code",
   "e2ee.backup.rotate.one":
-    "{label} was active after this backup was set up, so it may still hold the backup key. You revoked it {date}. A new code makes that key useless.",
-  "e2ee.backup.rotate.other":
-    "{labels} were active after this backup was set up, so they may still hold the backup key. You revoked them. A new code makes that key useless.",
+    "You revoked {label} on {date}, after this backup was set up. If it ever restored the backup, it may still hold its key. A new code makes that key useless.",
+  "e2ee.backup.rotate.many.one":
+    "You revoked {count} device after this backup was set up. If it ever restored the backup, it may still hold its key. A new code makes that key useless.",
+  "e2ee.backup.rotate.many.other":
+    "You revoked {count} devices after this backup was set up. If any of them ever restored the backup, it may still hold its key. A new code makes that key useless.",
   "e2ee.backup.code.title": "Save your recovery code",
   "e2ee.backup.code.newTitle": "Save your new recovery code",
   "e2ee.backup.code.description":
