@@ -153,7 +153,162 @@ async function expectMobileCollectorLayout(
   }
 }
 
+async function expectDesktopCollectorLayout(page: Page, section: Locator) {
+  const table = section.getByRole("table");
+  const metrics = [
+    "This card balance",
+    "This card TDH",
+    "This card unweighted TDH",
+    "Total balance",
+    "Total TDH",
+    "Total unweighted TDH",
+  ];
+  await expect(table.getByRole("button")).toHaveCount(6);
+  for (const [index, label] of metrics.entries()) {
+    if (label !== "This card balance") {
+      await table
+        .getByRole("button", { name: `Sort ${label} descending`, exact: true })
+        .click();
+    }
+    const ascending = table.getByRole("button", {
+      name: `Sort ${label} ascending`,
+      exact: true,
+    });
+    const header = table.getByRole("columnheader").nth(index + 4);
+    await expect(header).toHaveAttribute("aria-sort", "descending");
+    await ascending.focus();
+    await page.keyboard.press("Enter");
+    await expect(header).toHaveAttribute("aria-sort", "ascending");
+    const descending = table.getByRole("button", {
+      name: `Sort ${label} descending`,
+      exact: true,
+    });
+    await expect(descending).toBeFocused();
+    await expect(descending).toHaveCSS("outline-style", "solid");
+    await expect(descending).toHaveCSS("outline-width", "2px");
+    await descending.press("Space");
+    await expect(header).toHaveAttribute("aria-sort", "descending");
+  }
+  const collector = table.getByRole("row").nth(2).getByRole("link");
+  await collector.hover();
+  await expect(collector).toHaveCSS("color", "rgb(239, 239, 241)");
+  await page.mouse.move(0, 0);
+  for (const width of [1600, 900, 768]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expect(table).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    const layout = await table.evaluate((element) => {
+      const rows = Array.from(element.querySelectorAll("tbody tr"));
+      const lastRow = rows.at(-1);
+      if (!lastRow) throw new Error("Collector rows must be present");
+      return {
+        width: element.getBoundingClientRect().width,
+        shell: element.parentElement?.clientWidth ?? 0,
+        scrollWidth: element.parentElement?.scrollWidth ?? 0,
+        rows: rows
+          .slice(0, 2)
+          .map((row) => getComputedStyle(row).backgroundColor),
+        cells: rows.flatMap((row) =>
+          Array.from(row.querySelectorAll("td")).map((cell) => ({
+            left: getComputedStyle(cell).borderLeftWidth,
+            right: getComputedStyle(cell).borderRightWidth,
+          }))
+        ),
+        lastBorder: getComputedStyle(lastRow).borderBottomWidth,
+      };
+    });
+    expect(layout.width).toBeGreaterThanOrEqual(1040);
+    if (width <= 900) expect(layout.width).toBeGreaterThan(layout.shell);
+    if (width === 1600) expect(layout.scrollWidth).toBe(layout.shell);
+    expect(layout.rows[0]).toBe(layout.rows[1]);
+    expect(
+      layout.cells.every((cell) => cell.left === "0px" && cell.right === "0px")
+    ).toBe(true);
+    expect(layout.lastBorder).toBe("0px");
+  }
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await page.getByRole("button", { name: "Next page", exact: true }).click();
+  await expect(
+    page.getByRole("textbox", { name: "Page number", exact: true })
+  ).toHaveValue("2");
+  await expect(
+    table.getByRole("row").nth(2).getByRole("cell").first()
+  ).toHaveText("26");
+  await section
+    .getByRole("button", { name: "Filter by identity", exact: true })
+    .click();
+  await page
+    .getByRole("textbox", { name: "Handle, ENS name, or wallet address" })
+    .fill("collector-fixture");
+  await page.getByRole("button", { name: "Add identity filter" }).click();
+  await page.getByRole("button", { name: "Done", exact: true }).click();
+  await expect(table.getByRole("row")).toHaveCount(3);
+  await expect(
+    table.getByRole("row").nth(2).getByRole("cell").first()
+  ).toHaveText("87");
+  const download = page.waitForEvent("download");
+  await section
+    .getByRole("button", { name: "Download collectors leaderboard as CSV" })
+    .click();
+  expect((await download).suggestedFilename()).toBe(
+    "the-memes-1-collectors.csv"
+  );
+  await expect(section.getByRole("status")).toHaveText(
+    "Collectors CSV download ready."
+  );
+  await page.getByRole("button", { name: "Clear all search wallets" }).click();
+  await expect(table.getByRole("row")).toHaveCount(27);
+}
+
 export function defineCollectorsLeaderboardTests() {
+  test("Meme Lab collectors retain mobile controls and toggle the desktop header", async ({
+    page,
+  }) => {
+    await installCollectorsFixture(page);
+    await page.goto("/meme-lab/1?focus=collectors");
+    await waitForRouteReady(page);
+    const section = page
+      .getByRole("heading", { name: "Collectors leaderboard", exact: true })
+      .locator("..")
+      .locator("..");
+    const table = section.getByRole("table");
+    await expect(table.getByRole("row")).toHaveCount(26);
+    for (const width of [390, 767, 768, 900, 1600]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await expectNoHorizontalOverflow(page);
+      await expect(table.getByRole("columnheader")).toHaveCount(3);
+      await expect(table.getByRole("button")).toHaveCount(width < 768 ? 2 : 1);
+      if (width < 768) {
+        await expect(
+          table.getByRole("button", {
+            name: "Sort Balance ascending",
+            exact: true,
+          })
+        ).toBeVisible();
+        await expect(
+          table.getByRole("button", {
+            name: "Sort Balance descending",
+            exact: true,
+          })
+        ).toBeVisible();
+      }
+    }
+    const header = table.getByRole("columnheader").nth(2);
+    await expect(header).toHaveAttribute("aria-sort", "descending");
+    await header
+      .getByRole("button", { name: "Sort Balance ascending", exact: true })
+      .press("Enter");
+    await expect(header).toHaveAttribute("aria-sort", "ascending");
+    await header
+      .getByRole("button", { name: "Sort Balance descending", exact: true })
+      .press("Space");
+    await expect(header).toHaveAttribute("aria-sort", "descending");
+    await page.getByRole("button", { name: "Next page", exact: true }).click();
+    await expect(
+      table.getByRole("row").nth(1).getByRole("cell").first()
+    ).toHaveText("26");
+  });
+
   test("Collectors retains every metric and control across responsive layouts", async ({
     page,
   }) => {
@@ -183,10 +338,11 @@ export function defineCollectorsLeaderboardTests() {
       ).toBeVisible();
       await expect(
         section.getByRole("button", {
-          name: "Sort Balance ascending",
+          name: "Sort This card balance ascending",
           exact: true,
         })
-      ).toHaveCount(2);
+      ).toHaveCount(1);
+      await expectDesktopCollectorLayout(page, section);
       return;
     }
 

@@ -46,7 +46,10 @@ pagination.
    `focus=listings-and-offers` tab shows market prices immediately without a
    second accordion. **View listings & offers** beside the artwork actions opens
    this tab and focuses its market section.
-8. On `Collectors`, review the holder leaderboard.
+8. On `Collectors`, review the holder leaderboard. At 768 px and wider,
+   click the `Balance` column label to switch between high-to-low and low-to-high
+   order. Its arrow shows the current direction. The header supports Enter and
+   Space. Smaller screens retain the separate ascending and descending controls.
 9. On `References`, review linked The Memes cards referenced by the Meme Lab
    card.
 10. On `History`, use the sub-tabs for `Card Activity`, `Your Transactions`

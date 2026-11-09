@@ -87,9 +87,10 @@ describe("NFTLeaderboard component", () => {
     ).closest("tr");
     expect(collectorRow).toHaveClass(
       "tw-group",
-      "even:tw-bg-iron-900/70",
-      "hover:tw-bg-iron-900",
-      "focus-within:tw-bg-iron-900"
+      "md:even:tw-bg-transparent",
+      "md:hover:tw-bg-iron-950",
+      "md:focus-within:tw-bg-iron-950",
+      "md:last:tw-border-b-0"
     );
     expect(commonApiFetch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -373,6 +374,82 @@ describe("NFTLeaderboard component", () => {
       );
     }
   );
+
+  it.each([
+    ["This card balance", "balance"],
+    ["This card TDH", "boosted_tdh"],
+    ["This card unweighted TDH", "tdh__raw"],
+    ["Total balance", "total_balance"],
+    ["Total TDH", "total_boosted_tdh"],
+    ["Total unweighted TDH", "total_tdh__raw"],
+  ])("sorts the desktop %s header in both directions", async (label, key) => {
+    commonApiFetch.mockResolvedValue({ count: 79, page: 1, data: [collector] });
+    renderLeaderboard();
+    const table = within(screen.getByRole("table"));
+    await table.findByText("alice");
+    expect(table.getAllByRole("button")).toHaveLength(6);
+    // Begin with another metric ascending to prove inactive headers start descending.
+    await userEvent.click(
+      table.getByRole("button", {
+        name: "Sort This card balance ascending",
+        exact: true,
+      })
+    );
+    if (key === "balance") {
+      await userEvent.click(
+        table.getByRole("button", {
+          name: "Sort Total TDH descending",
+          exact: true,
+        })
+      );
+      await userEvent.click(
+        table.getByRole("button", {
+          name: "Sort Total TDH ascending",
+          exact: true,
+        })
+      );
+    }
+    await userEvent.click(screen.getByTestId("next"));
+    await userEvent.click(
+      table.getByRole("button", {
+        name: `Sort ${label} descending`,
+        exact: true,
+      })
+    );
+    await waitFor(() =>
+      expect(commonApiFetch).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          endpoint: expect.stringContaining(
+            `page=1&sort=${key}&sort_direction=DESC`
+          ),
+        })
+      )
+    );
+    const button = table.getByRole("button", {
+      name: `Sort ${label} ascending`,
+      exact: true,
+    });
+    expect(button.closest("th")).toHaveAttribute("aria-sort", "descending");
+    expect(
+      table
+        .getAllByRole("columnheader")
+        .filter((header) => header.hasAttribute("aria-sort"))
+    ).toHaveLength(1);
+    button.focus();
+    await userEvent.keyboard("{Enter}");
+    expect(button.closest("th")).toHaveAttribute("aria-sort", "ascending");
+    await waitFor(() =>
+      expect(commonApiFetch).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          endpoint: expect.stringContaining(
+            `page=1&sort=${key}&sort_direction=ASC`
+          ),
+        })
+      )
+    );
+    await userEvent.keyboard(" ");
+    expect(button.closest("th")).toHaveAttribute("aria-sort", "descending");
+  });
 
   it("retains previous rows while loading and uses TDH ranks for filtered results", async () => {
     commonApiFetch.mockResolvedValueOnce({

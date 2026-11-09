@@ -170,8 +170,12 @@
   a tooltip on hover or keyboard focus when the text label is hidden. The button
   shows progress, announces completion, and reports a download failure for retry.
 - At 768 px and wider, the Collectors table shows the same information in
-  columns. Sorting and paging keep the previous rows visible while the next
-  results load.
+  columns under `This card` and `Total`. Click a column label to sort high to
+  low; click the active label again to reverse direction. Every sortable label
+  has a visible indicator. The active column has a direction arrow and brighter
+  values. Headers work with Enter or Space and announce the next sort direction.
+  The table scrolls horizontally when its columns need more room. Sorting and
+  paging keep the previous rows visible while the next results load.
 - In Overview, explore `More by {artist}` for up to four other published Meme
   Cards per credited artist directly after the description, before detailed metadata.
   Cards are ordered by newest card number first. Each preview
