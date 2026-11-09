@@ -29,8 +29,9 @@ jest.mock("@/components/preferences/devices-security/BackupCard", () => ({
 jest.mock("@/components/e2ee/devices/E2eeNewDeviceNotice", () => ({
   E2eeNewDeviceNotice: () => null,
 }));
+let mockDeviceSecurity = { proof: "on", canEnableEncryption: false };
 jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
-  useDeviceSecurityState: () => ({ proof: "on", canEnableEncryption: false }),
+  useDeviceSecurityState: () => mockDeviceSecurity,
 }));
 
 const grant = (id: string, patch: Partial<ApiDeviceGrant> = {}) =>
@@ -105,14 +106,17 @@ const state = (
   retry: jest.fn(),
   localKeysUnreadable: false,
   canRevoke: () => true,
+  revokeBlocker: () => null,
   revoke: jest.fn(async () => undefined),
-  renameThisDevice: jest.fn(async () => undefined),
+  canRename: () => true,
+  rename: jest.fn(async () => undefined),
   ...patch,
 });
 
 describe("DevicesSecuritySettings", () => {
   beforeEach(() => {
     mockState = state();
+    mockDeviceSecurity = { proof: "on", canEnableEncryption: false };
   });
 
   it("pins this browser and groups the rest", () => {
@@ -286,7 +290,7 @@ describe("DevicesSecuritySettings", () => {
     render(<DevicesSecuritySettings />);
     expect(
       screen.getByText(/couldn’t read its own keys, so it can’t tell which device/)
-    ).toHaveAttribute("role", "status");
+    ).toHaveProperty("tagName", "OUTPUT");
     fireEvent.click(
       screen.getByRole("button", { name: "Revoke 6529 app on iPhone" })
     );
@@ -295,7 +299,7 @@ describe("DevicesSecuritySettings", () => {
     ).toBeVisible();
   });
 
-  it("renames this device", async () => {
+  it("renames this device from its card", async () => {
     render(<DevicesSecuritySettings />);
     fireEvent.click(screen.getByRole("button", { name: "Rename" }));
     const dialog = await screen.findByRole("dialog", {
@@ -306,16 +310,105 @@ describe("DevicesSecuritySettings", () => {
     });
     fireEvent.click(within(dialog).getByRole("button", { name: "Save name" }));
     await waitFor(() =>
-      expect(mockState.renameThisDevice).toHaveBeenCalledWith("Work laptop")
+      expect(mockState.rename).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "this" }),
+        "Work laptop"
+      )
     );
   });
 
-  it("offers setup when this browser has no permissions", () => {
+  it("renames any other device from its More menu", async () => {
+    const user = userEvent.setup();
+    render(<DevicesSecuritySettings />);
+    await user.click(
+      screen.getByRole("button", { name: "More actions for 6529 app on iPhone" })
+    );
+    await user.click(await screen.findByRole("menuitem", { name: "Rename…" }));
+    const dialog = await screen.findByRole("dialog", {
+      name: "Rename 6529 app on iPhone",
+    });
+    fireEvent.change(within(dialog).getByLabelText("Device name"), {
+      target: { value: "My phone" },
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Save name" }));
+    await waitFor(() =>
+      expect(mockState.rename).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "phone" }),
+        "My phone"
+      )
+    );
+  });
+
+  it("says why Revoke is missing and offers the next step", () => {
+    mockState = state({
+      canRevoke: (device) => device.id !== "phone",
+      revokeBlocker: (device) => (device.id === "phone" ? "elsewhere" : null),
+    });
+    render(<DevicesSecuritySettings />);
+    const phoneRow = screen
+      .getByText("6529 app on iPhone", { selector: "span" })
+      .closest("li")!;
+    expect(
+      within(phoneRow).queryByRole("button", { name: /^Revoke / })
+    ).toBeNull();
+    expect(
+      within(phoneRow).getByText(
+        "Encrypted DMs are open in another 6529 tab. Use them here to revoke this device."
+      )
+    ).toBeVisible();
+    expect(
+      within(phoneRow).getByRole("button", { name: "Use here" })
+    ).toBeVisible();
+  });
+
+  it("offers setup when this browser has no permissions, before any wallet request", () => {
     mockState = state({ thisDevice: null });
+    mockDeviceSecurity = { proof: "off", canEnableEncryption: false };
+    const setup = jest.fn();
+    window.addEventListener("6529:device-setup", setup, { once: true });
     render(<DevicesSecuritySettings />);
     expect(
       screen.getByText(/This browser has no permissions yet/)
     ).toBeVisible();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Turn on signed posts" })
+    );
+    expect(setup).toHaveBeenCalledWith(
+      expect.objectContaining({ detail: "posts" })
+    );
+  });
+
+  it("hides the turn-on action while this browser has both permissions", () => {
+    render(<DevicesSecuritySettings />);
+    expect(screen.queryByRole("button", { name: /^Turn on/ })).toBeNull();
+  });
+
+  it("names both permissions when revoking a combined device", async () => {
+    render(<DevicesSecuritySettings />);
+    const earlier = screen.getByRole("list", {
+      name: "Earlier setups of this browser · 1",
+    });
+    fireEvent.click(
+      within(earlier).getByRole("button", { name: "Revoke Brave on Windows" })
+    );
+    const dialog = await screen.findByRole("dialog", {
+      name: "Revoke Brave on Windows?",
+    });
+    expect(dialog).toHaveTextContent(
+      "It will stop posting as you and stop receiving encrypted DMs."
+    );
+  });
+
+  it("marks nothing as unknown once this browser's keys were read", async () => {
+    render(<DevicesSecuritySettings />);
+    expect(screen.queryByText(/couldn’t read its own keys/)).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Revoke 6529 app on iPhone" })
+    );
+    await screen.findByRole("dialog", { name: "Revoke 6529 app on iPhone?" });
+    expect(
+      screen.queryByText(/this may be the permission this browser uses/)
+    ).toBeNull();
   });
 
   it("shows loading, a recoverable error and the proxy state", () => {

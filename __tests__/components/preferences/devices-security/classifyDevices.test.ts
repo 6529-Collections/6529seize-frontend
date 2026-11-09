@@ -101,6 +101,24 @@ describe("classifyDevices", () => {
     );
   });
 
+  it("lists a second device claiming the same grant instead of dropping it", () => {
+    const result = classify({
+      grants: [grant("a")],
+      encryptedDevices: [
+        encrypted("e1", { grantId: "a" }),
+        encrypted("e2", { grantId: "a", label: "Second claim" }),
+      ],
+    });
+    expect(result.otherDevices.map(({ id }) => id).sort()).toEqual([
+      "a",
+      "e2",
+    ]);
+    expect(
+      result.otherDevices.find(({ id }) => id === "a")?.encryptedDevice
+        ?.deviceKey
+    ).toBe("e1");
+  });
+
   it("treats an encrypted device whose grant isn't listed as its own row", () => {
     const result = classify({
       encryptedDevices: [encrypted("e1", { grantId: "missing" })],

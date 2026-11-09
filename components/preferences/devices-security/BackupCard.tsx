@@ -12,6 +12,7 @@ import {
   type BackupPillState,
 } from "@/components/e2ee/backup/BackupStatusPill";
 import { E2eeBackupPanel } from "@/components/e2ee/backup/E2eeBackupPanel";
+import { useRequestE2eeEngine } from "@/components/e2ee/e2eeEngineRequest";
 import { hasContent } from "@/components/e2ee/ui/hasContent";
 import Button from "@/components/utils/button/Button";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
@@ -46,12 +47,15 @@ function BackupStateCard({
         </h2>
         {pill ? <BackupStatusPill locale={locale} state={pill} /> : null}
       </div>
-      <p
-        role={busy ? "status" : undefined}
-        className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
-      >
-        {t(locale, bodyKey)}
-      </p>
+      {busy ? (
+        <output className="tw-block tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(locale, bodyKey)}
+        </output>
+      ) : (
+        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(locale, bodyKey)}
+        </p>
+      )}
       {hasContent(action) ? (
         <div className="tw-flex tw-flex-wrap tw-gap-2">{action}</div>
       ) : null}
@@ -66,6 +70,8 @@ function BackupStateCard({
  */
 export function BackupCard() {
   const locale = useBrowserLocale();
+  // Backup lives in the engine: wherever this card is, the engine runs.
+  useRequestE2eeEngine();
   const e2ee = useE2ee();
   const { proof, canEnableEncryption } = useDeviceSecurityState();
   const setupScope = getDeviceSetupScope(proof, canEnableEncryption);

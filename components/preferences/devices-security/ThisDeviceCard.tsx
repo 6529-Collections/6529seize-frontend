@@ -1,7 +1,7 @@
 "use client";
 
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
-import { useId, useState } from "react";
+import { useId } from "react";
 import { CompactMenu } from "@/components/compact-menu";
 import { useDeviceSecurityState } from "@/components/device-signing/DeviceSecurityStatus";
 import {
@@ -9,8 +9,6 @@ import {
   getDeviceSetupTitleKey,
   openDeviceSetup,
 } from "@/components/device-signing/deviceSetup";
-import { RenameDevice } from "@/components/e2ee/devices/RenameDevice";
-import { E2eeDialog } from "@/components/e2ee/ui/E2eeDialog";
 import { useE2eeUpgradeCount } from "@/components/e2ee/useE2eeUpgrade";
 import Button from "@/components/utils/button/Button";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
@@ -44,17 +42,18 @@ function TurnOnMissing() {
 export function ThisDeviceCard({
   device,
   canRevoke,
+  canRename,
   onRevoke,
   onRename,
 }: {
   readonly device: SecurityDevice | null;
   readonly canRevoke: boolean;
+  readonly canRename: boolean;
   readonly onRevoke: (device: SecurityDevice) => void;
-  readonly onRename: (name: string) => Promise<void>;
+  readonly onRename: (device: SecurityDevice) => void;
 }) {
   const locale = useBrowserLocale();
   const titleId = useId();
-  const [renaming, setRenaming] = useState(false);
 
   if (!device) {
     return (
@@ -120,19 +119,17 @@ export function ThisDeviceCard({
         ) : null}
       </div>
       <div className="tw-flex tw-flex-wrap tw-gap-2">
-        <Button variant="secondary" size="sm" onClick={() => setRenaming(true)}>
-          {t(locale, "devicesSecurity.thisDevice.rename")}
-        </Button>
+        {canRename ? (
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => onRename(device)}
+          >
+            {t(locale, "devicesSecurity.thisDevice.rename")}
+          </Button>
+        ) : null}
         <TurnOnMissing />
       </div>
-      <E2eeDialog
-        open={renaming}
-        onClose={() => setRenaming(false)}
-        title={t(locale, "devicesSecurity.thisDevice.renameTitle")}
-        closeLabel={t(locale, "e2ee.action.close")}
-      >
-        <RenameDevice key={device.label} label={device.label} onRename={onRename} />
-      </E2eeDialog>
     </section>
   );
 }

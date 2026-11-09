@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -13,7 +13,7 @@ import {
 } from "@/hooks/device-signing/useDeviceGrants";
 import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
-import { useE2ee } from "@/hooks/e2ee/useE2ee";
+import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
 import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
 import type { E2eeDeviceInfo } from "@/lib/e2ee/types";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
@@ -72,6 +72,69 @@ export class DeviceActionUnavailableError extends Error {
   }
 }
 
+/**
+ * Why Revoke isn't offered for a device that holds encrypted DMs, from the
+ * state of encrypted messages in this browser; each has one next step.
+ */
+export type RevokeBlocker =
+  | "loading"
+  | "elsewhere"
+  | "failed"
+  | "needs-dms"
+  | "device-limit"
+  | "unsupported"
+  | "no-wallet";
+
+const BLOCKERS: Partial<Record<UseE2eeResult["status"], RevokeBlocker>> = {
+  idle: "loading",
+  loading: "loading",
+  elsewhere: "elsewhere",
+  "load-failed": "failed",
+  error: "failed",
+  "needs-enrollment": "needs-dms",
+  enrolling: "needs-dms",
+  "device-limit": "device-limit",
+  unsupported: "unsupported",
+  unavailable: "no-wallet",
+};
+
+/** A rename made through the API, shown until the engine's list catches up. */
+interface LabelOverride {
+  readonly label: string;
+  /** The engine's label when it was renamed; a change means it caught up. */
+  readonly previous: string;
+}
+
+/**
+ * The engine's devices as classify input, with names renamed through the
+ * API shown until the engine's own list has a new name.
+ */
+function useLabelOverrides(engineDevices: readonly E2eeDeviceInfo[]) {
+  const [overrides, setOverrides] = useState<
+    ReadonlyMap<string, LabelOverride>
+  >(new Map());
+  const engineInputs = useMemo(
+    () =>
+      engineDevices.map((device): EncryptedDeviceInput => {
+        const input = fromEngine(device);
+        const override = overrides.get(device.deviceKey);
+        return override?.previous === device.label
+          ? { ...input, label: override.label }
+          : input;
+      }),
+    [engineDevices, overrides]
+  );
+  const remember = (deviceKey: string, label: string) => {
+    const previous =
+      engineDevices.find((device) => device.deviceKey === deviceKey)?.label ??
+      "";
+    setOverrides((current) =>
+      new Map(current).set(deviceKey, { label, previous })
+    );
+  };
+  return { engineInputs, remember };
+}
+
 export interface SecurityDevicesState extends ClassifiedDevices {
   /** Acting as a proxy: devices belong to the profile's own sessions. */
   readonly proxy: boolean;
@@ -82,8 +145,12 @@ export interface SecurityDevicesState extends ClassifiedDevices {
   readonly localKeysUnreadable: boolean;
   /** Whether a device can be revoked from here right now. */
   readonly canRevoke: (device: SecurityDevice) => boolean;
+  /** Why an active device can't be revoked here yet, if that's the reason. */
+  readonly revokeBlocker: (device: SecurityDevice) => RevokeBlocker | null;
   readonly revoke: (device: SecurityDevice) => Promise<void>;
-  readonly renameThisDevice: (name: string) => Promise<void>;
+  /** Whether a device can be renamed from here right now. */
+  readonly canRename: (device: SecurityDevice) => boolean;
+  readonly rename: (device: SecurityDevice, name: string) => Promise<void>;
 }
 
 /**
@@ -106,6 +173,9 @@ export function useSecurityDevices(): SecurityDevicesState {
   const engineReady =
     engine !== null &&
     (e2ee.status === "ready" || e2ee.status === "device-limit");
+  // At the device limit the engine lists devices but this browser has no
+  // registered device to sign a revocation or rename with.
+  const engineCanAct = engine !== null && e2ee.status === "ready";
   const encryptionEnabled = isE2eeEnabled() && profileId !== null;
   const apiDevicesQuery = useQuery({
     queryKey: [QueryKey.E2EE_PROFILE_DEVICES, profileId, listAddress],
@@ -123,21 +193,22 @@ export function useSecurityDevices(): SecurityDevicesState {
   });
   const local = useLocalDeviceKeys(listAddress);
   const now = useMinuteClock();
+  const engineDevices = e2ee.devices;
+  const labels = useLabelOverrides(engineDevices);
 
   const grants = grantsQuery.data ?? EMPTY_GRANTS;
-  const engineDevices = e2ee.devices;
   const apiDevices = apiDevicesQuery.data ?? EMPTY_API_DEVICES;
   const classified = useMemo(
     () =>
       classifyDevices({
         grants,
         encryptedDevices: engineReady
-          ? engineDevices.map(fromEngine)
+          ? labels.engineInputs
           : apiDevices.map(fromApi),
         ownSigningKeys: local.publicKeys,
         now,
       }),
-    [apiDevices, engineDevices, engineReady, grants, local.publicKeys, now]
+    [apiDevices, engineReady, grants, labels.engineInputs, local.publicKeys, now]
   );
 
   // Without the encrypted-DMs list a grant can't be told apart from a
@@ -146,16 +217,22 @@ export function useSecurityDevices(): SecurityDevicesState {
     !encryptionEnabled || engineReady || apiDevicesQuery.isSuccess;
   const canRevoke = (device: SecurityDevice) =>
     encryptedKnown &&
-    ((device.encryptedDms?.status === "active" && engineReady) ||
+    ((device.encryptedDms?.status === "active" && engineCanAct) ||
       device.signedPosts?.status === "active");
+  const revokeBlocker = (device: SecurityDevice): RevokeBlocker | null =>
+    encryptedKnown &&
+    !canRevoke(device) &&
+    device.encryptedDms?.status === "active"
+      ? (BLOCKERS[e2ee.status] ?? null)
+      : null;
+  const canRename = (device: SecurityDevice) =>
+    encryptedKnown &&
+    (device.signedPosts?.status === "active" ||
+      device.encryptedDms?.status === "active");
 
   const revoke = async (device: SecurityDevice) => {
     const encrypted = device.encryptedDevice;
-    if (
-      encrypted &&
-      device.encryptedDms?.status === "active" &&
-      engineReady
-    ) {
+    if (encrypted && device.encryptedDms?.status === "active" && engineCanAct) {
       // A combined grant ends with its device.
       await engine.revokeDevice(encrypted.deviceKey);
       void grantsQuery.refetch();
@@ -173,21 +250,25 @@ export function useSecurityDevices(): SecurityDevicesState {
     throw new DeviceActionUnavailableError();
   };
 
-  const renameThisDevice = async (name: string) => {
-    const device = classified.thisDevice;
-    if (!device) {
+  const rename = async (device: SecurityDevice, name: string) => {
+    const encrypted = device.encryptedDevice;
+    if (encrypted && engineCanAct) {
+      // The engine renames and reloads its list, so the row updates at once.
+      await engine.renameDevice(encrypted.deviceKey, name);
       return;
     }
-    if (device.encryptedDevice && engineReady) {
-      await engine.renameThisDevice(name);
-      return;
-    }
-    if (device.encryptedDevice) {
+    if (encrypted) {
       await commonApiPost<{ label: string }, ApiE2eeDevice>({
-        endpoint: `e2ee/devices/${encodeURIComponent(device.encryptedDevice.deviceKey)}/label`,
+        endpoint: `e2ee/devices/${encodeURIComponent(encrypted.deviceKey)}/label`,
         body: { label: name },
       });
-      await apiDevicesQuery.refetch();
+      if (engineReady) {
+        // The engine's list is shown but can't reload now: show the new
+        // name until its next sync brings it.
+        labels.remember(encrypted.deviceKey, name);
+      } else {
+        await apiDevicesQuery.refetch();
+      }
       return;
     }
     if (device.grant) {
@@ -214,7 +295,9 @@ export function useSecurityDevices(): SecurityDevicesState {
     },
     localKeysUnreadable: local.failed,
     canRevoke,
+    revokeBlocker,
     revoke,
-    renameThisDevice,
+    canRename,
+    rename,
   };
 }

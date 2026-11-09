@@ -8,7 +8,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatList } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { SecurityDevice } from "./classifyDevices";
-import { DeviceMeta, formatPermissionNames } from "./DeviceParts";
+import { DeviceMeta, formatDeviceWithPermissions } from "./DeviceParts";
 
 /**
  * One reviewed revoke for earlier setups of this browser. Every device is
@@ -47,16 +47,22 @@ export function CleanUpDialog({
   const confirm = async () => {
     setPending(true);
     setFailedLabels([]);
-    const failed: string[] = [];
-    let revoked = 0;
-    for (const device of selected) {
-      try {
-        await onRevoke(device);
-        revoked += 1;
-      } catch {
-        failed.push(device.label);
-      }
-    }
+    // One at a time on purpose: each failure is named, and revokes never
+    // race each other through the engine.
+    const { revoked, failed } = await selected.reduce<
+      Promise<{ readonly revoked: number; readonly failed: readonly string[] }>
+    >(
+      async (previous, device) => {
+        const outcome = await previous;
+        try {
+          await onRevoke(device);
+          return { ...outcome, revoked: outcome.revoked + 1 };
+        } catch {
+          return { ...outcome, failed: [...outcome.failed, device.label] };
+        }
+      },
+      Promise.resolve({ revoked: 0, failed: [] })
+    );
     setPending(false);
     if (failed.length > 0) {
       setFailedLabels(failed);
@@ -135,11 +141,7 @@ export function CleanUpDialog({
                 />
                 <label htmlFor={checkboxId} className="tw-min-w-0 tw-flex-1">
                   <span className="tw-block tw-break-words tw-text-sm tw-font-semibold tw-text-iron-100">
-                    {device.label}
-                    <span className="tw-font-normal tw-text-iron-400">
-                      {" · "}
-                      {formatPermissionNames(locale, device)}
-                    </span>
+                    {formatDeviceWithPermissions(locale, device)}
                   </span>
                   <DeviceMeta locale={locale} device={device} />
                 </label>

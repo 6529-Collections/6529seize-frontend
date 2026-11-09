@@ -3,7 +3,6 @@
 import { useId, useState } from "react";
 import { E2eeNewDeviceNotice } from "@/components/e2ee/devices/E2eeNewDeviceNotice";
 import { tCount } from "@/components/e2ee/e2eeFormat";
-import { useRequestE2eeEngine } from "@/components/e2ee/e2eeEngineRequest";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
@@ -13,6 +12,7 @@ import type { SecurityDevice } from "./classifyDevices";
 import { CleanUpDialog } from "./CleanUpDialog";
 import { Disclosure } from "./DeviceParts";
 import { DeviceRow, HistoryRow } from "./DeviceRow";
+import { RenameDeviceDialog } from "./RenameDeviceDialog";
 import { RevokeDeviceDialog } from "./RevokeDeviceDialog";
 import { ThisDeviceCard } from "./ThisDeviceCard";
 import { useSecurityDevices } from "./useSecurityDevices";
@@ -45,11 +45,10 @@ function GroupHeading({
       id={id}
       className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-300"
     >
-      {label}
-      <span className="tw-font-normal tw-text-iron-500">
-        {" · "}
-        {formatInteger(locale, count)}
-      </span>
+      {t(locale, "devicesSecurity.labelWithCount", {
+        label,
+        count: formatInteger(locale, count),
+      })}
     </h3>
   );
 }
@@ -65,8 +64,8 @@ export default function DevicesSecuritySettings() {
   const othersId = useId();
   const earlierId = useId();
   const security = useSecurityDevices();
-  useRequestE2eeEngine(!security.proxy);
   const [target, setTarget] = useState<SecurityDevice | null>(null);
+  const [renaming, setRenaming] = useState<SecurityDevice | null>(null);
   const [cleaningUp, setCleaningUp] = useState(false);
   const [announcement, setAnnouncement] = useState<string | null>(null);
 
@@ -109,12 +108,9 @@ export default function DevicesSecuritySettings() {
         </div>
         {security.localKeysUnreadable ? (
           // Unknown, not "none": no row can be marked as this device.
-          <p
-            role="status"
-            className="tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-200"
-          >
+          <output className="tw-block tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-200">
             {t(locale, "devicesSecurity.localUnreadable")}
-          </p>
+          </output>
         ) : null}
         {security.failed ? (
           <div
@@ -144,8 +140,12 @@ export default function DevicesSecuritySettings() {
                 security.thisDevice !== null &&
                 security.canRevoke(security.thisDevice)
               }
+              canRename={
+                security.thisDevice !== null &&
+                security.canRename(security.thisDevice)
+              }
               onRevoke={setTarget}
-              onRename={security.renameThisDevice}
+              onRename={setRenaming}
             />
             <div className="tw-flex tw-flex-col tw-gap-2">
               <GroupHeading
@@ -167,7 +167,10 @@ export default function DevicesSecuritySettings() {
                       key={device.id}
                       device={device}
                       canRevoke={security.canRevoke(device)}
+                      revokeBlocker={security.revokeBlocker(device)}
+                      canRename={security.canRename(device)}
                       onRevoke={setTarget}
+                      onRename={setRenaming}
                     />
                   ))}
                 </ul>
@@ -203,7 +206,10 @@ export default function DevicesSecuritySettings() {
                       key={device.id}
                       device={device}
                       canRevoke={security.canRevoke(device)}
+                      revokeBlocker={security.revokeBlocker(device)}
+                      canRename={security.canRename(device)}
                       onRevoke={setTarget}
+                      onRename={setRenaming}
                     />
                   ))}
                 </ul>
@@ -211,8 +217,10 @@ export default function DevicesSecuritySettings() {
             ) : null}
             {security.history.length > 0 ? (
               <Disclosure
-                label={t(locale, "devicesSecurity.history.title")}
-                count={formatInteger(locale, security.history.length)}
+                label={t(locale, "devicesSecurity.labelWithCount", {
+                  label: t(locale, "devicesSecurity.history.title"),
+                  count: formatInteger(locale, security.history.length),
+                })}
               >
                 <ul className="tw-m-0 tw-list-none tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0">
                   {security.history.map((device) => (
@@ -227,9 +235,12 @@ export default function DevicesSecuritySettings() {
           </>
         )}
       </section>
-      <p role="status" className="tw-sr-only">
-        {announcement}
-      </p>
+      <output className="tw-sr-only">{announcement}</output>
+      <RenameDeviceDialog
+        device={renaming}
+        onRename={security.rename}
+        onClose={() => setRenaming(null)}
+      />
       <RevokeDeviceDialog
         device={target}
         localKeysUnreadable={security.localKeysUnreadable}

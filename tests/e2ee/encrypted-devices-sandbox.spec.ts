@@ -12,6 +12,7 @@ import {
 import {
   confirmDialog,
   enroll,
+  enrollButton,
   enrollmentHeading,
   ENCRYPTED_ROUTE,
   expectEnrollmentCard,
@@ -28,6 +29,9 @@ import {
 import { DEVICES_SECURITY_MESSAGES } from "../../i18n/messages/devices-security";
 import { e2eeMessage, NEW_DEVICE_NOTICE } from "../support/e2ee/e2eeCopy";
 import { isMobileWebProject } from "../support/surfaceSimulation";
+
+/** First visit compiles routes and loads the MLS WebAssembly module. */
+const FIRST_LOAD_TIMEOUT_MS = 120_000;
 
 /** Other members add a new device after a random 5-30 s delay (8.4). */
 const DEVICE_ADD_TIMEOUT_MS = 30_000 + 2 * E2EE_SYNC_TIMEOUT_MS;
@@ -168,6 +172,39 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     expect(alice.signatureCount()).toBe(1);
     expect(bobPhone.signatureCount()).toBe(1);
     expect(bobLaptop.signatureCount()).toBe(1);
+  });
+
+  test("Devices & security starts encrypted messages on a cold visit", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    // A fresh browser that never opened encrypted messages: no enrollment
+    // marker, no visit to /messages. The tab itself must start the engine.
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    sessions = [alice];
+    await gotoPath(alice.page, "/preferences?tab=security");
+    const backup = alice.page
+      .getByRole("main")
+      .getByRole("region", { name: /^Encrypted backup/u });
+    // A real state, not "Checking your backup…": encrypted DMs are off here.
+    await expect(backup).toContainText(
+      DEVICES_SECURITY_MESSAGES["devicesSecurity.backup.needsDms"],
+      { timeout: FIRST_LOAD_TIMEOUT_MS }
+    );
+    await backup.getByRole("button", { name: /^Turn on/u }).click();
+    await enrollButton(alice.page).click();
+    // After the one signature, the card is the backup itself, off.
+    await expect(
+      backup.getByRole("button", {
+        name: e2eeMessage("e2ee.backup.action.turnOn"),
+      })
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await expect(backup).toContainText(
+      DEVICES_SECURITY_MESSAGES["devicesSecurity.backup.pill.off"]
+    );
+    await expect(thisDeviceCard(alice.page)).toHaveCount(1);
+    expect(alice.signatureCount()).toBe(1);
   });
 
   test("cleared browser storage re-enrolls once and starts without the old history", async ({

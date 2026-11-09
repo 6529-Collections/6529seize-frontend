@@ -150,19 +150,25 @@ function mergeDevices({
   now,
 }: ClassifyDevicesInput): SecurityDevice[] {
   const ownKeys = new Set(ownSigningKeys.map((key) => key.toLowerCase()));
-  const byGrant = new Map(
-    encryptedDevices
-      .filter((device) => device.grantId !== null)
-      .map((device) => [device.grantId, device] as const)
-  );
-  const merged = grants.map((grant) =>
-    buildDevice(grant, byGrant.get(grant.id) ?? null, ownKeys, now)
-  );
   const grantIds = new Set(grants.map((grant) => grant.id));
-  const unmatched = encryptedDevices
-    .filter((device) => device.grantId === null || !grantIds.has(device.grantId))
-    .map((device) => buildDevice(null, device, ownKeys, now));
-  return [...merged, ...unmatched];
+  // One device per grant; a second device claiming the same grant (which
+  // shouldn't happen) is still listed on its own rather than lost.
+  const byGrant = new Map<string, EncryptedDeviceInput>();
+  const unmatched: EncryptedDeviceInput[] = [];
+  for (const device of encryptedDevices) {
+    const grantId = device.grantId;
+    if (grantId !== null && grantIds.has(grantId) && !byGrant.has(grantId)) {
+      byGrant.set(grantId, device);
+    } else {
+      unmatched.push(device);
+    }
+  }
+  return [
+    ...grants.map((grant) =>
+      buildDevice(grant, byGrant.get(grant.id) ?? null, ownKeys, now)
+    ),
+    ...unmatched.map((device) => buildDevice(null, device, ownKeys, now)),
+  ];
 }
 
 const byNewest = (a: SecurityDevice, b: SecurityDevice) =>

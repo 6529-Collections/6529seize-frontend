@@ -28,6 +28,8 @@ export const DEVICES_SECURITY_MESSAGES = {
   "devicesSecurity.chip.postsOff": "Signed posts off",
   "devicesSecurity.chip.dmsOff": "Encrypted DMs off",
   "devicesSecurity.setUp": "Set up {date}",
+  "devicesSecurity.labelWithCount": "{label} · {count}",
+  "devicesSecurity.labelWithPermissions": "{label} · {permissions}",
   "devicesSecurity.unverified": "Couldn’t check its wallet signature",
 
   "devicesSecurity.thisDevice.label": "This device",
@@ -42,7 +44,24 @@ export const DEVICES_SECURITY_MESSAGES = {
   "devicesSecurity.others.empty":
     "No other devices. To add one, open 6529 there and turn on signed posts and encrypted DMs. It takes one wallet signature.",
   "devicesSecurity.revokeUnavailable":
-    "Open encrypted messages in this browser to revoke encrypted DMs here.",
+    "Open encrypted DMs in this browser to revoke this device here.",
+  "devicesSecurity.blocked.loading":
+    "Checking encrypted DMs in this browser. Revoke appears in a moment.",
+  "devicesSecurity.blocked.elsewhere":
+    "Encrypted DMs are open in another 6529 tab. Use them here to revoke this device.",
+  "devicesSecurity.blocked.failed":
+    "Encrypted DMs couldn’t start in this browser. Try again to revoke this device.",
+  "devicesSecurity.blocked.needsDms":
+    "Turn on encrypted DMs in this browser to revoke this device here, or revoke it from a device that has them on.",
+  "devicesSecurity.blocked.deviceLimit":
+    "This browser can’t add encrypted DMs while you have 10 devices. Revoke this one from a device that has them on.",
+  "devicesSecurity.blocked.unsupported":
+    "This browser can’t use encrypted DMs. Revoke this device from one that can.",
+  "devicesSecurity.blocked.noWallet":
+    "Connect the wallet for this profile to revoke this device.",
+  "devicesSecurity.rename.title": "Rename {label}",
+  "devicesSecurity.row.more": "More actions for {label}",
+  "devicesSecurity.row.rename": "Rename…",
 
   "devicesSecurity.earlier.title": "Earlier setups of this browser",
   "devicesSecurity.earlier.body":
@@ -71,8 +90,8 @@ export const DEVICES_SECURITY_MESSAGES = {
   "devicesSecurity.revoke.done": "{label} revoked.",
 
   "devicesSecurity.history.title": "Revoked or expired in the last 30 days",
-  "devicesSecurity.history.revoked": "Revoked {date}",
-  "devicesSecurity.history.expired": "Expired {date}",
+  "devicesSecurity.history.revoked": "Set up {setUp} · Revoked {ended}",
+  "devicesSecurity.history.expired": "Set up {setUp} · Expired {ended}",
   "devicesSecurity.history.note":
     "Revoked devices can’t post as you or read new encrypted messages. Posts they signed earlier stay verifiable.",
 

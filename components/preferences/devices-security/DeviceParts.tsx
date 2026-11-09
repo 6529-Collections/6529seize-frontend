@@ -8,7 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { createElement, useId, useState, type ReactNode } from "react";
 import { formatE2eeLastActive, formatE2eeWallet } from "@/components/e2ee/e2eeFormat";
-import { formatDate } from "@/i18n/format";
+import { formatDate, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -79,8 +79,8 @@ export function PermissionChips({
   );
 }
 
-/** Permissions a device held, as words ("Signed posts, Encrypted DMs"). */
-export function formatPermissionNames(
+/** Permissions a device held, as a locale list ("Signed posts, Encrypted DMs"). */
+function formatPermissionNames(
   locale: SupportedLocale,
   device: SecurityDevice
 ): string {
@@ -91,7 +91,18 @@ export function formatPermissionNames(
   if (device.encryptedDms) {
     names.push(t(locale, "devicesSecurity.chip.dms"));
   }
-  return names.join(", ");
+  return formatList(locale, names, { style: "short", type: "unit" });
+}
+
+/** "{label} · {permissions}" as one translatable line. */
+export function formatDeviceWithPermissions(
+  locale: SupportedLocale,
+  device: SecurityDevice
+): string {
+  return t(locale, "devicesSecurity.labelWithPermissions", {
+    label: device.label,
+    permissions: formatPermissionNames(locale, device),
+  });
 }
 
 /** "Set up … · Last active … · Expires …", plus the wallet when asked. */
@@ -104,27 +115,41 @@ export function DeviceMeta({
   readonly device: SecurityDevice;
   readonly showWallet?: boolean;
 }) {
-  const items = [
-    t(locale, "devicesSecurity.setUp", {
-      date: formatDate(locale, device.createdAt),
-    }),
-    formatE2eeLastActive(locale, device.isThisDevice, device.lastActiveAt),
+  const items: { readonly key: string; readonly text: string }[] = [
+    {
+      key: "set-up",
+      text: t(locale, "devicesSecurity.setUp", {
+        date: formatDate(locale, device.createdAt),
+      }),
+    },
+    {
+      key: "last-active",
+      text: formatE2eeLastActive(
+        locale,
+        device.isThisDevice,
+        device.lastActiveAt
+      ),
+    },
   ];
   if (device.expiresAt !== null) {
-    items.push(
-      t(locale, "e2ee.devices.expires", {
+    items.push({
+      key: "expires",
+      text: t(locale, "e2ee.devices.expires", {
         date: formatDate(locale, device.expiresAt),
-      })
-    );
+      }),
+    });
   }
   const wallet = showWallet ? formatE2eeWallet(device.wallet) : "";
   if (wallet) {
-    items.push(t(locale, "signedMessages.devices.wallet", { address: wallet }));
+    items.push({
+      key: "wallet",
+      text: t(locale, "signedMessages.devices.wallet", { address: wallet }),
+    });
   }
   return (
     <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5 tw-p-0 tw-text-xs tw-text-iron-400">
       {items.map((item) => (
-        <li key={item}>{item}</li>
+        <li key={item.key}>{item.text}</li>
       ))}
     </ul>
   );
@@ -133,11 +158,9 @@ export function DeviceMeta({
 /** A heading-sized disclosure with no default marker (F-19). */
 export function Disclosure({
   label,
-  count,
   children,
 }: {
   readonly label: string;
-  readonly count?: string | undefined;
   readonly children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -158,7 +181,6 @@ export function Disclosure({
           }`}
         />
         <span>{label}</span>
-        {count ? <span className="tw-text-iron-500">· {count}</span> : null}
       </button>
       <div id={panelId} hidden={!open}>
         {open ? children : null}

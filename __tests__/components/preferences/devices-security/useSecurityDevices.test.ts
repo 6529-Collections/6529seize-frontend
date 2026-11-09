@@ -29,15 +29,19 @@ jest.mock("@/hooks/device-signing/useLocalDeviceKeys", () => ({
   useLocalDeviceKeys: () => ({ loaded: true, grant: null, ...mockLocalKeys }),
 }));
 let mockGrants: ApiDeviceGrant[];
+let mockGrantsState = { isLoading: false, isError: false };
+let mockGrantsAddress: string | null | undefined;
 const mockGrantsRefetch = jest.fn();
 const mockRevokeGrant = jest.fn();
 jest.mock("@/hooks/device-signing/useDeviceGrants", () => ({
-  useDeviceGrants: () => ({
-    data: mockGrants,
-    isLoading: false,
-    isError: false,
-    refetch: mockGrantsRefetch,
-  }),
+  useDeviceGrants: (address: string | null) => {
+    mockGrantsAddress = address;
+    return {
+      data: mockGrants,
+      ...mockGrantsState,
+      refetch: mockGrantsRefetch,
+    };
+  },
   useRevokeDeviceGrant: () => ({ revoke: mockRevokeGrant, isRevoking: false }),
 }));
 let mockE2ee: Record<string, unknown>;
@@ -107,7 +111,7 @@ const apiDevice = (key: string, patch: Partial<ApiE2eeDevice> = {}) =>
 
 const engine = {
   revokeDevice: jest.fn(async () => undefined),
-  renameThisDevice: jest.fn(async () => undefined),
+  renameDevice: jest.fn(async () => undefined),
 };
 
 describe("useSecurityDevices", () => {
@@ -121,6 +125,8 @@ describe("useSecurityDevices", () => {
     mockE2eeEnabled = true;
     mockLocalKeys = { failed: false, publicKeys: [] };
     mockGrants = [];
+    mockGrantsState = { isLoading: false, isError: false };
+    mockGrantsAddress = undefined;
     mockApiQuery = { data: undefined, isSuccess: false, isLoading: false, isError: false, refetch: jest.fn() };
     mockE2ee = { engine: null, status: "idle", devices: [] };
     mockRevokeGrant.mockResolvedValue(true);
@@ -207,16 +213,64 @@ describe("useSecurityDevices", () => {
     });
   });
 
-  describe("renaming this device", () => {
-    it("renames through the engine when it runs", async () => {
+  describe("renaming", () => {
+    it("renames any device through the engine, which reloads its list", async () => {
       mockE2ee = {
         engine,
         status: "ready",
-        devices: [engineDevice("e1", { isThisDevice: true })],
+        devices: [engineDevice("e1", { label: "Old name" })],
       };
       const { result } = renderHook(() => useSecurityDevices());
-      await act(() => result.current.renameThisDevice("Work laptop"));
-      expect(engine.renameThisDevice).toHaveBeenCalledWith("Work laptop");
+      const [device] = result.current.otherDevices;
+      expect(result.current.canRename(device!)).toBe(true);
+      await act(() => result.current.rename(device!, "Work laptop"));
+      expect(engine.renameDevice).toHaveBeenCalledWith("e1", "Work laptop");
+      expect(mockApiPost).not.toHaveBeenCalled();
+    });
+
+    it("renames through the API and shows the name until the engine's list catches up", async () => {
+      mockE2ee = {
+        engine,
+        status: "device-limit",
+        devices: [engineDevice("e1", { label: "Old name" })],
+      };
+      const { result, rerender } = renderHook(() => useSecurityDevices());
+      await act(() =>
+        result.current.rename(result.current.otherDevices[0]!, "Work laptop")
+      );
+      expect(engine.renameDevice).not.toHaveBeenCalled();
+      expect(mockApiPost).toHaveBeenCalledWith({
+        endpoint: "e2ee/devices/e1/label",
+        body: { label: "Work laptop" },
+      });
+      expect(result.current.otherDevices[0]?.label).toBe("Work laptop");
+
+      // A later sync brings a newer name; the engine's list wins again.
+      mockE2ee = {
+        ...mockE2ee,
+        devices: [engineDevice("e1", { label: "Renamed elsewhere" })],
+      };
+      rerender();
+      expect(result.current.otherDevices[0]?.label).toBe("Renamed elsewhere");
+    });
+
+    it("renames through the API and reloads the API list while the engine can't run", async () => {
+      const refetch = jest.fn();
+      mockApiQuery = {
+        ...mockApiQuery,
+        isSuccess: true,
+        refetch,
+        data: [apiDevice("0xabc")],
+      };
+      const { result } = renderHook(() => useSecurityDevices());
+      await act(() =>
+        result.current.rename(result.current.otherDevices[0]!, "Phone")
+      );
+      expect(mockApiPost).toHaveBeenCalledWith({
+        endpoint: "e2ee/devices/0xabc/label",
+        body: { label: "Phone" },
+      });
+      expect(refetch).toHaveBeenCalled();
     });
 
     it("renames a signed-posts-only grant through the API", async () => {
@@ -224,19 +278,91 @@ describe("useSecurityDevices", () => {
       mockGrants = [grant("a", { device_key: OWN_KEY })];
       mockLocalKeys = { failed: false, publicKeys: [OWN_KEY] };
       const { result } = renderHook(() => useSecurityDevices());
-      await act(() => result.current.renameThisDevice("Work laptop"));
+      await act(() =>
+        result.current.rename(result.current.thisDevice!, "Work laptop")
+      );
       expect(mockApiPost).toHaveBeenCalledWith({
         endpoint: "device-grants/a/label",
         body: { label: "Work laptop" },
       });
+      expect(mockGrantsRefetch).toHaveBeenCalled();
+    });
+
+    it("waits to rename until it knows which grants are combined", () => {
+      mockGrants = [grant("a")];
+      const { result } = renderHook(() => useSecurityDevices());
+      expect(result.current.canRename(result.current.otherDevices[0]!)).toBe(
+        false
+      );
     });
   });
 
-  it("reports a proxy session and unreadable local keys", () => {
+  describe("why Revoke is missing", () => {
+    it.each([
+      ["elsewhere", "elsewhere"],
+      ["load-failed", "failed"],
+      ["needs-enrollment", "needs-dms"],
+      ["unsupported", "unsupported"],
+      ["loading", "loading"],
+    ])("explains an encrypted-only device while the engine is %s", (status, blocker) => {
+      mockE2ee = { engine: null, status, devices: [] };
+      mockApiQuery = { ...mockApiQuery, isSuccess: true, data: [apiDevice("0xabc")] };
+      const { result } = renderHook(() => useSecurityDevices());
+      const [device] = result.current.otherDevices;
+      expect(result.current.canRevoke(device!)).toBe(false);
+      expect(result.current.revokeBlocker(device!)).toBe(blocker);
+    });
+
+    it("can't sign a revocation at the device limit, and says so", () => {
+      mockE2ee = {
+        engine,
+        status: "device-limit",
+        devices: [engineDevice("e1")],
+      };
+      const { result } = renderHook(() => useSecurityDevices());
+      const [device] = result.current.otherDevices;
+      expect(result.current.canRevoke(device!)).toBe(false);
+      expect(result.current.revokeBlocker(device!)).toBe("device-limit");
+    });
+
+    it("needs no explanation where Revoke is offered", () => {
+      mockGrants = [grant("a")];
+      mockE2eeEnabled = false;
+      const { result } = renderHook(() => useSecurityDevices());
+      expect(result.current.revokeBlocker(result.current.otherDevices[0]!)).toBeNull();
+    });
+  });
+
+  it("loads nothing for a proxy session", () => {
     mockAuth = { ...mockAuth, activeProfileProxy: { id: "proxy" } };
-    mockLocalKeys = { failed: true, publicKeys: [] };
     const { result } = renderHook(() => useSecurityDevices());
     expect(result.current.proxy).toBe(true);
+    expect(mockGrantsAddress).toBeNull();
+    expect(mockApiQueryEnabled).toBe(false);
+  });
+
+  it("reports unreadable local keys, and nothing while they are readable", () => {
+    mockLocalKeys = { failed: true, publicKeys: [] };
+    const { result, rerender } = renderHook(() => useSecurityDevices());
     expect(result.current.localKeysUnreadable).toBe(true);
+    mockLocalKeys = { failed: false, publicKeys: [OWN_KEY] };
+    rerender();
+    expect(result.current.localKeysUnreadable).toBe(false);
+  });
+
+  it("reports loading and a failure, and retries both lists", () => {
+    mockGrantsState = { isLoading: true, isError: false };
+    const { result, rerender } = renderHook(() => useSecurityDevices());
+    expect(result.current.loading).toBe(true);
+
+    const apiRefetch = jest.fn();
+    mockGrantsState = { isLoading: false, isError: true };
+    mockApiQuery = { ...mockApiQuery, refetch: apiRefetch };
+    rerender();
+    expect(result.current.loading).toBe(false);
+    expect(result.current.failed).toBe(true);
+    act(() => result.current.retry());
+    expect(mockGrantsRefetch).toHaveBeenCalled();
+    expect(apiRefetch).toHaveBeenCalled();
   });
 });

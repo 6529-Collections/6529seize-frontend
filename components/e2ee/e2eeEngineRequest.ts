@@ -12,7 +12,7 @@ let requests = 0;
 const listeners = new Set<() => void>();
 
 const notify = () => {
-  for (const listener of [...listeners]) {
+  for (const listener of listeners) {
     listener();
   }
 };

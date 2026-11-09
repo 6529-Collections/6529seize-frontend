@@ -350,6 +350,8 @@ export interface E2eeEngine {
   ignoreDevice(deviceKey: string): Promise<void>;
   revokeDevice(deviceKey: string): Promise<void>;
   renameThisDevice(label: string): Promise<void>; // local label only is fine
+  /** Renames one of this profile's devices on the server and reloads the list. */
+  renameDevice(deviceKey: string, label: string): Promise<void>;
 }
 
 export interface E2eeEngineDeps {

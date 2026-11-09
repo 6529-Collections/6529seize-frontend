@@ -239,6 +239,7 @@ export function createFakeE2eeEngine(
     ignoreDevice: jest.fn(async () => undefined),
     revokeDevice: jest.fn(async () => undefined),
     renameThisDevice: jest.fn(async () => undefined),
+    renameDevice: jest.fn(async () => undefined),
   };
   return engine;
 }
