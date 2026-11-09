@@ -156,10 +156,10 @@ function SignedMessagesNoticeContent({
         )}
       </div>
       <div
-        className={`tw-flex tw-flex-wrap tw-items-center tw-gap-1 ${
+        className={`tw-items-center tw-gap-1 ${
           isAlert
-            ? "tw-col-span-2 tw-col-start-2 tw-row-start-2 sm:tw-col-span-1 sm:tw-col-start-3 sm:tw-row-start-1"
-            : "tw-col-start-3 tw-row-start-1"
+            ? "tw-col-span-2 tw-col-start-2 tw-row-start-2 tw-grid tw-w-fit tw-max-w-full tw-grid-cols-2 sm:tw-col-span-1 sm:tw-col-start-3 sm:tw-row-start-1"
+            : "tw-col-start-3 tw-row-start-1 tw-flex tw-flex-wrap"
         }`}
       >
         {model.kind === "new-device" && (
