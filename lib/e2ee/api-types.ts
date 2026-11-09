@@ -9,9 +9,17 @@ import type { E2eeEligibilityReason } from "./types";
 export type ApiE2eePlatform = "web" | "desktop" | "phone";
 
 export interface ApiE2eeDeviceGrant {
+  /**
+   * 1 (or absent): MlsDeviceGrant v1, one signed `ciphersuite`. 2: v2, a
+   * signed suite set in `ciphersuites` (D172).
+   */
+  version?: 1 | 2;
   wallet: string;
   device_key: string;
+  /** v1: the signed suite; v2: the lowest entry of `ciphersuites`. */
   ciphersuite: number;
+  /** v2: the signed suites, strictly ascending (1 to 4). */
+  ciphersuites?: number[];
   issued_at: number;
   expires_at: number;
   origin: string;
@@ -98,6 +106,8 @@ export interface ApiE2eeClaimKeyPackagesRequest {
   targets: ApiE2eeClaimTarget[];
   group?: string;
   claimer_device_key: string;
+  /** The group's MLS suite; omitted means 0x004F (D172). */
+  ciphersuite?: number;
 }
 
 interface ApiE2eeClaimedKeyPackage {
@@ -120,6 +130,8 @@ export interface ApiE2eeClaimKeyPackagesResponse {
 
 export interface ApiE2eeEligibilityRequest {
   profile_ids: string[];
+  /** Count only devices that can join groups of this suite (D172). */
+  ciphersuite?: number;
 }
 
 export interface ApiE2eeEligibilityItem {

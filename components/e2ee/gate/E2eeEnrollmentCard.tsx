@@ -21,7 +21,7 @@ import SignedMessagesEnableStatus from "@/components/device-signing/SignedMessag
 import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
-  DEVICE_SETUP_TITLE,
+  getDeviceSetupTitleKey,
   type DeviceSetupScope,
 } from "@/components/device-signing/deviceSetup";
 import { faSignature } from "@fortawesome/free-solid-svg-icons";
@@ -36,7 +36,9 @@ import {
   getE2eeErrorCode,
   isE2eeSignatureRejection,
 } from "../e2eeErrors";
+import { tCount } from "../e2eeFormat";
 import { isSafariBrowser } from "../e2eePlatform";
+import { useE2eeUpgradeCount } from "../useE2eeUpgrade";
 import { turnOnWithCombinedSignIn } from "./e2eeCombinedTurnOn";
 
 const POINTS: readonly {
@@ -70,18 +72,62 @@ const ENROLL_REJECTED_KEY: MessageKey = "e2ee.enroll.rejected";
 
 const subscribeNever = () => () => undefined;
 
-const getEnrollErrorKey = (error: unknown): MessageKey =>
-  isE2eeSignatureRejection(error) ||
-  getE2eeErrorCode(error) === E2EE_SIGNATURE_REJECTED
-    ? ENROLL_REJECTED_KEY
-    : "e2ee.enroll.failed";
+const getEnrollErrorKey = (error: unknown, upgrading: boolean): MessageKey => {
+  if (
+    isE2eeSignatureRejection(error) ||
+    getE2eeErrorCode(error) === E2EE_SIGNATURE_REJECTED
+  ) {
+    return ENROLL_REJECTED_KEY;
+  }
+  return upgrading ? "e2ee.upgrade.failed" : "e2ee.enroll.failed";
+};
+
+/** Upgrade copy (D172) replaces first-time copy for encrypted DMs alone. */
+const getSignLabelKey = (
+  scope: DeviceSetupScope,
+  upgrading: boolean
+): MessageKey =>
+  upgrading && scope === "dms" ? "e2ee.upgrade.sign" : SIGN_LABEL[scope];
+
+function EncryptionIntro({
+  upgradeCount,
+}: {
+  readonly upgradeCount: number | null;
+}) {
+  const locale = useBrowserLocale();
+  if (upgradeCount === null) {
+    return (
+      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-300">
+        {t(locale, "e2ee.enroll.intro")}
+      </p>
+    );
+  }
+  return (
+    <>
+      <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-200">
+        {t(locale, "e2ee.upgrade.intro")}
+      </p>
+      {upgradeCount > 0 ? (
+        <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-300">
+          {tCount(
+            locale,
+            { one: "e2ee.upgrade.kept.one", other: "e2ee.upgrade.kept.other" },
+            upgradeCount
+          )}
+        </p>
+      ) : null}
+    </>
+  );
+}
 
 function SetupPermissionCopy({
   scope,
   isNative,
+  upgradeCount,
 }: {
   readonly scope: DeviceSetupScope;
   readonly isNative: boolean;
+  readonly upgradeCount: number | null;
 }) {
   const locale = useBrowserLocale();
   const includesSigning = scope !== "dms";
@@ -121,9 +167,7 @@ function SetupPermissionCopy({
               {t(locale, "e2ee.enroll.encryptionSection")}
             </h3>
           )}
-          <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-leading-5 tw-text-iron-300">
-            {t(locale, "e2ee.enroll.intro")}
-          </p>
+          <EncryptionIntro upgradeCount={upgradeCount} />
           <ul className="tw-m-0 tw-mt-3 tw-flex tw-list-none tw-flex-col tw-gap-3 tw-p-0">
             {POINTS.map(({ key, Icon }) => (
               <li key={key} className="tw-flex tw-items-start tw-gap-3">
@@ -184,6 +228,8 @@ export function E2eeEnrollmentCard({
   const selectedScope = alternateScope ?? scope;
   const [offerSeparateSetup, setOfferSeparateSetup] = useState(false);
   const includesEncryption = selectedScope !== "posts";
+  const upgradeCount = useE2eeUpgradeCount(engine);
+  const upgrading = includesEncryption && upgradeCount !== null;
   const headingId = useId();
   const { requestSignedMessagesGrant } = useAuth();
   const { address } = useSeizeConnectContext();
@@ -314,7 +360,7 @@ export function E2eeEnrollmentCard({
         }
       } catch (error) {
         setNoticeKey(null);
-        setErrorKey(getEnrollErrorKey(error));
+        setErrorKey(getEnrollErrorKey(error, upgrading));
         return {
           success: false,
           reason: isE2eeSignatureRejection(error)
@@ -332,6 +378,7 @@ export function E2eeEnrollmentCard({
       requestSignedMessagesGrant,
       selectedScope,
       showPartial,
+      upgrading,
       watchFinishing,
     ]
   );
@@ -369,7 +416,7 @@ export function E2eeEnrollmentCard({
             id={headingId}
             className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
           >
-            {t(locale, DEVICE_SETUP_TITLE[selectedScope])}
+            {t(locale, getDeviceSetupTitleKey(selectedScope, upgrading))}
           </h2>
         )}
         <div
@@ -379,7 +426,11 @@ export function E2eeEnrollmentCard({
               : undefined
           }
         >
-          <SetupPermissionCopy scope={selectedScope} isNative={isCapacitor} />
+          <SetupPermissionCopy
+            scope={selectedScope}
+            isNative={isCapacitor}
+            upgradeCount={upgrading ? upgradeCount : null}
+          />
           {details}
           {isSafari && includesEncryption ? (
             <p className="tw-mb-0 tw-mt-3 tw-rounded-lg tw-bg-amber-500/10 tw-p-3 tw-text-sm tw-leading-5 tw-text-amber-100">
@@ -404,7 +455,7 @@ export function E2eeEnrollmentCard({
               aria-busy={waiting || encryptionLoading}
               className="!tw-whitespace-normal tw-text-center"
             >
-              {t(locale, SIGN_LABEL[selectedScope])}
+              {t(locale, getSignLabelKey(selectedScope, upgrading))}
             </Button>
             {onClose && (
               <Button

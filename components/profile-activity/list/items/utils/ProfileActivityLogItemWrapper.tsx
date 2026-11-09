@@ -52,33 +52,36 @@ export default function ProfileActivityLogItemWrapper({
     <div className="tw-group tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-p-4 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 hover:tw-border-white/[0.12] hover:tw-bg-iron-900/80">
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-x-3">
-          {!isArchived &&
-            (avatarSrc ? (
-              <Image
-                src={avatarSrc}
-                alt={handleOrWallet}
-                width={24}
-                height={24}
-                sizes="24px"
-                unoptimized={
-                  !parseDecentralizedMediaRef(pfp) ||
-                  isGifImageUrl(avatarSrc) ||
-                  failedAvatarSrc === avatarSrc
-                }
-                onError={() => setFailedAvatarSrc(avatarSrc)}
-                className="tw-mt-0.5 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700 tw-object-cover sm:tw-mt-0"
-              />
-            ) : (
-              <div className="tw-mt-0.5 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700 sm:tw-mt-0" />
-            ))}
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1">
+          <div
+            className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${isArchived ? "" : "tw-pl-9"}`}
+          >
             {!isArchived && (
-              <CommonProfileLink
-                handleOrWallet={handleOrWallet}
-                isCurrentUser={isCurrentUser}
-                tabTarget={tabTarget}
-                textClassName={`tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-100 ${PROFILE_ACTIVITY_EMPHASIS}`}
-              />
+              <span className="-tw-ml-9 tw-inline-flex tw-shrink-0 tw-items-center tw-gap-x-3">
+                {avatarSrc ? (
+                  <Image
+                    src={avatarSrc}
+                    alt={handleOrWallet}
+                    width={24}
+                    height={24}
+                    sizes="24px"
+                    unoptimized={
+                      !parseDecentralizedMediaRef(pfp) ||
+                      isGifImageUrl(avatarSrc) ||
+                      failedAvatarSrc === avatarSrc
+                    }
+                    onError={() => setFailedAvatarSrc(avatarSrc)}
+                    className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700 tw-object-cover"
+                  />
+                ) : (
+                  <span className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700" />
+                )}
+                <CommonProfileLink
+                  handleOrWallet={handleOrWallet}
+                  isCurrentUser={isCurrentUser}
+                  tabTarget={tabTarget}
+                  textClassName={`tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-100 ${PROFILE_ACTIVITY_EMPHASIS}`}
+                />
+              </span>
             )}
             {children}
           </div>

@@ -81,7 +81,10 @@ export const appGrantToRequest = (
     device_key: fields.deviceKeyHex,
     scopes: [...fields.scopes],
     mls_device_key: fields.mls?.deviceKeyHex ?? null,
-    ciphersuite: fields.mls?.ciphersuite ?? null,
+    // Grant v2 (D172): the signed set, its lowest entry as `ciphersuite`.
+    version: 2,
+    ciphersuite: fields.mls?.ciphersuites[0] ?? null,
+    ciphersuites: [...(fields.mls?.ciphersuites ?? [])],
     issued_at: fields.issuedAtSeconds,
     expires_at: fields.expiresAtSeconds,
     origin: fields.origin,
@@ -102,7 +105,7 @@ async function prepareFields(
       mls: request.e2eeDevice
         ? {
             deviceKeyHex: request.e2eeDevice.deviceKeyHex,
-            ciphersuite: request.e2eeDevice.ciphersuite,
+            ciphersuites: request.e2eeDevice.ciphersuites,
           }
         : null,
       ...appGrantTimes((request.now ?? Date.now)()),

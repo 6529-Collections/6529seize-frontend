@@ -67,10 +67,11 @@ describe("E2EE engine: sync paths", () => {
     bob.primary.engine.dispose();
   });
 
-  it("polls an opened conversation every 5 s at once, not after the idle poll", async () => {
+  it("polls an opened conversation every 5 s even after a local lookup-resume event", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");
     const armed: number[] = [];
+    let wake: ((event: { type: string; data: unknown }) => void) | undefined;
     const scheduler = {
       setTimeout: (fire: () => void, ms: number) => {
         armed.push(ms);
@@ -78,12 +79,16 @@ describe("E2EE engine: sync paths", () => {
       },
       clearTimeout: world.scheduler.clearTimeout,
     };
-    const bob = await addUser(
-      world,
-      "bob",
-      { polling: true, scheduler },
-      { noWake: true }
-    );
+    const bob = await addUser(world, "bob", {
+      polling: true,
+      scheduler,
+      onWake: (listener) => {
+        wake = listener;
+        return () => {
+          wake = undefined;
+        };
+      },
+    });
     const g = await alice.primary.engine.createConversation({
       profileIds: ["bob"],
       kind: "dm",
@@ -92,6 +97,8 @@ describe("E2EE engine: sync paths", () => {
       await waitFor(
         () => bob.primary.engine.getConversation(g)?.status === "active"
       );
+      expect(wake).toBeDefined();
+      wake?.({ type: "E2EE_LOOKUP_RESUME", data: {} });
       armed.length = 0;
       bob.primary.engine.setOpenConversation(g);
       // Re-armed at once at the open-conversation cadence (contract 12).

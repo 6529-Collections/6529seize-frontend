@@ -7,6 +7,8 @@ line breaks. Mobile web and the app use Return for a line break and the visible
 Send button for submission.
 
 - Desktop web: `Enter` submits when submit is allowed.
+- After an accepted desktop chat send with `Enter`, the empty composer keeps
+  focus so you can immediately type the next message.
 - Desktop web: `Shift+Enter` inserts a new paragraph.
 - Mobile web and the app: an accepted chat send removes input focus and dismisses
   the keyboard. Canceled authentication and refused or failed submissions keep

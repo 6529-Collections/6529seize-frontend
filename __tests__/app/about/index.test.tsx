@@ -15,9 +15,10 @@ jest.mock("@/contexts/TitleContext", () => ({
   useSetTitle: () => mockSetTitle,
 }));
 
+let mockIsIos = false;
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => ({ isIos: true }),
+  default: () => ({ isIos: mockIsIos }),
 }));
 
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
@@ -32,6 +33,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
 describe("About index page", () => {
   beforeEach(() => {
+    mockIsIos = false;
     country = "US";
     mockSetTitle.mockClear();
   });
@@ -104,6 +106,7 @@ describe("About index page", () => {
   });
 
   it("keeps subscription links hidden for restricted iOS users", () => {
+    mockIsIos = true;
     country = "DE";
 
     render(<AboutIndexPage />);

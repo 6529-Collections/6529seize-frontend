@@ -1,29 +1,52 @@
 import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
+import type { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
-// A prepared upload can only be reused by the account/proxy that uploaded it.
+// A prepared upload can only be reused by the account/proxy that uploaded it,
+// and only for the purpose it was uploaded with: chat media is stripped of
+// identifying metadata, while decision-entry media keeps the original file.
 const preparedImages = new WeakMap<
   File,
-  { owner: string; media: ApiDropMedia }
+  { owner: string; purpose: ApiMediaUploadPurpose; media: ApiDropMedia }
 >();
 
 export const getDropUploadOwner = (): string =>
   `${getWalletAddress()?.toLowerCase() ?? ""}:${getWalletRole() ?? ""}`;
 
-export function getPreparedDropImage(file: File): ApiDropMedia | undefined {
+function getOwnedPreparedDropImage(file: File) {
   const prepared = preparedImages.get(file);
-  return prepared?.owner === getDropUploadOwner() ? prepared.media : undefined;
+  return prepared?.owner === getDropUploadOwner() ? prepared : undefined;
+}
+
+/** The prepared upload to reuse when posting `file` with `purpose`. */
+export function getPreparedDropImage(
+  file: File,
+  purpose: ApiMediaUploadPurpose
+): ApiDropMedia | undefined {
+  const prepared = getOwnedPreparedDropImage(file);
+  return prepared?.purpose === purpose ? prepared.media : undefined;
+}
+
+/**
+ * The prepared upload to show in the composer's own preview. The preview is
+ * never posted, so an upload prepared for either purpose will do.
+ */
+export function getPreparedDropImagePreview(
+  file: File
+): ApiDropMedia | undefined {
+  return getOwnedPreparedDropImage(file)?.media;
 }
 
 export function rememberPreparedDropImage(
   file: File,
   media: ApiDropMedia,
-  owner: string
+  owner: string,
+  purpose: ApiMediaUploadPurpose
 ): void {
-  preparedImages.set(file, { owner, media });
+  preparedImages.set(file, { owner, purpose, media });
 }
 
 export async function validateDropImageSignature(

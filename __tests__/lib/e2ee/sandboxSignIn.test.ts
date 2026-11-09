@@ -13,7 +13,7 @@ import {
   isExpectedDeviceGrantMessage,
   parseDeviceGrantMessage,
 } from "@/lib/device-signing/grant-message";
-import { E2EE_CIPHERSUITE } from "@/lib/e2ee/grant";
+import { E2EE_GRANT_SUITES } from "@/lib/e2ee/grant";
 
 jest.mock("@/config/devAuth", () => ({ isDevLikeEnv: () => true }));
 
@@ -35,8 +35,9 @@ const nonceQuery = (address: string, mls = true) => ({
   device_key: SIGNING_KEY,
   device_key_type: "ed25519",
   device_scopes: DEFAULT_DEVICE_SCOPES.join(","),
+  // What the app asks for since D172: a v2 suite set.
   ...(mls
-    ? { mls_device_key: MLS_KEY, mls_ciphersuite: String(E2EE_CIPHERSUITE) }
+    ? { mls_device_key: MLS_KEY, mls_ciphersuites: E2EE_GRANT_SUITES.join(".") }
     : {}),
 });
 
@@ -77,7 +78,7 @@ describe("E2EE sandbox sign-in challenges", () => {
     expect(
       isExpectedDeviceGrantMessage({
         ...expected,
-        mls: { deviceKeyHex: MLS_KEY, ciphersuite: E2EE_CIPHERSUITE },
+        mls: { deviceKeyHex: MLS_KEY, ciphersuites: E2EE_GRANT_SUITES },
       })
     ).toBe(true);
     // Never a signing-only grant in disguise, nor another MLS key.
@@ -85,20 +86,23 @@ describe("E2EE sandbox sign-in challenges", () => {
     expect(
       isExpectedDeviceGrantMessage({
         ...expected,
-        mls: { deviceKeyHex: SIGNING_KEY, ciphersuite: E2EE_CIPHERSUITE },
+        mls: { deviceKeyHex: SIGNING_KEY, ciphersuites: E2EE_GRANT_SUITES },
       })
     ).toBe(false);
     expect(parseDeviceGrantMessage(body.signable_message)).toMatchObject({
       domain: "localhost:3299",
       chainId: 1,
-      mls: { deviceKeyHex: MLS_KEY, ciphersuite: E2EE_CIPHERSUITE },
+      mls: {
+        version: 2,
+        deviceKeyHex: MLS_KEY,
+        ciphersuites: [...E2EE_GRANT_SUITES],
+      },
     });
   });
 
   it("answers a grant v2 request (a suite set) with a v2 resource", () => {
-    const { mls_ciphersuite: _v1, ...query } = nonceQuery(account.address);
     const { status, body } = signIn.issueNonce(
-      { ...query, mls_ciphersuites: "78.79" },
+      { ...nonceQuery(account.address), mls_ciphersuites: "78.79" },
       ORIGIN
     );
     expect(status).toBe(200);

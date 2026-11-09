@@ -2,7 +2,10 @@
 
 import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { getEncryptedConversationRoute } from "@/helpers/navigation.helpers";
+import {
+  getEncryptedConversationRoute,
+  getEncryptedMessagesRoute,
+} from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -27,6 +30,7 @@ const STATUS_KEYS: Partial<Record<E2eeConversation["status"], MessageKey>> = {
   left: "e2ee.list.status.left",
   removed: "e2ee.list.status.removed",
   restored: "e2ee.list.status.restored",
+  superseded: "e2ee.list.status.superseded",
 };
 
 function ConversationAvatar({
@@ -186,7 +190,9 @@ function E2eeConversationRow({
   const locale = useBrowserLocale();
   const title = getConversationTitle(locale, conversation, selfProfileId);
   const statusKey = STATUS_KEYS[conversation.status];
-  const href = getEncryptedConversationRoute(conversation.g);
+  const href = active
+    ? getEncryptedMessagesRoute()
+    : getEncryptedConversationRoute(conversation.g);
   const hasUnread =
     !muted && (conversation.unread > 0 || conversation.mentions > 0);
   const rowClass = active

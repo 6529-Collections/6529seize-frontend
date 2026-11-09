@@ -2,10 +2,12 @@
 
 import { useDeviceSecurityState } from "@/components/device-signing/DeviceSecurityStatus";
 import {
-  DEVICE_SETUP_TITLE,
   getDeviceSetupScope,
+  getDeviceSetupTitleKey,
   openDeviceSetup,
 } from "@/components/device-signing/deviceSetup";
+import { useE2eeUpgradeCount } from "@/components/e2ee/useE2eeUpgrade";
+import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
@@ -193,6 +195,8 @@ function EnableSignedMessagesButton() {
   const locale = useBrowserLocale();
   const { proof, canEnableEncryption } = useDeviceSecurityState();
   const scope = getDeviceSetupScope(proof, canEnableEncryption);
+  const { engine } = useE2ee();
+  const upgrading = useE2eeUpgradeCount(engine) !== null;
   if (!scope) return null;
   return (
     <div className="tw-mt-4">
@@ -201,7 +205,7 @@ function EnableSignedMessagesButton() {
         variant="secondary"
         onClick={() => openDeviceSetup(scope)}
       >
-        {t(locale, DEVICE_SETUP_TITLE[scope])}
+        {t(locale, getDeviceSetupTitleKey(scope, upgrading))}
       </Button>
     </div>
   );

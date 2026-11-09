@@ -17,6 +17,14 @@ fn bad(msg: &str) -> JsValue {
 
 type JsResult<T> = Result<T, JsValue>;
 
+/// The supported suite named by `code`, or the default suite (0x004F).
+fn suite_or_default(code: Option<u16>) -> JsResult<openmls::prelude::Ciphersuite> {
+    match code {
+        None => Ok(crate::device::CIPHERSUITE),
+        Some(code) => crate::device::supported_ciphersuite(code).map_err(js_err),
+    }
+}
+
 /// One MLS device (signature key, credential, groups).
 #[wasm_bindgen]
 pub struct MlsDevice {
@@ -66,24 +74,36 @@ impl MlsDevice {
         self.inner.sign_digest(digest32).map_err(js_err)
     }
 
+    /// `ciphersuite` (optional): the suite's code point, default 0x004F.
     #[wasm_bindgen(js_name = createKeyPackages)]
     pub fn create_key_packages(
         &mut self,
         count: u32,
         last_resort: bool,
         lifetime_secs: f64,
+        ciphersuite: Option<u16>,
     ) -> JsResult<String> {
         if !(lifetime_secs.is_finite() && lifetime_secs >= 0.0 && lifetime_secs.fract() == 0.0) {
             return Err(bad("lifetimeSecs must be a non-negative integer"));
         }
+        let suite = suite_or_default(ciphersuite)?;
         self.inner
-            .create_key_packages(count, last_resort, lifetime_secs as u64)
+            .create_key_packages_for(suite, count, last_resort, lifetime_secs as u64)
             .map_err(js_err)
     }
 
+    /// `ciphersuite` (optional): the suite's code point, default 0x004F.
     #[wasm_bindgen(js_name = createGroup)]
-    pub fn create_group(&mut self, g: &str, metadata_json: &str) -> JsResult<String> {
-        self.inner.create_group(g, metadata_json).map_err(js_err)
+    pub fn create_group(
+        &mut self,
+        g: &str,
+        metadata_json: &str,
+        ciphersuite: Option<u16>,
+    ) -> JsResult<String> {
+        let suite = suite_or_default(ciphersuite)?;
+        self.inner
+            .create_group_for(suite, g, metadata_json)
+            .map_err(js_err)
     }
 
     #[wasm_bindgen(js_name = groupSummary)]

@@ -39,14 +39,16 @@ const PAGE_LOAD_TIMEOUT_MS = 90000;
 const HYDRATION_SETTLE_MS = 5000;
 const PROBE_TIMEOUT_MS = 150000;
 
-// lib/e2ee/wasm/manifest.ts at the time of writing. Override when the module
-// is rebuilt: the probe only needs a URL the target serves.
+// Defaults equal lib/e2ee/wasm/manifest.ts (the probe ships in its own
+// Device Farm bundle, so it cannot read the manifest at run time);
+// __tests__/lib/e2ee/wasm/probeManifest.test.ts fails when a module rebuild
+// leaves them behind. The env overrides point at another target's module.
 const MLS_WASM = {
-  path: process.env.E2EE_WASM_PATH || "/e2ee/mls-wasm-c5dc4d96a05d6406.wasm",
+  path: process.env.E2EE_WASM_PATH || "/e2ee/mls-wasm-530b38d27f820745.wasm",
   sha256:
     process.env.E2EE_WASM_SHA256 ||
-    "c5dc4d96a05d6406b85dfa8c6a5836a0727da067c437216502a93c783595f5c8",
-  bytes: Number(process.env.E2EE_WASM_BYTES || 1804916),
+    "530b38d27f8207451ce64e6ab29acec3cbadceb9ae1102f824b5c85fea06e682",
+  bytes: Number(process.env.E2EE_WASM_BYTES || 1806438),
 };
 
 /**

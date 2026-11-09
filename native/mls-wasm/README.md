@@ -17,15 +17,27 @@ All cryptography comes from libraries: OpenMLS 0.9.1 with
 `openmls_rust_crypto` 0.6.0 for MLS, `ed25519-dalek` (K_n and inner message
 signatures), `aes-gcm` (wraps) and `sha3` (keccak256).
 
-The only ciphersuite is 0x004F,
+The default ciphersuite is 0x004F,
 `MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519` (`device::CIPHERSUITE`):
 X-Wing hybrid post-quantum key exchange (ML-KEM-768 with X25519) through the
 OpenMLS cargo feature `draft-ietf-mls-pq-ciphersuites`, AES-128-GCM, SHA-256
 and Ed25519 signatures. It must equal `E2EE_CIPHERSUITE` in
-`lib/e2ee/grant.ts` (the grant signs it) and the backend's pinned value.
-0x004F is a draft code point: if it changes, every device re-enrolls and every
-group is re-created; the engine drops a stored device whose grant names
-another suite.
+`lib/e2ee/grant.ts` (the grant signs it). The module also supports 0x004E,
+`MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519`
+(`device::CIPHERSUITE_AES256`): the same X-Wing key exchange and Ed25519 device
+key with AES-256-GCM and SHA-384. Under 0x004F the epoch secrets travel in
+HPKE sealed with AES-128-GCM (GroupSecrets in Welcomes, path secrets in
+UpdatePaths), so the floor is the AES-128 / SHA-256 level; 0x004E raises it.
+
+`createKeyPackages(count, lastResort, lifetimeSecs, ciphersuite?)` and
+`createGroup(g, metadataJson, ciphersuite?)` take an optional suite (default
+0x004F); `groupSummary` reports each group's `ciphersuite`. A group never
+changes suite: adds must use KeyPackages of the group's suite, and a Welcome
+is accepted on either supported suite. Leaf capabilities list both suites.
+Which suite a device may use is decided by its grant (contract 2), not here.
+Both are draft code points (draft-ietf-mls-pq-ciphersuites TBD1 and TBD2);
+the engine drops a stored device whose grant names a suite other than
+`E2EE_CIPHERSUITE`.
 
 ## Build
 
@@ -65,6 +77,14 @@ The hash depends on the toolchain, the dependency lock and the host path
 separator (remapped registry paths keep `\` on Windows), so rebuild on the
 same kind of host to reproduce a committed binary byte for byte.
 
+Everything under `lib/e2ee/wasm/generated/`, the binary and `manifest.ts` is
+build output: never edit it by hand; `6529 run build:mls-wasm` reproduces it.
+Its conventions come from wasm-bindgen, for example an omitted optional
+`ciphersuite` crosses into Rust as `Option<u16>`'s `None` sentinel
+(`0xFFFFFF`, outside the `u16` range). After a rebuild, also update the
+module defaults in `tests/device-farm/specs/e2ee-capabilities.probe.spec.cjs`
+(a Jest test checks them against `manifest.ts`).
+
 ## Tests
 
 ```sh
@@ -85,8 +105,12 @@ Jest loads the built `.wasm` in Node (from the repository root):
 cd native/mls-wasm
 cargo run --release --bin bench -- [sizes...] [--reps N]           # release (opt-level z)
 cargo run --profile bench-native --bin bench -- [sizes...] [--reps N]  # opt-level 3
-node bench/bench.mjs [sizes...] [--reps N]                       # the committed wasm
+node bench/bench.mjs [sizes...] [--reps N] [--suite S]          # the committed wasm
 ```
+
+`--suite` takes a code point in decimal or 0x hex (`--suite 78` and
+`--suite 0x004e` both select 0x004E); the default is 0x004F. The native
+`bench` binary measures the default suite only.
 
 ## Behaviour notes for the engine
 

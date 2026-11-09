@@ -1,6 +1,6 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
@@ -14,7 +14,6 @@ import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { formatMintDate } from "@/helpers/mint-date.helpers";
 import { getFileMimeTypeFromMetadata } from "@/helpers/nft.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
-import useCapacitor from "@/hooks/useCapacitor";
 import {
   formatInteger,
   formatNumber,
@@ -530,9 +529,8 @@ function MemeMarketplaceLinks({
   readonly nft: NFT;
   readonly locale: SupportedLocale;
 }) {
-  const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
-  const showMarketplaceLinks = !capacitor.isIos || country === "US";
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const showMarketplaceLinks = !hideNftPurchasing;
 
   if (!showMarketplaceLinks) {
     return null;

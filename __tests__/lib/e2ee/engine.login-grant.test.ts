@@ -60,8 +60,9 @@ async function signCombinedSignIn(
     expiresAtSeconds,
   };
   const mls = {
+    version: 2 as const,
     deviceKeyHex: mlsKey,
-    ciphersuite: E2EE_CIPHERSUITE,
+    ciphersuites: [E2EE_CIPHERSUITE],
     expiresAtSeconds,
   };
   const issuedAt = new Date(issuedAtSeconds * 1000).toISOString();
@@ -200,7 +201,14 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
 
     // Engine start does not wait for the network: it reports "enrolling".
     expect(alice.engine.getStatus()).not.toBe("needs-enrollment");
-    await waitForStatus(alice.engine, "ready");
+    // Combined setup can ask for the result while the background attempt is
+    // still running. Both callers should see the final status.
+    await expect(
+      Promise.all([
+        alice.engine.enrollWithLoginGrant(),
+        alice.engine.enrollWithLoginGrant(),
+      ])
+    ).resolves.toEqual(["ready", "ready"]);
     expect(alice.signCalls).toBe(0);
     const [record] = world.ds.devicesOf("alice");
     expect(record).toMatchObject({

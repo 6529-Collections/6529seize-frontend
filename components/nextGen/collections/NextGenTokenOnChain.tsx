@@ -1,5 +1,6 @@
 "use client";
 
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useEnsName, useReadContract } from "wagmi";
@@ -13,11 +14,9 @@ import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 import { mainnet } from "viem/chains";
 import { areEqualAddresses } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useIdentity } from "@/hooks/useIdentity";
 import Address from "@/components/address/Address";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { formatNameForUrl, getOpenseaLink } from "../nextgen_helpers";
 import { NextGenBackToCollectionPageLink } from "./collectionParts/NextGenCollectionHeader";
 
@@ -40,8 +39,7 @@ const MISSING_TOKEN_RETRY_INTERVAL_MS = 10_000;
 const MISSING_TOKEN_RETRY_LIMIT = 12;
 
 export default function NextGenTokenOnChain(props: Readonly<Props>) {
-  const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const account = useSeizeConnectContext();
 
   const [owner, setOwner] = useState<`0x${string}`>();
@@ -306,7 +304,7 @@ export default function NextGenTokenOnChain(props: Readonly<Props>) {
                 </Link>
               </dd>
             </div>
-            {(!capacitor.isIos || country === "US") && (
+            {!hideNftPurchasing && (
               <div className="tw-min-w-0">
                 <dt className="tw-text-sm tw-font-semibold tw-text-iron-400">
                   Marketplaces

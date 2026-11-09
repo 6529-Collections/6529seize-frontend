@@ -3,10 +3,13 @@
  * Contract section 11 benchmark for the wasm build, same scenario as
  * `cargo run --release --bin bench` (src/bin/bench.rs).
  *
- *   node native/mls-wasm/bench/bench.mjs [sizes...] [--reps N] [--wasm FILE] [--glue FILE]
+ *   node native/mls-wasm/bench/bench.mjs [sizes...] [--reps N] [--suite S] [--wasm FILE] [--glue FILE]
  *
- * Defaults: sizes 2 87 174 1024, the hashed module named in
- * lib/e2ee/wasm/manifest.ts and the glue in lib/e2ee/wasm/generated/.
+ * Defaults: sizes 2 87 174 1024, the module's default suite (0x004F), the
+ * hashed module named in lib/e2ee/wasm/manifest.ts and the glue in
+ * lib/e2ee/wasm/generated/. --suite takes a code point in decimal or 0x hex:
+ * `--suite 78` and `--suite 0x004e` both select 0x004E (suite-arg.cjs). Every
+ * result records the suite the module actually used.
  * Each size runs N times (default 3); every numeric field is the median.
  * Prints JSON on stdout and one line per size on stderr.
  */
@@ -17,6 +20,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { performance } from "node:perf_hooks";
 import { gzipSync } from "node:zlib";
+import { parseSuiteOption } from "./suite-arg.cjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repo = resolve(here, "..", "..", "..");
@@ -28,10 +32,12 @@ const option = (name) => {
 const sizes = args
   .filter(
     (a, i) =>
-      /^\d+$/.test(a) && !["--wasm", "--glue", "--reps"].includes(args[i - 1])
+      /^\d+$/.test(a) &&
+      !["--wasm", "--glue", "--reps", "--suite"].includes(args[i - 1])
   )
   .map(Number);
 const reps = Math.max(1, Number(option("--reps") ?? 3));
+const suite = parseSuiteOption(args);
 const manifest = readFileSync(
   join(repo, "lib", "e2ee", "wasm", "manifest.ts"),
   "utf8"
@@ -66,7 +72,7 @@ function device(name) {
   return d;
 }
 const keyPackage = (d) =>
-  JSON.parse(d.createKeyPackages(1, false, 30 * DAY))[0].data;
+  JSON.parse(d.createKeyPackages(1, false, 30 * DAY, suite))[0].data;
 const metadata = (g) =>
   JSON.stringify({
     v: 1,
@@ -79,12 +85,40 @@ const metadata = (g) =>
   });
 const entryItem = (entry) => JSON.stringify({ ...entry, type: "entry" });
 
+/** Mean encrypt and decrypt + verify times of MESSAGES 200-byte messages. */
+function measureMessages(creator, joiner, g) {
+  const body = enc.encode("x".repeat(200));
+  let encMs = 0;
+  let decMs = 0;
+  let msgLen = 0;
+  for (let i = 0; i < MESSAGES; i++) {
+    let t = now();
+    const m = JSON.parse(creator.encryptMessage(g, body));
+    encMs += now() - t;
+    msgLen = b64Len(m.data);
+    const item = JSON.stringify({
+      type: "message",
+      epoch: m.epoch,
+      data: m.data,
+    });
+    t = now();
+    const d = JSON.parse(joiner.decryptMessage(g, item));
+    decMs += now() - t;
+    if (!d.sig_ok) throw new Error("sig");
+  }
+  return { encMs: encMs / MESSAGES, decMs: decMs / MESSAGES, msgLen };
+}
+
 function run(n, seed) {
   const g = `0x${seed.toString(16).padStart(2, "0").repeat(32)}`;
   const creator = device("creator");
   const members = Array.from({ length: n - 1 }, (_, i) => device(`m${i + 1}`));
   const kps = members.map(keyPackage);
-  creator.createGroup(g, metadata(g));
+  const created = JSON.parse(creator.createGroup(g, metadata(g), suite));
+  if (created.ciphersuite !== (suite ?? 0x004f)) {
+    throw new Error(`asked for suite ${suite}, got ${created.ciphersuite}`);
+  }
+  const keyPackageBytes = b64Len(kps[0] ?? keyPackage(creator));
 
   let t = now();
   const res = JSON.parse(
@@ -104,29 +138,9 @@ function run(n, seed) {
     joinMs = now() - t;
   }
 
-  let encMs = 0;
-  let decMs = 0;
-  let msgLen = 0;
-  if (joiner) {
-    const body = enc.encode("x".repeat(200));
-    for (let i = 0; i < MESSAGES; i++) {
-      t = now();
-      const m = JSON.parse(creator.encryptMessage(g, body));
-      encMs += now() - t;
-      msgLen = b64Len(m.data);
-      const item = JSON.stringify({
-        type: "message",
-        epoch: m.epoch,
-        data: m.data,
-      });
-      t = now();
-      const d = JSON.parse(joiner.decryptMessage(g, item));
-      decMs += now() - t;
-      if (!d.sig_ok) throw new Error("sig");
-    }
-    encMs /= MESSAGES;
-    decMs /= MESSAGES;
-  }
+  const { encMs, decMs, msgLen } = joiner
+    ? measureMessages(creator, joiner, g)
+    : { encMs: 0, decMs: 0, msgLen: 0 };
 
   const summary = JSON.parse(creator.groupSummary(g));
   const victim = summary.members
@@ -174,7 +188,7 @@ function run(n, seed) {
   const creator2 = device("creator2");
   const members2 = Array.from({ length: n - 1 }, (_, i) => device(`s${i + 1}`));
   const kps2 = members2.map(keyPackage);
-  creator2.createGroup(g2, metadata(g2));
+  creator2.createGroup(g2, metadata(g2), suite);
   let splitMs = 0;
   let splitMaxEntry = 0;
   let splitMaxWelcome = 0;
@@ -197,7 +211,9 @@ function run(n, seed) {
   const state = creator.exportState().length;
   for (const d of [creator, creator2, ...members, ...members2]) d.free();
   return {
+    ciphersuite: created.ciphersuite,
     leaves: n,
+    key_package_bytes: keyPackageBytes,
     add_all_commit_ms: addAllMs,
     add_all_merge_ms: mergeMs,
     add_all_entry_bytes: res.entry.padded_len,

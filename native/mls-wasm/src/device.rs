@@ -19,12 +19,33 @@ use zeroize::Zeroizing;
 use crate::codec::{self, Word, ENTRY_BUCKETS, KIND_COMMIT, KIND_PROPOSAL, MESSAGE_BUCKETS};
 use crate::error::{Code, MlsError, Result};
 
-/// The single MLS ciphersuite in use (contract 3.6): 0x004F, X-Wing hybrid
+/// The default MLS ciphersuite (contract 3.6): 0x004F, X-Wing hybrid
 /// post-quantum key exchange (ML-KEM-768 + X25519), AES-128-GCM, SHA-256 and
-/// Ed25519 signatures. No other suite is offered or accepted. 0x004F is a
-/// draft code point (draft-ietf-mls-pq-ciphersuites): if it changes, every
-/// device re-enrolls and every group is re-created.
+/// Ed25519 signatures. New KeyPackages and groups use it unless the caller
+/// names another supported suite.
 pub const CIPHERSUITE: Ciphersuite = Ciphersuite::MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519;
+/// 0x004E: the same X-Wing key exchange and Ed25519 signatures with
+/// AES-256-GCM and SHA-384. Under 0x004F the epoch secrets travel in HPKE
+/// sealed with AES-128-GCM (GroupSecrets in Welcomes, path secrets in
+/// UpdatePaths), so the floor is the AES-128 / SHA-256 level; 0x004E raises
+/// it.
+pub const CIPHERSUITE_AES256: Ciphersuite =
+    Ciphersuite::MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519;
+/// Every suite this device can create, join and process groups in. A group
+/// never changes suite. Both are draft code points
+/// (draft-ietf-mls-pq-ciphersuites TBD1 and TBD2); one device key (Ed25519)
+/// serves both, and which suites a device may use is the grant's business
+/// (contract 2), decided by the caller.
+pub const SUPPORTED_CIPHERSUITES: [Ciphersuite; 2] = [CIPHERSUITE, CIPHERSUITE_AES256];
+
+/// The supported suite with this code point.
+pub fn supported_ciphersuite(code: u16) -> Result<Ciphersuite> {
+    SUPPORTED_CIPHERSUITES
+        .iter()
+        .copied()
+        .find(|suite| u16::from(*suite) == code)
+        .ok_or_else(|| MlsError::new(Code::BadInput, "unsupported ciphersuite"))
+}
 /// Private-use GroupContext extension carrying the 3.5 metadata JSON.
 pub const METADATA_EXTENSION: u16 = 0xF529;
 /// Exporter labels (contract 3.1).
@@ -271,7 +292,7 @@ fn leaf_node_json(index: u32, leaf: &LeafNode) -> Value {
 
 fn leaf_capabilities() -> Capabilities {
     Capabilities::builder()
-        .ciphersuites(vec![CIPHERSUITE])
+        .ciphersuites(SUPPORTED_CIPHERSUITES.to_vec())
         .extensions(vec![
             ExtensionType::Unknown(METADATA_EXTENSION),
             ExtensionType::LastResort,
@@ -731,12 +752,25 @@ impl Device {
 
     // -- key packages ------------------------------------------------------
 
+    /// KeyPackages on the default suite (0x004F).
     pub fn create_key_packages(
         &self,
         count: u32,
         last_resort: bool,
         lifetime_secs: u64,
     ) -> Result<String> {
+        self.create_key_packages_for(CIPHERSUITE, count, last_resort, lifetime_secs)
+    }
+
+    /// KeyPackages on `suite`, which must be one of SUPPORTED_CIPHERSUITES.
+    pub fn create_key_packages_for(
+        &self,
+        suite: Ciphersuite,
+        count: u32,
+        last_resort: bool,
+        lifetime_secs: u64,
+    ) -> Result<String> {
+        supported_ciphersuite(u16::from(suite))?;
         if count == 0 || count > 100 {
             return Err(MlsError::new(Code::BadInput, "count must be 1..100"));
         }
@@ -756,7 +790,7 @@ impl Device {
                 builder = builder.mark_as_last_resort();
             }
             let bundle = builder
-                .build(CIPHERSUITE, &self.provider, &self.signer, cwk.clone())
+                .build(suite, &self.provider, &self.signer, cwk.clone())
                 .map_err(|e| MlsError::mls("key package", e))?;
             let kp = bundle.key_package();
             let data = kp
@@ -799,7 +833,19 @@ impl Device {
             .ok_or_else(|| MlsError::new(Code::NoGroup, "no such group on this device"))
     }
 
+    /// A new group on the default suite (0x004F).
     pub fn create_group(&mut self, g: &str, metadata_json: &str) -> Result<String> {
+        self.create_group_for(CIPHERSUITE, g, metadata_json)
+    }
+
+    /// A new group on `suite`, which must be one of SUPPORTED_CIPHERSUITES.
+    pub fn create_group_for(
+        &mut self,
+        suite: Ciphersuite,
+        g: &str,
+        metadata_json: &str,
+    ) -> Result<String> {
+        supported_ciphersuite(u16::from(suite))?;
         codec::parse_g(g)?;
         if self.groups.contains_key(g) {
             return Err(MlsError::new(Code::GroupExists, "group already exists"));
@@ -809,7 +855,7 @@ impl Device {
         let meta_bytes = validate_metadata(&meta, g)?;
         let cwk = self.credential_with_key()?;
         let config = MlsGroupCreateConfig::builder()
-            .ciphersuite(CIPHERSUITE)
+            .ciphersuite(suite)
             .wire_format_policy(PURE_CIPHERTEXT_WIRE_FORMAT_POLICY)
             .use_ratchet_tree_extension(true)
             .max_past_epochs(MAX_PAST_EPOCHS)
@@ -870,6 +916,7 @@ impl Device {
         }
         Ok(json!({
             "g": g,
+            "ciphersuite": u16::from(mls.ciphersuite()),
             "epoch": mls.epoch().as_u64(),
             "epoch_fp": epoch_fp,
             "commit_key": commit_key,
@@ -982,7 +1029,8 @@ impl Device {
             let kp = kp_in
                 .validate(provider.crypto(), ProtocolVersion::Mls10)
                 .map_err(|e| MlsError::new(Code::BadKeyPackage, format!("{e:?}")))?;
-            if kp.ciphersuite() != CIPHERSUITE {
+            // A group never changes suite: every added KeyPackage must be on it.
+            if kp.ciphersuite() != st.mls.ciphersuite() {
                 return Err(MlsError::new(Code::BadKeyPackage, "wrong ciphersuite"));
             }
             if kp.leaf_node().credential().credential_type() != CredentialType::Basic {
@@ -1721,7 +1769,7 @@ impl Device {
             MlsMessageBodyIn::Welcome(w) => w,
             _ => return Err(MlsError::new(Code::BadWelcome, "not a Welcome")),
         };
-        if welcome.ciphersuite() != CIPHERSUITE {
+        if !SUPPORTED_CIPHERSUITES.contains(&welcome.ciphersuite()) {
             return Err(MlsError::new(Code::BadWelcome, "wrong ciphersuite"));
         }
         // Find our KeyPackage without consuming it.
@@ -1793,8 +1841,11 @@ impl Device {
             .into_group(&scratch)
             .map_err(|e| MlsError::new(Code::BadWelcome, format!("{e:?}")))?;
         let k = commit_signing_key(&scratch, &mls, &gb)?;
+        // The suite is reported before accepting, so the caller can refuse a
+        // group whose suite its device's grant does not cover.
         let summary = json!({
             "g": g,
+            "ciphersuite": u16::from(mls.ciphersuite()),
             "epoch": mls.epoch().as_u64(),
             "epoch_fp": codec::fp(mls.epoch_authenticator().as_slice()),
             "metadata": metadata,

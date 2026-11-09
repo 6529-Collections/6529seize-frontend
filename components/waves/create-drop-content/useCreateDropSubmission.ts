@@ -33,6 +33,7 @@ import {
 } from "./content-helpers";
 import { generateParts, toApiCreateDropParts } from "./part-builders";
 import { withClientDropId } from "@/services/api/client-drop-ids";
+import { getDropMediaUploadPurpose } from "@/services/uploads/mediaUploadPurpose";
 import {
   isReplyTargetUnavailableError,
   REPLY_TARGET_UNAVAILABLE_TOAST_ID,
@@ -277,6 +278,7 @@ export const useCreateDropSubmission = ({
   dropModeSessionScopeKey,
   isIdentityPickerAllowed,
   isApp,
+  isDesktop,
   requestAuth,
   setToast,
   signDrop,
@@ -323,6 +325,7 @@ export const useCreateDropSubmission = ({
   readonly dropModeSessionScopeKey: string;
   readonly isIdentityPickerAllowed: boolean;
   readonly isApp: boolean;
+  readonly isDesktop: boolean;
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly setToast: (toast: AppToastInput) => void;
   readonly signDrop: ReturnType<typeof useDropSignature>["signDrop"];
@@ -344,7 +347,7 @@ export const useCreateDropSubmission = ({
   readonly finalizeAndAddDropPart: (
     markdownOverride: string | null
   ) => CreateDropConfig;
-  readonly refreshState: () => void;
+  readonly refreshState: (restoreFocusAfterSubmit?: boolean) => void;
   readonly setSubmitting: Dispatch<SetStateAction<boolean>>;
   readonly setUploadingFiles: Dispatch<SetStateAction<UploadingFile[]>>;
   readonly setFiles: Dispatch<SetStateAction<File[]>>;
@@ -514,10 +517,11 @@ export const useCreateDropSubmission = ({
     });
   };
 
-  const prepareAndSubmitDrop = async (dropRequest: CreateDropConfig) => {
-    if (submitting) {
-      return;
-    }
+  const prepareAndSubmitDrop = async (
+    dropRequest: CreateDropConfig,
+    restoreFocusAfterSubmit = false
+  ) => {
+    if (submitting) return;
 
     if (
       isBlockedChatDropRequest({
@@ -544,10 +548,10 @@ export const useCreateDropSubmission = ({
 
       const generatedParts = await generateParts(
         dropRequest.parts,
-        setUploadingFiles
+        setUploadingFiles,
+        getDropMediaUploadPurpose(dropRequest)
       );
       if (!generatedParts.length) {
-        setSubmitting(false);
         return;
       }
       // The client_drop_id is part of the signed payload.
@@ -561,7 +565,6 @@ export const useCreateDropSubmission = ({
       );
       const updatedDropRequest = await getUpdatedDropRequest(requestBody);
       if (!updatedDropRequest) {
-        setSubmitting(false);
         return;
       }
 
@@ -665,7 +668,7 @@ export const useCreateDropSubmission = ({
         disableIdentityPickerAutoOpen();
       }
       setIsStormMode(false);
-      refreshState();
+      refreshState(isChatSubmit && isDesktop && restoreFocusAfterSubmit);
     } catch (error) {
       setToast({
         type: "error",
@@ -689,7 +692,10 @@ export const useCreateDropSubmission = ({
     [files, isDropMode, metadata, wave.participation.required_media]
   );
 
-  const onDrop = async (markdownOverride?: string): Promise<void> => {
+  const onDrop = async (
+    markdownOverride?: string,
+    restoreFocusAfterSubmit = false
+  ): Promise<void> => {
     if (submitting) {
       return;
     }
@@ -740,7 +746,10 @@ export const useCreateDropSubmission = ({
       return;
     }
 
-    await prepareAndSubmitDrop(getUpdatedDrop(submissionMarkdown));
+    await prepareAndSubmitDrop(
+      getUpdatedDrop(submissionMarkdown),
+      restoreFocusAfterSubmit
+    );
   };
 
   const onGifDrop = async (gif: string): Promise<void> => {

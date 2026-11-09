@@ -66,6 +66,7 @@ const ACTION_ERROR_KEYS: Readonly<Record<string, MessageKey>> = {
   E2EE_NO_DEVICES: "e2ee.new.eligibility.NO_DEVICES",
   E2EE_DEVICE_LIMIT: "e2ee.deviceLimit.title",
   E2EE_CONVERSATION_INACTIVE: "e2ee.composer.unavailable",
+  E2EE_SUPERSEDED: "e2ee.superseded.announce",
   E2EE_ATTACHMENTS_DISABLED: "e2ee.composer.attachmentsUnavailable",
 };
 

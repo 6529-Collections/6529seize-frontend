@@ -14,7 +14,7 @@ import {
 } from "./e2eeErrors";
 import { getE2eeDeviceLabel } from "./e2eeDeviceLabel";
 import { detectE2eePlatform, getE2eeGrantOrigin } from "./e2eePlatform";
-import { resolveE2eeProfiles } from "./e2eeProfiles";
+import { getE2eeLookupReads, resolveE2eeProfiles } from "./e2eeProfiles";
 import { getE2eeTestSigner } from "./e2eeTestSigner";
 
 /** Content-free wake hints the engine listens to (contract 5). */
@@ -71,7 +71,17 @@ export function subscribeE2eeWakes(
       listener({ type, data });
     })
   );
+  const browserWindow = typeof window === "undefined" ? null : window;
+  const browserDocument = typeof document === "undefined" ? null : document;
+  const resume = () => {
+    if (browserDocument?.visibilityState !== "hidden")
+      listener({ type: "E2EE_LOOKUP_RESUME", data: null });
+  };
+  browserWindow?.addEventListener("online", resume);
+  browserDocument?.addEventListener("visibilitychange", resume);
   return () => {
+    browserWindow?.removeEventListener("online", resume);
+    browserDocument?.removeEventListener("visibilitychange", resume);
     for (const unsubscribe of unsubscribers) {
       unsubscribe();
     }
@@ -140,8 +150,9 @@ export function useE2eeEngineDeps(): (
       api,
       signTypedData: (typedData) =>
         signE2eeTypedData(latest.current.signTypedDataAsync, typedData),
-      resolveProfiles: (profileIds) =>
-        resolveE2eeProfiles(latest.current.queryClient, profileIds),
+      lookupReads: getE2eeLookupReads(latest.current.queryClient),
+      resolveProfiles: (profileIds, resume) =>
+        resolveE2eeProfiles(latest.current.queryClient, profileIds, resume),
       verifyContractSignature: (contractWallet, hash, signature) =>
         verifyE2eeContractSignature(
           latest.current.publicClient,

@@ -2,6 +2,8 @@
 
 import { faUserShield } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useE2eeUpgradeCount } from "@/components/e2ee/useE2eeUpgrade";
+import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -9,8 +11,8 @@ import {
   useDeviceSecurityState,
 } from "@/components/device-signing/DeviceSecurityStatus";
 import {
-  DEVICE_SETUP_TITLE,
   getDeviceSetupScope,
+  getDeviceSetupTitleKey,
   openDeviceSetup,
 } from "./deviceSetup";
 
@@ -27,6 +29,8 @@ export default function DeviceSetupMenuAction({
   const details = useDeviceSecurityState();
   const { proof, canEnableEncryption } = details;
   const scope = getDeviceSetupScope(proof, canEnableEncryption);
+  const { engine } = useE2ee();
+  const upgrading = useE2eeUpgradeCount(engine) !== null;
   return (
     <>
       {showStatus && (
@@ -51,7 +55,7 @@ export default function DeviceSetupMenuAction({
             icon={faUserShield}
             className={mobile ? "tw-size-6 tw-shrink-0" : "tw-w-5 tw-shrink-0"}
           />
-          {t(locale, DEVICE_SETUP_TITLE[scope])}
+          {t(locale, getDeviceSetupTitleKey(scope, upgrading))}
         </button>
       )}
     </>

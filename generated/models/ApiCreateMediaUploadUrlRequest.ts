@@ -12,11 +12,13 @@
  */
 
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
+import { ApiMediaUploadPurpose } from '../models/ApiMediaUploadPurpose';
 import { HttpFile } from '../http/http';
 
 export class ApiCreateMediaUploadUrlRequest {
     'content_type': ApiMediaUploadMimeType;
     'file_name': string;
+    'purpose'?: ApiMediaUploadPurpose;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -33,6 +35,12 @@ export class ApiCreateMediaUploadUrlRequest {
             "name": "file_name",
             "baseName": "file_name",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "purpose",
+            "baseName": "purpose",
+            "type": "ApiMediaUploadPurpose",
             "format": ""
         }    ];
 
