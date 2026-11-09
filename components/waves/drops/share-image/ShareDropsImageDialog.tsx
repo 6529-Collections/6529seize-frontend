@@ -159,7 +159,7 @@ export default function ShareDropsImageDialog({
         locale
       );
       lines.push(when ? `${author} · ${when}` : author);
-      const content = messages[index]?.plainContent?.trim();
+      const content = messages[index]?.plainContent.trim();
       if (content) lines.push(content);
       lines.push("");
     });

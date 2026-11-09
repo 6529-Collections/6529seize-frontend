@@ -62,10 +62,7 @@ const ShareDropsImageCard = forwardRef<
     readonly include: ShareImageInclude;
     readonly locale: SupportedLocale;
   }
->(function ShareDropsImageCard(
-  { wave, drops, messages, time, include, locale },
-  ref
-) {
+>(({ wave, drops, messages, time, include, locale }, ref) => {
   const { findNativeEmoji, loadEmojiData } = useEmoji();
   useEffect(() => {
     void loadEmojiData();
@@ -85,6 +82,7 @@ const ShareDropsImageCard = forwardRef<
       {include.waveHeader && (
         <div className="tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-[#1f1f25] tw-px-5 tw-pb-3.5 tw-pt-[18px]">
           {wave.picture ? (
+            // eslint-disable-next-line @next/next/no-img-element -- html-to-image draws this into the PNG, which needs a plain img with crossOrigin rather than next/image output.
             <img
               src={getScaledImageUri(wave.picture, ImageScale.W_200_H_200)}
               alt=""
@@ -117,6 +115,7 @@ const ShareDropsImageCard = forwardRef<
           return (
             <li key={drop.id} className="tw-flex tw-gap-3 tw-px-3.5 tw-py-2">
               {drop.author.pfp ? (
+                // eslint-disable-next-line @next/next/no-img-element -- html-to-image draws this into the PNG, which needs a plain img with crossOrigin rather than next/image output.
                 <img
                   src={getScaledImageUri(
                     drop.author.pfp,
@@ -147,6 +146,7 @@ const ShareDropsImageCard = forwardRef<
                   </p>
                 )}
                 {image && (
+                  // eslint-disable-next-line @next/next/no-img-element -- html-to-image draws this into the PNG, which needs a plain img with crossOrigin rather than next/image output.
                   <img
                     src={getScaledImageUri(image.url, ImageScale.AUTOx800)}
                     alt=""
@@ -196,5 +196,7 @@ const ShareDropsImageCard = forwardRef<
     </div>
   );
 });
+
+ShareDropsImageCard.displayName = "ShareDropsImageCard";
 
 export default ShareDropsImageCard;

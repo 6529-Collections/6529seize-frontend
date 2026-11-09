@@ -36,7 +36,7 @@ async function renderPng(node: HTMLElement): Promise<Blob> {
 async function countUnreadableImages(node: HTMLElement): Promise<number> {
   const sources = Array.from(node.querySelectorAll("img"))
     .map((image) => image.currentSrc || image.src)
-    .filter((source) => source && !source.startsWith("data:"));
+    .filter((source) => source !== "" && !source.startsWith("data:"));
   const results = await Promise.all(
     [...new Set(sources)].map(async (source) => {
       try {
@@ -54,7 +54,8 @@ export function canCopyImages(): boolean {
   return (
     typeof ClipboardItem !== "undefined" &&
     typeof navigator !== "undefined" &&
-    typeof navigator.clipboard?.write === "function"
+    "clipboard" in navigator &&
+    typeof navigator.clipboard.write === "function"
   );
 }
 
