@@ -465,7 +465,7 @@ describe("MyStreamProvider resume sync", () => {
 
       expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
       expect(useEnhancedWavesListCoreMock).toHaveBeenCalledWith(
-        "wave-1",
+        null,
         expect.anything(),
         expect.objectContaining({ enabled: false, supportsPinning: true })
       );

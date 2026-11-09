@@ -16,6 +16,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { WsMessageType } from "@/helpers/Types";
 import type { WaveMessagesUpdate } from "@/contexts/wave/hooks/types";
+import type { UseWaveRealtimeUpdaterProps } from "@/contexts/wave/hooks/useWaveRealtimeUpdater.helpers";
 
 let mockGapSyncEnabled = true;
 const mockWebSocketCallbacks = new Map<
@@ -226,6 +227,29 @@ const readPosts = () =>
   );
 
 describe("useWaveRealtimeUpdater with gap-only sync", () => {
+  it("does not acknowledge messages outside Chat, including after browser focus", async () => {
+    const props: UseWaveRealtimeUpdaterProps = {
+      ...makeProps({
+        [WAVE]: { drops: [storedDrop(10)], latestFetchedSerialNo: 10 },
+      }),
+      activeReadWaveId: null,
+    };
+    const { rerender } = renderHook(
+      (current: UseWaveRealtimeUpdaterProps) => useWaveRealtimeUpdater(current),
+      { initialProps: props }
+    );
+    await setVisibility("hidden");
+    await emit(WsMessageType.DROP_UPDATE, frameDrop(11));
+    await setVisibility("visible");
+    await emit(WsMessageType.DROP_UPDATE, frameDrop(12));
+    await advance(WAVE_READ_DEBOUNCE_MS);
+    expect(readPosts()).toHaveLength(0);
+    rerender({ ...props, activeReadWaveId: WAVE });
+    await emit(WsMessageType.DROP_UPDATE, frameDrop(13));
+    await advance(WAVE_READ_DEBOUNCE_MS);
+    expect(readPosts()).toHaveLength(1);
+  });
+
   beforeAll(() => {
     Object.defineProperty(document, "visibilityState", {
       configurable: true,
