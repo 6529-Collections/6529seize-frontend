@@ -589,8 +589,16 @@ export function HeaderShareModalView({
                 })}
               </h3>
               {activeSubTab === SubMode.DESKTOP ? (
-                <div className="tw-h-56">
-                  <DesktopConnectionLink url={link.url} />
+                <div className="tw-flex tw-flex-col tw-gap-2">
+                  <div className="tw-h-56">
+                    <DesktopConnectionLink url={link.url} />
+                  </div>
+                  <p className="tw-m-0 tw-text-center tw-text-sm tw-text-iron-300">
+                    {t(
+                      HEADER_SHARE_LOCALE,
+                      "headerShare.connectModal.desktopMinimumVersion"
+                    )}
+                  </p>
                 </div>
               ) : (
                 <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-lg">

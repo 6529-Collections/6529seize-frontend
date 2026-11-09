@@ -1035,6 +1035,11 @@ describe("HeaderShare", () => {
               screen.getByRole("button", { name: "6529 Desktop" })
             );
           }
+          const desktopMinimumVersion =
+            "Requires 6529 Desktop v0.4.0 or later.";
+          expect(
+            screen.queryByText(desktopMinimumVersion)
+          ).not.toBeInTheDocument();
           expect(setup.prepareConnectionDeviceSetup).not.toHaveBeenCalled();
           await userEvent.click(
             screen.getByRole("button", {
@@ -1056,7 +1061,11 @@ describe("HeaderShare", () => {
                 /^testcore6529:\/\/navigate\/accept-connection-sharing.*#device_setup_key=setup-secret$/
               )
             );
+            expect(screen.getByText(desktopMinimumVersion)).toBeVisible();
           } else {
+            expect(
+              screen.queryByText(desktopMinimumVersion)
+            ).not.toBeInTheDocument();
             expect(
               screen.getByAltText("Private device setup QR code")
             ).toBeVisible();
@@ -2026,6 +2035,9 @@ describe("HeaderShare", () => {
         screen.queryByText("Continue in the 6529 Desktop app.")
       ).not.toBeInTheDocument();
       expect(desktopPanel).toHaveTextContent("Open in 6529 Desktop");
+      expect(
+        screen.queryByText("Requires 6529 Desktop v0.4.0 or later.")
+      ).not.toBeInTheDocument();
       expect(mockDesktopConnectionShare).toHaveBeenCalledWith({
         targetClientType: "desktop",
         signal: expect.objectContaining({ aborted: false }),
