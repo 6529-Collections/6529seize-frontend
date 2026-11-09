@@ -1085,39 +1085,21 @@ describe("BrainMobile", () => {
     });
   });
 
-  it.each(["wave type", "outcome visibility"])(
-    "falls back to default when the outcome %s gate becomes unavailable",
-    async (gate) => {
+  it.each(["outcome", "outcomes"])(
+    "opens retired %s links in Settings regardless of historical visibility",
+    async (tab) => {
       mockSearchParams.set("wave", "1");
+      mockSearchParams.set("tab", tab);
       waveData = createWave(false);
-
       const { rerender } = render(<BrainMobile>child</BrainMobile>);
-
-      await waitFor(() =>
-        expect(screen.getByTestId("tabs")).toBeInTheDocument()
-      );
-
-      act(() => {
-        latestTabsProps.onViewChange(BrainView.OUTCOME);
-      });
-
       await waitFor(() => {
-        expect(latestTabsProps.activeView).toBe(BrainView.OUTCOME);
+        expect(latestTabsProps.activeView).toBe(BrainView.CONFIGURATION);
         expect(screen.getByText("child")).toBeInTheDocument();
       });
-
-      if (gate === "outcome visibility") mockOutcomesVisible = false;
-      else
-        mockUseWave.mockReturnValue({
-          isMemesWave: false,
-          isCurationWave: false,
-          isRankWave: false,
-          isDm: false,
-        });
+      mockOutcomesVisible = false;
       rerender(<BrainMobile>child</BrainMobile>);
-
       await waitFor(() => {
-        expect(latestTabsProps.activeView).toBe(BrainView.DEFAULT);
+        expect(latestTabsProps.activeView).toBe(BrainView.CONFIGURATION);
         expect(screen.queryByTestId("outcome")).toBeNull();
         expect(screen.getByText("child")).toBeInTheDocument();
       });

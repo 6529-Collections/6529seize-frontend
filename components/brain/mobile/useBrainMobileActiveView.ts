@@ -162,7 +162,7 @@ function getWaveViewAvailability({
 }
 
 function normalizeActiveView({
-  activeView,
+  activeView: requestedView,
   firstDecisionDone,
   hasWave,
   isCompleted,
@@ -192,6 +192,10 @@ function normalizeActiveView({
   readonly routeDefaultView: BrainView | null;
   readonly wave: ApiWave | null | undefined;
 }): BrainView {
+  const activeView =
+    requestedView === BrainView.OUTCOME
+      ? BrainView.CONFIGURATION
+      : requestedView;
   const waveViewState: WaveViewState = {
     firstDecisionDone,
     hasAuthenticatedProfile,
