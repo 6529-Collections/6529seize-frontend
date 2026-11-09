@@ -22,9 +22,7 @@ export default function UserPageIdentityAddStatementsPlatformPicker<
   readonly statementTypes: readonly T[];
   readonly activeType: T;
   readonly rowCount: number;
-  readonly labelOverrides?: Readonly<
-    Partial<Record<STATEMENT_TYPE, string>>
-  >;
+  readonly labelOverrides?: Readonly<Partial<Record<STATEMENT_TYPE, string>>>;
   readonly onSelect: (type: T) => void;
 }) {
   const locale = useBrowserLocale();
@@ -46,31 +44,29 @@ export default function UserPageIdentityAddStatementsPlatformPicker<
   return (
     <div>
       <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
-        <legend className="tw-mb-2 tw-block tw-w-full tw-p-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+        <legend className="tw-mb-2 tw-block tw-w-full tw-p-0 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
           {t(locale, "user.profile.identity.statements.selectPlatform")}
         </legend>
-        {rows.map((row, rowIndex) => (
-          <span
-            key={row.join("-")}
-            className={
-              rowIndex === 0
-                ? "tw-isolate tw-inline-flex tw-w-full tw-rounded-md tw-shadow-sm"
-                : "tw-isolate tw-mt-3 tw-inline-flex tw-w-full tw-rounded-md tw-shadow-sm md:tw-mt-2"
-            }
-          >
-            {row.map((type, index) => (
-              <UserPageIdentityAddStatementsTypeButton
-                key={type}
-                statementType={type}
-                label={labelOverrides?.[type]}
-                isActive={activeType === type}
-                isFirst={index === 0}
-                isLast={index === row.length - 1}
-                onClick={() => onSelect(type)}
-              />
-            ))}
-          </span>
-        ))}
+        <div className="tw-grid tw-auto-rows-fr tw-grid-cols-1 tw-gap-y-3 md:tw-gap-y-2">
+          {rows.map((row) => (
+            <span
+              key={row.join("-")}
+              className="tw-isolate tw-inline-flex tw-w-full tw-min-w-0 tw-rounded-md tw-shadow-sm"
+            >
+              {row.map((type, index) => (
+                <UserPageIdentityAddStatementsTypeButton
+                  key={type}
+                  statementType={type}
+                  label={labelOverrides?.[type]}
+                  isActive={activeType === type}
+                  isFirst={index === 0}
+                  isLast={index === row.length - 1}
+                  onClick={() => onSelect(type)}
+                />
+              ))}
+            </span>
+          ))}
+        </div>
       </fieldset>
       {isTouchScreen ? (
         <Tooltip
