@@ -10,11 +10,15 @@ import {
 import { useState } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDate } from "@/i18n/format";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
-import { formatE2eeDateTime, formatE2eeLastActive } from "../e2eeFormat";
+import {
+  formatE2eeDate,
+  formatE2eeDateTime,
+  formatE2eeLastActive,
+} from "../e2eeFormat";
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
 import { useE2eeNow } from "../useE2eeNow";
 import { RevokeThisBrowserDetails } from "./RevokeThisBrowserDetails";
@@ -33,34 +37,37 @@ const PLATFORM_ICONS = {
 
 function DeviceDates({ device }: { readonly device: E2eeDeviceInfo }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const now = useE2eeNow();
-  // Endings are dates only, as on the Device Permissions page.
+  // Endings are dates only, as on the Device Permissions page, with the
+  // day taken in the display time zone.
   let ending: string;
   if (device.revokedAt !== null) {
     ending = t(locale, "e2ee.devices.revokedOn", {
-      date: formatDate(locale, device.revokedAt),
+      date: formatE2eeDate(locale, device.revokedAt, zone),
     });
   } else if (device.expiresAt <= now) {
     ending = t(locale, "e2ee.devices.expired", {
-      date: formatDate(locale, device.expiresAt),
+      date: formatE2eeDate(locale, device.expiresAt, zone),
     });
   } else {
     ending = t(locale, "e2ee.devices.expires", {
-      date: formatDate(locale, device.expiresAt),
+      date: formatE2eeDate(locale, device.expiresAt, zone),
     });
   }
   return (
     <ul className="tw-m-0 tw-mt-1 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5 tw-p-0 tw-text-xs tw-text-iron-400">
       <li>
         {t(locale, "e2ee.devices.created", {
-          date: formatE2eeDateTime(locale, device.createdAt),
+          date: formatE2eeDateTime(locale, device.createdAt, zone),
         })}
       </li>
       <li>
         {formatE2eeLastActive(
           locale,
           device.isThisDevice && device.revokedAt === null,
-          device.lastSeenAt
+          device.lastSeenAt,
+          zone
         )}
       </li>
       <li>{ending}</li>

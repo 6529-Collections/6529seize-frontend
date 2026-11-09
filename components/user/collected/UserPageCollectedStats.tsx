@@ -242,7 +242,7 @@ export default function UserPageCollectedStats({
       />
 
       <div ref={detailsScrollTargetRef} className="tw-scroll-mt-24">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-px-3 tw-py-3 md:tw-px-5">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-3 md:tw-px-5">
           <span data-profile-action="Complete my set" className="tw-contents">
             <CollectEntryLink
               collection="memes"

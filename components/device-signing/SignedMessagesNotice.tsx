@@ -4,9 +4,11 @@ import Button from "@/components/utils/button/Button";
 import { faSignature } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import type { DisplayTimeZone } from "@/lib/display-time-zone/displayTimeZone";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 import {
   ExclamationTriangleIcon,
@@ -41,7 +43,12 @@ function getNoticeCopy(
   {
     withEncryption,
     newDeviceReadsDms,
-  }: { readonly withEncryption: boolean; readonly newDeviceReadsDms: boolean }
+    zone,
+  }: {
+    readonly withEncryption: boolean;
+    readonly newDeviceReadsDms: boolean;
+    readonly zone: DisplayTimeZone;
+  }
 ): NoticeCopy {
   switch (model.kind) {
     case "new-device":
@@ -50,6 +57,7 @@ function getNoticeCopy(
           label: model.grant.device_label,
           createdAt: model.grant.created_at,
           reach: newDeviceReadsDms ? "both" : "posts",
+          zone,
         }),
         action: t(locale, "signedMessages.notice.newDevice.revoke"),
       };
@@ -102,6 +110,7 @@ function SignedMessagesNoticeContent({
   hideRenewal,
 }: SignedMessagesNoticeProps) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const titleId = useId();
   const { canEnableEncryption } = useDeviceSecurityState();
   const {
@@ -133,6 +142,7 @@ function SignedMessagesNoticeContent({
   const copy = getNoticeCopy(locale, model, {
     withEncryption: canEnableEncryption,
     newDeviceReadsDms,
+    zone,
   });
   const iconClass = "tw-col-start-1 tw-row-start-1 tw-size-5 tw-shrink-0";
   const onAction = () => {

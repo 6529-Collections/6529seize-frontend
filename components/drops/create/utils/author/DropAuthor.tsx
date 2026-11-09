@@ -1,4 +1,4 @@
-import { getTimeAgoShort } from "@/helpers/Helpers";
+import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import DropAuthorHandle from "./DropAuthorHandle";
 import UserCICAndLevel, {
@@ -20,6 +20,7 @@ export default function DropAuthor({
   size = DropPartSize.MEDIUM,
   children,
 }: DropAuthorProps) {
+  const timeAgoShort = useTimeAgoShort();
   const getTextClasses = (): string => {
     switch (size) {
       case DropPartSize.SMALL:
@@ -51,7 +52,7 @@ export default function DropAuthor({
       <p
         className={`${textClasses} tw-mb-0 tw-whitespace-nowrap tw-font-normal tw-leading-none tw-text-iron-500`}
       >
-        {getTimeAgoShort(timestamp)}
+        {timeAgoShort(timestamp)}
       </p>
     </div>
   );

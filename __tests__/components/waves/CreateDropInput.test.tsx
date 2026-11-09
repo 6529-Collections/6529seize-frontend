@@ -41,6 +41,10 @@ jest.mock("@lexical/react/LexicalHistoryPlugin", () => ({
 jest.mock("@lexical/react/LexicalOnChangePlugin", () => ({
   OnChangePlugin: () => <div />,
 }));
+jest.mock(
+  "@/components/drops/create/lexical/plugins/SelectAllContentsPlugin",
+  () => ({ __esModule: true, default: () => null })
+);
 jest.mock("@/components/drops/create/lexical/plugins/MarkdownShortcutPlugin", () => ({
   MarkdownShortcutPlugin: () => <div />,
 }));

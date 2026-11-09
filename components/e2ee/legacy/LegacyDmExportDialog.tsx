@@ -5,8 +5,10 @@ import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { withDisplayTimeZoneDate } from "@/lib/display-time-zone/displayTimeZone";
 import { formatE2eeDateTime, tCount } from "../e2eeFormat";
 import { E2eeDialog } from "../ui/E2eeDialog";
 import {
@@ -37,6 +39,9 @@ export function LegacyDmExportDialog({
   readonly wave: ApiWave;
 }) {
   const locale = useBrowserLocale();
+  // Exported times use the display time zone and name it when it is not the
+  // device's own, so a shared file does not reveal the device's UTC offset.
+  const zone = useDisplayTimeZone();
   const { connectedProfile } = useAuth();
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const controllerRef = useRef<AbortController | null>(null);
@@ -69,7 +74,15 @@ export function LegacyDmExportDialog({
           handle: handle
             ? `@${handle}`
             : t(locale, "e2ee.legacy.file.unknownAuthor"),
-          date: formatDate(locale, at),
+          date: formatDate(
+            locale,
+            at,
+            withDisplayTimeZoneDate(zone, {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          ),
           deletionDate: formatLegacyDmDeletionDate(locale),
         }),
         drops,
@@ -102,14 +115,14 @@ export function LegacyDmExportDialog({
         lang: locale,
         title: t(locale, "e2ee.legacy.file.title", { name: wave.name }),
         exportedAt: t(locale, "e2ee.legacy.file.exportedAt", {
-          date: formatE2eeDateTime(locale, at.getTime()),
+          date: formatE2eeDateTime(locale, at.getTime(), zone),
         }),
         participants: t(locale, "e2ee.legacy.file.participants"),
         replyTo: t(locale, "e2ee.legacy.file.replyTo"),
         edited: t(locale, "e2ee.legacy.file.edited"),
         media: t(locale, "e2ee.legacy.file.media"),
         unknownAuthor: t(locale, "e2ee.legacy.file.unknownAuthor"),
-        formatTime: (ms) => formatE2eeDateTime(locale, ms),
+        formatTime: (ms) => formatE2eeDateTime(locale, ms, zone),
       }),
       "text/html"
     );

@@ -7,6 +7,7 @@ import ContentPreferencesSettings from "@/components/preferences/ContentPreferen
 import DevicesSecuritySettings from "@/components/preferences/devices-security/DevicesSecuritySettings";
 import { isDevicesSecurityEnabled } from "@/components/preferences/devices-security/devicesSecurityFeature";
 import ReportsPreferencesSettings from "@/components/preferences/ReportsPreferencesSettings";
+import TimeZonePreferencesSettings from "@/components/preferences/TimeZonePreferencesSettings";
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -23,7 +24,8 @@ export type PreferencesTab =
   | "notifications"
   | "blocked-profiles"
   | "reports"
-  | "security";
+  | "security"
+  | "time-zone";
 
 const TABS: ReadonlyArray<{
   readonly id: PreferencesTab;
@@ -32,7 +34,8 @@ const TABS: ReadonlyArray<{
     | "preferences.tabs.notifications"
     | "preferences.tabs.blockedProfiles"
     | "preferences.tabs.reports"
-    | "preferences.tabs.security";
+    | "preferences.tabs.security"
+    | "preferences.tabs.timeZone";
 }> = [
   {
     id: "notifications",
@@ -53,6 +56,11 @@ const TABS: ReadonlyArray<{
     id: "security",
     routeTab: "security",
     labelKey: "preferences.tabs.security",
+  },
+  {
+    id: "time-zone",
+    routeTab: "time-zone",
+    labelKey: "preferences.tabs.timeZone",
   },
 ];
 
@@ -84,6 +92,8 @@ export default function PreferencesPageClient({
     hasValidWalletAuth === true &&
     !connectedProfile?.handle;
   const canManagePreferences = Boolean(connectedProfile?.handle);
+  // The time zone is saved on this device, so it needs no profile or sign-in.
+  const isDeviceTab = activeTab === "time-zone";
   const profileHref = connectedProfile?.handle
     ? `/${encodeURIComponent(connectedProfile.handle)}`
     : null;
@@ -150,7 +160,8 @@ export default function PreferencesPageClient({
         </nav>
 
         <div className="tw-mt-6">
-          {isLoadingProfile && (
+          {isDeviceTab && <TimeZonePreferencesSettings />}
+          {!isDeviceTab && isLoadingProfile && (
             <output
               aria-label={t(locale, "profilePreferences.loading")}
               className="tw-flex tw-min-h-32 tw-items-center tw-justify-center tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
@@ -158,7 +169,7 @@ export default function PreferencesPageClient({
               <span className="tw-size-6 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400" />
             </output>
           )}
-          {needsProfile && (
+          {!isDeviceTab && needsProfile && (
             <section className="tw-flex tw-flex-col tw-items-center tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6 tw-text-center">
               <p className="tw-m-0 tw-text-sm tw-text-iron-400">
                 {t(locale, "preferences.createProfile")}
@@ -166,13 +177,16 @@ export default function PreferencesPageClient({
               <UserSetUpProfileCta className="tw-mt-4" />
             </section>
           )}
-          {!isLoadingProfile && !needsProfile && !canManagePreferences && (
-            <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6">
-              <p className="tw-m-0 tw-text-center tw-text-sm tw-text-iron-400">
-                {t(locale, "preferences.signIn")}
-              </p>
-            </section>
-          )}
+          {!isDeviceTab &&
+            !isLoadingProfile &&
+            !needsProfile &&
+            !canManagePreferences && (
+              <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6">
+                <p className="tw-m-0 tw-text-center tw-text-sm tw-text-iron-400">
+                  {t(locale, "preferences.signIn")}
+                </p>
+              </section>
+            )}
           {canManagePreferences && activeTab === "blocked-profiles" ? (
             <ContentPreferencesSettings
               key={connectedProfile?.id ?? "signed-out"}

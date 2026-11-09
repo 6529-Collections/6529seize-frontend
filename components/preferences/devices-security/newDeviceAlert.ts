@@ -1,6 +1,10 @@
 import { formatE2eeDateTime } from "@/components/e2ee/e2eeFormat";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 
 /** What a newly set-up device can do as this profile. */
 export type NewDeviceReach = "both" | "posts" | "dms";
@@ -22,16 +26,19 @@ export function getNewDeviceAlertCopy(
     label,
     createdAt,
     reach,
+    zone = LOCAL_DISPLAY_TIME_ZONE,
   }: {
     readonly label: string;
     readonly createdAt: number;
     readonly reach: NewDeviceReach;
+    /** The display time zone for "Set up on {date}". */
+    readonly zone?: DisplayTimeZone | undefined;
   }
 ): { readonly title: string; readonly body: string } {
   return {
     title: t(locale, "devicesSecurity.newDevice.title", { label }),
     body: t(locale, BODY_KEYS[reach], {
-      date: formatE2eeDateTime(locale, createdAt),
+      date: formatE2eeDateTime(locale, createdAt, zone),
     }),
   };
 }

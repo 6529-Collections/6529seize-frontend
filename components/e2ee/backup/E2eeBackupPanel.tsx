@@ -10,7 +10,8 @@ import Button from "@/components/utils/button/Button";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useE2eeBackup } from "@/hooks/e2ee/useE2eeBackup";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDate, formatNumber } from "@/i18n/format";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import { formatNumber } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 import type {
   E2eeBackupManager,
@@ -18,7 +19,7 @@ import type {
   PreparedBackup,
 } from "@/lib/e2ee/backup";
 import type { E2eeDeviceInfo } from "@/lib/e2ee/types";
-import { formatE2eeDateTime, tCount } from "../e2eeFormat";
+import { formatE2eeDate, formatE2eeDateTime, tCount } from "../e2eeFormat";
 import { E2eeBanner } from "../ui/E2eeBanner";
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
 import {
@@ -178,6 +179,7 @@ function StatusDetails({
   readonly snapshot: E2eeBackupSnapshot;
   readonly locale: Locale;
 }) {
+  const zone = useDisplayTimeZone();
   if (snapshot.phase !== "on") {
     return null;
   }
@@ -198,7 +200,7 @@ function StatusDetails({
         {lastBackupAt === null ? null : (
           <li>
             {t(locale, "e2ee.backup.status.lastBackup", {
-              time: formatE2eeDateTime(locale, lastBackupAt),
+              time: formatE2eeDateTime(locale, lastBackupAt, zone),
             })}
           </li>
         )}
@@ -232,13 +234,14 @@ function RotationWarning({
   readonly disabled: boolean;
   readonly onReplace: () => void;
 }) {
+  const zone = useDisplayTimeZone();
   // One warning however many were revoked (a Clean up revokes several).
   const [only] = holders;
   const text =
     holders.length === 1 && only
       ? t(locale, "e2ee.backup.rotate.one", {
           label: only.label,
-          date: formatDate(locale, only.revokedAt ?? 0),
+          date: formatE2eeDate(locale, only.revokedAt ?? 0, zone),
         })
       : tCount(
           locale,

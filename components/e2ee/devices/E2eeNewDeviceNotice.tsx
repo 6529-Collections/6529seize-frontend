@@ -12,6 +12,7 @@ import {
 import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessagesAccount";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { t } from "@/i18n/messages";
 import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
 import { E2eeBanner } from "../ui/E2eeBanner";
@@ -60,6 +61,7 @@ function NewDeviceAlerts({
   readonly onAcknowledge: (deviceKey: string) => void;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const queryClient = useQueryClient();
   // The same device's signed-posts grant: its alert above the composer is
   // this alert, so answering either one answers both.
@@ -94,6 +96,7 @@ function NewDeviceAlerts({
           label: device.label,
           createdAt: device.createdAt,
           reach: device.linkedAuthorProof === true ? "both" : "dms",
+          zone,
         });
         return (
           <E2eeBanner

@@ -7,8 +7,13 @@ import {
   GlobeAltIcon,
 } from "@heroicons/react/24/outline";
 import { createElement, useId, useState, type ReactNode } from "react";
-import { formatE2eeLastActive, formatE2eeWallet } from "@/components/e2ee/e2eeFormat";
-import { formatDate, formatList } from "@/i18n/format";
+import {
+  formatE2eeDate,
+  formatE2eeLastActive,
+  formatE2eeWallet,
+} from "@/components/e2ee/e2eeFormat";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import { formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -122,11 +127,13 @@ export function DeviceMeta({
   readonly device: SecurityDevice;
   readonly showWallet?: boolean;
 }) {
+  // Days and times in the display time zone (Preferences → Time Zone).
+  const zone = useDisplayTimeZone();
   const items: { readonly key: string; readonly text: string }[] = [
     {
       key: "set-up",
       text: t(locale, "devicesSecurity.setUp", {
-        date: formatDate(locale, device.createdAt),
+        date: formatE2eeDate(locale, device.createdAt, zone),
       }),
     },
     {
@@ -134,7 +141,8 @@ export function DeviceMeta({
       text: formatE2eeLastActive(
         locale,
         device.isThisDevice,
-        device.lastActiveAt
+        device.lastActiveAt,
+        zone
       ),
     },
   ];
@@ -142,7 +150,7 @@ export function DeviceMeta({
     items.push({
       key: "expires",
       text: t(locale, "e2ee.devices.expires", {
-        date: formatDate(locale, device.expiresAt),
+        date: formatE2eeDate(locale, device.expiresAt, zone),
       }),
     });
   }
