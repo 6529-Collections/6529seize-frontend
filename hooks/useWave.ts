@@ -243,13 +243,14 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     [wave]
   );
 
-  const identityDropsCount = useMemo(
-    () =>
-      presentationCompetition(wave)
-        ? null
-        : (wave?.metrics.your_participation_drops_count ?? null),
-    [wave]
-  );
+  const competition = presentationCompetition(wave);
+  const projectedCount = competition
+    ? (wave as { competitionActiveEntryCount?: number | null })
+        .competitionActiveEntryCount
+    : undefined;
+  const identityDropsCount = competition
+    ? (projectedCount ?? null)
+    : (wave?.metrics.your_participation_drops_count ?? null);
 
   // Extract time period boundaries with proper defaults
   const participationStartTime = useMemo(
@@ -349,9 +350,15 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     return (
       wave.participation.authenticated_user_eligible && // User is eligible
       isWithinSubmissionPeriod && // Within time window
+      projectedCount !== null && // Required native count is available
       !hasReachedSubmissionLimit // Has not reached limit
     );
-  }, [wave, isWithinSubmissionPeriod, hasReachedSubmissionLimit]);
+  }, [
+    wave,
+    isWithinSubmissionPeriod,
+    projectedCount,
+    hasReachedSubmissionLimit,
+  ]);
 
   return {
     voting: {

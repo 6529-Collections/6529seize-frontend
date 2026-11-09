@@ -13,6 +13,7 @@ import {
   useCompetitionDetail,
   useDefaultCompetition,
 } from "./useCompetitionQueries";
+import { useMainStageActiveEntryCount } from "./useMainStageActiveEntryCount";
 
 /** Shared-chat entry actions use the same explicit competition as its full page. */
 export function useCompetitionSubmissionWave(
@@ -47,15 +48,17 @@ export function useCompetitionSubmissionWave(
     detail.data?.wave_id === wave?.id
       ? detail.data
       : null);
+  const activeEntryCount = useMainStageActiveEntryCount(competition, enabled);
   const submissionWave = useMemo(
     () =>
       wave && competition
         ? {
             ...competitionPresentationWave(wave, competition),
+            competitionActiveEntryCount: activeEntryCount,
             name: wave.name,
           }
         : null,
-    [wave, competition]
+    [wave, competition, activeEntryCount]
   );
   return {
     wave: submissionWave,

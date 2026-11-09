@@ -43,7 +43,11 @@ it("batches a full wave update burst while still refreshing later events", () =>
   expect(invalidateCompetitionWave).not.toHaveBeenCalled();
   act(() => jest.advanceTimersByTime(1));
   expect(invalidateCompetitionWave).toHaveBeenCalledTimes(1);
-  expect(invalidateCompetitionWave).toHaveBeenCalledWith(mockClient, "wave");
+  expect(invalidateCompetitionWave).toHaveBeenCalledWith(
+    mockClient,
+    "wave",
+    true
+  );
   act(() => {
     listener(event("later"));
     jest.advanceTimersByTime(1000);
@@ -86,16 +90,21 @@ it("does not subscribe when explicitly disabled", () => {
   expect(mockSubscribe).not.toHaveBeenCalled();
 });
 
-it("refreshes public authors once for a decision burst while ordinary updates leave them alone", () => {
+it("refreshes public authors and the active entry count on a decision, but not on a vote", () => {
   renderHook(() => useCompetitionEvents("wave"));
   act(() => {
     listener({
       ...event("vote"),
-      event_type: "COMPETITION_ENTRY_VOTE_CHANGED",
+      event_type: "COMPETITION_VOTE_CHANGED",
     });
     jest.advanceTimersByTime(1000);
   });
   expect(invalidateCompetitionAuthors).not.toHaveBeenCalled();
+  expect(invalidateCompetitionWave).toHaveBeenLastCalledWith(
+    mockClient,
+    "wave",
+    false
+  );
   act(() => {
     listener({
       ...event("winner-status"),
@@ -109,4 +118,9 @@ it("refreshes public authors once for a decision burst while ordinary updates le
   });
   expect(invalidateCompetitionAuthors).toHaveBeenCalledTimes(1);
   expect(invalidateCompetitionAuthors).toHaveBeenCalledWith(mockClient, "wave");
+  expect(invalidateCompetitionWave).toHaveBeenLastCalledWith(
+    mockClient,
+    "wave",
+    true
+  );
 });

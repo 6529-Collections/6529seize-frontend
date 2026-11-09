@@ -45,6 +45,7 @@ export const competitionScope = ({
   waveId,
   competitionId,
 }: CompetitionIdentity) => ({ wave_id: waveId, competition_id: competitionId });
+export const COMPETITION_ACTIVE_ENTRY_COUNT = "active-entry-count";
 export const competitionQueryKey = (
   identity: CompetitionIdentity,
   viewer: string | null
@@ -317,9 +318,15 @@ export async function invalidateCompetition(
 
 export async function invalidateCompetitionWave(
   client: QueryClient,
-  waveId: string
+  waveId: string,
+  refreshActiveEntryCount = true
 ) {
-  await invalidateCompetitionScope(client, waveId, { wave_id: waveId });
+  await invalidateCompetitionScope(
+    client,
+    waveId,
+    { wave_id: waveId },
+    refreshActiveEntryCount
+  );
 }
 
 /** Winner decisions also change public author identity on ordinary drop views. */
@@ -348,7 +355,8 @@ export async function invalidateCompetitionAuthors(
 async function invalidateCompetitionScope(
   client: QueryClient,
   waveId: string,
-  scope: { wave_id: string; competition_id?: string }
+  scope: { wave_id: string; competition_id?: string },
+  refreshActiveEntryCount = true
 ) {
   await Promise.all([
     client.invalidateQueries({
@@ -372,6 +380,9 @@ async function invalidateCompetitionScope(
     }),
     client.invalidateQueries({
       queryKey: [QueryKey.COMPETITION_RESOURCE, scope],
+      predicate: ({ queryKey }) =>
+        refreshActiveEntryCount ||
+        queryKey[2] !== COMPETITION_ACTIVE_ENTRY_COUNT,
     }),
     client.invalidateQueries({
       queryKey: [QueryKey.COMPETITION_CREDITS, scope],

@@ -130,6 +130,8 @@ Entry behavior differs by wave type:
   entry controls can simply be absent.
 - Main Stage keeps its submission control in the top wave header when switching
   between Chat and Leaderboard on desktop, mobile web, and the native app.
+  The control locks when your active entries reach the configured limit.
+  Winning entries do not use an active slot.
   `My submissions` stays available to signed-in users on their own profile in
   the leaderboard toolbar when they have entries, including when they cannot
   currently submit. A confirmed empty lookup hides it; a failed lookup still

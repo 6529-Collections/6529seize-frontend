@@ -8,9 +8,14 @@ import {
   invalidateCompetitionWave,
 } from "@/services/api/competitions-api";
 
-function parseCompetitionEvent(
-  value: unknown
-): {
+const entryCountEvents = new Set([
+  "COMPETITION_ENTRY_CREATED",
+  "COMPETITION_ENTRY_DELETED",
+  "COMPETITION_ENTRY_STATUS_CHANGED",
+  "COMPETITION_DECISION_COMPLETED",
+]);
+
+function parseCompetitionEvent(value: unknown): {
   event_id: string;
   wave_id: string;
   competition_id: string;
@@ -42,6 +47,7 @@ export function useCompetitionEvents(waveId: string, enabled = true) {
     if (!enabled) return;
     let refresh: ReturnType<typeof setTimeout> | undefined;
     let revealAuthors = false;
+    let refreshActiveEntryCount = false;
     const unsubscribe = subscribe(
       WsMessageType.COMPETITION_UPDATE,
       (data: unknown) => {
@@ -50,13 +56,20 @@ export function useCompetitionEvents(waveId: string, enabled = true) {
           return;
         seen.current.add(event.event_id);
         revealAuthors ||= event.event_type === "COMPETITION_DECISION_COMPLETED";
+        refreshActiveEntryCount ||=
+          !event.event_type || entryCountEvents.has(event.event_type);
         if (seen.current.size > 500)
           seen.current.delete(seen.current.values().next().value!);
         // The decision loop sends a burst for every competition in the wave.
         // Refresh each active query once per batch, not once per event.
         refresh ??= setTimeout(() => {
           refresh = undefined;
-          void invalidateCompetitionWave(client, waveId);
+          void invalidateCompetitionWave(
+            client,
+            waveId,
+            refreshActiveEntryCount
+          );
+          refreshActiveEntryCount = false;
           if (revealAuthors) {
             revealAuthors = false;
             void invalidateCompetitionAuthors(client, waveId);
