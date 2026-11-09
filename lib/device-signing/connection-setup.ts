@@ -300,11 +300,10 @@ export async function acceptConnectionDeviceSetup(input: {
       }).catch(() => undefined);
       throw error;
     }
-    if (outcome === "pending-enrollment") {
-      setE2eeEnrollmentMarker(identity.id, true);
-      if (typeof globalThis.dispatchEvent === "function")
-        globalThis.dispatchEvent(new Event("storage"));
-    }
+    if (outcome !== "pending-enrollment") return outcome;
+    setE2eeEnrollmentMarker(identity.id, true);
+    if (typeof globalThis.dispatchEvent === "function")
+      globalThis.dispatchEvent(new Event("storage"));
     return outcome;
   } finally {
     device.dispose();
