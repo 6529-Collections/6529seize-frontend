@@ -41,7 +41,7 @@ describe("UserPageIdentityAddStatementsSocialMediaAccountItems", () => {
     );
     expect(screen.getByText("Choose a platform")).toHaveClass("tw-mb-2");
     const picker = screen.getByRole("group", { name: "Choose a platform" });
-    const rows = Array.from(picker.querySelectorAll(":scope > span"));
+    const rows = Array.from(picker.querySelectorAll(":scope > div > span"));
     expect(rows).toHaveLength(2);
     expect(rows.map((row) => row.querySelectorAll("button").length)).toEqual([
       7, 6,

@@ -32,7 +32,7 @@ export default function ProfileActivityLogPfp({
                 alt="Profile picture"
                 width="20"
                 height="20"
-                className="tw-h-auto tw-max-h-10 tw-w-auto tw-min-w-10 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-800 tw-object-contain tw-ring-2 tw-ring-white/30"
+                className="tw-h-auto tw-max-h-10 tw-w-auto tw-min-w-10 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-white/10"
               />
             )}
           </div>
@@ -63,7 +63,7 @@ export default function ProfileActivityLogPfp({
           alt="Profile picture"
           width="20"
           height="20"
-          className="tw-h-auto tw-max-h-10 tw-w-auto tw-min-w-10 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-800 tw-object-contain tw-ring-2 tw-ring-white/30"
+          className="tw-h-auto tw-max-h-10 tw-w-auto tw-min-w-10 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-white/10"
         />
       </div>
     </>
