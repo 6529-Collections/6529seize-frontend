@@ -39,6 +39,21 @@ type PendingServerFeedSeed = {
   readonly promise: Promise<ServerWaveFeedSeedResult>;
 };
 
+/** Settle a single accepted full row before merging its stream update. */
+function settleAcceptedPendingDrop(
+  chatStore: ChatStore,
+  update: WaveMessagesUpdate
+): void {
+  const acceptedDrop = update.drops?.[0];
+  if (
+    update.pendingDropId &&
+    update.drops?.length === 1 &&
+    acceptedDrop?.type === DropSize.FULL
+  ) {
+    chatStore.settlePendingSend(update.pendingDropId, acceptedDrop);
+  }
+}
+
 function useWaveMessagesStore() {
   const [, forceRender] = useReducer((version: number) => version + 1, 0);
   // Drops live in the normalized chat store: records by key, a sorted index
@@ -362,14 +377,7 @@ function useWaveMessagesStore() {
       }
       if (update.drops !== undefined) {
         const chatStore = getChatStore();
-        const acceptedDrop = update.drops[0];
-        if (
-          update.pendingDropId &&
-          update.drops.length === 1 &&
-          acceptedDrop?.type === DropSize.FULL
-        ) {
-          chatStore.settlePendingSend(update.pendingDropId, acceptedDrop);
-        }
+        settleAcceptedPendingDrop(chatStore, update);
         chatStore.merge(update.key, update.drops, mergePolicy);
         // The store holds every drop the wave shows; without a store wave
         // (nothing merged yet, or every copy tombstoned) the wave keeps
