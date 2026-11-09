@@ -36,7 +36,7 @@ function readStorage(storage: "local" | "session", key: string): string | null {
   try {
     const target =
       storage === "local" ? globalThis.localStorage : globalThis.sessionStorage;
-    return target?.getItem(key) ?? null;
+    return target.getItem(key);
   } catch {
     return null;
   }
@@ -50,7 +50,6 @@ function writeStorage(
   try {
     const target =
       storage === "local" ? globalThis.localStorage : globalThis.sessionStorage;
-    if (!target) return;
     if (value === null) {
       target.removeItem(key);
     } else {
@@ -84,7 +83,7 @@ function readSnapshot(): DisplayTimeZoneSnapshot {
 
 function publish(next: DisplayTimeZoneSnapshot): void {
   cachedSnapshot = next;
-  globalThis.dispatchEvent?.(new Event(CHANGE_EVENT));
+  globalThis.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
 export function getDisplayTimeZoneSnapshot(): DisplayTimeZoneSnapshot {

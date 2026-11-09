@@ -12,7 +12,7 @@
   "displayTimeZone.option.other.description": "Choisissez une ville ou un fuseau.",
   "displayTimeZone.option.other.selected": "{zone} · {time} maintenant",
   "displayTimeZone.search.label": "Rechercher un fuseau horaire",
-  "displayTimeZone.search.placeholder": "Ville ou fuseau, par exemple Lisbonne",
+  "displayTimeZone.search.placeholder": "Ville ou fuseau, par exemple Lisbon",
   "displayTimeZone.search.empty": "Aucun fuseau ne correspond a \"{query}\". Essayez une ville comme Lisbon ou un fuseau comme Europe/Lisbon.",
   "displayTimeZone.preview.label": "Apercu",
   "displayTimeZone.footnote": "Enregistre sur cet appareil uniquement, pas dans votre profil. Les heures hors de votre fuseau local affichent toujours le nom du fuseau. Une capture d'ecran peut quand meme montrer l'horloge de votre appareil. Pour une seule capture, utilisez plutot le bouton horloge dans une wave.",

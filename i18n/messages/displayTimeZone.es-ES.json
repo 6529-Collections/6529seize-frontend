@@ -12,7 +12,7 @@
   "displayTimeZone.option.other.description": "Elige una ciudad o zona.",
   "displayTimeZone.option.other.selected": "{zone} · ahora {time}",
   "displayTimeZone.search.label": "Buscar zonas horarias",
-  "displayTimeZone.search.placeholder": "Ciudad o zona, por ejemplo Lisboa",
+  "displayTimeZone.search.placeholder": "Ciudad o zona, por ejemplo Lisbon",
   "displayTimeZone.search.empty": "Ninguna zona coincide con \"{query}\". Prueba una ciudad como Lisbon o una zona como Europe/Lisbon.",
   "displayTimeZone.preview.label": "Vista previa",
   "displayTimeZone.footnote": "Guardado solo en este dispositivo, no en tu perfil. Las horas fuera de tu zona local siempre muestran el nombre de la zona. Una captura de pantalla aun puede mostrar el reloj de tu dispositivo. Para una sola captura, usa el boton del reloj en cualquier wave.",
