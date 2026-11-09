@@ -977,6 +977,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     baseURL,
     page,
   }, testInfo) => {
+    // Desktop Enter submits; mobile uses Send, whose dismissal is covered below.
     test.skip(Boolean(testInfo.project.use.isMobile), "Desktop Enter shortcut");
     await gotoSandboxWave(page);
     const composer = page
@@ -988,9 +989,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     ).toBeEnabled();
     await composer.press("Enter");
 
-    await expect(page.locator('[data-serial-no="2"]')).toContainText(
-      SANDBOX_CHAT_DROP_CONTENT
-    );
+    await expect(
+      page.getByRole("main").locator('[data-serial-no="2"]')
+    ).toContainText(SANDBOX_CHAT_DROP_CONTENT);
     await expect(composer).toHaveText("");
     await expect(composer).toBeFocused();
     // Use the keyboard directly: locator.fill/press would refocus a broken editor.
