@@ -88,7 +88,6 @@ interface BrainMobileTabsProps {
   readonly hideCompetitionsTab?: boolean | undefined;
   readonly hasDefaultCompetition?: boolean | undefined;
   readonly activeCompetitionCount?: number | undefined;
-  readonly outcomesVisible?: boolean | undefined;
   readonly waveNavigationReady?: boolean | undefined;
   readonly showWavesTab: boolean;
   readonly showStreamBack: boolean;

@@ -94,6 +94,8 @@ export const COMPETITION_MESSAGES = {
   "competitions.decisions": "Winners",
   "competitions.outcomes": "Outcomes",
   "competitions.outcomes.positions": "Positions {positions}",
+  "competitions.outcomes.morePositions": "Load more positions",
+  "competitions.outcomes.moreOutcomes": "Load more outcomes",
   "competitions.outcomeTab": "Outcome",
   "competitions.voters": "Voters",
   "competitions.rules": "Rules",

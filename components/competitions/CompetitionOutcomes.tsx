@@ -66,7 +66,7 @@ function Outcome({ outcome }: { readonly outcome: ApiCompetitionOutcome }) {
           {description}
         </p>
       )}
-      {!items.length && isCredit && (
+      {!query.isPending && !query.isError && !items.length && isCredit && (
         <p className="tw-m-0 tw-text-iron-100">
           {formatInteger(locale, outcome.amount ?? 0)} {credit}
           {category}
@@ -92,7 +92,10 @@ function Outcome({ outcome }: { readonly outcome: ApiCompetitionOutcome }) {
           retry={() => void query.refetch()}
         />
       )}
-      <CompetitionLoadMore query={query} />
+      <CompetitionLoadMore
+        query={query}
+        label={t(locale, "competitions.outcomes.morePositions")}
+      />
     </div>
   );
 }
@@ -133,7 +136,10 @@ export default function CompetitionOutcomes() {
         {outcomes.map((outcome) => (
           <Outcome key={outcome.id} outcome={outcome} />
         ))}
-        <CompetitionLoadMore query={query} />
+        <CompetitionLoadMore
+          query={query}
+          label={t(locale, "competitions.outcomes.moreOutcomes")}
+        />
       </div>
     </section>
   );

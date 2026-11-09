@@ -35,7 +35,6 @@ const APPEARANCE_KEYS: ReadonlySet<string> = new Set(
 
 function AppearanceForm({ onClose }: { readonly onClose: () => void }) {
   const { competition } = useCompetition();
-  const locale = useBrowserLocale();
   const metadata = (competition.presentation ?? []).map((item, id) => ({
     ...item,
     id,

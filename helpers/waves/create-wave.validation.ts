@@ -12,7 +12,6 @@ import type {
   CreateWaveDisplayConfig,
   CreateWaveDropsConfig,
   CreateWaveDropsRequiredMetadata,
-  CreateWaveOutcomeConfig,
   CreateWaveVotingConfig,
   WaveGroupsConfig,
   WaveOverviewConfig,

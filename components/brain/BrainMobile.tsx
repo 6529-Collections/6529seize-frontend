@@ -501,7 +501,6 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
               searchParams.get("competition") ?? defaultCompetitionId
             )}
             activeCompetitionCount={activeCompetitionCount}
-            outcomesVisible={outcomesVisible}
             waveNavigationReady={waveNavigationReady}
             showWavesTab={hydrated}
             showStreamBack={hydrated}

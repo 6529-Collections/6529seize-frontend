@@ -690,7 +690,6 @@ describe("ContentTabContext", () => {
         hasAuthenticatedProfile: true,
         isMemesWave: false,
         isCurationWave: false,
-        showOutcomeTab: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -845,7 +844,6 @@ describe("ContentTabContext", () => {
         isMemesWave: false,
         isCurationWave: false,
         isApproveWave: true,
-        showOutcomeTab: false,
         votingState: WaveVotingState.ENDED,
         hasFirstDecisionPassed: false,
       })

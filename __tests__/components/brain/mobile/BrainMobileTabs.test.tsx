@@ -518,7 +518,6 @@ describe("BrainMobileTabs", () => {
         showStreamBack={false}
         isApp={false}
         wave={createWave()}
-        outcomesVisible={false}
       />
     );
 

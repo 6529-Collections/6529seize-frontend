@@ -4,34 +4,10 @@ import { CreateWaveOutcomeType } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 jest.mock(
-  "@/components/waves/create-wave/outcomes/CreateWaveOutcomeTypes",
-  () => ({
-    __esModule: true,
-    default: () => <div data-testid="types" />,
-  })
-);
-
-jest.mock(
   "@/components/waves/create-wave/outcomes/manual/CreateWaveOutcomesManual",
   () => ({
     __esModule: true,
     default: () => <div data-testid="manual" />,
-  })
-);
-
-jest.mock(
-  "@/components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRep",
-  () => ({
-    __esModule: true,
-    default: () => <div data-testid="rep" />,
-  })
-);
-
-jest.mock(
-  "@/components/waves/create-wave/outcomes/cic/CreateWaveOutcomesCIC",
-  () => ({
-    __esModule: true,
-    default: () => <div data-testid="cic" />,
   })
 );
 
@@ -88,8 +64,8 @@ describe("CreateWaveOutcomes", () => {
       CreateWaveOutcomeType.MANUAL
     );
     expect(screen.queryByRole("radio")).toBeNull();
-    expect(screen.queryByTestId("rep")).toBeNull();
-    expect(screen.queryByTestId("cic")).toBeNull();
+    expect(screen.queryByRole("radio", { name: "Rep" })).toBeNull();
+    expect(screen.queryByRole("radio", { name: "NIC" })).toBeNull();
     expect(screen.getByTestId("rows")).toBeInTheDocument();
   });
 

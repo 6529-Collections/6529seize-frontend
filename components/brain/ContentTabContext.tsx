@@ -59,7 +59,6 @@ type WaveTabParams = {
   isMemesWave: boolean;
   isCurationWave: boolean;
   isApproveWave?: boolean | undefined;
-  showOutcomeTab?: boolean | undefined;
   votingState: WaveVotingState;
   hasFirstDecisionPassed: boolean;
   transientPreferredTab?: MyStreamWaveTab | null;

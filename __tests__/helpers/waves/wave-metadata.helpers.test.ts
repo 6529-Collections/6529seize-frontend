@@ -10,7 +10,6 @@ import {
   getWaveCustomRulesFromMetadata,
   getWaveCustomRulesMetadataUpdate,
   getWaveOutcomeVisibilityFromMetadata,
-  getWaveOutcomeVisibilityMetadataUpdate,
   getWaveProposalCardConfigFromMetadata,
   getWaveProposalCardMetadataRequest,
   getWaveProposalCardMetadataUpdate,
@@ -869,43 +868,5 @@ describe("wave-metadata.helpers", () => {
         },
       ])
     ).toBe(true);
-  });
-
-  it("creates hidden outcome metadata and deletes rows when reset to shown", () => {
-    expect(
-      getWaveOutcomeVisibilityMetadataUpdate({
-        metadata: [],
-        outcomesVisible: false,
-      })
-    ).toEqual({
-      create: [
-        {
-          data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-          data_value: "false",
-        },
-      ],
-      deleteIds: [],
-    });
-
-    expect(
-      getWaveOutcomeVisibilityMetadataUpdate({
-        metadata: [
-          {
-            id: 1,
-            data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-            data_value: "false",
-          },
-          {
-            id: 2,
-            data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-            data_value: "hidden",
-          },
-        ],
-        outcomesVisible: true,
-      })
-    ).toEqual({
-      create: [],
-      deleteIds: [1, 2],
-    });
   });
 });

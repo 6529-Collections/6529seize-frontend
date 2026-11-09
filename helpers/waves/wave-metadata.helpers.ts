@@ -51,8 +51,6 @@ export const WAVE_DISPLAY_METADATA_KEYS = {
   outcomesVisible: "wave_display.outcomes.visible",
 } as const;
 
-const HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE = "false";
-
 type ApproveWaveDisplayMetadataField = {
   readonly displayKey: keyof CreateWaveApproveDisplayConfig;
   readonly dataKey: string;
@@ -84,11 +82,6 @@ interface ApproveWaveTabLabels {
 }
 
 interface ApproveWaveDisplayMetadataUpdate {
-  readonly create: ApiCreateWaveMetadataRequest[];
-  readonly deleteIds: number[];
-}
-
-interface WaveOutcomeVisibilityMetadataUpdate {
   readonly create: ApiCreateWaveMetadataRequest[];
   readonly deleteIds: number[];
 }
@@ -432,58 +425,11 @@ export const getApproveWaveDisplayMetadataUpdate = ({
   return { create, deleteIds };
 };
 
-const getOutcomeVisibilityMetadataRequest = (
-  outcomesVisible: boolean | null | undefined
-): ApiCreateWaveMetadataRequest | null => {
-  if (outcomesVisible !== false) {
-    return null;
-  }
-
-  return {
-    data_key: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-    data_value: HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE,
-  };
-};
-
 // Retained for existing consumers; the visibility preference is retired.
 // Configured outcomes and recorded rewards are always available to wave viewers.
 export const getWaveOutcomeVisibilityFromMetadata = (
   _metadata: readonly ApiWaveMetadata[] | null | undefined
 ): boolean => true;
-
-export const getWaveOutcomeVisibilityMetadataUpdate = ({
-  metadata,
-  outcomesVisible,
-}: {
-  readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
-  readonly outcomesVisible: boolean;
-}): WaveOutcomeVisibilityMetadataUpdate => {
-  const rows = getApproveWaveDisplayMetadataRows({
-    metadata,
-    dataKey: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-  });
-  const latestValue = getLatestMetadataValue({
-    metadata,
-    dataKey: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-  });
-  const request = getOutcomeVisibilityMetadataRequest(outcomesVisible);
-
-  if (request === null) {
-    return {
-      create: [],
-      deleteIds: rows.map((row) => row.id),
-    };
-  }
-
-  if (
-    latestValue?.trim().toLowerCase() ===
-    HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE
-  ) {
-    return { create: [], deleteIds: [] };
-  }
-
-  return { create: [request], deleteIds: [] };
-};
 
 export const getWaveCustomRulesFromMetadata = (
   metadata: readonly ApiWaveMetadata[] | null | undefined

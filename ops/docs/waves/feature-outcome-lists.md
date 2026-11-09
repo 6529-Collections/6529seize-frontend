@@ -8,7 +8,8 @@ happens after approval. The block is omitted when no outcomes are configured.
 
 Descriptions appear directly, with positions when rewards differ by rank.
 Repeated descriptions are grouped with their positions, such as `1–3, 5`.
-Large lists retain **Load more**, and a failed request offers **Try again**.
+Large lists use **Load more outcomes** or **Load more positions**, and a failed
+request offers **Try again**.
 There is no separate Outcome tab or outcome-visibility setting. Older links to
 an Outcome tab open Settings.
 
