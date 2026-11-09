@@ -4,15 +4,23 @@
  * Integration (D172): moving devices from 0x004F to 0x004E keeps history.
  * An earlier-suite device is retired once, its conversations become
  * read-only ("superseded"), one signature enrolls a fresh 0x004E key, and
- * "start again" continues each conversation exactly once. Real OpenMLS
- * WASM, fake delivery service, memory storage.
+ * "start again" continues each conversation exactly once. The earlier
+ * devices are genuine: enrolled with signed v1 grants on the engine as it ran
+ * before D172, with their conversations made on 0x004F, then moved to the
+ * current engine. Real OpenMLS WASM, fake delivery service, memory storage.
  */
-import { E2EE_CIPHERSUITE } from "@/lib/e2ee/grant";
+import {
+  computeGrantId,
+  credentialIdentity,
+  E2EE_CIPHERSUITE,
+  E2EE_LEGACY_CIPHERSUITE,
+  verifyGrant,
+} from "@/lib/e2ee/grant";
 import { retireOldSuiteDevice } from "@/lib/e2ee/suite-retirement";
 import {
   addUser,
   createWorld,
-  seedLegacySuiteDevice,
+  moveToCurrentSuite,
   realSleep,
   settle,
   startDevice,
@@ -31,14 +39,18 @@ const ids = (device: TestDevice): string[] =>
     .map((c) => c.g)
     .sort();
 
-/** Alice and Bob share a DM with history, then both become 0x004F devices. */
+/** A user whose device enrolled before D172 (0x004F, grant v1). */
+const addEarlierUser = (world: World, profileId: string): Promise<TestUser> =>
+  addUser(world, profileId, undefined, { earlierSuite: true });
+
+/** Alice and Bob share a 0x004F DM with history, then both move to 0x004E. */
 async function legacyDm(world: World): Promise<{
   alice: TestUser;
   bob: TestUser;
   old: string;
 }> {
-  const alice = await addUser(world, "alice");
-  const bob = await addUser(world, "bob");
+  const alice = await addEarlierUser(world, "alice");
+  const bob = await addEarlierUser(world, "bob");
   const old = await alice.primary.engine.createConversation({
     profileIds: ["bob"],
     kind: "dm",
@@ -46,8 +58,8 @@ async function legacyDm(world: World): Promise<{
   await settle(world);
   await alice.primary.engine.send(old, { text: "before the upgrade" });
   await settle(world);
-  await seedLegacySuiteDevice(world, alice, alice.primary);
-  await seedLegacySuiteDevice(world, bob, bob.primary);
+  await moveToCurrentSuite(world, alice, alice.primary);
+  await moveToCurrentSuite(world, bob, bob.primary);
   return { alice, bob, old };
 }
 
@@ -95,6 +107,26 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
     const { alice, old } = await legacyDm(world);
     const a = alice.primary.engine;
     const retiredKey = world.ds.devicesOf("alice")[0].device_key;
+
+    // Genuine earlier devices: wallet-signed v1 grants for 0x004F whose
+    // records verify, and the members of the kept DM carry credentials
+    // bound to those grants.
+    const members = (await alice.primary.storage.listGroups("alice")).find(
+      (group) => group.g === old
+    )?.members;
+    expect(members).toHaveLength(2);
+    for (const profileId of ["alice", "bob"]) {
+      const [record] = world.ds.devicesOf(profileId);
+      expect(record.grant).not.toHaveProperty("version");
+      expect(record.grant.ciphersuite).toBe(E2EE_LEGACY_CIPHERSUITE);
+      expect(record.grant_id).toBe(computeGrantId(record.grant));
+      await expect(
+        verifyGrant(record, { atMs: world.clock.now() })
+      ).resolves.toMatchObject({ ok: true, verified: true });
+      expect(
+        members?.find((m) => m.deviceKey === record.device_key)?.identity
+      ).toBe(credentialIdentity(record.grant.wallet, record.grant_id));
+    }
 
     expect(a.getStatus()).toBe("needs-enrollment");
     expect(a.getUpgrade()).toEqual({ superseded: 1 });
@@ -193,9 +225,9 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
   });
 
   it("shares one creation between concurrent calls for a group chat", async () => {
-    const alice = await addUser(world, "alice");
-    const bob = await addUser(world, "bob");
-    const carol = await addUser(world, "carol");
+    const alice = await addEarlierUser(world, "alice");
+    const bob = await addEarlierUser(world, "bob");
+    const carol = await addEarlierUser(world, "carol");
     const old = await alice.primary.engine.createConversation({
       profileIds: ["bob", "carol"],
       kind: "group",
@@ -203,7 +235,7 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
     });
     await settle(world);
     for (const user of [alice, bob, carol]) {
-      await seedLegacySuiteDevice(world, user, user.primary);
+      await moveToCurrentSuite(world, user, user.primary);
     }
     for (const user of [alice, bob, carol]) {
       await upgrade(world, user);
@@ -323,8 +355,8 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
   });
 
   it("keeps a message queued at the move as unsent, and resends it in the upgraded chat", async () => {
-    const alice = await addUser(world, "alice");
-    const bob = await addUser(world, "bob");
+    const alice = await addEarlierUser(world, "alice");
+    const bob = await addEarlierUser(world, "bob");
     const old = await alice.primary.engine.createConversation({
       profileIds: ["bob"],
       kind: "dm",
@@ -338,11 +370,11 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
       times: -1,
     });
     await queueWhileFailing(alice, old, "typed while offline");
-    await seedLegacySuiteDevice(world, alice, alice.primary, {
+    await moveToCurrentSuite(world, alice, alice.primary, {
       waitIdle: false,
     });
     world.ds.clearFaults();
-    await seedLegacySuiteDevice(world, bob, bob.primary);
+    await moveToCurrentSuite(world, bob, bob.primary);
     let a = alice.primary.engine;
     const storage = alice.primary.storage;
 
@@ -419,8 +451,8 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
   });
 
   it("lets exactly one of a discard and a resend of the same message happen", async () => {
-    const alice = await addUser(world, "alice");
-    const bob = await addUser(world, "bob");
+    const alice = await addEarlierUser(world, "alice");
+    const bob = await addEarlierUser(world, "bob");
     const old = await alice.primary.engine.createConversation({
       profileIds: ["bob"],
       kind: "dm",
@@ -434,11 +466,11 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
     });
     await queueWhileFailing(alice, old, "discard wins");
     await queueWhileFailing(alice, old, "resend wins", 2);
-    await seedLegacySuiteDevice(world, alice, alice.primary, {
+    await moveToCurrentSuite(world, alice, alice.primary, {
       waitIdle: false,
     });
     world.ds.clearFaults();
-    await seedLegacySuiteDevice(world, bob, bob.primary);
+    await moveToCurrentSuite(world, bob, bob.primary);
     await upgrade(world, alice);
     await upgrade(world, bob);
     const a = alice.primary.engine;
@@ -481,8 +513,8 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
   });
 
   it("deletes an unsent message on request, and never sends it", async () => {
-    const alice = await addUser(world, "alice");
-    await addUser(world, "bob");
+    const alice = await addEarlierUser(world, "alice");
+    await addEarlierUser(world, "bob");
     const old = await alice.primary.engine.createConversation({
       profileIds: ["bob"],
       kind: "dm",
@@ -495,7 +527,7 @@ describe("E2EE engine: moving to 0x004E (D172)", () => {
       times: -1,
     });
     await queueWhileFailing(alice, old, "never mind");
-    await seedLegacySuiteDevice(world, alice, alice.primary, {
+    await moveToCurrentSuite(world, alice, alice.primary, {
       waitIdle: false,
     });
     world.ds.clearFaults();
