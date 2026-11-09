@@ -123,6 +123,7 @@ describe("E2E pack manifest", () => {
         "tests/social/wave-live-unread-sandbox.spec.ts",
         "tests/social/wave-media-processing-sandbox.spec.ts",
         "tests/social/wave-time-zone-sandbox.spec.ts",
+        "tests/social/wave-share-image-sandbox.spec.ts",
       ],
       projects: ["web-desktop-chromium", "web-mobile-chromium"],
       env: {
