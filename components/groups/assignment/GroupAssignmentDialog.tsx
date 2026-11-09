@@ -12,6 +12,7 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { t } from "@/i18n/messages";
 import GroupAssignmentPanel from "./GroupAssignmentPanel";
 
@@ -75,6 +76,9 @@ export default function GroupAssignmentDialog({
   const modalRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const descriptionId = useId();
+  useAndroidBackLayer(!embedded, modalRef, () => {
+    if (!paused) onClose();
+  });
 
   useClickAway(modalRef, () => {
     if (!paused && !embedded) {

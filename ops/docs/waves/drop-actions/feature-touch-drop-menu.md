@@ -29,8 +29,8 @@ while the keyboard closes. Reaction search still stays above the keyboard.
   `500ms`.
 - Compact touch layouts use the touch sheet even when the browser also reports
   hover support.
-- Chat drops in compact mobile/tablet layouts can also expose `Open drop
-actions` in the drop header.
+- Chat drops in touch layouts expose `Open drop actions` in the header, or
+  beside a grouped message, so their actions also have a tap alternative.
 - Posts shown in a Curation tab expose `Open drop actions` so removal does not
   depend on discovering a long-press gesture.
 - Desktop-width layouts with hover support use desktop drop action controls
@@ -46,6 +46,23 @@ actions` in the drop header.
   Press and hold inside the editor to position the cursor, select text, or paste
   without closing the editor or losing unsaved changes. This also applies to
   direct messages and the active part of a storm drop.
+
+## Swipe to Reply
+
+On touch layouts, drag a chat message from right to left. The message follows
+your finger and the reply indicator changes appearance when the reply is ready.
+Release past that point to open the existing reply composer. Reverse below the
+threshold, cancel the touch, or scroll vertically to leave the composer unchanged.
+
+A short left drag on a grouped message reveals its timestamp without starting a
+reply. Long-press keeps its action sheet and does not turn into a reply or
+navigation swipe if the same finger then moves.
+
+Reply requires a connected profile and the wave's reply permissions. Open replies
+remain available when starting a new chat message is restricted. Temporary or
+failed messages cannot be replied to. Links, media controls, sliders, editors and
+selected text keep their own touch behavior. `Reply` in the action sheet remains
+available as the tap and assistive-technology alternative.
 
 ## What the Menu Can Show
 

@@ -76,30 +76,36 @@ interface EditorCommandsPluginHandles {
   blur: () => void;
 }
 
-const EditorCommandsPlugin = forwardRef<EditorCommandsPluginHandles>(
-  (_props, ref) => {
-    const [editor] = useLexicalComposerContext();
+const EditorCommandsPlugin = forwardRef<
+  EditorCommandsPluginHandles,
+  { readonly isApp: boolean }
+>(({ isApp }, ref) => {
+  const [editor] = useLexicalComposerContext();
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        focus: () => editor.focus(),
-        blur: () => editor.blur(),
-        setMarkdown: (markdown: string) => {
-          editor.update(() => {
-            $convertFromMarkdownString(
-              markdown,
-              CREATE_DROP_MARKDOWN_TRANSFORMERS
-            );
-          });
-        },
-      }),
-      [editor]
-    );
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => {
+        // Lexical commits its focus asynchronously. Keep native keyboard
+        // activation inside the user's gesture, then restore its selection.
+        if (isApp) editor.getRootElement()?.focus({ preventScroll: true });
+        editor.focus();
+      },
+      blur: () => editor.blur(),
+      setMarkdown: (markdown: string) => {
+        editor.update(() => {
+          $convertFromMarkdownString(
+            markdown,
+            CREATE_DROP_MARKDOWN_TRANSFORMERS
+          );
+        });
+      },
+    }),
+    [editor, isApp]
+  );
 
-    return null;
-  }
-);
+  return null;
+});
 EditorCommandsPlugin.displayName = "EditorCommandsPlugin";
 
 /**
@@ -439,7 +445,7 @@ const CreateDropInput = forwardRef<
               onAttachmentFiles={onAttachmentFiles}
             />
             <ClearEditorPlugin ref={clearEditorRef} />
-            <EditorCommandsPlugin ref={editorCommandsRef} />
+            <EditorCommandsPlugin ref={editorCommandsRef} isApp={isCapacitor} />
             <EditablePlugin
               editable={preserveKeyboardOnSubmit || !submitting}
             />

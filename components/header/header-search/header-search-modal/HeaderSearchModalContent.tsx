@@ -40,6 +40,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import {
@@ -245,6 +246,7 @@ function ScopedHeaderSearchModal({
     storageScope
   );
   const modalRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(true, modalRef, onClose);
   const inputRef = useRef<HTMLInputElement>(null);
   const resultsPanelRef = useRef<HTMLDivElement>(null);
   const inputKeyHandlerRef = useRef<

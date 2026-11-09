@@ -1,6 +1,11 @@
 "use client";
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import { useAuth } from "@/components/auth/Auth";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
+import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
+import { useSwipeToReply } from "@/hooks/useSwipeToReply";
+import { cancelHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
@@ -40,7 +45,6 @@ import {
   getDropClasses,
   getPointerId,
   getPointerType,
-  getPrimaryTouch,
   getWaveDropOuterClass,
   handleTouchEndInternal,
   handleTouchMoveInternal,
@@ -60,6 +64,10 @@ import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliverySt
 import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresentation";
 import { isDropAuthorSigned } from "./signature/dropAuthorSigned";
 import GroupedDropTimestamp from "./GroupedDropTimestamp";
+import { SwipeReplyHint } from "./SwipeReplyHint";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 const WaveDropInner = ({
   drop,
@@ -91,6 +99,7 @@ const WaveDropInner = ({
   maxEmbedDepth,
   signatureGroup,
 }: WaveDropProps) => {
+  const locale = useBrowserLocale();
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
   const [longPressTriggered, setLongPressTriggered] = useState(false);
@@ -189,6 +198,33 @@ const WaveDropInner = ({
       location,
     })
   );
+  const { connectedProfile } = useAuth();
+  const { getEligibility } = useWaveEligibility();
+  const canSwipeReply =
+    canUseTouchActionSheet &&
+    location === DropLocation.WAVE &&
+    effectiveShowInteractions &&
+    showReplyAndQuote &&
+    !isEditing &&
+    !drop.id.startsWith("temp-") &&
+    Boolean(connectedProfile?.handle) &&
+    isDropReplyEligible(drop, getEligibility(drop.wave.id));
+  const { contentRef: swipeContentRef, onTouchStart: startReplySwipe } =
+    useSwipeToReply({
+      rootRef: dropRef,
+      scope: drop.id,
+      enabled:
+        canUseTouchActionSheet &&
+        !isEditing &&
+        (canSwipeReply || showGroupedTimestamp),
+      canReply: canSwipeReply,
+      onReply: () => handleOnReply(),
+      onStart: () => {
+        clearLongPressTimeout({ longPressTimeoutRef });
+        setLongPressTriggered(false);
+        setIsSlideUp(false);
+      },
+    });
   const {
     canUseMobileActionsSheet,
     showActionsButton,
@@ -227,6 +263,7 @@ const WaveDropInner = ({
 
   const handleLongPress = useCallback(() => {
     if (!allowLongPress || isEditing) return;
+    cancelHorizontalSwipe();
     markNextClickForSuppression();
     // Cancel any active edit mode first
     if (editingDropId) {
@@ -243,7 +280,7 @@ const WaveDropInner = ({
   ]);
 
   const handleTouchStart = useCallback(
-    (e: React.TouchEvent) => {
+    (e: React.TouchEvent<HTMLDivElement>) => {
       handleTouchStartInternal({
         allowLongPress,
         isEditing,
@@ -253,39 +290,13 @@ const WaveDropInner = ({
         onLongPress: handleLongPress,
       });
 
-      if (showGroupedTimestamp && canUseTouchActionSheet && !isEditing) {
-        const touch = getPrimaryTouch(e);
-        if (!touch) {
-          resetTimestampSwipe();
-          return;
-        }
-
-        timestampSwipeStartRef.current = {
-          x: touch.clientX,
-          y: touch.clientY,
-        };
-        setTimestampSwipeOffset(0);
-        setIsTimestampSwipeDragging(false);
-        return;
-      }
-
-      resetTimestampSwipe();
+      startReplySwipe(e);
     },
-    [
-      allowLongPress,
-      canUseTouchActionSheet,
-      handleLongPress,
-      isEditing,
-      resetTimestampSwipe,
-      showGroupedTimestamp,
-    ]
+    [allowLongPress, handleLongPress, isEditing, startReplySwipe]
   );
 
   const handleTouchEnd = useCallback(() => {
-    handleTouchEndInternal({
-      longPressTimeoutRef,
-      touchStartPosition,
-    });
+    handleTouchEndInternal({ longPressTimeoutRef, touchStartPosition });
     resetTimestampSwipe();
     releaseSuppressionAfterTouchEnd();
   }, [releaseSuppressionAfterTouchEnd, resetTimestampSwipe]);
@@ -298,62 +309,8 @@ const WaveDropInner = ({
         touchStartPosition,
         longPressTimeoutRef,
       });
-
-      const swipeStart = timestampSwipeStartRef.current;
-      if (
-        !swipeStart ||
-        !showGroupedTimestamp ||
-        !canUseTouchActionSheet ||
-        isEditing
-      ) {
-        return;
-      }
-
-      const touch = getPrimaryTouch(e);
-      if (!touch) {
-        return;
-      }
-
-      const swipeDeltaX = swipeStart.x - touch.clientX;
-      const deltaY = Math.abs(touch.clientY - swipeStart.y);
-      const isActivatedSwipe =
-        swipeDeltaX > GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX &&
-        swipeDeltaX > deltaY * GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO;
-
-      if (!isActivatedSwipe && !isTimestampSwipeDragging) {
-        return;
-      }
-
-      if (swipeDeltaX <= 0 || deltaY > swipeDeltaX) {
-        resetTimestampSwipe();
-        return;
-      }
-
-      const nextOffset = clampGroupedTimestampSwipeOffset(swipeDeltaX);
-      if (nextOffset <= 0) {
-        return;
-      }
-
-      clearLongPressTimeout({ longPressTimeoutRef });
-      markNextClickForSuppression();
-      setLongPressTriggered(false);
-      setIsSlideUp(false);
-      setIsTimestampSwipeDragging(true);
-      setTimestampSwipeOffset(nextOffset);
-
-      if (e.cancelable) {
-        e.preventDefault();
-      }
     },
-    [
-      allowLongPress,
-      canUseTouchActionSheet,
-      isEditing,
-      isTimestampSwipeDragging,
-      markNextClickForSuppression,
-      resetTimestampSwipe,
-      showGroupedTimestamp,
-    ]
+    [allowLongPress]
   );
 
   const handlePointerDown = useCallback(
@@ -705,17 +662,27 @@ const WaveDropInner = ({
   const groupedTimestampTransitionClass = isTimestampSwipeDragging
     ? "tw-will-change-transform"
     : "tw-transition-transform tw-duration-150 tw-ease-out";
-  const swipeableContentClass = `tw-relative tw-z-10 ${
+  const showGroupedActionsButton =
+    showActionsButton && canUseTouchActionSheet && !showAuthorInfo;
+  const swipeableContentClass = `tw-relative tw-z-10 ${showGroupedActionsButton ? "tw-min-h-12 tw-pr-12" : ""} ${
     showGroupedTimestamp ? groupedTimestampTransitionClass : ""
   }`;
-  const swipeableContentStyle =
-    getGroupedTimestampContentStyle(timestampSwipeOffset);
+  const restingTransform =
+    timestampSwipeOffset > 0
+      ? `translateX(-${timestampSwipeOffset}px)`
+      : "none";
+  const swipeableContentStyle = canUseTouchActionSheet
+    ? {
+        transform: `var(--message-swipe-transform, ${restingTransform})`,
+      }
+    : getGroupedTimestampContentStyle(timestampSwipeOffset);
 
   return (
     <div className={outerClass}>
       <div
         ref={dropRef}
         className={dropClasses}
+        data-reply-enabled={canSwipeReply || undefined}
         data-wave-drop-id={drop.stableHash}
         data-serial-no={drop.serial_no}
         onTouchStart={handleTouchStart}
@@ -730,6 +697,7 @@ const WaveDropInner = ({
         onPointerOut={handleRowPointerOut}
         onClickCapture={handleClickCapture}
       >
+        {canSwipeReply && <SwipeReplyHint />}
         {showGroupedTimestamp && (
           <GroupedDropTimestamp
             swipeOffset={timestampSwipeOffset}
@@ -740,12 +708,23 @@ const WaveDropInner = ({
           />
         )}
         <div
+          ref={swipeContentRef}
           className={swipeableContentClass}
           data-testid={
             showGroupedTimestamp ? "grouped-drop-swipeable-content" : undefined
           }
           style={swipeableContentStyle}
         >
+          {showGroupedActionsButton && (
+            <button
+              type="button"
+              onClick={handleOpenTouchActions}
+              aria-label={t(locale, "waves.drop.actions.openMenu")}
+              className="tw-absolute tw-right-0 tw-top-0 tw-flex tw-size-12 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800"
+            >
+              <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
+            </button>
+          )}
           {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
           {moderationRejectedStatus}
           {canUseDesktopHoverActions &&

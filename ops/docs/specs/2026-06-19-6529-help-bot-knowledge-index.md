@@ -7,6 +7,11 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The touch-menu, header-navigation and encrypted-chat records cover touch reply,
+timestamp access, cancellable native conversation return and Android Back layer
+ordering. They retain visible tap alternatives, permission and delivery-state
+restrictions, system-edge gestures and reduced-motion behavior.
+
 The signing, encrypted-messages and connection-sharing records cover the shared
 permission consent flow, separate or combined grants, shared server device names,
 renewal versus revocation, Desktop secure sharing's Coming soon gate, and exact

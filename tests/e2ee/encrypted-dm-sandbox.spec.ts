@@ -2,7 +2,7 @@ import {
   dropEncryptedAttachment,
   checkEncryptedImageActions,
 } from "../support/e2ee/attachmentMedia";
-import type { BrowserContext } from "@playwright/test";
+import type { BrowserContext, Locator, Page } from "@playwright/test";
 import { ApiNotificationCause } from "../../generated/models/ApiNotificationCause";
 import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotificationsResponseV2";
 import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
@@ -57,6 +57,40 @@ async function decorateProfiles(context: BrowserContext) {
   });
 }
 
+async function dragEncryptedMessage(
+  page: Page,
+  target: Locator,
+  distance: number
+) {
+  await target.scrollIntoViewIfNeeded();
+  await target.click({ trial: true });
+  const box = await target.boundingBox();
+  if (!box) throw new Error("Encrypted gesture target must be visible");
+  const x = Math.max(
+    50,
+    Math.min(300, box.x + box.width * (distance > 0 ? 0.35 : 0.65))
+  );
+  const y = box.y + box.height / 2;
+  const client = await page.context().newCDPSession(page);
+  await client.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [{ x, y }],
+  });
+  for (let step = 1; step <= 8; step++) {
+    await client.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: [{ x: x + (distance * step) / 8, y }],
+    });
+  }
+  return async () => {
+    await client.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await client.detach();
+  };
+}
+
 /**
  * Encrypted 1:1 chat in two real browsers (D109 stories 1, 4, 8, 9, 10, 11).
  * Engine rules are covered in Jest (__tests__/lib/e2ee); this proves the
@@ -76,6 +110,119 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     const open = sessions;
     sessions = [];
     await closeE2eeUsers(open);
+  });
+
+  test("native encrypted chat gesture replies on release and swipes back to its list", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "Trusted touch input uses mobile Chromium with a simulated native bridge."
+    );
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    sessions.push(alice, bob);
+    await installSurfaceSimulation(alice.context, "capacitor-ios-sim", baseURL);
+    await alice.page.setViewportSize({ width: 412, height: 840 });
+    for (const session of sessions) {
+      await session.context.route("https://rpc.walletconnect.org/**", (route) =>
+        route.fulfill({
+          status: 400,
+          json: { error: "Fixture RPC unavailable" },
+        })
+      );
+    }
+    await enroll(alice, { app: true });
+    await enroll(bob);
+    await startChat(alice, ["bob"]);
+    const outgoing = "An encrypted greeting before the gesture";
+    const incoming = "An encrypted message for a touch reply";
+    await sendMessage(alice.page, outgoing);
+    await openConversationFromList(bob.page, "alice");
+    await expectMessage(bob.page, outgoing);
+    await sendMessage(bob.page, incoming);
+    await expectMessage(alice.page, incoming);
+
+    const received = messageRow(alice.page, incoming);
+    const body = received.getByText(incoming, { exact: true });
+    const timestamp = alice.page
+      .getByRole("listitem")
+      .filter({ hasText: incoming })
+      .locator("time")
+      .first();
+    await expect(timestamp).toBeVisible();
+    const timestampValue = await timestamp.getAttribute("datetime");
+    if (!timestampValue)
+      throw new Error("Encrypted timestamp must name its instant");
+    const avatar = received.getByRole("link", { name: "View bob's profile" });
+    const [before, avatarBefore] = await Promise.all([
+      body.boundingBox(),
+      avatar.boundingBox(),
+    ]);
+    if (!before || !avatarBefore)
+      throw new Error("Decrypted message and avatar must be visible");
+    const releaseReply = await dragEncryptedMessage(alice.page, body, -120);
+    await expect(
+      alice.page
+        .getByRole("listitem")
+        .filter({ hasText: incoming })
+        .locator("[data-reply-ready=true]")
+    ).toBeVisible();
+    await expect
+      .poll(async () => (await body.boundingBox())?.x ?? before.x)
+      .toBeLessThan(before.x - 80);
+    await expect
+      .poll(async () => {
+        const [bodyAfter, avatarAfter] = await Promise.all([
+          body.boundingBox(),
+          avatar.boundingBox(),
+        ]);
+        if (!bodyAfter || !avatarAfter) return Number.POSITIVE_INFINITY;
+        return Math.abs(
+          bodyAfter.x - before.x - (avatarAfter.x - avatarBefore.x)
+        );
+      })
+      .toBeLessThanOrEqual(1);
+    const cancelReply = alice.page.getByRole("button", {
+      name: "Cancel reply",
+      exact: true,
+    });
+    await expect(cancelReply).toHaveCount(0);
+    await alice.page.screenshot({
+      path: testInfo.outputPath("encrypted-reply-tracking.png"),
+    });
+    await releaseReply();
+    await expect(cancelReply).toBeVisible();
+    await expect(
+      alice.page.getByText("Replying to bob", { exact: true })
+    ).toBeVisible();
+    await expect(composer(alice.page)).toBeFocused();
+    await expect(timestamp).toHaveAttribute("datetime", timestampValue);
+    await cancelReply.click();
+    await expect(
+      (await openMessageActions(alice.page, received)).getByRole("menuitem", {
+        name: "Reply",
+        exact: true,
+      })
+    ).toBeVisible();
+    await alice.page.keyboard.press("Escape");
+
+    const releaseBack = await dragEncryptedMessage(alice.page, body, 130);
+    await releaseBack();
+    await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
+    await expect(conversationListRow(alice.page, "bob")).toBeVisible();
+    expect(
+      await alice.page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth
+      )
+    ).toBe(true);
+    const scan = await e2eeSandboxControls.plaintextScan(baseURL, [
+      outgoing,
+      incoming,
+    ]);
+    expect(scan.found).toEqual([]);
   });
 
   test("encrypted notifications align sender details and keep the account tooltip beside the avatar", async ({
