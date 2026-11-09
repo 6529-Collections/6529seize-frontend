@@ -4,13 +4,6 @@ import UserPageHeaderAboutStatement from "@/components/user/user-page-header/abo
 import type { CicStatement } from "@/entities/IProfile";
 
 describe("UserPageHeaderAboutStatement", () => {
-  it("shows placeholder when statement is null", () => {
-    render(<UserPageHeaderAboutStatement statement={null} />);
-    expect(
-      screen.getByText("Click to add an About statement")
-    ).toBeInTheDocument();
-  });
-
   it("renders statement value when provided", () => {
     const statement: CicStatement = { statement_value: "Hello there" } as any;
     render(<UserPageHeaderAboutStatement statement={statement} />);

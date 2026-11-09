@@ -150,6 +150,57 @@ describe("proxy", () => {
     }
   );
 
+  describe("legacy home wave links", () => {
+    const DESKTOP_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)";
+    const IPHONE_UA =
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15";
+
+    it.each([
+      [DESKTOP_UA, "wave=wave", "/waves/wave"],
+      [IPHONE_UA, "wave=wave", "/waves/wave"],
+      [IPHONE_UA, "view=waves&wave=wave", "/waves/wave"],
+      [IPHONE_UA, "view=messages&wave=dm", "/messages/dm"],
+      [
+        DESKTOP_UA,
+        "wave=wave&drop=message///&serialNo=42/&tab=leaderboard",
+        "/waves/wave?drop=message&serialNo=42&tab=leaderboard",
+      ],
+    ])(
+      "sends %s /?%s to the wave route",
+      async (userAgent, query, destination) => {
+        const request = createRequest("/");
+        request.nextUrl.search = `?${query}`;
+        jest.mocked(request.headers.get).mockReturnValue(userAgent);
+        await proxy(request);
+        expect(mockRedirect).toHaveBeenCalledWith(
+          new URL(destination, request.url)
+        );
+      }
+    );
+
+    it.each(["", "?wave=", "?view=waves", "?view=messages", "?drop=message"])(
+      "leaves the prerendered home page to serve /%s",
+      async (search) => {
+        mockFetchStatus(200);
+        const request = createRequest("/");
+        request.nextUrl.search = search;
+        jest.mocked(request.headers.get).mockReturnValue(IPHONE_UA);
+        const response = await proxy(request);
+        expect(response).toEqual({ kind: "next" });
+        expect(mockRedirect).not.toHaveBeenCalled();
+      }
+    );
+
+    it("keeps a wave query on other pages for the app to read after hydration", async () => {
+      mockFetchStatus(200);
+      const request = createRequest("/the-memes");
+      request.nextUrl.search = "?wave=wave";
+      const response = await proxy(request);
+      expect(response).toEqual({ kind: "next" });
+      expect(mockRedirect).not.toHaveBeenCalled();
+    });
+  });
+
   it.each([
     "/pdfjs/5.4.296/pdf.worker.min.mjs",
     "/pdfjs/5.4.296/cmaps/Adobe-Japan1-UCS2.bcmap",
@@ -284,8 +335,8 @@ describe("proxy", () => {
       "/waves/not-a-real-id",
       "/waves/not-a-real-id/",
       "/waves/5f207393-5418-4a75-8738-e40edb44a94",
-      "/waves/not-a-real-id/competitions",
-      "/waves/not-a-real-id/competitions/alpha",
+      "/waves/not-a-real-id/decisions",
+      "/waves/not-a-real-id/decisions/alpha",
       "/messages/not-a-real-id",
     ])(
       "rewrites %s to the not-found route before the staging gate",
@@ -343,7 +394,7 @@ describe("proxy", () => {
     it.each([
       `/waves/${WAVE_ID}`,
       `/waves/${WAVE_ID.toUpperCase()}`,
-      `/waves/${WAVE_ID}/competitions/alpha`,
+      `/waves/${WAVE_ID}/decisions/alpha`,
       `/messages/${WAVE_ID}`,
       "/waves/create",
       "/messages/create",

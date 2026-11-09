@@ -123,4 +123,42 @@ describe("convertActivityLogParams", () => {
     expect(res.page).toBe("1");
     expect(res.page_size).toBe("10");
   });
+
+  it.each(Object.values(ProfileActivityFilterTargetType))(
+    "opts only profile NIC into cursor mode for %s",
+    (targetType) => {
+      const res = convertActivityLogParams({
+        params: {
+          ...base,
+          handleOrWallet: "shelby",
+          matter: RateMatter.NIC,
+          targetType,
+        },
+        disableActiveGroup: false,
+      });
+      expect(res.activity_scope).toBe("NIC");
+      expect(res.rating_matter).toBeUndefined();
+    }
+  );
+
+  it.each([null, RateMatter.REP, RateMatter.WAVE_REP, RateMatter.DROP_REP])(
+    "preserves the existing request for %s",
+    (matter) => {
+      const res = convertActivityLogParams({
+        params: { ...base, handleOrWallet: "shelby", matter },
+        disableActiveGroup: false,
+      });
+      expect(res.activity_scope).toBeUndefined();
+      expect(res.cursor).toBeUndefined();
+    }
+  );
+
+  it("leaves the network-wide NIC request unchanged", () => {
+    expect(
+      convertActivityLogParams({
+        params: { ...base, matter: RateMatter.NIC },
+        disableActiveGroup: false,
+      }).activity_scope
+    ).toBeUndefined();
+  });
 });

@@ -134,10 +134,24 @@ describe("production exact-artifact deployment contract", () => {
     expect(build.env.NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES).toBe("true");
   });
 
+  it("enables app device grants in production builds", () => {
+    expect(build.env.NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS).toBe("true");
+  });
+
   it("turns the encrypted messages flag on in production builds", () => {
     // Encrypted DMs (D109) are on in production by owner decision
     // (2026-10-31); switching them off is a one-line change to "false" here.
     expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("true");
+  });
+
+  it("leaves gap-only chat sync off in production builds", () => {
+    // Production flips need the owner (WAVES-PLAN 0.7/0.8, C11).
+    expect(build.env).not.toHaveProperty("NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC");
+  });
+
+  it("leaves the app-socket PING off in production builds", () => {
+    // Production flips need the owner; the API must answer PING first.
+    expect(build.env).not.toHaveProperty("NEXT_PUBLIC_FEATURE_WS_PING");
   });
 
   it("generates the production sitemap under the fail-closed policy", () => {
@@ -198,6 +212,93 @@ describe("production exact-artifact deployment contract", () => {
     expect(deploySource).not.toMatch(/operation_id|authority/i);
   });
 
+  it("records the Sentry release with the installed sentry-cli only once production is live", () => {
+    type Step = {
+      name?: string;
+      run?: string;
+      uses?: string;
+      env?: Record<string, string>;
+      with?: Record<string, unknown>;
+      "continue-on-error"?: boolean;
+      "timeout-minutes"?: number;
+    };
+    const indexIn = (steps: Step[], name: string) => {
+      const index = steps.findIndex((step) => step.name === name);
+      expect(index).toBeGreaterThanOrEqual(0);
+      return index;
+    };
+
+    // Build: hand the deploy the binary the frozen install verified.
+    const buildSteps: Step[] = build.jobs["build-production-artifact"].steps;
+    const stage =
+      buildSteps[
+        indexIn(buildSteps, "Stage installed sentry-cli for the Sentry release")
+      ]!;
+    const upload =
+      buildSteps[
+        indexIn(buildSteps, "Upload sentry-cli for the Sentry release")
+      ]!;
+    expect(
+      indexIn(buildSteps, "Stage installed sentry-cli for the Sentry release")
+    ).toBeGreaterThan(indexIn(buildSteps, "Install frozen dependencies"));
+    expect(stage.run).toContain("node ops/scripts/resolve-sentry-cli.cjs");
+    expect(stage.env ?? {}).not.toHaveProperty("SENTRY_AUTH_TOKEN");
+    expect(stage["continue-on-error"]).toBe(true);
+    expect(upload["continue-on-error"]).toBe(true);
+    expect(upload.with?.["name"]).toBe(
+      "production-sentry-cli-${{ github.run_id }}"
+    );
+
+    // Deploy: after Elastic Beanstalk serves the commit, never blocking.
+    const steps: Step[] = deploy.jobs["build-upload-deploy"].steps;
+    const download =
+      steps[indexIn(steps, "Download sentry-cli for the Sentry release")]!;
+    const recordIndex = indexIn(steps, "Record the Sentry release");
+    const record = steps[recordIndex]!;
+    for (const earlier of [
+      "Check Elastic Beanstalk health and readiness",
+      "Verify exact deployed version",
+      "Download sentry-cli for the Sentry release",
+    ]) {
+      expect(recordIndex).toBeGreaterThan(indexIn(steps, earlier));
+    }
+    expect(download["continue-on-error"]).toBe(true);
+    expect(download.with?.["name"]).toBe(upload.with?.["name"]);
+    expect(record["continue-on-error"]).toBe(true);
+    expect(record["timeout-minutes"]).toBeGreaterThan(0);
+    expect(record.run).toContain(
+      'bash ops/scripts/sentry-release.sh "$cli" "$COMMIT_SHA"'
+    );
+    expect(record.env?.["SENTRY_AUTH_TOKEN"]).toBe(
+      "${{ secrets.SENTRY_AUTH_TOKEN }}"
+    );
+    // The same org and project the build plugin used.
+    const nextConfig = fs.readFileSync(
+      path.join(process.cwd(), "next.config.ts"),
+      "utf8"
+    );
+    expect(nextConfig).toContain(`org: "${record.env?.["SENTRY_ORG"]}"`);
+    expect(nextConfig).toContain(
+      `project: "${record.env?.["SENTRY_PROJECT"]}"`
+    );
+    // Release name = github.sha = the VERSION the build bakes and the runtime
+    // reports to Sentry.
+    expect(deploy.env.COMMIT_SHA).toBe("${{ github.sha }}");
+    expect(deploy.jobs["build-production-artifact"].with.target_sha).toBe(
+      "${{ github.sha }}"
+    );
+    expect(buildSource).toContain("VERSION: ${{ inputs.target_sha }}");
+    // set-commits --auto reads the full local history at the deployed commit.
+    const checkout = steps.find(
+      (step) => step.name === "Checkout exact production SHA"
+    );
+    expect(checkout?.with?.["fetch-depth"]).toBe(0);
+    // Nothing is downloaded at deploy time.
+    expect(JSON.stringify([stage, download, record])).not.toMatch(
+      /\bnpx\b|\bcurl\b|\bwget\b|npm (i|install)\b|pnpm (add|dlx)\b/
+    );
+  });
+
   it("publishes static files create-only to the shared prefix pages load from", () => {
     const steps: { name?: string; run?: string }[] =
       deploy.jobs["build-upload-deploy"].steps;
@@ -212,12 +313,15 @@ describe("production exact-artifact deployment contract", () => {
     expect(PRODUCTION_ASSET_PREFIX).toBe(
       `https://${PRODUCTION_ASSET_HOSTNAME}/${PRODUCTION_SHARED_ASSET_PATH}`
     );
-    expect(PRODUCTION_SHARED_ASSET_PATH).not.toMatch(/^web_build\/[a-f0-9]{40}$/);
+    expect(PRODUCTION_SHARED_ASSET_PATH).not.toMatch(
+      /^web_build\/[a-f0-9]{40}$/
+    );
     expect(deploy.env.SHARED_STATIC_PREFIX).toBe(sharedStaticPrefix);
     expect(deploy.env.AWS_BUCKET).toBe("seize-web");
 
     const publish = steps.find(
-      (step) => step.name === "Publish verified static files to the shared prefix"
+      (step) =>
+        step.name === "Publish verified static files to the shared prefix"
     );
     if (!publish?.run) {
       throw new Error("missing shared static publish step");
@@ -232,7 +336,9 @@ describe("production exact-artifact deployment contract", () => {
 
     // Static files are verified, then published, before any server serves
     // pages that reference them.
-    expect(stepIndex("Independently verify selected production bytes")).toBeLessThan(
+    expect(
+      stepIndex("Independently verify selected production bytes")
+    ).toBeLessThan(
       stepIndex("Publish verified static files to the shared prefix")
     );
     expect(stepIndex("Refuse stale main or production downgrade")).toBeLessThan(
@@ -246,7 +352,9 @@ describe("production exact-artifact deployment contract", () => {
     );
 
     // No more full per-commit copies of unchanged static files.
-    expect(deploySource).not.toContain('aws s3 cp production-artifact/target "');
+    expect(deploySource).not.toContain(
+      'aws s3 cp production-artifact/target "'
+    );
     expect(deploySource).not.toMatch(/aws s3 (?:cp|sync)[^\n]*--recursive/);
 
     const storage = JSON.parse(
@@ -299,7 +407,11 @@ describe("production exact-artifact deployment contract", () => {
     );
     // Nothing may delete or replace shared objects.
     for (const entry of storage.Statement) {
-      if (entry.Resource.some((resource) => resource.includes("/web_build/shared/"))) {
+      if (
+        entry.Resource.some((resource) =>
+          resource.includes("/web_build/shared/")
+        )
+      ) {
         expect(entry.Action).not.toContain("s3:DeleteObject");
         expect(entry.Action).not.toContain("s3:PutObjectAcl");
       }

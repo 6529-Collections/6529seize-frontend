@@ -130,11 +130,13 @@ const dispatchVisibilityChange = () => {
 function TestComponent({
   enabled,
   isDirectMessage,
+  latestSerialNo,
   removeWaveDeliveredNotifications,
   waveId,
 }: {
   readonly enabled?: boolean;
   readonly isDirectMessage?: boolean;
+  readonly latestSerialNo?: number | null;
   readonly removeWaveDeliveredNotifications: (
     waveId: string
   ) => Promise<unknown> | void;
@@ -144,11 +146,25 @@ function TestComponent({
     waveId,
     enabled,
     isDirectMessage,
+    latestSerialNo,
     removeWaveDeliveredNotifications,
   });
 
   return null;
 }
+
+/** Hides the tab, lets `whileHidden` run, then shows it again. */
+const leaveAndReturn = async (whileHidden: () => void = () => undefined) => {
+  await act(async () => {
+    setDocumentVisibilityState("hidden");
+    dispatchVisibilityChange();
+  });
+  whileHidden();
+  await act(async () => {
+    setDocumentVisibilityState("visible");
+    dispatchVisibilityChange();
+  });
+};
 
 describe("useWaveDropsNotificationRead", () => {
   const invalidateNotifications = jest.fn();
@@ -336,13 +352,15 @@ describe("useWaveDropsNotificationRead", () => {
     const renderTestComponent = (
       currentRemoveWaveDeliveredNotifications: (
         waveId: string
-      ) => Promise<unknown> | void
+      ) => Promise<unknown> | void,
+      latestSerialNo = 10
     ) => (
       <ReactQueryWrapperContext.Provider
         value={createReactQueryContextValue(invalidateNotifications)}
       >
         <TestComponent
           waveId="wave-1"
+          latestSerialNo={latestSerialNo}
           removeWaveDeliveredNotifications={
             currentRemoveWaveDeliveredNotifications
           }
@@ -362,9 +380,10 @@ describe("useWaveDropsNotificationRead", () => {
 
     rerender(renderTestComponent(nextRemoveWaveDeliveredNotifications));
 
-    await act(async () => {
-      dispatchVisibilityChange();
-    });
+    // A post arrives while the tab is hidden, so the return marks it read.
+    await leaveAndReturn(() =>
+      rerender(renderTestComponent(nextRemoveWaveDeliveredNotifications, 11))
+    );
 
     await waitFor(() => {
       expect(nextRemoveWaveDeliveredNotifications).toHaveBeenCalledWith(
@@ -600,16 +619,18 @@ describe("useWaveDropsNotificationRead", () => {
     const firstReadRequest = createDeferred();
     apiPostMock.mockReturnValueOnce(firstReadRequest.promise);
 
-    render(
+    const renderTestComponent = (latestSerialNo: number) => (
       <ReactQueryWrapperContext.Provider
         value={createReactQueryContextValue(invalidateNotifications)}
       >
         <TestComponent
           waveId="wave-1"
+          latestSerialNo={latestSerialNo}
           removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
         />
       </ReactQueryWrapperContext.Provider>
     );
+    const { rerender } = render(renderTestComponent(10));
 
     await waitFor(() => {
       expect(commonApiPostWithoutBodyAndResponse).toHaveBeenCalledTimes(1);
@@ -618,9 +639,7 @@ describe("useWaveDropsNotificationRead", () => {
     expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(1);
     expect(invalidateNotifications).not.toHaveBeenCalled();
 
-    await act(async () => {
-      dispatchVisibilityChange();
-    });
+    await leaveAndReturn(() => rerender(renderTestComponent(11)));
 
     await waitFor(() => {
       expect(removeWaveDeliveredNotifications).toHaveBeenCalledTimes(2);
@@ -644,6 +663,77 @@ describe("useWaveDropsNotificationRead", () => {
     expect(commonApiPostWithoutBodyAndResponse).toHaveBeenNthCalledWith(2, {
       endpoint: "notifications/wave/wave-1/read",
       headers: { Authorization: "Bearer test-jwt" },
+    });
+  });
+
+  describe("returning to the tab", () => {
+    const renderAt = (latestSerialNo: number | null) => (
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryContextValue(invalidateNotifications)}
+      >
+        <TestComponent
+          waveId="wave-1"
+          latestSerialNo={latestSerialNo}
+          removeWaveDeliveredNotifications={removeWaveDeliveredNotifications}
+        />
+      </ReactQueryWrapperContext.Provider>
+    );
+
+    const renderAndSettle = async (latestSerialNo: number | null) => {
+      const rendered = render(renderAt(latestSerialNo));
+      await waitFor(() => {
+        expect(apiPostMock).toHaveBeenCalledTimes(1);
+      });
+      return rendered;
+    };
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it("sends nothing after a quick switch away with no new posts", async () => {
+      await renderAndSettle(10);
+
+      await leaveAndReturn();
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(apiPostMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("marks the wave read when posts arrived while the tab was hidden", async () => {
+      const { rerender } = await renderAndSettle(10);
+
+      await leaveAndReturn(() => rerender(renderAt(11)));
+
+      await waitFor(() => {
+        expect(apiPostMock).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it("marks the wave read after an absence of 30 s or more", async () => {
+      await renderAndSettle(10);
+      const now = Date.now();
+      const dateNow = jest.spyOn(Date, "now").mockReturnValue(now);
+
+      await leaveAndReturn(() => dateNow.mockReturnValue(now + 30_000));
+
+      await waitFor(() => {
+        expect(apiPostMock).toHaveBeenCalledTimes(2);
+      });
+    });
+
+    it("leaves posts that arrived while visible to the live read marker", async () => {
+      const { rerender } = await renderAndSettle(10);
+      rerender(renderAt(12));
+
+      await leaveAndReturn();
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(apiPostMock).toHaveBeenCalledTimes(1);
     });
   });
 

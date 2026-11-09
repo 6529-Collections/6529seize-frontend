@@ -737,6 +737,8 @@ describe("artifact-portability.v1", () => {
       flags: [
         "NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES",
         "NEXT_PUBLIC_E2EE_DM_ENABLED",
+        "NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC",
+        "NEXT_PUBLIC_FEATURE_WS_PING",
       ],
     },
     {

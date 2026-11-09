@@ -23,6 +23,8 @@ export type E2eeEngineStatus =
   | "error";
 
 export interface E2eeDeviceInfo {
+  linkedAuthorProof?: boolean;
+  authorProofGrantId?: string;
   deviceKey: string;
   label: string;
   platform: "web" | "desktop" | "phone";
@@ -70,6 +72,9 @@ export interface E2eeAttachment {
   height?: number; // key material stays inside the engine
 }
 
+/** Why an own message stayed unsent (E2eeMessage.unsent). */
+export type E2eeUnsentReason = "suite_upgrade";
+
 export interface E2eeMessage {
   id: string;
   g: string;
@@ -89,6 +94,14 @@ export interface E2eeMessage {
   sigOk: boolean;
   undecryptable: boolean;
   pending: boolean; // in the outbox, not yet sequenced
+  /**
+   * An own message that was never sent and no longer sends (`pending` is
+   * false). "suite_upgrade": its conversation was superseded (D172) while
+   * the message was still queued. Its text is kept on this device only; the
+   * user may resend it in the conversation that continues this one
+   * (`resendUnsent`) or delete it (`discardUnsent`). Absent otherwise.
+   */
+  unsent?: E2eeUnsentReason;
   notice?: {
     type: E2eeNoticeType;
     actorProfileId: string | null;
@@ -132,7 +145,12 @@ export interface E2eeReportPreview {
   original: E2eeReportVersion | null;
 }
 
+/** What keeps a delayed conversation waiting (8.3). */
+export type E2eeDelayedReason = "send" | "commit";
+
 export interface E2eeConversation {
+  /** Original DM peer, retained for titles after leaving; not a current member. */
+  dmPeer?: E2eeMember | null;
   g: string;
   kind: "dm" | "group";
   name: string | null;
@@ -141,13 +159,33 @@ export interface E2eeConversation {
   createdBy: string;
   epoch: number;
   safetyCode: string; // "abcd efgh ijkl mnop"
-  /** "restored": from a history backup, read-only until this device joins. */
-  status: "active" | "invalid" | "left" | "removed" | "restored";
+  /**
+   * "restored": from a history backup, read-only until this device joins.
+   * "superseded": made under an earlier MLS ciphersuite (D172). Its history
+   * stays readable on this device; it is read-only (sends, edits, reactions
+   * and membership changes throw E2EE_SUPERSEDED) and continues through
+   * `restart(g)`.
+   */
+  status: "active" | "invalid" | "left" | "removed" | "restored" | "superseded";
+  /** The group's MLS ciphersuite (79 = 0x004F, 78 = 0x004E); informational. */
+  ciphersuite?: number;
+  /** The conversation that continues this one, when this device knows it. */
+  successor?: string | null;
+  /** The conversation this one continues (the reverse of `successor`). */
+  predecessor?: string | null;
   delayed: boolean; // 8.3 stall banner
+  /**
+   * What keeps a delayed conversation waiting (8.3), null when not delayed:
+   * "commit" while a required group change cannot go through, "send" while
+   * only sending keeps failing. A stuck commit wins when both apply.
+   */
+  delayedReason: E2eeDelayedReason | null;
   splitView: boolean; // 8.6 alarm
   /** Members' devices waiting for "Add device" or "Ignore". */
   untrustedDevices: E2eeUntrustedDevice[];
   lastMessage: E2eeMessage | null;
+  /** Notification cursor; excludes pending sends, own messages and imported history. */
+  lastIncomingSeq?: number;
   unread: number;
   mentions: number;
   /** A local saved-history read failed; retry without changing MLS state. */
@@ -196,6 +234,14 @@ export interface E2eeEngine {
    * it settles on; a refused sign-in grant leaves "needs-enrollment".
    */
   enrollWithLoginGrant(): Promise<E2eeEngineStatus>;
+  /**
+   * Non-null while this device has moved off an earlier MLS ciphersuite and
+   * not enrolled again (status "needs-enrollment"): the UI shows upgrade
+   * copy instead of first-time copy. `superseded` counts the read-only
+   * conversations kept. Enrolling still asks for at most one signature
+   * (`needsNewDevice()` is true, so a combined sign-in can carry it).
+   */
+  getUpgrade(): { superseded: number } | null;
   sync(): Promise<void>; // pull inbox + all groups now
   dispose(): void;
 
@@ -238,7 +284,24 @@ export interface E2eeEngine {
   removeMember(g: string, profileId: string): Promise<void>;
   setAdmin(g: string, profileId: string, admin: boolean): Promise<void>;
   leave(g: string): Promise<void>;
-  restart(g: string): Promise<string>; // new group, same people
+  /**
+   * A new conversation with the same people (and name), returning its g. On
+   * a "superseded" conversation it creates the successor on the current
+   * suite once and returns the same g on later calls; people who cannot be
+   * reached yet are skipped (E2EE_NO_DEVICES when nobody can be).
+   */
+  restart(g: string): Promise<string>;
+  /**
+   * Sends a copy of an unsent message (E2eeMessage.unsent) in the
+   * conversation that continues `g` (as `restart(g)` returns it: the linked
+   * successor, or a new one), then deletes the unsent copy. Text, mentions
+   * and attachments are kept; a reply is not (it points into `g`). Returns
+   * where the copy went. Concurrent calls share one send; a message that is
+   * not unsent fails with E2EE_NO_MESSAGE.
+   */
+  resendUnsent(g: string, id: string): Promise<{ g: string; id: string }>;
+  /** Deletes an unsent message from this device; nothing was ever sent. */
+  discardUnsent(g: string, id: string): Promise<void>;
   /**
    * Reports the message as the reader sees it (its latest edit, signed);
    * `includeOriginal` also sends the original of an edited message.

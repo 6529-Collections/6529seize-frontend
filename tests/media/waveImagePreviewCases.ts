@@ -584,10 +584,11 @@ export function defineWaveImagePreviewTests() {
     } finally {
       releasePreviews();
     }
-    await page
+    const previewTrigger = page
       .getByRole("button", { name: /^Open (image preview|drop media)$/ })
-      .first()
-      .click();
+      .first();
+    await expect(previewTrigger).toHaveCSS("cursor", "zoom-in");
+    await previewTrigger.click();
     await expect(page.getByTestId("image-gallery-counter")).toHaveText("1 / 2");
     await expect(
       page.getByRole("button", { name: "Retry preview" })

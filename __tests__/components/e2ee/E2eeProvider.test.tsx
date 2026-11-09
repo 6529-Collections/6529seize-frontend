@@ -1,4 +1,8 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  closeDeviceSetup,
+  openDeviceSetup,
+} from "@/components/device-signing/deviceSetup";
 import { useE2eeContext } from "@/components/e2ee/E2eeContext";
 import E2eeProvider from "@/components/e2ee/E2eeProvider";
 import type { E2eeEngineModules } from "@/components/e2ee/e2eeEngineLoader";
@@ -146,6 +150,25 @@ describe("E2eeProvider", () => {
     expect(loadModules).not.toHaveBeenCalled();
   });
 
+  it("starts encryption for setup opens but ignores a setup close", async () => {
+    const { loadModules } = createLoader();
+    render(
+      <E2eeProvider loadModules={loadModules}>
+        <ContextProbe />
+      </E2eeProvider>
+    );
+
+    await act(async () => {
+      closeDeviceSetup();
+    });
+    expect(loadModules).not.toHaveBeenCalled();
+
+    act(() => {
+      openDeviceSetup("dms");
+    });
+    await waitFor(() => expect(loadModules).toHaveBeenCalledTimes(1));
+  });
+
   it("loads the engine on an encrypted route with the profile's deps", async () => {
     mockPathname.mockReturnValue("/messages/encrypted");
     const { loadModules, deps } = createLoader();
@@ -246,5 +269,28 @@ describe("E2eeProvider", () => {
     await waitFor(() =>
       expect(screen.getByTestId("availability")).toHaveTextContent("failed")
     );
+  });
+
+  it("adopts a combined grant arriving after the setup engine has already loaded", async () => {
+    mockPathname.mockReturnValue("/messages/encrypted");
+    const { loadModules, engines } = createLoader();
+    render(
+      <E2eeProvider loadModules={loadModules}>
+        <ContextProbe />
+      </E2eeProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("availability")).toHaveTextContent("loaded")
+    );
+    const engine = engines[0]!;
+    await waitFor(() =>
+      expect(engine.enrollWithLoginGrant).toHaveBeenCalledTimes(1)
+    );
+    setE2eeEnrollmentMarker(SELF_ID, true);
+    act(() => globalThis.dispatchEvent(new Event("storage")));
+    await waitFor(() =>
+      expect(engine.enrollWithLoginGrant).toHaveBeenCalledTimes(2)
+    );
+    expect(engine.enroll).not.toHaveBeenCalled();
   });
 });

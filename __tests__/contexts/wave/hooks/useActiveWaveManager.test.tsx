@@ -92,10 +92,10 @@ describe("useActiveWaveManager", () => {
   });
 
   it.each([
-    "/waves/abc/competitions",
-    "/waves/abc/competitions/competition-1",
-    "/waves/abc/competitions/new",
-    "/waves/abc/competitions/competition-1?edit=1",
+    "/waves/abc/decisions",
+    "/waves/abc/decisions/competition-1",
+    "/waves/abc/decisions/new",
+    "/waves/abc/decisions/competition-1?edit=1",
   ])("uses route navigation when switching waves from %s", (source) => {
     globalThis.history.replaceState(null, "", source);
     (usePathname as jest.Mock).mockReturnValue(source.split("?")[0]);
@@ -118,8 +118,8 @@ describe("useActiveWaveManager", () => {
   });
 
   it("uses route navigation when deselecting a wave from competitions", () => {
-    globalThis.history.replaceState(null, "", "/waves/abc/competitions");
-    (usePathname as jest.Mock).mockReturnValue("/waves/abc/competitions");
+    globalThis.history.replaceState(null, "", "/waves/abc/decisions");
+    (usePathname as jest.Mock).mockReturnValue("/waves/abc/decisions");
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
     const push = jest.fn();
     (useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
@@ -173,17 +173,17 @@ describe("useActiveWaveManager", () => {
       defaultCompetitionQueryKey("stage", "member:self")
     );
     expect(push).toHaveBeenCalledWith(
-      "/waves/stage/competitions/primary?tab=leaderboard&restore=1&divider=42"
+      "/waves/stage/decisions/primary?tab=leaderboard&restore=1&divider=42"
     );
     expect(pushStateSpy).not.toHaveBeenCalled();
     expect(result.current.activeWaveId).toBe("chat");
     globalThis.history.replaceState(
       null,
       "",
-      "/waves/stage/competitions/primary?tab=leaderboard&divider=42"
+      "/waves/stage/decisions/primary?tab=leaderboard&divider=42"
     );
     (usePathname as jest.Mock).mockReturnValue(
-      "/waves/stage/competitions/primary"
+      "/waves/stage/decisions/primary"
     );
     (useSearchParams as jest.Mock).mockReturnValue(
       new URLSearchParams("tab=leaderboard&divider=42")

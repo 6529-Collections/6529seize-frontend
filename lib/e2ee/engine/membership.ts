@@ -1,3 +1,9 @@
+import { E2EE_CIPHERSUITE } from "../grant";
+import {
+  compareDmSessions,
+  getDmPeerId,
+  isUsableDm,
+} from "../dm-conversations";
 import { asE2eeApiError } from "../api-errors";
 import type { ApiE2eePolicyStatus } from "../api-types";
 import { randomHex } from "../bytes";
@@ -46,6 +52,7 @@ export async function checkEligibility(
   const out: E2eeEligibility[] = [];
   for (let offset = 0; offset < unique.length; offset += MAX_ELIGIBILITY) {
     const response = await ctx.api.checkEligibility({
+      ciphersuite: E2EE_CIPHERSUITE,
       profile_ids: unique.slice(offset, offset + MAX_ELIGIBILITY),
     });
     for (const result of response.results) {
@@ -67,19 +74,18 @@ const principalsOf = (runtime: GroupRuntime): Set<string> =>
   );
 
 export function findDm(ctx: EngineContext, profileId: string): string | null {
-  for (const runtime of ctx.store.groups.values()) {
-    const record = runtime.record;
-    if (record.status !== "active" || record.metadata.kind !== "dm") {
-      continue;
-    }
-    const principals = principalsOf(runtime);
-    const peers =
-      principals.size > 1 ? principals : new Set(record.metadata.admins);
-    if (peers.has(profileId) && peers.has(ctx.profileId) && peers.size === 2) {
-      return record.g;
-    }
-  }
-  return null;
+  const matches = [...ctx.store.groups.values()].flatMap(({ record }) => {
+    const identity = { ...record.metadata, ...record };
+    if (
+      getDmPeerId(identity, ctx.profileId) !== profileId ||
+      !isUsableDm(identity, ctx.profileId)
+    )
+      return [];
+    const conversation = ctx.store.getConversation(record.g);
+    return conversation ? [conversation] : [];
+  });
+  matches.sort((a, b) => compareDmSessions(a, b, ctx.profileId));
+  return matches[0]?.g ?? null;
 }
 
 function normalizeName(name: string | null | undefined): string | null {
@@ -175,19 +181,60 @@ async function ownSiblingDevices(ctx: EngineContext): Promise<string[]> {
   return out;
 }
 
+/**
+ * Links a new conversation to the superseded one it continues (D172): both
+ * records change in the caller's checkpoint, so the link is stored together
+ * with the new group. Returns the runtimes to write.
+ */
+function linkPredecessor(
+  ctx: EngineContext,
+  runtime: GroupRuntime,
+  predecessorG: string | undefined
+): GroupRuntime[] {
+  const predecessor = predecessorG
+    ? ctx.store.groups.get(predecessorG)
+    : undefined;
+  if (!predecessor) {
+    return [runtime];
+  }
+  runtime.record.predecessor = predecessor.record.g;
+  predecessor.record.successor = runtime.record.g;
+  // Confirmed by the caller once the members are added (D172).
+  predecessor.record.successorPending = true;
+  return [runtime, predecessor];
+}
+
+/**
+ * Drops links to a conversation that is being discarded, so a superseded one
+ * never points at a successor that does not exist (a retry links anew).
+ */
+function unlinkSuccessor(ctx: EngineContext, g: string): GroupRuntime[] {
+  const unlinked: GroupRuntime[] = [];
+  for (const runtime of ctx.store.groups.values()) {
+    if (runtime.record.successor === g) {
+      runtime.record.successor = null;
+      delete runtime.record.successorPending;
+      unlinked.push(runtime);
+    }
+  }
+  return unlinked;
+}
+
 async function createLocalGroup(
   ctx: EngineContext,
-  metadata: GroupMetadata
+  metadata: GroupMetadata,
+  predecessorG?: string
 ): Promise<GroupRuntime> {
   return ctx.queue.run(async () => {
     const mls = requireMls(ctx);
-    const summary = mls.createGroup(metadata.g, metadata);
+    const summary = mls.createGroup(metadata.g, metadata, E2EE_CIPHERSUITE);
     const now = ctx.now();
     const runtime = newRuntime(
       newGroupRecord({ summary, now, joinedAt: now, createdAt: now })
     );
     await applySummary(ctx, runtime, summary);
-    await checkpoint(ctx, { groups: [runtime] });
+    const linked = linkPredecessor(ctx, runtime, predecessorG);
+    await checkpoint(ctx, { groups: linked });
     try {
       await ctx.api.createGroup({
         group: metadata.g,
@@ -196,13 +243,19 @@ async function createLocalGroup(
       });
     } catch (error) {
       mls.deleteGroup(metadata.g);
-      await checkpoint(ctx, { deleteGroups: [metadata.g] });
+      const unlinked = unlinkSuccessor(ctx, metadata.g);
+      await checkpoint(ctx, { groups: unlinked, deleteGroups: [metadata.g] });
+      for (const changed of unlinked) {
+        ctx.store.touch(changed.record.g);
+      }
       throw error;
     }
     runtime.record.activity[ownDeviceKey(ctx)] = { at: now, known: true };
     ctx.store.groups.set(metadata.g, runtime);
-    await checkpoint(ctx, { groups: [runtime], skipWasm: true });
-    ctx.store.touch(metadata.g);
+    await checkpoint(ctx, { groups: linked, skipWasm: true });
+    for (const changed of linked) {
+      ctx.store.touch(changed.record.g);
+    }
     return runtime;
   });
 }
@@ -213,7 +266,10 @@ async function discardLocalGroup(ctx: EngineContext, g: string): Promise<void> {
       ctx.mls.deleteGroup(g);
     }
     ctx.store.groups.delete(g);
-    await checkpoint(ctx, { deleteGroups: [g] });
+    await checkpoint(ctx, {
+      groups: unlinkSuccessor(ctx, g),
+      deleteGroups: [g],
+    });
     ctx.store.touch();
   });
 }
@@ -264,7 +320,9 @@ async function claimForCreation(
 export async function createConversation(
   ctx: EngineContext,
   input: { profileIds: string[]; kind: "dm" | "group"; name?: string | null },
-  onDelayed: (g: string) => void
+  onDelayed: (g: string) => void,
+  /** The superseded conversation the new one continues (D172). */
+  predecessorG?: string
 ): Promise<string> {
   const targets = [...new Set(input.profileIds)].filter(
     (id) => id !== ctx.profileId
@@ -282,7 +340,7 @@ export async function createConversation(
   const metadata = creationMetadata(ctx, input, peer);
   const g = metadata.g;
   const packages = await claimForCreation(ctx, targets, input.kind);
-  const runtime = await createLocalGroup(ctx, metadata);
+  const runtime = await createLocalGroup(ctx, metadata, predecessorG);
   const failure = await commitAdds(ctx, g, packages, () => {
     onDelayed(g);
   });

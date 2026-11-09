@@ -3284,13 +3284,24 @@ paths:
             type: string
             pattern: ^0x[0-9a-f]{64}$
           description: >-
-            Web only, with device_key and mls_ciphersuite. The device's MLS
-            Ed25519 signature public key (0x + 64 lowercase hex), different from
-            device_key. When encrypted messages are on and mls_ciphersuite is
-            the server's ciphersuite, the SIWE message is a combined grant: it
-            also grants this key for end-to-end encrypted messages with the same
-            expiry (a second urn:6529:mls-device-grant:v1 resource and a
-            combined statement). Otherwise the challenge grants device_key only.
+            Web only, with device_key and mls_ciphersuites (or the v1
+            mls_ciphersuite). The device's MLS Ed25519 signature public key (0x
+            + 64 lowercase hex), different from device_key. When encrypted
+            messages are on and the suites are acceptable, the SIWE message is a
+            combined grant: it also grants this key for end-to-end encrypted
+            messages with the same expiry (a second urn:6529:mls-device-grant:v2
+            resource, or v1 for mls_ciphersuite, and a combined statement).
+            Otherwise the challenge grants device_key only.
+        - name: mls_ciphersuites
+          in: query
+          required: false
+          schema:
+            type: string
+            pattern: ^\d{1,5}(\.\d{1,5}){0,3}$
+          description: >-
+            Grant v2 (D172): the MLS suites of mls_device_key, decimal code
+            points in strictly ascending order joined by "." (for example "78");
+            1 to 4 entries, at least one accepted by the server (79 or 78).
         - name: mls_ciphersuite
           in: query
           required: false
@@ -3298,7 +3309,9 @@ paths:
             type: integer
             minimum: 1
             maximum: 65535
-          description: The MLS ciphersuite of mls_device_key; required with it.
+          description: >-
+            Grant v1: the one MLS suite of mls_device_key. Honoured only for 79
+            (0x004F) while v1 grants are accepted; use mls_ciphersuites.
       x-6529-query-schema:
         $ref: "#/components/schemas/ApiSessionNonceQuery"
       responses:
@@ -3343,6 +3356,134 @@ paths:
           description: Authentication required
         "403":
           description: Not available to proxies
+    post:
+      tags:
+        - Authentication
+      summary: Register an app device grant
+      description: >-
+        Registers an EIP-712 device grant (domain "6529 Device Grant", primary
+        type DeviceGrant) that 6529 Mobile or 6529 Desktop had the signed-in
+        wallet sign outside a web sign-in. It grants the device's Ed25519
+        signing key and, when mls_device_key is set, its encrypted-messages key
+        (register that key next with POST /e2ee/devices/login-grant). The server
+        rebuilds the statement from the fields and verifies the wallet signature
+        (EOA, or EIP-1271 on Ethereum mainnet). The grant wallet must be the
+        authenticated wallet. Verification, expiry and revocation work as for
+        sign-in grants. Idempotent on grant id. Not available to proxies.
+      operationId: registerDeviceGrant
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleRegisterDeviceGrant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRegisterDeviceGrantRequest"
+      responses:
+        "200":
+          description: The stored grant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeviceGrant"
+        "400":
+          description: Invalid grant or signature
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies, or not the signed-in wallet
+  /device-grants/{grantId}/label:
+    post:
+      tags:
+        - Authentication
+      summary: Rename a device signing grant owned by the caller
+      operationId: renameDeviceGrant
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleRenameDeviceGrant
+      parameters:
+        - name: grantId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRenameDeviceRequest"
+      responses:
+        "200":
+          description: Updated device
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeviceGrant"
+        "400":
+          description: Invalid device label
+        "401":
+          description: Unauthorized
+        "403":
+          description: Not available to proxies
+        "404":
+          description: Grant is missing, revoked or belongs to another profile
+  /device-grants/{grantId}/acknowledge:
+    post:
+      tags:
+        - Authentication
+      summary: Acknowledge a new-device notice for a signing grant
+      description: >-
+        Records the caller's acknowledgment of an active grant they own. The
+        notice is cleared across devices. Acknowledgment is idempotent and does
+        not change any signing or encryption permissions.
+      operationId: acknowledgeDeviceGrant
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleAcknowledgeDeviceGrant
+      parameters:
+        - name: grantId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: Acknowledged grant
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDeviceGrant"
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies
+        "404":
+          description: Grant is missing, inactive or belongs to another profile
   /device-grants/{grantId}/revoke:
     post:
       tags:
@@ -8502,13 +8643,19 @@ paths:
               $ref: "#/components/schemas/ApiCreateDropRequest"
       responses:
         "201":
-          description: successful operation
+          description: >-
+            The created drop. A retry carrying an already used client_drop_id
+            returns the drop created the first time.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDrop"
         "400":
           description: Invalid request
+        "409":
+          description: >-
+            client_drop_id was already used by this author for a different wave
+            or content.
   /drop-ids:
     get:
       tags:
@@ -9307,7 +9454,8 @@ paths:
       summary: Create S3 URL for drop media upload
       description: >-
         Requires authentication; content_type must be one of the defined MIME
-        types.
+        types. Optional `purpose` (default `chat`) is recorded with the upload;
+        chat uploads get a neutral public file name.
       operationId: createDropMediaUrl
       requestBody:
         required: true
@@ -9422,7 +9570,10 @@ paths:
       summary: Get upload ID and key for multipart upload
       description: >-
         Requires authentication; content_type must be one of the defined MIME
-        types.
+        types. Optional `purpose` (default `chat`): chat images are published
+        with identifying metadata removed and every chat upload gets a neutral
+        public file name; `decision_entry` uploads keep the original bytes and
+        file name and can only be attached to a decision entry.
       operationId: createMultipartDropMediaUrl
       requestBody:
         required: true
@@ -9512,7 +9663,9 @@ paths:
       tags:
         - Drops
       summary: Get upload ID and key for multipart upload
-      description: Requires the user to be authenticated
+      description: >-
+        Requires the user to be authenticated. Wave pictures are always chat
+        media (metadata removed, neutral file name); `purpose` is ignored.
       operationId: createMultipartWaveMediaUrl
       requestBody:
         required: true
@@ -10409,12 +10562,14 @@ paths:
       description: >-
         Registers the MLS device key that a combined sign-in grant (NC8) also
         granted, without a separate wallet signature. The grant must be one this
-        server stored at a Sign-In with Ethereum login, unrevoked and unexpired,
-        carrying an urn:6529:mls-device-grant:v1 resource for the current
-        ciphersuite, and its wallet must belong to the caller's profile. Same
-        device limit and renewal rules as POST /e2ee/devices. Requires a
-        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
-        is off.
+        server stored at a Sign-In with Ethereum login (carrying an
+        urn:6529:mls-device-grant:v1 resource for 0x004F while v1 grants are
+        honoured, or a v2 resource for a suite set naming an accepted suite,
+        D172) or an app device grant (POST /device-grants) with an
+        mls_device_key, unrevoked and unexpired, and its wallet must belong to
+        the caller's profile. Same device limit and renewal rules as POST
+        /e2ee/devices. Requires a profile; proxies are rejected; 404
+        E2EE_DISABLED while the feature flag is off.
       operationId: e2eeRegisterLoginGrantDevice
       security:
         - bearerAuth: []
@@ -10455,11 +10610,12 @@ paths:
       summary: Look up encrypted-messaging devices in bulk
       description: >-
         Returns the devices of the given profiles (active, and revoked or
-        expired within 90 days) and the records of the given device keys, so a
-        client can verify every member's grants in one request. At most 200
-        profile ids and 500 device keys; at least one of the two. Requires a
-        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
-        is off.
+        expired within 90 days, limited to those that can join groups of the
+        request's ciphersuite) and the records of the given device keys
+        (whatever their suite), so a client can verify every member's grants in
+        one request. At most 200 profile ids and 500 device keys; at least one
+        of the two. Requires a profile; proxies are rejected; 404 E2EE_DISABLED
+        while the feature flag is off.
       operationId: e2eeLookupDevices
       security:
         - bearerAuth: []
@@ -10548,6 +10704,49 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/label:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Rename an encrypted-messaging device owned by the caller
+      operationId: e2eeRenameDevice
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeRenameDevice
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRenameDeviceRequest"
+      responses:
+        "200":
+          description: Updated device
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDevice"
+        "400":
+          description: Invalid device label
+        "401":
+          description: Unauthorized
+        "403":
+          description: Device is revoked or belongs to another profile
+        "404":
+          description: Encrypted messaging is disabled
   /e2ee/devices/{device_key}/revoke:
     post:
       tags:
@@ -10862,7 +11061,8 @@ paths:
         - Encrypted Messages
       summary: List a profile's encrypted-messaging devices
       description: >-
-        Active devices and devices revoked or expired within 90 days. Requires a
+        Active devices and devices revoked or expired within 90 days, limited to
+        those that can join groups of the ciphersuite parameter. Requires a
         profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
         is off.
       operationId: e2eeGetProfileDevices
@@ -10881,6 +11081,15 @@ paths:
           required: true
           schema:
             type: string
+        - name: ciphersuite
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: >-
+            Only devices that can join groups of this MLS ciphersuite: 79
+            (0x004F) or 78 (0x004E). Omitting ciphersuite means 0x004F; clients
+            that support 0x004E must pass it explicitly.
       responses:
         "200":
           description: successful operation
@@ -10921,9 +11130,10 @@ paths:
       description: >-
         Applies each target's DM policy and blocks unless the target already
         shares the given group with the claimer device. Pops one unexpired
-        one-time KeyPackage per device (FIFO), else returns the last-resort
-        KeyPackage. Requires a profile; proxies are rejected; 404 E2EE_DISABLED
-        while the feature flag is off.
+        one-time KeyPackage per device that can join groups of the request's
+        ciphersuite (FIFO), else returns the last-resort KeyPackage. Requires a
+        profile; proxies are rejected; 404 E2EE_DISABLED while the feature flag
+        is off.
       operationId: e2eeClaimKeyPackages
       security:
         - bearerAuth: []
@@ -14714,6 +14924,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiNotificationsResponseV2"
+  /v2/notifications/unread-count:
+    get:
+      tags:
+        - NotificationsV2
+      summary: Get the authenticated user's unread notification count.
+      description: >-
+        Returns only the unread count that GET /v2/notifications reports as
+        unread_count, with the same authentication and capability filter,
+        without loading any notification.
+      operationId: getNotificationsUnreadCountV2
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/notifications/notifications-v2.handlers"
+          name: handleGetNotificationsUnreadCountV2
+      parameters:
+        - name: include_competitions
+          in: query
+          description: >-
+            Count native competition lifecycle notifications too. Defaults to
+            false, matching GET /v2/notifications.
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiNotificationsUnreadCountV2"
   /og-metadata/profiles/{identity}:
     get:
       tags:
@@ -17078,6 +17321,120 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiGlobalRepCategoryWaveContributorsPage"
+  /profile-logs:
+    get:
+      tags:
+        - Profiles
+      summary: Get profile activity logs
+      description: >-
+        Existing activity history, optionally restricted to the profile NIC
+        view. NIC mode preserves identity changes and read-access restrictions,
+        removes only REP and wave REP rating edits, and uses cursor paging in
+        descending created_at and id order. Other callers retain the legacy
+        response shape. Historical deletion or visibility changes are not a
+        frozen snapshot.
+      operationId: getProfileActivityLogs
+      security:
+        - {}
+        - bearerAuth: []
+      parameters:
+        - name: activity_scope
+          in: query
+          required: false
+          description: >-
+            Optional NIC-only profile history; excludes REP and wave REP rating
+            edits while preserving all other matching entries.
+          schema:
+            type: string
+            enum:
+              - NIC
+        - name: cursor
+          in: query
+          required: false
+          description: >-
+            Opaque NIC continuation cursor returned as next_cursor; required
+            after page 1 and bound to the same filters and viewer.
+          schema:
+            type: string
+        - name: profile
+          in: query
+          required: false
+          description: >-
+            Profile handle, wallet or identity key. NIC requires exactly one
+            profile or target.
+          schema:
+            type: string
+        - name: target
+          in: query
+          required: false
+          description: Incoming profile handle, wallet or identity key.
+          schema:
+            type: string
+        - name: include_incoming
+          in: query
+          required: false
+          description: >-
+            Include target matches alongside actor and proxy matches for profile
+            queries.
+          schema:
+            type: string
+        - name: log_type
+          in: query
+          required: false
+          description: Comma-separated activity types; empty means all types.
+          schema:
+            type: string
+        - name: rating_matter
+          in: query
+          required: false
+          description: >-
+            Legacy rating matter filter; cannot be combined with
+            activity_scope=NIC.
+          schema:
+            type: string
+        - name: category
+          in: query
+          required: false
+          description: >-
+            Legacy rating category filter; cannot be combined with
+            activity_scope=NIC.
+          schema:
+            type: string
+        - name: group_id
+          in: query
+          required: false
+          description: Legacy group filter; cannot be combined with activity_scope=NIC.
+          schema:
+            type: string
+        - name: order
+          in: query
+          required: false
+          description: Sort direction; NIC supports descending order only.
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          description: Page number, starting at 1.
+          schema:
+            type: integer
+        - name: page_size
+          in: query
+          required: false
+          description: >-
+            Page size. NIC defaults to 50 and accepts 1 through 500; legacy
+            defaults are unchanged.
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Matching activity page; next_cursor is present only in NIC mode.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProfileActivityLogPage"
+        "400":
+          description: Invalid NIC scope, page size, cursor or filter combination.
   /profile-preferences:
     get:
       tags:
@@ -21599,6 +21956,42 @@ paths:
           description: Authentication required
         "403":
           description: An acting profile is required
+  /v2/waves/{waveId}/all-mention-count:
+    get:
+      tags:
+        - WavesV2
+      summary: Preview the current number of recipients for an all mention
+      description: >-
+        Available to wave creators and admins with posting rights. Counts joined
+        followers with broadcast mentions enabled, excluding the author, muted
+        followers and profiles without wave or parent visibility. This snapshot
+        can change before sending. Does not send notifications.
+      operationId: getWaveAllMentionCount
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/wave-all-mention-count.handler"
+          name: handleGetWaveAllMentionCount
+      parameters:
+        - name: waveId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current all mention audience
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveAllMentionCount"
+        "401":
+          description: Authentication required
+        "403":
+          description: Wave creator or admin posting rights required
+        "404":
+          description: Wave not found or not visible to the caller
   /v2/waves/{waveId}/mention-search:
     get:
       tags:
@@ -22725,6 +23118,73 @@ components:
         status:
           type: integer
           description: Upstream failure status, or 502 for an unavailable lookup.
+    ApiAppDeviceGrant:
+      type: object
+      additionalProperties: false
+      description: >-
+        The fields of an EIP-712 DeviceGrant (domain "6529 Device Grant",
+        version 1, or version 2 with `uint16[] ciphersuites` in place of `uint16
+        ciphersuite`; the 6529 pre-genesis salt). The statement is not sent: the
+        server renders it from these fields.
+      required:
+        - wallet
+        - device_key
+        - scopes
+        - issued_at
+        - expires_at
+        - origin
+      properties:
+        wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        device_key:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+          description: The Ed25519 signing key.
+        scopes:
+          type: array
+          description: Canonical order post, edit, delete, react, vote; must include post.
+          items:
+            type: string
+        mls_device_key:
+          type: string
+          nullable: true
+          pattern: ^0x[0-9a-fA-F]{64}$
+          description: >-
+            The encrypted-messages (MLS signature) key, different from
+            device_key; null or absent for a signing-only grant.
+        ciphersuite:
+          type: integer
+          nullable: true
+          description: >-
+            v1: the MLS ciphersuite of mls_device_key (79 only, while v1 grants
+            are accepted); null or absent without one (0 is rejected). v2: the
+            lowest entry of ciphersuites, or null without an MLS key.
+        version:
+          type: integer
+          description: >-
+            1 (or absent): domain version "1" with `uint16 ciphersuite`. 2:
+            domain version "2" with `uint16[] ciphersuites` (D172).
+        ciphersuites:
+          type: array
+          items:
+            type: integer
+          description: >-
+            v2: the MLS suites of mls_device_key, 1 to 4 code points in strictly
+            ascending order with at least one accepted (79 or 78); [] for a
+            signing-only grant.
+        issued_at:
+          type: integer
+          format: int64
+          description: Unix seconds.
+        expires_at:
+          type: integer
+          format: int64
+          description: Unix seconds, minute aligned, at most 181 days after issued_at.
+        origin:
+          type: string
+          maxLength: 64
+          description: Printable ASCII, e.g. 6529.io or "6529 Desktop".
     ApiArchiveProfileCmsPackageRequest:
       type: object
       properties:
@@ -28289,9 +28749,9 @@ components:
           nullable: true
           maxLength: 2000
           description: >-
-            Required and non-blank for pause actions. The trimmed reason is
-            stored in the competition's public pause history. Optional for other
-            actions.
+            Required and non-blank for pause actions. The trimmed reason appears
+            in public pause history. Archive actions do not require or retain a
+            reason.
         starts_at:
           type: integer
           format: int64
@@ -30298,6 +30758,13 @@ components:
       required:
         - target_client_type
       properties:
+        encrypted_device_setup:
+          type: string
+          maxLength: 32768
+          pattern: ^v1\.[A-Za-z0-9_-]{16}\.[A-Za-z0-9_-]+$
+          description: >-
+            Encrypted fresh target-device keys and wallet grant. The unlock
+            secret is never sent to this API. Not supported for proxy sessions.
         target_client_type:
           type: string
           enum:
@@ -30466,6 +30933,20 @@ components:
             hidden. Omit or set to false to leave previews visible.
             Signature-required drops must include this field in the signed
             payload when present.
+        client_drop_id:
+          type: string
+          format: uuid
+          description: >-
+            Optional client-generated UUID that makes the create idempotent.
+            When the same author sends the same client_drop_id again with the
+            same wave and content (a retry), the drop created the first time is
+            returned instead of a new one. The same id with a different wave or
+            content is rejected with 409. Without it, every create makes a new
+            drop. Use the plain 8-4-4-4-12 UUID form. A retry is matched on wave
+            and content only, so a retry carrying a fresh signature for the same
+            content is answered too. Like every other body field, client_drop_id
+            is part of the signed payload when present: adding it to a body that
+            was signed without it fails the signature check.
         device_signature:
           $ref: "#/components/schemas/ApiDeviceSignature"
     ApiCreateGroup:
@@ -30569,6 +31050,8 @@ components:
         file_name:
           type: string
           example: image.png
+        purpose:
+          $ref: "#/components/schemas/ApiMediaUploadPurpose"
     ApiCreateMediaUrlResponse:
       required:
         - upload_url
@@ -31399,10 +31882,20 @@ components:
           nullable: true
     ApiDeviceGrant:
       type: object
+      allOf:
+        - $ref: "#/components/schemas/ApiDeviceGrantFields"
+      properties:
+        notice_acknowledged:
+          type: boolean
+          description: >-
+            Whether the owner acknowledged the new-device notice. Returned only
+            to the owner.
+    ApiDeviceGrantFields:
+      type: object
       description: >-
         A wallet signed grant that lets a browser-held Ed25519 device key sign
         drop writes. Its id is the EIP-191 hash of the exact SIWE message the
-        wallet signed.
+        wallet signed at sign-in, or the EIP-712 digest of an app device grant.
       required:
         - id
         - wallet
@@ -31438,11 +31931,13 @@ components:
           type: string
         domain:
           type: string
-          description: SIWE domain the grant was signed for, e.g. 6529.io.
+          description: >-
+            SIWE domain the grant was signed for, e.g. 6529.io, or the origin of
+            an app device grant (e.g. 6529.io or "6529 Desktop").
         issued_at:
           type: integer
           format: int64
-          description: SIWE Issued At, epoch milliseconds.
+          description: SIWE Issued At (or app grant issuedAt), epoch milliseconds.
         expires_at:
           type: integer
           format: int64
@@ -31461,7 +31956,7 @@ components:
     ApiDeviceGrantProof:
       type: object
       allOf:
-        - $ref: "#/components/schemas/ApiDeviceGrant"
+        - $ref: "#/components/schemas/ApiDeviceGrantFields"
       required:
         - message
         - wallet_signature
@@ -31469,12 +31964,18 @@ components:
       properties:
         message:
           type: string
-          description: Exact SIWE message signed by the wallet.
+          description: >-
+            Exact SIWE message signed by the wallet, or for an app device grant
+            the signed EIP-712 DeviceGrant message as JSON (it starts with "{";
+            its EIP-712 digest is the grant id).
         wallet_signature:
           type: string
         chain_id:
           type: integer
           format: int64
+          description: >-
+            SIWE Chain ID; 1 for app device grants, whose EIP-1271 contract
+            wallet signatures are checked on Ethereum mainnet.
     ApiDeviceSignature:
       type: object
       additionalProperties: false
@@ -31708,6 +32209,15 @@ components:
             voter count is then unknown, not zero. Omitted by older servers.
         id:
           type: string
+        client_drop_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: >-
+            The client_drop_id sent when the drop was created. Present on the
+            create response (including a retried create) and on the DROP_UPDATE
+            broadcast for that creation, so the author's client can match its
+            pending send. Omitted on other reads.
         serial_no:
           description: Sequence number of the drop in Seize
           type: number
@@ -32033,6 +32543,28 @@ components:
         media_error:
           type: string
           nullable: true
+        width:
+          type: integer
+          nullable: true
+          minimum: 1
+          description: >-
+            Displayed pixel width (after EXIF orientation), for reserving layout
+            space before the media loads. Omitted or null when unknown.
+        height:
+          type: integer
+          nullable: true
+          minimum: 1
+          description: >-
+            Displayed pixel height (after EXIF orientation). Omitted or null
+            when unknown.
+        thumbhash:
+          type: string
+          nullable: true
+          maxLength: 64
+          description: >-
+            Base64 ThumbHash placeholder (https://evanw.github.io/thumbhash/),
+            decodable with the thumbhash npm package. Omitted or null when
+            unknown.
     ApiDropMediaStatus:
       type: string
       enum:
@@ -33196,6 +33728,14 @@ components:
             when the claimer device is in it too
         claimer_device_key:
           type: string
+        ciphersuite:
+          type: integer
+          description: >-
+            The ciphersuite of the group the KeyPackages are for: 79 (0x004F) or
+            78 (0x004E). Omitted, it is the claimer device's grant suite;
+            clients that support 0x004E should still pass it explicitly. Only
+            target devices that can join groups of this suite are returned, and
+            the claimer device must be able to join it too (else 400).
     ApiE2eeClaimKeyPackagesResponse:
       type: object
       required:
@@ -33356,12 +33896,17 @@ components:
           type: string
           nullable: true
           description: >-
-            Set when the device was granted by a combined sign-in grant: the
-            exact Sign-In with Ethereum message the wallet signed. Then
-            wallet_signature is the EIP-191 signature over it, grant_id is its
-            EIP-191 hash, and grant holds the terms of its
-            urn:6529:mls-device-grant:v1 resource (origin = the SIWE domain,
-            issued_at = its Issued At). Null for EIP-712 MlsDeviceGrant grants.
+            Set for a combined sign-in grant or an app device grant with an
+            encrypted-messages key. For a combined sign-in grant, this is the
+            exact SIWE message the wallet signed; wallet_signature is its
+            EIP-191 signature, grant_id its EIP-191 hash, and grant holds the
+            terms of its urn:6529:mls-device-grant resource: v1 (one
+            ciphersuite) or v2 (version 2 and the ciphersuites set, D172), with
+            origin = the SIWE domain and issued_at = its Issued At. For an app
+            device grant, this is the signed EIP-712 DeviceGrant message as
+            JSON; wallet_signature is its typed-data signature and grant_id its
+            EIP-712 digest. Null for direct EIP-712 MlsDeviceGrant
+            registrations.
     ApiE2eeDeviceGrant:
       type: object
       description: >-
@@ -33381,11 +33926,29 @@ components:
         device_key:
           type: string
           description: 0x + 64 hex
+        version:
+          type: integer
+          description: >-
+            The grant version (D172). 1 (or absent): MlsDeviceGrant domain
+            version "1" with one `uint16 ciphersuite`, honoured only for 79
+            (0x004F) while v1 grants are accepted. 2: domain version "2" with
+            `uint16[] ciphersuites`.
         ciphersuite:
           type: integer
           description: >-
-            79 (0x004F, MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519, a draft
-            code point)
+            v1: the signed suite, 79 (0x004F,
+            MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519). v2: the lowest
+            entry of ciphersuites.
+        ciphersuites:
+          type: array
+          items:
+            type: integer
+          description: >-
+            v2: the signed suites, 1 to 4 code points in strictly ascending
+            order, at least one accepted by the server (79 or 78, 0x004E is
+            MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519). The device may
+            join groups of the accepted ones. Responses give v1 grants as their
+            one suite.
         issued_at:
           type: integer
           format: int64
@@ -33434,6 +33997,13 @@ components:
           maxItems: 500
           items:
             type: string
+        ciphersuite:
+          type: integer
+          description: >-
+            The MLS group ciphersuite the caller works in: 79 (0x004F) or 78
+            (0x004E). Omitting ciphersuite means 0x004F; clients that support
+            0x004E must pass it explicitly. Limits the devices found by
+            profile_ids; device_keys are returned whatever their suite.
     ApiE2eeDeviceLookupResponse:
       type: object
       required:
@@ -33502,6 +34072,13 @@ components:
           maxItems: 100
           items:
             type: string
+        ciphersuite:
+          type: integer
+          description: >-
+            The MLS group ciphersuite the caller works in: 79 (0x004F) or 78
+            (0x004E). Omitting ciphersuite means 0x004F; clients that support
+            0x004E must pass it explicitly. active_devices and NO_DEVICES count
+            only devices that can join groups of this suite.
     ApiE2eeEligibilityResponse:
       type: object
       required:
@@ -33578,7 +34155,10 @@ components:
       properties:
         data:
           type: string
-          description: Standard base64 TLS-serialized KeyPackage (at most 4 KiB)
+          description: >-
+            Standard base64 TLS-serialized MLS 1.0 KeyPackage (at most 8 KiB).
+            Its cipher_suite must be one the device's grant admits (today the
+            grant's own suite), else 400.
         last_resort:
           type: boolean
         expires_at:
@@ -33738,7 +34318,8 @@ components:
           pattern: ^0x[0-9a-f]{64}$
           description: >-
             Id of a combined grant this profile stored at sign-in (the
-            device_grant.id the session login returned)
+            device_grant.id the session login returned) or of an app device
+            grant with an encrypted-messages key
         label:
           type: string
           description: >-
@@ -36679,6 +37260,19 @@ components:
         - model/gltf-binary
         - video/quicktime
         - image/webp
+    ApiMediaUploadPurpose:
+      type: string
+      description: >-
+        Why drop or wave media is uploaded; optional, defaults to `chat`. `chat`
+        media has identifying metadata (location, camera, owner, capture time,
+        thumbnails) removed and gets a neutral public file name.
+        `decision_entry` keeps the artist's original bytes and file name; such
+        media can only be attached to a decision entry (a participatory drop),
+        never to a chat drop or a reply. Wave media is always treated as `chat`.
+        Distribution photo uploads ignore it.
+      enum:
+        - chat
+        - decision_entry
     ApiMemeCardDropMapping:
       type: object
       required:
@@ -38278,6 +38872,12 @@ components:
     ApiNotificationAdditionalContextV2:
       type: object
       properties:
+        encrypted_group:
+          type: string
+          description: Opaque encrypted-chat handle.
+        encrypted_message_seq:
+          type: integer
+          description: Sequence of the message to preview from local decrypted history.
         artist_id:
           type: string
         artwork_title:
@@ -38446,6 +39046,7 @@ components:
         - COMPETITION_LIFECYCLE
         - MEME_COLLABORATION
         - VOTING_CREDITS_RETURNED
+        - E2EE_MESSAGE
     ApiNotificationDropReactedReactor:
       type: object
       required:
@@ -38492,6 +39093,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiNotificationV2"
+        unread_count:
+          type: number
+          format: int64
+    ApiNotificationsUnreadCountV2:
+      type: object
+      required:
+        - unread_count
+      properties:
         unread_count:
           type: number
           format: int64
@@ -38984,6 +39593,73 @@ components:
           type: boolean
         designated_payee_name:
           type: string
+    ApiProfileActivityLog:
+      type: object
+      required:
+        - id
+        - profile_id
+        - target_id
+        - proxy_id
+        - type
+        - additional_data_1
+        - additional_data_2
+        - created_at
+        - contents
+        - is_target_of_type_drop
+      properties:
+        id:
+          type: string
+        profile_id:
+          type: string
+        target_id:
+          type: string
+          nullable: true
+        proxy_id:
+          type: string
+          nullable: true
+        type:
+          type: string
+        additional_data_1:
+          type: string
+          nullable: true
+        additional_data_2:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        contents:
+          type: object
+          additionalProperties: true
+        profile_handle:
+          type: string
+        target_profile_handle:
+          type: string
+          nullable: true
+        proxy_handle:
+          type: string
+          nullable: true
+        is_target_of_type_drop:
+          type: boolean
+    ApiProfileActivityLogPage:
+      type: object
+      required:
+        - page
+        - next
+        - data
+      properties:
+        page:
+          type: integer
+        next:
+          type: boolean
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiProfileActivityLog"
+        next_cursor:
+          type: string
+          nullable: true
+          description: Present only for NIC mode; null when no further page exists.
     ApiProfileBlockState:
       type: object
       required:
@@ -40703,6 +41379,12 @@ components:
         - native_refresh_token
         - refresh_token_expires_at
       properties:
+        encrypted_device_setup:
+          type: string
+          nullable: true
+          description: >-
+            One-time encrypted device setup, unlocked locally using the link
+            fragment.
         address:
           type: string
         role:
@@ -40773,6 +41455,20 @@ components:
         queued:
           type: boolean
           description: Queue acceptance, not confirmation of device delivery.
+    ApiRegisterDeviceGrantRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - grant
+        - wallet_signature
+      properties:
+        grant:
+          $ref: "#/components/schemas/ApiAppDeviceGrant"
+        wallet_signature:
+          type: string
+        device_label:
+          type: string
+          description: Sanitized to at most 48 characters of [A-Za-z0-9 ._()-].
     ApiRegisterPushNotificationTokenRequest:
       type: object
       required:
@@ -40813,6 +41509,16 @@ components:
         platform:
           type: string
           description: Optional platform (ios, android, web)
+    ApiRenameDeviceRequest:
+      type: object
+      required:
+        - label
+      properties:
+        label:
+          type: string
+          minLength: 1
+          maxLength: 48
+          pattern: ^[A-Za-z0-9 ._()-]+$
     ApiRepCategoriesPage:
       type: object
       required:
@@ -41324,7 +42030,15 @@ components:
           type: integer
           minimum: 1
           maximum: 65535
-          description: Required when mls_device_key is present.
+          description: >-
+            Grant v1: the one suite of mls_device_key (79 only, while v1 grants
+            are accepted). Give this or mls_ciphersuites with mls_device_key.
+        mls_ciphersuites:
+          type: string
+          pattern: ^\d{1,5}(\.\d{1,5}){0,3}$
+          description: >-
+            Grant v2: the suites of mls_device_key, ascending, joined by "."
+            (for example "78").
     ApiSessionNonceResponse:
       type: object
       required:
@@ -42774,6 +43488,15 @@ components:
           $ref: "#/components/schemas/ApiWaveRepSummary"
         wave_score:
           $ref: "#/components/schemas/ApiWaveScore"
+    ApiWaveAllMentionCount:
+      type: object
+      required:
+        - count
+      properties:
+        count:
+          type: integer
+          format: int64
+          minimum: 0
     ApiWaveChatConfig:
       type: object
       required:

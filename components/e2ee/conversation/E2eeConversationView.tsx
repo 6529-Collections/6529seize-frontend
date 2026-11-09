@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { ChatFileDropOverlay } from "@/components/composer/ChatFileDropOverlay";
+import { useChatFileDrop } from "@/hooks/useChatFileDrop";
 import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
 import { getEncryptedMessagesRoute } from "@/helpers/navigation.helpers";
 import { useE2eeConversation, type UseE2eeResult } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
+import { isUsableDm } from "@/lib/e2ee/dm-conversations";
 import type {
   E2eeConversation,
   E2eeEngine,
@@ -27,14 +30,20 @@ import {
   useE2eeViewStyle,
 } from "../ui/E2eePageShell";
 import { E2eeBlockDialog } from "./E2eeBlockDialog";
-import { E2eeComposer } from "./E2eeComposer";
+import { E2eeDmHistory } from "./E2eeDmHistory";
+import { E2eeComposer, type E2eeComposerHandle } from "./E2eeComposer";
 import { E2eeEmojiProvider } from "./E2eeEmojiProvider";
+import { E2eeContinuedNotice } from "./E2eeContinuedNotice";
 import { E2eeConversationBanners } from "./E2eeConversationBanners";
 import { E2eeUntrustedDeviceBanners } from "./E2eeUntrustedDeviceBanners";
 import { E2eeConversationHeader } from "./E2eeConversationHeader";
 import type { E2eeMessageActions } from "./E2eeMessageItem";
 import { E2eeReportDialog } from "./E2eeReportDialog";
 import { E2eeSearchPanel } from "./E2eeSearchPanel";
+import {
+  E2eeSupersededComposer,
+  useSupersededHandoff,
+} from "./E2eeSupersededComposer";
 import { E2eeTimeline } from "./E2eeTimeline";
 import {
   type E2eeDroppedMessage,
@@ -103,12 +112,18 @@ function useInitialSync(engine: E2eeEngine, missing: boolean): boolean {
 }
 
 const getDisabledReasonKey = (
-  conversation: E2eeConversation
+  conversation: E2eeConversation,
+  selfProfileId: string | null
 ): MessageKey | null => {
-  if (conversation.status !== "active") {
+  if (
+    conversation.status !== "active" ||
+    (conversation.kind === "dm" && !isUsableDm(conversation, selfProfileId))
+  ) {
     return "e2ee.composer.unavailable";
   }
-  if (conversation.delayed) {
+  // A group change that has not gone through holds sending back; a send
+  // that keeps failing does not, so writing (and focus) carries on (8.3).
+  if (conversation.delayed && conversation.delayedReason !== "send") {
     return "e2ee.composer.blocked";
   }
   return null;
@@ -129,6 +144,9 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const lastSeq = messages.at(-1)?.seq ?? 0;
   useOpenConversation(engine, g, conversation !== null, lastSeq);
   const synced = useInitialSync(engine, conversation === null);
+  const superseded = conversation?.status === "superseded";
+  const handoff = useSupersededHandoff(conversation !== null && !superseded);
+  const { announce } = handoff;
 
   const [jumpTarget, setJump] = useState<{
     id: string;
@@ -138,6 +156,10 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<E2eeMessage | null>(null);
   const [reportTarget, setReportTarget] = useState<E2eeMessage | null>(null);
+  const [discardTarget, setDiscardTarget] = useState<E2eeMessage | null>(null);
+  // Set when a discard succeeded: the outcome is announced and focus goes
+  // to the continue action once the dialog has closed.
+  const focusActionAfterDialog = useRef(false);
   const [blockSender, setBlockSender] = useState<E2eeMessage | null>(null);
   const { setToast } = useAuth();
   const { dropped, dismiss: dismissDropped } = useE2eeDroppedMessage(
@@ -151,6 +173,17 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [actionErrorKey, setActionErrorKey] = useState<MessageKey | null>(null);
+
+  const composerRef = useRef<E2eeComposerHandle>(null);
+  const fileDrop = useChatFileDrop({
+    enabled:
+      conversation !== null &&
+      getDisabledReasonKey(conversation, profileId) === null &&
+      e2ee.attachmentsEnabled &&
+      editingId === null,
+    includeEditor: true,
+    onFiles: (files) => composerRef.current?.attachFiles(files),
+  });
 
   const actions = useMemo<E2eeMessageActions>(() => {
     const react = async (
@@ -203,8 +236,16 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         };
         void jump();
       },
+      // D172: an unsent message leaves this read-only chat either way, so
+      // the outcome is announced here and focus moves to the continue action.
+      onResendUnsent: async (message) => {
+        await engine.resendUnsent(message.g, message.id);
+        announce(t(locale, "e2ee.unsent.resent"));
+        document.getElementById(composerInputId)?.focus();
+      },
+      onDiscardUnsent: (message) => setDiscardTarget(message),
     };
-  }, [engine, g, muted, profileId]);
+  }, [announce, composerInputId, engine, g, locale, muted, profileId]);
 
   if (!conversation) {
     return (
@@ -231,13 +272,21 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
   const editing = editingId
     ? (messages.find((m) => m.id === editingId) ?? null)
     : null;
-  const canAct = conversation.status === "active";
+  const canAct =
+    conversation.status === "active" &&
+    (conversation.kind !== "dm" || isUsableDm(conversation, profileId));
 
   return (
-    <div
+    <section
       style={style}
-      className="tw-flex tw-min-h-0 tw-w-full tw-flex-col tw-bg-black"
+      className="tw-relative tw-flex tw-min-h-0 tw-w-full tw-flex-col tw-bg-black"
+      aria-label={t(locale, "e2ee.composer.dropArea")}
+      onDragEnterCapture={fileDrop.handlers.onDragEnter}
+      onDragOverCapture={fileDrop.handlers.onDragOver}
+      onDragLeaveCapture={fileDrop.handlers.onDragLeave}
+      onDropCapture={fileDrop.handlers.onDrop}
     >
+      {fileDrop.active && <ChatFileDropOverlay />}
       <E2eeConversationHeader
         conversation={conversation}
         selfProfileId={profileId}
@@ -245,6 +294,12 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         searchPanelId={searchPanelId}
         onToggleSearch={() => setSearchOpen((open) => !open)}
         onOpenInfo={() => setInfoOpen(true)}
+      />
+      <E2eeDmHistory
+        conversation={conversation}
+        conversations={e2ee.conversations}
+        selfProfileId={profileId}
+        engine={engine}
       />
       {searchOpen ? (
         <div id={searchPanelId}>
@@ -268,14 +323,19 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         selfProfileId={profileId}
       />
       <E2eeNewDeviceNotice className="tw-flex-shrink-0 tw-px-4 tw-pt-2" />
-      {getDisabledReasonKey(conversation) === null ? (
+      {superseded || getDisabledReasonKey(conversation, profileId) === null ? (
         // One stop past the whole timeline for keyboard users.
         <button
           type="button"
           onClick={() => document.getElementById(composerInputId)?.focus()}
           className="tw-sr-only focus:tw-not-sr-only focus:tw-mx-4 focus:tw-my-1 focus:tw-self-start focus:tw-rounded-lg focus:tw-border-0 focus:tw-bg-iron-900 focus:tw-px-3 focus:tw-py-1.5 focus:tw-text-xs focus:tw-font-semibold focus:tw-text-iron-100 focus:tw-outline focus:tw-outline-2 focus:tw-outline-primary-400"
         >
-          {t(locale, "e2ee.conversation.skipToComposer")}
+          {t(
+            locale,
+            superseded
+              ? "e2ee.superseded.skipToAction"
+              : "e2ee.conversation.skipToComposer"
+          )}
         </button>
       ) : null}
       <E2eeTimeline
@@ -287,6 +347,13 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         actions={actions}
         jumpToId={jumpTarget?.id ?? null}
         jumpRequest={jumpTarget?.request ?? 0}
+        notice={
+          <E2eeContinuedNotice
+            conversation={conversation}
+            conversations={e2ee.conversations}
+            selfProfileId={profileId}
+          />
+        }
       />
       {actionErrorKey ? (
         <p
@@ -331,19 +398,53 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
           </E2eeBanner>
         </div>
       ) : null}
-      <E2eeComposer
-        restoredDraft={restoredDraft}
-        inputId={composerInputId}
-        conversation={conversation}
-        engine={engine}
-        selfProfileId={profileId}
-        replyTo={replyTo}
-        onCancelReply={() => setReplyToId(null)}
-        editing={editing}
-        onCancelEdit={() => setEditingId(null)}
-        disabledReasonKey={getDisabledReasonKey(conversation)}
-        attachmentsEnabled={e2ee.attachmentsEnabled}
-      />
+      {/* Focus inside here moves to the continue action if the chat turns read-only. */}
+      <div
+        className="tw-contents"
+        onFocus={handoff.onFocus}
+        onBlur={handoff.onBlur}
+      >
+        <output className="tw-sr-only">{handoff.announcement}</output>
+        {superseded ? (
+          <E2eeSupersededComposer
+            conversation={conversation}
+            conversations={e2ee.conversations}
+            selfProfileId={profileId}
+            engine={engine}
+            actionId={composerInputId}
+            takeFocus={handoff.takeFocus}
+          />
+        ) : (
+          <E2eeComposer
+            ref={composerRef}
+            restoredDraft={restoredDraft}
+            inputId={composerInputId}
+            conversation={conversation}
+            engine={engine}
+            selfProfileId={profileId}
+            onRequestEditLastMessage={() => {
+              if (!canAct || !profileId) return false;
+              const last = messages.findLast(
+                (message) =>
+                  message.kind === "message" &&
+                  message.senderProfileId === profileId &&
+                  !message.deleted &&
+                  !message.undecryptable &&
+                  !message.pending
+              );
+              if (!last) return false;
+              actions.onEdit(last);
+              return true;
+            }}
+            replyTo={replyTo}
+            onCancelReply={() => setReplyToId(null)}
+            editing={editing}
+            onCancelEdit={() => setEditingId(null)}
+            disabledReasonKey={getDisabledReasonKey(conversation, profileId)}
+            attachmentsEnabled={e2ee.attachmentsEnabled}
+          />
+        )}
+      </div>
 
       <E2eeConversationInfo
         open={infoOpen}
@@ -402,7 +503,32 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
         }}
         onClose={() => setDeleteTarget(null)}
       />
-    </div>
+      <E2eeConfirmDialog
+        open={discardTarget !== null}
+        title={t(locale, "e2ee.unsent.deleteConfirmTitle")}
+        body={t(locale, "e2ee.unsent.deleteConfirmBody")}
+        confirmLabel={t(locale, "e2ee.unsent.delete")}
+        errorFallbackKey="e2ee.unsent.deleteFailed"
+        onConfirm={async () => {
+          if (discardTarget) {
+            await engine.discardUnsent(discardTarget.g, discardTarget.id);
+            focusActionAfterDialog.current = true;
+          }
+        }}
+        onClose={() => {
+          setDiscardTarget(null);
+          if (focusActionAfterDialog.current) {
+            focusActionAfterDialog.current = false;
+            // Once the dialog has closed (the page is no longer inert and
+            // its focus return had nothing to go to): say so, move focus on.
+            globalThis.requestAnimationFrame(() => {
+              announce(t(locale, "e2ee.unsent.deleted"));
+              document.getElementById(composerInputId)?.focus();
+            });
+          }
+        }}
+      />
+    </section>
   );
 }
 

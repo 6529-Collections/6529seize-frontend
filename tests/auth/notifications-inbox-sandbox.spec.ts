@@ -15,7 +15,27 @@ import {
 import AxeBuilder from "@axe-core/playwright";
 import { ApiNotificationCause } from "../../generated/models/ApiNotificationCause";
 import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotificationsResponseV2";
+import type { Locator } from "@playwright/test";
 import { ApiVotingCreditReleaseReason } from "../../generated/models/ApiVotingCreditReleaseReason";
+
+async function expectCenteredCloseControl(inbox: Locator) {
+  const close = inbox.getByRole("button", { name: "Close notifications" });
+  await expect(close).toBeVisible();
+  const geometry = await close.evaluate((button) => {
+    const target = button.getBoundingClientRect();
+    const icon = button.querySelector("svg")!.getBoundingClientRect();
+    return {
+      width: target.width,
+      height: target.height,
+      horizontalOffset: icon.x + icon.width / 2 - target.x - target.width / 2,
+      verticalOffset: icon.y + icon.height / 2 - target.y - target.height / 2,
+    };
+  });
+  expect(geometry.width).toBeGreaterThanOrEqual(32);
+  expect(geometry.height).toBe(geometry.width);
+  expect(Math.abs(geometry.horizontalOffset)).toBeLessThanOrEqual(0.5);
+  expect(Math.abs(geometry.verticalOffset)).toBeLessThanOrEqual(0.5);
+}
 
 test.describe("Notifications inbox sandbox @auth @local-only", () => {
   test.beforeEach(async ({ page }) => {
@@ -78,7 +98,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     });
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
-    const trigger = page.getByRole("button", {
+    const trigger = page.getByRole("link", {
       name: "Notifications",
       exact: true,
     });
@@ -86,7 +106,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     const route = page.url();
-    await trigger.click();
+    await trigger.hover();
     const inbox = page.getByRole("region", {
       name: "Notifications",
       exact: true,
@@ -94,6 +114,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect(
       inbox.getByText("sandbox-alice mentioned you", { exact: true })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expectCenteredCloseControl(inbox);
     await expect(
       inbox.getByText("New reactions to your drop", { exact: true })
     ).toHaveCount(1);
@@ -141,7 +162,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       .toBeGreaterThan(0);
     await expect(artwork).toHaveAttribute(
       "href",
-      "/waves/00000000-0000-4000-8000-000000000533/competitions/10000000-0000-4000-8000-000000000001?drop=00000000-0000-4000-8000-000000000560"
+      "/waves/00000000-0000-4000-8000-000000000533/decisions/10000000-0000-4000-8000-000000000001?drop=00000000-0000-4000-8000-000000000560"
     );
     expect(page.url()).toBe(route);
     await expect
@@ -157,7 +178,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect(trigger).not.toHaveAccessibleDescription("Unread");
     await expectNoHorizontalOverflow(page);
     const accessibility = await new AxeBuilder({ page })
-      .include('[role="region"][aria-label="Notifications"]')
+      .include('section[aria-label="Notifications"]')
       .analyze();
     expect(accessibility.violations).toEqual([]);
     const box = await inbox.boundingBox();
@@ -165,7 +186,12 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     expect(box!.y).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
     await captureSafeScreenshot(page, testInfo, "desktop-notifications-inbox");
+    await inbox
+      .getByRole("heading", { name: "Notifications", exact: true })
+      .hover();
+    await expect(inbox).toBeVisible();
     await page.setViewportSize({ width: 1100, height: 540 });
+    await expectCenteredCloseControl(inbox);
     await expect(inbox).toBeVisible();
     await expect
       .poll(async () => {
@@ -187,13 +213,19 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await page.keyboard.press("Escape");
     await expect(inbox).not.toBeVisible();
     await expect(trigger).toBeFocused();
-    await trigger.click();
+    await trigger.press("ArrowDown");
     await inbox.getByRole("button", { name: "Close notifications" }).click();
     await expect(inbox).not.toBeVisible();
-    await trigger.click();
-    await trigger.click();
-    await expect(inbox).not.toBeVisible();
-    await trigger.click();
+    await trigger.focus();
+    await page.keyboard.press("ArrowDown");
+    await expect(inbox).toBeFocused();
+    await expect(
+      inbox.getByRole("button", { name: "Mark all as read" })
+    ).toBeEnabled();
+    await page.keyboard.press("Tab");
+    await expect(
+      inbox.getByRole("button", { name: "Mark all as read" })
+    ).toBeFocused();
     await inbox.getByRole("link", { name: "View all notifications" }).focus();
     await page.keyboard.press("Tab");
     await expect(inbox).not.toBeVisible();
@@ -201,7 +233,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       (request) =>
         request.method === "POST" && request.path === "/api/notifications/read"
     ).length;
-    await trigger.click();
+    await trigger.hover();
     await expect
       .poll(
         async () =>
@@ -232,7 +264,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
           /\/notifications\/(?:read|\d+\/read)$/.test(request.path)
       ).length
     );
-    await trigger.click();
+    await trigger.hover();
     const destination = inbox
       .getByRole("link")
       .filter({ hasText: "sandbox-alice mentioned you" });
@@ -264,6 +296,40 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("desktop bell navigates directly, including with the preview open", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    // The shared pack runs desktop and mobile; the mobile scenario below
+    // preserves direct navigation without a desktop hover preview.
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop sidebar inbox"
+    );
+    for (const previewOpen of [false, true]) {
+      await page.goto("/waves", { waitUntil: "domcontentloaded" });
+      await waitForRouteReady(page);
+      const bell = page
+        .getByLabel("Primary sidebar", { exact: true })
+        .getByRole("link", { name: "Notifications", exact: true });
+      await expect(bell).toHaveAttribute("href", "/notifications");
+      if (previewOpen) {
+        await bell.hover();
+        await expect(
+          page.getByRole("region", { name: "Notifications", exact: true })
+        ).toBeVisible();
+      }
+      await bell.click();
+      await expect(page).toHaveURL(/\/notifications$/, {
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      await expect(
+        page.getByRole("region", { name: "Notifications", exact: true })
+      ).not.toBeVisible();
+    }
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("desktop artwork alert opens the single submission", async ({
     page,
     baseURL,
@@ -277,8 +343,8 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await page.goto("/notifications", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     await page
-      .getByRole("button", { name: "Notifications", exact: true })
-      .click();
+      .getByRole("link", { name: "Notifications", exact: true })
+      .hover();
     const inbox = page.getByRole("region", {
       name: "Notifications",
       exact: true,
@@ -297,6 +363,76 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     ).toBeVisible();
     await expectNoUnsafeSandboxMutations(baseURL);
   });
+
+  for (const state of ["empty", "error"] as const) {
+    test(`desktop close stays centered during loading and ${state} states`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      // The floating inbox is desktop-only; mobile's full-page flow is covered below.
+      test.skip(
+        testInfo.project.name !== "web-desktop-chromium",
+        "Desktop sidebar inbox"
+      );
+      let release: (() => void) | undefined;
+      const responseReady = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      await page.route("**/api/v2/notifications?*", async (route) => {
+        await responseReady;
+        if (state === "error") {
+          await route.fulfill({ status: 400, json: { error: "Unavailable" } });
+        } else {
+          await route.fulfill({ json: { notifications: [], unread_count: 0 } });
+        }
+      });
+      try {
+        await page.goto("/waves", { waitUntil: "domcontentloaded" });
+        await waitForRouteReady(page);
+        const trigger = page.getByRole("link", {
+          name: "Notifications",
+          exact: true,
+        });
+        await trigger.hover();
+        const inbox = page.getByRole("region", {
+          name: "Notifications",
+          exact: true,
+        });
+        await expectCenteredCloseControl(inbox);
+        await expect(inbox.getByText("Loading notifications…")).toBeVisible();
+        release?.();
+        await expect(
+          inbox.getByText(
+            state === "empty"
+              ? "No notifications yet"
+              : "Couldn't load notifications.",
+            { exact: true }
+          )
+        ).toBeVisible();
+        await expectCenteredCloseControl(inbox);
+        const close = inbox.getByRole("button", {
+          name: "Close notifications",
+        });
+        await close.hover();
+        await expect(close).toHaveCSS("background-color", "rgb(38, 39, 43)");
+        await close.focus();
+        await page.keyboard.press("ArrowRight");
+        await expect(close).toBeFocused();
+        await expect(close).toHaveCSS("outline-width", "2px");
+        await captureSafeScreenshot(
+          page,
+          testInfo,
+          `notifications-close-${state}`
+        );
+        await page.keyboard.press("Enter");
+        await expect(inbox).not.toBeVisible();
+        await expect(trigger).toBeFocused();
+        await expectNoUnsafeSandboxMutations(baseURL);
+      } finally {
+        release?.();
+      }
+    });
+  }
 
   test("desktop mark-all retries an automatic read failure and View all opens the full feed", async ({
     page,
@@ -322,11 +458,11 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     });
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
-    const trigger = page.getByRole("button", {
+    const trigger = page.getByRole("link", {
       name: "Notifications",
       exact: true,
     });
-    await trigger.click();
+    await trigger.hover();
     const inbox = page.getByRole("region", {
       name: "Notifications",
       exact: true,
@@ -377,8 +513,8 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await page.goto("/waves", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
     await page
-      .getByRole("button", { name: "Notifications", exact: true })
-      .click();
+      .getByRole("link", { name: "Notifications", exact: true })
+      .hover();
     const inbox = page.getByRole("region", {
       name: "Notifications",
       exact: true,

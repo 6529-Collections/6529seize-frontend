@@ -1,8 +1,10 @@
 // The hardware page at /validator/hardware. Every fact here holds for
 // 0.1.0-rc.5 (commit 29a8caf): systems from its install guide and package
 // checks, memory and disk measured on rc.5 on 2026-11-03. The first start
-// is from 6529's mainnet join tests of 0.1.0-rc.7 (commit 214e228) on
-// 2026-11-05, as the tester guide gives it. Prices were read on 2026-10-31.
+// is from 6529's mainnet join tests of 0.1.0-rc.10, as the tester guide gives
+// it, and a data center's peers from rc.8's install guide
+// (docs/install/operations.md, Peers). Prices were read on 2026-10-31.
+// Release facts still to fill have the form {{RC10_...}} (fill-rc10.sh).
 
 /**
  * How long a home validator must stay on from 00:15 UTC to calculate, sign
@@ -145,7 +147,7 @@ export const PARTS: readonly {
     key: "first-start",
     part: "First start",
     answer: "Leave it on until the app says it is ready, about half an hour.",
-    why: "A new validator downloads the network's history and checks it before it can sign. In 6529's tests of rc.7 on 5 November this took about 25 minutes through Tor, and 10 with Tor off.",
+    why: "A new validator downloads the network's history and checks it before it can sign. In 6529's tests of rc.10 on 7 November this took about 21 minutes through Tor, and 16 with Tor off.",
   },
 ];
 
@@ -258,7 +260,7 @@ export const DATA_CENTER: readonly {
     chips: ["8–16 cores", "32–64 GB RAM", "4–8 TB NVMe"],
     price: "$192",
     unit: "a month, rented",
-    note: "Install it with the default settings too. With Tor off, it needs a peer's address from 6529 to join.",
+    note: "Install it with the default settings too. With Tor off, it reaches 6529's Bootstraps by their IP addresses, so you add no peer.",
   },
 ];
 
@@ -313,7 +315,7 @@ export const QUESTIONS: readonly {
 /** Where the page's numbers come from. */
 export const SOURCES: readonly string[] = [
   `Memory and disk: measured on the test release (0.1.0-rc.5, commit 29a8caf) on ${MEASURED_ON}, on 6529's validators and on a fresh install with the default settings.`,
-  "The first start: 6529's join tests of the test release (0.1.0-rc.7, commit 214e228) on 5 November 2026, fresh installs with the default settings, through Tor and with Tor off.",
+  "The first start: 6529's join tests of the test release (0.1.0-rc.10, commit f0a3440) on 7 November 2026, fresh installs with the default settings, through Tor and with Tor off.",
   "Internet: 6529's estimate of a month of Ethereum data, in the validator's specification.",
   `Prices: store and provider pages, read on ${PRICES_READ_ON}. Power at 18.16 cents a kWh, the US average for August 2026 (EIA).`,
 ];

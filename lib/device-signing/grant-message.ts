@@ -20,6 +20,11 @@ const URN_PATTERN =
   /^urn:6529:device-grant:v1:ed25519:([0-9a-f]{64}):([a-z.]+):([1-9]\d{0,15})$/;
 const MLS_URN_PATTERN =
   /^urn:6529:mls-device-grant:v1:([1-9]\d{0,4}):([0-9a-f]{64}):([1-9]\d{0,15})$/;
+// Grant v2 (D172): a suite set joined by "." (at most 4 x 5 digits and 3
+// dots); each entry is checked on its own (MLS_SUITE_PATTERN).
+const MLS_URN_PATTERN_V2 =
+  /^urn:6529:mls-device-grant:v2:([0-9.]{1,23}):([0-9a-f]{64}):([1-9]\d{0,15})$/;
+const MLS_SUITE_PATTERN = /^[1-9]\d{0,4}$/;
 const MAX_MLS_CIPHERSUITE = 0xffff;
 /** The server grants 180 days; allow a day of clock skew. */
 const MAX_GRANT_TTL_MS = 181 * 24 * 60 * 60 * 1000;
@@ -36,11 +41,19 @@ interface DeviceGrantTerms {
  * signature key for end-to-end encrypted messages, with the same expiry.
  */
 interface MlsDeviceGrantTerms {
+  /** 1: one suite (urn ...:v1:); 2: a suite set (urn ...:v2:, D172). */
+  readonly version: 1 | 2;
   /** 0x-prefixed lowercase hex of the raw MLS Ed25519 signature key. */
   readonly deviceKeyHex: string;
-  /** The MLS ciphersuite (uint16) the key is granted for. */
-  readonly ciphersuite: number;
+  /** The MLS suites (uint16) the key is granted for; v1: exactly one. */
+  readonly ciphersuites: readonly number[];
   readonly expiresAtSeconds: number;
+}
+
+/** What a client asks a combined challenge to grant (always v2). */
+interface ExpectedMlsGrant {
+  readonly deviceKeyHex: string;
+  readonly ciphersuites: readonly number[];
 }
 
 interface ParsedDeviceGrantMessage extends DeviceGrantTerms {
@@ -195,7 +208,8 @@ const SCOPE_NOUNS: Readonly<Record<DeviceScope, string>> = {
 const toScopeNoun = (scope: string): string =>
   Object.hasOwn(SCOPE_NOUNS, scope) ? SCOPE_NOUNS[scope as DeviceScope] : scope;
 
-const describeScopes = (scopes: readonly string[]): string =>
+/** What the device will sign, e.g. "posts, edits, deletes and reactions". */
+export const describeDeviceScopes = (scopes: readonly string[]): string =>
   formatEnglishList(scopes.map(toScopeNoun));
 
 /**
@@ -215,7 +229,7 @@ export function renderDeviceGrantStatement({
   return (
     `Sign in to 6529 and turn on signed messages on this device until ` +
     `${formatGrantExpiryDate(expiresAtSeconds)}. ` +
-    `This device will sign your ${describeScopes(scopes)} ` +
+    `This device will sign your ${describeDeviceScopes(scopes)} ` +
     `so anyone can verify they came from your wallet. ` +
     `It can't move funds, change your handle, add devices or act as an admin. ` +
     `No transaction, no gas, no token approvals. ` +
@@ -239,7 +253,7 @@ const renderCombinedGrantStatementV1: CombinedStatementRenderer = (
 ) =>
   `Sign in to 6529 and turn on signed messages on this device until ` +
   `${formatGrantExpiryDate(signing.expiresAtSeconds)}. ` +
-  `This device will sign your ${describeScopes(signing.scopes)} ` +
+  `This device will sign your ${describeDeviceScopes(signing.scopes)} ` +
   `so anyone can verify they came from your wallet. ` +
   `It will also encrypt (send) and decrypt (read) your end-to-end encrypted ` +
   `messages, which 6529.io cannot read. ` +
@@ -314,7 +328,10 @@ export function buildDeviceGrantUrn({
   )}:${scopes.join(".")}:${expiresAtSeconds}`;
 }
 
-const areCanonicalScopes = (scopes: readonly string[]): boolean => {
+/** Canonical order, no duplicates, includes "post". */
+export const areCanonicalDeviceScopes = (
+  scopes: readonly string[]
+): boolean => {
   let previousIndex = -1;
   for (const scope of scopes) {
     const index = CANONICAL_SCOPE_ORDER.indexOf(scope as DeviceScope);
@@ -327,33 +344,57 @@ const areCanonicalScopes = (scopes: readonly string[]): boolean => {
 };
 
 export function buildMlsDeviceGrantUrn({
+  version,
   deviceKeyHex,
-  ciphersuite,
+  ciphersuites,
   expiresAtSeconds,
 }: MlsDeviceGrantTerms): string {
-  return `urn:6529:mls-device-grant:v1:${ciphersuite}:${stripHexPrefix(
-    deviceKeyHex
-  )}:${expiresAtSeconds}`;
+  return `urn:6529:mls-device-grant:v${version}:${ciphersuites.join(
+    "."
+  )}:${stripHexPrefix(deviceKeyHex)}:${expiresAtSeconds}`;
 }
 
+/** 1 to 4 code points (1-65535), strictly ascending. */
+const isCanonicalSuites = (suites: readonly number[]): boolean =>
+  suites.length >= 1 &&
+  suites.length <= 4 &&
+  suites.every(
+    (suite, index) =>
+      suite >= 1 &&
+      suite <= MAX_MLS_CIPHERSUITE &&
+      (index === 0 || suite > (suites[index - 1] ?? 0))
+  );
+
 const parseMlsResource = (resource: string): MlsDeviceGrantTerms | null => {
-  const match = resource.startsWith("- ")
-    ? MLS_URN_PATTERN.exec(resource.slice(2))
-    : null;
+  if (!resource.startsWith("- ")) {
+    return null;
+  }
+  const urn = resource.slice(2);
+  const v1 = MLS_URN_PATTERN.exec(urn);
+  const match = v1 ?? MLS_URN_PATTERN_V2.exec(urn);
   if (!match) {
     return null;
   }
-  const [, ciphersuiteRaw = "", keyHex = "", expiresAt = ""] = match;
-  const ciphersuite = Number(ciphersuiteRaw);
+  const [, suitesRaw = "", keyHex = "", expiresAt = ""] = match;
+  const entries = suitesRaw.split(".");
+  if (!entries.every((entry) => MLS_SUITE_PATTERN.test(entry))) {
+    return null;
+  }
+  const ciphersuites = entries.map(Number);
   const expiresAtSeconds = Number(expiresAt);
   if (
-    ciphersuite > MAX_MLS_CIPHERSUITE ||
+    !isCanonicalSuites(ciphersuites) ||
     !Number.isSafeInteger(expiresAtSeconds) ||
     expiresAtSeconds % 60 !== 0
   ) {
     return null;
   }
-  return { deviceKeyHex: `0x${keyHex}`, ciphersuite, expiresAtSeconds };
+  return {
+    version: v1 ? 1 : 2,
+    deviceKeyHex: `0x${keyHex}`,
+    ciphersuites,
+    expiresAtSeconds,
+  };
 };
 
 /** One expiry and two different keys (revoking one never covers the other). */
@@ -391,7 +432,7 @@ const parseGrantResource = (
   }
   const [, keyHex = "", scopeList = "", expiresAt = ""] = match;
   const scopes = scopeList.split(".");
-  if (!areCanonicalScopes(scopes)) {
+  if (!areCanonicalDeviceScopes(scopes)) {
     return null;
   }
   return {
@@ -472,15 +513,22 @@ export function parseDeviceGrantMessage(
   };
 }
 
-/** The MLS key a combined challenge must grant, and nothing else. */
+/**
+ * The MLS key a combined challenge must grant, and nothing else: a v2
+ * resource for exactly the requested suite set.
+ */
 const isExpectedMls = (
   parsed: MlsDeviceGrantTerms | undefined,
-  expected: Omit<MlsDeviceGrantTerms, "expiresAtSeconds"> | null
+  expected: ExpectedMlsGrant | null
 ): boolean =>
   expected === null
     ? parsed === undefined
-    : parsed?.deviceKeyHex === expected.deviceKeyHex.toLowerCase() &&
-      parsed.ciphersuite === expected.ciphersuite;
+    : parsed?.version === 2 &&
+      parsed.deviceKeyHex === expected.deviceKeyHex.toLowerCase() &&
+      parsed.ciphersuites.length === expected.ciphersuites.length &&
+      parsed.ciphersuites.every(
+        (suite, index) => suite === expected.ciphersuites[index]
+      );
 
 /**
  * Checks the server's sign-in challenge before the wallet is asked to sign
@@ -502,7 +550,7 @@ export function isExpectedDeviceGrantMessage({
   readonly deviceKeyHex: string;
   readonly scopes: readonly string[];
   readonly nowMs: number;
-  readonly mls?: Omit<MlsDeviceGrantTerms, "expiresAtSeconds"> | null;
+  readonly mls?: ExpectedMlsGrant | null;
 }): boolean {
   const parsed = parseDeviceGrantMessage(message);
   if (!parsed) {

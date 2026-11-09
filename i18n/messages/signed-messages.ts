@@ -1,9 +1,9 @@
-// en-US source strings for signed messages (device-key signed drop writes).
+// en-US source strings for signed posts (device-key signed drop writes).
 // Other locales fall back to en-US while the feature is staged.
 export const SIGNED_MESSAGES_MESSAGES = {
-  "preferences.tabs.devices": "Devices",
+  "preferences.tabs.devices": "Device Permissions",
   "signedMessages.enable.unavailable":
-    "Couldn't turn on signed messages. Please try again.",
+    "Couldn't turn on signed posts. Please try again.",
   "signedMessages.enable.reconnectWallet":
     "Reconnect the wallet for this profile and try again.",
   "signedMessages.enable.reconnect": "Reconnect wallet",
@@ -21,8 +21,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "Don't see it? Open the wallet app on your phone. If nothing is waiting there, reconnect your wallet.",
   "signedMessages.enable.status.stalled":
     "Still nothing on your phone? Reconnect your wallet to pair it again. You'll be asked to sign again once it reconnects.",
-  "signedMessages.enable.status.rejected":
-    "Signature canceled. Nothing changed, and you can try again any time.",
+  "signedMessages.enable.status.rejected": "Signature cancelled.",
   "signedMessages.enable.status.notConnected":
     "Your wallet didn't connect. Unlock it and try again.",
   "signedMessages.enable.status.networkSwitchCanceled":
@@ -42,34 +41,36 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.enable.error.walletConnectSession":
     "Couldn't reach the wallet app on your phone. Reconnect your wallet to pair it again, then approve the signature.",
   "signedMessages.enable.error.signInFailed":
-    "Your wallet signed, but signed messages didn't turn on. Please try again.",
+    "Your wallet signed, but signed posts didn't turn on. Please try again.",
   "signedMessages.enable.error.contextChanged":
     "Your wallet or network changed while signing. Please try again.",
-  "signedMessages.notice.ariaLabel": "Signed messages",
+  "signedMessages.notice.ariaLabel": "Signed posts",
   "signedMessages.notice.dismiss": "Dismiss",
-  "signedMessages.notice.enable.title":
-    "Turn on signed messages (one signature)",
+  "signedMessages.notice.enable.title": "Turn on Signed Posts (one signature)",
   "signedMessages.notice.enable.body":
     "Your wallet signs once. This browser then signs your posts, edits, deletes and reactions for 180 days, so anyone can verify they came from you.",
   "signedMessages.notice.enable.action": "Turn on",
-  "signedMessages.notice.renew.title": "Signed messages end on {date}",
+  "signedMessages.notice.renew.title": "Signed posts end on {date}",
   "signedMessages.notice.renew.body":
     "Renew with one signature to keep signing your messages in this browser.",
   "signedMessages.notice.renew.action": "Renew",
   "signedMessages.notice.expired.title":
-    "Signed messages have ended in this browser",
+    "Signed posts have ended in this browser",
   "signedMessages.notice.expired.body":
     "Your messages are sent unsigned until you renew with one signature.",
   "signedMessages.notice.newDevice.message":
-    "{label} can now post as you. Not you?",
+    "{label} is now authorized for Signed Posts. If this wasn’t you, revoke it.",
   "signedMessages.notice.newDevice.revoke": "Revoke",
-  "signedMessages.notice.enabled": "Signed messages are on in this browser.",
+  "signedMessages.notice.newDevice.acknowledge": "Got it",
+  "signedMessages.notice.newDevice.acknowledgeError":
+    "Couldn’t acknowledge this device. Try again.",
+  "signedMessages.notice.enabled": "Signed posts are on in this browser.",
   "signedMessages.revoke.success": "{label} can no longer post as you.",
   "signedMessages.revoke.error":
     "Couldn't revoke this device. Please try again.",
-  "signedMessages.devices.title": "Devices that can post as you",
+  "signedMessages.devices.title": "Authorized devices",
   "signedMessages.devices.description":
-    "With signed messages on, a browser holds a key that signs your posts, edits, deletes and reactions. It cannot move funds, change your handle, add devices or act as an admin.",
+    "Review which devices can sign your posts or access encrypted DMs, and when each permission expires.",
   "signedMessages.devices.listLabel": "Devices",
   "signedMessages.devices.thisDevice": "This device",
   "signedMessages.devices.scopes": "Can {scopes}",
@@ -90,14 +91,22 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.devices.status.revoked": "Revoked",
   "signedMessages.devices.revoke": "Revoke",
   "signedMessages.devices.revokeLabel": "Revoke {label}",
+  "signedMessages.devices.authorProof": "Signed Posts",
+  "signedMessages.devices.revokeProofTitle": "Revoke signed posts for {label}?",
   "signedMessages.devices.revokeConfirm":
     "This device will no longer sign your messages. Its earlier signatures stay verifiable.",
   "signedMessages.devices.cancel": "Cancel",
-  "signedMessages.devices.empty": "No device can post as you yet.",
+  "signedMessages.devices.empty": "No authorized devices yet.",
+  "signedMessages.devices.localUnreadable":
+    "This browser couldn't read its own keys, so it can't mark which device below is this one. Check a device's name and dates before you revoke it.",
+  "signedMessages.devices.revokeMaybeThisDevice":
+    "This browser couldn't read its own keys, so this may be the permission this browser uses.",
   "signedMessages.devices.loading": "Loading devices",
   "signedMessages.devices.error": "Couldn't load your devices.",
   "signedMessages.devices.retry": "Try again",
-  "signedMessages.devices.enable": "Turn on signed messages in this browser",
+  "signedMessages.devices.enable": "Turn on Signed Posts in this browser",
+  "signedMessages.devices.enableOnDevice":
+    "Turn on Signed Posts on this device",
   "signedMessages.devices.proxy":
     "Switch to your own profile to manage devices.",
   "signedMessages.marker.label": "Signed by its author",
@@ -151,19 +160,19 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.prompt.rejected":
     "Nothing has been sent yet. 6529.io didn't accept this browser's signature. Try again, or send it without your signature.",
   "signedMessages.prompt.grantUnusable":
-    "Nothing has been sent yet. Signed messages are no longer on in this browser because its permission was revoked or has expired. Turn them back on with one wallet signature, or send this without your signature.",
+    "Nothing has been sent yet. Signed posts are no longer on in this browser because this device’s permission was revoked or has expired. Turn them back on with one wallet signature, or send this without your signature.",
   "signedMessages.prompt.failedShort":
     "This browser couldn't sign it. Nothing has been sent yet.",
   "signedMessages.prompt.rejectedShort":
     "6529.io didn't accept the signature. Nothing has been sent yet.",
   "signedMessages.prompt.grantUnusableShort":
-    "Signed messages are no longer on in this browser. Nothing has been sent yet.",
+    "Signed posts are no longer on in this browser. Nothing has been sent yet.",
   "signedMessages.prompt.retry": "Try again",
   "signedMessages.prompt.sendUnsigned": "Send unsigned",
   "signedMessages.prompt.saveUnsigned": "Save unsigned",
   "signedMessages.prompt.doUnsigned": "Do it unsigned",
-  "signedMessages.prompt.enable": "Turn on signed messages",
+  "signedMessages.prompt.enable": "Turn on Signed Posts",
   "signedMessages.prompt.enableFailed":
-    "Couldn't turn on signed messages. Try again, or continue unsigned.",
+    "Couldn't turn on signed posts. Try again, or continue unsigned.",
   "signedMessages.prompt.cancel": "Cancel",
 } as const;

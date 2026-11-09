@@ -59,6 +59,7 @@ import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 import MobileTabsScrollControls from "./MobileTabsScrollControls";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 import { useWaveChatPrefetch } from "@/hooks/competitions/useWaveChatPrefetch";
+import { WaveChatUnreadBadge } from "./WaveChatUnread";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -122,12 +123,13 @@ const TRAILING_TABS = [
 const TAB_LABELS: Record<
   Exclude<
     MyStreamWaveTab,
-    MyStreamWaveTab.CONFIGURATION | MyStreamWaveTab.ABOUT
+    | MyStreamWaveTab.CONFIGURATION
+    | MyStreamWaveTab.ABOUT
+    | MyStreamWaveTab.COMPETITIONS
   >,
   string
 > = {
   [MyStreamWaveTab.CHAT]: "Chat",
-  [MyStreamWaveTab.COMPETITIONS]: "Competitions",
   [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
   [MyStreamWaveTab.SUBMISSIONS]: "Submissions",
   [MyStreamWaveTab.SALES]: "Sales",
@@ -152,6 +154,8 @@ const getTabLabel = ({
   if (tab === MyStreamWaveTab.CONFIGURATION)
     return t(locale, "competitions.settings");
   if (tab === MyStreamWaveTab.ABOUT) return t(locale, "wave.navigation.about");
+  if (tab === MyStreamWaveTab.COMPETITIONS)
+    return t(locale, "competitions.title");
   if (isApproveWave && tab === MyStreamWaveTab.LEADERBOARD) {
     return approveLabels.approvals;
   }
@@ -432,6 +436,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           else if (tab === MyStreamWaveTab.POLLS) badgeCount = unansweredPolls;
           return {
             key: tab,
+            badge:
+              tab === MyStreamWaveTab.CHAT ? (
+                <WaveChatUnreadBadge waveId={wave.id} />
+              ) : undefined,
             onIntent: tab === MyStreamWaveTab.CHAT ? prefetchChat : undefined,
             label:
               nativeDefault &&
@@ -451,6 +459,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     ],
     [
       availableTabs,
+      wave.id,
       approveLabels,
       isApproveWave,
       isCompetitionWave,

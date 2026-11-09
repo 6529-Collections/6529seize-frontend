@@ -51,22 +51,89 @@ export const DEVICE_ADD_TIMEOUT_MS = 30_000 + 2 * SYNC_TIMEOUT_MS;
 const SIGN_IN_TIMEOUT_MS = 120_000;
 
 /** Opt-in: set only by the `e2ee-staging` pack. */
-export function stagingE2eeOptInProblem(
+export function stagingJourneyOptInProblem(
+  journey: string,
   baseURL: string | undefined
 ): string | null {
   if (process.env["PLAYWRIGHT_E2EE_STAGING"] !== "1") {
-    return "Encrypted DM staging journey is opt-in: run the e2ee-staging pack (PLAYWRIGHT_E2EE_STAGING=1).";
+    return `${journey} is opt-in: run the e2ee-staging pack (PLAYWRIGHT_E2EE_STAGING=1).`;
   }
   if (baseURL !== STAGING_ORIGIN) {
-    return `Encrypted DM staging journey runs only against ${STAGING_ORIGIN}, not ${baseURL ?? "an unset base URL"}.`;
+    return `${journey} runs only against ${STAGING_ORIGIN}, not ${baseURL ?? "an unset base URL"}.`;
   }
   return null;
+}
+
+export function stagingE2eeOptInProblem(
+  baseURL: string | undefined
+): string | null {
+  return stagingJourneyOptInProblem("Encrypted DM staging journey", baseURL);
 }
 
 export function hasStagingAccessCode(): boolean {
   return Boolean(
     process.env["PLAYWRIGHT_STAGING_ACCESS_CODE"] || process.env["STAGING_AUTH"]
   );
+}
+
+/** The parts of the spec's `test` object a staging journey configures. */
+interface StagingJourneyTest {
+  readonly describe: {
+    configure(options: {
+      mode: "default" | "serial";
+      retries: number;
+      timeout: number;
+    }): void;
+  };
+  skip(condition: boolean, description: string): void;
+}
+
+/**
+ * Describe-level set-up shared by the staging journeys: one worker in order,
+ * nothing retried (a retry would only add more staging data), and skipped
+ * unless the pack opted in.
+ */
+export function configureStagingJourney(
+  journeyTest: StagingJourneyTest,
+  options: {
+    readonly mode: "default" | "serial";
+    readonly testTimeoutMs: number;
+    readonly optInProblem: string | null;
+  }
+): void {
+  journeyTest.describe.configure({
+    mode: options.mode,
+    retries: 0,
+    timeout: options.testTimeoutMs,
+  });
+  journeyTest.skip(options.optInProblem !== null, options.optInProblem ?? "");
+}
+
+/**
+ * The start of a staging journey's `beforeAll`: its set-up timeout, the one
+ * project it runs on, and the staging access code it needs.
+ */
+export function startStagingJourneySetup(
+  testInfo: TestInfo,
+  options: {
+    readonly setupTimeoutMs: number;
+    readonly project: string;
+    /** "The staging E2EE journey", for the skip reason. */
+    readonly journey: string;
+    /** "The staging E2EE pack", for the missing access code error. */
+    readonly pack: string;
+  }
+): void {
+  testInfo.setTimeout(options.setupTimeoutMs);
+  testInfo.skip(
+    testInfo.project.name !== options.project,
+    `${options.journey} runs on ${options.project} only.`
+  );
+  if (!hasStagingAccessCode()) {
+    throw new Error(
+      `${options.pack} needs PLAYWRIGHT_STAGING_ACCESS_CODE or STAGING_AUTH.`
+    );
+  }
 }
 
 export interface StagingE2eeUser {
@@ -115,8 +182,7 @@ export interface StagingE2eeSession {
   /**
    * Whether the wallet already had a profile when it signed in. A combined
    * sign-in grant (NC8) enrolls only such a wallet: a new wallet has no
-   * profile to hold the key yet, so its sign-in grants signing only and the
-   * enrollment button signs in once more with the combined grant.
+   * profile to hold the key yet, so its sign-in grants signing only.
    */
   hadProfileAtSignIn: boolean;
   /** The id of the device grant the latest sign-in stored, if any. */
@@ -432,32 +498,33 @@ export async function signInThroughWalletModal(session: StagingE2eeSession) {
     .toBe(wallet.address.toLowerCase());
 }
 
-interface ProfileApiResult {
-  readonly step: "token" | "availability" | "create";
+export interface StagingApiResponse {
   readonly ok: boolean;
+  /** 0 when the browser has no session token. */
   readonly status: number;
-  readonly profileId: string | null;
-  readonly handle: string | null;
-  readonly error: string | null;
+  readonly json: unknown;
 }
 
 /**
- * Creates the user's throwaway profile with the browser's own session, the
- * same request the profile set-up form sends. Runs in the page so the access
- * token and staging access code never reach the test process.
+ * One staging API request with the browser's own session, the same headers
+ * the app sends. Runs in the page so the access token and the staging access
+ * code never reach the test process.
  */
-export async function createThrowawayProfile(session: StagingE2eeSession) {
-  const { page, user } = session;
-  const apiOrigin = STAGING_API_ORIGIN;
-  const result = await page.evaluate(
-    async ({ apiOrigin: api, handle, address }): Promise<ProfileApiResult> => {
+export async function stagingApiRequest(
+  session: StagingE2eeSession,
+  method: "GET" | "POST",
+  endpoint: string,
+  body?: object
+): Promise<StagingApiResponse> {
+  return await session.page.evaluate(
+    async ({ api, verb, path, payload, address }) => {
       const cookie = (name: string) => {
         const entry = document.cookie
           .split("; ")
           .find((part) => part.startsWith(`${name}=`));
         return entry ? decodeURIComponent(entry.slice(name.length + 1)) : null;
       };
-      let token = cookie("wallet-auth");
+      let token = cookie("__Host-wallet-auth");
       if (!token) {
         const accounts = JSON.parse(
           globalThis.localStorage.getItem("6529-wallet-accounts") ?? "[]"
@@ -468,77 +535,104 @@ export async function createThrowawayProfile(session: StagingE2eeSession) {
               account.address?.toLowerCase() === address.toLowerCase()
           )?.jwt ?? null;
       }
-      const empty = { profileId: null, handle: null, error: null };
       if (!token) {
-        return { step: "token", ok: false, status: 0, ...empty };
+        return { ok: false, status: 0, json: null };
       }
       const staging = cookie("x-6529-auth");
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        ...(staging ? { "x-6529-auth": staging } : {}),
-      };
-      const availability = await fetch(
-        `${api}/api/profiles/${encodeURIComponent(handle)}/availability`,
-        { headers }
-      );
-      const available = (await availability.json().catch(() => null)) as {
-        available?: boolean;
-        message?: string;
-      } | null;
-      if (!availability.ok || available?.available !== true) {
-        return {
-          step: "availability",
-          ok: false,
-          status: availability.status,
-          ...empty,
-          error: available?.message ?? null,
-        };
-      }
-      const created = await fetch(`${api}/api/profiles`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ handle, classification: "PSEUDONYM" }),
+      const response = await fetch(`${api}/api/${path}`, {
+        method: verb,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          ...(staging ? { "x-6529-auth": staging } : {}),
+        },
+        ...(payload === null ? {} : { body: JSON.stringify(payload) }),
       });
-      const body = (await created.json().catch(() => null)) as {
-        id?: string;
-        handle?: string;
-        error?: string;
-      } | null;
       return {
-        step: "create",
-        ok: created.ok,
-        status: created.status,
-        profileId: body?.id ?? null,
-        handle: body?.handle ?? null,
-        error: created.ok ? null : (body?.error ?? null),
+        ok: response.ok,
+        status: response.status,
+        json: (await response.json().catch(() => null)) as unknown,
       };
     },
-    { apiOrigin, handle: user.handle, address: session.wallet.address }
+    {
+      api: STAGING_API_ORIGIN,
+      verb: method,
+      path: endpoint,
+      payload: body ?? null,
+      address: session.wallet.address,
+    }
+  );
+}
+
+/** The API's error text, if the response body carries one. */
+export function stagingApiError(json: unknown): string | null {
+  if (typeof json !== "object" || json === null) return null;
+  const record = json as { error?: unknown; message?: unknown };
+  const error = record.error ?? record.message ?? null;
+  return typeof error === "string" ? error : null;
+}
+
+/**
+ * Creates the user's throwaway profile with the browser's own session, the
+ * same request the profile set-up form sends.
+ */
+export async function createThrowawayProfile(session: StagingE2eeSession) {
+  const { user } = session;
+  const failure = (step: string, status: number, error: string | null) =>
+    `${session.label}: creating throwaway profile ${user.handle} failed at ${step} (HTTP ${status}${error ? `: ${error}` : ""})`;
+  const availability = await stagingApiRequest(
+    session,
+    "GET",
+    `profiles/${encodeURIComponent(user.handle)}/availability`
   );
   expect(
-    result.ok,
-    `${session.label}: creating throwaway profile ${user.handle} failed at ${result.step} (HTTP ${result.status}${result.error ? `: ${result.error}` : ""})`
+    availability.status,
+    failure("token", availability.status, null)
+  ).not.toBe(0);
+  const available = availability.json as { available?: boolean } | null;
+  expect(
+    availability.ok && available?.available === true,
+    failure(
+      "availability",
+      availability.status,
+      stagingApiError(availability.json)
+    )
   ).toBe(true);
-  expect(result.handle?.toLowerCase()).toBe(user.handle.toLowerCase());
-  user.profileId = result.profileId;
+  const created = await stagingApiRequest(session, "POST", "profiles", {
+    handle: user.handle,
+    classification: "PSEUDONYM",
+  });
+  const body = created.json as { id?: string; handle?: string } | null;
+  expect(
+    created.ok,
+    failure(
+      "create",
+      created.status,
+      created.ok ? null : stagingApiError(created.json)
+    )
+  ).toBe(true);
+  expect(body?.handle?.toLowerCase()).toBe(user.handle.toLowerCase());
+  user.profileId = body?.id ?? null;
   // The app caches the profileless identity; reload to pick up the profile.
-  await page.reload({ waitUntil: "domcontentloaded" });
+  await session.page.reload({ waitUntil: "domcontentloaded" });
 }
 
 function enrollmentHeading(page: Page) {
-  return page.getByRole("heading", { name: "Turn on encrypted messages" });
+  return page.getByRole("heading", {
+    name: /^(Enable Encrypted DMs|Post Signing & DM Encryption)$/,
+  });
 }
 
-export function enrollmentButton(page: Page) {
+function enrollmentButton(page: Page) {
   return page.getByRole("button", {
-    name: "Turn on encrypted messages (one signature)",
+    name: /^Sign to enable (both|Encrypted DMs)$/,
   });
 }
 
 /** What the encrypted messages gate shows instead of chats, if anything. */
 const GATE_STATES = [
-  { state: "enrollment", text: "Turn on encrypted messages" },
+  { state: "enrollment", text: "Enable Encrypted DMs" },
+  { state: "enrollment", text: "Post Signing & DM Encryption" },
   {
     state: "no connected wallet (the scripted wallet did not reconnect)",
     text: "Connect the wallet for this profile to use encrypted messages.",
@@ -612,7 +706,8 @@ export async function expectEnrollmentCard(session: StagingE2eeSession) {
   });
 }
 
-const COMBINED_GRANT_RESOURCE = "- urn:6529:mls-device-grant:v1:";
+// Grant v2 (D172): clients ask for, and only sign, a suite-set resource.
+const COMBINED_GRANT_RESOURCE = "- urn:6529:mls-device-grant:v2:";
 
 /** NC8: the sign-in challenge also granted an encrypted-messages key. */
 const signedInWithCombinedGrant = (session: StagingE2eeSession): boolean =>
@@ -621,8 +716,8 @@ const signedInWithCombinedGrant = (session: StagingE2eeSession): boolean =>
 /**
  * NC8: the combined sign-in enrolled this browser. That takes a wallet that
  * already had a profile; a new wallet signs in with a signing-only grant
- * (the server omits the MLS key without a profile), so it turns encrypted
- * messages on from the enrollment button instead.
+ * (the server omits the MLS key without a profile), so it enables only
+ * Encrypted DMs from the enrollment card after creating a profile.
  */
 const enrolledByCombinedSignIn = (session: StagingE2eeSession): boolean =>
   session.hadProfileAtSignIn && signedInWithCombinedGrant(session);
@@ -666,11 +761,15 @@ async function expectEnrolledBySignIn(session: StagingE2eeSession) {
 /**
  * Turns on encrypted messages for this device. After a combined sign-in
  * (NC8) that already happened with the sign-in signature; otherwise the
- * enrollment button signs in once more with the combined grant (website).
+ * enrollment card grants only the permissions this browser still needs.
  */
 export async function enrollDevice(session: StagingE2eeSession) {
   if (enrolledByCombinedSignIn(session)) {
     await expectEnrolledBySignIn(session);
+    return;
+  }
+  if (session.signInGrantId) {
+    await enrollWithEncryptionOnly(session, session.signInGrantId);
     return;
   }
   await enrollWithCombinedTurnOn(session);
@@ -687,6 +786,49 @@ const waitForPost = (page: Page, pathname: string) => {
   response.catch(() => undefined);
   return response;
 };
+
+async function enrollWithEncryptionOnly(
+  session: StagingE2eeSession,
+  signingGrantId: string
+) {
+  const { page, wallet, evidence } = session;
+  await gotoStaging(page, ENCRYPTED_ROUTE);
+  const button = page.getByRole("button", {
+    name: "Sign to enable Encrypted DMs",
+    exact: true,
+  });
+  await expect(button).toBeEnabled({ timeout: FIRST_LOAD_TIMEOUT_MS });
+
+  const signInsBefore = wallet.count("personal_sign");
+  const typedGrantsBefore = wallet.typedDataSignatures("MlsDeviceGrant").length;
+  const registration = waitForPost(page, "/api/e2ee/devices");
+  await button.click();
+
+  const response = await registration;
+  expect(
+    response.ok(),
+    `${session.label}: encryption-only registration answered HTTP ${response.status()}`
+  ).toBe(true);
+  await expect(enrollmentHeading(page)).toHaveCount(0, {
+    timeout: UI_TIMEOUT_MS,
+  });
+  await expect(
+    page.getByRole("link", { name: "Devices for encrypted messages" }).first()
+  ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+
+  expect(wallet.count("personal_sign")).toBe(signInsBefore);
+  expect(wallet.typedDataSignatures("MlsDeviceGrant")).toHaveLength(
+    typedGrantsBefore + 1
+  );
+  expect(
+    evidence
+      .requestsMatching("POST", /\/api\/device-grants\/[^/]+\/revoke$/u)
+      .some(({ url }) =>
+        new URL(url).pathname.endsWith(`/${signingGrantId}/revoke`)
+      ),
+    `${session.label}: encryption-only setup revoked the Signed Posts grant`
+  ).toBe(false);
+}
 
 /** Prepare an existing Signed Posts permission for the DM-only journey. */
 async function prepareSignedPosts(session: StagingE2eeSession) {
@@ -737,26 +879,18 @@ async function prepareSignedPosts(session: StagingE2eeSession) {
   session.signInGrantId = grantId;
 }
 
-/**
- * NC8 on the website (owner decision: one grant per browser): the button's
- * combined sign-in grants the signing key and the encrypted-messages key
- * with one more personal_sign and no EIP-712 `MlsDeviceGrant`. The device
- * registers through POST /api/e2ee/devices/login-grant with that grant, and
- * the browser's earlier signing-only grant is revoked.
- */
+/** When both permissions are missing, one sign-in signature grants both. */
 async function enrollWithCombinedTurnOn(session: StagingE2eeSession) {
   const { page, wallet } = session;
   await gotoStaging(page, ENCRYPTED_ROUTE);
   await expectEnrollmentCard(session);
   const signaturesBefore = wallet.count("personal_sign");
   const typedGrantsBefore = wallet.typedDataSignatures("MlsDeviceGrant").length;
-  const replacedGrantId = session.signInGrantId;
   const login = waitForPost(page, "/api/auth/session-login");
   const registration = waitForPost(page, "/api/e2ee/devices/login-grant");
-  const revocation = replacedGrantId
-    ? waitForPost(page, `/api/device-grants/${replacedGrantId}/revoke`)
-    : null;
-  await enrollmentButton(page).click();
+  await page
+    .getByRole("button", { name: "Sign to enable both", exact: true })
+    .click();
 
   const loginResponse = await login;
   expect(
@@ -775,13 +909,6 @@ async function enrollWithCombinedTurnOn(session: StagingE2eeSession) {
   ).toBe(true);
   const body = response.request().postDataJSON() as { grant_id?: string };
   expect(body.grant_id?.toLowerCase()).toBe(grantId);
-  if (revocation) {
-    const revoked = await revocation;
-    expect(
-      revoked.ok(),
-      `${session.label}: revoking the replaced signing-only grant answered HTTP ${revoked.status()}`
-    ).toBe(true);
-  }
   await expect(enrollmentHeading(page)).toHaveCount(0, {
     timeout: UI_TIMEOUT_MS,
   });
@@ -812,19 +939,24 @@ interface PrepareSessionOptions {
 }
 
 /** Signs in, creates the throwaway profile when needed, then enrolls. */
-export async function prepareEnrolledSession(
+/**
+ * A signed-in session for `user` with a profile: signs in, creates the
+ * profile if the user has none, and optionally signs in again on a fresh
+ * device as a returning user does. Closes the session on failure.
+ */
+export async function prepareProfileSession(
   browser: Browser,
   testInfo: TestInfo,
   user: StagingE2eeUser,
   label: string,
-  options: PrepareSessionOptions = {}
+  { signInAgainWithProfile = false }: { signInAgainWithProfile?: boolean } = {}
 ): Promise<StagingE2eeSession> {
   let session = await openStagingSession(browser, testInfo, user, label);
   try {
     await signInThroughWalletModal(session);
     if (!user.profileId) {
       await createThrowawayProfile(session);
-      if (options.signInAgainWithProfile) {
+      if (signInAgainWithProfile) {
         // The first device is closed here, so its guard evidence is checked
         // now; the run's hygiene checks see only the second device.
         expect(
@@ -836,6 +968,25 @@ export async function prepareEnrolledSession(
         await signInThroughWalletModal(session);
       }
     }
+    return session;
+  } catch (error) {
+    await attachSessionEvidence(testInfo, [session]);
+    await session.close();
+    throw error;
+  }
+}
+
+export async function prepareEnrolledSession(
+  browser: Browser,
+  testInfo: TestInfo,
+  user: StagingE2eeUser,
+  label: string,
+  options: PrepareSessionOptions = {}
+): Promise<StagingE2eeSession> {
+  const session = await prepareProfileSession(browser, testInfo, user, label, {
+    signInAgainWithProfile: options.signInAgainWithProfile === true,
+  });
+  try {
     if (options.signedPostsFirst && !session.signInGrantId) {
       await prepareSignedPosts(session);
     }

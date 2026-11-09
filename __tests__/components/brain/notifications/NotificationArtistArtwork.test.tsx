@@ -46,6 +46,6 @@ it.each([
   expect(container).not.toHaveTextContent("hidden-artist");
   expect(screen.getByRole("link", { name: "Test artwork" })).toHaveAttribute(
     "href",
-    "/waves/wave%2F1/competitions/competition%2F1?drop=drop%2F1"
+    "/waves/wave%2F1/decisions/competition%2F1?drop=drop%2F1"
   );
 });

@@ -1,3 +1,4 @@
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import Link from "next/link";
 import ProfileCollectedActivityLink from "@/components/user/collected/ProfileCollectedActivityLink";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
@@ -57,9 +58,16 @@ export default function CollectEntryLink({
       </>
     ),
   };
-  return profileActivityKey ? (
-    <ProfileCollectedActivityLink {...props} activityKey={profileActivityKey} />
-  ) : (
-    <Link {...props} />
+  return (
+    <NftPurchasingGate>
+      {profileActivityKey ? (
+        <ProfileCollectedActivityLink
+          {...props}
+          activityKey={profileActivityKey}
+        />
+      ) : (
+        <Link {...props} />
+      )}
+    </NftPurchasingGate>
   );
 }

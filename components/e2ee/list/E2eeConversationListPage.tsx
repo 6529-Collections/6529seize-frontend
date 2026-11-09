@@ -20,6 +20,7 @@ import { E2eeRouteGate } from "../gate/E2eeRouteGate";
 import { E2eeBadge } from "../ui/E2eeBadge";
 import { E2eeCenteredMessage, E2eePageShell } from "../ui/E2eePageShell";
 import { E2eeConversationList } from "./E2eeConversationList";
+import { useSyncEncryptedPush } from "./useSyncEncryptedPush";
 
 const ACTION_LINK_CLASS =
   "tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-text-xs tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
@@ -72,12 +73,19 @@ function DevicesLink() {
 /** `/messages/encrypted`: the encrypted chats on this device. */
 export function E2eeConversationListPage() {
   const locale = useBrowserLocale();
+  useSyncEncryptedPush();
   // Devices and new chats only make sense once this device is turned on.
-  const ready = useE2ee().status === "ready";
+  const { status } = useE2ee();
+  const ready = status === "ready";
+  const showingSetup = status === "needs-enrollment" || status === "enrolling";
   return (
     <E2eePageShell
-      title={t(locale, "e2ee.title")}
-      subtitle={<E2eeBadge label={t(locale, "e2ee.badge.encrypted")} />}
+      title={showingSetup ? undefined : t(locale, "e2ee.title")}
+      subtitle={
+        ready ? (
+          <E2eeBadge label={t(locale, "e2ee.badge.encrypted")} />
+        ) : undefined
+      }
       backHref={getMessagesBaseRoute(false)}
       backLabel={t(locale, "e2ee.section.plaintext")}
       backOnSmallScreensOnly
@@ -92,7 +100,7 @@ export function E2eeConversationListPage() {
     >
       <E2eeRouteGate>
         {({ conversations, profileId }) => (
-          <div className="tw-mx-auto tw-flex tw-w-full tw-max-w-3xl tw-flex-col tw-gap-3 tw-px-2 tw-py-4 sm:tw-px-4">
+          <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 tw-px-2 tw-py-4 sm:tw-px-4">
             <E2eeNewDeviceNotice className="tw-px-2" />
             <E2eeRenewalBanner className="tw-mx-2" />
             {conversations.length === 0 ? (

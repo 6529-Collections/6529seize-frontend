@@ -16,9 +16,11 @@ const device = (change: Partial<StoredDevice> = {}): StoredDevice => {
     deviceKey: `0x${"3d".repeat(32)}`,
     wallet: WALLET,
     grant: {
+      version: 2,
       wallet: WALLET,
       device_key: `0x${"3d".repeat(32)}`,
       ciphersuite: E2EE_CIPHERSUITE,
+      ciphersuites: [E2EE_CIPHERSUITE],
       issued_at: NOW / 1000,
       expires_at: NOW / 1000 + 180 * DAY_S,
       origin: ORIGIN,
@@ -58,15 +60,18 @@ describe("needsNewDevice (NC8 turn-on)", () => {
     await expect(subject(device({ registered: true }))).resolves.toBe(false);
   });
 
-  it("leaves a registered device from another suite to enroll()", async () => {
+  it("needs a new key for a registered device of an earlier suite (D172)", async () => {
+    const { version: _v, ciphersuites: _s, ...v1 } = device().grant;
+    // A v1 grant for 0x004F: the sign-in folds the fresh 0x004E key in.
     await expect(
-      subject(
-        device({
-          registered: true,
-          grant: { ...device().grant, ciphersuite: 0x0001 },
-        })
-      )
-    ).resolves.toBe(false);
+      subject({
+        ...device({ registered: true }),
+        grant: { ...v1, ciphersuite: 0x004f },
+      })
+    ).resolves.toBe(true);
+    await expect(
+      subject(device({ registered: true, retired: true }))
+    ).resolves.toBe(true);
   });
 
   it("registers a pending grant that is still reusable without a prompt", async () => {
@@ -80,7 +85,10 @@ describe("needsNewDevice (NC8 turn-on)", () => {
     ["it is about to expire", { expires_at: NOW / 1000 + 6 * DAY_S }],
     ["another wallet signed it", { wallet: `0x${"2".repeat(40)}` }],
     ["another origin was granted", { origin: "staging.6529.io" }],
-    ["it is on another suite", { ciphersuite: 0x0001 }],
+    [
+      "it does not cover the current suite",
+      { ciphersuite: 0x004f, ciphersuites: [0x004f] },
+    ],
   ])(
     "needs a new key when a pending grant cannot be reused (%s)",
     async (_label, grant) => {

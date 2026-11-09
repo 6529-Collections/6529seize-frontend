@@ -120,7 +120,10 @@ export async function loadGroups(ctx: EngineContext): Promise<void> {
     ctx.store.groups.set(record.g, runtime);
   }
   const names = new Set(
-    groups.flatMap((record) => record.members.map((m) => m.profileId))
+    groups.flatMap((record) => [
+      ...record.members.map((m) => m.profileId),
+      ...(record.metadata.kind === "dm" ? record.metadata.admins : []),
+    ])
   );
   await resolveProfiles(
     ctx,
@@ -131,6 +134,9 @@ export async function loadGroups(ctx: EngineContext): Promise<void> {
 export function memberProfileIds(ctx: EngineContext): string[] {
   const ids = new Set<string>();
   for (const runtime of ctx.store.groups.values()) {
+    if (runtime.record.metadata.kind === "dm") {
+      for (const id of runtime.record.metadata.admins) ids.add(id);
+    }
     for (const member of runtime.record.members) {
       if (member.profileId !== null) {
         ids.add(member.profileId);
@@ -167,6 +173,11 @@ export async function resolveProfiles(
 export async function restore(ctx: EngineContext): Promise<boolean> {
   const device = await loadCurrentSuiteDevice(ctx);
   if (!device?.registered || !device.provisioned) {
+    if (ctx.store.upgrade !== null) {
+      // Moved off an earlier suite: its conversations stay readable while
+      // this device waits for the one signature (D172).
+      await loadGroups(ctx);
+    }
     return false;
   }
   const state = await ctx.storage.getWasmState(ctx.profileId);

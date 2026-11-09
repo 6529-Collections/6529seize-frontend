@@ -3,6 +3,8 @@
 import { ArrowDownTrayIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import useCapacitor from "@/hooks/useCapacitor";
+import { downloadMediaUrl } from "@/helpers/media-download.helpers";
 import { useNearViewport } from "@/hooks/useNearViewport";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
@@ -11,13 +13,14 @@ import { t } from "@/i18n/messages";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
 import type { E2eeAttachment, E2eeEngine } from "@/lib/e2ee/types";
 import { attachmentDisplayName } from "../e2eeFormat";
+import Button from "@/components/utils/button/Button";
+import { ImagePreviewLoading } from "@/components/drops/view/item/content/media/ImagePreviewLoading";
+import { E2eeImageMedia } from "./E2eeImageMedia";
 import {
   fitsInline,
   prepareInlineImage,
   withInlineImageSlot,
 } from "./e2eeInlineImage";
-
-const MAX_IMAGE_HEIGHT_PX = 320;
 
 const isInlineImage = (attachment: E2eeAttachment) =>
   isSafeInlineImageMime(attachment.mime);
@@ -60,14 +63,16 @@ function InlineImage(props: AttachmentProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const near = useNearViewport(ref, "400px 0px");
   return (
-    <span ref={ref} className="tw-block tw-min-h-24 tw-max-w-full">
+    <span ref={ref} className="tw-block tw-max-w-full">
       {near ? (
-        <InlineImageContent {...props} />
-      ) : (
-        <span
-          aria-hidden="true"
-          className="tw-block tw-h-48 tw-w-48 tw-max-w-full tw-rounded-lg tw-bg-iron-900"
+        <InlineImageContent
+          key={`${props.g}:${props.messageId}:${props.attachment.blob}`}
+          {...props}
         />
+      ) : (
+        <span className="tw-relative tw-block tw-h-64 tw-w-full">
+          <ImagePreviewLoading />
+        </span>
       )}
     </span>
   );
@@ -79,7 +84,14 @@ function InlineImageContent(props: AttachmentProps) {
   const name = attachmentDisplayName(locale, attachment.name);
   const tooLargeClaim = claimsTooLarge(attachment);
   const [url, setUrl] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<InlineState>("loading");
+
+  const retry = () => {
+    setUrl(null);
+    setState("loading");
+    setAttempt((current) => current + 1);
+  };
 
   useEffect(() => {
     if (tooLargeClaim) {
@@ -133,15 +145,7 @@ function InlineImageContent(props: AttachmentProps) {
       controller.abort();
       release();
     };
-  }, [engine, g, messageId, attachment.blob, tooLargeClaim]);
-
-  const aspectStyle =
-    attachment.width !== undefined &&
-    attachment.height !== undefined &&
-    attachment.width > 0 &&
-    attachment.height > 0
-      ? { aspectRatio: `${attachment.width} / ${attachment.height}` }
-      : undefined;
+  }, [engine, g, messageId, attachment.blob, tooLargeClaim, attempt]);
 
   if (tooLargeClaim || state === "tooLarge") {
     return (
@@ -153,35 +157,34 @@ function InlineImageContent(props: AttachmentProps) {
   }
   if (state === "failed") {
     return (
-      <span className="tw-text-xs tw-text-rose-300">
+      <span className="tw-flex tw-h-64 tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-xl tw-bg-iron-900 tw-text-sm tw-text-iron-400">
         {t(locale, "e2ee.message.attachment.failed", { name })}
+        <Button type="button" variant="tertiary" size="xs" onClick={retry}>
+          {t(locale, "drop.media.retry")}
+        </Button>
       </span>
     );
   }
   if (state === "loading" || !url) {
     return (
-      <span
-        role="status"
-        style={aspectStyle}
-        className="tw-flex tw-min-h-24 tw-w-48 tw-max-w-full tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-text-xs tw-text-iron-400"
-      >
-        <CircleLoader />
+      <output className="tw-relative tw-block tw-h-64 tw-w-full">
+        <ImagePreviewLoading />
         <span className="tw-sr-only">
           {t(locale, "e2ee.message.attachment.loading")}
         </span>
-      </span>
+      </output>
     );
   }
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- decrypted locally into a blob: URL; next/image cannot optimize it.
-    <img
-      src={url}
-      alt={t(locale, "e2ee.message.attachment.imageAlt", { name })}
-      width={attachment.width}
-      height={attachment.height}
-      style={{ ...aspectStyle, maxHeight: MAX_IMAGE_HEIGHT_PX }}
-      className="tw-h-auto tw-w-auto tw-max-w-full tw-rounded-lg tw-bg-iron-900 tw-object-contain"
-    />
+    <span className="tw-block tw-h-64 tw-w-full">
+      <E2eeImageMedia
+        key={url}
+        url={url}
+        name={name}
+        attachment={attachment}
+        onRetry={retry}
+      />
+    </span>
   );
 }
 
@@ -194,6 +197,7 @@ function DownloadableFile({
   note,
 }: AttachmentProps & { readonly note?: string }) {
   const locale = useBrowserLocale();
+  const { isCapacitor } = useCapacitor();
   const name = attachmentDisplayName(locale, attachment.name);
   const [pending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -204,14 +208,11 @@ function DownloadableFile({
     try {
       const blob = await engine.getAttachment(g, messageId, attachment.blob);
       const objectUrl = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = objectUrl;
-      anchor.download = name;
-      anchor.rel = "noopener";
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      globalThis.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+      try {
+        await downloadMediaUrl({ url: objectUrl, fileName: name, isCapacitor });
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
     } catch {
       setFailed(true);
     } finally {

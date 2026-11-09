@@ -10,6 +10,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 import TDHCalculationDetails from "./TDHCalculationDetails";
 import TDHCurrentRules from "./TDHCurrentRules";
 import TDHExample from "./TDHExample";

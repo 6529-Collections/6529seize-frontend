@@ -7,6 +7,7 @@ import { createPossessionStr } from "@/helpers/Helpers";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { t } from "@/i18n/messages";
 import UserPageIdentityStatementsGuidance from "./UserPageIdentityStatementsGuidance";
 
@@ -18,6 +19,7 @@ export default function UserPageIdentityAddStatementsHeader({
   readonly headerAction?: ReactNode;
 }) {
   const locale = useBrowserLocale();
+  const hasHydrated = useHasHydrated();
   const account = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
   const normalizedAddress = account.address?.toLowerCase();
@@ -26,7 +28,8 @@ export default function UserPageIdentityAddStatementsHeader({
     (profile.wallets ?? []).some(
       (wallet) => wallet.wallet.toLowerCase() === normalizedAddress
     );
-  const canEdit = isMyProfile && !activeProfileProxy && !!profile.handle;
+  const canEdit =
+    hasHydrated && isMyProfile && !activeProfileProxy && !!profile.handle;
   const possessionName = createPossessionStr(profile.handle ?? null);
 
   return (

@@ -19,6 +19,10 @@ import UserPageHeaderEditName from "./name/UserPageHeaderEditName";
 import UserPageHeaderEditClassification from "./name/classification/UserPageHeaderEditClassification";
 import UserPageHeaderEditPfp from "./pfp/UserPageHeaderEditPfp";
 import { getUserProfileHeaderMessage } from "./user-page-header.messages";
+import {
+  PROFILE_EDITOR_TOUCH_TARGETS_CLASS,
+  USER_PAGE_HEADER_TOUCH_TARGET_CLASS,
+} from "./user-page-header-surface";
 
 type EditTarget = "banner" | "pfp" | "name" | "classification" | "about";
 
@@ -142,7 +146,7 @@ export default function UserPageHeaderEditProfile({
         onClick={openMenu}
         aria-label={getUserProfileHeaderMessage("user.profileHeader.edit.open")}
         title={getUserProfileHeaderMessage("user.profileHeader.edit.open")}
-        className="tw-group tw-size-11 !tw-rounded-full !tw-border-transparent !tw-bg-transparent !tw-p-1 !tw-shadow-none focus-visible:!tw-outline-none active:!tw-bg-transparent desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent sm:tw-size-10 sm:!tw-p-0.5"
+        className={`tw-group tw-size-11 !tw-rounded-full !tw-border-transparent !tw-bg-transparent !tw-p-1 !tw-shadow-none focus-visible:!tw-outline-none active:!tw-bg-transparent desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent sm:tw-size-10 sm:!tw-p-0.5 ${USER_PAGE_HEADER_TOUCH_TARGET_CLASS}`}
       >
         <span className="tw-box-border tw-inline-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/75 tw-text-iron-100 tw-shadow-[0_8px_24px_rgba(0,0,0,0.32)] tw-transition-[background-color,border-color,color,transform] tw-duration-200 tw-ease-out group-focus-visible:tw-ring-2 group-focus-visible:tw-ring-primary-400 group-focus-visible:tw-ring-offset-2 group-focus-visible:tw-ring-offset-black group-active:tw-scale-95 group-active:tw-bg-black desktop-hover:group-hover:tw-border-white/25 desktop-hover:group-hover:tw-bg-black/90 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none">
           <PencilIcon className="tw-size-[1.125rem]" aria-hidden="true" />
@@ -157,12 +161,15 @@ export default function UserPageHeaderEditProfile({
         onAfterLeave={finishDialogLeave}
         tabletModal
         showHeaderCloseButton
-        showHeaderDivider
+        headerVariant="minimal"
+        headerClassName="!tw-px-5 tw-pb-5 sm:!tw-px-6"
+        titleClassName="!tw-text-base !tw-font-medium"
+        showHeaderDivider={false}
         enableDragToClose
         showScrollbar={showScrollbar}
         maxWidthClass={maxWidthClass}
         focusTitleOnOpen
-        surfaceClassName="tw-bg-iron-950 md:tw-shadow-2xl"
+        surfaceClassName={`tw-bg-iron-950 ${PROFILE_EDITOR_TOUCH_TARGETS_CLASS}`}
         headerActions={
           activeTarget === "banner" ? (
             <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400">
@@ -176,16 +183,16 @@ export default function UserPageHeaderEditProfile({
       >
         <div ref={viewRef}>
           {activeTarget === null && (
-            <div className="tw-px-4 sm:tw-px-6">
-              <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-p-0">
+            <div className="tw-px-5 sm:tw-px-6">
+              <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1 tw-p-0">
                 {options.map(({ target, label, Icon }) => (
                   <li key={target}>
                     <button
                       type="button"
                       onClick={() => selectTarget(target)}
-                      className="tw-group/option tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-1.5 tw-text-left tw-text-base tw-font-medium tw-text-iron-100 tw-transition-[background-color,color,transform] tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-scale-[0.99] active:tw-bg-white/[0.07] desktop-hover:hover:tw-bg-white/[0.045] desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+                      className="tw-group/option tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-3 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/[0.06] desktop-hover:hover:tw-bg-white/[0.035] desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
                     >
-                      <span className="tw-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.035] tw-text-iron-400 tw-transition-colors tw-duration-200 group-focus-visible/option:tw-border-primary-400/20 group-focus-visible/option:tw-bg-primary-500/10 group-focus-visible/option:tw-text-primary-300 group-active/option:tw-border-primary-400/20 group-active/option:tw-bg-primary-500/10 group-active/option:tw-text-primary-300 desktop-hover:group-hover/option:tw-border-primary-400/20 desktop-hover:group-hover/option:tw-bg-primary-500/10 desktop-hover:group-hover/option:tw-text-primary-300 motion-reduce:tw-transition-none">
+                      <span className="tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center tw-text-iron-400 tw-transition-colors tw-duration-150 group-focus-visible/option:tw-text-primary-400 group-active/option:tw-text-iron-200 desktop-hover:group-hover/option:tw-text-iron-200 motion-reduce:tw-transition-none">
                         <Icon className="tw-size-5" aria-hidden="true" />
                       </span>
                       <span className="tw-min-w-0 tw-flex-1 tw-leading-5">
@@ -233,7 +240,7 @@ export default function UserPageHeaderEditProfile({
             />
           )}
           {activeTarget === "about" && (
-            <div className="tw-px-4 sm:tw-px-6">
+            <div className="tw-px-5 sm:tw-px-6">
               <UserPageHeaderAboutEdit
                 profile={profile}
                 statement={statement}

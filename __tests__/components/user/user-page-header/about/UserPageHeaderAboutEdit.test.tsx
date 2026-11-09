@@ -4,12 +4,15 @@ import UserPageHeaderAboutEdit from "@/components/user/user-page-header/about/Us
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { commonApiDelete, commonApiPost } from "@/services/api/common-api";
+import type { CicStatement } from "@/entities/IProfile";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 jest.mock("react-use", () => ({ useKeyPressEvent: jest.fn() }));
 
 jest.mock("@tanstack/react-query", () => ({ useMutation: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({
+  commonApiDelete: jest.fn().mockResolvedValue({}),
   commonApiPost: jest.fn().mockResolvedValue({}),
 }));
 jest.mock("framer-motion", () => ({
@@ -17,7 +20,7 @@ jest.mock("framer-motion", () => ({
 }));
 jest.mock(
   "@/components/user/user-page-header/about/UserPageHeaderAboutEditError",
-  () => (props: any) => <div id="profile-about-error">{props.msg}</div>
+  () => (props: any) => <div id={props.id}>{props.msg}</div>
 );
 
 let mutationError: Error | null = null;
@@ -31,25 +34,18 @@ let mutationError: Error | null = null;
         throw mutationError;
       }
       await opts.mutationFn(val);
-      opts.onSuccess?.();
+      opts.onSuccess?.(undefined, val);
       opts.onSettled?.();
     },
   };
 });
 
 function AboutEditHarness({ onClose = jest.fn() }: { onClose?: () => void }) {
-  const [value, setValue] = useState("old");
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
   return (
     <UserPageHeaderAboutEdit
       profile={{ query: "alice" } as any}
-      statement={{ statement_value: "old" } as any}
+      statement={{ id: "about", statement_value: "old" } as any}
       onClose={onClose}
-      value={value}
-      onValueChange={setValue}
-      errorMsg={errorMsg}
-      onErrorMsgChange={setErrorMsg}
     />
   );
 }
@@ -59,9 +55,13 @@ describe("UserPageHeaderAboutEdit", () => {
     requestAuth: jest.fn().mockResolvedValue({ success: true }),
     setToast: jest.fn(),
   } as any;
-  const ctx = { onProfileStatementAdd: jest.fn() } as any;
+  const ctx = {
+    onProfileStatementAdd: jest.fn(),
+    onProfileStatementRemove: jest.fn(),
+  } as any;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     mutationError = null;
   });
 
@@ -83,9 +83,82 @@ describe("UserPageHeaderAboutEdit", () => {
     await userEvent.click(btn);
     expect(auth.requestAuth).toHaveBeenCalled();
     expect(auth.setToast).toHaveBeenCalledWith({
-      message: "About statement added.",
+      message: "About statement saved.",
       type: "success",
     });
+  });
+
+  it("removes an existing statement when its text is cleared", async () => {
+    const onClose = jest.fn();
+    render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={ctx}>
+          <AboutEditHarness onClose={onClose} />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    await userEvent.clear(
+      screen.getByRole("textbox", { name: "About statement" })
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(auth.requestAuth).toHaveBeenCalled();
+    expect(commonApiDelete).toHaveBeenCalledWith({
+      endpoint: "profiles/alice/cic/statements/about",
+    });
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(ctx.onProfileStatementRemove).toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it("shows a late-loading statement without enabling an untouched save", () => {
+    const editor = (statement: CicStatement | null) => (
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={ctx}>
+          <UserPageHeaderAboutEdit
+            profile={{ query: "alice" } as ApiIdentity}
+            statement={statement}
+            onClose={jest.fn()}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    const { rerender } = render(editor(null));
+    const statement = {
+      id: "about",
+      statement_value: "Loaded About",
+    } as CicStatement;
+    rerender(editor(statement));
+    expect(
+      screen.getByRole("textbox", { name: "About statement" })
+    ).toHaveValue("Loaded About");
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(commonApiDelete).not.toHaveBeenCalled();
+  });
+
+  it("preserves a changed draft when the statement loads", async () => {
+    const editor = (statement: CicStatement | null) => (
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={ctx}>
+          <UserPageHeaderAboutEdit
+            profile={{ query: "alice" } as ApiIdentity}
+            statement={statement}
+            onClose={jest.fn()}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    const { rerender } = render(editor(null));
+    await userEvent.type(
+      screen.getByRole("textbox", { name: "About statement" }),
+      "My draft"
+    );
+    rerender(
+      editor({ id: "about", statement_value: "Loaded About" } as CicStatement)
+    );
+    expect(
+      screen.getByRole("textbox", { name: "About statement" })
+    ).toHaveValue("My draft");
+    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
   });
 
   it("associates the inline save error with the textarea", async () => {
@@ -107,7 +180,7 @@ describe("UserPageHeaderAboutEdit", () => {
     expect(await screen.findByText("backend unavailable.")).toBeInTheDocument();
     expect(input).toHaveAttribute(
       "aria-describedby",
-      "profile-about-character-count profile-about-error"
+      expect.stringMatching(/-character-count .*?-profile-about-error/)
     );
   });
 });

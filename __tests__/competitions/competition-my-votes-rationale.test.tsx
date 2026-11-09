@@ -240,7 +240,7 @@ it("offers recovery instead of a perpetual loader for a pending row with no fetc
   render(<CompetitionMyVotes />);
   expect(screen.getByText("Your vote: 7")).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Try again" })).toBeInTheDocument();
-  expect(screen.queryByText("Loading competition…")).toBeNull();
+  expect(screen.queryByText("Loading decision…")).toBeNull();
 });
 
 it("omits the reply action when the voter cannot chat", () => {

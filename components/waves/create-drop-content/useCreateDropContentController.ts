@@ -51,6 +51,7 @@ import {
   canSubmitComposerAction,
   canSubmitDrop,
   createMetadataHandlers,
+  getComposerMediaUploadPurpose,
   hasMetadataContent,
   isDuplicateIdentitySubmissionError,
 } from "./content-helpers";
@@ -101,7 +102,7 @@ export function useCreateDropContentController({
   initialMarkdownKey = null,
 }: CreateDropContentProps): CreateDropLayoutProps {
   const { isSafeWallet, address } = useSeizeConnectContext();
-  const { isApp } = useDeviceInfo();
+  const { isApp, isMobileDevice, hasTouchScreen } = useDeviceInfo();
   const isMobile = useIsMobileScreen();
   const locale = useBrowserLocale();
   const { actionsContainerRef, isWideContainer, setActionsContainerRef } =
@@ -322,6 +323,7 @@ export function useCreateDropContentController({
       files,
       keepOptionsVisible: keepDesktopOptionsVisible,
       waveId: wave.id,
+      mediaUploadPurpose: getComposerMediaUploadPurpose(isDropMode, activeDrop),
       externalAttachmentDrop,
       onExternalAttachmentDropConsumed,
       setToast,
@@ -446,7 +448,6 @@ export function useCreateDropContentController({
 
   const {
     createDropInputRef,
-    shouldRefocusAfterChatSubmitRef,
     dropEditorRefreshKey,
     onReferencedNft,
     onMentionedUser,
@@ -595,6 +596,7 @@ export function useCreateDropContentController({
     dropModeSessionScopeKey,
     isIdentityPickerAllowed,
     isApp,
+    isDesktop: !isApp && !isMobileDevice && !hasTouchScreen,
     requestAuth,
     setToast,
     signDrop,
@@ -616,7 +618,6 @@ export function useCreateDropContentController({
     setIsStormMode,
     setMetadataOpenState,
     createDropInputRef,
-    shouldRefocusAfterChatSubmitRef,
   });
 
   const onSwitchToDropMode = useCallback(() => {

@@ -12,10 +12,15 @@ import {
 } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import {
+  DEVICE_SETUP_EVENT,
+  type DeviceSetupScope,
+} from "@/components/device-signing/deviceSetup";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { isEncryptedMessagesPathname } from "@/helpers/navigation.helpers";
 import type { E2eeBackupManager } from "@/lib/e2ee/backup";
 import type { E2eeEngine } from "@/lib/e2ee/types";
+import { requestPersistentStorage } from "@/lib/storage/persistent-storage";
 import {
   E2eeContext,
   type E2eeAvailability,
@@ -31,6 +36,7 @@ import {
   hasE2eeEnrollmentMarker,
   setE2eeEnrollmentMarker,
 } from "./e2eeLocalState";
+import E2eeDesktopNotices from "./E2eeDesktopNotices";
 import { E2eeSignOutPromptHost } from "./signout/E2eeSignOutPromptHost";
 import { useE2eeEngineDeps } from "./useE2eeEngineDeps";
 import { useLoginE2eePrefetch } from "./useLoginE2eePrefetch";
@@ -84,6 +90,10 @@ const updateEnrollmentMarker = (
     return;
   }
   setE2eeEnrollmentMarker(profileId, enrolled);
+  if (enrolled) {
+    // This browser now holds the device and its history: keep IndexedDB.
+    void requestPersistentStorage();
+  }
   for (const listener of [...markerListeners]) {
     listener();
   }
@@ -164,7 +174,21 @@ function E2eeProviderEnabled({
     takeOver: false,
   });
   const hasMarker = useEnrollmentMarker(profileId);
-  const wantsEngine = isEncryptedMessagesPathname(pathname) || hasMarker;
+  const [setupSession, setSetupSession] = useState<string | null>(null);
+  useEffect(() => {
+    const start = (event: Event) => {
+      const scope = (event as CustomEvent<DeviceSetupScope | null>).detail;
+      if (scope === "both" || scope === "dms") {
+        setSetupSession(sessionKey);
+      }
+    };
+    window.addEventListener(DEVICE_SETUP_EVENT, start);
+    return () => window.removeEventListener(DEVICE_SETUP_EVENT, start);
+  }, [sessionKey]);
+  const wantsEngine =
+    isEncryptedMessagesPathname(pathname) ||
+    hasMarker ||
+    (sessionKey !== null && sessionKey === setupSession);
 
   // Each profile/wallet session gets a new generation, so an engine from an
   // earlier session is never mistaken for the current one. Once wanted, a
@@ -228,6 +252,44 @@ function E2eeProviderEnabled({
     };
   }, [activeKey, buildDeps, loadModules, profileId, takeOver, wallet]);
 
+  // Follow combined-grant adoption even when the setup engine already exists.
+  useEffect(() => {
+    if (loadState?.phase !== "loaded" || loadState.key !== activeKey) return;
+    const engine = loadState.engine;
+    const pending = { checking: false, active: true, requested: false };
+    const shouldResume = () => pending.active && pending.requested;
+    const resumeGrantedDevice = async () => {
+      pending.requested = true;
+      if (
+        !pending.active ||
+        pending.checking ||
+        engine.getStatus() !== "needs-enrollment"
+      )
+        return;
+      pending.checking = true;
+      pending.requested = false;
+      try {
+        // Signing can store a combined grant while this engine is already
+        // waiting on the setup page. Re-read that grant without a new prompt.
+        await engine.enrollWithLoginGrant();
+      } catch {
+        // The engine exposes registration failures through its own state.
+      } finally {
+        pending.checking = false;
+        if (shouldResume()) void resumeGrantedDevice();
+      }
+    };
+    const resume = () => {
+      void resumeGrantedDevice();
+    };
+    resume();
+    globalThis.addEventListener("storage", resume);
+    return () => {
+      pending.active = false;
+      globalThis.removeEventListener("storage", resume);
+    };
+  }, [activeKey, loadState]);
+
   /** Hands every engine in this tab over (before removing local data). */
   const releaseEngines = useCallback(async () => {
     await Promise.all(
@@ -284,6 +346,12 @@ function E2eeProviderEnabled({
       <E2eeSignOutPromptHost
         profileId={isProxy ? null : profileId}
         releaseEngines={releaseEngines}
+      />
+      <E2eeDesktopNotices
+        engine={value.engine}
+        profileId={value.profileId}
+        wallet={wallet}
+        handle={connectedProfile?.handle ?? null}
       />
     </E2eeContext.Provider>
   );

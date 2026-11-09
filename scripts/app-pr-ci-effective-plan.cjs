@@ -103,13 +103,37 @@ function applyEffectiveAppPrCiPlan(plan) {
   // Museum lane itself. The selection tool then runs only the affected packs.
   const playwrightMuseum = files.some(requiresMuseumLane);
 
-  const playwrightProfileRep = files.some(
+  const playwrightProfileDialogs = files.some(
     (file) =>
       file.startsWith("components/user/rep/") ||
+      file.startsWith("components/user/user-page-header/about/") ||
+      file === "components/user/user-page-header/UserPageHeaderClient.tsx" ||
+      file.startsWith(
+        "components/user/user-page-header/UserPageHeaderEditProfile"
+      ) ||
+      file ===
+        "components/user/user-page-header/UserPageHeaderProfileEditor.tsx" ||
+      file === "components/user/user-page-header/useProfileEditor.ts" ||
+      file.startsWith("components/user/settings/") ||
       file.startsWith("components/user/utils/rate/") ||
       file === "components/react-query-wrapper/ReactQueryWrapper.tsx" ||
       file === "hooks/useRepAllocation.ts" ||
-      file === "tests/social/profile-rep-edit-sandbox.spec.ts"
+      file === "tests/social/profile-rep-edit-sandbox.spec.ts" ||
+      file === "tests/social/profile-about-sandbox.spec.ts"
+  );
+
+  const playwrightDropReactions = files.some(
+    (file) =>
+      /^(?:components\/waves\/drops\/(?:WaveDropReaction|reaction-utils)|hooks\/drops\/(?:useDropReaction|useOptimisticNotificationDropReaction)|services\/api\/wave-drop|tests\/social\/wave-reaction-sandbox\.spec\.ts|__tests__\/components\/waves\/drops\/WaveDropReaction)/u.test(
+        file
+      ) ||
+      [
+        "contexts/wave/hooks/useWaveRealtimeUpdater.helpers.ts",
+        "__tests__/useWaveRealtimeUpdater.test.ts",
+        "tests/support/composerSandboxServer.cjs",
+        "tests/packs.manifest.cjs",
+        ".github/workflows/app-pr-ci.yml",
+      ].includes(file)
   );
 
   const playwrightArtworkDocumentation = files.some((file) =>
@@ -118,10 +142,21 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const playwrightNativeCompetition = files.some(
     (file) =>
-      /^(?:components\/competitions\/|hooks\/competitions\/|__tests__\/competitions\/|app\/waves\/\[wave\]\/competitions\/|components\/waves\/create-wave\/|components\/waves\/leaderboard\/|__tests__\/components\/waves\/leaderboard\/|generated\/models\/ApiCompetition)/u.test(
+      /^(?:components\/competitions\/|hooks\/competitions\/|__tests__\/competitions\/|app\/waves\/\[wave\]\/decisions\/|components\/waves\/create-wave\/|components\/waves\/leaderboard\/|__tests__\/components\/waves\/leaderboard\/|generated\/models\/ApiCompetition)/u.test(
         file
       ) ||
       /^(?:hooks\/(?:useMemesQuickVote|useMemesWaveFooterStats|memesQuickVote\.)|components\/brain\/left-sidebar\/waves\/memes-quick-vote\/)/u.test(
+        file
+      ) ||
+      // Tests of chat sync, read markers and the realtime updater; this pack
+      // runs the live-update cases in wave-loading-sandbox.spec.ts.
+      /^(?:__tests__\/contexts\/wave\/hooks\/useWaveRealtimeUpdater|__tests__\/useWaveRealtimeUpdater|__tests__\/hooks\/useMarkWaveNotificationsRead)/u.test(
+        file
+      ) ||
+      // The chat hot path: this pack's chat render budget
+      // (chat-render-budget-sandbox.spec.ts) measures renders and requests
+      // per received message for each of these.
+      /^(?:contexts\/wave\/(?:MyStreamContext|ActiveWaveContext)|contexts\/wave\/hooks\/(?:useNewDropCounter|useEnhancedWavesListCore|useWaveRealtimeUpdater|useWaveMessagesStore|useWaveDataManager|useDropUpdateRefMessages)|contexts\/wave\/utils\/wave-messages-utils|lib\/chat-store\/|hooks\/(?:useWaveWebSocket|useWaveIsTyping|useMarkWaveNotificationsRead)|helpers\/waves\/drop\.helpers|components\/waves\/drops\/WaveDrop\.tsx$|components\/drops\/view\/DropsList\.tsx$|components\/drops\/view\/part\/DropPartMarkdown\.tsx$|components\/brain\/left-sidebar\/(?:waves\/BrainLeftSidebarWave\.tsx$|web\/WebBrainLeftSidebarWave\/)|tests\/support\/chatPerf|tests\/social\/(?:chat-render-budget|wave-live-unread)-sandbox\.spec\.ts$)/u.test(
         file
       ) ||
       [
@@ -278,12 +313,27 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const checks = {
     ...plan.checks,
-    playwright_critical_shell: playwrightProfileRep
+    playwright_critical_shell: playwrightProfileDialogs
       ? check(
           true,
-          "Profile REP and rating changes require the profile dialog browser pack."
+          "Profile editing changes require the profile dialog browser pack."
         )
       : baseChecks.playwright_critical_shell,
+    playwright_profile_nic: check(
+      files.some(
+        (file) =>
+          /^(?:components\/profile-activity\/|__tests__\/components\/profile-activity\/|helpers\/profile-logs\.helpers\.ts$|components\/user\/rep\/|tests\/social\/profile-nic-activity-sandbox\.spec\.ts$)/u.test(
+            file
+          ) ||
+          [
+            "tests/packs.manifest.cjs",
+            "tests/support/composerSandboxServer.cjs",
+            "scripts/app-pr-ci-effective-plan.cjs",
+            ".github/workflows/app-pr-ci.yml",
+          ].includes(file)
+      ),
+      "Profile activity changes need the NIC cursor and unchanged-view browser contracts."
+    ),
     install: check(
       true,
       playwrightMuseum
@@ -303,6 +353,10 @@ function applyEffectiveAppPrCiPlan(plan) {
       testTypecheck
         ? "Changed test code, test configuration, or dependency policy needs test-helper typechecking."
         : "No test code, test configuration, or dependency policy changed."
+    ),
+    playwright_drop_reactions: check(
+      playwrightDropReactions,
+      "Drop reaction state or its browser contract requires live tooltip and touch-dialog coverage."
     ),
     playwright_artwork_documentation: check(
       playwrightArtworkDocumentation,

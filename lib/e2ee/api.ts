@@ -41,13 +41,18 @@ export { E2eeApiError, asE2eeApiError, e2eeErrorCode } from "./api-errors";
 
 /** Contract 4.2: every endpoint the engine uses. Tests inject a fake. */
 export interface E2eeApiClient {
+  renameDevice(deviceKey: string, name: string): Promise<ApiE2eeDevice>;
   getMe(): Promise<ApiE2eeMe>;
   registerDevice(body: ApiE2eeRegisterDeviceRequest): Promise<ApiE2eeDevice>;
   registerLoginGrantDevice(
     body: ApiE2eeRegisterLoginGrantDeviceRequest
   ): Promise<ApiE2eeDevice>;
   getDevice(deviceKey: string): Promise<ApiE2eeDevice>;
-  getProfileDevices(profileId: string): Promise<ApiE2eeDevice[]>;
+  /** `ciphersuite`: only devices that can join groups of it (D172). */
+  getProfileDevices(
+    profileId: string,
+    ciphersuite?: number
+  ): Promise<ApiE2eeDevice[]>;
   revokeDevice(
     deviceKey: string,
     body: ApiE2eeRevokeDeviceRequest

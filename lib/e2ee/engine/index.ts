@@ -23,11 +23,12 @@ import {
   requireMls,
   type EngineContext,
 } from "./context";
+import { ConversationCreator } from "./conversation-creation";
+import { ConversationRestarter } from "./conversation-restart";
+import { UnsentMessages } from "./unsent";
 import { EngineController } from "./controller";
 import {
   confirmOwnRejection,
-  enrollDevice,
-  hasLoginGrant,
   needsNewDevice,
   refreshMe,
   renewalDue,
@@ -35,16 +36,15 @@ import {
   submitRevocation,
 } from "./enroll";
 import { backupHistory, importBackupHistory } from "./backup";
+import { EnrollmentFlight, NEEDS_ENROLLMENT } from "./enrollment-flight";
 import { E2eeError, errorMessage } from "./errors";
 import {
   addMembers,
   checkEligibility,
-  createConversation,
   findDm,
   leave,
   removeMember,
   rename,
-  restartTargets,
   setAdmin,
 } from "./membership";
 import { searchHistory } from "./history-search";
@@ -53,7 +53,6 @@ import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import {
   createContext,
-  loadGroups,
   memberProfileIds,
   resolveProfiles,
   restore,
@@ -66,11 +65,14 @@ import { approveDevice, ignoreUntrustedDevice } from "./trust";
 /** Contract section 12 engine: framework-agnostic, one instance per profile. */
 
 const OPEN_CONVERSATION_MS = 60_000;
-const NEEDS_ENROLLMENT = "needs-enrollment" satisfies E2eeEngineStatus;
 
 class E2eeEngineImpl implements E2eeEngineExt {
   private readonly ctx: EngineContext;
   private readonly controller: EngineController;
+  private readonly conversationCreator: ConversationCreator;
+  private readonly restarter: ConversationRestarter;
+  private readonly unsent: UnsentMessages;
+  private readonly enrollment: EnrollmentFlight;
 
   constructor(ctx: EngineContext) {
     this.ctx = ctx;
@@ -78,6 +80,24 @@ class E2eeEngineImpl implements E2eeEngineExt {
       refreshMe: () => this.refreshMe(),
       onOwnRevoked: () => this.onOwnRejected(),
       afterSync: () => resolveProfiles(this.ctx, memberProfileIds(this.ctx)),
+    });
+    this.conversationCreator = new ConversationCreator(
+      ctx,
+      () => this.controller.syncAll(),
+      () => this.requireReady(),
+      this.onDelayed
+    );
+    this.restarter = new ConversationRestarter(ctx, this.conversationCreator);
+    this.unsent = new UnsentMessages(ctx, {
+      successorOf: (g) => this.restart(g),
+      // Like send(), without letting a flush error fail the resend.
+      requestFlush: (g) => this.background(() => this.controller.flush(g)),
+    });
+    this.enrollment = new EnrollmentFlight(ctx, {
+      renew: () => this.renew(),
+      loadDevicesAtLimit: () => this.loadDevicesAtLimit(),
+      refreshMe: () => this.refreshMe(),
+      start: () => this.start(),
     });
   }
 
@@ -95,7 +115,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       const restored = await restore(this.ctx);
       if (!restored) {
         setStatus(this.ctx, NEEDS_ENROLLMENT);
-        await this.startEnrollmentFromLoginGrant();
+        await this.enrollment.startFromLoginGrant();
         return;
       }
       setStatus(this.ctx, "ready");
@@ -105,73 +125,13 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
-  /**
-   * NC8: the sign-in signature already granted this browser's MLS key, so
-   * enrollment needs no wallet prompt; finish it now. If the server refuses
-   * the sign-in grant, drop that device: enroll() then falls back to the
-   * separate grant prompt with a fresh key.
-   */
-  private async startEnrollmentFromLoginGrant(): Promise<void> {
-    if (!(await this.takeLoginGrantDevice())) {
-      return;
-    }
-    // Runs in the background so engine start never waits on the network;
-    // the status is "enrolling" from here until it settles.
-    void this.ctx.tasks.track(this.enrollFromLoginGrant());
-  }
-
-  /**
-   * Whether storage holds an unregistered device a combined sign-in stored.
-   * Any key this engine still holds from an earlier attempt is released,
-   * so enrollment loads the stored device's own key state.
-   */
-  private takeLoginGrantDevice(): Promise<boolean> {
-    return this.ctx.queue.run(async () => {
-      const stored = await this.ctx.storage.getDevice(this.ctx.profileId);
-      if (!hasLoginGrant(stored) || stored.registered) {
-        return false;
-      }
-      if (this.ctx.device?.deviceKey !== stored.deviceKey) {
-        this.ctx.mls?.dispose();
-        this.ctx.mls = null;
-        this.ctx.device = null;
-        this.ctx.lastState = null;
-      }
-      return true;
-    });
-  }
-
-  /**
-   * NC8: the gate's combined sign-in stored this browser's key while this
-   * engine waited for enrollment (holding the engine lock). The sign-in
-   * writes without a state version and keeps it, so this engine's next
-   * write still passes its version check.
-   */
-  async enrollWithLoginGrant(): Promise<E2eeEngineStatus> {
-    if (
-      this.ctx.store.status === NEEDS_ENROLLMENT &&
-      (await this.takeLoginGrantDevice())
-    ) {
-      await this.enrollFromLoginGrant();
-    }
-    return this.ctx.store.status;
+  /** NC8: enrolls from a combined sign-in grant stored meanwhile. */
+  enrollWithLoginGrant(): Promise<E2eeEngineStatus> {
+    return this.enrollment.withLoginGrant();
   }
 
   needsNewDevice(): Promise<boolean> {
     return this.ctx.queue.run(() => needsNewDevice(this.ctx));
-  }
-
-  private async enrollFromLoginGrant(): Promise<void> {
-    try {
-      await this.runEnrollment(false);
-    } catch {
-      // A rejected sign-in grant was dropped: enroll() asks for the separate
-      // grant signature. Any other failure leaves the pending device, and
-      // enroll() retries it without a prompt.
-      if (!this.ctx.disposed && this.ctx.store.status === "error") {
-        setStatus(this.ctx, NEEDS_ENROLLMENT, this.ctx.store.error);
-      }
-    }
   }
 
   private start(): void {
@@ -288,6 +248,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   getStatus = () => this.ctx.store.status;
   getError = () => this.ctx.store.error;
+  getUpgrade = () => this.ctx.store.upgrade;
   getThisDevice = () => this.ctx.store.thisDevice;
   getAttachmentsEnabled = () => this.ctx.store.attachmentsEnabled;
   getDevices = () => this.ctx.store.devices;
@@ -300,55 +261,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   // -- lifecycle --------------------------------------------------------------
 
   async enroll(): Promise<void> {
-    await this.runEnrollment(true);
-  }
-
-  private async runEnrollment(allowPrompt: boolean): Promise<void> {
-    const status = this.ctx.store.status;
-    if (status === "ready") {
-      if (allowPrompt) {
-        await this.renew();
-      }
-      return;
-    }
-    if (status === "enrolling" || status === "unsupported") {
-      return;
-    }
-    setStatus(this.ctx, "enrolling");
-    try {
-      const ready = await this.ctx.queue.run(() =>
-        enrollDevice(this.ctx, { allowPrompt })
-      );
-      if (!ready) {
-        if (this.ctx.store.status === "enrolling") {
-          // Nothing to enroll without a prompt (sign-in grant path).
-          setStatus(this.ctx, NEEDS_ENROLLMENT);
-          return;
-        }
-        // device-limit: list the profile's devices so the screen can show them.
-        await this.loadDevicesAtLimit();
-        return;
-      }
-      await loadGroups(this.ctx);
-      setStatus(this.ctx, "ready");
-      try {
-        await this.refreshMe();
-      } catch {
-        // Retried by the background pass.
-      }
-      this.start();
-    } catch (error) {
-      const code = errorMessage(error);
-      setStatus(
-        this.ctx,
-        code === "E2EE_SIGNATURE_REJECTED" ||
-          code === "E2EE_LOGIN_GRANT_REJECTED"
-          ? NEEDS_ENROLLMENT
-          : "error",
-        code
-      );
-      throw error;
-    }
+    await this.enrollment.run(true);
   }
 
   /** 8.8: in the grant's last 14 days, enroll() renews it (one prompt). */
@@ -429,16 +342,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
     return checkEligibility(this.ctx, profileIds);
   };
 
-  async createConversation(input: {
-    profileIds: string[];
-    kind: "dm" | "group";
-    name?: string | null;
-  }): Promise<string> {
-    this.requireReady();
-    const g = await createConversation(this.ctx, input, this.onDelayed);
-    await resolveProfiles(this.ctx, input.profileIds);
-    return g;
-  }
+  createConversation = (
+    input: Parameters<E2eeEngineExt["createConversation"]>[0]
+  ) => this.conversationCreator.create(input);
 
   findDm = (profileId: string) => findDm(this.ctx, profileId);
 
@@ -602,14 +508,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
     await leave(this.ctx, g.toLowerCase(), this.delayedFor(g.toLowerCase()));
   }
 
+  resendUnsent = (g: string, id: string) => this.unsent.resend(g, id);
+  discardUnsent = (g: string, id: string) => this.unsent.discard(g, id);
+
   async restart(g: string): Promise<string> {
     this.requireReady();
-    const runtime = requireGroup(this.ctx, g);
-    return this.createConversation({
-      profileIds: restartTargets(this.ctx, runtime),
-      kind: runtime.record.metadata.kind,
-      name: runtime.record.metadata.name,
-    });
+    return this.restarter.restart(g);
   }
 
   async report(
@@ -773,20 +677,14 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (!device) {
       throw new E2eeError("E2EE_NOT_READY");
     }
-    device.label = label.trim().slice(0, 48) || "Device";
-    await this.ctx.queue.run(() =>
-      checkpoint(this.ctx, { device, skipWasm: true })
-    );
-    if (this.ctx.store.thisDevice) {
-      this.ctx.store.thisDevice = {
-        ...this.ctx.store.thisDevice,
-        label: device.label,
-      };
-      this.ctx.store.devices = this.ctx.store.devices.map((info) =>
-        info.isThisDevice ? { ...info, label: device.label } : info
-      );
-    }
-    this.ctx.store.touch();
+    await this.ctx.queue.run(async () => {
+      if (this.ctx.disposed) throw new E2eeError("E2EE_NOT_READY");
+      // A superseded tab must stop before changing the account's device name.
+      await checkpoint(this.ctx, { skipWasm: true });
+      if (this.isDisposed()) throw new E2eeError("E2EE_NOT_READY");
+      await this.ctx.api.renameDevice(device.deviceKey, label);
+    });
+    await this.refreshMe();
   }
 }
 

@@ -4,7 +4,7 @@
 
 Edit-eligible users can change a non-DM wave picture from the `About` avatar.
 Selecting the avatar pencil opens `Update wave picture`.
-Changing a wave picture leaves every competition’s rules and submission settings unchanged.
+Changing a wave picture leaves every decision’s rules and submission settings unchanged.
 
 ## Location in the Site
 
@@ -64,6 +64,8 @@ Changing a wave picture leaves every competition’s rules and submission settin
 
 - There is no crop flow.
 - No request is sent until a valid file is selected and `Save` is pressed.
+- Wave pictures are published without identifying metadata such as location,
+  camera details and capture time, and with a neutral file name.
 - Shared avatar picture/collage fallback rules are documented in
   [Wave Avatar Fallbacks](../../shared/feature-wave-avatar-fallbacks.md).
 

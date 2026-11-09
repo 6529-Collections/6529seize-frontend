@@ -1,7 +1,7 @@
 import type { DEFAULT_LOCALE, SupportedLocale } from "@/i18n/locales";
 import { DE_DE_MESSAGES } from "@/i18n/messages/de-DE";
 import { EN_GB_MESSAGES } from "@/i18n/messages/en-GB";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import { ES_ES_MESSAGES } from "@/i18n/messages/es-ES";
 import { FR_FR_MESSAGES } from "@/i18n/messages/fr-FR";
 

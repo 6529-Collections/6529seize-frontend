@@ -19,6 +19,11 @@ import {
   setAuthJwt,
 } from "@/services/auth/auth.utils";
 
+const mockAcceptDeviceSetup = jest.fn(async (_input: unknown) => undefined);
+jest.mock("@/lib/device-signing/connection-setup", () => ({
+  acceptConnectionDeviceSetup: (input: unknown) => mockAcceptDeviceSetup(input),
+}));
+
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
   useTitle: () => ({
@@ -124,6 +129,8 @@ describe("AcceptConnectionSharing page", () => {
   });
 
   beforeEach(() => {
+    mockAcceptDeviceSetup.mockReset();
+    mockAcceptDeviceSetup.mockResolvedValue(undefined);
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
@@ -202,55 +209,65 @@ describe("AcceptConnectionSharing page", () => {
     expect(screen.getByText("Accept connection")).toBeInTheDocument();
   });
 
-  it("redeems and persists a native connection share session", async () => {
-    const push = jest.fn();
-    const seizeAcceptConnection = jest.fn();
-    (useRouter as jest.Mock).mockReturnValue({ push });
-    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
-    (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("connection_share_code=abc12345&address=0x123")
-    );
-    (useSeizeConnectContext as jest.Mock).mockReturnValue({
-      address: undefined,
-      seizeDisconnectAndLogout: jest.fn(),
-      seizeAcceptConnection,
-    });
-    (redeemConnectionShare as jest.Mock).mockResolvedValue({
-      client_type: "native",
-      address: "0x123",
-      role: "server-role",
-      access_token: "access-token",
-      access_token_expires_at: "2026-06-10T00:00:00.000Z",
-      native_refresh_token: "native-refresh-token",
-      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
-    });
-
-    render(
-      <TestProvider>
-        <AcceptConnectionSharingPage />
-      </TestProvider>
-    );
-
-    expect(
-      screen.queryByText(/Open this connection link in the 6529 mobile app/)
-    ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByText("Accept connection"));
-
-    await waitFor(() =>
-      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
-    );
-    expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith("0x123");
-    expect(persistSessionResponse).toHaveBeenCalledWith(
-      expect.objectContaining({
-        client_type: "native",
+  it.each(["native", "desktop"])(
+    "redeems and persists a %s connection-only session",
+    async (target) => {
+      const push = jest.fn();
+      const seizeAcceptConnection = jest.fn();
+      const seizeConnect = jest.fn();
+      (useRouter as jest.Mock).mockReturnValue({ push });
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(
+        target === "native"
+      );
+      if (target === "desktop") setUserAgent(DESKTOP_APP_USER_AGENT);
+      (useSearchParams as jest.Mock).mockReturnValue(
+        new URLSearchParams("connection_share_code=abc12345&address=0x123")
+      );
+      (useSeizeConnectContext as jest.Mock).mockReturnValue({
+        address: undefined,
+        seizeDisconnectAndLogout: jest.fn(),
+        seizeAcceptConnection,
+        seizeConnect,
+      });
+      (redeemConnectionShare as jest.Mock).mockResolvedValue({
+        client_type: target,
         address: "0x123",
         role: "server-role",
+        access_token: "access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
         native_refresh_token: "native-refresh-token",
-      })
-    );
-    expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
-    expect(push).toHaveBeenCalledWith("/");
-  });
+        refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+      });
+
+      render(
+        <TestProvider>
+          <AcceptConnectionSharingPage />
+        </TestProvider>
+      );
+
+      expect(
+        screen.queryByText(/Open this connection link in the 6529 mobile app/)
+      ).not.toBeInTheDocument();
+      fireEvent.click(screen.getByText("Accept connection"));
+
+      await waitFor(() =>
+        expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", target)
+      );
+      expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith("0x123");
+      expect(persistSessionResponse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          client_type: target,
+          address: "0x123",
+          role: "server-role",
+          native_refresh_token: "native-refresh-token",
+        })
+      );
+      expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
+      expect(push).toHaveBeenCalledWith("/");
+      expect(seizeConnect).not.toHaveBeenCalled();
+      expect(mockAcceptDeviceSetup).not.toHaveBeenCalled();
+    }
+  );
 
   it("redeems a legacy desktop token connection share in the 6529 Desktop app", async () => {
     const push = jest.fn();
@@ -382,7 +399,7 @@ describe("AcceptConnectionSharing page", () => {
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
-      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
+      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", "native")
     );
     expect(commonApiPost).not.toHaveBeenCalled();
     expect(setAuthJwt).not.toHaveBeenCalled();
@@ -442,7 +459,7 @@ describe("AcceptConnectionSharing page", () => {
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
-      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
+      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", "native")
     );
     expect(push).toHaveBeenCalledWith("/");
   });
@@ -637,10 +654,66 @@ describe("AcceptConnectionSharing page", () => {
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
-      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345")
+      expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", "native")
     );
     expect(persistSessionResponse).toHaveBeenCalled();
     expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
     expect(push).toHaveBeenCalledWith("/");
   });
+  it.each(["native", "desktop"])(
+    "imports shared setup in %s without connecting a wallet and removes the secret before paint",
+    async (target) => {
+      const push = jest.fn();
+      const accept = jest.fn();
+      const connect = jest.fn();
+      (useRouter as jest.Mock).mockReturnValue({ push });
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(
+        target === "native"
+      );
+      if (target === "desktop") setUserAgent(DESKTOP_APP_USER_AGENT);
+      openConnectionLink("connection_share_code=abc12345&address=0x123");
+      window.history.replaceState(
+        null,
+        "",
+        window.location.href + "#device_setup_key=private-unlock-secret"
+      );
+      (useSeizeConnectContext as jest.Mock).mockReturnValue({
+        seizeAcceptConnection: accept,
+        seizeConnect: connect,
+      });
+      (redeemConnectionShare as jest.Mock).mockResolvedValue({
+        address: "0x123",
+        access_token: "access-token",
+        role: null,
+        client_type: target,
+        encrypted_device_setup: "v1.ciphertext",
+      });
+      render(
+        <React.StrictMode>
+          <TestProvider>
+            <AcceptConnectionSharingPage />
+          </TestProvider>
+        </React.StrictMode>
+      );
+      expect(window.location.hash).toBe("");
+      expect(window.location.search).not.toContain("connection_share_code");
+      expect(await screen.findByText("Signed Posts")).toBeInTheDocument();
+      expect(screen.getByText("Encrypted DMs")).toBeInTheDocument();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Accept and enable both" })
+      );
+      await waitFor(() =>
+        expect(mockAcceptDeviceSetup).toHaveBeenCalledWith({
+          envelope: "v1.ciphertext",
+          secret: "private-unlock-secret",
+          wallet: "0x123",
+          accessToken: "access-token",
+          target,
+        })
+      );
+      await waitFor(() => expect(push).toHaveBeenCalledWith("/"));
+      expect(accept).toHaveBeenCalledWith("0x123");
+      expect(connect).not.toHaveBeenCalled();
+    }
+  );
 });

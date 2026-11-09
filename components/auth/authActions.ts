@@ -40,6 +40,7 @@ import { createTimedAbortSignal } from "./authRequestAbortSignal";
 import { getAuthNonce } from "./authNonce";
 import { createAuthRequestSignIn } from "./authRequestSignIn";
 import { createSignedMessagesGrantRequest } from "./authSignedMessagesGrant";
+import { getSignedMessagesTestSigner } from "./signedMessagesTestSigner";
 import type {
   AuthRequestActions,
   CreateAuthRequestActionsParams,
@@ -81,6 +82,8 @@ export function createAuthRequestActions({
   showSessionUpgradePrompt,
   signMessage,
   signModalReason,
+  ownProfileId,
+  signAppGrant,
 }: CreateAuthRequestActionsParams): AuthRequestActions {
   const signWithWallet = async (
     {
@@ -641,16 +644,34 @@ export function createAuthRequestActions({
     }
   };
 
+  // Local dev-auth browser tests only (null everywhere else): a throwaway
+  // test key stands in for the live wallet on a supported network.
+  const signedMessagesTestSigner = getSignedMessagesTestSigner();
   const requestSignedMessagesGrant = createSignedMessagesGrantRequest({
     address,
+    ownProfileId,
+    signAppGrant,
     canAuthenticate:
-      !activeProfileProxy && enableWalletAuthentication && !isDevAuthEnabled(),
-    canSignActiveWallet,
-    createGetSignature,
+      !activeProfileProxy &&
+      ((enableWalletAuthentication && !isDevAuthEnabled()) ||
+        signedMessagesTestSigner !== null),
+    canSignActiveWallet:
+      canSignActiveWallet || signedMessagesTestSigner !== null,
+    createGetSignature: signedMessagesTestSigner
+      ? () => async ({ message }) => ({
+          signature: await signedMessagesTestSigner(message),
+          userRejected: false,
+          failureToastShown: false,
+        })
+      : createGetSignature,
     createSigningAuthRequestGuard: () =>
-      createSigningAuthRequestGuard(createAuthRequestGuard({})),
+      signedMessagesTestSigner
+        ? createAuthRequestGuard({})
+        : createSigningAuthRequestGuard(createAuthRequestGuard({})),
     getNonce: getAuthNonce,
-    isActiveChainSupported,
+    isActiveChainSupported: signedMessagesTestSigner
+      ? () => true
+      : isActiveChainSupported,
     setAuthLoadingState,
     setToast,
   });

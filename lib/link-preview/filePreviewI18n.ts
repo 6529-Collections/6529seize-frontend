@@ -1,7 +1,6 @@
 import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import { t, type MessageKey } from "@/i18n/messages";
 import type { ExternalFileKind } from "@/lib/link-preview/fileKinds";
 
 const FILE_SIZE_UNITS = ["B", "KB", "MB", "GB"] as const;

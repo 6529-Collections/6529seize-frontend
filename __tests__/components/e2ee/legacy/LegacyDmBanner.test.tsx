@@ -42,9 +42,9 @@ jest.mock("@/components/e2ee/legacy/LegacyDmImportDialog", () => ({
 const wave = { id: "dm-wave", name: "alice" } as unknown as ApiWave;
 const composer = <textarea aria-label="composer" />;
 
-function renderGate(enabled = true) {
+function renderGate(enabled = true, showBanner = true) {
   return render(
-    <LegacyDmComposerGate wave={wave} enabled={enabled}>
+    <LegacyDmComposerGate wave={wave} enabled={enabled} showBanner={showBanner}>
       {composer}
     </LegacyDmComposerGate>
   );
@@ -74,7 +74,7 @@ describe("LegacyDmComposerGate", () => {
     expect(
       screen.getByRole("region", { name: "Unencrypted chat notice" })
     ).toHaveTextContent(
-      "Not end-to-end encrypted. This history will be deleted from 6529’s servers on Dec 1, 2026, unless we’re legally required to keep it."
+      "Not end-to-end encrypted. 6529 deletes this history from its servers on Dec 1, 2026 unless legally required to keep it."
     );
     expect(screen.getByLabelText("composer")).toBeInTheDocument();
     fireEvent.click(
@@ -88,6 +88,31 @@ describe("LegacyDmComposerGate", () => {
     renderGate();
     fireEvent.click(screen.getByRole("button", { name: "Export history" }));
     expect(screen.getByText("export dialog")).toBeInTheDocument();
+  });
+
+  it("keeps Quick Chat usable without the migration notice or actions", () => {
+    renderGate(true, false);
+    expect(screen.getByLabelText("composer")).toBeInTheDocument();
+    expect(screen.queryByRole("region")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("keeps Quick Chat read-only when an encrypted equivalent exists", () => {
+    mockEquivalent = { g: "0xabc" };
+    renderGate(true, false);
+    expect(screen.queryByLabelText("composer")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/This chat is read-only/)
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps Quick Chat closed after the deletion date without the banner", () => {
+    mockNow = Date.parse("2026-12-01T00:00:00Z");
+    renderGate(true, false);
+    expect(screen.queryByLabelText("composer")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/This unencrypted chat is closed/)
+    ).not.toBeInTheDocument();
   });
 
   it("goes read-only and offers the move once an encrypted chat with the same people exists", () => {

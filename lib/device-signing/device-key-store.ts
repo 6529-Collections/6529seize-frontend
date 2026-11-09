@@ -1,11 +1,12 @@
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
+import { requestPersistentStorage } from "@/lib/storage/persistent-storage";
 import { generateDeviceKeyPair } from "./ed25519";
 import { deviceKeyStorage, type StoredDeviceKey } from "./device-key-storage";
 import { writeDeviceGrantHint } from "./grant-hint";
 
 const DEVICE_GRANT_CHANGED_EVENT = "6529-device-grant-changed";
 const DAY_MS = 24 * 60 * 60 * 1000;
-const GRANT_RENEWAL_WINDOW_MS = 14 * DAY_MS;
+export const GRANT_RENEWAL_WINDOW_MS = 14 * DAY_MS;
 /** Grants this close to expiry are not used, so the server never sees one expire mid-write. */
 const SIGNING_EXPIRY_MARGIN_MS = 60 * 1000;
 
@@ -25,21 +26,37 @@ async function withDeviceKeyLock<T>(
   return await locks.request(`6529-device-key:${address}`, task);
 }
 
-function notifyDeviceGrantChanged(address: string): void {
+interface DeviceGrantChange {
+  readonly address: string;
+  readonly saved: boolean;
+}
+
+function notifyDeviceGrantChanged(address: string, saved = false): void {
   if (typeof globalThis.dispatchEvent !== "function") {
     return;
   }
   globalThis.dispatchEvent(
-    new CustomEvent(DEVICE_GRANT_CHANGED_EVENT, { detail: { address } })
+    new CustomEvent<DeviceGrantChange>(DEVICE_GRANT_CHANGED_EVENT, {
+      detail: { address, saved },
+    })
   );
 }
 
 export function subscribeToDeviceGrantChanges(
-  listener: () => void
+  listener: (change: DeviceGrantChange) => void
 ): () => void {
-  globalThis.addEventListener(DEVICE_GRANT_CHANGED_EVENT, listener);
+  const onChange = (event: Event) => {
+    const { detail } = event as CustomEvent<DeviceGrantChange | null>;
+    if (typeof detail?.address === "string" && detail.address.length > 0) {
+      listener({
+        address: normalizeAddress(detail.address),
+        saved: detail.saved === true,
+      });
+    }
+  };
+  globalThis.addEventListener(DEVICE_GRANT_CHANGED_EVENT, onChange);
   return () =>
-    globalThis.removeEventListener(DEVICE_GRANT_CHANGED_EVENT, listener);
+    globalThis.removeEventListener(DEVICE_GRANT_CHANGED_EVENT, onChange);
 }
 
 export function getDeviceGrantStatus(
@@ -150,7 +167,9 @@ export async function saveDeviceGrant(
     return true;
   });
   if (saved) {
-    notifyDeviceGrantChanged(normalized);
+    notifyDeviceGrantChanged(normalized, true);
+    // The key exists only here: keep IndexedDB from being evicted.
+    void requestPersistentStorage();
   }
   return saved;
 }
@@ -212,4 +231,22 @@ export async function allocateDeviceSeq(
 export async function listLocalDevicePublicKeys(): Promise<string[]> {
   const records = await deviceKeyStorage.readAll();
   return records.map((record) => record.publicKeyHex.toLowerCase());
+}
+
+/** Imports a freshly granted app key, preserving an existing usable local grant. */
+export async function installSharedDeviceKey(
+  record: StoredDeviceKey
+): Promise<void> {
+  const address = normalizeAddress(record.address);
+  const saved = await withDeviceKeyLock(address, async () => {
+    const existing = await deviceKeyStorage.read(address);
+    if (existing && getUsableGrant(existing, Date.now())) return false;
+    if (!record.grant || !getUsableGrant(record, Date.now()))
+      throw new Error("Invalid shared signing grant");
+    await deviceKeyStorage.write({ ...record, address });
+    writeDeviceGrantHint(address, record.grant, record.ownProfileId);
+    return true;
+  });
+  notifyDeviceGrantChanged(address, saved);
+  void requestPersistentStorage();
 }

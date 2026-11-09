@@ -14,6 +14,7 @@ import { PRODUCTION_ASSET_PREFIX } from "@/config/assetPrefix";
 import { withoutBuildStamp } from "@/config/buildStamp";
 import { computeVersionFromEnvOrGit, logOnceConfig } from "@/config/version";
 import { SENTRY_BUILD_OWNERSHIP_OPTIONS } from "@/config/sentryThirdPartyFiltering";
+import { SENTRY_BUILD_RELEASE_OPTIONS } from "@/config/sentryBuildRelease";
 import {
   loadAssetsFlagAtRuntime,
   resolveAssetsFlagFromEnv,
@@ -125,10 +126,8 @@ const nextConfigFactory = (phase: string): NextConfig => {
             : String(publicEnv.NEXTGEN_CHAIN_ID),
         MOBILE_APP_SCHEME: publicEnv.MOBILE_APP_SCHEME,
         CORE_SCHEME: publicEnv.CORE_SCHEME,
-        IPFS_API_ENDPOINT: publicEnv.IPFS_API_ENDPOINT,
         IPFS_GATEWAY_ENDPOINT: publicEnv.IPFS_GATEWAY_ENDPOINT,
         MEDIA_RESOLVER_ENDPOINT: publicEnv.MEDIA_RESOLVER_ENDPOINT,
-        IPFS_MFS_PATH: publicEnv.IPFS_MFS_PATH,
         GIPHY_API_KEY: publicEnv.GIPHY_API_KEY,
         WS_ENDPOINT: publicEnv.WS_ENDPOINT,
         DEV_MODE_MEMES_WAVE_ID: publicEnv.DEV_MODE_MEMES_WAVE_ID,
@@ -180,6 +179,9 @@ const nextConfigFactory = (phase: string): NextConfig => {
 
 const sentryWrappedConfig = withSentryConfig(nextConfigFactory, {
   ...SENTRY_BUILD_OWNERSHIP_OPTIONS,
+  // No build-time release, so the client Sentry chunk is the same across
+  // deploys; the Sentry.init calls set it from VERSION instead.
+  ...SENTRY_BUILD_RELEASE_OPTIONS,
 
   // For all available options, see:
   // https://www.npmjs.com/package/@sentry/webpack-plugin#options

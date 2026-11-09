@@ -24,6 +24,8 @@ function decodeFileName(value: string): string {
 
 export function getDownloadFilenameFromUrl(url: string, fallback = "media") {
   const decodedFallback = decodeFileName(fallback);
+  // Object URLs contain a generated ID, never the attachment's original name.
+  if (url.startsWith("blob:")) return fallback;
   try {
     const pathname = new URL(url).pathname;
     const name = pathname.split("/").findLast(Boolean);

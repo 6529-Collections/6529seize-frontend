@@ -211,6 +211,18 @@ export type INotificationMemeCollaboration = Omit<
   };
 };
 
+export type INotificationEncryptedMessage = Omit<
+  NotificationBase,
+  "related_identity"
+> & {
+  readonly cause: ApiNotificationCause.E2EeMessage;
+  readonly related_identity?: ApiProfileMin | null;
+  readonly additional_context: {
+    readonly encrypted_group?: string;
+    readonly encrypted_message_seq?: number;
+  };
+};
+
 export type INotificationArtistArtwork = NotificationBase &
   WithDrops & {
     readonly cause: ApiNotificationCause.ArtistArtworkSubmitted;
@@ -219,6 +231,7 @@ export type INotificationArtistArtwork = NotificationBase &
 
 export type TypedNotification =
   | INotificationArtistArtwork
+  | INotificationEncryptedMessage
   | INotificationVotingCreditsReturned
   | INotificationMemeCollaboration
   | INotificationCompetitionLifecycle

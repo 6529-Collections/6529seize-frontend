@@ -14,7 +14,6 @@ import React, {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
-import { useSetWaveData } from "@/contexts/TitleContext";
 import {
   type HeaderWaveDropAction,
   useHeaderContext,
@@ -22,7 +21,8 @@ import {
 import { useContentTab } from "../ContentTabContext";
 import { useBrainMobileSubmissionRules } from "../mobile/BrainMobileSubmissionRulesContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import MyStreamWaveChat from "./MyStreamWaveChat";
+import { WaveChatTitle } from "./WaveChatTitle";
+import { WaveChatWithUnread } from "./WaveChatWithUnread";
 import WaveChatActivity from "./WaveChatActivity";
 import MyStreamWavePending from "./MyStreamWavePending";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
@@ -129,8 +129,6 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   } = useHeaderContext();
   const contentRef = useRef<HTMLDivElement>(null);
   const {
-    waves,
-    directMessages,
     registerWave,
     serverFeedSeed: { completeInitialRegistration },
   } = useMyStream();
@@ -199,40 +197,12 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     });
   }, [updateEligibility, wave]);
 
-  // Get enhanced data from the waves list (has correct WS-updated values)
-  const enhancedData = useMemo(() => {
-    const waveFromList =
-      waves.list.find((w) => w.id === waveId) ??
-      directMessages.list.find((w) => w.id === waveId);
-    return {
-      newDropsCount: waveFromList?.newDropsCount.count ?? 0,
-      firstUnreadSerialNo: waveFromList?.firstUnreadDropSerialNo ?? null,
-    };
-  }, [waves.list, directMessages.list, waveId]);
-
-  const newDropsCount = enhancedData.newDropsCount;
-  const currentWaveId = wave?.id ?? null;
-  const currentWaveName = wave?.name ?? null;
-
-  // Update wave data in title context
-  const waveTitleData = useMemo(
-    () =>
-      currentWaveId === waveId && currentWaveName !== null
-        ? {
-            id: currentWaveId,
-            name: currentWaveName,
-            newItemsCount: newDropsCount,
-          }
-        : null,
-    [currentWaveId, currentWaveName, newDropsCount, waveId]
-  );
-  useSetWaveData(waveTitleData);
-
   // Create a stable key for proper remounting
   const stableWaveKey = `wave-${waveId}`;
 
   // Get the active tab and utilities from global context
-  const { activeContentTab, availableTabs, setActiveContentTab } = useContentTab();
+  const { activeContentTab, availableTabs, setActiveContentTab } =
+    useContentTab();
   const activeCurationId = competitionOnly
     ? null
     : searchParams.get("curation");
@@ -666,9 +636,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       <CompetitionHub waveId={wave.id} embedded />
     ),
     [MyStreamWaveTab.CHAT]: (
-      <MyStreamWaveChat
+      <WaveChatWithUnread
         wave={submissionWave ?? wave}
-        firstUnreadSerialNo={enhancedData.firstUnreadSerialNo}
         viewMode={showGalleryToggle ? viewMode : "chat"}
         onDropClick={onDropClick}
         chatSubmitDrop={activeChatSubmitDropState}
@@ -737,6 +706,11 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       key={stableWaveKey}
       data-testid="wave-content"
     >
+      <WaveChatTitle
+        waveId={wave.id}
+        waveName={wave.name}
+        chatActive={activeTabContent === components[MyStreamWaveTab.CHAT]}
+      />
       {competitionOnly ? (
         <div className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950">
           <MyStreamWaveDesktopTabs
@@ -780,6 +754,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         }
       >
         <WaveChatActivity
+          waveId={wave.id}
           active={activeTabContent === components[MyStreamWaveTab.CHAT]}
           chat={components[MyStreamWaveTab.CHAT]}
         >

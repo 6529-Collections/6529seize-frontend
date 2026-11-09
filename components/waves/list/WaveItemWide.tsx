@@ -308,7 +308,7 @@ export default function WaveItemWide({
         </div>
 
         <div className="tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-[13px] tw-gap-y-2 tw-p-[5px] @md/wave:tw-pl-0">
-          <span className="tw-row-start-1 tw-line-clamp-3 tw-self-center tw-break-words tw-text-base tw-font-semibold tw-leading-6 tw-tracking-tight tw-text-iron-50 @md/wave:tw-text-lg">
+          <span className="tw-col-span-2 tw-row-start-1 tw-min-w-0 tw-self-center tw-truncate tw-text-base tw-font-semibold tw-leading-6 tw-tracking-tight tw-text-iron-50 @md/wave:tw-col-span-1 @md/wave:tw-text-lg">
             {wave?.name ?? titlePlaceholder}
           </span>
           {authorSection}
@@ -355,7 +355,7 @@ export default function WaveItemWide({
               </div>
               <div
                 data-wave-item-interactive="true"
-                className="tw-pointer-events-auto tw-relative tw-col-start-2 tw-row-start-1 tw-self-center"
+                className="tw-pointer-events-auto tw-relative tw-col-span-2 tw-col-start-1 tw-row-start-4 tw-self-center tw-justify-self-start @md/wave:tw-col-span-1 @md/wave:tw-col-start-2 @md/wave:tw-row-start-1"
               >
                 <WaveItemFollow wave={wave} />
               </div>

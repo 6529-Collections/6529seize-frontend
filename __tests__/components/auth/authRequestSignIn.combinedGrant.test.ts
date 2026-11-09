@@ -106,8 +106,9 @@ const combinedMessage = (deviceKeyHex: string, mlsKey: string): string => {
     expiresAtSeconds: expiresAt(),
   };
   const mls = {
+    version: 2 as const,
     deviceKeyHex: mlsKey,
-    ciphersuite: 1,
+    ciphersuites: [0x004e],
     expiresAtSeconds: signing.expiresAtSeconds,
   };
   return [
@@ -126,7 +127,7 @@ type NonceParams = {
     | {
         readonly device_key: string;
         readonly mls_device_key?: string;
-        readonly mls_ciphersuite?: string;
+        readonly mls_ciphersuites?: string;
       }
     | undefined;
 };
@@ -168,7 +169,7 @@ const createSubject = (
 const preparedE2eeDevice = (deviceKeyHex = MLS_KEY) => {
   const device = {
     deviceKeyHex,
-    ciphersuite: 1,
+    ciphersuites: [0x004e],
     adopt: jest.fn(async () => true),
     dispose: jest.fn(),
   };
@@ -217,7 +218,7 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
     const { getNonce, getSignature, signIn } = createSubject();
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
 
     const signingKey = mockRecords.get(SIGNER)!.publicKeyHex;
@@ -229,7 +230,7 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
         device_key_type: "ed25519",
         device_scopes: SCOPES.join(","),
         mls_device_key: MLS_KEY,
-        mls_ciphersuite: "1",
+        mls_ciphersuites: "78",
       },
     });
     expect(getSignature).toHaveBeenCalledTimes(1);
@@ -254,7 +255,7 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
     );
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
 
     expect(getNonce).toHaveBeenCalledTimes(1);
@@ -273,7 +274,7 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
     });
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
 
     expect(getNonce).toHaveBeenCalledTimes(2);
@@ -297,7 +298,7 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
     );
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
 
     expect(getNonce).toHaveBeenCalledTimes(2);
@@ -320,7 +321,7 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
     });
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: false });
 
     expect(setToast).toHaveBeenCalledWith(
@@ -337,7 +338,7 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
     const { signIn } = createSubject();
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: false });
 
     expect(e2ee.dispose).toHaveBeenCalled();
@@ -356,7 +357,7 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
     const { signIn } = createSubject();
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
 
     expect(mockAdopt).not.toHaveBeenCalled();
@@ -367,7 +368,7 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
     const { getNonce, getSignature, signIn } = createSubject();
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: null })
+      signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
     ).resolves.toEqual({ success: true });
 
     expect(getNonce).toHaveBeenCalledTimes(1);
@@ -386,7 +387,11 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
     );
 
     await expect(
-      signIn({ signerAddress: SIGNER, role: "proxy-role" })
+      signIn({
+        signerAddress: SIGNER,
+        role: "proxy-role",
+        deviceGrantMode: "auto",
+      })
     ).resolves.toEqual({ success: false });
 
     expect(getSignature).not.toHaveBeenCalled();
@@ -397,11 +402,30 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
 
   it("does not prepare an MLS key when no signing grant is requested", async () => {
     const { signIn } = createSubject();
-    await signIn({ signerAddress: SIGNER, role: "proxy-role" });
+    await signIn({
+      signerAddress: SIGNER,
+      role: "proxy-role",
+      deviceGrantMode: "auto",
+    });
     expect(mockPrepareE2ee).not.toHaveBeenCalled();
   });
 
-  it("grants both keys from Turn on signed messages too, with one signature", async () => {
+  it("signs in without asking for either device permission", async () => {
+    preparedE2eeDevice();
+    const { getSignature, signIn } = createSubject();
+
+    await expect(
+      signIn({ signerAddress: SIGNER, role: null })
+    ).resolves.toEqual({
+      success: true,
+    });
+
+    expect(getSignature).toHaveBeenCalledTimes(1);
+    expect(mockPrepareE2ee).not.toHaveBeenCalled();
+    expect(mockAdopt).not.toHaveBeenCalled();
+  });
+
+  it("requests only the signing key for Signed Posts setup", async () => {
     preparedE2eeDevice();
     const { getSignature, signIn } = createSubject();
 
@@ -414,7 +438,8 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
     ).resolves.toEqual({ success: true });
 
     expect(getSignature).toHaveBeenCalledTimes(1);
-    expect(mockAdopt).toHaveBeenCalledTimes(1);
+    expect(mockPrepareE2ee).not.toHaveBeenCalled();
+    expect(mockAdopt).not.toHaveBeenCalled();
   });
 
   describe("turning on encrypted messages (requireE2eeDevice)", () => {

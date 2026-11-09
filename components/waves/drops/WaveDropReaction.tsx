@@ -222,7 +222,7 @@ function WaveDropReaction({
   findNativeEmoji,
   reaction,
   onOpenDetailDialog,
-  onLoadDetails,
+  onTooltipOpenChange,
   isDetailsLoading,
   isTouchDevice,
 }: {
@@ -231,7 +231,7 @@ function WaveDropReaction({
   readonly findNativeEmoji: ReturnType<typeof useEmoji>["findNativeEmoji"];
   readonly reaction: ApiDropReaction;
   readonly onOpenDetailDialog: (reactionKey: string) => void;
-  readonly onLoadDetails: () => Promise<void> | null;
+  readonly onTooltipOpenChange: (reactionKey: string, isOpen: boolean) => void;
   readonly isDetailsLoading: boolean;
   readonly isTouchDevice: boolean;
 }) {
@@ -689,11 +689,19 @@ function WaveDropReaction({
     return { displayProfiles, moreCount };
   }, [reaction.profiles, total]);
 
-  const handlePointerEnter = useCallback(() => {
-    if (!isTouchDevice) {
-      onLoadDetails()?.catch(() => undefined);
-    }
-  }, [isTouchDevice, onLoadDetails]);
+  const handleTooltipOpenChange = useCallback(
+    (isOpen: boolean) => onTooltipOpenChange(reaction.reaction, isOpen),
+    [onTooltipOpenChange, reaction.reaction]
+  );
+
+  const showTooltip =
+    Boolean(emojiNode) && total !== 0 && !isTouchDevice && hydrated;
+
+  // Hiding or unmounting a chip can remove its tooltip without a close event.
+  useEffect(
+    () => () => handleTooltipOpenChange(false),
+    [handleTooltipOpenChange, showTooltip]
+  );
 
   const handleMoreClick = useCallback(
     (e: React.MouseEvent) => {
@@ -723,8 +731,6 @@ function WaveDropReaction({
         onClick={handleClick}
         disabled={!canReact}
         aria-disabled={!canReact}
-        onMouseEnter={handlePointerEnter}
-        onFocus={handlePointerEnter}
         {...(!isTouchDevice && { "data-tooltip-id": tooltipId })}
         data-text-selection-exclude="true"
         className={clsx(
@@ -750,11 +756,11 @@ function WaveDropReaction({
           </span>
         </div>
       </button>
-      {!isTouchDevice &&
-        hydrated &&
+      {showTooltip &&
         createPortal(
           <Tooltip
             id={tooltipId}
+            setIsOpen={handleTooltipOpenChange}
             delayShow={250}
             place="bottom"
             positionStrategy="fixed"

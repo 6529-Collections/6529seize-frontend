@@ -4,8 +4,7 @@ import { ApiE2eeReportCategory } from "@/generated/models/ApiE2eeReportCategory"
 import type { ApiE2eeTrustAndSafetyReport } from "@/generated/models/ApiE2eeTrustAndSafetyReport";
 import type { ApiE2eeTrustAndSafetyReportPage } from "@/generated/models/ApiE2eeTrustAndSafetyReportPage";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import { t, type MessageKey } from "@/i18n/messages";
 import {
   fetchE2eeReport,
   setE2eeReportHold,

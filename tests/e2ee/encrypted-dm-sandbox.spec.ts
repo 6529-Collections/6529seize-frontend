@@ -1,4 +1,11 @@
+import {
+  dropEncryptedAttachment,
+  checkEncryptedImageActions,
+} from "../support/e2ee/attachmentMedia";
 import type { BrowserContext } from "@playwright/test";
+import { ApiNotificationCause } from "../../generated/models/ApiNotificationCause";
+import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotificationsResponseV2";
+import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
 import { expect, test } from "../testHelpers";
 import {
   closeE2eeUsers,
@@ -71,6 +78,102 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await closeE2eeUsers(open);
   });
 
+  test("encrypted notifications align sender details and keep the account tooltip beside the avatar", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    sessions.push(alice);
+    const groupId = `0x${"1".repeat(64)}`;
+    await alice.page.route("**/api/v2/notifications?*", async (route) => {
+      // One page: older pages (id_less_than) are empty, as the API answers.
+      if (new URL(route.request().url()).searchParams.has("id_less_than")) {
+        await route.fulfill({ json: { unread_count: 0, notifications: [] } });
+        return;
+      }
+      const notifications: ApiNotificationsResponseV2 = {
+        unread_count: 0,
+        notifications: [
+          {
+            id: 1,
+            cause: ApiNotificationCause.E2EeMessage,
+            created_at: Date.now(),
+            read_at: Date.now(),
+            related_identity: {
+              id: users.bob.profileId,
+              handle: "bob",
+              primary_address: users.bob.wallet,
+              pfp: "/favicon.png",
+              level: 82,
+              classification: ApiProfileClassification.Pseudonym,
+              badges: {
+                artist_of_memes: 1,
+                artist_of_main_stage_submissions: 0,
+              },
+            },
+            related_drops: [],
+            additional_context: { encrypted_group: groupId },
+          },
+        ],
+      };
+      await route.fulfill({ json: notifications });
+    });
+    await gotoPath(alice.page, "/notifications");
+    const sender = alice.page.getByRole("link", { name: "bob", exact: true });
+    const entry = alice.page.getByRole("article").filter({ has: sender });
+    const level = entry.getByRole("img", { name: "Level 82" });
+    await expect(sender).toHaveAttribute("href", "/bob", { timeout: 60_000 });
+    await expect(level).toBeVisible();
+    await expect(
+      entry.getByRole("button", { name: "View 1 minted meme" })
+    ).toBeVisible();
+    await expect(
+      entry.getByRole("link", {
+        name: /^(Open encrypted chat|Set up Encrypted DMs)$/,
+      })
+    ).toHaveAttribute("href", `/messages/encrypted/${groupId}`);
+    await expect
+      .poll(async () => {
+        const [senderBox, levelBox] = await Promise.all([
+          sender.boundingBox(),
+          level.boundingBox(),
+        ]);
+        if (!senderBox || !levelBox) return null;
+        return Math.abs(
+          senderBox.y + senderBox.height / 2 - levelBox.y - levelBox.height / 2
+        );
+      })
+      .toBeLessThanOrEqual(1);
+
+    if (!isMobileWebProject(testInfo.project.name)) {
+      await alice.page.setViewportSize({ width: 1100, height: 540 });
+      const account = alice.page.getByRole("button", {
+        name: "Open account and profiles menu",
+      });
+      await account.hover();
+      const tooltip = alice.page
+        .getByRole("tooltip")
+        .filter({ hasText: "Encrypted DMs:" });
+      await expect(tooltip).toBeVisible();
+      await expect
+        .poll(async () => {
+          const [anchor, popup] = await Promise.all([
+            account.boundingBox(),
+            tooltip.boundingBox(),
+          ]);
+          return Boolean(
+            anchor &&
+            popup &&
+            popup.x >= anchor.x + anchor.width &&
+            popup.y >= 0 &&
+            popup.y + popup.height <= 540
+          );
+        })
+        .toBe(true);
+    }
+  });
+
   test("iPad app keeps the back arrow when rotating into landscape", async ({
     baseURL,
     browser,
@@ -91,7 +194,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       );
     }
     await alice.page.setViewportSize({ width: 834, height: 1194 });
-    await enroll(alice);
+    await enroll(alice, { app: true });
     await enroll(bob);
     await startChat(alice, ["bob"]);
     const chatUrl = alice.page.url();
@@ -262,9 +365,9 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await (await openMessageActions(alice.page, typoRow))
       .getByRole("menuitem", { name: "Edit" })
       .click();
-    await expect(composer(alice.page)).toHaveValue(typo);
+    await expect(composer(alice.page)).toHaveText(typo);
     await composer(alice.page).fill(fixed);
-    await composer(alice.page).press("Enter");
+    await alice.page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(messageRow(alice.page, fixed)).toBeVisible();
     const bobFixed = messageRow(bob.page, fixed);
     await expect(bobFixed).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
@@ -364,30 +467,42 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
 
     // Story 9: the image is encrypted in the browser and uploaded as a blob.
     const caption = "Here is the picture.";
+    const pickedName = "picked-pixel.png";
     const chooser = alice.page.waitForEvent("filechooser");
-    // Keyboard activation: on phones the dev-only Next.js badge overlaps the
-    // composer's bottom-left attach button.
     await alice.page
-      .getByRole("button", { name: "Attach files" })
-      .press("Enter");
+      .getByRole("button", { name: "Attach files", exact: true })
+      .click();
     await (
       await chooser
     ).setFiles({
-      name: "pixel.png",
+      name: pickedName,
       mimeType: "image/png",
       buffer: Buffer.from(PIXEL_PNG_BASE64, "base64"),
     });
     await expect(
       alice.page
         .getByRole("list", { name: "Attachments" })
-        .getByText("pixel.png")
+        .getByText(pickedName, { exact: true })
+    ).toBeVisible();
+    await dropEncryptedAttachment(alice.page, {
+      name: "pixel.png",
+      mimeType: "image/png",
+      base64: PIXEL_PNG_BASE64,
+    });
+    await expect(
+      alice.page
+        .getByRole("list", { name: "Attachments" })
+        .getByText("pixel.png", { exact: true })
     ).toBeVisible();
     await sendMessage(alice.page, caption);
-    await expect(
-      messageRow(alice.page, caption).getByRole("img", {
-        name: "Image: pixel.png",
-      })
-    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    for (const filename of [pickedName, "pixel.png"]) {
+      await expect(
+        messageRow(alice.page, caption).getByRole("img", {
+          name: `Image: ${filename}`,
+          exact: true,
+        })
+      ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    }
 
     // Story 8: bob's list shows the unread message and its preview.
     await expect(bobRow.getByText("1 unread message")).toBeAttached({
@@ -395,15 +510,24 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     });
     await expect(bobRow).toContainText(caption);
     await bobRow.click();
-    const image = messageRow(bob.page, caption).getByRole("img", {
-      name: "Image: pixel.png",
-    });
-    await expect(image).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
-    await expect
-      .poll(() =>
-        image.evaluate((element: HTMLImageElement) => element.naturalWidth)
-      )
-      .toBe(1);
+    for (const filename of [pickedName, "pixel.png"]) {
+      const image = messageRow(bob.page, caption).getByRole("img", {
+        name: `Image: ${filename}`,
+        exact: true,
+      });
+      await expect(image).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
+      await expect
+        .poll(() =>
+          image.evaluate((element: HTMLImageElement) => element.naturalWidth)
+        )
+        .toBe(1);
+      await checkEncryptedImageActions(
+        bob.page,
+        image,
+        filename,
+        filename === pickedName ? "pixel.png" : undefined
+      );
+    }
     await gotoPath(bob.page, ENCRYPTED_ROUTE);
     await expect(conversationListRow(bob.page, "alice")).toBeVisible({
       timeout: E2EE_UI_TIMEOUT_MS,
@@ -421,5 +545,68 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       PIXEL_PNG_BASE64,
     ]);
     expect(scan.found).toEqual([]);
+  });
+  test("a restarted DM has one inbox entry and keeps earlier history reachable", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    sessions.push(alice, bob);
+    await enroll(alice);
+    await enroll(bob);
+    await startChat(alice, ["bob"]);
+    const oldUrl = alice.page.url();
+    await sendMessage(alice.page, "An earlier encrypted message");
+    await openConversationFromList(bob.page, "alice");
+    await expectMessage(bob.page, "An earlier encrypted message");
+    await alice.page
+      .getByRole("button", { name: "Chat info", exact: true })
+      .click();
+    await alice.page
+      .getByRole("dialog", { name: "Chat info", exact: true })
+      .getByRole("button", { name: "Leave chat", exact: true })
+      .click();
+    await alice.page
+      .getByRole("dialog", { name: "Leave this chat?", exact: true })
+      .getByRole("button", { name: "Leave chat", exact: true })
+      .click();
+    const resume = alice.page.getByRole("button", {
+      name: "Continue encrypted chat",
+      exact: true,
+    });
+    await expect(resume).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await resume.click();
+    await expect(alice.page).not.toHaveURL(oldUrl, {
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    const freshUrl = alice.page.url();
+    await sendMessage(alice.page, "A fresh encrypted message");
+    await gotoPath(alice.page, ENCRYPTED_ROUTE);
+    const row = conversationListRow(alice.page, "bob");
+    await expect(row).toHaveCount(1);
+    await row.click();
+    await expect(alice.page).toHaveURL(freshUrl);
+    const history = alice.page.getByRole("combobox", {
+      name: "Chat history",
+      exact: true,
+    });
+    await expect(history.getByRole("option")).toHaveCount(2);
+    const oldGroup = new URL(oldUrl).pathname.split("/").at(-1)!;
+    await history.selectOption(oldGroup);
+    await expect(alice.page).toHaveURL(oldUrl);
+    await expectMessage(alice.page, "An earlier encrypted message");
+    await expect(composer(alice.page)).toHaveCount(0);
+    await alice.page
+      .getByRole("link", { name: "Open current chat", exact: true })
+      .click();
+    await expectMessage(alice.page, "A fresh encrypted message");
+    await expect(composer(alice.page)).toBeEnabled();
+    expect(
+      await alice.page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth
+      )
+    ).toBe(true);
   });
 });

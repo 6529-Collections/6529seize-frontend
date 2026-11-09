@@ -32,8 +32,13 @@ const MAX_DEVICES = 10;
 const MAX_ONE_TIME = 100;
 const MAX_KEY_PACKAGE_BYTES = 4096;
 const MAX_WELCOME_BYTES = 3.5 * 1024 * 1024;
-/** 0x004F, X-Wing (contract 3.6); the backend accepts no other suite. */
+/**
+ * MLS suites (D172; mirrors the backend's e2ee-suite-policy): v1 grants name
+ * 0x004F, grant v2 signs a set. A request that names no suite means 0x004F.
+ */
 const E2EE_CIPHERSUITE = 0x004f;
+const E2EE_ACCEPTED_SUITES = new Set([0x004f, 0x004e]);
+const E2EE_GRANT_MAX_SUITES = 4;
 const MAX_CHUNK_BYTES = 1024 * 1024;
 const MAX_BLOB_BYTES = 25 * 1024 * 1024;
 const MAX_PROPOSALS_PER_EPOCH = 64;
@@ -58,6 +63,74 @@ const GRANT_TYPES = {
     { name: "origin", type: "string" },
   ],
 };
+// Grant v2 (D172): domain version "2" and a suite set.
+const GRANT_DOMAIN_V2 = { ...GRANT_DOMAIN, version: "2" };
+const GRANT_TYPES_V2 = {
+  MlsDeviceGrant: [
+    { name: "statement", type: "string" },
+    { name: "wallet", type: "address" },
+    { name: "deviceKey", type: "bytes32" },
+    { name: "ciphersuites", type: "uint16[]" },
+    { name: "issuedAt", type: "uint64" },
+    { name: "expiresAt", type: "uint64" },
+    { name: "origin", type: "string" },
+  ],
+};
+
+/** 1 to 4 code points, strictly ascending. */
+const isCanonicalSuites = (suites) =>
+  Array.isArray(suites) &&
+  suites.length >= 1 &&
+  suites.length <= E2EE_GRANT_MAX_SUITES &&
+  suites.every(
+    (suite, index) =>
+      Number.isInteger(suite) &&
+      suite >= 1 &&
+      suite <= 0xffff &&
+      (index === 0 || suite > suites[index - 1])
+  );
+
+/**
+ * The suites the server accepts (backend e2eeAcceptedSuites): both while the
+ * transition window is open, then 0x004E only (D172).
+ */
+function acceptedSuites(windowOpen) {
+  return windowOpen
+    ? E2EE_ACCEPTED_SUITES
+    : new Set([...E2EE_ACCEPTED_SUITES].filter((s) => s !== E2EE_CIPHERSUITE));
+}
+
+/**
+ * What is wrong with a grant's suite terms, or null (the backend's
+ * findE2eeGrantSuiteProblem plus the transition window).
+ */
+function grantSuiteProblem(grant, v1Accepted) {
+  if (grant.version === 2) {
+    const accepted = acceptedSuites(v1Accepted);
+    if (
+      !isCanonicalSuites(grant.ciphersuites) ||
+      !grant.ciphersuites.some((suite) => accepted.has(suite))
+    ) {
+      return "ciphersuites";
+    }
+    return grant.ciphersuite === grant.ciphersuites[0] ? null : "ciphersuite";
+  }
+  if (grant.version !== undefined && grant.version !== 1) {
+    return "version";
+  }
+  if (grant.ciphersuite !== E2EE_CIPHERSUITE) {
+    return "ciphersuite";
+  }
+  return v1Accepted ? null : "grant_version";
+}
+
+/** The suite of an MLS 1.0 KeyPackage (bytes 0-1: version, 2-3: suite). */
+function keyPackageSuite(bytes) {
+  if (bytes.length < 4 || bytes[0] !== 0 || bytes[1] !== 1) {
+    return null;
+  }
+  return (bytes[2] << 8) | bytes[3];
+}
 
 // ---------------------------------------------------------------------------
 // Encodings (independent of lib/e2ee so the two implementations cross-check)
@@ -174,15 +247,18 @@ function grantStatement(deviceKey, expiresAt) {
 }
 
 function grantTypedData(grant) {
+  const v2 = grant.version === 2;
   return {
-    domain: GRANT_DOMAIN,
-    types: GRANT_TYPES,
+    domain: v2 ? GRANT_DOMAIN_V2 : GRANT_DOMAIN,
+    types: v2 ? GRANT_TYPES_V2 : GRANT_TYPES,
     primaryType: "MlsDeviceGrant",
     message: {
       statement: grantStatement(lower(grant.device_key), grant.expires_at),
       wallet: getAddress(grant.wallet),
       deviceKey: lower(grant.device_key),
-      ciphersuite: grant.ciphersuite,
+      ...(v2
+        ? { ciphersuites: grant.ciphersuites }
+        : { ciphersuite: grant.ciphersuite }),
       issuedAt: BigInt(grant.issued_at),
       expiresAt: BigInt(grant.expires_at),
       origin: grant.origin,
@@ -237,6 +313,8 @@ function createFakeDeliveryService(options = {}) {
     requests: [],
     nextId: 1,
     attachmentsEnabled: options.attachmentsEnabled !== false,
+    // D172 transition window: v1 grants are honoured while it is open.
+    v1GrantsAccepted: options.v1GrantsAccepted !== false,
   };
 
   const id = (prefix) => `${prefix}${s.nextId++}`;
@@ -264,6 +342,24 @@ function createFakeDeliveryService(options = {}) {
       (d) => d.profile_id === profileId && isActive(d)
     );
 
+  /** Signed and accepted suites (no aliases), as e2eeDeviceSuites. */
+  const deviceSuites = (device) => {
+    if (device.grant.version === 2) {
+      const accepted = acceptedSuites(s.v1GrantsAccepted);
+      return device.grant.ciphersuites.filter((suite) => accepted.has(suite));
+    }
+    return s.v1GrantsAccepted && device.grant.ciphersuite === E2EE_CIPHERSUITE
+      ? [E2EE_CIPHERSUITE]
+      : [];
+  };
+
+  const canJoin = (device, suite) => deviceSuites(device).includes(suite);
+
+  const joinableDevicesOf = (profileId, suite) =>
+    activeDevicesOf(profileId).filter((d) => canJoin(d, suite));
+
+  const newPool = () => ({ oneTime: [], lastResort: new Map() });
+
   function requireOwnDevice(profileId, deviceKey) {
     const device = s.devices.get(lower(deviceKey));
     if (!device || device.profile_id !== profileId || !isActive(device)) {
@@ -283,7 +379,7 @@ function createFakeDeliveryService(options = {}) {
     const lifetime = grant.expires_at - grant.issued_at;
     const aligned = grant.expires_at % 60 === 0;
     if (
-      grant.ciphersuite !== E2EE_CIPHERSUITE ||
+      grantSuiteProblem(grant, s.v1GrantsAccepted) !== null ||
       lifetime <= 0 ||
       lifetime > GRANT_MAX_LIFETIME_S ||
       !aligned
@@ -329,7 +425,7 @@ function createFakeDeliveryService(options = {}) {
   }
 
   const MLS_RESOURCE =
-    /^- urn:6529:mls-device-grant:v1:(\d+):([0-9a-f]{64}):(\d+)$/m;
+    /^- urn:6529:mls-device-grant:v([12]):(\d+(?:\.\d+){0,3}):([0-9a-f]{64}):(\d+)$/m;
 
   /** NC8: the MLS terms of a stored combined sign-in grant. */
   async function verifyLoginGrant(profileId, grantId) {
@@ -345,16 +441,20 @@ function createFakeDeliveryService(options = {}) {
     if (!match || !issuedAt || !domain) {
       fail(400, "E2EE_BAD_GRANT");
     }
+    const version = Number(match[1]);
+    const suites = match[2].split(".").map(Number);
     const grant = {
+      ...(version === 2 ? { version: 2, ciphersuites: suites } : {}),
       wallet: lower(stored.wallet),
-      device_key: `0x${match[2]}`,
-      ciphersuite: Number(match[1]),
+      device_key: `0x${match[3]}`,
+      ciphersuite: suites[0],
       issued_at: Math.floor(Date.parse(issuedAt[1]) / 1000),
-      expires_at: Number(match[3]),
+      expires_at: Number(match[4]),
       origin: domain[1],
     };
     if (
-      grant.ciphersuite !== E2EE_CIPHERSUITE ||
+      (version === 1 && suites.length !== 1) ||
+      grantSuiteProblem(grant, s.v1GrantsAccepted) !== null ||
       grant.expires_at * 1000 <= now() ||
       hashMessage(stored.message) !== lower(grantId)
     ) {
@@ -435,7 +535,7 @@ function createFakeDeliveryService(options = {}) {
       wallet_signature: lower(input.signature),
       grant_message: input.grantMessage,
       verified_via: "eoa",
-      label,
+      label: existing?.label ?? label,
       platform: ["web", "desktop", "phone"].includes(body.platform)
         ? body.platform
         : "web",
@@ -446,7 +546,7 @@ function createFakeDeliveryService(options = {}) {
     };
     s.devices.set(key, device);
     if (!s.keyPackages.has(key)) {
-      s.keyPackages.set(key, { oneTime: [], lastResort: null });
+      s.keyPackages.set(key, newPool());
     }
     emit(
       [
@@ -507,7 +607,7 @@ function createFakeDeliveryService(options = {}) {
         removeFromRoster(group, target, group.epoch);
       }
     }
-    s.keyPackages.set(target, { oneTime: [], lastResort: null });
+    s.keyPackages.set(target, newPool());
     s.deliveries.delete(target);
     emit([profileId, ...sharing], "E2EE_DEVICE_REVOKED", {
       profile_id: profileId,
@@ -516,41 +616,62 @@ function createFakeDeliveryService(options = {}) {
     return device;
   }
 
+  /** Counts every suite, as the backend's status does. */
   function keyPackageStatus(deviceKey) {
-    const pool = s.keyPackages.get(deviceKey) || {
-      oneTime: [],
-      lastResort: null,
-    };
+    const pool = s.keyPackages.get(deviceKey) || newPool();
     const t = now() / 1000;
+    const lastResort = [...pool.lastResort.values()].map((kp) => kp.expires_at);
     return {
       device_key: deviceKey,
       one_time_available: pool.oneTime.filter((kp) => kp.expires_at > t).length,
-      last_resort_expires_at: pool.lastResort
-        ? pool.lastResort.expires_at
+      last_resort_expires_at: lastResort.length
+        ? Math.max(...lastResort)
         : null,
     };
   }
 
   function uploadKeyPackages(profileId, deviceKey, body) {
-    requireOwnDevice(profileId, deviceKey);
+    const device = requireOwnDevice(profileId, deviceKey);
     const items = body.key_packages || [];
     if (items.length < 1 || items.length > 100) {
       fail(400, "E2EE_TOO_LARGE");
     }
+    // D172: each KeyPackage names a suite this device's grant allows, with
+    // at most one last-resort per suite.
+    const suites = deviceSuites(device);
+    const parsed = items.map((item) => {
+      const bytes = unb64(item.data);
+      if (bytes.length > MAX_KEY_PACKAGE_BYTES) {
+        fail(413, "E2EE_TOO_LARGE");
+      }
+      const suite = keyPackageSuite(bytes);
+      if (suite === null || !suites.includes(suite)) {
+        fail(400, "E2EE_BAD_REQUEST");
+      }
+      return { ...item, suite };
+    });
+    const lastResortSuites = parsed
+      .filter((item) => item.last_resort)
+      .map((item) => item.suite);
+    if (new Set(lastResortSuites).size !== lastResortSuites.length) {
+      fail(400, "E2EE_BAD_REQUEST");
+    }
     const pool = s.keyPackages.get(deviceKey);
     // Retention (7.2): KeyPackages are pruned at expiry.
     pool.oneTime = pool.oneTime.filter((kp) => kp.expires_at > now() / 1000);
-    for (const item of items) {
-      if (unb64(item.data).length > MAX_KEY_PACKAGE_BYTES) {
-        fail(413, "E2EE_TOO_LARGE");
-      }
+    for (const item of parsed) {
+      const kp = {
+        data: item.data,
+        expires_at: item.expires_at,
+        suite: item.suite,
+      };
       if (item.last_resort) {
-        pool.lastResort = { data: item.data, expires_at: item.expires_at };
+        pool.lastResort.set(item.suite, kp);
       } else {
         if (pool.oneTime.length >= MAX_ONE_TIME) {
           fail(409, "E2EE_TOO_LARGE");
         }
-        pool.oneTime.push({ data: item.data, expires_at: item.expires_at });
+        pool.oneTime.push(kp);
       }
     }
     return keyPackageStatus(deviceKey);
@@ -613,50 +734,61 @@ function createFakeDeliveryService(options = {}) {
     return null;
   }
 
-  function decide(callerProfileId, targetProfileId) {
+  function decide(callerProfileId, targetProfileId, suite = E2EE_CIPHERSUITE) {
     const reason =
       callerProfileId === targetProfileId
         ? null
         : admissionReason(callerProfileId, targetProfileId);
     if (reason) {
       return {
-        status:
-          reason === "DM_SENDER_BLOCKED_RECIPIENT" ? "BLOCKED" : "POLICY",
+        status: reason === "DM_SENDER_BLOCKED_RECIPIENT" ? "BLOCKED" : "POLICY",
         reason,
       };
     }
     return {
-      status: activeDevicesOf(targetProfileId).length > 0 ? "OK" : "NO_DEVICES",
+      status:
+        joinableDevicesOf(targetProfileId, suite).length > 0
+          ? "OK"
+          : "NO_DEVICES",
       reason: null,
     };
   }
 
-  function policy(callerProfileId, targetProfileId) {
-    return decide(callerProfileId, targetProfileId).status;
+  /** A profile already in the group skips admission; only devices count. */
+  const rosterStatus = (targetProfileId, suite) =>
+    joinableDevicesOf(targetProfileId, suite).length > 0 ? "OK" : "NO_DEVICES";
+
+  function policy(callerProfileId, targetProfileId, suite) {
+    return decide(callerProfileId, targetProfileId, suite).status;
   }
 
-  function popKeyPackage(deviceKey) {
+  function popKeyPackage(deviceKey, suite) {
     const pool = s.keyPackages.get(deviceKey);
     if (!pool) {
       return null;
     }
     const t = now() / 1000;
     pool.oneTime = pool.oneTime.filter((kp) => kp.expires_at > t);
-    const oneTime = pool.oneTime.shift();
-    if (oneTime) {
+    const index = pool.oneTime.findIndex((kp) => kp.suite === suite);
+    if (index >= 0) {
+      const [oneTime] = pool.oneTime.splice(index, 1);
       return { data: oneTime.data, last_resort: false };
     }
-    if (pool.lastResort && pool.lastResort.expires_at > t) {
-      return { data: pool.lastResort.data, last_resort: true };
+    const lastResort = pool.lastResort.get(suite);
+    if (lastResort && lastResort.expires_at > t) {
+      return { data: lastResort.data, last_resort: true };
     }
     return null;
   }
 
   function claim(profileId, body) {
-    const claimer = requireOwnDevice(
-      profileId,
-      body.claimer_device_key
-    ).device_key;
+    const claimerDevice = requireOwnDevice(profileId, body.claimer_device_key);
+    const claimer = claimerDevice.device_key;
+    // The request's suite, else the claimer's (v1 suite or lowest of v2).
+    const suite = body.ciphersuite ?? claimerDevice.grant.ciphersuite;
+    if (!canJoin(claimerDevice, suite)) {
+      fail(400, "E2EE_BAD_REQUEST");
+    }
     const group = body.group ? s.groups.get(lower(body.group)) : null;
     const claimerInGroup = group ? group.roster.has(claimer) : false;
     const results = (body.targets || []).map((target) => {
@@ -666,10 +798,8 @@ function createFakeDeliveryService(options = {}) {
           (entry) => entry.profile_id === target.profile_id
         );
       const status = inRoster
-        ? activeDevicesOf(target.profile_id).length > 0
-          ? "OK"
-          : "NO_DEVICES"
-        : policy(profileId, target.profile_id);
+        ? rosterStatus(target.profile_id, suite)
+        : policy(profileId, target.profile_id, suite);
       if (status !== "OK") {
         return { profile_id: target.profile_id, status, key_packages: [] };
       }
@@ -677,11 +807,11 @@ function createFakeDeliveryService(options = {}) {
         ? new Set(target.device_keys.map(lower))
         : null;
       const keyPackages = [];
-      for (const device of activeDevicesOf(target.profile_id)) {
+      for (const device of joinableDevicesOf(target.profile_id, suite)) {
         if (wanted && !wanted.has(device.device_key)) {
           continue;
         }
-        const kp = popKeyPackage(device.device_key);
+        const kp = popKeyPackage(device.device_key, suite);
         if (kp) {
           keyPackages.push({
             device,
@@ -700,13 +830,14 @@ function createFakeDeliveryService(options = {}) {
   }
 
   function eligibility(profileId, body) {
+    const suite = body.ciphersuite ?? E2EE_CIPHERSUITE;
     return {
       results: (body.profile_ids || []).map((target) => {
-        const { status, reason } = decide(profileId, target);
+        const { status, reason } = decide(profileId, target, suite);
         return {
           profile_id: target,
           status,
-          active_devices: activeDevicesOf(target).length,
+          active_devices: joinableDevicesOf(target, suite).length,
           ...(reason ? { reason } : {}),
         };
       }),
@@ -846,11 +977,13 @@ function createFakeDeliveryService(options = {}) {
         fail(403, "E2EE_POLICY");
       }
       if (!inRoster.has(device.profile_id) && device.profile_id !== profileId) {
-        const status = policy(profileId, device.profile_id);
-        if (status === "BLOCKED") {
+        // Admission only, as the backend: the added device is in hand, so
+        // device counts (and their suites) do not apply.
+        const reason = admissionReason(profileId, device.profile_id);
+        if (reason === "DM_SENDER_BLOCKED_RECIPIENT") {
           fail(403, "E2EE_BLOCKED");
         }
-        if (status !== "OK") {
+        if (reason) {
           fail(403, "E2EE_POLICY");
         }
       }
@@ -1237,7 +1370,12 @@ function createFakeDeliveryService(options = {}) {
     const device = requireOwnDevice(profileId, deviceKey);
     const blob = requireBlob(blobId);
     const group = requireGroup(blob.group);
-    if (!group.history.has(device.device_key)) {
+    // D172: a profile keeps reading a superseded conversation's attachments
+    // from its next device (any of its devices was ever on the roster).
+    const profileWasMember = [...group.history.keys()].some(
+      (key) => s.devices.get(key)?.profile_id === device.profile_id
+    );
+    if (!profileWasMember) {
       fail(404, "E2EE_NOT_MEMBER");
     }
     const data = blob.chunks.get(index);
@@ -1299,13 +1437,31 @@ function createFakeDeliveryService(options = {}) {
     [
       "GET",
       /^e2ee\/profiles\/([^/]+)\/devices$/,
-      (c, [pid]) =>
-        [...s.devices.values()].filter(
+      (c, [pid]) => {
+        // D172: only devices able to join groups of the suite (default 0x004F).
+        const suite = c.query?.ciphersuite
+          ? Number(c.query.ciphersuite)
+          : E2EE_CIPHERSUITE;
+        return [...s.devices.values()].filter(
           (d) =>
             d.profile_id === decodeURIComponent(pid) &&
+            canJoin(d, suite) &&
             (d.revoked_at === null ||
               now() - d.revoked_at <= REVOKED_VISIBLE_MS)
-        ),
+        );
+      },
+    ],
+    [
+      "POST",
+      /^e2ee\/devices\/(0x[0-9a-f]+)\/label$/,
+      (c, [key]) => {
+        const device = s.devices.get(key);
+        if (device?.profile_id !== c.profileId || device.revoked_at !== null) {
+          fail(403, "E2EE_NOT_YOUR_DEVICE");
+        }
+        device.label = c.body.label;
+        return device;
+      },
     ],
     [
       "POST",
@@ -1421,7 +1577,13 @@ function createFakeDeliveryService(options = {}) {
       };
     }
     if (s.gate && method === "POST" && s.gate.path.test(path)) {
-      await new Promise((resolve) => s.gate.waiters.push(resolve));
+      const gate = s.gate;
+      await new Promise((resolve) => {
+        gate.waiters.push(resolve);
+        for (const notify of gate.arrivals.splice(0)) {
+          notify();
+        }
+      });
     }
     const fault = takeFault(method, path);
     if (fault) {
@@ -1534,10 +1696,15 @@ function createFakeDeliveryService(options = {}) {
      * commits for the same epoch.
      */
     hold(path) {
-      const gate = { path, waiters: [] };
+      const gate = { path, waiters: [], arrivals: [] };
       s.gate = gate;
       return {
         waiting: () => gate.waiters.length,
+        /** Resolves once a matching POST is being held. */
+        arrived: () =>
+          gate.waiters.length > 0
+            ? Promise.resolve()
+            : new Promise((resolve) => gate.arrivals.push(resolve)),
         release() {
           if (s.gate === gate) {
             s.gate = null;
@@ -1554,6 +1721,49 @@ function createFakeDeliveryService(options = {}) {
     },
     group(g) {
       return s.groups.get(lower(g)) || null;
+    },
+    /** D172: closes (false: v1 grants and 0x004F refused) or reopens the transition window. */
+    setV1GrantsAccepted(accepted) {
+      s.v1GrantsAccepted = accepted;
+    },
+    /**
+     * D172 sandbox seed: gives a registered device the record of one
+     * enrolled before grant v2, a v1 grant for 0x004F on the same key. The
+     * grant is signed by the device's wallet and verified like a
+     * registration, so grant, grant id and signature stay consistent. Its
+     * KeyPackages are dropped: such a device has none on 0x004E. Jest needs
+     * no seed, as it enrolls earlier devices on the earlier engine.
+     */
+    async markLegacySuiteDevice(deviceKey, signed) {
+      const device = s.devices.get(lower(deviceKey));
+      // Unknown (undefined) or revoked.
+      if (device?.revoked_at !== null) {
+        fail(404, "E2EE_NOT_FOUND");
+      }
+      const grant = signed?.grant;
+      if (
+        !grant ||
+        grant.version !== undefined ||
+        lower(grant.device_key) !== device.device_key
+      ) {
+        fail(400, "E2EE_BAD_GRANT");
+      }
+      const grantId = await verifyGrant(
+        device.profile_id,
+        grant,
+        signed.wallet_signature
+      );
+      device.grant = {
+        ...grant,
+        wallet: lower(grant.wallet),
+        device_key: device.device_key,
+      };
+      device.grant_id = lower(grantId);
+      device.wallet_signature = lower(signed.wallet_signature);
+      device.grant_message = null;
+      device.verified_via = "eoa";
+      s.keyPackages.set(device.device_key, newPool());
+      return device;
     },
     devicesOf(profileId) {
       return [...s.devices.values()].filter((d) => d.profile_id === profileId);
@@ -1592,8 +1802,17 @@ function createFakeApiClient(ds, profileId) {
     registerLoginGrantDevice: (body) =>
       call("POST", "e2ee/devices/login-grant", body),
     getDevice: (key) => call("GET", `e2ee/devices/${enc(key)}`),
-    getProfileDevices: (pid) =>
-      call("GET", `e2ee/profiles/${enc(pid)}/devices`),
+    getProfileDevices: (pid, ciphersuite) =>
+      call(
+        "GET",
+        `e2ee/profiles/${enc(pid)}/devices`,
+        undefined,
+        ciphersuite === undefined
+          ? undefined
+          : { ciphersuite: String(ciphersuite) }
+      ),
+    renameDevice: (key, name) =>
+      call("POST", `e2ee/devices/${enc(key)}/label`, { label: name }),
     revokeDevice: (key, body) =>
       call("POST", `e2ee/devices/${enc(key)}/revoke`, body),
     uploadKeyPackages: (key, body) =>

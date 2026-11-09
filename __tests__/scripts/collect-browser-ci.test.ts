@@ -213,6 +213,9 @@ it("partitions the full native competition pack across two uniquely identified j
     './bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"'
   );
   expect(step.env?.["NATIVE_COMPETITION_SHARD"]).toBe("${{ matrix.shard }}/2");
+  // Fresh CI checkouts never reuse Turbopack's dev filesystem cache; its
+  // restore can panic and stop the dev server mid-pack.
+  expect(step.env?.["NEXT_DEV_TURBOPACK_FS_CACHE"]).toBe("0");
   const upload = job.steps.find(
     (item) => item.name === "Upload app check artifacts"
   )!;
@@ -220,4 +223,21 @@ it("partitions the full native competition pack across two uniquely identified j
     "with.name",
     "app-pr-ci-results-${{ matrix.lane }}${{ matrix.shard && format('-{0}', matrix.shard) || '' }}-${{ github.event.pull_request.number || github.run_id }}"
   );
+});
+
+it.each([
+  "components/waves/CreateDrop.tsx",
+  "components/drops/create/lexical/plugins/mentions/MentionsPlugin.tsx",
+  "components/waves/create-drop-content/AllMentionConfirmationDialog.tsx",
+  "components/waves/create-drop-content/CreateDropSubmissionDialogs.tsx",
+  "components/waves/create-drop-content/useAllMentionConfirmation.ts",
+  "tests/social/waves-composer-sandbox.spec.ts",
+])("selects the all mention browser checks for %s", (file) => {
+  const outputs = select([file]);
+  expect(outputs["all_mention_confirmation_required"]).toBe("true");
+  expect(JSON.parse(outputs["core_playwright_matrix"]!)).toMatchObject({
+    include: expect.arrayContaining([
+      expect.objectContaining({ lane: "playwright-smoke" }),
+    ]),
+  });
 });

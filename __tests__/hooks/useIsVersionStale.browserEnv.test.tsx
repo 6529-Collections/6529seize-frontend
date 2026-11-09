@@ -58,7 +58,9 @@ describe("useIsVersionStale in a browser bundle", () => {
 
     expect(globalThis.fetch).toHaveBeenCalledWith("/api/version", {
       cache: "no-store",
-      headers: { "x-6529-client-version": PAGE_VERSION },
+      headers: expect.objectContaining({
+        "x-6529-client-version": PAGE_VERSION,
+      }),
     });
     expect(await findByText("fresh")).toBeInTheDocument();
   });

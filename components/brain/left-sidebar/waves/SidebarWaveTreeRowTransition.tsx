@@ -1,3 +1,4 @@
+import { isValidElement, memo } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type { AnimatedSidebarWaveTreeRow } from "@/hooks/useAnimatedSidebarWaveRows";
 
@@ -38,7 +39,7 @@ const getTransitionDurationClass = (row: AnimatedSidebarWaveTreeRow) => {
   return "tw-duration-200";
 };
 
-export function SidebarWaveTreeRowTransition({
+function SidebarWaveTreeRowTransitionInner({
   row,
   rowHeight,
   className,
@@ -66,3 +67,48 @@ export function SidebarWaveTreeRowTransition({
     </div>
   );
 }
+
+const shallowEqual = (
+  left: object | null | undefined,
+  right: object | null | undefined
+): boolean => {
+  if (left === right) return true;
+  if (!left || !right) return false;
+  const leftRecord = left as Record<string, unknown>;
+  const rightRecord = right as Record<string, unknown>;
+  const keys = Object.keys(leftRecord);
+  return (
+    keys.length === Object.keys(rightRecord).length &&
+    keys.every((key) => Object.is(leftRecord[key], rightRecord[key]))
+  );
+};
+
+// The list rebuilds its row objects, positions and row elements whenever any
+// wave's live unread values change. A row whose fields, position and row
+// element props are all equal renders the same output, so it is skipped.
+// Rows pass one element as children; anything else (arrays, fragments of
+// several children) compares unequal, so the row simply re-renders.
+const sameChildren = (left: ReactNode, right: ReactNode): boolean => {
+  if (Object.is(left, right)) return true;
+  if (!isValidElement(left) || !isValidElement(right)) return false;
+  return (
+    left.type === right.type &&
+    left.key === right.key &&
+    shallowEqual(left.props as object, right.props as object)
+  );
+};
+
+const areRowTransitionPropsEqual = (
+  previous: SidebarWaveTreeRowTransitionProps,
+  next: SidebarWaveTreeRowTransitionProps
+): boolean =>
+  previous.rowHeight === next.rowHeight &&
+  previous.className === next.className &&
+  shallowEqual(previous.row, next.row) &&
+  shallowEqual(previous.style, next.style) &&
+  sameChildren(previous.children, next.children);
+
+export const SidebarWaveTreeRowTransition = memo(
+  SidebarWaveTreeRowTransitionInner,
+  areRowTransitionPropsEqual
+);

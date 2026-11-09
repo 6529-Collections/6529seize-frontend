@@ -13,11 +13,17 @@ jest.mock("@/lib/device-signing/device-key-storage", () => ({
   },
 }));
 
+const mockRequestPersistentStorage = jest.fn(async () => undefined);
+jest.mock("@/lib/storage/persistent-storage", () => ({
+  requestPersistentStorage: () => mockRequestPersistentStorage(),
+}));
+
 import {
   allocateDeviceSeq,
   ensureDeviceKey,
   forgetDeviceGrant,
   getDeviceGrantStatus,
+  installSharedDeviceKey,
   listLocalDevicePublicKeys,
   saveDeviceGrant,
   subscribeToDeviceGrantChanges,
@@ -51,6 +57,7 @@ describe("device key store", () => {
   beforeAll(installNodeWebCrypto);
   beforeEach(() => {
     mockRecords.clear();
+    mockRequestPersistentStorage.mockClear();
   });
 
   it("creates one non-extractable key per lowercase wallet", async () => {
@@ -81,12 +88,39 @@ describe("device key store", () => {
       )
     ).resolves.toBe(false);
     expect(listener).not.toHaveBeenCalled();
+    expect(mockRequestPersistentStorage).not.toHaveBeenCalled();
 
     await expect(
       saveDeviceGrant(ADDRESS, grantFor(record.publicKeyHex))
     ).resolves.toBe(true);
     expect(listener).toHaveBeenCalledTimes(1);
+    // The key exists only in this browser: ask to keep its storage.
+    expect(mockRequestPersistentStorage).toHaveBeenCalledTimes(1);
     unsubscribe();
+  });
+
+  it("announces when importing a shared key installs a new grant", async () => {
+    const record = await ensureDeviceKey(ADDRESS);
+    const grant = grantFor(record.publicKeyHex, {
+      expires_at: Date.now() + DAY,
+    });
+    const listener = jest.fn();
+    const unsubscribe = subscribeToDeviceGrantChanges(listener);
+
+    try {
+      await installSharedDeviceKey({ ...record, grant });
+      expect(listener).toHaveBeenLastCalledWith({
+        address: ADDRESS.toLowerCase(),
+        saved: true,
+      });
+      await installSharedDeviceKey({ ...record, grant });
+      expect(listener).toHaveBeenLastCalledWith({
+        address: ADDRESS.toLowerCase(),
+        saved: false,
+      });
+    } finally {
+      unsubscribe();
+    }
   });
 
   it("allocates max(lastSeq + 1, now) and persists it before signing", async () => {

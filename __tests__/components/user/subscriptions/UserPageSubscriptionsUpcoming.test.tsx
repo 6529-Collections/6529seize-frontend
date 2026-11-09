@@ -1,10 +1,38 @@
 import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import { AuthContext } from "@/components/auth/Auth";
 import UserPageSubscriptionsUpcoming from "@/components/user/subscriptions/UserPageSubscriptionsUpcoming";
+import {
+  getUpcomingMintsAcrossSeasons,
+  isMintingToday,
+} from "@/components/meme-calendar/meme-calendar.helpers";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
+import * as localeFormat from "@/i18n/format";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import userEvent from "@testing-library/user-event";
+import { useNowMinting } from "@/hooks/useNowMinting";
 import { useQuery } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+
+jest.mock("@/hooks/useMediaQuery");
+
+jest.mock("@/hooks/useNowMinting", () => ({ useNowMinting: jest.fn() }));
+
+const mockNowMintingResult = {
+  nft: undefined,
+  isFetched: true,
+  isFetching: false,
+  isLoading: false,
+  error: null,
+  refetch: jest.fn(),
+};
 
 const mockInvalidateQueries = jest.fn();
 
@@ -103,6 +131,12 @@ describe("UserPageSubscriptionsUpcoming", () => {
   const mockSetToast = jest.fn();
 
   beforeEach(() => {
+    jest.mocked(useMediaQuery).mockReturnValue(false);
+    jest.mocked(isMintingToday).mockReturnValue(false);
+    jest
+      .mocked(getUpcomingMintsAcrossSeasons)
+      .mockReturnValue(mockUpcomingRows);
+    jest.mocked(useNowMinting).mockReturnValue(mockNowMintingResult);
     useQueryMock.mockImplementation(({ enabled }) => ({
       data: enabled
         ? {
@@ -146,6 +180,250 @@ describe("UserPageSubscriptionsUpcoming", () => {
     renderComponent();
     expect(screen.getByText("Upcoming Drops")).toBeInTheDocument();
   });
+
+  it("shows loading instead of an empty result while the request is pending", () => {
+    renderComponent({ memes_subscriptions: [], loading: true });
+    expect(screen.getByText("Loading upcoming drops")).toBeInTheDocument();
+    expect(
+      screen.queryByText("No upcoming drops found")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+  });
+
+  it("shows unavailable instead of an empty result after a failed request", () => {
+    renderComponent({ memes_subscriptions: [], error: true });
+    expect(screen.getByText("Unavailable")).toBeVisible();
+    expect(
+      screen.queryByText("No upcoming drops found")
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+  });
+
+  it("preserves the empty message for a successful empty response", () => {
+    renderComponent({ memes_subscriptions: [], loading: false, error: false });
+    expect(screen.getByText("No upcoming drops found")).toBeVisible();
+    expect(screen.queryByText("Unavailable")).not.toBeInTheDocument();
+  });
+
+  it("does not keep saying Loading settings after the settings request fails", () => {
+    renderComponent({ details: undefined, detailsError: true });
+    expect(screen.queryByText("Loading settings")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Unavailable")).toHaveLength(4);
+    expect(screen.getByText("The Memes #1")).toBeVisible();
+  });
+
+  it("shows the season on every row, including rows revealed by Show More", () => {
+    renderComponent();
+    expect(screen.getAllByText("SZN2")).toHaveLength(3);
+    expect(
+      screen.getByRole("heading", { name: "Upcoming Drops" }).parentElement
+    ).not.toHaveTextContent("SZN");
+    fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+    expect(screen.getAllByText("SZN2")).toHaveLength(4);
+  });
+
+  it("keeps season changes identifiable when the expanded list spans seasons", () => {
+    jest
+      .mocked(getUpcomingMintsAcrossSeasons)
+      .mockReturnValue([
+        ...mockUpcomingRows.slice(0, 3),
+        { ...mockUpcomingRows[3]!, seasonIndex: 2 },
+      ]);
+    renderComponent();
+    fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+    expect(screen.getAllByText("SZN2")).toHaveLength(3);
+    expect(screen.getAllByText("SZN3")).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", { name: "Upcoming Drops" }).parentElement
+    ).not.toHaveTextContent("SZN");
+    fireEvent.click(screen.getByRole("button", { name: "Show Less" }));
+    expect(screen.queryByText("SZN3")).not.toBeInTheDocument();
+  });
+
+  it("opens the full phone list in a sheet and restores focus on close", async () => {
+    jest.mocked(useMediaQuery).mockReturnValue(true);
+    const user = userEvent.setup();
+    renderComponent();
+    const opener = screen.getByRole("button", { name: "Show More" });
+    await user.click(opener);
+    const sheet = screen.getByRole("dialog", { name: "Upcoming Drops" });
+    await waitFor(() =>
+      expect(within(sheet).getByRole("heading")).toHaveFocus()
+    );
+    expect(within(sheet).getByText("The Memes #4")).toBeVisible();
+    expect(within(sheet).getAllByRole("switch")).toHaveLength(4);
+    await user.click(within(sheet).getByRole("button", { name: "Close" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    await waitFor(() => expect(opener).toHaveFocus());
+    expect(screen.queryByText("The Memes #4")).not.toBeInTheDocument();
+    expect(mockRequestAuth).not.toHaveBeenCalled();
+    expect(mockRefresh).not.toHaveBeenCalled();
+  });
+
+  it("places one amber funded boundary after its drop in both list views", () => {
+    renderComponent({ coverage: { funded_through: { token_id: 3 } } });
+    const marker = screen.getByText("Funded through");
+    expect(marker).toHaveClass("tw-text-amber-200");
+    fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+    expect(screen.getAllByText("Funded through")).toHaveLength(1);
+    expect(
+      within(marker).getByRole("link", { name: "The Memes #3" })
+    ).toHaveAttribute("href", "/the-memes/3");
+    expect(
+      screen
+        .getByText("The Memes #3", { selector: "span" })
+        .compareDocumentPosition(marker) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
+  it.each([false, true])(
+    "places one next-unfunded boundary before its drop when none are funded (readonly: %s)",
+    (readonly) => {
+      renderComponent({
+        readonly,
+        coverage: { next_unfunded: { token_id: 2 } },
+      });
+      const marker = screen.getByText("Next unfunded");
+      expect(marker).toHaveClass("tw-text-amber-200");
+      expect(
+        within(marker).getByRole("link", { name: "The Memes #2" })
+      ).toHaveAttribute("href", "/the-memes/2");
+      expect(
+        marker.compareDocumentPosition(
+          screen.getByText("The Memes #2", { selector: "span" })
+        ) & Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+      expect(screen.queryByText("Unfunded")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Top up" })
+      ).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+      expect(screen.getAllByText("Next unfunded")).toHaveLength(1);
+      expect(screen.queryByText("Unfunded")).not.toBeInTheDocument();
+      if (readonly) {
+        expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+        expect(screen.getAllByText("Subscribed", { exact: true })).toHaveLength(
+          2
+        );
+      } else {
+        expect(
+          screen.getByRole("switch", {
+            name: "Toggle subscription for The Memes #1",
+          })
+        ).toBeChecked();
+        expect(
+          screen.getByRole("switch", {
+            name: "Toggle subscription for The Memes #2",
+          })
+        ).not.toBeChecked();
+        expect(
+          screen.getByRole("switch", {
+            name: "Toggle subscription for The Memes #3",
+          })
+        ).toBeChecked();
+      }
+    }
+  );
+
+  it("does not duplicate the boundary at the next unfunded drop", () => {
+    renderComponent({
+      coverage: {
+        funded_through: { token_id: 1 },
+        next_unfunded: { token_id: 3 },
+      },
+    });
+    expect(screen.getAllByText("Funded through")).toHaveLength(1);
+    expect(screen.queryByText("Next unfunded")).not.toBeInTheDocument();
+    expect(screen.queryByText("Unfunded")).not.toBeInTheDocument();
+  });
+
+  it("reveals a later funding boundary with Show More", () => {
+    renderComponent({ coverage: { funded_through: { token_id: 4 } } });
+    expect(screen.queryByText("Funded through")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+    expect(screen.getAllByText("Funded through")).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Show Less" }));
+    expect(screen.queryByText("Funded through")).not.toBeInTheDocument();
+  });
+
+  it("does not request current artwork on days without a Minting Today row", () => {
+    renderComponent();
+    expect(useNowMinting).not.toHaveBeenCalled();
+  });
+
+  it("shows matching current artwork and keeps the mint-day lock when the image fails", () => {
+    jest.mocked(isMintingToday).mockReturnValue(true);
+    jest.mocked(useNowMinting).mockReturnValue({
+      ...mockNowMintingResult,
+      nft: {
+        id: 1,
+        contract: "0x123",
+        thumbnail: "https://example.com/meme-1.jpg",
+      } as ApiMemesExtendedData,
+    });
+    const { container } = renderComponent();
+    const image = container.querySelector("img");
+    expect(image).toHaveAttribute("src", "https://example.com/meme-1.jpg");
+    expect(
+      screen.getByRole("switch", {
+        name: "Toggle subscription for The Memes #1",
+      })
+    ).toBeDisabled();
+    fireEvent.error(image!);
+    expect(container.querySelector("img")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Minting Today" })).toBeVisible();
+    expect(screen.getByText("The Memes #1")).toBeVisible();
+    expect(
+      screen.getByRole("switch", {
+        name: "Toggle subscription for The Memes #1",
+      })
+    ).toBeDisabled();
+  });
+
+  it.each([
+    { id: 2, contract: "0x123" },
+    { id: 1, contract: "0x456" },
+  ])(
+    "omits artwork for a different token or contract ($id, $contract)",
+    (nft) => {
+      jest.mocked(isMintingToday).mockReturnValue(true);
+      jest.mocked(useNowMinting).mockReturnValue({
+        ...mockNowMintingResult,
+        nft: {
+          ...nft,
+          thumbnail: "https://example.com/other.jpg",
+        } as ApiMemesExtendedData,
+      });
+      const { container } = renderComponent({ readonly: true });
+      expect(container.querySelector("img")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Minting Today" })
+      ).toBeVisible();
+      expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([
+    { automatic: false, text: "You have to opt-in to each specific drop" },
+    {
+      automatic: true,
+      text: "Automatic airdrops of all eligible drops unless you opt-out",
+    },
+  ])(
+    "shows the mode explanation only to the owner (automatic=$automatic)",
+    ({ automatic, text }) => {
+      const details = { ...mockDetails, automatic };
+      const owner = renderComponent({ details });
+      expect(screen.getByText(text)).toBeVisible();
+      owner.unmount();
+
+      renderComponent({ details, readonly: true });
+      expect(screen.queryByText(text)).not.toBeInTheDocument();
+      expect(screen.getByText("The Memes #1")).toBeVisible();
+    }
+  );
 
   it("displays first 3 subscriptions by default", () => {
     renderComponent();
@@ -207,25 +485,20 @@ describe("UserPageSubscriptionsUpcoming", () => {
   it("displays dates for subscriptions", () => {
     renderComponent();
 
-    expect(screen.getByText("2024-01-01 / Monday")).toBeInTheDocument();
-    expect(screen.getByText("2024-01-02 / Tuesday")).toBeInTheDocument();
+    expect(screen.getByText("Mon, Jan 1, 2024")).toBeInTheDocument();
+    expect(screen.getByText("Tue, Jan 2, 2024")).toBeInTheDocument();
   });
 
   it("formats upcoming mint days as UTC calendar days", () => {
-    const {
-      formatFullDate,
-    } = require("@/components/meme-calendar/meme-calendar.helpers");
-
+    const format = jest.spyOn(localeFormat, "formatUtcDate");
     renderComponent();
-
-    expect(formatFullDate).toHaveBeenCalledWith(
-      mockUpcomingRows[0].utcDay,
-      "utc"
-    );
-    expect(formatFullDate).toHaveBeenCalledWith(
-      mockUpcomingRows[1].utcDay,
-      "utc"
-    );
+    expect(format).toHaveBeenCalledWith("en-US", mockUpcomingRows[0]!.utcDay, {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+    format.mockRestore();
   });
 
   it("shows minting today message when applicable", () => {
@@ -239,17 +512,13 @@ describe("UserPageSubscriptionsUpcoming", () => {
     expect(screen.getByText(/Minting Today/)).toBeInTheDocument();
   });
 
-  it("disables toggles in readonly mode", () => {
+  it("shows saved subscription statuses instead of toggles in readonly mode", () => {
     renderComponent({ readonly: true });
-
-    const toggles = screen.getAllByRole("button");
-    const subscriptionToggles = toggles.filter((toggle) =>
-      toggle.getAttribute("aria-label")?.includes("Toggle subscription")
-    );
-
-    subscriptionToggles.forEach((toggle) => {
-      expect(toggle).toBeDisabled();
-    });
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    expect(screen.getAllByText("Subscribed", { exact: true })).toHaveLength(2);
+    expect(screen.getByText("Not subscribed", { exact: true })).toBeVisible();
+    fireEvent.click(screen.getByText("Not subscribed", { exact: true }));
+    expect(mockRequestAuth).not.toHaveBeenCalled();
   });
 
   it("handles empty subscriptions list", () => {

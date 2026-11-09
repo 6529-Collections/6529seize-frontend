@@ -32,8 +32,8 @@ jest.mock("@tanstack/react-query", () => ({
   useMutation: () => ({ mutateAsync }),
   useQuery: () => ({ data: [] }),
 }));
-jest.mock("@/components/ipfs/IPFSContext", () => ({
-  useIpfsService: () => ({ addFile: jest.fn() }),
+jest.mock("@/services/api/profile-picture-upload-api", () => ({
+  uploadProfilePicture: jest.fn(),
 }));
 
 const authCtx = {

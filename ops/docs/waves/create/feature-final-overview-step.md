@@ -22,7 +22,7 @@ and the following settings:
 
 No configuration fields can be edited on this step. New waves open shared chat;
 add schedules, entry requirements, voting and outcomes afterward through
-[competition setup](../competitions/feature-manage-competitions.md).
+[decision setup](../competitions/feature-manage-competitions.md).
 
 ## Confirmation and Recovery
 

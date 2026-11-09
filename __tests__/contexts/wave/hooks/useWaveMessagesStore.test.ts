@@ -1,6 +1,7 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import useWaveMessagesStore from "@/contexts/wave/hooks/useWaveMessagesStore";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
+import { legacyMergeDrops } from "../../../lib/chat-store/legacyMergeDrops";
 
 describe("useWaveMessagesStore", () => {
   const baseDrop = {
@@ -754,5 +755,108 @@ describe("useWaveMessagesStore", () => {
     expect(result.current.getData("wave1")?.drops).toHaveLength(1);
     act(() => result.current.removeDrops("wave1", ["d1"]));
     expect(result.current.getData("wave1")?.drops).toHaveLength(0);
+  });
+});
+
+describe("useWaveMessagesStore empty batches and lookups", () => {
+  const drop = (id: string, serialNo: number) =>
+    ({
+      id,
+      serial_no: serialNo,
+      wave: { id: "wave1" },
+      author: { handle: "a" },
+      parts: [{ content: id }],
+      metadata: [],
+      created_at: serialNo * 1000,
+      title: "",
+      type: "FULL",
+    }) as any;
+
+  const populated = () => {
+    const hook = renderHook(() => useWaveMessagesStore());
+    act(() => {
+      hook.result.current.updateData({
+        key: "wave1",
+        drops: [drop("d1", 1), drop("d2", 2), drop("d3", 3)],
+      });
+    });
+    return hook;
+  };
+
+  const ids = (drops: readonly { readonly id: string }[] | undefined) =>
+    drops?.map((item) => item.id);
+
+  it("keeps a populated wave on an empty standard batch, as the old merge did", () => {
+    const { result } = populated();
+    const before = result.current.getData("wave1")!.drops;
+    act(() => result.current.updateData({ key: "wave1", drops: [] }));
+    const after = result.current.getData("wave1")!.drops;
+    expect(ids(after)).toEqual(ids(legacyMergeDrops([...before], [])));
+    expect(ids(after)).toEqual(["d3", "d2", "d1"]);
+  });
+
+  it("keeps a populated wave on an empty preserve-existing seed, as the old merge did", () => {
+    const { result } = populated();
+    const before = result.current.getData("wave1")!.drops;
+    const seed = Promise.resolve({ ok: false as const, waveId: "wave1" });
+    act(() => {
+      result.current.registerPendingServerFeedSeed("wave1", seed);
+      expect(
+        result.current.applyServerFeedSeed({
+          waveId: "wave1",
+          drops: [],
+          hasNextPage: false,
+          promise: seed,
+        })
+      ).toBe(true);
+    });
+    const after = result.current.getData("wave1")!.drops;
+    expect(ids(after)).toEqual(ids(legacyMergeDrops([], [...before])));
+    expect(ids(after)).toEqual(["d3", "d2", "d1"]);
+  });
+
+  it.each(["standard", "preserve-existing"] as const)(
+    "gives an empty wave no drops when every copy is tombstoned (%s)",
+    (policy) => {
+      const { result } = renderHook(() => useWaveMessagesStore());
+      act(() => {
+        result.current.removeDrop("wave1", "d1");
+        if (policy === "standard") {
+          result.current.updateData({ key: "wave1", drops: [drop("d1", 1)] });
+        } else {
+          const seed = Promise.resolve({ ok: false as const, waveId: "wave1" });
+          result.current.registerPendingServerFeedSeed("wave1", seed);
+          result.current.applyServerFeedSeed({
+            waveId: "wave1",
+            drops: [drop("d1", 1)] as any,
+            hasNextPage: false,
+            promise: seed,
+          });
+        }
+      });
+      expect(result.current.getData("wave1")?.drops).toEqual([]);
+    }
+  );
+
+  it("never applies an optimistic edit to a drop the wave no longer shows", () => {
+    const { result } = populated();
+    act(() => result.current.removeDrop("wave1", "d2"));
+    expect(
+      result.current.optimisticUpdateDrop({
+        waveId: "wave1",
+        dropId: "d2",
+        update: (draft) => ({ ...draft, title: "edited" }),
+      })
+    ).toBeNull();
+    act(() => {
+      expect(result.current.clearWave("wave1")).toBe(true);
+    });
+    expect(
+      result.current.optimisticUpdateDrop({
+        waveId: "wave1",
+        dropId: "d1",
+        update: (draft) => ({ ...draft, title: "edited" }),
+      })
+    ).toBeNull();
   });
 });

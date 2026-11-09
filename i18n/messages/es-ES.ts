@@ -22,7 +22,7 @@ import { ES_ES_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { ES_ES_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { ES_ES_THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
 import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
@@ -624,6 +624,7 @@ export const ES_ES_MESSAGES = {
   "drop.media.processingTimedOut": "El procesamiento de la imagen expiro.",
   "media.interactive.frameTitle": "Contenido HTML interactivo",
   "media.interactive.loading": "Cargando contenido interactivo",
+  "media.interactive.fullscreen": "Pantalla completa",
   "quickDm.regionAriaLabel": "Mensajes directos rápidos",
   "quickDm.openButtonAriaLabel": "Abrir mensajes directos rápidos",
   "quickDm.openButtonUnreadAriaLabel":
@@ -1142,14 +1143,14 @@ export const ES_ES_MESSAGES = {
   "waves.leaderboard.grid.voteSummary.standard":
     "Voto actual: {current} {unit}. Proyección: {projected} {unit}.",
   "waves.leaderboard.timeline.toggle":
-    "Mostrar u ocultar la cronología de decisiones",
-  "waves.leaderboard.timeline.decisionTimeline": "Cronología de decisiones",
+    "Mostrar u ocultar la cronología de resultados",
+  "waves.leaderboard.timeline.decisionTimeline": "Cronología de resultados",
   "waves.leaderboard.timeline.announcementHistory": "Historial de anuncios",
   "waves.leaderboard.timeline.paused": "En pausa",
   "waves.leaderboard.timeline.nextDecisionAfter":
-    "Próxima decisión después del {date}",
+    "Próximo resultado después del {date}",
   "waves.leaderboard.timeline.noDecisionScheduled":
-    "No hay ninguna decisión programada",
+    "No hay ningún resultado programado",
   "waves.leaderboard.timeline.noUpcomingEvents": "No hay próximos eventos",
   "waves.leaderboard.phase.nextWinnersIn": "Próximos ganadores anunciados en",
   "waves.leaderboard.phase.countdown": "{hours} h {minutes} min",
@@ -1174,7 +1175,7 @@ export const ES_ES_MESSAGES = {
   "waves.poll.status.voted": "Votado",
   "waves.poll.status.updated": "Actualizado",
   "waves.composer.placeholder.createDrop": "Crear un drop",
-  "waves.composer.placeholder.writeChatMessage": "Escribe un mensaje de chat",
+  "waves.composer.placeholder.writeChatMessage": "Escribe un mensaje",
   "waves.composer.placeholder.dropReply": "Responder con un drop",
   "waves.composer.placeholder.postReply": "Publicar una respuesta",
   "waves.composer.placeholder.quoteDrop": "Citar un drop",

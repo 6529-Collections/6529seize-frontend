@@ -58,6 +58,7 @@ const SANDBOX_SCHEDULED_WAVE_DESCRIPTION =
   "Local-only scheduled rank wave description for Playwright.";
 const SANDBOX_SCHEDULED_OUTCOME_TITLE = "Sandbox manual outcome";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_ALL_MENTION_CONTENT = "A wave announcement @all";
 const SANDBOX_POLL_QUESTION = "Which sandbox option do you prefer?";
 const SANDBOX_WAVE_GUIDELINES = Array.from(
   { length: 24 },
@@ -1244,7 +1245,10 @@ function isExpectedChatDropParts(parts, hasPoll) {
   }
 
   if (parts.length === 1) {
-    return isExpectedChatDropPart(parts[0], SANDBOX_CHAT_DROP_CONTENT);
+    return (
+      isExpectedChatDropPart(parts[0], SANDBOX_CHAT_DROP_CONTENT) ||
+      isExpectedChatDropPart(parts[0], SANDBOX_ALL_MENTION_CONTENT)
+    );
   }
 
   return (
@@ -1281,10 +1285,21 @@ function isExpectedChatDropSignerAddress(signerAddress) {
   return signerAddress === "" || isSameAddress(signerAddress, SANDBOX_WALLET);
 }
 
+// The web sends a plain lowercase UUID with every drop create (API #2318).
+function isExpectedClientDropId(clientDropId) {
+  return (
+    typeof clientDropId === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+      clientDropId
+    )
+  );
+}
+
 function isExpectedChatDropBody(body) {
   const hasPoll = isPlainObject(body?.poll);
   if (
     !hasOnlyKeys(body, [
+      "client_drop_id",
       "drop_type",
       "is_safe_signature",
       "mentioned_groups",
@@ -1305,6 +1320,7 @@ function isExpectedChatDropBody(body) {
 
   return (
     body.wave_id === SANDBOX_WAVE_ID &&
+    isExpectedClientDropId(body.client_drop_id) &&
     body.drop_type === "CHAT" &&
     body.title === null &&
     body.signature === null &&
@@ -1317,7 +1333,9 @@ function isExpectedChatDropBody(body) {
     Array.isArray(body.mentioned_users) &&
     body.mentioned_users.length === 0 &&
     Array.isArray(body.mentioned_groups) &&
-    body.mentioned_groups.length === 0 &&
+    (body.parts[0]?.content === SANDBOX_ALL_MENTION_CONTENT
+      ? body.mentioned_groups.length === 1 && body.mentioned_groups[0] === "ALL"
+      : body.mentioned_groups.length === 0) &&
     Array.isArray(body.mentioned_waves) &&
     body.mentioned_waves.length === 0 &&
     Array.isArray(body.metadata) &&
@@ -2451,6 +2469,8 @@ function loggedRequestBody(pathname, body) {
     const firstPart = Array.isArray(body.parts) ? body.parts[0] : null;
     return {
       wave_id: typeof body.wave_id === "string" ? body.wave_id : null,
+      client_drop_id:
+        typeof body.client_drop_id === "string" ? body.client_drop_id : null,
       drop_type: typeof body.drop_type === "string" ? body.drop_type : null,
       content: isPlainObject(firstPart) ? firstPart.content : null,
       poll: isPlainObject(body.poll)
@@ -2826,6 +2846,16 @@ const mockApiPatternReadRoutes = [
   { pattern: /^\/api\/v2\/waves\/[^/]+\/metadata$/, response: () => [] },
   { pattern: /^\/api\/v2\/drops\/[^/]+\/metadata$/, response: () => [] },
   { pattern: /^\/api\/v2\/drops\/[^/]+\/reactions$/, response: () => [] },
+  {
+    pattern: /^\/api\/identities\/profile-picture$/,
+    response: () => ({
+      ...localProfile,
+      query: "profile-picture",
+      handle: "profile-picture",
+      normalised_handle: "profile-picture",
+      pfp: "https://media.6529.io/ipfs/QmRT2Ur5E1GooeiCWxqToiQXnnok6drPYxuK8J3RLnaMg8",
+    }),
+  },
   { pattern: /^\/api\/identities\/[^/]+$/, response: () => localProfile },
   { pattern: /^\/api\/profiles\/[^/]+\/proxies$/, response: () => [] },
 ];
@@ -2902,7 +2932,16 @@ function handleNotificationRead(pathname, url, res) {
     const ids = url.searchParams.get("ids").split(",");
     return writeJsonResponse(res, {
       ...emptyPage(),
-      data: ids.includes(artworkNotificationDrop.id) ? [artworkNotificationDrop] : [],
+      data: ids.includes(artworkNotificationDrop.id)
+        ? [artworkNotificationDrop]
+        : [],
+    });
+  }
+  if (pathname === "/api/v2/notifications/unread-count") {
+    return writeJsonResponse(res, {
+      unread_count: sandboxNotifications.filter(
+        (notification) => !notification.read_at
+      ).length,
     });
   }
   if (pathname !== "/api/v2/notifications") {
@@ -3066,6 +3105,8 @@ function handleAllowedChatDropPost(method, pathname, body, requestKind, res) {
     return writeJsonResponse(res, submittedPollDrop);
   }
 
+  submittedChatDrop.created_at = Date.now();
+
   const parts = body.parts.map((part, index) => ({
     part_id: index + 1,
     content: part.content,
@@ -3095,7 +3136,7 @@ function handleAllowedChatDropEditPost(method, pathname, requestKind, res) {
 
   return writeJsonResponse(res, {
     ...submittedChatDrop,
-    updated_at: CREATED_AT + 3000,
+    updated_at: Date.now(),
     parts: [
       {
         ...submittedChatDrop.parts[0],
@@ -3278,13 +3319,24 @@ function buildPublicRuntime() {
     ALLOWLIST_API_ENDPOINT: mockApiOrigin,
     API_ENDPOINT: mockApiOrigin,
     BASE_ENDPOINT: frontendBaseUrl,
-    IPFS_API_ENDPOINT:
-      process.env.IPFS_API_ENDPOINT || "https://ipfs.6529.io/api/v0",
     IPFS_GATEWAY_ENDPOINT:
       process.env.IPFS_GATEWAY_ENDPOINT || "https://ipfs.6529.io/ipfs/",
     MEDIA_RESOLVER_ENDPOINT:
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
-    ...(isE2eeSandbox ? { NEXT_PUBLIC_E2EE_DM_ENABLED: "true" } : {}),
+    // Signed posts on too, so device setup offers the combined grant
+    // ("Sign to enable both") that the E2EE pack signs in through.
+    ...(isE2eeSandbox
+      ? {
+          NEXT_PUBLIC_E2EE_DM_ENABLED: "true",
+          NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
+        }
+      : {}),
+    // Sandbox packs run the staging chat configuration (gap-only sync and
+    // batched reads); set the variable to "false" to run the production one.
+    NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC:
+      process.env.NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC === "false"
+        ? "false"
+        : "true",
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,

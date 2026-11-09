@@ -81,6 +81,11 @@
       "lib/chain/gateway/**": ["files", "exports", "types"],
       "lib/chain/mock/**": ["files", "exports", "types"],
       "lib/chain/status-ladder.ts": ["files", "exports", "types"],
+      // Waves Phase 0 lane C: the wave message store uses the chat store
+      // (C2), but its pending-send and lifecycle API waits for lane A's
+      // optimistic send (A3), whose PR removes these.
+      "lib/chat-store/**": ["files", "exports", "types"],
+      "lib/action-lifecycle/**": ["files", "exports", "types"],
       // Backend operation-code catalog; several codes are intentionally
       // declared before the tool implements them (see inline comments).
       "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],
@@ -182,7 +187,11 @@
       "ts-jest",
       "ts-morph",
       "baseline-browser-mapping",
-      "react-doctor"
+      "react-doctor",
+      // Transitive dependency of @sentry/nextjs; ops/scripts/resolve-sentry-cli.cjs
+      // resolves the sentry-cli it installed through it, instead of listing a
+      // second copy of the CLI.
+      "@sentry/bundler-plugin-core"
     ],
 
     // Disable Jest and Playwright plugins so test-only usages are reported

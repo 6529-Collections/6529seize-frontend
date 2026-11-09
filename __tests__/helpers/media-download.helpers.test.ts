@@ -1,6 +1,9 @@
 import { Directory, Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
-import { downloadMediaUrl } from "@/helpers/media-download.helpers";
+import {
+  downloadMediaUrl,
+  getDownloadFilenameFromUrl,
+} from "@/helpers/media-download.helpers";
 
 jest.mock("@capacitor/filesystem", () => ({
   Directory: { Cache: "CACHE" },
@@ -57,3 +60,9 @@ it.each(["download", "share"])(
     if (step === "download") expect(Share.share).not.toHaveBeenCalled();
   }
 );
+
+it("keeps the original filename for a local decrypted object URL", () => {
+  expect(
+    getDownloadFilenameFromUrl("blob:https://6529.io/generated-id", "photo.png")
+  ).toBe("photo.png");
+});

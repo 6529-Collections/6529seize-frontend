@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { PROFILE_CMS_ASSET_CONTENT_SECURITY_POLICY } from "@/config/profileCmsAssetProxyHeaders";
 import {
   PROFILE_CMS_ASSET_PROXY_ALLOWED_HOSTS,
   isProfileCmsAssetProxyAllowedUrl,
@@ -51,15 +52,28 @@ function parseAssetUrl(value: string | null): URL | NextResponse {
   }
 }
 
-function isAllowedContentType(contentType: string): boolean {
-  const normalized = contentType.toLowerCase();
-  return (
-    normalized.startsWith("image/") || normalized.startsWith("application/json")
-  );
+// Raster images and the emoji JSON list are the only assets this proxy
+// serves. Other image types, such as SVG, are refused even when upstream
+// labels them as images.
+const ALLOWED_CONTENT_TYPES: ReadonlySet<string> = new Set([
+  "application/json",
+  "image/apng",
+  "image/avif",
+  "image/gif",
+  "image/jpeg",
+  "image/jpg",
+  "image/pjpeg",
+  "image/png",
+  "image/webp",
+]);
+
+function getContentTypeEssence(contentType: string | null): string | null {
+  const essence = contentType?.split(";")[0]?.trim().toLowerCase();
+  return essence && ALLOWED_CONTENT_TYPES.has(essence) ? essence : null;
 }
 
 function getCacheControl(contentType: string): string {
-  if (contentType.toLowerCase().startsWith("application/json")) {
+  if (contentType === "application/json") {
     return "public, max-age=300, s-maxage=300";
   }
 
@@ -147,10 +161,7 @@ async function readBodyWithLimit(
     return body;
   }
 
-  if (
-    typeof ReadableStream !== "undefined" &&
-    body instanceof ReadableStream
-  ) {
+  if (typeof ReadableStream !== "undefined" && body instanceof ReadableStream) {
     return readStreamWithLimit(body);
   }
 
@@ -192,8 +203,10 @@ async function proxyAsset(url: URL): Promise<NextResponse> {
       return jsonError("Unsupported CMS asset URL", 400);
     }
 
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !isAllowedContentType(contentType)) {
+    const contentType = getContentTypeEssence(
+      response.headers.get("content-type")
+    );
+    if (!contentType) {
       return jsonError("Unsupported CMS asset content type", 415);
     }
 
@@ -205,6 +218,11 @@ async function proxyAsset(url: URL): Promise<NextResponse> {
     headers.set("content-type", contentType);
     headers.set("Cache-Control", getCacheControl(contentType));
     headers.set("X-Content-Type-Options", "nosniff");
+    // next.config applies the same policy to every response on this path.
+    headers.set(
+      "Content-Security-Policy",
+      PROFILE_CMS_ASSET_CONTENT_SECURITY_POLICY
+    );
 
     const body = await readBodyWithLimit(response.body);
     if (body instanceof NextResponse) {

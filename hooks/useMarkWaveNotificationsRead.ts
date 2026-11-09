@@ -9,9 +9,12 @@ import {
   type MarkWaveNotificationsReadOptions,
   type WaveNotificationsReadMarkerState,
 } from "@/hooks/useMarkWaveNotificationsRead.helpers";
+import type { InvalidateNotificationsOptions } from "@/hooks/useMarkWaveNotificationsRead.types";
 import { getAuthJwt } from "@/services/auth/auth.utils";
 import { useCallback, useContext, useMemo } from "react";
 import { useOptionalDmUnreadActions } from "@/services/dm-unread/DmUnreadStateProvider";
+import { getNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
+import { isProfileCoveredByNotificationSocket } from "@/services/notifications/unread-notifications-polling";
 
 function useRawWaveNotificationsReadMarkerState(): WaveNotificationsReadMarkerState {
   const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
@@ -23,20 +26,38 @@ function useRawWaveNotificationsReadMarkerState(): WaveNotificationsReadMarkerSt
     : null;
   const connectedProfileId = connectedProfile?.id ?? null;
 
+  // The server answers every read with IDENTITY_NOTIFICATIONS_CHANGED on the
+  // reader's notification sockets, and that frame refreshes this and every
+  // connected account's count. A tab whose socket covers the reader skips its
+  // own count refetch; any other tab, and any proxy read, still refetches.
+  const invalidateAfterRead = useCallback(
+    (options?: InvalidateNotificationsOptions) => {
+      const isRealtimeCovered =
+        activeProfileProxyId === null &&
+        isProfileCoveredByNotificationSocket(
+          getNotificationRealtimeState(),
+          connectedProfileId
+        );
+      invalidateNotifications({
+        ...options,
+        refreshNotifications: !isRealtimeCovered,
+      });
+    },
+    [activeProfileProxyId, connectedProfileId, invalidateNotifications]
+  );
+
   return useWaveNotificationsReadMarkerStateFromConfig({
     address,
     connectedProfileId,
     activeProfileProxyId,
     activeProfileProxyCreatorId,
     walletAuth: getAuthJwt(),
-    invalidateNotifications,
+    invalidateNotifications: invalidateAfterRead,
   });
 }
 
 function useCanonicalMarkWaveNotificationsRead(
-  markWaveNotificationsRead: WaveNotificationsReadMarkerState[
-    "markWaveNotificationsRead"
-  ]
+  markWaveNotificationsRead: WaveNotificationsReadMarkerState["markWaveNotificationsRead"]
 ): WaveNotificationsReadMarkerState["markWaveNotificationsRead"] {
   const dmUnreadActions = useOptionalDmUnreadActions();
   const applyDmServerState = dmUnreadActions?.applyServerState;

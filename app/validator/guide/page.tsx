@@ -8,7 +8,10 @@ import {
   getLockedView,
   getValidatorMetadata,
 } from "@/lib/validator-page/pageAccess";
-import { getReleaseFeedSnapshot } from "@/lib/validator-page/releaseFeed";
+import {
+  getOfferedRelease,
+  getReleaseFeedSnapshot,
+} from "@/lib/validator-page/releaseFeed";
 import { getDebNames } from "@/lib/validator-page/releaseFiles";
 
 export default async function ValidatorGuideRoute() {
@@ -21,10 +24,12 @@ export default async function ValidatorGuideRoute() {
     getReleaseFeedSnapshot(),
     headers(),
   ]);
+  const release = getOfferedRelease(snapshot.releases);
   return (
     <ValidatorGuidePage
       platform={detectFromUserAgent(requestHeaders.get("user-agent"))}
-      debs={getDebNames(snapshot.releases[0])}
+      debs={getDebNames(release)}
+      newest={release?.version}
     />
   );
 }

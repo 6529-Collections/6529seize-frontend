@@ -99,7 +99,7 @@ test.describe("Encrypted group alarms @medium @local-only @e2ee", () => {
 
     const queued = "Sent once the group change goes through.";
     await composer(alice.page).fill(queued);
-    await composer(alice.page).press("Enter");
+    await alice.page.getByRole("button", { name: "Send", exact: true }).click();
     const pending = messageRow(alice.page, queued);
     await expect(pending.getByText("Sending…")).toBeVisible({
       timeout: E2EE_UI_TIMEOUT_MS,

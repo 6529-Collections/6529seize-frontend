@@ -39,7 +39,10 @@ describe("AuthSignModal onboarding", () => {
     );
     expect(screen.getByText(mockAddress)).toBeInTheDocument();
     expect(screen.getByText("No transaction or gas fees.")).toBeInTheDocument();
-    expect(screen.queryByText(/JWT/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/JWT|SIWE|Version 1/u)).not.toBeInTheDocument();
+    expect(
+      screen.getAllByRole("button").map((button) => button.textContent)
+    ).toEqual(["Cancel", "Sign message"]);
     expect(props.onConfirmSignRequest).not.toHaveBeenCalled();
     const button = screen.getByRole("button", { name: "Sign message" });
     expect(button).toHaveFocus();
@@ -66,13 +69,19 @@ describe("AuthSignModal onboarding", () => {
     expect(props.onCancelSignRequest).not.toHaveBeenCalled();
     expect(props.onConfirmSignRequest).not.toHaveBeenCalled();
   });
-  it("uses the existing cancellation callback for the close control", async () => {
+  it("cancels sign-in with the explicit Cancel button", async () => {
     const props = makeProps();
     render(<AuthSignModal {...props} />);
-    await userEvent.click(
-      screen.getByRole("button", { name: "Cancel sign-in" })
-    );
+    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(props.onCancelSignRequest).toHaveBeenCalledTimes(1);
+  });
+  it("ignores clicks outside the dialog surface", () => {
+    const props = makeProps();
+    render(<AuthSignModal {...props} />);
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(dialog);
+    expect(props.onCancelSignRequest).not.toHaveBeenCalled();
+    expect(dialog).toHaveAttribute("open");
   });
   it("uses the existing cancellation callback for Escape before signing", () => {
     const props = makeProps();

@@ -5,6 +5,7 @@ import { readUsCountryHint } from "@/components/cookies/usCountryHint";
 import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useSyncExternalStore } from "react";
 import useCapacitor from "./useCapacitor";
+import { useHasHydrated } from "./useHasHydrated";
 
 const subscribe = () => () => undefined;
 const clientSnapshot = () => true;
@@ -12,6 +13,19 @@ const serverSnapshot = () => false;
 const noHint = () => false;
 
 export function useNftPurchasingVisibility() {
+  const { isIos } = useCapacitor();
+  const isHydrated = useHasHydrated();
+
+  return {
+    hideNftPurchasing: !isHydrated || isIos,
+    shouldRedirect: isHydrated && isIos,
+    reservesNftPurchasingSpace: !isHydrated,
+  };
+}
+
+// The profile can still show existing subscription history where it did
+// before. The purchase controls on that page use the platform-only gate.
+export function useSubscriptionPageVisibility() {
   const { isIos } = useCapacitor();
   const { country, isCountryPending } = useCookieConsent();
   const isHydrated = useSyncExternalStore(

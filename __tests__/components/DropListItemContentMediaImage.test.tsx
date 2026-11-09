@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, within } from "@testing-library/react";
-import React, { createElement, forwardRef, type ComponentProps } from "react";
+import { createElement, forwardRef, type ComponentProps } from "react";
 import DropListItemContentMediaImage from "@/components/drops/view/item/content/media/DropListItemContentMediaImage";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -461,4 +461,22 @@ describe("DropListItemContentMediaImage retry", () => {
       "img?preview"
     );
   });
+});
+
+it("uses the zoom cursor only when the image can expand", () => {
+  const view = render(
+    <DropListItemContentMediaImage src="https://example.com/photo.png" />
+  );
+  expect(
+    screen.getByRole("button", { name: "Open image preview" })
+  ).toHaveClass("tw-cursor-zoom-in");
+  view.rerender(
+    <DropListItemContentMediaImage
+      src="https://example.com/photo.png"
+      disableModal
+    />
+  );
+  expect(
+    screen.queryByRole("button", { name: "Open image preview" })
+  ).not.toBeInTheDocument();
 });

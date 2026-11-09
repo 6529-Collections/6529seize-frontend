@@ -1,4 +1,4 @@
-import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+import { getPreparedDropImagePreview } from "@/services/uploads/prepareDropImage";
 import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 import React from "react";
 import CircleLoader, {
@@ -90,7 +90,7 @@ const ImageFilePreview: React.FC<{ file: File }> = ({ file }) => {
   const objectUrl = useObjectUrl(
     getContentType(file) === "image/avif" ? null : file
   );
-  const previewUrl = getPreparedDropImage(file)?.url ?? objectUrl;
+  const previewUrl = getPreparedDropImagePreview(file)?.url ?? objectUrl;
 
   return (
     <div className="tw-relative tw-h-full tw-w-full">

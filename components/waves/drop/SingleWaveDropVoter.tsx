@@ -1,5 +1,6 @@
 import React from "react";
 import type { ApiWaveVoter } from "@/generated/models/ApiWaveVoter";
+import type { ApiDropVoter } from "@/generated/models/ApiDropVoter";
 import Link from "next/link";
 import Image from "next/image";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
@@ -21,7 +22,7 @@ import { formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 
 interface SingleWaveDropVoterProps {
-  readonly voter: ApiWaveVoter;
+  readonly voter: ApiWaveVoter | ApiDropVoter;
   readonly position: number;
   readonly creditType: ApiWaveCreditType;
 }
@@ -32,14 +33,20 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
   creditType,
 }) => {
   const locale = useBrowserLocale();
-  const hasPositiveVotes = !!voter.positive_votes_summed;
-  const hasNegativeVotes = !!voter.negative_votes_summed;
+  const positiveVotes =
+    "vote" in voter ? Math.max(voter.vote, 0) : voter.positive_votes_summed;
+  const negativeVotes =
+    "vote" in voter ? Math.min(voter.vote, 0) : voter.negative_votes_summed;
+  const absoluteVotes =
+    "vote" in voter ? Math.abs(voter.vote) : voter.absolute_votes_summed;
+  const hasPositiveVotes = !!positiveVotes;
+  const hasNegativeVotes = !!negativeVotes;
 
   const pfpClasses =
     "tw-size-7 tw-rounded-md tw-ring-1 tw-ring-white/10 tw-bg-iron-800 tw-flex-shrink-0 tw-object-contain";
   const directionClasses = "tw-text-sm tw-font-medium tw-leading-none";
 
-  const voterIdentity = voter.voter.handle ?? voter.voter.id;
+  const voterIdentity = voter.voter.handle ?? voter.voter.primary_address;
   const describeVote = (vote: number) =>
     t(locale, "waves.voteInsights.voteByName", {
       name: voterIdentity,
@@ -95,7 +102,7 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
             {hasPositiveVotes && (
               <span
                 role="img"
-                aria-label={describeVote(voter.positive_votes_summed)}
+                aria-label={describeVote(positiveVotes)}
                 className={`${directionClasses} tw-text-green`}
               >
                 +
@@ -104,9 +111,7 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
             {hasNegativeVotes && (
               <span
                 role="img"
-                aria-label={describeVote(
-                  -Math.abs(voter.negative_votes_summed)
-                )}
+                aria-label={describeVote(-Math.abs(negativeVotes))}
                 className={`${directionClasses} tw-text-red`}
               >
                 −
@@ -122,11 +127,11 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
           >
             <div className="tw-space-x-1 tw-text-sm">
               <div className="tw-text-green">
-                +{formatNumberWithCommas(voter.positive_votes_summed)}
+                +{formatNumberWithCommas(positiveVotes)}
               </div>
               {hasNegativeVotes && (
                 <div className="tw-text-red">
-                  -{formatNumberWithCommas(voter.negative_votes_summed)}
+                  -{formatNumberWithCommas(Math.abs(negativeVotes))}
                 </div>
               )}
             </div>
@@ -134,7 +139,7 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
         </>
         <span className="tw-text-xs tw-text-iron-600">
           <span className="tw-tabular-nums">
-            {formatNumberWithCommas(voter.absolute_votes_summed)}
+            {formatNumberWithCommas(absoluteVotes)}
           </span>{" "}
           {WAVE_VOTING_LABELS[creditType]} {WAVE_VOTE_STATS_LABELS.TOTAL}
         </span>

@@ -8,6 +8,7 @@ import {
 } from "@/services/content-moderation/content-moderation-query";
 import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 import { clearSubmissionRequestKeys } from "@/services/api/submission-request-key";
+import { clearClientDropIds } from "@/services/api/client-drop-ids";
 
 export const CONTENT_MODERATOR_ACCESS_QUERY_KEY = [
   "content-moderation",
@@ -23,6 +24,7 @@ export const useContentModerationStateScope = (
   useEffect(() => {
     clearContentModerationState();
     clearSubmissionRequestKeys();
+    clearClientDropIds();
     const keepProfileId =
       proxyId || !isDirectProfileSession ? null : connectedProfileId;
     clearPrivateModerationQueries(queryClient, keepProfileId);

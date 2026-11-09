@@ -1,8 +1,33 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useEffect, useState } from "react";
 import WaveChatActivity from "@/components/brain/my-stream/WaveChatActivity";
+import { WaveChatReadContext } from "@/contexts/wave/WaveChatReadContext";
 
 afterEach(() => jest.restoreAllMocks());
+
+it("registers reading only while Chat is selected and unregisters on leaving", () => {
+  const unregister = jest.fn();
+  const register = jest.fn(() => unregister);
+  const content = (active: boolean, waveId = "wave-1") => (
+    <WaveChatReadContext.Provider value={register}>
+      <WaveChatActivity waveId={waveId} active={active} chat={<p>Chat</p>}>
+        <p>Leaderboard</p>
+      </WaveChatActivity>
+    </WaveChatReadContext.Provider>
+  );
+  const { rerender, unmount } = render(content(false));
+  expect(register).not.toHaveBeenCalled();
+  rerender(content(true));
+  expect(register).toHaveBeenCalledWith("wave-1");
+  rerender(content(false));
+  expect(unregister).toHaveBeenCalledTimes(1);
+  rerender(content(true));
+  rerender(content(true, "wave-2"));
+  expect(unregister).toHaveBeenCalledTimes(2);
+  expect(register).toHaveBeenLastCalledWith("wave-2");
+  unmount();
+  expect(unregister).toHaveBeenCalledTimes(3);
+});
 
 it("lazily retains visited chat DOM and draft while pausing hidden effects", () => {
   // The shared CSS stub omits visibility properties. This component uses only

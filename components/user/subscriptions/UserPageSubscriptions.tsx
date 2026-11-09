@@ -2,68 +2,36 @@
 
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
-import type { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
-import type { SubscriptionLog } from "@/generated/models/SubscriptionLog";
-import type { SubscriptionTopUp } from "@/generated/models/SubscriptionTopUp";
 import { useContext, useEffect, useState } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import SubscriptionTopUpButton from "./coverage/SubscriptionTopUpButton";
 import {
   getCardsRemainingUntilEndOf,
   isMintingToday,
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import type { Page } from "@/helpers/Types";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useLatestRequestSignal } from "@/hooks/useLatestRequestSignal";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { AirdropAddressResult } from "./UserPageSubscriptionsAirdropAddress";
-import UserPageSubscriptionsAirdropAddress from "./UserPageSubscriptionsAirdropAddress";
 import UserPageSubscriptionsBalance from "./UserPageSubscriptionsBalance";
-import UserPageSubscriptionsEditionPreference from "./UserPageSubscriptionsEditionPreference";
+import UserPageSubscriptionsSettings from "./UserPageSubscriptionsSettings";
 import UserPageSubscriptionsHistory from "./UserPageSubscriptionsHistory";
-import UserPageSubscriptionsMode from "./UserPageSubscriptionsMode";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
+import UserPageSubscriptionsResponsivePanel from "./UserPageSubscriptionsResponsivePanel";
+import { useSubscriptionDisclosure } from "./useSubscriptionDisclosure";
+import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
 import UserPageSubscriptionsTopUp from "./UserPageSubscriptionsTopUp";
 import UserPageSubscriptionsUpcoming from "./UserPageSubscriptionsUpcoming";
 import SubscriptionCoverageSummary from "./coverage/SubscriptionCoverageSummary";
+import SubscriptionCoverageNotice from "./coverage/SubscriptionCoverageNotice";
 import { useSubscriptionCoverage } from "./coverage/useSubscriptionCoverage";
-
-const HISTORY_PAGE_SIZE = 10;
-const SUBSCRIBE_GROUP_CLASS =
-  "tw-relative tw-h-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-shadow-lg tw-ring-1 tw-ring-white/[0.03] tw-transition-all tw-duration-500 tw-ease-out max-md:tw-p-4 max-md:tw-shadow-none max-md:tw-bg-iron-900 md:tw-grid md:tw-grid-rows-[minmax(0,1fr)_auto_minmax(0,1fr)]";
-const SUBSCRIBE_GROUP_CONTENT_CLASS =
-  "tw-min-w-0 md:tw-flex md:tw-h-full md:tw-flex-col";
-
-function createEmptyPage<T>(): Page<T> {
-  return { count: 0, page: 1, next: false, data: [] };
-}
-
-/**
- * Applies a request's outcome only while it is still the latest request of its
- * kind. An aborted (superseded or unmounted) request changes nothing.
- */
-function settleLatest<T>(
-  signal: AbortSignal,
-  request: Promise<T>,
-  onData: (data: T) => void,
-  onError: () => void,
-  onSettled: () => void
-): void {
-  request
-    .then((data) => {
-      if (!signal.aborted) onData(data);
-    })
-    .catch(() => {
-      if (!signal.aborted) onError();
-    })
-    .finally(() => {
-      if (!signal.aborted) onSettled();
-    });
-}
+import { useSubscriptionHistory } from "./useSubscriptionHistory";
 
 function getSubscriptionProfileKey(
   profile: ApiIdentity | null | undefined
@@ -90,24 +58,28 @@ export default function UserPageSubscriptions(
     : getSubscriptionProfileKey(connectedProfile);
   const isConnectedAccount = !!profileKey && connectedProfileKey === profileKey;
   const coverageQuery = useSubscriptionCoverage({ profileKey });
+  const history = useSubscriptionHistory(profileKey);
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const topUp = useSubscriptionDisclosure(
+    "profile-subscriptions-top-up",
+    !hideNftPurchasing && isConnectedAccount && !coverageQuery.isLoading,
+    "profile-subscriptions-top-up"
+  );
+  useScrollToHashOnMount("profile-subscriptions-overview", {
+    enabled: !!profileKey,
+    focusId: "profile-subscriptions-overview-title",
+  });
+
+  const [fetchErrors, setFetchErrors] = useState<Record<string, boolean>>({});
+  const setFetchError = (request: string, failed: boolean) => {
+    setFetchErrors((current) => ({ ...current, [request]: failed }));
+  };
 
   const [details, setDetails] = useState<SubscriptionDetails>();
   const [fetchingDetails, setFetchingDetails] = useState<boolean>(true);
 
   const [airdropResult, setAirdropResult] = useState<AirdropAddressResult>();
   const [fetchingAirdropAddress, setFetchingAirdropAddress] =
-    useState<boolean>(true);
-
-  const [topUpHistory, setTopUpHistory] = useState<Page<SubscriptionTopUp>>(
-    createEmptyPage
-  );
-  const [fetchingTopUpHistory, setFetchingTopUpHistory] =
-    useState<boolean>(true);
-
-  const [redeemedHistory, setRedeemedHistory] = useState<
-    Page<RedeemedSubscription>
-  >(createEmptyPage);
-  const [fetchingRedeemedHistory, setFetchingRedeemedHistory] =
     useState<boolean>(true);
 
   const remainingMintsForSeason = getCardsRemainingUntilEndOf("szn");
@@ -117,20 +89,9 @@ export default function UserPageSubscriptions(
   const [fetchingMemeSubscriptions, setFetchingMemeSubscriptions] =
     useState<boolean>(true);
 
-  const [subscriptionLogs, setSubscriptionLogs] =
-    useState<Page<SubscriptionLog>>(createEmptyPage);
-  const [fetchingSubscriptionLogs, setFetchingSubscriptionLogs] =
-    useState<boolean>(true);
-
-  // Each request kind keeps only its latest request: a newer request (a page
-  // change or another profile) aborts the previous one, so a superseded
-  // success, failure or loading update cannot overwrite the current state.
   const startDetailsRequest = useLatestRequestSignal();
   const startAirdropRequest = useLatestRequestSignal();
-  const startTopUpRequest = useLatestRequestSignal();
-  const startRedeemedRequest = useLatestRequestSignal();
   const startUpcomingRequest = useLatestRequestSignal();
-  const startLogsRequest = useLatestRequestSignal();
 
   function fetchDetails() {
     if (!profileKey) {
@@ -138,16 +99,24 @@ export default function UserPageSubscriptions(
     }
     const signal = startDetailsRequest();
     setFetchingDetails(true);
-    settleLatest(
+    setFetchError("details", false);
+    commonApiFetch<SubscriptionDetails>({
+      endpoint: `subscriptions/consolidation/details/${profileKey}`,
       signal,
-      commonApiFetch<SubscriptionDetails>({
-        endpoint: `subscriptions/consolidation/details/${profileKey}`,
-        signal,
-      }),
-      setDetails,
-      () => setDetails(undefined),
-      () => setFetchingDetails(false)
-    );
+    })
+      .then((data) => {
+        if (signal.aborted) return;
+        setDetails(data);
+      })
+      .catch(() => {
+        if (signal.aborted) return;
+        setFetchError("details", true);
+        setDetails(undefined);
+      })
+      .finally(() => {
+        if (signal.aborted) return;
+        setFetchingDetails(false);
+      });
   }
 
   function fetchAirdropAddress() {
@@ -156,52 +125,24 @@ export default function UserPageSubscriptions(
     }
     const signal = startAirdropRequest();
     setFetchingAirdropAddress(true);
-    settleLatest(
+    setFetchError("airdrop", false);
+    commonApiFetch<AirdropAddressResult>({
+      endpoint: `subscriptions/consolidation/${profileKey}/airdrop-address`,
       signal,
-      commonApiFetch<AirdropAddressResult>({
-        endpoint: `subscriptions/consolidation/${profileKey}/airdrop-address`,
-        signal,
-      }),
-      setAirdropResult,
-      () => setAirdropResult(undefined),
-      () => setFetchingAirdropAddress(false)
-    );
-  }
-
-  function fetchTopUpHistory(page: number) {
-    if (!profileKey) {
-      return;
-    }
-    const signal = startTopUpRequest();
-    setFetchingTopUpHistory(true);
-    settleLatest(
-      signal,
-      commonApiFetch<Page<SubscriptionTopUp>>({
-        endpoint: `subscriptions/consolidation/top-up/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-        signal,
-      }),
-      setTopUpHistory,
-      () => setTopUpHistory(createEmptyPage()),
-      () => setFetchingTopUpHistory(false)
-    );
-  }
-
-  function fetchRedeemHistory(page: number) {
-    if (!profileKey) {
-      return;
-    }
-    const signal = startRedeemedRequest();
-    setFetchingRedeemedHistory(true);
-    settleLatest(
-      signal,
-      commonApiFetch<Page<RedeemedSubscription>>({
-        endpoint: `subscriptions/consolidation/redeemed/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-        signal,
-      }),
-      setRedeemedHistory,
-      () => setRedeemedHistory(createEmptyPage()),
-      () => setFetchingRedeemedHistory(false)
-    );
+    })
+      .then((data) => {
+        if (signal.aborted) return;
+        setAirdropResult(data);
+      })
+      .catch(() => {
+        if (signal.aborted) return;
+        setFetchError("airdrop", true);
+        setAirdropResult(undefined);
+      })
+      .finally(() => {
+        if (signal.aborted) return;
+        setFetchingAirdropAddress(false);
+      });
   }
 
   function fetchMemeSubscriptions() {
@@ -210,47 +151,34 @@ export default function UserPageSubscriptions(
     }
     const signal = startUpcomingRequest();
     setFetchingMemeSubscriptions(true);
+    setFetchError("upcoming", false);
     let upcomingLimit: number = remainingMintsForSeason;
     if (isMintingToday()) {
       upcomingLimit += 1;
     }
-    settleLatest(
+    commonApiFetch<NFTSubscription[]>({
+      endpoint: `subscriptions/consolidation/upcoming-memes/${profileKey}?card_count=${upcomingLimit}`,
       signal,
-      commonApiFetch<NFTSubscription[]>({
-        endpoint: `subscriptions/consolidation/upcoming-memes/${profileKey}?card_count=${upcomingLimit}`,
-        signal,
-      }),
-      setMemeSubscriptions,
-      () => setMemeSubscriptions([]),
-      () => setFetchingMemeSubscriptions(false)
-    );
-  }
-
-  function fetchLogs(page: number) {
-    if (!profileKey) {
-      return;
-    }
-    const signal = startLogsRequest();
-    setFetchingSubscriptionLogs(true);
-    settleLatest(
-      signal,
-      commonApiFetch<Page<SubscriptionLog>>({
-        endpoint: `subscriptions/consolidation/logs/${profileKey}?page=${page}&page_size=${HISTORY_PAGE_SIZE}`,
-        signal,
-      }),
-      setSubscriptionLogs,
-      () => setSubscriptionLogs(createEmptyPage()),
-      () => setFetchingSubscriptionLogs(false)
-    );
+    })
+      .then((data) => {
+        if (signal.aborted) return;
+        setMemeSubscriptions(data);
+      })
+      .catch(() => {
+        if (signal.aborted) return;
+        setFetchError("upcoming", true);
+        setMemeSubscriptions([]);
+      })
+      .finally(() => {
+        if (signal.aborted) return;
+        setFetchingMemeSubscriptions(false);
+      });
   }
 
   const fetchSubscriptionData = (): void => {
     fetchDetails();
     fetchAirdropAddress();
-    fetchTopUpHistory(1);
     fetchMemeSubscriptions();
-    fetchRedeemHistory(1);
-    fetchLogs(1);
   };
 
   const refresh = (): void => {
@@ -258,6 +186,7 @@ export default function UserPageSubscriptions(
       return;
     }
     void coverageQuery.refetch();
+    void history.refresh();
     fetchSubscriptionData();
   };
 
@@ -276,117 +205,141 @@ export default function UserPageSubscriptions(
   }
 
   return (
-    <div className="tw-space-y-4 tw-pb-6">
-      <UserPageSubscriptionsSection
-        id="profile-subscriptions-overview"
-        title={t(locale, "subscriptions.page.title")}
-        action={
-          <Link
-            href="/about/subscriptions"
-            className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-font-semibold tw-leading-5 tw-text-iron-300 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:hover:tw-text-primary-300"
-          >
-            {t(locale, "subscriptions.page.learnMore")}
-            <ArrowRightIcon className="tw-size-4" aria-hidden="true" />
-          </Link>
-        }
-      >
-        <SubscriptionCoverageSummary
-          coverage={coverageQuery.data}
-          isError={coverageQuery.isError}
-          isLoading={coverageQuery.isLoading}
-          isOwner={isConnectedAccount}
-          onRefresh={() => {
-            void coverageQuery.refetch();
+    <div className="tw-relative tw-flex tw-min-w-0 tw-flex-col tw-gap-8 tw-pb-12 md:tw-gap-10">
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3">
+        <SubscriptionCoverageNotice
+          hasReadError={
+            Object.values(fetchErrors).some(Boolean) || history.isError
+          }
+          onRetry={() => {
+            fetchSubscriptionData();
+            void history.refresh();
           }}
+          show={coverageQuery.isError && !!coverageQuery.data}
+          onRefresh={
+            isConnectedAccount
+              ? () => {
+                  void coverageQuery.refetch();
+                }
+              : undefined
+          }
         />
-        <div
-          id="profile-subscriptions-settings"
-          className="tw-mt-6 tw-scroll-mt-24"
-        >
-          <h3 className="tw-mb-3 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-            {t(locale, "subscriptions.page.settingsTitle")}
-          </h3>
-          <div className="tw-grid tw-grid-cols-1 tw-gap-4 md:tw-grid-cols-2">
-            <div className={SUBSCRIBE_GROUP_CLASS}>
+        <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-8 lg:tw-grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:tw-gap-x-6 lg:tw-gap-y-10">
+          <UserPageSubscriptionsSection
+            id="profile-subscriptions"
+            className="lg:tw-flex lg:tw-flex-col"
+            title={t(locale, "subscriptions.page.title")}
+            headerClassName="tw-min-h-11 max-sm:!tw-mb-1"
+            action={
+              !hideNftPurchasing && (
+                <Link
+                  href="/about/subscriptions"
+                  className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-400 tw-no-underline tw-transition-colors focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 desktop-hover:hover:tw-text-iron-100"
+                >
+                  {t(locale, "subscriptions.page.learnMore")}
+                  <ArrowRightIcon className="tw-size-3" aria-hidden="true" />
+                </Link>
+              )
+            }
+          >
+            <section
+              id="profile-subscriptions-overview"
+              aria-labelledby="profile-subscriptions-overview-title"
+              className="tw-relative tw-flex tw-scroll-mt-24 tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-px-[18px] tw-py-5 sm:tw-p-7 lg:tw-flex-1"
+            >
               <div
-                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:-tw-translate-y-1 md:tw-justify-start`}
-              >
-                <UserPageSubscriptionsBalance
+                aria-hidden="true"
+                className="tw-pointer-events-none tw-absolute -tw-top-24 tw-right-[5%] tw-size-80 tw-bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.04),transparent_70%)] lg:-tw-top-32 lg:tw-right-[28%] lg:tw-size-[28rem]"
+              />
+              <div className="tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
+                <SubscriptionCoverageSummary
                   coverage={coverageQuery.data}
-                  details={details}
-                  fetching={fetchingDetails}
-                  refresh={refresh}
-                  show_refresh={isConnectedAccount}
+                  isLoading={coverageQuery.isLoading}
+                  isOwner={isConnectedAccount}
+                  showFundingPrompt={!hideNftPurchasing}
+                  action={
+                    <UserPageSubscriptionsBalance
+                      coverage={coverageQuery.data}
+                      details={details}
+                      fetching={fetchingDetails || coverageQuery.isLoading}
+                      refresh={refresh}
+                      show_refresh={isConnectedAccount}
+                    />
+                  }
+                  topUpAction={
+                    !hideNftPurchasing &&
+                    isConnectedAccount &&
+                    !coverageQuery.isLoading && (
+                      <SubscriptionTopUpButton
+                        status={coverageQuery.data?.status}
+                        expanded={topUp.expanded}
+                        onClick={() => topUp.setExpanded(!topUp.expanded)}
+                      />
+                    )
+                  }
                 />
               </div>
-              <div className="tw-my-4 tw-h-px tw-bg-white/[0.05]" />
-              <div
-                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-start`}
-              >
-                <UserPageSubscriptionsAirdropAddress
-                  show_edit={isConnectedAccount}
-                  airdrop={airdropResult}
-                  fetching={fetchingAirdropAddress}
-                />
-              </div>
-            </div>
-            <div className={SUBSCRIBE_GROUP_CLASS}>
-              <div
-                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-start`}
-              >
-                <UserPageSubscriptionsMode
-                  profileKey={profileKey}
-                  details={details}
-                  readonly={!isConnectedAccount}
-                  refresh={refresh}
-                />
-              </div>
-              <div className="tw-my-4 tw-h-px tw-bg-white/[0.05]" />
-              <div
-                className={`${SUBSCRIBE_GROUP_CONTENT_CLASS} md:tw-justify-center`}
-              >
-                <UserPageSubscriptionsEditionPreference
-                  profileKey={profileKey}
-                  details={details}
-                  readonly={!isConnectedAccount}
-                  refresh={refresh}
-                />
-              </div>
-            </div>
+            </section>
+          </UserPageSubscriptionsSection>
+          {!hideNftPurchasing && isConnectedAccount && (
+            <UserPageSubscriptionsTopUp
+              expanded={topUp.expanded}
+              coverage={coverageQuery.data}
+              onTransactionConfirmed={refresh}
+              onCancel={() => {
+                topUp.setExpanded(false);
+              }}
+            />
+          )}
+          <div className="tw-min-w-0 lg:tw-col-span-2">
+            <UserPageSubscriptionsUpcoming
+              profileKey={profileKey}
+              details={details}
+              memes_subscriptions={memeSubscriptions}
+              readonly={!isConnectedAccount}
+              refresh={refresh}
+              loading={fetchingMemeSubscriptions}
+              error={fetchErrors["upcoming"]}
+              detailsError={fetchErrors["details"]}
+              coverage={coverageQuery.isError ? undefined : coverageQuery.data}
+            />
+          </div>
+          <div className="tw-min-w-0 tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-rounded-xl tw-bg-iron-950 lg:tw-contents lg:tw-divide-y-0">
+            <UserPageSubscriptionsSettings
+              profileKey={profileKey}
+              details={details}
+              readonly={!isConnectedAccount}
+              refresh={refresh}
+              airdrop={airdropResult}
+              fetchingAirdrop={fetchingAirdropAddress}
+              detailsError={fetchErrors["details"]}
+              airdropError={fetchErrors["airdrop"]}
+            />
+            <UserPageSubscriptionsResponsivePanel
+              key={profileKey}
+              id="profile-subscriptions-history"
+              title={t(locale, "subscriptions.history.title")}
+              className="lg:tw-col-span-2"
+              fullHeight
+            >
+              <UserPageSubscriptionsHistory
+                key={profileKey}
+                selectedIndex={history.selectedIndex}
+                onSelectionChange={history.setSelectedIndex}
+                topups={history.topups}
+                redeemed={history.redeemed}
+                logs={history.logs}
+                topUpsLoading={history.topupsLoading}
+                redeemedLoading={history.redeemedLoading}
+                logsLoading={history.logsLoading}
+                setRedeemedPage={(page) => history.setPage("redeemed", page)}
+                setTopUpPage={(page) => history.setPage("topups", page)}
+                setLogsPage={(page) => history.setPage("logs", page)}
+              />
+            </UserPageSubscriptionsResponsivePanel>
           </div>
         </div>
-      </UserPageSubscriptionsSection>
-      {isConnectedAccount && (
-        <UserPageSubscriptionsTopUp
-          coverage={coverageQuery.data}
-          onTransactionConfirmed={refresh}
-        />
-      )}
-      <UserPageSubscriptionsUpcoming
-        profileKey={profileKey}
-        details={details}
-        memes_subscriptions={memeSubscriptions}
-        readonly={!isConnectedAccount}
-        refresh={refresh}
-        loading={fetchingMemeSubscriptions}
-      />
-      <UserPageSubscriptionsHistory
-        topups={topUpHistory}
-        redeemed={redeemedHistory}
-        logs={subscriptionLogs}
-        topUpsLoading={fetchingTopUpHistory}
-        redeemedLoading={fetchingRedeemedHistory}
-        logsLoading={fetchingSubscriptionLogs}
-        setRedeemedPage={(page: number) => {
-          fetchRedeemHistory(page);
-        }}
-        setTopUpPage={(page: number) => {
-          fetchTopUpHistory(page);
-        }}
-        setLogsPage={(page: number) => {
-          fetchLogs(page);
-        }}
-      />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
+import { useDeviceSecurityState } from "@/components/device-signing/DeviceSecurityStatus";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import Button from "@/components/utils/button/Button";
 import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
@@ -107,11 +108,10 @@ function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
     case "needs-enrollment":
     case "enrolling":
       return (
-        <E2eeEnrollmentCard
+        <InlineDeviceSetup
           engine={e2ee.engine}
           enrolling={e2ee.status === "enrolling"}
           engineError={e2ee.error}
-          details={<E2eeEnrollmentIdentity />}
         />
       );
     case "device-limit":
@@ -125,4 +125,20 @@ function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
     case "ready":
       return <E2eeLoadingState label={t(locale, "e2ee.loading")} />;
   }
+}
+
+function InlineDeviceSetup(
+  props: Omit<ComponentProps<typeof E2eeEnrollmentCard>, "scope" | "details">
+) {
+  const { proof } = useDeviceSecurityState();
+  const scope = proof === "off" || proof === "expired" ? "both" : "dms";
+  return (
+    <div className="tw-flex tw-min-h-full tw-flex-col tw-justify-center">
+      <E2eeEnrollmentCard
+        {...props}
+        scope={scope}
+        details={<E2eeEnrollmentIdentity />}
+      />
+    </div>
+  );
 }

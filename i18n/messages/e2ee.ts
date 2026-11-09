@@ -4,6 +4,38 @@
  * codes only; every user-visible string lives here.
  */
 export const E2EE_MESSAGES = {
+  "e2ee.dm.history.label": "Chat history",
+  "e2ee.dm.history.hint":
+    "Previous chats with this person stay here. Unread counts include all active histories. Messages and search belong to the selected history.",
+  "e2ee.dm.history.current": "Current chat · {date} · {count} unread",
+  "e2ee.dm.history.saved": "Saved chat {number} · {date} · {count} unread",
+  "e2ee.dm.history.openCurrent": "Open current chat",
+  "e2ee.dm.history.continue": "Continue encrypted chat",
+  "e2ee.connectionSetup.title": "Set up device",
+  "e2ee.connectionSetup.scan":
+    "Scan this code with the QR scanner in the 6529 mobile app.",
+  "e2ee.connectionSetup.openInstruction":
+    "Open the setup link in 6529 Desktop.",
+  "e2ee.connectionSetup.restore":
+    "Restore an encrypted backup to read earlier chats on this device.",
+  "e2ee.connectionSetup.action": "Set up signed posts and encrypted DMs",
+  "e2ee.connectionSetup.description":
+    "Approve with your wallet here, then open the link in the receiving app. It gets its own keys for signed posts and encrypted DMs.",
+  "e2ee.connectionSetup.compatibility":
+    "On iPhone, encrypted messages need iOS 16.4 or later; signed posts need iOS 17 or later.",
+  "e2ee.connectionSetup.approve": "Approve receiving device (one signature)",
+  "e2ee.connectionSetup.qr": "Private device setup QR code",
+  "e2ee.connectionSetup.open": "Open in 6529 Desktop",
+  "e2ee.connectionSetup.keepPrivate":
+    "Use this only on a device you own. It signs you in and enables signed posts and encrypted DMs. It expires shortly and works once.",
+  "e2ee.connectionSetup.back": "Back to connection sharing",
+  "e2ee.connectionSetup.failed":
+    "Signed in, but device setup could not finish. Create a new setup link from your source browser to try again. Your existing keys have been kept.",
+
+  "e2ee.notification.newMessage": "New encrypted message",
+  "e2ee.notification.open": "Open encrypted chat",
+  "e2ee.notification.setup": "Set up Encrypted DMs",
+  "e2ee.notification.senderAction": "sent you an encrypted message",
   "e2ee.badge.encrypted": "End-to-end encrypted",
   "e2ee.badge.encryptedShort": "Encrypted",
   "e2ee.title": "Encrypted messages",
@@ -46,6 +78,8 @@ export const E2EE_MESSAGES = {
   "e2ee.gate.elsewhere.body":
     "They run in one tab at a time so your chats stay in sync. Use them here and the other tab will pause.",
   "e2ee.gate.elsewhere.action": "Use here",
+  "e2ee.desktopNotice.title": "6529",
+  "e2ee.desktopNotice.body": "New encrypted message",
   "e2ee.signOut.title": "Sign out",
   "e2ee.signOut.titleAll": "Sign out of all profiles",
   "e2ee.signOut.body":
@@ -62,11 +96,10 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.identityUnknown":
     "You’ll sign with the wallet connected to this profile.",
   "e2ee.enroll.manage":
-    "You can turn this device off at any time from the Devices page in encrypted messages.",
+    "You can revoke these permissions in Preferences → Device Permissions.",
   "e2ee.gate.noWallet":
     "Connect the wallet for this profile to use encrypted messages.",
 
-  "e2ee.enroll.title": "Turn on encrypted messages",
   "e2ee.enroll.intro":
     "Encrypted chats can be read only by the people in them.",
   "e2ee.enroll.point.signature":
@@ -77,12 +110,46 @@ export const E2EE_MESSAGES = {
     "6529 cannot read your encrypted messages. It only delivers them.",
   "e2ee.enroll.point.noBackup":
     "Your history is stored on your devices. If you lose all of them or clear this browser’s data, you lose it, unless you turn on encrypted backup in Devices.",
+  "e2ee.enroll.point.noBackupApp":
+    "Your history is stored on your devices. If you lose all of them or clear the app data on the last device that holds your history, you lose it unless you turn on encrypted backup in Encrypted messages → Devices.",
   "e2ee.enroll.safari":
     "Safari can delete this site’s data if you don’t open 6529 for 7 days. Visit regularly, or use another browser or the 6529 app, to keep your history.",
-  "e2ee.enroll.button": "Turn on encrypted messages (one signature)",
+  "e2ee.enroll.button": "Enable encryption (one\u00a0signature)",
+  "e2ee.enroll.oneSignatureBoth":
+    "One wallet signature enables both permissions for 180 days.",
+  "e2ee.enroll.signBoth": "Sign to enable both",
+  "e2ee.enroll.signPosts": "Sign to enable Signed Posts",
+  "e2ee.enroll.signDms": "Sign to enable Encrypted DMs",
+  "e2ee.enroll.signingSection": "Signed Posts",
+  "e2ee.enroll.encryptionSection": "Encrypted DMs",
+  "e2ee.enroll.signingCombined":
+    "This device signs your posts, edits, deletes, and reactions so others can verify they came from you.",
+  "e2ee.enroll.encryptionCombined":
+    "This device can send and read encrypted messages.",
+  "e2ee.enroll.signingApp":
+    "Your wallet signs once. This device then signs your posts, edits, deletes and reactions for 180 days, so anyone can verify they came from you.",
+  "e2ee.enroll.combinedPartial":
+    "Signed posts are on. Encrypted DMs could not finish setup. You can try enabling them separately.",
+  "e2ee.enroll.combinedFinishing":
+    "Signed posts are on. Encrypted DMs are still finishing setup in this browser and will turn on by themselves.",
+  "e2ee.enroll.combinedFinishingDialog":
+    "Signed posts are on. Encrypted DMs are still finishing setup in this browser and will turn on by themselves. You can close this window.",
+  "e2ee.enroll.combinedUnavailable":
+    "Combined setup could not complete. You can try again or set up one permission at a time.",
+  "e2ee.enroll.unavailable":
+    "Open Encrypted messages to check whether this device can be set up.",
   "e2ee.enroll.waiting": "Waiting for your wallet signature…",
-  "e2ee.enroll.rejected": "You cancelled the signature. Nothing was turned on.",
+  "e2ee.enroll.rejected": "Signature cancelled.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
+  "e2ee.upgrade.title": "Upgrade encrypted messages",
+  "e2ee.upgrade.intro":
+    "Encrypted messages are moving to stronger encryption. Confirm once in your wallet to continue; your messages stay on this device.",
+  "e2ee.upgrade.kept.one":
+    "Your {count} existing conversation stays readable. Open it to continue it with the new encryption.",
+  "e2ee.upgrade.kept.other":
+    "Your {count} existing conversations stay readable. Open one to continue it with the new encryption.",
+  "e2ee.upgrade.sign": "Sign to upgrade Encrypted DMs",
+  "e2ee.upgrade.failed": "Couldn’t upgrade encrypted messages. Try again.",
 
   "e2ee.deviceLimit.title": "Too many devices",
   "e2ee.deviceLimit.body":
@@ -94,6 +161,14 @@ export const E2EE_MESSAGES = {
 
   "e2ee.renew.body":
     "This device’s access to encrypted messages ends on {date}. After that it can’t send or read them until you renew. Renewing is one wallet signature; it moves no funds and costs nothing.",
+  "e2ee.renew.inboxButton": "Renew encrypted DMs",
+  "e2ee.renew.inboxCombined":
+    "Signed posts and encrypted DMs expire on {date}.",
+  "e2ee.renew.dismiss": "Dismiss renewal reminder",
+  "e2ee.renew.proofBody": "Signed posts expire on {date}.",
+  "e2ee.renew.proofButton": "Renew signed posts",
+  "e2ee.renew.preview":
+    "Preview of the signed posts and encrypted DMs renewal reminder.",
   "e2ee.renew.button": "Renew (one signature)",
   "e2ee.renew.rejected":
     "You cancelled the signature. This device keeps access until {date}.",
@@ -130,7 +205,8 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.revokeDone": "Device revoked.",
   "e2ee.devices.empty": "No devices yet.",
   "e2ee.devices.revokedSection": "Revoked devices",
-  "e2ee.devices.rename.label": "Name for this device",
+  "e2ee.devices.rename.action": "Rename device",
+  "e2ee.devices.rename.label": "Device name",
   "e2ee.devices.rename.save": "Save name",
   "e2ee.devices.rename.saved": "Device name saved.",
   "e2ee.devices.rename.failed": "Couldn’t save the name. Try again.",
@@ -158,6 +234,7 @@ export const E2EE_MESSAGES = {
   "e2ee.list.status.left": "You left",
   "e2ee.list.status.removed": "Removed",
   "e2ee.list.status.restored": "From backup",
+  "e2ee.list.status.superseded": "Read-only",
   "e2ee.list.entry": "Encrypted messages",
   "e2ee.list.entryHint": "End-to-end encrypted chats",
   "e2ee.list.viewAll": "All encrypted chats",
@@ -239,6 +316,8 @@ export const E2EE_MESSAGES = {
 
   "e2ee.banner.delayed":
     "Group changes are delayed. Messages will send once the change goes through.",
+  "e2ee.banner.sendDelayed":
+    "Messages aren’t sending right now. We’ll keep retrying, and you can keep writing.",
   "e2ee.banner.splitView":
     "Security check needed: this device may not see the same chat as everyone else. Compare safety codes before sharing anything sensitive.",
   "e2ee.banner.splitViewAction": "Compare safety codes",
@@ -265,6 +344,35 @@ export const E2EE_MESSAGES = {
   "e2ee.banner.restored":
     "Restored from your backup. New messages appear here once someone in this chat adds this device.",
 
+  "e2ee.superseded.body":
+    "This conversation moved to stronger encryption. Its messages stay readable here, but you can’t send new ones.",
+  "e2ee.superseded.announce":
+    "This conversation moved to stronger encryption and is now read-only.",
+  "e2ee.superseded.continueDm": "Continue the conversation",
+  "e2ee.superseded.restartGroup": "Start again with the same members",
+  "e2ee.superseded.openSuccessor": "Open the new conversation",
+  "e2ee.superseded.noDevices.dm":
+    "{name} will be reachable once they open 6529.io and confirm the upgrade.",
+  "e2ee.superseded.noDevices.group":
+    "The other members will be reachable once they open 6529.io and confirm the upgrade.",
+  "e2ee.superseded.skipped":
+    "The new conversation started without {names}. Add them from Chat info once they open 6529.io and confirm the upgrade.",
+  "e2ee.superseded.skipToAction": "Skip to the end of this conversation",
+  "e2ee.superseded.notice":
+    "This conversation moved to stronger encryption. Earlier messages are kept in the previous conversation.",
+  "e2ee.superseded.noticeLink": "View earlier messages",
+  "e2ee.unsent.label": "Not sent: this chat was upgraded",
+  "e2ee.unsent.resend": "Resend in the upgraded chat",
+  "e2ee.unsent.delete": "Delete",
+  "e2ee.unsent.deleteLabel": "Delete unsent message",
+  "e2ee.unsent.resent": "Sent in the upgraded chat.",
+  "e2ee.unsent.deleted": "Unsent message deleted.",
+  "e2ee.unsent.resendFailed": "Couldn’t resend. Try again.",
+  "e2ee.unsent.deleteConfirmTitle": "Delete this unsent message?",
+  "e2ee.unsent.deleteConfirmBody":
+    "It was never sent. Its text will be removed from this device.",
+  "e2ee.unsent.deleteFailed": "Couldn’t delete. Try again.",
+
   "e2ee.message.undecryptable": "Couldn’t decrypt this message",
   "e2ee.message.undecryptableHint":
     "It couldn’t be read on this device. Ask {name} to send it again if you need it.",
@@ -276,6 +384,7 @@ export const E2EE_MESSAGES = {
   "e2ee.message.unverified": "Signature not verified",
   "e2ee.message.replyTo": "Reply to {name}",
   "e2ee.message.replyUnavailable": "Original message unavailable",
+  "e2ee.message.signatureVerified": "Sender’s device signature verified",
   "e2ee.message.actions": "Message actions",
   "e2ee.message.reactions": "Reactions",
   "e2ee.message.reactWith": "React with {reaction}",
@@ -319,6 +428,7 @@ export const E2EE_MESSAGES = {
   "e2ee.composer.placeholder": "Write an encrypted message",
   "e2ee.composer.send": "Send",
   "e2ee.composer.attach": "Attach files",
+  "e2ee.composer.dropArea": "Encrypted chat file upload area",
   "e2ee.composer.removeAttachment": "Remove {name}",
   "e2ee.composer.attachments": "Attachments",
   "e2ee.composer.tooManyFiles": "You can attach up to {max} files.",
@@ -527,7 +637,7 @@ export const E2EE_MESSAGES = {
   // Unencrypted DMs are deleted from 6529's servers on a fixed date (D146).
   "e2ee.legacy.banner.label": "Not end-to-end encrypted.",
   "e2ee.legacy.banner.deletion":
-    "This history will be deleted from 6529’s servers on {date}, unless we’re legally required to keep it.",
+    "6529 deletes this history from its servers on {date} unless legally required to keep it.",
   "e2ee.legacy.banner.closed":
     "This unencrypted chat is closed. Its history was deleted from 6529’s servers on {date}, except anything we’re legally required to keep.",
   "e2ee.legacy.region": "Unencrypted chat notice",
@@ -597,4 +707,30 @@ export const E2EE_MESSAGES = {
   "e2ee.legacy.file.edited": "edited",
   "e2ee.legacy.file.media": "Files",
   "e2ee.legacy.file.unknownAuthor": "Unknown",
+  "e2ee.deviceStatus.proofLine": "Signed Posts: {status}",
+  "e2ee.deviceStatus.encryptionLine": "Encrypted DMs: {status}",
+  "e2ee.deviceStatus.enableBoth": "Post Signing & DM Encryption",
+  "e2ee.deviceStatus.enableProof": "Enable Signed Posts",
+  "e2ee.deviceStatus.enableEncryption": "Enable Encrypted DMs",
+  "e2ee.devices.managePermission": "Manage access to encrypted DMs",
+  "e2ee.devices.permission": "Encrypted DMs",
+  "e2ee.devices.combinedPermissions":
+    "Signed Posts and Encrypted DMs (shared grant)",
+  "e2ee.devices.revokeCombinedTitle":
+    "Revoke access to signed posts and encrypted DMs for {label}?",
+  "e2ee.devices.revokeEncryptionTitle":
+    "Revoke access to encrypted DMs for {label}?",
+  "e2ee.devices.revokeHistory":
+    "The app clears this device’s local encrypted chat history when it processes the revocation. An encrypted backup can restore the history it contains.",
+  "e2ee.deviceStatus.summary":
+    "This device: signed posts {proof}; encrypted DMs {encryption}.",
+  "e2ee.deviceStatus.expiring": " · expires {time}",
+  "e2ee.deviceStatus.expired": "expired",
+  "e2ee.deviceStatus.on": "on",
+  "e2ee.deviceStatus.off": "off",
+  "e2ee.deviceStatus.checking": "checking",
+  "e2ee.deviceStatus.unknown": "could not verify",
+  "e2ee.deviceStatus.unavailable": "unavailable",
+  "e2ee.deviceStatus.elsewhere": "open in another tab",
+  "e2ee.deviceStatus.attention": "needs attention",
 } as const;

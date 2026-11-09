@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import type { RequestSignedMessagesGrant } from "@/components/auth/authSignedMessagesGrant";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
   SignedMessagesEnableFlow,
@@ -11,6 +12,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { reportSignedMessagesEnable } from "@/utils/monitoring/signedMessagesEnableMonitoring";
 import { useEffect, useMemo, useState } from "react";
+import { hasLocalTestSigner } from "@/components/auth/signedMessagesTestSigner";
 import { useSignedMessagesWallet } from "./useSignedMessagesWallet";
 
 /**
@@ -18,7 +20,12 @@ import { useSignedMessagesWallet } from "./useSignedMessagesWallet";
  * wallet signature. Without a live wallet it opens the wallet connection and
  * continues once connected; `status` says what is happening or what failed.
  */
-export function useEnableSignedMessages() {
+export function useEnableSignedMessages(
+  options: {
+    readonly requestGrant?: RequestSignedMessagesGrant | undefined;
+    readonly onEnabled?: (() => void) | undefined;
+  } = {}
+) {
   const locale = useBrowserLocale();
   const { requestSignedMessagesGrant, setToast } = useAuth();
   const {
@@ -46,35 +53,42 @@ export function useEnableSignedMessages() {
   const hasOtherLiveAccount = connectedAccounts.some(
     (account) => account.isConnected && !account.isActive
   );
+  // Local dev-auth browser tests only: a test signer is the live wallet.
+  const hasTestSigner = hasLocalTestSigner();
 
   const snapshot = useMemo(
     (): SignedMessagesEnableSnapshot => ({
       address,
-      canSignActiveWallet: canSignActiveWallet === true,
+      canSignActiveWallet: canSignActiveWallet === true || hasTestSigner,
       isWalletConnectionPending: isWalletConnectionPending === true,
       isConnectOpen: seizeConnectOpen === true,
       hasOtherLiveAccount,
-      isRemoteWallet,
-      requestGrant: requestSignedMessagesGrant,
+      isRemoteWallet: isRemoteWallet && !hasTestSigner,
+      requestGrant: options.requestGrant ?? requestSignedMessagesGrant,
       connectWallet: seizeConnectFresh,
       networkName,
-      isNetworkSupported,
+      isNetworkSupported: hasTestSigner ? () => true : isNetworkSupported,
       switchNetwork,
-      onEnabled: () =>
-        setToast({
-          message: t(locale, "signedMessages.notice.enabled"),
-          type: "success",
-        }),
+      onEnabled:
+        options.onEnabled ??
+        (() =>
+          setToast({
+            message: t(locale, "signedMessages.notice.enabled"),
+            type: "success",
+          })),
     }),
     [
       address,
       canSignActiveWallet,
       hasOtherLiveAccount,
+      hasTestSigner,
       isNetworkSupported,
       isRemoteWallet,
       isWalletConnectionPending,
       locale,
       networkName,
+      options.requestGrant,
+      options.onEnabled,
       requestSignedMessagesGrant,
       seizeConnectFresh,
       seizeConnectOpen,
@@ -89,7 +103,8 @@ export function useEnableSignedMessages() {
   useEffect(() => () => flow.dispose(), [flow]);
 
   return {
-    canEnable: requestSignedMessagesGrant !== undefined,
+    canEnable:
+      (options.requestGrant ?? requestSignedMessagesGrant) !== undefined,
     enable: flow.enable,
     reconnect: flow.reconnect,
     isEnabling,

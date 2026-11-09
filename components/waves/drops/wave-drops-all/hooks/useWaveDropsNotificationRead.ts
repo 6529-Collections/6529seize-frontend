@@ -1,10 +1,16 @@
 import { useWaveNotificationsReadMarkerState } from "@/hooks/useMarkWaveNotificationsRead";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 
+// Coming back after this long resyncs the open wave anyway, and the socket
+// may have missed posts meanwhile, so the wave is marked read again.
+const RETURN_READ_MIN_HIDDEN_MS = 30_000;
+
 interface UseWaveDropsNotificationReadParams {
   readonly waveId: string;
   readonly enabled?: boolean | undefined;
   readonly isDirectMessage?: boolean | undefined;
+  /** The newest serial the open wave has loaded, null before any. */
+  readonly latestSerialNo?: number | null | undefined;
   readonly removeWaveDeliveredNotifications: (
     waveId: string
   ) => Promise<unknown> | void;
@@ -52,9 +58,16 @@ export const useWaveDropsNotificationRead = ({
   waveId,
   enabled = true,
   isDirectMessage = false,
+  latestSerialNo = null,
   removeWaveDeliveredNotifications,
 }: UseWaveDropsNotificationReadParams) => {
   const readSyncAttemptRef = useRef<ReadSyncAttempt | null>(null);
+  const latestSerialNoRef = useRef(latestSerialNo);
+  // The newest serial this wave's read already covers: posts that arrive
+  // while the tab is visible are marked read as they arrive
+  // (useActiveWaveReadMarker), so only posts loaded while hidden are new.
+  const readSerialNoRef = useRef(latestSerialNo);
+  const hiddenAtRef = useRef<number | null>(null);
   const hookInstanceIdRef = useRef(Symbol("useWaveDropsNotificationRead"));
   const isHookMountedRef = useRef(false);
   const latestReadGuardStateRef = useRef<ReadGuardState>({
@@ -78,6 +91,13 @@ export const useWaveDropsNotificationRead = ({
       isHookMountedRef.current = false;
     };
   }, []);
+
+  useLayoutEffect(() => {
+    latestSerialNoRef.current = latestSerialNo;
+    if (enabled && document.visibilityState === "visible") {
+      readSerialNoRef.current = latestSerialNo;
+    }
+  }, [enabled, latestSerialNo]);
 
   const { markWaveNotificationsRead, identityKey, proxyRoleIdentityKey } =
     useWaveNotificationsReadMarkerState();
@@ -222,16 +242,39 @@ export const useWaveDropsNotificationRead = ({
       return;
     }
 
+    // Opening the wave while the tab is hidden defers its read to the
+    // return. After that, a return marks the wave read again only when it may
+    // have something new: posts loaded while hidden, or an absence long
+    // enough for the socket to have missed some. A quick switch away and back
+    // has nothing to mark.
+    let isReadPending = document.visibilityState !== "visible";
     const syncReadStateWhenVisible = () => {
-      if (document.visibilityState === "visible") {
-        void syncReadState({
-          waveId,
-          identityKey,
-          proxyRoleIdentityKey,
-        });
+      if (document.visibilityState !== "visible") {
+        hiddenAtRef.current ??= Date.now();
+        return;
       }
+      const hiddenAt = hiddenAtRef.current;
+      hiddenAtRef.current = null;
+      const latest = latestSerialNoRef.current;
+      const read = readSerialNoRef.current;
+      readSerialNoRef.current = latest;
+      const hasNewPosts = latest !== null && (read === null || latest > read);
+      const wasAwayLong =
+        hiddenAt !== null && Date.now() - hiddenAt >= RETURN_READ_MIN_HIDDEN_MS;
+      if (!isReadPending && !hasNewPosts && !wasAwayLong) {
+        return;
+      }
+      isReadPending = false;
+      syncReadState({
+        waveId,
+        identityKey,
+        proxyRoleIdentityKey,
+      });
     };
 
+    if (document.visibilityState !== "visible") {
+      hiddenAtRef.current ??= Date.now();
+    }
     syncReadState({
       waveId,
       identityKey,

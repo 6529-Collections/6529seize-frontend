@@ -11,22 +11,26 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 ## Location in the Site
 
 - Route: `/notifications`.
-- Reached through `View all notifications` in the desktop sidebar inbox, or
-  directly from mobile/app notifications navigation.
+- Reached by clicking the desktop sidebar bell, choosing `View all
+  notifications` in its preview, or using mobile/app notifications navigation.
 - Opened directly from URL, including `/notifications?reload=true`.
 
 ## Entry Points
 
-- On desktop, select the sidebar bell to preview notifications, then choose
-  `View all notifications` for the full feed. Mobile/app navigation opens the
-  full feed directly.
+- On desktop, hover over the sidebar bell to preview notifications. Click the
+  bell or choose `View all notifications` for the full feed. Mobile/app
+  navigation opens the full feed directly.
 - Open `/notifications` directly.
 - Open `/notifications?reload=true` to force one refetch/read pass.
 
 ## Desktop Inbox
 
-The desktop sidebar bell opens a floating inbox beside the sidebar while the
-current page stays in place. Compact rows show the actor, activity, a short drop
+Hovering the desktop sidebar bell opens a floating inbox after 100ms while
+the current page stays in place. The inbox stays open while moving between
+the bell and panel, and closes 200ms after leaving both unless keyboard focus
+remains inside the panel. With the bell focused, Arrow Down opens and focuses
+the inbox; Tab reaches its actions. Clicking the bell opens `/notifications`
+directly, including while the preview is open. Compact rows show the actor, activity, a short drop
 preview when available, a timestamp, and an `Unread` indicator. The newest
 notifications appear first; `Load more` retrieves older rows.
 Reactions to the same drop share one row with reactor avatars and one drop
@@ -44,8 +48,9 @@ a row marks its unread notifications read if needed and opens its destination.
 automatic read request. Read failures show an error; loading failures offer
 `Try again`. The empty inbox shows `No notifications yet`.
 
-Close the inbox with its close button, Escape, another bell click, or a click
-outside. Escape returns focus to the bell. Changing accounts or routes closes
+Close the inbox with its close button, Escape, a click outside, or by moving
+away from both bell and panel. Leaving the preview by keyboard also closes it.
+Escape and the close button return focus to the bell. Changing accounts or routes closes
 it. The inbox is also available when the desktop sidebar is collapsed.
 
 The full `/notifications` page retains its automatic mark-read behavior and
@@ -81,7 +86,7 @@ Unread counts keep their cached values while the Capacitor app is backgrounded
 or a mobile browser tab is hidden. Periodic count refreshes resume on return.
 Browser realtime notification delivery remains connected while the tab is hidden.
 
-- On native iOS when the detected country is not `US` or is unknown, subscription
+- In the iOS app, subscription
   coverage alerts, the Subscriptions filter, and the device's Subscription
   Coverage settings entry are hidden. Social follow notifications remain
   available. This concerns the app feed and controls, not previously delivered
@@ -121,19 +126,19 @@ Browser realtime notification delivery remains connected while the tab is hidden
 
 ## Row and Action Behavior
 
-- Competition result notifications show a trophy beside “Results are in for”
-  and the linked competition name, followed by a timestamp. The row wraps long
-  names on mobile and desktop. The name opens the relevant competition or entry.
+- Decision result notifications show a trophy beside “Results are in for”
+  and the linked decision name, followed by a timestamp. The row wraps long
+  names on mobile and desktop. The name opens the relevant decision or entry.
 
-- Returned voting credit notifications name the submission and competition and
+- Returned voting credit notifications name the submission and decision and
   show the amount released when a submission wins or its author permanently
-  deletes it. They apply to competitions with a shared (`WAVE`) credit budget.
-  Credits are reusable immediately in the same competition; notifications can
+  deletes it. They apply to decisions with a shared (`WAVE`) credit budget.
+  Credits are reusable immediately in the same decision; notifications can
   arrive shortly afterward. The amount is the current allocation when released,
   including the absolute value of negative votes, rather than a time-weighted
   winning score or the sum of historical votes.
-- A winning submission title opens its competition entry. After author deletion,
-  the saved title stays visible as text and the competition name remains linked.
+- A winning submission title opens its decision entry. After author deletion,
+  the saved title stays visible as text and the decision name remains linked.
   Removing an already-winning entry does not return credits or notify a second
   time. Zero votes, submission edits, admin deletion and system cleanup do not
   create returned-credit notifications. Existing vote notification preferences
@@ -169,6 +174,25 @@ Browser realtime notification delivery remains connected while the tab is hidden
   not repeatedly nag the user without a meaningful risk-state change.
 - Unknown causes render a generic row (formatted cause/context) instead of
   failing feed render.
+
+### Encrypted DMs
+
+Encrypted-DM entries appear in both the desktop inbox and the full **All** feed.
+Known senders use the usual avatar, clickable handle, level and applicable
+badges. Older entries without sender details use a lock and **New encrypted
+message**. A locally readable preview keeps a lock indicator; it is decrypted
+on this device, never supplied as plaintext by the notification API.
+
+Previewing requires the exact referenced message in this device's history.
+Without encryption setup, the action is **Set up Encrypted DMs**. With setup but
+without that local message, it is **Open encrypted chat**. A newly enrolled phone
+cannot preview an earlier browser-only message until it has the required history;
+older notifications without a message reference remain generic. The link can
+show **Chat not found on this device** when the device never joined that chat.
+
+These entries follow **Direct messages and wave activity** preferences and are
+created independently of the phone-push cooldown. Missing historical entries are
+not automatically backfilled. See [Encrypted messages](../encrypted-messages.md).
 
 ## Read, Paging, and Navigation
 

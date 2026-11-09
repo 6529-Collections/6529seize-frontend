@@ -6,8 +6,8 @@ The navigation controls expose two separate flows:
 
 - `Share` publishes the exact shareable web URL through copy, QR code, X,
   Farcaster, or the `More` system-share action when the platform allows it.
-- `Connect Device` transfers the authenticated session to 6529 Mobile
-  or 6529 Desktop.
+- `Connect Device` creates an additional authenticated session in 6529 Mobile
+  or 6529 Desktop, optionally with device permissions.
 
 Desktop page sharing and device connection use the same accessible dialog
 foundation and one consistent content inset, but never show each other's
@@ -62,7 +62,7 @@ profile menu. Mobile web and native apps open page sharing from the app header.
    - `Share on X` opens an X composer
    - `Share on Farcaster` opens a Farcaster composer
    - `More` opens the system share sheet, when it is available
-4. Close with the close button, backdrop, or `Escape`.
+5. Close with the close button, backdrop, or `Escape`.
 
 The QR code is visible in the desktop-web dialog. Browser mode contains
 the complete shareable URL, including pathname, search parameters, and hash
@@ -97,29 +97,37 @@ the `More` menu.
 
 ## Connect Device
 
-1. Select the desktop-web profile picture to open the account menu.
-2. Select `Connect Device`.
-3. The `Connect Device` dialog defaults to `Mobile`; select `Desktop` when
-   needed. The target tabs appear without an additional heading above them.
-4. Use the muted `Download apps` text link and download icon beside the dialog
-   title to close the connection dialog and open the 6529 Apps page in the same
-   tab.
-5. Mobile displays the existing one-time session-v2 connection QR code.
-6. Desktop keeps the same square dimensions but uses a dark-bordered handoff
-   card with a 6529 Desktop logo and compact white launch label. The entire card
-   opens 6529 Desktop, not only the visible label.
+1. Open the desktop-web account menu, then **Connect Device**.
+2. Confirm the avatar, handle and full wallet address. Under **Which app are you
+   connecting?**, select **6529 Mobile** or **6529 Desktop**.
+3. Choose **Connect only**, or **Connect with Post Signing & DM Encryption**.
+   Secure setup asks for a wallet signature before preparing its link. On Desktop,
+   the secure option shows **Coming soon**. **Connect only** signs in the receiving
+   app with a short-lived, one-time code.
+4. Mobile shows a full-width QR. Desktop shows the 6529 logo and **Open in 6529
+   Desktop** launch control, rather than a QR. The heading reads **Connect as
+   {handle}**, with **with Post Signing & DM Encryption** for secure setup.
+5. Copy with the icon inside the link field. The adjacent refresh icon generates
+   a new Connect-only code directly. For secure setup, refresh clears the displayed
+   link and returns to the wallet-signing state for a new signature.
+6. **Back** returns to the app and connection choices. The same row reminds you:
+   **Use only on a device you own. This code works once.**
 
-7. Copy the connection link with the copy icon inside the link field. Use the
-   separate refresh button to its right (`Generate new code`) to prepare a new
-   connection without closing the dialog. The selected tab stays open.
-8. While preparing the connection, copy and refresh are disabled and the previous
-   link cannot be used from the dialog. If preparation fails, use refresh to retry.
+The muted **Download apps** link beside the title opens the Apps page. Copy and
+refresh are disabled during preparation; a failed preparation can be retried.
+The modal transitions smoothly between screen heights and scrolls on short
+screens without clipping the QR, controls or focus rings.
 
-The refresh action prepares both connection targets again. Mobile receives a new
-one-time code. Desktop requests a new handoff for session-v2 authentication;
-legacy authentication rebuilds the link from the current local credentials.
+The receiving app confirms the incoming account. Secure links also list
+**Signed Posts** and **Encrypted DMs**, with **Accept and enable both** instead
+of **Accept connection**. One secure link both signs in and enrolls the app;
+registration does not occur merely because a QR was generated. Working receiver
+keys/history are preserved. Both connection types open Home after acceptance;
+secure setup completes before navigation. The source session remains connected. See
+[Encrypted messages setup](../encrypted-messages.md#setup-through-connection-sharing)
+for history, backup and capability limits.
 
-No copy-page, social, or current-page Share actions appear in this dialog.
+No page-copy, social, or current-page Share actions appear in this dialog.
 
 ## Common Scenarios
 
@@ -137,8 +145,8 @@ No copy-page, social, or current-page Share actions appear in this dialog.
 
 ## QR Rendering
 
-- QR payload and connection behavior are unchanged.
-- Codes render at 500 pixels with a four-module quiet zone.
+- Page-share and connection codes retain their own link payloads.
+- Codes scale within their container and keep a complete four-module quiet zone.
 - Foreground is pure black and background is opaque pure white.
 - The image uses nearest-neighbor rendering, contains the complete QR image,
   and is not cropped, blurred, or made transparent.
@@ -159,8 +167,9 @@ No copy-page, social, or current-page Share actions appear in this dialog.
   or unavailable states without revealing page-sharing controls. These notice
   states retain the final connection area's footprint. The unframed loading
   message remains visible until the Mobile QR has been generated and decoded,
-  then the complete QR and connection-link row fade in together. The dialog
-  does not resize between loading and ready states. Actionable authentication
+  then the complete QR and connection-link row appear together. Changes between
+  choices, signing and ready screens animate the dialog height, unless reduced
+  motion is enabled. Actionable authentication
   and unavailable notices retain their framed treatment.
 - In browsers, `More` is omitted in an insecure context, when the Web Share API
   is absent, when the browser rejects the title and URL payload, or when the

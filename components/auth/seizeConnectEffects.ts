@@ -4,9 +4,12 @@ import type { Dispatch, RefObject, SetStateAction } from "react";
 import { useEffect } from "react";
 import { getAddress, isAddress } from "viem";
 import {
+  AUTH_STORAGE_KEYS,
   clearAgentLoginActiveAddress,
   type ConnectedWalletAccount,
   getWalletAddress,
+  PROFILE_SWITCHED_EVENT,
+  syncWalletAuthCookie,
   WALLET_ACCOUNTS_UPDATED_EVENT,
 } from "@/services/auth/auth.utils";
 import { SecurityEventType } from "@/types/security";
@@ -353,6 +356,12 @@ export function useSeizeConnectProviderEffects({
     };
   }, [clearConnectIntentHandoffTimeout, isMountedRef, retryConnectTimeoutRef]);
 
+  // Write the session cookie the server reads from the stored session once per
+  // load, so a session saved before a cookie change keeps working server-side.
+  useEffect(() => {
+    syncWalletAuthCookie();
+  }, []);
+
   useEffect(() => {
     refreshStoredConnectedAccounts();
 
@@ -375,6 +384,46 @@ export function useSeizeConnectProviderEffects({
       );
     };
   }, [isSigningOutAllRef, refreshStoredConnectedAccounts]);
+
+  useEffect(() => {
+    const handleAccountStorageChanged = (event: StorageEvent) => {
+      if (isSigningOutAllRef.current || !(event instanceof StorageEvent)) {
+        return;
+      }
+      if (
+        event.key !== null &&
+        event.key !== AUTH_STORAGE_KEYS.accounts &&
+        event.key !== AUTH_STORAGE_KEYS.activeAddress &&
+        event.key !== AUTH_STORAGE_KEYS.legacyAddress
+      ) {
+        return;
+      }
+
+      refreshStoredConnectedAccounts();
+      const selectedAddress = getChecksummedAddress(getWalletAddress());
+      const previousAddress =
+        walletState.status === "connected" ? walletState.address : null;
+      if (selectedAddress) {
+        setConnectedIfNeeded(selectedAddress, { walletState, setConnected });
+      } else {
+        setDisconnectedIfNeeded({ walletState, setDisconnected });
+      }
+      if (previousAddress?.toLowerCase() !== selectedAddress?.toLowerCase()) {
+        globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+      }
+    };
+
+    globalThis.addEventListener("storage", handleAccountStorageChanged);
+    return () => {
+      globalThis.removeEventListener("storage", handleAccountStorageChanged);
+    };
+  }, [
+    isSigningOutAllRef,
+    refreshStoredConnectedAccounts,
+    setConnected,
+    setDisconnected,
+    walletState,
+  ]);
 
   useEffect(() => {
     if (!isInitialized || isSigningOutAll) {

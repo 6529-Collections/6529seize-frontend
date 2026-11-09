@@ -17,7 +17,7 @@ import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSA
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
@@ -614,6 +614,7 @@ export const EN_GB_MESSAGES = {
   "drop.media.processingTimedOut": "Image processing timed out.",
   "media.interactive.frameTitle": "Interactive HTML media",
   "media.interactive.loading": "Loading interactive media",
+  "media.interactive.fullscreen": "Full screen",
   "quickDm.regionAriaLabel": "Quick direct messages",
   "quickDm.openButtonAriaLabel": "Open quick direct messages",
   "quickDm.openButtonUnreadAriaLabel":
@@ -667,7 +668,7 @@ export const EN_GB_MESSAGES = {
   "waves.poll.status.voted": "Voted",
   "waves.poll.status.updated": "Updated",
   "waves.composer.placeholder.createDrop": "Create a drop",
-  "waves.composer.placeholder.writeChatMessage": "Write a chat message",
+  "waves.composer.placeholder.writeChatMessage": "Write a message",
   "waves.composer.placeholder.dropReply": "Drop a reply",
   "waves.composer.placeholder.postReply": "Post a reply",
   "waves.composer.placeholder.quoteDrop": "Quote a drop",
@@ -1109,12 +1110,12 @@ export const EN_GB_MESSAGES = {
   "waves.voteDetails.trigger.one": "View voters and vote log for {count} voter",
   "waves.voteDetails.trigger.other":
     "View voters and vote log for {count} voters",
-  "waves.leaderboard.timeline.toggle": "Toggle decision timeline",
-  "waves.leaderboard.timeline.decisionTimeline": "Decision Timeline",
+  "waves.leaderboard.timeline.toggle": "Toggle results timeline",
+  "waves.leaderboard.timeline.decisionTimeline": "Results timeline",
   "waves.leaderboard.timeline.announcementHistory": "Announcement history",
   "waves.leaderboard.timeline.paused": "Paused",
-  "waves.leaderboard.timeline.nextDecisionAfter": "Next decision after {date}",
-  "waves.leaderboard.timeline.noDecisionScheduled": "No decision scheduled",
+  "waves.leaderboard.timeline.nextDecisionAfter": "Next result after {date}",
+  "waves.leaderboard.timeline.noDecisionScheduled": "No result scheduled",
   "waves.leaderboard.timeline.noUpcomingEvents": "No upcoming events",
   "waves.leaderboard.phase.nextWinnersIn": "Next winners announced in",
   "waves.leaderboard.phase.countdown": "{hours}h {minutes}m",

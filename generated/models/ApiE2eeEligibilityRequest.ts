@@ -15,6 +15,10 @@ import { HttpFile } from '../http/http';
 
 export class ApiE2eeEligibilityRequest {
     'profile_ids': Array<string>;
+    /**
+    * The MLS group ciphersuite the caller works in: 79 (0x004F) or 78 (0x004E). Omitting ciphersuite means 0x004F; clients that support 0x004E must pass it explicitly. active_devices and NO_DEVICES count only devices that can join groups of this suite.
+    */
+    'ciphersuite'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -25,6 +29,12 @@ export class ApiE2eeEligibilityRequest {
             "name": "profile_ids",
             "baseName": "profile_ids",
             "type": "Array<string>",
+            "format": ""
+        },
+        {
+            "name": "ciphersuite",
+            "baseName": "ciphersuite",
+            "type": "number",
             "format": ""
         }    ];
 

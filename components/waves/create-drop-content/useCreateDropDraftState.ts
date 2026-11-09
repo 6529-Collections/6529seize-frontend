@@ -116,7 +116,16 @@ export const useCreateDropDraftState = ({
   const [mentionedWaves, setMentionedWaves] = useState<MentionedWave[]>([]);
   const [dropEditorRefreshKey, setDropEditorRefreshKey] = useState(0);
   const createDropInputRef = useRef<CreateDropInputHandles | null>(null);
-  const shouldRefocusAfterChatSubmitRef = useRef(false);
+  const shouldRestoreFocusRef = useRef(false);
+
+  useLayoutEffect(() => {
+    if (!shouldRestoreFocusRef.current || submitting) {
+      return;
+    }
+
+    shouldRestoreFocusRef.current = false;
+    createDropInputRef.current?.focus();
+  }, [dropEditorRefreshKey, submitting]);
 
   const onReferencedNft = useCallback((newNft: ReferencedNft) => {
     setReferencedNfts((current) => [
@@ -330,7 +339,8 @@ export const useCreateDropDraftState = ({
     return replacedDrop;
   };
 
-  const refreshState = () => {
+  const refreshState = (restoreFocusAfterSubmit = false) => {
+    shouldRestoreFocusRef.current = restoreFocusAfterSubmit;
     createDropInputRef.current?.clearEditorState();
     setEditorState(null);
     setMetadata(initialMetadata);
@@ -346,19 +356,8 @@ export const useCreateDropDraftState = ({
     setDropEditorRefreshKey((prev) => prev + 1);
   };
 
-  useLayoutEffect(() => {
-    if (!shouldRefocusAfterChatSubmitRef.current || submitting) {
-      return;
-    }
-
-    shouldRefocusAfterChatSubmitRef.current = false;
-    // Refocus the refreshed editor before iOS can dismiss its input session.
-    createDropInputRef.current?.focus();
-  }, [dropEditorRefreshKey, submitting]);
-
   return {
     createDropInputRef,
-    shouldRefocusAfterChatSubmitRef,
     dropEditorRefreshKey,
     onReferencedNft,
     onMentionedUser,

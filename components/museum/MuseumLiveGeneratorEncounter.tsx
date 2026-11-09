@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/museum";
 import { displayCreditWithoutRepeatedLicense } from "@/lib/museum/credit";
 import type { MuseumMedia } from "@/lib/museum/publication/types";
 import { MuseumRightsLink } from "./MuseumRightsLink";

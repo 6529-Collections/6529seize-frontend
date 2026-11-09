@@ -21,8 +21,10 @@ load older notifications.
 
 ## Main Flow
 
-1. On desktop, open the sidebar bell and select `View all notifications`.
-   Alternatively, open `/notifications` directly or use the mobile bell.
+1. Click the sidebar bell to open `/notifications`. On desktop you can also
+   hover over the bell (or focus it and press Arrow Down) to preview activity,
+   then select `View all notifications`. Direct URLs and the mobile bell also
+   open the full feed.
 2. Resolve access gates if shown:
    `Loading profile...`, `Reconnect wallet`, `Switch to primary profile`.
 3. Wait for `Loading notifications...`.

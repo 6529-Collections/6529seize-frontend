@@ -1,4 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { useEncryptedNotificationPreview } from "@/hooks/e2ee/useEncryptedNotificationPreview";
+import type { INotificationEncryptedMessage } from "@/types/feed.types";
 import NotificationInboxRow from "@/components/notifications/inbox/NotificationInboxRow";
 import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
@@ -10,6 +12,20 @@ import type {
   INotificationVotingCreditsReturned,
 } from "@/types/feed.types";
 import { isGroupedReactionsItem } from "@/types/feed.types";
+
+jest.mock("next/navigation", () => ({
+  ...jest.requireActual("next/navigation"),
+  useRouter: () => ({ push: jest.fn() }),
+}));
+
+jest.mock("@/hooks/e2ee/useEncryptedNotificationPreview", () => ({
+  useEncryptedNotificationPreview: jest.fn(),
+}));
+beforeEach(() => {
+  jest
+    .mocked(useEncryptedNotificationPreview)
+    .mockReturnValue({ preview: null, needsSetup: false });
+});
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -149,7 +165,7 @@ it.each(["wave.png", undefined])(
     }
     expect(screen.getByRole("link")).toHaveAttribute(
       "href",
-      "/waves/wave/competitions/competition"
+      "/waves/wave/decisions/competition"
     );
   }
 );
@@ -173,4 +189,86 @@ it("uses the group's latest drop even when the first reaction is older", () => {
     "href",
     "/waves/wave?serialNo=42"
   );
+});
+
+it.each([null, "A locally decrypted message"])(
+  "preserves encrypted notification fallback or local preview (%s)",
+  (preview) => {
+    jest
+      .mocked(useEncryptedNotificationPreview)
+      .mockReturnValue({ preview, needsSetup: !preview });
+    const notification: INotificationEncryptedMessage = {
+      id: 12,
+      created_at: 12,
+      read_at: null,
+      cause: ApiNotificationCause.E2EeMessage,
+      additional_context: { encrypted_group: "0xgroup" },
+    };
+    const onOpen = jest.fn();
+    render(
+      <NotificationInboxRow
+        notification={notification}
+        handle="viewer"
+        onOpen={onOpen}
+      />
+    );
+    expect(useEncryptedNotificationPreview).toHaveBeenCalledWith(
+      "0xgroup",
+      undefined
+    );
+    expect(screen.getByText("New encrypted message")).toBeInTheDocument();
+    expect(
+      screen.getByText(preview ?? "Set up Encrypted DMs")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "/messages/encrypted/0xgroup"
+    );
+    fireEvent.click(screen.getByRole("link"));
+    expect(onOpen).toHaveBeenCalledWith([12]);
+  }
+);
+
+it("links the sender avatar and handle separately from encrypted chat setup", () => {
+  jest.mocked(useEncryptedNotificationPreview).mockReturnValue({
+    preview: null,
+    needsSetup: true,
+  });
+  const onOpen = jest.fn();
+  render(
+    <NotificationInboxRow
+      notification={{
+        id: 13,
+        created_at: 13,
+        read_at: null,
+        cause: ApiNotificationCause.E2EeMessage,
+        related_identity: {
+          id: "alice",
+          handle: "alice",
+          pfp: "https://example.com/avatar.png",
+          level: 80,
+          artist_of_prevote_cards: [1],
+        } as ApiProfileMin,
+        additional_context: {
+          encrypted_group: "0xgroup",
+          encrypted_message_seq: 8,
+        },
+      }}
+      handle="viewer"
+      onOpen={onOpen}
+    />
+  );
+  const sender = screen.getByRole("link", { name: "alice" });
+  expect(sender).toHaveAttribute("href", "/alice");
+  expect(sender.querySelector("img")).toBeInTheDocument();
+  expect(screen.getByRole("img", { name: "Level 80" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "View 1 minted meme" })
+  ).toBeInTheDocument();
+  const setup = screen.getByRole("link", { name: "Set up Encrypted DMs" });
+  expect(setup).toHaveAttribute("href", "/messages/encrypted/0xgroup");
+  fireEvent.click(sender);
+  expect(onOpen).not.toHaveBeenCalled();
+  fireEvent.click(setup);
+  expect(onOpen).toHaveBeenCalledWith([13]);
 });

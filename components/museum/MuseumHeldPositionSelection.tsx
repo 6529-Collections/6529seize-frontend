@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/museum";
 import type { MuseumGenerativeStudy } from "@/lib/museum/generative-studies";
 
 interface MuseumHeldPositionSelectionProps {

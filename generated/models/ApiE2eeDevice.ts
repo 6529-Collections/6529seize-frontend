@@ -48,7 +48,7 @@ export class ApiE2eeDevice {
     'revoked_at': number | null;
     'revocation': ApiE2eeDeviceRevocation | null;
     /**
-    * Set when the device was granted by a combined sign-in grant: the exact Sign-In with Ethereum message the wallet signed. Then wallet_signature is the EIP-191 signature over it, grant_id is its EIP-191 hash, and grant holds the terms of its urn:6529:mls-device-grant:v1 resource (origin = the SIWE domain, issued_at = its Issued At). Null for EIP-712 MlsDeviceGrant grants.
+    * Set for a combined sign-in grant or an app device grant with an encrypted-messages key. For a combined sign-in grant, this is the exact SIWE message the wallet signed; wallet_signature is its EIP-191 signature, grant_id its EIP-191 hash, and grant holds the terms of its urn:6529:mls-device-grant resource: v1 (one ciphersuite) or v2 (version 2 and the ciphersuites set, D172), with origin = the SIWE domain and issued_at = its Issued At. For an app device grant, this is the signed EIP-712 DeviceGrant message as JSON; wallet_signature is its typed-data signature and grant_id its EIP-712 digest. Null for direct EIP-712 MlsDeviceGrant registrations.
     */
     'grant_message'?: string | null;
 

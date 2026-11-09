@@ -10,13 +10,15 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { normalizeOptionalWaveId } from "@/helpers/waves/wave.helpers";
 import { mapApiWaveToSidebarWave, useWavesV2 } from "./useWavesV2";
 import {
+  SIDEBAR_HIGHLY_RATED_WAVES_PARAMS,
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
   WAVE_SCORE_DISCOVERY_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
-import { useWaveById } from "./useWaveById";
+import { useAnnouncementsWave } from "./useAnnouncementsWave";
+import { useAnnouncementWaveActivity } from "./useAnnouncementWaveActivity";
 import {
   getWaveSubwavesQueryOptions,
   useWaveSubwavesMap,
@@ -55,8 +57,6 @@ type EnhancedWave = SidebarWave & {
   readonly isInAllWaves?: boolean;
   readonly sidebarSection?: SidebarDiscoverySection;
 };
-
-const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
 
 // V2 overview, pinned, and announcement wave sources are root-wave
 // sources. This guard is defensive against stale or malformed cached data; it is
@@ -156,14 +156,14 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     refetchIfStale: highlyRatedWavesRefetchIfStale,
   } = useWavesV2({
     overviewType: WAVE_SCORE_DISCOVERY_PARAMS.overviewType,
-    pageSize: HIGHLY_RATED_QUERY_PAGE_SIZE,
+    pageSize: SIDEBAR_HIGHLY_RATED_WAVES_PARAMS.pageSize,
     following: false,
     directMessage: false,
     excludeFollowed: isConnectedIdentity ? true : undefined,
     pinned: nonPinnedFilter,
     scoreSort: ApiWaveScoreSort.Quality,
     viewerIdentityKey,
-    refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+    refetchInterval: SIDEBAR_HIGHLY_RATED_WAVES_PARAMS.refetchIntervalMs,
     refetchIntervalInBackground: false,
     enabled: shouldLoadMainWaves,
   });
@@ -313,9 +313,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     isLoading: rawAnnouncementQueryLoading,
     error: rawAnnouncementQueryError,
     refetch: announcementRefetch,
-  } = useWaveById(announcementsWaveId, {
-    enabled: shouldFetchAnnouncementWave,
-  });
+  } = useAnnouncementsWave(announcementsWaveId, shouldFetchAnnouncementWave);
   const announcementQueryLoading =
     shouldFetchAnnouncementWave && rawAnnouncementQueryLoading;
   const announcementQueryError = shouldFetchAnnouncementWave
@@ -328,7 +326,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
         : null,
     [fetchedAnnouncementWave]
   );
-  const announcementWave = useMemo(() => {
+  const announcementWaveSource = useMemo(() => {
     const resolvedWave =
       trackedAnnouncementWave ?? fetchedAnnouncementSidebarWave;
     if (
@@ -340,6 +338,11 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     }
     return resolvedWave;
   }, [trackedAnnouncementWave, fetchedAnnouncementSidebarWave]);
+
+  const announcementWave = useAnnouncementWaveActivity(
+    announcementWaveSource,
+    viewerIdentityKey
+  );
 
   // Create a map of mainWaves by ID for easy lookup
   const mainWavesMap = useMemo(() => {
@@ -614,8 +617,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   );
 
   // Refresh all sources (main, pinned, announcements, subwaves): forced, or
-  // stale-only for reconnect and tab-resume resyncs.
-  const { refetchAllWaves, refreshStaleWaves } = useWavesListRefetch({
+  // stale-only on resync; or just the activity list for unknown-wave drops.
+  const refresh = useWavesListRefetch({
     shouldLoadMainWaves,
     isJoinedMode,
     highlyRated: {
@@ -640,8 +643,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     announcementWaveId: shouldFetchAnnouncementWave
       ? announcementsWaveId
       : null,
-    refetchAnnouncementWave: announcementRefetch,
   });
+  const { refetchAllWaves, refreshActivityList, refreshStaleWaves } = refresh;
 
   const topSectionWaveIds = useMemo(() => {
     const ids = new Set<string>();
@@ -746,8 +749,9 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       mainWaves,
       missingPinnedIds,
       mainWavesRefetch: shouldLoadMainWaves ? mainWavesRefetch : noopListAction,
-      // Refetch all waves including main and pinned
+      // Refetch all waves including main and pinned, or just the activity list
       refetchAllWaves,
+      refreshActivityList,
       refreshStaleWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,
@@ -783,6 +787,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       missingPinnedIds,
       mainWavesRefetch,
       refetchAllWaves,
+      refreshActivityList,
       refreshStaleWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,

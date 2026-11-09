@@ -39,7 +39,7 @@ The profile header appears on profile routes under `/{user}` and shows:
    - title row (display name, CIC icon, level, optional artist badge)
    - metadata row (classification and `Profile enabled: <Month Year>` when data
      exists)
-   - About panel (when a BIO exists, or when the viewer can edit)
+   - About panel (when an About statement exists)
    - stats row (`TDH`, `xTDH`, `NIC`, `Rep`, `Followers`)
 4. Use quick stats:
    - `TDH` -> `/{user}/collected`
@@ -56,15 +56,15 @@ The profile header appears on profile routes under `/{user}` and shows:
    - winners-only: opens `Winning Artworks`
    - both: opens `Active Submissions` first
 7. Actions depend on viewer context:
-   - own profile with handle and no active proxy: fine-pointer desktop layouts
-     expose direct edit controls on the banner, profile picture, name,
-     classification, and About
-   - smaller and touch-first layouts show an `Edit profile` action that opens
-     an editing hub for those same identity fields
+   - own profile with a handle and a confirmed direct session: desktop layouts
+     show `Edit` beside `Preferences`, opening Profile cover, Profile picture,
+     Profile name, Classification, and About statement together
+   - smaller layouts keep the circular `Edit profile` action, opening a field
+     menu and then the selected editor; no active proxy can edit
    - `Preferences` remains a distinct owner action for privacy, direct-message,
      and notification settings; it sits in the right-side action area below the
      banner on desktop, remains an icon-only action beside `Edit profile` in the
-     banner's top-right corner on touch-first and phone layouts, and sits to the
+     banner's top-right corner on smaller layouts, and sits to the
      right of the identity on smaller fine-pointer layouts
    - subscription coverage remains a separate status and navigation surface:
      a subtle row beneath Preferences on desktop layouts, and a full-width
@@ -94,8 +94,30 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
 
 - Display name fallback order: `handle` -> `display` -> primary wallet -> route
   value.
-- Long About text (`>240` chars) is clamped on mobile with `See more` /
-  `See less`; desktop stays expanded.
+- Owners use one `Edit` action beside `Preferences` on desktop. It opens a
+  dialog with Profile cover, Profile picture, Profile name, Classification,
+  and About statement together. Individual fields no longer have edit pencils.
+  The dialog uses compact dark controls, with name and classification alongside
+  each other when space allows. Classification options overlay the content
+  without moving the About statement. Empty upload controls show their upload
+  icon; saved or selected profile pictures show their preview inside the
+  `Upload image` area. Meme search stays above it, with no separate preview row.
+  Gradient and Image choices align with the left edge of the cover controls.
+  The Profile picture section shows Meme search immediately, separated from
+  file upload with `or`. You can type while Memes load; loading and retry states
+  remain available.
+- Smaller layouts keep the circular `Edit profile` button in the banner.
+  Choose a field in its icon menu to open that editor; use `Back` to return.
+  These editors use the same compact field styling as desktop. The picture
+  editor shows Meme search and file upload together, separated by `or`.
+- About text stays read-only in the header. An empty About has no placeholder;
+  add one through the profile editor. Clear the About editor and save to remove it.
+- Long About text is clamped to six lines on mobile with `See more` /
+  `See less` when it overflows; desktop stays expanded.
+- Profile editing is hidden from visitors, signed-out users, and active proxies.
+- The desktop editor keeps unsaved changes after a save error. If one field
+  saves before another fails, retry saves only the remaining changes. Closing
+  with unsaved desktop changes asks whether to discard them.
 - Mobile profile banners retain their existing full-strength artwork and
   top-right owner controls. Desktop banners fade into the content surface at
   the bottom; only the profile picture crosses that boundary.
@@ -104,8 +126,6 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
   its label, current state, and contextual action kept inline when space allows.
   It remains a full-width contextual row on smaller layouts and can wrap when
   translated or dynamic content cannot fit.
-- Touch-first layouts use the profile editing hub; fine-pointer desktop layouts
-  retain the field-level editing controls.
 - `Followers` opens a modal list; it does not navigate to a followers tab.
 - `Following` shows the total number of identities you follow, including rows
   not yet loaded. The list loads when you open it and shows profile images,
@@ -120,6 +140,9 @@ at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
 
 ## Edge Cases
 
+- On a fresh page load, viewer-specific actions wait until the browser restores
+  the signed-in session. The public profile summary remains available while
+  owner actions, relationship actions, and moderation controls are loading.
 - Quick stats links render only when the resolved route segment is route-safe
   (`a-z`, `A-Z`, `0-9`, `.`, `_`, `-`).
 - If no banner image is set, the header uses a gradient banner.

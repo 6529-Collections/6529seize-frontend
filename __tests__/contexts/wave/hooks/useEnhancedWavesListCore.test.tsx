@@ -1,11 +1,10 @@
-import { renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import useEnhancedWavesListCore from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import useNewDropCounter from "@/contexts/wave/hooks/useNewDropCounter";
 
 jest.mock("@/contexts/wave/hooks/useNewDropCounter", () => ({
   __esModule: true,
   default: jest.fn(() => ({
-    newDropsCounts: {},
     resetAllWavesNewDropsCount: jest.fn(),
     resetWaveNewDropsCount: jest.fn(),
   })),
@@ -29,6 +28,42 @@ jest.mock("@/contexts/wave/hooks/useNewDropCounter", () => ({
 }));
 
 const mockedUseNewDropCounter = useNewDropCounter as jest.Mock;
+
+// The counter writes live counts into the store the core hands it.
+const mockLiveCounts = (
+  counts: Record<string, unknown>,
+  resetWaveNewDropsCount: jest.Mock = jest.fn()
+) => {
+  mockedUseNewDropCounter.mockImplementation(
+    (
+      _activeWaveId: unknown,
+      _waves: unknown,
+      _refetch: unknown,
+      options?: {
+        readonly store?: {
+          readonly updateNewDropsCounts: (update: () => unknown) => void;
+        };
+      }
+    ) => {
+      options?.store?.updateNewDropsCounts(() => counts);
+      return {
+        resetAllWavesNewDropsCount: jest.fn(),
+        resetWaveNewDropsCount,
+      };
+    }
+  );
+};
+
+type CoreResult = ReturnType<typeof useEnhancedWavesListCore>;
+
+// A list row with the live unread values applied, as the sidebar shows it.
+const liveWave = (current: CoreResult, index = 0) => {
+  const base = current.waves[index]!;
+  return current.unreadSource.resolve(
+    base,
+    current.unreadSource.store.get(base.id)
+  );
+};
 
 const createWavesData = ({
   mainWavesRefetch,
@@ -80,12 +115,40 @@ const createSidebarWave = (overrides: Record<string, unknown> = {}) =>
 describe("useEnhancedWavesListCore", () => {
   beforeEach(() => {
     mockedUseNewDropCounter.mockClear();
-    mockedUseNewDropCounter.mockReturnValue({
-      newDropsCounts: {},
-      resetAllWavesNewDropsCount: jest.fn(),
-      resetWaveNewDropsCount: jest.fn(),
-    });
+    mockLiveCounts({});
   });
+
+  it.each([50, null])(
+    "uses the main feed timestamp %s over reply-inclusive activity",
+    (timestamp) => {
+      mockLiveCounts({
+        "wave-1": {
+          count: 0,
+          latestDropTimestamp: 999,
+          firstUnreadSerialNo: null,
+        },
+      });
+      const { result } = renderHook(() =>
+        useEnhancedWavesListCore(
+          null,
+          createWavesData({
+            mainWavesRefetch: jest.fn(),
+            refetchAllWaves: jest.fn(),
+            waves: [
+              createSidebarWave({
+                latestDropTimestamp: 500,
+                latestTopLevelDropTimestamp: timestamp,
+              }),
+            ],
+          }),
+          { supportsPinning: true }
+        )
+      );
+      expect(liveWave(result.current).newDropsCount.latestDropTimestamp).toBe(
+        timestamp
+      );
+    }
+  );
 
   it("uses the full waves refetch for live unknown-wave recovery", () => {
     const mainWavesRefetch = jest.fn();
@@ -112,6 +175,28 @@ describe("useEnhancedWavesListCore", () => {
       expect.anything(),
       mainWavesRefetch,
       expect.anything()
+    );
+  });
+
+  it("refreshes only the activity list for unknown-wave drops when the source can", () => {
+    const refetchAllWaves = jest.fn();
+    const refreshActivityList = jest.fn();
+    const wavesData = {
+      ...createWavesData({ mainWavesRefetch: jest.fn(), refetchAllWaves }),
+      refreshActivityList,
+    };
+
+    renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: true,
+      })
+    );
+
+    expect(mockedUseNewDropCounter).toHaveBeenCalledWith(
+      null,
+      [],
+      refreshActivityList,
+      expect.any(Object)
     );
   });
 
@@ -273,16 +358,12 @@ describe("useEnhancedWavesListCore", () => {
   });
 
   it("does not double-count websocket drops already covered by API unread data", () => {
-    mockedUseNewDropCounter.mockReturnValue({
-      newDropsCounts: {
-        "wave-1": {
-          count: 2,
-          latestDropTimestamp: 90,
-          firstUnreadSerialNo: 12,
-        },
+    mockLiveCounts({
+      "wave-1": {
+        count: 2,
+        latestDropTimestamp: 90,
+        firstUnreadSerialNo: 12,
       },
-      resetAllWavesNewDropsCount: jest.fn(),
-      resetWaveNewDropsCount: jest.fn(),
     });
     const wavesData = createWavesData({
       mainWavesRefetch: jest.fn(),
@@ -302,23 +383,150 @@ describe("useEnhancedWavesListCore", () => {
       })
     );
 
-    expect(result.current.waves[0]?.unreadDropsCount).toBe(3);
-    expect(result.current.waves[0]?.firstUnreadDropSerialNo).toBe(10);
+    expect(liveWave(result.current).unreadDropsCount).toBe(3);
+    expect(liveWave(result.current).firstUnreadDropSerialNo).toBe(10);
+  });
+
+  it("keeps wave objects stable when live unread values change", () => {
+    // The counter writes nothing here; the test writes to the store itself.
+    mockedUseNewDropCounter.mockImplementation(() => ({
+      resetAllWavesNewDropsCount: jest.fn(),
+      resetWaveNewDropsCount: jest.fn(),
+    }));
+    const wavesData = createWavesData({
+      mainWavesRefetch: jest.fn(),
+      refetchAllWaves: jest.fn(),
+      waves: [
+        createSidebarWave({ id: "wave-1", unreadDropsCount: 1 }),
+        createSidebarWave({ id: "wave-2" }),
+      ],
+    });
+    const { result, rerender } = renderHook(() =>
+      useEnhancedWavesListCore(null, wavesData, {
+        supportsPinning: true,
+      })
+    );
+    const before = result.current.waves;
+    const { store } = result.current.unreadSource;
+
+    act(() => {
+      store.updateNewDropsCounts((previous) => ({
+        ...previous,
+        "wave-2": {
+          count: 2,
+          latestDropTimestamp: 300,
+          firstUnreadSerialNo: 8,
+        },
+      }));
+    });
+    rerender();
+
+    // The list and its rows keep their identity; the live values resolve on
+    // top for the rows that show them.
+    expect(result.current.waves).toBe(before);
+    expect(liveWave(result.current, 0)).toBe(before[0]);
+    expect(liveWave(result.current, 1)).toMatchObject({
+      unreadDropsCount: 2,
+      firstUnreadDropSerialNo: 8,
+      sidebarActivityTimestamp: 300,
+      newDropsCount: { count: 2, latestDropTimestamp: 300 },
+    });
+    // Resolving again with the same entry returns the same object.
+    expect(liveWave(result.current, 1)).toBe(liveWave(result.current, 1));
+  });
+
+  it("leaves waves of other lists to their own unread values", () => {
+    // MyStreamWaveContent resolves both main-list and direct-message waves
+    // through the main list's source; a DM wave carries the server's DM
+    // unread state and must come back unchanged, even with an entry.
+    mockedUseNewDropCounter.mockImplementation(() => ({
+      resetAllWavesNewDropsCount: jest.fn(),
+      resetWaveNewDropsCount: jest.fn(),
+    }));
+    const { result } = renderHook(() =>
+      useEnhancedWavesListCore(
+        null,
+        createWavesData({
+          mainWavesRefetch: jest.fn(),
+          refetchAllWaves: jest.fn(),
+          waves: [createSidebarWave({ id: "wave-1" })],
+        }),
+        { supportsPinning: true }
+      )
+    );
+    const directMessage = {
+      ...result.current.waves[0]!,
+      id: "dm-1",
+      unreadDropsCount: 3,
+    };
+
+    const resolved = result.current.unreadSource.resolve(directMessage, {
+      newDrops: { count: 5, latestDropTimestamp: 400, firstUnreadSerialNo: 9 },
+      cleared: true,
+      forcedCount: 7,
+    });
+
+    expect(resolved).toBe(directMessage);
+  });
+
+  it("applies local read and mark-unread through the store", () => {
+    jest.useFakeTimers();
+    try {
+      const wavesData = createWavesData({
+        mainWavesRefetch: jest.fn(),
+        refetchAllWaves: jest.fn(),
+        waves: [
+          createSidebarWave({
+            id: "wave-1",
+            unreadDropsCount: 3,
+            firstUnreadDropSerialNo: 4,
+          }),
+        ],
+      });
+      const { result, rerender } = renderHook(
+        ({ activeWaveId }: { readonly activeWaveId: string | null }) =>
+          useEnhancedWavesListCore(activeWaveId, wavesData, {
+            supportsPinning: true,
+          }),
+        { initialProps: { activeWaveId: null as string | null } }
+      );
+      const before = result.current.waves;
+
+      act(() => result.current.markWaveRead("wave-1"));
+      expect(liveWave(result.current)).toMatchObject({
+        unreadDropsCount: 0,
+        firstUnreadDropSerialNo: null,
+      });
+
+      act(() => result.current.restoreWaveUnreadCount("wave-1", 5));
+      expect(liveWave(result.current)).toMatchObject({ unreadDropsCount: 5 });
+
+      // Opening the wave drops the forced count at once and clears the
+      // server count after the delay.
+      rerender({ activeWaveId: "wave-1" });
+      expect(liveWave(result.current).unreadDropsCount).toBe(3);
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+      expect(liveWave(result.current).unreadDropsCount).toBe(0);
+      expect(result.current.waves).toBe(before);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("uses only the canonical unread owner for direct-message rows", () => {
     const resetWaveNewDropsCount = jest.fn();
-    mockedUseNewDropCounter.mockReturnValue({
-      newDropsCounts: {
+    mockLiveCounts(
+      {
         "wave-1": {
           count: 50,
           latestDropTimestamp: 200,
           firstUnreadSerialNo: 2,
         },
       },
-      resetAllWavesNewDropsCount: jest.fn(),
-      resetWaveNewDropsCount,
-    });
+      resetWaveNewDropsCount
+    );
     const wavesData = createWavesData({
       mainWavesRefetch: jest.fn(),
       refetchAllWaves: jest.fn(),
@@ -353,7 +561,7 @@ describe("useEnhancedWavesListCore", () => {
       wavesData.refetchAllWaves,
       expect.objectContaining({ enabled: false })
     );
-    expect(result.current.waves[0]).toMatchObject({
+    expect(liveWave(result.current)).toMatchObject({
       unreadDropsCount: 2,
       firstUnreadDropSerialNo: 12,
       newDropsCount: { count: 0, firstUnreadSerialNo: 12 },
@@ -364,16 +572,12 @@ describe("useEnhancedWavesListCore", () => {
   });
 
   it("uses the canonical unread owner before its first snapshot is ready", () => {
-    mockedUseNewDropCounter.mockReturnValue({
-      newDropsCounts: {
-        "wave-1": {
-          count: 2,
-          latestDropTimestamp: 200,
-          firstUnreadSerialNo: 12,
-        },
+    mockLiveCounts({
+      "wave-1": {
+        count: 2,
+        latestDropTimestamp: 200,
+        firstUnreadSerialNo: 12,
       },
-      resetAllWavesNewDropsCount: jest.fn(),
-      resetWaveNewDropsCount: jest.fn(),
     });
     const wavesData = createWavesData({
       mainWavesRefetch: jest.fn(),
@@ -399,7 +603,7 @@ describe("useEnhancedWavesListCore", () => {
       wavesData.refetchAllWaves,
       expect.objectContaining({ enabled: false })
     );
-    expect(result.current.waves[0]).toMatchObject({
+    expect(liveWave(result.current)).toMatchObject({
       unreadDropsCount: 0,
       firstUnreadDropSerialNo: null,
       newDropsCount: { count: 0, firstUnreadSerialNo: null },

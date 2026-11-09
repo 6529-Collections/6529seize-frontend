@@ -10,6 +10,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { createWaveMetadata } from "@/services/api/waves-v2-api";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import type { CreateDropConfig } from "@/entities/IDrop";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import { useRouter } from "next/navigation";
@@ -313,7 +314,11 @@ export function useCreateWaveSubmission({
     drop: CreateDropConfig,
     adminGroupId: string
   ) => {
-    const dropRequest = await getCreateWaveDropRequest(drop);
+    // The wave's opening drop is chat; only decision entries keep originals.
+    const dropRequest = await getCreateWaveDropRequest(
+      drop,
+      ApiMediaUploadPurpose.Chat
+    );
     const picture = config.overview.image
       ? await multiPartUpload({ file: config.overview.image, path: "wave" })
       : null;

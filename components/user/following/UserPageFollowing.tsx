@@ -8,6 +8,7 @@ import Follower from "@/components/utils/followers/Follower";
 import { getFollowersMessage } from "@/components/utils/followers/followers.messages";
 import Button from "@/components/utils/button/Button";
 import useFollowingList, { useFollowingCount } from "@/hooks/useFollowingList";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { formatUserStatsRowInteger } from "../utils/stats/user-stats-row.messages";
 
 export default function UserPageFollowing({
@@ -15,6 +16,7 @@ export default function UserPageFollowing({
 }: {
   readonly profileId: string | null | undefined;
 }) {
+  const hasHydrated = useHasHydrated();
   const {
     connectedProfile,
     isAuthenticated,
@@ -22,6 +24,7 @@ export default function UserPageFollowing({
     isDirectProfileSession,
   } = useContext(AuthContext);
   if (
+    !hasHydrated ||
     !profileId ||
     !isAuthenticated ||
     !isDirectProfileSession ||

@@ -66,7 +66,7 @@ push to open the matching app route.
   - Tap handling accepts only payloads that include
     `notification_id`, `redirect`, `target_profile_id`, and
     `target_profile_handle`.
-  - Device-push redirect types are `profile` and `waves`.
+  - Device-push redirect types are `profile`, `waves`, and `e2ee`.
   - `profile` redirects can include `subroute` (`rep`, `identity`, or
     `subscriptions`);
     unknown subroutes fall back to profile root.
@@ -115,6 +115,18 @@ push to open the matching app route.
     offline devices, or failed refreshes can leave the badge temporarily stale.
   - Android dots/counts depend on the launcher and remaining notifications;
     there is no guaranteed numeric unread badge.
+
+### Encrypted-message pushes
+
+Message pushes use title **New encrypted message** and body **Open 6529 Mobile
+to view** in production or **Open 6529 Staging to view** on staging. They disclose
+no sender, chat name or message text. Invitations say **You were added to an
+encrypted chat**. Push throttling is separate from in-app notification creation.
+
+An `e2ee` push opens `/messages/encrypted` for the target connected profile. The
+app refreshes the encrypted chat list, where the recipient can choose a chat.
+Without encryption setup the route offers setup. Enabling a new device does not transfer earlier
+history from another device. See [Encrypted messages](../encrypted-messages.md).
 
 ### Signing out on a phone
 
@@ -181,7 +193,7 @@ push to open the matching app route.
 - Background cross-device reads update iOS badges; selective tray cleanup runs
   when the app executes reconciliation for that profile. This does not promise
   immediate background tray synchronization on either platform.
-- Device push tap redirects currently support `profile` and `waves` payload
+- Device push tap redirects support `profile`, `waves`, and `e2ee` payload
   types.
 - Push receive/tap issues do not surface a global blocking banner.
 - Registration retries run in the background; there is no per-attempt retry

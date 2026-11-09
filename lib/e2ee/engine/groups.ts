@@ -27,6 +27,8 @@ export function newRuntime(record: StoredGroup): GroupRuntime {
     deleted: new Set(),
     outbox: new Map(),
     stallSince: null,
+    sendFailingSince: null,
+    commitFailing: false,
   };
 }
 
@@ -40,6 +42,7 @@ export function newGroupRecord(input: {
   return {
     g: summary.g.toLowerCase(),
     status: "active",
+    ciphersuite: summary.ciphersuite,
     metadata: summary.metadata,
     cursor: 0,
     epoch: summary.epoch,

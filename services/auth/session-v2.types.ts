@@ -34,6 +34,8 @@ export interface SessionNonceDeviceGrantParams {
   /** Combined grant (NC8): also grant this MLS device key. */
   readonly mls_device_key?: string;
   readonly mls_ciphersuite?: string;
+  /** Grant v2 (D172): the MLS suites, ascending, joined by "." ("78"). */
+  readonly mls_ciphersuites?: string;
 }
 
 export interface SessionNativeResponse {

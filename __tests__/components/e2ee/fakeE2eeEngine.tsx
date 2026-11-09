@@ -84,6 +84,8 @@ export const conversation = (
   safetyCode: "abcd ef01 2345 6789",
   status: "active",
   delayed: false,
+  // A bare `delayed: true` keeps its historical meaning: a stuck commit.
+  delayedReason: overrides.delayed === true ? "commit" : null,
   splitView: false,
   untrustedDevices: [],
   lastMessage: null,
@@ -115,12 +117,19 @@ export interface FakeEngineState {
   conversations: E2eeConversation[];
   messages: Record<string, E2eeMessage[]>;
   attachmentsEnabled: boolean;
+  /** getUpgrade(): non-null after a ciphersuite move, before re-enrolling. */
+  upgrade: { superseded: number } | null;
 }
 
 export type FakeE2eeEngine = E2eeEngine & {
   readonly state: FakeEngineState;
   /** Mutate state and notify subscribers, like a real engine change. */
   readonly update: (change: Partial<FakeEngineState>) => void;
+  /** Sets a conversation's 8.3 delay (null: not delayed) and notifies. */
+  readonly setDelayed: (
+    g: string,
+    reason: E2eeConversation["delayedReason"]
+  ) => void;
 };
 
 /** In-memory engine implementing the contract section 12 interface. */
@@ -136,6 +145,7 @@ export function createFakeE2eeEngine(
     conversations: [],
     messages: {},
     attachmentsEnabled: true,
+    upgrade: null,
     ...initial,
   };
   const notify = () => {
@@ -149,8 +159,17 @@ export function createFakeE2eeEngine(
       Object.assign(state, change);
       notify();
     },
+    setDelayed: (g, reason) => {
+      state.conversations = state.conversations.map((item) =>
+        item.g === g
+          ? { ...item, delayed: reason !== null, delayedReason: reason }
+          : item
+      );
+      notify();
+    },
     getStatus: () => state.status,
     getError: () => state.error,
+    getUpgrade: () => state.upgrade,
     getThisDevice: () => state.thisDevice,
     getDevices: () => state.devices,
     getAttachmentsEnabled: () => state.attachmentsEnabled,
@@ -186,6 +205,21 @@ export function createFakeE2eeEngine(
     setAdmin: jest.fn(async () => undefined),
     leave: jest.fn(async () => undefined),
     restart: jest.fn(async () => DM_G),
+    // D172: an unsent message (E2eeMessage.unsent) leaves its conversation
+    // when it is resent in the successor (here DM_G) or deleted.
+    resendUnsent: jest.fn(async (g: string, id: string) => {
+      state.messages[g] = (state.messages[g] ?? []).filter(
+        (item) => item.id !== id
+      );
+      notify();
+      return { g: DM_G, id: `${id}-resent` };
+    }),
+    discardUnsent: jest.fn(async (g: string, id: string) => {
+      state.messages[g] = (state.messages[g] ?? []).filter(
+        (item) => item.id !== id
+      );
+      notify();
+    }),
     report: jest.fn(async () => undefined),
     reportPreview: jest.fn((g: string, id: string) => {
       const message = (state.messages[g] ?? []).find((item) => item.id === id);

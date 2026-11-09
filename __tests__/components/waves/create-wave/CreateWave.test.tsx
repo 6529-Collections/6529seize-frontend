@@ -235,6 +235,7 @@ import {
   WaveAdminGroupError,
 } from "@/components/waves/create-wave/services/waveGroupService";
 import { generateDropPart } from "@/components/waves/create-wave/services/waveMediaService";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { getCreateNewWaveBody } from "@/helpers/waves/create-wave.helpers";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { createWaveMetadata } from "@/services/api/waves-v2-api";
@@ -1333,6 +1334,11 @@ describe("CreateWave", () => {
         expect(mockedGenerateDropPart).toHaveBeenCalled();
         expect(commonApiPost).toHaveBeenCalled();
       });
+      // The wave's opening drop is chat, so its media is stripped.
+      expect(mockedGenerateDropPart).toHaveBeenCalledWith(
+        expect.anything(),
+        ApiMediaUploadPurpose.Chat
+      );
 
       expect(mockAuthContext.setToast).not.toHaveBeenCalledWith({
         message: "Wait for image uploads to finish.",
