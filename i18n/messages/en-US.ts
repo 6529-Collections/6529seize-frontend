@@ -3289,6 +3289,8 @@ export const EN_US_ROOT_MESSAGES = {
     "{artist} submitted {artwork} to {competition}.",
   "artworkAlerts.untitled": "untitled artwork",
   "emoji.picker.label": "Emoji picker",
+  "emoji.picker.openLabel": "Open emoji picker",
+  "emoji.picker.closeLabel": "Close emoji picker",
   "emoji.picker.loading": "Loading emoji picker...",
   "emoji.picker.unavailable": "Emoji picker is unavailable.",
   "waves.historyGap.load": "Load missed messages",
