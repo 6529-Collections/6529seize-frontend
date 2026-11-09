@@ -25,16 +25,34 @@ const isTransient = (status: number | undefined): boolean =>
   status === 408 ||
   status === 429;
 
-/** One tab at a time per wallet, so two tabs never revoke the same grant. */
+/** Runs queued per wallet in this tab when Web Locks are unavailable. */
+const inTabQueues = new Map<string, Promise<unknown>>();
+
+/**
+ * One holder at a time per wallet, so two tabs never revoke the same grant.
+ * Web Locks serialize across tabs. Without them, calls still run one at a
+ * time within this tab; across tabs an overlap could at worst repeat the
+ * revoke, which is idempotent, and any later attempt re-reads the server
+ * list and finds the grant already revoked.
+ */
 async function withLossLock<T>(
   address: string,
   task: () => Promise<T>
 ): Promise<T> {
   const locks = (globalThis.navigator as Partial<Navigator> | undefined)?.locks;
-  if (!locks) {
-    return await task();
+  if (locks) {
+    return await locks.request(`6529-device-key-loss:${address}`, task);
   }
-  return await locks.request(`6529-device-key-loss:${address}`, task);
+  const previous = inTabQueues.get(address) ?? Promise.resolve();
+  const run = previous.catch(() => undefined).then(task);
+  inTabQueues.set(address, run);
+  try {
+    return await run;
+  } finally {
+    if (inTabQueues.get(address) === run) {
+      inTabQueues.delete(address);
+    }
+  }
 }
 
 /**

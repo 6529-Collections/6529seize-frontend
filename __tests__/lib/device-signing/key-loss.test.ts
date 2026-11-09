@@ -291,6 +291,22 @@ describe("device key loss", () => {
         delete (globalThis.navigator as { locks?: unknown }).locks;
       }
     });
+
+    it("revokes once for concurrent calls in one tab without Web Locks", async () => {
+      expect(
+        (globalThis.navigator as { locks?: unknown }).locks
+      ).toBeUndefined();
+      mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
+      mockRevokeDeviceGrant.mockResolvedValue(grant(LOST_ID));
+
+      const results = await Promise.all([
+        revokeLostDeviceGrant(ADDRESS),
+        revokeLostDeviceGrant(ADDRESS),
+      ]);
+
+      expect(results.sort()).toEqual(["none", "revoked"]);
+      expect(mockRevokeDeviceGrant).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("reporting a loss", () => {
