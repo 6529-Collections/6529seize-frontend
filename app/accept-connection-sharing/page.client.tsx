@@ -159,6 +159,7 @@ function getSharedProfileName(profile: SharedProfile, address: string): string {
   );
 }
 
+/** Offers a path Home and announces the message when secure setup failed. */
 function HomeLinkCard({
   message,
   isError = false,
@@ -544,6 +545,7 @@ function ConnectionSharingContent({
   );
 }
 
+/** Renders the incoming connection and keeps a redeemed share's setup failure visible. */
 function AcceptConnectionSharing(
   props: Readonly<AcceptConnectionSharingProps>
 ) {
@@ -576,6 +578,7 @@ function AcceptConnectionSharing(
 
   useSetTitle(t(ACCEPT_CONNECTION_LOCALE, "acceptConnection.title"));
 
+  /** Opens Home after acceptance unless the current link needs recovery. */
   const acceptConnection = async () => {
     try {
       if (flow === "native-share") {
@@ -673,6 +676,7 @@ function AcceptConnectionSharing(
   );
 }
 
+/** Captures each incoming link's setup key before scrubbing credentials from the URL. */
 export default function AcceptConnectionSharingPage() {
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by app/accept-connection-sharing/page.tsx
   const searchParams = useSearchParams();

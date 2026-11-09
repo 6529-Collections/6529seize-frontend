@@ -185,8 +185,10 @@ export type ConnectionDeviceSetupStage =
 export type ConnectionDeviceSetupOutcome =
   | "reused"
   | "legacy-device"
+  // Adoption saves the MLS keys locally. The engine registers the device afterward.
   | "pending-enrollment";
 
+/** Distinguishes current-suite reuse from a legacy device that still needs upgrading. */
 function reusedDeviceOutcome(stored: StoredDevice | null) {
   return isOldSuiteDevice(stored) ? "legacy-device" : "reused";
 }

@@ -66,6 +66,7 @@ async function finishSharedDeviceSetup({
   }
 }
 
+/** Redeems a native or desktop share and keeps sign-in active if its device setup fails. */
 export async function acceptConnectionShare({
   address,
   connectionShareCode,
@@ -135,6 +136,7 @@ export async function acceptConnectionShare({
     return "rejected";
   }
 
+  // An envelope without its unlock key still needs a visible setup failure.
   const hasDeviceSetup =
     expectsDeviceSetup || Boolean(redeemResponse.encrypted_device_setup);
   const didPersistJwt = await persistSessionResponse(redeemResponse).catch(
