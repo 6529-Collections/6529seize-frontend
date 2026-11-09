@@ -21,6 +21,9 @@ const SIGNING_URN =
   "urn:6529:device-grant:v1:ed25519:d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a:post.edit.delete.react:1807876800";
 const MLS_URN =
   "urn:6529:mls-device-grant:v1:1:3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c:1807876800";
+// Grant v2 (D172): the same key for the suite set {0x004E}.
+const MLS_URN_V2 =
+  "urn:6529:mls-device-grant:v2:78:3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c:1807876800";
 const COMBINED_STATEMENT =
   "Sign in to 6529 and turn on signed messages on this device until 16 Apr 2027. This device will sign your posts, edits, deletes and reactions so anyone can verify they came from your wallet. It will also encrypt (send) and decrypt (read) your end-to-end encrypted messages, which 6529.io cannot read. It can't move funds, change your handle, add devices or act as an admin. No transaction, no gas, no token approvals. (Device key d75a9801...f707511a, encrypted messages key 3d4017c3...2af4660c)";
 const COMBINED_GRANT_ID =
@@ -32,8 +35,15 @@ const SIGNING = {
   expiresAtSeconds: EXPIRES_AT,
 };
 const MLS = {
+  version: 1 as const,
   deviceKeyHex: MLS_KEY,
-  ciphersuite: 1,
+  ciphersuites: [1],
+  expiresAtSeconds: EXPIRES_AT,
+};
+const MLS_V2 = {
+  version: 2 as const,
+  deviceKeyHex: MLS_KEY,
+  ciphersuites: [78],
   expiresAtSeconds: EXPIRES_AT,
 };
 
@@ -77,6 +87,21 @@ describe("NC8 combined grant shared vectors", () => {
       chainId: 1,
       mls: MLS,
     });
+  });
+
+  it("builds and parses the v2 resource with the same statement (D172)", () => {
+    expect(buildMlsDeviceGrantUrn(MLS_V2)).toBe(MLS_URN_V2);
+    expect(renderCombinedGrantStatement(SIGNING, MLS_V2)).toBe(
+      COMBINED_STATEMENT
+    );
+    const message = combinedMessage({ resources: [SIGNING_URN, MLS_URN_V2] });
+    expect(parseDeviceGrantMessage(message)?.mls).toEqual(MLS_V2);
+    const set = MLS_URN_V2.replace(":v2:78:", ":v2:78.79:");
+    expect(
+      parseDeviceGrantMessage(
+        combinedMessage({ resources: [SIGNING_URN, set] })
+      )?.mls
+    ).toEqual({ ...MLS_V2, ciphersuites: [78, 79] });
   });
 
   it("keeps the approved signed-messages wording around one added clause", () => {
@@ -170,6 +195,43 @@ describe("NC8 combined grant shared vectors", () => {
       "a ciphersuite above uint16",
       { resources: [SIGNING_URN, MLS_URN.replace(":v1:1:", ":v1:65536:")] },
     ],
+    [
+      "a v1 resource with a suite set",
+      { resources: [SIGNING_URN, MLS_URN.replace(":v1:1:", ":v1:1.78:")] },
+    ],
+    [
+      "a v2 set out of order",
+      {
+        resources: [SIGNING_URN, MLS_URN_V2.replace(":v2:78:", ":v2:79.78:")],
+      },
+    ],
+    [
+      "a v2 set with a repeated suite",
+      {
+        resources: [SIGNING_URN, MLS_URN_V2.replace(":v2:78:", ":v2:78.78:")],
+      },
+    ],
+    [
+      "a v2 set of five suites",
+      {
+        resources: [
+          SIGNING_URN,
+          MLS_URN_V2.replace(":v2:78:", ":v2:1.2.3.4.78:"),
+        ],
+      },
+    ],
+    [
+      "a v2 suite with a leading zero",
+      {
+        resources: [SIGNING_URN, MLS_URN_V2.replace(":v2:78:", ":v2:078:")],
+      },
+    ],
+    [
+      "an unknown resource version",
+      {
+        resources: [SIGNING_URN, MLS_URN_V2.replace(":v2:78:", ":v3:78:")],
+      },
+    ],
   ])("rejects %s", (_name, overrides) => {
     expect(parseDeviceGrantMessage(combinedMessage(overrides))).toBeNull();
   });
@@ -184,27 +246,37 @@ describe("combined sign-in challenge check", () => {
     nowMs,
   };
 
-  it("accepts a combined challenge only for exactly this MLS key", () => {
-    const message = combinedMessage();
+  it("accepts a combined challenge only for exactly this MLS key and suite set", () => {
+    const message = combinedMessage({ resources: [SIGNING_URN, MLS_URN_V2] });
     expect(
       isExpectedDeviceGrantMessage({
         ...expected,
         message,
-        mls: { deviceKeyHex: MLS_KEY, ciphersuite: 1 },
+        mls: { deviceKeyHex: MLS_KEY, ciphersuites: [78] },
       })
     ).toBe(true);
     expect(
       isExpectedDeviceGrantMessage({
         ...expected,
         message,
-        mls: { deviceKeyHex: `0x${"ab".repeat(32)}`, ciphersuite: 1 },
+        mls: { deviceKeyHex: `0x${"ab".repeat(32)}`, ciphersuites: [78] },
       })
     ).toBe(false);
     expect(
       isExpectedDeviceGrantMessage({
         ...expected,
         message,
-        mls: { deviceKeyHex: MLS_KEY, ciphersuite: 79 },
+        mls: { deviceKeyHex: MLS_KEY, ciphersuites: [78, 79] },
+      })
+    ).toBe(false);
+  });
+
+  it("never signs a v1 combined challenge (D172: new keys get v2 grants)", () => {
+    expect(
+      isExpectedDeviceGrantMessage({
+        ...expected,
+        message: combinedMessage(),
+        mls: { deviceKeyHex: MLS_KEY, ciphersuites: [1] },
       })
     ).toBe(false);
   });
@@ -225,7 +297,7 @@ describe("combined sign-in challenge check", () => {
       isExpectedDeviceGrantMessage({
         ...expected,
         message,
-        mls: { deviceKeyHex: MLS_KEY, ciphersuite: 1 },
+        mls: { deviceKeyHex: MLS_KEY, ciphersuites: [78] },
       })
     ).toBe(false);
   });

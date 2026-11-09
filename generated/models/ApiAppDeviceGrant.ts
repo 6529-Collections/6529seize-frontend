@@ -14,7 +14,7 @@
 import { HttpFile } from '../http/http';
 
 /**
-* The fields of an EIP-712 DeviceGrant (domain \"6529 Device Grant\", version 1, the 6529 pre-genesis salt). The statement is not sent: the server renders it from these fields.
+* The fields of an EIP-712 DeviceGrant (domain \"6529 Device Grant\", version 1, or version 2 with `uint16[] ciphersuites` in place of `uint16 ciphersuite`; the 6529 pre-genesis salt). The statement is not sent: the server renders it from these fields.
 */
 export class ApiAppDeviceGrant {
     'wallet': string;
@@ -31,9 +31,17 @@ export class ApiAppDeviceGrant {
     */
     'mls_device_key'?: string | null;
     /**
-    * The MLS ciphersuite of mls_device_key; null or absent without one (0 is rejected).
+    * v1: the MLS ciphersuite of mls_device_key (79 only, while v1 grants are accepted); null or absent without one (0 is rejected). v2: the lowest entry of ciphersuites, or null without an MLS key.
     */
     'ciphersuite'?: number | null;
+    /**
+    * 1 (or absent): domain version \"1\" with `uint16 ciphersuite`. 2: domain version \"2\" with `uint16[] ciphersuites` (D172).
+    */
+    'version'?: number;
+    /**
+    * v2: the MLS suites of mls_device_key, 1 to 4 code points in strictly ascending order with at least one accepted (79 or 78); [] for a signing-only grant.
+    */
+    'ciphersuites'?: Array<number>;
     /**
     * Unix seconds.
     */
@@ -80,6 +88,18 @@ export class ApiAppDeviceGrant {
             "name": "ciphersuite",
             "baseName": "ciphersuite",
             "type": "number",
+            "format": ""
+        },
+        {
+            "name": "version",
+            "baseName": "version",
+            "type": "number",
+            "format": ""
+        },
+        {
+            "name": "ciphersuites",
+            "baseName": "ciphersuites",
+            "type": "Array<number>",
             "format": ""
         },
         {

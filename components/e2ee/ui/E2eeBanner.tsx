@@ -57,7 +57,7 @@ export function E2eeBanner({
       </div>
       {hasContent(action) ? (
         <div
-          className={`tw-max-w-full tw-flex-shrink-0 tw-flex-wrap tw-items-center tw-gap-2 ${compactActions ? "tw-grid tw-w-full tw-grid-cols-2 @[48rem]/legacy-dm:tw-flex @[48rem]/legacy-dm:tw-w-auto @[48rem]/legacy-dm:tw-max-w-[55%] @[48rem]/legacy-dm:tw-justify-end [&>*]:tw-w-full @[48rem]/legacy-dm:[&>*]:tw-w-auto [&>:last-child:nth-child(odd)]:tw-col-span-2" : "tw-flex"}`}
+          className={`tw-max-w-full tw-flex-shrink-0 tw-flex-wrap tw-gap-2 ${compactActions ? "tw-grid tw-w-full tw-grid-cols-2 tw-items-stretch @[48rem]/legacy-dm:tw-flex @[48rem]/legacy-dm:tw-w-auto @[48rem]/legacy-dm:tw-max-w-[55%] @[48rem]/legacy-dm:tw-items-center @[48rem]/legacy-dm:tw-justify-end [&>*]:tw-w-full @[48rem]/legacy-dm:[&>*]:tw-w-auto [&>:last-child:nth-child(odd)]:tw-col-span-2" : "tw-flex tw-items-center"}`}
         >
           {action}
         </div>

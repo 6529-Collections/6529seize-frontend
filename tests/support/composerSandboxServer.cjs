@@ -3323,7 +3323,14 @@ function buildPublicRuntime() {
       process.env.IPFS_GATEWAY_ENDPOINT || "https://ipfs.6529.io/ipfs/",
     MEDIA_RESOLVER_ENDPOINT:
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
-    ...(isE2eeSandbox ? { NEXT_PUBLIC_E2EE_DM_ENABLED: "true" } : {}),
+    // Signed posts on too, so device setup offers the combined grant
+    // ("Sign to enable both") that the E2EE pack signs in through.
+    ...(isE2eeSandbox
+      ? {
+          NEXT_PUBLIC_E2EE_DM_ENABLED: "true",
+          NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
+        }
+      : {}),
     // Sandbox packs run the staging chat configuration (gap-only sync and
     // batched reads); set the variable to "false" to run the production one.
     NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC:

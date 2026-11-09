@@ -60,8 +60,9 @@ async function signCombinedSignIn(
     expiresAtSeconds,
   };
   const mls = {
+    version: 2 as const,
     deviceKeyHex: mlsKey,
-    ciphersuite: E2EE_CIPHERSUITE,
+    ciphersuites: [E2EE_CIPHERSUITE],
     expiresAtSeconds,
   };
   const issuedAt = new Date(issuedAtSeconds * 1000).toISOString();
@@ -117,6 +118,70 @@ async function combinedSignIn(
     expiresAtSeconds: grantExpiresAt(issuedAtSeconds),
   });
   return { storage, grantId, deviceKey: prepared.deviceKeyHex, adopted };
+}
+
+const REGISTER = /^e2ee\/devices\/login-grant$/;
+
+const registrations = (world: World): number =>
+  world.ds.state.requests.filter(
+    (r) => r.method === "POST" && REGISTER.test(r.path)
+  ).length;
+
+/**
+ * Starts `first` (one of them reaches the registration request), holds that
+ * request so the engine stays "enrolling", starts `whileHeld`, then releases
+ * it. Returns every call, in order.
+ */
+async function overlapRegistration(
+  world: World,
+  engine: { getStatus(): string },
+  first: () => Promise<unknown>[],
+  whileHeld: () => Promise<unknown>[]
+): Promise<Promise<unknown>[]> {
+  const gate = world.ds.hold(REGISTER);
+  const calls: Promise<unknown>[] = [];
+  try {
+    calls.push(...first());
+    await gate.arrived();
+    expect(engine.getStatus()).toBe("enrolling");
+    calls.push(...whileHeld());
+  } finally {
+    gate.release();
+  }
+  return calls;
+}
+
+/**
+ * The setup page's storage-event resume and the combined turn-on both call
+ * enrollWithLoginGrant(): two together, then a third while the held
+ * registration keeps the engine "enrolling".
+ */
+async function concurrentLoginGrantEnrollments(
+  world: World,
+  engine: { enrollWithLoginGrant(): Promise<string>; getStatus(): string }
+): Promise<unknown[]> {
+  const calls = await overlapRegistration(
+    world,
+    engine,
+    () => [engine.enrollWithLoginGrant(), engine.enrollWithLoginGrant()],
+    () => [engine.enrollWithLoginGrant()]
+  );
+  return Promise.all(calls);
+}
+
+/** Starts an engine waiting for enrollment with a combined sign-in stored. */
+async function signedInWaitingEngine() {
+  const world = await createWorld();
+  const account = privateKeyToAccount(generatePrivateKey());
+  world.ds.setWallets("alice", [account.address]);
+  const storage = createMemoryE2eeStorage();
+  const alice = await startDevice(world, "alice", account, {
+    storage,
+    enroll: false,
+    extra: { origin: ORIGIN },
+  });
+  const signIn = await combinedSignIn(world, "alice", account, storage);
+  return { world, account, storage, alice, signIn };
 }
 
 describe("E2EE engine: combined sign-in grant (NC8)", () => {
@@ -291,5 +356,97 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
     await alice.engine.enroll();
     expect(alice.engine.getStatus()).toBe("ready");
     expect(alice.signCalls).toBe(1);
+  });
+
+  it("gives concurrent sign-in enrollments one registration and its final status", async () => {
+    const { world, alice, signIn } = await signedInWaitingEngine();
+
+    await expect(
+      concurrentLoginGrantEnrollments(world, alice.engine)
+    ).resolves.toEqual(["ready", "ready", "ready"]);
+    expect(registrations(world)).toBe(1);
+    expect(world.ds.devicesOf("alice")).toEqual([
+      expect.objectContaining({ device_key: signIn.deviceKey }),
+    ]);
+    expect(alice.signCalls).toBe(0);
+  });
+
+  it("gives concurrent callers needs-enrollment for a refused sign-in grant, then enrolls later", async () => {
+    const { world, account, storage, alice, signIn } =
+      await signedInWaitingEngine();
+    world.ds.revokeLoginGrant(signIn.grantId);
+
+    await expect(
+      concurrentLoginGrantEnrollments(world, alice.engine)
+    ).resolves.toEqual([
+      "needs-enrollment",
+      "needs-enrollment",
+      "needs-enrollment",
+    ]);
+    expect(registrations(world)).toBe(1);
+    expect(alice.engine.getError()).toBe("E2EE_LOGIN_GRANT_REJECTED");
+    expect(world.ds.devicesOf("alice")).toEqual([]);
+
+    // The next combined sign-in enrolls: nothing is left in flight.
+    const next = await combinedSignIn(world, "alice", account, storage);
+    await expect(alice.engine.enrollWithLoginGrant()).resolves.toBe("ready");
+    expect(registrations(world)).toBe(2);
+    expect(world.ds.devicesOf("alice")).toEqual([
+      expect.objectContaining({ device_key: next.deviceKey }),
+    ]);
+    expect(alice.signCalls).toBe(0);
+  });
+
+  it("shares one registration between a sign-in enrollment and an explicit enroll()", async () => {
+    const { world, alice, signIn } = await signedInWaitingEngine();
+    const engine = alice.engine;
+
+    const calls = await overlapRegistration(
+      world,
+      engine,
+      () => [engine.enrollWithLoginGrant()],
+      () => [engine.enroll()]
+    );
+    await expect(Promise.all(calls)).resolves.toEqual(["ready", undefined]);
+    expect(engine.getStatus()).toBe("ready");
+    expect(registrations(world)).toBe(1);
+    expect(world.ds.devicesOf("alice")).toEqual([
+      expect.objectContaining({ device_key: signIn.deviceKey }),
+    ]);
+    // The prompt path joined the run: no wallet prompt, no second device.
+    expect(alice.signCalls).toBe(0);
+  });
+
+  it("fails only the starting caller on a transient registration error and frees the run", async () => {
+    const { world, storage, alice, signIn } = await signedInWaitingEngine();
+    const engine = alice.engine;
+    world.ds.addFault({ method: "POST", path: REGISTER, status: 503 });
+
+    const [starter, ...joiners] = await overlapRegistration(
+      world,
+      engine,
+      () => [engine.enroll()],
+      () => [engine.enrollWithLoginGrant(), engine.enroll()]
+    );
+    await expect(starter).rejects.toThrow();
+    // Joiners settle with the outcome instead of hanging or rethrowing.
+    await expect(Promise.all(joiners)).resolves.toEqual(["error", undefined]);
+    expect(engine.getStatus()).toBe("error");
+    expect(registrations(world)).toBe(1);
+    // Nothing partial: no server device, the local key still unregistered.
+    expect(world.ds.devicesOf("alice")).toEqual([]);
+    expect(await storage.getDevice("alice")).toMatchObject({
+      deviceKey: signIn.deviceKey,
+      registered: false,
+    });
+
+    // The run is free again: a retry registers the same key without a prompt.
+    await engine.enroll();
+    expect(engine.getStatus()).toBe("ready");
+    expect(registrations(world)).toBe(2);
+    expect(world.ds.devicesOf("alice")).toEqual([
+      expect.objectContaining({ device_key: signIn.deviceKey }),
+    ]);
+    expect(alice.signCalls).toBe(0);
   });
 });

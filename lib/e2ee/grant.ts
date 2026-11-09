@@ -29,13 +29,82 @@ export const E2EE_SALT = keccak256(
   toBytes("6529 Network pre-genesis interim 1")
 );
 /**
- * MLS_128_MLKEM768X25519_AES128GCM_SHA256_Ed25519 (0x004F, contract 3.6):
- * X-Wing hybrid ML-KEM-768 + X25519. The only suite; it must equal the WASM
- * module's `ciphersuite`, and it is also the suite a combined sign-in grant
- * (NC8) names. A draft code point: if it changes, devices stored
- * under the old value re-enroll (engine/enroll.ts).
+ * MLS_128_MLKEM768X25519_AES256GCM_SHA384_Ed25519 (0x004E): the suite of new
+ * devices and groups (D172). The same X-Wing key exchange and Ed25519 device
+ * keys as 0x004F with AES-256-GCM and SHA-384: under 0x004F the epoch secrets
+ * travel in HPKE sealed with AES-128-GCM, so the floor is the AES-128 /
+ * SHA-256 level; 0x004E raises it. A draft code point (TBD2). A stored device
+ * whose grant does not cover it is retired, keeping its history
+ * (engine/enroll.ts), and enrolls again.
  */
-export const E2EE_CIPHERSUITE = 0x004f;
+export const E2EE_CIPHERSUITE = 0x004e;
+
+/** 0x004F, the suite encrypted messages launched on (v1 grants). */
+export const E2EE_LEGACY_CIPHERSUITE = 0x004f;
+
+/** The suite set a new (v2) grant signs. */
+export const E2EE_GRANT_SUITES: readonly number[] = [E2EE_CIPHERSUITE];
+
+/**
+ * A grant naming `from` also covers `to` (D172): whether a grant for a
+ * provisional code point covers the RFC's final one is an owner decision;
+ * empty until decided. Mirrors the backend's E2EE_SUITE_ALIASES.
+ */
+const E2EE_SUITE_ALIASES: readonly { from: number; to: number }[] = [];
+
+const MAX_GRANT_SUITES = 4;
+const MAX_UINT16 = 0xffff;
+
+/** 1 to 4 code points, strictly ascending (one encoding per set). */
+function isCanonicalSuiteSet(value: unknown): value is number[] {
+  if (!Array.isArray(value) || value.length < 1) {
+    return false;
+  }
+  if (value.length > MAX_GRANT_SUITES) {
+    return false;
+  }
+  let previous = 0;
+  for (const suite of value) {
+    if (!Number.isInteger(suite) || suite <= previous || suite > MAX_UINT16) {
+      return false;
+    }
+    previous = suite as number;
+  }
+  return true;
+}
+
+/**
+ * The suites a grant covers: a v1 grant only 0x004F, a v2 grant its signed
+ * set plus aliases. Whether the server still honours v1 grants is its
+ * business (its listings stop offering them when the window closes).
+ */
+export function grantSuites(
+  grant: ApiE2eeDeviceGrant,
+  aliases: readonly { from: number; to: number }[] = E2EE_SUITE_ALIASES
+): number[] {
+  if (grant.version !== 2) {
+    return grant.ciphersuite === E2EE_LEGACY_CIPHERSUITE
+      ? [E2EE_LEGACY_CIPHERSUITE]
+      : [];
+  }
+  const signed = isCanonicalSuiteSet(grant.ciphersuites)
+    ? grant.ciphersuites
+    : [];
+  const covered = new Set(signed);
+  for (const alias of aliases) {
+    if (covered.has(alias.from)) {
+      covered.add(alias.to);
+    }
+  }
+  return Array.from(covered).sort((a, b) => a - b);
+}
+
+/** Whether the grant lets its device join groups of `suite`. */
+export const grantCoversSuite = (
+  grant: ApiE2eeDeviceGrant,
+  suite: number
+): boolean => grantSuites(grant).includes(suite);
+
 const ETHEREUM_MAINNET_CHAIN_ID = 1;
 const GRANT_LIFETIME_SECONDS = 15_552_000; // 180 days
 const GRANT_MAX_LIFETIME_SECONDS = 181 * 86_400;
@@ -47,12 +116,30 @@ const GRANT_DOMAIN = {
   salt: E2EE_SALT,
 } as const;
 
+const GRANT_DOMAIN_V2 = {
+  name: "6529 Encrypted Messages",
+  version: "2",
+  salt: E2EE_SALT,
+} as const;
+
 const GRANT_TYPES = {
   MlsDeviceGrant: [
     { name: "statement", type: "string" },
     { name: "wallet", type: "address" },
     { name: "deviceKey", type: "bytes32" },
     { name: "ciphersuite", type: "uint16" },
+    { name: "issuedAt", type: "uint64" },
+    { name: "expiresAt", type: "uint64" },
+    { name: "origin", type: "string" },
+  ],
+} as const;
+
+const GRANT_TYPES_V2 = {
+  MlsDeviceGrant: [
+    { name: "statement", type: "string" },
+    { name: "wallet", type: "address" },
+    { name: "deviceKey", type: "bytes32" },
+    { name: "ciphersuites", type: "uint16[]" },
     { name: "issuedAt", type: "uint64" },
     { name: "expiresAt", type: "uint64" },
     { name: "origin", type: "string" },
@@ -128,22 +215,28 @@ export function isAllowedE2eeGrantDomain(domain: string): boolean {
   return DEV_BUILD_ENVS.has(getNodeEnv() ?? "") && isDevGrantHost(host);
 }
 
-interface GrantMessage {
+interface GrantMessageFields {
   statement: string;
   wallet: `0x${string}`;
   deviceKey: `0x${string}`;
-  ciphersuite: number;
   issuedAt: bigint;
   expiresAt: bigint;
   origin: string;
 }
 
-interface GrantTypedData {
-  domain: typeof GRANT_DOMAIN;
-  types: typeof GRANT_TYPES;
-  primaryType: typeof GRANT_PRIMARY_TYPE;
-  message: GrantMessage;
-}
+type GrantTypedData =
+  | {
+      domain: typeof GRANT_DOMAIN;
+      types: typeof GRANT_TYPES;
+      primaryType: typeof GRANT_PRIMARY_TYPE;
+      message: GrantMessageFields & { ciphersuite: number };
+    }
+  | {
+      domain: typeof GRANT_DOMAIN_V2;
+      types: typeof GRANT_TYPES_V2;
+      primaryType: typeof GRANT_PRIMARY_TYPE;
+      message: GrantMessageFields & { ciphersuites: number[] };
+    };
 
 /** expiresAt = floor(issuedAt/60)*60 + 180 days, minute aligned. */
 export const grantExpiresAt = (issuedAtSeconds: number): number =>
@@ -172,16 +265,20 @@ export function renderGrantStatement(
   );
 }
 
+/** A new (v2) grant for this device: the suite set E2EE_GRANT_SUITES. */
 export function buildGrant(input: {
   wallet: string;
   deviceKey: string;
   issuedAtSeconds: number;
   origin: string;
 }): ApiE2eeDeviceGrant {
+  const ciphersuites = [...E2EE_GRANT_SUITES];
   return {
+    version: 2,
     wallet: input.wallet.toLowerCase(),
     device_key: input.deviceKey.toLowerCase(),
-    ciphersuite: E2EE_CIPHERSUITE,
+    ciphersuite: ciphersuites[0] ?? E2EE_CIPHERSUITE,
+    ciphersuites,
     issued_at: input.issuedAtSeconds,
     expires_at: grantExpiresAt(input.issuedAtSeconds),
     origin: input.origin,
@@ -195,24 +292,38 @@ export function buildGrantTypedData(grant: ApiE2eeDeviceGrant): GrantTypedData {
   if (!isHex(grant.device_key.toLowerCase(), 32)) {
     throw new Error("Grant device key is not 32 bytes");
   }
+  const fields: GrantMessageFields = {
+    statement: renderGrantStatement(grant.device_key, grant.expires_at),
+    wallet: getAddress(grant.wallet),
+    deviceKey: grant.device_key.toLowerCase() as `0x${string}`,
+    issuedAt: BigInt(grant.issued_at),
+    expiresAt: BigInt(grant.expires_at),
+    origin: grant.origin,
+  };
+  if (grant.version === 2) {
+    // Field order matters only in the types; the message is keyed.
+    return {
+      domain: GRANT_DOMAIN_V2,
+      types: GRANT_TYPES_V2,
+      primaryType: GRANT_PRIMARY_TYPE,
+      message: { ...fields, ciphersuites: [...(grant.ciphersuites ?? [])] },
+    };
+  }
   return {
     domain: GRANT_DOMAIN,
     types: GRANT_TYPES,
     primaryType: GRANT_PRIMARY_TYPE,
-    message: {
-      statement: renderGrantStatement(grant.device_key, grant.expires_at),
-      wallet: getAddress(grant.wallet),
-      deviceKey: grant.device_key.toLowerCase() as `0x${string}`,
-      ciphersuite: grant.ciphersuite,
-      issuedAt: BigInt(grant.issued_at),
-      expiresAt: BigInt(grant.expires_at),
-      origin: grant.origin,
-    },
+    message: { ...fields, ciphersuite: grant.ciphersuite },
   };
 }
 
+/** viem's typed-data parameter, for either grant version. */
+type AnyTypedData = Parameters<typeof hashTypedData>[0];
+const asTypedData = (typedData: GrantTypedData): AnyTypedData =>
+  typedData as unknown as AnyTypedData;
+
 export const computeGrantId = (grant: ApiE2eeDeviceGrant): `0x${string}` =>
-  hashTypedData(buildGrantTypedData(grant));
+  hashTypedData(asTypedData(buildGrantTypedData(grant)));
 
 export const credentialIdentity = (wallet: string, grantId: string): string =>
   `${CREDENTIAL_PREFIX}:${wallet.toLowerCase()}:${grantId.toLowerCase()}`;
@@ -269,12 +380,36 @@ interface VerifyGrantOptions {
   expectedProfileId?: string | undefined;
 }
 
+/**
+ * Whether a grant's suite terms are well formed: v1 names 0x004F, v2 a
+ * canonical set whose lowest entry is `ciphersuite`. This is about the
+ * grant's authenticity only; which groups a device may join is enforced
+ * where it matters (suite-filtered listings and claims, the WASM's add
+ * check and the Welcome gate), so an earlier-suite device of a contact
+ * still verifies during the move (D172).
+ */
+function checkGrantSuites(grant: ApiE2eeDeviceGrant): string | null {
+  if (grant.version === 2) {
+    if (!isCanonicalSuiteSet(grant.ciphersuites)) {
+      return "ciphersuites";
+    }
+    return grant.ciphersuite === grant.ciphersuites[0] ? null : "ciphersuite";
+  }
+  // Server data: any other version (not just the typed ones) is refused.
+  const version: unknown = grant.version;
+  if (version !== undefined && version !== 1) {
+    return "version";
+  }
+  return grant.ciphersuite === E2EE_LEGACY_CIPHERSUITE ? null : "ciphersuite";
+}
+
 function checkGrantFields(
   grant: ApiE2eeDeviceGrant,
   atMs: number
 ): string | null {
-  if (grant.ciphersuite !== E2EE_CIPHERSUITE) {
-    return "ciphersuite";
+  const suiteError = checkGrantSuites(grant);
+  if (suiteError) {
+    return suiteError;
   }
   if (
     !Number.isInteger(grant.issued_at) ||
@@ -306,7 +441,7 @@ async function recoverEoa(
   }
   try {
     const signer = await recoverTypedDataAddress({
-      ...typedData,
+      ...asTypedData(typedData),
       signature: signature as `0x${string}`,
     });
     return signer.toLowerCase();
@@ -369,12 +504,28 @@ function checkLoginGrantTerms(
   const grant = device.grant;
   const matches =
     mls.deviceKeyHex === grant.device_key.toLowerCase() &&
-    mls.ciphersuite === grant.ciphersuite &&
+    sameSuites(mls.version, mls.ciphersuites, grant) &&
     mls.expiresAtSeconds === grant.expires_at &&
     parsed.address.toLowerCase() === grant.wallet.toLowerCase() &&
     parsed.domain === grant.origin.toLowerCase() &&
     parseSiweIssuedAtSeconds(message) === grant.issued_at;
   return matches ? null : "login-grant-mismatch";
+}
+
+/** The signed version and suites equal the record's (v1: one suite). */
+function sameSuites(
+  version: 1 | 2,
+  suites: readonly number[],
+  grant: ApiE2eeDeviceGrant
+): boolean {
+  const recordVersion = grant.version === 2 ? 2 : 1;
+  const recordSuites =
+    recordVersion === 2 ? (grant.ciphersuites ?? []) : [grant.ciphersuite];
+  return (
+    version === recordVersion &&
+    suites.length === recordSuites.length &&
+    suites.every((suite, index) => suite === recordSuites[index])
+  );
 }
 
 /** Combined sign-in grant (NC8): EIP-191 over the exact SIWE message. */
@@ -420,7 +571,7 @@ function checkAppGrantTerms(
   const grant = device.grant;
   const matches =
     mls.deviceKeyHex === grant.device_key.toLowerCase() &&
-    mls.ciphersuite === grant.ciphersuite &&
+    sameSuites(fields.version === 1 ? 1 : 2, mls.ciphersuites, grant) &&
     fields.wallet === grant.wallet.toLowerCase() &&
     fields.origin === grant.origin &&
     fields.issuedAtSeconds === grant.issued_at &&
@@ -521,7 +672,7 @@ export async function verifyGrant(
   } catch {
     return failed("malformed");
   }
-  const grantId = hashTypedData(typedData);
+  const grantId = hashTypedData(asTypedData(typedData));
   if (grantId !== device.grant_id.toLowerCase()) {
     return failed("grant-id-mismatch");
   }

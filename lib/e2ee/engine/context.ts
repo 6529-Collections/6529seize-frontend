@@ -83,6 +83,9 @@ export function requireActiveGroup(
   g: string
 ): GroupRuntime {
   const runtime = requireGroup(ctx, g);
+  if (runtime.record.status === "superseded") {
+    throw new E2eeError("E2EE_SUPERSEDED");
+  }
   if (runtime.record.status !== "active") {
     throw new E2eeError("E2EE_CONVERSATION_INACTIVE");
   }
@@ -232,6 +235,14 @@ function persist(
   })();
   ctx.persistChain = run.catch(() => undefined);
   return run;
+}
+
+/** Runs a storage write under the engine's state version (CAS, then +1). */
+export function persistStored(
+  ctx: EngineContext,
+  write: (expectedVersion: number) => Promise<void>
+): Promise<void> {
+  return persist(ctx, write);
 }
 
 /** Clears this profile's local state under the engine's state version. */

@@ -13,12 +13,18 @@ import {
   E2EE_CIPHERSUITE,
 } from "../grant";
 import { MlsClient } from "../mls-adapter";
+import {
+  countSuperseded,
+  isOldSuiteDevice,
+  retireOldSuiteDevice,
+} from "../suite-retirement";
 import type { StoredDevice } from "../records";
 import type { E2eeDeviceInfo } from "../types";
 import { loadDefaultWasm } from "../wasm-loader";
 import {
   checkpoint,
   clearStoredState,
+  persistStored,
   DAY_MS,
   requireDevice,
   requireMls,
@@ -46,20 +52,35 @@ const grantExpired = (ctx: EngineContext, device: StoredDevice): boolean =>
   device.grant.expires_at * 1000 <= ctx.now();
 
 /**
- * The stored device, unless it was granted under another ciphersuite (the
- * classical 0x0001 build, or an earlier value of the draft 0x004F code
- * point). Such a device cannot take part in groups on the current suite, so
- * its MLS state, groups and messages are dropped and it enrolls again.
+ * The stored device, unless its grant does not cover the current suite
+ * (D172). Such a device is retired once, keeping its history: its groups
+ * become read-only ("superseded") and it enrolls again with one signature.
+ * `ctx.store.upgrade` then says how many conversations were kept.
  */
 export async function loadCurrentSuiteDevice(
   ctx: EngineContext
 ): Promise<StoredDevice | null> {
   const stored = await ctx.storage.getDevice(ctx.profileId);
-  if (stored && stored.grant.ciphersuite !== E2EE_CIPHERSUITE) {
-    await clearStoredState(ctx);
-    return null;
+  if (stored === null || !isOldSuiteDevice(stored)) {
+    return stored;
   }
-  return stored;
+  let superseded = 0;
+  if (stored.retired) {
+    superseded = countSuperseded(await ctx.storage.listGroups(ctx.profileId));
+  } else {
+    await persistStored(ctx, async (expectedVersion) => {
+      superseded = await retireOldSuiteDevice(
+        ctx.storage,
+        ctx.profileId,
+        stored,
+        expectedVersion,
+        ctx.now()
+      );
+    });
+  }
+  ctx.store.upgrade = { superseded };
+  ctx.store.touch();
+  return null;
 }
 
 export async function ensureWasm(ctx: EngineContext): Promise<void> {
@@ -76,6 +97,7 @@ function reusablePending(
   return (
     device !== null &&
     !device.registered &&
+    !isOldSuiteDevice(device) &&
     device.wallet.toLowerCase() === ctx.options.wallet.toLowerCase() &&
     device.grant.origin === ctx.options.origin &&
     device.grant.expires_at * 1000 - ctx.now() > MIN_REUSABLE_GRANT_MS
@@ -111,16 +133,13 @@ async function signGrant(
  */
 export async function needsNewDevice(ctx: EngineContext): Promise<boolean> {
   const stored = await ctx.storage.getDevice(ctx.profileId);
-  if (stored === null) {
+  if (stored === null || isOldSuiteDevice(stored)) {
     return true;
   }
   if (stored.registered) {
     return false;
   }
-  return (
-    stored.grant.ciphersuite !== E2EE_CIPHERSUITE ||
-    !reusablePending(ctx, stored)
-  );
+  return !reusablePending(ctx, stored);
 }
 
 const DEFAULT_DEVICE_LABEL = "Device";
@@ -148,7 +167,10 @@ async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
   const { grant, signature } = signed;
   ctx.mls?.dispose();
   ctx.mls = mls;
+  // A retired earlier-suite device hands its trust pins on (D172).
+  const previous = await ctx.storage.getDevice(ctx.profileId);
   const device: StoredDevice = {
+    ...(previous?.retired && previous.trust ? { trust: previous.trust } : {}),
     profileId: ctx.profileId,
     deviceKey,
     wallet: grant.wallet,
@@ -177,7 +199,8 @@ async function uploadKeyPackages(
   const packages = mls.createKeyPackages(
     count,
     lastResort,
-    lastResort ? LAST_RESORT_LIFETIME_S : ONE_TIME_LIFETIME_S
+    lastResort ? LAST_RESORT_LIFETIME_S : ONE_TIME_LIFETIME_S,
+    E2EE_CIPHERSUITE
   );
   // Persist the private halves BEFORE the public halves leave the device.
   await checkpoint(ctx);
@@ -223,23 +246,6 @@ export const hasLoginGrant = (
   device: StoredDevice | null
 ): device is StoredDevice & { loginGrantId: string } =>
   typeof device?.loginGrantId === "string";
-
-/** Selects the pending login-grant device and releases any earlier MLS state. */
-export function takeLoginGrantDevice(ctx: EngineContext): Promise<boolean> {
-  return ctx.queue.run(async () => {
-    const stored = await ctx.storage.getDevice(ctx.profileId);
-    if (!hasLoginGrant(stored) || stored.registered) {
-      return false;
-    }
-    if (ctx.device?.deviceKey !== stored.deviceKey) {
-      ctx.mls?.dispose();
-      ctx.mls = null;
-      ctx.device = null;
-      ctx.lastState = null;
-    }
-    return true;
-  });
-}
 
 const submitRegistration = async (
   ctx: EngineContext,

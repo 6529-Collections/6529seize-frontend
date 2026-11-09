@@ -126,6 +126,9 @@ export const publicEnvSchema = z.object({
   // Gap-only chat sync and batched read markers. On only when exactly
   // "true"; staging builds set it, production builds leave it unset.
   NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC: z.string().optional(),
+  // App-socket PING keepalive and liveness checks (API #2354). On only when
+  // exactly "true"; staging builds set it, production builds leave it unset.
+  NEXT_PUBLIC_FEATURE_WS_PING: z.string().optional(),
   // End-to-end encrypted DMs and groups (D109). On only when exactly "true";
   // staging builds set it, production builds leave it unset.
   NEXT_PUBLIC_E2EE_DM_ENABLED: z.string().optional(),

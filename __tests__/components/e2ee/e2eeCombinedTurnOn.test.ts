@@ -50,6 +50,76 @@ const createEngine = ({
   return { engine, asEngine: engine as unknown as E2eeEngine };
 };
 
+/**
+ * An engine with the real one's enrollment guard: the first
+ * enrollWithLoginGrant() starts the registration and holds "enrolling" until
+ * the test settles it; a call made meanwhile returns "enrolling" at once.
+ */
+const createRegisteringEngine = () => {
+  let status: E2eeEngineStatus = "needs-enrollment";
+  const listeners = new Set<() => void>();
+  const setStatus = (next: E2eeEngineStatus) => {
+    status = next;
+    for (const listener of [...listeners]) listener();
+  };
+  let settle: (next: E2eeEngineStatus) => void = () => undefined;
+  const engine = {
+    needsNewDevice: jest.fn(async () => true),
+    getStatus: () => status,
+    subscribe: (listener: () => void) => {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    enroll: jest.fn(async () => undefined),
+    registrations: 0,
+    enrollWithLoginGrant: jest.fn(async (): Promise<E2eeEngineStatus> => {
+      if (status !== "needs-enrollment") return status;
+      // The engine first re-reads the stored device on its serial queue.
+      await Promise.resolve();
+      if (engine.getStatus() === "enrolling") return "enrolling";
+      setStatus("enrolling");
+      engine.registrations += 1;
+      await new Promise<void>((resolve) => {
+        settle = (next) => {
+          setStatus(next);
+          resolve();
+        };
+      });
+      return status;
+    }),
+  };
+  return {
+    engine,
+    asEngine: engine as unknown as E2eeEngine,
+    settle: (next: E2eeEngineStatus) => settle(next),
+    listenerCount: () => listeners.size,
+  };
+};
+
+/**
+ * Stands in for E2eeProvider: adopting the sign-in key dispatches a
+ * same-tab "storage" event, and the provider resumes enrollment on it.
+ */
+const resumeOnStorageEvent = (engine: E2eeEngine) => {
+  const resume = () => {
+    if (engine.getStatus() === "needs-enrollment") {
+      void engine.enrollWithLoginGrant();
+    }
+  };
+  globalThis.addEventListener("storage", resume);
+  return () => globalThis.removeEventListener("storage", resume);
+};
+
+const adoptingGrant = (
+  result: SignedMessagesGrantResult = combined()
+): RequestSignedMessagesGrant =>
+  jest.fn(async () => {
+    globalThis.dispatchEvent(new Event("storage"));
+    return result;
+  });
+
 const run = (
   asEngine: E2eeEngine,
   requestGrant: RequestSignedMessagesGrant | undefined
@@ -59,6 +129,14 @@ const run = (
     address: ADDRESS,
     requestGrant,
   });
+
+/** Lets pending promise chains run until `ready` holds (fake-timer safe). */
+const waitUntil = async (ready: () => boolean): Promise<void> => {
+  for (let turn = 0; turn < 50 && !ready(); turn += 1) {
+    await Promise.resolve();
+  }
+  expect(ready()).toBe(true);
+};
 
 describe("turn on encrypted messages with one combined sign-in (NC8)", () => {
   beforeEach(() => {
@@ -84,6 +162,29 @@ describe("turn on encrypted messages with one combined sign-in (NC8)", () => {
     expect(engine.enrollWithLoginGrant).toHaveBeenCalledTimes(1);
     expect(engine.enroll).not.toHaveBeenCalled();
     expect(mockRevoke).toHaveBeenCalledWith(OLD_GRANT_ID);
+  });
+
+  it("says when only the encryption registration remains, and only then", async () => {
+    const { engine, asEngine } = createEngine();
+    const onRegistering = jest.fn(() => {
+      expect(engine.enrollWithLoginGrant).not.toHaveBeenCalled();
+    });
+    const turnOn = (result: SignedMessagesGrantResult) =>
+      turnOnWithCombinedSignIn({
+        engine: asEngine,
+        address: ADDRESS,
+        requestGrant: async () => result,
+        onRegistering,
+      });
+
+    await expect(turnOn(combined())).resolves.toBe("done");
+    expect(onRegistering).toHaveBeenCalledTimes(1);
+
+    onRegistering.mockClear();
+    await turnOn({ success: false, reason: "rejected" });
+    await turnOn(combined({ grantSaved: false }));
+    await turnOn(combined({ adopted: false }));
+    expect(onRegistering).not.toHaveBeenCalled();
   });
 
   it("is done at the device limit too, which the gate then shows", async () => {
@@ -151,6 +252,104 @@ describe("turn on encrypted messages with one combined sign-in (NC8)", () => {
     await expect(run(asEngine, async () => combined())).resolves.toBe(
       "partial"
     );
+  });
+
+  describe("while the provider already registers the granted key", () => {
+    let stopResuming: () => void = () => undefined;
+    afterEach(() => {
+      stopResuming();
+      jest.useRealTimers();
+    });
+
+    it("waits for that registration and reports done, not a failure", async () => {
+      const { engine, asEngine, settle, listenerCount } =
+        createRegisteringEngine();
+      stopResuming = resumeOnStorageEvent(asEngine);
+
+      const outcome = run(asEngine, adoptingGrant());
+      // The provider's call registers; the turn-on's own call meets it.
+      await waitUntil(
+        () => engine.enrollWithLoginGrant.mock.calls.length === 2
+      );
+      settle("ready");
+
+      await expect(outcome).resolves.toBe("done");
+      expect(engine.registrations).toBe(1);
+      expect(listenerCount()).toBe(0);
+    });
+
+    it("is done at the device limit too", async () => {
+      const { asEngine, settle, listenerCount } = createRegisteringEngine();
+      stopResuming = resumeOnStorageEvent(asEngine);
+
+      const outcome = run(asEngine, adoptingGrant());
+      await waitUntil(() => listenerCount() > 0);
+      settle("device-limit");
+
+      await expect(outcome).resolves.toBe("done");
+    });
+
+    it("reports partial setup only when that registration fails", async () => {
+      const { asEngine, settle, listenerCount } = createRegisteringEngine();
+      stopResuming = resumeOnStorageEvent(asEngine);
+
+      const outcome = run(asEngine, adoptingGrant());
+      await waitUntil(() => listenerCount() > 0);
+      settle("needs-enrollment");
+
+      await expect(outcome).resolves.toBe("partial");
+    });
+
+    it("reports a neutral pending state when it is still running after the wait", async () => {
+      jest.useFakeTimers();
+      const { asEngine, listenerCount } = createRegisteringEngine();
+      stopResuming = resumeOnStorageEvent(asEngine);
+
+      const outcome = run(asEngine, adoptingGrant());
+      await waitUntil(() => listenerCount() > 0);
+      jest.advanceTimersByTime(20_000);
+
+      await expect(outcome).resolves.toBe("pending");
+      expect(listenerCount()).toBe(0);
+    });
+
+    it("bounds the wait when the engine's own call waits for a run in flight", async () => {
+      // Single-flight engines make the second caller wait inside
+      // enrollWithLoginGrant() instead of answering "enrolling"; a stuck
+      // registration must still end in a neutral pending state.
+      jest.useFakeTimers();
+      const { engine, asEngine } = createEngine();
+      let enrolling = true;
+      Object.assign(engine, {
+        getStatus: () => (enrolling ? "enrolling" : "ready"),
+        subscribe: () => () => undefined,
+      });
+      engine.enrollWithLoginGrant.mockImplementation(
+        () => new Promise<E2eeEngineStatus>(() => undefined)
+      );
+
+      const outcome = run(asEngine, async () => combined());
+      await waitUntil(() => engine.enrollWithLoginGrant.mock.calls.length > 0);
+      await jest.advanceTimersByTimeAsync(20_000);
+
+      await expect(outcome).resolves.toBe("pending");
+      enrolling = false;
+    });
+
+    it("offers separate setup when the grant was not kept and registration is still running", async () => {
+      jest.useFakeTimers();
+      const { asEngine, listenerCount } = createRegisteringEngine();
+      stopResuming = resumeOnStorageEvent(asEngine);
+
+      const outcome = run(
+        asEngine,
+        adoptingGrant(combined({ grantSaved: false }))
+      );
+      await waitUntil(() => listenerCount() > 0);
+      jest.advanceTimersByTime(20_000);
+
+      await expect(outcome).resolves.toBe("fallback");
+    });
   });
 
   it("keeps the old grant when the new one was not kept locally", async () => {

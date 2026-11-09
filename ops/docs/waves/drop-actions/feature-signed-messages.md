@@ -164,6 +164,10 @@ wallets, added/expiry/last-used dates and **Active**, **Expired** or **Revoked**
 status. Signing history includes at most the newest 100 grants, so older grants
 can be absent from a long list. Proxies cannot manage devices.
 
+If this browser cannot read its own keys (for example when its site storage is
+unavailable), no entry is marked **This device**: the page says so, and the
+revoke confirmation warns that the permission may be this browser's own.
+
 Rename any unrevoked device you own from an authenticated browser or app. This
 updates the existing server name, reflected on other devices when their lists
 refresh; linked signing and encryption entries share it. It is not a local nickname.

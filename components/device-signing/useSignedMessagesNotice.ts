@@ -105,7 +105,8 @@ export function useSignedMessagesNotice({
   }, [address, grants, hasSeenBaseline]);
 
   const model = useMemo((): SignedMessagesNoticeModel | null => {
-    if (!address || !local.loaded || nowMs === 0) {
+    // An unreadable key store says nothing about this browser's keys.
+    if (!address || !local.loaded || local.failed || nowMs === 0) {
       return null;
     }
     const unseen = findUnseenGrant({

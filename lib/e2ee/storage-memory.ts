@@ -47,6 +47,8 @@ export class MemoryE2eeStorage implements E2eeStorage {
     }
     if (batch.wasmState) {
       this.wasm.set(profileId, new Uint8Array(batch.wasmState));
+    } else if (batch.dropWasmState) {
+      this.wasm.delete(profileId);
     }
     for (const g of batch.deleteGroups ?? []) {
       this.groups.delete(k(profileId, g));
