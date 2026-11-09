@@ -762,7 +762,12 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await a.page.screenshot({ path: testInfo.outputPath("long-history.png") });
     expectPrivateAndClean(
       [a, b],
-      needles({ historySeed, photoCaption, imageBytes: image.buffer })
+      needles({
+        historySeed,
+        photoCaption,
+        imageMarker: image.marker,
+        imageBytes: image.buffer,
+      })
     );
   });
 
