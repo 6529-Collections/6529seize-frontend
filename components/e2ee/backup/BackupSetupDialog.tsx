@@ -12,7 +12,7 @@ import type {
   PreparedBackup,
 } from "@/lib/e2ee/backup";
 import { tCount } from "../e2eeFormat";
-import { E2eeDialog } from "../ui/E2eeDialog";
+import { E2EE_DIALOG_SCROLL_REGION, E2eeDialog } from "../ui/E2eeDialog";
 import { CheckForm, type CodeGroup } from "./BackupCodeCheck";
 import { getBackupErrorKey } from "./e2eeBackupErrors";
 
@@ -567,7 +567,9 @@ export function BackupSetupDialog({
       scrollBody
       footer={content.footer}
     >
-      <div className="tw-flex tw-flex-col tw-gap-3">
+      <div
+        className={`tw-flex tw-flex-col tw-gap-3 ${E2EE_DIALOG_SCROLL_REGION}`}
+      >
         {showStep ? <StepLabel step={step} /> : null}
         {content.body}
         {/* The title changes in place from uploading to done or failed. */}

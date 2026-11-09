@@ -15,7 +15,12 @@ import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { SecurityDevice } from "./classifyDevices";
-import { DeviceMeta, PermissionChips, PlatformIcon } from "./DeviceParts";
+import {
+  DeviceMeta,
+  PermissionChips,
+  PlatformIcon,
+  WRAPPING_BUTTON,
+} from "./DeviceParts";
 
 /** "Turn on …" for whichever permission this browser is missing. */
 function TurnOnMissing() {
@@ -28,7 +33,12 @@ function TurnOnMissing() {
     return null;
   }
   return (
-    <Button variant="secondary" size="sm" onClick={() => openDeviceSetup(scope)}>
+    <Button
+      variant="secondary"
+      size="sm"
+      className={WRAPPING_BUTTON}
+      onClick={() => openDeviceSetup(scope)}
+    >
       {t(locale, getDeviceSetupTitleKey(scope, upgrading))}
     </Button>
   );

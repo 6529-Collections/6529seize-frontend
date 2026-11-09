@@ -18,6 +18,7 @@ import Button from "@/components/utils/button/Button";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
+import { WRAPPING_BUTTON } from "./DeviceParts";
 
 function BackupStateCard({
   pill,
@@ -131,6 +132,7 @@ export function BackupCard() {
               <Button
                 variant="action"
                 size="sm"
+                className={WRAPPING_BUTTON}
                 onClick={() => openDeviceSetup(setupScope)}
               >
                 {t(locale, getDeviceSetupTitleKey(setupScope, false))}

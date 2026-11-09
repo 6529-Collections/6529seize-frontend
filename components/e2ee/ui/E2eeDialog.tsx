@@ -11,6 +11,14 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { hasContent } from "./hasContent";
 
+/**
+ * The scrolling region of a `scrollBody` dialog's content: it takes the
+ * height left between the title and the footer and scrolls inside it, so
+ * the footer never covers content on a short screen.
+ */
+export const E2EE_DIALOG_SCROLL_REGION =
+  "tw-min-h-0 tw-overflow-y-auto tw-overscroll-contain tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500";
+
 interface E2eeDialogProps {
   readonly open: boolean;
   readonly onClose: () => void;
