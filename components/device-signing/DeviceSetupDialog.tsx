@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { BackupSetupLink } from "@/components/e2ee/backup/BackupSetupLink";
+import { formatE2eeDate } from "@/components/e2ee/e2eeFormat";
 import { E2eeEnrollmentCard } from "@/components/e2ee/gate/E2eeEnrollmentCard";
 import { E2eeEnrollmentIdentity } from "@/components/e2ee/gate/E2eeEnrollmentIdentity";
 import { E2eeDialog } from "@/components/e2ee/ui/E2eeDialog";
@@ -10,7 +11,7 @@ import Button from "@/components/utils/button/Button";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useE2eeBackup } from "@/hooks/e2ee/useE2eeBackup";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDate } from "@/i18n/format";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { t } from "@/i18n/messages";
 import { getDeviceSetupTitleKey, type DeviceSetupScope } from "./deviceSetup";
 
@@ -28,6 +29,7 @@ function BackupNextStep({
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const { thisDevice } = useE2ee();
   return (
     <E2eeDialog
@@ -41,7 +43,7 @@ function BackupNextStep({
       description={
         thisDevice
           ? t(locale, "e2ee.setupDone.until", {
-              date: formatDate(locale, thisDevice.expiresAt),
+              date: formatE2eeDate(locale, thisDevice.expiresAt, zone),
             })
           : undefined
       }
