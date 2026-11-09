@@ -115,8 +115,8 @@ the same way (for example "Brave on Windows"). **Rename** on this browser's
 card changes its name on the server. **Revoke** names the device and what
 stops before you confirm. Revoking this browser is in its **More** menu and
 opens **Revoke this browser?**, which names it as the browser in use, says
-whether a backup keeps the encrypted chats saved here, and offers **Set up
-backup first** when backup is off. Proxies see a note instead. See
+that only messages included in your last backup can be restored, and offers
+**Set up backup first** when backup is off. Proxies see a note instead. See
 [Encrypted messages](../encrypted-messages.md#devices).
 
 The setup action names whichever permissions this device is missing and opens

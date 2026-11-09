@@ -10,7 +10,7 @@ import Button from "@/components/utils/button/Button";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useE2eeBackup } from "@/hooks/e2ee/useE2eeBackup";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDate, formatList, formatNumber } from "@/i18n/format";
+import { formatDate, formatNumber } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 import type {
   E2eeBackupManager,
@@ -64,10 +64,9 @@ const STATUS_KEYS: Record<E2eeBackupSnapshot["phase"], MessageKey> = {
 };
 
 /**
- * Revoked devices that could still hold the backup key. The key reaches
- * another device only when it restores with the recovery code, so a device
- * counts only if it was revoked after the backup was set up and was active
- * after the backup existed. Devices last seen before then never held it.
+ * Revoked devices that may still hold the backup key: any device revoked
+ * after the backup was set up. A device can restore the backup and keep its
+ * key without its last-seen time moving, so that time can't rule it out.
  */
 function getRevokedKeyHolders(
   snapshot: E2eeBackupSnapshot,
@@ -78,11 +77,7 @@ function getRevokedKeyHolders(
     return [];
   }
   return devices.filter(
-    (device) =>
-      device.revokedAt !== null &&
-      device.revokedAt > createdAt &&
-      device.lastSeenAt !== null &&
-      device.lastSeenAt > createdAt
+    (device) => device.revokedAt !== null && device.revokedAt > createdAt
   );
 }
 
@@ -210,6 +205,7 @@ function RotationWarning({
   readonly disabled: boolean;
   readonly onReplace: () => void;
 }) {
+  // One warning however many were revoked (a Clean up revokes several).
   const [only] = holders;
   const text =
     holders.length === 1 && only
@@ -217,12 +213,14 @@ function RotationWarning({
           label: only.label,
           date: formatDate(locale, only.revokedAt ?? 0),
         })
-      : t(locale, "e2ee.backup.rotate.other", {
-          labels: formatList(
-            locale,
-            holders.map((device) => device.label)
-          ),
-        });
+      : tCount(
+          locale,
+          {
+            one: "e2ee.backup.rotate.many.one",
+            other: "e2ee.backup.rotate.many.other",
+          },
+          holders.length
+        );
   return (
     <E2eeBanner
       tone="warning"

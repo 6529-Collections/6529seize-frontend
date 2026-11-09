@@ -475,7 +475,8 @@ opening the tab starts encrypted messages in that browser so backup can show.
 **Revoke** asks first, naming the device and what stops; posts it signed stay
 verifiable. Revoking this device opens its own
 **Revoke this browser?** dialog: it names the browser you're using, says what
-stops, and says whether your backup keeps a copy. With backup off it warns
+stops, and with backup on says that only messages included in your last
+backup can be restored. With backup off it warns
 that the encrypted chats in this browser can't be restored afterwards and
 offers **Set up backup first**. Revoking it removes its encrypted messages and
 keys from this browser right away and shows the card to turn encrypted
@@ -544,11 +545,11 @@ restore it on a new device.
 - **Replace recovery code** shows a new code and uploads a fresh copy of
   your history from this browser. Your old code stops working once the new
   backup finishes uploading, and messages that are in the backup but not on
-  this browser aren't in the new one. When you revoke a device that was active
-  after the backup was set up (so it may have restored the backup and held its
-  key), the section names that device under **Replace your recovery code**.
-  Devices last active before the backup existed never held its key and raise
-  no warning.
+  this browser aren't in the new one. When you revoke a device after the
+  backup was set up, the section shows **Replace your recovery code**: if that
+  device ever restored the backup, it may still hold its key. One device is
+  named; several (for example after a clean-up) are counted in one warning,
+  with one **Replace recovery code** action.
 - **Turn off backup…** is in the section's **More backup options** menu.
   After confirmation it deletes the encrypted backup from 6529. Your recovery
   code stops working; messages on your devices stay, but can't be restored if
