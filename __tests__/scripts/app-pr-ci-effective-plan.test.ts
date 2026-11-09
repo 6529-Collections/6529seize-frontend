@@ -206,6 +206,7 @@ describe("effective App PR CI plan", () => {
     "components/drops/view/item/content/media/useOriginalImage.ts",
     "helpers/gif-preview.helpers.ts",
     "tests/social/wave-switch-loading.spec.ts",
+    "tests/social/wave-media-processing-sandbox.spec.ts",
     "tests/social/wave-loading-sandbox.spec.ts",
     "components/brain/my-stream/MyStreamWaveChat.tsx",
     "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
