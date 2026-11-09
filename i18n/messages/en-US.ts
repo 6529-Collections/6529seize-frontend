@@ -907,6 +907,9 @@ const WAVE_VOTE_MESSAGES = objectMessages("waves.vote", {
 
 const WAVE_VOTE_INSIGHTS_MESSAGES = objectMessages("waves.voteInsights", {
   topVoters: "Top voters",
+  activityLog: "Activity log",
+  votePlaced: "voted",
+  voteChanged: "changed from",
   viewVoters: "View voters",
   hideVoters: "Hide voters",
   emptyVotersTitle: "Be the First to Make a Vote",
