@@ -1,6 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { SingleWaveDropVoter } from "@/components/waves/drop/SingleWaveDropVoter";
+import type { ApiDropVoter } from "@/generated/models/ApiDropVoter";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ImageScale } from "@/helpers/image.helpers";
 import {
@@ -69,3 +70,30 @@ describe("SingleWaveDropVoter", () => {
     expect(handleSpan.className).toContain("tw-truncate");
   });
 });
+
+test.each([9, -9])(
+  "renders a signed native Decision allocation of %s",
+  (vote) => {
+    const voter = {
+      vote,
+      voter: { id: "native-voter", handle: "native-voter", pfp: null },
+    } as ApiDropVoter;
+    render(
+      <SingleWaveDropVoter
+        voter={voter}
+        position={1}
+        creditType={ApiWaveCreditType.Rep}
+      />
+    );
+    expect(
+      screen.getByRole("img", {
+        name: `native-voter: ${vote > 0 ? "+" : "-"}9 Rep`,
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        (_, element) => element?.textContent === "9 Rep Total"
+      ).length
+    ).toBeGreaterThan(0);
+  }
+);

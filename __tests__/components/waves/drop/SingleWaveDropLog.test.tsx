@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { SingleWaveDropLog } from "@/components/waves/drop/SingleWaveDropLog";
+import type { ApiDropVoteEditLog } from "@/generated/models/ApiDropVoteEditLog";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 jest.mock("next/link", () => ({
@@ -91,4 +92,23 @@ describe("SingleWaveDropLog", () => {
     );
     expect(container.querySelector(".tw-size-7")).toBeInTheDocument();
   });
+});
+
+test("renders a native Decision vote change with an ID fallback for the voter", () => {
+  const log = {
+    id: "native-change",
+    old_vote: 7,
+    new_vote: -3,
+    created_at: 1,
+    voter: { id: "native-voter", handle: null, pfp: null },
+  } as ApiDropVoteEditLog;
+  render(<SingleWaveDropLog log={log} creditType={ApiWaveCreditType.Rep} />);
+  expect(screen.getByRole("link", { name: "native-voter" })).toHaveAttribute(
+    "href",
+    "/native-voter"
+  );
+  expect(screen.getByText("changed from")).toBeInTheDocument();
+  expect(
+    screen.getByText((_, element) => element?.textContent === "-3 Rep")
+  ).toBeInTheDocument();
 });

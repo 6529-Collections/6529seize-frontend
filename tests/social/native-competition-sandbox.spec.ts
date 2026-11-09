@@ -1071,6 +1071,139 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("reads Decision vote details in the voter popup and full details", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.onlyCompetition("alpha");
+    sandbox.setVote("alpha", 7);
+    const dropId = entryDropId("alpha");
+    const fixtureResponse = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+    );
+    const entryFixture = await fixtureResponse.json();
+    const fixture = {
+      wave: entryFixture.wave,
+      drop: { ...entryFixture.drops[0], id: dropId },
+    };
+    const voter = {
+      ...fixture.drop.author,
+      id: "native-voter",
+      handle: "native-voter",
+      pfp: null,
+    };
+    const reads: string[] = [];
+    await page.route(
+      (url) => url.pathname.startsWith(`/api/v2/drops/${dropId}/vote`),
+      async (route) => {
+        const path = new URL(route.request().url()).pathname;
+        reads.push(path);
+        if (path.endsWith("/votes/logs"))
+          return route.fulfill({
+            json: [
+              {
+                id: "native-change",
+                voter,
+                old_vote: 0,
+                new_vote: 7,
+                created_at: Date.now(),
+              },
+            ],
+          });
+        if (path.endsWith("/vote-summary"))
+          return route.fulfill({
+            json: {
+              vote_distribution: {
+                positive_total: 7,
+                negative_total: 0,
+                positive_votes: [{ voter, vote: 7 }],
+                negative_votes: [],
+              },
+            },
+          });
+        if (path.endsWith("/votes"))
+          return route.fulfill({
+            json: {
+              page: 1,
+              count: 1,
+              next: false,
+              data: [{ voter, vote: 7 }],
+            },
+          });
+        return route.fallback();
+      }
+    );
+    await page.route(
+      (url) => url.pathname === `/api/v2/drops/${dropId}`,
+      (route) =>
+        route.fulfill({
+          json: {
+            ...fixture,
+            drop: {
+              ...fixture.drop,
+              drop_type: "CHAT",
+              submission_context: undefined,
+            },
+          },
+        })
+    );
+    await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+    const trigger = page
+      .getByRole("button", {
+        name: "View voters and vote log for 1 voter",
+        exact: true,
+      })
+      .first();
+    await expect(trigger).toBeVisible({ timeout: 30000 });
+    await trigger.click();
+    await expect(
+      page.getByRole("link", { name: "native-voter", exact: true }).first()
+    ).toBeVisible();
+    await page.getByRole("tab", { name: "Vote log", exact: true }).click();
+    await expect(page.getByText("voted", { exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await page.goto(`${ROOT}/alpha?tab=leaderboard&drop=${dropId}`);
+    const topVoters = page.getByRole("button", {
+      name: "Top voters View voters",
+      exact: true,
+    });
+    await expect(topVoters).toBeVisible({ timeout: 30000 });
+    await topVoters.click();
+    const voterPanel = page.getByRole("region", {
+      name: "Top voters",
+      exact: true,
+    });
+    await expect(
+      voterPanel.getByRole("link", { name: "native-voter", exact: true })
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Activity log", exact: true })
+      .click();
+    const activity = page.getByRole("region", {
+      name: "Activity log",
+      exact: true,
+    });
+    await expect(
+      activity.getByRole("link", { name: "native-voter", exact: true })
+    ).toBeVisible();
+    await expect(activity.getByText("voted", { exact: true })).toBeVisible();
+    await expect(activity).toHaveCSS("opacity", "1");
+    await expect(
+      page.getByText("Current votes couldn’t be loaded.", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByText("Be the First to Make a Vote", { exact: true })
+    ).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    await testInfo.attach("decision-vote-details", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+    expect(reads).toContain(`/api/v2/drops/${dropId}/votes`);
+    expect(reads).toContain(`/api/v2/drops/${dropId}/votes/logs`);
+    expect(reads).toContain(`/api/v2/drops/${dropId}/vote-summary`);
+  });
+
   test("edits shared wave metadata through v3 without rewriting its original competition", async ({
     page,
   }) => {

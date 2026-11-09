@@ -28,8 +28,9 @@ either list. Grid cards omit that highlight.
 ## User Journey
 
 1. Open the decision-level or drop-level voters surface.
-2. If a connected profile handle is available, voter data loads in pages of
-   `20`.
+2. Voter data loads in pages of `20`. Public Decision entries can load their
+   voter details without a connected profile; access still follows the wave and
+   Decision visibility rules.
 3. Each row shows:
    - position
    - voter avatar and profile link
@@ -60,7 +61,11 @@ either list. Grid cards omit that highlight.
 ## Common Scenarios
 
 - `All votes` ranks voters for the selected decision.
-- Single-drop `Top voters` ranks voters for that one drop.
+- Single-drop `Top voters` ranks voters for that one drop. For a Decision entry,
+  it shows allocations for that entry in its own Decision. Selecting the
+  leaderboard voter count opens the same voter data and a `Vote log` tab.
+- The full-detail `Activity log` shows recorded vote changes for that Decision
+  entry, including each voter, previous amount, new amount, and time.
 - The single-drop `Top voters` list starts collapsed. Select its header row,
   apart from the download control, to toggle it; the indicator reads `View voters`
   when closed and `Hide voters` when open.
@@ -74,7 +79,8 @@ either list. Grid cards omit that highlight.
   background refresh keeps the last valid summary visible.
 - `Download All` stays visible in the single-drop header, including
   when collapsed. It uses an icon-only button on narrow screens and downloads
-  all voters as CSV without toggling the list.
+  all voters as CSV without toggling the list. The CSV sorts signed votes from
+  highest to lowest; the on-screen list sorts by absolute vote size.
 - Drop-level voter data is requested when `Top voters` is expanded.
 - A thin loading bar appears while more rows are loading.
 - Empty states show `Be the First to Make a Vote` with scope-specific guidance:
@@ -93,7 +99,8 @@ either list. Grid cards omit that highlight.
   when both directions have amounts. A zero-only row shows neither marker.
   These markers identify direction; the adjacent number remains an absolute
   total, not a vote change. Wave-sidebar rows retain their colored markers.
-- Without a signed-in profile handle, voter rows can stay empty.
+- Legacy wave voter lists still require a signed-in profile handle. Decision
+  entry voter lists and vote history do not require one when publicly visible.
 - Card highlights are optional and omitted for winners, chat and approve
   waves, and when no summary is available. A missing highlight does not prove
   that the drop has no votes or no negative votes.
@@ -108,8 +115,12 @@ either list. Grid cards omit that highlight.
 
 - Voter requests retry up to three times with incremental delay.
 - If a later page fails, already loaded rows stay visible.
-- If initial requests do not return rows, the surface resolves to empty-state
-  guidance instead of showing a dedicated error banner.
+- Decision entry voter and activity panels show `Could not load voters.` or
+  `Could not load vote log.` with `Try again` when the first request fails. A
+  failed request does not show the no-votes empty state. Already loaded rows
+  remain visible if a later request fails.
+- Legacy wave lists retain their empty-state guidance when initial requests
+  do not return rows.
 - If the separate current-vote summary request fails or returns unusable data,
   it shows a compact retry state without hiding the rest of `Top voters`.
 - Reloading the wave route starts a fresh fetch attempt.
@@ -118,7 +129,8 @@ either list. Grid cards omit that highlight.
 
 - Sorting is fixed to descending absolute vote totals.
 - These surfaces do not expose user sorting or filtering controls.
-- Data requests require a signed-in profile handle.
+- Legacy wave list requests require a signed-in profile handle; visible
+  Decision entry details support anonymous reads.
 - Wave-level and drop-level voter rankings are separate scopes.
 - `Top voters` keeps its absolute totals, direction markers, tooltips, and
   ordering. The signed card highlight is separate from those rows.

@@ -2,9 +2,11 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useWaveActivityLogs } from "@/hooks/useWaveActivityLogs";
+import { useDropVoteLogs } from "@/hooks/useDropVoteLogs";
 import { t } from "@/i18n/messages";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
@@ -18,9 +20,10 @@ import {
 import React, { useId, useState } from "react";
 import { SingleWaveDropEmptyState } from "./SingleWaveDropEmptyState";
 import { SingleWaveDropLog } from "./SingleWaveDropLog";
+import { DropVoteLoadError } from "./DropVoteLoadError";
 
 interface SingleWaveDropLogsProps {
-  readonly drop: ApiDrop;
+  readonly drop: ApiDrop & Pick<ExtendedDrop, "competition_id">;
 }
 
 export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({
@@ -33,15 +36,24 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({
   const buttonId = `${panelId}-toggle`;
 
   const { connectedProfile } = useAuth();
+  const isDecisionEntry = !!drop.competition_id;
+  const decisionLogs = useDropVoteLogs({
+    dropId: drop.id,
+    enabled: isDecisionEntry && isActivityOpen,
+  });
+  const waveLogs = useWaveActivityLogs({
+    waveId: drop.wave.id,
+    connectedProfileHandle: connectedProfile?.handle ?? undefined,
+    reverse: false,
+    dropId: drop.id,
+    logTypes: ["DROP_VOTE_EDIT"],
+    enabled: !isDecisionEntry && isActivityOpen,
+  });
   const { logs, isFetchingNextPage, fetchNextPage, hasNextPage, isLoading } =
-    useWaveActivityLogs({
-      waveId: drop.wave.id,
-      connectedProfileHandle: connectedProfile?.handle ?? undefined,
-      reverse: false,
-      dropId: drop.id,
-      logTypes: ["DROP_VOTE_EDIT"],
-      enabled: isActivityOpen,
-    });
+    isDecisionEntry ? decisionLogs : waveLogs;
+
+  const hasLoadError =
+    isDecisionEntry && decisionLogs.isError && logs.length === 0;
 
   const intersectionElementRef = useIntersectionObserver(() => {
     if (hasNextPage && !isLoading && !isFetchingNextPage) {
@@ -65,7 +77,7 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({
           <span
             className={`tw-text-sm tw-font-medium ${isActivityOpen ? "tw-text-iron-300" : "tw-text-iron-400"}`}
           >
-            Activity log
+            {t(locale, "waves.voteInsights.activityLog")}
           </span>
           <m.div
             animate={{ rotate: isActivityOpen ? 180 : 0 }}
@@ -90,26 +102,33 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({
               className="tw-overflow-hidden"
             >
               <div className="tw-max-h-[19.75rem] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-                {logs.length > 0 || isLoading ? (
-                  <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
-                    {logs.map((log) => (
-                      <SingleWaveDropLog
-                        key={log.id}
-                        log={log}
-                        creditType={drop.wave.voting_credit_type}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <SingleWaveDropEmptyState
-                    icon={<ClockIcon className="tw-size-6" />}
-                    title={t(locale, "waves.voteInsights.emptyActivityTitle")}
-                    description={t(
-                      locale,
-                      "waves.voteInsights.emptyActivityDescription"
-                    )}
+                {hasLoadError && (
+                  <DropVoteLoadError
+                    kind="logs"
+                    onRetry={() => void decisionLogs.refetch()}
                   />
                 )}
+                {!hasLoadError &&
+                  (logs.length > 0 || isLoading ? (
+                    <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+                      {logs.map((log) => (
+                        <SingleWaveDropLog
+                          key={log.id}
+                          log={log}
+                          creditType={drop.wave.voting_credit_type}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <SingleWaveDropEmptyState
+                      icon={<ClockIcon className="tw-size-6" />}
+                      title={t(locale, "waves.voteInsights.emptyActivityTitle")}
+                      description={t(
+                        locale,
+                        "waves.voteInsights.emptyActivityDescription"
+                      )}
+                    />
+                  ))}
 
                 {isFetchingNextPage && (
                   <div className="tw-h-0.5 tw-w-full tw-overflow-hidden tw-bg-iron-800">
