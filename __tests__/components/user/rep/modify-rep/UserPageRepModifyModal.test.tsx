@@ -276,16 +276,15 @@ it("does not overwrite an edited amount when the allowance refreshes", async () 
   expect(input).toHaveValue("30");
 });
 
-it("stages removal as zero and only submits after Save", async () => {
+it("saves a manually entered zero without a separate removal control", async () => {
   renderModal();
-  await userEvent.click(
-    await screen.findByRole("button", { name: "Remove rating" })
-  );
-  expect(screen.getByRole("textbox")).toHaveValue("0");
+  fireEvent.change(await screen.findByRole("textbox"), {
+    target: { value: "0" },
+  });
+  expect(
+    screen.queryByRole("button", { name: "Remove rating" })
+  ).not.toBeInTheDocument();
   expect(post).not.toHaveBeenCalled();
-  expect(screen.getByRole("status")).toHaveTextContent(
-    "Save to remove this rating."
-  );
   await userEvent.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() =>
     expect(post).toHaveBeenCalledWith({

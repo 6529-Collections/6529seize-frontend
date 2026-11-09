@@ -10,14 +10,21 @@ import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiRatingWithProfileInfoAndLevel } from "@/generated/models/ApiRatingWithProfileInfoAndLevel";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { getIdentityQueryOptions } from "@/services/api/identity-query";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
 import Link from "next/link";
 import { useContext, useEffect, useRef, useState } from "react";
-import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
+import { UserPageIdentityHeaderCICRateForm } from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
+import { useNicRatingState } from "../identity/header/cic-rate/useNicRatingState";
 import UserPageRepModifyForm from "./modify-rep/UserPageRepModifyForm";
 import {
   canManageGivenRatings,
@@ -36,6 +43,7 @@ type RatingSelection = {
   readonly recipient: Recipient;
   readonly category: string | null;
 };
+type RatingListOrder = "rating" | "last_modified";
 
 function RatingLoadState({
   loading,
@@ -73,7 +81,7 @@ function RecipientRatings({
   category,
   editCategory,
   onSelectCategory,
-  onBack,
+  onCancel,
   onSuccess,
   onBusyChange,
 }: {
@@ -83,7 +91,7 @@ function RecipientRatings({
   readonly category: string | null;
   readonly editCategory: string | null;
   readonly onSelectCategory: (category: string) => void;
-  readonly onBack: () => void;
+  readonly onCancel: () => void;
   readonly onSuccess: () => void;
   readonly onBusyChange: (busy: boolean) => void;
 }) {
@@ -91,6 +99,11 @@ function RecipientRatings({
   const target = useQuery({
     ...getIdentityQueryOptions({ handleOrWallet: recipient.identity }),
   });
+  // Load the allowance alongside identity, then hand the same query to the form.
+  const nicRatingState = useNicRatingState(
+    recipient.identity,
+    matter === "NIC"
+  );
   const recipientProfile = target.data
     ? withRatingRecipientIdentity(target.data, recipient.identity)
     : null;
@@ -127,13 +140,15 @@ function RecipientRatings({
     editCategory !== null
   ) {
     return (
-      <UserPageRepModifyForm
-        profile={recipientProfile}
-        category={editCategory}
-        onCancel={onBack}
-        onSuccess={onSuccess}
-        onBusyChange={onBusyChange}
-      />
+      <div className="tw-pb-6">
+        <UserPageRepModifyForm
+          profile={recipientProfile}
+          category={editCategory}
+          onCancel={onCancel}
+          onSuccess={onSuccess}
+          onBusyChange={onBusyChange}
+        />
+      </div>
     );
   }
 
@@ -142,9 +157,6 @@ function RecipientRatings({
       <RatingLoadState loading={loading} error={error} retry={retry} />
       {!loading && !error && matter === "REP" && (
         <>
-          <p className="tw-text-sm tw-text-iron-400">
-            {t(locale, "user.rate.chooseCategory")}
-          </p>
           {ratings.length === 0 && (
             <p className="tw-text-sm tw-text-iron-400">
               {t(locale, "user.rate.empty")}
@@ -164,7 +176,6 @@ function RecipientRatings({
               <Button
                 variant="secondary"
                 size="sm"
-                className="tw-min-h-11 tw-shrink-0"
                 onClick={() => onSelectCategory(row.category)}
                 aria-label={t(locale, "user.rate.adjustCategoryFor", {
                   category: row.category,
@@ -178,12 +189,13 @@ function RecipientRatings({
         </>
       )}
       {!loading && !error && recipientProfile !== null && matter === "NIC" && (
-        <UserPageIdentityHeaderCICRate
+        <UserPageIdentityHeaderCICRateForm
           profile={recipientProfile}
+          ratingState={nicRatingState}
           isTooltip={false}
           locale={locale}
           onSuccess={onSuccess}
-          onCancel={onBack}
+          onCancel={onCancel}
           onBusyChange={onBusyChange}
         />
       )}
@@ -205,6 +217,7 @@ export default function ProfileRatingsDialog({
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
+  const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
   const canManage =
@@ -216,6 +229,8 @@ export default function ProfileRatingsDialog({
   const selection = canManage ? selectedRating : null;
   const [isOpen, setIsOpen] = useState(true);
   const [isBusy, setIsBusy] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<RatingListOrder>("rating");
+  const orderBy = canManage ? selectedOrder : "rating";
   const viewRef = useRef<HTMLDivElement>(null);
   const listScroll = useRef(0);
   const listTrigger = useRef<HTMLButtonElement | null>(null);
@@ -227,8 +242,9 @@ export default function ProfileRatingsDialog({
       if (!selection) listTrigger.current?.focus({ preventScroll: true });
     });
     return () => globalThis.cancelAnimationFrame(frame);
-  }, [selection]);
+  }, [selection, orderBy]);
 
+  const close = () => setIsOpen(false);
   const back = () => {
     setIsBusy(false);
     if (matter === "REP" && selection?.category && !category) {
@@ -243,8 +259,8 @@ export default function ProfileRatingsDialog({
     listTrigger.current = null;
     setSelection(null);
   };
-  const query = useInfiniteQuery({
-    queryKey: [
+  const getListQueryKey = (sort: RatingListOrder) =>
+    [
       QueryKey.PROFILE_RATING_LIST,
       {
         identity,
@@ -253,15 +269,39 @@ export default function ProfileRatingsDialog({
         category,
         owner: connectedProfile?.id,
         proxy: activeProfileProxy?.id,
+        orderBy: sort,
       },
-    ],
+    ] as const;
+  const changeOrder = (nextOrder: RatingListOrder) => {
+    if (nextOrder === orderBy) return;
+    const nextKey = getListQueryKey(nextOrder);
+    const cached =
+      queryClient.getQueryState<InfiniteData<RatingPage, number>>(nextKey);
+    if (cached?.data && cached.data.pages.length > 1) {
+      // Reuse page one without refetching every previously loaded page.
+      queryClient.setQueryData(
+        nextKey,
+        {
+          ...cached.data,
+          pages: cached.data.pages.slice(0, 1),
+          pageParams: cached.data.pageParams.slice(0, 1),
+        },
+        { updatedAt: cached.dataUpdatedAt }
+      );
+    }
+    listScroll.current = 0;
+    listTrigger.current = null;
+    setSelectedOrder(nextOrder);
+  };
+  const query = useInfiniteQuery({
+    queryKey: getListQueryKey(orderBy),
     queryFn: ({ pageParam, signal }) =>
       commonApiFetch<RatingPage>({
         endpoint: `profiles/${encodeURIComponent(identity)}/${matter === "REP" ? "rep" : "cic"}/ratings/by-rater`,
         params: {
           given: String(direction === "given"),
           ...(category ? { category } : {}),
-          order_by: direction === "given" ? "last_modified" : "rating",
+          order_by: orderBy,
           order: "DESC",
           page: String(pageParam),
           page_size: "25",
@@ -298,7 +338,7 @@ export default function ProfileRatingsDialog({
     <MobileWrapperDialog
       title={title}
       isOpen={isOpen}
-      onClose={() => setIsOpen(false)}
+      onClose={close}
       onAfterLeave={onClose}
       onBack={selection ? back : undefined}
       dismissible={!isBusy}
@@ -321,9 +361,40 @@ export default function ProfileRatingsDialog({
               {category}
             </p>
           )}
-          {direction === "given" && (
+          {canManage && (
+            <label className="tw-my-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
+              <span className="tw-shrink-0">
+                {t(locale, "user.rate.sortBy")}
+              </span>
+              <span className="tw-relative tw-min-w-0">
+                <select
+                  aria-label={t(locale, "user.rate.sortGiven", { matter })}
+                  value={orderBy}
+                  disabled={isBusy}
+                  onChange={(event) => {
+                    const value = event.currentTarget.value;
+                    if (value === "rating" || value === "last_modified")
+                      changeOrder(value);
+                  }}
+                  className="tw-min-h-9 tw-w-full tw-min-w-0 tw-cursor-pointer tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm tw-font-medium tw-text-iron-100 [color-scheme:dark] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                >
+                  <option value="rating">
+                    {t(locale, "user.rate.highestFirst")}
+                  </option>
+                  <option value="last_modified">
+                    {t(locale, "user.rate.recentFirst")}
+                  </option>
+                </select>
+                <ChevronDownIcon
+                  aria-hidden="true"
+                  className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-400"
+                />
+              </span>
+            </label>
+          )}
+          {!canManage && direction === "given" && (
             <p className="tw-mt-2 tw-text-xs tw-text-iron-400">
-              {t(locale, "user.rate.recentFirst")}
+              {t(locale, "user.rate.highestFirst")}
             </p>
           )}
           <RatingLoadState
@@ -353,7 +424,7 @@ export default function ProfileRatingsDialog({
                     >
                       {target.display}
                     </Link>
-                    <span className="tw-block tw-text-xs tw-tabular-nums tw-text-iron-400 lg:tw-shrink-0 lg:tw-text-sm lg:tw-text-iron-300">
+                    <span className="tw-block tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-300 lg:tw-shrink-0">
                       <span className="lg:tw-hidden">
                         {t(locale, "user.rate.ratingAmount", {
                           value: formatInteger(locale, row.rating),
@@ -369,7 +440,6 @@ export default function ProfileRatingsDialog({
                     <Button
                       variant="secondary"
                       size="sm"
-                      className="tw-min-h-11 tw-shrink-0"
                       aria-label={t(locale, "user.rate.adjustFor", {
                         matter,
                         name: target.display,
@@ -422,7 +492,7 @@ export default function ProfileRatingsDialog({
             onSelectCategory={(selectedCategory) =>
               setSelection({ ...selection, category: selectedCategory })
             }
-            onBack={back}
+            onCancel={close}
             onSuccess={returnAfterSave}
             onBusyChange={setIsBusy}
           />

@@ -358,7 +358,12 @@ const createReactQueryContextValue = (
   }) => {
     invalidateProfile(targetProfile);
     invalidateLogs();
-    void refreshProfileRatingLists(queryClient, "NIC");
+    void refreshProfileRatingLists(queryClient, "NIC", {
+      targetProfile,
+      connectedProfile,
+      profileProxy,
+      rater,
+    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.CIC_OVERVIEW],
     });
@@ -447,7 +452,11 @@ const createReactQueryContextValue = (
     invalidateProfile(targetProfile);
     invalidateProfileRepRatings(targetProfile);
     invalidateLogs();
-    void refreshProfileRatingLists(queryClient, "REP");
+    void refreshProfileRatingLists(queryClient, "REP", {
+      targetProfile,
+      connectedProfile,
+      profileProxy,
+    });
     queryClient.invalidateQueries({
       queryKey: [QueryKey.REP_OVERVIEW],
     });

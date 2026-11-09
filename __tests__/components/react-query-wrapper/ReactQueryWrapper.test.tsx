@@ -79,6 +79,7 @@ describe("ReactQueryWrapper context", () => {
     );
     expect(client.getQueryState(key)?.isInvalidated).toBe(true);
     expect(client.resetQueries).toHaveBeenCalledWith({
+      predicate: expect.any(Function),
       queryKey: [
         QueryKey.PROFILE_RATING_LIST,
         { matter: "REP", direction: "given" },
@@ -89,6 +90,7 @@ describe("ReactQueryWrapper context", () => {
         QueryKey.PROFILE_RATING_LIST,
         { matter: "REP", direction: "received" },
       ],
+      predicate: expect.any(Function),
     });
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.GLOBAL_REP_CATEGORY_OVERVIEW],

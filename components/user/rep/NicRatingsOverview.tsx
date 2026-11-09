@@ -98,9 +98,7 @@ export default function NicRatingsOverview({
           <div className="tw-mt-4 tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-1">
             <div className="tw-contents">
               <p className="tw-col-start-1 tw-row-start-1 tw-m-0 tw-text-xs tw-text-iron-400">
-                {direction === "given"
-                  ? t(locale, "user.rate.nicGiven")
-                  : t(locale, "user.rate.nicReceived")}
+                {t(locale, "user.rate.nicRegion")}
               </p>
               {scoreValue}
             </div>

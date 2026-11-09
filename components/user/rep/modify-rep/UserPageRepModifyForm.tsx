@@ -216,43 +216,23 @@ export default function UserPageRepModifyForm({
             adjustmentType="Rep"
           />
         </div>
-        <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1">
-          {repState?.rater_contribution !== 0 && (
-            <Button
-              variant="ghost"
-              size="lg"
-              fullWidth
-              disabled={mutating || isUnavailable}
-              onClick={() => setDraftRating("0")}
-            >
-              {t(locale, "user.rate.remove")}
-            </Button>
-          )}
-          {repState?.rater_contribution !== 0 &&
-            newRating === 0 &&
-            draftRating === "0" && (
-              <output className="tw-text-center tw-text-xs tw-text-iron-400">
-                {t(locale, "user.rate.removeHint")}
-              </output>
-            )}
-          <Button
-            type="submit"
-            disabled={isSaveDisabled}
-            loading={mutating}
-            variant="action"
-            size="xl"
-            fullWidth
-          >
-            {t(locale, "rep.categories.edit.save")}
-          </Button>
+        <div className="tw-mt-7 tw-flex tw-justify-end tw-gap-3">
           <Button
             onClick={onCancel}
             disabled={mutating}
             variant="ghost"
             size="lg"
-            fullWidth
           >
             {t(locale, "rep.categories.edit.cancel")}
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSaveDisabled}
+            loading={mutating}
+            variant="action"
+            size="lg"
+          >
+            {t(locale, "rep.categories.edit.save")}
           </Button>
         </div>
       </form>
