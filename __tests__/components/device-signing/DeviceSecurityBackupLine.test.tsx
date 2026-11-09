@@ -1,5 +1,8 @@
 import { render, screen } from "@testing-library/react";
-import { DeviceSecurityDetails } from "@/components/device-signing/DeviceSecurityStatus";
+import {
+  DeviceSecurityDetails,
+  getBackupLineState,
+} from "@/components/device-signing/DeviceSecurityStatus";
 
 const details = {
   proof: "on" as const,
@@ -34,4 +37,22 @@ describe("security status backup line", () => {
     render(<DeviceSecurityDetails {...details} backup={null} />);
     expect(screen.queryByText(/Encrypted backup/)).toBeNull();
   });
+});
+
+describe("getBackupLineState", () => {
+  it.each([
+    ["on", "on", "on"],
+    ["on", "off", "off"],
+    ["on", "available", "elsewhere"],
+    ["on", "loading", null],
+    ["on", "error", null],
+    ["on", undefined, null],
+    ["off", "off", null],
+    ["expired", "on", null],
+  ] as const)(
+    "encrypted DMs %s, backup %s → %s",
+    (encrypted, phase, expected) => {
+      expect(getBackupLineState(encrypted, phase)).toBe(expected);
+    }
+  );
 });
