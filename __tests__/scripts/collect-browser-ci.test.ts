@@ -233,6 +233,8 @@ it.each([
   "components/waves/create-drop-content/useAllMentionConfirmation.ts",
   "tests/social/waves-composer-sandbox.spec.ts",
   "components/waves/drops/WaveDropReplyCollapseAction.tsx",
+  "components/waves/drops/WaveDropActionsMore.tsx",
+  "components/waves/drops/WaveDropMobileMenu.tsx",
   "components/waves/drops/reply-threads/WaveDropReplyThread.tsx",
 ])("selects the composer browser checks for %s", (file) => {
   const outputs = select([file]);

@@ -221,7 +221,7 @@ jobs:
           ];
           const corePlaywrightLanes = [];
           const composerBrowserRequired = plan.changed_files.some((file) =>
-            /^(?:components\/waves\/(?:CreateDrop\.tsx$|drops\/(?:WaveDropReplyCollapseAction\.tsx$|reply-threads\/|wave-drops-all\/))|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|CreateDropSubmissionDialogs|useAllMentionConfirmation)\.|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
+            /^(?:components\/waves\/(?:CreateDrop\.tsx$|drops\/(?:WaveDrop(?:ReplyCollapseAction|ActionsMore|MobileMenu)\.tsx$|reply-threads\/|wave-drops-all\/))|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|CreateDropSubmissionDialogs|useAllMentionConfirmation)\.|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
           );
           write("composer_browser_required", String(composerBrowserRequired));
           const collectBrowserRequired = plan.changed_files.some((file) =>
