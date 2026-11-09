@@ -113,7 +113,7 @@ describe("create-wave.validation", () => {
     ).not.toContain(CREATE_WAVE_VALIDATION_ERROR.TYPE_REQUIRED);
   });
 
-  it("requires outcomes for scheduled rank waves", () => {
+  it("allows scheduled rank decisions without outcomes", () => {
     const config = {
       ...baseConfig,
       outcomes: [],
@@ -123,7 +123,9 @@ describe("create-wave.validation", () => {
       step: CreateWaveStep.OUTCOMES,
       config,
     });
-    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED);
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED
+    );
   });
 
   it("does not require outcomes for ongoing rank waves", () => {
@@ -141,7 +143,7 @@ describe("create-wave.validation", () => {
     );
   });
 
-  it("still requires outcomes for approve waves with a stray ongoing flag", () => {
+  it("allows approve decisions without outcomes", () => {
     const config = {
       ...baseConfig,
       overview: { ...baseConfig.overview, type: ApiWaveType.Approve },
@@ -152,7 +154,9 @@ describe("create-wave.validation", () => {
       step: CreateWaveStep.OUTCOMES,
       config,
     });
-    expect(errors).toContain(CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED);
+    expect(errors).not.toContain(
+      CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED
+    );
   });
 
   it("rejects the after-a-win duplicates rule for ongoing rank waves", () => {

@@ -8,10 +8,7 @@ import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCr
 import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
-import {
-  getWaveOutcomeVisibilityFromMetadata,
-  getApproveWaveTabLabelsFromMetadata,
-} from "@/helpers/waves/wave-metadata.helpers";
+import { getApproveWaveTabLabelsFromMetadata } from "@/helpers/waves/wave-metadata.helpers";
 import { useMemo, useState, type RefObject } from "react";
 import { WaveDisplayMetadataContext } from "@/contexts/WaveDisplayMetadataContext";
 import { TabToggle } from "@/components/common/TabToggle";
@@ -87,21 +84,16 @@ export function NativeCompetitionContent({
     [wave.id, competition.presentation]
   );
   const presentation = displayMetadata.metadata;
-  const outcomesVisible = getWaveOutcomeVisibilityFromMetadata(presentation);
   const selectedTab = getCompetitionTab(
     search.get("edit") === "1" &&
       competition.lifecycle !== ApiCompetitionLifecycle.Draft
       ? "rules"
       : search.get("tab")
   );
-  const tab =
-    selectedTab === "outcomes" && !outcomesVisible
-      ? "leaderboard"
-      : selectedTab;
+  const tab = selectedTab;
   const approveLabels = getApproveWaveTabLabelsFromMetadata(presentation);
   const tabLabel = (value: (typeof COMPETITION_TABS)[number]) => {
     if (value === "rules") return t(locale, "competitions.settings");
-    if (value === "outcomes") return t(locale, "competitions.outcomeTab");
     if (value === "leaderboard" && isCompetitionSubmissionHistory(competition))
       return t(locale, "competitions.submissions");
     if (competition.type === ApiCompetitionType.Approve) {
@@ -116,9 +108,7 @@ export function NativeCompetitionContent({
     competitionId: competition.id,
   });
   const paused = pauses.isSuccess ? pauses.data : null;
-  const tabOptions = COMPETITION_TABS.filter(
-    (value) => outcomesVisible || value !== "outcomes"
-  ).map((value) => ({
+  const tabOptions = COMPETITION_TABS.map((value) => ({
     key: value,
     label: tabLabel(value),
     panelId: `competition-${competition.id}-${value}`,
