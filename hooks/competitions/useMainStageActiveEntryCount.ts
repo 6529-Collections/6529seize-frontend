@@ -32,7 +32,7 @@ export function useMainStageActiveEntryCount(
     competition?.permissions.submit === true &&
     competition.capabilities.includes(ApiCompetitionCapability.MainStage) &&
     limit !== null;
-  const count = useQuery({
+  const count = useQuery<number>({
     queryKey: [
       QueryKey.COMPETITION_RESOURCE,
       { ...competitionScope(identity), viewer },
