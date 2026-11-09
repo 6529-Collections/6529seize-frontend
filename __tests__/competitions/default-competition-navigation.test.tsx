@@ -101,7 +101,7 @@ it.each([
   ["winners", "decisions"],
   ["my_votes", "votes"],
   ["configuration", "rules"],
-  ["outcome", "outcomes"],
+  ["outcome", "rules"],
 ])(
   "resolves the default for an explicit %s destination",
   (tab, destination) => {
@@ -141,13 +141,13 @@ it("preserves explicit competition links across refresh and updates only the imp
   mockSearch = new URLSearchParams("default=1&tab=outcomes");
   rerender();
   expect(mockReplace).toHaveBeenLastCalledWith(
-    "/waves/wave/decisions/alpha?default=1&tab=outcomes",
+    "/waves/wave/decisions/alpha?default=1&tab=rules",
     { scroll: false }
   );
   mockId = "beta";
   rerender();
   expect(mockReplace).toHaveBeenLastCalledWith(
-    "/waves/wave/decisions/beta?default=1&tab=outcomes",
+    "/waves/wave/decisions/beta?default=1&tab=rules",
     { scroll: false }
   );
 });
@@ -364,7 +364,9 @@ it("maps the familiar legacy tabs and retains view parameters on implicit naviga
     MyStreamWaveTab.LEADERBOARD
   );
   expect(getLegacyCompetitionTab("decisions")).toBe(MyStreamWaveTab.WINNERS);
-  expect(getLegacyCompetitionTab("outcomes")).toBe(MyStreamWaveTab.OUTCOME);
+  expect(getLegacyCompetitionTab("outcomes")).toBe(
+    MyStreamWaveTab.CONFIGURATION
+  );
   expect(getLegacyCompetitionTab("votes")).toBe(MyStreamWaveTab.MY_VOTES);
   expect(
     getImplicitCompetitionRoute(

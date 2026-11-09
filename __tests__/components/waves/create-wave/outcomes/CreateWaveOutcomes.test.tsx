@@ -83,9 +83,13 @@ describe("CreateWaveOutcomes", () => {
 
   it("shows rows list when no outcome type selected", () => {
     render(<CreateWaveOutcomes {...baseProps} />);
-    expect(
-      screen.getByRole("heading", { level: 3, name: "Choose outcome type" })
-    ).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Add outcome" }));
+    expect(baseProps.setOutcomeType).toHaveBeenCalledWith(
+      CreateWaveOutcomeType.MANUAL
+    );
+    expect(screen.queryByRole("radio")).toBeNull();
+    expect(screen.queryByTestId("rep")).toBeNull();
+    expect(screen.queryByTestId("cic")).toBeNull();
     expect(screen.getByTestId("rows")).toBeInTheDocument();
   });
 
@@ -149,24 +153,9 @@ describe("CreateWaveOutcomes", () => {
     expect(screen.queryByLabelText(/Max Winners/)).not.toBeInTheDocument();
   });
 
-  it("shows an enabled outcomes-visibility toggle", () => {
-    const setDisplay = jest.fn();
-    render(<CreateWaveOutcomes {...baseProps} setDisplay={setDisplay} />);
-
-    const toggle = screen.getByRole("checkbox");
-    expect(toggle).toBeEnabled();
-    expect(toggle).toBeChecked();
-    expect(toggle).toHaveAccessibleName("Show outcomes menu section");
-    expect(toggle).toHaveAccessibleDescription(
-      "Shows the Outcomes tab and reward details on leaderboard and winner cards. Rewards still apply when hidden."
-    );
-
-    fireEvent.click(toggle);
-
-    expect(setDisplay).toHaveBeenCalledWith({
-      ...baseDisplay,
-      outcomesVisible: false,
-    });
+  it("removes the outcomes visibility control", () => {
+    render(<CreateWaveOutcomes {...baseProps} />);
+    expect(screen.queryByRole("checkbox")).toBeNull();
   });
 
   it("marks restored outcome customizations without opening them", () => {
@@ -184,16 +173,13 @@ describe("CreateWaveOutcomes", () => {
       })
     ).toHaveAttribute("aria-expanded", "false");
     expect(screen.getByLabelText(/Max Winners/)).not.toBeVisible();
-    expect(screen.getByRole("checkbox")).toBeVisible();
-    expect(screen.getByRole("checkbox")).not.toBeChecked();
+    expect(screen.queryByRole("checkbox")).toBeNull();
   });
 
   it("does not render an empty advanced section for rank waves", () => {
     render(<CreateWaveOutcomes {...baseProps} waveType={ApiWaveType.Rank} />);
 
-    expect(
-      screen.getByRole("checkbox", { name: "Show outcomes menu section" })
-    ).toBeVisible();
+    expect(screen.queryByRole("checkbox")).toBeNull();
     expect(
       screen.queryByRole("button", { name: /Outcome visibility/ })
     ).not.toBeInTheDocument();
@@ -228,7 +214,7 @@ describe("CreateWaveOutcomes", () => {
       />
     );
 
-    expect(screen.getByTestId("types")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add outcome" })).toBeVisible();
     expect(screen.queryByText("Outcome is leaderboard position")).toBeNull();
   });
 });

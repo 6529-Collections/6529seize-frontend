@@ -557,29 +557,6 @@ const getApprovalValidationErrors = ({
   return errors;
 };
 
-const getOutcomesValidationErrors = ({
-  waveType,
-  outcomes,
-  ongoingRanking,
-}: {
-  readonly waveType: ApiWaveType;
-  readonly outcomes: CreateWaveOutcomeConfig[];
-  readonly ongoingRanking: boolean;
-}): CREATE_WAVE_VALIDATION_ERROR[] => {
-  const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  if (waveType === ApiWaveType.Chat) {
-    return errors;
-  }
-  // Ongoing rank waves never announce winners, so awarding outcomes is optional.
-  if (waveType === ApiWaveType.Rank && ongoingRanking) {
-    return errors;
-  }
-  if (!outcomes.length) {
-    errors.push(CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED);
-  }
-  return errors;
-};
-
 const getGroupsValidationErrors = ({
   waveType,
   groups,
@@ -666,13 +643,7 @@ export const getCreateWaveValidationErrors = ({
       );
       break;
     case CreateWaveStep.OUTCOMES:
-      errors.push(
-        ...getOutcomesValidationErrors({
-          waveType: config.overview.type,
-          outcomes: config.outcomes,
-          ongoingRanking: config.dates.ongoingRanking ?? false,
-        })
-      );
+      // Outcomes describe optional rewards; they are not required to select winners.
       break;
     case CreateWaveStep.REVIEW:
     case CreateWaveStep.DESCRIPTION:

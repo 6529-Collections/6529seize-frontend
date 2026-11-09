@@ -57,25 +57,19 @@ function setup(
 }
 
 describe("CreateWaveOutcomesRows", () => {
-  it("renders the empty state with error styling when outcomes are required", () => {
+  it("keeps an empty optional outcome list neutral even with a restored validation error", () => {
     setup({
       outcomes: [],
       errors: [CREATE_WAVE_VALIDATION_ERROR.OUTCOMES_REQUIRED],
     });
-    const msg = screen.getByText(
-      "No outcomes yet — add at least one to continue"
-    );
-    expect(msg).toHaveClass("tw-text-error");
-    expect(
-      screen.getByText(/Outcomes define what winners receive/)
-    ).toBeInTheDocument();
+    const msg = screen.getByText("No outcomes added");
+    expect(msg).not.toHaveClass("tw-text-error");
+    expect(screen.getByText(/Continue without an outcome/)).toBeInTheDocument();
   });
 
   it("renders the empty state without error styling before validation fires", () => {
     setup({ outcomes: [], errors: [] });
-    const msg = screen.getByText(
-      "No outcomes yet — add at least one to continue"
-    );
+    const msg = screen.getByText("No outcomes added");
     expect(msg).not.toHaveClass("tw-text-error");
   });
 

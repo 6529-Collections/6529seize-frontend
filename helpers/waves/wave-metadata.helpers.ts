@@ -256,7 +256,6 @@ const getProposalCardsMetadataRequest = (
 export const getCreateWaveDisplayMetadataRequests = ({
   display,
   waveType,
-  ongoingRanking = false,
 }: {
   readonly display: CreateWaveDisplayConfig | null | undefined;
   readonly waveType: ApiWaveType;
@@ -266,20 +265,6 @@ export const getCreateWaveDisplayMetadataRequests = ({
     return [];
   }
 
-  // A perpetual rank wave never has outcomes to show, so its outcomes tab is
-  // always submitted as hidden. The stored preference stays in config (so it
-  // is restored if the user switches back to scheduled announcements).
-  const isPerpetualRank = waveType === ApiWaveType.Rank && ongoingRanking;
-  let outcomeVisibilityRequest: ApiCreateWaveMetadataRequest | null;
-  if (waveType === ApiWaveType.Chat) {
-    outcomeVisibilityRequest = null;
-  } else if (isPerpetualRank) {
-    outcomeVisibilityRequest = getOutcomeVisibilityMetadataRequest(false);
-  } else {
-    outcomeVisibilityRequest = getOutcomeVisibilityMetadataRequest(
-      display.outcomesVisible
-    );
-  }
   const customRulesRequest = getCustomRulesMetadataRequest(display.customRules);
   const submissionButtonLabelRequest =
     waveType === ApiWaveType.Chat
@@ -290,7 +275,6 @@ export const getCreateWaveDisplayMetadataRequests = ({
       ? null
       : getProposalCardsMetadataRequest(display);
   const requests = [
-    outcomeVisibilityRequest,
     customRulesRequest,
     submissionButtonLabelRequest,
     proposalCardsRequest,
@@ -461,22 +445,11 @@ const getOutcomeVisibilityMetadataRequest = (
   };
 };
 
-const parseOutcomeVisibilityMetadataValue = (
-  value: string | null | undefined
-): boolean => {
-  const normalized = value?.trim().toLowerCase();
-  return normalized !== HIDDEN_OUTCOME_VISIBILITY_METADATA_VALUE;
-};
-
+// Retained for existing consumers; the visibility preference is retired.
+// Configured outcomes and recorded rewards are always available to wave viewers.
 export const getWaveOutcomeVisibilityFromMetadata = (
-  metadata: readonly ApiWaveMetadata[] | null | undefined
-): boolean =>
-  parseOutcomeVisibilityMetadataValue(
-    getLatestMetadataValue({
-      metadata,
-      dataKey: WAVE_DISPLAY_METADATA_KEYS.outcomesVisible,
-    })
-  );
+  _metadata: readonly ApiWaveMetadata[] | null | undefined
+): boolean => true;
 
 export const getWaveOutcomeVisibilityMetadataUpdate = ({
   metadata,
