@@ -26,18 +26,12 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { isCompetitionSubmissionHistory } from "@/helpers/competition-lifecycle.helpers";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
-import {
-  getApproveWaveTabLabelsFromMetadata,
-  getWaveOutcomeVisibilityFromMetadata,
-} from "@/helpers/waves/wave-metadata.helpers";
+import { getApproveWaveTabLabelsFromMetadata } from "@/helpers/waves/wave-metadata.helpers";
 import { getCompetitionIdFromPathname } from "@/helpers/competition.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveCurationTabs } from "@/hooks/waves/useWaveCurationTabs";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
-import {
-  useApproveWaveCustomTabLabels,
-  useWaveOutcomeVisibility,
-} from "@/hooks/waves/useWaveMetadata";
+import { useApproveWaveCustomTabLabels } from "@/hooks/waves/useWaveMetadata";
 import { getProfileWaveIdentity, useProfileWave } from "@/hooks/useProfileWave";
 import { useWave } from "@/hooks/useWave";
 import { useWavePollSummary } from "@/hooks/useWaveHasPolls";
@@ -302,7 +296,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
   const waveApproveLabels = useApproveWaveCustomTabLabels(wave);
-  const waveOutcomesVisible = useWaveOutcomeVisibility(wave);
   const nativePresentation = useMemo(
     () =>
       (nativeDefault?.presentation ?? []).map((item, id) => ({ ...item, id })),
@@ -311,9 +304,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const approveLabels = nativeDefault
     ? getApproveWaveTabLabelsFromMetadata(nativePresentation)
     : waveApproveLabels;
-  const outcomesVisible = nativeDefault
-    ? getWaveOutcomeVisibilityFromMetadata(nativePresentation)
-    : waveOutcomesVisible;
   const selectedIsApprove = nativeDefault
     ? nativeDefault.type === ApiCompetitionType.Approve
     : isApproveWave;
@@ -425,7 +415,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
             return isMemesWave;
           }
           if (tab === MyStreamWaveTab.OUTCOME) {
-            return outcomesVisible;
+            return false;
           }
           return true;
         })
@@ -465,7 +455,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       isCompetitionWave,
       isMemesWave,
       isCurationWave,
-      outcomesVisible,
       unansweredPolls,
       activeCompetitionCount,
       effectiveCompetitionId,

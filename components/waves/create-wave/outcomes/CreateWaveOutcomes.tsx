@@ -1,7 +1,4 @@
-import CreateWaveOutcomeTypes from "./CreateWaveOutcomeTypes";
 import CreateWaveOutcomesManual from "./manual/CreateWaveOutcomesManual";
-import CreateWaveOutcomesRep from "./rep/CreateWaveOutcomesRep";
-import CreateWaveOutcomesCIC from "./cic/CreateWaveOutcomesCIC";
 import CreateWaveOutcomesRows from "./winners/rows/CreateWaveOutcomesRows";
 import type {
   CreateWaveDatesConfig,
@@ -18,59 +15,6 @@ import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
 import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
-import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
-
-import { useId, type JSX } from "react";
-
-function ShowOutcomesToggle({
-  display,
-  disabled,
-  onChange,
-}: {
-  readonly display: CreateWaveDisplayConfig;
-  readonly disabled: boolean;
-  readonly onChange: (display: CreateWaveDisplayConfig) => void;
-}) {
-  const locale = useBrowserLocale();
-  const labelId = useId();
-  const descriptionId = useId();
-  return (
-    <label
-      className={`tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900 tw-px-4 tw-py-3 ${
-        disabled ? "tw-opacity-60" : ""
-      }`}
-    >
-      <span className="tw-min-w-0 tw-space-y-1">
-        <span
-          id={labelId}
-          className={`tw-block ${CREATE_WAVE_FORM_STYLES.fieldLabel}`}
-        >
-          {t(locale, "waves.create.outcomes.showOutcomes")}
-        </span>
-        <span
-          id={descriptionId}
-          className={`tw-block ${CREATE_WAVE_FORM_STYLES.supportingText}`}
-        >
-          {t(locale, "waves.create.outcomes.showOutcomesDescription")}
-        </span>
-      </span>
-      <input
-        type="checkbox"
-        aria-labelledby={labelId}
-        aria-describedby={descriptionId}
-        checked={display.outcomesVisible}
-        disabled={disabled}
-        onChange={(event) =>
-          onChange({
-            ...display,
-            outcomesVisible: event.target.checked,
-          })
-        }
-        className="tw-form-checkbox tw-size-5 tw-flex-shrink-0 tw-rounded tw-border-iron-600 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400 disabled:tw-cursor-not-allowed"
-      />
-    </label>
-  );
-}
 
 export default function WavesOutcome({
   outcomes,
@@ -78,12 +22,10 @@ export default function WavesOutcome({
   waveType,
   errors,
   dates,
-  display,
   maxWinners,
   lockDefinitions = false,
   setOutcomeType,
   setOutcomes,
-  setDisplay,
   setMaxWinners,
 }: {
   readonly outcomes: CreateWaveOutcomeConfig[];
@@ -113,30 +55,6 @@ export default function WavesOutcome({
 
   const onCancel = () => {
     setOutcomeType(null);
-  };
-
-  const components: Record<CreateWaveOutcomeType, JSX.Element> = {
-    [CreateWaveOutcomeType.MANUAL]: (
-      <CreateWaveOutcomesManual
-        onOutcome={onOutcome}
-        onCancel={onCancel}
-        waveType={waveType}
-      />
-    ),
-    [CreateWaveOutcomeType.REP]: (
-      <CreateWaveOutcomesRep
-        onOutcome={onOutcome}
-        onCancel={onCancel}
-        waveType={waveType}
-      />
-    ),
-    [CreateWaveOutcomeType.NIC]: (
-      <CreateWaveOutcomesCIC
-        onOutcome={onOutcome}
-        onCancel={onCancel}
-        waveType={waveType}
-      />
-    ),
   };
 
   if (isPerpetualRanking) {
@@ -169,23 +87,27 @@ export default function WavesOutcome({
           disabled={lockDefinitions}
           className="tw-m-0 tw-min-w-0 tw-space-y-6 tw-border-0 tw-p-0 disabled:tw-opacity-60"
         >
-          <section aria-labelledby="create-wave-outcome-type-heading">
-            <h3
-              id="create-wave-outcome-type-heading"
-              className={`tw-mb-3 ${CREATE_WAVE_FORM_STYLES.sectionTitle}`}
+          <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+            {t(locale, "waves.create.outcomes.optionalDescription")}
+          </p>
+          {outcomeType !== CreateWaveOutcomeType.MANUAL && !lockDefinitions && (
+            <button
+              type="button"
+              onClick={() => setOutcomeType(CreateWaveOutcomeType.MANUAL)}
+              className="tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
             >
-              {t(locale, "waves.create.outcomes.chooseType")}
-            </h3>
-            <CreateWaveOutcomeTypes
-              outcomeType={outcomeType}
-              setOutcomeType={setOutcomeType}
-            />
-          </section>
+              {t(locale, "waves.create.outcomes.addOutcome")}
+            </button>
+          )}
           <div>
             {/* <h3 className="tw-mb-2 tw-text-base tw-font-semibold tw-text-white">Title for created outcome cards</h3> */}
             <CommonAnimationHeight>
-              {outcomeType !== null ? (
-                components[outcomeType]
+              {outcomeType === CreateWaveOutcomeType.MANUAL ? (
+                <CreateWaveOutcomesManual
+                  onOutcome={onOutcome}
+                  onCancel={onCancel}
+                  waveType={waveType}
+                />
               ) : (
                 <CreateWaveOutcomesRows
                   waveType={waveType}
@@ -204,11 +126,6 @@ export default function WavesOutcome({
             maxWinners={maxWinners}
           />
         )}
-        <ShowOutcomesToggle
-          display={display}
-          disabled={false}
-          onChange={setDisplay}
-        />
         {isApproveWave && (
           <CreateWaveAdvancedSection
             title={t(locale, "waves.create.outcomes.approveAdvancedSummary")}

@@ -538,7 +538,7 @@ describe("BrainMobileViewContent", () => {
     expect(mockWaveWinners).not.toHaveBeenCalled();
   });
 
-  it("delegates outcome and votes while retaining the shared FAQ view", () => {
+  it("aliases retired Outcome to Settings and delegates votes while retaining FAQ", () => {
     const onDropClick = jest.fn();
     const wave = { id: "wave-1" } as any;
     const { rerender } = render(
@@ -626,7 +626,7 @@ describe("BrainMobileViewContent", () => {
     { isRankWave: true, isApproveWave: false },
     { isRankWave: false, isApproveWave: true },
   ])(
-    "delegates outcome eligibility independently of the parent wave type",
+    "opens Settings for retired Outcome regardless of parent wave type",
     ({ isRankWave, isApproveWave }) => {
       render(
         <BrainMobileViewContent
@@ -649,7 +649,7 @@ describe("BrainMobileViewContent", () => {
     }
   );
 
-  it("retains the shared outcome gate without mounting legacy content", () => {
+  it("opens shared Settings without mounting legacy Outcome content", () => {
     render(
       <BrainMobileViewContent
         activeView={BrainView.OUTCOME}
@@ -657,16 +657,15 @@ describe("BrainMobileViewContent", () => {
         isCurationWave={false}
         isMemesWave={false}
         isRankWave={true}
-        outcomesVisible={false}
         onDropClick={jest.fn()}
         onOpenQuickVote={jest.fn()}
         wave={{ id: "wave-1" } as any}
       >
-        <div role="status">Outcome unavailable</div>
+        <div role="status">Settings</div>
       </BrainMobileViewContent>
     );
 
-    expect(screen.getByRole("status")).toHaveTextContent("Outcome unavailable");
+    expect(screen.getByRole("status")).toHaveTextContent("Settings");
     expect(mockMyStreamWaveOutcome).not.toHaveBeenCalled();
   });
 

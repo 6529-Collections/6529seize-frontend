@@ -195,7 +195,6 @@ describe("useWaveContentTabRegistration", () => {
       expect.objectContaining({
         waveId: "wave-1",
         hasAuthenticatedProfile: false,
-        showOutcomeTab: false,
         votingState: WaveVotingState.ENDED,
         hasFirstDecisionPassed: true,
         hasPolls: true,
@@ -208,7 +207,6 @@ describe("useWaveContentTabRegistration", () => {
     expect(updateAvailableTabs).toHaveBeenLastCalledWith(
       expect.objectContaining({
         hasAuthenticatedProfile: true,
-        showOutcomeTab: false,
         votingState: WaveVotingState.ENDED,
       })
     );

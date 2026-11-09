@@ -37,7 +37,8 @@ const WAVE_TAB_VIEWS: Readonly<Record<string, BrainView>> = {
   submissions: BrainView.SUBMISSIONS,
   sales: BrainView.SALES,
   winners: BrainView.WINNERS,
-  outcome: BrainView.OUTCOME,
+  outcome: BrainView.CONFIGURATION,
+  outcomes: BrainView.CONFIGURATION,
   my_votes: BrainView.MY_VOTES,
   polls: BrainView.POLLS,
   faq: BrainView.FAQ,
@@ -161,7 +162,7 @@ function getWaveViewAvailability({
 }
 
 function normalizeActiveView({
-  activeView,
+  activeView: requestedView,
   firstDecisionDone,
   hasWave,
   isCompleted,
@@ -191,6 +192,10 @@ function normalizeActiveView({
   readonly routeDefaultView: BrainView | null;
   readonly wave: ApiWave | null | undefined;
 }): BrainView {
+  const activeView =
+    requestedView === BrainView.OUTCOME
+      ? BrainView.CONFIGURATION
+      : requestedView;
   const waveViewState: WaveViewState = {
     firstDecisionDone,
     hasAuthenticatedProfile,

@@ -18,7 +18,7 @@ export const DISPLAY_TIME_ZONE_OVERRIDE_STORAGE_KEY =
   "displayTimeZoneSessionOverride";
 const CHANGE_EVENT = "display-time-zone-change";
 
-export interface DisplayTimeZoneSnapshot {
+interface DisplayTimeZoneSnapshot {
   /** The saved setting. */
   readonly preference: DisplayTimeZonePreference;
   /** The wave switch for this tab, or null when it is off. */

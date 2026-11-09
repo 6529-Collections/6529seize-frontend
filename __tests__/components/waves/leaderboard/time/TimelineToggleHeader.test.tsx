@@ -115,6 +115,7 @@ describe("TimelineToggleHeader", () => {
     // 12:00 UTC on Apr 10 is already Apr 11 in Kiritimati (UTC+14).
     const nextDecisionTime = Date.UTC(2026, 3, 10, 12, 0, 0);
     const currentPause: ApiWaveDecisionPause = {
+      id: 1,
       start_time: Date.UTC(2026, 3, 8, 12, 0, 0),
       end_time: Date.UTC(2026, 3, 9, 12, 0, 0),
     };
