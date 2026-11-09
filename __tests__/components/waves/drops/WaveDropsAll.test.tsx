@@ -816,6 +816,26 @@ describe("WaveDropsAll", () => {
   });
 
   describe("Navigation and Quote Handling", () => {
+    it("keeps row navigation callbacks stable when a message arrives", () => {
+      const firstDrop = createMockDrop({ id: "first", serial_no: 1 });
+      const newDrop = createMockDrop({ id: "new", serial_no: 2 });
+      const { getWaveMessages, setWaveMessages } = setupMocks({
+        waveMessages: { drops: [firstDrop] },
+      });
+      const { props, rerender } = renderComponent();
+      const { onQuoteClick, onReplyClick } = dropsProps;
+
+      setWaveMessages({
+        ...getWaveMessages(),
+        drops: [newDrop, firstDrop],
+      });
+      rerender(<WaveDropsAll {...props} />);
+
+      expect(dropsProps.drops).toEqual([newDrop, firstDrop]);
+      expect(dropsProps.onQuoteClick).toBe(onQuoteClick);
+      expect(dropsProps.onReplyClick).toBe(onReplyClick);
+    });
+
     it("navigates to different wave when quote is from another wave", () => {
       const mockDrop = createMockDrop({
         wave: {

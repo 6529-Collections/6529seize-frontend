@@ -27,7 +27,14 @@ import { useWaveBoostedDrops } from "@/hooks/useWaveBoostedDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { useDeferredNewestDrops } from "./hooks/useDeferredNewestDrops";
 import { useFirstVisibleDropsPainted } from "./hooks/useFirstVisibleDropsPainted";
@@ -259,6 +266,11 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
 
   const waveChatScroll = useWaveChatScrollOptional();
   const replyThreads = useWaveReplyThreads();
+  // Navigation handlers are passed to every memoized message row.
+  const latestDropsRef = useRef(dropsForClipboard);
+  useLayoutEffect(() => {
+    latestDropsRef.current = dropsForClipboard;
+  }, [dropsForClipboard]);
   const replyTargetRequest = useRef<AbortController | null>(null);
   useEffect(
     () => () => replyTargetRequest.current?.abort(),
@@ -270,7 +282,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       if (
         !replyThreads ||
         dropId !== null ||
-        waveMessages?.drops.some((drop) => drop.serial_no === serialNo)
+        latestDropsRef.current.some((drop) => drop.serial_no === serialNo)
       ) {
         queueSerialTarget(serialNo);
         return;
@@ -290,7 +302,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           queueSerialTarget(thread?.parentSerialNo ?? serialNo);
         });
     },
-    [dropId, queueSerialTarget, replyThreads, waveMessages]
+    [dropId, queueSerialTarget, replyThreads]
   );
   useEffect(() => {
     if (!waveChatScroll) return;
