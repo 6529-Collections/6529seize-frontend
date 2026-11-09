@@ -1,4 +1,3 @@
-import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import Button from "@/components/utils/button/Button";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
@@ -8,116 +7,15 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import { RateMatter } from "@/types/enums";
-import { ChevronRightIcon } from "@heroicons/react/24/solid";
-import { useMemo } from "react";
-import { buildRepAvatarItems } from "./buildRepAvatarItems";
+import { useContext } from "react";
+import { AuthContext } from "@/components/auth/Auth";
+import { canManageGivenRatings } from "./ratingsManagement";
+import RatingContributorsControl from "./RatingContributorsControl";
 import type { RepDirection } from "./UserPageRep.helpers";
 import RepCategoryPill from "./RepCategoryPill";
 import RepDirectionToggle from "./RepDirectionToggle";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
-
-function getContributorMessageKey(
-  repDirection: RepDirection,
-  isOneContributor: boolean
-) {
-  if (repDirection === "given") {
-    return isOneContributor
-      ? "user.profile.rep.contributors.receivers.one"
-      : "user.profile.rep.contributors.receivers.other";
-  }
-  return isOneContributor
-    ? "user.profile.rep.contributors.raters.one"
-    : "user.profile.rep.contributors.raters.other";
-}
-
-function getViewContributorsMessageKey(
-  repDirection: RepDirection,
-  isOneContributor: boolean
-) {
-  if (repDirection === "given") {
-    return isOneContributor
-      ? "user.profile.rep.contributors.viewReceivers.one"
-      : "user.profile.rep.contributors.viewReceivers.other";
-  }
-  return isOneContributor
-    ? "user.profile.rep.contributors.viewRaters.one"
-    : "user.profile.rep.contributors.viewRaters.other";
-}
-
-function RepContributorControl({
-  overview,
-  repDirection,
-  onOpenOverviewContributors,
-}: {
-  readonly overview: ApiRepOverview | null;
-  readonly repDirection: RepDirection;
-  readonly onOpenOverviewContributors: () => void;
-}) {
-  const locale = useBrowserLocale();
-  const repAvatarItems = useMemo(
-    () =>
-      buildRepAvatarItems(overview?.contributors.data ?? [], 3, {
-        omitHref: true,
-      }),
-    [overview?.contributors.data]
-  );
-
-  if (!overview) {
-    return null;
-  }
-
-  const pluralCategory = new Intl.PluralRules(locale).select(
-    overview.contributor_count
-  );
-  const isOneContributor = pluralCategory === "one";
-  const contributorMessageKey = getContributorMessageKey(
-    repDirection,
-    isOneContributor
-  );
-  const viewContributorsMessageKey = getViewContributorsMessageKey(
-    repDirection,
-    isOneContributor
-  );
-  const contributorCount = formatInteger(locale, overview.contributor_count);
-  const contributorContent = (
-    <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-      {repAvatarItems.length > 0 && (
-        <span className="tw-flex-shrink-0">
-          <OverlappingAvatars items={repAvatarItems} size="sm" maxCount={3} />
-        </span>
-      )}
-      <span className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-300">
-        {t(locale, contributorMessageKey, { count: contributorCount })}
-      </span>
-    </span>
-  );
-
-  if (overview.contributor_count <= 0) {
-    return (
-      <span className="tw-flex tw-min-h-9 tw-flex-shrink-0 tw-items-center tw-px-1">
-        {contributorContent}
-      </span>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      aria-label={t(locale, viewContributorsMessageKey, {
-        count: contributorCount,
-      })}
-      onClick={onOpenOverviewContributors}
-      className="tw-flex tw-min-h-9 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.14] tw-bg-white/[0.04] tw-px-2.5 tw-py-1 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/[0.2] desktop-hover:hover:tw-bg-white/[0.07] motion-reduce:tw-transition-none"
-    >
-      {contributorContent}
-      <ChevronRightIcon
-        aria-hidden="true"
-        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
-      />
-    </button>
-  );
-}
 
 function RepEmptyState({
   loading,
@@ -184,6 +82,10 @@ export default function MobileRepTabContent({
   readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
   const locale = useBrowserLocale();
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const canManage =
+    repDirection === "given" &&
+    canManageGivenRatings(profile, connectedProfile, activeProfileProxy);
   const hiddenLoadedCategoryCount = Math.max(
     categories.length - visibleCount,
     0
@@ -202,6 +104,20 @@ export default function MobileRepTabContent({
 
   return (
     <>
+      <div className="tw-mt-6">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-1">
+          <h2 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400">
+            {t(locale, "user.profile.identity.mobileTabs.totalRep")}
+          </h2>
+          <RepDirectionToggle
+            repDirection={repDirection}
+            onRepDirectionChange={onRepDirectionChange}
+          />
+        </div>
+        <div className="tw-text-3xl tw-font-semibold tw-tabular-nums tw-leading-none tw-tracking-tight tw-text-primary-400">
+          {overview ? formatInteger(locale, overview.total_rep) : "—"}
+        </div>
+      </div>
       {repDirection === "given" &&
         overview !== null &&
         overview.authenticated_user_contribution !== null &&
@@ -229,11 +145,18 @@ export default function MobileRepTabContent({
       <div className="tw-mt-4">
         <div className="tw-mb-4">
           <div className="tw-flex tw-min-h-9 tw-items-center tw-gap-3">
-            <div className="tw-flex-shrink-0">
-              <RepContributorControl
+            <div
+              className={
+                canManage ? "tw-min-w-0 tw-flex-1" : "tw-flex-shrink-0"
+              }
+            >
+              <RatingContributorsControl
                 overview={overview}
-                repDirection={repDirection}
-                onOpenOverviewContributors={onOpenOverviewContributors}
+                direction={repDirection}
+                matter="REP"
+                compact
+                onClick={onOpenOverviewContributors}
+                canManage={canManage}
               />
             </div>
             {canEditRep && repDirection === "received" && (
@@ -283,14 +206,6 @@ export default function MobileRepTabContent({
                 </UserPageRateWrapper>
               </div>
             )}
-          </div>
-          <div className="tw-mt-3 tw-w-fit [&_[role=tab]:focus-visible]:tw-outline-offset-[-2px] [&_[role=tab][aria-selected=false]]:tw-text-iron-400 [&_[role=tab]]:tw-flex-none [&_[role=tab]]:tw-bg-transparent [&_[role=tab]]:tw-px-0 [&_[role=tab]]:tw-text-[13px] motion-reduce:[&_[role=tab]]:tw-transition-none [&_[role=tablist]>div>div]:tw-flex-none [&_[role=tablist]>div>div]:tw-p-0 [&_[role=tablist]>div]:tw-min-w-0 [&_[role=tablist]>div]:tw-gap-4 [&_[role=tablist]>div]:tw-bg-transparent [&_[role=tablist]>div]:tw-p-0 [&_[role=tablist]>div]:tw-ring-0">
-            <RepDirectionToggle
-              repDirection={repDirection}
-              onRepDirectionChange={onRepDirectionChange}
-              variant="tabs"
-              fill
-            />
           </div>
         </div>
       </div>
