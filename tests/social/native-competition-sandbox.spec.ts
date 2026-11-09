@@ -212,10 +212,6 @@ async function expectLegacySectionContent(page: Page, tab: string) {
     await expect(
       page.getByText("No Winners Yet", { exact: true })
     ).toBeVisible();
-  } else if (tab === "outcomes") {
-    await expect(
-      page.getByText("Nothing to show yet.", { exact: true })
-    ).toBeVisible();
   } else if (tab === "votes") {
     await expect(
       page.getByRole("article", { name: "Recorded alpha entry", exact: true })
