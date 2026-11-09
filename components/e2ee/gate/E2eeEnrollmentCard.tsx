@@ -16,7 +16,10 @@ import {
   useSyncExternalStore,
 } from "react";
 import { useAuth } from "@/components/auth/Auth";
-import type { RequestSignedMessagesGrant } from "@/components/auth/authSignedMessagesGrant";
+import type {
+  RequestSignedMessagesGrant,
+  SignedMessagesGrantFailure,
+} from "@/components/auth/authSignedMessagesGrant";
 import SignedMessagesEnableStatus from "@/components/device-signing/SignedMessagesEnableStatus";
 import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -70,6 +73,26 @@ function getPermissionPointKey(
 }
 
 const ENROLL_REJECTED_KEY: MessageKey = "e2ee.enroll.rejected";
+
+function getEnrollmentFailure(
+  error: unknown,
+  upgrading: boolean
+): { reason: SignedMessagesGrantFailure; errorKey: MessageKey | null } {
+  if (isE2eeSignatureRejection(error)) {
+    return { reason: "rejected", errorKey: ENROLL_REJECTED_KEY };
+  }
+  if (
+    getE2eeErrorCode(error) === "E2EE_SIGNATURE_FAILED" &&
+    isWalletConnectSessionError(error)
+  ) {
+    // The shared wallet flow chooses recovery or signing-error copy.
+    return { reason: "walletconnect-session", errorKey: null };
+  }
+  return {
+    reason: "signature-failed",
+    errorKey: upgrading ? "e2ee.upgrade.failed" : "e2ee.enroll.failed",
+  };
+}
 
 const subscribeNever = () => () => undefined;
 
@@ -351,18 +374,9 @@ export function E2eeEnrollmentCard({
         }
       } catch (error) {
         setNoticeKey(null);
-        if (isE2eeSignatureRejection(error)) {
-          setErrorKey(ENROLL_REJECTED_KEY);
-          return { success: false, reason: "rejected" };
-        }
-        if (
-          getE2eeErrorCode(error) === "E2EE_SIGNATURE_FAILED" &&
-          isWalletConnectSessionError(error)
-        ) {
-          return { success: false, reason: "walletconnect-session" };
-        }
-        setErrorKey(upgrading ? "e2ee.upgrade.failed" : "e2ee.enroll.failed");
-        return { success: false, reason: "signature-failed" };
+        const failure = getEnrollmentFailure(error, upgrading);
+        setErrorKey(failure.errorKey);
+        return { success: false, reason: failure.reason };
       } finally {
         setPending(false);
       }
