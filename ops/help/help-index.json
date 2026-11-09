@@ -7781,8 +7781,8 @@
         "An open drop's distribution refreshes after the user edits or resets a vote and when relevant real-time drop or vote updates arrive; closely spaced updates are grouped. Reopening detail can reuse a result for up to 60 seconds unless a vote update requests fresh data. There is no periodic polling, and the summary is not a live activity log.",
         "Reactions and content updates preserve the latest available card highlight. The user's own or incoming real-time vote changes clear it until the leaderboard's next normal refresh. Voting does not force the leaderboard to reload or reorder.",
         "Public Decision entry voter lists and vote history can be read without a connected profile, subject to the wave and Decision visibility rules. Legacy wave lists still require a signed-in profile handle.",
-      "If a Decision entry voter or activity panel fails to load, it shows Could not load voters. or Could not load vote log. with Try again. A failed request is not evidence that nobody voted; already loaded rows remain visible after a later request fails.",
-      "Top voters are distinct from winners, which are about submitted drops or outcomes."
+        "If a Decision entry voter or activity panel fails to load, it shows Could not load voters. or Could not load vote log. with Try again. A failed request is not evidence that nobody voted; already loaded rows remain visible after a later request fails.",
+        "Top voters are distinct from winners, which are about submitted drops or outcomes."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
