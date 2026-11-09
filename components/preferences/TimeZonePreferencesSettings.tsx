@@ -232,6 +232,8 @@ function TimeZonePreferencesCard() {
                         </span>
                         <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-text-xs tw-tabular-nums tw-text-iron-300">
                           {formatZonedClockTime(new Date(now), {
+                            // The zone name is on the line beside this time,
+                            // so the time itself is printed without a label.
                             zone: { timeZone: zone, isLocal: true },
                           })}
                         </span>

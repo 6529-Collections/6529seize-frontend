@@ -5,7 +5,7 @@ import { ChevronRightIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { XMarkIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
 import Link from "next/link";
-import { useState } from "react";
+import { useId, useState } from "react";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import {
   describeDisplayTimeZone,
@@ -94,6 +94,7 @@ function SwitchOption({
   readonly checked: boolean;
   readonly onSelect: (preference: DisplayTimeZonePreference) => void;
 }) {
+  const descriptionId = useId();
   return (
     <label
       className={clsx(
@@ -108,6 +109,8 @@ function SwitchOption({
         name={name}
         value={choice.preference}
         checked={checked}
+        aria-label={title}
+        aria-describedby={descriptionId}
         onChange={() => onSelect(choice.preference)}
         className="tw-mt-0.5 tw-size-4 tw-flex-shrink-0 tw-accent-primary-400"
       />
@@ -115,7 +118,10 @@ function SwitchOption({
         <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-50">
           {title}
         </span>
-        <span className="tw-block tw-text-xs tw-tabular-nums tw-text-iron-400">
+        <span
+          id={descriptionId}
+          className="tw-block tw-text-xs tw-tabular-nums tw-text-iron-400"
+        >
           {description}
         </span>
       </span>
@@ -165,6 +171,16 @@ export default function DisplayTimeZoneSwitch({
   const switchLabel = t(locale, "displayTimeZone.switch.label", {
     zone: current.name,
   });
+  const chipText =
+    variant === "header"
+      ? t(locale, "displayTimeZone.chip.label", { zone: current.name })
+      : current.name;
+  const buttonClasses =
+    variant === "app" ? APP_BUTTON_CLASSES : HEADER_BUTTON_CLASSES;
+  const iconClasses =
+    variant === "app"
+      ? "tw-size-5 tw-flex-shrink-0"
+      : "tw-h-4 tw-w-4 tw-flex-shrink-0";
   const isNamedZoneSetting =
     state.preference !== LOCAL_TIME_ZONE_PREFERENCE &&
     state.preference !== UTC_TIME_ZONE_PREFERENCE;
@@ -182,13 +198,7 @@ export default function DisplayTimeZoneSwitch({
               className={`${CHIP_PART_CLASSES} tw-gap-1.5 tw-rounded-l-full tw-pl-2.5 tw-pr-1.5`}
             >
               <ClockIcon aria-hidden="true" className="tw-size-4" />
-              <span className="tw-whitespace-nowrap">
-                {variant === "header"
-                  ? t(locale, "displayTimeZone.chip.label", {
-                      zone: current.name,
-                    })
-                  : current.name}
-              </span>
+              <span className="tw-whitespace-nowrap">{chipText}</span>
             </PopoverButton>
             <button
               type="button"
@@ -210,18 +220,9 @@ export default function DisplayTimeZoneSwitch({
                   "data-tooltip-content": switchLabel,
                 }
               : {})}
-            className={
-              variant === "app" ? APP_BUTTON_CLASSES : HEADER_BUTTON_CLASSES
-            }
+            className={buttonClasses}
           >
-            <ClockIcon
-              aria-hidden="true"
-              className={
-                variant === "app"
-                  ? "tw-size-5 tw-flex-shrink-0"
-                  : "tw-h-4 tw-w-4 tw-flex-shrink-0"
-              }
-            />
+            <ClockIcon aria-hidden="true" className={iconClasses} />
           </PopoverButton>
         )}
         <PopoverPanel
