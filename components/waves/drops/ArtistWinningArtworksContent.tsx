@@ -1,4 +1,6 @@
 import React from "react";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import { withDisplayTimeZoneDate } from "@/lib/display-time-zone/displayTimeZone";
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -38,6 +40,7 @@ const WinnerTrophyCard: React.FC<{
   readonly drop: ApiDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
 }> = ({ drop, onDropClick }) => {
+  const zone = useDisplayTimeZone();
   const extendedDrop = convertApiDropToExtendedDrop(drop);
   const media = drop.parts[0]?.media;
   const firstMedia = media?.[0];
@@ -170,7 +173,11 @@ const WinnerTrophyCard: React.FC<{
                 className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-amber-300/80"
               />
               <span>
-                Won on {Time.millis(decisionTime).toDate().toLocaleDateString()}
+                Won on{" "}
+                {new Intl.DateTimeFormat(
+                  undefined,
+                  withDisplayTimeZoneDate(zone, {})
+                ).format(Time.millis(decisionTime).toDate())}
               </span>
             </div>
           )}

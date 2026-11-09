@@ -1,5 +1,6 @@
+import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import type { ApiWaveLog } from "@/generated/models/ApiWaveLog";
-import { formatNumberWithCommas, getTimeAgoShort } from "@/helpers/Helpers";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 import Link from "next/link";
 import Image from "next/image";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
@@ -36,6 +37,7 @@ interface WaveLeaderboardRightSidebarActivityLogProps {
 export const WaveLeaderboardRightSidebarActivityLog: React.FC<
   WaveLeaderboardRightSidebarActivityLogProps
 > = ({ log, creditType, onDropClick }) => {
+  const timeAgoShort = useTimeAgoShort();
   const locale = useBrowserLocale();
   const unknownProfile = waveRightPanelText(
     "waves.sidebar.rightPanel.activity.unknownProfile"
@@ -136,7 +138,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
       <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end tw-gap-1 md:tw-col-start-4">
         {log.created_at !== null && (
           <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-400">
-            {getTimeAgoShort(new Date(log.created_at).getTime())}
+            {timeAgoShort(new Date(log.created_at).getTime())}
           </span>
         )}
         {onDropClick && (

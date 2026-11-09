@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeDeviceInfo } from "@/lib/e2ee/types";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
@@ -27,6 +28,7 @@ export function E2eeNewDeviceNotice({
   readonly className?: string | undefined;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const { engine, devices, profileId, status } = useE2ee();
   const { newDevices, acknowledge } = useE2eeNewDevices(
     profileId,
@@ -70,7 +72,7 @@ export function E2eeNewDeviceNotice({
           {t(locale, "e2ee.devices.newDevice", {
             label: device.label,
             platform: t(locale, PLATFORM_KEYS[device.platform]),
-            date: formatE2eeDateTime(locale, device.createdAt),
+            date: formatE2eeDateTime(locale, device.createdAt, zone),
           })}
         </E2eeBanner>
       ))}

@@ -5,8 +5,19 @@ import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar
 import { MemesWaveWinnersDrop } from "@/components/waves/winners/drops/MemesWaveWinnerDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveDecisionWinner } from "@/generated/models/ApiWaveDecisionWinner";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
+import { mockDefaultTimeZone } from "../../../../utils/timeZoneHydration";
 
 const mockMobileMenuOpenClick = jest.fn();
+
+let mockDisplayTimeZone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
+jest.mock("@/hooks/useDisplayTimeZone", () => ({
+  ...jest.requireActual("@/hooks/useDisplayTimeZone"),
+  useDisplayTimeZone: () => mockDisplayTimeZone,
+}));
 
 const setBrowserLanguages = (languages: readonly string[]) => {
   Object.defineProperty(globalThis.navigator, "languages", {
@@ -185,6 +196,7 @@ describe("MemesWaveWinnersDrop", () => {
     jest.clearAllMocks();
     getMintTimelineDetailsMock.mockReset();
     mockMobileMenuOpenClick.mockClear();
+    mockDisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
     useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
     useLongPressInteraction.mockReturnValue({
       isActive: false,
@@ -308,6 +320,43 @@ describe("MemesWaveWinnersDrop", () => {
       } else {
         Reflect.deleteProperty(globalThis.navigator, "languages");
       }
+    }
+  });
+
+  it("dates the mint in the display time zone", async () => {
+    // 14:40 UTC on Friday is already Saturday in Kiritimati (UTC+14).
+    const mintInstant = new Date("2026-08-07T14:40:00.000Z");
+    getMintTimelineDetailsMock.mockReturnValue({
+      instantUtc: mintInstant,
+    } as ReturnType<typeof getMintTimelineDetails>);
+    const mapped = {
+      ...winner,
+      drop: { ...winner.drop, submission_context: { meme_card_id: 532 } },
+    } as ApiWaveDecisionWinner;
+
+    const restoreZone = mockDefaultTimeZone("UTC");
+    try {
+      const { rerender } = render(
+        <MemesWaveWinnersDrop
+          winner={mapped}
+          wave={wave}
+          onDropClick={jest.fn()}
+        />
+      );
+      expect(await screen.findByText("Friday, August 7")).toBeInTheDocument();
+
+      mockDisplayTimeZone = { timeZone: "Pacific/Kiritimati", isLocal: false };
+      rerender(
+        <MemesWaveWinnersDrop
+          winner={mapped}
+          wave={wave}
+          onDropClick={jest.fn()}
+        />
+      );
+      // A bare date carries no zone label; only the day follows the zone.
+      expect(await screen.findByText("Saturday, August 8")).toBeInTheDocument();
+    } finally {
+      restoreZone();
     }
   });
 

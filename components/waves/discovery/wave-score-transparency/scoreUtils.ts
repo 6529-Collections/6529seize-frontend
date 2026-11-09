@@ -1,3 +1,8 @@
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  withDisplayTimeZone,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveScore } from "@/generated/models/ApiWaveScore";
@@ -100,10 +105,10 @@ const percentFormatter = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 0,
 });
 
-const dateTimeFormatter = new Intl.DateTimeFormat(undefined, {
+const DATE_TIME_FORMAT: Intl.DateTimeFormatOptions = {
   dateStyle: "medium",
   timeStyle: "short",
-});
+};
 
 export const formulaSteps: readonly FormulaStep[] = [
   {
@@ -194,12 +199,18 @@ export function formatWeight(value: number): string {
   return percentFormatter.format(value);
 }
 
-export function formatTimestamp(timestamp: unknown): string {
+export function formatTimestamp(
+  timestamp: unknown,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
+): string {
   const numericTimestamp = toNumber(timestamp);
   if (numericTimestamp <= 0) {
     return "Not calculated yet";
   }
-  return dateTimeFormatter.format(new Date(numericTimestamp));
+  return new Intl.DateTimeFormat(
+    undefined,
+    withDisplayTimeZone(zone, DATE_TIME_FORMAT)
+  ).format(new Date(numericTimestamp));
 }
 
 export function formatDaysFromMs(value: unknown): string {
