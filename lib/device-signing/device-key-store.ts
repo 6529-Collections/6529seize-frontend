@@ -26,21 +26,37 @@ async function withDeviceKeyLock<T>(
   return await locks.request(`6529-device-key:${address}`, task);
 }
 
-function notifyDeviceGrantChanged(address: string): void {
+interface DeviceGrantChange {
+  readonly address: string;
+  readonly saved: boolean;
+}
+
+function notifyDeviceGrantChanged(address: string, saved = false): void {
   if (typeof globalThis.dispatchEvent !== "function") {
     return;
   }
   globalThis.dispatchEvent(
-    new CustomEvent(DEVICE_GRANT_CHANGED_EVENT, { detail: { address } })
+    new CustomEvent<DeviceGrantChange>(DEVICE_GRANT_CHANGED_EVENT, {
+      detail: { address, saved },
+    })
   );
 }
 
 export function subscribeToDeviceGrantChanges(
-  listener: () => void
+  listener: (change: DeviceGrantChange) => void
 ): () => void {
-  globalThis.addEventListener(DEVICE_GRANT_CHANGED_EVENT, listener);
+  const onChange = (event: Event) => {
+    const { detail } = event as CustomEvent<DeviceGrantChange | null>;
+    if (typeof detail?.address === "string" && detail.address.length > 0) {
+      listener({
+        address: normalizeAddress(detail.address),
+        saved: detail.saved === true,
+      });
+    }
+  };
+  globalThis.addEventListener(DEVICE_GRANT_CHANGED_EVENT, onChange);
   return () =>
-    globalThis.removeEventListener(DEVICE_GRANT_CHANGED_EVENT, listener);
+    globalThis.removeEventListener(DEVICE_GRANT_CHANGED_EVENT, onChange);
 }
 
 export function getDeviceGrantStatus(
@@ -151,7 +167,7 @@ export async function saveDeviceGrant(
     return true;
   });
   if (saved) {
-    notifyDeviceGrantChanged(normalized);
+    notifyDeviceGrantChanged(normalized, true);
     // The key exists only here: keep IndexedDB from being evicted.
     void requestPersistentStorage();
   }
@@ -222,14 +238,15 @@ export async function installSharedDeviceKey(
   record: StoredDeviceKey
 ): Promise<void> {
   const address = normalizeAddress(record.address);
-  await withDeviceKeyLock(address, async () => {
+  const saved = await withDeviceKeyLock(address, async () => {
     const existing = await deviceKeyStorage.read(address);
-    if (existing && getUsableGrant(existing, Date.now())) return;
+    if (existing && getUsableGrant(existing, Date.now())) return false;
     if (!record.grant || !getUsableGrant(record, Date.now()))
       throw new Error("Invalid shared signing grant");
     await deviceKeyStorage.write({ ...record, address });
     writeDeviceGrantHint(address, record.grant, record.ownProfileId);
+    return true;
   });
-  notifyDeviceGrantChanged(address);
+  notifyDeviceGrantChanged(address, saved);
   void requestPersistentStorage();
 }

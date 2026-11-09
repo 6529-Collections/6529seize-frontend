@@ -105,6 +105,34 @@ const emitDropUpdateRef = (message: Record<string, unknown>) => {
 };
 
 describe("useNewDropCounter", () => {
+  it("preserves messages on browser focus until the Chat panel becomes active", () => {
+    const visibility = jest.spyOn(document, "visibilityState", "get");
+    visibility.mockReturnValue("hidden");
+    const { result, rerender } = renderHook(
+      ({ readingWaveId }: { readingWaveId: string | null }) =>
+        useTestNewDropCounter(readingWaveId, waves, jest.fn()),
+      { initialProps: { readingWaveId: null as string | null }, wrapper }
+    );
+    emitDropUpdate({ serialNo: 11 });
+    visibility.mockReturnValue("visible");
+    act(() => document.dispatchEvent(new Event("visibilitychange")));
+    expect(result.current.unreadStore.getNewDropsCounts()["wave2"]?.count).toBe(
+      1
+    );
+    emitDropUpdate({ serialNo: 12 });
+    expect(result.current.unreadStore.getNewDropsCounts()["wave2"]?.count).toBe(
+      2
+    );
+    rerender({ readingWaveId: "wave2" });
+    expect(result.current.unreadStore.getNewDropsCounts()["wave2"]?.count).toBe(
+      0
+    );
+    emitDropUpdate({ serialNo: 13 });
+    expect(result.current.unreadStore.getNewDropsCounts()["wave2"]?.count).toBe(
+      0
+    );
+  });
+
   beforeEach(() => {
     fetchDropByIdBatched.mockReset();
     (useWebSocketMessage as jest.Mock).mockClear();

@@ -2,6 +2,7 @@
 
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import {
+  useAcknowledgeDeviceGrant,
   useDeviceGrants,
   useRevokeDeviceGrant,
 } from "@/hooks/device-signing/useDeviceGrants";
@@ -14,6 +15,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import {
   dismissSignedMessagesNotice,
   markDeviceGrantsSeen,
+  rememberLocalDeviceGrants,
   useSignedMessagesNoticeState,
 } from "./signedMessagesNoticeStorage";
 
@@ -25,7 +27,8 @@ export type SignedMessagesNoticeModel =
 interface UnseenGrantInput {
   readonly grants: readonly ApiDeviceGrant[] | undefined;
   readonly seenGrantIds: readonly string[] | undefined;
-  readonly localPublicKeys: readonly string[] | null;
+  readonly localGrantIds: readonly string[] | undefined;
+  readonly localPublicKeys: readonly string[];
   readonly nowMs: number;
 }
 
@@ -33,19 +36,21 @@ interface UnseenGrantInput {
 function findUnseenGrant({
   grants,
   seenGrantIds,
+  localGrantIds,
   localPublicKeys,
   nowMs,
 }: UnseenGrantInput): ApiDeviceGrant | null {
-  if (!grants || !seenGrantIds || !localPublicKeys) {
+  if (!grants || !seenGrantIds) {
     return null;
   }
-  const seen = new Set(seenGrantIds);
+  const seen = new Set([...seenGrantIds, ...(localGrantIds ?? [])]);
   const own = new Set(localPublicKeys);
   return (
     grants.find(
       (grant) =>
         grant.revoked_at === null &&
         grant.expires_at > nowMs &&
+        grant.notice_acknowledged !== true &&
         !seen.has(grant.id) &&
         !own.has(grant.device_key.toLowerCase())
     ) ?? null
@@ -82,8 +87,10 @@ export function useSignedMessagesNotice({
   const nowMs = useMinuteClock();
   const local = useLocalDeviceKeys(address);
   const { data: grants } = useDeviceGrants(address);
-  const { dismissedUntil, seenGrantIds } =
+  const { dismissedUntil, seenGrantIds, localGrantIds } =
     useSignedMessagesNoticeState(address);
+  const { acknowledge: acknowledgeGrant, isAcknowledging } =
+    useAcknowledgeDeviceGrant();
   const { revoke: revokeGrant, isRevoking } = useRevokeDeviceGrant();
   const { canEnable, enable, isEnabling, reconnect, status } =
     useEnableSignedMessages();
@@ -100,6 +107,24 @@ export function useSignedMessagesNotice({
     }
   }, [address, grants, hasSeenBaseline]);
 
+  useEffect(() => {
+    if (!address || !local.loaded || local.failed || !local.publicKeys.length) {
+      return;
+    }
+    // Record exact matches while IndexedDB still holds the key, including
+    // the locally saved grant before it appears in the server list.
+    const localKeys = new Set(local.publicKeys);
+    const candidates = local.grant
+      ? [local.grant, ...(grants ?? [])]
+      : (grants ?? []);
+    rememberLocalDeviceGrants(
+      address,
+      candidates
+        .filter((grant) => localKeys.has(grant.device_key.toLowerCase()))
+        .map((grant) => grant.id)
+    );
+  }, [address, grants, local]);
+
   const model = useMemo((): SignedMessagesNoticeModel | null => {
     // An unreadable key store says nothing about this browser's keys.
     if (!address || !local.loaded || local.failed || nowMs === 0) {
@@ -108,6 +133,7 @@ export function useSignedMessagesNotice({
     const unseen = findUnseenGrant({
       grants,
       seenGrantIds,
+      localGrantIds,
       localPublicKeys: local.publicKeys,
       nowMs,
     });
@@ -124,20 +150,25 @@ export function useSignedMessagesNotice({
     dismissedUntil,
     grants,
     local,
+    localGrantIds,
     nowMs,
     seenGrantIds,
   ]);
 
   const dismiss = useCallback(() => {
-    if (!address || !model) {
-      return;
+    if (address && model && model.kind !== "new-device") {
+      dismissSignedMessagesNotice(address, Date.now());
     }
-    if (model.kind === "new-device") {
-      markDeviceGrantsSeen(address, [model.grant.id]);
-      return;
-    }
-    dismissSignedMessagesNotice(address, Date.now());
   }, [address, model]);
+
+  const acknowledge = useCallback(
+    async (grant: ApiDeviceGrant) => {
+      if (address && (await acknowledgeGrant(grant.id))) {
+        markDeviceGrantsSeen(address, [grant.id]);
+      }
+    },
+    [address, acknowledgeGrant]
+  );
 
   const revoke = useCallback(
     async (grant: ApiDeviceGrant) => {
@@ -157,6 +188,8 @@ export function useSignedMessagesNotice({
     reconnect,
     isEnabling,
     dismiss,
+    acknowledge,
+    isAcknowledging,
     revoke,
     isRevoking,
   };

@@ -167,6 +167,7 @@ describe.each(SECTIONS)("direct link to /about/%s", (section, title) => {
     });
 
     it.each([
+      ["in the US", "US"],
       ["outside the US", "FR"],
       ["with an unknown country", ""],
     ])(
@@ -176,7 +177,7 @@ describe.each(SECTIONS)("direct link to /about/%s", (section, title) => {
 
         expect(onRecoverableError).not.toHaveBeenCalled();
         expect(main()).toBeEmptyDOMElement();
-        expect(mockReplace).not.toHaveBeenCalled();
+        expect(mockReplace).toHaveBeenCalledWith("/about");
 
         await settleCountry(section, country);
 
@@ -186,15 +187,5 @@ describe.each(SECTIONS)("direct link to /about/%s", (section, title) => {
         expect(mockReplace).toHaveBeenCalledWith("/about");
       }
     );
-
-    it("shows the section in the US once the country check settles", async () => {
-      await hydrate(section);
-      expect(mockMount).not.toHaveBeenCalled();
-
-      await settleCountry(section, "US");
-
-      expect(main()?.querySelector("h1")?.textContent).toBe(title);
-      expect(mockReplace).not.toHaveBeenCalled();
-    });
   });
 });

@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { SingleWaveDropVoters } from "@/components/waves/drop/SingleWaveDropVoters";
+import { useDropVoters } from "@/hooks/useDropVoters";
 import { useWaveTopVoters } from "@/hooks/useWaveTopVoters";
 import { useAuth } from "@/components/auth/Auth";
 
@@ -10,6 +11,7 @@ const setToastMock = jest.fn();
 const downloaderMock = jest.fn();
 
 jest.mock("@/hooks/useWaveTopVoters");
+jest.mock("@/hooks/useDropVoters");
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(() => "jwt"),
@@ -42,6 +44,11 @@ const baseDrop = {
 describe("SingleWaveDropVoters", () => {
   beforeEach(() => {
     useVoters.mockReset();
+    jest
+      .mocked(useDropVoters)
+      .mockReturnValue({ voters: [], isError: false } as unknown as ReturnType<
+        typeof useDropVoters
+      >);
     downloadMock.mockReset();
     setToastMock.mockReset();
     downloaderMock.mockReset();
@@ -209,5 +216,72 @@ describe("SingleWaveDropVoters", () => {
       description: "Please try again.",
       details: "backend unavailable",
     });
+  });
+});
+
+describe("Decision voter reads", () => {
+  beforeEach(() => {
+    useAuthMock.mockReturnValue({
+      connectedProfile: null,
+      setToast: setToastMock,
+    });
+  });
+
+  test("uses native Decision voters without requiring a connected profile", async () => {
+    const fetchNextPage = jest.fn();
+    useVoters.mockReturnValue({ voters: [], isLoading: false });
+    jest.mocked(useDropVoters).mockReturnValue({
+      voters: [{ voter: { id: "decision-voter" }, vote: -9 }],
+      hasNextPage: true,
+      fetchNextPage,
+      isLoading: false,
+      isFetchingNextPage: false,
+      isError: false,
+    } as unknown as ReturnType<typeof useDropVoters>);
+    render(
+      <SingleWaveDropVoters
+        drop={{ ...baseDrop, competition_id: "decision" }}
+      />
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Top voters View voters" })
+    );
+    expect(useDropVoters).toHaveBeenLastCalledWith({
+      dropId: "d",
+      enabled: true,
+    });
+    expect(useVoters).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
+    expect(screen.getByTestId("voter")).toHaveTextContent("decision-voter");
+    intersectionCb();
+    expect(fetchNextPage).toHaveBeenCalledTimes(1);
+  });
+
+  test("shows retry instead of empty-vote guidance when Decision voters fail", async () => {
+    const refetch = jest.fn();
+    useVoters.mockReturnValue({ voters: [], isLoading: false });
+    jest.mocked(useDropVoters).mockReturnValue({
+      voters: [],
+      isError: true,
+      isLoading: false,
+      refetch,
+    } as unknown as ReturnType<typeof useDropVoters>);
+    render(
+      <SingleWaveDropVoters
+        drop={{ ...baseDrop, competition_id: "decision" }}
+      />
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Top voters View voters" })
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Could not load voters."
+    );
+    expect(
+      screen.queryByText("Be the First to Make a Vote")
+    ).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 });

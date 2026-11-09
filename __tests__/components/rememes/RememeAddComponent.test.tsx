@@ -236,6 +236,37 @@ describe("RememeAddComponent", () => {
         screen.getByRole("button", { name: "Clear reference #1" })
       ).toBeDisabled();
     });
+    expect(screen.getByRole("link", { name: "opensea" })).toHaveAttribute(
+      "href",
+      "https://opensea.io/assets/ethereum/0x1234567890123456789012345678901234567890/1"
+    );
+  });
+
+  it("encodes reserved characters in the OpenSea link path", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+    mockPostData.mockResolvedValue({
+      status: 200,
+      response: {
+        valid: true,
+        contract: { name: "Test Contract" },
+        nfts: [{ tokenId: "1?foo#bar", raw: {} }],
+      },
+    });
+
+    await user.type(screen.getByRole("textbox", { name: "Contract" }), "x/<y>");
+    await user.type(screen.getByRole("textbox", { name: "Token IDs" }), "1");
+    await user.type(
+      screen.getByRole("combobox", { name: "Meme References" }),
+      "#1"
+    );
+    await user.click(screen.getByText("#1 - The Memes #1"));
+    await user.click(screen.getByRole("button", { name: "Validate" }));
+
+    expect(await screen.findByRole("link", { name: "opensea" })).toHaveAttribute(
+      "href",
+      "https://opensea.io/assets/ethereum/x%2F%3Cy%3E/1%3Ffoo%23bar"
+    );
   });
 
   it("does not verify an incomplete valid response", async () => {

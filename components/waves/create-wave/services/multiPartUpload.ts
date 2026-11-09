@@ -1,6 +1,7 @@
 import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import {
   multipartUploadCore,
   multipartAttachmentUploadCore,
@@ -16,6 +17,12 @@ const MAX_FILE_SIZE = 500 * 1024 * 1024;
 interface MultiPartUploadParams {
   file: File;
   path: "drop" | "wave";
+  /**
+   * Chat (the default) has identifying metadata removed before publishing.
+   * Only media for a decision entry (participatory drop) should pass
+   * decision_entry, which keeps the original file.
+   */
+  purpose?: ApiMediaUploadPurpose | undefined;
   onProgress?: ((progressPercent: number) => void) | undefined;
   onProcessing?: (() => void) | undefined;
   waitForReady?: boolean | undefined;
@@ -53,6 +60,7 @@ function createProgressHandler(
 export async function multiPartUpload({
   file,
   path,
+  purpose = ApiMediaUploadPurpose.Chat,
   onProgress,
   onProcessing,
   waitForReady = true,
@@ -61,7 +69,8 @@ export async function multiPartUpload({
   if (signal?.aborted) {
     throw new DOMException("Upload aborted", "AbortError");
   }
-  const prepared = path === "drop" ? getPreparedDropImage(file) : undefined;
+  const prepared =
+    path === "drop" ? getPreparedDropImage(file, purpose) : undefined;
   if (prepared) {
     onProgress?.(100);
     return prepared;
@@ -85,6 +94,7 @@ export async function multiPartUpload({
     onCompleting: onProcessing,
     waitForReady,
     signal,
+    purpose,
   });
 
   const media: ApiDropMedia = {
@@ -109,7 +119,7 @@ export async function multiPartAttachmentUpload({
   file,
   onProgress,
   signal,
-}: Omit<MultiPartUploadParams, "path">): Promise<ApiAttachment> {
+}: Omit<MultiPartUploadParams, "path" | "purpose">): Promise<ApiAttachment> {
   if (!isAttachmentUploadFile(file)) {
     throw new Error("File type not supported.");
   }

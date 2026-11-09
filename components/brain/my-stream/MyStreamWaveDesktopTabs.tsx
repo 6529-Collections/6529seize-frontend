@@ -59,6 +59,7 @@ import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 import MobileTabsScrollControls from "./MobileTabsScrollControls";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 import { useWaveChatPrefetch } from "@/hooks/competitions/useWaveChatPrefetch";
+import { WaveChatUnreadBadge } from "./WaveChatUnread";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -435,6 +436,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           else if (tab === MyStreamWaveTab.POLLS) badgeCount = unansweredPolls;
           return {
             key: tab,
+            badge:
+              tab === MyStreamWaveTab.CHAT ? (
+                <WaveChatUnreadBadge waveId={wave.id} />
+              ) : undefined,
             onIntent: tab === MyStreamWaveTab.CHAT ? prefetchChat : undefined,
             label:
               nativeDefault &&
@@ -454,6 +459,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     ],
     [
       availableTabs,
+      wave.id,
       approveLabels,
       isApproveWave,
       isCompetitionWave,

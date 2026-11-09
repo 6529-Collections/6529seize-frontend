@@ -26,6 +26,7 @@ import type { CreateDropType } from "./types";
 import { CreateDropViewType } from "./types";
 import CreateDropStormView from "./utils/storm/CreateDropStormView";
 import type { ProfileMinWithoutSubs } from "@/helpers/ProfileTypes";
+import type { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 
 export interface DropEditorHandles {
   requestDrop: () => CreateDropConfig | null;
@@ -56,6 +57,11 @@ interface DropEditorProps {
   readonly waveId: string | null;
   /** Pins the composer rendering branch; see CreateDropWrapper. */
   readonly forceScreenType?: CreateDropScreenType | undefined;
+  /**
+   * What the drop's media is for. Defaults to chat; only an editor that
+   * creates a decision entry passes decision_entry.
+   */
+  readonly mediaUploadPurpose?: ApiMediaUploadPurpose | undefined;
   readonly onSubmitDrop: (dropRequest: CreateDropConfig) => void;
   readonly onCanSubmitChange?:
     | ((canSubmit: boolean) => void)
@@ -79,6 +85,7 @@ const DropEditorBody = forwardRef<DropEditorHandles, DropEditorProps>(
       wave,
       waveId,
       forceScreenType,
+      mediaUploadPurpose,
       onSubmitDrop,
       onCanSubmitChange,
     },
@@ -186,6 +193,7 @@ const DropEditorBody = forwardRef<DropEditorHandles, DropEditorProps>(
           submitOnEnter={submitOnEnter}
           showDropError={showDropError}
           forceScreenType={forceScreenType}
+          mediaUploadPurpose={mediaUploadPurpose}
           wave={wave}
           setIsStormMode={setIsStormMode}
           setViewType={setViewType}

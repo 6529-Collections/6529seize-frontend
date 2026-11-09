@@ -10,6 +10,7 @@ let mockNativePlatform: "ios" | "android" | "web" = "ios";
 let mockCountry = "";
 let mockIsCountryPending = true;
 const mockReplace = jest.fn();
+const mockRouter = { replace: mockReplace };
 const mockSetTitle = jest.fn();
 const mockManifoldMinting = jest.fn();
 const mockUseDropForgeMintingConfig = jest.fn(() => ({
@@ -41,7 +42,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
   }),
 }));
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: mockReplace }),
+  useRouter: () => mockRouter,
 }));
 jest.mock("next/dynamic", () => () => {
   return function MockManifoldMinting() {
@@ -101,37 +102,26 @@ it("renders no server HTML and mounts no mint hooks before the platform is known
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
-it("keeps a hydrated iOS page empty without redirecting while the country is pending", async () => {
-  await hydrateFromServerHtml();
+it.each(["US", "FR"])(
+  "redirects iOS on hydration before the country resolves to %s",
+  async (country) => {
+    await hydrateFromServerHtml();
 
-  expect(container).toBeEmptyDOMElement();
-  expectNoMintHooks();
-  expect(mockReplace).not.toHaveBeenCalled();
+    expect(container).toBeEmptyDOMElement();
+    expectNoMintHooks();
+    expect(mockReplace).toHaveBeenCalledWith("/the-memes");
 
-  mockCountry = "US";
-  mockIsCountryPending = false;
-  await act(async () => {
-    root?.render(<TheMemesMint nft={nft} />);
-  });
+    mockCountry = country;
+    mockIsCountryPending = false;
+    await act(async () => {
+      root?.render(<TheMemesMint nft={nft} />);
+    });
 
-  expect(container.querySelector("[data-testid='mint-flow']")).not.toBeNull();
-  expect(mockReplace).not.toHaveBeenCalled();
-});
-
-it("redirects a hydrated iOS page once the country resolves outside the US", async () => {
-  await hydrateFromServerHtml();
-  expect(mockReplace).not.toHaveBeenCalled();
-
-  mockCountry = "FR";
-  mockIsCountryPending = false;
-  await act(async () => {
-    root?.render(<TheMemesMint nft={nft} />);
-  });
-
-  expect(container).toBeEmptyDOMElement();
-  expectNoMintHooks();
-  expect(mockReplace).toHaveBeenCalledWith("/the-memes");
-});
+    expect(container).toBeEmptyDOMElement();
+    expectNoMintHooks();
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+  }
+);
 
 it("renders the mint flow on web after hydration without waiting for the country", async () => {
   mockNativePlatform = "web";

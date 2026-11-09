@@ -359,6 +359,7 @@ export * from '../models/ApiDeleteEulaConsentRequest';
 export * from '../models/ApiDeleteEulaConsentResponse';
 export * from '../models/ApiDeleteMyWaveChatHistoryResponse';
 export * from '../models/ApiDeviceGrant';
+export * from '../models/ApiDeviceGrantFields';
 export * from '../models/ApiDeviceGrantProof';
 export * from '../models/ApiDeviceSignature';
 export * from '../models/ApiDeviceSignedEvent';
@@ -588,6 +589,7 @@ export * from '../models/ApiMarketTransaction';
 export * from '../models/ApiMediaResolveRequest';
 export * from '../models/ApiMediaResolveResponse';
 export * from '../models/ApiMediaUploadMimeType';
+export * from '../models/ApiMediaUploadPurpose';
 export * from '../models/ApiMemeCardDropMapping';
 export * from '../models/ApiMemeCollaborationArtwork';
 export * from '../models/ApiMemeCollaborationCredit';
@@ -1305,7 +1307,7 @@ import { ApiCreateGroup } from '../models/ApiCreateGroup';
 import { ApiCreateGroupDescription          } from '../models/ApiCreateGroupDescription';
 import { ApiCreateLegacyDesktopConnectionShareRequest , ApiCreateLegacyDesktopConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateLegacyDesktopConnectionShareRequest';
 import { ApiCreateLegacyDesktopConnectionShareResponse } from '../models/ApiCreateLegacyDesktopConnectionShareResponse';
-import { ApiCreateMediaUploadUrlRequest   } from '../models/ApiCreateMediaUploadUrlRequest';
+import { ApiCreateMediaUploadUrlRequest    } from '../models/ApiCreateMediaUploadUrlRequest';
 import { ApiCreateMediaUrlResponse } from '../models/ApiCreateMediaUrlResponse';
 import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
 import { ApiCreateNewProfileProxy } from '../models/ApiCreateNewProfileProxy';
@@ -1347,6 +1349,7 @@ import { ApiDeleteEulaConsentRequest } from '../models/ApiDeleteEulaConsentReque
 import { ApiDeleteEulaConsentResponse } from '../models/ApiDeleteEulaConsentResponse';
 import { ApiDeleteMyWaveChatHistoryResponse } from '../models/ApiDeleteMyWaveChatHistoryResponse';
 import { ApiDeviceGrant } from '../models/ApiDeviceGrant';
+import { ApiDeviceGrantFields } from '../models/ApiDeviceGrantFields';
 import { ApiDeviceGrantProof } from '../models/ApiDeviceGrantProof';
 import { ApiDeviceSignature } from '../models/ApiDeviceSignature';
 import { ApiDeviceSignedEvent } from '../models/ApiDeviceSignedEvent';
@@ -1372,7 +1375,7 @@ import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropHiddenState } from '../models/ApiDropHiddenState';
 import { ApiDropId } from '../models/ApiDropId';
 import { ApiDropMainType } from '../models/ApiDropMainType';
-import { ApiDropMedia      } from '../models/ApiDropMedia';
+import { ApiDropMedia         } from '../models/ApiDropMedia';
 import { ApiDropMediaStatus } from '../models/ApiDropMediaStatus';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
@@ -1576,6 +1579,7 @@ import { ApiMarketTransaction    , ApiMarketTransactionPurposeEnum  , ApiMarketT
 import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
+import { ApiMediaUploadPurpose } from '../models/ApiMediaUploadPurpose';
 import { ApiMemeCardDropMapping } from '../models/ApiMemeCardDropMapping';
 import { ApiMemeCollaborationArtwork } from '../models/ApiMemeCollaborationArtwork';
 import { ApiMemeCollaborationCredit } from '../models/ApiMemeCollaborationCredit';
@@ -2163,6 +2167,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiMarketTransactionPurposeEnum",
     "ApiMarketTransactionApprovalScopeEnum",
     "ApiMediaUploadMimeType",
+    "ApiMediaUploadPurpose",
     "ApiMemeCollaborationInvitationStatusEnum",
     "ApiMemeCollaborationResponseRequestActionEnum",
     "ApiMemesExtendedDataTokenTypeEnum",
@@ -2612,6 +2617,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDeleteEulaConsentResponse": ApiDeleteEulaConsentResponse,
     "ApiDeleteMyWaveChatHistoryResponse": ApiDeleteMyWaveChatHistoryResponse,
     "ApiDeviceGrant": ApiDeviceGrant,
+    "ApiDeviceGrantFields": ApiDeviceGrantFields,
     "ApiDeviceGrantProof": ApiDeviceGrantProof,
     "ApiDeviceSignature": ApiDeviceSignature,
     "ApiDeviceSignedEvent": ApiDeviceSignedEvent,

@@ -34,6 +34,15 @@ export const registerAppDeviceGrant = (
     errorMode: "structured",
   });
 
+export const acknowledgeDeviceGrant = (
+  grantId: string
+): Promise<ApiDeviceGrant> =>
+  commonApiPost<Record<string, never>, ApiDeviceGrant>({
+    endpoint: `device-grants/${encodeURIComponent(grantId)}/acknowledge`,
+    body: {},
+    errorMode: "structured",
+  });
+
 export const revokeDeviceGrant = (grantId: string): Promise<ApiDeviceGrant> =>
   commonApiPost<Record<string, never>, ApiDeviceGrant>({
     endpoint: `device-grants/${encodeURIComponent(grantId)}/revoke`,

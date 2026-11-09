@@ -259,6 +259,13 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       });
       const source = new URL(page.url());
       const link = page.getByRole("link", { name: action, exact: true });
+      if (
+        testInfo.project.name === "capacitor-ios-sim" &&
+        action === "Complete my set"
+      ) {
+        await expect(link).toHaveCount(0);
+        continue;
+      }
       await link.scrollIntoViewIfNeeded();
       const destination = new URL(
         (await link.getAttribute("href"))!,
@@ -297,8 +304,16 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       );
       // A document navigation starts a fresh app history for each deep link.
       await gotoReady(page, path);
+      const expectedPath =
+        testInfo.project.name === "capacitor-ios-sim" && path === "/collect"
+          ? "/the-memes"
+          : path;
+      await expect(page).toHaveURL((url) => url.pathname === expectedPath);
       await expect(
-        page.getByRole("navigation", { name: "Primary navigation", exact: true })
+        page.getByRole("navigation", {
+          name: "Primary navigation",
+          exact: true,
+        })
       ).toBeVisible();
       await expect(
         page.getByRole("button", { name: "Back", exact: true })
@@ -990,6 +1005,36 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await filter.getByRole("button", { name: "Close", exact: true }).click();
     await expect(openFilters).toBeFocused();
     await expect(page).toHaveURL((url) => !url.searchParams.has("group"));
+  });
+
+  test("a US IP leaves Collect available outside iOS only", async ({
+    page,
+  }, testInfo) => {
+    await mockCountryCheck(page, "US");
+    await gotoReady(page, "/collect?collection=memes&intent=full_set");
+
+    if (testInfo.project.name !== "capacitor-ios-sim") {
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === "/collect" &&
+          url.searchParams.get("intent") === "full_set"
+      );
+      await expect(
+        page.getByRole("form", { name: "Complete a full set", exact: true })
+      ).toBeVisible();
+      return;
+    }
+
+    await expect(page).toHaveURL((url) => url.pathname === "/the-memes");
+    await expect(
+      page.getByRole("button", { name: "Collection: The Memes" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Complete my set" })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Review purchase" })
+    ).toHaveCount(0);
   });
 
   test("iOS native simulation hides non-US subscription downloads", async ({

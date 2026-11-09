@@ -86,7 +86,7 @@ Unread counts keep their cached values while the Capacitor app is backgrounded
 or a mobile browser tab is hidden. Periodic count refreshes resume on return.
 Browser realtime notification delivery remains connected while the tab is hidden.
 
-- On native iOS when the detected country is not `US` or is unknown, subscription
+- In the iOS app, subscription
   coverage alerts, the Subscriptions filter, and the device's Subscription
   Coverage settings entry are hidden. Social follow notifications remain
   available. This concerns the app feed and controls, not previously delivered

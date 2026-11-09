@@ -30,11 +30,6 @@ const visible = {
   shouldRedirect: false,
   reservesNftPurchasingSpace: false,
 };
-const hiddenWithoutRedirect = {
-  hideNftPurchasing: true,
-  shouldRedirect: false,
-  reservesNftPurchasingSpace: false,
-};
 const redirect = {
   hideNftPurchasing: true,
   shouldRedirect: true,
@@ -57,9 +52,9 @@ function visibilityFor(
 }
 
 it.each([
-  ["US iOS", "ios", "US", false, visible],
-  ["normalized US iOS", "ios", " us ", false, visible],
-  ["iOS while the country check is pending", "ios", "", true, hiddenWithoutRedirect],
+  ["US iOS", "ios", "US", false, redirect],
+  ["normalized US iOS", "ios", " us ", false, redirect],
+  ["iOS while the country check is pending", "ios", "", true, redirect],
   ["non-US iOS", "ios", "FR", false, redirect],
   ["iOS after a failed or empty check", "ios", "", false, redirect],
   ["iOS with an unknown country", "ios", undefined, false, redirect],
@@ -76,14 +71,9 @@ it.each([
   }
 );
 
-it("keeps the slot's space on iOS while a check expected to be US is pending", () => {
+it("ignores a remembered US country while the iOS country is pending", () => {
   mockUsCountryHint = true;
-  expect(visibilityFor("ios", "", true)).toEqual({
-    ...hiddenWithoutRedirect,
-    reservesNftPurchasingSpace: true,
-  });
-  // A settled restriction collapses it whatever the hint says.
-  expect(visibilityFor("ios", "FR", false)).toEqual(redirect);
+  expect(visibilityFor("ios", "", true)).toEqual(redirect);
 });
 
 // useCapacitor reports web on the server, so iOS cannot reach this render.

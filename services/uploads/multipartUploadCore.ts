@@ -14,6 +14,7 @@ import type { ApiUploadPartOfMultipartUploadResponse } from "@/generated/models/
 import type { ApiCompleteMultipartUploadRequest } from "@/generated/models/ApiCompleteMultipartUploadRequest";
 import type { ApiCompleteMultipartUploadResponse } from "@/generated/models/ApiCompleteMultipartUploadResponse";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiCreateAttachmentMultipartUploadRequest } from "@/generated/models/ApiCreateAttachmentMultipartUploadRequest";
 import type { ApiCreateAttachmentMultipartUploadResponse } from "@/generated/models/ApiCreateAttachmentMultipartUploadResponse";
@@ -43,6 +44,26 @@ interface MultipartUploadCoreParams {
   onCompleting?: (() => void) | undefined;
   waitForReady?: boolean | undefined;
   signal?: AbortSignal | undefined;
+}
+
+interface MediaMultipartUploadCoreParams extends MultipartUploadCoreParams {
+  /**
+   * Read by the drop-media and wave-media start endpoints. Chat media is
+   * stripped of identifying metadata; decision-entry media keeps the original
+   * file. Defaults to chat.
+   */
+  purpose?: ApiMediaUploadPurpose | undefined;
+}
+
+/**
+ * Chat is the API default, so the start body names a purpose only for a
+ * decision entry. Chat uploads then also work against an API that predates the
+ * field.
+ */
+function getStartPurposeBody(
+  purpose: ApiMediaUploadPurpose | undefined
+): Pick<ApiCreateMediaUploadUrlRequest, "purpose"> {
+  return purpose === ApiMediaUploadPurpose.DecisionEntry ? { purpose } : {};
 }
 
 export {
@@ -271,7 +292,8 @@ export async function multipartUploadCore({
   onCompleting,
   waitForReady = false,
   signal,
-}: MultipartUploadCoreParams): Promise<ApiCompleteMultipartUploadResponse> {
+  purpose,
+}: MediaMultipartUploadCoreParams): Promise<ApiCompleteMultipartUploadResponse> {
   const contentType = getApiMediaUploadMimeType(file);
 
   const startData = await commonApiPost<
@@ -282,6 +304,7 @@ export async function multipartUploadCore({
     body: {
       file_name: file.name,
       content_type: contentType,
+      ...getStartPurposeBody(purpose),
     },
     ...(signal ? { signal } : {}),
   });

@@ -18,6 +18,10 @@ let mockCurations: ApiWaveCuration[] = [];
 let mockWavePollSummary = { hasPolls: false, unansweredPolls: 0 };
 let mockPathname = "/waves/wave-1";
 
+jest.mock("@/components/brain/my-stream/WaveChatUnread", () => ({
+  WaveChatUnreadBadge: () => null,
+}));
+
 jest.mock("@/hooks/competitions/useWaveCompetitionsTab", () => ({
   useWaveCompetitionsTab: () => ({ hasCompetitions: false, activeCount: 0 }),
 }));
