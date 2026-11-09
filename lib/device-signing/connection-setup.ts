@@ -211,6 +211,7 @@ export async function acceptConnectionDeviceSetup(input: {
     // A share for the current suite can upgrade the receiver even if signing is already enabled.
     const canUpgradeSuite =
       terms.version === 2 && terms.ciphersuites?.includes(E2EE_CIPHERSUITE);
+    /** Keeps a registered device unless this share can upgrade its legacy suite. */
     const canReuseDevice = (stored: StoredDevice | null) =>
       stored?.registered === true &&
       (!canUpgradeSuite || !isOldSuiteDevice(stored));

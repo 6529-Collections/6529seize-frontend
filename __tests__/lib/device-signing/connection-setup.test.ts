@@ -233,6 +233,7 @@ it("keeps existing signing keys and registered MLS history when another setup li
   expect(await mockStorage.getWasmState(profileId)).toEqual(beforeState);
 });
 
+/** Signs a mobile share and records the grant ID expected by the API mock. */
 async function prepareNativeShare(account: PrivateKeyAccount) {
   const prepared = await prepareConnectionDeviceSetup({
     wallet: account.address,
