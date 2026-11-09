@@ -124,9 +124,8 @@ no sender, chat name or message text. Invitations say **You were added to an
 encrypted chat**. Push throttling is separate from in-app notification creation.
 
 An `e2ee` push opens `/messages/encrypted` for the target connected profile. The
-app attempts a sync, then opens a chat only when exactly one active, unmuted chat
-has unread messages locally; otherwise it stays on the list. Without encryption
-setup the route offers setup. Enabling a new device does not transfer earlier
+app refreshes the encrypted chat list, where the recipient can choose a chat.
+Without encryption setup the route offers setup. Enabling a new device does not transfer earlier
 history from another device. See [Encrypted messages](../encrypted-messages.md).
 
 ### Signing out on a phone

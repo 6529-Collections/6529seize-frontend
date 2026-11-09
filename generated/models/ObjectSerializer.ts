@@ -359,6 +359,7 @@ export * from '../models/ApiDeleteEulaConsentRequest';
 export * from '../models/ApiDeleteEulaConsentResponse';
 export * from '../models/ApiDeleteMyWaveChatHistoryResponse';
 export * from '../models/ApiDeviceGrant';
+export * from '../models/ApiDeviceGrantFields';
 export * from '../models/ApiDeviceGrantProof';
 export * from '../models/ApiDeviceSignature';
 export * from '../models/ApiDeviceSignedEvent';
@@ -1347,6 +1348,7 @@ import { ApiDeleteEulaConsentRequest } from '../models/ApiDeleteEulaConsentReque
 import { ApiDeleteEulaConsentResponse } from '../models/ApiDeleteEulaConsentResponse';
 import { ApiDeleteMyWaveChatHistoryResponse } from '../models/ApiDeleteMyWaveChatHistoryResponse';
 import { ApiDeviceGrant } from '../models/ApiDeviceGrant';
+import { ApiDeviceGrantFields } from '../models/ApiDeviceGrantFields';
 import { ApiDeviceGrantProof } from '../models/ApiDeviceGrantProof';
 import { ApiDeviceSignature } from '../models/ApiDeviceSignature';
 import { ApiDeviceSignedEvent } from '../models/ApiDeviceSignedEvent';
@@ -1372,7 +1374,7 @@ import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropHiddenState } from '../models/ApiDropHiddenState';
 import { ApiDropId } from '../models/ApiDropId';
 import { ApiDropMainType } from '../models/ApiDropMainType';
-import { ApiDropMedia      } from '../models/ApiDropMedia';
+import { ApiDropMedia         } from '../models/ApiDropMedia';
 import { ApiDropMediaStatus } from '../models/ApiDropMediaStatus';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
@@ -2612,6 +2614,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDeleteEulaConsentResponse": ApiDeleteEulaConsentResponse,
     "ApiDeleteMyWaveChatHistoryResponse": ApiDeleteMyWaveChatHistoryResponse,
     "ApiDeviceGrant": ApiDeviceGrant,
+    "ApiDeviceGrantFields": ApiDeviceGrantFields,
     "ApiDeviceGrantProof": ApiDeviceGrantProof,
     "ApiDeviceSignature": ApiDeviceSignature,
     "ApiDeviceSignedEvent": ApiDeviceSignedEvent,
