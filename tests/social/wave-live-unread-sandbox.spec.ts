@@ -92,8 +92,9 @@ test.describe("Live wave unread state @auth @local-only", () => {
     await fixture.waitForSockets();
     await dismissNextDevTools(page);
     const chat = page
-      .locator('[role="tab"][data-wave-tab-value="chat"]')
+      .getByRole("tab", { name: /^Chat\b/ })
       .filter({ visible: true });
+    await page.clock.install();
     await setVisibility(page, "hidden");
     await fixture.send(PERF_OPEN_WAVE_INDEX, 3, 150);
     await expect(chat.getByLabel(/3 unread messages/)).toHaveText("3");
@@ -108,7 +109,7 @@ test.describe("Live wave unread state @auth @local-only", () => {
       `${perfWaveName(PERF_OPEN_WAVE_INDEX)} | Brain`
     );
     // Allow the normal debounced read window to pass; none should be queued.
-    await page.waitForTimeout(3500);
+    await page.clock.runFor(3500);
     expect(reads).toHaveLength(0);
     expect(
       await page.evaluate(
@@ -133,6 +134,7 @@ test.describe("Live wave unread state @auth @local-only", () => {
     await expect(page).toHaveTitle(
       `${perfWaveName(PERF_OPEN_WAVE_INDEX)} | Brain`
     );
+    await expect(chat.getByLabel(/unread messages/)).toHaveCount(0);
   });
 
   test("a message in another wave raises its badge and links to the first unread", async ({

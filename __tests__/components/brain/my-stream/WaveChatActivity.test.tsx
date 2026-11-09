@@ -8,9 +8,9 @@ afterEach(() => jest.restoreAllMocks());
 it("registers reading only while Chat is selected and unregisters on leaving", () => {
   const unregister = jest.fn();
   const register = jest.fn(() => unregister);
-  const content = (active: boolean) => (
+  const content = (active: boolean, waveId = "wave-1") => (
     <WaveChatReadContext.Provider value={register}>
-      <WaveChatActivity waveId="wave-1" active={active} chat={<p>Chat</p>}>
+      <WaveChatActivity waveId={waveId} active={active} chat={<p>Chat</p>}>
         <p>Leaderboard</p>
       </WaveChatActivity>
     </WaveChatReadContext.Provider>
@@ -22,8 +22,11 @@ it("registers reading only while Chat is selected and unregisters on leaving", (
   rerender(content(false));
   expect(unregister).toHaveBeenCalledTimes(1);
   rerender(content(true));
-  unmount();
+  rerender(content(true, "wave-2"));
   expect(unregister).toHaveBeenCalledTimes(2);
+  expect(register).toHaveBeenLastCalledWith("wave-2");
+  unmount();
+  expect(unregister).toHaveBeenCalledTimes(3);
 });
 
 it("lazily retains visited chat DOM and draft while pausing hidden effects", () => {

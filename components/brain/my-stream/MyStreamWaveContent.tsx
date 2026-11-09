@@ -21,7 +21,7 @@ import {
 import { useContentTab } from "../ContentTabContext";
 import { useBrainMobileSubmissionRules } from "../mobile/BrainMobileSubmissionRulesContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { WaveChatTitle } from "./WaveChatUnread";
+import { WaveChatTitle } from "./WaveChatTitle";
 import { WaveChatWithUnread } from "./WaveChatWithUnread";
 import WaveChatActivity from "./WaveChatActivity";
 import MyStreamWavePending from "./MyStreamWavePending";

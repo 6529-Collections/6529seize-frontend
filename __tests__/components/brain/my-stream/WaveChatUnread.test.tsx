@@ -1,8 +1,6 @@
 import { act, render, screen } from "@testing-library/react";
-import {
-  WaveChatTitle,
-  WaveChatUnreadBadge,
-} from "@/components/brain/my-stream/WaveChatUnread";
+import { WaveChatUnreadBadge } from "@/components/brain/my-stream/WaveChatUnread";
+import { WaveChatTitle } from "@/components/brain/my-stream/WaveChatTitle";
 import {
   WaveUnreadProvider,
   type WaveUnreadSource,
@@ -57,6 +55,7 @@ jest.mock("@/contexts/TitleContext", () => ({
 beforeEach(() => {
   mockSetWaveData.mockClear();
   mockWave.isMuted = false;
+  mockWave.unreadDropsCount = 0;
 });
 
 it("updates only the badge outside Chat and only Chat contributes title counts", () => {
@@ -118,7 +117,21 @@ it("updates only the badge outside Chat and only Chat contributes title counts",
 it("hides muted-wave badges", () => {
   mockWave.isMuted = true;
   mockWave.unreadDropsCount = 5;
-  render(<WaveChatUnreadBadge waveId="wave-1" />);
+  const store = createWaveUnreadStore();
+  const subscribe = jest.spyOn(store, "subscribe");
+  render(
+    <WaveUnreadProvider value={{ store, resolve: (wave) => wave }}>
+      <WaveChatUnreadBadge waveId="wave-1" />
+    </WaveUnreadProvider>
+  );
   expect(screen.queryByText("5")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText(/unread messages/)).not.toBeInTheDocument();
+  expect(subscribe).not.toHaveBeenCalled();
   mockWave.unreadDropsCount = 0;
+});
+
+it("keeps the exact count accessible when the visible badge caps at 99+", () => {
+  mockWave.unreadDropsCount = 150;
+  render(<WaveChatUnreadBadge waveId="wave-1" />);
+  expect(screen.getByLabelText("150 unread messages")).toHaveTextContent("99+");
 });

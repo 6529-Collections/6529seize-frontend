@@ -115,6 +115,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const [displayedChatWaveId, setDisplayedChatWaveId] = useState<string | null>(
     null
   );
+  // During navigation, decline reads until the displayed Chat and route agree.
   const activeReadWaveId =
     displayedChatWaveId === activeWaveId ? displayedChatWaveId : null;
   const registerChat = useCallback((waveId: string) => {
