@@ -1,3 +1,4 @@
+import type { DropReplyThreadTarget } from "@/services/api/drop-reply-thread-target-api";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import {
@@ -97,6 +98,11 @@ interface UseWaveDropsSerialScrollParams {
   readonly waveId: string;
   readonly dropId: string | null;
   readonly initialDrop: number | null;
+  readonly linkedReply?: DropReplyThreadTarget | null | undefined;
+  readonly linkedReplyElement?: HTMLDivElement | null | undefined;
+  readonly getLinkedReplyElement?:
+    | ((parentSerialNo: number) => HTMLDivElement | null)
+    | undefined;
   readonly waveMessages: WaveMessagesResult;
   readonly fetchNextPage: FetchNextPage;
   readonly waitAndRevealDrop: WaitAndRevealDrop;
@@ -117,6 +123,9 @@ export const useWaveDropsSerialScroll = ({
   waveId,
   dropId,
   initialDrop,
+  linkedReply,
+  linkedReplyElement,
+  getLinkedReplyElement,
   waveMessages,
   fetchNextPage,
   waitAndRevealDrop,
@@ -137,6 +146,7 @@ export const useWaveDropsSerialScroll = ({
 
   const targetDropRef = useRef<HTMLDivElement | null>(null);
   const scrollAnchorRef = useRef<SerialScrollAnchor | null>(null);
+  const revealedLinkedReplyRef = useRef<DropReplyThreadTarget | null>(null);
 
   const holdScrollTarget = useCallback(
     (container: HTMLDivElement, target: HTMLDivElement) => {
@@ -305,6 +315,9 @@ export const useWaveDropsSerialScroll = ({
           return targetDropRef.current;
         }
 
+        const reply = getLinkedReplyElement?.(targetSerialNo);
+        if (reply && targetContainer?.contains(reply)) return reply;
+
         const matchingTarget =
           targetContainer?.ownerDocument.getElementById(
             `drop-${targetSerialNo}`
@@ -370,8 +383,23 @@ export const useWaveDropsSerialScroll = ({
       }
       return false;
     },
-    [scrollContainerRef, holdScrollTarget]
+    [getLinkedReplyElement, scrollContainerRef, holdScrollTarget]
   );
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (
+      !linkedReply ||
+      !linkedReplyElement ||
+      !container?.contains(linkedReplyElement)
+    )
+      return;
+    if (revealedLinkedReplyRef.current === linkedReply) return;
+    // The reply may finish loading after the parent was already revealed.
+    // Center it and replace the parent's scroll anchor as soon as it mounts.
+    revealedLinkedReplyRef.current = linkedReply;
+    scrollToSerialNo("auto", linkedReply.parentSerialNo);
+  }, [linkedReply, linkedReplyElement, scrollContainerRef, scrollToSerialNo]);
 
   const smoothScrollWithRetries = useCallback(
     async (
@@ -507,7 +535,7 @@ export const useWaveDropsSerialScroll = ({
     const currentSmallestSerial = smallestSerialNo.current;
     if (currentSmallestSerial && currentSmallestSerial <= serialTarget) {
       lastScrolledToSerialRef.current = serialTarget;
-      const success = scrollToSerialNo("smooth");
+      const success = scrollToSerialNo("smooth", serialTarget);
       if (success) {
         const targetSerialNo = serialTarget;
         settleTargetSerialNo = targetSerialNo;

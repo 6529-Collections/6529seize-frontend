@@ -1,5 +1,6 @@
 import { fetchGlobalDropsSearchV2 } from "@/services/api/global-drops-search-api";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
+import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -14,6 +15,7 @@ import {
   fetchDropReactionDetailsV2,
   fetchDropMetadataByIdV2,
   fetchDropRepliesV2,
+  fetchDropReplyWindowV2,
   fetchDropsV2ByIds,
   fetchDropV2ById,
   fetchGlobalBoostedDropsV2,
@@ -897,6 +899,62 @@ describe("fetchDropRepliesV2", () => {
     expectNoListEnrichmentCalls();
     expect(result.drops[0]?.metadata).toEqual(priorityMetadata);
     expect(result.drops[0]?.top_raters).toEqual([]);
+  });
+});
+
+describe("fetchDropReplyWindowV2", () => {
+  const signal = new AbortController().signal;
+  const makeReply = (serialNo: number) => ({
+    ...createDrop(1),
+    id: `reply-${serialNo}`,
+    serial_no: serialNo,
+  });
+
+  it("keeps an older linked reply and exposes cursors in both directions", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [50, 41, 40, 25, 13, 2].map(makeReply),
+    });
+
+    const result = await fetchDropReplyWindowV2({
+      parentDropId: "parent-drop",
+      serialNo: 40,
+      strategy: ApiDropSearchStrategy.Both,
+      limit: 2,
+      signal,
+    });
+
+    expect(result.drops.map((reply) => reply.serial_no)).toEqual([40, 25]);
+    expect(result.older).toBe(25);
+    expect(result.newer).toBe(40);
+    expect(commonApiFetchMock).toHaveBeenLastCalledWith({
+      endpoint: "v2/drops/parent-drop/replies",
+      params: {
+        limit: "3",
+        serial_no_limit: "40",
+        search_strategy: "FIND_BOTH",
+      },
+      signal,
+    });
+  });
+
+  it("keeps the closest newer replies when there are more to load", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [60, 51, 50].map(makeReply),
+    });
+
+    const result = await fetchDropReplyWindowV2({
+      parentDropId: "parent-drop",
+      serialNo: 40,
+      strategy: ApiDropSearchStrategy.Newer,
+      limit: 2,
+      signal,
+    });
+
+    expect(result.drops.map((reply) => reply.serial_no)).toEqual([51, 50]);
+    expect(result.newer).toBe(51);
+    expect(result.older).toBe(50);
   });
 });
 

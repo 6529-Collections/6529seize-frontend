@@ -6,6 +6,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import type { DropReplyThreadTarget } from "@/services/api/drop-reply-thread-target-api";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { createReplyCountReconciliation } from "./reply-count-reconciliation";
@@ -25,6 +26,15 @@ interface ExpandedReplyThreadsStore {
   readonly isExpanded: (dropId: string) => boolean;
   readonly setExpanded: (dropId: string, expanded: boolean) => void;
   readonly subscribe: (listener: () => void) => () => void;
+  readonly getLinkedReply: () => DropReplyThreadTarget | null;
+  readonly setLinkedReply: (target: DropReplyThreadTarget | null) => void;
+  readonly getLinkedReplyElement: (
+    parentSerialNo: number
+  ) => HTMLDivElement | null;
+  readonly setLinkedReplyElement: (
+    target: DropReplyThreadTarget,
+    element: HTMLDivElement | null
+  ) => void;
 }
 
 /**
@@ -34,6 +44,9 @@ interface ExpandedReplyThreadsStore {
 const createExpandedReplyThreadsStore = (): ExpandedReplyThreadsStore => {
   const expandedDropIds = new Set<string>();
   const listeners = new Set<() => void>();
+  const notify = () => listeners.forEach((listener) => listener());
+  let linkedReply: DropReplyThreadTarget | null = null;
+  let linkedReplyElement: HTMLDivElement | null = null;
   return {
     isExpanded: (dropId) => expandedDropIds.has(dropId),
     setExpanded: (dropId, expanded) => {
@@ -45,7 +58,23 @@ const createExpandedReplyThreadsStore = (): ExpandedReplyThreadsStore => {
       } else {
         expandedDropIds.delete(dropId);
       }
-      listeners.forEach((listener) => listener());
+      notify();
+    },
+    getLinkedReply: () => linkedReply,
+    setLinkedReply: (target) => {
+      if (linkedReply === target) return;
+      linkedReply = target;
+      linkedReplyElement = null;
+      notify();
+    },
+    getLinkedReplyElement: (parentSerialNo) =>
+      linkedReply?.parentSerialNo === parentSerialNo
+        ? linkedReplyElement
+        : null,
+    setLinkedReplyElement: (target, element) => {
+      if (linkedReply !== target || linkedReplyElement === element) return;
+      linkedReplyElement = element;
+      notify();
     },
     subscribe: (listener) => {
       listeners.add(listener);
@@ -193,5 +222,35 @@ export function useReplyThreadExpanded(
     threads?.store.subscribe ?? noopSubscribe,
     () => threads?.store.isExpanded(dropId) ?? false,
     () => false
+  );
+}
+
+export function useLinkedReply(
+  threads: WaveReplyThreadsContextValue | null,
+  parentDropId?: string
+): DropReplyThreadTarget | null {
+  return useSyncExternalStore(
+    threads?.store.subscribe ?? noopSubscribe,
+    () => {
+      const target = threads?.store.getLinkedReply() ?? null;
+      return parentDropId === undefined || target?.parentDropId === parentDropId
+        ? target
+        : null;
+    },
+    () => null
+  );
+}
+
+export function useLinkedReplyElement(
+  threads: WaveReplyThreadsContextValue | null,
+  target: DropReplyThreadTarget | null
+): HTMLDivElement | null {
+  return useSyncExternalStore(
+    threads?.store.subscribe ?? noopSubscribe,
+    () =>
+      target
+        ? (threads?.store.getLinkedReplyElement(target.parentSerialNo) ?? null)
+        : null,
+    () => null
   );
 }

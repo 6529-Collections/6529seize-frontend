@@ -2340,6 +2340,7 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   "replyThread.regionLabel": "Replies to this drop",
   "replyThread.loading": "Loading replies…",
   "replyThread.loadEarlier": "Show earlier replies",
+  "replyThread.loadNewer": "Show newer replies",
   "replyThread.empty": "No replies to show.",
   "replyThread.error": "Couldn't load replies.",
   "replyThread.retry": "Retry",

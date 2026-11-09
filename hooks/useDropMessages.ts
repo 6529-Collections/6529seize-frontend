@@ -14,6 +14,7 @@ import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-
 import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
 import { updateDropInCachedDrops } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import {
   generateUniqueKeys,
@@ -27,6 +28,8 @@ import { WsMessageType } from "@/helpers/Types";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import {
   fetchDropRepliesV2,
+  fetchDropReplyWindowV2,
+  type DropReplyWindow,
   type ApiWaveDropsV2PageFeed,
 } from "@/services/api/wave-drops-v2-api";
 import { useInfiniteHeadRefetch } from "./useInfiniteHeadRefetch";
@@ -34,7 +37,13 @@ import { useWaveDropUpdateRefetch } from "./useWaveDropUpdateRefetch";
 import type { InfinitePageAdapter } from "@/components/react-query-wrapper/utils/refreshInfiniteQueryHead";
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
 
-type DropMessagesPage = ApiWaveDropsFeed | ApiWaveDropsV2PageFeed;
+const LINKED_REPLY_PAGE_SIZE = 25;
+
+type DropMessagesPage = ApiWaveDropsV2PageFeed | DropReplyWindow;
+type DropMessagesPageParam =
+  | { readonly page: number }
+  | { readonly serialNo: number; readonly strategy: ApiDropSearchStrategy }
+  | null;
 
 const dropMessagesPageAdapter: InfinitePageAdapter<
   DropMessagesPage,
@@ -48,7 +57,8 @@ const dropMessagesPageAdapter: InfinitePageAdapter<
 export function useDropMessages(
   waveId: string,
   dropId: string | null,
-  wave?: ApiWave
+  wave?: ApiWave,
+  replySerialNo?: number
 ) {
   const { isCapacitor } = useCapacitor();
   const queryClient = useQueryClient();
@@ -60,6 +70,7 @@ export function useDropMessages(
       waveId,
       limit: WAVE_DROPS_PARAMS.limit,
       dropId,
+      ...(replySerialNo === undefined ? {} : { replySerialNo }),
     },
   ];
 
@@ -67,30 +78,54 @@ export function useDropMessages(
     data,
     fetchNextPage: onFetchNextPage,
     hasNextPage,
+    fetchPreviousPage,
+    hasPreviousPage,
     isFetching,
     isFetchingNextPage,
     isError,
     refetch,
   } = useInfiniteQuery({
     queryKey,
-    queryFn: async ({
+    queryFn: ({
       pageParam,
+      signal,
     }: {
-      pageParam: {
-        page: number;
-      } | null;
-    }) =>
-      fetchDropRepliesV2({
-        parentDropId: dropId ?? "",
-        page: pageParam?.page ?? 1,
-        pageSize: WAVE_DROPS_PARAMS.limit,
-        wave,
-      }),
+      pageParam: DropMessagesPageParam;
+      signal: AbortSignal;
+    }): Promise<DropMessagesPage> =>
+      pageParam && "serialNo" in pageParam
+        ? fetchDropReplyWindowV2({
+            parentDropId: dropId ?? "",
+            serialNo: pageParam.serialNo,
+            strategy: pageParam.strategy,
+            limit: LINKED_REPLY_PAGE_SIZE,
+            signal,
+          })
+        : fetchDropRepliesV2({
+            parentDropId: dropId ?? "",
+            page: pageParam?.page ?? 1,
+            pageSize: WAVE_DROPS_PARAMS.limit,
+            wave,
+            signal,
+          }),
     enabled: !!dropId,
-    initialPageParam: null,
-    getNextPageParam: (lastPage) =>
-      lastPage.next ? { page: lastPage.page + 1 } : null,
-    placeholderData: keepPreviousData,
+    initialPageParam:
+      replySerialNo === undefined
+        ? null
+        : { serialNo: replySerialNo, strategy: ApiDropSearchStrategy.Both },
+    getNextPageParam: (lastPage): DropMessagesPageParam | null => {
+      if ("older" in lastPage) {
+        return lastPage.older === null
+          ? null
+          : { serialNo: lastPage.older, strategy: ApiDropSearchStrategy.Older };
+      }
+      return lastPage.next ? { page: lastPage.page + 1 } : null;
+    },
+    getPreviousPageParam: (firstPage): DropMessagesPageParam | null =>
+      "newer" in firstPage && firstPage.newer !== null
+        ? { serialNo: firstPage.newer, strategy: ApiDropSearchStrategy.Newer }
+        : null,
+    placeholderData: replySerialNo === undefined ? keepPreviousData : undefined,
     staleTime: 60000,
     refetchOnWindowFocus: true,
     refetchOnMount: true,
@@ -136,7 +171,7 @@ export function useDropMessages(
     adapter: dropMessagesPageAdapter,
   });
   const requestRefetch = useDebouncedQueryRefetch({
-    refetch: refetchHead,
+    refetch: replySerialNo === undefined ? refetchHead : refetch,
     isFetching,
     isFetchingNextPage,
   });
@@ -181,6 +216,8 @@ export function useDropMessages(
     drops,
     fetchNextPage,
     hasNextPage,
+    fetchPreviousPage,
+    hasPreviousPage,
     isFetching: isFetching ?? !init,
     isFetchingNextPage,
     isError,

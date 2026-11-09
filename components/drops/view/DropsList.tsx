@@ -1,9 +1,11 @@
 "use client";
 
+import { useWaveReplyThreads } from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import LightDrop from "@/components/waves/drops/LightDrop";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
 import { WaveDropMobileMenuProvider } from "@/components/waves/drops/WaveDropMobileMenuContext";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type {
   Drop as DropType,
@@ -123,6 +125,14 @@ const DropsListRow = memo(
     virtualScrollRootMargin,
   }: DropsListRowProps) => {
     const isTarget = itemData.serialNo === drop.serial_no;
+    const replyThreads = useWaveReplyThreads();
+    const highlightMessageOnly =
+      location === DropLocation.WAVE &&
+      itemData.dropViewDropId === null &&
+      drop.type === DropSize.FULL &&
+      drop.drop_type === ApiDropType.Chat &&
+      !drop.reply_to &&
+      replyThreads !== null;
     const dropContent =
       drop.type === DropSize.FULL ? (
         <MemoizedDrop
@@ -149,6 +159,14 @@ const DropsListRow = memo(
           isVotingControlsLocked={itemData.isVotingControlsLocked}
           moderationPresentation={moderationPresentation}
           signatureGroup={signatureGroup}
+          messageHighlight={
+            highlightMessageOnly
+              ? {
+                  active: isTarget,
+                  scrollContainer: itemData.scrollContainerRef.current,
+                }
+              : undefined
+          }
         />
       ) : (
         <MemoizedLightDrop drop={drop} />
@@ -160,7 +178,7 @@ const DropsListRow = memo(
         serialNo={drop.serial_no}
         waveDropId={drop.type === DropSize.FULL ? drop.stableHash : undefined}
         ref={isTarget ? itemData.targetDropRef : null}
-        active={isTarget}
+        active={isTarget && !highlightMessageOnly}
         // Read when the row renders; the active row re-renders when it becomes
         // active, which is when the highlight observer uses this root.
         scrollContainer={itemData.scrollContainerRef.current ?? null}

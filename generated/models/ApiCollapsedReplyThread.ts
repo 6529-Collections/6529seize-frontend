@@ -14,7 +14,7 @@
 import { HttpFile } from '../http/http';
 
 /**
-* Top-level drop of an individually collapsed reply thread.
+* Top-level drop of a collapsed reply thread. V2 lookups by serial number also resolve threads in waves with wave-wide collapse.
 */
 export class ApiCollapsedReplyThread {
     'id': string;

@@ -1,5 +1,6 @@
 "use client";
 
+import HighlightDropWrapper from "@/components/drops/view/HighlightDropWrapper";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -35,6 +36,12 @@ interface DropProps {
   readonly previousDrop: DropType | null;
   readonly nextDrop: DropType | null;
   readonly showWaveInfo: boolean;
+  readonly messageHighlight?:
+    | {
+        readonly active: boolean;
+        readonly scrollContainer: HTMLDivElement | null;
+      }
+    | undefined;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
@@ -87,6 +94,7 @@ function DropContent({
   previousDrop,
   nextDrop,
   showWaveInfo,
+  messageHighlight,
   activeDrop,
   location,
   dropViewDropId,
@@ -267,15 +275,25 @@ function DropContent({
     ]
   );
 
+  const message = (
+    <ContentModerationDropGate
+      drop={drop}
+      presentation={moderationPresentation}
+      preserveGlobalContext={drop.drop_type === ApiDropType.Chat}
+    >
+      {components[drop.drop_type]}
+    </ContentModerationDropGate>
+  );
+
   return (
     <DropContext.Provider value={memoizedValue}>
-      <ContentModerationDropGate
-        drop={drop}
-        presentation={moderationPresentation}
-        preserveGlobalContext={drop.drop_type === ApiDropType.Chat}
-      >
-        {components[drop.drop_type]}
-      </ContentModerationDropGate>
+      {messageHighlight ? (
+        <HighlightDropWrapper {...messageHighlight}>
+          {message}
+        </HighlightDropWrapper>
+      ) : (
+        message
+      )}
       {showReplyThread && (
         <WaveDropReplyThread drop={drop} renderReply={renderThreadReply} />
       )}

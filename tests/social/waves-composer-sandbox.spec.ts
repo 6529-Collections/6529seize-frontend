@@ -585,6 +585,87 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("opens an older nested reply link and scrolls to its distinct highlight", async ({
+    baseURL,
+    page,
+  }) => {
+    const { payload, sourceDrop } = await loadSandboxDropFixture(page, baseURL);
+    const root = { id: String(sourceDrop["id"]), serial_no: 1 };
+    const makeReply = (serialNo: number, content: string) => ({
+      ...sourceDrop,
+      id: `00000000-0000-4000-8000-${String(serialNo).padStart(12, "0")}`,
+      serial_no: serialNo,
+      content,
+      reply_to_drop: root,
+      collapsed_reply_thread: root,
+    });
+    const earlierReplies = Array.from({ length: 24 }, (_, index) =>
+      makeReply(index + 2, `Earlier thread reply ${index + 1}`)
+    );
+    const directReply = earlierReplies.at(-1)!;
+    const target = {
+      ...makeReply(26, "Exact linked reply"),
+      reply_to_drop: { id: directReply.id, serial_no: directReply.serial_no },
+    };
+    const newerReplies = Array.from({ length: 55 }, (_, index) =>
+      makeReply(index + 27, `Newer thread reply ${index + 1}`)
+    )
+      .slice(0, 26)
+      .reverse();
+
+    await page.route(`**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`, (route) =>
+      route.fulfill({
+        json: {
+          ...payload,
+          drops: [{ ...sourceDrop, collapse_replies: true, replies_count: 80 }],
+        },
+      })
+    );
+    await page.route("**/api/v2/drops?**", async (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      if (params.get("serial_nos") === String(target.serial_no)) {
+        await route.fulfill({
+          json: {
+            page: 1,
+            next: false,
+            data: [{ ...target, wave: payload.wave }],
+          },
+        });
+      } else {
+        await route.fallback();
+      }
+    });
+    await page.route(`**/api/v2/drops/${root.id}/replies?**`, async (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      expect(params.get("serial_no_limit")).toBe(String(target.serial_no));
+      const drops =
+        params.get("search_strategy") === "FIND_NEWER"
+          ? newerReplies
+          : [...newerReplies, target, ...earlierReplies.toReversed()];
+      await route.fulfill({ json: { ...payload, drops } });
+    });
+
+    await installExternalDataFixtures(page);
+    await installOpenGraphFixture(page);
+    await page.goto(`/waves/${SANDBOX_WAVE_ID}?serialNo=${target.serial_no}`, {
+      waitUntil: "domcontentloaded",
+    });
+    const thread = page.getByRole("list", { name: "Replies to this drop" });
+    const linked = thread.getByText("Exact linked reply", { exact: true });
+    await expect(linked).toBeInViewport({ ratio: 0.9 });
+    const emphasis = thread.locator('[class*="tw-bg-[#263d68]"]');
+    await expect(emphasis).toHaveCount(1);
+    await expect(emphasis.getByText("Exact linked reply")).toBeVisible();
+    const contextHighlight = page.locator('[class*="tw-bg-[#25263f]"]');
+    await expect(contextHighlight).toHaveCount(1);
+    await expect(contextHighlight.getByRole("list")).toHaveCount(0);
+    await page.getByRole("button", { name: "Show newer replies" }).click();
+    await expect(
+      thread.getByText("Newer thread reply 1", { exact: true })
+    ).toBeVisible();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("expands and collapses a long chat drop without leaving the latest position", async ({
     baseURL,
     page,

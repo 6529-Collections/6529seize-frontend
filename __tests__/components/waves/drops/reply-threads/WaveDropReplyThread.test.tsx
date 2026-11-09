@@ -67,11 +67,13 @@ function Harness({
   drop,
   enabled = true,
   simulateSend = false,
+  simulateLink = false,
   waveConfig = wave,
 }: {
   readonly drop: ExtendedDrop;
   readonly enabled?: boolean;
   readonly simulateSend?: boolean;
+  readonly simulateLink?: boolean;
   readonly waveConfig?: ApiWave;
 }) {
   const store = useExpandedReplyThreadsStore();
@@ -81,6 +83,20 @@ function Harness({
       {simulateSend && (
         <button onClick={() => store.setExpanded(drop.id, true)}>
           Send reply
+        </button>
+      )}
+      {simulateLink && (
+        <button
+          onClick={() => {
+            store.setLinkedReply({
+              parentDropId: drop.id,
+              parentSerialNo: drop.serial_no,
+              replySerialNo: 11,
+            });
+            store.setExpanded(drop.id, true);
+          }}
+        >
+          Open reply link
         </button>
       )}
       <WaveReplyThreadsProvider
@@ -148,6 +164,23 @@ describe("WaveDropReplyThread", () => {
     expect(useDropMessagesMock).not.toHaveBeenCalled();
   });
 
+  it("loads the linked page and highlights only the linked reply in the thread", async () => {
+    const user = userEvent.setup();
+    render(
+      <Harness drop={makeDrop("root", 10, { replies_count: 2 })} simulateLink />
+    );
+    await user.click(screen.getByRole("button", { name: "Open reply link" }));
+    expect(useDropMessagesMock).toHaveBeenCalledWith(
+      "wave-1",
+      "root",
+      wave,
+      11
+    );
+    const [linked, other] = screen.getAllByRole("listitem");
+    expect(linked?.firstElementChild).toHaveClass("tw-bg-[#263d68]");
+    expect(other?.firstElementChild).not.toHaveClass("tw-bg-[#263d68]");
+  });
+
   it("opens the thread oldest first and fetches only while open", async () => {
     const user = userEvent.setup();
     render(<Harness drop={makeDrop("root", 10, { replies_count: 2 })} />);
@@ -161,7 +194,12 @@ describe("WaveDropReplyThread", () => {
     expect(
       screen.getByRole("button", { name: "Hide replies" })
     ).toHaveAttribute("aria-expanded", "true");
-    expect(useDropMessagesMock).toHaveBeenCalledWith("wave-1", "root", wave);
+    expect(useDropMessagesMock).toHaveBeenCalledWith(
+      "wave-1",
+      "root",
+      wave,
+      undefined
+    );
     const group = screen.getByRole("list", { name: "Replies to this drop" });
     expect(group).toHaveTextContent("reply-1 after start");
     expect(group).toHaveTextContent("reply-2 after reply-1");
