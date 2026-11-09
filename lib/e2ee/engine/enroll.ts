@@ -108,6 +108,10 @@ function reusablePending(
   );
 }
 
+/**
+ * Request the device grant signature. Keep wallet failures retryable and retain
+ * the cause so the caller can distinguish a broken session from other errors.
+ */
 async function signGrant(
   ctx: EngineContext,
   deviceKey: string

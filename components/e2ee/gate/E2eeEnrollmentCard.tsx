@@ -74,6 +74,10 @@ function getPermissionPointKey(
 
 const ENROLL_REJECTED_KEY: MessageKey = "e2ee.enroll.rejected";
 
+/**
+ * Choose enrollment feedback. The shared wallet flow handles session failures
+ * so it can offer reconnect only for a remote wallet.
+ */
 function getEnrollmentFailure(
   error: unknown,
   upgrading: boolean
