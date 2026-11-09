@@ -457,7 +457,6 @@ export default function CreateDrop({
       acceptCreatedDrop({
         serverDrop,
         body,
-        wave,
         queryClient,
         processIncomingDrop,
       });

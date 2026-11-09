@@ -4,8 +4,6 @@ import {
   type ProcessIncomingDropFn,
 } from "@/contexts/wave/hooks/useWaveRealtimeUpdater.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
 import { settleTemporaryThreadReply } from "../drops/reply-threads/pending-replies";
 import type { DropMutationBody } from "./drop-submission.types";
 
@@ -13,13 +11,11 @@ import type { DropMutationBody } from "./drop-submission.types";
 export function acceptCreatedDrop({
   serverDrop,
   body,
-  wave,
   queryClient,
   processIncomingDrop,
 }: {
   readonly serverDrop: ApiDrop;
   readonly body: DropMutationBody;
-  readonly wave: ApiWave;
   readonly queryClient: QueryClient;
   readonly processIncomingDrop: ProcessIncomingDropFn;
 }): void {
@@ -28,7 +24,8 @@ export function acceptCreatedDrop({
       pendingDropId: body.dropId,
     })
   ).catch(() => undefined);
-  if (body.dropId && isWaveRepliesCollapsed(wave)) {
+  // A reply cache can exist for a single collapsed thread in any wave.
+  if (body.dropId && body.drop.reply_to) {
     settleTemporaryThreadReply(
       queryClient,
       body.drop.wave_id,
