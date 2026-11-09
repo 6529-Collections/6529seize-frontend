@@ -20,13 +20,17 @@
       ],
       "summary": "Returning to an open wave refreshes its latest messages together while preserving the conversation and unsent draft.",
       "facts": [
+        "On desktop and mobile web, Chat shows a blue unread-message badge capped at 99+, except for muted waves. Leaderboard, Decisions, Settings and curations preserve unread chat messages even after returning to the browser tab. Incoming chat messages add a new-message count to the browser title only while Chat is selected. Open Chat in a visible browser tab to use the conversation's normal read acknowledgement.",
         "If you were at the bottom, the conversation follows the latest messages. If you were reading older messages, it keeps your place; use the bottom control to return to latest.",
         "After a long absence, Load missed messages marks a gap between cached history and the latest page. It loads a page when approached or selected, without delaying current messages.",
         "If missed history fails to load, select Could not load missed messages. Try again. Already loaded messages remain available."
       ],
       "canonical_path": "/waves",
       "tags": ["waves", "chat", "recovery"],
-      "source_refs": ["ops/docs/waves/chat/feature-scroll-behavior.md"]
+      "source_refs": [
+        "ops/docs/waves/chat/feature-scroll-behavior.md",
+        "ops/docs/waves/chat/feature-content-tabs.md"
+      ]
     },
     {
       "id": "waves.selected-post-preview",
