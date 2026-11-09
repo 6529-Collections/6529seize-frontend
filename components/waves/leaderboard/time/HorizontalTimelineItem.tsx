@@ -5,12 +5,19 @@ import { Time } from "@/helpers/time";
 import { formatDate, formatTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import {
+  withDisplayTimeZone,
+  withDisplayTimeZoneDate,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 
 interface HorizontalTimelineItemProps {
   readonly decision: DecisionPoint;
   readonly isNext: boolean;
   readonly flexGrow?: boolean | undefined;
   readonly locale: SupportedLocale;
+  /** The display time zone for the date and clock time. */
+  readonly zone: DisplayTimeZone;
 }
 
 /**
@@ -21,12 +28,13 @@ export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
   isNext,
   flexGrow = false,
   locale,
+  zone,
 }) => {
   const isPast = decision.timestamp < Time.currentMillis();
 
   return (
     <div
-      className={`tw-relative tw-flex tw-flex-col tw-items-center tw-z-10 ${
+      className={`tw-relative tw-z-10 tw-flex tw-flex-col tw-items-center ${
         flexGrow
           ? "tw-flex-1"
           : "tw-w-[60px] tw-flex-shrink-0 @[24rem]/timeline:tw-w-[80px]"
@@ -60,17 +68,25 @@ export const HorizontalTimelineItem: React.FC<HorizontalTimelineItemProps> = ({
             isNext ? "tw-text-iron-200" : "tw-text-iron-400"
           }`}
         >
-          {formatDate(locale, decision.timestamp, {
-            month: "short",
-            day: "numeric",
-          })}
+          {formatDate(
+            locale,
+            decision.timestamp,
+            withDisplayTimeZoneDate(zone, {
+              month: "short",
+              day: "numeric",
+            })
+          )}
         </div>
 
         <div className="tw-mt-0.5 tw-font-mono tw-text-[10px] tw-text-iron-600">
-          {formatTime(locale, decision.timestamp, {
-            hour: "2-digit",
-            minute: "2-digit",
-          })}
+          {formatTime(
+            locale,
+            decision.timestamp,
+            withDisplayTimeZone(zone, {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          )}
         </div>
       </div>
     </div>

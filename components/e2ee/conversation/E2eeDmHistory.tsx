@@ -1,5 +1,7 @@
 "use client";
 
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import { withDisplayTimeZoneDate } from "@/lib/display-time-zone/displayTimeZone";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
@@ -28,6 +30,7 @@ export function E2eeDmHistory({
   readonly engine: E2eeEngine;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const router = useRouter();
   const id = useId();
   const [restarting, setRestarting] = useState(false);
@@ -87,7 +90,15 @@ export function E2eeDmHistory({
                     : "e2ee.dm.history.saved",
                   {
                     number: formatInteger(locale, index + 1),
-                    date: formatDate(locale, session.updatedAt),
+                    date: formatDate(
+                      locale,
+                      session.updatedAt,
+                      withDisplayTimeZoneDate(zone, {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })
+                    ),
                     count: formatInteger(locale, session.unread),
                   }
                 )}

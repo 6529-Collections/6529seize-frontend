@@ -1,5 +1,10 @@
 "use client";
 
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import {
+  withDisplayTimeZone,
+  withDisplayTimeZoneDate,
+} from "@/lib/display-time-zone/displayTimeZone";
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
@@ -103,6 +108,7 @@ export default function MessageSearchResults({
   readonly onSelect: (drop: ExtendedDrop) => void;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const {
     selectedWave: scopeWave,
     liveNormalizedQuery,
@@ -246,11 +252,22 @@ export default function MessageSearchResults({
                   : "waves.drops.searchModal.result.open",
                 { serialNo, author, wave: drop.wave.name }
               );
-              const formattedDate = formatDate(locale, drop.created_at, {
-                day: "numeric",
-                month: "short",
-              });
-              const formattedTime = formatTime(locale, drop.created_at);
+              const formattedDate = formatDate(
+                locale,
+                drop.created_at,
+                withDisplayTimeZoneDate(zone, {
+                  day: "numeric",
+                  month: "short",
+                })
+              );
+              const formattedTime = formatTime(
+                locale,
+                drop.created_at,
+                withDisplayTimeZone(zone, {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              );
               // The row is one button, so its seal is static and the signed
               // status joins the button's name.
               const isAuthorSigned = isDropAuthorSigned(drop);

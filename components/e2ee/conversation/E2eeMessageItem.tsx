@@ -7,6 +7,7 @@ import { memo, useEffect, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useSwipeToReply } from "@/hooks/useSwipeToReply";
 import { SwipeReplyHint } from "@/components/waves/drops/SwipeReplyHint";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -275,6 +276,7 @@ function NoticeItem({
   readonly inViewportRow: boolean;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const Container = inViewportRow ? "div" : "li";
   return (
     <Container
@@ -285,7 +287,7 @@ function NoticeItem({
         {getNoticeText(locale, message, conversation.members, selfProfileId)}
         <span className="tw-sr-only">
           {" "}
-          {formatE2eeDateTime(locale, message.serverTs)}
+          {formatE2eeDateTime(locale, message.serverTs, zone)}
         </span>
       </p>
     </Container>
@@ -369,6 +371,7 @@ function MessageMeta({
   readonly compact: boolean;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   // Imported history shows its original time (claimed by the server copy).
   const shownTs = message.imported?.createdAt ?? message.ts;
   if (compact) {
@@ -387,10 +390,10 @@ function MessageMeta({
       />
       <time
         dateTime={new Date(shownTs).toISOString()}
-        title={formatE2eeDateTime(locale, shownTs)}
+        title={formatE2eeDateTime(locale, shownTs, zone)}
         className="tw-text-xs tw-text-iron-500"
       >
-        {formatE2eeTimestamp(locale, shownTs)}
+        {formatE2eeTimestamp(locale, shownTs, { zone })}
       </time>
       <MessageMarkers message={message} />
     </div>
