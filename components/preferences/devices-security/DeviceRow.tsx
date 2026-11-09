@@ -3,8 +3,9 @@
 import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { CompactMenu } from "@/components/compact-menu";
 import Button from "@/components/utils/button/Button";
+import { formatE2eeDate } from "@/components/e2ee/e2eeFormat";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDate } from "@/i18n/format";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { t } from "@/i18n/messages";
 import type { SecurityDevice } from "./classifyDevices";
 import { RevokeBlockerNote } from "./RevokeBlockerNote";
@@ -101,6 +102,7 @@ export function DeviceRow({
 /** One line per ended device: what it held, when it was set up and ended. */
 export function HistoryRow({ device }: { readonly device: SecurityDevice }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const revokedAt =
     device.signedPosts?.status === "revoked" ||
     device.encryptedDms?.status === "revoked";
@@ -118,8 +120,12 @@ export function HistoryRow({ device }: { readonly device: SecurityDevice }) {
               ? "devicesSecurity.history.revoked"
               : "devicesSecurity.history.expired",
             {
-              setUp: formatDate(locale, device.createdAt),
-              ended: formatDate(locale, device.endedAt ?? device.createdAt),
+              setUp: formatE2eeDate(locale, device.createdAt, zone),
+              ended: formatE2eeDate(
+                locale,
+                device.endedAt ?? device.createdAt,
+                zone
+              ),
             }
           )}
         </p>
