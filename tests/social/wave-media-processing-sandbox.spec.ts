@@ -3,6 +3,7 @@ import type { ApiDrop } from "../../generated/models/ApiDrop";
 import type { ApiWave } from "../../generated/models/ApiWave";
 import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
 import { ApiDropMediaStatus } from "../../generated/models/ApiDropMediaStatus";
+import { ApiDropModerationStatus } from "../../generated/models/ApiDropModerationStatus";
 import { expect, test, waitForRouteReady } from "../testHelpers";
 import {
   dismissNextDevTools,
@@ -42,6 +43,9 @@ test.describe("Wave media lifecycle @auth @local-only", () => {
       created_at: Date.now(),
       updated_at: null,
       hide_link_preview: true,
+      // This is an accepted visible post; media processing is independent of moderation.
+      moderation: { status: ApiDropModerationStatus.Visible, can_view: true },
+      viewer_context: { author_blocked: false, drop_hidden: false },
       parts: [
         {
           part_id: 1,
