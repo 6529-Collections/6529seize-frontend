@@ -97,6 +97,7 @@ export function markDeviceGrantsSeen(
   });
 }
 
+/** Records grants already matched to local keys for this wallet's notice. */
 export function rememberLocalDeviceGrants(
   address: string,
   grantIds: readonly string[]
