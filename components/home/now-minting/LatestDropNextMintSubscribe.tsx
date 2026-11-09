@@ -265,9 +265,7 @@ export default function LatestDropNextMintSubscribe(
   if (hideNftPurchasing) {
     // Blank space only, never purchasing UI: the server HTML and hydration
     // render keep the row's height so web and Android do not jump when it
-    // mounts. On iOS the space stays only through a country check expected to
-    // be US (see useNftPurchasingVisibility); the row and its requests still
-    // wait for the real result.
+    // mounts. The iOS app removes the space as soon as the platform is known.
     return reservesNftPurchasingSpace ? (
       <MemeSubscriptionAwarenessRowSpace />
     ) : null;

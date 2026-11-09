@@ -1139,7 +1139,7 @@
       ],
       "facts": [
         "The Join 6529 page lives at /join-6529.",
-        "On native iOS when the detected country is not US or is unknown, the Collect step, subscription promotions/actions, and purchasing FAQs are absent; progress counts four visible steps and there is no unavailable banner.",
+        "In the iOS app, the Collect step, subscription promotions/actions, and purchasing FAQs are absent; progress counts four visible steps and there is no unavailable banner.",
         "/join redirects to /join-6529 for compatibility.",
         "It is a state-aware onboarding hub that adapts to wallet connection, wallet auth, and profile setup.",
         "The journey covers connecting a wallet, setting up a profile, joining a Wave, participating, and collecting.",
@@ -1568,7 +1568,7 @@
       ],
       "facts": [
         "The Minting The Memes guide lives at /about/minting.",
-        "On native iOS when the detected country is not US or is unknown, About Minting and Subscriptions links are hidden and direct visits return to /about without rendering the guides.",
+        "In the iOS app, About Minting and Subscriptions links are hidden and direct visits return to /about without rendering the guides.",
         "The guide links to the current in-app mint at /the-memes/mint and the official standalone mint page at https://thememes.6529.io/.",
         "Users can choose regular minting or subscription minting; a subscription does not create eligibility and can mint only in a phase the destination wallet already qualifies for.",
         "The current mint flow can move through Phase 0, Phase 1, Phase 2, and a public phase for a card.",
@@ -2134,7 +2134,7 @@
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
-        "On native iOS when the detected country is not US or is unknown, subscription controls stay hidden and direct or deep-linked visits return to the profile Identity tab without showing subscription content once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and then keep the Subscriptions tab, and web and Android never wait for the country check. On every platform the Subscriptions tab and the profile-header subscription status are added just after the page loads rather than in the first render.",
+        "On iOS the profile Subscriptions tab can show history once the country check returns US. Other results return to Identity. Top up and the promotional profile header card are omitted throughout iOS.",
         "The coverage card separates the answer from the supporting facts. Small status text sits above the funded-drop headline: Covered green, Plan a top up neutral, Running low amber and Action required red. Visitors see neutral status text except Covered. Funded through appears for at least one funded drop. Plan a top up, Running low and Action required show the authoritative Top up by cutoff once for owners when supplied, without repeated zero- or one-funded-drop explanations. States without a status keep their existing explanation for both perspectives. The original gradient, all state data and thresholds remain unchanged. Summary dates retain their original full-year format, including UTC deadline times.",
         "Subscription balance and Forecast use stay visible in the quiet facts zone. Desktop facts are inline at 14px. Phones place the facts side by side, with 14px labels above 16px values and N mints available below the balance without parentheses; they stack below 384px. The owner refresh sits beside the balance label on phones and at the end of the balance row on desktop. Next unfunded stays in the facts when no deadline line already names the drop. Forecast use keeps its shared explanation tooltip. Real zero and empty results retain their normal display; failed reads show Unavailable and existing Retry recovery. Loading uses skeleton values and controls without guessed zero balances, off switches or an enabled Top up action.",
         "Minting settings remains inline from 1024px and opens from its compact phone row below that width. The phone sheet fits its content and uses the shared dimmed backdrop. Mode, Edition Preference and Airdrop Address retain their saved values, date, eligibility, address tooltip and owner controls. Only owners can change settings. Switches retain their original emerald styling. Subscription History remains a separate inline desktop section and compact phone sheet row. Learn more stays beside Subscription minting.",
@@ -6077,7 +6077,7 @@
         "Standard wave-created rows can offer Join wave and Follow creator controls; direct-message wave-created rows offer Open DM instead of joining the wave.",
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
         "The Subscriptions filter includes transition-based coverage alerts with runway, Meme context, authoritative deadline when available, and exact minimum top-up action.",
-        "On native iOS when the detected country is not US or is unknown, subscription coverage feed items, their filter and the device settings entry are hidden; social follow notifications remain available.",
+        "In the iOS app, subscription coverage feed items, their filter and the device settings entry are hidden; social follow notifications remain available.",
         "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted.",
         "Unread-count polling pauses in backgrounded Capacitor apps and hidden mobile browser tabs, preserving cached counts and refreshing on return. Browser realtime notification delivery stays connected.",
         "Route preparation, wallet restoration, profile loading and the first notifications fetch use one consistent Loading notifications indicator, without a separate route shimmer."
@@ -8137,7 +8137,7 @@
       ],
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
-        "On native iOS when the detected country is not US or is unknown, the mint page, recipient selection, mint count and SEIZE controls are absent and direct or deep-linked visits to /the-memes/mint return to /the-memes without an unavailable message once the country check settles (a failed check counts as unknown); US iOS deep links wait for the check and keep the Mint on 6529.io handoff, and web and Android keep the mint page.",
+        "In the iOS app, direct links to /the-memes/mint return to The Memes collection. Web and Android offer minting.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
         "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
         "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",
@@ -8436,7 +8436,7 @@
       "keywords": ["nextgen", "mint", "distribution", "plan", "collection"],
       "facts": [
         "NextGen mint and distribution-plan behavior is documented under NextGen docs.",
-        "On native iOS when the detected country is not US or is unknown, mint and burn-to-mint buttons are absent and direct mint routes return to the collection without displaying mint controls; countdown information and distribution data remain available.",
+        "In the iOS app, direct NextGen mint links return to the collection. Countdown and distribution information stay available.",
         "Mint routes live under /nextgen/collection/{collection}/mint.",
         "Distribution plan routes live under /nextgen/collection/{collection}/distribution-plan.",
         "The distribution-plan allowlist shows a loading state while entries are fetched and a no-match state when active filters return no entries."
@@ -9445,7 +9445,8 @@
         "Saved rules freeze exact targets, funding wallet, recipient, unit and total review limits, gas reserve, expiry and action count. They prepare one ETH purchase at a time for wallet approval. Pause and expiry retain unresolved operations, and confirmed acquisitions count permanently even if the NFT is later sold or transferred. Rules do not grant unattended wallet execution authority.",
         "Offers and listings support 1, 7 or 30 days or Custom… with an exact local date and time. The displayed time zone applies. Custom times must be at least five minutes away and within the supported 30-day window; invalid, missing or repeated daylight-saving times require a different time. Quote refresh does not extend a signed order. Eligible collection-wide or verified trait offers can be accepted through Sell or Accept offer for the NFT on the current artwork page. The holding wallet signs and receives sale proceeds; profile consolidation does not transfer signing authority.",
         "Meme Lab cards at /meme-lab/{id} share the Memes trading controls, edition quantities and purchase review. This card-level trading support does not add Meme Lab to the set planner, Lowest listings or TDH tools.",
-        "Selection purchase review fills the screen with artwork rows, a purchase summary and Back to collecting at the top. Deliver all to prepares one destination for every item, while Change delivery for this artwork retains exceptions or split deliveries. Applying a common destination combines each item’s copies at that address. Remove beside an artwork checks the existing unsigned review and prepares a new quote for the remaining exact orders, quantities and allocations. A failed update retains the original review. Removing the last item closes only after pending-purchase checks. Confirmation and removal remain unavailable during destination editing; preparation, wallet steps and unresolved transactions preserve their recovery state."
+        "Selection purchase review fills the screen with artwork rows, a purchase summary and Back to collecting at the top. Deliver all to prepares one destination for every item, while Change delivery for this artwork retains exceptions or split deliveries. Applying a common destination combines each item’s copies at that address. Remove beside an artwork checks the existing unsigned review and prepares a new quote for the remaining exact orders, quantities and allocations. A failed update retains the original review. Removing the last item closes only after pending-purchase checks. Confirmation and removal remain unavailable during destination editing; preparation, wallet steps and unresolved transactions preserve their recovery state.",
+        "The iOS app offers NFT browsing and order history. Collect shortcuts are hidden, and direct Collect links return to the collection."
       ],
       "canonical_path": "/collect",
       "link_label": "Open collecting tools",
