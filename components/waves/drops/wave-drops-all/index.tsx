@@ -260,7 +260,10 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const waveChatScroll = useWaveChatScrollOptional();
   const replyThreads = useWaveReplyThreads();
   const replyTargetRequest = useRef<AbortController | null>(null);
-  useEffect(() => () => replyTargetRequest.current?.abort(), [waveId]);
+  useEffect(
+    () => () => replyTargetRequest.current?.abort(),
+    [initialDrop, replyThreads, waveId]
+  );
   const queueVisibleSerialTarget = useCallback(
     (serialNo: number) => {
       replyTargetRequest.current?.abort();
@@ -387,7 +390,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         boostedDrops={visibleBoostedDrops}
         boostedDropsDisplayPreference={boostedDropsDisplayPreference}
         onBoostedDropClick={queueVisibleSerialTarget}
-        onScrollToUnread={queueSerialTarget}
+        onScrollToUnread={queueVisibleSerialTarget}
         unreadCount={unreadCount}
         suspendLightDropHydration={isScrolling || serialTarget !== null}
         virtualScrollRootMargin={virtualScrollRootMargin}

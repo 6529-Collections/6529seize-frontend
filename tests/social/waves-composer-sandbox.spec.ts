@@ -445,10 +445,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     baseURL,
     page,
   }, testInfo) => {
-    test.skip(
-      Boolean(testInfo.project.use.isMobile),
-      "Exercises desktop keyboard navigation"
-    );
+    const isMobile = Boolean(testInfo.project.use.isMobile);
     const { payload, sourceDrop } = await loadSandboxDropFixture(page, baseURL);
     const root = { id: String(sourceDrop["id"]), serial_no: 1 };
     const directReply = {
@@ -517,25 +514,53 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       });
     });
     await gotoSandboxWave(page);
-    const openActions = async () => {
+    const selectReplyPlacement = async (label: string) => {
       const rootRow = page
         .getByRole("main")
         .locator('[data-serial-no="1"]')
         .first();
+      if (isMobile) {
+        await rootRow.tap({ trial: true });
+        const box = await rootRow.boundingBox();
+        if (!box)
+          throw new Error("The top-level drop is outside the viewport.");
+        const session = await page.context().newCDPSession(page);
+        try {
+          await session.send("Input.dispatchTouchEvent", {
+            type: "touchStart",
+            touchPoints: [{ x: box.x + 24, y: box.y + 18 }],
+          });
+          const action = page
+            .getByRole("dialog")
+            .getByRole("button", { name: label, exact: true });
+          await expect(action).toBeVisible();
+          await session.send("Input.dispatchTouchEvent", {
+            type: "touchCancel",
+            touchPoints: [],
+          });
+          await action.tap();
+        } finally {
+          await session.detach();
+        }
+        return;
+      }
       await rootRow.hover();
-      await rootRow
-        .getByRole("button", { name: "More actions" })
-        .press("Enter");
+      const trigger = rootRow.getByRole("button", { name: "More actions" });
+      await trigger.click();
+      await expect(trigger).toHaveAttribute("aria-expanded", "true");
+      await page
+        .getByRole("menu")
+        .getByRole("button", { name: label, exact: true })
+        .click();
     };
 
-    await openActions();
-    await page
-      .getByRole("button", { name: "Collapse replies", exact: true })
-      .press("Enter");
+    await selectReplyPlacement("Collapse replies");
     await expect(
       page.getByText("Nested thread reply", { exact: true })
     ).toHaveCount(0);
-    await page.getByRole("button", { name: "Show 2 replies" }).press("Enter");
+    const showReplies = page.getByRole("button", { name: "Show 2 replies" });
+    if (isMobile) await showReplies.tap();
+    else await showReplies.press("Enter");
     const thread = page.getByRole("list", { name: "Replies to this drop" });
     await expect(
       thread.getByText("Direct thread reply", { exact: true })
@@ -544,10 +569,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       thread.getByText("Nested thread reply", { exact: true })
     ).toBeVisible();
 
-    await openActions();
-    await page
-      .getByRole("button", { name: "Show replies inline", exact: true })
-      .press("Enter");
+    await selectReplyPlacement("Show replies inline");
     await expect(thread).toHaveCount(0);
     await expect(
       page.getByText("Nested thread reply", { exact: true })

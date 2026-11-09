@@ -339,7 +339,7 @@ describe("MyStreamProvider resume sync", () => {
     }
   );
 
-  it("does not let an old profile refresh cancel or restart the current profile's fetches", () => {
+  it("does not let an old profile refresh cancel or restart the current profile's fetches", async () => {
     useWaveMessagesStoreMock.mockImplementation(
       jest.requireActual("@/contexts/wave/hooks/useWaveMessagesStore").default
     );
@@ -361,12 +361,12 @@ describe("MyStreamProvider resume sync", () => {
     mockCancelWaveDataFetch.mockClear();
     mockCancelPaginationFetch.mockClear();
 
-    act(() => staleRefresh("wave-1"));
+    await act(() => staleRefresh("wave-1"));
     expect(mockCancelWaveDataFetch).not.toHaveBeenCalled();
     expect(mockCancelPaginationFetch).not.toHaveBeenCalled();
     expect(mockRegisterWave).not.toHaveBeenCalled();
 
-    act(() => context!.refreshWaveMessages("wave-1"));
+    await act(() => context!.refreshWaveMessages("wave-1"));
     expect(mockCancelWaveDataFetch).toHaveBeenCalledWith("wave-1");
     expect(mockCancelPaginationFetch).toHaveBeenCalledWith("wave-1");
     expect(mockRegisterWave).toHaveBeenCalledWith("wave-1");

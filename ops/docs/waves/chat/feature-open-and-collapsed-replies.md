@@ -69,10 +69,10 @@ main chat.
 
 ## Edge Cases
 
-- Collapsed replies stay out of the wave’s unread count and
-  `New Messages` divider. Wave-wide collapse also skips notifications for
-  followers subscribed to every drop. Individual collapse keeps the wave’s
-  notification rules, including direct replies and mentions.
+- Wave-wide collapse keeps replies out of the wave’s unread count and
+  `New Messages` divider and skips notifications for followers subscribed to
+  every drop. Individual collapse keeps the wave’s unread and notification
+  rules. Unread replies in an individual thread can open that thread.
 - Curated views of a wave keep showing curated replies.
 - The reply count includes replies to replies anywhere in the thread. Live
   updates refresh the original drop's count from the server for both direct

@@ -36,9 +36,9 @@ export default function WaveDropReplyCollapseAction({
         endpoint: `drops/${drop.id}/collapse-replies`,
         body: { collapse_replies: collapsed },
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       onSelected();
-      stream?.refreshWaveMessages(waveId);
+      await stream?.refreshWaveMessages(waveId);
       chatScroll?.requestScrollToSerialNo({ waveId, serialNo: drop.serial_no });
       void queryClient.invalidateQueries({
         queryKey: [QueryKey.DROP_REPLY_THREAD_TARGET, { wave_id: waveId }],
@@ -53,7 +53,8 @@ export default function WaveDropReplyCollapseAction({
   });
 
   if (
-    threads?.waveId !== waveId ||
+    !threads ||
+    threads.waveId !== waveId ||
     threads.collapseAll ||
     activeProfileProxy ||
     connectedProfile?.id !== drop.author.id ||

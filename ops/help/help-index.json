@@ -4051,7 +4051,7 @@
         "Reply previews show the original author's handle and a placeholder avatar when the author has no profile picture. A missing profile picture does not mean the drop is missing. Removed content still follows moderation visibility rules.",
         "If loading a collapsed reply thread fails, it shows `Couldn't load replies.` and a Retry button. Already-loaded replies stay visible; Retry loads the thread again.",
         "Slow mode and disabled links still apply to replies from non-admins. Emoji reactions stay open to everyone who can see the wave.",
-        "Collapsed replies stay out of the wave unread count. Wave-wide collapse skips notifications for followers subscribed to every drop. Individual collapse keeps the wave notification rules, including direct replies and mentions.",
+        "Wave-wide collapse keeps replies out of the wave unread count and skips notifications for followers subscribed to every drop. Individual collapse keeps the wave's unread and notification rules, including direct replies and mentions.",
         "Links and notifications to a collapsed reply jump to its parent drop and open that thread.",
         "With open replies, the wave's creator, admins and chat members (when chat is limited to a group) can delete anyone's replies with the Delete action. Top-level drops keep the wave's normal admin deletion setting."
       ],

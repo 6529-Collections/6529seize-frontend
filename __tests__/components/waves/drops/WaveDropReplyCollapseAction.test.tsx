@@ -4,7 +4,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-const mockPost = jest.fn().mockResolvedValue({});
+const mockPost = jest.fn();
 const mockRefresh = jest.fn();
 const mockAuth = { connectedProfile: { id: "author" } };
 const mockThreads = { waveId: "wave", collapseAll: false };
@@ -43,6 +43,7 @@ function renderAction(drop: ApiDrop) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockPost.mockReset().mockResolvedValue({});
   mockAuth.connectedProfile.id = "author";
   mockThreads.collapseAll = false;
 });

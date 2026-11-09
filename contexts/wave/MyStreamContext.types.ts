@@ -103,7 +103,7 @@ export interface MyStreamActionsContextType {
     waveId: string,
     dropIds: readonly string[]
   ) => void;
-  readonly refreshWaveMessages: (waveId: string) => void;
+  readonly refreshWaveMessages: (waveId: string) => Promise<void>;
   readonly applyOptimisticDropUpdate: ({
     waveId,
     dropId,

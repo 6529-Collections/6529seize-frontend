@@ -576,11 +576,7 @@ export function useWaveDataFetching({
 
   const registerWave = useCallback(
     (waveId: string, syncNewest = false, options?: RegisterWaveOptions) => {
-      /* NOSONAR - intentional fire-and-forget */ void activateWave(
-        waveId,
-        syncNewest,
-        options
-      );
+      return activateWave(waveId, syncNewest, options);
     },
     [activateWave]
   );

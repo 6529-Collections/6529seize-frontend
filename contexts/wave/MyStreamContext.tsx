@@ -234,11 +234,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const { clearWave } = waveMessagesStore;
   const refreshWaveMessages = useCallback(
-    (waveId: string) => {
+    async (waveId: string) => {
       if (!clearWave(waveId)) return;
       cancelWaveDataFetch(waveId);
       cancelPaginationFetch(waveId);
-      registerWave(waveId);
+      await registerWave(waveId);
     },
     [cancelWaveDataFetch, cancelPaginationFetch, clearWave, registerWave]
   );
@@ -346,7 +346,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const setActiveWaveAndRegister = useCallback<ActiveWaveContextData["set"]>(
     (waveId, options) => {
       if (waveId) {
-        registerWave(waveId, true, {
+        void registerWave(waveId, true, {
           skipInitialBackfill: hasSerialNoTarget(options?.serialNo),
         });
       }
@@ -357,7 +357,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
   const syncActiveWave = useEffectEvent(() => {
     if (activeWaveId) {
-      registerWave(activeWaveId, true, {
+      void registerWave(activeWaveId, true, {
         skipInitialBackfill: hasActiveWaveDropTarget,
       });
     }
@@ -467,7 +467,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       }
     }
     if (activeWaveId) {
-      registerWave(activeWaveId, true, {
+      void registerWave(activeWaveId, true, {
         skipInitialBackfill: hasActiveWaveDropTarget,
       });
     }

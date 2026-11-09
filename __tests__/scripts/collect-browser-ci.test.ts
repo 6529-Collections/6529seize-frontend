@@ -232,9 +232,11 @@ it.each([
   "components/waves/create-drop-content/CreateDropSubmissionDialogs.tsx",
   "components/waves/create-drop-content/useAllMentionConfirmation.ts",
   "tests/social/waves-composer-sandbox.spec.ts",
-])("selects the all mention browser checks for %s", (file) => {
+  "components/waves/drops/WaveDropReplyCollapseAction.tsx",
+  "components/waves/drops/reply-threads/WaveDropReplyThread.tsx",
+])("selects the composer browser checks for %s", (file) => {
   const outputs = select([file]);
-  expect(outputs["all_mention_confirmation_required"]).toBe("true");
+  expect(outputs["composer_browser_required"]).toBe("true");
   expect(JSON.parse(outputs["core_playwright_matrix"]!)).toMatchObject({
     include: expect.arrayContaining([
       expect.objectContaining({ lane: "playwright-smoke" }),
