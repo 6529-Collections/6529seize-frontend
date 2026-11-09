@@ -973,6 +973,38 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("keeps desktop keyboard focus after Enter sends a chat message", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    test.skip(Boolean(testInfo.project.use.isMobile), "Desktop Enter shortcut");
+    await gotoSandboxWave(page);
+    const composer = page
+      .getByRole("textbox", { name: "Write a message" })
+      .last();
+    await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
+    await expect(
+      page.getByRole("button", { name: "Post" }).last()
+    ).toBeEnabled();
+    await composer.press("Enter");
+
+    await expect(page.locator('[data-serial-no="2"]')).toContainText(
+      SANDBOX_CHAT_DROP_CONTENT
+    );
+    await expect(composer).toHaveText("");
+    await expect(composer).toBeFocused();
+    // Use the keyboard directly: locator.fill/press would refocus a broken editor.
+    await page.keyboard.type("The next message starts without clicking.");
+    await expect(composer).toHaveText(
+      "The next message starts without clicking."
+    );
+    const sentMessages = (await fetchSandboxRequests(baseURL)).filter(
+      (request) => request.method === "POST" && request.path === "/api/drops"
+    );
+    expect(sentMessages).toHaveLength(1);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("submits one exact-shape synthetic chat drop without uploads", async ({
     baseURL,
     page,
