@@ -6,6 +6,7 @@ import ProfileAvatar from "@/components/common/profile/ProfileAvatar";
 import ArtworkNotificationThumbnail from "@/components/notifications/ArtworkNotificationThumbnail";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import LocalDateTime from "@/components/utils/time/LocalDateTime";
+import NotificationInboxReactions from "./NotificationInboxReactions";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -70,6 +71,14 @@ export default function NotificationInboxRow({
     pfpUrl = notification.related_wave?.pfp;
   }
   const preview = getInboxPreview(notification);
+  let reactions: string[] = [];
+  if (group) {
+    reactions = group.notifications.map(
+      (entry) => entry.additional_context.reaction
+    );
+  } else if (notification.cause === ApiNotificationCause.DropReacted) {
+    reactions = [notification.additional_context.reaction];
+  }
   return (
     <li>
       <Link
@@ -84,7 +93,9 @@ export default function NotificationInboxRow({
           <ProfileAvatar
             pfpUrl={pfpUrl}
             alt=""
-            fallbackContent={<BellIcon className="tw-size-5 tw-text-iron-400" />}
+            fallbackContent={
+              <BellIcon className="tw-size-5 tw-text-iron-400" />
+            }
           />
         )}
         <div className="tw-min-w-0 tw-flex-1">
@@ -93,6 +104,9 @@ export default function NotificationInboxRow({
               ? t(locale, "notifications.inbox.reactions")
               : getInboxSummary(notification, locale)}
           </p>
+          {reactions.length > 0 && (
+            <NotificationInboxReactions reactions={reactions} />
+          )}
           {group && (
             <div className="tw-mt-1">
               <OverlappingAvatars

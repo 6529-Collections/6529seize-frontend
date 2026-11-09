@@ -13,6 +13,17 @@ import type {
 } from "@/types/feed.types";
 import { isGroupedReactionsItem } from "@/types/feed.types";
 
+const mockLoadEmojiData = jest.fn(async () => {});
+const mockFindCustomEmoji = jest.fn();
+const mockFindNativeEmoji = jest.fn();
+jest.mock("@/contexts/EmojiContext", () => ({
+  useEmoji: () => ({
+    loadEmojiData: mockLoadEmojiData,
+    findCustomEmoji: mockFindCustomEmoji,
+    findNativeEmoji: mockFindNativeEmoji,
+  }),
+}));
+
 jest.mock("next/navigation", () => ({
   ...jest.requireActual("next/navigation"),
   useRouter: () => ({ push: jest.fn() }),
@@ -22,6 +33,10 @@ jest.mock("@/hooks/e2ee/useEncryptedNotificationPreview", () => ({
   useEncryptedNotificationPreview: jest.fn(),
 }));
 beforeEach(() => {
+  mockFindCustomEmoji.mockReturnValue(null);
+  mockFindNativeEmoji.mockImplementation((id: string) =>
+    id === "fire" ? { name: "Fire", skins: [{ native: "🔥" }] } : null
+  );
   jest
     .mocked(useEncryptedNotificationPreview)
     .mockReturnValue({ preview: null, needsSetup: false });
@@ -81,6 +96,8 @@ it("groups reactors, keeps mixed read state, and opens every distinct unread ID"
     />
   );
   expect(screen.getByText("New reactions to your drop")).toBeInTheDocument();
+  expect(screen.getAllByRole("img", { name: "Fire" })).toHaveLength(1);
+  expect(screen.getByText("🔥")).toBeInTheDocument();
   expect(screen.getByText("alice, bob, carol")).toBeInTheDocument();
   expect(screen.getByAltText("")).toHaveAttribute("src", "wave.png");
   expect(screen.getByText("@GelatoGenesis in #QUORUM")).toBeInTheDocument();
@@ -101,10 +118,79 @@ it("keeps single reactions readable and does not mark a read row again", () => {
     />
   );
   expect(screen.getByText("alice reacted to your drop")).toBeInTheDocument();
+  expect(screen.getByRole("img", { name: "Fire" })).toBeInTheDocument();
+  expect(mockLoadEmojiData).toHaveBeenCalled();
   expect(screen.getByAltText("")).toHaveAttribute("src", "alice.png");
   expect(screen.queryByText("Unread")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("link"));
   expect(onOpen).toHaveBeenCalledWith([]);
+});
+
+it("shows each distinct native and custom emoji in a grouped preview", () => {
+  mockFindCustomEmoji.mockImplementation((id: string) =>
+    id === "6529" ? { name: "6529", skins: [{ src: "6529.webp" }] } : null
+  );
+  const custom = reaction(3, "carol", null);
+  custom.additional_context.reaction = ":6529:";
+  const group = groupReactionNotifications([
+    reaction(1, "alice", null),
+    reaction(2, "bob", null),
+    custom,
+  ])[0]!;
+  render(
+    <NotificationInboxRow
+      notification={group}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.getAllByRole("img", { name: "Fire" })).toHaveLength(1);
+  expect(screen.getByRole("img", { name: "6529" })).toBeInTheDocument();
+  expect(screen.getByAltText("6529")).toHaveAttribute("src", "6529.webp");
+});
+
+it("keeps a text fallback until emoji data loads without hiding the notification", () => {
+  mockFindNativeEmoji.mockReturnValue(null);
+  const notification = reaction(1, "alice", null);
+  const { rerender } = render(
+    <NotificationInboxRow
+      notification={notification}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.getByText(":fire:")).toBeInTheDocument();
+  expect(screen.getByText("alice reacted to your drop")).toBeInTheDocument();
+  mockFindNativeEmoji.mockReturnValue({
+    name: "Fire",
+    skins: [{ native: "🔥" }],
+  });
+  rerender(
+    <NotificationInboxRow
+      notification={notification}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.queryByText(":fire:")).not.toBeInTheDocument();
+  expect(screen.getByRole("img", { name: "Fire" })).toBeInTheDocument();
+});
+
+it("keeps an unavailable custom reaction readable", () => {
+  const notification = reaction(1, "alice", null);
+  notification.additional_context.reaction = ":removed_emoji:";
+  render(
+    <NotificationInboxRow
+      notification={notification}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.getByText(":removed_emoji:")).toBeInTheDocument();
+  expect(screen.getByRole("link")).toHaveAttribute(
+    "href",
+    "/waves/wave?serialNo=42"
+  );
 });
 
 it("keeps the bell fallback for grouped reactions without a wave picture", () => {
