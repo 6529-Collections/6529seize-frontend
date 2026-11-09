@@ -238,6 +238,85 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     await expect(webBack).toBeVisible();
   });
 
+  test("recovers names after a rate-limited profile lookup across reloads", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    sessions.push(alice, bob);
+    await enroll(alice);
+    await enroll(bob);
+    await startChat(alice, ["bob"]);
+    await sendMessage(
+      alice.page,
+      "History survives an identity lookup failure"
+    );
+    await openConversationFromList(bob.page, "alice");
+    await expectMessage(
+      bob.page,
+      "History survives an identity lookup failure"
+    );
+
+    let blocked = true;
+    let lookups = 0;
+    await alice.context.route(
+      `**/api/identities/${users.bob.profileId}`,
+      async (route) => {
+        lookups += 1;
+        if (!blocked) {
+          await route.continue();
+          return;
+        }
+        await route.fulfill({
+          status: 429,
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Expose-Headers": "Retry-After",
+            "Retry-After": "1",
+          },
+          json: { error: "Rate limit exceeded" },
+        });
+      }
+    );
+    await alice.page.reload();
+    await expect.poll(() => lookups, { timeout: E2EE_UI_TIMEOUT_MS }).toBe(1);
+    await expect(
+      alice.page.getByRole("heading", {
+        level: 1,
+        name: "Unknown member",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expectMessage(
+      alice.page,
+      "History survives an identity lookup failure"
+    );
+    expect(lookups).toBe(1);
+    blocked = false;
+    await sendMessage(bob.page, "A recovered author name");
+    await expect(
+      alice.page.getByRole("heading", { level: 1, name: "bob", exact: true })
+    ).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
+    await expect(
+      messageRow(alice.page, "A recovered author name").getByRole("link", {
+        name: "bob",
+        exact: true,
+      })
+    ).toBeVisible();
+    expect(lookups).toBe(2);
+    await alice.page.reload();
+    await expectMessage(
+      alice.page,
+      "History survives an identity lookup failure"
+    );
+    await expectMessage(alice.page, "A recovered author name");
+    await expect(
+      alice.page.getByRole("heading", { level: 1, name: "bob", exact: true })
+    ).toBeVisible();
+  });
+
   test("ordinary sender identities and profile navigation on desktop and phone", async ({
     baseURL,
     browser,

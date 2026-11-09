@@ -32,6 +32,17 @@ anything 6529 is legally required to keep (see
 [Unencrypted direct messages](#unencrypted-direct-messages)). Until then you
 can export them or move them into an encrypted chat.
 
+## Names that temporarily show as Unknown member
+
+"Unknown member" means this device cannot currently resolve the person's name;
+it does not by itself mean they left. Known names and device owners are retained
+when a lookup fails. Temporary lookup failures are retried a limited number of
+times, with increasing delays and the server's rate-limit cooldown. Reopening a
+chat or returning online can resume eligible lookups. Older messages with a
+recoverable missing author are corrected as their history is opened, without
+resetting encryption or deleting messages. A person who cannot be resolved can
+continue to appear as Unknown member.
+
 ## Availability
 
 - On in production and staging, behind the `NEXT_PUBLIC_E2EE_DM_ENABLED`
