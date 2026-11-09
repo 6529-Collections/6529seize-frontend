@@ -1,5 +1,6 @@
 import { getAddress, isAddress } from "viem";
 import { shortenAddress } from "@/helpers/address.helpers";
+import { getCalendarDayIndex } from "@/helpers/timeDisplayHelpers";
 import {
   formatDate,
   formatInteger,
@@ -9,6 +10,12 @@ import {
 } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  withDisplayTimeZone,
+  withDisplayTimeZoneDate,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import { getDmPeerId } from "@/lib/e2ee/dm-conversations";
 import { safeAttachmentName } from "@/lib/e2ee/attachment-name";
 import type {
@@ -60,54 +67,77 @@ function formatNoticeWallets(
   return wallets.length > 0 ? formatList(locale, wallets) : "";
 }
 
-/** Compact timestamp: time today, day and month this year, full date otherwise. */
+export interface E2eeTimeOptions {
+  /** The display time zone; the device zone when omitted. */
+  readonly zone?: DisplayTimeZone | undefined;
+  /** Reference time for "today"; defaults to now. */
+  readonly now?: number | undefined;
+}
+
+const CLOCK_TIME: Intl.DateTimeFormatOptions = {
+  hour: "2-digit",
+  minute: "2-digit",
+};
+
+const FULL_DATE: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+};
+
+/** The year of a `getCalendarDayIndex` day. */
+const getDayIndexYear = (dayIndex: number): number =>
+  new Date(dayIndex * DAY_MS).getUTCFullYear();
+
+/**
+ * Compact timestamp: time today, day and month this year, full date
+ * otherwise. Days follow the display zone, and a time outside the device zone
+ * names its zone ("05:06 PM UTC").
+ */
 export function formatE2eeTimestamp(
   locale: SupportedLocale,
   ms: number,
-  now: number = Date.now()
+  { zone = LOCAL_DISPLAY_TIME_ZONE, now = Date.now() }: E2eeTimeOptions = {}
 ): string {
-  const date = new Date(ms);
-  const today = new Date(now);
-  if (
-    date.toDateString() === today.toDateString() &&
-    Math.abs(now - ms) < DAY_MS
-  ) {
-    return formatTime(locale, ms);
+  const day = getCalendarDayIndex(ms, zone.timeZone);
+  const today = getCalendarDayIndex(now, zone.timeZone);
+  if (day === today && Math.abs(now - ms) < DAY_MS) {
+    return formatTime(locale, ms, withDisplayTimeZone(zone, CLOCK_TIME));
   }
-  if (date.getFullYear() === today.getFullYear()) {
-    return formatDate(locale, ms, { day: "numeric", month: "short" });
+  if (getDayIndexYear(day) === getDayIndexYear(today)) {
+    return formatDate(
+      locale,
+      ms,
+      withDisplayTimeZoneDate(zone, { day: "numeric", month: "short" })
+    );
   }
-  return formatDate(locale, ms);
+  return formatDate(locale, ms, withDisplayTimeZoneDate(zone, FULL_DATE));
 }
 
 /**
- * Local calendar day of `ms`, for grouping a timeline by day. Day helpers use
- * the viewer's time zone, so they run only in the client timeline, which
- * renders after the engine starts in the browser (never during SSR).
+ * Calendar day of `ms` in the display zone, for grouping a timeline by day.
+ * Day helpers depend on the zone, so they run only in the client timeline,
+ * which renders after the engine starts in the browser (never during SSR).
  */
-export function getE2eeDayKey(ms: number): string {
-  const date = new Date(ms);
-  return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+export function getE2eeDayKey(
+  ms: number,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
+): string {
+  return String(getCalendarDayIndex(ms, zone.timeZone));
 }
 
-const startOfLocalDay = (ms: number): number => {
-  const date = new Date(ms);
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate()
-  ).getTime();
-};
-
-/** Day separator label: Today, Yesterday, a weekday this week, else a date. */
+/**
+ * Day separator label: Today, Yesterday, a weekday this week, else a date.
+ * The day changes at midnight in the display zone.
+ */
 export function getE2eeDayLabel(
   locale: SupportedLocale,
   ms: number,
-  now: number = Date.now()
+  { zone = LOCAL_DISPLAY_TIME_ZONE, now = Date.now() }: E2eeTimeOptions = {}
 ): string {
-  const days = Math.round(
-    (startOfLocalDay(now) - startOfLocalDay(ms)) / DAY_MS
-  );
+  const days =
+    getCalendarDayIndex(now, zone.timeZone) -
+    getCalendarDayIndex(ms, zone.timeZone);
   if (days === 0) {
     return t(locale, "e2ee.conversation.day.today");
   }
@@ -115,16 +145,30 @@ export function getE2eeDayLabel(
     return t(locale, "e2ee.conversation.day.yesterday");
   }
   if (days > 1 && days < 7) {
-    return formatDate(locale, ms, { weekday: "long" });
+    return formatDate(
+      locale,
+      ms,
+      withDisplayTimeZoneDate(zone, { weekday: "long" })
+    );
   }
-  return formatDate(locale, ms, { dateStyle: "medium" });
+  return formatDate(
+    locale,
+    ms,
+    withDisplayTimeZoneDate(zone, { dateStyle: "medium" })
+  );
 }
 
+/** Date and time in the display zone, naming the zone outside the device's. */
 export function formatE2eeDateTime(
   locale: SupportedLocale,
-  ms: number
+  ms: number,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
 ): string {
-  return formatDate(locale, ms, { dateStyle: "medium", timeStyle: "short" });
+  return formatDate(
+    locale,
+    ms,
+    withDisplayTimeZone(zone, { dateStyle: "medium", timeStyle: "short" })
+  );
 }
 
 export function findMember(

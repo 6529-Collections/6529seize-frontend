@@ -6,6 +6,7 @@ import {
   type UtcTimeOfDay,
 } from "@/helpers/utc-schedule.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useSyncExternalStore } from "react";
@@ -29,8 +30,10 @@ interface UtcScheduleTimeProps {
 
 /**
  * A weekly time published in UTC, such as "16:00 UTC", followed by its
- * equivalent in the viewer's time zone, such as "(your time: Mon, Wed, Fri
- * 09:00 PDT)". The local part depends on the viewer's zone and the current
+ * equivalent in the viewer's display time zone, such as "(your time: Mon, Wed,
+ * Fri 09:00 PDT)". When the viewer displays times in another zone, the
+ * equivalent uses that zone rather than the device's, and it is left out when
+ * that zone reads like UTC. The local part depends on the zone and the current
  * date (daylight saving), so server HTML and the hydration render show the UTC
  * time only. The local part is added right after hydration, and components
  * mounted later render it immediately.
@@ -46,6 +49,7 @@ export default function UtcScheduleTime({
     getServerMinuteClockSnapshot
   );
   const browserLocale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const resolvedLocale = locale ?? browserLocale;
   const utcTime = formatUtcTimeOfDay(resolvedLocale, time);
   const localTimes =
@@ -55,7 +59,8 @@ export default function UtcScheduleTime({
           resolvedLocale,
           time,
           weekdays,
-          minuteClock * MS_PER_MINUTE
+          minuteClock * MS_PER_MINUTE,
+          zone
         );
 
   if (localTimes === null) {

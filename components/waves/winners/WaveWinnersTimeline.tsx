@@ -7,9 +7,16 @@ import { WaveWinnersTimelineLoading } from "./WaveWinnersTimelineLoading";
 import { WaveWinnersDrops } from "./drops/WaveWinnersDrops";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatDate, formatTime } from "@/i18n/format";
+import {
+  withDisplayTimeZone,
+  withDisplayTimeZoneDate,
+} from "@/lib/display-time-zone/displayTimeZone";
 
-// Decision times are instants shown in the viewer's own time zone.
+// Decision times are instants shown in the display time zone: the day flips
+// at that zone's midnight, and the clock time names the zone when it is not
+// the device's own.
 const DECISION_DATE_FORMAT = {
   weekday: "short",
   month: "short",
@@ -39,6 +46,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
   outcomesVisible = true,
 }) => {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
 
   if (isLoading) {
     return <WaveWinnersTimelineLoading />;
@@ -70,12 +78,12 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
             const formattedDate = formatDate(
               locale,
               point.decision_time,
-              DECISION_DATE_FORMAT
+              withDisplayTimeZoneDate(zone, DECISION_DATE_FORMAT)
             );
             const formattedTime = formatTime(
               locale,
               point.decision_time,
-              DECISION_TIME_FORMAT
+              withDisplayTimeZone(zone, DECISION_TIME_FORMAT)
             );
 
             return (
