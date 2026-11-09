@@ -89,7 +89,8 @@ stay saved in this browser for the next sign-in.
 - `/messages/encrypted/{chat}`: one chat. The address is a random chat handle.
 - `/messages/encrypted/devices`: devices that can read your encrypted messages.
 - The **Encrypted** section sits above **Direct messages** in the messages
-  side pane on the web and on the app's Messages screen.
+  side pane on the web and on the app's Messages screen. Select the open chat
+  again in the side pane to return to the encrypted inbox.
 - A plaintext direct message shows **Not end-to-end encrypted** in its header
   with **Start encrypted chat**. In the app, tap the open-lock button next to
   the chat name.
