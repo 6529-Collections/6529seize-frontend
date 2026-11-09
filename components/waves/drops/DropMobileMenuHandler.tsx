@@ -4,6 +4,12 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
+import { useAuth } from "@/components/auth/Auth";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
+import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
+import { useSwipeToReply } from "@/hooks/useSwipeToReply";
+import { cancelHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
+import { SwipeReplyHint } from "./SwipeReplyHint";
 import {
   useWaveDropMobileMenu,
   withWaveDropMobileMenuProvider,
@@ -31,6 +37,14 @@ function DropMobileMenuHandlerInner({
   const [isSlideUp, setIsSlideUp] = useState(false);
   const { canUseTouchActionSheet } = useDropActionInteractionMode();
   const mobileMenu = useWaveDropMobileMenu();
+  const { connectedProfile } = useAuth();
+  const { getEligibility } = useWaveEligibility();
+  const canReply =
+    canUseTouchActionSheet &&
+    showReplyAndQuote &&
+    !isTemporaryDrop &&
+    Boolean(connectedProfile?.handle) &&
+    isDropReplyEligible(drop, getEligibility(drop.wave.id));
 
   const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
   const touchStartX = useRef(0);
@@ -41,16 +55,38 @@ function DropMobileMenuHandlerInner({
     clearSuppression,
     handleClickCapture,
   } = useLongPressClickSuppression();
+  const {
+    rootRef: swipeRootRef,
+    contentRef: swipeContentRef,
+    onTouchStart: startReplySwipe,
+  } = useSwipeToReply({
+    enabled: canReply,
+    canReply,
+    scope: drop.id,
+    onReply: () => handleOnReply(),
+    onStart: () => {
+      if (longPressTimeout.current) clearTimeout(longPressTimeout.current);
+      longPressTimeout.current = null;
+      setLongPressTriggered(false);
+      setIsSlideUp(false);
+    },
+  });
 
   const handleLongPress = useCallback(() => {
     if (!canUseTouchActionSheet) return;
+    cancelHorizontalSwipe();
     markNextClickForSuppression();
     setLongPressTriggered(true);
     setIsSlideUp(true);
   }, [canUseTouchActionSheet, markNextClickForSuppression]);
 
   const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (e.touches.length !== 1) {
+      handleTouchEnd();
+      return;
+    }
     if (isTemporaryDrop || !canUseTouchActionSheet) return;
+    startReplySwipe(e);
 
     touchStartX.current = e.touches[0]!.clientX;
     touchStartY.current = e.touches[0]!.clientY;
@@ -61,11 +97,6 @@ function DropMobileMenuHandlerInner({
   };
 
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    // Prevent scrolling/selection during long press detection
-    if (canUseTouchActionSheet && longPressTimeout.current) {
-      e.preventDefault();
-    }
-
     const touchX = e.touches[0]?.clientX;
     const touchY = e.touches[0]?.clientY;
 
@@ -145,14 +176,25 @@ function DropMobileMenuHandlerInner({
 
   return (
     <div
-      className={rootClassName}
+      ref={swipeRootRef}
+      className={`tw-relative ${rootClassName ?? ""}`}
       onClickCapture={handleClickCapture}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchEnd}
     >
-      {children}
+      {canReply && <SwipeReplyHint />}
+      <div
+        ref={swipeContentRef}
+        style={
+          canUseTouchActionSheet
+            ? { transform: "var(--message-swipe-transform, none)" }
+            : undefined
+        }
+      >
+        {children}
+      </div>
     </div>
   );
 }
