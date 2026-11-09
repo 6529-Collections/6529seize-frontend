@@ -167,8 +167,9 @@ export function CollectedStatsHeader({
         aria-expanded={isDetailsOpen}
         aria-controls={detailsId}
         onClick={onToggleDetails}
+        className="!tw-font-medium !tw-text-iron-300 !tw-shadow-none aria-expanded:!tw-border-iron-600 aria-expanded:!tw-bg-iron-800 aria-expanded:!tw-text-iron-50 desktop-hover:hover:!tw-text-iron-100 desktop-hover:aria-expanded:hover:!tw-bg-iron-700"
       >
-        <span className="-tw-ml-1 tw-inline-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0">
+        <span className="-tw-ml-1 tw-inline-flex tw-h-4 tw-w-4 tw-flex-shrink-0">
           <ChartBarIcon aria-hidden="true" className="tw-h-full tw-w-full" />
         </span>
         <span>{detailsButtonLabel}</span>
