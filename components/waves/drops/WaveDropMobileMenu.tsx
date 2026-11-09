@@ -48,6 +48,7 @@ import WaveDropMobileMenuReactionPicker from "./WaveDropMobileMenuReactionPicker
 import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
 import DropSignatureDialog from "./signature/DropSignatureDialog";
 import DropSignatureMenuItem from "./signature/DropSignatureMenuItem";
+import DisplayTimeZoneMobileMenuItem from "@/components/display-time-zone/DisplayTimeZoneMobileMenuItem";
 
 export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -282,6 +283,8 @@ function WaveDropMobileMenuAuthenticatedActions({
       )}
 
       <WaveDropReplyCollapseAction drop={drop} onSelected={closeMenu} mobile />
+      <DisplayTimeZoneMobileMenuItem onSelected={closeMenu} />
+
       <WaveDropBookmarkAction dropId={drop.id} onSelected={closeMenu} mobile />
       <WaveDropDocumentationAction drop={drop} onSelected={closeMenu} mobile />
 
@@ -560,6 +563,8 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
                       />
                     </>
                   )}
+                  {/* The time setting is on the device; no sign-in needed. */}
+                  <DisplayTimeZoneMobileMenuItem onSelected={closeMenu} />
                   {/* Anyone can check a signature; reading needs no sign-in. */}
                   <DropSignatureMenuItem
                     dropId={drop.id}

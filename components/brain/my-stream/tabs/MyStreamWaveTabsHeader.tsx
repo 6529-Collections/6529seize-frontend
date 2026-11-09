@@ -14,6 +14,9 @@ import {
   ShareIcon,
 } from "@heroicons/react/24/outline";
 import type { CompactMenuItem } from "@/components/compact-menu";
+import DisplayTimeZoneSwitch, {
+  useDisplayTimeZoneMenuItem,
+} from "@/components/display-time-zone/DisplayTimeZoneSwitch";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
@@ -295,6 +298,7 @@ export default function MyStreamWaveTabsHeader({
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { open: openSearch, trigger: searchTrigger } =
     useOpenMyStreamWaveSearch();
+  const displayTimeZoneMenuItem = useDisplayTimeZoneMenuItem();
 
   // Warm the wave search modal from the visitor's first interaction (or when
   // idle), so the first open does not wait on the network. The chunk stays out
@@ -385,6 +389,7 @@ export default function MyStreamWaveTabsHeader({
     : [];
   const headerOverflowMenuItems: CompactMenuItem[] = isCompact
     ? [
+        displayTimeZoneMenuItem,
         ...(showShareAction
           ? [
               {
@@ -501,6 +506,10 @@ export default function MyStreamWaveTabsHeader({
           >
             <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
           </button>
+          <DisplayTimeZoneSwitch
+            variant={isCompact ? "compact" : "header"}
+            tooltipId={headerActionsTooltipId}
+          />
           <button
             type="button"
             onClick={toggleRightSidebar}

@@ -1,5 +1,12 @@
+"use client";
+
 import React from "react";
 import { formatOrdinal } from "@/helpers/format.helpers";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import {
+  withDisplayTimeZone,
+  withDisplayTimeZoneDate,
+} from "@/lib/display-time-zone/displayTimeZone";
 import { faClock } from "@fortawesome/free-regular-svg-icons";
 import { faTrophy } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -19,6 +26,7 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
   variant = "default",
   surface = "translucent",
 }) => {
+  const zone = useDisplayTimeZone();
   const effectiveRank = rank ?? position;
   if (effectiveRank === 0 || Number.isNaN(effectiveRank)) return null;
 
@@ -30,17 +38,23 @@ const WinnerDropBadge: React.FC<WinnerDropBadgeProps> = ({
       : null;
 
   const dateString = dateTime
-    ? dateTime.toLocaleString(undefined, {
-        month: "short",
-        day: "numeric",
-      })
+    ? dateTime.toLocaleString(
+        undefined,
+        withDisplayTimeZoneDate(zone, {
+          month: "short",
+          day: "numeric",
+        })
+      )
     : null;
 
   const timeString = dateTime
-    ? dateTime.toLocaleString(undefined, {
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+    ? dateTime.toLocaleString(
+        undefined,
+        withDisplayTimeZone(zone, {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      )
     : null;
 
   let colorClasses = "";

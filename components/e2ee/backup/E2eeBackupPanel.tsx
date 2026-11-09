@@ -5,6 +5,7 @@ import Button from "@/components/utils/button/Button";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useE2eeBackup } from "@/hooks/e2ee/useE2eeBackup";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatNumber } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 import type {
@@ -66,6 +67,7 @@ function StatusDetails({
   readonly snapshot: E2eeBackupSnapshot;
   readonly locale: Locale;
 }) {
+  const zone = useDisplayTimeZone();
   if (snapshot.phase !== "on") {
     return null;
   }
@@ -75,7 +77,7 @@ function StatusDetails({
         {snapshot.uploading || snapshot.lastBackupAt === null
           ? t(locale, "e2ee.backup.status.uploading")
           : t(locale, "e2ee.backup.status.lastBackup", {
-              time: formatE2eeDateTime(locale, snapshot.lastBackupAt),
+              time: formatE2eeDateTime(locale, snapshot.lastBackupAt, zone),
             })}
       </li>
       {snapshot.quotaBytes > 0 ? (

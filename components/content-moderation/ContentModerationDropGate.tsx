@@ -1,5 +1,6 @@
 "use client";
 
+import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import { useAuth } from "@/components/auth/Auth";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -32,7 +33,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
 import WavePicture from "@/components/waves/WavePicture";
-import { getTimeAgoShort } from "@/helpers/Helpers";
 import {
   useCallback,
   useEffect,
@@ -178,6 +178,7 @@ function BlockedProfileActivityPresentation({
   readonly onHideAgain: () => void;
   readonly onReveal: () => void;
 }) {
+  const timeAgoShort = useTimeAgoShort();
   const locale = useBrowserLocale();
 
   return (
@@ -198,7 +199,7 @@ function BlockedProfileActivityPresentation({
             {drop.wave.name}
           </span>
           <span className="tw-block tw-text-xs tw-text-iron-500">
-            {getTimeAgoShort(drop.created_at)}
+            {timeAgoShort(drop.created_at)}
           </span>
         </span>
         <span className="tw-inline-flex tw-flex-none tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
