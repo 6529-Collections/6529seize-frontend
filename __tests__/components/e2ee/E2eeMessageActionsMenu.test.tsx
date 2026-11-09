@@ -116,7 +116,11 @@ it.each([
     const user = userEvent.setup();
     render(
       <E2eeMessageActionsMenu
-        message={message({ sigOk, senderProfileId: isOwn ? SELF_ID : "alice" })}
+        message={message({
+          id: "m1",
+          sigOk,
+          senderProfileId: isOwn ? SELF_ID : "alice",
+        })}
         isOwn={isOwn}
         selfProfileId={SELF_ID}
         senderName="Alice"
