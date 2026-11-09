@@ -1,5 +1,7 @@
 "use client";
 
+import { referencedProfileIds } from "@/lib/e2ee/profile-references";
+
 import { useQueries } from "@tanstack/react-query";
 import { useMemo } from "react";
 import type {
@@ -11,29 +13,6 @@ import { getE2eeProfileQueryOptions, toResolvedProfile } from "../e2eeProfiles";
 
 /** Bounds lookups for very long histories with many former members. */
 const MAX_FORMER_MEMBER_LOOKUPS = 50;
-
-function addMessageProfileIds(ids: Set<string>, message: E2eeMessage): void {
-  if (message.senderProfileId) {
-    ids.add(message.senderProfileId);
-  }
-  if (message.notice?.actorProfileId) {
-    ids.add(message.notice.actorProfileId);
-  }
-  for (const id of message.notice?.targetProfileIds ?? []) {
-    ids.add(id);
-  }
-  for (const id of Object.values(message.reactions).flat()) {
-    ids.add(id);
-  }
-}
-
-function referencedProfileIds(messages: readonly E2eeMessage[]): Set<string> {
-  const ids = new Set<string>();
-  for (const message of messages) {
-    addMessageProfileIds(ids, message);
-  }
-  return ids;
-}
 
 /**
  * Members for naming people in the timeline: the current members plus
