@@ -5,7 +5,6 @@ import { showAppToast } from "@/components/utils/toast/AppToast";
 import { DEFAULT_LOCALE, getBrowserLocale } from "@/i18n/locales";
 import { hasLocaleMessages, t } from "@/i18n/messages";
 import { subscribeToDeviceGrantChanges } from "@/lib/device-signing/device-key-store";
-import { listDeviceKeyLossAddresses } from "@/lib/device-signing/key-loss";
 import { revokeLostDeviceGrant } from "@/lib/device-signing/replace-lost-grant";
 import type { QueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -18,14 +17,25 @@ const currentLocale = () => {
 
 /**
  * After this browser lost its key store and signs a new grant, revokes the
- * grant it held before and says so briefly. Also retries on load, for an
- * earlier attempt that failed on the network.
+ * grant it held before and says so briefly. Only for the signed-in account
+ * (its own wallet and profile, not a proxy): a loss recorded for another
+ * account stays pending until that account signs in. Also retries when the
+ * account signs in or the page loads, for an earlier attempt that failed on
+ * the network.
  */
-export function useLostDeviceGrantCleanup(queryClient: QueryClient): void {
+export function useLostDeviceGrantCleanup(
+  queryClient: QueryClient,
+  wallet: string | null,
+  profileId: string | null
+): void {
   useEffect(() => {
+    if (!wallet || !profileId) {
+      return;
+    }
+    const account = { wallet: wallet.toLowerCase(), profileId };
     let active = true;
-    const cleanUp = (address: string) => {
-      void revokeLostDeviceGrant(address).then((result) => {
+    const cleanUp = () => {
+      void revokeLostDeviceGrant(account).then((result) => {
         if (!active || result === "none") {
           return;
         }
@@ -35,20 +45,23 @@ export function useLostDeviceGrantCleanup(queryClient: QueryClient): void {
         if (result === "revoked") {
           showAppToast({
             type: "success",
-            message: t(currentLocale(), "signedMessages.notice.restore.replaced"),
+            message: t(
+              currentLocale(),
+              "signedMessages.notice.restore.replaced"
+            ),
           });
         }
       });
     };
-    listDeviceKeyLossAddresses().forEach(cleanUp);
+    cleanUp();
     const unsubscribe = subscribeToDeviceGrantChanges(({ address, saved }) => {
-      if (saved) {
-        cleanUp(address);
+      if (saved && address === account.wallet) {
+        cleanUp();
       }
     });
     return () => {
       active = false;
       unsubscribe();
     };
-  }, [queryClient]);
+  }, [queryClient, wallet, profileId]);
 }

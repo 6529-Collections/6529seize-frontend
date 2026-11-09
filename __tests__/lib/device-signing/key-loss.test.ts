@@ -21,7 +21,9 @@ jest.mock("@/services/api/device-grants-api", () => ({
   fetchDeviceGrants: () => mockFetchDeviceGrants(),
 }));
 
+const mockCommonApiFetch = jest.fn();
 jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: (...args: unknown[]) => mockCommonApiFetch(...args),
   getStructuredApiErrorStatus: (error: unknown) =>
     (error as { status?: number }).status,
 }));
@@ -73,6 +75,14 @@ const grant = (id: string, deviceKey = LOST_KEY): ApiDeviceGrant =>
     revoked_at: null,
   }) as ApiDeviceGrant;
 
+const ACCOUNT = { wallet: ADDRESS, profileId: "profile-1" };
+
+/** The signed-in profile's encrypted-messages devices, from e2ee/me. */
+const e2eeMe = (devices: unknown[] = [], profileId = "profile-1") => ({
+  profile_id: profileId,
+  devices,
+});
+
 const writeHint = (writtenAt: number) => {
   const clock = jest.spyOn(Date, "now").mockReturnValue(writtenAt);
   writeDeviceGrantHint(ADDRESS, grant(LOST_ID), "profile-1");
@@ -88,6 +98,7 @@ describe("device key loss", () => {
       .mockReset()
       .mockResolvedValue([grant(NEW_ID, NEW_KEY), grant(LOST_ID)]);
     mockRevokeDeviceGrant.mockReset();
+    mockCommonApiFetch.mockReset().mockResolvedValue(e2eeMe());
     mockReportDeviceKeyStoreLoss.mockReset();
     mockEnrolled = false;
     mockStoredDevice = null;
@@ -140,13 +151,13 @@ describe("device key loss", () => {
       mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
       mockRevokeDeviceGrant.mockResolvedValue(grant(LOST_ID));
 
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("revoked");
+      await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("revoked");
 
       expect(mockRevokeDeviceGrant).toHaveBeenCalledTimes(1);
       expect(mockRevokeDeviceGrant).toHaveBeenCalledWith(LOST_ID);
       expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
       // Nothing is left to revoke on a later grant.
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("none");
+      await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("none");
       expect(mockRevokeDeviceGrant).toHaveBeenCalledTimes(1);
     });
 
@@ -157,7 +168,7 @@ describe("device key loss", () => {
     ])("revokes nothing with %s and keeps the loss", async (_label, record) => {
       mockReadDeviceKey.mockResolvedValue(record);
 
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("none");
+      await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("none");
 
       expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
       expect(readDeviceKeyLoss(ADDRESS)?.grantId).toBe(LOST_ID);
@@ -169,7 +180,7 @@ describe("device key loss", () => {
       });
 
       const expectDroppedWithoutRevoke = async () => {
-        await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("none");
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("none");
         expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
         expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
       };
@@ -217,11 +228,108 @@ describe("device key loss", () => {
       });
     });
 
+    describe("a combined grant, which also enrolled an encrypted-messages device", () => {
+      beforeEach(() => {
+        mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
+      });
+
+      it("is never revoked, so encrypted DMs that still work keep their device", async () => {
+        // The signing key store was dropped; the encrypted-messages device
+        // this grant enrolled is still active and in use.
+        mockCommonApiFetch.mockResolvedValue(
+          e2eeMe([
+            {
+              device_key: `0x${"1d".repeat(32)}`,
+              grant_id: LOST_ID,
+              grant_message: "6529.io sign-in grant",
+              revoked_at: null,
+            },
+          ])
+        );
+
+        // Signed Posts are on again with a new grant.
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("none");
+
+        expect(mockCommonApiFetch).toHaveBeenCalledWith(
+          expect.objectContaining({ endpoint: "e2ee/me" })
+        );
+        // No grant revoke, so the server never cascades to that device.
+        expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
+        expect(readDeviceKeyLoss(ACCOUNT.wallet)).toBeNull();
+      });
+
+      it("still revokes a grant that only enabled Signed Posts", async () => {
+        mockCommonApiFetch.mockResolvedValue(
+          e2eeMe([
+            {
+              device_key: `0x${"1d".repeat(32)}`,
+              grant_id: `0x${"7".repeat(64)}`,
+              grant_message: null,
+              revoked_at: null,
+            },
+          ])
+        );
+        mockRevokeDeviceGrant.mockResolvedValue(grant(LOST_ID));
+
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("revoked");
+        expect(mockRevokeDeviceGrant).toHaveBeenCalledWith(LOST_ID);
+      });
+
+      it("revokes nothing when the encrypted devices cannot be listed", async () => {
+        mockCommonApiFetch.mockRejectedValue({ status: 404 });
+
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
+        expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
+      });
+
+      it("leaves the loss pending when the server answers for another profile", async () => {
+        mockCommonApiFetch.mockResolvedValue(e2eeMe([], "profile-2"));
+
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
+        expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
+        expect(readDeviceKeyLoss(ACCOUNT.wallet)?.grantId).toBe(LOST_ID);
+        expect(
+          readDeviceKeyLoss(ACCOUNT.wallet)?.revokeAttempts
+        ).toBeUndefined();
+      });
+    });
+
+    describe("another signed-in account", () => {
+      const OTHER = {
+        wallet: "0xabcdef0000000000000000000000000000000002",
+        profileId: "profile-2",
+      };
+
+      it("never processes or discards this account's pending cleanup", async () => {
+        mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
+        // Profile B's grant list does not have A's grant.
+        mockFetchDeviceGrants.mockResolvedValue([grant(NEW_ID, NEW_KEY)]);
+
+        await expect(revokeLostDeviceGrant(OTHER)).resolves.toBe("none");
+        // A's wallet seen through another profile is not A either.
+        await expect(
+          revokeLostDeviceGrant({ wallet: ADDRESS, profileId: "profile-2" })
+        ).resolves.toBe("none");
+        expect(mockFetchDeviceGrants).not.toHaveBeenCalled();
+        expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
+        expect(readDeviceKeyLoss(ADDRESS)?.grantId).toBe(LOST_ID);
+
+        // A signs back in: the cleanup runs.
+        mockFetchDeviceGrants.mockResolvedValue([
+          grant(NEW_ID, NEW_KEY),
+          grant(LOST_ID),
+        ]);
+        mockRevokeDeviceGrant.mockResolvedValue(grant(LOST_ID));
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("revoked");
+        expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
+      });
+    });
+
     it("counts a failed grant list as an attempt and keeps the loss", async () => {
       mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
       mockFetchDeviceGrants.mockRejectedValue({ status: 503 });
 
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("failed");
+      await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
       expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
       expect(readDeviceKeyLoss(ADDRESS)?.revokeAttempts).toBe(1);
     });
@@ -231,10 +339,10 @@ describe("device key loss", () => {
       mockRevokeDeviceGrant.mockRejectedValue(new Error("offline"));
 
       for (let attempt = 1; attempt < MAX_LOST_GRANT_REVOKE_ATTEMPTS; attempt++) {
-        await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("failed");
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
         expect(readDeviceKeyLoss(ADDRESS)?.revokeAttempts).toBe(attempt);
       }
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("failed");
+      await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
       expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
       expect(mockRevokeDeviceGrant).toHaveBeenCalledTimes(
         MAX_LOST_GRANT_REVOKE_ATTEMPTS
@@ -247,9 +355,9 @@ describe("device key loss", () => {
         .mockRejectedValueOnce({ status: 503 })
         .mockResolvedValueOnce(grant(LOST_ID));
 
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("failed");
+      await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
       expect(readDeviceKeyLoss(ADDRESS)?.grantId).toBe(LOST_ID);
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("revoked");
+      await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("revoked");
       expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
     });
 
@@ -257,9 +365,9 @@ describe("device key loss", () => {
       mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
       mockRevokeDeviceGrant.mockRejectedValue({ status: 404 });
 
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("failed");
+      await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
       expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
-      await expect(revokeLostDeviceGrant(ADDRESS)).resolves.toBe("none");
+      await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("none");
       expect(mockRevokeDeviceGrant).toHaveBeenCalledTimes(1);
     });
 
@@ -281,8 +389,11 @@ describe("device key loss", () => {
         mockRevokeDeviceGrant.mockResolvedValue(grant(LOST_ID));
 
         const results = await Promise.all([
-          revokeLostDeviceGrant(ADDRESS),
-          revokeLostDeviceGrant(ADDRESS.toUpperCase().replace("0X", "0x")),
+          revokeLostDeviceGrant(ACCOUNT),
+          revokeLostDeviceGrant({
+            ...ACCOUNT,
+            wallet: ADDRESS.toUpperCase().replace("0X", "0x"),
+          }),
         ]);
 
         expect(results.sort()).toEqual(["none", "revoked"]);
@@ -300,8 +411,8 @@ describe("device key loss", () => {
       mockRevokeDeviceGrant.mockResolvedValue(grant(LOST_ID));
 
       const results = await Promise.all([
-        revokeLostDeviceGrant(ADDRESS),
-        revokeLostDeviceGrant(ADDRESS),
+        revokeLostDeviceGrant(ACCOUNT),
+        revokeLostDeviceGrant(ACCOUNT),
       ]);
 
       expect(results.sort()).toEqual(["none", "revoked"]);

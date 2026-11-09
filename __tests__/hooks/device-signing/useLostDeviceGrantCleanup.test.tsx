@@ -14,6 +14,7 @@ jest.mock("@/components/utils/toast/AppToast", () => ({
 import { useLostDeviceGrantCleanup } from "@/hooks/device-signing/useLostDeviceGrantCleanup";
 
 const ADDRESS = "0xabcdef0000000000000000000000000000000001";
+const PROFILE = "profile-1";
 
 const announce = (saved: boolean) =>
   globalThis.dispatchEvent(
@@ -25,7 +26,7 @@ const announce = (saved: boolean) =>
 const setup = () => {
   const queryClient = new QueryClient();
   const invalidate = jest.spyOn(queryClient, "invalidateQueries");
-  renderHook(() => useLostDeviceGrantCleanup(queryClient));
+  renderHook(() => useLostDeviceGrantCleanup(queryClient, ADDRESS, PROFILE));
   return invalidate;
 };
 
@@ -37,15 +38,21 @@ describe("useLostDeviceGrantCleanup", () => {
   });
 
   it("revokes the lost grant once a new one is saved, then says so", async () => {
-    const invalidate = setup();
     mockRevokeLost.mockResolvedValue("revoked");
+    const invalidate = setup();
+
+    // The attempt on sign-in already finds the pending cleanup.
+    await waitFor(() => expect(mockShowToast).toHaveBeenCalledTimes(1));
+    expect(mockRevokeLost).toHaveBeenCalledWith({
+      wallet: ADDRESS,
+      profileId: PROFILE,
+    });
+    mockRevokeLost.mockClear();
 
     announce(false);
     expect(mockRevokeLost).not.toHaveBeenCalled();
-
     announce(true);
-    await waitFor(() => expect(mockShowToast).toHaveBeenCalledTimes(1));
-    expect(mockRevokeLost).toHaveBeenCalledWith(ADDRESS);
+    await waitFor(() => expect(mockRevokeLost).toHaveBeenCalledTimes(1));
     expect(mockShowToast).toHaveBeenCalledWith({
       type: "success",
       message:
@@ -73,9 +80,45 @@ describe("useLostDeviceGrantCleanup", () => {
     expect(invalidate).not.toHaveBeenCalled();
   });
 
-  it("retries a recorded loss when the page loads", async () => {
-    localStorage.setItem(`6529-device-key-loss:${ADDRESS}`, "{}");
-    setup();
-    await waitFor(() => expect(mockRevokeLost).toHaveBeenCalledWith(ADDRESS));
+  it("cleans up only for the signed-in account, until A signs back in", async () => {
+    const queryClient = new QueryClient();
+    const OTHER = "0xabcdef0000000000000000000000000000000002";
+    const { rerender } = renderHook(
+      ({
+        wallet,
+        profileId,
+      }: {
+        wallet: string | null;
+        profileId: string | null;
+      }) => useLostDeviceGrantCleanup(queryClient, wallet, profileId),
+      {
+        initialProps: { wallet: OTHER, profileId: "profile-2" } as {
+          wallet: string | null;
+          profileId: string | null;
+        },
+      }
+    );
+    await waitFor(() => expect(mockRevokeLost).toHaveBeenCalledTimes(1));
+    expect(mockRevokeLost).toHaveBeenCalledWith({
+      wallet: OTHER,
+      profileId: "profile-2",
+    });
+
+    // A grant saved for A's wallet while B is signed in is not B's to handle.
+    announce(true);
+    await Promise.resolve();
+    expect(mockRevokeLost).toHaveBeenCalledTimes(1);
+
+    rerender({ wallet: null, profileId: null });
+    expect(mockRevokeLost).toHaveBeenCalledTimes(1);
+
+    rerender({ wallet: ADDRESS, profileId: PROFILE });
+    await waitFor(() =>
+      expect(mockRevokeLost).toHaveBeenLastCalledWith({
+        wallet: ADDRESS,
+        profileId: PROFILE,
+      })
+    );
+    expect(mockRevokeLost).toHaveBeenCalledTimes(2);
   });
 });

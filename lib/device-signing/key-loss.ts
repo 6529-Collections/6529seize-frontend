@@ -117,23 +117,6 @@ export function noteLostGrantRevokeFailure(address: string): void {
   }
 }
 
-/** Wallets with a recorded loss in this browser. */
-export function listDeviceKeyLossAddresses(): string[] {
-  try {
-    const storage = globalThis.localStorage;
-    const addresses: string[] = [];
-    for (let index = 0; index < storage.length; index += 1) {
-      const key = storage.key(index);
-      if (key?.startsWith(LOSS_KEY_PREFIX)) {
-        addresses.push(key.slice(LOSS_KEY_PREFIX.length));
-      }
-    }
-    return addresses;
-  } catch {
-    return [];
-  }
-}
-
 /**
  * Called when this browser holds no key record at all for the wallet. When
  * its grant note says it held a grant, records the loss once and returns it;

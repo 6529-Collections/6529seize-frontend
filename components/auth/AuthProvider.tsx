@@ -95,7 +95,6 @@ export default function Auth({
   );
   const queryClient = useQueryClient();
   useDeviceGrantChangeInvalidation(queryClient);
-  useLostDeviceGrantCleanup(queryClient);
   const pathname = usePathname();
   const router = useRouter();
   const seizeSettingsContext = useSeizeSettingsOptional();
@@ -267,6 +266,15 @@ export default function Auth({
     connectedProfile?.id,
     activeProfileProxy?.id,
     isDirectProfileSession
+  );
+  // A lost signing grant is cleaned up only for the signed-in wallet's own
+  // profile, never through a proxy and never for another account.
+  const lostGrantAccountReady =
+    isDirectProfileSession && isAddressAuthorized && Boolean(address);
+  useLostDeviceGrantCleanup(
+    queryClient,
+    lostGrantAccountReady ? (address ?? null) : null,
+    lostGrantAccountReady ? (connectedProfile?.id ?? null) : null
   );
 
   useEffect(() => {
