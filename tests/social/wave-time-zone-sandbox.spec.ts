@@ -1,5 +1,10 @@
+import { DEFAULT_LONG_PRESS_DURATION_MS } from "../../hooks/useLongPressInteraction";
 import { expect, test } from "../testHelpers";
 import { useLocalSandboxMutationGuard } from "../support/localSandbox";
+import {
+  findTouchMessage,
+  longPressTouchMessage,
+} from "../input/waveTouchTarget";
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
 // The sandbox seeds its drops at 2024-04-22T00:00:00Z: still April 21 in New
@@ -8,10 +13,11 @@ const SEED_INSTANT = "2024-04-22T00:00:00.000Z";
 
 /**
  * Display time zone (privacy): wave times can show in UTC instead of the
- * device zone, from the wave header switch (this tab only) or from
- * Preferences > Time Zone (saved on the device). Browser-only risks covered
- * here: a real non-UTC device zone, the stored choice applying after
- * hydration without errors, and the switch surviving a reload in the tab.
+ * device zone, from the wave header switch or the phone post menu (this tab
+ * only) or from Preferences > Time Zone (saved on the device). Browser-only
+ * risks covered here: a real non-UTC device zone, the stored choice applying
+ * after hydration without errors, the switch surviving a reload in the tab,
+ * and a phone header that keeps the wave title visible.
  */
 test.describe("Display time zone @auth @local-only", () => {
   useLocalSandboxMutationGuard(
@@ -57,6 +63,39 @@ test.describe("Display time zone @auth @local-only", () => {
       .click();
     await expect(seededTime).toHaveText("Apr 21, 2024 - 08:00 PM");
     await expect(page.getByText("Times in UTC")).toHaveCount(0);
+  });
+
+  test("phone post menu switches to UTC and back without crowding the header", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "Phones switch from the press-and-hold post menu."
+    );
+    // The mock API has no curations; the post menu asks for them.
+    await page.route("**/api/drops/*/curations**", (route) =>
+      route.fulfill({ json: [] })
+    );
+    await page.route(`**/api/waves/${WAVE}/curations**`, (route) =>
+      route.fulfill({ json: [] })
+    );
+    await page.goto(`/waves/${WAVE}`);
+    const seededTime = page.locator(`time[datetime="${SEED_INSTANT}"]`).first();
+    // Narrow screens show the date only for older posts.
+    await expect(seededTime).toHaveText("Apr 21, 2024");
+
+    const row = await findTouchMessage(page);
+    await longPressTouchMessage(row, DEFAULT_LONG_PRESS_DURATION_MS + 600);
+    await page
+      .getByRole("button", { name: "Show times in UTC for now" })
+      .click();
+    await expect(seededTime).toHaveText("Apr 22, 2024");
+
+    await longPressTouchMessage(row, DEFAULT_LONG_PRESS_DURATION_MS + 600);
+    await page
+      .getByRole("button", { name: "Show times in local time again" })
+      .click();
+    await expect(seededTime).toHaveText("Apr 21, 2024");
   });
 
   test("Preferences saves UTC on the device and waves use it after hydration", async ({
