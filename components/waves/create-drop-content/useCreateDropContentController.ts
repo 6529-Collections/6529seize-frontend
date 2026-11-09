@@ -101,7 +101,7 @@ export function useCreateDropContentController({
   initialMarkdownKey = null,
 }: CreateDropContentProps): CreateDropLayoutProps {
   const { isSafeWallet, address } = useSeizeConnectContext();
-  const { isApp } = useDeviceInfo();
+  const { isApp, isMobileDevice, hasTouchScreen } = useDeviceInfo();
   const isMobile = useIsMobileScreen();
   const locale = useBrowserLocale();
   const { actionsContainerRef, isWideContainer, setActionsContainerRef } =
@@ -476,6 +476,7 @@ export function useCreateDropContentController({
     currentPartMentionedUsers,
     currentPartMentionedWaves,
     currentPartReferencedNfts,
+    submitting,
     setDrop,
     setFiles,
     setEditorState,
@@ -593,6 +594,7 @@ export function useCreateDropContentController({
     dropModeSessionScopeKey,
     isIdentityPickerAllowed,
     isApp,
+    isDesktop: !isApp && !isMobileDevice && !hasTouchScreen,
     requestAuth,
     setToast,
     signDrop,
