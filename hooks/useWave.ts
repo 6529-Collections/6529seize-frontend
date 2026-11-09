@@ -406,17 +406,14 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     isRankWave: wave?.wave.type === ApiWaveType.Rank,
     isApproveWave: wave?.wave.type === ApiWaveType.Approve,
     isMemesWave:
-      presentationCompetition(wave)?.capabilities.includes(
-        ApiCompetitionCapability.MainStage
-      ) ?? isMemesWave(wave?.id.toLowerCase()),
+      competition?.capabilities.includes(ApiCompetitionCapability.MainStage) ??
+      isMemesWave(wave?.id.toLowerCase()),
     isCurationWave:
-      presentationCompetition(wave)?.capabilities.includes(
-        ApiCompetitionCapability.Curation
-      ) ?? isCurationWave(wave?.id.toLowerCase()),
+      competition?.capabilities.includes(ApiCompetitionCapability.Curation) ??
+      isCurationWave(wave?.id.toLowerCase()),
     isQuorumWave:
-      presentationCompetition(wave)?.capabilities.includes(
-        ApiCompetitionCapability.Quorum
-      ) ?? isQuorumWave(wave?.id.toLowerCase()),
+      competition?.capabilities.includes(ApiCompetitionCapability.Quorum) ??
+      isQuorumWave(wave?.id.toLowerCase()),
     isDm: !!wave?.chat?.scope?.group?.is_direct_message,
   };
 }

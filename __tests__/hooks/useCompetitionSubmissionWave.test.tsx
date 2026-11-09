@@ -60,23 +60,33 @@ const activePage = (count: number) => ({
   has_more: false,
 });
 
-it("checks native capacity and updates the submission action after entry changes", async () => {
-  const fetchEntries = jest.mocked(fetchCompetitionResource);
-  fetchEntries
-    .mockResolvedValueOnce(activePage(2))
-    .mockResolvedValueOnce(activePage(3))
-    .mockResolvedValueOnce(activePage(2));
+const fetchEntries = jest.mocked(fetchCompetitionResource);
+
+function renderParticipation() {
   const client = new QueryClient();
   const wrapper = ({ children }: { readonly children: ReactNode }) => (
     <QueryClientProvider client={client}>{children}</QueryClientProvider>
   );
-  const { result } = renderHook(
+  const hook = renderHook(
     () => {
       const target = useCompetitionSubmissionWave(wave);
       return useWave(target.wave).participation;
     },
     { wrapper }
   );
+  return { ...hook, client };
+}
+
+beforeEach(() => {
+  fetchEntries.mockReset();
+});
+
+it("checks native capacity and updates the submission action after entry changes", async () => {
+  fetchEntries
+    .mockResolvedValueOnce(activePage(2))
+    .mockResolvedValueOnce(activePage(3))
+    .mockResolvedValueOnce(activePage(2));
+  const { result, client } = renderParticipation();
 
   expect(result.current.canSubmitNow).toBe(false);
   await waitFor(() => expect(result.current.canSubmitNow).toBe(true));
@@ -105,4 +115,25 @@ it("checks native capacity and updates the submission action after entry changes
   await act(refresh);
   await waitFor(() => expect(result.current.canSubmitNow).toBe(true));
   expect(result.current.hasReachedLimit).toBe(false);
+});
+
+it("recovers from a failed count while the header stays mounted", async () => {
+  jest.useFakeTimers();
+  try {
+    fetchEntries
+      .mockRejectedValueOnce(new Error("Temporary network error"))
+      .mockRejectedValueOnce(new Error("Temporary network error"))
+      .mockResolvedValueOnce(activePage(2));
+    const { result, unmount } = renderParticipation();
+    await act(() => jest.advanceTimersByTimeAsync(1_000));
+    expect(fetchEntries).toHaveBeenCalledTimes(2);
+    expect(result.current.canSubmitNow).toBe(false);
+
+    await act(() => jest.advanceTimersByTimeAsync(15_000));
+    await waitFor(() => expect(result.current.canSubmitNow).toBe(true));
+    expect(fetchEntries).toHaveBeenCalledTimes(3);
+    unmount();
+  } finally {
+    jest.useRealTimers();
+  }
 });

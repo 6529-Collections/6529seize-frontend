@@ -40,7 +40,10 @@ export function useMainStageActiveEntryCount(
       { profileId, limit },
     ],
     enabled: needsCount && !!profileId && limit > 0,
-    retry: false,
+    retry: 1,
+    // Recover transient failures while the header is still open.
+    refetchInterval: (query) =>
+      query.state.status === "error" ? 15_000 : false,
     staleTime: 15_000,
     queryFn: async ({ signal }) => {
       if (!needsCount || !profileId)
@@ -72,5 +75,5 @@ export function useMainStageActiveEntryCount(
 
   if (!needsCount) return undefined;
   if (limit === 0) return 0;
-  return count.isError ? null : (count.data ?? null);
+  return count.data ?? null;
 }

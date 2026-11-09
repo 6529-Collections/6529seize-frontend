@@ -302,6 +302,7 @@ const competition = (id: string, title: string) => ({
   ...structuredClone(competitionRuleDefaults),
   participation: {
     ...structuredClone(competitionRuleDefaults.participation),
+    max_entries_per_participant: null as number | null,
     ends_at: null as number | null,
   },
   decisions: {
