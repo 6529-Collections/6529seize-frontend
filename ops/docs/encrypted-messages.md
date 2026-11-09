@@ -118,8 +118,12 @@ The explanation and signature button name the permissions this device needs:
 
 - Neither permission is on: **Turn on signed posts and encrypted DMs**, with
   separate **Signed Posts** and **Encrypted DMs** sections and **Sign to enable
-  both**. The composer notice uses the same title, so the notice and the dialog
-  it opens always name the same permissions.
+  both**. The composer's first-time notice uses the same title, so it and the
+  dialog it opens name the same permissions. Once signed posts have expired,
+  the notice is titled **Signed posts have ended in this browser**; when
+  encrypted DMs can be turned on too, its text says the same signature also
+  turns them on, and **Renew** opens **Turn on signed posts and encrypted
+  DMs**.
 - Only signing is missing: **Turn on signed posts** and **Sign to enable Signed Posts**.
 - Only encryption is missing: **Turn on encrypted DMs** and **Sign to enable Encrypted DMs**.
   This requests encryption alone and keeps the existing signing permission.
