@@ -265,9 +265,7 @@ export async function revokeOtherDevice(session: StagingE2eeSession) {
   // The former devices page redirects to Preferences → Devices & security.
   await gotoStaging(page, `${ENCRYPTED_ROUTE}/devices`);
   await expect(
-    page.getByRole("main").getByRole("region").filter({
-      has: page.getByText("This device", { exact: true }),
-    }),
+    page.getByRole("main").getByText("This device", { exact: true }),
     `${session.label} should pin this browser`
   ).toHaveCount(1, { timeout: UI_TIMEOUT_MS });
   const others = activeDeviceRows(page);

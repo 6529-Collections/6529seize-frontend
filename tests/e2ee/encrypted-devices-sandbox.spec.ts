@@ -255,12 +255,9 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
   });
 });
 
-/** This browser's pinned card on Devices & security. */
+/** This browser's pinned card on Devices & security (its one chip). */
 function thisDeviceCard(page: Page) {
-  return page
-    .getByRole("main")
-    .getByRole("region")
-    .filter({ has: page.getByText("This device", { exact: true }) });
+  return page.getByRole("main").getByText("This device", { exact: true });
 }
 
 /** Other active devices (incl. earlier setups): rows with a Revoke button. */
