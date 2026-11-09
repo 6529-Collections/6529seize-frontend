@@ -33,6 +33,17 @@ it.each([
   [{}, "/the-memes"],
   [{ collection: "gradients", intent: "full_set" }, "/6529-gradient"],
   [{ collection: "pebbles", intent: "lowest" }, "/nextgen/collection/pebbles"],
+  [{ intent: "pebbles_set" }, "/nextgen/collection/pebbles"],
+  [{ intent: "full_set", definition: "gradients" }, "/6529-gradient"],
+  [
+    {
+      collection: "memes",
+      intent: "full_set",
+      definition: "gradients",
+      token: "42",
+    },
+    "/6529-gradient/42",
+  ],
 ] as const)(
   "keeps Collect checkout unmounted on iOS for %j",
   async (params, destination) => {

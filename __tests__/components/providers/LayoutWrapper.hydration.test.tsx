@@ -176,7 +176,7 @@ it.each([
 it.each([
   ["ios", undefined, "native", true],
   ["ios", "CA", "native", true],
-  ["ios", "US", "native", false],
+  ["ios", "US", "native", true],
   ["android", "CA", "native", false],
   ["web", "CA", "small", false],
 ] as const)(
