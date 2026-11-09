@@ -1,3 +1,8 @@
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  withDisplayTimeZone,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import type { ApiDropNftLink } from "@/generated/models/ApiDropNftLink";
 import { ApiNftLinkMediaPreviewStatusEnum } from "@/generated/models/ApiNftLinkMediaPreview";
 import { getTimeAgo } from "@/helpers/Helpers";
@@ -555,19 +560,34 @@ export const patchFromMediaLinkUpdate = ({
   return didChange ? patched : current;
 };
 
+const DATA_HEALTH_DATE_TIME: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "numeric",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  second: "2-digit",
+};
+
 const toDataHealthDetails = ({
   prefix,
   timestampMs,
+  zone,
 }: {
   readonly prefix: string;
   readonly timestampMs: number;
+  readonly zone: DisplayTimeZone;
 }): string => {
-  const localDateTime = new Date(timestampMs).toLocaleString();
+  const localDateTime = new Intl.DateTimeFormat(
+    undefined,
+    withDisplayTimeZone(zone, DATA_HEALTH_DATE_TIME)
+  ).format(timestampMs);
   return `${prefix} ${getTimeAgo(timestampMs)} (${localDateTime})`;
 };
 
 export const deriveMarketplaceDataHealth = (
-  data: MarketplacePreviewData | null | undefined
+  data: MarketplacePreviewData | null | undefined,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
 ): MarketplaceDataHealth => {
   const lastErrorMessage = asNonEmptyString(data?.lastErrorMessage) ?? null;
   const hasFailedSince =
@@ -596,6 +616,7 @@ export const deriveMarketplaceDataHealth = (
       details: toDataHealthDetails({
         prefix: "NFT data stale: last successful update",
         timestampMs: updatedAt,
+        zone,
       }),
     };
   }
@@ -605,6 +626,7 @@ export const deriveMarketplaceDataHealth = (
     details: toDataHealthDetails({
       prefix: "NFT data fresh: last successful update",
       timestampMs: updatedAt,
+      zone,
     }),
   };
 };

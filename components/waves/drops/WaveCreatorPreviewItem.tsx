@@ -1,10 +1,10 @@
 "use client";
 
+import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import React from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { getTimeAgoShort } from "@/helpers/Helpers";
 import {
   ArrowTopRightOnSquareIcon,
   ChatBubbleLeftRightIcon,
@@ -24,6 +24,7 @@ export const WaveCreatorPreviewItem: React.FC<WaveCreatorPreviewItemProps> = ({
   wave,
   onSelect,
 }) => {
+  const timeAgoShort = useTimeAgoShort();
   const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
   const waveHref = getWaveRoute({
     waveId: wave.id,
@@ -69,7 +70,7 @@ export const WaveCreatorPreviewItem: React.FC<WaveCreatorPreviewItemProps> = ({
             <>
               <span>Last drop: </span>
               <span className="tw-text-iron-300">
-                {getTimeAgoShort(wave.metrics.latest_drop_timestamp)}
+                {timeAgoShort(wave.metrics.latest_drop_timestamp)}
               </span>
             </>
           ) : (

@@ -1,4 +1,5 @@
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.fr-FR.json";
+import displayTimeZoneMessages from "@/i18n/messages/displayTimeZone.fr-FR.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.fr-FR.json";
 import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.fr-FR.json";
 import { FR_FR_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
@@ -42,6 +43,7 @@ export const FR_FR_MESSAGES = {
   "e2ee.profile.viewUnknown": "Voir le profil",
   "e2ee.profile.level": "Niveau {level}",
   ...safeCollectingMessages,
+  ...displayTimeZoneMessages,
   ...delegationTapGuideMessages,
   ...networkTdhConsolidationMessages,
   ...FR_SUBMISSION_DISCOVERY_MESSAGES,

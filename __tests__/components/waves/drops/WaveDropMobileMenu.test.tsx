@@ -807,6 +807,41 @@ test("shows only copy link in the mobile menu for guests", () => {
   expect(screen.queryByTestId("delete")).toBeNull();
 });
 
+test("offers guests the time switch, which needs no sign-in", () => {
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Chat,
+    author: { handle: "alice" },
+  } as any;
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: null,
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(
+    screen.getByRole("button", { name: "Show times in UTC for now" })
+  ).toBeInTheDocument();
+});
+
 test("lets guests open the signature check from the mobile menu", () => {
   mockSignedMessagesEnabled = true;
   try {

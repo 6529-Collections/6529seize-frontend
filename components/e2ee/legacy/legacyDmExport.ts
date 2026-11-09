@@ -239,6 +239,10 @@ interface LegacyDmHtmlLabels {
   readonly edited: string;
   readonly media: string;
   readonly unknownAuthor: string;
+  /**
+   * A message time as readers see it: in the display time zone, naming that
+   * zone when it is not the device's own. `datetime` always carries UTC.
+   */
   readonly formatTime: (ms: number) => string;
 }
 
