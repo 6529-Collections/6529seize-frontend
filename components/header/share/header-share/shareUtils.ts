@@ -3,12 +3,6 @@ import { toDataURL } from "qrcode";
 import { publicEnv } from "@/config/env";
 import { stripCollectedReturnFromTokenRoute } from "@/helpers/profile-collected-navigation";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
-import {
-  getRefreshToken,
-  getWalletAddress,
-  getWalletRole,
-  hasActiveSessionV2Auth,
-} from "@/services/auth/auth.utils";
 import type { createConnectionShare } from "@/services/auth/session-v2.utils";
 
 export type NativeConnectionShare = Awaited<
@@ -51,30 +45,6 @@ export type PageShareSystemShareAdapter = {
   readonly canShare: (shareData: PageShareData) => Promise<boolean>;
   readonly share: (shareData: PageShareData) => Promise<void>;
 };
-
-export function getLocalLegacyDesktopAuth(walletAddress: string): {
-  readonly refreshToken: string;
-  readonly role: string | null;
-} | null {
-  if (hasActiveSessionV2Auth({ address: walletAddress })) {
-    return null;
-  }
-
-  const activeWalletAddress = getWalletAddress();
-  if (activeWalletAddress?.toLowerCase() !== walletAddress.toLowerCase()) {
-    return null;
-  }
-
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) {
-    return null;
-  }
-
-  return {
-    refreshToken,
-    role: getWalletRole(),
-  };
-}
 
 export function isAbortError(error: unknown, signal?: AbortSignal): boolean {
   return (
@@ -273,35 +243,6 @@ export function buildNativeConnectionShareUrls({
   return {
     appUrl: `${appScheme}://${DeepLinkScope.SHARE_CONNECTION}?${shareParams.toString()}`,
   };
-}
-
-export function buildLegacyDesktopConnectionSharePath({
-  token,
-  address,
-  role,
-}: {
-  readonly token: string;
-  readonly address: string;
-  readonly role: string | null;
-}): string {
-  const shareParams = new URLSearchParams({
-    token,
-    address,
-  });
-  if (role) {
-    shareParams.set("role", role);
-  }
-  return `/accept-connection-sharing?${shareParams.toString()}`;
-}
-
-export function buildLegacyDesktopConnectionShareUrl({
-  coreScheme,
-  deepLinkPath,
-}: {
-  readonly coreScheme: string;
-  readonly deepLinkPath: string;
-}): string {
-  return `${coreScheme}://${DeepLinkScope.NAVIGATE}${deepLinkPath}`;
 }
 
 export function buildNavigateDeepLinkUrl({
