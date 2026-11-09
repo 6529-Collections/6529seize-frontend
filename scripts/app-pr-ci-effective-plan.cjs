@@ -136,6 +136,20 @@ function applyEffectiveAppPrCiPlan(plan) {
       ].includes(file)
   );
 
+  // Encrypted messages, device signing, the sign-in grant path, and the
+  // shared composer editor the encrypted composer is built on.
+  const playwrightE2ee = files.some(
+    (file) =>
+      /^(?:(?:lib|components|hooks)\/(?:e2ee|device-signing)\/|components\/(?:composer|drops\/create\/lexical)\/|components\/waves\/(?:CreateDropEmojiPicker|LazyEmojiPicker|EditLastDropArrowUpPlugin|ComposerSendButton|composerPresentation)|native\/mls-wasm\/|app\/messages\/encrypted\/|tests\/(?:support\/)?e2ee\/|i18n\/messages\/e2ee\.ts$|components\/auth\/(?:authActions|authRequestSignIn|authSignedMessagesGrant|authLoginE2eeDevice|signedMessagesTestSigner)\.ts$|services\/auth\/devAuthTestOverride\.ts$)/u.test(
+        file
+      ) ||
+      [
+        "tests/support/composerSandboxServer.cjs",
+        "scripts/app-pr-ci-effective-plan.cjs",
+        ".github/workflows/app-pr-ci.yml",
+      ].includes(file)
+  );
+
   const playwrightArtworkDocumentation = files.some((file) =>
     ARTWORK_DOCUMENTATION_BROWSER_PATTERNS.some((pattern) => pattern.test(file))
   );
@@ -357,6 +371,12 @@ function applyEffectiveAppPrCiPlan(plan) {
     playwright_drop_reactions: check(
       playwrightDropReactions,
       "Drop reaction state or its browser contract requires live tooltip and touch-dialog coverage."
+    ),
+    playwright_e2ee: check(
+      playwrightE2ee,
+      playwrightE2ee
+        ? "Encrypted messages, device signing, the sign-in grant path or the shared composer changed and need the encrypted messages browser pack."
+        : "No encrypted messages, device signing or shared composer code changed."
     ),
     playwright_artwork_documentation: check(
       playwrightArtworkDocumentation,

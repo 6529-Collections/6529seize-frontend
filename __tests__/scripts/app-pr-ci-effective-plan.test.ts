@@ -552,6 +552,7 @@ it("does not select PDF coverage for unrelated content", () => {
 type WorkflowStep = {
   env?: Record<string, string>;
   id?: string;
+  if?: string;
   name?: string;
   run?: string;
   with?: Record<string, unknown>;
@@ -687,6 +688,76 @@ describe("Wave link-preview browser lane selection", () => {
     } finally {
       fs.rmSync(root, { recursive: true, force: true });
     }
+  });
+});
+
+describe("Encrypted messages browser lane selection", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(".github/workflows/app-pr-ci.yml", "utf8")
+  );
+  const publish = requireRunStep(
+    workflow.jobs.plan.steps as WorkflowStep[],
+    ({ id }) => id === "plan_outputs",
+    "Publish CI plan outputs"
+  );
+
+  it.each([
+    ["lib/e2ee/engine/index.ts", true],
+    ["components/e2ee/gate/E2eeEnrollmentCard.tsx", true],
+    ["hooks/e2ee/useE2ee.ts", true],
+    ["components/device-signing/DeviceSetupDialog.tsx", true],
+    ["lib/device-signing/login-grant.ts", true],
+    ["hooks/device-signing/useEnableSignedMessages.ts", true],
+    ["native/mls-wasm/src/lib.rs", true],
+    ["app/messages/encrypted/page.tsx", true],
+    ["tests/e2ee/encrypted-dm-sandbox.spec.ts", true],
+    ["tests/support/e2ee/sandboxSignIn.cjs", true],
+    ["components/auth/authSignedMessagesGrant.ts", true],
+    // The shared editor the encrypted composer is built on.
+    ["components/composer/ComposerEditor.tsx", true],
+    ["components/drops/create/lexical/plugins/SelectAllContentsPlugin.tsx", true],
+    ["components/waves/CreateDropEmojiPicker.tsx", true],
+    ["components/waves/LazyEmojiPicker.tsx", true],
+    ["components/drops/create/lexical/nodes/EmojiNode.tsx", true],
+    ["components/drops/create/utils/CreateDropContent.tsx", false],
+    ["components/auth/Auth.tsx", false],
+    ["components/waves/drops/WaveDrop.tsx", false],
+    ["README.md", false],
+  ] as const)("selects the encrypted lane for %s: %s", (file, selected) => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "e2ee-lane-plan-"));
+    const planDir = path.join(root, "test-results/app-pr-ci");
+    try {
+      fs.mkdirSync(planDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(planDir, "ci-plan.json"),
+        JSON.stringify({ ...executePlan([file]), risk: { computed_floor: 2 } })
+      );
+      const result = runWorkflowScript(publish.run, root, {
+        DEFAULT_CI_RUNNER: "ubuntu-latest",
+        BUILD_CI_RUNNER: "ubuntu-latest",
+      });
+      expect(result.status).toBe(0);
+      const matrixLine = result.output
+        .split("\n")
+        .find((line) => line.startsWith("core_playwright_matrix="));
+      const matrix = JSON.parse(
+        matrixLine?.slice("core_playwright_matrix=".length) ?? "{}"
+      ) as { include?: { lane: string }[] };
+      expect(
+        (matrix.include ?? []).some(({ lane }) => lane === "playwright-e2ee")
+      ).toBe(selected);
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("runs the manifest's encrypted messages pack for that lane", () => {
+    const job = workflow.jobs["core-playwright-checks"];
+    const step = (job.steps as WorkflowStep[]).find(
+      ({ name }) => name === "Run encrypted messages browser pack"
+    );
+    expect(step?.if).toBe("matrix.lane == 'playwright-e2ee'");
+    expect(step?.run).toBe("./bin/6529 run test:e2e:e2ee-sandbox");
   });
 });
 

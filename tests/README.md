@@ -226,7 +226,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile editing, Following, artist artwork alerts and REP editing dialogs, permissions and recovery.  |
 | `test:e2e:profile-nic-sandbox`                      | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile NIC activity filtering and cursor navigation across desktop, tablet and mobile.               |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
-| `test:e2e:e2ee-sandbox`                             | —                             | sandbox  | local       | manual                    | 30m     | Encrypted DMs and groups across several local browsers against the fake delivery service.             |
+| `test:e2e:e2ee-sandbox`                             | —                             | sandbox  | local       | pr-ci, manual             | 30m     | Encrypted DMs and groups across several local browsers against the fake delivery service.             |
 | `test:e2e:e2ee-picker-sandbox`                      | —                             | sandbox  | local       | manual                    | 15m     | Encrypted chat recipient selection in desktop Chromium and iPhone WebKit.                             |
 | `test:e2e:metamask-bridge`                          | —                             | sandbox  | local       | manual                    | 15m     | Isolated WebKit MetaMask bridge attribution and application-error boundaries.                         |
 | `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | pr-ci, manual             | 15m     | @smoke subset on desktop and mobile web shells.                                                       |
@@ -580,7 +580,10 @@ Surface matrix:
   development-like and the page is on `localhost` or `127.0.0.1`. The sandbox has no WebSocket, so
   engines poll (5 s with a chat open, 30 s otherwise) and specs use generous
   `expect` timeouts. The DM spec also runs on mobile Chromium; the others are
-  desktop only. It must never run against staging or production.
+  desktop only. App PR CI runs it (lane `playwright-e2ee`) for changes to
+  encrypted messages, device signing, the sign-in grant path, the shared
+  composer editor the encrypted composer is built on, or these fixtures. It
+  must never run against staging or production.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.

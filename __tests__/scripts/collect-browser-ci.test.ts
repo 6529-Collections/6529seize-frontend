@@ -163,6 +163,18 @@ it("selects every core browser lane when their shared workflow changes", () => {
     ],
   });
 });
+it("runs the encrypted messages lane when the plan requires it", () => {
+  const outputs = select([], { playwright_e2ee: { required: true } });
+  expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
+    include: [
+      {
+        lane: "playwright-e2ee",
+        label: "Encrypted messages desktop and mobile",
+        runner: "ubuntu-latest",
+      },
+    ],
+  });
+});
 it("runs the isolated Collect and market specs on both supported browser viewports", () => {
   const job = workflow.jobs["core-playwright-checks"]!;
   const step = job.steps.find(

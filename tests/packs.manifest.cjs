@@ -628,6 +628,7 @@ const PACKS = [
       [DESKTOP, MOBILE]
     ),
     timeoutMinutes: 30,
+    triggers: ["pr-ci", "manual"],
   },
   sandboxPack(
     "test:e2e:e2ee-picker-sandbox",
