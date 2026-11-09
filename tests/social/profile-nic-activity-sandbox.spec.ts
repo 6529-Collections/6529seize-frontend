@@ -394,6 +394,28 @@ test.describe("Profile NIC activity @local-only", () => {
           "iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAIAAABvFaqvAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAJUlEQVQ4jWPooBJgGDWIIBgNI8JgNIwIg9EwIgxGw4gwGMZhBAAG8pYuMnppeAAAAABJRU5ErkJggg==",
           "base64"
         );
+        await page.route(`${api}/api/profile-logs?*`, (route) =>
+          route.fulfill({
+            json: {
+              page: 1,
+              next: false,
+              data: fixtureRows()
+                .slice(0, 3)
+                .map((row, index) => ({
+                  ...row,
+                  profile_handle: "avatar-user",
+                  type: index < 2 ? "PFP_EDIT" : "HANDLE_EDIT",
+                  contents:
+                    index < 2
+                      ? {
+                          old_value: index === 0 ? source : null,
+                          new_value: source,
+                        }
+                      : { old_value: null, new_value: "avatar-user" },
+                })),
+            },
+          })
+        );
         const optimizerWidths: number[] = [];
         await page.route(
           `${api}/api/identities/avatar-user*`,
@@ -439,6 +461,27 @@ test.describe("Profile NIC activity @local-only", () => {
         const box = await avatar.boundingBox();
         expect(box?.width).toBe(24);
         expect(box?.height).toBe(24);
+        const activityAvatars = page
+          .getByRole("img", { name: "avatar-user", exact: true })
+          .filter({ visible: true });
+        await expect(activityAvatars).toHaveCount(3);
+        const centerOffsets = await activityAvatars.evaluateAll((images) =>
+          images.map((image) => {
+            const row = image.closest('[class~="tw-group"]');
+            const handle = row?.querySelector('a[aria-label="avatar-user"]');
+            if (!handle) throw new Error("Activity handle is missing");
+            const avatarBox = image.getBoundingClientRect();
+            const handleBox = handle.getBoundingClientRect();
+            return Math.abs(
+              avatarBox.y +
+                avatarBox.height / 2 -
+                (handleBox.y + handleBox.height / 2)
+            );
+          })
+        );
+        for (const offset of centerOffsets) {
+          expect(offset).toBeLessThanOrEqual(1);
+        }
         await expectNoHorizontalOverflow(page);
       });
     }
