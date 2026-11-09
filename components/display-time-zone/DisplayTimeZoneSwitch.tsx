@@ -157,7 +157,9 @@ export default function DisplayTimeZoneSwitch({
   };
 
   if (variant === "compact" && !isOverridden) {
-    return <AnnouncementRegion text={announcement} />;
+    // Compact headers switch from the overflow menu; nothing shows here
+    // until the switch is on.
+    return null;
   }
 
   const switchLabel = t(locale, "displayTimeZone.switch.label", {

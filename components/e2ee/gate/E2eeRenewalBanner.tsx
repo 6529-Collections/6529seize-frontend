@@ -1,5 +1,7 @@
 "use client";
 
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import { withDisplayTimeZoneDate } from "@/lib/display-time-zone/displayTimeZone";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useState, useSyncExternalStore } from "react";
@@ -110,6 +112,7 @@ function RenewalBannerContent({
   readonly preview: boolean;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const device = useE2ee();
   const { engine } = device;
   const security = useDeviceSecurityState();
@@ -126,7 +129,18 @@ function RenewalBannerContent({
   );
   if ((!showProof && !showEncryption && !previewOnly) || dismissed) return null;
 
-  const expiryDate = expiry === undefined ? "" : formatDate(locale, expiry);
+  const expiryDate =
+    expiry === undefined
+      ? ""
+      : formatDate(
+          locale,
+          expiry,
+          withDisplayTimeZoneDate(zone, {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })
+        );
   const busy = pending || signing.isEnabling;
 
   const renew = async () => {
