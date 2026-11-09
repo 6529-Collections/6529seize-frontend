@@ -695,6 +695,63 @@ describe("Wave link-preview browser lane selection", () => {
   });
 });
 
+describe("Profile browser job isolation", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(".github/workflows/app-pr-ci.yml", "utf8")
+  );
+  const publish = requireRunStep(
+    workflow.jobs.plan.steps as WorkflowStep[],
+    ({ id }) => id === "plan_outputs",
+    "Publish CI plan outputs"
+  );
+
+  it.each([true, false])(
+    "preserves shell selection in a separate profile job when required=%s",
+    (required) => {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "profile-ci-plan-"));
+      const planDir = path.join(root, "test-results/app-pr-ci");
+      const base = executePlan(["README.md"]);
+      const input = {
+        ...base,
+        checks: {
+          ...base.checks,
+          playwright_critical_shell: { required },
+        },
+        risk: { computed_floor: 2 },
+      };
+      try {
+        fs.mkdirSync(planDir, { recursive: true });
+        fs.writeFileSync(
+          path.join(planDir, "ci-plan.json"),
+          JSON.stringify(input)
+        );
+        const result = runWorkflowScript(publish.run, root, {
+          DEFAULT_CI_RUNNER: "ubuntu-latest",
+          BUILD_CI_RUNNER: "ubuntu-latest",
+        });
+        expect(result.status).toBe(0);
+        const output = result.output
+          .split("\n")
+          .find((line) => line.startsWith("core_playwright_matrix="));
+        expect(output).toBeDefined();
+        const matrix = JSON.parse(
+          output!.slice("core_playwright_matrix=".length)
+        ) as { include: { lane: string }[] };
+        for (const lane of [
+          "playwright-critical-shell",
+          "playwright-profile-following",
+        ]) {
+          expect(
+            matrix.include.filter((job) => job.lane === lane)
+          ).toHaveLength(required ? 1 : 0);
+        }
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+  );
+});
+
 describe("App PR CI merge-tree base", () => {
   const workflowPath = path.join(
     process.cwd(),
