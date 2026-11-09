@@ -9454,7 +9454,8 @@ paths:
       summary: Create S3 URL for drop media upload
       description: >-
         Requires authentication; content_type must be one of the defined MIME
-        types.
+        types. Optional `purpose` (default `chat`) is recorded with the upload;
+        chat uploads get a neutral public file name.
       operationId: createDropMediaUrl
       requestBody:
         required: true
@@ -9569,7 +9570,10 @@ paths:
       summary: Get upload ID and key for multipart upload
       description: >-
         Requires authentication; content_type must be one of the defined MIME
-        types.
+        types. Optional `purpose` (default `chat`): chat images are published
+        with identifying metadata removed and every chat upload gets a neutral
+        public file name; `decision_entry` uploads keep the original bytes and
+        file name and can only be attached to a decision entry.
       operationId: createMultipartDropMediaUrl
       requestBody:
         required: true
@@ -9659,7 +9663,9 @@ paths:
       tags:
         - Drops
       summary: Get upload ID and key for multipart upload
-      description: Requires the user to be authenticated
+      description: >-
+        Requires the user to be authenticated. Wave pictures are always chat
+        media (metadata removed, neutral file name); `purpose` is ignored.
       operationId: createMultipartWaveMediaUrl
       requestBody:
         required: true
@@ -31044,6 +31050,8 @@ components:
         file_name:
           type: string
           example: image.png
+        purpose:
+          $ref: "#/components/schemas/ApiMediaUploadPurpose"
     ApiCreateMediaUrlResponse:
       required:
         - upload_url
@@ -37252,6 +37260,19 @@ components:
         - model/gltf-binary
         - video/quicktime
         - image/webp
+    ApiMediaUploadPurpose:
+      type: string
+      description: >-
+        Why drop or wave media is uploaded; optional, defaults to `chat`. `chat`
+        media has identifying metadata (location, camera, owner, capture time,
+        thumbnails) removed and gets a neutral public file name.
+        `decision_entry` keeps the artist's original bytes and file name; such
+        media can only be attached to a decision entry (a participatory drop),
+        never to a chat drop or a reply. Wave media is always treated as `chat`.
+        Distribution photo uploads ignore it.
+      enum:
+        - chat
+        - decision_entry
     ApiMemeCardDropMapping:
       type: object
       required:

@@ -152,6 +152,7 @@
         "Competitions are now called decisions. The Competitions tab is now Decisions, + Competition is now + Decision, and the scheduled winner-selection moments formerly called decisions are now results (Pause results, Resume results, Next result). Older /competitions links still open the same decision.",
         "Where the decision experience is available, use Decisions in a wave to browse its active decisions and history. Each decision opens on Leaderboard and has its own entries, votes, rules, budget and results while Shared chat returns to the wave conversation. There is no separate Entries tab.",
         "Anonymous submissions is an optional decision setup setting and is off by default. It is fixed after publication. Other users see each entry without its author identity until that entry wins; the author's other submissions remain anonymous, including across later draws. You can manage your own entries through My submissions. Your identity is revealed automatically if your submission wins. Unrevealed anonymous entries remain visible despite account blocks so blocking cannot identify their author; hiding a specific drop and platform moderation still apply. Related author notifications remain visible despite account blocks and identity mutes until that entry wins; ordinary notifications retain their existing filters. Content and metadata remain visible as submitted, so self-disclosure there is the submitter's responsibility. If an older upload cannot be used anonymously, upload the media again and retry; the submission form keeps your other input.",
+        "Media attached to a decision entry keeps the artist's original file, including embedded details such as location, camera details, capture time and file name; chat and profile photos have those details removed. Remove anything you do not want public from the file before submitting.",
         "Decision links use /waves/{waveId}/decisions/{decisionId}; an entry link adds ?entry={entryId}. Older /waves/{waveId}/competitions links redirect permanently to the matching /decisions page with their query intact. Explicit decision and entry links preserve that decision across tabs, reload and Back/Forward even when another decision becomes the default.",
         "In decision setup, Decision type offers Rank and Approve in a desktop dropdown or a bottom sheet on smaller screens, including the app. The current choice is marked. Selecting a type closes the picker; dismissing it leaves the choice unchanged.",
         "In the app, the decision setup editor keeps the focused name or description field above the keyboard and action bar. Closing the keyboard restores the editor's full height.",
@@ -4286,6 +4287,7 @@
       ],
       "facts": [
         "Memes wave docs cover submission, preview/submit states, additional info fields, and quick voting.",
+        "A Memes submission is a decision entry, so uploaded artwork, supporting media, preview images and promo videos keep the artist's original files, including embedded details such as location, camera details and capture time.",
         "In Artwork Details, checking Additional Action opens Your plan (optional). Describe what you will do if selected, who receives it, timing, and any costs or conditions. The plan is public with the submission and supports up to 5000 characters; a blank plan is allowed.",
         "Unchecking Additional Action keeps the plan draft during the current modal session but excludes it from the submitted metadata. Rechecking restores it. Closing the modal discards the unsaved draft.",
         "Additional Information and optional Preview both show the Additional Action summary before submission. Use Back to edit the action and plan in Artwork. A marked action with no plan says no separate plan was provided.",
@@ -6752,6 +6754,7 @@
         "To change profile media on desktop, choose Edit beside Preferences and use Profile cover or Profile picture in the combined editor. Smaller layouts keep Edit profile > Profile cover or Profile picture.",
         "Editing requires a confirmed direct owner session and is hidden for visitors, signed-out users and active proxies. Desktop saves all changed profile fields with Save; the smaller picture editor retains Save PFP. Both editors show Select Meme search immediately, separated from file upload by or. Desktop lets you type while Memes load and keeps loading and retry states. Both layouts use compact field styling. Cover editing supports left-aligned Gradient and Image modes.",
         "In profile picture editors, saved or selected images show their preview inside the Upload image area, below Meme search, with no separate preview row. Select Meme search and Upload image remain available to choose a different Meme or file; drag and drop still works.",
+        "Uploaded profile pictures and banner images are published without identifying metadata such as location, camera details and capture time.",
         "Use these records when users ask how to change profile media."
       ],
       "canonical_path": "/{user}",
@@ -7023,6 +7026,7 @@
         "Remove an inline image with its Remove image X, or select it and press Backspace or Delete. Undo restores it in place. Drafts with inline images are not saved when leaving the composer.",
         "Unsupported files are reported immediately by name with the supported formats. Existing text and valid files remain in the draft, including valid files from mixed batches.",
         "AVIF still images are converted to WebP with orientation applied and metadata removed for compatibility with older supported apps. Wait for preparation before sending or continuing a Storm. Animated AVIF is unsupported; use a still image or GIF.",
+        "Images posted in chat, replies and DMs are published without location, camera details, capture time or other identifying metadata, under a neutral file name. Media attached to a decision entry keeps the artist's original file.",
         "Media must be non-empty and at most 500 MB. PDF limits are 25 MB and 100 pages; CSV is limited to 50 MB. The file tray supports eight files across all Storm parts and skips excess files without removing existing selections.",
         "AVIF limits are 64 million pixels and 16,383 pixels per side. Corrupt files and AVIF content with a mismatched filename are rejected. Uppercase .AVIF and empty or generic browser MIME types work.",
         "HEIC/HEIF, SVG, BMP, TIFF and JPEG XL images are unsupported. Renaming a file does not convert its format. Other upload surfaces have their own format rules.",
@@ -7034,6 +7038,48 @@
       "source_refs": [
         "ops/docs/waves/composer/feature-wave-drop-drag-paste-image-uploads.md",
         "ops/docs/waves/drop-actions/feature-image-viewer-and-scaling.md"
+      ]
+    },
+    {
+      "id": "media.photo-metadata-privacy",
+      "kind": "business_rule",
+      "title": "Photo metadata removed in chat and on profiles",
+      "aliases": [
+        "photo location",
+        "remove GPS from photos",
+        "EXIF data",
+        "image metadata",
+        "camera metadata",
+        "does 6529 strip metadata",
+        "photo privacy"
+      ],
+      "keywords": [
+        "metadata",
+        "EXIF",
+        "GPS",
+        "location",
+        "camera",
+        "capture time",
+        "privacy",
+        "decision entry",
+        "original file"
+      ],
+      "facts": [
+        "Images posted in chat, replies and direct messages are published without identifying metadata: location, camera details and serial numbers, owner and artist names, capture date and time, embedded thumbnails, and XMP and IPTC data. Every chat upload also gets a neutral public file name.",
+        "Profile pictures, profile banners and wave pictures have the same identifying metadata removed.",
+        "Decision entries are the exception: media attached to an entry, including Memes submission artwork and its supporting media, keeps the artist's original file, embedded details and file name. Check the file before submitting if you do not want those details public, especially for an anonymous submission.",
+        "Images pasted into the text of a decision entry are treated like chat images."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "media", "privacy", "profiles"],
+      "source_refs": [
+        "ops/docs/waves/composer/feature-wave-drop-drag-paste-image-uploads.md",
+        "ops/docs/waves/competitions/feature-competitions.md",
+        "ops/docs/waves/memes/feature-memes-submission.md",
+        "ops/docs/profiles/navigation/feature-profile-picture-editing.md",
+        "ops/docs/profiles/navigation/feature-banner-editing.md",
+        "ops/docs/waves/header/feature-wave-picture-edit.md"
       ]
     },
     {

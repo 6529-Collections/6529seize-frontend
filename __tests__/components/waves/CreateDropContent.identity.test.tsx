@@ -6,7 +6,30 @@ import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/React
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
+import { generateParts } from "@/components/waves/create-drop-content/part-builders";
+import { useDropFilePreparation } from "@/components/waves/create-drop-content/useDropFilePreparation";
+
+// Spies that keep the real behavior, so the media purpose can be asserted.
+jest.mock("@/components/waves/create-drop-content/part-builders", () => {
+  const actual = jest.requireActual(
+    "@/components/waves/create-drop-content/part-builders"
+  );
+  return { ...actual, generateParts: jest.fn(actual.generateParts) };
+});
+jest.mock(
+  "@/components/waves/create-drop-content/useDropFilePreparation",
+  () => {
+    const actual = jest.requireActual(
+      "@/components/waves/create-drop-content/useDropFilePreparation"
+    );
+    return {
+      ...actual,
+      useDropFilePreparation: jest.fn(actual.useDropFilePreparation),
+    };
+  }
+);
 
 const mockViewerSelection = {
   value: "0xviewer",
@@ -619,6 +642,59 @@ describe("CreateDropContent identity picker flow", () => {
     await userEvent.click(screen.getByText("change identity"));
 
     expect(screen.getByTestId("identity-picker-modal")).toBeInTheDocument();
+  });
+
+  it("uploads a decision entry's media as decision_entry", async () => {
+    const { submitDrop } = renderSubject({ drop: createStoredDrop() });
+
+    expect(useDropFilePreparation).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        purpose: ApiMediaUploadPurpose.DecisionEntry,
+      })
+    );
+
+    await userEvent.click(screen.getByText("select other"));
+    await waitFor(() => {
+      expect(
+        screen.queryByTestId("identity-picker-modal")
+      ).not.toBeInTheDocument();
+    });
+    await userEvent.click(screen.getByText("submit"));
+
+    await waitFor(() => {
+      expect(submitDrop).toHaveBeenCalledTimes(1);
+    });
+    expect(submitDrop.mock.calls[0]?.[0].drop.drop_type).toBe("PARTICIPATORY");
+    expect(generateParts).toHaveBeenCalledTimes(1);
+    expect(generateParts).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.any(Function),
+      ApiMediaUploadPurpose.DecisionEntry
+    );
+  });
+
+  it("uploads a chat drop's media as chat", async () => {
+    const { submitDrop } = renderSubject({
+      isDropMode: false,
+      drop: createStoredDrop(),
+    });
+
+    expect(useDropFilePreparation).toHaveBeenLastCalledWith(
+      expect.objectContaining({ purpose: ApiMediaUploadPurpose.Chat })
+    );
+
+    await userEvent.click(screen.getByText("submit"));
+
+    await waitFor(() => {
+      expect(submitDrop).toHaveBeenCalledTimes(1);
+    });
+    expect(submitDrop.mock.calls[0]?.[0].drop.drop_type).toBe("CHAT");
+    expect(generateParts).toHaveBeenCalledTimes(1);
+    expect(generateParts).toHaveBeenCalledWith(
+      expect.any(Array),
+      expect.any(Function),
+      ApiMediaUploadPurpose.Chat
+    );
   });
 
   it("does not suppress picker auto-open after a chat submit on an identity wave", async () => {

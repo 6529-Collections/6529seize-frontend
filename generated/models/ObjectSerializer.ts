@@ -589,6 +589,7 @@ export * from '../models/ApiMarketTransaction';
 export * from '../models/ApiMediaResolveRequest';
 export * from '../models/ApiMediaResolveResponse';
 export * from '../models/ApiMediaUploadMimeType';
+export * from '../models/ApiMediaUploadPurpose';
 export * from '../models/ApiMemeCardDropMapping';
 export * from '../models/ApiMemeCollaborationArtwork';
 export * from '../models/ApiMemeCollaborationCredit';
@@ -1306,7 +1307,7 @@ import { ApiCreateGroup } from '../models/ApiCreateGroup';
 import { ApiCreateGroupDescription          } from '../models/ApiCreateGroupDescription';
 import { ApiCreateLegacyDesktopConnectionShareRequest , ApiCreateLegacyDesktopConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateLegacyDesktopConnectionShareRequest';
 import { ApiCreateLegacyDesktopConnectionShareResponse } from '../models/ApiCreateLegacyDesktopConnectionShareResponse';
-import { ApiCreateMediaUploadUrlRequest   } from '../models/ApiCreateMediaUploadUrlRequest';
+import { ApiCreateMediaUploadUrlRequest    } from '../models/ApiCreateMediaUploadUrlRequest';
 import { ApiCreateMediaUrlResponse } from '../models/ApiCreateMediaUrlResponse';
 import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
 import { ApiCreateNewProfileProxy } from '../models/ApiCreateNewProfileProxy';
@@ -1578,6 +1579,7 @@ import { ApiMarketTransaction    , ApiMarketTransactionPurposeEnum  , ApiMarketT
 import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
+import { ApiMediaUploadPurpose } from '../models/ApiMediaUploadPurpose';
 import { ApiMemeCardDropMapping } from '../models/ApiMemeCardDropMapping';
 import { ApiMemeCollaborationArtwork } from '../models/ApiMemeCollaborationArtwork';
 import { ApiMemeCollaborationCredit } from '../models/ApiMemeCollaborationCredit';
@@ -2165,6 +2167,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiMarketTransactionPurposeEnum",
     "ApiMarketTransactionApprovalScopeEnum",
     "ApiMediaUploadMimeType",
+    "ApiMediaUploadPurpose",
     "ApiMemeCollaborationInvitationStatusEnum",
     "ApiMemeCollaborationResponseRequestActionEnum",
     "ApiMemesExtendedDataTokenTypeEnum",

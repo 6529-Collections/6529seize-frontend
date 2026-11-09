@@ -3,6 +3,7 @@ import type { ApiMintingClaimActionTypesResponse } from "@/generated/models/ApiM
 import type { ApiMintingClaimActionsResponse } from "@/generated/models/ApiMintingClaimActionsResponse";
 import type { ApiMintingClaimActionUpdateRequest } from "@/generated/models/ApiMintingClaimActionUpdateRequest";
 import type { ApiMemesMintStat } from "@/generated/models/ApiMemesMintStat";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { MintingClaimsPageResponse } from "@/generated/models/MintingClaimsPageResponse";
 import type { MintingClaimsProofsResponse } from "@/generated/models/MintingClaimsProofsResponse";
@@ -241,6 +242,8 @@ export async function uploadClaimMedia(
 ): Promise<string> {
   // Claim/field linkage is persisted by the subsequent patchClaim call.
   // This upload endpoint is intentionally generic and only returns media_url.
+  // The file becomes the minted card's artwork, so it must stay byte-for-byte
+  // the artist's original; decision_entry is the purpose that keeps it.
   const completion = await multipartUploadCore({
     file,
     endpoints: {
@@ -249,6 +252,7 @@ export async function uploadClaimMedia(
       complete: "drop-media/multipart-upload/completion",
     },
     waitForReady: true,
+    purpose: ApiMediaUploadPurpose.DecisionEntry,
   });
 
   return completion.media_url;

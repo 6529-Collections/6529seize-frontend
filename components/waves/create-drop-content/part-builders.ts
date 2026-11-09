@@ -1,6 +1,7 @@
 import type { CreateDropPart, CreateDropRequestPart } from "@/entities/IDrop";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
+import type { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { isAttachmentUploadFile } from "@/services/uploads/attachmentUploadMimeType";
 import type React from "react";
 import {
@@ -12,7 +13,8 @@ import type { UploadingFile } from "./types";
 
 const generateMediaForPart = async (
   media: File,
-  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
+  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>,
+  purpose: ApiMediaUploadPurpose
 ) => {
   setUploadingFiles((prev) => [
     ...prev,
@@ -21,6 +23,7 @@ const generateMediaForPart = async (
   return await multiPartUpload({
     file: media,
     path: "drop",
+    purpose,
     waitForReady: false,
     onProgress: (progress) =>
       setUploadingFiles((prev) =>
@@ -58,13 +61,14 @@ const generateAttachmentForPart = async (
 
 const generatePart = async (
   part: CreateDropPart,
-  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
+  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>,
+  purpose: ApiMediaUploadPurpose
 ): Promise<CreateDropRequestPart> => {
   const mediaFiles = part.media.filter((file) => !isAttachmentUploadFile(file));
   const attachmentFiles = part.media.filter(isAttachmentUploadFile);
   const media = await Promise.all(
     mediaFiles.map((mediaFile) =>
-      generateMediaForPart(mediaFile, setUploadingFiles)
+      generateMediaForPart(mediaFile, setUploadingFiles, purpose)
     )
   );
   const uploadedAttachments = await Promise.all(
@@ -94,11 +98,12 @@ const generatePart = async (
 
 export const generateParts = async (
   parts: CreateDropPart[],
-  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
+  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>,
+  purpose: ApiMediaUploadPurpose
 ): Promise<CreateDropRequestPart[]> => {
   try {
     return await Promise.all(
-      parts.map((part) => generatePart(part, setUploadingFiles))
+      parts.map((part) => generatePart(part, setUploadingFiles, purpose))
     );
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);

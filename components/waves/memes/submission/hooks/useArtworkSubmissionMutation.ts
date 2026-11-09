@@ -9,6 +9,7 @@ import { multiPartUpload } from "@/components/waves/create-wave/services/multiPa
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -120,9 +121,11 @@ function useArtworkUpload({
     mutationFn: async ({ file, callbacks }) => {
       updatePhase("uploading", callbacks);
 
+      // The artwork becomes a decision entry, which keeps the original file.
       return multiPartUpload({
         file,
         path: "drop",
+        purpose: ApiMediaUploadPurpose.DecisionEntry,
         onProgress: setUploadProgress,
       });
     },
