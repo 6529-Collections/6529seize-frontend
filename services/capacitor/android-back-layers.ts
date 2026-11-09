@@ -4,8 +4,9 @@ interface AndroidBackLayer {
 }
 
 const layers = new Set<AndroidBackLayer>();
+// The persistent time-zone map's inline listbox must not capture navigation.
 const OVERLAY_SELECTOR =
-  '[role="menu"], [role="listbox"], [role="dialog"], [role="alertdialog"], dialog[open]';
+  '[role="menu"], [role="listbox"]:not(svg[aria-labelledby~="world-time-zones-map-heading"]), [role="dialog"], [role="alertdialog"], dialog[open]';
 
 /** Register only open surfaces; there are no subscribers or render updates. */
 export function registerAndroidBackLayer(layer: AndroidBackLayer): () => void {
