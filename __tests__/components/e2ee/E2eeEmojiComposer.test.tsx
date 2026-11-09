@@ -2,6 +2,7 @@ jest.unmock("lexical");
 import {
   setComposerText,
   composerText,
+  composerTextBeforeCaret,
   selectComposerText,
   typeAtComposerSelection,
 } from "./composerTestUtils";
@@ -147,6 +148,10 @@ it("replaces the selected text with a native emoji, restores the caret and sends
   fireEvent.click(screen.getByRole("button", { name: "Choose smile" }));
   await waitFor(() => expect(input).toHaveFocus());
   expect(composerText(input)).toBe("Hello 😀");
+  // The caret is restored after the picker has closed (two frames). jsdom
+  // can briefly move it to the editor's start when focus lands, so wait for
+  // the restored caret rather than typing in that moment.
+  await waitFor(() => expect(composerTextBeforeCaret(input)).toBe("Hello 😀"));
   typeAtComposerSelection(input, "!");
   expect(composerText(input)).toBe("Hello 😀!");
   fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
@@ -218,6 +223,27 @@ it("replaces the whole message when it is selected by the browser's Select All",
   });
   typeAtComposerSelection(input, "Bye");
   expect(composerText(input)).toBe("Bye");
+});
+
+it("leaves a caret at the start of the message alone", () => {
+  const { input } = setup();
+  setRecalledMessage(input);
+  selectComposerText(input, 0);
+  act(() => {
+    // A caret at the editor's own start is not a whole-editor selection.
+    getSelection()!.collapse(input, 0);
+    document.dispatchEvent(new Event("selectionchange"));
+    input.dispatchEvent(
+      new InputEvent("beforeinput", {
+        inputType: "insertText",
+        data: "X",
+        bubbles: true,
+        cancelable: true,
+      })
+    );
+  });
+  typeAtComposerSelection(input, "X");
+  expect(composerText(input)).toBe("XHello :gm:");
 });
 
 it("replaces the whole message when typing arrives before the selection change", () => {
