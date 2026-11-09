@@ -10,6 +10,9 @@
  *   challenge, stores a combined grant for `/e2ee/devices/login-grant` and
  *   answers with the web session and the stored device grant.
  * - `GET /api/device-grants` lists the caller's grants.
+ * - `POST /api/device-grants/:id/revoke` ends one (and, like the backend,
+ *   the encrypted-DMs device a combined grant enrolled);
+ *   `POST /api/device-grants/:id/acknowledge` clears its new-device notice.
  *
  * The statement mirrors lib/device-signing/grant-message.ts byte for byte;
  * __tests__/lib/e2ee/sandboxSignIn.test.ts checks every challenge it renders
@@ -292,7 +295,49 @@ function createSandboxSignIn({ walletUser, getDeliveryService, now = Date.now })
     };
   }
 
-  return { issueNonce, login, listGrants, reset };
+  /** The caller's own grant by id, or null. */
+  function ownGrant(wallet, grantId) {
+    const owner = walletUser(wallet)?.profileId ?? null;
+    const id = String(grantId || "").toLowerCase();
+    return (
+      grants.find(
+        (grant) =>
+          grant.id.toLowerCase() === id &&
+          owner !== null &&
+          walletUser(grant.wallet)?.profileId === owner
+      ) ?? null
+    );
+  }
+
+  function revokeGrant(wallet, grantId) {
+    const grant = ownGrant(wallet, grantId);
+    if (!grant) {
+      return { status: 404, body: { error: "Device grant not found." } };
+    }
+    if (grant.revoked_at === null) {
+      grant.revoked_at = now();
+      getDeliveryService().revokeLoginGrant?.(grant.id);
+    }
+    return { status: 200, body: { ...grant } };
+  }
+
+  function acknowledgeGrant(wallet, grantId) {
+    const grant = ownGrant(wallet, grantId);
+    if (!grant) {
+      return { status: 404, body: { error: "Device grant not found." } };
+    }
+    grant.notice_acknowledged = true;
+    return { status: 200, body: { ...grant } };
+  }
+
+  return {
+    issueNonce,
+    login,
+    listGrants,
+    revokeGrant,
+    acknowledgeGrant,
+    reset,
+  };
 }
 
 module.exports = {

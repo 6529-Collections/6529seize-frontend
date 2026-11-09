@@ -584,6 +584,17 @@ function createE2eeSandboxApi({ corsHeaders }) {
       result = await signIn.login(parseJson(await readBody(req)));
     } else if (method === "GET" && pathname === "/api/device-grants") {
       result = signIn.listGrants(decodeJwtSubject(req.headers.authorization));
+    } else if (method === "POST") {
+      const action =
+        /^\/api\/device-grants\/([^/]+)\/(revoke|acknowledge)$/u.exec(pathname);
+      if (action) {
+        const wallet = decodeJwtSubject(req.headers.authorization);
+        const grantId = decodeURIComponent(action[1]);
+        result =
+          action[2] === "revoke"
+            ? signIn.revokeGrant(wallet, grantId)
+            : signIn.acknowledgeGrant(wallet, grantId);
+      }
     }
     if (result === null) {
       return false;

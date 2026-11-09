@@ -46,15 +46,21 @@ describe("E2EE sandbox sign-in challenges", () => {
   const profileId = "00000000-0000-4000-8000-00000000e2e1";
   const storeLoginGrant = jest.fn();
   const loginGrantRevokedAt = jest.fn((): number | null => null);
+  const revokeLoginGrant = jest.fn();
   const signIn = createSandboxSignIn({
     walletUser: (wallet: string) =>
       wallet === account.address.toLowerCase() ? { profileId } : null,
-    getDeliveryService: () => ({ storeLoginGrant, loginGrantRevokedAt }),
+    getDeliveryService: () => ({
+      storeLoginGrant,
+      loginGrantRevokedAt,
+      revokeLoginGrant,
+    }),
     now: () => NOW,
   });
 
   beforeEach(() => {
     storeLoginGrant.mockClear();
+    revokeLoginGrant.mockClear();
     signIn.reset();
     jest.useFakeTimers({ now: NOW });
   });
@@ -191,6 +197,43 @@ describe("E2EE sandbox sign-in challenges", () => {
         client_address: account.address,
       })
     ).resolves.toMatchObject({ status: 401 });
+  });
+
+  it("revokes and acknowledges the caller's own grant, ending its device too", async () => {
+    const { body: nonce } = signIn.issueNonce(
+      nonceQuery(account.address),
+      ORIGIN
+    );
+    await signIn.login({
+      client_type: "web",
+      server_signature: nonce.server_signature,
+      client_signature: await account.signMessage({
+        message: nonce.signable_message,
+      }),
+      client_address: account.address,
+      device_label: "Chrome on Windows",
+    });
+    const wallet = account.address.toLowerCase();
+    const grantId = hashMessage(nonce.signable_message).toLowerCase();
+    const stranger = privateKeyToAccount(generatePrivateKey()).address;
+
+    expect(signIn.acknowledgeGrant(stranger, grantId).status).toBe(404);
+    expect(signIn.acknowledgeGrant(wallet, grantId)).toMatchObject({
+      status: 200,
+      body: { id: grantId, notice_acknowledged: true },
+    });
+
+    expect(signIn.revokeGrant(stranger, grantId).status).toBe(404);
+    expect(revokeLoginGrant).not.toHaveBeenCalled();
+    expect(signIn.revokeGrant(wallet, grantId)).toMatchObject({
+      status: 200,
+      body: { id: grantId, revoked_at: NOW },
+    });
+    // Like the backend, the encrypted-DMs device it enrolled ends with it.
+    expect(revokeLoginGrant).toHaveBeenCalledWith(grantId);
+    expect(signIn.listGrants(wallet).body).toEqual([
+      expect.objectContaining({ id: grantId, revoked_at: NOW }),
+    ]);
   });
 
   it("refuses a signature from another wallet", async () => {

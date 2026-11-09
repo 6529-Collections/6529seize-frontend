@@ -597,13 +597,21 @@ function createFakeDeliveryService(options = {}) {
     ) {
       fail(400, "E2EE_BAD_SIGNATURE");
     }
-    const sharing = rosterProfilesSharing([target]);
-    device.revoked_at = now();
-    device.revocation = {
+    endDevice(device, {
       revoker_device_key: revoker,
       revoked_at: body.revoked_at,
       signature: lower(body.signature),
-    };
+    });
+    return device;
+  }
+
+  /** Revokes a device: off every roster, no key packages, members told. */
+  function endDevice(device, revocation) {
+    const target = device.device_key;
+    const profileId = device.profile_id;
+    const sharing = rosterProfilesSharing([target]);
+    device.revoked_at = now();
+    device.revocation = revocation;
     for (const group of s.groups.values()) {
       if (group.roster.has(target)) {
         removeFromRoster(group, target, group.epoch);
@@ -615,7 +623,6 @@ function createFakeDeliveryService(options = {}) {
       profile_id: profileId,
       device_key: target,
     });
-    return device;
   }
 
   /** Counts every suite, as the backend's status does. */
@@ -1860,11 +1867,20 @@ function createFakeDeliveryService(options = {}) {
       }
       return null;
     },
-    /** NC8: the wallet's session revoked the grant (DN1 device list). */
+    /**
+     * NC8: the wallet's session revoked the grant (DN1 device list). Like
+     * the backend, the device that grant enrolled ends with it.
+     */
     revokeLoginGrant(grantId) {
-      const stored = s.loginGrants.get(lower(grantId));
+      const id = lower(grantId);
+      const stored = s.loginGrants.get(id);
       if (stored) {
         stored.revoked = true;
+      }
+      for (const device of s.devices.values()) {
+        if (device.grant_id === id && device.revoked_at === null) {
+          endDevice(device, null);
+        }
       }
     },
     subscribe(profileId, listener) {
