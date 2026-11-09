@@ -12,6 +12,7 @@ import {
   isGroupedReactionsItem,
   type NotificationDisplayItem,
 } from "@/types/feed.types";
+import NotificationInboxReactions from "./NotificationInboxReactions";
 import {
   getInboxDestination,
   getInboxPreview,
@@ -70,6 +71,14 @@ export default function NotificationInboxRow({
     pfpUrl = notification.related_wave?.pfp;
   }
   const preview = getInboxPreview(notification);
+  let reactions: string[] = [];
+  if (group) {
+    reactions = group.notifications.map(
+      (entry) => entry.additional_context.reaction
+    );
+  } else if (notification.cause === ApiNotificationCause.DropReacted) {
+    reactions = [notification.additional_context.reaction];
+  }
   return (
     <li>
       <Link
@@ -95,6 +104,9 @@ export default function NotificationInboxRow({
               ? t(locale, "notifications.inbox.reactions")
               : getInboxSummary(notification, locale)}
           </p>
+          {reactions.length > 0 && (
+            <NotificationInboxReactions reactions={reactions} />
+          )}
           {group && (
             <div className="tw-mt-1">
               <OverlappingAvatars
