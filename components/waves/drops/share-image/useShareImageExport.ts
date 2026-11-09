@@ -111,7 +111,7 @@ export function useShareImageExport({
 
   const run = useCallback(
     async (
-      action: (blob: Blob) => Promise<void>,
+      action: (blob: Blob) => void | Promise<void>,
       success: ShareImageActionStatus
     ) => {
       const node = cardRef.current;
@@ -156,7 +156,7 @@ export function useShareImageExport({
     if (isNativeApp) {
       return run(shareNative, "shared");
     }
-    return run(async (blob) => {
+    return run((blob) => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;

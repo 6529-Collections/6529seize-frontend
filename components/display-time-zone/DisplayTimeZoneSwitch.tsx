@@ -171,6 +171,9 @@ export default function DisplayTimeZoneSwitch({
     variant === "header"
       ? t(locale, "displayTimeZone.chip.label", { zone: current.name })
       : current.name;
+  const tooltipProps = tooltipId
+    ? { "data-tooltip-id": tooltipId, "data-tooltip-content": switchLabel }
+    : {};
   const isNamedZoneSetting =
     state.preference !== LOCAL_TIME_ZONE_PREFERENCE &&
     state.preference !== UTC_TIME_ZONE_PREFERENCE;
@@ -204,12 +207,7 @@ export default function DisplayTimeZoneSwitch({
         ) : (
           <PopoverButton
             aria-label={switchLabel}
-            {...(tooltipId
-              ? {
-                  "data-tooltip-id": tooltipId,
-                  "data-tooltip-content": switchLabel,
-                }
-              : {})}
+            {...tooltipProps}
             className={HEADER_BUTTON_CLASSES}
           >
             <ClockIcon
