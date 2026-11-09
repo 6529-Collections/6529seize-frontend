@@ -1,9 +1,7 @@
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
-import type { ApiCompetitionOutcome } from "@/generated/models/ApiCompetitionOutcome";
 import type { ApiCompetitionAward } from "@/generated/models/ApiCompetitionAward";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
 import type { ApiWaveDecisionAward } from "@/generated/models/ApiWaveDecisionAward";
 import type { ApiWaveDecisionsStrategy } from "@/generated/models/ApiWaveDecisionsStrategy";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -100,24 +98,6 @@ export function competitionAward(
       : {}),
     ...(award.rep_category ? { rep_category: award.rep_category } : {}),
     ...(award.amount !== null ? { amount: award.amount } : {}),
-  };
-}
-
-export function competitionOutcome(
-  outcome: ApiCompetitionOutcome
-): ApiWaveOutcome {
-  return {
-    index: outcome.position,
-    type: outcome.type as ApiWaveOutcome["type"],
-    description: outcome.description,
-    ...(outcome.subtype
-      ? { subtype: outcome.subtype as NonNullable<ApiWaveOutcome["subtype"]> }
-      : {}),
-    ...(outcome.credit
-      ? { credit: outcome.credit as NonNullable<ApiWaveOutcome["credit"]> }
-      : {}),
-    ...(outcome.rep_category ? { rep_category: outcome.rep_category } : {}),
-    ...(outcome.amount !== null ? { amount: outcome.amount } : {}),
   };
 }
 

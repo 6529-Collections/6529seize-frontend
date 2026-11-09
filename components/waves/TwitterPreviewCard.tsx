@@ -1,5 +1,11 @@
 "use client";
 
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import {
+  withDisplayTimeZone,
+  withDisplayTimeZoneDate,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import { LinkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useMemo, useState, type MouseEvent, type ReactNode } from "react";
@@ -63,19 +69,25 @@ function getXPostPath(href: string): string {
   }
 }
 
-function formatTweetTimestamp(preview: TweetPreview): string | undefined {
+function formatTweetTimestamp(
+  preview: TweetPreview,
+  zone: DisplayTimeZone
+): string | undefined {
   if (preview.createdAtIso) {
     const date = new Date(preview.createdAtIso);
     if (!Number.isNaN(date.getTime())) {
-      const time = new Intl.DateTimeFormat("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-      }).format(date);
-      const day = new Intl.DateTimeFormat("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }).format(date);
+      const time = new Intl.DateTimeFormat(
+        "en-US",
+        withDisplayTimeZone(zone, { hour: "numeric", minute: "2-digit" })
+      ).format(date);
+      const day = new Intl.DateTimeFormat(
+        "en-US",
+        withDisplayTimeZoneDate(zone, {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      ).format(date);
       return `${time}, ${day}`;
     }
   }
@@ -687,7 +699,11 @@ export default function TwitterPreviewCard({
     preview.authorUrl ??
     (preview.authorHandle ? `https://x.com/${preview.authorHandle}` : href);
   const xPostPath = useMemo(() => getXPostPath(href), [href]);
-  const timestamp = useMemo(() => formatTweetTimestamp(preview), [preview]);
+  const zone = useDisplayTimeZone();
+  const timestamp = useMemo(
+    () => formatTweetTimestamp(preview, zone),
+    [preview, zone]
+  );
 
   if (state.type === "loading") {
     return <LoadingCard />;

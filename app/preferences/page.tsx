@@ -38,6 +38,8 @@ export default async function PreferencesPage({
   ) {
     // "devices" is the tab's former name, kept for old links.
     activeTab = "security";
+  } else if (requestedTab === "time-zone") {
+    activeTab = "time-zone";
   }
   return (
     <PreferencesPageClient

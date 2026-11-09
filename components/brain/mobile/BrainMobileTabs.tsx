@@ -42,10 +42,7 @@ import { useContentTab } from "../ContentTabContext";
 import { isCompetitionSubmissionHistory } from "@/helpers/competition-lifecycle.helpers";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import { useSubmissionRulesTabRef } from "./useSubmissionRulesTabRef";
-import {
-  getApproveWaveTabLabelsFromMetadata,
-  getWaveOutcomeVisibilityFromMetadata,
-} from "@/helpers/waves/wave-metadata.helpers";
+import { getApproveWaveTabLabelsFromMetadata } from "@/helpers/waves/wave-metadata.helpers";
 
 const WAVE_TAB_SKELETONS = [
   { id: "chat", widthClassName: "tw-w-14" },
@@ -91,7 +88,6 @@ interface BrainMobileTabsProps {
   readonly hideCompetitionsTab?: boolean | undefined;
   readonly hasDefaultCompetition?: boolean | undefined;
   readonly activeCompetitionCount?: number | undefined;
-  readonly outcomesVisible?: boolean | undefined;
   readonly waveNavigationReady?: boolean | undefined;
   readonly showWavesTab: boolean;
   readonly showStreamBack: boolean;
@@ -109,7 +105,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   hideCompetitionsTab = false,
   hasDefaultCompetition = false,
   activeCompetitionCount,
-  outcomesVisible = true,
   waveNavigationReady = true,
   showWavesTab,
   showStreamBack,
@@ -135,12 +130,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       })),
     [nativeCompetition?.presentation]
   );
-  const nativeOutcomesVisible = nativeCompetition
-    ? getWaveOutcomeVisibilityFromMetadata(nativePresentation)
-    : outcomesVisible;
   const approveLabels = getApproveWaveTabLabelsFromMetadata(nativePresentation);
   const nativeTabLabel = (tab: (typeof COMPETITION_TABS)[number]) => {
-    if (tab === "outcomes") return t(locale, "competitions.outcomeTab");
     if (
       tab === "leaderboard" &&
       nativeCompetition &&
@@ -159,12 +150,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const requestedCompetitionTab = getCompetitionTab(
     searchParams.get("edit") === "1" ? "rules" : searchParams.get("tab")
   );
-  const selectedCompetitionTab =
-    nativeCompetition &&
-    requestedCompetitionTab === "outcomes" &&
-    !nativeOutcomesVisible
-      ? "leaderboard"
-      : requestedCompetitionTab;
+  const selectedCompetitionTab = requestedCompetitionTab;
   const mappedCompetitionTab = getLegacyCompetitionTab(selectedCompetitionTab);
   const selectedLegacyView = nativeCompetition
     ? (mappedCompetitionTab ?? BrainView.COMPETITIONS)
@@ -210,8 +196,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     useWave(wave);
   const isCompetitionWave =
     isRankWave || isApproveWave || hasDefaultCompetition;
-  const supportsOutcomeView =
-    isCompetitionWave && !isCurationWave && outcomesVisible;
   const canShowMyVotesTab = isCompetitionWave || Boolean(nativeCompetition);
 
   // Get unread indicator for messages
@@ -520,9 +504,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 nativeCompetition &&
                 COMPETITION_TABS.filter(
                   (tab) =>
-                    (nativeOutcomesVisible || tab !== "outcomes") &&
-                    (canShowMyVotesTab || tab !== "votes") &&
-                    tab !== "rules"
+                    (canShowMyVotesTab || tab !== "votes") && tab !== "rules"
                 ).map((tab) => {
                   const selected = selectedCompetitionTab === tab;
                   return (
@@ -578,28 +560,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                           </span>
                         </TabButton>
                       </>
-                    )}
-                    {supportsOutcomeView && (
-                      <TabButton
-                        {...getTabStateProps(
-                          effectiveActiveView === BrainView.OUTCOME
-                        )}
-                        ref={getActiveButtonRef(
-                          effectiveActiveView === BrainView.OUTCOME
-                        )}
-                        onClick={() => handleWaveViewChange(BrainView.OUTCOME)}
-                        className={getTabButtonClassName(
-                          effectiveActiveView === BrainView.OUTCOME
-                        )}
-                      >
-                        <span
-                          className={getTabTextClassName({
-                            isActive: effectiveActiveView === BrainView.OUTCOME,
-                          })}
-                        >
-                          {t(locale, "wave.navigation.outcome")}
-                        </span>
-                      </TabButton>
                     )}
                     {isMemesWave && (
                       <TabButton

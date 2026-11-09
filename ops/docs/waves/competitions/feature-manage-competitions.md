@@ -22,7 +22,7 @@ The **Decisions** tab follows the selected decision's **Settings** tab and prece
 
 1. Open **Decisions**, then **+ Decision**, with decision creation permission.
 2. Choose Rank or Approve and configure eligibility, dates, submission
-   requirements, voting credits, result rules, outcomes and presentation.
+   requirements, voting credits, result rules, outcomes and presentation. Outcomes are optional and describe rewards fulfilled manually.
    **Decision type** opens a dropdown on desktop and a bottom sheet on
    smaller screens, including the app. The current choice is marked; choosing
    another type closes the picker. Dismissing it leaves the choice unchanged.
@@ -56,7 +56,7 @@ The **Decisions** tab follows the selected decision's **Settings** tab and prece
   An access change preserves existing entries, votes, outcomes and result progress.
 - Edit the name, description and guidelines together inside the overview card, then choose **Save changes** or **Cancel**.
 - For an original decision in an older wave, **Edit decision rules** opens its existing administration settings. Review entry requirements, dates, voting and winner limits, then choose **Save changes**. **Close editor** saves valid changes and returns to Settings.
-- Expand **Appearance and labels** in Settings to change the submission button, proposal card display, Approve tab labels and outcome visibility. Approve decisions default to **Proposals** and **Approved**; custom labels apply to that decision's tabs. Save or cancel within that section. These changes create a new configuration version without changing execution rules or access.
+- Expand **Appearance and labels** in Settings to change the submission button, proposal card display and Approve tab labels. Approve decisions default to **Proposals** and **Approved**; custom labels apply to that decision's tabs. Save or cancel within that section. These changes create a new configuration version without changing execution rules or access.
 - **Pause results** stops winner selection without closing otherwise open
   entry or vote windows. **Resume results** allows evaluation again. A paused
   Rank occurrence is skipped without shifting later scheduled occurrences.
@@ -110,13 +110,18 @@ Ordinary wave administration cannot grant them. The original decision in an olde
 
 For Approve decisions, **Edit approval thresholds** changes the required approvals and hold duration, including after entries and votes exist. Enter the hold in seconds; 0 means immediate approval. A hold cannot exceed the approval window. Cancel and reopen the editor if another administrator has saved newer settings.
 
-
 ## Related Pages
 
 - [Decisions](README.md)
 - [Browse and participate](feature-competitions.md)
 - [Wave creation](../create/README.md)
 - [Wave outcomes](../feature-outcome-lists.md)
+
+### Outcomes
+
+Configured outcomes appear below Winners in Settings. Descriptions and winning
+positions are shown directly. There is no separate Outcome tab or outcome
+visibility control. Existing Rep/NIC outcomes remain readable.
 
 ### Pause history
 

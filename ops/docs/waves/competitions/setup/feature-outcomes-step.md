@@ -2,106 +2,50 @@
 
 ## Overview
 
-Use `Outcomes` to define winner rewards in `Rank` and `Approve` decision setup.
-You must save at least one outcome before `Next` can move to `Guidelines`.
+Outcomes are optional descriptions of what winners receive or what happens
+after approval. The organizer fulfills these rewards or actions manually.
 
-Outcome type, reward configuration, and outcome visibility stay visible.
-The optional Approve winner limit is in the named `Winner limits` expandable.
+Open **Decisions → + Decision** in a wave and continue through setup to
+**Outcomes**. Scheduled Rank and Approve decisions include this step.
+Perpetual Ranking skips it because it has no winner announcements.
 
-## Location in the Site
+## Add an outcome
 
-- Decision setup: `/waves/{waveId}/decisions/new`
-- Desktop modal create mode: `?create=wave` on waves/messages shells
-- Step label: `Outcomes`
-- User-reachable in `Rank` and `Approve` creation
+1. Select **Add outcome**.
+2. Enter the **Manual action** description.
+3. For Rank, enter **Winning Positions**, such as `1–3, 5, 7–9` (use hyphens
+   in the input: `1-3,5,7-9`).
+4. Select **Save**, or **Cancel** to discard the unfinished outcome.
+5. Repeat for additional rewards, or continue with **Next**.
 
-## Step Path
+You can continue without adding any outcomes. A scheduled Rank decision without
+outcomes selects one winner per result. Approve decisions still use their
+approval threshold, hold duration and optional maximum winner count.
+Configured Rank distributions determine how many positions can win.
 
-- Scheduled `Rank`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
-- `Approve`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+New decisions offer manual outcomes. Rep and NIC have no separate creation
+options because actual profile ratings must be allocated manually. Existing
+credit outcomes and their award history remain readable.
 
-`Perpetual Ranking` skips this step because its live leaderboard is the outcome
-and it never announces winners.
+## Winner limits and validation
 
-## Outcome Types
+For Approve, expand **Winner limits** to set **Max Winners**. Leave it blank
+for unlimited winners. Open-ended approval warns when there is no end date or
+maximum winner count.
 
-### `Manual`
+An added outcome needs a description. Rank outcomes also need valid positive
+positions or ranges. Save or cancel an unfinished outcome before continuing.
+Saved outcomes can be removed before publication when definitions are editable.
 
-- Required: `Manual action`
-- Required: `Winning Positions` (examples: `1-3,5,7-9`)
-- `Save` adds one manual row to the outcomes list
+## View configured outcomes
 
-### `Rep`
-
-- Required: `Rep Category`
-- Starts with one winner row
-- `Add winner` appends rows
-- `Save` adds one rep row (category, total, winner count)
-
-### `NIC`
-
-- Starts with one winner row
-- `Add winner` appends rows
-- `Save` adds one NIC row (total, winner count)
-
-## User Journey
-
-1. Open `Outcomes` from `Voting`.
-2. Click one type: `Manual`, `Rep`, or `NIC`.
-3. Fill the selected form.
-4. Click `Save` to add a row, or `Cancel` to discard draft edits.
-5. Repeat to add more outcomes.
-6. Choose whether to `Show outcomes menu section` after creation. This controls the
-   Outcomes tab and reward details on leaderboard and winner cards. Rewards
-   still apply when hidden.
-7. For `Approve`, open `Winner limits` and optionally set `Max Winners`; blank
-   means unlimited.
-8. Click `Next` to continue to `Guidelines`, followed by `Description`.
-
-## Common Scenarios
-
-- Mix outcome types in one wave (for example manual + rep).
-- Add multiple winner rows for `Rep` or `NIC`.
-- Return from `Guidelines` to `Outcomes` and adjust rewards before submit.
-- Open-ended approval: when both wave end and max winners are blank, the visible
-  warning explains that the wave will run indefinitely.
-
-## Edge Cases
-
-- If no rows are saved, `Next` is blocked and `No outcomes added` is highlighted.
-- While a type form is open, step-level `Previous` and `Next` actions are hidden.
-- Manual validation can show:
-  - `Please enter your manual action`
-  - `Please enter positions`
-  - `Invalid position format`
-- Rep/NIC saves require totals greater than `0`.
-- Changing selected type while editing drops unsaved form values.
-- Saved `Manual` and `Rep` rows can be removed.
-- Saved `NIC` rows show a remove icon, but it currently does not remove the row.
-- `Show outcomes menu section` defaults on. `Max Winners` defaults blank.
-- A non-default `Max Winners` value shows `Customized` on the collapsed
-  `Winner limits` disclosure.
-
-## Failure and Recovery
-
-- If save validation appears, fix highlighted fields and click `Save` again.
-- If a saved `Manual` or `Rep` row is wrong, remove it and create a new row.
-- If a saved `NIC` row is wrong, restart create-wave to clear it.
-- If create mode closes before submit, reopen create-wave and re-enter outcomes.
-
-## Limitations / Notes
-
-- Percentage distribution mode is not exposed in the current outcomes UI.
-- `Approve` outcomes use approve-specific forms and payload mapping.
-- `Perpetual Ranking` has no Outcomes step or optional-settings disclosure.
+After publication, the decision's **Settings** shows a compact **Outcomes**
+block below **Winners**. The block is absent when no outcomes are configured.
+There is no Outcome tab or visibility toggle. Use the Winners/Approved view
+for actual results.
 
 ## Related Pages
 
-- [Decision Setup Index](../../create/README.md)
-- [Wave Create Modal Entry Points](../../create/feature-modal-entry-points.md)
-- [Decision Setup Guidelines Step](../../create/feature-rules-step.md)
-- [Decision Setup Voting Configuration](feature-voting-step.md)
-- [Decision Setup Description Step](../../create/feature-description-step.md)
-- [Wave Outcome Lists](../../feature-outcome-lists.md)
-- [Waves Index](../../README.md)
-- [Docs Home](../../../README.md)
+- [Manage decisions](../feature-manage-competitions.md)
+- [Decision outcomes](../../feature-outcome-lists.md)
+- [Voting setup](feature-voting-step.md)

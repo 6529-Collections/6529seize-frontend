@@ -3,6 +3,7 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { buildDropClipboardText } from "@/helpers/waves/drop-clipboard.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import WaveDropMobileMenuCopyAction from "./WaveDropMobileMenuCopyAction";
 
 interface WaveDropMobileMenuCopyTextProps {
@@ -15,12 +16,13 @@ export default function WaveDropMobileMenuCopyText({
   onCopy,
 }: WaveDropMobileMenuCopyTextProps) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
 
   return (
     <WaveDropMobileMenuCopyAction
       labelKey="waves.drop.actions.copyText"
       disabled={drop.id.startsWith("temp-")}
-      getText={() => buildDropClipboardText(drop, locale)}
+      getText={() => buildDropClipboardText(drop, locale, "plain", zone)}
       onCopy={onCopy}
       icon={
         <svg

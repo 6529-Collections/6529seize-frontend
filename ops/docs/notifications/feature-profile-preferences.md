@@ -8,11 +8,16 @@ profiles, and submitted report history.
 
 ## Location in the Site
 
-Preferences is a dedicated page at `/preferences`. It contains four tabs: **Notifications & Messages**, **Blocked Profiles**,
-**Reports**, and **Devices & security** (`/preferences?tab=security`; the
-older `?tab=devices` still opens it). Desktop
-uses the underlined tab row; narrow layouts use a two-by-two grid without
-horizontal scrolling.
+Preferences is a dedicated page at `/preferences`. It contains five tabs:
+**Notifications & Messages**, **Blocked Profiles**, **Reports**, **Devices &
+security** (`/preferences?tab=security`; the older `?tab=devices` still opens
+it), and **Time Zone** (`/preferences?tab=time-zone`). Desktop uses the
+underlined tab row; narrow layouts use a two-column grid without horizontal
+scrolling.
+
+**Time Zone** chooses whether times show in local time, UTC or another zone. It
+is saved on the device and works signed out; see
+[Display Time Zone](../waves/header/feature-display-time-zone.md).
 
 ## Entry Points
 
@@ -32,8 +37,8 @@ The profile-header action is hidden while an active profile proxy is in use.
 ## User Journey
 
 1. Open your own profile and select **Preferences**.
-2. Choose **Notifications & Messages**, **Blocked Profiles**, **Reports**, or
-   **Devices & security**.
+2. Choose **Notifications & Messages**, **Blocked Profiles**, **Reports**,
+   **Devices & security**, or **Time Zone**.
 3. Review or change the available settings for the active profile.
 4. When Preferences was opened from the profile header, return to the active
    profile with **Back to profile** on desktop or the standard back arrow in
