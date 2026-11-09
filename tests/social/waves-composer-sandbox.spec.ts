@@ -653,10 +653,14 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     const thread = page.getByRole("list", { name: "Replies to this drop" });
     const linked = thread.getByText("Exact linked reply", { exact: true });
     await expect(linked).toBeInViewport({ ratio: 0.9 });
-    const emphasis = thread.locator('[class*="tw-bg-[#263d68]"]');
+    const emphasis = page
+      .getByRole("list", { name: "Replies to this drop" })
+      .locator('[class*="tw-bg-[#263d68]"]');
     await expect(emphasis).toHaveCount(1);
     await expect(emphasis.getByText("Exact linked reply")).toBeVisible();
-    const contextHighlight = page.locator('[class*="tw-bg-[#25263f]"]');
+    const contextHighlight = page
+      .getByRole("main")
+      .locator('[class*="tw-bg-[#25263f]"]');
     await expect(contextHighlight).toHaveCount(1);
     await expect(contextHighlight.getByRole("list")).toHaveCount(0);
     await page.getByRole("button", { name: "Show newer replies" }).click();
