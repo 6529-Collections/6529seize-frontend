@@ -974,6 +974,7 @@ describe("HeaderShare", () => {
 
     it.each(["native", "desktop"] as const)(
       "offers combined %s setup with the appropriate availability",
+      /** Desktop gets a private app link and version notice. Mobile gets a QR code. */
       async (target) => {
         const flags = require("@/lib/device-signing/feature");
         const e2ee = require("@/config/e2eeEnv");
