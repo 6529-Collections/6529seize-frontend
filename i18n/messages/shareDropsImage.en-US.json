@@ -53,5 +53,8 @@
   "shareImage.select.postUnknown": "Select post",
   "shareImage.time.elapsedMinutes": "+{minutes} min",
   "shareImage.time.elapsedHours": "+{hours} h",
-  "shareImage.time.elapsedHoursMinutes": "+{hours} h {minutes} min"
+  "shareImage.time.elapsedHoursMinutes": "+{hours} h {minutes} min",
+  "shareImage.status.shared": "Image shared",
+  "shareImage.select.unloadedOne": "1 post in this range hasn't loaded yet. Scroll past it to include it.",
+  "shareImage.select.unloadedOther": "{count} posts in this range haven't loaded yet. Scroll through them to include them."
 }

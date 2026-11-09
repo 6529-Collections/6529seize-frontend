@@ -44,7 +44,13 @@ export function getShareImageTimeSpan(createdAts: readonly number[]): {
     const now = Date.now();
     return { first: now, last: now };
   }
-  return { first: Math.min(...createdAts), last: Math.max(...createdAts) };
+  let first = Number.POSITIVE_INFINITY;
+  let last = Number.NEGATIVE_INFINITY;
+  for (const createdAt of createdAts) {
+    first = Math.min(first, createdAt);
+    last = Math.max(last, createdAt);
+  }
+  return { first, last };
 }
 
 function formatElapsed(locale: SupportedLocale, milliseconds: number): string {

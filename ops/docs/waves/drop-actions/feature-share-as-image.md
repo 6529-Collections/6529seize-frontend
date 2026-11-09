@@ -3,9 +3,11 @@
 ## Overview
 
 `Share as image` turns a run of posts from a wave or direct message into a PNG
-for sharing elsewhere. Unlike a screenshot, the image never shows the viewer's
-time zone, phone status bar, unread line, badges, profile button or message
-box. It is made on the device; nothing is uploaded.
+for sharing elsewhere. Unlike a screenshot, it leaves out the phone status
+bar, unread line, badges, profile button and message box. Times are in UTC by
+default, so the image does not show the viewer's time zone unless they choose
+their own zone (the dialog warns when they do). It is made on the device;
+nothing is uploaded.
 
 ## Location in the Site
 

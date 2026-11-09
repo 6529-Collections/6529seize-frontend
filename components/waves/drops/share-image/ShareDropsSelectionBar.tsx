@@ -14,11 +14,13 @@ import { MAX_SHARE_IMAGE_POSTS } from "@/lib/share-drops-image/shareDropsImageFo
 export default function ShareDropsSelectionBar({
   count,
   isTooLong,
+  unloadedCount,
   onCancel,
   onNext,
 }: {
   readonly count: number;
   readonly isTooLong: boolean;
+  readonly unloadedCount: number;
   readonly onCancel: () => void;
   readonly onNext: () => void;
 }) {
@@ -32,6 +34,24 @@ export default function ShareDropsSelectionBar({
     globalThis.addEventListener("keydown", onKeyDown);
     return () => globalThis.removeEventListener("keydown", onKeyDown);
   }, [onCancel]);
+
+  const hint = (() => {
+    if (isTooLong) {
+      return t(locale, "shareImage.select.tooLong", {
+        max: MAX_SHARE_IMAGE_POSTS,
+      });
+    }
+    if (unloadedCount === 1) {
+      return t(locale, "shareImage.select.unloadedOne");
+    }
+    if (unloadedCount > 1) {
+      return t(locale, "shareImage.select.unloadedOther", {
+        count: unloadedCount,
+      });
+    }
+    return t(locale, "shareImage.select.hint", { max: MAX_SHARE_IMAGE_POSTS });
+  })();
+  const hintNeedsAttention = isTooLong || unloadedCount > 0;
 
   const title =
     count === 1
@@ -57,15 +77,10 @@ export default function ShareDropsSelectionBar({
         <p
           id={hintId}
           role={isTooLong ? "alert" : undefined}
-          className={`tw-m-0 tw-mt-0.5 tw-text-xs ${isTooLong ? "tw-text-error" : "tw-text-iron-400"}`}
+          aria-live={isTooLong ? undefined : "polite"}
+          className={`tw-m-0 tw-mt-0.5 tw-text-xs ${hintNeedsAttention ? "tw-text-error" : "tw-text-iron-400"}`}
         >
-          {isTooLong
-            ? t(locale, "shareImage.select.tooLong", {
-                max: MAX_SHARE_IMAGE_POSTS,
-              })
-            : t(locale, "shareImage.select.hint", {
-                max: MAX_SHARE_IMAGE_POSTS,
-              })}
+          {hint}
         </p>
       </div>
       <button

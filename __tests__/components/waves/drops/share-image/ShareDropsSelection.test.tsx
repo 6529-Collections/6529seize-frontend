@@ -133,4 +133,54 @@ describe("Share as image selection", () => {
     await user.keyboard("{Escape}");
     expect(screen.queryByText(/selected$/)).not.toBeInTheDocument();
   });
+
+  it("says when posts in the range have not loaded yet", async () => {
+    const user = userEvent.setup();
+    const light = {
+      id: "drop-2",
+      serial_no: 2,
+      type: DropSize.LIGHT as const,
+      waveId: "wave-1",
+      stableKey: "drop-2",
+      stableHash: "drop-2",
+    };
+    const first = DROPS[0]!;
+    const third = DROPS[2]!;
+    function LightHarness() {
+      const selection = useShareDropsSelection();
+      return (
+        <div>
+          {[first, third].map((drop) => (
+            <div key={drop.id} style={{ position: "relative" }}>
+              <WaveDropShareImageAction
+                drop={drop}
+                onSelected={() => undefined}
+              />
+              {selection?.isSelecting && <ShareDropSelectOverlay drop={drop} />}
+            </div>
+          ))}
+          <ShareDropsSelectionLayer />
+        </div>
+      );
+    }
+    render(
+      <ShareDropsSelectionProvider wave={WAVE} drops={[first, light, third]}>
+        <LightHarness />
+      </ShareDropsSelectionProvider>
+    );
+
+    await user.click(
+      screen.getAllByRole("button", { name: "Share as image" })[0]!
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Select post by author3" })
+    );
+
+    expect(screen.getByText("2 posts selected")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "1 post in this range hasn't loaded yet. Scroll past it to include it."
+      )
+    ).toBeInTheDocument();
+  });
 });

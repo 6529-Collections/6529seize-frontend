@@ -53,5 +53,8 @@
   "shareImage.select.postUnknown": "Selectionner le post",
   "shareImage.time.elapsedMinutes": "+{minutes} min",
   "shareImage.time.elapsedHours": "+{hours} h",
-  "shareImage.time.elapsedHoursMinutes": "+{hours} h {minutes} min"
+  "shareImage.time.elapsedHoursMinutes": "+{hours} h {minutes} min",
+  "shareImage.status.shared": "Image partagee",
+  "shareImage.select.unloadedOne": "1 post de cette plage n'est pas encore charge. Faites-le defiler pour l'inclure.",
+  "shareImage.select.unloadedOther": "{count} posts de cette plage ne sont pas encore charges. Faites-les defiler pour les inclure."
 }

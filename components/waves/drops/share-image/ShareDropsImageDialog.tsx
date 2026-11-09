@@ -96,6 +96,8 @@ export default function ShareDropsImageDialog({
     waveHeader: true,
     reactions: true,
   });
+  // The footer reports the most recent action, image or text.
+  const [lastAction, setLastAction] = useState<"image" | "text">("image");
   const [textStatus, setTextStatus] = useState<"idle" | "copied" | "failed">(
     "idle"
   );
@@ -143,6 +145,7 @@ export default function ShareDropsImageDialog({
   }, []);
 
   const copyText = async () => {
+    setLastAction("text");
     const lines: string[] = [];
     if (include.waveHeader) {
       lines.push(
@@ -174,16 +177,21 @@ export default function ShareDropsImageDialog({
   const statusText = (() => {
     if (exporter.status === "working")
       return t(locale, "shareImage.status.making");
+    if (lastAction === "text") {
+      if (textStatus === "copied")
+        return t(locale, "shareImage.status.textCopied");
+      if (textStatus === "failed")
+        return t(locale, "shareImage.status.textFailed");
+      return "";
+    }
+    if (exporter.status === "shared")
+      return t(locale, "shareImage.status.shared");
     if (exporter.status === "copied")
       return t(locale, "shareImage.status.copied");
     if (exporter.status === "downloaded")
       return t(locale, "shareImage.status.downloaded", { fileName });
     if (exporter.status === "failed")
       return t(locale, "shareImage.status.failed");
-    if (textStatus === "copied")
-      return t(locale, "shareImage.status.textCopied");
-    if (textStatus === "failed")
-      return t(locale, "shareImage.status.textFailed");
     return "";
   })();
   const isWorking = exporter.status === "working";
@@ -441,7 +449,10 @@ export default function ShareDropsImageDialog({
         </button>
         <button
           type="button"
-          onClick={() => void exporter.download()}
+          onClick={() => {
+            setLastAction("image");
+            void exporter.download();
+          }}
           disabled={isWorking}
           className={`${BUTTON_BASE} tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-text-iron-50 desktop-hover:hover:tw-bg-iron-700`}
         >
@@ -451,7 +462,10 @@ export default function ShareDropsImageDialog({
         {showShare && (
           <button
             type="button"
-            onClick={() => void exporter.share()}
+            onClick={() => {
+              setLastAction("image");
+              void exporter.share();
+            }}
             disabled={isWorking}
             className={`${BUTTON_BASE} tw-border-0 ${showCopyImage ? "tw-bg-iron-800 tw-text-iron-50" : "tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-600"}`}
           >
@@ -462,7 +476,10 @@ export default function ShareDropsImageDialog({
         {showCopyImage && (
           <button
             type="button"
-            onClick={exporter.copyImage}
+            onClick={() => {
+              setLastAction("image");
+              exporter.copyImage();
+            }}
             disabled={isWorking}
             className={`${BUTTON_BASE} tw-border-0 tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-600`}
           >
