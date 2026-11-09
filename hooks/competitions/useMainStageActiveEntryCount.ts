@@ -14,9 +14,14 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useCompetitionViewer } from "./useCompetitionQueries";
 
+type CompetitionForEntryCount = Pick<ApiCompetition, "id" | "wave_id"> &
+  Partial<
+    Pick<ApiCompetition, "capabilities" | "permissions" | "participation">
+  >;
+
 /** Count this viewer's active entries up to the configured submission limit. */
 export function useMainStageActiveEntryCount(
-  competition: ApiCompetition | null | undefined,
+  competition: CompetitionForEntryCount | null | undefined,
   enabled: boolean
 ): number | null | undefined {
   const { connectedProfile, activeProfileProxy } = useAuth();
@@ -26,12 +31,13 @@ export function useMainStageActiveEntryCount(
     waveId: competition?.wave_id ?? "",
     competitionId: competition?.id ?? "",
   };
-  const limit = competition?.participation.max_entries_per_participant ?? null;
-  const needsCount =
+  const mainStage =
     enabled &&
-    competition?.permissions.submit === true &&
-    competition.capabilities.includes(ApiCompetitionCapability.MainStage) &&
-    limit !== null;
+    competition?.capabilities?.includes(ApiCompetitionCapability.MainStage) &&
+    competition.permissions?.submit === true
+      ? competition
+      : null;
+  const limit = mainStage?.participation?.max_entries_per_participant ?? null;
   const count = useQuery<number>({
     queryKey: [
       QueryKey.COMPETITION_RESOURCE,
@@ -39,14 +45,14 @@ export function useMainStageActiveEntryCount(
       COMPETITION_ACTIVE_ENTRY_COUNT,
       { profileId, limit },
     ],
-    enabled: needsCount && !!profileId && limit > 0,
+    enabled: limit !== null && limit > 0 && !!profileId,
     retry: 1,
     // Recover transient failures while the header is still open.
     refetchInterval: (query) =>
       query.state.status === "error" ? 15_000 : false,
     staleTime: 15_000,
     queryFn: async ({ signal }) => {
-      if (!needsCount || !profileId)
+      if (limit === null || !profileId)
         throw new Error("Active entry count requires a profile and a limit");
 
       let active = 0;
@@ -73,7 +79,7 @@ export function useMainStageActiveEntryCount(
     },
   });
 
-  if (!needsCount) return undefined;
+  if (limit === null) return undefined;
   if (limit === 0) return 0;
   return count.data ?? null;
 }
