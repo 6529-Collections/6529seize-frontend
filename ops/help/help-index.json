@@ -6199,6 +6199,44 @@
       ]
     },
     {
+      "id": "waves.share-as-image",
+      "kind": "workflow",
+      "title": "Share posts as an image",
+      "aliases": [
+        "share as image",
+        "screenshot posts",
+        "export conversation image",
+        "share a conversation",
+        "quote image",
+        "screenshot without my time zone"
+      ],
+      "keywords": [
+        "share",
+        "image",
+        "PNG",
+        "screenshot",
+        "posts",
+        "UTC",
+        "privacy"
+      ],
+      "summary": "Share as image turns a run of posts into a PNG with neutral times and none of the viewer's own app chrome.",
+      "facts": [
+        "Open a post's More actions menu (desktop) or long-press a post (touch) and choose Share as image. That post is the first post; select another post to set the last one. Every loaded post between them is included, up to 20 per image.",
+        "Next opens the options and a live preview. Times default to UTC; other choices are Time since first post, Hide times, or Another time zone. Choosing the device's own zone shows a warning that the image would reveal it.",
+        "The image never includes the viewer's unread line, badges, profile button, message box, own reaction highlight or the phone status bar. It is made on the device and nothing is uploaded.",
+        "Copy image, Download image and Share (system share sheet on phones and in the app) export a 1080-pixel-wide PNG. Copy text copies the posts as text with the same times. Direct messages and private waves get a neutral file name and a reminder that the posts are private.",
+        "Images the browser cannot read appear as dark placeholders with a warning; videos and files are noted but not drawn."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/messages", "/preferences"],
+      "tags": ["waves", "sharing", "privacy"],
+      "source_refs": [
+        "components/waves/drops/share-image/ShareDropsImageDialog.tsx",
+        "components/waves/drops/share-image/ShareDropsSelectionContext.tsx",
+        "ops/docs/waves/drop-actions/feature-share-as-image.md"
+      ]
+    },
+    {
       "id": "notifications.mobile-push",
       "kind": "workflow",
       "title": "Mobile push notifications",

@@ -47,6 +47,7 @@ import WaveDropMobileMenuReactionPicker from "./WaveDropMobileMenuReactionPicker
 import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
 import DropSignatureDialog from "./signature/DropSignatureDialog";
 import DropSignatureMenuItem from "./signature/DropSignatureMenuItem";
+import WaveDropShareImageAction from "./share-image/WaveDropShareImageAction";
 
 export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -277,6 +278,7 @@ function WaveDropMobileMenuAuthenticatedActions({
         <>
           <WaveDropMobileMenuCopyText drop={drop} onCopy={closeMenu} />
           <WaveDropMobileMenuCopyLink drop={drop} onCopy={closeMenu} />
+          <WaveDropShareImageAction drop={drop} onSelected={closeMenu} mobile />
         </>
       )}
 
@@ -555,6 +557,11 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
                       <WaveDropMobileMenuCopyLink
                         drop={drop}
                         onCopy={closeMenu}
+                      />
+                      <WaveDropShareImageAction
+                        drop={drop}
+                        onSelected={closeMenu}
+                        mobile
                       />
                     </>
                   )}

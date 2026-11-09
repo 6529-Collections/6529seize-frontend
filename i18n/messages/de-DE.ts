@@ -1,5 +1,6 @@
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.de-DE.json";
 import displayTimeZoneMessages from "@/i18n/messages/displayTimeZone.de-DE.json";
+import shareDropsImageMessages from "@/i18n/messages/shareDropsImage.de-DE.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.de-DE.json";
 import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.de-DE.json";
 import { DE_DE_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
@@ -44,6 +45,7 @@ export const DE_DE_MESSAGES = {
   "e2ee.profile.level": "Stufe {level}",
   ...safeCollectingMessages,
   ...displayTimeZoneMessages,
+  ...shareDropsImageMessages,
   ...delegationTapGuideMessages,
   ...networkTdhConsolidationMessages,
   ...DE_SUBMISSION_DISCOVERY_MESSAGES,
