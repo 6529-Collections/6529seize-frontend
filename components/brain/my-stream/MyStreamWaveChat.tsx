@@ -301,11 +301,11 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const requestedScrollTarget =
     initialDropState?.waveId === wave.id ? initialDropState.serialNo : null;
   const collapseReplies = isWaveRepliesCollapsed(wave);
+  const replyThreadsEnabled = collapseReplies || !isDirectMessage;
   const replyThreadsStore = useExpandedReplyThreadsStore();
   // A link to a collapsed reply opens its parent's thread instead.
   const replyThreadTarget = useCollapsedReplyThreadTarget({
-    enabled:
-      viewMode !== "gallery" && (collapseReplies || !isWaveDirectMessage(wave)),
+    enabled: viewMode !== "gallery" && replyThreadsEnabled,
     collapseAll: collapseReplies,
     waveId: wave.id,
     serialNo: requestedScrollTarget,
@@ -564,10 +564,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           <ChatFileDropOverlay description={getAcceptedUploadFormats(locale)} />
         )}
         <WaveReplyThreadsProvider
-          enabled={
-            viewMode !== "gallery" &&
-            (collapseReplies || !isWaveDirectMessage(wave))
-          }
+          enabled={replyThreadsEnabled}
           wave={wave}
           store={replyThreadsStore}
         >
