@@ -53,7 +53,7 @@ same context.
 4. The thread renders:
    - Chat-only for chat-type waves.
    - Tabbed views for eligible waves (`Chat`, `Leaderboard`, `Winners`,
-     `Outcome`, and wave-specific tabs).
+     `Settings`, and wave-specific tabs).
 5. Read and navigate drops with unread markers, serial jumps, and search jump
    actions.
 6. Open `Rules` from the desktop right sidebar or the mobile `About`

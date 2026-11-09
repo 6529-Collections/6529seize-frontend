@@ -1,3 +1,4 @@
+import { recoverLoadedIdentities } from "./identity-recovery";
 import {
   findSavedImport,
   getSavedMessage,
@@ -79,7 +80,15 @@ class E2eeEngineImpl implements E2eeEngineExt {
     this.controller = new EngineController(ctx, {
       refreshMe: () => this.refreshMe(),
       onOwnRevoked: () => this.onOwnRejected(),
-      afterSync: () => resolveProfiles(this.ctx, memberProfileIds(this.ctx)),
+      resumeLookups: async () => {
+        this.ctx.lookupReads.resume();
+        await this.ctx.queue.run(() => recoverLoadedIdentities(this.ctx));
+        await resolveProfiles(this.ctx, memberProfileIds(this.ctx), true);
+      },
+      afterSync: async () => {
+        await this.ctx.queue.run(() => recoverLoadedIdentities(this.ctx));
+        await resolveProfiles(this.ctx, memberProfileIds(this.ctx));
+      },
     });
     this.conversationCreator = new ConversationCreator(
       ctx,
@@ -218,6 +227,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       this.ctx.device = null;
       this.ctx.lastState = null;
       this.ctx.store.groups.clear();
+      this.ctx.knownDeviceProfiles.clear();
       this.ctx.store.thisDevice = null;
       await clearStoredState(this.ctx);
       try {

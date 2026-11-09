@@ -151,6 +151,7 @@ const useCanonicalDropUpdateForExistingDrop = ({
 interface UseProcessIncomingDropParams extends Pick<
   UseWaveRealtimeUpdaterProps,
   | "activeWaveId"
+  | "activeReadWaveId"
   | "getData"
   | "hasServerFeedSeed"
   | "isWaveInUse"
@@ -248,6 +249,7 @@ const useApplyIncomingInsert = ({
 
 const useProcessIncomingDrop = ({
   activeWaveId,
+  activeReadWaveId = activeWaveId,
   getData,
   hasServerFeedSeed,
   isWaveInUse,
@@ -269,9 +271,10 @@ const useProcessIncomingDrop = ({
     syncNewestMessages,
   });
   const activeWaveIdRef = useLatestActiveWaveIdRef(activeWaveId);
+  const activeReadWaveIdRef = useLatestActiveWaveIdRef(activeReadWaveId);
   const markActiveWaveAsRead = useActiveWaveReadMarker({
-    activeWaveId,
-    activeWaveIdRef,
+    activeWaveId: activeReadWaveId,
+    activeWaveIdRef: activeReadWaveIdRef,
     batchReads: gapSyncEnabled,
     removeWaveDeliveredNotifications,
   });
@@ -433,6 +436,16 @@ const useProcessIncomingDrop = ({
         return;
       }
 
+      // Settle our POST response before eligibility refreshes or muted-wave
+      // filtering can defer it. The pending row never disappears in between.
+      if (options.pendingDropId && getData(waveId)) {
+        updateData({
+          key: waveId,
+          drops: [buildOptimisticDrop({ drop, existingDrop: null, options })],
+          pendingDropId: options.pendingDropId,
+        });
+      }
+
       const signal = await applyIncomingDrop(drop, waveId, type, options);
 
       // One rule for every socket message that changed a stored wave,
@@ -452,7 +465,7 @@ const useProcessIncomingDrop = ({
         gapSync.noteRealtimeFrame(waveId);
       }
     },
-    [applyIncomingDrop, gapSync, gapSyncEnabled]
+    [applyIncomingDrop, gapSync, gapSyncEnabled, getData, updateData]
   );
 
   const processDropUpdateRef = useDropUpdateRefMessages({
@@ -593,6 +606,7 @@ const useDropDeleteMessages = (
 
 export function useWaveRealtimeUpdater({
   activeWaveId,
+  activeReadWaveId,
   getData,
   hasServerFeedSeed,
   isWaveInUse,
@@ -611,6 +625,7 @@ export function useWaveRealtimeUpdater({
   const { processIncomingDrop, processDropUpdateRef, gapSync } =
     useProcessIncomingDrop({
       activeWaveId,
+      activeReadWaveId,
       getData,
       hasServerFeedSeed,
       isWaveInUse,

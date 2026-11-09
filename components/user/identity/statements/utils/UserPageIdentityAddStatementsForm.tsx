@@ -167,28 +167,24 @@ function UserPageIdentityAddStatementsFormContent({
           />
         )}
 
-        <div className="tw-mt-8">
-          <div className="tw-gap-x-3 sm:tw-flex sm:tw-flex-row-reverse">
-            <Button
-              type="submit"
-              loading={addStatementMutation.isPending}
-              size="lg"
-              fullWidth
-              className="sm:tw-w-auto"
-            >
-              {t(locale, "user.profile.identity.statements.save")}
-            </Button>
-            <Button
-              disabled={addStatementMutation.isPending}
-              onClick={onClose}
-              variant="secondary"
-              size="lg"
-              fullWidth
-              className="tw-mt-3 sm:tw-mt-0 sm:tw-w-auto"
-            >
-              {t(locale, "user.profile.identity.statements.cancel")}
-            </Button>
-          </div>
+        <div className="tw-mt-6 tw-flex tw-justify-end tw-gap-2">
+          <Button
+            disabled={addStatementMutation.isPending}
+            onClick={onClose}
+            variant="ghost"
+            size="md"
+            className="[@media(any-pointer:coarse)]:tw-min-h-11"
+          >
+            {t(locale, "user.profile.identity.statements.cancel")}
+          </Button>
+          <Button
+            type="submit"
+            loading={addStatementMutation.isPending}
+            size="md"
+            className="tw-min-w-20 !tw-border-0 !tw-shadow-none [@media(any-pointer:coarse)]:tw-min-h-11"
+          >
+            {t(locale, "user.profile.identity.statements.save")}
+          </Button>
         </div>
       </form>
     </div>

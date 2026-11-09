@@ -218,12 +218,9 @@ it.each([
     // Switching type resets form defaults; review must still read the parent chat.
     fireEvent.click(screen.getByRole("combobox", { name: "Decision type" }));
     fireEvent.click(screen.getByRole("option", { name: "Approve" }));
-    fireEvent.change(
-      screen.getByRole("textbox", { name: "Decision name" }),
-      {
-        target: { value: "Review chat access" },
-      }
-    );
+    fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
+      target: { value: "Review chat access" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(screen.getByText(expected)).toBeVisible();
     for (let step = 0; step < 3; step++) {
@@ -236,7 +233,7 @@ it.each([
       }
     );
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
-    fireEvent.click(screen.getByRole("radio", { name: "Manual" }));
+    fireEvent.click(screen.getByRole("button", { name: "Add outcome" }));
     fireEvent.change(screen.getByRole("textbox", { name: "Manual action" }), {
       target: { value: "Recognize the winner" },
     });
@@ -587,9 +584,7 @@ it("saves edits made during creation using the returned draft version before clo
     jest.advanceTimersByTime(1000);
   });
   expect(createCompetition).toHaveBeenCalledTimes(1);
-  expect(
-    screen.getByRole("textbox", { name: "Decision name" })
-  ).toBeEnabled();
+  expect(screen.getByRole("textbox", { name: "Decision name" })).toBeEnabled();
   fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
     target: { value: "Latest name" },
   });
@@ -748,14 +743,11 @@ it.each([false, true])(
       const view = render(
         <CompetitionDraftEditor wave={wave} onClose={jest.fn()} />
       );
-      fireEvent.click(
-        screen.getByRole("combobox", { name: "Decision type" })
-      );
+      fireEvent.click(screen.getByRole("combobox", { name: "Decision type" }));
       fireEvent.click(screen.getByRole("option", { name: "Approve" }));
-      fireEvent.change(
-        screen.getByRole("textbox", { name: "Decision name" }),
-        { target: { value: "Unfinished approve draft" } }
-      );
+      fireEvent.change(screen.getByRole("textbox", { name: "Decision name" }), {
+        target: { value: "Unfinished approve draft" },
+      });
       const leaving = new Event("beforeunload", { cancelable: true });
       globalThis.dispatchEvent(leaving);
       expect(leaving.defaultPrevented).toBe(storageUnavailable);

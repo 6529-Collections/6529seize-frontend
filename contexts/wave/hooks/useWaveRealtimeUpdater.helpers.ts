@@ -16,6 +16,7 @@ import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
 import { type QueryClient } from "@tanstack/react-query";
 import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
+import { reconcileDropMedia } from "@/helpers/waves/drop-media-reconciliation";
 import {
   reconcileAttachmentStatusUpdate,
   reconcileFinalizedDropAttachments,
@@ -34,6 +35,8 @@ type ApiDropWithUnknownSerialNo = Omit<ApiDrop, "serial_no"> & {
 export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly removeDrops: (waveId: string, dropIds: readonly string[]) => void;
   readonly activeWaveId: string | null;
+  /** Only the displayed Chat panel may acknowledge incoming messages. */
+  readonly activeReadWaveId?: string | null | undefined;
   readonly hasServerFeedSeed: (waveId: string) => boolean;
   /** Whether the wave is active or has a mounted message subscriber. */
   readonly isWaveInUse: (waveId: string) => boolean;
@@ -65,6 +68,8 @@ export type ProcessIncomingDropFn = (
 ) => Promise<void>;
 
 export interface ProcessIncomingDropOptions {
+  /** Pending row accepted by this POST response, even if its content changed. */
+  readonly pendingDropId?: string | null | undefined;
   readonly preferExistingPollVote?: boolean;
   /** Exact canonical payload already fetched for a compact WebSocket ref. */
   readonly canonicalDrop?: ApiDrop;
@@ -371,7 +376,10 @@ const buildOptimisticDrop = ({
   let reconciledDrop =
     existingDrop === null
       ? drop
-      : reconcileFinalizedDropAttachments(drop, existingDrop);
+      : reconcileDropMedia(
+          reconcileFinalizedDropAttachments(drop, existingDrop),
+          existingDrop
+        );
   if (existingDrop !== null && preferExistingPollVote === undefined) {
     reconciledDrop = reconcileDropAuthenticatedPollVote(
       reconciledDrop,

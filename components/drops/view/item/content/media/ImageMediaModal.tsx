@@ -325,7 +325,10 @@ export function ImageMediaModal({
           type="button"
           aria-label="Close modal"
           data-testid="modal-backdrop"
-          onClick={onClose}
+          onClick={(event) => {
+            event.stopPropagation();
+            onClose();
+          }}
           className="tw-fixed tw-inset-0 tw-z-1000 tw-border-0 tw-bg-black/80 tw-p-0"
         />
         <TransformWrapper
@@ -440,7 +443,10 @@ export function ImageMediaModal({
               type="button"
               variant="tertiary"
               size="sm"
-              onClick={retryPreview}
+              onClick={(event) => {
+                event.stopPropagation();
+                retryPreview();
+              }}
             >
               {t(DEFAULT_LOCALE, "drop.media.retryPreview")}
             </Button>
