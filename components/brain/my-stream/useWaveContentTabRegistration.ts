@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
@@ -9,15 +9,11 @@ import {
   getCompetitionIdFromPathname,
   isCompetitionPathname,
 } from "@/helpers/competition.helpers";
-import { getWaveOutcomeVisibilityFromMetadata } from "@/helpers/waves/wave-metadata.helpers";
 import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitionsTab";
 import { useWave } from "@/hooks/useWave";
 import { useWavePollSummary } from "@/hooks/useWaveHasPolls";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
-import {
-  useWaveMetadata,
-  useWaveOutcomeVisibility,
-} from "@/hooks/waves/useWaveMetadata";
+import { useWaveMetadata } from "@/hooks/waves/useWaveMetadata";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { useContentTab, WaveVotingState } from "../ContentTabContext";
 
@@ -64,15 +60,6 @@ export function useWaveContentTabRegistration(
     decisions: { firstDecisionDone },
   } = useWaveTimers(wave);
   const votingState = getVotingState(isUpcoming, isCompleted);
-  const waveOutcomesVisible = useWaveOutcomeVisibility(wave);
-  const nativePresentation = useMemo(
-    () =>
-      (nativeDefault?.presentation ?? []).map((item, id) => ({ ...item, id })),
-    [nativeDefault?.presentation]
-  );
-  const outcomesVisible = nativeDefault
-    ? getWaveOutcomeVisibilityFromMetadata(nativePresentation)
-    : waveOutcomesVisible;
   const { isPending: metadataPending } = useWaveMetadata(wave?.id, {
     enabled: isRankWave || isApproveWave,
   });
@@ -101,7 +88,6 @@ export function useWaveContentTabRegistration(
       hasAuthenticatedProfile,
       isCurationWave,
       isApproveWave,
-      showOutcomeTab: outcomesVisible,
       votingState,
       hasFirstDecisionPassed: firstDecisionDone,
       transientPreferredTab: hasSerialTarget ? MyStreamWaveTab.CHAT : null,
@@ -124,7 +110,6 @@ export function useWaveContentTabRegistration(
     defaultSelectionEnabled,
     hasAuthenticatedProfile,
     isCurationWave,
-    outcomesVisible,
     votingState,
     firstDecisionDone,
     hasSerialTarget,
