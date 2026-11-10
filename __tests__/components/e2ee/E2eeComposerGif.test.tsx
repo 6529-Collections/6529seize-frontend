@@ -106,7 +106,7 @@ it("preserves the draft and reply, and sends downloaded bytes as a file without 
   await screen.findByText("giphy.gif");
   expect(engine.send).not.toHaveBeenCalled();
   expect(composerText(input!)).toBe("A private caption");
-  fireEvent.click(screen.getByRole("button", { name: "Send", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Send" }));
   await waitFor(() =>
     expect(engine.send).toHaveBeenCalledWith(expect.any(String), {
       text: "A private caption",
@@ -127,9 +127,7 @@ it("blocks sending during download and supports cancellation without losing the 
   const { engine, input } = setup();
   setComposerText(input!, "Keep this draft");
   chooseGif();
-  expect(
-    screen.getByRole("button", { name: "Send", exact: true })
-  ).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
   const signal = mockDownload.mock.calls[0]![1];
   fireEvent.click(screen.getByRole("button", { name: "Cancel GIF download" }));
   expect(signal.aborted).toBe(true);
@@ -137,9 +135,7 @@ it("blocks sending during download and supports cancellation without losing the 
   expect(screen.queryByText("giphy.gif")).not.toBeInTheDocument();
   expect(composerText(input!)).toBe("Keep this draft");
   expect(engine.send).not.toHaveBeenCalled();
-  expect(
-    screen.getByRole("button", { name: "Send", exact: true })
-  ).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Send" })).toBeEnabled();
 });
 
 it("reports a failed download and allows retry", async () => {
@@ -198,9 +194,7 @@ it("cancels a pending GIF and enables sending after switching conversations", as
     screen.getByRole("textbox", { name: "Encrypted message" }),
     "A new conversation draft"
   );
-  expect(
-    screen.getByRole("button", { name: "Send", exact: true })
-  ).toBeEnabled();
+  expect(screen.getByRole("button", { name: "Send" })).toBeEnabled();
   expect(screen.queryByText("Downloading GIF…")).not.toBeInTheDocument();
   await act(async () => resolve(gif()));
   expect(screen.queryByText("giphy.gif")).not.toBeInTheDocument();

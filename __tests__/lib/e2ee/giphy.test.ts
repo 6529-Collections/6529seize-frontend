@@ -5,7 +5,7 @@ import { MAX_ATTACHMENT_FILE_BYTES } from "@/lib/e2ee/media";
 const GIF_URL = "https://media1.giphy.com/media/test/giphy.gif?cid=public";
 const GIF = new TextEncoder().encode("GIF89a-test-media");
 const originalFetch = globalThis.fetch;
-const fetchMock = jest.fn<typeof fetch>();
+const fetchMock = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
 
 beforeEach(() => {
   fetchMock.mockReset();
