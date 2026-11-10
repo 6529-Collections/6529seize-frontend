@@ -52,6 +52,9 @@ Entry behavior differs by wave type:
    - participation eligibility
    - submission window (`NOT_STARTED`, `ACTIVE`, `ENDED`)
    - per-user submission limits
+   - active submissions in the selected decision; winning, withdrawn, and
+     deleted submissions do not use capacity, and other decisions have separate
+     limits
 3. The app renders the wave-specific entry control.
 4. If blocked, the UI uses one of these states:
    - hidden controls

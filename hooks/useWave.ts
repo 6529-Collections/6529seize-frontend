@@ -245,8 +245,9 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
 
   const competition = presentationCompetition(wave);
   const projectedCount = competition
-    ? (wave as { competitionActiveEntryCount?: number | null })
-        .competitionActiveEntryCount
+    ? (competition.your_active_entries_count ??
+      (wave as { competitionActiveEntryCount?: number | null })
+        .competitionActiveEntryCount)
     : undefined;
   const identityDropsCount = competition
     ? (projectedCount ?? null)

@@ -299,6 +299,7 @@ const competition = (id: string, title: string) => ({
   lifecycle: "PUBLISHED",
   computed_phase: "VOTING_OPEN",
   config_version: 1,
+  your_active_entries_count: undefined as number | null | undefined,
   ...structuredClone({
     ...competitionRuleDefaults,
     participation: {
@@ -1949,6 +1950,99 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     }
   });
   for (const surface of ["web", "app"] as const) {
+    test(`locks Main Stage submission at three active entries (${surface})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "Native app simulation uses the mobile viewport."
+      );
+      if (surface === "app")
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const sandbox = await installCompetitionApi(
+        page,
+        false,
+        true,
+        MEMES_WAVE
+      );
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      sandbox.setCompetition("alpha", {
+        participation: {
+          ...competition("alpha", "Main Stage").participation,
+          max_entries_per_participant: 3,
+        },
+        your_active_entries_count: 3,
+      });
+      for (const tab of ["chat", "leaderboard"]) {
+        await page.goto(`/waves/${MEMES_WAVE}?tab=${tab}`, {
+          waitUntil: "domcontentloaded",
+        });
+        if (tab === "leaderboard") {
+          await expect(page).toHaveURL(
+            new RegExp(
+              `/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`
+            ),
+            { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+          );
+        }
+        await dismissNextDevTools(page);
+        const lock = page.getByRole("button", {
+          name: "Submission Limit Reached",
+          exact: true,
+        });
+        await expect(lock).toBeVisible();
+        await lock.press("Enter");
+        await expect(
+          page.getByRole("dialog", {
+            name: "Submission Limit Reached",
+            exact: true,
+          })
+        ).toBeVisible();
+        await expect(
+          page
+            .getByText(
+              "You have already submitted the maximum allowed (3 submissions)",
+              { exact: true }
+            )
+            .last()
+        ).toBeVisible();
+        await expect(
+          page.getByRole("dialog", {
+            name: "Submit Work to The Memes",
+            exact: true,
+          })
+        ).toHaveCount(0);
+        await page.keyboard.press("Escape");
+      }
+      sandbox.setCompetition("alpha", { your_active_entries_count: 2 });
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await expect(page).toHaveURL(
+        new RegExp(`/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`),
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      );
+      await expect(
+        page.getByRole("button", {
+          name: "Submission Limit Reached",
+          exact: true,
+        })
+      ).toHaveCount(0);
+      const submit = page.getByRole("button", { name: /^Submit (Work|Meme)/ });
+      await expect(submit).toBeVisible();
+      await submit.click();
+      await expect(
+        page.getByRole("dialog", {
+          name: "Submit Work to The Memes",
+          exact: true,
+        })
+      ).toBeVisible();
+      expect(sandbox.requests).toEqual([]);
+    });
+
     for (const eligible of [true, false]) {
       test(`keeps the Main Stage header action consistent in Chat and Leaderboard (${surface}, ${eligible ? "eligible" : "not eligible"})`, async ({
         page,
