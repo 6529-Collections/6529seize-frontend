@@ -11412,6 +11412,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         ).toBeVisible();
         // Visibility alone does not catch an ancestor clipping the button.
         await reply.click({ trial: true });
+        await page.mouse.move(0, 0);
+        await reply.focus();
+        await page.keyboard.press("Shift+Tab");
+        await page.keyboard.press("Tab");
+        await expect(reply).toBeFocused();
       }
       await testInfo.attach("winner-chat-actions", {
         body: await page.screenshot(),
