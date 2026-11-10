@@ -233,9 +233,15 @@ describe("drop signature details", () => {
 
     expect(
       await screen.findByText(
-        "This post was signed with the wallet 0x2222…2222, which is no longer linked to its author's profile, so this post isn't shown as signed."
+        "This post was signed by the wallet 0x2222222222222222222222222222222222222222, which is not one of its author's wallets now (for example, it was removed from the profile), so the signature can't be attributed to this author."
       )
     ).toBeVisible();
+    expect(
+      screen.getByText("Signed by a wallet that is not on this profile")
+    ).toBeVisible();
+    expect(
+      screen.queryByText("Couldn't verify this signature right now")
+    ).toBeNull();
     expect(
       screen.queryByText("The signature could not be verified")
     ).toBeNull();

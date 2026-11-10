@@ -250,7 +250,12 @@ name, tooltip and shape follow that check:
   verified the signature over the content shown.
 - **Signed, not yet verified**: a question mark, when the browser cannot
   verify it here (a contract wallet, whose check on Ethereum runs only in the
-  dialog; an unrecognized origin; or a lookup that failed).
+  dialog; an unrecognized origin; part of the signed post that cannot be
+  read with certainty; or a lookup that failed).
+- **Signed by a wallet that is not on this profile**: a person with a minus
+  sign, neutral, when the signing wallet is not one of the author's wallets
+  now (for example, it was removed from the profile), so the signature
+  cannot be attributed to this author. The dialog names the wallet.
 - **The signature doesn't match this post**: a shield with an exclamation
   mark, when the signature does not verify or covers other content.
 
@@ -298,7 +303,9 @@ chat's usual grouping), the header's seal stands for the whole group:
   author**.
 - While posts are being checked: **Checking the signatures in this group**.
   When a post's signature does not match: **A signature in this group
-  doesn't match its post**. When none could be verified here: **Signed
+  doesn't match its post**. When a post was signed by a wallet that is not
+  on the author's profile: **A post in this group was signed by a wallet
+  that is not on this profile**. When none could be verified here: **Signed
   posts, not yet verified**.
 - No post marked signed: no seal on the header.
 - Activating the header seal opens **Signatures in this group**, which lists

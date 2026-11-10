@@ -113,10 +113,14 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.marker.label": "Signed by its author",
   "signedMessages.marker.pending": "Checking the author's signature",
   "signedMessages.marker.unverified": "Signed, not yet verified",
+  "signedMessages.marker.unlinked":
+    "Signed by a wallet that is not on this profile",
   "signedMessages.marker.failed": "The signature doesn't match this post",
   "signedMessages.marker.withLabel": "{label}, signed by its author",
   "signedMessages.marker.withLabelUnverified":
     "{label}, signed, not yet verified",
+  "signedMessages.marker.withLabelUnlinked":
+    "{label}, signed by a wallet that is not on this profile",
   "signedMessages.marker.withLabelFailed":
     "{label}, the signature doesn't match this post",
   "signedMessages.signature.menuItem": "Signature",
@@ -149,7 +153,9 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.signature.unrecognizedOriginDescription":
     "This post's device was authorized from “{origin}”, which isn't a 6529 site or app, so this post isn't shown as signed.",
   "signedMessages.signature.unlinkedWalletDescription":
-    "This post was signed with the wallet {wallet}, which is no longer linked to its author's profile, so this post isn't shown as signed.",
+    "This post was signed by the wallet {wallet}, which is not one of its author's wallets now (for example, it was removed from the profile), so the signature can't be attributed to this author.",
+  "signedMessages.signature.unlinked":
+    "Signed by a wallet that is not on this profile",
   "signedMessages.signature.currentContent": "Current content",
   "signedMessages.signature.currentSigned": "The signed version",
   "signedMessages.signature.currentUnsigned": "Changed without a signature",
@@ -161,6 +167,8 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "{signed} of {count} posts signed by their author",
   "signedMessages.group.pending": "Checking the signatures in this group",
   "signedMessages.group.unverified": "Signed posts, not yet verified",
+  "signedMessages.group.unlinked":
+    "A post in this group was signed by a wallet that is not on this profile",
   "signedMessages.group.failed":
     "A signature in this group doesn't match its post",
   "signedMessages.group.title": "Signatures in this group",

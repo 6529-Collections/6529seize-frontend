@@ -259,6 +259,11 @@ describe("this browser's seal verdicts", () => {
     ["does not verify", { status: "invalid" }, "failed"],
     ["needs a contract-wallet check", { status: "unverifiable" }, "unverified"],
     [
+      "was made by a wallet no longer on the author's profile",
+      { status: "unverifiable", unlinkedWallet: AUTHOR },
+      "unlinked",
+    ],
+    [
       "comes from an unrecognized origin",
       { status: "unverifiable", unrecognizedOrigin: "evil.example" },
       "unverified",

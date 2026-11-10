@@ -10,6 +10,7 @@ const WITH_LABEL_KEYS = {
   failed: "signedMessages.marker.withLabelFailed",
   pending: "signedMessages.marker.withLabelUnverified",
   unverified: "signedMessages.marker.withLabelUnverified",
+  unlinked: "signedMessages.marker.withLabelUnlinked",
 } as const satisfies Record<SealState, string>;
 
 /**

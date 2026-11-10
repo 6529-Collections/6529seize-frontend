@@ -51,10 +51,10 @@ describe("DropGroupSignatureDialog", () => {
   });
 
   it("says signed by its author only for posts this browser verified", () => {
-    mockStates = { a: "pending", b: "unverified", c: "failed" };
+    mockStates = { a: "pending", b: "unverified", c: "failed", e: "unlinked" };
     render(
       <DropGroupSignatureDialog
-        group={[aDrop("a"), aDrop("b"), aDrop("c"), aDrop("d")]}
+        group={[aDrop("a"), aDrop("b"), aDrop("c"), aDrop("d"), aDrop("e")]}
         isOpen
         onClose={jest.fn()}
       />
@@ -66,6 +66,10 @@ describe("DropGroupSignatureDialog", () => {
     expect(rows[1]).toHaveTextContent("Signed, not yet verified");
     expect(rows[2]).toHaveTextContent("The signature doesn't match this post");
     expect(rows[3]).toHaveTextContent("Signed by its author");
+    expect(rows[4]).toHaveTextContent(
+      "Signed by a wallet that is not on this profile"
+    );
+    expect(rows[4]).not.toHaveTextContent("Signed by its author");
     rows
       .slice(0, 3)
       .forEach((row) =>

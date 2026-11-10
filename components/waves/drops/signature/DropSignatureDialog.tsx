@@ -31,6 +31,7 @@ import {
   MinusCircleIcon,
   QuestionMarkCircleIcon,
   ShieldCheckIcon,
+  UserMinusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
@@ -137,11 +138,24 @@ const VERDICT_PRESENTATION = {
   },
 } as const;
 
+/** A signature by a wallet that is not one of the author's wallets now. */
+const UNLINKED_PRESENTATION = {
+  Icon: UserMinusIcon,
+  iconClassName: "tw-text-iron-400",
+  titleKey: "signedMessages.signature.unlinked",
+  descriptionKey: "signedMessages.signature.unlinkedWalletDescription",
+} as const;
+
+const presentationOf = (verdict: DropSignatureVerdict) =>
+  verdict.status === "unverifiable" && verdict.unlinkedWallet
+    ? UNLINKED_PRESENTATION
+    : VERDICT_PRESENTATION[verdict.status];
+
 /** The verdict's explanation, naming why a signature is not verifiable. */
 function describeVerdict(
   locale: SupportedLocale,
   verdict: DropSignatureVerdict,
-  descriptionKey: (typeof VERDICT_PRESENTATION)[DropSignatureVerdict["status"]]["descriptionKey"]
+  descriptionKey: ReturnType<typeof presentationOf>["descriptionKey"]
 ): string {
   if (verdict.status === "unverifiable" && verdict.unrecognizedOrigin) {
     return t(locale, "signedMessages.signature.unrecognizedOriginDescription", {
@@ -150,7 +164,7 @@ function describeVerdict(
   }
   if (verdict.status === "unverifiable" && verdict.unlinkedWallet) {
     return t(locale, "signedMessages.signature.unlinkedWalletDescription", {
-      wallet: shortenAddress(verdict.unlinkedWallet),
+      wallet: verdict.unlinkedWallet,
     });
   }
   return t(locale, descriptionKey);
@@ -164,7 +178,7 @@ function VerdictView({
   readonly verdict: DropSignatureVerdict;
 }) {
   const { Icon, iconClassName, titleKey, descriptionKey } =
-    VERDICT_PRESENTATION[verdict.status];
+    presentationOf(verdict);
   const description = describeVerdict(locale, verdict, descriptionKey);
   return (
     <div>

@@ -11,6 +11,7 @@ import {
   QuestionMarkCircleIcon,
   ShieldCheckIcon as ShieldCheckOutlineIcon,
   ShieldExclamationIcon,
+  UserMinusIcon,
 } from "@heroicons/react/24/outline";
 import {
   useId,
@@ -43,6 +44,7 @@ const SEAL_LABEL_KEYS = {
   verified: "signedMessages.marker.label",
   pending: "signedMessages.marker.pending",
   unverified: "signedMessages.marker.unverified",
+  unlinked: "signedMessages.marker.unlinked",
   failed: "signedMessages.marker.failed",
 } as const satisfies Record<SealState, string>;
 
@@ -83,6 +85,16 @@ function SealIcon({ state }: { readonly state: SealPresentation }) {
         <QuestionMarkCircleIcon
           aria-hidden="true"
           data-seal-state="unverified"
+          className="tw-size-3.5"
+          strokeWidth={2}
+        />
+      );
+    case "unlinked":
+      // Neutral: neither the verified shield nor the failure state.
+      return (
+        <UserMinusIcon
+          aria-hidden="true"
+          data-seal-state="unlinked"
           className="tw-size-3.5"
           strokeWidth={2}
         />
@@ -219,7 +231,8 @@ const GROUP_PARTIAL_KEYS = {
 
 /**
  * A group's seal: any post whose signature does not match, then any still
- * being checked, then how many of all its posts this browser verified.
+ * being checked, then any signed by a wallet that is not on the author's
+ * profile, then how many of all its posts this browser verified.
  */
 function getGroupSeal(
   locale: SupportedLocale,
@@ -233,6 +246,12 @@ function getGroupSeal(
     return {
       state: "pending",
       label: t(locale, "signedMessages.group.pending"),
+    };
+  }
+  if (states.includes("unlinked")) {
+    return {
+      state: "unlinked",
+      label: t(locale, "signedMessages.group.unlinked"),
     };
   }
   const verified = states.filter((state) => state === "verified").length;

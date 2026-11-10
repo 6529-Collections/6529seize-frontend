@@ -19,9 +19,16 @@ import { isDropAuthorSigned } from "./authorSignedClaim";
  * "verified": this browser verified the signature over the content shown;
  * "unverified": signed according to 6529.io, but this browser could not
  * verify it (a contract wallet, an unrecognized origin, a failed lookup);
+ * "unlinked": the signing wallet is not one of the author's wallets now, so
+ * the signature cannot be attributed to this author;
  * "failed": the signature does not verify or does not match the content.
  */
-export type SealState = "pending" | "verified" | "unverified" | "failed";
+export type SealState =
+  | "pending"
+  | "verified"
+  | "unverified"
+  | "unlinked"
+  | "failed";
 
 /** What is shown of a drop and checked against its signed body. */
 export type SignedContentDrop = Pick<
@@ -146,8 +153,9 @@ function sealStateFromVerdict(verdict: DropSignatureVerdict): SealState {
       return verdict.currentContentSigned ? "verified" : "unverified";
     case "invalid":
       return "failed";
-    case "unsigned":
     case "unverifiable":
+      return verdict.unlinkedWallet === undefined ? "unverified" : "unlinked";
+    case "unsigned":
       return "unverified";
   }
 }

@@ -17,6 +17,7 @@ import {
   QuestionMarkCircleIcon,
   ShieldCheckIcon as ShieldCheckOutlineIcon,
   ShieldExclamationIcon,
+  UserMinusIcon,
 } from "@heroicons/react/24/outline";
 import { ShieldCheckIcon } from "@heroicons/react/16/solid";
 import { useId, useMemo, useState } from "react";
@@ -53,6 +54,7 @@ const ROW_STATUS = {
     key: "signedMessages.marker.unverified",
     Icon: QuestionMarkCircleIcon,
   },
+  unlinked: { key: "signedMessages.marker.unlinked", Icon: UserMinusIcon },
   failed: { key: "signedMessages.marker.failed", Icon: ShieldExclamationIcon },
 } as const satisfies Record<SealState, unknown>;
 

@@ -914,6 +914,57 @@ describe("drop signature verification in the browser", () => {
         return signedEvents([post, edit], [grant], edit.id);
       };
 
+      /** An edit, after an original post signed with these refs (or none). */
+      const editAfter = async (postRefs: string[] | null) => {
+        const grant = await createGrant();
+        const edit = await createEvent(grant, {
+          kind: 2,
+          seq: 1_760_000_000_001,
+          body: { title: null, parts: signedBody.parts },
+          refs: [DROP_ID],
+        });
+        if (postRefs === null) {
+          return signedEvents([edit], [grant], edit.id);
+        }
+        const post = await createEvent(grant, {
+          kind: 1,
+          seq: 1_760_000_000_000,
+          body: { ...signedBody, parts: [{ content: "gm" }] },
+          refs: postRefs,
+        });
+        return signedEvents([post, edit], [grant], edit.id);
+      };
+
+      it("checks the reply target against the original body even when its refs disagree", async () => {
+        const data = await editAfter([]);
+        await expect(
+          verifyDropSignedEvents(data, {
+            displayed: { ...matching(), replyToDropId: QUOTED },
+            expected,
+          })
+        ).resolves.toEqual({ status: "invalid" });
+        await expect(
+          verifyDropSignedEvents(data, { displayed: matching(), expected })
+        ).resolves.toMatchObject({ status: "signed" });
+      });
+
+      it("never verifies a reply target an edit of an unsigned post cannot vouch for", async () => {
+        const data = await editAfter(null);
+        await expect(
+          verifyDropSignedEvents(data, {
+            displayed: { ...matching(), replyToDropId: QUOTED },
+            expected,
+          })
+        ).resolves.toEqual({ status: "unverifiable" });
+        // Without a reply target shown, the edit verifies as before.
+        await expect(
+          verifyDropSignedEvents(data, {
+            displayed: { ...matching(), replyToDropId: null },
+            expected,
+          })
+        ).resolves.toMatchObject({ status: "signed" });
+      });
+
       it("verifies an edit that refers to this drop, with the reply target its post signed", async () => {
         await expect(
           verifyDropSignedEvents(await editedData([DROP_ID]), {

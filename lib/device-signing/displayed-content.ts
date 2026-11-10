@@ -368,11 +368,18 @@ export function signedReplyTarget(
   return ref?.dropId ?? null;
 }
 
+/** A reply target an edit's own body signs, when it names one. */
+function editReplyTarget(body: Record<string, unknown>): string | undefined {
+  const ref = readSignedRef(body["reply_to"]);
+  return ref === UNKNOWN || ref === null ? undefined : ref.dropId;
+}
+
 /**
  * Whether the signed post or edit body is what the reader is shown. A
- * post's body signs its reply target; an edit's does not, so an edited drop
- * shows its reply target against the original post when that is signed
- * (`replyTarget`; undefined when unknown).
+ * post's body signs its reply target. An edit's body normally does not, so
+ * an edited drop shows its reply target against the original post's signed
+ * body (`replyTarget`); without that body (an unsigned original, or one not
+ * loaded) a reply target shown cannot be vouched for and is "unknown".
  */
 export function compareDisplayed(
   body: unknown,
@@ -383,13 +390,15 @@ export function compareDisplayed(
   if (!isRecord(body)) {
     return "unknown";
   }
-  const signedTarget = isPost ? signedReplyTarget(body) : replyTarget;
+  const signedTarget = isPost
+    ? signedReplyTarget(body)
+    : (editReplyTarget(body) ?? replyTarget);
   // A reply target shown must be the signed one. One left out (a deleted
   // target, for example) shows nothing unsigned.
   let reply: DisplayedMatch = "match";
   if (displayed.replyToDropId !== null) {
     if (signedTarget === undefined) {
-      reply = isPost ? "unknown" : "match";
+      reply = "unknown";
     } else {
       reply =
         signedTarget !== null && sameId(signedTarget, displayed.replyToDropId)

@@ -540,7 +540,7 @@ export async function verifyDropSignedEvents(
           parseSignedBody(current.event),
           current.event.kind === DeviceEventKind.POST,
           options.displayed,
-          originalReplyTarget(verified, options.expected)
+          originalReplyTarget(verified)
         )
       : "match";
   if (shownMatch === "mismatch" || refs === "mismatch") {
@@ -582,17 +582,16 @@ export async function verifyDropSignedEvents(
 }
 
 /**
- * The reply target the drop's original post signs (null: not a reply), or
- * undefined when no verified post is among the events, as for a drop posted
- * unsigned and edited signed.
+ * The reply target the drop's original post signs in its body (null: not a
+ * reply), whatever its refs say, or undefined when no verified post is among
+ * the events (a drop posted unsigned and edited signed) or its body cannot
+ * be read.
  */
 function originalReplyTarget(
-  verified: readonly VerifiedEvent[],
-  expected: ExpectedDrop | undefined
+  verified: readonly VerifiedEvent[]
 ): string | null | undefined {
   const post = verified.find(
-    ({ event }) =>
-      event.kind === DeviceEventKind.POST && checkRefs(event, expected) === "ok"
+    ({ event }) => event.kind === DeviceEventKind.POST
   );
   if (!post) {
     return undefined;

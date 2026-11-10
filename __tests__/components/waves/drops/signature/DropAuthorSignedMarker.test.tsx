@@ -108,6 +108,11 @@ describe("drop author signed marker", () => {
     ["not yet checked", "pending", "Checking the author's signature"],
     ["not verifiable here", "unverified", "Signed, not yet verified"],
     ["not matching", "failed", "The signature doesn't match this post"],
+    [
+      "signed by a wallet not on the profile",
+      "unlinked",
+      "Signed by a wallet that is not on this profile",
+    ],
   ])("never says signed by its author for a drop %s", (_name, state, label) => {
     mockStates = { "drop-1": state };
     renderMarker();
@@ -250,6 +255,10 @@ describe("drop author signed marker", () => {
       ["pending", "Open entry, signed, not yet verified"],
       ["unverified", "Open entry, signed, not yet verified"],
       ["failed", "Open entry, the signature doesn't match this post"],
+      [
+        "unlinked",
+        "Open entry, signed by a wallet that is not on this profile",
+      ],
     ])("follows this browser's %s check", (state, name) => {
       mockStates = { "drop-1": state };
       renderCard();
@@ -356,6 +365,12 @@ describe("drop author signed marker", () => {
         },
         "Signed posts, not yet verified",
         "unverified",
+      ],
+      [
+        "signed by a wallet not on the profile",
+        { "drop-2": "unlinked" },
+        "A post in this group was signed by a wallet that is not on this profile",
+        "unlinked",
       ],
     ])(
       "never claims signatures while a post is %s",
