@@ -94,7 +94,8 @@ const latest = (...values: readonly (number | null | undefined)[]) => {
   return present.length > 0 ? Math.max(...present) : null;
 };
 
-const isActive = (device: SecurityDevice) =>
+/** Whether either permission is still in force (not revoked or expired). */
+export const isDeviceActive = (device: SecurityDevice) =>
   device.signedPosts?.status === "active" ||
   device.encryptedDms?.status === "active";
 
@@ -180,7 +181,7 @@ const byNewest = (a: SecurityDevice, b: SecurityDevice) =>
  */
 export function classifyDevices(input: ClassifyDevicesInput): ClassifiedDevices {
   const devices = mergeDevices(input);
-  const active = devices.filter(isActive);
+  const active = devices.filter(isDeviceActive);
   // The newest active match wins if this browser holds more than one key.
   const thisDevice =
     active
@@ -194,7 +195,7 @@ export function classifyDevices(input: ClassifyDevicesInput): ClassifiedDevices 
     (device.lastActiveAt === null ||
       device.lastActiveAt <= thisDevice.createdAt);
   const ended = devices
-    .filter((device) => !isActive(device))
+    .filter((device) => !isDeviceActive(device))
     .toSorted((a, b) => (b.endedAt ?? 0) - (a.endedAt ?? 0));
   const recent = ended.filter(
     (device) =>
