@@ -346,6 +346,9 @@ Opt-in stateful staging packs:
   in ordinary and encrypted chats, captures both at desktop and phone widths,
   and checks private footnote navigation and that private Markdown URLs cause
   no automatic requests.
+  The same check covers formatted encrypted notification previews in the
+  desktop overview and on the notifications page, including fenced code and
+  bounded previews at desktop and phone widths.
   Its privacy checks ensure no request URL, body or sent WebSocket
   frame contains any plaintext (raw, hex
   or base64 at any alignment), that the MLS WebAssembly module loads under the

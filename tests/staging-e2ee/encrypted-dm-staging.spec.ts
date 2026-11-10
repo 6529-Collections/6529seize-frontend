@@ -425,7 +425,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         await ordinary.setViewportSize({ width: 1440, height: 1000 });
         await b.page.setViewportSize({ width: 1440, height: 1000 });
       }
-      const secret = `Private URL checks ${runId}\n\n[Private link](https://${canary}.invalid/link)\n\nhttps://${canary}.invalid/plain\n\n![Private image](https://${canary}.invalid/image.png)\n\n<img src="https://${canary}.invalid/html.png">\n\n[Unsafe script](javascript:alert%281%29)\n\n[Unsafe data](data:text/html,private)\n\nA private note[^1].\n\n[^1]: Private footnote`;
+      const secret = `Private URL checks ${runId}\n\n**Preview bold** *Preview italic* and \`preview code\`\n\n[Private link](https://${canary}.invalid/link)\n\nhttps://${canary}.invalid/plain\n\n![Private image](https://${canary}.invalid/image.png)\n\n<img src="https://${canary}.invalid/html.png">\n\n[Unsafe script](javascript:alert%281%29)\n\n[Unsafe data](data:text/html,private)\n\nA private note[^1].\n\n[^1]: Private footnote`;
       await composer(a.page).fill(secret);
       await a.page.getByRole("button", { name: "Send", exact: true }).click();
       const privateRow = messageRow(b.page, `Private URL checks ${runId}`);
@@ -450,6 +450,87 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
           canary
         )
       ).toBe(false);
+      const notificationCodeText = `console.log("Notification code ${runId}");`;
+      const notificationCode = `\`\`\`js\n${notificationCodeText}\n\`\`\``;
+      await composer(a.page).fill(notificationCode);
+      await a.page.getByRole("button", { name: "Send", exact: true }).click();
+      await gotoStaging(b.page, "/notifications");
+      const notice = b.page
+        .getByRole("article")
+        .filter({ hasText: `Private URL checks ${runId}` });
+      for (const width of [1440, 390]) {
+        await b.page.setViewportSize({ width, height: 1000 });
+        await expect(notice.getByText("Preview bold")).toHaveJSProperty(
+          "tagName",
+          "STRONG",
+          { timeout: SYNC_TIMEOUT_MS }
+        );
+        await expect(notice.getByText("Preview italic")).toHaveJSProperty(
+          "tagName",
+          "EM"
+        );
+        await expect(notice.getByText("preview code")).toHaveJSProperty(
+          "tagName",
+          "CODE"
+        );
+        await expect(
+          notice.getByRole("link", { name: "Private link" })
+        ).toHaveCount(0);
+        expect(
+          await notice.evaluate(
+            (element) => element.getBoundingClientRect().height
+          )
+        ).toBeLessThan(180);
+        await testInfo.attach(`encrypted-notification-page-${width}`, {
+          body: await notice.screenshot(),
+          contentType: "image/png",
+        });
+        const codeNotice = b.page.getByRole("article").filter({
+          hasText: `Notification code ${runId}`,
+        });
+        await expect(
+          codeNotice.getByText(notificationCodeText)
+        ).toHaveJSProperty("tagName", "CODE", { timeout: SYNC_TIMEOUT_MS });
+        await expect(codeNotice).not.toContainText("```");
+        await testInfo.attach(`encrypted-notification-code-${width}`, {
+          body: await codeNotice.screenshot(),
+          contentType: "image/png",
+        });
+      }
+      await b.page.setViewportSize({ width: 1440, height: 1000 });
+      await b.page
+        .getByRole("link", { name: "Notifications", exact: true })
+        .first()
+        .press("ArrowDown");
+      const overview = b.page.getByRole("region", {
+        name: "Notifications",
+        exact: true,
+      });
+      const overviewNotice = overview.getByRole("article").filter({
+        hasText: `Private URL checks ${runId}`,
+      });
+      await expect(overviewNotice.getByText("Preview bold")).toHaveJSProperty(
+        "tagName",
+        "STRONG",
+        { timeout: SYNC_TIMEOUT_MS }
+      );
+      await expect(
+        overviewNotice.getByRole("link", { name: "Private link" })
+      ).toHaveCount(0);
+      await testInfo.attach("encrypted-notification-overview", {
+        body: await overview.screenshot(),
+        contentType: "image/png",
+      });
+      await expect(
+        overview
+          .getByRole("article")
+          .filter({
+            hasText: `Notification code ${runId}`,
+          })
+          .getByText(notificationCodeText)
+      ).toHaveJSProperty("tagName", "CODE");
+      await b.page.keyboard.press("Escape");
+      await openChat(b, dm);
       await b.page.reload();
       await expect(
         messageRow(b.page, `Private URL checks ${runId}`).getByRole("link", {
@@ -465,7 +546,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       ).toEqual([]);
       expectPrivateAndClean(
         [a, b],
-        needles({ privateMarkdown: secret, canary })
+        needles({ privateMarkdown: secret, canary, notificationCode })
       );
       await testInfo.attach("markdown-staging-locations", {
         body: JSON.stringify({

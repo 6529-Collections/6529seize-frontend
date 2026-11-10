@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { useEncryptedNotificationPreview } from "@/hooks/e2ee/useEncryptedNotificationPreview";
 import type { INotificationEncryptedMessage } from "@/types/feed.types";
 import NotificationInboxRow from "@/components/notifications/inbox/NotificationInboxRow";
+import NotificationEncryptedMessage from "@/components/brain/notifications/NotificationEncryptedMessage";
 import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -423,3 +424,51 @@ it("links the sender avatar and handle separately from encrypted chat setup", ()
   fireEvent.click(setup);
   expect(onOpen).toHaveBeenCalledWith([13]);
 });
+
+it.each(["overview", "page"])(
+  "renders private Markdown in the notification %s without message links or resources",
+  (surface) => {
+    const longBold = "formatted ".repeat(30).trim();
+    jest.mocked(useEncryptedNotificationPreview).mockReturnValue({
+      preview: `\`\`\`js\nconsole.log("preview");\n\`\`\`\n\n**Bold** *italic* ~~struck~~ and \`code\`.\n\n**${longBold}**\n\n[Private link](https://private.invalid/link) ![Private image](https://private.invalid/image.png)\n\n<img src="https://private.invalid/html.png">\n\n- [x] Complete\n\n| Key | Value |\n| --- | --- |\n| A | B |`,
+      needsSetup: false,
+    });
+    const notification: INotificationEncryptedMessage = {
+      id: 14,
+      created_at: 14,
+      read_at: null,
+      cause: ApiNotificationCause.E2EeMessage,
+      additional_context: {
+        encrypted_group: "0xgroup",
+        encrypted_message_seq: 9,
+      },
+    };
+    const { container } = render(
+      surface === "overview" ? (
+        <NotificationInboxRow
+          notification={notification}
+          handle="viewer"
+          onOpen={jest.fn()}
+        />
+      ) : (
+        <NotificationEncryptedMessage notification={notification} />
+      )
+    );
+    expect(screen.getByText("Bold").tagName).toBe("STRONG");
+    expect(screen.getByText("italic").tagName).toBe("EM");
+    expect(screen.getByText("struck").tagName).toBe("DEL");
+    expect(screen.getByText("code").tagName).toBe("CODE");
+    expect(screen.getByText('console.log("preview");').tagName).toBe("CODE");
+    expect(screen.getByText(longBold).tagName).toBe("STRONG");
+    expect(screen.getByText("Private image")).toBeInTheDocument();
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "/messages/encrypted/0xgroup"
+    );
+    expect(
+      container.querySelector("a a,img,iframe,video,audio,source,input,script")
+    ).toBeNull();
+  }
+);

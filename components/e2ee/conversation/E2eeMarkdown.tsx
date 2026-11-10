@@ -23,6 +23,7 @@ import type { ComponentPropsWithoutRef } from "react";
 import { highlightCodeElement } from "@/components/drops/view/part/dropPartMarkdown/highlight";
 import { normalizeDropMarkdownContent } from "@/components/drops/view/part/dropPartMarkdown/normalizeContent";
 import { rehypePreserveOrderedListDelimiter } from "@/components/drops/view/part/dropPartMarkdown/orderedListDelimiter";
+import { rehypeDropPreview } from "@/components/drops/view/part/dropPartMarkdown/preview";
 import type { E2eeMember } from "@/lib/e2ee/types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -211,6 +212,24 @@ const COMPONENTS: Components = {
   table: Table,
 };
 
+function PreviewImage({ alt }: ComponentPropsWithoutRef<"img">) {
+  const locale = useBrowserLocale();
+  return <span>{alt?.trim() || t(locale, "e2ee.message.imageLink")}</span>;
+}
+
+// Notification previews sit inside the link that opens the chat. Message links
+// and images are labels here, so they neither nest anchors nor load resources.
+const PREVIEW_COMPONENTS: Components = {
+  ...COMPONENTS,
+  a: ({ children }) => <span>{children}</span>,
+  img: PreviewImage,
+  input: ({ checked }) => <span>{checked ? "☑" : "☐"}</span>,
+  table: ({ children }) => <table>{children}</table>,
+  p: ({ children }) => (
+    <p className="tw-m-0 tw-text-sm tw-leading-5">{children}</p>
+  ),
+};
+
 const REMARK_PLUGINS = [remarkGfm];
 
 export const E2eeMarkdown = memo(
@@ -220,9 +239,11 @@ export const E2eeMarkdown = memo(
     members,
     mentions,
     selfProfileId,
+    preview = false,
   }: PrivateTextContext & {
     readonly text: string;
     readonly messageId: string;
+    readonly preview?: boolean;
   }) => {
     const renderId = useId();
     const context = useMemo(
@@ -234,23 +255,24 @@ export const E2eeMarkdown = memo(
         // Raw HTML is disabled; remark already scopes its generated footnote IDs.
         [rehypeSanitize, { ...defaultSchema, clobberPrefix: "" }],
         rehypePreserveOrderedListDelimiter,
+        ...(preview ? [rehypeDropPreview] : []),
         rehypePrivateText,
       ],
-      []
+      [preview]
     );
     return (
       <TextContext.Provider value={context}>
         <Markdown
-          className="word-break tw-min-w-0 tw-max-w-full tw-break-words tw-text-iron-200 [&_code]:tw-text-iron-200 [&_h1]:tw-text-iron-200 [&_h2]:tw-text-iron-200 [&_h3]:tw-text-iron-200 [&_h4]:tw-text-iron-200 [&_h5]:tw-text-iron-200 [&_h6]:tw-text-iron-200 [&_li]:tw-text-md [&_pre]:tw-max-w-full [&_pre]:tw-overflow-x-auto [&_pre_code]:tw-whitespace-pre-wrap [&_ul]:tw-list-disc [&_ul_ul]:tw-list-[circle] [&_ul_ul_ul]:tw-list-[square]"
+          className={`word-break tw-min-w-0 tw-max-w-full tw-break-words tw-text-iron-200 [&_code]:tw-text-iron-200 [&_h1]:tw-text-iron-200 [&_h2]:tw-text-iron-200 [&_h3]:tw-text-iron-200 [&_h4]:tw-text-iron-200 [&_h5]:tw-text-iron-200 [&_h6]:tw-text-iron-200 [&_li]:tw-text-md [&_pre]:tw-max-w-full [&_pre]:tw-overflow-x-auto [&_pre_code]:tw-whitespace-pre-wrap [&_ul]:tw-list-disc [&_ul_ul]:tw-list-[circle] [&_ul_ul_ul]:tw-list-[square] ${preview ? "[&_*]:!tw-my-0 [&_*]:!tw-text-sm [&_*]:!tw-leading-5 [&_pre_code]:!tw-p-0" : ""}`}
           skipHtml
           remarkPlugins={REMARK_PLUGINS}
           remarkRehypeOptions={{
             clobberPrefix: `e2ee-${messageId}-${renderId}-`,
           }}
           rehypePlugins={plugins}
-          components={COMPONENTS}
+          components={preview ? PREVIEW_COMPONENTS : COMPONENTS}
         >
-          {normalizeDropMarkdownContent(text)}
+          {preview ? text : normalizeDropMarkdownContent(text)}
         </Markdown>
       </TextContext.Provider>
     );
