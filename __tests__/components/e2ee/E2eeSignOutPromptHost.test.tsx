@@ -12,7 +12,6 @@ import {
   removeE2eeProfileLocalData,
 } from "@/lib/e2ee/local-data";
 import type { E2eeBackupManager, E2eeBackupSnapshot } from "@/lib/e2ee/backup";
-import type { E2eeEngine } from "@/lib/e2ee/types";
 import { SELF_ID } from "./fakeE2eeEngine";
 
 jest.mock("@/lib/e2ee/local-data", () => ({
@@ -165,7 +164,6 @@ describe("E2eeSignOutPromptHost", () => {
 });
 
 describe("E2eeSignOutPromptHost with a loaded engine", () => {
-  const OWN_KEY = `0x${"ab".repeat(32)}`;
   const snapshot = (
     overrides: Partial<E2eeBackupSnapshot> = {}
   ): E2eeBackupSnapshot => ({
@@ -185,7 +183,6 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     options: {
       snapshot?: E2eeBackupSnapshot;
       backupNow?: jest.Mock;
-      revokeDevice?: jest.Mock;
     } = {}
   ) {
     const order: string[] = [];
@@ -194,16 +191,6 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
       jest.fn(async () => {
         order.push("backup");
       });
-    const revokeDevice =
-      options.revokeDevice ??
-      jest.fn(async () => {
-        order.push("revoke");
-      });
-    const engine = {
-      getStatus: () => "ready",
-      getThisDevice: () => ({ deviceKey: OWN_KEY }),
-      revokeDevice,
-    } as unknown as E2eeEngine;
     const backup = {
       getSnapshot: () => options.snapshot ?? snapshot(),
       backupNow,
@@ -211,7 +198,7 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     const value: E2eeContextValue = {
       availability: "loaded",
       profileId: SELF_ID,
-      engine,
+      engine: null,
       store: null,
       backup,
       loadError: null,
@@ -239,7 +226,7 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     act(() => {
       done = signOutWithE2eeChoice("profile", signOut);
     });
-    return { order, backupNow, revokeDevice, signOut, done: () => done };
+    return { order, backupNow, signOut, done: () => done };
   }
 
   const removeBox = () =>
@@ -253,20 +240,14 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     setE2eeEnrollmentMarker(SELF_ID, true);
   });
 
-  it("removal is on by default when the backup is current, and backs up and removes the device first", async () => {
+  it("removal is on by default when the backup is current, and backs up first", async () => {
     const run = renderWithEngine();
     expect(await removeBox()).toBeChecked();
     expect(screen.getByText(/backup is up to date/)).toBeVisible();
+    expect(screen.getByText(/You stay a member of your chats/)).toBeVisible();
     await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
     await act(run.done);
-    expect(run.revokeDevice).toHaveBeenCalledWith(OWN_KEY);
-    expect(run.order).toEqual([
-      "backup",
-      "revoke",
-      "release",
-      "remove",
-      "signOut",
-    ]);
+    expect(run.order).toEqual(["backup", "release", "remove", "signOut"]);
   });
 
   it.each([
@@ -304,29 +285,13 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     expect(run.signOut).toHaveBeenCalledTimes(1);
   });
 
-  it("signs out and removes the data even when the device cannot be removed", async () => {
-    jest.spyOn(console, "warn").mockImplementation(() => {});
-    const revokeDevice = jest.fn(async () => {
-      throw new Error("offline");
-    });
-    const run = renderWithEngine({ revokeDevice });
-    await userEvent.click(
-      await screen.findByRole("button", { name: "Sign out" })
-    );
-    await act(run.done);
-    expect(revokeDevice).toHaveBeenCalled();
-    expect(removeProfile).toHaveBeenCalledWith(SELF_ID);
-    expect(run.signOut).toHaveBeenCalledTimes(1);
-  });
-
-  it("does nothing to the device or backup when removal is not chosen", async () => {
+  it("leaves the backup and local data alone when removal is not chosen", async () => {
     const run = renderWithEngine({ snapshot: snapshot({ phase: "off" }) });
     await userEvent.click(
       await screen.findByRole("button", { name: "Sign out" })
     );
     await act(run.done);
     expect(run.backupNow).not.toHaveBeenCalled();
-    expect(run.revokeDevice).not.toHaveBeenCalled();
     expect(removeProfile).not.toHaveBeenCalled();
     expect(run.signOut).toHaveBeenCalledTimes(1);
   });

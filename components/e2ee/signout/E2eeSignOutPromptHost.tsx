@@ -9,7 +9,6 @@ import {
   removeAllE2eeLocalData,
   removeE2eeProfileLocalData,
 } from "@/lib/e2ee/local-data";
-import type { E2eeEngine } from "@/lib/e2ee/types";
 import { useE2eeContext } from "../E2eeContext";
 import {
   clearE2eeLocalMarkers,
@@ -57,7 +56,7 @@ async function removeLocalData(
   }
 }
 
-/** How long sign-out waits for the backup update or the device removal. */
+/** How long sign-out waits for the backup update. */
 const STEP_TIMEOUT_MS = 30_000;
 
 /** Resolves true when `task` finished in time, false when it failed or timed out. */
@@ -91,23 +90,6 @@ const isBackupCurrent = (snapshot: E2eeBackupSnapshot | null): boolean =>
   snapshot.lastError === null &&
   snapshot.lastBackupAt !== null;
 
-/**
- * Removes this device from the profile's encrypted chats before its keys
- * are deleted, so other members stop encrypting to it. Best effort: an
- * engine that is not ready, a network failure or a slow server never
- * blocks the sign-out.
- */
-async function revokeThisDevice(engine: E2eeEngine | null): Promise<void> {
-  const device =
-    engine?.getStatus() === "ready" ? engine.getThisDevice() : null;
-  if (!engine || !device) {
-    return;
-  }
-  if (!(await settlesInTime(() => engine.revokeDevice(device.deviceKey)))) {
-    console.warn("Could not remove this device from encrypted chats");
-  }
-}
-
 function removeHelpKey(scope: E2eeSignOutScope, backedUp: boolean): MessageKey {
   if (scope === "all") {
     return "e2ee.signOut.remove.helpAll";
@@ -122,9 +104,10 @@ function removeHelpKey(scope: E2eeSignOutScope, backedUp: boolean): MessageKey {
  * browser holds encrypted messages. For a normal sign-out it is on by
  * default only when the encrypted backup is current (nothing would be lost)
  * and off otherwise; for "sign out of all profiles" it is on and explained.
- * Removal uploads the latest changes to the backup, removes this device
- * from the profile's encrypted chats, then deletes the local data, all
- * before the sign-out, so a failed removal leaves the user signed in.
+ * Removal uploads the latest changes to the backup, then deletes the local
+ * data, both before the sign-out, so a failed removal leaves the user
+ * signed in. The device stays registered, so the user stays a member of
+ * their chats and their next device is added automatically.
  */
 export function E2eeSignOutPromptHost({
   profileId,
@@ -141,9 +124,8 @@ export function E2eeSignOutPromptHost({
   /** The backup update failed once: the next confirm removes without it. */
   const [backupFailed, setBackupFailed] = useState(false);
   const context = useE2eeContext();
-  const ownEngine = context.profileId === profileId ? context : null;
-  const engine: E2eeEngine | null = ownEngine?.engine ?? null;
-  const backup: E2eeBackupManager | null = ownEngine?.backup ?? null;
+  const backup: E2eeBackupManager | null =
+    context.profileId === profileId ? context.backup : null;
 
   useEffect(
     () =>
@@ -189,7 +171,6 @@ export function E2eeSignOutPromptHost({
         setBackupFailed(true);
         return;
       }
-      await revokeThisDevice(engine);
       try {
         await releaseEngines();
         await removeLocalData(request.scope, request.profileId);

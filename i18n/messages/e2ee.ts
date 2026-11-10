@@ -91,11 +91,11 @@ export const E2EE_MESSAGES = {
     "Your encrypted messages stay saved in this browser unless you remove them.",
   "e2ee.signOut.remove.label": "Remove encrypted messages from this browser",
   "e2ee.signOut.remove.help":
-    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile, and removes this browser from your devices. Your history is lost unless backup is on.",
+    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile. You stay a member of your chats. Your history is lost unless backup is on.",
   "e2ee.signOut.remove.helpBackedUp":
-    "Your encrypted backup is up to date, so you can restore this history with your recovery code. Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile, and removes this browser from your devices.",
+    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile. You stay a member of your chats. Your encrypted backup is up to date, so after you sign in again you can restore this history with your recovery code.",
   "e2ee.signOut.remove.helpAll":
-    "Recommended on a shared computer. Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for every profile, and removes this browser from the signed-in profile’s devices. Your history is lost unless backup is on.",
+    "Recommended on a shared computer. Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for every profile. You stay a member of your chats. Your history is lost unless backup is on.",
   "e2ee.signOut.confirm": "Sign out",
   "e2ee.signOut.backupFailed":
     "Couldn’t update your encrypted backup, so your encrypted messages were kept in this browser. To remove them anyway, select the option again and sign out. Your newest messages may then be lost.",
