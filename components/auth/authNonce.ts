@@ -22,8 +22,17 @@ const MAX_TOKEN_LENGTH = 200;
 // Printable text on one line: no control characters (line breaks included).
 const CONTROL_CHARACTER = /\p{Cc}/u;
 const WHITESPACE = /\s/u;
-const RFC3339_TIMESTAMP =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
+// RFC 3339: a date and time, an optional fraction, then Z or an offset.
+const RFC3339_DATE_TIME = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+const RFC3339_FRACTION = /^\.\d{1,9}/;
+const RFC3339_OFFSET = /^[+-]\d{2}:\d{2}$/;
+
+/** Whether the text after the seconds is an optional fraction and a zone. */
+const isFractionAndZone = (value: string): boolean => {
+  const fraction = RFC3339_FRACTION.exec(value)?.[0] ?? "";
+  const zone = value.slice(fraction.length);
+  return zone === "Z" || RFC3339_OFFSET.test(zone);
+};
 const LOOPBACK_HOSTNAMES: ReadonlySet<string> = new Set([
   "localhost",
   "127.0.0.1",
@@ -74,7 +83,11 @@ const isToken = (value: string | undefined): value is string =>
   !CONTROL_CHARACTER.test(value);
 
 const readTimestamp = (value: string | undefined): number | null => {
-  if (value === undefined || !RFC3339_TIMESTAMP.test(value)) {
+  if (
+    value === undefined ||
+    !RFC3339_DATE_TIME.test(value) ||
+    !isFractionAndZone(value.slice(19))
+  ) {
     return null;
   }
   const ms = Date.parse(value);
