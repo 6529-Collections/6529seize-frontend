@@ -6,6 +6,7 @@ import {
   type ActiveDropState,
 } from "@/types/dropInteractionTypes";
 import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
 import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
@@ -157,6 +158,7 @@ export default function PrivilegedDropCreator({
     wave.chat,
     activeDrop
   );
+  const competition = presentationCompetition(wave);
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: hasProfile || isProfileLoadingForWallet,
     needsProfile: shouldOfferProfileSetup,
@@ -170,7 +172,9 @@ export default function PrivilegedDropCreator({
     submissionEnds: wave.participation.period?.max ?? null,
     maxDropsCount:
       wave.participation.no_of_applications_allowed_per_participant ?? null,
-    identityDropsCount: wave.metrics.your_participation_drops_count,
+    identityDropsCount: competition
+      ? (competition.your_active_entries_count ?? null)
+      : wave.metrics.your_participation_drops_count,
     onSlowModeCooldownExpired: refreshWaveAfterSlowModeExpires,
   });
   const blockingChatRestriction =

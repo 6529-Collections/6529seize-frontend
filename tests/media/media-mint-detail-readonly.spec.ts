@@ -28,6 +28,52 @@ async function gotoReady(page: Page, path: string) {
   await expectNoHorizontalOverflow(page);
 }
 
+async function expectQuietSectionDivider(section: Locator, width: number) {
+  await expect(section).toHaveCSS(
+    "border-top-width",
+    width >= 768 ? "1px" : "0px"
+  );
+  for (const side of ["left", "right", "bottom"]) {
+    await expect(section).toHaveCSS(`border-${side}-width`, "0px");
+  }
+  if (width >= 768) {
+    await expect(section).toHaveCSS("border-top-color", "rgb(38, 39, 43)");
+    await expect(section).toHaveCSS("padding-top", "32px");
+  }
+}
+
+async function expectFullWidthTabDivider(page: Page, name: string) {
+  const navigation = page.getByRole("navigation", { name, exact: true });
+  await expect(navigation).toHaveCSS("border-bottom-width", "1px");
+  await expect(navigation).toHaveCSS(
+    "border-bottom-color",
+    "rgba(255, 255, 255, 0.1)"
+  );
+  const fillsContent = await navigation.evaluate((nav) => {
+    const parent = nav.parentElement!;
+    const style = getComputedStyle(parent);
+    const contentWidth =
+      parent.clientWidth -
+      Number.parseFloat(style.paddingLeft) -
+      Number.parseFloat(style.paddingRight);
+    return Math.abs(nav.getBoundingClientRect().width - contentWidth) <= 1;
+  });
+  expect(fillsContent, "Primary tab divider spans the content width").toBe(
+    true
+  );
+}
+
+async function expectUniformMarketplaceIcons(page: Page) {
+  const links = page.getByRole("link", {
+    name: /^Open (OpenSea|Blur\.io|Manifold\.xyz|Rarible)$/,
+  });
+  await expect(links.first()).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  for (const link of await links.all()) {
+    await expect(link.getByRole("img")).toHaveCSS("width", "24px");
+    await expect(link.getByRole("img")).toHaveCSS("height", "24px");
+  }
+}
+
 async function expectFullCollectLabel(button: Locator) {
   const fits = await button.evaluate((element) => {
     const label = element.querySelector(":scope > span");
@@ -75,7 +121,47 @@ async function expectTradingPanelLayout(page: Page) {
   const supplyBox = (await page
     .getByText("Supply details & rankings", { exact: true })
     .boundingBox())!;
-  expect(marketBox.y).toBeGreaterThan(supplyBox.y + supplyBox.height);
+  if ((page.viewportSize()?.width ?? 0) >= 768) {
+    expect(marketBox.y).toBeGreaterThanOrEqual(
+      actionsBox.y + actionsBox.height
+    );
+    expect(marketBox.y + marketBox.height).toBeLessThan(supplyBox.y);
+    const marketplaces = page.getByText("Marketplaces", { exact: true });
+    await expect(marketplaces).toHaveCount(1);
+    const marketplaceIcon = page
+      .getByRole("link", { name: "Open OpenSea", exact: true })
+      .getByRole("img");
+    await expect(marketplaceIcon).toHaveCSS("width", "24px");
+    await expect(marketplaceIcon).toHaveCSS("height", "24px");
+    const links = (await page
+      .getByRole("link", { name: "Open OpenSea", exact: true })
+      .boundingBox())!;
+    const label = (await marketplaces.boundingBox())!;
+    const group = (await page
+      .getByText("Marketplaces", { exact: true })
+      .locator("..")
+      .boundingBox())!;
+    expect(label.x).toBeGreaterThan(marketBox.x + marketBox.width);
+    expect(group.y + group.height / 2).toBeCloseTo(
+      marketBox.y + marketBox.height / 2,
+      0
+    );
+    expect(links.x).toBeGreaterThan(marketBox.x + marketBox.width);
+    expect(group.x + group.width).toBeCloseTo(
+      actionsBox.x + actionsBox.width,
+      0
+    );
+    if (group.height <= 28) {
+      expect(links.y + links.height / 2).toBeCloseTo(
+        label.y + label.height / 2,
+        0
+      );
+    } else {
+      expect(links.y).toBeGreaterThanOrEqual(label.y + label.height);
+    }
+  } else {
+    expect(marketBox.y).toBeGreaterThan(supplyBox.y + supplyBox.height);
+  }
   await expect(
     panel.getByRole("button", { name: "View listings & offers", exact: true })
   ).toHaveCount(0);
@@ -206,6 +292,197 @@ function isProductionBaseURL(baseURL?: string) {
 }
 
 test.describe("Media, mint, and detail read-only coverage @surface @medium @large @readonly", () => {
+  for (const card of [
+    {
+      name: "Memes",
+      route: "/the-memes/1",
+      detailsId: "meme-card-live-details",
+      priceLabel: "Mint price",
+      editionLabel: "Edition size",
+      statistics: [
+        "Edition size",
+        "Ex. research",
+        "Ex. museum & research",
+        "Holding wallets",
+        "TDH rate",
+      ],
+    },
+    {
+      name: "Meme Lab",
+      route: "/meme-lab/1",
+      detailsId: "meme-lab-card-live-details",
+      priceLabel: "Mint Price",
+      editionLabel: "Edition Size",
+      statistics: ["Edition Size", "Collection"],
+    },
+  ]) {
+    test(`groups ${card.name} mint metadata above statistics on desktop and retains phone order`, async ({
+      page,
+    }, info) => {
+      await gotoReady(page, card.route);
+      const details = page.getByTestId(card.detailsId);
+      const date = details.getByText("Mint date", { exact: true });
+      const price = details.getByText(card.priceLabel, { exact: true });
+      const edition = details.getByText(card.editionLabel, { exact: true });
+      for (const width of [390, 767, 768, 1024, 1600]) {
+        await page.setViewportSize({ width, height: 1000 });
+        await expect(date).toHaveCount(1);
+        await expect(price).toHaveCount(1);
+        const mintSection = details
+          .getByText("Mint date", { exact: true })
+          .locator("xpath=ancestor::section[1]");
+        await expect(
+          mintSection.getByText(card.priceLabel, { exact: true })
+        ).toHaveCount(width >= 768 ? 1 : 0);
+        for (const label of [
+          "Mint date",
+          card.priceLabel,
+          ...card.statistics,
+        ]) {
+          await expect(details.getByText(label, { exact: true })).toBeVisible();
+        }
+        const dateBounds = (await details
+          .getByText("Mint date", { exact: true })
+          .locator("..")
+          .boundingBox())!;
+        const priceBounds = (await details
+          .getByText(card.priceLabel, { exact: true })
+          .locator("..")
+          .boundingBox())!;
+        const editionBounds = (await edition.boundingBox())!;
+        if (width >= 768) {
+          expect(dateBounds.y).toBeCloseTo(priceBounds.y, 0);
+          const valueOffset = await date.evaluate((element, priceLabel) => {
+            const section = element.closest("section");
+            const price = Array.from(
+              section?.querySelectorAll("div") ?? []
+            ).find((candidate) => candidate.textContent === priceLabel);
+            const dateValue = element.nextElementSibling;
+            const priceValue = price?.nextElementSibling;
+            if (!dateValue || !priceValue)
+              throw new Error("Both mint values must remain available");
+            return (
+              dateValue.getBoundingClientRect().top -
+              priceValue.getBoundingClientRect().top
+            );
+          }, card.priceLabel);
+          expect(valueOffset).toBeCloseTo(0, 0);
+          expect(dateBounds.x + dateBounds.width).toBeLessThanOrEqual(
+            priceBounds.x
+          );
+          expect(
+            Math.max(
+              dateBounds.y + dateBounds.height,
+              priceBounds.y + priceBounds.height
+            )
+          ).toBeLessThan(editionBounds.y);
+          for (const link of await details
+            .getByRole("link", {
+              name: /^(Distribution Plan|Main Stage Submission)$/,
+            })
+            .all()) {
+            const bounds = (await link.boundingBox())!;
+            expect(bounds.y).toBeGreaterThanOrEqual(
+              priceBounds.y + priceBounds.height
+            );
+            expect(bounds.y + bounds.height).toBeLessThan(editionBounds.y);
+          }
+        } else {
+          expect(dateBounds.y + dateBounds.height).toBeLessThan(
+            editionBounds.y
+          );
+          expect(priceBounds.y).toBeGreaterThan(
+            editionBounds.y + editionBounds.height
+          );
+        }
+        await expectNoHorizontalOverflow(page);
+      }
+      await details.screenshot({
+        path: info.outputPath("mint-details-desktop.png"),
+      });
+    });
+  }
+
+  test("keeps the Supply details chevron beside its label and opens content below", async ({
+    page,
+    isMobile,
+  }, info) => {
+    await gotoReady(page, "/the-memes/1");
+    const viewport = page.viewportSize()!;
+    await expect(
+      page.getByText("Supply details & rankings", { exact: true })
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    for (const width of [767, 768]) {
+      await page.setViewportSize({ width, height: 1000 });
+      const spacing = await page
+        .getByText("Supply details & rankings", { exact: true })
+        .evaluate((element) => {
+          const text = element.firstChild;
+          const arrow = element.querySelector("svg");
+          if (!text || !arrow)
+            throw new Error("Supply disclosure needs its label and chevron");
+          const range = document.createRange();
+          range.selectNodeContents(text);
+          const icon = arrow.getBoundingClientRect();
+          return {
+            textGap: icon.left - range.getBoundingClientRect().right,
+            rightGap: element.getBoundingClientRect().right - icon.right,
+          };
+        });
+      expect(width >= 768 ? spacing.textGap : spacing.rightGap).toBeCloseTo(
+        width >= 768 ? 4 : 0,
+        0
+      );
+      await expectNoHorizontalOverflow(page);
+    }
+    await page.setViewportSize(viewport);
+    await expect(page.getByTestId("collect-inline-actions")).toBeVisible({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
+    if (isMobile)
+      await expect(
+        page.getByRole("button", { name: "Open menu", exact: true })
+      ).toBeVisible();
+    const supply = page.getByText("Supply details & rankings", { exact: true });
+    const supplyDetails = page
+      .getByText("Supply details & rankings", { exact: true })
+      .locator("..");
+    const supplyChevron = page
+      .getByText("Supply details & rankings", { exact: true })
+      .locator("svg");
+    await expect(supplyDetails).not.toHaveAttribute("open");
+    await expect(supplyChevron).toHaveCSS("transform", "none");
+    await supply.focus();
+    await supply.press("Enter");
+    await expect(supplyDetails).toHaveAttribute("open", "");
+    await expect(supplyChevron).toHaveCSS(
+      "transform",
+      "matrix(-1, 0, 0, -1, 0, 0)"
+    );
+    const supplyContent = page
+      .getByText("Supply details & rankings", { exact: true })
+      .locator("..")
+      .locator(":scope > div");
+    await expect(supplyContent).toBeVisible();
+    const summaryBounds = (await supply.boundingBox())!;
+    const contentBounds = (await supplyContent.boundingBox())!;
+    expect(contentBounds.y).toBeGreaterThanOrEqual(
+      summaryBounds.y + summaryBounds.height
+    );
+    if (!isMobile) {
+      await supplyDetails.evaluate((element) =>
+        element.scrollIntoView({ block: "start" })
+      );
+      await supplyDetails.screenshot({
+        path: info.outputPath("supply-details-open.png"),
+      });
+    }
+    await supply.press("Space");
+    await expect(supplyDetails).not.toHaveAttribute("open");
+    await expect(supplyChevron).toHaveCSS("transform", "none");
+    await expect(supply).toBeFocused();
+  });
+
   test("preserves Meme card controls while scrolling and switching phone tabs", async ({
     page,
     isMobile,
@@ -265,11 +542,20 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
       await expect(sticky).toBeHidden();
       await expect(
         page.getByRole("button", { name: /^Show all .* properties$/ })
-      ).toBeHidden();
+      ).toBeVisible();
       const market = page.getByRole("button", {
         name: "View listings & offers",
         exact: true,
       });
+      await expect(market).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(market).toHaveCSS("color", "rgb(147, 147, 159)");
+      await market.hover();
+      await expect(market).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(market).toHaveCSS("color", "rgb(239, 239, 241)");
+      await page
+        .getByRole("button", { name: "View listings & offers", exact: true })
+        .locator("../..")
+        .screenshot({ path: info.outputPath("market-link-hover.png") });
       const reviewOffers = page
         .getByTestId("collect-detail-panel")
         .getByRole("button", { name: /^More trading actions for/ });
@@ -813,6 +1099,251 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
 
   defineCollectorsLeaderboardTests();
   defineNftMarketActivityTests();
+  for (const { name, route, collapseOnMobile } of [
+    { name: "Meme", route: "/the-memes/1", collapseOnMobile: true },
+    { name: "Meme Lab", route: "/meme-lab/1", collapseOnMobile: false },
+  ]) {
+    test(`expands and collapses ${name} properties at the supported breakpoints`, async ({
+      page,
+      isMobile,
+    }, info) => {
+      await gotoReady(page, route);
+      if (collapseOnMobile || !isMobile) {
+        await expect(page.getByTestId("collect-inline-actions")).toBeVisible({
+          timeout: RESPONSE_TIMEOUT_MS,
+        });
+      }
+      await expect(
+        page.getByText("Loading this artwork…", { exact: true })
+      ).toBeHidden({ timeout: RESPONSE_TIMEOUT_MS });
+      await expect(
+        page.getByText("Loading listings", { exact: true })
+      ).toBeHidden({ timeout: RESPONSE_TIMEOUT_MS });
+      if (isMobile) {
+        await expect(
+          page.getByRole("button", { name: "Open menu", exact: true })
+        ).toBeVisible();
+      }
+      const section = page
+        .getByRole("heading", { name: "Properties", exact: true })
+        .locator("../..");
+      const toggle = section.getByRole("button", {
+        name: /^Show all .* properties$/,
+      });
+      await expect(section).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+      const tiles = page
+        .getByRole("heading", { name: "Properties", exact: true })
+        .locator("../..")
+        .locator(":scope > div[id] > div");
+      const total = await tiles.count();
+      expect(total).toBeGreaterThan(6);
+      for (const width of [390, 639, 640, 767, 768, 1600]) {
+        await page.setViewportSize({ width, height: 1000 });
+        if (width < 768 && (!collapseOnMobile || width >= 640)) {
+          await expect(toggle).toBeHidden();
+          await expect(tiles.filter({ visible: true })).toHaveCount(total);
+        } else {
+          await expect(toggle).toBeVisible();
+          await expect(toggle).toHaveAttribute("aria-expanded", "false");
+          await expect(tiles.filter({ visible: true })).toHaveCount(6);
+          if (width >= 768) {
+            await expect(toggle).toHaveCSS("border-top-width", "0px");
+            await expect(toggle).toHaveCSS(
+              "background-color",
+              "rgba(0, 0, 0, 0)"
+            );
+            await expect(toggle).toHaveCSS("font-weight", "500");
+            const buttonBounds = (await toggle.boundingBox())!;
+            const sectionBounds = (await section.boundingBox())!;
+            expect(buttonBounds.width).toBeLessThan(sectionBounds.width / 2);
+            const rows = await tiles
+              .filter({ visible: true })
+              .evaluateAll((items) => [
+                ...new Set(
+                  items.map((item) => item.getBoundingClientRect().top)
+                ),
+              ]);
+            expect(rows).toHaveLength(2);
+          }
+          await toggle.scrollIntoViewIfNeeded();
+          await toggle.focus();
+          await expect(toggle).toBeFocused();
+          await toggle.press("Enter");
+          const fewer = section.getByRole("button", {
+            name: "Show fewer",
+            exact: true,
+          });
+          await expect(fewer).toHaveAttribute("aria-expanded", "true");
+          await expect(tiles.filter({ visible: true })).toHaveCount(total);
+          await fewer.press("Space");
+          await expect(toggle).toHaveAttribute("aria-expanded", "false");
+          await expect(toggle).toBeFocused();
+          await expect(tiles.filter({ visible: true })).toHaveCount(6);
+        }
+        await expectNoHorizontalOverflow(page);
+        if (width === 390 || width === 1600) {
+          await section.screenshot({
+            path: info.outputPath(`properties-${width}.png`),
+          });
+        }
+      }
+    });
+  }
+
+  test("unifies desktop card typography across Memes and Meme Lab", async ({
+    page,
+  }, info) => {
+    await gotoReady(page, "/the-memes/1");
+    const properties = page.getByRole("heading", {
+      name: "Properties",
+      exact: true,
+    });
+    const editionSize = page
+      .getByText("Edition size", { exact: true })
+      .locator("..")
+      .getByRole("definition");
+    const season = page.getByRole("link", { name: "View SZN 1 cards" });
+    for (const width of [390, 767, 768, 1600]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await expect(properties).toHaveCSS(
+        "font-size",
+        width >= 768 ? "16px" : "12px"
+      );
+      await expect(properties).toHaveCSS(
+        "text-transform",
+        width >= 768 ? "none" : "uppercase"
+      );
+      await expect(editionSize).toHaveCSS("font-size", "14px");
+      for (const name of ["Arweave links", "Properties", "TDH breakdown"]) {
+        await expect(
+          page
+            .getByRole("heading", { name, exact: true })
+            .locator("xpath=ancestor::section[1]")
+        ).toHaveCSS("border-top-width", "0px");
+      }
+      await expectQuietSectionDivider(
+        page
+          .getByRole("heading", { name: "Stats", exact: true })
+          .locator("xpath=ancestor::section[1]/.."),
+        width
+      );
+      await expectUniformMarketplaceIcons(page);
+      await expect(season).toHaveCSS(
+        "border-top-width",
+        width >= 768 ? "0px" : "1px"
+      );
+      if (width >= 768) {
+        await expectFullWidthTabDivider(page, "Meme page sections");
+        await expect(season).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+        await expect(season).toHaveCSS("padding-left", "0px");
+      }
+      await expectNoHorizontalOverflow(page);
+    }
+    await page
+      .getByRole("heading", { level: 1 })
+      .locator("xpath=ancestor::header")
+      .screenshot({ path: info.outputPath("memes-calendar-desktop.png") });
+    await gotoReady(page, "/meme-lab/1");
+    const labProperties = page.getByRole("heading", {
+      name: "Properties",
+      exact: true,
+    });
+    const labValue = page
+      .getByText("Edition Size", { exact: true })
+      .locator("../..")
+      .locator(":scope > div:last-child > span:first-child");
+    const nextCard = page.getByRole("link", { name: "Next NFT", exact: true });
+    for (const width of [390, 767, 768, 1600]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await expect(labProperties).toHaveCSS(
+        "font-size",
+        width >= 768 ? "16px" : "12px"
+      );
+      await expect(labProperties).toHaveCSS(
+        "text-transform",
+        width >= 768 ? "none" : "uppercase"
+      );
+      await expect(labValue).toHaveCSS("font-size", "14px");
+      await expectQuietSectionDivider(
+        page
+          .getByRole("heading", { name: "Properties", exact: true })
+          .locator("xpath=ancestor::section[1]"),
+        width
+      );
+      await expectUniformMarketplaceIcons(page);
+      await expect(nextCard).toHaveCSS(
+        "border-top-left-radius",
+        width >= 768 ? "8px" : "9999px"
+      );
+      await expect(nextCard).toHaveAttribute("href", "/meme-lab/2");
+      if (width >= 768) {
+        await expectFullWidthTabDivider(page, "Meme Lab page sections");
+      }
+      await expectNoHorizontalOverflow(page);
+    }
+    await page.screenshot({ path: info.outputPath("meme-lab-desktop.png") });
+    await page
+      .getByRole("heading", { name: "Properties", exact: true })
+      .locator("../..")
+      .screenshot({ path: info.outputPath("meme-lab-properties-desktop.png") });
+  });
+
+  test("aligns Gradient desktop typography and navigation with card controls", async ({
+    page,
+  }, info) => {
+    await gotoReady(page, "/6529-gradient/1");
+    const value = page
+      .getByText("Unweighted TDH", { exact: true })
+      .locator("..")
+      .locator(":scope > div:last-child");
+    const previous = page.getByRole("link", {
+      name: "Previous NFT",
+      exact: true,
+    });
+    await expect(value).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    const gradientStats = page
+      .getByText("Unweighted TDH", { exact: true })
+      .locator("xpath=ancestor::section[1]");
+    for (const width of [390, 767, 768, 1600]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await expect(gradientStats).toHaveCSS("border-bottom-width", "1px");
+      await expect(value).toHaveCSS("font-size", "14px");
+      await expect(value).toHaveCSS("font-weight", "600");
+      await expect(previous).toHaveCSS(
+        "border-top-left-radius",
+        width >= 768 ? "8px" : "9999px"
+      );
+      await expect(previous).toHaveAttribute("href", "/6529-gradient/0");
+      await expectUniformMarketplaceIcons(page);
+      const market = page.getByRole("button", {
+        name: "View listings & offers",
+        exact: true,
+      });
+      await expect(market).toHaveCSS(
+        "font-size",
+        width >= 768 ? "14px" : "13px"
+      );
+      if (width >= 768) {
+        await expectFullWidthTabDivider(page, "Overview");
+        await expect(page.getByTestId("collect-inline-actions")).toBeVisible({
+          timeout: RESPONSE_TIMEOUT_MS,
+        });
+        await expect(
+          page.getByRole("button", { name: "Connect wallet", exact: true })
+        ).toHaveCSS("background-color", "rgb(236, 236, 238)");
+      } else {
+        await expect(page.getByTestId("collect-inline-actions")).toHaveCount(0);
+      }
+      await expect(page.getByTestId("collect-sticky-actions")).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+    }
+    await previous.focus();
+    await expect(previous).toBeFocused();
+    await expect(previous).toHaveCSS("outline-style", "solid");
+    await expect(previous).toHaveCSS("outline-width", "2px");
+    await page.screenshot({ path: info.outputPath("gradient-desktop.png") });
+  });
+
   test("renders The Memes card detail shell", async ({ page }) => {
     await gotoReady(page, "/the-memes/1");
 
@@ -906,7 +1437,30 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await expect(
       timeline.getByRole("link", { name: "Open metadata URI" })
     ).toHaveAttribute("href", `https://arweave.net/${tx}`);
+    const date = timeline.getByRole("heading", { level: 5 });
+    const desktop = (page.viewportSize()?.width ?? 1280) >= 768;
+    await expect(
+      timeline.getByRole("heading", { level: 5 }).locator("..")
+    ).toHaveCSS(
+      "background-color",
+      desktop ? "rgba(0, 0, 0, 0)" : "rgb(255, 255, 255)"
+    );
+    if (desktop) {
+      await expect(date).toHaveCSS("font-size", "12px");
+      await expect(date).toHaveCSS("font-weight", "400");
+      await expect(timeline.getByText("Edit", { exact: true })).toHaveCSS(
+        "font-weight",
+        "600"
+      );
+    }
     await expectNoHorizontalOverflow(page);
+    await gotoReady(page, "/meme-lab/1?focus=timeline");
+    await expect(
+      page.getByRole("heading", { level: 5 }).locator("..")
+    ).toHaveCSS(
+      "background-color",
+      desktop ? "rgba(0, 0, 0, 0)" : "rgb(255, 255, 255)"
+    );
   });
 
   for (const recordedFormat of [true, false]) {
@@ -1117,11 +1671,18 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
 
   test.describe("production ReMemes detail fixture", () => {
     test.skip(
-      ({ baseURL }) => !isProductionBaseURL(baseURL),
-      "this ReMeme detail fixture is only stable against production data"
+      ({ baseURL }) =>
+        !isProductionBaseURL(baseURL) &&
+        !(
+          isLocalBaseURL(baseURL) &&
+          process.env["PLAYWRIGHT_ENV"] === "production"
+        ),
+      "this ReMeme fixture requires production data; local production-API previews opt in with PLAYWRIGHT_ENV=production"
     );
 
-    test("renders ReMemes detail tabs without mutation", async ({ page }) => {
+    test("renders ReMemes detail tabs without mutation", async ({
+      page,
+    }, info) => {
       await gotoReady(
         page,
         "/rememes/0xfb7dc9be63e53e24b217c02c16f3952ac3546e5f/7"
@@ -1159,10 +1720,41 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
         page.getByRole("link", { name: "Open Rarible" })
       ).toBeVisible();
 
+      const external = page.getByRole("link", {
+        name: "View Genart Memes on Etherscan",
+      });
+      const metadataTab = page.getByRole("button", { name: "Metadata" });
+      for (const width of [390, 767, 768, 1600]) {
+        await page.setViewportSize({ width, height: 1000 });
+        await expect(external).toHaveCSS("font-size", "14px");
+        await expectUniformMarketplaceIcons(page);
+        await expect(metadataTab).toHaveCSS(
+          "font-weight",
+          width >= 768 ? "500" : "600"
+        );
+        if (width >= 768) {
+          await expectFullWidthTabDivider(page, "ReMemes page sections");
+        }
+        await expectNoHorizontalOverflow(page);
+      }
+      await page.screenshot({ path: info.outputPath("rememes-desktop.png") });
+
       await page.getByRole("button", { name: "Metadata" }).click();
       await expect(
         page.getByRole("button", { name: "Metadata" })
       ).toHaveAttribute("aria-pressed", "true");
+      await expect(
+        page.getByRole("heading", { name: "Metadata", exact: true })
+      ).toHaveCSS("font-size", "16px");
+      for (const width of [390, 767, 768, 1600]) {
+        await page.setViewportSize({ width, height: 1000 });
+        await expect(
+          page
+            .getByRole("heading", { name: "Metadata", exact: true })
+            .locator("xpath=ancestor::section[1]")
+        ).toHaveCSS("border-top-width", "0px");
+        await expectNoHorizontalOverflow(page);
+      }
       await page.getByRole("button", { name: "References" }).click();
       await expect(
         page.getByRole("button", { name: "References" })
@@ -1277,6 +1869,10 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
         await gotoReady(page, `/the-memes/${fixture.id}`);
         const video = page.getByLabel("Video player", { exact: true });
         await expect(video).toBeVisible();
+        // Offscreen artwork defers its source. Bring it into view before
+        // waiting for metadata; CSS visibility alone does not guarantee this.
+        await video.scrollIntoViewIfNeeded();
+        await expect(video).toBeInViewport();
         await expect
           .poll(() =>
             video.evaluate((element: HTMLVideoElement) => element.videoWidth)

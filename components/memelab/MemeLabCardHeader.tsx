@@ -6,7 +6,10 @@ import { getDistributionDetailHref } from "@/components/distribution/distributio
 import { getMemeLabCollectionHref } from "@/components/memelab/memeLabRouteParams";
 import { MemePageArtViewer } from "@/components/the-memes/MemePageArtViewer";
 import { getSafeExternalUrl } from "@/components/the-memes/MemePageAdditionalDetails";
-import { MemeArtworkDetails } from "@/components/the-memes/MemePageLiveStats";
+import {
+  MemeArtworkDetails,
+  MemeMintDateMetric,
+} from "@/components/the-memes/MemePageLiveStats";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { addProtocol, numberWithCommas } from "@/helpers/Helpers";
@@ -18,18 +21,19 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import clsx from "clsx";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 const MEME_LAB_LABEL_CLASS =
   "tw-mb-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400";
 const MEME_LAB_VALUE_CLASS =
-  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
+  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-iron-100";
 const MEME_LAB_MARKET_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 [&>*]:tw-min-w-0 sm:tw-gap-x-8 sm:[&>*]:tw-min-w-[8.5rem] xl:tw-grid-cols-3";
 const MEME_LAB_CARD_DETAILS_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 sm:tw-gap-x-8 xl:tw-grid-cols-3";
 const MEME_LAB_CARD_DETAILS_ITEM_CLASS = "tw-min-w-0 sm:tw-min-w-[8.5rem]";
 const MEME_LAB_SECTION_TITLE_CLASS =
-  "tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400";
+  "tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400 md:tw-text-base md:tw-normal-case md:tw-leading-6 md:tw-text-iron-100";
 export const MEME_LAB_STATS_ROW_CLASS =
   "tw-grid tw-grid-cols-2 tw-items-start tw-gap-x-4 tw-gap-y-6 [&>*]:tw-min-w-0 sm:tw-flex sm:tw-flex-wrap sm:tw-gap-x-6 sm:[&>*]:tw-min-w-[8.5rem] md:tw-gap-x-10";
 
@@ -90,7 +94,7 @@ export function MemeLabStatMetric({
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1.5">
         <span className={MEME_LAB_VALUE_CLASS}>{value}</span>
         {rank !== undefined && total !== undefined && (
-          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-2 tw-py-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-400 md:tw-py-0.5 md:tw-text-[11px] md:tw-leading-4">
+          <span className="tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-2 tw-py-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-400 md:tw-py-0.5 md:tw-text-xs md:tw-font-medium md:tw-leading-4">
             Rank {numberWithCommas(rank)}/{numberWithCommas(total)}
           </span>
         )}
@@ -142,7 +146,7 @@ function MemeLabMetadataLink({ url }: { readonly url: unknown }) {
         href={safeMetadataUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white tw-no-underline hover:tw-text-iron-300 md:tw-text-lg md:tw-leading-6"
+        className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white tw-no-underline hover:tw-text-iron-300 md:tw-text-iron-100"
       >
         View
       </Link>
@@ -231,11 +235,18 @@ function MemeLabLiveDetails({
   readonly onMarketChange?: (() => void) | undefined;
   readonly locale: SupportedLocale;
 }) {
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   return (
-    <div className="tw-w-full">
-      <MemeArtworkDetails nft={nft} layout="aligned" locale={locale} />
+    <div data-testid="meme-lab-card-live-details" className="tw-w-full">
+      <MemeArtworkDetails
+        nft={nft}
+        layout="aligned"
+        locale={locale}
+        showMintDate={!isDesktop}
+      />
       <div className="tw-py-3">
         <CollectDetailActions
+          desktopCard
           collection="memelab"
           tokenId={String(nft.id)}
           title={nft.name}
@@ -243,6 +254,20 @@ function MemeLabLiveDetails({
           {...(onMarketChange ? { onMarketChange } : {})}
         />
       </div>
+      {isDesktop && (
+        <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-8">
+          <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.5fr)] tw-gap-6 [&>div>div:first-child]:tw-mb-2">
+            <MemeMintDateMetric nft={nft} locale={locale} />
+            <MemeLabMarketMetric
+              label="Mint Price"
+              value={nft.mint_price}
+              decimals={100000}
+              unit="ETH"
+            />
+          </div>
+          <MemeLabDistributionPlanLink nft={nft} locale={locale} />
+        </section>
+      )}
       <section
         aria-label="Card details"
         className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-6 md:tw-py-8"
@@ -251,12 +276,14 @@ function MemeLabLiveDetails({
       </section>
       <section className="tw-pt-6 md:tw-pt-8">
         <div className={MEME_LAB_MARKET_GRID_CLASS}>
-          <MemeLabMarketMetric
-            label="Mint Price"
-            value={nft.mint_price}
-            decimals={100000}
-            unit="ETH"
-          />
+          {!isDesktop && (
+            <MemeLabMarketMetric
+              label="Mint Price"
+              value={nft.mint_price}
+              decimals={100000}
+              unit="ETH"
+            />
+          )}
           <MemeLabMetadataLink url={nft.uri} />
           {showMarketplaceLinks && (
             <div className="tw-flex tw-min-w-[8.5rem] tw-items-end">
@@ -264,7 +291,9 @@ function MemeLabLiveDetails({
             </div>
           )}
         </div>
-        <MemeLabDistributionPlanLink nft={nft} locale={locale} />
+        {!isDesktop && (
+          <MemeLabDistributionPlanLink nft={nft} locale={locale} />
+        )}
       </section>
     </div>
   );
@@ -358,14 +387,14 @@ export function MemeLabCardVolumes({ nft }: { readonly nft: LabNFT }) {
   return (
     <section aria-labelledby="meme-lab-card-volumes-heading">
       <div className="tw-flex tw-items-center tw-gap-3">
-        <ChartBarSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500" />
+        <ChartBarSquareIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500 md:tw-hidden" />
         <h3
           id="meme-lab-card-volumes-heading"
           className={MEME_LAB_SECTION_TITLE_CLASS}
         >
           Card Volumes
         </h3>
-        <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
+        <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent md:tw-hidden" />
       </div>
       <div className={clsx("tw-mt-6", MEME_LAB_STATS_ROW_CLASS)}>
         <MemeLabMarketMetric
