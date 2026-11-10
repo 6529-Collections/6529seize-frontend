@@ -1,7 +1,6 @@
 "use client";
 
-import type {
-  ReactNode} from "react";
+import type { ReactNode } from "react";
 import {
   forwardRef,
   useCallback,
@@ -15,6 +14,7 @@ import { classNames } from "@/helpers/Helpers";
 
 interface HighlightDropWrapperProps {
   readonly active: boolean;
+  readonly emphasize?: boolean | undefined;
   readonly scrollContainer?: HTMLElement | null | undefined;
   readonly children: ReactNode;
   readonly className?: string | undefined;
@@ -36,6 +36,7 @@ const HighlightDropWrapper = forwardRef<
   (
     {
       active,
+      emphasize = false,
       scrollContainer,
       children,
       className = "",
@@ -49,12 +50,11 @@ const HighlightDropWrapper = forwardRef<
     forwardedRef
   ) => {
     const innerRef = useRef<HTMLDivElement>(null);
-    const [phase, setPhase] = useState<"idle" | "highlight" | "fading">(
-      "idle"
-    );
+    const [phase, setPhase] = useState<"idle" | "highlight" | "fading">("idle");
     const phaseRef = useRef(phase);
-    const highlightTimeoutRef =
-      useRef<ReturnType<typeof setTimeout> | null>(null);
+    const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+      null
+    );
     const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const rafRef = useRef<number | null>(null);
     const visibilityStartTimeRef = useRef<number | null>(null);
@@ -62,14 +62,17 @@ const HighlightDropWrapper = forwardRef<
     const lastExtendedRef = useRef(false);
     const prevActiveRef = useRef(false);
 
-    const setNode = (node: HTMLDivElement | null) => {
-      innerRef.current = node;
-      if (typeof forwardedRef === "function") {
-        forwardedRef(node);
-      } else if (forwardedRef) {
-        forwardedRef.current = node;
-      }
-    };
+    const setNode = useCallback(
+      (node: HTMLDivElement | null) => {
+        innerRef.current = node;
+        if (typeof forwardedRef === "function") {
+          forwardedRef(node);
+        } else if (forwardedRef) {
+          forwardedRef.current = node;
+        }
+      },
+      [forwardedRef]
+    );
 
     useEffect(() => {
       phaseRef.current = phase;
@@ -111,7 +114,8 @@ const HighlightDropWrapper = forwardRef<
       stopRAF();
 
       const getNow =
-        typeof performance !== "undefined" && typeof performance.now === "function"
+        typeof performance !== "undefined" &&
+        typeof performance.now === "function"
           ? () => performance.now()
           : () => Date.now();
 
@@ -149,8 +153,7 @@ const HighlightDropWrapper = forwardRef<
           const interWidth = Math.max(0, interRight - interLeft);
           const interHeight = Math.max(0, interBottom - interTop);
           const interArea = interWidth * interHeight;
-          const ratio =
-            interArea / Math.max(1, elRect.width * elRect.height);
+          const ratio = interArea / Math.max(1, elRect.width * elRect.height);
 
           if (ratio >= visibilityThreshold && !lastExtendedRef.current) {
             lastExtendedRef.current = true;
@@ -243,7 +246,10 @@ const HighlightDropWrapper = forwardRef<
     const classes = classNames(
       className,
       transitionClasses,
-      isHighlighted ? "tw-bg-[#25263f]" : "",
+      isHighlighted && !emphasize ? "tw-bg-[#25263f]" : "",
+      isHighlighted && emphasize
+        ? "tw-relative tw-bg-[#263d68] after:tw-pointer-events-none after:tw-absolute after:tw-inset-y-0 after:tw-left-0 after:tw-w-[3px] after:tw-bg-primary-300"
+        : "",
       !isHighlighted && isFading ? "tw-bg-transparent" : ""
     );
 

@@ -8,6 +8,7 @@ import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2Page
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { observeCachedChatResponse } from "../support/cachedChatResponse";
 import { expectCompetitionScroll } from "../support/competitionScroll";
+import { longPressMessage } from "../support/longPressMessage";
 import {
   expectNativeLeaderboardArtwork,
   expectNativeLeaderboardReady,
@@ -11331,6 +11332,104 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       releaseNavigation();
     }
   });
+
+  for (const proposalCard of [false, true]) {
+    test(`keeps winner chat reply actions reachable for ${proposalCard ? "proposal" : "standard"} cards`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(page);
+      sandbox.onlyCompetition("alpha");
+      const presentation = proposalCard
+        ? [
+            {
+              id: 1,
+              data_key: "wave_display.proposals.card_recipe",
+              data_value:
+                '{"version":1,"layout":"summary","excerpt_max_characters":420,"show_media_thumbnail":false}',
+            },
+          ]
+        : [];
+      sandbox.setCompetition("alpha", { presentation });
+      await page.route(`**/api/v2/waves/${WAVE}/metadata`, (route) =>
+        route.fulfill({ json: presentation })
+      );
+      await page.route("**/api/waves/*/curations**", (route) =>
+        route.fulfill({ json: [] })
+      );
+      await page.route("**/api/drops/*/curations**", (route) =>
+        route.fulfill({ json: [] })
+      );
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${WAVE}/drops`
+      );
+      expect(response.ok()).toBe(true);
+      const fixture = await response.json();
+      const winner = {
+        ...fixture.drops[0],
+        drop_type: "SUBMISSION",
+        title: "Winner hover menu regression",
+        content: "Winner card reply and reaction actions remain available.",
+        media: [],
+        submission_context: {
+          status: "WINNER",
+          has_metadata: false,
+          won_at: 2000,
+          voting: {
+            is_open: false,
+            total_votes_given: 123,
+            current_calculated_vote: 123,
+            predicted_final_vote: 123,
+            voters_count: 0,
+            place: 1,
+          },
+        },
+      };
+      await page.route(`**/api/v2/waves/${WAVE}/drops?*`, (route) =>
+        route.fulfill({ json: { ...fixture, drops: [winner] } })
+      );
+      await page.goto(`/waves/${WAVE}?tab=chat&competition=alpha`);
+      const title = page.getByText(winner.title, { exact: true });
+      await expect(title).toBeVisible({ timeout: 30000 });
+      const row = page
+        .getByRole("tabpanel")
+        .locator(".tw-group")
+        .filter({ has: title });
+      await expect(row.getByTestId("proposal-card-context-label")).toHaveCount(
+        proposalCard ? 1 : 0
+      );
+      const isMobile = testInfo.project.name === "web-mobile-chromium";
+      const reply = page.getByRole("button", {
+        name: isMobile ? "Reply" : "Reply to drop",
+        exact: true,
+      });
+      if (isMobile) {
+        await longPressMessage(page, row);
+      } else {
+        await row.hover();
+        await expect(
+          row.getByRole("button", { name: "React with Thumbs up", exact: true })
+        ).toBeVisible();
+        // Visibility alone does not catch an ancestor clipping the button.
+        await reply.click({ trial: true });
+        await page.mouse.move(0, 0);
+        await reply.focus();
+        await page.keyboard.press("Shift+Tab");
+        await page.keyboard.press("Tab");
+        await expect(reply).toBeFocused();
+      }
+      await testInfo.attach("winner-chat-actions", {
+        body: await page.screenshot(),
+        contentType: "image/png",
+      });
+      await reply.click();
+      await expect(
+        page.getByRole("button", { name: "Cancel reply", exact: true })
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      expect(sandbox.requests).toEqual([]);
+    });
+  }
 
   for (const waveId of [MEMES_WAVE, WAVE]) {
     test(`renders winners without legacy drop or metadata loading in ${waveId === WAVE ? "QUORUM approval" : "Main Stage"}`, async ({
