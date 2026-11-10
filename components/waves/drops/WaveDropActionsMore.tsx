@@ -30,6 +30,7 @@ import WaveDropCurationsDialog from "./WaveDropCurationsDialog";
 import WaveDropActionsMarkUnread from "./WaveDropActionsMarkUnread";
 import WaveDropActionsOpen from "./WaveDropActionsOpen";
 import WaveDropActionsOptions from "./WaveDropActionsOptions";
+import WaveDropReplyCollapseAction from "./WaveDropReplyCollapseAction";
 import WaveDropActionsRestoreLinkPreviews from "./WaveDropActionsRestoreLinkPreviews";
 import WaveDropActionsSetPinnedDrop from "./WaveDropActionsSetPinnedDrop";
 import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
@@ -37,6 +38,7 @@ import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
 import DropSignatureDialog from "./signature/DropSignatureDialog";
 import DropSignatureMenuItem from "./signature/DropSignatureMenuItem";
+import WaveDropShareImageAction from "./share-image/WaveDropShareImageAction";
 
 interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
@@ -183,6 +185,10 @@ export default function WaveDropActionsMore({
                   onCopy={closeDropdown}
                 />
                 <WaveDropActionsCopyText drop={drop} onCopy={closeDropdown} />
+                <WaveDropShareImageAction
+                  drop={drop}
+                  onSelected={closeDropdown}
+                />
                 <WaveDropBookmarkAction
                   dropId={drop.id}
                   onSelected={closeDropdown}
@@ -247,6 +253,10 @@ export default function WaveDropActionsMore({
             )}
             {!showOnlyQuickRemove && (
               <>
+                <WaveDropReplyCollapseAction
+                  drop={drop}
+                  onSelected={closeDropdown}
+                />
                 <WaveDropActionsRestoreLinkPreviews
                   drop={drop}
                   onRestored={closeDropdown}

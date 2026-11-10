@@ -357,7 +357,10 @@ describe("testing strategy CI plan", () => {
   });
 
   it("builds when the first-load budget or its checker changes", () => {
-    for (const file of ["scripts/perf-budget.json", "scripts/perf-budget.cjs"]) {
+    for (const file of [
+      "scripts/perf-budget.json",
+      "scripts/perf-budget.cjs",
+    ]) {
       expect(createCiPlan([file]).checks["build"]!.required).toBe(true);
     }
   });
@@ -648,7 +651,7 @@ describe("testing strategy CI plan", () => {
       if: "needs.plan.outputs.core_playwright_required == 'true' && github.event.pull_request.head.repo.full_name == github.repository",
       "runs-on": "${{ matrix.runner }}",
       "timeout-minutes":
-        "${{ (matrix.lane == 'playwright-native-competition' || matrix.lane == 'playwright-critical-shell') && 30 || 20 }}",
+        "${{ (matrix.lane == 'playwright-native-competition' || startsWith(matrix.lane, 'playwright-critical-shell')) && 30 || 20 }}",
       container: {
         image:
           "mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48",
@@ -656,6 +659,7 @@ describe("testing strategy CI plan", () => {
       },
       defaults: { run: { shell: "bash" } },
       strategy: {
+        "fail-fast": false,
         matrix: "${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}",
       },
     });
@@ -668,6 +672,11 @@ describe("testing strategy CI plan", () => {
         expect.objectContaining({
           name: "Run critical route-shell Playwright pack",
           if: "matrix.lane == 'playwright-critical-shell'",
+        }),
+        expect.objectContaining({
+          name: "Run own-profile Following browser regression pack",
+          if: "matrix.lane == 'playwright-critical-shell-profile'",
+          run: './bin/6529 run test:e2e:profile-following-sandbox --shard="$PROFILE_FOLLOWING_SHARD"',
         }),
       ])
     );

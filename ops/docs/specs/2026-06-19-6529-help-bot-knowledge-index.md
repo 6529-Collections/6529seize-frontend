@@ -7,6 +7,15 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The touch-menu, header-navigation and encrypted-chat records cover touch reply,
+timestamp access, cancellable native conversation return and Android Back layer
+ordering. They retain visible tap alternatives, permission and delivery-state
+restrictions, system-edge gestures and reduced-motion behavior. Reversal
+instructions require moving below the commit threshold before release. The shared
+Back record includes wave and direct-message detail routes. The mobile
+bottom-navigation record covers temporary section-tab hiding while composing in
+short landscape iPhone chat viewports.
+
 The signing, encrypted-messages and connection-sharing records cover the shared
 permission consent flow, separate or combined grants, shared server device names,
 renewal versus revocation, Desktop secure sharing's Coming soon gate, and exact
@@ -32,6 +41,14 @@ notification filters remain effective.
 
 The `profiles.identity-tab` record covers the existing-category Rep editor,
 its permission rules, stable allowance loading, retry action, and dismissal.
+It also covers desktop/mobile NIC Received/Given, owner Given management with
+highest totals first by default and optional most-recently-adjusted ordering,
+REP category selection, total replacement, manually entered zero removal and
+returning to the refreshed recipient list's first page after saving. `Load more`
+shows additional recipients; failed saves retain the draft and loaded pages.
+Back returns one step; Cancel discards the unsaved draft and closes management.
+Received and Given lists fit their content, share a height cap and scroll when needed.
+Visitor inspection and existing proxy allocation permissions remain distinct.
 
 The search record covers punctuation-tolerant Wave names across site search,
 sidebar search, composer mentions and the message-search Wave picker. It explains

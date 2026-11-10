@@ -106,8 +106,11 @@ HD highlights when the original is selected. Choose
   generate its responsive preview. Next may pass through source bytes for
   animations in other raster formats or when it cannot re-encode a valid image.
 - If no supported preview is available, the image frame stays in place and shows
-  `Preview unavailable`. Thread images retry briefly while new uploads process,
-  then offer `Retry`; the viewer offers `Retry preview`.
+  `Preview unavailable`. First-party thread images retry about every eleven
+  seconds for about a minute, then offer `Retry`; the viewer offers `Retry preview`.
+  A submitted message and its text stay visible while its image processes.
+  Once processing completes, a delayed update does not return that image to
+  the processing placeholder.
 - `Open in browser` / `Open in new tab` and `Download media` deliberately access
   the original. In the native app, downloads go directly to a temporary native
   file and the share sheet, without loading the file into the image viewer.

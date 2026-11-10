@@ -218,6 +218,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const {
     registerWave,
+    activateWave,
     prefetchWave,
     syncNewestMessages,
     fetchNextPage,
@@ -234,13 +235,13 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const { clearWave } = waveMessagesStore;
   const refreshWaveMessages = useCallback(
-    (waveId: string) => {
+    async (waveId: string) => {
       if (!clearWave(waveId)) return;
       cancelWaveDataFetch(waveId);
       cancelPaginationFetch(waveId);
-      registerWave(waveId);
+      await activateWave(waveId);
     },
-    [cancelWaveDataFetch, cancelPaginationFetch, clearWave, registerWave]
+    [activateWave, cancelWaveDataFetch, cancelPaginationFetch, clearWave]
   );
   const refetchAllMainWaves = wavesHookData.refetchAllWaves;
   const refetchAllDmWaves = dmWavesHookData.refetchAllWaves;
@@ -316,7 +317,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   );
 
   // Instantiate the real-time updater hook
-  const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
+  const realtime = useWaveRealtimeUpdater({
     activeWaveId,
     activeReadWaveId,
     getData: waveMessagesStore.getData,
@@ -329,7 +330,10 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     removeDrops: waveMessagesStore.removeDrops,
     removeWaveDeliveredNotifications,
     isWaveMuted,
+    refreshWaveMessages,
   });
+  const { processIncomingDrop, processDropRemoved, applyReplyPlacement } =
+    realtime;
 
   // processIncomingDrop is rebuilt when the active wave, its mute state or
   // wave eligibility changes. Expose a stable wrapper that always calls the
@@ -340,7 +344,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   }, [processIncomingDrop]);
   const stableProcessIncomingDrop = useCallback<
     MyStreamActionsContextType["processIncomingDrop"]
-  >((drop, type) => processIncomingDropRef.current(drop, type), []);
+  >((...args) => processIncomingDropRef.current(...args), []);
 
   const setActiveWaveAndRegister = useCallback<ActiveWaveContextData["set"]>(
     (waveId, options) => {
@@ -562,6 +566,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       processDropRemoved,
       processDropsRemoved: waveMessagesStore.removeDrops,
       refreshWaveMessages,
+      applyReplyPlacement,
       applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
     }),
     [
@@ -583,6 +588,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       processDropRemoved,
       waveMessagesStore.removeDrops,
       refreshWaveMessages,
+      applyReplyPlacement,
       waveMessagesStore.optimisticUpdateDrop,
     ]
   );
