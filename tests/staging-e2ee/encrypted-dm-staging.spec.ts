@@ -732,7 +732,9 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       base64: image.buffer.toString("base64"),
     });
     await sendEncrypted(a, caption);
-    for (const filename of [image.name, droppedName]) {
+    // Images are sent under neutral names, numbered in draft order.
+    const sentNames = ["image.png", "image-2.png"];
+    for (const filename of sentNames) {
       await expect(
         messageRow(a.page, caption).getByRole("img", {
           name: `Image: ${filename}`,
@@ -750,7 +752,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
 
     await openChat(b, dm);
     await expectDecrypted(b, caption);
-    for (const filename of [image.name, droppedName]) {
+    for (const filename of sentNames) {
       const received = messageRow(b.page, caption).getByRole("img", {
         name: `Image: ${filename}`,
         exact: true,
@@ -768,7 +770,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         b.page,
         received,
         filename,
-        filename === image.name ? droppedName : undefined
+        filename === sentNames[0] ? sentNames[1] : undefined
       );
     }
     await expectNothingUndecryptable(b);
