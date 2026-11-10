@@ -219,7 +219,8 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
       DEVICES_SECURITY_MESSAGES["devicesSecurity.backup.needsDms"],
       { timeout: FIRST_LOAD_TIMEOUT_MS }
     );
-    await backup.getByRole("button", { name: /^Turn on/u }).click();
+    // One "Turn on", on the This device card; backup only points to it.
+    await turnOnHere(alice.page).click();
     await enrollButton(alice.page).click();
     // Setup ends with backup's one more step, which starts the backup steps.
     const nextStep = confirmDialog(
@@ -330,7 +331,7 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
         { timeout: FIRST_LOAD_TIMEOUT_MS }
       );
       await expectNoHorizontalOverflow(page);
-      await backup.getByRole("button", { name: /^Turn on/u }).click();
+      await turnOnHere(page).click();
       await enrollButton(page).click();
       const nextStep = confirmDialog(page, e2eeMessage("e2ee.setupDone.titleBoth"));
       await expect(
@@ -380,7 +381,8 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
         e2eeMessage("e2ee.backup.setup.check.title")
       );
       await expect(check.getByLabel(/^Group \d+$/u)).toHaveCount(2);
-      // Checked in the browser: an empty answer is named, nothing is sent.
+      // Checked in the browser: a wrong answer is named, nothing is sent.
+      await check.getByLabel(/^Group \d+$/u).first().fill("AAAA");
       await check
         .getByRole("button", { name: e2eeMessage("e2ee.backup.code.confirm") })
         .click();
@@ -455,6 +457,16 @@ async function expectNoHorizontalOverflow(page: Page) {
       })
     )
     .toEqual([]);
+}
+
+/** The This device card's one "Turn on" while this browser has none. */
+function turnOnHere(page: Page) {
+  return page
+    .getByRole("main")
+    .getByRole("region", {
+      name: DEVICES_SECURITY_MESSAGES["devicesSecurity.thisDevice.label"],
+    })
+    .getByRole("button", { name: /^Turn on/u });
 }
 
 /** This browser's pinned card on Devices & security (its one chip). */

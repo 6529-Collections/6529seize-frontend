@@ -97,7 +97,7 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.identityUnknown":
     "You’ll sign with the wallet connected to this profile.",
   "e2ee.enroll.manage":
-    "You can revoke these permissions in Preferences → Device Permissions.",
+    "You can revoke these permissions in Preferences → {tab}.",
   "e2ee.gate.noWallet":
     "Connect the wallet for this profile to use encrypted messages.",
 

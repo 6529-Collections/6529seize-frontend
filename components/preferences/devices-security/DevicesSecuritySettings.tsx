@@ -1,7 +1,10 @@
 "use client";
 
 import { useId, useState } from "react";
-import { E2eeNewDeviceNotice } from "@/components/e2ee/devices/E2eeNewDeviceNotice";
+import {
+  E2eeNewDeviceNotice,
+  useAnnouncedDeviceKeys,
+} from "@/components/e2ee/devices/E2eeNewDeviceNotice";
 import { tCount } from "@/components/e2ee/e2eeFormat";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -64,6 +67,10 @@ export default function DevicesSecuritySettings() {
   const othersId = useId();
   const earlierId = useId();
   const security = useSecurityDevices();
+  const announced = useAnnouncedDeviceKeys();
+  const isNew = (device: SecurityDevice) =>
+    device.encryptedDevice !== null &&
+    announced.has(device.encryptedDevice.deviceKey);
   const [target, setTarget] = useState<SecurityDevice | null>(null);
   const [renaming, setRenaming] = useState<SecurityDevice | null>(null);
   const [cleaningUp, setCleaningUp] = useState(false);
@@ -166,6 +173,7 @@ export default function DevicesSecuritySettings() {
                     <DeviceRow
                       key={device.id}
                       device={device}
+                      isNew={isNew(device)}
                       canRevoke={security.canRevoke(device)}
                       revokeBlocker={security.revokeBlocker(device)}
                       canRename={security.canRename(device)}
@@ -205,6 +213,7 @@ export default function DevicesSecuritySettings() {
                     <DeviceRow
                       key={device.id}
                       device={device}
+                      isNew={isNew(device)}
                       canRevoke={security.canRevoke(device)}
                       revokeBlocker={security.revokeBlocker(device)}
                       canRename={security.canRename(device)}

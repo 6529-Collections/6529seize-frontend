@@ -26,6 +26,7 @@ const MORE_TRIGGER_CLASS =
  */
 export function DeviceRow({
   device,
+  isNew = false,
   canRevoke,
   revokeBlocker,
   canRename,
@@ -33,6 +34,8 @@ export function DeviceRow({
   onRename,
 }: {
   readonly device: SecurityDevice;
+  /** Announced by the new-device alert: marked to match it. */
+  readonly isNew?: boolean;
   readonly canRevoke: boolean;
   readonly revokeBlocker: RevokeBlocker | null;
   readonly canRename: boolean;
@@ -44,9 +47,16 @@ export function DeviceRow({
     <li className="tw-flex tw-flex-wrap tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3">
       <PlatformIcon platform={device.platform} />
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-basis-48 tw-flex-col tw-gap-2">
-        <span className="tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-text-iron-50">
-          {device.label}
-        </span>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+          <span className="tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-text-iron-50">
+            {device.label}
+          </span>
+          {isNew ? (
+            <span className="tw-rounded-full tw-bg-amber-500/15 tw-px-2 tw-py-0.5 tw-text-xs tw-font-semibold tw-text-amber-200">
+              {t(locale, "devicesSecurity.row.new")}
+            </span>
+          ) : null}
+        </div>
         <PermissionChips locale={locale} device={device} />
         <DeviceMeta locale={locale} device={device} />
         {device.unverified ? (

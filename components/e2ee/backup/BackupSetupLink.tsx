@@ -29,7 +29,11 @@ export function BackupSetupLink({
         requestE2eeBackupSetup();
         onNavigate?.();
       }}
-      className={getButtonClasses({ variant, size: "sm" })}
+      className={getButtonClasses({
+        variant,
+        size: "sm",
+        className: "tw-no-underline",
+      })}
     >
       {children}
     </Link>

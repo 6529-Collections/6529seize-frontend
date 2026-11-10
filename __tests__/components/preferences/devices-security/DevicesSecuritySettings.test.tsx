@@ -26,8 +26,10 @@ jest.mock(
 jest.mock("@/components/preferences/devices-security/BackupCard", () => ({
   BackupCard: () => null,
 }));
+let mockAnnounced = new Set<string>();
 jest.mock("@/components/e2ee/devices/E2eeNewDeviceNotice", () => ({
   E2eeNewDeviceNotice: () => null,
+  useAnnouncedDeviceKeys: () => mockAnnounced,
 }));
 let mockDeviceSecurity = { proof: "on", canEnableEncryption: false };
 jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
@@ -117,6 +119,18 @@ describe("DevicesSecuritySettings", () => {
   beforeEach(() => {
     mockState = state();
     mockDeviceSecurity = { proof: "on", canEnableEncryption: false };
+    mockAnnounced = new Set();
+  });
+
+  it("marks a device the new-device alert announces as New", () => {
+    mockAnnounced = new Set(["phone"]);
+    render(<DevicesSecuritySettings />);
+    const others = screen.getByRole("list", { name: "Other devices · 1" });
+    expect(within(others).getByText("New")).toBeVisible();
+    const earlier = screen.getByRole("list", {
+      name: "Earlier setups of this browser · 1",
+    });
+    expect(within(earlier).queryByText("New")).not.toBeInTheDocument();
   });
 
   it("pins this browser and groups the rest", () => {

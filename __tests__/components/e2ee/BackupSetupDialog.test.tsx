@@ -158,6 +158,24 @@ describe("BackupSetupDialog", () => {
     ).toBeInTheDocument();
   });
 
+  it("treats an empty answer as not started: no error, the first field focused", async () => {
+    const { manager } = renderDialog();
+    await toCheckStep();
+    fireEvent.click(button("Turn on backup"));
+    expect(within(dialog()).queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Group 4")).toHaveFocus();
+    expect(manager.confirmBackup).not.toHaveBeenCalled();
+  });
+
+  it("says why Continue waits, right beside it", () => {
+    renderDialog();
+    fireEvent.click(button("Continue"));
+    const hint = within(dialog()).getByText(
+      "Copy or download the code to continue."
+    );
+    expect(button("Continue")).toHaveAttribute("aria-describedby", hint.id);
+  });
+
   it("accepts the whole code pasted instead", async () => {
     const { manager } = renderDialog();
     await toCheckStep();

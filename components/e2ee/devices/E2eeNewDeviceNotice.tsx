@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { getNewDeviceAlertCopy } from "@/components/preferences/devices-security/newDeviceAlert";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import Button from "@/components/utils/button/Button";
@@ -18,6 +18,23 @@ import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
 import { E2eeBanner } from "../ui/E2eeBanner";
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
 import { useE2eeNewDevices } from "./useE2eeNewDevices";
+
+/**
+ * Device keys the new-device alert announces, so device lists can mark the
+ * same devices "New".
+ */
+export function useAnnouncedDeviceKeys(): ReadonlySet<string> {
+  const { devices, profileId, status } = useE2ee();
+  const { newDevices } = useE2eeNewDevices(
+    profileId,
+    devices,
+    status === "ready" || status === "device-limit"
+  );
+  return useMemo(
+    () => new Set(newDevices.map((device) => device.deviceKey)),
+    [newDevices]
+  );
+}
 
 /**
  * One alert for each device of this profile set up since this one, naming

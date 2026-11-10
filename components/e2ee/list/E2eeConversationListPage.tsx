@@ -89,7 +89,10 @@ export function E2eeConversationListPage() {
       title={showingSetup ? undefined : t(locale, "e2ee.title")}
       subtitle={
         ready ? (
-          <E2eeBadge label={t(locale, "e2ee.badge.encrypted")} />
+          <E2eeBadge
+            label={t(locale, "e2ee.badge.encrypted")}
+            shortLabel={t(locale, "e2ee.badge.encryptedShort")}
+          />
         ) : undefined
       }
       backHref={getMessagesBaseRoute(false)}

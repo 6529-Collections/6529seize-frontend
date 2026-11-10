@@ -39,7 +39,7 @@ function DeviceDates({ device }: { readonly device: E2eeDeviceInfo }) {
   const locale = useBrowserLocale();
   const zone = useDisplayTimeZone();
   const now = useE2eeNow();
-  // Endings are dates only, as on the Device Permissions page, with the
+  // Endings are dates only, as on Devices & security, with the
   // day taken in the display time zone.
   let ending: string;
   if (device.revokedAt !== null) {
@@ -65,7 +65,7 @@ function DeviceDates({ device }: { readonly device: E2eeDeviceInfo }) {
       <li>
         {formatE2eeLastActive(
           locale,
-          // Only while its permission is in force, as on Device Permissions.
+          // Only while its permission is in force, as on Devices & security.
           device.isThisDevice &&
             device.revokedAt === null &&
             device.expiresAt > now,

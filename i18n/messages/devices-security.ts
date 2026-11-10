@@ -130,4 +130,5 @@ export const DEVICES_SECURITY_MESSAGES = {
   "devicesSecurity.newDevice.dms":
     "It can now read your encrypted DMs. Set up on {date}. If this wasn’t you, revoke it.",
   "devicesSecurity.newDevice.itWasMe": "It was me",
+  "devicesSecurity.row.new": "New",
 } as const;
