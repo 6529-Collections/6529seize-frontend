@@ -1,7 +1,7 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import type { KeyboardEvent, ReactNode, RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import {
   useCallback,
   useEffect,
@@ -57,11 +57,8 @@ export function AppWalletModalShell(
     title: string;
     onHide: () => void;
     dismissDisabled?: boolean;
-    /**
-     * Opens above any other modal layer: other focus traps pause while it is
-     * open, key and pointer events stay inside it, and Escape closes only it.
-     * Key handlers inside a layered dialog must not rely on React keydown.
-     */
+    /** Above every other modal layer: their focus traps pause, key and pointer
+     * events stay inside, Escape closes only this. No React keydown inside. */
     layered?: boolean;
     children: ReactNode;
     footer: ReactNode;
@@ -592,6 +589,7 @@ export function UnlockAppWalletModal(
   const inputRef = useRef<HTMLInputElement>(null);
   const walletPasswordId = useId();
   const feedbackId = useId();
+  const formId = useId();
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -611,12 +609,6 @@ export function UnlockAppWalletModal(
     setUnlocking(false);
     onHide();
   }, [onHide]);
-
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && canUnlock) {
-      handleUnlock();
-    }
-  };
 
   const showUnlockError = useCallback(() => {
     setUnlocking(false);
@@ -676,6 +668,7 @@ export function UnlockAppWalletModal(
 
   return (
     <AppWalletModalShell
+      layered
       show={show}
       onHide={() => handleHide()}
       dismissDisabled={unlocking}
@@ -692,10 +685,10 @@ export function UnlockAppWalletModal(
             {t(DEFAULT_LOCALE, "appWallet.modal.cancel")}
           </Button>
           <Button
-            type="button"
+            type="submit"
+            form={formId}
             disabled={!canUnlock}
             loading={unlocking}
-            onClick={handleUnlock}
             variant="action"
             size="md"
           >
@@ -707,7 +700,14 @@ export function UnlockAppWalletModal(
         </>
       }
     >
-      <div className="tw-space-y-5">
+      <form
+        id={formId}
+        className="tw-space-y-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (canUnlock) void handleUnlock();
+        }}
+      >
         <div>
           <label
             className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
@@ -741,7 +741,6 @@ export function UnlockAppWalletModal(
                   );
                 }
               }}
-              onKeyDown={handleKeyPress}
             />
             <button
               type="button"
@@ -794,7 +793,7 @@ export function UnlockAppWalletModal(
         >
           {error || t(DEFAULT_LOCALE, "appWallet.modal.unlockHelp")}
         </p>
-      </div>
+      </form>
     </AppWalletModalShell>
   );
 }

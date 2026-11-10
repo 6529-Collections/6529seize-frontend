@@ -114,7 +114,9 @@
   for approval. Requests are shown one at a time. The dialog opens above any
   other open dialog (for example the Terms of Service), focus starts on its
   heading, long messages scroll in a keyboard-reachable area, and Escape
-  cancels only the confirmation.
+  cancels only the confirmation. The unlock (password) dialog opens the same
+  way: focus starts on the password field, Enter or `Unlock` submits, and
+  Escape cancels only the unlock.
 - App wallets use the same Ethereum RPC providers, in the same order, as the
   rest of the app's wallet connection.
 
