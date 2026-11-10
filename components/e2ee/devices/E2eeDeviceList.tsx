@@ -65,7 +65,10 @@ function DeviceDates({ device }: { readonly device: E2eeDeviceInfo }) {
       <li>
         {formatE2eeLastActive(
           locale,
-          device.isThisDevice && device.revokedAt === null,
+          // Only while its permission is in force, as on Device Permissions.
+          device.isThisDevice &&
+            device.revokedAt === null &&
+            device.expiresAt > now,
           device.lastSeenAt,
           zone
         )}

@@ -76,6 +76,19 @@ describe("E2eeDeviceList", () => {
     expect(screen.queryByText(/^Last seen/)).not.toBeInTheDocument();
   });
 
+  it("never calls an expired current browser active now", () => {
+    const expired = {
+      ...THIS_BROWSER,
+      lastSeenAt: Date.UTC(2026, 4, 1, 12, 0),
+      expiresAt: Date.now() - 60_000,
+    };
+    renderList({ devices: [expired, PHONE] });
+    const thisRow = rowOf("Brave on Windows");
+    expect(within(thisRow).queryByText("Active now")).not.toBeInTheDocument();
+    expect(within(thisRow).getByText(/^Last active /)).toBeInTheDocument();
+    expect(within(thisRow).getByText(/^Expired /)).toBeInTheDocument();
+  });
+
   it("gives this browser its own revoke dialog that warns when backup is off (F-06)", async () => {
     const onSetUpBackup = jest.fn();
     const engine = renderList({ onSetUpBackup });

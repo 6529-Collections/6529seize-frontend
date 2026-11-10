@@ -16,10 +16,11 @@ import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import type {
-  DevicePermission,
-  DevicePlatform,
-  SecurityDevice,
+import {
+  isDeviceActive,
+  type DevicePermission,
+  type DevicePlatform,
+  type SecurityDevice,
 } from "./classifyDevices";
 
 const PLATFORM_ICONS = {
@@ -133,7 +134,8 @@ export function DeviceMeta({
       key: "last-active",
       text: formatE2eeLastActive(
         locale,
-        device.isThisDevice,
+        // Active now only while a permission is in force here.
+        device.isThisDevice && isDeviceActive(device),
         device.lastActiveAt,
         zone
       ),
