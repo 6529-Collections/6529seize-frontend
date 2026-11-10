@@ -117,9 +117,11 @@ describe("GroupCard", () => {
     expect(renderMarkup("#112233")).toContain(
       "linear-gradient(135deg, #112233 0%, #445566 100%)"
     );
-    const injected = renderMarkup("#112233;position:fixed;inset:0");
-    expect(injected).not.toContain("position:fixed");
-    expect(injected).not.toContain("#112233");
-    expect(injected).toContain("#445566 100%)");
+    const withExtraDeclarations = renderMarkup(
+      "#112233;position:fixed;inset:0"
+    );
+    expect(withExtraDeclarations).not.toContain("position:fixed");
+    expect(withExtraDeclarations).not.toContain("#112233");
+    expect(withExtraDeclarations).toContain("#445566 100%)");
   });
 });

@@ -39,4 +39,24 @@ describe("getSafeCssColor", () => {
   ])("refuses %j", (value) => {
     expect(getSafeCssColor(value)).toBeNull();
   });
+
+  it.each(["red", "transparent", "RebeccaPurple"])(
+    "accepts the named colour %s only when names are allowed",
+    (value) => {
+      expect(getSafeCssColor(value)).toBeNull();
+      expect(getSafeCssColor(value, { allowNamedColors: true })).toBe(value);
+    }
+  );
+
+  it.each([
+    "re",
+    "a".repeat(25),
+    "red;position:fixed",
+    "red blue",
+    "url(x)",
+    "linear-gradient(red, blue)",
+    "var(--accent)",
+  ])("refuses %j even when names are allowed", (value) => {
+    expect(getSafeCssColor(value, { allowNamedColors: true })).toBeNull();
+  });
 });

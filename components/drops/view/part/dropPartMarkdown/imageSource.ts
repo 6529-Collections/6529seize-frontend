@@ -1,13 +1,12 @@
 import { publicEnv } from "@/config/env";
+import { hasImageFileExtension } from "@/helpers/download-file-type.helpers";
 
 /**
- * Same-site images in a post may only be static files: a file at the site
- * root (`/name.png`), a build asset or an emoji. Any other same-site path
- * (`/api/...`, route handlers, pages) is not loaded as an image, so showing a
- * post never makes the viewer's browser call the app's own endpoints.
+ * Same-site images in a post load only when the path names an image file,
+ * has no query string and is not an API or image-optimizer endpoint, so
+ * showing a post never makes the viewer's browser call the app's endpoints.
  */
-const STATIC_IMAGE_DIRECTORIES = ["/_next/static/", "/emojis/"] as const;
-const STATIC_IMAGE_FILE_NAME = /^[^/]+\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
+const ENDPOINT_PREFIXES = ["/api/", "/_next/image"] as const;
 
 const getOrigin = (value: string | undefined): string | null => {
   if (!value) {
@@ -28,22 +27,15 @@ const getSiteOrigins = (): string[] =>
       : getOrigin(globalThis.window.location.origin),
   ].filter((origin): origin is string => origin !== null);
 
-const isStaticImagePath = (pathname: string): boolean => {
-  const fileName = pathname.slice(pathname.lastIndexOf("/") + 1);
-  if (!STATIC_IMAGE_FILE_NAME.test(fileName)) {
-    return false;
-  }
-  const directory = pathname.slice(0, pathname.length - fileName.length);
-  return (
-    directory === "/" ||
-    STATIC_IMAGE_DIRECTORIES.some((prefix) => directory.startsWith(prefix))
-  );
-};
+const isSameSiteImageFile = (url: URL): boolean =>
+  url.search === "" &&
+  hasImageFileExtension(url.pathname) &&
+  !ENDPOINT_PREFIXES.some((prefix) => url.pathname.startsWith(prefix));
 
 /**
  * Whether a Markdown image source may be loaded. Images on other sites and
  * inline `data:` images are unaffected; same-site sources, including relative
- * paths, must be static image files.
+ * paths, must be plain image files.
  */
 export function isAllowedMarkdownImageSource(src: string): boolean {
   const trimmed = src.trim();
@@ -64,5 +56,5 @@ export function isAllowedMarkdownImageSource(src: string): boolean {
     return true;
   }
 
-  return url.search === "" && isStaticImagePath(url.pathname);
+  return isSameSiteImageFile(url);
 }

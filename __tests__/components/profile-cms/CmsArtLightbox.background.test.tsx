@@ -35,14 +35,20 @@ const renderWithBackground = (background: string) => {
 };
 
 describe("CMS artwork matte colour", () => {
-  it("applies a plain colour from the site content", () => {
-    expect(renderWithBackground("#f2eacb")).toContain("background:#f2eacb");
-  });
+  it.each(["#f2eacb", "ivory", "transparent", "rgb(242, 234, 203)"])(
+    "applies the plain colour %s from the site content",
+    (background) => {
+      expect(renderWithBackground(background)).toContain(
+        `background:${background}`
+      );
+    }
+  );
 
   it.each([
     "#f2eacb;position:fixed;inset:0",
     "url(https://tracker.example/pixel.png)",
     "var(--cms-colorway-paper)",
+    "linear-gradient(red, blue)",
   ])("ignores %s", (background) => {
     const markup = renderWithBackground(background);
     expect(markup).not.toContain("background:");

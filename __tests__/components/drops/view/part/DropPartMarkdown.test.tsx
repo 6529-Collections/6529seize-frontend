@@ -425,7 +425,7 @@ describe("DropPartMarkdown", () => {
         mentionedUsers={[]}
         mentionedWaves={[]}
         referencedNfts={[]}
-        partContent={`![a](/api/profiles/me.png) ![b](${site}/api/open-graph/x.png) ![c](/_next/image?url=x.png) ![d](./validator/download/x.png)`}
+        partContent={`![a](/api/profiles/me.png) ![b](${site}/api/open-graph/x.png) ![c](/_next/image?url=x.png) ![d](/museum/art.png?size=large) ![e](/waves/abc)`}
         onQuoteClick={jest.fn()}
       />
     );
@@ -433,14 +433,14 @@ describe("DropPartMarkdown", () => {
     expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
   });
 
-  it("keeps static same-site files and images on other sites", () => {
+  it("keeps same-site image files and images on other sites", () => {
     const site = new URL(publicEnv.BASE_ENDPOINT).origin;
     render(
       <DropPartMarkdown
         mentionedUsers={[]}
         mentionedWaves={[]}
         referencedNfts={[]}
-        partContent={`![a](${site}/6529.png)\n\n![b](https://cdn.example.com/api/art.png)`}
+        partContent={`![a](${site}/6529.png)\n\n![b](/museum/rooms/hall.webp)\n\n![c](/nextgen/token.jpg)\n\n![d](https://cdn.example.com/api/art.png)`}
         onQuoteClick={jest.fn()}
       />
     );
@@ -449,7 +449,12 @@ describe("DropPartMarkdown", () => {
       screen
         .getAllByRole("img", { name: "Drop media" })
         .map((image) => image.getAttribute("src"))
-    ).toEqual([`${site}/6529.png`, "https://cdn.example.com/api/art.png"]);
+    ).toEqual([
+      `${site}/6529.png`,
+      "/museum/rooms/hall.webp",
+      "/nextgen/token.jpg",
+      "https://cdn.example.com/api/art.png",
+    ]);
   });
 
   it("shows a bare same-site endpoint URL as a link, not an image", () => {

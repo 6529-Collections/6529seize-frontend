@@ -672,7 +672,9 @@ function getArtworkFrameStyle(item: CmsArtInspectionItem): CSSProperties {
     style.aspectRatio = `${item.width} / ${item.height}`;
   }
   // Site content sets a matte colour; anything but a plain colour is ignored.
-  const background = getSafeCssColor(item.background);
+  const background = getSafeCssColor(item.background, {
+    allowNamedColors: true,
+  });
   if (background) {
     style.background = background;
   }
