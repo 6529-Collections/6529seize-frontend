@@ -210,6 +210,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     isAppleMobile,
     waveMessages,
     shouldPinToBottom,
+    viewerProfileId: connectedProfile?.id,
   });
 
   const waveMin = useMemo(() => (wave ? toApiWaveMin(wave) : null), [wave]);
