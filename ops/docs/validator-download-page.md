@@ -4,9 +4,10 @@ Parent: [Documentation](README.md)
 
 ## Overview
 
-`/validator` is where testers download the 6529 validator. A password
-protects every page under it, except the signed release feed, which
-validators fetch to find updates.
+`/validator` is where testers download the 6529 validator. When the
+password gate is on, it protects every page under it, except the signed
+release feed, which validators fetch to find updates, and the authorize
+page.
 
 | Route | What it serves | Access |
 | --- | --- | --- |
@@ -46,12 +47,14 @@ cookie again.
   Report a problem (from rc.8) link `/validator#send-feedback`, and the
   password form carries the section to `/validator/unlock` and back. Keep
   the `send-feedback` id on the download page.
+- The gate matches the path after decoding it once and folding repeated
+  slashes, so `/%76alidator/<file>` and `/validator%2F<file>` are gated
+  like `/validator/<file>`; a malformed escape cannot hide the prefix.
 
 The password is never in the repository. Production reads it from the
 `VALIDATOR_PAGE_PASSWORD` environment variable, which the
 `Web Deploy - PROD` workflow copies from the `production` environment's
 GitHub secret of the same name into the Elastic Beanstalk environment.
-
 ### Change the password
 
 1. Set the new value:
@@ -79,14 +82,34 @@ From rc.10, a validator's Authorize step shows a QR code and a link,
 grant (the draft link, v1), so no server ever sees it. The page:
 
 - rebuilds the typed data from the link, checks it, and shows the account,
-  the keys with their shares, and the authorization number;
+  the keys with their shares, and the authorization number as it will be
+  signed;
+- names the network from the domain salt that is signed: only the mainnet
+  salt is mainnet, any other salt carries the Test network tag, and a link
+  for a test network that carries the mainnet salt is refused as damaged
+  (the validator writes that salt only as the mainnet network byte);
+- shows each key's 8-character code, as the validator's Keys page and
+  Authorize step show it, and under it the whole public key in groups of
+  8 hex characters, the last group the code. The code and the "this
+  validator" mark both come from the link, so the page warns when keys
+  not marked as this validator's hold a share of the authorization, and
+  says how much;
+- warns when the authorization number is above 1,000,000. The validator
+  drafts one above the account's last, a later authorization needs a
+  larger number, and the network keeps the greatest;
 - asks the account's own wallet to sign, through the site's AppKit and
   without the site's sign-in prompt (`components/providers/Providers.tsx`);
 - shows the signature to copy into the validator, which checks it against
-  its own draft.
+  its own draft, with what it authorizes: the listed key codes, for the
+  account, as that authorization number, and on a test network that it
+  counts only there.
 
 Nothing is stored or sent. The page is public, so the password gate never
-locks it. The code is in `lib/validator-page/authorize/`.
+locks it. The code is in `lib/validator-page/authorize/`. Its new copy is
+in the `validator-authorize` message namespace
+(`i18n/messages/validatorAuthorize.en-US.json`, en-US only); the rest of
+the page, the checks' problem list and the other `/validator` pages are
+still English-only strings in their components, with no other locale.
 
 ## Releases
 
@@ -108,7 +131,26 @@ Peer addresses never go on the pages or in this public repository. From
 
 The site reads the feed once a minute and keeps the last good copy for an
 hour if S3 fails. It serves the two feed files unchanged, so the signature
-verifies against what validators download. Only the newest release's files
+verifies against what validators download.
+
+Before it reads the feed, the site checks its signature as a validator
+does (the validator's `docs/releases-feed.md`, "The signature"): ECDSA over
+secp256k1 of SHA-256(`6529 Validator releases v1`, a zero byte, the feed's
+bytes), by a key that `releases.json.sig` names by address and that
+`lib/validator-page/feedSigningKeys.ts` lists. That file pins 6529's
+release-list key, the one every validator release has built in; a
+successor key is added there beside it before the old one is retired. A
+missing signature, one that does not verify, or a feed whose `sequence` is
+lower than one the server has already served counts as a failed read: the
+last good copy stays for up to an hour, then the pages say the release
+list could not be loaded, offer no download, and `releases.json` answers
+503. The `sequence` floor lives in the server's memory and starts again
+when it restarts.
+
+The SHA-256 on the pages therefore comes from the signed feed. The
+"Publisher" column of All files says which name the visitor's system
+should show for a file's code signature (6529 Collection LLC, and Apple's
+notarization on the Mac files); the site does not check code signatures. Only the newest release's files
 can be downloaded: an older release stays in the feed and on the history
 page, with its SHA-256, and its files answer 404 (the owner: rc.1 to rc.4
 never, and rc.5 not once rc.6 is out). Newest is by version, as the
@@ -123,6 +165,8 @@ No site deploy is needed.
    each object's SHA-256 against `SHA256SUMS`.
 2. Upload the new `feed/releases.json` and `feed/releases.json.sig`. Upload
    the feed last, so the page never lists a file that is not there yet.
+   Until both are in place the pair does not verify, and the site keeps
+   the last good feed.
 
 The pages show the new release within a minute. The download buttons pick
 each file by its name: `.dmg`, `-Setup-<version>-x64.exe`, `_amd64.deb`,
