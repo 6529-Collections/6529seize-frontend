@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import {
   WS_DROP_UPDATE_REASON_POLL_RESPONSE,
+  WS_DROP_UPDATE_REASON_REPLY_COLLAPSE,
   isWsDropUpdateRefData,
   WsMessageType,
 } from "@/helpers/Types";
@@ -55,11 +56,6 @@ export function getNewestTimestamp(
 
   return Math.max(cached, server);
 }
-
-const isPollResponseDropUpdate = (
-  message: WsDropUpdateMessage["data"]
-): boolean =>
-  getWebSocketMessageReason(message) === WS_DROP_UPDATE_REASON_POLL_RESPONSE;
 
 const updateLatestDropTimestamp = ({
   createdAt,
@@ -351,7 +347,12 @@ function useNewDropCounter(
 
   const handleDropUpdate = useCallback(
     (message: ApiDrop) => {
-      if (!enabled || !message.wave.id || isPollResponseDropUpdate(message))
+      if (!enabled || !message.wave.id) return;
+      const reason = getWebSocketMessageReason(message);
+      if (
+        reason === WS_DROP_UPDATE_REASON_POLL_RESPONSE ||
+        reason === WS_DROP_UPDATE_REASON_REPLY_COLLAPSE
+      )
         return;
       const wave = waves.find((candidate) => candidate.id === message.wave.id);
       if (!wave) {
@@ -396,7 +397,8 @@ function useNewDropCounter(
           !enabled ||
           !isWsDropUpdateRefData(message) ||
           message.update_type !== WsMessageType.DROP_UPDATE ||
-          message.reason === WS_DROP_UPDATE_REASON_POLL_RESPONSE
+          message.reason === WS_DROP_UPDATE_REASON_POLL_RESPONSE ||
+          message.reason === WS_DROP_UPDATE_REASON_REPLY_COLLAPSE
         ) {
           return;
         }

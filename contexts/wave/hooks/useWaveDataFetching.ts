@@ -609,6 +609,7 @@ export function useWaveDataFetching({
 
   return {
     registerWave,
+    activateWave,
     prefetchWave,
     cancelWaveDataFetch,
     syncNewestMessages,

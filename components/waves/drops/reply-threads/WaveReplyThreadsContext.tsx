@@ -1,10 +1,12 @@
 "use client";
 
+import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
 import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import type { DropReplyThreadTarget } from "@/services/api/drop-reply-thread-target-api";
 import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { createReplyCountReconciliation } from "./reply-count-reconciliation";
@@ -20,10 +22,19 @@ import {
   type ReactNode,
 } from "react";
 
-interface ExpandedReplyThreadsStore {
+export interface ExpandedReplyThreadsStore {
   readonly isExpanded: (dropId: string) => boolean;
   readonly setExpanded: (dropId: string, expanded: boolean) => void;
   readonly subscribe: (listener: () => void) => () => void;
+  readonly getLinkedReply: () => DropReplyThreadTarget | null;
+  readonly setLinkedReply: (target: DropReplyThreadTarget | null) => void;
+  readonly getLinkedReplyElement: (
+    parentSerialNo: number
+  ) => HTMLDivElement | null;
+  readonly setLinkedReplyElement: (
+    target: DropReplyThreadTarget,
+    element: HTMLDivElement | null
+  ) => void;
 }
 
 /**
@@ -33,6 +44,9 @@ interface ExpandedReplyThreadsStore {
 const createExpandedReplyThreadsStore = (): ExpandedReplyThreadsStore => {
   const expandedDropIds = new Set<string>();
   const listeners = new Set<() => void>();
+  const notify = () => listeners.forEach((listener) => listener());
+  let linkedReply: DropReplyThreadTarget | null = null;
+  let linkedReplyElement: HTMLDivElement | null = null;
   return {
     isExpanded: (dropId) => expandedDropIds.has(dropId),
     setExpanded: (dropId, expanded) => {
@@ -44,7 +58,23 @@ const createExpandedReplyThreadsStore = (): ExpandedReplyThreadsStore => {
       } else {
         expandedDropIds.delete(dropId);
       }
-      listeners.forEach((listener) => listener());
+      notify();
+    },
+    getLinkedReply: () => linkedReply,
+    setLinkedReply: (target) => {
+      if (linkedReply === target) return;
+      linkedReply = target;
+      linkedReplyElement = null;
+      notify();
+    },
+    getLinkedReplyElement: (parentSerialNo) =>
+      linkedReply?.parentSerialNo === parentSerialNo
+        ? linkedReplyElement
+        : null,
+    setLinkedReplyElement: (target, element) => {
+      if (linkedReply !== target || linkedReplyElement === element) return;
+      linkedReplyElement = element;
+      notify();
     },
     subscribe: (listener) => {
       listeners.add(listener);
@@ -59,6 +89,7 @@ interface WaveReplyThreadsContextValue {
   readonly waveId: string;
   readonly store: ExpandedReplyThreadsStore;
   readonly getWave: () => ApiWave;
+  readonly collapseAll: boolean;
 }
 
 const WaveReplyThreadsContext =
@@ -68,7 +99,11 @@ const WaveReplyThreadsContext =
  * Reconcile the original thread as well as the immediate parent when replies
  * change. Compact events use the same API-backed ancestry traversal.
  */
-function useLiveReplyCounts(waveId: string, enabled: boolean) {
+function useLiveReplyCounts(
+  waveId: string,
+  enabled: boolean,
+  collapseAll: boolean
+) {
   const { applyOptimisticDropUpdate } = useMyStreamActions();
   const reconciliationRef = useRef<ReturnType<
     typeof createReplyCountReconciliation
@@ -103,13 +138,15 @@ function useLiveReplyCounts(waveId: string, enabled: boolean) {
     WsMessageType.DROP_UPDATE,
     useCallback(
       (drop) => {
-        const parentDropId = drop.reply_to?.drop_id;
+        const parentDropId =
+          drop.collapsed_reply_thread?.id ??
+          (collapseAll ? drop.reply_to?.drop_id : undefined);
         if (!enabled || drop.wave.id !== waveId || !parentDropId) {
           return;
         }
         reconciliationRef.current?.request(parentDropId);
       },
-      [enabled, waveId]
+      [collapseAll, enabled, waveId]
     )
   );
 
@@ -123,10 +160,13 @@ function useLiveReplyCounts(waveId: string, enabled: boolean) {
           message.wave_id === waveId &&
           message.update_type === WsMessageType.DROP_UPDATE
         ) {
-          reconciliationRef.current?.request(message.drop_id);
+          const rootId = message.collapsed_reply_thread_id;
+          if (rootId || collapseAll) {
+            reconciliationRef.current?.request(rootId ?? message.drop_id);
+          }
         }
       },
-      [enabled, waveId]
+      [collapseAll, enabled, waveId]
     )
   );
 }
@@ -152,12 +192,13 @@ export function WaveReplyThreadsProvider({
   useEffect(() => {
     waveRef.current = wave;
   }, [wave]);
-  useLiveReplyCounts(wave.id, enabled);
+  const collapseAll = isWaveRepliesCollapsed(wave);
+  useLiveReplyCounts(wave.id, enabled, collapseAll);
 
   const getWave = useCallback(() => waveRef.current, []);
   const value = useMemo(
-    () => (enabled ? { waveId: wave.id, store, getWave } : null),
-    [enabled, wave.id, store, getWave]
+    () => (enabled ? { waveId: wave.id, store, getWave, collapseAll } : null),
+    [enabled, wave.id, store, getWave, collapseAll]
   );
 
   return (
@@ -167,7 +208,7 @@ export function WaveReplyThreadsProvider({
   );
 }
 
-/** Null outside the main stream of a collapsed-reply wave. */
+/** Null outside a wave stream with reply threads. */
 export const useWaveReplyThreads = (): WaveReplyThreadsContextValue | null =>
   useContext(WaveReplyThreadsContext);
 
@@ -181,5 +222,21 @@ export function useReplyThreadExpanded(
     threads?.store.subscribe ?? noopSubscribe,
     () => threads?.store.isExpanded(dropId) ?? false,
     () => false
+  );
+}
+
+export function useLinkedReply(
+  threads: WaveReplyThreadsContextValue | null,
+  parentDropId?: string
+): DropReplyThreadTarget | null {
+  return useSyncExternalStore(
+    threads?.store.subscribe ?? noopSubscribe,
+    () => {
+      const target = threads?.store.getLinkedReply() ?? null;
+      return parentDropId === undefined || target?.parentDropId === parentDropId
+        ? target
+        : null;
+    },
+    () => null
   );
 }
