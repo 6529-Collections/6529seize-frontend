@@ -111,7 +111,10 @@
     it calls a contract (with the 4-byte function selector).
   `Cancel` (or closing the dialog) rejects the request the same way any wallet
   does. Signing in with an app wallet therefore shows the sign-in message once
-  for approval. Requests are shown one at a time.
+  for approval. Requests are shown one at a time. The dialog opens above any
+  other open dialog (for example the Terms of Service), focus starts on its
+  heading, long messages scroll in a keyboard-reachable area, and Escape
+  cancels only the confirmation.
 - App wallets use the same Ethereum RPC providers, in the same order, as the
   rest of the app's wallet connection.
 

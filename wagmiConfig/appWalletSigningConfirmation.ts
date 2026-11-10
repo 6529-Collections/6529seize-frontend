@@ -139,6 +139,13 @@ function toChainId(value: unknown): number | null {
     const asNumber = Number(value);
     return Number.isSafeInteger(asNumber) ? asNumber : null;
   }
+  // EIP-712 domains may carry the chain ID as a hex or decimal string.
+  if (
+    typeof value === "string" &&
+    /^(0x[0-9a-f]+|[0-9]+)$/i.test(value.trim())
+  ) {
+    return toChainId(BigInt(value.trim()));
+  }
   return null;
 }
 

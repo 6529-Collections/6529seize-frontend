@@ -1,6 +1,7 @@
 import { decryptData } from "@/components/app-wallets/app-wallet-helpers";
 import {
   type AppWalletSigningRequest,
+  describeAppWalletTypedData,
   setAppWalletSigningConfirmationDelegate,
 } from "@/wagmiConfig/appWalletSigningConfirmation";
 import { createAppWalletConnector } from "@/wagmiConfig/wagmiAppWalletConnector";
@@ -212,6 +213,32 @@ describe("app wallet signing confirmation", () => {
       })
     );
   });
+
+  it.each([
+    ["a number", 1, 1],
+    ["a hex string", "0x1", 1],
+    ["a decimal string", "1", 1],
+    ["an unparseable string", "mainnet", null],
+  ])(
+    "reads a typed-data domain chain ID given as %s",
+    (_label, chainId, expected) => {
+      const request = describeAppWalletTypedData(
+        signer.address,
+        {
+          domain: { name: "6529", chainId },
+          types: { Grant: [{ name: "amount", type: "uint256" }] },
+          primaryType: "Grant",
+          message: { amount: 1n },
+        } as never,
+        [mainnet as Chain]
+      );
+
+      expect(request).toMatchObject({
+        domainChainId: expected,
+        domainChainName: expected === null ? null : "Ethereum",
+      });
+    }
+  );
 
   it("shows one request at a time", async () => {
     let releaseFirst: (approved: boolean) => void = () => undefined;

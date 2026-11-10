@@ -13,7 +13,7 @@ import type { AppWalletSigningRequest } from "@/wagmiConfig/appWalletSigningConf
 const VALUE_CLASS_NAME =
   "tw-m-0 tw-break-all tw-font-mono tw-text-sm tw-text-iron-50";
 const BLOCK_CLASS_NAME =
-  "tw-m-0 tw-max-h-48 tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-p-3 tw-font-mono tw-text-xs tw-text-iron-100";
+  "tw-m-0 tw-max-h-48 tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/30 tw-p-3 tw-font-mono tw-text-xs tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
 function displayAddress(address: string): string {
   return isAddress(address, { strict: false }) ? getAddress(address) : address;
@@ -30,6 +30,25 @@ function DetailRow({
       </dt>
       <dd className="tw-m-0">{children}</dd>
     </div>
+  );
+}
+
+/** Long signed content: a keyboard-reachable, named scroll region. */
+function ContentBlock({
+  label,
+  children,
+}: Readonly<{ label: string; children: ReactNode }>) {
+  return (
+    <DetailRow label={label}>
+      <pre
+        role="region"
+        aria-label={label}
+        tabIndex={0}
+        className={BLOCK_CLASS_NAME}
+      >
+        {children}
+      </pre>
+    </DetailRow>
   );
 }
 
@@ -53,13 +72,13 @@ function RequestDetails({
 }: Readonly<{ locale: SupportedLocale; request: AppWalletSigningRequest }>) {
   if (request.kind === "message") {
     return request.text === null ? (
-      <DetailRow label={t(locale, "appWallet.signing.rawMessage")}>
-        <pre className={BLOCK_CLASS_NAME}>{request.rawHex}</pre>
-      </DetailRow>
+      <ContentBlock label={t(locale, "appWallet.signing.rawMessage")}>
+        {request.rawHex}
+      </ContentBlock>
     ) : (
-      <DetailRow label={t(locale, "appWallet.signing.message")}>
-        <pre className={BLOCK_CLASS_NAME}>{request.text}</pre>
-      </DetailRow>
+      <ContentBlock label={t(locale, "appWallet.signing.message")}>
+        {request.text}
+      </ContentBlock>
     );
   }
 
@@ -90,9 +109,9 @@ function RequestDetails({
               : displayAddress(request.verifyingContract)}
           </p>
         </DetailRow>
-        <DetailRow label={t(locale, "appWallet.signing.typedDataContent")}>
-          <pre className={BLOCK_CLASS_NAME}>{request.messageJson}</pre>
-        </DetailRow>
+        <ContentBlock label={t(locale, "appWallet.signing.typedDataContent")}>
+          {request.messageJson}
+        </ContentBlock>
       </>
     );
   }
@@ -169,6 +188,7 @@ export function AppWalletSigningConfirmationModal({
 
   return (
     <AppWalletModalShell
+      layered
       show={request !== null}
       onHide={onCancel}
       title={request === null ? "" : t(locale, getTitleKey(request))}

@@ -1,4 +1,4 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { parseEther } from "viem";
 import { useAppWalletSigningConfirmation } from "@/hooks/useAppWalletSigningConfirmation";
@@ -53,6 +53,16 @@ describe("useAppWalletSigningConfirmation", () => {
     });
     expect(within(dialog).getByText(WALLET)).toBeInTheDocument();
     expect(dialog).toHaveTextContent("Sign in to 6529 Nonce: 42");
+    // Focus starts on the heading, never on a control that dismisses.
+    await waitFor(() =>
+      expect(
+        within(dialog).getByRole("heading", { name: "Sign this message?" })
+      ).toHaveFocus()
+    );
+    // Long content is a named scroll region the keyboard can reach.
+    expect(
+      within(dialog).getByRole("region", { name: "Message" })
+    ).toHaveAttribute("tabindex", "0");
 
     await user.click(within(dialog).getByRole("button", { name: "Sign" }));
     await expect(outcome).resolves.toBe("approved");
