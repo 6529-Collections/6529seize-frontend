@@ -200,6 +200,106 @@ describe("useWaveRealtimeUpdater", () => {
     );
   });
 
+  it.each([WsMessageType.DROP_UPDATE, WsMessageType.DROP_UPDATE_REF])(
+    "refreshes reply placement when the server omits reply presence (%s)",
+    (messageType) => {
+      const refreshWaveMessages = jest.fn();
+      const props = {
+        ...baseProps({ wave1: { drops: [], latestFetchedSerialNo: 10 } }),
+        refreshWaveMessages,
+      };
+      renderHook(() => useWaveRealtimeUpdater(props));
+      emitWebSocketMessage(
+        messageType,
+        messageType === WsMessageType.DROP_UPDATE
+          ? {
+              ...makeRealtimeDrop("root", "wave1", 9),
+              reason: "REPLY_COLLAPSE",
+            }
+          : {
+              drop_id: "root",
+              wave_id: "wave1",
+              serial_no: 9,
+              update_type: WsMessageType.DROP_UPDATE,
+              reason: "REPLY_COLLAPSE",
+            }
+      );
+      expect(refreshWaveMessages).toHaveBeenCalledWith("wave1");
+      expect(props.updateData).not.toHaveBeenCalled();
+    }
+  );
+
+  it("reports a failed reply placement refresh and allows a later refresh", async () => {
+    const error = new Error("Wave refresh failed");
+    const report = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    try {
+      const refreshWaveMessages = jest
+        .fn()
+        .mockRejectedValueOnce(error)
+        .mockResolvedValue(undefined);
+      const props = {
+        ...baseProps({ wave1: { drops: [], latestFetchedSerialNo: 10 } }),
+        refreshWaveMessages,
+      };
+      const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+      const change = { waveId: "wave1", dropId: "root", hasReplies: true };
+
+      await expect(result.current.applyReplyPlacement(change)).resolves.toBe(
+        false
+      );
+      expect(report).toHaveBeenCalledWith(
+        "Failed to refresh reply placement:",
+        error
+      );
+      await expect(result.current.applyReplyPlacement(change)).resolves.toBe(
+        true
+      );
+    } finally {
+      report.mockRestore();
+    }
+  });
+
+  it.each([WsMessageType.DROP_UPDATE, WsMessageType.DROP_UPDATE_REF])(
+    "updates an empty thread in place on a placement event (%s)",
+    (messageType) => {
+      const root = {
+        ...makeRealtimeDrop("root", "wave1", 9),
+        type: DropSize.FULL,
+        stableKey: "root-key",
+        stableHash: "root-hash",
+        collapse_replies: false,
+        replies_count: 2,
+      };
+      const refreshWaveMessages = jest.fn();
+      const props = {
+        ...baseProps({ wave1: { drops: [root], latestFetchedSerialNo: 10 } }),
+        refreshWaveMessages,
+      };
+      renderHook(() => useWaveRealtimeUpdater(props));
+      emitWebSocketMessage(messageType, {
+        ...(messageType === WsMessageType.DROP_UPDATE
+          ? makeRealtimeDrop("root", "wave1", 9)
+          : {
+              drop_id: "root",
+              wave_id: "wave1",
+              author_id: "author",
+              serial_no: 9,
+              update_type: WsMessageType.DROP_UPDATE,
+            }),
+        reason: "REPLY_COLLAPSE",
+        collapse_replies: true,
+        reply_placement_has_replies: false,
+      });
+      expect(props.updateData).toHaveBeenCalledWith({
+        key: "wave1",
+        drops: [{ ...root, collapse_replies: true, replies_count: 0 }],
+      });
+      expect(refreshWaveMessages).not.toHaveBeenCalled();
+    }
+  );
+
   it("keeps a collapsed thread's reply count when an update omits it", async () => {
     const store = {
       wave1: {

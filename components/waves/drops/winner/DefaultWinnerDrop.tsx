@@ -227,6 +227,16 @@ const DefaultWinnerDropInner = ({
       <div className="tw-group tw-relative tw-w-full">
         {detachedProposalHeader}
 
+        {canUseDesktopHoverActions && showInteractions && showReplyAndQuote && (
+          <div className="tw-absolute tw-right-0 tw-top-1">
+            <WaveDropActions
+              drop={drop}
+              activePartIndex={activePartIndex}
+              onReply={handleOnReply}
+            />
+          </div>
+        )}
+
         <div
           className={`tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl ${
             isChatProposal && !isActiveDrop
@@ -354,17 +364,6 @@ const DefaultWinnerDropInner = ({
               </div>
             </div>
           </div>
-          {canUseDesktopHoverActions &&
-            showInteractions &&
-            showReplyAndQuote && (
-              <div className="tw-absolute tw-right-0 tw-top-1">
-                <WaveDropActions
-                  drop={drop}
-                  activePartIndex={activePartIndex}
-                  onReply={handleOnReply}
-                />
-              </div>
-            )}
           <div
             className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-flex tw-flex-col tw-gap-2`}
           >

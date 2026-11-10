@@ -10,16 +10,18 @@ import { useState } from "react";
 
 /**
  * Links and notifications point at a drop's serial number. In collapsed-reply
- * waves a reply is not in the main stream, so resolve it to its parent.
+ * waves a reply is not in the main stream, so resolve it to its top-level thread.
  *
  * The requested serial is kept after the page removes it from the URL.
  */
 export function useCollapsedReplyThreadTarget({
   enabled,
+  collapseAll = true,
   waveId,
   serialNo,
 }: {
   readonly enabled: boolean;
+  readonly collapseAll?: boolean;
   readonly waveId: string;
   readonly serialNo: number | null;
 }): DropReplyThreadTarget | null {
@@ -40,11 +42,13 @@ export function useCollapsedReplyThreadTarget({
   const { data } = useQuery({
     queryKey: [
       QueryKey.DROP_REPLY_THREAD_TARGET,
-      { wave_id: waveId, serial_no: requestedSerialNo },
+      { wave_id: waveId, serial_no: requestedSerialNo, collapseAll },
     ],
     queryFn: ({ signal }) =>
       fetchDropReplyThreadTarget({
+        waveId,
         serialNo: requestedSerialNo ?? 0,
+        collapseAll,
         signal,
       }),
     enabled: enabled && requestedSerialNo !== null,
