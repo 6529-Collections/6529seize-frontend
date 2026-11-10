@@ -30,6 +30,7 @@ import { UnsentMessages } from "./unsent";
 import { EngineController } from "./controller";
 import {
   confirmOwnRejection,
+  E2EE_REVOCATION_UNVERIFIED,
   needsNewDevice,
   refreshMe,
   renewalDue,
@@ -61,7 +62,12 @@ import {
   supported,
 } from "./setup";
 import { toE2eeMessage } from "./store";
-import { approveDevice, ignoreUntrustedDevice } from "./trust";
+import {
+  approveDevice,
+  findApprovalTarget,
+  ignoreUntrustedDevice,
+  isTrustedMemberDevice,
+} from "./trust";
 
 /** Contract section 12 engine: framework-agnostic, one instance per profile. */
 
@@ -77,6 +83,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   constructor(ctx: EngineContext) {
     this.ctx = ctx;
+    ctx.store.memberTrust = (member) => isTrustedMemberDevice(ctx, member);
     this.controller = new EngineController(ctx, {
       refreshMe: () => this.refreshMe(),
       onOwnRevoked: () => this.onOwnRejected(),
@@ -184,17 +191,23 @@ class E2eeEngineImpl implements E2eeEngineExt {
       return;
     }
     const result = await refreshMe(this.ctx);
-    if (result.ownRevoked && !this.isDisposed()) {
+    if (this.isDisposed()) {
+      return;
+    }
+    if (result.ownRevocation === "verified") {
       await this.wipe();
+    } else if (result.ownRevocation === "unverified") {
+      this.suspend(E2EE_REVOCATION_UNVERIFIED);
     }
   }
 
   /**
    * The server refused this device (E2EE_NOT_YOUR_DEVICE, or a revocation
-   * hint). Only a revocation that /e2ee/me confirms for this profile wipes
-   * the state; an expired or unlisted device keeps it (enroll() renews or
-   * resumes it), and an unconfirmed refusal changes nothing. A disposed
-   * engine never acts: its account may already have changed.
+   * hint). Only a revocation that /e2ee/me lists for this profile and that
+   * verifies here wipes the state. A listed revocation that does not verify,
+   * or an expired or unlisted device, stops the device and keeps its data
+   * (enroll() renews or resumes it); an unconfirmed refusal changes nothing.
+   * A disposed engine never acts: its account may already have changed.
    */
   private async onOwnRejected(): Promise<void> {
     if (this.isDisposed()) {
@@ -208,8 +221,18 @@ class E2eeEngineImpl implements E2eeEngineExt {
       await this.wipe();
       return;
     }
+    this.suspend(
+      verdict === "revoked-unverified" ? E2EE_REVOCATION_UNVERIFIED : null
+    );
+  }
+
+  /**
+   * Stops using this device (no sync, no sends) and keeps every local
+   * record: the device key, history, outbox and trust stay for enroll().
+   */
+  private suspend(code: string | null): void {
     this.controller.stopBackground();
-    setStatus(this.ctx, NEEDS_ENROLLMENT);
+    setStatus(this.ctx, NEEDS_ENROLLMENT, code);
   }
 
   /**
@@ -628,7 +651,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
    */
   async trustDevice(deviceKey: string): Promise<void> {
     this.requireReady();
-    const target = this.ctx.store.findUntrusted(deviceKey.toLowerCase());
+    const target = findApprovalTarget(this.ctx, deviceKey.toLowerCase());
     if (!target) {
       return;
     }

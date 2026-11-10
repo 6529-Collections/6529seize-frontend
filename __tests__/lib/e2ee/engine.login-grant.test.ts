@@ -265,6 +265,46 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
     expect(record.grant_message ?? null).toBeNull();
   });
 
+  it("keeps the trust pins when the server refuses the sign-in grant", async () => {
+    const world = await createWorld();
+    const account = privateKeyToAccount(generatePrivateKey());
+    world.ds.setWallets("alice", [account.address]);
+    const signIn = await combinedSignIn(world, "alice", account);
+    // Pins handed on from an earlier device on this browser (D172).
+    const trust = {
+      wallets: { bob: [`0x${"bb".repeat(20)}`] },
+      approved: [],
+      ignored: [],
+    };
+    const pending = (await signIn.storage.getDevice("alice"))!;
+    await signIn.storage.writeBatch("alice", {
+      device: { ...pending, trust },
+    });
+    world.ds.revokeLoginGrant(signIn.grantId);
+
+    const alice = await startDevice(world, "alice", account, {
+      storage: signIn.storage,
+      enroll: false,
+      extra: { origin: ORIGIN },
+    });
+    await waitForStatus(alice.engine, "needs-enrollment");
+    await settle(world);
+    // The refused key goes; the pins stay with a retired marker.
+    expect(await signIn.storage.getDevice("alice")).toMatchObject({
+      deviceKey: signIn.deviceKey,
+      retired: true,
+      registered: false,
+      trust,
+    });
+    expect(await signIn.storage.getWasmState("alice")).toBeNull();
+
+    await alice.engine.enroll();
+    expect(alice.engine.getStatus()).toBe("ready");
+    const fresh = (await signIn.storage.getDevice("alice"))!;
+    expect(fresh.deviceKey).not.toBe(signIn.deviceKey);
+    expect(fresh.trust?.wallets).toEqual(trust.wallets);
+  });
+
   it("keeps an enrolled device when a later sign-in grants a new key", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");

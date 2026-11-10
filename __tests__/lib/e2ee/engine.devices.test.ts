@@ -3,6 +3,7 @@
  *
  * Integration: real OpenMLS WASM + fake delivery service. Multiple devices.
  */
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {
   addDevice,
   addUser,
@@ -115,6 +116,10 @@ describe("E2EE engine: devices", () => {
         ?.revokedAt
     ).not.toBeNull();
     expect(bobLaptop.engine.getStatus()).toBe("needs-enrollment");
+    // Revoked by a device of its own wallet: the revocation verifies, so the
+    // laptop's local data is removed.
+    expect(await bobLaptop.storage.getDevice("bob")).toBeNull();
+    expect(await bobLaptop.storage.listGroups("bob")).toEqual([]);
 
     await carol.primary.engine.send(g, { text: "after revocation" });
     await settle(world);
@@ -142,6 +147,120 @@ describe("E2EE engine: devices", () => {
     await bob.primary.engine.revokeDevice(laptopKey);
     await expect(laptop.engine.sync()).resolves.toBeUndefined();
     expect(laptop.engine.getStatus()).toBe("needs-enrollment");
+  });
+
+  it("keeps a device's data when its revocation does not verify here, and stops it", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    await addUser(world, "bob");
+    const g = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await alice.primary.engine.send(g, { text: "kept on this device" });
+    await settle(world);
+    const { storage } = alice.primary;
+    const aliceKey = alice.primary.engine.getThisDevice()!.deviceKey;
+
+    // The server lists a device of another wallet under alice, which revokes
+    // her device. Alice's device never added that wallet.
+    const other = privateKeyToAccount(generatePrivateKey());
+    world.ds.setWallets("alice", [alice.account.address, other.address]);
+    const listed = await startDevice(world, "alice", other);
+    await settle(world);
+    await listed.engine.revokeDevice(aliceKey);
+    await settle(world);
+
+    expect(alice.primary.engine.getStatus()).toBe("needs-enrollment");
+    expect(alice.primary.engine.getError()).toBe("E2EE_REVOCATION_UNVERIFIED");
+    await expect(
+      alice.primary.engine.send(g, { text: "not sent" })
+    ).rejects.toThrow("E2EE_NOT_READY");
+    // Nothing is deleted: key, state, chat and history stay.
+    expect(await storage.getDevice("alice")).toMatchObject({
+      deviceKey: aliceKey,
+      registered: true,
+    });
+    expect(await storage.getWasmState("alice")).not.toBeNull();
+    expect((await storage.listGroups("alice")).map((r) => r.g)).toEqual([g]);
+    expect(
+      (await storage.listMessages("alice", g)).map((m) => m.text)
+    ).toContain("kept on this device");
+
+    // A reload reads the same listing at start (GET /e2ee/me) and stops again.
+    stopDevice(world, alice.primary);
+    const reloaded = await startDevice(world, "alice", alice.account, {
+      storage,
+      enroll: false,
+    });
+    await reloaded.engine.idle();
+    expect(reloaded.engine.getStatus()).toBe("needs-enrollment");
+    expect(reloaded.engine.getError()).toBe("E2EE_REVOCATION_UNVERIFIED");
+    expect(await storage.getDevice("alice")).not.toBeNull();
+    expect(await storage.listGroups("alice")).toHaveLength(1);
+  });
+
+  it("removes a device's data once the device that revoked it was added here", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const other = privateKeyToAccount(generatePrivateKey());
+    world.ds.setWallets("alice", [alice.account.address, other.address]);
+    const listed = await startDevice(world, "alice", other);
+    await settle(world);
+    const listedKey = listed.engine.getThisDevice()!.deviceKey;
+    expect(
+      alice.primary.engine
+        .getDevices()
+        .find((device) => device.deviceKey === listedKey)?.needsApproval
+    ).toBe(true);
+    await alice.primary.engine.trustDevice(listedKey);
+
+    await listed.engine.revokeDevice(
+      alice.primary.engine.getThisDevice()!.deviceKey
+    );
+    await settle(world);
+    expect(alice.primary.engine.getStatus()).toBe("needs-enrollment");
+    expect(alice.primary.engine.getError()).toBeNull();
+    expect(await alice.primary.storage.getDevice("alice")).toBeNull();
+  });
+
+  it("does not remove a member device the server cannot find", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    const carol = await addUser(world, "carol");
+    const g = await alice.primary.engine.createConversation({
+      profileIds: ["bob", "carol"],
+      kind: "group",
+      name: "Lookups",
+    });
+    await settle(world);
+    const carolKey = carol.primary.engine.getThisDevice()!.deviceKey;
+    expect(leafKeys(alice.primary.engine, g)).toContain(carolKey);
+
+    world.ds.addFault({
+      method: "GET",
+      path: new RegExp(`^e2ee/devices/${carolKey}$`, "u"),
+      status: 404,
+      code: "E2EE_NOT_FOUND",
+      times: -1,
+    });
+    // Past the device cache and the 10-minute maintenance interval.
+    world.clock.advance(11 * 60_000);
+    await settle(world);
+    const lookups = world.ds.state.requests.filter(
+      (r) => r.path === `e2ee/devices/${carolKey}` && r.status === 404
+    );
+    expect(lookups.length).toBeGreaterThan(0);
+    for (const engine of [alice.primary.engine, bob.primary.engine]) {
+      expect(leafKeys(engine, g)).toContain(carolKey);
+    }
+    world.ds.clearFaults();
+    await alice.primary.engine.send(g, { text: "still three of us" });
+    await settle(world);
+    expect(texts(carol.primary.engine.getMessages(g))).toEqual([
+      "still three of us",
+    ]);
   });
 
   it("lost device: a new enrollment is re-added and the old one is revoked", async () => {

@@ -121,3 +121,76 @@ describe("E2EE device revocations and pinned wallets", () => {
     expect(await directory.revocationState(revoked)).toBe("unverified");
   });
 });
+
+describe("E2EE: this device's own revocation", () => {
+  it("never takes the listed owner alone, even before anything is pinned", async () => {
+    const { directory, revoked } = await revokedBy(() => null);
+    expect(await directory.revocationState(revoked)).toBe("verified");
+    expect(await directory.ownRevocationVerified(revoked, () => false)).toBe(
+      false
+    );
+  });
+
+  it("counts a revoker of the same profile it trusts, with a grant that verifies", async () => {
+    const { directory, revoked, revoker } = await revokedBy(() => null);
+    const isTrusted = jest.fn(
+      (record: ApiE2eeDevice) => record.device_key === revoker.record.device_key
+    );
+    expect(await directory.ownRevocationVerified(revoked, isTrusted)).toBe(
+      true
+    );
+    revoker.record.profile_id = "mallory";
+    expect(await directory.ownRevocationVerified(revoked, isTrusted)).toBe(
+      false
+    );
+  });
+
+  it("refuses a revocation whose signature does not verify or that is not there", async () => {
+    const target = await signedDevice(key(3), "bob");
+    const directory = new DeviceDirectory({
+      api: {} as E2eeApiClient,
+      now: () => NOW_MS,
+      verifyEd25519: () => false,
+    });
+    const selfRevoked: ApiE2eeDevice = {
+      ...target.record,
+      revoked_at: NOW_MS - 60_000,
+      revocation: {
+        revoker_device_key: key(3),
+        revoked_at: NOW_SECONDS - 60,
+        signature: "0xsig",
+      },
+    };
+    expect(await directory.ownRevocationVerified(selfRevoked, () => true)).toBe(
+      false
+    );
+    // The server's revoked_at alone (no signed revocation).
+    expect(
+      await directory.ownRevocationVerified(
+        { ...target.record, revoked_at: NOW_MS - 60_000 },
+        () => true
+      )
+    ).toBe(false);
+  });
+
+  it("counts the device's own signed revocation", async () => {
+    const target = await signedDevice(key(4), "bob");
+    const directory = new DeviceDirectory({
+      api: {} as E2eeApiClient,
+      now: () => NOW_MS,
+      verifyEd25519: () => true,
+    });
+    const selfRevoked: ApiE2eeDevice = {
+      ...target.record,
+      revoked_at: NOW_MS - 60_000,
+      revocation: {
+        revoker_device_key: key(4),
+        revoked_at: NOW_SECONDS - 60,
+        signature: "0xsig",
+      },
+    };
+    expect(
+      await directory.ownRevocationVerified(selfRevoked, () => false)
+    ).toBe(true);
+  });
+});

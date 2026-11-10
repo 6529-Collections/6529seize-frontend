@@ -280,6 +280,33 @@ function noticeNames(
   );
 }
 
+/**
+ * "device_added" copy. A device not yet verified for its owner on this
+ * device says so plainly; `owner.object` is the mid-sentence form ("you").
+ */
+function deviceAddedText(
+  locale: SupportedLocale,
+  notice: NonNullable<E2eeMessage["notice"]>,
+  owner: { readonly name: string; readonly object: string }
+): string {
+  const wallet = formatNoticeWallets(locale, notice.detail);
+  if (notice.unverified === true) {
+    return wallet
+      ? t(locale, "e2ee.notice.deviceAddedUnverified", {
+          name: owner.name,
+          wallet,
+          owner: owner.object,
+        })
+      : t(locale, "e2ee.notice.deviceAddedUnverifiedNoWallet", {
+          name: owner.name,
+          owner: owner.object,
+        });
+  }
+  return wallet
+    ? t(locale, "e2ee.notice.deviceAddedWallet", { name: owner.name, wallet })
+    : t(locale, "e2ee.notice.deviceAdded", { name: owner.name });
+}
+
 /** Timeline copy for a system notice (contract 8.6). */
 export function getNoticeText(
   locale: SupportedLocale,
@@ -328,15 +355,17 @@ export function getNoticeText(
       return actorId
         ? t(locale, "e2ee.notice.removed", { actor, targets: objects })
         : t(locale, "e2ee.notice.removedNoActor", { targets });
-    case "device_added": {
-      const wallet = formatNoticeWallets(locale, notice.detail);
-      return wallet
-        ? t(locale, "e2ee.notice.deviceAddedWallet", {
-            name: ownerName,
-            wallet,
-          })
-        : t(locale, "e2ee.notice.deviceAdded", { name: ownerName });
-    }
+    case "device_added":
+      return deviceAddedText(locale, notice, {
+        name: ownerName,
+        object: noticeNames(
+          locale,
+          members,
+          owner ? [owner] : [],
+          selfProfileId,
+          true
+        ),
+      });
     case "device_removed":
       return t(locale, "e2ee.notice.deviceRemoved", { name: ownerName });
     case "renamed":

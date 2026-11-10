@@ -32,6 +32,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeEngine, E2eeEngineStatus } from "@/lib/e2ee/types";
 import {
+  E2EE_REVOCATION_UNVERIFIED,
   E2EE_SIGNATURE_REJECTED,
   getE2eeErrorCode,
   isE2eeSignatureRejection,
@@ -541,6 +542,8 @@ function EnrollmentFeedback({
   if (declined) statusKey = ENROLL_REJECTED_KEY;
   else if (noticeKey) statusKey = noticeKey;
   else if (waiting && flow.status === null) statusKey = "e2ee.enroll.waiting";
+  else if (engineError === E2EE_REVOCATION_UNVERIFIED)
+    statusKey = "e2ee.enroll.revocationUnverified";
 
   return (
     <>

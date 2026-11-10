@@ -49,12 +49,22 @@ export interface StoredDevice {
  * other wallet waits for the user's explicit "Add device".
  */
 export interface StoredTrust {
-  /** profile id -> lowercase wallets pinned for that person. */
+  /**
+   * profile id -> lowercase wallets pinned for that person. The entry for
+   * this profile itself only serves to judge revocations; which of its own
+   * devices are added follows `ownWallets`.
+   */
   wallets: Record<string, string[]>;
   /** Device keys the user added explicitly (new or unverified wallet). */
   approved: string[];
   /** Device keys whose new-wallet notice the user dismissed. */
   ignored: string[];
+  /**
+   * Lowercase wallets the user trusts for this profile's own devices: added
+   * with "Add device", or a wallet this device was signed by before. Never
+   * filled on first sighting; this device's current wallet always counts.
+   */
+  ownWallets?: string[];
 }
 
 export interface StoredMember {
@@ -146,6 +156,12 @@ export interface StoredNotice {
   actorProfileId: string | null;
   targetProfileIds: string[];
   detail?: string;
+  /**
+   * device_added: when it was added, this device had not verified the new
+   * device for its owner (its wallet was not trusted for them here, or its
+   * signature could not be checked here).
+   */
+  unverified?: boolean;
 }
 
 /** One signed payload exactly as received, enough for a verifiable report. */

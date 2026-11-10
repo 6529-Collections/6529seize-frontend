@@ -3,6 +3,12 @@ import type { MessageKey } from "@/i18n/messages";
 /** Code used when the user declines the device-grant wallet signature. */
 export const E2EE_SIGNATURE_REJECTED = "E2EE_SIGNATURE_REJECTED";
 
+/**
+ * Engine code while this device is listed as revoked but the revocation
+ * could not be confirmed here (the device stopped; its data is kept).
+ */
+export const E2EE_REVOCATION_UNVERIFIED = "E2EE_REVOCATION_UNVERIFIED";
+
 interface ErrorLike {
   readonly name?: unknown;
   readonly code?: unknown;

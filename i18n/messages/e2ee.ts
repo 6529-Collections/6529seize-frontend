@@ -143,6 +143,8 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.waiting": "Waiting for your wallet signature…",
   "e2ee.enroll.rejected": "Signature cancelled.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
+  "e2ee.enroll.revocationUnverified":
+    "This device is listed as revoked, but the revocation couldn’t be confirmed here. It has stopped sending and receiving encrypted messages, and everything saved on it is kept.",
   "e2ee.upgrade.title": "Upgrade encrypted messages",
   "e2ee.upgrade.intro":
     "Encrypted messages are moving to stronger encryption. Confirm once in your wallet to continue; your messages stay on this device.",
@@ -195,6 +197,11 @@ export const E2EE_MESSAGES = {
     "Its wallet signature was checked on this device.",
   "e2ee.devices.unverifiedHint":
     "Its wallet signature couldn’t be checked on this device.",
+  "e2ee.devices.needsApproval": "Not added on this device",
+  "e2ee.devices.needsApprovalHint":
+    "Signed by wallet {wallet}, which this device hasn’t added for you. This device won’t add it to your encrypted chats until you add it. Add it only if you recognize it.",
+  "e2ee.devices.needsApprovalHintNoWallet":
+    "This device won’t add it to your encrypted chats until you add it. Add it only if you recognize it.",
   "e2ee.devices.revoke": "Revoke",
   "e2ee.devices.revokeAria": "Revoke {label}",
   "e2ee.devices.revokeConfirmTitle": "Revoke {label}?",
@@ -420,6 +427,10 @@ export const E2EE_MESSAGES = {
   "e2ee.notice.deviceAdded": "{name} added a device",
   "e2ee.notice.deviceAddedWallet":
     "{name} added a device signed by wallet {wallet}",
+  "e2ee.notice.deviceAddedUnverified":
+    "{name} added a device signed by wallet {wallet}, which isn’t verified for {owner} on this device",
+  "e2ee.notice.deviceAddedUnverifiedNoWallet":
+    "{name} added a device that isn’t verified for {owner} on this device",
   "e2ee.notice.deviceRemoved": "{name} removed a device",
   "e2ee.notice.renamed": "{actor} renamed the chat to “{name}”",
   "e2ee.notice.renamedNoName": "{actor} renamed the chat",
@@ -464,6 +475,7 @@ export const E2EE_MESSAGES = {
   "e2ee.info.memberDevices": "Devices of {name}",
   "e2ee.info.deviceLine": "{device} · {status} · signed by wallet {wallet}",
   "e2ee.info.deviceLineNoWallet": "{device} · {status}",
+  "e2ee.info.deviceNotPinned": "Not verified for {name} on this device",
   "e2ee.info.addPeople": "Add people",
   "e2ee.info.addSearch": "Search people to add",
   "e2ee.info.addSubmit": "Add to chat",

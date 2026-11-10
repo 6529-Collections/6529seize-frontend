@@ -18,6 +18,11 @@ export interface CommitChange {
   creation: boolean;
   /** device key -> lowercase wallet in the added leaf's credential. */
   addedWallets?: ReadonlyMap<string, string>;
+  /**
+   * Added device keys this device has not verified for their owner (wallet
+   * not trusted for them here, or signature not checked here).
+   */
+  unverifiedAdds?: ReadonlySet<string>;
 }
 
 /** Wallets that signed the added leaves' grants, for the notice. */
@@ -87,38 +92,66 @@ function departureNotices(
   return notices;
 }
 
+interface AddedDevices {
+  owners: Set<string>;
+  wallets: Set<string>;
+}
+
+/**
+ * "device_added" notices for new devices of existing members: verified
+ * devices share one notice, devices not verified for their owner here get
+ * their own, marked `unverified`, so its copy can say so.
+ */
+function addedDeviceNotices(
+  change: CommitChange,
+  before: Map<string, number>
+): StoredNotice[] {
+  const verified: AddedDevices = { owners: new Set(), wallets: new Set() };
+  const unverified: AddedDevices = { owners: new Set(), wallets: new Set() };
+  for (const member of change.added) {
+    if (member.profileId === null || !before.has(member.profileId)) {
+      continue;
+    }
+    const group = change.unverifiedAdds?.has(member.deviceKey)
+      ? unverified
+      : verified;
+    group.owners.add(member.profileId);
+    const wallet = change.addedWallets?.get(member.deviceKey);
+    if (wallet) {
+      group.wallets.add(wallet);
+    }
+  }
+  const notices: StoredNotice[] = [];
+  for (const group of [verified, unverified]) {
+    if (group.owners.size === 0) {
+      continue;
+    }
+    notices.push({
+      type: "device_added",
+      actorProfileId: change.committerProfileId,
+      targetProfileIds: [...group.owners],
+      // The signing wallets, comma separated (shown with the notice).
+      ...(group.wallets.size > 0
+        ? { detail: [...group.wallets].join(",") }
+        : {}),
+      ...(group === unverified ? { unverified: true } : {}),
+    });
+  }
+  return notices;
+}
+
 function deviceNotices(
   change: CommitChange,
   before: Map<string, number>,
   after: Map<string, number>
 ): StoredNotice[] {
-  const addedFor = new Set<string>();
-  const addedWallets = new Set<string>();
   const removedFor = new Set<string>();
-  for (const member of change.added) {
-    if (member.profileId !== null && before.has(member.profileId)) {
-      addedFor.add(member.profileId);
-      const wallet = change.addedWallets?.get(member.deviceKey);
-      if (wallet) {
-        addedWallets.add(wallet);
-      }
-    }
-  }
   for (const member of change.removed) {
     if (member.profileId !== null && after.has(member.profileId)) {
       removedFor.add(member.profileId);
     }
   }
-  const notices: StoredNotice[] = [];
-  if (addedFor.size > 0) {
-    notices.push({
-      type: "device_added",
-      actorProfileId: change.committerProfileId,
-      targetProfileIds: [...addedFor],
-      // The signing wallets, comma separated (shown with the notice).
-      ...(addedWallets.size > 0 ? { detail: [...addedWallets].join(",") } : {}),
-    });
-  }
+  const notices = addedDeviceNotices(change, before);
   if (removedFor.size > 0) {
     notices.push({
       type: "device_removed",
