@@ -197,7 +197,7 @@ it("keeps whitespace-only drafts empty and blocks sending them", () => {
   const { engine, input } = setup();
   setComposerText(input, "  \n  ");
   expect(
-    screen.getByRole("button", { name: "Send", exact: true })
+    screen.getByRole("button", { name: "Send" })
   ).toBeDisabled();
   fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
   expect(engine.send).not.toHaveBeenCalled();
@@ -343,7 +343,6 @@ it.each([false, true])(
     fireEvent.click(
       screen.getByRole("button", {
         name: editing ? "Save" : "Send",
-        exact: true,
       })
     );
     if (editing) {
