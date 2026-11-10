@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { E2eeRouteGate } from "@/components/e2ee/gate/E2eeRouteGate";
+import { E2eeError } from "@/lib/e2ee/engine/errors";
 import {
   contextFor,
   createFakeE2eeEngine,
@@ -14,9 +15,11 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
     connectedAccounts: [],
   }),
 }));
+const mockIsRemoteWallet = jest.fn(() => false);
+
 jest.mock("@/hooks/device-signing/useSignedMessagesWallet", () => ({
   useSignedMessagesWallet: () => ({
-    isRemoteWallet: false,
+    isRemoteWallet: mockIsRemoteWallet(),
     networkName: "Ethereum",
     isNetworkSupported: () => true,
     switchNetwork: jest.fn(),
@@ -31,6 +34,10 @@ const renderGate = (value: ReturnType<typeof contextFor>) =>
   );
 
 describe("E2eeRouteGate", () => {
+  afterEach(() => {
+    mockIsRemoteWallet.mockReturnValue(false);
+  });
+
   it("renders nothing when encrypted messages are disabled", () => {
     const { container } = renderGate(
       contextFor(null, { availability: "disabled", profileId: null })
@@ -114,6 +121,60 @@ describe("E2eeRouteGate", () => {
     expect(declined.tagName).toBe("OUTPUT");
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
+
+  const walletConnectRecoveryCopy =
+    "Couldn't reach the wallet app on your phone. Reconnect your wallet to pair it again, then approve the signature.";
+
+  it.each([
+    {
+      scenario: "upgrading with a remote wallet",
+      upgrade: { superseded: 1 },
+      remote: true,
+      signLabel: "Sign to upgrade Encrypted DMs",
+      alert: walletConnectRecoveryCopy,
+      reconnectCount: 1,
+    },
+    {
+      scenario: "enabling for the first time with a remote wallet",
+      upgrade: null,
+      remote: true,
+      signLabel: "Sign to enable Encrypted DMs",
+      alert: walletConnectRecoveryCopy,
+      reconnectCount: 1,
+    },
+    {
+      scenario: "upgrading with a non-remote wallet",
+      upgrade: { superseded: 1 },
+      remote: false,
+      signLabel: "Sign to upgrade Encrypted DMs",
+      alert: "Your wallet couldn't sign. Unlock it and try again.",
+      reconnectCount: 0,
+    },
+  ])(
+    "shows wallet session failure feedback when $scenario",
+    async ({ upgrade, remote, signLabel, alert, reconnectCount }) => {
+      mockIsRemoteWallet.mockReturnValue(remote);
+      const engine = createFakeE2eeEngine({
+        status: "needs-enrollment",
+        upgrade,
+      });
+      jest.mocked(engine.enroll).mockRejectedValueOnce(
+        new E2eeError("E2EE_SIGNATURE_FAILED", undefined, {
+          cause: new Error("Session topic doesn't exist"),
+        })
+      );
+      renderGate(contextFor(engine));
+      fireEvent.click(screen.getByRole("button", { name: signLabel }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(alert);
+      expect(
+        screen.queryAllByRole("button", { name: "Reconnect wallet" })
+      ).toHaveLength(reconnectCount);
+      expect(
+        screen.queryByText("Signature cancelled.")
+      ).not.toBeInTheDocument();
+    }
+  );
 
   it("lists the profile's devices at the device limit, revoked from an active device", () => {
     const engine = createFakeE2eeEngine({
