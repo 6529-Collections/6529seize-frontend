@@ -2,6 +2,12 @@ import {
   dropEncryptedAttachment,
   checkEncryptedImageActions,
 } from "../support/e2ee/attachmentMedia";
+import {
+  gifFixtureBytes,
+  GIPHY_FIXTURE_URL,
+  installGiphyFixture,
+  selectFixtureGif,
+} from "../support/e2ee/giphyFixture";
 import { measureStagingCatchUp } from "../support/staging-e2ee/catch-up";
 import {
   attachHistoryStartupDiagnostics,
@@ -650,6 +656,51 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       ).toBeNull();
     }
     expectPrivateAndClean([a, b], needles({ prefix, custom: ":gm:" }));
+  });
+
+  test("a public GIF selection round-trips as an encrypted attachment", async () => {
+    const current = requireWorld();
+    const { a, b, runId } = current;
+    const dm = await ensureDm(current);
+    const caption = qaMessage(runId, "GIF attachment");
+    await installGiphyFixture(a.page);
+    const recipientRequests = b.evidence.requests.length;
+    await openChat(a, dm);
+    await selectFixtureGif(a.page);
+    await sendEncrypted(a, caption);
+    await openChat(b, dm);
+    await expectDecrypted(b, caption);
+    const received = messageRow(b.page, caption).getByRole("img", {
+      name: "Image: giphy.gif",
+      exact: true,
+    });
+    await expect(received).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(received).toHaveAttribute("src", /^blob:/u);
+    expect(
+      b.evidence.requests
+        .slice(recipientRequests)
+        .filter((request) =>
+          new URL(request.url).hostname.endsWith(".giphy.com")
+        )
+    ).toEqual([]);
+    expectPrivateAndClean(
+      [a, b],
+      needles({
+        caption,
+        gifBytes: gifFixtureBytes(),
+      })
+    );
+    const gifUrlNeedles = needles({ gifUrl: GIPHY_FIXTURE_URL });
+    const senderUrlMatches = a.evidence.findLeaks(gifUrlNeedles);
+    // Public previews/downloads use this exact GET. Every other endpoint,
+    // request body and WebSocket frame must keep the provider URL private.
+    expect(senderUrlMatches.length).toBeGreaterThan(0);
+    expect(
+      senderUrlMatches.filter(
+        (match) => match.where !== `GET ${GIPHY_FIXTURE_URL}`
+      )
+    ).toEqual([]);
+    expect(b.evidence.findLeaks(gifUrlNeedles)).toEqual([]);
   });
 
   test("an encrypted image round-trips through the blob store", async () => {
