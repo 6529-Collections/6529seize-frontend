@@ -89,7 +89,7 @@ export function minimalOrientationTiff(orientation: number): Uint8Array {
 /** True only for an EXIF block that carries Orientation and nothing else. */
 export function isOrientationOnlyTiff(tiff: Uint8Array): boolean {
   const ifd = firstIfd(tiff);
-  if (!ifd || ifd.count !== 1 || tiff.length > 32) {
+  if (ifd?.count !== 1 || tiff.length > 32) {
     return false;
   }
   const entry = ifd.offset + 2;

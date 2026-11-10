@@ -6,13 +6,10 @@ const CLIPBOARD_TTL_MS = 30_000;
  * is not allowed everywhere; then the text stays, as it would have anyway.
  */
 async function clearClipboardIfUnchanged(copied: string): Promise<void> {
-  const clipboard = globalThis.navigator?.clipboard as Clipboard | undefined;
-  if (!clipboard?.readText || !clipboard.writeText) {
-    return;
-  }
   try {
-    if ((await clipboard.readText()) === copied) {
-      await clipboard.writeText("");
+    // Throws where the clipboard or reading it is not available.
+    if ((await navigator.clipboard.readText()) === copied) {
+      await navigator.clipboard.writeText("");
     }
   } catch {
     // Clipboard read and write permissions vary by platform; best effort.

@@ -252,6 +252,24 @@ function frameSize(
   };
 }
 
+/** The identifying block a segment carries, or null when it carries none. */
+function metadataLabel(
+  input: Uint8Array,
+  segment: JpegSegment,
+  role: SegmentRole
+): string | null {
+  if (role === "jfif") {
+    return jfifHasThumbnail(input, segment) ? "APP0:JFIF-thumbnail" : null;
+  }
+  if (role === "exif") {
+    return isOrientationOnlyTiff(exifTiff(input, segment)) ? null : "APP1:Exif";
+  }
+  if (role === "drop") {
+    return segment.marker === COM ? "COM" : `APP${segment.marker - APP0}`;
+  }
+  return null;
+}
+
 function describe(input: Uint8Array): ContainerDescription {
   const layout = walkJpeg(input);
   const render: Uint8Array[] = [];
@@ -261,20 +279,12 @@ function describe(input: Uint8Array): ContainerDescription {
     const role = segmentRole(input, segment);
     if (role === "render") {
       render.push(segmentBytes(input, segment));
-    } else if (role === "jfif") {
-      if (jfifHasThumbnail(input, segment)) {
-        metadataBlocks.push("APP0:JFIF-thumbnail");
-      }
     } else if (role === "exif") {
-      const tiff = exifTiff(input, segment);
-      orientation ??= readTiffOrientation(tiff);
-      if (!isOrientationOnlyTiff(tiff)) {
-        metadataBlocks.push("APP1:Exif");
-      }
-    } else {
-      metadataBlocks.push(
-        segment.marker === COM ? "COM" : `APP${segment.marker - APP0}`
-      );
+      orientation ??= readTiffOrientation(exifTiff(input, segment));
+    }
+    const label = metadataLabel(input, segment, role);
+    if (label !== null) {
+      metadataBlocks.push(label);
     }
   }
   if (layout.end !== input.length) {
