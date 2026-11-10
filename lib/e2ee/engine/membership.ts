@@ -276,26 +276,28 @@ async function discardLocalGroup(ctx: EngineContext, g: string): Promise<void> {
 
 function creationMetadata(
   ctx: EngineContext,
-  input: { kind: "dm" | "group"; name?: string | null | undefined },
+  input: { kind: GroupMetadata["kind"]; name?: string | null | undefined },
   peer: string | undefined
 ): GroupMetadata {
   const dm = input.kind === "dm";
-  return {
+  const metadata: GroupMetadata = {
     v: 1,
     g: randomHex(32),
     kind: input.kind,
-    name: dm ? null : normalizeName(input.name),
+    name: input.kind === "group" ? normalizeName(input.name) : null,
     admins: dm && peer !== undefined ? [ctx.profileId, peer] : [ctx.profileId],
     created_by: ctx.profileId,
     history: "from_join",
   };
+  // A self group's creation time picks the newest one (D175, P60 §2).
+  return input.kind === "self" ? { ...metadata, created: ctx.now() } : metadata;
 }
 
 /** Claims every target's KeyPackages (plus our siblings') before creating. */
 async function claimForCreation(
   ctx: EngineContext,
   targets: string[],
-  kind: "dm" | "group"
+  kind: GroupMetadata["kind"]
 ): Promise<ClaimedPackage[]> {
   const siblings = await ownSiblingDevices(ctx);
   const claim = await trustedClaim(
@@ -317,16 +319,26 @@ async function claimForCreation(
   return claim.packages;
 }
 
+/**
+ * Creates a conversation, or with kind "self" the self group of this
+ * profile's own devices (read-state sync, D175): its targets are ignored and
+ * only this device's trusted siblings are added.
+ */
 export async function createConversation(
   ctx: EngineContext,
-  input: { profileIds: string[]; kind: "dm" | "group"; name?: string | null },
+  input: {
+    profileIds: string[];
+    kind: GroupMetadata["kind"];
+    name?: string | null;
+  },
   onDelayed: (g: string) => void,
   /** The superseded conversation the new one continues (D172). */
   predecessorG?: string
 ): Promise<string> {
-  const targets = [...new Set(input.profileIds)].filter(
-    (id) => id !== ctx.profileId
-  );
+  const targets =
+    input.kind === "self"
+      ? []
+      : [...new Set(input.profileIds)].filter((id) => id !== ctx.profileId);
   const peer = targets[0];
   if (input.kind === "dm") {
     if (targets.length !== 1 || peer === undefined) {

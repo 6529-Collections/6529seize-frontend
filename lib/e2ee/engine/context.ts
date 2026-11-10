@@ -54,6 +54,27 @@ export interface EngineContext {
   lastWakeAt: number;
   openConversation: string | null;
   openUntil: number;
+  /** Read-state sync (D175, P60); set once the engine is built. */
+  readSync: ReadSyncHooks | null;
+}
+
+/**
+ * What log processing tells read-state sync (engine/read-sync.ts). Calls
+ * run inside the serial queue and must not wait on it.
+ */
+export interface ReadSyncHooks {
+  /** A decrypted payload of a self group. */
+  receive(
+    runtime: GroupRuntime,
+    body: Uint8Array,
+    senderDeviceKey: string
+  ): void;
+  /** This profile's own message, sent from another device, at `seq`. */
+  ownMessage(runtime: GroupRuntime, seq: number): void;
+  /** This device committed adds of own devices to a self group. */
+  devicesAdded(g: string): void;
+  /** This device joined a group through a Welcome. */
+  joined(runtime: GroupRuntime): void;
 }
 
 /** Read afresh after awaits; disposal can happen while a read is in flight. */

@@ -6,9 +6,12 @@ import type {
   E2eeEngineOptions,
 } from "@/lib/e2ee/types";
 
-/** What the provider hands the engine: its deps plus the conflict hook. */
+/**
+ * What the provider hands the engine: its deps, the conflict hook and
+ * whether read-state sync sends (D175).
+ */
 export type E2eeEngineHostDeps = E2eeEngineDeps &
-  Pick<E2eeEngineOptions, "onStateConflict">;
+  Pick<E2eeEngineOptions, "onStateConflict" | "readSync">;
 
 export interface E2eeEngineModules {
   readonly createE2eeEngine: (deps: E2eeEngineHostDeps) => Promise<E2eeEngine>;

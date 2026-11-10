@@ -1,6 +1,7 @@
 import type { E2eeEngineExt } from "../types";
 import { checkpoint, requireGroup, type EngineContext } from "./context";
 import type { ConversationCreator } from "./conversation-creation";
+import { E2eeError } from "./errors";
 import { restartTargets } from "./membership";
 import type { GroupRuntime } from "./store";
 
@@ -24,9 +25,14 @@ export class ConversationRestarter {
 
   restart(g: string): Promise<string> {
     const runtime = requireGroup(this.ctx, g);
+    const kind = runtime.record.metadata.kind;
+    // A self group is not a chat: read-state sync makes its own (P60).
+    if (kind === "self") {
+      return Promise.reject(new E2eeError("E2EE_NOT_ALLOWED"));
+    }
     const input: ConversationInput = {
       profileIds: restartTargets(this.ctx, runtime),
-      kind: runtime.record.metadata.kind,
+      kind,
       name: runtime.record.metadata.name,
     };
     if (runtime.record.status !== "superseded") {

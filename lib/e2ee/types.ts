@@ -419,6 +419,12 @@ export interface E2eeEngineExtraDeps {
   onStateConflict?: () => void;
   /** Encrypted-backup local state; wiped with the device (default IndexedDB). */
   backupState?: BackupStateStore;
+  /**
+   * Read-state sync between this profile's own devices (D175, P60): create
+   * a self group and send read positions. Joining self groups and applying
+   * what siblings send happen either way.
+   */
+  readSync?: boolean;
 }
 
 export type E2eeEngineOptions = E2eeEngineDeps & E2eeEngineExtraDeps;
@@ -434,4 +440,6 @@ export interface E2eeEngineExt extends E2eeEngine {
   setOpenConversation(g: string | null): void;
   /** Resolves when no operation or background task is in flight. */
   idle(): Promise<void>;
+  /** Sends unsent read positions now (the page or app is going away). */
+  flushReadSync(): Promise<void>;
 }

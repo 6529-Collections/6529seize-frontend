@@ -17,6 +17,7 @@ import {
   expectEnrollmentCard,
   expectMessage,
   gotoPath,
+  conversationListRow,
   messageRow,
   notice,
   NO_BACKUP_WARNING,
@@ -155,6 +156,63 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     expect(bobLaptop.signatureCount()).toBe(1);
   });
 
+  test("reading a chat on one device clears its unread badge on the other (D175)", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    test.skip(
+      process.env["NEXT_PUBLIC_E2EE_READ_SYNC"] === "false",
+      "Read-state sync is off for this run."
+    );
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bobPhone = await openE2eeUser(
+      browser,
+      testInfo,
+      baseURL,
+      users.bob,
+      "bob phone"
+    );
+    const bobLaptop = await openE2eeUser(
+      browser,
+      testInfo,
+      baseURL,
+      users.bob,
+      "bob laptop"
+    );
+    sessions = [alice, bobPhone, bobLaptop];
+    await enroll(alice);
+    await enroll(bobPhone);
+    await enroll(bobLaptop);
+    // Both of Bob's devices are enrolled, so both join the chat at once.
+    await startChat(alice, ["bob"]);
+    await openConversationFromList(bobPhone.page, "alice");
+    await openConversationFromList(bobLaptop.page, "alice");
+
+    await gotoPath(bobPhone.page, ENCRYPTED_ROUTE);
+    await gotoPath(bobLaptop.page, ENCRYPTED_ROUTE);
+    await sendMessage(alice.page, "Read me on one device.");
+    for (const device of [bobPhone, bobLaptop]) {
+      await expect(unreadBadge(device.page, "alice")).toHaveCount(1, {
+        timeout: E2EE_SYNC_TIMEOUT_MS,
+      });
+    }
+
+    // Reading on the laptop, then leaving the page, sends the position.
+    await openConversationFromList(bobLaptop.page, "alice");
+    await expectMessage(bobLaptop.page, "Read me on one device.");
+    await hidePage(bobLaptop.page);
+    await expect(unreadBadge(bobPhone.page, "alice")).toHaveCount(0, {
+      timeout: E2EE_SYNC_TIMEOUT_MS,
+    });
+
+    // A newer message stays unread on the phone.
+    await sendMessage(alice.page, "And this one is new.");
+    await expect(unreadBadge(bobPhone.page, "alice")).toHaveCount(1, {
+      timeout: E2EE_SYNC_TIMEOUT_MS,
+    });
+  });
+
   test("cleared browser storage re-enrolls once and starts without the old history", async ({
     baseURL,
     browser,
@@ -202,6 +260,25 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     expect(aliceAgain.signatureCount()).toBe(1);
   });
 });
+
+/** The unread-count badge of a chat in the list (its screen-reader text). */
+function unreadBadge(page: Page, title: string) {
+  return conversationListRow(page, title).getByText(/\d+ unread messages?/u);
+}
+
+/**
+ * The page goes to the background, as when the user switches devices or
+ * apps: the engine sends read positions still waiting (P60 §4).
+ */
+async function hidePage(page: Page) {
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+}
 
 function activeDeviceRows(page: Page) {
   // The active list is the first list on the devices page.

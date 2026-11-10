@@ -437,7 +437,19 @@ async function processMessageItem(
     if (!(error instanceof MlsError)) {
       throw error;
     }
-    return placeholder();
+    // A self group's items are never chat messages (D175, P60).
+    return record.metadata.kind === "self" ? null : placeholder();
+  }
+  if (record.metadata.kind === "self") {
+    if (!decrypted.sig_ok) {
+      return null;
+    }
+    ctx.readSync?.receive(
+      runtime,
+      base64ToBytes(decrypted.body),
+      decrypted.sender.device_key.toLowerCase()
+    );
+    return null;
   }
   checkEpochFp(
     runtime,
@@ -450,11 +462,12 @@ async function processMessageItem(
   }
   const senderDeviceKey = decrypted.sender.device_key.toLowerCase();
   if (!(await preparePayload(ctx, runtime, payload))) return payload.id;
+  const senderProfileId = await profileOfLeaf(ctx, senderDeviceKey);
   applyPayload(runtime, payload, {
     g: record.g,
     seq: item.seq,
     serverTs: item.created_at,
-    senderProfileId: await profileOfLeaf(ctx, senderDeviceKey),
+    senderProfileId,
     senderDeviceKey,
     sigOk: decrypted.sig_ok,
     epoch: decrypted.epoch,
@@ -463,6 +476,15 @@ async function processMessageItem(
     pending: false,
   });
   record.updatedAt = Math.max(record.updatedAt, item.created_at);
+  // P60: replying from another device marks the chat read up to the reply.
+  if (
+    payload.t === "msg" &&
+    !payload.imp &&
+    senderProfileId === ctx.profileId &&
+    decrypted.sig_ok
+  ) {
+    ctx.readSync?.ownMessage(runtime, item.seq);
+  }
   return payload.id;
 }
 

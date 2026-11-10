@@ -192,6 +192,28 @@ async function senderBlocked(
   return false;
 }
 
+/**
+ * A self group is joined only when this profile created it and every
+ * member is one of this profile's devices (D175, P60 §2 rule 2).
+ */
+async function selfGroupOwnedHere(
+  ctx: EngineContext,
+  summary: WasmWelcomeSummary
+): Promise<boolean> {
+  if (summary.metadata.kind !== "self") {
+    return true;
+  }
+  if (summary.metadata.created_by !== ctx.profileId) {
+    return false;
+  }
+  for (const leaf of summary.members) {
+    if ((await profileOfLeaf(ctx, leaf.device_key)) !== ctx.profileId) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /** 2.2/2.3 checks of every member; bad leaves become STRICT removals. */
 async function checkWelcomeMembers(
   ctx: EngineContext,
@@ -280,6 +302,7 @@ async function acceptJoin(
     welcome.created_at
   );
   await checkpoint(ctx, { groups: [runtime] });
+  ctx.readSync?.joined(runtime);
   return runtime;
 }
 
@@ -320,6 +343,7 @@ async function handleWelcome(
     const refused =
       !metadataOk ||
       !checks.senderOk ||
+      !(await selfGroupOwnedHere(ctx, staged)) ||
       (await senderBlocked(ctx, [senderProfileId]));
     if (refused) {
       mls.rejectWelcome(g);

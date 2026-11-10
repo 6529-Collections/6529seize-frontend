@@ -40,6 +40,16 @@ export interface StoredDevice {
    * kept only for its trust pins until the next device replaces it.
    */
   retired?: boolean;
+  /** Read-state sync bookkeeping of this device (D175, P60). */
+  readSync?: StoredReadSync;
+}
+
+/** What this device still owes its siblings in read-state sync (P60 §4). */
+export interface StoredReadSync {
+  /** Chats read here whose position has not been sent yet. */
+  unsent: string[];
+  /** When this device last created a self group (ms; once a day at most). */
+  createdAt?: number;
 }
 
 /**
@@ -139,6 +149,11 @@ export interface StoredGroup {
   successorPending?: boolean;
   /** The superseded conversation this one continues (this device). */
   predecessor?: string | null;
+  /**
+   * Self groups only (D175, P60): read positions received from this
+   * profile's other devices, kept until they apply. Chat handle -> seq.
+   */
+  readSync?: { received: Record<string, number> };
 }
 
 export interface StoredNotice {
