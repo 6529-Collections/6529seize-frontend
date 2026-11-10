@@ -7,6 +7,7 @@ import { Tooltip } from "react-tooltip";
 import useDownloader from "@/hooks/useDownloader";
 import type { NextGenToken } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
+import { openUrlInNewTab } from "@/helpers/open-url.helpers";
 import DotLoader, { Spinner } from "@/components/dotLoader/DotLoader";
 
 export enum Resolution {
@@ -132,8 +133,7 @@ export default function NextGenTokenDownload(
           aria-label={`Open ${quality} image in a new tab`}
           data-tooltip-id={`external-link-${props.token.id}-${quality}`}
           onClick={() => {
-            const h = getUrl(props.token, quality);
-            window.open(h, "_blank");
+            openUrlInNewTab(getUrl(props.token, quality));
           }}
           className="tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300 hover:tw-bg-white/10 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >

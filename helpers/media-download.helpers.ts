@@ -2,6 +2,10 @@ import {
   downloadAndShareInNativeApp,
   shareFetchedBlobInNativeApp,
 } from "@/helpers/capacitorBlobDownload.helpers";
+import {
+  getDownloadFileDecision,
+  prepareBlobForDownload,
+} from "@/helpers/download-file-type.helpers";
 
 const DOWNLOAD_URL_PROTOCOLS = new Set(["blob:", "http:", "https:"]);
 const MEDIA_DOWNLOAD_FETCH_TIMEOUT_MS = 120_000;
@@ -37,11 +41,22 @@ export function getDownloadFilenameFromUrl(url: string, fallback = "media") {
   }
 }
 
-export function triggerDirectDownload(url: string, fileName: string) {
+/**
+ * Saves `url` through a temporary link. The saved name keeps a served media
+ * extension (from `declaredType` or the name); anything else becomes `.bin`.
+ */
+export function triggerDirectDownload(
+  url: string,
+  fileName: string,
+  declaredType?: string
+) {
   const safeUrl = getSafeDownloadUrl(url);
   const anchor = document.createElement("a");
   anchor.href = safeUrl;
-  anchor.download = fileName;
+  anchor.download = getDownloadFileDecision({
+    fileName,
+    declaredTypes: [declaredType],
+  }).fileName;
   anchor.target = "_blank";
   anchor.rel = "noopener noreferrer";
   // A modal's focus trap blocks clicks outside it, including synthetic links.
@@ -65,15 +80,23 @@ export async function downloadMediaUrl({
   fileName,
   isCapacitor,
   dialogTitle = "Save file",
+  mimeType,
 }: {
   readonly url: string;
   readonly fileName: string;
   readonly isCapacitor: boolean;
   readonly dialogTitle?: string | undefined;
+  /** The type the caller expects; the saved type is still decided here. */
+  readonly mimeType?: string | undefined;
 }) {
   const safeUrl = getSafeDownloadUrl(url);
   if (isCapacitor && !safeUrl.startsWith("blob:")) {
-    await downloadAndShareInNativeApp(safeUrl, fileName, dialogTitle);
+    // Written straight to disk, so the declared type and name decide.
+    const { fileName: nativeFileName } = getDownloadFileDecision({
+      fileName,
+      declaredTypes: [mimeType],
+    });
+    await downloadAndShareInNativeApp(safeUrl, nativeFileName, dialogTitle);
     return;
   }
 
@@ -81,14 +104,14 @@ export async function downloadMediaUrl({
   const timeoutId = globalThis.window.setTimeout(() => {
     controller.abort();
   }, MEDIA_DOWNLOAD_FETCH_TIMEOUT_MS);
-  let blob: Blob;
+  let fetched: Blob;
   try {
     const response = await fetch(url, { signal: controller.signal });
     if (!response.ok) {
       throw new Error("Unable to download media.");
     }
 
-    blob = await response.blob();
+    fetched = await response.blob();
   } catch (error) {
     if (controller.signal.aborted) {
       throw new Error("Media download timed out.");
@@ -98,14 +121,21 @@ export async function downloadMediaUrl({
     globalThis.window.clearTimeout(timeoutId);
   }
 
+  const download = await prepareBlobForDownload({
+    blob: fetched,
+    fileName,
+    declaredType: mimeType,
+  });
   if (isCapacitor) {
-    await shareFetchedBlobInNativeApp(blob, fileName, { dialogTitle });
+    await shareFetchedBlobInNativeApp(download.blob, download.fileName, {
+      dialogTitle,
+    });
     return;
   }
 
-  const objectUrl = URL.createObjectURL(blob);
+  const objectUrl = URL.createObjectURL(download.blob);
   try {
-    triggerDirectDownload(objectUrl, fileName);
+    triggerDirectDownload(objectUrl, download.fileName);
   } finally {
     URL.revokeObjectURL(objectUrl);
   }
