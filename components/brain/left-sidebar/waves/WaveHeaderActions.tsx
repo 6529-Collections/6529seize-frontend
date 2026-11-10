@@ -3,3 +3,5 @@ export const WAVE_HEADER_ACTION_CLASSES =
 
 export const WAVE_HEADER_ACTION_SURFACE_CLASSES =
   "tw-inline-flex tw-size-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition-colors tw-duration-150 desktop-hover:group-hover:tw-bg-iron-800 desktop-hover:group-hover:tw-ring-white/10 group-active:tw-bg-iron-800 touch-only:tw-size-10 motion-reduce:tw-transition-none";
+
+export const WAVE_HEADER_ACTION_DESKTOP_SURFACE_CLASSES = `${WAVE_HEADER_ACTION_SURFACE_CLASSES} lg:tw-bg-transparent lg:tw-ring-0 lg:desktop-hover:group-hover:tw-bg-iron-900 lg:group-active:tw-bg-iron-900`;

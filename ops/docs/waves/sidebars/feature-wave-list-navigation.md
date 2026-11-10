@@ -54,7 +54,8 @@ Wave and DM rows in the left list control which thread is open.
 - Select the feed icon to open Profile Waves Feed. On desktop, it clears the
   selected wave; on mobile web and in the native app, it opens
   `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
-- The feed tooltip reads `Profile Waves Feed`. Create uses a transparent plus
+- The feed tooltip reads `Profile Waves Feed`. Its desktop shortcut has a
+  transparent resting surface and a dark hover surface. Create uses a solid white plus
   icon button named `Create wave` in both desktop sidebar modes. Both have
   visible keyboard focus and larger touch targets. The feed content header has a
   `Discover Waves` link with a compass to `/discover`; the sidebar keeps the two section-specific `View all` links.
@@ -112,7 +113,7 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
   with score shields overlapping the bottom-right corner of each avatar.
   The section keeps its own compact height independently of the vote list.
-- Create wave uses a transparent plus icon button in both expanded and collapsed
+- Create wave uses a solid white plus icon button in both expanded and collapsed
   desktop Waves panels, including signed-out visits. Its accessible name and
   hover tooltip read `Create wave`. The mobile Waves list keeps its visible label.
 - Each heading has a separate `View all` link aligned to the right, available

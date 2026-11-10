@@ -9,6 +9,7 @@ import Link from "next/link";
 import React from "react";
 import {
   WAVE_HEADER_ACTION_CLASSES,
+  WAVE_HEADER_ACTION_DESKTOP_SURFACE_CLASSES,
   WAVE_HEADER_ACTION_SURFACE_CLASSES,
 } from "../waves/WaveHeaderActions";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
@@ -119,7 +120,13 @@ export function WebProfileFeedShortcut({
       data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
       data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
     >
-      <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+      <span
+        className={
+          mobile
+            ? WAVE_HEADER_ACTION_SURFACE_CLASSES
+            : WAVE_HEADER_ACTION_DESKTOP_SURFACE_CLASSES
+        }
+      >
         <MasonryGridIcon />
       </span>
     </Link>
