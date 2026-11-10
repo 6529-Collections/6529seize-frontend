@@ -3731,6 +3731,9 @@ export const EN_US_ROOT_MESSAGES = {
   "navigation.primary.loading.network": "Loading network",
   "navigation.primary.loading.collections": "Loading collections",
   "navigation.primary.loading.notifications": "Loading notifications",
+  "ensAddressInput.addressUsed": "Address used: {address}",
+  "ensAddressInput.noAddressUsed":
+    "No address is used yet. Enter a full 0x wallet address or an ENS name that resolves.",
   "appWallet.validation.name.alphanumericSpaces":
     "Name can only contain alphanumeric characters and spaces",
   "appWallet.validation.password.minLength":
