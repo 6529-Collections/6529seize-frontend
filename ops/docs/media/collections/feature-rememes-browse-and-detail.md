@@ -12,6 +12,10 @@
 - Detail is progressively i18n-ready for document metadata, labels, accessible
   names, tab labels, reference-card labels, and locale-preserving navigation.
 - Detail uses in-page tabs: `Overview`, `Metadata`, and `References`.
+- Desktop detail sections use 16px headings and 14px labels, values, and
+  external links, with quieter 12px metadata. Properties use borderless tiles;
+  replica buttons have compact rounded corners. Smaller-screen styles are
+  unchanged.
 
 ## Location in the Site
 
@@ -32,7 +36,7 @@
 ### Browse Route `/rememes`
 
 1. Open `/rememes`.
-2. Wait for `Fetching ...` to finish.
+2. Wait for the card placeholders to be replaced by results.
 3. Review the header actions:
    - Result count badge
    - `LFG: Start the Show!`
@@ -53,6 +57,7 @@
 3. Use `Overview` replica chips (when shown) to open sibling token IDs.
 4. Open `Metadata` to review token URI, token type, parsed metadata, and
    attributes.
+   Desktop primary tabs share The Memes' full-width baseline.
 5. Open `References` to view linked `The Memes` cards and open
    `/the-memes/{id}`.
 
@@ -89,7 +94,9 @@
 
 ## Loading, Empty, and Error States
 
-- Browse shows `Fetching ...` during each list fetch.
+- Browse shows card placeholders during each list fetch, matching the loaded
+  grid's responsive columns, spacing, and width. Screen readers receive the
+  fetching status.
 - Browse filter controls are hidden while fetch is in progress.
 - Empty results show the shared `Nothing here yet` panel.
 - Browse fetch failures show no inline error banner. If the route already had
