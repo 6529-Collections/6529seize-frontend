@@ -4,21 +4,25 @@ import { PhotoIcon } from "@heroicons/react/24/outline";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import DropActionTooltip from "../DropActionTooltip";
 import { useShareDropsSelection } from "./ShareDropsSelectionContext";
 
 /**
- * "Share as image" in a post's menu: desktop dropdown row or mobile
- * long-press sheet row. Shown only inside a wave conversation; the post
- * becomes the first post of the image.
+ * "Share as image" for a post: a desktop dropdown row, a mobile long-press
+ * sheet row, or an icon button in the hover toolbar signed-out visitors see.
+ * Shown only inside a wave conversation; the post becomes the first post of
+ * the image.
  */
 export default function WaveDropShareImageAction({
   drop,
   onSelected,
   mobile = false,
+  toolbar = false,
 }: {
   readonly drop: Pick<ApiDrop, "id" | "serial_no">;
   readonly onSelected: () => void;
   readonly mobile?: boolean | undefined;
+  readonly toolbar?: boolean | undefined;
 }) {
   const locale = useBrowserLocale();
   const selection = useShareDropsSelection();
@@ -29,6 +33,27 @@ export default function WaveDropShareImageAction({
     onSelected();
     selection.start(drop.serial_no);
   };
+
+  if (toolbar) {
+    return (
+      <DropActionTooltip content={<span className="tw-text-xs">{label}</span>}>
+        <button
+          type="button"
+          aria-label={label}
+          onClick={(event) => {
+            event.stopPropagation();
+            select();
+          }}
+          className="icon tw-flex tw-size-7 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
+        >
+          <PhotoIcon
+            aria-hidden="true"
+            className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+          />
+        </button>
+      </DropActionTooltip>
+    );
+  }
 
   if (mobile) {
     return (
