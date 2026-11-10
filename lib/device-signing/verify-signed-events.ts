@@ -107,13 +107,23 @@ interface VerifyOptions {
   readonly grantCheckCache?: GrantCheckCache | undefined;
 }
 
-const belongsToExpectedDrop = (
+/** Events of another wave never count for this drop. */
+const isInExpectedWave = (
+  event: ApiDeviceSignedEvent,
+  expected: ExpectedDrop | undefined
+): boolean => expected === undefined || same(event.wave, expected.waveId);
+
+/**
+ * Whether the signing wallet is one of the author's wallets now. A wallet
+ * the author later removed from the profile still signed the post; this
+ * browser just cannot tie it to the author any more.
+ */
+const isAuthorWallet = (
   event: ApiDeviceSignedEvent,
   expected: ExpectedDrop | undefined
 ): boolean =>
   expected === undefined ||
-  (same(event.wave, expected.waveId) &&
-    expected.authorWallets.some((wallet) => same(wallet, event.author)));
+  expected.authorWallets.some((wallet) => same(wallet, event.author));
 
 function parseSignedBody(event: ApiDeviceSignedEvent): unknown {
   if (event.body === null) {
@@ -127,24 +137,33 @@ function parseSignedBody(event: ApiDeviceSignedEvent): unknown {
 }
 
 /**
- * The event's refs name what it acts on: a post its reply target (exactly
- * what its body signs), an edit the drop being shown.
+ * The event's refs name what it acts on: a post its reply target (what its
+ * body signs), an edit the drop being shown. "mismatch": an edit of another
+ * drop; "unknown": refs this browser cannot reconcile with the body.
  */
-function hasConsistentRefs(
+function checkRefs(
   event: ApiDeviceSignedEvent,
   expected: ExpectedDrop | undefined
-): boolean {
+): "ok" | "unknown" | "mismatch" {
   if (event.kind === DeviceEventKind.EDIT) {
-    return (
-      expected === undefined ||
-      (event.refs.length === 1 && same(event.refs[0] ?? "", expected.dropId))
-    );
+    if (expected === undefined) {
+      return "ok";
+    }
+    if (event.refs.length !== 1) {
+      return "unknown";
+    }
+    return same(event.refs[0] ?? "", expected.dropId) ? "ok" : "mismatch";
   }
   const body = parseSignedBody(event);
-  const target = isRecord(body) ? signedReplyTarget(body) : null;
-  return target === null
-    ? event.refs.length === 0
-    : event.refs.length === 1 && same(event.refs[0] ?? "", target);
+  const target = isRecord(body) ? signedReplyTarget(body) : undefined;
+  if (target === undefined) {
+    return "unknown";
+  }
+  const consistent =
+    target === null
+      ? event.refs.length === 0
+      : event.refs.length === 1 && same(event.refs[0] ?? "", target);
+  return consistent ? "ok" : "unknown";
 }
 
 const HEX_DIGITS = /^0x[0-9a-fA-F]+$/;
@@ -171,7 +190,12 @@ export type DropSignatureVerdict =
    * an origin no 6529 client produces (`unrecognizedOrigin`). Never shown as
    * signed.
    */
-  | { readonly status: "unverifiable"; readonly unrecognizedOrigin?: string }
+  | {
+      readonly status: "unverifiable";
+      readonly unrecognizedOrigin?: string;
+      /** The signing wallet, no longer one of the author's wallets. */
+      readonly unlinkedWallet?: string;
+    }
   | {
       readonly status: "signed";
       readonly signature: VerifiedDropSignature;
@@ -469,8 +493,7 @@ async function verifyContentEvents(
         );
         if (
           !walletSignature ||
-          !belongsToExpectedDrop(event, options.expected) ||
-          !hasConsistentRefs(event, options.expected) ||
+          !isInExpectedWave(event, options.expected) ||
           !(await verifyEvent(event, grant))
         ) {
           return null;
@@ -510,28 +533,33 @@ export async function verifyDropSignedEvents(
     // verify: never fall back to an older signed version.
     return { status: "invalid" };
   }
+  const refs = current ? checkRefs(current.event, options.expected) : "ok";
   const shownMatch =
     current && options.displayed
       ? compareDisplayed(
           parseSignedBody(current.event),
           current.event.kind === DeviceEventKind.POST,
           options.displayed,
-          originalReplyTarget(verified)
+          originalReplyTarget(verified, options.expected)
         )
       : "match";
-  if (shownMatch === "mismatch") {
+  if (shownMatch === "mismatch" || refs === "mismatch") {
     // A valid signature over content other than what is shown proves nothing
     // about the shown content.
     return { status: "invalid" };
   }
-  if (shownMatch === "partial") {
-    // Only some of the post's parts are loaded here: nothing is wrong, but
-    // the post as a whole was not compared.
+  if (shownMatch !== "match" || refs === "unknown") {
+    // Only some of the post's parts are loaded here, or part of the signed
+    // body could not be interpreted with certainty: nothing is known to be
+    // wrong, but the post as a whole was not compared.
     return { status: "unverifiable" };
   }
   const shown = current ?? verified.at(-1);
   if (!shown) {
     return { status: "invalid" };
+  }
+  if (!isAuthorWallet(shown.event, options.expected)) {
+    return { status: "unverifiable", unlinkedWallet: shown.event.author };
   }
   if (shown.walletSignature === "unverifiable") {
     return { status: "unverifiable" };
@@ -559,14 +587,16 @@ export async function verifyDropSignedEvents(
  * unsigned and edited signed.
  */
 function originalReplyTarget(
-  verified: readonly VerifiedEvent[]
+  verified: readonly VerifiedEvent[],
+  expected: ExpectedDrop | undefined
 ): string | null | undefined {
   const post = verified.find(
-    ({ event }) => event.kind === DeviceEventKind.POST
+    ({ event }) =>
+      event.kind === DeviceEventKind.POST && checkRefs(event, expected) === "ok"
   );
   if (!post) {
     return undefined;
   }
   const body = parseSignedBody(post.event);
-  return isRecord(body) ? signedReplyTarget(body) : null;
+  return isRecord(body) ? signedReplyTarget(body) : undefined;
 }

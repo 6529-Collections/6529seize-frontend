@@ -3,7 +3,48 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 /**
  * What a reader is shown of a drop, and how it compares with a signed post
  * or edit body.
+ *
+ * The signed body is the request as the author's browser sent it; 6529.io
+ * validates it and stores a normalized copy. Every comparison accepts each
+ * form the server accepts for the same value:
+ * - part ids (`drop_part_id` of a reply target or a quote) as integers or
+ *   numeric strings ("1"), and a reply target without a part id;
+ * - a title with surrounding whitespace, and an empty title, as no title;
+ * - a missing or null content, quote, reply target, media or attachment
+ *   list as none;
+ * - a missing or null media upload id, and one the server did not link;
+ * - drop, upload and attachment ids in any letter case;
+ * - media and attachments in any order (the server reads them back in its
+ *   own order).
+ * A value the comparison cannot interpret is "unknown", never a mismatch:
+ * only content that differs in substance is a mismatch.
  */
+
+/** How a shown drop compares with the signed body, from best to worst. */
+type DisplayedMatch =
+  /** Everything shown is what was signed. */
+  | "match"
+  /** What is shown matches, but not every part of the post is shown. */
+  | "partial"
+  /** Part of the signed body could not be interpreted with certainty. */
+  | "unknown"
+  /** Something shown differs in substance from what was signed. */
+  | "mismatch";
+
+const MATCH_RANK: Readonly<Record<DisplayedMatch, number>> = {
+  match: 0,
+  partial: 1,
+  unknown: 2,
+  mismatch: 3,
+};
+
+/** The worst of several outcomes: a mismatch decides over an unknown. */
+const worst = (...results: readonly DisplayedMatch[]): DisplayedMatch =>
+  results.reduce(
+    (current, result) =>
+      MATCH_RANK[result] > MATCH_RANK[current] ? result : current,
+    "match"
+  );
 
 const sameId = (left: string, right: string): boolean =>
   left.toLowerCase() === right.toLowerCase();
@@ -17,9 +58,8 @@ interface DisplayedDropRef {
 /**
  * What the reader is shown for the drop, compared with the signed body.
  * Media is identified by its URL (the server stores the signed URL and binds
- * an upload id to it), attachments by their ids. The server does not keep
- * the order media and attachments were signed in, so both are compared as
- * sets; parts are matched by their part id.
+ * an upload id to it), attachments by their ids; parts are matched by their
+ * part id.
  */
 export interface DisplayedDropContent {
   readonly title: string | null;
@@ -43,9 +83,6 @@ export interface DisplayedDropContent {
    */
   readonly totalParts: number | null;
 }
-
-const listOf = (value: unknown): readonly unknown[] =>
-  Array.isArray(value) ? value : [];
 
 type DisplayableDrop = Pick<ApiDrop, "title" | "parts"> &
   Partial<Pick<ApiDrop, "reply_to" | "parts_count">>;
@@ -82,39 +119,76 @@ export const toDisplayedDropContent = (
       : null,
 });
 
-const asText = (value: unknown): string =>
-  typeof value === "string" ? value : "";
-
 export const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-/** A signed `{ drop_id, drop_part_id }`, or null. */
-function readSignedRef(value: unknown): DisplayedDropRef | null {
-  if (!isRecord(value)) {
+/** Marks a signed value this module cannot interpret with certainty. */
+const UNKNOWN = Symbol("unknown");
+type Read<T> = T | typeof UNKNOWN;
+
+const isAbsent = (value: unknown): value is null | undefined =>
+  value === null || value === undefined;
+
+/** Signed text: a string, or "" for none; anything else is unknown. */
+function readText(value: unknown): Read<string> {
+  if (isAbsent(value)) {
+    return "";
+  }
+  return typeof value === "string" ? value : UNKNOWN;
+}
+
+/** A part id as the server reads it: an integer or a numeric string. */
+function readPartId(value: unknown): Read<number> {
+  if (typeof value === "number") {
+    return Number.isInteger(value) ? value : UNKNOWN;
+  }
+  if (typeof value === "string" && /^\s*\+?\d+\s*$/.test(value)) {
+    return Number(value);
+  }
+  return UNKNOWN;
+}
+
+/** A signed reference: null for none; a missing part id is null. */
+function readSignedRef(
+  value: unknown
+): Read<{ readonly dropId: string; readonly partId: number | null } | null> {
+  if (isAbsent(value)) {
     return null;
   }
-  const dropId = value["drop_id"];
-  const partId = value["drop_part_id"];
-  return typeof dropId === "string" && typeof partId === "number"
-    ? { dropId, partId }
-    : null;
+  if (!isRecord(value) || typeof value["drop_id"] !== "string") {
+    return UNKNOWN;
+  }
+  const rawPartId = value["drop_part_id"];
+  const partId = isAbsent(rawPartId) ? null : readPartId(rawPartId);
+  return partId === UNKNOWN ? UNKNOWN : { dropId: value["drop_id"], partId };
+}
+
+/** A signed list: an array, or [] for none; anything else is unknown. */
+function readList(value: unknown): Read<readonly unknown[]> {
+  if (isAbsent(value)) {
+    return [];
+  }
+  return Array.isArray(value) ? value : UNKNOWN;
 }
 
 /** A quote shown must be the one signed; a part shown without one shows nothing unsigned. */
-const matchesShownQuote = (
+function compareQuote(
   signed: unknown,
   shown: DisplayedDropRef | null
-): boolean => {
+): DisplayedMatch {
   if (shown === null) {
-    return true;
+    return "match";
   }
   const quote = readSignedRef(signed);
-  return (
-    quote !== null &&
+  if (quote === UNKNOWN || quote?.partId === null) {
+    return "unknown";
+  }
+  return quote !== null &&
     sameId(quote.dropId, shown.dropId) &&
     quote.partId === shown.partId
-  );
-};
+    ? "match"
+    : "mismatch";
+}
 
 interface MediaIdentity {
   readonly url: string;
@@ -126,84 +200,114 @@ const compareText = (left: string, right: string): number =>
 
 const byIdentity = (left: MediaIdentity, right: MediaIdentity): number =>
   compareText(left.url, right.url) ||
-  compareText(left.uploadId ?? "", right.uploadId ?? "");
+  compareText(
+    (left.uploadId ?? "").toLowerCase(),
+    (right.uploadId ?? "").toLowerCase()
+  );
 
-/** Signed media as identities, or null when one is malformed. */
-function readSignedMedia(signed: readonly unknown[]): MediaIdentity[] | null {
+/** Signed media as identities. */
+function readSignedMedia(value: unknown): Read<MediaIdentity[]> {
+  const list = readList(value);
+  if (list === UNKNOWN) {
+    return UNKNOWN;
+  }
   const media: MediaIdentity[] = [];
-  for (const item of signed) {
+  for (const item of list) {
     if (!isRecord(item) || typeof item["url"] !== "string") {
-      return null;
+      return UNKNOWN;
     }
     const uploadId = item["media_upload_id"];
-    media.push({
-      url: item["url"],
-      uploadId: typeof uploadId === "string" ? uploadId : null,
-    });
+    if (!isAbsent(uploadId) && typeof uploadId !== "string") {
+      return UNKNOWN;
+    }
+    media.push({ url: item["url"], uploadId: uploadId ?? null });
   }
   return media;
 }
 
 /**
- * The same media, in any order (the server does not keep the signed
- * order); an upload id is compared when both sides name one.
+ * The same media, in any order; an upload id is compared when both sides
+ * name one (the server may leave a signed upload id unlinked).
  */
-function matchesShownMedia(
-  signed: readonly unknown[],
+function compareMedia(
+  signed: unknown,
   shown: readonly MediaIdentity[]
-): boolean {
+): DisplayedMatch {
   const signedMedia = readSignedMedia(signed);
-  if (signedMedia?.length !== shown.length) {
-    return false;
+  if (signedMedia === UNKNOWN) {
+    return "unknown";
+  }
+  if (signedMedia.length !== shown.length) {
+    return "mismatch";
   }
   signedMedia.sort(byIdentity);
   const shownMedia = [...shown].sort(byIdentity);
-  return signedMedia.every((media, index) => {
+  const same = signedMedia.every((media, index) => {
     const item = shownMedia[index];
     return (
       item?.url === media.url &&
       (media.uploadId === null ||
         item.uploadId === null ||
-        media.uploadId === item.uploadId)
+        sameId(media.uploadId, item.uploadId))
     );
   });
+  return same ? "match" : "mismatch";
 }
 
-/** The same attachments, in any order. */
-function matchesShownAttachments(
-  signed: readonly unknown[],
+/** The same attachments, in any order and letter case. */
+function compareAttachments(
+  signed: unknown,
   shown: readonly string[]
-): boolean {
+): DisplayedMatch {
+  const list = readList(signed);
+  if (list === UNKNOWN) {
+    return "unknown";
+  }
   const signedIds: string[] = [];
-  for (const attachment of signed) {
+  for (const attachment of list) {
     const id = isRecord(attachment) ? attachment["attachment_id"] : undefined;
     if (typeof id !== "string") {
-      return false;
+      return "unknown";
     }
-    signedIds.push(id);
+    signedIds.push(id.toLowerCase());
   }
   if (signedIds.length !== shown.length) {
-    return false;
+    return "mismatch";
   }
-  const shownIds = [...shown].sort(compareText);
+  const shownIds = shown.map((id) => id.toLowerCase()).sort(compareText);
   return signedIds
     .sort(compareText)
-    .every((id, index) => id === shownIds[index]);
+    .every((id, index) => id === shownIds[index])
+    ? "match"
+    : "mismatch";
 }
 
-const matchesShownPart = (
-  part: unknown,
-  shown: DisplayedDropContent["parts"][number] | undefined
-): boolean =>
-  shown !== undefined &&
-  isRecord(part) &&
-  asText(part["content"]) === asText(shown.content) &&
-  matchesShownQuote(part["quoted_drop"], shown.quote) &&
-  matchesShownMedia(listOf(part["media"]), shown.media) &&
-  matchesShownAttachments(listOf(part["attachments"]), shown.attachmentIds);
+function compareContent(signed: unknown, shown: string | null): DisplayedMatch {
+  const text = readText(signed);
+  if (text === UNKNOWN) {
+    return "unknown";
+  }
+  return text === (shown ?? "") ? "match" : "mismatch";
+}
 
-/** "partial": what is shown matches, but not every part of the post is shown. */
-type DisplayedMatch = "match" | "partial" | "mismatch";
+function comparePart(
+  part: unknown,
+  shown: DisplayedDropContent["parts"][number]
+): DisplayedMatch {
+  if (part === undefined) {
+    // A part shown that the post never signed.
+    return "mismatch";
+  }
+  if (!isRecord(part)) {
+    return "unknown";
+  }
+  return worst(
+    compareContent(part["content"], shown.content),
+    compareQuote(part["quoted_drop"], shown.quote),
+    compareMedia(part["media"], shown.media),
+    compareAttachments(part["attachments"], shown.attachmentIds)
+  );
+}
 
 /**
  * How the parts shown compare with the signed parts: every part shown must
@@ -212,17 +316,24 @@ type DisplayedMatch = "match" | "partial" | "mismatch";
  * ("partial"), so it is reported neither as signed nor as a mismatch.
  */
 function compareShownParts(
-  signedParts: readonly unknown[],
+  signed: unknown,
   displayed: DisplayedDropContent
 ): DisplayedMatch {
+  const signedParts = readList(signed);
+  if (signedParts === UNKNOWN) {
+    return "unknown";
+  }
   const partIds = new Set(displayed.parts.map((part) => part.partId));
-  const everyShownPartSigned =
-    partIds.size === displayed.parts.length &&
-    displayed.parts.every((shown) =>
-      matchesShownPart(signedParts[shown.partId - 1], shown)
-    );
-  if (!everyShownPartSigned) {
-    return "mismatch";
+  if (partIds.size !== displayed.parts.length) {
+    return "unknown";
+  }
+  const shownParts = worst(
+    ...displayed.parts.map((shown) =>
+      comparePart(signedParts[shown.partId - 1], shown)
+    )
+  );
+  if (shownParts !== "match") {
+    return shownParts;
   }
   if (
     displayed.totalParts !== null &&
@@ -234,15 +345,34 @@ function compareShownParts(
   return displayed.parts.length < signedParts.length ? "partial" : "match";
 }
 
-/** The reply target a post's body signs, or null for a post that is not a reply. */
-export const signedReplyTarget = (
+/** The server trims a title and stores an empty one as none. */
+function compareTitle(signed: unknown, shown: string | null): DisplayedMatch {
+  const title = readText(signed);
+  if (title === UNKNOWN) {
+    return "unknown";
+  }
+  return title.trim() === (shown ?? "").trim() ? "match" : "mismatch";
+}
+
+/**
+ * The reply target a post's body signs: a drop id, null for a post that is
+ * not a reply, or undefined when it cannot be interpreted.
+ */
+export function signedReplyTarget(
   body: Record<string, unknown>
-): string | null => readSignedRef(body["reply_to"])?.dropId ?? null;
+): string | null | undefined {
+  const ref = readSignedRef(body["reply_to"]);
+  if (ref === UNKNOWN) {
+    return undefined;
+  }
+  return ref?.dropId ?? null;
+}
 
 /**
  * Whether the signed post or edit body is what the reader is shown. A
  * post's body signs its reply target; an edit's does not, so an edited drop
- * shows its reply target against the original post when that is signed.
+ * shows its reply target against the original post when that is signed
+ * (`replyTarget`; undefined when unknown).
  */
 export function compareDisplayed(
   body: unknown,
@@ -250,17 +380,26 @@ export function compareDisplayed(
   displayed: DisplayedDropContent,
   replyTarget: string | null | undefined
 ): DisplayedMatch {
-  if (!isRecord(body) || asText(body["title"]) !== asText(displayed.title)) {
-    return "mismatch";
+  if (!isRecord(body)) {
+    return "unknown";
   }
   const signedTarget = isPost ? signedReplyTarget(body) : replyTarget;
   // A reply target shown must be the signed one. One left out (a deleted
   // target, for example) shows nothing unsigned.
-  const replyMatches =
-    displayed.replyToDropId === null ||
-    signedTarget === undefined ||
-    (signedTarget !== null && sameId(signedTarget, displayed.replyToDropId));
-  return replyMatches
-    ? compareShownParts(listOf(body["parts"]), displayed)
-    : "mismatch";
+  let reply: DisplayedMatch = "match";
+  if (displayed.replyToDropId !== null) {
+    if (signedTarget === undefined) {
+      reply = isPost ? "unknown" : "match";
+    } else {
+      reply =
+        signedTarget !== null && sameId(signedTarget, displayed.replyToDropId)
+          ? "match"
+          : "mismatch";
+    }
+  }
+  return worst(
+    compareTitle(body["title"], displayed.title),
+    reply,
+    compareShownParts(body["parts"], displayed)
+  );
 }

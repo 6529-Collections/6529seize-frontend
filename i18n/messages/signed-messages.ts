@@ -148,6 +148,8 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.signature.origin": "Authorized from",
   "signedMessages.signature.unrecognizedOriginDescription":
     "This post's device was authorized from “{origin}”, which isn't a 6529 site or app, so this post isn't shown as signed.",
+  "signedMessages.signature.unlinkedWalletDescription":
+    "This post was signed with the wallet {wallet}, which is no longer linked to its author's profile, so this post isn't shown as signed.",
   "signedMessages.signature.currentContent": "Current content",
   "signedMessages.signature.currentSigned": "The signed version",
   "signedMessages.signature.currentUnsigned": "Changed without a signature",

@@ -137,6 +137,25 @@ const VERDICT_PRESENTATION = {
   },
 } as const;
 
+/** The verdict's explanation, naming why a signature is not verifiable. */
+function describeVerdict(
+  locale: SupportedLocale,
+  verdict: DropSignatureVerdict,
+  descriptionKey: (typeof VERDICT_PRESENTATION)[DropSignatureVerdict["status"]]["descriptionKey"]
+): string {
+  if (verdict.status === "unverifiable" && verdict.unrecognizedOrigin) {
+    return t(locale, "signedMessages.signature.unrecognizedOriginDescription", {
+      origin: verdict.unrecognizedOrigin,
+    });
+  }
+  if (verdict.status === "unverifiable" && verdict.unlinkedWallet) {
+    return t(locale, "signedMessages.signature.unlinkedWalletDescription", {
+      wallet: shortenAddress(verdict.unlinkedWallet),
+    });
+  }
+  return t(locale, descriptionKey);
+}
+
 function VerdictView({
   locale,
   verdict,
@@ -146,8 +165,7 @@ function VerdictView({
 }) {
   const { Icon, iconClassName, titleKey, descriptionKey } =
     VERDICT_PRESENTATION[verdict.status];
-  const unrecognizedOrigin =
-    verdict.status === "unverifiable" ? verdict.unrecognizedOrigin : undefined;
+  const description = describeVerdict(locale, verdict, descriptionKey);
   return (
     <div>
       <p className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-iron-50">
@@ -158,15 +176,7 @@ function VerdictView({
         <span>{t(locale, titleKey)}</span>
       </p>
       <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-        {unrecognizedOrigin === undefined
-          ? t(locale, descriptionKey)
-          : t(
-              locale,
-              "signedMessages.signature.unrecognizedOriginDescription",
-              {
-                origin: unrecognizedOrigin,
-              }
-            )}
+        {description}
       </p>
       {verdict.status === "signed" && (
         <SignedDetails locale={locale} verdict={verdict} />

@@ -222,6 +222,25 @@ describe("drop signature details", () => {
     expect(screen.queryByText("Signed by its author")).toBeNull();
   });
 
+  it("explains a post signed with a wallet no longer linked to its author", async () => {
+    mockVerify.mockResolvedValue({
+      status: "unverifiable",
+      unlinkedWallet: "0x2222222222222222222222222222222222222222",
+    });
+    renderWithQueryClient(
+      <DropSignatureDialog dropId={DROP_ID} isOpen onClose={jest.fn()} />
+    );
+
+    expect(
+      await screen.findByText(
+        "This post was signed with the wallet 0x2222…2222, which is no longer linked to its author's profile, so this post isn't shown as signed."
+      )
+    ).toBeVisible();
+    expect(
+      screen.queryByText("The signature could not be verified")
+    ).toBeNull();
+  });
+
   it.each([
     ["unsigned", "Not signed by its author"],
     ["invalid", "The signature could not be verified"],
