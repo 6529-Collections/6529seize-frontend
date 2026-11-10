@@ -14,18 +14,13 @@ const MAX_PATH_ELEMENTS = 5;
 const MAX_PATH_LENGTH = 160;
 const PATH_SEPARATOR = " > ";
 
-const LABEL_ATTRIBUTES =
-  "aria-label|aria-description|aria-valuetext|title|alt|placeholder|value";
 // `[name="value"]` for a label-bearing attribute. A quote inside the value
 // ends it only when the selector continues after `"]`. Not exact: anything
 // left with a quote is replaced below.
-const LABEL_ATTRIBUTE_PATTERN = new RegExp(
-  String.raw`\[(${LABEL_ATTRIBUTES})="(?:[^"]|"(?!\](?:\[| > |$)))*"\]`,
-  "g"
-);
-const LABEL_ASSIGNMENT_PATTERN = new RegExp(
-  String.raw`(?:${LABEL_ATTRIBUTES})=`
-);
+const LABEL_ATTRIBUTE_PATTERN =
+  /\[(aria-label|aria-description|aria-valuetext|title|alt|placeholder|value)="(?:[^"]|"(?!\](?:\[| > |$)))*"\]/g;
+const LABEL_ASSIGNMENT_PATTERN =
+  /(?:aria-label|aria-description|aria-valuetext|title|alt|placeholder|value)=/;
 
 const isUiCategory = (category: string | undefined): boolean =>
   category?.startsWith("ui.") === true;
@@ -60,7 +55,7 @@ function describeElement(element: Element): string {
 }
 
 /** `div.row > button#send.tw-btn`: tag, id and classes, no attributes. */
-export function elementStructurePath(element: Element): string {
+function elementStructurePath(element: Element): string {
   const parts: string[] = [];
   let length = 0;
   let current: Element | null = element;
