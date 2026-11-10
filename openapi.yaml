@@ -441,6 +441,166 @@ paths:
           description: Record changed; reload before retry
         "422":
           description: Invalid record or evidence
+  /artwork-documentation/contexts/{id}/publications:
+    get:
+      tags:
+        - ArtworkDocumentation
+      summary: List IIIF publications of a context, newest version first
+      operationId: artworkDocumentationListArtworkPublications
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artwork-documentation
+        handler:
+          import: >-
+            @/api/artwork-documentation/artwork-documentation-publication.handlers
+          name: handleListArtworkPublications
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Authorized artwork record response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiArtworkPublication"
+        "401":
+          description: Authentication required
+        "403":
+          description: Operation unavailable for this role
+        "404":
+          description: Record unavailable
+        "422":
+          description: Invalid record or evidence
+    post:
+      tags:
+        - ArtworkDocumentation
+      summary: Publish an IIIF Presentation 3 manifest for an approved public selection
+      description: >-
+        Compiles the artist-confirmed dossier snapshot into a deterministic IIIF
+        manifest bound to the supplied permanent URLs, rights and resource
+        roles, and stores it as the next publication version of the context.
+        Identical input for the same source digest returns the existing
+        publication. The generated router types a 200 response; the created
+        publication is returned in the body.
+      operationId: artworkDocumentationCreateArtworkPublication
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artwork-documentation
+        handler:
+          import: >-
+            @/api/artwork-documentation/artwork-documentation-publication.handlers
+          name: handleCreateArtworkPublication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: If-Match
+          in: header
+          required: true
+          schema:
+            type: string
+            pattern: ^"draft-[1-9][0-9]*"$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiArtworkPublicationRequest"
+      responses:
+        "200":
+          description: The published (or reused identical) publication
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtworkPublication"
+        "401":
+          description: Authentication required
+        "403":
+          description: Operation unavailable for this role
+        "404":
+          description: Record unavailable
+        "409":
+          description: >-
+            Record changed, confirmation missing or source digest stale; reload
+            before retry
+        "413":
+          description: Dossier record, asset or byte limit exceeded (DOSSIER_RECORD_LIMIT)
+        "422":
+          description: Invalid request, private asset, unsupported role, rights or binding
+        "428":
+          description: Idempotency key and draft version required
+  /artwork-documentation/contexts/{id}/publications/{publicationId}/withdraw:
+    post:
+      tags:
+        - ArtworkDocumentation
+      summary: Withdraw a publication so its public manifest is no longer served
+      operationId: artworkDocumentationWithdrawArtworkPublication
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: artwork-documentation
+        handler:
+          import: >-
+            @/api/artwork-documentation/artwork-documentation-publication.handlers
+          name: handleWithdrawArtworkPublication
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: publicationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: The withdrawn publication
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiArtworkPublication"
+        "401":
+          description: Authentication required
+        "403":
+          description: Operation unavailable for this role
+        "404":
+          description: Record unavailable
+        "428":
+          description: Idempotency key required
   /artwork-documentation/profiles:
     get:
       tags:
@@ -14346,6 +14506,43 @@ paths:
           description: Claim not found
         "503":
           description: Creator admin permission could not be verified
+  /museum/iiif/{publicationId}/manifest:
+    get:
+      tags:
+        - Museum
+      summary: Read a published IIIF Presentation 3 manifest
+      description: >-
+        Public, unauthenticated and served with open CORS so IIIF viewers on any
+        origin can load it. Returns the stored manifest JSON-LD of a published
+        artwork publication. Withdrawn publications answer 410.
+      operationId: getMuseumIiifManifest
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: true
+        typeImportGroup: museum
+        handler:
+          import: "@/api/museum/museum-publication.handlers"
+          name: handleGetMuseumIiifManifest
+      parameters:
+        - name: publicationId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: IIIF Presentation 3.0 Manifest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMuseumIiifManifest"
+        "404":
+          description: Publication not found
+        "410":
+          description: Publication withdrawn
   /nft-link:
     get:
       tags:
@@ -25392,6 +25589,154 @@ components:
         - allowed_kinds
         - records
         - next_cursor
+    ApiArtworkPublication:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+        context_id:
+          type: string
+          format: uuid
+        revision_id:
+          type: string
+          format: uuid
+        version:
+          type: integer
+        state:
+          type: string
+          enum:
+            - published
+            - withdrawn
+        source_sha256:
+          type: string
+        manifest_sha256:
+          type: string
+        manifest_url:
+          type: string
+          description: The permanent bound manifest id (<base_url>/manifest).
+        manifest_api_path:
+          type: string
+          description: The public API origin path serving this manifest.
+        compiler_version:
+          type: string
+        created_at:
+          type: integer
+        withdrawn_at:
+          type: integer
+          nullable: true
+      required:
+        - id
+        - context_id
+        - revision_id
+        - version
+        - state
+        - source_sha256
+        - manifest_sha256
+        - manifest_url
+        - manifest_api_path
+        - compiler_version
+        - created_at
+        - withdrawn_at
+    ApiArtworkPublicationBindings:
+      type: object
+      additionalProperties: false
+      properties:
+        base_url:
+          type: string
+          description: >-
+            https base under an approved namespace, for example
+            https://6529.io/iiif/objects/{objectId}
+        homepage_url:
+          type: string
+        media:
+          type: object
+          description: Stable public https URL per selected asset id.
+          additionalProperties:
+            type: string
+      required:
+        - base_url
+        - media
+    ApiArtworkPublicationProvider:
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+      required:
+        - id
+        - label
+    ApiArtworkPublicationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        source_sha256:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+        selection:
+          $ref: "#/components/schemas/ApiArtworkPublicationSelection"
+        bindings:
+          $ref: "#/components/schemas/ApiArtworkPublicationBindings"
+        rights:
+          $ref: "#/components/schemas/ApiArtworkPublicationRights"
+        roles:
+          type: object
+          description: Museum resource role per selected asset id.
+          additionalProperties:
+            type: string
+            enum:
+              - authorized_manifestation
+              - documentation_surrogate
+              - preservation_master
+              - access_derivative
+              - live_upstream_service
+              - technical_model
+      required:
+        - source_sha256
+        - selection
+        - bindings
+        - rights
+        - roles
+    ApiArtworkPublicationRequiredStatement:
+      type: object
+      additionalProperties: false
+      properties:
+        label:
+          type: string
+        value:
+          type: string
+      required:
+        - label
+        - value
+    ApiArtworkPublicationRights:
+      type: object
+      additionalProperties: false
+      properties:
+        rights_uri:
+          type: string
+          description: A canonical URI from the museum rights registry.
+        required_statement:
+          $ref: "#/components/schemas/ApiArtworkPublicationRequiredStatement"
+        provider:
+          $ref: "#/components/schemas/ApiArtworkPublicationProvider"
+      required:
+        - rights_uri
+        - required_statement
+    ApiArtworkPublicationSelection:
+      type: object
+      additionalProperties: false
+      properties:
+        asset_ids:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            format: uuid
+      required:
+        - asset_ids
     ApiAttachment:
       type: object
       required:
@@ -38399,6 +38744,24 @@ components:
         next_cursor:
           type: string
           nullable: true
+    ApiMuseumIiifManifest:
+      type: object
+      description: >-
+        An IIIF Presentation 3.0 Manifest (JSON-LD). Members beyond the typed
+        ones follow https://iiif.io/api/presentation/3.0/.
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        label:
+          type: object
+          additionalProperties: true
+      required:
+        - id
+        - type
+        - label
     ApiNft:
       type: object
       required:
