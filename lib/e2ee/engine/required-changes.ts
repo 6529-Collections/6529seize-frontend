@@ -25,6 +25,10 @@ export interface RequiredChangesInput {
   now: number;
   ownDeviceKey: string;
   ownProfileId: string;
+  /** This profile is an admin of the conversation. */
+  ownIsAdmin: boolean;
+  /** When this device joined the conversation (local clock, ms). */
+  joinedAt: number;
   members: readonly MemberRef[];
   leaving: ReadonlySet<string>;
   badGrants: ReadonlySet<string>;
@@ -39,7 +43,7 @@ export interface RequiredChangesInput {
 export interface RequiredChanges {
   /** Revoked, expired, leaving or bad-grant leaves: overdue at once. */
   strictRemovals: string[];
-  /** Idle > T_IDLE: overdue at discovery. */
+  /** Idle > T_IDLE (see `isIdle`): overdue at discovery. */
   idleRemovals: string[];
   /** Active devices of this device's own principal that are not leaves. */
   ownAdds: string[];
@@ -66,11 +70,27 @@ export function isStrictRemoval(
   return status.revoked || status.badGrant || expired;
 }
 
-function isIdle(
-  activity: LeafActivity | undefined,
-  now: number
-): boolean {
-  return activity !== undefined && now - activity.at > T_IDLE_MS;
+/**
+ * Whether this device proposes removing `member` as idle. Activity times
+ * come from the server's log, so idleness is counted from this device's own
+ * join (local clock) at the earliest. Another person's device is proposed
+ * only by an admin, or after this device saw it commit (`known`): a member
+ * that only knows the join time leaves the removal to the admins.
+ */
+function isIdle(member: MemberRef, input: RequiredChangesInput): boolean {
+  const activity = input.activity[member.deviceKey];
+  if (activity === undefined) {
+    return false;
+  }
+  const since = Math.max(activity.at, input.joinedAt);
+  if (input.now - since <= T_IDLE_MS) {
+    return false;
+  }
+  return (
+    member.profileId === input.ownProfileId ||
+    input.ownIsAdmin ||
+    activity.known
+  );
 }
 
 /**
@@ -143,7 +163,7 @@ export function computeRequiredChanges(
     }
     if (isStrictRemoval(member.deviceKey, input)) {
       strictRemovals.push(member.deviceKey);
-    } else if (isIdle(input.activity[member.deviceKey], input.now)) {
+    } else if (isIdle(member, input)) {
       idleRemovals.push(member.deviceKey);
     }
   }
