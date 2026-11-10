@@ -61,9 +61,12 @@ export const getFarcasterWarpcastApiKey = (): string | undefined =>
  * variable; see `ops/docs/validator-download-page.md`.
  */
 type ValidatorPageServerEnv = {
-  /** The page password. Unset or empty leaves the page open to everyone. */
+  /**
+   * The page password. Unset or empty, the page stays locked unless
+   * `isPublic` opens it.
+   */
   readonly password: string | undefined;
-  /** `true` opens the page to everyone even when a password is set. */
+  /** `true` opens the page to everyone, the only setting that does. */
   readonly isPublic: boolean;
   /** Private bucket that holds the release feed and the release files. */
   readonly releasesBucket: string | undefined;

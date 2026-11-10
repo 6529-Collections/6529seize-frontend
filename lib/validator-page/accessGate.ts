@@ -27,23 +27,67 @@ const ACCESS_TTL_SECONDS = 30 * 24 * 60 * 60;
 const COOKIE_VERSION = "v1";
 const COOKIE_KEY_SALT = "6529.io validator page access cookie v1";
 
-export function isValidatorPath(pathname: string): boolean {
-  return (
-    pathname === VALIDATOR_BASE_PATH ||
-    pathname.startsWith(`${VALIDATOR_BASE_PATH}/`)
-  );
+const PERCENT_ESCAPE = /%([0-9A-Fa-f]{2})/g;
+
+/**
+ * The path as the server resolves it: percent-decoded once, with repeated
+ * slashes as one. A path whose encoding is malformed keeps its other
+ * escapes decoded byte by byte, so a bad escape later in the path cannot
+ * hide the prefix.
+ */
+function normalizePathname(pathname: string): string {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    decoded = pathname.replaceAll(PERCENT_ESCAPE, (_escape, code: string) =>
+      String.fromCodePoint(Number.parseInt(code, 16))
+    );
+  }
+  return decoded.replaceAll(/\/{2,}/g, "/");
 }
 
 /**
- * The password the gate asks for, or null when the page is open to everyone:
- * `VALIDATOR_PAGE_PUBLIC=true`, or no password configured.
+ * True for `/validator` and everything under it, however the path is
+ * spelled: Next.js serves `public/validator/` for `/%76alidator/...` too.
  */
-export function getValidatorGatePassword(): string | null {
+export function isValidatorPath(pathname: string): boolean {
+  const normalized = normalizePathname(pathname);
+  return (
+    normalized === VALIDATOR_BASE_PATH ||
+    normalized.startsWith(`${VALIDATOR_BASE_PATH}/`)
+  );
+}
+
+type ValidatorGate =
+  | { readonly open: true }
+  | {
+      readonly open: false;
+      /** Null when none is configured: then nothing unlocks the pages. */
+      readonly password: string | null;
+    };
+
+/**
+ * Whether the pages are open to everyone. Only `VALIDATOR_PAGE_PUBLIC=true`
+ * opens them; without it they stay locked, with no way in when no password
+ * is configured, so a missing secret never opens them.
+ */
+function getValidatorGate(): ValidatorGate {
   const env = getValidatorPageServerEnv();
   if (env.isPublic) {
-    return null;
+    return { open: true };
   }
-  return env.password ?? null;
+  return { open: false, password: env.password ?? null };
+}
+
+/**
+ * The password the form accepts, or null when it accepts none: the pages
+ * are public (`VALIDATOR_PAGE_PUBLIC=true`) or no password is configured.
+ * Null does not mean open; see `hasValidatorAccess`.
+ */
+export function getValidatorGatePassword(): string | null {
+  const gate = getValidatorGate();
+  return gate.open ? null : gate.password;
 }
 
 // One entry: the key for the password in use.
@@ -137,10 +181,18 @@ export function isPasswordCorrect(input: string, password: string): boolean {
   );
 }
 
-/** True when the page is open, or the cookie is a valid one. */
+/**
+ * True when the pages are public, or the cookie is valid for the configured
+ * password. With neither the public flag nor a password, nothing is.
+ */
 export function hasValidatorAccess(cookieValue: string | undefined): boolean {
-  const password = getValidatorGatePassword();
-  return password === null || isAccessCookieValid(cookieValue, password);
+  const gate = getValidatorGate();
+  if (gate.open) {
+    return true;
+  }
+  return (
+    gate.password !== null && isAccessCookieValid(cookieValue, gate.password)
+  );
 }
 
 export const VALIDATOR_ACCESS_COOKIE_OPTIONS = {

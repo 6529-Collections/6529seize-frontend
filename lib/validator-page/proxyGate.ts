@@ -2,8 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import {
-  getValidatorGatePassword,
-  isAccessCookieValid,
+  hasValidatorAccess,
   isValidatorPath,
   VALIDATOR_ACCESS_COOKIE,
   VALIDATOR_LOCKED_PATH,
@@ -54,14 +53,7 @@ export function handleValidatorPageGate(
   ) {
     return undefined;
   }
-  const password = getValidatorGatePassword();
-  if (
-    password === null ||
-    isAccessCookieValid(
-      req.cookies.get(VALIDATOR_ACCESS_COOKIE)?.value,
-      password
-    )
-  ) {
+  if (hasValidatorAccess(req.cookies.get(VALIDATOR_ACCESS_COOKIE)?.value)) {
     return undefined;
   }
   if (

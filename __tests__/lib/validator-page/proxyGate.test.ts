@@ -110,15 +110,38 @@ describe("handleValidatorPageGate", () => {
     ).toBe("https://6529.io/validator/locked");
   });
 
-  it("opens everything when the page is public or has no password", () => {
+  it.each([
+    "/%76alidator/app-today.webp",
+    "/%76%61lidator/guide",
+    "/validator%2Fapp-today.webp",
+    "/%76alidator/%E0%A4%A",
+  ])("gates %s, a spelling of a path under /validator", (path) => {
+    expect(rewriteTarget(handleValidatorPageGate(request(path), path))).toBe(
+      "https://6529.io/validator/locked"
+    );
+  });
+
+  it("opens everything only when the page is public", () => {
     process.env["VALIDATOR_PAGE_PUBLIC"] = "true";
     expect(
       handleValidatorPageGate(request("/validator"), "/validator")
     ).toBeUndefined();
-    delete process.env["VALIDATOR_PAGE_PUBLIC"];
+    const encoded = "/%76alidator/app-today.webp";
+    expect(handleValidatorPageGate(request(encoded), encoded)).toBeUndefined();
+  });
+
+  it("stays locked with neither a password nor the public flag", () => {
     delete process.env["VALIDATOR_PAGE_PASSWORD"];
     expect(
-      handleValidatorPageGate(request("/validator"), "/validator")
+      rewriteTarget(
+        handleValidatorPageGate(request("/validator"), "/validator")
+      )
+    ).toBe("https://6529.io/validator/locked");
+    expect(
+      handleValidatorPageGate(
+        request("/validator/authorize"),
+        "/validator/authorize"
+      )
     ).toBeUndefined();
   });
 
