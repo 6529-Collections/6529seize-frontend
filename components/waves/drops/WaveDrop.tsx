@@ -65,9 +65,9 @@ import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliverySt
 import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresentation";
 import { isDropAuthorSigned } from "./signature/dropAuthorSigned";
 import GroupedDropTimestamp from "./GroupedDropTimestamp";
-import { SwipeReplyHint } from "./SwipeReplyHint";
 import ShareDropSelectOverlay from "./share-image/ShareDropSelectOverlay";
 import { useShareDropsSelection } from "./share-image/ShareDropsSelectionContext";
+import { SwipeReplyHint } from "./SwipeReplyHint";
 
 const WaveDropInner = ({
   drop,
@@ -688,8 +688,8 @@ const WaveDropInner = ({
         onPointerOut={handleRowPointerOut}
         onClickCapture={handleClickCapture}
       >
-        {canSwipeReply && <SwipeReplyHint />}
         {isChoosingSharePosts && <ShareDropSelectOverlay drop={drop} />}
+        {canSwipeReply && <SwipeReplyHint />}
         {showGroupedTimestamp && (
           <GroupedDropTimestamp
             swipeOffset={timestampSwipeOffset}

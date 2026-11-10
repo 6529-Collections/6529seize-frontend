@@ -4,8 +4,8 @@ import { useLocalSandboxMutationGuard } from "../support/localSandbox";
 const WAVE = "00000000-0000-4000-8000-000000000529";
 
 /**
- * Share as image: choose a range of posts and export a PNG rendered in the
- * browser. Browser-only risks: the selection overlay over real post rows,
+ * Share as image: start a selection from a post and export a PNG rendered in
+ * the browser. Browser-only risks: the selection overlay over real post rows,
  * the native dialog, and html-to-image producing a downloadable PNG with
  * UTC times rather than the device zone.
  */
@@ -17,7 +17,7 @@ test.describe("Share posts as image @auth @local-only", () => {
   );
   test.use({ timezoneId: "America/New_York", locale: "en-US" });
 
-  test("chooses a range, previews UTC times and downloads a PNG", async ({
+  test("selects a post, previews UTC times and downloads a PNG", async ({
     page,
   }, testInfo) => {
     test.skip(
@@ -36,19 +36,19 @@ test.describe("Share posts as image @auth @local-only", () => {
     );
     await page.goto(`/waves/${WAVE}`);
 
-    const rows = page.locator("[data-wave-drop-id]");
+    const rows = page.getByRole("main").locator("[data-wave-drop-id]");
     await expect(rows.first()).toBeVisible();
     const lastRow = rows.last();
     await lastRow.hover();
     await lastRow.getByRole("button", { name: "More actions" }).click();
     await page.getByRole("button", { name: "Share as image" }).click();
 
+    // The sandbox wave holds a single post, so the starting post is the whole
+    // range; choosing wider ranges is covered by the selection unit tests.
     await expect(page.getByText("1 post selected")).toBeVisible();
-    const choices = page.getByRole("button", { name: /^Select post by / });
-    const choiceCount = await choices.count();
-    test.skip(choiceCount < 2, "The sandbox wave needs at least two posts.");
-    await choices.nth(choiceCount - 2).click();
-    await expect(page.getByText("2 posts selected")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: /^Select post by / }).last()
+    ).toHaveAttribute("aria-pressed", "true");
 
     await page
       .getByRole("region", { name: "Share as image" })

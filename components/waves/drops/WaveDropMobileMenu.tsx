@@ -44,8 +44,8 @@ import WaveDropMobileMenuReactionPicker from "./WaveDropMobileMenuReactionPicker
 import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
 import DropSignatureDialog from "./signature/DropSignatureDialog";
 import DropSignatureMenuItem from "./signature/DropSignatureMenuItem";
-import WaveDropShareImageAction from "./share-image/WaveDropShareImageAction";
 import DisplayTimeZoneMobileMenuItem from "@/components/display-time-zone/DisplayTimeZoneMobileMenuItem";
+import WaveDropShareImageAction from "./share-image/WaveDropShareImageAction";
 
 export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;

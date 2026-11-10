@@ -53,5 +53,8 @@
   "shareImage.select.postUnknown": "Beitrag auswaehlen",
   "shareImage.time.elapsedMinutes": "+{minutes} Min.",
   "shareImage.time.elapsedHours": "+{hours} Std.",
-  "shareImage.time.elapsedHoursMinutes": "+{hours} Std. {minutes} Min."
+  "shareImage.time.elapsedHoursMinutes": "+{hours} Std. {minutes} Min.",
+  "shareImage.status.shared": "Bild geteilt",
+  "shareImage.select.unloadedOne": "1 Beitrag in diesem Bereich ist noch nicht geladen. Scrolle daran vorbei, um ihn aufzunehmen.",
+  "shareImage.select.unloadedOther": "{count} Beitraege in diesem Bereich sind noch nicht geladen. Scrolle durch sie, um sie aufzunehmen."
 }

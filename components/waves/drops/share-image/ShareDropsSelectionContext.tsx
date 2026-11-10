@@ -35,6 +35,8 @@ interface ShareDropsLayerValue {
   readonly step: Step;
   readonly wave: ApiWave | null | undefined;
   readonly selected: readonly ExtendedDrop[];
+  /** Posts in the range that are still placeholders and so not included. */
+  readonly unloadedCount: number;
   readonly cancel: () => void;
   readonly setStep: (step: Step) => void;
 }
@@ -93,6 +95,19 @@ export function ShareDropsSelectionProvider({
     [drops, range]
   );
 
+  const unloadedCount = useMemo(
+    () =>
+      range === null
+        ? 0
+        : drops.filter(
+            (drop) =>
+              !isFullDrop(drop) &&
+              drop.serial_no >= range.low &&
+              drop.serial_no <= range.high
+          ).length,
+    [drops, range]
+  );
+
   const cancel = useCallback(() => {
     setStep("idle");
     setFirstSerial(null);
@@ -122,8 +137,8 @@ export function ShareDropsSelectionProvider({
     [firstSerial, range, step]
   );
   const layer = useMemo<ShareDropsLayerValue>(
-    () => ({ step, wave, selected, cancel, setStep }),
-    [cancel, selected, step, wave]
+    () => ({ step, wave, selected, unloadedCount, cancel, setStep }),
+    [cancel, selected, step, unloadedCount, wave]
   );
 
   return (
@@ -142,13 +157,14 @@ export function ShareDropsSelectionProvider({
 export function ShareDropsSelectionLayer() {
   const layer = useContext(ShareDropsLayerContext);
   if (!layer) return null;
-  const { step, wave, selected, cancel, setStep } = layer;
+  const { step, wave, selected, unloadedCount, cancel, setStep } = layer;
 
   if (step === "selecting") {
     return (
       <ShareDropsSelectionBar
         count={selected.length}
         isTooLong={selected.length > MAX_SHARE_IMAGE_POSTS}
+        unloadedCount={unloadedCount}
         onCancel={cancel}
         onNext={() => setStep("options")}
       />
