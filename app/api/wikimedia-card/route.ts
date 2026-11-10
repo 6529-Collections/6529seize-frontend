@@ -22,8 +22,17 @@ import {
 } from "./target";
 import { sanitizeHtmlToText } from "@/lib/text/html";
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 
 const CACHE_MAX_ITEMS = 1000;
+
+// Cards load once per distinct link and stay cached for hours, so a reader
+// stays far below this budget.
+const enforceRateLimit = createClientRateLimiter({
+  limit: 120,
+  windowMs: 60 * 1000,
+  errorMessage: "Too many Wikimedia preview requests",
+});
 
 const TTL_BY_KIND: Record<WikimediaCardResponse["kind"], number> = {
   article: 24 * 60 * 60 * 1000,
@@ -715,6 +724,11 @@ export async function GET(request: NextRequest) {
     await assertPublicUrl(targetUrl, { policy: WIKIMEDIA_HOST_POLICY });
   } catch (error) {
     return respondWithGuardError(error, "The provided URL is not allowed.");
+  }
+
+  const rateLimitResponse = enforceRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   const languages = parseAcceptLanguage(request.headers.get("accept-language"));

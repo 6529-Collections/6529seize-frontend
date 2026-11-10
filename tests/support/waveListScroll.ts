@@ -30,7 +30,7 @@ export async function installWaveListScrollFixture(
   await page.route("**/api/v2/waves?**", (route) =>
     route.fulfill({ json: { data: waves, page: 1, next: false } })
   );
-  await page.route("**/api/v2/waves/joined**", (route) =>
+  await page.route(/\/api\/v2\/waves\/(?:joined|all)(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
         data: waves,

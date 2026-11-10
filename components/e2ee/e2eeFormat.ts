@@ -242,7 +242,10 @@ export function getConversationTitle(
   if (conversation.kind === "group" && conversation.name) {
     return conversation.name;
   }
-  if (conversation.kind === "dm") {
+  if (
+    conversation.kind === "dm" &&
+    !isUnpairedDm(conversation, selfProfileId)
+  ) {
     return (
       getDmPeer(conversation, selfProfileId)?.handle ??
       t(locale, "e2ee.unknownMember")
@@ -286,6 +289,21 @@ export function getDmPeer(
   );
 }
 
+/**
+ * A DM that does not hold exactly its two participants, with someone else
+ * in it: shown like a group, by its members, never under one person's name.
+ */
+export function isUnpairedDm(
+  conversation: E2eeConversation,
+  selfProfileId: string | null
+): boolean {
+  return (
+    conversation.kind === "dm" &&
+    getDmPeer(conversation, selfProfileId) === null &&
+    conversation.members.some((member) => member.profileId !== selfProfileId)
+  );
+}
+
 const NOTICE_NAME_FALLBACK: MessageKey = "e2ee.someone";
 
 function noticeNames(
@@ -307,6 +325,35 @@ function noticeNames(
         : getMemberName(locale, members, id, selfProfileId)
     )
   );
+}
+
+/**
+ * "device_added" copy. A device not yet verified for its owner on this
+ * device says so plainly, naming who added it (`actor`) and whose it is
+ * (`owner.object`, the mid-sentence form: "you").
+ */
+function deviceAddedText(
+  locale: SupportedLocale,
+  notice: NonNullable<E2eeMessage["notice"]>,
+  actor: string,
+  owner: { readonly name: string; readonly object: string }
+): string {
+  const wallet = formatNoticeWallets(locale, notice.detail);
+  if (notice.unverified === true) {
+    return wallet
+      ? t(locale, "e2ee.notice.deviceAddedUnverified", {
+          name: actor,
+          wallet,
+          owner: owner.object,
+        })
+      : t(locale, "e2ee.notice.deviceAddedUnverifiedNoWallet", {
+          name: actor,
+          owner: owner.object,
+        });
+  }
+  return wallet
+    ? t(locale, "e2ee.notice.deviceAddedWallet", { name: owner.name, wallet })
+    : t(locale, "e2ee.notice.deviceAdded", { name: owner.name });
 }
 
 /** Timeline copy for a system notice (contract 8.6). */
@@ -357,15 +404,17 @@ export function getNoticeText(
       return actorId
         ? t(locale, "e2ee.notice.removed", { actor, targets: objects })
         : t(locale, "e2ee.notice.removedNoActor", { targets });
-    case "device_added": {
-      const wallet = formatNoticeWallets(locale, notice.detail);
-      return wallet
-        ? t(locale, "e2ee.notice.deviceAddedWallet", {
-            name: ownerName,
-            wallet,
-          })
-        : t(locale, "e2ee.notice.deviceAdded", { name: ownerName });
-    }
+    case "device_added":
+      return deviceAddedText(locale, notice, actor, {
+        name: ownerName,
+        object: noticeNames(
+          locale,
+          members,
+          owner ? [owner] : [],
+          selfProfileId,
+          true
+        ),
+      });
     case "device_removed":
       return t(locale, "e2ee.notice.deviceRemoved", { name: ownerName });
     case "renamed":

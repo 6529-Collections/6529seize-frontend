@@ -36,6 +36,14 @@ const safeDecode = (value: string): string => {
   }
 };
 
+// A decoded segment is used as one path segment of an api.github.com request,
+// so it may not be a dot segment or carry its own path separator.
+const isUnsafePathSegment = (segment: string): boolean =>
+  segment === "." ||
+  segment === ".." ||
+  segment.includes("/") ||
+  segment.includes("\\");
+
 export const encodePathPart = (value: string): string =>
   encodeURIComponent(value);
 
@@ -201,10 +209,12 @@ export const parseGithubResource = (rawUrl: string | null): GithubResource => {
     throw unsupportedGithubUrlError();
   }
 
-  const [owner, repo, kindSegment, ...rest] = parsed.pathname
-    .split("/")
-    .filter(Boolean)
-    .map(safeDecode);
+  const segments = parsed.pathname.split("/").filter(Boolean).map(safeDecode);
+  if (segments.some(isUnsafePathSegment)) {
+    throw unsupportedGithubUrlError();
+  }
+
+  const [owner, repo, kindSegment, ...rest] = segments;
 
   if (!owner || !repo) {
     throw unsupportedGithubUrlError();

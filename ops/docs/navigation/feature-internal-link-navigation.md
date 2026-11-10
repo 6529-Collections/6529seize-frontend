@@ -57,6 +57,12 @@ Hash links jump to a section when the target ID exists.
   link.
 - Hash links only scroll when the destination ID exists.
 - Internal links explicitly marked with `target="_blank"` open a new tab.
+- A drop link counts as internal only when its origin exactly matches the site
+  and its path cannot be read as another host. Links with a path starting with
+  `//`, a backslash, control characters, credentials, or another port open in a
+  new tab like any external link. Scanned QR codes with such a destination are
+  refused as invalid codes.
+- Mention links keep the mentioned handle inside one profile path segment.
 - Browser modifiers (Cmd/Ctrl-click or middle-click) can still open a new tab.
 - Invalid or malformed markdown URLs are not rendered as clickable links.
 

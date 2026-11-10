@@ -4,11 +4,11 @@ import { faSignature } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { LockClosedIcon } from "@heroicons/react/24/outline";
 import UserLevel from "@/components/user/utils/level/UserLevel";
-import { shortenAddress } from "@/helpers/address.helpers";
 import { Capacitor } from "@capacitor/core";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLayoutEffect, useRef, useState } from "react";
+import { isAddress } from "viem";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { Spinner } from "@/components/dotLoader/DotLoader";
@@ -38,14 +38,19 @@ import {
 
 const ACCEPT_CONNECTION_LOCALE = DEFAULT_LOCALE;
 const SETUP_SECRET_PARAM = "device_setup_key";
+const SHARE_CODE_PARAM = "connection_share_code";
 // Query parameters that carry connection credentials.
-const CONNECTION_LINK_SECRET_PARAMS = [
-  "token",
-  "connection_share_code",
+const CONNECTION_LINK_SECRET_PARAMS = ["token", SHARE_CODE_PARAM] as const;
+// Fragment parameters that carry connection credentials.
+const CONNECTION_FRAGMENT_SECRET_PARAMS = [
+  SETUP_SECRET_PARAM,
+  SHARE_CODE_PARAM,
 ] as const;
 
 interface AcceptConnectionSharingProps {
   connectionShareCode: string;
+  /** The share code may still arrive in the fragment, read after mount. */
+  awaitingLink: boolean;
   token: string;
   address: string;
   role: string | undefined;
@@ -64,6 +69,12 @@ type ConnectionFlow =
   | "unsupported-legacy-desktop"
   | "missing-parameters";
 
+/** The link's wallet address, or "" when it is absent or not an address. */
+function toLinkAddress(value: string | null | undefined): string {
+  const address = value?.trim() ?? "";
+  return isAddress(address, { strict: false }) ? address : "";
+}
+
 /**
  * Removes connection credentials from the visible URL without navigating.
  * Reusing the current Next.js history state keeps the router (and so
@@ -73,9 +84,11 @@ type ConnectionFlow =
 function removeConnectionSecretsFromAddressBar(): void {
   const url = new URL(globalThis.location.href);
   const fragment = new URLSearchParams(url.hash.slice(1));
-  const hasSetupKey = fragment.has(SETUP_SECRET_PARAM);
+  const hasFragmentSecret = CONNECTION_FRAGMENT_SECRET_PARAMS.some((name) =>
+    fragment.has(name)
+  );
   const hasSecret =
-    hasSetupKey ||
+    hasFragmentSecret ||
     CONNECTION_LINK_SECRET_PARAMS.some((name) => url.searchParams.has(name));
   if (!hasSecret) {
     return;
@@ -84,8 +97,10 @@ function removeConnectionSecretsFromAddressBar(): void {
   for (const name of CONNECTION_LINK_SECRET_PARAMS) {
     url.searchParams.delete(name);
   }
-  if (hasSetupKey) {
-    fragment.delete(SETUP_SECRET_PARAM);
+  if (hasFragmentSecret) {
+    for (const name of CONNECTION_FRAGMENT_SECRET_PARAMS) {
+      fragment.delete(name);
+    }
     url.hash = fragment.toString();
   }
   globalThis.history.replaceState(
@@ -121,11 +136,12 @@ function getConnectionFlow({
 }): ConnectionFlow {
   const hasConnectionShareCode = connectionShareCode.trim().length > 0;
   const hasLegacyDesktopToken = token.trim().length > 0;
-  if (!hasConnectionShareCode && !hasLegacyDesktopToken) {
-    return "missing-parameters";
-  }
   if (shell === "pending") {
     return "pending";
+  }
+  // Every link names the account it connects; without one it is invalid.
+  if ((!hasConnectionShareCode && !hasLegacyDesktopToken) || !address) {
+    return "missing-parameters";
   }
   if (
     hasConnectionShareCode &&
@@ -140,7 +156,7 @@ function getConnectionFlow({
   if (shell !== "desktop-app") {
     return "unsupported-legacy-desktop";
   }
-  return address.trim().length > 0 ? "legacy-desktop" : "missing-parameters";
+  return "legacy-desktop";
 }
 
 function getSharedProfileName(profile: SharedProfile, address: string): string {
@@ -289,11 +305,10 @@ function IncomingConnectionCard({
                 )}
               </div>
             ) : null}
-            {address ? (
-              <div className="tw-mt-0.5 tw-truncate tw-font-mono tw-text-[11px] tw-text-neutral-500">
-                {shortenAddress(address)}
-              </div>
-            ) : null}
+            {/* The whole address, so the account the link connects can be checked. */}
+            <div className="tw-mt-0.5 tw-break-all tw-font-mono tw-text-[11px] tw-text-neutral-400">
+              {address}
+            </div>
           </div>
         </div>
       )}
@@ -554,7 +569,7 @@ function AcceptConnectionSharing(
   const { seizeAcceptConnection, address: connectedAddress } =
     useSeizeConnectContext();
 
-  const { connectionShareCode, token, address, role } = props;
+  const { connectionShareCode, token, address, role, awaitingLink } = props;
   const [acceptingConnection, setAcceptingConnection] = useState(false);
   const [failedSetupCode, setFailedSetupCode] = useState<string | null>(null);
   const shell = useConnectionShell();
@@ -562,7 +577,7 @@ function AcceptConnectionSharing(
     connectionShareCode,
     token,
     address,
-    shell,
+    shell: awaitingLink ? "pending" : shell,
   });
   const isIncomingConnectionAlreadyStored =
     isAddressInConnectedAccounts(address);
@@ -680,15 +695,20 @@ function AcceptConnectionSharing(
 export default function AcceptConnectionSharingPage() {
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by app/accept-connection-sharing/page.tsx
   const searchParams = useSearchParams();
-  const connectionShareCode = searchParams?.get("connection_share_code") || "";
+  const queryShareCode = searchParams.get(SHARE_CODE_PARAM)?.trim() ?? "";
   const token = searchParams?.get("token") || "";
-  const address = searchParams?.get("address") || "";
+  const address = toLinkAddress(searchParams.get("address"));
   const role = searchParams?.get("role") || undefined;
   // The whole query identifies a link visit, so reopening the same link (with
   // a new `_t`) on the mounted page is cleaned again.
   const linkQuery = searchParams.toString();
   const setupSecret = useRef<SetupKeyRef["current"]>(null);
+  const fragmentShareCode = useRef<string | null>(null);
   const [setupLinkQuery, setSetupLinkQuery] = useState<string | null>(null);
+  const [readFragment, setReadFragment] = useState<{
+    readonly query: string;
+    readonly shareCode: string;
+  } | null>(null);
   const capturedQuery = useRef<string | null>(null);
 
   // A layout effect runs before paint and before passive effects, such as
@@ -697,26 +717,47 @@ export default function AcceptConnectionSharingPage() {
   // from the router values the accept action uses.
   useLayoutEffect(() => {
     const fragment = new URLSearchParams(globalThis.location.hash.slice(1));
-    if (capturedQuery.current !== linkQuery) setupSecret.current = null;
+    if (capturedQuery.current !== linkQuery) {
+      setupSecret.current = null;
+      fragmentShareCode.current = null;
+    }
     capturedQuery.current = linkQuery;
     const unlockKey = fragment.get(SETUP_SECRET_PARAM);
     if (unlockKey) setupSecret.current = { key: unlockKey };
+    const shareCode = fragment.get(SHARE_CODE_PARAM)?.trim();
+    if (shareCode) fragmentShareCode.current = shareCode;
     removeConnectionSecretsFromAddressBar();
     // Publish the link type after scrubbing the URL. Strict Mode may replay
     // this effect after the fragment has already been removed.
     const setupQuery = setupSecret.current ? linkQuery : null;
+    const fragmentRead = {
+      query: linkQuery,
+      shareCode: fragmentShareCode.current ?? "",
+    };
     let active = true;
     queueMicrotask(() => {
-      if (active) setSetupLinkQuery(setupQuery);
+      if (!active) return;
+      setSetupLinkQuery(setupQuery);
+      setReadFragment(fragmentRead);
     });
     return () => {
       active = false;
     };
   }, [linkQuery]);
 
+  // A code in the fragment never reaches a server, so it wins over the query.
+  const fragmentForLink =
+    readFragment?.query === linkQuery ? readFragment : null;
+  const fragmentShareCodeForLink = fragmentForLink?.shareCode ?? "";
+  const connectionShareCode =
+    fragmentShareCodeForLink === "" ? queryShareCode : fragmentShareCodeForLink;
+
   return (
     <AcceptConnectionSharing
       connectionShareCode={connectionShareCode}
+      awaitingLink={
+        fragmentForLink === null && queryShareCode === "" && token === ""
+      }
       setupSecret={setupSecret}
       includesDeviceSetup={setupLinkQuery === linkQuery}
       token={token}

@@ -35,6 +35,15 @@ export interface E2eeDeviceInfo {
   revokedAt: number | null;
   isThisDevice: boolean;
   verified: boolean;
+  /** Lowercase wallet that signed the device's grant. */
+  wallet?: string;
+  /**
+   * Another active device of this profile that this device does not add to
+   * chats until the user adds it ("Add device", `trustDevice`): its wallet
+   * is not this device's and was not added here, or its signature could not
+   * be checked here.
+   */
+  needsApproval?: boolean;
 }
 
 export interface E2eeMember {
@@ -43,12 +52,18 @@ export interface E2eeMember {
   pfp: string | null;
   wallets: string[];
   isAdmin: boolean;
-  /** `wallet`: the lowercase wallet that signed the device's grant. */
+  /**
+   * `wallet`: the lowercase wallet that signed the device's grant.
+   * `walletPinned`: this device trusts that wallet for the member (pinned
+   * for them, added with "Add device", or, for the viewer, this device's own
+   * wallet); false means the device is not yet verified for the member here.
+   */
   devices: {
     deviceKey: string;
     label: string;
     verified: boolean;
     wallet: string | null;
+    walletPinned?: boolean;
   }[];
 }
 
@@ -108,6 +123,8 @@ export interface E2eeMessage {
     actorProfileId: string | null;
     targetProfileIds: string[];
     detail?: string;
+    /** device_added: not yet verified for its owner on this device. */
+    unverified?: boolean;
   };
   /** Moved from an unencrypted 6529.io DM: not verified (D146). */
   imported?: E2eeImported;

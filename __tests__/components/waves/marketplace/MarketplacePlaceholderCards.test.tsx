@@ -57,6 +57,29 @@ describe("Marketplace placeholder cards", () => {
     ).toBeNull();
   });
 
+  it("links the unavailable card to an on-site path in the current tab", () => {
+    render(
+      <MarketplaceUnavailableCard
+        href="https://test.6529.io/the-memes/1"
+        compact={true}
+      />
+    );
+
+    const link = screen.getByRole("link");
+    expect(link).toHaveAttribute("href", "/the-memes/1");
+    expect(link).not.toHaveAttribute("target");
+  });
+
+  it("opens an unavailable card whose path starts with // in a new tab", () => {
+    const href = "https://test.6529.io//other.example/path";
+    render(<MarketplaceUnavailableCard href={href} compact={true} />);
+
+    const link = screen.getByRole("link");
+    expect(link).toHaveAttribute("href", href);
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
+  });
+
   it("renders unavailable footer row in non-compact mode", () => {
     render(
       <LinkPreviewProvider variant="home">

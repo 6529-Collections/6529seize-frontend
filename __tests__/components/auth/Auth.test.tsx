@@ -26,6 +26,20 @@ import { validateAuthImmediate } from "@/services/auth/immediate-validation.util
 import type * as SessionV2Module from "@/services/auth/session-v2.utils";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { publicEnv } from "@/config/env";
+import {
+  appSignInChallenge,
+  siweSignInChallenge,
+} from "./signInChallengeFixtures";
+
+/** The challenge the API issues to this client type for a wallet. */
+const signInChallengeFor = (address: string): string =>
+  (
+    jest.requireMock("@/services/auth/session-v2.utils") as {
+      getSessionClientType: () => string;
+    }
+  ).getSessionClientType() === "native"
+    ? appSignInChallenge({ address })
+    : siweSignInChallenge({ address });
 
 const mockQueryClient = {
   getQueryData: jest.fn(),
@@ -524,10 +538,12 @@ describe("Auth component", () => {
     const sessionV2 = require("@/services/auth/session-v2.utils");
     sessionV2.getSessionClientType.mockReturnValue("web");
     sessionV2.getSessionNonce.mockReset();
-    sessionV2.getSessionNonce.mockResolvedValue({
-      signable_message: "sign this message exactly",
-      server_signature: "server-signature",
-    });
+    sessionV2.getSessionNonce.mockImplementation(
+      async ({ signerAddress }: { readonly signerAddress: string }) => ({
+        signable_message: signInChallengeFor(signerAddress),
+        server_signature: "server-signature",
+      })
+    );
     sessionV2.loginWithSessionV2.mockReset();
     sessionV2.persistSessionResponse.mockReset();
     sessionV2.persistSessionResponse.mockResolvedValue(true);
@@ -1286,7 +1302,9 @@ describe("Auth component", () => {
       expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
         signerAddress: validAddress,
       });
-      expect(mockSignMessage).toHaveBeenCalledWith("sign this message exactly");
+      expect(mockSignMessage).toHaveBeenCalledWith(
+        signInChallengeFor(validAddress)
+      );
       expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
         serverSignature: "server-signature",
         clientSignature: "0xsignature",
@@ -1493,7 +1511,9 @@ describe("Auth component", () => {
       expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
         signerAddress: validAddress,
       });
-      expect(mockSignMessage).toHaveBeenCalledWith("sign this message exactly");
+      expect(mockSignMessage).toHaveBeenCalledWith(
+        signInChallengeFor(validAddress)
+      );
       await waitFor(() =>
         expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
           serverSignature: "server-signature",
@@ -1646,7 +1666,7 @@ describe("Auth component", () => {
       connectedAccountsOverride = [];
       const sessionV2 = require("@/services/auth/session-v2.utils");
       sessionV2.getSessionNonce.mockResolvedValue({
-        signable_message: "6529 Authentication\nDomain: app.6529.io",
+        signable_message: siweSignInChallenge({ address: validAddress }),
         server_signature: "server-signature",
       });
       const sessionResponse = {
@@ -1676,7 +1696,7 @@ describe("Auth component", () => {
         signerAddress: validAddress,
       });
       expect(mockSignMessage).toHaveBeenCalledWith(
-        "6529 Authentication\nDomain: app.6529.io"
+        siweSignInChallenge({ address: validAddress })
       );
       await waitFor(() =>
         expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
@@ -1699,7 +1719,7 @@ describe("Auth component", () => {
       connectedAccountsOverride = [];
       const sessionV2 = require("@/services/auth/session-v2.utils");
       sessionV2.getSessionNonce.mockResolvedValue({
-        signable_message: "6529 Authentication\nDomain: native",
+        signable_message: appSignInChallenge({ address: validAddress }),
         server_signature: "server-signature",
       });
       const sessionResponse = {
@@ -1732,7 +1752,7 @@ describe("Auth component", () => {
         signerAddress: validAddress,
       });
       expect(mockSignMessage).toHaveBeenCalledWith(
-        "6529 Authentication\nDomain: native"
+        appSignInChallenge({ address: validAddress })
       );
       await waitFor(() =>
         expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
@@ -2944,7 +2964,7 @@ describe("Auth component", () => {
       await userEvent.click(screen.getByText("Sign message"));
       await waitFor(() => {
         expect(mockSignMessage).toHaveBeenCalledWith(
-          "sign this message exactly"
+          signInChallengeFor("0x1111111111111111111111111111111111111111")
         );
       });
     });
@@ -3051,7 +3071,7 @@ describe("Auth component", () => {
 
       mockActiveChainId = 137;
       nonce.resolve({
-        signable_message: "sign this message exactly",
+        signable_message: signInChallengeFor(validAddress),
         server_signature: "server-signature",
       });
 
@@ -3109,7 +3129,7 @@ describe("Auth component", () => {
 
       mockActiveChainId = 137;
       nonce.resolve({
-        signable_message: "sign this message exactly",
+        signable_message: signInChallengeFor(validAddress),
         server_signature: "server-signature",
       });
 
@@ -3180,7 +3200,7 @@ describe("Auth component", () => {
 
       mockActiveChainId = 137;
       nonce.resolve({
-        signable_message: "sign this message exactly",
+        signable_message: signInChallengeFor(validAddress),
         server_signature: "server-signature",
       });
 
