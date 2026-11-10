@@ -62,6 +62,7 @@ const activePage = (count: number) => ({
 
 const fetchEntries = jest.mocked(fetchCompetitionResource);
 
+/** Run the capacity query and the wave eligibility calculation against a fresh cache. */
 function renderParticipation() {
   const client = new QueryClient();
   const wrapper = ({ children }: { readonly children: ReactNode }) => (

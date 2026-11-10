@@ -39,6 +39,7 @@ function parseCompetitionEvent(value: unknown): {
   };
 }
 
+/** Batch realtime updates and refresh capacity when an event may change active entries. */
 export function useCompetitionEvents(waveId: string, enabled = true) {
   const { subscribe } = useWebSocket();
   const client = useQueryClient();

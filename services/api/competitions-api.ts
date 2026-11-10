@@ -316,6 +316,7 @@ export async function invalidateCompetition(
   );
 }
 
+/** Refresh a wave's competition resources, optionally retaining the active-entry count. */
 export async function invalidateCompetitionWave(
   client: QueryClient,
   waveId: string,
@@ -352,6 +353,7 @@ export async function invalidateCompetitionAuthors(
   ]);
 }
 
+/** Refresh shared wave views and the competition caches matching the supplied scope. */
 async function invalidateCompetitionScope(
   client: QueryClient,
   waveId: string,
