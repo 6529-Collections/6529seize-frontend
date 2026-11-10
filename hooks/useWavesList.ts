@@ -175,14 +175,16 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     hasNextPage: hasAllActivityWavesNextPage,
     fetchNextPage: fetchNextAllActivityWavesPage,
     status: allActivityWavesStatus,
+    hasLoadingError: hasAllActivityWavesError,
+    retryLoading: retryAllActivityWaves,
     refetch: allActivityWavesRefetch,
     refetchIfStale: allActivityWavesRefetchIfStale,
   } = useWavesV2({
+    allSnapshot: true,
     overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: false,
     directMessage: false,
-    pinned: nonPinnedFilter,
     viewerIdentityKey,
     refetchInterval: isJoinedMode
       ? false
@@ -716,8 +718,12 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       hasNextPage: hasMainWavesNextPage,
       fetchNextPage: fetchNextPageStable,
       status: mainWavesStatus,
-      hasLoadingError: isJoinedMode && hasFollowedActivityWavesError,
-      retryLoading: retryFollowedActivityWaves,
+      hasLoadingError: isJoinedMode
+        ? hasFollowedActivityWavesError
+        : hasAllActivityWavesError,
+      retryLoading: isJoinedMode
+        ? retryFollowedActivityWaves
+        : retryAllActivityWaves,
 
       recommendationsStatus: shouldLoadMainWaves
         ? recommendationsStatus
@@ -771,6 +777,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       mainWavesStatus,
       isJoinedMode,
       hasFollowedActivityWavesError,
+      hasAllActivityWavesError,
+      retryAllActivityWaves,
       retryFollowedActivityWaves,
       mainWaves,
       allPinnedWaves,

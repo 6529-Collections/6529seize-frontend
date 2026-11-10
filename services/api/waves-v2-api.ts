@@ -1,4 +1,5 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiAllWavesPage } from "@/generated/models/ApiAllWavesPage";
 import type { ApiJoinedWavesPage } from "@/generated/models/ApiJoinedWavesPage";
 import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
@@ -283,6 +284,29 @@ export async function fetchJoinedWavesPage({
 }): Promise<SidebarWavesPage> {
   const response = await commonApiFetch<ApiJoinedWavesPage>({
     endpoint: "v2/waves/joined",
+    params: { page_size: String(pageSize), ...(cursor ? { cursor } : {}) },
+    signal,
+    errorMode: "structured",
+  });
+  return {
+    waves: response.data.map(mapApiWaveOverviewToSidebarWave),
+    page: 1,
+    next: response.next_cursor !== null,
+    nextCursor: response.next_cursor,
+  };
+}
+
+export async function fetchAllWavesPage({
+  cursor,
+  pageSize,
+  signal,
+}: {
+  readonly cursor?: string | undefined;
+  readonly pageSize: number;
+  readonly signal?: AbortSignal | undefined;
+}): Promise<SidebarWavesPage> {
+  const response = await commonApiFetch<ApiAllWavesPage>({
+    endpoint: "v2/waves/all",
     params: { page_size: String(pageSize), ...(cursor ? { cursor } : {}) },
     signal,
     errorMode: "structured",
