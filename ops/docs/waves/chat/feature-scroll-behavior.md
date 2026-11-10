@@ -8,6 +8,7 @@ If you scroll up, it keeps your place and stops forced jumps.
 On Apple mobile only, new drops from other people can stay pending until you
 return to bottom. Your own outgoing drops remain in the chat while sending and
 after they are saved, including text-only drops and drops with images.
+An image drop keeps its place in the conversation when image processing finishes.
 
 ## Location in the Site
 

@@ -828,13 +828,15 @@ describe("useWaveRealtimeUpdater", () => {
     }
   );
 
-  it("normalizes string serial numbers before inserting realtime drops", async () => {
+  it("normalizes database numeric strings before inserting realtime drops", async () => {
     const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
     const props = baseProps(store);
     const { result } = renderHook(() => useWaveRealtimeUpdater(props));
     const drop: any = {
       id: "helpbot-reply",
       serial_no: "6831",
+      created_at: "1794293960499",
+      updated_at: "1794293961499",
       wave: { id: "wave1" },
       author: { handle: "help6529" },
     };
@@ -850,6 +852,8 @@ describe("useWaveRealtimeUpdater", () => {
     const insertedDrop = props.updateData.mock.calls[0][0].drops[0];
     expect(insertedDrop.serial_no).toBe(6831);
     expect(typeof insertedDrop.serial_no).toBe("number");
+    expect(insertedDrop.created_at).toBe(1794293960499);
+    expect(insertedDrop.updated_at).toBe(1794293961499);
   });
 
   it("handles aborted fetch without logging", async () => {

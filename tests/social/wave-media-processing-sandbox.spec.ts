@@ -307,8 +307,30 @@ test.describe("Wave media lifecycle @auth @local-only", () => {
     await expect(row).toContainText(content);
     await expect(row).toContainText("Processing image");
     expect(imageRequests).toBe(0);
+    // Catch even a brief reorder before a later canonical feed repairs the row.
+    await page.getByRole("tabpanel").evaluate((panel) => {
+      const rowOrder = () =>
+        Array.from(panel.querySelectorAll('[id^="drop-"]'))
+          .map((element) => element.id)
+          .join(",");
+      const expectedOrder = rowOrder();
+      panel.setAttribute("data-image-order-violations", "0");
+      new MutationObserver(() => {
+        if (rowOrder() !== expectedOrder) {
+          const count = Number(
+            panel.getAttribute("data-image-order-violations")
+          );
+          panel.setAttribute("data-image-order-violations", String(count + 1));
+        }
+      }).observe(panel, { childList: true, subtree: true });
+    });
     current = ready;
-    send(ready);
+    // Reproduce BIGINT strings emitted by the media worker's database pool.
+    send({
+      ...ready,
+      serial_no: String(serial) as unknown as number,
+      created_at: String(ready.created_at) as unknown as number,
+    });
     const preview = row.getByRole("img", { name: "Drop media", exact: true });
     await expect(preview).toBeVisible();
     await expect
@@ -335,5 +357,9 @@ test.describe("Wave media lifecycle @auth @local-only", () => {
     await expect(row.getByText("Processing image")).toHaveCount(0);
     await expect(preview).toBeVisible();
     expect(imageRequests).toBeGreaterThan(0);
+    await expect(page.getByRole("tabpanel")).toHaveAttribute(
+      "data-image-order-violations",
+      "0"
+    );
   });
 });
