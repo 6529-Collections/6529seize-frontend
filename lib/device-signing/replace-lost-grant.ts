@@ -7,6 +7,12 @@ import {
   fetchDeviceGrants,
   revokeDeviceGrant,
 } from "@/services/api/device-grants-api";
+import { isDirectProfileAuthSession } from "@/components/auth/auth-session-scope";
+import {
+  getConnectedWalletAccounts,
+  getWalletAddress,
+  getWalletRole,
+} from "@/services/auth/auth.utils";
 import { listLocalDevicePublicKeys, readDeviceKey } from "./device-key-store";
 import {
   clearDeviceKeyLoss,
@@ -31,8 +37,65 @@ interface SignedInAccount {
   readonly profileId: string;
 }
 
-/** The server answered for another profile than the signed-in account's. */
+/**
+ * The session changed to another wallet or profile around a server call, so
+ * its answer may belong to that other account and must not decide this one's
+ * record.
+ */
 class AccountChangedError extends Error {}
+
+/**
+ * Whether the client's current session still acts as this account: its
+ * active wallet, that wallet's own profile, and no proxy role. Requests are
+ * sent with the active session, so this is checked around each of them.
+ */
+function isStillSignedInAs(account: SignedInAccount): boolean {
+  if (getWalletAddress()?.toLowerCase() !== account.wallet) {
+    return false;
+  }
+  const stored = getConnectedWalletAccounts().find(
+    (candidate) => candidate.address.toLowerCase() === account.wallet
+  );
+  if (
+    stored?.profileId !== undefined &&
+    stored.profileId !== null &&
+    stored.profileId !== account.profileId
+  ) {
+    return false;
+  }
+  return isDirectProfileAuthSession({
+    authRole: stored ? stored.role : getWalletRole(),
+    profileId: account.profileId,
+    hasActiveProxy: false,
+  });
+}
+
+function assertSignedInAs(account: SignedInAccount): void {
+  if (!isStillSignedInAs(account)) {
+    throw new AccountChangedError("Signed-in account changed");
+  }
+}
+
+/**
+ * Runs one server call for this account, checking the session before and
+ * after it (also when it fails), so an answer or an error produced under
+ * another account never decides this account's record.
+ */
+async function asAccount<T>(
+  account: SignedInAccount,
+  call: () => Promise<T>
+): Promise<T> {
+  assertSignedInAs(account);
+  let result: T;
+  try {
+    result = await call();
+  } catch (error) {
+    assertSignedInAs(account);
+    throw error;
+  }
+  assertSignedInAs(account);
+  return result;
+}
 
 /** Failures worth another attempt later; any other 4xx never succeeds. */
 const isTransient = (status: number | undefined): boolean =>
@@ -80,13 +143,16 @@ async function withLossLock<T>(
  */
 async function enrolledEncryptedDevice(
   grantId: string,
-  profileId: string
+  account: SignedInAccount
 ): Promise<boolean> {
-  const me = await commonApiFetch<ApiE2eeMe>({
-    endpoint: "e2ee/me",
-    errorMode: "structured",
-  });
-  if (me.profile_id !== profileId) {
+  const me = await asAccount(account, () =>
+    commonApiFetch<ApiE2eeMe>({
+      endpoint: "e2ee/me",
+      errorMode: "structured",
+    })
+  );
+  // The server's own answer names the profile too.
+  if (me.profile_id !== account.profileId) {
     throw new AccountChangedError("Signed-in profile changed");
   }
   return me.devices.some(
@@ -113,9 +179,9 @@ async function isRevocable(
   if (!noteKey) {
     return false;
   }
-  const serverGrant = (await fetchDeviceGrants()).find(
-    (grant) => grant.id === loss.grantId
-  );
+  // Only a list read as this account may say the grant is gone.
+  const grants = await asAccount(account, () => fetchDeviceGrants());
+  const serverGrant = grants.find((grant) => grant.id === loss.grantId);
   const activeForNoteKey =
     serverGrant?.revoked_at === null &&
     serverGrant.device_key.toLowerCase() === noteKey;
@@ -126,7 +192,7 @@ async function isRevocable(
   if (localKeys.some((key) => key.toLowerCase() === noteKey)) {
     return false;
   }
-  return !(await enrolledEncryptedDevice(loss.grantId, account.profileId));
+  return !(await enrolledEncryptedDevice(loss.grantId, account));
 }
 
 /** Counts a failed attempt, or gives up after a permanent one or the cap. */
@@ -136,7 +202,8 @@ function recordFailure(
   error: unknown
 ): void {
   if (error instanceof AccountChangedError) {
-    // The session moved to another profile mid-check: leave it pending.
+    // The session moved to another account around a call: leave it pending
+    // for this account's next sign-in, without counting an attempt.
     return;
   }
   const attempts = (loss.revokeAttempts ?? 0) + 1;
@@ -159,7 +226,10 @@ function recordFailure(
  * Signed Posts; otherwise the loss is dropped without revoking.
  *
  * A loss recorded for another wallet or profile is left untouched, pending
- * until that account signs in again. The record (keyed by wallet, like the
+ * until that account signs in again. Every server call is bracketed by a
+ * check that the session is still this account, so a switch mid-cleanup
+ * leaves the record pending instead of letting another account's answer
+ * drop it. The record (keyed by wallet, like the
  * key store and the lock, and carrying the wallet's own profile) is cleared
  * only after a successful revoke; a transient failure keeps it for a later
  * attempt (at most MAX_LOST_GRANT_REVOKE_ATTEMPTS), and a permanent one
@@ -169,6 +239,7 @@ export async function revokeLostDeviceGrant(
   account: SignedInAccount
 ): Promise<LostGrantRevokeResult> {
   const wallet = account.wallet.toLowerCase();
+  const signedIn: SignedInAccount = { wallet, profileId: account.profileId };
   try {
     return await withLossLock(wallet, async () => {
       // Read inside the lock: another tab may have finished already.
@@ -185,7 +256,7 @@ export async function revokeLostDeviceGrant(
       }
       let revocable: boolean;
       try {
-        revocable = await isRevocable(loss, account);
+        revocable = await isRevocable(loss, signedIn);
       } catch (error) {
         recordFailure(wallet, loss, error);
         return "failed";
@@ -195,7 +266,7 @@ export async function revokeLostDeviceGrant(
         return "none";
       }
       try {
-        await revokeDeviceGrant(loss.grantId);
+        await asAccount(signedIn, () => revokeDeviceGrant(loss.grantId));
       } catch (error) {
         recordFailure(wallet, loss, error);
         return "failed";
