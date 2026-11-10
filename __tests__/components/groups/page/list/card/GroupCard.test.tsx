@@ -1,4 +1,5 @@
 import { render, fireEvent } from "@testing-library/react";
+import { renderToStaticMarkup } from "react-dom/server";
 import userEvent from "@testing-library/user-event";
 import GroupCard from "@/components/groups/page/list/card/GroupCard";
 import { AuthContext } from "@/components/auth/Auth";
@@ -95,5 +96,30 @@ describe("GroupCard", () => {
     expect(
       queryByRole("link", { name: "Open Loading group" })
     ).not.toBeInTheDocument();
+  });
+  it("uses only plain banner colours in the card gradient", () => {
+    const renderMarkup = (banner1: string) =>
+      renderToStaticMarkup(
+        <AuthContext.Provider value={{ connectedProfile: null } as any}>
+          <GroupCard
+            group={{
+              ...group,
+              created_by: {
+                handle: "h",
+                banner1_color: banner1,
+                banner2_color: "#445566",
+              },
+            }}
+          />
+        </AuthContext.Provider>
+      );
+
+    expect(renderMarkup("#112233")).toContain(
+      "linear-gradient(135deg, #112233 0%, #445566 100%)"
+    );
+    const injected = renderMarkup("#112233;position:fixed;inset:0");
+    expect(injected).not.toContain("position:fixed");
+    expect(injected).not.toContain("#112233");
+    expect(injected).toContain("#445566 100%)");
   });
 });
