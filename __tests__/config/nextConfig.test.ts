@@ -28,6 +28,10 @@ describe("shared Next config", () => {
     );
   });
 
+  it("keeps next dev and next build free of upgrade reminders", () => {
+    expect(sharedConfig(publicEnv, "").experimental?.agentUpgrade).toBe(false);
+  });
+
   it("does not publish production browser source maps by default", () => {
     expect(
       sharedConfig(publicEnv, "").productionBrowserSourceMaps
@@ -337,5 +341,39 @@ describe("image optimizer hardening", () => {
     expect(hostnames.filter((hostname) => hostname.startsWith("**."))).toEqual(
       []
     );
+  });
+});
+
+describe("image optimizer inputs", () => {
+  const imageConfig = () => sharedConfig(publicEnv, "").images ?? {};
+  const isRemoteOptimizable = (url: string) =>
+    hasRemoteMatch([], imageConfig().remotePatterns ?? [], new URL(url));
+
+  it.each([
+    "https://6529.io/profile-cms/templates/quiet-signal.png",
+    "https://seize.io/6529.png",
+    "https://staging.6529.io/intern-no-bg.png",
+  ])("optimizes a first-party absolute image without a query: %s", (url) => {
+    expect(isRemoteOptimizable(url)).toBe(true);
+  });
+
+  it.each([
+    "https://6529.io/api/og-metadata/image?url=https://example.com/a.png",
+    "https://seize.io/6529.png?v=1",
+    "https://staging.6529.io/api/profile-cms/assets?url=https://d3lqz0a4bldqgf.cloudfront.net/images/a.webp",
+  ])("refuses a first-party absolute image with a query: %s", (url) => {
+    expect(isRemoteOptimizable(url)).toBe(false);
+  });
+
+  it.each([
+    // Passed through unchanged from API, NFT metadata and Alchemy fields, so
+    // a query string cannot be ruled out and stays allowed.
+    "https://i2c.seadn.io/ethereum/0xabc/token.png?w=500",
+    "https://d3lqz0a4bldqgf.cloudfront.net/pfp/user/avatar.png?d=1",
+    "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/example?x=1",
+    "https://arweave.net/Jv9qMwx8lfuPMch9S_aBFk9-ENL1lWtbEV4zqWytJAM?ext=png",
+    "https://ipfs.io/ipfs/QmeDsW26YAivUJkBeaPNXL5noD6QshdFzdMZjSHJ6eXVbi?filename=1.png",
+  ])("keeps query strings on pass-through media hosts: %s", (url) => {
+    expect(isRemoteOptimizable(url)).toBe(true);
   });
 });

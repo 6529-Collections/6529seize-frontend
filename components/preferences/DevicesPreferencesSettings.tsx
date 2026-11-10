@@ -25,7 +25,7 @@ import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatDate, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -38,6 +38,7 @@ import {
   formatE2eeLastActive,
   formatE2eeWallet,
 } from "@/components/e2ee/e2eeFormat";
+import { useLinkedDeviceRevocation } from "@/components/e2ee/devices/useLinkedDeviceRevocation";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
 type GrantStatus = "active" | "expired" | "revoked";
@@ -119,15 +120,19 @@ function getGrantDates(
  * Revoke confirmation copy. The browser in use gets its own title, since
  * revoking it can delete the encrypted chats saved here.
  */
+/**
+ * `linkedHistoryKey`: for a combined grant, what happens to that device's
+ * encrypted history (useLinkedDeviceRevocation); null for a signing-only one.
+ */
 function getRevokeDialogCopy(
   locale: SupportedLocale,
   {
     label,
-    linked,
+    linkedHistoryKey,
     thisBrowser,
   }: {
     readonly label: string;
-    readonly linked: boolean;
+    readonly linkedHistoryKey: MessageKey | null;
     readonly thisBrowser: boolean;
   }
 ): { title: string; message: string; confirmText: string } {
@@ -141,17 +146,12 @@ function getRevokeDialogCopy(
   return {
     title: t(
       locale,
-      linked
+      linkedHistoryKey
         ? "e2ee.devices.revokeCombinedTitle"
         : "signedMessages.devices.revokeProofTitle",
       { label }
     ),
-    message: t(
-      locale,
-      linked
-        ? "e2ee.devices.revokeHistory"
-        : "signedMessages.devices.revokeConfirm"
-    ),
+    message: t(locale, linkedHistoryKey ?? "signedMessages.devices.revokeConfirm"),
     confirmText: t(locale, "signedMessages.devices.revoke"),
   };
 }
@@ -324,6 +324,10 @@ export default function DevicesPreferencesSettings() {
   const local = useLocalDeviceKeys(listAddress);
   const nowMs = useMinuteClock();
   const { revoke, isRevoking } = useRevokeDeviceGrant();
+  const linkedRevocation = useLinkedDeviceRevocation();
+  // A ref blocks a second confirm before React re-renders the dialog.
+  const signingRef = useRef(false);
+  const [signingRevoke, setSigningRevoke] = useState(false);
   const [pendingRevoke, setPendingRevoke] = useState<ApiDeviceGrant | null>(
     null
   );
@@ -354,13 +358,23 @@ export default function DevicesPreferencesSettings() {
   // Both sides lowercase: missing this browser would skip the stricter
   // "Revoke this browser?" dialog and its encrypted-chats warning.
   const ownKeys = new Set(local.publicKeys.map((key) => key.toLowerCase()));
-  const revokingThisBrowser =
+  const pendingIsOwn =
     pendingRevoke !== null &&
     ownKeys.has(pendingRevoke.device_key.toLowerCase());
+  const revokingThisBrowser = pendingIsOwn;
 
   const confirmRevoke = async () => {
-    if (canVerifyRevocation && pendingRevoke && (await revoke(pendingRevoke))) {
+    if (!canVerifyRevocation || !pendingRevoke || signingRef.current) return;
+    const linked = pendingLinkedDevice;
+    // A linked encryption device gets a signed revocation its devices can verify.
+    signingRef.current = true;
+    setSigningRevoke(true);
+    const signed = linked ? await linkedRevocation.sign(linked) : false;
+    signingRef.current = false;
+    setSigningRevoke(false);
+    if (await revoke(pendingRevoke)) {
       setPendingRevoke(null);
+      if (linked) await linkedRevocation.finish(linked, pendingIsOwn, signed);
       if (encryptionEnabled) void encryptionDevices.refetch();
     }
   };
@@ -505,16 +519,18 @@ export default function DevicesPreferencesSettings() {
       )}
       <MobileWrapperConfirmationDialog
         isOpen={pendingRevoke !== null && canVerifyRevocation}
-        onClose={() => !isRevoking && setPendingRevoke(null)}
+        onClose={() => !isRevoking && !signingRevoke && setPendingRevoke(null)}
         onConfirm={() => void confirmRevoke()}
         {...getRevokeDialogCopy(locale, {
           label:
             pendingLinkedDevice?.label ?? pendingRevoke?.device_label ?? "",
-          linked: pendingLinkedDevice !== undefined,
+          linkedHistoryKey: pendingLinkedDevice
+            ? linkedRevocation.historyKey(pendingLinkedDevice, pendingIsOwn)
+            : null,
           thisBrowser: revokingThisBrowser,
         })}
         cancelText={t(locale, "signedMessages.devices.cancel")}
-        isConfirming={isRevoking}
+        isConfirming={isRevoking || signingRevoke}
         confirmVariant="destructive"
       >
         {revokingThisBrowser ? (

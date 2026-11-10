@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { MessageKey } from "@/i18n/messages";
 import type { E2eeMember, E2eeMessage } from "@/lib/e2ee/types";
+import { MAX_ATTACHMENT_FILE_BYTES } from "@/lib/e2ee/media";
 import {
   type ActiveMentionQuery,
   filterMentionCandidates,
@@ -12,7 +13,7 @@ import {
 export const E2EE_MAX_TEXT_LENGTH = 10_000;
 const E2EE_MAX_FILES = 10;
 /** Blob limit is 25 MiB of ciphertext; keep headroom for per-chunk tags. */
-const E2EE_MAX_FILE_BYTES = 25 * 1024 * 1024 - 64 * 1024;
+const E2EE_MAX_FILE_BYTES = MAX_ATTACHMENT_FILE_BYTES;
 const E2EE_MAX_FILE_MB_LABEL = 25;
 
 export interface ComposerError {

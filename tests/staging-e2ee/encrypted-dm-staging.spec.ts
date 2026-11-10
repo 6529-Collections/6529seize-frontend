@@ -2,6 +2,12 @@ import {
   dropEncryptedAttachment,
   checkEncryptedImageActions,
 } from "../support/e2ee/attachmentMedia";
+import {
+  gifFixtureBytes,
+  GIPHY_FIXTURE_URL,
+  installGiphyFixture,
+  selectFixtureGif,
+} from "../support/e2ee/giphyFixture";
 import { measureStagingCatchUp } from "../support/staging-e2ee/catch-up";
 import { performance } from "node:perf_hooks";
 import {
@@ -345,13 +351,11 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expectPrivateAndClean([a, b], needles({ hello, reply }));
   });
 
-  test("ordinary and encrypted chats render identical Markdown without fetching encrypted URLs", async ({}, testInfo) => {
+  test("ordinary and encrypted chats render identical Markdown without fetching encrypted URLs", async ({ browser }, testInfo) => {
     const { a, b, runId } = requireWorld();
     const dm = await ensureDm(requireWorld());
     await openChat(a, dm);
     await openChat(b, dm);
-    const waveId = await createChatWave(a, `Markdown QA ${runId}`);
-    const ordinary = await a.context.newPage();
     const leakedRequests: string[] = [];
     const canary = `markdown-private-${runId}`;
     for (const session of [a, b]) {
@@ -360,7 +364,18 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       });
       await session.context.route(`**/*${canary}*`, (route) => route.abort());
     }
+    // Public chat can fetch emoji assets and send ordinary text. Keep that
+    // traffic outside the encrypted users' lifetime privacy evidence.
+    const regularSession = await prepareEnrolledSession(
+      browser,
+      testInfo,
+      createThrowawayUser("Markdown"),
+      "Ordinary Markdown",
+      { signInAgainWithProfile: true }
+    );
+    const ordinary = regularSession.page;
     try {
+      const waveId = await createChatWave(regularSession, `Markdown QA ${runId}`);
       await gotoStaging(ordinary, `/waves/${waveId}`);
       for (const sample of MARKDOWN_PARITY_CASES) {
         const marker = `Markdown ${sample.name} ${runId}`;
@@ -572,7 +587,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         contentType: "application/json",
       });
     } finally {
-      await ordinary.close();
+      await regularSession.close();
     }
   });
 
@@ -648,6 +663,51 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expectPrivateAndClean([a, b], needles({ prefix, custom: ":gm:" }));
   });
 
+  test("a public GIF selection round-trips as an encrypted attachment", async () => {
+    const current = requireWorld();
+    const { a, b, runId } = current;
+    const dm = await ensureDm(current);
+    const caption = qaMessage(runId, "GIF attachment");
+    await installGiphyFixture(a.page);
+    const recipientRequests = b.evidence.requests.length;
+    await openChat(a, dm);
+    await selectFixtureGif(a.page);
+    await sendEncrypted(a, caption);
+    await openChat(b, dm);
+    await expectDecrypted(b, caption);
+    const received = messageRow(b.page, caption).getByRole("img", {
+      name: "Image: giphy.gif",
+      exact: true,
+    });
+    await expect(received).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(received).toHaveAttribute("src", /^blob:/u);
+    expect(
+      b.evidence.requests
+        .slice(recipientRequests)
+        .filter((request) =>
+          new URL(request.url).hostname.endsWith(".giphy.com")
+        )
+    ).toEqual([]);
+    expectPrivateAndClean(
+      [a, b],
+      needles({
+        caption,
+        gifBytes: gifFixtureBytes(),
+      })
+    );
+    const gifUrlNeedles = needles({ gifUrl: GIPHY_FIXTURE_URL });
+    const senderUrlMatches = a.evidence.findLeaks(gifUrlNeedles);
+    // Public previews/downloads use this exact GET. Every other endpoint,
+    // request body and WebSocket frame must keep the provider URL private.
+    expect(senderUrlMatches.length).toBeGreaterThan(0);
+    expect(
+      senderUrlMatches.filter(
+        (match) => match.where !== `GET ${GIPHY_FIXTURE_URL}`
+      )
+    ).toEqual([]);
+    expect(b.evidence.findLeaks(gifUrlNeedles)).toEqual([]);
+  });
+
   test("an encrypted image round-trips through the blob store", async () => {
     const current = requireWorld();
     const { a, b, runId } = current;
@@ -668,7 +728,9 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       base64: image.buffer.toString("base64"),
     });
     await sendEncrypted(a, caption);
-    for (const filename of [image.name, droppedName]) {
+    // Images are sent under neutral names, numbered in draft order.
+    const sentNames = ["image.png", "image-2.png"];
+    for (const filename of sentNames) {
       await expect(
         messageRow(a.page, caption).getByRole("img", {
           name: `Image: ${filename}`,
@@ -686,7 +748,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
 
     await openChat(b, dm);
     await expectDecrypted(b, caption);
-    for (const filename of [image.name, droppedName]) {
+    for (const filename of sentNames) {
       const received = messageRow(b.page, caption).getByRole("img", {
         name: `Image: ${filename}`,
         exact: true,
@@ -704,7 +766,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         b.page,
         received,
         filename,
-        filename === image.name ? droppedName : undefined
+        filename === sentNames[0] ? sentNames[1] : undefined
       );
     }
     await expectNothingUndecryptable(b);

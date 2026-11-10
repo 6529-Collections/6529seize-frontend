@@ -15,6 +15,15 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: (...args: unknown[]) => mockRenameDevice(...args),
 }));
 
+const mockRevokeE2eeDevice = jest.fn();
+const mockRestart = jest.fn();
+let mockE2ee: Record<string, unknown>;
+jest.mock("@/hooks/e2ee/useE2ee", () => ({ useE2ee: () => mockE2ee }));
+const mockRemoveLocal = jest.fn();
+jest.mock("@/lib/e2ee/local-data", () => ({
+  removeE2eeProfileLocalData: (...args: unknown[]) => mockRemoveLocal(...args),
+}));
+
 const mockEncryptionQuery = jest.fn();
 let mockEncryptionEnabled = false;
 jest.mock("@/config/e2eeEnv", () => ({
@@ -28,6 +37,8 @@ const NOW = Date.UTC(2026, 9, 12, 12, 0);
 const DAY = 86_400_000;
 const ADDRESS = "0x1111111111111111111111111111111111111111";
 const OWN_KEY = `0x${"aa".repeat(32)}`;
+const PHONE_E2EE_KEY = `0x${"e2".repeat(32)}`;
+const THIS_E2EE_KEY = `0x${"e1".repeat(32)}`;
 
 const mockSetToast = jest.fn();
 const mockRequestGrant = jest.fn();
@@ -151,6 +162,16 @@ const phone = grant({
 
 describe("DevicesPreferencesSettings", () => {
   beforeEach(() => {
+    mockRevokeE2eeDevice.mockReset().mockResolvedValue(undefined);
+    mockRestart.mockReset();
+    mockRemoveLocal.mockReset().mockResolvedValue(undefined);
+    mockE2ee = {
+      status: "disabled",
+      engine: null,
+      thisDevice: null,
+      profileId: "profile",
+      restart: mockRestart,
+    };
     mockEncryptionEnabled = false;
     mockEncryptionQuery.mockReset().mockReturnValue({});
     mockAccount = ADDRESS;
@@ -246,6 +267,7 @@ describe("DevicesPreferencesSettings", () => {
       isSuccess: true,
       data: [
         {
+          device_key: PHONE_E2EE_KEY,
           grant_id: phone.id,
           grant_message: "combined grant",
           revoked_at: null,
@@ -262,10 +284,10 @@ describe("DevicesPreferencesSettings", () => {
     const dialog = screen.getByRole("dialog", {
       name: "Revoke access to signed posts and encrypted DMs for Safari on iPhone?",
     });
+    // Encrypted messages are off in this browser: nothing can sign the
+    // device's revocation here, so no deletion is promised.
     expect(
-      within(dialog).getByText(
-        /clears this device’s local encrypted chat history/
-      )
+      within(dialog).getByText(/Its saved chat history stays on it/)
     ).toBeVisible();
   });
 
@@ -376,6 +398,137 @@ describe("DevicesPreferencesSettings", () => {
         );
       });
       expect(mockRevoke).toHaveBeenCalledWith(grant());
+    });
+  });
+
+  describe("revoking a grant with a linked encryption device", () => {
+    const linkedPhone = {
+      device_key: PHONE_E2EE_KEY,
+      grant_id: phone.id,
+      grant_message: "combined grant",
+      label: "Safari on iPhone",
+      revoked_at: null,
+      grant: { expires_at: (NOW + DAY) / 1000 },
+    };
+    const linkedThis = {
+      ...linkedPhone,
+      device_key: THIS_E2EE_KEY,
+      grant_id: grant().id,
+      label: "Chrome on macOS",
+    };
+    const setUp = (ready: boolean) => {
+      mockEncryptionEnabled = true;
+      mockAuth = { ...mockAuth, connectedProfile: { id: "profile" } };
+      mockQuery = { ...mockQuery, data: [grant(), phone] };
+      mockEncryptionQuery.mockReturnValue({
+        isSuccess: true,
+        refetch: jest.fn(),
+        data: [linkedPhone, linkedThis],
+      });
+      mockE2ee = {
+        ...mockE2ee,
+        status: ready ? "ready" : "needs-enrollment",
+        engine: ready
+          ? {
+              revokeDevice: mockRevokeE2eeDevice,
+              getUpgrade: () => null,
+              subscribe: () => () => undefined,
+            }
+          : null,
+        thisDevice: ready ? { deviceKey: THIS_E2EE_KEY } : null,
+      };
+      const order: string[] = [];
+      mockRevokeE2eeDevice.mockImplementation(async () => {
+        order.push("signed");
+      });
+      mockRevoke.mockImplementation(async () => {
+        order.push("grant");
+        return true;
+      });
+      render(<DevicesPreferencesSettings />);
+      return order;
+    };
+    const confirm = async (label: string, button = "Revoke") => {
+      fireEvent.click(screen.getByRole("button", { name: `Revoke ${label}` }));
+      const dialog = screen.getByRole("dialog");
+      await act(async () => {
+        fireEvent.click(within(dialog).getByRole("button", { name: button }));
+      });
+    };
+
+    it("signs another device's revocation first when encrypted messages are on here", async () => {
+      const order = setUp(true);
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Safari on iPhone" })
+      );
+      expect(
+        within(screen.getByRole("dialog")).getByText(
+          /deletes its saved chat history once it confirms the revocation/
+        )
+      ).toBeVisible();
+      fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+      await confirm("Safari on iPhone");
+      expect(mockRevokeE2eeDevice).toHaveBeenCalledWith(PHONE_E2EE_KEY);
+      expect(order).toEqual(["signed", "grant"]);
+      expect(mockRemoveLocal).not.toHaveBeenCalled();
+    });
+
+    it("lets the engine clear this browser when it signed its own revocation", async () => {
+      setUp(true);
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Chrome on macOS" })
+      );
+      // This browser's own dialog says its encrypted chats go right away.
+      expect(
+        screen.getByRole("dialog", { name: "Revoke this browser?" })
+      ).toHaveTextContent("the encrypted chats saved here are deleted");
+      fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+      await confirm("Chrome on macOS", "Revoke this browser");
+      expect(mockRevokeE2eeDevice).toHaveBeenCalledWith(THIS_E2EE_KEY);
+      expect(mockRemoveLocal).not.toHaveBeenCalled();
+    });
+
+    it("clears this browser's encrypted data itself when the engine is not ready", async () => {
+      const order = setUp(false);
+      await confirm("Chrome on macOS", "Revoke this browser");
+      expect(order).toEqual(["grant"]);
+      expect(mockRevokeE2eeDevice).not.toHaveBeenCalled();
+      await waitFor(() =>
+        expect(mockRemoveLocal).toHaveBeenCalledWith("profile")
+      );
+      expect(mockRestart).toHaveBeenCalled();
+    });
+
+    it("signs once when confirm is pressed again while signing", async () => {
+      setUp(true);
+      let finishSigning: () => void = () => undefined;
+      mockRevokeE2eeDevice.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            finishSigning = resolve;
+          })
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Safari on iPhone" })
+      );
+      const dialog = screen.getByRole("dialog");
+      const button = within(dialog).getByRole("button", { name: "Revoke" });
+      fireEvent.click(button);
+      fireEvent.click(button);
+      await act(async () => {
+        finishSigning();
+      });
+      expect(mockRevokeE2eeDevice).toHaveBeenCalledTimes(1);
+      expect(mockRevoke).toHaveBeenCalledTimes(1);
+    });
+
+    it("revokes another device's grant unsigned when encrypted messages are off here", async () => {
+      const order = setUp(false);
+      await confirm("Safari on iPhone");
+      expect(order).toEqual(["grant"]);
+      expect(mockRemoveLocal).not.toHaveBeenCalled();
     });
   });
 

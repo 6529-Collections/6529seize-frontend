@@ -8,7 +8,7 @@ import type {
 } from "@/services/api/link-preview-api";
 import { fetchOptionalApiJson, type ApiContext } from "./apiClient";
 
-export type AttributeRecord = {
+type AttributeRecord = {
   readonly trait_type?: string | null | undefined;
   readonly value?: string | number | null | undefined;
 };
