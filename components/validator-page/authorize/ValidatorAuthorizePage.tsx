@@ -180,7 +180,7 @@ function DraftRows({ shown }: { readonly shown: Shown }) {
 
 /** What to weigh before signing that the checks can't decide. */
 function DraftWarnings({ shown }: { readonly shown: Shown }) {
-  const { draft, grant, locale } = shown;
+  const { draft, locale } = shown;
   const others = unmarkedKeys(draft.keys);
   const version = draft.authVersion;
   const percent = formatPercent(locale, others.fraction, 2);
