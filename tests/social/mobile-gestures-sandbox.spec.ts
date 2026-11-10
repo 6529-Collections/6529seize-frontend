@@ -80,6 +80,29 @@ async function openWave(page: Page) {
   ).toBeVisible();
 }
 
+async function keyboardEvent(page: Page, name: string, height = 0) {
+  await page.waitForFunction(
+    (eventName) =>
+      (
+        globalThis as typeof globalThis & {
+          __playwrightKeyboardListeners?: string[];
+        }
+      ).__playwrightKeyboardListeners?.includes(eventName),
+    name
+  );
+  const delivered = await page.evaluate(
+    ({ eventName, keyboardHeight }) =>
+      !dispatchEvent(
+        new CustomEvent(`playwright:${eventName}`, {
+          detail: { keyboardHeight },
+          cancelable: true,
+        })
+      ),
+    { eventName: name, keyboardHeight: height }
+  );
+  expect(delivered).toBe(true);
+}
+
 async function installMessageFixture(page: Page, baseURL: string | undefined) {
   await page.route("**/api/open-graph**", (route) =>
     route.fulfill({ json: {} })
@@ -137,6 +160,103 @@ for (const platform of ["ios", "android"] as const) {
       await page.setViewportSize({ width: 412, height: 840 });
       await installMessageFixture(page, baseURL);
     });
+
+    if (platform === "ios") {
+      test("short landscape keeps the composer, reply preview and messages above the keyboard", async ({
+        page,
+        baseURL,
+      }) => {
+        await page.setViewportSize({ width: 932, height: 430 });
+        await openWave(page);
+        const tabs = page.getByRole("navigation", {
+          name: "Wave sections",
+          exact: true,
+        });
+        const editor = page.getByRole("textbox").last();
+        const cancelReply = page.getByRole("button", {
+          name: "Cancel reply",
+          exact: true,
+        });
+        const draft = "Unsent landscape QA draft";
+        await expect(tabs).toBeVisible();
+        await editor.fill(draft);
+
+        const expectKeyboardLayout = async () => {
+          await expect(editor).toBeFocused();
+          await keyboardEvent(page, "keyboardWillShow", 244);
+          await keyboardEvent(page, "keyboardDidShow", 244);
+          await expect
+            .poll(() =>
+              editor.evaluate(
+                (element) => element.getBoundingClientRect().bottom
+              )
+            )
+            .toBeLessThanOrEqual(186);
+          await expect(tabs).toBeHidden();
+          await expect
+            .poll(() =>
+              page
+                .locator('[data-wave-drops-scroll-container="true"]')
+                .last()
+                .evaluate((element) => element.clientHeight)
+            )
+            .toBeGreaterThanOrEqual(24);
+          await expect(editor).toHaveText(draft);
+        };
+        const dismissKeyboard = async (expectReplyBlur = false) => {
+          await keyboardEvent(page, "keyboardWillHide");
+          await keyboardEvent(page, "keyboardDidHide");
+          await expect(tabs).toBeVisible();
+          if (expectReplyBlur) await expect(editor).not.toBeFocused();
+        };
+
+        await expectKeyboardLayout();
+        await dismissKeyboard();
+        for (const method of ["swipe", "sheet"] as const) {
+          const row = page
+            .getByTestId("wave-swipe-surface")
+            .locator("[data-wave-drop-id][data-reply-enabled=true]")
+            .last();
+          if (method === "swipe") {
+            const swipe = await touchDrag(page, row, -120);
+            await swipe.release();
+          } else {
+            await longPressMessage(page, row);
+            await page
+              .getByRole("dialog", { name: "Drop actions", exact: true })
+              .getByRole("button", { name: "Reply", exact: true })
+              .click();
+          }
+          await expect(cancelReply).toBeVisible();
+          await expectKeyboardLayout();
+          await expect
+            .poll(() =>
+              cancelReply.evaluate(
+                (element) => element.getBoundingClientRect().bottom
+              )
+            )
+            .toBeLessThanOrEqual(186);
+          await dismissKeyboard(true);
+          await expect(cancelReply).toBeVisible();
+          await cancelReply.click();
+          await expect(editor).toHaveText(draft);
+        }
+
+        await page.setViewportSize({ width: 430, height: 932 });
+        await editor.click();
+        await keyboardEvent(page, "keyboardWillShow", 388);
+        await keyboardEvent(page, "keyboardDidShow", 388);
+        await expect(tabs).toBeVisible();
+        await expect
+          .poll(() =>
+            editor.evaluate((element) => element.getBoundingClientRect().bottom)
+          )
+          .toBeLessThanOrEqual(544);
+        await dismissKeyboard();
+        await editor.fill("");
+        await expectNoUnsafeSandboxMutations(baseURL);
+      });
+    }
 
     test("wave-back follows interior touch, reverses and then commits without a second transition", async ({
       page,
