@@ -300,7 +300,7 @@ test("removes a successfully left open wave from Joined and restores it on rejoi
   await page.route("**/api/v2/waves?**", (route) =>
     route.fulfill({ json: { data: [row()], page: 1, next: false } })
   );
-  await page.route("**/api/v2/waves/joined**", (route) =>
+  await page.route(/\/api\/v2\/waves\/(?:joined|all)(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
         data: joined ? [row()] : [],
@@ -1637,7 +1637,7 @@ test("announcement replies preserve the unread badge and top-level timestamp", a
   await page.route("**/api/v2/waves?**", (route) =>
     route.fulfill({ json: { data: [announcement], page: 1, next: false } })
   );
-  await page.route("**/api/v2/waves/joined**", (route) =>
+  await page.route(/\/api\/v2\/waves\/(?:joined|all)(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
         data: [announcement],
