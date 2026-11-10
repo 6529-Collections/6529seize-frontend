@@ -21382,6 +21382,53 @@ paths:
           description: Snapshot expired or unavailable; restart without a cursor
         "503":
           description: Snapshot storage unavailable; retry without losing loaded waves
+  /v2/waves/all:
+    get:
+      tags:
+        - WavesV2
+      summary: List all accessible waves using a stable snapshot
+      description: >-
+        Freezes all accessible non-DM root wave IDs in activity order for 15
+        minutes, including pinned waves and waves without metrics. Subwaves are
+        reached through their parent. Continue with next_cursor; activity cannot
+        skip IDs. Every page rechecks visibility. New waves and newly accessible
+        waves appear on refresh. Cursors are bound to the read-context profile
+        (or guest) and page size. Existing page-number pagination is unchanged.
+      operationId: getAllWaves
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/all-waves.handler"
+          name: handleGetAllWaves
+      parameters:
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: cursor
+          in: query
+          description: Opaque next_cursor from the preceding page; omit to refresh.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 256
+      responses:
+        "200":
+          description: All accessible waves from one stable snapshot
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiAllWavesPage"
+        "400":
+          description: Invalid cursor or page size
+        "410":
+          description: Snapshot expired or unavailable; restart without a cursor
+        "503":
+          description: Snapshot storage unavailable; retry without losing loaded waves
   /v2/waves/active-votes:
     get:
       tags:
@@ -23237,6 +23284,25 @@ components:
         status:
           type: integer
           description: Upstream failure status, or 502 for an unavailable lookup.
+    ApiAllWavesPage:
+      type: object
+      required:
+        - data
+        - next_cursor
+        - snapshot_expires_at
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiWaveOverview"
+        next_cursor:
+          type: string
+          nullable: true
+          description: Continue this snapshot, or null when all IDs have been scanned.
+        snapshot_expires_at:
+          type: integer
+          format: int64
+          description: Snapshot expiry as Unix epoch milliseconds.
     ApiAppDeviceGrant:
       type: object
       additionalProperties: false

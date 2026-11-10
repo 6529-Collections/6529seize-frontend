@@ -165,8 +165,9 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
           />
 
           {/* Empty state */}
-          {!isSearching && collection === "joined" && (
+          {!isSearching && collection !== "pinned" && (
             <JoinedWavesListRecovery
+              collection={collection}
               hasError={hasLoadingError}
               hasNextPage={hasNextPage === true}
               isFetching={collectionFetching || isFetchingNextPage}
