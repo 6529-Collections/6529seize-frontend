@@ -1,6 +1,7 @@
 import type { ApiDeviceGrantProof } from "@/generated/models/ApiDeviceGrantProof";
 import type { ApiDeviceSignedEvent } from "@/generated/models/ApiDeviceSignedEvent";
 import type { ApiDropSignedEvents } from "@/generated/models/ApiDropSignedEvents";
+import { publicEnv } from "@/config/env";
 import { canonicalizeBody } from "@/lib/device-signing/canonical-json";
 import { signEventId } from "@/lib/device-signing/ed25519";
 import { parseDeviceGrantMessage } from "@/lib/device-signing/grant-message";
@@ -56,9 +57,23 @@ async function createGrant(
   } as ApiDeviceGrantProof;
 }
 
+/** What the server signs as refs: a post its reply target, others the drop. */
+const defaultRefs = (kind: number, body: object | null): string[] => {
+  if (kind !== 1) {
+    return [DROP_ID];
+  }
+  const replyTo = (body as { reply_to?: { drop_id: string } } | null)?.reply_to;
+  return replyTo ? [replyTo.drop_id] : [];
+};
+
 async function createEvent(
   grant: ApiDeviceGrantProof,
-  { kind, seq, body }: { kind: number; seq: number; body: object | null }
+  {
+    kind,
+    seq,
+    body,
+    refs = defaultRefs(kind, body),
+  }: { kind: number; seq: number; body: object | null; refs?: string[] }
 ): Promise<ApiDeviceSignedEvent> {
   const { canonical, bodyHash, bodySize } = canonicalizeBody(body);
   const fields = {
@@ -72,7 +87,7 @@ async function createEvent(
     seq,
     anchor: 0,
     claimedTime: seq,
-    refs: [DROP_ID],
+    refs,
     bodyHash,
     bodySize,
   };
@@ -89,7 +104,7 @@ async function createEvent(
     seq,
     anchor: 0,
     claimed_time: seq,
-    refs: [DROP_ID],
+    refs,
     body: canonical,
     body_hash: bodyHash,
     body_size: bodySize,
@@ -97,6 +112,22 @@ async function createEvent(
     created_at: seq + 10,
   } as ApiDeviceSignedEvent;
 }
+
+const shownPart = (content: string | null, partId = 1) => ({
+  partId,
+  content,
+  quote: null,
+  media: [],
+  attachmentIds: [],
+});
+
+/** One shown part, no reply target, every part shown. */
+const shownContent = (content: string | null) => ({
+  title: null,
+  replyToDropId: null,
+  parts: [shownPart(content)],
+  totalParts: null,
+});
 
 const signedEvents = (
   events: ApiDeviceSignedEvent[],
@@ -141,6 +172,7 @@ describe("drop signature verification in the browser", () => {
         deviceKey: VECTORS.deviceKey,
         grantExpiresAt: VECTORS.grantExpiresAtSeconds * 1000,
         walletSignature: "verified",
+        origin: "staging.6529.io",
       },
     });
   });
@@ -213,8 +245,16 @@ describe("drop signature verification in the browser", () => {
     });
     const data = signedEvents([post], [grant], post.id);
     const shown = (content: string, mediaCount = 0) => ({
-      title: null,
-      parts: [{ content, mediaCount, attachmentCount: 0 }],
+      ...shownContent(content),
+      parts: [
+        {
+          ...shownPart(content),
+          media: Array.from({ length: mediaCount }, (_, index) => ({
+            url: `https://media.example/${index}`,
+            uploadId: null,
+          })),
+        },
+      ],
     });
 
     await expect(
@@ -264,12 +304,32 @@ describe("drop signature verification in the browser", () => {
     for (const mismatch of [
       { dropId: "another-drop" },
       { waveId: "another-wave" },
-      { authorWallets: [otherWallet.address] },
     ]) {
       await expect(
         verifyDropSignedEvents(data, { expected: expected(mismatch) })
       ).resolves.toEqual({ status: "invalid" });
     }
+  });
+
+  it("never fails a post signed with a wallet the author later removed", async () => {
+    const grant = await createGrant();
+    const post = await createEvent(grant, {
+      kind: 1,
+      seq: 1_760_000_000_000,
+      body: { parts: [{ content: "gm" }] },
+    });
+    await expect(
+      verifyDropSignedEvents(signedEvents([post], [grant], post.id), {
+        expected: {
+          dropId: DROP_ID,
+          waveId: WAVE_ID,
+          authorWallets: [otherWallet.address],
+        },
+      })
+    ).resolves.toEqual({
+      status: "unverifiable",
+      unlinkedWallet: grant.wallet,
+    });
   });
 
   it("binds the grant to a 6529 domain and to its stored domain and chain", async () => {
@@ -356,7 +416,7 @@ describe("drop signature verification in the browser", () => {
     });
 
     it.each(["6529.io", "staging.6529.io"])(
-      "counts grants signed on %s in a production build",
+      "counts grants signed on %s in a staging build",
       async (domain) => {
         mockDevLike = false;
         await expect(verdictFor(domain)).resolves.toMatchObject({
@@ -364,6 +424,29 @@ describe("drop signature verification in the browser", () => {
         });
       }
     );
+
+    describe("in the production build", () => {
+      const baseEndpoint = publicEnv.BASE_ENDPOINT;
+      beforeEach(() => {
+        mockDevLike = false;
+        publicEnv.BASE_ENDPOINT = "https://6529.io";
+      });
+      afterEach(() => {
+        publicEnv.BASE_ENDPOINT = baseEndpoint;
+      });
+
+      it("counts grants signed on 6529.io", async () => {
+        await expect(verdictFor("6529.io")).resolves.toMatchObject({
+          status: "signed",
+        });
+      });
+
+      it("never counts a grant signed on staging.6529.io", async () => {
+        await expect(verdictFor("staging.6529.io")).resolves.toEqual({
+          status: "invalid",
+        });
+      });
+    });
 
     it.each(["localhost", "localhost:3001", "127.0.0.1:3001", "app.localhost"])(
       "never counts a grant signed on %s in a production build",
@@ -405,18 +488,735 @@ describe("drop signature verification in the browser", () => {
     expect(
       toDisplayedDropContent({
         title: "t",
+        reply_to: { drop_id: "parent", drop_part_id: 2 },
         parts: [
-          { content: "a", media: [{}, {}], attachments: [{}] },
+          {
+            content: "a",
+            quoted_drop: { drop_id: "quoted", drop_part_id: 1 },
+            media: [
+              { url: "https://m/1", media_upload_id: "u1" },
+              { url: "https://m/2" },
+            ],
+            attachments: [{ attachment_id: "att-1" }],
+          },
           { content: null, media: [] },
         ],
+        parts_count: 3,
       } as unknown as Parameters<typeof toDisplayedDropContent>[0])
     ).toEqual({
       title: "t",
+      replyToDropId: "parent",
       parts: [
-        { content: "a", mediaCount: 2, attachmentCount: 1 },
-        { content: null, mediaCount: 0, attachmentCount: 0 },
+        {
+          partId: 1,
+          content: "a",
+          quote: { dropId: "quoted", partId: 1 },
+          media: [
+            { url: "https://m/1", uploadId: "u1" },
+            { url: "https://m/2", uploadId: null },
+          ],
+          attachmentIds: ["att-1"],
+        },
+        {
+          partId: 2,
+          content: null,
+          quote: null,
+          media: [],
+          attachmentIds: [],
+        },
       ],
+      totalParts: 3,
     });
+  });
+
+  describe("binding what is shown to what was signed", () => {
+    const PARENT = "c0c5d6e7-1111-4222-8333-944455556666";
+    const QUOTED = "d0c5d6e7-1111-4222-8333-944455556666";
+    const signedBody = {
+      wave_id: WAVE_ID,
+      title: null,
+      reply_to: { drop_id: PARENT, drop_part_id: 1 },
+      parts: [
+        {
+          content: "gm",
+          quoted_drop: { drop_id: QUOTED, drop_part_id: 2 },
+          media: [
+            {
+              url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/a.webp",
+              mime_type: "image/webp",
+              media_upload_id: "upload-1",
+            },
+          ],
+          attachments: [{ attachment_id: "attachment-1" }],
+        },
+      ],
+    };
+    type Shown = NonNullable<
+      Parameters<typeof verifyDropSignedEvents>[1]
+    >["displayed"] & {};
+    type ShownPart = Shown["parts"][number];
+    const matching = (): Shown => ({
+      title: null,
+      replyToDropId: PARENT,
+      parts: [
+        {
+          partId: 1,
+          content: "gm",
+          quote: { dropId: QUOTED, partId: 2 },
+          media: [
+            {
+              url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/a.webp",
+              uploadId: "upload-1",
+            },
+          ],
+          attachmentIds: ["attachment-1"],
+        },
+      ],
+      totalParts: null,
+    });
+    const withPart = (part: Partial<ShownPart>): Shown => {
+      const shown = matching();
+      return { ...shown, parts: [{ ...shown.parts[0]!, ...part }] };
+    };
+    const expected = {
+      dropId: DROP_ID,
+      waveId: WAVE_ID,
+      authorWallets: [wallet.address],
+    };
+
+    const postData = async (refs?: string[]) => {
+      const grant = await createGrant();
+      const post = await createEvent(grant, {
+        kind: 1,
+        seq: 1_760_000_000_000,
+        body: signedBody,
+        ...(refs ? { refs } : {}),
+      });
+      return signedEvents([post], [grant], post.id);
+    };
+
+    it("verifies a reply whose target, quote, media and attachments are the signed ones", async () => {
+      await expect(
+        verifyDropSignedEvents(await postData(), {
+          displayed: matching(),
+          expected,
+        })
+      ).resolves.toMatchObject({
+        status: "signed",
+        currentContentSigned: true,
+      });
+    });
+
+    it.each([
+      ["another reply target", { ...matching(), replyToDropId: QUOTED }],
+      [
+        "another quoted drop",
+        withPart({ quote: { dropId: PARENT, partId: 2 } }),
+      ],
+      [
+        "another quoted part",
+        withPart({ quote: { dropId: QUOTED, partId: 1 } }),
+      ],
+      [
+        "another media URL",
+        withPart({
+          media: [{ url: "https://media.example/other.webp", uploadId: null }],
+        }),
+      ],
+      [
+        "another media upload",
+        withPart({
+          media: [
+            {
+              url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/a.webp",
+              uploadId: "upload-2",
+            },
+          ],
+        }),
+      ],
+      ["another attachment", withPart({ attachmentIds: ["attachment-2"] })],
+      [
+        "an extra attachment",
+        withPart({ attachmentIds: ["attachment-1", "x"] }),
+      ],
+    ])("reports invalid when the drop shows %s", async (_name, displayed) => {
+      await expect(
+        verifyDropSignedEvents(await postData(), { displayed, expected })
+      ).resolves.toEqual({ status: "invalid" });
+    });
+
+    it.each([
+      [
+        "no reply target (a deleted parent)",
+        { ...matching(), replyToDropId: null },
+      ],
+      ["no quote", withPart({ quote: null })],
+      [
+        "the media without its upload id",
+        withPart({
+          media: [
+            {
+              url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/a.webp",
+              uploadId: null,
+            },
+          ],
+        }),
+      ],
+    ])("still verifies when the drop shows %s", async (_name, displayed) => {
+      await expect(
+        verifyDropSignedEvents(await postData(), { displayed, expected })
+      ).resolves.toMatchObject({ status: "signed" });
+    });
+
+    it("never fails, but never verifies, a post whose refs disagree with its signed reply target", async () => {
+      await expect(
+        verifyDropSignedEvents(await postData([QUOTED]), {
+          displayed: matching(),
+          expected,
+        })
+      ).resolves.toEqual({ status: "unverifiable" });
+      await expect(verifyDropSignedEvents(await postData([]))).resolves.toEqual(
+        { status: "unverifiable" }
+      );
+    });
+
+    describe("forms 6529.io accepts for the same value", () => {
+      const verdictForBody = async (body: object, refs?: string[]) => {
+        const grant = await createGrant();
+        const post = await createEvent(grant, {
+          kind: 1,
+          seq: 1_760_000_000_000,
+          body,
+          ...(refs ? { refs } : {}),
+        });
+        return signedEvents([post], [grant], post.id);
+      };
+      const signedPart = signedBody.parts[0]!;
+
+      it("verifies a reply and a quote signed with string part ids", async () => {
+        // The shape of a real post: the part id of the reply target, and of
+        // a quote, as a string the server accepted.
+        const data = await verdictForBody({
+          ...signedBody,
+          reply_to: { drop_id: PARENT, drop_part_id: "1" },
+          parts: [
+            {
+              ...signedPart,
+              quoted_drop: { drop_id: QUOTED, drop_part_id: "2" },
+            },
+          ],
+        });
+        await expect(
+          verifyDropSignedEvents(data, { displayed: matching(), expected })
+        ).resolves.toMatchObject({
+          status: "signed",
+          currentContentSigned: true,
+        });
+      });
+
+      it("still compares a string quote part id as a number", async () => {
+        const data = await verdictForBody({
+          ...signedBody,
+          parts: [
+            {
+              ...signedPart,
+              quoted_drop: { drop_id: QUOTED, drop_part_id: "3" },
+            },
+          ],
+        });
+        await expect(
+          verifyDropSignedEvents(data, { displayed: matching(), expected })
+        ).resolves.toEqual({ status: "invalid" });
+      });
+
+      it.each([
+        [
+          "a reply target without a part id",
+          { ...signedBody, reply_to: { drop_id: PARENT } },
+          matching(),
+        ],
+        [
+          "ids in another letter case",
+          {
+            ...signedBody,
+            reply_to: { drop_id: PARENT.toUpperCase(), drop_part_id: 1 },
+            parts: [
+              {
+                ...signedPart,
+                quoted_drop: { drop_id: QUOTED.toUpperCase(), drop_part_id: 2 },
+                media: [
+                  { ...signedPart.media[0], media_upload_id: "UPLOAD-1" },
+                ],
+                attachments: [{ attachment_id: "ATTACHMENT-1" }],
+              },
+            ],
+          },
+          matching(),
+        ],
+        [
+          "a title with surrounding whitespace",
+          { ...signedBody, title: "  Hello  " },
+          { ...matching(), title: "Hello" },
+        ],
+        [
+          "an empty title as no title",
+          { ...signedBody, title: "" },
+          matching(),
+        ],
+        [
+          "null lists, quote and content as none",
+          {
+            wave_id: WAVE_ID,
+            reply_to: { drop_id: PARENT, drop_part_id: 1 },
+            parts: [
+              {
+                content: null,
+                quoted_drop: null,
+                media: null,
+                attachments: null,
+              },
+            ],
+          },
+          {
+            ...matching(),
+            parts: [
+              {
+                partId: 1,
+                content: null,
+                quote: null,
+                media: [],
+                attachmentIds: [],
+              },
+            ],
+          },
+        ],
+        [
+          "missing lists as none",
+          {
+            wave_id: WAVE_ID,
+            reply_to: { drop_id: PARENT },
+            parts: [{ content: "gm" }],
+          },
+          {
+            ...matching(),
+            parts: [
+              {
+                partId: 1,
+                content: "gm",
+                quote: null,
+                media: [],
+                attachmentIds: [],
+              },
+            ],
+          },
+        ],
+      ])("verifies %s", async (_name, body, displayed) => {
+        const refs =
+          "reply_to" in body
+            ? [(body.reply_to as { drop_id: string }).drop_id]
+            : [];
+        await expect(
+          verifyDropSignedEvents(await verdictForBody(body, refs), {
+            displayed,
+            expected,
+          })
+        ).resolves.toMatchObject({ status: "signed" });
+      });
+
+      it.each([
+        ["parts that are not a list", { ...signedBody, parts: "gm" }],
+        ["a part that is not an object", { ...signedBody, parts: ["gm"] }],
+        ["a title that is not text", { ...signedBody, title: 7 }],
+        [
+          "content that is not text",
+          { ...signedBody, parts: [{ ...signedPart, content: 7 }] },
+        ],
+        [
+          "a quote part id that is not a number",
+          {
+            ...signedBody,
+            parts: [
+              {
+                ...signedPart,
+                quoted_drop: { drop_id: QUOTED, drop_part_id: "two" },
+              },
+            ],
+          },
+        ],
+        [
+          "media without a URL",
+          {
+            ...signedBody,
+            parts: [{ ...signedPart, media: [{ mime_type: "image/webp" }] }],
+          },
+        ],
+        [
+          "an attachment without an id",
+          { ...signedBody, parts: [{ ...signedPart, attachments: [{}] }] },
+        ],
+      ])(
+        "reports a body with %s as not verifiable here, never failed",
+        async (_name, body) => {
+          await expect(
+            verifyDropSignedEvents(await verdictForBody(body, [PARENT]), {
+              displayed: matching(),
+              expected,
+            })
+          ).resolves.toEqual({ status: "unverifiable" });
+        }
+      );
+
+      it("reports a reply target it cannot read as not verifiable here", async () => {
+        const data = await verdictForBody(
+          { ...signedBody, reply_to: { drop_id: 7, drop_part_id: 1 } },
+          ["7"]
+        );
+        await expect(
+          verifyDropSignedEvents(data, { displayed: matching(), expected })
+        ).resolves.toEqual({ status: "unverifiable" });
+      });
+    });
+
+    it("shows a reply target only for a post that signs it", async () => {
+      const grant = await createGrant();
+      const post = await createEvent(grant, {
+        kind: 1,
+        seq: 1_760_000_000_000,
+        body: { parts: [{ content: "gm", media: [] }] },
+      });
+      const data = signedEvents([post], [grant], post.id);
+      const shown = shownContent("gm");
+      await expect(
+        verifyDropSignedEvents(data, { displayed: shown, expected })
+      ).resolves.toMatchObject({ status: "signed" });
+      await expect(
+        verifyDropSignedEvents(data, {
+          displayed: { ...shown, replyToDropId: PARENT },
+          expected,
+        })
+      ).resolves.toEqual({ status: "invalid" });
+    });
+
+    describe("an edited drop", () => {
+      const editedData = async (editRefs: string[]) => {
+        const grant = await createGrant();
+        const post = await createEvent(grant, {
+          kind: 1,
+          seq: 1_760_000_000_000,
+          body: { ...signedBody, parts: [{ content: "gm" }] },
+        });
+        const edit = await createEvent(grant, {
+          kind: 2,
+          seq: 1_760_000_000_001,
+          body: { title: null, parts: signedBody.parts },
+          refs: editRefs,
+        });
+        return signedEvents([post, edit], [grant], edit.id);
+      };
+
+      /** An edit, after an original post signed with these refs (or none). */
+      const editAfter = async (postRefs: string[] | null) => {
+        const grant = await createGrant();
+        const edit = await createEvent(grant, {
+          kind: 2,
+          seq: 1_760_000_000_001,
+          body: { title: null, parts: signedBody.parts },
+          refs: [DROP_ID],
+        });
+        if (postRefs === null) {
+          return signedEvents([edit], [grant], edit.id);
+        }
+        const post = await createEvent(grant, {
+          kind: 1,
+          seq: 1_760_000_000_000,
+          body: { ...signedBody, parts: [{ content: "gm" }] },
+          refs: postRefs,
+        });
+        return signedEvents([post, edit], [grant], edit.id);
+      };
+
+      it("checks the reply target against the original body even when its refs disagree", async () => {
+        const data = await editAfter([]);
+        await expect(
+          verifyDropSignedEvents(data, {
+            displayed: { ...matching(), replyToDropId: QUOTED },
+            expected,
+          })
+        ).resolves.toEqual({ status: "invalid" });
+        await expect(
+          verifyDropSignedEvents(data, { displayed: matching(), expected })
+        ).resolves.toMatchObject({ status: "signed" });
+      });
+
+      it("never verifies a reply target an edit of an unsigned post cannot vouch for", async () => {
+        const data = await editAfter(null);
+        await expect(
+          verifyDropSignedEvents(data, {
+            displayed: { ...matching(), replyToDropId: QUOTED },
+            expected,
+          })
+        ).resolves.toEqual({ status: "unverifiable" });
+        // Without a reply target shown, the edit verifies as before.
+        await expect(
+          verifyDropSignedEvents(data, {
+            displayed: { ...matching(), replyToDropId: null },
+            expected,
+          })
+        ).resolves.toMatchObject({ status: "signed" });
+      });
+
+      it("verifies an edit that refers to this drop, with the reply target its post signed", async () => {
+        await expect(
+          verifyDropSignedEvents(await editedData([DROP_ID]), {
+            displayed: matching(),
+            expected,
+          })
+        ).resolves.toMatchObject({
+          status: "signed",
+          currentContentSigned: true,
+        });
+      });
+
+      it("reports invalid for an edit that refers to another drop", async () => {
+        await expect(
+          verifyDropSignedEvents(await editedData([PARENT]), {
+            displayed: matching(),
+            expected,
+          })
+        ).resolves.toEqual({ status: "invalid" });
+      });
+
+      it("reports invalid when it shows a reply target its post did not sign", async () => {
+        await expect(
+          verifyDropSignedEvents(await editedData([DROP_ID]), {
+            displayed: { ...matching(), replyToDropId: QUOTED },
+            expected,
+          })
+        ).resolves.toEqual({ status: "invalid" });
+      });
+    });
+
+    describe("a post with several parts", () => {
+      const partsData = async () => {
+        const grant = await createGrant();
+        const post = await createEvent(grant, {
+          kind: 1,
+          seq: 1_760_000_000_000,
+          body: {
+            parts: [
+              { content: "one" },
+              { content: "two" },
+              { content: "three" },
+            ],
+          },
+        });
+        return signedEvents([post], [grant], post.id);
+      };
+      const showing = (
+        parts: readonly (readonly [number, string])[],
+        totalParts: number | null = null
+      ) => ({
+        ...shownContent(null),
+        parts: parts.map(([partId, content]) => shownPart(content, partId)),
+        totalParts,
+      });
+
+      it("verifies every part shown, matched by part id", async () => {
+        const data = await partsData();
+        await expect(
+          verifyDropSignedEvents(data, {
+            displayed: showing([
+              [1, "one"],
+              [2, "two"],
+              [3, "three"],
+            ]),
+          })
+        ).resolves.toMatchObject({ status: "signed" });
+        // Shown in another order: each part still meets its signed part.
+        await expect(
+          verifyDropSignedEvents(data, {
+            displayed: showing([
+              [3, "three"],
+              [1, "one"],
+              [2, "two"],
+            ]),
+          })
+        ).resolves.toMatchObject({ status: "signed" });
+      });
+
+      it.each([
+        ["only the first part of three (a one-part list)", [[1, "one"]], 3],
+        [
+          "a part that failed to load",
+          [
+            [1, "one"],
+            [3, "three"],
+          ],
+          3,
+        ],
+        ["fewer parts without a part count", [[1, "one"]], null],
+      ] as const)(
+        "never verifies, nor fails, a post showing %s",
+        async (_name, parts, totalParts) => {
+          await expect(
+            verifyDropSignedEvents(await partsData(), {
+              displayed: showing(parts, totalParts),
+            })
+          ).resolves.toEqual({ status: "unverifiable" });
+        }
+      );
+
+      it.each([
+        ["another text in a part", [[2, "two!"]], 3],
+        ["a part under another part id", [[1, "two"]], 3],
+        ["a part the post never signed", [[4, "four"]], 4],
+        ["another part count", [[1, "one"]], 4],
+        [
+          "an extra part",
+          [
+            [1, "one"],
+            [2, "two"],
+            [3, "three"],
+            [4, "four"],
+          ],
+          null,
+        ],
+      ] as const)(
+        "reports invalid when the drop shows %s",
+        async (_name, parts, totalParts) => {
+          await expect(
+            verifyDropSignedEvents(await partsData(), {
+              displayed: showing(parts, totalParts),
+            })
+          ).resolves.toEqual({ status: "invalid" });
+        }
+      );
+    });
+
+    describe("media and attachments in any order", () => {
+      const twoOfEach = {
+        parts: [
+          {
+            content: "gm",
+            media: [
+              { url: "https://media.example/b.webp", media_upload_id: "u-b" },
+              { url: "https://media.example/a.webp", media_upload_id: "u-a" },
+            ],
+            attachments: [
+              { attachment_id: "attachment-b" },
+              { attachment_id: "attachment-a" },
+            ],
+          },
+        ],
+      };
+      const dataFor = async () => {
+        const grant = await createGrant();
+        const post = await createEvent(grant, {
+          kind: 1,
+          seq: 1_760_000_000_000,
+          body: twoOfEach,
+        });
+        return signedEvents([post], [grant], post.id);
+      };
+      const shownWith = (
+        media: readonly { url: string; uploadId: string | null }[],
+        attachmentIds: readonly string[]
+      ) => ({
+        ...shownContent("gm"),
+        parts: [{ ...shownPart("gm"), media, attachmentIds }],
+      });
+      const signedOrder = [
+        { url: "https://media.example/b.webp", uploadId: "u-b" },
+        { url: "https://media.example/a.webp", uploadId: "u-a" },
+      ];
+
+      it.each([
+        ["the signed order", signedOrder, ["attachment-b", "attachment-a"]],
+        [
+          "another order (as the server reads them back)",
+          [...signedOrder].reverse(),
+          ["attachment-a", "attachment-b"],
+        ],
+      ])(
+        "verifies media and attachments shown in %s",
+        async (_name, media, ids) => {
+          await expect(
+            verifyDropSignedEvents(await dataFor(), {
+              displayed: shownWith(media, ids),
+            })
+          ).resolves.toMatchObject({ status: "signed" });
+        }
+      );
+
+      it.each([
+        [
+          "another media file",
+          [
+            { url: "https://media.example/a.webp", uploadId: "u-a" },
+            { url: "https://media.example/c.webp", uploadId: null },
+          ],
+          ["attachment-a", "attachment-b"],
+        ],
+        [
+          "a media file twice",
+          [
+            { url: "https://media.example/a.webp", uploadId: "u-a" },
+            { url: "https://media.example/a.webp", uploadId: "u-a" },
+          ],
+          ["attachment-a", "attachment-b"],
+        ],
+        [
+          "another upload id",
+          [
+            { url: "https://media.example/a.webp", uploadId: "u-b" },
+            { url: "https://media.example/b.webp", uploadId: "u-a" },
+          ],
+          ["attachment-a", "attachment-b"],
+        ],
+        ["another attachment", signedOrder, ["attachment-a", "attachment-c"]],
+        ["an attachment twice", signedOrder, ["attachment-a", "attachment-a"]],
+      ])(
+        "reports invalid when the drop shows %s",
+        async (_name, media, ids) => {
+          await expect(
+            verifyDropSignedEvents(await dataFor(), {
+              displayed: shownWith(media, ids),
+            })
+          ).resolves.toEqual({ status: "invalid" });
+        }
+      );
+    });
+  });
+
+  it("reuses a shared grant check for posts under the same grant", async () => {
+    const grant = await createGrant();
+    const post = await createEvent(grant, {
+      kind: 1,
+      seq: 1_760_000_000_000,
+      body: { parts: [{ content: "gm" }] },
+    });
+    const data = signedEvents([post], [grant], post.id);
+    const grantCheckCache = new Map();
+    await verifyDropSignedEvents(data, { grantCheckCache });
+    expect(grantCheckCache.size).toBe(1);
+    const [cached] = [...grantCheckCache.values()];
+    await expect(
+      verifyDropSignedEvents(data, { grantCheckCache })
+    ).resolves.toMatchObject({ status: "signed" });
+    expect([...grantCheckCache.values()]).toEqual([cached]);
+    // A changed proof is checked again, never served from the cache (a
+    // signature that does not recover could only be a contract wallet's).
+    await expect(
+      verifyDropSignedEvents(
+        signedEvents(
+          [post],
+          [{ ...grant, wallet_signature: `0x${"00".repeat(65)}` }],
+          post.id
+        ),
+        { grantCheckCache }
+      )
+    ).resolves.toEqual({ status: "unverifiable" });
+    expect(grantCheckCache.size).toBe(2);
   });
 
   it("reports invalid when the claimed current event does not verify", async () => {
@@ -591,7 +1391,8 @@ describe("drop signature verification in the browser", () => {
     it.each([
       [
         "the code read fails",
-        () => reader({ hasCode: jest.fn().mockRejectedValue(new Error("rpc")) }),
+        () =>
+          reader({ hasCode: jest.fn().mockRejectedValue(new Error("rpc")) }),
       ],
       [
         "the EIP-1271 read fails",
@@ -626,10 +1427,7 @@ describe("drop signature verification in the browser", () => {
       const { data } = await notRecovering();
       await expect(
         verifyDropSignedEvents(data, {
-          displayed: {
-            title: null,
-            parts: [{ content: "swapped", mediaCount: 0, attachmentCount: 0 }],
-          },
+          displayed: shownContent("swapped"),
         })
       ).resolves.toEqual({ status: "invalid" });
     });
