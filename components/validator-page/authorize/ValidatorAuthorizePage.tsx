@@ -182,7 +182,7 @@ function DraftRows({ shown }: { readonly shown: Shown }) {
 function DraftWarnings({ shown }: { readonly shown: Shown }) {
   const { draft, grant, locale } = shown;
   const others = unmarkedKeys(draft.keys);
-  const version = BigInt(grant.message.authVersion);
+  const version = draft.authVersion;
   const percent = formatPercent(locale, others.fraction, 2);
   return (
     <>

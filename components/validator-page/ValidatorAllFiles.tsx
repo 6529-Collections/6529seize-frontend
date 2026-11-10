@@ -214,8 +214,9 @@ export default function ValidatorAllFiles({
       <p className={`tw-m-0 ${BODY}`}>
         Each SHA-256 comes from 6529&apos;s signed list of releases. This page
         checks that signature before it lists a file. The publisher is the name
-        your system should show when it opens the file; this page doesn&apos;t
-        check it, so check it yourself.
+        your system should show when it opens the file or, for an archive, the
+        program inside it; this page doesn&apos;t check it, so check it
+        yourself.
       </p>
       <div>
         <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">

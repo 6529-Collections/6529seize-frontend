@@ -10,8 +10,9 @@ import { signFeed, TEST_FEED_SIGNING_KEY } from "./feedSigning";
 const FEED = new TextEncoder().encode(`${JSON.stringify(TEST_FEED)}\n`);
 const KEYS = [TEST_FEED_SIGNING_KEY];
 // secp256k1's group order: s and n - s are the same signature.
-const ORDER =
-  0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141n;
+const ORDER = BigInt(
+  "0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
+);
 
 function sigFile(fields: Record<string, unknown>): Uint8Array {
   return new TextEncoder().encode(JSON.stringify(fields));
