@@ -7,12 +7,42 @@ import { resolvePreviewForResource } from "./service/previews";
 // snapshots can remain visible for this TTL after upstream visibility changes.
 const CACHE_TTL_MS = 2 * 60 * 1000;
 const CACHE_MAX_ITEMS = 500;
+// A refresh re-fetches only a snapshot at least this old, so however many
+// viewers poll one link, GitHub sees at most one request per link in this
+// interval. Visible status badges poll every 30 seconds.
+const MIN_REFRESH_INTERVAL_MS = 20 * 1000;
 
-const cache = new LruTtlCache<string, GithubPreviewResponse>({
+type CachedPreview = {
+  readonly preview: GithubPreviewResponse;
+  readonly fetchedAt: number;
+};
+
+const cache = new LruTtlCache<string, CachedPreview>({
   max: CACHE_MAX_ITEMS,
   ttlMs: CACHE_TTL_MS,
 });
 const inFlight = new Map<string, Promise<GithubPreviewResponse>>();
+
+const loadPreview = async (
+  cacheKey: string,
+  resource: ReturnType<typeof parseGithubResource>
+): Promise<GithubPreviewResponse> => {
+  const previewRequest = resolvePreviewForResource(resource);
+  inFlight.set(cacheKey, previewRequest);
+
+  try {
+    const preview = await previewRequest;
+    cache.set(cacheKey, { preview, fetchedAt: Date.now() });
+    return preview;
+  } catch (error) {
+    cache.delete(cacheKey);
+    throw error;
+  } finally {
+    if (inFlight.get(cacheKey) === previewRequest) {
+      inFlight.delete(cacheKey);
+    }
+  }
+};
 
 export const resolveGithubPreview = async (
   rawUrl: string | null,
@@ -20,36 +50,20 @@ export const resolveGithubPreview = async (
 ): Promise<GithubPreviewResponse> => {
   const resource = parseGithubResource(rawUrl);
   const cacheKey = getResourceCacheKey(resource);
-  const bypassCache = options?.bypassCache === true;
-  const cached = bypassCache ? undefined : cache.get(cacheKey);
+  const cached = cache.get(cacheKey);
+  const refreshDue =
+    options?.bypassCache === true &&
+    cached !== undefined &&
+    Date.now() - cached.fetchedAt >= MIN_REFRESH_INTERVAL_MS;
 
-  if (cached) {
-    return cached;
+  if (cached && !refreshDue) {
+    return cached.preview;
   }
 
-  if (!bypassCache) {
-    const pending = inFlight.get(cacheKey);
-    if (pending) {
-      return pending;
-    }
+  const pending = inFlight.get(cacheKey);
+  if (pending) {
+    return pending;
   }
 
-  const previewRequest = resolvePreviewForResource(resource);
-
-  if (bypassCache) {
-    return previewRequest;
-  }
-
-  inFlight.set(cacheKey, previewRequest);
-
-  try {
-    const preview = await previewRequest;
-    cache.set(cacheKey, preview);
-    return preview;
-  } catch (error) {
-    cache.delete(cacheKey);
-    throw error;
-  } finally {
-    inFlight.delete(cacheKey);
-  }
+  return loadPreview(cacheKey, resource);
 };

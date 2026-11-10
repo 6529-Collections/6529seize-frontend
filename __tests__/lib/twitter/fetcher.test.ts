@@ -1,5 +1,11 @@
 jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
+const mockFetchPublicUrl = jest.fn();
+
+jest.mock("@/lib/security/urlGuard", () => ({
+  fetchPublicUrl: (...args: unknown[]) => mockFetchPublicUrl(...args),
+}));
+
 import { fetchTweetPreview } from "@/lib/twitter/fetcher";
 
 const createSyndicationResponse = () =>
@@ -37,7 +43,7 @@ const createSyndicationResponse = () =>
     }),
   }) as Response;
 
-const createOEmbedFallbackResponses = (pageResponse: unknown) => [
+const createOEmbedFallbackResponses = () => [
   { ok: false, status: 404 },
   {
     ok: true,
@@ -49,7 +55,6 @@ const createOEmbedFallbackResponses = (pageResponse: unknown) => [
     }),
   },
   { ok: false, status: 404 },
-  pageResponse,
 ];
 
 const createPageResponse = (
@@ -76,6 +81,10 @@ const mockFetchSequence = (responses: readonly unknown[]): jest.Mock => {
 };
 
 describe("fetchTweetPreview", () => {
+  beforeEach(() => {
+    mockFetchPublicUrl.mockReset();
+  });
+
   it("fetches Twitter syndication metadata and caches by tweet ID", async () => {
     const fetchImpl = jest
       .fn()
@@ -639,11 +648,10 @@ describe("fetchTweetPreview", () => {
   });
 
   it("reads the tweet page image metadata when syndication has no media", async () => {
-    const fetchImpl = mockFetchSequence(
-      createOEmbedFallbackResponses(
-        createPageResponse(
-          '<html><head><meta content="https://pbs.twimg.com/media/page.jpg" property="og:image"></head><body><div><div></div></div></body></html>'
-        )
+    const fetchImpl = mockFetchSequence(createOEmbedFallbackResponses());
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createPageResponse(
+        '<html><head><meta content="https://pbs.twimg.com/media/page.jpg" property="og:image"></head><body><div><div></div></div></body></html>'
       )
     );
 
@@ -652,7 +660,14 @@ describe("fetchTweetPreview", () => {
       { fetchImpl }
     );
 
-    expect(fetchImpl).toHaveBeenCalledTimes(4);
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+    expect(mockFetchPublicUrl).toHaveBeenCalledWith(
+      "https://x.com/Mayudropsphotos/status/2057513333985554410",
+      expect.anything(),
+      expect.objectContaining({
+        policy: { allowedHostSuffixes: ["twitter.com", "x.com"] },
+      })
+    );
     expect(preview).toMatchObject({
       text: "Post text",
       mediaImageUrl: "https://pbs.twimg.com/media/page.jpg",
@@ -660,12 +675,11 @@ describe("fetchTweetPreview", () => {
   });
 
   it("skips tweet page image metadata from oversized pages", async () => {
-    const fetchImpl = mockFetchSequence(
-      createOEmbedFallbackResponses(
-        createPageResponse(
-          '<meta property="og:image" content="https://pbs.twimg.com/media/page.jpg">',
-          { "content-length": `${3 * 1024 * 1024}` }
-        )
+    const fetchImpl = mockFetchSequence(createOEmbedFallbackResponses());
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createPageResponse(
+        '<meta property="og:image" content="https://pbs.twimg.com/media/page.jpg">',
+        { "content-length": `${3 * 1024 * 1024}` }
       )
     );
 
@@ -674,8 +688,57 @@ describe("fetchTweetPreview", () => {
       { fetchImpl }
     );
 
-    expect(fetchImpl).toHaveBeenCalledTimes(4);
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
     expect(preview.text).toBe("Post text");
     expect(preview.mediaImageUrl).toBeUndefined();
+  });
+
+  it("stores a canonical tweet URL instead of the caller's link text", async () => {
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValueOnce(createSyndicationResponse());
+
+    const preview = await fetchTweetPreview(
+      "https://mobile.twitter.com/SomeoneElse/status/2057513333985554499?s=20&ref=x#frag",
+      { fetchImpl }
+    );
+
+    expect(preview.url).toBe(
+      "https://x.com/Mayudropsphotos/status/2057513333985554499"
+    );
+  });
+
+  it("sends oEmbed and the tweet page a URL rebuilt from the parsed tweet", async () => {
+    const fetchImpl = mockFetchSequence(createOEmbedFallbackResponses());
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createPageResponse("<html></html>")
+    );
+
+    await fetchTweetPreview(
+      "https://twitter.com/#!/Mayudropsphotos/status/2057513333985554412?s=20",
+      { fetchImpl }
+    );
+
+    const oembedEndpoint = fetchImpl.mock.calls[1]?.[0] as URL | undefined;
+    expect(oembedEndpoint?.searchParams.get("url")).toBe(
+      "https://x.com/Mayudropsphotos/status/2057513333985554412"
+    );
+    expect(mockFetchPublicUrl.mock.calls[0]?.[0]).toBe(
+      "https://x.com/Mayudropsphotos/status/2057513333985554412"
+    );
+  });
+
+  it.each([
+    "http://x.com/user/status/2057513333985554413",
+    "ftp://x.com/user/status/2057513333985554413",
+    "https://x.com:8443/user/status/2057513333985554413",
+  ])("rejects %s without any upstream request", async (url) => {
+    const fetchImpl = jest.fn();
+
+    await expect(fetchTweetPreview(url, { fetchImpl })).rejects.toThrow(
+      "Invalid Twitter/X status URL."
+    );
+    expect(fetchImpl).not.toHaveBeenCalled();
+    expect(mockFetchPublicUrl).not.toHaveBeenCalled();
   });
 });

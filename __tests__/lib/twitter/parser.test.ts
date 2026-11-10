@@ -1,7 +1,11 @@
 jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
 import { parseTwitterOEmbed } from "@/lib/twitter/parser";
-import { extractTweetId, parseTweetUrl } from "@/lib/twitter/url";
+import {
+  buildCanonicalTweetUrl,
+  extractTweetId,
+  parseTweetUrl,
+} from "@/lib/twitter/url";
 
 describe("Twitter preview parsing", () => {
   it("extracts status IDs from X and Twitter URLs", () => {
@@ -12,6 +16,32 @@ describe("Twitter preview parsing", () => {
       "9876543210"
     );
     expect(parseTweetUrl("https://example.com/status/123")).toBeUndefined();
+  });
+
+  it.each([
+    "http://x.com/user/status/123",
+    "javascript://x.com/user/status/123",
+    "ftp://twitter.com/user/status/123",
+    "https://x.com:444/user/status/123",
+    "https://user:secret@x.com/user/status/123",
+  ])("accepts only plain https tweet links, rejecting %s", (url) => {
+    expect(parseTweetUrl(url)).toBeUndefined();
+  });
+
+  it("keeps the caller's https link and builds a canonical URL from the tweet", () => {
+    const href = "https://mobile.twitter.com/Someone/status/123?s=20";
+    expect(parseTweetUrl(href)).toEqual({
+      tweetId: "123",
+      href,
+      authorHandle: "Someone",
+    });
+    expect(buildCanonicalTweetUrl("123", "Someone")).toBe(
+      "https://x.com/Someone/status/123"
+    );
+    expect(buildCanonicalTweetUrl("123")).toBe("https://x.com/i/status/123");
+    expect(buildCanonicalTweetUrl("123", "not a handle/../x")).toBe(
+      "https://x.com/i/status/123"
+    );
   });
 
   it("parses normalized metadata from Twitter oEmbed HTML", () => {
