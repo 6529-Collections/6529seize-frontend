@@ -199,6 +199,52 @@ describe("E2eeReportsPanel", () => {
     expect(mockFetchReports).toHaveBeenCalledTimes(1);
   });
 
+  it("asks for confirmation before releasing a hold", async () => {
+    const report = aReport({ on_hold: true, expires_at: null });
+    mockFetchReports.mockResolvedValue({
+      items: [report],
+      next_before: null,
+      next_before_id: null,
+    });
+    mockFetchReport.mockResolvedValue(report);
+    mockSetHold.mockResolvedValue({
+      ...report,
+      on_hold: false,
+      expires_at: CREATED + 180 * DAY,
+    });
+    renderPanel();
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: /^Review evidence: / })
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Release hold" })
+    );
+    let dialog = await screen.findByRole("dialog", {
+      name: "Release this hold?",
+    });
+    expect(dialog).toHaveTextContent(
+      /Report: A credible threat of violence, reported .+\. Releasing the hold returns it to its 180-day retention, so the reported message and report details may then be deleted on schedule\./
+    );
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Cancel" })
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(mockSetHold).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("button", { name: "Release hold" }));
+    dialog = await screen.findByRole("dialog", { name: "Release this hold?" });
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Release hold" })
+    );
+    expect(mockSetHold).toHaveBeenCalledWith(report.id, false);
+    expect(
+      await screen.findByRole("button", { name: "Place on hold" })
+    ).toBeVisible();
+  });
+
   it("marks an unverified report and reports a failed hold change", async () => {
     const report = aReport({ verified: false });
     mockFetchReports.mockResolvedValue({
@@ -317,9 +363,11 @@ describe("E2eeReportsPanel", () => {
 
 describe("readE2eeReportEvidence", () => {
   it("refuses a body larger than the server's report cap before decoding", () => {
-    expect(
-      readE2eeReportEvidence("A".repeat(EVIDENCE_CAP + 4))
-    ).toEqual({ readable: false, text: "", attachments: [] });
+    expect(readE2eeReportEvidence("A".repeat(EVIDENCE_CAP + 4))).toEqual({
+      readable: false,
+      text: "",
+      attachments: [],
+    });
   });
 
   it("reads a message payload's text and attachment names, not its keys", () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { E2eeConfirmDialog } from "@/components/e2ee/ui/E2eeConfirmDialog";
 import { ApiE2eeReportCategory } from "@/generated/models/ApiE2eeReportCategory";
 import type { ApiE2eeTrustAndSafetyReport } from "@/generated/models/ApiE2eeTrustAndSafetyReport";
 import type { ApiE2eeTrustAndSafetyReportPage } from "@/generated/models/ApiE2eeTrustAndSafetyReportPage";
@@ -20,7 +21,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { formatTimestamp } from "./content-moderation-page.helpers";
 import { readE2eeReportEvidence } from "./e2eeReportEvidence";
 
@@ -141,6 +142,7 @@ export default function E2eeReportDetail({
   const locale = useBrowserLocale();
   const queryClient = useQueryClient();
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const [confirmRelease, setConfirmRelease] = useState(false);
   const detailKey = [
     ...ENCRYPTED_REPORTS_QUERY_KEY,
     "detail",
@@ -364,7 +366,13 @@ export default function E2eeReportDetail({
               type="button"
               aria-describedby="e2ee-report-hold-help"
               disabled={hold.isPending}
-              onClick={() => hold.mutate(!report.on_hold)}
+              onClick={() => {
+                if (report.on_hold) {
+                  setConfirmRelease(true);
+                } else {
+                  hold.mutate(true);
+                }
+              }}
               className="tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-50"
             >
               {t(
@@ -384,6 +392,33 @@ export default function E2eeReportDetail({
               )}
             </p>
           </div>
+          <E2eeConfirmDialog
+            open={confirmRelease}
+            title={t(
+              locale,
+              "contentModeration.moderator.encryptedReports.releaseConfirmTitle"
+            )}
+            body={t(
+              locale,
+              "contentModeration.moderator.encryptedReports.releaseConfirmBody",
+              {
+                category,
+                date: formatTimestamp(report.created_at, locale) ?? "",
+              }
+            )}
+            confirmLabel={t(
+              locale,
+              "contentModeration.moderator.encryptedReports.release"
+            )}
+            onConfirm={async () => {
+              try {
+                await hold.mutateAsync(false);
+              } catch {
+                // The panel's alert region announces a failed change.
+              }
+            }}
+            onClose={() => setConfirmRelease(false)}
+          />
         </>
       )}
     </section>
