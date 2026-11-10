@@ -342,7 +342,10 @@ Opt-in stateful staging packs:
   image popup dismissal, downloads and focus return, a group with a
   third user and a revoked second device that can no longer read new messages.
   It also checks sender profile links and levels, plus DM header profile
-  links. Its privacy checks ensure no request URL, body or sent WebSocket
+  links. Its Markdown comparison posts identical formatting, lists, code, tables
+  and footnotes in ordinary and encrypted chats, captures both at desktop and
+  phone widths, and proves private Markdown URLs cause no automatic requests.
+  Its privacy checks ensure no request URL, body or sent WebSocket
   frame contains any plaintext (raw, hex
   or base64 at any alignment), that the MLS WebAssembly module loads under the
   served CSP (`'wasm-unsafe-eval'` without `'unsafe-eval'`) and that the

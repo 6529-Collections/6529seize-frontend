@@ -4,6 +4,9 @@
  * codes only; every user-visible string lives here.
  */
 export const E2EE_MESSAGES = {
+  "e2ee.message.imageLink": "Image link",
+  "e2ee.message.imageLinkFrom": "Image from {host}",
+  "e2ee.message.markdownTable": "Message table",
   "e2ee.connectionSetup.title": "Set up device",
   "e2ee.connectionSetup.scan":
     "Scan this code with the QR scanner in the 6529 mobile app.",

@@ -1338,4 +1338,7 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_TRANSFER_MESSAGES,
   ...FR_FR_THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...FR_FR_THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.message.imageLink": "Lien vers l’image",
+  "e2ee.message.imageLinkFrom": "Image de {host}",
+  "e2ee.message.markdownTable": "Tableau du message",
 } satisfies Partial<Record<MessageKey, string>>;
