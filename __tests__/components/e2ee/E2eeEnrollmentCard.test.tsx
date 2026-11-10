@@ -4,6 +4,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { SeizeConnectContext } from "@/components/auth/seizeConnectContextValue";
 import type { SeizeConnectContextType } from "@/components/auth/seizeConnectTypes";
@@ -35,6 +36,11 @@ jest.mock("@/components/auth/Auth", () => ({
 const mockTurnOn = jest.fn<Promise<CombinedTurnOnOutcome>, [unknown]>();
 jest.mock("@/components/e2ee/gate/e2eeCombinedTurnOn", () => ({
   turnOnWithCombinedSignIn: (input: unknown) => mockTurnOn(input),
+}));
+
+const mockRemoveLocal = jest.fn(async () => undefined);
+jest.mock("@/components/e2ee/useRemoveE2eeLocalData", () => ({
+  useRemoveE2eeLocalData: () => mockRemoveLocal,
 }));
 
 const ADDRESS = "0x1111111111111111111111111111111111111111";
@@ -526,5 +532,58 @@ describe("E2eeEnrollmentCard upgrade copy (D172)", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Couldn’t upgrade encrypted messages. Try again."
     );
+  });
+
+  it("explains a stop on an unconfirmed revocation and adds no failure alert", async () => {
+    const engine = createFakeE2eeEngine({ status: "needs-enrollment" });
+    jest
+      .mocked(engine.enroll)
+      .mockRejectedValueOnce(new Error("E2EE_REVOCATION_UNVERIFIED"));
+    render(
+      <SeizeConnectContext.Provider
+        value={
+          {
+            address: ADDRESS,
+            canSignActiveWallet: true,
+            connectedAccounts: [],
+            seizeConnectFresh: mockConnect,
+          } as unknown as SeizeConnectContextType
+        }
+      >
+        <E2eeEnrollmentCard
+          scope="dms"
+          engine={engine}
+          enrolling={false}
+          engineError="E2EE_REVOCATION_UNVERIFIED"
+        />
+      </SeizeConnectContext.Provider>
+    );
+    const notice =
+      /listed as revoked, but the revocation couldn’t be confirmed here/u;
+    expect(screen.getByText(notice)).toHaveTextContent(
+      "remove them from this browser below, then turn them on again"
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign to enable Encrypted DMs" })
+    );
+
+    await waitFor(() => expect(engine.enroll).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByText(notice)).toBeInTheDocument());
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    // The way out needs no running engine: remove this browser's data.
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Remove encrypted messages from this browser",
+      })
+    );
+    const dialog = screen.getByRole("dialog", {
+      name: "Remove encrypted messages from this browser?",
+    });
+    await act(async () => {
+      fireEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
+    });
+    expect(mockRemoveLocal).toHaveBeenCalledTimes(1);
   });
 });
