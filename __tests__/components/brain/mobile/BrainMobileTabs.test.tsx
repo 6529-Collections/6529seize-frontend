@@ -38,6 +38,10 @@ jest.mock("react-use", () => ({
 }));
 
 const registerRef = jest.fn();
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isIos: false }),
+}));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ registerRef }),
 }));

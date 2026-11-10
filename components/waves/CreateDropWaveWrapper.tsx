@@ -14,6 +14,7 @@ export enum CreateDropWaveWrapperContext {
 interface CreateDropWaveWrapperProps {
   readonly children: React.ReactNode;
   readonly context?: CreateDropWaveWrapperContext | undefined;
+  readonly iosMaxHeight?: React.CSSProperties["maxHeight"] | undefined;
 }
 
 function useResizeObserver(
@@ -69,6 +70,7 @@ function useResizeObserver(
 export function CreateDropWaveWrapper({
   children,
   context = CreateDropWaveWrapperContext.WAVE_CHAT,
+  iosMaxHeight,
 }: CreateDropWaveWrapperProps) {
   const capacitor = useCapacitor();
 
@@ -103,6 +105,7 @@ export function CreateDropWaveWrapper({
   return (
     <div
       ref={containerRef}
+      style={capacitor.isIos ? { maxHeight: iosMaxHeight } : undefined}
       className={`${containerClassName} tw-sticky tw-top-0 tw-flex tw-w-full tw-flex-none tw-flex-col tw-overflow-y-auto tw-overscroll-contain tw-rounded-b-xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${COMPOSER_ROW_PADDING_CLASS_NAME} tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300`}
     >
       {children}
