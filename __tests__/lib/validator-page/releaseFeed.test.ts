@@ -1,5 +1,4 @@
 /** @jest-environment node */
-jest.mock("server-only", () => ({}), { virtual: true });
 import {
   getOfferedRelease,
   parseFeedSupport,

@@ -1,5 +1,4 @@
 /** @jest-environment node */
-jest.mock("server-only", () => ({}), { virtual: true });
 import { NextRequest } from "next/server";
 
 import { isAccessCookieValid } from "@/lib/validator-page/accessGate";

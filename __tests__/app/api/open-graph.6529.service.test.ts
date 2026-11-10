@@ -1,4 +1,3 @@
-jest.mock("server-only", () => ({}), { virtual: true });
 import { createFirstParty6529Plan } from "@/app/api/open-graph/6529/service";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import { publicEnv } from "@/config/env";

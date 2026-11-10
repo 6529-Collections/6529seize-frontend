@@ -1,4 +1,3 @@
-jest.mock("server-only", () => ({}), { virtual: true });
 const mockClient = { readContract: jest.fn() };
 
 jest.mock("viem", () => ({

@@ -1,4 +1,3 @@
-jest.mock("server-only", () => ({}), { virtual: true });
 import { publicEnvSchema } from "@/config/env.schema";
 
 const originalEthereumRpcUrl = process.env["ETHEREUM_RPC_URL"];

@@ -1,4 +1,3 @@
-jest.mock("server-only", () => ({}), { virtual: true });
 import { createEtherscanPlan } from "@/app/api/open-graph/etherscan/service";
 import { createPublicClient, custom } from "viem";
 import { mainnet } from "viem/chains";

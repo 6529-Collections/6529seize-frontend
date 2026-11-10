@@ -1,5 +1,4 @@
 /** @jest-environment node */
-jest.mock("server-only", () => ({}), { virtual: true });
 
 import { ReadableStream } from "node:stream/web";
 import {

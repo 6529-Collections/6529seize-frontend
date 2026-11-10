@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-jest.mock("server-only", () => ({}), { virtual: true });
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
