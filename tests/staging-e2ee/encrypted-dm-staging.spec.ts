@@ -450,10 +450,8 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
           canary
         )
       ).toBe(false);
-      const notificationCodeText = `console.log("Notification code ${runId}");`;
-      const notificationCode = `\`\`\`js\n${notificationCodeText}\n\`\`\``;
-      await composer(a.page).fill(notificationCode);
-      await a.page.getByRole("button", { name: "Send", exact: true }).click();
+      // Resizing can restart the engine and clear the in-memory timeline. Check
+      // each notification while it is the latest saved local preview as well.
       await gotoStaging(b.page, "/notifications");
       const notice = b.page
         .getByRole("article")
@@ -485,17 +483,6 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
           body: await notice.screenshot(),
           contentType: "image/png",
         });
-        const codeNotice = b.page.getByRole("article").filter({
-          hasText: `Notification code ${runId}`,
-        });
-        await expect(
-          codeNotice.getByText(notificationCodeText)
-        ).toHaveJSProperty("tagName", "CODE", { timeout: SYNC_TIMEOUT_MS });
-        await expect(codeNotice).not.toContainText("```");
-        await testInfo.attach(`encrypted-notification-code-${width}`, {
-          body: await codeNotice.screenshot(),
-          contentType: "image/png",
-        });
       }
       await b.page.setViewportSize({ width: 1440, height: 1000 });
       await b.page
@@ -521,6 +508,31 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         body: await overview.screenshot(),
         contentType: "image/png",
       });
+      await b.page.keyboard.press("Escape");
+      const notificationCodeText = `console.log("Notification code ${runId}");`;
+      const notificationCode = `\`\`\`js\n${notificationCodeText}\n\`\`\``;
+      await composer(a.page).fill(notificationCode);
+      await a.page.getByRole("button", { name: "Send", exact: true }).click();
+      await gotoStaging(b.page, "/notifications");
+      for (const width of [1440, 390]) {
+        await b.page.setViewportSize({ width, height: 1000 });
+        const codeNotice = b.page.getByRole("article").filter({
+          hasText: `Notification code ${runId}`,
+        });
+        await expect(
+          codeNotice.getByText(notificationCodeText)
+        ).toHaveJSProperty("tagName", "CODE", { timeout: SYNC_TIMEOUT_MS });
+        await expect(codeNotice).not.toContainText("```");
+        await testInfo.attach(`encrypted-notification-code-${width}`, {
+          body: await codeNotice.screenshot(),
+          contentType: "image/png",
+        });
+      }
+      await b.page.setViewportSize({ width: 1440, height: 1000 });
+      await b.page
+        .getByRole("link", { name: "Notifications", exact: true })
+        .first()
+        .press("ArrowDown");
       await expect(
         overview
           .getByRole("article")
@@ -529,6 +541,10 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
           })
           .getByText(notificationCodeText)
       ).toHaveJSProperty("tagName", "CODE");
+      await testInfo.attach("encrypted-notification-code-overview", {
+        body: await overview.screenshot(),
+        contentType: "image/png",
+      });
       await b.page.keyboard.press("Escape");
       await openChat(b, dm);
       await b.page.reload();
