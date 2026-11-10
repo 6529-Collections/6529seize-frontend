@@ -5,10 +5,11 @@ import {
   AdditionalDetailsSection,
   ArweaveLinkRow,
   EmptyDetailsState,
-  MetadataCard,
   MetricBlock,
   type AdditionalDetailsMediaRow,
 } from "@/components/the-memes/MemePageAdditionalDetails";
+import MemePropertiesGrid from "@/components/the-memes/MemePropertiesGrid";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import type { IAttribute, LabNFT } from "@/entities/INFT";
 import { parseNftDescriptionToHtml, printMintDate } from "@/helpers/Helpers";
 import {
@@ -178,15 +179,17 @@ function MemeLabCardDescription({ nft }: { readonly nft: LabNFT }) {
 
 export function MemeLabAdditionalDetailsContent({
   nft,
+  locale = DEFAULT_LOCALE,
 }: {
   readonly nft: LabNFT;
+  readonly locale?: SupportedLocale;
 }) {
   const arweaveRows = getMemeLabArweaveRows(nft);
   const detailRows = getMemeLabDetailRows(nft);
   const attributes = getMemeLabMetadataAttributes(nft.metadata);
 
   return (
-    <div className="tw-space-y-[34px] tw-pb-8 tw-pt-8 sm:tw-space-y-14">
+    <div className="tw-space-y-[34px] tw-pb-8 tw-pt-8 sm:tw-space-y-14 md:tw-space-y-8">
       {arweaveRows.length > 0 && (
         <AdditionalDetailsSection title="Arweave links" icon={LinkIcon}>
           <div>
@@ -205,17 +208,13 @@ export function MemeLabAdditionalDetailsContent({
         </div>
       </AdditionalDetailsSection>
 
-      <AdditionalDetailsSection title="Properties" icon={SwatchIcon}>
+      <AdditionalDetailsSection
+        title="Properties"
+        icon={SwatchIcon}
+        className="md:tw-border-x-0 md:tw-border-b-0 md:tw-border-t md:tw-border-solid md:tw-border-iron-800 md:tw-pt-8"
+      >
         {attributes.length > 0 ? (
-          <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 lg:tw-grid-cols-4">
-            {attributes.map((attribute) => (
-              <MetadataCard
-                key={`${attribute.trait_type}-${attribute.value}`}
-                label={attribute.trait_type}
-                value={attribute.value}
-              />
-            ))}
-          </div>
+          <MemePropertiesGrid attributes={attributes} locale={locale} />
         ) : (
           <EmptyDetailsState>No properties found.</EmptyDetailsState>
         )}
