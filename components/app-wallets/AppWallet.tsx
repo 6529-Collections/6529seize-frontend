@@ -1,6 +1,5 @@
 "use client";
 
-import { Filesystem, Directory, Encoding } from "@capacitor/filesystem";
 import {
   faCircleArrowLeft,
   faCopy,
@@ -35,7 +34,8 @@ import { UnlockAppWalletModal } from "./AppWalletModal";
 import { decryptData } from "./app-wallet-helpers";
 import AppWalletAvatar from "./AppWalletAvatar";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
-import { Share } from "@capacitor/share";
+import AppWalletSavedRecoveryFilesNotice from "./AppWalletSavedRecoveryFilesNotice";
+import { shareTextFileInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import {
@@ -143,17 +143,11 @@ export default function AppWalletComponent(
     text: string
   ) => {
     try {
-      const result = await Filesystem.writeFile({
-        path: fileName,
-        data: content,
-        directory: Directory.Documents,
-        encoding: Encoding.UTF8,
-      });
-
-      await Share.share({
+      // A temporary cache file that is removed once the share sheet closes;
+      // the user decides where the export is kept.
+      await shareTextFileInNativeApp(content, fileName, {
         title,
         text,
-        url: result.uri,
         dialogTitle: "Share or Save File",
       });
     } catch {
@@ -366,6 +360,11 @@ export default function AppWalletComponent(
         {printBalance()}
       </header>
 
+      <AppWalletSavedRecoveryFilesNotice
+        key={appWallet.address.toLowerCase()}
+        address={appWallet.address}
+      />
+
       <UnlockAppWalletModal
         address={appWallet.address}
         address_hashed={appWallet.address_hashed}
@@ -513,11 +512,7 @@ export default function AppWalletComponent(
                   confirmationText: "REVEAL",
                 }}
                 onUnlock={(pass: string) => {
-                  void decryptData(
-                    appWallet.address,
-                    appWallet.mnemonic,
-                    pass
-                  )
+                  void decryptData(appWallet.address, appWallet.mnemonic, pass)
                     .then((decryptedPhrase) => {
                       setPhrase(decryptedPhrase.split(" "));
                       setRevealPhrase(true);
@@ -607,11 +602,7 @@ export default function AppWalletComponent(
                 confirmationText: "REVEAL",
               }}
               onUnlock={(pass: string) => {
-                void decryptData(
-                  appWallet.address,
-                  appWallet.private_key,
-                  pass
-                )
+                void decryptData(appWallet.address, appWallet.private_key, pass)
                   .then((decryptedPrivateKey) => {
                     setPrivateKey(decryptedPrivateKey);
                     setRevealPrivateKey(true);
