@@ -20,6 +20,8 @@ rolls back if the request fails.
 
 ## Entry Points
 
+- Submission and winner cards both support reactions and replies. On desktop,
+  hover the card to reveal its action bar; on touch, long-press its content.
 - Use quick-react buttons in the action bar/menu. Each button names its emoji
   in its accessible label and desktop tooltip, such as `React with Thumbs up`.
 - On desktop, hover an action or reach it with keyboard focus to read its label

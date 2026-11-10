@@ -238,6 +238,95 @@ describe("PrivilegedDropCreator", () => {
     expect(screen.getByTestId("create")).toBeInTheDocument();
   });
 
+  it.each([
+    {
+      name: "native below limit",
+      native: true,
+      count: 1,
+      waveCount: 99,
+      blocked: false,
+    },
+    {
+      name: "native at limit",
+      native: true,
+      count: 3,
+      waveCount: 0,
+      blocked: true,
+    },
+    {
+      name: "native unknown count",
+      native: true,
+      count: null,
+      waveCount: 99,
+      blocked: false,
+    },
+    {
+      name: "native absent count",
+      native: true,
+      count: undefined,
+      waveCount: 99,
+      blocked: false,
+    },
+    {
+      name: "legacy below limit",
+      native: false,
+      count: null,
+      waveCount: 1,
+      blocked: false,
+    },
+    {
+      name: "legacy at limit",
+      native: false,
+      count: null,
+      waveCount: 3,
+      blocked: true,
+    },
+  ])(
+    "uses the correct creator capacity for $name",
+    ({ native, count, waveCount, blocked }) => {
+      mockPriv.mockImplementation(
+        jest.requireActual<typeof import("@/hooks/useDropPriviledges")>(
+          "@/hooks/useDropPriviledges"
+        ).useDropPrivileges
+      );
+      mockUseAuth.mockReturnValue({
+        connectedProfile: { id: "artist", handle: "artist" },
+      });
+      const targetWave = {
+        ...wave,
+        participation: {
+          ...wave.participation,
+          no_of_applications_allowed_per_participant: 3,
+        },
+        metrics: { ...wave.metrics, your_participation_drops_count: waveCount },
+        ...(native
+          ? {
+              competition: {
+                wave_id: wave.id,
+                your_active_entries_count: count,
+              },
+            }
+          : {}),
+      };
+      renderPrivilegedDropCreator({
+        fixedDropMode: DropMode.PARTICIPATION,
+        wave: targetWave as React.ComponentProps<
+          typeof PrivilegedDropCreator
+        >["wave"],
+      });
+      if (blocked) {
+        expect(screen.getByTestId("placeholder")).toHaveAttribute(
+          "data-type",
+          "submission"
+        );
+        expect(screen.queryByTestId("create")).not.toBeInTheDocument();
+      } else {
+        expect(screen.getByTestId("create")).toBeInTheDocument();
+        expect(screen.queryByTestId("placeholder")).not.toBeInTheDocument();
+      }
+    }
+  );
+
   describe("open replies", () => {
     const replyOnlyWave = {
       ...wave,

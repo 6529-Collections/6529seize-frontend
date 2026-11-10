@@ -5,8 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { removeTemporaryThreadReply } from "@/components/waves/drops/reply-threads/pending-replies";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -29,7 +27,7 @@ const isSaved = (error: unknown): boolean =>
  * messages and says it was posted; it returns false for any other error.
  * `isSaved` tells the send queue to count such a drop as sent.
  */
-export function useSavedDropRecovery(wave: ApiWave) {
+export function useSavedDropRecovery() {
   const queryClient = useQueryClient();
   const { setToast } = useAuth();
   const { processDropRemoved, refreshWaveMessages } = useMyStreamActions();
@@ -40,12 +38,12 @@ export function useSavedDropRecovery(wave: ApiWave) {
       if (!isSaved(error)) return false;
       const waveId = body.drop.wave_id;
       if (body.dropId) {
-        if (isWaveRepliesCollapsed(wave)) {
+        if (body.drop.reply_to) {
           removeTemporaryThreadReply(queryClient, waveId, body.dropId);
         }
         processDropRemoved(waveId, body.dropId);
       }
-      refreshWaveMessages(waveId);
+      void refreshWaveMessages(waveId);
       body.onSuccess?.();
       setToast({
         type: "success",
@@ -54,14 +52,7 @@ export function useSavedDropRecovery(wave: ApiWave) {
       });
       return true;
     },
-    [
-      locale,
-      processDropRemoved,
-      queryClient,
-      refreshWaveMessages,
-      setToast,
-      wave,
-    ]
+    [locale, processDropRemoved, queryClient, refreshWaveMessages, setToast]
   );
   return useMemo(() => ({ recover, isSaved }), [recover]);
 }

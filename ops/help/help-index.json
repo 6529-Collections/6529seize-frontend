@@ -1964,7 +1964,7 @@
         "Desktop secure setup requires 6529 Desktop v0.4.0 or later and uses Open in 6529 Desktop to launch a private link.",
         "Mobile shows a full-width QR; Desktop uses the 6529 logo and Open in 6529 Desktop launch control instead of a QR. The link field includes a copy icon with refresh beside it. Back returns to the app and connection choices.",
         "Connect-only refresh generates a new code directly. Secure refresh removes the displayed link and returns to the wallet-signing state for a fresh signature. Copy and refresh are unavailable during preparation; preparation failures can be retried.",
-        "The regular app QR scanner accepts secure and Connect-only connection links. A device camera can open a link when its app link handler supports that URL. Secure acceptance lists Signed Posts and Encrypted DMs with Accept and enable both; Connect-only acceptance uses Accept connection without granting those permissions. Both connection types open Home after acceptance; secure setup completes before navigation.",
+        "The regular app QR scanner accepts secure and Connect-only connection links. A device camera can open a link when its app link handler supports that URL. Secure acceptance lists Signed Posts and Encrypted DMs with Accept and enable both. Connect-only acceptance uses Accept connection without granting those permissions. Successful acceptance opens Home. If secure setup fails after sign-in, the app keeps the session and asks you to open a fresh secure link.",
         "Generating a secure QR does not create an active device. The receiving app registers it when setup completes. Working receiver keys and history are preserved; source history is not copied. Restore encrypted backup for earlier history on a new device.",
         "Connection links expire shortly, work once and should be used only on a device you own. Proxy sessions cannot authorize secure setup. The receiving app clears one-time credentials from the address bar, so reload alone cannot reopen them; open the original link again.",
         "Use Download apps beside the title to open the Apps page. Page sharing is a separate navigation action and never appears in the connection dialog."
@@ -3905,7 +3905,7 @@
       ],
       "facts": [
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
-        "On desktop, hover or keyboard-focus a drop action to read its label beside the control. Moving the pointer away, scrolling, resizing, pressing Escape, clicking elsewhere, or activating the control with a pointer or keyboard dismisses action tooltips. Touch uses the drop action menu.",
+        "Submission and winner cards both support reactions and replies: hover the card on desktop or long-press its content on touch. On desktop, hover or keyboard-focus a drop action to read its label beside the control. Moving the pointer away, scrolling, resizing, pressing Escape, clicking elsewhere, or activating the control with a pointer or keyboard dismisses action tooltips. Touch uses the drop action menu.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
         "Desktop and touch quick reactions show up to three available emojis ranked by local usage. Each button names its emoji in its accessible label and desktop tooltip, such as React with Thumbs up. If none can be displayed, one thumbs-up fallback appears and sends a thumbs-up reaction.",
         "Quick reactions and the emoji picker Frequently used section share local emoji history, including composer emoji selections. History stays in the current browser or app installation and does not sync between devices.",
@@ -4048,13 +4048,14 @@
         "With `Anyone who can see this wave can reply` on, everyone who can see the wave can reply to its drops, even outside the chat group. New top-level drops still need chat access.",
         "Viewers who can only reply see `Only chat members can start new drops here. You can reply to any drop.` and use the drop's Reply action to open the composer.",
         "With `Collapse replies under each drop` on, replies stay out of the main chat. A drop with replies shows `Show N replies`; selecting it opens the thread under the drop, oldest first, and `Hide replies` closes it.",
+        "In a wave with inline replies, the author of a top-level chat drop can select Collapse replies in its actions menu. Existing and future replies, including nested replies, move under Show N replies for everyone. The author can select Show replies inline to reverse it.",
         "The reply count includes replies to replies throughout the thread. Direct and nested replies refresh the original drop's count live; duplicate updates do not add extra replies.",
         "Sending a reply opens its thread for the sender. The pending reply remains visible while saving and loading, then becomes the saved reply; unsuccessful sends are removed or show the existing moderation rejection state.",
         "Reply previews show the original author's handle and a placeholder avatar when the author has no profile picture. A missing profile picture does not mean the drop is missing. Removed content still follows moderation visibility rules.",
         "If loading a collapsed reply thread fails, it shows `Couldn't load replies.` and a Retry button. Already-loaded replies stay visible; Retry loads the thread again.",
         "Slow mode and disabled links still apply to replies from non-admins. Emoji reactions stay open to everyone who can see the wave.",
-        "Collapsed replies do not count as unread and do not notify followers subscribed to every drop; the replied-to author and mentioned profiles are still notified.",
-        "Links and notifications to a collapsed reply jump to its parent drop and open that thread.",
+        "Wave-wide collapse keeps replies out of the wave unread count and skips notifications for followers subscribed to every drop. Individual collapse keeps the wave's unread and notification rules, including direct replies and mentions.",
+        "Links and notifications to a collapsed reply open the top-level thread and scroll to the highlighted reply, even in older pages. Show earlier replies and Show newer replies let you browse the rest of the thread when available.",
         "With open replies, the wave's creator, admins and chat members (when chat is limited to a group) can delete anyone's replies with the Delete action. Top-level drops keep the wave's normal admin deletion setting."
       ],
       "canonical_path": "/waves",
@@ -4313,6 +4314,7 @@
         "Video artwork in Quick Vote starts automatically, muted and inline, on web and in the native app. Reduced-motion preferences keep autoplay off, and playback controls remain available.",
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
+        "Submission limits count your active entries in the selected decision. Winning, withdrawn, and deleted entries do not use capacity; entries in other decisions have separate limits. Main Stage allows three active submissions. At the limit, the header submission action is locked and the form cannot submit another entry. Removing an active submission frees a slot.",
         "On The Memes Main Stage, Chat and Leaderboard keep the same submission control in the top wave header above the tabs. On web it shows Submit Work to The Memes or the compact Submit Work label when available; How to Submit opens nomination guidance when participation eligibility is missing. Timing and submission-limit restrictions stay in that header. The native app uses the equivalent submit or lock icon in its top header in both views. My submissions appears in the leaderboard toolbar for signed-in users on their own profile when they have entries; a failed lookup still allows retry; Main Stage has no separate Drop button beside the leaderboard sort controls.",
         "Unavailable conversation-header submission actions show a lock icon on desktop, tablet, and phone. Hover, focus, or select the lock to read the full restriction reason, including opening or closing dates and submission limits. Recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity. The desktop How to Submit helper keeps its label.",
         "In the Artwork step, Continue remains available before required fields are complete, except while an interactive artwork hash is being verified; selecting Continue turns every missing or invalid field and the missing media control red, shows inline recovery messages, and focuses the first missing item in form order.",
@@ -6977,6 +6979,8 @@
       "facts": [
         "Wave chat docs cover scroll behavior, unread dividers, unread controls, and serial jump navigation.",
         "Unread controls help users return to new content in long wave threads.",
+        "On iPhone and iPad, incoming drops can wait while you read older messages. Your own outgoing drops remain in the chat during sending and after saving, with or without images. Sending does not reveal incoming drops that are still waiting; use the bottom control to reveal them.",
+        "Image drops keep their place in the conversation as processing finishes; completing an image does not move its message into older history.",
         "Serial jump navigation is separate from page-level browser navigation. Shared serial links load and highlight the selected accessible post. The one-time serialNo and divider parameters clear without reopening chat or jumping to newest messages. Scroll or use the bottom arrow to leave that position.",
         "If a drop thread cannot load, the error offers Try again instead of an empty conversation prompt. Already loaded replies remain visible during a failure."
       ],

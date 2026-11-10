@@ -122,8 +122,9 @@ The receiving app confirms the incoming account. Secure links also list
 **Signed Posts** and **Encrypted DMs**, with **Accept and enable both** instead
 of **Accept connection**. One secure link both signs in and enrolls the app;
 registration does not occur merely because a QR was generated. Working receiver
-keys/history are preserved. Both connection types open Home after acceptance;
-secure setup completes before navigation. The source session remains connected. See
+keys and history are preserved. Successful acceptance opens Home. If secure
+setup fails after sign-in, the receiving app shows a recovery message and a
+link to Home. The source session remains connected. See
 [Encrypted messages setup](../encrypted-messages.md#setup-through-connection-sharing)
 for history, backup and capability limits.
 
