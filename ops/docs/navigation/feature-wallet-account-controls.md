@@ -270,7 +270,8 @@ tooltip with a short hover delay and right-side placement, without a native titl
 Avatar shields show this device's permissions: green when both are ready without
 renewal due, amber for partial setup or an approaching expiry, and neutral for
 off, unavailable or unresolved states. Connected-profile avatars carry smaller
-shields; they do not imply another physical device is set up.
+shields for the same device. An inactive profile shows Signed Posts as verified
+only when this device's key matches a recent server check for that profile.
 
 The mobile sidepanel prints the status beneath identity and above TDH: the
 connection dot belongs to the first row and the shield belongs to the permission

@@ -15,7 +15,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
 
 /** Refreshes while visible and immediately when the client returns to focus. */
-const DEVICE_GRANTS_REFRESH_MS = 10 * 60 * 1000;
+export const DEVICE_GRANTS_REFRESH_MS = 10 * 60 * 1000;
 
 const forgetRevokedLocalGrants = async (
   grants: readonly ApiDeviceGrant[]
@@ -29,11 +29,15 @@ const forgetRevokedLocalGrants = async (
 };
 
 /** The device grants of the signed-in profile (null address: disabled). */
-export function useDeviceGrants(address: string | null) {
+export function useDeviceGrants(
+  address: string | null,
+  mode: "active" | "cache-only" = "active"
+) {
+  const active = mode === "active" && address !== null;
   const query = useQuery({
     queryKey: [QueryKey.DEVICE_GRANTS, address],
     queryFn: ({ signal }) => fetchDeviceGrants(signal),
-    enabled: address !== null,
+    enabled: active,
     staleTime: DEVICE_GRANTS_REFRESH_MS,
     refetchOnWindowFocus: "always",
     refetchInterval: DEVICE_GRANTS_REFRESH_MS,
@@ -43,10 +47,10 @@ export function useDeviceGrants(address: string | null) {
 
   const grants = query.data;
   useEffect(() => {
-    if (grants) {
+    if (active && grants) {
       forgetRevokedLocalGrants(grants).catch(() => undefined);
     }
-  }, [grants]);
+  }, [active, grants]);
 
   return query;
 }
