@@ -41,8 +41,9 @@ Wave and DM rows in the left list control which thread is open.
   later messages do not scroll to it again.
 - On desktop pointer devices, the Waves list uses a slim iron scrollbar for
   dragging and track clicks. Touch devices keep their native scrolling behavior.
-- `All`, `Pinned`, and `Joined` are peer collections in one sticky row, with
-  a separate search icon on the right. The collection group matches the search
+- `All`, `Pinned`, and `Joined` are peer collections on a dark surface without
+  an outer border in one sticky row. The search icon on the right is transparent
+  at rest and gains a dark background on hover. The collection group matches the search
   button height, including the larger touch controls. Switch directly without
   scrolling through pinned waves.
   Each collection remembers its scroll position; selecting another wave enables

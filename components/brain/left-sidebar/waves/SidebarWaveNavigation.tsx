@@ -109,7 +109,7 @@ export function SidebarWaveNavigationControls({
             {navigation.canUseCollections ? (
               <fieldset
                 aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
-                className="tw-m-0 tw-flex tw-h-9 tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5 touch-only:tw-h-10"
+                className="tw-m-0 tw-flex tw-h-9 tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-p-0.5 touch-only:tw-h-10"
               >
                 {(["all", "pinned", "joined"] as const).map((tab) => (
                   <button
@@ -139,9 +139,9 @@ export function SidebarWaveNavigationControls({
               title={findWaveLabel}
               aria-expanded={false}
               onClick={() => setSearchOpen(true)}
-              className="tw-group tw-ml-auto tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white touch-only:tw-size-11 touch-only:tw-rounded-none"
+              className="tw-group tw-ml-auto tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white touch-only:tw-size-11"
             >
-              <span className="tw-flex tw-size-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 desktop-hover:group-hover:tw-bg-iron-800 touch-only:tw-size-10">
+              <span className="tw-flex tw-size-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent desktop-hover:group-hover:tw-bg-iron-900 touch-only:tw-size-10">
                 <MagnifyingGlassIcon className="tw-size-4" aria-hidden="true" />
               </span>
             </button>

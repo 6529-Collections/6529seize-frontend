@@ -254,6 +254,23 @@ test("sidebar collection and search controls count deliberate use without query 
   await page
     .getByRole("button", { name: "Enable synthetic telemetry" })
     .click();
+  const collectionFilter = page.getByRole("group", {
+    name: "Wave list filter",
+  });
+  await expect(collectionFilter).toHaveCSS("border-top-width", "0px");
+  await expect(collectionFilter).toHaveCSS(
+    "background-color",
+    "rgb(19, 19, 22)"
+  );
+  const searchButton = page.getByRole("button", {
+    name: "Find a wave…",
+    exact: true,
+  });
+  const searchSurface = page
+    .getByRole("button", { name: "Find a wave…", exact: true })
+    .locator(":scope > span");
+  await expect(searchSurface).toHaveCSS("border-top-width", "0px");
+  await expect(searchSurface).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await page.getByRole("button", { name: "Pinned", exact: true }).hover();
   await page.getByRole("button", { name: "Pinned", exact: true }).focus();
   expect(
@@ -268,7 +285,14 @@ test("sidebar collection and search controls count deliberate use without query 
         (await featureEvents(page, "Wave Feature Activated", "pinned")).length
     )
     .toBe(1);
-  await page.getByRole("button", { name: "Find a wave…", exact: true }).click();
+  await searchButton.hover();
+  if (await page.evaluate(() => matchMedia("(any-hover: hover)").matches)) {
+    await expect(searchSurface).toHaveCSS(
+      "background-color",
+      "rgb(28, 28, 33)"
+    );
+  }
+  await searchButton.click();
   await page
     .getByRole("searchbox", { name: "Find a wave…" })
     .fill("private-search-content");
