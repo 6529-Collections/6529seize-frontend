@@ -1,11 +1,13 @@
 import "next/dist/compiled/server-only";
 
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { discardResponse } from "@/lib/fetch/fetchDeadline";
 import { readLimitedText } from "@/lib/fetch/limitedBody";
+import { fetchPublicUrl } from "@/lib/security/urlGuard";
 import { parseTwitterOEmbed } from "./parser";
 import { extractMetaImage } from "./meta";
 import type { TweetPreview, TwitterOEmbedResponse } from "./types";
-import { parseTweetUrl } from "./url";
+import { buildCanonicalTweetUrl, parseTweetUrl } from "./url";
 import {
   findFirstImageUrl,
   getSyndicationToken,
@@ -20,6 +22,8 @@ const TWITTER_PREVIEW_CACHE_MAX_ITEMS = 500;
 const TWITTER_PREVIEW_FETCH_TIMEOUT_MS = 8000;
 const TWITTER_MEDIA_FETCH_TIMEOUT_MS = 5000;
 const TWITTER_PAGE_MAX_BYTES = 2 * 1024 * 1024;
+const TWITTER_PAGE_MAX_REDIRECTS = 3;
+const TWITTER_PAGE_HOST_SUFFIXES = ["twitter.com", "x.com"] as const;
 
 const previewCache = new LruTtlCache<string, Promise<TweetPreview>>({
   max: TWITTER_PREVIEW_CACHE_MAX_ITEMS,
@@ -97,7 +101,6 @@ async function fetchSyndicationMediaImageUrl(
 }
 
 async function fetchSyndicationPreview(
-  href: string,
   tweetId: string,
   fetchImpl: typeof fetch
 ): Promise<TweetPreview | undefined> {
@@ -117,15 +120,28 @@ async function fetchSyndicationPreview(
     return undefined;
   }
 
-  return parseSyndicationPreview(await response.json(), href, tweetId);
+  const payload: unknown = await response.json();
+  const screenName =
+    typeof payload === "object" && payload !== null
+      ? (payload as { user?: { screen_name?: unknown } }).user?.screen_name
+      : undefined;
+  return parseSyndicationPreview(
+    payload,
+    buildCanonicalTweetUrl(
+      tweetId,
+      typeof screenName === "string" ? screenName : undefined
+    ),
+    tweetId
+  );
 }
 
+// The tweet page is fetched through the public-address guard and may only
+// redirect within Twitter/X hosts.
 async function fetchTweetPageMetaImageUrl(
-  href: string,
-  fetchImpl: typeof fetch
+  pageUrl: string
 ): Promise<string | undefined> {
-  const response = await fetchWithTimeout(
-    href,
+  const response = await fetchPublicUrl(
+    pageUrl,
     {
       headers: {
         Accept:
@@ -134,11 +150,15 @@ async function fetchTweetPageMetaImageUrl(
           "Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)",
       },
     },
-    TWITTER_MEDIA_FETCH_TIMEOUT_MS,
-    fetchImpl
+    {
+      policy: { allowedHostSuffixes: TWITTER_PAGE_HOST_SUFFIXES },
+      maxRedirects: TWITTER_PAGE_MAX_REDIRECTS,
+      timeoutMs: TWITTER_MEDIA_FETCH_TIMEOUT_MS,
+    }
   );
 
   if (!response.ok) {
+    discardResponse(response);
     return undefined;
   }
 
@@ -148,7 +168,7 @@ async function fetchTweetPageMetaImageUrl(
 }
 
 async function resolveTweetMediaImageUrl(
-  href: string,
+  pageUrl: string,
   tweetId: string,
   fetchImpl: typeof fetch
 ): Promise<string | undefined> {
@@ -162,7 +182,7 @@ async function resolveTweetMediaImageUrl(
   }
 
   try {
-    return await fetchTweetPageMetaImageUrl(href, fetchImpl);
+    return await fetchTweetPageMetaImageUrl(pageUrl);
   } catch {
     return undefined;
   }
@@ -177,8 +197,14 @@ async function fetchTweetPreviewUncached(
     throw new Error("Invalid Twitter/X status URL.");
   }
 
+  // Upstream requests and the cached preview use a URL rebuilt from the
+  // parsed tweet, never the caller's link text.
+  const canonicalUrl = buildCanonicalTweetUrl(
+    parsed.tweetId,
+    parsed.authorHandle
+  );
   const endpoint = new URL(TWITTER_OEMBED_ENDPOINT);
-  endpoint.searchParams.set("url", href);
+  endpoint.searchParams.set("url", canonicalUrl);
   endpoint.searchParams.set("omit_script", "true");
   endpoint.searchParams.set("dnt", "true");
 
@@ -186,7 +212,6 @@ async function fetchTweetPreviewUncached(
 
   try {
     const syndicationPreview = await fetchSyndicationPreview(
-      href,
       parsed.tweetId,
       fetchImpl
     );
@@ -209,9 +234,9 @@ async function fetchTweetPreviewUncached(
   }
 
   const oembed = assertOEmbedResponse(await response.json());
-  const preview = parseTwitterOEmbed(oembed, href, parsed.tweetId);
+  const preview = parseTwitterOEmbed(oembed, canonicalUrl, parsed.tweetId);
   const mediaImageUrl = await resolveTweetMediaImageUrl(
-    href,
+    canonicalUrl,
     parsed.tweetId,
     fetchImpl
   );

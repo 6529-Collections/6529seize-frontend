@@ -210,6 +210,7 @@ export async function seedProcessedHistory(
         total,
         originalCursor,
         photos: 9000,
+        photoAttachmentCount: photo.attachments.length,
         schemaVersion: 1,
         devicePreserved: true,
         sealedStateReadable: true,
