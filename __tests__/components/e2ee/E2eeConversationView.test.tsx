@@ -248,6 +248,25 @@ describe("E2eeConversationView", () => {
     ).toHaveAttribute("href", "/alice");
   });
 
+  it("shows a DM holding someone else by its members, in the header and chat info", async () => {
+    renderView(
+      conversation({ kind: "dm", name: null, admins: [SELF_ID, ALICE_ID] })
+    );
+    const heading = screen.getByRole("heading", {
+      level: 1,
+      name: "alice and bob",
+    });
+    expect(within(heading).queryByRole("link")).toBeNull();
+    expect(screen.getByText("3 members")).toBeInTheDocument();
+    expect(
+      screen.getByText("You can’t send messages in this chat.")
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Chat info" }));
+    const dialog = await screen.findByRole("dialog", { name: "Chat info" });
+    expect(within(dialog).getByText("Group")).toBeInTheDocument();
+    expect(within(dialog).queryByText("Direct message")).toBeNull();
+  });
+
   it("renders messages, notices and message states", () => {
     renderView();
     const log = screen.getByRole("list", { name: "Messages" });

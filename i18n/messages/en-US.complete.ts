@@ -3,6 +3,7 @@ import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/namespaces/artwork-docume
 import { MUSEUM_MESSAGES } from "@/i18n/namespaces/museum";
 import { NETWORK_TDH_MESSAGES } from "@/i18n/namespaces/network-tdh";
 import { NETWORK_TDH_CONSOLIDATION_MESSAGES } from "@/i18n/namespaces/network-tdh-consolidation";
+import { VALIDATOR_AUTHORIZE_MESSAGES } from "@/i18n/namespaces/validator-authorize";
 
 /**
  * The complete en-US source dictionary: the root dictionary plus every feature
@@ -21,6 +22,7 @@ export const EN_US_MESSAGES = {
   ...MUSEUM_MESSAGES,
   ...NETWORK_TDH_MESSAGES,
   ...NETWORK_TDH_CONSOLIDATION_MESSAGES,
+  ...VALIDATOR_AUTHORIZE_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

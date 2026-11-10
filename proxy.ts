@@ -11,6 +11,7 @@ import { getAccessVerdict, isStagingDeployment } from "@/lib/proxy/accessProbe";
 import {
   plainNotFoundResponse,
   plainServiceUnavailableResponse,
+  UNCACHEABLE_RESPONSE_HEADERS,
 } from "@/lib/proxy/plainResponses";
 import {
   isRetiredReviewDataPath,
@@ -113,6 +114,18 @@ function isRetiredReviewDataRequest(req: NextRequest): boolean {
     isRetiredReviewDataPath(req.nextUrl.pathname) ||
     isRetiredReviewDataPath(new URL(req.url).pathname)
   );
+}
+
+/**
+ * A redirect decided from the request itself (cookies, user agent, legacy
+ * query, or a failure) is never stored by the page edge cache or the browser.
+ * The fixed path redirects in `redirectMappings` stay cacheable.
+ */
+function uncacheableRedirect(url: URL, status: 301 | 307 = 307): NextResponse {
+  return NextResponse.redirect(url, {
+    status,
+    headers: UNCACHEABLE_RESPONSE_HEADERS,
+  });
 }
 
 function stripTrailingSlashes(value: string): string {
@@ -335,13 +348,13 @@ async function enforceAccessControl(
   if (verdict === "unauthorized") {
     req.nextUrl.pathname = "/access";
     req.nextUrl.search = "";
-    return NextResponse.redirect(req.nextUrl);
+    return uncacheableRedirect(req.nextUrl);
   }
 
   if (verdict === "restricted") {
     req.nextUrl.pathname = "/restricted";
     req.nextUrl.search = "";
-    return NextResponse.redirect(req.nextUrl);
+    return uncacheableRedirect(req.nextUrl);
   }
 
   // Fail closed: without a definitive answer the gate must not let pages through.
@@ -381,7 +394,9 @@ export default async function proxy(req: NextRequest) {
     if (hasMalformedWaveId(normalizedPathname, req.nextUrl.searchParams)) {
       const notFoundUrl = req.nextUrl.clone();
       notFoundUrl.pathname = MALFORMED_WAVE_ROUTE;
-      return NextResponse.rewrite(notFoundUrl);
+      return NextResponse.rewrite(notFoundUrl, {
+        headers: UNCACHEABLE_RESPONSE_HEADERS,
+      });
     }
 
     const redirectTarget = normalizedPathname.startsWith("/my-stream")
@@ -393,7 +408,7 @@ export default async function proxy(req: NextRequest) {
       const [pathnamePart, searchPart] = redirectTarget.split("?");
       clone.pathname = pathnamePart || "/";
       clone.search = searchPart ? `?${searchPart}` : "";
-      return NextResponse.redirect(clone, 301);
+      return uncacheableRedirect(clone, 301);
     }
 
     if (isStaticAssetPath(normalizedPathname)) {
@@ -410,6 +425,6 @@ export default async function proxy(req: NextRequest) {
 
     return await enforceAccessControl(req, normalizedPathname);
   } catch {
-    return NextResponse.redirect(new URL("/error", req.url));
+    return uncacheableRedirect(new URL("/error", req.url));
   }
 }

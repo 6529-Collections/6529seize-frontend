@@ -60,6 +60,12 @@ Wave and DM rows in the left list control which thread is open.
   to `/discover`; the sidebar keeps the two section-specific `View all` links.
   The collapsed rail retains its icon-only feed link.
 - Browser back/forward keeps the active row and URL in sync.
+- `All` includes pinned, joined, unjoined, and quiet accessible waves. Subwaves
+  are reached by expanding their parent. It loads in stable batches so new
+  activity cannot skip a wave between pages. Scroll near the bottom or select
+  `Load more waves` to continue. Failed loads keep existing rows and offer
+  `Retry`. Expired lists refresh automatically; newly created or newly accessible
+  waves appear on refresh. Access permissions are checked for every batch.
 - Joined waves load in batches without skipping a wave when new activity moves
   it higher in the list. The order uses recent wave activity, including joined,
   unmuted subwaves. Muting a wave removes its own activity from the ordering.

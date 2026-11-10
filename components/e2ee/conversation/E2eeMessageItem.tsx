@@ -25,17 +25,15 @@ import {
   getMemberName,
   getNoticeText,
 } from "../e2eeFormat";
-import { E2eeProfileLink } from "../ui/E2eeProfileLink";
 import { E2eeMessageAvatar, E2eeMessageIdentity } from "./E2eeMessageIdentity";
 import { E2eeImageGallery } from "./E2eeImageGallery";
 import { E2eeAttachmentView } from "./E2eeAttachmentView";
-import { splitLinks } from "./e2eeLinks";
+import { E2eeMarkdown } from "./E2eeMarkdown";
 import {
   E2eeImportedNote,
   importedAuthor,
   importedAuthorName,
 } from "./E2eeImportedNote";
-import { splitMentions } from "./e2eeMentions";
 import {
   E2eeMessageActionsMenu,
   type E2eeMessageActions,
@@ -103,47 +101,14 @@ function MessageBody({
   if (!message.text) {
     return null;
   }
-  const segments = splitMentions(
-    message.text,
-    conversation.members,
-    message.mentions
-  );
   return (
-    <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-md tw-leading-6 tw-text-iron-100">
-      {segments.flatMap((segment) =>
-        segment.kind === "mention" ? (
-          <E2eeProfileLink
-            key={segment.start}
-            member={findMember(conversation.members, segment.profileId)}
-            className={`tw-rounded tw-px-0.5 tw-font-semibold ${
-              segment.profileId === selfProfileId
-                ? "tw-bg-primary-500/25 tw-text-primary-300"
-                : "tw-text-primary-300"
-            }`}
-          >
-            {segment.value}
-          </E2eeProfileLink>
-        ) : (
-          splitLinks(segment.value, segment.start).map((part) =>
-            part.kind === "link" ? (
-              <a
-                key={part.start}
-                href={part.href}
-                target="_blank"
-                rel="noopener noreferrer nofollow ugc"
-                className="tw-break-all tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-2 hover:tw-decoration-primary-300 focus-visible:tw-rounded focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              >
-                {part.value}
-              </a>
-            ) : (
-              <span key={part.start}>
-                <E2eeEmojiText text={part.value} />
-              </span>
-            )
-          )
-        )
-      )}
-    </p>
+    <E2eeMarkdown
+      text={message.text}
+      messageId={message.id}
+      members={conversation.members}
+      mentions={message.mentions}
+      selfProfileId={selfProfileId}
+    />
   );
 }
 

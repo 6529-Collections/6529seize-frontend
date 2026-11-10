@@ -17,6 +17,7 @@ import {
   rollback,
   type EngineContext,
 } from "./context";
+import { dmParticipants, retryWelcomeLater, type LeafOwner } from "./dm-join";
 import { RetryableError } from "./errors";
 import {
   addNotices,
@@ -192,18 +193,27 @@ async function senderBlocked(
   return false;
 }
 
-/** 2.2/2.3 checks of every member; bad leaves become STRICT removals. */
+/**
+ * 2.2/2.3 checks of every member; bad leaves become STRICT removals. Also
+ * returns each leaf's owner per its device record and why none was found.
+ */
 async function checkWelcomeMembers(
   ctx: EngineContext,
   summary: WasmWelcomeSummary
-): Promise<{ senderOk: boolean; badGrants: string[] }> {
+): Promise<{
+  senderOk: boolean;
+  badGrants: string[];
+  owners: LeafOwner[];
+}> {
   const now = ctx.now();
   const badGrants: string[] = [];
+  const owners: LeafOwner[] = [];
   let senderOk = false;
   const sender = summary.sender.device_key.toLowerCase();
   for (const leaf of summary.members) {
     const check = await ctx.directory.checkLeaf(leaf, now);
     const key = leaf.device_key.toLowerCase();
+    owners.push(check);
     if (key === sender) {
       senderOk = check.ok;
     }
@@ -211,7 +221,7 @@ async function checkWelcomeMembers(
       badGrants.push(key);
     }
   }
-  return { senderOk, badGrants };
+  return { senderOk, badGrants, owners };
 }
 
 async function commitKeyMatches(
@@ -321,7 +331,15 @@ async function handleWelcome(
       !metadataOk ||
       !checks.senderOk ||
       (await senderBlocked(ctx, [senderProfileId]));
-    if (refused) {
+    const participants = refused
+      ? "refused"
+      : await dmParticipants(ctx, staged, checks.owners, senderProfileId);
+    // Left unacknowledged (its KeyPackage kept) for a later sync; the
+    // Welcomes after it are still handled now.
+    if (participants === "unknown" && retryWelcomeLater(ctx, welcome.id)) {
+      return null;
+    }
+    if (participants !== "ok") {
       mls.rejectWelcome(g);
       await checkpoint(ctx);
       await ack(ctx, welcome);

@@ -5,6 +5,7 @@ import {
   getDownloadFilenameFromUrl,
   triggerDirectDownload,
 } from "@/helpers/media-download.helpers";
+import { getOpenableUrl, openUrlInNewTab } from "@/helpers/open-url.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useCallback, useState } from "react";
 
@@ -69,7 +70,9 @@ export function useMediaActions({
   const { isCapacitor } = useCapacitor();
   const [isDownloading, setIsDownloading] = useState(false);
   const fileName = getDownloadFilenameFromUrl(url, fallbackFileName);
-  const canOpen = canOpenMediaInBrowser({ mimeType, url, isCapacitor });
+  const canOpen =
+    getOpenableUrl(url) !== null &&
+    canOpenMediaInBrowser({ mimeType, url, isCapacitor });
   let openLabel: string | undefined;
 
   if (canOpen) {
@@ -79,7 +82,7 @@ export function useMediaActions({
   }
 
   const openMedia = useCallback(() => {
-    globalThis.window.open(url, "_blank", "noopener,noreferrer");
+    openUrlInNewTab(url);
   }, [url]);
 
   const downloadMedia = useCallback(async () => {
@@ -94,15 +97,16 @@ export function useMediaActions({
         fileName,
         isCapacitor,
         dialogTitle,
+        mimeType,
       });
     } catch {
       if (!isCapacitor) {
-        triggerDirectDownload(url, fileName);
+        triggerDirectDownload(url, fileName, mimeType);
       }
     } finally {
       setIsDownloading(false);
     }
-  }, [dialogTitle, fileName, isCapacitor, isDownloading, url]);
+  }, [dialogTitle, fileName, isCapacitor, isDownloading, mimeType, url]);
 
   return {
     downloadMedia,

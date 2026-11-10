@@ -18,6 +18,17 @@ policies, one origin request policy, one response headers policy, and the
 staging and production distribution configs. Edit those files and apply them
 with the commands under [Setup](#setup) so the repository stays the record.
 
+> **Never apply `distribution-production.json` as written.** It records the
+> production web ACL (`WebACLId`) and the `X-Origin-Verify` origin header, but
+> the header value is a placeholder (`UNRESOLVED_PLACEHOLDER_…`); the real value
+> lives only in SSM. Applying the file would send the placeholder, and every
+> request would get a 403. Leaving out `WebACLId` would detach the web ACL.
+> The file's top-level `_DoNotApplyAsWritten` key makes the AWS CLI reject it.
+> Start every distribution change from a fresh `get-distribution-config` and
+> its ETag, as described under [Origin lockdown](#origin-lockdown).
+> `__tests__/ops/cloudfrontPageCacheContract.test.ts` fails if the file loses
+> the web ACL, the header placeholder or the guard key.
+
 ## What the edge caches
 
 The origin decides. Every cache policy has a default and minimum TTL of 0, so
@@ -29,9 +40,15 @@ and honours `stale-while-revalidate`:
 - **ISR pages and API routes** with `s-maxage` are cached for their own TTL.
 - **Dynamic pages** (most routes, because the root layout reads cookies and
   headers) send `private, no-cache, no-store` and are never stored.
-- **Redirects** from `proxy.ts` and Next carry no `Cache-Control`, so they are
-  never stored either. Error responses use an error-caching minimum of 0, so a
-  transient 5xx or 404 is never held at the edge.
+- **Proxy answers that depend on the request** carry
+  `private, no-cache, no-store, max-age=0, must-revalidate`: the staging-gate
+  redirects to `/access` and `/restricted`, the user-agent based `/my-stream`
+  redirect, the legacy `/?wave=` redirect, the redirect to `/error`, the plain
+  404 and 503 answers, and the malformed wave id rewrite. They do not rely on
+  the default TTL of 0. The fixed path redirects in `proxy.ts` carry no
+  `Cache-Control`, so they are not stored either. Error responses use an
+  error-caching minimum of 0, so a transient 5xx or 404 is never held at the
+  edge.
 
 | Path                            | Cache key                                                                                                                                            | Notes                                                                                                                    |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -57,6 +74,16 @@ Why the page key looks like this:
   guarantee even if a route later starts varying. `wallet-auth` is the name the
   cookie had before; it stays in the key until browsers have dropped it, and
   can then be removed from the policy.
+- **`validator_access`** is the `/validator` password cookie, read by the
+  validator gate and pages.
+
+`__tests__/ops/cloudfrontPageCacheContract.test.ts` keeps this key and the
+application in step. It fails when server code (`cookies()` from
+`next/headers`, or a `NextRequest`'s `cookies`) reads a cookie the page policy
+does not key on, when an `/api/og-metadata` route reads one the OG policy does
+not key on, or when Next varies responses on a header the page policy leaves
+out. Add the cookie or header to the policy file and apply it to CloudFront
+before the code that reads it ships.
 
 Compression: Node keeps compressing (`compress` stays on in
 `config/nextConfig.ts`); see [Compression](#compression) for why.
@@ -151,7 +178,10 @@ aws cloudfront create-response-headers-policy --response-headers-policy-config f
 To change a policy, edit its file, then run `aws cloudfront get-cache-policy
 --id <id>` for the current ETag and `aws cloudfront update-cache-policy --id <id>
 --if-match <etag> --cache-policy-config file://<file>`. Distribution changes use
-`get-distribution-config` and `update-distribution` the same way.
+`get-distribution-config` and `update-distribution`, but edit the config that
+`get-distribution-config` returns, never the repository file (see the warning
+under [Overview](#overview)); then copy the change back into the repository
+file, keeping the header placeholder.
 
 Origin and TLS: CloudFront connects to the origin hostname over HTTPS and
 forwards the viewer's `Host`, so nginx (staging) or the load balancer
@@ -331,11 +361,12 @@ that header matches. Its default action answers 403.
 - Sentry redacts the header once #4685 ships. Rotate the value after that.
 - #4685 adds `ops/scripts/production-origin-lock.sh`, which applies, rotates,
   reports (`status`) and unlocks the setup without printing the value.
-- `ops/cloudfront/frontend-html/distribution-production.json` contains neither
-  the header nor the web ACL (`WebACLId`), so never apply that file to
-  production as it is. Start every change from a fresh `get-distribution-config`
-  and pass its ETag with `--if-match`. Keep `Origins.Items[].CustomHeaders` and
-  `WebACLId`: without the header, every request gets a 403.
+- `ops/cloudfront/frontend-html/distribution-production.json` records the web
+  ACL (`WebACLId`) and the header name, with a placeholder instead of the
+  header value, so never apply that file to production as it is. Start every
+  change from a fresh `get-distribution-config` and pass its ETag with
+  `--if-match`. Keep `Origins.Items[].CustomHeaders` and `WebACLId`: without
+  the real header value, every request gets a 403.
 
 With both controls, a CloudFront geo restriction on `E3KTTDJUNHRYW9` cannot be
 bypassed, either directly or through another distribution.

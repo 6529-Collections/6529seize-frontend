@@ -620,6 +620,15 @@ describe("fetchWaveDropsFeedV2", () => {
     });
   });
 
+  it("keeps a leaderboard drop's real part count while loading only its first part", () => {
+    const drop = mapLeaderboardDropV2({
+      drop: { ...createDrop(1), parts_count: 3 } as unknown as ApiDropV2,
+      wave: waveMin,
+    });
+    expect(drop.parts).toHaveLength(1);
+    expect(drop.parts_count).toBe(3);
+  });
+
   it("maps V2 priority metadata into leaderboard legacy drops", () => {
     const priorityMetadata = [
       {

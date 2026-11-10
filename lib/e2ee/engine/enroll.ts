@@ -18,7 +18,7 @@ import {
   isOldSuiteDevice,
   retireOldSuiteDevice,
 } from "../suite-retirement";
-import type { StoredDevice } from "../records";
+import type { StoredDevice, StoredTrust } from "../records";
 import type { E2eeDeviceInfo } from "../types";
 import { loadDefaultWasm } from "../wasm-loader";
 import {
@@ -30,7 +30,16 @@ import {
   requireMls,
   type EngineContext,
 } from "./context";
-import { E2eeError } from "./errors";
+import {
+  E2EE_SIGNATURE_REJECTED,
+  E2eeError,
+  isE2eeSignatureRejection,
+} from "./errors";
+import {
+  isTrustedOwnRevoker,
+  ownDeviceNeedsApproval,
+  withOwnWallet,
+} from "./trust";
 
 /** Contract 2 + 8.8: one wallet prompt per device; KeyPackage pool upkeep. */
 
@@ -104,6 +113,10 @@ function reusablePending(
   );
 }
 
+/**
+ * Request the device grant signature. Keep wallet failures retryable and retain
+ * the cause so the caller can distinguish a broken session from other errors.
+ */
 async function signGrant(
   ctx: EngineContext,
   deviceKey: string
@@ -114,14 +127,17 @@ async function signGrant(
     issuedAtSeconds: Math.floor(ctx.now() / 1000),
     origin: ctx.options.origin,
   });
+  const typedData = buildGrantTypedData(grant);
+  let signature: string;
   try {
-    const signature = await ctx.options.signTypedData(
-      buildGrantTypedData(grant)
-    );
-    return { grant, signature: signature.toLowerCase() };
-  } catch {
-    throw new E2eeError("E2EE_SIGNATURE_REJECTED");
+    signature = await ctx.options.signTypedData(typedData);
+  } catch (error) {
+    const code = isE2eeSignatureRejection(error)
+      ? E2EE_SIGNATURE_REJECTED
+      : "E2EE_SIGNATURE_FAILED";
+    throw new E2eeError(code, undefined, { cause: error });
   }
+  return { grant, signature: signature.toLowerCase() };
 }
 
 /**
@@ -150,6 +166,20 @@ const deviceLabel = (ctx: EngineContext): string => {
   return label.length > 0 ? label : DEFAULT_DEVICE_LABEL;
 };
 
+/**
+ * The trust a device hands on to its successor on this browser. A wallet it
+ * was signed by stays an own wallet when the successor uses another one.
+ */
+function inheritedTrust(
+  previous: StoredDevice,
+  wallet: string
+): StoredTrust | null {
+  if (previous.wallet.toLowerCase() === wallet.toLowerCase()) {
+    return previous.trust ?? null;
+  }
+  return withOwnWallet(previous.trust, previous.wallet, previous.profileId);
+}
+
 /** Creates the device key and obtains the single wallet signature. */
 async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
   if (!ctx.wasm) {
@@ -169,8 +199,11 @@ async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
   ctx.mls = mls;
   // A retired earlier-suite device hands its trust pins on (D172).
   const previous = await ctx.storage.getDevice(ctx.profileId);
+  const trust = previous?.retired
+    ? inheritedTrust(previous, grant.wallet)
+    : null;
   const device: StoredDevice = {
-    ...(previous?.retired && previous.trust ? { trust: previous.trust } : {}),
+    ...(trust ? { trust } : {}),
     profileId: ctx.profileId,
     deviceKey,
     wallet: grant.wallet,
@@ -339,6 +372,10 @@ export async function renewGrant(ctx: EngineContext): Promise<void> {
     platform: device.platform,
   });
   ctx.directory.seed([record]);
+  const trust = inheritedTrust(device, grant.wallet);
+  if (trust) {
+    device.trust = trust;
+  }
   device.wallet = grant.wallet;
   device.grant = grant;
   device.grantId = computeGrantId(grant);
@@ -350,13 +387,39 @@ export async function renewGrant(ctx: EngineContext): Promise<void> {
   await uploadKeyPackages(ctx, 1, true);
 }
 
-/** Forgets a pending device whose grant the server will not accept. */
-async function discardPendingDevice(ctx: EngineContext): Promise<void> {
+/**
+ * Forgets a pending device whose grant the server will not accept. Its key
+ * goes; history kept from an earlier device (D172) and the trust pins stay,
+ * under a retired marker that hands them to the next device: the server's
+ * refusal is no reason to delete them.
+ */
+async function discardPendingDevice(
+  ctx: EngineContext,
+  device: StoredDevice
+): Promise<void> {
   ctx.mls?.dispose();
   ctx.mls = null;
   ctx.device = null;
   ctx.lastState = null;
-  await clearStoredState(ctx);
+  const groups = await ctx.storage.listGroups(ctx.profileId);
+  if (groups.length === 0 && !device.trust) {
+    await clearStoredState(ctx);
+    return;
+  }
+  const { loginGrantId: _loginGrantId, ...rest } = device;
+  const retired: StoredDevice = {
+    ...rest,
+    retired: true,
+    registered: false,
+    provisioned: false,
+  };
+  await persistStored(ctx, (expectedVersion) =>
+    ctx.storage.writeBatch(ctx.profileId, {
+      expectedVersion,
+      device: retired,
+      dropWasmState: true,
+    })
+  );
 }
 
 const isLoginGrantRejection = (error: unknown): boolean =>
@@ -379,7 +442,7 @@ async function registerPending(
     if (!isLoginGrantRejection(error)) {
       throw error;
     }
-    await discardPendingDevice(ctx);
+    await discardPendingDevice(ctx, device);
     if (!allowPrompt) {
       throw error;
     }
@@ -436,7 +499,7 @@ export async function enrollDevice(
 function toDeviceInfo(
   ctx: EngineContext,
   record: ApiE2eeDevice,
-  verified: boolean
+  { verified, usable }: { verified: boolean; usable: boolean }
 ): E2eeDeviceInfo {
   const own = record.device_key.toLowerCase() === ctx.device?.deviceKey;
   const platform =
@@ -456,6 +519,13 @@ function toDeviceInfo(
     ...(record.grant_message ? { authorProofGrantId: record.grant_id } : {}),
     isThisDevice: own,
     verified,
+    wallet: record.grant.wallet.toLowerCase(),
+    // Only a registered device adds others (not at the device limit).
+    needsApproval:
+      !own &&
+      usable &&
+      ctx.device?.registered === true &&
+      ownDeviceNeedsApproval(ctx, record, verified),
   };
 }
 
@@ -472,15 +542,56 @@ async function getOwnMe(ctx: EngineContext): Promise<ApiE2eeMe> {
   return me;
 }
 
-/** What /e2ee/me says about this device after the server refused it. */
-type OwnRejection = "revoked" | "inactive" | "unconfirmed";
+/**
+ * Records (or clears) that this device stopped on a revocation that did not
+ * verify, so a reload stays stopped without contacting the server. Runs in
+ * the queue.
+ */
+export async function markRevocationUnverified(
+  ctx: EngineContext,
+  unverified: boolean
+): Promise<void> {
+  const device = ctx.device;
+  if (!device || (device.revocationUnverified === true) === unverified) {
+    return;
+  }
+  if (unverified) {
+    device.revocationUnverified = true;
+  } else {
+    delete device.revocationUnverified;
+  }
+  await checkpoint(ctx, { device, skipWasm: true });
+}
+
+/**
+ * Whether a listed revocation of this device verifies (see
+ * `DeviceDirectory.ownRevocationVerified`); only then is local data removed.
+ */
+const ownRevocationVerified = (
+  ctx: EngineContext,
+  record: ApiE2eeDevice
+): Promise<boolean> =>
+  ctx.directory.ownRevocationVerified(record, (revoker) =>
+    isTrustedOwnRevoker(ctx, revoker)
+  );
+
+/**
+ * What /e2ee/me says about this device after the server refused it.
+ * "revoked-unverified": listed revoked, but the revocation does not verify.
+ */
+type OwnRejection =
+  | "revoked"
+  | "revoked-unverified"
+  | "inactive"
+  | "unconfirmed";
 
 /**
  * E2EE_NOT_YOUR_DEVICE also answers a request sent with another profile's
  * credentials, so it alone never justifies a wipe. Asks /e2ee/me for this
- * profile: "revoked" only when it lists this device revoked, "inactive"
- * when it lists the device expired or not at all, otherwise "unconfirmed"
- * (another profile answered, the device is still active, or no answer).
+ * profile: "revoked" only when it lists this device revoked and the
+ * revocation verifies ("revoked-unverified" otherwise), "inactive" when it
+ * lists the device expired or not at all, otherwise "unconfirmed" (another
+ * profile answered, the device is still active, or no answer).
  */
 export async function confirmOwnRejection(
   ctx: EngineContext
@@ -499,7 +610,15 @@ export async function confirmOwnRejection(
     (record) => record.device_key.toLowerCase() === device.deviceKey
   );
   if (own && own.revoked_at !== null) {
-    return "revoked";
+    ctx.directory.seed(me.devices);
+    try {
+      return (await ownRevocationVerified(ctx, own))
+        ? "revoked"
+        : "revoked-unverified";
+    } catch {
+      // The revoker's record could not be read: judge it on a later answer.
+      return "unconfirmed";
+    }
   }
   if (!own || grantExpired(ctx, device)) {
     return "inactive";
@@ -507,17 +626,28 @@ export async function confirmOwnRejection(
   return "unconfirmed";
 }
 
+/**
+ * This device's revocation as /e2ee/me lists it: "none", "verified" (local
+ * data may be removed) or "unverified" (the device stops, data is kept).
+ */
+type OwnRevocation = "none" | "verified" | "unverified";
+
 /** Refreshes the device list and KeyPackage pool from GET /e2ee/me. */
 export async function refreshMe(
   ctx: EngineContext
-): Promise<{ ownRevoked: boolean }> {
+): Promise<{ ownRevocation: OwnRevocation }> {
   const me = await getOwnMe(ctx);
   ctx.lastMeAt = ctx.now();
   ctx.directory.seed(me.devices);
   const infos: E2eeDeviceInfo[] = [];
   for (const record of me.devices) {
     const verification = await ctx.directory.verify(record);
-    infos.push(toDeviceInfo(ctx, record, verification.verified));
+    infos.push(
+      toDeviceInfo(ctx, record, {
+        verified: verification.verified,
+        usable: verification.ok && record.revoked_at === null,
+      })
+    );
   }
   ctx.store.devices = infos;
   ctx.store.attachmentsEnabled = me.attachments_enabled !== false;
@@ -528,13 +658,18 @@ export async function refreshMe(
   ctx.store.thisDevice = infos.find((info) => info.isThisDevice) ?? null;
   ctx.store.touch();
   // Only a listed revocation counts: a device missing from the list is not
-  // proof (another session, or a listing that is not yet up to date).
+  // proof (another session, or a listing that is not yet up to date). And
+  // only one that verifies here removes local data.
   if (
     ctx.device?.registered === true &&
     own !== undefined &&
     own.revoked_at !== null
   ) {
-    return { ownRevoked: true };
+    return {
+      ownRevocation: (await ownRevocationVerified(ctx, own))
+        ? "verified"
+        : "unverified",
+    };
   }
   if (ctx.device?.provisioned) {
     const status = me.key_packages.find(
@@ -542,7 +677,7 @@ export async function refreshMe(
     );
     await ctx.queue.run(() => ensureKeyPackages(ctx, status ?? null));
   }
-  return { ownRevoked: false };
+  return { ownRevocation: "none" };
 }
 
 /** Signs and submits a revocation (2.4) with this device's MLS key. */

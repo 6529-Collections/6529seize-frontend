@@ -14,6 +14,7 @@ import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.en-US.json"
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.en-US.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.en-US.json";
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.en-US.json";
+import appWalletRecoveryFilesMessages from "@/i18n/messages/appWalletRecoveryFiles.en-US.json";
 /* eslint max-lines: "off" */
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-US.json";
 
@@ -1462,6 +1463,9 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   joinedRetry: "Retry",
   joinedRetryLabel: "Retry loading joined waves",
   joinedLoadMore: "Load more joined waves",
+  allLoadError: "Some waves could not be loaded.",
+  allRetryLabel: "Retry loading all waves",
+  allLoadMore: "Load more waves",
   announcementWavesAriaLabel: "Announcement waves",
   highlyRatedAriaLabel: "Worth checking out waves",
   pinnedAriaLabel: "Pinned waves",
@@ -3422,6 +3426,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...studioTemplateDescriptions,
   ...profileCmsStudioUploadMessages,
   ...studioWalletImportMessages,
+  ...appWalletRecoveryFilesMessages,
   "nftActivity.loading": "Loading NFT activity…",
   "nftActivity.error": "Could not load NFT activity.",
   "nftActivity.moreError": "Could not load more NFT activity.",
@@ -3726,6 +3731,9 @@ export const EN_US_ROOT_MESSAGES = {
   "navigation.primary.loading.network": "Loading network",
   "navigation.primary.loading.collections": "Loading collections",
   "navigation.primary.loading.notifications": "Loading notifications",
+  "ensAddressInput.addressUsed": "Address used: {address}",
+  "ensAddressInput.noAddressUsed":
+    "No address is used yet. Enter a full 0x wallet address or an ENS name that resolves.",
   "appWallet.validation.name.alphanumericSpaces":
     "Name can only contain alphanumeric characters and spaces",
   "appWallet.validation.password.minLength":
@@ -3769,6 +3777,41 @@ export const EN_US_ROOT_MESSAGES = {
   "appWallet.modal.importSuccess": "Wallet imported.",
   "appWallet.modal.sensitiveConfirmation":
     "Type {confirmation} to confirm {action}",
+  "appWallet.signing.messageTitle": "Sign this message?",
+  "appWallet.signing.typedDataTitle": "Sign this data?",
+  "appWallet.signing.transactionTitle": "Approve this transaction?",
+  "appWallet.signing.help":
+    "Check every detail. Approve only a request you started, and cancel if anything looks unfamiliar.",
+  "appWallet.signing.wallet": "Wallet",
+  "appWallet.signing.message": "Message",
+  "appWallet.signing.rawMessage": "Message (raw data)",
+  "appWallet.signing.primaryType": "Data type",
+  "appWallet.signing.domainName": "Requested by",
+  "appWallet.signing.verifyingContract": "Contract",
+  "appWallet.signing.typedDataContent": "Content",
+  "appWallet.signing.to": "To",
+  "appWallet.signing.newContract": "New contract deployment",
+  "appWallet.signing.value": "Amount",
+  "appWallet.signing.valueNative": "{amount} {symbol}",
+  "appWallet.signing.valueUnknownChain":
+    "{amount} in the smallest unit of the native token of chain ID {id}",
+  "appWallet.signing.valueUnknownNetwork":
+    "{amount} in the smallest unit of the native token of an unspecified network",
+  "appWallet.signing.network": "Network",
+  "appWallet.signing.networkName": "{name} (chain ID {id})",
+  "appWallet.signing.unknownNetwork": "Unknown network",
+  "appWallet.signing.notSpecified": "Not specified",
+  "appWallet.signing.callData": "Contract call",
+  "appWallet.signing.callDataNone": "None",
+  "appWallet.signing.callDataNoSelector":
+    "Yes, {count} bytes without a function selector",
+  "appWallet.signing.callDataCreation":
+    "Contract creation, {count} bytes of code",
+  "appWallet.signing.contentUnavailable":
+    "This content cannot be shown, so it cannot be signed here. Cancel this request.",
+  "appWallet.signing.callDataSelector": "Yes, function selector {selector}",
+  "appWallet.signing.sign": "Sign",
+  "appWallet.signing.approveTransaction": "Approve",
   "profileSetup.requiredTitle": "You need to set up a profile to continue.",
   "profileSetup.messagesDescription": "Create a profile to access messages.",
   "profileSetup.notificationsDescription":
@@ -3781,14 +3824,17 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.shareModal.closeAriaLabel": "Close share modal",
   "headerShare.shareModal.backdropAriaLabel": "Dismiss share modal",
   "headerShare.connectModal.title": "Connect Device",
+  "headerShare.connectModal.mobileTitle": "Connect 6529 Mobile",
+  "headerShare.connectModal.desktopTitle": "Connect 6529 Desktop",
   "headerShare.connectModal.chooseApp": "Which app are you connecting?",
   "headerShare.connectModal.only": "Connect only",
   "headerShare.connectModal.secure":
     "Connect with Post Signing & DM Encryption",
-  "headerShare.connectModal.desktopComingSoon": "Coming soon",
   "headerShare.connectModal.as": "Connect as {name}",
   "headerShare.connectModal.asSecure":
     "Connect as {name} with Post Signing & DM Encryption",
+  "headerShare.connectModal.desktopMinimumVersion":
+    "Requires 6529 Desktop {version} or later.",
   "headerShare.connectModal.back": "Back",
   "headerShare.connectModal.oneTime":
     "Use only on a device you own. This code works once.",
@@ -4137,6 +4183,10 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.topUp.validation.selectOption": "Select a top-up option",
   "subscriptions.topUp.validation.wallet":
     "You must have an active wallet connection to top up",
+  "subscriptions.topUp.validation.priceMismatch":
+    "The server lists a card price of {serverPrice} ETH but this page uses {localPrice} ETH, so nothing was sent. Refresh the page and try again.",
+  "subscriptions.topUp.validation.amountMismatch":
+    "This top-up amount does not match the selected number of cards, so nothing was sent. Refresh the page and try again.",
   "subscriptions.topUp.sendingTo": "Sending to",
   "subscriptions.notification.title": "Subscription coverage",
   "subscriptions.notification.earlyWarning":

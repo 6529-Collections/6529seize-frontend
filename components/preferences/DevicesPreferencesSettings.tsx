@@ -24,7 +24,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
@@ -32,6 +32,7 @@ import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { getEncryptedDevicesRoute } from "@/helpers/navigation.helpers";
 import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
 import { RenameDevice } from "@/components/e2ee/devices/RenameDevice";
+import { useLinkedDeviceRevocation } from "@/components/e2ee/devices/useLinkedDeviceRevocation";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
 type GrantStatus = "active" | "expired" | "revoked";
@@ -161,6 +162,9 @@ function DeviceGrantRow({
             t(locale, "signedMessages.devices.wallet", {
               address: shortenAddress(grant.wallet),
             }),
+            t(locale, "signedMessages.devices.origin", {
+              origin: grant.domain,
+            }),
             ...getGrantDates(locale, grant, status),
           ].join(" · ")}
         </p>
@@ -259,6 +263,10 @@ export default function DevicesPreferencesSettings() {
   const local = useLocalDeviceKeys(listAddress);
   const nowMs = useMinuteClock();
   const { revoke, isRevoking } = useRevokeDeviceGrant();
+  const linkedRevocation = useLinkedDeviceRevocation();
+  // A ref blocks a second confirm before React re-renders the dialog.
+  const signingRef = useRef(false);
+  const [signingRevoke, setSigningRevoke] = useState(false);
   const [pendingRevoke, setPendingRevoke] = useState<ApiDeviceGrant | null>(
     null
   );
@@ -287,10 +295,22 @@ export default function DevicesPreferencesSettings() {
     ? linkedDevices.get(pendingRevoke.id)
     : undefined;
   const ownKeys = new Set(local.publicKeys);
+  const pendingIsOwn =
+    pendingRevoke !== null &&
+    ownKeys.has(pendingRevoke.device_key.toLowerCase());
 
   const confirmRevoke = async () => {
-    if (canVerifyRevocation && pendingRevoke && (await revoke(pendingRevoke))) {
+    if (!canVerifyRevocation || !pendingRevoke || signingRef.current) return;
+    const linked = pendingLinkedDevice;
+    // A linked encryption device gets a signed revocation its devices can verify.
+    signingRef.current = true;
+    setSigningRevoke(true);
+    const signed = linked ? await linkedRevocation.sign(linked) : false;
+    signingRef.current = false;
+    setSigningRevoke(false);
+    if (await revoke(pendingRevoke)) {
       setPendingRevoke(null);
+      if (linked) await linkedRevocation.finish(linked, pendingIsOwn, signed);
       if (encryptionEnabled) void encryptionDevices.refetch();
     }
   };
@@ -435,7 +455,7 @@ export default function DevicesPreferencesSettings() {
       )}
       <MobileWrapperConfirmationDialog
         isOpen={pendingRevoke !== null && canVerifyRevocation}
-        onClose={() => !isRevoking && setPendingRevoke(null)}
+        onClose={() => !isRevoking && !signingRevoke && setPendingRevoke(null)}
         onConfirm={() => void confirmRevoke()}
         title={t(
           locale,
@@ -450,12 +470,12 @@ export default function DevicesPreferencesSettings() {
         message={t(
           locale,
           pendingLinkedDevice
-            ? "e2ee.devices.revokeHistory"
+            ? linkedRevocation.historyKey(pendingLinkedDevice, pendingIsOwn)
             : "signedMessages.devices.revokeConfirm"
         )}
         confirmText={t(locale, "signedMessages.devices.revoke")}
         cancelText={t(locale, "signedMessages.devices.cancel")}
-        isConfirming={isRevoking}
+        isConfirming={isRevoking || signingRevoke}
         confirmVariant="destructive"
       >
         {local.failed ? (

@@ -13,6 +13,11 @@ import { checkpoint, type EngineContext } from "./context";
  * only devices signed by a pinned wallet are added automatically. A device
  * signed by any other wallet, or by a contract wallet whose signature could
  * not be checked here, waits for the user's explicit "Add device".
+ *
+ * The user's own profile is never trusted on first sighting: another own
+ * device is added automatically only when signed by this device's wallet or
+ * by a wallet the user added (`ownWallets`). The wallets seen for the own
+ * profile are still pinned, but only to judge revocations, as before.
  */
 
 type DeviceTrust = "trusted" | E2eeUntrustedDevice["reason"];
@@ -26,13 +31,41 @@ const emptyTrust = (): StoredTrust => ({
   wallets: {},
   approved: [],
   ignored: [],
+  ownWallets: [],
 });
 
+/**
+ * A trust record written before own-device trust became explicit has no
+ * `ownWallets`: the wallets it pinned for this profile then are kept as
+ * `legacyOwnWallets`, which only judge this device's own revocation.
+ * Records written since always carry `ownWallets`, so pins first-sighted
+ * later never count there.
+ */
+function normalizeTrust(trust: StoredTrust, profileId: string): StoredTrust {
+  if (trust.ownWallets !== undefined) {
+    return trust;
+  }
+  return {
+    ...trust,
+    ownWallets: [],
+    legacyOwnWallets: [...(trust.wallets[profileId] ?? [])],
+  };
+}
+
 const trustOf = (ctx: EngineContext): StoredTrust =>
-  ctx.device?.trust ?? emptyTrust();
+  ctx.device?.trust
+    ? normalizeTrust(ctx.device.trust, ctx.profileId)
+    : emptyTrust();
 
 const storedPins = (ctx: EngineContext, profileId: string): string[] =>
   trustOf(ctx).wallets[profileId] ?? [];
+
+/** Adds `key` as the newest entry (moving it if present), keeping `max`. */
+const remember = (
+  list: readonly string[],
+  key: string,
+  max: number = MAX_DEVICE_DECISIONS
+): string[] => [...list.filter((item) => item !== key), key].slice(-max);
 
 /** Whether this profile has seen (and pinned) `profileId` before. */
 export const hasPinnedWallets = (
@@ -51,6 +84,116 @@ export function isPinnedWallet(
     return true;
   }
   return storedPins(ctx, profileId).includes(key);
+}
+
+/** Wallets the user trusts for this profile's own devices (never first-sighted). */
+function isOwnWallet(ctx: EngineContext, wallet: string): boolean {
+  const key = wallet.toLowerCase();
+  return (
+    ctx.device?.wallet.toLowerCase() === key ||
+    (trustOf(ctx).ownWallets ?? []).includes(key)
+  );
+}
+
+/**
+ * Whether a device of `profileId` signed by `wallet` may be added without
+ * asking: pinned for another person, an own wallet for this profile.
+ */
+export function isTrustedWallet(
+  ctx: EngineContext,
+  profileId: string,
+  wallet: string
+): boolean {
+  return profileId === ctx.profileId
+    ? isOwnWallet(ctx, wallet)
+    : isPinnedWallet(ctx, profileId, wallet);
+}
+
+const isApproved = (ctx: EngineContext, deviceKey: string): boolean =>
+  trustOf(ctx).approved.includes(deviceKey.toLowerCase());
+
+/**
+ * Whether this device trusts a member device for its owner (roster and
+ * notices). Before anything is pinned for another person, `firstSighting`
+ * says which wallets their first sighting would pin (when omitted, all).
+ */
+export function isTrustedMemberDevice(
+  ctx: EngineContext,
+  member: { profileId: string; deviceKey: string; wallet: string | null },
+  firstSighting?: ReadonlySet<string>
+): boolean {
+  if (isApproved(ctx, member.deviceKey)) {
+    return true;
+  }
+  if (member.wallet === null) {
+    return false;
+  }
+  const wallet = member.wallet.toLowerCase();
+  if (
+    member.profileId !== ctx.profileId &&
+    !hasPinnedWallets(ctx, member.profileId)
+  ) {
+    return firstSighting?.has(wallet) ?? true;
+  }
+  return isTrustedWallet(ctx, member.profileId, wallet);
+}
+
+/**
+ * Another device of this profile that this device does not add until the
+ * user adds it. Synchronous: `verified` is the grant check already made.
+ */
+export function ownDeviceNeedsApproval(
+  ctx: EngineContext,
+  device: ApiE2eeDevice,
+  verified: boolean
+): boolean {
+  const key = device.device_key.toLowerCase();
+  if (key === ctx.device?.deviceKey || device.revoked_at !== null) {
+    return false;
+  }
+  return (
+    classifyDevice({
+      approved: isApproved(ctx, key),
+      verified,
+      pinned: isOwnWallet(ctx, device.grant.wallet),
+    }) !== "trusted"
+  );
+}
+
+/**
+ * A revoker this device trusts for its own revocation: another device of
+ * this profile that the user added, or signed by an own wallet (or by one
+ * pinned for this profile before own wallets existed). A device the user
+ * chose to ignore never is, whatever its wallet. Its grant is checked
+ * separately at the revocation time.
+ */
+export const isTrustedOwnRevoker = (
+  ctx: EngineContext,
+  revoker: ApiE2eeDevice
+): boolean =>
+  revoker.profile_id === ctx.profileId &&
+  !trustOf(ctx).ignored.includes(revoker.device_key.toLowerCase()) &&
+  (isApproved(ctx, revoker.device_key) ||
+    isOwnWallet(ctx, revoker.grant.wallet) ||
+    (trustOf(ctx).legacyOwnWallets ?? []).includes(
+      revoker.grant.wallet.toLowerCase()
+    ));
+
+/** `trust` (of `profileId`) with `wallet` added to the own wallets. */
+export function withOwnWallet(
+  trust: StoredTrust | undefined,
+  wallet: string,
+  profileId: string
+): StoredTrust {
+  const base = trust ? normalizeTrust(trust, profileId) : emptyTrust();
+  return {
+    ...base,
+    ownWallets: remember(
+      base.ownWallets ?? [],
+      wallet.toLowerCase(),
+      MAX_PINNED_WALLETS
+    ),
+  };
 }
 
 export function classifyDevice(input: {
@@ -72,12 +215,11 @@ export async function deviceTrust(
   ctx: EngineContext,
   device: ApiE2eeDevice
 ): Promise<DeviceTrust> {
-  const key = device.device_key.toLowerCase();
   const verification = await ctx.directory.verify(device);
   return classifyDevice({
-    approved: trustOf(ctx).approved.includes(key),
+    approved: isApproved(ctx, device.device_key),
     verified: verification.verified,
-    pinned: isPinnedWallet(ctx, device.profile_id, device.grant.wallet),
+    pinned: isTrustedWallet(ctx, device.profile_id, device.grant.wallet),
   });
 }
 
@@ -96,18 +238,15 @@ async function saveTrust(ctx: EngineContext, next: StoredTrust): Promise<void> {
   await checkpoint(ctx, { device, skipWasm: true });
   // Revocations are judged against pinned wallets; judge them again.
   ctx.directory.resetRevocations();
+  // Member snapshots show whether each device is trusted.
+  ctx.store.touch();
 }
-
-/** Adds `key` as the newest entry (moving it if present), keeping `max`. */
-const remember = (
-  list: readonly string[],
-  key: string,
-  max: number = MAX_DEVICE_DECISIONS
-): string[] => [...list.filter((item) => item !== key), key].slice(-max);
 
 /**
  * First sighting: a person with no pinned wallet yet gets the wallets of the
  * given verified devices pinned. People already pinned are left unchanged.
+ * Pins for this profile itself only judge revocations (see the header):
+ * they never make an own device trusted.
  */
 export async function pinFirstSighting(
   ctx: EngineContext,
@@ -134,16 +273,24 @@ export async function pinFirstSighting(
   await saveTrust(ctx, { ...trust, wallets });
 }
 
-/** "Add device": pins the device's wallet for its owner and approves it. */
+/**
+ * "Add device": pins the device's wallet for its owner and approves it. For
+ * this profile's own devices the wallet becomes an own wallet too.
+ */
 export async function approveDevice(
   ctx: EngineContext,
   device: { profileId: string; deviceKey: string; wallet: string }
 ): Promise<void> {
-  const trust = trustOf(ctx);
+  const current = trustOf(ctx);
+  const trust =
+    device.profileId === ctx.profileId
+      ? withOwnWallet(current, device.wallet, ctx.profileId)
+      : current;
   const key = device.deviceKey.toLowerCase();
   const wallet = device.wallet.toLowerCase();
   const pins = trust.wallets[device.profileId] ?? [];
   await saveTrust(ctx, {
+    ...trust,
     wallets: {
       ...trust.wallets,
       [device.profileId]: remember(pins, wallet, MAX_PINNED_WALLETS),
@@ -151,6 +298,52 @@ export async function approveDevice(
     approved: remember(trust.approved, key),
     ignored: trust.ignored.filter((item) => item !== key),
   });
+  if (device.profileId === ctx.profileId) {
+    refreshOwnApprovals(ctx);
+  }
+}
+
+/** Re-reads which listed own devices need approval (no I/O). */
+function refreshOwnApprovals(ctx: EngineContext): void {
+  ctx.store.devices = ctx.store.devices.map((info) => {
+    const record = ctx.directory.cached(info.deviceKey);
+    if (!info.needsApproval || !record) {
+      return info;
+    }
+    return {
+      ...info,
+      needsApproval: ownDeviceNeedsApproval(ctx, record, info.verified),
+    };
+  });
+  ctx.store.touch();
+}
+
+/**
+ * The device "Add device" approves: one a chat lists as untrusted, or
+ * another device of this profile that the device list shows as needing
+ * approval (so it can be added before any chat exists).
+ */
+export function findApprovalTarget(
+  ctx: EngineContext,
+  deviceKey: string
+): { profileId: string; deviceKey: string; wallet: string } | null {
+  const key = deviceKey.toLowerCase();
+  const listed = ctx.store.findUntrusted(key);
+  if (listed) {
+    return listed;
+  }
+  const shown = ctx.store.devices.some(
+    (device) => device.deviceKey === key && device.needsApproval === true
+  );
+  const record = ctx.directory.cached(key);
+  if (!shown || record?.profile_id !== ctx.profileId) {
+    return null;
+  }
+  return {
+    profileId: record.profile_id,
+    deviceKey: key,
+    wallet: record.grant.wallet.toLowerCase(),
+  };
 }
 
 /** "Ignore": keeps the device out and stops showing its notice. */

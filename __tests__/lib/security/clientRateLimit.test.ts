@@ -303,11 +303,35 @@ describe("createClientRateLimiter", () => {
     expect(enforce(client, 1)?.status).toBe(429);
   });
 
-  it("evicts the oldest client buckets when the bucket cap is reached", () => {
+  it("keeps live buckets when the table is full and charges new clients to a shared overflow budget", async () => {
     const enforce = createLimiter(1, 2);
 
     expect(allowedCount(enforce, ["8.8.8.8", "8.8.8.8"])).toBe(1);
-    expect(allowedCount(enforce, ["1.1.1.1", "9.9.9.9"])).toBe(2);
+    jest.advanceTimersByTime(10_000);
+    expect(allowedCount(enforce, ["1.1.1.1"])).toBe(1);
+
+    // The table is full: new clients share ten times one client's budget.
+    const newcomers = Array.from({ length: 11 }, (_v, i) => `9.9.9.${i}`);
+    expect(allowedCount(enforce, newcomers.slice(0, 10))).toBe(10);
+    const overflowing = enforce(requestFrom(newcomers[10]));
+    expect(overflowing?.status).toBe(429);
+    expect(overflowing?.headers.get("retry-after")).toBe("60");
+    expect(await overflowing?.json()).toEqual({
+      error: "Too many test requests",
+    });
+    // The tracked clients' windows were not reset to make room.
+    expect(enforce(requestFrom("8.8.8.8"))?.status).toBe(429);
+    expect(enforce(requestFrom("1.1.1.1"))?.status).toBe(429);
+  });
+
+  it("gives new clients their own buckets again once windows expire", () => {
+    const enforce = createLimiter(1, 2);
+
+    expect(allowedCount(enforce, ["8.8.8.8", "1.1.1.1"])).toBe(2);
+    expect(allowedCount(enforce, ["9.9.9.9", "9.9.9.9"])).toBe(2);
+
+    jest.advanceTimersByTime(WINDOW_MS);
+    expect(allowedCount(enforce, ["9.9.9.9", "9.9.9.9"])).toBe(1);
     expect(enforce(requestFrom("8.8.8.8"))).toBeNull();
   });
 });
