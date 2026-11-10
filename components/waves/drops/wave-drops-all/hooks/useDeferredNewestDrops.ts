@@ -1,6 +1,7 @@
 "use client";
 
 import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
+import { DropSize, type Drop } from "@/helpers/waves/drop.helpers";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 type WaveMessagesResult = ReturnType<
@@ -18,7 +19,27 @@ interface UseDeferredNewestDropsProps {
   readonly isAppleMobile: boolean;
   readonly waveMessages: WaveMessagesResult;
   readonly shouldPinToBottom: boolean;
+  readonly viewerProfileId?: string | null | undefined;
 }
+
+const isOwnDrop = (drop: Drop, viewerProfileId: string | null): boolean =>
+  viewerProfileId !== null &&
+  drop.type === DropSize.FULL &&
+  drop.author.id === viewerProfileId;
+
+// Pending sends use epoch timestamps as serials, outside the server sequence.
+const getLatestAcceptedSerial = (
+  waveMessages: WaveMessagesResult
+): number | null => {
+  let latest: number | null = null;
+  for (const drop of waveMessages?.drops ?? []) {
+    if (drop.id.startsWith("temp-") || !Number.isFinite(drop.serial_no)) {
+      continue;
+    }
+    latest = Math.max(latest ?? drop.serial_no, drop.serial_no);
+  }
+  return latest;
+};
 
 interface DeferredNewestDropsSession {
   readonly waveId: string;
@@ -151,23 +172,28 @@ const getDeferredNewestDropsNextSession = ({
 };
 
 const filterDeferredDrops = ({
-  isAppleMobile,
+  shouldDefer,
   visibleLatestSerial,
   waveMessages,
+  viewerProfileId,
 }: {
-  readonly isAppleMobile: boolean;
+  readonly shouldDefer: boolean;
   readonly visibleLatestSerial: number | null;
   readonly waveMessages: WaveMessagesResult;
+  readonly viewerProfileId: string | null;
 }): WaveMessagesResult => {
   if (!waveMessages) {
     return waveMessages;
   }
 
-  if (!isAppleMobile || visibleLatestSerial === null) {
+  if (!shouldDefer || visibleLatestSerial === null) {
     return waveMessages;
   }
 
   const filteredDrops = waveMessages.drops.filter((drop) => {
+    if (isOwnDrop(drop, viewerProfileId)) {
+      return true;
+    }
     if (typeof drop.serial_no !== "number") {
       return true;
     }
@@ -186,18 +212,20 @@ const filterDeferredDrops = ({
 };
 
 const getPendingDropsCount = ({
-  isAppleMobile,
+  shouldDefer,
   visibleLatestSerial,
   waveMessages,
+  viewerProfileId,
 }: {
-  readonly isAppleMobile: boolean;
+  readonly shouldDefer: boolean;
   readonly visibleLatestSerial: number | null;
   readonly waveMessages: WaveMessagesResult;
+  readonly viewerProfileId: string | null;
 }): number => {
   const drops = waveMessages?.drops;
 
   if (
-    !isAppleMobile ||
+    !shouldDefer ||
     !drops ||
     drops.length === 0 ||
     visibleLatestSerial === null
@@ -206,7 +234,10 @@ const getPendingDropsCount = ({
   }
 
   return drops.reduce((count, drop) => {
-    if (typeof drop.serial_no !== "number") {
+    if (
+      isOwnDrop(drop, viewerProfileId) ||
+      typeof drop.serial_no !== "number"
+    ) {
       return count;
     }
 
@@ -219,8 +250,10 @@ export function useDeferredNewestDrops({
   isAppleMobile,
   waveMessages,
   shouldPinToBottom,
+  viewerProfileId = null,
 }: UseDeferredNewestDropsProps): DeferredNewestDropsState {
-  const latestSerialNo = waveMessages?.drops[0]?.serial_no ?? null;
+  const latestSerialNo = getLatestAcceptedSerial(waveMessages);
+  const shouldDefer = isAppleMobile && !shouldPinToBottom;
   const [session, setSession] = useState<DeferredNewestDropsSession>(() =>
     createDeferredNewestDropsSession(waveId)
   );
@@ -265,25 +298,27 @@ export function useDeferredNewestDrops({
   const renderedWaveMessages = useMemo(
     () =>
       filterDeferredDrops({
-        isAppleMobile,
+        shouldDefer,
         visibleLatestSerial,
         waveMessages,
+        viewerProfileId,
       }),
-    [isAppleMobile, visibleLatestSerial, waveMessages]
+    [shouldDefer, visibleLatestSerial, waveMessages, viewerProfileId]
   );
 
   const pendingDropsCount = useMemo(
     () =>
       getPendingDropsCount({
-        isAppleMobile,
+        shouldDefer,
         visibleLatestSerial,
         waveMessages,
+        viewerProfileId,
       }),
-    [isAppleMobile, visibleLatestSerial, waveMessages]
+    [shouldDefer, visibleLatestSerial, waveMessages, viewerProfileId]
   );
 
   const revealPendingDrops = useCallback(() => {
-    const newestSerial = waveMessages?.drops[0]?.serial_no ?? null;
+    const newestSerial = getLatestAcceptedSerial(waveMessages);
     if (
       newestSerial === null ||
       sessionRef.current.revealedLatestSerial === newestSerial
