@@ -191,6 +191,7 @@ describe("effective App PR CI plan", () => {
     "services/wallet-signatures/competition-signature.ts",
     "i18n/messages/competitions.ts",
     "tests/social/native-competition-sandbox.spec.ts",
+    "components/waves/drops/winner/DefaultWinnerDrop.tsx",
     "tests/media/waveImagePreviewCases.ts",
     "components/waves/drop/MemesDropArtworkHero.tsx",
     "components/drops/view/item/content/media/DropImagePreview.tsx",
