@@ -214,7 +214,10 @@ const COMPONENTS: Components = {
 
 function PreviewImage({ alt }: ComponentPropsWithoutRef<"img">) {
   const locale = useBrowserLocale();
-  return <span>{alt?.trim() || t(locale, "e2ee.message.imageLink")}</span>;
+  const label = alt?.trim() ?? "";
+  return (
+    <span>{label.length > 0 ? label : t(locale, "e2ee.message.imageLink")}</span>
+  );
 }
 
 // Notification previews sit inside the link that opens the chat. Message links
