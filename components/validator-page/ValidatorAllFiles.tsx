@@ -42,20 +42,23 @@ function Cell({
   );
 }
 
-/** The signer on one line, and Apple's notarization under it. */
-function SignedBy({
-  signer,
+/**
+ * The publisher the system should name on one line, and Apple's
+ * notarization under it.
+ */
+function Publisher({
+  publisher,
   note,
 }: {
-  readonly signer: string | null;
+  readonly publisher: string | null;
   readonly note: string | null;
 }) {
-  if (!signer) {
-    return <span>Not signed</span>;
+  if (!publisher) {
+    return <span>None</span>;
   }
   return (
     <span className="tw-flex tw-flex-col max-lg:tw-items-end">
-      <span className="tw-whitespace-nowrap">{signer}</span>
+      <span className="tw-whitespace-nowrap">{publisher}</span>
       {note && <span className="tw-text-xs tw-text-iron-500">{note}</span>}
     </span>
   );
@@ -138,7 +141,7 @@ export default function ValidatorAllFiles({
               SHA-256
             </th>
             <th scope="col" className={HEAD}>
-              Signed by
+              Publisher
             </th>
             <th scope="col" className={HEAD}>
               <span className="tw-sr-only">Download</span>
@@ -184,8 +187,11 @@ export default function ValidatorAllFiles({
                     />
                   </span>
                 </Cell>
-                <Cell label="Signed by" className="tw-text-iron-300">
-                  <SignedBy signer={entry.signedBy} note={entry.signedNote} />
+                <Cell label="Publisher" className="tw-text-iron-300">
+                  <Publisher
+                    publisher={entry.publisher}
+                    note={entry.publisherNote}
+                  />
                 </Cell>
                 <td className={`${CELL} lg:tw-text-right`}>
                   <a
@@ -205,6 +211,12 @@ export default function ValidatorAllFiles({
           })}
         </tbody>
       </table>
+      <p className={`tw-m-0 ${BODY}`}>
+        Each SHA-256 comes from 6529&apos;s signed list of releases. This page
+        checks that signature before it lists a file. The publisher is the name
+        your system should show when it opens the file; this page doesn&apos;t
+        check it, so check it yourself.
+      </p>
       <div>
         <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
           Check a file
