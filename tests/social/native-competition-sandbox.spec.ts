@@ -303,6 +303,7 @@ const competition = (id: string, title: string) => ({
     ...competitionRuleDefaults,
     participation: {
       ...competitionRuleDefaults.participation,
+      max_entries_per_participant: null as number | null,
       ends_at: null as number | null,
     },
   }),
@@ -2075,6 +2076,57 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       });
     }
   }
+
+  test("locks the Main Stage submit action at the active entry limit", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    sandbox.setCompetition("alpha", {
+      participation: {
+        ...competition("alpha", "Main Stage").participation,
+        max_entries_per_participant: 3,
+      },
+    });
+    let activeEntries = 3;
+    await page.route(
+      `**/v3/waves/${MEMES_WAVE}/competitions/alpha/entries?**`,
+      (route) => {
+        const { searchParams } = new URL(route.request().url());
+        if (
+          searchParams.get("status") !== "ACTIVE" ||
+          searchParams.get("submitter") !== PROFILE
+        )
+          return route.fallback();
+        return route.fulfill({
+          json: pageResult(
+            Array.from({ length: activeEntries }, (_, i) => ({
+              id: `active-${i}`,
+              wave_id: MEMES_WAVE,
+              competition_id: "alpha",
+              submitter: { id: PROFILE },
+              status: "ACTIVE",
+            }))
+          ),
+        });
+      }
+    );
+    await page.goto(`/waves/${MEMES_WAVE}?tab=chat`);
+    await dismissNextDevTools(page);
+
+    const submit = page.getByRole("button", { name: /^Submit (Work|Meme)/ });
+    const limit = page.getByRole("button", {
+      name: "Submission Limit Reached",
+    });
+    await expect(limit).toBeVisible();
+    await expect(submit).toHaveCount(0);
+
+    activeEntries = 2;
+    await page.reload();
+    await expect(submit).toBeVisible();
+    await expect(limit).toHaveCount(0);
+  });
 
   test("uses competition resources for the original primary across navigation, votes and settings", async ({
     page,

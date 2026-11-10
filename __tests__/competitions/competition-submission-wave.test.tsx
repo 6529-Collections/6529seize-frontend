@@ -2,6 +2,7 @@ import { renderHook } from "@testing-library/react";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useCompetitionSubmissionWave } from "@/hooks/competitions/useCompetitionSubmissionWave";
+import { useMainStageActiveEntryCount } from "@/hooks/competitions/useMainStageActiveEntryCount";
 import { competitionPresentationWave } from "@/helpers/competition-presentation.helpers";
 import type { CompetitionContextValue } from "@/contexts/CompetitionContext";
 
@@ -24,6 +25,9 @@ jest.mock("next/navigation", () => ({
 }));
 jest.mock("@/contexts/CompetitionContext", () => ({
   useOptionalCompetition: () => mockContext,
+}));
+jest.mock("@/hooks/competitions/useMainStageActiveEntryCount", () => ({
+  useMainStageActiveEntryCount: jest.fn(),
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useDefaultCompetition: (...args: unknown[]) => {
@@ -111,9 +115,15 @@ it("handles an initial missing wave without selecting a command scope", () => {
   expect(result.current.pending).toBe(false);
 });
 it("uses the default native competition for shared-chat actions and preserves the parent name", () => {
+  jest.mocked(useMainStageActiveEntryCount).mockReturnValueOnce(2);
   const { result } = renderHook(() => useCompetitionSubmissionWave(wave));
   expect(result.current.wave?.name).toBe("Shared chat");
   expect(result.current.wave?.competition.id).toBe("alpha");
+  expect(result.current.wave?.competitionActiveEntryCount).toBe(2);
+  expect(useMainStageActiveEntryCount).toHaveBeenCalledWith(
+    mockDetail.data,
+    true
+  );
   expect(result.current.wave?.participation).toMatchObject({
     terms: "alpha terms",
     signature_required: true,
