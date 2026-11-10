@@ -41,6 +41,7 @@ import { getAuthNonce } from "./authNonce";
 import { createAuthRequestSignIn } from "./authRequestSignIn";
 import { createSignedMessagesGrantRequest } from "./authSignedMessagesGrant";
 import { getSignedMessagesTestSigner } from "./signedMessagesTestSigner";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import type {
   AuthRequestActions,
   CreateAuthRequestActionsParams,
@@ -658,11 +659,26 @@ export function createAuthRequestActions({
     canSignActiveWallet:
       canSignActiveWallet || signedMessagesTestSigner !== null,
     createGetSignature: signedMessagesTestSigner
-      ? () => async ({ message }) => ({
-          signature: await signedMessagesTestSigner(message),
-          userRejected: false,
-          failureToastShown: false,
-        })
+      ? () =>
+          async ({ message }) => {
+            // A declined test prompt reads as a wallet's Reject would.
+            try {
+              return {
+                signature: await signedMessagesTestSigner(message),
+                userRejected: false,
+                failureToastShown: false,
+              };
+            } catch (error) {
+              if (!isUserRejectedSigningError(error)) {
+                throw error;
+              }
+              return {
+                signature: null,
+                userRejected: true,
+                failureToastShown: false,
+              };
+            }
+          }
       : createGetSignature,
     createSigningAuthRequestGuard: () =>
       signedMessagesTestSigner
