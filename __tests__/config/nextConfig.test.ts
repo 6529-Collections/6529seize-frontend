@@ -1,7 +1,4 @@
 import { configSchema } from "next/dist/server/config-schema";
-import { existsSync } from "node:fs";
-import path from "node:path";
-import { hasLocalMatch } from "next/dist/shared/lib/match-local-pattern";
 import { hasRemoteMatch } from "next/dist/shared/lib/match-remote-pattern";
 import { sharedConfig } from "@/config/nextConfig";
 import type { PublicEnv } from "@/config/env.schema";
@@ -345,57 +342,8 @@ describe("image optimizer hardening", () => {
 
 describe("image optimizer inputs", () => {
   const imageConfig = () => sharedConfig(publicEnv, "").images ?? {};
-  const localPatterns = () => imageConfig().localPatterns ?? [];
-  const isLocalOptimizable = (src: string) =>
-    hasLocalMatch(localPatterns(), src);
   const isRemoteOptimizable = (url: string) =>
     hasRemoteMatch([], imageConfig().remotePatterns ?? [], new URL(url));
-
-  it.each([
-    // public/ images rendered by next/image (About pages, header fallback,
-    // marketplace logos, transfer modal emoji, documentation example).
-    "/faq-waves-view.jpg",
-    "/the-memes-4.jpeg",
-    "/intern-no-bg.png",
-    "/superrare-icon.png",
-    "/emojis/sgt_saluting_face.webp",
-    "/artwork-documentation/examples/an-alteration.png",
-    // CMS template images optimized through getImageProps.
-    "/profile-cms/templates/quiet-signal.png",
-    "/profile-cms/templates/memes/1.webp",
-    "/profile-cms/templates/approved/ada-colour-1.webp",
-  ])("optimizes the local image the app renders: %s", (src) => {
-    expect(isLocalOptimizable(src)).toBe(true);
-  });
-
-  it.each([
-    "/api/og-metadata/image?url=https%3A%2F%2Fexample.com%2Fa.png",
-    "/api/og-metadata/image",
-    `/api/profile-cms/assets?url=${encodeURIComponent(
-      "https://d3lqz0a4bldqgf.cloudfront.net/images/a.webp"
-    )}`,
-    "/faq-profile.jpg?v=2",
-    "/profile-cms/templates/quiet-signal.png?w=1",
-    "/unlisted.png",
-  ])("refuses a local source the app never renders: %s", (src) => {
-    expect(isLocalOptimizable(src)).toBe(false);
-  });
-
-  it("lists only local images that ship in public/", () => {
-    const publicDir = path.join(process.cwd(), "public");
-    // Rendered by the direct-messages list, but not in public/ at present.
-    const knownMissing = new Set(["/android-chrome-256x256.png"]);
-    for (const { pathname = "" } of localPatterns()) {
-      const literal = pathname.replace(/\/\*\*$/, "");
-      if (knownMissing.has(literal)) {
-        continue;
-      }
-      expect([literal, existsSync(path.join(publicDir, literal))]).toEqual([
-        literal,
-        true,
-      ]);
-    }
-  });
 
   it.each([
     "https://6529.io/profile-cms/templates/quiet-signal.png",

@@ -11,10 +11,7 @@ import {
 } from "./versionReloadImageHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
-import type {
-  LocalPattern,
-  RemotePattern,
-} from "next/dist/shared/lib/image-config";
+import type { RemotePattern } from "next/dist/shared/lib/image-config";
 import { HTML_LIMITED_BOT_UA_RE } from "next/dist/shared/lib/router/utils/html-bots";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
 import {
@@ -63,33 +60,6 @@ const FIRST_PARTY_IMAGE_HOSTNAMES = new Set<string>([
   "seize.io",
   "staging.6529.io",
 ]);
-
-// Every local path the app hands to the optimizer: public/ images rendered by
-// next/image and the CMS template images optimized through getImageProps.
-// None carries a query string. Next adds its own static-import paths.
-const IMAGE_LOCAL_PATHNAMES = [
-  "/android-chrome-256x256.png",
-  "/artwork-documentation/examples/**",
-  "/emojis/**",
-  "/ethereum-history.png",
-  "/faq-profile.jpg",
-  "/faq-waves-view.jpg",
-  "/foundation.png",
-  "/gammaio.jpg",
-  "/intern-no-bg.png",
-  "/manifold.png",
-  "/memelab.png",
-  "/nakamoto-card-og.png",
-  "/opensea.png",
-  "/profile-cms/templates/**",
-  "/superrare-icon.png",
-  "/the-memes-4.jpeg",
-  "/transient.png",
-] as const;
-
-function getImageLocalPatterns(): LocalPattern[] {
-  return IMAGE_LOCAL_PATHNAMES.map((pathname) => ({ pathname, search: "" }));
-}
 
 function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
   const resolverHostnames = new Set([
@@ -150,7 +120,9 @@ export function sharedConfig(
     allowedDevOrigins: getAllowedDevOrigins(),
     images: {
       loader: "default",
-      localPatterns: getImageLocalPatterns(),
+      // localPatterns stays unset: Next then allows local sources only
+      // without a query string, so a route that reads its input from the
+      // query cannot be an optimizer source.
       remotePatterns: [
         {
           protocol: "https",
