@@ -22,6 +22,7 @@ import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import { ExpandedMediaToolbar } from "./MediaActionToolbar";
 import { useLocalImagePreviewSource } from "./LocalImagePreviewContext";
 import { ImageQualityToggle } from "./ImageQualityToggle";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import {
   useOriginalImage,
   type OriginalImageQuality,
@@ -225,6 +226,7 @@ export function ImageMediaModal({
     | undefined;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  useAndroidBackLayer(true, dialogRef, onClose);
   const localOriginalQuality = useOriginalImage(src);
   const quality = originalQuality ?? localOriginalQuality;
   const originalRequested = quality.requested;

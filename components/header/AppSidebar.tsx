@@ -9,7 +9,8 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { Fragment, useCallback, useEffect, useMemo } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
 import {
   DROP_FORGE_PATH,
@@ -87,6 +88,8 @@ export default function AppSidebar({
       })
   );
   const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(open, dialogRef, handleClose);
 
   const menu = useMemo(() => {
     const sectionMap = new Map(
@@ -175,6 +178,7 @@ export default function AppSidebar({
   return (
     <Transition appear show={open} as={Fragment}>
       <Dialog
+        ref={dialogRef}
         as="div"
         className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden"
         onClose={handleClose}

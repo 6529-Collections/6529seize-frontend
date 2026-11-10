@@ -72,6 +72,7 @@ export async function installSurfaceSimulation(
               { name: "addListener", rtype: "callback" },
               { name: "getLaunchUrl", rtype: "promise" },
               { name: "getState", rtype: "promise" },
+              { name: "minimizeApp", rtype: "promise" },
               { name: "removeAllListeners", rtype: "promise" },
               { name: "removeListener", rtype: "promise" },
             ],
@@ -146,6 +147,25 @@ export async function installSurfaceSimulation(
           string,
           { eventName: string; remove: () => void }
         >();
+        const appListeners = new Map<
+          string,
+          { eventName: string; remove: () => void }
+        >();
+        const nativeCalls: string[] = [];
+        let lastBackAt = 0;
+        Object.defineProperty(runtime, "__playwrightAppListeners", {
+          configurable: true,
+          get: () =>
+            Array.from(appListeners.values(), ({ eventName }) => eventName),
+        });
+        Object.defineProperty(runtime, "__playwrightNativeCalls", {
+          configurable: true,
+          get: () => nativeCalls,
+        });
+        Object.defineProperty(runtime, "__playwrightLastBackAt", {
+          configurable: true,
+          get: () => lastBackAt,
+        });
         Object.defineProperty(runtime, "__playwrightKeyboardListeners", {
           configurable: true,
           get: () =>
@@ -179,19 +199,19 @@ export async function installSurfaceSimulation(
                 simulatedKey === "Keyboard.addListener"
               ) {
                 const callbackId = `playwright-${platform}-${pluginName}-${++listenerIdCounter}`;
-                if (
-                  pluginName === "Keyboard" &&
-                  typeof callback === "function"
-                ) {
+                if (typeof callback === "function") {
                   const { eventName } = options as { eventName: string };
                   const eventType = `playwright:${eventName}`;
                   const listener = (event: Event) => {
+                    if (eventName === "backButton") lastBackAt = Date.now();
                     callback((event as CustomEvent).detail);
                     // Acknowledge callback delivery independently of layout.
                     event.preventDefault();
                   };
                   globalThis.addEventListener(eventType, listener);
-                  keyboardListeners.set(callbackId, {
+                  const listeners =
+                    pluginName === "App" ? appListeners : keyboardListeners;
+                  listeners.set(callbackId, {
                     eventName,
                     remove: () =>
                       globalThis.removeEventListener(eventType, listener),
@@ -212,10 +232,30 @@ export async function installSurfaceSimulation(
               options: unknown
             ) => {
               const simulatedKey = `${pluginName}.${methodName}`;
-              if (simulatedKey === "Keyboard.removeListener") {
+              if (
+                simulatedKey === "Keyboard.hide" ||
+                simulatedKey === "App.minimizeApp"
+              ) {
+                nativeCalls.push(simulatedKey);
+              }
+              if (
+                simulatedKey === "Keyboard.removeListener" ||
+                simulatedKey === "App.removeListener"
+              ) {
                 const { callbackId } = options as { callbackId: string };
-                keyboardListeners.get(callbackId)?.remove();
-                keyboardListeners.delete(callbackId);
+                const listeners =
+                  pluginName === "App" ? appListeners : keyboardListeners;
+                listeners.get(callbackId)?.remove();
+                listeners.delete(callbackId);
+              }
+              if (
+                simulatedKey === "Keyboard.removeAllListeners" ||
+                simulatedKey === "App.removeAllListeners"
+              ) {
+                const listeners =
+                  pluginName === "App" ? appListeners : keyboardListeners;
+                listeners.forEach(({ remove }) => remove());
+                listeners.clear();
               }
               if (Object.hasOwn(simulatedNativeResponses, simulatedKey)) {
                 return Promise.resolve(simulatedNativeResponses[simulatedKey]);

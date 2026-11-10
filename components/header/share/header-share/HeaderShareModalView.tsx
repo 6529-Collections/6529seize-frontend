@@ -38,6 +38,7 @@ import type { HeaderShareModalViewProps } from "./HeaderShareModalView.types";
 import { buildSocialShareUrls, type ConnectionShareStatus } from "./shareUtils";
 import { FarcasterLogo, XLogo } from "./SocialShareIcons";
 import { useSystemShare } from "./useSystemShare";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 
 const SHARE_ACTION_CLASS_NAME =
   "tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
@@ -90,6 +91,7 @@ export function HeaderShareModalView({
   isMobile,
   isElectron,
 }: HeaderShareModalViewProps) {
+  useAndroidBackLayer(shouldRender, dialogRef, onClose);
   const [connectionMode, setConnectionMode] = useState<
     "only" | "secure" | null
   >(null);

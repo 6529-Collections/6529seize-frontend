@@ -1,5 +1,9 @@
 import { formatDate, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 
 import {
   getNextUtcOccurrence,
@@ -63,30 +67,35 @@ const describeOccurrences = (occurrences: readonly ScheduleOccurrence[]) =>
 
 /**
  * The upcoming occurrences of a weekly UTC schedule, written in the viewer's
- * time zone: "Mon, Wed, Fri 09:00 PDT" for a viewer in Los Angeles in summer,
- * "Tue, Thu, Sat 05:00 GMT+13" in Auckland. The weekday is part of the answer
- * because the local day can differ from the UTC day. Each weekday is resolved
- * to its next occurrence, so a daylight-saving change before one of them is
- * reflected. Without a shared local time, each day is listed with its own.
+ * display time zone: "Mon, Wed, Fri 09:00 PDT" for a viewer in Los Angeles in
+ * summer, "Tue, Thu, Sat 05:00 GMT+13" in Auckland. The weekday is part of the
+ * answer because the local day can differ from the UTC day. Each weekday is
+ * resolved to its next occurrence, so a daylight-saving change before one of
+ * them is reflected. Without a shared local time, each day is listed with its
+ * own.
+ *
+ * `zone` defaults to the device zone. A viewer who displays times in another
+ * zone sees that zone instead, so the device zone is never printed.
  *
  * Returns null when there is nothing to add: no weekday resolves, or the
- * viewer's schedule reads exactly like the UTC one (a viewer in UTC).
+ * schedule reads exactly like the UTC one (a viewer in, or displaying, UTC).
  *
- * Reads the runtime's time zone: call it only on the client, after
- * hydration.
+ * Reads the runtime's time zone for the device zone: call it only on the
+ * client, after hydration.
  */
 export function formatLocalScheduleTimes(
   locale: SupportedLocale,
   time: UtcTimeOfDay,
   utcWeekdays: readonly number[],
-  nowMs: number
+  nowMs: number,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
 ): string | null {
   const occurrences = getScheduleOccurrences(
     locale,
     time,
     utcWeekdays,
     nowMs,
-    {}
+    zone.timeZone === undefined ? {} : { timeZone: zone.timeZone }
   );
   const [first] = occurrences;
   if (first === undefined) {

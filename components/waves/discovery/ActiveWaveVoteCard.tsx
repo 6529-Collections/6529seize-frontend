@@ -2,6 +2,7 @@
 import { ExploreWaveCard } from "@/components/home/explore-waves/ExploreWaveCard";
 import type { ApiActiveWaveVote } from "@/generated/models/ApiActiveWaveVote";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { mapApiWaveOverviewToSidebarWave } from "@/services/api/waves-v2-api";
 import { ClockIcon } from "@heroicons/react/24/outline";
@@ -13,6 +14,7 @@ export function ActiveWaveVoteCard({
   readonly vote: ApiActiveWaveVote;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const { isApp } = useDeviceInfo();
   return (
     <ExploreWaveCard
@@ -25,7 +27,7 @@ export function ActiveWaveVoteCard({
             aria-hidden="true"
             className="tw-mt-0.5 tw-size-3 tw-shrink-0"
           />
-          <span>{getActiveWaveVoteDeadlineLabel(vote, locale)}</span>
+          <span>{getActiveWaveVoteDeadlineLabel(vote, locale, zone)}</span>
         </span>
       }
     />

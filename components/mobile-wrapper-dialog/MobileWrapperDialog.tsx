@@ -17,6 +17,7 @@ import type { CSSProperties, ReactNode, RefObject } from "react";
 import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
 import { useMobileDialogDrag } from "./useMobileDialogDrag";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 
 // Browser chrome can resize the viewport slightly without opening a keyboard.
 const BROWSER_KEYBOARD_MIN_INSET = 100;
@@ -507,6 +508,9 @@ export default function MobileWrapperDialog({
   const shouldHideOnDesktopHover =
     hideOnDesktopHover && !isMobileLayoutViewport && !isTouchDevice;
   const dialogOpen = isOpen && dialogMount !== null;
+  useAndroidBackLayer(dialogOpen, dialogRef, () => {
+    if (dismissible) (onEscape ?? onBack ?? handleClose)();
+  });
   useRetainedDialogFocus(keepMounted, dialogOpen, dialogRef);
 
   const fitBrowserViewport = useCallback(

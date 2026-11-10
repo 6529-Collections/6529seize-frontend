@@ -6,8 +6,10 @@ import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import type { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
 import type { TimeLeft } from "@/helpers/waves/time.utils";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { withDisplayTimeZoneDate } from "@/lib/display-time-zone/displayTimeZone";
 import { CompactTimeCountdown } from "./CompactTimeCountdown";
 
 interface TimelineToggleHeaderProps {
@@ -31,6 +33,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
   currentPause,
 }) => {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const statusDescriptionId = useId();
   const hasNextDecision = typeof nextDecisionTime === "number";
 
@@ -48,10 +51,14 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
           <span className="tw-truncate tw-font-medium tw-text-iron-400">
             {hasNextDecision
               ? t(locale, "waves.leaderboard.timeline.nextDecisionAfter", {
-                  date: formatDate(locale, nextDecisionTime, {
-                    month: "short",
-                    day: "numeric",
-                  }),
+                  date: formatDate(
+                    locale,
+                    nextDecisionTime,
+                    withDisplayTimeZoneDate(zone, {
+                      month: "short",
+                      day: "numeric",
+                    })
+                  ),
                 })
               : t(locale, "waves.leaderboard.timeline.noDecisionScheduled")}
           </span>
@@ -70,10 +77,7 @@ export const TimelineToggleHeader: FC<TimelineToggleHeaderProps> = ({
     }
 
     return (
-      <span
-        id={statusDescriptionId}
-        className="tw-text-xs tw-text-iron-400"
-      >
+      <span id={statusDescriptionId} className="tw-text-xs tw-text-iron-400">
         {t(locale, "waves.leaderboard.timeline.noUpcomingEvents")}
       </span>
     );

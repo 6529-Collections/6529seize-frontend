@@ -1,6 +1,6 @@
-import { render, screen } from '@testing-library/react';
-import React from 'react';
-import WaveDropTime from '@/components/waves/drops/time/WaveDropTime';
+import { render, screen } from "@testing-library/react";
+import React from "react";
+import WaveDropTime from "@/components/waves/drops/time/WaveDropTime";
 
 function renderWithTime(ts: number) {
   render(<WaveDropTime timestamp={ts} />);
@@ -10,18 +10,24 @@ function renderCompactRevealWithTime(ts: number) {
   render(<WaveDropTime timestamp={ts} variant="compactReveal" />);
 }
 
-test('shows time for today', () => {
+test("shows time for today", () => {
   const now = Date.now();
   renderWithTime(now);
-  const expected = new Date(now).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+  const expected = new Date(now).toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   expect(screen.getByText(expected)).toBeInTheDocument();
 });
 
-test('shows yesterday prefix', () => {
+test("shows yesterday prefix", () => {
   const now = Date.now();
-  const yesterday = now - 24*60*60*1000;
+  const yesterday = now - 24 * 60 * 60 * 1000;
   renderWithTime(yesterday);
-  const timeStr = new Date(yesterday).toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+  const timeStr = new Date(yesterday).toLocaleTimeString(undefined, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   expect(screen.getByText(`Yesterday - ${timeStr}`)).toBeInTheDocument();
 });
 
@@ -34,7 +40,9 @@ test("compact reveal includes time for non-today timestamps", () => {
     minute: "2-digit",
   });
   const label = screen.getByText(`Yesterday, ${timeStr}`);
-  expect(label).toHaveClass("tw-whitespace-nowrap");
+  // The text sits in a <time> element inside the nowrap paragraph.
+  expect(label.closest("p")).toHaveClass("tw-whitespace-nowrap");
+  expect(label).toHaveAttribute("dateTime", new Date(yesterday).toISOString());
 });
 
 test("compact reveal skips invalid timestamps instead of throwing", () => {
