@@ -1,18 +1,10 @@
 /**
  * Click and input breadcrumbs describe the element as a selector path built
- * by the SDK. Besides tag, id, classes and `serializeAttribute` attributes,
- * the SDK always appends `aria-label`, `title` and `alt`, whose text can name
- * people, waves or files. Only the structure is kept for debugging.
+ * by the SDK: tag, id and classes, then `aria-label`, `type`, `name`, `title`
+ * and `alt`. Any `dom.serializeAttribute` attribute present on an element
+ * would replace its id and classes, so none is configured. Label text can
+ * name people, waves or files, so only the structure is kept.
  */
-
-/**
- * Attributes recorded in `ui.*` breadcrumbs instead of id and classes when an
- * element has them. Stable test ids and roles only; never label text.
- */
-export const SENTRY_UI_BREADCRUMB_ATTRIBUTES: readonly string[] = [
-  "data-testid",
-  "role",
-];
 
 // `[name="value"]` for a label-bearing attribute. A quote inside the value
 // ends it only when the selector continues after `"]`: another attribute, the

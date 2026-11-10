@@ -143,6 +143,9 @@ export default function E2eeReportDetail({
   const queryClient = useQueryClient();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const [confirmRelease, setConfirmRelease] = useState(false);
+  // Set synchronously, so a second click before the next render joins the
+  // release in flight instead of sending another.
+  const releaseRef = useRef<Promise<unknown> | null>(null);
   const detailKey = [
     ...ENCRYPTED_REPORTS_QUERY_KEY,
     "detail",
@@ -178,7 +181,8 @@ export default function E2eeReportDetail({
     loading: query.isLoading,
     onHold: hold.isSuccess ? query.data?.on_hold : undefined,
     loadFailed: query.isError && !query.isFetching,
-    holdFailed: hold.isError && !hold.isPending,
+    // A failed release is shown in its confirmation, which stays open.
+    holdFailed: hold.isError && !hold.isPending && !confirmRelease,
   });
   useEffect(() => {
     // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- The live regions stay mounted in the panel so screen readers keep hearing them while this view mounts and unmounts; this only hands them the derived text.
@@ -410,12 +414,13 @@ export default function E2eeReportDetail({
               locale,
               "contentModeration.moderator.encryptedReports.release"
             )}
+            errorFallbackKey="contentModeration.moderator.encryptedReports.holdFailed"
             onConfirm={async () => {
-              try {
-                await hold.mutateAsync(false);
-              } catch {
-                // The panel's alert region announces a failed change.
-              }
+              // A failure keeps the dialog open with its error and retry.
+              releaseRef.current ??= hold.mutateAsync(false).finally(() => {
+                releaseRef.current = null;
+              });
+              await releaseRef.current;
             }}
             onClose={() => setConfirmRelease(false)}
           />

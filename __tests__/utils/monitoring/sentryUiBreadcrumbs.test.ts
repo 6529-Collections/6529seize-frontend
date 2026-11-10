@@ -71,6 +71,32 @@ describe("UI breadcrumb labels", () => {
   });
 });
 
+describe("UI breadcrumbs from the installed SDK", () => {
+  // The selector builder the browser SDK uses for click and input breadcrumbs.
+  const { htmlTreeAsString } = jest.requireActual<{
+    htmlTreeAsString: (element: Element) => string;
+  }>(
+    require.resolve("@sentry/core", {
+      paths: [require.resolve("@sentry/nextjs")],
+    })
+  );
+
+  it("keeps tag and classes of a labelled element with a role, without its label", () => {
+    document.body.innerHTML = `<div class="tw-flex row"><span id="send" role="button" class="tw-btn primary" aria-label="Reply to Ann in Night Owls" title="Ann">Ann</span></div>`;
+    const element = document.getElementById("send")!;
+
+    const message = sanitizeSentryBreadcrumb(
+      { category: "ui.click", message: htmlTreeAsString(element) },
+      "/messages"
+    )?.message;
+
+    // The SDK stops at 80 characters of path before label text is removed,
+    // so this long label leaves no room for the parent.
+    expect(message).toBe("span#send.tw-btn.primary[aria-label][title]");
+    expect(message).not.toMatch(/Ann|Night Owls/);
+  });
+});
+
 describe("culture context", () => {
   it("removes the culture context and keeps the others", () => {
     const event = sanitizeSentryEvent({

@@ -14,7 +14,6 @@ import {
 import { startMobileLaunchTiming } from "@/utils/monitoring/mobileLaunchTiming";
 import { sanitizeSentryLog } from "@/utils/monitoring/sentryLogSanitizer";
 import { installCyclicJsonTimerDiagnostics } from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
-import { SENTRY_UI_BREADCRUMB_ATTRIBUTES } from "@/utils/monitoring/sentryUiBreadcrumbs";
 import {
   sanitizeSentryBreadcrumb,
   sanitizeSentrySpan,
@@ -70,19 +69,9 @@ Sentry.init({
     const configuredIntegrations = [
       // The culture context reports the device time zone and locale, which
       // the display time zone setting keeps private. Click and input
-      // breadcrumbs keep the element's structure only (see
-      // utils/monitoring/sentryUiBreadcrumbs.ts).
-      ...integrations
-        .filter(({ name }) => name !== "CultureContext")
-        .map((integration) =>
-          integration.name === "Breadcrumbs"
-            ? Sentry.breadcrumbsIntegration({
-                dom: {
-                  serializeAttribute: [...SENTRY_UI_BREADCRUMB_ATTRIBUTES],
-                },
-              })
-            : integration
-        ),
+      // breadcrumbs keep the SDK's default tag, id and class path;
+      // sanitizeSentryBreadcrumb removes label text from them.
+      ...integrations.filter(({ name }) => name !== "CultureContext"),
       Sentry.thirdPartyErrorFilterIntegration({
         filterKeys: [SENTRY_APPLICATION_KEY],
         behaviour: SENTRY_THIRD_PARTY_FILTER_BEHAVIOUR,

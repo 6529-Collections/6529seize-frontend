@@ -1,15 +1,10 @@
 const mockInit = jest.fn();
 const mockReplayIntegration = jest.fn(() => ({ name: "replay" }));
-const mockBreadcrumbsIntegration = jest.fn((_options: unknown) => ({
-  name: "Breadcrumbs",
-  configured: true,
-}));
 
 jest.mock("@sentry/nextjs", () => ({
   __esModule: true,
   init: mockInit,
   replayIntegration: mockReplayIntegration,
-  breadcrumbsIntegration: mockBreadcrumbsIntegration,
   thirdPartyErrorFilterIntegration: jest.fn(() => ({
     name: "third-party-errors-filter",
   })),
@@ -19,7 +14,7 @@ jest.mock("@sentry/nextjs", () => ({
 type SentryInitConfig = {
   integrations: (
     integrations: Array<{ name: string }>
-  ) => Array<{ name: string; configured?: boolean }>;
+  ) => Array<{ name: string }>;
   replaysSessionSampleRate: number;
   replaysOnErrorSampleRate: number;
   sendDefaultPii: boolean;
@@ -61,7 +56,6 @@ describe("instrumentation-client Session Replay opt-in", () => {
     jest.resetModules();
     mockInit.mockReset();
     mockReplayIntegration.mockClear();
-    mockBreadcrumbsIntegration.mockClear();
   });
 
   afterAll(() => {
@@ -87,7 +81,7 @@ describe("instrumentation-client Session Replay opt-in", () => {
     expect(config.sendDefaultPii).toBe(false);
   });
 
-  it("drops the culture context and records UI breadcrumbs by structure", () => {
+  it("drops the culture context and keeps the default breadcrumbs", () => {
     const config = loadConfig({ buildFlag: "false", runtimeFlag: "false" });
 
     const integrations = config.integrations([
@@ -99,13 +93,10 @@ describe("instrumentation-client Session Replay opt-in", () => {
 
     expect(integrations).toEqual([
       { name: "Dedupe" },
-      { name: "Breadcrumbs", configured: true },
+      { name: "Breadcrumbs" },
       { name: "HttpContext" },
       { name: "third-party-errors-filter" },
     ]);
-    expect(mockBreadcrumbsIntegration).toHaveBeenCalledWith({
-      dom: { serializeAttribute: ["data-testid", "role"] },
-    });
   });
 
   it("excludes Replay when the flag is unset", () => {
