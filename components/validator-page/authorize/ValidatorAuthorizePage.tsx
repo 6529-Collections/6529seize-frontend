@@ -5,12 +5,24 @@ import Link from "next/link";
 import { useRef, useState, type ReactNode } from "react";
 
 import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatList, formatPercent } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/validator-authorize";
 import {
+  groupedPublicKey,
+  isImplausibleAuthVersion,
   keyCode,
   sharePercents,
   shortAddress,
+  unmarkedKeys,
 } from "@/lib/validator-page/authorize/display";
 import type { Draft } from "@/lib/validator-page/authorize/draftLink";
+import {
+  grantNetwork,
+  type GrantTypedData,
+} from "@/lib/validator-page/authorize/typedData";
 
 import ValidatorPageFrame, { ValidatorPageHeader } from "../ValidatorPageFrame";
 import { BODY, LINK, PRIMARY_BUTTON, TEXT_BUTTON } from "../validatorStyles";
@@ -28,8 +40,15 @@ function Notice({
   tone = "plain",
 }: {
   readonly children: ReactNode;
-  readonly tone?: "plain" | "error";
+  readonly tone?: "plain" | "warning" | "error";
 }) {
+  if (tone === "warning") {
+    return (
+      <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-amber-300">
+        {children}
+      </p>
+    );
+  }
   if (tone === "error") {
     return (
       <p
@@ -48,21 +67,30 @@ function Notice({
   );
 }
 
-function TestNetworkTag({ draft }: { readonly draft: Draft }) {
-  if (draft.network === "mainnet") {
+/** The draft as the page shows it, from what the wallet will sign. */
+type Shown = {
+  readonly draft: Draft;
+  readonly grant: GrantTypedData;
+  /** From the domain salt that is signed, never from the link's label. */
+  readonly network: "mainnet" | "test";
+  readonly locale: SupportedLocale;
+};
+
+function TestNetworkTag({ shown }: { readonly shown: Shown }) {
+  if (shown.network === "mainnet") {
     return null;
   }
   return (
     <span className="tw-inline-flex tw-items-center tw-self-start tw-rounded-full tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-text-amber-300">
-      Test network
+      {t(shown.locale, "validator.authorize.network.test")}
     </span>
   );
 }
 
-function KeyCodes({ draft }: { readonly draft: Draft }) {
-  const mine = draft.keys.filter((key) => key.mine);
+function KeyCodes({ shown }: { readonly shown: Shown }) {
+  const mine = shown.draft.keys.filter((key) => key.mine);
   if (mine.length === 0) {
-    return <TestNetworkTag draft={draft} />;
+    return <TestNetworkTag shown={shown} />;
   }
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
@@ -70,7 +98,7 @@ function KeyCodes({ draft }: { readonly draft: Draft }) {
         <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
           Validator key
         </span>
-        <TestNetworkTag draft={draft} />
+        <TestNetworkTag shown={shown} />
       </div>
       <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1 tw-p-0">
         {mine.map((key) => (
@@ -105,11 +133,9 @@ function Row({
   );
 }
 
-function DraftRows({ draft }: { readonly draft: Draft }) {
+function DraftRows({ shown }: { readonly shown: Shown }) {
+  const { draft, grant, locale } = shown;
   const percents = sharePercents(draft.keys.map((key) => key.share));
-  const purpose = (
-    JSON.parse(draft.typedDataJson) as { message: { purpose: string } }
-  ).message.purpose;
   return (
     <dl className="tw-m-0 tw-flex tw-flex-col tw-gap-3">
       <Row label="Account">
@@ -134,23 +160,76 @@ function DraftRows({ draft }: { readonly draft: Draft }) {
                     this validator
                   </span>
                 )}
+                <span className="tw-basis-full tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-400">
+                  {groupedPublicKey(key.pubkey)}
+                </span>
               </li>
             ))}
           </ul>
         </Row>
       )}
-      <Row label="Authorization">#{draft.authVersion.toString()}</Row>
-      <Row label="Purpose">{purpose}</Row>
+      <Row label={t(locale, "validator.authorize.version.label")}>
+        {t(locale, "validator.authorize.version.value", {
+          version: String(grant.message.authVersion),
+        })}
+      </Row>
+      <Row label="Purpose">{grant.message.purpose}</Row>
     </dl>
   );
 }
 
-function DraftIntro({ draft }: { readonly draft: Draft }) {
+/** What to weigh before signing that the checks can't decide. */
+function DraftWarnings({ shown }: { readonly shown: Shown }) {
+  const { draft, grant, locale } = shown;
+  const others = unmarkedKeys(draft.keys);
+  const version = BigInt(grant.message.authVersion);
+  const percent = formatPercent(locale, others.fraction, 2);
+  return (
+    <>
+      {others.count === 1 && (
+        <Notice tone="warning">
+          {t(locale, "validator.authorize.keys.unmarked.one", { percent })}
+        </Notice>
+      )}
+      {others.count > 1 && (
+        <Notice tone="warning">
+          {t(locale, "validator.authorize.keys.unmarked.other", {
+            count: others.count,
+            percent,
+          })}
+        </Notice>
+      )}
+      {isImplausibleAuthVersion(version) && (
+        <Notice tone="warning">
+          {t(locale, "validator.authorize.version.implausible", {
+            version: version.toString(),
+          })}
+        </Notice>
+      )}
+    </>
+  );
+}
+
+/** The heading names the validator's own keys only when the link marks one. */
+function introHeading({ draft, locale }: Shown, mine: number): string {
+  if (mine > 1) {
+    return "Authorize these validator keys";
+  }
+  if (mine === 1) {
+    return "Authorize this validator key";
+  }
+  return draft.keys.length > 1
+    ? t(locale, "validator.authorize.heading.unmarked.other")
+    : t(locale, "validator.authorize.heading.unmarked.one");
+}
+
+function DraftIntro({ shown }: { readonly shown: Shown }) {
+  const { draft } = shown;
   const mine = draft.keys.filter((key) => key.mine).length;
   if (draft.keys.length === 0) {
     return (
       <>
-        <TestNetworkTag draft={draft} />
+        <TestNetworkTag shown={shown} />
         <h2 className={HEADING}>Stop this account&apos;s keys</h2>
         <p className={TEXT}>
           No key will sign for this account from the day it counts.
@@ -160,12 +239,8 @@ function DraftIntro({ draft }: { readonly draft: Draft }) {
   }
   return (
     <>
-      <KeyCodes draft={draft} />
-      <h2 className={HEADING}>
-        {mine > 1
-          ? "Authorize these validator keys"
-          : "Authorize this validator key"}
-      </h2>
+      <KeyCodes shown={shown} />
+      <h2 className={HEADING}>{introHeading(shown, mine)}</h2>
       <p className={TEXT}>
         Your wallet signs one message that lets the 6529 Validator on your
         computer sign for this account. It costs no gas and moves nothing.
@@ -291,7 +366,39 @@ function WalletStep({
   );
 }
 
-function SignatureCard({ signature }: { readonly signature: string }) {
+/** What the signature authorizes, as signed, whoever made the link. */
+function signedSummary({ draft, grant, network, locale }: Shown): string {
+  const params = {
+    account: shortAddress(draft.account),
+    version: String(grant.message.authVersion),
+    codes: formatList(
+      locale,
+      draft.keys.map((key) => keyCode(key.pubkey))
+    ),
+  };
+  let summary: string;
+  if (draft.keys.length === 0) {
+    summary = t(locale, "validator.authorize.signed.stop", params);
+  } else if (draft.keys.length === 1) {
+    summary = t(locale, "validator.authorize.signed.keys.one", params);
+  } else {
+    summary = t(locale, "validator.authorize.signed.keys.other", params);
+  }
+  const sentences = [summary];
+  if (network === "test") {
+    sentences.push(t(locale, "validator.authorize.signed.network.test"));
+  }
+  sentences.push(t(locale, "validator.authorize.signed.nothingSent"));
+  return sentences.join(" ");
+}
+
+function SignatureCard({
+  signature,
+  shown,
+}: {
+  readonly signature: string;
+  readonly shown: Shown;
+}) {
   const box = useRef<HTMLParagraphElement>(null);
   const [copied, setCopied] = useState<"copied" | "select" | null>(null);
 
@@ -346,10 +453,7 @@ function SignatureCard({ signature }: { readonly signature: string }) {
           {copied === "copied" ? "Copied." : "Select the text and copy it."}
         </Notice>
       )}
-      <p className={SMALL}>
-        The signature only works on your validator, for this authorization.
-        Nothing was sent anywhere.
-      </p>
+      <p className={SMALL}>{signedSummary(shown)}</p>
     </section>
   );
 }
@@ -367,20 +471,15 @@ function NoLink() {
       </p>
       <ol className="tw-m-0 tw-flex tw-flex-col tw-gap-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300">
         <li>
-          On your computer, open 6529 Validator and go to Authorize, or to
-          Keys, then Add a computer.
+          On your computer, open 6529 Validator and go to Authorize, or to Keys,
+          then Add a computer.
         </li>
-        <li>
-          Choose your phone as the wallet, and paste its address.
-        </li>
-        <li>
-          Scan the code it shows with your phone, or open its link here.
-        </li>
+        <li>Choose your phone as the wallet, and paste its address.</li>
+        <li>Scan the code it shows with your phone, or open its link here.</li>
         <li>Sign here, then paste the signature into your validator.</li>
       </ol>
       <p className={TEXT}>
-        Sign only if the key code on this page matches the one on your
-        computer.
+        Sign only if the key code on this page matches the one on your computer.
       </p>
       <p className={SMALL}>
         <Link href="/validator" className={LINK}>
@@ -394,6 +493,7 @@ function NoLink() {
 
 function AuthorizeBody() {
   const session = useAuthorizeSession();
+  const locale = useBrowserLocale();
   const { draft, review, signing } = session;
 
   if (draft === undefined) {
@@ -412,13 +512,20 @@ function AuthorizeBody() {
       </section>
     );
   }
+  const shown: Shown = {
+    draft,
+    grant: review.grant,
+    network: grantNetwork(review.grant.domain.salt),
+    locale,
+  };
   if (signing.status === "signed") {
-    return <SignatureCard signature={signing.signature} />;
+    return <SignatureCard signature={signing.signature} shown={shown} />;
   }
   return (
     <section className={CARD}>
-      <DraftIntro draft={draft} />
-      <DraftRows draft={draft} />
+      <DraftIntro shown={shown} />
+      <DraftRows shown={shown} />
+      <DraftWarnings shown={shown} />
       {review.problems.length > 0 ? (
         <>
           <Notice tone="error">
