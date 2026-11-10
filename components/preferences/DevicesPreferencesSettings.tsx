@@ -161,6 +161,9 @@ function DeviceGrantRow({
             t(locale, "signedMessages.devices.wallet", {
               address: shortenAddress(grant.wallet),
             }),
+            t(locale, "signedMessages.devices.origin", {
+              origin: grant.domain,
+            }),
             ...getGrantDates(locale, grant, status),
           ].join(" · ")}
         </p>

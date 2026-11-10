@@ -510,7 +510,24 @@ describe("SignedMessagesNotice", () => {
           "Safari on iPhone is now authorized for Signed Posts. If this wasn’t you, revoke it."
         )
       ).toBeVisible();
+      expect(
+        screen.getByText(
+          "Authorized from 6529.io · device key cccccccc...cccccccc"
+        )
+      ).toBeVisible();
       expect(screen.getByRole("button", { name: "Revoke" })).toBeVisible();
+    });
+
+    it("names an app that authorized the new device", () => {
+      mockGrants = [];
+      const { rerender } = render(<SignedMessagesNotice composerEmpty />);
+      mockGrants = [{ ...otherDevice, domain: "6529 Desktop" }];
+      rerender(<SignedMessagesNotice composerEmpty />);
+      expect(
+        screen.getByText(
+          "Authorized from 6529 Desktop · device key bbbbbbbb...bbbbbbbb"
+        )
+      ).toBeVisible();
     });
 
     it("neither alerts nor offers to turn on when this browser's keys could not be read", () => {
@@ -621,18 +638,89 @@ describe("SignedMessagesNotice", () => {
       ).toBeNull();
     });
 
-    it("clears an alert acknowledged on another device when the grant list refreshes", () => {
+    const seedNoticeState = (state: Record<string, unknown>) =>
+      localStorage.setItem(
+        "6529-signed-messages-notice",
+        JSON.stringify({ [ADDRESS]: state })
+      );
+
+    it("shows each new device once per browser, whatever the server flag says later", () => {
       mockGrants = [];
       const { rerender } = render(<SignedMessagesNotice composerEmpty />);
-      mockGrants = [otherDevice];
-      rerender(<SignedMessagesNotice composerEmpty />);
-      expect(screen.getByRole("button", { name: "Got it" })).toBeVisible();
-
+      // This browser took in the server's acknowledgements once, at its
+      // first run; a flag set after that does not hide the alert here.
       mockGrants = [{ ...otherDevice, notice_acknowledged: true }];
       rerender(<SignedMessagesNotice composerEmpty />);
+      expect(screen.getByRole("button", { name: "Got it" })).toBeVisible();
+      expect(
+        screen.getByText(/is now authorized for Signed Posts/)
+      ).toBeVisible();
+    });
+
+    it("takes in the grants already acknowledged once, in a browser with a baseline", () => {
+      seedNoticeState({ seenGrantIds: [grant().id] });
+      const acknowledged = { ...otherDevice, notice_acknowledged: true };
+      mockGrants = [grant(), acknowledged];
+      const { rerender } = render(<SignedMessagesNotice composerEmpty />);
       expect(screen.queryByRole("button", { name: "Got it" })).toBeNull();
-      expect(mockAcknowledge).not.toHaveBeenCalled();
-      expect(mockRevoke).not.toHaveBeenCalled();
+
+      // A device that was never acknowledged still raises the alert.
+      const unacknowledged = grant({
+        id: `0x${"4".repeat(64)}`,
+        device_key: `0x${"ee".repeat(32)}`,
+        device_label: "Edge on Windows",
+        notice_acknowledged: false,
+      });
+      mockGrants = [grant(), acknowledged, unacknowledged];
+      rerender(<SignedMessagesNotice composerEmpty />);
+      expect(
+        screen.getByText(/Edge on Windows is now authorized for Signed Posts/)
+      ).toBeVisible();
+    });
+
+    it("never announces the renewal of a device this browser has seen", () => {
+      mockGrants = [otherDevice];
+      const { rerender } = render(<SignedMessagesNotice composerEmpty />);
+      const renewal = grant({
+        id: `0x${"5".repeat(64)}`,
+        device_key: otherDevice.device_key,
+        device_label: otherDevice.device_label,
+      });
+      mockGrants = [renewal, { ...otherDevice, expires_at: NOW - DAY }];
+      rerender(<SignedMessagesNotice composerEmpty />);
+      expect(screen.queryByRole("button", { name: "Got it" })).toBeNull();
+
+      // A new key is still a new device.
+      mockGrants = [
+        renewal,
+        { ...otherDevice, expires_at: NOW - DAY },
+        grant({
+          id: `0x${"6".repeat(64)}`,
+          device_key: `0x${"ff".repeat(32)}`,
+        }),
+      ];
+      rerender(<SignedMessagesNotice composerEmpty />);
+      expect(screen.getByRole("button", { name: "Got it" })).toBeVisible();
+    });
+
+    it("stays dismissed in this browser once acknowledged here", async () => {
+      mockGrants = [];
+      const { rerender, unmount } = render(
+        <SignedMessagesNotice composerEmpty />
+      );
+      mockGrants = [otherDevice];
+      rerender(<SignedMessagesNotice composerEmpty />);
+      mockAcknowledge.mockResolvedValue(true);
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: "Got it" }));
+      });
+      expect(mockAcknowledge).toHaveBeenCalledWith(otherDevice.id);
+      expect(screen.queryByRole("button", { name: "Got it" })).toBeNull();
+
+      unmount();
+      mockGrants = [{ ...otherDevice, notice_acknowledged: false }];
+      render(<SignedMessagesNotice composerEmpty />);
+      expect(screen.queryByRole("button", { name: "Got it" })).toBeNull();
     });
   });
 });
