@@ -273,17 +273,18 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
   };
 };
 
-export async function fetchJoinedWavesPage({
-  cursor,
-  pageSize,
-  signal,
-}: {
+interface FetchSnapshotWavesPageProps {
   readonly cursor?: string | undefined;
   readonly pageSize: number;
   readonly signal?: AbortSignal | undefined;
-}): Promise<SidebarWavesPage> {
-  const response = await commonApiFetch<ApiJoinedWavesPage>({
-    endpoint: "v2/waves/joined",
+}
+
+async function fetchSnapshotWavesPage(
+  endpoint: "v2/waves/joined" | "v2/waves/all",
+  { cursor, pageSize, signal }: FetchSnapshotWavesPageProps
+): Promise<SidebarWavesPage> {
+  const response = await commonApiFetch<ApiJoinedWavesPage | ApiAllWavesPage>({
+    endpoint,
     params: { page_size: String(pageSize), ...(cursor ? { cursor } : {}) },
     signal,
     errorMode: "structured",
@@ -296,28 +297,11 @@ export async function fetchJoinedWavesPage({
   };
 }
 
-export async function fetchAllWavesPage({
-  cursor,
-  pageSize,
-  signal,
-}: {
-  readonly cursor?: string | undefined;
-  readonly pageSize: number;
-  readonly signal?: AbortSignal | undefined;
-}): Promise<SidebarWavesPage> {
-  const response = await commonApiFetch<ApiAllWavesPage>({
-    endpoint: "v2/waves/all",
-    params: { page_size: String(pageSize), ...(cursor ? { cursor } : {}) },
-    signal,
-    errorMode: "structured",
-  });
-  return {
-    waves: response.data.map(mapApiWaveOverviewToSidebarWave),
-    page: 1,
-    next: response.next_cursor !== null,
-    nextCursor: response.next_cursor,
-  };
-}
+export const fetchJoinedWavesPage = (props: FetchSnapshotWavesPageProps) =>
+  fetchSnapshotWavesPage("v2/waves/joined", props);
+
+export const fetchAllWavesPage = (props: FetchSnapshotWavesPageProps) =>
+  fetchSnapshotWavesPage("v2/waves/all", props);
 
 export async function fetchWavesV2Page({
   page,
