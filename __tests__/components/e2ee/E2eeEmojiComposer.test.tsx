@@ -213,8 +213,9 @@ it.each(["gm", "gm-wave"])(
     );
     expect(input).toHaveTextContent(":unknown:");
     expect(
-      screen.queryByRole("button", { name: /GIF|Poll|Storm/i })
+      screen.queryByRole("button", { name: /Poll|Storm/i })
     ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add GIF" })).toBeVisible();
     fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
     await waitFor(() =>
       expect(engine.send).toHaveBeenCalledWith(

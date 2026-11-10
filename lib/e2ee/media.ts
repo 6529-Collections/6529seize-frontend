@@ -22,6 +22,8 @@ export const BLOB_CHUNK_BYTES = 1024 * 1024;
 const GCM_TAG_BYTES = 16;
 export const PLAINTEXT_CHUNK_BYTES = BLOB_CHUNK_BYTES - GCM_TAG_BYTES;
 export const MAX_BLOB_BYTES = 25 * 1024 * 1024;
+/** Leave room for chunk authentication tags within the encrypted blob limit. */
+export const MAX_ATTACHMENT_FILE_BYTES = MAX_BLOB_BYTES - 64 * 1024;
 
 const AAD_PREFIX = utf8Encode("6529-e2ee-blob-v1");
 
