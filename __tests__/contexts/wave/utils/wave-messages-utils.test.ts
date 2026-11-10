@@ -136,7 +136,7 @@ describe("fetchNewestWaveMessages", () => {
     expect(commonApiFetchWithRetry).toHaveBeenCalledWith(
       expect.objectContaining({
         endpoint: "v2/waves/wave-1/drops",
-        params: { limit: "10" },
+        params: { limit: "10", respect_drop_reply_collapse: "true" },
         signal: undefined,
         retryOptions: expect.objectContaining({ maxRetries: 2 }),
       })

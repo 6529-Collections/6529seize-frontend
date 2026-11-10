@@ -31,6 +31,7 @@ type DropsCacheQueryParams = {
   dropType?: unknown;
   containsMedia?: unknown;
   curationId?: unknown;
+  replySerialNo?: unknown;
 };
 
 const updateQueryData = (
@@ -142,7 +143,8 @@ function isMatchingDropsQuery(
 
 function upsertDropInQueryData(
   oldData: DropsInfiniteData | undefined,
-  drop: ApiDrop
+  drop: ApiDrop,
+  allowInsert: boolean
 ): DropsInfiniteData | undefined {
   if (!oldData?.pages || oldData.pages.length === 0) {
     return oldData;
@@ -171,7 +173,7 @@ function upsertDropInQueryData(
     }
   }
 
-  if (!pages[0]?.drops) {
+  if (!allowInsert || !pages[0]?.drops) {
     return oldData;
   }
 
@@ -195,7 +197,13 @@ export function upsertDropIntoMatchingDropsQueries(
 
     queryClient.setQueryData<DropsInfiniteData | undefined>(
       query.queryKey,
-      (oldData) => upsertDropInQueryData(oldData, drop),
+      // Cursor windows should pick up new replies from their own refetch.
+      (oldData) =>
+        upsertDropInQueryData(
+          oldData,
+          drop,
+          params.replySerialNo === undefined
+        ),
       { updatedAt: Date.now() }
     );
   }

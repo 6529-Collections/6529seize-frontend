@@ -477,6 +477,7 @@ const localDrop = {
   reactions: [],
   boosts: 0,
   is_signed: false,
+  collapse_replies: false,
   hide_link_preview: false,
   moderation: {
     status: "VISIBLE",

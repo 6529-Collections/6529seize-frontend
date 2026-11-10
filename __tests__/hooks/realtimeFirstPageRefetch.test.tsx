@@ -6,6 +6,7 @@ import { WsMessageType } from "@/helpers/Types";
 import { useDropMessages } from "@/hooks/useDropMessages";
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
 import { useWaveDrops } from "@/hooks/useWaveDrops";
+import { fetchDropReplyWindowV2 } from "@/services/api/drop-reply-window-api";
 import { fetchWaveCurationDropsV2 } from "@/services/api/wave-curation-drops-v2-api";
 import {
   fetchDropRepliesV2,
@@ -35,6 +36,9 @@ jest.mock("@/services/api/wave-drops-v2-api", () => ({
   fetchWaveDropsFeedV2: jest.fn(),
   fetchDropRepliesV2: jest.fn(),
 }));
+jest.mock("@/services/api/drop-reply-window-api", () => ({
+  fetchDropReplyWindowV2: jest.fn(),
+}));
 jest.mock("@/services/api/wave-curation-drops-v2-api", () => ({
   fetchWaveCurationDropsV2: jest.fn(),
 }));
@@ -43,6 +47,7 @@ type FeedResult = Awaited<ReturnType<typeof fetchWaveDropsFeedV2>>;
 
 const fetchFeedMock = jest.mocked(fetchWaveDropsFeedV2);
 const fetchRepliesMock = jest.mocked(fetchDropRepliesV2);
+const fetchReplyWindowMock = jest.mocked(fetchDropReplyWindowV2);
 const fetchCurationMock = jest.mocked(fetchWaveCurationDropsV2);
 
 const WAVE_ID = "wave-1";
@@ -198,7 +203,9 @@ describe("useWaveDrops realtime refresh", () => {
     expect(fetchFeedMock).toHaveBeenCalledTimes(1);
     const signal = fetchFeedMock.mock.calls[0]?.[0].signal;
     unmount();
-    finishFeed({ drops: [makeDrop(11), makeDrop(10)] } as unknown as FeedResult);
+    finishFeed({
+      drops: [makeDrop(11), makeDrop(10)],
+    } as unknown as FeedResult);
     await settle();
 
     expect(signal?.aborted).toBe(true);
@@ -335,4 +342,36 @@ describe("useDropMessages realtime refresh", () => {
     await waitFor(() => expect(result.current.drops).toHaveLength(61));
     expect(fetchRepliesMock).toHaveBeenCalledTimes(3);
   });
+});
+
+it("keeps loaded replies visible while another link in the same thread loads", async () => {
+  type ReplyWindow = Awaited<ReturnType<typeof fetchDropReplyWindowV2>>;
+  const makeWindow = (serialNo: number) =>
+    ({
+      wave,
+      drops: [makeDrop(serialNo)],
+      older: null,
+      newer: null,
+    }) as unknown as ReplyWindow;
+  let finishWindow: ((result: ReplyWindow) => void) | undefined;
+  fetchReplyWindowMock.mockResolvedValueOnce(makeWindow(20));
+  fetchReplyWindowMock.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finishWindow = resolve;
+      })
+  );
+
+  const { result, rerender } = renderHook(
+    ({ serialNo }) => useDropMessages(WAVE_ID, "thread-drop", wave, serialNo),
+    { wrapper, initialProps: { serialNo: 20 } }
+  );
+  await waitFor(() => expect(idsOf(result.current.drops)).toEqual(["drop-20"]));
+  rerender({ serialNo: 10 });
+  expect(result.current.isFetching).toBe(true);
+  expect(idsOf(result.current.drops)).toEqual(["drop-20"]);
+
+  await waitFor(() => expect(finishWindow).toBeDefined());
+  await act(async () => finishWindow?.(makeWindow(10)));
+  await waitFor(() => expect(idsOf(result.current.drops)).toEqual(["drop-10"]));
 });
