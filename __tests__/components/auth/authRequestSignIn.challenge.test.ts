@@ -19,6 +19,7 @@ jest.mock("@/utils/error-sanitizer", () => ({
 
 import { createAuthRequestSignIn } from "@/components/auth/authRequestSignIn";
 import { loginWithSessionV2 } from "@/services/auth/session-v2.utils";
+import { logErrorSecurely } from "@/utils/error-sanitizer";
 import {
   appSignInChallenge,
   siweSignInChallenge,
@@ -82,7 +83,7 @@ beforeEach(() => {
 });
 
 const EXPIRES_LINE = "Expiration Time: 2026-11-10T14:37:52.000Z";
-const LONG_TEXT = "x".repeat(501);
+const LONG_TEXT = "x".repeat(2001);
 
 /** Replaces one exact line of a challenge. */
 const withLine = (message: string, line: string, replacement: string) => {
@@ -296,6 +297,67 @@ describe("sign-in challenge checks in 6529 Mobile", () => {
 
   it("refuses the website's challenge format", async () => {
     await expectRefused(siweSignInChallenge({ address: SIGNER }));
+  });
+});
+
+describe("refused challenge logging", () => {
+  const logMock = jest.mocked(logErrorSecurely);
+
+  beforeEach(() => {
+    logMock.mockClear();
+  });
+
+  it.each([
+    ["origin", { origin: "https://example.com" }],
+    ["address", { address: OTHER_WALLET }],
+    ["chain", { chainId: 5 }],
+    ["resources", { resources: ["https://example.com/terms"] }],
+    ["shape", { statement: "Sign in.\nApprove tokens." }],
+  ] as const)(
+    "logs a refusal for %s with the reason code only",
+    async (reason, overrides) => {
+      await expectRefused(
+        siweSignInChallenge({ address: SIGNER, ...overrides })
+      );
+
+      expect(logMock).toHaveBeenCalledTimes(1);
+      const [context, error] = logMock.mock.calls[0]!;
+      expect(context).toBe(`requestSignIn:challenge-refused:${reason}`);
+      const logged = `${context} ${String(error)}`;
+      expect(logged).not.toContain(SIGNER);
+      expect(logged).not.toContain(OTHER_WALLET);
+      expect(logged).not.toContain("251566deb966204ff0646078ebf6a8f9");
+      expect((error as { response?: unknown }).response).toBeUndefined();
+      expect(logged).not.toContain("wants you to sign in");
+    }
+  );
+
+  it("logs timestamps and nonce problems by code", async () => {
+    await expectRefused(
+      withLine(
+        siweSignInChallenge({ address: SIGNER }),
+        EXPIRES_LINE,
+        "Expiration Time: 2026-11-10T14:00:00.000Z"
+      )
+    );
+    await expectRefused(
+      withLine(
+        siweSignInChallenge({ address: SIGNER }),
+        "Nonce: 251566deb966204ff0646078ebf6a8f9",
+        "Nonce: two words"
+      )
+    );
+
+    expect(logMock.mock.calls.map(([context]) => context)).toEqual([
+      "requestSignIn:challenge-refused:timestamps",
+      "requestSignIn:challenge-refused:nonce",
+    ]);
+  });
+
+  it("logs nothing for a challenge it signs", async () => {
+    await expectSigned(siweSignInChallenge({ address: SIGNER }));
+
+    expect(logMock).not.toHaveBeenCalled();
   });
 });
 

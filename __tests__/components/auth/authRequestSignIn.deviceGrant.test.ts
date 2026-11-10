@@ -293,16 +293,19 @@ describe("sign-in with a device grant", () => {
   it.each([
     [
       "another chain",
+      "chain",
       (message: string) => message.replace("Chain ID: 1", "Chain ID: 5"),
     ],
     [
       "another 6529 host",
+      "origin",
       (message: string) =>
         message.replaceAll("https://staging.6529.io", "https://6529.io"),
     ],
   ])(
     "never signs a grant challenge for %s and falls back to an ordinary challenge",
-    async (_case, alter) => {
+    async (_case, reason, alter) => {
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
       const { getNonce, getSignature, signIn } = createSubject((params) =>
         params.deviceGrant
           ? alter(grantMessage(params.deviceGrant.device_key))
@@ -315,6 +318,11 @@ describe("sign-in with a device grant", () => {
       expect(getNonce).toHaveBeenCalledTimes(2);
       expect(getSignature).toHaveBeenCalledTimes(1);
       expect(getSignature).toHaveBeenCalledWith({ message: ordinaryMessage });
+      // The fallback is noted by reason code only.
+      expect(warn).toHaveBeenCalledWith(
+        `[requestSignIn] Device-grant challenge not recognised (${reason}).`
+      );
+      warn.mockRestore();
     }
   );
 

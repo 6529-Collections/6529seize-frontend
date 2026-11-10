@@ -48,10 +48,14 @@ The frontend signs `signable_message` exactly as returned. It does not sign a `n
 
 ### Sign-in challenge contract
 
-Before any wallet is asked to sign (the in-app wallet shows nothing), the
-client checks the challenge (`isExpectedSignInChallenge` in
-`components/auth/authNonce.ts`). A challenge that fails is not signed and the
-user sees "Couldn't verify the authentication response." Check backend changes
+Before any wallet, including the in-app wallet, is asked to sign, the client
+checks the challenge (`getSignInChallengeProblem` in
+`components/auth/authNonce.ts`). A challenge that fails is not signed, the
+user sees "Couldn't verify the authentication response.", and the refusal is
+logged with a reason code only (`shape`, `origin`, `address`, `chain`,
+`nonce`, `timestamps` or `resources`); a grant challenge that is not
+recognised is noted as a warning with the same codes before the ordinary
+challenge is used. Check backend changes
 against this list; wording may change freely, structure may not.
 
 - Everywhere: lines are split on `\n` only; no other control characters
@@ -62,7 +66,7 @@ against this list; wording may change freely, structure may not.
   `<page origin> wants you to sign in with your Ethereum account:`, where the
   page origin is `https://6529.io` or `https://staging.6529.io` (local hosts
   in development builds only); line 2 is the signer's address; line 3 empty;
-  line 4 the statement, any single line of printable text up to 500
+  line 4 the statement, any single line of printable text up to 2,000
   characters; line 5 empty. Then `Key: value` fields in any order, each at
   most once: required `URI` (the page origin), `Version: 1`, `Chain ID: 1`,
   `Nonce`, `Issued At`, `Expiration Time`; optional `Not Before` (timestamp)
@@ -77,7 +81,7 @@ against this list; wording may change freely, structure may not.
   `Client Origin` (Desktop only, the page origin), `Session Type` (the client
   type), `Wallet` (the signer), `Chain ID: 1`, `Issued At`,
   `Expiration Time`, `Nonce`, `Action: login`, and `Purpose` (any single line
-  of printable text up to 500 characters). No `Payload Hash`.
+  of printable text up to 2,000 characters). No `Payload Hash`.
 
 Web login posts:
 

@@ -163,7 +163,8 @@ function getNativeLinkPathname(
     return null;
   const { host, pathname } = getCustomSchemeParts(url);
   if (host === DeepLinkScope.NAVIGATE) {
-    // The same routes stay out of the app as for universal links.
+    // The app ignores navigate links to the routes kept out of it, as it
+    // does for universal links, and stays where it is.
     const path = pathname || "/";
     return isMobileAppDestination(path) ? path : null;
   }

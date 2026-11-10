@@ -17,7 +17,8 @@ const RESOURCES_LINE = "Resources:";
 const MAINNET_CHAIN_ID = "1";
 // The server issues challenges valid for five minutes; allow for change.
 const MAX_CHALLENGE_LIFETIME_MS = 60 * 60 * 1000;
-const MAX_TEXT_LENGTH = 500;
+// The longest statement today (a combined grant) is about 500 characters.
+const MAX_TEXT_LENGTH = 2000;
 const MAX_TOKEN_LENGTH = 200;
 // Printable text on one line: no control characters (line breaks included).
 const CONTROL_CHARACTER = /\p{Cc}/u;
@@ -142,43 +143,85 @@ const SIWE_FIELDS: ReadonlySet<string> = new Set([
 ]);
 
 /**
+ * Why a challenge was refused, for logs: one short code and nothing from the
+ * challenge itself.
+ */
+export type SignInChallengeProblem =
+  | "shape"
+  | "origin"
+  | "address"
+  | "chain"
+  | "nonce"
+  | "timestamps"
+  | "resources";
+
+/** The first failed check, in order, or null when every check passed. */
+const firstProblem = (
+  checks: ReadonlyArray<readonly [SignInChallengeProblem, () => boolean]>
+): SignInChallengeProblem | null =>
+  checks.find(([, passes]) => !passes())?.[0] ?? null;
+
+/** Optional fields, when present, are well formed. */
+const hasWellFormedOptionalFields = (
+  fields: ReadonlyMap<string, string>
+): boolean => {
+  const notBefore = fields.get("Not Before");
+  const requestId = fields.get("Request ID");
+  return (
+    (notBefore === undefined || readTimestamp(notBefore) !== null) &&
+    (requestId === undefined || isToken(requestId))
+  );
+};
+
+/**
  * The website's Sign-In with Ethereum challenge: issued for this page's
  * origin, which must be a 6529 app host, for the signer on mainnet, with a
  * one-line statement, a nonce and a bounded lifetime. An ordinary sign-in
  * carries no resources; a grant sign-in's resources go to the grant parser.
  */
-const isExpectedSiweChallenge = (
+const getSiweChallengeProblem = (
   lines: readonly string[],
   signerAddress: string,
   kind: SignInChallengeKind,
   page: PageLocation
-): boolean => {
+): SignInChallengeProblem | null => {
   const [header, address, beforeStatement, statement, afterStatement] = lines;
   const resourcesIndex = lines.indexOf(RESOURCES_LINE);
-  const fieldLines = lines.slice(
-    5,
-    resourcesIndex < 0 ? undefined : resourcesIndex
+  const fields = readFields(
+    lines.slice(5, resourcesIndex < 0 ? undefined : resourcesIndex),
+    SIWE_FIELDS,
+    SIWE_REQUIRED_FIELDS
   );
-  const fields = readFields(fieldLines, SIWE_FIELDS, SIWE_REQUIRED_FIELDS);
-  const notBefore = fields?.get("Not Before");
-  const requestId = fields?.get("Request ID");
-  return (
-    fields !== null &&
-    isAllowedGrantDomain(page.host) &&
-    header === `${page.origin}${SIWE_HEADER_SUFFIX}` &&
-    isSameAddress(address, signerAddress) &&
-    beforeStatement === "" &&
-    isSingleLineText(statement) &&
-    afterStatement === "" &&
-    fields.get("URI") === page.origin &&
-    fields.get("Version") === "1" &&
-    fields.get("Chain ID") === MAINNET_CHAIN_ID &&
-    isToken(fields.get("Nonce")) &&
-    hasBoundedLifetime(fields) &&
-    (notBefore === undefined || readTimestamp(notBefore) !== null) &&
-    (requestId === undefined || isToken(requestId)) &&
-    (kind === "ordinary" ? resourcesIndex < 0 : resourcesIndex > 5)
-  );
+  if (fields === null) {
+    return "shape";
+  }
+  return firstProblem([
+    [
+      "shape",
+      () =>
+        header?.endsWith(SIWE_HEADER_SUFFIX) === true &&
+        beforeStatement === "" &&
+        isSingleLineText(statement) &&
+        afterStatement === "" &&
+        fields.get("Version") === "1" &&
+        hasWellFormedOptionalFields(fields),
+    ],
+    [
+      "origin",
+      () =>
+        isAllowedGrantDomain(page.host) &&
+        header === `${page.origin}${SIWE_HEADER_SUFFIX}` &&
+        fields.get("URI") === page.origin,
+    ],
+    ["address", () => isSameAddress(address, signerAddress)],
+    ["chain", () => fields.get("Chain ID") === MAINNET_CHAIN_ID],
+    ["nonce", () => isToken(fields.get("Nonce"))],
+    ["timestamps", () => hasBoundedLifetime(fields)],
+    [
+      "resources",
+      () => (kind === "ordinary" ? resourcesIndex < 0 : resourcesIndex > 5),
+    ],
+  ]);
 };
 
 /**
@@ -226,65 +269,74 @@ const STRUCTURED_FIELDS: ReadonlySet<string> = new Set([
  * on mainnet, a login action, a nonce, a bounded lifetime and a one-line
  * purpose, and no other field.
  */
-const isExpectedStructuredChallenge = (
+const getStructuredChallengeProblem = (
   lines: readonly string[],
   signerAddress: string,
   clientType: "native" | "desktop",
   page: PageLocation | null
-): boolean => {
+): SignInChallengeProblem | null => {
   const site = getStructuredChallengeSite(clientType, page);
   const fields = readFields(
     lines.slice(1),
     STRUCTURED_FIELDS,
     STRUCTURED_REQUIRED_FIELDS
   );
-  return (
-    site !== null &&
-    fields !== null &&
-    lines[0] === "6529 Authentication" &&
-    fields.get("Version") === "2" &&
-    fields.get("Audience") === getWalletSignatureAudience() &&
-    fields.get("Domain") === site.domain &&
-    fields.get("Client Origin") === (site.clientOrigin ?? undefined) &&
-    fields.get("Session Type") === clientType &&
-    isSameAddress(fields.get("Wallet"), signerAddress) &&
-    fields.get("Chain ID") === MAINNET_CHAIN_ID &&
-    hasBoundedLifetime(fields) &&
-    isToken(fields.get("Nonce")) &&
-    fields.get("Action") === "login" &&
-    isSingleLineText(fields.get("Purpose"))
-  );
+  if (fields === null || lines[0] !== "6529 Authentication") {
+    return "shape";
+  }
+  return firstProblem([
+    [
+      "shape",
+      () =>
+        fields.get("Version") === "2" &&
+        fields.get("Session Type") === clientType &&
+        fields.get("Action") === "login" &&
+        isSingleLineText(fields.get("Purpose")),
+    ],
+    [
+      "origin",
+      () =>
+        site !== null &&
+        fields.get("Audience") === getWalletSignatureAudience() &&
+        fields.get("Domain") === site.domain &&
+        fields.get("Client Origin") === (site.clientOrigin ?? undefined),
+    ],
+    ["address", () => isSameAddress(fields.get("Wallet"), signerAddress)],
+    ["chain", () => fields.get("Chain ID") === MAINNET_CHAIN_ID],
+    ["nonce", () => isToken(fields.get("Nonce"))],
+    ["timestamps", () => hasBoundedLifetime(fields)],
+  ]);
 };
 
 /**
- * Whether a sign-in challenge is one this client expects before any wallet,
- * including the in-app wallet that shows nothing, is asked to sign it: the
- * format for this client type, this deployment's host, the signer's address,
- * mainnet, and nothing else embedded. The contract is documented in
+ * Checks a sign-in challenge before any wallet, including the in-app wallet,
+ * is asked to sign it: the format for this client type, this deployment's
+ * host, the signer's address, mainnet, and nothing else embedded. Returns the
+ * first failed check, or null when the challenge may be signed. The contract
+ * is documented in
  * ops/docs/developer/wallet-auth-final-structure-and-merge-rationale.md
  * ("Sign-in challenge contract").
  */
-export function isExpectedSignInChallenge(
+export function getSignInChallengeProblem(
   message: string,
   signerAddress: string,
   kind: SignInChallengeKind
-): boolean {
+): SignInChallengeProblem | null {
   const lines = message.split("\n");
   if (lines.some((line) => CONTROL_CHARACTER.test(line))) {
-    return false;
+    return "shape";
   }
   const page = readPageLocation();
   const clientType = getSessionClientType();
   if (clientType === "web") {
-    return (
-      page !== null && isExpectedSiweChallenge(lines, signerAddress, kind, page)
-    );
+    return page === null
+      ? "origin"
+      : getSiweChallengeProblem(lines, signerAddress, kind, page);
   }
   // The apps' challenges never carry device grants.
-  return (
-    kind === "ordinary" &&
-    isExpectedStructuredChallenge(lines, signerAddress, clientType, page)
-  );
+  return kind === "grant"
+    ? "resources"
+    : getStructuredChallengeProblem(lines, signerAddress, clientType, page);
 }
 
 // The declared response type is non-null, but an empty body still arrives.

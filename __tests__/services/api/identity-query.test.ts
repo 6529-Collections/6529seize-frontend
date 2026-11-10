@@ -27,23 +27,43 @@ describe("getIdentityQueryOptions", () => {
   });
 
   it.each([
-    ["../auth/logout", "identities/..%2Fauth%2Flogout"],
-    ["0x1?x=1#y", "identities/0x1%3Fx%3D1%23y"],
+    ["raw", "café.eth"],
+    ["percent-encoded, as a route param can arrive", "caf%C3%A9.eth"],
+    ["percent-encoded in lower case", "caf%c3%a9.eth"],
   ])(
-    "encodes %s so it stays inside the identities path",
-    async (value, endpoint) => {
+    "requests a non-ASCII name given %s as the same single-encoded segment",
+    async (_case, value) => {
+      await getIdentityQueryOptions({ handleOrWallet: value }).queryFn();
+
+      expect(fetchMock).toHaveBeenCalledWith({
+        endpoint: "identities/caf%C3%A9.eth",
+      });
+    }
+  );
+
+  it.each([
+    ["a slash", "../auth/logout", "identities/..%2Fauth%2Flogout"],
+    ["an encoded slash", "..%2Fauth%2Flogout", "identities/..%2Fauth%2Flogout"],
+    ["a query and fragment", "0x1?x=1#y", "identities/0x1%3Fx%3D1%23y"],
+    ["invalid encoding", "100%", "identities/100%25"],
+  ])(
+    "keeps a value with %s inside the identities path",
+    async (_case, value, endpoint) => {
       await getIdentityQueryOptions({ handleOrWallet: value }).queryFn();
 
       expect(fetchMock).toHaveBeenCalledWith({ endpoint });
     }
   );
 
-  it.each([".", ".."])("never requests the dot segment %s", async (value) => {
-    await expect(
-      getIdentityQueryOptions({ handleOrWallet: value }).queryFn()
-    ).rejects.toThrow();
-    expect(fetchMock).not.toHaveBeenCalled();
-  });
+  it.each([".", "..", "%2E%2E", "%2e"])(
+    "never requests the dot segment %s",
+    async (value) => {
+      await expect(
+        getIdentityQueryOptions({ handleOrWallet: value }).queryFn()
+      ).rejects.toThrow();
+      expect(fetchMock).not.toHaveBeenCalled();
+    }
+  );
 
   it("passes headers through", async () => {
     await getIdentityQueryOptions({

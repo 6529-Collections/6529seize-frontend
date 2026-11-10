@@ -176,7 +176,7 @@ No page-copy, social, or current-page Share actions appear in this dialog.
   (`#connection_share_code=`); the fragment wins when both are present.
 - `mobile6529://navigate/<path>` app links follow the same excluded routes as
   universal links (for example `/accept-connection-sharing`, `/app-wallets`,
-  `/auth`, `/api`), so those open in the browser rather than the app.
+  `/auth`, `/api`): the app ignores such a link and stays where it is.
   Connection links use `mobile6529://share-connection` instead.
 - Connection preparation can show sign-in, authentication-upgrade, loading,
   or unavailable states without revealing page-sharing controls. These notice

@@ -18,7 +18,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
 // The challenge format has its own tests (authRequestSignIn.challenge.test.ts);
 // the grant parsing is stubbed here too.
 jest.mock("@/components/auth/authNonce", () => ({
-  isExpectedSignInChallenge: () => true,
+  getSignInChallengeProblem: () => null,
 }));
 
 const GRANT = {
