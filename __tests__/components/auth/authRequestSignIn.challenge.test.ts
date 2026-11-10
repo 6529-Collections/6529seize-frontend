@@ -81,16 +81,80 @@ beforeEach(() => {
   );
 });
 
+const EXPIRES_LINE = "Expiration Time: 2026-11-10T14:37:52.000Z";
+const LONG_TEXT = "x".repeat(501);
+
+/** Replaces one exact line of a challenge. */
+const withLine = (message: string, line: string, replacement: string) => {
+  expect(message.split("\n")).toContain(line);
+  return message
+    .split("\n")
+    .map((current) => (current === line ? replacement : current))
+    .join("\n");
+};
+
+/** Swaps two exact lines of a challenge. */
+const swapLines = (message: string, first: string, second: string) =>
+  message
+    .split("\n")
+    .map((current) => {
+      if (current === first) return second;
+      return current === second ? first : current;
+    })
+    .join("\n");
+
 describe("sign-in challenge checks on the website", () => {
+  const challenge = () => siweSignInChallenge({ address: SIGNER });
+
   it("signs the website's challenge for this host and wallet", async () => {
-    await expectSigned(siweSignInChallenge({ address: SIGNER }));
+    await expectSigned(challenge());
   });
 
   it("signs the same challenge for a proxy sign-in and sends the role", async () => {
-    await expectSigned(siweSignInChallenge({ address: SIGNER }), "proxy-1");
+    await expectSigned(challenge(), "proxy-1");
     expect(loginMock).toHaveBeenCalledWith(
       expect.objectContaining({ role: "proxy-1", signerAddress: SIGNER })
     );
+  });
+
+  it.each([
+    [
+      "a reworded statement",
+      () =>
+        siweSignInChallenge({
+          address: SIGNER,
+          statement: "Welcome back to 6529. Signing costs no gas.",
+        }),
+    ],
+    [
+      "another nonce shape",
+      () =>
+        withLine(
+          challenge(),
+          "Nonce: 251566deb966204ff0646078ebf6a8f9",
+          "Nonce: ab6edf48-fd9f-4809-a2ce-185f0235288c"
+        ),
+    ],
+    [
+      "optional Not Before and Request ID fields",
+      () =>
+        `${challenge()}\nNot Before: 2026-11-10T14:32:52.000Z\nRequest ID: req-42`,
+    ],
+    [
+      "fields in another order",
+      () => swapLines(challenge(), "Version: 1", "Chain ID: 1"),
+    ],
+    [
+      "a lifetime of one hour",
+      () =>
+        withLine(
+          challenge(),
+          EXPIRES_LINE,
+          "Expiration Time: 2026-11-10T15:32:52.000Z"
+        ),
+    ],
+  ])("still signs a challenge with %s", async (_case, build) => {
+    await expectSigned(build());
   });
 
   it.each([
@@ -99,25 +163,61 @@ describe("sign-in challenge checks on the website", () => {
     ["another site", { origin: "https://example.com" }],
     ["another wallet", { address: OTHER_WALLET }],
     ["another chain", { chainId: 5 }],
-    ["another statement", { statement: "Approve all tokens." }],
     ["unrequested resources", { resources: ["https://example.com/terms"] }],
-  ])("refuses a challenge for %s", async (_case, overrides) => {
+    ["a statement over two lines", { statement: "Sign in.\nApprove tokens." }],
+    ["a carriage return in the statement", { statement: "Sign in.\rNow." }],
+    ["an over-long statement", { statement: LONG_TEXT }],
+    ["an empty statement", { statement: "" }],
+    [
+      "a device grant it did not request",
+      {
+        statement: "Sign in.",
+        resources: [
+          `urn:6529:device-grant:v1:ed25519:${"a".repeat(64)}:post:1`,
+        ],
+      },
+    ],
+  ])("refuses a challenge with %s", async (_case, overrides) => {
     await expectRefused(siweSignInChallenge({ address: SIGNER, ...overrides }));
   });
 
-  it("refuses a challenge whose URI names another site", async () => {
-    await expectRefused(
-      siweSignInChallenge({ address: SIGNER }).replace(
-        "URI: https://6529.io",
-        "URI: https://example.com"
-      )
-    );
+  it.each([
+    [
+      "a URI for another site",
+      "URI: https://6529.io",
+      "URI: https://example.com",
+    ],
+    ["another version", "Version: 1", "Version: 2"],
+    [
+      "a nonce with whitespace",
+      "Nonce: 251566deb966204ff0646078ebf6a8f9",
+      "Nonce: 2515 66de",
+    ],
+    ["an empty nonce", "Nonce: 251566deb966204ff0646078ebf6a8f9", "Nonce: "],
+    [
+      "a lifetime over one hour",
+      EXPIRES_LINE,
+      "Expiration Time: 2026-11-10T15:32:53.000Z",
+    ],
+    [
+      "an expiry before it was issued",
+      EXPIRES_LINE,
+      "Expiration Time: 2026-11-10T14:00:00.000Z",
+    ],
+    ["an unreadable expiry", EXPIRES_LINE, "Expiration Time: soon"],
+    ["no expiry", EXPIRES_LINE, "Not Before: 2026-11-10T14:32:52.000Z"],
+  ])("refuses a challenge with %s", async (_case, line, replacement) => {
+    await expectRefused(withLine(challenge(), line, replacement));
   });
 
-  it("refuses a challenge with extra lines", async () => {
-    await expectRefused(
-      `${siweSignInChallenge({ address: SIGNER })}\nRequest ID: 1`
-    );
+  it.each([
+    ["an unknown field", "Payload Hash: abc"],
+    ["a repeated field", "Chain ID: 1"],
+    ["a Request ID with spaces", "Request ID: two words"],
+    ["an unreadable Not Before", "Not Before: later"],
+    ["a line that is not a field", "Approve all tokens"],
+  ])("refuses a challenge with %s", async (_case, extraLine) => {
+    await expectRefused(`${challenge()}\n${extraLine}`);
   });
 
   it("refuses the apps' challenge format", async () => {
@@ -126,43 +226,72 @@ describe("sign-in challenge checks on the website", () => {
 });
 
 describe("sign-in challenge checks in 6529 Mobile", () => {
+  const challenge = () => appSignInChallenge({ address: SIGNER });
+  const PURPOSE_LINE = "Purpose: Sign this message to authenticate with 6529.";
+
   beforeEach(() => {
     mockClientType = "native";
   });
 
   it("signs the mobile app's challenge for this API and wallet", async () => {
-    await expectSigned(appSignInChallenge({ address: SIGNER }));
+    await expectSigned(challenge());
   });
 
   it("signs it for a proxy sign-in", async () => {
-    await expectSigned(appSignInChallenge({ address: SIGNER }), "proxy-1");
+    await expectSigned(challenge(), "proxy-1");
+  });
+
+  it.each([
+    [
+      "a reworded purpose",
+      () => withLine(challenge(), PURPOSE_LINE, "Purpose: Sign in to 6529."),
+    ],
+    [
+      "fields in another order",
+      () => swapLines(challenge(), "Action: login", PURPOSE_LINE),
+    ],
+    [
+      "another nonce shape",
+      () =>
+        withLine(
+          challenge(),
+          "Nonce: ab6edf48-fd9f-4809-a2ce-185f0235288c",
+          "Nonce: 251566deb966204ff0646078ebf6a8f9"
+        ),
+    ],
+  ])("still signs a challenge with %s", async (_case, build) => {
+    await expectSigned(build());
   });
 
   it.each([
     ["another wallet", { address: OTHER_WALLET }],
     ["another chain", { chainId: 11155111 }],
     ["another API", { audience: "api.example.com" }],
-    ["extra lines", { extraLines: ["Payload Hash: " + "a".repeat(64)] }],
-  ])("refuses a challenge for %s", async (_case, overrides) => {
+    ["a payload hash", { extraLines: ["Payload Hash: " + "a".repeat(64)] }],
+    ["a repeated wallet", { extraLines: [`Wallet: ${OTHER_WALLET}`] }],
+    ["a client origin", { extraLines: ["Client Origin: https://6529.io"] }],
+  ])("refuses a challenge with %s", async (_case, overrides) => {
     await expectRefused(appSignInChallenge({ address: SIGNER, ...overrides }));
   });
 
-  it("refuses a challenge with a site domain instead of the app's", async () => {
-    await expectRefused(
-      appSignInChallenge({ address: SIGNER }).replace(
-        "Domain: native",
-        "Domain: 6529.io"
-      )
-    );
-  });
-
-  it("refuses another action", async () => {
-    await expectRefused(
-      appSignInChallenge({ address: SIGNER }).replace(
-        "Action: login",
-        "Action: create_drop"
-      )
-    );
+  it.each([
+    ["a site domain instead of the app's", "Domain: native", "Domain: 6529.io"],
+    ["another action", "Action: login", "Action: create_drop"],
+    ["another session type", "Session Type: native", "Session Type: desktop"],
+    ["an over-long purpose", PURPOSE_LINE, `Purpose: ${LONG_TEXT}`],
+    ["a carriage return in the purpose", PURPOSE_LINE, "Purpose: Sign in.\r"],
+    [
+      "no nonce",
+      "Nonce: ab6edf48-fd9f-4809-a2ce-185f0235288c",
+      "Action: login",
+    ],
+    [
+      "a lifetime over one hour",
+      EXPIRES_LINE,
+      "Expiration Time: 2026-11-10T16:00:00.000Z",
+    ],
+  ])("refuses a challenge with %s", async (_case, line, replacement) => {
+    await expectRefused(withLine(challenge(), line, replacement));
   });
 
   it("refuses the website's challenge format", async () => {

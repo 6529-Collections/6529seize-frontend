@@ -13,15 +13,17 @@ import {
 } from "./authErrors";
 
 const SIWE_HEADER_SUFFIX = " wants you to sign in with your Ethereum account:";
-const SIWE_SIGN_IN_STATEMENT =
-  "Sign in to 6529. This request does not create a blockchain transaction, cost gas, or approve tokens.";
-const SIWE_NONCE_PATTERN = /^[A-Za-z0-9]{8,128}$/;
-const STRUCTURED_LOGIN_PURPOSE = "Sign this message to authenticate with 6529.";
-const UUID_NONCE_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const MAINNET_CHAIN_ID_LINE = "Chain ID: 1";
-// The server issues challenges valid for five minutes.
-const MAX_CHALLENGE_LIFETIME_MS = 10 * 60 * 1000;
+const RESOURCES_LINE = "Resources:";
+const MAINNET_CHAIN_ID = "1";
+// The server issues challenges valid for five minutes; allow for change.
+const MAX_CHALLENGE_LIFETIME_MS = 60 * 60 * 1000;
+const MAX_TEXT_LENGTH = 500;
+const MAX_TOKEN_LENGTH = 200;
+// Printable text on one line: no control characters (line breaks included).
+const CONTROL_CHARACTER = /\p{Cc}/u;
+const WHITESPACE = /\s/u;
+const RFC3339_TIMESTAMP =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
 const LOOPBACK_HOSTNAMES: ReadonlySet<string> = new Set([
   "localhost",
   "127.0.0.1",
@@ -51,17 +53,38 @@ const readPageLocation = (): PageLocation | null => {
   return location.origin && location.origin !== "null" ? location : null;
 };
 
-const isSameAddress = (value: string, signerAddress: string): boolean =>
+const isSameAddress = (value: string | undefined, signerAddress: string) =>
+  value !== undefined &&
   isAddress(value, { strict: false }) &&
   value.toLowerCase() === signerAddress.toLowerCase();
 
-/** An ISO timestamp line pair the server rendered with toISOString(). */
-const isChallengeLifetime = (
-  issuedAtLine: string | undefined,
-  expiresAtLine: string | undefined
-): boolean => {
-  const issuedAt = readIsoTimestamp(issuedAtLine, "Issued At: ");
-  const expiresAt = readIsoTimestamp(expiresAtLine, "Expiration Time: ");
+/** Printable text on one line, at most MAX_TEXT_LENGTH characters. */
+const isSingleLineText = (value: string | undefined): value is string =>
+  value !== undefined &&
+  value.trim().length > 0 &&
+  value.length <= MAX_TEXT_LENGTH &&
+  !CONTROL_CHARACTER.test(value);
+
+/** A non-empty value without whitespace, such as a nonce or request id. */
+const isToken = (value: string | undefined): value is string =>
+  value !== undefined &&
+  value.length > 0 &&
+  value.length <= MAX_TOKEN_LENGTH &&
+  !WHITESPACE.test(value) &&
+  !CONTROL_CHARACTER.test(value);
+
+const readTimestamp = (value: string | undefined): number | null => {
+  if (value === undefined || !RFC3339_TIMESTAMP.test(value)) {
+    return null;
+  }
+  const ms = Date.parse(value);
+  return Number.isFinite(ms) ? ms : null;
+};
+
+/** Issued before it expires, for at most MAX_CHALLENGE_LIFETIME_MS. */
+const hasBoundedLifetime = (fields: ReadonlyMap<string, string>): boolean => {
+  const issuedAt = readTimestamp(fields.get("Issued At"));
+  const expiresAt = readTimestamp(fields.get("Expiration Time"));
   return (
     issuedAt !== null &&
     expiresAt !== null &&
@@ -70,30 +93,46 @@ const isChallengeLifetime = (
   );
 };
 
-const readIsoTimestamp = (
-  line: string | undefined,
-  prefix: string
-): number | null => {
-  if (!line?.startsWith(prefix)) {
-    return null;
+/**
+ * `Key: value` lines as a map, or null when a line is not one, names a key
+ * outside `allowed`, repeats a key, or a `required` key is missing.
+ */
+const readFields = (
+  lines: readonly string[],
+  allowed: ReadonlySet<string>,
+  required: readonly string[]
+): Map<string, string> | null => {
+  const fields = new Map<string, string>();
+  for (const line of lines) {
+    const separator = line.indexOf(": ");
+    const key = separator > 0 ? line.slice(0, separator) : "";
+    if (!allowed.has(key) || fields.has(key)) {
+      return null;
+    }
+    fields.set(key, line.slice(separator + 2));
   }
-  const value = line.slice(prefix.length);
-  const ms = Date.parse(value);
-  return Number.isFinite(ms) && new Date(ms).toISOString() === value
-    ? ms
-    : null;
+  return required.every((key) => fields.has(key)) ? fields : null;
 };
 
-const readPrefixed = (
-  line: string | undefined,
-  prefix: string
-): string | null =>
-  line?.startsWith(prefix) ? line.slice(prefix.length) : null;
+const SIWE_REQUIRED_FIELDS = [
+  "URI",
+  "Version",
+  "Chain ID",
+  "Nonce",
+  "Issued At",
+  "Expiration Time",
+] as const;
+const SIWE_FIELDS: ReadonlySet<string> = new Set([
+  ...SIWE_REQUIRED_FIELDS,
+  "Not Before",
+  "Request ID",
+]);
 
 /**
  * The website's Sign-In with Ethereum challenge: issued for this page's
- * origin, which must be a 6529 app host, for the signer on mainnet, with the
- * plain sign-in statement, or with grant resources when one was requested.
+ * origin, which must be a 6529 app host, for the signer on mainnet, with a
+ * one-line statement, a nonce and a bounded lifetime. An ordinary sign-in
+ * carries no resources; a grant sign-in's resources go to the grant parser.
  */
 const isExpectedSiweChallenge = (
   lines: readonly string[],
@@ -101,37 +140,31 @@ const isExpectedSiweChallenge = (
   kind: SignInChallengeKind,
   page: PageLocation
 ): boolean => {
-  const [
-    header,
-    address,
-    beforeStatement,
-    statement,
-    afterStatement,
-    uri,
-    version,
-    chainId,
-    nonce,
-    issuedAt,
-    expiresAt,
-    ...rest
-  ] = lines;
-  const nonceValue = readPrefixed(nonce, "Nonce: ");
+  const [header, address, beforeStatement, statement, afterStatement] = lines;
+  const resourcesIndex = lines.indexOf(RESOURCES_LINE);
+  const fieldLines = lines.slice(
+    5,
+    resourcesIndex < 0 ? undefined : resourcesIndex
+  );
+  const fields = readFields(fieldLines, SIWE_FIELDS, SIWE_REQUIRED_FIELDS);
+  const notBefore = fields?.get("Not Before");
+  const requestId = fields?.get("Request ID");
   return (
+    fields !== null &&
     isAllowedGrantDomain(page.host) &&
     header === `${page.origin}${SIWE_HEADER_SUFFIX}` &&
-    address !== undefined &&
     isSameAddress(address, signerAddress) &&
     beforeStatement === "" &&
+    isSingleLineText(statement) &&
     afterStatement === "" &&
-    uri === `URI: ${page.origin}` &&
-    version === "Version: 1" &&
-    chainId === MAINNET_CHAIN_ID_LINE &&
-    nonceValue !== null &&
-    SIWE_NONCE_PATTERN.test(nonceValue) &&
-    isChallengeLifetime(issuedAt, expiresAt) &&
-    (kind === "ordinary"
-      ? statement === SIWE_SIGN_IN_STATEMENT && rest.length === 0
-      : rest[0] === "Resources:")
+    fields.get("URI") === page.origin &&
+    fields.get("Version") === "1" &&
+    fields.get("Chain ID") === MAINNET_CHAIN_ID &&
+    isToken(fields.get("Nonce")) &&
+    hasBoundedLifetime(fields) &&
+    (notBefore === undefined || readTimestamp(notBefore) !== null) &&
+    (requestId === undefined || isToken(requestId)) &&
+    (kind === "ordinary" ? resourcesIndex < 0 : resourcesIndex > 5)
   );
 };
 
@@ -156,10 +189,29 @@ const getStructuredChallengeSite = (
   return { domain: page.host, clientOrigin: page.origin };
 };
 
+const STRUCTURED_REQUIRED_FIELDS = [
+  "Version",
+  "Audience",
+  "Domain",
+  "Session Type",
+  "Wallet",
+  "Chain ID",
+  "Issued At",
+  "Expiration Time",
+  "Nonce",
+  "Action",
+  "Purpose",
+] as const;
+const STRUCTURED_FIELDS: ReadonlySet<string> = new Set([
+  ...STRUCTURED_REQUIRED_FIELDS,
+  "Client Origin",
+]);
+
 /**
- * The apps' structured "6529 Authentication" login challenge, line by line:
- * this API as audience, the app's own domain, the signer on mainnet, a login
- * action with the fixed purpose, and no other line.
+ * The apps' structured "6529 Authentication" login challenge: this API as
+ * audience, the app's own domain, client origin and session type, the signer
+ * on mainnet, a login action, a nonce, a bounded lifetime and a one-line
+ * purpose, and no other field.
  */
 const isExpectedStructuredChallenge = (
   lines: readonly string[],
@@ -168,42 +220,26 @@ const isExpectedStructuredChallenge = (
   page: PageLocation | null
 ): boolean => {
   const site = getStructuredChallengeSite(clientType, page);
-  if (!site) {
-    return false;
-  }
-  const expectedHead = [
-    "6529 Authentication",
-    "Version: 2",
-    `Audience: ${getWalletSignatureAudience()}`,
-    `Domain: ${site.domain}`,
-    ...(site.clientOrigin ? [`Client Origin: ${site.clientOrigin}`] : []),
-    `Session Type: ${clientType}`,
-  ];
-  const head = lines.slice(0, expectedHead.length);
-  const [
-    wallet,
-    chainId,
-    issuedAt,
-    expiresAt,
-    nonce,
-    action,
-    purpose,
-    ...rest
-  ] = lines.slice(expectedHead.length);
-  const walletValue = readPrefixed(wallet, "Wallet: ");
-  const nonceValue = readPrefixed(nonce, "Nonce: ");
+  const fields = readFields(
+    lines.slice(1),
+    STRUCTURED_FIELDS,
+    STRUCTURED_REQUIRED_FIELDS
+  );
   return (
-    head.every((line, index) => line === expectedHead[index]) &&
-    head.length === expectedHead.length &&
-    walletValue !== null &&
-    isSameAddress(walletValue, signerAddress) &&
-    chainId === MAINNET_CHAIN_ID_LINE &&
-    isChallengeLifetime(issuedAt, expiresAt) &&
-    nonceValue !== null &&
-    UUID_NONCE_PATTERN.test(nonceValue) &&
-    action === "Action: login" &&
-    purpose === `Purpose: ${STRUCTURED_LOGIN_PURPOSE}` &&
-    rest.length === 0
+    site !== null &&
+    fields !== null &&
+    lines[0] === "6529 Authentication" &&
+    fields.get("Version") === "2" &&
+    fields.get("Audience") === getWalletSignatureAudience() &&
+    fields.get("Domain") === site.domain &&
+    fields.get("Client Origin") === (site.clientOrigin ?? undefined) &&
+    fields.get("Session Type") === clientType &&
+    isSameAddress(fields.get("Wallet"), signerAddress) &&
+    fields.get("Chain ID") === MAINNET_CHAIN_ID &&
+    hasBoundedLifetime(fields) &&
+    isToken(fields.get("Nonce")) &&
+    fields.get("Action") === "login" &&
+    isSingleLineText(fields.get("Purpose"))
   );
 };
 
@@ -211,7 +247,9 @@ const isExpectedStructuredChallenge = (
  * Whether a sign-in challenge is one this client expects before any wallet,
  * including the in-app wallet that shows nothing, is asked to sign it: the
  * format for this client type, this deployment's host, the signer's address,
- * mainnet, and nothing else embedded.
+ * mainnet, and nothing else embedded. The contract is documented in
+ * ops/docs/developer/wallet-auth-final-structure-and-merge-rationale.md
+ * ("Sign-in challenge contract").
  */
 export function isExpectedSignInChallenge(
   message: string,
@@ -219,6 +257,9 @@ export function isExpectedSignInChallenge(
   kind: SignInChallengeKind
 ): boolean {
   const lines = message.split("\n");
+  if (lines.some((line) => CONTROL_CHARACTER.test(line))) {
+    return false;
+  }
   const page = readPageLocation();
   const clientType = getSessionClientType();
   if (clientType === "web") {

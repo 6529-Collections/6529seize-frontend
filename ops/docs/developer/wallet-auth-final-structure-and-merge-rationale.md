@@ -46,6 +46,39 @@ The backend returns:
 
 The frontend signs `signable_message` exactly as returned. It does not sign a `nonce` field, rebuild the message, trim it, normalize it, JSON-stringify it, or send client-controlled origin/session fields.
 
+### Sign-in challenge contract
+
+Before any wallet is asked to sign (the in-app wallet shows nothing), the
+client checks the challenge (`isExpectedSignInChallenge` in
+`components/auth/authNonce.ts`). A challenge that fails is not signed and the
+user sees "Couldn't verify the authentication response." Check backend changes
+against this list; wording may change freely, structure may not.
+
+- Everywhere: lines are split on `\n` only; no other control characters
+  (`\r`, tabs) anywhere. Nonces are non-empty, whitespace-free and at most 200
+  characters. Timestamps are RFC 3339 and `Expiration Time` is after
+  `Issued At` by at most one hour.
+- Website (`client_type=web`, ERC-4361): line 1 is
+  `<page origin> wants you to sign in with your Ethereum account:`, where the
+  page origin is `https://6529.io` or `https://staging.6529.io` (local hosts
+  in development builds only); line 2 is the signer's address; line 3 empty;
+  line 4 the statement, any single line of printable text up to 500
+  characters; line 5 empty. Then `Key: value` fields in any order, each at
+  most once: required `URI` (the page origin), `Version: 1`, `Chain ID: 1`,
+  `Nonce`, `Issued At`, `Expiration Time`; optional `Not Before` (timestamp)
+  and `Request ID` (no whitespace). No other field. An ordinary sign-in has no
+  `Resources:` section; a requested device-grant sign-in has one, and its
+  statement and resources must match the grant parser in
+  `lib/device-signing/grant-message.ts`.
+- 6529 Mobile and 6529 Desktop (`client_type=native|desktop`): line 1 is
+  `6529 Authentication`, then `Key: value` fields in any order, each at most
+  once, and no others: `Version: 2`, `Audience` (the API host the client
+  calls), `Domain` (`native`, or the Desktop page host `localhost:<port>`),
+  `Client Origin` (Desktop only, the page origin), `Session Type` (the client
+  type), `Wallet` (the signer), `Chain ID: 1`, `Issued At`,
+  `Expiration Time`, `Nonce`, `Action: login`, and `Purpose` (any single line
+  of printable text up to 500 characters). No `Payload Hash`.
+
 Web login posts:
 
 ```json
