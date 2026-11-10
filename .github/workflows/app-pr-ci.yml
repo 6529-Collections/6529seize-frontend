@@ -236,8 +236,10 @@ jobs:
             corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_native_competition?.required) {
-            for (const shard of [1, 2]) {
-              corePlaywrightLanes.push({ lane: "playwright-native-competition", label: `Native competitions shard ${shard}/2`, runner: defaultRunner, shard });
+            // Three shards keep each job well under its 30-minute limit; two
+            // shards of about 220 tests each reached it.
+            for (const shard of [1, 2, 3]) {
+              corePlaywrightLanes.push({ lane: "playwright-native-competition", label: `Native competitions shard ${shard}/3`, runner: defaultRunner, shard });
             }
           }
           if (plan.checks.playwright_submission_artwork?.required) {
@@ -498,7 +500,7 @@ jobs:
           NEXT_DEV_TURBOPACK_FS_CACHE: "0"
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
-          NATIVE_COMPETITION_SHARD: "${{ matrix.shard }}/2"
+          NATIVE_COMPETITION_SHARD: "${{ matrix.shard }}/3"
         run: ./bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"
 
       - name: Run submission artwork browser regression pack

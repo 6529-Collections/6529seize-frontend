@@ -414,6 +414,11 @@ false` because CI dev servers always start cold.
   shard 1 runs desktop and mobile web, and shard 2 runs the Capacitor iOS and
   Android simulators. As one serial job the pack reached the 30-minute limit,
   and a single retry could cancel it.
+- When the native competition check is selected, it runs
+  `test:e2e:native-competition-sandbox` as three parallel jobs with Playwright
+  `--shard=1/3`, `--shard=2/3` and `--shard=3/3`, so every test still runs
+  once. With two shards each job ran about 220 tests and reached the 30-minute
+  limit, which cancelled the job before its last tests.
 - Browser matrix jobs do not cancel their siblings on failure, preserving each
   job's results. All selected jobs must still pass `Installed app checks`.
 - Museum selection: `scripts/museum-release-selection.cjs` maps each changed

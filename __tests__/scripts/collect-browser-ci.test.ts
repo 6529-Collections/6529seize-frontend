@@ -65,15 +65,21 @@ it("schedules submission artwork separately without replacing competition covera
     include: [
       {
         lane: "playwright-native-competition",
-        label: "Native competitions shard 1/2",
+        label: "Native competitions shard 1/3",
         runner: "ubuntu-latest",
         shard: 1,
       },
       {
         lane: "playwright-native-competition",
-        label: "Native competitions shard 2/2",
+        label: "Native competitions shard 2/3",
         runner: "ubuntu-latest",
         shard: 2,
+      },
+      {
+        lane: "playwright-native-competition",
+        label: "Native competitions shard 3/3",
+        runner: "ubuntu-latest",
+        shard: 3,
       },
       {
         lane: "playwright-submission-artwork",
@@ -185,7 +191,7 @@ it("runs the isolated Collect and market specs on both supported browser viewpor
   expect(job.permissions).toEqual({ contents: "read", issues: "read" });
 });
 
-it("partitions the full native competition pack across two uniquely identified jobs", () => {
+it("partitions the full native competition pack across three uniquely identified jobs", () => {
   const outputs = select([], {
     playwright_native_competition: { required: true },
   });
@@ -193,15 +199,21 @@ it("partitions the full native competition pack across two uniquely identified j
     include: [
       {
         lane: "playwright-native-competition",
-        label: "Native competitions shard 1/2",
+        label: "Native competitions shard 1/3",
         runner: "ubuntu-latest",
         shard: 1,
       },
       {
         lane: "playwright-native-competition",
-        label: "Native competitions shard 2/2",
+        label: "Native competitions shard 2/3",
         runner: "ubuntu-latest",
         shard: 2,
+      },
+      {
+        lane: "playwright-native-competition",
+        label: "Native competitions shard 3/3",
+        runner: "ubuntu-latest",
+        shard: 3,
       },
     ],
   });
@@ -212,7 +224,7 @@ it("partitions the full native competition pack across two uniquely identified j
   expect(step.run).toBe(
     './bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"'
   );
-  expect(step.env?.["NATIVE_COMPETITION_SHARD"]).toBe("${{ matrix.shard }}/2");
+  expect(step.env?.["NATIVE_COMPETITION_SHARD"]).toBe("${{ matrix.shard }}/3");
   // Fresh CI checkouts never reuse Turbopack's dev filesystem cache; its
   // restore can panic and stop the dev server mid-pack.
   expect(step.env?.["NEXT_DEV_TURBOPACK_FS_CACHE"]).toBe("0");
