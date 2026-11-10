@@ -1,16 +1,18 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import type { KeyboardEvent, ReactNode, RefObject } from "react";
+import type { ReactNode, RefObject } from "react";
 import {
   useCallback,
   useEffect,
+  useEffectEvent,
   useId,
   useRef,
   useState,
   useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
+import { FocusTrap } from "focus-trap-react";
 import { EyeIcon, EyeSlashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   decryptData,
@@ -32,6 +34,14 @@ const subscribeToHydration = () => () => undefined;
 const getHydratedSnapshot = () => true;
 const getServerHydratedSnapshot = () => false;
 
+// Events a layered dialog keeps to itself, so modal layers underneath it
+// (document key handlers, click-away handlers) never react to it.
+const LAYERED_CONTAINED_EVENTS = [
+  "mousedown",
+  "pointerdown",
+  "touchstart",
+] as const;
+
 function closeDialog(dialog: HTMLDialogElement) {
   if (typeof dialog.close === "function" && dialog.open) {
     dialog.close();
@@ -41,12 +51,15 @@ function closeDialog(dialog: HTMLDialogElement) {
   dialog.removeAttribute("open");
 }
 
-function AppWalletModalShell(
+export function AppWalletModalShell(
   props: Readonly<{
     show: boolean;
     title: string;
     onHide: () => void;
     dismissDisabled?: boolean;
+    /** Above every other modal layer: their focus traps pause, key and pointer
+     * events stay inside, Escape closes only this. No React keydown inside. */
+    layered?: boolean;
     children: ReactNode;
     footer: ReactNode;
   }>
@@ -63,10 +76,15 @@ function AppWalletModalShell(
     children,
     dismissDisabled = false,
     footer,
+    layered = false,
     onHide,
     show,
     title,
   } = props;
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const requestHide = useEffectEvent(() => {
+    if (!dismissDisabled) onHide();
+  });
   useAndroidBackLayer(show && isHydrated, dialogRef, () => {
     if (!dismissDisabled) onHide();
   });
@@ -98,11 +116,12 @@ function AppWalletModalShell(
     } else {
       dialog.setAttribute("open", "");
     }
-    dialog
-      .querySelector<HTMLElement>(
-        "[autofocus], input:not([disabled]), button:not([disabled])"
-      )
-      ?.focus();
+    // Start on the first field, otherwise on the heading: never on a control
+    // that dismisses or confirms the dialog.
+    const initialFocus =
+      dialog.querySelector<HTMLElement>("[autofocus], input:not([disabled])") ??
+      titleRef.current;
+    initialFocus?.focus();
 
     return () => {
       closeDialog(dialog);
@@ -111,13 +130,42 @@ function AppWalletModalShell(
     };
   }, [isHydrated, show]);
 
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!layered || !show || !dialog) {
+      return undefined;
+    }
+
+    const keepInside = (event: Event) => {
+      event.stopPropagation();
+    };
+    const onKeyDown = (event: Event) => {
+      event.stopPropagation();
+      if ("key" in event && event.key === "Escape") {
+        event.preventDefault();
+        requestHide();
+      }
+    };
+    dialog.addEventListener("keydown", onKeyDown);
+    for (const type of LAYERED_CONTAINED_EVENTS) {
+      dialog.addEventListener(type, keepInside);
+    }
+    return () => {
+      dialog.removeEventListener("keydown", onKeyDown);
+      for (const type of LAYERED_CONTAINED_EVENTS) {
+        dialog.removeEventListener(type, keepInside);
+      }
+    };
+  }, [isHydrated, layered, show]);
+
   if (!isHydrated) {
     return null;
   }
 
-  return createPortal(
+  const dialogElement = (
     <dialog
       ref={dialogRef}
+      data-modal-layer={layered ? "top" : undefined}
       aria-modal="true"
       aria-labelledby={titleId}
       className="tailwind-scope tw-relative tw-m-0 tw-h-[100dvh] tw-max-h-none tw-w-screen tw-max-w-none tw-overflow-y-auto tw-border-none tw-bg-transparent tw-p-0 tw-text-inherit backdrop:tw-bg-black/75 backdrop:tw-backdrop-blur-sm"
@@ -140,8 +188,10 @@ function AppWalletModalShell(
         <section className="tw-my-auto tw-w-full tw-max-w-md tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-50 tw-shadow-2xl tw-shadow-black/60 tw-ring-1 tw-ring-white/5">
           <header className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-5 tw-py-4 sm:tw-px-6">
             <h2
+              ref={titleRef}
               id={titleId}
-              className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50"
+              tabIndex={-1}
+              className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 focus:tw-outline-none"
             >
               {title}
             </h2>
@@ -164,7 +214,29 @@ function AppWalletModalShell(
           </div>
         </section>
       </div>
-    </dialog>,
+    </dialog>
+  );
+
+  return createPortal(
+    layered ? (
+      <FocusTrap
+        active={show}
+        focusTrapOptions={{
+          // The dialog moves focus itself; this trap exists so that any
+          // focus trap already active underneath pauses while it is open.
+          initialFocus: false,
+          fallbackFocus: () => dialogRef.current ?? document.body,
+          allowOutsideClick: true,
+          clickOutsideDeactivates: false,
+          escapeDeactivates: false,
+          returnFocusOnDeactivate: false,
+        }}
+      >
+        {dialogElement}
+      </FocusTrap>
+    ) : (
+      dialogElement
+    ),
     document.body
   );
 }
@@ -517,6 +589,7 @@ export function UnlockAppWalletModal(
   const inputRef = useRef<HTMLInputElement>(null);
   const walletPasswordId = useId();
   const feedbackId = useId();
+  const formId = useId();
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -536,12 +609,6 @@ export function UnlockAppWalletModal(
     setUnlocking(false);
     onHide();
   }, [onHide]);
-
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && canUnlock) {
-      handleUnlock();
-    }
-  };
 
   const showUnlockError = useCallback(() => {
     setUnlocking(false);
@@ -601,6 +668,7 @@ export function UnlockAppWalletModal(
 
   return (
     <AppWalletModalShell
+      layered
       show={show}
       onHide={() => handleHide()}
       dismissDisabled={unlocking}
@@ -617,10 +685,10 @@ export function UnlockAppWalletModal(
             {t(DEFAULT_LOCALE, "appWallet.modal.cancel")}
           </Button>
           <Button
-            type="button"
+            type="submit"
+            form={formId}
             disabled={!canUnlock}
             loading={unlocking}
-            onClick={handleUnlock}
             variant="action"
             size="md"
           >
@@ -632,7 +700,14 @@ export function UnlockAppWalletModal(
         </>
       }
     >
-      <div className="tw-space-y-5">
+      <form
+        id={formId}
+        className="tw-space-y-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (canUnlock) void handleUnlock();
+        }}
+      >
         <div>
           <label
             className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
@@ -666,7 +741,6 @@ export function UnlockAppWalletModal(
                   );
                 }
               }}
-              onKeyDown={handleKeyPress}
             />
             <button
               type="button"
@@ -719,7 +793,7 @@ export function UnlockAppWalletModal(
         >
           {error || t(DEFAULT_LOCALE, "appWallet.modal.unlockHelp")}
         </p>
-      </div>
+      </form>
     </AppWalletModalShell>
   );
 }

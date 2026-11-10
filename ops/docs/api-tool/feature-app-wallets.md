@@ -100,6 +100,25 @@
 - The native `Connect -> App Wallets` list uses the same stored wallets and
   existing unlock/connect flow. The `External Wallets` destination omits these
   app-local connectors.
+- A connected app wallet never signs or sends on its own. Each message,
+  structured-data signature and transaction first opens an app dialog that
+  shows the wallet address and exactly what will be signed:
+  - a message shows its full text (raw data shows as hex),
+  - structured data shows its data type, the requesting app name, network,
+    contract and content,
+  - a transaction shows the full recipient address (or
+    `New contract deployment`), the amount in ETH, the network, and whether
+    it calls a contract (with the 4-byte function selector).
+  `Cancel` (or closing the dialog) rejects the request the same way any wallet
+  does. Signing in with an app wallet therefore shows the sign-in message once
+  for approval. Requests are shown one at a time. The dialog opens above any
+  other open dialog (for example the Terms of Service), focus starts on its
+  heading, long messages scroll in a keyboard-reachable area, and Escape
+  cancels only the confirmation. The unlock (password) dialog opens the same
+  way: focus starts on the password field, Enter or `Unlock` submits, and
+  Escape cancels only the unlock.
+- App wallets use the same Ethereum RPC providers, in the same order, as the
+  rest of the app's wallet connection.
 
 ## Edge Cases
 
