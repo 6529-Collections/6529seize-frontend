@@ -4,6 +4,9 @@
  * codes only; every user-visible string lives here.
  */
 export const E2EE_MESSAGES = {
+  "e2ee.message.imageLink": "Image link",
+  "e2ee.message.imageLinkFrom": "Image from {host}",
+  "e2ee.message.markdownTable": "Message table",
   "e2ee.dm.history.label": "Chat history",
   "e2ee.dm.history.hint":
     "Previous chats with this person stay here. Unread counts include all active histories. Messages and search belong to the selected history.",
