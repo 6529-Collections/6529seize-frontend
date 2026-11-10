@@ -288,18 +288,16 @@ jobs:
             corePlaywrightLanes.push({ lane: "playwright-drop-editing", label: "Drop editing desktop and mobile", runner: defaultRunner });
           }
           if (plan.checks.playwright_critical_shell.required) {
-            corePlaywrightLanes.push(
-              {
-                lane: "playwright-critical-shell",
-                label: "Playwright critical shell",
-                runner: defaultRunner,
-              },
-              {
-                lane: "playwright-profile-following",
-                label: "Profile editing and ratings",
-                runner: defaultRunner,
-              }
-            );
+            corePlaywrightLanes.push({
+              lane: "playwright-critical-shell",
+              label: "Playwright critical shell",
+              runner: defaultRunner,
+            });
+            // The profile pages pack is the longest critical-shell step. Two
+            // Playwright shards in parallel jobs leave room for a retry.
+            for (const shard of [1, 2]) {
+              corePlaywrightLanes.push({ lane: "playwright-critical-shell-profile", label: `Critical shell profile pages shard ${shard}/2`, runner: defaultRunner, shard });
+            }
           }
           if (plan.checks.playwright_museum.required) {
             appCheckLanes.push(
@@ -385,8 +383,8 @@ jobs:
       needs.plan.outputs.core_playwright_required == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
-    # Profile coverage has its own job budget instead of sharing the shell budget.
-    timeout-minutes: ${{ (matrix.lane == 'playwright-native-competition' || matrix.lane == 'playwright-critical-shell' || matrix.lane == 'playwright-profile-following') && 30 || 20 }}
+    # Allow full native and profile coverage to finish after dev-server bootstrap.
+    timeout-minutes: ${{ (matrix.lane == 'playwright-native-competition' || startsWith(matrix.lane, 'playwright-critical-shell')) && 30 || 20 }}
     permissions:
       contents: read
       issues: read
@@ -590,12 +588,15 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/session-recovery"
         run: ./bin/6529 run test:e2e:session-recovery-sandbox
 
+      # Each shard boots its own sandbox server; together they run every
+      # profile pages test once on all four projects.
       - name: Run own-profile Following browser regression pack
-        if: matrix.lane == 'playwright-profile-following'
+        if: matrix.lane == 'playwright-critical-shell-profile'
         env:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/profile-following"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/profile-following"
-        run: ./bin/6529 run test:e2e:profile-following-sandbox
+          PROFILE_FOLLOWING_SHARD: "${{ matrix.shard }}/2"
+        run: ./bin/6529 run test:e2e:profile-following-sandbox --shard="$PROFILE_FOLLOWING_SHARD"
 
       - name: Run profile NIC activity browser regression pack
         if: matrix.lane == 'playwright-profile-nic'
@@ -607,7 +608,7 @@ jobs:
       # A dev server killed by the kernel OOM killer exits without any output,
       # so record the container's memory peak and OOM-kill count.
       - name: Report browser lane memory pressure
-        if: always() && (matrix.lane == 'playwright-critical-shell' || matrix.lane == 'playwright-profile-following')
+        if: always() && startsWith(matrix.lane, 'playwright-critical-shell')
         run: |
           for file in memory.peak memory.max memory.events; do
             echo "== /sys/fs/cgroup/${file}"

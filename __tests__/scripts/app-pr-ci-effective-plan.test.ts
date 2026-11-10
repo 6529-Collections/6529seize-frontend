@@ -212,6 +212,18 @@ describe("effective App PR CI plan", () => {
     "components/waves/drops/WaveDropPartContentMedias.tsx",
     "components/react-query-wrapper/utils/updateAttachmentInCachedDrops.ts",
     "tests/social/wave-loading-sandbox.spec.ts",
+    "tests/social/android-back-sandbox.spec.ts",
+    "tests/social/mobile-gestures-sandbox.spec.ts",
+    "hooks/useAndroidBackLayer.ts",
+    "hooks/useHorizontalSwipe.ts",
+    "hooks/useSwipeToReply.ts",
+    "helpers/waves/drop-reply-eligibility.ts",
+    "components/waves/drops/SwipeReplyHint.tsx",
+    "components/e2ee/conversation/E2eeMessageItem.tsx",
+    "components/e2ee/conversation/E2eeConversationView.tsx",
+    "components/navigation/AndroidBackNavigation.tsx",
+    "services/capacitor/android-back-layers.ts",
+    "components/brain/mobile/useWaveListSwipeBack.ts",
     "components/brain/my-stream/MyStreamWaveChat.tsx",
     "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
     "components/waves/drops/wave-drops-all/utils/observeSerialScrollTarget.ts",
@@ -706,7 +718,7 @@ describe("Profile browser job isolation", () => {
   );
 
   it.each([true, false])(
-    "preserves shell selection in a separate profile job when required=%s",
+    "preserves shell selection and both profile shards when required=%s",
     (required) => {
       const root = fs.mkdtempSync(path.join(os.tmpdir(), "profile-ci-plan-"));
       const planDir = path.join(root, "test-results/app-pr-ci");
@@ -736,15 +748,22 @@ describe("Profile browser job isolation", () => {
         expect(output).toBeDefined();
         const matrix = JSON.parse(
           output!.slice("core_playwright_matrix=".length)
-        ) as { include: { lane: string }[] };
-        for (const lane of [
-          "playwright-critical-shell",
-          "playwright-profile-following",
-        ]) {
-          expect(
-            matrix.include.filter((job) => job.lane === lane)
-          ).toHaveLength(required ? 1 : 0);
-        }
+        ) as { include: { lane: string; shard?: number }[] };
+        expect(
+          matrix.include.filter(
+            (job) => job.lane === "playwright-critical-shell"
+          )
+        ).toHaveLength(required ? 1 : 0);
+        expect(
+          matrix.include
+            .filter((job) => job.lane === "playwright-critical-shell-profile")
+            .map((job) => job.shard)
+        ).toEqual(required ? [1, 2] : []);
+        expect(
+          matrix.include.filter(
+            (job) => job.lane === "playwright-profile-following"
+          )
+        ).toHaveLength(0);
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
       }
