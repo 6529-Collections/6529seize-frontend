@@ -12,25 +12,25 @@ import { fetchPublicUrl, type UrlGuardOptions } from "@/lib/security/urlGuard";
 // back to the page's own metadata.
 export const TOKEN_URI_MAX_BYTES = 1024 * 1024;
 const TOKEN_URI_TIMEOUT_MS = 4000;
-// Parse one document at a time, so a batch never stacks several parses.
+// A few documents at a time, so a batch of NFT links never stacks many
+// parses. Callers hold a preview slot while they wait, so the wait is short;
+// a lookup that is not admitted in time fails and the preview falls back to
+// the page's own metadata.
 const metadataAdmission = new AdmissionQueue({
+  concurrency: 4,
   maxPending: 32,
-  waitMs: 15_000,
+  waitMs: 2_000,
 });
 
 export async function fetchTokenUriJson(
   url: URL,
-  options: UrlGuardOptions,
-  signal?: AbortSignal
+  options: UrlGuardOptions
 ): Promise<unknown> {
-  const release = await metadataAdmission.acquire(signal);
+  const release = await metadataAdmission.acquire();
   try {
     const response = await fetchPublicUrl(
       url,
-      {
-        headers: { Accept: "application/json" },
-        ...(signal ? { signal } : {}),
-      },
+      { headers: { Accept: "application/json" } },
       {
         ...options,
         timeoutMs: TOKEN_URI_TIMEOUT_MS,

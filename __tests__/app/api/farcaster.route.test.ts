@@ -492,7 +492,7 @@ describe("farcaster API route", () => {
         nextUrl: new URL("https://api.local/farcaster"),
       }) as any;
 
-    for (let index = 0; index < 300; index++) {
+    for (let index = 0; index < 1200; index++) {
       expect((await GET(fromClient("8.8.8.8"))).status).toBe(400);
     }
     const limited = await GET(fromClient("8.8.8.8"));

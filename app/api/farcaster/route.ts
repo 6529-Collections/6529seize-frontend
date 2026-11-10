@@ -117,27 +117,17 @@ const frameCache = new LruTtlCache<
 });
 
 const createAbortController = (
-  timeoutMs: number,
-  callerSignal?: AbortSignal
+  timeoutMs: number
 ): {
   controller: AbortController;
   cancel: () => void;
 } => {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-  const onCallerAbort = () => controller.abort();
-  if (callerSignal?.aborted) {
-    controller.abort();
-  } else {
-    callerSignal?.addEventListener("abort", onCallerAbort, { once: true });
-  }
 
   return {
     controller,
-    cancel: () => {
-      clearTimeout(timeoutId);
-      callerSignal?.removeEventListener("abort", onCallerAbort);
-    },
+    cancel: () => clearTimeout(timeoutId),
   };
 };
 
@@ -163,14 +153,10 @@ const buildWarpcastUrl = (
 
 const fetchWarpcastJson = async <T>(
   path: string,
-  params: Record<string, string | undefined>,
-  signal?: AbortSignal
+  params: Record<string, string | undefined>
 ): Promise<T | null> => {
   const url = buildWarpcastUrl(path, params);
-  const { controller, cancel } = createAbortController(
-    FETCH_TIMEOUT_MS,
-    signal
-  );
+  const { controller, cancel } = createAbortController(FETCH_TIMEOUT_MS);
 
   try {
     const response = await fetch(url, {
@@ -215,11 +201,9 @@ const fetchCastPreview = async (
   }
 
   const response = await withPreviewFetchSlot(signal, () =>
-    fetchWarpcastJson<WarpcastCastResponse>(
-      "/v2/cast",
-      { hash: identifier.castHash },
-      signal
-    )
+    fetchWarpcastJson<WarpcastCastResponse>("/v2/cast", {
+      hash: identifier.castHash,
+    })
   );
 
   const mapped = mapWarpcastCast(response, identifier.canonicalUrl);
@@ -237,11 +221,9 @@ const fetchProfilePreview = async (
   }
 
   const response = await withPreviewFetchSlot(signal, () =>
-    fetchWarpcastJson<WarpcastUserResponse>(
-      "/v2/user-by-username",
-      { username: identifier.username },
-      signal
-    )
+    fetchWarpcastJson<WarpcastUserResponse>("/v2/user-by-username", {
+      username: identifier.username,
+    })
   );
 
   const mapped = mapWarpcastUser(response, identifier.canonicalUrl);
@@ -259,11 +241,9 @@ const fetchChannelPreview = async (
   }
 
   const response = await withPreviewFetchSlot(signal, () =>
-    fetchWarpcastJson<WarpcastChannelResponse>(
-      "/v2/channel",
-      { channelId: identifier.channel },
-      signal
-    )
+    fetchWarpcastJson<WarpcastChannelResponse>("/v2/channel", {
+      channelId: identifier.channel,
+    })
   );
 
   const mapped = mapWarpcastChannel(response, identifier.canonicalUrl);
@@ -304,10 +284,7 @@ type FetchHtmlResult =
  * Fetches frame HTML with public URL guarding. Frame metadata lives in the
  * head, so a long page is read only up to the cap and parsed from that.
  */
-const fetchHtml = async (
-  url: URL,
-  signal?: AbortSignal
-): Promise<FetchHtmlResult | null> => {
+const fetchHtml = async (url: URL): Promise<FetchHtmlResult | null> => {
   try {
     const response = await fetchPublicUrl(
       url,
@@ -316,7 +293,6 @@ const fetchHtml = async (
         headers: {
           accept: HTML_ACCEPT_HEADER,
         },
-        ...(signal ? { signal } : {}),
       },
       {
         ...PUBLIC_URL_OPTIONS,
@@ -377,9 +353,7 @@ const detectFramePreview = async (
     return cached;
   }
 
-  const result = await withPreviewFetchSlot(signal, () =>
-    fetchHtml(url, signal)
-  );
+  const result = await withPreviewFetchSlot(signal, () => fetchHtml(url));
   if (!result) {
     frameCache.set(url.toString(), null);
     return null;

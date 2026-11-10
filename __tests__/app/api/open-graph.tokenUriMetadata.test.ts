@@ -14,7 +14,6 @@ import {
   TOKEN_URI_MAX_BYTES,
 } from "@/app/api/open-graph/tokenUriMetadata";
 import { BodyTooLargeError } from "@/lib/fetch/limitedBody";
-import { AdmissionQueueError } from "@/lib/fetch/admissionQueue";
 import { PUBLIC_URL_OPTIONS } from "@/app/api/open-graph/publicUrlOptions";
 
 const lookupAll: (
@@ -150,37 +149,49 @@ describe("NFT metadata transport", () => {
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
-  it("stops waiting for admission when the caller goes away", async () => {
-    const stream = new TransformStream<Uint8Array, Uint8Array>();
-    const writer = stream.writable.getWriter();
-    mockFetch.mockResolvedValueOnce(new Response(stream.readable));
-    const admitted = fetchTokenUriJson(url, {});
-    const controller = new AbortController();
-    const queued = fetchTokenUriJson(url, {}, controller.signal);
-    controller.abort();
-    await expect(queued).rejects.toBeInstanceOf(AdmissionQueueError);
-    await writer.write(new TextEncoder().encode('{"name":"Artwork"}'));
-    await writer.close();
-    await expect(admitted).resolves.toEqual({ name: "Artwork" });
-    expect(mockFetch).toHaveBeenCalledTimes(1);
+  /** Starts four lookups whose bodies stay open until `finish` is called. */
+  const holdFourLookups = () => {
+    const writers = Array.from({ length: 4 }, () => {
+      const stream = new TransformStream<Uint8Array, Uint8Array>();
+      mockFetch.mockResolvedValueOnce(new Response(stream.readable));
+      return stream.writable.getWriter();
+    });
+    const lookups = writers.map(() => fetchTokenUriJson(url, {}));
+    const finish = async (index: number) => {
+      await writers[index]?.write(
+        new TextEncoder().encode(`{"name":"Artwork ${index}"}`)
+      );
+      await writers[index]?.close();
+    };
+    return { lookups, finish };
+  };
+
+  it("reads up to four documents at once and admits a waiting lookup when one ends", async () => {
+    const { lookups, finish } = holdFourLookups();
+    mockFetch.mockResolvedValueOnce(new Response('{"name":"Next artwork"}'));
+    const queued = fetchTokenUriJson(url, {});
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(mockFetch).toHaveBeenCalledTimes(4);
+
+    await finish(0);
+    await expect(lookups[0]).resolves.toEqual({ name: "Artwork 0" });
+    await expect(queued).resolves.toEqual({ name: "Next artwork" });
+    expect(mockFetch).toHaveBeenCalledTimes(5);
+    await Promise.all([finish(1), finish(2), finish(3)]);
+    await Promise.all(lookups);
   });
 
-  it("waits for the active metadata body before fetching the next preview", async () => {
-    const stream = new TransformStream<Uint8Array, Uint8Array>();
-    const writer = stream.writable.getWriter();
-    mockFetch
-      .mockResolvedValueOnce(new Response(stream.readable))
-      .mockResolvedValueOnce(new Response('{"name":"Next artwork"}'));
-    const admitted = fetchTokenUriJson(url, {});
-    const queued = fetchTokenUriJson(url, {});
-    await writer.write(new TextEncoder().encode('{"name":"Artwork"}'));
-    expect(mockFetch).toHaveBeenCalledTimes(1);
-    await writer.close();
-    await expect(admitted).resolves.toEqual({ name: "Artwork" });
-    await expect(queued).resolves.toEqual({
-      name: "Next artwork",
+  it("gives up after a short wait for a metadata slot, so the preview can fall back", async () => {
+    const { lookups, finish } = holdFourLookups();
+    const started = Date.now();
+    await expect(fetchTokenUriJson(url, {})).rejects.toMatchObject({
+      name: "AdmissionQueueError",
+      kind: "timeout",
     });
-    expect(mockFetch).toHaveBeenCalledTimes(2);
+    expect(Date.now() - started).toBeLessThan(5_000);
+    expect(mockFetch).toHaveBeenCalledTimes(4);
+    await Promise.all([0, 1, 2, 3].map(finish));
+    await Promise.all(lookups);
   });
 
   it("releases metadata admission after a failed fetch", async () => {

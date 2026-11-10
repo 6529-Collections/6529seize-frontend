@@ -144,8 +144,9 @@ Only `https://` URLs match. Host must be apex or `www`.
   types remain supported. Metadata that embeds artwork larger than that limit
   yields no image from this lookup, so the card uses the page's own image or
   the minimal preview.
-- NFT token metadata is read one document at a time per server process. Up to
-  32 other lookups can wait for at most 15 seconds before their download starts.
+- NFT token metadata is read up to four documents at a time per server
+  process. Up to 32 other lookups can wait for at most 2 seconds before their
+  download starts.
   If that queue is full or the wait expires, the existing preview fallback is
   used; refreshing later can retry the metadata lookup.
 - Large previews can still be returned, but previews exceeding the in-memory

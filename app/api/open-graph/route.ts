@@ -46,7 +46,9 @@ import { PUBLIC_URL_OPTIONS } from "./publicUrlOptions";
 import {
   PREVIEW_BUSY_HEADERS,
   PREVIEW_BUSY_MESSAGE,
+  PREVIEW_CLIENT_LIMIT_MESSAGE,
   PREVIEW_HTML_MAX_BYTES,
+  chargePreviewUrls,
   enforcePreviewClientLimit,
   isPreviewBusyError,
   previewBusyResponse,
@@ -63,7 +65,10 @@ const BATCH_REQUEST_MAX_BYTES = 64 * 1024;
 
 type PreviewContext = {
   readonly apiAuth?: string | null | undefined;
-  /** Aborts outbound work when the caller disconnects. */
+  /**
+   * Stops a caller's wait for a fetch slot when it disconnects. Admitted work
+   * ignores it, so it completes and is cached for the next viewer.
+   */
   readonly signal?: AbortSignal | undefined;
 };
 
@@ -205,16 +210,17 @@ function looksLikeHtmlDocument(value: string): boolean {
 /**
  * Fetches remote generic preview content through the public URL guard.
  */
-async function fetchGenericResponse(
-  url: URL,
-  signal?: AbortSignal
-): Promise<Response> {
-  const response = await fetchPublicUrl(url, signal ? { signal } : {}, {
-    ...PUBLIC_URL_OPTIONS,
-    timeoutMs: FETCH_TIMEOUT_MS,
-    maxRedirects: MAX_REDIRECTS,
-    buildRequestInit: buildHostAwareRequestInit,
-  });
+async function fetchGenericResponse(url: URL): Promise<Response> {
+  const response = await fetchPublicUrl(
+    url,
+    {},
+    {
+      ...PUBLIC_URL_OPTIONS,
+      timeoutMs: FETCH_TIMEOUT_MS,
+      maxRedirects: MAX_REDIRECTS,
+      buildRequestInit: buildHostAwareRequestInit,
+    }
+  );
 
   ensureSuccessfulResponse(response);
 
@@ -225,10 +231,9 @@ async function fetchGenericResponse(
  * Fetches remote OpenGraph HTML through the public URL guard and byte cap.
  */
 async function fetchHtml(
-  url: URL,
-  signal?: AbortSignal
+  url: URL
 ): Promise<{ html: string; contentType: string | null; finalUrl: string }> {
-  const response = await fetchGenericResponse(url, signal);
+  const response = await fetchGenericResponse(url);
   return extractHtmlResponse(response, url);
 }
 
@@ -427,11 +432,11 @@ function handlePreviewError(error: unknown) {
   return NextResponse.json({ error: message }, { status: 502 });
 }
 
-function createGenericPlan(url: URL, signal?: AbortSignal): PreviewPlan {
+function createGenericPlan(url: URL): PreviewPlan {
   return {
     cacheKey: `generic:${url.toString()}`,
     execute: async () => {
-      const response = await fetchGenericResponse(url, signal);
+      const response = await fetchGenericResponse(url);
       const finalUrlInstance = getFetchedFinalUrl(response, url);
       await assertPublicUrl(finalUrlInstance, PUBLIC_URL_OPTIONS);
 
@@ -519,34 +524,33 @@ async function resolveLinkPreview(
     await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
   }
 
-  const fetchPreviewHtml = (url: URL) => fetchHtml(url, signal);
   const assertPreviewUrl = (url: URL) =>
     assertPublicUrl(url, PUBLIC_URL_OPTIONS);
   const fetchTokenMetadata = (url: URL) =>
-    fetchTokenUriJson(url, PUBLIC_URL_OPTIONS, signal);
+    fetchTokenUriJson(url, PUBLIC_URL_OPTIONS);
   const plan =
     firstParty6529Plan ??
     createYoutubePlan(targetUrl) ??
     createManifoldPlan(targetUrl, {
-      fetchHtml: fetchPreviewHtml,
+      fetchHtml,
       assertPublicUrl: assertPreviewUrl,
     }) ??
     createFoundationPlan(targetUrl, {
-      fetchHtml: fetchPreviewHtml,
+      fetchHtml,
       assertPublicUrl: assertPreviewUrl,
     }) ??
     createOpenSeaPlan(targetUrl, {
-      fetchHtml: fetchPreviewHtml,
+      fetchHtml,
       assertPublicUrl: assertPreviewUrl,
       fetchTokenMetadata,
     }) ??
     createTransientPlan(targetUrl, {
-      fetchHtml: fetchPreviewHtml,
+      fetchHtml,
       assertPublicUrl: assertPreviewUrl,
       fetchTokenMetadata,
     }) ??
     createCompoundPlan(targetUrl) ??
-    createGenericPlan(targetUrl, signal);
+    createGenericPlan(targetUrl);
 
   if (firstParty6529Plan) {
     return executeFirstParty6529Plan(firstParty6529Plan, targetUrl, signal);
@@ -671,7 +675,7 @@ async function executeFirstParty6529Plan(
       throw error;
     }
     await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
-    const fallbackPlan = createGenericPlan(targetUrl, signal);
+    const fallbackPlan = createGenericPlan(targetUrl);
     return executePlan(fallbackPlan, signal);
   }
 }
@@ -710,27 +714,32 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Each URL is charged, so batching does not stretch the budget.
-  const rateLimited = enforcePreviewClientLimit(
+  // Each URL is charged, so batching does not stretch the budget. A batch
+  // larger than the remaining budget is served up to that budget.
+  const { allowed, limited } = chargePreviewUrls(
     request,
     Math.max(1, urls.length)
   );
-  if (rateLimited) {
-    return rateLimited;
+  if (limited) {
+    return limited;
   }
+  const admittedUrls = urls.slice(0, allowed);
 
   const context: PreviewContext = {
     apiAuth: getRequestApiAuth(request),
     signal: request.signal,
   };
   const batchResults = await mapWithConcurrency(
-    urls,
+    admittedUrls,
     BATCH_CONCURRENCY,
     (url) => resolveBatchUrl(url, context)
   );
   const results: Record<string, LinkPreviewResponse> = {};
   const errors: Record<string, string> = {};
   let busy = false;
+  for (const url of urls.slice(allowed)) {
+    errors[url] = PREVIEW_CLIENT_LIMIT_MESSAGE;
+  }
 
   for (const result of batchResults) {
     if (result.data) {

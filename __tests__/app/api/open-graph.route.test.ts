@@ -2453,7 +2453,7 @@ describe("open-graph API route", () => {
   });
 
   describe("fair-use limits", () => {
-    const CLIENT_URL_BUDGET = 300;
+    const CLIENT_URL_BUDGET = 1200;
     const FETCH_SLOTS = 32;
     const FETCH_QUEUE = 256;
 
@@ -2496,24 +2496,30 @@ describe("open-graph API route", () => {
       return init?.headers?.["Retry-After"];
     };
 
-    it("charges every URL in a batch against one per-client budget", async () => {
+    it("charges every URL in a batch against one per-client budget and serves a batch up to what is left", async () => {
       usePlan(async (url) => ({ data: { title: url.toString() } }));
       const cached = "https://opensea.io/item/ethereum/art/1";
+      const second = "https://opensea.io/item/ethereum/art/2";
 
       for (let index = 0; index < CLIENT_URL_BUDGET - 1; index++) {
         expect((await GET(getFrom(cached, "8.8.8.8"))).status).toBe(200);
       }
 
-      // One unit is left: a two-URL batch does not fit, a one-URL batch does.
-      const batch = await POST(
-        postFrom([cached, "https://opensea.io/item/ethereum/art/2"], "8.8.8.8")
-      );
-      expect(batch.status).toBe(429);
+      // One unit is left: a two-URL batch is served for its first URL only.
+      const batch = await POST(postFrom([cached, second], "8.8.8.8"));
+      expect(batch.status).toBe(200);
       expect(await batch.json()).toEqual({
+        results: { [cached]: { title: cached } },
+        errors: { [second]: "Too many link preview requests" },
+      });
+
+      // Nothing is left: the next batch and GET are refused whole.
+      const refused = await POST(postFrom([cached], "8.8.8.8"));
+      expect(refused.status).toBe(429);
+      expect(await refused.json()).toEqual({
         error: "Too many link preview requests",
       });
       expect(Number(lastRetryAfter())).toBeGreaterThan(0);
-      expect((await POST(postFrom([cached], "8.8.8.8"))).status).toBe(200);
       expect((await GET(getFrom(cached, "8.8.8.8"))).status).toBe(429);
 
       // Another client keeps its own budget.
@@ -2586,7 +2592,32 @@ describe("open-graph API route", () => {
       expect(execute).toHaveBeenCalledTimes(FETCH_SLOTS);
     });
 
-    it("fetches preview pages only on ports 80 and 443, with the caller's abort signal", async () => {
+    it("finishes and caches admitted work after the caller goes away", async () => {
+      let finish: () => void = () => undefined;
+      const execute = jest.fn(
+        () =>
+          new Promise((resolve) => {
+            finish = () => resolve({ data: { title: "slow site" } });
+          })
+      );
+      usePlan(execute);
+      const target = "https://opensea.io/item/ethereum/slow";
+      const controller = new AbortController();
+      const abandoned = GET(getFrom(target, undefined, controller.signal));
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(execute).toHaveBeenCalledTimes(1);
+
+      controller.abort();
+      finish();
+      await abandoned;
+
+      const later = await GET(getFrom(target));
+      expect(later.status).toBe(200);
+      expect(await later.json()).toEqual({ title: "slow site" });
+      expect(execute).toHaveBeenCalledTimes(1);
+    });
+
+    it("fetches preview pages only on ports 80 and 443, without the caller's abort signal", async () => {
       const controller = new AbortController();
       mockFetchPublicUrl.mockResolvedValueOnce(
         createResponse(200, {
@@ -2603,9 +2634,7 @@ describe("open-graph API route", () => {
 
       expect(response.status).toBe(200);
       const [, init, options] = mockFetchPublicUrl.mock.calls[0] ?? [];
-      expect(init).toEqual(
-        expect.objectContaining({ signal: controller.signal })
-      );
+      expect(init).not.toHaveProperty("signal");
       expect(options).toEqual(
         expect.objectContaining({ allowedPorts: [80, 443] })
       );
@@ -2619,12 +2648,14 @@ describe("open-graph API route", () => {
       const actualGuard = jest.requireActual(
         "@/lib/security/urlGuard"
       ) as typeof import("@/lib/security/urlGuard");
-      mockFetchPublicUrl.mockImplementationOnce(async (_url, _init, options) => {
-        // The redirect target is checked with the route's own options.
-        const target = new URL("https://safe.example:8080/next");
-        await actualGuard.assertPublicUrl(target, options);
-        return createResponse(200, { url: target.toString() });
-      });
+      mockFetchPublicUrl.mockImplementationOnce(
+        async (_url, _init, options) => {
+          // The redirect target is checked with the route's own options.
+          const target = new URL("https://safe.example:8080/next");
+          await actualGuard.assertPublicUrl(target, options);
+          return createResponse(200, { url: target.toString() });
+        }
+      );
 
       const response = await GET(getFrom("https://safe.example/page"));
 

@@ -112,7 +112,7 @@ const createRequest = (
 
 // Upstream fetches admitted at once, and callers that may wait for one.
 const FETCH_SLOTS = 4;
-const FETCH_QUEUE = 64;
+const FETCH_QUEUE = 256;
 
 /** Makes the next `count` upstream fetches hang until the returned call. */
 const holdUpstreams = (count: number): (() => void) => {
@@ -390,24 +390,29 @@ describe("/api/og-metadata/image", () => {
     request.nextUrl.searchParams.set("animated", "1");
     const response = await GET(request);
     expect(response.status).toBe(200);
-    expect(response.headers.get("content-type")).toBe("image/png");
+    // An opaque first frame is a JPEG still.
+    expect(response.headers.get("content-type")).toBe("image/jpeg");
     expect(mockSharp).toHaveBeenCalledTimes(1);
   });
 
-  it("preserves the GIF first-frame colors in a static PNG", async () => {
+  it("preserves the GIF first-frame colors in a static still", async () => {
     mockImageResponse(GIF_2_FRAME.byteLength, "image/gif", GIF_2_FRAME);
 
     const response = await GET(createRequest("https://cdn.test/art.gif"));
     const output = actualSharp(Buffer.from(await response.arrayBuffer()));
     expect(await output.metadata()).toMatchObject({
-      format: "png",
+      format: "jpeg",
       width: 2,
       height: 2,
     });
     const { data, info } = await output
       .raw()
       .toBuffer({ resolveWithObject: true });
-    expect([...data.subarray(0, 3)]).toEqual([255, 0, 0]);
+    // JPEG is lossy: the first pixel stays red within a small tolerance.
+    const [red = 0, green = 255, blue = 255] = data.subarray(0, 3);
+    expect(red).toBeGreaterThan(240);
+    expect(green).toBeLessThan(16);
+    expect(blue).toBeLessThan(16);
     expect(info.width).toBe(2);
   });
 
@@ -499,68 +504,143 @@ describe("/api/og-metadata/image", () => {
     }
   });
 
-  it("decodes one image at a time while the next image downloads", async () => {
-    const image = actualSharp(PNG_1X1);
-    const bufferOutput: { toBuffer: () => Promise<Buffer> } = image;
-    const originalToBuffer = bufferOutput.toBuffer.bind(image);
-    const workOrder: string[] = [];
-    let finishProcessing: () => void = () => {
-      throw new Error("Image processing has not started.");
-    };
-    let processingStarted: () => void = () => {
-      throw new Error("Image processing wait has not started.");
-    };
-    const started = new Promise<void>((resolve) => {
-      processingStarted = resolve;
+  it("decodes at most three images at once while later images download", async () => {
+    let decodesStarted = 0;
+    let openGate: () => void = () => undefined;
+    const gate = new Promise<void>((resolve) => {
+      openGate = resolve;
     });
-    const continueProcessing = new Promise<void>((resolve) => {
-      finishProcessing = resolve;
-    });
-    jest.spyOn(bufferOutput, "toBuffer").mockImplementationOnce(async () => {
-      workOrder.push("first-decode-start");
-      processingStarted();
-      await continueProcessing;
-      const bytes = await originalToBuffer();
-      workOrder.push("first-decode-complete");
-      return bytes;
-    });
-    mockSharp.mockReturnValueOnce(image);
-    mockImageResponse(PNG_1X1.byteLength);
-    const pending = GET(createRequest("https://cdn.test/processing.png"));
-    await started;
-    mockFetchPublicUrl.mockImplementationOnce(async () => {
-      workOrder.push("second-fetch");
-      return {
-        body: createReadableBody(PNG_1X1),
-        headers: createHeaders({ "content-type": "image/png" }),
-        ok: true,
-        status: 200,
-      };
-    });
-    const waiting = GET(createRequest("https://cdn.test/another.png"));
-    await settle();
+    mockSharp.mockImplementation(((
+      input?: Parameters<typeof sharp>[0],
+      options?: Parameters<typeof sharp>[1]
+    ) => {
+      const image = actualSharp(input, options);
+      const output: { toBuffer: () => Promise<Buffer> } = image;
+      const originalToBuffer = output.toBuffer.bind(image);
+      jest.spyOn(output, "toBuffer").mockImplementation(async () => {
+        decodesStarted += 1;
+        await gate;
+        return originalToBuffer();
+      });
+      return image;
+    }) as typeof sharp);
+    mockFetchPublicUrl.mockImplementation(async () => ({
+      body: createReadableBody(PNG_1X1),
+      headers: createHeaders({ "content-type": "image/png" }),
+      ok: true,
+      status: 200,
+    }));
+
+    const responses = Array.from({ length: 4 }, (_value, index) =>
+      GET(createRequest(`https://cdn.test/decode-${index}.png`))
+    );
+    // Sharp reads metadata on its own threads before the encode starts.
+    for (let tries = 0; tries < 200 && decodesStarted < 3; tries++) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     try {
-      // The second image downloads, then waits for the decoder.
-      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
-      expect(mockSharp).toHaveBeenCalledTimes(1);
+      // All four downloaded; the fourth waits for a decode slot.
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(4);
+      expect(decodesStarted).toBe(3);
+      expect(mockSharp).toHaveBeenCalledTimes(3);
     } finally {
-      finishProcessing();
-      expect((await pending).status).toBe(200);
-      const secondResponse = await waiting;
-      expect(secondResponse.status).toBe(200);
-      expect(
-        await actualSharp(
-          Buffer.from(await secondResponse.arrayBuffer())
-        ).metadata()
-      ).toMatchObject({ format: "png", width: 1, height: 1 });
+      openGate();
     }
-    expect(workOrder).toEqual([
-      "first-decode-start",
-      "second-fetch",
-      "first-decode-complete",
-    ]);
-    expect(mockSharp).toHaveBeenCalledTimes(2);
+    const settled = await Promise.all(responses);
+    expect(settled.every((response) => response.status === 200)).toBe(true);
+    expect(mockSharp).toHaveBeenCalledTimes(4);
+  });
+
+  it("encodes opaque stills as JPEG and keeps PNG for images with transparency", async () => {
+    const opaque = await actualSharp({
+      create: {
+        width: 4,
+        height: 3,
+        channels: 3,
+        background: { r: 200, g: 40, b: 40 },
+      },
+    })
+      .png()
+      .toBuffer();
+    const transparent = await actualSharp({
+      create: {
+        width: 4,
+        height: 3,
+        channels: 4,
+        background: { r: 200, g: 40, b: 40, alpha: 0.5 },
+      },
+    })
+      .png()
+      .toBuffer();
+    mockImageResponse(opaque.byteLength, "image/png", opaque);
+    mockImageResponse(transparent.byteLength, "image/png", transparent);
+
+    const still = await GET(createRequest("https://cdn.test/opaque.png"));
+    expect(still.status).toBe(200);
+    expect(still.headers.get("content-type")).toBe("image/jpeg");
+    expect(
+      await actualSharp(Buffer.from(await still.arrayBuffer())).metadata()
+    ).toMatchObject({ format: "jpeg", width: 4, height: 3 });
+
+    const alpha = await GET(createRequest("https://cdn.test/transparent.png"));
+    expect(alpha.status).toBe(200);
+    expect(alpha.headers.get("content-type")).toBe("image/png");
+    expect(
+      await actualSharp(Buffer.from(await alpha.arrayBuffer())).metadata()
+    ).toMatchObject({ format: "png", hasAlpha: true });
+  });
+
+  it("finishes and caches an admitted image after every caller has left", async () => {
+    let deliver: () => void = () => undefined;
+    mockFetchPublicUrl.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          deliver = () =>
+            resolve({
+              body: createReadableBody(PNG_1X1),
+              headers: createHeaders({ "content-type": "image/png" }),
+              ok: true,
+              status: 200,
+            });
+        })
+    );
+    const controller = new AbortController();
+    const abandoned = GET(
+      createRequest("https://cdn.test/slow-host.png", "1108", controller.signal)
+    );
+    await settle();
+    controller.abort();
+    expect((await abandoned).status).toBe(503);
+
+    // Wait for the admitted job to finish its encode, then for it to store.
+    let encoded: () => void = () => undefined;
+    const encodeDone = new Promise<void>((resolve) => {
+      encoded = resolve;
+    });
+    mockSharp.mockImplementationOnce(((
+      input?: Parameters<typeof sharp>[0],
+      options?: Parameters<typeof sharp>[1]
+    ) => {
+      const image = actualSharp(input, options);
+      const output: { toBuffer: () => Promise<Buffer> } = image;
+      const originalToBuffer = output.toBuffer.bind(image);
+      jest.spyOn(output, "toBuffer").mockImplementation(async () => {
+        const bytes = await originalToBuffer();
+        encoded();
+        return bytes;
+      });
+      return image;
+    }) as typeof sharp);
+    deliver();
+    await encodeDone;
+    await settle();
+
+    const later = await GET(createRequest("https://cdn.test/slow-host.png"));
+    expect(later.status).toBe(200);
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+    expect(mockSharp).toHaveBeenCalledTimes(1);
   });
 
   it("bounds pending image requests and removes aborted waiters before any download", async () => {
@@ -640,7 +720,7 @@ describe("/api/og-metadata/image", () => {
         nextUrl: new URL(
           `http://localhost:3001/api/og-metadata/image?url=${encodeURIComponent(
             `https://cdn.test/cached.png?v=${index % 2}`
-          )}&w=${(index % 1200) + 1}&n=${index}`
+          )}&w=${(index % 2) + 600}&n=${index}`
         ),
       }) as NextRequest;
     mockFetchPublicUrl.mockImplementation(async () => ({
@@ -650,10 +730,10 @@ describe("/api/og-metadata/image", () => {
       status: 200,
     }));
 
-    for (let index = 0; index < 600; index++) {
+    for (let index = 0; index < 3000; index++) {
       expect((await GET(fromClient(index))).status).toBe(200);
     }
-    const limited = await GET(fromClient(600));
+    const limited = await GET(fromClient(3000));
     expect(limited.status).toBe(429);
     expect(limited.headers.get("retry-after")).toEqual(expect.any(String));
     await expect(limited.json()).resolves.toEqual({
@@ -679,7 +759,7 @@ describe("/api/og-metadata/image", () => {
     const response = await GET(request);
 
     expect(response.status).toBe(200);
-    expect(response.headers.get("content-type")).toBe("image/png");
+    expect(response.headers.get("content-type")).toBe("image/jpeg");
     expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
     expect(mockFetchPublicUrl.mock.calls[1]?.[1]).toMatchObject({
       headers: expect.objectContaining({

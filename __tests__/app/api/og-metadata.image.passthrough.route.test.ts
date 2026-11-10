@@ -200,7 +200,7 @@ describe("/api/og-metadata/image", () => {
       expect(mockSharp).not.toHaveBeenCalled();
       expect(mockFetchPublicUrl).toHaveBeenCalledWith(
         new URL(GIPHY_MP4),
-        { headers: { accept: "video/mp4" }, signal: expect.any(AbortSignal) },
+        { headers: { accept: "video/mp4" } },
         expect.objectContaining({
           timeoutMs: 7000,
           policy: { allowedHosts: GIPHY_MEDIA_HOSTS },
@@ -452,7 +452,7 @@ describe("/api/og-metadata/image", () => {
     });
 
     it("lets identical queued requests share one admission slot and never caches busy answers", async () => {
-      // Four fetch slots, and 64 callers may wait for one.
+      // Four fetch slots, and 256 callers may wait for one.
       const rejecters: Array<(error: Error) => void> = [];
       for (let index = 0; index < 4; index++) {
         mockFetchPublicUrl.mockImplementationOnce(
@@ -469,18 +469,18 @@ describe("/api/og-metadata/image", () => {
       const shared = Array.from({ length: 40 }, () =>
         GET(createRequest("https://cdn.test/shared.png"))
       );
-      const others = Array.from({ length: 63 }, (_value, index) =>
+      const others = Array.from({ length: 255 }, (_value, index) =>
         GET(createRequest(`https://cdn.test/other-${index}.png`))
       );
       await Promise.resolve();
 
-      // 40 identical waiters hold one place, so 63 more fill the queue of 64.
+      // 40 identical waiters hold one place, so 255 more fill the queue of 256.
       const full = await GET(createRequest("https://cdn.test/full.png"));
       expect(full.status).toBe(503);
       expect(full.headers.get("cache-control")).toBe("no-store");
 
       rejecters.forEach((reject) => reject(new Error("Upstream failed")));
-      for (let index = 0; index < 64; index++) {
+      for (let index = 0; index < 256; index++) {
         mockUpstream({ body: GIF_2_FRAME, contentType: "image/gif" });
       }
       const activeResponses = await Promise.all(active);
@@ -492,8 +492,8 @@ describe("/api/og-metadata/image", () => {
         true
       );
       await Promise.all(others);
-      // 4 active + 1 shared + 63 others; the busy answer was not cached.
-      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(68);
+      // 4 active + 1 shared + 255 others; the busy answer was not cached.
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(260);
       mockUpstream({ body: GIF_2_FRAME, contentType: "image/gif" });
       expect(
         (await GET(createRequest("https://cdn.test/full.png"))).status
@@ -562,13 +562,14 @@ describe("/api/og-metadata/image", () => {
       );
 
       expect(response.status).toBe(200);
-      expect(response.headers.get("content-type")).toBe("image/png");
+      // An opaque first frame is a JPEG still.
+      expect(response.headers.get("content-type")).toBe("image/jpeg");
       expect(response.headers.get("cache-control")).toBe("public, max-age=300");
       expect(
         await actualSharp(
           (response as unknown as MockNextResponse).bytes()
         ).metadata()
-      ).toMatchObject({ format: "png", width: 2, height: 2 });
+      ).toMatchObject({ format: "jpeg", width: 2, height: 2 });
     });
 
     it("retries the animation after the five-minute stand-in expires", async () => {

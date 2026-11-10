@@ -25,10 +25,9 @@ const enforceUnlockRateLimit = createClientRateLimiter({
   errorMessage: "Too many password attempts",
 });
 
-// Wrong passwords from all addresses together, per server process: spreading
-// guesses over many addresses still meets this budget. Once it is spent the
-// form answers "wait" to everyone until the window ends; right passwords
-// never use it up.
+// Wrong passwords from all addresses share one budget per server process.
+// Once it is spent the form answers "wait" to everyone until the window
+// ends; right passwords never use it up.
 const MAX_FAILED_UNLOCKS_PER_WINDOW = 100;
 const failedUnlocks = { count: 0, resetAt: 0 };
 

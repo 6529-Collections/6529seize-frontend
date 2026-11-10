@@ -154,7 +154,7 @@ describe("createClientRateLimiter", () => {
     ).toBe(1);
   });
 
-  it("buckets IPv6 addresses with a dotted tail by their /56", () => {
+  it("buckets IPv6 addresses with a dotted tail by their /64", () => {
     const enforce = createLimiter(1);
 
     expect(
@@ -183,7 +183,7 @@ describe("createClientRateLimiter", () => {
     expect(enforce(requestFrom("8.8.8.8"))).toBeNull();
   });
 
-  it("buckets IPv6 clients by /56 across compressed spellings", () => {
+  it("buckets IPv6 clients by /64 across compressed spellings", () => {
     const enforce = createLimiter(1);
 
     expect(
@@ -195,29 +195,14 @@ describe("createClientRateLimiter", () => {
     ).toBe(1);
     expect(
       allowedCount(enforce, [
-        "2a00:1450:0:100::1",
+        "2a00:1450:0:1::1",
         "2a00:1450:1::1",
         "2a00:1451::",
       ])
     ).toBe(3);
   });
 
-  it("shares one budget across every /64 inside a /56", () => {
-    const enforce = createLimiter(2);
-
-    expect(
-      allowedCount(enforce, [
-        "2a00:1450:7:ab00::1",
-        "2a00:1450:7:ab01::1",
-        "2a00:1450:7:ab7f:1:2:3:4",
-        "2a00:1450:7:abff::",
-      ])
-    ).toBe(2);
-    // The neighbouring /56 keeps its own budget.
-    expect(allowedCount(enforce, ["2a00:1450:7:ac00::1"])).toBe(1);
-  });
-
-  it("expands embedded IPv4 tails before taking the /56", () => {
+  it("expands embedded IPv4 tails before taking the /64", () => {
     const enforce = createLimiter(1);
 
     expect(
@@ -318,18 +303,20 @@ describe("createClientRateLimiter", () => {
     expect(enforce(client, 1)?.status).toBe(429);
   });
 
-  it("keeps live buckets when the table is full and limits the new client", async () => {
+  it("keeps live buckets when the table is full and charges new clients to a shared overflow budget", async () => {
     const enforce = createLimiter(1, 2);
 
     expect(allowedCount(enforce, ["8.8.8.8", "8.8.8.8"])).toBe(1);
     jest.advanceTimersByTime(10_000);
     expect(allowedCount(enforce, ["1.1.1.1"])).toBe(1);
 
-    // No room for a third client: it waits for the earliest window to end.
-    const untracked = enforce(requestFrom("9.9.9.9"));
-    expect(untracked?.status).toBe(429);
-    expect(untracked?.headers.get("retry-after")).toBe("50");
-    expect(await untracked?.json()).toEqual({
+    // The table is full: new clients share ten times one client's budget.
+    const newcomers = Array.from({ length: 11 }, (_v, i) => `9.9.9.${i}`);
+    expect(allowedCount(enforce, newcomers.slice(0, 10))).toBe(10);
+    const overflowing = enforce(requestFrom(newcomers[10]));
+    expect(overflowing?.status).toBe(429);
+    expect(overflowing?.headers.get("retry-after")).toBe("60");
+    expect(await overflowing?.json()).toEqual({
       error: "Too many test requests",
     });
     // The tracked clients' windows were not reset to make room.
@@ -337,15 +324,14 @@ describe("createClientRateLimiter", () => {
     expect(enforce(requestFrom("1.1.1.1"))?.status).toBe(429);
   });
 
-  it("reuses expired buckets' room once their windows end", () => {
+  it("gives new clients their own buckets again once windows expire", () => {
     const enforce = createLimiter(1, 2);
 
     expect(allowedCount(enforce, ["8.8.8.8", "1.1.1.1"])).toBe(2);
-    expect(enforce(requestFrom("9.9.9.9"))?.status).toBe(429);
+    expect(allowedCount(enforce, ["9.9.9.9", "9.9.9.9"])).toBe(2);
 
     jest.advanceTimersByTime(WINDOW_MS);
-    expect(enforce(requestFrom("9.9.9.9"))).toBeNull();
+    expect(allowedCount(enforce, ["9.9.9.9", "9.9.9.9"])).toBe(1);
     expect(enforce(requestFrom("8.8.8.8"))).toBeNull();
-    expect(enforce(requestFrom("1.1.1.1"))?.status).toBe(429);
   });
 });
