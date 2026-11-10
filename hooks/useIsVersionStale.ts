@@ -96,13 +96,15 @@ export function useIsVersionStale(
           const announcedOrder = parseReleaseOrder(
             response.announced_release_order
           );
-          const stale =
+          const updateAvailable =
             response.stale &&
             (CURRENT_RELEASE_ORDER === null ||
               (announcedOrder !== null &&
                 announcedOrder > CURRENT_RELEASE_ORDER));
-          if (stale) noteAnnouncedVersion(CURRENT, response.announced_version);
-          setStale(stale);
+          if (updateAvailable) {
+            noteAnnouncedVersion(CURRENT, response.announced_version);
+          }
+          setStale(updateAvailable);
         }
       } catch {
         /* ignore network errors */

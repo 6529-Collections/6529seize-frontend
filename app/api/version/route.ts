@@ -255,11 +255,12 @@ const versionResponse = ({
   });
   // Adoption telemetry: sampled, and only about the tab's build.
   logVersionPoll(request?.headers, stale);
+  const announcedReleaseOrder = announcedVersion?.releaseOrder ?? null;
   return NextResponse.json(
     {
       announced_version: announcedVersion?.version ?? null,
-      ...(announcedVersion?.releaseOrder != null
-        ? { announced_release_order: announcedVersion.releaseOrder }
+      ...(announcedReleaseOrder !== null
+        ? { announced_release_order: announcedReleaseOrder }
         : {}),
       stale,
       version,
