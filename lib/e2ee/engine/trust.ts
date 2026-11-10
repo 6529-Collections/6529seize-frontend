@@ -162,14 +162,17 @@ export function ownDeviceNeedsApproval(
 
 /**
  * A revoker this device trusts for its own revocation: another device of
- * this profile that the user added, or signed by an own wallet. Its grant
- * is checked separately at the revocation time.
+ * this profile that the user added, or signed by an own wallet (or by one
+ * pinned for this profile before own wallets existed). A device the user
+ * chose to ignore never is, whatever its wallet. Its grant is checked
+ * separately at the revocation time.
  */
 export const isTrustedOwnRevoker = (
   ctx: EngineContext,
   revoker: ApiE2eeDevice
 ): boolean =>
   revoker.profile_id === ctx.profileId &&
+  !trustOf(ctx).ignored.includes(revoker.device_key.toLowerCase()) &&
   (isApproved(ctx, revoker.device_key) ||
     isOwnWallet(ctx, revoker.grant.wallet) ||
     (trustOf(ctx).legacyOwnWallets ?? []).includes(

@@ -220,6 +220,17 @@ describe("E2EE: own revocation by a device of an own-profile pin from before", (
     ).toBe(true);
   });
 
+  it("refuses it from a device the user chose to ignore", async () => {
+    const { directory, revoked, revoker } = await revokedBy(() => null);
+    const ctx = legacyCtx(revoker.wallet);
+    ctx.device!.trust!.ignored = [key(2)];
+    expect(
+      await directory.ownRevocationVerified(revoked, (record) =>
+        isTrustedOwnRevoker(ctx, record)
+      )
+    ).toBe(false);
+  });
+
   it("refuses it when the signature does not verify", async () => {
     const target = await signedDevice(key(1), "bob");
     const revoker = await signedDevice(key(2), "bob");

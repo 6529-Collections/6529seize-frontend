@@ -343,6 +343,23 @@ describe("E2EE device trust for the own profile", () => {
     expect(isTrustedOwnRevoker(ctx, phone)).toBe(true);
   });
 
+  it("never trusts an ignored own device as revoker, whatever its wallet", async () => {
+    const { ctx } = fakeCtx(new Map());
+    ctx.device!.trust = {
+      wallets: { [OWN]: [OWN_WALLET, WALLET_B] },
+      approved: [],
+      ignored: [],
+    };
+    const legacy = sibling(32, WALLET_B);
+    const sameWallet = sibling(33, OWN_WALLET);
+    expect(isTrustedOwnRevoker(ctx, legacy)).toBe(true);
+    expect(isTrustedOwnRevoker(ctx, sameWallet)).toBe(true);
+    await ignoreUntrustedDevice(ctx, key(32));
+    await ignoreUntrustedDevice(ctx, key(33));
+    expect(isTrustedOwnRevoker(ctx, legacy)).toBe(false);
+    expect(isTrustedOwnRevoker(ctx, sameWallet)).toBe(false);
+  });
+
   it("never treats own-profile pins first-sighted since then as revokers", async () => {
     const { ctx } = fakeCtx(new Map());
     await pinFirstSighting(ctx, [{ profileId: OWN, wallet: WALLET_B }]);

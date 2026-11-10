@@ -388,6 +388,29 @@ describe("DevicesPreferencesSettings", () => {
       expect(mockRestart).toHaveBeenCalled();
     });
 
+    it("signs once when confirm is pressed again while signing", async () => {
+      setUp(true);
+      let finishSigning: () => void = () => undefined;
+      mockRevokeE2eeDevice.mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            finishSigning = resolve;
+          })
+      );
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Safari on iPhone" })
+      );
+      const dialog = screen.getByRole("dialog");
+      const button = within(dialog).getByRole("button", { name: "Revoke" });
+      fireEvent.click(button);
+      fireEvent.click(button);
+      await act(async () => {
+        finishSigning();
+      });
+      expect(mockRevokeE2eeDevice).toHaveBeenCalledTimes(1);
+      expect(mockRevoke).toHaveBeenCalledTimes(1);
+    });
+
     it("revokes another device's grant unsigned when encrypted messages are off here", async () => {
       const order = setUp(false);
       await confirm("Safari on iPhone");
