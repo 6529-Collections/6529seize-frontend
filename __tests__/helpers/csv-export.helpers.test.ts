@@ -68,6 +68,17 @@ describe("buildCsv", () => {
     ).toBe('wallet,phaseName\n0xabc,"Phase, one"\n0xdef,\'+bonus');
     expect(buildCsvFromRecords([])).toBe("");
   });
+
+  it("keeps columns aligned when a record misses or adds a field", () => {
+    const records: object[] = [
+      { wallet: "0xabc", amount: 1, phase: "a" },
+      { amount: 2, phase: "b" },
+      { phase: "c", extra: "=x", wallet: "0xdef", amount: 3 },
+    ];
+    expect(buildCsvFromRecords(records)).toBe(
+      "wallet,amount,phase\n0xabc,1,a\n,2,b\n0xdef,3,c"
+    );
+  });
 });
 
 describe("readCsvCell", () => {

@@ -50,22 +50,31 @@ export function buildCsv(rows: ReadonlyArray<ReadonlyArray<unknown>>): string {
   return rows.map((row) => row.map(toCsvCell).join(",")).join("\n");
 }
 
-/** A header row from the first record's keys, then one row per record. */
+/**
+ * A header row from the first record's keys, then one row per record with
+ * the values of those keys, so a missing or extra field cannot shift columns.
+ */
 export function buildCsvFromRecords(records: readonly object[]): string {
   const [first] = records;
   if (!first) {
     return "";
   }
+  const keys = Object.keys(first);
   return buildCsv([
-    Object.keys(first),
-    ...records.map((record): unknown[] => Object.values(record)),
+    keys,
+    ...records.map((record) => {
+      const fields = new Map<string, unknown>(Object.entries(record));
+      return keys.map((key) => fields.get(key));
+    }),
   ]);
 }
 
 /**
  * Reads back a cell written by `toCsvCell`, for CSV files the app exported
  * and a person uploads again: the `'` added before formula-like text is
- * removed. Other cells are returned unchanged.
+ * removed, so cells written by `toCsvCell` round-trip. It cannot tell that
+ * prefix from an apostrophe typed by hand before such text in an uploaded
+ * file, so that cell loses its apostrophe. Other cells are unchanged.
  */
 export function readCsvCell(cell: string): string {
   if (
