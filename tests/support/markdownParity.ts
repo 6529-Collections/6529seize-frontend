@@ -42,7 +42,7 @@ export const MARKDOWN_PARITY_CASES = [
       "table",
       "th",
       "td",
-      "a[data-footnote-ref]",
+      "sup a",
       "section[data-footnotes]",
     ],
   },

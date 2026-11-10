@@ -868,11 +868,12 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await a.page.getByText("performance fixture 0", { exact: true }).click();
     const oldestRow = messageRow(a.page, "performance fixture 0");
     await expect(oldestRow).toBeVisible({ timeout: UI_TIMEOUT_MS });
-    const oldestPhoto = oldestRow.getByRole("img", { name: /^Image:/u });
-    await expect(oldestPhoto).toBeVisible({
-      timeout: UI_TIMEOUT_MS,
-    });
-    await expect(oldestPhoto).toHaveAttribute("src", /^blob:/u);
+    const oldestPhotos = oldestRow.getByRole("img", { name: /^Image:/u });
+    await expect(oldestPhotos).toHaveCount(fixture.photoAttachmentCount);
+    for (const oldestPhoto of await oldestPhotos.all()) {
+      await expect(oldestPhoto).toBeVisible({ timeout: UI_TIMEOUT_MS });
+      await expect(oldestPhoto).toHaveAttribute("src", /^blob:/u);
+    }
     const searchJumpMs = performance.now() - searching;
     await testInfo.attach("long-history-performance.json", {
       body: Buffer.from(
