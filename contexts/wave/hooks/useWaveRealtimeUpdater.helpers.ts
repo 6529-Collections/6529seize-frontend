@@ -28,10 +28,6 @@ import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 const HELP_BOT_HANDLE = "help6529";
 const HELP_BOT_FINAL_REACTIONS = new Set([":white_check_mark:", ":warning:"]);
 
-type ApiDropWithUnknownSerialNo = Omit<ApiDrop, "serial_no"> & {
-  readonly serial_no: unknown;
-};
-
 export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly refreshWaveMessages?: (waveId: string) => Promise<void>;
   readonly removeDrops: (waveId: string, dropIds: readonly string[]) => void;
@@ -109,7 +105,7 @@ const getIncomingWaveId = (drop: ApiDrop): string | null => {
   return typeof wave?.id === "string" && wave.id.length > 0 ? wave.id : null;
 };
 
-const parseRealtimeSerialNo = (value: unknown): number | null => {
+const parseRealtimeInteger = (value: unknown): number | null => {
   if (typeof value === "number" && Number.isSafeInteger(value)) {
     return value;
   }
@@ -128,16 +124,24 @@ const parseRealtimeSerialNo = (value: unknown): number | null => {
 };
 
 const normalizeRealtimeDrop = (drop: ApiDrop): ApiDrop => {
-  const rawSerialNo = (drop as ApiDropWithUnknownSerialNo).serial_no;
-  const serialNo = parseRealtimeSerialNo(rawSerialNo);
+  // Worker-originated frames can carry database BIGINTs as numeric strings.
+  const serialNo = parseRealtimeInteger(drop.serial_no) ?? drop.serial_no;
+  const createdAt = parseRealtimeInteger(drop.created_at) ?? drop.created_at;
+  const updatedAt = parseRealtimeInteger(drop.updated_at) ?? drop.updated_at;
 
-  if (serialNo === null || serialNo === rawSerialNo) {
+  if (
+    serialNo === drop.serial_no &&
+    createdAt === drop.created_at &&
+    updatedAt === drop.updated_at
+  ) {
     return drop;
   }
 
   return {
     ...drop,
     serial_no: serialNo,
+    created_at: createdAt,
+    updated_at: updatedAt,
   };
 };
 
