@@ -196,6 +196,7 @@ for (const platform of ["ios", "android"] as const) {
           await expect
             .poll(() =>
               page
+                .getByRole("tabpanel")
                 .locator('[data-wave-drops-scroll-container="true"]')
                 .last()
                 .evaluate((element) => element.clientHeight)
