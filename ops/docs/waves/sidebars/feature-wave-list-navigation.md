@@ -54,8 +54,9 @@ Wave and DM rows in the left list control which thread is open.
 - Select the feed icon to open Profile Waves Feed. On desktop, it clears the
   selected wave; on mobile web and in the native app, it opens
   `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
-- The feed tooltip reads `Profile Waves Feed`. Its desktop shortcut has a
-  transparent resting surface and a dark hover surface. Create uses a solid white plus
+- The feed tooltip reads `Profile Waves Feed`. Its header shortcut uses the same
+  transparent resting surface, rounded corners and dark hover surface on desktop
+  and smaller screens. Touch devices keep a larger target. Create uses a solid white plus
   icon button named `Create wave` in both desktop sidebar modes. Both have
   visible keyboard focus and larger touch targets. The feed content header has a
   `Discover Waves` link with a compass to `/discover`; the sidebar keeps the two section-specific `View all` links.
