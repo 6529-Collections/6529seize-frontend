@@ -81,7 +81,13 @@ export function BackupCard() {
     case "proxy":
       return null;
     case "ready":
-      return <E2eeBackupPanel />;
+      // Ready comes before GET /e2ee/me names this device; until then backup
+      // can't act for it ("Set up encrypted messages on this device first").
+      return e2ee.thisDevice ? (
+        <E2eeBackupPanel />
+      ) : (
+        <BackupStateCard pill={null} bodyKey="e2ee.backup.status.loading" busy />
+      );
     case "idle":
     case "loading":
       return (
