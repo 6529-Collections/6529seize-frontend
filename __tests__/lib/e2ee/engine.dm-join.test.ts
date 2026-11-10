@@ -9,6 +9,7 @@
  * stored successor only while that is a usable DM with the same person.
  */
 import type { E2eeApiClient } from "@/lib/e2ee/api";
+import { DM_UNKNOWN_DEVICE_RETRY_MS } from "@/lib/e2ee/engine/dm-join";
 import { MlsClient } from "@/lib/e2ee/mls-adapter";
 import type { GroupMetadata } from "@/lib/e2ee/wasm-types";
 import { createFakeApiClient } from "@/tests/support/e2ee/fakeDeliveryService.cjs";
@@ -36,7 +37,10 @@ const pendingWelcomes = (world: World, device: TestDevice): string[] =>
   (world.ds.state["deliveries"] as Map<string, string[]>).get(keyOf(device)) ??
   [];
 
-/** An API client whose device lookups answer `status` for chosen devices. */
+/**
+ * An API client whose device lookups answer `status` for chosen devices,
+ * which profile device lists then leave out too.
+ */
 function lookupFaults(world: World, profileId: string) {
   const base = createFakeApiClient(world.ds, profileId);
   const failing = new Map<string, number>();
@@ -53,6 +57,10 @@ function lookupFaults(world: World, profileId: string) {
       }
       return base.getDevice(deviceKey, signal);
     },
+    getProfileDevices: async (owner, ciphersuite) =>
+      (await base.getProfileDevices(owner, ciphersuite)).filter(
+        (device) => !failing.has(device.device_key.toLowerCase())
+      ),
   };
   return { api, failing };
 }
@@ -220,22 +228,48 @@ describe("E2EE engine: joining direct conversations", () => {
     expect(pendingWelcomes(world, bob.primary)).toEqual([]);
   });
 
-  it("refuses a DM invitation holding a device whose owner is unknown, while a group one still joins", async () => {
+  /** A DM from Alice's laptop whose other device (her phone) Bob's server lookups do not find. */
+  async function dmWithUnknownPhone() {
     const alice = await addUser(world, "alice");
     const alicePhone = await addDevice(world, alice);
     const lookups = lookupFaults(world, "bob");
     const bob = await addUser(world, "bob", { api: lookups.api });
     await settle(world);
-    // The server does not know Alice's phone (not the sender) to Bob.
     lookups.failing.set(keyOf(alicePhone), 404);
     const dm = await alice.primary.engine.createConversation({
       profileIds: ["bob"],
       kind: "dm",
     });
     await settle(world);
+    // Held back for a later sync: not joined, not acknowledged.
+    expect(bob.primary.engine.getConversation(dm)).toBeNull();
+    expect(pendingWelcomes(world, bob.primary)).toHaveLength(1);
+    return { alice, bob, lookups, dm };
+  }
+
+  it("retries a DM invitation holding a device the server does not know yet, and joins once it does", async () => {
+    const { bob, lookups, dm } = await dmWithUnknownPhone();
+    lookups.failing.clear();
+    // Past the directory's 5-minute memory of the miss, inside the window.
+    world.clock.advance(6 * 60_000);
+    await settle(world);
+    expect(bob.primary.engine.getConversation(dm)).toMatchObject({
+      status: "active",
+      dmPeer: { profileId: "alice" },
+    });
+    expect(pendingWelcomes(world, bob.primary)).toEqual([]);
+  });
+
+  it("refuses and acknowledges it once the device stays unknown past the window", async () => {
+    const { bob, dm } = await dmWithUnknownPhone();
+    world.clock.advance(DM_UNKNOWN_DEVICE_RETRY_MS);
+    await settle(world);
     expect(bob.primary.engine.getConversation(dm)).toBeNull();
     expect(pendingWelcomes(world, bob.primary)).toEqual([]);
+  });
 
+  it("joins later invitations while one waits for an unknown device", async () => {
+    const { alice, bob, dm } = await dmWithUnknownPhone();
     const group = await alice.primary.engine.createConversation({
       profileIds: ["bob"],
       kind: "group",
@@ -246,6 +280,8 @@ describe("E2EE engine: joining direct conversations", () => {
       status: "active",
       kind: "group",
     });
+    expect(bob.primary.engine.getConversation(dm)).toBeNull();
+    expect(pendingWelcomes(world, bob.primary)).toHaveLength(1);
   });
 
   it("retries a DM invitation whose device lookups fail for now, then joins", async () => {
