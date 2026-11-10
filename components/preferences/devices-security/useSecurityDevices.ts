@@ -179,10 +179,14 @@ export function useSecurityDevices(): SecurityDevicesState {
   // At the device limit the engine lists devices but this browser has no
   // registered device to sign a revocation or rename with.
   const engineCanAct = engine !== null && e2ee.status === "ready";
+  // A running engine lists at least this device (all ten at the limit). An
+  // empty list hasn't loaded yet: the API list stands in until it has, so a
+  // combined device never shows as signed posts only.
+  const engineListed = engineReady && e2ee.devices.length > 0;
   const encryptionEnabled = isE2eeEnabled() && profileId !== null;
   const apiDevicesQuery = useQuery({
     queryKey: ownE2eeDevicesQueryKey(profileId, listAddress),
-    enabled: encryptionEnabled && listAddress !== null && !engineReady,
+    enabled: encryptionEnabled && listAddress !== null && !engineListed,
     queryFn: ({ signal }) => fetchOwnE2eeDevices(profileId, signal),
   });
   const local = useLocalDeviceKeys(listAddress);
@@ -196,19 +200,19 @@ export function useSecurityDevices(): SecurityDevicesState {
     () =>
       classifyDevices({
         grants,
-        encryptedDevices: engineReady
+        encryptedDevices: engineListed
           ? labels.engineInputs
           : apiDevices.map(fromApi),
         ownSigningKeys: local.publicKeys,
         now,
       }),
-    [apiDevices, engineReady, grants, labels.engineInputs, local.publicKeys, now]
+    [apiDevices, engineListed, grants, labels.engineInputs, local.publicKeys, now]
   );
 
   // Without the encrypted-DMs list a grant can't be told apart from a
   // combined one, so nothing is revocable until it is known.
   const encryptedKnown =
-    !encryptionEnabled || engineReady || apiDevicesQuery.isSuccess;
+    !encryptionEnabled || engineListed || apiDevicesQuery.isSuccess;
   const canRevoke = (device: SecurityDevice) =>
     encryptedKnown &&
     ((device.encryptedDms?.status === "active" && engineCanAct) ||
@@ -236,7 +240,7 @@ export function useSecurityDevices(): SecurityDevicesState {
       if (!(await revokeGrant(device.grant))) {
         throw new Error("Device grant revoke failed");
       }
-      if (encryptionEnabled && !engineReady) {
+      if (encryptionEnabled && !engineListed) {
         void apiDevicesQuery.refetch();
       }
       return;
@@ -256,7 +260,7 @@ export function useSecurityDevices(): SecurityDevicesState {
         endpoint: `e2ee/devices/${encodeURIComponent(encrypted.deviceKey)}/label`,
         body: { label: name },
       });
-      if (engineReady) {
+      if (engineListed) {
         // The engine's list is shown but can't reload now: show the new
         // name until its next sync brings it.
         labels.remember(encrypted.deviceKey, name);
@@ -283,7 +287,7 @@ export function useSecurityDevices(): SecurityDevicesState {
     failed: grantsQuery.isError || apiDevicesQuery.isError,
     retry: () => {
       void grantsQuery.refetch();
-      if (encryptionEnabled && !engineReady) {
+      if (encryptionEnabled && !engineListed) {
         void apiDevicesQuery.refetch();
       }
     },
