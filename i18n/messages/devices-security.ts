@@ -80,11 +80,13 @@ export const DEVICES_SECURITY_MESSAGES = {
     "Couldn’t revoke {labels}. The others were revoked. Try again.",
 
   "devicesSecurity.revoke.title": "Revoke {label}?",
-  "devicesSecurity.revoke.both":
-    "It will stop posting as you and stop receiving encrypted DMs. The encrypted chats saved on it are deleted the next time it opens 6529.",
+  "devicesSecurity.revoke.bothSigned":
+    "It will stop posting as you and stop receiving encrypted DMs. It deletes the encrypted chats saved on it once it confirms the revocation came from a device of yours.",
+  "devicesSecurity.revoke.bothUnsigned":
+    "It will stop posting as you and stop receiving encrypted DMs. The encrypted chats saved on it stay there until they’re removed on that device, because encrypted messages aren’t on in this browser to confirm the revocation.",
   "devicesSecurity.revoke.posts": "It will stop posting as you.",
   "devicesSecurity.revoke.dms":
-    "It will stop receiving encrypted DMs. The encrypted chats saved on it are deleted the next time it opens 6529.",
+    "It will stop receiving encrypted DMs. It deletes the encrypted chats saved on it once it confirms the revocation came from a device of yours.",
   "devicesSecurity.revoke.after":
     "Posts it already signed stay verifiable. To use it again, turn it back on there with one wallet signature.",
   "devicesSecurity.revoke.done": "{label} revoked.",

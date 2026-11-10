@@ -561,8 +561,8 @@ opening the tab starts encrypted messages in that browser so backup can show.
   expanded, each ended device is one row.
 - **What these permissions mean** explains both permissions.
 
-**Revoke** asks first, naming the device and what stops; posts it signed stay
-verifiable. Revoking this device opens its own
+**Revoke** asks first, naming the device, what stops and what happens to the
+encrypted chats saved on it; posts it signed stay verifiable. Revoking this device opens its own
 **Revoke this browser?** dialog: it names the browser you're using, says what
 stops, and with backup on says that only messages included in your last
 backup can be restored. With backup off it warns
