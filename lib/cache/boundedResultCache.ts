@@ -11,7 +11,19 @@ type Flight<T> = {
   readonly controller: AbortController;
   readonly promise: Promise<T>;
   subscribers: number;
+  /** Set by the job once it will run to the end whatever its callers do. */
+  readonly state: { committed: boolean };
 };
+
+/**
+ * Loads one value. `signal` aborts when every caller has left. A job that
+ * calls `commit()` (for example once it holds a scarce slot) keeps its entry
+ * after every caller leaves, so a returning caller joins it.
+ */
+type Job<T> = (
+  signal: AbortSignal,
+  commit: () => void
+) => Promise<CacheableResult<T>>;
 
 export type CacheableResult<T> = {
   readonly value: T;
@@ -61,11 +73,7 @@ export class BoundedResultCache<T> {
     this.now = now ?? (() => Date.now());
   }
 
-  load(
-    key: string,
-    job: (signal: AbortSignal) => Promise<CacheableResult<T>>,
-    signal?: AbortSignal
-  ): Promise<T> {
+  load(key: string, job: Job<T>, signal?: AbortSignal): Promise<T> {
     if (signal?.aborted) {
       return Promise.reject(abortReason(signal));
     }
@@ -128,20 +136,20 @@ export class BoundedResultCache<T> {
     }
   }
 
-  private start(
-    key: string,
-    job: (signal: AbortSignal) => Promise<CacheableResult<T>>
-  ): Flight<T> {
+  private start(key: string, job: Job<T>): Flight<T> {
     const controller = new AbortController();
+    const state = { committed: false };
     // An async wrapper starts the job synchronously and turns a job that
     // throws before returning its promise into an ordinary rejection.
     const run = async (): Promise<T> => {
-      const result = await job(controller.signal);
+      const result = await job(controller.signal, () => {
+        state.committed = true;
+      });
       this.store(key, result);
       return result.value;
     };
     const promise = run();
-    const flight: Flight<T> = { controller, promise, subscribers: 0 };
+    const flight: Flight<T> = { controller, promise, subscribers: 0, state };
     const settle = () => {
       if (this.flights.get(key) === flight) {
         this.flights.delete(key);
@@ -179,7 +187,7 @@ export class BoundedResultCache<T> {
 
   private leave(key: string, flight: Flight<T>): void {
     flight.subscribers -= 1;
-    if (flight.subscribers > 0) {
+    if (flight.subscribers > 0 || flight.state.committed) {
       return;
     }
     // Nobody waits any more: stop the job, and let the next caller start a

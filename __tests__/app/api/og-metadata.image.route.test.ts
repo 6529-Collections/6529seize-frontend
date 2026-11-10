@@ -592,6 +592,48 @@ describe("/api/og-metadata/image", () => {
     ).toMatchObject({ format: "png", hasAlpha: true });
   });
 
+  it("keeps an opaque still lossless as PNG when format=png is asked for, and caches it apart from the default", async () => {
+    const opaque = await actualSharp({
+      create: {
+        width: 4,
+        height: 3,
+        channels: 3,
+        background: { r: 20, g: 120, b: 220 },
+      },
+    })
+      .png()
+      .toBuffer();
+    mockImageResponse(opaque.byteLength, "image/png", opaque);
+    mockImageResponse(opaque.byteLength, "image/png", opaque);
+
+    const lossless = createRequest("https://cdn.test/artwork.png", "960");
+    lossless.nextUrl.searchParams.set("format", "png");
+    lossless.nextUrl.searchParams.set("animated", "1");
+    const png = await GET(lossless);
+    expect(png.status).toBe(200);
+    expect(png.headers.get("content-type")).toBe("image/png");
+    expect(
+      await actualSharp(Buffer.from(await png.arrayBuffer())).metadata()
+    ).toMatchObject({ format: "png", width: 4, height: 3 });
+
+    const inline = await GET(
+      createRequest("https://cdn.test/artwork.png", "960")
+    );
+    expect(inline.headers.get("content-type")).toBe("image/jpeg");
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses an unknown output format before fetching", async () => {
+    const request = createRequest("https://cdn.test/artwork.png");
+    request.nextUrl.searchParams.set("format", "webp");
+    const response = await GET(request);
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({
+      error: "Unsupported format",
+    });
+    expect(mockFetchPublicUrl).not.toHaveBeenCalled();
+  });
+
   it("finishes and caches an admitted image after every caller has left", async () => {
     let deliver: () => void = () => undefined;
     mockFetchPublicUrl.mockImplementationOnce(

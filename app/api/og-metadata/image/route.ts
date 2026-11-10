@@ -70,6 +70,9 @@ const MAX_ANIMATED_WORK_BYTES = 512 * 1024 * 1024;
 const VIDEO_PASSTHROUGH_MAX_BYTES = 8 * 1024 * 1024;
 const PNG_CONTENT_TYPE = "image/png";
 const JPEG_CONTENT_TYPE = "image/jpeg";
+// `mp4`: Giphy video pass-through; `png`: a lossless still for export.
+// Without `format`, stills are JPEG unless they have transparency.
+const OUTPUT_FORMATS: ReadonlySet<string> = new Set(["mp4", "png"]);
 const GIF_CONTENT_TYPE = "image/gif";
 const MP4_CONTENT_TYPE = "video/mp4";
 const CACHE_CONTROL =
@@ -419,10 +422,13 @@ const normalizeImage = async ({
   buffer,
   width,
   allowAnimation,
+  lossless,
 }: {
   readonly buffer: Buffer;
   readonly width: number;
   readonly allowAnimation: boolean;
+  /** Always encode the still as PNG (`format=png`). */
+  readonly lossless: boolean;
 }): Promise<{ data: Buffer; contentType: string; degraded: boolean }> => {
   const detectedContentType = detectContentType(buffer);
   if (!detectedContentType) {
@@ -449,12 +455,12 @@ const normalizeImage = async ({
     frames > 1 &&
     Number.isSafeInteger(animatedWorkBytes) &&
     animatedWorkBytes <= MAX_ANIMATED_WORK_BYTES;
-  const hasAlpha = metadata.hasAlpha === true;
+  const asPng = lossless || metadata.hasAlpha === true;
   // Preserve ordinary external GIFs without admitting an unbounded animation.
   // Range-fetched or over-budget GIFs keep the first-frame still path.
   if (!animated) {
     return {
-      ...(await encodeStill(image, width, hasAlpha)),
+      ...(await encodeStill(image, width, asPng)),
       degraded: false,
     };
   }
@@ -475,7 +481,7 @@ const normalizeImage = async ({
       error
     );
     return {
-      ...(await encodeStill(image, width, hasAlpha)),
+      ...(await encodeStill(image, width, asPng)),
       degraded: true,
     };
   }
@@ -486,16 +492,18 @@ const fitInside = (image: Sharp, width: number): Sharp =>
     .rotate()
     .resize(width, MAX_HEIGHT, { fit: "inside", withoutEnlargement: true });
 
-// Stills (and first frames) are JPEG, several times smaller than PNG for
-// photos; images with an alpha channel stay PNG. WebP would be smaller still,
-// but the social-card renderer (next/og) accepts only PNG, JPEG and GIF.
+// Stills (and first frames) are JPEG by default, several times smaller than
+// PNG for photos; images with an alpha channel, and callers that ask for
+// `format=png` (lossless artwork export), get PNG. WebP would be smaller
+// still, but the social-card renderer (next/og) accepts only PNG, JPEG and
+// GIF.
 const encodeStill = async (
   image: Sharp,
   width: number,
-  hasAlpha: boolean
+  asPng: boolean
 ): Promise<{ data: Buffer; contentType: string }> => {
   const resized = fitInside(image, width);
-  return hasAlpha
+  return asPng
     ? { data: await resized.png().toBuffer(), contentType: PNG_CONTENT_TYPE }
     : {
         data: await resized.jpeg({ quality: 82 }).toBuffer(),
@@ -581,9 +589,12 @@ const mediaResult = (
 // becomes a briefly cached error answer.
 const runAdmittedJob = async (
   signal: AbortSignal,
+  commit: () => void,
   job: (releaseFetch: () => void) => Promise<CacheableResult<ProxyResult>>
 ): Promise<CacheableResult<ProxyResult>> => {
   const releaseFetch = await fetchAdmission.acquire(signal);
+  // Admitted: a returning viewer joins this job rather than starting another.
+  commit();
   try {
     return await job(releaseFetch);
   } catch (error) {
@@ -694,8 +705,8 @@ const serveGiphyVideo = async (
   }
   const result = await proxyResults.load(
     cacheKey("mp4", videoUrl),
-    (signal) =>
-      runAdmittedJob(signal, async () =>
+    (signal, commit) =>
+      runAdmittedJob(signal, commit, async () =>
         mediaResult(await fetchGiphyVideo(videoUrl), MP4_CONTENT_TYPE)
       ),
     request.signal
@@ -711,14 +722,21 @@ const serveGiphyVideo = async (
 
 const serveImage = async (
   request: NextRequest,
-  imageUrl: URL
+  imageUrl: URL,
+  lossless: boolean
 ): Promise<NextResponse> => {
   const width = parseWidth(request.nextUrl.searchParams.get("w"));
-  const animated = request.nextUrl.searchParams.get("animated") === "1";
+  // A lossless request is always a still.
+  const animated =
+    !lossless && request.nextUrl.searchParams.get("animated") === "1";
+  let mode = animated ? "animated" : "still";
+  if (lossless) {
+    mode = "png";
+  }
   const result = await proxyResults.load(
-    cacheKey(`${animated ? "animated" : "still"}:${width}`, imageUrl),
-    (signal) =>
-      runAdmittedJob(signal, async (releaseFetch) => {
+    cacheKey(`${mode}:${width}`, imageUrl),
+    (signal, commit) =>
+      runAdmittedJob(signal, commit, async (releaseFetch) => {
         const { buffer, complete } = await fetchImageBuffer(imageUrl);
         const { data, contentType, degraded } = await withTransformSlot(
           releaseFetch,
@@ -727,6 +745,7 @@ const serveImage = async (
               buffer,
               width,
               allowAnimation: complete && animated,
+              lossless,
             })
         );
         return mediaResult(data, contentType, degraded);
@@ -750,11 +769,16 @@ export async function GET(request: NextRequest) {
     return rateLimited;
   }
 
+  const format = request.nextUrl.searchParams.get("format");
+  if (format !== null && !OUTPUT_FORMATS.has(format)) {
+    return jsonError("Unsupported format", 400);
+  }
+
   try {
     const sourceUrl = parseImageUrl(request.nextUrl.searchParams.get("url"));
-    return request.nextUrl.searchParams.get("format") === "mp4"
+    return format === "mp4"
       ? await serveGiphyVideo(request, sourceUrl)
-      : await serveImage(request, sourceUrl);
+      : await serveImage(request, sourceUrl, format === "png");
   } catch (error) {
     // A caller that left while queued keeps the existing busy answer.
     const failure = request.signal.aborted
