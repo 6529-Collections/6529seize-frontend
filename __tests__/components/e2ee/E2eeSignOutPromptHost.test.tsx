@@ -240,11 +240,13 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     setE2eeEnrollmentMarker(SELF_ID, true);
   });
 
-  it("removal is on by default when the backup is current, and backs up first", async () => {
+  it("removal stays off by default with a current backup, and backs up first when chosen", async () => {
     const run = renderWithEngine();
-    expect(await removeBox()).toBeChecked();
+    expect(await removeBox()).not.toBeChecked();
     expect(screen.getByText(/backup is up to date/)).toBeVisible();
+    expect(screen.getByText(/counts as a new device/)).toBeVisible();
     expect(screen.getByText(/You stay a member of your chats/)).toBeVisible();
+    await userEvent.click(await removeBox());
     await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
     await act(run.done);
     expect(run.order).toEqual(["backup", "release", "remove", "signOut"]);
@@ -254,22 +256,24 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     ["the backup is off", snapshot({ phase: "off" })],
     ["the first upload is still running", snapshot({ uploading: true })],
     ["the last run failed", snapshot({ lastError: "E2EE_BACKUP_FAILED" })],
-  ])("removal stays off by default when %s", async (_, current) => {
-    renderWithEngine({ snapshot: current });
-    expect(await removeBox()).not.toBeChecked();
-    expect(
-      screen.getByText(/history is lost unless backup is on/)
-    ).toBeVisible();
-  });
+  ])(
+    "without a current backup (%s) the help says history is lost",
+    async (_, current) => {
+      renderWithEngine({ snapshot: current });
+      expect(await removeBox()).not.toBeChecked();
+      expect(
+        screen.getByText(/history is lost unless backup is on/)
+      ).toBeVisible();
+    }
+  );
 
   it("keeps the messages when the backup update fails, and removes them when asked again", async () => {
     const backupNow = jest.fn(async () => {
       throw new Error("offline");
     });
     const run = renderWithEngine({ backupNow });
-    await userEvent.click(
-      await screen.findByRole("button", { name: "Sign out" })
-    );
+    await userEvent.click(await removeBox());
+    await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Couldn’t update your encrypted backup"
     );
@@ -286,7 +290,7 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
   });
 
   it("leaves the backup and local data alone when removal is not chosen", async () => {
-    const run = renderWithEngine({ snapshot: snapshot({ phase: "off" }) });
+    const run = renderWithEngine();
     await userEvent.click(
       await screen.findByRole("button", { name: "Sign out" })
     );

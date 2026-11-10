@@ -80,9 +80,8 @@ async function settlesInTime(task: () => Promise<unknown>): Promise<boolean> {
 
 /**
  * True when the encrypted backup is on, fully uploaded and its last run
- * succeeded: removing this browser's copy then loses nothing that the
- * recovery code cannot restore (sign-out still uploads the latest changes
- * first).
+ * succeeded: the help then says the removed history can be restored with
+ * the recovery code (removal still uploads the latest changes first).
  */
 const isBackupCurrent = (snapshot: E2eeBackupSnapshot | null): boolean =>
   snapshot?.phase === "on" &&
@@ -101,9 +100,9 @@ function removeHelpKey(scope: E2eeSignOutScope, backedUp: boolean): MessageKey {
 
 /**
  * Offers "Remove encrypted messages from this browser" on sign-out when this
- * browser holds encrypted messages. For a normal sign-out it is on by
- * default only when the encrypted backup is current (nothing would be lost)
- * and off otherwise; for "sign out of all profiles" it is on and explained.
+ * browser holds encrypted messages: off by default for a normal sign-out
+ * (removing leaves a registered device behind and this browser counts as a
+ * new device next time), on and explained for "sign out of all profiles".
  * Removal uploads the latest changes to the backup, then deletes the local
  * data, both before the sign-out, so a failed removal leaves the user
  * signed in. The device stays registered, so the user stays a member of
@@ -136,7 +135,7 @@ export function E2eeSignOutPromptHost({
         }
         const current = isBackupCurrent(backup?.getSnapshot() ?? null);
         await new Promise<void>((resolve, reject) => {
-          setRemove(scope === "all" || current);
+          setRemove(scope === "all");
           setBackedUp(current);
           setFailed(false);
           setBackupFailed(false);

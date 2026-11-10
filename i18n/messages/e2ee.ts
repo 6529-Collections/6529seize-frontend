@@ -88,14 +88,14 @@ export const E2EE_MESSAGES = {
   "e2ee.signOut.title": "Sign out",
   "e2ee.signOut.titleAll": "Sign out of all profiles",
   "e2ee.signOut.body":
-    "Your encrypted messages stay saved in this browser unless you remove them.",
+    "Your encrypted chats and this browser’s encryption keys stay saved here, ready for your next sign-in, unless you remove them.",
   "e2ee.signOut.remove.label": "Remove encrypted messages from this browser",
   "e2ee.signOut.remove.help":
-    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile. You stay a member of your chats. Your history is lost unless backup is on.",
+    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile. You stay a member of your chats, but this browser must be set up again for encrypted messages and then counts as a new device. Your history is lost unless backup is on.",
   "e2ee.signOut.remove.helpBackedUp":
-    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile. You stay a member of your chats. Your encrypted backup is up to date, so after you sign in again you can restore this history with your recovery code.",
+    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile. You stay a member of your chats, but this browser must be set up again for encrypted messages and then counts as a new device. Your encrypted backup is up to date, so you can then restore this history with your recovery code.",
   "e2ee.signOut.remove.helpAll":
-    "Recommended on a shared computer. Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for every profile. You stay a member of your chats. Your history is lost unless backup is on.",
+    "Recommended on a shared computer. Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for every profile. You stay a member of your chats, but this browser must be set up again for encrypted messages and then counts as a new device for each profile. Your history is lost unless backup is on.",
   "e2ee.signOut.confirm": "Sign out",
   "e2ee.signOut.backupFailed":
     "Couldn’t update your encrypted backup, so your encrypted messages were kept in this browser. To remove them anyway, select the option again and sign out. Your newest messages may then be lost.",

@@ -106,21 +106,23 @@ native keyboard removes focus and restores the normal bottom safe-area clearance
 
 When this browser holds encrypted messages, **Sign out** and **Sign Out All
 Profiles** ask first whether to **Remove encrypted messages from this
-browser**. It deletes the chats, attachment keys, unsent messages and
-encryption keys saved here: for the profile you sign out of, or for every
-profile with Sign Out All Profiles. This browser stays registered as one of
-your devices, so you stay a member of your chats, even when it was your only
-device, and the device you sign in with next is added to them automatically. Without
-encrypted backup the deleted history cannot be recovered; with it, restore
-the history with your recovery code after you sign in again. If you keep
-them, they stay saved in this browser for the next sign-in.
+browser**. If you keep them, the chats and this browser's encryption keys
+stay saved here, ready for the next sign-in. Removing deletes the chats,
+attachment keys, unsent messages and encryption keys saved here: for the
+profile you sign out of, or for every profile with Sign Out All Profiles.
 
-- Sign Out All Profiles has removal on by default.
-- Sign out has it on by default only when [encrypted backup](#encrypted-backup)
-  is on, fully uploaded and its last run succeeded. Removing then first
-  uploads the latest changes. If that upload fails, nothing is removed, the
-  option turns off and the dialog explains why; select it again to remove
-  the messages anyway.
+- You stay a member of your chats: this browser's earlier registration stays
+  listed under your devices until its permission expires.
+- This browser must then be set up again for encrypted messages and counts
+  as a new device, towards the device limit.
+- Without [encrypted backup](#encrypted-backup) the deleted history cannot be
+  recovered; with it, restore the history with your recovery code after you
+  set this browser up again.
+- Sign out has removal off by default. Sign Out All Profiles has it on by
+  default.
+- When backup is on, removing first uploads the latest changes. If that
+  upload fails, nothing is removed, the option turns off and the dialog
+  explains why; select it again to remove the messages anyway.
 - Signing out because a session expired or became invalid never removes
   anything and shows no prompt.
 
