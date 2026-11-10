@@ -1,6 +1,5 @@
 "use client";
 
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -8,19 +7,97 @@ import { formatInteger, selectPluralCategory } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { ShieldCheckIcon } from "@heroicons/react/16/solid";
-import { ShieldCheckIcon as ShieldCheckOutlineIcon } from "@heroicons/react/24/outline";
-import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
+import {
+  QuestionMarkCircleIcon,
+  ShieldCheckIcon as ShieldCheckOutlineIcon,
+  ShieldExclamationIcon,
+} from "@heroicons/react/24/outline";
+import {
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactNode,
+  type RefObject,
+} from "react";
 import { Tooltip } from "react-tooltip";
 import DropGroupSignatureDialog, {
   type GroupSignatureDrop,
 } from "./DropGroupSignatureDialog";
 import DropSignatureDialog from "./DropSignatureDialog";
-import { isDropAuthorSigned } from "./dropAuthorSigned";
+import { authorSignedLabel, isDropAuthorSigned } from "./dropAuthorSigned";
+import {
+  useDropSealStates,
+  type SealState,
+  type VerdictDrop,
+} from "./dropSignatureVerdicts";
+import { useNearViewport } from "./useNearViewport";
 
-type MarkedDrop = Pick<
-  ApiDrop,
-  "id" | "is_author_signed" | "title" | "parts" | "wave" | "author"
->;
+type MarkedDrop = VerdictDrop;
+
+/** What a seal shows: a drop's state, or a group's ("all" or "partial"). */
+type SealPresentation = SealState | "all" | "partial";
+
+const SEAL_LABEL_KEYS = {
+  verified: "signedMessages.marker.label",
+  pending: "signedMessages.marker.pending",
+  unverified: "signedMessages.marker.unverified",
+  failed: "signedMessages.marker.failed",
+} as const satisfies Record<SealState, string>;
+
+/**
+ * Each state has its own shape, so it never rests on colour alone: the
+ * filled seal only once this browser verified the signature.
+ */
+function SealIcon({ state }: { readonly state: SealPresentation }) {
+  switch (state) {
+    case "verified":
+    case "all":
+      return (
+        <ShieldCheckIcon
+          aria-hidden="true"
+          data-seal-state={state}
+          className="tw-size-3.5"
+        />
+      );
+    case "partial":
+      return (
+        <ShieldCheckOutlineIcon
+          aria-hidden="true"
+          data-seal-state="partial"
+          className="tw-size-3.5"
+          strokeWidth={2}
+        />
+      );
+    case "pending":
+      return (
+        <ShieldCheckOutlineIcon
+          aria-hidden="true"
+          data-seal-state="pending"
+          className="tw-size-3.5 tw-opacity-50"
+        />
+      );
+    case "unverified":
+      return (
+        <QuestionMarkCircleIcon
+          aria-hidden="true"
+          data-seal-state="unverified"
+          className="tw-size-3.5"
+          strokeWidth={2}
+        />
+      );
+    case "failed":
+      return (
+        <ShieldExclamationIcon
+          aria-hidden="true"
+          data-seal-state="failed"
+          className="tw-size-3.5 tw-text-red"
+          strokeWidth={2}
+        />
+      );
+  }
+}
 
 // Enter and Space activate the seal itself; a clickable card around it must
 // not treat them as its own activation. (The Signature dialogs keep their own
@@ -36,12 +113,14 @@ function SignedSealButton({
   icon,
   onOpenDialog,
   dialog,
+  buttonRef,
 }: {
   readonly label: string;
   readonly icon: ReactNode;
   readonly onOpenDialog: () => void;
   /** The Signature dialog this seal opens (rendered closed until then). */
   readonly dialog: ReactNode;
+  readonly buttonRef: RefObject<HTMLButtonElement | null>;
 }) {
   const { hasTouchScreen } = useDeviceInfo();
   const tooltipId = `drop-author-signed-${useId()}`;
@@ -51,6 +130,7 @@ function SignedSealButton({
   return (
     <>
       <button
+        ref={buttonRef}
         type="button"
         aria-label={label}
         aria-haspopup="dialog"
@@ -94,13 +174,26 @@ function SignedSealButton({
   );
 }
 
+/** This browser's check of one drop, queued while its seal is near the viewport. */
+function useNearDropSealState(
+  drop: MarkedDrop,
+  ref: RefObject<Element | null>
+): SealState {
+  const near = useNearViewport(ref);
+  const drops = useMemo(() => [drop], [drop]);
+  return useDropSealStates(drops, near)[0] ?? "pending";
+}
+
 function DropAuthorSignedMarkerButton({ drop }: { readonly drop: MarkedDrop }) {
   const locale = useBrowserLocale();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const state = useNearDropSealState(drop, buttonRef);
   return (
     <SignedSealButton
-      label={t(locale, "signedMessages.marker.label")}
-      icon={<ShieldCheckIcon aria-hidden="true" className="tw-size-3.5" />}
+      buttonRef={buttonRef}
+      label={t(locale, SEAL_LABEL_KEYS[state])}
+      icon={<SealIcon state={state} />}
       onOpenDialog={() => setIsDialogOpen(true)}
       dialog={
         <DropSignatureDialog
@@ -124,54 +217,69 @@ const GROUP_PARTIAL_KEYS = {
   other: "signedMessages.group.partial.other",
 } as const;
 
-/** "All 3 posts signed by their author" or "2 of 3 posts signed by their author". */
-function getGroupSealLabel(
+/**
+ * A group's seal: any post whose signature does not match, then any still
+ * being checked, then how many of all its posts this browser verified.
+ */
+function getGroupSeal(
   locale: SupportedLocale,
-  signedCount: number,
+  states: readonly SealState[],
   total: number
-): string {
+): { readonly state: SealPresentation; readonly label: string } {
+  if (states.includes("failed")) {
+    return { state: "failed", label: t(locale, "signedMessages.group.failed") };
+  }
+  if (states.includes("pending")) {
+    return {
+      state: "pending",
+      label: t(locale, "signedMessages.group.pending"),
+    };
+  }
+  const verified = states.filter((state) => state === "verified").length;
+  if (verified === 0) {
+    return {
+      state: "unverified",
+      label: t(locale, "signedMessages.group.unverified"),
+    };
+  }
   const category =
     selectPluralCategory(locale, total) === "one" ? "one" : "other";
   const count = formatInteger(locale, total);
-  if (signedCount === total) {
-    return t(locale, GROUP_ALL_KEYS[category], { count });
+  if (verified === total) {
+    return {
+      state: "all",
+      label: t(locale, GROUP_ALL_KEYS[category], { count }),
+    };
   }
-  return t(locale, GROUP_PARTIAL_KEYS[category], {
-    signed: formatInteger(locale, signedCount),
-    count,
-  });
+  // "2 of 3 posts signed by their author": verified here, not just claimed.
+  return {
+    state: "partial",
+    label: t(locale, GROUP_PARTIAL_KEYS[category], {
+      signed: formatInteger(locale, verified),
+      count,
+    }),
+  };
 }
 
 function DropGroupSignedMarkerButton({
   group,
-  signedCount,
+  signedDrops,
 }: {
   readonly group: readonly GroupSignatureDrop[];
-  readonly signedCount: number;
+  /** The posts 6529.io marks as signed, checked while the seal is near the viewport. */
+  readonly signedDrops: readonly GroupSignatureDrop[];
 }) {
   const locale = useBrowserLocale();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const allSigned = signedCount === group.length;
-  // A partly signed group shows an outlined seal: the shape, not only the
-  // label, tells it apart from a fully signed group.
-  const icon = allSigned ? (
-    <ShieldCheckIcon
-      aria-hidden="true"
-      data-seal-state="all"
-      className="tw-size-3.5"
-    />
-  ) : (
-    <ShieldCheckOutlineIcon
-      aria-hidden="true"
-      data-seal-state="partial"
-      className="tw-size-3.5"
-      strokeWidth={2}
-    />
-  );
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const near = useNearViewport(buttonRef);
+  const states = useDropSealStates(signedDrops, near);
+  const seal = getGroupSeal(locale, states, group.length);
   return (
     <SignedSealButton
-      label={getGroupSealLabel(locale, signedCount, group.length)}
-      icon={icon}
+      buttonRef={buttonRef}
+      label={seal.label}
+      icon={<SealIcon state={seal.state} />}
       onOpenDialog={() => setIsDialogOpen(true)}
       dialog={
         <DropGroupSignatureDialog
@@ -197,16 +305,41 @@ const SealBeside = ({
   </span>
 );
 
+function GroupSealBeside({
+  group,
+  children,
+}: {
+  readonly group: readonly GroupSignatureDrop[];
+  readonly children: ReactNode;
+}) {
+  const signedDrops = useMemo(() => group.filter(isDropAuthorSigned), [group]);
+  if (signedDrops.length === 0) {
+    return children;
+  }
+  return (
+    <SealBeside
+      seal={
+        <DropGroupSignedMarkerButton group={group} signedDrops={signedDrops} />
+      }
+    >
+      {children}
+    </SealBeside>
+  );
+}
+
 /**
- * Adds the "Signed by its author" seal beside a drop's timestamp and keeps
- * both on one line. The seal opens the Signature dialog, which verifies the
- * signature in the browser. Unsigned drops render the timestamp exactly as
- * before.
+ * Adds the author-signed seal beside a drop's timestamp and keeps both on
+ * one line. When the seal nears the viewport, this browser verifies the signature
+ * itself; the seal reads "Signed by its author" only after that check
+ * passed, a neutral pending state until then, and distinct states when the
+ * signature cannot be verified here or does not match. The seal opens the
+ * Signature dialog. Unsigned drops render the timestamp exactly as before.
  *
  * With `group` (a chat header followed by grouped posts by the same author),
- * the seal stands for the whole group: a full seal when every post is author
- * signed, an outlined seal when only some are, and nothing when none are. It
- * then opens the group Signature dialog. A group of one behaves as a drop.
+ * the seal stands for the whole group: a full seal when this browser
+ * verified every post, an outlined seal when it verified only some, and
+ * nothing when 6529.io marks none as signed. It then opens the group
+ * Signature dialog. A group of one behaves as a drop.
  */
 export function WithDropAuthorSignedMarker({
   drop,
@@ -218,22 +351,7 @@ export function WithDropAuthorSignedMarker({
   readonly children: ReactNode;
 }) {
   if (group && group.length > 1) {
-    const signedCount = group.filter(isDropAuthorSigned).length;
-    if (signedCount === 0) {
-      return children;
-    }
-    return (
-      <SealBeside
-        seal={
-          <DropGroupSignedMarkerButton
-            group={group}
-            signedCount={signedCount}
-          />
-        }
-      >
-        {children}
-      </SealBeside>
-    );
+    return <GroupSealBeside group={group}>{children}</GroupSealBeside>;
   }
   if (!isDropAuthorSigned(drop)) {
     return children;
@@ -245,20 +363,72 @@ export function WithDropAuthorSignedMarker({
   );
 }
 
-/**
- * Static seal for timestamps that cannot hold controls: the one revealed on
- * grouped chat rows and timestamps inside a button (search results, entry
- * pickers). The drop menu's Signature item opens the dialog there.
- */
-export function DropAuthorSignedIndicator() {
+function StaticSeal({
+  state,
+  sealRef,
+}: {
+  readonly state: SealState;
+  readonly sealRef?: RefObject<HTMLSpanElement | null> | undefined;
+}) {
   const locale = useBrowserLocale();
   return (
     <span
+      ref={sealRef}
       role="img"
-      aria-label={t(locale, "signedMessages.marker.label")}
+      aria-label={t(locale, SEAL_LABEL_KEYS[state])}
       className="tw-inline-flex tw-flex-shrink-0 tw-text-iron-400"
     >
-      <ShieldCheckIcon aria-hidden="true" className="tw-size-3.5" />
+      <SealIcon state={state} />
+    </span>
+  );
+}
+
+function CheckedStaticSeal({ drop }: { readonly drop: MarkedDrop }) {
+  const sealRef = useRef<HTMLSpanElement>(null);
+  const state = useNearDropSealState(drop, sealRef);
+  return <StaticSeal state={state} sealRef={sealRef} />;
+}
+
+/**
+ * Static seal for timestamps that cannot hold controls: the one revealed on
+ * grouped chat rows and timestamps inside a button (search results, entry
+ * pickers). The drop menu's Signature item opens the dialog there. Given the
+ * drop, it shows this browser's check; without one it never claims more
+ * than signed, not yet verified.
+ */
+export function DropAuthorSignedIndicator({
+  drop,
+}: {
+  readonly drop?: MarkedDrop | undefined;
+}) {
+  return drop ? (
+    <CheckedStaticSeal drop={drop} />
+  ) : (
+    <StaticSeal state="unverified" />
+  );
+}
+
+/**
+ * The hidden name of a control that is the whole drop card: point its
+ * aria-labelledby at `id`. It is the label with the drop's signed status
+ * as this browser's check reports it, and follows that check as it
+ * finishes.
+ */
+export function AuthorSignedLabel({
+  id,
+  drop,
+  label,
+}: {
+  readonly id: string;
+  readonly drop: MarkedDrop;
+  readonly label: string;
+}) {
+  const locale = useBrowserLocale();
+  const drops = useMemo(() => [drop], [drop]);
+  const state = useDropSealStates(drops, false)[0] ?? "pending";
+  return (
+    <span id={id} hidden>
+      {authorSignedLabel(locale, label, drop, state)}
     </span>
   );
 }

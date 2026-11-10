@@ -1,11 +1,9 @@
 import {
+  AuthorSignedLabel,
   DropAuthorSignedIndicator,
   WithDropAuthorSignedMarker,
 } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
-import {
-  isDropAuthorSigned,
-  withAuthorSignedLabel,
-} from "@/components/waves/drops/signature/dropAuthorSigned";
+import { isDropAuthorSigned } from "@/components/waves/drops/signature/dropAuthorSigned";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -58,6 +56,17 @@ jest.mock(
   })
 );
 
+/** This browser's verdict per drop id; "verified" unless set. */
+let mockStates: Record<string, string> = {};
+const mockStateOf = (drop: { id: string }) => mockStates[drop.id] ?? "verified";
+const mockUseDropSealStates = jest.fn();
+jest.mock("@/components/waves/drops/signature/dropSignatureVerdicts", () => ({
+  useDropSealStates: (drops: { id: string }[], active: boolean) => {
+    mockUseDropSealStates(drops, active);
+    return drops.map(mockStateOf);
+  },
+}));
+
 const aDrop = (overrides: Record<string, unknown> = {}) =>
   ({
     id: "drop-1",
@@ -85,6 +94,33 @@ describe("drop author signed marker", () => {
     mockHasTouchScreen = false;
     mockDialog.mockClear();
     mockGroupDialog.mockClear();
+    mockUseDropSealStates.mockClear();
+    mockStates = {};
+  });
+
+  it("checks the drop once its seal is seen (immediately without IntersectionObserver)", () => {
+    const drop = aDrop();
+    renderMarker(drop);
+    expect(mockUseDropSealStates).toHaveBeenLastCalledWith([drop], true);
+  });
+
+  it.each([
+    ["not yet checked", "pending", "Checking the author's signature"],
+    ["not verifiable here", "unverified", "Signed, not yet verified"],
+    ["not matching", "failed", "The signature doesn't match this post"],
+  ])("never says signed by its author for a drop %s", (_name, state, label) => {
+    mockStates = { "drop-1": state };
+    renderMarker();
+    const seal = screen.getByRole("button", { name: label });
+    expect(seal.querySelector(`[data-seal-state="${state}"]`)).not.toBeNull();
+    expect(marker()).not.toBeInTheDocument();
+  });
+
+  it("shows the filled seal only once this browser verified the signature", () => {
+    renderMarker();
+    expect(
+      marker()!.querySelector('[data-seal-state="verified"]')
+    ).not.toBeNull();
   });
 
   it("renders beside the timestamp when signed messages are on and the drop is author signed", () => {
@@ -200,17 +236,61 @@ describe("drop author signed marker", () => {
     // DropSignatureDialog.test.tsx.
   });
 
-  it("names a signed drop inside a single-button card", () => {
-    expect(withAuthorSignedLabel("en-US", "Open entry", aDrop())).toBe(
-      "Open entry, signed by its author"
-    );
-    expect(
-      withAuthorSignedLabel(
-        "en-US",
-        "Open entry",
-        aDrop({ is_author_signed: false })
-      )
-    ).toBe("Open entry");
+  describe("the name of a single-button card", () => {
+    const renderCard = (drop = aDrop()) =>
+      render(
+        <button type="button" aria-labelledby="card-label">
+          <AuthorSignedLabel id="card-label" drop={drop} label="Open entry" />
+          <DropAuthorSignedIndicator drop={drop} />
+        </button>
+      );
+
+    it.each([
+      ["verified", "Open entry, signed by its author"],
+      ["pending", "Open entry, signed, not yet verified"],
+      ["unverified", "Open entry, signed, not yet verified"],
+      ["failed", "Open entry, the signature doesn't match this post"],
+    ])("follows this browser's %s check", (state, name) => {
+      mockStates = { "drop-1": state };
+      renderCard();
+      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    });
+
+    it("updates with the check, as its seal does", () => {
+      mockStates = { "drop-1": "pending" };
+      const drop = aDrop();
+      const { rerender } = renderCard(drop);
+      expect(
+        screen.getByRole("button", {
+          name: "Open entry, signed, not yet verified",
+        })
+      ).toBeInTheDocument();
+
+      mockStates = { "drop-1": "verified" };
+      rerender(
+        <button type="button" aria-labelledby="card-label">
+          <AuthorSignedLabel id="card-label" drop={drop} label="Open entry" />
+          <DropAuthorSignedIndicator drop={drop} />
+        </button>
+      );
+      expect(
+        screen.getByRole("button", { name: "Open entry, signed by its author" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("img", { name: "Signed by its author" })
+      ).toBeInTheDocument();
+    });
+
+    it("is the plain label for a drop 6529.io marks unsigned", () => {
+      renderCard(aDrop({ is_author_signed: false }));
+      expect(
+        screen.getByRole("button", { name: "Open entry" })
+      ).toBeInTheDocument();
+      expect(mockUseDropSealStates).toHaveBeenCalledWith(
+        [expect.objectContaining({ id: "drop-1" })],
+        false
+      );
+    });
   });
 
   describe("for a grouped chat header", () => {
@@ -240,6 +320,59 @@ describe("drop author signed marker", () => {
         name: "2 of 3 posts signed by their author",
       });
       expect(seal.querySelector('[data-seal-state="partial"]')).not.toBeNull();
+    });
+
+    it("counts only the posts this browser verified", () => {
+      const group = groupOf(true, true, true);
+      mockStates = { "drop-2": "unverified" };
+      renderGroup(group);
+      expect(
+        screen.getByRole("button", {
+          name: "2 of 3 posts signed by their author",
+        })
+      ).toBeInTheDocument();
+      expect(mockUseDropSealStates).toHaveBeenLastCalledWith(group, true);
+    });
+
+    it.each([
+      [
+        "checking",
+        { "drop-2": "pending" },
+        "Checking the signatures in this group",
+        "pending",
+      ],
+      [
+        "not matching",
+        { "drop-1": "pending", "drop-2": "failed" },
+        "A signature in this group doesn't match its post",
+        "failed",
+      ],
+      [
+        "not verified",
+        {
+          "drop-1": "unverified",
+          "drop-2": "unverified",
+          "drop-3": "unverified",
+        },
+        "Signed posts, not yet verified",
+        "unverified",
+      ],
+    ])(
+      "never claims signatures while a post is %s",
+      (_name, states, label, state) => {
+        mockStates = states;
+        renderGroup(groupOf(true, true, true));
+        const seal = screen.getByRole("button", { name: label });
+        expect(
+          seal.querySelector(`[data-seal-state="${state}"]`)
+        ).not.toBeNull();
+      }
+    );
+
+    it("checks only the posts 6529.io marks as signed", () => {
+      const group = groupOf(false, true);
+      renderGroup(group);
+      expect(mockUseDropSealStates).toHaveBeenLastCalledWith([group[1]], true);
     });
 
     it("shows no seal when no post is signed", () => {
@@ -320,11 +453,26 @@ describe("drop author signed marker", () => {
     });
   });
 
-  it("labels the static seal used on grouped rows", () => {
+  it("never claims a verified signature on a static seal without its drop", () => {
     render(<DropAuthorSignedIndicator />);
 
     expect(
+      screen.getByRole("img", { name: "Signed, not yet verified" })
+    ).toBeInTheDocument();
+  });
+
+  it("labels a static seal from this browser's check of its drop", () => {
+    const drop = aDrop();
+    const { rerender } = render(<DropAuthorSignedIndicator drop={drop} />);
+    expect(
       screen.getByRole("img", { name: "Signed by its author" })
+    ).toBeInTheDocument();
+    expect(mockUseDropSealStates).toHaveBeenLastCalledWith([drop], true);
+
+    mockStates = { "drop-1": "pending" };
+    rerender(<DropAuthorSignedIndicator drop={{ ...drop }} />);
+    expect(
+      screen.getByRole("img", { name: "Checking the author's signature" })
     ).toBeInTheDocument();
   });
 });

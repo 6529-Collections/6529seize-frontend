@@ -33,19 +33,20 @@ import {
   ShieldCheckIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useQuery } from "@tanstack/react-query";
 import type { KeyboardEvent, ReactNode, SyntheticEvent } from "react";
 import { useRef } from "react";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { usePublicClient } from "wagmi";
+import {
+  recordDropSignatureVerdict,
+  type SignedContentDrop,
+} from "./dropSignatureVerdicts";
 
 interface DropSignatureDialogProps {
   readonly dropId: string;
   /** The drop as shown; its content is checked against the signed body. */
-  readonly drop?:
-    | Pick<ApiDrop, "title" | "parts" | "wave" | "author">
-    | undefined;
+  readonly drop?: SignedContentDrop | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }
@@ -73,6 +74,7 @@ function SignedDetails({
       t(locale, "signedMessages.signature.deviceKey"),
       getDeviceKeyFingerprint(signature.deviceKey),
     ],
+    [t(locale, "signedMessages.signature.origin"), signature.origin],
     [
       t(locale, "signedMessages.signature.grantExpires"),
       formatDate(locale, signature.grantExpiresAt),
@@ -144,6 +146,8 @@ function VerdictView({
 }) {
   const { Icon, iconClassName, titleKey, descriptionKey } =
     VERDICT_PRESENTATION[verdict.status];
+  const unrecognizedOrigin =
+    verdict.status === "unverifiable" ? verdict.unrecognizedOrigin : undefined;
   return (
     <div>
       <p className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-iron-50">
@@ -154,7 +158,15 @@ function VerdictView({
         <span>{t(locale, titleKey)}</span>
       </p>
       <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-        {t(locale, descriptionKey)}
+        {unrecognizedOrigin === undefined
+          ? t(locale, descriptionKey)
+          : t(
+              locale,
+              "signedMessages.signature.unrecognizedOriginDescription",
+              {
+                origin: unrecognizedOrigin,
+              }
+            )}
       </p>
       {verdict.status === "signed" && (
         <SignedDetails locale={locale} verdict={verdict} />
@@ -194,13 +206,19 @@ function useDropSignatureVerdict({
         drop && authorAddress && signedEvents.events.length > 0
           ? await fetchAuthorWallets(authorAddress, signal)
           : [];
-      return await verifyDropSignedEvents(signedEvents, {
+      const verdict = await verifyDropSignedEvents(signedEvents, {
         contractWallets,
         displayed: content,
         expected: drop
           ? { dropId, waveId: drop.wave.id, authorWallets }
           : undefined,
       });
+      // The drop's seal shows this check too (including a contract wallet
+      // verified on Ethereum, which the seal's own check leaves unverified).
+      if (drop) {
+        recordDropSignatureVerdict(dropId, drop, verdict);
+      }
+      return verdict;
     },
     staleTime: 60_000,
     retry: 1,

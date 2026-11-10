@@ -78,6 +78,7 @@ const signedVerdict = (
       "0xd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
     grantExpiresAt: Date.UTC(2027, 3, 16, 12, 0),
     walletSignature: "verified",
+    origin: "6529 Desktop",
   },
   ...overrides,
 });
@@ -109,6 +110,8 @@ describe("drop signature details", () => {
     });
     expect(screen.getByText("0x1111…1111")).toBeVisible();
     expect(screen.getByText("d75a9801...f707511a")).toBeVisible();
+    expect(screen.getByText("Authorized from")).toBeVisible();
+    expect(screen.getByText("6529 Desktop")).toBeVisible();
     expect(screen.getByText("Verified in your browser")).toBeVisible();
     expect(screen.getByText("The signed version")).toBeVisible();
   });
@@ -148,7 +151,10 @@ describe("drop signature details", () => {
 
   it.each([
     ["verified", "Verified in your browser"],
-    ["contract-verified", "Contract wallet: verified on Ethereum in your browser"],
+    [
+      "contract-verified",
+      "Contract wallet: verified on Ethereum in your browser",
+    ],
   ] as const)(
     "labels the %s wallet signature check with its own text",
     async (walletSignature, label) => {
@@ -194,6 +200,26 @@ describe("drop signature details", () => {
     expect(
       screen.queryByText("The signature could not be verified")
     ).toBeNull();
+  });
+
+  it("names an origin no 6529 client produces, never showing the post as signed", async () => {
+    mockVerify.mockResolvedValue({
+      status: "unverifiable",
+      unrecognizedOrigin: "evil.example",
+    });
+    renderWithQueryClient(
+      <DropSignatureDialog dropId={DROP_ID} isOpen onClose={jest.fn()} />
+    );
+
+    expect(
+      await screen.findByText("Couldn't verify this signature right now")
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "This post's device was authorized from “evil.example”, which isn't a 6529 site or app, so this post isn't shown as signed."
+      )
+    ).toBeVisible();
+    expect(screen.queryByText("Signed by its author")).toBeNull();
   });
 
   it.each([
@@ -382,7 +408,10 @@ describe("drop signature details", () => {
       </div>
     );
 
-    const seal = screen.getByRole("button", { name: "Signed by its author" });
+    // The seal says signed by its author only after this browser checked it.
+    const seal = await screen.findByRole("button", {
+      name: "Signed by its author",
+    });
     seal.focus();
     await user.keyboard("{Enter}");
     const dialog = await screen.findByRole("dialog", { name: "Signature" });

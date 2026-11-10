@@ -60,6 +60,8 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "Your messages are sent unsigned until you renew with one signature.",
   "signedMessages.notice.newDevice.message":
     "{label} is now authorized for Signed Posts. If this wasn’t you, revoke it.",
+  "signedMessages.notice.newDevice.details":
+    "Authorized from {origin} · device key {fingerprint}",
   "signedMessages.notice.newDevice.revoke": "Revoke",
   "signedMessages.notice.newDevice.acknowledge": "Got it",
   "signedMessages.notice.newDevice.acknowledgeError":
@@ -80,6 +82,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.devices.scope.react": "react",
   "signedMessages.devices.scope.vote": "vote",
   "signedMessages.devices.wallet": "Wallet {address}",
+  "signedMessages.devices.origin": "Authorized from {origin}",
   "signedMessages.devices.granted": "Added {date}",
   "signedMessages.devices.expires": "Expires {date}",
   "signedMessages.devices.expiredOn": "Expired {date}",
@@ -110,7 +113,14 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.devices.proxy":
     "Switch to your own profile to manage devices.",
   "signedMessages.marker.label": "Signed by its author",
+  "signedMessages.marker.pending": "Checking the author's signature",
+  "signedMessages.marker.unverified": "Signed, not yet verified",
+  "signedMessages.marker.failed": "The signature doesn't match this post",
   "signedMessages.marker.withLabel": "{label}, signed by its author",
+  "signedMessages.marker.withLabelUnverified":
+    "{label}, signed, not yet verified",
+  "signedMessages.marker.withLabelFailed":
+    "{label}, the signature doesn't match this post",
   "signedMessages.signature.menuItem": "Signature",
   "signedMessages.signature.title": "Signature",
   "signedMessages.signature.close": "Close",
@@ -137,6 +147,9 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.signature.walletVerified": "Verified in your browser",
   "signedMessages.signature.contractWalletVerified":
     "Contract wallet: verified on Ethereum in your browser",
+  "signedMessages.signature.origin": "Authorized from",
+  "signedMessages.signature.unrecognizedOriginDescription":
+    "This post's device was authorized from “{origin}”, which isn't a 6529 site or app, so this post isn't shown as signed.",
   "signedMessages.signature.currentContent": "Current content",
   "signedMessages.signature.currentSigned": "The signed version",
   "signedMessages.signature.currentUnsigned": "Changed without a signature",
@@ -146,6 +159,10 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "{signed} of {count} post signed by its author",
   "signedMessages.group.partial.other":
     "{signed} of {count} posts signed by their author",
+  "signedMessages.group.pending": "Checking the signatures in this group",
+  "signedMessages.group.unverified": "Signed posts, not yet verified",
+  "signedMessages.group.failed":
+    "A signature in this group doesn't match its post",
   "signedMessages.group.title": "Signatures in this group",
   "signedMessages.group.description":
     "Select a post to check its signature in your browser.",
