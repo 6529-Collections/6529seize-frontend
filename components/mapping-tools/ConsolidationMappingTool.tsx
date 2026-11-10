@@ -11,6 +11,7 @@ import {
   MappingToolSubmitButton,
   MappingToolUpload,
 } from "./MappingToolControls";
+import { buildCsv } from "@/helpers/csv-export.helpers";
 import { parseCsvFile } from "./mappingToolCsv";
 import { downloadCsvFile } from "./mappingToolDownload";
 import styles from "./MappingTool.module.css";
@@ -90,12 +91,17 @@ export default function ConsolidationMappingTool() {
   }
 
   function downloadConsolidatedCsv(data: ConsolidationData[]) {
-    const csvHeader = "address,token_id,balance,contract,name";
-    const csvRows = data.map((d) => {
-      return `${d.address},${d.token_id},${d.balance},${d.contract},${d.name}`;
-    });
     downloadCsvFile(
-      `${csvHeader}\n${csvRows.join("\n")}`,
+      buildCsv([
+        ["address", "token_id", "balance", "contract", "name"],
+        ...data.map((d) => [
+          d.address,
+          d.token_id,
+          d.balance,
+          d.contract,
+          d.name,
+        ]),
+      ]),
       "consolidation_output.csv"
     );
   }
