@@ -1,3 +1,4 @@
+import { buildCsv } from "@/helpers/csv-export.helpers";
 import type { NftTDH } from "./NFTLeaderboard";
 
 const CSV_HEADERS = [
@@ -26,17 +27,6 @@ function getCollectorCsvName(collector: NftTDH) {
   return populatedName ?? "";
 }
 
-function escapeCsvValue(value: number | string | null | undefined) {
-  const rawValue = value === null || value === undefined ? "" : `${value}`;
-  const stringValue = /^[=+\-@\t]/.test(rawValue) ? `'${rawValue}` : rawValue;
-
-  if (!/[",\n\r]/.test(stringValue)) {
-    return stringValue;
-  }
-
-  return `"${stringValue.replaceAll('"', '""')}"`;
-}
-
 export function buildNftCollectorsCsv(
   collectors: readonly NftTDH[],
   isSearchFiltered: boolean
@@ -54,12 +44,10 @@ export function buildNftCollectorsCsv(
       collector.total_balance,
       collector.total_boosted_tdh,
       collector.total_tdh__raw,
-    ]
-      .map(escapeCsvValue)
-      .join(",");
+    ];
   });
 
-  return `${[CSV_HEADERS.join(","), ...rows].join("\n")}\n`;
+  return `${buildCsv([CSV_HEADERS, ...rows])}\n`;
 }
 
 export function downloadNftCollectorsCsv(nftId: number, csv: string) {
