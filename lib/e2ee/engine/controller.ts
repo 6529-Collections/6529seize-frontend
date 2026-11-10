@@ -198,12 +198,25 @@ export class EngineController {
     if (!serverGroups || !this.isReady()) {
       return;
     }
-    for (const [g, known] of lastSeqByGroup(serverGroups)) {
-      const runtime = this.ctx.store.groups.get(g);
-      if (isActive(runtime) && isBehind(runtime, known)) {
-        await this.guard(this.syncGroup(g));
-      }
-    }
+    const behind = [...lastSeqByGroup(serverGroups)]
+      .filter(([g, known]) => {
+        const runtime = this.ctx.store.groups.get(g);
+        return isActive(runtime) && isBehind(runtime, known);
+      })
+      .map(([g]) => g);
+    await this.syncInOrder(behind);
+  }
+
+  /**
+   * Catches up groups one after another, as the full pass does: every
+   * catch-up runs in the engine's serial queue anyway, and fetching them in
+   * parallel would only burst requests against the per-device rate limits.
+   */
+  private syncInOrder(groups: readonly string[]): Promise<void> {
+    return groups.reduce<Promise<void>>(
+      (previous, g) => previous.then(() => this.guard(this.syncGroup(g))),
+      Promise.resolve()
+    );
   }
 
   /** One group's (or the pool's) failure must not stop the whole pass. */

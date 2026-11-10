@@ -5,11 +5,14 @@
  * polling fallback, stale-epoch re-encryption, roster repair and snapshots.
  */
 import { POLL_OPEN_MS } from "@/lib/e2ee/engine/controller";
+import { newRuntime } from "@/lib/e2ee/engine/groups";
 import {
   addUser,
   createWorld,
   realSleep,
   settle,
+  startDevice,
+  stopDevice,
   texts,
 } from "./support/harness";
 
@@ -126,6 +129,41 @@ describe("E2EE engine: sync paths", () => {
     } finally {
       bob.primary.engine.dispose();
     }
+  });
+
+  it("keeps listedThrough in memory only, so a reload catches up afresh", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    const g = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await settle(world);
+    // The commit that added Bob lies outside his delivery window, so his
+    // cursor stays behind the group's last_seq once he has caught up.
+    const record = (await bob.primary.storage.listGroups("bob")).find(
+      (item) => item.g === g
+    );
+    if (!record) throw new Error("no stored group");
+    expect(record).not.toHaveProperty("listedThrough");
+    expect(newRuntime(record).listedThrough).toBeUndefined();
+
+    stopDevice(world, bob.primary);
+    const start = world.ds.state.requests.length;
+    const restarted = await startDevice(world, "bob", bob.account, {
+      storage: bob.primary.storage,
+      enroll: false,
+    });
+    await restarted.engine.sync();
+    await restarted.engine.idle();
+    const fetches = world.ds.state.requests
+      .slice(start)
+      .filter(
+        (r) => r.profileId === "bob" && r.path === `e2ee/groups/${g}/log`
+      );
+    expect(fetches.length).toBeGreaterThan(0);
+    restarted.engine.dispose();
   });
 
   it("polls an opened conversation every 5 s even after a local lookup-resume event", async () => {

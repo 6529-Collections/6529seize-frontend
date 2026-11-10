@@ -262,6 +262,8 @@ async function acceptJoin(
   record.splitView = checks.splitView;
   const runtime = existing ?? newRuntime(record);
   runtime.record = record;
+  // A rejoin opens a new delivery window: catch up afresh.
+  delete runtime.listedThrough;
   ctx.store.groups.set(g, runtime);
   await applySummary(ctx, runtime, summary);
   for (const member of record.members) {
