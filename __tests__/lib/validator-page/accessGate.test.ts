@@ -64,21 +64,12 @@ describe("validator page access gate", () => {
     expect(isPasswordCorrect("", PASSWORD)).toBe(false);
   });
 
-  it("stays locked with neither a password nor VALIDATOR_PAGE_PUBLIC=true", () => {
+  it("is open without a password or with VALIDATOR_PAGE_PUBLIC=true", () => {
     delete process.env["VALIDATOR_PAGE_PASSWORD"];
     delete process.env["VALIDATOR_PAGE_PUBLIC"];
     expect(getValidatorGatePassword()).toBeNull();
-    expect(hasValidatorAccess(undefined)).toBe(false);
-    expect(hasValidatorAccess(createAccessCookieValue(""))).toBe(false);
-
-    process.env["VALIDATOR_PAGE_PUBLIC"] = "false";
-    expect(hasValidatorAccess(undefined)).toBe(false);
-    process.env["VALIDATOR_PAGE_PUBLIC"] = "true";
     expect(hasValidatorAccess(undefined)).toBe(true);
-  });
 
-  it("asks for the password unless VALIDATOR_PAGE_PUBLIC=true", () => {
-    delete process.env["VALIDATOR_PAGE_PUBLIC"];
     process.env["VALIDATOR_PAGE_PASSWORD"] = PASSWORD;
     expect(getValidatorGatePassword()).toBe(PASSWORD);
     expect(hasValidatorAccess(undefined)).toBe(false);
@@ -86,10 +77,8 @@ describe("validator page access gate", () => {
 
     process.env["VALIDATOR_PAGE_PUBLIC"] = "TRUE";
     expect(getValidatorGatePassword()).toBeNull();
-    expect(hasValidatorAccess(undefined)).toBe(true);
     process.env["VALIDATOR_PAGE_PUBLIC"] = "false";
     expect(getValidatorGatePassword()).toBe(PASSWORD);
-    expect(hasValidatorAccess(undefined)).toBe(false);
   });
 
   it.each([

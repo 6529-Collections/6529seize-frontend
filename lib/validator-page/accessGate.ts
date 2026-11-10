@@ -59,35 +59,16 @@ export function isValidatorPath(pathname: string): boolean {
   );
 }
 
-type ValidatorGate =
-  | { readonly open: true }
-  | {
-      readonly open: false;
-      /** Null when none is configured: then nothing unlocks the pages. */
-      readonly password: string | null;
-    };
-
 /**
- * Whether the pages are open to everyone. Only `VALIDATOR_PAGE_PUBLIC=true`
- * opens them; without it they stay locked, with no way in when no password
- * is configured, so a missing secret never opens them.
- */
-function getValidatorGate(): ValidatorGate {
-  const env = getValidatorPageServerEnv();
-  if (env.isPublic) {
-    return { open: true };
-  }
-  return { open: false, password: env.password ?? null };
-}
-
-/**
- * The password the form accepts, or null when it accepts none: the pages
- * are public (`VALIDATOR_PAGE_PUBLIC=true`) or no password is configured.
- * Null does not mean open; see `hasValidatorAccess`.
+ * The password the gate asks for, or null when the page is open to everyone:
+ * `VALIDATOR_PAGE_PUBLIC=true`, or no password configured.
  */
 export function getValidatorGatePassword(): string | null {
-  const gate = getValidatorGate();
-  return gate.open ? null : gate.password;
+  const env = getValidatorPageServerEnv();
+  if (env.isPublic) {
+    return null;
+  }
+  return env.password ?? null;
 }
 
 // One entry: the key for the password in use.
@@ -181,18 +162,10 @@ export function isPasswordCorrect(input: string, password: string): boolean {
   );
 }
 
-/**
- * True when the pages are public, or the cookie is valid for the configured
- * password. With neither the public flag nor a password, nothing is.
- */
+/** True when the page is open, or the cookie is a valid one. */
 export function hasValidatorAccess(cookieValue: string | undefined): boolean {
-  const gate = getValidatorGate();
-  if (gate.open) {
-    return true;
-  }
-  return (
-    gate.password !== null && isAccessCookieValid(cookieValue, gate.password)
-  );
+  const password = getValidatorGatePassword();
+  return password === null || isAccessCookieValid(cookieValue, password);
 }
 
 export const VALIDATOR_ACCESS_COOKIE_OPTIONS = {

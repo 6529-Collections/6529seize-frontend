@@ -126,15 +126,6 @@ describe("the hardware page's facts, as of 0.1.0-rc.5", () => {
     ...QUESTIONS.flatMap((q) => [q.question, q.answer]),
   ].join("\n");
 
-  // The cookies below unlock the page only while a password is configured.
-  beforeAll(() => {
-    process.env["VALIDATOR_PAGE_PASSWORD"] = PASSWORD;
-  });
-
-  afterAll(() => {
-    delete process.env["VALIDATOR_PAGE_PASSWORD"];
-  });
-
   it("names the systems the rc.5 packages run on", () => {
     const mac = SYSTEMS.find((s) => s.key === "mac");
     const windows = SYSTEMS.find((s) => s.key === "windows");

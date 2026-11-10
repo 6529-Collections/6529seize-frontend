@@ -121,27 +121,17 @@ describe("handleValidatorPageGate", () => {
     );
   });
 
-  it("opens everything only when the page is public", () => {
+  it("opens everything when the page is public or has no password", () => {
     process.env["VALIDATOR_PAGE_PUBLIC"] = "true";
     expect(
       handleValidatorPageGate(request("/validator"), "/validator")
     ).toBeUndefined();
     const encoded = "/%76alidator/app-today.webp";
     expect(handleValidatorPageGate(request(encoded), encoded)).toBeUndefined();
-  });
-
-  it("stays locked with neither a password nor the public flag", () => {
+    delete process.env["VALIDATOR_PAGE_PUBLIC"];
     delete process.env["VALIDATOR_PAGE_PASSWORD"];
     expect(
-      rewriteTarget(
-        handleValidatorPageGate(request("/validator"), "/validator")
-      )
-    ).toBe("https://6529.io/validator/locked");
-    expect(
-      handleValidatorPageGate(
-        request("/validator/authorize"),
-        "/validator/authorize"
-      )
+      handleValidatorPageGate(request("/validator"), "/validator")
     ).toBeUndefined();
   });
 

@@ -44,7 +44,6 @@ cookie again.
   Report a problem (from rc.8) link `/validator#send-feedback`, and the
   password form carries the section to `/validator/unlock` and back. Keep
   the `send-feedback` id on the download page.
-
 - The gate matches the path after decoding it once and folding repeated
   slashes, so `/%76alidator/<file>` and `/validator%2F<file>` are gated
   like `/validator/<file>`; a malformed escape cannot hide the prefix.
@@ -53,15 +52,6 @@ The password is never in the repository. Production reads it from the
 `VALIDATOR_PAGE_PASSWORD` environment variable, which the
 `Web Deploy - PROD` workflow copies from the `production` environment's
 GitHub secret of the same name into the Elastic Beanstalk environment.
-
-Only `VALIDATOR_PAGE_PUBLIC=true` opens the pages. Without it they ask for
-the password, and with no password configured they stay locked: the form
-shows, and nothing it accepts opens them. For local development,
-`.env.sample` sets `VALIDATOR_PAGE_PUBLIC=true`; an older `.env` without
-it shows the password form. A server that should show the pages, staging
-included, needs `VALIDATOR_PAGE_PUBLIC=true` or a password in its
-environment.
-
 ### Change the password
 
 1. Set the new value:
