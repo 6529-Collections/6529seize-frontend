@@ -527,4 +527,43 @@ describe("E2eeEnrollmentCard upgrade copy (D172)", () => {
       "Couldn’t upgrade encrypted messages. Try again."
     );
   });
+
+  it("explains a stop on an unconfirmed revocation and adds no failure alert", async () => {
+    const engine = createFakeE2eeEngine({ status: "needs-enrollment" });
+    jest
+      .mocked(engine.enroll)
+      .mockRejectedValueOnce(new Error("E2EE_REVOCATION_UNVERIFIED"));
+    render(
+      <SeizeConnectContext.Provider
+        value={
+          {
+            address: ADDRESS,
+            canSignActiveWallet: true,
+            connectedAccounts: [],
+            seizeConnectFresh: mockConnect,
+          } as unknown as SeizeConnectContextType
+        }
+      >
+        <E2eeEnrollmentCard
+          scope="dms"
+          engine={engine}
+          enrolling={false}
+          engineError="E2EE_REVOCATION_UNVERIFIED"
+        />
+      </SeizeConnectContext.Provider>
+    );
+    const notice =
+      /listed as revoked, but the revocation couldn’t be confirmed here/u;
+    expect(screen.getByText(notice)).toHaveTextContent(
+      "sign out with “Remove encrypted messages from this browser” selected"
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign to enable Encrypted DMs" })
+    );
+
+    await waitFor(() => expect(engine.enroll).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByText(notice)).toBeInTheDocument());
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
 });

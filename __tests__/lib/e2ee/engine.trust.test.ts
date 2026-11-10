@@ -130,6 +130,12 @@ describe("E2EE engine: device trust on first use", () => {
         true,
       ]);
     }
+    // Not added on bob's devices is no reason to remove a member device.
+    world.clock.advance(11 * 60_000);
+    await settle(world);
+    for (const device of [alice.primary, bob.primary, bobPhone]) {
+      expect(leafKeys(device.engine, g)).toContain(ghostKey);
+    }
   });
 
   it("a fresh device adds own devices of its wallet; one of another wallet waits for Add device", async () => {

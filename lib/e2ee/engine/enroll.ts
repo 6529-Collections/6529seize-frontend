@@ -538,6 +538,27 @@ async function getOwnMe(ctx: EngineContext): Promise<ApiE2eeMe> {
 export const E2EE_REVOCATION_UNVERIFIED = "E2EE_REVOCATION_UNVERIFIED";
 
 /**
+ * Records (or clears) that this device stopped on a revocation that did not
+ * verify, so a reload stays stopped without contacting the server. Runs in
+ * the queue.
+ */
+export async function markRevocationUnverified(
+  ctx: EngineContext,
+  unverified: boolean
+): Promise<void> {
+  const device = ctx.device;
+  if (!device || (device.revocationUnverified === true) === unverified) {
+    return;
+  }
+  if (unverified) {
+    device.revocationUnverified = true;
+  } else {
+    delete device.revocationUnverified;
+  }
+  await checkpoint(ctx, { device, skipWasm: true });
+}
+
+/**
  * Whether a listed revocation of this device verifies (see
  * `DeviceDirectory.ownRevocationVerified`); only then is local data removed.
  */

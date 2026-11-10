@@ -475,8 +475,12 @@ to turn encrypted messages on again. Your device's data is removed only when
 the revocation verifies on it (it came from that device, or from a device of
 yours this device trusts). If 6529.io lists this device as revoked but the
 revocation can't be confirmed, the device stops sending and receiving
-encrypted messages, keeps everything saved on it, and the card to turn them on
-says so. A new device is named after its
+encrypted messages, keeps everything saved on it, and stays stopped (also after
+a reload) until you act; the card to turn them on says so. Turning them on
+again checks once more. To use them on that browser again, sign out with
+**Remove encrypted messages from this browser** selected and turn them on
+again; that deletes the history saved there, which only an encrypted backup
+can restore. A new device is named after its
 browser or app and OS family (for example "Chrome on Windows" or "6529 Mobile on
 iPhone"); devices added earlier keep their name. A profile can have up to 10
 active devices; at the limit, the new device lists the profile's devices and

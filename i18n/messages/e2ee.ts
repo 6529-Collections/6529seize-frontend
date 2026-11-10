@@ -144,7 +144,7 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.rejected": "Signature cancelled.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
   "e2ee.enroll.revocationUnverified":
-    "This device is listed as revoked, but the revocation couldn’t be confirmed here. It has stopped sending and receiving encrypted messages, and everything saved on it is kept.",
+    "This device is listed as revoked, but the revocation couldn’t be confirmed here. It has stopped sending and receiving encrypted messages, and everything saved on it is kept. To use them here again, sign out with “Remove encrypted messages from this browser” selected, then turn them on again; that deletes the history saved here, which only an encrypted backup can restore.",
   "e2ee.upgrade.title": "Upgrade encrypted messages",
   "e2ee.upgrade.intro":
     "Encrypted messages are moving to stronger encryption. Confirm once in your wallet to continue; your messages stay on this device.",

@@ -9,6 +9,7 @@ import {
   addUser,
   createWorld,
   notices,
+  realSleep,
   settle,
   startDevice,
   stopDevice,
@@ -186,18 +187,84 @@ describe("E2EE engine: devices", () => {
     expect(
       (await storage.listMessages("alice", g)).map((m) => m.text)
     ).toContain("kept on this device");
+    expect((await storage.getDevice("alice"))?.revocationUnverified).toBe(true);
 
-    // A reload reads the same listing at start (GET /e2ee/me) and stops again.
+    // Stopped means quiet: no sync, poll, enrolment or refresh by itself.
+    stopDevice(world, listed);
+    const aliceCalls = () =>
+      world.ds.state.requests.filter((r) => r.profileId === "alice");
+    const statuses: string[] = [];
+    alice.primary.engine.subscribe(() => {
+      statuses.push(alice.primary.engine.getStatus());
+    });
+    const before = aliceCalls().length;
+    for (let step = 0; step < 4; step += 1) {
+      world.clock.advance(11 * 60_000);
+      await alice.primary.engine.sync();
+      await alice.primary.engine.enrollWithLoginGrant();
+      alice.primary.engine.setOpenConversation(g);
+      await settle(world);
+      await realSleep(50);
+      await alice.primary.engine.idle();
+    }
+    expect(aliceCalls().length).toBe(before);
+    expect(statuses.filter((s) => s !== "needs-enrollment")).toEqual([]);
+
+    // Turning on again checks the listing once and stays stopped.
+    await expect(alice.primary.engine.enroll()).rejects.toThrow(
+      "E2EE_REVOCATION_UNVERIFIED"
+    );
+    expect(
+      aliceCalls()
+        .slice(before)
+        .map((r) => r.path)
+    ).toEqual(["e2ee/me"]);
+    expect(alice.primary.engine.getStatus()).toBe("needs-enrollment");
+    expect(statuses.filter((s) => s !== "needs-enrollment")).toEqual([]);
+    expect(alice.primary.signCalls).toBe(1);
+
+    // A reload stays stopped without contacting the server.
     stopDevice(world, alice.primary);
+    const reloadAt = aliceCalls().length;
     const reloaded = await startDevice(world, "alice", alice.account, {
       storage,
       enroll: false,
     });
+    world.clock.advance(31 * 60_000);
+    await settle(world);
     await reloaded.engine.idle();
     expect(reloaded.engine.getStatus()).toBe("needs-enrollment");
     expect(reloaded.engine.getError()).toBe("E2EE_REVOCATION_UNVERIFIED");
+    expect(aliceCalls().length).toBe(reloadAt);
     expect(await storage.getDevice("alice")).not.toBeNull();
     expect(await storage.listGroups("alice")).toHaveLength(1);
+  });
+
+  it("resumes a stopped device once the server no longer lists it as revoked", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const { storage } = alice.primary;
+    await alice.primary.engine.idle();
+    stopDevice(world, alice.primary);
+    // As left by an earlier stop on a listing that has since been corrected.
+    const stored = (await storage.getDevice("alice"))!;
+    await storage.writeBatch("alice", {
+      expectedVersion: await storage.getStateVersion("alice"),
+      device: { ...stored, revocationUnverified: true },
+    });
+    const restarted = await startDevice(world, "alice", alice.account, {
+      storage,
+      enroll: false,
+    });
+    expect(restarted.engine.getStatus()).toBe("needs-enrollment");
+    expect(restarted.engine.getError()).toBe("E2EE_REVOCATION_UNVERIFIED");
+
+    await restarted.engine.enroll();
+    expect(restarted.engine.getStatus()).toBe("ready");
+    expect(restarted.signCalls).toBe(0);
+    expect(
+      (await storage.getDevice("alice"))?.revocationUnverified
+    ).toBeUndefined();
   });
 
   it("removes a device's data once the device that revoked it was added here", async () => {

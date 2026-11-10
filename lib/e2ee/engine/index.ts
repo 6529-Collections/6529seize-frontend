@@ -31,6 +31,7 @@ import { EngineController } from "./controller";
 import {
   confirmOwnRejection,
   E2EE_REVOCATION_UNVERIFIED,
+  markRevocationUnverified,
   needsNewDevice,
   refreshMe,
   renewalDue,
@@ -134,6 +135,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
         await this.enrollment.startFromLoginGrant();
         return;
       }
+      if (this.ctx.device?.revocationUnverified === true) {
+        // Stopped until the user acts (see recheckRevocation).
+        setStatus(this.ctx, NEEDS_ENROLLMENT, E2EE_REVOCATION_UNVERIFIED);
+        return;
+      }
       setStatus(this.ctx, "ready");
       this.start();
     } catch (error) {
@@ -197,7 +203,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (result.ownRevocation === "verified") {
       await this.wipe();
     } else if (result.ownRevocation === "unverified") {
-      this.suspend(E2EE_REVOCATION_UNVERIFIED);
+      await this.suspend(E2EE_REVOCATION_UNVERIFIED);
     }
   }
 
@@ -221,18 +227,45 @@ class E2eeEngineImpl implements E2eeEngineExt {
       await this.wipe();
       return;
     }
-    this.suspend(
+    await this.suspend(
       verdict === "revoked-unverified" ? E2EE_REVOCATION_UNVERIFIED : null
     );
   }
 
   /**
-   * Stops using this device (no sync, no sends) and keeps every local
-   * record: the device key, history, outbox and trust stay for enroll().
+   * Stops using this device (no sync, no sends, no timers) and keeps every
+   * local record: the device key, history, outbox and trust stay for
+   * enroll(). An unverified revocation is remembered, so a reload stays
+   * stopped without contacting the server.
    */
-  private suspend(code: string | null): void {
+  private async suspend(code: string | null): Promise<void> {
     this.controller.stopBackground();
+    this.ctx.timers.cancelAll();
     setStatus(this.ctx, NEEDS_ENROLLMENT, code);
+    if (code === E2EE_REVOCATION_UNVERIFIED) {
+      await this.ctx.queue.run(() => markRevocationUnverified(this.ctx, true));
+    }
+  }
+
+  /**
+   * Turning encrypted messages on again after an unverified revocation
+   * checks the listing once: still unverified keeps the device stopped (and
+   * fails), a verified one removes the local data, and a device no longer
+   * listed as revoked resumes.
+   */
+  private async recheckRevocation(): Promise<void> {
+    if (this.ctx.device?.revocationUnverified !== true) {
+      return;
+    }
+    const { ownRevocation } = await refreshMe(this.ctx);
+    if (ownRevocation === "unverified") {
+      throw new Error(E2EE_REVOCATION_UNVERIFIED);
+    }
+    if (ownRevocation === "verified") {
+      await this.wipe();
+      return;
+    }
+    await this.ctx.queue.run(() => markRevocationUnverified(this.ctx, false));
   }
 
   /**
@@ -294,6 +327,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   // -- lifecycle --------------------------------------------------------------
 
   async enroll(): Promise<void> {
+    await this.recheckRevocation();
     await this.enrollment.run(true);
   }
 

@@ -36,6 +36,12 @@ export interface StoredDevice {
   /** Which wallets this profile trusts for each person (engine/trust.ts). */
   trust?: StoredTrust;
   /**
+   * The server listed this device as revoked but the revocation did not
+   * verify here: the engine stays stopped (no sync, no sends) until the user
+   * turns encrypted messages on again, which checks once more.
+   */
+  revocationUnverified?: boolean;
+  /**
    * A device of an earlier MLS suite, retired with its history kept (D172):
    * kept only for its trust pins until the next device replaces it.
    */

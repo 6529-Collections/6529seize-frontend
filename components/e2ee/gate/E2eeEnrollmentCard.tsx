@@ -70,6 +70,8 @@ function getPermissionPointKey(
 }
 
 const ENROLL_REJECTED_KEY: MessageKey = "e2ee.enroll.rejected";
+const REVOCATION_UNVERIFIED_KEY: MessageKey =
+  "e2ee.enroll.revocationUnverified";
 
 const subscribeNever = () => () => undefined;
 
@@ -360,8 +362,11 @@ export function E2eeEnrollmentCard({
             return { success: true };
         }
       } catch (error) {
-        setNoticeKey(null);
-        setErrorKey(getEnrollErrorKey(error, upgrading));
+        // Still listed as revoked: a neutral notice says what to do instead
+        // of a failure alert.
+        const stopped = getE2eeErrorCode(error) === E2EE_REVOCATION_UNVERIFIED;
+        setNoticeKey(stopped ? REVOCATION_UNVERIFIED_KEY : null);
+        setErrorKey(stopped ? null : getEnrollErrorKey(error, upgrading));
         return {
           success: false,
           reason: isE2eeSignatureRejection(error)
@@ -543,7 +548,7 @@ function EnrollmentFeedback({
   else if (noticeKey) statusKey = noticeKey;
   else if (waiting && flow.status === null) statusKey = "e2ee.enroll.waiting";
   else if (engineError === E2EE_REVOCATION_UNVERIFIED)
-    statusKey = "e2ee.enroll.revocationUnverified";
+    statusKey = REVOCATION_UNVERIFIED_KEY;
 
   return (
     <>
