@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { removeBaseEndpoint } from "@/helpers/Helpers";
+import { getInternalLinkPath } from "@/helpers/internalLink";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -525,12 +525,7 @@ export function getHttpsHref(
 }
 
 export function getRelativeHref(href: string): string | undefined {
-  const relative = removeBaseEndpoint(href);
-  if (typeof relative !== "string" || relative.length === 0) {
-    return undefined;
-  }
-
-  return relative.startsWith("/") ? relative : undefined;
+  return getInternalLinkPath(href) ?? undefined;
 }
 
 export function LinkPreviewCardLayout({
