@@ -21,6 +21,7 @@ export function useWaveDataManager({
   // Use composition to build the complete functionality
   const {
     registerWave,
+    activateWave,
     prefetchWave,
     cancelWaveDataFetch,
     syncNewestMessages,
@@ -44,6 +45,7 @@ export function useWaveDataManager({
   return {
     // Initial data loading & updates
     registerWave,
+    activateWave,
     prefetchWave,
     cancelWaveDataFetch,
     syncNewestMessages,

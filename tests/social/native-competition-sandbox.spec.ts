@@ -8,6 +8,7 @@ import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2Page
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { observeCachedChatResponse } from "../support/cachedChatResponse";
 import { expectCompetitionScroll } from "../support/competitionScroll";
+import { longPressMessage } from "../support/longPressMessage";
 import {
   expectNativeLeaderboardArtwork,
   expectNativeLeaderboardReady,
@@ -299,9 +300,11 @@ const competition = (id: string, title: string) => ({
   lifecycle: "PUBLISHED",
   computed_phase: "VOTING_OPEN",
   config_version: 1,
+  your_active_entries_count: 0,
   ...structuredClone(competitionRuleDefaults),
   participation: {
     ...structuredClone(competitionRuleDefaults.participation),
+    max_entries_per_participant: null as number | null,
     ends_at: null as number | null,
   },
   decisions: {
@@ -1942,6 +1945,99 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     }
   });
   for (const surface of ["web", "app"] as const) {
+    test(`locks Main Stage submission at three active entries (${surface})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "Native app simulation uses the mobile viewport."
+      );
+      if (surface === "app")
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const sandbox = await installCompetitionApi(
+        page,
+        false,
+        true,
+        MEMES_WAVE
+      );
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      sandbox.setCompetition("alpha", {
+        participation: {
+          ...competition("alpha", "Main Stage").participation,
+          max_entries_per_participant: 3,
+        },
+        your_active_entries_count: 3,
+      });
+      for (const tab of ["chat", "leaderboard"]) {
+        await page.goto(`/waves/${MEMES_WAVE}?tab=${tab}`, {
+          waitUntil: "domcontentloaded",
+        });
+        if (tab === "leaderboard") {
+          await expect(page).toHaveURL(
+            new RegExp(
+              `/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`
+            ),
+            { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+          );
+        }
+        await dismissNextDevTools(page);
+        const lock = page.getByRole("button", {
+          name: "Submission Limit Reached",
+          exact: true,
+        });
+        await expect(lock).toBeVisible();
+        await lock.press("Enter");
+        await expect(
+          page.getByRole("dialog", {
+            name: "Submission Limit Reached",
+            exact: true,
+          })
+        ).toBeVisible();
+        await expect(
+          page
+            .getByText(
+              "You have already submitted the maximum allowed (3 submissions)",
+              { exact: true }
+            )
+            .last()
+        ).toBeVisible();
+        await expect(
+          page.getByRole("dialog", {
+            name: "Submit Work to The Memes",
+            exact: true,
+          })
+        ).toHaveCount(0);
+        await page.keyboard.press("Escape");
+      }
+      sandbox.setCompetition("alpha", { your_active_entries_count: 2 });
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await expect(page).toHaveURL(
+        new RegExp(`/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`),
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      );
+      await expect(
+        page.getByRole("button", {
+          name: "Submission Limit Reached",
+          exact: true,
+        })
+      ).toHaveCount(0);
+      const submit = page.getByRole("button", { name: /^Submit (Work|Meme)/ });
+      await expect(submit).toBeVisible();
+      await submit.click();
+      await expect(
+        page.getByRole("dialog", {
+          name: "Submit Work to The Memes",
+          exact: true,
+        })
+      ).toBeVisible();
+      expect(sandbox.requests).toEqual([]);
+    });
+
     for (const eligible of [true, false]) {
       test(`keeps the Main Stage header action consistent in Chat and Leaderboard (${surface}, ${eligible ? "eligible" : "not eligible"})`, async ({
         page,
@@ -11236,6 +11332,104 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       releaseNavigation();
     }
   });
+
+  for (const proposalCard of [false, true]) {
+    test(`keeps winner chat reply actions reachable for ${proposalCard ? "proposal" : "standard"} cards`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(page);
+      sandbox.onlyCompetition("alpha");
+      const presentation = proposalCard
+        ? [
+            {
+              id: 1,
+              data_key: "wave_display.proposals.card_recipe",
+              data_value:
+                '{"version":1,"layout":"summary","excerpt_max_characters":420,"show_media_thumbnail":false}',
+            },
+          ]
+        : [];
+      sandbox.setCompetition("alpha", { presentation });
+      await page.route(`**/api/v2/waves/${WAVE}/metadata`, (route) =>
+        route.fulfill({ json: presentation })
+      );
+      await page.route("**/api/waves/*/curations**", (route) =>
+        route.fulfill({ json: [] })
+      );
+      await page.route("**/api/drops/*/curations**", (route) =>
+        route.fulfill({ json: [] })
+      );
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${WAVE}/drops`
+      );
+      expect(response.ok()).toBe(true);
+      const fixture = await response.json();
+      const winner = {
+        ...fixture.drops[0],
+        drop_type: "SUBMISSION",
+        title: "Winner hover menu regression",
+        content: "Winner card reply and reaction actions remain available.",
+        media: [],
+        submission_context: {
+          status: "WINNER",
+          has_metadata: false,
+          won_at: 2000,
+          voting: {
+            is_open: false,
+            total_votes_given: 123,
+            current_calculated_vote: 123,
+            predicted_final_vote: 123,
+            voters_count: 0,
+            place: 1,
+          },
+        },
+      };
+      await page.route(`**/api/v2/waves/${WAVE}/drops?*`, (route) =>
+        route.fulfill({ json: { ...fixture, drops: [winner] } })
+      );
+      await page.goto(`/waves/${WAVE}?tab=chat&competition=alpha`);
+      const title = page.getByText(winner.title, { exact: true });
+      await expect(title).toBeVisible({ timeout: 30000 });
+      const row = page
+        .getByRole("tabpanel")
+        .locator(".tw-group")
+        .filter({ has: title });
+      await expect(row.getByTestId("proposal-card-context-label")).toHaveCount(
+        proposalCard ? 1 : 0
+      );
+      const isMobile = testInfo.project.name === "web-mobile-chromium";
+      const reply = page.getByRole("button", {
+        name: isMobile ? "Reply" : "Reply to drop",
+        exact: true,
+      });
+      if (isMobile) {
+        await longPressMessage(page, row);
+      } else {
+        await row.hover();
+        await expect(
+          row.getByRole("button", { name: "React with Thumbs up", exact: true })
+        ).toBeVisible();
+        // Visibility alone does not catch an ancestor clipping the button.
+        await reply.click({ trial: true });
+        await page.mouse.move(0, 0);
+        await reply.focus();
+        await page.keyboard.press("Shift+Tab");
+        await page.keyboard.press("Tab");
+        await expect(reply).toBeFocused();
+      }
+      await testInfo.attach("winner-chat-actions", {
+        body: await page.screenshot(),
+        contentType: "image/png",
+      });
+      await reply.click();
+      await expect(
+        page.getByRole("button", { name: "Cancel reply", exact: true })
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      expect(sandbox.requests).toEqual([]);
+    });
+  }
 
   for (const waveId of [MEMES_WAVE, WAVE]) {
     test(`renders winners without legacy drop or metadata loading in ${waveId === WAVE ? "QUORUM approval" : "Main Stage"}`, async ({

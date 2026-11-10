@@ -30,7 +30,9 @@ export const E2EE_MESSAGES = {
     "Use this only on a device you own. It signs you in and enables signed posts and encrypted DMs. It expires shortly and works once.",
   "e2ee.connectionSetup.back": "Back to connection sharing",
   "e2ee.connectionSetup.failed":
-    "Signed in, but device setup could not finish. Create a new setup link from your source browser to try again. Your existing keys have been kept.",
+    "Signed in, but device setup could not finish. Open a new setup link to try again.",
+  "e2ee.connectionSetup.pending":
+    "Signed in. Encrypted DMs are still being set up on this device.",
 
   "e2ee.notification.newMessage": "New encrypted message",
   "e2ee.notification.open": "Open encrypted chat",
