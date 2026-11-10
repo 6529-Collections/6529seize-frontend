@@ -4016,6 +4016,54 @@
       ]
     },
     {
+      "id": "waves.chat-participation-reasons",
+      "kind": "business_rule",
+      "title": "Why you can or cannot chat or reply in a wave",
+      "aliases": [
+        "why can't I post in this wave",
+        "why can't I reply",
+        "not eligible for this wave",
+        "chat drops are not allowed",
+        "wave participation reasons",
+        "participation inspector"
+      ],
+      "keywords": [
+        "waves",
+        "chat",
+        "reply",
+        "eligible",
+        "eligibility",
+        "permission",
+        "reason",
+        "slow mode",
+        "cooldown",
+        "chat group",
+        "open replies",
+        "proxy"
+      ],
+      "summary": "The API explains per wave whether the current identity may post a chat drop or a reply, with a stable reason code when it may not.",
+      "facts": [
+        "GET /api/waves/{waveId}/participation returns one decision per action (CHAT and REPLY) with allowed, a reason_code when denied, the visible constraints (chat enabled, chat group required, replies open, slow mode interval) and retry_at when a slow-mode cooldown applies.",
+        "Posting a top-level chat drop always requires being in the wave's chat group when one is configured (reason NOT_IN_CHAT_GROUP). Open replies let everyone who can view the wave reply, but not start top-level drops.",
+        "A wave with chat turned off accepts no chat drops or replies from anyone (reason CHAT_DISABLED).",
+        "Slow mode applies per identity and per wave to chat drops and replies, including open repliers outside the chat group; the wave creator and admin-group members are exempt. The next allowed time is next_drop_allowed on the wave and retry_at on a SLOW_MODE_COOLDOWN decision.",
+        "Unencrypted direct messages take no new messages after the retention cutoff (reason LEGACY_DM_CLOSED); start an encrypted chat instead.",
+        "A proxy needs the create-drop action to post on someone's behalf; without it the reason is PROXY_LACKS_ACTION. Signed-out users get NOT_AUTHENTICATED.",
+        "A wave the user cannot see answers not found; the inspector never explains hidden waves or names private groups.",
+        "Allowed means the policy gates pass right now. A post can still be rejected for its content, an invisible reply target, disallowed links, a missing signature, or a cooldown reserved in the meantime.",
+        "When group membership cannot be evaluated the answer is a temporary error (503), not a denial; try again shortly."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves?create=wave"],
+      "tags": ["waves", "chat", "eligibility"],
+      "source_refs": [
+        "generated/models/ApiWaveParticipationDecision.ts",
+        "generated/models/ApiWaveParticipationReasonCode.ts",
+        "components/waves/SlowModeChatNotice.tsx",
+        "hooks/useDropPriviledges.ts"
+      ]
+    },
+    {
       "id": "waves.replies",
       "kind": "business_rule",
       "title": "Open and collapsed wave replies",

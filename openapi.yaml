@@ -20244,6 +20244,50 @@ paths:
           description: Invalid request
         "404":
           description: Wave not found
+  /waves/{id}/participation:
+    get:
+      tags:
+        - Waves
+      summary: Explain whether the caller can chat or reply in a wave.
+      description: >-
+        One decision per supported action (CHAT: a top-level chat drop, REPLY: a
+        reply to a drop in the wave) for the current identity, honouring proxy
+        context. The decisions are built from the same policy the drop write
+        path enforces, so a denial carries the reason code the write would
+        return. A hidden wave or hidden parent wave is a 404, never a reason
+        code; reason codes never name private groups. An allowed decision is not
+        a promise that every payload is accepted (reply target visibility,
+        links, signatures and content checks still apply), and slow mode is
+        reserved atomically at write time. When membership eligibility cannot be
+        evaluated the request fails with 503 exactly as the write path does; it
+        is never reported as a denial.
+      operationId: getWaveParticipation
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/wave-participation.handlers"
+          name: handleGetWaveParticipation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveParticipation"
+        "404":
+          description: Wave not found
+        "503":
+          description: Membership eligibility is temporarily unavailable
   /waves/{id}/drops:
     get:
       tags:
@@ -44438,6 +44482,32 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiWaveOverview"
+    ApiWaveParticipation:
+      type: object
+      required:
+        - wave_id
+        - evaluated_at
+        - decisions
+      properties:
+        wave_id:
+          type: string
+        evaluated_at:
+          type: integer
+          format: int64
+          description: >-
+            Server time (epoch milliseconds) the decisions were made at; compare
+            retry_at against it.
+        decisions:
+          type: array
+          description: Exactly one decision per supported action.
+          items:
+            $ref: "#/components/schemas/ApiWaveParticipationDecision"
+    ApiWaveParticipationAction:
+      type: string
+      description: CHAT is a top-level chat drop; REPLY is a reply to a drop in the wave.
+      enum:
+        - CHAT
+        - REPLY
     ApiWaveParticipationConfig:
       type: object
       required:
@@ -44484,6 +44554,68 @@ components:
           anyOf:
             - type: "null"
             - $ref: "#/components/schemas/ApiWaveParticipationSubmissionStrategy"
+    ApiWaveParticipationConstraints:
+      type: object
+      description: >-
+        Wave settings the decision was made under. Only facts the wave already
+        shows to everyone who can view it.
+      required:
+        - chat_enabled
+        - chat_group_required
+        - replies_open
+      properties:
+        chat_enabled:
+          type: boolean
+        chat_group_required:
+          type: boolean
+          description: >-
+            Whether top-level chat drops require membership of the wave's chat
+            group. The group itself is not named here.
+        replies_open:
+          type: boolean
+          description: >-
+            Whether everyone who can view the wave may reply, even outside the
+            chat group.
+        slow_mode_cooldown_ms:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Present when slow mode is active.
+    ApiWaveParticipationDecision:
+      type: object
+      required:
+        - action
+        - allowed
+        - constraints
+        - evaluation
+      properties:
+        action:
+          $ref: "#/components/schemas/ApiWaveParticipationAction"
+        allowed:
+          type: boolean
+        reason_code:
+          $ref: "#/components/schemas/ApiWaveParticipationReasonCode"
+        constraints:
+          $ref: "#/components/schemas/ApiWaveParticipationConstraints"
+        retry_at:
+          type: integer
+          format: int64
+          description: >-
+            Epoch milliseconds at which the slow-mode cooldown lifts. Only with
+            SLOW_MODE_COOLDOWN.
+        evaluation:
+          $ref: "#/components/schemas/ApiWaveParticipationEvaluation"
+    ApiWaveParticipationEvaluation:
+      type: string
+      description: >-
+        EVALUATED when the decision was made against live membership.
+        UNAVAILABLE is reserved for a decision that could not be made because
+        membership eligibility was temporarily unavailable; it is never a
+        denial. The endpoint currently answers that situation with 503 instead,
+        so clients should treat both the same way.
+      enum:
+        - EVALUATED
+        - UNAVAILABLE
     ApiWaveParticipationIdentitySubmissionAllowDuplicates:
       type: string
       enum:
@@ -44496,6 +44628,24 @@ components:
         - ONLY_MYSELF
         - ONLY_OTHERS
         - EVERYONE
+    ApiWaveParticipationReasonCode:
+      type: string
+      description: >-
+        Why the action is denied. Absent when allowed. The drop write path
+        returns the same code in its error body. NOT_AUTHENTICATED: no profile
+        is authenticated. PROXY_LACKS_ACTION: acting as a proxy without the
+        CREATE_DROP_TO_WAVE action. NOT_IN_CHAT_GROUP: the identity is outside
+        the wave's chat group (for REPLY, and replies are not open).
+        CHAT_DISABLED: the wave has chat turned off. LEGACY_DM_CLOSED: the
+        unencrypted direct message cutoff has passed. SLOW_MODE_COOLDOWN: the
+        identity's slow-mode cooldown has not lifted; see retry_at.
+      enum:
+        - NOT_AUTHENTICATED
+        - PROXY_LACKS_ACTION
+        - NOT_IN_CHAT_GROUP
+        - CHAT_DISABLED
+        - LEGACY_DM_CLOSED
+        - SLOW_MODE_COOLDOWN
     ApiWaveParticipationRequirement:
       type: string
       enum:
