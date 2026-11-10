@@ -10,7 +10,7 @@ export const normalizeDropMarkdownContent = (
   return mapMarkdownProse(content, (prose) =>
     prose.replaceAll(/\n{3,}/g, (match: string) => {
       const extraBlankLines = match.length - 2;
-      const fillerParagraphs = Array(extraBlankLines)
+      const fillerParagraphs = new Array(extraBlankLines)
         .fill("&nbsp;")
         .join("\n\n");
       return `\n\n${fillerParagraphs}\n\n`;
