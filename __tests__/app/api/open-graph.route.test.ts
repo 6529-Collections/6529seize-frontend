@@ -302,6 +302,7 @@ describe("open-graph API route", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL("https://app.local/api/open-graph"),
     } as any;
 
@@ -354,6 +355,7 @@ describe("open-graph API route", () => {
     utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=http://safe.example/article"
       ),
@@ -428,26 +430,35 @@ describe("open-graph API route", () => {
     },
     {
       label: "image collection",
-      data: { images: Array.from({ length: 1000 }, () => ({ url: "art.png" })) },
+      data: {
+        images: Array.from({ length: 1000 }, () => ({ url: "art.png" })),
+      },
     },
-  ])("returns oversized $label previews without caching them", async ({ data }) => {
-    const execute = jest.fn().mockResolvedValue({ data });
-    opensea.createOpenSeaPlan.mockReturnValue({ cacheKey: "oversized", execute });
-    const request = {
-      nextUrl: new URL(
-        "https://app.local/api/open-graph?url=https://opensea.io/item/ethereum/art/1"
-      ),
-    } as NextRequest;
+  ])(
+    "returns oversized $label previews without caching them",
+    async ({ data }) => {
+      const execute = jest.fn().mockResolvedValue({ data });
+      opensea.createOpenSeaPlan.mockReturnValue({
+        cacheKey: "oversized",
+        execute,
+      });
+      const request = {
+        headers: new Headers(),
+        nextUrl: new URL(
+          "https://app.local/api/open-graph?url=https://opensea.io/item/ethereum/art/1"
+        ),
+      } as NextRequest;
 
-    const first = await GET(request);
-    const second = await GET(request);
+      const first = await GET(request);
+      const second = await GET(request);
 
-    expect(first.status).toBe(200);
-    expect(await first.json()).toBe(data);
-    expect(second.status).toBe(200);
-    expect(await second.json()).toBe(data);
-    expect(execute).toHaveBeenCalledTimes(2);
-  });
+      expect(first.status).toBe(200);
+      expect(await first.json()).toBe(data);
+      expect(second.status).toBe(200);
+      expect(await second.json()).toBe(data);
+      expect(execute).toHaveBeenCalledTimes(2);
+    }
+  );
 
   it("passes through richer generic article metadata from the parser", async () => {
     const html =
@@ -497,6 +508,7 @@ describe("open-graph API route", () => {
     utils.buildResponse.mockReturnValue(responsePayload);
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://news.example/articles/richer-card"
       ),
@@ -559,6 +571,7 @@ describe("open-graph API route", () => {
     });
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://mini.example/app"
       ),
@@ -641,6 +654,7 @@ describe("open-graph API route", () => {
     });
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://frame.example/app"
       ),
@@ -700,6 +714,7 @@ describe("open-graph API route", () => {
     });
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://mini.example/app"
       ),
@@ -747,6 +762,7 @@ describe("open-graph API route", () => {
     });
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://legacy.example/frame"
       ),
@@ -803,6 +819,7 @@ describe("open-graph API route", () => {
     });
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://legacy.example/frame"
       ),
@@ -862,6 +879,7 @@ describe("open-graph API route", () => {
     });
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://mini.example/app"
       ),
@@ -919,6 +937,7 @@ describe("open-graph API route", () => {
     });
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://mini.example/app"
       ),
@@ -982,6 +1001,7 @@ describe("open-graph API route", () => {
     });
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://mini.example/app"
       ),
@@ -1025,6 +1045,7 @@ describe("open-graph API route", () => {
     utils.buildResponse.mockReturnValue(genericPayload);
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://plain.example/app"
       ),
@@ -1082,6 +1103,7 @@ describe("open-graph API route", () => {
     utils.buildResponse.mockReturnValue(genericPayload);
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://private-media.example/app"
       ),
@@ -1113,6 +1135,7 @@ describe("open-graph API route", () => {
     const youtubeUrl =
       "https://music.youtube.com/watch?v=abc123XYZ_0&t=1m30s&list=PL123456&index=4";
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
       ),
@@ -1198,6 +1221,7 @@ describe("open-graph API route", () => {
 
     const youtubeUrl = "https://youtu.be/thumb12345";
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
       ),
@@ -1229,6 +1253,7 @@ describe("open-graph API route", () => {
 
     const youtubeUrl = "https://youtu.be/missing123";
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
       ),
@@ -1265,11 +1290,13 @@ describe("open-graph API route", () => {
 
     const youtubeUrl = "https://youtu.be/recover123";
     const firstResponse = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
       ),
     } as any);
     const secondResponse = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
       ),
@@ -1301,6 +1328,7 @@ describe("open-graph API route", () => {
 
     const youtubeUrl = "https://youtu.be/oversized1";
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         `https://app.local/api/open-graph?url=${encodeURIComponent(youtubeUrl)}`
       ),
@@ -1330,11 +1358,13 @@ describe("open-graph API route", () => {
     const firstUrl = "https://youtu.be/cache12345?t=42";
     const secondUrl = "https://youtu.be/cache12345?t=90";
     const firstResponse = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         `https://app.local/api/open-graph?url=${encodeURIComponent(firstUrl)}`
       ),
     } as any);
     const secondResponse = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         `https://app.local/api/open-graph?url=${encodeURIComponent(secondUrl)}`
       ),
@@ -1445,6 +1475,7 @@ describe("open-graph API route", () => {
     utils.buildResponse.mockReturnValue(fallbackData);
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://6529.io/the-memes/509"
       ),
@@ -1533,6 +1564,7 @@ describe("open-graph API route", () => {
     utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(null);
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://www.facebook.com/20531316728/posts/10154009990506729/"
       ),
@@ -1599,6 +1631,7 @@ describe("open-graph API route", () => {
     utils.buildGoogleWorkspaceResponse.mockResolvedValueOnce(googlePayload);
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://docs.google.com/document/d/abc/edit"
       ),
@@ -1612,15 +1645,20 @@ describe("open-graph API route", () => {
     expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
   });
 
-  it("rejects oversized HTML responses before parsing metadata", async () => {
+  it("reads head metadata from the first 1 MiB of a longer page", async () => {
+    const head =
+      "<html><head><title>Long page</title>" +
+      '<meta property="og:title" content="Long page" /></head><body>';
     const fetchResponse = createResponse(200, {
       headers: {
         "content-length": `${8 * 1024 * 1024 + 1}`,
         "content-type": "text/html",
       },
-      body: "<html></html>",
+      body: `${head}${"<p>filler</p>".repeat(200_000)}</body></html>`,
       url: "https://large.example/page",
     });
+    const preview = { title: "Long page" };
+    utils.buildResponse.mockReturnValue(preview);
 
     mockFetchPublicUrl.mockImplementationOnce(
       async (url, init = {}, options = {}) => {
@@ -1630,6 +1668,7 @@ describe("open-graph API route", () => {
     );
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://large.example/page"
       ),
@@ -1637,11 +1676,11 @@ describe("open-graph API route", () => {
 
     const response = await GET(request);
 
-    expect(response.status).toBe(413);
-    expect(await response.json()).toEqual({
-      error: "Preview response is too large to process safely.",
-    });
-    expect(utils.buildResponse).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(preview);
+    const html = utils.buildResponse.mock.calls[0]?.[1] as string;
+    expect(html.startsWith(head)).toBe(true);
+    expect(new TextEncoder().encode(html).byteLength).toBe(1024 * 1024);
   });
 
   it("returns metadata-only file previews for non-HTML responses", async () => {
@@ -1659,6 +1698,7 @@ describe("open-graph API route", () => {
     );
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://image.example/file.png"
       ),
@@ -1702,6 +1742,7 @@ describe("open-graph API route", () => {
     );
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://api.example/data"
       ),
@@ -1739,6 +1780,7 @@ describe("open-graph API route", () => {
     );
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://files.example/download"
       ),
@@ -1770,6 +1812,7 @@ describe("open-graph API route", () => {
     );
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://files.example/download?id=1"
       ),
@@ -1812,6 +1855,7 @@ describe("open-graph API route", () => {
     );
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://files.example/download"
       ),
@@ -1838,6 +1882,7 @@ describe("open-graph API route", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://compound.finance"
       ),
@@ -1879,6 +1924,7 @@ describe("open-graph API route", () => {
     });
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://etherscan.io/address/0x0000000000000000000000000000000000000001"
       ),
@@ -1916,6 +1962,7 @@ describe("open-graph API route", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://foundation.app/mint/eth/0x5847Eaef547F1B01C0a23d8af615AB2f0bB235A4/8"
       ),
@@ -1954,6 +2001,7 @@ describe("open-graph API route", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/31136811317196283853097434082447684930607990400663529852029007509349076041729"
       ),
@@ -1992,6 +2040,7 @@ describe("open-graph API route", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://www.transient.xyz/nfts/ethereum/0xda48f4db41415fc2873efb487eec1068626fad60/7"
       ),
@@ -2030,6 +2079,7 @@ describe("open-graph API route", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://manifold.xyz/@artist/id/123"
       ),
@@ -2049,6 +2099,7 @@ describe("open-graph API route", () => {
     mockFetchPublicUrl.mockRejectedValueOnce(new Error("Failed to fetch URL."));
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=http://safe.example/article"
       ),
@@ -2075,6 +2126,7 @@ describe("open-graph API route", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/open-graph?url=https://compound.finance"
       ),
@@ -2385,6 +2437,7 @@ describe("open-graph API route", () => {
     ensRouteModule.fetchEnsPreview.mockResolvedValue(previewPayload);
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL("https://app.local/api/open-graph?url=vitalik.eth"),
     } as any;
 
@@ -2397,5 +2450,189 @@ describe("open-graph API route", () => {
       input: "vitalik.eth",
     });
     expect(utils.buildResponse).not.toHaveBeenCalled();
+  });
+
+  describe("fair-use limits", () => {
+    const CLIENT_URL_BUDGET = 300;
+    const FETCH_SLOTS = 32;
+    const FETCH_QUEUE = 256;
+
+    const getFrom = (
+      targetUrl: string,
+      forwardedFor?: string,
+      signal?: AbortSignal
+    ): NextRequest =>
+      ({
+        headers: new Headers(
+          forwardedFor ? { "x-forwarded-for": forwardedFor } : {}
+        ),
+        nextUrl: new URL(
+          `https://app.local/api/open-graph?url=${encodeURIComponent(targetUrl)}`
+        ),
+        signal,
+      }) as unknown as NextRequest;
+
+    const postFrom = (urls: readonly string[], forwardedFor: string) =>
+      ({
+        headers: new Headers({
+          "content-type": "application/json",
+          "x-forwarded-for": forwardedFor,
+        }),
+        body: createBody(JSON.stringify({ urls })),
+      }) as unknown as NextRequest;
+
+    /** Resolves every OpenSea URL through a plan whose work the test controls. */
+    const usePlan = (execute: (url: URL) => Promise<unknown>) => {
+      opensea.createOpenSeaPlan.mockImplementation((url: URL) => ({
+        cacheKey: `test:${url.toString()}`,
+        execute: () => execute(url),
+      }));
+    };
+
+    const lastRetryAfter = (): string | undefined => {
+      const init = nextResponseJson.mock.calls.at(-1)?.[1] as
+        | { headers?: Record<string, string> }
+        | undefined;
+      return init?.headers?.["Retry-After"];
+    };
+
+    it("charges every URL in a batch against one per-client budget", async () => {
+      usePlan(async (url) => ({ data: { title: url.toString() } }));
+      const cached = "https://opensea.io/item/ethereum/art/1";
+
+      for (let index = 0; index < CLIENT_URL_BUDGET - 1; index++) {
+        expect((await GET(getFrom(cached, "8.8.8.8"))).status).toBe(200);
+      }
+
+      // One unit is left: a two-URL batch does not fit, a one-URL batch does.
+      const batch = await POST(
+        postFrom([cached, "https://opensea.io/item/ethereum/art/2"], "8.8.8.8")
+      );
+      expect(batch.status).toBe(429);
+      expect(await batch.json()).toEqual({
+        error: "Too many link preview requests",
+      });
+      expect(Number(lastRetryAfter())).toBeGreaterThan(0);
+      expect((await POST(postFrom([cached], "8.8.8.8"))).status).toBe(200);
+      expect((await GET(getFrom(cached, "8.8.8.8"))).status).toBe(429);
+
+      // Another client keeps its own budget.
+      expect((await GET(getFrom(cached, "1.1.1.1"))).status).toBe(200);
+    });
+
+    it("bounds concurrent preview fetches and answers 503 with Retry-After when the queue is full", async () => {
+      const settleAll: Array<() => void> = [];
+      const execute = jest.fn(
+        (url: URL) =>
+          new Promise((resolve) => {
+            settleAll.push(() => resolve({ data: { title: url.toString() } }));
+          })
+      );
+      usePlan(execute);
+      const pending = Array.from(
+        { length: FETCH_SLOTS + FETCH_QUEUE },
+        (_value, index) =>
+          GET(getFrom(`https://opensea.io/item/ethereum/art/${index}`))
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      expect(execute).toHaveBeenCalledTimes(FETCH_SLOTS);
+      const busy = await GET(getFrom("https://opensea.io/item/ethereum/full"));
+      expect(busy.status).toBe(503);
+      expect(lastRetryAfter()).toBe("5");
+
+      const busyBatch = await POST(
+        postFrom(["https://opensea.io/item/ethereum/full"], "8.8.8.8")
+      );
+      expect(busyBatch.status).toBe(503);
+      expect(lastRetryAfter()).toBe("5");
+
+      // Each finished preview admits a waiting one; none runs past the cap.
+      while (settleAll.length > 0) {
+        settleAll.splice(0).forEach((settle) => settle());
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+      const responses = await Promise.all(pending);
+      expect(responses.every((response) => response.status === 200)).toBe(true);
+      expect(execute).toHaveBeenCalledTimes(FETCH_SLOTS + FETCH_QUEUE);
+    });
+
+    it("stops waiting for a fetch slot when the caller goes away", async () => {
+      const settleAll: Array<() => void> = [];
+      const execute = jest.fn(
+        () =>
+          new Promise((resolve) => {
+            settleAll.push(() => resolve({ data: { title: "done" } }));
+          })
+      );
+      usePlan(execute);
+      const active = Array.from({ length: FETCH_SLOTS }, (_value, index) =>
+        GET(getFrom(`https://opensea.io/item/ethereum/art/${index}`))
+      );
+      const controller = new AbortController();
+      const abandoned = GET(
+        getFrom(
+          "https://opensea.io/item/ethereum/abandoned",
+          undefined,
+          controller.signal
+        )
+      );
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      controller.abort();
+
+      expect((await abandoned).status).toBe(503);
+      settleAll.splice(0).forEach((settle) => settle());
+      await Promise.all(active);
+      expect(execute).toHaveBeenCalledTimes(FETCH_SLOTS);
+    });
+
+    it("fetches preview pages only on ports 80 and 443, with the caller's abort signal", async () => {
+      const controller = new AbortController();
+      mockFetchPublicUrl.mockResolvedValueOnce(
+        createResponse(200, {
+          headers: { "content-type": "text/html" },
+          body: "<html><head><title>ok</title></head></html>",
+          url: "https://safe.example/page",
+        })
+      );
+      utils.buildResponse.mockReturnValue({ title: "ok" });
+
+      const response = await GET(
+        getFrom("https://safe.example/page", undefined, controller.signal)
+      );
+
+      expect(response.status).toBe(200);
+      const [, init, options] = mockFetchPublicUrl.mock.calls[0] ?? [];
+      expect(init).toEqual(
+        expect.objectContaining({ signal: controller.signal })
+      );
+      expect(options).toEqual(
+        expect.objectContaining({ allowedPorts: [80, 443] })
+      );
+      expect(guard.assertPublicUrl).toHaveBeenCalledWith(
+        new URL("https://safe.example/page"),
+        expect.objectContaining({ allowedPorts: [80, 443] })
+      );
+    });
+
+    it("refuses a preview URL whose redirect leaves ports 80 and 443", async () => {
+      const actualGuard = jest.requireActual(
+        "@/lib/security/urlGuard"
+      ) as typeof import("@/lib/security/urlGuard");
+      mockFetchPublicUrl.mockImplementationOnce(async (_url, _init, options) => {
+        // The redirect target is checked with the route's own options.
+        const target = new URL("https://safe.example:8080/next");
+        await actualGuard.assertPublicUrl(target, options);
+        return createResponse(200, { url: target.toString() });
+      });
+
+      const response = await GET(getFrom("https://safe.example/page"));
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({
+        error: "URL port is not allowed.",
+      });
+      expect(utils.buildResponse).not.toHaveBeenCalled();
+    });
   });
 });

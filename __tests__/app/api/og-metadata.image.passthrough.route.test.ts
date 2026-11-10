@@ -200,10 +200,12 @@ describe("/api/og-metadata/image", () => {
       expect(mockSharp).not.toHaveBeenCalled();
       expect(mockFetchPublicUrl).toHaveBeenCalledWith(
         new URL(GIPHY_MP4),
-        { headers: { accept: "video/mp4" } },
+        { headers: { accept: "video/mp4" }, signal: expect.any(AbortSignal) },
         expect.objectContaining({
           timeoutMs: 7000,
           policy: { allowedHosts: GIPHY_MEDIA_HOSTS },
+          allowedProtocols: ["https:"],
+          allowedPorts: [443],
         })
       );
     });
@@ -450,42 +452,48 @@ describe("/api/og-metadata/image", () => {
     });
 
     it("lets identical queued requests share one admission slot and never caches busy answers", async () => {
-      let rejectFetch: (error: Error) => void = () => {
-        throw new Error("Image fetch has not started.");
-      };
-      mockFetchPublicUrl.mockImplementationOnce(
-        () =>
-          new Promise<Response>((_resolve, reject) => {
-            rejectFetch = reject;
-          })
-      );
+      // Four fetch slots, and 64 callers may wait for one.
+      const rejecters: Array<(error: Error) => void> = [];
+      for (let index = 0; index < 4; index++) {
+        mockFetchPublicUrl.mockImplementationOnce(
+          () =>
+            new Promise<Response>((_resolve, reject) => {
+              rejecters.push(reject);
+            })
+        );
+      }
       jest.spyOn(console, "error").mockImplementation(() => undefined);
-      const active = GET(createRequest("https://cdn.test/active.png"));
+      const active = Array.from({ length: 4 }, (_value, index) =>
+        GET(createRequest(`https://cdn.test/active-${index}.png`))
+      );
       const shared = Array.from({ length: 40 }, () =>
         GET(createRequest("https://cdn.test/shared.png"))
       );
-      const others = Array.from({ length: 31 }, (_value, index) =>
+      const others = Array.from({ length: 63 }, (_value, index) =>
         GET(createRequest(`https://cdn.test/other-${index}.png`))
       );
       await Promise.resolve();
 
-      // 40 identical waiters hold one slot, so 31 more fill the queue of 32.
+      // 40 identical waiters hold one place, so 63 more fill the queue of 64.
       const full = await GET(createRequest("https://cdn.test/full.png"));
       expect(full.status).toBe(503);
       expect(full.headers.get("cache-control")).toBe("no-store");
 
-      rejectFetch(new Error("Upstream failed"));
-      for (let index = 0; index < 32; index++) {
+      rejecters.forEach((reject) => reject(new Error("Upstream failed")));
+      for (let index = 0; index < 64; index++) {
         mockUpstream({ body: GIF_2_FRAME, contentType: "image/gif" });
       }
-      expect((await active).status).toBe(502);
+      const activeResponses = await Promise.all(active);
+      expect(activeResponses.every((response) => response.status === 502)).toBe(
+        true
+      );
       const sharedResponses = await Promise.all(shared);
       expect(sharedResponses.every((response) => response.status === 200)).toBe(
         true
       );
       await Promise.all(others);
-      // 1 active + 1 shared + 31 others; the busy answer was not cached.
-      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(33);
+      // 4 active + 1 shared + 63 others; the busy answer was not cached.
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(68);
       mockUpstream({ body: GIF_2_FRAME, contentType: "image/gif" });
       expect(
         (await GET(createRequest("https://cdn.test/full.png"))).status
@@ -513,11 +521,13 @@ describe("/api/og-metadata/image", () => {
           error: "Unsupported image host",
         });
         expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
-        // The image path passes exactly the options it passed before this change.
+        // Every hop, redirects included, must stay on HTTPS port 443.
         expect(mockFetchPublicUrl.mock.calls[0]?.[2]).toEqual({
           timeoutMs: 7000,
           userAgent:
             "Mozilla/5.0 (compatible; 6529-og-image/1.0; +https://6529.io)",
+          allowedProtocols: ["https:"],
+          allowedPorts: [443],
         });
         expect(mockSharp).not.toHaveBeenCalled();
       }

@@ -63,6 +63,17 @@ export interface UrlGuardOptions {
   readonly policy?: UrlGuardHostPolicy | undefined;
   readonly allowIpAddresses?: boolean | undefined;
   readonly hooks?: UrlGuardHooks | undefined;
+  /**
+   * Schemes accepted on every hop, redirects included (for example
+   * `["https:"]`). When omitted, any scheme the fetch can follow is accepted.
+   */
+  readonly allowedProtocols?: readonly string[] | undefined;
+  /**
+   * Ports accepted on every hop, redirects included. A URL without an
+   * explicit port uses its scheme's default (80 for http, 443 for https).
+   * When omitted, any port is accepted.
+   */
+  readonly allowedPorts?: readonly number[] | undefined;
 }
 
 interface ParsePublicUrlOptions {
@@ -202,10 +213,7 @@ function isPrivateIpv4(address: string): boolean {
   );
 }
 
-function parseIpv6Part(
-  part: string,
-  allowIpv4Tail: boolean
-): number[] | null {
+function parseIpv6Part(part: string, allowIpv4Tail: boolean): number[] | null {
   if (part === "") {
     return [];
   }
@@ -486,10 +494,45 @@ export function parsePublicUrl(
   return parsed;
 }
 
+const DEFAULT_PORTS: ReadonlyMap<string, number> = new Map([
+  ["http:", 80],
+  ["https:", 443],
+]);
+
+function getEffectivePort(url: URL): number | null {
+  if (url.port) {
+    return Number(url.port);
+  }
+  return DEFAULT_PORTS.get(url.protocol.toLowerCase()) ?? null;
+}
+
+function checkSchemeAndPort(url: URL, options: UrlGuardOptions): void {
+  const { allowedProtocols, allowedPorts } = options;
+  if (
+    allowedProtocols &&
+    !allowedProtocols.includes(url.protocol.toLowerCase())
+  ) {
+    const message = "URL scheme is not allowed.";
+    emitBlockedHook(url, "unsupported-protocol", message, options.hooks);
+    throw new UrlGuardError(message, "unsupported-protocol");
+  }
+
+  if (allowedPorts) {
+    const port = getEffectivePort(url);
+    if (port === null || !allowedPorts.includes(port)) {
+      const message = "URL port is not allowed.";
+      emitBlockedHook(url, "host-not-allowed", message, options.hooks);
+      throw new UrlGuardError(message, "host-not-allowed");
+    }
+  }
+}
+
 async function validatePublicUrl(
   url: URL,
   options: UrlGuardOptions = {}
 ): Promise<ValidatedPublicUrl> {
+  checkSchemeAndPort(url, options);
+
   let hostname = url.hostname;
 
   if (!hostname) {

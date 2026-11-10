@@ -58,10 +58,15 @@ the `1200x630` image dimensions and `summary_large_image` Twitter card.
   - Each processed frame must be at most 512 million pixels, with neither
     dimension exceeding 65,536 pixels. Sources outside these limits do not
     produce a normalized preview.
-  - Images are processed one at a time per server process. Up to 32 requests can
-    wait for at most 15 seconds before downloading, so a card's banner, avatar,
-    and artwork can all render. A full queue or expired wait produces a
-    temporary `503` response with a one-second retry interval.
+  - Sources are fetched over HTTPS on port 443 only, including every redirect.
+  - Each server process downloads up to four sources at once, and up to 64
+    more requests can wait for at most 15 seconds before downloading. Images
+    are decoded one at a time, and only after their bytes have arrived, so a
+    slow source host does not hold up other images. A full queue or expired
+    wait produces a temporary `503` response with a one-second retry interval.
+  - Each client can make up to 600 image requests a minute, whatever width or
+    query string it asks for. Beyond that the route answers `429` with a
+    `Retry-After` header.
 
 ## Standard Route Contract
 

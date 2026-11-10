@@ -14,6 +14,8 @@ import {
   TOKEN_URI_MAX_BYTES,
 } from "@/app/api/open-graph/tokenUriMetadata";
 import { BodyTooLargeError } from "@/lib/fetch/limitedBody";
+import { AdmissionQueueError } from "@/lib/fetch/admissionQueue";
+import { PUBLIC_URL_OPTIONS } from "@/app/api/open-graph/publicUrlOptions";
 
 const lookupAll: (
   hostname: string,
@@ -110,6 +112,57 @@ describe("NFT metadata transport", () => {
     );
     expect(reads).toBe(Math.floor(TOKEN_URI_MAX_BYTES / chunk.byteLength) + 1);
     expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops reading at 1 MiB and never parses an oversized document", async () => {
+    expect(TOKEN_URI_MAX_BYTES).toBe(1024 * 1024);
+    const parse = jest.spyOn(JSON, "parse");
+    const chunk = new TextEncoder().encode("[".repeat(256 * 1024));
+    try {
+      mockFetch.mockResolvedValue(
+        new Response(
+          new ReadableStream({
+            pull(controller) {
+              controller.enqueue(chunk);
+            },
+          })
+        )
+      );
+      await expect(fetchTokenUriJson(url, {})).rejects.toBeInstanceOf(
+        BodyTooLargeError
+      );
+      expect(parse).not.toHaveBeenCalled();
+    } finally {
+      parse.mockRestore();
+    }
+  });
+
+  it("refuses a redirect to a port other than 80 or 443", async () => {
+    mockFetch.mockResolvedValue(
+      new Response(null, {
+        status: 302,
+        headers: { location: "https://metadata.example:8443/nft/1" },
+      })
+    );
+    await expect(
+      fetchTokenUriJson(url, PUBLIC_URL_OPTIONS)
+    ).rejects.toMatchObject({ kind: "host-not-allowed" });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops waiting for admission when the caller goes away", async () => {
+    const stream = new TransformStream<Uint8Array, Uint8Array>();
+    const writer = stream.writable.getWriter();
+    mockFetch.mockResolvedValueOnce(new Response(stream.readable));
+    const admitted = fetchTokenUriJson(url, {});
+    const controller = new AbortController();
+    const queued = fetchTokenUriJson(url, {}, controller.signal);
+    controller.abort();
+    await expect(queued).rejects.toBeInstanceOf(AdmissionQueueError);
+    await writer.write(new TextEncoder().encode('{"name":"Artwork"}'));
+    await writer.close();
+    await expect(admitted).resolves.toEqual({ name: "Artwork" });
+    expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
   it("waits for the active metadata body before fetching the next preview", async () => {

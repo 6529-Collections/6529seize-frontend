@@ -101,6 +101,7 @@ const createRequest = (
   signal: AbortSignal = new AbortController().signal
 ): NextRequest =>
   ({
+    headers: new Headers(),
     signal,
     nextUrl: new URL(
       `http://localhost:3001/api/og-metadata/image?url=${encodeURIComponent(
@@ -108,6 +109,31 @@ const createRequest = (
       )}&w=${width}`
     ),
   }) as NextRequest;
+
+// Upstream fetches admitted at once, and callers that may wait for one.
+const FETCH_SLOTS = 4;
+const FETCH_QUEUE = 64;
+
+/** Makes the next `count` upstream fetches hang until the returned call. */
+const holdUpstreams = (count: number): (() => void) => {
+  const rejecters: Array<(error: Error) => void> = [];
+  for (let index = 0; index < count; index++) {
+    mockFetchPublicUrl.mockImplementationOnce(
+      () =>
+        new Promise<Response>((_resolve, reject) => {
+          rejecters.push(reject);
+        })
+    );
+  }
+  return () => {
+    rejecters.forEach((reject) => reject(new Error("Upstream failed")));
+  };
+};
+
+const settle = (): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
 
 const createReadableBody = (buffer: Buffer) => {
   let hasRead = false;
@@ -206,7 +232,9 @@ describe("/api/og-metadata/image", () => {
   it("applies a finite pixel limit and first-frame selection to every Sharp input", async () => {
     for (const [index, body] of [PNG_1X1, GIF_2_FRAME].entries()) {
       mockImageResponse(body.byteLength, "application/octet-stream", body);
-      const response = await GET(createRequest(`https://cdn.test/art-${index}`));
+      const response = await GET(
+        createRequest(`https://cdn.test/art-${index}`)
+      );
       expect(response.status).toBe(200);
     }
 
@@ -455,32 +483,23 @@ describe("/api/og-metadata/image", () => {
     });
   });
 
-  it("admits a waiting image after the active upstream request fails", async () => {
-    let rejectFetch: (error: Error) => void = () => {
-      throw new Error("Image fetch has not started.");
-    };
-    mockFetchPublicUrl.mockImplementationOnce(
-      () =>
-        new Promise<Response>((_resolve, reject) => {
-          rejectFetch = reject;
-        })
-    );
-    const pending = GET(createRequest("https://cdn.test/pending.png"));
+  it("keeps fetching and decoding other images while one upstream is slow", async () => {
+    const releaseSlow = holdUpstreams(1);
+    const slow = GET(createRequest("https://cdn.test/slow.png"));
     mockImageResponse(PNG_1X1.byteLength);
-    const waiting = GET(createRequest("https://cdn.test/another.png"));
-    await Promise.resolve();
 
     try {
-      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
-      expect(mockSharp).not.toHaveBeenCalled();
+      const fast = await GET(createRequest("https://cdn.test/fast.png"));
+      expect(fast.status).toBe(200);
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
+      expect(mockSharp).toHaveBeenCalledTimes(1);
     } finally {
-      rejectFetch(new Error("Upstream failed"));
-      expect((await pending).status).toBe(502);
-      expect((await waiting).status).toBe(200);
+      releaseSlow();
+      expect((await slow).status).toBe(502);
     }
   });
 
-  it("normalizes simultaneous small images sequentially without overlapping downloads or decode", async () => {
+  it("decodes one image at a time while the next image downloads", async () => {
     const image = actualSharp(PNG_1X1);
     const bufferOutput: { toBuffer: () => Promise<Buffer> } = image;
     const originalToBuffer = bufferOutput.toBuffer.bind(image);
@@ -519,10 +538,11 @@ describe("/api/og-metadata/image", () => {
       };
     });
     const waiting = GET(createRequest("https://cdn.test/another.png"));
-    await Promise.resolve();
+    await settle();
 
     try {
-      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+      // The second image downloads, then waits for the decoder.
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(2);
       expect(mockSharp).toHaveBeenCalledTimes(1);
     } finally {
       finishProcessing();
@@ -537,23 +557,21 @@ describe("/api/og-metadata/image", () => {
     }
     expect(workOrder).toEqual([
       "first-decode-start",
-      "first-decode-complete",
       "second-fetch",
+      "first-decode-complete",
     ]);
+    expect(mockSharp).toHaveBeenCalledTimes(2);
   });
 
   it("bounds pending image requests and removes aborted waiters before any download", async () => {
-    let rejectFetch: (error: Error) => void = () => {
-      throw new Error("Image fetch has not started.");
-    };
-    mockFetchPublicUrl.mockImplementationOnce(
-      () =>
-        new Promise<Response>((_resolve, reject) => {
-          rejectFetch = reject;
-        })
+    const releaseSlow = holdUpstreams(FETCH_SLOTS);
+    const active = Array.from({ length: FETCH_SLOTS }, (_value, index) =>
+      GET(createRequest(`https://cdn.test/active-${index}.png`))
     );
-    const active = GET(createRequest("https://cdn.test/active.png"));
-    const controllers = Array.from({ length: 32 }, () => new AbortController());
+    const controllers = Array.from(
+      { length: FETCH_QUEUE },
+      () => new AbortController()
+    );
     const waiting = controllers.map((controller, index) =>
       GET(
         createRequest(
@@ -563,23 +581,26 @@ describe("/api/og-metadata/image", () => {
         )
       )
     );
-    await Promise.resolve();
+    await settle();
 
     try {
       const full = await GET(createRequest("https://cdn.test/full.png"));
       expect(full.status).toBe(503);
       expect(full.headers.get("cache-control")).toBe("no-store");
       expect(full.headers.get("retry-after")).toBe("1");
-      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(FETCH_SLOTS);
       expect(mockSharp).not.toHaveBeenCalled();
     } finally {
       controllers.forEach((controller) => controller.abort());
       const responses = await Promise.all(waiting);
       expect(responses.every((response) => response.status === 503)).toBe(true);
-      rejectFetch(new Error("Upstream failed"));
-      expect((await active).status).toBe(502);
+      releaseSlow();
+      const activeResponses = await Promise.all(active);
+      expect(activeResponses.every((response) => response.status === 502)).toBe(
+        true
+      );
     }
-    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(FETCH_SLOTS);
     mockImageResponse(PNG_1X1.byteLength);
     expect(
       (await GET(createRequest("https://cdn.test/retry.png"))).status
@@ -588,16 +609,10 @@ describe("/api/og-metadata/image", () => {
 
   it("expires a queued image after 15 seconds without fetching it", async () => {
     jest.useFakeTimers();
-    let rejectFetch: (error: Error) => void = () => {
-      throw new Error("Image fetch has not started.");
-    };
-    mockFetchPublicUrl.mockImplementationOnce(
-      () =>
-        new Promise<Response>((_resolve, reject) => {
-          rejectFetch = reject;
-        })
+    const releaseSlow = holdUpstreams(FETCH_SLOTS);
+    const active = Array.from({ length: FETCH_SLOTS }, (_value, index) =>
+      GET(createRequest(`https://cdn.test/active-${index}.png`))
     );
-    const active = GET(createRequest("https://cdn.test/active.png"));
     const waiting = GET(createRequest("https://cdn.test/queued.png"));
     await Promise.resolve();
 
@@ -607,14 +622,50 @@ describe("/api/og-metadata/image", () => {
       expect(response.status).toBe(503);
       expect(response.headers.get("cache-control")).toBe("no-store");
       expect(response.headers.get("retry-after")).toBe("1");
-      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(1);
+      expect(mockFetchPublicUrl).toHaveBeenCalledTimes(FETCH_SLOTS);
       expect(mockSharp).not.toHaveBeenCalled();
       expect(jest.getTimerCount()).toBe(0);
     } finally {
-      rejectFetch(new Error("Upstream failed"));
-      await active;
+      releaseSlow();
+      await Promise.all(active);
       jest.useRealTimers();
     }
+  });
+
+  it("limits each client however it varies the width or query string", async () => {
+    const fromClient = (index: number) =>
+      ({
+        headers: new Headers({ "x-forwarded-for": "8.8.8.8" }),
+        signal: new AbortController().signal,
+        nextUrl: new URL(
+          `http://localhost:3001/api/og-metadata/image?url=${encodeURIComponent(
+            `https://cdn.test/cached.png?v=${index % 2}`
+          )}&w=${(index % 1200) + 1}&n=${index}`
+        ),
+      }) as NextRequest;
+    mockFetchPublicUrl.mockImplementation(async () => ({
+      body: createReadableBody(PNG_1X1),
+      headers: createHeaders({ "content-type": "image/png" }),
+      ok: true,
+      status: 200,
+    }));
+
+    for (let index = 0; index < 600; index++) {
+      expect((await GET(fromClient(index))).status).toBe(200);
+    }
+    const limited = await GET(fromClient(600));
+    expect(limited.status).toBe(429);
+    expect(limited.headers.get("retry-after")).toEqual(expect.any(String));
+    await expect(limited.json()).resolves.toEqual({
+      error: "Too many image requests",
+    });
+
+    // Another client keeps its own budget.
+    const other = await GET({
+      ...createRequest("https://cdn.test/cached.png"),
+      headers: new Headers({ "x-forwarded-for": "1.1.1.1" }),
+    } as NextRequest);
+    expect(other.status).toBe(200);
   });
 
   it("uses a static bounded range preview even when animation is requested", async () => {

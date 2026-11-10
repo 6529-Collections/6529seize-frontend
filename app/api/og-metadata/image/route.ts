@@ -17,6 +17,7 @@ import {
   AdmissionQueue,
   AdmissionQueueError,
 } from "@/lib/fetch/admissionQueue";
+import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 import { NextResponse, type NextRequest } from "next/server";
 import sharp, { type Metadata, type Sharp } from "sharp";
 
@@ -37,11 +38,27 @@ const MAX_WIDTH = 1200;
 const MAX_HEIGHT = 12000;
 const MAX_INPUT_PIXELS = 512_000_000;
 const MAX_INPUT_DIMENSION = 65_536;
-// Admit before fetching to bound both compressed buffers and native image work.
-// Ordinary multi-image cards can wait briefly without allocating image buffers.
-const imageAdmission = new AdmissionQueue({ maxPending: 32, waitMs: 15_000 });
-// Video pass-through never decodes, so it must not wait behind GIF re-encodes.
-const videoAdmission = new AdmissionQueue({ maxPending: 32, waitMs: 15_000 });
+// Upstream fetches run a few at a time, so one slow host does not hold up
+// every image. A fetch keeps its slot until its bytes are handed to the
+// decoder, so at most this many source buffers are held at once.
+const fetchAdmission = new AdmissionQueue({
+  concurrency: 4,
+  maxPending: 64,
+  waitMs: 15_000,
+});
+// Decoding and re-encoding run one at a time, and only on buffered bytes.
+// Video pass-through never decodes, so it needs no decode slot.
+const transformAdmission = new AdmissionQueue({
+  maxPending: 32,
+  waitMs: 15_000,
+});
+// Every request counts, whatever its width or query string: a wave of image
+// drops loads well under this many proxied images a minute per viewer.
+const enforceImageRateLimit = createClientRateLimiter({
+  limit: 600,
+  windowMs: 60 * 1000,
+  errorMessage: "Too many image requests",
+});
 const OVERSIZED_GIF_PREVIEW_MAX_BYTES = 8 * 1024 * 1024;
 const MAX_ANIMATED_WORK_BYTES = 512 * 1024 * 1024;
 const VIDEO_PASSTHROUGH_MAX_BYTES = 8 * 1024 * 1024;
@@ -109,9 +126,12 @@ const IMAGE_TYPE_SIGNATURES = [
       buffer[11] === 0x50,
   },
 ] as const;
+// HTTPS on the default port only, on the first hop and every redirect.
 const FETCH_OPTIONS: FetchPublicUrlOptions = {
   timeoutMs: 7000,
   userAgent: USER_AGENT,
+  allowedProtocols: ["https:"],
+  allowedPorts: [443],
 };
 // Every redirect hop must stay on an exact Giphy media host.
 const GIPHY_VIDEO_FETCH_OPTIONS: FetchPublicUrlOptions = {
@@ -305,7 +325,8 @@ const readImageResponseBuffer = async (
 };
 
 const fetchImageBuffer = async (
-  url: URL
+  url: URL,
+  signal: AbortSignal
 ): Promise<{ buffer: Buffer; complete: boolean }> => {
   const response = await fetchPublicUrl(
     url,
@@ -313,6 +334,7 @@ const fetchImageBuffer = async (
       headers: {
         accept: IMAGE_ACCEPT_HEADER,
       },
+      signal,
     },
     FETCH_OPTIONS
   );
@@ -327,7 +349,7 @@ const fetchImageBuffer = async (
   if (shouldUseOversizedGifPreview({ contentLength, contentType, url })) {
     await cancelResponseBody(response);
     return {
-      buffer: await fetchOversizedGifPreviewBuffer(url),
+      buffer: await fetchOversizedGifPreviewBuffer(url, signal),
       complete: false,
     };
   }
@@ -344,7 +366,10 @@ const fetchImageBuffer = async (
   return { buffer: await readImageResponseBuffer(response), complete: true };
 };
 
-const fetchOversizedGifPreviewBuffer = async (url: URL): Promise<Buffer> => {
+const fetchOversizedGifPreviewBuffer = async (
+  url: URL,
+  signal: AbortSignal
+): Promise<Buffer> => {
   const response = await fetchPublicUrl(
     url,
     {
@@ -352,6 +377,7 @@ const fetchOversizedGifPreviewBuffer = async (url: URL): Promise<Buffer> => {
         accept: IMAGE_ACCEPT_HEADER,
         range: `bytes=0-${OVERSIZED_GIF_PREVIEW_MAX_BYTES - 1}`,
       },
+      signal,
     },
     FETCH_OPTIONS
   );
@@ -483,10 +509,13 @@ const parseImageUrl = (value: string | null): URL => {
 const isMp4 = (buffer: Buffer): boolean =>
   buffer.byteLength >= 12 && buffer.toString("latin1", 4, 8) === "ftyp";
 
-const fetchGiphyVideo = async (url: URL): Promise<Buffer> => {
+const fetchGiphyVideo = async (
+  url: URL,
+  signal: AbortSignal
+): Promise<Buffer> => {
   const response = await fetchPublicUrl(
     url,
-    { headers: { accept: MP4_CONTENT_TYPE } },
+    { headers: { accept: MP4_CONTENT_TYPE }, signal },
     GIPHY_VIDEO_FETCH_OPTIONS
   );
   if (!response.ok) {
@@ -529,17 +558,21 @@ const mediaResult = (
   ttlMs: degraded ? DEGRADED_RESULT_TTL_MS : RESULT_TTL_MS,
 });
 
-// Runs one admitted job. Busy or abandoned admissions propagate uncached; any
-// other failure becomes a briefly cached error answer.
+// Runs one job in a fetch slot; the job may release the slot early (the
+// release is idempotent). Busy or abandoned admissions propagate uncached;
+// any other failure becomes a briefly cached error answer.
 const runAdmittedJob = async (
-  admission: AdmissionQueue,
   signal: AbortSignal,
-  job: () => Promise<CacheableResult<ProxyResult>>
+  job: (releaseFetch: () => void) => Promise<CacheableResult<ProxyResult>>
 ): Promise<CacheableResult<ProxyResult>> => {
-  const releaseAdmission = await admission.acquire(signal);
+  const releaseFetch = await fetchAdmission.acquire(signal);
   try {
-    return await job();
+    return await job(releaseFetch);
   } catch (error) {
+    // A job whose callers all left is not an answer about the image.
+    if (error instanceof AdmissionQueueError || signal.aborted) {
+      throw error;
+    }
     console.error("Unable to normalize OG metadata image.", error);
     return {
       value: { kind: "error", ...describeFailure(error) },
@@ -549,7 +582,23 @@ const runAdmittedJob = async (
         : FAILURE_TTL_MS,
     };
   } finally {
-    releaseAdmission();
+    releaseFetch();
+  }
+};
+
+// Takes the decode slot only once the source bytes are buffered, then gives
+// up the fetch slot, so a slow upstream never holds the decoder.
+const withTransformSlot = async <T>(
+  signal: AbortSignal,
+  releaseFetch: () => void,
+  transform: () => Promise<T>
+): Promise<T> => {
+  const releaseTransform = await transformAdmission.acquire(signal);
+  releaseFetch();
+  try {
+    return await transform();
+  } finally {
+    releaseTransform();
   }
 };
 
@@ -630,8 +679,8 @@ const serveGiphyVideo = async (
   const result = await proxyResults.load(
     cacheKey("mp4", videoUrl),
     (signal) =>
-      runAdmittedJob(videoAdmission, signal, async () =>
-        mediaResult(await fetchGiphyVideo(videoUrl), MP4_CONTENT_TYPE)
+      runAdmittedJob(signal, async () =>
+        mediaResult(await fetchGiphyVideo(videoUrl, signal), MP4_CONTENT_TYPE)
       ),
     request.signal
   );
@@ -653,13 +702,18 @@ const serveImage = async (
   const result = await proxyResults.load(
     cacheKey(`${animated ? "animated" : "still"}:${width}`, imageUrl),
     (signal) =>
-      runAdmittedJob(imageAdmission, signal, async () => {
-        const { buffer, complete } = await fetchImageBuffer(imageUrl);
-        const { data, contentType, degraded } = await normalizeImage({
-          buffer,
-          width,
-          allowAnimation: complete && animated,
-        });
+      runAdmittedJob(signal, async (releaseFetch) => {
+        const { buffer, complete } = await fetchImageBuffer(imageUrl, signal);
+        const { data, contentType, degraded } = await withTransformSlot(
+          signal,
+          releaseFetch,
+          () =>
+            normalizeImage({
+              buffer,
+              width,
+              allowAnimation: complete && animated,
+            })
+        );
         return mediaResult(data, contentType, degraded);
       }),
     request.signal
@@ -676,6 +730,11 @@ const serveImage = async (
 };
 
 export async function GET(request: NextRequest) {
+  const rateLimited = enforceImageRateLimit(request);
+  if (rateLimited) {
+    return rateLimited;
+  }
+
   try {
     const sourceUrl = parseImageUrl(request.nextUrl.searchParams.get("url"));
     return request.nextUrl.searchParams.get("format") === "mp4"

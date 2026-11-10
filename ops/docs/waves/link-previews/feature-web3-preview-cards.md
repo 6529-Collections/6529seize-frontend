@@ -138,10 +138,12 @@ Only `https://` URLs match. Host must be apex or `www`.
   trigger parent-card navigation.
 - OpenSea cards filter blocked OpenGraph-overlay image URLs.
 - OpenSea and Transient NFT previews can read public token metadata as a fallback.
-  Metadata larger than 64 MiB after decompression, slow downloads, or redirects
-  to non-public destinations are skipped; the existing preview fallback remains
-  available. Embedded artwork and missing or unusual JSON content types remain
-  supported within that limit.
+  Metadata larger than 1 MiB after decompression, slow downloads, or redirects
+  to non-public destinations or to ports other than 80 and 443 are skipped; the
+  existing preview fallback remains available. Missing or unusual JSON content
+  types remain supported. Metadata that embeds artwork larger than that limit
+  yields no image from this lookup, so the card uses the page's own image or
+  the minimal preview.
 - NFT token metadata is read one document at a time per server process. Up to
   32 other lookups can wait for at most 15 seconds before their download starts.
   If that queue is full or the wait expires, the existing preview fallback is

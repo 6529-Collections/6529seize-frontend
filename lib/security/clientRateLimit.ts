@@ -4,10 +4,9 @@ import { NextResponse } from "next/server";
 import { isCloudFrontOriginFacingAddress } from "@/lib/security/cloudFrontOriginFacing";
 import { isForbiddenAddress, parseIpv6Groups } from "@/lib/security/urlGuard";
 
-const DEFAULT_MAX_BUCKETS = 10_000;
+const DEFAULT_MAX_BUCKETS = 50_000;
 const UNIDENTIFIED_CLIENT_KEY = "unidentified";
 const UNIDENTIFIED_LIMIT_MULTIPLIER = 10;
-const IPV6_PREFIX_GROUPS = 4;
 
 type RateLimitBucket = {
   count: number;
@@ -58,12 +57,17 @@ function parseForwardedAddress(
     const ipv4 = toDottedIpv4(groups[6] ?? 0, groups[7] ?? 0);
     return { address: ipv4, key: ipv4 };
   }
-  // Classify the uncompressed form, and bucket by /64 because one IPv6
-  // subscriber usually controls a whole /64.
+  // Classify the uncompressed form, and bucket by /56: one IPv6 subscriber
+  // is commonly delegated a /56 (and at least a /64), so every address it
+  // can pick shares one budget.
   const canonical = groups.map((group) => group.toString(16));
+  const prefix = [
+    ...canonical.slice(0, 3),
+    ((groups[3] ?? 0) & 0xff00).toString(16),
+  ];
   return {
     address: canonical.join(":"),
-    key: `${canonical.slice(0, IPV6_PREFIX_GROUPS).join(":")}::/64`,
+    key: `${prefix.join(":")}::/56`,
   };
 }
 
@@ -103,6 +107,11 @@ function getClientKey(headers: Headers): string | null {
  * Fixed-window, per-client limiter held in this server process. Requests
  * without a public client address (local development, internal callers)
  * share one larger budget.
+ *
+ * The table holds at most `maxBuckets` live windows. A full table never
+ * drops a live window to make room: a client it cannot track is answered as
+ * limited until windows expire, so no client can reset its own budget by
+ * cycling through many addresses.
  */
 export function createClientRateLimiter({
   limit,
@@ -122,18 +131,22 @@ export function createClientRateLimiter({
     }
   }
 
-  function openBucket(key: string, now: number): RateLimitBucket {
+  /** Opens a window for `key`, or returns null when the table is full. */
+  function openBucket(key: string, now: number): RateLimitBucket | null {
+    // Expired buckets were pruned already, so every remaining one is live.
     buckets.delete(key);
-    while (buckets.size >= maxBuckets) {
-      const oldest = buckets.keys().next();
-      if (oldest.done) {
-        break;
-      }
-      buckets.delete(oldest.value);
+    if (buckets.size >= maxBuckets) {
+      return null;
     }
     const bucket: RateLimitBucket = { count: 0, resetAt: now + windowMs };
     buckets.set(key, bucket);
     return bucket;
+  }
+
+  /** When the earliest live window closes and frees a slot. */
+  function earliestReset(now: number): number {
+    const oldest = buckets.values().next();
+    return oldest.done ? now + windowMs : oldest.value.resetAt;
   }
 
   return function enforceClientRateLimit(
@@ -150,15 +163,13 @@ export function createClientRateLimiter({
     const bucket =
       existing && existing.resetAt > now ? existing : openBucket(key, now);
 
-    if (bucket.count + cost <= budget) {
+    if (bucket && bucket.count + cost <= budget) {
       bucket.count += cost;
       return null;
     }
 
-    const retryAfterSeconds = Math.max(
-      1,
-      Math.ceil((bucket.resetAt - now) / 1000)
-    );
+    const resetAt = bucket?.resetAt ?? earliestReset(now);
+    const retryAfterSeconds = Math.max(1, Math.ceil((resetAt - now) / 1000));
     return NextResponse.json(
       { error: errorMessage },
       {
