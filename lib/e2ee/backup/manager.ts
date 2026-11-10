@@ -359,7 +359,13 @@ export class E2eeBackupManager {
 
   private async runIncremental(): Promise<void> {
     const local = this.local;
-    if (!local || this.deps.engine.getStatus() !== "ready") {
+    // The engine reports ready before GET /e2ee/me names this device. That
+    // isn't a failure: the engine's next change schedules another run.
+    if (
+      !local ||
+      this.deps.engine.getStatus() !== "ready" ||
+      this.deps.engine.getThisDevice() === null
+    ) {
       return;
     }
     const deviceKey = this.deviceKey();
