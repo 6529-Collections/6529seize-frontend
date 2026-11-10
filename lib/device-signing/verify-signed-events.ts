@@ -1,5 +1,4 @@
 import type { ApiDeviceGrantProof } from "@/generated/models/ApiDeviceGrantProof";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDeviceSignedEvent } from "@/generated/models/ApiDeviceSignedEvent";
 import type { ApiDropSignedEvents } from "@/generated/models/ApiDropSignedEvents";
 import { hashMessage, recoverMessageAddress, type Hex } from "viem";
@@ -16,12 +15,22 @@ import {
 } from "./app-grant";
 import { verifyEventIdSignature } from "./ed25519";
 import { isAllowedGrantDomain, parseDeviceGrantMessage } from "./grant-message";
+import { isRecognizedAppGrantOrigin } from "./grant-origins";
+import {
+  compareDisplayed,
+  isRecord,
+  signedReplyTarget,
+  type DisplayedDropContent,
+} from "./displayed-content";
+
 import {
   computeInterimEventId,
   DEVICE_EVENT_KIND_SCOPE,
   DeviceEventKind,
   ED25519_KEY_TYPE,
 } from "./interim-event";
+
+export { toDisplayedDropContent } from "./displayed-content";
 
 /**
  * How this browser verified the wallet's signature on a grant (sign-in or app):
@@ -33,10 +42,23 @@ export type WalletSignatureCheck = "verified" | "contract-verified";
 
 /**
  * A grant's wallet signature: verified, "unverifiable" when only a contract
- * check on Ethereum could decide it and that check could not run, or null
- * when it is invalid.
+ * check on Ethereum could decide it and that check could not run,
+ * "unrecognized-origin" for a valid app grant signed for an origin no 6529
+ * client produces, or null when it is invalid.
  */
-type GrantCheck = WalletSignatureCheck | "unverifiable" | null;
+type GrantCheck =
+  | WalletSignatureCheck
+  | "unverifiable"
+  | "unrecognized-origin"
+  | null;
+
+/**
+ * Grant checks shared by verifications that run without a contract-wallet
+ * reader, so a wallet signature many posts share is recovered once.
+ */
+export type GrantCheckCache = Map<string, Promise<GrantCheck>>;
+
+const MAX_CACHED_GRANT_CHECKS = 200;
 
 /**
  * Reads contract wallets on Ethereum mainnet. Each method throws when
@@ -60,20 +82,6 @@ const ETHEREUM_MAINNET_CHAIN_ID = 1;
 /** bytes4(keccak256("isValidSignature(bytes32,bytes)")) */
 const EIP1271_MAGIC_VALUE = "0x1626ba7e";
 
-/**
- * What the reader is shown for the drop, compared with the signed body. Media
- * and attachments are compared by count: requests may reference uploads by id
- * while the drop shows their resolved URLs.
- */
-interface DisplayedDropContent {
-  readonly title: string | null;
-  readonly parts: readonly {
-    readonly content: string | null;
-    readonly mediaCount: number;
-    readonly attachmentCount: number;
-  }[];
-}
-
 const same = (left: string, right: string): boolean =>
   left.toLowerCase() === right.toLowerCase();
 
@@ -95,35 +103,27 @@ interface VerifyOptions {
   readonly displayed?: DisplayedDropContent | undefined;
   /** When given, only events of this drop, wave and author count. */
   readonly expected?: ExpectedDrop | undefined;
+  /** Shares grant checks across verifications (ignored with a contract reader). */
+  readonly grantCheckCache?: GrantCheckCache | undefined;
 }
 
-const belongsToExpectedDrop = (
+/** Events of another wave never count for this drop. */
+const isInExpectedWave = (
+  event: ApiDeviceSignedEvent,
+  expected: ExpectedDrop | undefined
+): boolean => expected === undefined || same(event.wave, expected.waveId);
+
+/**
+ * Whether the signing wallet is one of the author's wallets now. A wallet
+ * the author later removed from the profile still signed the post; this
+ * browser just cannot tie it to the author any more.
+ */
+const isAuthorWallet = (
   event: ApiDeviceSignedEvent,
   expected: ExpectedDrop | undefined
 ): boolean =>
   expected === undefined ||
-  (same(event.wave, expected.waveId) &&
-    expected.authorWallets.some((wallet) => same(wallet, event.author)));
-
-const countOf = (value: unknown): number =>
-  Array.isArray(value) ? value.length : 0;
-
-export const toDisplayedDropContent = (
-  drop: Pick<ApiDrop, "title" | "parts">
-): DisplayedDropContent => ({
-  title: drop.title ?? null,
-  parts: drop.parts.map((part) => ({
-    content: part.content ?? null,
-    mediaCount: countOf(part.media),
-    attachmentCount: countOf(part.attachments),
-  })),
-});
-
-const asText = (value: unknown): string =>
-  typeof value === "string" ? value : "";
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null && !Array.isArray(value);
+  expected.authorWallets.some((wallet) => same(wallet, event.author));
 
 function parseSignedBody(event: ApiDeviceSignedEvent): unknown {
   if (event.body === null) {
@@ -136,32 +136,34 @@ function parseSignedBody(event: ApiDeviceSignedEvent): unknown {
   }
 }
 
-/** Whether the signed post or edit body is what the reader is shown. */
-function matchesDisplayed(
+/**
+ * The event's refs name what it acts on: a post its reply target (what its
+ * body signs), an edit the drop being shown. "mismatch": an edit of another
+ * drop; "unknown": refs this browser cannot reconcile with the body.
+ */
+function checkRefs(
   event: ApiDeviceSignedEvent,
-  displayed: DisplayedDropContent
-): boolean {
+  expected: ExpectedDrop | undefined
+): "ok" | "unknown" | "mismatch" {
+  if (event.kind === DeviceEventKind.EDIT) {
+    if (expected === undefined) {
+      return "ok";
+    }
+    if (event.refs.length !== 1) {
+      return "unknown";
+    }
+    return same(event.refs[0] ?? "", expected.dropId) ? "ok" : "mismatch";
+  }
   const body = parseSignedBody(event);
-  if (!isRecord(body)) {
-    return false;
+  const target = isRecord(body) ? signedReplyTarget(body) : undefined;
+  if (target === undefined) {
+    return "unknown";
   }
-  const parts = Array.isArray(body["parts"]) ? body["parts"] : [];
-  if (
-    asText(body["title"]) !== asText(displayed.title) ||
-    parts.length !== displayed.parts.length
-  ) {
-    return false;
-  }
-  return parts.every((part: unknown, index) => {
-    const shown = displayed.parts[index];
-    return (
-      shown !== undefined &&
-      isRecord(part) &&
-      asText(part["content"]) === asText(shown.content) &&
-      countOf(part["media"]) === shown.mediaCount &&
-      countOf(part["attachments"]) === shown.attachmentCount
-    );
-  });
+  const consistent =
+    target === null
+      ? event.refs.length === 0
+      : event.refs.length === 1 && same(event.refs[0] ?? "", target);
+  return consistent ? "ok" : "unknown";
 }
 
 const HEX_DIGITS = /^0x[0-9a-fA-F]+$/;
@@ -174,6 +176,8 @@ interface VerifiedDropSignature {
   readonly deviceKey: string;
   readonly grantExpiresAt: number;
   readonly walletSignature: WalletSignatureCheck;
+  /** Where the device was authorized: a site host or a 6529 app's name. */
+  readonly origin: string;
 }
 
 export type DropSignatureVerdict =
@@ -182,9 +186,16 @@ export type DropSignatureVerdict =
   /**
    * The signed events verify, but the grant's wallet signature needs a
    * contract-wallet check on Ethereum that could not run (no client, an
-   * unreachable node or another chain). Never shown as signed.
+   * unreachable node or another chain), or the device was authorized from
+   * an origin no 6529 client produces (`unrecognizedOrigin`). Never shown as
+   * signed.
    */
-  | { readonly status: "unverifiable" }
+  | {
+      readonly status: "unverifiable";
+      readonly unrecognizedOrigin?: string;
+      /** The signing wallet, no longer one of the author's wallets. */
+      readonly unlinkedWallet?: string;
+    }
   | {
       readonly status: "signed";
       readonly signature: VerifiedDropSignature;
@@ -195,7 +206,7 @@ export type DropSignatureVerdict =
 interface VerifiedEvent {
   readonly event: ApiDeviceSignedEvent;
   readonly grant: ApiDeviceGrantProof;
-  readonly walletSignature: WalletSignatureCheck | "unverifiable";
+  readonly walletSignature: Exclude<GrantCheck, null>;
 }
 
 const CONTENT_KINDS: ReadonlySet<number> = new Set([
@@ -206,7 +217,8 @@ const CONTENT_KINDS: ReadonlySet<number> = new Set([
 /**
  * An app grant (6529 Mobile or Desktop, EIP-712) commits to exactly the
  * stored terms; its id is the typed-data digest. Its origin is what the
- * wallet was shown, so it is not limited to the site's hosts.
+ * wallet was shown, a site host or an app's name, and is checked against the
+ * recognized origins once the signature is known to be valid.
  */
 const isAppGrantConsistent = (grant: ApiDeviceGrantProof): boolean => {
   const parsed = parseAppGrantMessage(grant.message);
@@ -300,7 +312,28 @@ async function checkContractWalletSignature(
   }
 }
 
+/**
+ * A valid app grant signed for an origin no 6529 client produces is never
+ * reported as verified. Sign-in grants name an allowed host or are invalid.
+ */
+const withRecognizedOrigin = (
+  grant: ApiDeviceGrantProof,
+  check: GrantCheck
+): GrantCheck =>
+  check !== null &&
+  isAppGrantMessage(grant.message) &&
+  !isRecognizedAppGrantOrigin(grant.domain)
+    ? "unrecognized-origin"
+    : check;
+
 async function checkGrant(
+  grant: ApiDeviceGrantProof,
+  options: VerifyOptions
+): Promise<GrantCheck> {
+  return withRecognizedOrigin(grant, await checkGrantSignature(grant, options));
+}
+
+async function checkGrantSignature(
   grant: ApiDeviceGrantProof,
   { contractWallets }: VerifyOptions
 ): Promise<GrantCheck> {
@@ -395,6 +428,48 @@ async function verifyEvent(
   }
 }
 
+/** Everything checkGrant reads, so a cached check is only reused for the same grant. */
+const grantCheckKey = (grant: ApiDeviceGrantProof): string =>
+  JSON.stringify([
+    grant.id.toLowerCase(),
+    grant.message,
+    grant.wallet_signature,
+    grant.chain_id,
+    grant.wallet,
+    grant.device_key,
+    grant.scopes,
+    grant.domain,
+    grant.expires_at,
+  ]);
+
+/**
+ * One check per grant in this verification. Without a contract-wallet
+ * reader (whose answers can change), checks are also shared through
+ * `grantCheckCache`.
+ */
+function grantCheckFor(
+  grant: ApiDeviceGrantProof,
+  options: VerifyOptions,
+  local: Map<string, Promise<GrantCheck>>
+): Promise<GrantCheck> {
+  const key = grantCheckKey(grant);
+  const shared = options.contractWallets ? undefined : options.grantCheckCache;
+  const known = local.get(key) ?? shared?.get(key);
+  if (known) {
+    local.set(key, known);
+    return known;
+  }
+  const check = checkGrant(grant, options);
+  local.set(key, check);
+  if (shared) {
+    if (shared.size >= MAX_CACHED_GRANT_CHECKS) {
+      shared.clear();
+    }
+    shared.set(key, check);
+  }
+  return check;
+}
+
 async function verifyContentEvents(
   data: ApiDropSignedEvents,
   options: VerifyOptions
@@ -407,20 +482,18 @@ async function verifyContentEvents(
     data.events
       .filter((event) => CONTENT_KINDS.has(event.kind))
       .map(async (event): Promise<VerifiedEvent | null> => {
-        const grantId = event.auth_ref.toLowerCase();
-        const grant = grants.get(grantId);
+        const grant = grants.get(event.auth_ref.toLowerCase());
         if (!grant) {
           return null;
         }
-        let grantCheck = grantChecks.get(grantId);
-        if (!grantCheck) {
-          grantCheck = checkGrant(grant, options);
-          grantChecks.set(grantId, grantCheck);
-        }
-        const walletSignature = await grantCheck;
+        const walletSignature = await grantCheckFor(
+          grant,
+          options,
+          grantChecks
+        );
         if (
           !walletSignature ||
-          !belongsToExpectedDrop(event, options.expected) ||
+          !isInExpectedWave(event, options.expected) ||
           !(await verifyEvent(event, grant))
         ) {
           return null;
@@ -460,21 +533,39 @@ export async function verifyDropSignedEvents(
     // verify: never fall back to an older signed version.
     return { status: "invalid" };
   }
-  if (
-    current &&
-    options.displayed &&
-    !matchesDisplayed(current.event, options.displayed)
-  ) {
+  const refs = current ? checkRefs(current.event, options.expected) : "ok";
+  const shownMatch =
+    current && options.displayed
+      ? compareDisplayed(
+          parseSignedBody(current.event),
+          current.event.kind === DeviceEventKind.POST,
+          options.displayed,
+          originalReplyTarget(verified)
+        )
+      : "match";
+  if (shownMatch === "mismatch" || refs === "mismatch") {
     // A valid signature over content other than what is shown proves nothing
     // about the shown content.
     return { status: "invalid" };
+  }
+  if (shownMatch !== "match" || refs === "unknown") {
+    // Only some of the post's parts are loaded here, or part of the signed
+    // body could not be interpreted with certainty: nothing is known to be
+    // wrong, but the post as a whole was not compared.
+    return { status: "unverifiable" };
   }
   const shown = current ?? verified.at(-1);
   if (!shown) {
     return { status: "invalid" };
   }
+  if (!isAuthorWallet(shown.event, options.expected)) {
+    return { status: "unverifiable", unlinkedWallet: shown.event.author };
+  }
   if (shown.walletSignature === "unverifiable") {
     return { status: "unverifiable" };
+  }
+  if (shown.walletSignature === "unrecognized-origin") {
+    return { status: "unverifiable", unrecognizedOrigin: shown.grant.domain };
   }
   return {
     status: "signed",
@@ -485,6 +576,26 @@ export async function verifyDropSignedEvents(
       deviceKey: shown.grant.device_key,
       grantExpiresAt: shown.grant.expires_at,
       walletSignature: shown.walletSignature,
+      origin: shown.grant.domain,
     },
   };
+}
+
+/**
+ * The reply target the drop's original post signs in its body (null: not a
+ * reply), whatever its refs say, or undefined when no verified post is among
+ * the events (a drop posted unsigned and edited signed) or its body cannot
+ * be read.
+ */
+function originalReplyTarget(
+  verified: readonly VerifiedEvent[]
+): string | null | undefined {
+  const post = verified.find(
+    ({ event }) => event.kind === DeviceEventKind.POST
+  );
+  if (!post) {
+    return undefined;
+  }
+  const body = parseSignedBody(post.event);
+  return isRecord(body) ? signedReplyTarget(body) : undefined;
 }

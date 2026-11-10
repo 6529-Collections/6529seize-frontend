@@ -1,7 +1,16 @@
 import { ARWEAVE_GATEWAY_CSP_SOURCES } from "../lib/media/arweave-gateways";
 import { getMediaResolverSource } from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_CSP_SOURCES } from "../lib/media/ipfs-gateways";
+import { PRODUCTION_ASSET_PREFIX } from "./assetPrefix";
 import { SENTRY_INGEST_HOSTNAME_PATTERN } from "./sentryIngest";
+
+/**
+ * The only scripts the asset CDN serves to this app are the build's
+ * `_next/static` files under the shared production prefix. The trailing slash
+ * makes the source a path prefix, so other paths on the CDN host (archived
+ * WordPress uploads, release metadata) cannot run as script.
+ */
+const PRODUCTION_SCRIPT_ASSET_SOURCE = `${PRODUCTION_ASSET_PREFIX}/_next/static/`;
 
 function isLocalhostHostname(hostname: string): boolean {
   return (
@@ -225,7 +234,7 @@ export function createSecurityHeaders(
       // Next.js bootstrap scripts, the consent-gated GA snippet, and imported
       // legacy WordPress pages still rely on inline script execution.
       "'unsafe-inline'",
-      "https://dnclu2fna0b2b.cloudfront.net",
+      PRODUCTION_SCRIPT_ASSET_SOURCE,
       "https://www.google-analytics.com",
       "https://www.googletagmanager.com",
       "https://dataplane.rum.us-east-1.amazonaws.com",
@@ -291,6 +300,14 @@ export function createSecurityHeaders(
           },
         ]
       : []),
+    // Cross-origin pages that open or are opened by this site get no window
+    // reference to it. Popups this site opens itself keep `window.opener`,
+    // which the Base Account (Coinbase) wallet popup needs to answer; its SDK
+    // only rejects `same-origin`.
+    {
+      key: "Cross-Origin-Opener-Policy",
+      value: "same-origin-allow-popups",
+    },
     // Legacy equivalent of frame-ancestors 'self' for browsers without CSP2.
     { key: "X-Frame-Options", value: "SAMEORIGIN" },
     { key: "X-Content-Type-Options", value: "nosniff" },

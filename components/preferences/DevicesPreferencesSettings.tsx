@@ -216,6 +216,9 @@ function DeviceGrantRow({
               address:
                 formatE2eeWallet(grant.wallet) || shortenAddress(grant.wallet),
             }),
+            t(locale, "signedMessages.devices.origin", {
+              origin: grant.domain,
+            }),
             ...getGrantDates(
               locale,
               grant,

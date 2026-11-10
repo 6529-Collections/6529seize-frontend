@@ -1,5 +1,6 @@
 "use client";
 
+import { publicEnv } from "@/config/env";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
@@ -8,6 +9,7 @@ import { t } from "@/i18n/messages";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import { ApiAttachmentSafetyStatus } from "@/generated/models/ApiAttachmentSafetyStatus";
+import { DEFAULT_MEDIA_RESOLVER_ENDPOINT } from "@/lib/media/decentralized-media";
 import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -39,6 +41,35 @@ export function getSafeAttachmentUrl(rawUrl: string): string | null {
   }
 
   return null;
+}
+
+const getOrigin = (value: string): string | null => {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Whether an attachment may be shown in an inline viewer: only HTTPS files
+ * served by the app's own media resolver. Other files keep the download and
+ * copy-link actions.
+ */
+export function canPreviewAttachmentInline(url: string): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+
+  return (
+    parsed.protocol === "https:" &&
+    [publicEnv.MEDIA_RESOLVER_ENDPOINT, DEFAULT_MEDIA_RESOLVER_ENDPOINT].some(
+      (endpoint) => getOrigin(endpoint) === parsed.origin
+    )
+  );
 }
 
 type AttachmentRenderType = "csv" | "pdf" | "unknown";
