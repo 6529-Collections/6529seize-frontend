@@ -3,10 +3,6 @@
 import { useEffect, useLayoutEffect } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
-  $convertFromMarkdownString,
-  $convertToMarkdownString,
-} from "@lexical/markdown";
-import {
   $getSelection,
   $getRoot,
   $isRangeSelection,
@@ -16,7 +12,10 @@ import {
   PASTE_COMMAND,
 } from "lexical";
 import { mergeRegister } from "@lexical/utils";
-import { E2EE_COMPOSER_TRANSFORMERS } from "./e2eeComposerTransformers";
+import {
+  exportE2eeComposerMarkdown,
+  importE2eeComposerMarkdown,
+} from "./e2eeComposerTransformers";
 import { getPastedImages } from "./useE2eeComposerParts";
 
 /** Private input adapters never mount public uploads, HTML media import or remote mention search. */
@@ -33,14 +32,12 @@ export function E2eeComposerInputPlugin({
 }) {
   const [editor] = useLexicalComposerContext();
   useLayoutEffect(() => {
-    const currentValue = editor
-      .getEditorState()
-      .read(() => $convertToMarkdownString(E2EE_COMPOSER_TRANSFORMERS));
+    const currentValue = exportE2eeComposerMarkdown(editor.getEditorState());
     if (currentValue === value) return;
     const wasFocused = document.activeElement === editor.getRootElement();
     editor.update(
       () => {
-        $convertFromMarkdownString(value, E2EE_COMPOSER_TRANSFORMERS);
+        importE2eeComposerMarkdown(value);
         if (!wasFocused) $setSelection(null);
       },
       { discrete: true }

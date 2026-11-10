@@ -1,5 +1,7 @@
 import Image from "next/image";
 
+import { getAppWalletAvatarDataUri } from "@/helpers/app-wallet-avatar.helpers";
+
 export default function AppWalletAvatar(
   props: Readonly<{ address: string; size?: number | undefined }>
 ) {
@@ -12,7 +14,7 @@ export default function AppWalletAvatar(
       loading="eager"
       height={size}
       width={size}
-      src={`https://robohash.org/${props.address}.png`}
+      src={getAppWalletAvatarDataUri(props.address)}
       alt={props.address}
     />
   );

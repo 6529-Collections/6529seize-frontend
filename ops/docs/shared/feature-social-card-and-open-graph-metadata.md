@@ -48,7 +48,8 @@ the `1200x630` image dimensions and `summary_large_image` Twitter card.
   retried once on transient failures and may take up to 10 seconds, and an
   export without artwork fails with `502` rather than returning a placeholder.
 - `/api/og-metadata/image?url={url}&w={width}` safely normalizes allowed remote
-  images to PNG for card rendering. Images retain their aspect ratio and fit
+  images for card rendering: JPEG, or PNG when the image has transparency
+  (the card renderer does not accept WebP). Images retain their aspect ratio and fit
   within the requested width (at most 1,200 pixels) and 12,000 pixels high,
   without cropping or enlarging smaller originals. GIF previews use the first
   frame. Only JPEG, PNG, GIF, and WebP sources are normalized; SVG and other
@@ -58,10 +59,16 @@ the `1200x630` image dimensions and `summary_large_image` Twitter card.
   - Each processed frame must be at most 512 million pixels, with neither
     dimension exceeding 65,536 pixels. Sources outside these limits do not
     produce a normalized preview.
-  - Images are processed one at a time per server process. Up to 32 requests can
-    wait for at most 15 seconds before downloading, so a card's banner, avatar,
-    and artwork can all render. A full queue or expired wait produces a
-    temporary `503` response with a one-second retry interval.
+  - Sources are fetched over HTTPS on port 443 only, including every redirect.
+  - Each server process downloads up to four sources at once, and up to 256
+    more requests can wait for at most 15 seconds before downloading. Up to
+    three images are decoded at once, and only after their bytes have arrived,
+    so a slow source host does not hold up other images. A download that has
+    started finishes and is cached even if every viewer waiting for it leaves. A full queue or expired
+    wait produces a temporary `503` response with a one-second retry interval.
+  - Each client address can make up to 3,000 image requests a minute, whatever width or
+    query string it asks for. Beyond that the route answers `429` with a
+    `Retry-After` header.
 
 ## Standard Route Contract
 
