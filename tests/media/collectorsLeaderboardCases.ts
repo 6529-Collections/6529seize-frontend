@@ -341,9 +341,10 @@ export function defineCollectorsLeaderboardTests() {
     const csvButton = section.getByRole("button", {
       name: "Download collectors leaderboard as CSV",
     });
+    const csvTooltipText = "Download CSV";
     const csvTooltip = page
       .getByRole("tooltip")
-      .filter({ hasText: "Download CSV" });
+      .filter({ hasText: csvTooltipText });
     const initialWidth = page.viewportSize()?.width ?? 1280;
 
     if (initialWidth >= 768) {
@@ -386,9 +387,9 @@ export function defineCollectorsLeaderboardTests() {
     // The closing tooltip is hidden from the role query before it unmounts.
     await page.mouse.move(0, 0);
     await expect(
-      page.getByRole("tooltip", { includeHidden: true }).filter({
-        hasText: "Download CSV",
-      })
+      page
+        .getByRole("tooltip", { includeHidden: true })
+        .filter({ hasText: csvTooltipText })
     ).toHaveCount(0);
     await expect(csvButton).not.toBeFocused();
     await csvButton.focus();
