@@ -527,7 +527,7 @@ export default function MarketDepthPanel({
           <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1 tw-gap-y-0.5">
             <p
               hidden={!open}
-              className="tw-m-0 tw-text-meta tw-leading-5 tw-text-iron-400"
+              className="tw-m-0 tw-text-meta tw-leading-5 tw-text-iron-400 md:[[data-nft-card-page]_&]:tw-text-sm"
             >
               {t(resolvedLocale, "marketDepth.description")}
             </p>
@@ -562,7 +562,7 @@ export default function MarketDepthPanel({
               if (data) void updateBrowsingDepth(new AbortController().signal);
               else refresh();
             }}
-            className="tw-font-inherit tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-meta tw-font-medium tw-text-iron-200 tw-transition-colors hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            className="tw-font-inherit tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-py-2 tw-text-meta tw-font-medium tw-text-iron-200 tw-transition-colors hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 md:[[data-nft-card-page]_&]:tw-text-sm"
           >
             <ArrowPathIcon aria-hidden="true" className="tw-h-4 tw-w-4" />
             {t(resolvedLocale, "marketDepth.retry")}
@@ -603,7 +603,7 @@ export default function MarketDepthPanel({
                     ) && (
                       <p
                         role="status"
-                        className="tw-mb-0 tw-mt-5 tw-text-meta tw-leading-5 tw-text-iron-400"
+                        className="tw-mb-0 tw-mt-5 tw-text-meta tw-leading-5 tw-text-iron-400 md:[[data-nft-card-page]_&]:tw-text-sm"
                       >
                         {t(
                           resolvedLocale,
@@ -650,11 +650,11 @@ export default function MarketDepthPanel({
                           {summary && (
                             <div className="tw-order-first tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-justify-between tw-gap-1 lg:tw-flex-row lg:tw-gap-4 lg:tw-pb-4">
                               <dl className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-                                <dt className="tw-m-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500">
+                                <dt className="tw-m-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500 md:[[data-nft-card-page]_&]:tw-text-sm md:[[data-nft-card-page]_&]:tw-text-iron-400">
                                   {t(resolvedLocale, summary)}
                                 </dt>
                                 <dd
-                                  className={`tw-m-0 tw-text-sm tw-font-medium tw-tabular-nums tw-tracking-[-0.01em] [overflow-wrap:anywhere] sm:tw-text-base ${value ? "tw-text-iron-50" : "tw-text-iron-600"}`}
+                                  className={`tw-m-0 tw-text-sm tw-font-medium tw-tabular-nums tw-tracking-[-0.01em] [overflow-wrap:anywhere] sm:tw-text-base md:[[data-nft-card-page]_&]:tw-text-sm md:[[data-nft-card-page]_&]:tw-font-semibold ${value ? "tw-text-iron-50 md:[[data-nft-card-page]_&]:tw-text-iron-100" : "tw-text-iron-600"}`}
                                 >
                                   <DecimalValue
                                     locale={resolvedLocale}

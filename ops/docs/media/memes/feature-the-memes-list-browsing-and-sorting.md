@@ -114,6 +114,8 @@
 ## Route States
 
 - Loading:
+  - On initial page load or refresh, card placeholders use the same responsive
+    columns, spacing, and content width as the loaded collection grid.
   - While page data is being fetched, the route shows `Fetching` with a dot
     loader.
 - End of list:

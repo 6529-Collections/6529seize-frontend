@@ -35,17 +35,17 @@ import MemeSupplyStats from "./MemeSupplyStats";
 const ARTWORK_LABEL_CLASS =
   "tw-mb-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 md:tw-mb-2";
 const CREATOR_NAME_CLASS =
-  "tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline md:tw-text-lg";
+  "tw-min-w-0 tw-break-words tw-text-sm tw-font-semibold tw-leading-none tw-text-white tw-no-underline md:tw-text-lg md:[[data-nft-card-page]_&]:tw-text-sm md:[[data-nft-card-page]_&]:tw-text-iron-100";
 const INLINE_METRIC_LABEL_CLASS =
   "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400";
 const MARKET_METRIC_LABEL_BASE_CLASS =
   "tw-mb-1 md:tw-mb-2 tw-text-[13px] sm:tw-text-sm tw-font-medium tw-leading-5";
 const MARKET_METRIC_VALUE_CLASS =
-  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
+  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-iron-100";
 const COLLECTOR_METRIC_VALUE_CLASS =
-  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6";
+  "tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-iron-100";
 const RANK_BADGE_CLASS =
-  "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-2 tw-py-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-400 md:tw-py-0.5 md:tw-text-[11px] md:tw-leading-4";
+  "tw-inline-flex tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-px-2 tw-py-1 tw-text-[10px] tw-font-semibold tw-leading-none tw-text-iron-400 md:tw-py-0.5 md:tw-text-xs md:tw-font-medium md:tw-leading-4";
 const INLINE_STATS_ROW_CLASS =
   "tw-flex tw-flex-wrap tw-gap-x-10 tw-gap-y-6 sm:tw-gap-x-14";
 const DETAIL_STATS_GRID_CLASS =
@@ -122,11 +122,17 @@ export function MemeCollectorsStats({
 export function MemeEditionSizeStats({
   nftMeta,
   locale = DEFAULT_LOCALE,
+  children,
 }: {
   readonly nftMeta: ApiMemesExtendedData;
   readonly locale?: SupportedLocale | undefined;
+  readonly children?: ReactNode;
 }) {
-  return <MemeSupplyStats nftMeta={nftMeta} locale={locale} />;
+  return (
+    <MemeSupplyStats nftMeta={nftMeta} locale={locale}>
+      {children}
+    </MemeSupplyStats>
+  );
 }
 
 function InlineStatsMetric({
@@ -275,11 +281,13 @@ export function MemeArtworkDetails({
   layout = "default",
   compactMobile = false,
   locale = DEFAULT_LOCALE,
+  showMintDate = true,
 }: {
   readonly nft: BaseNFT;
   readonly layout?: "default" | "aligned";
   readonly compactMobile?: boolean;
   readonly locale?: SupportedLocale | undefined;
+  readonly showMintDate?: boolean;
 }) {
   const mintDate = getMintDateParts(nft.mint_date, locale);
   const artistHandles = getArtistHandles(nft.artist_seize_handle);
@@ -318,7 +326,11 @@ export function MemeArtworkDetails({
       className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 md:tw-pb-8 lg:tw-pt-0 ${compactMobile ? "tw-py-4 sm:tw-pb-6 sm:tw-pt-8" : "tw-pb-6 tw-pt-8"}`}
     >
       <div className={rowClassName}>
-        <div className={creatorClassName}>
+        <div
+          className={
+            showMintDate ? creatorClassName : "tw-col-span-full tw-min-w-0"
+          }
+        >
           <div
             className={`${ARTWORK_LABEL_CLASS} ${compactMobile ? "max-sm:tw-text-[13px]" : ""}`}
           >
@@ -355,7 +367,7 @@ export function MemeArtworkDetails({
                     </span>
                   )}
                   {showComma && (
-                    <span className="tw-whitespace-pre tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-500 md:tw-text-lg">
+                    <span className="tw-whitespace-pre tw-text-sm tw-font-semibold tw-leading-none tw-text-iron-500 md:tw-text-lg md:[[data-nft-card-page]_&]:tw-text-sm">
                       {" , "}
                     </span>
                   )}
@@ -364,18 +376,20 @@ export function MemeArtworkDetails({
             })}
           </div>
         </div>
-        <div className={itemClassName}>
-          <div
-            className={`${ARTWORK_LABEL_CLASS} ${compactMobile ? "max-sm:tw-text-[13px]" : ""}`}
-          >
-            {t(locale, "theMemes.detail.live.artwork.mintDate")}
+        {showMintDate && (
+          <div className={itemClassName}>
+            <div
+              className={`${ARTWORK_LABEL_CLASS} ${compactMobile ? "max-sm:tw-text-[13px]" : ""}`}
+            >
+              {t(locale, "theMemes.detail.live.artwork.mintDate")}
+            </div>
+            <div className={mintDateClassName}>
+              <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white md:tw-text-lg md:[[data-nft-card-page]_&]:tw-text-sm md:[[data-nft-card-page]_&]:tw-text-iron-100">
+                {mintDate.date}
+              </span>
+            </div>
           </div>
-          <div className={mintDateClassName}>
-            <span className="tw-text-sm tw-font-semibold tw-leading-none tw-text-white md:tw-text-lg">
-              {mintDate.date}
-            </span>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );
@@ -522,12 +536,14 @@ export function MemeCardFileType({ nft }: { readonly nft: NFT }) {
   );
 }
 
-function MemeMarketplaceLinks({
+export function MemeMarketplaceLinks({
   nft,
   locale,
+  inline = false,
 }: {
   readonly nft: NFT;
   readonly locale: SupportedLocale;
+  readonly inline?: boolean;
 }) {
   const { hideNftPurchasing } = useNftPurchasingVisibility();
   const showMarketplaceLinks = !hideNftPurchasing;
@@ -537,8 +553,20 @@ function MemeMarketplaceLinks({
   }
 
   return (
-    <div className={MARKET_GRID_ITEM_CLASS}>
-      <div className={`${MARKET_METRIC_LABEL_BASE_CLASS} tw-text-iron-400`}>
+    <div
+      className={
+        inline
+          ? "tw-ml-auto tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-3 tw-gap-y-1"
+          : MARKET_GRID_ITEM_CLASS
+      }
+    >
+      <div
+        className={
+          inline
+            ? "tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400"
+            : `${MARKET_METRIC_LABEL_BASE_CLASS} tw-text-iron-400`
+        }
+      >
         {t(locale, "theMemes.detail.live.market.marketplaces")}
       </div>
       <NFTMarketplaceLinks contract={nft.contract} id={nft.id} />
@@ -546,20 +574,91 @@ function MemeMarketplaceLinks({
   );
 }
 
+export function MemeMintDateMetric({
+  nft,
+  locale,
+}: {
+  readonly nft: BaseNFT;
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <div className={MARKET_GRID_ITEM_CLASS}>
+      <div className={`${MARKET_METRIC_LABEL_BASE_CLASS} tw-text-iron-400`}>
+        {t(locale, "theMemes.detail.live.artwork.mintDate")}
+      </div>
+      <div className={MARKET_METRIC_VALUE_CLASS}>
+        {getMintDateParts(nft.mint_date, locale).date}
+      </div>
+    </div>
+  );
+}
+
+export function MemeMintDetails({
+  nft,
+  locale,
+}: {
+  readonly nft: NFT;
+  readonly locale: SupportedLocale;
+}) {
+  return (
+    <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-8">
+      <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.5fr)] tw-gap-6">
+        <MemeMintDateMetric nft={nft} locale={locale} />
+        <MarketMetric
+          label={t(locale, "theMemes.detail.live.market.mintPrice")}
+          value={nft.mint_price}
+          decimals={100000}
+          unit={t(locale, "theMemes.detail.live.market.ethUnit")}
+          locale={locale}
+        />
+      </div>
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-pt-5">
+        <MemeDistributionPlanLink nft={nft} locale={locale} />
+        <MemePageMainStageSubmissionLink memeCardId={nft.id} locale={locale} />
+      </div>
+    </section>
+  );
+}
+
+export function MemeTdhRate({
+  nft,
+  recordedInTdh,
+  locale,
+  definition = false,
+}: {
+  readonly nft: NFT;
+  readonly recordedInTdh?: boolean | null | undefined;
+  readonly locale: SupportedLocale;
+  readonly definition?: boolean;
+}) {
+  return (
+    <MarketMetric
+      label={t(locale, "theMemes.detail.live.market.tdhRate")}
+      value={nft.hodl_rate}
+      decimals={100}
+      displayValue={
+        recordedInTdh === false
+          ? t(locale, "theMemes.detail.live.market.pending")
+          : undefined
+      }
+      locale={locale}
+      definition={definition}
+    />
+  );
+}
+
 export function MemeNftLivePanel({
   nft,
   recordedInTdh,
   locale = DEFAULT_LOCALE,
+  showMarketplaceLinks = true,
 }: {
   readonly nft: NFT;
   readonly recordedInTdh?: boolean | null | undefined;
   readonly locale?: SupportedLocale | undefined;
+  readonly showMarketplaceLinks?: boolean;
 }) {
   const ethUnit = t(locale, "theMemes.detail.live.market.ethUnit");
-  const pendingTdhLabel =
-    recordedInTdh === false
-      ? t(locale, "theMemes.detail.live.market.pending")
-      : undefined;
 
   return (
     <section className="tw-pt-4 sm:tw-pt-6 md:tw-pt-8">
@@ -571,14 +670,10 @@ export function MemeNftLivePanel({
           unit={ethUnit}
           locale={locale}
         />
-        <MarketMetric
-          label={t(locale, "theMemes.detail.live.market.tdhRate")}
-          value={nft.hodl_rate}
-          decimals={100}
-          displayValue={pendingTdhLabel}
-          locale={locale}
-        />
-        <MemeMarketplaceLinks nft={nft} locale={locale} />
+        <MemeTdhRate nft={nft} recordedInTdh={recordedInTdh} locale={locale} />
+        {showMarketplaceLinks && (
+          <MemeMarketplaceLinks nft={nft} locale={locale} />
+        )}
       </div>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-pt-5">
         <MemeDistributionPlanLink nft={nft} locale={locale} />
@@ -600,6 +695,7 @@ function MarketMetric({
   unit,
   displayValue,
   locale,
+  definition = false,
 }: {
   readonly label: string;
   readonly value: number;
@@ -607,7 +703,10 @@ function MarketMetric({
   readonly unit?: string | undefined;
   readonly displayValue?: string | undefined;
   readonly locale: SupportedLocale;
+  readonly definition?: boolean;
 }) {
+  const Label = definition ? "dt" : "div";
+  const Value = definition ? "dd" : "div";
   const unavailableLabel = t(locale, "theMemes.detail.live.market.unavailable");
   const fractionDigits = getFractionDigits(decimals);
   const formattedValue =
@@ -620,10 +719,10 @@ function MarketMetric({
 
   return (
     <div className={MARKET_GRID_ITEM_CLASS}>
-      <div className={`${MARKET_METRIC_LABEL_BASE_CLASS} tw-text-iron-400`}>
+      <Label className={`${MARKET_METRIC_LABEL_BASE_CLASS} tw-text-iron-400`}>
         {label}
-      </div>
-      <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline">
+      </Label>
+      <Value className="tw-m-0 tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline">
         <span
           className={
             displayValue !== undefined || formattedValue === unavailableLabel
@@ -638,7 +737,7 @@ function MarketMetric({
             {unit}
           </span>
         )}
-      </div>
+      </Value>
     </div>
   );
 }
