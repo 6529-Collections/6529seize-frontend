@@ -312,13 +312,10 @@ release from the first event that carries it.
 
 ## Release build dependencies
 
-The production build restores no Actions cache and installs every dependency
-from the registry through the package policy and Socket Firewall. Cache
-entries are shared by every run on the same ref, including runs on `main` that
-execute another branch's tree (Staging E2E runs the deployed `1a-staging`
-tree), so release builds never read one. The workflow-security check in
-`ops/scripts/testing-strategy.cjs` rejects a cache action or `cache` input in
-the production build and deploy workflows.
+Release builds restore no Actions cache: their only inputs are the commit, the
+lockfile and the registry, through the package policy and Socket Firewall. The
+workflow-security check in `ops/scripts/testing-strategy.cjs` rejects a cache
+action or `cache` input in the production build and deploy workflows.
 
 ## Sitemap generation
 

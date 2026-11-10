@@ -390,9 +390,9 @@ const TEXT_SECRET_PATTERNS = [
     findLines: findNpmAuthTokenLines,
   },
 ];
-// Workflows that build, verify or publish production bytes. They must not use
-// an Actions cache: entries are shared by every run on the same ref, including
-// runs that execute other branches' code.
+// Workflows that build, verify or publish production bytes. They restore no
+// Actions cache: their only inputs are the commit, the lockfile and the
+// registry.
 const RELEASE_WORKFLOW_FILES = new Set([
   ".github/workflows/build-upload-deploy-prod.yml",
   ".github/workflows/production-artifact-metadata.yml",
@@ -1299,7 +1299,7 @@ function workflowSecurityFindingsForText(text, filePath) {
       file: displayPath(filePath),
       pattern: "release-workflow-cache",
       reason:
-        "production build and deploy workflows must not use an Actions cache; its entries are shared with every run on the same ref.",
+        "production build and deploy workflows must not use an Actions cache; their only inputs are the commit, the lockfile and the registry.",
     });
   }
 
