@@ -43,6 +43,7 @@ threads.
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
 - [Wave Drop Quote Link Cards (Same-Origin Serial Links)](feature-quote-link-cards.md)
 - [Wave Drop Selection Copy](feature-selection-copy.md)
+- [Share Posts as Image](feature-share-as-image.md)
 
 ### Menus and thread-state actions
 

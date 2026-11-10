@@ -37,6 +37,7 @@ import ReportDropModal from "@/components/content-moderation/ReportDropModal";
 import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
 import DropSignatureDialog from "./signature/DropSignatureDialog";
 import DropSignatureMenuItem from "./signature/DropSignatureMenuItem";
+import WaveDropShareImageAction from "./share-image/WaveDropShareImageAction";
 
 interface WaveDropActionsMoreProps {
   readonly drop: ExtendedDrop;
@@ -183,6 +184,10 @@ export default function WaveDropActionsMore({
                   onCopy={closeDropdown}
                 />
                 <WaveDropActionsCopyText drop={drop} onCopy={closeDropdown} />
+                <WaveDropShareImageAction
+                  drop={drop}
+                  onSelected={closeDropdown}
+                />
                 <WaveDropBookmarkAction
                   dropId={drop.id}
                   onSelected={closeDropdown}
