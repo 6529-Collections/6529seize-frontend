@@ -31,10 +31,31 @@ const emptyTrust = (): StoredTrust => ({
   wallets: {},
   approved: [],
   ignored: [],
+  ownWallets: [],
 });
 
+/**
+ * A trust record written before own-device trust became explicit has no
+ * `ownWallets`: the wallets it pinned for this profile then are kept as
+ * `legacyOwnWallets`, which only judge this device's own revocation.
+ * Records written since always carry `ownWallets`, so pins first-sighted
+ * later never count there.
+ */
+function normalizeTrust(trust: StoredTrust, profileId: string): StoredTrust {
+  if (trust.ownWallets !== undefined) {
+    return trust;
+  }
+  return {
+    ...trust,
+    ownWallets: [],
+    legacyOwnWallets: [...(trust.wallets[profileId] ?? [])],
+  };
+}
+
 const trustOf = (ctx: EngineContext): StoredTrust =>
-  ctx.device?.trust ?? emptyTrust();
+  ctx.device?.trust
+    ? normalizeTrust(ctx.device.trust, ctx.profileId)
+    : emptyTrust();
 
 const storedPins = (ctx: EngineContext, profileId: string): string[] =>
   trustOf(ctx).wallets[profileId] ?? [];
@@ -150,14 +171,18 @@ export const isTrustedOwnRevoker = (
 ): boolean =>
   revoker.profile_id === ctx.profileId &&
   (isApproved(ctx, revoker.device_key) ||
-    isOwnWallet(ctx, revoker.grant.wallet));
+    isOwnWallet(ctx, revoker.grant.wallet) ||
+    (trustOf(ctx).legacyOwnWallets ?? []).includes(
+      revoker.grant.wallet.toLowerCase()
+    ));
 
-/** `trust` with `wallet` added to the own wallets (newest last). */
+/** `trust` (of `profileId`) with `wallet` added to the own wallets. */
 export function withOwnWallet(
   trust: StoredTrust | undefined,
-  wallet: string
+  wallet: string,
+  profileId: string
 ): StoredTrust {
-  const base = trust ?? emptyTrust();
+  const base = trust ? normalizeTrust(trust, profileId) : emptyTrust();
   return {
     ...base,
     ownWallets: remember(
@@ -256,7 +281,7 @@ export async function approveDevice(
   const current = trustOf(ctx);
   const trust =
     device.profileId === ctx.profileId
-      ? withOwnWallet(current, device.wallet)
+      ? withOwnWallet(current, device.wallet, ctx.profileId)
       : current;
   const key = device.deviceKey.toLowerCase();
   const wallet = device.wallet.toLowerCase();

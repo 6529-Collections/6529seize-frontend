@@ -45,6 +45,7 @@ import { tCount } from "../e2eeFormat";
 import { isSafariBrowser } from "../e2eePlatform";
 import { useE2eeUpgradeCount } from "../useE2eeUpgrade";
 import { turnOnWithCombinedSignIn } from "./e2eeCombinedTurnOn";
+import { E2eeRemoveLocalData } from "./E2eeRemoveLocalData";
 
 const POINTS: readonly {
   readonly key: MessageKey;
@@ -581,6 +582,9 @@ function EnrollmentFeedback({
       >
         {statusKey ? t(locale, statusKey) : null}
       </output>
+      {engineError === E2EE_REVOCATION_UNVERIFIED ? (
+        <E2eeRemoveLocalData />
+      ) : null}
       {failureKey ? (
         <p
           role="alert"

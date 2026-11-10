@@ -2,15 +2,10 @@ import type { MessageKey } from "@/i18n/messages";
 import { E2EE_SIGNATURE_REJECTED } from "@/lib/e2ee/engine/errors";
 
 export {
+  E2EE_REVOCATION_UNVERIFIED,
   E2EE_SIGNATURE_REJECTED,
   isE2eeSignatureRejection,
 } from "@/lib/e2ee/engine/errors";
-
-/**
- * Engine code while this device is listed as revoked but the revocation
- * could not be confirmed here (the device stopped; its data is kept).
- */
-export const E2EE_REVOCATION_UNVERIFIED = "E2EE_REVOCATION_UNVERIFIED";
 
 /**
  * Normalized rejection thrown to the engine, keeping the wallet's rejection

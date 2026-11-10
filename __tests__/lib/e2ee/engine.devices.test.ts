@@ -267,6 +267,48 @@ describe("E2EE engine: devices", () => {
     ).toBeUndefined();
   });
 
+  it("accepts a revocation from a wallet this device pinned for its profile before", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const other = privateKeyToAccount(generatePrivateKey());
+    world.ds.setWallets("alice", [alice.account.address, other.address]);
+    const phone = await startDevice(world, "alice", other);
+    await settle(world);
+    // The laptop's trust as an earlier build stored it: both wallets pinned
+    // for alice on first sighting, no own wallets yet.
+    const { storage } = alice.primary;
+    await alice.primary.engine.idle();
+    stopDevice(world, alice.primary);
+    const stored = (await storage.getDevice("alice"))!;
+    await storage.writeBatch("alice", {
+      expectedVersion: await storage.getStateVersion("alice"),
+      device: {
+        ...stored,
+        trust: {
+          wallets: {
+            alice: [
+              alice.account.address.toLowerCase(),
+              other.address.toLowerCase(),
+            ],
+          },
+          approved: [],
+          ignored: [],
+        },
+      },
+    });
+    const laptop = await startDevice(world, "alice", alice.account, {
+      storage,
+    });
+    expect(laptop.engine.getStatus()).toBe("ready");
+    await laptop.engine.idle();
+
+    await phone.engine.revokeDevice(stored.deviceKey);
+    await settle(world);
+    expect(laptop.engine.getStatus()).toBe("needs-enrollment");
+    expect(laptop.engine.getError()).toBeNull();
+    expect(await storage.getDevice("alice")).toBeNull();
+  });
+
   it("removes a device's data once the device that revoked it was added here", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");

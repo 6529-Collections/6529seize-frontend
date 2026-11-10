@@ -30,7 +30,6 @@ import { UnsentMessages } from "./unsent";
 import { EngineController } from "./controller";
 import {
   confirmOwnRejection,
-  E2EE_REVOCATION_UNVERIFIED,
   markRevocationUnverified,
   needsNewDevice,
   refreshMe,
@@ -40,7 +39,7 @@ import {
 } from "./enroll";
 import { backupHistory, importBackupHistory } from "./backup";
 import { EnrollmentFlight, NEEDS_ENROLLMENT } from "./enrollment-flight";
-import { E2eeError, errorMessage } from "./errors";
+import { E2EE_REVOCATION_UNVERIFIED, E2eeError, errorMessage } from "./errors";
 import {
   addMembers,
   checkEligibility,
@@ -259,7 +258,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
     const { ownRevocation } = await refreshMe(this.ctx);
     if (ownRevocation === "unverified") {
-      throw new Error(E2EE_REVOCATION_UNVERIFIED);
+      throw new E2eeError(E2EE_REVOCATION_UNVERIFIED);
     }
     if (ownRevocation === "verified") {
       await this.wipe();

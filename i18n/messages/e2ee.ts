@@ -147,7 +147,15 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.rejected": "Signature cancelled.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
   "e2ee.enroll.revocationUnverified":
-    "This device is listed as revoked, but the revocation couldn’t be confirmed here. It has stopped sending and receiving encrypted messages, and everything saved on it is kept. To use them here again, sign out with “Remove encrypted messages from this browser” selected, then turn them on again; that deletes the history saved here, which only an encrypted backup can restore.",
+    "This device is listed as revoked, but the revocation couldn’t be confirmed here. It has stopped sending and receiving encrypted messages, and everything saved on it is kept. To use them here again, remove them from this browser below, then turn them on again; that deletes the history saved here, which only an encrypted backup can restore.",
+  "e2ee.enroll.removeLocal": "Remove encrypted messages from this browser",
+  "e2ee.enroll.removeLocalTitle":
+    "Remove encrypted messages from this browser?",
+  "e2ee.enroll.removeLocalBody":
+    "This deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved in this browser. An encrypted backup can restore the history it contains. You can then turn encrypted messages on again as a new device.",
+  "e2ee.enroll.removeLocalConfirm": "Remove",
+  "e2ee.enroll.removeLocalFailed":
+    "Couldn’t remove encrypted messages from this browser. Try again.",
   "e2ee.upgrade.title": "Upgrade encrypted messages",
   "e2ee.upgrade.intro":
     "Encrypted messages are moving to stronger encryption. Confirm once in your wallet to continue; your messages stay on this device.",
@@ -746,7 +754,11 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.revokeEncryptionTitle":
     "Revoke access to encrypted DMs for {label}?",
   "e2ee.devices.revokeHistory":
-    "The app clears this device’s local encrypted chat history when it processes the revocation. An encrypted backup can restore the history it contains.",
+    "That device stops receiving encrypted messages. It deletes its saved chat history once it confirms the revocation came from a device of yours it trusts; otherwise the history stays on it until it’s removed there. An encrypted backup can restore the history it contains.",
+  "e2ee.devices.revokeHistoryThis":
+    "The encrypted chat history and keys saved in this browser are deleted right away. An encrypted backup can restore the history it contains.",
+  "e2ee.devices.revokeHistoryUnsigned":
+    "That device stops receiving encrypted messages. Its saved chat history stays on it until it’s removed there, because encrypted messages aren’t on in this browser to confirm the revocation.",
   "e2ee.deviceStatus.summary":
     "This device: signed posts {proof}; encrypted DMs {encryption}.",
   "e2ee.deviceStatus.expiring": " · expires {time}",

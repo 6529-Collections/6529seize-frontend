@@ -69,8 +69,15 @@ export interface StoredTrust {
    * Lowercase wallets the user trusts for this profile's own devices: added
    * with "Add device", or a wallet this device was signed by before. Never
    * filled on first sighting; this device's current wallet always counts.
+   * Absent only on records written before this list existed.
    */
   ownWallets?: string[];
+  /**
+   * The wallets pinned for this profile before `ownWallets` existed. They
+   * never add a device; they only count as revokers of this device itself
+   * (with a verifying signature and grant).
+   */
+  legacyOwnWallets?: string[];
 }
 
 export interface StoredMember {

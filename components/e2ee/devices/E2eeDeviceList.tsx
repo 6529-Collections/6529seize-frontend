@@ -221,7 +221,12 @@ export function E2eeDeviceList({
             label: target?.label ?? "",
           }
         )}
-        body={t(locale, "e2ee.devices.revokeHistory")}
+        body={t(
+          locale,
+          target?.isThisDevice
+            ? "e2ee.devices.revokeHistoryThis"
+            : "e2ee.devices.revokeHistory"
+        )}
         confirmLabel={t(locale, "e2ee.devices.revokeConfirm")}
         errorFallbackKey="e2ee.devices.revokeFailed"
         onConfirm={async () => {

@@ -282,23 +282,25 @@ function noticeNames(
 
 /**
  * "device_added" copy. A device not yet verified for its owner on this
- * device says so plainly; `owner.object` is the mid-sentence form ("you").
+ * device says so plainly, naming who added it (`actor`) and whose it is
+ * (`owner.object`, the mid-sentence form: "you").
  */
 function deviceAddedText(
   locale: SupportedLocale,
   notice: NonNullable<E2eeMessage["notice"]>,
+  actor: string,
   owner: { readonly name: string; readonly object: string }
 ): string {
   const wallet = formatNoticeWallets(locale, notice.detail);
   if (notice.unverified === true) {
     return wallet
       ? t(locale, "e2ee.notice.deviceAddedUnverified", {
-          name: owner.name,
+          name: actor,
           wallet,
           owner: owner.object,
         })
       : t(locale, "e2ee.notice.deviceAddedUnverifiedNoWallet", {
-          name: owner.name,
+          name: actor,
           owner: owner.object,
         });
   }
@@ -356,7 +358,7 @@ export function getNoticeText(
         ? t(locale, "e2ee.notice.removed", { actor, targets: objects })
         : t(locale, "e2ee.notice.removedNoActor", { targets });
     case "device_added":
-      return deviceAddedText(locale, notice, {
+      return deviceAddedText(locale, notice, actor, {
         name: ownerName,
         object: noticeNames(
           locale,

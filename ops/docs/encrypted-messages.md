@@ -199,8 +199,14 @@ were removed, renewal cannot recreate them: restore a backup where available.
 Preferences → **Device Permissions** identifies each grant's permissions and
 explains what **Revoke** will disable. Revoking a combined grant disables both
 Signed Posts and Encrypted DMs; a separate grant disables only its own permission.
-These are not separate revoke switches within a combined grant. Revoking this
-encryption device clears its local encrypted history and keys. Reauthorizing
+These are not separate revoke switches within a combined grant. When
+encrypted messages are on in this browser, revoking a combined grant also signs
+its encrypted device's revocation, so your other devices and that device can
+verify it. Revoking this browser's own grant clears its local encrypted history
+and keys right away. Another device deletes its history once it confirms the
+revocation came from a device of yours it trusts; otherwise (for example when
+encrypted messages are off in the browser you revoke from) it stops and keeps
+that history until it is removed there. The dialog says which applies. Reauthorizing
 later creates a new device; it does not bring that deleted local history back.
 Earlier Signed Posts remain verifiable after revocation.
 
@@ -439,10 +445,10 @@ itself or from a device signed by a wallet trusted for its owner.
 
 When a member's new device is added by someone else and your device has not
 verified it for that person (its wallet is not trusted for them here, or its
-signature could not be checked here), the timeline says so: **{name} added a
-device signed by wallet 0x1234…abcd, which isn’t verified for {name} on this
-device**. **Chat info** marks that device **Not verified for {name} on this
-device**.
+signature could not be checked here), the timeline says so, naming who added
+it and whose device it is: **alice added a device signed by wallet
+0x1234…abcd, which isn’t verified for bob on this device**. **Chat info** marks
+that device **Not verified for bob on this device**.
 
 Trust on first use cannot catch a wrong device that is already there the first
 time your device sees someone. Compare safety codes and check the wallets in
@@ -502,10 +508,12 @@ yours this device trusts). If 6529.io lists this device as revoked but the
 revocation can't be confirmed, the device stops sending and receiving
 encrypted messages, keeps everything saved on it, and stays stopped (also after
 a reload) until you act; the card to turn them on says so. Turning them on
-again checks once more. To use them on that browser again, sign out with
-**Remove encrypted messages from this browser** selected and turn them on
-again; that deletes the history saved there, which only an encrypted backup
-can restore. A new device is named after its
+again checks once more. To use them on that browser again, select **Remove
+encrypted messages from this browser** on that card (or at sign-out) and turn
+them on again; that deletes the history saved there, which only an encrypted
+backup can restore. A device that already pinned one of your other wallets
+before this check existed still accepts a revocation signed by a device of that
+wallet. A new device is named after its
 browser or app and OS family (for example "Chrome on Windows" or "6529 Mobile on
 iPhone"); devices added earlier keep their name. A profile can have up to 10
 active devices; at the limit, the new device lists the profile's devices and

@@ -32,6 +32,7 @@ import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { getEncryptedDevicesRoute } from "@/helpers/navigation.helpers";
 import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
 import { RenameDevice } from "@/components/e2ee/devices/RenameDevice";
+import { useLinkedDeviceRevocation } from "@/components/e2ee/devices/useLinkedDeviceRevocation";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
 type GrantStatus = "active" | "expired" | "revoked";
@@ -259,6 +260,7 @@ export default function DevicesPreferencesSettings() {
   const local = useLocalDeviceKeys(listAddress);
   const nowMs = useMinuteClock();
   const { revoke, isRevoking } = useRevokeDeviceGrant();
+  const linkedRevocation = useLinkedDeviceRevocation();
   const [pendingRevoke, setPendingRevoke] = useState<ApiDeviceGrant | null>(
     null
   );
@@ -287,10 +289,18 @@ export default function DevicesPreferencesSettings() {
     ? linkedDevices.get(pendingRevoke.id)
     : undefined;
   const ownKeys = new Set(local.publicKeys);
+  const pendingIsOwn =
+    pendingRevoke !== null &&
+    ownKeys.has(pendingRevoke.device_key.toLowerCase());
 
   const confirmRevoke = async () => {
-    if (canVerifyRevocation && pendingRevoke && (await revoke(pendingRevoke))) {
+    if (!canVerifyRevocation || !pendingRevoke) return;
+    const linked = pendingLinkedDevice;
+    // A linked encryption device gets a signed revocation its devices can verify.
+    const signed = linked ? await linkedRevocation.sign(linked) : false;
+    if (await revoke(pendingRevoke)) {
       setPendingRevoke(null);
+      if (linked) await linkedRevocation.finish(linked, pendingIsOwn, signed);
       if (encryptionEnabled) void encryptionDevices.refetch();
     }
   };
@@ -450,7 +460,7 @@ export default function DevicesPreferencesSettings() {
         message={t(
           locale,
           pendingLinkedDevice
-            ? "e2ee.devices.revokeHistory"
+            ? linkedRevocation.historyKey(pendingLinkedDevice, pendingIsOwn)
             : "signedMessages.devices.revokeConfirm"
         )}
         confirmText={t(locale, "signedMessages.devices.revoke")}

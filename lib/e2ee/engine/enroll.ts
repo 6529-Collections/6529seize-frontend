@@ -177,7 +177,7 @@ function inheritedTrust(
   if (previous.wallet.toLowerCase() === wallet.toLowerCase()) {
     return previous.trust ?? null;
   }
-  return withOwnWallet(previous.trust, previous.wallet);
+  return withOwnWallet(previous.trust, previous.wallet, previous.profileId);
 }
 
 /** Creates the device key and obtains the single wallet signature. */
@@ -541,12 +541,6 @@ async function getOwnMe(ctx: EngineContext): Promise<ApiE2eeMe> {
   }
   return me;
 }
-
-/**
- * Engine error code while this device is listed as revoked but the
- * revocation does not verify here: it stops, and its local data is kept.
- */
-export const E2EE_REVOCATION_UNVERIFIED = "E2EE_REVOCATION_UNVERIFIED";
 
 /**
  * Records (or clears) that this device stopped on a revocation that did not

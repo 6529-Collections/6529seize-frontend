@@ -160,6 +160,7 @@ describe("E2EE device trust (trust on first use)", () => {
       wallets: { bob: [WALLET_A, WALLET_B] },
       approved: [key(5)],
       ignored: [key(6)],
+      ownWallets: [],
     });
   });
 
@@ -205,7 +206,8 @@ describe("E2EE device trust for the own profile", () => {
     // The wallets seen are still pinned, but only to judge revocations.
     expect(isPinnedWallet(ctx, OWN, WALLET_A)).toBe(true);
     expect(await deviceTrust(ctx, listed)).toBe("new-wallet");
-    expect(ctx.device?.trust?.ownWallets).toBeUndefined();
+    // Records written now carry an (empty) own-wallet list from the start.
+    expect(ctx.device?.trust?.ownWallets).toEqual([]);
     // Later sightings change nothing either.
     expect(await trustedPackages(ctx, [pkg(sibling(12, WALLET_A))])).toEqual(
       []
@@ -252,8 +254,9 @@ describe("E2EE device trust for the own profile", () => {
     expect(ownDeviceNeedsApproval(ctx, sibling(20, OWN_WALLET), false)).toBe(
       true
     );
-    expect(ownDeviceNeedsApproval(ctx, device(key(999), WALLET_A, OWN), true))
-      .toBe(false);
+    expect(
+      ownDeviceNeedsApproval(ctx, device(key(999), WALLET_A, OWN), true)
+    ).toBe(false);
 
     const member = (profileId: string, n: number, wallet: string | null) => ({
       profileId,
@@ -296,7 +299,7 @@ describe("E2EE device trust for the own profile", () => {
   });
 
   it("keeps a wallet this device was signed by as an own wallet", () => {
-    expect(withOwnWallet(undefined, WALLET_A)).toEqual({
+    expect(withOwnWallet(undefined, WALLET_A, OWN)).toEqual({
       wallets: {},
       approved: [],
       ignored: [],
@@ -305,8 +308,45 @@ describe("E2EE device trust for the own profile", () => {
     expect(
       withOwnWallet(
         { wallets: {}, approved: [], ignored: [], ownWallets: [WALLET_A] },
-        WALLET_B.toUpperCase()
+        WALLET_B.toUpperCase(),
+        OWN
       ).ownWallets
     ).toEqual([WALLET_A, WALLET_B]);
+    // A record from before own wallets existed keeps its own-profile pins.
+    expect(
+      withOwnWallet(
+        { wallets: { [OWN]: [WALLET_B] }, approved: [], ignored: [] },
+        WALLET_A,
+        OWN
+      )
+    ).toMatchObject({ ownWallets: [WALLET_A], legacyOwnWallets: [WALLET_B] });
+  });
+
+  it("accepts a revoker of a wallet pinned for this profile before own wallets existed, and never adds it", async () => {
+    const { ctx } = fakeCtx(new Map());
+    // As stored by an earlier build: own pins, no ownWallets.
+    ctx.device!.trust = {
+      wallets: { [OWN]: [OWN_WALLET, WALLET_B] },
+      approved: [],
+      ignored: [],
+    };
+    const phone = sibling(29, WALLET_B);
+    expect(isTrustedOwnRevoker(ctx, phone)).toBe(true);
+    expect(await deviceTrust(ctx, phone)).toBe("new-wallet");
+    expect(ownDeviceNeedsApproval(ctx, phone, true)).toBe(true);
+    // Written again, the record keeps that snapshot.
+    await ignoreUntrustedDevice(ctx, key(30));
+    expect(ctx.device?.trust).toMatchObject({
+      ownWallets: [],
+      legacyOwnWallets: [OWN_WALLET, WALLET_B],
+    });
+    expect(isTrustedOwnRevoker(ctx, phone)).toBe(true);
+  });
+
+  it("never treats own-profile pins first-sighted since then as revokers", async () => {
+    const { ctx } = fakeCtx(new Map());
+    await pinFirstSighting(ctx, [{ profileId: OWN, wallet: WALLET_B }]);
+    expect(isPinnedWallet(ctx, OWN, WALLET_B)).toBe(true);
+    expect(isTrustedOwnRevoker(ctx, sibling(31, WALLET_B))).toBe(false);
   });
 });
