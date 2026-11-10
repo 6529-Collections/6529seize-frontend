@@ -30,7 +30,11 @@ import {
   requireMls,
   type EngineContext,
 } from "./context";
-import { E2eeError } from "./errors";
+import {
+  E2EE_SIGNATURE_REJECTED,
+  E2eeError,
+  isE2eeSignatureRejection,
+} from "./errors";
 import {
   isTrustedOwnRevoker,
   ownDeviceNeedsApproval,
@@ -109,6 +113,10 @@ function reusablePending(
   );
 }
 
+/**
+ * Request the device grant signature. Keep wallet failures retryable and retain
+ * the cause so the caller can distinguish a broken session from other errors.
+ */
 async function signGrant(
   ctx: EngineContext,
   deviceKey: string
@@ -119,14 +127,17 @@ async function signGrant(
     issuedAtSeconds: Math.floor(ctx.now() / 1000),
     origin: ctx.options.origin,
   });
+  const typedData = buildGrantTypedData(grant);
+  let signature: string;
   try {
-    const signature = await ctx.options.signTypedData(
-      buildGrantTypedData(grant)
-    );
-    return { grant, signature: signature.toLowerCase() };
-  } catch {
-    throw new E2eeError("E2EE_SIGNATURE_REJECTED");
+    signature = await ctx.options.signTypedData(typedData);
+  } catch (error) {
+    const code = isE2eeSignatureRejection(error)
+      ? E2EE_SIGNATURE_REJECTED
+      : "E2EE_SIGNATURE_FAILED";
+    throw new E2eeError(code, undefined, { cause: error });
   }
+  return { grant, signature: signature.toLowerCase() };
 }
 
 /**

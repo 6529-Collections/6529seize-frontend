@@ -66,6 +66,44 @@ it("keeps older notifications without a sequence generic even with local message
   expect(mockConversation).toHaveBeenLastCalledWith(null);
 });
 
+it("uses the saved local summary before the timeline is loaded after a reload", () => {
+  mockConversation.mockReturnValue({
+    messages: [],
+    conversation: {
+      lastMessage: {
+        seq: 5,
+        kind: "message",
+        senderProfileId: "other",
+        text: "Saved local preview",
+      },
+    },
+  });
+  const { result, rerender } = renderHook(
+    ({ seq }) => useEncryptedNotificationPreview("group", seq),
+    { initialProps: { seq: 5 } }
+  );
+  expect(result.current.preview).toBe("Saved local preview");
+  rerender({ seq: 4 });
+  expect(result.current.preview).toBeNull();
+});
+
+it("does not use an older saved preview when the timeline marks the message deleted", () => {
+  const lastMessage = {
+    seq: 5,
+    kind: "message",
+    senderProfileId: "other",
+    text: "Stale local preview",
+  };
+  mockConversation.mockReturnValue({
+    messages: [{ ...lastMessage, deleted: true }],
+    conversation: { lastMessage },
+  });
+  const { result } = renderHook(() =>
+    useEncryptedNotificationPreview("group", 5)
+  );
+  expect(result.current.preview).toBeNull();
+});
+
 it.each(["needs-enrollment", "loading", "error"])(
   "uses a generic entry when local encryption is %s",
   (status) => {
@@ -105,4 +143,15 @@ it("only previews the specific message referenced by a notification", () => {
   expect(result.current.preview).toBe("First");
   rerender({ seq: 4 });
   expect(result.current.preview).toBeNull();
+});
+
+it("retains complete Markdown so preview clamping cannot cut closing syntax", () => {
+  const text = `**${"formatted ".repeat(30)}**`;
+  mockConversation.mockReturnValue({
+    messages: [{ seq: 1, kind: "message", senderProfileId: "other", text }],
+  });
+  const { result } = renderHook(() =>
+    useEncryptedNotificationPreview("group", 1)
+  );
+  expect(result.current.preview).toBe(text);
 });

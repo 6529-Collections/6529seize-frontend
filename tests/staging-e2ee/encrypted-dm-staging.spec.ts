@@ -2,6 +2,12 @@ import {
   dropEncryptedAttachment,
   checkEncryptedImageActions,
 } from "../support/e2ee/attachmentMedia";
+import {
+  gifFixtureBytes,
+  GIPHY_FIXTURE_URL,
+  installGiphyFixture,
+  selectFixtureGif,
+} from "../support/e2ee/giphyFixture";
 import { measureStagingCatchUp } from "../support/staging-e2ee/catch-up";
 import { performance } from "node:perf_hooks";
 import {
@@ -9,6 +15,13 @@ import {
   browserPerformanceSnapshot,
 } from "../support/staging-e2ee/performance";
 import type { Browser, TestInfo } from "@playwright/test";
+import { createChatWave } from "../support/staging-e2ee/chat-wave";
+import {
+  MARKDOWN_PARITY_CASES,
+  markdownBody,
+  markdownSnapshot,
+  revealNewestMessage,
+} from "../support/markdownParity";
 
 import { expect, test } from "../testHelpers";
 import {
@@ -338,6 +351,237 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expectPrivateAndClean([a, b], needles({ hello, reply }));
   });
 
+  test("ordinary and encrypted chats render identical Markdown without fetching encrypted URLs", async ({}, testInfo) => {
+    const { a, b, runId } = requireWorld();
+    const dm = await ensureDm(requireWorld());
+    await openChat(a, dm);
+    await openChat(b, dm);
+    const waveId = await createChatWave(a, `Markdown QA ${runId}`);
+    const ordinary = await a.context.newPage();
+    const leakedRequests: string[] = [];
+    const canary = `markdown-private-${runId}`;
+    for (const session of [a, b]) {
+      session.context.on("request", (request) => {
+        if (request.url().includes(canary)) leakedRequests.push(request.url());
+      });
+      await session.context.route(`**/*${canary}*`, (route) => route.abort());
+    }
+    try {
+      await gotoStaging(ordinary, `/waves/${waveId}`);
+      for (const sample of MARKDOWN_PARITY_CASES) {
+        const marker = `Markdown ${sample.name} ${runId}`;
+        const text = `${marker}\n\n${sample.text}`;
+        await composer(a.page).fill(text);
+        await a.page.getByRole("button", { name: "Send", exact: true }).click();
+        const encryptedRow = messageRow(b.page, marker);
+        await revealNewestMessage(b.page, encryptedRow);
+        const encrypted = markdownBody(encryptedRow, marker);
+        const encryptedResult = await markdownSnapshot(
+          encrypted,
+          sample.selectors
+        );
+        const input = ordinary
+          .getByRole("textbox", { name: "Write a message", exact: true })
+          .last();
+        await input.fill(text);
+        const accepted = ordinary.waitForResponse(
+          (response) =>
+            response.request().method() === "POST" &&
+            new URL(response.url()).pathname === "/api/drops",
+          { timeout: SYNC_TIMEOUT_MS }
+        );
+        accepted.catch(() => undefined);
+        await ordinary
+          .getByRole("button", { name: "Post", exact: true })
+          .last()
+          .click();
+        expect(
+          (await accepted).ok(),
+          "The ordinary Markdown message was accepted by staging"
+        ).toBe(true);
+        const regularRow = ordinary
+          .getByText(marker, { exact: true })
+          .locator("xpath=ancestor::*[@data-wave-drop-id][1]");
+        await expect(regularRow).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
+        const more = regularRow.getByRole("button", {
+          name: "Show more",
+          exact: true,
+        });
+        if (await more.isVisible()) await more.click();
+        const regular = markdownBody(regularRow, marker);
+        expect(await markdownSnapshot(regular, sample.selectors)).toEqual(
+          encryptedResult
+        );
+        for (const width of [1440, 390]) {
+          await ordinary.setViewportSize({ width, height: 1000 });
+          await b.page.setViewportSize({ width, height: 1000 });
+          expect(await markdownSnapshot(regular, sample.selectors)).toEqual(
+            await markdownSnapshot(encrypted, sample.selectors)
+          );
+          for (const [name, body] of [
+            ["regular", regular],
+            ["encrypted", encrypted],
+          ] as const) {
+            await testInfo.attach(`${name}-${sample.name}-${width}`, {
+              body: await body.screenshot(),
+              contentType: "image/png",
+            });
+          }
+        }
+        await ordinary.setViewportSize({ width: 1440, height: 1000 });
+        await b.page.setViewportSize({ width: 1440, height: 1000 });
+      }
+      const secret = `Private URL checks ${runId}\n\n**Preview bold** *Preview italic* and \`preview code\`\n\n[Private link](https://${canary}.invalid/link)\n\nhttps://${canary}.invalid/plain\n\n![Private image](https://${canary}.invalid/image.png)\n\n<img src="https://${canary}.invalid/html.png">\n\n[Unsafe script](javascript:alert%281%29)\n\n[Unsafe data](data:text/html,private)\n\nA private note[^1].\n\n[^1]: Private footnote`;
+      await composer(a.page).fill(secret);
+      await a.page.getByRole("button", { name: "Send", exact: true }).click();
+      const privateRow = messageRow(b.page, `Private URL checks ${runId}`);
+      await revealNewestMessage(b.page, privateRow);
+      await expect(
+        privateRow.getByRole("link", { name: "Private image" })
+      ).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
+      await expect(
+        privateRow.getByRole("link", { name: /Unsafe script|Unsafe data/ })
+      ).toHaveCount(0);
+      await privateRow.getByRole("link", { name: "Private link" }).hover();
+      await privateRow.getByRole("link", { name: "Private link" }).focus();
+      const note = privateRow.getByRole("link", { name: "1", exact: true });
+      await expect(note).toHaveAttribute("href", /^#e2ee-/u);
+      await note.click();
+      await expect(privateRow.getByText("Private footnote")).toBeVisible();
+      expect(
+        await privateRow.evaluate(
+          (element, token) =>
+            element.querySelector(`img[src*='${token}'],iframe,video,audio`) !==
+            null,
+          canary
+        )
+      ).toBe(false);
+      // Resizing can restart the engine and clear the in-memory timeline. Check
+      // each notification while it is the latest saved local preview as well.
+      await gotoStaging(b.page, "/notifications");
+      const notice = b.page
+        .getByRole("article")
+        .filter({ hasText: `Private URL checks ${runId}` });
+      for (const width of [1440, 390]) {
+        await b.page.setViewportSize({ width, height: 1000 });
+        await expect(notice.getByText("Preview bold")).toHaveJSProperty(
+          "tagName",
+          "STRONG",
+          { timeout: SYNC_TIMEOUT_MS }
+        );
+        await expect(notice.getByText("Preview italic")).toHaveJSProperty(
+          "tagName",
+          "EM"
+        );
+        await expect(notice.getByText("preview code")).toHaveJSProperty(
+          "tagName",
+          "CODE"
+        );
+        await expect(
+          notice.getByRole("link", { name: "Private link", exact: true })
+        ).toHaveCount(0);
+        expect(
+          await notice.evaluate(
+            (element) => element.getBoundingClientRect().height
+          )
+        ).toBeLessThan(180);
+        await testInfo.attach(`encrypted-notification-page-${width}`, {
+          body: await notice.screenshot(),
+          contentType: "image/png",
+        });
+      }
+      await b.page.setViewportSize({ width: 1440, height: 1000 });
+      await b.page
+        .getByRole("link", { name: "Notifications", exact: true })
+        .first()
+        .press("ArrowDown");
+      const overview = b.page.getByRole("region", {
+        name: "Notifications",
+        exact: true,
+      });
+      const overviewNotice = overview.getByRole("article").filter({
+        hasText: `Private URL checks ${runId}`,
+      });
+      await expect(overviewNotice.getByText("Preview bold")).toHaveJSProperty(
+        "tagName",
+        "STRONG",
+        { timeout: SYNC_TIMEOUT_MS }
+      );
+      await expect(
+        overviewNotice.getByRole("link", { name: "Private link", exact: true })
+      ).toHaveCount(0);
+      await testInfo.attach("encrypted-notification-overview", {
+        body: await overview.screenshot(),
+        contentType: "image/png",
+      });
+      await b.page.keyboard.press("Escape");
+      const notificationCodeText = `console.log("Notification code ${runId}");`;
+      const notificationCode = `\`\`\`js\n${notificationCodeText}\n\`\`\``;
+      await composer(a.page).fill(notificationCode);
+      await a.page.getByRole("button", { name: "Send", exact: true }).click();
+      await gotoStaging(b.page, "/notifications");
+      for (const width of [1440, 390]) {
+        await b.page.setViewportSize({ width, height: 1000 });
+        const codeNotice = b.page.getByRole("article").filter({
+          hasText: `Notification code ${runId}`,
+        });
+        await expect(
+          codeNotice.getByText(notificationCodeText)
+        ).toHaveJSProperty("tagName", "CODE", { timeout: SYNC_TIMEOUT_MS });
+        await expect(codeNotice).not.toContainText("```");
+        await testInfo.attach(`encrypted-notification-code-${width}`, {
+          body: await codeNotice.screenshot(),
+          contentType: "image/png",
+        });
+      }
+      await b.page.setViewportSize({ width: 1440, height: 1000 });
+      await b.page
+        .getByRole("link", { name: "Notifications", exact: true })
+        .first()
+        .press("ArrowDown");
+      await expect(
+        overview
+          .getByRole("article")
+          .filter({
+            hasText: `Notification code ${runId}`,
+          })
+          .getByText(notificationCodeText)
+      ).toHaveJSProperty("tagName", "CODE");
+      await testInfo.attach("encrypted-notification-code-overview", {
+        body: await overview.screenshot(),
+        contentType: "image/png",
+      });
+      await b.page.keyboard.press("Escape");
+      await openChat(b, dm);
+      await b.page.reload();
+      await expect(
+        messageRow(b.page, `Private URL checks ${runId}`).getByRole("link", {
+          name: "Private image",
+        })
+      ).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
+      expect(leakedRequests).toEqual([]);
+      expect(
+        a.evidence.findLeaks(needles({ privateMarkdown: secret, canary }))
+      ).toEqual([]);
+      expect(
+        b.evidence.findLeaks(needles({ privateMarkdown: secret, canary }))
+      ).toEqual([]);
+      expectPrivateAndClean(
+        [a, b],
+        needles({ privateMarkdown: secret, canary, notificationCode })
+      );
+      await testInfo.attach("markdown-staging-locations", {
+        body: JSON.stringify({
+          regular: `https://staging.6529.io/waves/${waveId}`,
+          encrypted: `https://staging.6529.io/messages/encrypted/${dm}`,
+        }),
+        contentType: "application/json",
+      });
+    } finally {
+      await ordinary.close();
+    }
+  });
+
   test("the full emoji board sends custom emojis and reactions without individual asset requests", async () => {
     const current = requireWorld();
     const { a, b, runId } = current;
@@ -408,6 +652,51 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       ).toBeNull();
     }
     expectPrivateAndClean([a, b], needles({ prefix, custom: ":gm:" }));
+  });
+
+  test("a public GIF selection round-trips as an encrypted attachment", async () => {
+    const current = requireWorld();
+    const { a, b, runId } = current;
+    const dm = await ensureDm(current);
+    const caption = qaMessage(runId, "GIF attachment");
+    await installGiphyFixture(a.page);
+    const recipientRequests = b.evidence.requests.length;
+    await openChat(a, dm);
+    await selectFixtureGif(a.page);
+    await sendEncrypted(a, caption);
+    await openChat(b, dm);
+    await expectDecrypted(b, caption);
+    const received = messageRow(b.page, caption).getByRole("img", {
+      name: "Image: giphy.gif",
+      exact: true,
+    });
+    await expect(received).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await expect(received).toHaveAttribute("src", /^blob:/u);
+    expect(
+      b.evidence.requests
+        .slice(recipientRequests)
+        .filter((request) =>
+          new URL(request.url).hostname.endsWith(".giphy.com")
+        )
+    ).toEqual([]);
+    expectPrivateAndClean(
+      [a, b],
+      needles({
+        caption,
+        gifBytes: gifFixtureBytes(),
+      })
+    );
+    const gifUrlNeedles = needles({ gifUrl: GIPHY_FIXTURE_URL });
+    const senderUrlMatches = a.evidence.findLeaks(gifUrlNeedles);
+    // Public previews/downloads use this exact GET. Every other endpoint,
+    // request body and WebSocket frame must keep the provider URL private.
+    expect(senderUrlMatches.length).toBeGreaterThan(0);
+    expect(
+      senderUrlMatches.filter(
+        (match) => match.where !== `GET ${GIPHY_FIXTURE_URL}`
+      )
+    ).toEqual([]);
+    expect(b.evidence.findLeaks(gifUrlNeedles)).toEqual([]);
   });
 
   test("an encrypted image round-trips through the blob store", async () => {
@@ -734,11 +1023,14 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await a.page.getByText("performance fixture 0", { exact: true }).click();
     const oldestRow = messageRow(a.page, "performance fixture 0");
     await expect(oldestRow).toBeVisible({ timeout: UI_TIMEOUT_MS });
-    const oldestPhoto = oldestRow.getByRole("img", { name: /^Image:/u });
-    await expect(oldestPhoto).toBeVisible({
+    const oldestPhotos = oldestRow.getByRole("img", { name: /^Image:/u });
+    await expect(oldestPhotos).toHaveCount(fixture.photoAttachmentCount, {
       timeout: UI_TIMEOUT_MS,
     });
-    await expect(oldestPhoto).toHaveAttribute("src", /^blob:/u);
+    for (const oldestPhoto of await oldestPhotos.all()) {
+      await expect(oldestPhoto).toBeVisible({ timeout: UI_TIMEOUT_MS });
+      await expect(oldestPhoto).toHaveAttribute("src", /^blob:/u);
+    }
     const searchJumpMs = performance.now() - searching;
     await testInfo.attach("long-history-performance.json", {
       body: Buffer.from(

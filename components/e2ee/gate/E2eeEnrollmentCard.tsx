@@ -16,7 +16,10 @@ import {
   useSyncExternalStore,
 } from "react";
 import { useAuth } from "@/components/auth/Auth";
-import type { RequestSignedMessagesGrant } from "@/components/auth/authSignedMessagesGrant";
+import type {
+  RequestSignedMessagesGrant,
+  SignedMessagesGrantFailure,
+} from "@/components/auth/authSignedMessagesGrant";
 import SignedMessagesEnableStatus from "@/components/device-signing/SignedMessagesEnableStatus";
 import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -28,6 +31,7 @@ import { faSignature } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useCapacitor from "@/hooks/useCapacitor";
 import Button from "@/components/utils/button/Button";
+import { isWalletConnectSessionError } from "@/helpers/wallet-error.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeEngine, E2eeEngineStatus } from "@/lib/e2ee/types";
@@ -73,17 +77,31 @@ const ENROLL_REJECTED_KEY: MessageKey = "e2ee.enroll.rejected";
 const REVOCATION_UNVERIFIED_KEY: MessageKey =
   "e2ee.enroll.revocationUnverified";
 
-const subscribeNever = () => () => undefined;
-
-const getEnrollErrorKey = (error: unknown, upgrading: boolean): MessageKey => {
-  if (
-    isE2eeSignatureRejection(error) ||
-    getE2eeErrorCode(error) === E2EE_SIGNATURE_REJECTED
-  ) {
-    return ENROLL_REJECTED_KEY;
+/**
+ * Choose enrollment feedback. The shared wallet flow handles session failures
+ * so it can offer reconnect only for a remote wallet.
+ */
+function getEnrollmentFailure(
+  error: unknown,
+  upgrading: boolean
+): { reason: SignedMessagesGrantFailure; errorKey: MessageKey | null } {
+  if (isE2eeSignatureRejection(error)) {
+    return { reason: "rejected", errorKey: ENROLL_REJECTED_KEY };
   }
-  return upgrading ? "e2ee.upgrade.failed" : "e2ee.enroll.failed";
-};
+  if (
+    getE2eeErrorCode(error) === "E2EE_SIGNATURE_FAILED" &&
+    isWalletConnectSessionError(error)
+  ) {
+    // The shared wallet flow chooses recovery or signing-error copy.
+    return { reason: "walletconnect-session", errorKey: null };
+  }
+  return {
+    reason: "signature-failed",
+    errorKey: upgrading ? "e2ee.upgrade.failed" : "e2ee.enroll.failed",
+  };
+}
+
+const subscribeNever = () => () => undefined;
 
 /** Upgrade copy (D172) replaces first-time copy for encrypted DMs alone. */
 const getSignLabelKey = (
@@ -366,13 +384,9 @@ export function E2eeEnrollmentCard({
         // of a failure alert.
         const stopped = getE2eeErrorCode(error) === E2EE_REVOCATION_UNVERIFIED;
         setNoticeKey(stopped ? REVOCATION_UNVERIFIED_KEY : null);
-        setErrorKey(stopped ? null : getEnrollErrorKey(error, upgrading));
-        return {
-          success: false,
-          reason: isE2eeSignatureRejection(error)
-            ? "rejected"
-            : "signature-failed",
-        };
+        const failure = getEnrollmentFailure(error, upgrading);
+        setErrorKey(stopped ? null : failure.errorKey);
+        return { success: false, reason: failure.reason };
       } finally {
         setPending(false);
       }

@@ -489,7 +489,7 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
         pageSize: 20,
         following: false,
         directMessage: false,
-        pinned: ApiWavesPinFilter.NotPinned,
+        allSnapshot: true,
         enabled: true,
         refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
         refetchIntervalInBackground: false,
@@ -536,7 +536,7 @@ test("keeps highly rated visible and polls followed activity when the bottom lis
         pageSize: 20,
         following: false,
         enabled: false,
-        pinned: ApiWavesPinFilter.NotPinned,
+        allSnapshot: true,
         refetchInterval: false,
       }),
     ])

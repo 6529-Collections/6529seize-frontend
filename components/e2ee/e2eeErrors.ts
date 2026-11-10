@@ -1,45 +1,16 @@
 import type { MessageKey } from "@/i18n/messages";
+import { E2EE_SIGNATURE_REJECTED } from "@/lib/e2ee/engine/errors";
 
-/** Code used when the user declines the device-grant wallet signature. */
-export const E2EE_SIGNATURE_REJECTED = "E2EE_SIGNATURE_REJECTED";
+export {
+  E2EE_SIGNATURE_REJECTED,
+  isE2eeSignatureRejection,
+} from "@/lib/e2ee/engine/errors";
 
 /**
  * Engine code while this device is listed as revoked but the revocation
  * could not be confirmed here (the device stopped; its data is kept).
  */
 export const E2EE_REVOCATION_UNVERIFIED = "E2EE_REVOCATION_UNVERIFIED";
-
-interface ErrorLike {
-  readonly name?: unknown;
-  readonly code?: unknown;
-  readonly message?: unknown;
-  readonly cause?: unknown;
-}
-
-const MAX_CAUSE_DEPTH = 5;
-
-const isRejectionShape = (value: ErrorLike): boolean =>
-  value.name === "UserRejectedRequestError" ||
-  value.code === 4001 ||
-  value.code === "4001" ||
-  value.code === E2EE_SIGNATURE_REJECTED ||
-  value.message === E2EE_SIGNATURE_REJECTED;
-
-/** True for a wallet "user rejected" error, possibly wrapped in causes. */
-export function isE2eeSignatureRejection(error: unknown): boolean {
-  let current: unknown = error;
-  for (let depth = 0; depth < MAX_CAUSE_DEPTH; depth += 1) {
-    if (current === null || typeof current !== "object") {
-      return false;
-    }
-    const value = current as ErrorLike;
-    if (isRejectionShape(value)) {
-      return true;
-    }
-    current = value.cause;
-  }
-  return false;
-}
 
 /**
  * Normalized rejection thrown to the engine, keeping the wallet's rejection
@@ -56,7 +27,7 @@ export function getE2eeErrorCode(error: unknown): string | null {
   if (error === null || typeof error !== "object") {
     return null;
   }
-  const { code, message } = error as ErrorLike;
+  const { code, message } = error as { code?: unknown; message?: unknown };
   if (typeof code === "string" && code.startsWith("E2EE_")) {
     return code;
   }
