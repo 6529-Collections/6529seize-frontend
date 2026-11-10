@@ -410,10 +410,17 @@ false` because CI dev servers always start cold.
 - When the critical-shell check is selected, it runs as three parallel jobs.
   One job runs both route-shell halves and `test:e2e:session-recovery-sandbox`.
   The other two run `test:e2e:profile-following-sandbox` with Playwright
-  `--shard=1/2` and `--shard=2/2`. With the four projects in config order,
-  shard 1 runs desktop and mobile web, and shard 2 runs the Capacitor iOS and
-  Android simulators. As one serial job the pack reached the 30-minute limit,
-  and a single retry could cancel it.
+  `--shard=1/2` and `--shard=2/2`. Playwright splits the ordered test list by
+  count, not by project. Today each of the four projects has the same number
+  of tests, so shard 1 runs desktop and mobile web, and shard 2 runs the
+  Capacitor iOS and Android simulators. If project counts diverge, a shard can
+  straddle projects, but every test still runs exactly once. As one serial job
+  the pack reached the 30-minute limit, and a single retry could cancel it.
+- `test:e2e:native-competition-sandbox` runs as four Playwright shards
+  (`--shard=N/4`) in parallel jobs. With two shards, each job took 24–28
+  minutes against its 30-minute limit. The pack's desktop and mobile halves
+  are each dominated by `native-competition-sandbox.spec.ts`, so four
+  count-based shards come out within a few minutes of each other.
 - Browser matrix jobs do not cancel their siblings on failure, preserving each
   job's results. All selected jobs must still pass `Installed app checks`.
 - Museum selection: `scripts/museum-release-selection.cjs` maps each changed
