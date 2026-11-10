@@ -395,7 +395,7 @@ jobs:
       run:
         shell: bash
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}
 
     env:
