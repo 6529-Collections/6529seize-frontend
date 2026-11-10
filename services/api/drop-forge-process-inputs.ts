@@ -1,5 +1,12 @@
 import type { ApiDropForgeJob } from "@/generated/models/ApiDropForgeJob";
 
+export function isForgeProcessTargetValid(
+  claim: number,
+  plan: string
+): boolean {
+  return Number.isSafeInteger(claim) && claim > 0 && plan.trim() !== "";
+}
+
 export function getForgePhaseIds(
   phases: readonly { id: string; name: string }[]
 ): string[] {

@@ -3328,7 +3328,7 @@ export const EN_US_ROOT_MESSAGES = {
     "EMMA access expired or was denied. Sign in to resume the same job; saved progress is preserved.",
   "dropForge.completed": "Completed — lists are ready to download.",
   "dropForge.inputsMissing":
-    "Complete Phase 0, Phase 1 and Phase 2 in EMMA first.",
+    "Select a distribution plan, confirm the claim ID, and complete Phase 0, Phase 1 and Phase 2 in EMMA.",
   "dropForge.download": "Download lists",
   "dropForge.downloading": "Downloading…",
   "dropForge.pendingLists": "Process and finalize to make lists available.",

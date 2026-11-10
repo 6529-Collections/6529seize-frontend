@@ -11,7 +11,10 @@ import {
 } from "@/hooks/useDropForgeProcess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { forgeProcessInputsMatch } from "@/services/api/drop-forge-process-inputs";
+import {
+  forgeProcessInputsMatch,
+  isForgeProcessTargetValid,
+} from "@/services/api/drop-forge-process-inputs";
 import { startForgeProcess } from "@/services/api/drop-forge-api";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 export default function ProcessAndFinalize({
@@ -37,6 +40,8 @@ export default function ProcessAndFinalize({
   const job = operation.data;
   const awaitingAuth = job?.status === JobStatus.AwaitingAuth;
   const pending = submitting || job?.status === JobStatus.Pending;
+  const hasRequiredInputs =
+    isForgeProcessTargetValid(claim, plan) && phaseIds.length === 3;
   const inputsMatch = !job || forgeProcessInputsMatch(job, phaseIds);
   const requiresReset = !inputsMatch && job.status !== JobStatus.Failed;
   const completed = job?.status === JobStatus.Completed && inputsMatch;
@@ -48,7 +53,7 @@ export default function ProcessAndFinalize({
     }
   }, [completed, job, onCompleted]);
   async function run() {
-    if (pending || completed || requiresReset || phaseIds.length !== 3) return;
+    if (pending || completed || requiresReset || !hasRequiredInputs) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -97,7 +102,7 @@ export default function ProcessAndFinalize({
           pending ||
           completed ||
           requiresReset ||
-          phaseIds.length !== 3 ||
+          !hasRequiredInputs ||
           operation.isLoading
         }
         aria-busy={pending}
@@ -112,7 +117,7 @@ export default function ProcessAndFinalize({
         className="tw-text-sm tw-text-iron-300"
       >
         {pending && `${Math.min((job?.step ?? 0) + 1, 5)} / 5`}
-        {phaseIds.length !== 3 && t(locale, "dropForge.inputsMissing")}
+        {!hasRequiredInputs && t(locale, "dropForge.inputsMissing")}
         {requiresReset && t(locale, "dropForge.inputsChanged")}
         {awaitingAuth && t(locale, "dropForge.authRequired")}
       </div>

@@ -82,7 +82,7 @@ The Memes token distribution outputs.
   - clicking a thumbnail opens a full-size lightbox; a separate icon opens the
     source image in a new tab.
 - `Process and Finalize`:
-  - requires the confirmed token and three ordered phase IDs.
+  - requires a distribution plan, a confirmed claim ID, and three ordered phase IDs.
   - shows processing, completed, failed or sign-in-required status from a durable backend job.
   - `Sign in to resume` renews the current admin's authorization for the same job.
     Captured inputs and completed checkpoints are preserved. Once inputs are

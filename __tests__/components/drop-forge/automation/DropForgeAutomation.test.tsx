@@ -170,6 +170,30 @@ it("prevents launch for unpublished or unsaved changes", async () => {
   expect(screen.getByRole("button", { name: "Launch" })).toBeDisabled();
   expect(requestForgeLaunch).not.toHaveBeenCalled();
 });
+it.each<[number, string]>([
+  [123, ""],
+  [123, "   "],
+  [Number.NaN, "plan"],
+  [0, "plan"],
+  [1.5, "plan"],
+])("blocks processing for claim %s and plan %j", (claim, plan) => {
+  renderUI(
+    <ProcessAndFinalize
+      contract="0xcreator"
+      claim={claim}
+      plan={plan}
+      phaseIds={["p0", "p1", "p2"]}
+    />
+  );
+
+  const button = screen.getByRole("button", { name: "Process and Finalize" });
+  expect(button).toBeDisabled();
+  fireEvent.click(button);
+  expect(latestForgeProcess).not.toHaveBeenCalled();
+  expect(mockRequestAuth).not.toHaveBeenCalled();
+  expect(startForgeProcess).not.toHaveBeenCalled();
+});
+
 it("runs one Process and Finalize operation and restores its completed state on refresh", async () => {
   const job = {
     id: "job",

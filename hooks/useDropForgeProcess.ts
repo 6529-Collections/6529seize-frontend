@@ -1,6 +1,7 @@
 import { ApiDropForgeJobStatusEnum as JobStatus } from "@/generated/models/ApiDropForgeJob";
 import { useQuery } from "@tanstack/react-query";
 import { latestForgeProcess } from "@/services/api/drop-forge-api";
+import { isForgeProcessTargetValid } from "@/services/api/drop-forge-process-inputs";
 export const forgeProcessKey = (
   contract: string,
   claim: number,
@@ -14,7 +15,7 @@ export function useDropForgeProcess(
   return useQuery({
     queryKey: forgeProcessKey(contract, claim, plan),
     queryFn: () => latestForgeProcess(contract, claim, plan),
-    enabled: claim > 0 && !!plan,
+    enabled: isForgeProcessTargetValid(claim, plan),
     refetchInterval: (query) =>
       query.state.data?.status === JobStatus.Pending ? 3000 : false,
   });
