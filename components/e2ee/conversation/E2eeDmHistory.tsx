@@ -81,7 +81,7 @@ export function E2eeDmHistory({
               onChange={(event) =>
                 router.push(getEncryptedConversationRoute(event.target.value))
               }
-              className="tw-block tw-min-h-10 tw-w-full tw-min-w-0 tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+              className="tw-block tw-min-h-10 tw-w-full tw-min-w-0 tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-py-2 tw-pe-10 tw-ps-3 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
             >
               {thread.sessions.map((session, index) => (
                 <option key={session.g} value={session.g}>
@@ -109,7 +109,7 @@ export function E2eeDmHistory({
             </select>
             <ChevronDownIcon
               aria-hidden="true"
-              className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-100"
+              className="tw-pointer-events-none tw-absolute tw-end-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-100"
             />
           </div>
           <p
