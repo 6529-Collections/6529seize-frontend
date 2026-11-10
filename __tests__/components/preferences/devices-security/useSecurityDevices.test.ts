@@ -152,6 +152,23 @@ describe("useSecurityDevices", () => {
     expect(result.current.otherDevices.map(({ id }) => id)).toEqual(["0xabc"]);
   });
 
+  it("keeps the API list until a running engine has loaded its own", () => {
+    // Ready, but GET /e2ee/me hasn't filled the engine's list yet: without a
+    // stand-in, a combined device would show as signed posts only.
+    mockE2ee = { engine, status: "ready", devices: [] };
+    mockGrants = [grant("g1")];
+    mockApiQuery = {
+      ...mockApiQuery,
+      isSuccess: true,
+      data: [apiDevice("0xabc", { grant_id: "g1", grant_message: "signed" })],
+    };
+    const { result } = renderHook(() => useSecurityDevices());
+    expect(mockApiQueryEnabled).toBe(true);
+    const [phone] = result.current.otherDevices;
+    expect(phone?.signedPosts?.status).toBe("active");
+    expect(phone?.encryptedDms?.status).toBe("active");
+  });
+
   it("finds this browser by its signing key", () => {
     mockGrants = [grant("a", { device_key: OWN_KEY })];
     mockLocalKeys = { failed: false, publicKeys: [OWN_KEY] };
