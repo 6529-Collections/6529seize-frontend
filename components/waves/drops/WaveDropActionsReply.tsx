@@ -5,7 +5,9 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import DropActionTooltip from "./DropActionTooltip";
 import { AuthContext } from "@/components/auth/Auth";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
-import { ChatRestriction } from "@/hooks/useDropPriviledges";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
 
 interface WaveDropActionsReplyProps {
   readonly drop: ApiDrop;
@@ -17,34 +19,17 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
   onReply,
   drop,
 }) => {
+  const locale = useBrowserLocale();
   const { setToast } = useContext(AuthContext);
   const { getEligibility } = useWaveEligibility();
   const isTemporaryDrop = drop.id.startsWith("temp-");
 
-  // Check centralized eligibility first, fallback to drop's eligibility
-  const waveEligibility = getEligibility(drop.wave.id);
-  const isEligibleToChat =
-    waveEligibility?.authenticated_user_eligible_to_chat ??
-    drop.wave.authenticated_user_eligible_to_chat;
-  // Open replies let people outside the chat group reply to drops.
-  const isEligibleToReply =
-    waveEligibility?.authenticated_user_eligible_to_reply ??
-    drop.wave.authenticated_user_eligible_to_reply;
-  const isSlowModeOnlyBlock =
-    isEligibleToChat === false &&
-    waveEligibility?.authenticated_user_chat_restriction ===
-      ChatRestriction.SLOW_MODE;
-
   const canReply = !isTemporaryDrop;
 
   const handleReplyClick = () => {
-    if (
-      isEligibleToChat === false &&
-      isEligibleToReply !== true &&
-      !isSlowModeOnlyBlock
-    ) {
+    if (!isDropReplyEligible(drop, getEligibility(drop.wave.id))) {
       setToast({
-        message: "You are not eligible to chat in this wave",
+        message: t(locale, "waves.drop.actions.replyUnavailable"),
         type: "error",
       });
       return;
@@ -54,7 +39,11 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
 
   return (
     <DropActionTooltip
-      content={<span className="tw-text-xs">Reply</span>}
+      content={
+        <span className="tw-text-xs">
+          {t(locale, "waves.drop.actions.reply")}
+        </span>
+      }
       disabled={!canReply}
     >
       <button
@@ -63,7 +52,7 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
         }`}
         onClick={canReply ? handleReplyClick : undefined}
         disabled={!canReply}
-        aria-label="Reply to drop"
+        aria-label={t(locale, "waves.drop.actions.replyToDrop")}
       >
         <svg
           className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out ${

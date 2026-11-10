@@ -44,6 +44,10 @@ import { useFirstVisibleDropsPainted } from "./hooks/useFirstVisibleDropsPainted
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
+import {
+  ShareDropsSelectionLayer,
+  ShareDropsSelectionProvider,
+} from "../share-image/ShareDropsSelectionContext";
 
 const EMPTY_DROPS: Drop[] = [];
 
@@ -399,46 +403,49 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   );
 
   return (
-    <div
-      ref={containerRef}
-      className="tw-relative tw-flex tw-h-full tw-flex-col tw-justify-end tw-overflow-hidden tw-bg-iron-950"
-    >
-      <WaveDropsContent
-        waveMessages={renderedWaveMessagesWithFullWave}
-        dropId={dropId}
-        scrollContainerRef={scrollContainerRef}
-        scrollContainerCallbackRef={scrollContainerCallbackRef}
-        bottomAnchorRef={bottomAnchorRef}
-        bottomAnchorCallbackRef={bottomAnchorCallbackRef}
-        paginationThreshold={virtualizedDropsPageSize}
-        onTopIntersection={handleTopIntersection}
-        onReply={onReply}
-        queueSerialTarget={queueVisibleSerialTarget}
-        activeDrop={activeDrop}
-        serialTarget={serialTarget}
-        targetDropRef={targetDropRef}
-        onQuoteClick={handleQuoteClick}
-        isAtBottom={isAtBottom}
-        scrollToBottom={scrollToBottom}
-        typingMessage={typingMessage}
-        onDropContentClick={onDropContentClick}
-        pendingCount={pendingDropsCount}
-        onRevealPending={revealPendingDrops}
-        bottomPaddingClassName={bottomPaddingClassName}
-        boostedDrops={visibleBoostedDrops}
-        boostedDropsDisplayPreference={boostedDropsDisplayPreference}
-        onBoostedDropClick={queueVisibleSerialTarget}
-        onScrollToUnread={queueVisibleSerialTarget}
-        unreadCount={unreadCount}
-        suspendLightDropHydration={isScrolling || serialTarget !== null}
-        virtualScrollRootMargin={virtualScrollRootMargin}
-        winningThreshold={winningThreshold}
-        winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-        isVotingClosed={isVotingClosed}
-        isVotingControlsLocked={isVotingControlsLocked}
-      />
-      <WaveDropsScrollingOverlay isVisible={isScrolling} />
-    </div>
+    <ShareDropsSelectionProvider wave={wave} drops={dropsForClipboard}>
+      <div
+        ref={containerRef}
+        className="tw-relative tw-flex tw-h-full tw-flex-col tw-justify-end tw-overflow-hidden tw-bg-iron-950"
+      >
+        <WaveDropsContent
+          waveMessages={renderedWaveMessagesWithFullWave}
+          dropId={dropId}
+          scrollContainerRef={scrollContainerRef}
+          scrollContainerCallbackRef={scrollContainerCallbackRef}
+          bottomAnchorRef={bottomAnchorRef}
+          bottomAnchorCallbackRef={bottomAnchorCallbackRef}
+          paginationThreshold={virtualizedDropsPageSize}
+          onTopIntersection={handleTopIntersection}
+          onReply={onReply}
+          queueSerialTarget={queueVisibleSerialTarget}
+          activeDrop={activeDrop}
+          serialTarget={serialTarget}
+          targetDropRef={targetDropRef}
+          onQuoteClick={handleQuoteClick}
+          isAtBottom={isAtBottom}
+          scrollToBottom={scrollToBottom}
+          typingMessage={typingMessage}
+          onDropContentClick={onDropContentClick}
+          pendingCount={pendingDropsCount}
+          onRevealPending={revealPendingDrops}
+          bottomPaddingClassName={bottomPaddingClassName}
+          boostedDrops={visibleBoostedDrops}
+          boostedDropsDisplayPreference={boostedDropsDisplayPreference}
+          onBoostedDropClick={queueVisibleSerialTarget}
+          onScrollToUnread={queueVisibleSerialTarget}
+          unreadCount={unreadCount}
+          suspendLightDropHydration={isScrolling || serialTarget !== null}
+          virtualScrollRootMargin={virtualScrollRootMargin}
+          winningThreshold={winningThreshold}
+          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+          isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
+        />
+        <WaveDropsScrollingOverlay isVisible={isScrolling} />
+        <ShareDropsSelectionLayer />
+      </div>
+    </ShareDropsSelectionProvider>
   );
 };
 

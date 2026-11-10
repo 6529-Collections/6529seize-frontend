@@ -8,6 +8,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useMessageSearch } from "@/hooks/useMessageSearch";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { t } from "@/i18n/messages";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { FocusTrap } from "focus-trap-react";
@@ -36,6 +37,7 @@ export default function WaveDropsSearchModal({
 }) {
   useLayoutViewportLock(isOpen);
   const modalRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(isOpen, modalRef, onClose);
   const inputRef = useRef<HTMLInputElement>(null);
   const locale = useBrowserLocale();
   const router = useRouter();

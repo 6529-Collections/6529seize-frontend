@@ -41,7 +41,8 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, useId, useState } from "react";
+import { type ReactNode, useId, useRef, useState } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { useContentModerationDropGateContext } from "./ContentModerationDropGateContext";
 import {
   getReportDialogDescriptionKey,
@@ -529,12 +530,17 @@ export default function ReportDropModal({
     },
   });
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const dismissReport = () => {
+    if (!mutation.isPending && !withdrawMutation.isPending) closeModal();
+  };
+  useAndroidBackLayer(isOpen, dialogRef, dismissReport);
+
   return (
     <Dialog
+      ref={dialogRef}
       open={isOpen}
-      onClose={() => {
-        if (!mutation.isPending && !withdrawMutation.isPending) closeModal();
-      }}
+      onClose={dismissReport}
       className="tailwind-scope tw-relative tw-z-[1000]"
       aria-describedby={descriptionId}
     >

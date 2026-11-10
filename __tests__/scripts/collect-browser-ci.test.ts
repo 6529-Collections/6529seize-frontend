@@ -225,6 +225,56 @@ it("partitions the full native competition pack across two uniquely identified j
   );
 });
 
+it("shards the critical-shell profile pages pack beside the route-shell job", () => {
+  const outputs = select([], {
+    playwright_critical_shell: { required: true },
+  });
+  expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
+    include: [
+      {
+        lane: "playwright-critical-shell",
+        label: "Playwright critical shell",
+        runner: "ubuntu-latest",
+      },
+      {
+        lane: "playwright-critical-shell-profile",
+        label: "Critical shell profile pages shard 1/2",
+        runner: "ubuntu-latest",
+        shard: 1,
+      },
+      {
+        lane: "playwright-critical-shell-profile",
+        label: "Critical shell profile pages shard 2/2",
+        runner: "ubuntu-latest",
+        shard: 2,
+      },
+    ],
+  });
+  const job = workflow.jobs["core-playwright-checks"]!;
+  const stepIf = (name: string) =>
+    job.steps.find((item) => item.name === name)?.if;
+  // Route shells, hydration and session recovery stay together in one job.
+  expect(stepIf("Run critical route-shell Playwright pack")).toBe(
+    "matrix.lane == 'playwright-critical-shell'"
+  );
+  expect(stepIf("Run critical-shell hydration Playwright pack")).toContain(
+    "matrix.lane == 'playwright-critical-shell' &&"
+  );
+  expect(stepIf("Run session recovery browser regression pack")).toBe(
+    "matrix.lane == 'playwright-critical-shell'"
+  );
+  const profile = job.steps.find(
+    (item) => item.name === "Run own-profile Following browser regression pack"
+  )!;
+  expect(profile.if).toBe("matrix.lane == 'playwright-critical-shell-profile'");
+  expect(profile.run).toBe(
+    './bin/6529 run test:e2e:profile-following-sandbox --shard="$PROFILE_FOLLOWING_SHARD"'
+  );
+  expect(profile.env?.["PROFILE_FOLLOWING_SHARD"]).toBe(
+    "${{ matrix.shard }}/2"
+  );
+});
+
 it.each([
   "components/waves/CreateDrop.tsx",
   "components/drops/create/lexical/plugins/mentions/MentionsPlugin.tsx",
