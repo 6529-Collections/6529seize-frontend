@@ -109,7 +109,9 @@ the `More` menu.
    {handle}**, with **with Post Signing & DM Encryption** for secure setup.
 5. Copy with the icon inside the link field. The adjacent refresh icon generates
    a new Connect-only code directly. For secure setup, refresh clears the displayed
-   link and returns to the wallet-signing state for a new signature.
+   link and returns to the wallet-signing state for a new signature. A secure
+   setup link is not shown as text or as a tooltip; the field reads
+   **Connection ready**, and the QR code and copy icon still carry the link.
 6. **Back** returns to the app and connection choices. The same row reminds you:
    **Use only on a device you own. This code works once.**
 
@@ -118,7 +120,11 @@ refresh are disabled during preparation; a failed preparation can be retried.
 The modal transitions smoothly between screen heights and scrolls on short
 screens without clipping the QR, controls or focus rings.
 
-The receiving app confirms the incoming account. Secure links also list
+The receiving app confirms the incoming account, showing its full wallet
+address. Every connection link names that address; a link without a valid one
+shows **Missing required parameters** and cannot be accepted, and the app
+accepts the connection only when the redeemed sign-in is for that same
+address. Secure links also list
 **Signed Posts** and **Encrypted DMs**, with **Accept and enable both** instead
 of **Accept connection**. One secure link both signs in and enrolls the app;
 registration does not occur merely because a QR was generated. Working receiver
@@ -163,7 +169,13 @@ No page-copy, social, or current-page Share actions appear in this dialog.
   Desktop. Opened anywhere else, the page shows a message and a home link
   instead of `Accept connection`. The page removes the link's one-time
   credential from the address bar as soon as it loads, so reloading it does not
-  reopen the connection; open the original link or QR code again instead.
+  reopen the connection; open the original link or QR code again instead. The
+  one-time code may travel in the query or in the URL fragment
+  (`#connection_share_code=`); the fragment wins when both are present.
+- `mobile6529://navigate/<path>` app links follow the same excluded routes as
+  universal links (for example `/accept-connection-sharing`, `/app-wallets`,
+  `/auth`, `/api`), so those open in the browser rather than the app.
+  Connection links use `mobile6529://share-connection` instead.
 - Connection preparation can show sign-in, authentication-upgrade, loading,
   or unavailable states without revealing page-sharing controls. These notice
   states retain the final connection area's footprint. The unframed loading

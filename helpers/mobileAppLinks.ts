@@ -162,7 +162,11 @@ function getNativeLinkPathname(
   )
     return null;
   const { host, pathname } = getCustomSchemeParts(url);
-  if (host === DeepLinkScope.NAVIGATE) return pathname || "/";
+  if (host === DeepLinkScope.NAVIGATE) {
+    // The same routes stay out of the app as for universal links.
+    const path = pathname || "/";
+    return isMobileAppDestination(path) ? path : null;
+  }
   if (host === DeepLinkScope.SHARE_CONNECTION)
     return "/accept-connection-sharing";
   return null;
@@ -170,10 +174,10 @@ function getNativeLinkPathname(
 
 /**
  * Maps a link the app was opened with to a root-relative destination, or null
- * to ignore it. Accepts `<scheme>://navigate/<path>`,
- * `<scheme>://share-connection?...` and https universal links / App Links on
- * the production hosts or the app's own shared staging origin, except paths
- * the association file keeps in the browser.
+ * to ignore it. Accepts `<scheme>://navigate/<path>` outside the excluded app
+ * routes, `<scheme>://share-connection?...` and https universal links / App
+ * Links on the production hosts or the app's own shared staging origin, except
+ * paths the association file keeps in the browser.
  */
 export function getNativeLinkDestination(
   value: string,
