@@ -1,8 +1,13 @@
 "use client";
 
 import React, { useSyncExternalStore } from "react";
-import { Time } from "@/helpers/time";
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import {
+  formatWaveDropRevealTimestamp,
+  formatWaveDropTimestamp,
+} from "@/lib/display-time-zone/waveDropTimeFormat";
 
 type WaveDropTimeSize = "xs" | "meta" | "sm";
 type WaveDropTimeColor = "default" | "iron-400";
@@ -16,8 +21,9 @@ interface WaveDropTimeProps {
 }
 
 /**
- * A reusable component for displaying timestamps in wave drops
- * Uses the exact same logic as the original WaveDropHeader implementation
+ * The timestamp shown with a drop. It renders in the display time zone (see
+ * Preferences > Time Zone and the wave header switch); outside the device's
+ * own zone the clock time names its zone, such as "05:06 PM UTC".
  */
 const SIZE_CLASSES: Record<WaveDropTimeSize, string> = {
   xs: "tw-text-xs",
@@ -32,38 +38,6 @@ const getValidTimestampDate = (timestamp: WaveDropTimestamp): Date | null => {
 
   const date = timestamp instanceof Date ? timestamp : new Date(timestamp);
   return Number.isFinite(date.getTime()) ? date : null;
-};
-
-const getTimeLabel = (date: Date): string =>
-  date.toLocaleTimeString(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-const getCompactRevealTimestamp = (date: Date): string => {
-  const now = new Date();
-  const isToday = date.toDateString() === now.toDateString();
-
-  if (isToday) {
-    return getTimeLabel(date);
-  }
-
-  const yesterday = new Date();
-  yesterday.setDate(now.getDate() - 1);
-  const isYesterday = date.toDateString() === yesterday.toDateString();
-  const timeLabel = getTimeLabel(date);
-
-  if (isYesterday) {
-    return `Yesterday, ${timeLabel}`;
-  }
-
-  return new Intl.DateTimeFormat(undefined, {
-    month: "short",
-    day: "numeric",
-    ...(date.getFullYear() === now.getFullYear() ? {} : { year: "2-digit" }),
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(date);
 };
 
 const subscribeToViewportResize = (onStoreChange: () => void): (() => void) => {
@@ -81,60 +55,26 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({
   color = "default",
   variant = "default",
 }) => {
-  // Hooks must be called at the top level
   const isMobile = useSyncExternalStore(
     subscribeToViewportResize,
     getIsMobileSnapshot,
     getIsMobileServerSnapshot
   );
   const compact = useCompactMode();
+  const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
 
-  // Don't render if no timestamp
   const date = getValidTimestampDate(timestamp);
   if (!date) return null;
 
-  // Updated time formatting logic to just show time for today
-  const formatTime = () => {
-    if (variant === "compactReveal") {
-      return getCompactRevealTimestamp(date);
-    }
-
-    const timeObj = Time.millis(date.getTime());
-    const now = new Date();
-    const isToday = date.toDateString() === now.toDateString();
-
-    // For today, just show time on both mobile and desktop
-    if (isToday) {
-      return getTimeLabel(date);
-    }
-
-    // Otherwise follow the original behavior
-    if (isMobile) {
-      // On mobile: show only date for non-today timestamps
-      return timeObj.toLocaleDropDateString();
-    }
-
-    // On desktop: show date and time for non-today timestamps
-    // Get the parts separately to handle formatting
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-    const isYesterday = date.toDateString() === yesterday.toDateString();
-
-    const timeStr = getTimeLabel(date);
-
-    if (isYesterday) {
-      return `Yesterday - ${timeStr}`;
-    }
-
-    const sameYear = date.getFullYear() === now.getFullYear();
-    const dateStr = date.toLocaleDateString(undefined, {
-      month: "short",
-      day: "2-digit",
-      ...(sameYear ? {} : { year: "numeric" }),
-    });
-
-    return `${dateStr} - ${timeStr}`;
-  };
+  const label =
+    variant === "compactReveal"
+      ? formatWaveDropRevealTimestamp(date, { zone, locale })
+      : formatWaveDropTimestamp(date, {
+          zone,
+          locale,
+          dateOnlyAfterToday: isMobile,
+        });
 
   const textSizeClass =
     compact && size === "xs"
@@ -148,7 +88,7 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({
     <p
       className={`${textSizeClass} ${textColorClass} ${textWeightClass} tw-m-0 tw-whitespace-nowrap tw-leading-none`}
     >
-      {formatTime()}
+      <time dateTime={date.toISOString()}>{label}</time>
     </p>
   );
 };

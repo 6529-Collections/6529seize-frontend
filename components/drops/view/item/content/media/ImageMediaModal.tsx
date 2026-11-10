@@ -22,6 +22,7 @@ import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import { ExpandedMediaToolbar } from "./MediaActionToolbar";
 import { useLocalImagePreviewSource } from "./LocalImagePreviewContext";
 import { ImageQualityToggle } from "./ImageQualityToggle";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import {
   useOriginalImage,
   type OriginalImageQuality,
@@ -225,6 +226,7 @@ export function ImageMediaModal({
     | undefined;
 }) {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  useAndroidBackLayer(true, dialogRef, onClose);
   const localOriginalQuality = useOriginalImage(src);
   const quality = originalQuality ?? localOriginalQuality;
   const originalRequested = quality.requested;
@@ -325,7 +327,10 @@ export function ImageMediaModal({
           type="button"
           aria-label="Close modal"
           data-testid="modal-backdrop"
-          onClick={onClose}
+          onClick={(event) => {
+            event.stopPropagation();
+            onClose();
+          }}
           className="tw-fixed tw-inset-0 tw-z-1000 tw-border-0 tw-bg-black/80 tw-p-0"
         />
         <TransformWrapper
@@ -440,7 +445,10 @@ export function ImageMediaModal({
               type="button"
               variant="tertiary"
               size="sm"
-              onClick={retryPreview}
+              onClick={(event) => {
+                event.stopPropagation();
+                retryPreview();
+              }}
             >
               {t(DEFAULT_LOCALE, "drop.media.retryPreview")}
             </Button>

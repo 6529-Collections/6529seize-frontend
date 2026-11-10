@@ -1,6 +1,8 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -17,15 +19,9 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
 import { PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import type { FC, PointerEvent, Ref } from "react";
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import type { FC, Ref } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import WaveDropActionsAddReaction from "./WaveDropActionsAddReaction";
 import WaveDropCurationsActionIcon from "./WaveDropCurationsActionIcon";
 import WaveDropCurationsDialog from "./WaveDropCurationsDialog";
@@ -47,6 +43,8 @@ import WaveDropMobileMenuReactionPicker from "./WaveDropMobileMenuReactionPicker
 import WaveDropDocumentationAction from "./WaveDropDocumentationAction";
 import DropSignatureDialog from "./signature/DropSignatureDialog";
 import DropSignatureMenuItem from "./signature/DropSignatureMenuItem";
+import DisplayTimeZoneMobileMenuItem from "@/components/display-time-zone/DisplayTimeZoneMobileMenuItem";
+import WaveDropShareImageAction from "./share-image/WaveDropShareImageAction";
 
 export interface WaveDropMobileMenuProps {
   readonly drop: ApiDrop;
@@ -154,42 +152,17 @@ function WaveDropMobileMenuAuthenticatedActions({
   readonly showOnlyQuickRemove: boolean;
 }) {
   const locale = useBrowserLocale();
-  const handledTouchReplyRef = useRef(false);
-  const handledTouchReplyResetTimeoutRef = useRef<ReturnType<
-    typeof setTimeout
-  > | null>(null);
-
-  const resetHandledTouchReply = useCallback(() => {
-    handledTouchReplyRef.current = false;
-    if (handledTouchReplyResetTimeoutRef.current !== null) {
-      globalThis.clearTimeout(handledTouchReplyResetTimeoutRef.current);
-      handledTouchReplyResetTimeoutRef.current = null;
-    }
-  }, []);
-
-  useEffect(() => resetHandledTouchReply, [resetHandledTouchReply]);
-
-  const handleReplyPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
-    if (event.pointerType !== "touch" && event.pointerType !== "pen") {
-      return;
-    }
-
-    resetHandledTouchReply();
-    handledTouchReplyRef.current = true;
-    handledTouchReplyResetTimeoutRef.current = globalThis.setTimeout(() => {
-      resetHandledTouchReply();
-    }, 750);
-    closeMenu();
-    onReply();
-  };
-
+  const { setToast } = useContext(AuthContext);
+  const { getEligibility } = useWaveEligibility();
   const handleReplyClick = () => {
-    if (handledTouchReplyRef.current) {
-      resetHandledTouchReply();
-      closeMenu();
+    if (isTemporaryDrop) return;
+    if (!isDropReplyEligible(drop, getEligibility(drop.wave.id))) {
+      setToast({
+        message: t(locale, "waves.drop.actions.replyUnavailable"),
+        type: "error",
+      });
       return;
     }
-
     closeMenu();
     onReply();
   };
@@ -211,11 +184,6 @@ function WaveDropMobileMenuAuthenticatedActions({
 
   return (
     <>
-      <WaveDropActionsQuickReact
-        drop={extendedDrop}
-        isMobile
-        onReactionStarted={closeMenu}
-      />
       <WaveDropActionsAddReaction
         drop={extendedDrop}
         isMobile={true}
@@ -229,8 +197,6 @@ function WaveDropMobileMenuAuthenticatedActions({
               ? "tw-cursor-default tw-opacity-50"
               : "active:tw-bg-iron-800"
           } tw-transition-colors tw-duration-200`}
-          onPointerDown={handleReplyPointerDown}
-          onPointerCancel={resetHandledTouchReply}
           onClick={handleReplyClick}
           disabled={isTemporaryDrop}
         >
@@ -250,7 +216,7 @@ function WaveDropMobileMenuAuthenticatedActions({
             />
           </svg>
           <span className="tw-text-base tw-font-semibold tw-text-iron-300">
-            Reply
+            {t(locale, "waves.drop.actions.reply")}
           </span>
         </button>
       )}
@@ -277,8 +243,11 @@ function WaveDropMobileMenuAuthenticatedActions({
         <>
           <WaveDropMobileMenuCopyText drop={drop} onCopy={closeMenu} />
           <WaveDropMobileMenuCopyLink drop={drop} onCopy={closeMenu} />
+          <WaveDropShareImageAction drop={drop} onSelected={closeMenu} mobile />
         </>
       )}
+
+      <DisplayTimeZoneMobileMenuItem onSelected={closeMenu} />
 
       <WaveDropBookmarkAction dropId={drop.id} onSelected={closeMenu} mobile />
       <WaveDropDocumentationAction drop={drop} onSelected={closeMenu} mobile />
@@ -401,6 +370,7 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
   const reactionButtonRef = useRef<HTMLButtonElement>(null);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isSignatureOpen, setIsSignatureOpen] = useState(false);
+  const [replyHandoff, setReplyHandoff] = useState(false);
   const curationsDialogTimeoutRef = useRef<ReturnType<
     typeof setTimeout
   > | null>(null);
@@ -410,6 +380,9 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
       clearCurationsDialogTimeout(curationsDialogTimeoutRef);
     };
   }, []);
+
+  // A new opening ends the previous reply handoff before committing its UI.
+  if (isOpen && replyHandoff) setReplyHandoff(false);
 
   const isAuthor = useMemo(
     () =>
@@ -442,6 +415,17 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
   );
 
   const closeMenu = () => setOpen(false);
+  const handleReply = () => {
+    if (isCapacitor) {
+      // A leaving modal keeps the chat inert during its exit animation. Remove
+      // that boundary before transferring the completed tap to the editor.
+      flushSync(() => {
+        setReplyHandoff(true);
+        closeMenu();
+      });
+    }
+    onReply();
+  };
   const resetMenuView = () => setActiveView("actions");
   const backToActions = () => {
     setActiveView("actions");
@@ -524,96 +508,116 @@ const WaveDropMobileMenuContent: FC<WaveDropMobileMenuProps> = ({
 
   return (
     <>
-      <MobileWrapperDialog
-        ariaLabel={dialogLabel}
-        avoidKeyboard={activeView === "reactions"}
-        isOpen={isOpen}
-        onClose={closeMenu}
-        onBack={activeView === "reactions" ? backToActions : undefined}
-        onAfterLeave={resetMenuView}
-        zIndexClassName={mobileMenuZIndexClassName}
-        showHeaderDivider={activeView === "reactions"}
-        showScrollbar={activeView === "actions"}
-        enableDragToClose
-        hideOnDesktopHover={!isCapacitor}
-      >
-        {activeView === "actions" ? (
-          <div className="tw-px-4 sm:tw-px-6">
-            <div
-              className={`tw-grid tw-grid-cols-1 tw-gap-y-1 [&>button>span]:tw-text-base [&>button>span]:tw-font-medium [&>button]:tw-min-h-12 [&>button]:tw-gap-x-3 [&>button]:tw-rounded-lg [&>button]:tw-px-3.5 [&>button]:tw-py-2.5 ${
-                longPressTriggered && "tw-select-none"
-              }`}
-            >
-              {showGuestCopyOnly ? (
-                <>
-                  {showCopyOption && (
-                    <>
-                      <WaveDropMobileMenuCopyText
-                        drop={drop}
-                        onCopy={closeMenu}
-                      />
-                      <WaveDropMobileMenuCopyLink
-                        drop={drop}
-                        onCopy={closeMenu}
-                      />
-                    </>
-                  )}
-                  {/* Anyone can check a signature; reading needs no sign-in. */}
-                  <DropSignatureMenuItem
-                    dropId={drop.id}
-                    onSelect={() => {
+      {!replyHandoff && (
+        <MobileWrapperDialog
+          ariaLabel={dialogLabel}
+          avoidKeyboard={activeView === "reactions"}
+          isOpen={isOpen}
+          onClose={closeMenu}
+          onBack={activeView === "reactions" ? backToActions : undefined}
+          onAfterLeave={resetMenuView}
+          zIndexClassName={mobileMenuZIndexClassName}
+          showHeaderDivider={activeView === "reactions"}
+          showScrollbar={activeView === "actions"}
+          titleActions={
+            activeView === "actions" &&
+            !showGuestCopyOnly &&
+            !showOnlyQuickRemove ? (
+              <WaveDropActionsQuickReact
+                drop={extendedDrop}
+                isMobile
+                onReactionStarted={closeMenu}
+              />
+            ) : undefined
+          }
+          enableDragToClose
+          hideOnDesktopHover={!isCapacitor}
+        >
+          {activeView === "actions" ? (
+            <div className="tw-px-4 sm:tw-px-6">
+              <div
+                className={`tw-grid tw-grid-cols-1 tw-gap-y-1 [&>button>span]:tw-text-base [&>button>span]:tw-font-medium [&>button]:tw-min-h-12 [&>button]:tw-gap-x-3 [&>button]:tw-rounded-lg [&>button]:tw-px-3.5 [&>button]:tw-py-2.5 ${
+                  longPressTriggered && "tw-select-none"
+                }`}
+              >
+                {showGuestCopyOnly ? (
+                  <>
+                    {showCopyOption && (
+                      <>
+                        <WaveDropMobileMenuCopyText
+                          drop={drop}
+                          onCopy={closeMenu}
+                        />
+                        <WaveDropMobileMenuCopyLink
+                          drop={drop}
+                          onCopy={closeMenu}
+                        />
+                        <WaveDropShareImageAction
+                          drop={drop}
+                          onSelected={closeMenu}
+                          mobile
+                        />
+                      </>
+                    )}
+                    {/* The time setting is on the device; no sign-in needed. */}
+                    <DisplayTimeZoneMobileMenuItem onSelected={closeMenu} />
+                    {/* Anyone can check a signature; reading needs no sign-in. */}
+                    <DropSignatureMenuItem
+                      dropId={drop.id}
+                      onSelect={() => {
+                        closeMenu();
+                        setIsSignatureOpen(true);
+                      }}
+                      mobile
+                    />
+                  </>
+                ) : (
+                  <WaveDropMobileMenuAuthenticatedActions
+                    extendedDrop={extendedDrop}
+                    drop={drop}
+                    showReplyAndQuote={showReplyAndQuote}
+                    isTemporaryDrop={isTemporaryDrop}
+                    onReply={handleReply}
+                    onOpenReactionPicker={() => setActiveView("reactions")}
+                    reactionButtonRef={reactionButtonRef}
+                    onBoostAnimation={onBoostAnimation}
+                    showOpenOption={showOpenOption}
+                    showCopyOption={showCopyOption}
+                    showManageCurations={showManageCurations}
+                    quickAddCuration={quickAddCuration}
+                    quickRemoveCuration={quickRemoveCuration}
+                    onQuickAdd={() => void handleQuickAdd()}
+                    onQuickRemove={() => void handleQuickRemove()}
+                    onCurationsClick={handleCurationsClick}
+                    isAuthor={isAuthor}
+                    showOptions={showOptions}
+                    onEdit={onEdit}
+                    canSetPinnedDrop={canSetPinnedDrop}
+                    canDelete={canDelete}
+                    closeMenu={closeMenu}
+                    showVoting={showVoting}
+                    onReport={() => {
+                      closeMenu();
+                      setIsReportOpen(true);
+                    }}
+                    onShowSignature={() => {
                       closeMenu();
                       setIsSignatureOpen(true);
                     }}
-                    mobile
+                    showOnlyQuickRemove={showOnlyQuickRemove}
                   />
-                </>
-              ) : (
-                <WaveDropMobileMenuAuthenticatedActions
-                  extendedDrop={extendedDrop}
-                  drop={drop}
-                  showReplyAndQuote={showReplyAndQuote}
-                  isTemporaryDrop={isTemporaryDrop}
-                  onReply={onReply}
-                  onOpenReactionPicker={() => setActiveView("reactions")}
-                  reactionButtonRef={reactionButtonRef}
-                  onBoostAnimation={onBoostAnimation}
-                  showOpenOption={showOpenOption}
-                  showCopyOption={showCopyOption}
-                  showManageCurations={showManageCurations}
-                  quickAddCuration={quickAddCuration}
-                  quickRemoveCuration={quickRemoveCuration}
-                  onQuickAdd={() => void handleQuickAdd()}
-                  onQuickRemove={() => void handleQuickRemove()}
-                  onCurationsClick={handleCurationsClick}
-                  isAuthor={isAuthor}
-                  showOptions={showOptions}
-                  onEdit={onEdit}
-                  canSetPinnedDrop={canSetPinnedDrop}
-                  canDelete={canDelete}
-                  closeMenu={closeMenu}
-                  showVoting={showVoting}
-                  onReport={() => {
-                    closeMenu();
-                    setIsReportOpen(true);
-                  }}
-                  onShowSignature={() => {
-                    closeMenu();
-                    setIsSignatureOpen(true);
-                  }}
-                  showOnlyQuickRemove={showOnlyQuickRemove}
-                />
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        ) : (
-          <WaveDropMobileMenuReactionPicker
-            drop={extendedDrop}
-            onDismiss={closeMenu}
-            onReactionSuccess={onAddReaction}
-          />
-        )}
-      </MobileWrapperDialog>
+          ) : (
+            <WaveDropMobileMenuReactionPicker
+              drop={extendedDrop}
+              onDismiss={closeMenu}
+              onReactionSuccess={onAddReaction}
+            />
+          )}
+        </MobileWrapperDialog>
+      )}
       {showManageCurations && (
         <WaveDropCurationsDialog
           dropId={drop.id}

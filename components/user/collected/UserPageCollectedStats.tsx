@@ -21,6 +21,9 @@ import ProfileCollectedActivityLink from "./ProfileCollectedActivityLink";
 import { getButtonClasses } from "@/components/utils/button/buttonStyles";
 import { t } from "@/i18n/messages";
 
+const COLLECTED_ACTION_CLASS =
+  "!tw-font-medium !tw-text-iron-300 !tw-shadow-none desktop-hover:hover:!tw-text-iron-100";
+
 const getCollapsedStartedSeasons = ({
   startedSeasons,
   visibleSeasonCount,
@@ -239,7 +242,7 @@ export default function UserPageCollectedStats({
       />
 
       <div ref={detailsScrollTargetRef} className="tw-scroll-mt-24">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-px-5 md:tw-py-4">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-3 md:tw-px-5">
           <span data-profile-action="Complete my set" className="tw-contents">
             <CollectEntryLink
               collection="memes"
@@ -252,6 +255,11 @@ export default function UserPageCollectedStats({
               locale={locale}
               complete
               profileActivityKey={isApp ? "complete-set" : undefined}
+              className={getButtonClasses({
+                variant: "tertiary",
+                size: "sm",
+                className: `${COLLECTED_ACTION_CLASS} !tw-px-3 !tw-text-xs tw-no-underline hover:tw-no-underline`,
+              })}
             />
           </span>
           {isApp ? (
@@ -262,7 +270,7 @@ export default function UserPageCollectedStats({
               className={getButtonClasses({
                 variant: "tertiary",
                 size: "sm",
-                className: "tw-no-underline hover:tw-no-underline",
+                className: `${COLLECTED_ACTION_CLASS} tw-no-underline hover:tw-no-underline`,
               })}
             >
               {t(locale, "collect.entry.manage")}
@@ -273,6 +281,7 @@ export default function UserPageCollectedStats({
               href="/collect/orders"
               variant="tertiary"
               size="sm"
+              className={COLLECTED_ACTION_CLASS}
             >
               {t(locale, "collect.entry.manage")}
             </ButtonLink>

@@ -52,7 +52,7 @@ describe("ContentTabContext", () => {
     ["leaderboard", MyStreamWaveTab.LEADERBOARD],
     ["decisions", MyStreamWaveTab.WINNERS],
     ["votes", MyStreamWaveTab.MY_VOTES],
-    ["outcomes", MyStreamWaveTab.OUTCOME],
+    ["outcomes", MyStreamWaveTab.CONFIGURATION],
     ["rules", MyStreamWaveTab.CONFIGURATION],
   ])(
     "selects the wave-level %s tab on a flat default route",
@@ -117,7 +117,7 @@ describe("ContentTabContext", () => {
     ["rules", MyStreamWaveTab.CONFIGURATION],
     ["decisions", MyStreamWaveTab.WINNERS],
     ["votes", MyStreamWaveTab.MY_VOTES],
-    ["outcomes", MyStreamWaveTab.OUTCOME],
+    ["outcomes", MyStreamWaveTab.CONFIGURATION],
   ])(
     "renders flat legacy %s before desktop tab availability is registered",
     (tab, expected) => {
@@ -251,8 +251,8 @@ describe("ContentTabContext", () => {
       hasFirstDecisionPassed: true,
     };
     act(() => result.current.updateAvailableTabs(waveTabs));
-    act(() => result.current.setActiveContentTab(MyStreamWaveTab.OUTCOME));
-    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.OUTCOME);
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.MY_VOTES));
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.MY_VOTES);
 
     mockSearch = new URLSearchParams({ competition: "newer" });
     rerender();
@@ -287,7 +287,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.SUBMISSIONS,
       MyStreamWaveTab.WINNERS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.COMPETITIONS,
     ]);
@@ -442,7 +441,6 @@ describe("ContentTabContext", () => {
     expect(result.current.availableTabs).toEqual([
       MyStreamWaveTab.SUBMISSIONS,
       MyStreamWaveTab.WINNERS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
     ]);
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.SUBMISSIONS);
@@ -532,7 +530,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.WINNERS,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.FAQ,
     ]);
   });
@@ -587,7 +584,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.FAQ,
     ]);
   });
@@ -643,7 +639,6 @@ describe("ContentTabContext", () => {
     expect(result.current.availableTabs).toEqual([
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.LEADERBOARD,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
     ]);
@@ -667,7 +662,6 @@ describe("ContentTabContext", () => {
     expect(result.current.availableTabs).toEqual([
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.LEADERBOARD,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
     ]);
@@ -696,7 +690,6 @@ describe("ContentTabContext", () => {
         hasAuthenticatedProfile: true,
         isMemesWave: false,
         isCurationWave: false,
-        showOutcomeTab: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -784,7 +777,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.SUBMISSIONS,
       MyStreamWaveTab.WINNERS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
     ]);
@@ -811,7 +803,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.WINNERS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
     ]);
@@ -838,7 +829,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.WINNERS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
     ]);
@@ -854,7 +844,6 @@ describe("ContentTabContext", () => {
         isMemesWave: false,
         isCurationWave: false,
         isApproveWave: true,
-        showOutcomeTab: false,
         votingState: WaveVotingState.ENDED,
         hasFirstDecisionPassed: false,
       })
@@ -1465,7 +1454,7 @@ describe("remembered wave entries", () => {
       })
     );
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.POLLS);
-    act(() => result.current.setActiveContentTab(MyStreamWaveTab.OUTCOME));
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.MY_VOTES));
     act(() =>
       result.current.updateAvailableTabs({
         ...rememberedWaveParams,
@@ -1473,7 +1462,7 @@ describe("remembered wave entries", () => {
         hasPolls: true,
       })
     );
-    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.OUTCOME);
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.MY_VOTES);
   });
 
   it("restores the Votes view for guests without changing storage", () => {

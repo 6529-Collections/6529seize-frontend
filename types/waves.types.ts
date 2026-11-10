@@ -167,7 +167,7 @@ export enum CreateWaveOutcomeConfigWinnersCreditValueType {
   PERCENTAGE = "PERCENTAGE",
 }
 
-export interface CreateWaveOutcomeConfigWinner {
+interface CreateWaveOutcomeConfigWinner {
   readonly value: number;
 }
 

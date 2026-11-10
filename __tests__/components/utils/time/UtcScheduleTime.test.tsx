@@ -1,11 +1,21 @@
 import UtcScheduleTime from "@/components/utils/time/UtcScheduleTime";
 import { formatDate } from "@/i18n/format";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import { render } from "@testing-library/react";
 import {
   mockDefaultTimeZone,
   renderServerThenHydrate,
   renderToStringInTimeZone,
 } from "../../../utils/timeZoneHydration";
+
+let mockDisplayTimeZone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
+jest.mock("@/hooks/useDisplayTimeZone", () => ({
+  ...jest.requireActual("@/hooks/useDisplayTimeZone"),
+  useDisplayTimeZone: () => mockDisplayTimeZone,
+}));
 
 const CHECKPOINT = { hour: 16, minute: 0 } as const;
 const MONDAY_WEDNESDAY_FRIDAY = [1, 3, 5] as const;
@@ -69,6 +79,7 @@ const VIEWERS = [
 describe("UtcScheduleTime", () => {
   afterEach(() => {
     jest.restoreAllMocks();
+    mockDisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
   });
 
   it("detects the mismatch it prevents when the viewer's zone is read in the render", async () => {
@@ -167,5 +178,43 @@ describe("UtcScheduleTime", () => {
     } finally {
       restoreZone();
     }
+  });
+
+  describe("with a display time zone", () => {
+    it("omits the equivalent when the display zone is UTC", () => {
+      jest.spyOn(Date, "now").mockReturnValue(SUMMER_MONDAY);
+      mockDisplayTimeZone = { timeZone: "UTC", isLocal: false };
+      const restoreZone = mockDefaultTimeZone("America/Los_Angeles");
+      try {
+        const { container } = render(<Checkpoint />);
+        expect(container).toHaveTextContent(/^16:00 UTC$/);
+        expect(container).not.toHaveTextContent("PDT");
+      } finally {
+        restoreZone();
+      }
+    });
+
+    it("writes the equivalent in the display zone, not the device zone", () => {
+      jest.spyOn(Date, "now").mockReturnValue(SUMMER_MONDAY);
+      mockDisplayTimeZone = { timeZone: "Pacific/Auckland", isLocal: false };
+      const restoreZone = mockDefaultTimeZone("America/Los_Angeles");
+      try {
+        const { container } = render(<Checkpoint />);
+        expect(container).toHaveTextContent(
+          "16:00 UTC (your time: Tue, Thu, Sat 04:00 GMT+12)"
+        );
+        expect(container).not.toHaveTextContent("PDT");
+      } finally {
+        restoreZone();
+      }
+    });
+
+    it("keeps the server HTML free of the display zone", () => {
+      jest.spyOn(Date, "now").mockReturnValue(SUMMER_MONDAY);
+      mockDisplayTimeZone = { timeZone: "Pacific/Auckland", isLocal: false };
+      const html = renderToStringInTimeZone(<Checkpoint />, "UTC");
+      expect(html).toContain("16:00 UTC");
+      expect(html).not.toContain("your time");
+    });
   });
 });

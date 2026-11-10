@@ -696,30 +696,41 @@ describe("BrainMobile", () => {
     );
   });
 
-  it("returns from an app wave detail to the waves list on edge swipe", async () => {
-    mockPathname = "/waves/1";
-    mockActiveWaveId = "1";
-    waveData = createWave(false);
+  it.each([
+    { pathname: "/waves/1", isDirectMessage: false },
+    { pathname: "/messages/1", isDirectMessage: true },
+  ])(
+    "returns from $pathname to its list on an interior swipe",
+    async ({ pathname, isDirectMessage }) => {
+      mockPathname = pathname;
+      mockActiveWaveId = "1";
+      waveData = createWave(isDirectMessage);
 
-    render(<BrainMobile>child</BrainMobile>);
+      render(<BrainMobile>child</BrainMobile>);
 
-    const waveContent = await screen.findByText("child");
-    fireEvent.touchStart(waveContent, {
-      touches: [{ clientX: 10, clientY: 100 }],
-    });
-    fireEvent.touchMove(waveContent, {
-      touches: [{ clientX: 60, clientY: 104 }],
-    });
-    fireEvent.touchEnd(waveContent, {
-      changedTouches: [{ clientX: 100, clientY: 106 }],
-    });
+      const waveContent = await screen.findByText("child");
+      fireEvent.touchStart(waveContent, {
+        touches: [{ identifier: 1, clientX: 60, clientY: 100 }],
+      });
+      fireEvent.touchMove(waveContent, {
+        touches: [{ identifier: 1, clientX: 180, clientY: 104 }],
+      });
+      fireEvent.touchEnd(waveContent, {
+        touches: [],
+        changedTouches: [{ identifier: 1, clientX: 210, clientY: 106 }],
+      });
 
-    expect(mockRequestMainWavesList).toHaveBeenCalledTimes(1);
-    expect(mockClearLastVisited).toHaveBeenCalledWith("wave");
-    expect(mockSetActiveWave).toHaveBeenCalledWith(null, {
-      isDirectMessage: false,
-    });
-  });
+      expect(mockRequestMainWavesList).toHaveBeenCalledTimes(
+        isDirectMessage ? 0 : 1
+      );
+      expect(mockClearLastVisited).toHaveBeenCalledWith(
+        isDirectMessage ? "dm" : "wave"
+      );
+      expect(mockSetActiveWave).toHaveBeenCalledWith(null, {
+        isDirectMessage,
+      });
+    }
+  );
 
   it("enables wave-list swipe when the active wave comes from the URL", async () => {
     mockPathname = "/waves/1";
@@ -730,13 +741,14 @@ describe("BrainMobile", () => {
 
     const waveContent = await screen.findByText("child");
     fireEvent.touchStart(waveContent, {
-      touches: [{ clientX: 10, clientY: 100 }],
+      touches: [{ identifier: 1, clientX: 60, clientY: 100 }],
     });
     fireEvent.touchMove(waveContent, {
-      touches: [{ clientX: 60, clientY: 104 }],
+      touches: [{ identifier: 1, clientX: 180, clientY: 104 }],
     });
     fireEvent.touchEnd(waveContent, {
-      changedTouches: [{ clientX: 100, clientY: 106 }],
+      touches: [],
+      changedTouches: [{ identifier: 1, clientX: 210, clientY: 106 }],
     });
 
     expect(mockRequestMainWavesList).toHaveBeenCalledTimes(1);
@@ -748,7 +760,6 @@ describe("BrainMobile", () => {
 
   it.each([
     { app: false, pathname: "/waves/1", query: "" },
-    { app: true, pathname: "/messages/1", query: "" },
     { app: true, pathname: "/waves/1", query: "drop=drop-1" },
     { app: true, pathname: "/waves/1", query: "create=wave" },
   ])(
@@ -764,10 +775,14 @@ describe("BrainMobile", () => {
 
       const waveContent = await screen.findByText("child");
       fireEvent.touchStart(waveContent, {
-        touches: [{ clientX: 10, clientY: 100 }],
+        touches: [{ identifier: 1, clientX: 60, clientY: 100 }],
+      });
+      fireEvent.touchMove(waveContent, {
+        touches: [{ identifier: 1, clientX: 180, clientY: 100 }],
       });
       fireEvent.touchEnd(waveContent, {
-        changedTouches: [{ clientX: 100, clientY: 100 }],
+        touches: [],
+        changedTouches: [{ identifier: 1, clientX: 210, clientY: 100 }],
       });
 
       expect(mockRequestMainWavesList).not.toHaveBeenCalled();
@@ -1085,39 +1100,21 @@ describe("BrainMobile", () => {
     });
   });
 
-  it.each(["wave type", "outcome visibility"])(
-    "falls back to default when the outcome %s gate becomes unavailable",
-    async (gate) => {
+  it.each(["outcome", "outcomes"])(
+    "opens retired %s links in Settings regardless of historical visibility",
+    async (tab) => {
       mockSearchParams.set("wave", "1");
+      mockSearchParams.set("tab", tab);
       waveData = createWave(false);
-
       const { rerender } = render(<BrainMobile>child</BrainMobile>);
-
-      await waitFor(() =>
-        expect(screen.getByTestId("tabs")).toBeInTheDocument()
-      );
-
-      act(() => {
-        latestTabsProps.onViewChange(BrainView.OUTCOME);
-      });
-
       await waitFor(() => {
-        expect(latestTabsProps.activeView).toBe(BrainView.OUTCOME);
+        expect(latestTabsProps.activeView).toBe(BrainView.CONFIGURATION);
         expect(screen.getByText("child")).toBeInTheDocument();
       });
-
-      if (gate === "outcome visibility") mockOutcomesVisible = false;
-      else
-        mockUseWave.mockReturnValue({
-          isMemesWave: false,
-          isCurationWave: false,
-          isRankWave: false,
-          isDm: false,
-        });
+      mockOutcomesVisible = false;
       rerender(<BrainMobile>child</BrainMobile>);
-
       await waitFor(() => {
-        expect(latestTabsProps.activeView).toBe(BrainView.DEFAULT);
+        expect(latestTabsProps.activeView).toBe(BrainView.CONFIGURATION);
         expect(screen.queryByTestId("outcome")).toBeNull();
         expect(screen.getByText("child")).toBeInTheDocument();
       });

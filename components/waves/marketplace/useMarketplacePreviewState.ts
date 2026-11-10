@@ -1,5 +1,6 @@
 "use client";
 
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { useQuery } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -39,6 +40,7 @@ export const useMarketplacePreviewState = ({
 }: UseMarketplacePreviewStateParams): MarketplacePreviewState => {
   const normalizedHref = href.trim();
   const hasHref = normalizedHref.length > 0;
+  const zone = useDisplayTimeZone();
 
   const marketplacePreviewQuery = useQuery({
     queryKey: [QueryKey.MARKETPLACE_PREVIEW, { href: normalizedHref, mode }],
@@ -109,7 +111,8 @@ export const useMarketplacePreviewState = ({
         marketplacePreviewQuery.data?.priceCurrency ?? undefined,
       resolvedTitle: toNonEmptyString(marketplacePreviewQuery.data?.title),
       resolvedDataHealth: deriveMarketplaceDataHealth(
-        marketplacePreviewQuery.data
+        marketplacePreviewQuery.data,
+        zone
       ),
     };
   }

@@ -6,18 +6,21 @@ export class E2eeApiError extends Error {
   readonly status: number;
   readonly code: string | null;
   readonly currentEpoch: number | null;
+  readonly retryAfterMs: number;
 
   constructor(input: {
     message: string;
     status: number;
     code?: string | null;
     currentEpoch?: number | null;
+    retryAfterMs?: number;
   }) {
     super(input.message);
     this.name = "E2eeApiError";
     this.status = input.status;
     this.code = input.code ?? null;
     this.currentEpoch = input.currentEpoch ?? null;
+    this.retryAfterMs = input.retryAfterMs ?? 0;
   }
 }
 
@@ -26,6 +29,7 @@ interface ErrorShape {
   readonly status?: unknown;
   readonly code?: unknown;
   readonly currentEpoch?: unknown;
+  readonly retryAfterMs?: unknown;
 }
 
 /** Duck-typed so test doubles (and errors crossing realms) qualify. */
@@ -44,6 +48,8 @@ export function asE2eeApiError(error: unknown): E2eeApiError | null {
     message: error instanceof Error ? error.message : "E2EE API error",
     status: shape.status,
     code: typeof shape.code === "string" ? shape.code : null,
+    retryAfterMs:
+      typeof shape.retryAfterMs === "number" ? shape.retryAfterMs : 0,
     currentEpoch:
       typeof shape.currentEpoch === "number" ? shape.currentEpoch : null,
   });

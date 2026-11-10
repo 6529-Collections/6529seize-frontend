@@ -39,8 +39,11 @@ import React, {
 } from "react";
 
 const AUTO_RETRY_DELAY_MS = 1500;
-// First-party CDN previews can still be processing after an upload.
-const MAX_AUTO_RETRY_ATTEMPTS = 40;
+// CloudFront ignores retry query parameters in its cache key and holds origin
+// errors for 10 seconds. Wait past that window before retrying the same image;
+// the query parameter only bypasses the browser's cached failed response.
+const CDN_RETRY_DELAY_MS = 11_000;
+const MAX_AUTO_RETRY_ATTEMPTS = 6;
 const MAX_FAILED_LOAD_ATTEMPTS = MAX_AUTO_RETRY_ATTEMPTS + 1;
 // The guarded proxy is retried only while busy, with backoff.
 const MAX_PROXY_AUTO_RETRY_ATTEMPTS = 5;
@@ -424,7 +427,7 @@ function WaveDropPartContentMediaImageContent({
           2 ** Math.max(0, imageViewState.failedAttempts - 1),
         MAX_PROXY_RETRY_DELAY_MS
       )
-    : AUTO_RETRY_DELAY_MS;
+    : CDN_RETRY_DELAY_MS;
 
   useEffect(() => {
     if (!imageViewState.retryPending) {

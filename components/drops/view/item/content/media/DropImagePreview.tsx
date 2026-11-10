@@ -23,7 +23,7 @@ import {
 } from "react";
 
 const IMAGE_PROXY_PATH = "/api/og-metadata/image";
-/** Cache-busts a retried preview without changing the media it names. */
+/** Bypasses the browser cache; the first-party CDN ignores query parameters. */
 export const IMAGE_RETRY_QUERY_PARAM = "drop_media_retry";
 
 export const isGuardedImageProxyUrl = (src: string): boolean =>

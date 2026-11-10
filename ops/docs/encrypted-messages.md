@@ -32,6 +32,17 @@ anything 6529 is legally required to keep (see
 [Unencrypted direct messages](#unencrypted-direct-messages)). Until then you
 can export them or move them into an encrypted chat.
 
+## Names that temporarily show as Unknown member
+
+"Unknown member" means this device cannot currently resolve the person's name;
+it does not by itself mean they left. Known names and device owners are retained
+when a lookup fails. Temporary lookup failures are retried a limited number of
+times, with increasing delays and the server's rate-limit cooldown. Reopening a
+chat or returning online can resume eligible lookups. Older messages with a
+recoverable missing author are corrected as their history is opened, without
+resetting encryption or deleting messages. A person who cannot be resolved can
+continue to appear as Unknown member.
+
 ## Availability
 
 - On in production and staging, behind the `NEXT_PUBLIC_E2EE_DM_ENABLED`
@@ -733,3 +744,17 @@ sized shields. A disconnected wallet does not by itself disable stored grants.
 
 See [Wallet and Account Controls](navigation/feature-wallet-account-controls.md)
 and [Notifications Feed](notifications/feature-notifications-feed.md).
+
+## Touch shortcuts
+
+On a touch layout, swipe left on an available message to start a reply on release.
+Reverse below the reply threshold before release, or release a short swipe, to
+leave the composer unchanged. Message timestamps and the visible message-actions
+menu remain available. Pending, unsent, deleted and unreadable messages, notices,
+and read-only conversations do not offer swipe to reply. Links, media controls and text selection keep their own interactions.
+
+In the native app, swipe right across conversation content to return to the
+Encrypted messages list, or use the existing Back control. Reverse below the
+gesture threshold before release to cancel the return. Vertical scrolling
+and multi-touch do not trigger the shortcut. Reduced motion removes the added
+settling animation.

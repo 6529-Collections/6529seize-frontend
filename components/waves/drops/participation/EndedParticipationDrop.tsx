@@ -1,11 +1,11 @@
 "use client";
 
+import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { getTimeAgoShort } from "@/helpers/Helpers";
 import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import type { ImageScale } from "@/helpers/image.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
@@ -99,6 +99,7 @@ function EndedParticipationDropInner({
   embedDepth,
   maxEmbedDepth,
 }: EndedParticipationDropProps) {
+  const timeAgoShort = useTimeAgoShort();
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const router = useRouter();
   const identityProfile = getParticipationIdentityProfile({
@@ -233,7 +234,7 @@ function EndedParticipationDropInner({
             {!isStackedTimestamp && (
               <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
                 <WithDropAuthorSignedMarker drop={drop}>
-                  {getTimeAgoShort(drop.created_at)}
+                  {timeAgoShort(drop.created_at)}
                 </WithDropAuthorSignedMarker>
               </p>
             )}
@@ -241,7 +242,7 @@ function EndedParticipationDropInner({
           {isStackedTimestamp && (
             <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
               <WithDropAuthorSignedMarker drop={drop}>
-                {getTimeAgoShort(drop.created_at)}
+                {timeAgoShort(drop.created_at)}
               </WithDropAuthorSignedMarker>
             </p>
           )}
