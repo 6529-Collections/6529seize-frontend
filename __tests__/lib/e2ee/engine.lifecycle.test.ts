@@ -4,6 +4,7 @@
  * Integration: real OpenMLS WASM + fake delivery service. Device limit and
  * grant renewal (8.8).
  */
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
 import {
   addDevice,
   addUser,
@@ -117,6 +118,35 @@ describe("E2EE engine: lifecycle", () => {
     });
     expect(fresh.deviceKey).not.toBe(stored.deviceKey);
     expect(restarted.engine.getUpgrade()).toBeNull();
+    restarted.engine.dispose();
+  });
+
+  it("keeps the wallet of a retired device as an own wallet when the next one is signed by another", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const sibling = await addDevice(world, alice);
+    const { storage } = alice.primary;
+    const stored = (await storage.getDevice("alice"))!;
+    alice.primary.engine.dispose();
+    const { version: _v, ciphersuites: _s, ...v1 } = stored.grant;
+    await storage.writeBatch("alice", {
+      device: { ...stored, grant: { ...v1, ciphersuite: 1 } },
+    });
+
+    // The next device on this browser is signed by another wallet of alice.
+    const second = privateKeyToAccount(generatePrivateKey());
+    world.ds.setWallets("alice", [alice.account.address, second.address]);
+    const restarted = await startDevice(world, "alice", second, { storage });
+    await settle(world);
+    expect(restarted.engine.getStatus()).toBe("ready");
+    expect((await storage.getDevice("alice"))?.trust?.ownWallets).toEqual([
+      alice.account.address.toLowerCase(),
+    ]);
+    // So the sibling signed by that wallet needs no approval here.
+    const siblingKey = sibling.engine.getThisDevice()!.deviceKey;
+    expect(
+      restarted.engine.getDevices().find((d) => d.deviceKey === siblingKey)
+    ).toMatchObject({ needsApproval: false });
     restarted.engine.dispose();
   });
 

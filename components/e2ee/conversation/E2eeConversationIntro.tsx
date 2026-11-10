@@ -4,7 +4,7 @@ import { LockClosedIcon } from "@heroicons/react/24/outline";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { E2eeConversation } from "@/lib/e2ee/types";
-import { getConversationTitle, getDmPeer } from "../e2eeFormat";
+import { getConversationTitle, getDmPeer, isUnpairedDm } from "../e2eeFormat";
 import { E2eeAvatar, E2eeAvatarStack } from "../ui/E2eeAvatar";
 import { E2eeProfileLink } from "../ui/E2eeProfileLink";
 
@@ -38,7 +38,9 @@ export function E2eeConversationIntro({
 
   return (
     <div className="tw-mx-auto tw-flex tw-max-w-md tw-flex-col tw-items-center tw-px-6 tw-pb-6 tw-pt-10 tw-text-center">
-      {peer || conversation.kind === "dm" ? (
+      {peer ||
+      (conversation.kind === "dm" &&
+        !isUnpairedDm(conversation, selfProfileId)) ? (
         <E2eeProfileLink member={peer} avatar className="tw-inline-flex">
           <E2eeAvatar
             pfp={peer?.pfp ?? null}

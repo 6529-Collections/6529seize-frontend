@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { readJsonBody } from "@/app/api/alchemy/readJsonBody";
+import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 import { fetchTweetPreview, type TweetPreview } from "@/lib/twitter";
 
 interface TwitterPreviewBatchRequest {
@@ -21,8 +23,21 @@ type TwitterPreviewBatchItem =
   | TwitterPreviewBatchError;
 
 const TWITTER_PREVIEW_BATCH_MAX_URLS = 5;
+// Five URLs of at most a few hundred characters fit well inside this.
+const TWITTER_PREVIEW_BATCH_MAX_BODY_BYTES = 8 * 1024;
 const TWITTER_PREVIEW_METADATA_ERROR_MESSAGE =
   "Unable to fetch Twitter/X post.";
+
+// Each requested URL costs one unit. Clients batch and cache previews by
+// tweet, so reading a busy wave stays far below this budget.
+const enforceRateLimit = createClientRateLimiter({
+  limit: 240,
+  windowMs: 60 * 1000,
+  errorMessage: "Too many Twitter/X preview requests",
+});
+
+const batchJsonError = (message: string, status = 400): NextResponse =>
+  NextResponse.json({ error: message }, { status });
 
 const readErrorMessage = (error: unknown): string =>
   error instanceof Error
@@ -75,6 +90,11 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const rateLimitResponse = enforceRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const preview = await fetchTweetPreview(href);
     return NextResponse.json(preview);
@@ -87,19 +107,23 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function POST(request: Request) {
-  let body: TwitterPreviewBatchRequest | null;
-
-  try {
-    body = (await request.json()) as TwitterPreviewBatchRequest | null;
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid Twitter/X preview batch request body." },
-      { status: 400 }
-    );
+export async function POST(request: NextRequest) {
+  const bodyResult = await readJsonBody<TwitterPreviewBatchRequest | null>({
+    request,
+    maxBodyBytes: TWITTER_PREVIEW_BATCH_MAX_BODY_BYTES,
+    jsonError: (message, status) =>
+      batchJsonError(
+        status === 413
+          ? message
+          : "Invalid Twitter/X preview batch request body.",
+        status
+      ),
+  });
+  if (!bodyResult.ok) {
+    return bodyResult.response;
   }
 
-  const urls = normalizeBatchUrls(body?.urls);
+  const urls = normalizeBatchUrls(bodyResult.body?.urls);
   if (urls.length === 0) {
     return NextResponse.json(
       { error: "At least one Twitter/X URL is required." },
@@ -114,6 +138,11 @@ export async function POST(request: Request) {
       },
       { status: 400 }
     );
+  }
+
+  const rateLimitResponse = enforceRateLimit(request, urls.length);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   const items: readonly TwitterPreviewBatchItem[] = await Promise.all(

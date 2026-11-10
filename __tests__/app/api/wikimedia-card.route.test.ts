@@ -173,7 +173,10 @@ describe("wikimedia-card route", () => {
 
       const failed = await (
         await GET(
-          requestFor("https://en.m.wikipedia.org/wiki/Cache_unavailable_alias", "fr")
+          requestFor(
+            "https://en.m.wikipedia.org/wiki/Cache_unavailable_alias",
+            "fr"
+          )
         )
       ).json();
       expect(failed.kind).toBe("unavailable");
@@ -181,10 +184,15 @@ describe("wikimedia-card route", () => {
         "https://en.wikipedia.org/wiki/Cache_unavailable_alias"
       );
 
-      mockLocalizedSummary("https://en.wikipedia.org/wiki/Cache_unavailable_alias");
+      mockLocalizedSummary(
+        "https://en.wikipedia.org/wiki/Cache_unavailable_alias"
+      );
       const recovered = await (
         await GET(
-          requestFor("https://en.wikipedia.org/wiki/Cache_unavailable_alias", "fr")
+          requestFor(
+            "https://en.wikipedia.org/wiki/Cache_unavailable_alias",
+            "fr"
+          )
         )
       ).json();
 
@@ -314,5 +322,29 @@ describe("parseAcceptLanguage", () => {
       "x4",
       "en",
     ]);
+  });
+});
+
+describe("wikimedia-card fair use", () => {
+  it("limits each client to its per-minute card budget", async () => {
+    mockLocalizedSummary("https://en.wikipedia.org/wiki/Fair_use");
+    const requestFrom = (clientIp: string): NextRequest =>
+      ({
+        nextUrl: new URL(
+          `http://localhost/api/wikimedia-card?url=${encodeURIComponent(
+            "https://en.wikipedia.org/wiki/Fair_use"
+          )}`
+        ),
+        headers: new Headers({ "x-forwarded-for": clientIp }),
+      }) as unknown as NextRequest;
+
+    let response: { readonly status: number } | undefined;
+    for (let index = 0; index < 121; index += 1) {
+      response = await GET(requestFrom("8.8.4.70"));
+    }
+    const otherClient = await GET(requestFrom("8.8.4.71"));
+
+    expect(response?.status).toBe(429);
+    expect(otherClient.status).toBe(200);
   });
 });

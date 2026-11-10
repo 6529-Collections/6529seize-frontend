@@ -10,6 +10,7 @@ import {
   loginWithSessionV2,
   persistSessionResponse,
 } from "@/services/auth/session-v2.utils";
+import { siweSignInChallenge } from "./signInChallengeFixtures";
 
 const ADDRESS = "0x1111111111111111111111111111111111111111";
 let mockWalletAddress: string | null = ADDRESS;
@@ -34,6 +35,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
   PROFILE_SWITCHED_EVENT: "6529-profile-switched",
 }));
 jest.mock("@/services/auth/session-v2.utils", () => ({
+  getSessionClientType: () => "web",
   getSessionNonce: jest.fn(),
   loginWithSessionV2: jest.fn(),
   persistSessionResponse: jest.fn(),
@@ -58,8 +60,9 @@ const proxy = {
   id: "proxy-1",
   created_by: { id: "grantor-profile" },
 } as ApiProfileProxy;
+// A proxy sign-in signs the ordinary challenge; the role goes to the login.
 const nonce = {
-  signable_message: "Sign in to 6529",
+  signable_message: siweSignInChallenge({ address: ADDRESS }),
   server_signature: "server-signature",
 };
 

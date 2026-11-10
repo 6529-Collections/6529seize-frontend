@@ -8,28 +8,20 @@ jest.mock("next/server", () => ({
   NextResponse: { json: mockNextResponseJson },
 }));
 
-const mockFetchPublicJson = jest.fn();
+const mockFetchAlchemyJson = jest.fn();
 
 jest.mock("@/config/alchemyEnv", () => ({
   getAlchemyApiKey: jest.fn(() => "test-alchemy-key"),
 }));
 
-jest.mock("@/lib/security/urlGuard", () => {
-  class UrlGuardError extends Error {
-    readonly statusCode: number;
+jest.mock("@/app/api/alchemy/fetchAlchemyJson", () => ({
+  fetchAlchemyJson: (...args: unknown[]) => mockFetchAlchemyJson(...args),
+}));
 
-    constructor(message: string, statusCode = 400) {
-      super(message);
-      this.statusCode = statusCode;
-    }
-  }
-
-  return {
-    ...jest.requireActual("@/lib/security/urlGuard"),
-    UrlGuardError,
-    fetchPublicJson: (...args: unknown[]) => mockFetchPublicJson(...args),
-  };
-});
+function upstreamTokens(tokens: readonly unknown[]) {
+  const payload = { tokens };
+  return { ok: true, payload, text: JSON.stringify(payload) };
+}
 
 import type { NextRequest } from "next/server";
 import { POST } from "@/app/api/alchemy/token-metadata/route";
@@ -98,14 +90,14 @@ function requestFor(
 describe("app/api/alchemy/token-metadata route", () => {
   beforeEach(() => {
     mockNextResponseJson.mockClear();
-    mockFetchPublicJson.mockReset();
-    mockFetchPublicJson.mockResolvedValue({ tokens: [] });
+    mockFetchAlchemyJson.mockReset();
+    mockFetchAlchemyJson.mockImplementation(async () => upstreamTokens([]));
   });
 
   it("fetches normalized metadata batches and caches identical requests", async () => {
-    mockFetchPublicJson.mockResolvedValueOnce({
-      tokens: [{ tokenId: "1", title: "Cached token" }],
-    });
+    mockFetchAlchemyJson.mockResolvedValueOnce(
+      upstreamTokens([{ tokenId: "1", title: "Cached token" }])
+    );
 
     const body = {
       address: CONTRACT,
@@ -122,17 +114,15 @@ describe("app/api/alchemy/token-metadata route", () => {
       tokens: [{ tokenId: "1", title: "Cached token" }],
     });
     expect(second.body).toEqual(first.body);
-    expect(mockFetchPublicJson).toHaveBeenCalledTimes(1);
-    expect(mockFetchPublicJson.mock.calls[0]?.[0]).toContain(
+    expect(mockFetchAlchemyJson).toHaveBeenCalledTimes(1);
+    expect(mockFetchAlchemyJson.mock.calls[0]?.[0]).toContain(
       "test-alchemy-key"
     );
-    expect(
-      JSON.parse(
-        (mockFetchPublicJson.mock.calls[0]?.[1] as RequestInit).body as string
-      )
-    ).toEqual({
-      tokens: [{ contractAddress: CONTRACT, tokenId: "1" }],
-    });
+    expect(mockFetchAlchemyJson.mock.calls[0]?.[1]).toEqual(
+      expect.objectContaining({
+        jsonBody: { tokens: [{ contractAddress: CONTRACT, tokenId: "1" }] },
+      })
+    );
   });
 
   it("rejects requests over the total token cap before calling Alchemy", async () => {
@@ -152,7 +142,7 @@ describe("app/api/alchemy/token-metadata route", () => {
     expect(response.body).toEqual({
       error: "Maximum 100 tokens per request",
     });
-    expect(mockFetchPublicJson).not.toHaveBeenCalled();
+    expect(mockFetchAlchemyJson).not.toHaveBeenCalled();
   });
 
   it("rejects invalid contract addresses and token IDs", async () => {
@@ -170,7 +160,7 @@ describe("app/api/alchemy/token-metadata route", () => {
     expect(invalidContract.body).toEqual({ error: "Invalid contract address" });
     expect(invalidTokenId.status).toBe(400);
     expect(invalidTokenId.body).toEqual({ error: "Invalid tokenId" });
-    expect(mockFetchPublicJson).not.toHaveBeenCalled();
+    expect(mockFetchAlchemyJson).not.toHaveBeenCalled();
   });
 
   it("rate limits each client after its per-minute budget", async () => {
@@ -192,7 +182,7 @@ describe("app/api/alchemy/token-metadata route", () => {
     expect(response?.headers).toEqual(
       expect.objectContaining({ "Retry-After": expect.any(String) })
     );
-    expect(mockFetchPublicJson).toHaveBeenCalledTimes(120);
+    expect(mockFetchAlchemyJson).toHaveBeenCalledTimes(120);
 
     const otherClient = (await POST(
       requestFor({ address: CONTRACT, tokenIds: ["1"] }, "8.8.8.41")
@@ -214,7 +204,7 @@ describe("app/api/alchemy/token-metadata route", () => {
     }
 
     expect(response?.status).toBe(429);
-    expect(mockFetchPublicJson).toHaveBeenCalledTimes(120);
+    expect(mockFetchAlchemyJson).toHaveBeenCalledTimes(120);
   });
 
   it("does not let client-supplied forwarded entries mint rate limit buckets", async () => {
@@ -230,7 +220,7 @@ describe("app/api/alchemy/token-metadata route", () => {
     }
 
     expect(response?.status).toBe(429);
-    expect(mockFetchPublicJson).toHaveBeenCalledTimes(120);
+    expect(mockFetchAlchemyJson).toHaveBeenCalledTimes(120);
   });
 
   it("does not spend the budget on invalid requests", async () => {
@@ -254,6 +244,53 @@ describe("app/api/alchemy/token-metadata route", () => {
 
     expect(response.status).toBe(413);
     expect(response.body).toEqual({ error: "Request body is too large" });
-    expect(mockFetchPublicJson).not.toHaveBeenCalled();
+    expect(mockFetchAlchemyJson).not.toHaveBeenCalled();
+  });
+
+  it("serves reordered and repeated token lists from one cached batch", async () => {
+    mockFetchAlchemyJson.mockResolvedValueOnce(
+      upstreamTokens([{ tokenId: "5001" }, { tokenId: "5002" }])
+    );
+
+    const first = (await POST(
+      requestFor({ address: CONTRACT, tokenIds: ["5002", "5001"] }, "8.8.8.60")
+    )) as RouteResponse;
+    const reordered = (await POST(
+      requestFor(
+        { address: CONTRACT, tokenIds: ["5001", "5002", "5001"] },
+        "8.8.8.61"
+      )
+    )) as RouteResponse;
+
+    expect(first.status).toBe(200);
+    expect(reordered.body).toEqual(first.body);
+    expect(mockFetchAlchemyJson).toHaveBeenCalledTimes(1);
+    expect(mockFetchAlchemyJson.mock.calls[0]?.[1]).toEqual(
+      expect.objectContaining({
+        jsonBody: {
+          tokens: [
+            { contractAddress: CONTRACT, tokenId: "5001" },
+            { contractAddress: CONTRACT, tokenId: "5002" },
+          ],
+        },
+        maxBytes: 16 * 1024 * 1024,
+      })
+    );
+  });
+
+  it("reports an upstream failure, such as an oversized response, without caching it", async () => {
+    mockFetchAlchemyJson.mockResolvedValueOnce({ ok: false, status: 502 });
+
+    const failed = (await POST(
+      requestFor({ address: CONTRACT, tokenIds: ["6001"] }, "8.8.8.62")
+    )) as RouteResponse;
+    const retried = (await POST(
+      requestFor({ address: CONTRACT, tokenIds: ["6001"] }, "8.8.8.62")
+    )) as RouteResponse;
+
+    expect(failed.status).toBe(502);
+    expect(failed.body).toEqual({ error: "Failed to fetch token metadata" });
+    expect(retried.status).toBe(200);
+    expect(mockFetchAlchemyJson).toHaveBeenCalledTimes(2);
   });
 });

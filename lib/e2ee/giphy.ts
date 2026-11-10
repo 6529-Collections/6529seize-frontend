@@ -1,4 +1,5 @@
 import { toArrayBuffer } from "./bytes";
+import { markGifPickerFile } from "./gif-picker-files";
 import { MAX_ATTACHMENT_FILE_BYTES } from "./media";
 
 const DOWNLOAD_TIMEOUT_MS = 30_000;
@@ -69,7 +70,7 @@ async function readGif(response: Response): Promise<File> {
   if (signature !== "GIF87a" && signature !== "GIF89a") {
     throw new GifDownloadError("unavailable");
   }
-  return file;
+  return markGifPickerFile(file);
 }
 
 /** Public GIPHY retrieval only. The returned file uses the normal E2EE upload. */
