@@ -1,4 +1,6 @@
 type AdmissionQueueOptions = {
+  /** Callers admitted at once; defaults to one. */
+  readonly concurrency?: number | undefined;
   readonly maxPending: number;
   readonly waitMs: number;
 };
@@ -21,14 +23,21 @@ export class AdmissionQueueError extends Error {
   }
 }
 
-/** Serializes resource-heavy work without starting downloads for queued callers. */
+/**
+ * Bounds resource-heavy work without starting downloads for queued callers:
+ * at most `concurrency` callers run at once, and at most `maxPending` wait.
+ */
 export class AdmissionQueue {
-  private active = false;
+  private active = 0;
   private readonly pending: PendingAdmission[] = [];
+  private readonly concurrency: number;
   private readonly maxPending: number;
   private readonly waitMs: number;
 
-  constructor({ maxPending, waitMs }: AdmissionQueueOptions) {
+  constructor({ concurrency = 1, maxPending, waitMs }: AdmissionQueueOptions) {
+    if (!Number.isSafeInteger(concurrency) || concurrency < 1) {
+      throw new RangeError("concurrency must be a positive safe integer.");
+    }
     if (!Number.isSafeInteger(maxPending) || maxPending < 0) {
       throw new RangeError("maxPending must be a nonnegative safe integer.");
     }
@@ -37,6 +46,7 @@ export class AdmissionQueue {
         "waitMs must be a positive supported timer duration."
       );
     }
+    this.concurrency = concurrency;
     this.maxPending = maxPending;
     this.waitMs = waitMs;
   }
@@ -45,8 +55,8 @@ export class AdmissionQueue {
     if (signal?.aborted) {
       return Promise.reject(new AdmissionQueueError("aborted"));
     }
-    if (!this.active) {
-      this.active = true;
+    if (this.active < this.concurrency) {
+      this.active += 1;
       return Promise.resolve(this.createRelease());
     }
     if (this.pending.length >= this.maxPending) {
@@ -105,10 +115,11 @@ export class AdmissionQueue {
           pending = this.pending.shift();
           continue;
         }
+        // The released slot passes straight to the next caller.
         pending.grant();
         return;
       }
-      this.active = false;
+      this.active -= 1;
     };
   }
 }

@@ -88,11 +88,21 @@ loading.
 
 ## Limitations / Notes
 
-- Generic preview fetch supports public HTTP(S) destinations only.
+- Generic preview fetch supports public HTTP(S) destinations on ports 80 and
+  443 only, on the first request and every redirect.
 - Card quality depends on metadata published by the destination.
 - Previews read page metadata (`meta`, `link`, `title`, and JSON-LD) from the
-  first 1 MiB of the page only; metadata placed after that on very large pages
-  is not used.
+  first 1 MiB of the page only; the rest is not downloaded, and metadata placed
+  after that on very large pages is not used.
+- Each client address can request up to 1,200 preview URLs a minute (every URL
+  in a batch counts; a batch larger than what is left is served up to that
+  budget). Each server process fetches up to 32 previews at once and lets up
+  to 256 more wait for at most 10 seconds. Beyond either limit the preview
+  request is answered `429` or `503` with a `Retry-After` header, and the link
+  falls back to its plain presentation until a later load retries it.
+- The browser waits up to 20 seconds for a preview batch. A preview that has
+  started fetching on the server finishes and is cached even if the viewer
+  scrolls away or the browser stops waiting, so the next load gets it.
 - Slow or redirect-heavy destinations can degrade preview quality or fall back to
   non-rich link states.
 - Link-preview chrome uses the app message catalog, but the wave preview stack
