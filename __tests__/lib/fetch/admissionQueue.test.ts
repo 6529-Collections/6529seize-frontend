@@ -37,6 +37,42 @@ describe("AdmissionQueue", () => {
     expect(jest.getTimerCount()).toBe(0);
   });
 
+  it("admits up to its concurrency at once and passes freed slots on in order", async () => {
+    const queue = new AdmissionQueue({
+      concurrency: 2,
+      maxPending: 1,
+      waitMs: 100,
+    });
+    const releaseFirst = await queue.acquire();
+    const releaseSecond = await queue.acquire();
+    let admittedThird = false;
+    const third = queue.acquire().then((release) => {
+      admittedThird = true;
+      return release;
+    });
+    await expect(queue.acquire()).rejects.toMatchObject({ kind: "full" });
+    await Promise.resolve();
+    expect(admittedThird).toBe(false);
+
+    releaseFirst();
+    const releaseThird = await third;
+    expect(admittedThird).toBe(true);
+    releaseSecond();
+    releaseThird();
+    // Both slots are free again.
+    (await queue.acquire())();
+    const [a, b] = await Promise.all([queue.acquire(), queue.acquire()]);
+    a();
+    b();
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it("rejects a concurrency below one", () => {
+    expect(
+      () => new AdmissionQueue({ concurrency: 0, maxPending: 1, waitMs: 100 })
+    ).toThrow(RangeError);
+  });
+
   it("rejects excess pending callers without releasing the active caller", async () => {
     const queue = new AdmissionQueue({ maxPending: 1, waitMs: 100 });
     const releaseFirst = await queue.acquire();

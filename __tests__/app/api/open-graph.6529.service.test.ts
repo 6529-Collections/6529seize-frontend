@@ -257,7 +257,8 @@ describe("createFirstParty6529Plan", () => {
 
     const { data } = await plan!.execute();
 
-    expect(claimAuthHeader).toBe("secret");
+    // Previews read public data only; the admin-only claim lookup is not made.
+    expect(claimAuthHeader).toBeNull();
     const fetchUrls = mockFetch.mock.calls.map((call) =>
       readFetchUrl(call[0]).toString()
     );
@@ -265,8 +266,10 @@ describe("createFirstParty6529Plan", () => {
       expect.arrayContaining([
         `https://api.test/api/nfts?contract=${MEMES_CONTRACT}&id=509`,
         "https://api.test/api/memes_extended_data?id=509",
-        `https://api.test/api/minting-claims/${MEMES_CONTRACT}/claims/509`,
       ])
+    );
+    expect(fetchUrls).not.toContain(
+      `https://api.test/api/minting-claims/${MEMES_CONTRACT}/claims/509`
     );
     expect(fetchUrls).not.toContain(
       "https://api.test/api/memes-mint-stats/509"
@@ -561,7 +564,7 @@ describe("createFirstParty6529Plan", () => {
         headers: { accept: "application/json" },
       })
     );
-    expect(productionFallbackAuthHeaders).toEqual([null, null, null]);
+    expect(productionFallbackAuthHeaders).toEqual([null, null]);
     expect(data).toMatchObject({
       type: "6529.collection",
       kind: "the-memes",
@@ -695,7 +698,7 @@ describe("createFirstParty6529Plan", () => {
     const fetchHosts = mockFetch.mock.calls.map(
       (call) => readFetchUrl(call[0]).host
     );
-    expect(fetchHosts).toEqual(["api.6529.io", "api.6529.io", "api.6529.io"]);
+    expect(fetchHosts).toEqual(["api.6529.io", "api.6529.io"]);
   });
 
   it("tries the production fallback for primary server errors", async () => {

@@ -1,4 +1,4 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import {
@@ -8,12 +8,16 @@ import {
   parsePublicUrl,
 } from "@/lib/security/urlGuard";
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 import {
   decodeHtmlEntities,
   replaceHtmlBreaksWithNewlines,
   stripHtmlTags,
 } from "@/lib/text/html";
-import type { FetchPublicUrlOptions, UrlGuardOptions } from "@/lib/security/urlGuard";
+import type {
+  FetchPublicUrlOptions,
+  UrlGuardOptions,
+} from "@/lib/security/urlGuard";
 import type {
   TikTokPreviewKind,
   TikTokPreviewResult,
@@ -24,6 +28,17 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const CACHE_STALE_TTL_MS = 3 * CACHE_TTL_MS;
 const CACHE_MAX_ITEMS = 500;
 const FETCH_TIMEOUT_MS = 8000;
+// A vm./vt. share link resolves to a standard TikTok URL in one step.
+const MAX_SHORT_LINK_RESOLUTIONS = 1;
+
+// Previews load once per distinct link and are cached here for a day, so a
+// reader stays far below this budget.
+const enforceRateLimit = createClientRateLimiter({
+  limit: 120,
+  windowMs: 60 * 1000,
+  errorMessage: "Too many TikTok preview requests",
+});
+
 const USER_AGENT =
   "6529seize-tiktok-preview/1.0 (+https://6529.io; Fetching public TikTok oEmbed data)";
 
@@ -41,7 +56,8 @@ const TIKTOK_URL_GUARD_OPTIONS: UrlGuardOptions = {
   },
 };
 
-const TIKTOK_UNSUPPORTED_MESSAGE = "The provided URL is not a supported TikTok link.";
+const TIKTOK_UNSUPPORTED_MESSAGE =
+  "The provided URL is not a supported TikTok link.";
 const INVALID_URL_MESSAGE = "The provided url parameter is not a valid URL.";
 
 const TIKTOK_FETCH_OPTIONS: FetchPublicUrlOptions = {
@@ -84,7 +100,9 @@ interface NormalizedTikTokUrl {
   readonly kind: TikTokPreviewKind;
 }
 
-type HandlerResult<T> = { ok: true; value: T } | { ok: false; response: NextResponse };
+type HandlerResult<T> =
+  | { ok: true; value: T }
+  | { ok: false; response: NextResponse };
 
 function mapGuardErrorToResponse(error: UrlGuardError): NextResponse {
   const message =
@@ -101,13 +119,19 @@ function parseRequestUrl(rawUrl: string): HandlerResult<URL> {
     if (error instanceof UrlGuardError) {
       return {
         ok: false,
-        response: NextResponse.json({ error: error.message }, { status: error.statusCode }),
+        response: NextResponse.json(
+          { error: error.message },
+          { status: error.statusCode }
+        ),
       };
     }
 
     return {
       ok: false,
-      response: NextResponse.json({ error: INVALID_URL_MESSAGE }, { status: 400 }),
+      response: NextResponse.json(
+        { error: INVALID_URL_MESSAGE },
+        { status: 400 }
+      ),
     };
   }
 }
@@ -123,12 +147,17 @@ async function ensureTikTokUrlAllowed(url: URL): Promise<HandlerResult<URL>> {
 
     return {
       ok: false,
-      response: NextResponse.json({ error: TIKTOK_UNSUPPORTED_MESSAGE }, { status: 400 }),
+      response: NextResponse.json(
+        { error: TIKTOK_UNSUPPORTED_MESSAGE },
+        { status: 400 }
+      ),
     };
   }
 }
 
-async function normalizeTikTokLink(url: URL): Promise<HandlerResult<NormalizedTikTokUrl>> {
+async function normalizeTikTokLink(
+  url: URL
+): Promise<HandlerResult<NormalizedTikTokUrl>> {
   try {
     const normalized = await normalizeTikTokUrl(url);
     return { ok: true, value: normalized };
@@ -156,7 +185,9 @@ function getCachedPreviewResponse(canonicalUrl: string): NextResponse | null {
   return NextResponse.json(cached.data, { status: cached.status });
 }
 
-async function resolveTikTokPreview(normalized: NormalizedTikTokUrl): Promise<NextResponse> {
+async function resolveTikTokPreview(
+  normalized: NormalizedTikTokUrl
+): Promise<NextResponse> {
   const cachedResponse = getCachedPreviewResponse(normalized.canonicalUrl);
   if (cachedResponse) {
     return cachedResponse;
@@ -173,7 +204,9 @@ async function resolveTikTokPreview(normalized: NormalizedTikTokUrl): Promise<Ne
     return NextResponse.json(data, { status });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Unable to fetch TikTok preview at this time.";
+      error instanceof Error
+        ? error.message
+        : "Unable to fetch TikTok preview at this time.";
     return NextResponse.json({ error: message }, { status: 502 });
   }
 }
@@ -302,25 +335,39 @@ async function resolveShortLink(url: URL): Promise<URL> {
   }
 
   if (!response.ok) {
-    throw new Error(`Short link resolution failed with status ${response.status}`);
+    throw new Error(
+      `Short link resolution failed with status ${response.status}`
+    );
   }
 
   return new URL(response.url || url.toString());
 }
 
-async function normalizeTikTokUrl(url: URL): Promise<NormalizedTikTokUrl> {
+function isShortLinkHost(hostname: string): boolean {
+  return hostname === "vm.tiktok.com" || hostname === "vt.tiktok.com";
+}
+
+async function normalizeTikTokUrl(
+  url: URL,
+  shortLinkResolutions = 0
+): Promise<NormalizedTikTokUrl> {
   const hostname = url.hostname.toLowerCase();
 
-  if (hostname === "vm.tiktok.com" || hostname === "vt.tiktok.com") {
+  if (isShortLinkHost(hostname)) {
+    if (shortLinkResolutions >= MAX_SHORT_LINK_RESOLUTIONS) {
+      throw new Error("TikTok short link did not resolve to a TikTok page.");
+    }
     const resolved = await resolveShortLink(url);
-    return normalizeTikTokUrl(resolved);
+    return normalizeTikTokUrl(resolved, shortLinkResolutions + 1);
   }
 
   ensureCanonicalHost(hostname);
   url.hash = "";
   sanitizeTrackingParams(url);
 
-  const segments = url.pathname.split("/").filter((segment) => segment.length > 0);
+  const segments = url.pathname
+    .split("/")
+    .filter((segment) => segment.length > 0);
   const normalized = parseTikTokPath(segments);
 
   const search = url.search ? url.search : "";
@@ -357,7 +404,9 @@ async function fetchTikTokPreview(
     }
 
     if (!response.ok) {
-      throw new Error(`TikTok oEmbed request failed with status ${response.status}`);
+      throw new Error(
+        `TikTok oEmbed request failed with status ${response.status}`
+      );
     }
 
     const payload = (await response.json()) as TikTokOEmbedResponse;
@@ -418,7 +467,10 @@ function scheduleRevalidation(canonicalUrl: string): void {
 export async function GET(request: NextRequest) {
   const rawUrl = request.nextUrl.searchParams.get("url");
   if (!rawUrl) {
-    return NextResponse.json({ error: "A url query parameter is required." }, { status: 400 });
+    return NextResponse.json(
+      { error: "A url query parameter is required." },
+      { status: 400 }
+    );
   }
 
   const parsedResult = parseRequestUrl(rawUrl);
@@ -429,6 +481,11 @@ export async function GET(request: NextRequest) {
   const guardResult = await ensureTikTokUrlAllowed(parsedResult.value);
   if (!guardResult.ok) {
     return guardResult.response;
+  }
+
+  const rateLimitResponse = enforceRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   const normalizedResult = await normalizeTikTokLink(parsedResult.value);

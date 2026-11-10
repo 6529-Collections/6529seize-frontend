@@ -56,6 +56,12 @@ function select(
   });
   return outputs;
 }
+const NATIVE_COMPETITION_SHARDS = [1, 2, 3, 4].map((shard) => ({
+  lane: "playwright-native-competition",
+  label: `Native competitions shard ${shard}/4`,
+  runner: "ubuntu-latest",
+  shard,
+}));
 it("schedules submission artwork separately without replacing competition coverage", () => {
   const outputs = select([], {
     playwright_submission_artwork: { required: true },
@@ -63,18 +69,7 @@ it("schedules submission artwork separately without replacing competition covera
   });
   expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
     include: [
-      {
-        lane: "playwright-native-competition",
-        label: "Native competitions shard 1/2",
-        runner: "ubuntu-latest",
-        shard: 1,
-      },
-      {
-        lane: "playwright-native-competition",
-        label: "Native competitions shard 2/2",
-        runner: "ubuntu-latest",
-        shard: 2,
-      },
+      ...NATIVE_COMPETITION_SHARDS,
       {
         lane: "playwright-submission-artwork",
         label: "Submission artwork desktop and mobile",
@@ -185,25 +180,12 @@ it("runs the isolated Collect and market specs on both supported browser viewpor
   expect(job.permissions).toEqual({ contents: "read", issues: "read" });
 });
 
-it("partitions the full native competition pack across two uniquely identified jobs", () => {
+it("partitions the full native competition pack across four uniquely identified jobs", () => {
   const outputs = select([], {
     playwright_native_competition: { required: true },
   });
   expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
-    include: [
-      {
-        lane: "playwright-native-competition",
-        label: "Native competitions shard 1/2",
-        runner: "ubuntu-latest",
-        shard: 1,
-      },
-      {
-        lane: "playwright-native-competition",
-        label: "Native competitions shard 2/2",
-        runner: "ubuntu-latest",
-        shard: 2,
-      },
-    ],
+    include: NATIVE_COMPETITION_SHARDS,
   });
   const job = workflow.jobs["core-playwright-checks"]!;
   const step = job.steps.find(
@@ -212,7 +194,10 @@ it("partitions the full native competition pack across two uniquely identified j
   expect(step.run).toBe(
     './bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"'
   );
-  expect(step.env?.["NATIVE_COMPETITION_SHARD"]).toBe("${{ matrix.shard }}/2");
+  // The shard total must match the number of matrix jobs, or tests are lost.
+  expect(step.env?.["NATIVE_COMPETITION_SHARD"]).toBe(
+    `\${{ matrix.shard }}/${NATIVE_COMPETITION_SHARDS.length}`
+  );
   // Fresh CI checkouts never reuse Turbopack's dev filesystem cache; its
   // restore can panic and stop the dev server mid-pack.
   expect(step.env?.["NEXT_DEV_TURBOPACK_FS_CACHE"]).toBe("0");
