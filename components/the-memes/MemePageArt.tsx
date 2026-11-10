@@ -4,10 +4,10 @@ import {
   AdditionalDetailsSection,
   ArweaveLinkRow,
   EmptyDetailsState,
-  MetadataCard,
   MetricBlock,
   type AdditionalDetailsMediaRow,
 } from "@/components/the-memes/MemePageAdditionalDetails";
+import MemePropertiesGrid from "@/components/the-memes/MemePropertiesGrid";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import type { IAttribute, NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
@@ -20,7 +20,6 @@ import {
 import { formatInteger, formatNumber, roundTo } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { useId, useState } from "react";
 import {
   BoltIcon,
   ChartBarIcon,
@@ -72,8 +71,6 @@ export function MemePageArt(props: {
   nftMeta: ApiMemesExtendedData | undefined;
   locale?: SupportedLocale;
 }) {
-  const [showAllProperties, setShowAllProperties] = useState(false);
-  const propertiesId = useId();
   if (!props.show || !props.nft || !props.nftMeta) {
     return <></>;
   }
@@ -240,7 +237,7 @@ export function MemePageArt(props: {
   ];
 
   return (
-    <div className="tw-space-y-8 tw-pb-8 tw-pt-6 sm:tw-space-y-14 sm:tw-pt-8">
+    <div className="tw-space-y-8 tw-pb-8 tw-pt-6 sm:tw-space-y-14 sm:tw-pt-8 md:tw-space-y-8">
       {mediaRows.length > 0 && (
         <AdditionalDetailsSection
           compactMobile
@@ -265,43 +262,12 @@ export function MemePageArt(props: {
         icon={SwatchIcon}
       >
         {propertyAttributes.length > 0 ? (
-          <>
-            <div
-              id={propertiesId}
-              className="tw-grid tw-grid-cols-2 tw-gap-2 sm:tw-grid-cols-3 sm:tw-gap-3 lg:tw-grid-cols-4"
-            >
-              {propertyAttributes.map((attribute, index) => (
-                <MetadataCard
-                  key={attribute.trait_type}
-                  compactMobile
-                  className={
-                    index >= 6 && !showAllProperties
-                      ? "tw-hidden sm:tw-flex"
-                      : "tw-flex"
-                  }
-                  label={attribute.trait_type}
-                  value={attribute.value}
-                />
-              ))}
-            </div>
-            {propertyAttributes.length > 6 && (
-              <button
-                type="button"
-                aria-expanded={showAllProperties}
-                aria-controls={propertiesId}
-                onClick={() => setShowAllProperties(!showAllProperties)}
-                className="tw-mt-3 tw-h-10 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-text-[13px] tw-font-semibold tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:tw-hidden"
-              >
-                {t(
-                  locale,
-                  showAllProperties
-                    ? "theMemes.detail.mobile.fewerProperties"
-                    : "theMemes.detail.mobile.showProperties",
-                  { count: formatInteger(locale, propertyAttributes.length) }
-                )}
-              </button>
-            )}
-          </>
+          <MemePropertiesGrid
+            attributes={propertyAttributes}
+            locale={locale}
+            compactMobile
+            collapseOnMobile
+          />
         ) : (
           <EmptyDetailsState>
             {t(locale, "theMemes.detail.art.empty.noProperties")}
@@ -326,7 +292,7 @@ export function MemePageArt(props: {
         </div>
       </AdditionalDetailsSection>
 
-      <div className="tw-grid tw-grid-cols-1 tw-gap-x-16 tw-gap-y-8 sm:tw-gap-y-14 lg:tw-grid-cols-2">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-x-16 tw-gap-y-8 sm:tw-gap-y-14 md:tw-border-x-0 md:tw-border-b-0 md:tw-border-t md:tw-border-solid md:tw-border-iron-800 md:tw-pt-8 lg:tw-grid-cols-2">
         <AdditionalDetailsSection
           compactMobile
           title={t(locale, "theMemes.detail.art.sections.stats")}

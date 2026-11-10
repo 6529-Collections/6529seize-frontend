@@ -8,6 +8,11 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import TheMemesCard from "@/components/the-memes/TheMemesCard";
 import TheMemesSortButton from "@/components/the-memes/TheMemesSortButton";
+import {
+  THE_MEMES_CONTAINER_CLASS_NAME,
+  THE_MEMES_GRID_CLASS_NAME,
+  THE_MEMES_PAGE_CLASS_NAME,
+} from "@/components/the-memes/theMemesLayout";
 import useMemesSortVisibility from "@/components/the-memes/useMemesSortVisibility";
 import {
   getAllSeasonsLabel,
@@ -559,7 +564,7 @@ export default function TheMemesComponent({
     }
 
     return (
-      <div className="tw-grid tw-grid-cols-2 tw-gap-2.5 sm:tw-grid-cols-3 sm:tw-gap-4 sm:tw-pt-2 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
+      <div className={`${THE_MEMES_GRID_CLASS_NAME} sm:tw-pt-2`}>
         {nfts.map((nft) => printNft(nft))}
       </div>
     );
@@ -594,7 +599,7 @@ export default function TheMemesComponent({
           <h2 className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
             {formatInteger(locale, meme.meme)} - {meme.meme_name}
           </h2>
-          <div className="tw-grid tw-grid-cols-2 tw-gap-2.5 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
+          <div className={THE_MEMES_GRID_CLASS_NAME}>
             {memeNfts.map((nft) => printNft(nft))}
           </div>
         </section>
@@ -609,8 +614,8 @@ export default function TheMemesComponent({
       tokenIds={tokenIds}
       enabled={connectedProfile !== null}
     >
-      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
-        <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-8 tw-pt-4 sm:tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
+      <div className={THE_MEMES_PAGE_CLASS_NAME}>
+        <div className={THE_MEMES_CONTAINER_CLASS_NAME}>
           <header className="tw-pb-5 max-sm:tw-pb-2">
             <div className="tw-flex tw-flex-col tw-gap-4">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
