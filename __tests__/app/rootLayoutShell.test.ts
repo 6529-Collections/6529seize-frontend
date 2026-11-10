@@ -24,11 +24,16 @@ it("starts native detection synchronously after the legacy-browser checks", () =
   expect(stylesIndex).toBeGreaterThan(-1);
   expect(scriptIdIndex).toBeGreaterThan(stylesIndex);
   const scriptStart = head.lastIndexOf("<", scriptIdIndex);
-  expect(head.slice(0, scriptStart).match(/<script\b[^>]*>/gi)).toEqual([
+  const legacyScripts =
+    head.slice(0, scriptStart).match(/<script\b[^>]*>/gi) ?? [];
+  expect(legacyScripts).toEqual([
     expect.stringContaining("LEGACY_BROWSER_FLAG_SCRIPT"),
     expect.stringContaining("LEGACY_BROWSER_SYNTAX_SCRIPT"),
     expect.stringContaining("LEGACY_BROWSER_NOTICE_SCRIPT"),
   ]);
+  expect(legacyScripts.every((script) => script.startsWith("<script"))).toBe(
+    true
+  );
   const element = head.slice(scriptStart, head.indexOf("/>", scriptIdIndex));
   // Lowercase <script> is plain HTML; <Script> would wait for the Next runtime.
   expect(element).toMatch(/^<script\b/);
