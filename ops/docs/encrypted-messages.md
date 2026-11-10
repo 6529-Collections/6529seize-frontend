@@ -232,6 +232,13 @@ offers **Open chat** instead. Your list and sidebar show one direct-message
 entry per person, including when you have left an earlier chat or started a
 replacement. Group chats remain separate.
 
+A direct message has exactly two people. A device joins one only when you are
+one of the two people it names, the invitation comes from one of you, and
+every device in it belongs to one of you; otherwise the invitation is not
+joined. A chat marked as a direct message that holds anyone else is listed on
+its own, titled by everyone in it rather than under one person, and you can’t
+send in it.
+
 **Chat history** above the timeline lets you open earlier chats with that
 person, including imported messages kept in the earlier chat. Messages and
 search stay within the selected history; histories are not copied together or

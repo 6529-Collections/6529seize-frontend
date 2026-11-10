@@ -213,7 +213,10 @@ export function getConversationTitle(
   if (conversation.kind === "group" && conversation.name) {
     return conversation.name;
   }
-  if (conversation.kind === "dm") {
+  if (
+    conversation.kind === "dm" &&
+    !isUnpairedDm(conversation, selfProfileId)
+  ) {
     return (
       getDmPeer(conversation, selfProfileId)?.handle ??
       t(locale, "e2ee.unknownMember")
@@ -254,6 +257,21 @@ export function getDmPeer(
       (member) => member.profileId === getDmPeerId(conversation, selfProfileId)
     ) ??
     null
+  );
+}
+
+/**
+ * A DM that does not hold exactly its two participants, with someone else
+ * in it: shown like a group, by its members, never under one person's name.
+ */
+export function isUnpairedDm(
+  conversation: E2eeConversation,
+  selfProfileId: string | null
+): boolean {
+  return (
+    conversation.kind === "dm" &&
+    getDmPeer(conversation, selfProfileId) === null &&
+    conversation.members.some((member) => member.profileId !== selfProfileId)
   );
 }
 
