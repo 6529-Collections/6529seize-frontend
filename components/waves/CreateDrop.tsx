@@ -58,7 +58,6 @@ import type { CreateDropProps } from "./create-drop-content/create-drop.types";
 import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMonitoring";
 import { removeTemporaryThreadReply } from "./drops/reply-threads/pending-replies";
 import { acceptCreatedDrop } from "./create-drop-content/accept-created-drop";
-import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
 import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
 
 export default function CreateDrop({
@@ -112,7 +111,7 @@ export default function CreateDrop({
     useState<string | null>(null);
   const { applyOptimisticDropUpdate, processDropRemoved, processIncomingDrop } =
     useMyStreamActions();
-  const savedDrop = useSavedDropRecovery(wave);
+  const savedDrop = useSavedDropRecovery();
   const retainModerationRejectedDrop = useModerationRejectedDropDelivery({
     applyOptimisticDropUpdate,
     processDropRemoved,
@@ -498,12 +497,13 @@ export default function CreateDrop({
         if (!body.dropId) {
           return;
         }
-        if (isWaveRepliesCollapsed(wave))
+        if (body.drop.reply_to) {
           removeTemporaryThreadReply(
             queryClient,
             body.drop.wave_id,
             body.dropId
           );
+        }
 
         if (
           isContentModerationRejection &&

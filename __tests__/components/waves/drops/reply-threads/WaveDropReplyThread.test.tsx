@@ -39,7 +39,14 @@ const useDropMessagesMock = useDropMessages as jest.Mock;
 const useWebSocketMessageMock = useWebSocketMessage as jest.Mock;
 const fetchDropMock = fetchDropByIdBatched as jest.Mock;
 
-const wave = { id: "wave-1" } as ApiWave;
+const wave = {
+  id: "wave-1",
+  chat: { replies: { collapsed: true } },
+} as ApiWave;
+const inlineWave = {
+  id: "wave-1",
+  chat: { replies: { collapsed: false } },
+} as ApiWave;
 
 const makeDrop = (
   id: string,
@@ -60,10 +67,14 @@ function Harness({
   drop,
   enabled = true,
   simulateSend = false,
+  simulateLink = false,
+  waveConfig = wave,
 }: {
   readonly drop: ExtendedDrop;
   readonly enabled?: boolean;
   readonly simulateSend?: boolean;
+  readonly simulateLink?: boolean;
+  readonly waveConfig?: ApiWave;
 }) {
   const store = useExpandedReplyThreadsStore();
   const [queryClient] = useState(() => new QueryClient());
@@ -74,7 +85,25 @@ function Harness({
           Send reply
         </button>
       )}
-      <WaveReplyThreadsProvider enabled={enabled} wave={wave} store={store}>
+      {simulateLink && (
+        <button
+          onClick={() => {
+            store.setLinkedReply({
+              parentDropId: drop.id,
+              parentSerialNo: drop.serial_no,
+              replySerialNo: 11,
+            });
+            store.setExpanded(drop.id, true);
+          }}
+        >
+          Open reply link
+        </button>
+      )}
+      <WaveReplyThreadsProvider
+        enabled={enabled}
+        wave={waveConfig}
+        store={store}
+      >
         <WaveDropReplyThread
           drop={drop}
           renderReply={({ reply, previousReply }) => (
@@ -88,7 +117,7 @@ function Harness({
   );
 }
 
-function LiveHarness() {
+function LiveHarness({ waveConfig = wave }: { readonly waveConfig?: ApiWave }) {
   const [drop, setDrop] = useState(() =>
     makeDrop("root", 10, { replies_count: 1 })
   );
@@ -96,7 +125,7 @@ function LiveHarness() {
     if (dropId === "root") setDrop((current) => update(current) ?? current);
     return null;
   });
-  return <Harness drop={drop} />;
+  return <Harness drop={drop} waveConfig={waveConfig} />;
 }
 
 describe("WaveDropReplyThread", () => {
@@ -135,6 +164,23 @@ describe("WaveDropReplyThread", () => {
     expect(useDropMessagesMock).not.toHaveBeenCalled();
   });
 
+  it("loads the linked page and highlights only the linked reply in the thread", async () => {
+    const user = userEvent.setup();
+    render(
+      <Harness drop={makeDrop("root", 10, { replies_count: 2 })} simulateLink />
+    );
+    await user.click(screen.getByRole("button", { name: "Open reply link" }));
+    expect(useDropMessagesMock).toHaveBeenCalledWith(
+      "wave-1",
+      "root",
+      wave,
+      11
+    );
+    const [linked, other] = screen.getAllByRole("listitem");
+    expect(linked?.firstElementChild).toHaveClass("tw-bg-[#263d68]");
+    expect(other?.firstElementChild).not.toHaveClass("tw-bg-[#263d68]");
+  });
+
   it("opens the thread oldest first and fetches only while open", async () => {
     const user = userEvent.setup();
     render(<Harness drop={makeDrop("root", 10, { replies_count: 2 })} />);
@@ -148,7 +194,12 @@ describe("WaveDropReplyThread", () => {
     expect(
       screen.getByRole("button", { name: "Hide replies" })
     ).toHaveAttribute("aria-expanded", "true");
-    expect(useDropMessagesMock).toHaveBeenCalledWith("wave-1", "root", wave);
+    expect(useDropMessagesMock).toHaveBeenCalledWith(
+      "wave-1",
+      "root",
+      wave,
+      undefined
+    );
     const group = screen.getByRole("list", { name: "Replies to this drop" });
     expect(group).toHaveTextContent("reply-1 after start");
     expect(group).toHaveTextContent("reply-2 after reply-1");
@@ -349,6 +400,34 @@ describe("WaveDropReplyThread", () => {
       ...overrides,
     });
 
+    it("reconciles the root of an individually collapsed nested reply", async () => {
+      fetchDropMock.mockResolvedValue(
+        makeDrop("root", 10, { replies_count: 2 })
+      );
+      render(<LiveHarness waveConfig={inlineWave} />);
+      const onUpdate = useWebSocketMessageMock.mock.calls.find(
+        ([type]) => type === WsMessageType.DROP_UPDATE
+      )?.[1];
+      act(() => {
+        onUpdate(
+          makeDrop("nested-reply", 12, {
+            reply_to: {
+              drop_id: "first-reply",
+              drop_part_id: 1,
+              is_deleted: false,
+            },
+            collapsed_reply_thread: { id: "root", serial_no: 10 },
+          })
+        );
+      });
+
+      expect(
+        await screen.findByRole("button", { name: "Show 2 replies" })
+      ).toBeInTheDocument();
+      expect(fetchDropMock).toHaveBeenCalledWith("root");
+      expect(fetchDropMock).not.toHaveBeenCalledWith("first-reply");
+    });
+
     it("uses the server count without double-counting duplicate events", async () => {
       fetchDropMock.mockResolvedValue(
         makeDrop("root", 10, { replies_count: 2 })
@@ -406,6 +485,28 @@ describe("WaveDropReplyThread", () => {
         })
       );
       await screen.findByRole("button", { name: "Show 2 replies" });
+    });
+
+    it("uses the compact event's root in waves with inline replies", async () => {
+      fetchDropMock.mockResolvedValue(
+        makeDrop("root", 10, { replies_count: 2 })
+      );
+      render(<LiveHarness waveConfig={inlineWave} />);
+
+      act(() =>
+        getHandler(WsMessageType.DROP_UPDATE_REF)({
+          drop_id: "new-reply",
+          wave_id: "wave-1",
+          author_id: "author",
+          serial_no: 12,
+          update_type: WsMessageType.DROP_UPDATE,
+          collapsed_reply_thread_id: "root",
+        })
+      );
+
+      await screen.findByRole("button", { name: "Show 2 replies" });
+      expect(fetchDropMock).toHaveBeenCalledWith("root");
+      expect(fetchDropMock).not.toHaveBeenCalledWith("new-reply");
     });
 
     it("reconciles delayed or edited replies without adding to the count", async () => {

@@ -82,7 +82,10 @@ describe("wave-messages-utils additional", () => {
     expect(mockFetch).toHaveBeenCalledWith(
       expect.objectContaining({
         endpoint: "v2/waves/w/drops",
-        params: { limit: WAVE_DROPS_PARAMS.limit.toString() },
+        params: {
+          limit: WAVE_DROPS_PARAMS.limit.toString(),
+          respect_drop_reply_collapse: "true",
+        },
       })
     );
     expect(res?.[0]?.wave).toEqual(expect.objectContaining({ id: "w" }));
@@ -99,6 +102,7 @@ describe("wave-messages-utils additional", () => {
         endpoint: "v2/waves/w/drops",
         params: {
           limit: WAVE_DROPS_NATIVE_INITIAL_PARAMS.limit.toString(),
+          respect_drop_reply_collapse: "true",
         },
       })
     );
@@ -135,6 +139,7 @@ describe("wave-messages-utils additional", () => {
           limit: WAVE_DROPS_PARAMS.limit.toString(),
           serial_no_limit: "5",
           search_strategy: "FIND_BOTH",
+          respect_drop_reply_collapse: "true",
         }),
       })
     );
