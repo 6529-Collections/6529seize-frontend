@@ -480,6 +480,7 @@ const PACKS = [
         "tests/social/wave-time-zone-sandbox.spec.ts",
         "tests/social/android-back-sandbox.spec.ts",
         "tests/social/mobile-gestures-sandbox.spec.ts",
+        "tests/social/wave-share-image-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,
