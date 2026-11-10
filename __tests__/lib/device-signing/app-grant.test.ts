@@ -290,7 +290,7 @@ describe("signed drops under an app grant", () => {
       seq,
       anchor: 0,
       claimedTime: seq,
-      refs: [DROP_ID],
+      refs: [],
       bodyHash,
       bodySize,
     };
@@ -307,7 +307,7 @@ describe("signed drops under an app grant", () => {
       seq,
       anchor: 0,
       claimed_time: seq,
-      refs: [DROP_ID],
+      refs: [],
       body: canonical,
       body_hash: bodyHash,
       body_size: bodySize,
@@ -338,6 +338,29 @@ describe("signed drops under an app grant", () => {
       signature: { wallet: WALLET, walletSignature: "verified" },
     });
   });
+
+  it.each(["6529 Desktop", "6529.io", "staging.6529.io"])(
+    "verifies a post under an app grant authorized from %s",
+    async (origin) => {
+      const grant = await grantProof({ ...appGrant(), origin });
+      await expect(
+        verifyDropSignedEvents(await signedPost(grant))
+      ).resolves.toMatchObject({ status: "signed", signature: { origin } });
+    }
+  );
+
+  it.each(["evil.example", "6529 Mobile", "ipfs.6529.io", "6529.io:8443"])(
+    "never shows a post as signed under an app grant authorized from %s",
+    async (origin) => {
+      const grant = await grantProof({ ...appGrant(), origin });
+      await expect(
+        verifyDropSignedEvents(await signedPost(grant))
+      ).resolves.toEqual({
+        status: "unverifiable",
+        unrecognizedOrigin: origin,
+      });
+    }
+  );
 
   it.each([
     ["another origin", { domain: "6529.io" }],

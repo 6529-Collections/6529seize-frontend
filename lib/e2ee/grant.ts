@@ -8,7 +8,6 @@ import {
   recoverTypedDataAddress,
   toBytes,
 } from "viem";
-import { getNodeEnv } from "@/config/env";
 import {
   type AppGrantFields,
   computeAppGrantId,
@@ -20,6 +19,10 @@ import {
   parseDeviceGrantMessage,
   parseSiweIssuedAtSeconds,
 } from "@/lib/device-signing/grant-message";
+import {
+  isRecognizedAppGrantOrigin,
+  isRecognizedGrantHost,
+} from "@/lib/device-signing/grant-origins";
 import type { ApiE2eeDevice, ApiE2eeDeviceGrant } from "./api-types";
 import { isHex } from "./bytes";
 
@@ -148,72 +151,14 @@ const GRANT_TYPES_V2 = {
 
 const GRANT_PRIMARY_TYPE = "MlsDeviceGrant";
 
-/** The app hosts a combined sign-in grant (NC8) may name, exactly. */
-const APP_GRANT_HOSTS: ReadonlySet<string> = new Set([
-  "6529.io",
-  "staging.6529.io",
-]);
-
-/** Builds that may accept local hosts; anything else fails closed. */
-const DEV_BUILD_ENVS: ReadonlySet<string> = new Set([
-  "development",
-  "test",
-  "local",
-]);
-
-/** Local development host names (dev builds only), any port. */
-const DEV_GRANT_HOSTNAMES: ReadonlySet<string> = new Set([
-  "localhost",
-  "127.0.0.1",
-  "[::1]",
-]);
-
-const isDevGrantHost = (host: string): boolean => {
-  let hostname: string;
-  try {
-    hostname = new URL(`https://${host}`).hostname;
-  } catch {
-    return false;
-  }
-  return (
-    DEV_GRANT_HOSTNAMES.has(hostname) ||
-    hostname.endsWith(".localhost") ||
-    hostname.endsWith(".test")
-  );
-};
-
-/**
- * The host a SIWE domain names, or null unless it is exactly one bare host
- * (no scheme, path, query, fragment, user info, whitespace or empty label).
- */
-function toExactHost(domain: string): string | null {
-  const value = domain.toLowerCase();
-  if (value.split(".").includes("")) {
-    return null;
-  }
-  try {
-    return new URL(`https://${value}`).host === value ? value : null;
-  } catch {
-    return null;
-  }
-}
-
 /**
  * Sign-in grants count only when signed on the app itself: exactly 6529.io
- * or staging.6529.io, never another 6529.io subdomain (IPFS or media
- * gateways serve content others control). Development builds also accept
- * local hosts.
+ * (and staging.6529.io outside production), never another 6529.io subdomain
+ * (IPFS or media gateways serve content others control). Development builds
+ * also accept local hosts.
  */
-export function isAllowedE2eeGrantDomain(domain: string): boolean {
-  const host = toExactHost(domain);
-  if (host === null) {
-    return false;
-  }
-  if (APP_GRANT_HOSTS.has(host)) {
-    return true;
-  }
-  return DEV_BUILD_ENVS.has(getNodeEnv() ?? "") && isDevGrantHost(host);
-}
+export const isAllowedE2eeGrantDomain = (domain: string): boolean =>
+  isRecognizedGrantHost(domain);
 
 interface GrantMessageFields {
   statement: string;
@@ -357,7 +302,10 @@ export type GrantVerifiedVia = "eoa" | "eip1271" | "server";
 export interface GrantVerification {
   /** The grant is acceptable (cryptographically or by the server's word). */
   ok: boolean;
-  /** Verified by this client (EOA recovery or its own EIP-1271 call). */
+  /**
+   * Verified by this client (EOA recovery or its own EIP-1271 call) for an
+   * origin it recognizes; "unrecognized-origin" in `reason` otherwise.
+   */
   verified: boolean;
   via: GrantVerifiedVia | null;
   reason: string | null;
@@ -662,10 +610,41 @@ export async function verifyGrant(
     return failed(fieldError);
   }
   if (typeof device.grant_message === "string") {
+    // A sign-in grant's domain is checked against the app hosts above.
     return isAppGrantMessage(device.grant_message)
-      ? await verifyAppGrant(device, device.grant_message, options)
+      ? withRecognizedOrigin(
+          grant.origin,
+          await verifyAppGrant(device, device.grant_message, options)
+        )
       : await verifyLoginGrant(device, device.grant_message, options);
   }
+  return withRecognizedOrigin(
+    grant.origin,
+    await verifyTypedGrant(device, options)
+  );
+}
+
+/**
+ * A grant whose signed origin is neither a 6529 app nor a host of the 6529
+ * app is never reported as verified by this client. It stays acceptable
+ * (ok): honest clients may have signed origins this list does not know, such
+ * as earlier app builds, and every client must keep agreeing on which
+ * devices a group may hold.
+ */
+const withRecognizedOrigin = (
+  origin: string,
+  result: GrantVerification
+): GrantVerification =>
+  result.verified && !isRecognizedAppGrantOrigin(origin)
+    ? { ...result, verified: false, reason: "unrecognized-origin" }
+    : result;
+
+/** An encrypted-messages grant: EIP-712 MlsDeviceGrant over the record. */
+async function verifyTypedGrant(
+  device: ApiE2eeDevice,
+  options: VerifyGrantOptions
+): Promise<GrantVerification> {
+  const grant = device.grant;
   let typedData: GrantTypedData;
   try {
     typedData = buildGrantTypedData(grant);
