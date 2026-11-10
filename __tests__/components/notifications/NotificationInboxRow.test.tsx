@@ -109,6 +109,79 @@ it("groups reactors, keeps mixed read state, and opens every distinct unread ID"
   expect(onOpen).toHaveBeenCalledWith([2, 1]);
 });
 
+it("shows three reactors once when snapshots mix profile IDs and handle IDs", () => {
+  const notifications = ["alice", "bob", "carol", "alice", "bob"].map(
+    (handle, index) => {
+      const notification = reaction(index + 1, handle, null);
+      return {
+        ...notification,
+        related_identity: {
+          ...notification.related_identity,
+          id: index < 3 ? `profile-${handle}` : handle,
+        },
+      };
+    }
+  );
+  const onOpen = jest.fn();
+  render(
+    <NotificationInboxRow
+      notification={groupReactionNotifications(notifications)[0]!}
+      handle="viewer"
+      onOpen={onOpen}
+    />
+  );
+
+  expect(screen.getByText("alice, bob, carol")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("link"));
+  expect(onOpen).toHaveBeenCalledWith([1, 2, 3, 4, 5]);
+});
+
+it.each(["alice", "ALICE", " alice "])(
+  "matches reactor handles across ID formats regardless of case or whitespace (%s)",
+  (handle) => {
+    const notification = reaction(1, handle, null);
+    const first = {
+      ...notification,
+      related_identity: {
+        ...notification.related_identity,
+        id: "profile-alice",
+      },
+    };
+    render(
+      <NotificationInboxRow
+        notification={
+          groupReactionNotifications([first, reaction(2, "alice", null)])[0]!
+        }
+        handle="viewer"
+        onOpen={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("alice")).toBeInTheDocument();
+  }
+);
+
+it("keeps distinct reactors without handles and deduplicates them by profile ID", () => {
+  const notifications = ["alice", "bob", "alice"].map((id, index) => {
+    const notification = reaction(index + 1, id, null);
+    return {
+      ...notification,
+      related_identity: { ...notification.related_identity, handle: null },
+    };
+  });
+  render(
+    <NotificationInboxRow
+      notification={groupReactionNotifications(notifications)[0]!}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+
+  expect(
+    screen.getByText("Unknown profile, Unknown profile")
+  ).toBeInTheDocument();
+});
+
 it("keeps single reactions readable and does not mark a read row again", () => {
   const onOpen = jest.fn();
   render(
