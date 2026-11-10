@@ -409,6 +409,9 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         for (const width of [1440, 390]) {
           await ordinary.setViewportSize({ width, height: 1000 });
           await b.page.setViewportSize({ width, height: 1000 });
+          expect(await markdownSnapshot(regular, sample.selectors)).toEqual(
+            await markdownSnapshot(encrypted, sample.selectors)
+          );
           for (const [name, body] of [
             ["regular", regular],
             ["encrypted", encrypted],
@@ -422,7 +425,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         await ordinary.setViewportSize({ width: 1440, height: 1000 });
         await b.page.setViewportSize({ width: 1440, height: 1000 });
       }
-      const secret = `Private URL checks ${runId}\n\n[Private link](https://${canary}.invalid/link)\n\nhttps://${canary}.invalid/plain\n\n![Private image](https://${canary}.invalid/image.png)\n\n<img src="https://${canary}.invalid/html.png">\n\n[Unsafe script](javascript:alert%281%29)\n\n[Unsafe data](data:text/html,private)`;
+      const secret = `Private URL checks ${runId}\n\n[Private link](https://${canary}.invalid/link)\n\nhttps://${canary}.invalid/plain\n\n![Private image](https://${canary}.invalid/image.png)\n\n<img src="https://${canary}.invalid/html.png">\n\n[Unsafe script](javascript:alert%281%29)\n\n[Unsafe data](data:text/html,private)\n\nA private note[^1].\n\n[^1]: Private footnote`;
       await composer(a.page).fill(secret);
       await a.page.getByRole("button", { name: "Send", exact: true }).click();
       const privateRow = messageRow(b.page, `Private URL checks ${runId}`);
@@ -435,6 +438,10 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       ).toHaveCount(0);
       await privateRow.getByRole("link", { name: "Private link" }).hover();
       await privateRow.getByRole("link", { name: "Private link" }).focus();
+      const note = privateRow.getByRole("link", { name: "1", exact: true });
+      await expect(note).toHaveAttribute("href", /^#e2ee-/u);
+      await note.click();
+      await expect(privateRow.getByText("Private footnote")).toBeVisible();
       expect(
         await privateRow.evaluate(
           (element, token) =>
@@ -869,7 +876,9 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const oldestRow = messageRow(a.page, "performance fixture 0");
     await expect(oldestRow).toBeVisible({ timeout: UI_TIMEOUT_MS });
     const oldestPhotos = oldestRow.getByRole("img", { name: /^Image:/u });
-    await expect(oldestPhotos).toHaveCount(fixture.photoAttachmentCount);
+    await expect(oldestPhotos).toHaveCount(fixture.photoAttachmentCount, {
+      timeout: UI_TIMEOUT_MS,
+    });
     for (const oldestPhoto of await oldestPhotos.all()) {
       await expect(oldestPhoto).toBeVisible({ timeout: UI_TIMEOUT_MS });
       await expect(oldestPhoto).toHaveAttribute("src", /^blob:/u);

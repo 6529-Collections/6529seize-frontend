@@ -69,7 +69,8 @@ does not offer GIF, Poll or Storm actions.
 
 Messages support the same Markdown formatting as ordinary chats: headings,
 **bold** and italic text, strikethrough, lists and task lists, quotes,
-inline and fenced code, tables, separators, links and footnotes. Code blocks use
+inline and fenced code, tables, separators and links. Encrypted messages also
+support footnotes. Code blocks use
 syntax highlighting, and member mentions and custom emoji stay literal inside
 code. Extra blank lines keep their spacing when you send or edit a message.
 

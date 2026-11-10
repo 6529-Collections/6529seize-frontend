@@ -191,7 +191,7 @@ function Paragraph({ children }: ComponentPropsWithoutRef<"p">) {
     );
   }
   return (
-    <p className="tw-m-0 tw-mb-1.5 tw-whitespace-pre-wrap last:tw-mb-0">
+    <p className="tw-m-0 tw-mb-1.5 tw-whitespace-pre-wrap tw-text-md tw-leading-6 last:tw-mb-0">
       {children}
     </p>
   );
@@ -241,7 +241,7 @@ export const E2eeMarkdown = memo(
     return (
       <TextContext.Provider value={context}>
         <Markdown
-          className="word-break tw-min-w-0 tw-max-w-full tw-break-words tw-text-md tw-leading-6 tw-text-iron-200 [&_code]:tw-text-iron-200 [&_h1]:tw-text-iron-200 [&_h2]:tw-text-iron-200 [&_h3]:tw-text-iron-200 [&_h4]:tw-text-iron-200 [&_h5]:tw-text-iron-200 [&_h6]:tw-text-iron-200 [&_pre]:tw-max-w-full [&_pre]:tw-overflow-x-auto [&_pre_code]:tw-whitespace-pre-wrap"
+          className="word-break tw-min-w-0 tw-max-w-full tw-break-words tw-text-iron-200 [&_code]:tw-text-iron-200 [&_h1]:tw-text-iron-200 [&_h2]:tw-text-iron-200 [&_h3]:tw-text-iron-200 [&_h4]:tw-text-iron-200 [&_h5]:tw-text-iron-200 [&_h6]:tw-text-iron-200 [&_li]:tw-text-md [&_pre]:tw-max-w-full [&_pre]:tw-overflow-x-auto [&_pre_code]:tw-whitespace-pre-wrap [&_ul]:tw-list-disc [&_ul_ul]:tw-list-[circle] [&_ul_ul_ul]:tw-list-[square]"
           skipHtml
           remarkPlugins={REMARK_PLUGINS}
           remarkRehypeOptions={{
