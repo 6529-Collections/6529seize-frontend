@@ -82,6 +82,11 @@ Multipart drops ("storms") stay in one card while users switch parts.
   still require the whole file before pages appear.
 - Desktop previews use the browser's PDF viewer. **Download** and **Copy link**
   remain in the attachment options menu.
+- The eye button appears only for PDFs served by 6529's own media host. Other
+  PDF links keep **Download** and **Copy link** without an inline preview.
+- Markdown images from other sites display as before. Images on 6529.io itself
+  display only when they are static image files (for example `/6529.png`);
+  other 6529.io paths, such as `/api/...`, are not loaded as images.
 - Drop-author profile pictures first request a scaled image variant when supported by the media host.
 - If that optimized avatar load fails, the card retries with an unoptimized load of the same source.
 - If both avatar attempts fail (or no avatar source exists), the card keeps layout with a neutral profile placeholder.

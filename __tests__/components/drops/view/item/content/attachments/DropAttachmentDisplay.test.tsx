@@ -9,7 +9,7 @@ import userEvent from "@testing-library/user-event";
 jest.mock("@/components/ipfs/IPFSContext", () => ({
   resolveIpfsUrlSync: (url: string) =>
     url.startsWith("ipfs://")
-      ? `https://ipfs.example.com/ipfs/${url.slice(7)}`
+      ? `https://media.6529.io/ipfs/${url.slice(7)}`
       : url,
 }));
 
@@ -60,7 +60,7 @@ describe("DropAttachmentDisplay", () => {
     });
     const props = {
       mimeType: "application/pdf",
-      attachmentUrl: "https://example.test/paper.pdf",
+      attachmentUrl: "https://media.6529.io/ipfs/bafypaper/paper.pdf",
     };
     const { rerender } = render(<DropAttachmentDisplay {...props} />);
     await userEvent.click(
@@ -129,7 +129,7 @@ describe("DropAttachmentDisplay", () => {
     const user = userEvent.setup();
     jest.spyOn(globalThis, "fetch").mockResolvedValue({
       ok: true,
-      blob: async () => new Blob(["pdf"], { type: "application/pdf" }),
+      blob: async () => new Blob(["%PDF-1.7"], { type: "application/pdf" }),
     } as Response);
     if (URL.createObjectURL === undefined) {
       (URL as { createObjectURL: (blob: Blob) => string }).createObjectURL =
@@ -145,14 +145,17 @@ describe("DropAttachmentDisplay", () => {
     const revokeObjectURLSpy = jest
       .spyOn(URL, "revokeObjectURL")
       .mockImplementation(() => {});
+    const savedNames: string[] = [];
     const clickSpy = jest
       .spyOn(HTMLAnchorElement.prototype, "click")
-      .mockImplementation(() => {});
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        savedNames.push(this.download);
+      });
 
     render(
       <DropAttachmentDisplay
         mimeType="application/pdf"
-        attachmentUrl="https://example.com/files/paper.pdf"
+        attachmentUrl="https://media.6529.io/ipfs/bafypaper/paper.pdf"
       />
     );
 
@@ -166,7 +169,11 @@ describe("DropAttachmentDisplay", () => {
 
     expect(screen.getByTitle("paper.pdf")).toHaveAttribute(
       "src",
-      "https://example.com/files/paper.pdf"
+      "https://media.6529.io/ipfs/bafypaper/paper.pdf"
+    );
+    expect(screen.getByTitle("paper.pdf")).toHaveAttribute(
+      "referrerpolicy",
+      "no-referrer"
     );
 
     expect(
@@ -178,9 +185,49 @@ describe("DropAttachmentDisplay", () => {
     );
     await user.click(screen.getByRole("button", { name: "Download" }));
 
+    await waitFor(() => expect(clickSpy).toHaveBeenCalled());
     expect(createObjectURLSpy).toHaveBeenCalled();
-    expect(clickSpy).toHaveBeenCalled();
+    expect(savedNames).toEqual(["paper.pdf"]);
     expect(revokeObjectURLSpy).toHaveBeenCalledWith("blob:test");
+  });
+
+  it("offers a PDF from another host for download without an inline preview", async () => {
+    const user = userEvent.setup();
+    jest.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      blob: async () =>
+        new Blob(["<!doctype html><title>x</title>"], { type: "text/html" }),
+    } as Response);
+    (URL as { createObjectURL: (blob: Blob) => string }).createObjectURL = () =>
+      "blob:other";
+    (URL as { revokeObjectURL: (url: string) => void }).revokeObjectURL =
+      () => {};
+    const savedNames: string[] = [];
+    jest
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        savedNames.push(this.download);
+      });
+
+    render(
+      <DropAttachmentDisplay
+        mimeType="application/pdf"
+        attachmentUrl="https://files.example.com/paper.pdf"
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Render attachment preview" })
+    ).not.toBeInTheDocument();
+    expect(document.querySelector("iframe")).toBeNull();
+
+    await user.click(
+      screen.getByRole("button", { name: "Attachment options" })
+    );
+    await user.click(screen.getByRole("button", { name: "Download" }));
+
+    // Content that is not a PDF is saved as an opaque file.
+    await waitFor(() => expect(savedNames).toEqual(["paper.bin"]));
   });
 
   it("uses the provided attachment file name instead of deriving it from the URL", () => {
@@ -357,7 +404,7 @@ describe("DropAttachmentDisplay", () => {
     await user.click(screen.getByRole("button", { name: "Copy link" }));
 
     expect(writeText).toHaveBeenCalledWith(
-      "https://ipfs.example.com/ipfs/bafybeigateway/sample.csv"
+      "https://media.6529.io/ipfs/bafybeigateway/sample.csv"
     );
   });
 
@@ -463,7 +510,7 @@ describe("DropAttachmentDisplay", () => {
     );
     await user.click(screen.getByRole("button", { name: "Copy link" }));
     expect(writeText).toHaveBeenCalledWith(
-      "https://ipfs.example.com/ipfs/bafybeigateway/sample.csv"
+      "https://media.6529.io/ipfs/bafybeigateway/sample.csv"
     );
     expect(screen.getByRole("button", { name: "Copied" })).toBeInTheDocument();
   });
