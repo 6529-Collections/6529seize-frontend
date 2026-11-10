@@ -4174,6 +4174,8 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.topUp.validation.selectOption": "Select a top-up option",
   "subscriptions.topUp.validation.wallet":
     "You must have an active wallet connection to top up",
+  "subscriptions.topUp.validation.amountMismatch":
+    "This top-up amount does not match the selected number of cards, so nothing was sent. Refresh the page and try again.",
   "subscriptions.topUp.sendingTo": "Sending to",
   "subscriptions.notification.title": "Subscription coverage",
   "subscriptions.notification.earlyWarning":

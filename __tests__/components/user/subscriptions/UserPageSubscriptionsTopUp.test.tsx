@@ -386,6 +386,64 @@ describe("UserPageSubscriptionsTopUp", () => {
     expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["more than the selected cards cost", 1, "1.5"],
+    ["less than the selected cards need", 3, "0.01"],
+    ["not an ETH amount", 1, "lots"],
+  ])(
+    "refuses a backend top-up that is %s",
+    async (_label, additionalMints, amountEth) => {
+      const coverage = {
+        recommended_top_up: {
+          target_fully_funded_drops: 2,
+          additional_mints: additionalMints,
+          amount_eth: amountEth,
+          projected_through: {
+            token_id: 560,
+            mint_at: new Date("2026-10-12T15:40:00Z"),
+          },
+        },
+      } as ApiSubscriptionCoverage;
+      render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("radio", { name: /^Recommended/ }));
+      await user.click(screen.getByRole("button", { name: /^Top up / }));
+
+      expect(
+        screen.getByRole("textbox", { name: "Transaction error details" })
+      ).toHaveValue(
+        "This top-up amount does not match the selected number of cards, so nothing was sent. Refresh the page and try again."
+      );
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    }
+  );
+
+  it("sends a backend top-up that needs exactly the selected cards", async () => {
+    const coverage = {
+      recommended_top_up: {
+        target_fully_funded_drops: 2,
+        additional_mints: 2,
+        amount_eth: "0.13058",
+        projected_through: {
+          token_id: 560,
+          mint_at: new Date("2026-10-12T15:40:00Z"),
+        },
+      },
+    } as ApiSubscriptionCoverage;
+    render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("radio", { name: /^Recommended/ }));
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.13058 ETH" })
+    );
+
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther("0.13058"),
+    });
+  });
+
   it("sends the exact minimum for partial funding, and omits a duplicate option", async () => {
     const point = { token_id: 571, mint_at: new Date("2026-11-06T15:40:00Z") };
     const coverage = {
