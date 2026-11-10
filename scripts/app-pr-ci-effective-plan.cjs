@@ -184,6 +184,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/drops/view/item/content/media/MediaDisplayImage.tsx",
         "components/memes/drops/MemeParticipationDrop.tsx",
         "components/memes/drops/MemeWinnerDrop.tsx",
+        "components/waves/drops/winner/DefaultWinnerDrop.tsx",
         "components/memes/drops/MemesLeaderboardDrop.tsx",
         "components/drops/view/item/content/media/ImageMediaModal.tsx",
         "components/drops/view/item/content/media/useOriginalImage.ts",
