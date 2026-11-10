@@ -303,6 +303,12 @@ export function sharedConfig(
       // TypeScript API checker keeps the previous behavior of skipping test
       // files; tests are typechecked by the Jest ratchet, not by the build.
       useTypeScriptCli: false,
+      // Next 16.4 defaults this to "security": `next dev` and `next build`
+      // look up advisories for the installed version and, when they detect a
+      // coding agent, stop on the first reminder. Dependency updates go
+      // through Dependabot and the weekly Dependency Audit workflow instead,
+      // so builds and dev servers keep running without that lookup.
+      agentUpgrade: false,
     },
   };
 }
