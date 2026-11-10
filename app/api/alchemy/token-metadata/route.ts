@@ -15,12 +15,14 @@ const MAX_BATCH_SIZE = 100;
 const MAX_TOKENS_PER_REQUEST = 100;
 const MAX_BODY_BYTES = 32 * 1024;
 const CACHE_TTL_MS = 5 * 60 * 1000;
-// A full 100-token batch is usually well under 1 MB; allow ample headroom.
-const MAX_RESPONSE_BYTES = 4 * 1024 * 1024;
+// A full 100-token batch is usually well under 1 MB. Collections that keep
+// metadata on-chain (inline base64 images) are far larger, so allow ample
+// headroom before refusing a batch.
+const MAX_RESPONSE_BYTES = 16 * 1024 * 1024;
 // Cached batches are bounded by memory, not count. A batch larger than the
 // per-entry cap is served but not kept.
 const MAX_CACHE_BYTES = 32 * 1024 * 1024;
-const MAX_CACHE_ENTRY_BYTES = 4 * 1024 * 1024;
+const MAX_CACHE_ENTRY_BYTES = 8 * 1024 * 1024;
 const TOKEN_ID_DECIMAL_PATTERN = /^(0|[1-9]\d{0,77})$/;
 const TOKEN_ID_HEX_PATTERN = /^0x[\da-fA-F]{1,64}$/;
 

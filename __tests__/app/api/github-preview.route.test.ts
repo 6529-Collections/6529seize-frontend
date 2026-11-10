@@ -850,6 +850,34 @@ describe("github-preview API route", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
+  it("keeps the valid snapshot when a refresh fails", async () => {
+    const url = "https://github.com/o/r/issues/14";
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: url,
+          title: "Kept issue",
+          state: "open",
+          state_reason: null,
+        })
+      )
+      .mockRejectedValueOnce(new Error("GitHub unavailable"));
+
+    const now = jest.spyOn(Date, "now").mockReturnValue(3_000_000);
+    await GET(requestFor(url));
+    now.mockReturnValue(3_030_000);
+    const refreshed = await GET(requestFor(url, true));
+    const afterFailure = await GET(requestFor(url));
+    now.mockRestore();
+
+    expect(refreshed.status).toBe(400);
+    await expect(afterFailure.json()).resolves.toMatchObject({
+      title: "Kept issue",
+      state: "open",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it("serves a recent snapshot to refresh requests instead of re-fetching", async () => {
     const url = "https://github.com/o/r/issues/13";
     fetchMock.mockImplementation(async () =>

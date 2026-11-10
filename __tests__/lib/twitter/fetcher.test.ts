@@ -728,8 +728,22 @@ describe("fetchTweetPreview", () => {
     );
   });
 
+  it("fetches an http tweet link through the canonical https URL", async () => {
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValueOnce(createSyndicationResponse());
+
+    const preview = await fetchTweetPreview(
+      "http://twitter.com/Someone/status/2057513333985554414",
+      { fetchImpl }
+    );
+
+    expect(preview.url).toBe(
+      "https://x.com/Mayudropsphotos/status/2057513333985554414"
+    );
+  });
+
   it.each([
-    "http://x.com/user/status/2057513333985554413",
     "ftp://x.com/user/status/2057513333985554413",
     "https://x.com:8443/user/status/2057513333985554413",
   ])("rejects %s without any upstream request", async (url) => {

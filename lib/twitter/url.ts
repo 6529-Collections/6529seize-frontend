@@ -48,9 +48,10 @@ export const parseTweetUrl = (href: string): TweetUrlParts | undefined => {
     return undefined;
   }
 
-  // Only ordinary https links on the default port are tweet links.
+  // Only ordinary web links on the default port are tweet links. Server
+  // requests rebuild a canonical https URL, so http input is fine here.
   if (
-    url.protocol !== "https:" ||
+    (url.protocol !== "https:" && url.protocol !== "http:") ||
     url.port !== "" ||
     url.username !== "" ||
     url.password !== ""

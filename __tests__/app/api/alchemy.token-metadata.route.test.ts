@@ -273,7 +273,7 @@ describe("app/api/alchemy/token-metadata route", () => {
             { contractAddress: CONTRACT, tokenId: "5002" },
           ],
         },
-        maxBytes: 4 * 1024 * 1024,
+        maxBytes: 16 * 1024 * 1024,
       })
     );
   });

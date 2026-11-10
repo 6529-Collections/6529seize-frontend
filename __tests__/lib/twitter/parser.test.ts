@@ -19,13 +19,21 @@ describe("Twitter preview parsing", () => {
   });
 
   it.each([
-    "http://x.com/user/status/123",
     "javascript://x.com/user/status/123",
     "ftp://twitter.com/user/status/123",
     "https://x.com:444/user/status/123",
+    "http://x.com:8080/user/status/123",
     "https://user:secret@x.com/user/status/123",
-  ])("accepts only plain https tweet links, rejecting %s", (url) => {
+  ])("accepts only plain web tweet links, rejecting %s", (url) => {
     expect(parseTweetUrl(url)).toBeUndefined();
+  });
+
+  it("still recognises http tweet links so they keep their tweet card", () => {
+    expect(parseTweetUrl("http://x.com/u/status/123")).toEqual({
+      tweetId: "123",
+      href: "http://x.com/u/status/123",
+      authorHandle: "u",
+    });
   });
 
   it("keeps the caller's https link and builds a canonical URL from the tweet", () => {
