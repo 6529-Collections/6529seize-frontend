@@ -104,7 +104,7 @@ export default function Timeline(props: Readonly<Props>) {
           href={value}
           target="_blank"
           rel="noopener noreferrer"
-          className="md:[[data-meme-card-page]_&]:tw-font-mono"
+          className="md:[[data-nft-card-page]_&]:tw-font-mono"
         >
           {value}
         </a>

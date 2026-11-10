@@ -89,7 +89,7 @@ beforeEach(() => {
 });
 
 describe("MemePageArt", () => {
-  it("reveals every property and can restore the six-property phone preview", () => {
+  it("reveals every property and can restore the six-property preview", () => {
     const manyProperties = {
       ...nft,
       metadata: {
@@ -107,12 +107,16 @@ describe("MemePageArt", () => {
       name: "Show all 8 properties",
     });
     const lastTile = screen.getByText("Property 8").parentElement;
-    expect(lastTile).toHaveClass("tw-hidden", "sm:tw-flex");
+    expect(lastTile).toHaveClass("tw-hidden", "sm:tw-flex", "md:tw-hidden");
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(toggle);
     expect(lastTile).not.toHaveClass("tw-hidden");
     expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(toggle).toHaveTextContent("Show fewer");
     fireEvent.click(toggle);
     expect(lastTile).toHaveClass("tw-hidden");
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(toggle).toHaveTextContent("Show all 8 properties");
   });
 
   it("does not add a disclosure for a short property list", () => {

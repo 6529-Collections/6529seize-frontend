@@ -3,13 +3,16 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
 
 export default function MemeSupplyStats({
   nftMeta,
   locale,
+  children,
 }: {
   readonly nftMeta: ApiMemesExtendedData;
   readonly locale: SupportedLocale;
+  readonly children?: ReactNode;
 }) {
   const reserveSupplyRows = [
     {
@@ -31,7 +34,7 @@ export default function MemeSupplyStats({
 
   return (
     <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-2 tw-pt-6 has-[details[open]]:tw-pb-6 md:tw-pt-8 md:has-[details[open]]:tw-pb-8">
-      <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-6">
+      <dl className="tw-m-0 tw-grid tw-grid-cols-2 tw-gap-x-6 tw-gap-y-6 md:tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.5fr)]">
         {[
           {
             label: t(locale, "theMemes.detail.live.edition.editionSize"),
@@ -52,9 +55,10 @@ export default function MemeSupplyStats({
             </dd>
           </div>
         ))}
+        {children}
       </dl>
       <details className="tw-group tw-mt-4">
-        <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none [&::-webkit-details-marker]:tw-hidden">
+        <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none md:tw-justify-start md:tw-gap-1 [&::-webkit-details-marker]:tw-hidden">
           {t(locale, "theMemes.detail.live.edition.supplyDetails")}
           <ChevronDownIcon
             aria-hidden="true"

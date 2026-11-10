@@ -48,8 +48,11 @@
 | `timeline`            | `History` primary tab, `Timeline` sub-tab                  |
 
 - Missing or invalid `focus` opens `Overview`.
+- On desktop, a horizontal divider separates TDH breakdown from the
+  Stats/Boosts group in Overview.
+  Smaller screens keep their existing section styling.
 - The primary tabs are `Overview`, `Listings & offers`, `Collectors`, and `History`.
-  They keep the blue underline. History sub-tabs use compact round pills, and
+  They keep the blue underline and full-width baseline. History sub-tabs use compact round pills, and
   the activity-type dropdown is a compact framed button aligned to the right.
 - Card Activity rows stack on narrow screens while preserving their item,
   wallet, total, date and transaction links.
@@ -130,8 +133,18 @@
   unavailable, Make an offer fills both labelled slots. Review offers remains
   available inside the menu. All actions share one panel
   background and retain their existing button styles.
-  View listings & offers is a separate navigation row below Supply details &
-  rankings, outside the trading panel. It still opens the Listings & offers tab.
+  On desktop, View listings & offers sits on the left of a row directly below
+  the trading buttons, with Marketplaces and its icons on the right. Mint date
+  and Mint price share the next row, followed by Distribution Plan and
+  Main Stage Submission when available. Edition size, reserve-adjusted supply,
+  Holding wallets and TDH rate follow below, before Supply details & rankings.
+  These fields keep their existing values, pending/unavailable states and link
+  availability rules. Smaller screens keep View listings & offers below
+  Supply details & rankings and marketplace shortcuts beside the market metrics.
+  View listings & offers still opens the Listings & offers tab.
+  On desktop, the Supply details & rankings chevron sits immediately beside its
+  label. It points down when closed and up when open, with details shown
+  underneath. Smaller screens retain their existing placement.
   Each action keeps its existing availability and trading behavior.
 - Review offers keeps its dialog height stable while the initial offers load.
   Muted placeholder rows appear first; the wallet and quantity form is revealed
@@ -148,9 +161,13 @@
   The card actions return when the selection is cleared or another tab opens.
   Delivery, owner actions and the additional-actions menu remain in the inline section.
 - Long descriptions initially show five lines on phones. `Read more` reveals
-  the full description and `Show less` restores the preview. Properties show
-  the first six tiles; `Show all N properties` reveals the remainder and
-  `Show fewer` restores the preview. Short sections need no disclosure.
+  the full description and `Show less` restores the preview.
+- Properties show the first six tiles on phones and desktop.
+  `Show all N properties` reveals the remainder and `Show fewer` restores the preview.
+  Desktop uses two rows of three tiles with a compact text-and-chevron control
+  below the grid, aligned to the right.
+  Short sections need no disclosure. Between 640 and 767 px, all properties
+  remain visible without a disclosure.
 - In `Collectors`, screens narrower than 768 px show a collector list with this
   card's metrics in a `This card` row, with a `Total` row aligned underneath.
   Each collector has one header row labelling the Balance, TDH and Unweighted TDH
@@ -178,6 +195,8 @@
   paging keep the previous rows visible while the next results load.
 - On desktop, section headings use a consistent compact style, and artwork,
   supply, properties, and market values use the same text size as their labels.
+  The season and calendar periods form a text row; season and year keep their
+  collection-filter links and keyboard focus without chip backgrounds or borders.
   In `History` > `Timeline`, changes use the full section width with a thin
   vertical line, small markers, and horizontal dividers. Dates and metadata
   links are quieter than the change names. Smaller screens keep their existing

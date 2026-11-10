@@ -433,7 +433,7 @@ function EventRow({
       </td>
       <td
         role="cell"
-        className={`${CELL} tw-col-start-2 tw-row-start-1 tw-self-center tw-whitespace-normal tw-text-right tw-font-mono tw-text-xs tw-font-semibold tw-tabular-nums tw-text-iron-100 [overflow-wrap:anywhere] @4xl:tw-text-sm @4xl:[overflow-wrap:normal] [&>[aria-hidden=true]]:tw-font-normal [&>[aria-hidden=true]]:tw-text-iron-500 md:[[data-meme-card-page]_&]:tw-font-sans`}
+        className={`${CELL} tw-col-start-2 tw-row-start-1 tw-self-center tw-whitespace-normal tw-text-right tw-font-mono tw-text-xs tw-font-semibold tw-tabular-nums tw-text-iron-100 [overflow-wrap:anywhere] @4xl:tw-text-sm @4xl:[overflow-wrap:normal] [&>[aria-hidden=true]]:tw-font-normal [&>[aria-hidden=true]]:tw-text-iron-500 md:[[data-nft-card-page]_&]:tw-font-sans`}
       >
         {totalPrice ?? (
           <>

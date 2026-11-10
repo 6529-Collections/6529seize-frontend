@@ -345,7 +345,7 @@ export function MemePageArtViewer({
               <div
                 className={clsx(
                   styles["artControlsFormatLabel"],
-                  "md:[[data-meme-card-page]_&]:tw-font-semibold"
+                  "md:[[data-nft-card-page]_&]:tw-font-semibold"
                 )}
               >
                 {currentFormat}

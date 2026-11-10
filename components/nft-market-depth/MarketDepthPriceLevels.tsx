@@ -77,7 +77,7 @@ export default function MarketDepthPriceLevels({
   return (
     <div className="tw-min-w-0 tw-@container [&_button]:tw-scroll-mb-40 [&_input]:tw-scroll-mb-40">
       <div className="tw-min-w-0">
-        <table className="tw-w-full tw-table-fixed tw-border-separate tw-border-spacing-x-0 tw-border-spacing-y-1 tw-text-right tw-text-meta tw-leading-5 md:[[data-meme-card-page]_&]:tw-text-sm">
+        <table className="tw-w-full tw-table-fixed tw-border-separate tw-border-spacing-x-0 tw-border-spacing-y-1 tw-text-right tw-text-meta tw-leading-5 md:[[data-nft-card-page]_&]:tw-text-sm">
           <caption className="tw-sr-only">
             {t(locale, "marketDepth.table.ariaLabel", {
               side: label,
@@ -163,7 +163,7 @@ export default function MarketDepthPriceLevels({
                         )}
                         title={level.unit_price}
                         onClick={toggleDetails}
-                        className="tw-font-inherit tw-flex tw-min-h-[60px] tw-w-full tw-flex-col tw-items-start tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-2 tw-pl-3 tw-pr-0 tw-text-left tw-text-meta tw-font-medium tw-tabular-nums tw-text-iron-200 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 sm:tw-min-h-12 sm:tw-flex-row sm:tw-items-center sm:tw-justify-start sm:tw-gap-2 sm:tw-px-0 md:[[data-meme-card-page]_&]:tw-text-sm"
+                        className="tw-font-inherit tw-flex tw-min-h-[60px] tw-w-full tw-flex-col tw-items-start tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-2 tw-pl-3 tw-pr-0 tw-text-left tw-text-meta tw-font-medium tw-tabular-nums tw-text-iron-200 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 sm:tw-min-h-12 sm:tw-flex-row sm:tw-items-center sm:tw-justify-start sm:tw-gap-2 sm:tw-px-0 md:[[data-nft-card-page]_&]:tw-text-sm"
                       >
                         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
                           <span className="tw-min-w-0 [overflow-wrap:anywhere]">
@@ -194,12 +194,12 @@ export default function MarketDepthPriceLevels({
                       </button>
                     </td>
                     <td
-                      className={`${cellClass} tw-hidden tw-break-words tw-py-2.5 tw-text-meta tw-text-iron-300 sm:tw-table-cell sm:tw-px-3 md:[[data-meme-card-page]_&]:tw-text-sm`}
+                      className={`${cellClass} tw-hidden tw-break-words tw-py-2.5 tw-text-meta tw-text-iron-300 sm:tw-table-cell sm:tw-px-3 md:[[data-nft-card-page]_&]:tw-text-sm`}
                     >
                       {formatInteger(locale, level.quantity)}
                     </td>
                     <td
-                      className={`${cellClass} ${best && !tradeActionsAvailable ? "sm:tw-rounded-r-xl" : ""} tw-hidden tw-break-words tw-py-2.5 tw-pr-2.5 tw-text-meta tw-text-iron-500 sm:tw-table-cell sm:tw-pl-3 md:[[data-meme-card-page]_&]:tw-text-sm`}
+                      className={`${cellClass} ${best && !tradeActionsAvailable ? "sm:tw-rounded-r-xl" : ""} tw-hidden tw-break-words tw-py-2.5 tw-pr-2.5 tw-text-meta tw-text-iron-500 sm:tw-table-cell sm:tw-pl-3 md:[[data-nft-card-page]_&]:tw-text-sm`}
                     >
                       {formatInteger(locale, level.cumulative_quantity)}
                     </td>
@@ -264,7 +264,7 @@ export default function MarketDepthPriceLevels({
             if (focusedOrderHash) onOrderFocused?.();
             setShowAll((current) => !current);
           }}
-          className="tw-font-inherit tw-mx-auto tw-mt-3 tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-transparent tw-px-[18px] tw-py-2 tw-text-meta tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-border-white/[0.16] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none sm:tw-min-h-[38px] sm:tw-w-auto sm:touch-only:tw-min-h-11 md:[[data-meme-card-page]_&]:tw-text-sm"
+          className="tw-font-inherit tw-mx-auto tw-mt-3 tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-transparent tw-px-[18px] tw-py-2 tw-text-meta tw-font-medium tw-text-iron-400 tw-transition-colors hover:tw-border-white/[0.16] hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none sm:tw-min-h-[38px] sm:tw-w-auto sm:touch-only:tw-min-h-11 md:[[data-nft-card-page]_&]:tw-text-sm"
         >
           {showAll
             ? t(locale, "marketDepth.levels.showFewer")

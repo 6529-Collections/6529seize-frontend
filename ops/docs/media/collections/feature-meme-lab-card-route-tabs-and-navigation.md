@@ -11,6 +11,17 @@ Card detail uses `focus` tab deep links and previous/next card navigation.
 Distribution route shows wallet-level distribution rows, wallet filters, and
 pagination.
 
+On desktop, card sections use 16px headings, 14px labels and values, and 12px
+metadata. Previous/next controls have compact rounded corners. A horizontal
+divider separates Card details from Properties. The main tab baseline spans
+the content width, matching The Memes. Properties use quiet borderless tiles
+in a three-column, six-property preview. **Show all
+{count} properties** expands the list; **Show fewer** restores the preview. The
+control appears only when more than six properties are available. Smaller
+screens keep all properties visible. Timeline entries use the full section width with
+dark backgrounds, thin markers, and horizontal dividers. Smaller screens keep
+their existing typography and controls.
+
 ## Location in the Site
 
 - Meme Lab card route: `/meme-lab/{id}`
@@ -60,6 +71,14 @@ pagination.
 ### Collect, list or make an offer
 
 Meme Lab cards use the same trading controls and purchase review as The Memes.
+On desktop, **Connect wallet** appears above the trading actions. When **Collect**
+is available, **List** sits in **More trading actions** beside **Make an offer**;
+without **Collect**, **List** remains visible in the action row. Smaller screens
+keep their existing layout. **View listings & offers** remains below the actions.
+On desktop, **Mint date** and **Mint Price** share a row above the card statistics.
+**Distribution Plan** follows the mint row when available. All edition, burn,
+reserve, rank, collection and metadata information retains its existing values
+and visibility rules; smaller screens keep their existing order.
 **Collect** near the artwork shows the lowest supported listing; **Other listings**
 shows alternatives. **Make an offer** opens a WETH offer for this exact card.
 **List** checks ownership and requires the wallet holding the editions to sign.
