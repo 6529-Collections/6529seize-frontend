@@ -239,7 +239,7 @@ it("keeps the inline trade draft while desktop cards switch back to the phone la
   expect(screen.getByTestId("inline-trade")).toBe(inline);
   expect(inline).toHaveAttribute("data-reviewed", "true");
   expect(
-    within(inline).getByRole("button", { name: "List", exact: true })
+    within(inline).getByRole("button", { name: "List" })
   ).toBeInTheDocument();
   expect(inline).toHaveAttribute("data-card-layout", "false");
   expect(document.querySelector("[data-collect-sticky-actions]")).toBeNull();

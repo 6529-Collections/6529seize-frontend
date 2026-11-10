@@ -361,3 +361,20 @@ same baseline color. No tab labels, handlers, focus/scroll hooks, controls or
 data behavior changed. The existing six detail browser cases now verify these
 widths and colors as well as the accepted divider locations. The case passed
 before the final Meme Lab rule; the final rerun covers that last addition.
+
+## Release integration validation
+
+The final six desktop/phone detail cases pass with both accepted divider
+locations and all four primary tab baselines. Latest main was merged normally
+without conflicts. The post-merge data/action regression selection passes 114
+tests in seven suites, including full statistics and pending/missing metadata,
+collector sorting, native purchasing gates, and responsive controller draft
+retention.
+
+The earlier PR quality failure came from unsupported Playwright-style exact
+options in seven Jest role queries. Those options were removed; Testing Library
+already matches string role names exactly. The queries, accessible names,
+interaction assertions, and all existing behavior guarantees are retained. No
+baseline was inflated or suppression added. The full Jest typecheck ratchet
+and Playwright typecheck now pass, as does changed-file lint. Deployment and
+latest-head GitHub checks are tracked separately by the release workflow.

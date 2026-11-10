@@ -102,7 +102,7 @@ test("renders leaderboard and toggles the desktop Balance header", async () => {
   ).toBeInTheDocument();
 
   const header = screen
-    .getAllByRole("columnheader", { name: "Balance", exact: true })
+    .getAllByRole("columnheader", { name: "Balance" })
     .find((element) => element.hasAttribute("aria-sort"));
   if (!header)
     throw new Error("Desktop Balance header must expose its sort direction");

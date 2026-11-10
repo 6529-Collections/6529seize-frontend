@@ -392,20 +392,17 @@ describe("NFTLeaderboard component", () => {
     await userEvent.click(
       table.getByRole("button", {
         name: "Sort This card balance ascending",
-        exact: true,
       })
     );
     if (key === "balance") {
       await userEvent.click(
         table.getByRole("button", {
           name: "Sort Total TDH descending",
-          exact: true,
         })
       );
       await userEvent.click(
         table.getByRole("button", {
           name: "Sort Total TDH ascending",
-          exact: true,
         })
       );
     }
@@ -413,7 +410,6 @@ describe("NFTLeaderboard component", () => {
     await userEvent.click(
       table.getByRole("button", {
         name: `Sort ${label} descending`,
-        exact: true,
       })
     );
     await waitFor(() =>
@@ -427,7 +423,6 @@ describe("NFTLeaderboard component", () => {
     );
     const button = table.getByRole("button", {
       name: `Sort ${label} ascending`,
-      exact: true,
     });
     expect(button.closest("th")).toHaveAttribute("aria-sort", "descending");
     expect(
