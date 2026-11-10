@@ -28662,6 +28662,15 @@ components:
         - cancelled_at
         - archived_at
       properties:
+        your_active_entries_count:
+          type: integer
+          format: int64
+          minimum: 0
+          nullable: true
+          description: >-
+            Number of ACTIVE entries submitted by the authenticated acting
+            profile in this competition. Winning, withdrawn and deleted entries
+            do not consume submission capacity. Null for anonymous readers.
         presentation:
           type: array
           items:
