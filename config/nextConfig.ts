@@ -2,6 +2,7 @@ import { createSecurityHeaders } from "./securityHeaders";
 import { e2eeAssetCacheHeaders } from "./e2eeAssetCacheHeaders";
 import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
+import { openGraphProxyImageHeaders } from "./openGraphProxyImageHeaders";
 import { profileCmsAssetProxyHeaders } from "./profileCmsAssetProxyHeaders";
 import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
 import {
@@ -10,7 +11,10 @@ import {
 } from "./versionReloadImageHeaders";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
-import type { RemotePattern } from "next/dist/shared/lib/image-config";
+import type {
+  LocalPattern,
+  RemotePattern,
+} from "next/dist/shared/lib/image-config";
 import { HTML_LIMITED_BOT_UA_RE } from "next/dist/shared/lib/router/utils/html-bots";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
 import {
@@ -52,6 +56,40 @@ const IPFS_PATH_GATEWAY_HOSTNAMES = new Set<string>(IPFS_PATH_GATEWAY_HOSTS);
 const SINGLE_LABEL_WILDCARD = "+([^.])";
 // An omitted port matches any port, so pin the default HTTPS port explicitly.
 const HTTPS_DEFAULT_PORT = { protocol: "https" as const, port: "" };
+// The app never passes a first-party absolute image URL with a query string
+// to the optimizer, and a query there could only reach a dynamic route.
+const FIRST_PARTY_IMAGE_HOSTNAMES = new Set<string>([
+  "6529.io",
+  "seize.io",
+  "staging.6529.io",
+]);
+
+// Every local path the app hands to the optimizer: public/ images rendered by
+// next/image and the CMS template images optimized through getImageProps.
+// None carries a query string. Next adds its own static-import paths.
+const IMAGE_LOCAL_PATHNAMES = [
+  "/android-chrome-256x256.png",
+  "/artwork-documentation/examples/**",
+  "/emojis/**",
+  "/ethereum-history.png",
+  "/faq-profile.jpg",
+  "/faq-waves-view.jpg",
+  "/foundation.png",
+  "/gammaio.jpg",
+  "/intern-no-bg.png",
+  "/manifold.png",
+  "/memelab.png",
+  "/nakamoto-card-og.png",
+  "/opensea.png",
+  "/profile-cms/templates/**",
+  "/superrare-icon.png",
+  "/the-memes-4.jpeg",
+  "/transient.png",
+] as const;
+
+function getImageLocalPatterns(): LocalPattern[] {
+  return IMAGE_LOCAL_PATHNAMES.map((pathname) => ({ pathname, search: "" }));
+}
 
 function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
   const resolverHostnames = new Set([
@@ -66,7 +104,11 @@ function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
   return [
     ...STATIC_ALLOWED_IMAGE_HOSTNAMES.filter(
       (hostname) => !IPFS_PATH_GATEWAY_HOSTNAMES.has(hostname)
-    ).map((hostname) => ({ ...HTTPS_DEFAULT_PORT, hostname })),
+    ).map((hostname) => ({
+      ...HTTPS_DEFAULT_PORT,
+      hostname,
+      ...(FIRST_PARTY_IMAGE_HOSTNAMES.has(hostname) ? { search: "" } : {}),
+    })),
     ...Array.from(resolverHostnames, (hostname) => ({
       ...HTTPS_DEFAULT_PORT,
       hostname,
@@ -108,6 +150,7 @@ export function sharedConfig(
     allowedDevOrigins: getAllowedDevOrigins(),
     images: {
       loader: "default",
+      localPatterns: getImageLocalPatterns(),
       remotePatterns: [
         {
           protocol: "https",
@@ -231,6 +274,7 @@ export function sharedConfig(
         },
         meebits445Headers,
         profileCmsAssetProxyHeaders,
+        openGraphProxyImageHeaders,
         versionReloadImageHeaders,
         versionUpdateRocketImageHeaders,
         e2eeAssetCacheHeaders,
