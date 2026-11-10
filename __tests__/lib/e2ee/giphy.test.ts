@@ -77,10 +77,15 @@ it.each(["abc", "-1", "1.5", "1e3"])(
   }
 );
 
-it("bounds streamed bytes even when content-length is missing or incorrect", async () => {
-  const cancel = jest.fn();
-  fetchMock.mockResolvedValue(
-    new Response(
+it.each([false, true])(
+  "bounds streamed bytes and releases the reader even if cancellation fails: %s",
+  async (cancelFails) => {
+    const cancel = jest.fn(() =>
+      cancelFails
+        ? Promise.reject(new Error("Cancellation failed"))
+        : Promise.resolve()
+    );
+    const response = new Response(
       new ReadableStream({
         start(controller) {
           controller.enqueue(GIF);
@@ -89,11 +94,13 @@ it("bounds streamed bytes even when content-length is missing or incorrect", asy
         cancel,
       }),
       { headers: { "content-length": "1" } }
-    )
-  );
-  await expect(download()).rejects.toMatchObject({ reason: "tooLarge" });
-  expect(cancel).toHaveBeenCalled();
-});
+    );
+    fetchMock.mockResolvedValue(response);
+    await expect(download()).rejects.toMatchObject({ reason: "tooLarge" });
+    expect(cancel).toHaveBeenCalled();
+    expect(response.body?.locked).toBe(false);
+  }
+);
 
 it("aborts retrieval when the composer cancels it", async () => {
   const controller = new AbortController();

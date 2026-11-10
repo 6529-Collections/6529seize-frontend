@@ -57,7 +57,10 @@ async function readGif(response: Response): Promise<File> {
       parts.push(toArrayBuffer(value));
     }
   } finally {
-    await reader.cancel();
+    await reader.cancel().catch(() => {
+      // An errored stream may reject cancellation. Preserve the read error
+      // (including the size-limit error) and always release its lock.
+    });
     reader.releaseLock();
   }
   const file = new File(parts, "giphy.gif", { type: "image/gif" });
