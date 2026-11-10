@@ -14,7 +14,10 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { E2eeComposer } from "@/components/e2ee/conversation/E2eeComposer";
-import { E2EE_COMPOSER_TRANSFORMERS } from "@/components/e2ee/conversation/e2eeComposerTransformers";
+import {
+  E2EE_COMPOSER_TRANSFORMERS,
+  importE2eeComposerMarkdown,
+} from "@/components/e2ee/conversation/e2eeComposerTransformers";
 import { $convertFromMarkdownString } from "@lexical/markdown";
 import { getNearestEditorFromDOMNode } from "lexical";
 import {
@@ -219,7 +222,8 @@ function setRecalledMessage(input: HTMLElement) {
   const editor = getNearestEditorFromDOMNode(input)!;
   act(() =>
     editor.update(
-      () => $convertFromMarkdownString("Hello :gm:", E2EE_COMPOSER_TRANSFORMERS),
+      () =>
+        $convertFromMarkdownString("Hello :gm:", E2EE_COMPOSER_TRANSFORMERS),
       { discrete: true }
     )
   );
@@ -315,6 +319,41 @@ it("inserts a custom shortcode into an edit and preserves the existing edit flow
     )
   );
 });
+
+it.each([false, true])(
+  "keeps rich Markdown and extra blank paragraphs when editing=%s",
+  async (editing) => {
+    const { engine, input, original } = setup(editing);
+    const editor = getNearestEditorFromDOMNode(input)!;
+    const text =
+      "# Heading\n\n**Bold** and *italic*\n\n\nAfter blank\n\n```ts\nconst answer = 42;\n```";
+    act(() =>
+      editor.update(() => importE2eeComposerMarkdown(text), { discrete: true })
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: editing ? "Save" : "Send",
+        exact: true,
+      })
+    );
+    if (editing) {
+      await waitFor(() =>
+        expect(engine.edit).toHaveBeenCalledWith(
+          convoGroup(engine),
+          original.id,
+          text
+        )
+      );
+    } else {
+      await waitFor(() =>
+        expect(engine.send).toHaveBeenCalledWith(
+          convoGroup(engine),
+          expect.objectContaining({ text })
+        )
+      );
+    }
+  }
+);
 
 it.each(["mobile browser", "native app"])(
   "does not submit Return on %s",

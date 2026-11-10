@@ -9,6 +9,13 @@ import {
   browserPerformanceSnapshot,
 } from "../support/staging-e2ee/performance";
 import type { Browser, TestInfo } from "@playwright/test";
+import { createChatWave } from "../support/staging-e2ee/chat-wave";
+import {
+  MARKDOWN_PARITY_CASES,
+  markdownBody,
+  markdownSnapshot,
+  revealNewestMessage,
+} from "../support/markdownParity";
 
 import { expect, test } from "../testHelpers";
 import {
@@ -336,6 +343,114 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       "A's sends were not observed, so the plaintext check would be vacuous"
     ).toBeGreaterThan(0);
     expectPrivateAndClean([a, b], needles({ hello, reply }));
+  });
+
+  test("ordinary and encrypted chats render identical Markdown without fetching encrypted URLs", async ({}, testInfo) => {
+    const { a, b, runId } = requireWorld();
+    const dm = await ensureDm(requireWorld());
+    await openChat(a, dm);
+    await openChat(b, dm);
+    const waveId = await createChatWave(a, `Markdown QA ${runId}`);
+    const ordinary = await a.context.newPage();
+    const leakedRequests: string[] = [];
+    const canary = `markdown-private-${runId}`;
+    for (const session of [a, b]) {
+      session.context.on("request", (request) => {
+        if (request.url().includes(canary)) leakedRequests.push(request.url());
+      });
+      await session.context.route(`**/*${canary}*`, (route) => route.abort());
+    }
+    try {
+      await gotoStaging(ordinary, `/waves/${waveId}`);
+      for (const sample of MARKDOWN_PARITY_CASES) {
+        const marker = `Markdown ${sample.name} ${runId}`;
+        const text = `${marker}\n\n${sample.text}`;
+        await composer(a.page).fill(text);
+        await a.page.getByRole("button", { name: "Send", exact: true }).click();
+        const encryptedRow = messageRow(b.page, marker);
+        await revealNewestMessage(b.page, encryptedRow);
+        const encrypted = markdownBody(encryptedRow, marker);
+        const encryptedResult = await markdownSnapshot(
+          encrypted,
+          sample.selectors
+        );
+        const input = ordinary
+          .getByRole("textbox", { name: "Write a message", exact: true })
+          .last();
+        await input.fill(text);
+        await ordinary
+          .getByRole("button", { name: "Send", exact: true })
+          .last()
+          .click();
+        const regularRow = ordinary
+          .locator("[data-wave-drop-id]")
+          .filter({ has: ordinary.getByText(marker, { exact: true }) });
+        await expect(regularRow).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
+        const more = regularRow.getByRole("button", {
+          name: "Show more",
+          exact: true,
+        });
+        if (await more.isVisible()) await more.click();
+        const regular = markdownBody(regularRow, marker);
+        expect(await markdownSnapshot(regular, sample.selectors)).toEqual(
+          encryptedResult
+        );
+        for (const width of [1440, 390]) {
+          await ordinary.setViewportSize({ width, height: 1000 });
+          await b.page.setViewportSize({ width, height: 1000 });
+          for (const [name, body] of [
+            ["regular", regular],
+            ["encrypted", encrypted],
+          ] as const) {
+            await testInfo.attach(`${name}-${sample.name}-${width}`, {
+              body: await body.screenshot(),
+              contentType: "image/png",
+            });
+          }
+        }
+        await ordinary.setViewportSize({ width: 1440, height: 1000 });
+        await b.page.setViewportSize({ width: 1440, height: 1000 });
+      }
+      const secret = `Private URL checks ${runId}\n\n[Private link](https://${canary}.invalid/link)\n\nhttps://${canary}.invalid/plain\n\n![Private image](https://${canary}.invalid/image.png)\n\n<img src="https://${canary}.invalid/html.png">`;
+      await composer(a.page).fill(secret);
+      await a.page.getByRole("button", { name: "Send", exact: true }).click();
+      const privateRow = messageRow(b.page, `Private URL checks ${runId}`);
+      await revealNewestMessage(b.page, privateRow);
+      await expect(
+        privateRow.getByRole("link", { name: "Private image" })
+      ).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
+      await privateRow.getByRole("link", { name: "Private link" }).hover();
+      await privateRow.getByRole("link", { name: "Private link" }).focus();
+      await expect(
+        privateRow.locator(`img[src*='${canary}'],iframe,video,audio`)
+      ).toHaveCount(0);
+      await b.page.reload();
+      await expect(
+        messageRow(b.page, `Private URL checks ${runId}`).getByRole("link", {
+          name: "Private image",
+        })
+      ).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
+      expect(leakedRequests).toEqual([]);
+      expect(
+        a.evidence.findLeaks(needles({ privateMarkdown: secret, canary }))
+      ).toEqual([]);
+      expect(
+        b.evidence.findLeaks(needles({ privateMarkdown: secret, canary }))
+      ).toEqual([]);
+      expectPrivateAndClean(
+        [a, b],
+        needles({ privateMarkdown: secret, canary })
+      );
+      await testInfo.attach("markdown-staging-locations", {
+        body: JSON.stringify({
+          regular: `https://staging.6529.io/waves/${waveId}`,
+          encrypted: `https://staging.6529.io/messages/encrypted/${dm}`,
+        }),
+        contentType: "application/json",
+      });
+    } finally {
+      await ordinary.close();
+    }
   });
 
   test("the full emoji board sends custom emojis and reactions without individual asset requests", async () => {

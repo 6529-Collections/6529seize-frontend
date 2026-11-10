@@ -67,6 +67,18 @@ shortcodes render as inline images while composing and editing; encrypted drafts
 keep their shortcode representation for encryption and sending. Encrypted chat
 does not offer GIF, Poll or Storm actions.
 
+Messages support the same Markdown formatting as ordinary chats: headings,
+**bold** and italic text, strikethrough, lists and task lists, quotes,
+inline and fenced code, tables, separators, links and footnotes. Code blocks use
+syntax highlighting, and member mentions and custom emoji stay literal inside
+code. Extra blank lines keep their spacing when you send or edit a message.
+
+Links open only when you select them. Encrypted messages do not automatically
+load link previews, embeds or images from Markdown URLs. A Markdown image is
+shown as a link using its alternative text (or its URL); select the link to
+open it. To show an image privately inside the chat, attach or paste the image
+so it is encrypted on your device.
+
 Custom emojis also render inline in the encrypted chat list and sidebar message
 previews, at a compact size that keeps each preview on one line.
 
