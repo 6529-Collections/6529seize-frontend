@@ -84,6 +84,8 @@ export const TRANSFER_MESSAGES = {
   "recipientSelector.profileStats": "TDH: {tdh} — Level: {level}",
   "recipientSelector.change": "Change",
   "recipientSelector.scrollForMore": "Scroll for more",
+  "recipientSelector.ens.notVerified":
+    "{name} does not resolve on Ethereum to a result below. Choose a recipient yourself and check the full wallet address.",
 } as const;
 
 export const FR_FR_TRANSFER_MESSAGES = {

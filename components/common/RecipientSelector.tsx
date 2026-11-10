@@ -14,10 +14,21 @@ import { faAnglesDown, faAnglesUp } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
-import { isAddress } from "viem";
+import { getAddress, isAddress } from "viem";
+import { mainnet } from "viem/chains";
+import { useEnsAddress } from "wagmi";
 import TransferModalPfp from "../nft-transfer/TransferModalPfp";
 
 const MIN_SEARCH_LENGTH = 3;
+
+function getEnsLookupName(query: string): string | undefined {
+  const name = query.trim().toLowerCase();
+  return name.endsWith(".eth") ? name : undefined;
+}
+
+function displayWalletAddress(wallet: string): string {
+  return isAddress(wallet, { strict: false }) ? getAddress(wallet) : wallet;
+}
 
 function getSearchStatusText(
   locale: SupportedLocale,
@@ -282,10 +293,13 @@ function RecipientSearchDisplay({
   autoFocus,
   label,
   locale,
+  unverifiedEnsName,
 }: {
   readonly query: string;
   readonly setQuery: (v: string) => void;
   readonly searchStatusText: string;
+  /** An ENS query whose forward resolution does not match the results. */
+  readonly unverifiedEnsName: string | null;
   readonly results: CommunityMemberMinimal[];
   readonly onPick: (r: CommunityMemberMinimal) => void;
   readonly resultsListRef: React.RefObject<HTMLDivElement | null>;
@@ -317,6 +331,16 @@ function RecipientSearchDisplay({
       <div className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
         {searchStatusText}
       </div>
+      {unverifiedEnsName !== null && (
+        <p
+          role="status"
+          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-amber-300"
+        >
+          {translate(locale, "recipientSelector.ens.notVerified", {
+            name: unverifiedEnsName,
+          })}
+        </p>
+      )}
       <div
         ref={resultsListRef}
         className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-space-y-2 tw-overflow-auto tw-pr-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/20"
@@ -343,6 +367,11 @@ function RecipientSearchDisplay({
                   level: formatInteger(locale, r.level),
                 })}
               </div>
+              {unverifiedEnsName !== null && r.wallet && (
+                <div className="tw-break-all tw-font-mono tw-text-[11px] tw-text-iron-300">
+                  {displayWalletAddress(r.wallet)}
+                </div>
+              )}
             </div>
           </button>
         ))}
@@ -443,6 +472,26 @@ export default function RecipientSelector({
     }
   }, [open]);
 
+  const debouncedQuery = useDebouncedValue(trimmedQuery, 350);
+  const enabled = open && debouncedQuery.length >= MIN_SEARCH_LENGTH;
+
+  // An ENS search result is only auto-selected when the name resolves
+  // forward on Ethereum to that result's wallet.
+  const ensLookupName = enabled ? getEnsLookupName(debouncedQuery) : undefined;
+  const ensAddressQuery = useEnsAddress({
+    name: ensLookupName,
+    chainId: mainnet.id,
+  });
+  const verifiedEnsAddress =
+    ensLookupName !== undefined &&
+    !ensAddressQuery.isError &&
+    typeof ensAddressQuery.data === "string" &&
+    isAddress(ensAddressQuery.data, { strict: false })
+      ? ensAddressQuery.data
+      : null;
+  const isEnsLookupPending =
+    ensLookupName !== undefined && ensAddressQuery.isLoading;
+
   useEffect(() => {
     if (
       !selectedProfile ||
@@ -456,11 +505,15 @@ export default function RecipientSelector({
     const wallets = profile.wallets;
 
     if (pendingWalletMatch) {
-      const normalizedMatch = pendingWalletMatch.toLowerCase();
+      // A name selects the wallet it resolves to, never a wallet labelled
+      // with it.
+      const normalizedMatch = (
+        isAddress(pendingWalletMatch)
+          ? pendingWalletMatch
+          : (verifiedEnsAddress ?? "")
+      ).toLowerCase();
       const matchedWallet = wallets.find(
-        (w) =>
-          w.wallet.toLowerCase() === normalizedMatch ||
-          w.display?.toLowerCase() === normalizedMatch
+        (w) => !!normalizedMatch && w.wallet.toLowerCase() === normalizedMatch
       );
       if (matchedWallet) {
         onWalletSelect(matchedWallet.wallet);
@@ -479,10 +532,8 @@ export default function RecipientSelector({
     selectedWallet,
     pendingWalletMatch,
     onWalletSelect,
+    verifiedEnsAddress,
   ]);
-
-  const debouncedQuery = useDebouncedValue(trimmedQuery, 350);
-  const enabled = open && debouncedQuery.length >= MIN_SEARCH_LENGTH;
 
   const { data, isFetching } = useQuery<CommunityMemberMinimal[]>({
     queryKey: ["memberSearch", debouncedQuery],
@@ -556,7 +607,11 @@ export default function RecipientSelector({
 
     const normalizedQuery = debouncedQuery.toLowerCase();
     const isExactAddress = isAddress(debouncedQuery);
-    const isLikelyEns = normalizedQuery.endsWith(".eth");
+    // A name counts only when it resolves on Ethereum to the single
+    // result's wallet; the label the search matched on is never trusted.
+    const isLikelyEns =
+      normalizedQuery.endsWith(".eth") &&
+      areEqualAddresses(data[0]?.wallet, verifiedEnsAddress);
 
     if (!isExactAddress && !isLikelyEns) {
       return;
@@ -572,7 +627,24 @@ export default function RecipientSelector({
         onProfileSelect(result);
       }
     }
-  }, [data, debouncedQuery, trimmedQuery, selectedProfile, onProfileSelect]);
+  }, [
+    data,
+    debouncedQuery,
+    trimmedQuery,
+    selectedProfile,
+    onProfileSelect,
+    verifiedEnsAddress,
+  ]);
+
+  const hasUnverifiedEnsResults =
+    ensLookupName !== undefined &&
+    !isEnsLookupPending &&
+    results.length > 0 &&
+    !results.some(
+      (result) =>
+        verifiedEnsAddress !== null &&
+        areEqualAddresses(result.wallet, verifiedEnsAddress)
+    );
 
   useEffect(() => {
     const hasOverflow = (el: HTMLElement | null) =>
@@ -682,6 +754,7 @@ export default function RecipientSelector({
             onSearchChange?.(nextQuery);
           }}
           searchStatusText={searchStatusText}
+          unverifiedEnsName={hasUnverifiedEnsResults ? ensLookupName : null}
           results={results}
           onPick={(r) => {
             onProfileSelect(r);
