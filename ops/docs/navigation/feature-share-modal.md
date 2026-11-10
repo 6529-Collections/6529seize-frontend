@@ -101,9 +101,10 @@ the `More` menu.
 2. Confirm the avatar, handle and full wallet address. Under **Which app are you
    connecting?**, select **6529 Mobile** or **6529 Desktop**.
 3. Choose **Connect only**, or **Connect with Post Signing & DM Encryption**.
-   Secure setup asks for a wallet signature before preparing its link. On Desktop,
-   the secure option shows **Coming soon**. **Connect only** signs in the receiving
-   app with a short-lived, one-time code.
+   The modal title changes to **Connect 6529 Mobile** or **Connect 6529 Desktop**.
+   Secure Desktop setup shows the v0.4.0 minimum under the secure action, during
+   wallet signing, and below **Open in 6529 Desktop**. **Connect only** signs in
+   the receiving app with a short-lived, one-time code.
 4. Mobile shows a full-width QR. Desktop shows the 6529 logo and **Open in 6529
    Desktop** launch control, rather than a QR. The heading reads **Connect as
    {handle}**, with **with Post Signing & DM Encryption** for secure setup.
@@ -111,7 +112,8 @@ the `More` menu.
    a new Connect-only code directly. For secure setup, refresh clears the displayed
    link and returns to the wallet-signing state for a new signature. A secure
    setup link is not shown as text or as a tooltip; the field reads
-   **Connection ready**, and the QR code and copy icon still carry the link.
+   **Connection ready**, and the Mobile QR code or Desktop launch control and the
+   copy icon still carry the link.
 6. **Back** returns to the app and connection choices. The same row reminds you:
    **Use only on a device you own. This code works once.**
 
