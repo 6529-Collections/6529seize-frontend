@@ -13,6 +13,7 @@ jest.mock("@/components/e2ee/backup/E2eeBackupPanel", () => ({
 
 const base = () => ({
   status: "ready",
+  thisDevice: { deviceKey: "0xthis" },
   restart: jest.fn(),
   takeOverHere: jest.fn(),
 });
@@ -26,6 +27,14 @@ describe("BackupCard", () => {
   it("shows the backup once encrypted messages run here", () => {
     render(<BackupCard />);
     expect(screen.getByText("Backup panel")).toBeInTheDocument();
+  });
+
+  it("keeps loading until the running engine has named this device", () => {
+    // Backup can't act for a device the engine hasn't listed yet.
+    mockE2ee = { ...base(), thisDevice: null };
+    render(<BackupCard />);
+    expect(screen.queryByText("Backup panel")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Checking your backup…");
   });
 
   it.each(["disabled", "proxy"])("renders nothing when %s", (status) => {
