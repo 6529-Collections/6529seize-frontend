@@ -56,7 +56,8 @@ jest.mock("next/image", () => ({
 }));
 
 const props = {
-  url: "blob:https://6529.io/local-photo",
+  // Object URLs carry the origin of the page that created them.
+  url: `blob:${globalThis.location.origin}/local-photo`,
   name: "photo.png",
   attachment: {
     blob: "encrypted-blob-id",
@@ -152,7 +153,7 @@ it.each([false, true])(
     mockIsCapacitor = native;
     const other = {
       ...props,
-      url: "blob:https://6529.io/second-photo",
+      url: `blob:${globalThis.location.origin}/second-photo`,
       name: "second.png",
       attachment: {
         ...props.attachment,

@@ -418,6 +418,60 @@ describe("DropPartMarkdown", () => {
     expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
   });
 
+  it("does not load same-site endpoints as markdown images", () => {
+    const site = new URL(publicEnv.BASE_ENDPOINT).origin;
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={`![a](/api/profiles/me.png) ![b](${site}/api/open-graph/x.png) ![c](/_next/image?url=x.png) ![d](/museum/art.png?size=large) ![e](/waves/abc)`}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
+  });
+
+  it("keeps same-site image files and images on other sites", () => {
+    const site = new URL(publicEnv.BASE_ENDPOINT).origin;
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={`![a](${site}/6529.png)\n\n![b](/museum/rooms/hall.webp)\n\n![c](/nextgen/token.jpg)\n\n![d](https://cdn.example.com/api/art.png)`}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen
+        .getAllByRole("img", { name: "Drop media" })
+        .map((image) => image.getAttribute("src"))
+    ).toEqual([
+      `${site}/6529.png`,
+      "/museum/rooms/hall.webp",
+      "/nextgen/token.jpg",
+      "https://cdn.example.com/api/art.png",
+    ]);
+  });
+
+  it("shows a bare same-site endpoint URL as a link, not an image", () => {
+    const href = `${new URL(publicEnv.BASE_ENDPOINT).origin}/api/x/pixel.png`;
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={href}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
+  });
+
   it("preserves whitespace between a markdown image and following text", () => {
     const { container } = render(
       <DropPartMarkdown
