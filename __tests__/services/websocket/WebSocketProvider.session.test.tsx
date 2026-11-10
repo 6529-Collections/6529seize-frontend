@@ -241,6 +241,92 @@ describe("WebSocketProvider sessions", () => {
     expect(sockets).toHaveLength(1);
   });
 
+  describe("after sign-out", () => {
+    const dropSocket = (ws: MockWebSocket) => {
+      act(() => {
+        ws.readyState = MockWebSocket.CLOSED;
+        ws.onclose?.(new CloseEvent("close", { code: 1006 }));
+      });
+    };
+
+    it("makes no authenticated reconnect when the token goes away during backoff", () => {
+      const { result } = renderProvider();
+      const ws = connectAs(result, ALICE);
+      dropSocket(ws);
+      expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
+
+      // Signed out while the reconnect timer is pending.
+      mockGetAuthJwt.mockReturnValue(null);
+      act(() => {
+        jest.advanceTimersByTime(60_000);
+      });
+
+      expect(sockets).toHaveLength(1);
+    });
+
+    it("cancels a pending reconnect on disconnect even when already disconnected", () => {
+      const { result } = renderProvider();
+      const ws = connectAs(result, ALICE);
+      dropSocket(ws);
+
+      act(() => {
+        result.current.disconnect();
+        jest.advanceTimersByTime(60_000);
+      });
+
+      expect(sockets).toHaveLength(1);
+    });
+
+    it("does not reconnect a closed socket when no current token exists", () => {
+      const { result } = renderProvider();
+      const ws = connectAs(result, ALICE);
+      mockGetAuthJwt.mockReturnValue(null);
+      dropSocket(ws);
+      act(() => {
+        jest.advanceTimersByTime(60_000);
+      });
+
+      expect(sockets).toHaveLength(1);
+    });
+
+    it("does not replace a stale socket with a remembered token", () => {
+      const { result } = renderProvider();
+      const ws = connectAs(result, ALICE);
+      const since = Date.now();
+      act(() => {
+        ws.frame({ type: "DROP_UPDATE", data: {} });
+      });
+      ws.readyState = MockWebSocket.CLOSED;
+      mockGetAuthJwt.mockReturnValue(null);
+
+      act(() => {
+        result.current.ensureLive(since);
+      });
+
+      expect(sockets).toHaveLength(1);
+      expect(result.current.status).toBe(WebSocketStatus.DISCONNECTED);
+    });
+
+    it("still reconnects a signed-in session with its current token", () => {
+      const { result } = renderProvider();
+      const ws = connectAs(result, ALICE);
+      dropSocket(ws);
+      mockGetAuthJwt.mockReturnValue(ALICE_ROTATED);
+      act(() => {
+        jest.advanceTimersByTime(60_000);
+      });
+
+      expect(sockets).toHaveLength(2);
+      act(() => {
+        latestSocket().open();
+      });
+      expect(latestSocket().sent[0]).toEqual({
+        type: "AUTHENTICATE",
+        access_token: ALICE_ROTATED,
+      });
+    });
+  });
+
   describe("ensureLive", () => {
     it("keeps a socket that delivered a frame since the given time", () => {
       const { result } = renderProvider();
@@ -402,6 +488,22 @@ describe("WebSocketProvider sessions", () => {
       });
 
       expect(sockets).toHaveLength(2);
+    });
+
+    it("closes an unanswering socket without a replacement after sign-out", () => {
+      const { result } = renderProvider();
+      const ws = connectAs(result, ALICE);
+      mockGetAuthJwt.mockReturnValue(null);
+      act(() => {
+        jest.advanceTimersByTime(KEEPALIVE_IDLE_MS + PONG_TIMEOUT_MS * 2);
+      });
+
+      expect(ws.close).toHaveBeenCalledWith(1000, "Signed out");
+      act(() => {
+        ws.onclose?.(new CloseEvent("close", { code: 1000 }));
+        jest.advanceTimersByTime(60_000);
+      });
+      expect(sockets).toHaveLength(1);
     });
 
     it("keeps a visible tab's quiet socket alive under the gateway's idle timeout", () => {
