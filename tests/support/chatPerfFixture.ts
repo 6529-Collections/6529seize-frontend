@@ -203,7 +203,7 @@ export async function installChatPerfFixture(
   await page.route("**/api/v2/waves?**", (route) =>
     route.fulfill({ json: listPage() })
   );
-  await page.route("**/api/v2/waves/joined**", (route) =>
+  await page.route(/\/api\/v2\/waves\/(?:joined|all)(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
         data: overviews,

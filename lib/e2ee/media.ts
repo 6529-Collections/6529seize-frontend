@@ -8,6 +8,7 @@ import {
   u32be,
   utf8Encode,
 } from "./bytes";
+import { isGifPickerFile } from "./gif-picker-files";
 import { neutralImageName, stripImageMetadata } from "./image-metadata";
 import type { PayloadAttachment } from "./payload";
 
@@ -23,9 +24,15 @@ export const BLOB_CHUNK_BYTES = 1024 * 1024;
 const GCM_TAG_BYTES = 16;
 export const PLAINTEXT_CHUNK_BYTES = BLOB_CHUNK_BYTES - GCM_TAG_BYTES;
 export const MAX_BLOB_BYTES = 25 * 1024 * 1024;
+/** Leave room for chunk authentication tags within the encrypted blob limit. */
+export const MAX_ATTACHMENT_FILE_BYTES = MAX_BLOB_BYTES - 64 * 1024;
 /** The most chunks `encryptMedia` writes: MAX_BLOB_BYTES of whole ciphertext chunks. */
 export const MAX_BLOB_CHUNKS = Math.ceil(MAX_BLOB_BYTES / BLOB_CHUNK_BYTES);
-/** The largest plaintext `encryptMedia` accepts (ciphertextSize <= MAX_BLOB_BYTES). */
+/**
+ * The largest plaintext `encryptMedia` accepts (ciphertextSize <= MAX_BLOB_BYTES).
+ * Above MAX_ATTACHMENT_FILE_BYTES (the composer's limit) because history
+ * moved from unencrypted DMs is checked against the blob limit itself.
+ */
 export const MAX_ATTACHMENT_BYTES =
   MAX_BLOB_BYTES - MAX_BLOB_CHUNKS * GCM_TAG_BYTES;
 
@@ -276,7 +283,8 @@ async function imageSize(
 
 /**
  * Bytes and details of a file to attach. Photos (JPEG, PNG, WebP, GIF) go
- * without identifying metadata (image-metadata), and every image gets a
+ * without identifying metadata (image-metadata), and every image except a
+ * GIF from the GIF picker (sent as downloaded, gif-picker-files) gets a
  * neutral name (`imageNumber` tells images of one message apart); other
  * files are sent as they are, under their own name.
  * When the cleaned copy does not decode where the original does, the
@@ -287,9 +295,8 @@ export async function mediaFromFile(
   imageNumber = 1
 ): Promise<MediaInput> {
   const original = new Uint8Array(await file.arrayBuffer());
-  let bytes = file.type.startsWith("image/")
-    ? stripImageMetadata(original)
-    : original;
+  const photo = file.type.startsWith("image/") && !isGifPickerFile(file);
+  let bytes = photo ? stripImageMetadata(original) : original;
   let size = await imageSize(
     bytes === original
       ? file
@@ -302,7 +309,8 @@ export async function mediaFromFile(
   return {
     bytes,
     mime: file.type,
-    name: neutralImageName(file.type, imageNumber) ?? file.name,
+    name:
+      (photo ? neutralImageName(file.type, imageNumber) : null) ?? file.name,
     width: size?.width,
     height: size?.height,
   };

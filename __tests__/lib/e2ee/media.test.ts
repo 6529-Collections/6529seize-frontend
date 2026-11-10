@@ -7,6 +7,7 @@ import {
 } from "@/tests/support/e2ee/fakeDeliveryService.cjs";
 
 import { base64ToBytes, randomBytes } from "@/lib/e2ee/bytes";
+import { markGifPickerFile } from "@/lib/e2ee/gif-picker-files";
 import {
   BLOB_CHUNK_BYTES,
   chunkAad,
@@ -259,6 +260,52 @@ describe("mediaFromFile", () => {
     );
     expect(media.bytes).toEqual(odd);
     expect(media.name).toBe("image.jpg");
+  });
+
+  it("sends a GIF from the GIF picker as downloaded, under its own name", async () => {
+    // A 1x1 GIF whose comment block a user's own GIF would lose.
+    const gif = Uint8Array.of(
+      ...bytesOf("GIF89a"),
+      1,
+      0,
+      1,
+      0,
+      0,
+      0,
+      0,
+      0x21,
+      0xfe,
+      5,
+      ...bytesOf("51.5N"),
+      0,
+      0x2c,
+      0,
+      0,
+      0,
+      0,
+      1,
+      0,
+      1,
+      0,
+      0,
+      2,
+      2,
+      0x44,
+      0x01,
+      0,
+      0x3b
+    );
+    const picked = await mediaFromFile(
+      markGifPickerFile(new File([gif], "giphy.gif", { type: "image/gif" }))
+    );
+    expect(picked.bytes).toEqual(gif);
+    expect(picked.name).toBe("giphy.gif");
+
+    const own = await mediaFromFile(
+      new File([gif], "giphy.gif", { type: "image/gif" })
+    );
+    expect(hasPlace(own.bytes)).toBe(false);
+    expect(own.name).toBe("image.gif");
   });
 
   it("falls back to the original when the cleaned copy does not decode", async () => {
