@@ -7344,14 +7344,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       if (collection === "Joined") await expect(pinnedWave).toHaveCount(0);
       else await expect(pinnedWave).toBeVisible();
       await expect(
-        page
-          .getByRole("status")
-          .filter({
-            hasText:
-              collection === "Joined"
-                ? "Some joined waves could not be loaded."
-                : "Some waves could not be loaded.",
-          })
+        page.getByRole("status").filter({
+          hasText:
+            collection === "Joined"
+              ? "Some joined waves could not be loaded."
+              : "Some waves could not be loaded.",
+        })
       ).toBeVisible();
       failContinuation = false;
       await retry.click();
@@ -8770,8 +8768,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           },
         })
       );
-      await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
-        route.fulfill({ json: { data: [main, bar], page: 1, next: false } })
+      await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
+        route.fulfill({
+          json: {
+            data: [main, bar],
+            page: 1,
+            next: false,
+            next_cursor: null,
+            snapshot_expires_at: Date.now() + 900000,
+          },
+        })
       );
       await page.route("**/api/v2/official-waves", (route) =>
         route.fulfill({ json: [main, bar] })
@@ -8969,8 +8975,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       { ...overview, id: WAVE, name: "Warmed Competition Wave" },
       { ...overview, id: targetWaveId, name: "Previously Unvisited Wave" },
     ];
-    await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
-      route.fulfill({ json: { data: waves, page: 1, next: false } })
+    await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
+      route.fulfill({
+        json: {
+          data: waves,
+          page: 1,
+          next: false,
+          next_cursor: null,
+          snapshot_expires_at: Date.now() + 900000,
+        },
+      })
     );
     await page.route("**/api/v2/official-waves", (route) =>
       route.fulfill({ json: waves })
@@ -10602,8 +10616,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         id: WAVE,
         name: "Selected competition wave",
       };
-      await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
-        route.fulfill({ json: { data: [targetWave], page: 1, next: false } })
+      await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
+        route.fulfill({
+          json: {
+            data: [targetWave],
+            page: 1,
+            next: false,
+            next_cursor: null,
+            snapshot_expires_at: Date.now() + 900000,
+          },
+        })
       );
       await page.route("**/api/v2/official-waves", (route) =>
         route.fulfill({ json: [targetWave] })
