@@ -217,7 +217,6 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.rename.failed": "Couldn’t save the name. Try again.",
   "e2ee.devices.newDevice":
     "New device added {date}: {label} ({platform}). It can read your encrypted messages. If this wasn’t you, revoke it.",
-  "e2ee.devices.newDeviceConfirm": "This was me",
   "e2ee.devices.newDeviceRevoke": "Revoke {label}",
   "e2ee.devices.open": "Devices for encrypted messages",
 

@@ -185,14 +185,11 @@ encrypted backup. See [Encrypted messages](../../encrypted-messages.md#renewal-a
 
 ## New-Device Alert
 
-The browser checks the profile's grants when a wave opens, when the app
-returns to focus, and every 10 minutes while visible. An active grant for
-another device can raise a notice above the composer. Choose **Got it**
-to clear that notice across devices as their grant lists refresh. Choose
-**Revoke** to remove the device's permission. The first list a browser sees
-for a wallet is its baseline. If the browser loses its local signing key but
-still remembers its grant, that grant does not trigger a new-device notice.
-Set up Signed Posts again to sign from that browser. Review existing grants in
+When another device is authorized to sign posts, an alert can appear above
+the Wave composer. If the same setup also enabled Encrypted DMs, the alert
+lists both permissions and can appear in either surface. Choose **This was me**
+once to clear the alert across devices as they refresh. **Revoke access**
+shows which permissions will stop. Review existing grants in
 **Device Permissions**.
 
 ## Checking a Drop's Signature

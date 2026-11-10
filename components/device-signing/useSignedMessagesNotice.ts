@@ -9,7 +9,6 @@ import {
 import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
 import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
-import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessagesAccount";
 import { getDeviceGrantStatus } from "@/lib/device-signing/device-key-store";
 import { useCallback, useEffect, useMemo } from "react";
 import {
@@ -79,11 +78,14 @@ function getLocalNotice(
  * turning on, renewing or an expired grant.
  */
 export function useSignedMessagesNotice({
+  address,
   composerEmpty,
+  legacyNewDeviceAlerts,
 }: {
+  readonly address: string | null;
   readonly composerEmpty: boolean;
+  readonly legacyNewDeviceAlerts: boolean;
 }) {
-  const address = useSignedMessagesAccount();
   const nowMs = useMinuteClock();
   const local = useLocalDeviceKeys(address);
   const { data: grants } = useDeviceGrants(address);
@@ -99,13 +101,13 @@ export function useSignedMessagesNotice({
   // The first list this browser sees for a wallet is its baseline, so only
   // grants added afterwards raise the new-device alert.
   useEffect(() => {
-    if (address && grants && !hasSeenBaseline) {
+    if (legacyNewDeviceAlerts && address && grants && !hasSeenBaseline) {
       markDeviceGrantsSeen(
         address,
         grants.map((grant) => grant.id)
       );
     }
-  }, [address, grants, hasSeenBaseline]);
+  }, [address, grants, hasSeenBaseline, legacyNewDeviceAlerts]);
 
   useEffect(() => {
     if (!address || !local.loaded || local.failed || !local.publicKeys.length) {
@@ -137,7 +139,7 @@ export function useSignedMessagesNotice({
       localPublicKeys: local.publicKeys,
       nowMs,
     });
-    if (unseen) {
+    if (legacyNewDeviceAlerts && unseen) {
       return { kind: "new-device", grant: unseen };
     }
     if (!composerEmpty || (dismissedUntil ?? 0) > nowMs) {
@@ -149,6 +151,7 @@ export function useSignedMessagesNotice({
     composerEmpty,
     dismissedUntil,
     grants,
+    legacyNewDeviceAlerts,
     local,
     localGrantIds,
     nowMs,
@@ -182,6 +185,9 @@ export function useSignedMessagesNotice({
 
   return {
     model,
+    canShowDeviceAlerts: address !== null && local.loaded && !local.failed,
+    localSigningKeys: local.publicKeys,
+    localGrantIds,
     canEnable,
     enable,
     enableStatus: status,
