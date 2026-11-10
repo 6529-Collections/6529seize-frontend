@@ -107,6 +107,10 @@ it("does not select the NIC pack for unrelated code", () => {
 
 describe("effective App PR CI plan", () => {
   it.each([
+    "components/user/identity/getting-started/IdentityGettingStartedCard.tsx",
+    "components/user/identity/getting-started/identityGettingStartedSession.ts",
+    "components/brain/my-stream/tabs/MainStageNominationPopover.tsx",
+    "i18n/messages/identityGettingStarted.en-US.json",
     "components/user/rep/modify-rep/UserPageRepModifyModal.tsx",
     "components/user/utils/rate/UserPageRateInput.tsx",
     "components/react-query-wrapper/ReactQueryWrapper.tsx",

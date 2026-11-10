@@ -1,8 +1,36 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserPageSetUpProfile from "@/components/user/utils/set-up-profile/UserPageSetUpProfile";
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useContext, type ContextType } from "react";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { hasIdentityGettingStartedSession } from "@/components/user/identity/getting-started/identityGettingStartedSession";
+
+let mockMutationOptions:
+  | { readonly onSuccess: (profile: ApiIdentity) => void }
+  | undefined;
+const mockMutate = jest.fn();
+
+function ProfileSuccessHarness({
+  profile,
+  setToast,
+}: {
+  readonly profile: ApiIdentity;
+  readonly setToast: ContextType<typeof AuthContext>["setToast"];
+}) {
+  const auth = useContext(AuthContext);
+  const queryContext = useContext(ReactQueryWrapperContext);
+  return (
+    <AuthContext.Provider value={{ ...auth, requestAuth: jest.fn(), setToast }}>
+      <ReactQueryWrapperContext.Provider
+        value={{ ...queryContext, onProfileEdit: jest.fn() }}
+      >
+        <UserPageSetUpProfile profile={profile} />
+      </ReactQueryWrapperContext.Provider>
+    </AuthContext.Provider>
+  );
+}
 
 jest.mock(
   "@/components/user/utils/set-up-profile/UserPageSetUpProfileHeader",
@@ -10,18 +38,18 @@ jest.mock(
 );
 jest.mock(
   "@/components/user/settings/UserSettingsUsername",
-  () => (props: any) =>
-    (
-      <button
-        data-testid="username"
-        onClick={() => {
-          props.setUserName("newname");
-          props.setIsAvailable(true);
-          props.setIsLoading(false);
-        }}>
-        username
-      </button>
-    )
+  () => (props: any) => (
+    <button
+      data-testid="username"
+      onClick={() => {
+        props.setUserName("newname");
+        props.setIsAvailable(true);
+        props.setIsLoading(false);
+      }}
+    >
+      username
+    </button>
+  )
 );
 jest.mock("@/components/user/settings/UserSettingsClassification", () => () => (
   <div data-testid="classification" />
@@ -45,10 +73,20 @@ jest.mock("next/navigation", () => ({
 }));
 
 jest.mock("@tanstack/react-query", () => ({
-  useMutation: () => ({ mutateAsync: jest.fn() }),
+  useMutation: (options: {
+    readonly onSuccess: (profile: ApiIdentity) => void;
+  }) => {
+    mockMutationOptions = options;
+    return { mutateAsync: mockMutate };
+  },
 }));
 
 describe("UserPageSetUpProfile", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    sessionStorage.clear();
+    mockMutationOptions = undefined;
+  });
   const profile: any = {
     handle: "user",
     wallets: [
@@ -61,9 +99,11 @@ describe("UserPageSetUpProfile", () => {
   it("renders primary wallet selector when multiple wallets", () => {
     render(
       <AuthContext.Provider
-        value={{ requestAuth: jest.fn(), setToast: jest.fn() } as any}>
+        value={{ requestAuth: jest.fn(), setToast: jest.fn() } as any}
+      >
         <ReactQueryWrapperContext.Provider
-          value={{ onProfileEdit: jest.fn() } as any}>
+          value={{ onProfileEdit: jest.fn() } as any}
+        >
           <UserPageSetUpProfile profile={profile} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
@@ -74,14 +114,11 @@ describe("UserPageSetUpProfile", () => {
   it("submits profile update on save", async () => {
     const user = userEvent.setup();
     const requestAuth = jest.fn().mockResolvedValue({ success: true });
-    const mutate = jest.fn();
-    jest
-      .spyOn(require("@tanstack/react-query"), "useMutation")
-      .mockReturnValue({ mutateAsync: mutate } as any);
     render(
       <AuthContext.Provider value={{ requestAuth, setToast: jest.fn() } as any}>
         <ReactQueryWrapperContext.Provider
-          value={{ onProfileEdit: jest.fn() } as any}>
+          value={{ onProfileEdit: jest.fn() } as any}
+        >
           <UserPageSetUpProfile profile={profile} />
         </ReactQueryWrapperContext.Provider>
       </AuthContext.Provider>
@@ -89,6 +126,31 @@ describe("UserPageSetUpProfile", () => {
     await user.click(screen.getByTestId("username"));
     await user.click(screen.getByTestId("save"));
     expect(requestAuth).toHaveBeenCalled();
-    expect(mutate).toHaveBeenCalled();
+    expect(mockMutate).toHaveBeenCalled();
   });
+
+  it.each([
+    { handle: null, message: "Profile created", hasCreationSession: true },
+    { handle: "user", message: "Profile updated.", hasCreationSession: false },
+  ])(
+    "reports the correct success for a profile whose existing handle is $handle",
+    ({ handle, message, hasCreationSession }) => {
+      const setToast = jest.fn();
+      render(
+        <ProfileSuccessHarness
+          profile={{ ...profile, handle }}
+          setToast={setToast}
+        />
+      );
+
+      act(() =>
+        mockMutationOptions?.onSuccess({ ...profile, handle: "newname" })
+      );
+
+      expect(setToast).toHaveBeenCalledWith({ message, type: "success" });
+      expect(hasIdentityGettingStartedSession("newname")).toBe(
+        hasCreationSession
+      );
+    }
+  );
 });

@@ -52,6 +52,20 @@ async function seedSession(page: Page, role: string | null = null) {
   );
 }
 
+async function seedGettingStartedSession(page: Page) {
+  await seedSession(page);
+  await page.addInitScript(() => {
+    // Represent the successful creation session while keeping reload/dismiss real.
+    const fixtureKey = "playwright-getting-started-session-seeded";
+    if (sessionStorage.getItem(fixtureKey)) return;
+    sessionStorage.setItem(fixtureKey, "true");
+    sessionStorage.setItem(
+      "identity-getting-started-created-profile:playwright",
+      "true"
+    );
+  });
+}
+
 async function openOwnProfile(page: Page, expectOwnerAction = true) {
   // Exercise account-menu navigation; the direct-load test covers cold hydration.
   const profileLoaded = page.waitForResponse((response) =>
@@ -156,6 +170,174 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       (route) =>
         route.fulfill({ json: { count: 0, data: [], next: null, page: 1 } })
     );
+  });
+
+  test("Guided welcome explains paths, opens eligibility and keeps dismissal across reload", async ({
+    page,
+    baseURL,
+    isMobile,
+  }, testInfo) => {
+    await seedGettingStartedSession(page);
+    await installStatements(page, getSandboxApiOrigin(baseURL));
+    await openOwnProfile(page);
+    if (isMobile) await page.setViewportSize({ width: 320, height: 900 });
+    const guidance = page.getByRole("region", {
+      name: "Getting started with your identity",
+      exact: true,
+    });
+    await expect(
+      guidance.getByRole("heading", { name: "Your profile is ready" })
+    ).toBeVisible();
+    await expect(
+      guidance.getByText("Profile created", { exact: true })
+    ).toBeVisible();
+    await expect(
+      guidance.getByText(
+        "Waves are spaces for conversations, creative work, and community decisions.",
+        { exact: true }
+      )
+    ).toBeVisible();
+    await expect(
+      guidance.getByText("Learn how nomination and submission work.", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(
+      guidance.getByRole("link", { name: /^The Memes Main Stage/ })
+    ).toHaveAttribute("href", /^\/waves\//);
+    await expect(
+      guidance.getByRole("link", { name: "How 6529 works", exact: true })
+    ).toHaveAttribute("href", "/join-6529");
+    await expect(
+      guidance.getByRole("link", { name: "Create a wave", exact: true })
+    ).toHaveCount(0);
+    const submissionGuidance = guidance.getByRole("button", {
+      name: /^How to submit to The Memes/,
+    });
+    if (isMobile) await submissionGuidance.tap();
+    else await submissionGuidance.click();
+    const eligibility = page.getByRole("dialog", {
+      name: "How to submit to The Memes",
+      exact: true,
+    });
+    await expect(
+      eligibility.getByText("Unlock submissions", { exact: true })
+    ).toBeVisible();
+    await expect(eligibility).toContainText("MemesNominee REP");
+    await expect(eligibility).toContainText("50,000");
+    await expect(
+      eligibility.getByRole("link", { name: "Get nominated", exact: true })
+    ).toHaveAttribute("href", "/waves/0ecb95d0-d8f2-48e8-8137-bfa71ee8593c");
+    await expectNoHorizontalOverflow(page);
+    await expectAxeClean(page, { include: ['[role="dialog"]'] });
+    const closeEligibility = eligibility.getByRole("button", {
+      name: "Close",
+      exact: true,
+    });
+    if (isMobile) await closeEligibility.tap();
+    else await closeEligibility.click();
+    await expect(eligibility).toHaveCount(0);
+    await expect(submissionGuidance).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+    await expectAxeClean(page, {
+      include: ['[aria-label="Getting started with your identity"]'],
+    });
+    await testInfo.attach("guided-welcome", {
+      body: await guidance.screenshot(),
+      contentType: "image/png",
+    });
+    const findWave = guidance.getByRole("link", {
+      name: "Find a Wave",
+      exact: true,
+    });
+    await expect(findWave).toHaveAttribute("href", "/discover");
+    if (isMobile) await findWave.tap();
+    else {
+      await findWave.focus();
+      await expect(findWave).toBeFocused();
+      await findWave.press("Enter");
+    }
+    await page.waitForURL(/\/discover$/, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await page.goBack();
+    await expect(guidance).toHaveCount(1);
+    await expect(guidance).toBeVisible();
+    await guidance
+      .getByRole("button", {
+        name: "Dismiss getting-started guidance",
+        exact: true,
+      })
+      .click();
+    await expect(guidance).toHaveCount(0);
+    await page.reload();
+    await expect(
+      page.getByRole("navigation", { name: "Profile sections" })
+    ).toBeVisible();
+    await expect(guidance).toHaveCount(0);
+  });
+
+  test("Guided welcome About shortcut preserves editor recovery and restores focus", async ({
+    page,
+    baseURL,
+  }) => {
+    await seedGettingStartedSession(page);
+    const api = getSandboxApiOrigin(baseURL);
+    await installStatements(page, api);
+    await openOwnProfile(page);
+    const guidance = page.getByRole("region", {
+      name: "Getting started with your identity",
+      exact: true,
+    });
+    const addAbout = guidance.getByRole("button", {
+      name: /^Add an About statement/,
+    });
+    await addAbout.click();
+    const dialog = page.getByRole("dialog", {
+      name: "Edit About",
+      exact: true,
+    });
+    const input = dialog.getByRole("textbox", {
+      name: "About statement",
+      exact: true,
+    });
+    await expect(input).toBeVisible();
+    await input.fill("This introduction is cancelled.");
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expect(addAbout).toBeFocused();
+    await addAbout.click();
+    await expect(input).toBeEmpty();
+    const draft = "A new member exploring art and community decisions.";
+    await input.fill(draft);
+    let failNextSave = true;
+    await page.route(`${api}/api/profiles/*/cic/statements`, (route) => {
+      if (route.request().method() === "POST" && failNextSave) {
+        failNextSave = false;
+        return route.fulfill({ status: 400, json: { error: "Unavailable" } });
+      }
+      return route.fallback();
+    });
+    const save = dialog.getByRole("button", { name: "Save", exact: true });
+    await save.click();
+    await expect(
+      dialog.getByRole("heading", { name: "Couldn't save About", exact: true })
+    ).toBeVisible();
+    await expect(input).toHaveValue(draft);
+    await expect(save).toBeEnabled();
+    await save.click();
+    await expect(dialog).toHaveCount(0);
+    const editAbout = guidance.getByRole("button", {
+      name: /^Edit About statement/,
+    });
+    await expect(editAbout).toBeVisible();
+    await expect(editAbout).toBeFocused();
+    await expect(page.getByText(draft, { exact: true })).toBeVisible();
+    await editAbout.click();
+    await expect(input).toHaveValue(draft);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
   });
 
   test("hydrates a saved owner session on a direct profile load and reload", async ({

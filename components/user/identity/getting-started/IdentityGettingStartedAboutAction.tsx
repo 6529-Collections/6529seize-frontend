@@ -12,7 +12,7 @@ import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 
 const ABOUT_STATEMENT_TYPE: CicStatement["statement_type"] = STATEMENT_TYPE.BIO;
 
@@ -40,6 +40,45 @@ export default function IdentityGettingStartedAboutAction({
         item.statement_group === STATEMENT_GROUP.GENERAL &&
         item.statement_type === ABOUT_STATEMENT_TYPE
     ) ?? null;
+
+  let editor: ReactNode;
+  if (isPending) {
+    editor = (
+      <p
+        role="status"
+        className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
+      >
+        {t(locale, "identityGettingStarted.aboutLoading")}
+      </p>
+    );
+  } else if (isError && !data) {
+    editor = (
+      <div role="alert">
+        <p className="tw-mb-4 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(locale, "identityGettingStarted.aboutLoadError")}
+        </p>
+        <Button
+          variant="secondary"
+          loading={isFetching}
+          onClick={() => {
+            void refetch();
+          }}
+        >
+          {t(locale, "identityGettingStarted.retry")}
+        </Button>
+      </div>
+    );
+  } else {
+    editor = (
+      <UserPageHeaderAboutEdit
+        key={statement?.id ?? "new-about"}
+        profile={profile}
+        statement={statement}
+        onClose={() => setIsOpen(false)}
+        autoFocus
+      />
+    );
+  }
 
   return (
     <>
@@ -78,37 +117,7 @@ export default function IdentityGettingStartedAboutAction({
           <p className="tw-mb-4 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-400">
             {t(locale, "user.profile.identity.statements.add.privacyNotice")}
           </p>
-          {isPending ? (
-            <p
-              role="status"
-              className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
-            >
-              {t(locale, "identityGettingStarted.aboutLoading")}
-            </p>
-          ) : isError && !data ? (
-            <div role="alert">
-              <p className="tw-mb-4 tw-text-sm tw-leading-6 tw-text-iron-300">
-                {t(locale, "identityGettingStarted.aboutLoadError")}
-              </p>
-              <Button
-                variant="secondary"
-                loading={isFetching}
-                onClick={() => {
-                  void refetch();
-                }}
-              >
-                {t(locale, "identityGettingStarted.retry")}
-              </Button>
-            </div>
-          ) : (
-            <UserPageHeaderAboutEdit
-              key={statement?.id ?? "new-about"}
-              profile={profile}
-              statement={statement}
-              onClose={() => setIsOpen(false)}
-              autoFocus
-            />
-          )}
+          {editor}
         </div>
       </MobileWrapperDialog>
     </>

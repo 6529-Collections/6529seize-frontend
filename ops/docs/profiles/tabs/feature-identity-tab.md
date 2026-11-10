@@ -5,6 +5,9 @@
 `Identity` is the default profile tab at `/{user}`.
 It combines `Rep` and `NIC` on one route.
 
+- After first profile setup, the connected owner can use a getting-started card
+  above the Identity content to explore Waves, learn about The Memes, and add
+  an optional About statement.
 - Desktop shows both surfaces at the same time.
 - Rep and NIC support direction toggles: `Received` and `Given`.
 - Mobile switches between `REP`, `NIC`, and `ID Statements` subviews
@@ -55,6 +58,47 @@ Mobile (`< lg`):
 7. Review activity logs and apply filters.
 8. On mobile, switch between `REP`, `NIC`, and `ID Statements` as
    needed.
+
+## Getting Started After Profile Setup
+
+After you choose and save your first profile username, your own Identity tab
+shows `Profile created` and `Your profile is ready`. The welcome introduces
+6529 as a network where people share ideas, create art, and decide what to build
+together. An About statement is optional; you can explore without adding one.
+
+- `Find a Wave` opens [Wave Discovery](../../waves/discovery/feature-discover-sections-and-search.md)
+  at `/discover`. Waves are spaces for conversations, creative work, and
+  community decisions.
+- `The Memes Main Stage` opens the network's configured Main Stage Wave, where
+  you can discover artwork the community is considering for future Meme Cards.
+- `How to submit to The Memes` opens a dialog with that title, containing the
+  existing `Unlock submissions` nomination and eligibility explanation. It
+  shows progress toward the `MemesNominee` REP requirement and a `Get nominated`
+  action. Closing the dialog returns focus to the card action. Nomination
+  eligibility is separate from submission and does not guarantee selection. See
+  [Wave Leaderboard Drop Entry and Eligibility](../../waves/leaderboard/feature-drop-entry-and-eligibility.md).
+- `Add an About statement`, marked `Optional`, opens the existing About editor
+  directly. If you already have an About statement, the shortcut says
+  `Edit About statement`. It waits for the initial statement request before
+  becoming available. The dialog explains that statements are optional and
+  fully and permanently public. The same validation, saving, and error recovery
+  apply as in the [profile editor](../navigation/feature-header-summary.md).
+- `How 6529 works` opens the [Join 6529 guide](../../navigation/feature-join-6529-journey.md)
+  at `/join-6529`.
+
+The welcome and exploration paths sit side by side on larger screens and stack
+on phones. Descriptions stay visible on smaller layouts. If Main Stage details
+are unavailable, the welcome and `Find a Wave` remain available.
+
+The card is tied to the browser session in which the profile was created. It
+can remain visible when you return to your own Identity tab in that session.
+Select the close control to dismiss it without confirmation. Dismissal does
+not change your profile or prevent you from exploring Waves; the card has no
+reopen action. You can open `/join-6529` separately for guidance.
+
+Visitors, signed-out viewers, and active profile proxies do not see this card.
+An ordinary visit to an existing profile in a new browser session does not
+show the profile-creation welcome.
 
 ## Rep Behavior
 
@@ -272,6 +316,11 @@ proxy allocation entry points and permissions are unchanged.
 
 ## Failure and Recovery
 
+- If the getting-started About shortcut cannot load your statement, its dialog
+  shows `Couldn't load your About statement. Try again before editing.` and
+  `Retry`. Retrying shows `Loading your About statement…` before the editor
+  becomes available. A failed save keeps the editor open with the existing
+  error guidance so you can revise or retry.
 - Rep submit failures show an error toast and keep dialog values.
 - NIC submit failures show an error toast and keep entered value.
 - If loading a later categories page fails, already visible categories stay on
@@ -283,6 +332,11 @@ proxy allocation entry points and permissions are unchanged.
 
 ## Limitations / Notes
 
+- Getting-started card messages use canonical `en-US` copy in locales without
+  translations. The reused About editor and nomination guidance retain their
+  existing English fallback copy. Actions and destinations remain available;
+  frontend localization maintainers can translate these surfaces in a later
+  profile localization pass.
 - The NIC activity loading-error message and `Retry` use `en-US` fallback copy
   where translations are unavailable; frontend localization maintainers can
   translate those message keys without changing this flow.

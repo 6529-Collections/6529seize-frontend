@@ -48,6 +48,16 @@ Back returns one step; Cancel discards the unsaved draft and closes management.
 Received and Given lists fit their content, share a height cap and scroll when needed.
 Visitor inspection and existing proxy allocation permissions remain distinct.
 
+The `profiles.getting-started` record covers the first-profile welcome in the
+Identity tab: `Find a Wave` opens Discovery, Main Stage opens its configured
+Wave, and `How to submit to The Memes` opens a dialog with the existing
+`Unlock submissions` nomination guidance. An optional About shortcut opens the
+existing editor. `How 6529 works` opens Join 6529.
+Its facts keep creation-session visibility, owner/proxy restrictions, dismissal,
+and the welcome's availability without Main Stage details explicit. About
+guidance includes the initial loading wait, error and Retry states, the
+existing-statement edit label, and the optional and permanently public notice.
+
 The search record covers punctuation-tolerant Wave names across site search,
 sidebar search, composer mentions and the message-search Wave picker. It explains
 all-term matching, partial names, relevance ordering, literal wildcard characters,
