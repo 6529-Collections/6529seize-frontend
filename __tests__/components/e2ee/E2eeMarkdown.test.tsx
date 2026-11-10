@@ -1,6 +1,16 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { E2eeMarkdown } from "@/components/e2ee/conversation/E2eeMarkdown";
 import { member } from "./fakeE2eeEngine";
+import type { SupportedLocale } from "@/i18n/locales";
+import { loadLocaleMessages } from "@/i18n/messages";
+
+let mockLocale: SupportedLocale = "en-US";
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => mockLocale,
+}));
+afterEach(() => {
+  mockLocale = "en-US";
+});
 
 jest.mock("@/components/e2ee/ui/E2eeProfileLink", () => ({
   E2eeProfileLink: ({ children }: { children: React.ReactNode }) => (
@@ -19,6 +29,36 @@ const props = {
   mentions: ["bob-id"],
   selfProfileId: "self",
 };
+
+it.each([
+  ["en-US", "Image from example.com", "Message table"],
+  ["en-GB", "Image from example.com", "Message table"],
+  ["fr-FR", "Image de example.com", "Tableau du message"],
+  ["es-ES", "Imagen de example.com", "Tabla del mensaje"],
+  ["de-DE", "Bild von example.com", "Nachrichtentabelle"],
+] as const)(
+  "names image links and keyboard-scrollable tables in %s",
+  async (locale, imageName, tableName) => {
+    mockLocale = locale;
+    await loadLocaleMessages(locale);
+    render(
+      <E2eeMarkdown
+        {...props}
+        text={
+          "![](https://example.com/private-token.png)\n\n| Key |\n| --- |\n| Value |"
+        }
+      />
+    );
+    expect(screen.getByRole("link", { name: imageName })).toHaveAttribute(
+      "href",
+      "https://example.com/private-token.png"
+    );
+    expect(screen.getByRole("region", { name: tableName })).toHaveAttribute(
+      "tabindex",
+      "0"
+    );
+  }
+);
 
 it("renders Markdown and GFM with the real parser", () => {
   const { container } = render(
@@ -95,18 +135,14 @@ it("renders URLs and images as explicit safe anchors without resource elements",
   ).toBeNull();
 });
 
-it("preserves extra blank lines and scopes working footnotes to each message", () => {
+it("preserves blank lines and isolates footnotes even when the same message renders twice", () => {
   const { container } = render(
     <>
       <E2eeMarkdown
         {...props}
         text={"First\n\n\nSecond[^1]\n\n[^1]: Footnote"}
       />
-      <E2eeMarkdown
-        {...props}
-        messageId="another"
-        text={"Third[^1]\n\n[^1]: Other footnote"}
-      />
+      <E2eeMarkdown {...props} text={"Third[^1]\n\n[^1]: Other footnote"} />
     </>
   );
   expect(
@@ -121,6 +157,17 @@ it("preserves extra blank lines and scopes working footnotes to each message", (
       container.querySelector(`[id="${target?.slice(1)}"]`)
     ).not.toBeNull();
   }
+  for (const backlink of container.querySelectorAll(
+    "a[data-footnote-backref]"
+  )) {
+    expect(backlink).not.toHaveAttribute("target");
+    expect(
+      container.querySelector(
+        `[id="${backlink.getAttribute("href")?.slice(1)}"]`
+      )
+    ).not.toBeNull();
+  }
+  expect(container.querySelector("a[node],a[ref]")).toBeNull();
 });
 
 it("refreshes highlighted code after an edit without duplicating text", async () => {

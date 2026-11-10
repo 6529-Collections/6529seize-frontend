@@ -69,9 +69,18 @@ export async function markdownSnapshot(
   body: Locator,
   selectors: readonly string[]
 ) {
-  for (const selector of selectors) {
-    await expect(body.locator(selector).first()).toBeVisible();
-  }
+  await expect
+    .poll(() =>
+      body.evaluate(
+        (element, expected) =>
+          expected.filter((selector) => {
+            const node = element.querySelector(selector);
+            return !node || node.getBoundingClientRect().height === 0;
+          }),
+        selectors
+      )
+    )
+    .toEqual([]);
   return body.evaluate((element) =>
     Array.from(
       element.querySelectorAll(

@@ -6,10 +6,15 @@ import {
   memo,
   useContext,
   useEffect,
+  useId,
   useMemo,
   useRef,
 } from "react";
-import Markdown, { type Components, type ExtraProps } from "react-markdown";
+import Markdown, {
+  defaultUrlTransform,
+  type Components,
+  type ExtraProps,
+} from "react-markdown";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import type { Plugin, PluggableList } from "unified";
@@ -19,6 +24,8 @@ import { highlightCodeElement } from "@/components/drops/view/part/dropPartMarkd
 import { normalizeDropMarkdownContent } from "@/components/drops/view/part/dropPartMarkdown/normalizeContent";
 import { rehypePreserveOrderedListDelimiter } from "@/components/drops/view/part/dropPartMarkdown/orderedListDelimiter";
 import type { E2eeMember } from "@/lib/e2ee/types";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { findMember } from "../e2eeFormat";
 import { E2eeProfileLink } from "../ui/E2eeProfileLink";
 import { E2eeEmojiText } from "./E2eeEmojiText";
@@ -89,12 +96,13 @@ function PrivateLink({
   ...props
 }: ComponentPropsWithoutRef<"a"> & ExtraProps) {
   // Native anchors have no router prefetch, preview, proxy or hover fetch.
-  if (!href) return <span>{children}</span>;
+  const safeHref = href ? defaultUrlTransform(href) : undefined;
+  if (!safeHref) return <span>{children}</span>;
   return (
     <a
       {...props}
-      href={href}
-      target={href.startsWith("#") ? undefined : "_blank"}
+      href={safeHref}
+      target={safeHref.startsWith("#") ? undefined : "_blank"}
       rel="noopener noreferrer nofollow ugc"
       className="tw-break-all tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-2 hover:tw-decoration-primary-300 focus-visible:tw-rounded focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
     >
@@ -104,12 +112,40 @@ function PrivateLink({
 }
 
 function PrivateImage({ src, alt, title }: ComponentPropsWithoutRef<"img">) {
+  const locale = useBrowserLocale();
   // Rendering a Markdown image must not contact its host or an image proxy.
   const href = typeof src === "string" ? src : undefined;
+  if (!href) return <span>{alt}</span>;
+  let label = alt;
+  if (!label?.trim()) {
+    let host: string | undefined;
+    try {
+      host = new URL(href).hostname;
+    } catch {
+      /* Relative links have no host label. */
+    }
+    label = host
+      ? t(locale, "e2ee.message.imageLinkFrom", { host })
+      : t(locale, "e2ee.message.imageLink");
+  }
   return (
     <PrivateLink href={href} title={title}>
-      {alt !== undefined && alt.length > 0 ? alt : href}
+      {label}
     </PrivateLink>
+  );
+}
+
+function Table({ children }: ComponentPropsWithoutRef<"table">) {
+  const locale = useBrowserLocale();
+  return (
+    <div
+      role="region"
+      aria-label={t(locale, "e2ee.message.markdownTable")}
+      tabIndex={0}
+      className="tw-max-w-full tw-overflow-x-auto focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+    >
+      <table>{children}</table>
+    </div>
   );
 }
 
@@ -172,11 +208,7 @@ const COMPONENTS: Components = {
       {children}
     </blockquote>
   ),
-  table: ({ children }) => (
-    <div className="tw-max-w-full tw-overflow-x-auto">
-      <table>{children}</table>
-    </div>
-  ),
+  table: Table,
 };
 
 const REMARK_PLUGINS = [remarkGfm];
@@ -192,6 +224,7 @@ export const E2eeMarkdown = memo(
     readonly text: string;
     readonly messageId: string;
   }) => {
+    const renderId = useId();
     const context = useMemo(
       () => ({ members, mentions, selfProfileId }),
       [members, mentions, selfProfileId]
@@ -211,7 +244,9 @@ export const E2eeMarkdown = memo(
           className="word-break tw-min-w-0 tw-max-w-full tw-break-words tw-text-md tw-leading-6 tw-text-iron-200 [&_code]:tw-text-iron-200 [&_h1]:tw-text-iron-200 [&_h2]:tw-text-iron-200 [&_h3]:tw-text-iron-200 [&_h4]:tw-text-iron-200 [&_h5]:tw-text-iron-200 [&_h6]:tw-text-iron-200 [&_pre]:tw-max-w-full [&_pre]:tw-overflow-x-auto [&_pre_code]:tw-whitespace-pre-wrap"
           skipHtml
           remarkPlugins={REMARK_PLUGINS}
-          remarkRehypeOptions={{ clobberPrefix: `e2ee-${messageId}-` }}
+          remarkRehypeOptions={{
+            clobberPrefix: `e2ee-${messageId}-${renderId}-`,
+          }}
           rehypePlugins={plugins}
           components={COMPONENTS}
         >

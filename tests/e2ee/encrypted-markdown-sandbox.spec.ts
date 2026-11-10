@@ -77,7 +77,7 @@ test.describe("Encrypted Markdown @medium @local-only @e2ee", () => {
       });
     }
     const privateText =
-      'Private links\n\n[Named link](https://markdown-private-canary.invalid/named)\n\nhttps://markdown-private-canary.invalid/plain\n\n![Private image](https://markdown-private-canary.invalid/image.png)\n\n<img src="https://markdown-private-canary.invalid/html.png">';
+      'Private links\n\n[Named link](https://markdown-private-canary.invalid/named)\n\nhttps://markdown-private-canary.invalid/plain\n\n![Private image](https://markdown-private-canary.invalid/image.png)\n\n<img src="https://markdown-private-canary.invalid/html.png">\n\n[Unsafe script](javascript:alert%281%29)\n\n[Unsafe data](data:text/html,private)';
     await composer(alice.page).fill(privateText);
     await alice.page.getByRole("button", { name: "Send", exact: true }).click();
     const privateRow = messageRow(bob.page, "Private links");
@@ -85,10 +85,16 @@ test.describe("Encrypted Markdown @medium @local-only @e2ee", () => {
     await expect(
       privateRow.getByRole("link", { name: "Private image" })
     ).toBeVisible({ timeout: 75_000 });
-    await expect(
-      privateRow.locator(
-        "img[src*='markdown-private-canary'],iframe,video,audio"
+    expect(
+      await privateRow.evaluate(
+        (element) =>
+          element.querySelector(
+            "img[src*='markdown-private-canary'],iframe,video,audio"
+          ) !== null
       )
+    ).toBe(false);
+    await expect(
+      privateRow.getByRole("link", { name: /Unsafe script|Unsafe data/ })
     ).toHaveCount(0);
     await privateRow.getByRole("link", { name: "Named link" }).hover();
     await privateRow.getByRole("link", { name: "Named link" }).focus();
@@ -100,12 +106,16 @@ test.describe("Encrypted Markdown @medium @local-only @e2ee", () => {
     );
     await alice.page.getByRole("button", { name: "Save", exact: true }).click();
     await expect(
-      messageRow(bob.page, "Markdown edited").locator("strong")
-    ).toHaveText("Updated bold", { timeout: 75_000 });
+      messageRow(bob.page, "Markdown edited").getByText("Updated bold", {
+        exact: true,
+      })
+    ).toHaveJSProperty("tagName", "STRONG", { timeout: 75_000 });
     await gotoPath(bob.page, `/messages/encrypted/${g}`);
     await expect(
-      messageRow(bob.page, "Markdown edited").locator("strong")
-    ).toHaveText("Updated bold");
+      messageRow(bob.page, "Markdown edited").getByText("Updated bold", {
+        exact: true,
+      })
+    ).toHaveJSProperty("tagName", "STRONG");
     await expect(
       messageRow(bob.page, "Private links").getByRole("link", {
         name: "Private image",

@@ -193,6 +193,16 @@ it("takes focus back after the mobile emoji panel gives it to its trigger", asyn
 const convoGroup = (engine: ReturnType<typeof createFakeE2eeEngine>) =>
   engine.state.conversations[0]!.g;
 
+it("keeps whitespace-only drafts empty and blocks sending them", () => {
+  const { engine, input } = setup();
+  setComposerText(input, "  \n  ");
+  expect(
+    screen.getByRole("button", { name: "Send", exact: true })
+  ).toBeDisabled();
+  fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
+  expect(engine.send).not.toHaveBeenCalled();
+});
+
 it.each(["gm", "gm-wave"])(
   "renders known custom emojis inline and keeps unknown tokens in the encrypted payload: %s",
   async (id) => {

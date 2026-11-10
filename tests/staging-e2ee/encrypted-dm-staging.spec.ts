@@ -378,13 +378,24 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
           .getByRole("textbox", { name: "Write a message", exact: true })
           .last();
         await input.fill(text);
+        const accepted = ordinary.waitForResponse(
+          (response) =>
+            response.request().method() === "POST" &&
+            new URL(response.url()).pathname === "/api/drops",
+          { timeout: SYNC_TIMEOUT_MS }
+        );
+        accepted.catch(() => undefined);
         await ordinary
-          .getByRole("button", { name: "Send", exact: true })
+          .getByRole("button", { name: "Post", exact: true })
           .last()
           .click();
+        expect(
+          (await accepted).ok(),
+          "The ordinary Markdown message was accepted by staging"
+        ).toBe(true);
         const regularRow = ordinary
-          .locator("[data-wave-drop-id]")
-          .filter({ has: ordinary.getByText(marker, { exact: true }) });
+          .getByText(marker, { exact: true })
+          .locator("xpath=ancestor::*[@data-wave-drop-id][1]");
         await expect(regularRow).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
         const more = regularRow.getByRole("button", {
           name: "Show more",
@@ -411,7 +422,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         await ordinary.setViewportSize({ width: 1440, height: 1000 });
         await b.page.setViewportSize({ width: 1440, height: 1000 });
       }
-      const secret = `Private URL checks ${runId}\n\n[Private link](https://${canary}.invalid/link)\n\nhttps://${canary}.invalid/plain\n\n![Private image](https://${canary}.invalid/image.png)\n\n<img src="https://${canary}.invalid/html.png">`;
+      const secret = `Private URL checks ${runId}\n\n[Private link](https://${canary}.invalid/link)\n\nhttps://${canary}.invalid/plain\n\n![Private image](https://${canary}.invalid/image.png)\n\n<img src="https://${canary}.invalid/html.png">\n\n[Unsafe script](javascript:alert%281%29)\n\n[Unsafe data](data:text/html,private)`;
       await composer(a.page).fill(secret);
       await a.page.getByRole("button", { name: "Send", exact: true }).click();
       const privateRow = messageRow(b.page, `Private URL checks ${runId}`);
@@ -419,11 +430,19 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       await expect(
         privateRow.getByRole("link", { name: "Private image" })
       ).toBeVisible({ timeout: SYNC_TIMEOUT_MS });
+      await expect(
+        privateRow.getByRole("link", { name: /Unsafe script|Unsafe data/ })
+      ).toHaveCount(0);
       await privateRow.getByRole("link", { name: "Private link" }).hover();
       await privateRow.getByRole("link", { name: "Private link" }).focus();
-      await expect(
-        privateRow.locator(`img[src*='${canary}'],iframe,video,audio`)
-      ).toHaveCount(0);
+      expect(
+        await privateRow.evaluate(
+          (element, token) =>
+            element.querySelector(`img[src*='${token}'],iframe,video,audio`) !==
+            null,
+          canary
+        )
+      ).toBe(false);
       await b.page.reload();
       await expect(
         messageRow(b.page, `Private URL checks ${runId}`).getByRole("link", {
