@@ -169,6 +169,11 @@ async function commitAdds(
   return null;
 }
 
+/**
+ * This profile's other usable devices, claimed with a new chat. The claim
+ * alone never adds one: `trustedClaim` keeps only own devices signed by an
+ * own wallet or added with "Add device" (engine/trust.ts).
+ */
 async function ownSiblingDevices(ctx: EngineContext): Promise<string[]> {
   const own = ownDeviceKey(ctx);
   const out: string[] = [];

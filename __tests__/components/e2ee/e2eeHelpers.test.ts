@@ -212,6 +212,48 @@ describe("format helpers", () => {
     ).toBe("The safety code changed");
   });
 
+  it("names who added a device not yet verified for its owner", () => {
+    const wallet = "0x1111111111111111111111111111111111111111";
+    const added = (actor: string | null, owner: string, detail?: string) =>
+      message({
+        id: `added-${actor}-${owner}`,
+        kind: "notice",
+        notice: {
+          type: "device_added",
+          actorProfileId: actor,
+          targetProfileIds: [owner],
+          unverified: true,
+          ...(detail === undefined ? {} : { detail }),
+        },
+      });
+    // alice (the committer) added a device of bob's.
+    expect(
+      getNoticeText("en-US", added(ALICE_ID, BOB_ID, wallet), members, SELF_ID)
+    ).toMatch(
+      /^alice added a device signed by wallet 0x1111…1111, which isn’t verified for bob on this device$/u
+    );
+    expect(
+      getNoticeText("en-US", added(ALICE_ID, SELF_ID), members, SELF_ID)
+    ).toBe("alice added a device that isn’t verified for you on this device");
+    // A verified add keeps naming the device's owner.
+    expect(
+      getNoticeText(
+        "en-US",
+        message({
+          id: "verified-add",
+          kind: "notice",
+          notice: {
+            type: "device_added",
+            actorProfileId: ALICE_ID,
+            targetProfileIds: [BOB_ID],
+          },
+        }),
+        members,
+        SELF_ID
+      )
+    ).toBe("bob added a device");
+  });
+
   it("previews undecryptable, deleted and attachment-only messages", () => {
     expect(
       getMessagePreview(
