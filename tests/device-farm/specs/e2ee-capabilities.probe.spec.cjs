@@ -44,11 +44,11 @@ const PROBE_TIMEOUT_MS = 150000;
 // __tests__/lib/e2ee/wasm/probeManifest.test.ts fails when a module rebuild
 // leaves them behind. The env overrides point at another target's module.
 const MLS_WASM = {
-  path: process.env.E2EE_WASM_PATH || "/e2ee/mls-wasm-530b38d27f820745.wasm",
+  path: process.env.E2EE_WASM_PATH || "/e2ee/mls-wasm-1f82f7363c88d403.wasm",
   sha256:
     process.env.E2EE_WASM_SHA256 ||
-    "530b38d27f8207451ce64e6ab29acec3cbadceb9ae1102f824b5c85fea06e682",
-  bytes: Number(process.env.E2EE_WASM_BYTES || 1806438),
+    "1f82f7363c88d4033d41b8cd1334cb32b9d228800034fe855908dbf08e0f88ae",
+  bytes: Number(process.env.E2EE_WASM_BYTES || 1806608),
 };
 
 /**

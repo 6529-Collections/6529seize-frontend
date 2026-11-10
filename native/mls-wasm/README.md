@@ -122,6 +122,12 @@ node bench/bench.mjs [sizes...] [--reps N] [--suite S]          # the committed 
   `NOT_MEMBER`, `BAD_WELCOME`, `NO_KEY_PACKAGE`, `BAD_KEY_PACKAGE`,
   `BAD_METADATA`, `NO_CREDENTIAL`, `PENDING_PROPOSALS`, `MLS_ERROR`,
   `BAD_STATE`, `INTERNAL`.
+- Group metadata (contract 3.5) names its `kind`: `dm`, `group`, or `self`
+  for a group of one user's own devices that syncs read positions between
+  them (D175, design P60). A `self` group may also carry `created`, its
+  creation time in milliseconds, a non-negative integer. The kind never
+  changes. The module checks only the shape; the engine checks who may be a
+  member of a `self` group.
 - `exportState()` holds the signer, credential, the full OpenMLS storage, the
   pending own commit, a staged incoming commit, retained message keys of the
   last two epochs and this module's bookkeeping. Staged Welcomes are not

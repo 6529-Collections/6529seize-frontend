@@ -333,9 +333,16 @@ fn validate_metadata(meta: &Value, g: &str) -> Result<Vec<u8>> {
     if obj.get("g").and_then(Value::as_str) != Some(g) {
         return Err(bad("metadata.g must equal the group handle"));
     }
+    // "self": a user's own devices only, for read-state sync (D175, P60).
     match obj.get("kind").and_then(Value::as_str) {
-        Some("dm") | Some("group") => {}
-        _ => return Err(bad("metadata.kind must be dm or group")),
+        Some("dm") | Some("group") | Some("self") => {}
+        _ => return Err(bad("metadata.kind must be dm, group or self")),
+    }
+    // P60: the creation time of a self group, used to pick the newest one.
+    match obj.get("created") {
+        None => {}
+        Some(value) if value.as_u64().is_some() => {}
+        _ => return Err(bad("metadata.created must be a non-negative integer")),
     }
     match obj.get("name") {
         None | Some(Value::Null) => {}
