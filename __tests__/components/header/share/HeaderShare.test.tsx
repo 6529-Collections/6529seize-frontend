@@ -974,6 +974,7 @@ describe("HeaderShare", () => {
 
     it.each(["native", "desktop"] as const)(
       "offers combined %s setup with the appropriate availability",
+      /** Desktop gets a private app link and version notice. Mobile gets a QR code. */
       async (target) => {
         const flags = require("@/lib/device-signing/feature");
         const e2ee = require("@/config/e2eeEnv");
@@ -999,10 +1000,29 @@ describe("HeaderShare", () => {
           ...mockSeizeConnect.useSeizeConnectContext(),
           connectedAccounts: [],
         });
-        setup.prepareConnectionDeviceSetup.mockResolvedValue({
-          envelope: "encrypted-setup",
-          secret: "setup-secret",
+        let finishSigning = () => {};
+        const signingPending = new Promise<void>((resolve) => {
+          finishSigning = resolve;
         });
+        setup.prepareConnectionDeviceSetup
+          .mockImplementationOnce(
+            async ({
+              onSignatureRequested,
+            }: {
+              onSignatureRequested: () => void;
+            }) => {
+              onSignatureRequested();
+              await signingPending;
+              return {
+                envelope: "encrypted-setup-1",
+                secret: "setup-secret-1",
+              };
+            }
+          )
+          .mockResolvedValueOnce({
+            envelope: "encrypted-setup-2",
+            secret: "setup-secret-2",
+          });
         const normalShare =
           session.createConnectionShare.getMockImplementation();
         let issued = 0;
@@ -1030,55 +1050,93 @@ describe("HeaderShare", () => {
             screen.getByRole("button", { name: "QR Code" })
           );
           expect(screen.getByText(address)).toBeVisible();
+          expect(
+            screen.getByRole("dialog", { name: "Connect Device" })
+          ).toBeVisible();
+          expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
+          const secureButton = screen.getByRole("button", {
+            name: "Connect with Post Signing & DM Encryption",
+          });
           if (target === "desktop") {
             await userEvent.click(
               screen.getByRole("button", { name: "6529 Desktop" })
             );
-            const secureButton = screen.getByRole("button", {
-              name: "Connect with Post Signing & DM Encryption",
-            });
-            expect(secureButton).toHaveAttribute("aria-disabled", "true");
-            expect(secureButton).toHaveAttribute(
-              "aria-description",
-              "Coming soon"
+            const version = screen.getByText("v0.4.0");
+            expect(version).toHaveClass("tw-font-semibold");
+            expect(version.parentElement).toHaveClass("tw-text-xs");
+            expect(secureButton.nextElementSibling).toContainElement(version);
+            expect(secureButton).toHaveAccessibleDescription(
+              "Requires 6529 Desktop v0.4.0 or later."
             );
-            expect(
-              screen.getByRole("button", { name: "Connect only" })
-            ).toBeEnabled();
-            await userEvent.hover(secureButton);
-            expect(await screen.findByRole("tooltip")).toHaveTextContent(
-              "Coming soon"
-            );
-            await userEvent.click(secureButton);
-            expect(setup.prepareConnectionDeviceSetup).not.toHaveBeenCalled();
-            return;
           }
           expect(setup.prepareConnectionDeviceSetup).not.toHaveBeenCalled();
-          await userEvent.click(
-            screen.getByRole("button", {
-              name: "Connect with Post Signing & DM Encryption",
-            })
-          );
+          await userEvent.click(secureButton);
+          expect(
+            await screen.findByText("Check your wallet to sign")
+          ).toBeVisible();
+          const targetTitle =
+            target === "desktop"
+              ? "Connect 6529 Desktop"
+              : "Connect 6529 Mobile";
+          expect(
+            screen.getByRole("dialog", { name: targetTitle })
+          ).toBeVisible();
+          if (target === "desktop") {
+            expect(screen.getByText("v0.4.0").parentElement).toHaveClass(
+              "tw-text-sm"
+            );
+          } else {
+            expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
+          }
+          finishSigning();
           expect(
             await screen.findByRole("heading", {
               name: "Connect as prxt0 with Post Signing & DM Encryption",
             })
           ).toBeVisible();
           expect(setup.prepareConnectionDeviceSetup).toHaveBeenCalledTimes(1);
-          expect(
-            screen.getByAltText("Private device setup QR code")
-          ).toBeVisible();
+          if (target === "desktop") {
+            expect(
+              screen.getByTestId("desktop-connection-panel")
+            ).toHaveAttribute(
+              "href",
+              `testcore6529://navigate/accept-connection-sharing?connection_share_code=combined-1&address=${address}#device_setup_key=setup-secret-1`
+            );
+            const version = within(
+              screen.getByTestId("desktop-connection-panel")
+            ).getByText("v0.4.0");
+            expect(version).toBeVisible();
+            expect(version.parentElement).toHaveTextContent(
+              "Requires 6529 Desktop v0.4.0 or later."
+            );
+          } else {
+            expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
+            expect(
+              screen.getByAltText("Private device setup QR code")
+            ).toBeVisible();
+          }
           await userEvent.click(
             screen.getByRole("button", { name: "Generate new code" })
           );
           expect(screen.queryByTitle(/combined-1/)).not.toBeInTheDocument();
           finishRefresh();
           expect(await screen.findByTitle(/combined-2/)).toBeVisible();
+          if (target === "desktop") {
+            expect(
+              screen.getByTestId("desktop-connection-panel")
+            ).toHaveAttribute(
+              "href",
+              `testcore6529://navigate/accept-connection-sharing?connection_share_code=combined-2&address=${address}#device_setup_key=setup-secret-2`
+            );
+          }
           expect(setup.prepareConnectionDeviceSetup).toHaveBeenCalledTimes(2);
           await userEvent.click(screen.getByRole("button", { name: "Back" }));
           expect(
+            screen.getByRole("dialog", { name: "Connect Device" })
+          ).toBeVisible();
+          expect(
             screen.getByRole("button", {
-              name: "6529 Mobile",
+              name: target === "desktop" ? "6529 Desktop" : "6529 Mobile",
             })
           ).toHaveAttribute("aria-pressed", "true");
         } finally {
@@ -1154,7 +1212,7 @@ describe("HeaderShare", () => {
           )
         );
         expect(
-          screen.getByRole("heading", { name: "Connect Device" })
+          screen.getByRole("dialog", { name: `Connect 6529 ${target}` })
         ).toBeInTheDocument();
       }
     );
@@ -1357,7 +1415,7 @@ describe("HeaderShare", () => {
       expect(back).toHaveFocus();
       await userEvent.keyboard("{Escape}");
       await waitForElementToBeRemoved(() =>
-        screen.queryByRole("heading", { name: "Connect Device" })
+        screen.queryByTestId("header-share-modal")
       );
     });
 
@@ -2033,6 +2091,7 @@ describe("HeaderShare", () => {
         screen.queryByText("Continue in the 6529 Desktop app.")
       ).not.toBeInTheDocument();
       expect(desktopPanel).toHaveTextContent("Open in 6529 Desktop");
+      expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
       expect(mockDesktopConnectionShare).toHaveBeenCalledWith({
         targetClientType: "desktop",
         signal: expect.objectContaining({ aborted: false }),
@@ -2482,7 +2541,7 @@ describe("HeaderShare", () => {
       );
       expect(screen.queryByTitle(/first-share-code/)).not.toBeInTheDocument();
       expect(
-        screen.getByRole("heading", { name: "Connect Device" })
+        screen.getByRole("heading", { name: "Connect 6529 Mobile" })
       ).toBeInTheDocument();
       expect(
         screen.getByText("Preparing Device Connection")
@@ -2535,7 +2594,7 @@ describe("HeaderShare", () => {
 
       await waitFor(() => expect(mockMobileConnectionShare).toHaveBeenCalled());
       expect(
-        screen.getByRole("heading", { name: "Connect Device" })
+        screen.getByRole("heading", { name: "Connect 6529 Mobile" })
       ).toBeInTheDocument();
       expect(
         screen.getByText("Device Connection Unavailable")
