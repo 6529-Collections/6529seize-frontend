@@ -81,20 +81,50 @@ describe("useWave", () => {
     }
   );
 
-  it("does not use wave-wide counts when the competition count is unavailable", () => {
-    const wave = {
-      ...baseWave,
-      metrics: { your_participation_drops_count: 99 },
-      competition: {
-        wave_id: baseWave.id,
-        lifecycle: "PUBLISHED",
-        participation: { ends_at: null },
-        capabilities: [],
-      },
+  it.each([null, undefined])(
+    "does not use wave-wide counts when the Main Stage count is %s",
+    (count) => {
+      const wave = {
+        ...baseWave,
+        metrics: { your_participation_drops_count: 99 },
+        competition: {
+          wave_id: baseWave.id,
+          lifecycle: "PUBLISHED",
+          participation: { ends_at: null },
+          capabilities: ["MAIN_STAGE"],
+          your_active_entries_count: count,
+        },
+      };
+      const { result } = renderHook(() => useWave(wave));
+      expect(result.current.participation.currentSubmissions).toBeNull();
+      expect(result.current.participation.hasReachedLimit).toBe(false);
+    }
+  );
+
+  it("updates capacity when selecting a sibling decision in the same wave", () => {
+    const competition = {
+      id: "full-decision",
+      wave_id: baseWave.id,
+      lifecycle: "PUBLISHED",
+      participation: { ends_at: null },
+      capabilities: [],
+      your_active_entries_count: 3,
     };
-    const { result } = renderHook(() => useWave(wave));
-    expect(result.current.participation.currentSubmissions).toBeNull();
-    expect(result.current.participation.hasReachedLimit).toBe(false);
+    const { result, rerender } = renderHook(
+      ({ selected }) => useWave({ ...baseWave, competition: selected }),
+      { initialProps: { selected: competition } }
+    );
+    expect(result.current.participation.hasReachedLimit).toBe(true);
+    rerender({
+      selected: {
+        ...competition,
+        id: "sibling-decision",
+        your_active_entries_count: 1,
+      },
+    });
+    expect(result.current.participation.currentSubmissions).toBe(1);
+    expect(result.current.participation.remainingSubmissions).toBe(1);
+    expect(result.current.participation.canSubmitNow).toBe(true);
   });
 
   it("closes manually ended competitions without a scheduled deadline", () => {

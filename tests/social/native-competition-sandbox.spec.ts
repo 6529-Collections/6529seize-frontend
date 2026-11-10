@@ -303,6 +303,7 @@ const competition = (id: string, title: string) => ({
   ...structuredClone(competitionRuleDefaults),
   participation: {
     ...structuredClone(competitionRuleDefaults.participation),
+    max_entries_per_participant: null as number | null,
     ends_at: null as number | null,
   },
   decisions: {
@@ -2006,6 +2007,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       }
       sandbox.setCompetition("alpha", { your_active_entries_count: 2 });
       await page.reload({ waitUntil: "domcontentloaded" });
+      await expect(
+        page.getByRole("button", {
+          name: "Submission Limit Reached",
+          exact: true,
+        })
+      ).toHaveCount(0);
       const submit = page.getByRole("button", { name: /^Submit (Work|Meme)/ });
       await expect(submit).toBeVisible();
       await submit.click();
