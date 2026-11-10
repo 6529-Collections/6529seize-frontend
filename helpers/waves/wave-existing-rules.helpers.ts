@@ -14,6 +14,10 @@ import {
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
+import {
   CREDIT_SCOPE_LABELS,
   formatDuration,
   formatFiniteNumber,
@@ -40,6 +44,8 @@ interface WaveRulesContext {
   readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
   readonly creditLabel: string;
   readonly isChatWave: boolean;
+  /** The zone that schedule times render in. */
+  readonly zone: DisplayTimeZone;
 }
 
 const getOptionalRulesText = (value: string): string | null =>
@@ -142,21 +148,24 @@ const getWaveAccessSection = (context: WaveRulesContext): WaveRuleSection => ({
   ],
 });
 
-const getWaveTimingSection = ({ wave }: WaveRulesContext): WaveRuleSection => ({
+const getWaveTimingSection = ({
+  wave,
+  zone,
+}: WaveRulesContext): WaveRuleSection => ({
   id: "timing",
   title: "Schedule",
   rows: [
     {
       id: "submission-window",
       label: "Submission window",
-      value: getWavePeriod(wave.participation.period),
+      value: getWavePeriod(wave.participation.period, zone),
     },
     {
       id: "voting-window",
       label: "Voting window",
-      value: getWavePeriod(wave.voting.period),
+      value: getWavePeriod(wave.voting.period, zone),
     },
-    ...getDecisionRows(wave.wave.decisions_strategy),
+    ...getDecisionRows(wave.wave.decisions_strategy, zone),
   ],
 });
 
@@ -262,6 +271,7 @@ const getWaveVotingSection = ({
 const getWaveApprovalSection = ({
   creditLabel,
   wave,
+  zone,
 }: WaveRulesContext): WaveRuleSection => ({
   id: "approval",
   title: "Approval",
@@ -289,7 +299,7 @@ const getWaveApprovalSection = ({
     {
       id: "approval-window",
       label: "Approval window",
-      value: getWavePeriod(wave.voting.period),
+      value: getWavePeriod(wave.voting.period, zone),
     },
   ],
 });
@@ -329,9 +339,12 @@ const getWaveAutomaticSections = (
 export const getWaveRules = ({
   wave,
   metadata,
+  zone = LOCAL_DISPLAY_TIME_ZONE,
 }: {
   readonly wave: ApiWave;
   readonly metadata: readonly ApiWaveMetadata[] | null | undefined;
+  /** The display time zone for schedule times; defaults to the device zone. */
+  readonly zone?: DisplayTimeZone | undefined;
 }): WaveRules => {
   const isChatWave = wave.wave.type === ApiWaveType.Chat;
   const bindingRules = normalizeWaveCustomRules(wave.participation.terms);
@@ -340,6 +353,7 @@ export const getWaveRules = ({
     metadata,
     creditLabel: getWaveCreditLabel(wave.voting.credit_type),
     isChatWave,
+    zone,
   };
 
   return {

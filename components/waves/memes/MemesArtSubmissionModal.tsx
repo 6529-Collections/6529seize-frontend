@@ -10,13 +10,14 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import React, { Fragment, useMemo } from "react";
+import React, { Fragment, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MemesArtSubmissionContainer from "./submission/MemesArtSubmissionContainer";
 import { useDropDetailMetadata } from "@/components/waves/drop/useDropDetailMetadata";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { t, type MessageKey } from "@/i18n/messages";
 
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
@@ -38,6 +39,8 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
   sourceDrop,
   onSourceDropDeleted,
 }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(isOpen, dialogRef, onClose);
   const locale = useBrowserLocale();
   const { metadata, metadataState } = useDropDetailMetadata(sourceDrop, isOpen);
   const hydratedSourceDrop = useMemo(
@@ -94,6 +97,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
   return createPortal(
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
+        ref={dialogRef}
         className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1020] tw-overflow-hidden"
         onClose={onClose}
       >
