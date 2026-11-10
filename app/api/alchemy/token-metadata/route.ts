@@ -3,10 +3,11 @@ import { NextResponse } from "next/server";
 
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { isValidEthAddress } from "@/helpers/Helpers";
+import { BoundedResultCache } from "@/lib/cache/boundedResultCache";
 import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
-import { fetchPublicJson, UrlGuardError } from "@/lib/security/urlGuard";
 import { normaliseAddress, resolveNetwork } from "@/services/alchemy/utils";
 import type { SupportedChain } from "@/types/nft";
+import { fetchAlchemyJson } from "../fetchAlchemyJson";
 import { readJsonBody } from "../readJsonBody";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
@@ -14,7 +15,14 @@ const MAX_BATCH_SIZE = 100;
 const MAX_TOKENS_PER_REQUEST = 100;
 const MAX_BODY_BYTES = 32 * 1024;
 const CACHE_TTL_MS = 5 * 60 * 1000;
-const MAX_CACHE_ENTRIES = 500;
+// A full 100-token batch is usually well under 1 MB. Collections that keep
+// metadata on-chain (inline base64 images) are far larger, so allow ample
+// headroom before refusing a batch.
+const MAX_RESPONSE_BYTES = 16 * 1024 * 1024;
+// Cached batches are bounded by memory, not count. A batch larger than the
+// per-entry cap is served but not kept.
+const MAX_CACHE_BYTES = 32 * 1024 * 1024;
+const MAX_CACHE_ENTRY_BYTES = 8 * 1024 * 1024;
 const TOKEN_ID_DECIMAL_PATTERN = /^(0|[1-9]\d{0,77})$/;
 const TOKEN_ID_HEX_PATTERN = /^0x[\da-fA-F]{1,64}$/;
 
@@ -26,13 +34,15 @@ type TokenMetadataRequestBody = {
 };
 
 type TokenToFetch = { contractAddress: string; tokenId: string };
-type BatchCacheEntry = { expiresAt: number; tokens: unknown[] };
 
 type ParseResult =
   | { ok: true; tokens: TokenToFetch[]; chain: SupportedChain }
   | { ok: false; response: NextResponse };
 
-const batchCache = new Map<string, BatchCacheEntry>();
+const batchCache = new BoundedResultCache<unknown[]>({
+  maxBytes: MAX_CACHE_BYTES,
+  maxEntryBytes: MAX_CACHE_ENTRY_BYTES,
+});
 
 const enforceRateLimit = createClientRateLimiter({
   limit: 120,
@@ -223,49 +233,56 @@ function parseRequestBody(body: TokenMetadataRequestBody): ParseResult {
   };
 }
 
+function getTokenKey(token: TokenToFetch): string {
+  return `${token.contractAddress.toLowerCase()}:${token.tokenId}`;
+}
+
+/**
+ * One entry per distinct token, in a fixed order, so the same set of tokens
+ * always maps to the same upstream batch and cache entry whatever order or
+ * repetition the caller used.
+ */
+function canonicaliseTokens(tokens: readonly TokenToFetch[]): TokenToFetch[] {
+  const byKey = new Map<string, TokenToFetch>();
+  for (const token of tokens) {
+    const key = getTokenKey(token);
+    if (!byKey.has(key)) {
+      byKey.set(key, token);
+    }
+  }
+  return Array.from(byKey.entries())
+    .sort(([left], [right]) => {
+      if (left < right) {
+        return -1;
+      }
+      return left > right ? 1 : 0;
+    })
+    .map(([, token]) => token);
+}
+
 function getBatchCacheKey(
   chain: SupportedChain,
   tokens: readonly TokenToFetch[]
 ): string {
-  return `${chain}:${tokens
-    .map((token) => `${token.contractAddress.toLowerCase()}:${token.tokenId}`)
-    .join("|")}`;
+  return `${chain}:${tokens.map(getTokenKey).join("|")}`;
 }
 
-function getCachedBatch(key: string, now = Date.now()): unknown[] | null {
-  const cached = batchCache.get(key);
-  if (!cached) {
-    return null;
-  }
-  if (cached.expiresAt <= now) {
-    batchCache.delete(key);
-    return null;
-  }
-  return cached.tokens;
-}
+class AlchemyBatchError extends Error {
+  readonly status: number;
 
-function pruneBatchCache(now = Date.now()): void {
-  batchCache.forEach((entry, key) => {
-    if (entry.expiresAt <= now) {
-      batchCache.delete(key);
-    }
-  });
-
-  while (batchCache.size >= MAX_CACHE_ENTRIES) {
-    const oldestBatch = batchCache.keys().next();
-    if (oldestBatch.done) {
-      break;
-    }
-    batchCache.delete(oldestBatch.value);
+  constructor(status: number) {
+    super("Failed to fetch token metadata");
+    this.name = "AlchemyBatchError";
+    this.status = status;
   }
 }
 
-function setCachedBatch(key: string, tokens: unknown[]): void {
-  pruneBatchCache();
-  batchCache.set(key, {
-    expiresAt: Date.now() + CACHE_TTL_MS,
-    tokens,
-  });
+function readResponseTokens(payload: unknown): unknown[] {
+  if (!isRecord(payload)) {
+    return [];
+  }
+  const tokens = payload["tokens"] ?? payload["nfts"];
+  return Array.isArray(tokens) ? tokens : [];
 }
 
 async function fetchAlchemyBatch({
@@ -279,31 +296,27 @@ async function fetchAlchemyBatch({
   readonly tokens: readonly TokenToFetch[];
   readonly signal: AbortSignal;
 }): Promise<unknown[]> {
-  const cacheKey = getBatchCacheKey(chain, tokens);
-  const cached = getCachedBatch(cacheKey);
-  if (cached) {
-    return cached;
-  }
-
-  const payload = await fetchPublicJson<{
-    tokens?: unknown[] | undefined;
-    nfts?: unknown[] | undefined;
-  }>(
-    url,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      body: JSON.stringify({ tokens }),
-      signal,
+  return batchCache.load(
+    getBatchCacheKey(chain, tokens),
+    async (jobSignal) => {
+      const result = await fetchAlchemyJson(url, {
+        maxBytes: MAX_RESPONSE_BYTES,
+        signal: jobSignal,
+        jsonBody: { tokens },
+      });
+      if (!result.ok) {
+        throw new AlchemyBatchError(result.status);
+      }
+      return {
+        value: readResponseTokens(result.payload),
+        // The parsed value is held in memory as JavaScript strings, about
+        // two bytes for each character of the response text.
+        bytes: result.text.length * 2,
+        ttlMs: CACHE_TTL_MS,
+      };
     },
-    { timeoutMs: 10000 }
+    signal
   );
-  const responseTokens = payload.tokens ?? payload.nfts ?? [];
-  setCachedBatch(cacheKey, responseTokens);
-  return responseTokens;
 }
 
 export async function POST(request: NextRequest) {
@@ -326,7 +339,8 @@ export async function POST(request: NextRequest) {
     return rateLimitResponse;
   }
 
-  const { tokens: tokensToFetch, chain } = parseResult;
+  const { chain } = parseResult;
+  const tokensToFetch = canonicaliseTokens(parseResult.tokens);
 
   try {
     const apiKey = getAlchemyApiKey();
@@ -350,10 +364,10 @@ export async function POST(request: NextRequest) {
       { headers: NO_STORE_HEADERS }
     );
   } catch (error) {
-    if (error instanceof UrlGuardError) {
+    if (error instanceof AlchemyBatchError) {
       return NextResponse.json(
         { error: error.message },
-        { status: error.statusCode, headers: NO_STORE_HEADERS }
+        { status: error.status, headers: NO_STORE_HEADERS }
       );
     }
     const message =

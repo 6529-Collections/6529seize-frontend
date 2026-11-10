@@ -100,8 +100,9 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
         />
 
         {/* Empty state */}
-        {!isSearching && !isCollapsed && collection === "joined" && (
+        {!isSearching && !isCollapsed && collection !== "pinned" && (
           <JoinedWavesListRecovery
+            collection={collection}
             hasError={hasLoadingError}
             hasNextPage={hasNextPage === true}
             isFetching={collectionFetching || isFetchingNextPage}

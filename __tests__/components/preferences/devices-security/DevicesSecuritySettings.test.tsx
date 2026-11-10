@@ -110,6 +110,9 @@ const state = (
   revoke: jest.fn(async () => undefined),
   canRename: () => true,
   rename: jest.fn(async () => undefined),
+  signsRevocations: true,
+  approvalFor: () => null,
+  engine: null,
   ...patch,
 });
 
@@ -397,6 +400,54 @@ describe("DevicesSecuritySettings", () => {
     expect(dialog).toHaveTextContent(
       "It will stop posting as you and stop receiving encrypted DMs."
     );
+    // Signed here, so that device can verify it and delete its chats.
+    expect(dialog).toHaveTextContent(
+      "It deletes the encrypted chats saved on it once it confirms"
+    );
+  });
+
+  it("says a combined device keeps its chats when this browser can't sign the revoke", async () => {
+    mockState = state({ signsRevocations: false });
+    render(<DevicesSecuritySettings />);
+    const earlier = screen.getByRole("list", {
+      name: "Earlier setups of this browser · 1",
+    });
+    fireEvent.click(
+      within(earlier).getByRole("button", { name: "Revoke Brave on Windows" })
+    );
+    const dialog = await screen.findByRole("dialog", {
+      name: "Revoke Brave on Windows?",
+    });
+    expect(dialog).toHaveTextContent(
+      "The encrypted chats saved on it stay there until they’re removed on that device"
+    );
+  });
+
+  it("offers Add device on an own device this browser doesn't add to chats yet", async () => {
+    const trustDevice = jest.fn(async () => undefined);
+    mockState = state({
+      engine: { trustDevice } as unknown as SecurityDevicesState["engine"],
+      approvalFor: (device) =>
+        device.id === "phone"
+          ? {
+              deviceKey: "phone",
+              label: "6529 app on iPhone",
+              platform: "phone",
+              createdAt: NOW - 10 * DAY,
+              lastSeenAt: NOW - HOUR,
+              expiresAt: NOW + 170 * DAY,
+              revokedAt: null,
+              isThisDevice: false,
+              verified: true,
+              needsApproval: true,
+              wallet: WALLET,
+            }
+          : null,
+    });
+    render(<DevicesSecuritySettings />);
+    expect(screen.getAllByText("Not added on this device")).toHaveLength(1);
+    await userEvent.click(screen.getByRole("button", { name: /^Add device signed by wallet/ }));
+    expect(trustDevice).toHaveBeenCalledWith("phone");
   });
 
   it("marks nothing as unknown once this browser's keys were read", async () => {

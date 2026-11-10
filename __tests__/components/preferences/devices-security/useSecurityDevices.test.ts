@@ -46,6 +46,10 @@ jest.mock("@/hooks/device-signing/useDeviceGrants", () => ({
 }));
 let mockE2ee: Record<string, unknown>;
 jest.mock("@/hooks/e2ee/useE2ee", () => ({ useE2ee: () => mockE2ee }));
+const mockRemoveLocal = jest.fn(async () => undefined);
+jest.mock("@/components/e2ee/useRemoveE2eeLocalData", () => ({
+  useRemoveE2eeLocalData: () => mockRemoveLocal,
+}));
 let mockApiQuery: Record<string, unknown>;
 let mockApiQueryEnabled: boolean | undefined;
 jest.mock("@tanstack/react-query", () => ({
@@ -201,6 +205,47 @@ describe("useSecurityDevices", () => {
       expect(mockGrantsRefetch).toHaveBeenCalled();
     });
 
+    it("signs revocations only while the engine runs here", () => {
+      mockE2ee = { engine, status: "ready", devices: [engineDevice("e1")] };
+      expect(renderHook(() => useSecurityDevices()).result.current.signsRevocations).toBe(true);
+      mockE2ee = { engine: null, status: "locked", devices: [] };
+      expect(renderHook(() => useSecurityDevices()).result.current.signsRevocations).toBe(false);
+    });
+
+    it("removes this browser's encrypted chats after an unsigned revoke of its combined grant", async () => {
+      // The engine isn't running, so the server revokes this browser's
+      // encrypted device unsigned and nothing here would clear it.
+      mockE2ee = { engine: null, status: "locked", devices: [] };
+      mockGrants = [grant("a", { device_key: OWN_KEY })];
+      mockLocalKeys = { failed: false, publicKeys: [OWN_KEY] };
+      mockApiQuery = {
+        ...mockApiQuery,
+        isSuccess: true,
+        data: [apiDevice("0xabc", { grant_id: "a", grant_message: "signed" })],
+      };
+      const { result } = renderHook(() => useSecurityDevices());
+      const device = result.current.thisDevice;
+      expect(device?.encryptedDms?.status).toBe("active");
+      await act(() => result.current.revoke(device!));
+      expect(mockRevokeGrant).toHaveBeenCalledWith(mockGrants[0]);
+      expect(mockRemoveLocal).toHaveBeenCalled();
+    });
+
+    it("leaves local data alone when revoking another device's grant", async () => {
+      mockE2ee = { engine: null, status: "locked", devices: [] };
+      mockGrants = [grant("a")];
+      mockApiQuery = {
+        ...mockApiQuery,
+        isSuccess: true,
+        data: [apiDevice("0xabc", { grant_id: "a", grant_message: "signed" })],
+      };
+      const { result } = renderHook(() => useSecurityDevices());
+      const [device] = result.current.otherDevices;
+      await act(() => result.current.revoke(device!));
+      expect(mockRevokeGrant).toHaveBeenCalled();
+      expect(mockRemoveLocal).not.toHaveBeenCalled();
+    });
+
     it("revokes a signed-posts-only grant through the API", async () => {
       mockGrants = [grant("a")];
       mockE2eeEnabled = false;
@@ -227,6 +272,33 @@ describe("useSecurityDevices", () => {
       await expect(result.current.revoke(device!)).rejects.toBeInstanceOf(
         DeviceActionUnavailableError
       );
+    });
+  });
+
+  describe("approvals", () => {
+    it("finds an own device this browser doesn't add to chats yet", () => {
+      mockE2ee = {
+        engine,
+        status: "ready",
+        devices: [
+          engineDevice("e1", { needsApproval: true, wallet: ADDRESS }),
+          engineDevice("e2", { label: "6529 app on iPhone", platform: "phone" }),
+        ],
+      };
+      const { result } = renderHook(() => useSecurityDevices());
+      const byId = (id: string) =>
+        result.current.otherDevices.find((device) => device.id === id)!;
+      expect(result.current.approvalFor(byId("e1"))?.deviceKey).toBe("e1");
+      expect(result.current.approvalFor(byId("e2"))).toBeNull();
+      expect(result.current.engine).toBe(engine);
+    });
+
+    it("finds none from the API list", () => {
+      mockE2ee = { engine: null, status: "unsupported", devices: [] };
+      mockApiQuery = { ...mockApiQuery, isSuccess: true, data: [apiDevice("0xabc")] };
+      const { result } = renderHook(() => useSecurityDevices());
+      const [device] = result.current.otherDevices;
+      expect(result.current.approvalFor(device!)).toBeNull();
     });
   });
 

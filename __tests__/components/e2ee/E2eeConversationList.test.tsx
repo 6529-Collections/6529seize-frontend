@@ -7,6 +7,7 @@ import { setE2eeChatMuted } from "@/components/e2ee/e2eeMutedChats";
 import { useE2eeUnreadSummary } from "@/hooks/e2ee/useE2ee";
 import {
   ALICE_ID,
+  BOB_ID,
   contextFor,
   conversation,
   createFakeE2eeEngine,
@@ -183,6 +184,49 @@ describe("encrypted conversation list", () => {
     expect(row).toHaveAttribute("href", `/messages/encrypted/${GROUP_G}`);
   });
 
+  it("lists a DM holding someone else as its own chat, by its members", () => {
+    const pair = {
+      kind: "dm" as const,
+      name: null,
+      admins: [SELF_ID, ALICE_ID],
+    };
+    const real = conversation({
+      ...pair,
+      g: DM_G,
+      members: [member(SELF_ID, "me"), member(ALICE_ID, "alice")],
+    });
+    // Sorts first by g, so it would have been the current chat with alice.
+    const crowded = conversation({
+      ...pair,
+      g: GROUP_G,
+      lastMessage: message({ id: "m3", senderProfileId: BOB_ID, text: "hi" }),
+    });
+    render(
+      <E2eeTestProvider
+        value={contextFor(
+          createFakeE2eeEngine({ conversations: [real, crowded] })
+        )}
+      >
+        <E2eeConversationListPage />
+      </E2eeTestProvider>
+    );
+    const list = screen.getByRole("list", { name: "Encrypted chats" });
+    const rows = within(list).getAllByRole("link");
+    expect(rows.map((row) => row.getAttribute("href")).sort()).toEqual(
+      [`/messages/encrypted/${DM_G}`, `/messages/encrypted/${GROUP_G}`].sort()
+    );
+    const crowdedRow = rows.find((row) =>
+      row.getAttribute("href")?.endsWith(GROUP_G)
+    );
+    expect(crowdedRow).toHaveTextContent("alice and bob");
+    expect(crowdedRow).toHaveTextContent("bob: hi");
+    const realRow = rows.find((row) =>
+      row.getAttribute("href")?.endsWith(DM_G)
+    );
+    expect(realRow).toHaveTextContent("alice");
+    expect(realRow).not.toHaveTextContent("bob");
+  });
+
   it("marks a chat muted on this device and leaves it out of the badge", () => {
     setE2eeChatMuted(SELF_ID, GROUP_G, true);
     const engine = createFakeE2eeEngine({ conversations });
@@ -247,7 +291,9 @@ describe("encrypted conversation list", () => {
       expect(links[0]).toHaveAttribute("href", href);
       expect(links[0]).toHaveTextContent("2 unread messages");
     }
-    expect(within(sidebar!).getByRole("link", { current: "page" })).toBeVisible();
+    expect(
+      within(sidebar!).getByRole("link", { current: "page" })
+    ).toBeVisible();
   });
 
   it("opens the history with unread incoming messages when concurrent chats share a row", () => {
@@ -443,7 +489,9 @@ describe("E2eeMessagesSection", () => {
           <E2eeMessagesSection collapsed={collapsed} />
         </E2eeTestProvider>
       );
-      const list = within(screen.getByRole("list", { name: "Encrypted chats" }));
+      const list = within(
+        screen.getByRole("list", { name: "Encrypted chats" })
+      );
       expect(list.getByRole("link", { current: "page" })).toHaveAttribute(
         "href",
         "/messages/encrypted"

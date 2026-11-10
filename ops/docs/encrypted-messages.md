@@ -65,7 +65,8 @@ continue to appear as Unknown member.
 Encrypted and ordinary messages use the same rich-text editor. Custom emoji
 shortcodes render as inline images while composing and editing; encrypted drafts
 keep their shortcode representation for encryption and sending. Encrypted chat
-does not offer GIF, Poll or Storm actions.
+does not offer Poll or Storm actions. GIFs can be sent as encrypted attachments;
+their search and previews connect publicly to GIPHY.
 
 Messages support the same Markdown formatting as ordinary chats: headings,
 **bold** and italic text, strikethrough, lists and task lists, quotes,
@@ -105,11 +106,25 @@ native keyboard removes focus and restores the normal bottom safe-area clearance
 
 When this browser holds encrypted messages, **Sign out** and **Sign Out All
 Profiles** ask first whether to **Remove encrypted messages from this
-browser**. It deletes the chats, attachment keys, unsent messages and
-encryption keys saved here: for the profile you sign out of, or for every
-profile with Sign Out All Profiles (where it is on by default). Without
-encrypted backup that history cannot be recovered. If you keep them, they
-stay saved in this browser for the next sign-in.
+browser**. If you keep them, the chats and this browser's encryption keys
+stay saved here, ready for the next sign-in. Removing deletes the chats,
+attachment keys, unsent messages and encryption keys saved here: for the
+profile you sign out of, or for every profile with Sign Out All Profiles.
+
+- You stay a member of your chats: this browser's earlier registration stays
+  listed under your devices until its permission expires.
+- This browser must then be set up again for encrypted messages and counts
+  as a new device, towards the device limit.
+- Without [encrypted backup](#encrypted-backup) the deleted history cannot be
+  recovered; with it, restore the history with your recovery code after you
+  set this browser up again.
+- Sign out has removal off by default. Sign Out All Profiles has it on by
+  default.
+- When backup is on, removing first uploads the latest changes. If that
+  upload fails, nothing is removed, the option turns off and the dialog
+  explains why; select it again to remove the messages anyway.
+- Signing out because a session expired or became invalid never removes
+  anything and shows no prompt.
 
 ## Location in the site
 
@@ -205,8 +220,14 @@ were removed, renewal cannot recreate them: restore a backup where available.
 Preferences → **Devices & security** identifies each grant's permissions and
 explains what **Revoke** will disable. Revoking a combined grant disables both
 Signed Posts and Encrypted DMs; a separate grant disables only its own permission.
-These are not separate revoke switches within a combined grant. Revoking this
-encryption device clears its local encrypted history and keys. Reauthorizing
+These are not separate revoke switches within a combined grant. When
+encrypted messages are on in this browser, revoking a combined grant also signs
+its encrypted device's revocation, so your other devices and that device can
+verify it. Revoking this browser's own grant clears its local encrypted history
+and keys right away. Another device deletes its history once it confirms the
+revocation came from a device of yours it trusts; otherwise (for example when
+encrypted messages are off in the browser you revoke from) it stops and keeps
+that history until it is removed there. The dialog says which applies. Reauthorizing
 later creates a new device; it does not bring that deleted local history back.
 Earlier Signed Posts remain verifiable after revocation.
 
@@ -237,6 +258,13 @@ If you already have an encrypted direct message with that person, the page
 offers **Open chat** instead. Your list and sidebar show one direct-message
 entry per person, including when you have left an earlier chat or started a
 replacement. Group chats remain separate.
+
+A direct message has exactly two people. A device joins one only when you are
+one of the two people it names, the invitation comes from one of you, and
+every device in it belongs to one of you; otherwise the invitation is not
+joined. A chat marked as a direct message that holds anyone else is listed on
+its own, titled by everyone in it rather than under one person, and you can’t
+send in it.
 
 **Chat history** above the timeline lets you open earlier chats with that
 person, including imported messages kept in the earlier chat. Messages and
@@ -355,12 +383,37 @@ appear.
   (**Too large to preview**) instead, and only a few images load at once.
   File names are shown and saved without path separators, control or
   right-to-left override characters, and at most 120 characters long.
+- Photos are cleaned on your device before they are encrypted, because the
+  server only ever receives encrypted data and cannot do it for you. JPEG,
+  PNG (including animated PNG), WebP and GIF images are sent without
+  location, camera details and serial numbers, capture date and time,
+  embedded thumbnails, comments, and XMP and IPTC data. Pixels, colour
+  profiles and animation are kept unchanged, and the image keeps its
+  orientation. JPEG HDR gain maps are removed with the other extra data, so
+  an HDR JPEG arrives as its standard-range image. Images are recognised by
+  their contents, so this also applies when the picker reports no file type.
+  Every image is sent under a neutral name such as `image.jpg`. Images in
+  history moved from an unencrypted DM are cleaned but keep the names they
+  had there. GIFs chosen with **Add GIF** are public images and are sent
+  exactly as downloaded, under their own name.
+- Other images (HEIC, AVIF, TIFF and others), videos, PDFs and other files
+  are sent exactly as chosen, with their embedded details and, except for
+  images, their file names. An image that cannot be cleaned safely is sent
+  unchanged rather than blocked.
+- Attachments declaring more than one encrypted attachment can hold (25
+  encrypted chunks, 25 MB) are refused without downloading anything.
   The server can switch attachments off as a kill switch; while it is off
   the attach control is disabled and chats are text only.
 - Paste images (Ctrl+V or Cmd+V) into the composer to attach them, with the
   same limits as the attach control. Text copied together with an image is
   pasted into the message as well. Pasting attaches images only while the
   attach control is enabled, so not while you edit a message.
+- Select **Add GIF** to search GIPHY. Searches and previews connect directly
+  to GIPHY and are not end-to-end encrypted. Choosing a GIF downloads it into
+  your attachments; select **Send** to send it with your message. The GIF is
+  encrypted on your device, and recipients view the decrypted attachment
+  without connecting to GIPHY. You can cancel a download or remove the GIF
+  before sending. The same file size and attachment limits apply.
 - Open a message's menu to react, reply, or edit or delete your own messages.
   On someone else's message the menu also offers **Mute on this device** (the
   same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted
@@ -418,6 +471,13 @@ person's devices. Later devices of that person are added automatically only
 when one of those wallets signed them and this device could check the
 signature.
 
+Your own profile is the exception: it is never trusted on first sighting.
+Your other devices are added automatically only when they are signed by the
+wallet this device was signed by, or by a wallet you added on this device with
+**Add device**. If your profile has several wallets (for example a
+consolidation) and you set up a device with another one, each device asks you
+once to add the other wallet's devices.
+
 When a member has a device signed by a wallet your device has not seen for
 them, it is not added and the chat shows **{name} has a device signed by a new
 wallet 0x1234…abcd.** (for your own profile: **You have a device signed by a
@@ -429,6 +489,13 @@ they told you they set up a new one.
 
 A revoked device is removed only when the revocation comes from that device
 itself or from a device signed by a wallet trusted for its owner.
+
+When a member's new device is added by someone else and your device has not
+verified it for that person (its wallet is not trusted for them here, or its
+signature could not be checked here), the timeline says so, naming who added
+it and whose device it is: **alice added a device signed by wallet
+0x1234…abcd, which isn’t verified for bob on this device**. **Chat info** marks
+that device **Not verified for bob on this device**.
 
 Trust on first use cannot catch a wrong device that is already there the first
 time your device sees someone. Compare safety codes and check the wallets in
@@ -494,19 +561,37 @@ opening the tab starts encrypted messages in that browser so backup can show.
   expanded, each ended device is one row.
 - **What these permissions mean** explains both permissions.
 
-**Revoke** asks first, naming the device and what stops; posts it signed stay
-verifiable. Revoking this device opens its own
+**Revoke** asks first, naming the device, what stops and what happens to the
+encrypted chats saved on it; posts it signed stay verifiable. Revoking this device opens its own
 **Revoke this browser?** dialog: it names the browser you're using, says what
 stops, and with backup on says that only messages included in your last
 backup can be restored. With backup off it warns
 that the encrypted chats in this browser can't be restored afterwards and
 offers **Set up backup first**. Revoking it removes its encrypted messages and
 keys from this browser right away and shows the card to turn encrypted
-messages on again. A new device is named after its
+messages on again. Your device's data is removed only when
+the revocation verifies on it (it came from that device, or from a device of
+yours this device trusts). If 6529.io lists this device as revoked but the
+revocation can't be confirmed, the device stops sending and receiving
+encrypted messages, keeps everything saved on it, and stays stopped (also after
+a reload) until you act; the card to turn them on says so. Turning them on
+again checks once more. To use them on that browser again, select **Remove
+encrypted messages from this browser** on that card (or at sign-out) and turn
+them on again; that deletes the history saved there, which only an encrypted
+backup can restore. A device that already pinned one of your other wallets
+before this check existed still accepts a revocation signed by a device of that
+wallet. A new device is named after its
 browser or app and OS family (for example "Chrome on Windows" or "6529 Mobile on
 iPhone"); devices added earlier keep their name. A profile can have up to 10
 active devices; at the limit, the new device lists the profile's devices and
 asks you to revoke one from a device you already use, then turn it on.
+
+A device of yours signed by a wallet this device has not added shows **Not
+added on this device** with the signing wallet and **Add device**. Until you
+add it, this device does not add it to your encrypted chats (your chats show
+the same notice with **Add device** and **Ignore**). Adding it trusts that
+wallet for your profile on this device, so other devices signed by it are
+added too.
 
 When another device of yours is turned on, your other devices show which
 device was added and when, that it can read your encrypted messages, and
@@ -643,9 +728,7 @@ restore it on a new device.
   source-browser-approved [connection sharing](#setup-through-connection-sharing)
   signs in and enrolls the receiving app without connecting a wallet there.
   Ordinary app sign-in alone does not grant these permissions. Secure setup
-  requires a compatible app build with cryptographic support. The web
-  **6529 Desktop** secure setup button shows **Coming soon**. Desktop users
-  can choose **Connect only**.
+  requires a compatible Desktop or Mobile build with cryptographic support.
 
 - **Phones.** 6529 Mobile needs iOS 16.4 or later (earlier iOS versions cannot
   run the current site at all) or a current Android System WebView. Signed
@@ -774,8 +857,9 @@ Choose **Connect only** for an additional signed-in app session, or
 The source browser does not need encryption enabled on itself to approve the
 receiving app. Proxy sessions cannot authorize secure setup.
 
-The **6529 Desktop** secure option is disabled and shows **Coming soon**.
-Choose **Connect only** to sign in on Desktop.
+Desktop secure setup requires 6529 Desktop v0.4.0 or later. Approve the wallet
+signature in the browser, then select **Open in 6529 Desktop** to open the
+private link.
 
 For Mobile secure setup, approve the wallet signature in the browser, then scan
 one QR or open its private link in the receiving app. The regular **Scan QR Code**

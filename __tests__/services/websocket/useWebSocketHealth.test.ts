@@ -280,6 +280,20 @@ describe("useWebSocketHealth", () => {
     expect(mockConnect).not.toHaveBeenCalled();
   });
 
+  it("tells a disconnected provider to stand down when the token goes away", () => {
+    mockGetAuthJwt.mockReturnValue("signed-in-token");
+    renderHook(() => useWebSocketHealth());
+    expect(mockConnect).toHaveBeenCalledWith("signed-in-token");
+    mockDisconnect.mockClear();
+
+    // The socket dropped and is waiting to reconnect when the user signs out.
+    mockGetAuthJwt.mockReturnValue(null);
+    act(() => window.dispatchEvent(new Event(AUTH_TOKEN_CHANGED_EVENT)));
+
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+    expect(mockReauthenticate).not.toHaveBeenCalled();
+  });
+
   it("sets a 10 second health-check interval and reacts on timer", () => {
     mockGetAuthJwt.mockReturnValue(null);
     renderHook(() => useWebSocketHealth());

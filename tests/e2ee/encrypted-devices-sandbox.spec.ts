@@ -123,6 +123,15 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     await expect(thisDeviceCard(bobLaptop.page)).toHaveCount(1, {
       timeout: E2EE_UI_TIMEOUT_MS,
     });
+    // Encrypted messages are running in this tab (the backup card shows its
+    // real state), so the revoke signs with this device and members see
+    // the removal. Before that, Revoke goes through the grant instead.
+    await expect(
+      bobLaptop.page
+        .getByRole("main")
+        .getByRole("region", { name: /^Encrypted backup/u })
+        .getByRole("button", { name: e2eeMessage("e2ee.backup.action.turnOn") })
+    ).toBeVisible({ timeout: FIRST_LOAD_TIMEOUT_MS });
     const phoneRow = revocableDeviceRows(bobLaptop.page);
     await expect(phoneRow).toHaveCount(1, { timeout: E2EE_UI_TIMEOUT_MS });
     const revokePhone = phoneRow.getByRole("button", { name: /^Revoke /u });
@@ -140,7 +149,7 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
       )
     );
     await expect(dialog).toContainText(
-      DEVICES_SECURITY_MESSAGES["devicesSecurity.revoke.both"]
+      DEVICES_SECURITY_MESSAGES["devicesSecurity.revoke.bothSigned"]
     );
     await dialog
       .getByRole("button", { name: e2eeMessage("e2ee.devices.revokeConfirm") })

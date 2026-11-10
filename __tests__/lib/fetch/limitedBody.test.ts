@@ -70,6 +70,33 @@ describe("limitedBody", () => {
     );
   });
 
+  it("can return the first bytes of a longer body instead of rejecting it", async () => {
+    const cancel = jest.fn();
+    const chunks = ["<head>ab", "cdef</head>", "never read"].map((chunk) =>
+      new TextEncoder().encode(chunk)
+    );
+    const body = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        const next = chunks.shift();
+        if (next) {
+          controller.enqueue(next);
+        } else {
+          controller.close();
+        }
+      },
+      cancel,
+    });
+    const source = {
+      body,
+      headers: new Headers({ "content-length": "999999" }),
+    };
+
+    await expect(readLimitedText(source, 12, { truncate: true })).resolves.toBe(
+      "<head>abcdef"
+    );
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
   it("parses JSON only after the bounded text read", async () => {
     const response = createBodySource(JSON.stringify({ ok: true }), {
       "content-type": "application/json",

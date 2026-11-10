@@ -13,16 +13,27 @@ import { DeviceActionUnavailableError } from "./useSecurityDevices";
 const isOn = (device: SecurityDevice, key: "signedPosts" | "encryptedDms") =>
   device[key]?.status === "active";
 
-function getScopeKey(device: SecurityDevice): MessageKey {
+/**
+ * What stops, and what happens to its encrypted history: a revoke signed
+ * here lets that device verify it and delete its chats; an unsigned one
+ * (encrypted messages not running here) leaves them there.
+ */
+function getScopeKey(device: SecurityDevice, signed: boolean): MessageKey {
   const posts = isOn(device, "signedPosts");
   const dms = isOn(device, "encryptedDms");
   if (posts && dms) {
-    return "devicesSecurity.revoke.both";
+    return signed
+      ? "devicesSecurity.revoke.bothSigned"
+      : "devicesSecurity.revoke.bothUnsigned";
   }
   return dms ? "devicesSecurity.revoke.dms" : "devicesSecurity.revoke.posts";
 }
 
-function getCopy(locale: SupportedLocale, device: SecurityDevice | null) {
+function getCopy(
+  locale: SupportedLocale,
+  device: SecurityDevice | null,
+  signed: boolean
+) {
   const label = device?.label ?? "";
   if (device?.isThisDevice) {
     return {
@@ -33,7 +44,7 @@ function getCopy(locale: SupportedLocale, device: SecurityDevice | null) {
   }
   return {
     title: t(locale, "devicesSecurity.revoke.title", { label }),
-    body: device ? t(locale, getScopeKey(device)) : "",
+    body: device ? t(locale, getScopeKey(device, signed)) : "",
     confirm: t(locale, "e2ee.devices.revokeConfirm"),
   };
 }
@@ -51,16 +62,19 @@ const getErrorKey = (error: unknown): MessageKey =>
 export function RevokeDeviceDialog({
   device,
   localKeysUnreadable,
+  signed,
   onRevoke,
   onClose,
 }: {
   readonly device: SecurityDevice | null;
   readonly localKeysUnreadable: boolean;
+  /** Signed by this browser's encrypted-DMs device (see useSecurityDevices). */
+  readonly signed: boolean;
   readonly onRevoke: (device: SecurityDevice) => Promise<void>;
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
-  const copy = getCopy(locale, device);
+  const copy = getCopy(locale, device, signed);
   return (
     <E2eeConfirmDialog
       open={device !== null}

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { removeBaseEndpoint } from "@/helpers/Helpers";
+import { getInternalLinkPath } from "@/helpers/internalLink";
 
 import ChatItemHrefButtons from "./ChatItemHrefButtons";
 import { useLinkPreviewContext } from "./LinkPreviewContext";
@@ -22,11 +22,7 @@ export default function LinkHandlerFrame({
 }: LinkHandlerFrameProps) {
   const { hideActions } = useLinkPreviewContext();
   const effectiveRelativeHref =
-    relativeHref ??
-    (() => {
-      const relative = removeBaseEndpoint(href);
-      return relative.startsWith("/") ? relative : undefined;
-    })();
+    relativeHref ?? getInternalLinkPath(href) ?? undefined;
   const actionButtons = hideActions ? null : (
     <ChatItemHrefButtons
       href={href}

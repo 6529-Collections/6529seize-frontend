@@ -166,6 +166,8 @@ export default function DevicesSecuritySettings() {
                     <DeviceRow
                       key={device.id}
                       device={device}
+                      approval={security.approvalFor(device)}
+                      engine={security.engine}
                       canRevoke={security.canRevoke(device)}
                       revokeBlocker={security.revokeBlocker(device)}
                       canRename={security.canRename(device)}
@@ -205,6 +207,8 @@ export default function DevicesSecuritySettings() {
                     <DeviceRow
                       key={device.id}
                       device={device}
+                      approval={security.approvalFor(device)}
+                      engine={security.engine}
                       canRevoke={security.canRevoke(device)}
                       revokeBlocker={security.revokeBlocker(device)}
                       canRename={security.canRename(device)}
@@ -244,6 +248,7 @@ export default function DevicesSecuritySettings() {
       <RevokeDeviceDialog
         device={target}
         localKeysUnreadable={security.localKeysUnreadable}
+        signed={security.signsRevocations}
         onRevoke={revoke}
         onClose={() => setTarget(null)}
       />

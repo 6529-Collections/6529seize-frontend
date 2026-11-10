@@ -281,6 +281,77 @@ describe("urlGuard", () => {
     }
   );
 
+  describe("allowed schemes and ports", () => {
+    const options: FetchPublicUrlOptions = {
+      allowedProtocols: ["https:"],
+      allowedPorts: [443],
+    };
+
+    beforeEach(() => {
+      lookup.mockResolvedValue([{ address: SAFE_EXAMPLE_ADDRESS, family: 4 }]);
+    });
+
+    it.each([
+      ["another port", "https://safe.example:8443/next", "host-not-allowed"],
+      ["plain http", "http://safe.example/next", "unsupported-protocol"],
+      ["port 80", "https://safe.example:80/next", "host-not-allowed"],
+    ])("refuses a redirect hop to %s", async (_label, location, kind) => {
+      mockUndiciFetch.mockResolvedValue(
+        createResponse(302, {
+          headers: { location },
+          url: "https://safe.example/article",
+        })
+      );
+
+      await expect(
+        fetchPublicUrl("https://safe.example/article", {}, options)
+      ).rejects.toMatchObject({ kind });
+      expect(mockUndiciFetch).toHaveBeenCalledTimes(1);
+    });
+
+    it("refuses a first hop on another port before resolving it", async () => {
+      await expect(
+        fetchPublicUrl("https://safe.example:8443/article", {}, options)
+      ).rejects.toMatchObject({ kind: "host-not-allowed" });
+      expect(lookup).not.toHaveBeenCalled();
+      expect(mockUndiciFetch).not.toHaveBeenCalled();
+    });
+
+    it("follows redirects that keep to the allowed scheme and port", async () => {
+      mockUndiciFetch
+        .mockResolvedValueOnce(
+          createResponse(301, {
+            headers: { location: "https://safe.example:443/next" },
+            url: "https://safe.example/article",
+          })
+        )
+        .mockResolvedValueOnce(
+          createResponse(200, { url: "https://safe.example/next" })
+        );
+
+      const response = await fetchPublicUrl(
+        "https://safe.example/article",
+        {},
+        options
+      );
+      expect(response.status).toBe(200);
+      expect(mockUndiciFetch).toHaveBeenCalledTimes(2);
+    });
+
+    it("accepts the default ports of each listed scheme", async () => {
+      mockUndiciFetch.mockResolvedValue(
+        createResponse(200, { url: "http://safe.example/page" })
+      );
+
+      const response = await fetchPublicUrl(
+        "http://safe.example/page",
+        {},
+        { allowedPorts: [80, 443] }
+      );
+      expect(response.status).toBe(200);
+    });
+  });
+
   it("blocks a redirect hop that resolves to a private address", async () => {
     lookup.mockImplementation(async (hostname: string) => {
       if (hostname === "safe.example") {
@@ -502,7 +573,10 @@ describe("parseIpv6Groups", () => {
     ["::", [0, 0, 0, 0, 0, 0, 0, 0]],
     ["::1", [0, 0, 0, 0, 0, 0, 0, 1]],
     ["1::", [1, 0, 0, 0, 0, 0, 0, 0]],
-    ["2606:2800:220:1:248:1893:25c8:1946", [0x2606, 0x2800, 0x220, 1, 0x248, 0x1893, 0x25c8, 0x1946]],
+    [
+      "2606:2800:220:1:248:1893:25c8:1946",
+      [0x2606, 0x2800, 0x220, 1, 0x248, 0x1893, 0x25c8, 0x1946],
+    ],
   ])("expands %s", (address, groups) => {
     expect(parseIpv6Groups(address)).toEqual(groups);
   });

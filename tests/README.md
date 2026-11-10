@@ -346,6 +346,8 @@ Opt-in stateful staging packs:
   in ordinary and encrypted chats, captures both at desktop and phone widths,
   and checks private footnote navigation and that private Markdown URLs cause
   no automatic requests.
+  Ordinary chat uses a separate throwaway session so public traffic stays out
+  of the encrypted users' lifetime privacy evidence.
   The same check covers formatted encrypted notification previews in the
   desktop overview and on the notifications page, including fenced code and
   bounded previews at desktop and phone widths.
