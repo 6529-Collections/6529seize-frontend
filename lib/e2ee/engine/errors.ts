@@ -1,6 +1,12 @@
 /** Code used when the user declines the device-grant wallet signature. */
 export const E2EE_SIGNATURE_REJECTED = "E2EE_SIGNATURE_REJECTED";
 
+/**
+ * This device is listed as revoked but the revocation does not verify here:
+ * it stops (no sync, no sends) and its local data is kept.
+ */
+export const E2EE_REVOCATION_UNVERIFIED = "E2EE_REVOCATION_UNVERIFIED";
+
 interface ErrorLike {
   readonly name?: unknown;
   readonly code?: unknown;
@@ -58,6 +64,7 @@ type E2eeErrorCode =
   | "E2EE_DEVICE_LIMIT"
   | typeof E2EE_SIGNATURE_REJECTED
   | "E2EE_SIGNATURE_FAILED"
+  | typeof E2EE_REVOCATION_UNVERIFIED
   | "E2EE_LOGIN_GRANT_REJECTED"
   | "E2EE_DEVICE_MISMATCH"
   | "E2EE_ACCOUNT_MISMATCH"

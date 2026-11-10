@@ -51,6 +51,7 @@ const CONNECTION_SHARE_STATUS_KEYS = {
   unauthenticated: null,
 } as const;
 const COPY_FEEDBACK_DURATION_MS = 1500;
+const DEVICE_SETUP_FRAGMENT_MARKER = "#device_setup_key=";
 const TOOLTIP_STYLE = {
   zIndex: 10000,
   backgroundColor: "#1F2937",
@@ -286,15 +287,23 @@ export function HeaderShareModalView({
         ? "headerShare.connectionRefresh.loading"
         : "headerShare.connectionRefresh.unavailable"
     );
+    // A link with device setup material stays out of selectable text and
+    // tooltips; the QR code and the copy button still carry it.
+    const isSetupLink = url.includes(DEVICE_SETUP_FRAGMENT_MARKER);
+    let urlText = url || unavailableLabel;
+    if (url && isSetupLink) {
+      urlText = t(HEADER_SHARE_LOCALE, "headerShare.connectionRefresh.ready");
+    }
 
     return (
       <div className="tw-flex tw-h-10 tw-w-full tw-items-center tw-gap-2">
         <div className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-px-3">
           <div
+            data-testid="connection-share-url"
             className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-text-iron-400"
-            title={url || undefined}
+            title={url && !isSetupLink ? url : undefined}
           >
-            {url || unavailableLabel}
+            {urlText}
           </div>
           <button
             type="button"

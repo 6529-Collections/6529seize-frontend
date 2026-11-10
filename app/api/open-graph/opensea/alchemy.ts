@@ -1,11 +1,15 @@
 import { apiUrl } from "@/services/api/api-endpoints";
 import { getStagingApiKey } from "@/config/serverEnv";
+import { readLimitedJson } from "@/lib/fetch/limitedBody";
 
 import { extractAlchemyMetadata } from "./shared";
 import type { AlchemyNftMetadata, OpenSeaMetadataFetchResult } from "./shared";
 import { buildTokenIdCandidates } from "./tokenUri";
 
 const FETCH_TIMEOUT_MS = 8000;
+// The response embeds the token's own metadata, so it gets the same 1 MiB
+// parse bound as a token URI document (see tokenUriMetadata.ts).
+const METADATA_RESPONSE_MAX_BYTES = 1024 * 1024;
 
 type AlchemyMetadataCandidateResult =
   | {
@@ -47,7 +51,10 @@ const requestMetadataCandidate = async (
 
   let payload: unknown;
   try {
-    payload = (await response.json()) as unknown;
+    payload = await readLimitedJson<unknown>(
+      response,
+      METADATA_RESPONSE_MAX_BYTES
+    );
   } catch (error) {
     return {
       kind: "json_error",

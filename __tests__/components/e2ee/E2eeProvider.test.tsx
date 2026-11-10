@@ -256,6 +256,30 @@ describe("E2eeProvider", () => {
     ).toBe("1");
   });
 
+  it("keeps the enrollment marker while a device is stopped on an unconfirmed revocation", async () => {
+    mockPathname.mockReturnValue("/messages/encrypted");
+    const { loadModules, engines } = createLoader();
+    render(
+      <E2eeProvider loadModules={loadModules}>
+        <ContextProbe />
+      </E2eeProvider>
+    );
+    await waitFor(() => expect(engines).toHaveLength(1));
+    const marker = () =>
+      globalThis.localStorage.getItem(`6529:e2ee:enrolled:${SELF_ID}`);
+    act(() => engines[0]?.update({ status: "ready" }));
+    // The device still holds its data, so sign-out can offer to remove it.
+    act(() =>
+      engines[0]?.update({
+        status: "needs-enrollment",
+        error: "E2EE_REVOCATION_UNVERIFIED",
+      })
+    );
+    expect(marker()).toBe("1");
+    act(() => engines[0]?.update({ status: "needs-enrollment", error: null }));
+    expect(marker()).not.toBe("1");
+  });
+
   it("reports a load failure code", async () => {
     mockPathname.mockReturnValue("/messages/encrypted");
     const loadModules = jest.fn(async () => {

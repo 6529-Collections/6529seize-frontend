@@ -48,6 +48,17 @@ export const parseTweetUrl = (href: string): TweetUrlParts | undefined => {
     return undefined;
   }
 
+  // Only ordinary web links on the default port are tweet links. Server
+  // requests rebuild a canonical https URL, so http input is fine here.
+  if (
+    (url.protocol !== "https:" && url.protocol !== "http:") ||
+    url.port !== "" ||
+    url.username !== "" ||
+    url.password !== ""
+  ) {
+    return undefined;
+  }
+
   const hostname = url.hostname.toLowerCase();
   const isSupportedHost = TWITTER_DOMAINS.some((domain) =>
     matchesDomainOrSubdomain(hostname, domain)
@@ -85,6 +96,24 @@ export const parseTweetUrl = (href: string): TweetUrlParts | undefined => {
     href,
     ...(authorHandle ? { authorHandle } : {}),
   };
+};
+
+const TWITTER_HANDLE_PATTERN = /^\w{1,15}$/;
+
+/**
+ * The https URL of a tweet, built only from its id and, when it is a valid
+ * handle, its author handle. Server requests and cached previews use this
+ * instead of the caller's link text.
+ */
+export const buildCanonicalTweetUrl = (
+  tweetId: string,
+  authorHandle?: string
+): string => {
+  const handle =
+    authorHandle && TWITTER_HANDLE_PATTERN.test(authorHandle)
+      ? authorHandle
+      : "i";
+  return `https://x.com/${handle}/status/${tweetId}`;
 };
 
 export const extractTweetId = (href: string): string | undefined =>

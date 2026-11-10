@@ -237,6 +237,7 @@ describe("/api/pepe/resolve", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/pepe/resolve?kind=asset&slug=GOXPEPE"
       ),
@@ -297,6 +298,7 @@ describe("/api/pepe/resolve", () => {
 
   it("returns 400 for invalid params", async () => {
     const request = {
+      headers: new Headers(),
       nextUrl: new URL("https://app.local/api/pepe/resolve"),
     } as any;
 
@@ -320,6 +322,7 @@ describe("/api/pepe/resolve", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/pepe/resolve?kind=collection&slug=rare-pepes"
       ),
@@ -333,5 +336,24 @@ describe("/api/pepe/resolve", () => {
       image: null,
       name: "Rare Pepes",
     });
+  });
+
+  it("limits each client to its per-minute preview budget", async () => {
+    const requestFrom = (clientIp: string) =>
+      ({
+        headers: new Headers({ "x-forwarded-for": clientIp }),
+        nextUrl: new URL(
+          "https://app.local/api/pepe/resolve?kind=asset&slug=GOXPEPE"
+        ),
+      }) as any;
+
+    let response: { status: number } | undefined;
+    for (let index = 0; index < 121; index += 1) {
+      response = await GET(requestFrom("8.8.4.10"));
+    }
+
+    expect(response?.status).toBe(429);
+    const otherClient = await GET(requestFrom("8.8.4.11"));
+    expect(otherClient.status).toBe(200);
   });
 });

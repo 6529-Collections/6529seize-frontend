@@ -1118,17 +1118,41 @@ describe("HeaderShare", () => {
           await userEvent.click(
             screen.getByRole("button", { name: "Generate new code" })
           );
-          expect(screen.queryByTitle(/combined-1/)).not.toBeInTheDocument();
           finishRefresh();
-          expect(await screen.findByTitle(/combined-2/)).toBeVisible();
+          const refreshedLink = `connection_share_code=combined-2&address=${address}#device_setup_key=setup-secret-2`;
           if (target === "desktop") {
-            expect(
-              screen.getByTestId("desktop-connection-panel")
-            ).toHaveAttribute(
-              "href",
-              `testcore6529://navigate/accept-connection-sharing?connection_share_code=combined-2&address=${address}#device_setup_key=setup-secret-2`
+            await waitFor(() =>
+              expect(
+                screen.getByTestId("desktop-connection-panel")
+              ).toHaveAttribute(
+                "href",
+                `testcore6529://navigate/accept-connection-sharing?${refreshedLink}`
+              )
+            );
+          } else {
+            const qrcode = require("qrcode");
+            await waitFor(() =>
+              expect(qrcode.toDataURL).toHaveBeenCalledWith(
+                expect.stringContaining(refreshedLink),
+                expect.anything()
+              )
             );
           }
+          // The setup link reaches the QR code or Desktop launch control and
+          // the copy button only, not selectable text or a tooltip.
+          const urlField = await screen.findByTestId("connection-share-url");
+          expect(urlField).toHaveTextContent("Connection ready");
+          expect(urlField).not.toHaveAttribute("title");
+          expect(screen.queryByTitle(/combined-/)).not.toBeInTheDocument();
+          expect(
+            screen.queryByText(/device_setup_key/)
+          ).not.toBeInTheDocument();
+          await userEvent.click(
+            screen.getByRole("button", { name: "Copy link" })
+          );
+          expect(navigator.clipboard.writeText).toHaveBeenLastCalledWith(
+            expect.stringContaining(refreshedLink)
+          );
           expect(setup.prepareConnectionDeviceSetup).toHaveBeenCalledTimes(2);
           await userEvent.click(screen.getByRole("button", { name: "Back" }));
           expect(

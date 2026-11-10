@@ -573,7 +573,10 @@ describe("fetchLinkPreview", () => {
     const batchSignal = getFetchSignal(0);
     expect(batchSignal.aborted).toBe(false);
 
-    jest.advanceTimersByTime(10_000);
+    // The server may queue a preview for 10 s and fetch it for 8 s.
+    jest.advanceTimersByTime(19_999);
+    expect(batchSignal.aborted).toBe(false);
+    jest.advanceTimersByTime(1);
 
     await failure;
     expect(batchSignal.aborted).toBe(true);
@@ -611,7 +614,7 @@ describe("fetchLinkPreview", () => {
     const batchSignal = getFetchSignal(0);
     expect(batchSignal.aborted).toBe(false);
 
-    jest.advanceTimersByTime(10_000);
+    jest.advanceTimersByTime(20_000);
 
     await failure;
     expect(batchSignal.aborted).toBe(true);

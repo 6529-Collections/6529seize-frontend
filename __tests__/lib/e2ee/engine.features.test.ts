@@ -115,7 +115,8 @@ describe("E2EE engine: features", () => {
         blob: expect.stringMatching(/^0x[0-9a-f]{32}$/),
         mime: "image/png",
         size: bytes.length,
-        name: "photo.png",
+        // Images travel under a neutral name, not the picked file's.
+        name: "image.png",
       },
     ]);
     expect(JSON.stringify(message)).not.toMatch(/"k"|"n"/);
