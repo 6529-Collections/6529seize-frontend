@@ -50,8 +50,11 @@ function loadSandbox(apiOnly?: string, env: Record<string, string> = {}) {
     { resolve: jest.fn(() => "/fixture/next") }
   );
   const context = {
+    structuredClone: globalThis.structuredClone,
     readFixture: (_pathname: string): unknown => undefined,
     readPublicRuntime: (): Record<string, unknown> => ({}),
+    readApi: (_pathname: string, _res: unknown): Promise<void> =>
+      Promise.resolve(),
     mutateChat: (_edit: boolean, _res: unknown): unknown => undefined,
     Date,
     require: requireFixture,
@@ -75,6 +78,7 @@ function loadSandbox(apiOnly?: string, env: Record<string, string> = {}) {
     fs.readFileSync(serverPath, "utf8") +
       "\nglobalThis.readFixture = (pathname) => mockApiPatternReadRoutes.find((route) => route.pattern.test(pathname))?.response();" +
       "\nglobalThis.readPublicRuntime = buildPublicRuntime;" +
+      '\nglobalThis.readApi = (pathname, res) => handleRequest({ method: "GET", url: pathname }, res);' +
       '\nglobalThis.mutateChat = (edit, res) => edit ? handleAllowedChatDropEditPost("POST", `/api/drops/${SANDBOX_SUBMITTED_CHAT_DROP_ID}`, "allowed-sandbox-mutation", res) : handleAllowedChatDropPost("POST", "/api/drops", {parts: [{content: SANDBOX_CHAT_DROP_CONTENT}]}, "allowed-sandbox-mutation", res);',
     context
   );
@@ -84,6 +88,7 @@ function loadSandbox(apiOnly?: string, env: Record<string, string> = {}) {
     spawnSync,
     readFixture: context.readFixture,
     readPublicRuntime: context.readPublicRuntime,
+    readApi: context.readApi,
     mutateChat: context.mutateChat,
   };
 }
@@ -147,6 +152,30 @@ it("returns explicit unmanaged invitation state for ordinary sandbox drops", () 
       "/api/drops/ordinary-artwork/collaborations/invitation/response"
     )
   ).toBeUndefined();
+});
+
+it("returns a terminal NIC activity page without forcing contract retries", async () => {
+  const { readApi } = loadSandbox("1");
+  const res = { writeHead: jest.fn(), end: jest.fn() };
+  await readApi(
+    "/api/profile-logs?activity_scope=NIC&profile=playwright&page=1&page_size=10",
+    res
+  );
+  expect(res.writeHead).toHaveBeenCalledWith(
+    200,
+    expect.objectContaining({
+      "Access-Control-Allow-Origin": "http://localhost:3295",
+      "Access-Control-Allow-Credentials": "true",
+      "Content-Type": "application/json; charset=utf-8",
+    })
+  );
+  expect(JSON.parse(res.end.mock.calls[0][0])).toEqual({
+    data: [],
+    count: 0,
+    page: 1,
+    next: false,
+    next_cursor: null,
+  });
 });
 
 it("keeps newly submitted and edited sandbox drops inside the live edit window", () => {

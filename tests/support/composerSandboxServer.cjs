@@ -2778,6 +2778,7 @@ const mockApiExactReadRoutes = new Map([
   ],
   ["/api/v2/boosted-drops", () => emptyPage()],
   ["/api/v2/drops", () => emptyPage()],
+  ["/api/profile-logs", () => ({ ...emptyPage(), next_cursor: null })],
   ["/api/mention-aliases", () => []],
   ["/api/content-moderation/blocked-profiles", () => []],
   ["/api/feed", () => []],
