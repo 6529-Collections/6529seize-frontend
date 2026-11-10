@@ -1,8 +1,9 @@
 "use client";
 
-import { forwardRef, useEffect } from "react";
+import { forwardRef, useEffect, useMemo, type ReactNode } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useEmoji } from "@/contexts/EmojiContext";
+import { getReactionCount } from "../reaction-utils";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { ClipboardMessage } from "@/helpers/waves/drop-clipboard.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -63,7 +64,17 @@ const ShareDropsImageCard = forwardRef<
     readonly locale: SupportedLocale;
   }
 >(({ wave, drops, messages, time, include, locale }, ref) => {
-  const { findNativeEmoji, loadEmojiData } = useEmoji();
+  const { emojiMap, findNativeEmoji, loadEmojiData } = useEmoji();
+  const customEmojiSrc = useMemo(() => {
+    const sources = new Map<string, string>();
+    for (const category of emojiMap) {
+      for (const emoji of category.emojis) {
+        const src = emoji.skins[0]?.src;
+        if (src) sources.set(emoji.id, src);
+      }
+    }
+    return sources;
+  }, [emojiMap]);
   useEffect(() => {
     void loadEmojiData();
   }, [loadEmojiData]);
@@ -163,15 +174,28 @@ const ShareDropsImageCard = forwardRef<
                   <p className="tw-m-0 tw-mt-2 tw-flex tw-flex-wrap tw-gap-1.5">
                     {drop.reactions.map((reaction) => {
                       const id = reaction.reaction.replaceAll(":", "");
+                      const customSrc = customEmojiSrc.get(id);
                       const native = findNativeEmoji(id)?.skins[0]?.native;
+                      let emoji: ReactNode = native ?? reaction.reaction;
+                      if (customSrc) {
+                        emoji = (
+                          // eslint-disable-next-line @next/next/no-img-element -- html-to-image draws this into the PNG, which needs a plain img with crossOrigin rather than next/image output.
+                          <img
+                            src={customSrc}
+                            alt={id.replaceAll("_", " ")}
+                            crossOrigin="anonymous"
+                            className="tw-block tw-size-4 tw-object-contain"
+                          />
+                        );
+                      }
                       return (
                         <span
                           key={reaction.reaction}
                           className="tw-inline-flex tw-h-6 tw-items-center tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-2 tw-text-xs tw-text-iron-300"
                         >
-                          <span>{native ?? reaction.reaction}</span>
+                          <span>{emoji}</span>
                           <span>
-                            {formatInteger(locale, reaction.profiles.length)}
+                            {formatInteger(locale, getReactionCount(reaction))}
                           </span>
                         </span>
                       );

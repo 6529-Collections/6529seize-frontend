@@ -11,6 +11,9 @@ import WaveDropActionsBoost from "./WaveDropActionsBoost";
 import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropActionsEdit from "./WaveDropActionsEdit";
 import WaveDropActionsMore from "./WaveDropActionsMore";
+import WaveDropShareImageAction from "./share-image/WaveDropShareImageAction";
+
+const noop = () => undefined;
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropActionsReply from "./WaveDropActionsReply";
@@ -78,7 +81,10 @@ export default function WaveDropActions({
       <div className="tw-flex tw-items-center tw-gap-x-2">
         <div className="tw-flex tw-h-9 tw-items-center tw-gap-x-0.5 tw-rounded-xl tw-bg-iron-950 tw-px-1 tw-shadow-md tw-shadow-black/20 tw-ring-1 tw-ring-inset tw-ring-iron-700/40">
           {showGuestCopyOnly ? (
-            <WaveDropActionsCopyLink drop={drop} />
+            <>
+              <WaveDropActionsCopyLink drop={drop} />
+              <WaveDropShareImageAction drop={drop} onSelected={noop} toolbar />
+            </>
           ) : (
             <>
               <WaveDropActionsQuickReact drop={drop} />

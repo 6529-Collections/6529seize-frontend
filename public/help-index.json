@@ -6234,7 +6234,7 @@
       ],
       "summary": "Share as image turns a run of posts into a PNG with neutral times and none of the viewer's own app chrome.",
       "facts": [
-        "Open a post's More actions menu (desktop) or long-press a post (touch) and choose Share as image. That post is the first post; select another post to set the last one. Every loaded post between them is included, up to 20 per image.",
+        "Open a post's More actions menu (desktop; signed-out visitors use the image button beside Copy link) or long-press a post (touch) and choose Share as image. That post is the first post; select another post to set the last one. Every loaded post between them is included, up to 20 per image.",
         "Next opens the options and a live preview. Times default to UTC; other choices are Time since first post, Hide times, or Another time zone. Choosing the device's own zone shows a warning that the image would reveal it.",
         "The image never includes the viewer's unread line, badges, profile button, message box, own reaction highlight or the phone status bar. It is made on the device and nothing is uploaded.",
         "Copy image, Download image and Share (system share sheet on phones and in the app) export a 1080-pixel-wide PNG. Copy text copies the posts as text with the same times. Direct messages and private waves get a neutral file name and a reminder that the posts are private.",
