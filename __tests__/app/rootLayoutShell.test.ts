@@ -15,22 +15,30 @@ it("reads no request data in the root layout", () => {
 
 // On Capacitor these hide the server HTML (an ungated, purchasing-free tree)
 // before the body is parsed, until the commit that reveals the native layout
-// also starts the EULA check. They must stay synchronous and first in <head>.
-it("starts native detection before any other head script", () => {
+// also starts the EULA check. Native detection must stay synchronous, with
+// only the legacy-browser checks ahead of it.
+it("starts native detection synchronously after the legacy-browser checks", () => {
   const head = layout.slice(layout.indexOf("<head>"), layout.indexOf("</head>"));
   const stylesIndex = head.indexOf("__html: NATIVE_STARTUP_STYLES");
   const scriptIdIndex = head.indexOf('id="native-startup-bootstrap"');
   expect(stylesIndex).toBeGreaterThan(-1);
   expect(scriptIdIndex).toBeGreaterThan(stylesIndex);
-  expect(head.indexOf("<script")).toBe(head.lastIndexOf("<", scriptIdIndex));
-  const element = head.slice(
-    head.lastIndexOf("<", scriptIdIndex),
-    head.indexOf("/>", scriptIdIndex)
+  const scriptStart = head.lastIndexOf("<", scriptIdIndex);
+  const legacyScripts =
+    head.slice(0, scriptStart).match(/<script\b[^>]*>/gi) ?? [];
+  expect(legacyScripts).toEqual([
+    expect.stringContaining("LEGACY_BROWSER_FLAG_SCRIPT"),
+    expect.stringContaining("LEGACY_BROWSER_SYNTAX_SCRIPT"),
+    expect.stringContaining("LEGACY_BROWSER_NOTICE_SCRIPT"),
+  ]);
+  expect(legacyScripts.every((script) => script.startsWith("<script"))).toBe(
+    true
   );
+  const element = head.slice(scriptStart, head.indexOf("/>", scriptIdIndex));
   // Lowercase <script> is plain HTML; <Script> would wait for the Next runtime.
   expect(element).toMatch(/^<script\b/);
   expect(element).toContain("NATIVE_STARTUP_SCRIPT");
-  expect(element).not.toContain("strategy=");
+  expect(element).not.toMatch(/\s(?:async|defer|strategy)\b/);
 });
 
 // The browser reads these stamps from HTML so unchanged chunks stay cacheable.
