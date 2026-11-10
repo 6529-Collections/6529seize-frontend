@@ -1,3 +1,5 @@
+import { mapMarkdownProse } from "@/helpers/waves/mapMarkdownProse";
+
 export const normalizeDropMarkdownContent = (
   content: string | null
 ): string | null => {
@@ -15,4 +17,3 @@ export const normalizeDropMarkdownContent = (
     })
   );
 };
-import { mapMarkdownProse } from "@/helpers/waves/mapMarkdownProse";
