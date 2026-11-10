@@ -76,7 +76,9 @@ describe("UI breadcrumbs from the installed SDK", () => {
   const { htmlTreeAsString } = jest.requireActual<{
     htmlTreeAsString: (element: Element) => string;
   }>(
-    require.resolve("@sentry/core", {
+    // Resolved through @sentry/nextjs, whose version it is; the package is
+    // not a direct dependency of the app.
+    require.resolve(["@sentry", "core"].join("/"), {
       paths: [require.resolve("@sentry/nextjs")],
     })
   );

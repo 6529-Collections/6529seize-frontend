@@ -182,7 +182,7 @@ export default function E2eeReportDetail({
     onHold: hold.isSuccess ? query.data?.on_hold : undefined,
     loadFailed: query.isError && !query.isFetching,
     // A failed release is shown in its confirmation, which stays open.
-    holdFailed: hold.isError && !hold.isPending && !confirmRelease,
+    holdFailed: hold.isError && !confirmRelease,
   });
   useEffect(() => {
     // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- The live regions stay mounted in the panel so screen readers keep hearing them while this view mounts and unmounts; this only hands them the derived text.
