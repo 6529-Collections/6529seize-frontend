@@ -25,6 +25,8 @@ export function useAppWalletSigningConfirmation() {
     const unregister = setAppWalletSigningConfirmationDelegate(
       (request) =>
         new Promise<boolean>((resolve) => {
+          // A request is never left unanswered behind a newer one.
+          pendingRef.current?.resolve(false);
           const next = { request, resolve };
           pendingRef.current = next;
           setPending(next);

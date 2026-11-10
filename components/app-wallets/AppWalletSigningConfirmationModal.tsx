@@ -1,8 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { formatEther, getAddress, isAddress } from "viem";
-import { AppWalletModalShell } from "@/components/app-wallets/AppWalletModal";
+import { formatUnits, getAddress, isAddress } from "viem";
+import { AppWalletModalShell } from "@/components/app-wallets/AppWalletModalShell";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDecimalString, formatInteger } from "@/i18n/format";
@@ -37,7 +37,23 @@ function DetailRow({
 function ContentBlock({
   label,
   children,
-}: Readonly<{ label: string; children: ReactNode }>) {
+  locale,
+  available = true,
+}: Readonly<{
+  label: string;
+  children: ReactNode;
+  locale: SupportedLocale;
+  available?: boolean;
+}>) {
+  if (!available) {
+    return (
+      <DetailRow label={label}>
+        <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
+          {t(locale, "appWallet.signing.contentUnavailable")}
+        </p>
+      </DetailRow>
+    );
+  }
   return (
     <DetailRow label={label}>
       <pre
@@ -72,11 +88,19 @@ function RequestDetails({
 }: Readonly<{ locale: SupportedLocale; request: AppWalletSigningRequest }>) {
   if (request.kind === "message") {
     return request.text === null ? (
-      <ContentBlock label={t(locale, "appWallet.signing.rawMessage")}>
+      <ContentBlock
+        label={t(locale, "appWallet.signing.rawMessage")}
+        locale={locale}
+        available={request.canShowContent}
+      >
         {request.rawHex}
       </ContentBlock>
     ) : (
-      <ContentBlock label={t(locale, "appWallet.signing.message")}>
+      <ContentBlock
+        label={t(locale, "appWallet.signing.message")}
+        locale={locale}
+        available={request.canShowContent}
+      >
         {request.text}
       </ContentBlock>
     );
@@ -109,7 +133,11 @@ function RequestDetails({
               : displayAddress(request.verifyingContract)}
           </p>
         </DetailRow>
-        <ContentBlock label={t(locale, "appWallet.signing.typedDataContent")}>
+        <ContentBlock
+          label={t(locale, "appWallet.signing.typedDataContent")}
+          locale={locale}
+          available={request.canShowContent}
+        >
           {request.messageJson}
         </ContentBlock>
       </>
@@ -127,9 +155,12 @@ function RequestDetails({
       </DetailRow>
       <DetailRow label={t(locale, "appWallet.signing.value")}>
         <p className={VALUE_CLASS_NAME}>
-          {t(locale, "appWallet.signing.valueEth", {
-            amount: formatDecimalString(locale, formatEther(request.valueWei)),
-          })}
+          {formatNativeAmount(
+            locale,
+            request.valueWei,
+            request.nativeCurrency,
+            request.chainId
+          )}
         </p>
       </DetailRow>
       <DetailRow label={t(locale, "appWallet.signing.network")}>
@@ -138,28 +169,58 @@ function RequestDetails({
         </p>
       </DetailRow>
       <DetailRow label={t(locale, "appWallet.signing.callData")}>
-        <p className={VALUE_CLASS_NAME}>
-          {formatCallData(locale, request.hasCallData, request.selector)}
-        </p>
+        <p className={VALUE_CLASS_NAME}>{formatCallData(locale, request)}</p>
       </DetailRow>
     </>
   );
 }
 
+type TransactionRequest = Extract<
+  AppWalletSigningRequest,
+  { kind: "transaction" }
+>;
+
 function formatCallData(
   locale: SupportedLocale,
-  hasCallData: boolean,
-  selector: string | null
+  request: TransactionRequest
 ): string {
-  if (selector !== null) {
-    return t(locale, "appWallet.signing.callDataSelector", { selector });
+  const count = formatInteger(locale, request.callDataBytes);
+  if (request.to === null) {
+    return t(locale, "appWallet.signing.callDataCreation", { count });
   }
-  return t(
-    locale,
-    hasCallData
-      ? "appWallet.signing.callDataPresent"
-      : "appWallet.signing.callDataNone"
-  );
+  if (request.selector !== null) {
+    return t(locale, "appWallet.signing.callDataSelector", {
+      selector: request.selector,
+    });
+  }
+  return request.callDataBytes === 0
+    ? t(locale, "appWallet.signing.callDataNone")
+    : t(locale, "appWallet.signing.callDataNoSelector", { count });
+}
+
+/** The amount in the chain's own native token, never assumed to be ETH. */
+function formatNativeAmount(
+  locale: SupportedLocale,
+  value: bigint,
+  nativeCurrency: TransactionRequest["nativeCurrency"],
+  chainId: number | null
+): string {
+  if (nativeCurrency !== null) {
+    return t(locale, "appWallet.signing.valueNative", {
+      amount: formatDecimalString(
+        locale,
+        formatUnits(value, nativeCurrency.decimals)
+      ),
+      symbol: nativeCurrency.symbol,
+    });
+  }
+  const amount = formatDecimalString(locale, value.toString());
+  return chainId === null
+    ? t(locale, "appWallet.signing.valueUnknownNetwork", { amount })
+    : t(locale, "appWallet.signing.valueUnknownChain", {
+        amount,
+        id: formatInteger(locale, chainId),
+      });
 }
 
 function getTitleKey(request: AppWalletSigningRequest) {
@@ -189,6 +250,7 @@ export function AppWalletSigningConfirmationModal({
   return (
     <AppWalletModalShell
       layered
+      locale={locale}
       show={request !== null}
       onHide={onCancel}
       title={request === null ? "" : t(locale, getTitleKey(request))}
@@ -202,7 +264,13 @@ export function AppWalletSigningConfirmationModal({
           >
             {t(locale, "appWallet.modal.cancel")}
           </Button>
-          <Button type="button" onClick={onConfirm} variant="action" size="md">
+          <Button
+            type="button"
+            onClick={onConfirm}
+            disabled={request?.canShowContent !== true}
+            variant="action"
+            size="md"
+          >
             {t(
               locale,
               request?.kind === "transaction"

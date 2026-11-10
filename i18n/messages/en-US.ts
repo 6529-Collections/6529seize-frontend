@@ -3792,14 +3792,23 @@ export const EN_US_ROOT_MESSAGES = {
   "appWallet.signing.to": "To",
   "appWallet.signing.newContract": "New contract deployment",
   "appWallet.signing.value": "Amount",
-  "appWallet.signing.valueEth": "{amount} ETH",
+  "appWallet.signing.valueNative": "{amount} {symbol}",
+  "appWallet.signing.valueUnknownChain":
+    "{amount} in the smallest unit of the native token of chain ID {id}",
+  "appWallet.signing.valueUnknownNetwork":
+    "{amount} in the smallest unit of the native token of an unspecified network",
   "appWallet.signing.network": "Network",
   "appWallet.signing.networkName": "{name} (chain ID {id})",
   "appWallet.signing.unknownNetwork": "Unknown network",
   "appWallet.signing.notSpecified": "Not specified",
   "appWallet.signing.callData": "Contract call",
   "appWallet.signing.callDataNone": "None",
-  "appWallet.signing.callDataPresent": "Yes",
+  "appWallet.signing.callDataNoSelector":
+    "Yes, {count} bytes without a function selector",
+  "appWallet.signing.callDataCreation":
+    "Contract creation, {count} bytes of code",
+  "appWallet.signing.contentUnavailable":
+    "This content cannot be shown, so it cannot be signed here. Cancel this request.",
   "appWallet.signing.callDataSelector": "Yes, function selector {selector}",
   "appWallet.signing.sign": "Sign",
   "appWallet.signing.approveTransaction": "Approve",

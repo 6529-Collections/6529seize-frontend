@@ -1,6 +1,9 @@
 import { decryptData } from "@/components/app-wallets/app-wallet-helpers";
 import {
   type AppWalletSigningRequest,
+  confirmAppWalletSigningRequest,
+  describeAppWalletMessage,
+  describeAppWalletTransaction,
   describeAppWalletTypedData,
   setAppWalletSigningConfirmationDelegate,
 } from "@/wagmiConfig/appWalletSigningConfirmation";
@@ -10,13 +13,14 @@ import {
   parseEther,
   recoverMessageAddress,
   UserRejectedRequestError,
+  type Address,
   type Chain,
   type LocalAccount,
   type Transport,
   type WalletClient,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { mainnet } from "viem/chains";
+import { mainnet, polygon } from "viem/chains";
 
 jest.mock("@/components/app-wallets/app-wallet-helpers", () => ({
   decryptData: jest.fn(),
@@ -43,19 +47,25 @@ type ConnectorInstance = {
   icon: string;
 };
 
-function createInstance(
-  transports?: Record<number, Transport>
-): ConnectorInstance {
+function setUpConnector(transports?: Record<number, Transport>) {
   const createFn = createAppWalletConnector(
     [mainnet as Chain],
     { appWallet },
     () => Promise.resolve("password")
   );
-  return (createFn as unknown as (config: unknown) => ConnectorInstance)({
-    chains: [mainnet],
-    emitter: { emit: jest.fn(), on: jest.fn(), off: jest.fn() },
-    transports,
-  });
+  const setup = (next?: Record<number, Transport>) =>
+    (createFn as unknown as (config: unknown) => ConnectorInstance)({
+      chains: [mainnet],
+      emitter: { emit: jest.fn(), on: jest.fn(), off: jest.fn() },
+      transports: next,
+    });
+  return { instance: setup(transports), setup };
+}
+
+function createInstance(
+  transports?: Record<number, Transport>
+): ConnectorInstance {
+  return setUpConnector(transports).instance;
 }
 
 async function connectedAccount(
@@ -104,6 +114,7 @@ describe("app wallet signing confirmation", () => {
       walletAddress: signer.address,
       text: "Sign in to 6529",
       rawHex: null,
+      canShowContent: true,
     });
     await expect(
       recoverMessageAddress({ message: "Sign in to 6529", signature })
@@ -163,8 +174,10 @@ describe("app wallet signing confirmation", () => {
       valueWei: parseEther("0.06529"),
       chainId: 1,
       chainName: "Ethereum",
-      hasCallData: true,
+      nativeCurrency: { symbol: "ETH", decimals: 18 },
+      callDataBytes: 6,
       selector: "0xa9059cbb",
+      canShowContent: true,
     });
   });
 
@@ -285,5 +298,117 @@ describe("app wallet signing confirmation", () => {
 
   it("uses a locally generated icon", () => {
     expect(createInstance().icon).toMatch(/^data:image\/svg\+xml/);
+  });
+
+  it("rebuilds the wallet client when the installing config's transports change", async () => {
+    const { instance, setup } = setUpConnector();
+    await instance.connect();
+    expect((await instance.getClient()).transport["url"]).toBe(
+      "https://rpc1.6529.io"
+    );
+
+    setup({ [mainnet.id]: http("https://rpc.example.test/") });
+
+    expect((await instance.getClient()).transport["url"]).toBe(
+      "https://rpc.example.test/"
+    );
+  });
+
+  it("labels a transaction with the chain's own native token", () => {
+    const request = describeAppWalletTransaction(
+      signer.address,
+      { chainId: polygon.id, to: RECIPIENT, value: 1n },
+      [mainnet, polygon]
+    );
+
+    expect(request).toMatchObject({
+      chainName: polygon.name,
+      nativeCurrency: {
+        symbol: polygon.nativeCurrency.symbol,
+        decimals: polygon.nativeCurrency.decimals,
+      },
+    });
+    expect(polygon.nativeCurrency.symbol).not.toBe("ETH");
+    expect(
+      describeAppWalletTransaction(
+        signer.address,
+        { chainId: 999_999, to: RECIPIENT },
+        [mainnet]
+      )
+    ).toMatchObject({ chainName: null, nativeCurrency: null });
+  });
+
+  it.each([
+    ["data shorter than 4 bytes", RECIPIENT as Address, "0xa9059c" as const, 3],
+    ["contract creation code", undefined, "0x6080604052" as const, 5],
+  ])("shows no function selector for %s", (_label, to, data, bytes) => {
+    expect(
+      describeAppWalletTransaction(signer.address, { chainId: 1, to, data }, [
+        mainnet,
+      ])
+    ).toMatchObject({ to: to ?? null, callDataBytes: bytes, selector: null });
+  });
+
+  it("marks typed data and messages it cannot show as not signable", () => {
+    const circular: Record<string, unknown> = {};
+    circular["self"] = circular;
+
+    expect(
+      describeAppWalletTypedData(
+        signer.address,
+        {
+          domain: { name: "6529" },
+          types: { Grant: [{ name: "self", type: "string" }] },
+          primaryType: "Grant",
+          message: circular,
+        } as never,
+        [mainnet]
+      )
+    ).toMatchObject({ messageJson: null, canShowContent: false });
+    expect(
+      describeAppWalletMessage(signer.address, { raw: "not hex" as never })
+    ).toMatchObject({ rawHex: null, canShowContent: false });
+    expect(
+      describeAppWalletMessage(signer.address, { raw: "0x48656c6c6f" })
+    ).toMatchObject({ rawHex: "0x48656c6c6f", canShowContent: true });
+  });
+
+  it("rejects a request whose host never answers once that host goes away", async () => {
+    const hanging = setAppWalletSigningConfirmationDelegate(
+      () => new Promise<boolean>(() => undefined)
+    );
+    const message = describeAppWalletMessage(signer.address, "first");
+
+    const first = confirmAppWalletSigningRequest(message);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    hanging();
+    await expect(first).rejects.toMatchObject({ code: 4001 });
+
+    const delegate = useDelegate(() => true);
+    await expect(
+      confirmAppWalletSigningRequest(
+        describeAppWalletMessage(signer.address, "second")
+      )
+    ).resolves.toBeUndefined();
+    expect(delegate).toHaveBeenCalledTimes(1);
+  });
+
+  it("rejects the open request when a new host takes over", async () => {
+    setAppWalletSigningConfirmationDelegate(
+      () => new Promise<boolean>(() => undefined)
+    );
+    const first = confirmAppWalletSigningRequest(
+      describeAppWalletMessage(signer.address, "first")
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const delegate = useDelegate(() => true);
+    await expect(first).rejects.toMatchObject({ code: 4001 });
+    await expect(
+      confirmAppWalletSigningRequest(
+        describeAppWalletMessage(signer.address, "second")
+      )
+    ).resolves.toBeUndefined();
+    expect(delegate).toHaveBeenCalledTimes(1);
   });
 });
