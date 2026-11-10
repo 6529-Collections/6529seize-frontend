@@ -974,6 +974,7 @@ describe("HeaderShare", () => {
 
     it.each(["native", "desktop"] as const)(
       "offers combined %s setup with the appropriate availability",
+      /** Desktop gets a private app link and version notice. Mobile gets a QR code. */
       async (target) => {
         const flags = require("@/lib/device-signing/feature");
         const e2ee = require("@/config/e2eeEnv");
@@ -999,10 +1000,15 @@ describe("HeaderShare", () => {
           ...mockSeizeConnect.useSeizeConnectContext(),
           connectedAccounts: [],
         });
-        setup.prepareConnectionDeviceSetup.mockResolvedValue({
-          envelope: "encrypted-setup",
-          secret: "setup-secret",
-        });
+        setup.prepareConnectionDeviceSetup
+          .mockResolvedValueOnce({
+            envelope: "encrypted-setup-1",
+            secret: "setup-secret-1",
+          })
+          .mockResolvedValueOnce({
+            envelope: "encrypted-setup-2",
+            secret: "setup-secret-2",
+          });
         const normalShare =
           session.createConnectionShare.getMockImplementation();
         let issued = 0;
@@ -1057,7 +1063,7 @@ describe("HeaderShare", () => {
               screen.getByTestId("desktop-connection-panel")
             ).toHaveAttribute(
               "href",
-              `testcore6529://navigate/accept-connection-sharing?connection_share_code=combined-1&address=${address}#device_setup_key=setup-secret`
+              `testcore6529://navigate/accept-connection-sharing?connection_share_code=combined-1&address=${address}#device_setup_key=setup-secret-1`
             );
             expect(screen.getByText(desktopMinimumVersion)).toBeVisible();
           } else {
@@ -1074,6 +1080,14 @@ describe("HeaderShare", () => {
           expect(screen.queryByTitle(/combined-1/)).not.toBeInTheDocument();
           finishRefresh();
           expect(await screen.findByTitle(/combined-2/)).toBeVisible();
+          if (target === "desktop") {
+            expect(
+              screen.getByTestId("desktop-connection-panel")
+            ).toHaveAttribute(
+              "href",
+              `testcore6529://navigate/accept-connection-sharing?connection_share_code=combined-2&address=${address}#device_setup_key=setup-secret-2`
+            );
+          }
           expect(setup.prepareConnectionDeviceSetup).toHaveBeenCalledTimes(2);
           await userEvent.click(screen.getByRole("button", { name: "Back" }));
           expect(

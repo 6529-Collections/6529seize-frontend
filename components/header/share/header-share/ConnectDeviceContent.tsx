@@ -88,6 +88,7 @@ export function ConnectDeviceFooter({
   );
 }
 
+/** Offer secure setup when the account and feature flags allow device grants. */
 export function ConnectDeviceChoices({
   activeSubTab,
   isElectron,

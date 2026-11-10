@@ -18,8 +18,10 @@ are controlled by the `NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` build flag; a
 build with the flag off shows none of the controls below and leaves writes
 unchanged. In 6529 Mobile and 6529 Desktop they also need the
 `NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS` build flag and a compatible released app.
-The website currently disables secure Desktop connection sharing with **Coming
-soon**, while retaining **Connect only** (see
+In the website's **Connect Device** dialog, choose **Connect only** to sign in
+without granting device permissions. For secure setup, choose **Connect with
+Post Signing & DM Encryption**. Mobile uses a QR code. Desktop uses a private
+app link and requires 6529 Desktop v0.4.0 or later (see
 [In 6529 Mobile and 6529 Desktop](#in-6529-mobile-and-6529-desktop)).
 
 ## Location in the Site
