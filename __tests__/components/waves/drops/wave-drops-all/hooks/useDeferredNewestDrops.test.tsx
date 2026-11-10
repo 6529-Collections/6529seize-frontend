@@ -62,6 +62,15 @@ const feedWithDrops = (drops: Drop[]): WaveFeed =>
   }) as WaveFeed;
 
 function renderOwnDropScenario() {
+  const initialProps: {
+    drops: Drop[];
+    pinned: boolean;
+    viewerProfileId: string | null;
+  } = {
+    drops: [fullDrop("old", 1, "other")],
+    pinned: true,
+    viewerProfileId: "viewer",
+  };
   return renderHook(
     ({
       drops,
@@ -79,13 +88,7 @@ function renderOwnDropScenario() {
         waveMessages: feedWithDrops(drops),
         viewerProfileId,
       }),
-    {
-      initialProps: {
-        drops: [fullDrop("old", 1, "other")],
-        pinned: true,
-        viewerProfileId: "viewer",
-      },
-    }
+    { initialProps }
   );
 }
 
