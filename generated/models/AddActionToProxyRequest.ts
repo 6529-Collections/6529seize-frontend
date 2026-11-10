@@ -25,6 +25,10 @@ export class AddActionToProxyRequest {
     'action_type': ApiProfileProxyActionType;
     'end_time': number | null;
     'credit_amount': number;
+    /**
+    * Optional wave scope of the grant. Omitted or null grants posting in every wave the grantor can post in (legacy behaviour). A non-empty list restricts the proxy to creating and editing drops in exactly these waves; wave visibility and group gates still apply. An empty list, duplicates or non-string entries are rejected with 400 and nothing is created.
+    */
+    'wave_allowlist'?: Array<string>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -48,6 +52,12 @@ export class AddActionToProxyRequest {
             "baseName": "credit_amount",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "wave_allowlist",
+            "baseName": "wave_allowlist",
+            "type": "Array<string>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

@@ -31151,6 +31151,21 @@ components:
             - type: "null"
             - type: number
               format: int64
+        wave_allowlist:
+          description: >-
+            Optional wave scope of the grant. Omitted or null grants posting in
+            every wave the grantor can post in (legacy behaviour). A non-empty
+            list restricts the proxy to creating and editing drops in exactly
+            these waves; wave visibility and group gates still apply. An empty
+            list, duplicates or non-string entries are rejected with 400 and
+            nothing is created.
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
     ApiCreateNewProfileProxyPublishCmsAction:
       type: object
       required:
@@ -40947,6 +40962,7 @@ components:
         - revoked_at
         - created_at
         - is_active
+        - wave_allowlist
       properties:
         id:
           type: string
@@ -41000,6 +41016,16 @@ components:
           example: 1719850339996
         is_active:
           type: boolean
+        wave_allowlist:
+          description: >-
+            Wave scope of a CREATE_DROP_TO_WAVE grant. null means unrestricted
+            (every grant created before wave scopes existed, and every other
+            action type). A list means the proxy may only create and edit drops
+            in these waves.
+          type: array
+          nullable: true
+          items:
+            type: string
     ApiProfileProxyActionType:
       type: string
       enum:
@@ -43099,6 +43125,20 @@ components:
           format: int64
           nullable: true
           example: 1719850339996
+        wave_allowlist:
+          description: >-
+            Replaces the wave scope of a CREATE_DROP_TO_WAVE grant. Omit to keep
+            the stored scope. null is rejected with 400: a scope cannot be
+            lifted back to "every wave" through update, only replaced; revoke
+            the action to stop the proxy posting altogether. An empty list or
+            duplicates are rejected with 400.
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 100
     ApiUpdateWaveDecisionPause:
       required:
         - id

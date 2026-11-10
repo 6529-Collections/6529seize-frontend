@@ -27,6 +27,10 @@ export class ApiProfileProxyAction {
     'rejected_at': number | null;
     'revoked_at': number | null;
     'is_active': boolean;
+    /**
+    * Wave scope of a CREATE_DROP_TO_WAVE grant. null means unrestricted (every grant created before wave scopes existed, and every other action type). A list means the proxy may only create and edit drops in these waves.
+    */
+    'wave_allowlist': Array<string> | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -103,6 +107,12 @@ export class ApiProfileProxyAction {
             "name": "is_active",
             "baseName": "is_active",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "wave_allowlist",
+            "baseName": "wave_allowlist",
+            "type": "Array<string>",
             "format": ""
         }    ];
 
