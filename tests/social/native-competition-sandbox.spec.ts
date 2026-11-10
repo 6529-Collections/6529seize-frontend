@@ -1976,6 +1976,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await page.goto(`/waves/${MEMES_WAVE}?tab=${tab}`, {
           waitUntil: "domcontentloaded",
         });
+        if (tab === "leaderboard") {
+          await expect(page).toHaveURL(
+            new RegExp(
+              `/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`
+            ),
+            { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+          );
+        }
         await dismissNextDevTools(page);
         const lock = page.getByRole("button", {
           name: "Submission Limit Reached",
@@ -2007,6 +2015,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       }
       sandbox.setCompetition("alpha", { your_active_entries_count: 2 });
       await page.reload({ waitUntil: "domcontentloaded" });
+      await expect(page).toHaveURL(
+        new RegExp(`/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`),
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      );
       await expect(
         page.getByRole("button", {
           name: "Submission Limit Reached",
