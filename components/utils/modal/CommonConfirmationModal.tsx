@@ -6,6 +6,7 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 
 import Button from "@/components/utils/button/Button";
 import type { ButtonVariant } from "@/components/utils/button/buttonStyles";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 
 interface CommonConfirmationModalProps {
   readonly isOpen: boolean;
@@ -33,24 +34,25 @@ export default function CommonConfirmationModal({
   confirmVariant = "destructive",
 }: CommonConfirmationModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(isOpen, modalRef, onClose);
   useClickAway(modalRef, onClose);
   useKeyPressEvent("Escape", onClose);
 
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="tw-cursor-default tw-relative tw-z-[80]">
+    <div className="tw-relative tw-z-[80] tw-cursor-default">
       <div className="tw-fixed tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50" />
       <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
         <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-p-4 tw-text-center sm:tw-items-center sm:tw-p-0">
           <div
             ref={modalRef}
-            className="sm:tw-max-w-xl tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full tw-p-6"
+            className="tw-relative tw-w-full tw-transform tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-left tw-shadow-xl tw-transition-all tw-duration-500 sm:tw-w-full sm:tw-max-w-xl"
           >
             <div className="tw-flex tw-justify-between">
               <div className="tw-max-w-xl sm:tw-flex sm:tw-space-x-4">
                 {icon && <div>{icon}</div>}
-                <div className="tw-mt-3 sm:tw-mt-0 sm:tw-max-w-sm tw-flex tw-flex-col">
+                <div className="tw-mt-3 tw-flex tw-flex-col sm:tw-mt-0 sm:tw-max-w-sm">
                   <p className="tw-mb-0 tw-text-lg tw-font-medium tw-text-iron-50">
                     {title}
                   </p>

@@ -1,6 +1,17 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { ActiveWaveVoteRow } from "@/components/waves/discovery/ActiveWaveVoteRow";
 import type { ApiActiveWaveVote } from "@/generated/models/ApiActiveWaveVote";
+import { mockDefaultTimeZone } from "../../../utils/timeZoneHydration";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
+
+let mockDisplayTimeZone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
+jest.mock("@/hooks/useDisplayTimeZone", () => ({
+  ...jest.requireActual("@/hooks/useDisplayTimeZone"),
+  useDisplayTimeZone: () => mockDisplayTimeZone,
+}));
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -48,4 +59,25 @@ it("keeps unscored waves navigable without inventing a zero score", () => {
     screen.getByRole("link", { name: /Community acquisition/ })
   ).toBeVisible();
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
+});
+
+it("shows the deadline in the display time zone", () => {
+  const deadline = Date.UTC(2026, 0, 1, 23, 59);
+  const restoreZone = mockDefaultTimeZone("UTC");
+  try {
+    const { rerender } = render(
+      <ActiveWaveVoteRow vote={{ ...vote, voting_ends_at: deadline }} compact />
+    );
+    expect(screen.getByText(/^Voting ends Jan 1, 11:59\sPM$/)).toBeVisible();
+
+    mockDisplayTimeZone = { timeZone: "Asia/Dubai", isLocal: false };
+    rerender(
+      <ActiveWaveVoteRow vote={{ ...vote, voting_ends_at: deadline }} compact />
+    );
+    const label = screen.getByText(/^Voting ends Jan 2, 3:59\sAM GMT\+4$/);
+    expect(label).toHaveAttribute("title", label.textContent ?? "");
+  } finally {
+    mockDisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
+    restoreZone();
+  }
 });

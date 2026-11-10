@@ -1,13 +1,9 @@
 "use client";
 
-import type { RefObject} from "react";
+import type { RefObject } from "react";
 import { useEffect, useMemo, useRef } from "react";
-import type {
-  Drop,
-  ExtendedDrop} from "@/helpers/waves/drop.helpers";
-import {
-  DropSize
-} from "@/helpers/waves/drop.helpers";
+import type { Drop, ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 import type {
   ClipboardFormat,
   ClipboardMessage,
@@ -20,6 +16,8 @@ import {
 } from "@/helpers/waves/drop-clipboard.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
+import type { DisplayTimeZone } from "@/lib/display-time-zone/displayTimeZone";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 
 interface UseWaveDropsClipboardOptions {
   readonly containerRef: RefObject<HTMLDivElement | null>;
@@ -58,12 +56,15 @@ const nodeIsEditable = (node: Node | null): boolean => {
     return true;
   }
 
-  if (parent instanceof HTMLInputElement || parent instanceof HTMLTextAreaElement) {
+  if (
+    parent instanceof HTMLInputElement ||
+    parent instanceof HTMLTextAreaElement
+  ) {
     return true;
   }
 
   const allowDefaultElement = parent.closest(
-    "[data-wave-clipboard-allow-default=\"true\"]"
+    '[data-wave-clipboard-allow-default="true"]'
   );
 
   return allowDefaultElement !== null;
@@ -77,7 +78,14 @@ const escapeAttributeValue = (value: string): string => {
   let out = "";
   for (const ch of value) {
     const code = ch.codePointAt(0)!;
-    if (code <= 0x1F || code === 0x7F || ch === "\"" || ch === "\\" || ch === "[" || ch === "]") {
+    if (
+      code <= 0x1f ||
+      code === 0x7f ||
+      ch === '"' ||
+      ch === "\\" ||
+      ch === "[" ||
+      ch === "]"
+    ) {
       out += "\\" + ch;
     } else {
       out += ch;
@@ -109,17 +117,25 @@ const findDropElement = (node: Node | null): HTMLElement | null => {
   return null;
 };
 
-const isRangeFullyCoveringElement = (range: Range, element: HTMLElement): boolean => {
+const isRangeFullyCoveringElement = (
+  range: Range,
+  element: HTMLElement
+): boolean => {
   const elementRange = document.createRange();
   elementRange.selectNodeContents(element);
 
-  const coversStart = range.compareBoundaryPoints(Range.START_TO_START, elementRange) <= 0;
-  const coversEnd = range.compareBoundaryPoints(Range.END_TO_END, elementRange) >= 0;
+  const coversStart =
+    range.compareBoundaryPoints(Range.START_TO_START, elementRange) <= 0;
+  const coversEnd =
+    range.compareBoundaryPoints(Range.END_TO_END, elementRange) >= 0;
 
   return coversStart && coversEnd;
 };
 
-const getSelectedTextForElement = (range: Range, element: HTMLElement): string => {
+const getSelectedTextForElement = (
+  range: Range,
+  element: HTMLElement
+): string => {
   const elementRange = document.createRange();
   elementRange.selectNodeContents(element);
 
@@ -268,7 +284,8 @@ const buildRangePayload = (
   container: HTMLElement,
   messages: ClipboardMessage[],
   format: ClipboardFormat,
-  locale: SupportedLocale
+  locale: SupportedLocale,
+  zone: DisplayTimeZone
 ): string | undefined => {
   const messagesById = new Map(
     messages.map((message) => [message.id, message] as const)
@@ -287,6 +304,7 @@ const buildRangePayload = (
     messagesById,
     format,
     locale,
+    zone,
   });
 
   if (segments.length > 0 || usedPartialHandling) {
@@ -327,22 +345,22 @@ const resolveRangeBoundaries = (
 
   const startElementForRange =
     startDropId == null
-      ? startElement ?? null
-      : dropElements.get(startDropId) ?? startElement ?? null;
+      ? (startElement ?? null)
+      : (dropElements.get(startDropId) ?? startElement ?? null);
   const endElementForRange =
     endDropId != null
-      ? dropElements.get(endDropId) ?? endElement ?? null
-      : endElement ?? null;
+      ? (dropElements.get(endDropId) ?? endElement ?? null)
+      : (endElement ?? null);
 
   const startFullySelected = Boolean(
     startDropId &&
-      startElementForRange &&
-      isRangeFullyCoveringElement(selectionRange, startElementForRange)
+    startElementForRange &&
+    isRangeFullyCoveringElement(selectionRange, startElementForRange)
   );
   const endFullySelected = Boolean(
     endDropId &&
-      endElementForRange &&
-      isRangeFullyCoveringElement(selectionRange, endElementForRange)
+    endElementForRange &&
+    isRangeFullyCoveringElement(selectionRange, endElementForRange)
   );
 
   return {
@@ -404,6 +422,7 @@ type BuildSegmentsOptions = {
   readonly messagesById: Map<string, ClipboardMessage>;
   readonly format: ClipboardFormat;
   readonly locale: SupportedLocale;
+  readonly zone: DisplayTimeZone;
 };
 
 const buildSegmentsFromSelection = ({
@@ -412,6 +431,7 @@ const buildSegmentsFromSelection = ({
   messagesById,
   format,
   locale,
+  zone,
 }: BuildSegmentsOptions): string[] => {
   const fullMessageIds = selectedIds.filter((id) => !partialSegments.has(id));
   const totalFullMessages = fullMessageIds.length;
@@ -433,7 +453,8 @@ const buildSegmentsFromSelection = ({
       message,
       format,
       totalFullMessages === 1,
-      locale
+      locale,
+      zone
     );
 
     segments.push(segment);
@@ -447,6 +468,7 @@ export const useWaveDropsClipboard = ({
   drops,
 }: UseWaveDropsClipboardOptions): void => {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const fullDrops = useMemo(
     () =>
       (drops ?? []).filter(
@@ -530,13 +552,14 @@ export const useWaveDropsClipboard = ({
             container,
             context.messages,
             formatRef.current,
-            locale
+            locale,
+            zone
           )
         : undefined;
 
       const payload =
         rangePayload ??
-        formatMessages(context.messages, formatRef.current, locale);
+        formatMessages(context.messages, formatRef.current, locale, zone);
 
       if (!payload) {
         formatRef.current = "plain";
@@ -566,5 +589,5 @@ export const useWaveDropsClipboard = ({
       globalThis.removeEventListener?.("keydown", handleKeyDown);
       container.removeEventListener("copy", handleCopy);
     };
-  }, [clipboardMessages, containerRef, locale]);
+  }, [clipboardMessages, containerRef, locale, zone]);
 };

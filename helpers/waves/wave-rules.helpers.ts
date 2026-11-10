@@ -1,6 +1,7 @@
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveMetadata } from "@/generated/models/ApiWaveMetadata";
+import type { DisplayTimeZone } from "@/lib/display-time-zone/displayTimeZone";
 import type { CreateWaveConfig } from "@/types/waves.types";
 import { getCreateRules } from "./wave-create-rules.helpers";
 import { getWaveRules } from "./wave-existing-rules.helpers";
@@ -12,6 +13,8 @@ type BuildWaveRulesInput =
   | {
       readonly wave: ApiWave;
       readonly metadata?: readonly ApiWaveMetadata[] | null | undefined;
+      /** The viewer's display time zone for schedule times. */
+      readonly zone?: DisplayTimeZone | undefined;
     }
   | {
       readonly config: CreateWaveConfig;
@@ -23,6 +26,7 @@ export const buildWaveRules = (input: BuildWaveRulesInput): WaveRules => {
     return getWaveRules({
       wave: input.wave,
       metadata: input.metadata,
+      zone: input.zone,
     });
   }
 

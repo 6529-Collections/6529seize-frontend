@@ -10,6 +10,7 @@ export default function useLongPressClickSuppression() {
     typeof setTimeout
   > | null>(null);
   const shouldSuppressNextClickRef = useRef(false);
+  const releaseDocumentSuppressionRef = useRef<(() => void) | null>(null);
 
   const clearSuppression = useCallback(() => {
     if (clearSuppressionTimeoutRef.current) {
@@ -18,6 +19,8 @@ export default function useLongPressClickSuppression() {
     }
 
     shouldSuppressNextClickRef.current = false;
+    releaseDocumentSuppressionRef.current?.();
+    releaseDocumentSuppressionRef.current = null;
   }, []);
 
   const markNextClickForSuppression = useCallback(() => {
@@ -27,7 +30,24 @@ export default function useLongPressClickSuppression() {
     }
 
     shouldSuppressNextClickRef.current = true;
-  }, []);
+    if (releaseDocumentSuppressionRef.current) return;
+
+    // A sheet can appear under the held finger in a portal. Its release click
+    // belongs to the original hold, even when it lands outside the source row.
+    const onReleaseClick = (event: globalThis.MouseEvent) => {
+      if (event.detail === 0) return;
+      clearSuppression();
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    // The next deliberate press must be able to choose a menu action at once.
+    document.addEventListener("pointerdown", clearSuppression, true);
+    document.addEventListener("click", onReleaseClick, true);
+    releaseDocumentSuppressionRef.current = () => {
+      document.removeEventListener("pointerdown", clearSuppression, true);
+      document.removeEventListener("click", onReleaseClick, true);
+    };
+  }, [clearSuppression]);
 
   const releaseSuppressionAfterTouchEnd = useCallback(() => {
     if (!shouldSuppressNextClickRef.current) {
@@ -39,10 +59,9 @@ export default function useLongPressClickSuppression() {
     }
 
     clearSuppressionTimeoutRef.current = setTimeout(() => {
-      shouldSuppressNextClickRef.current = false;
-      clearSuppressionTimeoutRef.current = null;
+      clearSuppression();
     }, CLEAR_SUPPRESSION_AFTER_TOUCH_END_MS);
-  }, []);
+  }, [clearSuppression]);
 
   const handleClickCapture = useCallback(
     (event: MouseEvent<HTMLElement>) => {

@@ -1,9 +1,19 @@
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  withDisplayTimeZoneDate,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
+
 /**
  * Format timestamp into readable countdown or date
  * @param timestamp Future timestamp in milliseconds or null
+ * @param zone Display time zone for the date shown a week or more ahead
  * @returns Formatted string for display
  */
-export function formatCountdown(timestamp: number | null): string {
+export function formatCountdown(
+  timestamp: number | null,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
+): string {
   if (timestamp === null) return "";
 
   const now = Date.now();
@@ -33,11 +43,14 @@ export function formatCountdown(timestamp: number | null): string {
     return `in ${days}d ${hours}h`;
   }
 
-  // Format as date for distant future
-  return new Date(timestamp).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
+  // Format as date for distant future; the day follows the display zone
+  return new Date(timestamp).toLocaleDateString(
+    undefined,
+    withDisplayTimeZoneDate(zone, {
+      month: "short",
+      day: "numeric",
+    })
+  );
 }
 
 /**

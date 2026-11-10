@@ -3,6 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { NftSocialCardFormat } from "@/components/providers/metadata";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { ArtworkShareDetails } from "./artworkShare";
@@ -25,6 +26,7 @@ export default function ArtworkShareDialog({
   const titleId = useId();
   const [format, setFormat] = useState<NftSocialCardFormat>("portrait");
   useBodyScrollLock({ reserveScrollbarGap: true });
+  useAndroidBackLayer(true, dialogRef, onClose);
 
   useEffect(() => {
     const dialog = dialogRef.current;

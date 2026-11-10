@@ -1,7 +1,12 @@
 import type { TimeLeft } from "@/helpers/waves/time.utils";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatDate, formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
+import {
+  withDisplayTimeZone,
+  withDisplayTimeZoneDate,
+} from "@/lib/display-time-zone/displayTimeZone";
 
 interface CompactPhaseStatusProps {
   readonly labelKey: MessageKey;
@@ -18,11 +23,16 @@ export function CompactPhaseStatus({
   detailKey,
 }: CompactPhaseStatusProps) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const date =
     typeof timestamp === "number" && timestamp > 0 ? new Date(timestamp) : null;
   const hasDate = date !== null && Number.isFinite(date.getTime());
   const fullDate = hasDate
-    ? formatDate(locale, date, { dateStyle: "full", timeStyle: "long" })
+    ? formatDate(
+        locale,
+        date,
+        withDisplayTimeZone(zone, { dateStyle: "full", timeStyle: "long" })
+      )
     : undefined;
 
   return (
@@ -53,11 +63,15 @@ export function CompactPhaseStatus({
             aria-label={fullDate}
             className="tw-whitespace-nowrap"
           >
-            {formatDate(locale, date, {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
+            {formatDate(
+              locale,
+              date,
+              withDisplayTimeZoneDate(zone, {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
+            )}
           </time>
         )}
         {detailKey && <span>{t(locale, detailKey)}</span>}

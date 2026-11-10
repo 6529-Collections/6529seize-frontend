@@ -1,5 +1,6 @@
 "use client";
 
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { useEffect, useRef, useState } from "react";
 
 import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
@@ -55,6 +56,7 @@ import {
 } from "./scoreUtils";
 
 export function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
+  const zone = useDisplayTimeZone();
   const score = wave.wave_score;
   const waveHref = getWaveHref(wave);
   const analysisRef = useRef<HTMLElement>(null);
@@ -149,6 +151,7 @@ export function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
     .map(formatScoreMismatch)
     .join("; ");
   const markdownAnalysis = buildWaveScoreMarkdown({
+    zone,
     wave,
     waveHref,
     score,
@@ -231,7 +234,7 @@ export function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
             </div>
             <p className="tw-mt-2 tw-text-sm tw-text-iron-400">
               Created by {getWaveDisplayHandle(wave)}. Score calculated{" "}
-              {formatTimestamp(score.calculated_at)}.
+              {formatTimestamp(score.calculated_at, zone)}.
             </p>
             {scoreMismatches.length > 0 && (
               <output className="tw-mt-4 tw-rounded-lg tw-bg-amber-500/10 tw-p-3 tw-text-sm tw-text-amber-100 tw-ring-1 tw-ring-inset tw-ring-amber-400/25">
@@ -272,11 +275,7 @@ export function WaveScoreResult({ wave }: { readonly wave: ApiWave }) {
               <CameraIcon className="tw-size-4" aria-hidden="true" />
               Screenshot
             </Button>
-            <ButtonLink
-              href={waveHref}
-              variant="tertiary"
-              size="md"
-            >
+            <ButtonLink href={waveHref} variant="tertiary" size="md">
               Open wave
               <ArrowLongRightIcon className="tw-size-4" aria-hidden="true" />
             </ButtonLink>

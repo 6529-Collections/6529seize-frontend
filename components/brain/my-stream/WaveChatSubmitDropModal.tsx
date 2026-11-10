@@ -4,6 +4,7 @@ import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import { useEffect, useId, useRef, type CSSProperties } from "react";
@@ -84,6 +85,7 @@ export function WaveChatSubmitDropModal({
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const onCloseRef = useRef(onClose);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+  useAndroidBackLayer(isOpen, dialogRef, onClose);
 
   useEffect(() => {
     onCloseRef.current = onClose;

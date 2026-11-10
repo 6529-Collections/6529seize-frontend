@@ -36,9 +36,11 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import useLongPressInteraction from "@/hooks/useLongPressInteraction";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { withDisplayTimeZoneDate } from "@/lib/display-time-zone/displayTimeZone";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -79,6 +81,7 @@ const getMetadataValue = (
 
 function MemesWinnerMintDate({ memeCardId }: { readonly memeCardId: number }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const mintDate = React.useMemo(() => {
     try {
       const instantUtc = getMintTimelineDetails(memeCardId).instantUtc;
@@ -92,11 +95,15 @@ function MemesWinnerMintDate({ memeCardId }: { readonly memeCardId: number }) {
     return null;
   }
 
-  const mintDateLabel = formatDate(locale, mintDate, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  const mintDateLabel = formatDate(
+    locale,
+    mintDate,
+    withDisplayTimeZoneDate(zone, {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    })
+  );
 
   return (
     <p className="tw-mb-0 tw-mt-2 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-text-sm tw-leading-5">
