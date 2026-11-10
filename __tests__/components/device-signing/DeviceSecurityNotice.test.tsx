@@ -35,7 +35,7 @@ jest.mock("@/hooks/e2ee/useE2ee", () => ({
     profileId: "profile",
     status: "ready",
     devices: [],
-    thisDevice: { deviceKey: "0xown" },
+    thisDevice: { deviceKey: "0xOWN" },
   }),
 }));
 jest.mock("@/services/api/device-grants-api", () => ({
@@ -114,7 +114,7 @@ describe("device security notices", () => {
     expect(await browserWave.findByText(copy)).toBeVisible();
 
     await act(async () => {
-      fireEvent.click(mobileDms.getByRole("button", { name: "This was me" }));
+      fireEvent.click(mobileDms.getByRole("button", { name: /^This was me/u }));
     });
     expect(acknowledgeDeviceGrant).toHaveBeenCalledWith("0xgrant");
     expect(acknowledgeEncryptedDmDevice).not.toHaveBeenCalled();
@@ -125,6 +125,37 @@ describe("device security notices", () => {
       await browser.refetchQueries();
     });
     await waitFor(() => expect(browserWave.queryByText(copy)).toBeNull());
+  });
+
+  it("keeps a standalone notice visible when revocation fails", async () => {
+    const standalone: ApiDeviceSecurityNotice = {
+      ...combined,
+      signing_grant_id: null,
+      signing_device_key: null,
+    };
+    const revokeEncryptedDevice = jest.fn().mockRejectedValue(new Error());
+    const onHandled = jest.fn();
+    render(
+      <DeviceSecurityNotice
+        notice={standalone}
+        onHandled={onHandled}
+        revokeEncryptedDevice={revokeEncryptedDevice}
+      />
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Revoke access for 6529 Desktop on Mac",
+      })
+    );
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Revoke access" })
+    );
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "Couldn’t revoke the device. Try again."
+    );
+    expect(revokeEncryptedDevice).toHaveBeenCalledWith("0xmls");
+    expect(onHandled).not.toHaveBeenCalled();
   });
 
   it("ignores this DM device and keeps a standalone notice visible after a failed acknowledgment", async () => {
@@ -148,16 +179,21 @@ describe("device security notices", () => {
         <E2eeNewDeviceNotice />
       </QueryClientProvider>
     );
-    const action = await screen.findByRole("button", { name: "This was me" });
+    const action = await screen.findByRole("button", { name: /^This was me/u });
     expect(screen.queryByText(/This device was authorized/)).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Revoke access for 6529 Mobile" })
+    ).toHaveAccessibleDescription(
+      "To revoke access, open Encrypted DMs on a device that can use them."
+    );
     await act(async () => {
       fireEvent.click(action);
     });
     expect(acknowledgeEncryptedDmDevice).toHaveBeenCalledWith("0xstandalone");
     expect(acknowledgeDeviceGrant).not.toHaveBeenCalled();
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Couldn’t acknowledge this device. Try again."
-    );
+    expect(
+      await screen.findByText("Couldn’t acknowledge this device. Try again.")
+    ).toHaveRole("alert");
     expect(action).toBeEnabled();
   });
 });

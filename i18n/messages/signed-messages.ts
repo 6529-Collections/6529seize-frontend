@@ -67,6 +67,9 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "deviceSecurity.notice.posts": "{label} was authorized to sign posts as you.",
   "deviceSecurity.notice.encryptedDms":
     "{label} was authorized to read your encrypted DMs.",
+  "deviceSecurity.notice.acknowledgeLabel": "This was me · {label}",
+  "deviceSecurity.notice.revokeUnavailable":
+    "To revoke access, open Encrypted DMs on a device that can use them.",
   "deviceSecurity.notice.revokeLabel": "Revoke access for {label}",
   "deviceSecurity.notice.revokeTitle": "Revoke access for {label}?",
   "deviceSecurity.notice.revoke.both":

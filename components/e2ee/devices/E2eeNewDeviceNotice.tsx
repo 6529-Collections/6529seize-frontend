@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/components/auth/Auth";
 import { DeviceSecurityNotice } from "@/components/device-signing/DeviceSecurityNotice";
 import {
   deviceSecurityNoticeKey,
@@ -23,14 +24,22 @@ const PLATFORM_KEYS: Record<E2eeDeviceInfo["platform"], MessageKey> = {
   phone: "e2ee.devices.platform.phone",
 };
 
-/**
- * "{label} can now read your encrypted messages. Not you? Revoke." for each
- * device of this profile that appeared since the user last saw the list.
- */
+/** Mount account-scoped queries only while this surface has an owner session. */
 export function E2eeNewDeviceNotice({
   className = "",
 }: {
   readonly className?: string | undefined;
+}) {
+  const { activeProfileProxy, isAuthenticated } = useAuth();
+  return isAuthenticated === true && !activeProfileProxy ? (
+    <AuthenticatedE2eeDeviceNotice className={className} />
+  ) : null;
+}
+
+function AuthenticatedE2eeDeviceNotice({
+  className,
+}: {
+  readonly className: string;
 }) {
   const locale = useBrowserLocale();
   const zone = useDisplayTimeZone();
@@ -48,7 +57,8 @@ export function E2eeNewDeviceNotice({
     const pending = notices.filter(
       (notice) =>
         notice.encrypted_dm_device_key !== null &&
-        notice.encrypted_dm_device_key.toLowerCase() !== thisDevice?.deviceKey
+        notice.encrypted_dm_device_key.toLowerCase() !==
+          thisDevice?.deviceKey.toLowerCase()
     );
     if (!pending.length) {
       return null;

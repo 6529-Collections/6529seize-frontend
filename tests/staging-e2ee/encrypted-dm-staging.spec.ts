@@ -544,14 +544,13 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     ).toBeVisible({ timeout: DEVICE_ADD_TIMEOUT_MS });
     await openChatFromList(b2, dm, a.user.handle, DEVICE_ADD_TIMEOUT_MS);
 
-    const combinedNotice = b.page.getByRole("status").filter({
-      hasText:
-        /was authorized to read your encrypted DMs and sign posts as you/u,
+    const combinedNotice = b.page.getByRole("group", {
+      name: /was authorized to read your encrypted DMs and sign posts as you/u,
     });
     await expect(combinedNotice).toBeVisible({
       timeout: DEVICE_ADD_TIMEOUT_MS,
     });
-    await combinedNotice.getByRole("button", { name: "This was me" }).click();
+    await combinedNotice.getByRole("button", { name: /^This was me/u }).click();
     await expect(combinedNotice).toHaveCount(0, { timeout: UI_TIMEOUT_MS });
     // Fetch the account's notices again and continue to use the authorized device.
     await Promise.all([
