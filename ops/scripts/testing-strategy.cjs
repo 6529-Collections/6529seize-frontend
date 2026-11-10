@@ -15,6 +15,10 @@ const WORKFLOW_SECURITY_SCHEMA_VERSION =
   "frontend-testing.workflow-security.v1";
 const MAX_RISK_LEVEL = 5;
 const TEXT_SCAN_MAX_BYTES = 1024 * 1024;
+const BINARY_SNIFF_BYTES = 8000;
+const BLOB_READ_BATCH_BYTES = 64 * 1024 * 1024;
+// Above the largest blob batch plus its headers, and any log of a push.
+const GIT_OUTPUT_MAX_BYTES = 256 * 1024 * 1024;
 const EXISTING_REVIEWBOT_INITIAL_LANES = Object.freeze([
   "general",
   "wcag",
@@ -266,6 +270,42 @@ const SECRET_SCAN_EXTENSIONS = new Set([
   ".tfvars",
   ".txt",
   ".sh",
+  ".bash",
+  ".zsh",
+  ".ps1",
+  ".bat",
+  ".cmd",
+  ".py",
+  ".rb",
+  ".go",
+  ".rs",
+  ".java",
+  ".kt",
+  ".swift",
+  ".php",
+  ".html",
+  ".htm",
+  ".xml",
+  ".plist",
+  ".ini",
+  ".cfg",
+  ".conf",
+  ".properties",
+  ".gradle",
+  ".tf",
+  ".hcl",
+  ".sql",
+  ".csv",
+  ".log",
+  ".har",
+  ".jsonc",
+  ".json5",
+  ".mdx",
+  ".netrc",
+  ".git-credentials",
+  ".pgpass",
+  ".pypirc",
+  ".yarnrc",
 ]);
 const TEXT_SECRET_PATTERNS = [
   {
@@ -275,10 +315,11 @@ const TEXT_SECRET_PATTERNS = [
     // Accepted trade-off: a real secret VALUE that itself begins with one
     // of these identifier prefixes would be suppressed — vanishingly
     // unlikely for generated credentials, and the value must also sit on
-    // a line naming one of these specific keys.
+    // a line naming one of these specific keys. A bare `undefined` (a test
+    // clearing the variable) is not a value either.
     name: "named-secret-assignment",
     pattern:
-      /\b(?:ANTHROPIC_API_KEY|OPENROUTER_API_KEY|STAGING_AUTH|STAGING_API_KEY|AWS_SECRET_ACCESS_KEY|AWS_ACCESS_KEY_ID|SENTRY_AUTH_TOKEN|ALCHEMY_API_KEY|SSR_CLIENT_SECRET)\b[ \t]*[:=][ \t]*['"]?(?!z\.|process\.|publicEnv\.|privateEnv\.|serverEnv\.|import\.|env\.)[A-Za-z0-9_./+=:@-]{8,}/i,
+      /\b(?:ANTHROPIC_API_KEY|OPENROUTER_API_KEY|STAGING_AUTH|STAGING_API_KEY|AWS_SECRET_ACCESS_KEY|AWS_ACCESS_KEY_ID|SENTRY_AUTH_TOKEN|ALCHEMY_API_KEY|SSR_CLIENT_SECRET)\b[ \t]*[:=][ \t]*['"]?(?!z\.|process\.|publicEnv\.|privateEnv\.|serverEnv\.|import\.|env\.|undefined\b)[A-Za-z0-9_./+=:@-]{8,}/i,
   },
   {
     name: "authorization-bearer-token",
@@ -286,15 +327,52 @@ const TEXT_SECRET_PATTERNS = [
   },
   {
     name: "private-key-block",
-    pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----/,
+    pattern: /-----BEGIN [A-Z ]*PRIVATE KEY(?: BLOCK)?-----/,
   },
   {
+    // Classic, OAuth, user-to-server, server-to-server, refresh and
+    // fine-grained GitHub tokens.
     name: "github-token",
-    pattern: /\b(?:ghp|github_pat)_[A-Za-z0-9_]{20,}/,
+    pattern: /\b(?:gh[pousr]|github_pat)_[A-Za-z0-9_]{20,}/,
   },
   {
+    // Long-term (AKIA) and temporary (ASIA) AWS access key IDs.
     name: "aws-access-key-id",
-    pattern: /\bAKIA[0-9A-Z]{16}\b/,
+    pattern: /\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/,
+  },
+  {
+    // Sentry organization (sntrys_) and user (sntryu_) auth tokens.
+    name: "sentry-auth-token",
+    pattern: /\bsntry[su]_[A-Za-z0-9+/=_-]{20,}/,
+  },
+  {
+    name: "npm-access-token",
+    pattern: /\bnpm_[A-Za-z0-9]{36}\b/,
+  },
+  {
+    name: "slack-token",
+    pattern: /\bxox[abeoprs]-[A-Za-z0-9-]{10,}/,
+  },
+  {
+    // A webhook URL is itself the credential.
+    name: "chat-webhook-url",
+    pattern:
+      /\b(?:discord(?:app)?\.com\/api\/webhooks\/\d{5,}\/[A-Za-z0-9_-]{20,}|hooks\.slack\.com\/services\/[A-Z0-9]+\/[A-Z0-9]+\/[A-Za-z0-9]{10,})/,
+  },
+  {
+    // Anthropic, OpenRouter and OpenAI project keys.
+    name: "model-provider-key",
+    pattern: /\bsk-(?:ant-[a-z]+\d*-|or-v1-|proj-)[A-Za-z0-9_-]{20,}/,
+  },
+  {
+    name: "google-api-key",
+    pattern: /\bAIza[0-9A-Za-z_-]{35}/,
+  },
+  {
+    // Ethereum RPC endpoints that carry their API key in the path.
+    name: "rpc-url-with-key",
+    pattern:
+      /\b[a-z0-9-]+\.(?:g\.alchemy\.com\/v2|infura\.io\/v3|quiknode\.pro)\/[A-Za-z0-9_-]{16,}/i,
   },
   {
     // Three-part base64url token starting with the JWT header prefix
@@ -312,6 +390,16 @@ const TEXT_SECRET_PATTERNS = [
     findLines: findNpmAuthTokenLines,
   },
 ];
+// Workflows that build, verify or publish production bytes. They must not use
+// an Actions cache: entries are shared by every run on the same ref, including
+// runs that execute other branches' code.
+const RELEASE_WORKFLOW_FILES = new Set([
+  ".github/workflows/build-upload-deploy-prod.yml",
+  ".github/workflows/production-artifact-metadata.yml",
+  ".github/workflows/production-artifact-verifier.yml",
+  ".github/workflows/production-build-artifact.yml",
+  ".github/workflows/publish-delegation-docs-content.yml",
+]);
 const WORKFLOW_WRITE_PERMISSION_SCOPES = new Set([
   "actions",
   "attestations",
@@ -758,7 +846,8 @@ function shouldScanTextFile(filePath) {
     SECRET_SCAN_EXTENSIONS.has(extension) ||
     normalized.startsWith(".env") ||
     normalized.endsWith(".env") ||
-    /^(id_rsa|id_ed25519|id_ecdsa|credentials?|secrets?|private[-_]?key)$/i.test(
+    basename.startsWith(".env") ||
+    /^(id_rsa|id_ed25519|id_ecdsa|id_dsa|credentials?|secrets?|private[-_]?key)$/i.test(
       basename
     )
   );
@@ -868,6 +957,269 @@ function scanFilesForSecrets(files, cwd = process.cwd()) {
   };
 }
 
+function runGit(args, { cwd = process.cwd(), input } = {}) {
+  const result = spawnSync(resolveGitCommand(), args, {
+    cwd,
+    input: input === undefined ? undefined : Buffer.from(input, "utf8"),
+    encoding: "buffer",
+    maxBuffer: GIT_OUTPUT_MAX_BYTES,
+    stdio: [input === undefined ? "ignore" : "pipe", "pipe", "pipe"],
+  });
+  if (result.error) {
+    throw result.error;
+  }
+  if (result.status !== 0) {
+    throw new Error(
+      result.stderr.toString("utf8").trim() || `git ${args[0]} failed`
+    );
+  }
+  return result.stdout;
+}
+
+function isGitCommit(rev, cwd) {
+  try {
+    runGit(["rev-parse", "--verify", "--quiet", `${rev}^{commit}`], { cwd });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Each file version a commit range writes, from git's tree diffs: no file
+// contents are needed to list them. Merges list only paths whose result
+// differs from every parent, so a merge adds what its resolution introduced.
+function introducedFileVersions(revisions, cwd) {
+  const output = runGit(
+    [
+      "log",
+      "--raw",
+      "-z",
+      "--no-renames",
+      "--no-abbrev",
+      "--no-color",
+      "--no-show-signature",
+      "--diff-merges=dense-combined",
+      "--root",
+      "--format=commit %H",
+      ...revisions,
+      "--",
+    ],
+    { cwd }
+  );
+  const versions = new Map();
+  const commits = new Set();
+  const tokens = output.toString("utf8").split("\0");
+  let commit = null;
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index].replace(/^\n+/, "");
+    if (token.startsWith("commit ")) {
+      commit = token.slice("commit ".length).trim();
+      commits.add(commit);
+      continue;
+    }
+    if (!token.startsWith(":")) {
+      continue;
+    }
+    index += 1;
+    const filePath = displayPath(tokens[index]);
+    const parentCount = /^:+/.exec(token)[0].length;
+    // One mode per parent and the result, then one object name each, then
+    // the status. The result's mode and object come last.
+    const fields = token.slice(parentCount).split(" ");
+    const mode = fields[parentCount];
+    const objectName = fields[2 * parentCount + 1] || "";
+    if (
+      (mode === "100644" || mode === "100755") &&
+      /^[0-9a-f]{40,64}$/.test(objectName) &&
+      !/^0+$/.test(objectName) &&
+      !versions.has(objectName)
+    ) {
+      versions.set(objectName, { file: filePath, commit });
+    }
+  }
+  return { commits: commits.size, versions };
+}
+
+function blobSizes(objectNames, cwd) {
+  const output = runGit(
+    ["cat-file", "--batch-check=%(objectname) %(objecttype) %(objectsize)"],
+    { cwd, input: `${objectNames.join("\n")}\n` }
+  );
+  const sizes = new Map();
+  for (const line of output.toString("utf8").split("\n")) {
+    const [objectName, type, size] = line.trim().split(" ");
+    if (objectName && type === "blob") {
+      sizes.set(objectName, Number(size));
+    }
+  }
+  return sizes;
+}
+
+function promisorRemote(cwd) {
+  const configValue = (args) => {
+    try {
+      return runGit(["config", ...args], { cwd })
+        .toString("utf8")
+        .trim();
+    } catch {
+      return "";
+    }
+  };
+  const extension = configValue(["--get", "extensions.partialClone"]);
+  if (extension) {
+    return extension;
+  }
+  for (const line of configValue([
+    "--get-regexp",
+    String.raw`^remote\..*\.promisor$`,
+  ]).split("\n")) {
+    const [key, value] = line.trim().split(/\s+/);
+    if (key && value === "true") {
+      return key.slice("remote.".length, -".promisor".length);
+    }
+  }
+  return "";
+}
+
+// A blobless CI clone holds no file contents. Fetch every needed version in
+// one request; reading them one by one would make one request per object.
+function fetchObjects(objectNames, remote, cwd) {
+  runGit(
+    [
+      "-c",
+      "fetch.negotiationAlgorithm=noop",
+      "fetch",
+      "--quiet",
+      "--no-tags",
+      "--no-write-fetch-head",
+      "--recurse-submodules=no",
+      "--filter=blob:none",
+      "--stdin",
+      remote,
+    ],
+    { cwd, input: `${objectNames.join("\n")}\n` }
+  );
+}
+
+// Reads blobs in batches of bounded total size, so memory stays bounded and a
+// large range still needs only a few git processes.
+function readBlobs(objectNames, sizes, cwd) {
+  const batches = [];
+  let current = [];
+  let currentBytes = 0;
+  for (const objectName of objectNames) {
+    const size = sizes.get(objectName) || 0;
+    if (current.length > 0 && currentBytes + size > BLOB_READ_BATCH_BYTES) {
+      batches.push(current);
+      current = [];
+      currentBytes = 0;
+    }
+    current.push(objectName);
+    currentBytes += size;
+  }
+  if (current.length > 0) {
+    batches.push(current);
+  }
+
+  const blobs = new Map();
+  for (const batch of batches) {
+    const output = runGit(["cat-file", "--batch"], {
+      cwd,
+      input: `${batch.join("\n")}\n`,
+    });
+    let offset = 0;
+    while (offset < output.length) {
+      const headerEnd = output.indexOf(0x0a, offset);
+      if (headerEnd === -1) {
+        break;
+      }
+      const [objectName, type, size] = output
+        .subarray(offset, headerEnd)
+        .toString("utf8")
+        .split(" ");
+      offset = headerEnd + 1;
+      if (type === "missing" || !/^\d+$/.test(size || "")) {
+        continue;
+      }
+      const length = Number(size);
+      blobs.set(objectName, output.subarray(offset, offset + length));
+      offset += length + 1;
+    }
+  }
+  return blobs;
+}
+
+// Scans every file version the commits in `from..to` introduce, so a value
+// added in one commit and removed in a later one, or kept only in a file the
+// range also deletes, is still found. Commits reachable from `exclude` (shared
+// branches whose own pushes are scanned) are left out. When `from` is not a
+// commit, only `to` itself is scanned.
+function scanPushedRangeForSecrets({ from, to = "HEAD", exclude = [] }, cwd) {
+  const revisions = isGitCommit(from, cwd)
+    ? [to, "--not", from, ...exclude.filter((ref) => isGitCommit(ref, cwd))]
+    : ["-1", to];
+  const { commits, versions } = introducedFileVersions(revisions, cwd);
+  const findings = [];
+  const skipped = [];
+  const candidates = [];
+  for (const [objectName, version] of versions) {
+    if (shouldScanTextFile(version.file)) {
+      candidates.push(objectName);
+    } else {
+      skipped.push({ file: version.file, reason: "not-text-extension" });
+    }
+  }
+
+  let sizes = new Map();
+  if (candidates.length > 0) {
+    const remote = promisorRemote(cwd);
+    if (remote) {
+      fetchObjects(candidates, remote, cwd);
+    }
+    sizes = blobSizes(candidates, cwd);
+  }
+
+  const readable = [];
+  for (const objectName of candidates) {
+    const size = sizes.get(objectName);
+    const { file } = versions.get(objectName);
+    if (size === undefined) {
+      throw new Error(`Could not read ${file} (${objectName}).`);
+    }
+    if (size > TEXT_SCAN_MAX_BYTES) {
+      skipped.push({ file, reason: "too-large" });
+    } else {
+      readable.push(objectName);
+    }
+  }
+
+  const blobs = readBlobs(readable, sizes, cwd);
+  for (const objectName of readable) {
+    const { file, commit } = versions.get(objectName);
+    const content = blobs.get(objectName);
+    if (!content) {
+      throw new Error(`Could not read ${file} (${objectName}).`);
+    }
+    if (content.subarray(0, BINARY_SNIFF_BYTES).includes(0)) {
+      skipped.push({ file, reason: "binary" });
+      continue;
+    }
+    for (const finding of scanTextForSecrets(content.toString("utf8"), file)) {
+      findings.push({
+        ...finding,
+        commit: commit ? commit.slice(0, 12) : null,
+      });
+    }
+  }
+
+  return {
+    commits_scanned: commits,
+    file_versions_scanned: readable.length,
+    findings,
+    skipped,
+  };
+}
+
 function workflowSecurityFindingsForText(text, filePath) {
   const findings = [];
   const workflowLines = text.split(/\r\n|\r|\n/).map((line) => line.trim());
@@ -924,7 +1276,43 @@ function workflowSecurityFindingsForText(text, filePath) {
     });
   }
 
+  if (
+    RELEASE_WORKFLOW_FILES.has(normalizePath(filePath)) &&
+    workflowLines.some(isWorkflowCacheLine)
+  ) {
+    findings.push({
+      file: displayPath(filePath),
+      pattern: "release-workflow-cache",
+      reason:
+        "production build and deploy workflows must not use an Actions cache; its entries are shared with every run on the same ref.",
+    });
+  }
+
   return findings;
+}
+
+function isWorkflowCacheLine(line) {
+  const entry = line.startsWith("- ") ? line.slice(2).trim() : line;
+  const separatorIndex = entry.indexOf(":");
+  if (entry.startsWith("#") || separatorIndex === -1) {
+    return false;
+  }
+  const key = stripBoundaryQuotes(
+    entry.slice(0, separatorIndex).trim()
+  ).toLowerCase();
+  const value = stripBoundaryQuotes(
+    entry
+      .slice(separatorIndex + 1)
+      .replace(/\s#.*$/, "")
+      .trim()
+  ).toLowerCase();
+  if (key === "uses") {
+    return value.startsWith("actions/cache");
+  }
+  if (key === "package-manager-cache") {
+    return value !== "false";
+  }
+  return key === "cache" || key === "cache-dependency-path";
 }
 
 function workflowHasTrigger(lines, trigger) {
@@ -1420,6 +1808,8 @@ function canRunCommand(command) {
   return result.status === 0;
 }
 
+let resolvedWindowsGitCommand = null;
+
 function resolveGitCommand() {
   if (process.env.GIT_COMMAND) {
     return process.env.GIT_COMMAND;
@@ -1427,11 +1817,15 @@ function resolveGitCommand() {
   if (process.platform !== "win32") {
     return "git";
   }
-  const candidates = [
-    String.raw`C:\Program Files\Git\cmd\git.exe`,
-    String.raw`C:\Program Files\Git\bin\git.exe`,
-  ];
-  return candidates.find((candidate) => canRunCommand(candidate)) || "git";
+  if (resolvedWindowsGitCommand === null) {
+    const candidates = [
+      String.raw`C:\Program Files\Git\cmd\git.exe`,
+      String.raw`C:\Program Files\Git\bin\git.exe`,
+    ];
+    resolvedWindowsGitCommand =
+      candidates.find((candidate) => canRunCommand(candidate)) || "git";
+  }
+  return resolvedWindowsGitCommand;
 }
 
 function changedFilesFromGit(baseRef, cwd = process.cwd()) {
@@ -1513,6 +1907,7 @@ function usage() {
   node ops/scripts/testing-strategy.cjs compute-risk-floor --files app/page.tsx,components/Foo.tsx [--json]
   node ops/scripts/testing-strategy.cjs ci-plan --changed-from origin/main --output ci-plan.json
   node ops/scripts/testing-strategy.cjs scan-changed-secrets --changed-from origin/main --output secret-scan.json
+  node ops/scripts/testing-strategy.cjs scan-pushed-secrets --from <before> [--to HEAD] [--exclude-reachable-from origin/main,...] --output secret-scan.json
   node ops/scripts/testing-strategy.cjs validate-workflow-security --changed-from origin/main --output workflow-security.json
   node ops/scripts/testing-strategy.cjs validate-manifest --file <file>
   node ops/scripts/testing-strategy.cjs summarize-manifest --file <file>
@@ -1559,6 +1954,56 @@ function commandScanChangedSecrets(args) {
   }
 }
 
+function listArg(value) {
+  return typeof value === "string"
+    ? value
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : [];
+}
+
+// A push scan reads the current version of every changed file, as the PR scan
+// does, and every file version each pushed commit wrote.
+function commandScanPushedSecrets(args) {
+  if (typeof args.from !== "string" || args.from.length === 0) {
+    throw new Error("scan-pushed-secrets needs --from <base revision>.");
+  }
+  const changed = scanFilesForSecrets(changedFilesFromGit(args.from));
+  const pushed = scanPushedRangeForSecrets({
+    from: args.from,
+    to: typeof args.to === "string" ? args.to : "HEAD",
+    exclude: listArg(args["exclude-reachable-from"]),
+  });
+  const seen = new Set(
+    pushed.findings.map((f) => `${f.file}:${f.line}:${f.pattern}`)
+  );
+  const findings = [
+    ...pushed.findings,
+    ...changed.findings.filter(
+      (f) => !seen.has(`${f.file}:${f.line}:${f.pattern}`)
+    ),
+  ];
+  const result = {
+    schema_version: SECRET_SCAN_SCHEMA_VERSION,
+    ok: findings.length === 0,
+    commits_scanned: pushed.commits_scanned,
+    file_versions_scanned: pushed.file_versions_scanned,
+    findings,
+    skipped: [...changed.skipped, ...pushed.skipped],
+  };
+  writeJsonResult(result, args);
+  if (!result.ok) {
+    for (const finding of result.findings) {
+      const where = finding.commit ? ` in commit ${finding.commit}` : "";
+      console.error(
+        `error: ${finding.file}:${finding.line}${where}: possible secret (${finding.pattern})`
+      );
+    }
+    process.exitCode = 1;
+  }
+}
+
 function commandValidateWorkflowSecurity(args) {
   const result = validateWorkflowSecurityFiles(filesFromArgs(args));
   writeJsonResult(result, args);
@@ -1596,6 +2041,7 @@ const COMMAND_HANDLERS = {
   "ci-plan": commandCiPlan,
   "compute-risk-floor": commandComputeRiskFloor,
   "scan-changed-secrets": commandScanChangedSecrets,
+  "scan-pushed-secrets": commandScanPushedSecrets,
   "validate-manifest": commandValidateManifest,
   "summarize-manifest": commandSummarizeManifest,
   "validate-mutation-registry": commandValidateMutationRegistry,
@@ -1640,6 +2086,7 @@ module.exports = {
   normalizePath,
   parseArgs,
   scanFilesForSecrets,
+  scanPushedRangeForSecrets,
   summarizeValidationManifest,
   validateArtifactPointer,
   validateMutationRegistry,
