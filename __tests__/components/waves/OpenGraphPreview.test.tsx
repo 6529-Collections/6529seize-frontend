@@ -47,7 +47,7 @@ jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
 const proxied = (url: string, kind: "image" | "icon" = "image") =>
   `/api/og-metadata/image?${new URLSearchParams({
     url,
-    ...(kind === "image" ? { animated: "1", w: "800" } : { w: "64" }),
+    w: kind === "image" ? "640" : "64",
   }).toString()}`;
 
 describe("OpenGraphPreview", () => {
@@ -212,7 +212,7 @@ describe("OpenGraphPreview", () => {
       })
     ).toHaveAttribute(
       "src",
-      proxied("https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg")
+      "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg"
     );
     expect(screen.queryByTestId("youtube-video-embed")).toBeNull();
 
@@ -281,7 +281,7 @@ describe("OpenGraphPreview", () => {
       screen.getByRole("img", { name: "YouTube video thumbnail" })
     ).toHaveAttribute(
       "src",
-      proxied("https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg")
+      "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg"
     );
     expect(screen.queryByText("by [object Object]")).toBeNull();
   });
@@ -542,7 +542,7 @@ describe("OpenGraphPreview", () => {
     const image = screen.getByAltText("punk6529bot");
     expect(image).toHaveAttribute(
       "src",
-      proxied("https://6529.io/api/og-metadata/profiles/punk6529bot")
+      "https://6529.io/api/og-metadata/profiles/punk6529bot"
     );
     expect(image).toHaveClass("tw-object-contain");
     expect(image).toHaveAttribute(
@@ -812,23 +812,106 @@ describe("OpenGraphPreview", () => {
       );
     });
 
-    it("omits a favicon the proxy cannot serve", () => {
+    it("uses the first raster favicon and skips .ico and SVG icons", () => {
       const { container } = render(
         <OpenGraphPreview
           href="https://journal.example/notes"
           preview={{
             title: "Research Notes",
             favicon: "https://journal.example/favicon.ico",
+            favicons: [
+              "https://journal.example/favicon.ico",
+              "https://journal.example/icon.svg",
+              "https://journal.example/apple-touch-icon.png",
+              "https://journal.example/icon-32.webp",
+            ],
+          }}
+        />
+      );
+
+      const favicons = container.querySelectorAll('img[alt=""]');
+      expect(favicons).toHaveLength(1);
+      expect(favicons[0]).toHaveAttribute(
+        "src",
+        proxied("https://journal.example/apple-touch-icon.png", "icon")
+      );
+    });
+
+    it("requests no favicon when only .ico or SVG icons are listed", () => {
+      const { container } = render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{
+            title: "Research Notes",
+            favicon: "https://journal.example/favicon.ico",
+            favicons: [
+              "https://journal.example/favicon.ico",
+              "https://journal.example/icon.svg",
+              "https://journal.example/icon?size=32",
+            ],
+          }}
+        />
+      );
+
+      expect(container.querySelector('img[alt=""]')).toBeNull();
+      expect(screen.getByText("Research Notes")).toBeInTheDocument();
+    });
+
+    it("omits a favicon that fails to load without retrying", () => {
+      const { container } = render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{
+            title: "Research Notes",
+            favicon: "https://journal.example/favicon.png",
           }}
         />
       );
 
       const favicon = container.querySelector('img[alt=""]');
       expect(favicon).not.toBeNull();
+      // A proxy refusal (for example 429 or 503) reaches the image as an error.
       fireEvent.error(favicon!);
 
       expect(container.querySelector('img[alt=""]')).toBeNull();
       expect(screen.getByText("Research Notes")).toBeInTheDocument();
+    });
+
+    it.each([
+      "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33/1.png",
+      "https://i.seadn.io/gcs/files/preview.png",
+      "https://media.6529.io/ipfs/bafy/preview.png",
+    ])("loads the first-party or allowed image host %s directly", (image) => {
+      render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{ title: "Research Notes", image }}
+        />
+      );
+
+      expect(screen.getByAltText("Research Notes")).toHaveAttribute(
+        "src",
+        image
+      );
+    });
+
+    it("requests other hosts from the proxy as a still", () => {
+      render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{
+            title: "Research Notes",
+            image: "https://cdn.example.com/animated.gif",
+          }}
+        />
+      );
+
+      const src = screen.getByAltText("Research Notes").getAttribute("src")!;
+      const query = new URL(src, "https://example.com").searchParams;
+      expect(src.startsWith("/api/og-metadata/image?")).toBe(true);
+      expect(query.get("url")).toBe("https://cdn.example.com/animated.gif");
+      expect(query.get("w")).toBe("640");
+      expect(query.has("animated")).toBe(false);
     });
 
     it("lays the card out without an image that fails to load", () => {

@@ -20,7 +20,7 @@ import {
   AUTHOR_KEYS,
   DESCRIPTION_KEYS,
   deriveDomain,
-  extractFaviconUrl,
+  extractFaviconCandidates,
   extractImageAlt,
   extractImageUrl,
   formatPublishedDate,
@@ -45,7 +45,11 @@ import {
   isGithubStatusPreviewResponse,
   LinkPreviewCardLayout,
 } from "./cards";
-import { getLinkPreviewImageSrc, LinkPreviewImage } from "./previewImage";
+import {
+  getLinkPreviewImageSrc,
+  LinkPreviewImage,
+  selectLinkPreviewFavicon,
+} from "./previewImage";
 import {
   FarcasterEmbedPreviewCard,
   FirstPartyOpenGraphPreviewCard,
@@ -419,7 +423,9 @@ export default function OpenGraphPreview({
   const description = readFirstString(preview, DESCRIPTION_KEYS);
   const imageUrl = extractImageUrl(preview);
   const imageAlt = extractImageAlt(preview);
-  const faviconUrl = extractFaviconUrl(preview);
+  const faviconUrl = selectLinkPreviewFavicon(
+    extractFaviconCandidates(preview)
+  );
   const domain = deriveDomain(href, preview);
   const author = readFirstString(preview, AUTHOR_KEYS);
   const publishedDateRaw = readFirstString(preview, PUBLISHED_TIME_KEYS);

@@ -5,22 +5,52 @@ import { useState, type ReactNode } from "react";
 import Image, { type ImageProps } from "next/image";
 
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
+import { publicEnv } from "@/config/env";
 import { getInternalLinkPath } from "@/helpers/internalLink";
+import { getMediaResolverHostname } from "@/lib/media/decentralized-media";
+import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "@/lib/media/static-image-hosts";
 
 const IMAGE_PROXY_PATH = "/api/og-metadata/image";
 
 type LinkPreviewImageKind = "image" | "icon";
 
-const PROXY_PARAMS: Record<LinkPreviewImageKind, Record<string, string>> = {
-  image: { animated: "1", w: "800" },
-  icon: { w: "64" },
+// Without `animated=1` the proxy returns a still, which suits a thumbnail.
+const PROXY_WIDTH: Record<LinkPreviewImageKind, string> = {
+  image: "640",
+  icon: "64",
 };
 
+const DIRECT_IMAGE_HOSTNAMES: ReadonlySet<string> = new Set(
+  STATIC_ALLOWED_IMAGE_HOSTNAMES
+);
+
+const RASTER_ICON_EXTENSION = /\.(?:png|jpe?g|webp|gif)$/i;
+
+/** Hosts the app already loads images from directly: its own and its CDNs. */
+function isDirectImageUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    const hostname = url.hostname.toLowerCase();
+    return (
+      url.protocol === "https:" &&
+      !url.port &&
+      !url.username &&
+      !url.password &&
+      (DIRECT_IMAGE_HOSTNAMES.has(hostname) ||
+        hostname ===
+          getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT))
+    );
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Where a link preview loads an image from. Images on this site load
- * directly; every other host goes through the first-party image proxy, so
- * viewers never request a host chosen by the poster. Sources the proxy does
- * not accept (non-HTTPS, local hosts, unparseable values) are not shown.
+ * Where a link preview loads an image from. Images on this site and on the
+ * app's own static image hosts load directly; any other host goes through
+ * the first-party image proxy as a still, so viewers never request a host
+ * chosen by the poster. Sources the proxy does not accept (non-HTTPS, local
+ * hosts, unparseable values) are not requested at all.
  */
 export function getLinkPreviewImageSrc(
   source: string | null | undefined,
@@ -36,12 +66,33 @@ export function getLinkPreviewImageSrc(
     return internalPath;
   }
 
+  if (isDirectImageUrl(trimmed)) {
+    return trimmed;
+  }
+
   if (!isAllowedOgImageSourceUrl(trimmed)) {
     return undefined;
   }
 
-  const query = new URLSearchParams({ url: trimmed, ...PROXY_PARAMS[kind] });
+  const query = new URLSearchParams({ url: trimmed, w: PROXY_WIDTH[kind] });
   return `${IMAGE_PROXY_PATH}?${query.toString()}`;
+}
+
+/**
+ * The first favicon in a format the image proxy can serve. `.ico` and SVG
+ * icons, and icons without a raster file extension, are skipped so that no
+ * request is made for an icon that cannot be shown.
+ */
+export function selectLinkPreviewFavicon(
+  candidates: readonly string[]
+): string | undefined {
+  return candidates.find((candidate) => {
+    try {
+      return RASTER_ICON_EXTENSION.test(new URL(candidate).pathname);
+    } catch {
+      return false;
+    }
+  });
 }
 
 /**
