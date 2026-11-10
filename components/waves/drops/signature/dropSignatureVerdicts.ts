@@ -153,7 +153,12 @@ function sealStateFromVerdict(verdict: DropSignatureVerdict): SealState {
 }
 
 /** This browser's verdict for the drop as shown, or "pending". */
-export function readSealState(drop: VerdictDrop): SealState {
+function readSealState(drop: VerdictDrop): SealState {
+  // Drops 6529.io does not mark as signed are never checked (and lists may
+  // hold partial drop data for them).
+  if (!isDropAuthorSigned(drop)) {
+    return "pending";
+  }
   const entry = entries.get(drop.id);
   return entry?.key === contentKey(drop) ? entry.state : "pending";
 }

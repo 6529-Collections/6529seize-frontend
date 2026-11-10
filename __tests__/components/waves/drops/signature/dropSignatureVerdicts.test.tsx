@@ -4,7 +4,6 @@ import {
   WithDropAuthorSignedMarker,
 } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import {
-  readSealState,
   recordDropSignatureVerdict,
   useDropSealStates,
 } from "@/components/waves/drops/signature/dropSignatureVerdicts";
@@ -93,6 +92,16 @@ const signedEventsFor = (dropId: string) => ({
   events: [{ id: `0x${"e".repeat(64)}`, kind: 1 }],
   grants: [],
 });
+
+/** This browser's verdict for a drop, read the way a seal reads it. */
+const stateOf = (drop: ReturnType<typeof aDrop>) => {
+  const { result, unmount } = renderHook(() =>
+    useDropSealStates([drop], false)
+  );
+  const [state] = result.current;
+  unmount();
+  return state;
+};
 
 /** Lets pending promises and due timers run (fake timers). */
 const flush = async (ms = 0) => {
@@ -222,7 +231,7 @@ describe("this browser's seal verdicts", () => {
     const second = renderHook(() => useDropSealStates([drop], true));
     expect(second.result.current).toEqual(["verified"]);
     // The same content as a new object (a refetch) is the same verdict.
-    expect(readSealState({ ...drop })).toBe("verified");
+    expect(stateOf({ ...drop })).toBe("verified");
     expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
     expect(mockVerify).toHaveBeenCalledTimes(1);
   });
@@ -369,7 +378,7 @@ describe("this browser's seal verdicts", () => {
     expect(hooks[0]!.result.current).toEqual(["verified"]);
     expect(mockFetchSignedEvents).toHaveBeenCalledTimes(2);
     expect(mockVerify).toHaveBeenCalledTimes(2);
-    expect(readSealState(drops[4])).toBe("pending");
+    expect(stateOf(drops[4])).toBe("pending");
 
     // Shown again, a dropped check is queued again.
     const again = renderHook(() => useDropSealStates([drops[4]], true));
@@ -396,7 +405,7 @@ describe("this browser's seal verdicts", () => {
     rerender({ near: false });
     pending.forEach((item) => item.resolve(signedVerdict));
     await flush(60_000);
-    expect(readSealState(busy[1])).toBe("verified");
+    expect(stateOf(busy[1])).toBe("verified");
     expect(mockFetchSignedEvents).toHaveBeenCalledTimes(2);
     expect(mockFetchSignedEvents).not.toHaveBeenCalledWith(
       drop.id,
@@ -504,8 +513,8 @@ describe("this browser's seal verdicts", () => {
     });
     expect(result.current).toEqual(["verified"]);
     // Verdicts no seal shows are forgotten, oldest first.
-    expect(readSealState(others[0])).toBe("pending");
-    expect(readSealState(others[599])).toBe("verified");
+    expect(stateOf(others[0])).toBe("pending");
+    expect(stateOf(others[599])).toBe("verified");
   });
 
   it.each([
