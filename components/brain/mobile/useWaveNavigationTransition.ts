@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import {
   commitWaveNavigationTransition,
   skipWaveNavigationTransition,
+  consumeWaveSwipeHandoff,
 } from "@/helpers/waves/wave-navigation-transition";
 
 type WaveNavigationScreen = "list" | "wave" | null;
@@ -26,6 +27,7 @@ export function useWaveNavigationTransition(screen: WaveNavigationScreen) {
   useLayoutEffect(() => {
     const previousScreen = previousScreenRef.current;
     previousScreenRef.current = screen;
+    if (screen !== previousScreen && consumeWaveSwipeHandoff()) return;
     if (commitWaveNavigationTransition(screen)) return;
     const container = containerRef.current;
     if (

@@ -5,6 +5,7 @@ import { buildDropClipboardText } from "@/helpers/waves/drop-clipboard.helpers";
 import type { DropClipboardCopyStatus } from "@/hooks/drops/useDropClipboardCopyFeedback";
 import { useDropClipboardCopyFeedback } from "@/hooks/drops/useDropClipboardCopyFeedback";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { t } from "@/i18n/messages";
 import React from "react";
 
@@ -28,6 +29,7 @@ const WaveDropActionsCopyText: React.FC<WaveDropActionsCopyTextProps> = ({
   onCopy,
 }) => {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const isDisabled = drop.id.startsWith("temp-");
   const { status, statusMessage, copyToClipboard } =
     useDropClipboardCopyFeedback();
@@ -42,7 +44,10 @@ const WaveDropActionsCopyText: React.FC<WaveDropActionsCopyTextProps> = ({
     // The dropdown closes (via onCopy) only after a confirmed clipboard
     // write; on failure it stays open and shows transient "Copy failed"
     // feedback instead of silently closing as if the copy succeeded.
-    copyToClipboard(() => buildDropClipboardText(drop, locale), onCopy);
+    void copyToClipboard(
+      () => buildDropClipboardText(drop, locale, "plain", zone),
+      onCopy
+    );
   };
 
   return (

@@ -3,6 +3,16 @@ import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { formatTime } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  withDisplayTimeZone,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
+
+const CLIPBOARD_TIME_FORMAT: Intl.DateTimeFormatOptions = {
+  hour: "2-digit",
+  minute: "2-digit",
+};
 
 export type ClipboardFormat = "plain" | "markdown";
 
@@ -213,12 +223,17 @@ const extractEmbeds = (metadata: ApiDropMetadata[]): EmbedInfo[] => {
 
 type QuoteDropSource = {
   readonly author?: { readonly handle?: string | null | undefined } | undefined;
-  readonly parts?: ReadonlyArray<{
-    readonly part_id: number;
-    readonly content: string | null;
-  }> | undefined;
+  readonly parts?:
+    | ReadonlyArray<{
+        readonly part_id: number;
+        readonly content: string | null;
+      }>
+    | undefined;
   readonly created_at?: number | null | undefined;
-  readonly wave?: { readonly name?: string | null | undefined } | null | undefined;
+  readonly wave?:
+    | { readonly name?: string | null | undefined }
+    | null
+    | undefined;
 };
 
 const mergeQuoteDropSources = (
@@ -306,14 +321,10 @@ type DropReferenceDescriptor = {
   readonly drop?: QuoteDropSource | null | undefined;
 };
 
-const formatDeletedReference = (
-  descriptor: DropReferenceDescriptor
-): string =>
+const formatDeletedReference = (descriptor: DropReferenceDescriptor): string =>
   `> **${descriptor.label}** (original message deleted: ${descriptor.dropId}#${descriptor.dropPartId})`;
 
-const formatFallbackReference = (
-  descriptor: DropReferenceDescriptor
-): string =>
+const formatFallbackReference = (descriptor: DropReferenceDescriptor): string =>
   `> **${descriptor.label}** (${descriptor.dropId}#${descriptor.dropPartId})`;
 
 const resolveReferenceDetails = (
@@ -373,15 +384,21 @@ const formatReference = (
     return formatDeletedReference(descriptor);
   }
 
-  const { authorHandle, normalizedContent, waveName } =
-    resolveReferenceDetails(descriptor, quoteLookup);
+  const { authorHandle, normalizedContent, waveName } = resolveReferenceDetails(
+    descriptor,
+    quoteLookup
+  );
 
   if (!authorHandle && !normalizedContent && !waveName) {
     return formatFallbackReference(descriptor);
   }
 
   const lines = [
-    buildReferenceHeading(descriptor.label, authorHandle, normalizedContent.length > 0),
+    buildReferenceHeading(
+      descriptor.label,
+      authorHandle,
+      normalizedContent.length > 0
+    ),
     ...buildReferenceContentLines(normalizedContent),
   ];
 
@@ -619,9 +636,16 @@ export const formatMessage = (
   message: ClipboardMessage,
   format: ClipboardFormat,
   isSingle: boolean,
-  locale: SupportedLocale
+  locale: SupportedLocale,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
 ): string => {
-  const timeLabel = formatTime(locale, message.timestamp);
+  // Copied text leaves the screen, so it uses the display time zone too and
+  // names the zone when it is not the device's own.
+  const timeLabel = formatTime(
+    locale,
+    message.timestamp,
+    withDisplayTimeZone(zone, CLIPBOARD_TIME_FORMAT)
+  );
   const authorLabel = message.author || "Unknown";
   const formatContent = resolveFormatContent(message, format);
   const heading = createHeading(authorLabel, timeLabel, format, isSingle);
@@ -649,7 +673,8 @@ export const formatMessage = (
 export const formatMessages = (
   messages: ClipboardMessage[],
   format: ClipboardFormat,
-  locale: SupportedLocale
+  locale: SupportedLocale,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
 ): string => {
   if (messages.length === 0) {
     return "";
@@ -657,7 +682,7 @@ export const formatMessages = (
 
   const isSingle = messages.length === 1;
   const segments = messages.map((message) =>
-    formatMessage(message, format, isSingle, locale)
+    formatMessage(message, format, isSingle, locale, zone)
   );
 
   return segments.join("\n\n");
@@ -666,9 +691,10 @@ export const formatMessages = (
 export const buildDropClipboardText = (
   drop: ClipboardDropSource,
   locale: SupportedLocale,
-  format: ClipboardFormat = "plain"
+  format: ClipboardFormat = "plain",
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
 ): string => {
   const quoteLookup = buildQuoteDropLookup([drop]);
   const message = buildClipboardMessage(drop, quoteLookup);
-  return formatMessage(message, format, true, locale);
+  return formatMessage(message, format, true, locale, zone);
 };

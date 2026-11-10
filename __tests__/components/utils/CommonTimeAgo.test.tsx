@@ -1,5 +1,9 @@
 import { act, render, screen } from "@testing-library/react";
 import CommonTimeAgo from "@/components/utils/CommonTimeAgo";
+import {
+  resetDisplayTimeZoneSnapshotForTests,
+  setDisplayTimeZoneOverride,
+} from "@/lib/display-time-zone/displayTimeZoneStore";
 
 jest.mock("@/helpers/Helpers", () => ({
   getTimeAgo: jest.fn(),
@@ -23,6 +27,9 @@ describe("CommonTimeAgo", () => {
   });
 
   afterEach(() => {
+    act(() => setDisplayTimeZoneOverride(null));
+    resetDisplayTimeZoneSnapshotForTests();
+    globalThis.sessionStorage.clear();
     jest.clearAllTimers();
     jest.useRealTimers();
     toLocaleStringSpy.mockRestore();
@@ -81,5 +88,22 @@ describe("CommonTimeAgo", () => {
 
     expect(helpers.getTimeAgo).toHaveBeenCalledTimes(2);
     expect(screen.getByText("updated")).toBeInTheDocument();
+  });
+
+  it("formats the hover title in the display zone", () => {
+    const timestamp = 1_700_000_000_000;
+    helpers.getTimeAgo.mockReturnValue("long");
+    // Jest runs in UTC, so another zone stands in for "not the device zone".
+    act(() => setDisplayTimeZoneOverride("Asia/Tokyo"));
+
+    render(<CommonTimeAgo timestamp={timestamp} />);
+
+    expect(toLocaleStringSpy).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({
+        timeZone: "Asia/Tokyo",
+        timeZoneName: "short",
+      })
+    );
   });
 });

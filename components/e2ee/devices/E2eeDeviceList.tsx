@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
 import { formatE2eeDateTime } from "../e2eeFormat";
@@ -30,32 +31,33 @@ const PLATFORM_ICONS = {
 
 function DeviceDates({ device }: { readonly device: E2eeDeviceInfo }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const now = useE2eeNow();
   const lastSeen =
     device.lastSeenAt === null
       ? t(locale, "e2ee.devices.lastSeenNever")
       : t(locale, "e2ee.devices.lastSeen", {
-          date: formatE2eeDateTime(locale, device.lastSeenAt),
+          date: formatE2eeDateTime(locale, device.lastSeenAt, zone),
         });
   let ending: string;
   if (device.revokedAt !== null) {
     ending = t(locale, "e2ee.devices.revokedOn", {
-      date: formatE2eeDateTime(locale, device.revokedAt),
+      date: formatE2eeDateTime(locale, device.revokedAt, zone),
     });
   } else if (device.expiresAt <= now) {
     ending = t(locale, "e2ee.devices.expired", {
-      date: formatE2eeDateTime(locale, device.expiresAt),
+      date: formatE2eeDateTime(locale, device.expiresAt, zone),
     });
   } else {
     ending = t(locale, "e2ee.devices.expires", {
-      date: formatE2eeDateTime(locale, device.expiresAt),
+      date: formatE2eeDateTime(locale, device.expiresAt, zone),
     });
   }
   return (
     <ul className="tw-m-0 tw-mt-1 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-0.5 tw-p-0 tw-text-xs tw-text-iron-400">
       <li>
         {t(locale, "e2ee.devices.created", {
-          date: formatE2eeDateTime(locale, device.createdAt),
+          date: formatE2eeDateTime(locale, device.createdAt, zone),
         })}
       </li>
       <li>{lastSeen}</li>
