@@ -24,6 +24,10 @@ import { ApiCreateWaveMetadataRequest } from '../models/ApiCreateWaveMetadataReq
 import { HttpFile } from '../http/http';
 
 export class ApiCompetition {
+    /**
+    * Number of ACTIVE entries submitted by the authenticated acting profile in this competition. Winning, withdrawn and deleted entries do not consume submission capacity. Null for anonymous readers.
+    */
+    'your_active_entries_count'?: number | null;
     'presentation'?: Array<ApiCreateWaveMetadataRequest>;
     'id': string;
     'wave_id': string;
@@ -52,6 +56,12 @@ export class ApiCompetition {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "your_active_entries_count",
+            "baseName": "your_active_entries_count",
+            "type": "number",
+            "format": "int64"
+        },
         {
             "name": "presentation",
             "baseName": "presentation",
