@@ -67,7 +67,11 @@ Sentry.init({
 
   integrations(integrations) {
     const configuredIntegrations = [
-      ...integrations,
+      // The culture context reports the device time zone and locale, which
+      // the display time zone setting keeps private. Click and input
+      // breadcrumbs keep the SDK's default tag, id and class path;
+      // sanitizeSentryBreadcrumb removes label text from them.
+      ...integrations.filter(({ name }) => name !== "CultureContext"),
       Sentry.thirdPartyErrorFilterIntegration({
         filterKeys: [SENTRY_APPLICATION_KEY],
         behaviour: SENTRY_THIRD_PARTY_FILTER_BEHAVIOUR,

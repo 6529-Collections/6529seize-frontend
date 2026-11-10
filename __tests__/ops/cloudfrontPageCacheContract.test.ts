@@ -148,8 +148,31 @@ function listSourceFiles(entry: string): string[] {
   return files;
 }
 
-const USE_CLIENT_PATTERN =
-  /^\s*(?:(?:\/\/[^\n]*|\/\*[\s\S]*?\*\/)\s*)*["']use client["']/;
+/**
+ * True when the module starts with a "use client" directive, allowing only
+ * whitespace and comments before it. Scans by index, so it cannot backtrack.
+ */
+function startsWithUseClient(source: string): boolean {
+  let rest = source.trimStart();
+  for (;;) {
+    if (rest.startsWith("//")) {
+      const lineEnd = rest.indexOf("\n");
+      if (lineEnd === -1) {
+        return false;
+      }
+      rest = rest.slice(lineEnd + 1).trimStart();
+    } else if (rest.startsWith("/*")) {
+      const commentEnd = rest.indexOf("*/", 2);
+      if (commentEnd === -1) {
+        return false;
+      }
+      rest = rest.slice(commentEnd + 2).trimStart();
+    } else {
+      break;
+    }
+  }
+  return rest.startsWith('"use client"') || rest.startsWith("'use client'");
+}
 
 interface CookieRead {
   readonly file: string;
@@ -227,7 +250,7 @@ function collectServerCookieReads() {
 
   for (const file of SERVER_SOURCE_ROOTS.flatMap(listSourceFiles)) {
     const source = readFileSync(file, "utf8");
-    if (USE_CLIENT_PATTERN.test(source)) {
+    if (startsWithUseClient(source)) {
       continue;
     }
     const relativeFile = relative(ROOT, file).replaceAll("\\", "/");
