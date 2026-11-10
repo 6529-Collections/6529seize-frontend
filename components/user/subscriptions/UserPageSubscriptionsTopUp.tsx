@@ -388,6 +388,21 @@ function SubscriptionTopUpForm({
       setError(t(locale, "subscriptions.topUp.validation.wallet"));
       return;
     }
+    // The server price is never used for the amount check below; it only
+    // has to agree with the price this page shows.
+    const serverPriceEth = coverage?.mint_price_eth;
+    if (
+      serverPriceEth !== undefined &&
+      parseEthToWei(serverPriceEth) !== MEMES_MINT_PRICE_WEI
+    ) {
+      setError(
+        t(locale, "subscriptions.topUp.validation.priceMismatch", {
+          serverPrice: serverPriceEth,
+          localPrice: formatEther(MEMES_MINT_PRICE_WEI),
+        })
+      );
+      return;
+    }
     const value = parseEthToWei(selectedTopUp.amountEth);
     if (
       value === null ||

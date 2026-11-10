@@ -418,6 +418,58 @@ describe("UserPageSubscriptionsTopUp", () => {
     }
   );
 
+  it.each([
+    ["1 Card", /^Top up 0.06529 ETH$/],
+    ["Recommended", /^Top up /],
+  ])(
+    "refuses to send %s when the server card price differs from the shown price",
+    async (option, buttonName) => {
+      const coverage = {
+        mint_price_eth: "0.07",
+        recommended_top_up: {
+          target_fully_funded_drops: 1,
+          additional_mints: 1,
+          amount_eth: "0.06529",
+          projected_through: {
+            token_id: 560,
+            mint_at: new Date("2026-10-12T15:40:00Z"),
+          },
+        },
+      } as ApiSubscriptionCoverage;
+      render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+      const user = userEvent.setup();
+      await user.click(
+        screen.getByRole("radio", { name: new RegExp(`^${option}`) })
+      );
+      await user.click(screen.getByRole("button", { name: buttonName }));
+
+      expect(
+        screen.getByRole("textbox", { name: "Transaction error details" })
+      ).toHaveValue(
+        "The server lists a card price of 0.07 ETH but this page uses 0.06529 ETH, so nothing was sent. Refresh the page and try again."
+      );
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    }
+  );
+
+  it("sends when the server card price matches the shown price", async () => {
+    const coverage = {
+      mint_price_eth: "0.06529",
+    } as ApiSubscriptionCoverage;
+    render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("radio", { name: "1 Card" }));
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.06529 ETH" })
+    );
+
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther("0.06529"),
+    });
+  });
+
   it("sends a backend top-up that needs exactly the selected cards", async () => {
     const coverage = {
       recommended_top_up: {

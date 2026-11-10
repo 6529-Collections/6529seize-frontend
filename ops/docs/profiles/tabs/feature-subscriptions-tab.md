@@ -152,7 +152,8 @@ first render.
    beneath the option before selection. Before sending either one, the page
    checks that its amount needs exactly the shown number of cards at the
    current card price; otherwise nothing is sent and the error asks you to
-   refresh and try again. `Show Deep Time Subscriptions` reveals
+   refresh and try again. If the server's card price differs from the price
+   the page shows, no top-up is sent and the error names both prices. `Show Deep Time Subscriptions` reveals
    Remaining Period, Era, and Eon and becomes `Hide Deep Time Subscriptions`.
    Close, Escape, or the backdrop dismisses the dialog and returns focus to
    the opener. Reopening retains the draft selection and Other count.
