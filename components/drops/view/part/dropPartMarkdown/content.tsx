@@ -25,6 +25,7 @@ import {
   hasMentionedGroup,
   markGroupMentionTokens,
 } from "@/helpers/waves/drop-group-mentions";
+import { isAllowedMarkdownImageSource } from "./imageSource";
 import { isDirectImageUrl } from "./linkUtils";
 import { normalizeDropMarkdownContent } from "./normalizeContent";
 import { isPreviewableHrefSource } from "./sourcePositions";
@@ -156,7 +157,7 @@ const getBareImageHref = (
   elementProps: MarkdownElementProps | null
 ): string | null => {
   const href = getSmartHref(elementProps);
-  if (!href || !isDirectImageUrl(href)) {
+  if (!href || !isDirectImageUrl(href) || !isAllowedMarkdownImageSource(href)) {
     return null;
   }
 
