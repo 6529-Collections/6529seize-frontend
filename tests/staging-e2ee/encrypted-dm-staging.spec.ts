@@ -474,7 +474,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
           "CODE"
         );
         await expect(
-          notice.getByRole("link", { name: "Private link" })
+          notice.getByRole("link", { name: "Private link", exact: true })
         ).toHaveCount(0);
         expect(
           await notice.evaluate(
@@ -515,7 +515,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         { timeout: SYNC_TIMEOUT_MS }
       );
       await expect(
-        overviewNotice.getByRole("link", { name: "Private link" })
+        overviewNotice.getByRole("link", { name: "Private link", exact: true })
       ).toHaveCount(0);
       await testInfo.attach("encrypted-notification-overview", {
         body: await overview.screenshot(),
