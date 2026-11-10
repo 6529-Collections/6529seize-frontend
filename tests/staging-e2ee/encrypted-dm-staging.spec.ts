@@ -445,10 +445,20 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       [a, b],
       needles({
         caption,
-        gifUrl: GIPHY_FIXTURE_URL,
         gifBytes: gifFixtureBytes(),
       })
     );
+    const gifUrlNeedles = needles({ gifUrl: GIPHY_FIXTURE_URL });
+    const senderUrlMatches = a.evidence.findLeaks(gifUrlNeedles);
+    // Public previews/downloads use this exact GET. Every other endpoint,
+    // request body and WebSocket frame must keep the provider URL private.
+    expect(senderUrlMatches.length).toBeGreaterThan(0);
+    expect(
+      senderUrlMatches.filter(
+        (match) => match.where !== `GET ${GIPHY_FIXTURE_URL}`
+      )
+    ).toEqual([]);
+    expect(b.evidence.findLeaks(gifUrlNeedles)).toEqual([]);
   });
 
   test("an encrypted image round-trips through the blob store", async () => {
