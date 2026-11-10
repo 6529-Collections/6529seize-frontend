@@ -11,7 +11,9 @@ nothing is uploaded.
 
 ## Location in the Site
 
-- Desktop: a post's `More actions` menu (`⋮`) > `Share as image`.
+- Desktop: a post's `More actions` menu (`⋮`) > `Share as image`. Signed-out
+  visitors, whose hover toolbar has no `⋮` menu, use the image button beside
+  `Copy link`.
 - Touch: long-press a post > `Share as image`.
 - Available in wave and direct-message conversations (`/waves/{waveId}`,
   `/messages/{waveId}`). Not offered in the single-post overlay.
@@ -39,11 +41,13 @@ nothing is uploaded.
 
 - Wave picture, name and the date in the chosen zone (optional).
 - Each post's author picture, handle, level, time label, text, first image
-  and reaction counts (optional). Videos and files show a "not shown" note.
+  and reaction counts (optional), with custom 6529 emoji drawn as images.
+  Videos and files show a "not shown" note.
 - Never: the viewer's reaction highlight, unread line, badges, profile button,
   message box, drafts or phone status bar.
 
-The PNG is 1080 pixels wide. The file name uses the wave name and the UTC date
+The preview scales the card to fit the dialog, so it never scrolls sideways;
+the PNG is always 1080 pixels wide. The file name uses the wave name and the UTC date
 of the first post; for direct messages and private waves it is
 `6529-posts-{date}.png`. Private conversations show a reminder before sharing.
 

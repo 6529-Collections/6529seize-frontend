@@ -22,6 +22,7 @@ if (typeof window !== "undefined") {
 import React from "react";
 import {
   render,
+  renderHook,
   screen,
   waitFor,
   act,
@@ -29,8 +30,17 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropsAll from "@/components/waves/drops/wave-drops-all";
+import {
+  useExpandedReplyThreadsStore,
+  useWaveReplyThreads,
+} from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import {
+  fetchDropReplyThreadTarget,
+  type DropReplyThreadTarget,
+} from "@/services/api/drop-reply-thread-target-api";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 
 const BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY =
@@ -38,6 +48,16 @@ const BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY =
 
 // Mock hooks and dependencies
 jest.mock("@/hooks/useVirtualizedWaveDrops");
+jest.mock(
+  "@/components/waves/drops/reply-threads/WaveReplyThreadsContext",
+  () => ({
+    ...jest.requireActual(
+      "@/components/waves/drops/reply-threads/WaveReplyThreadsContext"
+    ),
+    useWaveReplyThreads: jest.fn(() => null),
+  })
+);
+jest.mock("@/services/api/drop-reply-thread-target-api");
 jest.mock("@/hooks/useScrollBehavior");
 jest.mock("@/hooks/useWaveIsTyping");
 jest.mock("@/hooks/useWaveBoostedDrops");
@@ -816,6 +836,26 @@ describe("WaveDropsAll", () => {
   });
 
   describe("Navigation and Quote Handling", () => {
+    it("keeps row navigation callbacks stable when a message arrives", () => {
+      const firstDrop = createMockDrop({ id: "first", serial_no: 1 });
+      const newDrop = createMockDrop({ id: "new", serial_no: 2 });
+      const { getWaveMessages, setWaveMessages } = setupMocks({
+        waveMessages: { drops: [firstDrop] },
+      });
+      const { props, rerender } = renderComponent();
+      const { onQuoteClick, onReplyClick } = dropsProps;
+
+      setWaveMessages({
+        ...getWaveMessages(),
+        drops: [newDrop, firstDrop],
+      });
+      rerender(<WaveDropsAll {...props} />);
+
+      expect(dropsProps.drops).toEqual([newDrop, firstDrop]);
+      expect(dropsProps.onQuoteClick).toBe(onQuoteClick);
+      expect(dropsProps.onReplyClick).toBe(onReplyClick);
+    });
+
     it("navigates to different wave when quote is from another wave", () => {
       const mockDrop = createMockDrop({
         wave: {
@@ -875,6 +915,61 @@ describe("WaveDropsAll", () => {
       await waitFor(() => {
         expect(dropsProps.suspendLightDropHydration).toBe(false);
       });
+    });
+
+    it("opens a quoted reply after the initial link is removed from the URL", async () => {
+      const { result } = renderHook(useExpandedReplyThreadsStore);
+      const waveId = "current-wave";
+      const store = result.current;
+      const replyThreads = {
+        waveId,
+        store,
+        collapseAll: true,
+        getWave: jest.fn<ApiWave, []>(),
+      };
+      const wave = { ...createMockDrop().wave, id: waveId };
+      setupMocks({
+        waveMessages: { drops: [createMockDrop({ wave, serial_no: 10 })] },
+      });
+      const lookup = Promise.withResolvers<DropReplyThreadTarget | null>();
+      const target = {
+        parentDropId: "thread-root",
+        parentSerialNo: 4,
+        replySerialNo: 42,
+      };
+      const abortLookup = jest.fn();
+      const replyThreadsMock = jest.mocked(useWaveReplyThreads);
+      replyThreadsMock.mockReturnValue(replyThreads);
+      jest
+        .mocked(fetchDropReplyThreadTarget)
+        .mockReturnValueOnce(lookup.promise);
+
+      try {
+        const { props, rerender } = renderComponent({
+          waveId,
+          initialDrop: 10,
+        });
+        MockAbortController.mockImplementationOnce(() => ({
+          abort: abortLookup,
+          signal: mockSignal,
+        }));
+        act(() => {
+          dropsProps.onQuoteClick(createMockDrop({ wave, serial_no: 42 }));
+        });
+        expect(fetchDropReplyThreadTarget).toHaveBeenCalledWith(
+          expect.objectContaining({ waveId, serialNo: 42 })
+        );
+
+        replyThreadsMock.mockReturnValue({ ...replyThreads });
+        rerender(<WaveDropsAll {...props} initialDrop={null} />);
+        expect(abortLookup).not.toHaveBeenCalled();
+
+        await act(async () => lookup.resolve(target));
+        expect(store.getLinkedReply()).toEqual(target);
+        expect(store.isExpanded(target.parentDropId)).toBe(true);
+      } finally {
+        replyThreadsMock.mockReturnValue(null);
+      }
     });
   });
 

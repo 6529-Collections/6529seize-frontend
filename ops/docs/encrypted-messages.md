@@ -67,6 +67,24 @@ shortcodes render as inline images while composing and editing; encrypted drafts
 keep their shortcode representation for encryption and sending. Encrypted chat
 does not offer GIF, Poll or Storm actions.
 
+Messages support the same Markdown formatting as ordinary chats: headings,
+**bold** and italic text, strikethrough, lists and task lists, quotes,
+inline and fenced code, tables, separators and links. Encrypted messages also
+support footnotes. Code blocks use
+syntax highlighting, and member mentions and custom emoji stay literal inside
+code. Extra blank lines keep their spacing when you send or edit a message.
+
+Encrypted notification previews use the same local Markdown renderer in the
+notification overview and on the notifications page. Previews stay compact;
+message links and images appear as labels, and selecting the notification opens
+the encrypted chat.
+
+Links open only when you select them. Encrypted messages do not automatically
+load link previews, embeds or images from Markdown URLs. A Markdown image is
+shown as a link using its alternative text (or a label identifying the image host); select the link to
+open it. To show an image privately inside the chat, attach or paste the image
+so it is encrypted on your device.
+
 Custom emojis also render inline in the encrypted chat list and sidebar message
 previews, at a compact size that keeps each preview on one line.
 
@@ -780,8 +798,10 @@ One secure link signs in and enrolls the app; a second connection-only scan is
 unnecessary. Generating or viewing a QR does not register an active device.
 Registration happens when the receiving app accepts and completes setup.
 
-After accepting either connection type, the receiving app opens Home. Secure
-setup completes before navigation; Encrypted DMs do not open automatically.
+After a successful acceptance, the receiving app opens Home. A new device
+may still be registering for Encrypted DMs. If secure setup fails after
+sign-in, the app keeps you signed in and shows how to try again with a fresh
+secure link. You can choose **Take me home** from that screen.
 
 The Mobile QR fills the available width. Below it, the link field has a copy
 icon and separate refresh icon. **Back** returns to the app and connection

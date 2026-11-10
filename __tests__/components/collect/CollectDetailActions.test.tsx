@@ -1,5 +1,6 @@
 import type { CollectOwnerActionRenderer } from "@/components/collect/CollectOwnerAction";
 import CollectDetailActions from "@/components/collect/CollectDetailActions";
+import { CollectDetailLayout } from "@/components/collect/CollectDetailActionRow";
 import { MEMES_CONTRACT, MEMELAB_CONTRACT } from "@/constants/constants";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
@@ -17,12 +18,13 @@ import type {
   CollectTradeCollection,
 } from "@/components/collect/collect.types";
 import userEvent from "@testing-library/user-event";
-import { useState, type ReactNode } from "react";
+import { useContext, useState, type ReactNode } from "react";
 
 const mockFetchAssets = jest.fn();
 const mockControllerRender = jest.fn();
 let mockSuspendedController: Promise<void> | null = null;
 let mockHidePurchasing = false;
+let mockIsDesktop = false;
 const mockAuth = {
   connectedProfile: {
     id: "profile-one",
@@ -38,6 +40,9 @@ jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
 }));
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
+}));
+jest.mock("@/hooks/useMediaQuery", () => ({
+  useMediaQuery: () => mockIsDesktop,
 }));
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
@@ -90,6 +95,7 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
     supportingActions?: ReactNode;
   }) {
     const [reviewed, setReviewed] = useState(false);
+    const detailLayout = useContext(CollectDetailLayout);
     mockControllerRender();
     if (mockSuspendedController) throw mockSuspendedController;
     return (
@@ -99,6 +105,7 @@ jest.mock("@/components/collect/CollectTradeController", () => ({
         data-action={action}
         data-presentation={presentation}
         data-reviewed={reviewed}
+        data-card-layout={Boolean(detailLayout)}
       >
         {layout === "inline-buy" && <button>Collect</button>}
         {layout === "inline-buy" && secondaryActions}
@@ -128,7 +135,8 @@ function renderActions(
   tokenId = "5",
   onMarketChange?: () => void,
   collection: CollectTradeCollection = "memes",
-  mobileSticky = false
+  mobileSticky = false,
+  desktopCard = false
 ) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
@@ -141,6 +149,7 @@ function renderActions(
         title="Meme Five"
         locale="en-US"
         mobileSticky={mobileSticky}
+        desktopCard={desktopCard}
         {...(onMarketChange ? { onMarketChange } : {})}
       />
     </QueryClientProvider>
@@ -162,6 +171,7 @@ async function openOffer() {
 beforeEach(() => {
   jest.clearAllMocks();
   mockHidePurchasing = false;
+  mockIsDesktop = false;
   mockSuspendedController = null;
   mockAuth.connectedProfile.id = "profile-one";
   mockAuth.connectedProfile.wallets = [
@@ -208,6 +218,32 @@ it("opens the same accept flow from the Meme more-actions menu and restores focu
   await user.keyboard("{Escape}");
   await waitFor(() => expect(trigger).toHaveFocus());
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+it("keeps the inline trade draft while desktop cards switch back to the phone layout", async () => {
+  mockIsDesktop = true;
+  const view = renderActions("5", undefined, "memes", false, true);
+  const inline = await screen.findByTestId("inline-trade");
+  expect(inline).toHaveAttribute("data-card-layout", "true");
+  expect(
+    within(inline).getByRole("button", {
+      name: "More trading actions for Meme Five",
+    })
+  ).toBeInTheDocument();
+  fireEvent.click(
+    within(inline).getByRole("button", { name: "Prepare review" })
+  );
+  expect(inline).toHaveAttribute("data-reviewed", "true");
+  mockIsDesktop = false;
+  view.rerender(view.content("5"));
+  expect(screen.getByTestId("inline-trade")).toBe(inline);
+  expect(inline).toHaveAttribute("data-reviewed", "true");
+  expect(
+    within(inline).getByRole("button", { name: "List" })
+  ).toBeInTheDocument();
+  expect(inline).toHaveAttribute("data-card-layout", "false");
+  expect(document.querySelector("[data-collect-sticky-actions]")).toBeNull();
+  expect(mockFetchAssets).toHaveBeenCalledTimes(1);
 });
 it("loads the exact Meme Lab asset through its explicit family and retains shared controls", async () => {
   const lab = {
@@ -301,12 +337,22 @@ it("does not reopen an escaped offer when suspended content resolves", async () 
     ).toHaveFocus()
   );
 });
-it("preserves iOS purchasing gate before any query or action", () => {
-  mockHidePurchasing = true;
-  renderActions();
-  expect(screen.queryByRole("button")).not.toBeInTheDocument();
-  expect(mockFetchAssets).not.toHaveBeenCalled();
-});
+it.each(["default", "desktopCard", "mobileSticky"])(
+  "preserves iOS purchasing gate before any query or action (%s)",
+  (layout) => {
+    mockHidePurchasing = true;
+    mockIsDesktop = true;
+    renderActions(
+      "5",
+      undefined,
+      "memes",
+      layout === "mobileSticky",
+      layout === "desktopCard"
+    );
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(mockFetchAssets).not.toHaveBeenCalled();
+  }
+);
 it("refreshes the enclosing market from inline Collect and owner listing", async () => {
   const changed = jest.fn();
   renderActions("5", changed);
