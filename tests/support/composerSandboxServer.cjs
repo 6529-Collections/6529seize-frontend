@@ -3331,6 +3331,7 @@ function buildPublicRuntime() {
       ? {
           NEXT_PUBLIC_E2EE_DM_ENABLED: "true",
           NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
+          GIPHY_API_KEY: "e2ee-sandbox-fixture",
         }
       : {}),
     // Sandbox packs run the staging chat configuration (gap-only sync and

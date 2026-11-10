@@ -34,6 +34,12 @@ import {
   installSurfaceSimulation,
   isMobileWebProject,
 } from "../support/surfaceSimulation";
+import {
+  gifFixtureBytes,
+  GIPHY_FIXTURE_URL,
+  installGiphyFixture,
+  openGifPicker,
+} from "../support/e2ee/giphyFixture";
 
 /** A valid 1x1 RGBA PNG (raster images are the only inline type). */
 const PIXEL_PNG_BASE64 =
@@ -110,6 +116,54 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     const open = sessions;
     sessions = [];
     await closeE2eeUsers(open);
+  });
+
+  test("a public GIF selection is sent privately as an encrypted attachment", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    sessions = [alice, bob];
+    await installGiphyFixture(alice.page);
+    const recipientGiphyRequests: string[] = [];
+    bob.page.on("request", (request) => {
+      if (new URL(request.url()).hostname.endsWith(".giphy.com"))
+        recipientGiphyRequests.push(request.url());
+    });
+    await enroll(alice);
+    await enroll(bob);
+    await startChat(alice, ["bob"]);
+    const selected = await openGifPicker(alice.page);
+    await alice.page.screenshot({
+      path: testInfo.outputPath("gif-picker.png"),
+    });
+    await selected.click();
+    await expect(
+      alice.page.getByRole("list", { name: "Attachments" })
+    ).toContainText("giphy.gif");
+    const caption = "A GIF sent through the encrypted attachment pipeline";
+    await sendMessage(alice.page, caption);
+    await openConversationFromList(bob.page, "alice");
+    await expectMessage(bob.page, caption);
+    const received = messageRow(bob.page, caption).getByRole("img", {
+      name: "Image: giphy.gif",
+      exact: true,
+    });
+    await expect(received).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await expect(received).toHaveAttribute("src", /^blob:/u);
+    await bob.page.screenshot({
+      path: testInfo.outputPath("encrypted-gif.png"),
+    });
+    expect(recipientGiphyRequests).toEqual([]);
+    const scan = await e2eeSandboxControls.plaintextScan(baseURL, [
+      caption,
+      GIPHY_FIXTURE_URL,
+      gifFixtureBytes().toString("base64"),
+    ]);
+    expect(scan.scannedBytes).toBeGreaterThan(0);
+    expect(scan.found).toEqual([]);
   });
 
   test("native encrypted chat gesture replies on release and swipes back to its list", async ({
