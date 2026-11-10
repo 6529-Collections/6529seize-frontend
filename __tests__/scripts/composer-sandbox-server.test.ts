@@ -50,7 +50,6 @@ function loadSandbox(apiOnly?: string, env: Record<string, string> = {}) {
     { resolve: jest.fn(() => "/fixture/next") }
   );
   const context = {
-    structuredClone: globalThis.structuredClone,
     readFixture: (_pathname: string): unknown => undefined,
     readPublicRuntime: (): Record<string, unknown> => ({}),
     readApi: (_pathname: string, _res: unknown): Promise<void> =>
