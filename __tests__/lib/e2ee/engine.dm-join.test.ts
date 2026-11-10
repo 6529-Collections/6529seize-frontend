@@ -5,7 +5,8 @@
  * conversation has exactly two participants: an invitation to one joins only
  * when its pair names this user, its sender is one of the two and every
  * device belongs to one of them, as commit validation already requires.
- * Group invitations join as before.
+ * Group invitations join as before. Continuing a superseded DM follows its
+ * stored successor only while that is a usable DM with the same person.
  */
 import type { E2eeApiClient } from "@/lib/e2ee/api";
 import { MlsClient } from "@/lib/e2ee/mls-adapter";
@@ -17,8 +18,11 @@ import {
   createWorld,
   moveToCurrentSuite,
   settle,
+  startDevice,
+  stopDevice,
   texts,
   type TestDevice,
+  type TestUser,
   type World,
 } from "./support/harness";
 
@@ -266,8 +270,21 @@ describe("E2EE engine: joining direct conversations", () => {
     expect(bob.primary.engine.findDm("alice")).toBe(g);
     expect(pendingWelcomes(world, bob.primary)).toEqual([]);
   });
+});
 
-  it("keeps a continued DM (D172) working for the other person and their later device", async () => {
+describe("E2EE engine: continuing a superseded DM (D172)", () => {
+  let world: World;
+
+  beforeEach(async () => {
+    world = await createWorld();
+  });
+
+  afterEach(() => {
+    for (const device of world.devices) device.engine.dispose();
+  });
+
+  /** Alice and Bob share a DM made on 0x004F, then both move to 0x004E. */
+  async function supersededDm() {
     const alice = await addUser(world, "alice", undefined, {
       earlierSuite: true,
     });
@@ -281,8 +298,85 @@ describe("E2EE engine: joining direct conversations", () => {
     await moveToCurrentSuite(world, bob, bob.primary);
     await alice.primary.engine.enroll();
     await bob.primary.engine.enroll();
+    await addUser(world, "carol");
     await settle(world);
+    return { alice, bob, old };
+  }
 
+  /** Stores `successor` as the link of `g` and starts the device again. */
+  async function relink(
+    user: TestUser,
+    g: string,
+    successor: string
+  ): Promise<TestDevice> {
+    const device = user.primary;
+    await device.engine.idle();
+    stopDevice(world, device);
+    const groups = (await device.storage.listGroups(user.profileId))
+      .filter((group) => group.g === g)
+      .map(({ successorPending: _pending, ...group }) => ({
+        ...group,
+        successor,
+      }));
+    await device.storage.writeBatch(user.profileId, {
+      expectedVersion: await device.storage.getStateVersion(user.profileId),
+      groups,
+    });
+    const restarted = await startDevice(world, user.profileId, user.account, {
+      storage: device.storage,
+      enroll: false,
+    });
+    user.devices.push(restarted);
+    user.primary = restarted;
+    return restarted;
+  }
+
+  it("continues in the stored successor when it is the DM with the same person", async () => {
+    const { alice, old } = await supersededDm();
+    const fresh = await alice.primary.engine.restart(old);
+    await settle(world);
+    const device = await relink(alice, old, fresh);
+    const count = device.engine.getConversations().length;
+    await expect(device.engine.restart(old)).resolves.toBe(fresh);
+    expect(device.engine.getConversations()).toHaveLength(count);
+  });
+
+  it("does not continue in a stored successor that is a DM with someone else", async () => {
+    const { alice, old } = await supersededDm();
+    const withCarol = await alice.primary.engine.createConversation({
+      profileIds: ["carol"],
+      kind: "dm",
+    });
+    await settle(world);
+    const device = await relink(alice, old, withCarol);
+    const next = await device.engine.restart(old);
+    expect(next).not.toBe(withCarol);
+    expect(device.engine.getConversation(next)).toMatchObject({
+      status: "active",
+      dmPeer: { profileId: "bob" },
+    });
+    expect(device.engine.getConversation(old)?.successor).toBe(next);
+  });
+
+  it("does not continue in a stored successor that holds a third person", async () => {
+    const { alice, old } = await supersededDm();
+    const crowded = await createWithMetadata(
+      alice.primary,
+      { profileIds: ["bob", "carol"], kind: "group" },
+      { kind: "dm", name: null, admins: ["alice", "bob"] }
+    );
+    await settle(world);
+    const device = await relink(alice, old, crowded);
+    const next = await device.engine.restart(old);
+    expect(next).not.toBe(crowded);
+    expect(device.engine.getConversation(next)).toMatchObject({
+      status: "active",
+      dmPeer: { profileId: "bob" },
+    });
+  });
+
+  it("keeps a continued DM working for the other person and their later device", async () => {
+    const { alice, bob, old } = await supersededDm();
     // Bob continues it; Alice joins through his invitation.
     const fresh = await bob.primary.engine.restart(old);
     await settle(world);

@@ -25,6 +25,7 @@ import {
   formatE2eeWallet,
   formatSafetyCode,
   getMemberName,
+  isUnpairedDm,
   tCount,
 } from "../e2eeFormat";
 import { setE2eeChatMuted, useMutedE2eeChats } from "../e2eeMutedChats";
@@ -399,7 +400,9 @@ export function E2eeConversationInfo({
             <span className="tw-font-semibold tw-text-iron-200">
               {t(
                 locale,
-                isGroup ? "e2ee.info.kind.group" : "e2ee.info.kind.dm"
+                isGroup || isUnpairedDm(conversation, selfProfileId)
+                  ? "e2ee.info.kind.group"
+                  : "e2ee.info.kind.dm"
               )}
             </span>
             <span>{t(locale, "e2ee.info.encryptedNote")}</span>
