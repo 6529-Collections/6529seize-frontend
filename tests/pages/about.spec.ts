@@ -79,12 +79,20 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expect(
       mac.getByText("Last compatible version for macOS 12 Monterey")
     ).toBeVisible();
-    const currentDownload = mac.getByRole("link", {
+    const currentRelease = mac
+      .getByRole("heading", { name: "Version 0.3.18", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    const legacyRelease = mac
+      .getByRole("heading", { name: "Version 0.3.15", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    const currentDownload = currentRelease.getByRole("link", {
       name: /^Download .*version 0\.3\.18, Apple silicon$/,
     });
     const legacyDownloadName = /^Download .*version 0\.3\.15, Apple silicon$/;
-    const legacyDownload = mac.getByRole("link", { name: legacyDownloadName });
-    const legacyMirror = mac.getByRole("link", {
+    const legacyDownload = legacyRelease.getByRole("link", {
+      name: legacyDownloadName,
+    });
+    const legacyMirror = legacyRelease.getByRole("link", {
       name: /^Arweave mirror .*version 0\.3\.15, Apple silicon$/,
     });
     await expect(currentDownload).toHaveAttribute(
@@ -96,9 +104,7 @@ test.describe("About Pages @smoke @medium @large", () => {
       /6529-DESKTOP-mac-arm64-0\.3\.15\.dmg$/
     );
     await expect(
-      currentDownload
-        .locator("xpath=ancestor::section[1]")
-        .getByText("Arweave mirror · Coming soon")
+      currentRelease.getByText("Arweave mirror · Coming soon")
     ).toBeVisible();
     await expect(legacyMirror).toHaveAttribute("href", legacyMirrorUrl);
     await expect(mac.getByText(/Keep your existing app data/)).toBeVisible();
@@ -116,9 +122,7 @@ test.describe("About Pages @smoke @medium @large", () => {
         backgroundColor
       );
 
-      const contentBox = await legacyDownload
-        .locator("xpath=ancestor::section[1]")
-        .boundingBox();
+      const contentBox = await legacyRelease.boundingBox();
       const mirrorBox = await legacyMirror.boundingBox();
       expect(contentBox).not.toBeNull();
       expect(mirrorBox).not.toBeNull();
