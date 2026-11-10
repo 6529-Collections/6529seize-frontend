@@ -55,10 +55,11 @@
   - recipient search supports handle, ENS, or wallet input,
   - search runs at 3+ characters,
   - exact wallet input with one matching result can auto-select profile and wallet,
-  - a `.eth` name auto-selects only when it resolves on Ethereum to the one
-    result's wallet, and that resolved wallet is selected; otherwise the
-    results show each wallet address in full with a note that the name was not
-    verified, and you choose the recipient yourself,
+  - a `.eth` name auto-selects only when it resolves on Ethereum to a wallet
+    of the one result's profile, and that resolved wallet is selected;
+    otherwise nothing is auto-selected, the results show each wallet address
+    in full, and a note says whether the name could not be checked right now,
+    does not resolve, or resolves to another address (shown in full),
   - profiles with one wallet can auto-select that wallet,
   - `Transfer` stays disabled until a destination wallet is selected.
 6. Click `Transfer` to submit.

@@ -10,6 +10,9 @@ import { useState } from "react";
 const alice = "0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed";
 const aliceChecksummed = "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed";
 const other = "0xfb6916095ca1df60bb79ce92ce3ea74c37c5d359";
+const otherChecksummed = "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359";
+const stranger = "0x70997970c51812dc3a010c7d01b50e0d17dc79c8";
+const strangerChecksummed = "0x70997970C51812dc3A010C7d01b50e0d17dc79C8";
 
 const aliceResult = {
   profile_id: "alice",
@@ -116,21 +119,44 @@ it("auto-selects an ENS result only when the name resolves to its wallet", async
   expect(onWallet).not.toHaveBeenCalledWith(other);
 });
 
+it("auto-selects the resolved wallet when it is another wallet of the same profile", async () => {
+  mockEnsAddress.mockReturnValue({
+    data: otherChecksummed,
+    isLoading: false,
+    isError: false,
+  });
+  const { onProfile, onWallet } = await search("alice.eth");
+
+  expect(onProfile).toHaveBeenCalledWith(aliceResult);
+  expect(onWallet).toHaveBeenLastCalledWith(other);
+  expect(onWallet).not.toHaveBeenCalledWith(alice);
+});
+
 it.each([
-  ["resolves elsewhere", { data: other, isLoading: false, isError: false }],
-  ["does not resolve", { data: null, isLoading: false, isError: false }],
-  ["lookup fails", { data: undefined, isLoading: false, isError: true }],
+  [
+    "resolves to an address outside the profile",
+    { data: stranger, isLoading: false, isError: false },
+    `alice.eth resolves on Ethereum to ${strangerChecksummed}, which is not a wallet of the results below.`,
+  ],
+  [
+    "does not resolve",
+    { data: null, isLoading: false, isError: false },
+    "alice.eth does not resolve on Ethereum.",
+  ],
+  [
+    "cannot be checked right now",
+    { data: undefined, isLoading: false, isError: true },
+    "alice.eth could not be checked on Ethereum right now, so nothing was selected.",
+  ],
 ])(
-  "does not auto-select when the name %s, and shows full addresses",
-  async (_label, ensState) => {
+  "does not auto-select when the name %s, and says so",
+  async (_label, ensState, message) => {
     mockEnsAddress.mockReturnValue(ensState);
     const { onProfile, onWallet } = await search("alice.eth");
 
     expect(onProfile).not.toHaveBeenCalled();
     expect(onWallet).not.toHaveBeenCalled();
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "alice.eth does not resolve on Ethereum to a result below."
-    );
+    expect(await screen.findByRole("status")).toHaveTextContent(message);
     expect(screen.getByText(aliceChecksummed)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /alice/ }));
