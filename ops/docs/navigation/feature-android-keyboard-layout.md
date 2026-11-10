@@ -39,6 +39,10 @@ blank space.
 
 - Wave or message composing: bottom navigation hides while typing and returns
   after keyboard close, restoring reserve spacing.
+- On short iPhone screens in landscape, wave and message section tabs also hide
+  while the chat keyboard is open. The header and Back remain available, with
+  room below them for messages, the reply preview, and the composer. Dismiss the
+  keyboard to restore the section tabs.
 - Single-drop reply chat on iOS and Android: the full-screen chat panel docks
   above the keyboard, and composer bottom safe-area padding becomes `0` while
   the keyboard is open.

@@ -597,7 +597,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
               enabled={isDirectMessage}
               showBanner={showLegacyDmBanner}
             >
-              <CreateDropWaveWrapper>
+              <CreateDropWaveWrapper
+                iosMaxHeight={effectiveWaveViewStyle.height}
+              >
                 <PrivilegedDropCreator
                   activeDrop={activeDrop}
                   onCancelReplyQuote={onCancelReplyQuote}
