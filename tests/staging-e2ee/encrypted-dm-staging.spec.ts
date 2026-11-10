@@ -355,13 +355,11 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expectPrivateAndClean([a, b], needles({ hello, reply }));
   });
 
-  test("ordinary and encrypted chats render identical Markdown without fetching encrypted URLs", async ({}, testInfo) => {
+  test("ordinary and encrypted chats render identical Markdown without fetching encrypted URLs", async ({ browser }, testInfo) => {
     const { a, b, runId } = requireWorld();
     const dm = await ensureDm(requireWorld());
     await openChat(a, dm);
     await openChat(b, dm);
-    const waveId = await createChatWave(a, `Markdown QA ${runId}`);
-    const ordinary = await a.context.newPage();
     const leakedRequests: string[] = [];
     const canary = `markdown-private-${runId}`;
     for (const session of [a, b]) {
@@ -370,7 +368,18 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       });
       await session.context.route(`**/*${canary}*`, (route) => route.abort());
     }
+    // Public chat can fetch emoji assets and send ordinary text. Keep that
+    // traffic outside the encrypted users' lifetime privacy evidence.
+    const regularSession = await prepareEnrolledSession(
+      browser,
+      testInfo,
+      createThrowawayUser("Markdown"),
+      "Ordinary Markdown",
+      { signInAgainWithProfile: true }
+    );
+    const ordinary = regularSession.page;
     try {
+      const waveId = await createChatWave(regularSession, `Markdown QA ${runId}`);
       await gotoStaging(ordinary, `/waves/${waveId}`);
       for (const sample of MARKDOWN_PARITY_CASES) {
         const marker = `Markdown ${sample.name} ${runId}`;
@@ -582,7 +591,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
         contentType: "application/json",
       });
     } finally {
-      await ordinary.close();
+      await regularSession.close();
     }
   });
 
