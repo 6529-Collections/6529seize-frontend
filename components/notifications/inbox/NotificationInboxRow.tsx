@@ -53,10 +53,16 @@ export default function NotificationInboxRow({
   const reactors = group
     ? [
         ...new Map(
-          group.notifications.map((entry) => [
-            entry.related_identity.id,
-            entry.related_identity,
-          ])
+          group.notifications.map(({ related_identity: profile }) => {
+            // The profile API enforces unique, case-insensitive handles.
+            // Grouped API snapshots can identify the same reactor by profile ID
+            // or by handle, so prefer the handle shared by both representations.
+            const normalizedHandle = profile.handle?.trim().toLowerCase();
+            const key = normalizedHandle
+              ? `handle:${normalizedHandle}`
+              : `id:${profile.id}`;
+            return [key, profile] as const;
+          })
         ).values(),
       ]
     : [];
