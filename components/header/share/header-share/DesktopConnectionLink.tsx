@@ -1,10 +1,44 @@
 import { faExternalLink } from "@fortawesome/free-solid-svg-icons";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import Image from "next/image";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import { HEADER_SHARE_LOCALE, squareStyle } from "./constants";
 
-export function DesktopConnectionLink({ url }: { readonly url: string }) {
+/** Show the minimum Desktop version wherever secure connection is offered. */
+export function DesktopConnectionVersionNotice({
+  compact = false,
+  id,
+}: {
+  readonly compact?: boolean;
+  readonly id?: string;
+}) {
+  return (
+    <p
+      id={id}
+      className={`tw-m-0 tw-text-iron-300 ${compact ? "tw-text-xs" : "tw-text-sm"}`}
+    >
+      {tRich(
+        HEADER_SHARE_LOCALE,
+        "headerShare.connectModal.desktopMinimumVersion",
+        {
+          version: (
+            <span key="version" className="tw-font-semibold">
+              v0.4.0
+            </span>
+          ),
+        }
+      )}
+    </p>
+  );
+}
+
+export function DesktopConnectionLink({
+  url,
+  showVersionNotice = false,
+}: {
+  readonly url: string;
+  readonly showVersionNotice?: boolean;
+}) {
   return (
     <a
       data-testid="desktop-connection-panel"
@@ -22,12 +56,15 @@ export function DesktopConnectionLink({ url }: { readonly url: string }) {
         height={124}
         className="tw-unselectable"
       />
-      <span className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-200 tw-bg-iron-50 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-900 tw-transition-colors group-hover:tw-border-white group-hover:tw-bg-white group-hover:tw-text-black">
-        <FontAwesomeSvgIcon icon={faExternalLink} aria-hidden="true" />
-        <span className="tw-whitespace-nowrap">
-          {t(HEADER_SHARE_LOCALE, "headerShare.core.open")}
+      <div className="tw-flex tw-flex-col tw-items-center tw-gap-1.5">
+        <span className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-200 tw-bg-iron-50 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-900 tw-transition-colors group-hover:tw-border-white group-hover:tw-bg-white group-hover:tw-text-black">
+          <FontAwesomeSvgIcon icon={faExternalLink} aria-hidden="true" />
+          <span className="tw-whitespace-nowrap">
+            {t(HEADER_SHARE_LOCALE, "headerShare.core.open")}
+          </span>
         </span>
-      </span>
+        {showVersionNotice && <DesktopConnectionVersionNotice />}
+      </div>
     </a>
   );
 }

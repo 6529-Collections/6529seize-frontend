@@ -27,7 +27,7 @@ import {
 } from "react";
 import { Tooltip } from "react-tooltip";
 
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import {
   HEADER_SHARE_LOCALE,
   Mode,
@@ -122,12 +122,16 @@ export function HeaderShareModalView({
     };
   }, []);
 
-  const modalTitle = t(
-    HEADER_SHARE_LOCALE,
-    isConnectMode
-      ? "headerShare.connectModal.title"
-      : "headerShare.shareModal.title"
-  );
+  let modalTitleKey: MessageKey = "headerShare.shareModal.title";
+  if (isConnectMode) {
+    modalTitleKey = "headerShare.connectModal.title";
+    if (connectionMode) {
+      modalTitleKey =
+        activeSubTab === SubMode.DESKTOP
+          ? "headerShare.connectModal.desktopTitle"
+          : "headerShare.connectModal.mobileTitle";
+    }
+  }
   const closeAriaLabel = t(
     HEADER_SHARE_LOCALE,
     isConnectMode
@@ -592,17 +596,7 @@ export function HeaderShareModalView({
                 })}
               </h3>
               {activeSubTab === SubMode.DESKTOP ? (
-                <div className="tw-flex tw-flex-col tw-gap-2">
-                  <div className="tw-h-56">
-                    <DesktopConnectionLink url={link.url} />
-                  </div>
-                  <p className="tw-m-0 tw-text-center tw-text-sm tw-text-iron-300">
-                    {t(
-                      HEADER_SHARE_LOCALE,
-                      "headerShare.connectModal.desktopMinimumVersion"
-                    )}
-                  </p>
-                </div>
+                <DesktopConnectionLink url={link.url} showVersionNotice />
               ) : (
                 <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-lg">
                   {renderQRCodeImage(
@@ -727,7 +721,7 @@ export function HeaderShareModalView({
               id="header-share-title"
               className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
             >
-              {modalTitle}
+              {t(HEADER_SHARE_LOCALE, modalTitleKey)}
             </h2>
             {isConnectMode && (
               <Link
