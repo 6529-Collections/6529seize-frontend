@@ -64,8 +64,11 @@ main chat.
 - Emoji reactions stay open to everyone who can see the wave, as before.
 - Replies can answer other replies inside a thread. The thread shows every
   reply under the top drop.
-- Links and notifications that point at a collapsed reply jump to its parent
-  drop and open that thread.
+- Links and notifications to a collapsed reply open its top-level thread and
+  scroll to the exact reply. The top-level drop gets a subtle highlight. The
+  linked reply has a brighter highlight and a blue edge. Use
+  `Show earlier replies` or `Show newer replies` to browse the rest of the
+  thread when available.
 
 ## Edge Cases
 

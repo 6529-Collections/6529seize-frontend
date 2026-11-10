@@ -312,7 +312,7 @@ export const mapLeaderboardDropV2 = ({
   };
 };
 
-const hydrateDropsV2 = async ({
+export const hydrateDropsV2 = async ({
   drops,
   headers,
   wave,

@@ -303,23 +303,19 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const collapseReplies = isWaveRepliesCollapsed(wave);
   const replyThreadsEnabled = collapseReplies || !isDirectMessage;
   const replyThreadsStore = useExpandedReplyThreadsStore();
-  // A link to a collapsed reply opens its parent's thread instead.
+  // Resolve the thread to load while retaining the linked reply to reveal.
   const replyThreadTarget = useCollapsedReplyThreadTarget({
     enabled: viewMode !== "gallery" && replyThreadsEnabled,
     collapseAll: collapseReplies,
     waveId: wave.id,
     serialNo: requestedScrollTarget,
   });
-  const scrollTarget =
-    replyThreadTarget?.parentSerialNo ?? requestedScrollTarget;
-
   useEffect(() => {
     if (!replyThreadTarget) {
       return;
     }
-    replyThreadsStore.setExpanded(replyThreadTarget.parentDropId, true);
     fetchAroundSerialNo(wave.id, replyThreadTarget.parentSerialNo);
-  }, [fetchAroundSerialNo, replyThreadTarget, replyThreadsStore, wave.id]);
+  }, [fetchAroundSerialNo, replyThreadTarget, wave.id]);
 
   let dividerTarget = firstUnreadSerialNo;
   if (initialDropState?.waveId === wave.id) {
@@ -569,16 +565,13 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           store={replyThreadsStore}
         >
           <WaveDropsAllWithoutProvider
-            key={
-              replyThreadTarget
-                ? `${wave.id}-thread-${replyThreadTarget.parentSerialNo}`
-                : wave.id
-            }
+            key={[wave.id, replyThreadTarget?.replySerialNo].join(":")}
             waveId={wave.id}
             wave={wave}
             onReply={handleReply}
             activeDrop={activeDrop}
-            initialDrop={scrollTarget}
+            initialDrop={replyThreadTarget ? null : requestedScrollTarget}
+            initialThreadReply={replyThreadTarget}
             dividerSerialNo={dividerTarget}
             unreadCount={
               isDirectMessage

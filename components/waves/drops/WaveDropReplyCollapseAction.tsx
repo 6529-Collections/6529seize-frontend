@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -11,7 +10,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiPost } from "@/services/api/common-api";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useWaveReplyThreads } from "./reply-threads/WaveReplyThreadsContext";
 
 export default function WaveDropReplyCollapseAction({
@@ -28,7 +27,6 @@ export default function WaveDropReplyCollapseAction({
   const threads = useWaveReplyThreads();
   const stream = useMyStreamActionsOptional();
   const chatScroll = useWaveChatScrollOptional();
-  const queryClient = useQueryClient();
   const waveId = drop.wave.id;
   const mutation = useMutation({
     mutationFn: (collapsed: boolean) =>
@@ -36,13 +34,20 @@ export default function WaveDropReplyCollapseAction({
         endpoint: `drops/${drop.id}/collapse-replies`,
         body: { collapse_replies: collapsed },
       }),
-    onSuccess: async () => {
+    onSuccess: async (savedDrop, requestedCollapse) => {
       onSelected();
-      await stream?.refreshWaveMessages(waveId);
-      chatScroll?.requestScrollToSerialNo({ waveId, serialNo: drop.serial_no });
-      void queryClient.invalidateQueries({
-        queryKey: [QueryKey.DROP_REPLY_THREAD_TARGET, { wave_id: waveId }],
+      const refreshed = await stream?.applyReplyPlacement({
+        waveId,
+        dropId: drop.id,
+        collapseReplies: savedDrop.collapse_replies ?? requestedCollapse,
+        hasReplies: savedDrop.reply_placement_has_replies,
       });
+      if (refreshed) {
+        chatScroll?.requestScrollToSerialNo({
+          waveId,
+          serialNo: drop.serial_no,
+        });
+      }
     },
     onError: () => {
       setToast({

@@ -461,6 +461,7 @@ describe("MyStreamWaveChat", () => {
       mockFetchDropReplyThreadTarget.mockResolvedValue({
         parentDropId: "parent-drop",
         parentSerialNo: 4,
+        replySerialNo: 5,
       });
       const collapsedWave = {
         ...wave,
@@ -485,7 +486,12 @@ describe("MyStreamWaveChat", () => {
       });
 
       await waitFor(() => {
-        expect(capturedPropsHolder.current.initialDrop).toBe(4);
+        expect(capturedPropsHolder.current.initialThreadReply).toEqual({
+          parentDropId: "parent-drop",
+          parentSerialNo: 4,
+          replySerialNo: 5,
+        });
+        expect(capturedPropsHolder.current.initialDrop).toBeNull();
       });
       expect(mockFetchDropReplyThreadTarget).toHaveBeenCalledWith(
         expect.objectContaining({ serialNo: 5, collapseAll: collapsed })

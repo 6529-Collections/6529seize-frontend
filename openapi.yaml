@@ -26125,7 +26125,9 @@ components:
       additionalProperties: true
     ApiCollapsedReplyThread:
       type: object
-      description: Top-level drop of an individually collapsed reply thread.
+      description: >-
+        Top-level drop of a collapsed reply thread. V2 lookups by serial number
+        also resolve threads in waves with wave-wide collapse.
       required:
         - id
         - serial_no
@@ -32398,6 +32400,11 @@ components:
         collapse_replies:
           type: boolean
           description: Author-selected reply placement on a top-level chat drop.
+        reply_placement_has_replies:
+          type: boolean
+          description: >-
+            Whether any replies were present when the reply placement was saved.
+            Included in reply placement updates.
         collapsed_reply_thread:
           $ref: "#/components/schemas/ApiCollapsedReplyThread"
         hide_link_preview:

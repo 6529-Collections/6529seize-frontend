@@ -317,7 +317,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   );
 
   // Instantiate the real-time updater hook
-  const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
+  const realtime = useWaveRealtimeUpdater({
     activeWaveId,
     activeReadWaveId,
     getData: waveMessagesStore.getData,
@@ -332,6 +332,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     isWaveMuted,
     refreshWaveMessages,
   });
+  const { processIncomingDrop, processDropRemoved, applyReplyPlacement } =
+    realtime;
 
   // processIncomingDrop is rebuilt when the active wave, its mute state or
   // wave eligibility changes. Expose a stable wrapper that always calls the
@@ -564,6 +566,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       processDropRemoved,
       processDropsRemoved: waveMessagesStore.removeDrops,
       refreshWaveMessages,
+      applyReplyPlacement,
       applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
     }),
     [
@@ -585,6 +588,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       processDropRemoved,
       waveMessagesStore.removeDrops,
       refreshWaveMessages,
+      applyReplyPlacement,
       waveMessagesStore.optimisticUpdateDrop,
     ]
   );

@@ -4339,7 +4339,7 @@
         "If loading a collapsed reply thread fails, it shows `Couldn't load replies.` and a Retry button. Already-loaded replies stay visible; Retry loads the thread again.",
         "Slow mode and disabled links still apply to replies from non-admins. Emoji reactions stay open to everyone who can see the wave.",
         "Wave-wide collapse keeps replies out of the wave unread count and skips notifications for followers subscribed to every drop. Individual collapse keeps the wave's unread and notification rules, including direct replies and mentions.",
-        "Links and notifications to a collapsed reply jump to its parent drop and open that thread.",
+        "Links and notifications to a collapsed reply open the top-level thread and scroll to the highlighted reply, even in older pages. Show earlier replies and Show newer replies let you browse the rest of the thread when available.",
         "With open replies, the wave's creator, admins and chat members (when chat is limited to a group) can delete anyone's replies with the Delete action. Top-level drops keep the wave's normal admin deletion setting."
       ],
       "canonical_path": "/waves",

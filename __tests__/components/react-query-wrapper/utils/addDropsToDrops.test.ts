@@ -1,3 +1,4 @@
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryClient } from "@tanstack/react-query";
 import {
   addDropToDrops,
@@ -79,6 +80,30 @@ test("skips media-filtered caches when websocket drop omits parts", () => {
   expect((qc.getQueryData(activeWaveKey) as any).pages[0].drops[0].id).toBe(
     "old"
   );
+});
+
+test("updates loaded replies without inserting new drops into a linked history page", () => {
+  const qc = new QueryClient();
+  const key = [
+    QueryKey.DROPS,
+    { waveId: "w", dropId: "parent", replySerialNo: 42 },
+  ];
+  const linked = {
+    id: "linked",
+    wave: { id: "w" },
+    reply_to: { drop_id: "parent" },
+  };
+  const original = { pages: [{ drops: [linked] }] };
+  qc.setQueryData(key, original);
+
+  upsertDropIntoMatchingDropsQueries(qc, {
+    drop: { ...linked, id: "latest" } as ApiDrop,
+  });
+  expect(qc.getQueryData(key)).toBe(original);
+
+  const updated = { ...linked, is_signed: true } as ApiDrop;
+  upsertDropIntoMatchingDropsQueries(qc, { drop: updated });
+  expect(qc.getQueryData(key)).toEqual({ pages: [{ drops: [updated] }] });
 });
 
 test("upserts websocket reply drops into matching reply caches", () => {

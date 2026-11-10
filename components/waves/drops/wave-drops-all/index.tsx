@@ -3,7 +3,10 @@
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { useWaveReplyThreads } from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
-import { fetchDropReplyThreadTarget } from "@/services/api/drop-reply-thread-target-api";
+import {
+  fetchDropReplyThreadTarget,
+  type DropReplyThreadTarget,
+} from "@/services/api/drop-reply-thread-target-api";
 import WaveDropsScrollingOverlay from "@/components/waves/drops/WaveDropsScrollingOverlay";
 import {
   UnreadDividerProvider,
@@ -27,7 +30,14 @@ import { useWaveBoostedDrops } from "@/hooks/useWaveBoostedDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { useDeferredNewestDrops } from "./hooks/useDeferredNewestDrops";
 import { useFirstVisibleDropsPainted } from "./hooks/useFirstVisibleDropsPainted";
@@ -94,6 +104,7 @@ interface WaveDropsAllProps {
   }) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
+  readonly initialThreadReply?: DropReplyThreadTarget | null | undefined;
   readonly dividerSerialNo?: number | null | undefined;
   readonly unreadCount?: number | undefined;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
@@ -112,6 +123,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   onReply,
   activeDrop,
   initialDrop,
+  initialThreadReply,
   dividerSerialNo,
   unreadCount,
   onDropContentClick,
@@ -237,6 +249,11 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       ? boostedDrops
       : undefined;
 
+  const replyThreads = useWaveReplyThreads();
+  const replyThreadStore = replyThreads?.store;
+  const collapseAll = replyThreads?.collapseAll;
+  const replyTargetRequest = useRef<AbortController | null>(null);
+
   const {
     serialTarget,
     queueSerialTarget,
@@ -246,7 +263,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   } = useWaveDropsSerialScroll({
     waveId,
     dropId,
-    initialDrop,
+    initialDrop: initialThreadReply?.parentSerialNo ?? initialDrop,
+    replyThreadStore,
     waveMessages,
     fetchNextPage,
     waitAndRevealDrop,
@@ -255,27 +273,45 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     scrollToVisualBottom,
   });
 
+  useEffect(() => {
+    if (!replyThreadStore) return;
+    replyThreadStore.setLinkedReply(initialThreadReply ?? null);
+    if (initialThreadReply) {
+      replyThreadStore.setExpanded(initialThreadReply.parentDropId, true);
+    }
+  }, [collapseAll, initialThreadReply, replyThreadStore]);
+
   const scrollToBottom = useCallback(() => {
+    replyTargetRequest.current?.abort();
+    replyThreads?.store.setLinkedReply(null);
     cancelSerialScroll();
     // Jump before offscreen placeholders hydrate and change the scroll range.
     forcePinToBottom("auto");
-  }, [cancelSerialScroll, forcePinToBottom]);
+  }, [cancelSerialScroll, forcePinToBottom, replyThreads]);
 
   const waveChatScroll = useWaveChatScrollOptional();
-  const replyThreads = useWaveReplyThreads();
-  const replyTargetRequest = useRef<AbortController | null>(null);
+  // Navigation handlers are passed to every memoized message row.
+  const latestDropsRef = useRef(dropsForClipboard);
+  useLayoutEffect(() => {
+    latestDropsRef.current = dropsForClipboard;
+  }, [dropsForClipboard]);
   useEffect(
     () => () => replyTargetRequest.current?.abort(),
-    [initialDrop, replyThreads, waveId]
+    [collapseAll, replyThreadStore, waveId]
   );
+  useEffect(() => {
+    // A new link supersedes the lookup. Clearing the URL after reading it does not.
+    if (initialDrop !== null) replyTargetRequest.current?.abort();
+  }, [initialDrop]);
   const queueVisibleSerialTarget = useCallback(
     (serialNo: number) => {
       replyTargetRequest.current?.abort();
       if (
         !replyThreads ||
         dropId !== null ||
-        waveMessages?.drops.some((drop) => drop.serial_no === serialNo)
+        latestDropsRef.current.some((drop) => drop.serial_no === serialNo)
       ) {
+        replyThreads?.store.setLinkedReply(null);
         queueSerialTarget(serialNo);
         return;
       }
@@ -283,6 +319,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       const controller = new AbortController();
       replyTargetRequest.current = controller;
       void fetchDropReplyThreadTarget({
+        waveId,
         serialNo,
         collapseAll: replyThreads.collapseAll,
         signal: controller.signal,
@@ -290,11 +327,12 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         .catch(() => null)
         .then((thread) => {
           if (controller.signal.aborted) return;
+          replyThreads.store.setLinkedReply(thread);
           if (thread) replyThreads.store.setExpanded(thread.parentDropId, true);
           queueSerialTarget(thread?.parentSerialNo ?? serialNo);
         });
     },
-    [dropId, queueSerialTarget, replyThreads, waveMessages]
+    [dropId, queueSerialTarget, replyThreads, waveId]
   );
   useEffect(() => {
     if (!waveChatScroll) return;

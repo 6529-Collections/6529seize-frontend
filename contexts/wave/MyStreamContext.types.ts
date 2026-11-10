@@ -5,7 +5,10 @@ import type { WaveMessages } from "./hooks/types";
 import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
 import type { Listener as WaveMessagesListener } from "./hooks/useWaveMessagesStore";
 import type { NextPageProps } from "./hooks/useWavePagination";
-import type { ProcessIncomingDropFn } from "./hooks/useWaveRealtimeUpdater.helpers";
+import type {
+  ProcessIncomingDropFn,
+  ReplyPlacementChange,
+} from "./hooks/useWaveRealtimeUpdater.helpers";
 import type { ServerWaveFeedSeedResult } from "./server-wave-feed-seed";
 
 // Define nested structures for context data
@@ -101,6 +104,9 @@ export interface MyStreamActionsContextType {
     dropIds: readonly string[]
   ) => void;
   readonly refreshWaveMessages: (waveId: string) => Promise<void>;
+  readonly applyReplyPlacement: (
+    change: ReplyPlacementChange
+  ) => Promise<boolean>;
   readonly applyOptimisticDropUpdate: ({
     waveId,
     dropId,

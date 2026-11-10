@@ -44,6 +44,7 @@ import {
   updateCachedDrop,
   type ProcessIncomingDropFn,
   type ProcessIncomingDropOptions,
+  type ReplyPlacementChange,
   type UseWaveRealtimeUpdaterProps,
 } from "./useWaveRealtimeUpdater.helpers";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
@@ -529,7 +530,7 @@ const useAttachmentStatusUpdate = ({
 const useDropUpdateMessages = (
   processIncomingDrop: ProcessIncomingDropFn,
   processDropUpdateRef: (messageData: unknown) => void,
-  onReplyPlacementChanged: (waveId: string) => void
+  onReplyPlacementChanged: (change: ReplyPlacementChange) => void
 ): void => {
   const pendingDropUpdateRef = useRef<Promise<void> | null>(null);
 
@@ -540,7 +541,12 @@ const useDropUpdateMessages = (
         isWsDropUpdateRefData(messageData) &&
         messageData.reason === WS_DROP_UPDATE_REASON_REPLY_COLLAPSE
       ) {
-        onReplyPlacementChanged(messageData.wave_id);
+        onReplyPlacementChanged({
+          waveId: messageData.wave_id,
+          dropId: messageData.drop_id,
+          collapseReplies: messageData.collapse_replies,
+          hasReplies: messageData.reply_placement_has_replies,
+        });
         return;
       }
       processDropUpdateRef(messageData);
@@ -555,7 +561,14 @@ const useDropUpdateMessages = (
         WS_DROP_UPDATE_REASON_REPLY_COLLAPSE
       ) {
         const waveId = getIncomingWaveId(messageData);
-        if (waveId) onReplyPlacementChanged(waveId);
+        if (waveId) {
+          onReplyPlacementChanged({
+            waveId,
+            dropId: messageData.id,
+            collapseReplies: messageData.collapse_replies,
+            hasReplies: messageData.reply_placement_has_replies,
+          });
+        }
         return;
       }
       pendingDropUpdateRef.current = processIncomingDrop(
@@ -645,6 +658,7 @@ export function useWaveRealtimeUpdater({
 }: UseWaveRealtimeUpdaterProps): {
   processIncomingDrop: ProcessIncomingDropFn;
   processDropRemoved: (waveId: string, dropId: string) => void;
+  applyReplyPlacement: (change: ReplyPlacementChange) => Promise<boolean>;
 } {
   const queryClient = useQueryClient();
   const { processIncomingDrop, processDropUpdateRef, gapSync } =
@@ -676,12 +690,48 @@ export function useWaveRealtimeUpdater({
     queryClient,
   });
 
-  useDropUpdateMessages(processIncomingDrop, processDropUpdateRef, (waveId) => {
-    if (waveId === activeWaveId || getData(waveId))
-      void refreshWaveMessages?.(waveId);
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.DROP_REPLY_THREAD_TARGET, { wave_id: waveId }],
-    });
+  const applyReplyPlacement = useCallback(
+    async ({
+      waveId,
+      dropId,
+      collapseReplies,
+      hasReplies,
+    }: ReplyPlacementChange): Promise<boolean> => {
+      void queryClient.invalidateQueries({
+        queryKey: [QueryKey.DROP_REPLY_THREAD_TARGET, { wave_id: waveId }],
+      });
+      const wave = getData(waveId);
+      if (hasReplies === false && typeof collapseReplies === "boolean") {
+        const drop = wave?.drops.find((item) => item.id === dropId);
+        if (
+          drop?.type === DropSize.FULL &&
+          (drop.collapse_replies !== collapseReplies ||
+            (drop.replies_count ?? 0) > 0)
+        ) {
+          updateData({
+            key: waveId,
+            drops: [
+              { ...drop, collapse_replies: collapseReplies, replies_count: 0 },
+            ],
+          });
+        }
+        return false;
+      }
+      if (!refreshWaveMessages || (!wave && waveId !== activeWaveId))
+        return false;
+      try {
+        await refreshWaveMessages(waveId);
+        return true;
+      } catch (error) {
+        reportBackgroundTaskError("Failed to refresh reply placement:", error);
+        return false;
+      }
+    },
+    [activeWaveId, getData, queryClient, refreshWaveMessages, updateData]
+  );
+
+  useDropUpdateMessages(processIncomingDrop, processDropUpdateRef, (change) => {
+    void applyReplyPlacement(change);
   });
   useDropDeleteMessages(removeDrops);
 
@@ -697,5 +747,5 @@ export function useWaveRealtimeUpdater({
     processAttachmentStatusUpdate
   );
 
-  return { processIncomingDrop, processDropRemoved };
+  return { processIncomingDrop, processDropRemoved, applyReplyPlacement };
 }
