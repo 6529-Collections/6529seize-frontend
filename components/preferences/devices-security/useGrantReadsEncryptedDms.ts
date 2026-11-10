@@ -32,6 +32,9 @@ export function useGrantReadsEncryptedDms(
   if (!grant || !devices) {
     return false;
   }
+  // A device enrolled with the same sign-in signature carries that grant's
+  // message (grant_message) and its id; one with its own EIP-712 grant
+  // doesn't, even under the same name.
   return devices.some(
     (device) =>
       device.revoked_at === null &&

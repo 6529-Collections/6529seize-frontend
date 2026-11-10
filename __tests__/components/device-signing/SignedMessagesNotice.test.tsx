@@ -9,6 +9,12 @@ import {
 } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { E2EE_MESSAGES } from "@/i18n/messages/e2ee";
+import { formatE2eeDateTime } from "@/components/e2ee/e2eeFormat";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import { contextFor, E2eeTestProvider } from "../e2ee/fakeE2eeEngine";
 
 const NOW = Date.UTC(2026, 9, 12, 12, 0);
@@ -17,6 +23,13 @@ const ADDRESS = "0x1111111111111111111111111111111111111111";
 const OWN_KEY = `0x${"aa".repeat(32)}`;
 
 let mockEnabled = true;
+jest.mock("@/hooks/useDisplayTimeZone", () => ({
+  useDisplayTimeZone: jest.fn(),
+}));
+const mockZone = useDisplayTimeZone as jest.MockedFunction<
+  typeof useDisplayTimeZone
+>;
+
 jest.mock("@/lib/device-signing/feature", () => ({
   isSignedMessagesEnabled: () => mockEnabled,
 }));
@@ -131,6 +144,7 @@ const otherDevice = grant({
 describe("SignedMessagesNotice", () => {
   beforeEach(() => {
     localStorage.clear();
+    mockZone.mockReturnValue(LOCAL_DISPLAY_TIME_ZONE);
     mockEnabled = true;
     mockAccount = ADDRESS;
     mockLocal = { loaded: true, grant: null, publicKeys: [OWN_KEY] };
@@ -508,6 +522,27 @@ describe("SignedMessagesNotice", () => {
   describe("new-device alert", () => {
     beforeEach(() => {
       mockLocal = { ...mockLocal, grant: grant() };
+    });
+
+    it("dates the alert in the display time zone, as the inbox's alert does", () => {
+      const auckland: DisplayTimeZone = {
+        timeZone: "Pacific/Auckland",
+        isLocal: false,
+      };
+      mockZone.mockReturnValue(auckland);
+      mockGrants = [];
+      const { rerender } = render(<SignedMessagesNotice composerEmpty />);
+      // Oct 11, 12:00 UTC is already Oct 12 in Auckland.
+      const createdAt = Date.UTC(2026, 9, 11, 12, 0);
+      mockGrants = [{ ...otherDevice, created_at: createdAt }];
+      rerender(<SignedMessagesNotice composerEmpty />);
+      const setUp = formatE2eeDateTime("en-US", createdAt, auckland);
+      expect(setUp).toMatch(/^Oct 12, 2026/u);
+      expect(
+        screen.getByText(
+          `It can now post as you. Set up on ${setUp}. If this wasn’t you, revoke it.`
+        )
+      ).toBeVisible();
     });
 
     it("treats the first list as a baseline and alerts only for later grants", () => {

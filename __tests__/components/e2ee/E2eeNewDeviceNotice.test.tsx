@@ -3,6 +3,12 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { E2eeNewDeviceNotice } from "@/components/e2ee/devices/E2eeNewDeviceNotice";
 import { writeKnownE2eeDevices } from "@/components/e2ee/e2eeLocalState";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
+import { formatE2eeDateTime } from "@/components/e2ee/e2eeFormat";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import type { E2eeDeviceInfo } from "@/lib/e2ee/types";
 import {
   contextFor,
@@ -20,10 +26,22 @@ jest.mock("@/hooks/device-signing/useSignedMessagesAccount", () => ({
   useSignedMessagesAccount: () => mockAccount,
 }));
 
+jest.mock("@/hooks/useDisplayTimeZone", () => ({
+  useDisplayTimeZone: jest.fn(),
+}));
+const mockZone = useDisplayTimeZone as jest.MockedFunction<
+  typeof useDisplayTimeZone
+>;
+const AUCKLAND_ZONE: DisplayTimeZone = {
+  timeZone: "Pacific/Auckland",
+  isLocal: false,
+};
+
 let mockGrants: ApiDeviceGrant[] | undefined;
+let mockGrantsError = false;
 const mockAcknowledgeGrant = jest.fn(async () => true);
 jest.mock("@/hooks/device-signing/useDeviceGrants", () => ({
-  useDeviceGrants: () => ({ data: mockGrants }),
+  useDeviceGrants: () => ({ data: mockGrants, isError: mockGrantsError }),
   useAcknowledgeDeviceGrant: () => ({
     acknowledge: mockAcknowledgeGrant,
     isAcknowledging: false,
@@ -70,6 +88,8 @@ const laptop = device({
   linkedAuthorProof: false,
 });
 
+let rerenderNotice: () => void = () => undefined;
+
 function renderNotice(devices: readonly E2eeDeviceInfo[]) {
   const engine = createFakeE2eeEngine({
     thisDevice,
@@ -77,13 +97,16 @@ function renderNotice(devices: readonly E2eeDeviceInfo[]) {
   });
   // This browser already knew only itself: the others are new.
   writeKnownE2eeDevices(SELF_ID, [thisDevice.deviceKey]);
-  render(
-    <QueryClientProvider client={new QueryClient()}>
+  const client = new QueryClient();
+  const tree = () => (
+    <QueryClientProvider client={client}>
       <E2eeTestProvider value={contextFor(engine)}>
         <E2eeNewDeviceNotice />
       </E2eeTestProvider>
     </QueryClientProvider>
   );
+  const { rerender } = render(tree());
+  rerenderNotice = () => rerender(tree());
   return engine;
 }
 
@@ -92,7 +115,58 @@ describe("E2eeNewDeviceNotice", () => {
     localStorage.clear();
     mockAccount = ADDRESS;
     mockGrants = [grant()];
+    mockGrantsError = false;
     mockAcknowledgeGrant.mockClear();
+    mockZone.mockReturnValue(LOCAL_DISPLAY_TIME_ZONE);
+  });
+
+  it("dates the alert in the display time zone", () => {
+    mockZone.mockReturnValue(AUCKLAND_ZONE);
+    // Oct 11, 12:00 UTC is already Oct 12 in Auckland.
+    const late = { ...phone, createdAt: Date.UTC(2026, 9, 11, 12, 0) };
+    renderNotice([late]);
+    const setUp = formatE2eeDateTime("en-US", late.createdAt, AUCKLAND_ZONE);
+    expect(setUp).toMatch(/^Oct 12, 2026/u);
+    expect(
+      screen.getByText(
+        `It can now post as you and read your encrypted DMs. Set up on ${setUp}. If this wasn’t you, revoke it.`
+      )
+    ).toBeVisible();
+  });
+
+  it("waits for this account's grants before a combined device's It was me", async () => {
+    mockGrants = undefined;
+    renderNotice([phone]);
+    expect(screen.getByRole("button", { name: "It was me" })).toBeDisabled();
+
+    mockGrants = [grant()];
+    rerenderNotice();
+    const itWasMe = screen.getByRole("button", { name: "It was me" });
+    expect(itWasMe).toBeEnabled();
+    await act(async () => {
+      fireEvent.click(itWasMe);
+    });
+    expect(mockAcknowledgeGrant).toHaveBeenCalledWith(GRANT_ID);
+  });
+
+  it("still tries the grant when the list couldn't load", async () => {
+    mockGrants = undefined;
+    mockGrantsError = true;
+    renderNotice([phone]);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "It was me" }));
+    });
+    expect(screen.queryByText(/^New device: /u)).toBeNull();
+    expect(mockAcknowledgeGrant).toHaveBeenCalledWith(GRANT_ID);
+  });
+
+  it("doesn't acknowledge a grant that is no longer active", async () => {
+    mockGrants = [grant({ revoked_at: Date.UTC(2026, 9, 12) })];
+    renderNotice([phone]);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "It was me" }));
+    });
+    expect(mockAcknowledgeGrant).not.toHaveBeenCalled();
   });
 
   it("raises one alert naming both permissions for a combined device", () => {

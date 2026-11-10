@@ -571,6 +571,24 @@ function createE2eeSandboxApi({ corsHeaders }) {
     return false;
   }
 
+  /** POST /api/device-grants/:id/(revoke|acknowledge), else null. */
+  function deviceGrantAction(req, method, pathname) {
+    const action =
+      method === "POST"
+        ? /^\/api\/device-grants\/([^/]+)\/(revoke|acknowledge)$/u.exec(
+            pathname
+          )
+        : null;
+    if (!action) {
+      return null;
+    }
+    const wallet = decodeJwtSubject(req.headers.authorization);
+    const grantId = decodeURIComponent(action[1]);
+    return action[2] === "revoke"
+      ? signIn.revokeGrant(wallet, grantId)
+      : signIn.acknowledgeGrant(wallet, grantId);
+  }
+
   /** Web sign-in with device grants; true when the request was answered. */
   async function handleSignIn(req, res, { method, url, pathname }) {
     let result = null;
@@ -584,17 +602,8 @@ function createE2eeSandboxApi({ corsHeaders }) {
       result = await signIn.login(parseJson(await readBody(req)));
     } else if (method === "GET" && pathname === "/api/device-grants") {
       result = signIn.listGrants(decodeJwtSubject(req.headers.authorization));
-    } else if (method === "POST") {
-      const action =
-        /^\/api\/device-grants\/([^/]+)\/(revoke|acknowledge)$/u.exec(pathname);
-      if (action) {
-        const wallet = decodeJwtSubject(req.headers.authorization);
-        const grantId = decodeURIComponent(action[1]);
-        result =
-          action[2] === "revoke"
-            ? signIn.revokeGrant(wallet, grantId)
-            : signIn.acknowledgeGrant(wallet, grantId);
-      }
+    } else {
+      result = deviceGrantAction(req, method, pathname);
     }
     if (result === null) {
       return false;

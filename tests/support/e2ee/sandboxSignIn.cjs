@@ -274,6 +274,15 @@ function createSandboxSignIn({ walletUser, getDeliveryService, now = Date.now })
     };
   }
 
+  /** The backend revokes a combined grant with the device it enrolled. */
+  function revokedAtOf(grant) {
+    return (
+      grant.revoked_at ??
+      getDeliveryService().loginGrantRevokedAt?.(grant.id) ??
+      null
+    );
+  }
+
   /** Newest first: the grants of the profile that owns `wallet`. */
   function listGrants(wallet) {
     const owner = walletUser(wallet)?.profileId ?? null;
@@ -281,12 +290,8 @@ function createSandboxSignIn({ walletUser, getDeliveryService, now = Date.now })
       owner === null
         ? grant.wallet === String(wallet || "").toLowerCase()
         : walletUser(grant.wallet)?.profileId === owner;
-    // The backend revokes a combined grant with the device it enrolled.
     const withRevocation = (grant) => {
-      const revokedAt =
-        grant.revoked_at ??
-        getDeliveryService().loginGrantRevokedAt?.(grant.id) ??
-        null;
+      const revokedAt = revokedAtOf(grant);
       return revokedAt === null ? grant : { ...grant, revoked_at: revokedAt };
     };
     return {
@@ -314,16 +319,19 @@ function createSandboxSignIn({ walletUser, getDeliveryService, now = Date.now })
     if (!grant) {
       return { status: 404, body: { error: "Device grant not found." } };
     }
-    if (grant.revoked_at === null) {
+    // Idempotent, keeping the first revocation time, like the backend.
+    const revokedAt = revokedAtOf(grant);
+    if (revokedAt === null) {
       grant.revoked_at = now();
       getDeliveryService().revokeLoginGrant?.(grant.id);
     }
-    return { status: 200, body: { ...grant } };
+    return { status: 200, body: { ...grant, revoked_at: revokedAtOf(grant) } };
   }
 
   function acknowledgeGrant(wallet, grantId) {
     const grant = ownGrant(wallet, grantId);
-    if (!grant) {
+    // Like the backend: 404 for a missing, inactive or foreign grant.
+    if (!grant || revokedAtOf(grant) !== null || grant.expires_at <= now()) {
       return { status: 404, body: { error: "Device grant not found." } };
     }
     grant.notice_acknowledged = true;

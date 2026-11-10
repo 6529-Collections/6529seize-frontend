@@ -234,6 +234,42 @@ describe("E2EE sandbox sign-in challenges", () => {
     expect(signIn.listGrants(wallet).body).toEqual([
       expect.objectContaining({ id: grantId, revoked_at: NOW }),
     ]);
+    // Idempotent: a second revoke keeps the first time and ends nothing new.
+    expect(signIn.revokeGrant(wallet, grantId).body).toMatchObject({
+      revoked_at: NOW,
+    });
+    expect(revokeLoginGrant).toHaveBeenCalledTimes(1);
+    // An inactive grant can't be acknowledged (404, as on the backend).
+    expect(signIn.acknowledgeGrant(wallet, grantId).status).toBe(404);
+  });
+
+  it("refuses to acknowledge a grant whose device was revoked", async () => {
+    const { body: nonce } = signIn.issueNonce(
+      nonceQuery(account.address),
+      ORIGIN
+    );
+    await signIn.login({
+      client_type: "web",
+      server_signature: nonce.server_signature,
+      client_signature: await account.signMessage({
+        message: nonce.signable_message,
+      }),
+      client_address: account.address,
+    });
+    const grantId = hashMessage(nonce.signable_message).toLowerCase();
+    loginGrantRevokedAt.mockReturnValue(NOW - 1);
+    try {
+      expect(
+        signIn.acknowledgeGrant(account.address.toLowerCase(), grantId).status
+      ).toBe(404);
+      // Revoking it again reports the device's revocation time.
+      expect(
+        signIn.revokeGrant(account.address.toLowerCase(), grantId).body
+      ).toMatchObject({ revoked_at: NOW - 1 });
+      expect(revokeLoginGrant).not.toHaveBeenCalled();
+    } finally {
+      loginGrantRevokedAt.mockReturnValue(null);
+    }
   });
 
   it("refuses a signature from another wallet", async () => {

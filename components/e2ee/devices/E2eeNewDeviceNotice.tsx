@@ -66,7 +66,8 @@ function NewDeviceAlerts({
   // The same device's signed-posts grant: its alert above the composer is
   // this alert, so answering either one answers both.
   const address = useSignedMessagesAccount();
-  const { data: grants } = useDeviceGrants(address);
+  const grantsQuery = useDeviceGrants(address);
+  const grants = grantsQuery.data;
   const { acknowledge: acknowledgeGrant } = useAcknowledgeDeviceGrant();
   const [target, setTarget] = useState<E2eeDeviceInfo | null>(null);
 
@@ -74,18 +75,36 @@ function NewDeviceAlerts({
     device.authorProofGrantId === undefined
       ? undefined
       : grants?.find((grant) => grant.id === device.authorProofGrantId);
+  // A combined device's "It was me" waits for this account's grants, so
+  // its signed-posts notice is cleared too instead of coming back.
+  const grantsLoading =
+    address !== null && grants === undefined && !grantsQuery.isError;
+  const waitsForGrants = (device: E2eeDeviceInfo) =>
+    device.authorProofGrantId !== undefined && grantsLoading;
   const shown = devices.filter(
     (device) => linkedGrant(device)?.notice_acknowledged !== true
   );
+  // The revoke dialog stays mounted for its target even after the alert
+  // itself has gone, so a confirm in progress isn't cut off.
   if (shown.length === 0 && target === null) {
     return null;
   }
 
   const itWasMe = (device: E2eeDeviceInfo) => {
     onAcknowledge(device.deviceKey);
+    const grantId = device.authorProofGrantId;
+    if (grantId === undefined || address === null) {
+      return;
+    }
     const grant = linkedGrant(device);
-    if (grant?.revoked_at === null) {
-      void acknowledgeGrant(grant.id);
+    // The API acknowledges only an active grant (an alert's device is
+    // unexpired, and so is its grant). If the list failed to load, try
+    // anyway: a refusal shows the usual "Couldn't acknowledge".
+    if (
+      grant?.revoked_at === null ||
+      (grant === undefined && grantsQuery.isError)
+    ) {
+      void acknowledgeGrant(grantId);
     }
   };
 
@@ -117,6 +136,7 @@ function NewDeviceAlerts({
                 <Button
                   variant="secondary"
                   size="xs"
+                  disabled={waitsForGrants(device)}
                   onClick={() => itWasMe(device)}
                 >
                   {t(locale, "devicesSecurity.newDevice.itWasMe")}

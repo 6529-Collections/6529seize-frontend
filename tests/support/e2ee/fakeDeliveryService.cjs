@@ -1545,7 +1545,7 @@ function createFakeDeliveryService(options = {}) {
     const items = all.slice(0, limit);
     return {
       items,
-      next_after_seq: all.length > limit ? items[items.length - 1].seq : null,
+      next_after_seq: all.length > limit ? items.at(-1).seq : null,
     };
   }
 
@@ -1560,7 +1560,8 @@ function createFakeDeliveryService(options = {}) {
   function compactBackup(profileId, backupId, body) {
     requireOwnDevice(profileId, body.device_key);
     const gen = ownBackup(profileId, backupId);
-    for (const seq of [...gen.chunks.keys()]) {
+    // Deleting the current key while iterating a Map is safe.
+    for (const seq of gen.chunks.keys()) {
       if (seq <= body.through_seq) {
         gen.chunks.delete(seq);
       }
