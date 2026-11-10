@@ -182,6 +182,30 @@ it("aborts an unfinished download when leaving the composer", () => {
   expect(signal.aborted).toBe(true);
 });
 
+it("cancels a pending GIF and enables sending after switching conversations", async () => {
+  let resolve!: (file: File) => void;
+  mockDownload.mockReturnValue(
+    new Promise((done) => {
+      resolve = done;
+    })
+  );
+  const { rerender } = setup();
+  chooseGif();
+  const signal = mockDownload.mock.calls[0]![1];
+  rerender({ conversation: conversation({ g: "another-conversation" }) });
+  expect(signal.aborted).toBe(true);
+  setComposerText(
+    screen.getByRole("textbox", { name: "Encrypted message" }),
+    "A new conversation draft"
+  );
+  expect(
+    screen.getByRole("button", { name: "Send", exact: true })
+  ).toBeEnabled();
+  expect(screen.queryByText("Downloading GIF…")).not.toBeInTheDocument();
+  await act(async () => resolve(gif()));
+  expect(screen.queryByText("giphy.gif")).not.toBeInTheDocument();
+});
+
 it.each([
   { attachmentsEnabled: false },
   { editing: message({ id: "editing", text: "Existing message" }) },

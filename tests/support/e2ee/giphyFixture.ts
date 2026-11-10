@@ -65,7 +65,10 @@ export async function openGifPicker(page: Page) {
   await expect(dialog).toContainText(
     "GIF searches and previews connect to GIPHY"
   );
-  const gif = dialog.locator(`[data-giphy-id="${GIF_ID}"]`);
+  const gif = dialog.getByRole("img", {
+    name: "Private GIF fixture",
+    exact: true,
+  });
   await expect(gif).toBeVisible();
   return gif;
 }

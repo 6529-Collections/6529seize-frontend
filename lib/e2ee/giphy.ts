@@ -31,19 +31,27 @@ async function readGif(response: Response): Promise<File> {
     throw new GifDownloadError("unavailable");
   }
   const declaredSize = response.headers.get("content-length");
-  if (declaredSize && Number(declaredSize) > MAX_ATTACHMENT_FILE_BYTES) {
+  const size = declaredSize === null ? null : Number(declaredSize);
+  if (
+    declaredSize !== null &&
+    (!/^\d+$/u.test(declaredSize) || !Number.isSafeInteger(size))
+  ) {
+    await response.body.cancel();
+    throw new GifDownloadError("unavailable");
+  }
+  if (size !== null && size > MAX_ATTACHMENT_FILE_BYTES) {
     await response.body.cancel();
     throw new GifDownloadError("tooLarge");
   }
   const reader = response.body.getReader();
   const parts: ArrayBuffer[] = [];
-  let size = 0;
+  let receivedSize = 0;
   try {
     for (;;) {
       const { done, value } = await reader.read();
       if (done) break;
-      size += value.byteLength;
-      if (size > MAX_ATTACHMENT_FILE_BYTES) {
+      receivedSize += value.byteLength;
+      if (receivedSize > MAX_ATTACHMENT_FILE_BYTES) {
         throw new GifDownloadError("tooLarge");
       }
       parts.push(toArrayBuffer(value));
@@ -54,7 +62,7 @@ async function readGif(response: Response): Promise<File> {
   }
   const file = new File(parts, "giphy.gif", { type: "image/gif" });
   const header = new Uint8Array(await file.slice(0, 6).arrayBuffer());
-  const signature = String.fromCharCode(...header);
+  const signature = String.fromCodePoint(...header);
   if (signature !== "GIF87a" && signature !== "GIF89a") {
     throw new GifDownloadError("unavailable");
   }

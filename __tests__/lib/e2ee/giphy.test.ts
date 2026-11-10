@@ -63,6 +63,20 @@ it("refuses a declared oversized file before reading it", async () => {
   await expect(download()).rejects.toMatchObject({ reason: "tooLarge" });
 });
 
+it.each(["abc", "-1", "1.5", "1e3"])(
+  "rejects a malformed content-length before reading: %s",
+  async (declaredSize) => {
+    const cancel = jest.fn();
+    fetchMock.mockResolvedValue(
+      new Response(new ReadableStream({ cancel }), {
+        headers: { "content-length": declaredSize },
+      })
+    );
+    await expect(download()).rejects.toMatchObject({ reason: "unavailable" });
+    expect(cancel).toHaveBeenCalled();
+  }
+);
+
 it("bounds streamed bytes even when content-length is missing or incorrect", async () => {
   const cancel = jest.fn();
   fetchMock.mockResolvedValue(

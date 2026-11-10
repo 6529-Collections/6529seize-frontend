@@ -365,18 +365,27 @@ function PastedImagesStatus({
 function ComposerFooter({
   locale,
   error,
+  gifPending,
 }: {
   readonly locale: SupportedLocale;
   readonly error: ComposerError | null;
+  readonly gifPending: boolean;
 }) {
   return (
-    <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-px-4 tw-pb-2">
-      {error ? (
-        <p role="alert" className="tw-m-0 tw-text-xs tw-text-rose-300">
-          {t(locale, error.key, error.params)}
-        </p>
+    <>
+      {gifPending ? (
+        <output className="tw-block tw-px-3 tw-pb-2 tw-text-xs tw-text-iron-400">
+          {t(locale, "e2ee.composer.gifDownloading")}
+        </output>
       ) : null}
-    </div>
+      {error ? (
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-2 tw-px-4 tw-pb-2">
+          <p role="alert" className="tw-m-0 tw-text-xs tw-text-rose-300">
+            {t(locale, error.key, error.params)}
+          </p>
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -676,14 +685,14 @@ export function E2eeComposer({
                 />
               </button>
             </DropActionTooltip>
-            {canAttach && !isUploading ? (
+            {canAttach && !isUploading && (
               <E2eeGifAttachmentPicker
                 key={conversation.g}
                 onAttach={(file) => addFiles([file])}
                 onError={setError}
                 onPendingChange={setGifPending}
               />
-            ) : null}
+            )}
           </>
         ) : null}
         <div className="tw-relative tw-min-w-0 tw-flex-1">
@@ -732,12 +741,7 @@ export function E2eeComposer({
         </DropActionTooltip>
       </div>
       <PastedImagesStatus locale={locale} notice={paste.notice} />
-      {gifPending ? (
-        <output className="tw-block tw-px-3 tw-pb-2 tw-text-xs tw-text-iron-400">
-          {t(locale, "e2ee.composer.gifDownloading")}
-        </output>
-      ) : null}
-      {error ? <ComposerFooter locale={locale} error={error} /> : null}
+      <ComposerFooter locale={locale} error={error} gifPending={gifPending} />
     </div>
   );
 }
