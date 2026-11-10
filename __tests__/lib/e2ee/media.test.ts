@@ -308,16 +308,54 @@ describe("mediaFromFile", () => {
     expect(own.name).toBe("image.gif");
   });
 
-  it("falls back to the original when the cleaned copy does not decode", async () => {
-    const file = new File([photo], "x.jpg", { type: "image/jpeg" });
-    globalThis.createImageBitmap = jest.fn(async (source: unknown) => {
-      if (source === file) {
+  /** Decodes only the copies `decodes` accepts (by their bytes). */
+  const mockDecoder = (decodes: (bytes: Uint8Array) => boolean) => {
+    globalThis.createImageBitmap = jest.fn(async (source: Blob) => {
+      if (decodes(new Uint8Array(await source.arrayBuffer()))) {
         return { width: 4, height: 3, close: () => undefined };
       }
       throw new Error("decode failed");
     }) as unknown as typeof createImageBitmap;
-    const media = await mediaFromFile(file);
+  };
+
+  it("falls back to the original when only the original decodes", async () => {
+    mockDecoder(hasPlace);
+    const media = await mediaFromFile(
+      new File([photo], "x.jpg", { type: "image/jpeg" })
+    );
     expect(media.bytes).toEqual(photo);
     expect(media).toMatchObject({ width: 4, height: 3, name: "image.jpg" });
+  });
+
+  it("sends the cleaned copy without dimensions when neither copy decodes", async () => {
+    mockDecoder(() => false);
+    const media = await mediaFromFile(
+      new File([photo], "x.jpg", { type: "image/jpeg" })
+    );
+    expect(hasPlace(media.bytes)).toBe(false);
+    expect(media.width).toBeUndefined();
+    expect(media.height).toBeUndefined();
+  });
+
+  it.each(["", "application/octet-stream"])(
+    "recognises a photo picked with type %j by its bytes",
+    async (type) => {
+      const media = await mediaFromFile(
+        new File([photo], "IMG_0001", { type })
+      );
+      expect(hasPlace(media.bytes)).toBe(false);
+      expect(media.mime).toBe("image/jpeg");
+      expect(media.name).toBe("image.jpg");
+    }
+  );
+
+  it("numbers images and keeps names when asked to", async () => {
+    const file = new File([photo], "moved.jpg", { type: "image/jpeg" });
+    expect((await mediaFromFile(file, { imageNumber: 2 })).name).toBe(
+      "image-2.jpg"
+    );
+    const kept = await mediaFromFile(file, { keepName: true });
+    expect(kept.name).toBe("moved.jpg");
+    expect(hasPlace(kept.bytes)).toBe(false);
   });
 });

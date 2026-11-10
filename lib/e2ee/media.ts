@@ -9,7 +9,11 @@ import {
   utf8Encode,
 } from "./bytes";
 import { isGifPickerFile } from "./gif-picker-files";
-import { neutralImageName, stripImageMetadata } from "./image-metadata";
+import {
+  neutralImageName,
+  sniffImageMime,
+  stripImageMetadata,
+} from "./image-metadata";
 import type { PayloadAttachment } from "./payload";
 
 /**
@@ -261,18 +265,21 @@ export const isSafeInlineImageMime = (mime: string): boolean =>
 export const localBlobType = (mime: string): string =>
   isSafeInlineImageMime(mime) ? mime.toLowerCase() : "application/octet-stream";
 
-/** Oriented pixel size; {} when not an image or the browser cannot tell; null when it fails to decode. */
+/**
+ * Oriented pixel size; {} when not an image or the browser cannot tell;
+ * null when it fails to decode.
+ */
 async function imageSize(
-  blob: Blob
+  bytes: Uint8Array,
+  mime: string
 ): Promise<{ width?: number; height?: number } | null> {
-  if (
-    !blob.type.startsWith("image/") ||
-    typeof createImageBitmap !== "function"
-  ) {
+  if (!mime.startsWith("image/") || typeof createImageBitmap !== "function") {
     return {};
   }
   try {
-    const bitmap = await createImageBitmap(blob);
+    const bitmap = await createImageBitmap(
+      new Blob([toArrayBuffer(bytes)], { type: mime })
+    );
     const size = { width: bitmap.width, height: bitmap.height };
     bitmap.close();
     return size;
@@ -281,36 +288,52 @@ async function imageSize(
   }
 }
 
+interface FileMedia extends MediaInput {
+  /** The image was given a neutral name (counts towards `imageNumber`). */
+  readonly neutralName: boolean;
+}
+
 /**
- * Bytes and details of a file to attach. Photos (JPEG, PNG, WebP, GIF) go
- * without identifying metadata (image-metadata), and every image except a
- * GIF from the GIF picker (sent as downloaded, gif-picker-files) gets a
- * neutral name (`imageNumber` tells images of one message apart); other
- * files are sent as they are, under their own name.
- * When the cleaned copy does not decode where the original does, the
- * original is sent: removing metadata never blocks sending.
+ * Bytes and details of a file to attach. A JPEG, PNG, WebP or GIF,
+ * recognised by its bytes whatever type the picker reported, goes without
+ * identifying metadata (image-metadata) and with the recognised type. Images
+ * get a neutral name (`imageNumber` tells images of one message apart)
+ * unless `keepName` (history moved from an unencrypted DM keeps the names
+ * already shown there). A GIF from the GIF picker is a public image: it is
+ * sent as downloaded, under its own name (gif-picker-files). Other files are
+ * sent as they are.
+ *
+ * Cleaning never blocks sending: when the cleaned copy does not decode but
+ * the original does, the original is sent; when neither decodes, the
+ * cleaned copy is sent without dimensions.
  */
 export async function mediaFromFile(
   file: File,
-  imageNumber = 1
-): Promise<MediaInput> {
+  options: { readonly imageNumber?: number; readonly keepName?: boolean } = {}
+): Promise<FileMedia> {
   const original = new Uint8Array(await file.arrayBuffer());
-  const photo = file.type.startsWith("image/") && !isGifPickerFile(file);
-  let bytes = photo ? stripImageMetadata(original) : original;
-  let size = await imageSize(
-    bytes === original
-      ? file
-      : new Blob([toArrayBuffer(bytes)], { type: file.type })
-  );
-  if (size === null && bytes !== original) {
-    bytes = original;
-    size = await imageSize(file);
+  const picked = isGifPickerFile(file);
+  const sniffed = picked ? null : sniffImageMime(original);
+  const mime = sniffed ?? file.type;
+  const cleaned = sniffed === null ? original : stripImageMetadata(original);
+  let bytes = cleaned;
+  let size = await imageSize(cleaned, mime);
+  if (size === null && cleaned !== original) {
+    const originalSize = await imageSize(original, mime);
+    if (originalSize !== null) {
+      bytes = original;
+      size = originalSize;
+    }
   }
+  const neutral =
+    picked || options.keepName === true
+      ? null
+      : neutralImageName(mime, options.imageNumber ?? 1);
   return {
     bytes,
-    mime: file.type,
-    name:
-      (photo ? neutralImageName(file.type, imageNumber) : null) ?? file.name,
+    mime,
+    name: neutral ?? file.name,
+    neutralName: neutral !== null,
     width: size?.width,
     height: size?.height,
   };

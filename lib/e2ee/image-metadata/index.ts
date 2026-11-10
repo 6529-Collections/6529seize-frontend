@@ -47,6 +47,22 @@ function sniffFormat(bytes: Uint8Array): ImageFormat | null {
   return tag(0) === "GIF8" ? "gif" : null;
 }
 
+const FORMAT_MIME: Record<ImageFormat, string> = {
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+};
+
+/**
+ * The MIME type of a JPEG, PNG, WebP or GIF recognised by its bytes, or
+ * null: pickers can report an empty or generic type for real photos.
+ */
+export function sniffImageMime(bytes: Uint8Array): string | null {
+  const format = sniffFormat(bytes);
+  return format === null ? null : FORMAT_MIME[format];
+}
+
 /** Same size, orientation and render stream, and nothing identifying left. */
 const preserved = (
   before: ContainerDescription,

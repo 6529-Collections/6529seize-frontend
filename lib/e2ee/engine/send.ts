@@ -182,17 +182,23 @@ async function enqueue(
 
 /**
  * Encrypts and uploads a message's files in order. Images are numbered so
- * their neutral names ("image.jpg", "image-2.jpg") stay distinct.
+ * their neutral names ("image.jpg", "image-2.jpg") stay distinct; moved
+ * history (`keepNames`) keeps the names already shown in the old DM.
  */
 async function uploadFiles(
   ctx: EngineContext,
   runtime: GroupRuntime,
-  files: readonly File[]
+  files: readonly File[],
+  keepNames = false
 ): Promise<PayloadAttachment[]> {
   const attachments: PayloadAttachment[] = [];
   let images = 0;
   for (const file of files) {
-    if (file.type.startsWith("image/")) {
+    const media = await mediaFromFile(file, {
+      imageNumber: images + 1,
+      keepName: keepNames,
+    });
+    if (media.neutralName) {
       images += 1;
     }
     attachments.push(
@@ -200,7 +206,7 @@ async function uploadFiles(
         api: ctx.api,
         g: runtime.record.g,
         deviceKey: ownDeviceKey(ctx),
-        media: await mediaFromFile(file, images),
+        media,
       })
     );
   }
@@ -286,7 +292,7 @@ export async function queueImported(
   if (await ctx.queue.run(() => duplicateImport(ctx, runtime, id, imp))) {
     return false;
   }
-  const attachments = await uploadFiles(ctx, runtime, input.files ?? []);
+  const attachments = await uploadFiles(ctx, runtime, input.files ?? [], true);
   const payload: MsgPayload = {
     v: 1,
     t: "msg",

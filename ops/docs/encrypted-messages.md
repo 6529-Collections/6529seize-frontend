@@ -108,12 +108,12 @@ When this browser holds encrypted messages, **Sign out** and **Sign Out All
 Profiles** ask first whether to **Remove encrypted messages from this
 browser**. It deletes the chats, attachment keys, unsent messages and
 encryption keys saved here: for the profile you sign out of, or for every
-profile with Sign Out All Profiles. It also removes this browser from the
-signed-in profile's devices, so other members stop encrypting to it; if that
-cannot reach the server, signing out continues and the browser stays listed
-until you revoke it from another device. Without encrypted backup that
-history cannot be recovered. If you keep them, they stay saved in this
-browser for the next sign-in.
+profile with Sign Out All Profiles. This browser stays registered as one of
+your devices, so you stay a member of your chats, even when it was your only
+device, and the device you sign in with next is added to them automatically. Without
+encrypted backup the deleted history cannot be recovered; with it, restore
+the history with your recovery code after you sign in again. If you keep
+them, they stay saved in this browser for the next sign-in.
 
 - Sign Out All Profiles has removal on by default.
 - Sign out has it on by default only when [encrypted backup](#encrypted-backup)
@@ -368,9 +368,12 @@ appear.
   embedded thumbnails, comments, and XMP and IPTC data. Pixels, colour
   profiles and animation are kept unchanged, and the image keeps its
   orientation. JPEG HDR gain maps are removed with the other extra data, so
-  an HDR JPEG arrives as its standard-range image. Every image is sent under
-  a neutral name such as `image.jpg`. GIFs chosen with **Add GIF** are public
-  images and are sent exactly as downloaded, under their own name.
+  an HDR JPEG arrives as its standard-range image. Images are recognised by
+  their contents, so this also applies when the picker reports no file type.
+  Every image is sent under a neutral name such as `image.jpg`. Images in
+  history moved from an unencrypted DM are cleaned but keep the names they
+  had there. GIFs chosen with **Add GIF** are public images and are sent
+  exactly as downloaded, under their own name.
 - Other images (HEIC, AVIF, TIFF and others), videos, PDFs and other files
   are sent exactly as chosen, with their embedded details and, except for
   images, their file names. An image that cannot be cleaned safely is sent
@@ -527,9 +530,7 @@ The **Encrypted backup** section on `/messages/encrypted/devices` keeps an
 encrypted copy of your message history so you can restore it on a new device.
 
 - **Turn on backup** shows a recovery code once: 14 groups of 4 letters and
-  numbers. Select **Copy code** or **Download as text file** (a copied code
-  is cleared from the clipboard after 30 seconds if it is still there and the
-  browser allows reading the clipboard), store it
+  numbers. Select **Copy code** or **Download as text file**, store it
   somewhere safe (for example a password manager), tick **I saved my recovery
   code somewhere safe**, then select **Turn on backup**. Closing the dialog
   before that turns nothing on and discards the code.
