@@ -44,12 +44,11 @@ export default function IdentityGettingStartedAboutAction({
   let editor: ReactNode;
   if (isPending) {
     editor = (
-      <p
-        role="status"
-        className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
+      <output
+        className="tw-m-0 tw-block tw-text-sm tw-leading-6 tw-text-iron-300"
       >
         {t(locale, "identityGettingStarted.aboutLoading")}
-      </p>
+      </output>
     );
   } else if (isError && !data) {
     editor = (
