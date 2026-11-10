@@ -56,6 +56,7 @@ import {
   usePastedImages,
 } from "./useE2eeComposerParts";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
+import { E2eeGifAttachmentPicker } from "./E2eeGifAttachmentPicker";
 
 /** Thumbnails are drawn at twice their 48 px box for sharp displays. */
 const THUMBNAIL_PX = 96;
@@ -445,6 +446,7 @@ export function E2eeComposer({
   const [error, setError] = useState<ComposerError | null>(null);
   // Files of the message being encrypted and uploaded right now.
   const [uploading, setUploading] = useState<readonly File[]>([]);
+  const [gifPending, setGifPending] = useState(false);
   const mentions = useMentionPicker(conversation.members, selfProfileId);
 
   // Attachments switched off server-side drop anything already picked.
@@ -542,13 +544,18 @@ export function E2eeComposer({
     }
     if (editing) {
       await submitEdit(editing, trimmed);
-    } else if (!isEmpty && !isUploading) {
+    } else if (!isEmpty && !isUploading && !gifPending) {
       await submitNew(trimmed);
     }
   };
 
   const canEditLastMessage =
-    !text.trim() && files.length === 0 && !editing && !replyTo && !isUploading;
+    !text.trim() &&
+    files.length === 0 &&
+    !editing &&
+    !replyTo &&
+    !isUploading &&
+    !gifPending;
 
   const onKeyDown = (event: KeyboardEvent): boolean => {
     if (handleMentionKey(event, mentions, pickMention)) return true;
@@ -669,6 +676,14 @@ export function E2eeComposer({
                 />
               </button>
             </DropActionTooltip>
+            {canAttach && !isUploading ? (
+              <E2eeGifAttachmentPicker
+                key={conversation.g}
+                onAttach={(file) => addFiles([file])}
+                onError={setError}
+                onPendingChange={setGifPending}
+              />
+            ) : null}
           </>
         ) : null}
         <div className="tw-relative tw-min-w-0 tw-flex-1">
@@ -708,7 +723,7 @@ export function E2eeComposer({
         <DropActionTooltip content={t(locale, "e2ee.composer.hint")}>
           <ComposerSendButton
             onClick={() => void submit()}
-            disabled={isEmpty || tooLong || isUploading}
+            disabled={isEmpty || tooLong || isUploading || gifPending}
             aria-label={t(
               locale,
               editing ? "e2ee.composer.saveEdit" : "e2ee.composer.send"
@@ -717,6 +732,11 @@ export function E2eeComposer({
         </DropActionTooltip>
       </div>
       <PastedImagesStatus locale={locale} notice={paste.notice} />
+      {gifPending ? (
+        <output className="tw-block tw-px-3 tw-pb-2 tw-text-xs tw-text-iron-400">
+          {t(locale, "e2ee.composer.gifDownloading")}
+        </output>
+      ) : null}
       {error ? <ComposerFooter locale={locale} error={error} /> : null}
     </div>
   );
