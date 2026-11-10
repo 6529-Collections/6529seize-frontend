@@ -92,13 +92,14 @@ export default function RootLayout({
   return (
     // Headless UI may add its focus-visible marker before React hydrates when
     // keyboard input arrives during startup. Keep that root-only mutation.
-    // data-version is the browser's VERSION (config/env.browser.ts), kept out
-    // of the bundle so unchanged chunks keep their names across deploys.
+    // The browser reads its build stamp from HTML so unchanged chunks keep
+    // their names across deploys.
     <html
       lang="en-US"
       className={Montserrat.variable}
       data-scroll-behavior="smooth"
       data-version={publicEnv.VERSION}
+      data-release-order={publicEnv.VERSION_RELEASE_ORDER}
       suppressHydrationWarning
     >
       <head>
