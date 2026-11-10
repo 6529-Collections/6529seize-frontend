@@ -1,8 +1,8 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import CollectionGridSkeleton from "@/components/collection-page/CollectionGridSkeleton";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
-import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
@@ -459,11 +459,7 @@ export default function MemeLabComponent({
 
   function printNftsContent() {
     if (catalog.isLoading) {
-      return (
-        <div className="tw-pb-5 tw-pt-4 tw-text-sm tw-text-iron-300">
-          {t(locale, "memeLab.loading.fetching")} <DotLoader />
-        </div>
-      );
+      return <CollectionGridSkeleton className={COLLECTION_GRID_LIST_CLASS} />;
     }
 
     if (catalog.isInitialError) {

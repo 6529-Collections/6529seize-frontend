@@ -425,11 +425,15 @@ jobs:
 
           announcement_file="current-production-version.json"
           published_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          test "$(git rev-parse --is-shallow-repository)" = false
+          release_order="$(git rev-list --count "$COMMIT_SHA")"
+          [[ "$release_order" =~ ^[1-9][0-9]*$ ]]
           jq -n \
             --arg version "$COMMIT_SHA" \
+            --argjson release_order "$release_order" \
             --arg published_at "$published_at" \
             --arg workflow_run_url "$RUN_URL" \
-            '{schema_version:"frontend-announced-version.v1",environment:"production",version:$version,ready:true,published_at:$published_at,workflow_run_url:$workflow_run_url}' \
+            '{schema_version:"frontend-announced-version.v1",environment:"production",version:$version,release_order:$release_order,ready:true,published_at:$published_at,workflow_run_url:$workflow_run_url}' \
             > "$announcement_file"
           aws s3 cp "$announcement_file" "s3://${AWS_BUCKET}/${ANNOUNCED_VERSION_OBJECT_KEY}" \
             --cache-control "no-store, max-age=0, must-revalidate" \

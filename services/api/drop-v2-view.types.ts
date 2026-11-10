@@ -4,7 +4,7 @@ import type { ApiSubmissionDropContext } from "@/generated/models/ApiSubmissionD
 
 export interface ApiDropV2View extends ApiDrop {
   readonly submission_context?: ApiSubmissionDropContext | undefined;
-  /** Thread size, only sent for drops in waves with collapsed replies. */
+  /** Thread size for a drop with collapsed replies. */
   readonly replies_count?: number | undefined;
 }
 

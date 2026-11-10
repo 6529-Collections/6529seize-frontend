@@ -172,13 +172,13 @@ export function useVirtualizedWaveMessages(
   wave?: ApiWave
 ): VirtualizedWaveMessages | undefined {
   const storedWaveMessages = useMyStreamWaveMessages(waveId);
-  const collapseReplies = dropId === null && isWaveRepliesCollapsed(wave);
+  const collapseAllReplies = isWaveRepliesCollapsed(wave);
   const fullWaveMessages = useMemo(
     () =>
-      collapseReplies && storedWaveMessages
-        ? withoutCollapsedReplies(storedWaveMessages)
+      dropId === null && storedWaveMessages
+        ? withoutCollapsedReplies(storedWaveMessages, collapseAllReplies)
         : storedWaveMessages,
-    [collapseReplies, storedWaveMessages]
+    [collapseAllReplies, dropId, storedWaveMessages]
   );
   const fullWaveMessagesForDrop = useDropMessages(waveId, dropId, wave);
   const fetchNextPageForDrop = fullWaveMessagesForDrop.fetchNextPage;

@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { useEncryptedNotificationPreview } from "@/hooks/e2ee/useEncryptedNotificationPreview";
 import type { INotificationEncryptedMessage } from "@/types/feed.types";
 import NotificationInboxRow from "@/components/notifications/inbox/NotificationInboxRow";
+import NotificationEncryptedMessage from "@/components/brain/notifications/NotificationEncryptedMessage";
 import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -107,6 +108,79 @@ it("groups reactors, keeps mixed read state, and opens every distinct unread ID"
   expect(link).toHaveAttribute("href", "/waves/wave?serialNo=42");
   fireEvent.click(link);
   expect(onOpen).toHaveBeenCalledWith([2, 1]);
+});
+
+it("shows three reactors once when snapshots mix profile IDs and handle IDs", () => {
+  const notifications = ["alice", "bob", "carol", "alice", "bob"].map(
+    (handle, index) => {
+      const notification = reaction(index + 1, handle, null);
+      return {
+        ...notification,
+        related_identity: {
+          ...notification.related_identity,
+          id: index < 3 ? `profile-${handle}` : handle,
+        },
+      };
+    }
+  );
+  const onOpen = jest.fn();
+  render(
+    <NotificationInboxRow
+      notification={groupReactionNotifications(notifications)[0]!}
+      handle="viewer"
+      onOpen={onOpen}
+    />
+  );
+
+  expect(screen.getByText("alice, bob, carol")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("link"));
+  expect(onOpen).toHaveBeenCalledWith([1, 2, 3, 4, 5]);
+});
+
+it.each(["alice", "ALICE", " alice "])(
+  "matches reactor handles across ID formats regardless of case or whitespace (%s)",
+  (handle) => {
+    const notification = reaction(1, handle, null);
+    const first = {
+      ...notification,
+      related_identity: {
+        ...notification.related_identity,
+        id: "profile-alice",
+      },
+    };
+    render(
+      <NotificationInboxRow
+        notification={
+          groupReactionNotifications([first, reaction(2, "alice", null)])[0]!
+        }
+        handle="viewer"
+        onOpen={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("alice")).toBeInTheDocument();
+  }
+);
+
+it("keeps distinct reactors without handles and deduplicates them by profile ID", () => {
+  const notifications = ["alice", "bob", "alice"].map((id, index) => {
+    const notification = reaction(index + 1, id, null);
+    return {
+      ...notification,
+      related_identity: { ...notification.related_identity, handle: null },
+    };
+  });
+  render(
+    <NotificationInboxRow
+      notification={groupReactionNotifications(notifications)[0]!}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+
+  expect(
+    screen.getByText("Unknown profile, Unknown profile")
+  ).toBeInTheDocument();
 });
 
 it("keeps single reactions readable and does not mark a read row again", () => {
@@ -423,3 +497,51 @@ it("links the sender avatar and handle separately from encrypted chat setup", ()
   fireEvent.click(setup);
   expect(onOpen).toHaveBeenCalledWith([13]);
 });
+
+it.each(["overview", "page"])(
+  "renders private Markdown in the notification %s without message links or resources",
+  (surface) => {
+    const longBold = "formatted ".repeat(30).trim();
+    jest.mocked(useEncryptedNotificationPreview).mockReturnValue({
+      preview: `\`\`\`js\nconsole.log("preview");\n\`\`\`\n\n**Bold** *italic* ~~struck~~ and \`code\`.\n\n**${longBold}**\n\n[Private link](https://private.invalid/link) ![Private image](https://private.invalid/image.png)\n\n<img src="https://private.invalid/html.png">\n\n- [x] Complete\n\n| Key | Value |\n| --- | --- |\n| A | B |`,
+      needsSetup: false,
+    });
+    const notification: INotificationEncryptedMessage = {
+      id: 14,
+      created_at: 14,
+      read_at: null,
+      cause: ApiNotificationCause.E2EeMessage,
+      additional_context: {
+        encrypted_group: "0xgroup",
+        encrypted_message_seq: 9,
+      },
+    };
+    const { container } = render(
+      surface === "overview" ? (
+        <NotificationInboxRow
+          notification={notification}
+          handle="viewer"
+          onOpen={jest.fn()}
+        />
+      ) : (
+        <NotificationEncryptedMessage notification={notification} />
+      )
+    );
+    expect(screen.getByText("Bold").tagName).toBe("STRONG");
+    expect(screen.getByText("italic").tagName).toBe("EM");
+    expect(screen.getByText("struck").tagName).toBe("DEL");
+    expect(screen.getByText("code").tagName).toBe("CODE");
+    expect(screen.getByText('console.log("preview");').tagName).toBe("CODE");
+    expect(screen.getByText(longBold).tagName).toBe("STRONG");
+    expect(screen.getByText("Private image")).toBeInTheDocument();
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "/messages/encrypted/0xgroup"
+    );
+    expect(
+      container.querySelector("a a,img,iframe,video,audio,source,input,script")
+    ).toBeNull();
+  }
+);
