@@ -41,7 +41,7 @@ function closeDialog(dialog: HTMLDialogElement) {
   dialog.removeAttribute("open");
 }
 
-function AppWalletModalShell(
+export function AppWalletModalShell(
   props: Readonly<{
     show: boolean;
     title: string;
