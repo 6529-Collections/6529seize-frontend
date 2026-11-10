@@ -29,6 +29,7 @@ import {
   isExternalHref,
   LinkPreviewCardLayout,
 } from "./cards";
+import { LinkPreviewImage, useLinkPreviewImage } from "./previewImage";
 import type { FirstPartyOpenGraphPreviewKind } from "./types";
 
 function createLiveMintFact(
@@ -97,14 +98,13 @@ export function FirstPartyOpenGraphPreviewCard({
           className="tw-relative tw-block tw-h-28 tw-w-full tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-black/35 lg:tw-h-full lg:tw-w-72 xl:tw-w-80"
         >
           {/* Generated 6529 OG images are already complete cards; preserve them. */}
-          <Image
+          <LinkPreviewImage
             src={imageUrl}
             alt={title}
             fill
             className="tw-object-contain"
             loading="lazy"
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 14rem, (max-width: 1024px) 18rem, 20rem"
-            unoptimized
           />
         </Link>
 
@@ -159,7 +159,7 @@ export function SeizeCollectionPreviewCard({
   readonly hideActions?: boolean | undefined;
   readonly locale: SupportedLocale;
 }) {
-  const imageUrl = extractImageUrl(preview);
+  const image = useLinkPreviewImage(extractImageUrl(preview));
   const people: readonly SeizeCollectionPreviewPerson[] = Array.isArray(
     preview.people
   )
@@ -200,12 +200,12 @@ export function SeizeCollectionPreviewCard({
         <div
           className={[
             "tw-grid tw-w-full tw-min-w-0 tw-items-center tw-gap-3 sm:tw-gap-4",
-            imageUrl
+            image.src
               ? "tw-grid-cols-[5.5rem,minmax(0,1fr)] sm:tw-grid-cols-[6.75rem,minmax(0,1fr)] md:tw-grid-cols-[8.25rem,minmax(0,1fr)]"
               : "tw-grid-cols-1",
           ].join(" ")}
         >
-          {imageUrl && (
+          {image.src && (
             <Link
               href={effectiveHref}
               target={linkTarget}
@@ -216,13 +216,14 @@ export function SeizeCollectionPreviewCard({
             >
               <span className="tw-relative tw-block tw-h-full tw-w-full">
                 <Image
-                  src={imageUrl}
+                  src={image.src}
                   alt={preview.title}
                   fill
                   className="tw-object-contain"
                   loading="lazy"
                   sizes="(max-width: 640px) 5.5rem, (max-width: 768px) 6.75rem, 8.25rem"
                   unoptimized
+                  onError={image.onError}
                 />
               </span>
             </Link>
@@ -377,6 +378,7 @@ export function FarcasterEmbedPreviewCard({
     deriveDomain(href, preview);
   // The API normalizes this to #rrggbb before it reaches the client.
   const splashColor = preview.splashBackgroundColor ?? "#855dcd";
+  const splash = useLinkPreviewImage(preview.splashImageUrl, "icon");
   const mediaSizes = isHome
     ? "(max-width: 768px) 100vw, 480px"
     : "(max-width: 640px) 100vw, (max-width: 1024px) 13rem, 15rem";
@@ -416,22 +418,20 @@ export function FarcasterEmbedPreviewCard({
             onClick={(event) => event.stopPropagation()}
             className="tw-relative tw-block tw-aspect-[3/2] tw-w-full tw-min-w-0 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-black tw-bg-black tw-no-underline"
           >
-            {imageUrl ? (
-              <Image
-                src={imageUrl}
-                alt={imageAlt}
-                fill
-                className="tw-object-cover tw-transition tw-duration-300 hover:tw-scale-[1.02]"
-                loading="lazy"
-                sizes={mediaSizes}
-                unoptimized
-              />
-            ) : (
-              <span
-                aria-hidden="true"
-                className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-[#855dcd]/40 tw-via-black tw-to-iron-950"
-              />
-            )}
+            <LinkPreviewImage
+              src={imageUrl}
+              alt={imageAlt}
+              fill
+              className="tw-object-cover tw-transition tw-duration-300 hover:tw-scale-[1.02]"
+              loading="lazy"
+              sizes={mediaSizes}
+              fallback={
+                <span
+                  aria-hidden="true"
+                  className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-[#855dcd]/40 tw-via-black tw-to-iron-950"
+                />
+              }
+            />
             <span className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-16 tw-bg-gradient-to-t tw-from-black/70 tw-to-transparent" />
             <span
               aria-hidden="true"
@@ -447,20 +447,21 @@ export function FarcasterEmbedPreviewCard({
 
           <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-col tw-justify-center tw-gap-2 tw-overflow-hidden">
             <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-              {preview.splashImageUrl && (
+              {splash.src && (
                 <span
                   className="tw-relative tw-h-7 tw-w-7 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/10"
                   style={{ backgroundColor: splashColor }}
                   aria-hidden="true"
                 >
                   <Image
-                    src={preview.splashImageUrl}
+                    src={splash.src}
                     alt=""
                     fill
                     className="tw-object-cover"
                     loading="lazy"
                     sizes="1.75rem"
                     unoptimized
+                    onError={splash.onError}
                   />
                 </span>
               )}
@@ -562,17 +563,8 @@ function YoutubeThumbnailBackdrop({
   readonly mediaSizes: string;
   readonly isInteractive: boolean;
 }) {
-  if (!thumbnailUrl) {
-    return (
-      <span
-        aria-hidden="true"
-        className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-iron-900 tw-via-black tw-to-iron-950"
-      />
-    );
-  }
-
   return (
-    <Image
+    <LinkPreviewImage
       src={thumbnailUrl}
       alt={thumbnailAlt}
       fill
@@ -583,7 +575,12 @@ function YoutubeThumbnailBackdrop({
       }
       loading="lazy"
       sizes={mediaSizes}
-      unoptimized
+      fallback={
+        <span
+          aria-hidden="true"
+          className="tw-absolute tw-inset-0 tw-bg-gradient-to-br tw-from-iron-900 tw-via-black tw-to-iron-950"
+        />
+      }
     />
   );
 }

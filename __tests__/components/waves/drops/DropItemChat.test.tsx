@@ -5,13 +5,14 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 
 jest.mock("next/link", () => ({
   __esModule: true,
-  default: ({ href, children }: any) => <a href={href}>{children}</a>,
+  default: ({ href, children, target, rel }: any) => (
+    <a href={href} target={target} rel={rel}>
+      {children}
+    </a>
+  ),
 }));
 
 jest.mock("@/hooks/useDrop", () => ({ useDrop: jest.fn() }));
-jest.mock("@/helpers/Helpers", () => ({
-  removeBaseEndpoint: jest.fn((l: string) => l.replace("https://base.com", "")),
-}));
 jest.mock("@/contexts/SeizeSettingsContext", () => ({
   useSeizeSettings: () => ({ isMemesSubmission: () => false }),
 }));
@@ -38,18 +39,27 @@ jest.mock("@/components/waves/ChatItemHrefButtons", () => (p: any) => (
 ));
 
 const { useDrop } = require("@/hooks/useDrop");
-const { removeBaseEndpoint } = require("@/helpers/Helpers");
 
 describe("DropItemChat", () => {
   it("renders fallback link when drop not loaded", () => {
     (useDrop as jest.Mock).mockReturnValue({ drop: null });
     const { container } = render(
-      <DropItemChat href="https://base.com/path" dropId="d1" />
+      <DropItemChat href="https://test.6529.io/path" dropId="d1" />
     );
     const link = container.querySelector("a");
     expect(link).toHaveAttribute("href", "/path");
-    expect(link).toHaveTextContent("https://base.com/path");
-    expect(removeBaseEndpoint).toHaveBeenCalledWith("https://base.com/path");
+    expect(link).toHaveTextContent("https://test.6529.io/path");
+    expect(link).not.toHaveAttribute("target");
+  });
+
+  it("opens a link that is not provably on this site in a new tab", () => {
+    (useDrop as jest.Mock).mockReturnValue({ drop: null });
+    const href = "https://test.6529.io//other.example/path";
+    const { container } = render(<DropItemChat href={href} dropId="d1" />);
+    const link = container.querySelector("a");
+    expect(link).toHaveAttribute("href", href);
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer nofollow");
   });
 
   it("shows drop details when loaded", () => {
@@ -63,7 +73,7 @@ describe("DropItemChat", () => {
         rank: 2,
       },
     });
-    render(<DropItemChat href="https://base.com/p" dropId="d1" />);
+    render(<DropItemChat href="https://test.6529.io/p" dropId="d1" />);
     const links = screen.getAllByRole("link");
     expect(links[0]).toHaveAttribute("href", "/p");
     expect(screen.getByRole("heading", { name: "Title" })).toHaveClass(
@@ -96,7 +106,7 @@ describe("DropItemChat", () => {
       },
     });
 
-    render(<DropItemChat href="https://base.com/p" dropId="d1" />);
+    render(<DropItemChat href="https://test.6529.io/p" dropId="d1" />);
 
     expect(screen.getByText("Chat Title").closest("a")).toBeNull();
     expect(screen.getByRole("link", { name: "Wave" })).toHaveAttribute(

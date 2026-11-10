@@ -46,7 +46,20 @@ describe("ChatItemHrefButtons", () => {
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/local");
     expect(link).not.toHaveAttribute("target");
+    expect(link).not.toHaveAttribute("rel");
   });
+
+  it.each(["//other.example/path", "/\\other.example/path"])(
+    "opens the full link in a new tab when the relative href is %j",
+    (relativeHref) => {
+      const href = "https://test.6529.io//other.example/path";
+      render(<ChatItemHrefButtons href={href} relativeHref={relativeHref} />);
+      const link = screen.getByRole("link");
+      expect(link).toHaveAttribute("href", href);
+      expect(link).toHaveAttribute("target", "_blank");
+      expect(link).toHaveAttribute("rel", "noopener noreferrer nofollow");
+    }
+  );
 
   it("renders and triggers preview toggle action from context", () => {
     const onToggle = jest.fn();
