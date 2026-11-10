@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import { utf8Encode } from "@/lib/e2ee/bytes";
+import { MAX_ATTACHMENT_BYTES, MAX_BLOB_CHUNKS } from "@/lib/e2ee/media";
 import {
   decodePayload,
   encodePayload,
@@ -110,6 +111,22 @@ describe("payload codec (contract 6)", () => {
         text: "",
         att: [{ ...attachment, w: -1 }],
       },
+      {
+        v: 1,
+        t: "msg",
+        id: ID,
+        ts: 1,
+        text: "",
+        att: [{ ...attachment, chunks: MAX_BLOB_CHUNKS + 1 }],
+      },
+      {
+        v: 1,
+        t: "msg",
+        id: ID,
+        ts: 1,
+        text: "",
+        att: [{ ...attachment, size: MAX_ATTACHMENT_BYTES + 1 }],
+      },
       { v: 1, t: "edit", id: ID, ts: 1, target: ID2 },
       { v: 1, t: "del", id: ID, ts: 1 },
       { v: 1, t: "react", id: ID, ts: 1, target: ID2, r: "" },
@@ -119,6 +136,17 @@ describe("payload codec (contract 6)", () => {
     for (const value of bad) {
       expect(parsePayload(value)).toBeNull();
     }
+  });
+
+  it("accepts attachments at the largest size and chunk count a sender produces", () => {
+    const largest = {
+      ...attachment,
+      chunks: MAX_BLOB_CHUNKS,
+      size: MAX_ATTACHMENT_BYTES,
+    };
+    expect(
+      parsePayload({ v: 1, t: "msg", id: ID, ts: 1, text: "", att: [largest] })
+    ).toMatchObject({ att: [largest] });
   });
 
   it("counts text and reactions in characters, not UTF-16 units", () => {
