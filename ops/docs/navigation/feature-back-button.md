@@ -3,9 +3,9 @@
 ## Overview
 
 In the app layout, header `Back` is context-aware. It appears only in supported
-contexts, then runs route rules before history. Standard wave detail views also
-support a right swipe from the left edge of the main content as a shortcut back
-to the Waves list.
+contexts, then runs route rules before history. In the native app, ordinary wave
+and direct-message details also support a rightward swipe across conversation
+content to return to their matching list.
 
 ## Location in the Site
 
@@ -20,8 +20,8 @@ to the Waves list.
 ## Entry Points
 
 - Open a wave or DM thread.
-- In the native app, open a standard wave at `/waves/{waveId}` and start a
-  right swipe from the left edge of the main content.
+- In the native app, open a wave or DM thread and start a rightward swipe
+  across ordinary conversation content.
 - Open a route with `?drop={dropId}`.
 - Open `/waves/create` or `/messages/create`.
 - Open Preferences from the active profile's **Preferences** action.
@@ -34,8 +34,8 @@ to the Waves list.
    - route is `/waves/create` or `/messages/create`,
    - Preferences includes its explicit profile-entry context,
    - route is a profile page and in-app history can go back.
-2. User taps `Back`. In a native-app standard wave, the user can instead swipe
-   right from the left edge of the main content.
+2. User taps `Back`. In a native-app wave or DM, the user can instead swipe
+   right across ordinary conversation content.
 3. The app applies the first match in this order:
    - `/waves/create` -> replace to `/waves`
    - `/messages/create` -> replace to `/messages`
@@ -54,17 +54,21 @@ to the Waves list.
   returns to that profile.
 - Close focused drop: if `?drop=` exists, `Back` removes only `drop`.
 - Leave thread: `Back` clears active thread state and returns to section root.
-- Leave a standard wave in the native app: an edge swipe right clears the
-  active wave and returns to `/waves`, using the same state reset as `Back`.
+- Leave a wave or DM in the native app: a completed rightward swipe clears the
+  active thread and returns to `/waves` or `/messages`, using the same state
+  reset as `Back`.
 - Return from profile: if in-app history has a valid target, `Back` returns to
   it.
 
 ## Edge Cases
 
 - Repeat taps are ignored while fallback loading is active.
-- Edge swipe applies only to native-app `/waves/{waveId}` views. It does not run
-  on web, direct messages, list/create routes, or while a focused drop or create
-  overlay is active.
+- The conversation swipe applies to native-app wave and DM details. It does
+  not run on web or list/create routes, or while a focused drop or create overlay
+  is active. Screen edges remain available to the system or browser.
+- Reverse below the gesture threshold before release to cancel. A slow, short
+  drag also stays in the conversation; a longer drag or quick flick returns to
+  the list.
 - Vertical gestures and touches that begin on sliders, editors, media controls,
   or horizontally scrollable content do not trigger Back.
 - Profile routes hide `Back` when there is no valid in-app target (for example
@@ -77,7 +81,7 @@ to the Waves list.
 ## Failure and Recovery
 
 - If `Back` is missing, use menu or bottom navigation to return to section root.
-- If the edge gesture is unavailable or does not complete, use the visible
+- If the swipe shortcut is unavailable or does not complete, use the visible
   app-header `Back` control.
 - If no valid history target exists, navigate directly to `/waves`,
   `/messages`, or another root route from navigation controls.
@@ -87,7 +91,7 @@ to the Waves list.
 
 - This behavior is app-layout only.
 - `Back` is context-aware, not a strict browser-back wrapper.
-- Edge swipe is an optional shortcut and never replaces the visible `Back`
+- The conversation swipe is an optional shortcut and never replaces the visible `Back`
   control.
 - Leaving a thread with `Back` clears last-visited thread memory for that
   section.

@@ -24,6 +24,7 @@ import { useAppWallets } from "./AppWalletsContext";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { DELEGATION_FIELD_CLASS_NAME } from "@/components/delegation/delegation-ui";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 
 const LEGACY_UNLOCK_MIN_PASS_LENGTH = 6;
 const APP_WALLET_INPUT_CLASS_NAME = DELEGATION_FIELD_CLASS_NAME;
@@ -66,6 +67,9 @@ function AppWalletModalShell(
     show,
     title,
   } = props;
+  useAndroidBackLayer(show && isHydrated, dialogRef, () => {
+    if (!dismissDisabled) onHide();
+  });
 
   useEffect(() => {
     if (typeof document === "undefined") {

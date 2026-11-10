@@ -420,9 +420,25 @@ const handleTouchMoveInternal = ({
 const clampGroupedTimestampSwipeOffset = (offset: number): number =>
   Math.min(GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX, Math.max(0, offset));
 
+const getGroupedTimestampContentClass = (
+  showTimestamp: boolean,
+  isDragging: boolean
+): string => {
+  const base = "tw-relative tw-z-10";
+  if (!showTimestamp) return base;
+  return `${base} ${isDragging ? "tw-will-change-transform" : "tw-transition-transform tw-duration-150 tw-ease-out"}`;
+};
+
 const getGroupedTimestampContentStyle = (
-  offset: number
+  offset: number,
+  useTouchSwipeFeedback = false
 ): CSSProperties | undefined => {
+  if (useTouchSwipeFeedback) {
+    const restingTransform = offset > 0 ? `translateX(-${offset}px)` : "none";
+    return {
+      transform: `var(--message-swipe-transform, ${restingTransform})`,
+    };
+  }
   if (offset <= 0) {
     return undefined;
   }
@@ -730,13 +746,13 @@ export {
   getAuthorHeader,
   getContentBlock,
   getGroupedTimestampActionStyle,
+  getGroupedTimestampContentClass,
   getGroupedTimestampContentStyle,
   getGroupingClass,
   getContentOffsetClass,
   getDropClasses,
   getPointerId,
   getPointerType,
-  getPrimaryTouch,
   getWaveDropOuterClass,
   handleTouchEndInternal,
   handleTouchMoveInternal,
