@@ -70,6 +70,69 @@ it("does not reuse a chat after the peer left, but retains the original pair for
   ).toBe("replacement");
 });
 
+it("keeps a DM holding a third person out of the peer's thread and DM lookups", () => {
+  const crowded = dm("a-crowded", {
+    members: [
+      member(SELF_ID, "me"),
+      member(ALICE_ID, "alice"),
+      member(BOB_ID, "bob"),
+    ],
+  });
+  expect(getDmPeerId(crowded, SELF_ID)).toBeNull();
+  expect(isUsableDm(crowded, SELF_ID)).toBe(false);
+  // Even with the lower g, it never becomes the current chat with alice.
+  const threads = groupConversationThreads([crowded, dm("b-real")], SELF_ID);
+  expect(threads.map((thread) => thread.key).sort()).toEqual([
+    `dm:${ALICE_ID}`,
+    "group:a-crowded",
+  ]);
+  expect(
+    threads.find((thread) => thread.key === `dm:${ALICE_ID}`)?.current.g
+  ).toBe("b-real");
+});
+
+it("needs a pair that includes you, and ignores members not identified yet", () => {
+  const identity = (
+    admins: string[],
+    members: (string | null)[]
+  ): Parameters<typeof getDmPeerId>[0] => ({
+    kind: "dm",
+    admins,
+    members: members.map((profileId) => ({ profileId })),
+  });
+  expect(
+    getDmPeerId(identity([ALICE_ID, BOB_ID], [SELF_ID, ALICE_ID]), SELF_ID)
+  ).toBeNull();
+  expect(
+    getDmPeerId(identity([SELF_ID, SELF_ID], [SELF_ID, BOB_ID]), SELF_ID)
+  ).toBe(BOB_ID);
+  expect(
+    getDmPeerId(identity([SELF_ID, ALICE_ID], [SELF_ID, null]), SELF_ID)
+  ).toBe(ALICE_ID);
+});
+
+it("still resolves a real two-person chat whose admins are not a pair", () => {
+  const legacy = dm("legacy", { admins: [SELF_ID] });
+  expect(getDmPeerId(legacy, SELF_ID)).toBe(ALICE_ID);
+  expect(isUsableDm(legacy, SELF_ID)).toBe(true);
+  expect(groupConversationThreads([legacy], SELF_ID)[0]?.key).toBe(
+    `dm:${ALICE_ID}`
+  );
+  expect(
+    getDmPeerId(
+      dm("legacy-three", {
+        admins: [SELF_ID],
+        members: [
+          member(SELF_ID, "me"),
+          member(ALICE_ID, "alice"),
+          member(BOB_ID, "bob"),
+        ],
+      }),
+      SELF_ID
+    )
+  ).toBeNull();
+});
+
 it("does not collapse chats whose peer or signed-in profile cannot be identified", () => {
   expect(
     getDmPeerId(
