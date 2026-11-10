@@ -330,7 +330,7 @@ it.each([
     );
     await waitFor(() =>
       expect(screen.getByRole("status")).toHaveTextContent(
-        "Inputs changed. Reset the distribution before processing again."
+        /^Inputs changed\. Reset the distribution before processing again\.$/
       )
     );
     const button = screen.getByRole("button", {
@@ -345,6 +345,28 @@ it.each([
     expect(startForgeProcess).not.toHaveBeenCalled();
   }
 );
+
+it("shows progress while a job with changed phase inputs is still running", async () => {
+  jest.mocked(latestForgeProcess).mockResolvedValue({
+    id: "job",
+    status: JobStatus.Pending,
+    phase_ids: ["old0", "old1", "old2"],
+    kind: JobKind.ProcessAll,
+    step: 1,
+  } as ApiDropForgeJob);
+  renderUI(
+    <ProcessAndFinalize
+      contract="creator"
+      claim={123}
+      plan="plan"
+      phaseIds={["p0", "p1", "p2"]}
+    />
+  );
+  expect(
+    await screen.findByRole("button", { name: "Processing and finalizing…" })
+  ).toBeDisabled();
+  expect(screen.getByRole("status")).toHaveTextContent(/^2 \/ 5$/);
+});
 
 it("allows processing changed phases after an explicit reset invalidates the prior job", async () => {
   jest.mocked(latestForgeProcess).mockResolvedValue({

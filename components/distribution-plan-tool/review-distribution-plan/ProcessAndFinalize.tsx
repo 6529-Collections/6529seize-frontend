@@ -90,6 +90,16 @@ export default function ProcessAndFinalize({
   if (pending) label = "dropForge.processing";
   if (completed) label = "dropForge.completed";
   if (awaitingAuth && !pending) label = "dropForge.resumeAuth";
+  let statusMessage = "";
+  if (pending) {
+    statusMessage = `${Math.min((job?.step ?? 0) + 1, 5)} / 5`;
+  } else if (!hasRequiredInputs) {
+    statusMessage = t(locale, "dropForge.inputsMissing");
+  } else if (requiresReset) {
+    statusMessage = t(locale, "dropForge.inputsChanged");
+  } else if (awaitingAuth) {
+    statusMessage = t(locale, "dropForge.authRequired");
+  }
   const failure = error ?? job?.error ?? getToastErrorDetails(operation.error);
   return (
     <div className="tw-flex tw-flex-col tw-items-end tw-gap-2">
@@ -116,10 +126,7 @@ export default function ProcessAndFinalize({
         aria-live="polite"
         className="tw-text-sm tw-text-iron-300"
       >
-        {pending && `${Math.min((job?.step ?? 0) + 1, 5)} / 5`}
-        {!hasRequiredInputs && t(locale, "dropForge.inputsMissing")}
-        {requiresReset && t(locale, "dropForge.inputsChanged")}
-        {awaitingAuth && t(locale, "dropForge.authRequired")}
+        {statusMessage}
       </div>
       {failure && (
         <p role="alert" className="tw-max-w-lg tw-text-sm tw-text-error">
