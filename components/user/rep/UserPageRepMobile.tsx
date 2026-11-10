@@ -1,5 +1,8 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -27,6 +30,7 @@ import type { RepDirection } from "./UserPageRep.helpers";
 import { getCanEditRep, getCanEditNic } from "./UserPageRep.helpers";
 import MobileTabCards, { type MobileTab } from "./MobileTabCards";
 import MobileRepTabContent from "./MobileRepTabContent";
+import { useNicRatingsOverview } from "./useNicRatingsOverview";
 import MobileNicTabContent from "./MobileNicTabContent";
 import MobileStatementsTabContent from "./MobileStatementsTabContent";
 
@@ -70,11 +74,13 @@ export default function UserPageRepMobile({
   readonly onOpenGlobalCategory: (category: string) => void;
   readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
+  const locale = useBrowserLocale();
   const params = useParams();
   const user = params["user"]?.toString().toLowerCase() ?? null;
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
 
+  const nicRatings = useNicRatingsOverview(profile, cicOverview);
   const [activeTab, setActiveTab] = useState<MobileTab>("rep");
   const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
@@ -139,18 +145,13 @@ export default function UserPageRepMobile({
     <div>
       <IdentityGettingStartedCard profile={profile} className="tw-mb-4" />
 
-      <MobileTabCards
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        overview={overview}
-        cicOverview={cicOverview}
-        profile={profile}
-        identityStatementCount={identityStatementCount}
-      />
+      <MobileTabCards activeTab={activeTab} onTabChange={setActiveTab} />
 
       <AnimatePresence mode="wait">
         {activeTab === "rep" && (
           <motion.div
+            role="region"
+            aria-label={t(locale, "user.rate.repRegion")}
             key="rep"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -189,7 +190,7 @@ export default function UserPageRepMobile({
           >
             <MobileNicTabContent
               profile={profile}
-              cicOverview={cicOverview}
+              ratings={nicRatings}
               initialActivityLogParams={initialActivityLogParams}
               canEditNic={canEditNic}
               onRateNic={() => setIsNicRateOpen(true)}
@@ -208,6 +209,7 @@ export default function UserPageRepMobile({
             <MobileStatementsTabContent
               profile={profile}
               canEditStatements={canEditStatements}
+              statementCount={identityStatementCount}
             />
           </motion.div>
         )}

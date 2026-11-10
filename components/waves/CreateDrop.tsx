@@ -31,7 +31,6 @@ import { useKeyPressEvent } from "react-use";
 import { DropMode } from "./dropComposer.types";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
-import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import { useUnreadDividerOptional } from "@/contexts/wave/UnreadDividerContext";
 import { useWave } from "@/hooks/useWave";
 import {
@@ -58,7 +57,7 @@ import { getDropSubmissionErrorContent } from "./create-drop-content/drop-submis
 import type { CreateDropProps } from "./create-drop-content/create-drop.types";
 import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMonitoring";
 import { removeTemporaryThreadReply } from "./drops/reply-threads/pending-replies";
-import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
+import { acceptCreatedDrop } from "./create-drop-content/accept-created-drop";
 import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
 
 export default function CreateDrop({
@@ -112,7 +111,7 @@ export default function CreateDrop({
     useState<string | null>(null);
   const { applyOptimisticDropUpdate, processDropRemoved, processIncomingDrop } =
     useMyStreamActions();
-  const savedDrop = useSavedDropRecovery(wave);
+  const savedDrop = useSavedDropRecovery();
   const retainModerationRejectedDrop = useModerationRejectedDropDelivery({
     applyOptimisticDropUpdate,
     processDropRemoved,
@@ -453,19 +452,13 @@ export default function CreateDrop({
   const addDropMutation = useMutation({
     mutationFn: submitQueuedDrop,
     onSuccess: (serverDrop, body) => {
-      if (body.dropId) {
-        if (isWaveRepliesCollapsed(wave))
-          removeTemporaryThreadReply(
-            queryClient,
-            body.drop.wave_id,
-            body.dropId
-          );
-        processDropRemoved(body.drop.wave_id, body.dropId);
-      }
       startLocalSlowModeCooldown(body);
-      void Promise.resolve(
-        processIncomingDrop(serverDrop, ProcessIncomingDropType.DROP_INSERT)
-      ).catch(() => undefined);
+      acceptCreatedDrop({
+        serverDrop,
+        body,
+        queryClient,
+        processIncomingDrop,
+      });
       body.onSuccess?.();
 
       if (
@@ -504,12 +497,13 @@ export default function CreateDrop({
         if (!body.dropId) {
           return;
         }
-        if (isWaveRepliesCollapsed(wave))
+        if (body.drop.reply_to) {
           removeTemporaryThreadReply(
             queryClient,
             body.drop.wave_id,
             body.dropId
           );
+        }
 
         if (
           isContentModerationRejection &&

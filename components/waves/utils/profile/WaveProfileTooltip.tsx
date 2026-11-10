@@ -1,7 +1,8 @@
+import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import { useMemo } from "react";
 import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { useWaveById } from "@/hooks/useWaveById";
-import { getTimeAgoShort, numberWithCommas } from "@/helpers/Helpers";
+import { numberWithCommas } from "@/helpers/Helpers";
 import WavePicture from "@/components/waves/WavePicture";
 
 interface WaveProfileTooltipProps {
@@ -18,6 +19,7 @@ export default function WaveProfileTooltip({
   initialWave = null,
   fallbackName,
 }: WaveProfileTooltipProps) {
+  const timeAgoShort = useTimeAgoShort();
   const { wave } = useWaveById(waveId);
 
   const waveName =
@@ -44,7 +46,7 @@ export default function WaveProfileTooltip({
   const hasDrops = typeof dropsCount === "number" && dropsCount > 0;
   const lastDropLabel =
     hasDrops && typeof latestDropTimestamp === "number"
-      ? `Last drop ${getTimeAgoShort(latestDropTimestamp)}`
+      ? `Last drop ${timeAgoShort(latestDropTimestamp)}`
       : "No drops yet";
 
   return (

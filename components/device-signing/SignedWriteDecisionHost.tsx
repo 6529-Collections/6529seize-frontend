@@ -28,9 +28,11 @@ import {
   useCallback,
   useEffect,
   useId,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 
 const TITLE_KEYS = {
   post: "signedMessages.prompt.title.post",
@@ -196,15 +198,18 @@ function SigningDecisionPrompt({ locale, request }: PromptProps) {
   const enableThenRetry = useEnableThenRetry(request.id);
   const reasonGroup = getReasonGroup(request.reason);
   const compact = isCompactAction(request.action);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const open = enableThenRetry.state !== "enabling";
+  const dismissPrompt = () => {
+    if (compact) resolveSigningDecision(request.id, "cancel");
+  };
+  useAndroidBackLayer(open, dialogRef, dismissPrompt);
   return (
     <Dialog
-      open={enableThenRetry.state !== "enabling"}
+      ref={dialogRef}
+      open={open}
       role="alertdialog"
-      onClose={() => {
-        if (compact) {
-          resolveSigningDecision(request.id, "cancel");
-        }
-      }}
+      onClose={dismissPrompt}
       // Above every dialog a signed write can start from (the delete
       // confirmation, the touch drop menu, the single-drop view, the wave
       // guidelines and preview shells), so their backdrops never cover it.

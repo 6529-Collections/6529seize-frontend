@@ -314,12 +314,48 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
       statementHeadingBox!.x + statementHeadingBox!.width
     ).toBeLessThanOrEqual(helpBox!.x);
     expect(helpBox!.x + helpBox!.width).toBeLessThanOrEqual(addStatementBox!.x);
-    expect(
-      Math.abs(checkerBox!.width - addWalletBox!.width)
-    ).toBeLessThanOrEqual(1);
-    expect(Math.abs(checkerBox!.y - addWalletBox!.y)).toBeLessThanOrEqual(1);
+    const walletActionSizes = await page
+      .getByRole("link", {
+        name: /^(Wallet Checker|Safe Collecting|Add another wallet)$/,
+      })
+      .evaluateAll((links) =>
+        links.map((link) => {
+          const label = document.createRange();
+          label.selectNodeContents(link);
+          const style = getComputedStyle(link);
+          return {
+            width: link.getBoundingClientRect().width,
+            contentWidth:
+              label.getBoundingClientRect().width +
+              Number.parseFloat(style.paddingLeft) +
+              Number.parseFloat(style.paddingRight) +
+              Number.parseFloat(style.borderLeftWidth) +
+              Number.parseFloat(style.borderRightWidth),
+          };
+        })
+      );
+    for (const action of walletActionSizes) {
+      expect(Math.abs(action.width - action.contentWidth)).toBeLessThanOrEqual(
+        1
+      );
+    }
+    if (Math.abs(checkerBox!.y - addWalletBox!.y) <= 1) {
+      expect(checkerBox!.x + checkerBox!.width).toBeLessThanOrEqual(
+        addWalletBox!.x + 1
+      );
+    } else {
+      expect(addWalletBox!.y).toBeGreaterThanOrEqual(
+        checkerBox!.y + checkerBox!.height
+      );
+    }
     expect(addWalletBox!.y).toBeLessThan(statementHeadingBox!.y);
-    expect(addStatementBox!.height).toBeLessThan(addWalletBox!.height);
+    await expect(walletChecker).toHaveCSS("min-height", "32px");
+    await expect(addWallet).toHaveCSS("min-height", "32px");
+    await expect(walletChecker).toHaveCSS("font-size", "12px");
+    await expect(addWallet).toHaveCSS("font-size", "12px");
+    expect(addWalletBox!.height).toBeGreaterThanOrEqual(
+      addStatementBox!.height
+    );
     expect(
       Math.abs(
         statementHeadingBox!.y +
@@ -335,11 +371,128 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     const addDialog = page.getByRole("dialog");
     await expect(addDialog).toBeVisible();
     await expect(
+      addDialog.getByRole("heading", {
+        name: "Add Statements About Your Identity",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(
       addDialog.getByText(
         "Statements are optional and fully and permanently public.",
         { exact: true }
       )
     ).toBeVisible();
+    const statementInfo = addDialog.getByRole("complementary", {
+      name: "About identity statements",
+    });
+    await expect(statementInfo).toContainText(
+      "6529 does not connect to social media accounts or verify posts."
+    );
+    for (const description of [
+      "Your handle on social media platforms.",
+      "Your handle on NFT platforms.",
+      "Your handle on messaging platforms.",
+      "Your posts verifying your profile here.",
+    ]) {
+      await expect(
+        addDialog.getByText(description, { exact: true })
+      ).toBeVisible();
+    }
+    await expectNoHorizontalOverflow(page);
+    await addDialog
+      .getByRole("button", { name: /^Social Media Accounts/ })
+      .click();
+    await expect(
+      addDialog.getByRole("textbox", { name: "X", exact: true })
+    ).toBeFocused();
+    const platformPicker = addDialog.getByRole("group", {
+      name: "Choose a platform",
+    });
+    await expect(platformPicker).toBeVisible();
+    const platformBoxes = await platformPicker
+      .getByRole("button")
+      .evaluateAll((buttons) =>
+        buttons.map((button) => {
+          const { x, y, width, height } = button.getBoundingClientRect();
+          return { x, y, width, height };
+        })
+      );
+    expect(platformBoxes).toHaveLength(13);
+    expect(
+      platformBoxes.filter((box) => Math.abs(box.y - platformBoxes[0]!.y) <= 1)
+    ).toHaveLength(7);
+    expect(
+      platformBoxes.filter((box) => Math.abs(box.y - platformBoxes[7]!.y) <= 1)
+    ).toHaveLength(6);
+    for (const [index, box] of platformBoxes.entries()) {
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      expect(
+        Math.abs(box.height - platformBoxes[0]!.height)
+      ).toBeLessThanOrEqual(1);
+      const previousBox = platformBoxes[index - 1];
+      if (previousBox && Math.abs(box.y - previousBox.y) <= 1) {
+        expect(
+          Math.abs(box.x - (previousBox.x + previousBox.width) + 1)
+        ).toBeLessThanOrEqual(1);
+      }
+    }
+    await expectNoHorizontalOverflow(page);
+    const statementCancel = addDialog.getByRole("button", {
+      name: "Cancel",
+      exact: true,
+    });
+    const statementSave = addDialog.getByRole("button", {
+      name: "Save",
+      exact: true,
+    });
+    await expect(statementCancel).toBeVisible();
+    await expect(statementSave).toBeVisible();
+    const [statementCancelBox, statementSaveBox, statementInputBox] =
+      await Promise.all([
+        statementCancel.boundingBox(),
+        statementSave.boundingBox(),
+        addDialog
+          .getByRole("textbox", { name: "X", exact: true })
+          .boundingBox(),
+      ]);
+    expect(statementCancelBox).not.toBeNull();
+    expect(statementSaveBox).not.toBeNull();
+    expect(statementInputBox).not.toBeNull();
+    expect(
+      Math.abs(statementCancelBox!.y - statementSaveBox!.y)
+    ).toBeLessThanOrEqual(1);
+    expect(
+      statementCancelBox!.x + statementCancelBox!.width
+    ).toBeLessThanOrEqual(statementSaveBox!.x);
+    expect(
+      Math.abs(
+        statementSaveBox!.x +
+          statementSaveBox!.width -
+          (statementInputBox!.x + statementInputBox!.width)
+      )
+    ).toBeLessThanOrEqual(1);
+    await addDialog.getByRole("button", { name: "Back", exact: true }).click();
+    await expect(statementInfo).toBeVisible();
+    for (const category of [/^NFT Accounts/, /^Contact/]) {
+      await addDialog.getByRole("button", { name: category }).click();
+      await expect(platformPicker).toBeVisible();
+      const heights = await platformPicker
+        .getByRole("button")
+        .evaluateAll((buttons) =>
+          buttons.map((button) => button.getBoundingClientRect().height)
+        );
+      expect(heights.length).toBeGreaterThan(0);
+      for (const height of heights) {
+        expect(Math.abs(height - platformBoxes[0]!.height)).toBeLessThanOrEqual(
+          1
+        );
+      }
+      await expectNoHorizontalOverflow(page);
+      await addDialog
+        .getByRole("button", { name: "Back", exact: true })
+        .click();
+      await expect(statementInfo).toBeVisible();
+    }
     await page.keyboard.press("Escape");
     await expect(addDialog).toBeHidden();
     await expect(addStatement).toBeFocused();

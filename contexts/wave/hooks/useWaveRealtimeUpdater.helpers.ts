@@ -16,6 +16,7 @@ import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { recordReactionRealtimeReconciliation } from "@/utils/monitoring/dropReactionMonitoring";
 import { type QueryClient } from "@tanstack/react-query";
 import { reconcileDropAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconciliation";
+import { reconcileDropMedia } from "@/helpers/waves/drop-media-reconciliation";
 import {
   reconcileAttachmentStatusUpdate,
   reconcileFinalizedDropAttachments,
@@ -27,11 +28,8 @@ import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 const HELP_BOT_HANDLE = "help6529";
 const HELP_BOT_FINAL_REACTIONS = new Set([":white_check_mark:", ":warning:"]);
 
-type ApiDropWithUnknownSerialNo = Omit<ApiDrop, "serial_no"> & {
-  readonly serial_no: unknown;
-};
-
 export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
+  readonly refreshWaveMessages?: (waveId: string) => Promise<void>;
   readonly removeDrops: (waveId: string, dropIds: readonly string[]) => void;
   readonly activeWaveId: string | null;
   /** Only the displayed Chat panel may acknowledge incoming messages. */
@@ -54,6 +52,13 @@ export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   readonly isWaveMuted: (waveId: string) => boolean;
 }
 
+export interface ReplyPlacementChange {
+  readonly waveId: string;
+  readonly dropId: string;
+  readonly collapseReplies?: boolean | undefined;
+  readonly hasReplies?: boolean | undefined;
+}
+
 export enum ProcessIncomingDropType {
   DROP_RATING_UPDATE = "DROP_RATING_UPDATE",
   DROP_INSERT = "DROP_INSERT",
@@ -67,6 +72,8 @@ export type ProcessIncomingDropFn = (
 ) => Promise<void>;
 
 export interface ProcessIncomingDropOptions {
+  /** Pending row accepted by this POST response, even if its content changed. */
+  readonly pendingDropId?: string | null | undefined;
   readonly preferExistingPollVote?: boolean;
   /** Exact canonical payload already fetched for a compact WebSocket ref. */
   readonly canonicalDrop?: ApiDrop;
@@ -98,7 +105,7 @@ const getIncomingWaveId = (drop: ApiDrop): string | null => {
   return typeof wave?.id === "string" && wave.id.length > 0 ? wave.id : null;
 };
 
-const parseRealtimeSerialNo = (value: unknown): number | null => {
+const parseRealtimeInteger = (value: unknown): number | null => {
   if (typeof value === "number" && Number.isSafeInteger(value)) {
     return value;
   }
@@ -117,16 +124,24 @@ const parseRealtimeSerialNo = (value: unknown): number | null => {
 };
 
 const normalizeRealtimeDrop = (drop: ApiDrop): ApiDrop => {
-  const rawSerialNo = (drop as ApiDropWithUnknownSerialNo).serial_no;
-  const serialNo = parseRealtimeSerialNo(rawSerialNo);
+  // Worker-originated frames can carry database BIGINTs as numeric strings.
+  const serialNo = parseRealtimeInteger(drop.serial_no) ?? drop.serial_no;
+  const createdAt = parseRealtimeInteger(drop.created_at) ?? drop.created_at;
+  const updatedAt = parseRealtimeInteger(drop.updated_at) ?? drop.updated_at;
 
-  if (serialNo === null || serialNo === rawSerialNo) {
+  if (
+    serialNo === drop.serial_no &&
+    createdAt === drop.created_at &&
+    updatedAt === drop.updated_at
+  ) {
     return drop;
   }
 
   return {
     ...drop,
     serial_no: serialNo,
+    created_at: createdAt,
+    updated_at: updatedAt,
   };
 };
 
@@ -373,7 +388,10 @@ const buildOptimisticDrop = ({
   let reconciledDrop =
     existingDrop === null
       ? drop
-      : reconcileFinalizedDropAttachments(drop, existingDrop);
+      : reconcileDropMedia(
+          reconcileFinalizedDropAttachments(drop, existingDrop),
+          existingDrop
+        );
   if (existingDrop !== null && preferExistingPollVote === undefined) {
     reconciledDrop = reconcileDropAuthenticatedPollVote(
       reconciledDrop,

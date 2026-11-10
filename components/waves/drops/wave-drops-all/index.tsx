@@ -2,6 +2,11 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import { useWaveReplyThreads } from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
+import {
+  fetchDropReplyThreadTarget,
+  type DropReplyThreadTarget,
+} from "@/services/api/drop-reply-thread-target-api";
 import WaveDropsScrollingOverlay from "@/components/waves/drops/WaveDropsScrollingOverlay";
 import {
   UnreadDividerProvider,
@@ -25,13 +30,24 @@ import { useWaveBoostedDrops } from "@/hooks/useWaveBoostedDrops";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useWaveDropsClipboard } from "./hooks/useWaveDropsClipboard";
 import { useDeferredNewestDrops } from "./hooks/useDeferredNewestDrops";
 import { useFirstVisibleDropsPainted } from "./hooks/useFirstVisibleDropsPainted";
 import { useWaveDropsNotificationRead } from "./hooks/useWaveDropsNotificationRead";
 import { useWaveDropsSerialScroll } from "./hooks/useWaveDropsSerialScroll";
 import { WaveDropsContent } from "./subcomponents/WaveDropsContent";
+import {
+  ShareDropsSelectionLayer,
+  ShareDropsSelectionProvider,
+} from "../share-image/ShareDropsSelectionContext";
 
 const EMPTY_DROPS: Drop[] = [];
 
@@ -88,6 +104,7 @@ interface WaveDropsAllProps {
   }) => void;
   readonly activeDrop: ActiveDropState | null;
   readonly initialDrop: number | null;
+  readonly initialThreadReply?: DropReplyThreadTarget | null | undefined;
   readonly dividerSerialNo?: number | null | undefined;
   readonly unreadCount?: number | undefined;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
@@ -106,6 +123,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   onReply,
   activeDrop,
   initialDrop,
+  initialThreadReply,
   dividerSerialNo,
   unreadCount,
   onDropContentClick,
@@ -192,6 +210,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     isAppleMobile,
     waveMessages,
     shouldPinToBottom,
+    viewerProfileId: connectedProfile?.id,
   });
 
   const waveMin = useMemo(() => (wave ? toApiWaveMin(wave) : null), [wave]);
@@ -231,6 +250,11 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
       ? boostedDrops
       : undefined;
 
+  const replyThreads = useWaveReplyThreads();
+  const replyThreadStore = replyThreads?.store;
+  const collapseAll = replyThreads?.collapseAll;
+  const replyTargetRequest = useRef<AbortController | null>(null);
+
   const {
     serialTarget,
     queueSerialTarget,
@@ -240,7 +264,8 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   } = useWaveDropsSerialScroll({
     waveId,
     dropId,
-    initialDrop,
+    initialDrop: initialThreadReply?.parentSerialNo ?? initialDrop,
+    replyThreadStore,
     waveMessages,
     fetchNextPage,
     waitAndRevealDrop,
@@ -249,20 +274,74 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
     scrollToVisualBottom,
   });
 
+  useEffect(() => {
+    if (!replyThreadStore) return;
+    replyThreadStore.setLinkedReply(initialThreadReply ?? null);
+    if (initialThreadReply) {
+      replyThreadStore.setExpanded(initialThreadReply.parentDropId, true);
+    }
+  }, [collapseAll, initialThreadReply, replyThreadStore]);
+
   const scrollToBottom = useCallback(() => {
+    replyTargetRequest.current?.abort();
+    replyThreads?.store.setLinkedReply(null);
     cancelSerialScroll();
     // Jump before offscreen placeholders hydrate and change the scroll range.
     forcePinToBottom("auto");
-  }, [cancelSerialScroll, forcePinToBottom]);
+  }, [cancelSerialScroll, forcePinToBottom, replyThreads]);
 
   const waveChatScroll = useWaveChatScrollOptional();
+  // Navigation handlers are passed to every memoized message row.
+  const latestDropsRef = useRef(dropsForClipboard);
+  useLayoutEffect(() => {
+    latestDropsRef.current = dropsForClipboard;
+  }, [dropsForClipboard]);
+  useEffect(
+    () => () => replyTargetRequest.current?.abort(),
+    [collapseAll, replyThreadStore, waveId]
+  );
+  useEffect(() => {
+    // A new link supersedes the lookup. Clearing the URL after reading it does not.
+    if (initialDrop !== null) replyTargetRequest.current?.abort();
+  }, [initialDrop]);
+  const queueVisibleSerialTarget = useCallback(
+    (serialNo: number) => {
+      replyTargetRequest.current?.abort();
+      if (
+        !replyThreads ||
+        dropId !== null ||
+        latestDropsRef.current.some((drop) => drop.serial_no === serialNo)
+      ) {
+        replyThreads?.store.setLinkedReply(null);
+        queueSerialTarget(serialNo);
+        return;
+      }
+
+      const controller = new AbortController();
+      replyTargetRequest.current = controller;
+      void fetchDropReplyThreadTarget({
+        waveId,
+        serialNo,
+        collapseAll: replyThreads.collapseAll,
+        signal: controller.signal,
+      })
+        .catch(() => null)
+        .then((thread) => {
+          if (controller.signal.aborted) return;
+          replyThreads.store.setLinkedReply(thread);
+          if (thread) replyThreads.store.setExpanded(thread.parentDropId, true);
+          queueSerialTarget(thread?.parentSerialNo ?? serialNo);
+        });
+    },
+    [dropId, queueSerialTarget, replyThreads, waveId]
+  );
   useEffect(() => {
     if (!waveChatScroll) return;
     return waveChatScroll.registerScrollHandler({
       waveId,
-      handler: queueSerialTarget,
+      handler: queueVisibleSerialTarget,
     });
-  }, [waveChatScroll, waveId, queueSerialTarget]);
+  }, [waveChatScroll, waveId, queueVisibleSerialTarget]);
 
   const revealPendingDrops = useCallback(() => {
     if ((waveMessages?.drops.length ?? 0) === 0) {
@@ -296,7 +375,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const handleQuoteClick = useCallback(
     (drop: ApiDrop) => {
       if (drop.wave.id === waveId) {
-        queueSerialTarget(drop.serial_no);
+        queueVisibleSerialTarget(drop.serial_no);
       } else {
         const waveDetails = drop.wave as unknown as {
           chat?:
@@ -321,50 +400,53 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         router.push(href);
       }
     },
-    [router, waveId, queueSerialTarget]
+    [router, waveId, queueVisibleSerialTarget]
   );
 
   return (
-    <div
-      ref={containerRef}
-      className="tw-relative tw-flex tw-h-full tw-flex-col tw-justify-end tw-overflow-hidden tw-bg-iron-950"
-    >
-      <WaveDropsContent
-        waveMessages={renderedWaveMessagesWithFullWave}
-        dropId={dropId}
-        scrollContainerRef={scrollContainerRef}
-        scrollContainerCallbackRef={scrollContainerCallbackRef}
-        bottomAnchorRef={bottomAnchorRef}
-        bottomAnchorCallbackRef={bottomAnchorCallbackRef}
-        paginationThreshold={virtualizedDropsPageSize}
-        onTopIntersection={handleTopIntersection}
-        onReply={onReply}
-        queueSerialTarget={queueSerialTarget}
-        activeDrop={activeDrop}
-        serialTarget={serialTarget}
-        targetDropRef={targetDropRef}
-        onQuoteClick={handleQuoteClick}
-        isAtBottom={isAtBottom}
-        scrollToBottom={scrollToBottom}
-        typingMessage={typingMessage}
-        onDropContentClick={onDropContentClick}
-        pendingCount={pendingDropsCount}
-        onRevealPending={revealPendingDrops}
-        bottomPaddingClassName={bottomPaddingClassName}
-        boostedDrops={visibleBoostedDrops}
-        boostedDropsDisplayPreference={boostedDropsDisplayPreference}
-        onBoostedDropClick={queueSerialTarget}
-        onScrollToUnread={queueSerialTarget}
-        unreadCount={unreadCount}
-        suspendLightDropHydration={isScrolling || serialTarget !== null}
-        virtualScrollRootMargin={virtualScrollRootMargin}
-        winningThreshold={winningThreshold}
-        winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-        isVotingClosed={isVotingClosed}
-        isVotingControlsLocked={isVotingControlsLocked}
-      />
-      <WaveDropsScrollingOverlay isVisible={isScrolling} />
-    </div>
+    <ShareDropsSelectionProvider wave={wave} drops={dropsForClipboard}>
+      <div
+        ref={containerRef}
+        className="tw-relative tw-flex tw-h-full tw-flex-col tw-justify-end tw-overflow-hidden tw-bg-iron-950"
+      >
+        <WaveDropsContent
+          waveMessages={renderedWaveMessagesWithFullWave}
+          dropId={dropId}
+          scrollContainerRef={scrollContainerRef}
+          scrollContainerCallbackRef={scrollContainerCallbackRef}
+          bottomAnchorRef={bottomAnchorRef}
+          bottomAnchorCallbackRef={bottomAnchorCallbackRef}
+          paginationThreshold={virtualizedDropsPageSize}
+          onTopIntersection={handleTopIntersection}
+          onReply={onReply}
+          queueSerialTarget={queueVisibleSerialTarget}
+          activeDrop={activeDrop}
+          serialTarget={serialTarget}
+          targetDropRef={targetDropRef}
+          onQuoteClick={handleQuoteClick}
+          isAtBottom={isAtBottom}
+          scrollToBottom={scrollToBottom}
+          typingMessage={typingMessage}
+          onDropContentClick={onDropContentClick}
+          pendingCount={pendingDropsCount}
+          onRevealPending={revealPendingDrops}
+          bottomPaddingClassName={bottomPaddingClassName}
+          boostedDrops={visibleBoostedDrops}
+          boostedDropsDisplayPreference={boostedDropsDisplayPreference}
+          onBoostedDropClick={queueVisibleSerialTarget}
+          onScrollToUnread={queueVisibleSerialTarget}
+          unreadCount={unreadCount}
+          suspendLightDropHydration={isScrolling || serialTarget !== null}
+          virtualScrollRootMargin={virtualScrollRootMargin}
+          winningThreshold={winningThreshold}
+          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+          isVotingClosed={isVotingClosed}
+          isVotingControlsLocked={isVotingControlsLocked}
+        />
+        <WaveDropsScrollingOverlay isVisible={isScrolling} />
+        <ShareDropsSelectionLayer />
+      </div>
+    </ShareDropsSelectionProvider>
   );
 };
 

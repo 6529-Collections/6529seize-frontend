@@ -48,6 +48,7 @@ import MixpanelSetup from "./MixpanelSetup";
 import QueryClientSetup from "./QueryClientSetup";
 import WagmiSetup from "./WagmiSetup";
 import DocumentLanguage from "./DocumentLanguage";
+import AndroidBackNavigation from "@/components/navigation/AndroidBackNavigation";
 
 export default function Providers({
   children,
@@ -77,6 +78,7 @@ export default function Providers({
           <ViewProvider>
             <WaveInformationProvider>
               <NavigationHistoryProvider>
+                <AndroidBackNavigation />
                 <LocaleMessagesGate>{children}</LocaleMessagesGate>
               </NavigationHistoryProvider>
             </WaveInformationProvider>

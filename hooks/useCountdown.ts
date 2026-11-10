@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useReducer } from "react";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatCountdown } from "@/utils/timeFormatters";
 
 /**
@@ -11,6 +12,7 @@ import { formatCountdown } from "@/utils/timeFormatters";
 export function useCountdown(targetTime: number | null): string {
   // Use reducer to trigger re-renders; display value is calculated during render
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  const zone = useDisplayTimeZone();
 
   useEffect(() => {
     // Skip if no target time or already passed
@@ -48,5 +50,5 @@ export function useCountdown(targetTime: number | null): string {
   }, [targetTime]);
 
   // ✅ Calculate display during rendering (not in effect)
-  return formatCountdown(targetTime);
+  return formatCountdown(targetTime, zone);
 }

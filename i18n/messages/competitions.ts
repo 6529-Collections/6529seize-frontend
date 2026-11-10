@@ -93,6 +93,9 @@ export const COMPETITION_MESSAGES = {
     "This decision shares its settings with the wave. Changing its title also renames the wave. Its description remains the pinned wave drop.",
   "competitions.decisions": "Winners",
   "competitions.outcomes": "Outcomes",
+  "competitions.outcomes.positions": "Positions {positions}",
+  "competitions.outcomes.morePositions": "Load more positions",
+  "competitions.outcomes.moreOutcomes": "Load more outcomes",
   "competitions.outcomeTab": "Outcome",
   "competitions.voters": "Voters",
   "competitions.rules": "Rules",
@@ -128,8 +131,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.guidelinesPlaceholder": "Add decision guidelines…",
   "competitions.announceDescription":
     "Winners are announced on a schedule you’ll set on the Schedule step — a fixed timeline that ends the decision, or repeating cycles.",
-  "competitions.reviewDescription":
-    "Review your decision before publishing.",
+  "competitions.reviewDescription": "Review your decision before publishing.",
   "competitions.saving": "Saving…",
   "competitions.save": "Save changes",
   "competitions.next": "Next",
@@ -158,8 +160,7 @@ export const COMPETITION_MESSAGES = {
     "This decision will move into history and cannot be reopened. Existing entries, votes, winners and awarded outcomes are preserved.",
   "competitions.archiveIrreversible":
     "This action is permanent and cannot be undone. This decision cannot be reopened.",
-  "competitions.archiveConfirmationName":
-    "Decision name to confirm archival",
+  "competitions.archiveConfirmationName": "Decision name to confirm archival",
   "competitions.archiveNameHelp":
     "Type the full decision name below exactly to enable Confirm, including capitals, spaces and punctuation.",
   "competitions.clone": "Clone as a draft",

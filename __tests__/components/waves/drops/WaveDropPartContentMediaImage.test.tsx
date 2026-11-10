@@ -112,7 +112,7 @@ describe("WaveDropPartContentMediaImage", () => {
     expect(screen.getByRole("status")).toHaveTextContent("Loading image");
     expect(screen.getByText("Processing image")).toBeInTheDocument();
     act(() => {
-      jest.advanceTimersByTime(1500);
+      jest.advanceTimersByTime(11_000);
     });
     expect(
       screen.getByRole("status", { name: "Loading image" })
@@ -224,9 +224,10 @@ describe("WaveDropPartContentMediaImage", () => {
     expect(screen.getByText("Processing image")).toBeInTheDocument();
     expect(screen.queryByText("Preview unavailable")).not.toBeInTheDocument();
 
-    act(() => {
-      jest.advanceTimersByTime(1500);
-    });
+    act(() => jest.advanceTimersByTime(10_000));
+    expect(screen.getByText("Processing image")).toBeInTheDocument();
+    expect(screen.queryByAltText("Drop media")).not.toBeInTheDocument();
+    act(() => jest.advanceTimersByTime(1_000));
 
     await waitFor(() => {
       expect(screen.getByAltText("Drop media")).toHaveAttribute(
@@ -243,13 +244,13 @@ describe("WaveDropPartContentMediaImage", () => {
       <WaveDropPartContentMediaImage src="https://example.com/path/image.png" />
     );
 
-    for (let retryAttempt = 1; retryAttempt <= 40; retryAttempt++) {
+    for (let retryAttempt = 1; retryAttempt <= 6; retryAttempt++) {
       failCurrentPreview();
 
       expect(screen.getByText("Processing image")).toBeInTheDocument();
 
       act(() => {
-        jest.advanceTimersByTime(1500);
+        jest.advanceTimersByTime(11_000);
       });
 
       await waitFor(() => {
@@ -270,7 +271,7 @@ describe("WaveDropPartContentMediaImage", () => {
     await waitFor(() => {
       expect(screen.getByAltText("Drop media")).toHaveAttribute(
         "src",
-        "https://example.com/path/image.png?scale=auto&drop_media_retry=41"
+        "https://example.com/path/image.png?scale=auto&drop_media_retry=7"
       );
     });
   });

@@ -407,6 +407,15 @@ App PR CI:
   memory. Those steps also set `NEXT_DEV_TURBOPACK_FS_CACHE=0`, which
   `next.config.ts` maps to `experimental.turbopackFileSystemCacheForDev:
 false` because CI dev servers always start cold.
+- When the critical-shell check is selected, it runs as three parallel jobs.
+  One job runs both route-shell halves and `test:e2e:session-recovery-sandbox`.
+  The other two run `test:e2e:profile-following-sandbox` with Playwright
+  `--shard=1/2` and `--shard=2/2`. With the four projects in config order,
+  shard 1 runs desktop and mobile web, and shard 2 runs the Capacitor iOS and
+  Android simulators. As one serial job the pack reached the 30-minute limit,
+  and a single retry could cancel it.
+- Browser matrix jobs do not cancel their siblings on failure, preserving each
+  job's results. All selected jobs must still pass `Installed app checks`.
 - Museum selection: `scripts/museum-release-selection.cjs` maps each changed
   file to Museum page surfaces through the surface registry and import graph
   (copy keys and `public/museum` assets map through the sources that name

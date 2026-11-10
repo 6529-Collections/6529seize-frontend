@@ -105,6 +105,20 @@ describe("engine deps", () => {
     }
   });
 
+  it("resumes identity reads on reconnect and removes lifecycle listeners on stop", () => {
+    const listener = jest.fn();
+    const stop = subscribeE2eeWakes(() => () => undefined, listener);
+    window.dispatchEvent(new Event("online"));
+    expect(listener).toHaveBeenCalledWith({
+      type: "E2EE_LOOKUP_RESUME",
+      data: null,
+    });
+    listener.mockClear();
+    stop();
+    window.dispatchEvent(new Event("online"));
+    expect(listener).not.toHaveBeenCalled();
+  });
+
   it("checks contract wallets on mainnet, or defers to the server without RPC", async () => {
     const client = { verifyHash: jest.fn().mockResolvedValue(true) };
     await expect(

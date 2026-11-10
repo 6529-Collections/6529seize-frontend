@@ -47,14 +47,14 @@ export function getCompetitionIdFromPathname(
 export const COMPETITION_TABS = [
   "leaderboard",
   "decisions",
-  "outcomes",
   "votes",
   "rules",
 ] as const;
 export type CompetitionTab = (typeof COMPETITION_TABS)[number];
 export const getCompetitionTab = (tab: string | null): CompetitionTab => {
   if (tab === "voters") return "votes";
-  if (tab === "settings") return "rules";
+  if (tab === "settings" || tab === "outcomes" || tab === "outcome")
+    return "rules";
   return (
     COMPETITION_TABS.find((candidate) => candidate === tab) ?? "leaderboard"
   );

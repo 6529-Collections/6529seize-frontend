@@ -191,6 +191,7 @@ describe("effective App PR CI plan", () => {
     "services/wallet-signatures/competition-signature.ts",
     "i18n/messages/competitions.ts",
     "tests/social/native-competition-sandbox.spec.ts",
+    "components/waves/drops/winner/DefaultWinnerDrop.tsx",
     "tests/media/waveImagePreviewCases.ts",
     "components/waves/drop/MemesDropArtworkHero.tsx",
     "components/drops/view/item/content/media/DropImagePreview.tsx",
@@ -206,7 +207,26 @@ describe("effective App PR CI plan", () => {
     "components/drops/view/item/content/media/useOriginalImage.ts",
     "helpers/gif-preview.helpers.ts",
     "tests/social/wave-switch-loading.spec.ts",
+    "tests/social/wave-media-processing-sandbox.spec.ts",
+    "components/waves/drops/wave-drops-all/hooks/useDeferredNewestDrops.ts",
+    "components/waves/drops/wave-drops-all/index.tsx",
+    "helpers/waves/drop-media-reconciliation.ts",
+    "components/waves/drops/WaveDropPartContentMediaImage.tsx",
+    "components/waves/drops/WaveDropPartContentMedias.tsx",
+    "components/react-query-wrapper/utils/updateAttachmentInCachedDrops.ts",
     "tests/social/wave-loading-sandbox.spec.ts",
+    "tests/social/android-back-sandbox.spec.ts",
+    "tests/social/mobile-gestures-sandbox.spec.ts",
+    "hooks/useAndroidBackLayer.ts",
+    "hooks/useHorizontalSwipe.ts",
+    "hooks/useSwipeToReply.ts",
+    "helpers/waves/drop-reply-eligibility.ts",
+    "components/waves/drops/SwipeReplyHint.tsx",
+    "components/e2ee/conversation/E2eeMessageItem.tsx",
+    "components/e2ee/conversation/E2eeConversationView.tsx",
+    "components/navigation/AndroidBackNavigation.tsx",
+    "services/capacitor/android-back-layers.ts",
+    "components/brain/mobile/useWaveListSwipeBack.ts",
     "components/brain/my-stream/MyStreamWaveChat.tsx",
     "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
     "components/waves/drops/wave-drops-all/utils/observeSerialScrollTarget.ts",
@@ -688,6 +708,70 @@ describe("Wave link-preview browser lane selection", () => {
       fs.rmSync(root, { recursive: true, force: true });
     }
   });
+});
+
+describe("Profile browser job isolation", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(".github/workflows/app-pr-ci.yml", "utf8")
+  );
+  const publish = requireRunStep(
+    workflow.jobs.plan.steps as WorkflowStep[],
+    ({ id }) => id === "plan_outputs",
+    "Publish CI plan outputs"
+  );
+
+  it.each([true, false])(
+    "preserves shell selection and both profile shards when required=%s",
+    (required) => {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "profile-ci-plan-"));
+      const planDir = path.join(root, "test-results/app-pr-ci");
+      const base = executePlan(["README.md"]);
+      const input = {
+        ...base,
+        checks: {
+          ...base.checks,
+          playwright_critical_shell: { required },
+        },
+        risk: { computed_floor: 2 },
+      };
+      try {
+        fs.mkdirSync(planDir, { recursive: true });
+        fs.writeFileSync(
+          path.join(planDir, "ci-plan.json"),
+          JSON.stringify(input)
+        );
+        const result = runWorkflowScript(publish.run, root, {
+          DEFAULT_CI_RUNNER: "ubuntu-latest",
+          BUILD_CI_RUNNER: "ubuntu-latest",
+        });
+        expect(result.status).toBe(0);
+        const output = result.output
+          .split("\n")
+          .find((line) => line.startsWith("core_playwright_matrix="));
+        expect(output).toBeDefined();
+        const matrix = JSON.parse(
+          output!.slice("core_playwright_matrix=".length)
+        ) as { include: { lane: string; shard?: number }[] };
+        expect(
+          matrix.include.filter(
+            (job) => job.lane === "playwright-critical-shell"
+          )
+        ).toHaveLength(required ? 1 : 0);
+        expect(
+          matrix.include
+            .filter((job) => job.lane === "playwright-critical-shell-profile")
+            .map((job) => job.shard)
+        ).toEqual(required ? [1, 2] : []);
+        expect(
+          matrix.include.filter(
+            (job) => job.lane === "playwright-profile-following"
+          )
+        ).toHaveLength(0);
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+  );
 });
 
 describe("App PR CI merge-tree base", () => {

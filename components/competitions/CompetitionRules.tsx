@@ -14,6 +14,7 @@ import { t } from "@/i18n/messages";
 import { formatDate, formatInteger, formatNumber } from "@/i18n/format";
 import { Time } from "@/helpers/time";
 import CompetitionOverview from "./CompetitionOverview";
+import CompetitionOutcomes from "./CompetitionOutcomes";
 import CompetitionAccess from "./CompetitionAccess";
 import CompetitionApprovalThresholds from "./CompetitionApprovalThresholds";
 
@@ -250,6 +251,7 @@ export default function CompetitionRules() {
             </RuleRow>
           )}
         </RulesSection>
+        <CompetitionOutcomes />
       </div>
     </div>
   );
