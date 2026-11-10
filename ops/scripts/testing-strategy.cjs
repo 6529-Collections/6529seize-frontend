@@ -1159,8 +1159,26 @@ function scanPushedRangeForSecrets({ from, to = "HEAD", exclude = [] }, cwd) {
     ? [to, "--not", from, ...exclude.filter((ref) => isGitCommit(ref, cwd))]
     : ["-1", to];
   const { commits, versions } = introducedFileVersions(revisions, cwd);
-  const findings = [];
   const skipped = [];
+  const { readable, sizes } = readableFileVersions(versions, cwd, skipped);
+  const findings = scanFileVersions(
+    readable,
+    { sizes, versions },
+    cwd,
+    skipped
+  );
+
+  return {
+    commits_scanned: commits,
+    file_versions_scanned: readable.length,
+    findings,
+    skipped,
+  };
+}
+
+// The text file versions small enough to scan, with their sizes. Contents
+// are fetched first when the clone has none.
+function readableFileVersions(versions, cwd, skipped) {
   const candidates = [];
   for (const [objectName, version] of versions) {
     if (shouldScanTextFile(version.file)) {
@@ -1169,16 +1187,15 @@ function scanPushedRangeForSecrets({ from, to = "HEAD", exclude = [] }, cwd) {
       skipped.push({ file: version.file, reason: "not-text-extension" });
     }
   }
-
-  let sizes = new Map();
-  if (candidates.length > 0) {
-    const remote = promisorRemote(cwd);
-    if (remote) {
-      fetchObjects(candidates, remote, cwd);
-    }
-    sizes = blobSizes(candidates, cwd);
+  if (candidates.length === 0) {
+    return { readable: [], sizes: new Map() };
   }
 
+  const remote = promisorRemote(cwd);
+  if (remote) {
+    fetchObjects(candidates, remote, cwd);
+  }
+  const sizes = blobSizes(candidates, cwd);
   const readable = [];
   for (const objectName of candidates) {
     const size = sizes.get(objectName);
@@ -1192,7 +1209,11 @@ function scanPushedRangeForSecrets({ from, to = "HEAD", exclude = [] }, cwd) {
       readable.push(objectName);
     }
   }
+  return { readable, sizes };
+}
 
+function scanFileVersions(readable, { sizes, versions }, cwd, skipped) {
+  const findings = [];
   const blobs = readBlobs(readable, sizes, cwd);
   for (const objectName of readable) {
     const { file, commit } = versions.get(objectName);
@@ -1211,13 +1232,7 @@ function scanPushedRangeForSecrets({ from, to = "HEAD", exclude = [] }, cwd) {
       });
     }
   }
-
-  return {
-    commits_scanned: commits,
-    file_versions_scanned: readable.length,
-    findings,
-    skipped,
-  };
+  return findings;
 }
 
 function workflowSecurityFindingsForText(text, filePath) {
