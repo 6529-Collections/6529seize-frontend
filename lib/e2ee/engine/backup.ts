@@ -1,5 +1,5 @@
 import { historyKey, type HistoryKey } from "../history-order";
-import { loadMessage, trimHistory } from "./history";
+import { loadMessage, recountUnread, trimHistory } from "./history";
 import type { BackupHistory, BackupMessageRecord } from "../backup/format";
 import type { StoredGroup, StoredMessage } from "../records";
 import { checkpoint, type EngineContext } from "./context";
@@ -20,11 +20,17 @@ export async function backupHistory(
   ctx: EngineContext
 ): Promise<BackupHistory> {
   const out: BackupHistory = { groups: [], messages: [] };
+  // Read positions go into the backup with read-state sync on (P60 §5).
+  const withReads = ctx.options.readSync === true;
+  const reads: Record<string, number> = {};
   for (const runtime of ctx.store.groups.values()) {
     const record = runtime.record;
     // A self group holds no history, only read-state sync (D175, P60).
     if (record.metadata.kind === "self") {
       continue;
+    }
+    if (withReads && record.readSeq > 0) {
+      reads[record.g] = record.readSeq;
     }
     out.groups.push({
       g: record.g,
@@ -48,6 +54,9 @@ export async function backupHistory(
       );
       after = historyKey(rows.at(-1)!);
     }
+  }
+  if (Object.keys(reads).length > 0) {
+    out.reads = reads;
   }
   return out;
 }
@@ -118,6 +127,12 @@ export async function importBackupHistory(
     history.groups.map((group) => [group.g.toLowerCase(), group])
   );
   const messagesByGroup = groupMessages(history.messages);
+  const reads = new Map(
+    Object.entries(history.reads ?? {}).map(([g, seq]) => [
+      g.toLowerCase(),
+      seq,
+    ])
+  );
   const touched: GroupRuntime[] = [];
   let conversations = 0;
   let imported = 0;
@@ -129,7 +144,9 @@ export async function importBackupHistory(
     );
     let runtime = ctx.store.groups.get(g);
     if (!runtime) {
-      runtime = newRuntime(restoredGroup(record, maxSeq));
+      // P60 §5: the backed-up read position when there is one; without it
+      // everything restored counts as read, as before.
+      runtime = newRuntime(restoredGroup(record, reads.get(g) ?? maxSeq));
       ctx.store.groups.set(g, runtime);
       conversations += 1;
     }
@@ -151,5 +168,34 @@ export async function importBackupHistory(
   if (touched.length > 0) {
     await checkpoint(ctx, { groups: touched, skipWasm: true });
   }
+  await applyBackedUpReads(ctx, reads);
   return { conversations, messages: imported };
+}
+
+/**
+ * Moves chats this device already has forward to a backed-up read position
+ * (never back), then recounts their unread messages (D175, P60 §5).
+ */
+async function applyBackedUpReads(
+  ctx: EngineContext,
+  reads: ReadonlyMap<string, number>
+): Promise<void> {
+  const moved: GroupRuntime[] = [];
+  for (const [g, seq] of reads) {
+    const runtime = ctx.store.groups.get(g);
+    if (
+      runtime &&
+      runtime.record.metadata.kind !== "self" &&
+      seq > runtime.record.readSeq
+    ) {
+      runtime.record.readSeq = seq;
+      moved.push(runtime);
+    }
+  }
+  if (moved.length === 0) {
+    return;
+  }
+  await checkpoint(ctx, { groups: moved, skipWasm: true });
+  await Promise.all(moved.map((runtime) => recountUnread(ctx, runtime)));
+  await checkpoint(ctx, { groups: moved, skipWasm: true });
 }

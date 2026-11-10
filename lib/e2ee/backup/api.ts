@@ -3,11 +3,7 @@ import {
   commonApiFetch,
   commonApiPost,
 } from "@/services/api/common-api";
-import {
-  assertE2eeAccount,
-  type E2eeApiAccount,
-  toE2eeApiError,
-} from "../api";
+import { assertE2eeAccount, type E2eeApiAccount, toE2eeApiError } from "../api";
 
 /** REST shapes of the backup routes (backend `/e2ee/backup*`). */
 

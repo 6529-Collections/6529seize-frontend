@@ -260,4 +260,70 @@ describe("E2EE encrypted history backup", () => {
       "E2EE_BACKUP_NONE"
     );
   });
+
+  it("backs up read positions with other changes, alone at most every 6 h, and restores them (P60 §5)", async () => {
+    const world = await createWorld();
+    const server = createFakeBackupServer(world.clock.now);
+    const alice = await addUser(world, "alice", { readSync: true });
+    const bob = await addUser(world, "bobreadspeer");
+    const a = alice.primary.engine;
+    const g = await a.createConversation({
+      profileIds: ["bobreadspeer"],
+      kind: "dm",
+    });
+    await settle(world);
+    await bob.primary.engine.send(g, { text: "one" });
+    await bob.primary.engine.send(g, { text: "two" });
+    await settle(world);
+    a.markRead(g);
+    bob.primary.engine.markRead(g);
+    await settle(world);
+    // Only a device with read-state sync on backs up read positions.
+    expect((await a.backupHistory()).reads?.[g]).toBeGreaterThan(0);
+    expect((await bob.primary.engine.backupHistory()).reads).toBeUndefined();
+
+    const backupA = managerFor(world, server, alice.primary);
+    await backupA.start();
+    const prepared = await backupA.prepareBackup();
+    await backupA.confirmBackup(prepared);
+    const chunks = () => server.generations("alice")[0]!.chunk_count;
+    const afterOn = chunks();
+
+    // A new message goes up; a read alone waits.
+    await bob.primary.engine.send(g, { text: "three" });
+    await settle(world);
+    await backupA.backupNow();
+    expect(chunks()).toBe(afterOn + 1);
+    a.markRead(g);
+    await settle(world);
+    expect(a.getConversation(g)?.unread).toBe(0);
+    await backupA.backupNow();
+    expect(chunks()).toBe(afterOn + 1);
+    // Six hours later the read goes up on its own, once.
+    world.clock.advance(6 * 60 * 60_000 + 1_000);
+    await backupA.backupNow();
+    expect(chunks()).toBe(afterOn + 2);
+    await backupA.backupNow();
+    expect(chunks()).toBe(afterOn + 2);
+
+    // One more message, unread, then the device is lost.
+    await bob.primary.engine.send(g, { text: "four" });
+    await settle(world);
+    await backupA.backupNow();
+    stopDevice(world, alice.primary);
+    stopDevice(world, bob.primary);
+
+    const fresh = await startDevice(world, "alice", alice.account, {
+      extra: { readSync: true },
+    });
+    alice.devices.push(fresh);
+    const backupB = managerFor(world, server, fresh);
+    await backupB.start();
+    await backupB.restore(prepared.code);
+    // Read up to "three" before; only "four" is unread after the restore.
+    expect(texts(fresh.engine.getMessages(g))).toEqual(
+      expect.arrayContaining(["one", "two", "three", "four"])
+    );
+    expect(fresh.engine.getConversation(g)?.unread).toBe(1);
+  });
 });

@@ -33,17 +33,27 @@ export interface BackupGroupRecord {
 
 export type BackupMessageRecord = Omit<StoredMessage, "pending">;
 
+/**
+ * A read position (D175, design P60 §5): a chat handle and the highest log
+ * seq read in it, so a restored device starts from what was read.
+ */
+export type BackupReadRecord = [g: string, seq: number];
+
 export interface BackupSegment {
   v: 2;
   at: number;
   groups: BackupGroupRecord[];
   messages: BackupMessageRecord[];
+  /** Added after v2 shipped; older decoders ignore the key. */
+  reads?: BackupReadRecord[];
 }
 
 /** What the engine hands to the backup module (copies, never live state). */
 export interface BackupHistory {
   groups: BackupGroupRecord[];
   messages: BackupMessageRecord[];
+  /** Read positions by chat handle (absent: none known). */
+  reads?: Record<string, number>;
 }
 
 export const messageKey = (g: string, id: string): string => `${g}|${id}`;
@@ -71,6 +81,7 @@ export interface EncodedSegment {
   json: Uint8Array;
   groups: BackupGroupRecord[];
   messages: BackupMessageRecord[];
+  reads: BackupReadRecord[];
 }
 
 /** Greedy packing of records into segments of at most `maxBytes` JSON. */
@@ -82,20 +93,33 @@ export function packSegments(
   const out: EncodedSegment[] = [];
   let groups: BackupGroupRecord[] = [];
   let messages: BackupMessageRecord[] = [];
-  // Fixed overhead of `{"v":2,"at":…,"groups":[],"messages":[]}`.
+  let reads: BackupReadRecord[] = [];
+  // Fixed overhead of `{"v":2,"at":…,"groups":[],"messages":[],"reads":[]}`.
   const base = utf8Encode(
-    JSON.stringify({ v: 2, at, groups: [], messages: [] })
+    JSON.stringify({ v: 2, at, groups: [], messages: [], reads: [] })
   ).length;
   let size = base;
 
   const flush = () => {
-    if (groups.length === 0 && messages.length === 0) {
+    if (groups.length === 0 && messages.length === 0 && reads.length === 0) {
       return;
     }
-    const segment: BackupSegment = { v: 2, at, groups, messages };
-    out.push({ json: utf8Encode(JSON.stringify(segment)), groups, messages });
+    const segment: BackupSegment = {
+      v: 2,
+      at,
+      groups,
+      messages,
+      ...(reads.length > 0 ? { reads } : {}),
+    };
+    out.push({
+      json: utf8Encode(JSON.stringify(segment)),
+      groups,
+      messages,
+      reads,
+    });
     groups = [];
     messages = [];
+    reads = [];
     size = base;
   };
 
@@ -117,6 +141,9 @@ export function packSegments(
     add(utf8Encode(JSON.stringify(message)).length, () =>
       messages.push(message)
     );
+  }
+  for (const read of Object.entries(history.reads ?? {})) {
+    add(utf8Encode(JSON.stringify(read)).length, () => reads.push(read));
   }
   flush();
   return out;
@@ -236,6 +263,19 @@ function isMessageRecord(value: unknown): value is BackupMessageRecord {
   );
 }
 
+const GROUP_HANDLE = /^0x[0-9a-f]{64}$/u;
+
+function isReadRecord(value: unknown): value is BackupReadRecord {
+  return (
+    Array.isArray(value) &&
+    value.length === 2 &&
+    isString(value[0]) &&
+    GROUP_HANDLE.test(value[0].toLowerCase()) &&
+    Number.isSafeInteger(value[1]) &&
+    (value[1] as number) >= 0
+  );
+}
+
 /** Parses one decrypted segment; malformed records are dropped. */
 export function decodeSegment(json: Uint8Array): BackupSegment {
   let parsed: unknown;
@@ -252,24 +292,31 @@ export function decodeSegment(json: Uint8Array): BackupSegment {
   ) {
     throw new BackupError("E2EE_BACKUP_CORRUPT");
   }
+  const reads = Array.isArray(parsed["reads"])
+    ? parsed["reads"].filter(isReadRecord)
+    : [];
   return {
     v: 2,
     at: isNumber(parsed["at"]) ? parsed["at"] : 0,
     groups: parsed["groups"].filter(isGroupRecord),
     messages: parsed["messages"].filter(isMessageRecord),
+    ...(reads.length > 0 ? { reads } : {}),
   };
 }
 
 /**
  * Later segments win: a record seen again is a newer version of it. The
  * order is the verified hash-chain order (chain.ts), so the server cannot
- * reorder, replay or drop segments to bring back an older version.
+ * reorder, replay or drop segments to bring back an older version. Read
+ * positions only move forward, so the highest one per chat wins, whichever
+ * device wrote it (P60 §3).
  */
 export function mergeSegments(
   segments: readonly BackupSegment[]
 ): BackupHistory {
   const groups = new Map<string, BackupGroupRecord>();
   const messages = new Map<string, BackupMessageRecord>();
+  const reads: Record<string, number> = {};
   for (const segment of segments) {
     for (const group of segment.groups) {
       groups.set(group.g.toLowerCase(), group);
@@ -277,6 +324,14 @@ export function mergeSegments(
     for (const message of segment.messages) {
       messages.set(messageKey(message.g.toLowerCase(), message.id), message);
     }
+    for (const [g, seq] of segment.reads ?? []) {
+      const key = g.toLowerCase();
+      reads[key] = Math.max(reads[key] ?? 0, seq);
+    }
   }
-  return { groups: [...groups.values()], messages: [...messages.values()] };
+  return {
+    groups: [...groups.values()],
+    messages: [...messages.values()],
+    ...(Object.keys(reads).length > 0 ? { reads } : {}),
+  };
 }
