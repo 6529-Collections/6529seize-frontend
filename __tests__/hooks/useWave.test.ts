@@ -52,6 +52,51 @@ describe("useWave", () => {
     expect(result.current.isMemesWave).toBe(true);
   });
 
+  it.each([0, 2, 3, 4])(
+    "uses the selected competition count (%s) for submission capacity",
+    (count) => {
+      const wave = {
+        ...baseWave,
+        participation: {
+          ...baseWave.participation,
+          no_of_applications_allowed_per_participant: 3,
+        },
+        metrics: { your_participation_drops_count: 99 },
+        competition: {
+          id: "selected-decision",
+          wave_id: baseWave.id,
+          lifecycle: "PUBLISHED",
+          participation: { ends_at: null },
+          capabilities: ["MAIN_STAGE"],
+          your_active_entries_count: count,
+        },
+      };
+      const { result } = renderHook(() => useWave(wave));
+      expect(result.current.participation.currentSubmissions).toBe(count);
+      expect(result.current.participation.hasReachedLimit).toBe(count >= 3);
+      expect(result.current.participation.remainingSubmissions).toBe(
+        Math.max(0, 3 - count)
+      );
+      expect(result.current.participation.canSubmitNow).toBe(count < 3);
+    }
+  );
+
+  it("does not use wave-wide counts when the competition count is unavailable", () => {
+    const wave = {
+      ...baseWave,
+      metrics: { your_participation_drops_count: 99 },
+      competition: {
+        wave_id: baseWave.id,
+        lifecycle: "PUBLISHED",
+        participation: { ends_at: null },
+        capabilities: [],
+      },
+    };
+    const { result } = renderHook(() => useWave(wave));
+    expect(result.current.participation.currentSubmissions).toBeNull();
+    expect(result.current.participation.hasReachedLimit).toBe(false);
+  });
+
   it("closes manually ended competitions without a scheduled deadline", () => {
     const wave = {
       ...baseWave,
