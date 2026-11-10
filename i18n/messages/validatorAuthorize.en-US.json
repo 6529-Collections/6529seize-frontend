@@ -1,0 +1,15 @@
+{
+  "validator.authorize.network.test": "Test network",
+  "validator.authorize.heading.unmarked.one": "Authorize this key",
+  "validator.authorize.heading.unmarked.other": "Authorize these keys",
+  "validator.authorize.keys.unmarked.one": "One key here isn't marked as this validator's. It holds {percent} of this account's authorization. Sign only if you know it, for example as the key of your other computer.",
+  "validator.authorize.keys.unmarked.other": "{count} keys here aren't marked as this validator's. Together they hold {percent} of this account's authorization. Sign only if you know each of them, for example as the keys of your other computers.",
+  "validator.authorize.version.label": "Authorization",
+  "validator.authorize.version.value": "#{version}",
+  "validator.authorize.version.implausible": "Authorization #{version} is far above the number a validator drafts, which is one above the account's last authorization. A later authorization needs a larger number still. Don't sign unless you expected this number.",
+  "validator.authorize.signed.keys.one": "This signature authorizes the key {codes} for {account}, as authorization #{version}.",
+  "validator.authorize.signed.keys.other": "This signature authorizes the keys {codes} for {account}, as authorization #{version}.",
+  "validator.authorize.signed.stop": "This signature stops every key of {account}, as authorization #{version}.",
+  "validator.authorize.signed.network.test": "It counts only on the test network it was made for.",
+  "validator.authorize.signed.nothingSent": "Nothing was sent anywhere."
+}
