@@ -14,6 +14,7 @@ import {
 import { startMobileLaunchTiming } from "@/utils/monitoring/mobileLaunchTiming";
 import { sanitizeSentryLog } from "@/utils/monitoring/sentryLogSanitizer";
 import { installCyclicJsonTimerDiagnostics } from "@/utils/monitoring/cyclicJsonTimerDiagnostics";
+import { withUiElementPath } from "@/utils/monitoring/sentryUiBreadcrumbs";
 import {
   sanitizeSentryBreadcrumb,
   sanitizeSentrySpan,
@@ -69,8 +70,7 @@ Sentry.init({
     const configuredIntegrations = [
       // The culture context reports the device time zone and locale, which
       // the display time zone setting keeps private. Click and input
-      // breadcrumbs keep the SDK's default tag, id and class path;
-      // sanitizeSentryBreadcrumb removes label text from them.
+      // breadcrumbs are rebuilt from tag, id and classes (beforeBreadcrumb).
       ...integrations.filter(({ name }) => name !== "CultureContext"),
       Sentry.thirdPartyErrorFilterIntegration({
         filterKeys: [SENTRY_APPLICATION_KEY],
@@ -101,8 +101,8 @@ Sentry.init({
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii
   sendDefaultPii: false,
 
-  beforeBreadcrumb(breadcrumb) {
-    return sanitizeSentryBreadcrumb(breadcrumb);
+  beforeBreadcrumb(breadcrumb, hint) {
+    return sanitizeSentryBreadcrumb(withUiElementPath(breadcrumb, hint));
   },
 
   // Structured logs skip beforeSend, so they are sanitized here as well.

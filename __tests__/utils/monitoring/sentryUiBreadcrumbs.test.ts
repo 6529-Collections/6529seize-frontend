@@ -2,7 +2,11 @@ import {
   sanitizeSentryBreadcrumb,
   sanitizeSentryEvent,
 } from "@/utils/sentry-sanitizer";
-import { stripUiBreadcrumbLabels } from "@/utils/monitoring/sentryUiBreadcrumbs";
+import type { Breadcrumb } from "@sentry/nextjs";
+import {
+  stripUiBreadcrumbLabels,
+  withUiElementPath,
+} from "@/utils/monitoring/sentryUiBreadcrumbs";
 
 describe("UI breadcrumb labels", () => {
   it("keeps the selector structure and drops label values", () => {
@@ -83,19 +87,90 @@ describe("UI breadcrumbs from the installed SDK", () => {
     })
   );
 
-  it("keeps tag and classes of a labelled element with a role, without its label", () => {
-    document.body.innerHTML = `<div class="tw-flex row"><span id="send" role="button" class="tw-btn primary" aria-label="Reply to Ann in Night Owls" title="Ann">Ann</span></div>`;
-    const element = document.getElementById("send")!;
-
-    const message = sanitizeSentryBreadcrumb(
-      { category: "ui.click", message: htmlTreeAsString(element) },
+  /** What beforeBreadcrumb receives for a click: the SDK's path and event. */
+  function clickBreadcrumb(element: Element): Breadcrumb | null {
+    let event: Event | undefined;
+    document.addEventListener("click", (e) => (event = e), { once: true });
+    element.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    return sanitizeSentryBreadcrumb(
+      withUiElementPath(
+        { category: "ui.click", message: htmlTreeAsString(element) },
+        { event, name: "click", global: true }
+      ),
       "/messages"
+    );
+  }
+
+  it.each([
+    "Reply to Ann in Night Owls",
+    'a"][b',
+    'x"] > y',
+    'ends with"]',
+    "two\nlines",
+  ])("keeps tag, id and classes of a labelled element: %j", (label) => {
+    document.body.innerHTML = `<div class="tw-flex row"><span id="send" role="button" class="tw-btn primary" title="Ann">Ann</span></div>`;
+    const element = document.getElementById("send")!;
+    element.setAttribute("aria-label", label);
+
+    const message = clickBreadcrumb(element)?.message;
+
+    expect(message).toBe("body > div.tw-flex.row > span#send.tw-btn.primary");
+  });
+
+  it("uses the element itself when the hint carries it instead of an event", () => {
+    document.body.innerHTML = `<input class="search" aria-label="Find Ann">`;
+    const input = document.querySelector("input")!;
+    expect(
+      withUiElementPath(
+        { category: "ui.input", message: 'input[aria-label="Find Ann"]' },
+        { event: input, name: "input" }
+      ).message
+    ).toBe("body > input.search");
+  });
+});
+
+describe("UI breadcrumbs without an element", () => {
+  const sanitize = (message: string, hint?: Record<string, unknown>) =>
+    sanitizeSentryBreadcrumb(
+      withUiElementPath({ category: "ui.click", message }, hint),
+      "/waves"
     )?.message;
 
-    // The SDK stops at 80 characters of path before label text is removed,
-    // so this long label leaves no room for the parent.
-    expect(message).toBe("span#send.tw-btn.primary[aria-label][title]");
-    expect(message).not.toMatch(/Ann|Night Owls/);
+  it.each([
+    ['button[aria-label="a"][b"][type="button"]'],
+    ['li > button[aria-label="x"] > y"]'],
+    ['button[title="two\nlines"] > [alt=x'],
+    ['button[type="button"]'],
+  ])("replaces a path that may still hold label text: %j", (message) => {
+    expect(sanitize(message)).toBe("ui.click");
+  });
+
+  it("keeps a path whose labels were fully removed", () => {
+    expect(sanitize('div.row > button.tw-btn[aria-label="Ann"]')).toBe(
+      "div.row > button.tw-btn[aria-label]"
+    );
+    // A label ending in `"]` at the end of the path is removed whole.
+    expect(sanitize('button[aria-label="ends with"]"]')).toBe(
+      "button[aria-label]"
+    );
+  });
+
+  it("falls back when the hint target is not an element", () => {
+    const event = new Event("keypress");
+    Object.defineProperty(event, "target", { value: document });
+    expect(sanitize('input[aria-label="Ann"]', { event })).toBe(
+      "input[aria-label]"
+    );
+    expect(sanitize('input[aria-label="Ann"]', { event: { target: 1 } })).toBe(
+      "input[aria-label]"
+    );
+  });
+
+  it("leaves other breadcrumbs to the sanitizer", () => {
+    const breadcrumb = { category: "console", message: 'x [title="y"]' };
+    expect(withUiElementPath(breadcrumb, { event: document.body })).toBe(
+      breadcrumb
+    );
   });
 });
 
