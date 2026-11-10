@@ -27,7 +27,11 @@ import {
   startChat,
 } from "../support/e2ee/e2eeUi";
 import { DEVICES_SECURITY_MESSAGES } from "../../i18n/messages/devices-security";
-import { e2eeMessage, NEW_DEVICE_NOTICE } from "../support/e2ee/e2eeCopy";
+import {
+  e2eeMessage,
+  e2eeMessagePattern,
+  NEW_DEVICE_NOTICE,
+} from "../support/e2ee/e2eeCopy";
 import { isMobileWebProject } from "../support/surfaceSimulation";
 
 /** The describe title of the phone-layout tests (mobile project only). */
@@ -260,6 +264,43 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     expect(alice.signatureCount()).toBe(1);
   });
 
+  test("a declined wallet signature during setup is a choice that can be tried again", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    sessions = [alice];
+    await gotoPath(alice.page, "/preferences?tab=security");
+    await expect(
+      alice.page
+        .getByRole("main")
+        .getByRole("region", { name: /^Encrypted backup/u })
+    ).toContainText(DEVICES_SECURITY_MESSAGES["devicesSecurity.backup.needsDms"], {
+      timeout: FIRST_LOAD_TIMEOUT_MS,
+    });
+    await turnOnHere(alice.page).click();
+
+    // The wallet's "Reject": said calmly, nothing signed, the button stays.
+    alice.rejectNextSignature();
+    await enrollButton(alice.page).click();
+    await expect(
+      alice.page.getByText(e2eeMessage("e2ee.enroll.rejected"), { exact: true })
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await expect(alice.page.getByRole("dialog").getByRole("alert")).toHaveCount(0);
+    expect(alice.signatureCount()).toBe(0);
+
+    // Trying again turns both permissions on with one signature.
+    await enrollButton(alice.page).click();
+    await expect(
+      confirmDialog(alice.page, e2eeMessage("e2ee.setupDone.titleBoth")).getByRole(
+        "heading",
+        { name: e2eeMessage("e2ee.setupDone.titleBoth") }
+      )
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    expect(alice.signatureCount()).toBe(1);
+  });
+
   test("cleared browser storage re-enrolls once and starts without the old history", async ({
     baseURL,
     browser,
@@ -413,7 +454,8 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
         .click();
 
       // The card (now on) and the device list at phone width.
-      await expect(backup).toContainText(e2eeMessage("e2ee.backup.status.on"), {
+      // On: the pill says so and the details say when.
+      await expect(backup).toContainText(e2eeMessagePattern("e2ee.backup.status.lastBackup"), {
         timeout: E2EE_UI_TIMEOUT_MS,
       });
       await expect(thisDeviceCard(page)).toHaveCount(1);

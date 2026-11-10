@@ -230,7 +230,20 @@ export interface E2eeUserSession {
    * (personal_sign) or a separate encryption grant (typed data).
    */
   signatureCount(): number;
+  /**
+   * Test-only: the next wallet signature prompt in this browser is declined,
+   * as a wallet's "Reject" would (EIP-1193 code 4001). Off by default; one
+   * prompt only.
+   */
+  rejectNextSignature(): void;
   close(): Promise<void>;
+}
+
+/** What a wallet's "Reject" throws (viem's UserRejectedRequestError shape). */
+function walletRejection(): Error {
+  const error = new Error("User rejected the request.");
+  error.name = "UserRejectedRequestError";
+  return Object.assign(error, { code: 4001 });
 }
 
 /**
@@ -250,6 +263,15 @@ export async function openE2eeUser(
     ...(baseURL === undefined ? {} : { baseURL }),
   });
   let signatures = 0;
+  let rejectNext = false;
+  const answer = <T>(sign: () => Promise<T>): Promise<T> => {
+    if (rejectNext) {
+      rejectNext = false;
+      return Promise.reject(walletRejection());
+    }
+    signatures += 1;
+    return sign();
+  };
   await context.addInitScript(
     ({ walletKey, jwtKey, wallet, jwt }) => {
       globalThis.localStorage.setItem(walletKey, wallet);
@@ -264,17 +286,13 @@ export async function openE2eeUser(
   );
   await context.exposeFunction(
     TEST_SIGNER_GLOBAL,
-    async (typedData: Parameters<PrivateKeyAccount["signTypedData"]>[0]) => {
-      signatures += 1;
-      return user.account.signTypedData(typedData);
-    }
+    async (typedData: Parameters<PrivateKeyAccount["signTypedData"]>[0]) =>
+      answer(() => user.account.signTypedData(typedData))
   );
   await context.exposeFunction(
     SIGNED_MESSAGES_TEST_SIGNER_GLOBAL,
-    async (message: string) => {
-      signatures += 1;
-      return user.account.signMessage({ message });
-    }
+    async (message: string) =>
+      answer(() => user.account.signMessage({ message }))
   );
   await hideNextDevOverlay(context);
   const guard: LocalSandboxBrowserMutationGuard =
@@ -287,6 +305,9 @@ export async function openE2eeUser(
     context,
     page,
     signatureCount: () => signatures,
+    rejectNextSignature: () => {
+      rejectNext = true;
+    },
     async close() {
       guard.assertNoBlockedMutations();
       assertNoPageErrors(diagnostics);
