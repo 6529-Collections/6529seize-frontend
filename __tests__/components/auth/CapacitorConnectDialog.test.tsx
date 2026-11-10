@@ -122,6 +122,21 @@ describe("CapacitorConnectDialog", () => {
     expect(defaultProps.onBack).toHaveBeenCalledTimes(1);
   });
 
+  it("renders app-wallet avatars locally as decorative images", () => {
+    const { container } = render(
+      <CapacitorConnectDialog
+        {...defaultProps}
+        view="app-wallets"
+        appWallets={[appWallet]}
+      />
+    );
+
+    const avatar = container.querySelector("img");
+    expect(avatar).toHaveAttribute("alt", "");
+    expect(avatar?.getAttribute("src")).toMatch(/^data:image\/svg\+xml/);
+    expect(container.innerHTML).not.toContain("robohash");
+  });
+
   it("announces the empty app-wallet state with semantic output", () => {
     render(<CapacitorConnectDialog {...defaultProps} view="app-wallets" />);
 

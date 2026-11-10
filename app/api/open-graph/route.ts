@@ -43,6 +43,17 @@ import { HTML_FETCH_HEADERS, createFetchConfig } from "./fetchConfig";
 import { fetchTokenUriJson } from "./tokenUriMetadata";
 import { copyPreviewCacheEntry } from "./previewCacheBudget";
 import { PUBLIC_URL_OPTIONS } from "./publicUrlOptions";
+import {
+  PREVIEW_BUSY_HEADERS,
+  PREVIEW_BUSY_MESSAGE,
+  PREVIEW_CLIENT_LIMIT_MESSAGE,
+  PREVIEW_HTML_MAX_BYTES,
+  chargePreviewUrls,
+  enforcePreviewClientLimit,
+  isPreviewBusyError,
+  previewBusyResponse,
+  withPreviewFetchSlot,
+} from "./previewAdmission";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const CACHE_MAX_ITEMS = 500;
@@ -50,11 +61,15 @@ const FETCH_TIMEOUT_MS = 8000;
 const MAX_REDIRECTS = 5;
 const BATCH_CONCURRENCY = 5;
 const MAX_BATCH_URLS = BATCH_CONCURRENCY;
-const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
 const BATCH_REQUEST_MAX_BYTES = 64 * 1024;
 
 type PreviewContext = {
   readonly apiAuth?: string | null | undefined;
+  /**
+   * Stops a caller's wait for a fetch slot when it disconnects. Admitted work
+   * ignores it, so it completes and is cached for the next viewer.
+   */
+  readonly signal?: AbortSignal | undefined;
 };
 
 const cache = new LruTtlCache<string, LinkPreviewResponse>({
@@ -148,6 +163,8 @@ function ensureSuccessfulResponse(response: Response): void {
 
 /**
  * Validates and reads an HTML response using the shared byte-limited reader.
+ * Metadata lives in the head, so a long page is read only up to the cap and
+ * parsed from what was read.
  */
 async function extractHtmlResponse(
   response: Response,
@@ -160,7 +177,9 @@ async function extractHtmlResponse(
       "HTML",
       { allowMissing: true }
     );
-    const html = await readLimitedText(response, HTML_RESPONSE_MAX_BYTES);
+    const html = await readLimitedText(response, PREVIEW_HTML_MAX_BYTES, {
+      truncate: true,
+    });
     if (contentType === null && !looksLikeHtmlDocument(html)) {
       throw new UnsupportedContentTypeError(null, "HTML");
     }
@@ -389,6 +408,10 @@ function getErrorMessage(
 }
 
 function handlePreviewError(error: unknown) {
+  if (isPreviewBusyError(error)) {
+    return previewBusyResponse();
+  }
+
   if (isEnsPreviewError(error)) {
     return NextResponse.json(
       { error: error.message },
@@ -473,11 +496,12 @@ async function resolveLinkPreview(
   rawUrl: string | null,
   context?: PreviewContext
 ): Promise<LinkPreviewResponse> {
+  const signal = context?.signal;
   if (rawUrl) {
     try {
       const etherscanPlan = createEtherscanPlan(new URL(rawUrl));
       if (etherscanPlan) {
-        return executePlan(etherscanPlan);
+        return executePlan(etherscanPlan, signal);
       }
     } catch {
       // Bare ENS names and other non-URL inputs continue through existing
@@ -487,7 +511,10 @@ async function resolveLinkPreview(
 
   const ensTarget = detectEnsTarget(rawUrl);
   if (ensTarget) {
-    return fetchEnsPreview(ensTarget) as Promise<LinkPreviewResponse>;
+    return withPreviewFetchSlot(
+      signal,
+      () => fetchEnsPreview(ensTarget) as Promise<LinkPreviewResponse>
+    );
   }
 
   const targetUrl = parsePublicUrl(rawUrl);
@@ -497,43 +524,53 @@ async function resolveLinkPreview(
     await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
   }
 
+  const assertPreviewUrl = (url: URL) =>
+    assertPublicUrl(url, PUBLIC_URL_OPTIONS);
+  const fetchTokenMetadata = (url: URL) =>
+    fetchTokenUriJson(url, PUBLIC_URL_OPTIONS);
   const plan =
     firstParty6529Plan ??
     createYoutubePlan(targetUrl) ??
     createManifoldPlan(targetUrl, {
       fetchHtml,
-      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+      assertPublicUrl: assertPreviewUrl,
     }) ??
     createFoundationPlan(targetUrl, {
       fetchHtml,
-      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
+      assertPublicUrl: assertPreviewUrl,
     }) ??
     createOpenSeaPlan(targetUrl, {
       fetchHtml,
-      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-      fetchTokenMetadata: (url) => fetchTokenUriJson(url, PUBLIC_URL_OPTIONS),
+      assertPublicUrl: assertPreviewUrl,
+      fetchTokenMetadata,
     }) ??
     createTransientPlan(targetUrl, {
       fetchHtml,
-      assertPublicUrl: (url) => assertPublicUrl(url, PUBLIC_URL_OPTIONS),
-      fetchTokenMetadata: (url) => fetchTokenUriJson(url, PUBLIC_URL_OPTIONS),
+      assertPublicUrl: assertPreviewUrl,
+      fetchTokenMetadata,
     }) ??
     createCompoundPlan(targetUrl) ??
     createGenericPlan(targetUrl);
 
   if (firstParty6529Plan) {
-    return executeFirstParty6529Plan(firstParty6529Plan, targetUrl);
+    return executeFirstParty6529Plan(firstParty6529Plan, targetUrl, signal);
   }
 
-  return executePlan(plan);
+  return executePlan(plan, signal);
 }
 
 export async function GET(request: NextRequest) {
+  const rateLimited = enforcePreviewClientLimit(request);
+  if (rateLimited) {
+    return rateLimited;
+  }
+
   const rawUrl = request.nextUrl.searchParams.get("url");
 
   try {
     const preview = await resolveLinkPreview(rawUrl, {
       apiAuth: getRequestApiAuth(request),
+      signal: request.signal,
     });
     return NextResponse.json(preview);
   } catch (error) {
@@ -545,6 +582,8 @@ type BatchResult = {
   readonly url: string;
   readonly data?: LinkPreviewResponse | undefined;
   readonly error?: string | undefined;
+  /** No fetch slot was free; the caller may retry this URL shortly. */
+  readonly busy?: boolean | undefined;
 };
 
 function isOpenGraphBatchBody(value: unknown): value is {
@@ -596,18 +635,26 @@ async function resolveBatchUrl(
     const data = await resolveLinkPreview(url, context);
     return { url, data };
   } catch (error) {
+    if (isPreviewBusyError(error)) {
+      return { url, error: PREVIEW_BUSY_MESSAGE, busy: true };
+    }
     return { url, error: getErrorMessage(error) };
   }
 }
 
-async function executePlan(plan: PreviewPlan): Promise<LinkPreviewResponse> {
+async function executePlan(
+  plan: PreviewPlan,
+  signal?: AbortSignal
+): Promise<LinkPreviewResponse> {
   const cached = cache.get(plan.cacheKey);
 
   if (cached) {
     return cached;
   }
 
-  const { data, ttl } = await plan.execute();
+  const { data, ttl } = await withPreviewFetchSlot(signal, () =>
+    plan.execute()
+  );
   const cacheEntry = copyPreviewCacheEntry(plan.cacheKey, data);
   if (cacheEntry) {
     cache.set(cacheEntry.key, cacheEntry.data, ttl);
@@ -618,14 +665,18 @@ async function executePlan(plan: PreviewPlan): Promise<LinkPreviewResponse> {
 
 async function executeFirstParty6529Plan(
   plan: PreviewPlan,
-  targetUrl: URL
+  targetUrl: URL,
+  signal?: AbortSignal
 ): Promise<LinkPreviewResponse> {
   try {
-    return await executePlan(plan);
-  } catch {
+    return await executePlan(plan, signal);
+  } catch (error) {
+    if (isPreviewBusyError(error)) {
+      throw error;
+    }
     await assertPublicUrl(targetUrl, PUBLIC_URL_OPTIONS);
     const fallbackPlan = createGenericPlan(targetUrl);
-    return executePlan(fallbackPlan);
+    return executePlan(fallbackPlan, signal);
   }
 }
 
@@ -663,26 +714,54 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Each URL is charged, so batching does not stretch the budget. A batch
+  // larger than the remaining budget is served up to that budget.
+  const { allowed, limited } = chargePreviewUrls(
+    request,
+    Math.max(1, urls.length)
+  );
+  if (limited) {
+    return limited;
+  }
+  const admittedUrls = urls.slice(0, allowed);
+
   const context: PreviewContext = {
     apiAuth: getRequestApiAuth(request),
+    signal: request.signal,
   };
   const batchResults = await mapWithConcurrency(
-    urls,
+    admittedUrls,
     BATCH_CONCURRENCY,
     (url) => resolveBatchUrl(url, context)
   );
   const results: Record<string, LinkPreviewResponse> = {};
   const errors: Record<string, string> = {};
+  let busy = false;
+  for (const url of urls.slice(allowed)) {
+    errors[url] = PREVIEW_CLIENT_LIMIT_MESSAGE;
+  }
 
   for (const result of batchResults) {
     if (result.data) {
       results[result.url] = result.data;
     } else {
       errors[result.url] = result.error ?? "Invalid or forbidden URL";
+      busy ||= result.busy === true;
     }
   }
 
-  return NextResponse.json({ results, errors });
+  if (!busy) {
+    return NextResponse.json({ results, errors });
+  }
+
+  // Previews that resolved are still returned and the busy ones can be
+  // retried after Retry-After. With nothing resolved, the whole batch is
+  // answered as busy.
+  const resolvedAny = Object.keys(results).length > 0;
+  return NextResponse.json(
+    { results, errors },
+    { status: resolvedAny ? 200 : 503, headers: PREVIEW_BUSY_HEADERS }
+  );
 }
 
 export const dynamic = "force-dynamic";
