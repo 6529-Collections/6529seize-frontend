@@ -4,6 +4,9 @@
  * codes only; every user-visible string lives here.
  */
 export const E2EE_MESSAGES = {
+  "e2ee.message.imageLink": "Image link",
+  "e2ee.message.imageLinkFrom": "Image from {host}",
+  "e2ee.message.markdownTable": "Message table",
   "e2ee.dm.history.label": "Chat history",
   "e2ee.dm.history.hint":
     "Previous chats with this person stay here. Unread counts include all active histories. Messages and search belong to the selected history.",
@@ -430,6 +433,14 @@ export const E2EE_MESSAGES = {
   "e2ee.composer.placeholder": "Write an encrypted message",
   "e2ee.composer.send": "Send",
   "e2ee.composer.attach": "Attach files",
+  "e2ee.composer.gifPrivacy":
+    "GIF searches and previews connect to GIPHY and are not end-to-end encrypted. The GIF you send is encrypted as an attachment.",
+  "e2ee.composer.gifDownloading": "Downloading GIF…",
+  "e2ee.composer.cancelGif": "Cancel GIF download",
+  "e2ee.composer.gifFailed":
+    "Couldn’t download the GIF. Try again or attach a GIF file.",
+  "e2ee.composer.gifTooLarge":
+    "This GIF is larger than 25 MB. Choose a smaller GIF.",
   "e2ee.composer.dropArea": "Encrypted chat file upload area",
   "e2ee.composer.removeAttachment": "Remove {name}",
   "e2ee.composer.attachments": "Attachments",

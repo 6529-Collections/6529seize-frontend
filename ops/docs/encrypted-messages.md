@@ -65,7 +65,26 @@ continue to appear as Unknown member.
 Encrypted and ordinary messages use the same rich-text editor. Custom emoji
 shortcodes render as inline images while composing and editing; encrypted drafts
 keep their shortcode representation for encryption and sending. Encrypted chat
-does not offer GIF, Poll or Storm actions.
+does not offer Poll or Storm actions. GIFs can be sent as encrypted attachments;
+their search and previews connect publicly to GIPHY.
+
+Messages support the same Markdown formatting as ordinary chats: headings,
+**bold** and italic text, strikethrough, lists and task lists, quotes,
+inline and fenced code, tables, separators and links. Encrypted messages also
+support footnotes. Code blocks use
+syntax highlighting, and member mentions and custom emoji stay literal inside
+code. Extra blank lines keep their spacing when you send or edit a message.
+
+Encrypted notification previews use the same local Markdown renderer in the
+notification overview and on the notifications page. Previews stay compact;
+message links and images appear as labels, and selecting the notification opens
+the encrypted chat.
+
+Links open only when you select them. Encrypted messages do not automatically
+load link previews, embeds or images from Markdown URLs. A Markdown image is
+shown as a link using its alternative text (or a label identifying the image host); select the link to
+open it. To show an image privately inside the chat, attach or paste the image
+so it is encrypted on your device.
 
 Custom emojis also render inline in the encrypted chat list and sidebar message
 previews, at a compact size that keeps each preview on one line.
@@ -336,6 +355,12 @@ appear.
   same limits as the attach control. Text copied together with an image is
   pasted into the message as well. Pasting attaches images only while the
   attach control is enabled, so not while you edit a message.
+- Select **Add GIF** to search GIPHY. Searches and previews connect directly
+  to GIPHY and are not end-to-end encrypted. Choosing a GIF downloads it into
+  your attachments; select **Send** to send it with your message. The GIF is
+  encrypted on your device, and recipients view the decrypted attachment
+  without connecting to GIPHY. You can cancel a download or remove the GIF
+  before sending. The same file size and attachment limits apply.
 - Open a message's menu to react, reply, or edit or delete your own messages.
   On someone else's message the menu also offers **Mute on this device** (the
   same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted
