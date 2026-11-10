@@ -27,11 +27,13 @@ jest.mock("next/image", () => ({
   },
 }));
 
-jest.mock("@/helpers/Helpers", () => ({
-  removeBaseEndpoint: jest.fn((url: string) =>
-    url.replace("https://example.com", "")
-  ),
-}));
+jest.mock("@/config/env", () => {
+  const actual = jest.requireActual("@/config/env");
+  return {
+    ...actual,
+    publicEnv: { ...actual.publicEnv, BASE_ENDPOINT: "https://example.com" },
+  };
+});
 
 jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
   __esModule: true,
@@ -42,7 +44,11 @@ jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
   },
 }));
 
-const { removeBaseEndpoint } = require("@/helpers/Helpers");
+const proxied = (url: string, kind: "image" | "icon" = "image") =>
+  `/api/og-metadata/image?${new URLSearchParams({
+    url,
+    w: kind === "image" ? "640" : "64",
+  }).toString()}`;
 
 describe("OpenGraphPreview", () => {
   beforeEach(() => {
@@ -50,22 +56,15 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders loading skeleton when preview is undefined", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
-
     render(<OpenGraphPreview href="https://example.com/article" />);
 
     const skeleton = screen.getByTestId("og-preview-skeleton");
     expect(skeleton).toBeInTheDocument();
     expect(skeleton.parentElement).toHaveClass("tw-h-full");
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("/article");
-    expect(removeBaseEndpoint).toHaveBeenCalledWith(
-      "https://example.com/article"
-    );
   });
 
   it("hides action buttons when hideActions is true", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
-
     render(
       <OpenGraphPreview
         href="https://example.com/article"
@@ -79,8 +78,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders fallback when preview is unavailable", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
-
     render(
       <OpenGraphPreview href="https://example.com/article" preview={null} />
     );
@@ -95,8 +92,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders preview details when data is provided", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
-
     render(
       <OpenGraphPreview
         href="https://example.com/article"
@@ -124,7 +119,10 @@ describe("OpenGraphPreview", () => {
     expect(card).toHaveAttribute("href", "/article");
     expect(card).not.toHaveAttribute("target");
     const image = screen.getByAltText("Example article hero");
-    expect(image).toHaveAttribute("src", "https://cdn.example.com/preview.png");
+    expect(image).toHaveAttribute(
+      "src",
+      proxied("https://cdn.example.com/preview.png")
+    );
     expect(image).toHaveAttribute(
       "sizes",
       "(max-width: 640px) 6rem, (max-width: 768px) 8rem, 10.5rem"
@@ -138,10 +136,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders external file previews without scanned safety claims", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue(
-      "https://files.example/Safety%20Plan.pdf"
-    );
-
     render(
       <OpenGraphPreview
         href="https://files.example/Safety%20Plan.pdf"
@@ -180,10 +174,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders YouTube video previews with click-to-play iframe", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue(
-      "https://youtu.be/abc123XYZ_0?t=42"
-    );
-
     render(
       <OpenGraphPreview
         href="https://youtu.be/abc123XYZ_0?t=42"
@@ -240,10 +230,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("does not render an iframe control for untrusted YouTube embed URLs", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue(
-      "https://youtu.be/abc123XYZ_0"
-    );
-
     render(
       <OpenGraphPreview
         href="https://youtu.be/abc123XYZ_0"
@@ -267,10 +253,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("uses localized YouTube fallbacks for sparse server data", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue(
-      "https://youtu.be/abc123XYZ_0"
-    );
-
     render(
       <OpenGraphPreview
         href="https://youtu.be/abc123XYZ_0"
@@ -305,10 +287,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders Farcaster Mini App previews with launch metadata", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue(
-      "https://mini.example/app"
-    );
-
     render(
       <OpenGraphPreview
         href="https://mini.example/app"
@@ -348,18 +326,14 @@ describe("OpenGraphPreview", () => {
       screen.getByRole("img", {
         name: "Farcaster embed preview for Example Mini",
       })
-    ).toHaveAttribute("src", "https://mini.example/preview.png");
+    ).toHaveAttribute("src", proxied("https://mini.example/preview.png"));
     expect(screen.getByAltText("")).toHaveAttribute(
       "src",
-      "https://mini.example/splash.png"
+      proxied("https://mini.example/splash.png", "icon")
     );
   });
 
   it("renders legacy Farcaster frame titles before the site label", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue(
-      "https://legacy.example/frame"
-    );
-
     render(
       <OpenGraphPreview
         href="https://legacy.example/frame"
@@ -388,10 +362,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("falls Farcaster action links back to the pasted URL for http targets", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue(
-      "https://mini.example/app"
-    );
-
     render(
       <OpenGraphPreview
         href="https://mini.example/app"
@@ -415,11 +385,9 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders sparse article metadata with a source label and no empty fields", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/research/notes");
-
     render(
       <OpenGraphPreview
-        href="https://journal.example/research/notes"
+        href="https://example.com/research/notes"
         preview={{
           type: "article",
           title: "Research Notes",
@@ -444,10 +412,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("prefers canonical URL domains over source fallbacks", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue(
-      "https://canonical.example/article"
-    );
-
     render(
       <OpenGraphPreview
         href="https://request.example/redirect"
@@ -464,11 +428,9 @@ describe("OpenGraphPreview", () => {
   });
 
   it("formats supported calendar dates in UTC", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/research/notes");
-
     render(
       <OpenGraphPreview
-        href="https://journal.example/research/notes"
+        href="https://example.com/research/notes"
         preview={{
           title: "Late Dispatch",
           source: "Example Journal",
@@ -482,8 +444,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders timezone-ambiguous timestamps without datetime attributes", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/dispatch");
-
     render(
       <OpenGraphPreview
         href="https://journal.example/dispatch"
@@ -501,8 +461,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders free-text published dates without invalid datetime attributes", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/dispatch");
-
     render(
       <OpenGraphPreview
         href="https://journal.example/dispatch"
@@ -520,8 +478,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders partially parseable published dates without invalid datetime attributes", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/dispatch");
-
     render(
       <OpenGraphPreview
         href="https://journal.example/dispatch"
@@ -539,8 +495,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("does not render generic badges for dotted provider-style types", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/provider");
-
     render(
       <OpenGraphPreview
         href="https://journal.example/provider"
@@ -557,8 +511,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("preserves generated 6529 profile cards instead of cropping them", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/punk6529bot");
-
     render(
       <OpenGraphPreview
         href="https://6529.io/punk6529bot"
@@ -600,10 +552,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("handles external links and image arrays", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue(
-      "https://othersite.com/post"
-    );
-
     render(
       <OpenGraphPreview
         href="https://othersite.com/post"
@@ -626,14 +574,12 @@ describe("OpenGraphPreview", () => {
 
     expect(screen.getByAltText("othersite.com")).toHaveAttribute(
       "src",
-      "https://cdn.othersite.com/img.jpg"
+      proxied("https://cdn.othersite.com/img.jpg")
     );
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("undefined");
   });
 
   it("uses secureUrl fields when provided", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
-
     render(
       <OpenGraphPreview
         href="https://example.com/article"
@@ -646,13 +592,11 @@ describe("OpenGraphPreview", () => {
 
     expect(screen.getByAltText("Secure Image")).toHaveAttribute(
       "src",
-      "https://cdn.example.com/secure.png"
+      proxied("https://cdn.example.com/secure.png")
     );
   });
 
   it("wraps long unbroken segments to keep layout consistent", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
-
     const longUrl = `https://example.com/${"a".repeat(48)}`;
 
     render(
@@ -670,8 +614,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders borderless image-only card when imageOnly is enabled", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/article");
-
     render(
       <OpenGraphPreview
         href="https://example.com/article"
@@ -694,13 +636,11 @@ describe("OpenGraphPreview", () => {
     expect(screen.queryByTestId("href-buttons")).toBeNull();
     expect(screen.getByAltText("Example Title")).toHaveAttribute(
       "src",
-      "https://cdn.example.com/preview.png"
+      proxied("https://cdn.example.com/preview.png")
     );
   });
 
   it("renders first-party The Memes collection cards without duplicate mint counts", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue("/the-memes/509");
-
     render(
       <OpenGraphPreview
         href="https://6529.io/the-memes/509"
@@ -767,10 +707,6 @@ describe("OpenGraphPreview", () => {
   });
 
   it("renders first-party NextGen cards with capped rare trait chips", () => {
-    (removeBaseEndpoint as jest.Mock).mockReturnValue(
-      "/nextgen/token/10000000514"
-    );
-
     render(
       <OpenGraphPreview
         href="https://6529.io/nextgen/token/10000000514"
@@ -824,5 +760,236 @@ describe("OpenGraphPreview", () => {
     expect(
       screen.getByRole("link", { name: "perilousvault.eth" })
     ).toHaveAttribute("href", "/perilousvault");
+  });
+
+  describe("preview links", () => {
+    it.each([
+      "https://example.com//other.example/path",
+      "https://example.com/\\other.example/path",
+      "https://example.com.other.example/path",
+    ])("opens %s in a new tab", (href) => {
+      render(
+        <OpenGraphPreview href={href} preview={{ title: "Look-alike link" }} />
+      );
+
+      const card = screen.getByTestId("og-preview-card");
+      expect(card).toHaveAttribute("href", href);
+      expect(card).toHaveAttribute("target", "_blank");
+      expect(card).toHaveAttribute("rel", "noopener noreferrer");
+      expect(screen.getByTestId("href-buttons")).toHaveTextContent("undefined");
+    });
+
+    it("keeps the query and fragment of an on-site link", () => {
+      render(
+        <OpenGraphPreview
+          href="https://example.com/waves/1?drop=2#part"
+          preview={{ title: "On-site link" }}
+        />
+      );
+
+      const card = screen.getByTestId("og-preview-card");
+      expect(card).toHaveAttribute("href", "/waves/1?drop=2#part");
+      expect(card).not.toHaveAttribute("target");
+    });
+  });
+
+  describe("preview media", () => {
+    it("loads favicons through the image proxy", () => {
+      const { container } = render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{
+            title: "Research Notes",
+            favicon: "https://journal.example/favicon.png",
+          }}
+        />
+      );
+
+      const favicon = container.querySelector('img[alt=""]');
+      expect(favicon).toHaveAttribute(
+        "src",
+        proxied("https://journal.example/favicon.png", "icon")
+      );
+    });
+
+    it("uses the first raster favicon and skips .ico and SVG icons", () => {
+      const { container } = render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{
+            title: "Research Notes",
+            favicon: "https://journal.example/favicon.ico",
+            favicons: [
+              "https://journal.example/favicon.ico",
+              "https://journal.example/icon.svg",
+              "https://journal.example/apple-touch-icon.png",
+              "https://journal.example/icon-32.webp",
+            ],
+          }}
+        />
+      );
+
+      const favicons = container.querySelectorAll('img[alt=""]');
+      expect(favicons).toHaveLength(1);
+      expect(favicons[0]).toHaveAttribute(
+        "src",
+        proxied("https://journal.example/apple-touch-icon.png", "icon")
+      );
+    });
+
+    it("requests no favicon when only .ico or SVG icons are listed", () => {
+      const { container } = render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{
+            title: "Research Notes",
+            favicon: "https://journal.example/favicon.ico",
+            favicons: [
+              "https://journal.example/favicon.ico",
+              "https://journal.example/icon.svg",
+              "https://journal.example/icon?size=32",
+            ],
+          }}
+        />
+      );
+
+      expect(container.querySelector('img[alt=""]')).toBeNull();
+      expect(screen.getByText("Research Notes")).toBeInTheDocument();
+    });
+
+    it("omits a favicon that fails to load without retrying", () => {
+      const { container } = render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{
+            title: "Research Notes",
+            favicon: "https://journal.example/favicon.png",
+          }}
+        />
+      );
+
+      const favicon = container.querySelector('img[alt=""]');
+      expect(favicon).not.toBeNull();
+      // A proxy refusal (for example 429 or 503) reaches the image as an error.
+      fireEvent.error(favicon!);
+
+      expect(container.querySelector('img[alt=""]')).toBeNull();
+      expect(screen.getByText("Research Notes")).toBeInTheDocument();
+    });
+
+    it.each([
+      "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x450/0x33/1.png",
+      "https://i.seadn.io/gcs/files/preview.png",
+      "https://media.6529.io/ipfs/bafy/preview.png",
+    ])("loads the first-party or allowed image host %s directly", (image) => {
+      render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{ title: "Research Notes", image }}
+        />
+      );
+
+      expect(screen.getByAltText("Research Notes")).toHaveAttribute(
+        "src",
+        image
+      );
+    });
+
+    it("requests other hosts from the proxy as a still", () => {
+      render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{
+            title: "Research Notes",
+            image: "https://cdn.example.com/animated.gif",
+          }}
+        />
+      );
+
+      const src = screen.getByAltText("Research Notes").getAttribute("src")!;
+      const query = new URL(src, "https://example.com").searchParams;
+      expect(src.startsWith("/api/og-metadata/image?")).toBe(true);
+      expect(query.get("url")).toBe("https://cdn.example.com/animated.gif");
+      expect(query.get("w")).toBe("640");
+      expect(query.has("animated")).toBe(false);
+    });
+
+    it("lays the card out without an image that fails to load", () => {
+      render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{
+            title: "Research Notes",
+            image: "https://cdn.example.com/broken.png",
+          }}
+        />
+      );
+
+      const card = screen.getByTestId("og-preview-card");
+      fireEvent.error(screen.getByAltText("Research Notes"));
+
+      expect(screen.queryByAltText("Research Notes")).toBeNull();
+      expect(card).toHaveClass("tw-grid-cols-1");
+      expect(card).not.toHaveClass("tw-grid-cols-[6rem,minmax(0,1fr)]");
+    });
+
+    it.each([
+      "http://cdn.example.com/plain.png",
+      "https://localhost/private.png",
+      "ipfs://bafy/preview.png",
+    ])("does not request the image source %s", (image) => {
+      render(
+        <OpenGraphPreview
+          href="https://journal.example/notes"
+          preview={{ title: "Research Notes", image }}
+        />
+      );
+
+      expect(screen.queryByAltText("Research Notes")).toBeNull();
+      expect(screen.getByTestId("og-preview-card")).toHaveClass(
+        "tw-grid-cols-1"
+      );
+    });
+
+    it("loads images on this site directly", () => {
+      render(
+        <OpenGraphPreview
+          href="https://example.com/punk6529bot"
+          preview={{
+            title: "punk6529bot",
+            image: "https://example.com/api/og-metadata/profiles/punk6529bot",
+          }}
+        />
+      );
+
+      expect(screen.getByAltText("punk6529bot")).toHaveAttribute(
+        "src",
+        "/api/og-metadata/profiles/punk6529bot"
+      );
+    });
+
+    it("shows the YouTube placeholder when the thumbnail fails", () => {
+      render(
+        <OpenGraphPreview
+          href="https://youtu.be/abc123XYZ_0"
+          preview={{
+            type: "youtube.video",
+            title: "A Good Video",
+            videoId: "abc123XYZ_0",
+            watchUrl: "https://www.youtube.com/watch?v=abc123XYZ_0",
+            embedUrl: "https://www.youtube-nocookie.com/embed/abc123XYZ_0",
+            thumbnailUrl: "https://i.ytimg.com/vi/abc123XYZ_0/hqdefault.jpg",
+          }}
+        />
+      );
+
+      const play = screen.getByTestId("youtube-video-play");
+      fireEvent.error(
+        screen.getByRole("img", { name: "YouTube thumbnail for A Good Video" })
+      );
+
+      expect(play.querySelector("img")).toBeNull();
+      expect(play.querySelector(".tw-bg-gradient-to-br")).not.toBeNull();
+    });
   });
 });

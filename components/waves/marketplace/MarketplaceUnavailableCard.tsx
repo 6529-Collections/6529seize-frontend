@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 
-import { removeBaseEndpoint } from "@/helpers/Helpers";
 import { useLinkPreviewVariant } from "../LinkPreviewContext";
 import { LinkPreviewCardLayout } from "../OpenGraphPreview";
 import type { MarketplaceTypePreviewProps } from "./common";
+import { resolvePreviewHref } from "./MarketplaceItemPreviewCard.utils";
 import {
   getMarketplaceContainerClass,
   MARKETPLACE_MEDIA_FRAME_CLASS,
@@ -16,12 +16,7 @@ export default function MarketplaceUnavailableCard({
   compact = false,
 }: MarketplaceTypePreviewProps) {
   const variant = useLinkPreviewVariant();
-  const relative = removeBaseEndpoint(href);
-  const isRelativeHref =
-    typeof relative === "string" && relative.startsWith("/");
-  const resolvedHref = isRelativeHref ? relative : href;
-  const target = isRelativeHref ? undefined : "_blank";
-  const rel = isRelativeHref ? undefined : "noopener noreferrer";
+  const { href: resolvedHref, target, rel } = resolvePreviewHref(href);
 
   return (
     <LinkPreviewCardLayout href={href} variant={variant} hideActions>

@@ -67,6 +67,20 @@ loading.
   and fall back to regular clickable links.
 - Some URLs route to dedicated handlers first; this page only covers the generic
   external-card path.
+- Preview images, favicons, and video thumbnails on third-party hosts load
+  through the 6529 image proxy (`/api/og-metadata/image`) as still images, not
+  from the linked site. Images on 6529.io, the 6529 CDN and media hosts, and
+  the other image hosts the app already loads directly (for example YouTube
+  thumbnails) load directly.
+- The card uses the first favicon with a `.png`, `.jpg`, `.jpeg`, `.webp`, or
+  `.gif` file name (often the `apple-touch-icon`). Sites that list only `.ico`
+  or SVG icons show no favicon.
+- A card whose image is not HTTPS, or fails to load (including when the proxy
+  is busy), is shown without the image or with its usual placeholder; it does
+  not retry or show a broken image.
+- A card opens in the current tab only when its link is on the site's exact
+  origin and its path cannot be read as another host. Any other link, including
+  `https://6529.io//…`, opens in a new tab.
 - Generic external file cards never inline-render, iframe, download, scan, or
   proxy the file body.
 - External file links must not show `Scanned and validated`; that claim belongs
