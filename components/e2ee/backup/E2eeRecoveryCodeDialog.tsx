@@ -6,6 +6,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeBackupManager, PreparedBackup } from "@/lib/e2ee/backup";
 import { E2eeDialog } from "../ui/E2eeDialog";
+import { clearClipboardLater } from "./clearClipboardLater";
 import { getBackupErrorKey } from "./e2eeBackupErrors";
 
 interface E2eeRecoveryCodeDialogProps {
@@ -70,6 +71,7 @@ export function E2eeRecoveryCodeDialog({
     setCopyKey(null);
     try {
       await navigator.clipboard.writeText(prepared.code);
+      clearClipboardLater(prepared.code);
       setCopyKey("e2ee.backup.code.copied");
     } catch {
       setCopyKey("e2ee.backup.code.copyFailed");

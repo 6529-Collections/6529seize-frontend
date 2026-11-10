@@ -1,5 +1,9 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import {
+  E2eeContext,
+  type E2eeContextValue,
+} from "@/components/e2ee/E2eeContext";
 import { setE2eeEnrollmentMarker } from "@/components/e2ee/e2eeLocalState";
 import { E2eeSignOutPromptHost } from "@/components/e2ee/signout/E2eeSignOutPromptHost";
 import { signOutWithE2eeChoice } from "@/components/e2ee/signout/e2eeSignOut";
@@ -7,6 +11,8 @@ import {
   removeAllE2eeLocalData,
   removeE2eeProfileLocalData,
 } from "@/lib/e2ee/local-data";
+import type { E2eeBackupManager, E2eeBackupSnapshot } from "@/lib/e2ee/backup";
+import type { E2eeEngine } from "@/lib/e2ee/types";
 import { SELF_ID } from "./fakeE2eeEngine";
 
 jest.mock("@/lib/e2ee/local-data", () => ({
@@ -155,5 +161,173 @@ describe("E2eeSignOutPromptHost", () => {
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
+  });
+});
+
+describe("E2eeSignOutPromptHost with a loaded engine", () => {
+  const OWN_KEY = `0x${"ab".repeat(32)}`;
+  const snapshot = (
+    overrides: Partial<E2eeBackupSnapshot> = {}
+  ): E2eeBackupSnapshot => ({
+    phase: "on",
+    backupCreatedAt: 1,
+    backupUpdatedAt: 2,
+    usedBytes: 10,
+    quotaBytes: 100,
+    lastBackupAt: 3,
+    busy: false,
+    uploading: false,
+    lastError: null,
+    ...overrides,
+  });
+
+  function renderWithEngine(
+    options: {
+      snapshot?: E2eeBackupSnapshot;
+      backupNow?: jest.Mock;
+      revokeDevice?: jest.Mock;
+    } = {}
+  ) {
+    const order: string[] = [];
+    const backupNow =
+      options.backupNow ??
+      jest.fn(async () => {
+        order.push("backup");
+      });
+    const revokeDevice =
+      options.revokeDevice ??
+      jest.fn(async () => {
+        order.push("revoke");
+      });
+    const engine = {
+      getStatus: () => "ready",
+      getThisDevice: () => ({ deviceKey: OWN_KEY }),
+      revokeDevice,
+    } as unknown as E2eeEngine;
+    const backup = {
+      getSnapshot: () => options.snapshot ?? snapshot(),
+      backupNow,
+    } as unknown as E2eeBackupManager;
+    const value: E2eeContextValue = {
+      availability: "loaded",
+      profileId: SELF_ID,
+      engine,
+      store: null,
+      backup,
+      loadError: null,
+      restart: () => undefined,
+      takeOverHere: () => undefined,
+    };
+    const releaseEngines = jest.fn(async () => {
+      order.push("release");
+    });
+    removeProfile.mockImplementation(async () => {
+      order.push("remove");
+    });
+    render(
+      <E2eeContext.Provider value={value}>
+        <E2eeSignOutPromptHost
+          profileId={SELF_ID}
+          releaseEngines={releaseEngines}
+        />
+      </E2eeContext.Provider>
+    );
+    const signOut = jest.fn(async () => {
+      order.push("signOut");
+    });
+    let done: Promise<void> = Promise.resolve();
+    act(() => {
+      done = signOutWithE2eeChoice("profile", signOut);
+    });
+    return { order, backupNow, revokeDevice, signOut, done: () => done };
+  }
+
+  const removeBox = () =>
+    screen.findByRole("checkbox", {
+      name: "Remove encrypted messages from this browser",
+    });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    globalThis.localStorage.clear();
+    setE2eeEnrollmentMarker(SELF_ID, true);
+  });
+
+  it("removal is on by default when the backup is current, and backs up and removes the device first", async () => {
+    const run = renderWithEngine();
+    expect(await removeBox()).toBeChecked();
+    expect(screen.getByText(/backup is up to date/)).toBeVisible();
+    await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await act(run.done);
+    expect(run.revokeDevice).toHaveBeenCalledWith(OWN_KEY);
+    expect(run.order).toEqual([
+      "backup",
+      "revoke",
+      "release",
+      "remove",
+      "signOut",
+    ]);
+  });
+
+  it.each([
+    ["the backup is off", snapshot({ phase: "off" })],
+    ["the first upload is still running", snapshot({ uploading: true })],
+    ["the last run failed", snapshot({ lastError: "E2EE_BACKUP_FAILED" })],
+  ])("removal stays off by default when %s", async (_, current) => {
+    renderWithEngine({ snapshot: current });
+    expect(await removeBox()).not.toBeChecked();
+    expect(
+      screen.getByText(/history is lost unless backup is on/)
+    ).toBeVisible();
+  });
+
+  it("keeps the messages when the backup update fails, and removes them when asked again", async () => {
+    const backupNow = jest.fn(async () => {
+      throw new Error("offline");
+    });
+    const run = renderWithEngine({ backupNow });
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Sign out" })
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Couldn’t update your encrypted backup"
+    );
+    expect(await removeBox()).not.toBeChecked();
+    expect(removeProfile).not.toHaveBeenCalled();
+    expect(run.signOut).not.toHaveBeenCalled();
+
+    await userEvent.click(await removeBox());
+    await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await act(run.done);
+    expect(backupNow).toHaveBeenCalledTimes(1);
+    expect(removeProfile).toHaveBeenCalledWith(SELF_ID);
+    expect(run.signOut).toHaveBeenCalledTimes(1);
+  });
+
+  it("signs out and removes the data even when the device cannot be removed", async () => {
+    jest.spyOn(console, "warn").mockImplementation(() => {});
+    const revokeDevice = jest.fn(async () => {
+      throw new Error("offline");
+    });
+    const run = renderWithEngine({ revokeDevice });
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Sign out" })
+    );
+    await act(run.done);
+    expect(revokeDevice).toHaveBeenCalled();
+    expect(removeProfile).toHaveBeenCalledWith(SELF_ID);
+    expect(run.signOut).toHaveBeenCalledTimes(1);
+  });
+
+  it("does nothing to the device or backup when removal is not chosen", async () => {
+    const run = renderWithEngine({ snapshot: snapshot({ phase: "off" }) });
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Sign out" })
+    );
+    await act(run.done);
+    expect(run.backupNow).not.toHaveBeenCalled();
+    expect(run.revokeDevice).not.toHaveBeenCalled();
+    expect(removeProfile).not.toHaveBeenCalled();
+    expect(run.signOut).toHaveBeenCalledTimes(1);
   });
 });
