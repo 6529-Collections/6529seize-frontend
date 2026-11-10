@@ -44,7 +44,7 @@ import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscription
 import { formatAddress } from "@/helpers/Helpers";
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatInteger } from "@/i18n/format";
+import { formatDecimalString, formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { formatSubscriptionEth } from "./coverage/subscriptionCoverage.helpers";
 
@@ -397,8 +397,11 @@ function SubscriptionTopUpForm({
     ) {
       setError(
         t(locale, "subscriptions.topUp.validation.priceMismatch", {
-          serverPrice: serverPriceEth,
-          localPrice: formatEther(MEMES_MINT_PRICE_WEI),
+          serverPrice: formatDecimalString(locale, serverPriceEth),
+          localPrice: formatDecimalString(
+            locale,
+            formatEther(MEMES_MINT_PRICE_WEI)
+          ),
         })
       );
       return;
