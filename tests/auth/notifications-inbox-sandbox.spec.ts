@@ -81,6 +81,19 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       data.notifications = data.notifications.map((notification) => ({
         ...notification,
         related_wave: wave,
+        additional_context: {
+          ...notification.additional_context,
+          ...(notification.cause === ApiNotificationCause.DropReacted && {
+            reactors: [
+              { handle: "sandbox-bob", pfp: "/favicon.png", subscribed: false },
+              {
+                handle: "sandbox-carol",
+                pfp: "/favicon.png",
+                subscribed: false,
+              },
+            ],
+          }),
+        },
       }));
       const customReaction = data.notifications.find(
         (notification) =>
@@ -147,6 +160,11 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     const reactionRow = inbox.getByRole("link").filter({
       hasText: "New reactions to your drop",
     });
+    for (const handle of ["sandbox-bob", "sandbox-carol"]) {
+      await expect(
+        reactionRow.getByRole("img", { name: handle, exact: true })
+      ).toHaveCount(1);
+    }
     await expect(
       reactionRow.getByRole("img", { name: "Thumbs Up", exact: true })
     ).toHaveCount(1);
@@ -231,6 +249,8 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     expect(box!.y).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
     await captureSafeScreenshot(page, testInfo, "desktop-notifications-inbox");
+    await reactionRow.scrollIntoViewIfNeeded();
+    await captureSafeScreenshot(page, testInfo, "distinct-notification-reactors");
     await inbox
       .getByRole("heading", { name: "Notifications", exact: true })
       .hover();
