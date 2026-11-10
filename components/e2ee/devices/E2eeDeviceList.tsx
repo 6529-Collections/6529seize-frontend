@@ -22,6 +22,7 @@ import {
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
 import { useE2eeNow } from "../useE2eeNow";
 import { RevokeThisBrowserDetails } from "./RevokeThisBrowserDetails";
+import { E2eeDeviceApproval } from "./E2eeDeviceApproval";
 
 const PLATFORM_KEYS: Record<E2eeDeviceInfo["platform"], MessageKey> = {
   web: "e2ee.devices.platform.web",
@@ -110,10 +111,11 @@ function VerifiedIndicator({ verified }: { readonly verified: boolean }) {
 
 interface E2eeDeviceRowProps {
   readonly device: E2eeDeviceInfo;
+  readonly engine?: E2eeEngine | null | undefined;
   readonly onRevoke?: ((device: E2eeDeviceInfo) => void) | undefined;
 }
 
-function E2eeDeviceRow({ device, onRevoke }: E2eeDeviceRowProps) {
+function E2eeDeviceRow({ device, engine, onRevoke }: E2eeDeviceRowProps) {
   const locale = useBrowserLocale();
   const Icon = PLATFORM_ICONS[device.platform];
   const isActive = device.revokedAt === null;
@@ -147,6 +149,7 @@ function E2eeDeviceRow({ device, onRevoke }: E2eeDeviceRowProps) {
           )}
         </p>
         <DeviceDates device={device} />
+        <E2eeDeviceApproval device={device} engine={engine ?? null} />
       </div>
       {isActive && onRevoke ? (
         <Button
@@ -238,6 +241,7 @@ export function E2eeDeviceList({
           <E2eeDeviceRow
             key={device.deviceKey}
             device={device}
+            engine={engine}
             onRevoke={engine ? setTarget : undefined}
           />
         ))}

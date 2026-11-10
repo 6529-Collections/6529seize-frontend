@@ -16,6 +16,7 @@ import type { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import {
   fetchWavesV2Page,
   fetchJoinedWavesPage,
+  fetchAllWavesPage,
   getWavesV2OverviewQueryKeyParams,
 } from "@/services/api/waves-v2-api";
 
@@ -27,6 +28,7 @@ const isFiniteInterval = (interval: number | false): interval is number =>
   typeof interval === "number" && Number.isFinite(interval) && interval > 0;
 
 interface UseWavesV2Props {
+  readonly allSnapshot?: boolean | undefined;
   readonly joinedSnapshot?: boolean | undefined;
   readonly overviewType: ApiWavesOverviewType;
   readonly pageSize?: number | undefined;
@@ -48,6 +50,7 @@ interface UseWavesV2Props {
 
 export const useWavesV2 = ({
   joinedSnapshot = false,
+  allSnapshot = false,
   overviewType,
   pageSize = 20,
   following = false,
@@ -65,6 +68,8 @@ export const useWavesV2 = ({
   refetchIntervalInBackground = false,
   enabled = true,
 }: UseWavesV2Props) => {
+  const usesSnapshot = joinedSnapshot || allSnapshot;
+  const snapshotPagination = allSnapshot ? "all-snapshot" : "snapshot";
   const queryKeyParams = useMemo(
     () =>
       getWavesV2OverviewQueryKeyParams({
@@ -106,10 +111,10 @@ export const useWavesV2 = ({
         QueryKey.WAVES_V2,
         {
           ...queryKeyParams,
-          ...(joinedSnapshot ? { pagination: "snapshot" } : {}),
+          ...(usesSnapshot ? { pagination: snapshotPagination } : {}),
         },
       ] as const,
-    [queryKeyParams, joinedSnapshot]
+    [queryKeyParams, usesSnapshot, snapshotPagination]
   );
   const [lastErrorTimestamp, setLastErrorTimestamp] = useState<number | null>(
     null
@@ -121,8 +126,11 @@ export const useWavesV2 = ({
   const query = useInfiniteQuery({
     queryKey,
     queryFn: async ({ pageParam, signal }) => {
-      if (joinedSnapshot) {
-        return await fetchJoinedWavesPage({
+      if (usesSnapshot) {
+        const fetchSnapshot = allSnapshot
+          ? fetchAllWavesPage
+          : fetchJoinedWavesPage;
+        return await fetchSnapshot({
           cursor: typeof pageParam === "string" ? pageParam : undefined,
           pageSize,
           signal,
@@ -146,7 +154,7 @@ export const useWavesV2 = ({
     },
     initialPageParam: 1 as number | string,
     getNextPageParam: (lastPage) => {
-      if (joinedSnapshot) return lastPage.nextCursor ?? null;
+      if (usesSnapshot) return lastPage.nextCursor ?? null;
       return lastPage.next ? lastPage.page + 1 : null;
     },
     placeholderData: (previousData, previousQuery) => {
@@ -162,7 +170,7 @@ export const useWavesV2 = ({
           : null;
       const currentViewerIdentity = queryKeyParams.viewer_identity ?? null;
 
-      if (!joinedSnapshot && previousViewerIdentity === currentViewerIdentity) {
+      if (!usesSnapshot && previousViewerIdentity === currentViewerIdentity) {
         return previousData;
       }
 
@@ -200,7 +208,7 @@ export const useWavesV2 = ({
   );
 
   const fetchNextPage = useCallback(() => {
-    if (joinedSnapshot) {
+    if (usesSnapshot) {
       if (query.isFetching) return;
       void query
         .fetchNextPage({ cancelRefetch: false })
@@ -224,7 +232,7 @@ export const useWavesV2 = ({
     runAfterRetryFailureCooldown(() => {
       query.fetchNextPage().catch(() => undefined);
     });
-  }, [runAfterRetryFailureCooldown, query, joinedSnapshot]);
+  }, [runAfterRetryFailureCooldown, query, usesSnapshot]);
 
   const retryLoading = useCallback(() => {
     if (query.isFetching) return;

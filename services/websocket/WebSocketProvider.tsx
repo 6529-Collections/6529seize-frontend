@@ -20,7 +20,7 @@ import {
   WEBSOCKET_RECOVERY_CAPABILITY,
   type WebSocketConnectionInfo,
 } from "./WebSocketTypes";
-import { getSocketIdentityKey } from "./socketIdentity";
+import { createCredentialMarker, getSocketIdentityKey } from "./socketIdentity";
 import { isPongFrame, isWsPingEnabled, SocketPinger } from "./socketPing";
 import { publicEnv } from "@/config/env";
 import { applyDelayJitter } from "@/helpers/jitter.helpers";
@@ -141,19 +141,6 @@ const getBatchedMessages = (data: unknown): NormalizedIncomingMessage[] => {
       ? [message]
       : [];
   });
-};
-
-const createCredentialMarker = (credential: string): string => {
-  let primary = 0;
-  let secondary = 5381;
-
-  for (let index = 0; index < credential.length; index += 1) {
-    const code = credential.codePointAt(index) ?? 0;
-    primary = (primary * 31 + code) % 2_147_483_647;
-    secondary = (secondary * 33 + code) % 2_147_483_647;
-  }
-
-  return `${credential.length}:${primary}:${secondary}`;
 };
 
 type AnySubscriber = MessageCallback | FrameMetadataCallback;
@@ -357,6 +344,19 @@ export function WebSocketProvider({
   }, []);
 
   /**
+   * The token a replacement socket uses: always the current one. When the
+   * current socket was authenticated and no token remains (signed out), the
+   * result is null and no replacement is made.
+   */
+  const getReplacementToken = useCallback((): string | undefined | null => {
+    const current = getAuthJwt();
+    if (current) {
+      return current;
+    }
+    return reconnectTokenRef.current === undefined ? undefined : null;
+  }, []);
+
+  /**
    * Attempt reconnection with exponential backoff
    */
   const attemptReconnect = useCallback(
@@ -380,12 +380,24 @@ export function WebSocketProvider({
       );
       // Schedule reconnection
       reconnectTimerRef.current = setTimeout(() => {
+        reconnectTimerRef.current = null;
+        // Reconnect with the token current when the timer fires, never with
+        // one remembered from a session that has since signed out.
+        const nextToken = getReplacementToken();
+        if (nextToken === null) {
+          reconnectAttemptsRef.current = 0;
+          return;
+        }
         reconnectAttemptsRef.current += 1;
-        // Attempt reconnection with the stored token
-        connectSocket(reconnectTokenRef.current);
+        connectSocket(nextToken);
       }, delay);
     },
-    [clearReconnectTimer, config.maxReconnectAttempts, config.reconnectDelay]
+    [
+      clearReconnectTimer,
+      config.maxReconnectAttempts,
+      config.reconnectDelay,
+      getReplacementToken,
+    ]
   );
 
   /**
@@ -479,9 +491,16 @@ export function WebSocketProvider({
             // A socket that stops answering PINGs is replaced: a new
             // session, with the reconnect resync that follows one.
             pingerRef.current = new SocketPinger(ws, () => {
-              if (wsRef.current === ws) {
-                connectSocket(getAuthJwt() ?? reconnectTokenRef.current);
+              if (wsRef.current !== ws) {
+                return;
               }
+              const replacementToken = getReplacementToken();
+              if (replacementToken === null) {
+                isManualDisconnectRef.current = true;
+                ws.close(1000, "Signed out");
+                return;
+              }
+              connectSocket(replacementToken);
             });
           }
 
@@ -532,9 +551,9 @@ export function WebSocketProvider({
           // API Gateway may close a slow listener with code 1000. Only a local
           // intentional disconnect should suppress normal authenticated recovery.
           const shouldReconnect = !isManualDisconnectRef.current;
-          const freshToken = shouldReconnect
-            ? (getAuthJwt() ?? reconnectTokenRef.current)
-            : undefined;
+          // Only the current token reconnects; without one there is no
+          // authenticated reconnect.
+          const freshToken = shouldReconnect ? getAuthJwt() : null;
 
           // Reconnect server-initiated closures, including normal transport closes.
           if (shouldReconnect) {
@@ -566,6 +585,7 @@ export function WebSocketProvider({
       clearAuthenticationTimer,
       stopPinger,
       attemptReconnect,
+      getReplacementToken,
       markAuthenticated,
       updateStatus,
     ]
@@ -598,11 +618,17 @@ export function WebSocketProvider({
   /** Replaces a socket that stopped answering, unless it was replaced already. */
   const replaceUnresponsiveSocket = useCallback(
     (ws: WebSocket) => {
-      if (wsRef.current === ws) {
-        connect(getAuthJwt() ?? reconnectTokenRef.current);
+      if (wsRef.current !== ws) {
+        return;
       }
+      const nextToken = getReplacementToken();
+      if (nextToken === null) {
+        disconnect();
+        return;
+      }
+      connect(nextToken);
     },
-    [connect]
+    [connect, disconnect, getReplacementToken]
   );
 
   const reauthenticate = useCallback(

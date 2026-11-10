@@ -171,7 +171,7 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
       )
     );
     await expect(dialog).toContainText(
-      DEVICES_SECURITY_MESSAGES["devicesSecurity.revoke.both"]
+      DEVICES_SECURITY_MESSAGES["devicesSecurity.revoke.bothSigned"]
     );
     await dialog
       .getByRole("button", { name: e2eeMessage("e2ee.devices.revokeConfirm") })

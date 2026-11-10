@@ -7172,175 +7172,207 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(sandbox.requests).toHaveLength(0);
   });
 
-  test("keeps joined waves complete across pagination failure, refresh, and the DMs round trip", async ({
-    page,
-  }, testInfo) => {
-    // This scenario exercises four independent page initializations on both
-    // desktop and the simulated native shell.
-    test.setTimeout(120000);
-    const app = testInfo.project.name === "web-mobile-chromium";
-    await installCompetitionApi(page);
-    if (app)
-      await installSurfaceSimulation(
-        page.context(),
-        "capacitor-ios-sim",
-        testInfo.project.use.baseURL
+  for (const collection of ["Joined", "All"] as const) {
+    test(`keeps ${collection.toLowerCase()} waves complete across pagination failure, refresh, and the DMs round trip`, async ({
+      page,
+    }, testInfo) => {
+      // This scenario exercises four independent page initializations on both
+      // desktop and the simulated native shell.
+      test.setTimeout(120000);
+      const loadMoreLabel =
+        collection === "Joined" ? "Load more joined waves" : "Load more waves";
+      const retryLabel =
+        collection === "Joined"
+          ? "Retry loading joined waves"
+          : "Retry loading all waves";
+      const regionLabel =
+        collection === "Joined"
+          ? "Following waves list"
+          : "All recent waves list";
+      const app = testInfo.project.name === "web-mobile-chromium";
+      await installCompetitionApi(page);
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const fixture = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
       );
-    const fixture = await page.request.get(
-      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
-    );
-    const { wave: overview } = await fixture.json();
-    const joined = Array.from({ length: 45 }, (_, index) => ({
-      ...overview,
-      id: `00000000-0000-4000-8000-${String(index + 700).padStart(12, "0")}`,
-      name: `Joined wave ${String(index + 1).padStart(2, "0")}`,
-      parent_wave: null,
-      has_subwaves: false,
-      last_drop_time: Date.now() - index * 1000,
-      context_profile_context: {
-        ...overview.context_profile_context,
-        subscribed: true,
-        pinned: index === 44,
-        followed_subwaves_count: 0,
-      },
-    }));
-    await page.route("**/api/v2/waves?**", async (route) => {
-      const params = new URL(route.request().url()).searchParams;
-      if (params.get("pinned") !== "PINNED") {
-        await route.fallback();
-        return;
-      }
-      await route.fulfill({
-        json: { data: [joined[44]], page: 1, next: false },
-      });
-    });
-    let failContinuation = true;
-    const requested: string[] = [];
-    const offsets = new Map([
-      ["joined-continuation-alpha", 20],
-      ["joined-continuation-beta", 40],
-    ]);
-    await page.route("**/api/v2/waves/joined?**", async (route) => {
-      const cursor = new URL(route.request().url()).searchParams.get("cursor");
-      requested.push(cursor ?? "first");
-      if (cursor && failContinuation) {
-        await route.fulfill({
-          status: 503,
-          json: { error: "Joined waves temporarily unavailable" },
-        });
-        return;
-      }
-      const offset = cursor ? offsets.get(cursor) : 0;
-      if (offset === undefined) {
-        await route.fulfill({ status: 400, json: { error: "Unknown cursor" } });
-        return;
-      }
-      await route.fulfill({
-        json: {
-          data: joined.slice(offset, offset + 20),
-          next_cursor:
-            offset === 0
-              ? "joined-continuation-alpha"
-              : offset === 20
-                ? "joined-continuation-beta"
-                : null,
-          snapshot_expires_at: Date.now() + 900000,
+      const { wave: overview } = await fixture.json();
+      const joined = Array.from({ length: 45 }, (_, index) => ({
+        ...overview,
+        id: `00000000-0000-4000-8000-${String(index + 700).padStart(12, "0")}`,
+        name: `Joined wave ${String(index + 1).padStart(2, "0")}`,
+        parent_wave: null,
+        has_subwaves: false,
+        last_drop_time: Date.now() - index * 1000,
+        context_profile_context: {
+          ...overview.context_profile_context,
+          subscribed: true,
+          pinned: index === 44,
+          followed_subwaves_count: 0,
         },
-      });
-    });
-    const selectJoined = async () => {
-      await page
-        .getByRole("button", { name: "Joined", exact: true })
-        .filter({ visible: true })
-        .click();
-    };
-    const finishPagination = async () => {
-      const lastWave = page
-        .getByRole("link", { name: "Joined wave 45", exact: true })
-        .filter({ visible: true });
-      for (let attempt = 0; attempt < 4; attempt += 1) {
-        await page
-          .getByRole("region", { name: "Following waves list", exact: true })
-          .evaluate((list) => {
-            let container = list.parentElement;
-            while (
-              container &&
-              !["auto", "scroll"].includes(
-                getComputedStyle(container).overflowY
-              )
-            )
-              container = container.parentElement;
-            if (container) container.scrollTop = container.scrollHeight;
-          });
-        const more = page.getByRole("button", {
-          name: "Load more joined waves",
-          exact: true,
+      }));
+      await page.route("**/api/v2/waves?**", async (route) => {
+        const params = new URL(route.request().url()).searchParams;
+        if (params.get("pinned") !== "PINNED") {
+          await route.fallback();
+          return;
+        }
+        await route.fulfill({
+          json: { data: [joined[44]], page: 1, next: false },
         });
-        if (await more.count()) {
-          // Reaching the button can itself start automatic pagination. The final
-          // response may remove it before Playwright finishes the click.
-          await more.click({ timeout: 1500 }).catch(async (error: unknown) => {
-            if (await more.count()) throw error;
+      });
+      let failContinuation = true;
+      const requested: string[] = [];
+      const offsets = new Map([
+        ["joined-continuation-alpha", 20],
+        ["joined-continuation-beta", 40],
+      ]);
+      await page.route(
+        `**/api/v2/waves/${collection.toLowerCase()}?**`,
+        async (route) => {
+          const cursor = new URL(route.request().url()).searchParams.get(
+            "cursor"
+          );
+          requested.push(cursor ?? "first");
+          if (cursor && failContinuation) {
+            await route.fulfill({
+              status: 503,
+              json: { error: "Joined waves temporarily unavailable" },
+            });
+            return;
+          }
+          const offset = cursor ? offsets.get(cursor) : 0;
+          if (offset === undefined) {
+            await route.fulfill({
+              status: 400,
+              json: { error: "Unknown cursor" },
+            });
+            return;
+          }
+          await route.fulfill({
+            json: {
+              data: joined.slice(offset, offset + 20),
+              next_cursor:
+                offset === 0
+                  ? "joined-continuation-alpha"
+                  : offset === 20
+                    ? "joined-continuation-beta"
+                    : null,
+              snapshot_expires_at: Date.now() + 900000,
+            },
           });
         }
-        if (await lastWave.count()) break;
-      }
-      await expect(lastWave).toBeVisible();
+      );
+      const selectCollection = async () => {
+        await page
+          .getByRole("button", { name: collection, exact: true })
+          .filter({ visible: true })
+          .click();
+      };
+      const finishPagination = async () => {
+        const lastWave = page
+          .getByRole("link", {
+            name: collection === "Joined" ? "Joined wave 45" : "Joined wave 44",
+            exact: true,
+          })
+          .filter({ visible: true });
+        for (let attempt = 0; attempt < 4; attempt += 1) {
+          await page
+            .getByRole("region", { name: regionLabel, exact: true })
+            .evaluate((list) => {
+              let container = list.parentElement;
+              while (
+                container &&
+                !["auto", "scroll"].includes(
+                  getComputedStyle(container).overflowY
+                )
+              )
+                container = container.parentElement;
+              if (container) container.scrollTop = container.scrollHeight;
+            });
+          const more = page.getByRole("button", {
+            name: loadMoreLabel,
+            exact: true,
+          });
+          if (await more.count()) {
+            // Reaching the button can itself start automatic pagination. The final
+            // response may remove it before Playwright finishes the click.
+            await more
+              .click({ timeout: 1500 })
+              .catch(async (error: unknown) => {
+                if (await more.count()) throw error;
+              });
+          }
+          if (await lastWave.count()) break;
+        }
+        await expect(lastWave).toBeVisible();
+        await expect(
+          page.getByRole("button", {
+            name: loadMoreLabel,
+            exact: true,
+          })
+        ).toHaveCount(0);
+      };
+      await page.goto("/waves", { waitUntil: "domcontentloaded" });
+      await page
+        .getByRole("button", { name: "Pinned", exact: true })
+        .filter({ visible: true })
+        .click();
       await expect(
-        page.getByRole("button", {
-          name: "Load more joined waves",
-          exact: true,
+        page.getByRole("link", { name: "Joined wave 45", exact: true })
+      ).toBeVisible();
+      await selectCollection();
+      const more = page.getByRole("button", {
+        name: loadMoreLabel,
+        exact: true,
+      });
+      await more.click();
+      const retry = page.getByRole("button", {
+        name: retryLabel,
+        exact: true,
+      });
+      await expect(retry).toBeVisible({ timeout: 30000 });
+      // All keeps pins reachable during a failure; Joined follows its loaded batches.
+      const pinnedWave = page.getByRole("link", {
+        name: "Joined wave 45",
+        exact: true,
+      });
+      if (collection === "Joined") await expect(pinnedWave).toHaveCount(0);
+      else await expect(pinnedWave).toBeVisible();
+      await expect(
+        page.getByRole("status").filter({
+          hasText:
+            collection === "Joined"
+              ? "Some joined waves could not be loaded."
+              : "Some waves could not be loaded.",
         })
-      ).toHaveCount(0);
-    };
-    await page.goto("/waves", { waitUntil: "domcontentloaded" });
-    await page
-      .getByRole("button", { name: "Pinned", exact: true })
-      .filter({ visible: true })
-      .click();
-    await expect(
-      page.getByRole("link", { name: "Joined wave 45", exact: true })
-    ).toBeVisible();
-    await selectJoined();
-    const more = page.getByRole("button", {
-      name: "Load more joined waves",
-      exact: true,
+      ).toBeVisible();
+      failContinuation = false;
+      await retry.click();
+      await finishPagination();
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await finishPagination();
+      // Both destinations rebuild the real sidebar and retain the saved collection.
+      await page.goto("/messages", { waitUntil: "domcontentloaded" });
+      await expect(page).toHaveURL(/\/messages$/);
+      await page.goto("/waves", { waitUntil: "domcontentloaded" });
+      await finishPagination();
+      expect(requested).toContain("joined-continuation-alpha");
+      expect(requested).toContain("joined-continuation-beta");
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `${collection.toLowerCase()}-waves-pagination.png`
+        ),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
     });
-    await more.click();
-    const retry = page.getByRole("button", {
-      name: "Retry loading joined waves",
-      exact: true,
-    });
-    await expect(retry).toBeVisible({ timeout: 30000 });
-    // The pin belongs to the final joined batch. It must not extend the first
-    // batch or make the list look complete while the continuation has failed.
-    await expect(
-      page.getByRole("link", { name: "Joined wave 45", exact: true })
-    ).toHaveCount(0);
-    await expect(
-      page
-        .getByRole("status")
-        .filter({ hasText: "Some joined waves could not be loaded." })
-    ).toBeVisible();
-    failContinuation = false;
-    await retry.click();
-    await finishPagination();
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await finishPagination();
-    // Both destinations rebuild the real sidebar and retain the saved collection.
-    await page.goto("/messages", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/messages$/);
-    await page.goto("/waves", { waitUntil: "domcontentloaded" });
-    await finishPagination();
-    expect(requested).toContain("joined-continuation-alpha");
-    expect(requested).toContain("joined-continuation-beta");
-    await expectNoHorizontalOverflow(page);
-    await page.screenshot({
-      path: testInfo.outputPath("joined-waves-pagination.png"),
-      animations: "disabled",
-      style: "nextjs-portal { visibility: hidden; }",
-    });
-  });
+  }
 
   test("aligns Waves collection filters with the search control", async ({
     page,
@@ -8736,8 +8768,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           },
         })
       );
-      await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
-        route.fulfill({ json: { data: [main, bar], page: 1, next: false } })
+      await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
+        route.fulfill({
+          json: {
+            data: [main, bar],
+            page: 1,
+            next: false,
+            next_cursor: null,
+            snapshot_expires_at: Date.now() + 900000,
+          },
+        })
       );
       await page.route("**/api/v2/official-waves", (route) =>
         route.fulfill({ json: [main, bar] })
@@ -8935,8 +8975,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       { ...overview, id: WAVE, name: "Warmed Competition Wave" },
       { ...overview, id: targetWaveId, name: "Previously Unvisited Wave" },
     ];
-    await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
-      route.fulfill({ json: { data: waves, page: 1, next: false } })
+    await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
+      route.fulfill({
+        json: {
+          data: waves,
+          page: 1,
+          next: false,
+          next_cursor: null,
+          snapshot_expires_at: Date.now() + 900000,
+        },
+      })
     );
     await page.route("**/api/v2/official-waves", (route) =>
       route.fulfill({ json: waves })
@@ -10568,8 +10616,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         id: WAVE,
         name: "Selected competition wave",
       };
-      await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
-        route.fulfill({ json: { data: [targetWave], page: 1, next: false } })
+      await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
+        route.fulfill({
+          json: {
+            data: [targetWave],
+            page: 1,
+            next: false,
+            next_cursor: null,
+            snapshot_expires_at: Date.now() + 900000,
+          },
+        })
       );
       await page.route("**/api/v2/official-waves", (route) =>
         route.fulfill({ json: [targetWave] })

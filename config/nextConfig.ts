@@ -2,6 +2,7 @@ import { createSecurityHeaders } from "./securityHeaders";
 import { e2eeAssetCacheHeaders } from "./e2eeAssetCacheHeaders";
 import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
+import { openGraphProxyImageHeaders } from "./openGraphProxyImageHeaders";
 import { profileCmsAssetProxyHeaders } from "./profileCmsAssetProxyHeaders";
 import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
 import {
@@ -52,6 +53,13 @@ const IPFS_PATH_GATEWAY_HOSTNAMES = new Set<string>(IPFS_PATH_GATEWAY_HOSTS);
 const SINGLE_LABEL_WILDCARD = "+([^.])";
 // An omitted port matches any port, so pin the default HTTPS port explicitly.
 const HTTPS_DEFAULT_PORT = { protocol: "https" as const, port: "" };
+// The app never passes a first-party absolute image URL with a query string
+// to the optimizer, and a query there could only reach a dynamic route.
+const FIRST_PARTY_IMAGE_HOSTNAMES = new Set<string>([
+  "6529.io",
+  "seize.io",
+  "staging.6529.io",
+]);
 
 function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
   const resolverHostnames = new Set([
@@ -66,7 +74,11 @@ function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
   return [
     ...STATIC_ALLOWED_IMAGE_HOSTNAMES.filter(
       (hostname) => !IPFS_PATH_GATEWAY_HOSTNAMES.has(hostname)
-    ).map((hostname) => ({ ...HTTPS_DEFAULT_PORT, hostname })),
+    ).map((hostname) => ({
+      ...HTTPS_DEFAULT_PORT,
+      hostname,
+      ...(FIRST_PARTY_IMAGE_HOSTNAMES.has(hostname) ? { search: "" } : {}),
+    })),
     ...Array.from(resolverHostnames, (hostname) => ({
       ...HTTPS_DEFAULT_PORT,
       hostname,
@@ -108,6 +120,9 @@ export function sharedConfig(
     allowedDevOrigins: getAllowedDevOrigins(),
     images: {
       loader: "default",
+      // localPatterns stays unset: Next then allows local sources only
+      // without a query string, so a route that reads its input from the
+      // query cannot be an optimizer source.
       remotePatterns: [
         {
           protocol: "https",
@@ -240,6 +255,7 @@ export function sharedConfig(
         },
         meebits445Headers,
         profileCmsAssetProxyHeaders,
+        openGraphProxyImageHeaders,
         versionReloadImageHeaders,
         versionUpdateRocketImageHeaders,
         e2eeAssetCacheHeaders,
@@ -296,6 +312,12 @@ export function sharedConfig(
       // TypeScript API checker keeps the previous behavior of skipping test
       // files; tests are typechecked by the Jest ratchet, not by the build.
       useTypeScriptCli: false,
+      // Next 16.4 defaults this to "security": `next dev` and `next build`
+      // look up advisories for the installed version and, when they detect a
+      // coding agent, stop on the first reminder. Dependency updates go
+      // through Dependabot and the weekly Dependency Audit workflow instead,
+      // so builds and dev servers keep running without that lookup.
+      agentUpgrade: false,
     },
   };
 }

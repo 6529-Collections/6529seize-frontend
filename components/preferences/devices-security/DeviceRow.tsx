@@ -4,7 +4,9 @@ import { EllipsisHorizontalIcon } from "@heroicons/react/24/outline";
 import { CompactMenu } from "@/components/compact-menu";
 import Button from "@/components/utils/button/Button";
 import { formatE2eeDate } from "@/components/e2ee/e2eeFormat";
+import { E2eeDeviceApproval } from "@/components/e2ee/devices/E2eeDeviceApproval";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
 import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { t } from "@/i18n/messages";
 import type { SecurityDevice } from "./classifyDevices";
@@ -27,6 +29,8 @@ const MORE_TRIGGER_CLASS =
 export function DeviceRow({
   device,
   isNew = false,
+  approval = null,
+  engine = null,
   canRevoke,
   revokeBlocker,
   canRename,
@@ -36,6 +40,9 @@ export function DeviceRow({
   readonly device: SecurityDevice;
   /** Announced by the new-device alert: marked to match it. */
   readonly isNew?: boolean;
+  /** This profile's device not added here yet: "Add device". */
+  readonly approval?: E2eeDeviceInfo | null;
+  readonly engine?: E2eeEngine | null;
   readonly canRevoke: boolean;
   readonly revokeBlocker: RevokeBlocker | null;
   readonly canRename: boolean;
@@ -59,6 +66,7 @@ export function DeviceRow({
         </div>
         <PermissionChips locale={locale} device={device} />
         <DeviceMeta locale={locale} device={device} />
+        {approval ? <E2eeDeviceApproval device={approval} engine={engine} /> : null}
         {device.unverified ? (
           <p className="tw-m-0 tw-text-xs tw-text-amber-200">
             {t(locale, "devicesSecurity.unverified")}

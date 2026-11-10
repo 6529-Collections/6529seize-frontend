@@ -86,9 +86,14 @@ async function installWaveList(page: Page, baseURL: string | undefined) {
   expect(response.ok()).toBe(true);
   const body = await response.json();
   const first = body.data[0];
-  await page.route("**/api/v2/waves?**", (route) =>
+  await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
     route.fulfill({
-      json: { ...body, data: [first, { ...first, id: TARGET, name: NAME }] },
+      json: {
+        ...body,
+        data: [first, { ...first, id: TARGET, name: NAME }],
+        next_cursor: null,
+        snapshot_expires_at: Date.now() + 900000,
+      },
     })
   );
 }
@@ -395,12 +400,14 @@ for (const name of ["Sandbox Direct Message", "sandboxfriend"]) {
     await page.route("**/api/open-graph**", (route) =>
       route.fulfill({ json: {} })
     );
-    await page.route("**/api/v2/waves?**", (route) =>
+    await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
       route.fulfill({
         json: {
           data: [{ ...overview, id, name, is_dm_wave: true }],
           page: 1,
           next: false,
+          next_cursor: null,
+          snapshot_expires_at: Date.now() + 900000,
         },
       })
     );
@@ -453,12 +460,14 @@ test("keeps the subwave title in place when parent navigation arrives", async ({
   await page.route("**/api/open-graph**", (route) =>
     route.fulfill({ json: {} })
   );
-  await page.route("**/api/v2/waves?**", (route) =>
+  await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
         data: [{ ...parent, has_subwaves: true }],
         page: 1,
         next: false,
+        next_cursor: null,
+        snapshot_expires_at: Date.now() + 900000,
       },
     })
   );

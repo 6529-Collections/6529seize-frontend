@@ -14,7 +14,8 @@ import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
 import type { ApiE2eeDevice } from "@/lib/e2ee/api-types";
-import type { E2eeDeviceInfo } from "@/lib/e2ee/types";
+import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
+import { useRemoveE2eeLocalData } from "@/components/e2ee/useRemoveE2eeLocalData";
 import { commonApiPost } from "@/services/api/common-api";
 import {
   classifyDevices,
@@ -40,6 +41,23 @@ const fromEngine = (device: E2eeDeviceInfo): EncryptedDeviceInput => ({
   verified: device.verified,
   grantId: device.authorProofGrantId ?? null,
 });
+
+/** The engine's record of `device` when it still waits for "Add device". */
+const findApproval = (
+  engineDevices: readonly E2eeDeviceInfo[],
+  device: SecurityDevice
+): E2eeDeviceInfo | null => {
+  const key = device.encryptedDevice?.deviceKey;
+  return (
+    engineDevices.find(
+      (info) =>
+        key !== undefined &&
+        info.deviceKey === key &&
+        info.needsApproval === true &&
+        info.revokedAt === null
+    ) ?? null
+  );
+};
 
 const toPlatform = (platform: string): DevicePlatform =>
   platform === "desktop" || platform === "phone" ? platform : "web";
@@ -154,6 +172,19 @@ export interface SecurityDevicesState extends ClassifiedDevices {
   /** Whether a device can be renamed from here right now. */
   readonly canRename: (device: SecurityDevice) => boolean;
   readonly rename: (device: SecurityDevice, name: string) => Promise<void>;
+  /**
+   * Whether a revoke from here is signed by this browser's encrypted-DMs
+   * device, so the revoked device can verify it and delete its history.
+   * Unsigned (encrypted messages not running here), a combined grant's
+   * device keeps its history until it's removed there.
+   */
+  readonly signsRevocations: boolean;
+  /**
+   * This profile's own device that this browser doesn't add to encrypted
+   * chats yet (signed by a wallet not added here), for "Add device".
+   */
+  readonly approvalFor: (device: SecurityDevice) => E2eeDeviceInfo | null;
+  readonly engine: E2eeEngine | null;
 }
 
 /**
@@ -172,6 +203,7 @@ export function useSecurityDevices(): SecurityDevicesState {
   const grantsQuery = useDeviceGrants(listAddress);
   const { revoke: revokeGrant } = useRevokeDeviceGrant();
   const e2ee = useE2ee();
+  const removeLocal = useRemoveE2eeLocalData();
   const engine = e2ee.engine;
   const engineReady =
     engine !== null &&
@@ -231,7 +263,8 @@ export function useSecurityDevices(): SecurityDevicesState {
   const revoke = async (device: SecurityDevice) => {
     const encrypted = device.encryptedDevice;
     if (encrypted && device.encryptedDms?.status === "active" && engineCanAct) {
-      // A combined grant ends with its device.
+      // Signed here, so that device (and this one, for itself) can verify
+      // it. A combined grant ends with its device.
       await engine.revokeDevice(encrypted.deviceKey);
       void grantsQuery.refetch();
       return;
@@ -239,6 +272,11 @@ export function useSecurityDevices(): SecurityDevicesState {
     if (device.grant && device.signedPosts?.status === "active") {
       if (!(await revokeGrant(device.grant))) {
         throw new Error("Device grant revoke failed");
+      }
+      if (device.isThisDevice && device.encryptedDms?.status === "active") {
+        // The server revoked this browser's encrypted device unsigned, and
+        // the engine isn't running to clear it: remove it here.
+        await removeLocal?.();
       }
       if (encryptionEnabled && !engineListed) {
         void apiDevicesQuery.refetch();
@@ -297,5 +335,9 @@ export function useSecurityDevices(): SecurityDevicesState {
     revoke,
     canRename,
     rename,
+    signsRevocations: engineCanAct,
+    approvalFor: (device) =>
+      engineListed ? findApproval(engineDevices, device) : null,
+    engine,
   };
 }

@@ -13,26 +13,40 @@ type AlchemyJsonResult =
 /**
  * Fetches an Alchemy JSON response within a deadline and a byte cap. Upstream
  * failures resolve to a status (504 for timeouts, 502 for network, size, or
- * parse failures); only a caller abort rejects.
+ * parse failures); only a caller abort rejects. A `jsonBody` is sent as a
+ * JSON POST.
  */
 export async function fetchAlchemyJson(
   url: string,
   {
     maxBytes,
     signal,
-  }: { readonly maxBytes: number; readonly signal: AbortSignal }
+    jsonBody,
+  }: {
+    readonly maxBytes: number;
+    readonly signal: AbortSignal;
+    readonly jsonBody?: unknown;
+  }
 ): Promise<AlchemyJsonResult> {
   const deadline = createFetchDeadline(
     signal,
     UPSTREAM_TIMEOUT_MS,
     () => new Error("Alchemy request timed out")
   );
+  const init: RequestInit =
+    jsonBody === undefined
+      ? { headers: { Accept: "application/json" } }
+      : {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(jsonBody),
+        };
   try {
     return await deadline.run(async (): Promise<AlchemyJsonResult> => {
-      const response = await fetch(url, {
-        headers: { Accept: "application/json" },
-        signal: deadline.signal,
-      });
+      const response = await fetch(url, { ...init, signal: deadline.signal });
       if (!response.ok) {
         discardResponse(response);
         return { ok: false, status: response.status };

@@ -14,6 +14,7 @@ export * from '../models/ApiAlchemyContractMetadataBatchRequest';
 export * from '../models/ApiAlchemyContractMetadataBatchResponse';
 export * from '../models/ApiAlchemyContractMetadataRequest';
 export * from '../models/ApiAlchemyContractMetadataResult';
+export * from '../models/ApiAllWavesPage';
 export * from '../models/ApiAppDeviceGrant';
 export * from '../models/ApiArchiveProfileCmsPackageRequest';
 export * from '../models/ApiArtistArtworkAlert';
@@ -1006,6 +1007,7 @@ import { ApiAlchemyContractMetadataBatchRequest } from '../models/ApiAlchemyCont
 import { ApiAlchemyContractMetadataBatchResponse } from '../models/ApiAlchemyContractMetadataBatchResponse';
 import { ApiAlchemyContractMetadataRequest , ApiAlchemyContractMetadataRequestChainEnum   } from '../models/ApiAlchemyContractMetadataRequest';
 import { ApiAlchemyContractMetadataResult , ApiAlchemyContractMetadataResultChainEnum      } from '../models/ApiAlchemyContractMetadataResult';
+import { ApiAllWavesPage } from '../models/ApiAllWavesPage';
 import { ApiAppDeviceGrant } from '../models/ApiAppDeviceGrant';
 import { ApiArchiveProfileCmsPackageRequest } from '../models/ApiArchiveProfileCmsPackageRequest';
 import { ApiArtistArtworkAlert } from '../models/ApiArtistArtworkAlert';
@@ -2303,6 +2305,7 @@ let typeMap: {[index: string]: any} = {
     "ApiAlchemyContractMetadataBatchResponse": ApiAlchemyContractMetadataBatchResponse,
     "ApiAlchemyContractMetadataRequest": ApiAlchemyContractMetadataRequest,
     "ApiAlchemyContractMetadataResult": ApiAlchemyContractMetadataResult,
+    "ApiAllWavesPage": ApiAllWavesPage,
     "ApiAppDeviceGrant": ApiAppDeviceGrant,
     "ApiArchiveProfileCmsPackageRequest": ApiArchiveProfileCmsPackageRequest,
     "ApiArtistArtworkAlert": ApiArtistArtworkAlert,

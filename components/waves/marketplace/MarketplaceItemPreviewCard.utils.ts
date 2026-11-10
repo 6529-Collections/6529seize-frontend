@@ -1,6 +1,6 @@
 import type { MouseEvent } from "react";
 
-import { removeBaseEndpoint } from "@/helpers/Helpers";
+import { getInternalLinkPath } from "@/helpers/internalLink";
 import type {
   MarketplaceBrand,
   ResolvedPreviewHref,
@@ -13,9 +13,9 @@ interface BuildMarketplaceCtaLabelParams {
 }
 
 export const resolvePreviewHref = (href: string): ResolvedPreviewHref => {
-  const relative = removeBaseEndpoint(href);
-  if (typeof relative === "string" && relative.startsWith("/")) {
-    return { href: relative };
+  const internalPath = getInternalLinkPath(href);
+  if (internalPath !== null) {
+    return { href: internalPath };
   }
 
   return {
