@@ -79,6 +79,7 @@ const normalizeAnnouncementEndpoint = (endpoint: string): string | null => {
   }
 };
 
+/** Pass ordered announcements through for comparison with the tab's build. */
 const shouldExposeAnnouncedVersion = (
   announcedVersion: AnnouncedVersion,
   currentVersion: string
@@ -101,6 +102,7 @@ const shouldExposeAnnouncedVersion = (
   return buildTime === null || publishedTime > buildTime;
 };
 
+/** Read ready announcements and validate their optional rollout order. */
 const extractReadyVersion = (payload: unknown): AnnouncedVersion | null => {
   if (!isRecord(payload) || payload["ready"] !== true) {
     return null;
@@ -196,6 +198,7 @@ async function getAnnouncedVersion(
   return request.promise;
 }
 
+/** Require a strictly newer order for stamped clients and support older tabs. */
 const shouldRefreshClient = ({
   announcedVersion,
   clientReleaseOrder,
@@ -228,6 +231,7 @@ const shouldRefreshClient = ({
   );
 };
 
+/** Compare against the tab's build even when a different instance answers. */
 const versionResponse = ({
   announcedVersion,
   clientVersion,
@@ -269,6 +273,7 @@ const versionResponse = ({
   );
 };
 
+/** Report the live instance version and whether the requesting tab can update. */
 export async function GET(request?: Request) {
   const version = getCurrentVersion();
   const clientVersion = normalizeVersion(

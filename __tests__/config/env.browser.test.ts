@@ -153,9 +153,9 @@ describe("config/env.browser", () => {
   it("takes VERSION from the page's <html data-version>", () => {
     setPageVersion("deployed-commit");
 
-    expect(
-      loadModule(BROWSER_MODULE, bakeBrowserRuntime()).publicEnv.VERSION
-    ).toBe("deployed-commit");
+    const { publicEnv } = loadModule(BROWSER_MODULE, bakeBrowserRuntime());
+    expect(publicEnv.VERSION).toBe("deployed-commit");
+    expect(publicEnv).not.toHaveProperty("VERSION_RELEASE_ORDER");
   });
 
   it("leaves VERSION unset when the attribute is empty", () => {

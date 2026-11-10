@@ -192,6 +192,37 @@ describe("frontend deployment workflow contract", () => {
     }
   );
 
+  it.each([
+    [
+      "production-build-artifact.yml",
+      "build-production-artifact",
+      "Checkout protected main history",
+      "Capture production release order",
+    ],
+    [
+      "build-upload-deploy-prod.yml",
+      "build-upload-deploy",
+      "Checkout exact production SHA",
+      "Publish announced production version",
+    ],
+  ])(
+    "checks out complete history for release ordering in %s",
+    (file, job, checkoutName, orderName) => {
+      const { workflow } = readWorkflow(file);
+      const steps = workflow.jobs[job].steps;
+      const checkout = steps.findIndex(
+        (step: { name?: string }) => step.name === checkoutName
+      );
+      const order = steps.findIndex(
+        (step: { name?: string }) => step.name === orderName
+      );
+
+      expect(checkout).toBeGreaterThanOrEqual(0);
+      expect(order).toBeGreaterThan(checkout);
+      expect(steps[checkout].with["fetch-depth"]).toBe(0);
+    }
+  );
+
   describe("production announcement publication", () => {
     let temporaryDirectory: string;
     let commitSha: string;
@@ -215,7 +246,7 @@ describe("frontend deployment workflow contract", () => {
           cwd: temporaryDirectory,
           encoding: "utf8",
         });
-      runGit("init", "--quiet");
+      runGit("-c", "init.defaultBranch=main", "init", "--quiet");
       for (const message of ["first release", "next release"]) {
         runGit(
           "-c",

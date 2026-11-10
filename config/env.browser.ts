@@ -13,6 +13,7 @@ import type { PublicEnv } from "./env.schema";
 // The start tag is parsed before any script runs, so these values are there
 // when this module loads.
 
+/** Decode the public environment validated and baked by the build. */
 function readBakedPublicEnv(): PublicEnv {
   const raw =
     typeof process === "undefined"
@@ -33,6 +34,7 @@ function readBakedPublicEnv(): PublicEnv {
   }
 }
 
+/** Restore the per-build values from the document that loaded this bundle. */
 function readPublicEnv(): PublicEnv {
   const baked = readBakedPublicEnv();
   if (typeof document === "undefined") return baked;

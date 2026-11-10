@@ -256,11 +256,19 @@ describe("GET version route", () => {
     ["older release", 1199, "1200", false],
     ["same order", 1200, "1200", false],
     ["newer release", 1201, "1200", true],
+    ["same commit with a higher order", 1201, "1200", false, "client-version"],
+    ["malformed release order", "1201junk", "1200", false],
     ["old announcement format", undefined, "1200", false],
     ["legacy tab", 1201, undefined, true],
   ])(
     "checks ordered announcements for %s",
-    async (_case, order, clientOrder, stale) => {
+    async (
+      _case,
+      order,
+      clientOrder,
+      stale,
+      announcedVersion = "different-version"
+    ) => {
       const { publicEnv } = require("@/config/env");
       publicEnv.BASE_ENDPOINT = "https://6529.io";
       publicEnv.VERSION_RELEASE_ORDER = "1199";
@@ -271,7 +279,7 @@ describe("GET version route", () => {
           published_at: "2026-07-09T10:05:00.000Z",
           ready: true,
           release_order: order,
-          version: "different-version",
+          version: announcedVersion,
         }),
       });
 
@@ -279,8 +287,10 @@ describe("GET version route", () => {
 
       expect(jsonMock).toHaveBeenCalledWith(
         {
-          announced_version: "different-version",
-          ...(order === undefined ? {} : { announced_release_order: order }),
+          announced_version: announcedVersion,
+          ...(typeof order === "number"
+            ? { announced_release_order: order }
+            : {}),
           stale,
           version: "current-version",
         },
@@ -480,7 +490,8 @@ describe("GET version route", () => {
   it("logs a hidden tab's poll with the staleness it returned", async () => {
     jsonMock.mockReturnValue({ ok: true });
     const values: Record<string, string> = {
-      [VERSION_POLL_HEADERS.version]: "0123456789abcdef0123456789abcdef01234567",
+      [VERSION_POLL_HEADERS.version]:
+        "0123456789abcdef0123456789abcdef01234567",
       "x-6529-client-hidden": "1",
       "x-6529-client-age-min": "90",
       "x-6529-client-releases-behind": "2",

@@ -11,6 +11,7 @@ export const VERSION_POLL_HEADERS = {
   releasesBehind: "x-6529-client-releases-behind",
 } as const;
 
+/** Validate commit counts from a JSON announcement or an HTTP header. */
 export function parseReleaseOrder(value: unknown): number | null {
   const order =
     typeof value === "string" && /^[1-9]\d*$/.test(value)

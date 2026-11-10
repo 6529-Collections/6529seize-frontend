@@ -71,6 +71,7 @@ export function useIsVersionStale(
 
     const isHidden = () => document.visibilityState === "hidden";
 
+    /** Check update availability for the build loaded in this tab. */
     async function check() {
       lastCheckAt = Date.now();
       // Checks can overlap after a wake; only the newest one may set state.
