@@ -60,8 +60,6 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "Your messages are sent unsigned until you renew with one signature.",
   "signedMessages.notice.newDevice.message":
     "{label} is now authorized for Signed Posts. If this wasn’t you, revoke it.",
-  "signedMessages.notice.newDevice.details":
-    "Authorized from {origin} · device key {fingerprint}",
   "signedMessages.notice.newDevice.revoke": "Revoke",
   "signedMessages.notice.newDevice.acknowledge": "Got it",
   "signedMessages.notice.newDevice.acknowledgeError":

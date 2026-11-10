@@ -187,14 +187,10 @@ encrypted backup. See [Encrypted messages](../../encrypted-messages.md#renewal-a
 
 The browser checks the profile's grants when a wave opens, when the app
 returns to focus, and every 10 minutes while visible. An active grant for
-another device can raise a notice above the composer. It names where the
-device was authorized (a site host such as 6529.io, or **6529 Desktop**) and
-a short form of its device key. Each browser shows a newly authorized device
-once, until it is dismissed there: choose **Got it** to clear the notice in
-this browser. Renewing a device this browser has already seen does not raise
-it again. Choose **Revoke** to remove the device's permission. The first list
-a browser sees for a wallet is its baseline. If the browser loses its local
-signing key but
+another device can raise a notice above the composer. Choose **Got it**
+to clear that notice across devices as their grant lists refresh. Choose
+**Revoke** to remove the device's permission. The first list a browser sees
+for a wallet is its baseline. If the browser loses its local signing key but
 still remembers its grant, that grant does not trigger a new-device notice.
 Set up Signed Posts again to sign from that browser. Review existing grants in
 **Device Permissions**.

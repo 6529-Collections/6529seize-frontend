@@ -15,7 +15,6 @@ import {
 import { useId } from "react";
 import { useDeviceSecurityState } from "./DeviceSecurityStatus";
 import { openDeviceSetup } from "./deviceSetup";
-import { getNewDeviceNoticeDetails } from "./newDeviceNotice";
 import SignedMessagesEnableStatus from "./SignedMessagesEnableStatus";
 import {
   useSignedMessagesNotice,
@@ -38,7 +37,7 @@ function getNoticeCopy(
         title: t(locale, "signedMessages.notice.newDevice.message", {
           label: model.grant.device_label,
         }),
-        body: getNewDeviceNoticeDetails(locale, model.grant),
+        body: null,
         action: t(locale, "signedMessages.notice.newDevice.revoke"),
       };
     case "renew":
@@ -159,7 +158,7 @@ function SignedMessagesNoticeContent({
       <div
         className={`tw-items-center tw-gap-1 ${
           isAlert
-            ? "tw-col-span-2 tw-col-start-2 tw-row-start-3 tw-grid tw-w-fit tw-max-w-full tw-grid-cols-2 sm:tw-col-span-1 sm:tw-col-start-3 sm:tw-row-start-1"
+            ? "tw-col-span-2 tw-col-start-2 tw-row-start-2 tw-grid tw-w-fit tw-max-w-full tw-grid-cols-2 sm:tw-col-span-1 sm:tw-col-start-3 sm:tw-row-start-1"
             : "tw-col-start-3 tw-row-start-1 tw-flex tw-flex-wrap"
         }`}
       >

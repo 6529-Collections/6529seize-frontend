@@ -15,8 +15,6 @@ interface AddressNoticeState {
   readonly seenGrantIds?: readonly string[];
   /** Grant ids previously matched to a key held by this browser. */
   readonly localGrantIds?: readonly string[];
-  /** The grants 6529.io marked acknowledged were taken in once. */
-  readonly acknowledgedImported?: boolean;
 }
 
 type NoticeState = Readonly<Record<string, AddressNoticeState>>;
@@ -96,32 +94,6 @@ export function markDeviceGrantsSeen(
   updateAddressState(address, (current) => {
     const seen = new Set([...(current.seenGrantIds ?? []), ...grantIds]);
     return { ...current, seenGrantIds: [...seen].slice(-MAX_SEEN_GRANTS) };
-  });
-}
-
-/**
- * Marks the given grants seen and records that this was done, so it runs
- * once per browser and wallet. Before this browser has a baseline nothing
- * is marked: its first grant list becomes the baseline.
- */
-export function importAcknowledgedDeviceGrants(
-  address: string,
-  grantIds: readonly string[]
-): void {
-  updateAddressState(address, (current) => {
-    if (current.acknowledgedImported) {
-      return current;
-    }
-    // Without a baseline yet, the first list becomes the baseline anyway.
-    if (current.seenGrantIds === undefined) {
-      return { ...current, acknowledgedImported: true };
-    }
-    const seen = new Set([...current.seenGrantIds, ...grantIds]);
-    return {
-      ...current,
-      seenGrantIds: [...seen].slice(-MAX_SEEN_GRANTS),
-      acknowledgedImported: true,
-    };
   });
 }
 

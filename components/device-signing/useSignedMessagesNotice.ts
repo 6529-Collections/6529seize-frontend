@@ -13,10 +13,6 @@ import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessag
 import { getDeviceGrantStatus } from "@/lib/device-signing/device-key-store";
 import { useCallback, useEffect, useMemo } from "react";
 import {
-  findUnseenNewDeviceGrant,
-  useImportAcknowledgedDeviceGrants,
-} from "./newDeviceNotice";
-import {
   dismissSignedMessagesNotice,
   markDeviceGrantsSeen,
   rememberLocalDeviceGrants,
@@ -49,7 +45,16 @@ function findUnseenGrant({
   }
   const seen = new Set([...seenGrantIds, ...(localGrantIds ?? [])]);
   const own = new Set(localPublicKeys);
-  return findUnseenNewDeviceGrant(grants, seen, own, nowMs);
+  return (
+    grants.find(
+      (grant) =>
+        grant.revoked_at === null &&
+        grant.expires_at > nowMs &&
+        grant.notice_acknowledged !== true &&
+        !seen.has(grant.id) &&
+        !own.has(grant.device_key.toLowerCase())
+    ) ?? null
+  );
 }
 
 function getLocalNotice(
@@ -102,8 +107,6 @@ export function useSignedMessagesNotice({
     }
   }, [address, grants, hasSeenBaseline]);
 
-  const acknowledgedImported = useImportAcknowledgedDeviceGrants();
-
   useEffect(() => {
     if (!address || !local.loaded || local.failed || !local.publicKeys.length) {
       return;
@@ -127,9 +130,8 @@ export function useSignedMessagesNotice({
     if (!address || !local.loaded || local.failed || nowMs === 0) {
       return null;
     }
-    // Until the one-time import ran, earlier acknowledgements are not known.
     const unseen = findUnseenGrant({
-      grants: acknowledgedImported ? grants : undefined,
+      grants,
       seenGrantIds,
       localGrantIds,
       localPublicKeys: local.publicKeys,
@@ -151,7 +153,6 @@ export function useSignedMessagesNotice({
     localGrantIds,
     nowMs,
     seenGrantIds,
-    acknowledgedImported,
   ]);
 
   const dismiss = useCallback(() => {
