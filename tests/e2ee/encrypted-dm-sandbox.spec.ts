@@ -721,7 +721,9 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
         .getByText("pixel.png", { exact: true })
     ).toBeVisible();
     await sendMessage(alice.page, caption);
-    for (const filename of [pickedName, "pixel.png"]) {
+    // Images are sent under neutral names, numbered in draft order.
+    const sentNames = ["image.png", "image-2.png"];
+    for (const filename of sentNames) {
       await expect(
         messageRow(alice.page, caption).getByRole("img", {
           name: `Image: ${filename}`,
@@ -736,7 +738,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     });
     await expect(bobRow).toContainText(caption);
     await bobRow.click();
-    for (const filename of [pickedName, "pixel.png"]) {
+    for (const filename of sentNames) {
       const image = messageRow(bob.page, caption).getByRole("img", {
         name: `Image: ${filename}`,
         exact: true,
@@ -751,7 +753,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
         bob.page,
         image,
         filename,
-        filename === pickedName ? "pixel.png" : undefined
+        filename === sentNames[0] ? sentNames[1] : undefined
       );
     }
     await gotoPath(bob.page, ENCRYPTED_ROUTE);

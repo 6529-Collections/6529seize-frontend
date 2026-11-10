@@ -17,8 +17,12 @@ import {
   encryptMedia,
   isInlineMime,
   isSafeInlineImageMime,
+  isWithinAttachmentLimits,
   localBlobType,
+  MAX_ATTACHMENT_BYTES,
   MAX_BLOB_BYTES,
+  MAX_BLOB_CHUNKS,
+  mediaFromFile,
   MediaError,
   PLAINTEXT_CHUNK_BYTES,
   uploadMedia,
@@ -153,5 +157,120 @@ describe("local blob types for decrypted attachments", () => {
       expect(localBlobType(risky)).toBe("application/octet-stream");
       expect(isSafeInlineImageMime(risky)).toBe(false);
     }
+  });
+});
+
+describe("attachment limits", () => {
+  it("match what encryptMedia can produce", () => {
+    expect(MAX_BLOB_CHUNKS).toBe(25);
+    expect(ciphertextSize(MAX_ATTACHMENT_BYTES)).toBe(MAX_BLOB_BYTES);
+    expect(ciphertextSize(MAX_ATTACHMENT_BYTES + 1)).toBeGreaterThan(
+      MAX_BLOB_BYTES
+    );
+    expect(
+      Math.ceil(MAX_ATTACHMENT_BYTES / PLAINTEXT_CHUNK_BYTES)
+    ).toBeLessThanOrEqual(MAX_BLOB_CHUNKS);
+  });
+
+  it.each([
+    [{ size: 0, chunks: 1 }, true],
+    [{ size: MAX_ATTACHMENT_BYTES, chunks: MAX_BLOB_CHUNKS }, true],
+    [{ size: MAX_ATTACHMENT_BYTES + 1, chunks: 1 }, false],
+    [{ size: 10, chunks: MAX_BLOB_CHUNKS + 1 }, false],
+    [{ size: 10, chunks: 0 }, false],
+  ])("%o within limits: %s", (attachment, expected) => {
+    expect(isWithinAttachmentLimits(attachment)).toBe(expected);
+  });
+
+  it("refuses an oversized declaration before downloading anything", async () => {
+    const getBlobChunk = jest.fn();
+    const api = { getBlobChunk } as unknown as Parameters<
+      typeof downloadMedia
+    >[0]["api"];
+    const attachment = {
+      blob: "0x0123456789abcdef0123456789abcdef",
+      k: "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+      n: "AAAAAAAAAAAAAAAA",
+      chunks: 1_000_000,
+      mime: "image/png",
+      size: 10,
+      name: "image.png",
+    };
+    await expect(
+      downloadMedia({ api, deviceKey: "0xab", attachment })
+    ).rejects.toThrow("E2EE_MEDIA_SIZE");
+    expect(getBlobChunk).not.toHaveBeenCalled();
+  });
+});
+
+describe("mediaFromFile", () => {
+  const bytesOf = (value: string) =>
+    Uint8Array.from(value, (char) => char.codePointAt(0) ?? 0);
+  const segment = (marker: number, payload: Uint8Array) =>
+    Uint8Array.of(
+      0xff,
+      marker,
+      (payload.length + 2) >> 8,
+      (payload.length + 2) & 0xff,
+      ...payload
+    );
+  /** A JPEG whose comment names a place, and a frame and scan to decode. */
+  const photo = Uint8Array.of(
+    0xff,
+    0xd8,
+    ...segment(0xfe, bytesOf("Home, 51.5N 0.1W")),
+    ...segment(0xc0, Uint8Array.of(8, 0, 1, 0, 1, 1, 1, 0x11, 0)),
+    ...segment(0xda, Uint8Array.of(1, 1, 0, 0, 63, 0)),
+    0x12,
+    0xff,
+    0xd9
+  );
+  const hasPlace = (bytes: Uint8Array) =>
+    new TextDecoder("latin1").decode(bytes).includes("51.5N");
+  const originalBitmap = globalThis.createImageBitmap;
+
+  afterEach(() => {
+    globalThis.createImageBitmap = originalBitmap;
+  });
+
+  it("sends a photo without its metadata under a neutral name", async () => {
+    const media = await mediaFromFile(
+      new File([photo], "IMG_20261109_home.jpg", { type: "image/jpeg" })
+    );
+    expect(hasPlace(photo)).toBe(true);
+    expect(hasPlace(media.bytes)).toBe(false);
+    expect(media.name).toBe("image.jpg");
+    expect(media.mime).toBe("image/jpeg");
+  });
+
+  it("sends other files unchanged under their own name", async () => {
+    const pdf = bytesOf("%PDF-1.7 Home, 51.5N 0.1W");
+    const media = await mediaFromFile(
+      new File([pdf], "report.pdf", { type: "application/pdf" })
+    );
+    expect(media.bytes).toEqual(pdf);
+    expect(media.name).toBe("report.pdf");
+  });
+
+  it("sends an image it cannot clean unchanged", async () => {
+    const odd = bytesOf("not really a jpeg");
+    const media = await mediaFromFile(
+      new File([odd], "x.jpg", { type: "image/jpeg" })
+    );
+    expect(media.bytes).toEqual(odd);
+    expect(media.name).toBe("image.jpg");
+  });
+
+  it("falls back to the original when the cleaned copy does not decode", async () => {
+    const file = new File([photo], "x.jpg", { type: "image/jpeg" });
+    globalThis.createImageBitmap = jest.fn(async (source: unknown) => {
+      if (source === file) {
+        return { width: 4, height: 3, close: () => undefined };
+      }
+      throw new Error("decode failed");
+    }) as unknown as typeof createImageBitmap;
+    const media = await mediaFromFile(file);
+    expect(media.bytes).toEqual(photo);
+    expect(media).toMatchObject({ width: 4, height: 3, name: "image.jpg" });
   });
 });
