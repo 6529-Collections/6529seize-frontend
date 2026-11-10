@@ -57,7 +57,7 @@ export default function NftNavigation(
   function printNavigation() {
     return (
       <span
-        className={`tw-flex tw-items-center tw-justify-center tw-gap-2 ${props.square ? "[&>*]:tw-rounded-lg [&>*]:tw-border-iron-800 [&>*]:tw-bg-iron-950 [&>*]:tw-shadow-none" : ""}`}
+        className={`tw-flex tw-items-center tw-justify-center tw-gap-2 md:[[data-nft-card-page]_&>*]:tw-rounded-lg md:[[data-nft-card-page]_&>*]:tw-border-iron-800 md:[[data-nft-card-page]_&>*]:tw-bg-iron-950 md:[[data-nft-card-page]_&>*]:tw-shadow-none md:[[data-nft-card-page]_&>a:focus-visible]:tw-outline md:[[data-nft-card-page]_&>a:focus-visible]:tw-outline-2 md:[[data-nft-card-page]_&>a:focus-visible]:tw-outline-offset-2 md:[[data-nft-card-page]_&>a:focus-visible]:tw-outline-primary-400 md:[[data-nft-card-page]_&>a:hover]:tw-bg-iron-900 ${props.square ? "[&>*]:tw-rounded-lg [&>*]:tw-border-iron-800 [&>*]:tw-bg-iron-950 [&>*]:tw-shadow-none" : ""}`}
       >
         {isFirst ? (
           <span

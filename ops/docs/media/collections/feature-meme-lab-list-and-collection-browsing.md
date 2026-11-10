@@ -36,7 +36,7 @@
 ### Main List Route `/meme-lab`
 
 1. Open `/meme-lab`.
-2. Wait for `Fetching ...` to finish.
+2. Wait for the card placeholders to be replaced by results.
 3. The default `Age` view shows 40 cards per page. Use the pagination controls
    below the grid to move between pages.
 4. Optional: select `LFG: Start the Show!` to open the slideshow.
@@ -82,7 +82,9 @@
 
 ## Loading, Empty, and Error States
 
-- `/meme-lab` shows a message-backed `Fetching ...` row during initial load.
+- `/meme-lab` shows card placeholders while loading, matching the loaded grid's
+  responsive column count, spacing, and width. Screen readers receive the
+  message-backed fetching status.
 - The default `Age` view requests one 40-card page at a time. Other sort and
   grouped views load the complete data required for correct ordering, then show
   the sorted results in 40-card pages.
@@ -91,10 +93,10 @@
 - Changing pages or choosing `Try again` moves keyboard focus to the results
   area, where it stays while cards load. Screen readers announce loading and the
   current page when results arrive.
-- `/meme-lab/collection/{collection}` does not show a dedicated loading row.
+- `/meme-lab/collection/{collection}` uses the same matching card placeholders
+  and announces loading to screen readers.
 - Empty or unknown collections show `Nothing here yet`.
-- If collection fetch calls fail, the route can stay on header and sort controls
-  with no cards and no inline error panel.
+- Failed collection requests show an inline error with `Try again`.
 
 ## Edge Cases
 

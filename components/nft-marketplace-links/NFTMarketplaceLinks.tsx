@@ -131,7 +131,7 @@ export default function NFTMarketplaceLinks({
             >
               <Image
                 unoptimized
-                className="tw-size-6 tw-rounded-full md:tw-size-7"
+                className="tw-size-6 tw-rounded-full md:tw-size-7 md:[[data-nft-card-page]_&]:tw-size-6"
                 src={marketplace.imageSrc}
                 alt={marketplace.alt}
                 width={size}
