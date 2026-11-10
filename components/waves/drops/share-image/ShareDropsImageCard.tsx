@@ -65,15 +65,15 @@ const ShareDropsImageCard = forwardRef<
   }
 >(({ wave, drops, messages, time, include, locale }, ref) => {
   const { emojiMap, findNativeEmoji, loadEmojiData } = useEmoji();
-  const customEmojiSrc = useMemo(() => {
-    const sources = new Map<string, string>();
+  const customEmoji = useMemo(() => {
+    const byId = new Map<string, { src: string; name: string }>();
     for (const category of emojiMap) {
       for (const emoji of category.emojis) {
         const src = emoji.skins[0]?.src;
-        if (src) sources.set(emoji.id, src);
+        if (src) byId.set(emoji.id, { src, name: emoji.name });
       }
     }
-    return sources;
+    return byId;
   }, [emojiMap]);
   useEffect(() => {
     void loadEmojiData();
@@ -174,15 +174,17 @@ const ShareDropsImageCard = forwardRef<
                   <p className="tw-m-0 tw-mt-2 tw-flex tw-flex-wrap tw-gap-1.5">
                     {drop.reactions.map((reaction) => {
                       const id = reaction.reaction.replaceAll(":", "");
-                      const customSrc = customEmojiSrc.get(id);
+                      // Custom 6529 emoji take precedence over native ones
+                      // with the same id, as in the feed.
+                      const custom = customEmoji.get(id);
                       const native = findNativeEmoji(id)?.skins[0]?.native;
                       let emoji: ReactNode = native ?? reaction.reaction;
-                      if (customSrc) {
+                      if (custom) {
                         emoji = (
                           // eslint-disable-next-line @next/next/no-img-element -- html-to-image draws this into the PNG, which needs a plain img with crossOrigin rather than next/image output.
                           <img
-                            src={customSrc}
-                            alt={id.replaceAll("_", " ")}
+                            src={custom.src}
+                            alt={custom.name || id.replaceAll("_", " ")}
                             crossOrigin="anonymous"
                             className="tw-block tw-size-4 tw-object-contain"
                           />

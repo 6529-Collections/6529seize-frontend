@@ -12,12 +12,12 @@ import WaveDropActionsCopyLink from "./WaveDropActionsCopyLink";
 import WaveDropActionsEdit from "./WaveDropActionsEdit";
 import WaveDropActionsMore from "./WaveDropActionsMore";
 import WaveDropShareImageAction from "./share-image/WaveDropShareImageAction";
-
-const noop = () => undefined;
 import WaveDropActionsQuickReact from "./WaveDropActionsQuickReact";
 import WaveDropActionsRate from "./WaveDropActionsRate";
 import WaveDropActionsReply from "./WaveDropActionsReply";
 import { useWaveDropLayers } from "./WaveDropLayerContext";
+
+const noop = () => undefined;
 
 interface WaveDropActionsProps {
   readonly drop: ExtendedDrop;
