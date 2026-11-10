@@ -243,13 +243,12 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     [wave]
   );
 
-  const identityDropsCount = useMemo(
-    () =>
-      presentationCompetition(wave)
-        ? null
-        : (wave?.metrics.your_participation_drops_count ?? null),
-    [wave]
-  );
+  const identityDropsCount = useMemo(() => {
+    const competition = presentationCompetition(wave);
+    return competition
+      ? (competition.your_active_entries_count ?? null)
+      : (wave?.metrics.your_participation_drops_count ?? null);
+  }, [wave]);
 
   // Extract time period boundaries with proper defaults
   const participationStartTime = useMemo(

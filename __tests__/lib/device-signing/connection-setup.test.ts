@@ -119,13 +119,14 @@ it("transfers a new MLS identity and non-extractable signing key without touchin
   expect(mockRegister).not.toHaveBeenCalled();
   expect(mockRecord).toBeNull();
   expect(await mockStorage.getDevice(profileId)).toBeNull();
-  await acceptConnectionDeviceSetup({
+  const outcome = await acceptConnectionDeviceSetup({
     envelope: prepared!.envelope,
     secret: prepared!.secret,
     wallet,
     accessToken: "test-session",
     target: "native",
   });
+  expect(outcome).toBe("pending-enrollment");
   expect(mockRegister).toHaveBeenCalledTimes(1);
   // The receiving device registers exactly the v2 terms that were signed.
   expect(mockRegister.mock.calls[0]![0].body.grant).toMatchObject({
@@ -218,13 +219,14 @@ it("keeps existing signing keys and registered MLS history when another setup li
     },
     isCurrent: () => true,
   });
-  await acceptConnectionDeviceSetup({
+  const outcome = await acceptConnectionDeviceSetup({
     envelope: prepared!.envelope,
     secret: prepared!.secret,
     wallet,
     accessToken: "test-session",
     target: "native",
   });
+  expect(outcome).toBe("reused");
   expect(mockRegister).toHaveBeenCalledTimes(1);
   expect(mockRecord).toBe(beforeRecord);
   expect((await mockStorage.getDevice(profileId))?.deviceKey).toBe(
@@ -316,11 +318,12 @@ describe("accepting a v2 share on a registered earlier-suite device", () => {
     const earlierDevice = await mockStorage.getDevice(profileId);
     const earlierSigning = mockRecord;
 
-    await acceptNativeShare(
+    const outcome = await acceptNativeShare(
       await prepareNativeShare(receiver.account),
       receiver.account.address
     );
 
+    expect(outcome).toBe("pending-enrollment");
     expect(mockRegister).toHaveBeenCalledTimes(1);
     expect(mockRecord).toBe(earlierSigning);
     const adopted = await mockStorage.getDevice(profileId);

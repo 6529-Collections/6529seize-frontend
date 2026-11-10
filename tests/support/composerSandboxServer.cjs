@@ -477,6 +477,7 @@ const localDrop = {
   reactions: [],
   boosts: 0,
   is_signed: false,
+  collapse_replies: false,
   hide_link_preview: false,
   moderation: {
     status: "VISIBLE",
@@ -2777,6 +2778,7 @@ const mockApiExactReadRoutes = new Map([
   ],
   ["/api/v2/boosted-drops", () => emptyPage()],
   ["/api/v2/drops", () => emptyPage()],
+  ["/api/profile-logs", () => ({ ...emptyPage(), next_cursor: null })],
   ["/api/mention-aliases", () => []],
   ["/api/content-moderation/blocked-profiles", () => []],
   ["/api/feed", () => []],
