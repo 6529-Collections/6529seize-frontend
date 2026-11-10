@@ -1,60 +1,42 @@
+import {
+  MEDIA_SIGNATURE_BYTE_COUNT,
+  getExtensionForDeclaredType,
+  isMarkupContent,
+  isSameFormat,
+  sniffMediaType,
+} from "@/helpers/media-signature.helpers";
+
 /**
  * Decides the type and file name of a file the app saves for the user.
  *
- * - When the leading bytes show a served media format (image, video, audio,
- *   GLB, PDF), the file is saved as that type with its usual extension.
- * - Otherwise the name's last extension decides. Inert document, data,
- *   archive and media extensions are kept, and the file is saved as
- *   `application/octet-stream` so the browser downloads it instead of
- *   rendering it, whatever type the server declared.
- * - Extensions a browser or system can render as active content or run
- *   (HTML, SVG, scripts, executables, ...) and unknown or missing extensions
- *   become `.bin`. Only the last extension counts: `invoice.pdf.exe` is an
- *   `exe`.
+ * - The name's last extension counts (`invoice.pdf.exe` is an `exe`).
+ *   Extensions that can run or render active content become `.bin`.
+ * - An inert document, data, archive or media extension is kept. The file is
+ *   saved as its media type only when the leading bytes confirm that format;
+ *   otherwise as `application/octet-stream`, so the browser downloads it
+ *   instead of rendering it, whatever type the server declared.
+ * - Bytes that are an HTML, SVG or XML document become `.bin` unless the
+ *   name is a plain-text format (such a file still downloads as text).
+ * - A missing or unknown extension takes the format the bytes show, or,
+ *   for a name without any extension, a served media type the caller
+ *   declared; otherwise `.bin`.
  */
 
 const OPAQUE_TYPE = "application/octet-stream";
 const OPAQUE_EXTENSION = "bin";
 const DEFAULT_BASE_NAME = "download";
 const MAX_BASE_NAME_LENGTH = 100;
-const LEADING_BYTE_COUNT = 16;
-const JPEG = "image/jpeg";
-const MPEG_AUDIO = "audio/mpeg";
-const QUICKTIME = "video/quicktime";
 
-/** Formats the app serves as media or attachments, with the saved extension. */
-const DOWNLOAD_EXTENSION_BY_TYPE: ReadonlyMap<string, string> = new Map([
-  ["image/png", "png"],
-  [JPEG, "jpg"],
-  ["image/gif", "gif"],
-  ["image/webp", "webp"],
-  ["image/avif", "avif"],
-  ["image/bmp", "bmp"],
-  ["video/mp4", "mp4"],
-  [QUICKTIME, "mov"],
-  ["video/x-msvideo", "avi"],
-  [MPEG_AUDIO, "mp3"],
-  ["audio/wav", "wav"],
-  ["audio/aac", "aac"],
-  ["audio/ogg", "ogg"],
-  ["model/gltf-binary", "glb"],
-  ["application/pdf", "pdf"],
-  ["text/csv", "csv"],
-  ["text/plain", "txt"],
-]);
+/** Raster image extensions the app shows and keeps on download. */
+const IMAGE_EXTENSIONS: ReadonlySet<string> = new Set(
+  "png jpg jpeg gif webp avif heic heif bmp".split(" ")
+);
 
-const TYPE_ALIASES: Readonly<Record<string, string>> = {
-  "image/jpg": JPEG,
-  "image/pjpeg": JPEG,
-  "image/x-png": "image/png",
-  "audio/mp3": MPEG_AUDIO,
-  "audio/mpeg3": MPEG_AUDIO,
-  "audio/x-mpeg": MPEG_AUDIO,
-  "audio/x-mp3": MPEG_AUDIO,
-  "audio/x-wav": "audio/wav",
-  "audio/wave": "audio/wav",
-  "audio/x-aac": "audio/aac",
-};
+/** Whether a URL path names a raster image file by its extension. */
+export function hasImageFileExtension(pathname: string): boolean {
+  const extension = /\.([a-z0-9]+)$/i.exec(pathname)?.[1]?.toLowerCase();
+  return extension !== undefined && IMAGE_EXTENSIONS.has(extension);
+}
 
 /**
  * Extensions kept when the bytes do not show a served media format: the
@@ -67,9 +49,10 @@ const INERT_EXTENSIONS: ReadonlySet<string> = new Set(
     "txt md csv tsv json pdf doc docx xls xlsx ppt pptx odt ods odp rtf epub",
     "zip 7z rar tar gz",
     "psd ai fig sketch glb gltf obj stl",
-    "wav flac mp3 mpeg m4a aac ogg mp4 mov qt avi webm",
-    "png jpg jpeg gif webp avif heic bmp",
-  ].flatMap((group) => group.split(" "))
+    "wav flac mp3 mpeg m4a m4b aac ogg mp4 m4v mov qt avi webm 3gp 3g2",
+  ]
+    .flatMap((group) => group.split(" "))
+    .concat([...IMAGE_EXTENSIONS])
 );
 
 /** Extensions that are always saved as `.bin`, even if listed above. */
@@ -81,67 +64,14 @@ const ACTIVE_EXTENSIONS: ReadonlySet<string> = new Set(
   ].flatMap((group) => group.split(" "))
 );
 
-const ascii = (bytes: Uint8Array, start: number, end: number): string =>
-  String.fromCodePoint(...bytes.subarray(start, end));
-
-const startsWith = (bytes: Uint8Array, signature: readonly number[]) =>
-  signature.every((value, index) => bytes[index] === value);
-
-function getIsoMediaType(bytes: Uint8Array): string | null {
-  if (ascii(bytes, 4, 8) !== "ftyp") {
-    return null;
-  }
-  const brand = ascii(bytes, 8, 12);
-  if (brand === "avif" || brand === "avis") {
-    return "image/avif";
-  }
-  return brand === "qt  " ? QUICKTIME : "video/mp4";
-}
-
-function getRiffType(bytes: Uint8Array): string | null {
-  if (ascii(bytes, 0, 4) !== "RIFF") {
-    return null;
-  }
-  const format = ascii(bytes, 8, 12);
-  if (format === "WEBP") return "image/webp";
-  if (format === "WAVE") return "audio/wav";
-  return format === "AVI " ? "video/x-msvideo" : null;
-}
-
-function getAudioFrameType(bytes: Uint8Array): string | null {
-  if (ascii(bytes, 0, 3) === "ID3") {
-    return MPEG_AUDIO;
-  }
-  if (bytes[0] !== 0xff || bytes[1] === undefined) {
-    return null;
-  }
-  if ((bytes[1] & 0xf6) === 0xf0) {
-    return "audio/aac";
-  }
-  return (bytes[1] & 0xe0) === 0xe0 ? MPEG_AUDIO : null;
-}
-
-/** The served format the leading bytes belong to, if any. */
-function sniffDownloadType(bytes: Uint8Array): string | null {
-  if (startsWith(bytes, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) {
-    return "image/png";
-  }
-  if (startsWith(bytes, [0xff, 0xd8, 0xff])) return JPEG;
-  const head = ascii(bytes, 0, 6);
-  if (head === "GIF87a" || head === "GIF89a") return "image/gif";
-  if (head.startsWith("%PDF-")) return "application/pdf";
-  if (head.startsWith("glTF")) return "model/gltf-binary";
-  if (head.startsWith("OggS")) return "audio/ogg";
-  return (
-    getIsoMediaType(bytes) ?? getRiffType(bytes) ?? getAudioFrameType(bytes)
-  );
-}
-
-function normalizeDownloadType(value: string | null | undefined) {
-  const type = (value?.split(";")[0] ?? "").trim().toLowerCase();
-  const canonical = TYPE_ALIASES[type] ?? type;
-  return DOWNLOAD_EXTENSION_BY_TYPE.has(canonical) ? canonical : null;
-}
+/** Plain-text formats; markup inside them still downloads as text. */
+const TEXT_EXTENSIONS: ReadonlySet<string> = new Set([
+  "txt",
+  "md",
+  "csv",
+  "tsv",
+  "json",
+]);
 
 const CONTROL_CHARACTERS = /[\u0000-\u001f\u007f-\u009f]/g;
 /** Bidirectional controls, zero-width characters and the byte-order mark. */
@@ -195,22 +125,12 @@ interface DownloadFileDecision {
   readonly type: string;
 }
 
-function getKeptExtension(extension: string | null): string | null {
-  return extension &&
-    INERT_EXTENSIONS.has(extension) &&
-    !ACTIVE_EXTENSIONS.has(extension)
-    ? extension
-    : null;
-}
-
 /**
  * The name and type to save a file under.
  *
  * `leadingBytes` are the first bytes of the content when the caller has them
  * (a native download is written to disk first, and a direct link is never
- * read, so those decide by name alone). A name without any extension may take
- * the extension of a served media type the caller declared (for example a
- * video URL without a file name).
+ * read, so those decide by name alone).
  */
 export function getDownloadFileDecision({
   fileName,
@@ -223,25 +143,43 @@ export function getDownloadFileDecision({
 }): DownloadFileDecision {
   const { base, extension } = splitFileName(fileName);
   const safeBase = getSafeBaseName(base);
-  const sniffed = leadingBytes ? sniffDownloadType(leadingBytes) : null;
-  const sniffedExtension = sniffed
-    ? DOWNLOAD_EXTENSION_BY_TYPE.get(sniffed)
-    : undefined;
-  if (sniffed && sniffedExtension) {
-    return { fileName: `${safeBase}.${sniffedExtension}`, type: sniffed };
+  const opaque = {
+    fileName: `${safeBase}.${OPAQUE_EXTENSION}`,
+    type: OPAQUE_TYPE,
+  };
+  if (extension && ACTIVE_EXTENSIONS.has(extension)) {
+    return opaque;
+  }
+  if (
+    leadingBytes &&
+    isMarkupContent(leadingBytes) &&
+    !(extension && TEXT_EXTENSIONS.has(extension))
+  ) {
+    return opaque;
+  }
+
+  const sniffed = leadingBytes ? sniffMediaType(leadingBytes) : null;
+  if (extension && INERT_EXTENSIONS.has(extension)) {
+    return {
+      fileName: `${safeBase}.${extension}`,
+      type:
+        sniffed && isSameFormat(sniffed, extension)
+          ? sniffed.type
+          : OPAQUE_TYPE,
+    };
+  }
+  if (sniffed) {
+    return { fileName: `${safeBase}.${sniffed.extension}`, type: sniffed.type };
   }
 
   const declaredExtension = extension
-    ? undefined
-    : declaredTypes
-        .map(normalizeDownloadType)
-        .map((type) =>
-          type ? DOWNLOAD_EXTENSION_BY_TYPE.get(type) : undefined
-        )
-        .find((value) => value !== undefined);
-  const savedExtension =
-    getKeptExtension(extension) ?? declaredExtension ?? OPAQUE_EXTENSION;
-  return { fileName: `${safeBase}.${savedExtension}`, type: OPAQUE_TYPE };
+    ? null
+    : (declaredTypes
+        .map(getExtensionForDeclaredType)
+        .find((value) => value !== null) ?? null);
+  return declaredExtension
+    ? { fileName: `${safeBase}.${declaredExtension}`, type: OPAQUE_TYPE }
+    : opaque;
 }
 
 function readLeadingBytes(blob: Blob): Promise<Uint8Array> {
@@ -257,7 +195,7 @@ function readLeadingBytes(blob: Blob): Promise<Uint8Array> {
     reader.onerror = () => {
       reject(reader.error ?? new Error("File read failed"));
     };
-    reader.readAsArrayBuffer(blob.slice(0, LEADING_BYTE_COUNT));
+    reader.readAsArrayBuffer(blob.slice(0, MEDIA_SIGNATURE_BYTE_COUNT));
   });
 }
 

@@ -231,8 +231,8 @@ describe("DropAttachmentDisplay", () => {
     );
     await user.click(screen.getByRole("button", { name: "Download" }));
 
-    // Content that is not a PDF keeps its name but is never rendered.
-    await waitFor(() => expect(savedNames).toEqual(["paper.pdf"]));
+    // An HTML document named .pdf is saved as an opaque file.
+    await waitFor(() => expect(savedNames).toEqual(["paper.bin"]));
     expect(savedTypes).toEqual(["application/octet-stream"]);
   });
 
