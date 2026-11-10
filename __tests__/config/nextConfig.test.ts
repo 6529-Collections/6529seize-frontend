@@ -28,6 +28,10 @@ describe("shared Next config", () => {
     );
   });
 
+  it("keeps next dev and next build free of upgrade reminders", () => {
+    expect(sharedConfig(publicEnv, "").experimental?.agentUpgrade).toBe(false);
+  });
+
   it("does not publish production browser source maps by default", () => {
     expect(
       sharedConfig(publicEnv, "").productionBrowserSourceMaps
