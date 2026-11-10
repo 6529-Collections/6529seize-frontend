@@ -106,6 +106,7 @@ export function toE2eeMessage(stored: StoredMessage): E2eeMessage {
       ...(stored.notice.detail === undefined
         ? {}
         : { detail: stored.notice.detail }),
+      ...(stored.notice.unverified === true ? { unverified: true } : {}),
     };
   }
   return message;
@@ -142,6 +143,17 @@ export class EngineStore {
   devices: E2eeDeviceInfo[] = [];
   /** Server switch (GET /e2ee/me); false until the server has answered. */
   attachmentsEnabled = false;
+  /**
+   * Whether this device trusts a member device for its owner (set by the
+   * engine from its trust record); member snapshots carry it.
+   */
+  memberTrust:
+    | ((member: {
+        profileId: string;
+        deviceKey: string;
+        wallet: string | null;
+      }) => boolean)
+    | null = null;
   readonly groups = new Map<string, GroupRuntime>();
   readonly profiles = new Map<string, ProfileInfo>();
   /** profile id -> devices waiting for "Add device" (engine/trust.ts). */
@@ -345,14 +357,21 @@ export class EngineStore {
         byProfile.set(member.profileId, entry);
       }
       const cached = this.directory.cached(member.deviceKey);
+      const wallet =
+        parseCredentialIdentity(member.identity)?.wallet ??
+        cached?.grant.wallet.toLowerCase() ??
+        null;
+      const pinned = this.memberTrust?.({
+        profileId: member.profileId,
+        deviceKey: member.deviceKey,
+        wallet,
+      });
       entry.devices.push({
         deviceKey: member.deviceKey,
         label: cached?.label ?? "Device",
         verified: this.directory.isVerified(member.deviceKey),
-        wallet:
-          parseCredentialIdentity(member.identity)?.wallet ??
-          cached?.grant.wallet.toLowerCase() ??
-          null,
+        wallet,
+        ...(pinned === undefined ? {} : { walletPinned: pinned }),
       });
     }
     return [...byProfile.values()];

@@ -113,6 +113,56 @@ describe("notices (contract 8.6)", () => {
     ]);
   });
 
+  it("marks an added device not yet verified for its owner in its own notice", () => {
+    const wallets = new Map([
+      ["a2", "0xaaa"],
+      ["b3", "0xbbb"],
+    ]);
+    expect(
+      deriveCommitNotices(
+        change({
+          added: [
+            { deviceKey: "a2", profileId: "alice" },
+            { deviceKey: "b3", profileId: "bob" },
+          ],
+          addedWallets: wallets,
+          unverifiedAdds: new Set(["b3"]),
+        })
+      )
+    ).toEqual([
+      {
+        type: "device_added",
+        actorProfileId: "alice",
+        targetProfileIds: ["alice"],
+        detail: "0xaaa",
+      },
+      {
+        type: "device_added",
+        actorProfileId: "alice",
+        targetProfileIds: ["bob"],
+        detail: "0xbbb",
+        unverified: true,
+      },
+    ]);
+    // Verified for its owner: one plain notice, as before.
+    expect(
+      deriveCommitNotices(
+        change({
+          added: [{ deviceKey: "b3", profileId: "bob" }],
+          addedWallets: wallets,
+          unverifiedAdds: new Set(),
+        })
+      )
+    ).toEqual([
+      {
+        type: "device_added",
+        actorProfileId: "alice",
+        targetProfileIds: ["bob"],
+        detail: "0xbbb",
+      },
+    ]);
+  });
+
   it("rename and admin changes", () => {
     expect(
       deriveCommitNotices(
