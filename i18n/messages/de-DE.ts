@@ -1302,4 +1302,7 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_TRANSFER_MESSAGES,
   ...DE_DE_THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...DE_DE_THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.message.imageLink": "Bildlink",
+  "e2ee.message.imageLinkFrom": "Bild von {host}",
+  "e2ee.message.markdownTable": "Nachrichtentabelle",
 } satisfies Partial<Record<MessageKey, string>>;

@@ -1,5 +1,6 @@
 "use client";
 import { useWaveChatPrefetch } from "@/hooks/competitions/useWaveChatPrefetch";
+import useCapacitor from "@/hooks/useCapacitor";
 
 import React, { useCallback, useMemo, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -163,6 +164,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       ? (selectedLegacyView as unknown as BrainView)
       : activeView;
   const { registerRef } = useLayout();
+  const { isIos } = useCapacitor();
   const { connectedProfile, isAuthenticated } = useAuth();
   const hasValidNotificationAuth = isAuthenticated === true;
   const shouldShowCurationTabs = Boolean(isApp && waveActive && wave?.id);
@@ -381,6 +383,9 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   return (
     <nav
       ref={setMobileTabsRef}
+      data-compact-keyboard-chat-tabs={
+        isIos && waveActive && isChatActive ? "true" : undefined
+      }
       aria-label={t(
         locale,
         waveActive

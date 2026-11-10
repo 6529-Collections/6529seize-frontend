@@ -14,10 +14,11 @@ import styles from "./CollectDetailActionRow.module.css";
 
 export const CollectDetailHasPrimaryAction = createContext(false);
 
-// Only the Meme detail page opts in; other inline trade surfaces keep their layout.
+// Card detail pages opt in; other inline trade surfaces keep their layout.
 export const CollectDetailLayout = createContext<{
   readonly offerAction: ReactNode;
   readonly marketLink: ReactNode;
+  readonly stickyActions: boolean;
 } | null>(null);
 
 /** Keeps the existing listing status above its actions. */
@@ -46,7 +47,11 @@ function CollectDetailFooter({ children }: { readonly children?: ReactNode }) {
           {children}
         </div>
       )}
-      {layout.marketLink}
+      {Boolean(layout.marketLink) && (
+        <div data-collect-inline-market-link className="tw-contents">
+          {layout.marketLink}
+        </div>
+      )}
     </div>
   );
 }
@@ -75,29 +80,32 @@ export default function CollectDetailActionRow({
     );
   }
   return (
-    <MobileActionRow
+    <CardActionRow
       primaryAction={primaryAction}
       offerAction={layout.offerAction}
       supportingActions={supportingActions}
       details={details}
+      stickyActions={layout.stickyActions}
     >
       {children}
-    </MobileActionRow>
+    </CardActionRow>
   );
 }
 
-function MobileActionRow({
+function CardActionRow({
   children,
   primaryAction,
   offerAction,
   supportingActions,
   details,
+  stickyActions,
 }: {
   readonly children: ReactNode;
   readonly primaryAction: ReactNode;
   readonly offerAction: ReactNode;
   readonly supportingActions?: ReactNode;
   readonly details?: ReactNode;
+  readonly stickyActions: boolean;
 }) {
   const [offscreen, setOffscreen] = useState(false);
   const { isCapacitor } = useCapacitor();
@@ -116,7 +124,7 @@ function MobileActionRow({
   return (
     <>
       <div
-        ref={observeRow}
+        ref={stickyActions ? observeRow : undefined}
         data-collect-inline-actions
         data-testid="collect-inline-actions"
         className={styles["inlineActions"]}
@@ -132,7 +140,8 @@ function MobileActionRow({
         </CollectDetailHasPrimaryAction.Provider>
         {details}
       </div>
-      {typeof document !== "undefined" &&
+      {stickyActions &&
+        typeof document !== "undefined" &&
         createPortal(
           <div
             data-collect-sticky-actions
