@@ -229,28 +229,26 @@ export function extractImageAlt(
   return undefined;
 }
 
-export function extractFaviconUrl(
+/** Every favicon the preview lists, in preference order. */
+export function extractFaviconCandidates(
   data: OpenGraphPreviewData | null | undefined
-): string | undefined {
+): string[] {
   if (!data) {
-    return undefined;
+    return [];
   }
 
-  for (const key of FAVICON_KEYS) {
-    const faviconUrl = extractImageFromValue(data[key]);
-    if (faviconUrl) {
-      return faviconUrl;
+  const candidates: string[] = [];
+  for (const key of [...FAVICON_KEYS, ...FAVICON_COLLECTION_KEYS]) {
+    const value = data[key];
+    for (const entry of Array.isArray(value) ? value : [value]) {
+      const faviconUrl = extractImageFromValue(entry);
+      if (faviconUrl && !candidates.includes(faviconUrl)) {
+        candidates.push(faviconUrl);
+      }
     }
   }
 
-  for (const key of FAVICON_COLLECTION_KEYS) {
-    const faviconUrl = extractImageFromValue(data[key]);
-    if (faviconUrl) {
-      return faviconUrl;
-    }
-  }
-
-  return undefined;
+  return candidates;
 }
 
 export function getFirstPartyOgKindFromImageUrl(

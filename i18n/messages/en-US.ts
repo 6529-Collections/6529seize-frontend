@@ -14,6 +14,7 @@ import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.en-US.json"
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.en-US.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.en-US.json";
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.en-US.json";
+import appWalletRecoveryFilesMessages from "@/i18n/messages/appWalletRecoveryFiles.en-US.json";
 /* eslint max-lines: "off" */
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-US.json";
 
@@ -3425,6 +3426,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...studioTemplateDescriptions,
   ...profileCmsStudioUploadMessages,
   ...studioWalletImportMessages,
+  ...appWalletRecoveryFilesMessages,
   "nftActivity.loading": "Loading NFT activity…",
   "nftActivity.error": "Could not load NFT activity.",
   "nftActivity.moreError": "Could not load more NFT activity.",

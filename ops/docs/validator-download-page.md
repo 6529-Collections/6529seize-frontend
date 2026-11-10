@@ -32,7 +32,10 @@ place of the page it asked for. Each page and the download route check the
 cookie again.
 
 - The form posts to `/validator/unlock`. Each address gets 10 tries in 15
-  minutes, right or wrong.
+  minutes, right or wrong. Each server process also accepts at most 100
+  wrong passwords in 15 minutes from all addresses together; after that the
+  form asks everyone to wait until the window ends. Right passwords do not
+  count toward that budget.
 - A correct password sets `validator_access`: `HttpOnly`, `Secure`,
   `SameSite=Strict`, path `/validator`, for 30 days. It holds an expiry and
   an HMAC whose key comes from the password through scrypt, so changing the

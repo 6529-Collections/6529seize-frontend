@@ -138,8 +138,11 @@ async function getApiFetch(): Promise<typeof fetch> {
   }
 
   try {
-    const { ssrFetch } = await import("@/lib/fetch/ssrFetch");
-    return ssrFetch;
+    // Previews show public data and are cached for every viewer, so they are
+    // fetched without the viewer's wallet session. The cache scope above
+    // separates callers only by their API access header.
+    const { anonymousSsrFetch } = await import("@/lib/fetch/ssrFetch");
+    return anonymousSsrFetch;
   } catch {
     // Preview enrichment should degrade to public API data if server signing is unavailable.
     return fetch;

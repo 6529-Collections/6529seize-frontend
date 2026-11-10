@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import { publicEnv } from "@/config/env";
 import { getFarcasterWarpcastApiKey } from "@/config/serverEnv";
 import {
-  BodyTooLargeError,
   UnsupportedContentTypeError,
   assertContentType,
   isHtmlContentType,
@@ -46,6 +45,14 @@ import {
   extractFirstMetaContent,
   extractTitleTag,
 } from "@/app/api/open-graph/utils";
+import {
+  PREVIEW_HTML_MAX_BYTES,
+  enforcePreviewClientLimit,
+  isPreviewBusyError,
+  previewBusyResponse,
+  withPreviewFetchSlot,
+} from "@/app/api/open-graph/previewAdmission";
+import { PREVIEW_ALLOWED_PORTS } from "@/app/api/open-graph/publicUrlOptions";
 
 const WARPCAST_API_BASE =
   publicEnv.FARCASTER_WARPCAST_API_BASE ?? "https://api.warpcast.com";
@@ -63,7 +70,6 @@ const USER_AGENT =
   "6529seize-farcaster/1.0 (+https://6529.io; Fetching Farcaster metadata)";
 const HTML_ACCEPT_HEADER =
   "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8";
-const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
 const JSON_RESPONSE_MAX_BYTES = 2 * 1024 * 1024;
 const FRAME_IMAGE_META_KEYS = [
   "fc:frame:image",
@@ -87,6 +93,7 @@ const PUBLIC_URL_POLICY: UrlGuardOptions["policy"] = {
 
 const PUBLIC_URL_OPTIONS: UrlGuardOptions = {
   policy: PUBLIC_URL_POLICY,
+  allowedPorts: PREVIEW_ALLOWED_PORTS,
 };
 
 const castCache = new LruTtlCache<string, FarcasterCastPreview | null>({
@@ -185,16 +192,19 @@ const fetchWarpcastJson = async <T>(
 };
 
 const fetchCastPreview = async (
-  identifier: Extract<FarcasterResourceIdentifier, { type: "cast" }>
+  identifier: Extract<FarcasterResourceIdentifier, { type: "cast" }>,
+  signal?: AbortSignal
 ): Promise<FarcasterCastPreview | null> => {
   const cached = castCache.get(identifier.canonicalUrl);
   if (cached !== undefined) {
     return cached;
   }
 
-  const response = await fetchWarpcastJson<WarpcastCastResponse>("/v2/cast", {
-    hash: identifier.castHash,
-  });
+  const response = await withPreviewFetchSlot(signal, () =>
+    fetchWarpcastJson<WarpcastCastResponse>("/v2/cast", {
+      hash: identifier.castHash,
+    })
+  );
 
   const mapped = mapWarpcastCast(response, identifier.canonicalUrl);
   castCache.set(identifier.canonicalUrl, mapped);
@@ -202,18 +212,18 @@ const fetchCastPreview = async (
 };
 
 const fetchProfilePreview = async (
-  identifier: Extract<FarcasterResourceIdentifier, { type: "profile" }>
+  identifier: Extract<FarcasterResourceIdentifier, { type: "profile" }>,
+  signal?: AbortSignal
 ): Promise<FarcasterProfilePreview | null> => {
   const cached = profileCache.get(identifier.canonicalUrl);
   if (cached !== undefined) {
     return cached;
   }
 
-  const response = await fetchWarpcastJson<WarpcastUserResponse>(
-    "/v2/user-by-username",
-    {
+  const response = await withPreviewFetchSlot(signal, () =>
+    fetchWarpcastJson<WarpcastUserResponse>("/v2/user-by-username", {
       username: identifier.username,
-    }
+    })
   );
 
   const mapped = mapWarpcastUser(response, identifier.canonicalUrl);
@@ -222,18 +232,18 @@ const fetchProfilePreview = async (
 };
 
 const fetchChannelPreview = async (
-  identifier: Extract<FarcasterResourceIdentifier, { type: "channel" }>
+  identifier: Extract<FarcasterResourceIdentifier, { type: "channel" }>,
+  signal?: AbortSignal
 ): Promise<FarcasterChannelPreview | null> => {
   const cached = channelCache.get(identifier.canonicalUrl);
   if (cached !== undefined) {
     return cached;
   }
 
-  const response = await fetchWarpcastJson<WarpcastChannelResponse>(
-    "/v2/channel",
-    {
+  const response = await withPreviewFetchSlot(signal, () =>
+    fetchWarpcastJson<WarpcastChannelResponse>("/v2/channel", {
       channelId: identifier.channel,
-    }
+    })
   );
 
   const mapped = mapWarpcastChannel(response, identifier.canonicalUrl);
@@ -271,7 +281,8 @@ type FetchHtmlResult =
     };
 
 /**
- * Fetches frame HTML with public URL guarding and a bounded response body.
+ * Fetches frame HTML with public URL guarding. Frame metadata lives in the
+ * head, so a long page is read only up to the cap and parsed from that.
  */
 const fetchHtml = async (url: URL): Promise<FetchHtmlResult | null> => {
   try {
@@ -303,17 +314,12 @@ const fetchHtml = async (url: URL): Promise<FetchHtmlResult | null> => {
     assertContentType(response.headers, isHtmlContentType, "HTML", {
       allowMissing: true,
     });
-    const html = await readLimitedText(response, HTML_RESPONSE_MAX_BYTES);
+    const html = await readLimitedText(response, PREVIEW_HTML_MAX_BYTES, {
+      truncate: true,
+    });
     const finalUrl = response.url || url.toString();
     return { html, finalUrl };
   } catch (error) {
-    if (error instanceof BodyTooLargeError) {
-      return {
-        blockedReason:
-          "Farcaster frame response is too large to process safely.",
-      };
-    }
-
     if (error instanceof UnsupportedContentTypeError) {
       return {
         blockedReason:
@@ -339,14 +345,15 @@ const fetchHtml = async (url: URL): Promise<FetchHtmlResult | null> => {
  * Reads and normalizes a Farcaster frame preview, including blocked outcomes.
  */
 const detectFramePreview = async (
-  url: URL
+  url: URL,
+  signal?: AbortSignal
 ): Promise<FarcasterFramePreview | FarcasterUnsupportedPreview | null> => {
   const cached = frameCache.get(url.toString());
   if (cached !== undefined) {
     return cached;
   }
 
-  const result = await fetchHtml(url);
+  const result = await withPreviewFetchSlot(signal, () => fetchHtml(url));
   if (!result) {
     frameCache.set(url.toString(), null);
     return null;
@@ -423,24 +430,25 @@ const toUnsupported = (
 });
 
 const handleResource = async (
-  resource: FarcasterResourceIdentifier
+  resource: FarcasterResourceIdentifier,
+  signal?: AbortSignal
 ): Promise<FarcasterPreviewResponse> => {
   if (resource.type === "cast") {
-    const preview = await fetchCastPreview(resource);
+    const preview = await fetchCastPreview(resource, signal);
     return (
       preview ?? toUnavailable(resource.canonicalUrl, "Cast not available")
     );
   }
 
   if (resource.type === "profile") {
-    const preview = await fetchProfilePreview(resource);
+    const preview = await fetchProfilePreview(resource, signal);
     return (
       preview ?? toUnavailable(resource.canonicalUrl, "Profile not available")
     );
   }
 
   if (resource.type === "channel") {
-    const preview = await fetchChannelPreview(resource);
+    const preview = await fetchChannelPreview(resource, signal);
     return (
       preview ?? toUnavailable(resource.canonicalUrl, "Channel not available")
     );
@@ -469,6 +477,11 @@ const handleGuardError = (error: unknown, fallbackStatus = 400) => {
 };
 
 export async function GET(request: NextRequest) {
+  const rateLimited = enforcePreviewClientLimit(request);
+  if (rateLimited) {
+    return rateLimited;
+  }
+
   let targetUrl: URL;
 
   try {
@@ -487,12 +500,12 @@ export async function GET(request: NextRequest) {
     const resource = parseFarcasterResource(targetUrl);
 
     if (resource) {
-      const response = await handleResource(resource);
+      const response = await handleResource(resource, request.signal);
       return NextResponse.json(response);
     }
 
     if (targetUrl.protocol === "http:" || targetUrl.protocol === "https:") {
-      const framePreview = await detectFramePreview(targetUrl);
+      const framePreview = await detectFramePreview(targetUrl, request.signal);
       if (framePreview) {
         return NextResponse.json(framePreview);
       }
@@ -502,6 +515,10 @@ export async function GET(request: NextRequest) {
       toUnsupported(targetUrl.toString(), "Unsupported Farcaster URL")
     );
   } catch (error) {
+    if (isPreviewBusyError(error)) {
+      return previewBusyResponse();
+    }
+
     if (isUrlGuardError(error)) {
       return handleGuardError(error, error.statusCode);
     }
