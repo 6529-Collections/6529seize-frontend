@@ -1,6 +1,7 @@
 jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
 import { createOpenSeaPlan } from "@/app/api/open-graph/opensea/service";
+import { BodyTooLargeError } from "@/lib/fetch/limitedBody";
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import { publicEnv } from "@/config/env";
 import { getStagingApiKey } from "@/config/serverEnv";
@@ -22,6 +23,25 @@ describe("createOpenSeaPlan", () => {
   >;
   const originalFetch = global.fetch;
   const mockFetch = jest.fn();
+  // Alchemy bodies are read through the byte-limited stream reader, so give
+  // the `json()` mocks a matching stream body.
+  const fetchWithStreamBody = async (...args: unknown[]) => {
+    const response = await mockFetch(...args);
+    if (typeof response?.json !== "function" || response.body) {
+      return response;
+    }
+    const text = JSON.stringify(await response.json());
+    return {
+      ...response,
+      headers: new Headers(),
+      body: new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode(text));
+          controller.close();
+        },
+      }),
+    };
+  };
   const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
 
   beforeEach(() => {
@@ -40,7 +60,7 @@ describe("createOpenSeaPlan", () => {
     });
     mockedGetAlchemyApiKey.mockReturnValue("test-alchemy-key");
     jest.mocked(getStagingApiKey).mockReturnValue(undefined);
-    global.fetch = mockFetch as unknown as typeof fetch;
+    global.fetch = fetchWithStreamBody as unknown as typeof fetch;
   });
 
   afterAll(() => {
@@ -362,6 +382,88 @@ describe("createOpenSeaPlan", () => {
       "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/1"
     );
     expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  describe("oversized token metadata", () => {
+    const itemUrl =
+      "https://opensea.io/item/ethereum/0x495f947276749ce646f68ac8c248420045cb7b5e/1";
+    const pageMetadata = {
+      html: `
+        <html>
+          <head>
+            <meta property="og:title" content="OpenGraph token name" />
+            <meta property="og:image" content="https://i.seadn.io/s/raw/files/opengraph-token.png" />
+          </head>
+        </html>
+      `,
+      contentType: "text/html; charset=utf-8",
+      finalUrl: itemUrl,
+    };
+    const expectPagePreview = (data: unknown) =>
+      expect(data).toEqual(
+        expect.objectContaining({
+          type: "opensea.nft",
+          title: "OpenGraph token name",
+          image: expect.objectContaining({
+            url: "https://i.seadn.io/s/raw/files/opengraph-token.png",
+          }),
+        })
+      );
+
+    it("falls back to the page metadata when the token URI document is over the cap", async () => {
+      const tokenUri = "https://metadata.example/token/1";
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: async () => ({ tokenUri, raw: { tokenUri, metadata: {} } }),
+      });
+      fetchTokenMetadata.mockRejectedValueOnce(
+        new BodyTooLargeError(1024 * 1024)
+      );
+      fetchHtml.mockResolvedValue(pageMetadata);
+
+      const plan = createOpenSeaPlan(new URL(itemUrl), {
+        fetchHtml,
+        assertPublicUrl,
+        fetchTokenMetadata,
+      });
+      const result = await plan?.execute();
+
+      expect(fetchTokenMetadata).toHaveBeenCalledTimes(1);
+      expectPagePreview(result?.data);
+    });
+
+    it("does not parse an Alchemy response over 1 MiB and answers as for an Alchemy error", async () => {
+      const parse = jest.spyOn(JSON, "parse");
+      const cancel = jest.fn();
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ "content-length": String(1024 * 1024 + 1) }),
+        body: new ReadableStream<Uint8Array>({ cancel }),
+      });
+
+      try {
+        const plan = createOpenSeaPlan(new URL(itemUrl), {
+          fetchHtml,
+          assertPublicUrl,
+          fetchTokenMetadata,
+        });
+        const result = await plan?.execute();
+
+        expect(cancel).toHaveBeenCalledTimes(1);
+        expect(parse).not.toHaveBeenCalled();
+        expect(result?.data).toEqual(
+          expect.objectContaining({
+            type: "opensea.nft",
+            title: "NFT #1",
+            image: null,
+          })
+        );
+      } finally {
+        parse.mockRestore();
+      }
+    });
   });
 
   it("uses the backend proxy for Ethereum when the API key is unavailable", async () => {

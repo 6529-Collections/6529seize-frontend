@@ -256,10 +256,12 @@ function GifPickerDialog({
   giphyApiKey,
   onSelect,
   onClose,
+  description,
 }: {
   readonly giphyApiKey?: string | undefined;
   readonly onSelect: (gif: string) => void;
   readonly onClose: () => void;
+  readonly description?: string | undefined;
 }) {
   const isMobile = useIsMobileScreen();
   const locale = useBrowserLocale();
@@ -370,6 +372,11 @@ function GifPickerDialog({
               clear={true}
               autoFocus={true}
             />
+            {description ? (
+              <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+                {description}
+              </p>
+            ) : null}
           </div>
           <GiphyResults
             onSelect={onSelect}
@@ -392,11 +399,13 @@ export default function CreateDropGifPicker({
   show,
   setShow,
   onSelect,
+  description,
 }: {
   readonly giphyApiKey?: string | undefined;
   readonly show: boolean;
   readonly setShow: (show: boolean) => void;
   readonly onSelect: (gif: string) => void;
+  readonly description?: string | undefined;
 }) {
   const handleClose = () => setShow(false);
 
@@ -409,6 +418,7 @@ export default function CreateDropGifPicker({
       giphyApiKey={giphyApiKey}
       onSelect={onSelect}
       onClose={handleClose}
+      description={description}
     />
   );
 }

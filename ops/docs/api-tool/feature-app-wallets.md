@@ -77,6 +77,19 @@
   - unlock-gated reveal/hide and copy for mnemonic and private key,
   - unlock-gated `Download Recovery File`,
   - delete with confirmation.
+- Recovery exports open the native share sheet with a temporary file. The app
+  removes that file when the sheet closes on iOS and shortly after it closes
+  on Android, whether the export was saved, shared, cancelled, or failed; it
+  keeps no copy on the device.
+- If an earlier app version left a recovery file for the wallet in the app's
+  Documents folder, wallet detail shows `Recovery file saved on this device`
+  with a `Remove saved recovery files` action. The notice explains that a
+  plaintext file holds the recovery phrase and private key in readable form and
+  asks the user to save the phrase somewhere safe first. Nothing is removed
+  until the user chooses the action. The notice is hidden when the folder
+  cannot be listed.
+- Wallet avatars are generated on the device from the wallet address; no
+  avatar image is requested from another service.
 - Visiting `/tools/app-wallets/{appWalletAddress}` for a missing wallet shows
   `Wallet with address ... not found`.
 - Wallet detail balance area can show loading or `Error` when balance lookup
