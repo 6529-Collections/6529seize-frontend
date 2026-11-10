@@ -29,6 +29,7 @@ const HELP_BOT_HANDLE = "help6529";
 const HELP_BOT_FINAL_REACTIONS = new Set([":white_check_mark:", ":warning:"]);
 
 export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
+  readonly refreshWaveMessages?: (waveId: string) => Promise<void>;
   readonly removeDrops: (waveId: string, dropIds: readonly string[]) => void;
   readonly activeWaveId: string | null;
   /** Only the displayed Chat panel may acknowledge incoming messages. */
@@ -49,6 +50,13 @@ export interface UseWaveRealtimeUpdaterProps extends WaveDataStoreUpdater {
   }>;
   readonly removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
   readonly isWaveMuted: (waveId: string) => boolean;
+}
+
+export interface ReplyPlacementChange {
+  readonly waveId: string;
+  readonly dropId: string;
+  readonly collapseReplies?: boolean | undefined;
+  readonly hasReplies?: boolean | undefined;
 }
 
 export enum ProcessIncomingDropType {

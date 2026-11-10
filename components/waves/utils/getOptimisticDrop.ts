@@ -8,6 +8,7 @@ import type { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiReplyToDropResponse } from "@/generated/models/ApiReplyToDropResponse";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { getIndividuallyCollapsedThread } from "@/helpers/waves/collapsed-replies.helpers";
 import { getOptimisticDropId } from "@/helpers/waves/drop.helpers";
 import type { ApiWaveMinWithChatLinkSettings } from "@/helpers/waves/wave.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
@@ -72,6 +73,10 @@ export const getOptimisticDrop = (
 
   const replyTo = getReplyTo();
   const replyToObj = replyTo ? { reply_to: replyTo } : {};
+  const collapsedReplyThread =
+    activeDrop?.action === ActiveDropAction.REPLY
+      ? getIndividuallyCollapsedThread(activeDrop.drop)
+      : undefined;
   const poll = getOptimisticPoll(dropRequest);
 
   return {
@@ -82,6 +87,9 @@ export const getOptimisticDrop = (
       : {}),
     serial_no: Date.now(),
     ...replyToObj,
+    ...(collapsedReplyThread
+      ? { collapsed_reply_thread: collapsedReplyThread }
+      : {}),
     wave: {
       id: wave.id,
       name: wave.name,

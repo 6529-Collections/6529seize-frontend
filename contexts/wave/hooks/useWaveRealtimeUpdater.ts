@@ -8,7 +8,13 @@ import type {
   WsDropUpdateRefMessage,
   WsDropUpdateMessage,
 } from "@/helpers/Types";
-import { WsMessageType } from "@/helpers/Types";
+import {
+  isWsDropUpdateRefData,
+  WS_DROP_UPDATE_REASON_REPLY_COLLAPSE,
+  WsMessageType,
+} from "@/helpers/Types";
+import { getWebSocketMessageReason } from "@/services/websocket/WebSocketTypes";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
@@ -38,6 +44,7 @@ import {
   updateCachedDrop,
   type ProcessIncomingDropFn,
   type ProcessIncomingDropOptions,
+  type ReplyPlacementChange,
   type UseWaveRealtimeUpdaterProps,
 } from "./useWaveRealtimeUpdater.helpers";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
@@ -522,18 +529,48 @@ const useAttachmentStatusUpdate = ({
 
 const useDropUpdateMessages = (
   processIncomingDrop: ProcessIncomingDropFn,
-  processDropUpdateRef: (messageData: unknown) => void
+  processDropUpdateRef: (messageData: unknown) => void,
+  onReplyPlacementChanged: (change: ReplyPlacementChange) => void
 ): void => {
   const pendingDropUpdateRef = useRef<Promise<void> | null>(null);
 
   useWebSocketMessage<WsDropUpdateRefMessage["data"]>(
     WsMessageType.DROP_UPDATE_REF,
-    processDropUpdateRef
+    (messageData) => {
+      if (
+        isWsDropUpdateRefData(messageData) &&
+        messageData.reason === WS_DROP_UPDATE_REASON_REPLY_COLLAPSE
+      ) {
+        onReplyPlacementChanged({
+          waveId: messageData.wave_id,
+          dropId: messageData.drop_id,
+          collapseReplies: messageData.collapse_replies,
+          hasReplies: messageData.reply_placement_has_replies,
+        });
+        return;
+      }
+      processDropUpdateRef(messageData);
+    }
   );
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
     (messageData) => {
+      if (
+        getWebSocketMessageReason(messageData) ===
+        WS_DROP_UPDATE_REASON_REPLY_COLLAPSE
+      ) {
+        const waveId = getIncomingWaveId(messageData);
+        if (waveId) {
+          onReplyPlacementChanged({
+            waveId,
+            dropId: messageData.id,
+            collapseReplies: messageData.collapse_replies,
+            hasReplies: messageData.reply_placement_has_replies,
+          });
+        }
+        return;
+      }
       pendingDropUpdateRef.current = processIncomingDrop(
         messageData,
         ProcessIncomingDropType.DROP_INSERT,
@@ -617,9 +654,11 @@ export function useWaveRealtimeUpdater({
   removeDrops,
   removeWaveDeliveredNotifications,
   isWaveMuted,
+  refreshWaveMessages,
 }: UseWaveRealtimeUpdaterProps): {
   processIncomingDrop: ProcessIncomingDropFn;
   processDropRemoved: (waveId: string, dropId: string) => void;
+  applyReplyPlacement: (change: ReplyPlacementChange) => Promise<boolean>;
 } {
   const queryClient = useQueryClient();
   const { processIncomingDrop, processDropUpdateRef, gapSync } =
@@ -651,7 +690,49 @@ export function useWaveRealtimeUpdater({
     queryClient,
   });
 
-  useDropUpdateMessages(processIncomingDrop, processDropUpdateRef);
+  const applyReplyPlacement = useCallback(
+    async ({
+      waveId,
+      dropId,
+      collapseReplies,
+      hasReplies,
+    }: ReplyPlacementChange): Promise<boolean> => {
+      void queryClient.invalidateQueries({
+        queryKey: [QueryKey.DROP_REPLY_THREAD_TARGET, { wave_id: waveId }],
+      });
+      const wave = getData(waveId);
+      if (hasReplies === false && typeof collapseReplies === "boolean") {
+        const drop = wave?.drops.find((item) => item.id === dropId);
+        if (
+          drop?.type === DropSize.FULL &&
+          (drop.collapse_replies !== collapseReplies ||
+            (drop.replies_count ?? 0) > 0)
+        ) {
+          updateData({
+            key: waveId,
+            drops: [
+              { ...drop, collapse_replies: collapseReplies, replies_count: 0 },
+            ],
+          });
+        }
+        return false;
+      }
+      if (!refreshWaveMessages || (!wave && waveId !== activeWaveId))
+        return false;
+      try {
+        await refreshWaveMessages(waveId);
+        return true;
+      } catch (error) {
+        reportBackgroundTaskError("Failed to refresh reply placement:", error);
+        return false;
+      }
+    },
+    [activeWaveId, getData, queryClient, refreshWaveMessages, updateData]
+  );
+
+  useDropUpdateMessages(processIncomingDrop, processDropUpdateRef, (change) => {
+    void applyReplyPlacement(change);
+  });
   useDropDeleteMessages(removeDrops);
 
   // React Query state has its own resync (WebSocketRecoverySync); the message
@@ -666,5 +747,5 @@ export function useWaveRealtimeUpdater({
     processAttachmentStatusUpdate
   );
 
-  return { processIncomingDrop, processDropRemoved };
+  return { processIncomingDrop, processDropRemoved, applyReplyPlacement };
 }
