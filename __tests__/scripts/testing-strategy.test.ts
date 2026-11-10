@@ -357,7 +357,10 @@ describe("testing strategy CI plan", () => {
   });
 
   it("builds when the first-load budget or its checker changes", () => {
-    for (const file of ["scripts/perf-budget.json", "scripts/perf-budget.cjs"]) {
+    for (const file of [
+      "scripts/perf-budget.json",
+      "scripts/perf-budget.cjs",
+    ]) {
       expect(createCiPlan([file]).checks["build"]!.required).toBe(true);
     }
   });
@@ -656,6 +659,7 @@ describe("testing strategy CI plan", () => {
       },
       defaults: { run: { shell: "bash" } },
       strategy: {
+        "fail-fast": false,
         matrix: "${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}",
       },
     });
@@ -668,6 +672,11 @@ describe("testing strategy CI plan", () => {
         expect.objectContaining({
           name: "Run critical route-shell Playwright pack",
           if: "matrix.lane == 'playwright-critical-shell'",
+        }),
+        expect.objectContaining({
+          name: "Run own-profile Following browser regression pack",
+          if: "matrix.lane == 'playwright-critical-shell-profile'",
+          run: './bin/6529 run test:e2e:profile-following-sandbox --shard="$PROFILE_FOLLOWING_SHARD"',
         }),
       ])
     );
