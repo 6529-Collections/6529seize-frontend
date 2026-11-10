@@ -42,65 +42,87 @@ describe("getDownloadFileDecision", () => {
     ).toEqual({ fileName: "art.png", type: "image/png" });
   });
 
+  const OPAQUE = "application/octet-stream";
+
   it.each([
-    ["page.html", "text/html", "<!doctype html><script>"],
-    ["logo.svg", "image/svg+xml", "<svg xmlns="],
-    ["run.js", "text/javascript", "alert(1)"],
-    ["setup.exe", "application/x-msdownload", "MZ\u0090\0"],
-    ["fake.png", "image/png", "<html><body>"],
-  ])("saves %s (%s) as an opaque file", (fileName, declaredType, content) => {
-    expect(
-      getDownloadFileDecision({
-        fileName,
-        declaredTypes: [declaredType],
-        leadingBytes: bytes(content),
-      })
-    ).toEqual({
-      fileName: `${fileName.split(".")[0]}.bin`,
-      type: "application/octet-stream",
-    });
-  });
+    ["x.html", "text/html", "<!doctype html><script>", "x.bin"],
+    ["x.svg", "image/svg+xml", "<svg xmlns=", "x.bin"],
+    ["run.js", "text/javascript", "alert(1)", "run.bin"],
+    ["setup.exe", "application/x-msdownload", "MZ", "setup.bin"],
+    ["x.pdf.exe", "application/pdf", "MZ", "x.pdf.bin"],
+    ["no-extension", "", "data", "no-extension.bin"],
+    ["unknown.qqq", "", "data", "unknown.bin"],
+  ])(
+    "saves %s (%s) as an opaque .bin file",
+    (fileName, declaredType, content, expected) => {
+      expect(
+        getDownloadFileDecision({
+          fileName,
+          declaredTypes: [declaredType],
+          leadingBytes: bytes(content),
+        })
+      ).toEqual({ fileName: expected, type: OPAQUE });
+    }
+  );
 
-  it("keeps plain text and CSV, which have no signature, as text", () => {
-    expect(
-      getDownloadFileDecision({
-        fileName: "notes.txt",
-        declaredTypes: ["text/plain; charset=utf-8"],
-        leadingBytes: bytes("hello"),
-      })
-    ).toEqual({ fileName: "notes.txt", type: "text/plain" });
-    expect(
-      getDownloadFileDecision({
-        fileName: "data.csv",
-        declaredTypes: ["application/octet-stream"],
-        leadingBytes: bytes("a,b\n1,2"),
-      })
-    ).toEqual({ fileName: "data.csv", type: "text/csv" });
-  });
+  it.each([
+    ["report.docx", "application/vnd.openxmlformats-officedocument"],
+    ["photos.zip", "application/zip"],
+    ["data.csv", "text/csv"],
+    ["notes.html.txt", "text/plain"],
+    ["a.txt", "text/html"],
+    ["fake.png", "image/png"],
+  ])(
+    "keeps the name of %s but never lets the browser render it",
+    (fileName, declaredType) => {
+      expect(
+        getDownloadFileDecision({
+          fileName,
+          declaredTypes: [declaredType],
+          leadingBytes: bytes("<html><script>alert(1)</script>"),
+        })
+      ).toEqual({ fileName, type: OPAQUE });
+    }
+  );
 
-  it("uses the declared type, then the extension, when no bytes are available", () => {
-    expect(
-      getDownloadFileDecision({
-        fileName: "video",
-        declaredTypes: ["video/mp4"],
-      })
-    ).toEqual({ fileName: "video.mp4", type: "video/mp4" });
+  it("decides by name when no bytes are available", () => {
     expect(
       getDownloadFileDecision({
         fileName: "photo.jpeg",
         declaredTypes: ["image"],
       })
-    ).toEqual({ fileName: "photo.jpg", type: "image/jpeg" });
-    expect(getDownloadFileDecision({ fileName: "animation.html" })).toEqual({
-      fileName: "animation.bin",
-      type: "application/octet-stream",
+    ).toEqual({ fileName: "photo.jpeg", type: OPAQUE });
+    expect(getDownloadFileDecision({ fileName: "report.docx" })).toEqual({
+      fileName: "report.docx",
+      type: OPAQUE,
     });
+    expect(
+      getDownloadFileDecision({
+        fileName: "animation.html",
+        declaredTypes: ["video/mp4"],
+      })
+    ).toEqual({ fileName: "animation.bin", type: OPAQUE });
+  });
+
+  it("names a file without an extension after a declared media type", () => {
+    expect(
+      getDownloadFileDecision({
+        fileName: "video",
+        declaredTypes: ["video/mp4"],
+      })
+    ).toEqual({ fileName: "video.mp4", type: OPAQUE });
+    expect(
+      getDownloadFileDecision({
+        fileName: "page",
+        declaredTypes: ["text/html"],
+      })
+    ).toEqual({ fileName: "page.bin", type: OPAQUE });
   });
 
   it.each([
     ["../../etc/passwd.png", "_.._etc_passwd.png"],
     ["C:\\Users\\me\\photo.png", "C__Users_me_photo.png"],
-    ["re\u202Egnp.exe", "regnp.png"],
+    ["re\u202Egnp.exe", "regnp.bin"],
     ["line\nbreak\u0000.png", "linebreak.png"],
     [".hidden.png", "hidden.png"],
     ["...", "download.png"],

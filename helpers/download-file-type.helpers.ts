@@ -1,12 +1,16 @@
 /**
  * Decides the type and file name of a file the app saves for the user.
  *
- * The saved file never keeps a type or extension only because the server or
- * the uploader declared it: the type comes from the leading bytes where they
- * are available, otherwise from a declared type or extension on the list of
- * formats the app serves. Anything else is saved as an opaque binary file
- * (`application/octet-stream`, `.bin`), so a document a browser would render
- * or a script the system would run opens as neither.
+ * - When the leading bytes show a served media format (image, video, audio,
+ *   GLB, PDF), the file is saved as that type with its usual extension.
+ * - Otherwise the name's last extension decides. Inert document, data,
+ *   archive and media extensions are kept, and the file is saved as
+ *   `application/octet-stream` so the browser downloads it instead of
+ *   rendering it, whatever type the server declared.
+ * - Extensions a browser or system can render as active content or run
+ *   (HTML, SVG, scripts, executables, ...) and unknown or missing extensions
+ *   become `.bin`. Only the last extension counts: `invoice.pdf.exe` is an
+ *   `exe`.
  */
 
 const OPAQUE_TYPE = "application/octet-stream";
@@ -52,16 +56,30 @@ const TYPE_ALIASES: Readonly<Record<string, string>> = {
   "audio/x-aac": "audio/aac",
 };
 
-const TYPE_BY_EXTENSION: ReadonlyMap<string, string> = new Map([
-  ...[...DOWNLOAD_EXTENSION_BY_TYPE].map(
-    ([type, extension]) => [extension, type] as const
-  ),
-  ["jpeg", JPEG],
-  ["qt", QUICKTIME],
-]);
+/**
+ * Extensions kept when the bytes do not show a served media format: the
+ * formats drops accept as media or attachments (see
+ * `services/uploads/mediaUploadMimeType.ts`), plus common document, data and
+ * archive files people send in encrypted chats. Saved as octet-stream.
+ */
+const INERT_EXTENSIONS: ReadonlySet<string> = new Set(
+  [
+    "txt md csv tsv json pdf doc docx xls xlsx ppt pptx odt ods odp rtf epub",
+    "zip 7z rar tar gz",
+    "psd ai fig sketch glb gltf obj stl",
+    "wav flac mp3 mpeg m4a aac ogg mp4 mov qt avi webm",
+    "png jpg jpeg gif webp avif heic bmp",
+  ].flatMap((group) => group.split(" "))
+);
 
-/** Text formats have no signature, so a declared type or extension decides. */
-const TYPES_WITHOUT_SIGNATURE = new Set(["text/csv", "text/plain"]);
+/** Extensions that are always saved as `.bin`, even if listed above. */
+const ACTIVE_EXTENSIONS: ReadonlySet<string> = new Set(
+  [
+    "html htm xhtml shtml svg svgz xml xsl",
+    "js mjs cjs wasm hta ps1 vbs jar sh",
+    "exe msi bat cmd com scr pif app dmg pkg apk lnk url desktop",
+  ].flatMap((group) => group.split(" "))
+);
 
 const ascii = (bytes: Uint8Array, start: number, end: number): string =>
   String.fromCodePoint(...bytes.subarray(start, end));
@@ -177,14 +195,22 @@ interface DownloadFileDecision {
   readonly type: string;
 }
 
+function getKeptExtension(extension: string | null): string | null {
+  return extension &&
+    INERT_EXTENSIONS.has(extension) &&
+    !ACTIVE_EXTENSIONS.has(extension)
+    ? extension
+    : null;
+}
+
 /**
  * The name and type to save a file under.
  *
- * `leadingBytes` are the first bytes of the content when the caller has them.
- * Then a binary format must match its signature; a declared type that the
- * bytes do not confirm is not trusted. Without bytes (a native download
- * written straight to disk, or a direct link) the first declared type on the
- * list, then the name's extension, decide.
+ * `leadingBytes` are the first bytes of the content when the caller has them
+ * (a native download is written to disk first, and a direct link is never
+ * read, so those decide by name alone). A name without any extension may take
+ * the extension of a served media type the caller declared (for example a
+ * video URL without a file name).
  */
 export function getDownloadFileDecision({
   fileName,
@@ -196,21 +222,26 @@ export function getDownloadFileDecision({
   readonly leadingBytes?: Uint8Array | undefined;
 }): DownloadFileDecision {
   const { base, extension } = splitFileName(fileName);
-  const candidates = [
-    ...declaredTypes.map(normalizeDownloadType),
-    extension ? (TYPE_BY_EXTENSION.get(extension) ?? null) : null,
-  ].filter((type): type is string => type !== null);
-  const type = leadingBytes
-    ? (sniffDownloadType(leadingBytes) ??
-      candidates.find((candidate) => TYPES_WITHOUT_SIGNATURE.has(candidate)))
-    : candidates[0];
-  const savedExtension =
-    (type && DOWNLOAD_EXTENSION_BY_TYPE.get(type)) ?? OPAQUE_EXTENSION;
+  const safeBase = getSafeBaseName(base);
+  const sniffed = leadingBytes ? sniffDownloadType(leadingBytes) : null;
+  const sniffedExtension = sniffed
+    ? DOWNLOAD_EXTENSION_BY_TYPE.get(sniffed)
+    : undefined;
+  if (sniffed && sniffedExtension) {
+    return { fileName: `${safeBase}.${sniffedExtension}`, type: sniffed };
+  }
 
-  return {
-    fileName: `${getSafeBaseName(base)}.${savedExtension}`,
-    type: type ?? OPAQUE_TYPE,
-  };
+  const declaredExtension = extension
+    ? undefined
+    : declaredTypes
+        .map(normalizeDownloadType)
+        .map((type) =>
+          type ? DOWNLOAD_EXTENSION_BY_TYPE.get(type) : undefined
+        )
+        .find((value) => value !== undefined);
+  const savedExtension =
+    getKeptExtension(extension) ?? declaredExtension ?? OPAQUE_EXTENSION;
+  return { fileName: `${safeBase}.${savedExtension}`, type: OPAQUE_TYPE };
 }
 
 function readLeadingBytes(blob: Blob): Promise<Uint8Array> {

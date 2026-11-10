@@ -198,8 +198,13 @@ describe("DropAttachmentDisplay", () => {
       blob: async () =>
         new Blob(["<!doctype html><title>x</title>"], { type: "text/html" }),
     } as Response);
-    (URL as { createObjectURL: (blob: Blob) => string }).createObjectURL = () =>
-      "blob:other";
+    const savedTypes: string[] = [];
+    (URL as { createObjectURL: (blob: Blob) => string }).createObjectURL = (
+      blob: Blob
+    ) => {
+      savedTypes.push(blob.type);
+      return "blob:other";
+    };
     (URL as { revokeObjectURL: (url: string) => void }).revokeObjectURL =
       () => {};
     const savedNames: string[] = [];
@@ -226,8 +231,9 @@ describe("DropAttachmentDisplay", () => {
     );
     await user.click(screen.getByRole("button", { name: "Download" }));
 
-    // Content that is not a PDF is saved as an opaque file.
-    await waitFor(() => expect(savedNames).toEqual(["paper.bin"]));
+    // Content that is not a PDF keeps its name but is never rendered.
+    await waitFor(() => expect(savedNames).toEqual(["paper.pdf"]));
+    expect(savedTypes).toEqual(["application/octet-stream"]);
   });
 
   it("uses the provided attachment file name instead of deriving it from the URL", () => {

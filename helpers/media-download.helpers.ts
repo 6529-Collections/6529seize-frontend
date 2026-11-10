@@ -42,8 +42,8 @@ export function getDownloadFilenameFromUrl(url: string, fallback = "media") {
 }
 
 /**
- * Saves `url` through a temporary link. The saved name keeps a served media
- * extension (from `declaredType` or the name); anything else becomes `.bin`.
+ * Saves `url` through a temporary link. The saved name keeps an inert
+ * extension; active or unknown extensions become `.bin`.
  */
 export function triggerDirectDownload(
   url: string,
