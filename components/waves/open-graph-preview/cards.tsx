@@ -37,6 +37,7 @@ import {
   TITLE_KEYS,
   wrapLongUnbrokenSegments,
 } from "./core";
+import { useLinkPreviewImage } from "./previewImage";
 import type { OpenGraphPreviewData } from "./types";
 
 const TRUSTED_YOUTUBE_EMBED_HOSTS: readonly string[] = [
@@ -121,6 +122,9 @@ export function GenericOpenGraphPreviewCard({
   readonly locale: SupportedLocale;
 }) {
   const sourceLabel = domain ?? t(locale, "linkPreview.externalSourceFallback");
+  // A card whose image is refused or fails to load is laid out as text only.
+  const image = useLinkPreviewImage(imageUrl);
+  const favicon = useLinkPreviewImage(faviconUrl, "icon");
 
   return (
     <Link
@@ -129,38 +133,40 @@ export function GenericOpenGraphPreviewCard({
       rel={linkRel}
       className={[
         "tw-group/og-card tw-relative tw-grid tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950/70 tw-p-3 tw-pr-12 tw-no-underline tw-shadow-sm tw-shadow-black/20 tw-transition tw-duration-200 hover:tw-border-sky-400/40 hover:tw-bg-iron-900/80 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-pr-14",
-        imageUrl
+        image.src
           ? "tw-grid-cols-[6rem,minmax(0,1fr)] tw-gap-3 sm:tw-grid-cols-[8rem,minmax(0,1fr)] md:tw-grid-cols-[10.5rem,minmax(0,1fr)]"
           : "tw-grid-cols-1",
       ].join(" ")}
       data-testid="og-preview-card"
     >
       <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-0 tw-w-1 tw-bg-sky-400/70" />
-      {imageUrl && (
+      {image.src && (
         <span className="tw-relative tw-block tw-aspect-[16/10] tw-h-full tw-min-h-[6.5rem] tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-black/40 sm:tw-min-h-[7.5rem]">
           <Image
-            src={imageUrl}
+            src={image.src}
             alt={imageAlt ?? title}
             fill
             className="tw-object-cover tw-transition tw-duration-300 group-hover/og-card:tw-scale-[1.02]"
             loading="lazy"
             sizes="(max-width: 640px) 6rem, (max-width: 768px) 8rem, 10.5rem"
             unoptimized
+            onError={image.onError}
           />
         </span>
       )}
       <span className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-col tw-justify-center tw-gap-1.5 tw-overflow-hidden">
         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-          {faviconUrl && (
+          {favicon.src && (
             <span className="tw-relative tw-block tw-h-4 tw-w-4 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-sm tw-bg-iron-800">
               <Image
-                src={faviconUrl}
+                src={favicon.src}
                 alt=""
                 fill
                 className="tw-object-contain"
                 loading="lazy"
                 sizes="16px"
                 unoptimized
+                onError={favicon.onError}
               />
             </span>
           )}

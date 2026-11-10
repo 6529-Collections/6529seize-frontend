@@ -1,6 +1,5 @@
 import type { ReactElement } from "react";
 
-import Image from "next/image";
 import Link from "next/link";
 
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -46,6 +45,7 @@ import {
   isGithubStatusPreviewResponse,
   LinkPreviewCardLayout,
 } from "./cards";
+import { getLinkPreviewImageSrc, LinkPreviewImage } from "./previewImage";
 import {
   FarcasterEmbedPreviewCard,
   FirstPartyOpenGraphPreviewCard,
@@ -323,17 +323,14 @@ function DefaultOpenGraphPreviewContent({
             compact
           />
         )}
-        {imageUrl && (
-          <Image
-            src={imageUrl}
-            alt={title}
-            fill
-            className="tw-object-cover"
-            loading="lazy"
-            sizes="(max-width: 768px) 100vw, 480px"
-            unoptimized
-          />
-        )}
+        <LinkPreviewImage
+          src={imageUrl}
+          alt={title}
+          fill
+          className="tw-object-cover"
+          loading="lazy"
+          sizes="(max-width: 768px) 100vw, 480px"
+        />
         <div className="tw-absolute tw-inset-0 tw-bg-gradient-to-t tw-from-black tw-via-black/60 tw-to-black/5" />
         <div className="tw-relative tw-z-10 tw-flex tw-h-full tw-flex-col tw-justify-end tw-gap-2 tw-p-4">
           {domain && (
@@ -441,7 +438,7 @@ export default function OpenGraphPreview({
   const firstPartyKind = getFirstPartyOgKindFromImageUrl(imageUrl);
   const displayTitle = title ?? domain ?? href;
 
-  if (imageOnly && imageUrl) {
+  if (imageOnly && getLinkPreviewImageSrc(imageUrl)) {
     return (
       <LinkPreviewCardLayout
         href={commonProps.href}
@@ -457,14 +454,13 @@ export default function OpenGraphPreview({
           data-testid="og-preview-card"
         >
           <div className="tw-relative tw-aspect-[16/9] tw-w-full tw-overflow-hidden tw-bg-iron-900/60">
-            <Image
+            <LinkPreviewImage
               src={imageUrl}
               alt={displayTitle}
               fill
               className="tw-object-cover"
               loading="lazy"
               sizes="(max-width: 768px) 100vw, 480px"
-              unoptimized
             />
           </div>
         </Link>

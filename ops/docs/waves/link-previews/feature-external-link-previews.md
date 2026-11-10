@@ -67,6 +67,14 @@ loading.
   and fall back to regular clickable links.
 - Some URLs route to dedicated handlers first; this page only covers the generic
   external-card path.
+- Preview images, favicons, and video thumbnails load through the 6529 image
+  proxy (`/api/og-metadata/image`), not from the linked site. Images on 6529.io
+  load directly. The proxy serves HTTPS JPEG, PNG, GIF, and WebP images only:
+  a favicon in another format (for example `.ico` or SVG) is left out, and a
+  card whose image is not HTTPS or fails to load is shown without the image.
+- A card opens in the current tab only when its link is on the site's exact
+  origin and its path cannot be read as another host. Any other link, including
+  `https://6529.io//…`, opens in a new tab.
 - Generic external file cards never inline-render, iframe, download, scan, or
   proxy the file body.
 - External file links must not show `Scanned and validated`; that claim belongs
