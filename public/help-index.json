@@ -10842,7 +10842,8 @@
       "facts": [
         "App Wallets are wallets stored in the 6529 Mobile environment using native secure storage. They are separate from 6529 Desktop wallets in 6529 Desktop and from external wallets offered through the External Wallets connection flow.",
         "Open About > Safe Collecting > App Wallets, or open Connect > App Wallets to choose an existing app-local wallet or start Create App Wallet. The App Wallets menu appears only when native app-wallet support is available.",
-        "The App Wallets page lists locally stored wallets and provides Create Wallet, Import Wallet, and wallet-detail actions. Never send a wallet password, mnemonic, or private key to the help bot."
+        "The App Wallets page lists locally stored wallets and provides Create Wallet, Import Wallet, and wallet-detail actions. Never send a wallet password, mnemonic, or private key to the help bot.",
+        "A connected App Wallet never signs or sends on its own. Each message, structured-data signature, and transaction first opens an app dialog showing the exact message, or the full recipient address, ETH amount, network, and any contract call. Cancel rejects the request, and signing in shows the sign-in message once for approval."
       ],
       "canonical_path": "/tools/app-wallets",
       "related_paths": ["/tools/app-wallets/import-wallet", "/about/6529-apps"],
