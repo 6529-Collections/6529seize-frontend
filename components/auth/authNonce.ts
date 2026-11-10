@@ -33,7 +33,7 @@ const LOOPBACK_HOSTNAMES: ReadonlySet<string> = new Set([
  * also carries the device-grant resources this client asked for; their
  * statement and resources are checked by the device-grant parser.
  */
-export type SignInChallengeKind = "ordinary" | "grant";
+type SignInChallengeKind = "ordinary" | "grant";
 
 interface PageLocation {
   readonly origin: string;
@@ -44,8 +44,11 @@ interface PageLocation {
 }
 
 const readPageLocation = (): PageLocation | null => {
-  const location = globalThis.window?.location;
-  return location?.origin && location.origin !== "null" ? location : null;
+  if (typeof window === "undefined") {
+    return null;
+  }
+  const { location } = window;
+  return location.origin && location.origin !== "null" ? location : null;
 };
 
 const isSameAddress = (value: string, signerAddress: string): boolean =>

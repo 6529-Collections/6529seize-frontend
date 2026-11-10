@@ -20,7 +20,7 @@ import {
   WEBSOCKET_RECOVERY_CAPABILITY,
   type WebSocketConnectionInfo,
 } from "./WebSocketTypes";
-import { getSocketIdentityKey } from "./socketIdentity";
+import { createCredentialMarker, getSocketIdentityKey } from "./socketIdentity";
 import { isPongFrame, isWsPingEnabled, SocketPinger } from "./socketPing";
 import { publicEnv } from "@/config/env";
 import { applyDelayJitter } from "@/helpers/jitter.helpers";
@@ -141,19 +141,6 @@ const getBatchedMessages = (data: unknown): NormalizedIncomingMessage[] => {
       ? [message]
       : [];
   });
-};
-
-const createCredentialMarker = (credential: string): string => {
-  let primary = 0;
-  let secondary = 5381;
-
-  for (let index = 0; index < credential.length; index += 1) {
-    const code = credential.codePointAt(index) ?? 0;
-    primary = (primary * 31 + code) % 2_147_483_647;
-    secondary = (secondary * 33 + code) % 2_147_483_647;
-  }
-
-  return `${credential.length}:${primary}:${secondary}`;
 };
 
 type AnySubscriber = MessageCallback | FrameMetadataCallback;

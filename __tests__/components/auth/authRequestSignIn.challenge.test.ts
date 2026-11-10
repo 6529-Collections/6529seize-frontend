@@ -69,13 +69,16 @@ const expectRefused = async (message: string) => {
 beforeEach(() => {
   mockClientType = "web";
   loginMock.mockReset();
-  loginMock.mockImplementation(async () => ({
-    address: SIGNER,
-    role: null,
-    access_token: "jwt",
-    access_token_expires_at: "2026-11-10T15:00:00.000Z",
-    client_type: mockClientType,
-  }));
+  loginMock.mockImplementation(
+    async () =>
+      ({
+        address: SIGNER,
+        role: null,
+        access_token: "jwt",
+        access_token_expires_at: "2026-11-10T15:00:00.000Z",
+        client_type: mockClientType,
+      }) as Awaited<ReturnType<typeof loginWithSessionV2>>
+  );
 });
 
 describe("sign-in challenge checks on the website", () => {

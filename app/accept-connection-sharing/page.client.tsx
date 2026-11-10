@@ -695,9 +695,9 @@ function AcceptConnectionSharing(
 export default function AcceptConnectionSharingPage() {
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by app/accept-connection-sharing/page.tsx
   const searchParams = useSearchParams();
-  const queryShareCode = searchParams?.get(SHARE_CODE_PARAM)?.trim() || "";
+  const queryShareCode = searchParams.get(SHARE_CODE_PARAM)?.trim() ?? "";
   const token = searchParams?.get("token") || "";
-  const address = toLinkAddress(searchParams?.get("address"));
+  const address = toLinkAddress(searchParams.get("address"));
   const role = searchParams?.get("role") || undefined;
   // The whole query identifies a link visit, so reopening the same link (with
   // a new `_t`) on the mounted page is cleaned again.
@@ -748,7 +748,9 @@ export default function AcceptConnectionSharingPage() {
   // A code in the fragment never reaches a server, so it wins over the query.
   const fragmentForLink =
     readFragment?.query === linkQuery ? readFragment : null;
-  const connectionShareCode = fragmentForLink?.shareCode || queryShareCode;
+  const fragmentShareCodeForLink = fragmentForLink?.shareCode ?? "";
+  const connectionShareCode =
+    fragmentShareCodeForLink === "" ? queryShareCode : fragmentShareCodeForLink;
 
   return (
     <AcceptConnectionSharing
