@@ -10,12 +10,16 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import { parseNftDescriptionToHtml } from "@/helpers/Helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { useCallback, useId, useState } from "react";
 import {
   MemeArtworkDetails,
   MemeCardFileType,
   MemeEditionSizeStats,
   MemeNftLivePanel,
+  MemeMarketplaceLinks,
+  MemeMintDetails,
+  MemeTdhRate,
 } from "./MemePageLiveStats";
 
 export function MemePageLiveRightMenu(props: {
@@ -25,14 +29,20 @@ export function MemePageLiveRightMenu(props: {
   locale?: SupportedLocale;
   onMarketChange?: (() => void) | undefined;
 }) {
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   if (props.show && props.nft) {
     const locale = props.locale ?? DEFAULT_LOCALE;
     const tokenId = String(props.nft.id);
 
     return (
-      <div className="tw-w-full">
-        <MemeArtworkDetails nft={props.nft} locale={locale} compactMobile />
-        <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 tw-pt-5">
+      <div data-testid="meme-card-live-details" className="tw-w-full">
+        <MemeArtworkDetails
+          nft={props.nft}
+          locale={locale}
+          compactMobile
+          showMintDate={!isDesktop}
+        />
+        <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-6 tw-pt-5 md:tw-pb-3">
           <CollectDetailActions
             mobileSticky
             hideMarketLink
@@ -44,36 +54,77 @@ export function MemePageLiveRightMenu(props: {
               ? { onMarketChange: props.onMarketChange }
               : {})}
           />
+          <NftPurchasingGate
+            placeholder={
+              <div
+                aria-hidden="true"
+                className="tw-mt-3 tw-hidden tw-h-11 md:tw-block"
+              />
+            }
+          >
+            {isDesktop && (
+              <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-4">
+                <div className="tw-shrink-0">
+                  <CollectMarketButton
+                    locale={locale}
+                    mobileRow
+                    fullWidth
+                    onClick={() => revealMarketDepth(MEMES_CONTRACT, tokenId)}
+                  />
+                </div>
+                <MemeMarketplaceLinks nft={props.nft} locale={locale} inline />
+              </div>
+            )}
+          </NftPurchasingGate>
         </div>
+        {isDesktop && <MemeMintDetails nft={props.nft} locale={locale} />}
         {props.nftMeta && (
-          <MemeEditionSizeStats nftMeta={props.nftMeta} locale={locale} />
+          <MemeEditionSizeStats nftMeta={props.nftMeta} locale={locale}>
+            {isDesktop && (
+              <MemeTdhRate
+                nft={props.nft}
+                recordedInTdh={props.nftMeta.recorded_in_tdh}
+                locale={locale}
+                definition
+              />
+            )}
+          </MemeEditionSizeStats>
         )}
-        <NftPurchasingGate
-          // Same box as the row below (CollectMarketButton is tw-min-h-11),
-          // measured at 52.7 px in the production server HTML (PR #4589).
-          placeholder={
-            <div
-              aria-hidden="true"
-              className="tw-border-0 tw-border-b tw-border-solid tw-border-transparent tw-py-1"
-            >
-              <div className="tw-h-11" />
-            </div>
-          }
-        >
-          <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-1">
-            <CollectMarketButton
-              locale={locale}
-              mobileRow
-              fullWidth
-              onClick={() => revealMarketDepth(MEMES_CONTRACT, tokenId)}
-            />
+        {isDesktop && !props.nftMeta && (
+          <div className="tw-pt-8">
+            <MemeTdhRate nft={props.nft} locale={locale} />
           </div>
-        </NftPurchasingGate>
-        <MemeNftLivePanel
-          nft={props.nft}
-          recordedInTdh={props.nftMeta?.recorded_in_tdh}
-          locale={locale}
-        />
+        )}
+        {!isDesktop && (
+          <NftPurchasingGate
+            // Same box as the row below (CollectMarketButton is tw-min-h-11),
+            // measured at 52.7 px in the production server HTML (PR #4589).
+            placeholder={
+              <div
+                aria-hidden="true"
+                className="tw-border-0 tw-border-b tw-border-solid tw-border-transparent tw-py-1"
+              >
+                <div className="tw-h-11" />
+              </div>
+            }
+          >
+            <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-py-1">
+              <CollectMarketButton
+                locale={locale}
+                mobileRow
+                fullWidth
+                onClick={() => revealMarketDepth(MEMES_CONTRACT, tokenId)}
+              />
+            </div>
+          </NftPurchasingGate>
+        )}
+        {!isDesktop && (
+          <MemeNftLivePanel
+            nft={props.nft}
+            recordedInTdh={props.nftMeta?.recorded_in_tdh}
+            locale={locale}
+          />
+        )}
       </div>
     );
   }
