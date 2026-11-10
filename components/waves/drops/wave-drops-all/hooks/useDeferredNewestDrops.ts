@@ -22,12 +22,13 @@ interface UseDeferredNewestDropsProps {
   readonly viewerProfileId?: string | null | undefined;
 }
 
+/** Full drops carry profile IDs; LIGHT author summaries carry handles. */
 const isOwnDrop = (drop: Drop, viewerProfileId: string | null): boolean =>
   viewerProfileId !== null &&
   drop.type === DropSize.FULL &&
   drop.author.id === viewerProfileId;
 
-// Pending sends use epoch timestamps as serials, outside the server sequence.
+/** Latest server serial; getOptimisticDrop gives temp- rows timestamp serials. */
 const getLatestAcceptedSerial = (
   waveMessages: WaveMessagesResult
 ): number | null => {

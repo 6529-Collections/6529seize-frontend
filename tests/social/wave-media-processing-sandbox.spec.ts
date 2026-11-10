@@ -1,4 +1,4 @@
-import type { WebSocketRoute } from "@playwright/test";
+import type { Page, WebSocketRoute } from "@playwright/test";
 import type { ApiDrop } from "../../generated/models/ApiDrop";
 import type { ApiWave } from "../../generated/models/ApiWave";
 import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
@@ -14,6 +14,36 @@ import {
 const WAVE_ID = "00000000-0000-4000-8000-000000000529";
 const IMAGE_URL =
   "https://d3lqz0a4bldqgf.cloudfront.net/drops/processing-regression/image.png";
+
+async function observeWaveSockets(page: Page, api: string) {
+  const sockets = new Set<WebSocketRoute>();
+  const subscribed = new Set<WebSocketRoute>();
+  await page.routeWebSocket(
+    (url) => url.port === new URL(api).port,
+    (socket) => {
+      sockets.add(socket);
+      socket.onMessage((payload) => {
+        const message = JSON.parse(String(payload)) as {
+          type: string;
+          wave_id?: string;
+        };
+        if (message.type === "AUTHENTICATE")
+          socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
+        if (message.type === "SUBSCRIBE_TO_WAVE" && message.wave_id === WAVE_ID)
+          subscribed.add(socket);
+      });
+      socket.onClose(() => {
+        sockets.delete(socket);
+        subscribed.delete(socket);
+      });
+    }
+  );
+  const send = (drop: ApiDrop) => {
+    for (const socket of sockets)
+      socket.send(JSON.stringify({ type: "DROP_UPDATE", data: drop }));
+  };
+  return { subscribed, send };
+}
 
 test.describe("Wave media lifecycle @auth @local-only", () => {
   useLocalSandboxMutationGuard(
@@ -124,32 +154,10 @@ test.describe("Wave media lifecycle @auth @local-only", () => {
         },
       });
     });
-    const sockets = new Set<WebSocketRoute>();
-    let subscribed = false;
-    await page.routeWebSocket(
-      (url) => url.port === new URL(api).port,
-      (socket) => {
-        sockets.add(socket);
-        socket.onMessage((payload) => {
-          const message = JSON.parse(String(payload)) as {
-            type: string;
-            wave_id?: string;
-          };
-          if (message.type === "AUTHENTICATE")
-            socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
-          if (
-            message.type === "SUBSCRIBE_TO_WAVE" &&
-            message.wave_id === WAVE_ID
-          )
-            subscribed = true;
-        });
-        socket.onClose(() => sockets.delete(socket));
-      }
-    );
+    const { subscribed, send: broadcast } = await observeWaveSockets(page, api);
     const send = (drop: ApiDrop) => {
       published.unshift(drop);
-      for (const socket of sockets)
-        socket.send(JSON.stringify({ type: "DROP_UPDATE", data: drop }));
+      broadcast(drop);
     };
     await page.goto(`/waves/${WAVE_ID}`, { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
@@ -157,12 +165,15 @@ test.describe("Wave media lifecycle @auth @local-only", () => {
     await expect(
       page.getByRole("textbox", { name: "Write a message" }).last()
     ).toBeVisible();
-    await expect.poll(() => subscribed).toBe(true);
-    const panel = page.getByRole("tabpanel");
-    const scroller = panel
+    await expect.poll(() => subscribed.size).toBeGreaterThan(0);
+    const scroller = page
+      .getByRole("tabpanel")
       .locator("[data-wave-drops-scroll-container]")
       .first();
-    await expect(panel.locator("#drop-30")).toBeAttached();
+    const incomingRow = page.getByRole("tabpanel").locator("#drop-31");
+    const ownTextRow = page.getByRole("tabpanel").locator("#drop-32");
+    const ownImageRow = page.getByRole("tabpanel").locator("#drop-33");
+    await expect(page.getByRole("tabpanel").locator("#drop-30")).toBeAttached();
     await scroller.evaluate((element) => {
       element.scrollTop = -300;
     });
@@ -175,18 +186,18 @@ test.describe("Wave media lifecycle @auth @local-only", () => {
       exact: true,
     });
     await expect(reveal).toHaveText("1");
-    await expect(panel.locator("#drop-31")).toHaveCount(0);
+    await expect(incomingRow).toHaveCount(0);
     send(own);
-    await expect(panel.locator("#drop-32")).toContainText(ownText);
+    await expect(ownTextRow).toContainText(ownText);
     send(imageDrop);
-    await expect(panel.locator("#drop-33")).toContainText(ownImageText);
-    await expect(panel.locator("#drop-33")).toContainText("Processing image");
+    await expect(ownImageRow).toContainText(ownImageText);
+    await expect(ownImageRow).toContainText("Processing image");
     await expect(reveal).toHaveText("1");
-    await expect(panel.locator("#drop-31")).toHaveCount(0);
+    await expect(incomingRow).toHaveCount(0);
     await reveal.click();
-    await expect(panel.locator("#drop-31")).toContainText(incomingText);
-    await expect(panel.locator("#drop-32")).toContainText(ownText);
-    await expect(panel.locator("#drop-33")).toContainText(ownImageText);
+    await expect(incomingRow).toContainText(incomingText);
+    await expect(ownTextRow).toContainText(ownText);
+    await expect(ownImageRow).toContainText(ownImageText);
   });
 
   test("retains image and text after ready followed by a delayed processing frame", async ({
@@ -242,35 +253,7 @@ test.describe("Wave media lifecycle @auth @local-only", () => {
         })),
       })),
     };
-    const sockets = new Set<WebSocketRoute>();
-    const subscribed = new Set<WebSocketRoute>();
-    await page.routeWebSocket(
-      (url) => url.port === new URL(api).port,
-      (socket) => {
-        sockets.add(socket);
-        socket.onMessage((payload) => {
-          const message = JSON.parse(String(payload)) as {
-            type: string;
-            wave_id?: string;
-          };
-          if (message.type === "AUTHENTICATE")
-            socket.send(JSON.stringify({ type: "AUTHENTICATED", data: {} }));
-          if (
-            message.type === "SUBSCRIBE_TO_WAVE" &&
-            message.wave_id === WAVE_ID
-          )
-            subscribed.add(socket);
-        });
-        socket.onClose(() => {
-          sockets.delete(socket);
-          subscribed.delete(socket);
-        });
-      }
-    );
-    const send = (drop: ApiDrop) => {
-      for (const socket of sockets)
-        socket.send(JSON.stringify({ type: "DROP_UPDATE", data: drop }));
-    };
+    const { subscribed, send } = await observeWaveSockets(page, api);
     let published = false;
     let current = processing;
     const headers = { "access-control-allow-origin": "*" };
