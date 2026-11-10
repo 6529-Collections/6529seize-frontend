@@ -8,6 +8,7 @@ import {
   getConversationTitle,
   getMessagePreview,
   getNoticeText,
+  isUnpairedDm,
 } from "@/components/e2ee/e2eeFormat";
 import { getE2eeGrantOrigin } from "@/components/e2ee/e2eePlatform";
 import {
@@ -161,6 +162,28 @@ describe("format helpers", () => {
     expect(
       getConversationTitle("en-US", conversation({ name: null }), SELF_ID)
     ).toBe("alice and bob");
+  });
+
+  it("titles a DM holding someone else by its members, not one person", () => {
+    const crowded = conversation({
+      kind: "dm",
+      name: null,
+      admins: [SELF_ID, ALICE_ID],
+    });
+    expect(isUnpairedDm(crowded, SELF_ID)).toBe(true);
+    expect(getConversationTitle("en-US", crowded, SELF_ID)).toBe(
+      "alice and bob"
+    );
+    const alone = conversation({
+      kind: "dm",
+      name: null,
+      members: members.slice(0, 1),
+    });
+    expect(isUnpairedDm(alone, SELF_ID)).toBe(false);
+    expect(isUnpairedDm(conversation(), SELF_ID)).toBe(false);
+    expect(getConversationTitle("en-US", alone, SELF_ID)).toBe(
+      "Unknown member"
+    );
   });
 
   it("describes notices with names", () => {

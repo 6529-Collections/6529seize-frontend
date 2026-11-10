@@ -25,7 +25,22 @@ it("mounts each config after commit without remounting public content", () => {
   const onMount = jest.fn().mockResolvedValue(undefined);
   const onContentMount = jest.fn();
   const renderedConfigs: Config[] = [];
-  jest.mocked(hydrate).mockReturnValue({ onMount });
+  // The test render wrapper's WagmiProvider hydrates its own config through
+  // the same module; leave that one real and record only these configs.
+  const actualHydrate = jest.requireActual<typeof import("@wagmi/core")>(
+    "@wagmi/core"
+  ).hydrate;
+  jest
+    .mocked(hydrate)
+    .mockImplementation((config, parameters) =>
+      config === first || config === second
+        ? { onMount }
+        : actualHydrate(config, parameters)
+    );
+  const hydratedConfigs = () =>
+    jest
+      .mocked(hydrate)
+      .mock.calls.filter(([config]) => config === first || config === second);
   function Content() {
     renderedConfigs.push(useConfig());
     // Reconnect has not run on a config before its first child render.
@@ -43,12 +58,10 @@ it("mounts each config after commit without remounting public content", () => {
   const view = render(tree(first, false));
   view.rerender(tree(second, true));
   view.rerender(tree(second, true));
-  expect(hydrate).toHaveBeenNthCalledWith(1, first, {
-    reconnectOnMount: false,
-  });
-  expect(hydrate).toHaveBeenNthCalledWith(2, second, {
-    reconnectOnMount: true,
-  });
+  expect(hydratedConfigs()).toEqual([
+    [first, { reconnectOnMount: false }],
+    [second, { reconnectOnMount: true }],
+  ]);
   expect(onMount).toHaveBeenCalledTimes(2);
   expect(onContentMount).toHaveBeenCalledTimes(1);
   expect(renderedConfigs.at(-1)).toBe(second);

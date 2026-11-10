@@ -1,3 +1,6 @@
+/**
+ * @jest-environment-options {"url":"https://staging.6529.io"}
+ */
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import type { StoredDeviceKey } from "@/lib/device-signing/device-key-storage";
 import type { LoginE2eeDevice } from "@/lib/device-signing/login-e2ee";
@@ -56,6 +59,7 @@ import {
   renderDeviceGrantStatement,
 } from "@/lib/device-signing/grant-message";
 import { loginWithSessionV2 } from "@/services/auth/session-v2.utils";
+import { SIWE_SIGN_IN_STATEMENT } from "./signInChallengeFixtures";
 
 // A fresh wallet per test: a declined grant sign-in makes that wallet's next
 // automatic sign-in an ordinary one for the rest of the page (module state).
@@ -136,7 +140,7 @@ type NonceParams = {
 const combinedServer = (params: NonceParams): string => {
   const grant = params.deviceGrant;
   if (!grant) {
-    return [...header(), "Sign in to 6529.", ...footer].join("\n");
+    return [...header(), SIWE_SIGN_IN_STATEMENT, ...footer].join("\n");
   }
   return grant.mls_device_key
     ? combinedMessage(grant.device_key, grant.mls_device_key)
