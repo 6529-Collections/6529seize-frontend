@@ -10,9 +10,11 @@ import {
   randomBytes,
   toArrayBuffer,
 } from "@/lib/e2ee/bytes";
-import { E2EE_CIPHERSUITE } from "@/lib/e2ee/grant";
+import { E2EE_CIPHERSUITE, E2EE_GRANT_SUITES } from "@/lib/e2ee/grant";
 import { createLoginE2eeDevice } from "@/lib/e2ee/login-device";
+import type { StoredDevice } from "@/lib/e2ee/records";
 import { getDefaultE2eeStorage } from "@/lib/e2ee/storage";
+import { isOldSuiteDevice } from "@/lib/e2ee/suite-retirement";
 import { MlsClient } from "@/lib/e2ee/mls-adapter";
 import { loadDefaultWasm } from "@/lib/e2ee/wasm-loader";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
@@ -31,6 +33,7 @@ import { DEFAULT_DEVICE_SCOPES } from "./grant-message";
 import {
   openConnectionSetup,
   sealConnectionSetup,
+  type ConnectionSetupBundle,
   type ConnectionSetupTarget,
 } from "./connection-setup-envelope";
 
@@ -60,7 +63,7 @@ export async function prepareConnectionDeviceSetup(input: {
         new Uint8Array(await crypto.subtle.exportKey("raw", pair.publicKey))
       ),
       scopes: DEFAULT_DEVICE_SCOPES,
-      mls: { deviceKeyHex: mls.deviceKey(), ciphersuite: E2EE_CIPHERSUITE },
+      mls: { deviceKeyHex: mls.deviceKey(), ciphersuites: E2EE_GRANT_SUITES },
       ...appGrantTimes(Date.now()),
       origin:
         input.target === "desktop" ? "6529 Desktop" : globalThis.location.host,
@@ -90,7 +93,9 @@ export async function prepareConnectionDeviceSetup(input: {
           grant: {
             ...request.grant,
             mls_device_key: fields.mls.deviceKeyHex,
-            ciphersuite: E2EE_CIPHERSUITE,
+            version: 2,
+            ciphersuite: E2EE_GRANT_SUITES[0] ?? 0,
+            ciphersuites: [...E2EE_GRANT_SUITES],
           },
         },
       },
@@ -146,6 +151,48 @@ async function importSigningPair(
   }
 }
 
+/** The app grant id of the setup's terms (v1 or v2, D172). */
+function setupGrantId(
+  terms: ConnectionSetupBundle["request"]["grant"]
+): string {
+  const v2 = terms.version === 2;
+  return computeAppGrantId(
+    buildAppGrantTypedData({
+      wallet: terms.wallet,
+      deviceKeyHex: terms.device_key,
+      scopes: terms.scopes,
+      ...(v2 ? {} : { version: 1 as const }),
+      mls: {
+        deviceKeyHex: terms.mls_device_key,
+        ciphersuites: v2 ? (terms.ciphersuites ?? []) : [terms.ciphersuite],
+      },
+      issuedAtSeconds: terms.issued_at,
+      expiresAtSeconds: terms.expires_at,
+      origin: terms.origin,
+    }).message
+  );
+}
+
+export type ConnectionDeviceSetupStage =
+  | "open-envelope"
+  | "resolve-profile"
+  | "load-keys"
+  | "read-local-device"
+  | "register-grant"
+  | "adopt-encryption"
+  | "save-signing-key";
+
+export type ConnectionDeviceSetupOutcome =
+  | "reused"
+  | "legacy-device"
+  // Adoption saves the MLS keys locally. The engine registers the device afterward.
+  | "pending-enrollment";
+
+/** Distinguishes current-suite reuse from a legacy device that still needs upgrading. */
+function reusedDeviceOutcome(stored: StoredDevice | null) {
+  return isOldSuiteDevice(stored) ? "legacy-device" : "reused";
+}
+
 /** Imports target-bound keys and registers the grant from the receiving app. */
 export async function acceptConnectionDeviceSetup(input: {
   readonly envelope: string;
@@ -153,13 +200,16 @@ export async function acceptConnectionDeviceSetup(input: {
   readonly wallet: string;
   readonly accessToken: string;
   readonly target: ConnectionSetupTarget;
-}): Promise<void> {
+  readonly onStage?: (stage: ConnectionDeviceSetupStage) => void;
+}): Promise<ConnectionDeviceSetupOutcome> {
+  input.onStage?.("open-envelope");
   const bundle = await openConnectionSetup(
     input.envelope,
     input.secret,
     input.wallet,
     input.target
   );
+  input.onStage?.("resolve-profile");
   const identity = await commonApiFetch<ApiIdentity>({
     endpoint: `identities/${encodeURIComponent(input.wallet)}`,
     includeWalletAuth: false,
@@ -171,36 +221,34 @@ export async function acceptConnectionDeviceSetup(input: {
     terms.expires_at * 1000 <= Date.now() + 60000
   )
     throw new Error("Device setup grant mismatch");
+  input.onStage?.("load-keys");
   const pair = (await isEd25519Supported())
     ? await importSigningPair(bundle.privateKey, terms.device_key)
     : null;
-  const grantId = computeAppGrantId(
-    buildAppGrantTypedData({
-      wallet: terms.wallet,
-      deviceKeyHex: terms.device_key,
-      scopes: terms.scopes,
-      mls: {
-        deviceKeyHex: terms.mls_device_key,
-        ciphersuite: terms.ciphersuite,
-      },
-      issuedAtSeconds: terms.issued_at,
-      expiresAtSeconds: terms.expires_at,
-      origin: terms.origin,
-    }).message
-  );
+  const grantId = setupGrantId(terms);
   const state = base64ToBytes(bundle.mlsState);
   const device = await createLoginE2eeDevice({ state });
   state.fill(0);
   try {
     if (device.deviceKeyHex !== terms.mls_device_key)
       throw new Error("Device setup encryption key mismatch");
-    const existing = await getDefaultE2eeStorage().getDevice(identity.id);
+    // A share for the current suite can upgrade the receiver even if signing is already enabled.
+    const canUpgradeSuite =
+      terms.version === 2 && terms.ciphersuites?.includes(E2EE_CIPHERSUITE);
+    /** Keeps a registered device unless this share can upgrade its legacy suite. */
+    const canReuseDevice = (stored: StoredDevice | null) =>
+      stored?.registered === true &&
+      (!canUpgradeSuite || !isOldSuiteDevice(stored));
+    input.onStage?.("read-local-device");
+    const storage = getDefaultE2eeStorage();
+    const existing = await storage.getDevice(identity.id);
     if (
-      existing?.registered &&
+      canReuseDevice(existing) &&
       (!pair || (await readUsableDeviceGrant(input.wallet, Date.now())))
     )
-      return;
+      return reusedDeviceOutcome(existing);
 
+    input.onStage?.("register-grant");
     const grant = await commonApiPost<typeof bundle.request, ApiDeviceGrant>({
       endpoint: "device-grants",
       body: bundle.request,
@@ -215,9 +263,10 @@ export async function acceptConnectionDeviceSetup(input: {
       grant.expires_at <= Date.now() + 60000
     )
       throw new Error("Device setup grant mismatch");
-    let adopted: boolean;
+    let outcome: ConnectionDeviceSetupOutcome = "pending-enrollment";
     try {
-      adopted = await device.adopt({
+      input.onStage?.("adopt-encryption");
+      const adopted = await device.adopt({
         profileId: identity.id,
         wallet: input.wallet,
         grantId,
@@ -227,12 +276,14 @@ export async function acceptConnectionDeviceSetup(input: {
         expiresAtSeconds: bundle.request.grant.expires_at,
         platform: input.target === "desktop" ? "desktop" : "phone",
       });
-      if (
-        !adopted &&
-        !(await getDefaultE2eeStorage().getDevice(identity.id))?.registered
-      )
-        throw new Error("Device setup could not be saved");
-      if (pair)
+      if (!adopted) {
+        const current = await storage.getDevice(identity.id);
+        if (!canReuseDevice(current))
+          throw new Error("Device setup could not be saved");
+        outcome = reusedDeviceOutcome(current);
+      }
+      if (pair) {
+        input.onStage?.("save-signing-key");
         await installSharedDeviceKey({
           address: input.wallet.toLowerCase(),
           publicKeyHex: grant.device_key,
@@ -241,6 +292,7 @@ export async function acceptConnectionDeviceSetup(input: {
           ownProfileId: identity.id,
           lastSeq: 0,
         });
+      }
     } catch (error) {
       await commonApiPost({
         endpoint: `device-grants/${grant.id}/revoke`,
@@ -250,12 +302,11 @@ export async function acceptConnectionDeviceSetup(input: {
       }).catch(() => undefined);
       throw error;
     }
-    // Keeping an already registered MLS device is intentional: never replace its history.
-    if (adopted) {
-      setE2eeEnrollmentMarker(identity.id, true);
-      if (typeof globalThis.dispatchEvent === "function")
-        globalThis.dispatchEvent(new Event("storage"));
-    }
+    if (outcome !== "pending-enrollment") return outcome;
+    setE2eeEnrollmentMarker(identity.id, true);
+    if (typeof globalThis.dispatchEvent === "function")
+      globalThis.dispatchEvent(new Event("storage"));
+    return outcome;
   } finally {
     device.dispose();
   }

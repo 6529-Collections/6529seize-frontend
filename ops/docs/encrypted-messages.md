@@ -13,20 +13,35 @@ their device (see [Device trust](#device-trust)).
 
 Chats use the MLS protocol (RFC 9420) through a WebAssembly build of OpenMLS
 that runs in the browser or app. Keys are agreed with a hybrid post-quantum
-method: the MLS ciphersuite is 0x004F (X-Wing, which combines ML-KEM-768 with
-X25519). Recorded messages stay confidential as long as either part holds,
-so a future quantum computer that breaks X25519 alone cannot read them.
-Messages use AES-128-GCM. Device signatures use Ed25519, which is not
-post-quantum; they protect who sent a message, not its secrecy. 0x004F is a
-draft code point; if it changes before it is final, each device sets up
-encrypted messages again (one more wallet signature) and chats are started
-again.
+method, X-Wing, which combines ML-KEM-768 with X25519. Recorded messages stay
+confidential as long as either part holds, so a future quantum computer that
+breaks X25519 alone cannot read them. Chats have used the MLS ciphersuite
+0x004F, with AES-128-GCM messages and SHA-256 hashes. They are moving to
+0x004E (AES-256-GCM, SHA-384). Once a device has confirmed the upgrade, the
+chats it starts use 0x004E, and chats started before stay readable but
+read-only; each can be continued (see
+[Moving to stronger encryption](#moving-to-stronger-encryption)). Device
+signatures use Ed25519, which is not post-quantum; they protect who sent a
+message, not its secrecy. Both suites are draft code points; if the one in
+use changes before it is final, each device sets up encrypted messages again
+(one more wallet signature).
 
 Existing direct messages are not end-to-end encrypted, and 6529 deletes
 them from its servers, backups included, on **1 December 2026**, except
 anything 6529 is legally required to keep (see
 [Unencrypted direct messages](#unencrypted-direct-messages)). Until then you
 can export them or move them into an encrypted chat.
+
+## Names that temporarily show as Unknown member
+
+"Unknown member" means this device cannot currently resolve the person's name;
+it does not by itself mean they left. Known names and device owners are retained
+when a lookup fails. Temporary lookup failures are retried a limited number of
+times, with increasing delays and the server's rate-limit cooldown. Reopening a
+chat or returning online can resume eligible lookups. Older messages with a
+recoverable missing author are corrected as their history is opened, without
+resetting encryption or deleting messages. A person who cannot be resolved can
+continue to appear as Unknown member.
 
 ## Availability
 
@@ -50,7 +65,26 @@ can export them or move them into an encrypted chat.
 Encrypted and ordinary messages use the same rich-text editor. Custom emoji
 shortcodes render as inline images while composing and editing; encrypted drafts
 keep their shortcode representation for encryption and sending. Encrypted chat
-does not offer GIF, Poll or Storm actions.
+does not offer Poll or Storm actions. GIFs can be sent as encrypted attachments;
+their search and previews connect publicly to GIPHY.
+
+Messages support the same Markdown formatting as ordinary chats: headings,
+**bold** and italic text, strikethrough, lists and task lists, quotes,
+inline and fenced code, tables, separators and links. Encrypted messages also
+support footnotes. Code blocks use
+syntax highlighting, and member mentions and custom emoji stay literal inside
+code. Extra blank lines keep their spacing when you send or edit a message.
+
+Encrypted notification previews use the same local Markdown renderer in the
+notification overview and on the notifications page. Previews stay compact;
+message links and images appear as labels, and selecting the notification opens
+the encrypted chat.
+
+Links open only when you select them. Encrypted messages do not automatically
+load link previews, embeds or images from Markdown URLs. A Markdown image is
+shown as a link using its alternative text (or a label identifying the image host); select the link to
+open it. To show an image privately inside the chat, attach or paste the image
+so it is encrypted on your device.
 
 Custom emojis also render inline in the encrypted chat list and sidebar message
 previews, at a compact size that keeps each preview on one line.
@@ -85,7 +119,8 @@ stay saved in this browser for the next sign-in.
 - `/messages/encrypted/{chat}`: one chat. The address is a random chat handle.
 - `/messages/encrypted/devices`: devices that can read your encrypted messages.
 - The **Encrypted** section sits above **Direct messages** in the messages
-  side pane on the web and on the app's Messages screen.
+  side pane on the web and on the app's Messages screen. Select the open chat
+  again in the side pane to return to the encrypted inbox.
 - A plaintext direct message shows **Not end-to-end encrypted** in its header
   with **Start encrypted chat**. In the app, tap the open-lock button next to
   the chat name.
@@ -105,6 +140,10 @@ The explanation and signature button name the permissions this device needs:
 - Only signing is missing: **Enable Signed Posts** and **Sign to enable Signed Posts**.
 - Only encryption is missing: **Enable Encrypted DMs** and **Sign to enable Encrypted DMs**.
   This requests encryption alone and keeps the existing signing permission.
+
+A device that used the earlier encryption sees **Upgrade encrypted messages**
+instead of the first-time wording; see
+[Moving to stronger encryption](#moving-to-stronger-encryption).
 
 When encryption is included, the card explains all of the following:
 
@@ -130,7 +169,15 @@ setup page was already open. Signing and encryption still use separate keys.
 If combined setup cannot finish, the page explains the result and offers explicit
 next actions. It does not silently request a different permission. If signing
 succeeds but encryption registration fails, signing stays on and encryption can
-be retried separately.
+be retried separately. If encryption registration is still running after about
+20 seconds, the card says signed posts are on and encrypted DMs are still
+finishing setup; it closes once encryption is on and reports a failure only if
+registration actually fails.
+
+After a signing permission or an encryption device is stored, the site asks the
+browser to keep its storage persistent. Some browsers decide this silently;
+others ask. Browsers can otherwise remove site storage when space runs low,
+which removes this browser's keys and its encrypted history.
 
 On Safari, the site's data can be deleted if you do not open 6529 for 7 days;
 the card says so on Safari.
@@ -200,6 +247,63 @@ selectable. This does not impose a global server-side limit on MLS groups.
 From a plaintext direct message, **Start encrypted chat** opens this page with
 the same people already chosen. Earlier messages are not copied.
 
+## Moving to stronger encryption
+
+Encrypted chats are moving from the MLS ciphersuite 0x004F (AES-128-GCM) to
+0x004E (AES-256-GCM). When the move reaches 6529.io, each device confirms it
+once; your decrypted history, attachments and chat threads stay on the
+device. Until then, chats keep using 0x004F and none of the steps below
+appear.
+
+- **Confirming on a device.** A device that used the earlier encryption shows
+  **Upgrade encrypted messages** in place of the first-time setup card:
+  "Encrypted messages are moving to stronger encryption. Confirm once in your
+  wallet to continue; your messages stay on this device." It also says how
+  many existing conversations stay readable. **Sign to upgrade Encrypted DMs**
+  asks for one wallet signature. If Signed Posts are also off, the card keeps
+  **Sign to enable both**, and a combined sign-in can carry the upgrade
+  without another prompt. The card shows "Couldn’t upgrade encrypted messages.
+  Try again." if the upgrade fails. The setup dialog, the account-menu entry
+  and the Preferences → **Device Permissions** button also read **Upgrade
+  encrypted messages** while the upgrade is pending.
+- **Earlier conversations.** Chats started before the move are read-only:
+  their messages stay readable and searchable, but you can’t send, edit, react,
+  rename, change members or leave them. The list labels them **Read-only**,
+  and the composer is replaced by "This conversation moved to stronger
+  encryption. Its messages stay readable here, but you can’t send new ones."
+  A keyboard **Skip to the end of this conversation** link jumps past the
+  messages to the action. If a chat turns read-only while you are typing in
+  it, focus moves to the action; otherwise screen readers hear the change once.
+- **Continuing a direct message.** Select **Continue the conversation**. It
+  opens the current session with that person, or starts one on the new
+  encryption. Both sessions stay in one list entry, and **Chat history**
+  switches between them. If the other person hasn’t confirmed the upgrade
+  yet, the page says they will be reachable once they open 6529.io and
+  confirm the upgrade. Their direct-message preferences and blocks apply as
+  when starting a new chat.
+- **Continuing a group.** Select **Start again with the same members**. It
+  creates the new group once, with the same name and you as its admin, and
+  opens it. Once this device has the new group, the action reads **Open the
+  new conversation**. Members
+  whose devices haven’t confirmed the upgrade are left out: the page names
+  them and offers **Open the new conversation** instead of opening it
+  directly. Add them later from **Chat info** once they open 6529.io and
+  confirm the upgrade. If nobody else can be added yet, the page says the
+  other members will be reachable once they do.
+- **The new conversation.** Its timeline opens with "This conversation moved
+  to stronger encryption. Earlier messages are kept in the previous
+  conversation." and **View earlier messages**, which opens the read-only
+  chat when this device has it.
+- **Messages that had not gone out yet.** A message of yours that was still
+  waiting to send when the chat moved stays in the read-only chat, marked "Not
+  sent: this chat was upgraded". It is kept on this device only and is never
+  sent by itself. **Resend in the upgraded chat** sends a copy (text, mentions
+  and attachments; not the reply it answered) in the conversation that
+  continues it, starting that conversation if needed. **Delete** removes it
+  from this device after you confirm. Either way the page says what happened
+  and moves focus to the continue action. If the other person hasn’t
+  confirmed the upgrade yet, resending says so and keeps the message.
+
 ## In a chat
 
 - In a direct chat, select the person's name or avatar in the header or chat
@@ -251,6 +355,12 @@ the same people already chosen. Earlier messages are not copied.
   same limits as the attach control. Text copied together with an image is
   pasted into the message as well. Pasting attaches images only while the
   attach control is enabled, so not while you edit a message.
+- Select **Add GIF** to search GIPHY. Searches and previews connect directly
+  to GIPHY and are not end-to-end encrypted. Choosing a GIF downloads it into
+  your attachments; select **Send** to send it with your message. The GIF is
+  encrypted on your device, and recipients view the decrypted attachment
+  without connecting to GIPHY. You can cancel a download or remove the GIF
+  before sending. The same file size and attachment limits apply.
 - Open a message's menu to react, reply, or edit or delete your own messages.
   On someone else's message the menu also offers **Mute on this device** (the
   same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted
@@ -328,7 +438,14 @@ time your device sees someone. Compare safety codes and check the wallets in
 
 - **Group changes are delayed. Messages will send once the change goes
   through.** A required change (for example removing a revoked device) has not
-  been accepted yet. Sending resumes on its own.
+  been accepted yet. The composer reads "Sending is paused until the group
+  change goes through." Sending resumes on its own.
+- **Messages aren’t sending right now. We’ll keep retrying, and you can keep
+  writing.** Sending has failed for about 20 seconds while the chat itself is
+  fine (for example the delivery service is overloaded). The composer stays
+  available, and what you type is kept. New messages stay pending (see
+  [Message states](#message-states)) and go out in order once a retry
+  succeeds; retries continue every few seconds.
 - **Security check needed: this device may not see the same chat as everyone
   else.** Members may be seeing different versions of the chat. Compare
   safety codes before sharing anything sensitive.
@@ -351,6 +468,8 @@ time your device sees someone. Compare safety codes and check the wallets in
 - **Couldn’t decrypt this message**: this device could not read it; ask the
   sender to send it again.
 - **Signature not verified**: the sender's signature did not check out.
+- **Sender’s device signature verified** appears in the message actions menu
+  for verified messages received from other participants.
 
 ## Devices
 
@@ -431,11 +550,8 @@ encrypted copy of your message history so you can restore it on a new device.
   **Open 6529 Mobile to view** in production or **Open 6529 Staging to view**
   on staging. Invitation pushes say that you were added to an encrypted chat.
   Pushes carry no sender, chat name or message text, and open
-  `/messages/encrypted`. The phone attempts a sync, then checks its local
-  chats even if that sync fails. It opens exactly one active, unmuted chat
-  with unread messages; otherwise the list stays open and shows which chats
-  changed. Leaving the wake visit cancels pending navigation. The phone
-  decides this itself.
+  `/messages/encrypted`. The phone refreshes the encrypted chat list and
+  stays there so the recipient can choose which chat to open.
 - 6529 Desktop shows a local notification, "New encrypted message", when a
   chat gets a message from someone else, unless the chat is muted or open in
   the focused window. Like phone push it names no sender, chat or text.
@@ -452,10 +568,8 @@ encrypted copy of your message history so you can restore it on a new device.
   supported; encryption-only setup uses its own encryption grant. Alternatively,
   source-browser-approved [connection sharing](#setup-through-connection-sharing)
   signs in and enrolls the receiving app without connecting a wallet there.
-  Ordinary app sign-in alone does not grant these permissions. The web
-  **6529 Desktop** connection option currently allows **Connect only**; its
-  secure setup button is disabled with **Coming soon** until that app release.
-  Availability inside an app also depends on its build and cryptographic support.
+  Ordinary app sign-in alone does not grant these permissions. Secure setup
+  requires a compatible Desktop or Mobile build with cryptographic support.
 
 - **Phones.** 6529 Mobile needs iOS 16.4 or later (earlier iOS versions cannot
   run the current site at all) or a current Android System WebView. Signed
@@ -557,6 +671,10 @@ without images**. Images and files too large for one encrypted attachment
 - **Chat not found on this device**: devices only receive chats they were
   added to. Open the chat on a device that was in it, or ask a member to add
   your new device (it is added automatically after you turn it on).
+- **This conversation moved to stronger encryption**: the chat is read-only.
+  Select **Continue the conversation** (direct message) or **Start again with
+  the same members** (group); see
+  [Moving to stronger encryption](#moving-to-stronger-encryption).
 - **You cancelled the signature**: select the button again and approve the
   wallet signature.
 - **That recovery code doesn't open this backup**: the code is from an older
@@ -580,14 +698,16 @@ Choose **Connect only** for an additional signed-in app session, or
 The source browser does not need encryption enabled on itself to approve the
 receiving app. Proxy sessions cannot authorize secure setup.
 
-**6529 Desktop** currently keeps the secure option visible but disabled, with a
-**Coming soon** tooltip. **Connect only** remains available. This is a release
-gate, not an automatic check of the installed app version.
+Desktop secure setup requires 6529 Desktop v0.4.0 or later. Approve the wallet
+signature in the browser, then select **Open in 6529 Desktop** to open the
+private link.
 
 For Mobile secure setup, approve the wallet signature in the browser, then scan
 one QR or open its private link in the receiving app. The regular **Scan QR Code**
 flow accepts it; you do not have to start from the encryption page. A device
 camera can hand the link to the app when its link handler supports that URL.
+If you use **Scan Connection QR** from the upgrade prompt, a valid scan closes
+the prompt and opens the incoming connection for approval.
 The receiving screen identifies the account and lists **Signed Posts** and
 **Encrypted DMs** above **Accept and enable both**. A Connect-only link keeps
 **Accept connection** and does not list or enable these permissions.
@@ -596,8 +716,10 @@ One secure link signs in and enrolls the app; a second connection-only scan is
 unnecessary. Generating or viewing a QR does not register an active device.
 Registration happens when the receiving app accepts and completes setup.
 
-After accepting either connection type, the receiving app opens Home. Secure
-setup completes before navigation; Encrypted DMs do not open automatically.
+After a successful acceptance, the receiving app opens Home. A new device
+may still be registering for Encrypted DMs. If secure setup fails after
+sign-in, the app keeps you signed in and shows how to try again with a fresh
+secure link. You can choose **Take me home** from that screen.
 
 The Mobile QR fills the available width. Below it, the link field has a copy
 icon and separate refresh icon. **Back** returns to the app and connection
@@ -648,3 +770,17 @@ sized shields. A disconnected wallet does not by itself disable stored grants.
 
 See [Wallet and Account Controls](navigation/feature-wallet-account-controls.md)
 and [Notifications Feed](notifications/feature-notifications-feed.md).
+
+## Touch shortcuts
+
+On a touch layout, swipe left on an available message to start a reply on release.
+Reverse below the reply threshold before release, or release a short swipe, to
+leave the composer unchanged. Message timestamps and the visible message-actions
+menu remain available. Pending, unsent, deleted and unreadable messages, notices,
+and read-only conversations do not offer swipe to reply. Links, media controls and text selection keep their own interactions.
+
+In the native app, swipe right across conversation content to return to the
+Encrypted messages list, or use the existing Back control. Reverse below the
+gesture threshold before release to cancel the return. Vertical scrolling
+and multi-touch do not trigger the shortcut. Reduced motion removes the added
+settling animation.

@@ -2,6 +2,16 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveTabsMemeSubmit from "@/components/brain/my-stream/tabs/MyStreamWaveTabsMemeSubmit";
 import { SubmissionStatus } from "@/hooks/useWave";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
+
+let mockDisplayTimeZone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
+jest.mock("@/hooks/useDisplayTimeZone", () => ({
+  ...jest.requireActual("@/hooks/useDisplayTimeZone"),
+  useDisplayTimeZone: () => mockDisplayTimeZone,
+}));
 
 const useWave = jest.fn();
 const useCountdown = jest.fn();
@@ -39,6 +49,7 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useCountdown.mockReturnValue("soon");
+    mockDisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
   });
 
   it("opens the closing time from the restricted submission control", async () => {
@@ -185,5 +196,78 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
     expect(screen.getByText("Submit Meme")).toBeInTheDocument();
     expect(screen.getByText("Closing 3h")).toHaveClass("tw-hidden");
     expect(screen.getByText("2 Left")).toHaveClass("tw-hidden");
+  });
+
+  describe("display time zone", () => {
+    // The fields Date#toLocaleString() prints by default.
+    const inZone = (value: number, timeZone: string) =>
+      new Date(value).toLocaleString(undefined, {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+        timeZone,
+        timeZoneName: "short",
+      });
+
+    it("dates the closed tooltip in the display zone and names it", () => {
+      mockDisplayTimeZone = { timeZone: "Asia/Dubai", isLocal: false };
+      // 23:59 UTC on Jan 1 is already Jan 2 in Dubai.
+      const endTime = Date.UTC(2026, 0, 1, 23, 59);
+      renderComponent({
+        ...baseInfo,
+        participation: {
+          status: SubmissionStatus.ENDED,
+          startTime: endTime - 1000,
+          endTime,
+        },
+      });
+      const reason = `Submissions closed on ${inZone(endTime, "Asia/Dubai")}`;
+      expect(reason).toMatch(/GMT\+4$/);
+      expect(screen.getByTestId("closed")).toHaveAccessibleDescription(reason);
+    });
+
+    it("names the zone on the opening time", () => {
+      mockDisplayTimeZone = { timeZone: "UTC", isLocal: false };
+      const startTime = Date.UTC(2026, 0, 2, 0, 30);
+      renderComponent({
+        ...baseInfo,
+        participation: {
+          status: SubmissionStatus.NOT_STARTED,
+          startTime,
+          endTime: startTime + 1000,
+        },
+      });
+      expect(screen.getByTestId("info")).toHaveAccessibleDescription(
+        `Submissions open on ${inZone(startTime, "UTC")}`
+      );
+    });
+
+    it("names the zone on the closing-soon tooltip", () => {
+      mockDisplayTimeZone = { timeZone: "UTC", isLocal: false };
+      const endTime = Date.now() + 12 * 60 * 60 * 1000;
+      renderComponent({
+        ...baseInfo,
+        participation: {
+          status: SubmissionStatus.ACTIVE,
+          isEligible: true,
+          hasReachedLimit: false,
+          remainingSubmissions: 10,
+          maxSubmissions: 10,
+          canSubmitNow: true,
+          isWithinPeriod: true,
+          startTime: endTime - 1000,
+          endTime,
+        },
+      });
+      expect(
+        screen.getByRole("button", { name: /Submit Meme/ })
+      ).toHaveAttribute(
+        "title",
+        `Submissions closing soon! Ends on ${inZone(endTime, "UTC")}`
+      );
+    });
   });
 });

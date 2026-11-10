@@ -11,8 +11,14 @@ export class MlsDevice {
     acceptStaged(g: string): string;
     acceptWelcome(g: string): string;
     createCommit(g: string, ops_json: string): string;
-    createGroup(g: string, metadata_json: string): string;
-    createKeyPackages(count: number, last_resort: boolean, lifetime_secs: number): string;
+    /**
+     * `ciphersuite` (optional): the suite's code point, default 0x004F.
+     */
+    createGroup(g: string, metadata_json: string, ciphersuite?: number | null): string;
+    /**
+     * `ciphersuite` (optional): the suite's code point, default 0x004F.
+     */
+    createKeyPackages(count: number, last_resort: boolean, lifetime_secs: number, ciphersuite?: number | null): string;
     /**
      * Fresh device with a new Ed25519 signature key.
      */
@@ -104,8 +110,8 @@ export interface InitOutput {
     readonly mlsdevice_acceptWelcome: (a: number, b: number, c: number, d: number) => void;
     readonly mlsdevice_create: (a: number) => void;
     readonly mlsdevice_createCommit: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
-    readonly mlsdevice_createGroup: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
-    readonly mlsdevice_createKeyPackages: (a: number, b: number, c: number, d: number, e: number) => void;
+    readonly mlsdevice_createGroup: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
+    readonly mlsdevice_createKeyPackages: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
     readonly mlsdevice_credentialIdentity: (a: number, b: number) => void;
     readonly mlsdevice_decryptMessage: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
     readonly mlsdevice_deleteGroup: (a: number, b: number, c: number, d: number) => void;

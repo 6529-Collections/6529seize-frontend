@@ -16,7 +16,7 @@ function finalEnv(options: Record<string, unknown>): Record<string, unknown> {
   // injected fails here rather than silently renaming the client chunk again.
   const { withSentryConfig } = jest.requireActual<{
     withSentryConfig: WrapConfig;
-  }>("@sentry/nextjs");
+  }>("@sentry/nextjs/config");
   return withSentryConfig({ env: {} }, options).env ?? {};
 }
 

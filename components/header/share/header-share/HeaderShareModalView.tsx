@@ -27,7 +27,7 @@ import {
 } from "react";
 import { Tooltip } from "react-tooltip";
 
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import {
   HEADER_SHARE_LOCALE,
   Mode,
@@ -38,6 +38,7 @@ import type { HeaderShareModalViewProps } from "./HeaderShareModalView.types";
 import { buildSocialShareUrls, type ConnectionShareStatus } from "./shareUtils";
 import { FarcasterLogo, XLogo } from "./SocialShareIcons";
 import { useSystemShare } from "./useSystemShare";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 
 const SHARE_ACTION_CLASS_NAME =
   "tw-inline-flex tw-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
@@ -58,6 +59,19 @@ const TOOLTIP_STYLE = {
   padding: "4px 8px",
 };
 
+function getModalTitleKey(
+  mode: Mode,
+  activeSubTab: SubMode,
+  hasSelectedConnectionMode: boolean
+): MessageKey {
+  if (mode !== Mode.CONNECT) return "headerShare.shareModal.title";
+  if (!hasSelectedConnectionMode) return "headerShare.connectModal.title";
+  return activeSubTab === SubMode.DESKTOP
+    ? "headerShare.connectModal.desktopTitle"
+    : "headerShare.connectModal.mobileTitle";
+}
+
+/** Show the share flow, including the secure Desktop link or Mobile QR code. */
 export function HeaderShareModalView({
   open,
   shouldRender,
@@ -89,6 +103,7 @@ export function HeaderShareModalView({
   isMobile,
   isElectron,
 }: HeaderShareModalViewProps) {
+  useAndroidBackLayer(shouldRender, dialogRef, onClose);
   const [connectionMode, setConnectionMode] = useState<
     "only" | "secure" | null
   >(null);
@@ -119,11 +134,10 @@ export function HeaderShareModalView({
     };
   }, []);
 
-  const modalTitle = t(
-    HEADER_SHARE_LOCALE,
-    isConnectMode
-      ? "headerShare.connectModal.title"
-      : "headerShare.shareModal.title"
+  const modalTitleKey = getModalTitleKey(
+    mode,
+    activeSubTab,
+    connectionMode !== null
   );
   const closeAriaLabel = t(
     HEADER_SHARE_LOCALE,
@@ -589,9 +603,7 @@ export function HeaderShareModalView({
                 })}
               </h3>
               {activeSubTab === SubMode.DESKTOP ? (
-                <div className="tw-h-56">
-                  <DesktopConnectionLink url={link.url} />
-                </div>
+                <DesktopConnectionLink url={link.url} showVersionNotice />
               ) : (
                 <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-lg">
                   {renderQRCodeImage(
@@ -716,7 +728,7 @@ export function HeaderShareModalView({
               id="header-share-title"
               className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
             >
-              {modalTitle}
+              {t(HEADER_SHARE_LOCALE, modalTitleKey)}
             </h2>
             {isConnectMode && (
               <Link

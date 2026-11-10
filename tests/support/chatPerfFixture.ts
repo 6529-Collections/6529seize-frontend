@@ -181,17 +181,21 @@ export async function installChatPerfFixture(
     }) satisfies ApiDrop;
 
   // Messages the server knows, per wave, oldest first.
+  // The open wave and the "other" wave start with read history, so live
+  // messages land after it.
   const messages = new Map<number, FeedDrop[]>();
-  messages.set(
-    PERF_OPEN_WAVE_INDEX,
-    Array.from({ length: INITIAL_MESSAGES }, (_, offset) =>
-      feedDrop({
-        index: PERF_OPEN_WAVE_INDEX,
-        serialNo: offset + 1,
-        createdAt: now - (INITIAL_MESSAGES - offset) * 30_000,
-      })
-    )
-  );
+  for (const index of [PERF_OPEN_WAVE_INDEX, PERF_OTHER_WAVE_INDEX]) {
+    messages.set(
+      index,
+      Array.from({ length: INITIAL_MESSAGES }, (_, offset) =>
+        feedDrop({
+          index,
+          serialNo: offset + 1,
+          createdAt: now - (INITIAL_MESSAGES - offset) * 30_000,
+        })
+      )
+    );
+  }
   const waveIndexOf = (id: string | undefined) =>
     overviews.findIndex((wave) => wave.id === id);
 
@@ -199,7 +203,7 @@ export async function installChatPerfFixture(
   await page.route("**/api/v2/waves?**", (route) =>
     route.fulfill({ json: listPage() })
   );
-  await page.route("**/api/v2/waves/joined**", (route) =>
+  await page.route(/\/api\/v2\/waves\/(?:joined|all)(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
         data: overviews,

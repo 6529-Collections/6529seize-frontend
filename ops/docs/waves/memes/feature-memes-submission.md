@@ -130,6 +130,10 @@ reached), select the header restriction control to see the reason, then use
   take longer.
 - After a file is selected, the preview surface keeps a `Change` control for
   clearing the current upload and picking another file.
+- A submission is a decision entry, so uploaded artwork, supporting media,
+  preview images and promo videos keep the artist's original files, including
+  embedded details such as location, camera details, capture time and file
+  name. Photos posted in chat have those details removed.
 - The interactive artwork panel always shows `Media Type` as `Interactive HTML
   (text/html)` while the provider selector switches between `IPFS` and
   `Arweave`.

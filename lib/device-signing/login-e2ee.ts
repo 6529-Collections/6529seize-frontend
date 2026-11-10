@@ -79,7 +79,8 @@ export async function prepareLoginE2eeDevice({
 
 export const toE2eeNonceParams = (
   device: LoginE2eeDevice
-): { readonly mls_device_key: string; readonly mls_ciphersuite: string } => ({
+): { readonly mls_device_key: string; readonly mls_ciphersuites: string } => ({
   mls_device_key: device.deviceKeyHex,
-  mls_ciphersuite: String(device.ciphersuite),
+  // Grant v2 (D172): the suite set, ascending, joined by ".".
+  mls_ciphersuites: device.ciphersuites.join("."),
 });

@@ -18,8 +18,10 @@ are controlled by the `NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` build flag; a
 build with the flag off shows none of the controls below and leaves writes
 unchanged. In 6529 Mobile and 6529 Desktop they also need the
 `NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS` build flag and a compatible released app.
-The website currently disables secure Desktop connection sharing with **Coming
-soon**, while retaining **Connect only** (see
+In the website's **Connect Device** dialog, choose **Connect only** to sign in
+without granting device permissions. For secure setup, choose **Connect with
+Post Signing & DM Encryption**. Mobile uses a QR code. Desktop uses a private
+app link and requires 6529 Desktop v0.4.0 or later (see
 [In 6529 Mobile and 6529 Desktop](#in-6529-mobile-and-6529-desktop)).
 
 ## Location in the Site
@@ -164,6 +166,10 @@ wallets, added/expiry/last-used dates and **Active**, **Expired** or **Revoked**
 status. Signing history includes at most the newest 100 grants, so older grants
 can be absent from a long list. Proxies cannot manage devices.
 
+If this browser cannot read its own keys (for example when its site storage is
+unavailable), no entry is marked **This device**: the page says so, and the
+revoke confirmation warns that the permission may be this browser's own.
+
 Rename any unrevoked device you own from an authenticated browser or app. This
 updates the existing server name, reflected on other devices when their lists
 refresh; linked signing and encryption entries share it. It is not a local nickname.
@@ -179,12 +185,15 @@ encrypted backup. See [Encrypted messages](../../encrypted-messages.md#renewal-a
 
 ## New-Device Alert
 
-The browser checks the profile's grants when a wave opens and at most every
-10 minutes while the tab is visible. When an active grant appears that this
-browser has not seen and that is not one of its own keys, the composer notice
-shows **{label} can now post as you. Not you?** with **Revoke** and a dismiss
-control. The first list a browser sees for a wallet is its baseline, so a
-grant that already exists then never raises the alert; review **Device Permissions** for existing grants.
+The browser checks the profile's grants when a wave opens, when the app
+returns to focus, and every 10 minutes while visible. An active grant for
+another device can raise a notice above the composer. Choose **Got it**
+to clear that notice across devices as their grant lists refresh. Choose
+**Revoke** to remove the device's permission. The first list a browser sees
+for a wallet is its baseline. If the browser loses its local signing key but
+still remembers its grant, that grant does not trigger a new-device notice.
+Set up Signed Posts again to sign from that browser. Review existing grants in
+**Device Permissions**.
 
 ## Checking a Drop's Signature
 
@@ -404,10 +413,9 @@ connection/signing flow. Progress appears below the relevant action.
 ## Connection sharing and status
 
 The Connect Device modal offers source-browser approval for receiving-app signing
-and encryption keys. Its **6529 Desktop** secure option is visible but disabled
-with **Coming soon**; there is no automatic release-version check. Connect-only
-Desktop handoff remains available. The compatible Mobile flow uses one QR for
-sign-in and setup, with no receiving-wallet connection. Working receiver keys and
+and encryption keys. A compatible Desktop build uses a private app link and
+Mobile uses a QR code. Both sign in and set up permissions without connecting
+the receiving wallet. Working receiver keys and
 history are preserved; source history is not copied. See
 [Encrypted messages](../../encrypted-messages.md#setup-through-connection-sharing).
 

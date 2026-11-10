@@ -48,6 +48,19 @@ Explicit tab, decision, curation and message links retain their destinations.
 Browser Back/Forward and native app Back restore the section from that visit
 when it is still available, ahead of the wave's latest remembered choice.
 
+## Unread Chat Messages
+
+- On desktop and mobile web, `Chat` shows a blue unread-message badge, capped
+  at `99+`, using the same style as the Decisions count. Muted waves omit it.
+- New messages remain unread while you use Leaderboard, Decisions, Settings,
+  curations, or another section, including after returning to the browser tab.
+- While a non-chat section is selected, incoming chat messages do not add a
+  new-message count to the browser tab title.
+- Selecting Chat in a visible browser tab clears the live new-message count
+  and uses the conversation's normal read acknowledgement. If Chat is selected
+  in a background browser tab, new messages still appear in the browser title
+  until you return to it.
+
 ## Location in the Site
 
 - Public or group waves: `/waves/{waveId}`
@@ -181,7 +194,7 @@ when it is still available, ahead of the wave's latest remembered choice.
 - Memes wave tabs start with `Chat`, then `Leaderboard` (or `Submissions` after
   voting ends), `Winners` when available, and `Votes`.
   Other available sections follow these tabs.
-- Curation waves do not expose an `Outcome` tab; `Sales` fills that dedicated
+- Configured decision outcomes appear in Settings. Curation waves use `Sales` for their dedicated
   results-slot instead.
 - In `My Votes`, non-image rows suppress inline media interaction even when the row
   includes video, audio, or HTML media.

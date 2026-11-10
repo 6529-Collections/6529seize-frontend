@@ -82,7 +82,6 @@ env:
   NEXTGEN_CHAIN_ID: "1"
   MOBILE_APP_SCHEME: "mobile6529"
   CORE_SCHEME: "core6529"
-  IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
   IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
   ASSETS_FROM_S3: "true"
   ANNOUNCED_VERSION_ENDPOINT: "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json"
@@ -191,6 +190,14 @@ jobs:
           build_timestamp="$(git show -s --format=%cI "$TARGET_SHA")"
           [[ "$build_timestamp" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T ]]
           echo "VERSION_BUILD_TIMESTAMP=$build_timestamp" >> "$GITHUB_ENV"
+
+      - name: Capture production release order
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse --is-shallow-repository)" = false
+          release_order="$(git rev-list --count "$TARGET_SHA")"
+          [[ "$release_order" =~ ^[1-9][0-9]*$ ]]
+          echo "VERSION_RELEASE_ORDER=$release_order" >> "$GITHUB_ENV"
 
       - name: Install Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0

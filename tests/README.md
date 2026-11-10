@@ -255,7 +255,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:staging:museum-about`                     | museum-about                  | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum About proposition route smoke.                                                 |
 | `test:e2e:staging:museum-inside-system`             | museum-inside-system          | readonly | staging     | post-deploy, manual       | 30m     | Staging Network Museum Inside the System project and comparison sweep.                                |
 | `test:e2e:staging:museum-rights`                    | museum-rights                 | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum rights education and object-license route sweep.                               |
-| `test:e2e:staging:e2ee`                             | e2ee-staging                  | stateful | staging     | manual                    | 60m     | Encrypted DMs, attachments, groups and device revocation between throwaway users (writes QA data).    |
+| `test:e2e:staging:e2ee`                             | e2ee-staging                  | stateful | staging     | manual                    | 75m     | Encrypted DMs, device revocation and live wave unread badges for throwaway users (writes QA data).    |
 | `test:e2e:production:home-readonly`                 | home-readonly                 | readonly | production  | post-deploy, manual       | 15m     | Production home-page read-only canary.                                                                |
 | `test:e2e:production:social-readonly`               | social-readonly               | readonly | production  | cron, manual, post-deploy | 15m     | Production waves and profile read-only canary.                                                        |
 | `test:e2e:production:media-readonly`                | media-readonly                | readonly | production  | cron, manual, post-deploy | 15m     | Production media and mint detail read-only canary.                                                    |
@@ -342,7 +342,16 @@ Opt-in stateful staging packs:
   image popup dismissal, downloads and focus return, a group with a
   third user and a revoked second device that can no longer read new messages.
   It also checks sender profile links and levels, plus DM header profile
-  links. Its privacy checks ensure no request URL, body or sent WebSocket
+  links. Its Markdown comparison posts identical formatting, lists, code, tables
+  in ordinary and encrypted chats, captures both at desktop and phone widths,
+  and checks private footnote navigation and that private Markdown URLs cause
+  no automatic requests.
+  Ordinary chat uses a separate throwaway session so public traffic stays out
+  of the encrypted users' lifetime privacy evidence.
+  The same check covers formatted encrypted notification previews in the
+  desktop overview and on the notifications page, including fenced code and
+  bounded previews at desktop and phone widths.
+  Its privacy checks ensure no request URL, body or sent WebSocket
   frame contains any plaintext (raw, hex
   or base64 at any alignment), that the MLS WebAssembly module loads under the
   served CSP (`'wasm-unsafe-eval'` without `'unsafe-eval'`) and that the
@@ -407,6 +416,22 @@ App PR CI:
   memory. Those steps also set `NEXT_DEV_TURBOPACK_FS_CACHE=0`, which
   `next.config.ts` maps to `experimental.turbopackFileSystemCacheForDev:
 false` because CI dev servers always start cold.
+- When the critical-shell check is selected, it runs as three parallel jobs.
+  One job runs both route-shell halves and `test:e2e:session-recovery-sandbox`.
+  The other two run `test:e2e:profile-following-sandbox` with Playwright
+  `--shard=1/2` and `--shard=2/2`. Playwright splits the ordered test list by
+  count, not by project. Today each of the four projects has the same number
+  of tests, so shard 1 runs desktop and mobile web, and shard 2 runs the
+  Capacitor iOS and Android simulators. If project counts diverge, a shard can
+  straddle projects, but every test still runs exactly once. As one serial job
+  the pack reached the 30-minute limit, and a single retry could cancel it.
+- `test:e2e:native-competition-sandbox` runs as four Playwright shards
+  (`--shard=N/4`) in parallel jobs. With two shards, each job took 24–28
+  minutes against its 30-minute limit. The pack's desktop and mobile halves
+  are each dominated by `native-competition-sandbox.spec.ts`, so four
+  count-based shards come out within a few minutes of each other.
+- Browser matrix jobs do not cancel their siblings on failure, preserving each
+  job's results. All selected jobs must still pass `Installed app checks`.
 - Museum selection: `scripts/museum-release-selection.cjs` maps each changed
   file to Museum page surfaces through the surface registry and import graph
   (copy keys and `public/museum` assets map through the sources that name
@@ -559,18 +584,25 @@ Surface matrix:
 - `test:e2e:e2ee-sandbox` runs end-to-end encrypted DMs and groups (D109)
   in several browser contexts at once, each a different local user (alice,
   bob, carol, dave) or another device of the same user, against one Next dev
-  server whose public runtime turns `NEXT_PUBLIC_E2EE_DM_ENABLED` on. The
+  server whose public runtime turns `NEXT_PUBLIC_E2EE_DM_ENABLED` and
+  `NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` on, so device setup offers the
+  combined grant ("Sign to enable both"). The
   composer sandbox mock API mounts the in-memory fake delivery service
   (`tests/support/e2ee/fakeDeliveryService.cjs`) at `/api/e2ee/*`, acting as
   the profile whose wallet is the synthetic dev JWT's `sub`, and exposes
   loopback-only `/__e2ee-sandbox/*` controls for DM policy, blocks, faults,
   epoch fingerprint tampering, state reads and a plaintext scan of everything
-  the service received. Each context sets its dev wallet and JWT through the
-  localhost-only dev-auth test override (`services/auth/devAuthTestOverride.ts`)
-  and answers the single enrollment signature with a throwaway viem key
-  through the test signer seam (`components/e2ee/e2eeTestSigner.ts`); both
-  are inert unless `USE_DEV_AUTH=true`, the build is development-like and the
-  page is on `localhost` or `127.0.0.1`. The sandbox has no WebSocket, so
+  the service received. It also serves the web sign-in with device grants
+  (`tests/support/e2ee/sandboxSignIn.cjs`: `/api/auth/session-nonce`,
+  `/api/auth/session-login`, `/api/device-grants`), so the real combined
+  sign-in, its challenge check and the sign-in grant registration run end to
+  end. Each context sets its dev wallet and JWT through the localhost-only
+  dev-auth test override (`services/auth/devAuthTestOverride.ts`) and answers
+  the one wallet signature with a throwaway viem key through the test signer
+  seams (`components/auth/signedMessagesTestSigner.ts` for the combined
+  sign-in, `components/e2ee/e2eeTestSigner.ts` for a separate encryption
+  grant); all are inert unless `USE_DEV_AUTH=true`, the build is
+  development-like and the page is on `localhost` or `127.0.0.1`. The sandbox has no WebSocket, so
   engines poll (5 s with a chat open, 30 s otherwise) and specs use generous
   `expect` timeouts. The DM spec also runs on mobile Chromium; the others are
   desktop only. It must never run against staging or production.
@@ -769,7 +801,9 @@ Large-pack ownership:
   exact sandbox reaction endpoint and body.
 - `test:e2e:e2ee-sandbox` is owned by PR or train owners changing encrypted
   messages (`lib/e2ee`, `components/e2ee`, `hooks/e2ee`,
-  `app/messages/encrypted`, the MLS WebAssembly module), the dev-auth test
+  `app/messages/encrypted`, the MLS WebAssembly module), device signing
+  (`lib/device-signing`, `components/device-signing`,
+  `hooks/device-signing`), the sign-in grant path, the dev-auth test
   override, the composer sandbox mock API or the fake delivery service.
 - `test:e2e:production:readonly` is owned by the release captain or validation
   agent after a production deploy. It is a production-safe aggregate of the

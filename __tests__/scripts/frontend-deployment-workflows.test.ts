@@ -192,9 +192,46 @@ describe("frontend deployment workflow contract", () => {
     }
   );
 
+  it.each([
+    [
+      "production-build-artifact.yml",
+      "build-production-artifact",
+      "Checkout protected main history",
+      "Capture production release order",
+    ],
+    [
+      "build-upload-deploy-prod.yml",
+      "build-upload-deploy",
+      "Checkout exact production SHA",
+      "Publish announced production version",
+    ],
+  ])(
+    "checks out complete history for release ordering in %s",
+    (file, job, checkoutName, orderName) => {
+      const { workflow } = readWorkflow(file);
+      const steps = workflow.jobs[job].steps;
+      const checkout = steps.findIndex(
+        (step: { name?: string }) => step.name === checkoutName
+      );
+      const order = steps.findIndex(
+        (step: { name?: string }) => step.name === orderName
+      );
+
+      expect(checkout).toBeGreaterThanOrEqual(0);
+      expect(order).toBeGreaterThan(checkout);
+      expect(steps[checkout].with["fetch-depth"]).toBe(0);
+    }
+  );
+
   describe("production announcement publication", () => {
     let temporaryDirectory: string;
+    let commitSha: string;
     const workflow = readWorkflow("build-upload-deploy-prod.yml").workflow;
+    const build = readWorkflow("production-build-artifact.yml").workflow;
+    const captureOrder = build.jobs["build-production-artifact"].steps.find(
+      (step: { name?: string }) =>
+        step.name === "Capture production release order"
+    );
     const publish = workflow.jobs["build-upload-deploy"].steps.find(
       (step: { name?: string }) =>
         step.name === "Publish announced production version"
@@ -204,6 +241,30 @@ describe("frontend deployment workflow contract", () => {
       temporaryDirectory = fs.mkdtempSync(
         path.join(os.tmpdir(), "announcement-oidc-")
       );
+      const runGit = (...args: string[]) =>
+        childProcess.execFileSync("git", args, {
+          cwd: temporaryDirectory,
+          encoding: "utf8",
+        });
+      runGit("-c", "init.defaultBranch=main", "init", "--quiet");
+      for (const message of ["first release", "next release"]) {
+        runGit(
+          "-c",
+          "user.name=Release test",
+          "-c",
+          "user.email=release@example.test",
+          "-c",
+          "commit.gpgSign=false",
+          "-c",
+          "core.hooksPath=/dev/null",
+          "commit",
+          "--allow-empty",
+          "--quiet",
+          "-m",
+          message
+        );
+      }
+      commitSha = runGit("rev-parse", "HEAD").trim();
     });
     afterEach(() => {
       fs.rmSync(temporaryDirectory, { recursive: true, force: true });
@@ -239,7 +300,7 @@ aws() {
             cwd: temporaryDirectory,
             env: {
               ...process.env,
-              COMMIT_SHA: "a".repeat(40),
+              COMMIT_SHA: commitSha,
               BEANSTALK_ENV_NAME: "test-environment",
               AWS_BUCKET: "test-bucket",
               ANNOUNCED_VERSION_ENDPOINT:
@@ -260,6 +321,29 @@ aws() {
           ? fs.readFileSync(calls, "utf8").trim().split("\n")
           : [];
         expect(actualCalls).toEqual(expectedCalls);
+        if (succeeds) {
+          const buildEnv = path.join(temporaryDirectory, "build-env");
+          childProcess.execFileSync("bash", ["-c", captureOrder.run], {
+            cwd: temporaryDirectory,
+            env: {
+              ...process.env,
+              TARGET_SHA: commitSha,
+              GITHUB_ENV: buildEnv,
+            },
+          });
+          expect(fs.readFileSync(buildEnv, "utf8")).toBe(
+            "VERSION_RELEASE_ORDER=2\n"
+          );
+          const announcement = fs.readFileSync(
+            path.join(temporaryDirectory, "current-production-version.json"),
+            "utf8"
+          );
+          expect(JSON.parse(announcement)).toMatchObject({
+            ready: true,
+            release_order: 2,
+            version: commitSha,
+          });
+        }
       }
     );
   });

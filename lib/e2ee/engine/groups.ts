@@ -1,3 +1,5 @@
+import { profileOfLeaf } from "./member-identity";
+export { profileOfLeaf } from "./member-identity";
 import { cacheMessage } from "./history";
 import type {
   LeafActivity,
@@ -27,6 +29,8 @@ export function newRuntime(record: StoredGroup): GroupRuntime {
     deleted: new Set(),
     outbox: new Map(),
     stallSince: null,
+    sendFailingSince: null,
+    commitFailing: false,
   };
 }
 
@@ -40,6 +44,7 @@ export function newGroupRecord(input: {
   return {
     g: summary.g.toLowerCase(),
     status: "active",
+    ciphersuite: summary.ciphersuite,
     metadata: summary.metadata,
     cursor: 0,
     epoch: summary.epoch,
@@ -75,23 +80,6 @@ export const memberRefs = (record: StoredGroup): MemberRef[] =>
     deviceKey: member.deviceKey,
     profileId: member.profileId,
   }));
-
-/** Resolves the profile of a leaf from the device directory (best effort). */
-export async function profileOfLeaf(
-  ctx: EngineContext,
-  deviceKey: string
-): Promise<string | null> {
-  const cached = ctx.directory.profileOf(deviceKey);
-  if (cached !== null) {
-    return cached;
-  }
-  try {
-    const record = await ctx.directory.getDevice(deviceKey);
-    return record?.profile_id ?? null;
-  } catch {
-    return null;
-  }
-}
 
 export async function leafRefs(
   ctx: EngineContext,

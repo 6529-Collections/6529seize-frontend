@@ -10,6 +10,10 @@ import {
   createFetchDeadline,
   discardResponse,
 } from "@/lib/fetch/fetchDeadline";
+import {
+  findSchemeOrPortRefusal,
+  type UrlSchemePortOptions,
+} from "@/lib/security/urlSchemePort";
 
 type UrlGuardErrorKind =
   | "missing-url"
@@ -59,7 +63,7 @@ interface UrlGuardHooks {
     | undefined;
 }
 
-export interface UrlGuardOptions {
+export interface UrlGuardOptions extends UrlSchemePortOptions {
   readonly policy?: UrlGuardHostPolicy | undefined;
   readonly allowIpAddresses?: boolean | undefined;
   readonly hooks?: UrlGuardHooks | undefined;
@@ -202,10 +206,7 @@ function isPrivateIpv4(address: string): boolean {
   );
 }
 
-function parseIpv6Part(
-  part: string,
-  allowIpv4Tail: boolean
-): number[] | null {
+function parseIpv6Part(part: string, allowIpv4Tail: boolean): number[] | null {
   if (part === "") {
     return [];
   }
@@ -486,10 +487,20 @@ export function parsePublicUrl(
   return parsed;
 }
 
+function checkSchemeAndPort(url: URL, options: UrlGuardOptions): void {
+  const refusal = findSchemeOrPortRefusal(url, options);
+  if (refusal) {
+    emitBlockedHook(url, refusal.kind, refusal.message, options.hooks);
+    throw new UrlGuardError(refusal.message, refusal.kind);
+  }
+}
+
 async function validatePublicUrl(
   url: URL,
   options: UrlGuardOptions = {}
 ): Promise<ValidatedPublicUrl> {
+  checkSchemeAndPort(url, options);
+
   let hostname = url.hostname;
 
   if (!hostname) {

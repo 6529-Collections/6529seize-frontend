@@ -19,7 +19,8 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { useMutation } from "@tanstack/react-query";
-import { Fragment, useContext, useState } from "react";
+import { Fragment, useContext, useRef, useState } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { createPortal } from "react-dom";
 
 export default function DropsListItemDeleteDropModal({
@@ -91,11 +92,18 @@ export default function DropsListItemDeleteDropModal({
     }
   };
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const dismissDelete = () => {
+    if (!mutating) closeModal();
+  };
+  useAndroidBackLayer(true, dialogRef, dismissDelete);
+
   return createPortal(
     <Transition appear show as={Fragment}>
       <Dialog
+        ref={dialogRef}
         className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1020] tw-cursor-default"
-        onClose={mutating ? () => undefined : closeModal}
+        onClose={dismissDelete}
       >
         <TransitionChild
           as={Fragment}

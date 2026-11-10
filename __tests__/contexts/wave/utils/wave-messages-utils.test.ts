@@ -3,7 +3,6 @@ import {
   fetchNewestWaveMessages,
   formatWaveMessages,
   maxOrNull,
-  mergeDrops,
 } from "@/contexts/wave/utils/wave-messages-utils";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiFetchWithRetry } from "@/services/api/common-api";
@@ -107,103 +106,8 @@ describe("createEmptyWaveMessages", () => {
   });
 });
 
-describe("mergeDrops", () => {
-  it("prefers newer drops and keeps stable ordering", () => {
-    const current = [
-      {
-        ...sampleDrop,
-        serial_no: 4,
-        created_at: "2023-12-31T23:59:59Z",
-        stableKey: "existing",
-        stableHash: "existing",
-        type: DropSize.FULL,
-      },
-    ] as any[];
-    const incoming = [
-      {
-        ...sampleDrop,
-        id: "drop-2",
-        serial_no: 6,
-        created_at: "2024-01-02T00:00:00Z",
-        type: DropSize.FULL,
-      },
-    ] as any[];
-
-    const merged = mergeDrops(current, incoming);
-    expect(merged[0]?.id).toBe("drop-2");
-    expect(merged[0]?.serial_no).toBe(6);
-  });
-
-  it("orders temporary and canonical drops by created time consistently", () => {
-    const current = [
-      {
-        ...sampleDrop,
-        id: "temp-text",
-        serial_no: 999_999_999,
-        created_at: 1_000,
-        stableKey: "temp-text",
-        stableHash: "temp-text",
-        type: DropSize.FULL,
-      },
-      {
-        ...sampleDrop,
-        id: "older-file",
-        serial_no: 10,
-        created_at: 500,
-        stableKey: "older-file",
-        stableHash: "older-file",
-        type: DropSize.FULL,
-      },
-    ] as any[];
-    const incoming = [
-      {
-        ...sampleDrop,
-        id: "server-file",
-        serial_no: 12,
-        created_at: 2_000,
-        type: DropSize.FULL,
-      },
-    ] as any[];
-
-    const merged = mergeDrops(current, incoming);
-
-    expect(merged.map((drop) => drop.id)).toEqual([
-      "server-file",
-      "temp-text",
-      "older-file",
-    ]);
-  });
-
-  it("falls back to serial number when created_at is null", () => {
-    const current = [
-      {
-        ...sampleDrop,
-        id: "null-created-at",
-        serial_no: 20,
-        created_at: null,
-        stableKey: "null-created-at",
-        stableHash: "null-created-at",
-        type: DropSize.FULL,
-      },
-    ] as any[];
-    const incoming = [
-      {
-        ...sampleDrop,
-        id: "low-created-at",
-        serial_no: 10,
-        created_at: 5,
-        type: DropSize.FULL,
-      },
-    ] as any[];
-
-    const merged = mergeDrops(current, incoming);
-
-    expect(merged.map((drop) => drop.id)).toEqual([
-      "null-created-at",
-      "low-created-at",
-    ]);
-  });
-});
+// mergeDrops moved into lib/chat-store; its vectors live in
+// __tests__/lib/chat-store/chat-store.test.ts.
 
 describe("fetchNewestWaveMessages", () => {
   it("rethrows cancellation without logging a message-fetch failure", async () => {
@@ -232,7 +136,7 @@ describe("fetchNewestWaveMessages", () => {
     expect(commonApiFetchWithRetry).toHaveBeenCalledWith(
       expect.objectContaining({
         endpoint: "v2/waves/wave-1/drops",
-        params: { limit: "10" },
+        params: { limit: "10", respect_drop_reply_collapse: "true" },
         signal: undefined,
         retryOptions: expect.objectContaining({ maxRetries: 2 }),
       })

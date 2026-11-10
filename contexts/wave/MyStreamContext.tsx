@@ -7,6 +7,7 @@ import { useWaveById } from "@/hooks/useWaveById";
 import useWavesList from "@/hooks/useWavesList";
 import { usePathname } from "next/navigation";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { shouldResyncOnResume } from "@/helpers/resumeSync.helpers";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import type { ReactNode } from "react";
@@ -33,6 +34,8 @@ import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
 import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
 import { useDmUnreadConversations } from "@/services/dm-unread/DmUnreadStateProvider";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
+import { WaveUnreadProvider } from "./WaveUnreadContext";
+import { WaveChatReadContext } from "./WaveChatReadContext";
 
 import type {
   ActiveWaveContextData,
@@ -46,7 +49,6 @@ interface MyStreamProviderProps {
   readonly children: ReactNode;
 }
 
-const BROWSER_RESUME_SYNC_COOLDOWN_MS = 1000;
 const MAIN_WAVES_LIST_IDLE_DELAY_MS = 1000;
 const MAIN_WAVES_LIST_IDLE_TIMEOUT_MS = 2500;
 
@@ -110,6 +112,20 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const pathname = usePathname() as string | null;
   const { activeWaveId, hasActiveWaveDropTarget, setActiveWave } =
     useActiveWaveManager();
+  const [displayedChatWaveId, setDisplayedChatWaveId] = useState<string | null>(
+    null
+  );
+  // During navigation, decline reads until the displayed Chat and route agree.
+  const activeReadWaveId =
+    displayedChatWaveId === activeWaveId ? displayedChatWaveId : null;
+  const registerChat = useCallback((waveId: string) => {
+    setDisplayedChatWaveId(waveId);
+    return () => {
+      setDisplayedChatWaveId((current) =>
+        current === waveId ? null : current
+      );
+    };
+  }, []);
   const [
     directMessagesListActivationCount,
     setDirectMessagesListActivationCount,
@@ -156,12 +172,17 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     () => new Set(dmWavesData.waves.map((wave) => wave.id)),
     [dmWavesData.waves]
   );
-  const wavesHookData = useEnhancedWavesListCore(activeWaveId, mainWavesData, {
-    enabled: isMainWavesListEnabled,
-    supportsPinning: true,
-    otherListWaveIds: dmWaveIds,
-    preserveBackendWaveOrder: true,
-  });
+  // Keep the selected wave live, but only its displayed Chat panel can read it.
+  const wavesHookData = useEnhancedWavesListCore(
+    activeReadWaveId,
+    mainWavesData,
+    {
+      enabled: isMainWavesListEnabled,
+      supportsPinning: true,
+      otherListWaveIds: dmWaveIds,
+      preserveBackendWaveOrder: true,
+    }
+  );
   const dmWavesHookData = useEnhancedWavesListCore(activeWaveId, dmWavesData, {
     enabled: isDirectMessagesListEnabled,
     supportsPinning: false,
@@ -172,7 +193,10 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);
+  // When the lists and active wave last resynced (from any trigger), and
+  // when the browser tab was hidden, for the resume rule.
   const lastBrowserResumeSyncAtRef = useRef(0);
+  const hiddenSinceRef = useRef<number | null>(null);
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const markDirectMessageRead = useCallback(
     (waveId: string, readThroughSerialNo?: number) => {
@@ -194,6 +218,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const {
     registerWave,
+    activateWave,
     prefetchWave,
     syncNewestMessages,
     fetchNextPage,
@@ -210,13 +235,13 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const { clearWave } = waveMessagesStore;
   const refreshWaveMessages = useCallback(
-    (waveId: string) => {
+    async (waveId: string) => {
       if (!clearWave(waveId)) return;
       cancelWaveDataFetch(waveId);
       cancelPaginationFetch(waveId);
-      registerWave(waveId);
+      await activateWave(waveId);
     },
-    [cancelWaveDataFetch, cancelPaginationFetch, clearWave, registerWave]
+    [activateWave, cancelWaveDataFetch, cancelPaginationFetch, clearWave]
   );
   const refetchAllMainWaves = wavesHookData.refetchAllWaves;
   const refetchAllDmWaves = dmWavesHookData.refetchAllWaves;
@@ -292,8 +317,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   );
 
   // Instantiate the real-time updater hook
-  const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
+  const realtime = useWaveRealtimeUpdater({
     activeWaveId,
+    activeReadWaveId,
     getData: waveMessagesStore.getData,
     hasServerFeedSeed: waveMessagesStore.hasServerFeedSeed,
     isWaveInUse: waveMessagesStore.isWaveInUse,
@@ -304,7 +330,10 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     removeDrops: waveMessagesStore.removeDrops,
     removeWaveDeliveredNotifications,
     isWaveMuted,
+    refreshWaveMessages,
   });
+  const { processIncomingDrop, processDropRemoved, applyReplyPlacement } =
+    realtime;
 
   // processIncomingDrop is rebuilt when the active wave, its mute state or
   // wave eligibility changes. Expose a stable wrapper that always calls the
@@ -315,7 +344,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   }, [processIncomingDrop]);
   const stableProcessIncomingDrop = useCallback<
     MyStreamActionsContextType["processIncomingDrop"]
-  >((drop, type) => processIncomingDropRef.current(drop, type), []);
+  >((...args) => processIncomingDropRef.current(...args), []);
 
   const setActiveWaveAndRegister = useCallback<ActiveWaveContextData["set"]>(
     (waveId, options) => {
@@ -352,6 +381,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   // flags only pre-filter: each hook's own load guard (auth and profile
   // readiness) stays the source of truth and no-ops while it is not ready.
   const syncActiveWaveAndRefreshStaleLists = useEffectEvent(() => {
+    lastBrowserResumeSyncAtRef.current = Date.now();
     syncActiveWave();
     if (isMainWavesListEnabled) {
       refreshStaleMainWaves();
@@ -361,19 +391,27 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     }
   });
 
-  const runBrowserResumeSync = useEffectEvent(() => {
+  // Every visible tab reacts to focus and visibility, so a resync runs only
+  // after the tab was hidden 30 s or more, or 60 s after the last one. Coming
+  // back online follows a real connectivity gap and always resyncs.
+  const runBrowserResumeSync = useEffectEvent((afterOffline: boolean) => {
     if (document.visibilityState !== "visible") {
       return;
     }
 
-    const now = Date.now();
-    const sinceLastBrowserResumeSyncMs =
-      now - lastBrowserResumeSyncAtRef.current;
-    if (sinceLastBrowserResumeSyncMs < BROWSER_RESUME_SYNC_COOLDOWN_MS) {
+    const hiddenSince = hiddenSinceRef.current;
+    hiddenSinceRef.current = null;
+    if (
+      !afterOffline &&
+      !shouldResyncOnResume({
+        now: Date.now(),
+        hiddenSince,
+        lastSyncAt: lastBrowserResumeSyncAtRef.current,
+      })
+    ) {
       return;
     }
 
-    lastBrowserResumeSyncAtRef.current = now;
     syncActiveWaveAndRefreshStaleLists();
   });
 
@@ -464,20 +502,27 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       return;
     }
 
+    // The page loaded fresh data; the first focus has nothing to catch up.
+    lastBrowserResumeSyncAtRef.current = Date.now();
+    if (document.visibilityState !== "visible") {
+      hiddenSinceRef.current = Date.now();
+    }
+
     const handleVisibilityChange = () => {
       if (document.visibilityState !== "visible") {
+        hiddenSinceRef.current ??= Date.now();
         return;
       }
 
-      runBrowserResumeSync();
+      runBrowserResumeSync(false);
     };
 
     const handleFocus = () => {
-      runBrowserResumeSync();
+      runBrowserResumeSync(false);
     };
 
     const handleOnline = () => {
-      runBrowserResumeSync();
+      runBrowserResumeSync(true);
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -521,6 +566,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       processDropRemoved,
       processDropsRemoved: waveMessagesStore.removeDrops,
       refreshWaveMessages,
+      applyReplyPlacement,
       applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
     }),
     [
@@ -542,6 +588,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       processDropRemoved,
       waveMessagesStore.removeDrops,
       refreshWaveMessages,
+      applyReplyPlacement,
       waveMessagesStore.optimisticUpdateDrop,
     ]
   );
@@ -641,11 +688,17 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     setActiveWaveAndRegister,
   ]);
 
+  // Live unread values for the main list. Direct messages use the server's
+  // canonical unread state, which the list itself carries.
   return (
     <MyStreamActionsContext.Provider value={actionsValue}>
-      <MyStreamContext.Provider value={contextValue}>
-        {children}
-      </MyStreamContext.Provider>
+      <WaveUnreadProvider value={wavesHookData.unreadSource}>
+        <MyStreamContext.Provider value={contextValue}>
+          <WaveChatReadContext.Provider value={registerChat}>
+            {children}
+          </WaveChatReadContext.Provider>
+        </MyStreamContext.Provider>
+      </WaveUnreadProvider>
     </MyStreamActionsContext.Provider>
   );
 };

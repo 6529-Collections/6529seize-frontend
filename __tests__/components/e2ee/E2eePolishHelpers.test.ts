@@ -60,16 +60,16 @@ describe("day separators", () => {
 
   it("labels today, yesterday, this week and older days", () => {
     expect(
-      getE2eeDayLabel("en-US", new Date(2026, 9, 31, 1).getTime(), now)
+      getE2eeDayLabel("en-US", new Date(2026, 9, 31, 1).getTime(), { now })
     ).toBe("Today");
     expect(
-      getE2eeDayLabel("en-US", new Date(2026, 9, 30, 23).getTime(), now)
+      getE2eeDayLabel("en-US", new Date(2026, 9, 30, 23).getTime(), { now })
     ).toBe("Yesterday");
     expect(
-      getE2eeDayLabel("en-US", new Date(2026, 9, 27, 9).getTime(), now)
+      getE2eeDayLabel("en-US", new Date(2026, 9, 27, 9).getTime(), { now })
     ).toBe("Tuesday");
     expect(
-      getE2eeDayLabel("en-US", new Date(2025, 0, 2, 9).getTime(), now)
+      getE2eeDayLabel("en-US", new Date(2025, 0, 2, 9).getTime(), { now })
     ).toBe("Jan 2, 2025");
   });
 

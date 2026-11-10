@@ -56,6 +56,12 @@ function select(
   });
   return outputs;
 }
+const NATIVE_COMPETITION_SHARDS = [1, 2, 3, 4].map((shard) => ({
+  lane: "playwright-native-competition",
+  label: `Native competitions shard ${shard}/4`,
+  runner: "ubuntu-latest",
+  shard,
+}));
 it("schedules submission artwork separately without replacing competition coverage", () => {
   const outputs = select([], {
     playwright_submission_artwork: { required: true },
@@ -63,18 +69,7 @@ it("schedules submission artwork separately without replacing competition covera
   });
   expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
     include: [
-      {
-        lane: "playwright-native-competition",
-        label: "Native competitions shard 1/2",
-        runner: "ubuntu-latest",
-        shard: 1,
-      },
-      {
-        lane: "playwright-native-competition",
-        label: "Native competitions shard 2/2",
-        runner: "ubuntu-latest",
-        shard: 2,
-      },
+      ...NATIVE_COMPETITION_SHARDS,
       {
         lane: "playwright-submission-artwork",
         label: "Submission artwork desktop and mobile",
@@ -185,25 +180,12 @@ it("runs the isolated Collect and market specs on both supported browser viewpor
   expect(job.permissions).toEqual({ contents: "read", issues: "read" });
 });
 
-it("partitions the full native competition pack across two uniquely identified jobs", () => {
+it("partitions the full native competition pack across four uniquely identified jobs", () => {
   const outputs = select([], {
     playwright_native_competition: { required: true },
   });
   expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
-    include: [
-      {
-        lane: "playwright-native-competition",
-        label: "Native competitions shard 1/2",
-        runner: "ubuntu-latest",
-        shard: 1,
-      },
-      {
-        lane: "playwright-native-competition",
-        label: "Native competitions shard 2/2",
-        runner: "ubuntu-latest",
-        shard: 2,
-      },
-    ],
+    include: NATIVE_COMPETITION_SHARDS,
   });
   const job = workflow.jobs["core-playwright-checks"]!;
   const step = job.steps.find(
@@ -212,13 +194,69 @@ it("partitions the full native competition pack across two uniquely identified j
   expect(step.run).toBe(
     './bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"'
   );
-  expect(step.env?.["NATIVE_COMPETITION_SHARD"]).toBe("${{ matrix.shard }}/2");
+  // The shard total must match the number of matrix jobs, or tests are lost.
+  expect(step.env?.["NATIVE_COMPETITION_SHARD"]).toBe(
+    `\${{ matrix.shard }}/${NATIVE_COMPETITION_SHARDS.length}`
+  );
+  // Fresh CI checkouts never reuse Turbopack's dev filesystem cache; its
+  // restore can panic and stop the dev server mid-pack.
+  expect(step.env?.["NEXT_DEV_TURBOPACK_FS_CACHE"]).toBe("0");
   const upload = job.steps.find(
     (item) => item.name === "Upload app check artifacts"
   )!;
   expect(upload).toHaveProperty(
     "with.name",
     "app-pr-ci-results-${{ matrix.lane }}${{ matrix.shard && format('-{0}', matrix.shard) || '' }}-${{ github.event.pull_request.number || github.run_id }}"
+  );
+});
+
+it("shards the critical-shell profile pages pack beside the route-shell job", () => {
+  const outputs = select([], {
+    playwright_critical_shell: { required: true },
+  });
+  expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
+    include: [
+      {
+        lane: "playwright-critical-shell",
+        label: "Playwright critical shell",
+        runner: "ubuntu-latest",
+      },
+      {
+        lane: "playwright-critical-shell-profile",
+        label: "Critical shell profile pages shard 1/2",
+        runner: "ubuntu-latest",
+        shard: 1,
+      },
+      {
+        lane: "playwright-critical-shell-profile",
+        label: "Critical shell profile pages shard 2/2",
+        runner: "ubuntu-latest",
+        shard: 2,
+      },
+    ],
+  });
+  const job = workflow.jobs["core-playwright-checks"]!;
+  const stepIf = (name: string) =>
+    job.steps.find((item) => item.name === name)?.if;
+  // Route shells, hydration and session recovery stay together in one job.
+  expect(stepIf("Run critical route-shell Playwright pack")).toBe(
+    "matrix.lane == 'playwright-critical-shell'"
+  );
+  expect(stepIf("Run critical-shell hydration Playwright pack")).toContain(
+    "matrix.lane == 'playwright-critical-shell' &&"
+  );
+  expect(stepIf("Run session recovery browser regression pack")).toBe(
+    "matrix.lane == 'playwright-critical-shell'"
+  );
+  const profile = job.steps.find(
+    (item) => item.name === "Run own-profile Following browser regression pack"
+  )!;
+  expect(profile.if).toBe("matrix.lane == 'playwright-critical-shell-profile'");
+  expect(profile.run).toBe(
+    './bin/6529 run test:e2e:profile-following-sandbox --shard="$PROFILE_FOLLOWING_SHARD"'
+  );
+  expect(profile.env?.["PROFILE_FOLLOWING_SHARD"]).toBe(
+    "${{ matrix.shard }}/2"
   );
 });
 
@@ -229,9 +267,13 @@ it.each([
   "components/waves/create-drop-content/CreateDropSubmissionDialogs.tsx",
   "components/waves/create-drop-content/useAllMentionConfirmation.ts",
   "tests/social/waves-composer-sandbox.spec.ts",
-])("selects the all mention browser checks for %s", (file) => {
+  "components/waves/drops/WaveDropReplyCollapseAction.tsx",
+  "components/waves/drops/WaveDropActionsMore.tsx",
+  "components/waves/drops/WaveDropMobileMenu.tsx",
+  "components/waves/drops/reply-threads/WaveDropReplyThread.tsx",
+])("selects the composer browser checks for %s", (file) => {
   const outputs = select([file]);
-  expect(outputs["all_mention_confirmation_required"]).toBe("true");
+  expect(outputs["composer_browser_required"]).toBe("true");
   expect(JSON.parse(outputs["core_playwright_matrix"]!)).toMatchObject({
     include: expect.arrayContaining([
       expect.objectContaining({ lane: "playwright-smoke" }),

@@ -5,6 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import { memo, useEffect, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useSwipeToReply } from "@/hooks/useSwipeToReply";
+import { SwipeReplyHint } from "@/components/waves/drops/SwipeReplyHint";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -22,22 +25,21 @@ import {
   getMemberName,
   getNoticeText,
 } from "../e2eeFormat";
-import { E2eeProfileLink } from "../ui/E2eeProfileLink";
 import { E2eeMessageAvatar, E2eeMessageIdentity } from "./E2eeMessageIdentity";
 import { E2eeImageGallery } from "./E2eeImageGallery";
 import { E2eeAttachmentView } from "./E2eeAttachmentView";
-import { splitLinks } from "./e2eeLinks";
+import { E2eeMarkdown } from "./E2eeMarkdown";
 import {
   E2eeImportedNote,
   importedAuthor,
   importedAuthorName,
 } from "./E2eeImportedNote";
-import { splitMentions } from "./e2eeMentions";
 import {
   E2eeMessageActionsMenu,
   type E2eeMessageActions,
 } from "./E2eeMessageActionsMenu";
 import { E2eeEmojiText } from "./E2eeEmojiText";
+import { E2eeUnsentNotice } from "./E2eeUnsentNotice";
 
 export type { E2eeMessageActions } from "./E2eeMessageActionsMenu";
 
@@ -99,47 +101,14 @@ function MessageBody({
   if (!message.text) {
     return null;
   }
-  const segments = splitMentions(
-    message.text,
-    conversation.members,
-    message.mentions
-  );
   return (
-    <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-md tw-leading-6 tw-text-iron-100">
-      {segments.flatMap((segment) =>
-        segment.kind === "mention" ? (
-          <E2eeProfileLink
-            key={segment.start}
-            member={findMember(conversation.members, segment.profileId)}
-            className={`tw-rounded tw-px-0.5 tw-font-semibold ${
-              segment.profileId === selfProfileId
-                ? "tw-bg-primary-500/25 tw-text-primary-300"
-                : "tw-text-primary-300"
-            }`}
-          >
-            {segment.value}
-          </E2eeProfileLink>
-        ) : (
-          splitLinks(segment.value, segment.start).map((part) =>
-            part.kind === "link" ? (
-              <a
-                key={part.start}
-                href={part.href}
-                target="_blank"
-                rel="noopener noreferrer nofollow ugc"
-                className="tw-break-all tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-2 hover:tw-decoration-primary-300 focus-visible:tw-rounded focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              >
-                {part.value}
-              </a>
-            ) : (
-              <span key={part.start}>
-                <E2eeEmojiText text={part.value} />
-              </span>
-            )
-          )
-        )
-      )}
-    </p>
+    <E2eeMarkdown
+      text={message.text}
+      messageId={message.id}
+      members={conversation.members}
+      mentions={message.mentions}
+      selfProfileId={selfProfileId}
+    />
   );
 }
 
@@ -272,6 +241,7 @@ function NoticeItem({
   readonly inViewportRow: boolean;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const Container = inViewportRow ? "div" : "li";
   return (
     <Container
@@ -282,7 +252,7 @@ function NoticeItem({
         {getNoticeText(locale, message, conversation.members, selfProfileId)}
         <span className="tw-sr-only">
           {" "}
-          {formatE2eeDateTime(locale, message.serverTs)}
+          {formatE2eeDateTime(locale, message.serverTs, zone)}
         </span>
       </p>
     </Container>
@@ -366,6 +336,7 @@ function MessageMeta({
   readonly compact: boolean;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   // Imported history shows its original time (claimed by the server copy).
   const shownTs = message.imported?.createdAt ?? message.ts;
   if (compact) {
@@ -384,10 +355,10 @@ function MessageMeta({
       />
       <time
         dateTime={new Date(shownTs).toISOString()}
-        title={formatE2eeDateTime(locale, shownTs)}
+        title={formatE2eeDateTime(locale, shownTs, zone)}
         className="tw-text-xs tw-text-iron-500"
       >
-        {formatE2eeTimestamp(locale, shownTs)}
+        {formatE2eeTimestamp(locale, shownTs, { zone })}
       </time>
       <MessageMarkers message={message} />
     </div>
@@ -476,6 +447,20 @@ function E2eeMessageItemComponent({
   });
   const resolvedReply = replyTarget ?? storedReply ?? null;
   const locale = useBrowserLocale();
+  const canSwipeReply =
+    canAct &&
+    selfProfileId !== null &&
+    message.kind !== "notice" &&
+    !message.deleted &&
+    !message.undecryptable &&
+    !message.pending &&
+    !message.unsent;
+  const { rootRef, contentRef, onTouchStart } = useSwipeToReply({
+    enabled: canSwipeReply,
+    canReply: canSwipeReply,
+    scope: `${message.g}:${message.id}`,
+    onReply: () => actions.onReply(message),
+  });
   if (message.kind === "notice") {
     return (
       <NoticeItem
@@ -499,7 +484,8 @@ function E2eeMessageItemComponent({
     (canAct || !isOwn) &&
     !message.deleted &&
     !message.undecryptable &&
-    !message.pending;
+    !message.pending &&
+    !message.unsent;
 
   const Container = inViewportRow ? "div" : "li";
   return (
@@ -508,71 +494,92 @@ function E2eeMessageItemComponent({
       tabIndex={inViewportRow ? undefined : -1}
       className={getMessageRowClassName(compact, message.pending, appear)}
     >
-      <div className="tw-w-10 tw-flex-shrink-0">
-        {compact ? null : (
-          <E2eeMessageAvatar member={sender} fallbackName={shownName} />
-        )}
-      </div>
       <div
-        className={`tw-min-w-0 tw-flex-1 ${showActions ? "touch-only:tw-pr-8" : ""}`}
+        ref={rootRef}
+        onTouchStart={onTouchStart}
+        className="tw-relative tw-min-w-0 tw-flex-1"
       >
-        <MessageMeta
-          message={message}
-          name={shownName}
-          member={sender}
-          compact={compact}
-        />
-        {message.reply && !(replyLoading && !resolvedReply) ? (
-          <ReplyPreview
-            replyId={message.reply}
-            target={resolvedReply}
-            conversation={conversation}
-            selfProfileId={selfProfileId}
-            onJumpTo={actions.onJumpTo}
-          />
-        ) : null}
-        <MessageBody
-          message={message}
-          conversation={conversation}
-          selfProfileId={selfProfileId}
-          senderName={shownName}
-        />
-        {message.imported && !message.deleted ? (
-          <E2eeImportedNote
-            imported={message.imported}
-            importerName={importerName}
-            showDetail={!compact}
-          />
-        ) : null}
-        {!message.deleted &&
-        !message.undecryptable &&
-        message.attachments.length > 0 ? (
-          <E2eeImageGallery attachments={message.attachments}>
-            <div className="tw-mt-1 tw-space-y-2">
-              {message.attachments.map((attachment) => (
-                <E2eeAttachmentView
-                  key={attachment.blob}
-                  engine={engine}
-                  g={message.g}
-                  messageId={message.id}
-                  attachment={attachment}
-                />
-              ))}
-            </div>
-          </E2eeImageGallery>
-        ) : null}
-        {compact && hasMarkers(message) ? (
-          <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
-            <MessageMarkers message={message} />
+        {canSwipeReply && <SwipeReplyHint />}
+        <div
+          ref={contentRef}
+          className="tw-relative tw-flex tw-gap-3 [[data-reply-swiping=true]_&]:tw-z-10"
+          style={{ transform: "var(--message-swipe-transform, none)" }}
+        >
+          <div className="tw-w-10 tw-flex-shrink-0">
+            {compact ? null : (
+              <E2eeMessageAvatar member={sender} fallbackName={shownName} />
+            )}
           </div>
-        ) : null}
-        <Reactions
-          message={message}
-          conversation={conversation}
-          selfProfileId={selfProfileId}
-          canAct={canAct && showActions}
-          onReact={(reaction, on) => actions.onReact(message, reaction, on)}
-        />
+          <div
+            className={`tw-min-w-0 tw-flex-1 ${showActions ? "touch-only:tw-pr-8" : ""}`}
+          >
+            <MessageMeta
+              message={message}
+              name={shownName}
+              member={sender}
+              compact={compact}
+            />
+            {message.reply && !(replyLoading && !resolvedReply) ? (
+              <ReplyPreview
+                replyId={message.reply}
+                target={resolvedReply}
+                conversation={conversation}
+                selfProfileId={selfProfileId}
+                onJumpTo={actions.onJumpTo}
+              />
+            ) : null}
+            <MessageBody
+              message={message}
+              conversation={conversation}
+              selfProfileId={selfProfileId}
+              senderName={shownName}
+            />
+            {message.imported && !message.deleted ? (
+              <E2eeImportedNote
+                imported={message.imported}
+                importerName={importerName}
+                showDetail={!compact}
+              />
+            ) : null}
+            {!message.deleted &&
+            !message.undecryptable &&
+            message.attachments.length > 0 ? (
+              <E2eeImageGallery attachments={message.attachments}>
+                <div className="tw-mt-1 tw-space-y-2">
+                  {message.attachments.map((attachment) => (
+                    <E2eeAttachmentView
+                      key={attachment.blob}
+                      engine={engine}
+                      g={message.g}
+                      messageId={message.id}
+                      attachment={attachment}
+                    />
+                  ))}
+                </div>
+              </E2eeImageGallery>
+            ) : null}
+            {message.unsent && isOwn ? (
+              <E2eeUnsentNotice
+                message={message}
+                conversation={conversation}
+                selfProfileId={selfProfileId}
+                actions={actions}
+              />
+            ) : null}
+            {compact && hasMarkers(message) ? (
+              <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2">
+                <MessageMarkers message={message} />
+              </div>
+            ) : null}
+            <Reactions
+              message={message}
+              conversation={conversation}
+              selfProfileId={selfProfileId}
+              canAct={canAct && showActions}
+              onReact={(reaction, on) => actions.onReact(message, reaction, on)}
+            />
+          </div>
+        </div>
       </div>
       {showActions ? (
         <div className="tw-absolute tw-right-3 tw-top-1">

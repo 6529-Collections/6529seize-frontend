@@ -21,10 +21,12 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   })),
 }));
 
+const mockSignDrop = jest.fn(async () => ({
+  success: true,
+  signature: "0xabc",
+}));
 jest.mock("@/hooks/drops/useDropSignature", () => ({
-  useDropSignature: jest.fn(() => ({
-    signDrop: jest.fn(async () => ({ success: true, signature: "0xabc" })),
-  })),
+  useDropSignature: jest.fn(() => ({ signDrop: mockSignDrop })),
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -60,7 +62,7 @@ const wave = {
   wave: {},
 } as any;
 
-const renderModal = (submitDrop = jest.fn()) => {
+const renderModal = (submitDrop = jest.fn(), modalWave = wave) => {
   render(
     <AuthContext.Provider
       value={
@@ -78,7 +80,7 @@ const renderModal = (submitDrop = jest.fn()) => {
           isOpen
           activeDrop={null}
           onCancelReplyQuote={jest.fn()}
-          wave={wave}
+          wave={modalWave}
           dropId={null}
           submitDrop={submitDrop}
           onClose={jest.fn()}
@@ -112,6 +114,35 @@ describe("QuorumProposalDropModal", () => {
       "# Untitled QUORUM Proposal"
     );
     expect(submitBody.drop.parts[0].content).toContain("Coordinate proposals.");
+  });
+
+  it("signs the client_drop_id it submits", async () => {
+    const user = userEvent.setup();
+    const submitDrop = jest.fn();
+    renderModal(submitDrop, {
+      ...wave,
+      participation: { ...wave.participation, signature_required: true },
+    });
+
+    await user.type(screen.getByLabelText("Summary"), "Signed proposal.");
+    for (let i = 0; i < 4; i += 1) {
+      await user.click(screen.getByRole("button", { name: "Next" }));
+    }
+    await user.click(screen.getByRole("button", { name: "Submit Proposal" }));
+
+    await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
+    const submitted = submitDrop.mock.calls[0][0].drop;
+    expect(submitted.client_drop_id).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+    );
+    expect(submitted.signature).toBe("0xabc");
+    expect(mockSignDrop).toHaveBeenCalledWith(
+      expect.objectContaining({
+        drop: expect.objectContaining({
+          client_drop_id: submitted.client_drop_id,
+        }),
+      })
+    );
   });
 
   it("keeps submit disabled until the draft has content", async () => {

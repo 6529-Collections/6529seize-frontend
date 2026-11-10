@@ -38,7 +38,7 @@ const flush = async () => {
 
 const device = (): LoginE2eeDevice => ({
   deviceKeyHex: `0x${"3d".repeat(32)}`,
-  ciphersuite: 1,
+  ciphersuites: [0x004e],
   adopt: jest.fn(async () => true),
   dispose: jest.fn(),
 });

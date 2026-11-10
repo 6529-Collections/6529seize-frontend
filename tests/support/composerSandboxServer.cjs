@@ -477,6 +477,7 @@ const localDrop = {
   reactions: [],
   boosts: 0,
   is_signed: false,
+  collapse_replies: false,
   hide_link_preview: false,
   moderation: {
     status: "VISIBLE",
@@ -1285,10 +1286,21 @@ function isExpectedChatDropSignerAddress(signerAddress) {
   return signerAddress === "" || isSameAddress(signerAddress, SANDBOX_WALLET);
 }
 
+// The web sends a plain lowercase UUID with every drop create (API #2318).
+function isExpectedClientDropId(clientDropId) {
+  return (
+    typeof clientDropId === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+      clientDropId
+    )
+  );
+}
+
 function isExpectedChatDropBody(body) {
   const hasPoll = isPlainObject(body?.poll);
   if (
     !hasOnlyKeys(body, [
+      "client_drop_id",
       "drop_type",
       "is_safe_signature",
       "mentioned_groups",
@@ -1309,6 +1321,7 @@ function isExpectedChatDropBody(body) {
 
   return (
     body.wave_id === SANDBOX_WAVE_ID &&
+    isExpectedClientDropId(body.client_drop_id) &&
     body.drop_type === "CHAT" &&
     body.title === null &&
     body.signature === null &&
@@ -2457,6 +2470,8 @@ function loggedRequestBody(pathname, body) {
     const firstPart = Array.isArray(body.parts) ? body.parts[0] : null;
     return {
       wave_id: typeof body.wave_id === "string" ? body.wave_id : null,
+      client_drop_id:
+        typeof body.client_drop_id === "string" ? body.client_drop_id : null,
       drop_type: typeof body.drop_type === "string" ? body.drop_type : null,
       content: isPlainObject(firstPart) ? firstPart.content : null,
       poll: isPlainObject(body.poll)
@@ -2700,6 +2715,14 @@ const mockApiExactReadRoutes = new Map([
   ],
   ["/api/v2/official-waves", () => [localWaveOverview]],
   [
+    "/api/v2/waves/all",
+    () => ({
+      data: [localWaveOverview],
+      next_cursor: null,
+      snapshot_expires_at: Date.now() + 900000,
+    }),
+  ],
+  [
     "/api/v2/waves/joined",
     () => ({
       data: [],
@@ -2763,6 +2786,7 @@ const mockApiExactReadRoutes = new Map([
   ],
   ["/api/v2/boosted-drops", () => emptyPage()],
   ["/api/v2/drops", () => emptyPage()],
+  ["/api/profile-logs", () => ({ ...emptyPage(), next_cursor: null })],
   ["/api/mention-aliases", () => []],
   ["/api/content-moderation/blocked-profiles", () => []],
   ["/api/feed", () => []],
@@ -2921,6 +2945,13 @@ function handleNotificationRead(pathname, url, res) {
       data: ids.includes(artworkNotificationDrop.id)
         ? [artworkNotificationDrop]
         : [],
+    });
+  }
+  if (pathname === "/api/v2/notifications/unread-count") {
+    return writeJsonResponse(res, {
+      unread_count: sandboxNotifications.filter(
+        (notification) => !notification.read_at
+      ).length,
     });
   }
   if (pathname !== "/api/v2/notifications") {
@@ -3302,7 +3333,21 @@ function buildPublicRuntime() {
       process.env.IPFS_GATEWAY_ENDPOINT || "https://ipfs.6529.io/ipfs/",
     MEDIA_RESOLVER_ENDPOINT:
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
-    ...(isE2eeSandbox ? { NEXT_PUBLIC_E2EE_DM_ENABLED: "true" } : {}),
+    // Signed posts on too, so device setup offers the combined grant
+    // ("Sign to enable both") that the E2EE pack signs in through.
+    ...(isE2eeSandbox
+      ? {
+          NEXT_PUBLIC_E2EE_DM_ENABLED: "true",
+          NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
+          GIPHY_API_KEY: "e2ee-sandbox-fixture",
+        }
+      : {}),
+    // Sandbox packs run the staging chat configuration (gap-only sync and
+    // batched reads); set the variable to "false" to run the production one.
+    NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC:
+      process.env.NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC === "false"
+        ? "false"
+        : "true",
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,

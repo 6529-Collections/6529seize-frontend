@@ -14,6 +14,7 @@ export * from '../models/ApiAlchemyContractMetadataBatchRequest';
 export * from '../models/ApiAlchemyContractMetadataBatchResponse';
 export * from '../models/ApiAlchemyContractMetadataRequest';
 export * from '../models/ApiAlchemyContractMetadataResult';
+export * from '../models/ApiAllWavesPage';
 export * from '../models/ApiAppDeviceGrant';
 export * from '../models/ApiArchiveProfileCmsPackageRequest';
 export * from '../models/ApiArtistArtworkAlert';
@@ -145,6 +146,7 @@ export * from '../models/ApiCmsPublishedSite';
 export * from '../models/ApiCmsSignatureEnvelope';
 export * from '../models/ApiCmsSite';
 export * from '../models/ApiCmsStorageLocation';
+export * from '../models/ApiCollapsedReplyThread';
 export * from '../models/ApiCollectAccount';
 export * from '../models/ApiCollectAcquisitionPlan';
 export * from '../models/ApiCollectAnalysis';
@@ -359,6 +361,7 @@ export * from '../models/ApiDeleteEulaConsentRequest';
 export * from '../models/ApiDeleteEulaConsentResponse';
 export * from '../models/ApiDeleteMyWaveChatHistoryResponse';
 export * from '../models/ApiDeviceGrant';
+export * from '../models/ApiDeviceGrantFields';
 export * from '../models/ApiDeviceGrantProof';
 export * from '../models/ApiDeviceSignature';
 export * from '../models/ApiDeviceSignedEvent';
@@ -588,6 +591,7 @@ export * from '../models/ApiMarketTransaction';
 export * from '../models/ApiMediaResolveRequest';
 export * from '../models/ApiMediaResolveResponse';
 export * from '../models/ApiMediaUploadMimeType';
+export * from '../models/ApiMediaUploadPurpose';
 export * from '../models/ApiMemeCardDropMapping';
 export * from '../models/ApiMemeCollaborationArtwork';
 export * from '../models/ApiMemeCollaborationCredit';
@@ -646,6 +650,7 @@ export * from '../models/ApiNotificationPollVoteOption';
 export * from '../models/ApiNotificationV2';
 export * from '../models/ApiNotificationsResponse';
 export * from '../models/ApiNotificationsResponseV2';
+export * from '../models/ApiNotificationsUnreadCountV2';
 export * from '../models/ApiOgMediaAsset';
 export * from '../models/ApiOgMetadata';
 export * from '../models/ApiOgMetadataDrop';
@@ -763,6 +768,7 @@ export * from '../models/ApiSessionRefreshNativeRequest';
 export * from '../models/ApiSessionRefreshWebRequest';
 export * from '../models/ApiSessionWebResponse';
 export * from '../models/ApiSetCompetitionVoteRequest';
+export * from '../models/ApiSetDropReplyCollapseRequest';
 export * from '../models/ApiSetPinnedDropRequest';
 export * from '../models/ApiSetProfileWaveRequest';
 export * from '../models/ApiStartMultipartMediaUploadResponse';
@@ -1001,6 +1007,7 @@ import { ApiAlchemyContractMetadataBatchRequest } from '../models/ApiAlchemyCont
 import { ApiAlchemyContractMetadataBatchResponse } from '../models/ApiAlchemyContractMetadataBatchResponse';
 import { ApiAlchemyContractMetadataRequest , ApiAlchemyContractMetadataRequestChainEnum   } from '../models/ApiAlchemyContractMetadataRequest';
 import { ApiAlchemyContractMetadataResult , ApiAlchemyContractMetadataResultChainEnum      } from '../models/ApiAlchemyContractMetadataResult';
+import { ApiAllWavesPage } from '../models/ApiAllWavesPage';
 import { ApiAppDeviceGrant } from '../models/ApiAppDeviceGrant';
 import { ApiArchiveProfileCmsPackageRequest } from '../models/ApiArchiveProfileCmsPackageRequest';
 import { ApiArtistArtworkAlert } from '../models/ApiArtistArtworkAlert';
@@ -1132,6 +1139,7 @@ import { ApiCmsPublishedSite } from '../models/ApiCmsPublishedSite';
 import { ApiCmsSignatureEnvelope } from '../models/ApiCmsSignatureEnvelope';
 import { ApiCmsSite } from '../models/ApiCmsSite';
 import { ApiCmsStorageLocation } from '../models/ApiCmsStorageLocation';
+import { ApiCollapsedReplyThread } from '../models/ApiCollapsedReplyThread';
 import { ApiCollectAccount } from '../models/ApiCollectAccount';
 import { ApiCollectAcquisitionPlan  , ApiCollectAcquisitionPlanStatusEnum  , ApiCollectAcquisitionPlanOptimalityEnum             } from '../models/ApiCollectAcquisitionPlan';
 import { ApiCollectAnalysis               } from '../models/ApiCollectAnalysis';
@@ -1211,7 +1219,7 @@ import { ApiCommunityMetric } from '../models/ApiCommunityMetric';
 import { ApiCommunityMetricSample } from '../models/ApiCommunityMetricSample';
 import { ApiCommunityMetrics } from '../models/ApiCommunityMetrics';
 import { ApiCommunityMetricsSeries } from '../models/ApiCommunityMetricsSeries';
-import { ApiCompetition                       } from '../models/ApiCompetition';
+import { ApiCompetition                        } from '../models/ApiCompetition';
 import { ApiCompetitionActionRequest } from '../models/ApiCompetitionActionRequest';
 import { ApiCompetitionAward } from '../models/ApiCompetitionAward';
 import { ApiCompetitionAwardPage } from '../models/ApiCompetitionAwardPage';
@@ -1299,12 +1307,12 @@ import { ApiCreateConnectionShareResponse    , ApiCreateConnectionShareResponseT
 import { ApiCreateDropMedia } from '../models/ApiCreateDropMedia';
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateDropPollRequest } from '../models/ApiCreateDropPollRequest';
-import { ApiCreateDropRequest                    } from '../models/ApiCreateDropRequest';
+import { ApiCreateDropRequest                     } from '../models/ApiCreateDropRequest';
 import { ApiCreateGroup } from '../models/ApiCreateGroup';
 import { ApiCreateGroupDescription          } from '../models/ApiCreateGroupDescription';
 import { ApiCreateLegacyDesktopConnectionShareRequest , ApiCreateLegacyDesktopConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateLegacyDesktopConnectionShareRequest';
 import { ApiCreateLegacyDesktopConnectionShareResponse } from '../models/ApiCreateLegacyDesktopConnectionShareResponse';
-import { ApiCreateMediaUploadUrlRequest   } from '../models/ApiCreateMediaUploadUrlRequest';
+import { ApiCreateMediaUploadUrlRequest    } from '../models/ApiCreateMediaUploadUrlRequest';
 import { ApiCreateMediaUrlResponse } from '../models/ApiCreateMediaUrlResponse';
 import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
 import { ApiCreateNewProfileProxy } from '../models/ApiCreateNewProfileProxy';
@@ -1337,7 +1345,7 @@ import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
 import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
 import { ApiCreatedProfileCmsAgentGrant } from '../models/ApiCreatedProfileCmsAgentGrant';
 import { ApiCuratedProfileWaveDropsPage } from '../models/ApiCuratedProfileWaveDropsPage';
-import { ApiCurationDrop                                       } from '../models/ApiCurationDrop';
+import { ApiCurationDrop                                         } from '../models/ApiCurationDrop';
 import { ApiCurationDropsPage } from '../models/ApiCurationDropsPage';
 import { ApiDecentralizedMediaProtocol } from '../models/ApiDecentralizedMediaProtocol';
 import { ApiDecentralizedMediaResolution          } from '../models/ApiDecentralizedMediaResolution';
@@ -1346,6 +1354,7 @@ import { ApiDeleteEulaConsentRequest } from '../models/ApiDeleteEulaConsentReque
 import { ApiDeleteEulaConsentResponse } from '../models/ApiDeleteEulaConsentResponse';
 import { ApiDeleteMyWaveChatHistoryResponse } from '../models/ApiDeleteMyWaveChatHistoryResponse';
 import { ApiDeviceGrant } from '../models/ApiDeviceGrant';
+import { ApiDeviceGrantFields } from '../models/ApiDeviceGrantFields';
 import { ApiDeviceGrantProof } from '../models/ApiDeviceGrantProof';
 import { ApiDeviceSignature } from '../models/ApiDeviceSignature';
 import { ApiDeviceSignedEvent } from '../models/ApiDeviceSignedEvent';
@@ -1355,7 +1364,7 @@ import { ApiDistributionAirdropsUploadResponse } from '../models/ApiDistribution
 import { ApiDmDropsUnreadCount } from '../models/ApiDmDropsUnreadCount';
 import { ApiDmUnreadConversationState } from '../models/ApiDmUnreadConversationState';
 import { ApiDmUnreadSnapshot } from '../models/ApiDmUnreadSnapshot';
-import { ApiDrop                                       } from '../models/ApiDrop';
+import { ApiDrop                                           } from '../models/ApiDrop';
 import { ApiDropAndDropVote } from '../models/ApiDropAndDropVote';
 import { ApiDropAndWave } from '../models/ApiDropAndWave';
 import { ApiDropAttachmentReference } from '../models/ApiDropAttachmentReference';
@@ -1371,7 +1380,7 @@ import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropHiddenState } from '../models/ApiDropHiddenState';
 import { ApiDropId } from '../models/ApiDropId';
 import { ApiDropMainType } from '../models/ApiDropMainType';
-import { ApiDropMedia      } from '../models/ApiDropMedia';
+import { ApiDropMedia         } from '../models/ApiDropMedia';
 import { ApiDropMediaStatus } from '../models/ApiDropMediaStatus';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
@@ -1403,7 +1412,7 @@ import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropType } from '../models/ApiDropType';
-import { ApiDropV2                                 } from '../models/ApiDropV2';
+import { ApiDropV2                                   } from '../models/ApiDropV2';
 import { ApiDropV2ContextProfileContext } from '../models/ApiDropV2ContextProfileContext';
 import { ApiDropV2Page } from '../models/ApiDropV2Page';
 import { ApiDropV2PageWithoutCount } from '../models/ApiDropV2PageWithoutCount';
@@ -1415,7 +1424,7 @@ import { ApiDropVoteSummary } from '../models/ApiDropVoteSummary';
 import { ApiDropVoter } from '../models/ApiDropVoter';
 import { ApiDropVotersPage } from '../models/ApiDropVotersPage';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
-import { ApiDropWithoutWave                                      } from '../models/ApiDropWithoutWave';
+import { ApiDropWithoutWave                                        } from '../models/ApiDropWithoutWave';
 import { ApiDropWithoutWavesPageWithoutCount } from '../models/ApiDropWithoutWavesPageWithoutCount';
 import { ApiDropsLeaderboardPage } from '../models/ApiDropsLeaderboardPage';
 import { ApiDropsLeaderboardPageV2 } from '../models/ApiDropsLeaderboardPageV2';
@@ -1575,6 +1584,7 @@ import { ApiMarketTransaction    , ApiMarketTransactionPurposeEnum  , ApiMarketT
 import { ApiMediaResolveRequest } from '../models/ApiMediaResolveRequest';
 import { ApiMediaResolveResponse } from '../models/ApiMediaResolveResponse';
 import { ApiMediaUploadMimeType } from '../models/ApiMediaUploadMimeType';
+import { ApiMediaUploadPurpose } from '../models/ApiMediaUploadPurpose';
 import { ApiMemeCardDropMapping } from '../models/ApiMemeCardDropMapping';
 import { ApiMemeCollaborationArtwork } from '../models/ApiMemeCollaborationArtwork';
 import { ApiMemeCollaborationCredit } from '../models/ApiMemeCollaborationCredit';
@@ -1633,6 +1643,7 @@ import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVote
 import { ApiNotificationV2         } from '../models/ApiNotificationV2';
 import { ApiNotificationsResponse } from '../models/ApiNotificationsResponse';
 import { ApiNotificationsResponseV2 } from '../models/ApiNotificationsResponseV2';
+import { ApiNotificationsUnreadCountV2 } from '../models/ApiNotificationsUnreadCountV2';
 import { ApiOgMediaAsset } from '../models/ApiOgMediaAsset';
 import { ApiOgMetadata       } from '../models/ApiOgMetadata';
 import { ApiOgMetadataDrop               } from '../models/ApiOgMetadataDrop';
@@ -1744,12 +1755,13 @@ import { ApiSessionLoginRequest, ApiSessionLoginRequestClientTypeEnum      , Api
 import { ApiSessionLogoutNativeRequest, ApiSessionLogoutNativeRequestClientTypeEnum      } from '../models/ApiSessionLogoutNativeRequest';
 import { ApiSessionLogoutWebRequest, ApiSessionLogoutWebRequestClientTypeEnum     } from '../models/ApiSessionLogoutWebRequest';
 import { ApiSessionNativeResponse    , ApiSessionNativeResponseClientTypeEnum     } from '../models/ApiSessionNativeResponse';
-import { ApiSessionNonceQuery , ApiSessionNonceQueryClientTypeEnum    , ApiSessionNonceQueryDeviceKeyTypeEnum      } from '../models/ApiSessionNonceQuery';
+import { ApiSessionNonceQuery , ApiSessionNonceQueryClientTypeEnum    , ApiSessionNonceQueryDeviceKeyTypeEnum       } from '../models/ApiSessionNonceQuery';
 import { ApiSessionNonceResponse } from '../models/ApiSessionNonceResponse';
 import { ApiSessionRefreshNativeRequest, ApiSessionRefreshNativeRequestClientTypeEnum      } from '../models/ApiSessionRefreshNativeRequest';
 import { ApiSessionRefreshWebRequest, ApiSessionRefreshWebRequestClientTypeEnum    } from '../models/ApiSessionRefreshWebRequest';
 import { ApiSessionWebResponse    , ApiSessionWebResponseClientTypeEnum    } from '../models/ApiSessionWebResponse';
 import { ApiSetCompetitionVoteRequest } from '../models/ApiSetCompetitionVoteRequest';
+import { ApiSetDropReplyCollapseRequest } from '../models/ApiSetDropReplyCollapseRequest';
 import { ApiSetPinnedDropRequest } from '../models/ApiSetPinnedDropRequest';
 import { ApiSetProfileWaveRequest } from '../models/ApiSetProfileWaveRequest';
 import { ApiStartMultipartMediaUploadResponse     } from '../models/ApiStartMultipartMediaUploadResponse';
@@ -2161,6 +2173,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiMarketTransactionPurposeEnum",
     "ApiMarketTransactionApprovalScopeEnum",
     "ApiMediaUploadMimeType",
+    "ApiMediaUploadPurpose",
     "ApiMemeCollaborationInvitationStatusEnum",
     "ApiMemeCollaborationResponseRequestActionEnum",
     "ApiMemesExtendedDataTokenTypeEnum",
@@ -2292,6 +2305,7 @@ let typeMap: {[index: string]: any} = {
     "ApiAlchemyContractMetadataBatchResponse": ApiAlchemyContractMetadataBatchResponse,
     "ApiAlchemyContractMetadataRequest": ApiAlchemyContractMetadataRequest,
     "ApiAlchemyContractMetadataResult": ApiAlchemyContractMetadataResult,
+    "ApiAllWavesPage": ApiAllWavesPage,
     "ApiAppDeviceGrant": ApiAppDeviceGrant,
     "ApiArchiveProfileCmsPackageRequest": ApiArchiveProfileCmsPackageRequest,
     "ApiArtistArtworkAlert": ApiArtistArtworkAlert,
@@ -2416,6 +2430,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCmsSignatureEnvelope": ApiCmsSignatureEnvelope,
     "ApiCmsSite": ApiCmsSite,
     "ApiCmsStorageLocation": ApiCmsStorageLocation,
+    "ApiCollapsedReplyThread": ApiCollapsedReplyThread,
     "ApiCollectAccount": ApiCollectAccount,
     "ApiCollectAcquisitionPlan": ApiCollectAcquisitionPlan,
     "ApiCollectAnalysis": ApiCollectAnalysis,
@@ -2610,6 +2625,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDeleteEulaConsentResponse": ApiDeleteEulaConsentResponse,
     "ApiDeleteMyWaveChatHistoryResponse": ApiDeleteMyWaveChatHistoryResponse,
     "ApiDeviceGrant": ApiDeviceGrant,
+    "ApiDeviceGrantFields": ApiDeviceGrantFields,
     "ApiDeviceGrantProof": ApiDeviceGrantProof,
     "ApiDeviceSignature": ApiDeviceSignature,
     "ApiDeviceSignedEvent": ApiDeviceSignedEvent,
@@ -2874,6 +2890,7 @@ let typeMap: {[index: string]: any} = {
     "ApiNotificationV2": ApiNotificationV2,
     "ApiNotificationsResponse": ApiNotificationsResponse,
     "ApiNotificationsResponseV2": ApiNotificationsResponseV2,
+    "ApiNotificationsUnreadCountV2": ApiNotificationsUnreadCountV2,
     "ApiOgMediaAsset": ApiOgMediaAsset,
     "ApiOgMetadata": ApiOgMetadata,
     "ApiOgMetadataDrop": ApiOgMetadataDrop,
@@ -2983,6 +3000,7 @@ let typeMap: {[index: string]: any} = {
     "ApiSessionRefreshWebRequest": ApiSessionRefreshWebRequest,
     "ApiSessionWebResponse": ApiSessionWebResponse,
     "ApiSetCompetitionVoteRequest": ApiSetCompetitionVoteRequest,
+    "ApiSetDropReplyCollapseRequest": ApiSetDropReplyCollapseRequest,
     "ApiSetPinnedDropRequest": ApiSetPinnedDropRequest,
     "ApiSetProfileWaveRequest": ApiSetProfileWaveRequest,
     "ApiStartMultipartMediaUploadResponse": ApiStartMultipartMediaUploadResponse,

@@ -13,12 +13,27 @@ import {
 /** today's `findClosestMatch` window between a send and its server copy. */
 const MATCH_WINDOW_MS = 10_000;
 
-export function stableIdentity(drop: ExtendedDrop): {
+/**
+ * The content-hash identity for a new record. A malformed copy (for example
+ * one without an author) keeps the identity it came with rather than
+ * breaking the merge.
+ */
+export function stableIdentity(
+  drop: ExtendedDrop,
+  key: string
+): {
   readonly stableKey: string;
   readonly stableHash: string;
 } {
-  const { key, hash } = getStableDropKey(drop);
-  return { stableKey: key, stableHash: hash };
+  try {
+    const identity = getStableDropKey(drop);
+    return { stableKey: identity.key, stableHash: identity.hash };
+  } catch {
+    return {
+      stableKey: drop.stableKey || drop.id || key,
+      stableHash: drop.stableHash || drop.id || key,
+    };
+  }
 }
 
 const authorKey = (drop: ExtendedDrop): string | null | undefined =>
@@ -29,6 +44,18 @@ const contentOf = (drop: ExtendedDrop): string =>
 
 /** True when a field `getStableDropKey` hashes differs, other than the time. */
 export function stableInputsChanged(
+  current: ExtendedDrop,
+  incoming: ExtendedDrop
+): boolean {
+  try {
+    return compareStableInputs(current, incoming);
+  } catch {
+    // A malformed copy: hash again (`stableIdentity` falls back safely).
+    return true;
+  }
+}
+
+function compareStableInputs(
   current: ExtendedDrop,
   incoming: ExtendedDrop
 ): boolean {
@@ -91,18 +118,32 @@ export function findPendingMatch(
   pending: readonly ExtendedDrop[]
 ): ExtendedDrop | null {
   const candidates = pending
-    .filter((drop) => isCandidate(serverDrop, drop))
+    .filter((drop) => {
+      try {
+        return isCandidate(serverDrop, drop);
+      } catch {
+        // A malformed copy matches nothing.
+        return false;
+      }
+    })
     .sort(
       (a, b) =>
         Math.abs(timeOf(a) - timeOf(serverDrop)) -
         Math.abs(timeOf(b) - timeOf(serverDrop))
     );
   for (const candidate of candidates) {
-    if (
-      getStableDropKey(serverDrop, [candidate]).hash === candidate.stableHash
-    ) {
+    if (hashesWith(serverDrop, candidate)) {
       return candidate;
     }
   }
   return null;
+}
+
+/** Today's rule: the server copy, hashed with the send's time, is the send. */
+function hashesWith(serverDrop: ExtendedDrop, pending: ExtendedDrop): boolean {
+  try {
+    return getStableDropKey(serverDrop, [pending]).hash === pending.stableHash;
+  } catch {
+    return false;
+  }
 }

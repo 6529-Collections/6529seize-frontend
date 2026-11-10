@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import WebUnifiedWavesList from "./WebUnifiedWavesList";
 import { useMyStream } from "../../../../contexts/wave/MyStreamContext";
+import { useWavesWithUnread } from "@/contexts/wave/WaveUnreadContext";
 
 interface WebBrainLeftSidebarWavesProps {
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
@@ -14,6 +15,9 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
   showProfileFeedShortcut = true,
 }) => {
   const { waves, registerWave, requestMainWavesList } = useMyStream();
+  // Live unread counts and activity order; only the receiving wave's row
+  // gets a new object when a message arrives.
+  const liveWaves = useWavesWithUnread(waves.list);
 
   useEffect(() => requestMainWavesList(), [requestMainWavesList]);
 
@@ -25,7 +29,7 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
 
   return (
     <WebUnifiedWavesList
-      waves={waves.list}
+      waves={liveWaves}
       fetchNextPage={onNextPage}
       hasNextPage={waves.hasNextPage}
       isFetching={waves.isFetching}

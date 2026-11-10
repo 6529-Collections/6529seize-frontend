@@ -1,7 +1,7 @@
 "use client";
 
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useAuth } from "@/components/auth/Auth";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { getActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import { getMemeLabRouteHrefWithLocale } from "@/components/memelab/memeLabRouteParams";
 import { MemeLabCardVolumes } from "@/components/memelab/MemeLabCardHeader";
@@ -77,7 +77,7 @@ export default function MemeLabPageComponent({
   const capacitor = useCapacitor();
 
   const { connectedProfile } = useAuth();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { setTitle } = useTitle();
 
   const focusParam = searchParams.get("focus");
@@ -475,7 +475,7 @@ export default function MemeLabPageComponent({
       return (
         <>
           <MemeLabOverview nft={nft} />
-          {nft && <MemeLabAdditionalDetailsContent nft={nft} />}
+          {nft && <MemeLabAdditionalDetailsContent nft={nft} locale={locale} />}
         </>
       );
     }
@@ -511,7 +511,7 @@ export default function MemeLabPageComponent({
           <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
             <h3
               id="meme-lab-card-activity-heading"
-              className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg"
+              className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg md:tw-text-base md:tw-leading-6 md:tw-text-iron-100"
             >
               {t(locale, "memeLab.detail.tabs.cardActivity")}
             </h3>
@@ -543,7 +543,10 @@ export default function MemeLabPageComponent({
   }
 
   return (
-    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+    <div
+      data-nft-card-page
+      className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white"
+    >
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
@@ -635,7 +638,7 @@ export default function MemeLabPageComponent({
             <MemeLabStaticHeader
               nft={nft}
               nftMeta={nftMeta}
-              showMarketplaceLinks={!capacitor.isIos || country === "US"}
+              showMarketplaceLinks={!hideNftPurchasing}
               locale={locale}
               hasOwnershipContext={hasOwnershipContext}
               nftBalance={nftBalance}

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MemeLabLeaderboard from "@/components/leaderboard/MemeLabLeaderboard";
 import { SortDirection } from "@/entities/ISort";
@@ -84,7 +84,7 @@ beforeEach(() => {
   (fetchNftTdhResults as jest.Mock).mockReset();
 });
 
-test("renders leaderboard and sorts when caret clicked", async () => {
+test("renders leaderboard and toggles the desktop Balance header", async () => {
   setup();
 
   await waitFor(() => expect(fetchNftTdhResults).toHaveBeenCalled());
@@ -101,13 +101,27 @@ test("renders leaderboard and sorts when caret clicked", async () => {
     screen.getByRole("columnheader", { name: "Collector x2" })
   ).toBeInTheDocument();
 
+  const header = screen
+    .getAllByRole("columnheader", { name: "Balance" })
+    .find((element) => element.hasAttribute("aria-sort"));
+  if (!header)
+    throw new Error("Desktop Balance header must expose its sort direction");
   await userEvent.click(
-    screen.getByRole("button", { name: "Sort Balance ascending" })
+    within(header).getByRole("button", { name: "Sort Balance ascending" })
   );
-
   await waitFor(() => expect(fetchNftTdhResults).toHaveBeenCalledTimes(2));
   expect(fetchNftTdhResults.mock.calls[1][0]).toEqual(
     expect.objectContaining({ sortDirection: SortDirection.ASC })
+  );
+  expect(header).toHaveAttribute("aria-sort", "ascending");
+  await userEvent.click(
+    within(header).getByRole("button", { name: "Sort Balance descending" })
+  );
+  expect(header).toHaveAttribute("aria-sort", "descending");
+  await waitFor(() =>
+    expect(fetchNftTdhResults).toHaveBeenLastCalledWith(
+      expect.objectContaining({ sortDirection: SortDirection.DESC })
+    )
   );
   expect(setScrollPosition).not.toHaveBeenCalled();
 });

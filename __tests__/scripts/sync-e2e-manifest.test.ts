@@ -120,6 +120,12 @@ describe("E2E pack manifest", () => {
         "tests/social/wave-switch-loading.spec.ts",
         "tests/social/wave-loading-sandbox.spec.ts",
         "tests/social/chat-render-budget-sandbox.spec.ts",
+        "tests/social/wave-live-unread-sandbox.spec.ts",
+        "tests/social/wave-media-processing-sandbox.spec.ts",
+        "tests/social/wave-time-zone-sandbox.spec.ts",
+        "tests/social/android-back-sandbox.spec.ts",
+        "tests/social/mobile-gestures-sandbox.spec.ts",
+        "tests/social/wave-share-image-sandbox.spec.ts",
       ],
       projects: ["web-desktop-chromium", "web-mobile-chromium"],
       env: {
@@ -385,7 +391,10 @@ describe("E2E pack manifest", () => {
         alias: "e2ee-staging",
         environments: ["staging"],
         triggers: ["manual"],
-        specs: ["tests/staging-e2ee/encrypted-dm-staging.spec.ts"],
+        specs: [
+          "tests/staging-e2ee/encrypted-dm-staging.spec.ts",
+          "tests/staging-e2ee/wave-unread-staging.spec.ts",
+        ],
         projects: ["web-desktop-chromium"],
         workers: 1,
         env: {

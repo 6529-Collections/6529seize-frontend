@@ -7,6 +7,12 @@ import {
   useOptionalDmUnreadActions,
   useDmUnreadSummary,
 } from "@/services/dm-unread/DmUnreadStateProvider";
+import {
+  WebSocketContext,
+  type WebSocketContextValue,
+} from "@/services/websocket/WebSocketContext";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { fakeJwt } from "../../helpers/fakeJwt";
 import { mockRandomUnit } from "../../helpers/mockRandomUnit";
 
 const commonApiFetchMock = jest.fn();
@@ -293,6 +299,10 @@ describe("DmUnreadStateProvider", () => {
     try {
       await act(async () => {
         await jest.advanceTimersByTimeAsync(0);
+      });
+      // A focus resyncs once the last snapshot is a minute old.
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(60_000);
       });
       act(() => window.dispatchEvent(new Event("focus")));
       expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
@@ -582,10 +592,94 @@ describe("DmUnreadStateProvider", () => {
     });
     expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
 
+    // Switching windows soon after a snapshot does not resync.
     nowSpy.mockReturnValue(11_501);
+    act(() => window.dispatchEvent(new Event("focus")));
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+
+    nowSpy.mockReturnValue(70_001);
     act(() => window.dispatchEvent(new Event("focus")));
     await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalledTimes(3));
     nowSpy.mockRestore();
+  });
+
+  describe("focus and visibility resync", () => {
+    const advance = async (ms: number) => {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(ms);
+      });
+    };
+    let visibility: DocumentVisibilityState = "visible";
+    const setVisibility = (next: DocumentVisibilityState) => {
+      visibility = next;
+      act(() => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+    };
+    const snapshotRequests = () =>
+      commonApiFetchMock.mock.calls.filter(
+        ([request]) => request?.endpoint === "dm-drops/unread/snapshot"
+      ).length;
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      visibility = "visible";
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        get: () => visibility,
+      });
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(document, "visibilityState");
+      jest.useRealTimers();
+    });
+
+    const renderLoaded = async () => {
+      const rendered = render(
+        <DmUnreadStateProvider>
+          <Capture />
+        </DmUnreadStateProvider>
+      );
+      await advance(0);
+      expect(snapshotRequests()).toBe(1);
+      return rendered;
+    };
+
+    it("ignores window focus within a minute of the last snapshot", async () => {
+      const rendered = await renderLoaded();
+      for (let index = 0; index < 10; index++) {
+        act(() => window.dispatchEvent(new Event("focus")));
+        await advance(5_000);
+      }
+      expect(snapshotRequests()).toBe(1);
+      rendered.unmount();
+    });
+
+    it("resyncs on focus once the last snapshot is a minute old", async () => {
+      const rendered = await renderLoaded();
+      await advance(60_000);
+      act(() => window.dispatchEvent(new Event("focus")));
+      await advance(0);
+      expect(snapshotRequests()).toBe(2);
+      rendered.unmount();
+    });
+
+    it("resyncs on return after the tab was hidden 30 seconds", async () => {
+      const rendered = await renderLoaded();
+      setVisibility("hidden");
+      await advance(29_000);
+      setVisibility("visible");
+      await advance(0);
+      expect(snapshotRequests()).toBe(1);
+
+      setVisibility("hidden");
+      await advance(30_000);
+      setVisibility("visible");
+      await advance(0);
+      expect(snapshotRequests()).toBe(2);
+      rendered.unmount();
+    });
   });
 
   describe("reconnect resync stagger", () => {
@@ -668,6 +762,36 @@ describe("DmUnreadStateProvider", () => {
       }
     });
 
+    it("takes a staggered snapshot when the server sends a resync marker", async () => {
+      const rendered = await mountAfterFirstConnect();
+      try {
+        isConnected = true;
+        rendered.rerender(providerUi());
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(3_000);
+        });
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
+        // Past the recovery cooldown, as after a real delivery failure.
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(2_000);
+        });
+
+        act(() => {
+          websocketHandlers.get("RESYNC_REQUIRED")?.({});
+        });
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(1_499);
+        });
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(3);
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(1);
+        });
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(4);
+      } finally {
+        rendered.unmount();
+      }
+    });
+
     it("cancels the pending reconnect snapshot on unmount", async () => {
       const rendered = await mountAfterFirstConnect();
       isConnected = true;
@@ -678,6 +802,112 @@ describe("DmUnreadStateProvider", () => {
       });
 
       expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("first snapshot and the socket", () => {
+    let socketStatus: WebSocketStatus | undefined;
+    // A fresh element per call so rerender() re-reads the socket state.
+    const providerUi = () => (
+      <WebSocketContext.Provider
+        value={{ status: socketStatus } as unknown as WebSocketContextValue}
+      >
+        <DmUnreadStateProvider>
+          <Capture />
+        </DmUnreadStateProvider>
+      </WebSocketContext.Provider>
+    );
+    const flush = async (ms: number) => {
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(ms);
+      });
+    };
+
+    beforeEach(() => {
+      jest.useFakeTimers();
+      socketStatus = WebSocketStatus.CONNECTING;
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it.each([WebSocketStatus.CONNECTING, WebSocketStatus.AUTHENTICATING])(
+      "waits while the socket is %s and takes one snapshot when it connects",
+      async (status) => {
+        socketStatus = status;
+        const rendered = render(providerUi());
+        await flush(1_000);
+        expect(commonApiFetchMock).not.toHaveBeenCalled();
+
+        socketStatus = WebSocketStatus.CONNECTED;
+        isConnected = true;
+        rendered.rerender(providerUi());
+        await flush(5_000);
+
+        expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+        rendered.unmount();
+      }
+    );
+
+    it("retries with the rotated token when the old one is rejected mid-request", async () => {
+      socketStatus = undefined;
+      jwt = fakeJwt({ id: "first", sub: "0xprofile1" });
+      const rotated = fakeJwt({ id: "rotated", sub: "0xprofile1" });
+      commonApiFetchMock.mockImplementationOnce(async () => {
+        jwt = rotated;
+        throw Object.assign(new Error("Unauthorized"), { status: 401 });
+      });
+      const rendered = render(providerUi());
+      await flush(0);
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+
+      await flush(10_000);
+
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(2);
+      expect(commonApiFetchMock).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          headers: { Authorization: `Bearer ${rotated}` },
+        })
+      );
+      rendered.unmount();
+    });
+
+    it("takes the snapshot after 3 s when the socket does not connect", async () => {
+      const rendered = render(providerUi());
+      await flush(2_999);
+      expect(commonApiFetchMock).not.toHaveBeenCalled();
+
+      await flush(1);
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+      rendered.unmount();
+    });
+
+    it("takes the snapshot at once without a connecting socket", async () => {
+      socketStatus = WebSocketStatus.DISCONNECTED;
+      const rendered = render(providerUi());
+      await flush(0);
+
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+      rendered.unmount();
+    });
+
+    it("keeps the snapshot loop through a same-identity token rotation", async () => {
+      socketStatus = undefined;
+      jwt = fakeJwt({ id: "first", sub: "0xprofile1" });
+      const rendered = render(providerUi());
+      await flush(0);
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+
+      jwt = fakeJwt({ id: "rotated", sub: "0xprofile1" });
+      act(() => {
+        window.dispatchEvent(new Event("auth-token-changed"));
+      });
+      rendered.rerender(providerUi());
+      await flush(10_000);
+
+      expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+      rendered.unmount();
     });
   });
 

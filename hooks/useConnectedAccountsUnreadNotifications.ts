@@ -8,7 +8,7 @@ import {
   isTerminalNotificationAuthQueryError,
   shouldRetryQuery,
 } from "@/components/react-query-wrapper/utils/query-utils";
-import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
+import type { ApiNotificationsUnreadCountV2 } from "@/generated/models/ApiNotificationsUnreadCountV2";
 import {
   isAuthJwtUsable,
   type ConnectedWalletAccount,
@@ -19,7 +19,9 @@ import { useMobileBatterySavings } from "./useMobileAppActivity";
 import { useNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 import {
   getUnreadNotificationsRefetchInterval,
+  getUnreadNotificationsStaleTimeOption,
   isProfileCoveredByNotificationSocket,
+  shouldPollUnreadNotificationsInBackground,
 } from "@/services/notifications/unread-notifications-polling";
 
 type ConnectedAccountUnreadCounts = Readonly<Record<string, number>>;
@@ -93,10 +95,9 @@ const fetchUnreadCountForAccount = async (
   }
 
   try {
-    const notifications = await commonApiFetch<ApiNotificationsResponseV2>({
-      endpoint: "v2/notifications",
+    const notifications = await commonApiFetch<ApiNotificationsUnreadCountV2>({
+      endpoint: "v2/notifications/unread-count",
       params: {
-        limit: "1",
         include_competitions: "true",
       },
       headers: {
@@ -147,7 +148,7 @@ export function useConnectedAccountsUnreadNotifications(
       }),
     [accounts, terminalJwtFingerprintByAccount]
   );
-  const responseVersion = "v2-native-competitions";
+  const responseVersion = "v2-unread-count";
 
   const blockAccountUntilNewToken = useCallback(
     (addressKey: string, jwtFingerprint: string) => {
@@ -189,13 +190,17 @@ export function useConnectedAccountsUnreadNotifications(
         ],
         queryFn: ({ signal }: { readonly signal: AbortSignal }) =>
           fetchUnreadCountForAccount(jwt, signal),
+        ...getUnreadNotificationsStaleTimeOption(isRealtimeCovered),
         refetchInterval: (query: {
           readonly state: { readonly error: unknown };
         }) => getUnreadNotificationsRefetchInterval(query, isRealtimeCovered),
         refetchOnWindowFocus: true,
         refetchOnMount: true,
         refetchOnReconnect: true,
-        refetchIntervalInBackground: !isMobileEnvironment,
+        refetchIntervalInBackground: shouldPollUnreadNotificationsInBackground({
+          isMobileEnvironment,
+          isRealtimeCovered,
+        }),
         retry: (failureCount: number, error: unknown) => {
           const terminalJwtFingerprint = getTerminalJwtFingerprint(error);
           if (terminalJwtFingerprint !== null) {

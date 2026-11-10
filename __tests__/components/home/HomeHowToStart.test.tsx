@@ -87,15 +87,19 @@ it.each(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"] as const)(
     expect(
       screen.queryByRole("link", { name: "Collect or create" })
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Hold Meme Cards" })).toHaveAttribute(
-      "href", "/the-memes"
-    );
-    expect(screen.getByRole("link", { name: "submit your own art" })).toHaveAttribute(
-      "href", "/about/apply"
-    );
     expect(
-      screen.getByRole("heading", { name: "Collect or create" }).parentElement?.querySelector("p")
-    ).toHaveTextContent("Hold Meme Cards to earn voting weight, or submit your own art.");
+      screen.getByRole("link", { name: "Hold Meme Cards" })
+    ).toHaveAttribute("href", "/the-memes");
+    expect(
+      screen.getByRole("link", { name: "submit your own art" })
+    ).toHaveAttribute("href", "/about/apply");
+    expect(
+      screen
+        .getByRole("heading", { name: "Collect or create" })
+        .parentElement?.querySelector("p")
+    ).toHaveTextContent(
+      "Hold Meme Cards to earn voting weight, or submit your own art."
+    );
     expect(
       screen.queryByRole("link", { name: "Browse The Memes" })
     ).not.toBeInTheDocument();
@@ -110,7 +114,9 @@ it.each(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"] as const)(
       screen.getByRole("link", { name: "Read the full guide" })
     ).toHaveAttribute("href", "/join-6529");
     expect(
-      screen.queryByRole("link", { name: "Do I need a wallet or ETH to start?" })
+      screen.queryByRole("link", {
+        name: "Do I need a wallet or ETH to start?",
+      })
     ).not.toBeInTheDocument();
     expect(
       screen.queryByText("Browse first, connect when ready.")
@@ -121,7 +127,7 @@ it.each(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"] as const)(
 it.each([
   ["restricted iOS", true, "EE", false],
   ["unknown-country iOS", true, "", false],
-  ["US iOS", true, "US", true],
+  ["US iOS", true, "US", false],
   ["Android", false, "EE", true],
   ["web", false, "", true],
 ] as const)(
@@ -135,16 +141,22 @@ it.each([
       isCountryPending: country === "",
     } as ReturnType<typeof useCookieConsent>);
     render(<HomeHowToStart />);
-    const description = screen.getByRole("heading", {
-      name: "Collect or create",
-    }).parentElement?.querySelector("p");
+    const description = screen
+      .getByRole("heading", {
+        name: "Collect or create",
+      })
+      .parentElement?.querySelector("p");
     expect(description).toHaveTextContent(
       allowed
         ? "Hold Meme Cards to earn voting weight, or submit your own art."
         : "Explore the art and take part in the community."
     );
-    expect(Boolean(screen.queryByRole("link", { name: "Hold Meme Cards" }))).toBe(allowed);
-    expect(Boolean(screen.queryByRole("link", { name: "submit your own art" }))).toBe(allowed);
+    expect(
+      Boolean(screen.queryByRole("link", { name: "Hold Meme Cards" }))
+    ).toBe(allowed);
+    expect(
+      Boolean(screen.queryByRole("link", { name: "submit your own art" }))
+    ).toBe(allowed);
   }
 );
 

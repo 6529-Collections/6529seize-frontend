@@ -1,6 +1,6 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import RememeImage from "@/components/nft-image/RememeImage";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
 import { RememeReferencesGrid } from "@/components/rememes/RememeReferences";
@@ -23,7 +23,6 @@ import {
   parseIpfsUrl,
   parseNftDescriptionToHtml,
 } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -68,8 +67,7 @@ interface Props {
 export default function RememePage(props: Readonly<Props>) {
   const locale = props.locale ?? DEFAULT_LOCALE;
   const { setTitle } = useTitle();
-  const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const [rememe, setRememe] = useState<Rememe>();
 
   const [activeTab, setActiveTab] = useState<Tabs>(Tabs.LIVE);
@@ -340,7 +338,7 @@ export default function RememePage(props: Readonly<Props>) {
                   </div>
                 )}
               </div>
-              {(!capacitor.isIos || country === "US") && (
+              {!hideNftPurchasing && (
                 <div className="tw-w-fit tw-max-w-full">
                   <NFTMarketplaceLinks
                     contract={rememe.contract}
@@ -389,7 +387,7 @@ export default function RememePage(props: Readonly<Props>) {
     return (
       <section className="tw-pb-5 tw-pt-3">
         <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-gap-y-1">
-          <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
+          <h2 className="tw-mb-0 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100 md:tw-text-base">
             {t(locale, "rememes.detail.replicas.title")}
           </h2>
           <span className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-400">
@@ -414,7 +412,7 @@ export default function RememePage(props: Readonly<Props>) {
                 aria-label={t(locale, "rememes.detail.replicas.link", {
                   tokenId: rep,
                 })}
-                className="tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                className="tw-inline-flex tw-items-center tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-500 hover:tw-bg-iron-900 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 md:tw-rounded-lg"
                 key={`${rememe.contract}-${rep}-replica`}
               >
                 #{rep}
@@ -551,10 +549,10 @@ export default function RememePage(props: Readonly<Props>) {
                       key={row.key}
                       className="odd:tw-bg-iron-900/40 even:tw-bg-transparent"
                     >
-                      <td className="tw-w-52 tw-whitespace-nowrap tw-border-0 tw-px-4 tw-py-3 tw-align-top tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-text-iron-500">
+                      <td className="tw-w-52 tw-whitespace-nowrap tw-border-0 tw-px-4 tw-py-3 tw-align-top tw-text-xs tw-font-semibold tw-uppercase tw-leading-5 tw-text-iron-500 md:tw-text-sm md:tw-font-medium md:tw-normal-case md:tw-text-iron-400">
                         {row.label}
                       </td>
-                      <td className="tw-border-0 tw-px-4 tw-py-3 tw-align-top tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200">
+                      <td className="tw-border-0 tw-px-4 tw-py-3 tw-align-top tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-200 md:tw-text-iron-100">
                         {row.value}
                       </td>
                     </tr>
@@ -593,7 +591,7 @@ export default function RememePage(props: Readonly<Props>) {
     return (
       <nav
         aria-label={t(locale, "rememes.detail.sections.tabs")}
-        className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
+        className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 md:tw-w-full md:tw-border-white/10"
       >
         <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
           <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4">
@@ -612,7 +610,10 @@ export default function RememePage(props: Readonly<Props>) {
   }
 
   return (
-    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+    <div
+      data-nft-card-page
+      className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white"
+    >
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">

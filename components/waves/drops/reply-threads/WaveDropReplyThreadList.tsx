@@ -6,7 +6,9 @@ import { useDropMessages } from "@/hooks/useDropMessages";
 import { useMyStreamWaveMessages } from "@/contexts/wave/MyStreamContext";
 import { getVisibleThreadReplies } from "./pending-replies";
 import { t } from "@/i18n/messages";
-import { useMemo } from "react";
+import HighlightDropWrapper from "@/components/drops/view/HighlightDropWrapper";
+import { useLinkedReply, useWaveReplyThreads } from "./WaveReplyThreadsContext";
+import { useCallback, useMemo } from "react";
 import type { RenderThreadReply } from "./WaveDropReplyThread";
 
 interface WaveDropReplyThreadListProps {
@@ -29,17 +31,28 @@ export default function WaveDropReplyThreadList({
   renderReply,
 }: WaveDropReplyThreadListProps) {
   const locale = useBrowserLocale();
+  const threads = useWaveReplyThreads();
+  const linkedReply = useLinkedReply(threads, parentDropId);
+  const setLinkedReplyElement = useCallback(
+    (element: HTMLDivElement | null) => {
+      if (linkedReply)
+        threads?.store.setLinkedReplyElement(linkedReply, element);
+    },
+    [linkedReply, threads]
+  );
   const waveMessages = useMyStreamWaveMessages(waveId);
   const {
     data,
     drops,
     fetchNextPage,
     hasNextPage,
+    fetchPreviousPage,
+    hasPreviousPage,
     isFetching,
     isFetchingNextPage,
     isError,
     refetch,
-  } = useDropMessages(waveId, parentDropId, wave);
+  } = useDropMessages(waveId, parentDropId, wave, linkedReply?.replySerialNo);
   const replies = useMemo(
     () =>
       getVisibleThreadReplies({
@@ -60,7 +73,9 @@ export default function WaveDropReplyThreadList({
         <div className="tw-pl-3">
           <button
             type="button"
-            disabled={isFetchingNextPage}
+            disabled={
+              isFetchingNextPage || (linkedReply !== null && isFetching)
+            }
             onClick={() => {
               fetchNextPage().catch(() => undefined);
             }}
@@ -75,16 +90,43 @@ export default function WaveDropReplyThreadList({
         aria-busy={isFetching}
         className="tw-m-0 tw-list-none tw-p-0"
       >
-        {replies.map((reply, index) => (
-          <li key={reply.stableKey}>
-            {renderReply({
-              reply,
-              previousReply: replies[index - 1] ?? null,
-              nextReply: replies[index + 1] ?? null,
-            })}
-          </li>
-        ))}
+        {replies.map((reply, index) => {
+          const content = renderReply({
+            reply,
+            previousReply: replies[index - 1] ?? null,
+            nextReply: replies[index + 1] ?? null,
+          });
+          return (
+            <li key={reply.stableKey}>
+              {linkedReply?.replySerialNo === reply.serial_no ? (
+                <HighlightDropWrapper
+                  active
+                  emphasize
+                  ref={setLinkedReplyElement}
+                >
+                  {content}
+                </HighlightDropWrapper>
+              ) : (
+                content
+              )}
+            </li>
+          );
+        })}
       </ul>
+      {hasPreviousPage && (
+        <div className="tw-pl-3">
+          <button
+            type="button"
+            disabled={isFetching}
+            onClick={() => {
+              fetchPreviousPage().catch(() => undefined);
+            }}
+            className={THREAD_TEXT_BUTTON_CLASS_NAME}
+          >
+            {t(locale, "waves.chat.replyThread.loadNewer")}
+          </button>
+        </div>
+      )}
       {isError && (
         <div className="tw-py-1 tw-pl-3">
           <p role="alert" className="tw-m-0 tw-text-xs tw-text-iron-300">

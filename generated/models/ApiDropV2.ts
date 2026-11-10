@@ -12,6 +12,7 @@
  */
 
 import { ApiAttachment } from '../models/ApiAttachment';
+import { ApiCollapsedReplyThread } from '../models/ApiCollapsedReplyThread';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropMainType } from '../models/ApiDropMainType';
 import { ApiDropMedia } from '../models/ApiDropMedia';
@@ -50,6 +51,11 @@ export class ApiDropV2 {
     * True when the drop\'s current content is the body of an author\'s device signed create or edit event, the same state as a non-null current_event_id from GET /drops/{dropId}/signed-events. False otherwise, including when the viewer cannot see the drop\'s content or its author is anonymous. Treat a missing value as false.
     */
     'is_author_signed'?: boolean;
+    /**
+    * Author-selected reply placement on a top-level chat drop.
+    */
+    'collapse_replies'?: boolean;
+    'collapsed_reply_thread'?: ApiCollapsedReplyThread;
     'hide_link_preview': boolean;
     'title'?: string;
     'content'?: string;
@@ -67,7 +73,7 @@ export class ApiDropV2 {
     'reactions'?: Array<ApiDropReactionCounter>;
     'boosts': number;
     /**
-    * Number of replies in this drop\'s thread. Only provided for drops in waves with collapsed replies, and omitted when there are none.
+    * Number of replies in this drop\'s collapsed thread. Omitted when there are none.
     */
     'replies_count'?: number;
     'reply_to_drop'?: ApiReplyToDropV2;
@@ -129,6 +135,18 @@ export class ApiDropV2 {
             "name": "is_author_signed",
             "baseName": "is_author_signed",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "collapse_replies",
+            "baseName": "collapse_replies",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "collapsed_reply_thread",
+            "baseName": "collapsed_reply_thread",
+            "type": "ApiCollapsedReplyThread",
             "format": ""
         },
         {

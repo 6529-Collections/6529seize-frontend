@@ -3,7 +3,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropId } from "@/generated/models/ApiDropId";
 import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
 import type { Drop } from "@/helpers/waves/drop.helpers";
-import { DropSize, getStableDropKey } from "@/helpers/waves/drop.helpers";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 import { commonApiFetchWithRetry } from "@/services/api/common-api";
 import { fetchWaveDropsFeedV2 } from "@/services/api/wave-drops-v2-api";
 import type { WaveEligibility } from "../WaveEligibilityContext";
@@ -276,74 +276,6 @@ export function createEmptyWaveMessages(
   };
 }
 
-/**
- * Merges two arrays of drops, removing duplicates based on id,
- * preferring newer versions of duplicates, and sorting by serial_no
- *
- * @param currentDrops Current array of drops
- * @param newDrops New array of drops to merge in
- * @returns A new merged array with no duplicates, sorted by serial_no
- */
-export function mergeDrops(currentDrops: Drop[], newDrops: Drop[]): Drop[] {
-  // Create a map for fast lookup by id
-  const dropsMapStableKey = new Map<string, Drop>();
-
-  const newDropsWithStableKey = newDrops.map((drop) => {
-    const { key, hash } = getStableDropKey(drop, currentDrops);
-
-    return {
-      ...drop,
-      stableHash: hash,
-      stableKey: key,
-    };
-  });
-
-  for (const drop of currentDrops) {
-    dropsMapStableKey.set(drop.stableKey, drop);
-  }
-
-  // Then add all new drops, overwriting any duplicates
-  // This ensures we keep the newest version of each drop
-  for (const drop of newDropsWithStableKey) {
-    dropsMapStableKey.set(drop.stableKey, drop);
-  }
-
-  // Convert the map back to an array
-  const mergedDrops = Array.from(dropsMapStableKey.values());
-
-  const dropsMapSerialNo = new Map<number, Drop>();
-
-  for (const drop of mergedDrops) {
-    dropsMapSerialNo.set(drop.serial_no, drop);
-  }
-
-  const finalDrops = Array.from(dropsMapSerialNo.values());
-
-  finalDrops.sort((a, b) => {
-    if (a.type === DropSize.LIGHT || b.type === DropSize.LIGHT) {
-      return b.serial_no - a.serial_no;
-    }
-
-    const createdAtDiff = getDropCreatedAtMillis(b) - getDropCreatedAtMillis(a);
-    return createdAtDiff || b.serial_no - a.serial_no;
-  });
-
-  return finalDrops;
-}
-
-function getDropCreatedAtMillis(drop: Drop): number {
-  if (drop.created_at === undefined || drop.created_at === null) {
-    return drop.serial_no;
-  }
-
-  const timestamp =
-    typeof drop.created_at === "number"
-      ? drop.created_at
-      : new Date(drop.created_at).getTime();
-
-  return Number.isFinite(timestamp) ? timestamp : drop.serial_no;
-}
-
 // Helper function to get the highest serial number from an array of drops
 function getHighestSerialNo(drops: ApiDrop[] | Drop[]): number | null {
   if (drops.length === 0) {
@@ -449,6 +381,7 @@ const buildDropIdsRequestParams = ({
     wave_id: apiParams.wave_id,
     min_serial_no: apiParams.min_serial_no.toString(),
     limit: itemsPerRequest.toString(),
+    respect_drop_reply_collapse: "true",
   };
 
   if (currentMaxSerialForNextCall !== null) {

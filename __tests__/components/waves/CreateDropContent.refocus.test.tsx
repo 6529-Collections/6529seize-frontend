@@ -1,5 +1,11 @@
 import React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateDropContent from "@/components/waves/CreateDropContent";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -100,6 +106,9 @@ jest.mock("@/components/waves/CreateDropInput", () => {
         <div
           data-testid="input"
           data-mode={props.isDropMode ? "drop" : "chat"}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") void props.onDrop();
+          }}
         />
       );
     }),
@@ -328,6 +337,49 @@ describe("CreateDropContent submission focus", () => {
       expect(mockInputBlur).toHaveBeenCalledTimes(
         platform === "desktop" ? 0 : 1
       );
+    }
+  );
+
+  it.each(["desktop", "mobile browser", "native app"])(
+    "restores only desktop focus after an accepted keyboard submit on %s",
+    async (platform) => {
+      mockIsApp = platform === "native app";
+      mockIsMobile = platform === "mobile browser";
+      const { submitDrop } = renderSubject();
+
+      fireEvent.keyDown(screen.getByTestId("input"), { key: "Enter" });
+
+      await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "submit" })).toBeEnabled()
+      );
+      expect(mockInputFocus).toHaveBeenCalledTimes(
+        platform === "desktop" ? 1 : 0
+      );
+      expect(mockInputBlur).toHaveBeenCalledTimes(
+        platform === "desktop" ? 0 : 1
+      );
+      expect(mockInputClear).toHaveBeenCalled();
+    }
+  );
+
+  it.each(["refused", "failed"])(
+    "does not schedule keyboard refocus when a send is %s",
+    async (failure) => {
+      const submitDrop = jest.fn(async () => {
+        if (failure === "failed") throw new Error("Send failed");
+        return false;
+      });
+      renderSubject({ submitDrop });
+
+      fireEvent.keyDown(screen.getByTestId("input"), { key: "Enter" });
+
+      await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "submit" })).toBeEnabled()
+      );
+      expect(mockInputFocus).not.toHaveBeenCalled();
+      expect(mockInputClear).not.toHaveBeenCalled();
     }
   );
 

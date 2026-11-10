@@ -6,6 +6,7 @@ import {
   groupChanges,
   noteStallFor,
   clearStallFor,
+  releaseSendStallIfIdle,
   otherAddDelayMs,
   repairRoster,
   requiredChangesPlanner,
@@ -53,6 +54,7 @@ interface ControllerHooks {
   onOwnRevoked: () => Promise<void>;
   /** Called after every sync pass (e.g. resolve new members' profiles). */
   afterSync: () => Promise<void>;
+  resumeLookups?: () => Promise<void>;
 }
 
 export class EngineController {
@@ -356,6 +358,7 @@ export class EngineController {
     while (this.isReady()) {
       const runtime = this.ctx.store.groups.get(g);
       if (!isActive(runtime) || runtime.outbox.size === 0) {
+        releaseSendStallIfIdle(this.ctx, runtime);
         return;
       }
       const commit = await runGroupCommit(
@@ -375,6 +378,7 @@ export class EngineController {
       }
       const step = await this.ctx.queue.run(() => sendNext(this.ctx, runtime));
       if (step === "failed") {
+        runtime.sendFailingSince ??= this.ctx.now();
         if (noteStallFor(this.ctx, runtime)) {
           this.armRetry(g);
           return;
@@ -386,6 +390,7 @@ export class EngineController {
         attempt += 1;
         continue;
       }
+      runtime.sendFailingSince = null;
       clearStallFor(this.ctx, runtime);
       attempt = 0;
       if (step === "empty" || step === "inactive") {
@@ -474,6 +479,13 @@ export class EngineController {
 
   onWake(event: { type: string; data: unknown }): void {
     if (!this.isReady()) {
+      return;
+    }
+    if (event.type === "E2EE_LOOKUP_RESUME") {
+      this.debounce(
+        "lookup-resume",
+        () => this.hooks.resumeLookups?.() ?? Promise.resolve()
+      );
       return;
     }
     this.ctx.lastWakeAt = this.ctx.now();

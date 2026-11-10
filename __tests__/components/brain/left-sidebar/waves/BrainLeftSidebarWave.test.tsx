@@ -201,7 +201,9 @@ describe("BrainLeftSidebarWave", () => {
     mockedUseMyStream.mockImplementation(() => ({
       activeWave: { id: activeWaveId, set: setActiveWave },
     }));
-    rerender(<BrainLeftSidebarWave wave={baseWave} onHover={onHover} />);
+    // The row is memoized. In the app a stream context change re-renders it;
+    // the mocked hook is not a context, so a new wave object stands in.
+    rerender(<BrainLeftSidebarWave wave={{ ...baseWave }} onHover={onHover} />);
     expect(screen.getByRole("link")).toHaveAttribute("href", "/waves");
   });
 

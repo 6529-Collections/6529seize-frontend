@@ -303,21 +303,39 @@ describe("socket-driven unread notification polling", () => {
     unmount();
   });
 
-  it("refreshes every account when the tab becomes visible again", async () => {
+  it("refreshes covered accounts on return only once their counts are five minutes old", async () => {
     const { unmount } = renderSurfaces();
     await advance(0);
     await acknowledgeIdentitySync();
 
+    // The socket keeps covered counts current, so a return within the
+    // reconciliation window has nothing to refetch.
     act(() => setVisibility("hidden"));
     await advance(2 * 60_000);
     commonApiFetchMock.mockClear();
 
     act(() => setVisibility("visible"));
     await advance(0);
-    expect(requestCounts()).toEqual({ active: 1, second: 1, third: 1 });
+    expect(requestCounts()).toEqual({ active: 0, second: 0, third: 0 });
 
-    // A quick switch back within the stale window does not refetch again.
+    // A hidden tab does not poll covered accounts; it refreshes on return.
     act(() => setVisibility("hidden"));
+    await advance(6 * 60_000);
+    expect(requestCounts()).toEqual({ active: 0, second: 0, third: 0 });
+
+    act(() => setVisibility("visible"));
+    await advance(0);
+    expect(requestCounts()).toEqual({ active: 1, second: 1, third: 1 });
+    unmount();
+  });
+
+  it("refreshes uncovered accounts on every return", async () => {
+    const { unmount } = renderSurfaces();
+    await advance(0);
+    commonApiFetchMock.mockClear();
+
+    act(() => setVisibility("hidden"));
+    await advance(15_000);
     act(() => setVisibility("visible"));
     await advance(0);
     expect(requestCounts()).toEqual({ active: 1, second: 1, third: 1 });

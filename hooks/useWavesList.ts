@@ -10,6 +10,7 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { normalizeOptionalWaveId } from "@/helpers/waves/wave.helpers";
 import { mapApiWaveToSidebarWave, useWavesV2 } from "./useWavesV2";
 import {
+  SIDEBAR_HIGHLY_RATED_WAVES_PARAMS,
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
   WAVE_SCORE_DISCOVERY_PARAMS,
@@ -56,8 +57,6 @@ type EnhancedWave = SidebarWave & {
   readonly isInAllWaves?: boolean;
   readonly sidebarSection?: SidebarDiscoverySection;
 };
-
-const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
 
 // V2 overview, pinned, and announcement wave sources are root-wave
 // sources. This guard is defensive against stale or malformed cached data; it is
@@ -157,14 +156,14 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     refetchIfStale: highlyRatedWavesRefetchIfStale,
   } = useWavesV2({
     overviewType: WAVE_SCORE_DISCOVERY_PARAMS.overviewType,
-    pageSize: HIGHLY_RATED_QUERY_PAGE_SIZE,
+    pageSize: SIDEBAR_HIGHLY_RATED_WAVES_PARAMS.pageSize,
     following: false,
     directMessage: false,
     excludeFollowed: isConnectedIdentity ? true : undefined,
     pinned: nonPinnedFilter,
     scoreSort: ApiWaveScoreSort.Quality,
     viewerIdentityKey,
-    refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+    refetchInterval: SIDEBAR_HIGHLY_RATED_WAVES_PARAMS.refetchIntervalMs,
     refetchIntervalInBackground: false,
     enabled: shouldLoadMainWaves,
   });
@@ -176,14 +175,16 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     hasNextPage: hasAllActivityWavesNextPage,
     fetchNextPage: fetchNextAllActivityWavesPage,
     status: allActivityWavesStatus,
+    hasLoadingError: hasAllActivityWavesError,
+    retryLoading: retryAllActivityWaves,
     refetch: allActivityWavesRefetch,
     refetchIfStale: allActivityWavesRefetchIfStale,
   } = useWavesV2({
+    allSnapshot: true,
     overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: false,
     directMessage: false,
-    pinned: nonPinnedFilter,
     viewerIdentityKey,
     refetchInterval: isJoinedMode
       ? false
@@ -254,23 +255,13 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     allValue: hasAllActivityWavesNextPage,
     deferredValue: false,
   });
-  const fetchNextMainWavesPage = useCallback(() => {
-    if (!shouldLoadMainWaves) {
-      return;
-    }
-
-    if (isJoinedMode) {
-      fetchNextFollowedActivityWavesPage();
-      return;
-    }
-
-    fetchNextAllActivityWavesPage();
-  }, [
-    isJoinedMode,
+  const fetchNextMainWavesPage = getModeValue({
     shouldLoadMainWaves,
-    fetchNextAllActivityWavesPage,
-    fetchNextFollowedActivityWavesPage,
-  ]);
+    isJoinedMode,
+    joinedValue: fetchNextFollowedActivityWavesPage,
+    allValue: fetchNextAllActivityWavesPage,
+    deferredValue: noopListAction,
+  });
   const mainWavesStatus = getModeValue({
     shouldLoadMainWaves,
     isJoinedMode,
@@ -278,23 +269,13 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     allValue: allActivityWavesStatus,
     deferredValue: "pending",
   });
-  const mainWavesRefetch = useCallback(() => {
-    if (!shouldLoadMainWaves) {
-      return;
-    }
-
-    if (isJoinedMode) {
-      followedActivityWavesRefetch();
-      return;
-    }
-
-    allActivityWavesRefetch();
-  }, [
-    isJoinedMode,
+  const mainWavesRefetch = getModeValue({
     shouldLoadMainWaves,
-    allActivityWavesRefetch,
-    followedActivityWavesRefetch,
-  ]);
+    isJoinedMode,
+    joinedValue: followedActivityWavesRefetch,
+    allValue: allActivityWavesRefetch,
+    deferredValue: noopListAction,
+  });
   const trackedAnnouncementWave = useMemo(() => {
     if (!shouldLoadMainWaves) {
       return null;
@@ -717,8 +698,12 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       hasNextPage: hasMainWavesNextPage,
       fetchNextPage: fetchNextPageStable,
       status: mainWavesStatus,
-      hasLoadingError: isJoinedMode && hasFollowedActivityWavesError,
-      retryLoading: retryFollowedActivityWaves,
+      hasLoadingError: isJoinedMode
+        ? hasFollowedActivityWavesError
+        : hasAllActivityWavesError,
+      retryLoading: isJoinedMode
+        ? retryFollowedActivityWaves
+        : retryAllActivityWaves,
 
       recommendationsStatus: shouldLoadMainWaves
         ? recommendationsStatus
@@ -772,6 +757,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       mainWavesStatus,
       isJoinedMode,
       hasFollowedActivityWavesError,
+      hasAllActivityWavesError,
+      retryAllActivityWaves,
       retryFollowedActivityWaves,
       mainWaves,
       allPinnedWaves,

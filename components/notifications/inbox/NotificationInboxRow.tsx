@@ -4,14 +4,15 @@ import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import BellIcon from "@/components/common/icons/BellIcon";
 import ProfileAvatar from "@/components/common/profile/ProfileAvatar";
 import ArtworkNotificationThumbnail from "@/components/notifications/ArtworkNotificationThumbnail";
-import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import LocalDateTime from "@/components/utils/time/LocalDateTime";
+import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
   isGroupedReactionsItem,
   type NotificationDisplayItem,
 } from "@/types/feed.types";
+import NotificationInboxReactions from "./NotificationInboxReactions";
 import {
   getInboxDestination,
   getInboxPreview,
@@ -52,10 +53,16 @@ export default function NotificationInboxRow({
   const reactors = group
     ? [
         ...new Map(
-          group.notifications.map((entry) => [
-            entry.related_identity.id,
-            entry.related_identity,
-          ])
+          group.notifications.map(({ related_identity: profile }) => {
+            // The profile API enforces unique, case-insensitive handles.
+            // Grouped API snapshots can identify the same reactor by profile ID
+            // or by handle, so prefer the handle shared by both representations.
+            const normalizedHandle = profile.handle?.trim().toLowerCase();
+            const key = normalizedHandle
+              ? `handle:${normalizedHandle}`
+              : `id:${profile.id}`;
+            return [key, profile] as const;
+          })
         ).values(),
       ]
     : [];
@@ -70,6 +77,14 @@ export default function NotificationInboxRow({
     pfpUrl = notification.related_wave?.pfp;
   }
   const preview = getInboxPreview(notification);
+  let reactions: string[] = [];
+  if (group) {
+    reactions = group.notifications.map(
+      (entry) => entry.additional_context.reaction
+    );
+  } else if (notification.cause === ApiNotificationCause.DropReacted) {
+    reactions = [notification.additional_context.reaction];
+  }
   return (
     <li>
       <Link
@@ -84,7 +99,9 @@ export default function NotificationInboxRow({
           <ProfileAvatar
             pfpUrl={pfpUrl}
             alt=""
-            fallbackContent={<BellIcon className="tw-size-5 tw-text-iron-400" />}
+            fallbackContent={
+              <BellIcon className="tw-size-5 tw-text-iron-400" />
+            }
           />
         )}
         <div className="tw-min-w-0 tw-flex-1">
@@ -93,6 +110,9 @@ export default function NotificationInboxRow({
               ? t(locale, "notifications.inbox.reactions")
               : getInboxSummary(notification, locale)}
           </p>
+          {reactions.length > 0 && (
+            <NotificationInboxReactions reactions={reactions} />
+          )}
           {group && (
             <div className="tw-mt-1">
               <OverlappingAvatars

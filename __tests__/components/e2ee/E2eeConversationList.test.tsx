@@ -237,19 +237,17 @@ describe("encrypted conversation list", () => {
     );
     const lists = screen.getAllByRole("list", { name: "Encrypted chats" });
     expect(lists).toHaveLength(2);
-    for (const list of lists) {
+    const [inbox, sidebar] = lists;
+    for (const [list, href] of [
+      [inbox!, `/messages/encrypted/${currentG}`],
+      [sidebar!, "/messages/encrypted"],
+    ] as const) {
       const links = within(list).queryAllByRole("link");
       expect(links).toHaveLength(1);
-      expect(links[0]).toHaveAttribute(
-        "href",
-        `/messages/encrypted/${currentG}`
-      );
+      expect(links[0]).toHaveAttribute("href", href);
       expect(links[0]).toHaveTextContent("2 unread messages");
     }
-    expect(screen.getByRole("link", { current: "page" })).toHaveAttribute(
-      "href",
-      `/messages/encrypted/${currentG}`
-    );
+    expect(within(sidebar!).getByRole("link", { current: "page" })).toBeVisible();
   });
 
   it("opens the history with unread incoming messages when concurrent chats share a row", () => {
@@ -434,16 +432,25 @@ describe("E2eeMessagesSection", () => {
     ).toBeInTheDocument();
   });
 
-  it("lists encrypted chats and marks the open one", () => {
-    mockPathname.mockReturnValue(`/messages/encrypted/${GROUP_G}`);
-    render(
-      <E2eeTestProvider
-        value={contextFor(createFakeE2eeEngine({ conversations }))}
-      >
-        <E2eeMessagesSection />
-      </E2eeTestProvider>
-    );
-    const active = screen.getByRole("link", { current: "page" });
-    expect(active).toHaveAttribute("href", `/messages/encrypted/${GROUP_G}`);
-  });
+  it.each([false, true])(
+    "links the selected chat back to the inbox (collapsed: %s)",
+    (collapsed) => {
+      mockPathname.mockReturnValue(`/messages/encrypted/${GROUP_G}`);
+      render(
+        <E2eeTestProvider
+          value={contextFor(createFakeE2eeEngine({ conversations }))}
+        >
+          <E2eeMessagesSection collapsed={collapsed} />
+        </E2eeTestProvider>
+      );
+      const list = within(screen.getByRole("list", { name: "Encrypted chats" }));
+      expect(list.getByRole("link", { current: "page" })).toHaveAttribute(
+        "href",
+        "/messages/encrypted"
+      );
+      expect(
+        list.getByRole("link", { current: false, name: /alice/ })
+      ).toHaveAttribute("href", `/messages/encrypted/${DM_G}`);
+    }
+  );
 });

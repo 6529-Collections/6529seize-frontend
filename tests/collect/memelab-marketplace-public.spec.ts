@@ -326,9 +326,50 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   await expect(
     page.getByRole("button", { name: "Make an offer: Meme Lab artwork" })
   ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "List", exact: true })
-  ).toBeVisible();
+  if (isMobile) {
+    await expect(
+      page.getByRole("button", { name: "List", exact: true })
+    ).toBeVisible();
+  } else {
+    const more = page.getByRole("button", {
+      name: "More trading actions for Meme Lab artwork",
+      exact: true,
+    });
+    await more.click();
+    await expect(
+      page.getByRole("menuitem", {
+        name: "List: Meme Lab artwork",
+        exact: true,
+      })
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(more).toBeFocused();
+    const actions = page.getByTestId("collect-inline-actions");
+    const connect = page.getByRole("button", {
+      name: "Connect wallet",
+      exact: true,
+    });
+    await expect(connect).toBeVisible();
+    await expect(connect).toHaveCSS("border-radius", "8px");
+    await expect(connect).toHaveCSS("font-size", "14px");
+    await expect(connect).toHaveCSS("background-color", "rgb(236, 236, 238)");
+    const connectBounds = (await connect.boundingBox())!;
+    const actionBounds = (await actions.boundingBox())!;
+    expect(connectBounds.height).toBe(44);
+    expect(connectBounds.y + connectBounds.height).toBeLessThanOrEqual(
+      actionBounds.y
+    );
+    await expect(
+      page.getByRole("button", { name: "Make an offer: Meme Lab artwork" })
+    ).toHaveCSS("border-radius", "8px");
+    await expect(
+      page.getByRole("button", { name: "View listings & offers", exact: true })
+    ).toHaveCSS("font-size", "14px");
+    await expect(
+      page.getByRole("button", { name: "View listings & offers", exact: true })
+    ).toHaveCSS("font-weight", "500");
+  }
+  await expect(page.getByTestId("collect-sticky-actions")).toHaveCount(0);
   await sections.getByRole("button", { name: "Overview", exact: true }).click();
   await page
     .getByRole("button", { name: "View listings & offers", exact: true })
@@ -372,7 +413,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
           .getByText(summary, { exact: true })
           .locator("..")
           .getByRole("definition")
-      ).toHaveCSS("font-size", "16px");
+      ).toHaveCSS("font-size", "14px");
       const hiddenHeading = market.getByRole("heading", {
         name: heading,
         exact: true,
@@ -385,7 +426,7 @@ test("Meme Lab shares card trading actions and market navigation before wallet c
   const levels = offers.getByRole("button", { name: /^Offers at / });
   await expect(levels).toHaveCount(10);
   const firstLevel = levels.first();
-  await expect(firstLevel).toHaveCSS("font-size", "13px");
+  await expect(firstLevel).toHaveCSS("font-size", isMobile ? "13px" : "14px");
   await firstLevel.focus();
   await page.keyboard.press("Enter");
   await expect(firstLevel).toBeFocused();

@@ -1,12 +1,12 @@
 "use client";
 
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import Address from "@/components/address/Address";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import ProfileAvatar, {
   ProfileBadgeSize,
 } from "@/components/common/profile/ProfileAvatar";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import NftMarketActivity from "@/components/nft-market-activity/NftMarketActivity";
 import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import NFTMarketplaceLinks from "@/components/nft-marketplace-links/NFTMarketplaceLinks";
@@ -102,7 +102,7 @@ function GradientInfoMetric({
         {label}
       </div>
       <div
-        className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1.5 tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6 ${valueClassName}`}
+        className={`tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1.5 tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-iron-100 ${valueClassName}`}
       >
         {children}
       </div>
@@ -360,7 +360,7 @@ function GradientActivitySection({ nft }: { readonly nft: NftWithOwner }) {
       <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
         <h3
           id="gradient-card-activity-heading"
-          className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200"
+          className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-200 md:tw-text-base md:tw-leading-6 md:tw-text-iron-100"
         >
           {t(locale, "nftActivity.cardTitle")}
         </h3>
@@ -413,7 +413,7 @@ export default function GradientPageComponent({
     if (marketActive) params.set("focus", MARKET_TAB_FOCUS);
     return params;
   }, [returnContext, marketActive]);
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { address: connectedAddress } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
 
@@ -531,7 +531,10 @@ export default function GradientPageComponent({
   }, [id, nft]);
 
   return (
-    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+    <div
+      data-nft-card-page
+      className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white"
+    >
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-4">
           <div className="tw-flex tw-flex-col tw-gap-4">
@@ -608,6 +611,7 @@ export default function GradientPageComponent({
                   />
                 </div>
                 <CollectDetailActions
+                  desktopCard
                   collection="gradients"
                   tokenId={String(nft.id)}
                   title={nft.name}
@@ -624,7 +628,7 @@ export default function GradientPageComponent({
                   isOwner={isOwner}
                   collectionRank={collectionRank}
                   collectionCount={collectionCount}
-                  showMarketplaceLinks={!capacitor.isIos || country === "US"}
+                  showMarketplaceLinks={!hideNftPurchasing}
                 />
               </div>
             </div>
@@ -634,7 +638,7 @@ export default function GradientPageComponent({
               navigation={
                 <nav
                   aria-label={t(locale, "theMemes.detail.tabs.overview")}
-                  className="tw-mb-6 tw-flex tw-gap-x-6 tw-overflow-x-auto"
+                  className="tw-mb-6 tw-flex tw-gap-x-6 tw-overflow-x-auto md:tw-w-full md:tw-border-x-0 md:tw-border-b md:tw-border-t-0 md:tw-border-solid md:tw-border-white/10 md:[&>button]:-tw-mb-px"
                 >
                   <MemePageTabButton
                     title={t(locale, "theMemes.detail.tabs.overview")}

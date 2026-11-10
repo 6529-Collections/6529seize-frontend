@@ -148,10 +148,15 @@ function applyEffectiveAppPrCiPlan(plan) {
       /^(?:hooks\/(?:useMemesQuickVote|useMemesWaveFooterStats|memesQuickVote\.)|components\/brain\/left-sidebar\/waves\/memes-quick-vote\/)/u.test(
         file
       ) ||
+      // Tests of chat sync, read markers and the realtime updater; this pack
+      // runs the live-update cases in wave-loading-sandbox.spec.ts.
+      /^(?:__tests__\/contexts\/wave\/hooks\/useWaveRealtimeUpdater|__tests__\/useWaveRealtimeUpdater|__tests__\/hooks\/useMarkWaveNotificationsRead)/u.test(
+        file
+      ) ||
       // The chat hot path: this pack's chat render budget
       // (chat-render-budget-sandbox.spec.ts) measures renders and requests
       // per received message for each of these.
-      /^(?:contexts\/wave\/(?:MyStreamContext|ActiveWaveContext)|contexts\/wave\/hooks\/(?:useNewDropCounter|useEnhancedWavesListCore|useWaveRealtimeUpdater|useWaveMessagesStore|useWaveDataManager|useDropUpdateRefMessages)|contexts\/wave\/utils\/wave-messages-utils|lib\/chat-store\/|hooks\/(?:useWaveWebSocket|useWaveIsTyping|useMarkWaveNotificationsRead)|helpers\/waves\/drop\.helpers|components\/waves\/drops\/WaveDrop\.tsx$|components\/drops\/view\/DropsList\.tsx$|components\/drops\/view\/part\/DropPartMarkdown\.tsx$|components\/brain\/left-sidebar\/(?:waves\/BrainLeftSidebarWave\.tsx$|web\/WebBrainLeftSidebarWave\/)|tests\/support\/chatPerf|tests\/social\/chat-render-budget-sandbox\.spec\.ts$)/u.test(
+      /^(?:contexts\/wave\/(?:MyStreamContext|ActiveWaveContext)|contexts\/wave\/hooks\/(?:useNewDropCounter|useEnhancedWavesListCore|useWaveRealtimeUpdater|useWaveMessagesStore|useWaveDataManager|useDropUpdateRefMessages)|contexts\/wave\/utils\/wave-messages-utils|lib\/chat-store\/|hooks\/(?:useWaveWebSocket|useWaveIsTyping|useMarkWaveNotificationsRead)|helpers\/waves\/drop\.helpers|components\/waves\/drops\/WaveDrop\.tsx$|components\/drops\/view\/DropsList\.tsx$|components\/drops\/view\/part\/DropPartMarkdown\.tsx$|components\/brain\/left-sidebar\/(?:waves\/BrainLeftSidebarWave\.tsx$|web\/WebBrainLeftSidebarWave\/)|tests\/support\/chatPerf|tests\/social\/(?:chat-render-budget|wave-live-unread)-sandbox\.spec\.ts$)/u.test(
         file
       ) ||
       [
@@ -164,6 +169,13 @@ function applyEffectiveAppPrCiPlan(plan) {
         "services/wallet-signatures/competition-signature.ts",
         "i18n/messages/competitions.ts",
         "tests/social/native-competition-sandbox.spec.ts",
+        "tests/social/wave-media-processing-sandbox.spec.ts",
+        "components/waves/drops/wave-drops-all/hooks/useDeferredNewestDrops.ts",
+        "components/waves/drops/wave-drops-all/index.tsx",
+        "helpers/waves/drop-media-reconciliation.ts",
+        "components/waves/drops/WaveDropPartContentMediaImage.tsx",
+        "components/waves/drops/WaveDropPartContentMedias.tsx",
+        "components/react-query-wrapper/utils/updateAttachmentInCachedDrops.ts",
         "tests/media/waveImagePreviewCases.ts",
         "components/waves/drop/MemesDropArtworkHero.tsx",
         "components/drops/view/item/content/media/DropImagePreview.tsx",
@@ -174,6 +186,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/drops/view/item/content/media/MediaDisplayImage.tsx",
         "components/memes/drops/MemeParticipationDrop.tsx",
         "components/memes/drops/MemeWinnerDrop.tsx",
+        "components/waves/drops/winner/DefaultWinnerDrop.tsx",
         "components/memes/drops/MemesLeaderboardDrop.tsx",
         "components/drops/view/item/content/media/ImageMediaModal.tsx",
         "components/drops/view/item/content/media/useOriginalImage.ts",
@@ -181,10 +194,24 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
         "tests/social/wave-loading-sandbox.spec.ts",
+        "tests/social/android-back-sandbox.spec.ts",
+        "tests/social/mobile-gestures-sandbox.spec.ts",
+        "hooks/useAndroidBackLayer.ts",
+        "hooks/useHorizontalSwipe.ts",
+        "hooks/useLongPressClickSuppression.ts",
+        "hooks/useSwipeToReply.ts",
+        "helpers/waves/drop-reply-eligibility.ts",
+        "components/waves/drops/SwipeReplyHint.tsx",
+        "components/e2ee/conversation/E2eeMessageItem.tsx",
+        "components/e2ee/conversation/E2eeConversationView.tsx",
+        "components/navigation/AndroidBackNavigation.tsx",
+        "services/capacitor/android-back-layers.ts",
+        "components/brain/mobile/useWaveListSwipeBack.ts",
         "components/brain/my-stream/MyStreamWaveChat.tsx",
         "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
         "hooks/useNativeKeyboard.ts",
         "tests/support/surfaceSimulation.ts",
+        "tests/support/longPressMessage.ts",
         "components/waves/drops/wave-drops-all/utils/observeSerialScrollTarget.ts",
         // The chat render window; this pack runs wave-loading-sandbox.spec.ts.
         "hooks/useVirtualizedWaveMessages.ts",

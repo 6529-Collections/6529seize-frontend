@@ -12,7 +12,8 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { Fragment, useId } from "react";
+import { Fragment, useId, useRef } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { createPortal } from "react-dom";
 
 interface WaveGuidelinesAgreementDialogProps {
@@ -31,6 +32,8 @@ export default function WaveGuidelinesAgreementDialog({
   const dialogDescriptionId = useId();
   const guidelinesTitleId = useId();
   const isOpen = guidelines !== null;
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(isOpen, dialogRef, onDecline);
 
   if (!isOpen || typeof document === "undefined") {
     return null;
@@ -39,6 +42,7 @@ export default function WaveGuidelinesAgreementDialog({
   return createPortal(
     <Transition show as={Fragment}>
       <Dialog
+        ref={dialogRef}
         as="div"
         className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000001] tw-cursor-default"
         onClose={onDecline}

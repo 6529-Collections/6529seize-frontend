@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { ApiNotificationsResponseV2 } from "@/generated/models/ApiNotificationsResponseV2";
+import type { ApiNotificationsUnreadCountV2 } from "@/generated/models/ApiNotificationsUnreadCountV2";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useMobileBatterySavings } from "./useMobileAppActivity";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -14,7 +14,9 @@ import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint"
 import { useNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 import {
   getUnreadNotificationsRefetchInterval,
+  getUnreadNotificationsStaleTimeOption,
   isProfileCoveredByNotificationSocket,
+  shouldPollUnreadNotificationsInBackground,
 } from "@/services/notifications/unread-notifications-polling";
 
 interface UseUnreadNotificationsOptions {
@@ -52,14 +54,14 @@ export function useUnreadNotifications(
     options.profileId
   );
 
-  const notificationQuery = useQuery<ApiNotificationsResponseV2>({
+  const notificationQuery = useQuery<ApiNotificationsUnreadCountV2>({
     // The token decides whose count this is, so every consumer of the active
     // account shares one cache entry even while its profile handle catches up.
     queryKey: [
       QueryKey.IDENTITY_NOTIFICATIONS,
       {
         auth: authFingerprint,
-        limit: "1",
+        kind: "unread-count",
         version: "v2",
         includeCompetitions: true,
       },
@@ -70,13 +72,13 @@ export function useUnreadNotifications(
         throw createMissingAuthPollingError();
       }
 
-      return await commonApiFetch<ApiNotificationsResponseV2>({
-        endpoint: `v2/notifications`,
+      // The count alone: the list route also loads and maps notifications.
+      return await commonApiFetch<ApiNotificationsUnreadCountV2>({
+        endpoint: `v2/notifications/unread-count`,
         headers: {
           Authorization: `Bearer ${requestAuthJwt}`,
         },
         params: {
-          limit: "1",
           include_competitions: "true",
         },
         cache: "no-store",
@@ -85,6 +87,7 @@ export function useUnreadNotifications(
       });
     },
     enabled: isEnabled,
+    ...getUnreadNotificationsStaleTimeOption(isRealtimeCovered),
     refetchInterval: (query) =>
       getUnreadNotificationsRefetchInterval(query, isRealtimeCovered),
     refetchOnWindowFocus: (query) =>
@@ -93,7 +96,10 @@ export function useUnreadNotifications(
       !isTerminalNotificationAuthQueryError(query.state.error),
     refetchOnReconnect: (query) =>
       !isTerminalNotificationAuthQueryError(query.state.error),
-    refetchIntervalInBackground: !isMobileEnvironment,
+    refetchIntervalInBackground: shouldPollUnreadNotificationsInBackground({
+      isMobileEnvironment,
+      isRealtimeCovered,
+    }),
     retry: (failureCount: number, retryError: unknown) =>
       !isTerminalNotificationAuthQueryError(retryError) &&
       shouldRetryQuery(failureCount, retryError),

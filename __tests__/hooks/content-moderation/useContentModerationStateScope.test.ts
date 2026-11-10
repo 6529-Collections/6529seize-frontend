@@ -8,6 +8,11 @@ import {
   setDropHiddenOverride,
   setGlobalDropModerationOverride,
 } from "@/services/content-moderation/content-moderation-state";
+import { clearClientDropIds } from "@/services/api/client-drop-ids";
+
+jest.mock("@/services/api/client-drop-ids", () => ({
+  clearClientDropIds: jest.fn(),
+}));
 
 describe("useContentModerationStateScope", () => {
   beforeEach(resetContentModerationStateForTests);
@@ -27,6 +32,20 @@ describe("useContentModerationStateScope", () => {
 
     expect(getDropHiddenOverride("viewer-1", "drop-1")).toBeUndefined();
     expect(getGlobalDropModerationOverride("drop-2")).toBeUndefined();
+  });
+
+  it("forgets kept client_drop_ids when the connected profile changes", () => {
+    const { rerender } = renderHook(
+      ({ profileId }) => useContentModerationStateScope(profileId),
+      { initialProps: { profileId: "viewer-1" } }
+    );
+    jest.mocked(clearClientDropIds).mockClear();
+
+    rerender({ profileId: "viewer-1" });
+    expect(clearClientDropIds).not.toHaveBeenCalled();
+
+    rerender({ profileId: "viewer-2" });
+    expect(clearClientDropIds).toHaveBeenCalledTimes(1);
   });
 
   it("keeps moderation overrides when the connected profile is unchanged", () => {

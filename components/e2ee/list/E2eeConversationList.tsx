@@ -2,11 +2,16 @@
 
 import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { getEncryptedConversationRoute } from "@/helpers/navigation.helpers";
+import {
+  getEncryptedConversationRoute,
+  getEncryptedMessagesRoute,
+} from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import type { DisplayTimeZone } from "@/lib/display-time-zone/displayTimeZone";
 import { groupConversationThreads } from "@/lib/e2ee/dm-conversations";
 import type { E2eeConversation } from "@/lib/e2ee/types";
 import { E2eeEmojiProvider } from "../conversation/E2eeEmojiProvider";
@@ -27,6 +32,7 @@ const STATUS_KEYS: Partial<Record<E2eeConversation["status"], MessageKey>> = {
   left: "e2ee.list.status.left",
   removed: "e2ee.list.status.removed",
   restored: "e2ee.list.status.restored",
+  superseded: "e2ee.list.status.superseded",
 };
 
 function ConversationAvatar({
@@ -165,6 +171,8 @@ interface E2eeConversationRowProps {
   readonly collapsed: boolean;
   /** Muted on this device: a muted mark instead of unread badges. */
   readonly muted: boolean;
+  /** The display time zone for the last-activity time. */
+  readonly zone: DisplayTimeZone;
 }
 
 function MutedMark({ locale }: { readonly locale: SupportedLocale }) {
@@ -182,11 +190,14 @@ function E2eeConversationRow({
   active,
   collapsed,
   muted,
+  zone,
 }: E2eeConversationRowProps) {
   const locale = useBrowserLocale();
   const title = getConversationTitle(locale, conversation, selfProfileId);
   const statusKey = STATUS_KEYS[conversation.status];
-  const href = getEncryptedConversationRoute(conversation.g);
+  const href = active
+    ? getEncryptedMessagesRoute()
+    : getEncryptedConversationRoute(conversation.g);
   const hasUnread =
     !muted && (conversation.unread > 0 || conversation.mentions > 0);
   const rowClass = active
@@ -247,7 +258,7 @@ function E2eeConversationRow({
                   : "tw-text-iron-500"
               }`}
             >
-              {formatE2eeTimestamp(locale, conversation.updatedAt)}
+              {formatE2eeTimestamp(locale, conversation.updatedAt, { zone })}
             </span>
           </span>
           <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
@@ -296,6 +307,7 @@ export function E2eeConversationList({
   label,
 }: E2eeConversationListProps) {
   const muted = useMutedE2eeChats(selfProfileId);
+  const zone = useDisplayTimeZone();
   const threads = groupConversationThreads(conversations, selfProfileId);
   const visible = limit === undefined ? threads : threads.slice(0, limit);
   return (
@@ -335,6 +347,7 @@ export function E2eeConversationList({
               )}
               collapsed={collapsed}
               muted={unmuted.length === 0}
+              zone={zone}
             />
           );
         })}

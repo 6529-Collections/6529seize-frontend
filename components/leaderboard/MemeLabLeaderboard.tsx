@@ -6,6 +6,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { CardCollectorsSortHeader } from "./CardCollectorsSortHeader";
 import type { NftTDHRanked } from "./NFTLeaderboard";
 import {
   fetchNftTdhResults,
@@ -128,26 +131,36 @@ export default function MemeLabLeaderboard(props: Readonly<Props>) {
       <div className="tw-overflow-x-auto">
         <table className="tw-w-full tw-min-w-[28rem] tw-border-collapse md:tw-min-w-[640px]">
           <thead>
-            <tr>
+            <tr className="md:tw-border-0 md:tw-border-b md:tw-border-solid md:tw-border-iron-800">
               <th
                 scope="col"
-                className={`tw-w-12 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-font-semibold tw-text-iron-400 md:tw-w-20 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
+                className={`tw-w-12 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-font-semibold tw-text-iron-400 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME} md:tw-w-12 md:tw-border-b-0 md:tw-py-3 md:tw-pl-0 md:tw-pr-3 md:tw-text-left md:tw-text-xs md:tw-font-medium md:tw-leading-4 md:tw-text-iron-500`}
               >
                 Rank
               </th>
               <th
                 scope="col"
-                className={`tw-min-w-[11rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-left tw-font-semibold tw-text-iron-400 md:tw-min-w-[18rem] md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
+                className={`tw-min-w-[11rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-left tw-font-semibold tw-text-iron-400 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME} md:tw-min-w-[18rem] md:tw-border-b-0 md:tw-px-3 md:tw-py-3 md:tw-text-xs md:tw-font-medium md:tw-leading-4 md:tw-text-iron-500`}
               >
                 Collector{" "}
                 {totalResults > 0 && `x${totalResults.toLocaleString()}`}
               </th>
-              <th scope="col" className={`${tableHeaderClassName} tw-border-l`}>
+              <th
+                scope="col"
+                className={`${tableHeaderClassName} tw-border-l md:tw-hidden`}
+              >
                 <span className="tw-flex tw-items-center tw-justify-center tw-gap-1.5">
                   Balance
                   {printSortControls("Balance")}
                 </span>
               </th>
+              <CardCollectorsSortHeader
+                label={t(DEFAULT_LOCALE, "theMemes.detail.collectors.balance")}
+                locale={DEFAULT_LOCALE}
+                direction={request.sortDirection}
+                onSort={handleSortChange}
+                className="tw-hidden md:tw-table-cell md:tw-pl-10"
+              />
             </tr>
           </thead>
           <tbody>

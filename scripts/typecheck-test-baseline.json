@@ -3,7 +3,7 @@
   "config": "tsconfig.jest.json",
   "toolchain": {
     "typescript_version": "5.9.3",
-    "pnpm_lock_sha256": "316b9c4ea74c18e287bcefffeaa90efe7afe8c60e5ca82e0abc2437cd821e5ee",
+    "pnpm_lock_sha256": "c17203da28001c5849b74a5118072d1fd39a2bb7e1d0b5e87f9836fde6cebaef",
     "jest_tsconfig_sha256": "feda509a89cdd90cbcd9da6eecae28759c34c7aaae3725593ec2b1c022017062",
     "base_tsconfig_sha256": "fdbd8e548aed634324fd228e74d541ea702c1311597aa938741651e50de59c5f"
   },
@@ -489,10 +489,6 @@
     "__tests__/components/waves/create-wave/groups/CreateWaveGroupSearchField.test.tsx": 8,
     "__tests__/components/waves/create-wave/groups/CreateWaveInlineGroupIdentities.test.tsx": 1,
     "__tests__/components/waves/create-wave/main-steps/CreateWavesMainStepIcon.test.tsx": 1,
-    "__tests__/components/waves/create-wave/outcomes/CreateWaveOutcomeTypes.test.tsx": 1,
-    "__tests__/components/waves/create-wave/outcomes/rep/CreateWaveOutcomesRepRank.test.tsx": 1,
-    "__tests__/components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinnersAddWinner.test.tsx": 1,
-    "__tests__/components/waves/create-wave/outcomes/winners/CreateWaveOutcomesWinnersRows.test.tsx": 4,
     "__tests__/components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRow.test.tsx": 1,
     "__tests__/components/waves/create-wave/outcomes/winners/rows/CreateWaveOutcomesRows.test.tsx": 1,
     "__tests__/components/waves/create-wave/outcomes/winners/rows/manual/CreateWaveOutcomesRowManual.test.tsx": 2,
@@ -769,7 +765,7 @@
     "__tests__/services/auth/immediate-validation.utils.test.ts": 2,
     "__tests__/services/auth/session-v2.utils.test.ts": 5,
     "__tests__/services/wallet-signatures/structured-wallet-signatures.test.ts": 1,
-    "__tests__/services/websocket/useWebSocketHealth.test.ts": 21,
+    "__tests__/services/websocket/useWebSocketHealth.test.ts": 9,
     "__tests__/services/websocket/WebSocketProvider.test.tsx": 39,
     "__tests__/standalone/StandaloneTheMemesMintPageClient.test.tsx": 1,
     "__tests__/useWaveRealtimeUpdater.test.ts": 1,

@@ -39,6 +39,28 @@ jest.mock("@/components/nft-image/utils/gateway-fallback", () => ({
 }));
 
 describe("OverlappingAvatars", () => {
+  it.each([0, 1, 2, 3, 4, 5, 6])(
+    "shows at most five avatars without padding a list of %i reactors",
+    (count) => {
+      render(
+        <OverlappingAvatars
+          items={Array.from({ length: count }, (_, index) => ({
+            key: `reactor-${index}`,
+            pfpUrl: "https://example.com/shared-avatar.png",
+            ariaLabel: `Reactor ${index}`,
+          }))}
+        />
+      );
+
+      expect(screen.queryAllByRole("img")).toHaveLength(Math.min(count, 5));
+      for (let index = 0; index < Math.min(count, 5); index += 1) {
+        expect(
+          screen.getAllByRole("img", { name: `Reactor ${index}` })
+        ).toHaveLength(1);
+      }
+    }
+  );
+
   it("portals tooltips outside paint-contained avatar rows", () => {
     const { container } = render(
       <OverlappingAvatars

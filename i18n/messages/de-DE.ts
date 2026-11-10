@@ -1,4 +1,6 @@
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.de-DE.json";
+import displayTimeZoneMessages from "@/i18n/messages/displayTimeZone.de-DE.json";
+import shareDropsImageMessages from "@/i18n/messages/shareDropsImage.de-DE.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.de-DE.json";
 import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.de-DE.json";
 import { DE_DE_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
@@ -42,6 +44,8 @@ export const DE_DE_MESSAGES = {
   "e2ee.profile.viewUnknown": "Profil ansehen",
   "e2ee.profile.level": "Stufe {level}",
   ...safeCollectingMessages,
+  ...displayTimeZoneMessages,
+  ...shareDropsImageMessages,
   ...delegationTapGuideMessages,
   ...networkTdhConsolidationMessages,
   ...DE_SUBMISSION_DISCOVERY_MESSAGES,
@@ -1146,15 +1150,13 @@ export const DE_DE_MESSAGES = {
     "{reached} von {required} {unit} erreicht. Stimmen jetzt: {votesNow} {unit}. Status: {status}.",
   "waves.leaderboard.grid.voteSummary.standard":
     "Aktueller Stand: {current} {unit}. Prognose: {projected} {unit}.",
-  "waves.leaderboard.timeline.toggle":
-    "Ergebniszeitplan ein- oder ausblenden",
+  "waves.leaderboard.timeline.toggle": "Ergebniszeitplan ein- oder ausblenden",
   "waves.leaderboard.timeline.decisionTimeline": "Ergebniszeitplan",
   "waves.leaderboard.timeline.announcementHistory": "Ankündigungsverlauf",
   "waves.leaderboard.timeline.paused": "Pausiert",
   "waves.leaderboard.timeline.nextDecisionAfter":
     "Nächstes Ergebnis nach dem {date}",
-  "waves.leaderboard.timeline.noDecisionScheduled":
-    "Kein Ergebnis geplant",
+  "waves.leaderboard.timeline.noDecisionScheduled": "Kein Ergebnis geplant",
   "waves.leaderboard.timeline.noUpcomingEvents":
     "Keine bevorstehenden Ereignisse",
   "waves.leaderboard.phase.nextWinnersIn":
@@ -1300,4 +1302,7 @@ export const DE_DE_MESSAGES = {
   ...DE_DE_TRANSFER_MESSAGES,
   ...DE_DE_THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...DE_DE_THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.message.imageLink": "Bildlink",
+  "e2ee.message.imageLinkFrom": "Bild von {host}",
+  "e2ee.message.markdownTable": "Nachrichtentabelle",
 } satisfies Partial<Record<MessageKey, string>>;

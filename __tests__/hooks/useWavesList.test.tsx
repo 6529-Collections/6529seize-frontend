@@ -480,7 +480,8 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
         pinned: ApiWavesPinFilter.NotPinned,
         scoreSort: ApiWaveScoreSort.Quality,
         enabled: true,
-        refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+        // The discovery list refreshes every 5 minutes, not every minute.
+        refetchInterval: 5 * 60_000,
         refetchIntervalInBackground: false,
       }),
       expect.objectContaining({
@@ -488,7 +489,7 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
         pageSize: 20,
         following: false,
         directMessage: false,
-        pinned: ApiWavesPinFilter.NotPinned,
+        allSnapshot: true,
         enabled: true,
         refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
         refetchIntervalInBackground: false,
@@ -528,14 +529,14 @@ test("keeps highly rated visible and polls followed activity when the bottom lis
         excludeFollowed: true,
         pinned: ApiWavesPinFilter.NotPinned,
         scoreSort: ApiWaveScoreSort.Quality,
-        refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+        refetchInterval: 5 * 60_000,
       }),
       expect.objectContaining({
         overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
         pageSize: 20,
         following: false,
         enabled: false,
-        pinned: ApiWavesPinFilter.NotPinned,
+        allSnapshot: true,
         refetchInterval: false,
       }),
     ])

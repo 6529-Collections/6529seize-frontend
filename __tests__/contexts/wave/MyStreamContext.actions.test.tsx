@@ -40,6 +40,15 @@ const mockProcessIncomingDropImpls: jest.Mock[] = [];
 const mockMainWaves: { current: readonly { id: string; unread: number }[] } = {
   current: [{ id: mockWaveId, unread: 0 }],
 };
+// The waves list is its own source of renders (a query in the app), so the
+// mock is an external store: changing it re-renders the provider.
+const mockMainWavesListeners = new Set<() => void>();
+const setMockMainWaves = (
+  waves: readonly { id: string; unread: number }[]
+): void => {
+  mockMainWaves.current = waves;
+  mockMainWavesListeners.forEach((listener) => listener());
+};
 
 jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: () => ({
@@ -75,7 +84,16 @@ const mockEmptyWaves: readonly unknown[] = [];
 
 jest.mock("@/hooks/useWavesList", () => ({
   __esModule: true,
-  default: () => mockListData(mockMainWaves.current),
+  default: () =>
+    mockListData(
+      jest.requireActual<typeof import("react")>("react").useSyncExternalStore(
+        (listener: () => void) => {
+          mockMainWavesListeners.add(listener);
+          return () => mockMainWavesListeners.delete(listener);
+        },
+        () => mockMainWaves.current
+      )
+    ),
 }));
 
 jest.mock("@/hooks/useDmWavesList", () => ({
@@ -204,7 +222,7 @@ const flushStoreNotifications = async () => {
 // unread count, which is what changes the full stream context today.
 const deliverIncomingDrop = async (drop: Drop, unread: number) => {
   act(() => {
-    mockMainWaves.current = [{ id: mockWaveId, unread }];
+    setMockMainWaves([{ id: mockWaveId, unread }]);
     mockCapturedStore.updateData?.({ key: mockWaveId, drops: [drop] });
   });
   await flushStoreNotifications();
@@ -261,6 +279,26 @@ describe("MyStreamProvider actions context", () => {
     expect(mockProcessIncomingDropImpls.length).toBeGreaterThan(2);
   });
 
+  it("re-renders no row when drops arrive without a waves-list change", async () => {
+    const { actionRowRender, dataRowRender } = await renderRows();
+    actionRowRender.mockClear();
+    dataRowRender.mockClear();
+
+    for (const [index, id] of ["drop-1", "drop-2", "drop-3"].entries()) {
+      act(() => {
+        mockCapturedStore.updateData?.({
+          key: mockWaveId,
+          drops: [buildDrop(id, index + 1)],
+        });
+      });
+      await flushStoreNotifications();
+    }
+
+    // The store tells its subscribers; the provider no longer re-renders.
+    expect(dataRowRender).not.toHaveBeenCalled();
+    expect(actionRowRender).not.toHaveBeenCalled();
+  });
+
   it("runs mount-time actions against the latest stream state", async () => {
     const { actionRowRender } = await renderRows();
     const actions = actionRowRender.mock.calls[0]![0];
@@ -306,6 +344,18 @@ describe("MyStreamProvider actions context", () => {
     expect(latestImpl).toHaveBeenCalledWith(
       incoming,
       ProcessIncomingDropType.DROP_INSERT
+    );
+    await act(async () => {
+      await actions.processIncomingDrop(
+        incoming,
+        ProcessIncomingDropType.DROP_INSERT,
+        { pendingDropId: "temp-pending" }
+      );
+    });
+    expect(latestImpl).toHaveBeenLastCalledWith(
+      incoming,
+      ProcessIncomingDropType.DROP_INSERT,
+      { pendingDropId: "temp-pending" }
     );
     for (const staleImpl of mockProcessIncomingDropImpls.slice(0, -1)) {
       expect(staleImpl).not.toHaveBeenCalled();

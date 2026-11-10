@@ -342,7 +342,12 @@ export function MemePageArtViewer({
                   className={styles["artSlideIcon"]}
                 />
               </button>
-              <div className={styles["artControlsFormatLabel"]}>
+              <div
+                className={clsx(
+                  styles["artControlsFormatLabel"],
+                  "md:[[data-nft-card-page]_&]:tw-font-semibold"
+                )}
+              >
                 {currentFormat}
               </div>
               <button

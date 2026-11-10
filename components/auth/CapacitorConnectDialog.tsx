@@ -12,6 +12,7 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import Image from "next/image";
+import { getAppWalletAvatarDataUri } from "@/helpers/app-wallet-avatar.helpers";
 
 export type CapacitorConnectDialogView = "closed" | "options" | "app-wallets";
 
@@ -100,7 +101,7 @@ function AppWalletRows({
       icon={
         <Image
           unoptimized
-          src={`https://robohash.org/${wallet.address}.png?size=64x64`}
+          src={getAppWalletAvatarDataUri(wallet.address)}
           alt=""
           width={36}
           height={36}

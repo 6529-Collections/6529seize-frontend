@@ -20,6 +20,7 @@ import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { isEncryptedMessagesPathname } from "@/helpers/navigation.helpers";
 import type { E2eeBackupManager } from "@/lib/e2ee/backup";
 import type { E2eeEngine } from "@/lib/e2ee/types";
+import { requestPersistentStorage } from "@/lib/storage/persistent-storage";
 import {
   E2eeContext,
   type E2eeAvailability,
@@ -89,6 +90,10 @@ const updateEnrollmentMarker = (
     return;
   }
   setE2eeEnrollmentMarker(profileId, enrolled);
+  if (enrolled) {
+    // This browser now holds the device and its history: keep IndexedDB.
+    void requestPersistentStorage();
+  }
   for (const listener of [...markerListeners]) {
     listener();
   }
@@ -172,7 +177,8 @@ function E2eeProviderEnabled({
   const [setupSession, setSetupSession] = useState<string | null>(null);
   useEffect(() => {
     const start = (event: Event) => {
-      if ((event as CustomEvent<DeviceSetupScope>).detail !== "posts") {
+      const scope = (event as CustomEvent<DeviceSetupScope | null>).detail;
+      if (scope === "both" || scope === "dms") {
         setSetupSession(sessionKey);
       }
     };

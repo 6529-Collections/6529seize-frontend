@@ -60,7 +60,7 @@ export const WaveOutcome: FC<WaveOutcomeProps> = ({ waveId, outcome }) => {
   return <WaveOutcomeView outcome={outcome} distribution={distributionState} />;
 };
 
-export const WaveOutcomeView: FC<{
+const WaveOutcomeView: FC<{
   readonly outcome: ApiWaveOutcome;
   readonly distribution: WaveOutcomeDistributionState;
 }> = ({ outcome, distribution }) => {

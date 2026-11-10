@@ -5,7 +5,10 @@ import type { WaveMessages } from "./hooks/types";
 import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
 import type { Listener as WaveMessagesListener } from "./hooks/useWaveMessagesStore";
 import type { NextPageProps } from "./hooks/useWavePagination";
-import type { ProcessIncomingDropType } from "./hooks/useWaveRealtimeUpdater";
+import type {
+  ProcessIncomingDropFn,
+  ReplyPlacementChange,
+} from "./hooks/useWaveRealtimeUpdater.helpers";
 import type { ServerWaveFeedSeedResult } from "./server-wave-feed-seed";
 
 // Define nested structures for context data
@@ -16,6 +19,11 @@ export interface WavesContextData {
   readonly hasLoadingError?: boolean | undefined;
   readonly retryLoading?: (() => void) | undefined;
   readonly isPinnedWavesLoading?: boolean;
+  /**
+   * The waves with the server's unread values. They keep their identity while
+   * messages arrive; read live unread counts, dividers and activity order with
+   * useWavesWithUnread or useWaveUnread (WaveUnreadContext).
+   */
   readonly list: MinimalWave[];
   readonly isFetching: boolean;
   readonly isFetchingNextPage: boolean;
@@ -89,16 +97,16 @@ export interface MyStreamActionsContextType {
     props: NextPageProps
   ) => Promise<(ApiDrop | ApiDropId)[] | null>;
   readonly fetchAroundSerialNo: (waveId: string, serialNo: number) => void;
-  readonly processIncomingDrop: (
-    drop: ApiDrop,
-    type: ProcessIncomingDropType
-  ) => Promise<void>;
+  readonly processIncomingDrop: ProcessIncomingDropFn;
   readonly processDropRemoved: (waveId: string, dropId: string) => void;
   readonly processDropsRemoved: (
     waveId: string,
     dropIds: readonly string[]
   ) => void;
-  readonly refreshWaveMessages: (waveId: string) => void;
+  readonly refreshWaveMessages: (waveId: string) => Promise<void>;
+  readonly applyReplyPlacement: (
+    change: ReplyPlacementChange
+  ) => Promise<boolean>;
   readonly applyOptimisticDropUpdate: ({
     waveId,
     dropId,

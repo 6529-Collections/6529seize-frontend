@@ -101,9 +101,10 @@ the `More` menu.
 2. Confirm the avatar, handle and full wallet address. Under **Which app are you
    connecting?**, select **6529 Mobile** or **6529 Desktop**.
 3. Choose **Connect only**, or **Connect with Post Signing & DM Encryption**.
-   Secure setup asks for a wallet signature before preparing its link; Connect
-   only does not grant signing or encryption. The Desktop secure option is
-   currently disabled with a **Coming soon** tooltip; Connect only works.
+   The modal title changes to **Connect 6529 Mobile** or **Connect 6529 Desktop**.
+   Secure Desktop setup shows the v0.4.0 minimum under the secure action, during
+   wallet signing, and below **Open in 6529 Desktop**. **Connect only** signs in
+   the receiving app with a short-lived, one-time code.
 4. Mobile shows a full-width QR. Desktop shows the 6529 logo and **Open in 6529
    Desktop** launch control, rather than a QR. The heading reads **Connect as
    {handle}**, with **with Post Signing & DM Encryption** for secure setup.
@@ -122,8 +123,9 @@ The receiving app confirms the incoming account. Secure links also list
 **Signed Posts** and **Encrypted DMs**, with **Accept and enable both** instead
 of **Accept connection**. One secure link both signs in and enrolls the app;
 registration does not occur merely because a QR was generated. Working receiver
-keys/history are preserved. Both connection types open Home after acceptance;
-secure setup completes before navigation. The source session remains connected. See
+keys and history are preserved. Successful acceptance opens Home. If secure
+setup fails after sign-in, the receiving app shows a recovery message and a
+link to Home. The source session remains connected. See
 [Encrypted messages setup](../encrypted-messages.md#setup-through-connection-sharing)
 for history, backup and capability limits.
 

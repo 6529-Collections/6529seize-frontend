@@ -4,10 +4,11 @@ import { useState } from "react";
 import { E2eeEnrollmentCard } from "@/components/e2ee/gate/E2eeEnrollmentCard";
 import { E2eeEnrollmentIdentity } from "@/components/e2ee/gate/E2eeEnrollmentIdentity";
 import { E2eeDialog } from "@/components/e2ee/ui/E2eeDialog";
+import { useE2eeUpgradeCount } from "@/components/e2ee/useE2eeUpgrade";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { DEVICE_SETUP_TITLE, type DeviceSetupScope } from "./deviceSetup";
+import { getDeviceSetupTitleKey, type DeviceSetupScope } from "./deviceSetup";
 
 export default function DeviceSetupDialog({
   onClose,
@@ -19,10 +20,11 @@ export default function DeviceSetupDialog({
   const locale = useBrowserLocale();
   const e2ee = useE2ee();
   const [scope, setScope] = useState(initialScope);
+  const upgrading = useE2eeUpgradeCount(e2ee.engine) !== null;
   return (
     <E2eeDialog
       open
-      title={t(locale, DEVICE_SETUP_TITLE[scope])}
+      title={t(locale, getDeviceSetupTitleKey(scope, upgrading))}
       closeLabel={t(locale, "signedMessages.notice.dismiss")}
       onClose={onClose}
       size="md"

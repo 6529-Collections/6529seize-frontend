@@ -76,7 +76,6 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock("@/services/auth/auth.utils");
 jest.mock("@/services/auth/session-v2.utils", () => ({
   createConnectionShare: jest.fn(),
-  createLegacyDesktopConnectionShare: jest.fn(),
 }));
 
 // Mock Reown AppKit
@@ -152,6 +151,9 @@ jest.mock("qrcode", () => ({
 }));
 
 // Mock auth utils
+const mockMobileConnectionShare = jest.fn();
+const mockDesktopConnectionShare = jest.fn();
+
 const mockAuthUtils = {
   getRefreshToken: jest.fn<string | null, []>(() => null),
   getWalletAddress: jest.fn<string | null, []>(() => null),
@@ -273,8 +275,16 @@ describe("HeaderShare", () => {
     qrcode.toDataURL.mockResolvedValue("data:image/png;base64,FAKE_QR_CODE");
 
     const sessionV2 = require("@/services/auth/session-v2.utils");
-    sessionV2.createConnectionShare.mockReset();
-    sessionV2.createConnectionShare.mockResolvedValue({
+    sessionV2.createConnectionShare
+      .mockReset()
+      .mockImplementation(
+        (request: { targetClientType?: "desktop" | "native" }) =>
+          request.targetClientType === "desktop"
+            ? mockDesktopConnectionShare(request)
+            : mockMobileConnectionShare(request)
+      );
+    mockMobileConnectionShare.mockReset();
+    mockMobileConnectionShare.mockResolvedValue({
       connection_share_code: "mock-share-code",
       expires_at: new Date(Date.now() + 60_000).toISOString(),
       address: "0x1234567890123456789012345678901234567890",
@@ -283,14 +293,16 @@ describe("HeaderShare", () => {
       deep_link_path:
         "/accept-connection-sharing?connection_share_code=mock-share-code",
     });
-    sessionV2.createLegacyDesktopConnectionShare.mockReset();
-    sessionV2.createLegacyDesktopConnectionShare.mockResolvedValue({
-      refresh_token: "legacy-desktop-refresh-token",
-      address: "0x1234567890123456789012345678901234567890",
-      role: "user",
-      deep_link_path:
-        "/accept-connection-sharing?token=legacy-desktop-refresh-token&address=0x1234567890123456789012345678901234567890&role=user",
-    });
+    mockDesktopConnectionShare.mockReset();
+    mockDesktopConnectionShare.mockImplementation(() =>
+      Promise.resolve({
+        connection_share_code: "mock-desktop-share-code",
+        expires_at: new Date(Date.now() + 60_000).toISOString(),
+        address: "0x1234567890123456789012345678901234567890",
+        role: "user",
+        target_client_type: "desktop",
+      })
+    );
   });
 
   afterEach(() => {
@@ -962,6 +974,7 @@ describe("HeaderShare", () => {
 
     it.each(["native", "desktop"] as const)(
       "offers combined %s setup with the appropriate availability",
+      /** Desktop gets a private app link and version notice. Mobile gets a QR code. */
       async (target) => {
         const flags = require("@/lib/device-signing/feature");
         const e2ee = require("@/config/e2eeEnv");
@@ -987,10 +1000,29 @@ describe("HeaderShare", () => {
           ...mockSeizeConnect.useSeizeConnectContext(),
           connectedAccounts: [],
         });
-        setup.prepareConnectionDeviceSetup.mockResolvedValue({
-          envelope: "encrypted-setup",
-          secret: "setup-secret",
+        let finishSigning = () => {};
+        const signingPending = new Promise<void>((resolve) => {
+          finishSigning = resolve;
         });
+        setup.prepareConnectionDeviceSetup
+          .mockImplementationOnce(
+            async ({
+              onSignatureRequested,
+            }: {
+              onSignatureRequested: () => void;
+            }) => {
+              onSignatureRequested();
+              await signingPending;
+              return {
+                envelope: "encrypted-setup-1",
+                secret: "setup-secret-1",
+              };
+            }
+          )
+          .mockResolvedValueOnce({
+            envelope: "encrypted-setup-2",
+            secret: "setup-secret-2",
+          });
         const normalShare =
           session.createConnectionShare.getMockImplementation();
         let issued = 0;
@@ -1018,55 +1050,93 @@ describe("HeaderShare", () => {
             screen.getByRole("button", { name: "QR Code" })
           );
           expect(screen.getByText(address)).toBeVisible();
+          expect(
+            screen.getByRole("dialog", { name: "Connect Device" })
+          ).toBeVisible();
+          expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
+          const secureButton = screen.getByRole("button", {
+            name: "Connect with Post Signing & DM Encryption",
+          });
           if (target === "desktop") {
             await userEvent.click(
               screen.getByRole("button", { name: "6529 Desktop" })
             );
-            const secureButton = screen.getByRole("button", {
-              name: "Connect with Post Signing & DM Encryption",
-            });
-            expect(secureButton).toHaveAttribute("aria-disabled", "true");
-            expect(secureButton).toHaveAttribute(
-              "aria-description",
-              "Coming soon"
+            const version = screen.getByText("v0.4.0");
+            expect(version).toHaveClass("tw-font-semibold");
+            expect(version.parentElement).toHaveClass("tw-text-xs");
+            expect(secureButton.nextElementSibling).toContainElement(version);
+            expect(secureButton).toHaveAccessibleDescription(
+              "Requires 6529 Desktop v0.4.0 or later."
             );
-            expect(
-              screen.getByRole("button", { name: "Connect only" })
-            ).toBeEnabled();
-            await userEvent.hover(secureButton);
-            expect(await screen.findByRole("tooltip")).toHaveTextContent(
-              "Coming soon"
-            );
-            await userEvent.click(secureButton);
-            expect(setup.prepareConnectionDeviceSetup).not.toHaveBeenCalled();
-            return;
           }
           expect(setup.prepareConnectionDeviceSetup).not.toHaveBeenCalled();
-          await userEvent.click(
-            screen.getByRole("button", {
-              name: "Connect with Post Signing & DM Encryption",
-            })
-          );
+          await userEvent.click(secureButton);
+          expect(
+            await screen.findByText("Check your wallet to sign")
+          ).toBeVisible();
+          const targetTitle =
+            target === "desktop"
+              ? "Connect 6529 Desktop"
+              : "Connect 6529 Mobile";
+          expect(
+            screen.getByRole("dialog", { name: targetTitle })
+          ).toBeVisible();
+          if (target === "desktop") {
+            expect(screen.getByText("v0.4.0").parentElement).toHaveClass(
+              "tw-text-sm"
+            );
+          } else {
+            expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
+          }
+          finishSigning();
           expect(
             await screen.findByRole("heading", {
               name: "Connect as prxt0 with Post Signing & DM Encryption",
             })
           ).toBeVisible();
           expect(setup.prepareConnectionDeviceSetup).toHaveBeenCalledTimes(1);
-          expect(
-            screen.getByAltText("Private device setup QR code")
-          ).toBeVisible();
+          if (target === "desktop") {
+            expect(
+              screen.getByTestId("desktop-connection-panel")
+            ).toHaveAttribute(
+              "href",
+              `testcore6529://navigate/accept-connection-sharing?connection_share_code=combined-1&address=${address}#device_setup_key=setup-secret-1`
+            );
+            const version = within(
+              screen.getByTestId("desktop-connection-panel")
+            ).getByText("v0.4.0");
+            expect(version).toBeVisible();
+            expect(version.parentElement).toHaveTextContent(
+              "Requires 6529 Desktop v0.4.0 or later."
+            );
+          } else {
+            expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
+            expect(
+              screen.getByAltText("Private device setup QR code")
+            ).toBeVisible();
+          }
           await userEvent.click(
             screen.getByRole("button", { name: "Generate new code" })
           );
           expect(screen.queryByTitle(/combined-1/)).not.toBeInTheDocument();
           finishRefresh();
           expect(await screen.findByTitle(/combined-2/)).toBeVisible();
+          if (target === "desktop") {
+            expect(
+              screen.getByTestId("desktop-connection-panel")
+            ).toHaveAttribute(
+              "href",
+              `testcore6529://navigate/accept-connection-sharing?connection_share_code=combined-2&address=${address}#device_setup_key=setup-secret-2`
+            );
+          }
           expect(setup.prepareConnectionDeviceSetup).toHaveBeenCalledTimes(2);
           await userEvent.click(screen.getByRole("button", { name: "Back" }));
           expect(
+            screen.getByRole("dialog", { name: "Connect Device" })
+          ).toBeVisible();
+          expect(
             screen.getByRole("button", {
-              name: "6529 Mobile",
+              name: target === "desktop" ? "6529 Desktop" : "6529 Mobile",
             })
           ).toHaveAttribute("aria-pressed", "true");
         } finally {
@@ -1080,7 +1150,6 @@ describe("HeaderShare", () => {
     it.each(["Mobile", "Desktop"])(
       "refreshes %s in place and copies the replacement link",
       async (target) => {
-        const sessionV2 = require("@/services/auth/session-v2.utils");
         const qrcode = require("qrcode");
         renderWithProviders(<HeaderShare />);
         await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
@@ -1106,7 +1175,7 @@ describe("HeaderShare", () => {
         expect(copy.querySelector("svg")).toHaveClass("tw-size-4");
         expect(refresh.querySelector("svg")).toHaveClass("tw-size-4");
 
-        sessionV2.createConnectionShare.mockResolvedValue({
+        mockMobileConnectionShare.mockResolvedValue({
           connection_share_code: "replacement-code",
           expires_at: new Date(Date.now() + 300_000).toISOString(),
           address: "0x1234567890123456789012345678901234567890",
@@ -1115,19 +1184,19 @@ describe("HeaderShare", () => {
           deep_link_path:
             "/accept-connection-sharing?connection_share_code=replacement-code",
         });
-        sessionV2.createLegacyDesktopConnectionShare.mockResolvedValue({
-          deep_link_path:
-            "/accept-connection-sharing?token=replacement-desktop-token",
+        mockDesktopConnectionShare.mockResolvedValue({
+          connection_share_code: "replacement-desktop-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          address: "0x1234567890123456789012345678901234567890",
+          target_client_type: "desktop",
         });
         await userEvent.click(refresh);
         await waitFor(() =>
           expect(refresh).toHaveAttribute("aria-disabled", "false")
         );
 
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2);
-        expect(
-          sessionV2.createLegacyDesktopConnectionShare
-        ).toHaveBeenCalledTimes(2);
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(2);
+        expect(mockDesktopConnectionShare).toHaveBeenCalledTimes(2);
         expect(qrcode.toDataURL).toHaveBeenLastCalledWith(
           expect.stringContaining("connection_share_code=replacement-code"),
           QR_CODE_OPTIONS
@@ -1139,17 +1208,16 @@ describe("HeaderShare", () => {
           expect.stringContaining(
             target === "Mobile"
               ? "replacement-code"
-              : "replacement-desktop-token"
+              : "replacement-desktop-code"
           )
         );
         expect(
-          screen.getByRole("heading", { name: "Connect Device" })
+          screen.getByRole("dialog", { name: `Connect 6529 ${target}` })
         ).toBeInTheDocument();
       }
     );
 
     it("disables repeat refresh and stale copy while preparing a replacement", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
       renderWithProviders(<HeaderShare />);
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
       await chooseConnectOnly();
@@ -1160,7 +1228,7 @@ describe("HeaderShare", () => {
         expect(refresh).toHaveAttribute("aria-disabled", "false")
       );
       expect(screen.getByTitle(/mock-share-code/)).toBeInTheDocument();
-      sessionV2.createConnectionShare.mockImplementation(() =>
+      mockMobileConnectionShare.mockImplementation(() =>
         createPendingPromise()
       );
       await userEvent.click(refresh);
@@ -1173,8 +1241,8 @@ describe("HeaderShare", () => {
       expect(screen.getByRole("button", { name: "Copy link" })).toBeDisabled();
       expect(screen.queryByTitle(/mock-share-code/)).not.toBeInTheDocument();
       await userEvent.click(refresh);
-      expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2);
-      const signal = sessionV2.createConnectionShare.mock.calls[1][0].signal;
+      expect(mockMobileConnectionShare).toHaveBeenCalledTimes(2);
+      const signal = mockMobileConnectionShare.mock.calls[1][0].signal;
       await userEvent.click(
         screen.getByLabelText("Close connect device modal")
       );
@@ -1184,7 +1252,6 @@ describe("HeaderShare", () => {
     it.each(["Mobile", "Desktop"])(
       "allows retry after %s refresh fails",
       async (target) => {
-        const sessionV2 = require("@/services/auth/session-v2.utils");
         const consoleError = jest
           .spyOn(console, "error")
           .mockImplementation(() => undefined);
@@ -1205,8 +1272,8 @@ describe("HeaderShare", () => {
           );
           const shareMock =
             target === "Mobile"
-              ? sessionV2.createConnectionShare
-              : sessionV2.createLegacyDesktopConnectionShare;
+              ? mockMobileConnectionShare
+              : mockDesktopConnectionShare;
           shareMock.mockRejectedValueOnce(new Error("temporary share failure"));
           await userEvent.click(refresh);
           expect(
@@ -1238,7 +1305,6 @@ describe("HeaderShare", () => {
     );
 
     it("allows another refresh after navigation interrupts a pending refresh", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
       const { rerender } = renderWithProviders(<HeaderShare />);
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
       await chooseConnectOnly();
@@ -1248,12 +1314,12 @@ describe("HeaderShare", () => {
       await waitFor(() =>
         expect(refresh).toHaveAttribute("aria-disabled", "false")
       );
-      sessionV2.createConnectionShare.mockImplementationOnce(() =>
+      mockMobileConnectionShare.mockImplementationOnce(() =>
         createPendingPromise()
       );
       await userEvent.click(refresh);
       const interruptedSignal =
-        sessionV2.createConnectionShare.mock.calls[1][0].signal;
+        mockMobileConnectionShare.mock.calls[1][0].signal;
       mockPathname = "/new-path";
       mockSearchParams = new URLSearchParams("changed=true");
       rerender(
@@ -1267,7 +1333,7 @@ describe("HeaderShare", () => {
       );
       await userEvent.click(refresh);
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(4)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(4)
       );
       await waitFor(() =>
         expect(refresh).toHaveAttribute("aria-disabled", "false")
@@ -1281,7 +1347,6 @@ describe("HeaderShare", () => {
         .spyOn(globalThis, "requestAnimationFrame")
         .mockImplementation((callback) => initialFrames.push(callback));
       try {
-        const sessionV2 = require("@/services/auth/session-v2.utils");
         renderWithProviders(<HeaderShare />);
         await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
         await chooseConnectOnly();
@@ -1295,7 +1360,7 @@ describe("HeaderShare", () => {
         const pending = new Promise<void>((resolve) => {
           finishRefresh = resolve;
         });
-        sessionV2.createConnectionShare.mockImplementationOnce(async () => {
+        mockMobileConnectionShare.mockImplementationOnce(async () => {
           await pending;
           return {
             connection_share_code: "keyboard-refreshed-code",
@@ -1313,7 +1378,7 @@ describe("HeaderShare", () => {
         });
         expect(refresh).toHaveFocus();
         await userEvent.keyboard("{Enter} ");
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2);
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(2);
         expect(refresh).toHaveFocus();
         finishRefresh();
         await waitFor(() =>
@@ -1350,7 +1415,7 @@ describe("HeaderShare", () => {
       expect(back).toHaveFocus();
       await userEvent.keyboard("{Escape}");
       await waitForElementToBeRemoved(() =>
-        screen.queryByRole("heading", { name: "Connect Device" })
+        screen.queryByTestId("header-share-modal")
       );
     });
 
@@ -1424,7 +1489,6 @@ describe("HeaderShare", () => {
     it.each(["Mobile", "Desktop"])(
       "replays the reveal when a %s refresh becomes ready without replacing the controls",
       async (target) => {
-        const sessionV2 = require("@/services/auth/session-v2.utils");
         renderWithProviders(<HeaderShare />);
         await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
         await userEvent.click(
@@ -1450,12 +1514,13 @@ describe("HeaderShare", () => {
         });
         const shareMock =
           target === "Mobile"
-            ? sessionV2.createConnectionShare
-            : sessionV2.createLegacyDesktopConnectionShare;
+            ? mockMobileConnectionShare
+            : mockDesktopConnectionShare;
         shareMock.mockImplementationOnce(async () => {
           await pending;
           return {
             connection_share_code: "refreshed-code",
+            target_client_type: target === "Desktop" ? "desktop" : "native",
             expires_at: new Date(Date.now() + 60_000).toISOString(),
             address: "0x1234567890123456789012345678901234567890",
             deep_link_path:
@@ -1632,9 +1697,8 @@ describe("HeaderShare", () => {
     });
 
     it("aborts in-flight connection-share creation when the modal closes", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
       const signals: AbortSignal[] = [];
-      sessionV2.createConnectionShare.mockImplementation(
+      mockMobileConnectionShare.mockImplementation(
         ({ signal }: { readonly signal?: AbortSignal }) => {
           signals.push(signal!);
           return createPendingPromise();
@@ -1645,7 +1709,7 @@ describe("HeaderShare", () => {
 
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(1)
       );
 
       await userEvent.click(
@@ -1664,8 +1728,7 @@ describe("HeaderShare", () => {
         ensureActiveSessionV2WebSession: jest.fn(async () => true),
         requestSessionUpgrade,
       });
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      sessionV2.createConnectionShare.mockRejectedValue(
+      mockMobileConnectionShare.mockRejectedValue(
         new Error(
           "Connection sharing requires an active session-v2 web session"
         )
@@ -1684,7 +1747,7 @@ describe("HeaderShare", () => {
           "You can't connect a device from your current authentication. Update to the new secure session first."
         )
       ).toBeInTheDocument();
-      expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1);
+      expect(mockMobileConnectionShare).toHaveBeenCalledTimes(1);
 
       await userEvent.click(screen.getByRole("button", { name: "Update" }));
 
@@ -1750,7 +1813,6 @@ describe("HeaderShare", () => {
         ensureActiveSessionV2WebSession,
         requestSessionUpgrade,
       });
-      const sessionV2 = require("@/services/auth/session-v2.utils");
 
       renderWithProviders(<HeaderShare />);
 
@@ -1766,7 +1828,7 @@ describe("HeaderShare", () => {
           abortSignal: expect.objectContaining({ aborted: false }),
         })
       );
-      expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+      expect(mockMobileConnectionShare).not.toHaveBeenCalled();
       expect(requestSessionUpgrade).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByRole("button", { name: "Update" }));
@@ -1782,7 +1844,6 @@ describe("HeaderShare", () => {
       auth.useAuth.mockReturnValue({
         requestSessionUpgrade,
       });
-      const sessionV2 = require("@/services/auth/session-v2.utils");
 
       renderWithProviders(<HeaderShare />);
 
@@ -1792,7 +1853,7 @@ describe("HeaderShare", () => {
       expect(
         await screen.findByText("Update Authentication")
       ).toBeInTheDocument();
-      expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+      expect(mockMobileConnectionShare).not.toHaveBeenCalled();
       expect(requestSessionUpgrade).not.toHaveBeenCalled();
     });
 
@@ -1808,7 +1869,6 @@ describe("HeaderShare", () => {
         ensureActiveSessionV2WebSession,
         requestSessionUpgrade,
       });
-      const sessionV2 = require("@/services/auth/session-v2.utils");
       const consoleErrorSpy = jest
         .spyOn(console, "error")
         .mockImplementation(() => undefined);
@@ -1828,7 +1888,7 @@ describe("HeaderShare", () => {
             abortSignal: expect.objectContaining({ aborted: false }),
           })
         );
-        expect(sessionV2.createConnectionShare).not.toHaveBeenCalled();
+        expect(mockMobileConnectionShare).not.toHaveBeenCalled();
         expect(requestSessionUpgrade).not.toHaveBeenCalled();
       } finally {
         consoleErrorSpy.mockRestore();
@@ -1837,9 +1897,8 @@ describe("HeaderShare", () => {
 
     it("generates connection QR codes from one-time connection share codes even when the local v2 marker is stale", async () => {
       const qrcode = require("qrcode");
-      const sessionV2 = require("@/services/auth/session-v2.utils");
       mockAuthUtils.hasActiveSessionV2Auth.mockReturnValue(false);
-      sessionV2.createConnectionShare.mockResolvedValue({
+      mockMobileConnectionShare.mockResolvedValue({
         connection_share_code: "share-code",
         expires_at: new Date(Date.now() + 300_000).toISOString(),
         address: "0x1234567890123456789012345678901234567890",
@@ -1855,7 +1914,7 @@ describe("HeaderShare", () => {
       await chooseConnectOnly();
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledWith({
+        expect(mockMobileConnectionShare).toHaveBeenCalledWith({
           signal: expect.objectContaining({ aborted: false }),
         })
       );
@@ -1876,7 +1935,6 @@ describe("HeaderShare", () => {
 
     it("asks the backend for a connection share when context auth is stale but a wallet is active", async () => {
       const qrcode = require("qrcode");
-      const sessionV2 = require("@/services/auth/session-v2.utils");
       mockSeizeConnect.useSeizeConnectContext.mockReturnValue({
         isAuthenticated: true,
         hasValidWalletAuth: false,
@@ -1886,7 +1944,7 @@ describe("HeaderShare", () => {
         hasInitializationError: false,
         initializationError: null,
       });
-      sessionV2.createConnectionShare.mockResolvedValue({
+      mockMobileConnectionShare.mockResolvedValue({
         connection_share_code: "stale-context-share-code",
         expires_at: new Date(Date.now() + 300_000).toISOString(),
         address: "0x1234567890123456789012345678901234567890",
@@ -1902,7 +1960,7 @@ describe("HeaderShare", () => {
       await chooseConnectOnly();
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(1)
       );
       await waitFor(() =>
         expect(qrcode.toDataURL).toHaveBeenCalledWith(
@@ -1918,8 +1976,7 @@ describe("HeaderShare", () => {
     });
 
     it("keeps the connection QR visible while the share modal closes", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      sessionV2.createConnectionShare.mockResolvedValue({
+      mockMobileConnectionShare.mockResolvedValue({
         connection_share_code: "closing-share-code",
         expires_at: new Date(Date.now() + 300_000).toISOString(),
         address: "0x1234567890123456789012345678901234567890",
@@ -1949,8 +2006,7 @@ describe("HeaderShare", () => {
     });
 
     it("clears the closing QR snapshot before the share modal opens again", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      sessionV2.createConnectionShare
+      mockMobileConnectionShare
         .mockResolvedValueOnce({
           connection_share_code: "snapshot-share-code",
           expires_at: new Date(Date.now() + 300_000).toISOString(),
@@ -1983,7 +2039,7 @@ describe("HeaderShare", () => {
       await chooseConnectOnly();
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(2)
       );
       expect(
         screen.queryByTitle(/snapshot-share-code/)
@@ -1993,20 +2049,20 @@ describe("HeaderShare", () => {
       ).toBeInTheDocument();
     });
 
-    it("uses an existing legacy refresh token for 6529 Desktop connection sharing", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      mockAuthUtils.hasActiveSessionV2Auth.mockReturnValue(false);
+    it("opens Desktop with an encoded one-time code and omits legacy credentials", async () => {
       mockAuthUtils.getRefreshToken.mockReturnValue(
         "local-legacy-refresh-token"
       );
-      mockAuthUtils.getWalletRole.mockReturnValue("role+admin&test");
+      mockDesktopConnectionShare.mockResolvedValue({
+        connection_share_code: "desktop&code=value%",
+        expires_at: new Date(Date.now() + 60_000).toISOString(),
+        address: "0x1234567890123456789012345678901234567890",
+        role: "role+admin&test",
+        target_client_type: "desktop",
+      });
 
       renderWithProviders(<HeaderShare />);
-
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
-      await chooseConnectOnly();
-      await screen.findByTestId("header-share-modal");
-      await userEvent.click(screen.getByRole("button", { name: "Back" }));
       await userEvent.click(
         screen.getByRole("button", { name: "6529 Desktop" })
       );
@@ -2025,7 +2081,7 @@ describe("HeaderShare", () => {
       expect(desktopPanel.tagName).toBe("A");
       expect(desktopPanel).toHaveAttribute(
         "href",
-        expect.stringContaining("token=local-legacy-refresh-token")
+        "testcore6529://navigate/accept-connection-sharing?connection_share_code=desktop%26code%3Dvalue%25&address=0x1234567890123456789012345678901234567890"
       );
       expect(screen.getByAltText("6529 Desktop")).toHaveAttribute(
         "width",
@@ -2035,17 +2091,15 @@ describe("HeaderShare", () => {
         screen.queryByText("Continue in the 6529 Desktop app.")
       ).not.toBeInTheDocument();
       expect(desktopPanel).toHaveTextContent("Open in 6529 Desktop");
-      expect(
-        await screen.findByTitle(/token=local-legacy-refresh-token/)
-      ).toBeInTheDocument();
-      expect(screen.getByTitle(/role=role%2Badmin%26test/)).toBeInTheDocument();
-      expect(
-        sessionV2.createLegacyDesktopConnectionShare
-      ).not.toHaveBeenCalled();
+      expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
+      expect(mockDesktopConnectionShare).toHaveBeenCalledWith({
+        targetClientType: "desktop",
+        signal: expect.objectContaining({ aborted: false }),
+      });
+      expect(mockAuthUtils.getRefreshToken).not.toHaveBeenCalled();
     });
 
-    it("does not publish a legacy Desktop URL from a stale generation", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
+    it("does not publish a Desktop URL from a stale generation", async () => {
       const firstAddress = "0x1111111111111111111111111111111111111111";
       const secondAddress = "0x2222222222222222222222222222222222222222";
       let activeAddress = firstAddress;
@@ -2053,9 +2107,6 @@ describe("HeaderShare", () => {
       const firstMobileShare = new Promise<unknown>((resolve) => {
         resolveFirstMobileShare = resolve;
       });
-      mockAuthUtils.getRefreshToken.mockReturnValue(
-        "stale-local-legacy-refresh-token"
-      );
       mockAuthUtils.getWalletAddress.mockImplementation(() => activeAddress);
       mockSeizeConnect.useSeizeConnectContext.mockImplementation(() => ({
         isAuthenticated: true,
@@ -2066,7 +2117,7 @@ describe("HeaderShare", () => {
         hasInitializationError: false,
         initializationError: null,
       }));
-      sessionV2.createConnectionShare
+      mockMobileConnectionShare
         .mockImplementationOnce(() => firstMobileShare)
         .mockImplementationOnce(() => createPendingPromise());
 
@@ -2075,7 +2126,7 @@ describe("HeaderShare", () => {
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
       await chooseConnectOnly();
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(1)
       );
 
       activeAddress = secondAddress;
@@ -2085,7 +2136,7 @@ describe("HeaderShare", () => {
         </QueryClientProvider>
       );
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(2)
       );
 
       await act(async () => {
@@ -2109,52 +2160,12 @@ describe("HeaderShare", () => {
       await chooseConnectOnly();
 
       expect(
-        screen.queryByTitle(/stale-local-legacy-refresh-token/)
+        screen.queryByTitle(/mock-desktop-share-code/)
       ).not.toBeInTheDocument();
       expect(
         screen.getByText("Preparing Device Connection")
       ).toBeInTheDocument();
-      expect(
-        sessionV2.createLegacyDesktopConnectionShare
-      ).not.toHaveBeenCalled();
-    });
-
-    it("ignores a local legacy refresh token for v2 Desktop connection sharing", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      mockAuthUtils.getRefreshToken.mockReturnValue(
-        "stale-local-legacy-refresh-token"
-      );
-      sessionV2.createLegacyDesktopConnectionShare.mockResolvedValue({
-        refresh_token: "bridged-v2-desktop-refresh-token",
-        address: "0x1234567890123456789012345678901234567890",
-        role: null,
-        deep_link_path:
-          "/accept-connection-sharing?token=bridged-v2-desktop-refresh-token&address=0x1234567890123456789012345678901234567890",
-      });
-
-      renderWithProviders(<HeaderShare />);
-
-      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
-      await chooseConnectOnly();
-      await waitFor(() =>
-        expect(
-          sessionV2.createLegacyDesktopConnectionShare
-        ).toHaveBeenCalledWith({
-          signal: expect.objectContaining({ aborted: false }),
-        })
-      );
-      await userEvent.click(screen.getByRole("button", { name: "Back" }));
-      await userEvent.click(
-        screen.getByRole("button", { name: "6529 Desktop" })
-      );
-      await chooseConnectOnly();
-
-      expect(
-        await screen.findByTitle(/token=bridged-v2-desktop-refresh-token/)
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByTitle(/stale-local-legacy-refresh-token/)
-      ).not.toBeInTheDocument();
+      expect(mockDesktopConnectionShare).not.toHaveBeenCalled();
     });
 
     it("shows an upgrade action for Desktop sharing when the web session is missing", async () => {
@@ -2169,7 +2180,6 @@ describe("HeaderShare", () => {
         ensureActiveSessionV2WebSession,
         requestSessionUpgrade,
       });
-      const sessionV2 = require("@/services/auth/session-v2.utils");
 
       renderWithProviders(<HeaderShare />);
 
@@ -2191,9 +2201,7 @@ describe("HeaderShare", () => {
           abortSignal: expect.objectContaining({ aborted: false }),
         })
       );
-      expect(
-        sessionV2.createLegacyDesktopConnectionShare
-      ).not.toHaveBeenCalled();
+      expect(mockDesktopConnectionShare).not.toHaveBeenCalled();
 
       await userEvent.click(screen.getByRole("button", { name: "Update" }));
 
@@ -2212,7 +2220,6 @@ describe("HeaderShare", () => {
         ensureActiveSessionV2WebSession,
         requestSessionUpgrade,
       });
-      const sessionV2 = require("@/services/auth/session-v2.utils");
       const consoleErrorSpy = jest
         .spyOn(console, "error")
         .mockImplementation(() => undefined);
@@ -2238,52 +2245,43 @@ describe("HeaderShare", () => {
             abortSignal: expect.objectContaining({ aborted: false }),
           })
         );
-        expect(
-          sessionV2.createLegacyDesktopConnectionShare
-        ).not.toHaveBeenCalled();
+        expect(mockDesktopConnectionShare).not.toHaveBeenCalled();
         expect(requestSessionUpgrade).not.toHaveBeenCalled();
       } finally {
         consoleErrorSpy.mockRestore();
       }
     });
 
-    it("uses the backend legacy desktop bridge when no local refresh token exists", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      sessionV2.createLegacyDesktopConnectionShare.mockResolvedValue({
-        refresh_token: "bridged-legacy-refresh-token",
+    it("rejects an already expired Desktop code and offers a retry", async () => {
+      mockDesktopConnectionShare.mockResolvedValueOnce({
+        connection_share_code: "expired-desktop-code",
+        expires_at: new Date(Date.now() - 60_000).toISOString(),
         address: "0x1234567890123456789012345678901234567890",
-        role: null,
-        deep_link_path:
-          "/accept-connection-sharing?token=bridged-legacy-refresh-token&address=0x1234567890123456789012345678901234567890",
+        target_client_type: "desktop",
       });
 
       renderWithProviders(<HeaderShare />);
-
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
-      await chooseConnectOnly();
-      await waitFor(() =>
-        expect(
-          sessionV2.createLegacyDesktopConnectionShare
-        ).toHaveBeenCalledWith({
-          signal: expect.objectContaining({ aborted: false }),
-        })
-      );
-      await userEvent.click(screen.getByRole("button", { name: "Back" }));
       await userEvent.click(
         screen.getByRole("button", { name: "6529 Desktop" })
       );
       await chooseConnectOnly();
 
       expect(
-        await screen.findByTitle(/token=bridged-legacy-refresh-token/)
-      ).toBeInTheDocument();
+        await screen.findByText("Device Connection Unavailable")
+      ).toBeVisible();
       expect(
-        screen.queryByTitle(/connection_share_code=/)
+        screen.queryByTitle(/expired-desktop-code/)
       ).not.toBeInTheDocument();
+      await userEvent.click(
+        screen.getByRole("button", { name: "Generate new code" })
+      );
+      expect(
+        await screen.findByTitle(/mock-desktop-share-code/)
+      ).toBeInTheDocument();
     });
 
     it("regenerates the Desktop connection share when the active wallet changes while the modal is open", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
       const firstAddress = "0x1111111111111111111111111111111111111111";
       const secondAddress = "0x2222222222222222222222222222222222222222";
       let resolveSecondMobileShare!: (share: unknown) => void;
@@ -2302,20 +2300,22 @@ describe("HeaderShare", () => {
         hasInitializationError: false,
         initializationError: null,
       }));
-      sessionV2.createLegacyDesktopConnectionShare
+      mockDesktopConnectionShare
         .mockResolvedValueOnce({
-          refresh_token: "first-desktop-refresh-token",
+          connection_share_code: "first-desktop-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          target_client_type: "desktop",
           address: firstAddress,
           role: null,
-          deep_link_path: `/accept-connection-sharing?token=first-desktop-refresh-token&address=${firstAddress}`,
         })
         .mockResolvedValueOnce({
-          refresh_token: "second-desktop-refresh-token",
+          connection_share_code: "second-desktop-code",
+          expires_at: new Date(Date.now() + 300_000).toISOString(),
+          target_client_type: "desktop",
           address: secondAddress,
           role: null,
-          deep_link_path: `/accept-connection-sharing?token=second-desktop-refresh-token&address=${secondAddress}`,
         });
-      sessionV2.createConnectionShare
+      mockMobileConnectionShare
         .mockResolvedValueOnce({
           connection_share_code: "first-mobile-share-code",
           expires_at: new Date(Date.now() + 300_000).toISOString(),
@@ -2332,9 +2332,7 @@ describe("HeaderShare", () => {
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
       await chooseConnectOnly();
       await waitFor(() =>
-        expect(
-          sessionV2.createLegacyDesktopConnectionShare
-        ).toHaveBeenCalledTimes(1)
+        expect(mockDesktopConnectionShare).toHaveBeenCalledTimes(1)
       );
       await userEvent.click(screen.getByRole("button", { name: "Back" }));
       await userEvent.click(
@@ -2342,7 +2340,7 @@ describe("HeaderShare", () => {
       );
       await chooseConnectOnly();
       expect(
-        await screen.findByTitle(/token=first-desktop-refresh-token/)
+        await screen.findByTitle(/connection_share_code=first-desktop-code/)
       ).toBeInTheDocument();
 
       activeAddress = secondAddress;
@@ -2353,17 +2351,15 @@ describe("HeaderShare", () => {
       );
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(2)
       );
       expect(
-        screen.queryByTitle(/token=first-desktop-refresh-token/)
+        screen.queryByTitle(/connection_share_code=first-desktop-code/)
       ).not.toBeInTheDocument();
       expect(
         screen.getByText("Preparing Device Connection")
       ).toBeInTheDocument();
-      expect(
-        sessionV2.createLegacyDesktopConnectionShare
-      ).toHaveBeenCalledTimes(1);
+      expect(mockDesktopConnectionShare).toHaveBeenCalledTimes(1);
 
       resolveSecondMobileShare({
         connection_share_code: "second-mobile-share-code",
@@ -2376,21 +2372,18 @@ describe("HeaderShare", () => {
       });
 
       await waitFor(() =>
-        expect(
-          sessionV2.createLegacyDesktopConnectionShare
-        ).toHaveBeenCalledTimes(2)
+        expect(mockDesktopConnectionShare).toHaveBeenCalledTimes(2)
       );
       expect(
-        await screen.findByTitle(/token=second-desktop-refresh-token/)
+        await screen.findByTitle(/connection_share_code=second-desktop-code/)
       ).toBeInTheDocument();
       expect(
-        screen.queryByTitle(/token=first-desktop-refresh-token/)
+        screen.queryByTitle(/connection_share_code=first-desktop-code/)
       ).not.toBeInTheDocument();
     });
 
     it("regenerates the connection share when the active wallet changes while the modal is open", async () => {
       const qrcode = require("qrcode");
-      const sessionV2 = require("@/services/auth/session-v2.utils");
       const firstAddress = "0x1111111111111111111111111111111111111111";
       const secondAddress = "0x2222222222222222222222222222222222222222";
       let activeAddress = firstAddress;
@@ -2405,7 +2398,7 @@ describe("HeaderShare", () => {
         hasInitializationError: false,
         initializationError: null,
       }));
-      sessionV2.createConnectionShare
+      mockMobileConnectionShare
         .mockResolvedValueOnce({
           connection_share_code: "first-wallet-share-code",
           expires_at: new Date(Date.now() + 300_000).toISOString(),
@@ -2430,7 +2423,7 @@ describe("HeaderShare", () => {
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
       await chooseConnectOnly();
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(1)
       );
       await waitFor(() =>
         expect(qrcode.toDataURL).toHaveBeenCalledWith(
@@ -2449,7 +2442,7 @@ describe("HeaderShare", () => {
       );
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(2)
       );
       await waitFor(() =>
         expect(qrcode.toDataURL).toHaveBeenCalledWith(
@@ -2463,8 +2456,7 @@ describe("HeaderShare", () => {
 
     it("mints a fresh connection share code after the share modal closes", async () => {
       const qrcode = require("qrcode");
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      sessionV2.createConnectionShare
+      mockMobileConnectionShare
         .mockResolvedValueOnce({
           connection_share_code: "first-share-code",
           expires_at: new Date(Date.now() + 300_000).toISOString(),
@@ -2491,7 +2483,7 @@ describe("HeaderShare", () => {
       await chooseConnectOnly();
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(1)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(1)
       );
       await waitFor(() =>
         expect(qrcode.toDataURL).toHaveBeenCalledWith(
@@ -2507,7 +2499,7 @@ describe("HeaderShare", () => {
       await chooseConnectOnly();
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(2)
       );
       await waitFor(() =>
         expect(qrcode.toDataURL).toHaveBeenCalledWith(
@@ -2518,8 +2510,7 @@ describe("HeaderShare", () => {
     });
 
     it("clears one-time connection share URLs as soon as the share modal closes", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      sessionV2.createConnectionShare
+      mockMobileConnectionShare
         .mockResolvedValueOnce({
           connection_share_code: "first-share-code",
           expires_at: new Date(Date.now() + 300_000).toISOString(),
@@ -2546,11 +2537,11 @@ describe("HeaderShare", () => {
       await chooseConnectOnly();
 
       await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalledTimes(2)
+        expect(mockMobileConnectionShare).toHaveBeenCalledTimes(2)
       );
       expect(screen.queryByTitle(/first-share-code/)).not.toBeInTheDocument();
       expect(
-        screen.getByRole("heading", { name: "Connect Device" })
+        screen.getByRole("heading", { name: "Connect 6529 Mobile" })
       ).toBeInTheDocument();
       expect(
         screen.getByText("Preparing Device Connection")
@@ -2559,8 +2550,7 @@ describe("HeaderShare", () => {
 
     it("encodes connection-share deep-link query values without exposing role", async () => {
       const qrcode = require("qrcode");
-      const sessionV2 = require("@/services/auth/session-v2.utils");
-      sessionV2.createConnectionShare.mockResolvedValue({
+      mockMobileConnectionShare.mockResolvedValue({
         connection_share_code: "share&code=value%",
         expires_at: new Date(Date.now() + 300_000).toISOString(),
         address: "0x1234567890123456789012345678901234567890",
@@ -2592,9 +2582,8 @@ describe("HeaderShare", () => {
     });
 
     it("shows an unavailable state when connection-share creation fails", async () => {
-      const sessionV2 = require("@/services/auth/session-v2.utils");
       jest.spyOn(console, "error").mockImplementation(() => undefined);
-      sessionV2.createConnectionShare.mockRejectedValue(
+      mockMobileConnectionShare.mockRejectedValue(
         new Error("connection share creation failed")
       );
 
@@ -2603,11 +2592,9 @@ describe("HeaderShare", () => {
       await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
       await chooseConnectOnly();
 
-      await waitFor(() =>
-        expect(sessionV2.createConnectionShare).toHaveBeenCalled()
-      );
+      await waitFor(() => expect(mockMobileConnectionShare).toHaveBeenCalled());
       expect(
-        screen.getByRole("heading", { name: "Connect Device" })
+        screen.getByRole("heading", { name: "Connect 6529 Mobile" })
       ).toBeInTheDocument();
       expect(
         screen.getByText("Device Connection Unavailable")

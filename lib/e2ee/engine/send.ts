@@ -220,6 +220,32 @@ export async function queueMessage(
 }
 
 /**
+ * Queues a copy of an unsent message (D172) in `g`: text, mentions and
+ * attachments (already uploaded, so no new upload); not a reply, which
+ * pointed into the old conversation. Returns the new message id.
+ */
+export async function queueUnsentCopy(
+  ctx: EngineContext,
+  g: string,
+  source: StoredMessage
+): Promise<string> {
+  const runtime = requireActiveGroup(ctx, g);
+  const payload: MsgPayload = {
+    v: 1,
+    t: "msg",
+    id: newMessageId(),
+    ts: ctx.now(),
+    text: source.text,
+    mentions: [...new Set(source.mentions)],
+  };
+  if (source.attachments.length > 0) {
+    payload.att = source.attachments.map((attachment) => ({ ...attachment }));
+  }
+  await enqueue(ctx, runtime, payload);
+  return payload.id;
+}
+
+/**
  * Queues one message moved from an unencrypted DM (D146). Returns false,
  * sending nothing, when the chat already holds a copy of that original.
  */

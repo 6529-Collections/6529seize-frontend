@@ -16,7 +16,9 @@ interface RegisteredHandler {
 
 interface WaveChatScrollContextValue {
   readonly requestScrollToSerialNo: (request: ScrollRequest) => void;
-  readonly registerScrollHandler: (registration: RegisteredHandler) => () => void;
+  readonly registerScrollHandler: (
+    registration: RegisteredHandler
+  ) => () => void;
 }
 
 const WaveChatScrollContext = createContext<WaveChatScrollContextValue | null>(
@@ -82,4 +84,3 @@ export function WaveChatScrollProvider({
 export function useWaveChatScrollOptional() {
   return useContext(WaveChatScrollContext);
 }
-

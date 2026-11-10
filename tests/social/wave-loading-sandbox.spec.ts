@@ -20,6 +20,10 @@ import {
 import { CHROMIUM_SANDBOX } from "../support/chromiumSandbox";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import {
+  GAP_SYNC_TIMING,
+  simulateGapSyncBurst,
+} from "../support/gapSyncSchedule";
+import {
   installWaveListScrollFixture,
   scrollWaveId,
   sidebarScrollMetrics,
@@ -303,7 +307,7 @@ test("removes a successfully left open wave from Joined and restores it on rejoi
   await page.route("**/api/v2/waves?**", (route) =>
     route.fulfill({ json: { data: [row()], page: 1, next: false } })
   );
-  await page.route("**/api/v2/waves/joined**", (route) =>
+  await page.route(/\/api\/v2\/waves\/(?:joined|all)(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
         data: joined ? [row()] : [],
@@ -1013,6 +1017,73 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
           name: "Wave chat file upload area",
         })
         .getByText(`Shared link fixture post ${serial}`, { exact: true }),
+    /**
+     * Sends a stored post as a full socket frame. Like the server, the frame
+     * carries none of the viewer's own context.
+     */
+    async frame(serial: number) {
+      const drop = drops.find((candidate) => candidate.serial_no === serial);
+      if (!drop) throw new Error(`Missing fixture post ${serial}`);
+      await expect.poll(() => sockets.length).toBeGreaterThan(0);
+      // Socket frames carry the v1 drop shape.
+      const frame = {
+        id: drop.id,
+        serial_no: drop.serial_no,
+        drop_type: "CHAT",
+        wave: { id: WAVE, name: feed.wave.name, picture: null },
+        author: {
+          id: drop.author.id,
+          handle: drop.author.handle ?? null,
+          pfp: drop.author.pfp ?? null,
+          level: drop.author.level,
+          classification: drop.author.classification,
+          primary_address: drop.author.primary_address,
+          banner1_color: null,
+          banner2_color: null,
+          cic: 0,
+          rep: 0,
+          tdh: 0,
+          archived: false,
+          active_main_stage_submission_ids: [],
+          winner_main_stage_drop_ids: [],
+          artist_of_prevote_cards: [],
+          profile_wave_id: null,
+          is_wave_creator: false,
+        },
+        created_at: drop.created_at,
+        updated_at: null,
+        title: null,
+        parts: [
+          {
+            part_id: 1,
+            content: drop.content,
+            media: [],
+            attachments: [],
+            quoted_drop: null,
+          },
+        ],
+        parts_count: 1,
+        referenced_nfts: [],
+        mentioned_users: [],
+        mentioned_groups: [],
+        mentioned_waves: [],
+        metadata: [],
+        rating: 0,
+        realtime_rating: 0,
+        rating_prediction: 0,
+        top_raters: [],
+        raters_count: 0,
+        is_signed: false,
+        reactions: [],
+        boosts: 0,
+        hide_link_preview: false,
+        nft_links: [],
+        viewer_context: { author_blocked: false, drop_hidden: false },
+        ...(drop.moderation ? { moderation: drop.moderation } : {}),
+      };
+      for (const socket of sockets)
+        socket.send(JSON.stringify({ type: "DROP_UPDATE", data: frame }));
+    },
     async incoming() {
       const drop = {
         ...drops[0]!,
@@ -1037,6 +1108,22 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
         );
     },
   };
+}
+
+/**
+ * Hides the tab as if the reader stepped away: a return resyncs only after
+ * the tab was hidden 30 s or more, so the page's clock moves 31 s ahead.
+ */
+async function hideTabForAWhile(page: Page) {
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+    const now = Date.now.bind(Date);
+    Date.now = () => now() + 31_000;
+  });
 }
 
 test("resume shows the latest page before missed history and preserves the composer", async ({
@@ -1068,13 +1155,7 @@ test("resume shows the latest page before missed history and preserves the compo
   await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
   const composer = page.getByRole("textbox", { name: "Write a message" });
   await composer.fill("Keep this unsent draft");
-  await page.evaluate(() => {
-    Object.defineProperty(document, "visibilityState", {
-      configurable: true,
-      value: "hidden",
-    });
-    document.dispatchEvent(new Event("visibilitychange"));
-  });
+  await hideTabForAWhile(page);
   fixture.missMessages(1000);
   try {
     await page.evaluate(() => {
@@ -1111,6 +1192,93 @@ test("resume shows the latest page before missed history and preserves the compo
   }
 });
 
+test("live posts arrive without a request each and a lost one is repaired after the burst", async ({
+  page,
+  baseURL,
+}, testInfo) => {
+  // Sandbox packs run the staging configuration, where this flag is on. A
+  // local run of the production configuration sets it to "false", and this
+  // case has nothing to check there.
+  test.skip(
+    process.env["NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC"] === "false",
+    "Gap-only chat sync is off in this run."
+  );
+  const fixture = await sharedPostFixture(page, baseURL);
+  const newestFetches: { readonly search: string; readonly at: number }[] = [];
+  const readMarkers: number[] = [];
+  let counting = false;
+  page.on("request", (request) => {
+    const url = new URL(request.url());
+    if (!counting) return;
+    if (
+      url.pathname.endsWith(`/api/v2/waves/${WAVE}/drops`) &&
+      url.searchParams.get("search_strategy") === "FIND_NEWER"
+    ) {
+      newestFetches.push({ search: url.search, at: Date.now() });
+    }
+    if (
+      request.method() === "POST" &&
+      url.pathname.endsWith(`/notifications/wave/${WAVE}/read`)
+    ) {
+      readMarkers.push(Date.now());
+    }
+  });
+  await page.goto(`/waves/${WAVE}`, { waitUntil: "domcontentloaded" });
+  await expect(fixture.post(151)).toBeInViewport({ timeout: 30000 });
+  counting = true;
+
+  // Ten posts arrive back to back; the frame for post 157 is lost. The
+  // product's timers are replayed over the recorded send times, so a slow
+  // runner changes what the schedule allows, not what the test proves.
+  fixture.missMessages(10);
+  const sentAt: number[] = [];
+  for (let serial = 152; serial <= 161; serial++) {
+    if (serial === 157) continue;
+    await fixture.frame(serial);
+    sentAt.push(Date.now());
+  }
+  for (let serial = 152; serial <= 161; serial++) {
+    if (serial === 157) continue;
+    await expect(fixture.post(serial)).toBeAttached();
+  }
+  const schedule = simulateGapSyncBurst(sentAt);
+  const { maxWaitMs, toleranceMs } = GAP_SYNC_TIMING;
+
+  // The socket is trusted: no post fetches the newest posts. Every check is
+  // a timer's, as many as the schedule allows, and the last one runs after
+  // the last frame, no earlier than scheduled (less delivery tolerance). It
+  // fetches everything since the last verified post and repairs the lost
+  // frame. For back-to-back frames that is one check, 5 s after the last.
+  await expect(fixture.post(157)).toBeAttached({ timeout: maxWaitMs });
+  const earliestTrailingAt = schedule.trailingCheckAt.min - toleranceMs;
+  await expect
+    .poll(() => newestFetches.at(-1)?.at ?? 0, { timeout: maxWaitMs })
+    .toBeGreaterThanOrEqual(earliestTrailingAt);
+  expect(newestFetches.length).toBeGreaterThanOrEqual(schedule.checks.min);
+  expect(newestFetches.length).toBeLessThanOrEqual(schedule.checks.max);
+  expect(newestFetches[0]!.search).toContain("serial_no_limit=151");
+
+  // The received posts are marked read once per window, not one by one,
+  // plus at most one for the repaired post.
+  await expect
+    .poll(() => readMarkers.length, { timeout: 10000 })
+    .toBeGreaterThanOrEqual(schedule.readWindows.min);
+  expect(readMarkers.length).toBeLessThanOrEqual(schedule.readWindows.max + 1);
+  const burstStartedAt = sentAt[0] ?? 0;
+  await testInfo.attach("gap-sync-requests", {
+    body: JSON.stringify({
+      received: 9,
+      sentAtMs: sentAt.map((at) => at - burstStartedAt),
+      schedule,
+      newestFetchesAtMs: newestFetches.map(
+        (fetch) => fetch.at - burstStartedAt
+      ),
+      readMarkers: readMarkers.length,
+    }),
+    contentType: "application/json",
+  });
+});
+
 test("resume preserves an older reading position while loading the latest page", async ({
   page,
   baseURL,
@@ -1129,13 +1297,7 @@ test("resume preserves an older reading position while loading the latest page",
   await expect(
     page.getByRole("button", { name: "Scroll to bottom", exact: true })
   ).toBeVisible();
-  await page.evaluate(() => {
-    Object.defineProperty(document, "visibilityState", {
-      configurable: true,
-      value: "hidden",
-    });
-    document.dispatchEvent(new Event("visibilitychange"));
-  });
+  await hideTabForAWhile(page);
   fixture.missMessages(1000);
   await page.evaluate(() => {
     Object.defineProperty(document, "visibilityState", {
@@ -1482,7 +1644,7 @@ test("announcement replies preserve the unread badge and top-level timestamp", a
   await page.route("**/api/v2/waves?**", (route) =>
     route.fulfill({ json: { data: [announcement], page: 1, next: false } })
   );
-  await page.route("**/api/v2/waves/joined**", (route) =>
+  await page.route(/\/api\/v2\/waves\/(?:joined|all)(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
         data: [announcement],

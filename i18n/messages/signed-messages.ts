@@ -59,8 +59,11 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.notice.expired.body":
     "Your messages are sent unsigned until you renew with one signature.",
   "signedMessages.notice.newDevice.message":
-    "{label} can now post as you. Not you?",
+    "{label} is now authorized for Signed Posts. If this wasn’t you, revoke it.",
   "signedMessages.notice.newDevice.revoke": "Revoke",
+  "signedMessages.notice.newDevice.acknowledge": "Got it",
+  "signedMessages.notice.newDevice.acknowledgeError":
+    "Couldn’t acknowledge this device. Try again.",
   "signedMessages.notice.enabled": "Signed posts are on in this browser.",
   "signedMessages.revoke.success": "{label} can no longer post as you.",
   "signedMessages.revoke.error":
@@ -94,6 +97,10 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "This device will no longer sign your messages. Its earlier signatures stay verifiable.",
   "signedMessages.devices.cancel": "Cancel",
   "signedMessages.devices.empty": "No authorized devices yet.",
+  "signedMessages.devices.localUnreadable":
+    "This browser couldn't read its own keys, so it can't mark which device below is this one. Check a device's name and dates before you revoke it.",
+  "signedMessages.devices.revokeMaybeThisDevice":
+    "This browser couldn't read its own keys, so this may be the permission this browser uses.",
   "signedMessages.devices.loading": "Loading devices",
   "signedMessages.devices.error": "Couldn't load your devices.",
   "signedMessages.devices.retry": "Try again",

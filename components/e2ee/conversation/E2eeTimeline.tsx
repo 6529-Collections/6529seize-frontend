@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type {
@@ -134,6 +135,8 @@ interface E2eeTimelineProps {
   readonly actions: E2eeMessageActions;
   readonly jumpToId?: string | null;
   readonly jumpRequest?: number;
+  /** Shown under the intro, before the messages (a continued chat). */
+  readonly notice?: ReactNode;
 }
 
 /**
@@ -152,8 +155,11 @@ export function E2eeTimeline({
   actions,
   jumpToId,
   jumpRequest = 0,
+  notice,
 }: E2eeTimelineProps) {
   const locale = useBrowserLocale();
+  // Day separators change at midnight in the display time zone.
+  const zone = useDisplayTimeZone();
   // Your own device changes live in the new-device notice and Devices page.
   const messages = useMemo(
     () =>
@@ -382,14 +388,14 @@ export function E2eeTimeline({
   const items: ReactNode[] = [];
   let previousDay: string | null = null;
   messages.forEach((message, index) => {
-    const day = getE2eeDayKey(message.ts);
+    const day = getE2eeDayKey(message.ts, zone);
     const newDay = day !== previousDay;
     if (newDay) {
       previousDay = day;
       items.push(
         <DaySeparator
           key={`day-${day}`}
-          label={getE2eeDayLabel(locale, message.ts)}
+          label={getE2eeDayLabel(locale, message.ts, { zone })}
         />
       );
     }
@@ -434,6 +440,7 @@ export function E2eeTimeline({
             selfProfileId={selfProfileId}
             empty={!messages.some((message) => message.kind === "message")}
           />
+          {notice}
           {engine.loadHistory &&
           (messages.length > 0 || conversation.historyError) ? (
             <button
