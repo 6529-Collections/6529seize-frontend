@@ -37,14 +37,8 @@ export const MARKDOWN_PARITY_CASES = [
   },
   {
     name: "table",
-    text: "| Name | Status |\n| :--- | ---: |\n| Alice | **Ready** |\n| Bob | Waiting |\n\nParagraph one\n\n\nParagraph two\n\nA note[^1].\n\n[^1]: Footnote text.",
-    selectors: [
-      "table",
-      "th",
-      "td",
-      "a[data-footnote-ref]",
-      "section[data-footnotes]",
-    ],
+    text: "| Name | Status |\n| :--- | ---: |\n| Alice | **Ready** |\n| Bob | Waiting |\n\nParagraph one\n\n\nParagraph two",
+    selectors: ["table", "th", "td"],
   },
 ] as const;
 
@@ -93,6 +87,12 @@ export async function markdownSnapshot(
         text: node.textContent?.replaceAll(/\s+/g, " ").trim(),
         start: node.getAttribute("start"),
         checked: node instanceof HTMLInputElement ? node.checked : null,
+        listStyle:
+          node instanceof HTMLUListElement
+            ? getComputedStyle(node).listStyleType
+            : null,
+        codeFontSize:
+          node.tagName === "PRE" ? getComputedStyle(node).fontSize : null,
       }))
   );
 }
