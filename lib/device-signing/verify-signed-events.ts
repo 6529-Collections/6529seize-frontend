@@ -16,6 +16,7 @@ import {
 } from "./app-grant";
 import { verifyEventIdSignature } from "./ed25519";
 import { isAllowedGrantDomain, parseDeviceGrantMessage } from "./grant-message";
+import { isRecognizedAppGrantOrigin } from "./grant-origins";
 import {
   computeInterimEventId,
   DEVICE_EVENT_KIND_SCOPE,
@@ -33,10 +34,23 @@ export type WalletSignatureCheck = "verified" | "contract-verified";
 
 /**
  * A grant's wallet signature: verified, "unverifiable" when only a contract
- * check on Ethereum could decide it and that check could not run, or null
- * when it is invalid.
+ * check on Ethereum could decide it and that check could not run,
+ * "unrecognized-origin" for a valid app grant signed for an origin no 6529
+ * client produces, or null when it is invalid.
  */
-type GrantCheck = WalletSignatureCheck | "unverifiable" | null;
+type GrantCheck =
+  | WalletSignatureCheck
+  | "unverifiable"
+  | "unrecognized-origin"
+  | null;
+
+/**
+ * Grant checks shared by verifications that run without a contract-wallet
+ * reader, so a wallet signature many posts share is recovered once.
+ */
+export type GrantCheckCache = Map<string, Promise<GrantCheck>>;
+
+const MAX_CACHED_GRANT_CHECKS = 200;
 
 /**
  * Reads contract wallets on Ethereum mainnet. Each method throws when
@@ -60,18 +74,40 @@ const ETHEREUM_MAINNET_CHAIN_ID = 1;
 /** bytes4(keccak256("isValidSignature(bytes32,bytes)")) */
 const EIP1271_MAGIC_VALUE = "0x1626ba7e";
 
+/** A drop part another drop points at (a reply target or a quote). */
+interface DisplayedDropRef {
+  readonly dropId: string;
+  readonly partId: number;
+}
+
 /**
- * What the reader is shown for the drop, compared with the signed body. Media
- * and attachments are compared by count: requests may reference uploads by id
- * while the drop shows their resolved URLs.
+ * What the reader is shown for the drop, compared with the signed body.
+ * Media is identified by its URL (the server stores the signed URL and binds
+ * an upload id to it), attachments by their ids. The server does not keep
+ * the order media and attachments were signed in, so both are compared as
+ * sets; parts are matched by their part id.
  */
 interface DisplayedDropContent {
   readonly title: string | null;
+  /** The drop this one replies to, when the reader is shown one. */
+  readonly replyToDropId: string | null;
   readonly parts: readonly {
+    /** 1-based: the signed body's parts[partId - 1]. */
+    readonly partId: number;
     readonly content: string | null;
-    readonly mediaCount: number;
-    readonly attachmentCount: number;
+    /** The quoted drop part, when the reader is shown one. */
+    readonly quote: DisplayedDropRef | null;
+    readonly media: readonly {
+      readonly url: string;
+      readonly uploadId: string | null;
+    }[];
+    readonly attachmentIds: readonly string[];
   }[];
+  /**
+   * The drop's part count when only its first parts are shown (some lists
+   * load one part); null when every part is shown.
+   */
+  readonly totalParts: number | null;
 }
 
 const same = (left: string, right: string): boolean =>
@@ -95,6 +131,8 @@ interface VerifyOptions {
   readonly displayed?: DisplayedDropContent | undefined;
   /** When given, only events of this drop, wave and author count. */
   readonly expected?: ExpectedDrop | undefined;
+  /** Shares grant checks across verifications (ignored with a contract reader). */
+  readonly grantCheckCache?: GrantCheckCache | undefined;
 }
 
 const belongsToExpectedDrop = (
@@ -105,18 +143,42 @@ const belongsToExpectedDrop = (
   (same(event.wave, expected.waveId) &&
     expected.authorWallets.some((wallet) => same(wallet, event.author)));
 
-const countOf = (value: unknown): number =>
-  Array.isArray(value) ? value.length : 0;
+const listOf = (value: unknown): readonly unknown[] =>
+  Array.isArray(value) ? value : [];
+
+type DisplayableDrop = Pick<ApiDrop, "title" | "parts"> &
+  Partial<Pick<ApiDrop, "reply_to" | "parts_count">>;
+
+/** Some read paths omit a part's media or attachments. */
+const listOrEmpty = <T>(list: readonly T[] | undefined): readonly T[] =>
+  list ?? [];
+
+const toDisplayedRef = (
+  ref: { readonly drop_id: string; readonly drop_part_id: number } | null
+): DisplayedDropRef | null =>
+  ref ? { dropId: ref.drop_id, partId: ref.drop_part_id } : null;
 
 export const toDisplayedDropContent = (
-  drop: Pick<ApiDrop, "title" | "parts">
+  drop: DisplayableDrop
 ): DisplayedDropContent => ({
   title: drop.title ?? null,
-  parts: drop.parts.map((part) => ({
+  replyToDropId: drop.reply_to?.drop_id ?? null,
+  parts: drop.parts.map((part, index) => ({
+    partId: typeof part.part_id === "number" ? part.part_id : index + 1,
     content: part.content ?? null,
-    mediaCount: countOf(part.media),
-    attachmentCount: countOf(part.attachments),
+    quote: toDisplayedRef(part.quoted_drop ?? null),
+    media: listOrEmpty(part.media).map((media) => ({
+      url: media.url,
+      uploadId: media.media_upload_id ?? null,
+    })),
+    attachmentIds: listOrEmpty(part.attachments).map(
+      (attachment) => attachment.attachment_id
+    ),
   })),
+  totalParts:
+    typeof drop.parts_count === "number" && drop.parts_count > drop.parts.length
+      ? drop.parts_count
+      : null,
 });
 
 const asText = (value: unknown): string =>
@@ -124,6 +186,123 @@ const asText = (value: unknown): string =>
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
+
+/** A signed `{ drop_id, drop_part_id }`, or null. */
+function readSignedRef(value: unknown): DisplayedDropRef | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const dropId = value["drop_id"];
+  const partId = value["drop_part_id"];
+  return typeof dropId === "string" && typeof partId === "number"
+    ? { dropId, partId }
+    : null;
+}
+
+/** A quote shown must be the one signed; a part shown without one shows nothing unsigned. */
+const matchesShownQuote = (
+  signed: unknown,
+  shown: DisplayedDropRef | null
+): boolean => {
+  if (shown === null) {
+    return true;
+  }
+  const quote = readSignedRef(signed);
+  return (
+    quote !== null &&
+    same(quote.dropId, shown.dropId) &&
+    quote.partId === shown.partId
+  );
+};
+
+interface MediaIdentity {
+  readonly url: string;
+  readonly uploadId: string | null;
+}
+
+const compareText = (left: string, right: string): number =>
+  left < right ? -1 : Number(left > right);
+
+const byIdentity = (left: MediaIdentity, right: MediaIdentity): number =>
+  compareText(left.url, right.url) ||
+  compareText(left.uploadId ?? "", right.uploadId ?? "");
+
+/** Signed media as identities, or null when one is malformed. */
+function readSignedMedia(signed: readonly unknown[]): MediaIdentity[] | null {
+  const media: MediaIdentity[] = [];
+  for (const item of signed) {
+    if (!isRecord(item) || typeof item["url"] !== "string") {
+      return null;
+    }
+    const uploadId = item["media_upload_id"];
+    media.push({
+      url: item["url"],
+      uploadId: typeof uploadId === "string" ? uploadId : null,
+    });
+  }
+  return media;
+}
+
+/**
+ * The same media, in any order (the server does not keep the signed
+ * order); an upload id is compared when both sides name one.
+ */
+function matchesShownMedia(
+  signed: readonly unknown[],
+  shown: readonly MediaIdentity[]
+): boolean {
+  const signedMedia = readSignedMedia(signed);
+  if (signedMedia?.length !== shown.length) {
+    return false;
+  }
+  signedMedia.sort(byIdentity);
+  const shownMedia = [...shown].sort(byIdentity);
+  return signedMedia.every((media, index) => {
+    const item = shownMedia[index];
+    return (
+      item?.url === media.url &&
+      (media.uploadId === null ||
+        item.uploadId === null ||
+        media.uploadId === item.uploadId)
+    );
+  });
+}
+
+/** The same attachments, in any order. */
+function matchesShownAttachments(
+  signed: readonly unknown[],
+  shown: readonly string[]
+): boolean {
+  const signedIds: string[] = [];
+  for (const attachment of signed) {
+    const id = isRecord(attachment) ? attachment["attachment_id"] : undefined;
+    if (typeof id !== "string") {
+      return false;
+    }
+    signedIds.push(id);
+  }
+  if (signedIds.length !== shown.length) {
+    return false;
+  }
+  const shownIds = [...shown].sort(compareText);
+  return signedIds
+    .sort(compareText)
+    .every((id, index) => id === shownIds[index]);
+}
+
+const matchesShownPart = (
+  part: unknown,
+  shown: DisplayedDropContent["parts"][number] | undefined
+): boolean =>
+  shown !== undefined &&
+  isRecord(part) &&
+  asText(part["content"]) === asText(shown.content) &&
+  matchesShownQuote(part["quoted_drop"], shown.quote) &&
+  matchesShownMedia(listOf(part["media"]), shown.media) &&
+  matchesShownAttachments(listOf(part["attachments"]), shown.attachmentIds);
+
+/** "partial": what is shown matches, but not every part of the post is shown. */
+type DisplayedMatch = "match" | "partial" | "mismatch";
 
 function parseSignedBody(event: ApiDeviceSignedEvent): unknown {
   if (event.body === null) {
@@ -136,32 +315,85 @@ function parseSignedBody(event: ApiDeviceSignedEvent): unknown {
   }
 }
 
-/** Whether the signed post or edit body is what the reader is shown. */
-function matchesDisplayed(
-  event: ApiDeviceSignedEvent,
+/**
+ * How the parts shown compare with the signed parts: every part shown must
+ * be the signed part with its part id. When fewer parts are loaded than the
+ * post has, what is shown matches but the whole post was not compared
+ * ("partial"), so it is reported neither as signed nor as a mismatch.
+ */
+function compareShownParts(
+  signedParts: readonly unknown[],
   displayed: DisplayedDropContent
-): boolean {
-  const body = parseSignedBody(event);
-  if (!isRecord(body)) {
-    return false;
-  }
-  const parts = Array.isArray(body["parts"]) ? body["parts"] : [];
-  if (
-    asText(body["title"]) !== asText(displayed.title) ||
-    parts.length !== displayed.parts.length
-  ) {
-    return false;
-  }
-  return parts.every((part: unknown, index) => {
-    const shown = displayed.parts[index];
-    return (
-      shown !== undefined &&
-      isRecord(part) &&
-      asText(part["content"]) === asText(shown.content) &&
-      countOf(part["media"]) === shown.mediaCount &&
-      countOf(part["attachments"]) === shown.attachmentCount
+): DisplayedMatch {
+  const partIds = new Set(displayed.parts.map((part) => part.partId));
+  const everyShownPartSigned =
+    partIds.size === displayed.parts.length &&
+    displayed.parts.every((shown) =>
+      matchesShownPart(signedParts[shown.partId - 1], shown)
     );
-  });
+  if (!everyShownPartSigned) {
+    return "mismatch";
+  }
+  if (
+    displayed.totalParts !== null &&
+    signedParts.length !== displayed.totalParts
+  ) {
+    // 6529.io says the post has another number of parts than was signed.
+    return "mismatch";
+  }
+  return displayed.parts.length < signedParts.length ? "partial" : "match";
+}
+
+/** The reply target a post's body signs, or null for a post that is not a reply. */
+const signedReplyTarget = (body: Record<string, unknown>): string | null =>
+  readSignedRef(body["reply_to"])?.dropId ?? null;
+
+/**
+ * Whether the signed post or edit body is what the reader is shown. A
+ * post's body signs its reply target; an edit's does not, so an edited drop
+ * shows its reply target against the original post when that is signed.
+ */
+function compareDisplayed(
+  event: ApiDeviceSignedEvent,
+  displayed: DisplayedDropContent,
+  replyTarget: string | null | undefined
+): DisplayedMatch {
+  const body = parseSignedBody(event);
+  if (!isRecord(body) || asText(body["title"]) !== asText(displayed.title)) {
+    return "mismatch";
+  }
+  const signedTarget =
+    event.kind === DeviceEventKind.POST ? signedReplyTarget(body) : replyTarget;
+  // A reply target shown must be the signed one. One left out (a deleted
+  // target, for example) shows nothing unsigned.
+  const replyMatches =
+    displayed.replyToDropId === null ||
+    signedTarget === undefined ||
+    (signedTarget !== null && same(signedTarget, displayed.replyToDropId));
+  return replyMatches
+    ? compareShownParts(listOf(body["parts"]), displayed)
+    : "mismatch";
+}
+
+/**
+ * The event's refs name what it acts on: a post its reply target (exactly
+ * what its body signs), an edit the drop being shown.
+ */
+function hasConsistentRefs(
+  event: ApiDeviceSignedEvent,
+  expected: ExpectedDrop | undefined
+): boolean {
+  if (event.kind === DeviceEventKind.EDIT) {
+    return (
+      expected === undefined ||
+      (event.refs.length === 1 && same(event.refs[0] ?? "", expected.dropId))
+    );
+  }
+  const body = parseSignedBody(event);
+  const target = isRecord(body) ? signedReplyTarget(body) : null;
+  return target === null
+    ? event.refs.length === 0
+    : event.refs.length === 1 && same(event.refs[0] ?? "", target);
 }
 
 const HEX_DIGITS = /^0x[0-9a-fA-F]+$/;
@@ -174,6 +406,8 @@ interface VerifiedDropSignature {
   readonly deviceKey: string;
   readonly grantExpiresAt: number;
   readonly walletSignature: WalletSignatureCheck;
+  /** Where the device was authorized: a site host or a 6529 app's name. */
+  readonly origin: string;
 }
 
 export type DropSignatureVerdict =
@@ -182,9 +416,11 @@ export type DropSignatureVerdict =
   /**
    * The signed events verify, but the grant's wallet signature needs a
    * contract-wallet check on Ethereum that could not run (no client, an
-   * unreachable node or another chain). Never shown as signed.
+   * unreachable node or another chain), or the device was authorized from
+   * an origin no 6529 client produces (`unrecognizedOrigin`). Never shown as
+   * signed.
    */
-  | { readonly status: "unverifiable" }
+  | { readonly status: "unverifiable"; readonly unrecognizedOrigin?: string }
   | {
       readonly status: "signed";
       readonly signature: VerifiedDropSignature;
@@ -195,7 +431,7 @@ export type DropSignatureVerdict =
 interface VerifiedEvent {
   readonly event: ApiDeviceSignedEvent;
   readonly grant: ApiDeviceGrantProof;
-  readonly walletSignature: WalletSignatureCheck | "unverifiable";
+  readonly walletSignature: Exclude<GrantCheck, null>;
 }
 
 const CONTENT_KINDS: ReadonlySet<number> = new Set([
@@ -206,7 +442,8 @@ const CONTENT_KINDS: ReadonlySet<number> = new Set([
 /**
  * An app grant (6529 Mobile or Desktop, EIP-712) commits to exactly the
  * stored terms; its id is the typed-data digest. Its origin is what the
- * wallet was shown, so it is not limited to the site's hosts.
+ * wallet was shown, a site host or an app's name, and is checked against the
+ * recognized origins once the signature is known to be valid.
  */
 const isAppGrantConsistent = (grant: ApiDeviceGrantProof): boolean => {
   const parsed = parseAppGrantMessage(grant.message);
@@ -300,7 +537,28 @@ async function checkContractWalletSignature(
   }
 }
 
+/**
+ * A valid app grant signed for an origin no 6529 client produces is never
+ * reported as verified. Sign-in grants name an allowed host or are invalid.
+ */
+const withRecognizedOrigin = (
+  grant: ApiDeviceGrantProof,
+  check: GrantCheck
+): GrantCheck =>
+  check !== null &&
+  isAppGrantMessage(grant.message) &&
+  !isRecognizedAppGrantOrigin(grant.domain)
+    ? "unrecognized-origin"
+    : check;
+
 async function checkGrant(
+  grant: ApiDeviceGrantProof,
+  options: VerifyOptions
+): Promise<GrantCheck> {
+  return withRecognizedOrigin(grant, await checkGrantSignature(grant, options));
+}
+
+async function checkGrantSignature(
   grant: ApiDeviceGrantProof,
   { contractWallets }: VerifyOptions
 ): Promise<GrantCheck> {
@@ -395,6 +653,48 @@ async function verifyEvent(
   }
 }
 
+/** Everything checkGrant reads, so a cached check is only reused for the same grant. */
+const grantCheckKey = (grant: ApiDeviceGrantProof): string =>
+  JSON.stringify([
+    grant.id.toLowerCase(),
+    grant.message,
+    grant.wallet_signature,
+    grant.chain_id,
+    grant.wallet,
+    grant.device_key,
+    grant.scopes,
+    grant.domain,
+    grant.expires_at,
+  ]);
+
+/**
+ * One check per grant in this verification. Without a contract-wallet
+ * reader (whose answers can change), checks are also shared through
+ * `grantCheckCache`.
+ */
+function grantCheckFor(
+  grant: ApiDeviceGrantProof,
+  options: VerifyOptions,
+  local: Map<string, Promise<GrantCheck>>
+): Promise<GrantCheck> {
+  const key = grantCheckKey(grant);
+  const shared = options.contractWallets ? undefined : options.grantCheckCache;
+  const known = local.get(key) ?? shared?.get(key);
+  if (known) {
+    local.set(key, known);
+    return known;
+  }
+  const check = checkGrant(grant, options);
+  local.set(key, check);
+  if (shared) {
+    if (shared.size >= MAX_CACHED_GRANT_CHECKS) {
+      shared.clear();
+    }
+    shared.set(key, check);
+  }
+  return check;
+}
+
 async function verifyContentEvents(
   data: ApiDropSignedEvents,
   options: VerifyOptions
@@ -407,20 +707,19 @@ async function verifyContentEvents(
     data.events
       .filter((event) => CONTENT_KINDS.has(event.kind))
       .map(async (event): Promise<VerifiedEvent | null> => {
-        const grantId = event.auth_ref.toLowerCase();
-        const grant = grants.get(grantId);
+        const grant = grants.get(event.auth_ref.toLowerCase());
         if (!grant) {
           return null;
         }
-        let grantCheck = grantChecks.get(grantId);
-        if (!grantCheck) {
-          grantCheck = checkGrant(grant, options);
-          grantChecks.set(grantId, grantCheck);
-        }
-        const walletSignature = await grantCheck;
+        const walletSignature = await grantCheckFor(
+          grant,
+          options,
+          grantChecks
+        );
         if (
           !walletSignature ||
           !belongsToExpectedDrop(event, options.expected) ||
+          !hasConsistentRefs(event, options.expected) ||
           !(await verifyEvent(event, grant))
         ) {
           return null;
@@ -460,14 +759,23 @@ export async function verifyDropSignedEvents(
     // verify: never fall back to an older signed version.
     return { status: "invalid" };
   }
-  if (
-    current &&
-    options.displayed &&
-    !matchesDisplayed(current.event, options.displayed)
-  ) {
+  const shownMatch =
+    current && options.displayed
+      ? compareDisplayed(
+          current.event,
+          options.displayed,
+          originalReplyTarget(verified)
+        )
+      : "match";
+  if (shownMatch === "mismatch") {
     // A valid signature over content other than what is shown proves nothing
     // about the shown content.
     return { status: "invalid" };
+  }
+  if (shownMatch === "partial") {
+    // Only some of the post's parts are loaded here: nothing is wrong, but
+    // the post as a whole was not compared.
+    return { status: "unverifiable" };
   }
   const shown = current ?? verified.at(-1);
   if (!shown) {
@@ -475,6 +783,9 @@ export async function verifyDropSignedEvents(
   }
   if (shown.walletSignature === "unverifiable") {
     return { status: "unverifiable" };
+  }
+  if (shown.walletSignature === "unrecognized-origin") {
+    return { status: "unverifiable", unrecognizedOrigin: shown.grant.domain };
   }
   return {
     status: "signed",
@@ -485,6 +796,25 @@ export async function verifyDropSignedEvents(
       deviceKey: shown.grant.device_key,
       grantExpiresAt: shown.grant.expires_at,
       walletSignature: shown.walletSignature,
+      origin: shown.grant.domain,
     },
   };
+}
+
+/**
+ * The reply target the drop's original post signs (null: not a reply), or
+ * undefined when no verified post is among the events, as for a drop posted
+ * unsigned and edited signed.
+ */
+function originalReplyTarget(
+  verified: readonly VerifiedEvent[]
+): string | null | undefined {
+  const post = verified.find(
+    ({ event }) => event.kind === DeviceEventKind.POST
+  );
+  if (!post) {
+    return undefined;
+  }
+  const body = parseSignedBody(post.event);
+  return isRecord(body) ? signedReplyTarget(body) : null;
 }
