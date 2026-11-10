@@ -74,6 +74,11 @@ support footnotes. Code blocks use
 syntax highlighting, and member mentions and custom emoji stay literal inside
 code. Extra blank lines keep their spacing when you send or edit a message.
 
+Encrypted notification previews use the same local Markdown renderer in the
+notification overview and on the notifications page. Previews stay compact;
+message links and images appear as labels, and selecting the notification opens
+the encrypted chat.
+
 Links open only when you select them. Encrypted messages do not automatically
 load link previews, embeds or images from Markdown URLs. A Markdown image is
 shown as a link using its alternative text (or a label identifying the image host); select the link to

@@ -144,3 +144,14 @@ it("only previews the specific message referenced by a notification", () => {
   rerender({ seq: 4 });
   expect(result.current.preview).toBeNull();
 });
+
+it("retains complete Markdown so preview clamping cannot cut closing syntax", () => {
+  const text = `**${"formatted ".repeat(30)}**`;
+  mockConversation.mockReturnValue({
+    messages: [{ seq: 1, kind: "message", senderProfileId: "other", text }],
+  });
+  const { result } = renderHook(() =>
+    useEncryptedNotificationPreview("group", 1)
+  );
+  expect(result.current.preview).toBe(text);
+});

@@ -36,6 +36,8 @@ export function useEncryptedNotificationPreview(
   ) {
     return { preview: null, needsSetup };
   }
-  const preview = incoming.text.slice(0, 240);
+  // Clamp the rendered preview in the UI; cutting Markdown source can remove
+  // closing delimiters and display formatting syntax as text.
+  const preview = incoming.text;
   return { preview: preview === "" ? null : preview, needsSetup };
 }
