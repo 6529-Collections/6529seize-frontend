@@ -59,6 +59,18 @@ const TOOLTIP_STYLE = {
   padding: "4px 8px",
 };
 
+function getModalTitleKey(
+  mode: Mode,
+  activeSubTab: SubMode,
+  hasSelectedConnectionMode: boolean
+): MessageKey {
+  if (mode !== Mode.CONNECT) return "headerShare.shareModal.title";
+  if (!hasSelectedConnectionMode) return "headerShare.connectModal.title";
+  return activeSubTab === SubMode.DESKTOP
+    ? "headerShare.connectModal.desktopTitle"
+    : "headerShare.connectModal.mobileTitle";
+}
+
 /** Show the share flow, including the secure Desktop link or Mobile QR code. */
 export function HeaderShareModalView({
   open,
@@ -122,16 +134,11 @@ export function HeaderShareModalView({
     };
   }, []);
 
-  let modalTitleKey: MessageKey = "headerShare.shareModal.title";
-  if (isConnectMode) {
-    modalTitleKey = "headerShare.connectModal.title";
-    if (connectionMode) {
-      modalTitleKey =
-        activeSubTab === SubMode.DESKTOP
-          ? "headerShare.connectModal.desktopTitle"
-          : "headerShare.connectModal.mobileTitle";
-    }
-  }
+  const modalTitleKey = getModalTitleKey(
+    mode,
+    activeSubTab,
+    connectionMode !== null
+  );
   const closeAriaLabel = t(
     HEADER_SHARE_LOCALE,
     isConnectMode
