@@ -67,6 +67,67 @@ describe("E2EE engine: sync paths", () => {
     bob.primary.engine.dispose();
   });
 
+  it("never names the open conversation in its fast poll (D175)", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(
+      world,
+      "bob",
+      { polling: true },
+      { noWake: true }
+    );
+    const g = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    const other = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "group",
+      name: "Other",
+    });
+    try {
+      await waitFor(
+        () =>
+          bob.primary.engine.getConversation(g)?.status === "active" &&
+          bob.primary.engine.getConversation(other)?.status === "active"
+      );
+      await bob.primary.engine.idle();
+      const bobGets = () =>
+        world.ds.state.requests.filter(
+          (r) => r.profileId === "bob" && r.method === "GET"
+        );
+      const start = bobGets().length;
+      bob.primary.engine.setOpenConversation(g);
+      const listings = () =>
+        bobGets()
+          .slice(start)
+          .filter((r) => /^e2ee\/devices\/0x[0-9a-f]+\/groups$/.test(r.path))
+          .length;
+      // Several fast polls while nothing is new: only the device's group
+      // listing, never the open conversation's log or record.
+      await waitFor(() => listings() >= 3);
+      const named = (handle: string) =>
+        bobGets()
+          .slice(start)
+          .filter((r) => r.path.startsWith(`e2ee/groups/${handle}`));
+      expect(named(g)).toEqual([]);
+      // A new item in another chat is fetched for that chat only.
+      await alice.primary.engine.send(other, { text: "elsewhere" });
+      await waitFor(() =>
+        texts(bob.primary.engine.getMessages(other)).includes("elsewhere")
+      );
+      expect(named(other).length).toBeGreaterThan(0);
+      expect(named(g)).toEqual([]);
+      // The open chat is fetched once it has something new.
+      await alice.primary.engine.send(g, { text: "here" });
+      await waitFor(() =>
+        texts(bob.primary.engine.getMessages(g)).includes("here")
+      );
+    } finally {
+      bob.primary.engine.dispose();
+    }
+  });
+
   it("polls an opened conversation every 5 s even after a local lookup-resume event", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");

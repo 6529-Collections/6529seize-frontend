@@ -139,6 +139,12 @@ export async function catchUpGroup(
     }
     await afterPage(ctx, runtime, page.group, next === null);
     if (next === null) {
+      // The server read the group row before the page, so every item this
+      // device may see up to its last_seq is in what was just processed.
+      runtime.listedThrough = Math.max(
+        runtime.listedThrough ?? 0,
+        page.group.last_seq
+      );
       break;
     }
   }
