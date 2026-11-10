@@ -1,12 +1,17 @@
+import { Capacitor } from "@capacitor/core";
 import { Filesystem } from "@capacitor/filesystem";
 import { Share } from "@capacitor/share";
 
 import {
   downloadAndShareInNativeApp,
+  removeStaleSharedFiles,
   shareFetchedBlobInNativeApp,
   shareTextFileInNativeApp,
 } from "@/helpers/capacitorBlobDownload.helpers";
 
+jest.mock("@capacitor/core", () => ({
+  Capacitor: { getPlatform: jest.fn() },
+}));
 jest.mock("@capacitor/filesystem", () => ({
   Directory: { Cache: "CACHE", Documents: "DOCUMENTS" },
   Encoding: { UTF8: "utf8" },
@@ -21,8 +26,10 @@ jest.mock("@capacitor/filesystem", () => ({
 }));
 jest.mock("@capacitor/share", () => ({ Share: { share: jest.fn() } }));
 
-const NOW = 1_800_000_000_000;
 const MINUTE = 60_000;
+const ANDROID_RETENTION_MS = 2 * MINUTE;
+// Each test runs at a later clock so path timestamps never repeat across tests.
+let now = 1_800_000_000_000;
 
 const entry = (
   name: string,
@@ -43,7 +50,9 @@ const deletedPaths = () =>
 
 beforeEach(() => {
   jest.resetAllMocks();
-  jest.spyOn(Date, "now").mockReturnValue(NOW);
+  now += 60 * MINUTE;
+  jest.spyOn(Date, "now").mockImplementation(() => now);
+  jest.mocked(Capacitor.getPlatform).mockReturnValue("ios");
   jest.mocked(Filesystem.writeFile).mockResolvedValue({ uri: "file://x" });
   jest.mocked(Filesystem.downloadFile).mockResolvedValue({ path: "x" });
   jest.mocked(Filesystem.getUri).mockResolvedValue({ uri: "file://shared" });
@@ -54,24 +63,25 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  jest.useRealTimers();
   jest.restoreAllMocks();
 });
 
 describe("shareFetchedBlobInNativeApp", () => {
   const blob = new Blob(["decrypted bytes"], { type: "text/plain" });
-  const expectedPath = `share-temp/${NOW}-my_file.txt`;
+  const expectedPath = () => `share-temp/${now}-my_file.txt`;
 
   it("shares from the dedicated cache folder and removes the file afterwards", async () => {
     await shareFetchedBlobInNativeApp(blob, "my file.txt");
 
     expect(Filesystem.writeFile).toHaveBeenCalledWith(
-      expect.objectContaining({ directory: "CACHE", path: expectedPath })
+      expect.objectContaining({ directory: "CACHE", path: expectedPath() })
     );
     expect(Share.share).toHaveBeenCalledWith(
       expect.objectContaining({ url: "file://shared", title: "my file.txt" })
     );
     expect(deletedPaths()).toEqual([
-      { directory: "CACHE", path: expectedPath },
+      { directory: "CACHE", path: expectedPath() },
     ]);
     // Removal happens only once the share sheet has finished.
     expect(
@@ -86,18 +96,35 @@ describe("shareFetchedBlobInNativeApp", () => {
       shareFetchedBlobInNativeApp(blob, "my file.txt")
     ).rejects.toThrow("Share canceled");
     expect(deletedPaths()).toEqual([
-      { directory: "CACHE", path: expectedPath },
+      { directory: "CACHE", path: expectedPath() },
+    ]);
+  });
+
+  it("keeps the file on Android until the receiving app has had time to read it", async () => {
+    jest.mocked(Capacitor.getPlatform).mockReturnValue("android");
+    jest.useFakeTimers({ doNotFake: ["nextTick", "setImmediate"] });
+    jest.spyOn(Date, "now").mockImplementation(() => now);
+
+    await shareFetchedBlobInNativeApp(blob, "my file.txt");
+
+    expect(Share.share).toHaveBeenCalledTimes(1);
+    expect(Filesystem.deleteFile).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(ANDROID_RETENTION_MS - 1);
+    expect(Filesystem.deleteFile).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(1);
+    expect(deletedPaths()).toEqual([
+      { directory: "CACHE", path: expectedPath() },
     ]);
   });
 
   it("removes stale files in its folder and leaves recent ones alone", async () => {
     jest.mocked(Filesystem.readdir).mockResolvedValue({
       files: [
-        entry("old-by-mtime.bin", NOW - 30 * MINUTE),
-        entry("recent.bin", NOW - MINUTE),
-        entry(`${NOW - 60 * MINUTE}-old-by-name.bin`, undefined),
+        entry("old-by-mtime.bin", now - 30 * MINUTE),
+        entry("recent.bin", now - MINUTE),
+        entry(`${now - 60 * MINUTE}-old-by-name.bin`, undefined),
         entry("no-age.bin", undefined),
-        entry("nested", NOW - 60 * MINUTE, "directory"),
+        entry("nested", now - 60 * MINUTE, "directory"),
       ],
     });
 
@@ -113,9 +140,9 @@ describe("shareFetchedBlobInNativeApp", () => {
         { directory: "CACHE", path: "share-temp/old-by-mtime.bin" },
         {
           directory: "CACHE",
-          path: `share-temp/${NOW - 60 * MINUTE}-old-by-name.bin`,
+          path: `share-temp/${now - 60 * MINUTE}-old-by-name.bin`,
         },
-        { directory: "CACHE", path: expectedPath },
+        { directory: "CACHE", path: expectedPath() },
       ])
     );
     expect(deletedPaths()).toHaveLength(3);
@@ -137,23 +164,40 @@ describe("shareFetchedBlobInNativeApp", () => {
   });
 });
 
+describe("removeStaleSharedFiles", () => {
+  it("reads a modification time given in seconds as seconds", async () => {
+    const nowSeconds = Math.floor(now / 1000);
+    jest.mocked(Filesystem.readdir).mockResolvedValue({
+      files: [
+        entry("old-seconds.bin", nowSeconds - 30 * 60),
+        entry("recent-seconds.bin", nowSeconds - 60),
+      ],
+    });
+
+    await removeStaleSharedFiles();
+
+    expect(deletedPaths()).toEqual([
+      { directory: "CACHE", path: "share-temp/old-seconds.bin" },
+    ]);
+  });
+});
+
 describe("shareTextFileInNativeApp", () => {
   const share = { title: "Title", text: "Text", dialogTitle: "Dialog" };
 
   it("writes UTF-8 text to the cache folder and removes it after sharing", async () => {
     await shareTextFileInNativeApp("content", "Wallet-0x1-export.txt", share);
 
+    const path = `share-temp/${now}-Wallet-0x1-export.txt`;
     expect(Filesystem.writeFile).toHaveBeenCalledWith({
-      path: "share-temp/Wallet-0x1-export.txt",
+      path,
       data: "content",
       directory: "CACHE",
       encoding: "utf8",
       recursive: true,
     });
     expect(Share.share).toHaveBeenCalledWith({ ...share, url: "file://x" });
-    expect(deletedPaths()).toEqual([
-      { directory: "CACHE", path: "share-temp/Wallet-0x1-export.txt" },
-    ]);
+    expect(deletedPaths()).toEqual([{ directory: "CACHE", path }]);
   });
 
   it("removes the file when sharing fails", async () => {
@@ -163,7 +207,39 @@ describe("shareTextFileInNativeApp", () => {
       shareTextFileInNativeApp("content", "a/b.txt", share)
     ).rejects.toThrow("Error sharing item");
     expect(deletedPaths()).toEqual([
-      { directory: "CACHE", path: "share-temp/a_b.txt" },
+      { directory: "CACHE", path: `share-temp/${now}-a_b.txt` },
+    ]);
+  });
+
+  it("gives two exports of the same name in flight separate files", async () => {
+    let finishFirst: () => void = () => undefined;
+    jest
+      .mocked(Share.share)
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            finishFirst = () => resolve({});
+          })
+      )
+      .mockResolvedValueOnce({});
+
+    const first = shareTextFileInNativeApp("one", "Same.txt", share);
+    await waitForCalls(Share.share as jest.Mock, 1);
+    await shareTextFileInNativeApp("two", "Same.txt", share);
+
+    const written = jest
+      .mocked(Filesystem.writeFile)
+      .mock.calls.map(([options]) => options.path);
+    expect(written).toHaveLength(2);
+    expect(new Set(written).size).toBe(2);
+    // Finishing the second export removed only its own file.
+    expect(deletedPaths()).toEqual([{ directory: "CACHE", path: written[1] }]);
+
+    finishFirst();
+    await first;
+    expect(deletedPaths()).toEqual([
+      { directory: "CACHE", path: written[1] },
+      { directory: "CACHE", path: written[0] },
     ]);
   });
 });
@@ -179,12 +255,23 @@ describe("downloadAndShareInNativeApp", () => {
     expect(Filesystem.downloadFile).toHaveBeenCalledWith(
       expect.objectContaining({
         directory: "CACHE",
-        path: `share-temp/${NOW}-a.jpg`,
+        path: `share-temp/${now}-a.jpg`,
         recursive: true,
       })
     );
     expect(deletedPaths()).toEqual([
-      { directory: "CACHE", path: `share-temp/${NOW}-a.jpg` },
+      { directory: "CACHE", path: `share-temp/${now}-a.jpg` },
     ]);
   });
 });
+
+async function waitForCalls(mock: jest.Mock, count: number): Promise<void> {
+  for (
+    let attempt = 0;
+    attempt < 50 && mock.mock.calls.length < count;
+    attempt++
+  ) {
+    await Promise.resolve();
+  }
+  expect(mock.mock.calls).toHaveLength(count);
+}

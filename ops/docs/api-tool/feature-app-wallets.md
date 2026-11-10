@@ -78,8 +78,9 @@
   - unlock-gated `Download Recovery File`,
   - delete with confirmation.
 - Recovery exports open the native share sheet with a temporary file. The app
-  removes that file when the sheet closes, whether the export was saved,
-  shared, cancelled, or failed; it keeps no copy on the device.
+  removes that file when the sheet closes on iOS and shortly after it closes
+  on Android, whether the export was saved, shared, cancelled, or failed; it
+  keeps no copy on the device.
 - If an earlier app version left a recovery file for the wallet in the app's
   Documents folder, wallet detail shows `Recovery file saved on this device`
   with a `Remove saved recovery files` action. The notice explains that a
