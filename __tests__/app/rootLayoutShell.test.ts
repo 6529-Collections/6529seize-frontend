@@ -41,19 +41,16 @@ it("starts native detection synchronously after the legacy-browser checks", () =
   expect(element).not.toMatch(/\s(?:async|defer|strategy)\b/);
 });
 
-// Browser bundles carry no VERSION, so the chunk holding the baked public env
-// keeps its name across deploys. config/env.browser.ts reads it from <html>.
-it("renders VERSION on the <html> start tag for the browser", () => {
+// The browser reads these stamps from HTML so unchanged chunks stay cacheable.
+it("renders the build stamp on the <html> start tag", () => {
   const htmlStart = layout.slice(
     layout.indexOf("<html"),
     layout.indexOf(">", layout.indexOf("<html"))
   );
   expect(htmlStart).toContain("data-version={publicEnv.VERSION}");
-  const browserEnv = readFileSync(
-    path.join(process.cwd(), "config/env.browser.ts"),
-    "utf8"
+  expect(htmlStart).toContain(
+    "data-release-order={publicEnv.VERSION_RELEASE_ORDER}"
   );
-  expect(browserEnv).toContain('documentElement.dataset["version"]');
 });
 
 function sourceFiles(directory: string): string[] {
