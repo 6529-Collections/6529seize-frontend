@@ -17,6 +17,7 @@ import {
   rollback,
   type EngineContext,
 } from "./context";
+import { dmParticipantsOk } from "./dm-join";
 import { RetryableError } from "./errors";
 import {
   addNotices,
@@ -192,18 +193,27 @@ async function senderBlocked(
   return false;
 }
 
-/** 2.2/2.3 checks of every member; bad leaves become STRICT removals. */
+/**
+ * 2.2/2.3 checks of every member; bad leaves become STRICT removals. Also
+ * returns each leaf's owner per its device record (null: none determined).
+ */
 async function checkWelcomeMembers(
   ctx: EngineContext,
   summary: WasmWelcomeSummary
-): Promise<{ senderOk: boolean; badGrants: string[] }> {
+): Promise<{
+  senderOk: boolean;
+  badGrants: string[];
+  owners: (string | null)[];
+}> {
   const now = ctx.now();
   const badGrants: string[] = [];
+  const owners: (string | null)[] = [];
   let senderOk = false;
   const sender = summary.sender.device_key.toLowerCase();
   for (const leaf of summary.members) {
     const check = await ctx.directory.checkLeaf(leaf, now);
     const key = leaf.device_key.toLowerCase();
+    owners.push(check.profileId);
     if (key === sender) {
       senderOk = check.ok;
     }
@@ -211,7 +221,7 @@ async function checkWelcomeMembers(
       badGrants.push(key);
     }
   }
-  return { senderOk, badGrants };
+  return { senderOk, badGrants, owners };
 }
 
 async function commitKeyMatches(
@@ -320,6 +330,7 @@ async function handleWelcome(
     const refused =
       !metadataOk ||
       !checks.senderOk ||
+      !(await dmParticipantsOk(ctx, staged, checks.owners, senderProfileId)) ||
       (await senderBlocked(ctx, [senderProfileId]));
     if (refused) {
       mls.rejectWelcome(g);
