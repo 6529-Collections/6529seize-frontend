@@ -1,3 +1,4 @@
+jest.mock("server-only", () => ({}), { virtual: true });
 import {
   getReviewbotPublicUsageSummary,
   normalizeReviewbotUsageApiBaseUrl,

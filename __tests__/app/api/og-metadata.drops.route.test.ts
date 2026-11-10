@@ -1,4 +1,5 @@
 /** @jest-environment node */
+jest.mock("server-only", () => ({}), { virtual: true });
 
 const mockImageResponse = jest.fn((element, init) => ({
   element,

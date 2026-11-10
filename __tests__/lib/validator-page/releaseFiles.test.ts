@@ -1,4 +1,5 @@
 /** @jest-environment node */
+jest.mock("server-only", () => ({}), { virtual: true });
 import { parseReleaseFeed } from "@/lib/validator-page/releaseFeed";
 import {
   formatFileSize,

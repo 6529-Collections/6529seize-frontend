@@ -1,6 +1,7 @@
 /**
  * @jest-environment node
  */
+jest.mock("server-only", () => ({}), { virtual: true });
 
 const nextResponseJson = jest.fn(
   (body: unknown, init?: { status?: number | undefined }) => ({
@@ -276,7 +277,9 @@ describe("github-preview API route", () => {
     const constructorResponse = await GET(
       requestFor("https://github.com/o/r/constructor")
     );
-    const protoResponse = await GET(requestFor("https://github.com/o/r/__proto__"));
+    const protoResponse = await GET(
+      requestFor("https://github.com/o/r/__proto__")
+    );
 
     expect(constructorResponse.status).toBe(400);
     await expect(constructorResponse.json()).resolves.toMatchObject({
@@ -290,9 +293,8 @@ describe("github-preview API route", () => {
   });
 
   it("rejects unsupported GitHub resource kinds when building cache keys", async () => {
-    const { getResourceCacheKey } = await import(
-      "../../../app/api/github-preview/service/resource"
-    );
+    const { getResourceCacheKey } =
+      await import("../../../app/api/github-preview/service/resource");
 
     expect(() =>
       getResourceCacheKey({

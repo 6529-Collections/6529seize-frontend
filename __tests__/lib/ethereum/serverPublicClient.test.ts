@@ -1,4 +1,5 @@
 /** @jest-environment node */
+jest.mock("server-only", () => ({}), { virtual: true });
 
 jest.mock("node:dns/promises", () => ({ lookup: jest.fn() }));
 const mockFetch = jest.fn();

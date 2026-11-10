@@ -1,3 +1,4 @@
+jest.mock("server-only", () => ({}), { virtual: true });
 const mockPublicClient = {
   getEnsResolver: jest.fn(),
   getEnsAddress: jest.fn(),
