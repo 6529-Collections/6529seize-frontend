@@ -1,5 +1,10 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
+import {
+  PRODUCTION_ASSET_HOSTNAME,
+  PRODUCTION_ASSET_PREFIX,
+  PRODUCTION_SHARED_ASSET_PATH,
+} from "@/config/assetPrefix";
 import { createSecurityHeaders } from "@/config/securityHeaders";
 
 function findFilesMatching(directory: string, pattern: RegExp): string[] {
@@ -467,6 +472,61 @@ describe("createSecurityHeaders CSP", () => {
         "usb=()",
         "xr-spatial-tracking=()",
       ].join(", ")
+    );
+  });
+});
+
+describe("createSecurityHeaders opener policy", () => {
+  it("isolates the window from cross-origin openers but keeps its own popups", () => {
+    const headers = createSecurityHeaders(
+      "https://api.6529.io",
+      "https://ipfs.6529.io"
+    ).filter((header) => header.key === "Cross-Origin-Opener-Policy");
+
+    expect(headers).toEqual([
+      { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+    ]);
+  });
+});
+
+describe("createSecurityHeaders script sources on the asset CDN", () => {
+  const scriptAssetSource = `${PRODUCTION_ASSET_PREFIX}/_next/static/`;
+
+  it("allows only the build's static files from the asset CDN", () => {
+    const scriptSrc = getDirectiveSources(
+      getContentSecurityPolicy(),
+      "script-src"
+    );
+
+    expect(scriptSrc).toContain(scriptAssetSource);
+    expect(
+      scriptSrc.filter((source) => source.includes(PRODUCTION_ASSET_HOSTNAME))
+    ).toEqual([scriptAssetSource]);
+  });
+
+  it("matches the prefix the production deploy uploads static files to", () => {
+    const workflow = readFileSync(
+      join(process.cwd(), ".github/workflows/build-upload-deploy-prod.yml"),
+      "utf8"
+    );
+    const uploadPrefix = /SHARED_STATIC_PREFIX:\s*"([^"]+)"/.exec(
+      workflow
+    )?.[1];
+
+    expect(uploadPrefix).toBe(`${PRODUCTION_SHARED_ASSET_PATH}/_next/static`);
+    expect(scriptAssetSource).toBe(
+      `https://${PRODUCTION_ASSET_HOSTNAME}/${uploadPrefix}/`
+    );
+  });
+
+  it("keeps fonts and styles on the whole asset CDN host", () => {
+    const policy = getContentSecurityPolicy();
+
+    expect(getDirectiveSources(policy, "font-src")).toContain(
+      `https://${PRODUCTION_ASSET_HOSTNAME}`
+    );
+    expect(getDirectiveSources(policy, "style-src")).toContain(
+      `https://${PRODUCTION_ASSET_HOSTNAME}`
     );
   });
 });
