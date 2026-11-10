@@ -463,10 +463,13 @@ iPhone"); devices added earlier keep their name. A profile can have up to 10
 active devices; at the limit, the new device lists the profile's devices and
 asks you to revoke one from a device you already use, then turn it on.
 
-When another device of yours is turned on, your other devices show which
-device was added and when, that it can read your encrypted messages, and
-**Revoke** or **This was me**. Your own device changes are not repeated in
-each chat's timeline.
+When you authorize another device, the app can show a security alert on your
+other devices. The alert names the new device and the permissions it gained.
+A device set up for both Encrypted DMs and Signed Posts has one alert, which
+can appear in either Encrypted DMs or Waves. Choose **This was me** once to
+clear it across your devices as they refresh, or **Revoke access** if you
+do not recognize it. Your own device changes are not repeated in each chat's
+timeline.
 
 ## Encrypted backup
 

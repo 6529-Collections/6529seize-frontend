@@ -544,6 +544,27 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     ).toBeVisible({ timeout: DEVICE_ADD_TIMEOUT_MS });
     await openChatFromList(b2, dm, a.user.handle, DEVICE_ADD_TIMEOUT_MS);
 
+    const combinedNotice = b.page.getByRole("status").filter({
+      hasText:
+        /was authorized to read your encrypted DMs and sign posts as you/u,
+    });
+    await expect(combinedNotice).toBeVisible({
+      timeout: DEVICE_ADD_TIMEOUT_MS,
+    });
+    await combinedNotice.getByRole("button", { name: "This was me" }).click();
+    await expect(combinedNotice).toHaveCount(0, { timeout: UI_TIMEOUT_MS });
+    // Fetch the account's notices again and continue to use the authorized device.
+    await Promise.all([
+      b.page.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname === "/api/device-security-notices" &&
+          response.ok(),
+        { timeout: UI_TIMEOUT_MS }
+      ),
+      openChat(b, dm),
+    ]);
+    await expect(combinedNotice).toHaveCount(0);
+
     await sendEncrypted(a, beforeRevoke);
     await expectDecrypted(b, beforeRevoke);
     await expectDecrypted(b2, beforeRevoke);

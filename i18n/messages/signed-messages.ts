@@ -60,8 +60,21 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "Your messages are sent unsigned until you renew with one signature.",
   "signedMessages.notice.newDevice.message":
     "{label} is now authorized for Signed Posts. If this wasn’t you, revoke it.",
-  "signedMessages.notice.newDevice.revoke": "Revoke",
-  "signedMessages.notice.newDevice.acknowledge": "Got it",
+  "signedMessages.notice.newDevice.revoke": "Revoke access",
+  "signedMessages.notice.newDevice.acknowledge": "This was me",
+  "deviceSecurity.notice.both":
+    "{label} was authorized to read your encrypted DMs and sign posts as you.",
+  "deviceSecurity.notice.posts": "{label} was authorized to sign posts as you.",
+  "deviceSecurity.notice.encryptedDms":
+    "{label} was authorized to read your encrypted DMs.",
+  "deviceSecurity.notice.revokeLabel": "Revoke access for {label}",
+  "deviceSecurity.notice.revokeTitle": "Revoke access for {label}?",
+  "deviceSecurity.notice.revoke.both":
+    "This device will stop signing posts and receiving encrypted DMs. The app clears its local encrypted chat history when it processes the revocation.",
+  "deviceSecurity.notice.revoke.posts":
+    "This device will lose permission to sign posts as you.",
+  "deviceSecurity.notice.revoke.encryptedDms":
+    "This device will stop receiving encrypted DMs. The app clears its local encrypted chat history when it processes the revocation.",
   "signedMessages.notice.newDevice.acknowledgeError":
     "Couldn’t acknowledge this device. Try again.",
   "signedMessages.notice.enabled": "Signed posts are on in this browser.",
