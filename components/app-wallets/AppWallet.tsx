@@ -36,6 +36,8 @@ import AppWalletAvatar from "./AppWalletAvatar";
 import AppWalletsUnsupported from "./AppWalletsUnsupported";
 import AppWalletSavedRecoveryFilesNotice from "./AppWalletSavedRecoveryFilesNotice";
 import { shareTextFileInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import {
@@ -69,6 +71,7 @@ export default function AppWalletComponent(
   const chainId = useChainId();
   const { setToast } = useAuth();
   const account = useSeizeConnectContext();
+  const locale = useBrowserLocale();
 
   const balance = useBalance({
     address: props.address as `0x${string}`,
@@ -148,7 +151,7 @@ export default function AppWalletComponent(
       await shareTextFileInNativeApp(content, fileName, {
         title,
         text,
-        dialogTitle: "Share or Save File",
+        dialogTitle: t(locale, "appWallets.recoveryExport.shareDialogTitle"),
       });
     } catch {
       alert("Unable to write file");

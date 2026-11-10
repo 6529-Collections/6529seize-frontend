@@ -3,8 +3,10 @@
   "appWallets.savedRecoveryFiles.plaintextBody": "An earlier export left a recovery file for this wallet in this app's Documents folder. It contains the recovery phrase and private key in readable form.",
   "appWallets.savedRecoveryFiles.encryptedBody": "An earlier export left an encrypted recovery file for this wallet in this app's Documents folder.",
   "appWallets.savedRecoveryFiles.beforeRemoving": "Before you remove it, make sure you have saved the recovery phrase somewhere safe. Removing it cannot be undone.",
+  "appWallets.savedRecoveryFiles.fileListLabel": "Files that will be removed:",
   "appWallets.savedRecoveryFiles.remove": "Remove saved recovery files",
   "appWallets.savedRecoveryFiles.removing": "Removing…",
   "appWallets.savedRecoveryFiles.removed": "The saved recovery files were removed from this device.",
-  "appWallets.savedRecoveryFiles.removeFailed": "Some recovery files could not be removed. Please try again."
+  "appWallets.savedRecoveryFiles.removeFailed": "Some recovery files could not be removed. Please try again.",
+  "appWallets.recoveryExport.shareDialogTitle": "Share or Save File"
 }

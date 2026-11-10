@@ -321,7 +321,9 @@ describe("AppWallet", () => {
       appWallets: [wallet],
       deleteAppWallet: jest.fn(),
     });
-    const expectedPath = "share-temp/Test-0xABC-encrypted-recovery.json";
+    const expectedPath = expect.stringMatching(
+      /^share-temp\/\d{13}-Test-0xABC-encrypted-recovery\.json$/
+    );
 
     let alertSpy: jest.SpyInstance;
     beforeEach(() => {
@@ -351,7 +353,10 @@ describe("AppWallet", () => {
         expect.objectContaining({ directory: "DOCUMENTS" })
       );
       expect(Share.share).toHaveBeenCalledWith(
-        expect.objectContaining({ url: "file://recovery" })
+        expect.objectContaining({
+          url: "file://recovery",
+          dialogTitle: "Share or Save File",
+        })
       );
       expect(Filesystem.deleteFile).toHaveBeenCalledWith({
         directory: "CACHE",
@@ -373,7 +378,9 @@ describe("AppWallet", () => {
         screen.getByRole("button", { name: "plaintext export" })
       );
 
-      const plaintextPath = "share-temp/Test-0xABC-plaintext-recovery.txt";
+      const plaintextPath = expect.stringMatching(
+        /^share-temp\/\d{13}-Test-0xABC-plaintext-recovery\.txt$/
+      );
       await waitFor(() =>
         expect(Filesystem.deleteFile).toHaveBeenCalledWith({
           directory: "CACHE",

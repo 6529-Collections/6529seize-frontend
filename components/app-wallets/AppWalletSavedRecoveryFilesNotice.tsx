@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 import Button from "@/components/utils/button/Button";
+import { removeStaleSharedFiles } from "@/helpers/capacitorBlobDownload.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -24,6 +26,7 @@ export default function AppWalletSavedRecoveryFilesNotice({
 }: Readonly<{ address: string }>) {
   const locale = useBrowserLocale();
   const titleId = useId();
+  const fileListLabelId = useId();
   const removedRef = useRef<HTMLParagraphElement>(null);
   const removeButtonRef = useRef<HTMLButtonElement>(null);
   const [files, setFiles] = useState<readonly SavedRecoveryFile[]>([]);
@@ -31,6 +34,9 @@ export default function AppWalletSavedRecoveryFilesNotice({
 
   useEffect(() => {
     let active = true;
+    // A recovery export shared just before the app was closed can still be
+    // in the share cache; clear it without waiting for the next share.
+    void removeStaleSharedFiles();
     findSavedRecoveryFiles(address)
       .then((found) => {
         if (active) {
@@ -42,16 +48,6 @@ export default function AppWalletSavedRecoveryFilesNotice({
       active = false;
     };
   }, [address]);
-
-  useEffect(() => {
-    // The button is disabled while removing, which drops focus; put it back
-    // somewhere meaningful once the outcome is known.
-    if (removal === "removed") {
-      removedRef.current?.focus();
-    } else if (removal === "failed") {
-      removeButtonRef.current?.focus();
-    }
-  }, [removal]);
 
   if (removal === "removed") {
     return (
@@ -75,8 +71,18 @@ export default function AppWalletSavedRecoveryFilesNotice({
   const onRemove = () => {
     setRemoval("removing");
     void removeSavedRecoveryFiles(files).then((remaining) => {
-      setFiles(remaining);
-      setRemoval(remaining.length === 0 ? "removed" : "failed");
+      const removed = remaining.length === 0;
+      // Render the outcome before moving focus: the button is disabled while
+      // removing, which drops focus, so put it somewhere meaningful.
+      flushSync(() => {
+        setFiles(remaining);
+        setRemoval(removed ? "removed" : "failed");
+      });
+      if (removed) {
+        removedRef.current?.focus();
+      } else {
+        removeButtonRef.current?.focus();
+      }
     });
   };
 
@@ -102,6 +108,22 @@ export default function AppWalletSavedRecoveryFilesNotice({
       <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-200">
         {t(locale, "appWallets.savedRecoveryFiles.beforeRemoving")}
       </p>
+      <p
+        id={fileListLabelId}
+        className="tw-m-0 tw-mt-3 tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-200"
+      >
+        {t(locale, "appWallets.savedRecoveryFiles.fileListLabel")}
+      </p>
+      <ul
+        aria-labelledby={fileListLabelId}
+        className="tw-m-0 tw-mt-1 tw-list-disc tw-space-y-1 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300"
+      >
+        {files.map((file) => (
+          <li key={file.name} className="tw-break-all">
+            {file.name}
+          </li>
+        ))}
+      </ul>
       {removal === "failed" && (
         <p
           role="alert"

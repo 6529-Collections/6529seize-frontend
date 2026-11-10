@@ -1,12 +1,16 @@
 import { Filesystem } from "@capacitor/filesystem";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import AppWalletSavedRecoveryFilesNotice from "@/components/app-wallets/AppWalletSavedRecoveryFilesNotice";
+import { removeStaleSharedFiles } from "@/helpers/capacitorBlobDownload.helpers";
 
 jest.mock("@capacitor/filesystem", () => ({
   Directory: { Documents: "DOCUMENTS", Cache: "CACHE" },
   Filesystem: { readdir: jest.fn(), deleteFile: jest.fn() },
+}));
+jest.mock("@/helpers/capacitorBlobDownload.helpers", () => ({
+  removeStaleSharedFiles: jest.fn(),
 }));
 
 const ADDRESS = "0xAbC0000000000000000000000000000000000001";
@@ -29,6 +33,7 @@ const renderNotice = () =>
 beforeEach(() => {
   jest.resetAllMocks();
   jest.mocked(Filesystem.deleteFile).mockResolvedValue();
+  jest.mocked(removeStaleSharedFiles).mockResolvedValue();
 });
 
 describe("AppWalletSavedRecoveryFilesNotice", () => {
@@ -77,6 +82,15 @@ describe("AppWalletSavedRecoveryFilesNotice", () => {
     expect(region).toHaveTextContent(
       "make sure you have saved the recovery phrase somewhere safe"
     );
+
+    const fileList = screen.getByRole("list", {
+      name: "Files that will be removed:",
+    });
+    const listed = within(fileList)
+      .getAllByRole("listitem")
+      .map((item) => item.textContent);
+    expect(listed).toEqual([PLAINTEXT, ENCRYPTED]);
+    expect(removeStaleSharedFiles).toHaveBeenCalledTimes(1);
 
     await userEvent.click(
       screen.getByRole("button", { name: "Remove saved recovery files" })
