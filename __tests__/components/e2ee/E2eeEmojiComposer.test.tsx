@@ -196,9 +196,7 @@ const convoGroup = (engine: ReturnType<typeof createFakeE2eeEngine>) =>
 it("keeps whitespace-only drafts empty and blocks sending them", () => {
   const { engine, input } = setup();
   setComposerText(input, "  \n  ");
-  expect(
-    screen.getByRole("button", { name: "Send" })
-  ).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
   fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
   expect(engine.send).not.toHaveBeenCalled();
 });
@@ -363,6 +361,19 @@ it.each([false, true])(
     }
   }
 );
+
+it("keeps restored code free of invisible spacing placeholders before copying", () => {
+  const { input } = setup(true);
+  const editor = getNearestEditorFromDOMNode(input)!;
+  const code = "const first = 1;\n\n\nconst last = 2;";
+  act(() =>
+    editor.update(
+      () => importE2eeComposerMarkdown(`Before\n\n\n\`\`\`ts\n${code}\n\`\`\``),
+      { discrete: true }
+    )
+  );
+  expect(input.querySelector("code")?.textContent).toBe(code);
+});
 
 it.each(["mobile browser", "native app"])(
   "does not submit Return on %s",

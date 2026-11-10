@@ -1,4 +1,5 @@
-import type { EditorState } from "lexical";
+import { $getRoot, type EditorState } from "lexical";
+import { $isCodeNode } from "@lexical/code";
 import { $convertFromMarkdownString } from "@lexical/markdown";
 import { exportDropMarkdown } from "@/components/waves/drops/normalizeDropMarkdown";
 import {
@@ -27,4 +28,11 @@ export function importE2eeComposerMarkdown(markdown: string): void {
     addBlankLinePlaceholders(markdown),
     E2EE_COMPOSER_TRANSFORMERS
   );
+  // The importer keeps code's blank lines itself. Remove prose-only placeholders
+  // before code can be selected/copied, as well as before sending it.
+  for (const node of $getRoot().getAllTextNodes()) {
+    if ($isCodeNode(node.getParent())) {
+      node.setTextContent(removeBlankLinePlaceholders(node.getTextContent()));
+    }
+  }
 }

@@ -32,7 +32,7 @@ export const MARKDOWN_PARITY_CASES = [
   },
   {
     name: "code",
-    text: '```ts\nconst greeting = "hello";\nconsole.log(greeting);\n```\n\n```unknown-language\n@literal :gm: https://example.invalid/code\n```',
+    text: '```ts\nconst greeting = "hello";\n\n\nconsole.log(greeting);\n```\n\n```unknown-language\n@literal :gm: https://example.invalid/code\n```',
     selectors: ["pre code.hljs"],
   },
   {

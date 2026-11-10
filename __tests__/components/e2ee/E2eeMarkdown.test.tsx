@@ -187,3 +187,14 @@ it("refreshes highlighted code after an edit without duplicating text", async ()
     "const old"
   );
 });
+
+it("keeps extra blank lines and literal spacing inside fenced code", async () => {
+  const code = "const first = 1;\n\n\nconst last = 2;\n";
+  const { container } = render(
+    <E2eeMarkdown {...props} text={`\`\`\`ts\n${code}\`\`\``} />
+  );
+  await waitFor(() =>
+    expect(container.querySelector("pre code")).toHaveClass("hljs")
+  );
+  expect(container.querySelector("pre code")?.textContent).toBe(code);
+});
