@@ -383,11 +383,16 @@ export function defineCollectorsLeaderboardTests() {
     await expect(csvTooltip).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(csvTooltip).toBeHidden();
-    // Finish the hover interaction before exercising keyboard focus. The tooltip
-    // becomes invisible before its dismissal transition removes it from the DOM.
+    // The closing tooltip is hidden from the role query before it unmounts.
     await page.mouse.move(0, 0);
-    await expect(csvTooltip).toHaveCount(0);
+    await expect(
+      page.getByRole("tooltip", { includeHidden: true }).filter({
+        hasText: "Download CSV",
+      })
+    ).toHaveCount(0);
+    await expect(csvButton).not.toBeFocused();
     await csvButton.focus();
+    await expect(csvButton).toBeFocused();
     await expect(csvTooltip).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(csvTooltip).toBeHidden();
