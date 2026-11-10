@@ -752,6 +752,27 @@ class E2eeEngineImpl implements E2eeEngineExt {
     });
     await this.refreshMe();
   }
+
+  async renameDevice(deviceKey: string, label: string): Promise<void> {
+    const target = deviceKey.toLowerCase();
+    if (target === this.ctx.device?.deviceKey) {
+      await this.renameThisDevice(label);
+      return;
+    }
+    if (!this.ctx.device) {
+      throw new E2eeError("E2EE_NOT_READY");
+    }
+    await this.ctx.queue.run(async () => {
+      if (this.ctx.disposed) throw new E2eeError("E2EE_NOT_READY");
+      // Same guard as renaming this device: a superseded tab stops first.
+      await checkpoint(this.ctx, { skipWasm: true });
+      if (this.isDisposed()) throw new E2eeError("E2EE_NOT_READY");
+      await this.ctx.api.renameDevice(target, label);
+    });
+    // The list (and every other open device of the profile, on its next
+    // sync) shows the new name.
+    await this.refreshMe();
+  }
 }
 
 /** Creates the engine for one profile; resolves once local state is loaded. */

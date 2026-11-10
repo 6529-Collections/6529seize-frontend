@@ -10,6 +10,9 @@ jest.mock("next/navigation", () => ({
   notFound: jest.fn(() => {
     throw new Error("NEXT_NOT_FOUND");
   }),
+  permanentRedirect: jest.fn((url: string) => {
+    throw new Error(`NEXT_REDIRECT ${url}`);
+  }),
 }));
 jest.mock("@/components/e2ee/routes/E2eeMessagesRoute", () => ({
   __esModule: true,
@@ -42,6 +45,12 @@ describe("/messages/encrypted routes", () => {
     await expect(
       EncryptedConversationPage({ params: Promise.resolve({ group: GROUP }) })
     ).rejects.toThrow("NEXT_NOT_FOUND");
+  });
+
+  it("sends the former devices page to Preferences → Devices & security", () => {
+    expect(() => EncryptedMessagesDevicesPage()).toThrow(
+      "NEXT_REDIRECT /preferences?tab=security"
+    );
   });
 
   it("renders the client-only views when the flag is on", () => {

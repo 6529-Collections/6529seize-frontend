@@ -23,12 +23,23 @@ jest.mock("@/components/preferences/ContentPreferencesSettings", () => () => (
 jest.mock("@/components/preferences/ReportsPreferencesSettings", () => () => (
   <div>Reports settings panel</div>
 ));
-jest.mock("@/components/preferences/DevicesPreferencesSettings", () => () => (
-  <div>Devices settings panel</div>
-));
-let mockSignedMessagesEnabled = false;
-jest.mock("@/lib/device-signing/feature", () => ({
-  isSignedMessagesEnabled: () => mockSignedMessagesEnabled,
+jest.mock(
+  "@/components/preferences/devices-security/DevicesSecuritySettings",
+  () => () => <div>Devices settings panel</div>
+);
+let mockDevicesSecurityEnabled = false;
+jest.mock(
+  "@/components/preferences/devices-security/devicesSecurityFeature",
+  () => ({
+    isDevicesSecurityEnabled: () => mockDevicesSecurityEnabled,
+  })
+);
+let mockBackupPhase: string | null = null;
+jest.mock("@/hooks/e2ee/useE2eeBackup", () => ({
+  useE2eeBackup: () => ({
+    manager: null,
+    snapshot: mockBackupPhase ? { phase: mockBackupPhase } : null,
+  }),
 }));
 describe("PreferencesPageClient", () => {
   beforeEach(() => {
@@ -47,22 +58,40 @@ describe("PreferencesPageClient", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    mockSignedMessagesEnabled = false;
+    mockDevicesSecurityEnabled = false;
+    mockBackupPhase = null;
   });
 
-  it("offers the Devices tab only while signed messages are enabled", () => {
-    const { rerender } = render(<PreferencesPageClient activeTab="devices" />);
+  it("offers Devices & security only while signed posts or encrypted DMs are enabled", () => {
+    const { rerender } = render(<PreferencesPageClient activeTab="security" />);
     expect(
-      screen.queryByRole("link", { name: "Device Permissions" })
+      screen.queryByRole("link", { name: /^Devices & security/ })
     ).toBeNull();
     expect(screen.queryByText("Devices settings panel")).toBeNull();
 
-    mockSignedMessagesEnabled = true;
-    rerender(<PreferencesPageClient activeTab="devices" />);
-    const devicesTab = screen.getByRole("link", { name: "Device Permissions" });
-    expect(devicesTab).toHaveAttribute("href", "/preferences?tab=devices");
+    mockDevicesSecurityEnabled = true;
+    rerender(<PreferencesPageClient activeTab="security" />);
+    const devicesTab = screen.getByRole("link", { name: "Devices & security" });
+    expect(devicesTab).toHaveAttribute("href", "/preferences?tab=security");
     expect(devicesTab).toHaveAttribute("aria-current", "page");
     expect(screen.getByText("Devices settings panel")).toBeVisible();
+  });
+
+  it("marks the tab, in words too, while encrypted backup is off", () => {
+    mockDevicesSecurityEnabled = true;
+    mockBackupPhase = "off";
+    const { rerender } = render(
+      <PreferencesPageClient activeTab="notifications" />
+    );
+    expect(
+      screen.getByRole("link", { name: /^Devices & security\W+backup is off$/ })
+    ).toBeVisible();
+
+    mockBackupPhase = "on";
+    rerender(<PreferencesPageClient activeTab="notifications" />);
+    expect(
+      screen.getByRole("link", { name: "Devices & security" })
+    ).toBeVisible();
   });
 
   it("renders the full-height default notifications view", () => {

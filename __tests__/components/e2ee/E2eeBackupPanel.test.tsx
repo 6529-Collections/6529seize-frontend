@@ -112,15 +112,23 @@ describe("E2eeBackupPanel", () => {
     expect(
       screen.getByRole("heading", { name: "Encrypted backup" })
     ).toBeInTheDocument();
-    expect(screen.getByText(/Backup is off/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Turn on backup" }));
+    expect(screen.getByText("Off")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Your encrypted messages are saved only on your devices/)
+    ).toBeInTheDocument();
+    expect(
+      within(screen.getByRole("list", { name: "How backup works" })).getAllByRole(
+        "listitem"
+      )
+    ).toHaveLength(3);
+    fireEvent.click(screen.getByRole("button", { name: "Set up backup" }));
     const dialog = await screen.findByRole("dialog", {
       name: "Save your recovery code",
     });
     expect(dialog).toHaveTextContent(CODE);
-    const confirm = screen
-      .getAllByRole("button", { name: "Turn on backup" })
-      .find((button) => dialog.contains(button))!;
+    const confirm = within(dialog).getByRole("button", {
+      name: "Turn on backup",
+    });
     expect(confirm).toBeDisabled();
     fireEvent.click(
       screen.getByRole("checkbox", {
@@ -134,6 +142,7 @@ describe("E2eeBackupPanel", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
     expect(screen.getByText("Backup is on.")).toBeInTheDocument();
+    expect(screen.getByText("On")).toBeInTheDocument();
     expect(screen.queryByText(CODE)).not.toBeInTheDocument();
   });
 
@@ -269,7 +278,7 @@ describe("E2eeBackupPanel", () => {
       within(dialog).getByRole("button", { name: "Turn off backup" })
     );
     await waitFor(() => expect(manager.turnOff).toHaveBeenCalledTimes(1));
-    expect(await screen.findByText(/Backup is off/)).toBeInTheDocument();
+    expect(await screen.findByText("Off")).toBeInTheDocument();
   });
 
   it.each([

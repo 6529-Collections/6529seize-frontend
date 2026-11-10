@@ -76,8 +76,12 @@ export const getEncryptedMessagesWakeRoute = (): string =>
 export const getNewEncryptedChatRoute = (): string =>
   `${ENCRYPTED_MESSAGES_ROUTE}/new`;
 
+/**
+ * Devices & security in Preferences: devices, permissions and encrypted
+ * backup. The former `/messages/encrypted/devices` page redirects here.
+ */
 export const getEncryptedDevicesRoute = (): string =>
-  `${ENCRYPTED_MESSAGES_ROUTE}/devices`;
+  "/preferences?tab=security";
 
 export const getEncryptedConversationRoute = (group: string): string =>
   `${ENCRYPTED_MESSAGES_ROUTE}/${encodeURIComponent(group)}`;
