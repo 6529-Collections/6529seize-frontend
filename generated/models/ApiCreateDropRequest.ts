@@ -26,6 +26,9 @@ import { HttpFile } from '../http/http';
 export class ApiCreateDropRequest {
     'wave_id': string;
     'reply_to'?: ApiReplyToDrop;
+    /**
+    * Optional. Defaults to CHAT when omitted. Only CHAT and PARTICIPATORY are accepted here; WINNER is assigned by the backend.
+    */
     'drop_type'?: ApiDropType;
     'is_additional_action_promised'?: boolean;
     'mentioned_groups'?: Array<ApiDropGroupMention>;

@@ -25501,7 +25501,9 @@ components:
     ApiAvailableRatingCredit:
       type: object
       required:
-        - credit
+        - cic_credit
+        - rep_credit
+        - wave_rep_credit
       properties:
         cic_credit:
           type: number
@@ -25648,7 +25650,6 @@ components:
       type: object
       required:
         - amount
-        - category
       properties:
         amount:
           type: number
@@ -30900,7 +30901,6 @@ components:
       type: object
       required:
         - wave_id
-        - type
       allOf:
         - $ref: "#/components/schemas/ApiCreateWaveDropRequest"
       properties:
@@ -30909,7 +30909,11 @@ components:
         reply_to:
           $ref: "#/components/schemas/ApiReplyToDrop"
         drop_type:
-          $ref: "#/components/schemas/ApiDropType"
+          allOf:
+            - $ref: "#/components/schemas/ApiDropType"
+          description: >-
+            Optional. Defaults to CHAT when omitted. Only CHAT and PARTICIPATORY
+            are accepted here; WINNER is assigned by the backend.
         is_additional_action_promised:
           type: boolean
         mentioned_groups:
@@ -31043,7 +31047,6 @@ components:
       required:
         - content_type
         - file_name
-        - file_size
       properties:
         content_type:
           $ref: "#/components/schemas/ApiMediaUploadMimeType"
@@ -38764,7 +38767,6 @@ components:
         - image
         - image_compact
         - animation
-        - animation_compact
       properties:
         id:
           type: string
@@ -38772,9 +38774,18 @@ components:
         image:
           type: string
           description: The URL of the NFT image
+        image_compact:
+          type: string
+          description: The URL of a smaller rendition of the NFT image
         animation:
           type: string
           description: The URL of the NFT animation, if available
+        animation_compact:
+          type: string
+          nullable: true
+          description: >-
+            The URL of a compressed rendition of the NFT animation. Absent for
+            collections that do not produce one.
     ApiNftOwner:
       type: object
       required:
@@ -41345,6 +41356,9 @@ components:
           format: int64
         last_modified:
           type: string
+        level:
+          type: number
+          format: int64
     ApiRatingWithProfileInfoAndLevelPage:
       type: object
       required:
