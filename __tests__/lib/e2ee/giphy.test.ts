@@ -1,4 +1,5 @@
 /** @jest-environment node */
+import { isGifPickerFile } from "@/lib/e2ee/gif-picker-files";
 import { downloadGiphyGif, GifDownloadError } from "@/lib/e2ee/giphy";
 import { MAX_ATTACHMENT_FILE_BYTES } from "@/lib/e2ee/media";
 
@@ -24,6 +25,8 @@ it("downloads original bytes without app credentials, referrer or redirected req
   const file = await download();
   expect(file.name).toBe("giphy.gif");
   expect(file.type).toBe("image/gif");
+  // Sent as downloaded, not cleaned or renamed like a user's own photo.
+  expect(isGifPickerFile(file)).toBe(true);
   expect(new Uint8Array(await file.arrayBuffer())).toEqual(GIF);
   expect(fetchMock).toHaveBeenCalledWith(GIF_URL, {
     signal: expect.any(AbortSignal),

@@ -1,3 +1,5 @@
+import type { NextRequest } from "next/server";
+
 const mockNextResponseJson = jest.fn(
   (body: unknown, init?: { status?: number | undefined }) => ({
     status: init?.status ?? 200,
@@ -14,6 +16,28 @@ jest.mock("next/server", () => ({
 jest.mock("@/lib/twitter", () => ({
   fetchTweetPreview: mockFetchTweetPreview,
 }));
+
+const postRequest = (body: unknown, clientIp?: string) => {
+  const encoded = new TextEncoder().encode(
+    typeof body === "string" ? body : JSON.stringify(body)
+  );
+  let read = false;
+  const request = {
+    headers: new Headers(clientIp ? { "x-forwarded-for": clientIp } : {}),
+    body: {
+      getReader: () => ({
+        read: async () => {
+          if (read) {
+            return { done: true, value: undefined };
+          }
+          read = true;
+          return { done: false, value: encoded };
+        },
+      }),
+    },
+  };
+  return request as unknown as NextRequest;
+};
 
 describe("twitter preview API route", () => {
   beforeEach(() => {
@@ -32,6 +56,7 @@ describe("twitter preview API route", () => {
 
     const { GET } = await import("../../../app/api/twitter/preview/route");
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/twitter/preview?url=https://x.com/Mayudropsphotos/status/2057513333985554492"
       ),
@@ -50,6 +75,7 @@ describe("twitter preview API route", () => {
   it("returns an error when the URL is missing", async () => {
     const { GET } = await import("../../../app/api/twitter/preview/route");
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL("https://app.local/api/twitter/preview"),
     } as any);
 
@@ -64,6 +90,7 @@ describe("twitter preview API route", () => {
 
     const { GET } = await import("../../../app/api/twitter/preview/route");
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL("https://app.local/api/twitter/preview?url=not-a-tweet"),
     } as any);
 
@@ -76,6 +103,7 @@ describe("twitter preview API route", () => {
 
     const { GET } = await import("../../../app/api/twitter/preview/route");
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://app.local/api/twitter/preview?url=https://twitter.com/Mayudropsphotos/status/2057513333985554492"
       ),
@@ -102,11 +130,11 @@ describe("twitter preview API route", () => {
     });
 
     const { POST } = await import("../../../app/api/twitter/preview/route");
-    const response = await POST({
-      json: async () => ({
+    const response = await POST(
+      postRequest({
         urls: [` ${goodUrl} `, "not-a-tweet", goodUrl],
-      }),
-    } as any);
+      })
+    );
     const body = (await response.json()) as {
       readonly results: Record<string, unknown>;
       readonly errors: Record<string, string | undefined>;
@@ -125,9 +153,7 @@ describe("twitter preview API route", () => {
 
   it("returns an error when the POST batch has no URLs", async () => {
     const { POST } = await import("../../../app/api/twitter/preview/route");
-    const response = await POST({
-      json: async () => ({ urls: [] }),
-    } as any);
+    const response = await POST(postRequest({ urls: [] }));
 
     expect(response.status).toBe(400);
     expect(mockFetchTweetPreview).not.toHaveBeenCalled();
@@ -140,11 +166,46 @@ describe("twitter preview API route", () => {
     );
 
     const { POST } = await import("../../../app/api/twitter/preview/route");
-    const response = await POST({
-      json: async () => ({ urls }),
-    } as any);
+    const response = await POST(postRequest({ urls }));
 
     expect(response.status).toBe(400);
     expect(mockFetchTweetPreview).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized and malformed POST bodies before fetching", async () => {
+    const { POST } = await import("../../../app/api/twitter/preview/route");
+    const oversized = await POST(
+      postRequest({ urls: ["https://x.com/a/status/1".padEnd(9000, "1")] })
+    );
+    const malformed = await POST(postRequest("{not json"));
+
+    expect(oversized.status).toBe(413);
+    expect(malformed.status).toBe(400);
+    expect(mockFetchTweetPreview).not.toHaveBeenCalled();
+  });
+
+  it("limits each client to its per-minute preview budget, counting batch URLs", async () => {
+    mockFetchTweetPreview.mockResolvedValue({ tweetId: "1", url: "u" });
+    const { GET, POST } =
+      await import("../../../app/api/twitter/preview/route");
+    const urls = Array.from(
+      { length: 5 },
+      (_value, index) => `https://x.com/user/status/${index + 1}`
+    );
+
+    for (let index = 0; index < 48; index += 1) {
+      const batch = await POST(postRequest({ urls }, "8.8.4.20"));
+      expect(batch.status).toBe(200);
+    }
+    const limited = await GET({
+      headers: new Headers({ "x-forwarded-for": "8.8.4.20" }),
+      nextUrl: new URL(
+        "https://app.local/api/twitter/preview?url=https://x.com/a/status/1"
+      ),
+    } as any);
+    const otherClient = await POST(postRequest({ urls }, "8.8.4.21"));
+
+    expect(limited.status).toBe(429);
+    expect(otherClient.status).toBe(200);
   });
 });

@@ -8,6 +8,7 @@ import {
   getConversationTitle,
   getMessagePreview,
   getNoticeText,
+  isUnpairedDm,
 } from "@/components/e2ee/e2eeFormat";
 import { getE2eeGrantOrigin } from "@/components/e2ee/e2eePlatform";
 import {
@@ -163,6 +164,28 @@ describe("format helpers", () => {
     ).toBe("alice and bob");
   });
 
+  it("titles a DM holding someone else by its members, not one person", () => {
+    const crowded = conversation({
+      kind: "dm",
+      name: null,
+      admins: [SELF_ID, ALICE_ID],
+    });
+    expect(isUnpairedDm(crowded, SELF_ID)).toBe(true);
+    expect(getConversationTitle("en-US", crowded, SELF_ID)).toBe(
+      "alice and bob"
+    );
+    const alone = conversation({
+      kind: "dm",
+      name: null,
+      members: members.slice(0, 1),
+    });
+    expect(isUnpairedDm(alone, SELF_ID)).toBe(false);
+    expect(isUnpairedDm(conversation(), SELF_ID)).toBe(false);
+    expect(getConversationTitle("en-US", alone, SELF_ID)).toBe(
+      "Unknown member"
+    );
+  });
+
   it("describes notices with names", () => {
     const notice = (
       type: "removed" | "renamed" | "safety_code_changed",
@@ -187,6 +210,48 @@ describe("format helpers", () => {
     expect(
       getNoticeText("en-US", notice("safety_code_changed"), members, SELF_ID)
     ).toBe("The safety code changed");
+  });
+
+  it("names who added a device not yet verified for its owner", () => {
+    const wallet = "0x1111111111111111111111111111111111111111";
+    const added = (actor: string | null, owner: string, detail?: string) =>
+      message({
+        id: `added-${actor}-${owner}`,
+        kind: "notice",
+        notice: {
+          type: "device_added",
+          actorProfileId: actor,
+          targetProfileIds: [owner],
+          unverified: true,
+          ...(detail === undefined ? {} : { detail }),
+        },
+      });
+    // alice (the committer) added a device of bob's.
+    expect(
+      getNoticeText("en-US", added(ALICE_ID, BOB_ID, wallet), members, SELF_ID)
+    ).toMatch(
+      /^alice added a device signed by wallet 0x1111…1111, which isn’t verified for bob on this device$/u
+    );
+    expect(
+      getNoticeText("en-US", added(ALICE_ID, SELF_ID), members, SELF_ID)
+    ).toBe("alice added a device that isn’t verified for you on this device");
+    // A verified add keeps naming the device's owner.
+    expect(
+      getNoticeText(
+        "en-US",
+        message({
+          id: "verified-add",
+          kind: "notice",
+          notice: {
+            type: "device_added",
+            actorProfileId: ALICE_ID,
+            targetProfileIds: [BOB_ID],
+          },
+        }),
+        members,
+        SELF_ID
+      )
+    ).toBe("bob added a device");
   });
 
   it("previews undecryptable, deleted and attachment-only messages", () => {

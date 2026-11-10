@@ -2,6 +2,7 @@ import type { MessageKey } from "@/i18n/messages";
 import { E2EE_SIGNATURE_REJECTED } from "@/lib/e2ee/engine/errors";
 
 export {
+  E2EE_REVOCATION_UNVERIFIED,
   E2EE_SIGNATURE_REJECTED,
   isE2eeSignatureRejection,
 } from "@/lib/e2ee/engine/errors";
