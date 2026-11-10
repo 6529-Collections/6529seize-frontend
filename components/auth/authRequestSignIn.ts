@@ -19,6 +19,7 @@ import {
   type LoginE2eeDevice,
 } from "@/lib/device-signing/login-e2ee";
 import { adoptLoginE2eeDevice } from "./authLoginE2eeDevice";
+import { isExpectedSignInChallenge } from "./authNonce";
 import { AUTH_SIGNATURE_FAILED_MESSAGE } from "@/services/auth/auth.messages";
 import { canStoreAnotherWalletAccount } from "@/services/auth/auth.utils";
 import {
@@ -108,19 +109,29 @@ const toGrantChallenge = (
   e2eeDevice: LoginE2eeDevice | null
 ): SignInChallenge | null => {
   const message = nonceResponse.signable_message;
-  if (e2eeDevice && isDeviceGrantChallenge(message, deviceGrant, e2eeDevice)) {
+  const isGrantForm = isExpectedSignInChallenge(
+    message,
+    deviceGrant.address,
+    "grant"
+  );
+  if (
+    isGrantForm &&
+    e2eeDevice &&
+    isDeviceGrantChallenge(message, deviceGrant, e2eeDevice)
+  ) {
     return { nonceResponse, deviceGrant, e2eeDevice };
   }
   // A server with encrypted messages off (or on another ciphersuite) grants
   // the signing key alone; encrypted messages then keep their own prompt.
-  if (isDeviceGrantChallenge(message, deviceGrant)) {
+  if (isGrantForm && isDeviceGrantChallenge(message, deviceGrant)) {
     return { nonceResponse, deviceGrant, e2eeDevice: null };
   }
   // A challenge without any device grant is the ordinary one; never sign a
   // grant for a key other than this device's.
-  return carriesDeviceGrant(message)
-    ? null
-    : { nonceResponse, deviceGrant: null, e2eeDevice: null };
+  return !carriesDeviceGrant(message) &&
+    isExpectedSignInChallenge(message, deviceGrant.address, "ordinary")
+    ? { nonceResponse, deviceGrant: null, e2eeDevice: null }
+    : null;
 };
 
 const getGrantChallenge = async ({
@@ -280,6 +291,17 @@ const getOrdinaryChallenge = async (
   if (carriesDeviceGrant(nonceResponse.signable_message)) {
     throw new NonceResponseValidationError(
       "Unrequested device grant in the sign-in challenge"
+    );
+  }
+  if (
+    !isExpectedSignInChallenge(
+      nonceResponse.signable_message,
+      signerAddress,
+      "ordinary"
+    )
+  ) {
+    throw new NonceResponseValidationError(
+      "Unexpected sign-in challenge format"
     );
   }
   return { nonceResponse, deviceGrant: null, e2eeDevice: null };

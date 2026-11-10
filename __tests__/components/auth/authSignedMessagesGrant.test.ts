@@ -7,12 +7,18 @@ const SIGNATURE = `0x${"ab".repeat(65)}`;
 const mockPersistSessionResponse = jest.fn();
 const mockLoginWithSessionV2 = jest.fn();
 jest.mock("@/services/auth/session-v2.utils", () => ({
+  getSessionClientType: () => "web",
   loginWithSessionV2: (...args: unknown[]) => mockLoginWithSessionV2(...args),
   persistSessionResponse: (...args: unknown[]) =>
     mockPersistSessionResponse(...args),
 }));
 jest.mock("@/services/auth/auth.utils", () => ({
   canStoreAnotherWalletAccount: () => true,
+}));
+// The challenge format has its own tests (authRequestSignIn.challenge.test.ts);
+// the grant parsing is stubbed here too.
+jest.mock("@/components/auth/authNonce", () => ({
+  isExpectedSignInChallenge: () => true,
 }));
 
 const GRANT = {

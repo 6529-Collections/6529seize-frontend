@@ -1,3 +1,6 @@
+/**
+ * @jest-environment-options {"url":"https://staging.6529.io"}
+ */
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import type { StoredDeviceKey } from "@/lib/device-signing/device-key-storage";
 import { installNodeWebCrypto } from "../../lib/device-signing/device-signing-test-utils";
@@ -45,24 +48,20 @@ import {
   renderLegacyDeviceGrantStatement,
 } from "@/lib/device-signing/grant-message";
 import { loginWithSessionV2 } from "@/services/auth/session-v2.utils";
+import {
+  appSignInChallenge,
+  siweSignInChallenge,
+} from "./signInChallengeFixtures";
 
 const SIGNER = "0x1111111111111111111111111111111111111111";
 const SCOPES = "post,edit,delete,react";
 const loginMock = loginWithSessionV2 as jest.Mock;
 
-const ordinaryMessage = [
-  "https://staging.6529.io wants you to sign in with your Ethereum account:",
-  SIGNER,
-  "",
-  "Sign in to 6529.",
-  "",
-  "URI: https://staging.6529.io",
-  "Version: 1",
-  "Chain ID: 1",
-  "Nonce: a1b2c3d4e5f60718293a4b5c6d7e8f90",
-  "Issued At: 2026-10-12T12:00:00.000Z",
-  "Expiration Time: 2026-10-12T12:05:00.000Z",
-].join("\n");
+const ordinaryMessageFor = (signer: string): string =>
+  mockClientType === "web"
+    ? siweSignInChallenge({ address: signer })
+    : appSignInChallenge({ address: signer });
+const ordinaryMessage = siweSignInChallenge({ address: SIGNER });
 
 const grantMessage = (
   deviceKeyHex: string,
@@ -94,7 +93,7 @@ const createSubject = (
   nonceFor: (params: NonceParams) => string | Promise<string> = (params) =>
     params.deviceGrant
       ? grantMessage(params.deviceGrant.device_key, params.signerAddress)
-      : ordinaryMessage
+      : ordinaryMessageFor(params.signerAddress)
 ) => {
   const getNonce = jest.fn(async (params: NonceParams) => ({
     signable_message: await nonceFor(params),
@@ -244,7 +243,9 @@ describe("sign-in with a device grant", () => {
       success: true,
     });
     expect(getNonce).toHaveBeenCalledWith({ signerAddress: SIGNER });
-    expect(getSignature).toHaveBeenCalledWith({ message: ordinaryMessage });
+    expect(getSignature).toHaveBeenCalledWith({
+      message: ordinaryMessageFor(SIGNER),
+    });
     expect(loginMock.mock.calls[0]![0]).not.toHaveProperty("deviceLabel");
     expect(mockRecords.size).toBe(0);
   });
@@ -288,6 +289,34 @@ describe("sign-in with a device grant", () => {
     expect(getSignature).toHaveBeenCalledTimes(1);
     expect(getSignature).toHaveBeenCalledWith({ message: ordinaryMessage });
   });
+
+  it.each([
+    [
+      "another chain",
+      (message: string) => message.replace("Chain ID: 1", "Chain ID: 5"),
+    ],
+    [
+      "another 6529 host",
+      (message: string) =>
+        message.replaceAll("https://staging.6529.io", "https://6529.io"),
+    ],
+  ])(
+    "never signs a grant challenge for %s and falls back to an ordinary challenge",
+    async (_case, alter) => {
+      const { getNonce, getSignature, signIn } = createSubject((params) =>
+        params.deviceGrant
+          ? alter(grantMessage(params.deviceGrant.device_key))
+          : ordinaryMessage
+      );
+
+      await expect(
+        signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
+      ).resolves.toEqual({ success: true });
+      expect(getNonce).toHaveBeenCalledTimes(2);
+      expect(getSignature).toHaveBeenCalledTimes(1);
+      expect(getSignature).toHaveBeenCalledWith({ message: ordinaryMessage });
+    }
+  );
 
   it("falls back to an ordinary challenge when the grant request fails", async () => {
     const { getNonce, getSignature, signIn } = createSubject((params) => {
@@ -377,7 +406,7 @@ describe("sign-in with a device grant", () => {
       expect(subject.getNonce).toHaveBeenCalledTimes(1);
       expect(subject.getNonce).toHaveBeenCalledWith({ signerAddress: signer });
       expect(subject.getSignature).toHaveBeenCalledWith({
-        message: ordinaryMessage,
+        message: ordinaryMessageFor(signer),
       });
       expect(loginMock.mock.calls.at(-1)![0]).not.toHaveProperty("deviceLabel");
     };
