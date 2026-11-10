@@ -255,23 +255,13 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     allValue: hasAllActivityWavesNextPage,
     deferredValue: false,
   });
-  const fetchNextMainWavesPage = useCallback(() => {
-    if (!shouldLoadMainWaves) {
-      return;
-    }
-
-    if (isJoinedMode) {
-      fetchNextFollowedActivityWavesPage();
-      return;
-    }
-
-    fetchNextAllActivityWavesPage();
-  }, [
-    isJoinedMode,
+  const fetchNextMainWavesPage = getModeValue({
     shouldLoadMainWaves,
-    fetchNextAllActivityWavesPage,
-    fetchNextFollowedActivityWavesPage,
-  ]);
+    isJoinedMode,
+    joinedValue: fetchNextFollowedActivityWavesPage,
+    allValue: fetchNextAllActivityWavesPage,
+    deferredValue: noopListAction,
+  });
   const mainWavesStatus = getModeValue({
     shouldLoadMainWaves,
     isJoinedMode,
@@ -279,23 +269,13 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     allValue: allActivityWavesStatus,
     deferredValue: "pending",
   });
-  const mainWavesRefetch = useCallback(() => {
-    if (!shouldLoadMainWaves) {
-      return;
-    }
-
-    if (isJoinedMode) {
-      followedActivityWavesRefetch();
-      return;
-    }
-
-    allActivityWavesRefetch();
-  }, [
-    isJoinedMode,
+  const mainWavesRefetch = getModeValue({
     shouldLoadMainWaves,
-    allActivityWavesRefetch,
-    followedActivityWavesRefetch,
-  ]);
+    isJoinedMode,
+    joinedValue: followedActivityWavesRefetch,
+    allValue: allActivityWavesRefetch,
+    deferredValue: noopListAction,
+  });
   const trackedAnnouncementWave = useMemo(() => {
     if (!shouldLoadMainWaves) {
       return null;

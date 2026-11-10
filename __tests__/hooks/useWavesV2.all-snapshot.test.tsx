@@ -155,3 +155,21 @@ it("resumes the requested next page after an expired snapshot refresh", async ()
     "snapshot-b:20",
   ]);
 });
+
+it("keeps rows and exposes Retry when the expiration refresh fails", async () => {
+  api
+    .mockResolvedValueOnce(page(ids("a", 0, 20), "snapshot-a:20"))
+    .mockRejectedValueOnce(failure(410))
+    .mockRejectedValueOnce(failure(400));
+  const { result } = setup();
+  await waitFor(() => expect(result.current.waves).toHaveLength(20));
+  act(() => result.current.fetchNextPage());
+  await waitFor(() => expect(api).toHaveBeenCalledTimes(3));
+  await waitFor(() => expect(result.current.isFetching).toBe(false));
+  expect(result.current.hasLoadingError).toBe(true);
+  expect(result.current.waves.map((wave) => wave.id)).toEqual(ids("a", 0, 20));
+  api.mockResolvedValueOnce(page(ids("b", 0, 20), null));
+  act(() => result.current.retryLoading());
+  await waitFor(() => expect(result.current.hasLoadingError).toBe(false));
+  expect(result.current.waves.map((wave) => wave.id)).toEqual(ids("b", 0, 20));
+});
