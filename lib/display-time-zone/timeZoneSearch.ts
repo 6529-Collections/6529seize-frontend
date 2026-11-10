@@ -23,7 +23,7 @@ const FALLBACK_TIME_ZONES: readonly string[] = [
 let cachedTimeZones: readonly string[] | null = null;
 
 /** IANA zones from the runtime, or a short list when it cannot enumerate them. */
-function getSupportedTimeZones(): readonly string[] {
+export function getSupportedTimeZones(): readonly string[] {
   if (cachedTimeZones) return cachedTimeZones;
   try {
     const zones = Intl.supportedValuesOf("timeZone");

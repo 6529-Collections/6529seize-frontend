@@ -492,7 +492,7 @@ test("suppresses the click generated after a long press", async () => {
 
   longPressOptions.onInteractionStart();
   fireEvent.touchEnd(openButton);
-  await userEvent.click(openButton);
+  fireEvent.click(openButton, { detail: 1 });
 
   expect(startDropOpen).not.toHaveBeenCalled();
   expect(onDropClick).not.toHaveBeenCalled();

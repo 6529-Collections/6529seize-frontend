@@ -26,30 +26,6 @@ export function useCreateDropFocusBehavior({
   useBlurOnNativeKeyboardDismiss(blurInput, isApp && activeDrop !== null);
   const isInitialMountRef = useRef(true);
 
-  const scheduleMobileInputFocus = useCallback(
-    (delayMs: number) => {
-      let timeoutId: ReturnType<typeof setTimeout> | undefined;
-      const frameId = requestAnimationFrame(() => {
-        if (delayMs <= 0) {
-          createDropInputRef.current?.focus();
-          return;
-        }
-
-        timeoutId = setTimeout(() => {
-          createDropInputRef.current?.focus();
-        }, delayMs);
-      });
-
-      return () => {
-        cancelAnimationFrame(frameId);
-        if (timeoutId !== undefined) {
-          clearTimeout(timeoutId);
-        }
-      };
-    },
-    [createDropInputRef]
-  );
-
   useLayoutEffect(() => {
     const isInitialMount = isInitialMountRef.current;
 
@@ -81,15 +57,10 @@ export function useCreateDropFocusBehavior({
         return;
       }
 
-      let cancelScheduledFocus: (() => void) | undefined;
-      const timer = setTimeout(() => {
-        cancelScheduledFocus = scheduleMobileInputFocus(300);
-      }, 200);
-
-      return () => {
-        clearTimeout(timer);
-        cancelScheduledFocus?.();
-      };
+      // iOS needs focus during the reply gesture's activation. Deferring it
+      // until after the reply animation can select the editor without an IME.
+      createDropInputRef.current?.focus();
+      return;
     }
 
     if (shouldFocusInitialActiveDrop) {
@@ -105,5 +76,5 @@ export function useCreateDropFocusBehavior({
       createDropInputRef.current?.focus();
     }, 100);
     return () => clearTimeout(timer);
-  }, [activeDrop, isApp, scheduleMobileInputFocus, focusOnInitialActiveDrop]);
+  }, [activeDrop, isApp, createDropInputRef, focusOnInitialActiveDrop]);
 }
