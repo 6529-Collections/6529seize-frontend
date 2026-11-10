@@ -4,6 +4,11 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropActions from "@/components/waves/drops/WaveDropActions";
+import {
+  ShareDropsSelectionLayer,
+  ShareDropsSelectionProvider,
+} from "@/components/waves/drops/share-image/ShareDropsSelectionContext";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 
 jest.mock("@/components/waves/drops/WaveDropActionsAddReaction", () => ({
   __esModule: true,
@@ -180,5 +185,31 @@ describe("WaveDropActions", () => {
       screen.queryByRole("button", { name: "Open more actions" })
     ).toBeNull();
     expect(screen.queryByTestId("rate")).toBeNull();
+  });
+
+  it("offers Share as image to guests inside a conversation", () => {
+    authMock.mockReturnValue({ connectedProfile: null });
+    const drop = {
+      ...baseDrop,
+      serial_no: 7,
+      type: DropSize.FULL,
+      stableKey: "drop-1",
+      stableHash: "drop-1",
+      author: { handle: "alice" },
+    };
+
+    render(
+      <ShareDropsSelectionProvider
+        wave={{ id: "wave-1" } as never}
+        drops={[drop]}
+      >
+        <WaveDropActions drop={drop} activePartIndex={0} onReply={() => {}} />
+        <ShareDropsSelectionLayer />
+      </ShareDropsSelectionProvider>
+    );
+
+    expect(screen.getByTestId("copy-link")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Share as image" }));
+    expect(screen.getByText("1 post selected")).toBeInTheDocument();
   });
 });
