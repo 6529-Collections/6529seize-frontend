@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -43,16 +44,6 @@ export default function AppWalletSavedRecoveryFilesNotice({
     };
   }, [address]);
 
-  useEffect(() => {
-    // The button is disabled while removing, which drops focus; put it back
-    // somewhere meaningful once the outcome is known.
-    if (removal === "removed") {
-      removedRef.current?.focus();
-    } else if (removal === "failed") {
-      removeButtonRef.current?.focus();
-    }
-  }, [removal]);
-
   if (removal === "removed") {
     return (
       <p
@@ -75,8 +66,18 @@ export default function AppWalletSavedRecoveryFilesNotice({
   const onRemove = () => {
     setRemoval("removing");
     void removeSavedRecoveryFiles(files).then((remaining) => {
-      setFiles(remaining);
-      setRemoval(remaining.length === 0 ? "removed" : "failed");
+      const removed = remaining.length === 0;
+      // Render the outcome before moving focus: the button is disabled while
+      // removing, which drops focus, so put it somewhere meaningful.
+      flushSync(() => {
+        setFiles(remaining);
+        setRemoval(removed ? "removed" : "failed");
+      });
+      if (removed) {
+        removedRef.current?.focus();
+      } else {
+        removeButtonRef.current?.focus();
+      }
     });
   };
 
