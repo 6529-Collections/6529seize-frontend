@@ -21,6 +21,7 @@ import { createConnectionShare } from "@/services/auth/session-v2.utils";
 import { publicEnv } from "@/config/env";
 import { t } from "@/i18n/messages";
 import { HEADER_SHARE_LOCALE } from "./constants";
+import { DesktopConnectionVersionNotice } from "./DesktopConnectionLink";
 
 /** Source-side wallet approval. The receiving app never needs a live wallet. */
 export default function DeviceConnectionShare({
@@ -157,6 +158,9 @@ export default function DeviceConnectionShare({
         status={flow.status}
         onReconnect={flow.reconnect}
       />
+      {!activeLink && target === "desktop" && (
+        <DesktopConnectionVersionNotice />
+      )}
       {!activeLink && !flow.isEnabling && (
         <Button variant="primary" size="md" onClick={refresh}>
           {t(HEADER_SHARE_LOCALE, "headerShare.connectionRefresh.action")}
