@@ -1,0 +1,22 @@
+{
+  "identityGettingStarted.region": "Getting started with your identity",
+  "identityGettingStarted.dismiss": "Dismiss getting-started guidance",
+  "identityGettingStarted.created": "Profile created",
+  "identityGettingStarted.title": "Your profile is ready",
+  "identityGettingStarted.introduction": "Welcome to 6529—a network where people share ideas, create art, and decide what to build together.",
+  "identityGettingStarted.discover": "Find a Wave",
+  "identityGettingStarted.wavesDescription": "Waves are spaces for conversations, creative work, and community decisions.",
+  "identityGettingStarted.explore": "More to explore",
+  "identityGettingStarted.mainStage": "The Memes Main Stage",
+  "identityGettingStarted.mainStageDescription": "Discover artwork the community is considering for future Meme Cards.",
+  "identityGettingStarted.submission": "How to submit to The Memes",
+  "identityGettingStarted.submissionDescription": "Learn how nomination and submission work.",
+  "identityGettingStarted.aboutAdd": "Add an About statement",
+  "identityGettingStarted.aboutEdit": "Edit About statement",
+  "identityGettingStarted.optional": "Optional",
+  "identityGettingStarted.guide": "How 6529 works",
+  "identityGettingStarted.aboutLoadError": "Couldn't load your About statement. Try again before editing.",
+  "identityGettingStarted.aboutLoading": "Loading your About statement…",
+  "identityGettingStarted.retry": "Retry",
+  "identityGettingStarted.updated": "Profile updated."
+}

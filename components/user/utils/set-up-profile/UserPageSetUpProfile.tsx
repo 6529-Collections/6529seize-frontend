@@ -16,6 +16,8 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useMutation } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -45,6 +47,7 @@ export default function UserPageSetUpProfile({
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
   const pathname = usePathname();
+  const locale = useBrowserLocale();
 
   const [userName, setUserName] = useState<string>(profile.handle ?? "");
 
@@ -83,12 +86,19 @@ export default function UserPageSetUpProfile({
       });
     },
     onSuccess: (updatedProfile) => {
-      if (!profile.handle?.trim() && updatedProfile.handle?.trim()) {
+      const isNewProfile =
+        !profile.handle?.trim() && !!updatedProfile.handle?.trim();
+      if (isNewProfile) {
         markIdentityGettingStartedSession(updatedProfile.handle);
       }
 
       setToast({
-        message: "Profile updated.",
+        message: t(
+          locale,
+          isNewProfile
+            ? "identityGettingStarted.created"
+            : "identityGettingStarted.updated"
+        ),
         type: "success",
       });
 

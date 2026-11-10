@@ -178,7 +178,7 @@ function RepProgressSection({
   );
 }
 
-function MainStageNominationPopoverContent() {
+export function MainStageNominationPopoverContent() {
   const { hasProfile, isError, isLoading, progress } =
     useMemesNomineeProgress();
 
