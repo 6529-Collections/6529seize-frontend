@@ -89,6 +89,13 @@ answers and waits until the purge completes:
   `production` environment names the distribution (`E3KTTDJUNHRYW9`); the
   step is skipped when it is empty.
 
+The production page and its ready announcement carry a release order derived
+from the number of commits reachable from their exact source SHA. The deploy
+requires the next SHA to descend from the running one, so the count grows on
+every forward release. An open tab offers an update only when the announced
+order exceeds its own. This prevents an older announcement from prompting a
+reload when a tab reaches a newer instance during a rollout.
+
 The step runs only when the version check passed. It fails the job when it
 cannot start a purge, or when the distribution does not serve the deployed
 host. It only warns when the purge is still running after ten minutes, or when

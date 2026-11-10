@@ -5,10 +5,21 @@
  */
 export const VERSION_POLL_HEADERS = {
   version: "x-6529-client-version",
+  releaseOrder: "x-6529-client-release-order",
   hidden: "x-6529-client-hidden",
   ageMinutes: "x-6529-client-age-min",
   releasesBehind: "x-6529-client-releases-behind",
 } as const;
+
+export function parseReleaseOrder(value: unknown): number | null {
+  const order =
+    typeof value === "string" && /^[1-9]\d*$/.test(value)
+      ? Number(value)
+      : value;
+  return typeof order === "number" && Number.isSafeInteger(order) && order > 0
+    ? order
+    : null;
+}
 
 /**
  * The page's build ID (its git SHA) when it is one, for reporting it beside
@@ -43,7 +54,8 @@ export function noteAnnouncedVersion(
 /** Headers for one version poll from this page. */
 export function getVersionPollHeaders(
   currentVersion: string,
-  hidden: boolean
+  hidden: boolean,
+  releaseOrder: number | null = null
 ): Record<string, string> {
   const pageAgeMinutes =
     typeof performance === "undefined"
@@ -51,6 +63,9 @@ export function getVersionPollHeaders(
       : Math.floor(performance.now() / 60_000);
   return {
     [VERSION_POLL_HEADERS.version]: currentVersion,
+    ...(releaseOrder === null
+      ? {}
+      : { [VERSION_POLL_HEADERS.releaseOrder]: String(releaseOrder) }),
     [VERSION_POLL_HEADERS.hidden]: hidden ? "1" : "0",
     [VERSION_POLL_HEADERS.ageMinutes]: String(pageAgeMinutes),
     [VERSION_POLL_HEADERS.releasesBehind]: String(announcedSinceLoad.size),

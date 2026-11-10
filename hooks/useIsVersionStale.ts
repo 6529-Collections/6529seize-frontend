@@ -5,12 +5,16 @@ import { applyDelayJitter } from "@/helpers/jitter.helpers";
 import {
   getVersionPollHeaders,
   noteAnnouncedVersion,
+  parseReleaseOrder,
 } from "@/lib/version/versionPoll";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { subscribeNativeAppActivity } from "@/services/app-activity/native-app-activity";
 
-const CURRENT = publicEnv.VERSION ?? "unknown"; // baked into the bundle
+const CURRENT = publicEnv.VERSION ?? "unknown";
+const CURRENT_RELEASE_ORDER = parseReleaseOrder(
+  publicEnv.VERSION_RELEASE_ORDER
+);
 const SHOW_NEW_VERSION_TOAST_PARAM = "showNewVersionToast";
 const VERSION_ENDPOINT = "/api/version";
 // Showing a tab fires visibilitychange and focus together; check only once.
@@ -23,6 +27,7 @@ const HIDDEN_CHECK_JITTER_RATIO = 0.2;
 type VersionStatusResponse = {
   readonly stale?: unknown;
   readonly announced_version?: unknown;
+  readonly announced_release_order?: unknown;
 };
 
 /**
@@ -74,16 +79,30 @@ export function useIsVersionStale(
       try {
         const response = await fetch(VERSION_ENDPOINT, {
           cache: "no-store",
-          headers: getVersionPollHeaders(CURRENT, isHidden()),
+          headers: getVersionPollHeaders(
+            CURRENT,
+            isHidden(),
+            CURRENT_RELEASE_ORDER
+          ),
         }).then((r) => r.json() as Promise<VersionStatusResponse>);
-        noteAnnouncedVersion(CURRENT, response.announced_version);
 
         if (
           !disposed &&
           checkId === latestCheckId &&
           typeof response.stale === "boolean"
         ) {
-          setStale(response.stale);
+          // Older servers can still answer during the first ordered rollout.
+          // An ordered page requires a newer announced order even from them.
+          const announcedOrder = parseReleaseOrder(
+            response.announced_release_order
+          );
+          const stale =
+            response.stale &&
+            (CURRENT_RELEASE_ORDER === null ||
+              (announcedOrder !== null &&
+                announcedOrder > CURRENT_RELEASE_ORDER));
+          if (stale) noteAnnouncedVersion(CURRENT, response.announced_version);
+          setStale(stale);
         }
       } catch {
         /* ignore network errors */

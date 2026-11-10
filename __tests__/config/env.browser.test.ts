@@ -15,6 +15,7 @@ const rawBuildEnv = {
   NODE_ENV: "production",
   VERSION: "abc123",
   VERSION_BUILD_TIMESTAMP: "2026-11-04T10:00:00Z",
+  VERSION_RELEASE_ORDER: "1200",
   API_ENDPOINT: "https://api.6529.io",
   BASE_ENDPOINT: "https://6529.io",
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io",
@@ -89,6 +90,7 @@ function setPageVersion(version: string | null): void {
 describe("config/env.browser", () => {
   afterEach(() => {
     setPageVersion(null);
+    document.documentElement.removeAttribute("data-release-order");
   });
 
   it("is swapped in for @/config/env only in Turbopack browser bundles", () => {
@@ -116,6 +118,7 @@ describe("config/env.browser", () => {
 
   it("reads the baked env as the server's re-validation does, minus the build timestamp", () => {
     setPageVersion("abc123");
+    document.documentElement.setAttribute("data-release-order", "1200");
     const browser = loadModule(BROWSER_MODULE, bakeBrowserRuntime());
     const server = loadModule(SERVER_MODULE, bakePublicRuntime());
 
@@ -133,12 +136,16 @@ describe("config/env.browser", () => {
 
   it("bakes no per-build value into the browser bundle", () => {
     const baked = JSON.parse(bakeBrowserRuntime()) as Record<string, unknown>;
+    const stampKeys = [
+      "VERSION",
+      "VERSION_BUILD_TIMESTAMP",
+      "VERSION_RELEASE_ORDER",
+    ];
 
-    expect(baked).not.toHaveProperty("VERSION");
-    expect(baked).not.toHaveProperty("VERSION_BUILD_TIMESTAMP");
+    for (const key of stampKeys) expect(baked).not.toHaveProperty(key);
     expect(Object.keys(baked).sort()).toEqual(
       Object.keys(parseBuildEnv())
-        .filter((key) => key !== "VERSION" && key !== "VERSION_BUILD_TIMESTAMP")
+        .filter((key) => !stampKeys.includes(key))
         .sort()
     );
   });
