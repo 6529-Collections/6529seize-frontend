@@ -6,7 +6,10 @@ import UserPageSetUpProfileHeader from "./UserPageSetUpProfileHeader";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { markIdentityGettingStartedSession } from "@/components/user/identity/getting-started/identityGettingStartedSession";
+import {
+  markIdentityGettingStartedSession,
+  requestIdentityGettingStartedArrival,
+} from "@/components/user/identity/getting-started/identityGettingStartedSession";
 import UserSettingsClassification from "@/components/user/settings/UserSettingsClassification";
 import UserSettingsPrimaryWallet from "@/components/user/settings/UserSettingsPrimaryWallet";
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
@@ -86,10 +89,14 @@ export default function UserPageSetUpProfile({
       });
     },
     onSuccess: (updatedProfile) => {
+      const returnPath = getWaveCreationReturnPath(globalThis.location.search);
       const isNewProfile =
         !profile.handle?.trim() && !!updatedProfile.handle?.trim();
       if (isNewProfile) {
         markIdentityGettingStartedSession(updatedProfile.handle);
+        if (!returnPath) {
+          requestIdentityGettingStartedArrival(updatedProfile.handle);
+        }
       }
 
       setToast({
@@ -111,10 +118,7 @@ export default function UserPageSetUpProfile({
         }
         return `/${updatedHandle}`;
       })();
-      router.replace(
-        getWaveCreationReturnPath(globalThis.location.search) ?? newPath,
-        { scroll: false }
-      );
+      router.replace(returnPath ?? newPath, { scroll: false });
       onProfileEdit({
         profile: updatedProfile,
         previousProfile: null,

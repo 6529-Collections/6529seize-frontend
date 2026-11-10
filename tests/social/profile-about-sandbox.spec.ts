@@ -52,9 +52,9 @@ async function seedSession(page: Page, role: string | null = null) {
   );
 }
 
-async function seedGettingStartedSession(page: Page) {
+async function seedGettingStartedSession(page: Page, arrival = false) {
   await seedSession(page);
-  await page.addInitScript(() => {
+  await page.addInitScript((shouldArrive) => {
     // Represent the successful creation session while keeping reload/dismiss real.
     const fixtureKey = "playwright-getting-started-session-seeded";
     if (sessionStorage.getItem(fixtureKey)) return;
@@ -63,7 +63,112 @@ async function seedGettingStartedSession(page: Page) {
       "identity-getting-started-created-profile:playwright",
       "true"
     );
+    if (shouldArrive) {
+      sessionStorage.setItem(
+        "identity-getting-started-arrival:playwright",
+        "true"
+      );
+    }
+  }, arrival);
+}
+
+async function observeGettingStartedScroll(page: Page) {
+  await page.addInitScript(() => {
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function (options) {
+      if (
+        this.getAttribute("aria-label") === "Getting started with your identity"
+      ) {
+        const key = "playwright-guided-arrival-scrolls";
+        const previous = JSON.parse(sessionStorage.getItem(key) ?? "[]");
+        sessionStorage.setItem(
+          key,
+          JSON.stringify([
+            ...previous,
+            {
+              behavior: typeof options === "object" ? options.behavior : null,
+              block: typeof options === "object" ? options.block : null,
+              focused: this.contains(document.activeElement),
+            },
+          ])
+        );
+      }
+      originalScrollIntoView.call(this, options);
+    };
   });
+}
+
+async function getGettingStartedScrolls(page: Page) {
+  return page.evaluate(async () => {
+    // Let scheduled arrival effects run before asserting the absence of a repeat.
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+    return JSON.parse(
+      sessionStorage.getItem("playwright-guided-arrival-scrolls") ?? "[]"
+    ) as {
+      behavior: ScrollBehavior | null;
+      block: ScrollLogicalPosition | null;
+      focused: boolean;
+    }[];
+  });
+}
+
+async function installHostedWalletReads(page: Page) {
+  // Hosted wallet usage/discovery and contract reads are outside this fixture.
+  await page.route("https://api.web3modal.org/getWallets?*", (route) =>
+    route.fulfill({ json: { data: [], count: 0 } })
+  );
+  await page.route("https://api.web3modal.org/appkit/v1/config?*", (route) =>
+    route.fulfill({ json: { features: [] } })
+  );
+  await page.route(
+    "https://api.web3modal.org/appkit/v1/project-limits?*",
+    (route) =>
+      route.fulfill({
+        json: {
+          planLimits: {
+            tier: "starter",
+            isAboveMauLimit: false,
+            isAboveRpcLimit: false,
+          },
+        },
+      })
+  );
+  await page.route("https://rpc.walletconnect.org/v1/**", async (route) => {
+    const payload = route.request().postDataJSON() as
+      | { id: number; method: string }
+      | { id: number; method: string }[];
+    const respond = (call: { id: number; method: string }) => {
+      expect(call.method).toBe("eth_call");
+      return {
+        jsonrpc: "2.0",
+        id: call.id,
+        error: {
+          code: -32000,
+          message: "Contract reads are unavailable in this profile fixture",
+        },
+      };
+    };
+    await route.fulfill({
+      json: Array.isArray(payload) ? payload.map(respond) : respond(payload),
+    });
+  });
+}
+
+async function finishHostedWalletInitialization(
+  page: Page,
+  navigate: () => Promise<unknown>
+) {
+  const responses = ["config", "project-limits"].map((path) =>
+    page
+      .waitForResponse(
+        (response) => new URL(response.url()).pathname === `/appkit/v1/${path}`
+      )
+      .then((response) => response.finished())
+  );
+  await navigate();
+  await Promise.all(responses);
 }
 
 async function openOwnProfile(page: Page, expectOwnerAction = true) {
@@ -172,6 +277,67 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     );
   });
 
+  test("Guided welcome arrives once, respects motion preferences and preserves focus", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    await seedGettingStartedSession(page, true);
+    await observeGettingStartedScroll(page);
+    await page.emulateMedia({
+      reducedMotion: isMobile ? "reduce" : "no-preference",
+    });
+    await installStatements(page, getSandboxApiOrigin(baseURL));
+    await installHostedWalletReads(page);
+    await finishHostedWalletInitialization(page, () =>
+      page.goto("/playwright")
+    );
+    const guidance = page.getByRole("region", {
+      name: "Getting started with your identity",
+      exact: true,
+    });
+    await expect(guidance).toBeVisible();
+    const expectedScrolls = [
+      {
+        behavior: isMobile ? "instant" : "smooth",
+        block: "start",
+        focused: false,
+      },
+    ];
+    await expect
+      .poll(() => getGettingStartedScrolls(page))
+      .toEqual(expectedScrolls);
+    // Keep the native scroll call real: the card must actually reach the viewport.
+    await expect
+      .poll(async () => {
+        const box = await guidance.boundingBox();
+        return box !== null && box.y >= 0 && box.y < 200;
+      })
+      .toBe(true);
+    expect(
+      await guidance.evaluate((element) =>
+        element.contains(document.activeElement)
+      )
+    ).toBe(false);
+    expect(
+      await page.evaluate(() =>
+        sessionStorage.getItem("identity-getting-started-arrival:playwright")
+      )
+    ).toBeNull();
+    await finishHostedWalletInitialization(page, () => page.reload());
+    await expect(guidance).toBeVisible();
+    expect(await getGettingStartedScrolls(page)).toEqual(expectedScrolls);
+    await guidance
+      .getByRole("link", { name: "Find a Wave", exact: true })
+      .click();
+    await page.waitForURL(/\/discover$/, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await page.goBack();
+    await expect(guidance).toBeVisible();
+    expect(await getGettingStartedScrolls(page)).toEqual(expectedScrolls);
+  });
+
   test("Guided welcome explains paths, opens eligibility and keeps dismissal across reload", async ({
     page,
     baseURL,
@@ -191,6 +357,21 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expect(
       guidance.getByText("Profile created", { exact: true })
     ).toBeVisible();
+    const allGuidance = page.getByRole("region", {
+      name: "Getting started with your identity",
+      exact: true,
+      includeHidden: true,
+    });
+    for (const width of [1023, 1024, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(allGuidance).toHaveCount(1);
+      await expect(guidance).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    }
+    await page.setViewportSize({
+      width: isMobile ? 320 : 1280,
+      height: 900,
+    });
     await expect(
       guidance.getByText(
         "Waves are spaces for conversations, creative work, and community decisions.",
@@ -242,8 +423,13 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expectAxeClean(page, {
       include: ['[aria-label="Getting started with your identity"]'],
     });
+    const screenshotPath = testInfo.outputPath("guided-welcome.png");
+    await guidance.screenshot({
+      path: screenshotPath,
+      style: "nextjs-portal{display:none!important}",
+    });
     await testInfo.attach("guided-welcome", {
-      body: await guidance.screenshot(),
+      path: screenshotPath,
       contentType: "image/png",
     });
     const findWave = guidance.getByRole("link", {
@@ -282,6 +468,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     baseURL,
   }) => {
     await seedGettingStartedSession(page);
+    await observeGettingStartedScroll(page);
     const api = getSandboxApiOrigin(baseURL);
     await installStatements(page, api);
     await openOwnProfile(page);
@@ -337,6 +524,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expect(input).toHaveValue(draft);
     await page.keyboard.press("Escape");
     await expect(dialog).toHaveCount(0);
+    expect(await getGettingStartedScrolls(page)).toEqual([]);
     await expectNoHorizontalOverflow(page);
   });
 
@@ -358,39 +546,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     });
     await seedSession(page);
     await installStatements(page, getSandboxApiOrigin(baseURL));
-    // Hosted wallet usage and contract reads are outside this profile fixture.
-    await page.route(
-      "https://api.web3modal.org/appkit/v1/project-limits?*",
-      (route) =>
-        route.fulfill({
-          json: {
-            planLimits: {
-              tier: "starter",
-              isAboveMauLimit: false,
-              isAboveRpcLimit: false,
-            },
-          },
-        })
-    );
-    await page.route("https://rpc.walletconnect.org/v1/**", async (route) => {
-      const payload = route.request().postDataJSON() as
-        | { id: number; method: string }
-        | { id: number; method: string }[];
-      const respond = (call: { id: number; method: string }) => {
-        expect(call.method).toBe("eth_call");
-        return {
-          jsonrpc: "2.0",
-          id: call.id,
-          error: {
-            code: -32000,
-            message: "Contract reads are unavailable in this profile fixture",
-          },
-        };
-      };
-      await route.fulfill({
-        json: Array.isArray(payload) ? payload.map(respond) : respond(payload),
-      });
-    });
+    await installHostedWalletReads(page);
     await page.goto("/playwright");
     const edit = page.getByRole("button", {
       name: "Edit profile",

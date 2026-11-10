@@ -5,12 +5,17 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useContext, type ContextType } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { hasIdentityGettingStartedSession } from "@/components/user/identity/getting-started/identityGettingStartedSession";
+import {
+  consumeIdentityGettingStartedArrival,
+  hasIdentityGettingStartedSession,
+  markIdentityGettingStartedSession,
+} from "@/components/user/identity/getting-started/identityGettingStartedSession";
 
 let mockMutationOptions:
   | { readonly onSuccess: (profile: ApiIdentity) => void }
   | undefined;
 const mockMutate = jest.fn();
+const mockRouterReplace = jest.fn();
 
 function ProfileSuccessHarness({
   profile,
@@ -67,7 +72,7 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ replace: jest.fn() }),
+  useRouter: () => ({ replace: mockRouterReplace }),
   usePathname: () => "/[user]",
   useSearchParams: () => ({ get: jest.fn() }),
 }));
@@ -82,10 +87,17 @@ jest.mock("@tanstack/react-query", () => ({
 }));
 
 describe("UserPageSetUpProfile", () => {
+  const originalUrl = globalThis.location.href;
+
   beforeEach(() => {
     jest.clearAllMocks();
     sessionStorage.clear();
+    globalThis.history.replaceState(null, "", "/profile");
     mockMutationOptions = undefined;
+  });
+
+  afterEach(() => {
+    globalThis.history.replaceState(null, "", originalUrl);
   });
   const profile: any = {
     handle: "user",
@@ -131,6 +143,7 @@ describe("UserPageSetUpProfile", () => {
 
   it.each([
     { handle: null, message: "Profile created", hasCreationSession: true },
+    { handle: "   ", message: "Profile created", hasCreationSession: true },
     { handle: "user", message: "Profile updated.", hasCreationSession: false },
   ])(
     "reports the correct success for a profile whose existing handle is $handle",
@@ -151,6 +164,56 @@ describe("UserPageSetUpProfile", () => {
       expect(hasIdentityGettingStartedSession("newname")).toBe(
         hasCreationSession
       );
+      expect(consumeIdentityGettingStartedArrival("newname")).toBe(
+        hasCreationSession
+      );
+      expect(mockRouterReplace).toHaveBeenCalledWith("/newname", {
+        scroll: false,
+      });
     }
   );
+
+  it.each(["/waves/create", "/waves/11111111-2222-3333-4444-555555555555"])(
+    "returns to %s without leaving a profile reveal pending",
+    (returnPath) => {
+      globalThis.history.replaceState(
+        null,
+        "",
+        `/profile?returnTo=${encodeURIComponent(returnPath)}`
+      );
+      render(
+        <ProfileSuccessHarness
+          profile={{ ...profile, handle: null }}
+          setToast={jest.fn()}
+        />
+      );
+
+      act(() =>
+        mockMutationOptions?.onSuccess({ ...profile, handle: "newname" })
+      );
+
+      expect(mockRouterReplace).toHaveBeenCalledWith(returnPath, {
+        scroll: false,
+      });
+      expect(hasIdentityGettingStartedSession("newname")).toBe(true);
+      expect(consumeIdentityGettingStartedArrival("newname")).toBe(false);
+    }
+  );
+
+  it("does not rearm arrival when an existing profile with a visible guide is updated", () => {
+    markIdentityGettingStartedSession("newname");
+    render(
+      <ProfileSuccessHarness
+        profile={{ ...profile, handle: "newname" }}
+        setToast={jest.fn()}
+      />
+    );
+
+    act(() =>
+      mockMutationOptions?.onSuccess({ ...profile, handle: "newname" })
+    );
+
+    expect(hasIdentityGettingStartedSession("newname")).toBe(true);
+    expect(consumeIdentityGettingStartedArrival("newname")).toBe(false);
+  });
 });

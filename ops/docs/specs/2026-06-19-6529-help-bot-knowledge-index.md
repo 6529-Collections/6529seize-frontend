@@ -57,6 +57,10 @@ Its facts keep creation-session visibility, owner/proxy restrictions, dismissal,
 and the welcome's availability without Main Stage details explicit. About
 guidance includes the initial loading wait, error and Retry states, the
 existing-statement edit label, and the optional and permanently public notice.
+It also explains the one-time arrival scroll when successful profile setup
+finishes on Identity, reduced-motion support, unchanged keyboard focus, and no
+repeated scroll on ordinary return or reload. Setup entered from Wave creation
+returns to that flow instead.
 
 The search record covers punctuation-tolerant Wave names across site search,
 sidebar search, composer mentions and the message-search Wave picker. It explains

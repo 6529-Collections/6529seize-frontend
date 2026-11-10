@@ -6428,6 +6428,7 @@
       ],
       "facts": [
         "After you save your first profile username, your own Identity tab at /{user} shows Profile created and Your profile is ready. The welcome introduces 6529 as a network where people share ideas, create art, and decide what to build together. Adding an About statement is optional.",
+        "When successful profile setup finishes on Identity, the page scrolls the getting-started welcome into view once without moving keyboard focus. Reduced-motion preferences prevent animated scrolling. Ordinary returns to Identity and page reloads do not repeat this arrival scroll. If you started setup while creating a Wave, you return to that flow instead.",
         "Find a Wave opens /discover, where you can explore discussions and community decisions. Waves are spaces for conversations, creative work, and community decisions.",
         "The Memes Main Stage opens the network's configured Main Stage Wave to discover artwork the community is considering for future Meme Cards.",
         "How to submit to The Memes opens a dialog with that title and the existing Unlock submissions guidance, progress toward the MemesNominee REP requirement, and a Get nominated action. Closing returns focus to the card action. Eligibility, submitting work, and community selection are separate stages; nomination does not guarantee selection.",

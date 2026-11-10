@@ -1,9 +1,11 @@
-import type { ReactNode } from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { StrictMode, type ReactNode } from "react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import IdentityGettingStartedCard from "@/components/user/identity/getting-started/IdentityGettingStartedCard";
 import {
+  consumeIdentityGettingStartedArrival,
   hasIdentityGettingStartedSession,
   markIdentityGettingStartedSession,
+  requestIdentityGettingStartedArrival,
 } from "@/components/user/identity/getting-started/identityGettingStartedSession";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { amIUser } from "@/helpers/Helpers";
@@ -73,12 +75,56 @@ const profile = Object.assign(new ApiIdentity(), {
 });
 
 describe("IdentityGettingStartedCard", () => {
+  const frames = new Map<number, FrameRequestCallback>();
+  const scrollIntoView = jest.fn();
+  let nextFrameId = 1;
+  let reducedMotion = false;
+
+  function flushFrames() {
+    act(() => {
+      const pending = [...frames.values()];
+      frames.clear();
+      pending.forEach((callback) => callback(0));
+    });
+  }
+
   beforeEach(() => {
     sessionStorage.clear();
+    frames.clear();
+    scrollIntoView.mockClear();
+    nextFrameId = 1;
+    reducedMotion = false;
     mockHasHydrated = true;
     mockActiveProxy = false;
     mockSettings = undefined;
     jest.mocked(amIUser).mockReturnValue(true);
+    jest
+      .spyOn(Element.prototype, "scrollIntoView")
+      .mockImplementation(scrollIntoView);
+    jest
+      .spyOn(globalThis, "requestAnimationFrame")
+      .mockImplementation((callback) => {
+        const id = nextFrameId++;
+        frames.set(id, callback);
+        return id;
+      });
+    jest.spyOn(globalThis, "cancelAnimationFrame").mockImplementation((id) => {
+      frames.delete(id);
+    });
+    jest.spyOn(globalThis, "matchMedia").mockImplementation((query) => ({
+      matches: reducedMotion && query === "(prefers-reduced-motion: reduce)",
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    }));
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("keeps the welcome and discovery available before Main Stage settings arrive", () => {
@@ -149,29 +195,42 @@ describe("IdentityGettingStartedCard", () => {
 
   it("waits for hydration before reading the creation session", () => {
     markIdentityGettingStartedSession(profile.handle);
+    requestIdentityGettingStartedArrival(profile.handle);
     mockHasHydrated = false;
     const { rerender } = render(
       <IdentityGettingStartedCard profile={profile} />
     );
     expect(screen.queryByRole("region")).not.toBeInTheDocument();
+    flushFrames();
+    expect(scrollIntoView).not.toHaveBeenCalled();
 
     mockHasHydrated = true;
     rerender(<IdentityGettingStartedCard profile={profile} />);
     expect(screen.getByRole("region")).toBeInTheDocument();
+    flushFrames();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
   });
 
   it("hides a creation session from visitors", () => {
     markIdentityGettingStartedSession(profile.handle);
+    requestIdentityGettingStartedArrival(profile.handle);
     jest.mocked(amIUser).mockReturnValue(false);
     render(<IdentityGettingStartedCard profile={profile} />);
+    flushFrames();
     expect(screen.queryByRole("region")).not.toBeInTheDocument();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(consumeIdentityGettingStartedArrival(profile.handle)).toBe(true);
   });
 
   it("hides a creation session while acting through a proxy", () => {
     markIdentityGettingStartedSession(profile.handle);
+    requestIdentityGettingStartedArrival(profile.handle);
     mockActiveProxy = true;
     render(<IdentityGettingStartedCard profile={profile} />);
+    flushFrames();
     expect(screen.queryByRole("region")).not.toBeInTheDocument();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(consumeIdentityGettingStartedArrival(profile.handle)).toBe(true);
   });
 
   it("does not show success before a handle exists", () => {
@@ -184,19 +243,110 @@ describe("IdentityGettingStartedCard", () => {
 
   it("dismisses immediately and clears only this profile's creation session", () => {
     markIdentityGettingStartedSession("ALICE");
+    requestIdentityGettingStartedArrival("ALICE");
     markIdentityGettingStartedSession("bob");
+    requestIdentityGettingStartedArrival("bob");
     const { unmount } = render(
       <IdentityGettingStartedCard profile={profile} />
     );
     fireEvent.click(
       screen.getByRole("button", { name: "Dismiss getting-started guidance" })
     );
+    flushFrames();
 
     expect(screen.queryByRole("region")).not.toBeInTheDocument();
+    expect(scrollIntoView).not.toHaveBeenCalled();
     expect(hasIdentityGettingStartedSession("alice")).toBe(false);
+    expect(consumeIdentityGettingStartedArrival("alice")).toBe(false);
     expect(hasIdentityGettingStartedSession("bob")).toBe(true);
+    expect(consumeIdentityGettingStartedArrival("bob")).toBe(true);
     unmount();
     render(<IdentityGettingStartedCard profile={profile} />);
     expect(screen.queryByRole("region")).not.toBeInTheDocument();
+  });
+
+  it("reveals the newly created profile once without changing keyboard focus", () => {
+    markIdentityGettingStartedSession(profile.handle);
+    requestIdentityGettingStartedArrival(profile.handle);
+    const { rerender, unmount } = render(
+      <StrictMode>
+        <button type="button">Continue editing</button>
+        <IdentityGettingStartedCard profile={profile} />
+      </StrictMode>
+    );
+    const previousFocus = screen.getByRole("button", {
+      name: "Continue editing",
+    });
+    previousFocus.focus();
+    const focus = jest.spyOn(HTMLElement.prototype, "focus");
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    flushFrames();
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      block: "start",
+      behavior: "smooth",
+    });
+    expect(scrollIntoView.mock.contexts[0]).toBe(screen.getByRole("region"));
+    expect(focus).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(previousFocus);
+    expect(hasIdentityGettingStartedSession(profile.handle)).toBe(true);
+
+    rerender(
+      <StrictMode>
+        <button type="button">Continue editing</button>
+        <IdentityGettingStartedCard profile={profile} />
+      </StrictMode>
+    );
+    flushFrames();
+    unmount();
+    render(<IdentityGettingStartedCard profile={profile} />);
+    flushFrames();
+
+    expect(screen.getByRole("region")).toBeInTheDocument();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(consumeIdentityGettingStartedArrival(profile.handle)).toBe(false);
+  });
+
+  it("uses instant arrival scrolling when reduced motion is preferred", () => {
+    reducedMotion = true;
+    markIdentityGettingStartedSession(profile.handle);
+    requestIdentityGettingStartedArrival(profile.handle);
+    render(<IdentityGettingStartedCard profile={profile} />);
+    flushFrames();
+
+    expect(scrollIntoView).toHaveBeenCalledWith({
+      block: "start",
+      behavior: "instant",
+    });
+  });
+
+  it("cancels a pending reveal on unmount and keeps it for the next mount", () => {
+    markIdentityGettingStartedSession(profile.handle);
+    requestIdentityGettingStartedArrival(profile.handle);
+    const { unmount } = render(
+      <IdentityGettingStartedCard profile={profile} />
+    );
+    unmount();
+    expect(globalThis.cancelAnimationFrame).toHaveBeenCalledTimes(1);
+    expect(frames.size).toBe(0);
+    flushFrames();
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    render(<IdentityGettingStartedCard profile={profile} />);
+    flushFrames();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(consumeIdentityGettingStartedArrival(profile.handle)).toBe(false);
+  });
+
+  it("keeps a returning profile's guide visible without replaying arrival", () => {
+    markIdentityGettingStartedSession(profile.handle);
+    render(<IdentityGettingStartedCard profile={profile} />);
+    flushFrames();
+
+    expect(screen.getByRole("region")).toBeInTheDocument();
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });

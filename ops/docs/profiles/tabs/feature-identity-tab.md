@@ -66,6 +66,12 @@ shows `Profile created` and `Your profile is ready`. The welcome introduces
 6529 as a network where people share ideas, create art, and decide what to build
 together. An About statement is optional; you can explore without adding one.
 
+When successful profile setup finishes on Identity, the page scrolls the welcome
+into view once without moving keyboard focus. Reduced-motion preferences prevent
+animated scrolling. Returning to Identity or reloading the page does not repeat
+this arrival scroll. If you started setup while creating a Wave, you return to
+that flow instead.
+
 - `Find a Wave` opens [Wave Discovery](../../waves/discovery/feature-discover-sections-and-search.md)
   at `/discover`. Waves are spaces for conversations, creative work, and
   community decisions.
