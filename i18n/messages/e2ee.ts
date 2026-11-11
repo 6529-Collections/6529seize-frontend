@@ -4,6 +4,8 @@
  * codes only; every user-visible string lives here.
  */
 export const E2EE_MESSAGES = {
+  "e2ee.message.taskChecked": "Checked task",
+  "e2ee.message.taskUnchecked": "Unchecked task",
   "e2ee.message.imageLink": "Image link",
   "e2ee.message.imageLinkFrom": "Image from {host}",
   "e2ee.message.markdownTable": "Message table",
