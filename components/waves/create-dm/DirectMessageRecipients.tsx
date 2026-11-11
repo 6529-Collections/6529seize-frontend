@@ -20,13 +20,19 @@ import Image from "next/image";
 
 export type DirectMessageRecipient = Pick<
   CommunityMemberMinimal,
-  "profile_id" | "primary_wallet" | "handle" | "display" | "pfp"
-> & { readonly wallet: string | null };
+  "primary_wallet" | "handle" | "display" | "pfp"
+> &
+  (
+    | Pick<CommunityMemberMinimal, "wallet" | "profile_id">
+    | { readonly wallet: null; readonly profile_id: string }
+  );
 
-export const recipientKey = (person: DirectMessageRecipient): string =>
-  (person.primary_wallet ?? person.wallet)?.toLowerCase() ??
-  person.profile_id ??
-  "";
+export function recipientKey(person: DirectMessageRecipient): string {
+  if (person.wallet === null) {
+    return person.primary_wallet?.toLowerCase() ?? person.profile_id;
+  }
+  return (person.primary_wallet ?? person.wallet).toLowerCase();
+}
 
 export const recipientName = (person: DirectMessageRecipient): string =>
   person.handle ??

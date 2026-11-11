@@ -1,6 +1,12 @@
 import type { ComponentProps } from "react";
 import type DirectMessageRecipients from "@/components/waves/create-dm/DirectMessageRecipients";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import {
   clearE2eeComposePrefill,
   setE2eeComposePrefill,
@@ -259,6 +265,18 @@ describe("unified new message", () => {
 
   afterEach(() => jest.restoreAllMocks());
 
+  it("requests the encryption engine after the first recipient is selected", () => {
+    const context = contextFor(null);
+    render(
+      <E2eeTestProvider value={context}>
+        <PlaintextCapableForm create={jest.fn()} />
+      </E2eeTestProvider>
+    );
+    expect(context.requestEngine).not.toHaveBeenCalled();
+    pick("alice");
+    expect(context.requestEngine).toHaveBeenCalledTimes(1);
+  });
+
   it("offers one exact active group without including a partial roster or an earlier group", () => {
     const engine = createFakeE2eeEngine({
       conversations: [
@@ -335,6 +353,37 @@ describe("unified new message", () => {
     });
   });
 
+  it("requires a new choice when the selected group stops matching", () => {
+    const weekend = conversation({
+      g: "weekend",
+      name: "Weekend plans",
+      members: participants,
+    });
+    const project = conversation({
+      g: "project",
+      name: "Project updates",
+      members: participants,
+    });
+    const engine = createFakeE2eeEngine({ conversations: [weekend, project] });
+    renderNew(engine);
+    pick("alice", "bob");
+    fireEvent.click(screen.getByRole("radio", { name: /Project updates/ }));
+    const open = screen.getByRole("button", { name: "Open chat" });
+    expect(open).toBeEnabled();
+
+    act(() => engine.update({ conversations: [weekend] }));
+    expect(
+      screen.getByText(
+        "The selected group no longer matches. Choose a group to open."
+      )
+    ).toBeVisible();
+    expect(open).toBeDisabled();
+    expect(mockPush).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("radio", { name: /Weekend plans/ }));
+    fireEvent.click(open);
+    expect(mockPush).toHaveBeenCalledWith("/messages/encrypted/weekend");
+  });
+
   it("keeps a mixed group's name and selection while making fallback explicit", async () => {
     const engine = createFakeE2eeEngine();
     jest.mocked(engine.checkEligibility).mockResolvedValue([
@@ -383,6 +432,7 @@ describe("unified new message", () => {
     { status: "NO_DEVICES", afterCutoff: false, fallback: true },
     { status: "NO_DEVICES", afterCutoff: true, fallback: false },
     { status: "POLICY", afterCutoff: false, fallback: false },
+    { status: "BLOCKED", afterCutoff: false, fallback: false },
   ] as const)(
     "offers fallback only for a recipient without encryption before the cutoff ($status, closed=$afterCutoff)",
     async ({ status, afterCutoff, fallback }) => {
@@ -409,10 +459,12 @@ describe("unified new message", () => {
           identity(ALICE_ID, "alice").wallet,
         ]);
       } else {
+        const blockedLabel =
+          status === "BLOCKED"
+            ? /You blocked them/
+            : /Doesn’t accept messages from you/;
         await screen.findByText(
-          afterCutoff
-            ? /Unencrypted messaging has ended/
-            : /Doesn’t accept messages from you/
+          afterCutoff ? /Unencrypted messaging has ended/ : blockedLabel
         );
         expect(
           screen.queryByRole("button", { name: "Continue unencrypted" })
@@ -423,4 +475,25 @@ describe("unified new message", () => {
       }
     }
   );
+
+  it("blocks an unencrypted submit after the cutoff even if the old button is visible", async () => {
+    const engine = createFakeE2eeEngine();
+    jest
+      .mocked(engine.checkEligibility)
+      .mockResolvedValue([{ profileId: ALICE_ID, status: "NO_DEVICES" }]);
+    const create = jest.fn(async () => true);
+    render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <PlaintextCapableForm create={create} />
+      </E2eeTestProvider>
+    );
+    pick("alice");
+    const fallback = await screen.findByRole("button", {
+      name: "Continue unencrypted",
+    });
+    jest.mocked(Date.now).mockReturnValue(Date.parse(LEGACY_DM_DELETION_AT));
+    fireEvent.click(fallback);
+    expect(create).not.toHaveBeenCalled();
+    expect(engine.createConversation).not.toHaveBeenCalled();
+  });
 });

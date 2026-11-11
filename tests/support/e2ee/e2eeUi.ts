@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from "@playwright/test";
+import { escapeRegExp } from "lodash";
 
 import { dismissNextDevTools } from "../localSandbox";
 import {
@@ -114,7 +115,7 @@ export async function pickPerson(
     .getByRole("button", {
       name: options.searchLabel
         ? handle
-        : new RegExp(`^${handle} Level\\b`, "u"),
+        : new RegExp(String.raw`^${escapeRegExp(handle)} Level\b`, "u"),
       exact: Boolean(options.searchLabel),
     })
     .click();

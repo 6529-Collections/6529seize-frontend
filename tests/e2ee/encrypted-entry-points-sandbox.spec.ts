@@ -130,7 +130,7 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await e2eeSandboxControls.block(baseURL, "dave", "alice");
 
     const { page } = alice;
-    await gotoPath(page, "/messages");
+    await gotoPath(page, ENCRYPTED_ROUTE);
     const entry = page.getByRole("button", {
       name: "New message",
       exact: true,
@@ -171,8 +171,12 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
     await expect(page).toHaveURL(
       (url) =>
-        url.pathname === "/messages" && url.searchParams.get("create") === "dm"
+        url.pathname === ENCRYPTED_ROUTE &&
+        url.searchParams.get("create") === "dm"
     );
+    await expect(
+      page.getByRole("button", { name: "Remove bob" })
+    ).toBeVisible();
 
     const state = await e2eeSandboxControls.state(baseURL);
     for (const group of state.groups) {

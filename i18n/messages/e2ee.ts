@@ -300,6 +300,9 @@ export const E2EE_MESSAGES = {
   "e2ee.new.forceGroup": "Create a group I can add people to later",
   "e2ee.new.matches.one": "Existing group with these people",
   "e2ee.new.matches.many": "Existing groups with these people",
+  "e2ee.new.matches.choose": "Choose a group to open.",
+  "e2ee.new.matches.changed":
+    "The selected group no longer matches. Choose a group to open.",
   "e2ee.new.newGroup": "Start a new group",
   "e2ee.new.viewGroups": "View existing groups",
   "e2ee.new.useUnencrypted": "Use unencrypted chat instead",

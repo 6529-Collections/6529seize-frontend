@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { getEncryptedConversationRoute } from "@/helpers/navigation.helpers";
@@ -91,7 +91,7 @@ function resolveExistingChat(
   );
   const showMatches = !choice.preferNewGroup && matchingGroups.length > 0;
   const existingGroup =
-    matchingGroups.length === 1
+    matchingGroups.length === 1 && choice.chosenGroup === null
       ? matchingGroups[0]
       : matchingGroups.find((chat) => chat.g === choice.chosenGroup);
 
@@ -228,9 +228,7 @@ export function NewMessageForm({
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
   const [notice, setNotice] = useState<MessageKey | null>(null);
 
-  useEffect(() => {
-    requestEngine();
-  }, [requestEngine]);
+  const hasRecipients = selected.length > 0;
 
   const engine = e2ee.status === "ready" ? e2ee.engine : null;
   const profileIds = selected.map((person) => person.profileId);
@@ -284,6 +282,7 @@ export function NewMessageForm({
       setNotice("e2ee.new.self");
       return;
     }
+    if (e2ee.status === "idle") requestEngine();
     resetAction();
     setSelected((current) =>
       current.some((item) => item.profileId === person.profileId)
@@ -315,9 +314,12 @@ export function NewMessageForm({
     setCreating(true);
     setErrorKey(null);
     try {
-      if (useUnencrypted && createUnencrypted && !isLegacyDmClosed()) {
-        if (await createUnencrypted(wallets)) return;
-      } else if (engine && allEligible) {
+      if (useUnencrypted && createUnencrypted) {
+        // The displayed eligibility can predate the cutoff at the time of the click.
+        if (!isLegacyDmClosed()) await createUnencrypted(wallets);
+        return;
+      }
+      if (engine && allEligible) {
         const g = await engine.createConversation({
           profileIds,
           kind,
@@ -325,7 +327,6 @@ export function NewMessageForm({
           requireAllRecipients: true,
         });
         openChat(g);
-        return;
       }
     } catch (error) {
       setErrorKey(getE2eeActionErrorKey(error, "e2ee.new.createFailed"));
@@ -337,9 +338,10 @@ export function NewMessageForm({
       ) {
         profileIds.forEach(eligibility.retry);
       }
+    } finally {
+      sending.current = false;
+      setCreating(false);
     }
-    sending.current = false;
-    setCreating(false);
   };
 
   const { actionLabel, warning } = getMessageAction({
@@ -381,11 +383,11 @@ export function NewMessageForm({
           disabled={creating}
         />
         {notice && (
-          <p role="status" className="tw-m-0 tw-text-sm tw-text-amber-200">
+          <output className="tw-block tw-text-sm tw-text-amber-200">
             {t(locale, notice)}
-          </p>
+          </output>
         )}
-        {!engine && <E2eeGateState e2ee={e2ee} />}
+        {!engine && hasRecipients && <E2eeGateState e2ee={e2ee} />}
         {showMatches && (
           <ExistingGroupChoices
             groups={matchingGroups}

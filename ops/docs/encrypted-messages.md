@@ -246,8 +246,9 @@ encrypted messages list. It stays visible on iPad in portrait and landscape.
    start a group with one other person and add people later, use **More options**.
 4. If you already have a matching encrypted DM or group on this device, select
    **Open chat**. For several matching groups, choose one first. A group matches
-   when it has the same current members. **Start a new group** lets you create
-   a separate chat with the same people.
+   when it has the same current members. If your chosen group stops matching,
+   choose again. **Start a new group** lets you create a separate chat with the
+   same people.
 
 If someone cannot receive encrypted messages, the composer shows why and keeps
 the recipients and group name while you adjust the selection. Before the

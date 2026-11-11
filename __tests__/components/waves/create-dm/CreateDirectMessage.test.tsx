@@ -132,21 +132,35 @@ it("keeps the chosen recipient in the unified composer when they need an unencry
     const input = screen.getByRole("textbox", { name: "To:" });
     fireEvent.change(input, { target: { value: "ali" } });
     fireEvent.click(await screen.findByRole("button", { name: /alice Level/ }));
-    expect(context.requestEngine).toHaveBeenCalled();
+    expect(engine.checkEligibility).toHaveBeenCalledWith(["0xABC"]);
     expect(screen.getByRole("button", { name: "Remove alice" })).toBeVisible();
     expect(
       await screen.findByText("Hasn’t turned on encrypted messages yet")
     ).toBeVisible();
     expect(screen.getByText(/deletes it from its servers/)).toBeVisible();
     expect(mockPush).not.toHaveBeenCalled();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Continue unencrypted" })
+    const fallback = screen.getByRole("button", {
+      name: "Continue unencrypted",
+    });
+    jest
+      .mocked(createDirectMessageWave)
+      .mockRejectedValueOnce(new Error("Request failed"));
+    fireEvent.click(fallback);
+    await waitFor(() =>
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "error" })
+      )
     );
+    expect(fallback).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Remove alice" })).toBeVisible();
+
+    fireEvent.click(fallback);
     await waitFor(() => expect(close).toHaveBeenCalledTimes(1));
     expect(createDirectMessageWave).toHaveBeenCalledWith({
       addresses: ["0xabc"],
     });
     expect(mockPush).toHaveBeenCalledWith("/messages/dm-1");
+    expect(fallback).toBeEnabled();
   } finally {
     now.mockRestore();
   }
