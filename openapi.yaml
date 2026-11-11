@@ -9212,6 +9212,51 @@ paths:
       responses:
         "201":
           description: successful operation
+  /drops/signed-events:
+    get:
+      tags:
+        - Drops
+      summary: Get the device signed events of several drops
+      description: >-
+        Batch form of GET /drops/{dropId}/signed-events for up to 50 drops. Each
+        drop the caller can read is listed in drops, in request order, with the
+        same current_event_id and the same empty result when moderation hides
+        its content from the caller or its author is anonymous to the caller.
+        Two differences: events holds only the drop's content events (post, edit
+        and delete), at most 20 (the first, the current one and the newest;
+        drops with more are listed in truncated_drop_ids, and the single drop
+        route returns all of them); and the grants of every listed event are in
+        the top-level grants, once each, so each drop's own grants array is
+        empty. Ids the caller cannot read, whether or not such a drop exists,
+        are listed in unavailable instead. Duplicate ids are answered once.
+      operationId: getDropsSignedEvents
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleGetDropsSignedEvents
+      parameters:
+        - name: drop_ids
+          in: query
+          required: true
+          description: Comma separated drop ids, 1 to 50.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropSignedEventsBatch"
+        "400":
+          description: drop_ids is missing, empty or lists more than 50 ids
   /drops/{dropId}/signed-events:
     get:
       tags:
@@ -33120,6 +33165,40 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDeviceGrantProof"
+    ApiDropSignedEventsBatch:
+      type: object
+      required:
+        - drops
+        - grants
+        - unavailable
+        - truncated_drop_ids
+      properties:
+        drops:
+          type: array
+          description: >-
+            The readable drops, in request order. Each drop's grants array is
+            empty; its events' grants are in the top-level grants.
+          items:
+            $ref: "#/components/schemas/ApiDropSignedEvents"
+        grants:
+          type: array
+          description: The grants referenced by the events of every listed drop, once each.
+          items:
+            $ref: "#/components/schemas/ApiDeviceGrantProof"
+        unavailable:
+          type: array
+          description: >-
+            Requested ids the caller cannot read, whether or not such a drop
+            exists, in request order.
+          items:
+            type: string
+        truncated_drop_ids:
+          type: array
+          description: >-
+            Listed drops that have more content events than were returned; GET
+            /drops/{dropId}/signed-events returns all of them.
+          items:
+            type: string
     ApiDropsLeaderboardPage:
       type: object
       required:
@@ -34070,6 +34149,13 @@ components:
             JSON; wallet_signature is its typed-data signature and grant_id its
             EIP-712 digest. Null for direct EIP-712 MlsDeviceGrant
             registrations.
+        counts_toward_limit:
+          type: boolean
+          description: >-
+            Only in GET /e2ee/me. True when the device takes one of max_devices
+            slots of its grant version: not revoked, not expired, and seen
+            (registered, renewed or used) in the last 30 days. Idle active
+            devices stay usable but do not block enrolling another device.
     ApiE2eeDeviceGrant:
       type: object
       description: >-
@@ -34433,6 +34519,10 @@ components:
             $ref: "#/components/schemas/ApiE2eeKeyPackageStatus"
         max_devices:
           type: integer
+          description: >-
+            Devices per grant version that may count toward the limit at once
+            (see counts_toward_limit); enrolling another device beyond it
+            returns E2EE_DEVICE_LIMIT.
         attachments_enabled:
           type: boolean
           description: >-
