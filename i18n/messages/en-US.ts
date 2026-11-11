@@ -3371,6 +3371,7 @@ export const EN_US_ROOT_MESSAGES = {
   "drop.upload.imageTooLarge":
     "Image files must be 256 MiB or smaller. Export a smaller image and try again.",
   "drop.upload.submitFailed": "Couldn't submit this drop.",
+  "drop.upload.tryAgain": PLEASE_TRY_AGAIN,
   "drop.upload.imagePreview": "Preview of {file}",
   "drop.upload.removeFile": "Remove file",
 

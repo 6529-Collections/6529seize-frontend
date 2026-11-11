@@ -422,17 +422,22 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
         .getByRole("textbox", { name: "Write a message" })
         .last();
       await composer.fill("Keep this image draft");
+      await showDropActionsIfCollapsed(page);
+      const chooserPromise = page.waitForEvent("filechooser");
       await page
-        .getByLabel("Upload media", { exact: true })
-        .first()
-        .setInputFiles({
-          name: "selected-image.png",
-          mimeType: "image/png",
-          buffer: Buffer.from(
-            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
-            "base64"
-          ),
-        });
+        .getByRole("button", { name: "Attach files", exact: true })
+        .or(page.getByRole("button", { name: "Upload", exact: true }))
+        .click();
+      await (
+        await chooserPromise
+      ).setFiles({
+        name: "selected-image.png",
+        mimeType: "image/png",
+        buffer: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+          "base64"
+        ),
+      });
       await expect.poll(() => polls).toBeGreaterThan(0);
       const post = page
         .getByRole("button", { name: "Post", exact: true })

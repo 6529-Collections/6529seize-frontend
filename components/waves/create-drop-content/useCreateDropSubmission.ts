@@ -677,7 +677,7 @@ export const useCreateDropSubmission = ({
         description:
           error instanceof ImageProcessingError
             ? error.message
-            : t(locale, "tryAgain"),
+            : t(locale, "drop.upload.tryAgain"),
         details: getToastErrorDetails(error),
       });
     } finally {
