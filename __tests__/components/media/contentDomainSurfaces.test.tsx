@@ -97,7 +97,8 @@ function renderNftHtml(animation: string) {
 function renderSandboxedFrame(src: string) {
   const original = globalThis.IntersectionObserver;
   // Without an observer the frame renders immediately.
-  delete (globalThis as { IntersectionObserver?: unknown }).IntersectionObserver;
+  delete (globalThis as { IntersectionObserver?: unknown })
+    .IntersectionObserver;
   try {
     return render(<SandboxedExternalIframe src={src} title="Artwork" />);
   } finally {
@@ -125,9 +126,9 @@ function openedUrls(mediaUrl: string): Array<string | URL | undefined> {
     renderHook(() =>
       useMediaActions({ url: mediaUrl, fallbackFileName: "media" })
     ).result.current.openMedia?.();
-    expect(open.mock.calls.every((call) => call[2] === "noopener,noreferrer")).toBe(
-      true
-    );
+    expect(
+      open.mock.calls.every((call) => call[2] === "noopener,noreferrer")
+    ).toBe(true);
     return open.mock.calls.map((call) => call[0]);
   } finally {
     open.mockRestore();
@@ -200,15 +201,17 @@ describe("with the previous resolver endpoint, outputs are unchanged", () => {
         copyValue: `https://media.6529.io/ipfs/${CID_V0}`,
       })
     );
-    expect(resolveTrustedEmbedAssetUrl(cmsAsset(`ipfs://${CID_V0}/a.html`))).toBe(
-      `https://media.6529.io/ipfs/${CID_V0}/a.html`
-    );
+    expect(
+      resolveTrustedEmbedAssetUrl(cmsAsset(`ipfs://${CID_V0}/a.html`))
+    ).toBe(`https://media.6529.io/ipfs/${CID_V0}/a.html`);
   });
 
   it("opens unsupported media and media actions exactly as before", () => {
     // The unsupported-media link resolves the URL first, which drops the
     // query, as it does on main; the media action opens it as stored.
-    expect(openedUrls(`https://media.6529.io/ipfs/${CID_V0}/a.html?seed=1`)).toEqual([
+    expect(
+      openedUrls(`https://media.6529.io/ipfs/${CID_V0}/a.html?seed=1`)
+    ).toEqual([
       `https://media.6529.io/ipfs/${CID_V0}/a.html`,
       `https://media.6529.io/ipfs/${CID_V0}/a.html?seed=1`,
     ]);
@@ -253,13 +256,15 @@ describe("with the previous resolver endpoint, outputs are unchanged", () => {
       `https://arweave.net/${TX_ID}`
     );
     // Content-domain inputs are rewritten to the configured host.
-    expect(image(`https://media.6529usercontent.com/ipfs/${CID_V1}/a.png`)).toBe(
-      `https://media.6529.io/ipfs/${CID_V1}/a.png`
-    );
+    expect(
+      image(`https://media.6529usercontent.com/ipfs/${CID_V1}/a.png`)
+    ).toBe(`https://media.6529.io/ipfs/${CID_V1}/a.png`);
     expect(image(`https://${CID_V1}.ipfs.6529usercontent.com/a.png`)).toBe(
       `https://media.6529.io/ipfs/${CID_V1}/a.png`
     );
-    expect(image("https://not-a-cid.ipfs.6529usercontent.com/a.png")).toBeNull();
+    expect(
+      image("https://not-a-cid.ipfs.6529usercontent.com/a.png")
+    ).toBeNull();
   });
 
   it("opens stored Drop Forge media unchanged", () => {
@@ -345,7 +350,12 @@ describe("with the content-domain resolver endpoint", () => {
       `${ISOLATED}/`,
       `https://media.6529usercontent.com/ipfs/${CID_V0}`,
     ]);
-    expect(urls.some((url) => url.includes("6529.io"))).toBe(false);
+    expect(
+      urls.some((url) => {
+        const { hostname } = new URL(url);
+        return hostname === "6529.io" || hostname.endsWith(".6529.io");
+      })
+    ).toBe(false);
     renderNftHtml(`ipfs://${CID_V0}`);
     expect(document.querySelector("iframe")).toHaveAttribute(
       "src",
@@ -370,10 +380,12 @@ describe("with the content-domain resolver endpoint", () => {
   });
 
   it("opens first-party media on its per-CID host", () => {
-    expect(getOpenableUrl(`ipfs://${CID_V0}/a.html`)).toBe(`${ISOLATED}/a.html`);
-    expect(getOpenableUrl(`https://ipfs.6529.io/ipfs/${CID_V0}/a.html?x=1`)).toBe(
-      `${ISOLATED}/a.html?x=1`
+    expect(getOpenableUrl(`ipfs://${CID_V0}/a.html`)).toBe(
+      `${ISOLATED}/a.html`
     );
+    expect(
+      getOpenableUrl(`https://ipfs.6529.io/ipfs/${CID_V0}/a.html?x=1`)
+    ).toBe(`${ISOLATED}/a.html?x=1`);
     expect(getOpenableUrl("https://example.com/a.html")).toBe(
       "https://example.com/a.html"
     );
@@ -428,9 +440,9 @@ describe("with the content-domain resolver endpoint", () => {
         `${ISOLATED}/a.html`
       );
     }
-    expect(resolveTrustedEmbedAssetUrl(cmsAsset("https://example.com/a.html"))).toBe(
-      null
-    );
+    expect(
+      resolveTrustedEmbedAssetUrl(cmsAsset("https://example.com/a.html"))
+    ).toBe(null);
     expect(
       resolveTrustedEmbedAssetUrl(
         cmsAsset("https://not-a-cid.ipfs.6529usercontent.com/a.html")
@@ -447,9 +459,9 @@ describe("with the content-domain resolver endpoint", () => {
         layout="portrait"
       />
     );
-    expect(html.container.querySelector("iframe")?.getAttribute("srcdoc")).toContain(
-      `src="${ISOLATED}/a.html"`
-    );
+    expect(
+      html.container.querySelector("iframe")?.getAttribute("srcdoc")
+    ).toContain(`src="${ISOLATED}/a.html"`);
     html.unmount();
 
     const image = render(
@@ -460,20 +472,22 @@ describe("with the content-domain resolver endpoint", () => {
         layout="portrait"
       />
     );
-    expect(image.container.querySelector("iframe")?.getAttribute("srcdoc")).toContain(
-      `src="https://media.6529usercontent.com/ipfs/${CID_V0}/a.png"`
-    );
+    expect(
+      image.container.querySelector("iframe")?.getAttribute("srcdoc")
+    ).toContain(`src="https://media.6529usercontent.com/ipfs/${CID_V0}/a.png"`);
   });
 
   it("allows both domains' hosts for interactive media and keeps path checks", () => {
     expect(isInteractiveMediaAllowedHost("media.6529.io")).toBe(true);
-    expect(isInteractiveMediaAllowedHost("media.6529usercontent.com")).toBe(true);
+    expect(isInteractiveMediaAllowedHost("media.6529usercontent.com")).toBe(
+      true
+    );
     expect(
       isInteractiveMediaAllowedHost(`${CID_V1}.ipfs.6529usercontent.com`)
     ).toBe(true);
-    expect(isInteractiveMediaAllowedHost("not-a-cid.ipfs.6529usercontent.com")).toBe(
-      false
-    );
+    expect(
+      isInteractiveMediaAllowedHost("not-a-cid.ipfs.6529usercontent.com")
+    ).toBe(false);
     expect(isInteractiveMediaAllowedHost("6529usercontent.com")).toBe(false);
     expect(isInteractiveMediaAllowedHost("evil.example")).toBe(false);
     expect(
@@ -537,9 +551,9 @@ describe("with the content-domain resolver endpoint", () => {
 
   it("treats both media hosts as first-party for previews and images", () => {
     for (const host of ["media.6529.io", "media.6529usercontent.com"]) {
-      expect(canPreviewAttachmentInline(`https://${host}/ipfs/${CID_V1}/a.pdf`)).toBe(
-        true
-      );
+      expect(
+        canPreviewAttachmentInline(`https://${host}/ipfs/${CID_V1}/a.pdf`)
+      ).toBe(true);
     }
     expect(
       canPreviewAttachmentInline(

@@ -21,6 +21,12 @@ const CID_V0_AS_V1 =
 const CID_V1 = "bafybeigdyrzt5sfp7udm7hu76mjts3sfb44oixwkw55rmpbc6g6wuigv3i";
 const TX_ID = "OI6-rpJ2C3Ab4HiZRWt5A1SumhjnYigmSPBPX0ICBj8";
 
+/** Whether the URL's host is `domain` or one of its subdomains. */
+const isOnDomain = (url: string, domain: string): boolean => {
+  const { hostname } = new URL(url);
+  return hostname === domain || hostname.endsWith(`.${domain}`);
+};
+
 describe("first-party media hosts on both domains", () => {
   it.each([
     [`https://media.6529.io/ipfs/${CID_V1}/a.html`, CID_V1, "a.html"],
@@ -97,15 +103,15 @@ describe("first-party media hosts on both domains", () => {
 
   it("classifies first-party hostnames", () => {
     expect(isFirstPartyMediaResolverHostname("media.6529.io")).toBe(true);
-    expect(isFirstPartyMediaResolverHostname("MEDIA.6529usercontent.com.")).toBe(
-      true
-    );
+    expect(
+      isFirstPartyMediaResolverHostname("MEDIA.6529usercontent.com.")
+    ).toBe(true);
     expect(isFirstPartyMediaResolverHostname("ipfs.6529.io")).toBe(false);
     expect(isFirstPartyMediaHostname("ipfs.6529.io")).toBe(true);
     expect(isFirstPartyMediaHostname("ipfs-cache.6529.io")).toBe(true);
-    expect(isFirstPartyMediaHostname(`${CID_V1}.ipfs.6529usercontent.com`)).toBe(
-      true
-    );
+    expect(
+      isFirstPartyMediaHostname(`${CID_V1}.ipfs.6529usercontent.com`)
+    ).toBe(true);
     expect(isFirstPartyMediaHostname("a.b.ipfs.6529usercontent.com")).toBe(
       false
     );
@@ -160,9 +166,9 @@ describe("with the previous resolver endpoint", () => {
       withoutEndpoint
     );
     expect(withoutEndpoint).toContain(`https://ipfs.6529.io/ipfs/${CID_V1}`);
-    expect(
-      withoutEndpoint.some((url) => url.includes("6529usercontent"))
-    ).toBe(false);
+    expect(withoutEndpoint.some((url) => url.includes("6529usercontent"))).toBe(
+      false
+    );
   });
 });
 
@@ -270,9 +276,9 @@ describe("with the content-domain resolver endpoint", () => {
       `https://ipfs-cache.6529.io/ipfs/${CID_V1}/a.png`,
       `ipfs://${CID_V1}/a.png`,
     ]) {
-      expect(normalizeDecentralizedMediaUrl(input, CONTENT_DOMAIN_ENDPOINT)).toBe(
-        `https://media.6529usercontent.com/ipfs/${CID_V1}/a.png`
-      );
+      expect(
+        normalizeDecentralizedMediaUrl(input, CONTENT_DOMAIN_ENDPOINT)
+      ).toBe(`https://media.6529usercontent.com/ipfs/${CID_V1}/a.png`);
     }
   });
 
@@ -284,10 +290,10 @@ describe("with the content-domain resolver endpoint", () => {
       `https://media.6529usercontent.com/ipfs/${CID_V1}/a.png`
     );
     expect(urls).toContain(`https://ipfs.io/ipfs/${CID_V1}/a.png`);
-    expect(urls.some((url) => url.includes("6529.io"))).toBe(false);
-    expect(urls.some((url) => url.includes(".ipfs.6529usercontent.com"))).toBe(
-      false
-    );
+    expect(urls.some((url) => isOnDomain(url, "6529.io"))).toBe(false);
+    expect(
+      urls.some((url) => isOnDomain(url, "ipfs.6529usercontent.com"))
+    ).toBe(false);
 
     const [resolved] = resolveDecentralizedMediaInputs(
       [`https://media.6529.io/ipfs/${CID_V1}`],
@@ -297,7 +303,7 @@ describe("with the content-domain resolver endpoint", () => {
       `https://media.6529usercontent.com/ipfs/${CID_V1}`
     );
     expect(
-      resolved?.external_fallback_urls.some((url) => url.includes("6529.io"))
+      resolved?.external_fallback_urls.some((url) => isOnDomain(url, "6529.io"))
     ).toBe(false);
   });
 });

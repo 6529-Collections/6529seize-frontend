@@ -385,19 +385,31 @@ describe("image optimizer media hosts on both domains", () => {
   const patternsFor = (endpoint: string | undefined) =>
     sharedConfig(envFor(endpoint), "").images?.remotePatterns ?? [];
 
-  it.each([undefined, "https://media.6529.io", "https://media.6529usercontent.com"])(
+  it.each([
+    undefined,
+    "https://media.6529.io",
+    "https://media.6529usercontent.com",
+  ])(
     "allows resolver paths on both media hosts when the endpoint is %p",
     (endpoint) => {
       const patterns = patternsFor(endpoint);
       for (const host of ["media.6529.io", "media.6529usercontent.com"]) {
         expect(
-          hasRemoteMatch([], patterns, new URL(`https://${host}/ipfs/${CID}/1.png`))
+          hasRemoteMatch(
+            [],
+            patterns,
+            new URL(`https://${host}/ipfs/${CID}/1.png`)
+          )
         ).toBe(true);
         expect(
           hasRemoteMatch([], patterns, new URL(`https://${host}/arweave/abc`))
         ).toBe(true);
         expect(
-          hasRemoteMatch([], patterns, new URL(`https://${host}/api/media/resolve`))
+          hasRemoteMatch(
+            [],
+            patterns,
+            new URL(`https://${host}/api/media/resolve`)
+          )
         ).toBe(false);
         expect(
           hasRemoteMatch([], patterns, new URL(`http://${host}/ipfs/${CID}`))
@@ -421,7 +433,8 @@ describe("image optimizer media hosts on both domains", () => {
       patterns.filter(
         (pattern) =>
           !(pattern instanceof URL) &&
-          pattern.hostname.includes("6529usercontent.com")
+          (pattern.hostname === "6529usercontent.com" ||
+            pattern.hostname.endsWith(".6529usercontent.com"))
       )
     ).toEqual([
       {

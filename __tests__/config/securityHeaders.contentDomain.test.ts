@@ -60,7 +60,10 @@ const withoutContentDomain = (sources: readonly string[]): string[] =>
 describe.each(VARIANTS)("security headers (%s)", (_name, previous, options) => {
   const previousDirectives = directives(previous);
   const directivesWithPreviousHost = [...previousDirectives]
-    .filter(([, sources]) => sources.includes(PREVIOUS_ENDPOINT))
+    // An exact source in the directive's list, not a substring of one.
+    .filter(([, sources]) =>
+      sources.some((source) => source === PREVIOUS_ENDPOINT)
+    )
     .map(([name]) => name);
 
   it("lists the previous media host in connect, media and frame sources", () => {
