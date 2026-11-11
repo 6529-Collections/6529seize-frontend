@@ -50,7 +50,8 @@ message. Previewing does not load linked pages, embedded content, or message
 images. Encrypted previews remain available only from this device's local history.
 Known custom emoji shortcodes render as compact emoji images in regular and
 encrypted previews, including encrypted rows on the full notifications page.
-Unicode emoji keep their normal appearance. Unknown shortcodes remain readable
+Native emoji shortcodes render as their Unicode emoji, which keep their normal
+appearance. Unknown shortcodes remain readable
 as text, and code spans keep shortcodes literal. Encrypted previews use the full
 trusted emoji catalog without requesting individual emoji from the message.
 

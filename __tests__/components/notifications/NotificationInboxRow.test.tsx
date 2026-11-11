@@ -193,7 +193,7 @@ it.each(["regular", "encrypted-inbox", "encrypted-feed"])(
   "loads catalog emoji outside chat for %s previews without turning message URLs into resources",
   async (surface) => {
     const content =
-      "**:el_fafo_angy:** 😀 :not_in_catalog: `:el_fafo_angy:` [Link](https://example.com/private) ![Image](https://example.com/private.png)";
+      "**:el_fafo_angy:** 😀 :fire: :+1: :not_in_catalog: `:el_fafo_angy: :fire:` [Link](https://example.com/private) ![Image](https://example.com/private.png)";
     jest
       .mocked(useEncryptedNotificationPreview)
       .mockReturnValue({ preview: content, needsSetup: false });
@@ -237,9 +237,9 @@ it.each(["regular", "encrypted-inbox", "encrypted-feed"])(
     expect(image).toHaveAttribute("width", "16");
     expect(image).toHaveAttribute("height", "16");
     expect(image.closest("strong")).not.toBeNull();
-    expect(container).toHaveTextContent("😀 :not_in_catalog:");
+    expect(container).toHaveTextContent("😀 🔥 👍 :not_in_catalog:");
     const code = container.querySelector("code");
-    expect(code).toHaveTextContent(":el_fafo_angy:");
+    expect(code).toHaveTextContent(":el_fafo_angy: :fire:");
     expect(code?.querySelector("img")).toBeNull();
     expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(

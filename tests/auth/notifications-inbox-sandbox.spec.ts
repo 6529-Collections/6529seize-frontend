@@ -90,7 +90,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await page.route("**/api/v2/notifications?*", async (route) => {
       const response = await route.fetch();
       const data = (await response.json()) as ApiNotificationsResponseV2;
-      const content = `**Bold** :el_fafo_angy: *italic* ~~gone~~ and \`code\`.\n\n**${longBold}**\n\n[Canary link](https://notification-markdown-canary.invalid/link) ![Canary image](https://notification-markdown-canary.invalid/image.png)`;
+      const content = `**Bold** :el_fafo_angy: :fire: *italic* ~~gone~~ and \`code\`.\n\n**${longBold}**\n\n[Canary link](https://notification-markdown-canary.invalid/link) ![Canary image](https://notification-markdown-canary.invalid/image.png)`;
       data.notifications = data.notifications.map((notification) => ({
         ...notification,
         related_drops: notification.related_drops.map(
@@ -139,6 +139,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect(emoji).toHaveAttribute("src", /^data:image\/webp;base64,/u);
     await expect(emoji).toHaveCSS("width", "16px");
     await expect(emoji).toHaveCSS("height", "16px");
+    await expect(row).toContainText("🔥");
     await expect(row.getByText(longBold, { exact: true })).toHaveJSProperty(
       "tagName",
       "STRONG"
