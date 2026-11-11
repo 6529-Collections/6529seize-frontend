@@ -2566,6 +2566,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "result.openInWave": "Open message {serialNo} by {author} in {wave}",
     "result.open": "Open message {serialNo} by {author}",
     "result.checked": "Checked task",
+    "result.emoji": "Emoji {shortcode}",
     "result.imageFallback": "image",
     "result.mediaOnly": "Message with media or an attachment",
     "result.serial": "Message #{serialNo}",
