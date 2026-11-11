@@ -1,7 +1,7 @@
 import { jwtDecode } from "jwt-decode";
 import { getBrowserLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { AUTH_STORAGE_KEYS, getAuthJwt } from "./auth.utils";
+import { AUTH_STORAGE_KEYS, getAuthJwt, getWalletAddress } from "./auth.utils";
 
 /**
  * All tabs share one stored session. When another tab switches profile or
@@ -15,6 +15,8 @@ import { AUTH_STORAGE_KEYS, getAuthJwt } from "./auth.utils";
  * tab showing no signed-in profile) nothing is checked.
  */
 let displayedWallet: string | null = null;
+/** A catch-up is scheduled and has not run yet. */
+let catchUpPending = false;
 
 /** Records the wallet this tab shows as signed in; returns the reset. */
 export function showSignedInWallet(
@@ -22,6 +24,7 @@ export function showSignedInWallet(
 ): () => void {
   const shown = address ? address.toLowerCase() : null;
   displayedWallet = shown;
+  catchUpPending = false;
   return () => {
     if (displayedWallet === shown) {
       displayedWallet = null;
@@ -48,27 +51,41 @@ const getTokenWallet = (token: string): string | null => {
   }
 };
 
-/** Lets this tab adopt the stored selection through its storage listeners. */
+/**
+ * Lets this tab adopt the stored selection through its storage listeners.
+ * Refusals in the same turn share one catch-up.
+ */
 const followStoredProfile = (): void => {
   if (
+    catchUpPending ||
     typeof StorageEvent !== "function" ||
     typeof globalThis.dispatchEvent !== "function"
   ) {
     return;
   }
+  catchUpPending = true;
   setTimeout(() => {
+    if (!catchUpPending) {
+      return;
+    }
+    catchUpPending = false;
     globalThis.dispatchEvent(
       new StorageEvent("storage", { key: AUTH_STORAGE_KEYS.activeAddress })
     );
   }, 0);
 };
 
+const refuse = (): never => {
+  followStoredProfile();
+  throw new DisplayedProfileChangedError();
+};
+
 /**
  * Throws `DisplayedProfileChangedError`, without sending anything, when a
  * write would carry the stored session of a wallet other than the one this
- * tab shows. Only the session the API helpers attach is checked: reads,
- * sign-in endpoints and requests that bring their own credential are sent
- * as before.
+ * tab shows. Only the session the API helpers attach themselves is checked:
+ * reads, sign-in endpoints and requests that bring their own credential are
+ * sent as before.
  */
 export function assertWriteMatchesDisplayedWallet(request: {
   readonly url: string;
@@ -93,6 +110,17 @@ export function assertWriteMatchesDisplayedWallet(request: {
   if (tokenWallet === null || tokenWallet === shown) {
     return;
   }
-  followStoredProfile();
-  throw new DisplayedProfileChangedError();
+  refuse();
+}
+
+/**
+ * Throws `DisplayedProfileChangedError` when the stored selection, which a
+ * sign-out acts on, is not the signed-in wallet this tab shows.
+ */
+export function assertStoredWalletIsDisplayed(): void {
+  const shown = displayedWallet;
+  if (shown === null || getWalletAddress()?.toLowerCase() === shown) {
+    return;
+  }
+  refuse();
 }

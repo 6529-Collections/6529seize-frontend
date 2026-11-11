@@ -252,13 +252,15 @@ export const upsertCreateWaveDraft = (
 };
 
 interface CreateWaveDraftOwner {
-  readonly wallet: string;
   readonly profileId: string | null;
 }
 
-/** Scopes are `<primary wallet>:<profile id>`; a profile owns its id's scopes. */
+/**
+ * Scopes are `<primary wallet>:<profile id>`; a profile owns its id's scopes.
+ * Scopes saved without a profile id cannot be attributed and go as well.
+ */
 const isOwnedScope = (scope: string, owner: CreateWaveDraftOwner): boolean =>
-  scope === `${owner.wallet.toLowerCase()}:` ||
+  scope.endsWith(":") ||
   (!!owner.profileId && scope.endsWith(`:${owner.profileId}`));
 
 /**

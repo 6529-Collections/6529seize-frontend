@@ -23,7 +23,6 @@ import { useIdentity } from "@/hooks/useIdentity";
 import { useSecureSign } from "@/hooks/useSecureSign";
 import { useDeviceGrantChangeInvalidation } from "@/hooks/device-signing/useDeviceGrantChangeInvalidation";
 import { commonApiFetch } from "@/services/api/common-api";
-import { showSignedInWallet } from "@/services/auth/displayed-wallet-guard";
 import {
   getAuthJwt,
   getWalletAddress,
@@ -82,6 +81,7 @@ import { useSeizeConnectContext } from "./SeizeConnectContext";
 import { useAuthChainGuard } from "./useAuthChainGuard";
 import { useAuthContextValue } from "./useAuthContextValue";
 import { useSessionRecovery } from "./useSessionRecovery";
+import { useShownWalletForWrites } from "./useShownWalletForWrites";
 
 export default function Auth({
   children,
@@ -316,10 +316,7 @@ export default function Auth({
     latestAddressRef.current = address;
   }, [address]);
 
-  useEffect(
-    () => showSignedInWallet(isAddressAuthorized ? address : null),
-    [address, isAddressAuthorized]
-  );
+  useShownWalletForWrites(address, isAddressAuthorized);
 
   useEffect(() => {
     resetTrackedAuthImpactKeys();

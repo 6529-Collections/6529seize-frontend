@@ -183,13 +183,16 @@ describe("create-wave-draft.helpers", () => {
   it("removes only the signed-out profile's drafts", () => {
     upsertCreateWaveDraft(makeDraft("mine", 100), "0xprimary:profile-a");
     upsertCreateWaveDraft(makeDraft("no-profile", 100), "0xsigner:");
+    upsertCreateWaveDraft(makeDraft("no-profile-2", 100), "0xprimary:");
     upsertCreateWaveDraft(makeDraft("theirs", 100), "0xother:profile-b");
     upsertCreateWaveDraft(makeDraft("legacy", 100));
 
-    removeCreateWaveDrafts({ wallet: "0xSIGNER", profileId: "profile-a" });
+    removeCreateWaveDrafts({ profileId: "profile-a" });
 
     expect(readStoredScope("0xprimary:profile-a")).toEqual([]);
+    // Drafts saved without a profile id cannot be attributed and go too.
     expect(readStoredScope("0xsigner:")).toEqual([]);
+    expect(readStoredScope("0xprimary:")).toEqual([]);
     expect(readStoredScope("0xother:profile-b")).toEqual(["theirs"]);
     expect(readCreateWaveDrafts().map((draft) => draft.id)).toEqual(["legacy"]);
   });

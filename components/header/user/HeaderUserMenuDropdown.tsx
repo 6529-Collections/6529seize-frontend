@@ -15,6 +15,7 @@ import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { signOutAndRemoveLocalData } from "@/components/auth/signOutLocalData";
+import { DisplayedProfileChangedError } from "@/services/auth/displayed-wallet-guard";
 import { useChainSwitcher } from "@/components/header/useChainSwitcher";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
@@ -146,7 +147,13 @@ export default function HeaderUserMenuDropdown({
       onClose();
     } catch (error) {
       console.error(errorMessage, error);
-      setToast({ message: errorMessage, type: "error" });
+      setToast({
+        message:
+          error instanceof DisplayedProfileChangedError
+            ? error.message
+            : errorMessage,
+        type: "error",
+      });
     } finally {
       setPendingAction(null);
     }

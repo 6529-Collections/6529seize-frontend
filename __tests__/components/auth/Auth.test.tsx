@@ -8,6 +8,14 @@ jest.mock("@/components/auth/useSessionRecovery", () => ({
 jest.mock("@/services/auth/displayed-wallet-guard", () => ({
   showSignedInWallet: jest.fn(() => () => undefined),
 }));
+jest.mock("@/helpers/waves/wave-draft.helpers", () => ({
+  ...jest.requireActual("@/helpers/waves/wave-draft.helpers"),
+  clearAllWaveDrafts: jest.fn(),
+}));
+jest.mock("@/helpers/waves/create-wave-draft.helpers", () => ({
+  ...jest.requireActual("@/helpers/waves/create-wave-draft.helpers"),
+  removeCreateWaveDrafts: jest.fn(),
+}));
 import {
   act,
   render,
@@ -662,6 +670,54 @@ describe("Auth component", () => {
       expect(reset).not.toHaveBeenCalled();
       unmount();
       expect(reset).toHaveBeenCalled();
+    });
+
+    it.each([
+      ["a forced logout after a rejected stored session", "reset"],
+      ["an expired session invalidated for a new signature", "invalidate"],
+    ])("keeps drafts on %s", async (_case, path) => {
+      const drafts = {
+        chat: jest.requireMock<{ clearAllWaveDrafts: jest.Mock }>(
+          "@/helpers/waves/wave-draft.helpers"
+        ).clearAllWaveDrafts,
+        waves: jest.requireMock<{ removeCreateWaveDrafts: jest.Mock }>(
+          "@/helpers/waves/create-wave-draft.helpers"
+        ).removeCreateWaveDrafts,
+      };
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      const authUtils = jest.requireMock<{
+        getAuthJwt: jest.Mock;
+        invalidateAuthSessionForAddress: jest.Mock;
+      }>("@/services/auth/auth.utils");
+      authUtils.getAuthJwt.mockReturnValue("rejected-jwt");
+      jest
+        .mocked(validateAuthImmediate)
+        .mockImplementationOnce(async ({ callbacks }) => {
+          if (path === "reset") {
+            callbacks.onReset();
+          } else {
+            await callbacks.onRemoveJwt();
+          }
+          return {
+            isValid: false,
+            validationCompleted: true,
+            authRefreshOutcome: "failed",
+            wasCancelled: false,
+            shouldShowModal: path !== "reset",
+          };
+        });
+
+      renderAuthState();
+
+      await waitFor(() =>
+        expect(
+          path === "reset"
+            ? mockSeizeDisconnectAndLogout
+            : authUtils.invalidateAuthSessionForAddress
+        ).toHaveBeenCalled()
+      );
+      expect(drafts.chat).not.toHaveBeenCalled();
+      expect(drafts.waves).not.toHaveBeenCalled();
     });
 
     it("reports no wallet while the shown wallet is not signed in", () => {

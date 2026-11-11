@@ -146,6 +146,55 @@ describe("writes and the profile this tab shows", () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
+  it("sends a write that brings its own credential equal to the stored session", async () => {
+    resetShownWallet = showSignedInWallet(WALLET_X);
+    const storedToken = tokenFor(WALLET_Y);
+    getAuthJwtMock.mockReturnValue(storedToken);
+
+    await commonApiPost({
+      endpoint: "device-grants",
+      body: {},
+      headers: { Authorization: `Bearer ${storedToken}` },
+    });
+    await commonApiPut({
+      endpoint: "e2ee/devices",
+      body: {},
+      headers: { authorization: `Bearer ${storedToken}` },
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("schedules one catch-up for writes refused together", async () => {
+    jest.useFakeTimers();
+    resetShownWallet = showSignedInWallet(WALLET_X);
+    getAuthJwtMock.mockReturnValue(tokenFor(WALLET_Y));
+    const onStorage = jest.fn();
+    globalThis.addEventListener("storage", onStorage);
+
+    const results = await Promise.allSettled([
+      commonApiPost({ endpoint: "a", body: {} }),
+      commonApiPost({ endpoint: "b", body: {} }),
+      commonApiDelete({ endpoint: "c" }),
+    ]);
+    jest.runAllTimers();
+
+    expect(results.map((result) => result.status)).toEqual([
+      "rejected",
+      "rejected",
+      "rejected",
+    ]);
+    expect(onStorage).toHaveBeenCalledTimes(1);
+
+    // A later refusal schedules a new catch-up.
+    await expect(
+      commonApiPost({ endpoint: "d", body: {} })
+    ).rejects.toBeInstanceOf(DisplayedProfileChangedError);
+    jest.runAllTimers();
+    expect(onStorage).toHaveBeenCalledTimes(2);
+    globalThis.removeEventListener("storage", onStorage);
+  });
+
   it("stops checking once the provider resets, but not after a newer wallet is shown", async () => {
     const resetX = showSignedInWallet(WALLET_X);
     resetShownWallet = showSignedInWallet(WALLET_Y);

@@ -23,6 +23,7 @@ import { t } from "@/i18n/messages";
 import HeaderQRScanner from "./share/HeaderQRScanner";
 import { useChainSwitcher } from "./useChainSwitcher";
 import { signOutAndRemoveLocalData } from "@/components/auth/signOutLocalData";
+import { DisplayedProfileChangedError } from "@/services/auth/displayed-wallet-guard";
 import Link from "next/link";
 
 export default function AppUserConnect({
@@ -65,9 +66,12 @@ export default function AppUserConnect({
       } else if (typeof error === "string") {
         errorDetails = error;
       }
-      const toastMessage = errorDetails
+      let toastMessage = errorDetails
         ? `${errorMessage}: ${errorDetails}`
         : errorMessage;
+      if (error instanceof DisplayedProfileChangedError) {
+        toastMessage = error.message;
+      }
       setToast({ message: toastMessage, type: "error" });
     } finally {
       onNavigate();
