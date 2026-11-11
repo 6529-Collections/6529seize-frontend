@@ -7,6 +7,7 @@ import {
   getWalletAddress,
   getWalletRole,
 } from "../auth/auth.utils";
+import { assertWriteMatchesDisplayedWallet } from "../auth/displayed-wallet-guard";
 import { prepareSubmissionRequestKey } from "./submission-request-key";
 import { sessionAwareFetch } from "./session-aware-fetch";
 
@@ -375,6 +376,12 @@ const executeApiRequest = async <T>({
   credentials,
   cache,
 }: ExecuteApiRequestParams): Promise<T> => {
+  assertWriteMatchesDisplayedWallet({
+    url,
+    method,
+    headers,
+    usesStoredSession: manageWalletAuth,
+  });
   const requestStartedAtMs = getRequestTimingNow();
   let status: RequestStatus = "unknown";
   const requestInit = createRequestInit({

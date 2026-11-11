@@ -23,6 +23,7 @@ import { useIdentity } from "@/hooks/useIdentity";
 import { useSecureSign } from "@/hooks/useSecureSign";
 import { useDeviceGrantChangeInvalidation } from "@/hooks/device-signing/useDeviceGrantChangeInvalidation";
 import { commonApiFetch } from "@/services/api/common-api";
+import { showSignedInWallet } from "@/services/auth/displayed-wallet-guard";
 import {
   getAuthJwt,
   getWalletAddress,
@@ -314,6 +315,11 @@ export default function Auth({
   useEffect(() => {
     latestAddressRef.current = address;
   }, [address]);
+
+  useEffect(
+    () => showSignedInWallet(isAddressAuthorized ? address : null),
+    [address, isAddressAuthorized]
+  );
 
   useEffect(() => {
     resetTrackedAuthImpactKeys();

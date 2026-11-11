@@ -3690,6 +3690,8 @@ export const EN_US_ROOT_MESSAGES = {
     "Your wallet, profile, or network changed. Select the profile again to continue.",
   "auth.proxySwitch.failed":
     "Couldn't switch profiles. Your current profile is still selected. Please try again.",
+  "auth.displayedProfileChanged":
+    "Nothing was sent: the signed-in profile changed in another tab. Check the profile shown here and try again.",
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",

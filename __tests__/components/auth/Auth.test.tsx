@@ -5,6 +5,9 @@ jest.mock("@testing-library/react", () =>
 jest.mock("@/components/auth/useSessionRecovery", () => ({
   useSessionRecovery: jest.fn(),
 }));
+jest.mock("@/services/auth/displayed-wallet-guard", () => ({
+  showSignedInWallet: jest.fn(() => () => undefined),
+}));
 import {
   act,
   render,
@@ -630,6 +633,47 @@ describe("Auth component", () => {
         authRefreshOutcome: "not_attempted",
       });
       await pendingValidation.promise;
+    });
+  });
+
+  describe("Write checks", () => {
+    const renderAuthState = () =>
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={createReactQueryWrapperContextValue()}
+        >
+          <Auth>
+            <ShowAuthState />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+    it("reports the signed-in wallet this tab shows and resets on unmount", () => {
+      const { showSignedInWallet } = jest.requireMock<{
+        showSignedInWallet: jest.Mock;
+      }>("@/services/auth/displayed-wallet-guard");
+      const reset = jest.fn();
+      showSignedInWallet.mockImplementation(() => reset);
+      walletAddress = "0x1";
+
+      const { unmount } = renderAuthState();
+
+      expect(showSignedInWallet).toHaveBeenLastCalledWith("0x1");
+      expect(reset).not.toHaveBeenCalled();
+      unmount();
+      expect(reset).toHaveBeenCalled();
+    });
+
+    it("reports no wallet while the shown wallet is not signed in", () => {
+      const { showSignedInWallet } = jest.requireMock<{
+        showSignedInWallet: jest.Mock;
+      }>("@/services/auth/displayed-wallet-guard");
+      walletAddress = "0x1";
+      connectedAccountsOverride = [];
+
+      renderAuthState();
+
+      expect(showSignedInWallet).toHaveBeenLastCalledWith(null);
     });
   });
 
