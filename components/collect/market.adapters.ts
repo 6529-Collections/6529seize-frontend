@@ -257,6 +257,7 @@ export function marketOperationView(
         ? t(locale, "collect.receipt.notRecorded")
         : review.totalLabel),
     makerLabel: operation.wallet,
+    transactionHash: operation.transaction_hash ?? undefined,
     updatedLabel: formatDate(locale, operation.updated_at, {
       dateStyle: "medium",
       timeStyle: "short",

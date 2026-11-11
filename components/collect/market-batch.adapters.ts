@@ -52,6 +52,7 @@ export function marketBatchOperationView(
     detail: t(locale, "collect.batchReview.atomic"),
     amountLabel,
     makerLabel: operation.wallet,
+    transactionHash: operation.transaction_hash ?? undefined,
     updatedLabel: formatDate(locale, operation.updated_at, {
       dateStyle: "medium",
       timeStyle: "short",

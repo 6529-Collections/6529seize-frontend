@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import CollectOrdersClient from "@/components/collect/CollectOrdersClient";
 import type CollectOrdersView from "@/components/collect/CollectOrdersView";
 import type CollectBatchController from "@/components/collect/CollectBatchController";
@@ -6,6 +7,8 @@ import { fetchRecoverableMarketOperation } from "@/components/collect/market-rec
 import { fetchRecoverableMarketBatch } from "@/components/collect/market-batch-recovery";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { ComponentProps } from "react";
+import { fetchMarketBatch } from "@/services/api/market-batch-api";
+import { fetchMarketOperation } from "@/services/api/market-api";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { batchFixture, PAYER } from "./market-batch.fixture";
 const batch = batchFixture().operation;
@@ -39,6 +42,12 @@ beforeEach(() => {
   mockAuth.activeProfileProxy = null;
   mockHistory = [batch, single];
 });
+jest.mock("@/services/api/market-batch-api", () => ({
+  fetchMarketBatch: jest.fn(),
+}));
+jest.mock("@/services/api/market-api", () => ({
+  fetchMarketOperation: jest.fn(),
+}));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => mockAuth,
 }));
@@ -228,5 +237,45 @@ it.each([true, false])(
     expect(other).not.toHaveBeenCalled();
     expect(mockSingle).not.toHaveBeenCalled();
     expect(mockBatch).not.toHaveBeenCalled();
+  }
+);
+
+it.each([true, false])(
+  "reads a linked pending order without entering recovery on iOS (batch=%s)",
+  async (initialBatch) => {
+    const platform = jest
+      .spyOn(Capacitor, "getPlatform")
+      .mockReturnValue("ios");
+    const order = initialBatch ? batch : single;
+    const fetch = initialBatch ? fetchMarketBatch : fetchMarketOperation;
+    mockHistory = [{ ...single, state: "LIVE" } as ApiMarketOperation];
+    mockReceipt = order;
+    jest.mocked(fetchMarketBatch).mockResolvedValue(batch);
+    jest.mocked(fetchMarketOperation).mockResolvedValue(single);
+    try {
+      render(
+        <CollectOrdersClient
+          initialOperationId={order.id}
+          initialBatch={initialBatch}
+        />
+      );
+      const query = mockQueries.find((value) =>
+        value.queryKey.includes("read-only")
+      );
+      const signal = new AbortController().signal;
+      expect(query).toBeDefined();
+      await expect(query?.queryFn({ signal })).resolves.toBe(order);
+      expect(fetch).toHaveBeenCalledWith(order.id, signal);
+      expect(
+        mockQueries.find((value) => value.queryKey.includes("live-receipts"))
+          ?.enabled
+      ).toBe(false);
+      expect(fetchRecoverableMarketOperation).not.toHaveBeenCalled();
+      expect(fetchRecoverableMarketBatch).not.toHaveBeenCalled();
+      expect(mockSingle).not.toHaveBeenCalled();
+      expect(mockBatch).not.toHaveBeenCalled();
+    } finally {
+      platform.mockRestore();
+    }
   }
 );

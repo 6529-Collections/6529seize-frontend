@@ -57,8 +57,8 @@ and content stay hidden while it loads, a US deep link then opens the
 `Subscriptions` tab in place, and a non-US, unknown, failed, or slow (over five
 seconds) check redirects. Web and Android never wait for the country check.
 
-In the iOS app, the profile tab can show existing subscriptions, without
-funding actions. The promotional subscription card is omitted from the
+In the iOS app, the profile tab can show existing subscriptions, history,
+upcoming choices, and settings in read-only mode. The promotional subscription card is omitted from the
 profile header. On every platform the `Subscriptions` tab and its requests
 are left out of the server HTML and the first
 render, because the page cannot yet tell whether it is the iOS app. They appear
@@ -101,7 +101,7 @@ first render.
   - settings and upcoming-drop actions are enabled
   - `Top Up` is shown
 - Read-only mode:
-  - any non-owner context (for example viewing another profile)
+  - the iOS app, or any non-owner context (for example viewing another profile)
   - saved settings and upcoming subscription choices are shown as read-only values
   - `Top Up` is hidden
 - Active proxy session:

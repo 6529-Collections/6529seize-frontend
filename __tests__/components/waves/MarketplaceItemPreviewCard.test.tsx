@@ -1,4 +1,5 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { Capacitor } from "@capacitor/core";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
 import MarketplaceItemPreviewCard from "@/components/waves/MarketplaceItemPreviewCard";
@@ -535,3 +536,37 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(screen.queryByTestId("marketplace-data-health-icon")).toBeNull();
   });
 });
+
+it.each([false, true])(
+  "shows the artwork without marketplace actions on iOS (compact=%s)",
+  (compact) => {
+    const platform = jest
+      .spyOn(Capacitor, "getPlatform")
+      .mockReturnValue("ios");
+    const open = jest.spyOn(globalThis, "open").mockImplementation(() => null);
+    try {
+      render(
+        <MarketplaceItemPreviewCard
+          href="https://manifold.xyz/@creator/id/123"
+          mediaUrl="https://example.com/art.png"
+          mediaMimeType="image/png"
+          title="Sample artwork"
+          price="1 ETH"
+          compact={compact}
+        />
+      );
+      const card = screen.getByTestId("manifold-item-card");
+      expect(screen.getByTestId("manifold-item-media")).toBeVisible();
+      expect(card).not.toHaveAttribute("tabindex");
+      expect(card).not.toHaveAttribute("role");
+      expect(within(card).queryByRole("link")).not.toBeInTheDocument();
+      expect(within(card).queryByRole("button")).not.toBeInTheDocument();
+      fireEvent.click(card);
+      fireEvent.keyDown(card, { key: "Enter" });
+      expect(open).not.toHaveBeenCalled();
+    } finally {
+      platform.mockRestore();
+      open.mockRestore();
+    }
+  }
+);

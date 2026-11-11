@@ -13,8 +13,10 @@ wallets count together.
 - `/collect`: opens the set planner, with **Lowest listings** and **TDH** tools.
 - `/collect/orders`: inspect trades, potential offers and receipts, and recover
   transactions.
-- The iOS app shows collection browsing and existing orders. The Collect
-  planner and purchase actions are available on the web and Android.
+- On iOS, **Manage orders** shows existing orders, receipts and saved rules.
+  Open **Order details** to see the wallet and any recorded transaction hash.
+  Trade recovery, cancellation and rule changes are available on the web and
+  Android, alongside the Collect planner.
 - `/the-memes`, `/meme-lab`, `/6529-gradient` and `/nextgen/collection/pebbles`: browse artwork
   and open individual cards.
 

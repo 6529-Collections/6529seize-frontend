@@ -15,6 +15,8 @@ interface CollectOrdersViewProps {
   readonly error?: string | undefined;
   readonly onConnect: () => void;
   readonly onRetry: () => void;
+  readonly readOnly?: boolean;
+  readonly expandedOrderId?: string | undefined;
   readonly onInspect: (orderId: string) => void;
   readonly onCancel: (orderId: string) => void;
   readonly hasMore?: boolean;
@@ -113,15 +115,17 @@ export default function CollectOrdersView(props: CollectOrdersViewProps) {
                         time: order.updatedLabel,
                       })}
                     </p>
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      onClick={() => props.onInspect(order.id)}
-                      className="tw-min-h-11"
-                    >
-                      {t(locale, "collect.orders.inspect")}
-                    </Button>
-                    {order.cancellable && (
+                    {!props.readOnly && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => props.onInspect(order.id)}
+                        className="tw-min-h-11"
+                      >
+                        {t(locale, "collect.orders.inspect")}
+                      </Button>
+                    )}
+                    {!props.readOnly && order.cancellable && (
                       <Button
                         variant="tertiary"
                         size="sm"
@@ -132,13 +136,14 @@ export default function CollectOrdersView(props: CollectOrdersViewProps) {
                         {t(locale, "collect.action.cancel")}
                       </Button>
                     )}
-                    {order.cancelDisabledReason && (
+                    {!props.readOnly && order.cancelDisabledReason && (
                       <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
                         {order.cancelDisabledReason}
                       </p>
                     )}
                   </div>
                   <details
+                    open={order.id === props.expandedOrderId || undefined}
                     className={`tw-group tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400 ${order.media !== undefined && order.media !== null ? "sm:tw-pl-20" : ""}`}
                   >
                     <summary className="tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-rounded-md focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
@@ -153,6 +158,12 @@ export default function CollectOrdersView(props: CollectOrdersViewProps) {
                         wallet: order.makerLabel,
                       })}
                     </p>
+                    {order.transactionHash && (
+                      <p className="tw-m-0 tw-break-all tw-pb-2">
+                        {t(locale, "collect.trade.transactionHash")}:{" "}
+                        {order.transactionHash}
+                      </p>
+                    )}
                   </details>
                 </li>
               ))}

@@ -15,6 +15,7 @@ import {
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
+import { installSurfaceSimulation } from "../support/surfaceSimulation";
 
 const WAVE_ID = "00000000-0000-4000-8000-000000000529";
 const PREVIEW_ID = "00000000-0000-4000-8000-000000000533";
@@ -25,14 +26,15 @@ async function installPreview(
   page: Page,
   baseURL: string | undefined,
   name = WAVE_NAME,
-  following = true
+  following = true,
+  sharedHref?: string
 ) {
   const response = await page.request.get(
     `${getSandboxApiOrigin(baseURL)}/api/waves/${WAVE_ID}`
   );
   expect(response.ok()).toBe(true);
   const wave: ApiWave = await response.json();
-  const href = `${baseURL}/waves/${PREVIEW_ID}`;
+  const href = sharedHref ?? `${baseURL}/waves/${PREVIEW_ID}`;
   const preview: ApiWave = {
     ...wave,
     id: PREVIEW_ID,
@@ -133,6 +135,47 @@ test.describe("Embedded wave preview sandbox @auth @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Wave previews require the isolated mock API runner."
   );
+
+  test("keeps a shared NFT preview readable without marketplace actions on iOS", async ({
+    page,
+    baseURL,
+  }) => {
+    const listing = "https://manifold.xyz/@creator/id/123";
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      baseURL
+    );
+    await installPreview(page, baseURL, WAVE_NAME, true, listing);
+    await page.route("**/api/nft-link?*", (route) =>
+      route.fulfill({
+        json: {
+          is_enrichable: true,
+          validation_error: null,
+          data: {
+            name: "Sample listing",
+            price: "1",
+            price_currency: "ETH",
+            media_uri: `${baseURL}/6529.png`,
+          },
+        },
+      })
+    );
+    await page.goto(`/waves/${WAVE_ID}`, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const chat = page.getByRole("region", {
+      name: "Wave chat file upload area",
+    });
+    const card = chat.getByTestId("manifold-item-card");
+    await expect(
+      card.getByText("Sample listing", { exact: true })
+    ).toBeVisible();
+    await expect(card.getByTestId("manifold-item-media")).toBeVisible();
+    await expect(card.getByRole("link")).toHaveCount(0);
+    await expect(card.getByRole("button")).toHaveCount(0);
+    await expect(card).not.toHaveAttribute("tabindex");
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
 
   test("keeps names readable in description cards and chat at narrow and wide widths", async ({
     page,

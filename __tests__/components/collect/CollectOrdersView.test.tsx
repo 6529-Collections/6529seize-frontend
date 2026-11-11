@@ -88,3 +88,25 @@ it("waits for auth without exposing either login prompts or private order data",
   rerender(<CollectOrdersView {...p} resolvingAuth={false} authenticated />);
   expect(screen.getByText(order.title)).toBeInTheDocument();
 });
+
+it("discloses a linked read-only receipt without view or cancel actions", () => {
+  const transactionHash = "0x123456";
+  render(
+    <CollectOrdersView
+      {...props()}
+      readOnly
+      expandedOrderId={order.id}
+      orders={[{ ...order, transactionHash }]}
+    />
+  );
+  expect(screen.getByText(`Wallet: ${order.makerLabel}`)).toBeVisible();
+  expect(
+    screen.getByText(`Transaction hash: ${transactionHash}`)
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "View order" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Cancel order" })
+  ).not.toBeInTheDocument();
+});

@@ -206,6 +206,7 @@ export interface CollectOrderView {
   readonly detail: string;
   readonly amountLabel: string;
   readonly makerLabel: string;
+  readonly transactionHash?: string | undefined;
   readonly updatedLabel: string;
   readonly cancellable: boolean;
   readonly cancelDisabledReason?: string | undefined;
