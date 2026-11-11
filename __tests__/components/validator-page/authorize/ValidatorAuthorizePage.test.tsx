@@ -204,6 +204,60 @@ describe("the authorize page", () => {
     expect(wallet.seizeConnect).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps the en-US copy of the draft rows, intro and wallet step", async () => {
+    connect();
+    let finishSigning: (value: string) => void = () => undefined;
+    signTypedDataAsync.mockReturnValue(
+      new Promise<string>((resolve) => {
+        finishSigning = resolve;
+      })
+    );
+    open(FRAGMENT);
+    const rows = (await screen.findByText(PURPOSE)).closest("dl")!;
+    expect(
+      [...rows.querySelectorAll("dt")].map((label) => label.textContent)
+    ).toEqual(["Account", "Keys", "Authorization", "Purpose"]);
+    expect(
+      screen.getByText(
+        "Your wallet signs one message that lets the 6529 Validator on your computer sign for this account. It costs no gas and moves nothing."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Your wallet shows the same words. Each key's public key ends in its code. Signing costs no gas."
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign in your wallet" })
+    );
+    expect(
+      await screen.findByRole("button", { name: "Waiting for your wallet" })
+    ).toBeDisabled();
+    await act(async () => {
+      finishSigning(fixture.signature);
+    });
+  });
+
+  it("keeps the en-US copy of a stop's wallet step and the no-link about line", async () => {
+    connect();
+    const { unmount } = open(STOP_FRAGMENT);
+    expect(
+      await screen.findByText(
+        "Your wallet shows the same words. Signing costs no gas."
+      )
+    ).toBeInTheDocument();
+    unmount();
+
+    open(null);
+    const about = (
+      await screen.findByRole("link", { name: "What is the 6529 Validator?" })
+    ).closest("p");
+    expect(about).toHaveTextContent(
+      /^What is the 6529 Validator\? Read about it and download it there\.$/
+    );
+  });
+
   it("tags a test network", async () => {
     open(TEST_FRAGMENT);
     expect(await screen.findByText("Test network")).toBeInTheDocument();

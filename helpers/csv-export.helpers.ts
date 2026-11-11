@@ -36,6 +36,8 @@ function cellText(value: unknown): string {
 /** One CSV cell: formula-like text is prefixed with `'`, then quoted if needed. */
 export function toCsvCell(value: unknown): string {
   const text = cellText(value);
+  // Text that already starts with `'` (such as `'=1`) is not formula-like:
+  // it is written as it is, with no second prefix.
   const safeText =
     FORMULA_START_PATTERN.test(text) && !isPlainNumber(text)
       ? `${FORMULA_TEXT_PREFIX}${text}`
