@@ -9,6 +9,18 @@ import {
 const file = (name: string, type = "") => new File(["content"], name, { type });
 
 describe("drop upload validation", () => {
+  it("accepts the exact image limit and keeps the larger non-image allowance", () => {
+    const image = file("boundary.jpg", "image/jpeg");
+    Object.defineProperty(image, "size", { value: 256 * 1024 * 1024 });
+    const video = file("movie.mp4", "video/mp4");
+    Object.defineProperty(video, "size", { value: 300 * 1024 * 1024 });
+    const setToast = jest.fn();
+    expect(filterValidDropUploadFiles([image, video], setToast)).toEqual([
+      image,
+      video,
+    ]);
+    expect(setToast).not.toHaveBeenCalled();
+  });
   it("rejects an image above the server's 256 MiB limit with recovery guidance", () => {
     const image = file("large.jpg", "image/jpeg");
     Object.defineProperty(image, "size", { value: 256 * 1024 * 1024 + 1 });

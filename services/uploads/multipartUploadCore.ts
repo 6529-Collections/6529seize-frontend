@@ -21,7 +21,7 @@ import type { ApiCreateAttachmentMultipartUploadResponse } from "@/generated/mod
 import type { ApiCompleteAttachmentMultipartUploadRequest } from "@/generated/models/ApiCompleteAttachmentMultipartUploadRequest";
 import { getApiAttachmentUploadMimeType } from "@/services/uploads/attachmentUploadMimeType";
 import { t } from "@/i18n/messages";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { captureVideoPoster } from "./captureVideoPoster";
 import { ImageProcessingError } from "@/services/uploads/ImageProcessingError";
 
@@ -48,6 +48,7 @@ interface MultipartUploadCoreParams {
 }
 
 interface MediaMultipartUploadCoreParams extends MultipartUploadCoreParams {
+  locale?: SupportedLocale | undefined;
   /**
    * Read by the drop-media and wave-media start endpoints. Chat media is
    * stripped of identifying metadata; decision-entry media keeps the original
@@ -221,30 +222,33 @@ function isAbortError(error: unknown): boolean {
 }
 
 function getImageProcessingFailedMessage(
-  response: ApiCompleteMultipartUploadResponse
+  response: ApiCompleteMultipartUploadResponse,
+  locale: SupportedLocale
 ): string {
-  return (
-    response.media_error ?? t(DEFAULT_LOCALE, "drop.media.processingFailed")
-  );
+  return response.media_error ?? t(locale, "drop.media.processingFailed");
 }
 
 function assertImageProcessingDidNotFail(
-  response: ApiCompleteMultipartUploadResponse
+  response: ApiCompleteMultipartUploadResponse,
+  locale: SupportedLocale
 ): void {
   if (response.media_status === ApiDropMediaStatus.Failed) {
-    throw new ImageProcessingError(getImageProcessingFailedMessage(response));
+    throw new ImageProcessingError(
+      getImageProcessingFailedMessage(response, locale)
+    );
   }
 }
 
 async function waitForMediaReady(
   completionData: ApiCompleteMultipartUploadResponse,
+  locale: SupportedLocale,
   signal?: AbortSignal
 ): Promise<ApiCompleteMultipartUploadResponse> {
   if (!completionData.media_upload_id) {
     return completionData;
   }
 
-  assertImageProcessingDidNotFail(completionData);
+  assertImageProcessingDidNotFail(completionData, locale);
 
   if (
     completionData.media_status === undefined ||
@@ -277,13 +281,13 @@ async function waitForMediaReady(
       return status;
     }
 
-    assertImageProcessingDidNotFail(status);
+    assertImageProcessingDidNotFail(status, locale);
   }
 
   if (lastPollError instanceof Error) {
     throw lastPollError;
   }
-  throw new Error(t(DEFAULT_LOCALE, "drop.media.processingTimedOut"));
+  throw new ImageProcessingError(t(locale, "drop.media.processingTimedOut"));
 }
 
 export async function multipartUploadCore({
@@ -294,6 +298,7 @@ export async function multipartUploadCore({
   waitForReady = false,
   signal,
   purpose,
+  locale = DEFAULT_LOCALE,
 }: MediaMultipartUploadCoreParams): Promise<ApiCompleteMultipartUploadResponse> {
   const contentType = getApiMediaUploadMimeType(file);
 
@@ -366,10 +371,10 @@ export async function multipartUploadCore({
     throw new Error("No final media_url returned from completion endpoint");
   }
 
-  assertImageProcessingDidNotFail(completionData);
+  assertImageProcessingDidNotFail(completionData, locale);
 
   return waitForReady
-    ? await waitForMediaReady(completionData, signal)
+    ? await waitForMediaReady(completionData, locale, signal)
     : completionData;
 }
 

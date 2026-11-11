@@ -443,6 +443,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
         .getByRole("button", { name: "Post", exact: true })
         .last();
       await expect(post).toBeDisabled();
+      await expect(
+        page.getByRole("status").filter({ hasText: "Processing image" }).last()
+      ).toBeVisible();
       await composer.press("Enter");
       status = outcome;
       if (outcome === "failed") {

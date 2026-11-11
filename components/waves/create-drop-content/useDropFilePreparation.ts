@@ -113,6 +113,7 @@ export function useDropFilePreparation({
           file,
           path: "drop",
           purpose,
+          locale,
           waitForReady: true,
           signal: controller.signal,
           onProgress: (progress) => updateFile(file, { progress }),

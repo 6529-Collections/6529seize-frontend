@@ -8,6 +8,7 @@ import {
 } from "@/services/uploads/prepareDropImage";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
+import { ImageProcessingError } from "@/services/uploads/ImageProcessingError";
 
 jest.mock("@/components/auth/Auth", () => ({ useAuth: () => ({}) }));
 jest.mock("@/services/uploads/prepareDropImage", () => ({
@@ -75,6 +76,7 @@ it.each(["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"])(
     expect(multiPartUpload).toHaveBeenCalledWith(
       expect.objectContaining({
         purpose: ApiMediaUploadPurpose.Chat,
+        locale: "en-US",
         waitForReady: true,
       })
     );
@@ -87,7 +89,7 @@ it.each(["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"])(
   }
 );
 it("prepares and remembers a decision entry's file as a decision entry", async () => {
-  const file = image("entry.avif");
+  const file = new File(["image"], "entry.jpg", { type: "image/jpeg" });
   const { result } = renderHook(() =>
     useComposer("wave", [], ApiMediaUploadPurpose.DecisionEntry)
   );
@@ -98,6 +100,7 @@ it("prepares and remembers a decision entry's file as a decision entry", async (
       file,
       path: "drop",
       purpose: ApiMediaUploadPurpose.DecisionEntry,
+      waitForReady: true,
     })
   );
   expect(rememberPreparedDropImage).toHaveBeenCalledWith(
@@ -112,7 +115,7 @@ it("preserves valid selections when another file fails", async () => {
     .mocked(multiPartUpload)
     .mockResolvedValueOnce(ready)
     .mockRejectedValueOnce(
-      new Error(
+      new ImageProcessingError(
         "This image is too large to process. Reduce its dimensions and upload again."
       )
     );

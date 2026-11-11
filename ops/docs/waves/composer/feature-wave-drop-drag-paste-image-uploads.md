@@ -28,7 +28,7 @@ draft.
 3. Wait for image preparation to finish. An inline image shows a compact
    preview with an uploading indicator. Its frame keeps the same size when
    uploading finishes. Every image selected for the tray uploads and passes
-   processing before its preview appears; the composer shows its progress.
+   processing before it can be posted; the composer shows its progress.
 4. Add or edit the message. Sending and continuing a Storm wait for pending
    image preparation to finish.
 5. Send the drop, then select its image to open the image viewer.
@@ -41,8 +41,9 @@ draft.
 - 3D: GLB.
 - Attachments: PDF and CSV.
 - Files must be non-empty. Images are limited to **256 MiB**; other media is
-  limited to **500 MB**.
-- PDF files: up to **25 MB** and **100 pages**. CSV files: up to **50 MB**.
+  limited to **500 MiB**.
+- PDF files: up to **25 MiB** and **100 pages**. CSV files: up to **50 MiB**.
+  These size limits use MiB (1,048,576 bytes); some upload controls label them MB.
 - The file tray allows **eight files across the whole drop**, including its
   Storm parts. Excess files are skipped; existing selections are kept.
 - AVIF images must contain a single still image, with at most **64 million

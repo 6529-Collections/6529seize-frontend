@@ -550,7 +550,8 @@ export const useCreateDropSubmission = ({
       const generatedParts = await generateParts(
         dropRequest.parts,
         setUploadingFiles,
-        getDropMediaUploadPurpose(dropRequest)
+        getDropMediaUploadPurpose(dropRequest),
+        locale
       );
       if (!generatedParts.length) {
         return;
