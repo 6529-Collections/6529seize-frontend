@@ -33,6 +33,8 @@ export interface E2eeContextValue {
   readonly backup: E2eeBackupManager | null;
   /** Error code when the engine module or instance failed to load. */
   readonly loadError: string | null;
+  /** Load the engine when compose opens outside an encrypted route. */
+  readonly requestEngine: () => void;
   /** Dispose and recreate the engine (after an error). */
   readonly restart: () => void;
   /** "Use here": ask the tab that holds the engine to hand it to this one. */
@@ -48,6 +50,7 @@ const DISABLED_E2EE_CONTEXT: E2eeContextValue = {
   store: null,
   backup: null,
   loadError: null,
+  requestEngine: noop,
   restart: noop,
   takeOverHere: noop,
 };

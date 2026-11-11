@@ -12,6 +12,7 @@ export interface E2eePrefillPerson {
 }
 
 interface E2eeComposePrefill {
+  readonly ownerProfileId: string;
   readonly people: readonly E2eePrefillPerson[];
   readonly source: "dm";
 }

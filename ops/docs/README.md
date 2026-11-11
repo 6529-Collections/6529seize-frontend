@@ -64,7 +64,7 @@ March 19, 2026.
 
 - [Home](home/README.md): `/`
 - [Waves](waves/README.md): `/discover`, `/waves`, `/waves/{waveId}`,
-  `/waves/create`, `/messages`, `/messages/create`
+  `/waves/create`, `/messages`, `/messages/new`
 - [Profiles](profiles/README.md): `/{user}`, tab routes under `/{user}/*`, and
   `/about/primary-address`
 - [Media](media/README.md): `/the-memes`, `/the-memes/{param*}`,
@@ -113,7 +113,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 
 - Home and waves:
   `/`, `/discover`, `/waves`, `/waves/{waveId}`, `/waves/create`,
-  `/messages`, `/messages/create` (thread can also be selected with
+  `/messages`, `/messages/new` (thread can also be selected with
   `wave={waveId}` query param on `/messages`)
 - Profiles:
   `/{user}`, `/{user}/brain`, `/{user}/collected`, `/{user}/followers`,
