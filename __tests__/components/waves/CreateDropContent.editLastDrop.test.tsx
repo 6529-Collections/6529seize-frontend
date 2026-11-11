@@ -9,6 +9,13 @@ import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experi
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { validateDropImageSignature } from "@/services/uploads/prepareDropImage";
 
+jest.mock("@/components/waves/create-wave/services/multiPartUpload", () => ({
+  multiPartUpload: jest.fn(async () => ({
+    url: "https://cdn.example/image.png",
+    mime_type: "image/png",
+  })),
+}));
+
 jest.mock("@/services/uploads/prepareDropImage", () => ({
   ...jest.requireActual("@/services/uploads/prepareDropImage"),
   validateDropImageSignature: jest.fn(),
