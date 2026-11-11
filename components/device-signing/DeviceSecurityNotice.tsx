@@ -67,7 +67,10 @@ export function DeviceSecurityNotice({
 
   return (
     <>
-      <div role="group" aria-labelledby={noticeId}>
+      <fieldset
+        aria-labelledby={noticeId}
+        className="tw-min-w-0 tw-border-0 tw-p-0"
+      >
         <E2eeBanner
           tone="warning"
           live={false}
@@ -122,7 +125,7 @@ export function DeviceSecurityNotice({
             </p>
           )}
         </E2eeBanner>
-      </div>
+      </fieldset>
       <E2eeConfirmDialog
         open={confirmRevoke}
         title={t(locale, "deviceSecurity.notice.revokeTitle", { label })}
