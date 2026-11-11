@@ -3369,6 +3369,14 @@ export const EN_US_ROOT_MESSAGES = {
   "drop.upload.invalidFile": "Could not add {file}",
   "drop.upload.empty": "Choose a file that is not empty.",
   "drop.upload.tooLarge": "Media files must be 500 MB or smaller.",
+  "drop.upload.imageTooLarge":
+    "Image files must be {limit} MiB or smaller. Export a smaller image and try again.",
+  "drop.upload.submitFailed": "Couldn't submit this drop.",
+  "drop.upload.tryAgain": PLEASE_TRY_AGAIN,
+  "drop.upload.unsupportedType": "File type not supported.",
+  "drop.upload.uploadFailed": "Error uploading file. Please try again.",
+  "drop.upload.attachmentValidationFailed":
+    "{file} failed attachment validation.",
   "drop.upload.imagePreview": "Preview of {file}",
   "drop.upload.removeFile": "Remove file",
 
