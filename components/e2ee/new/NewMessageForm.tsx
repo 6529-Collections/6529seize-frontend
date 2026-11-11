@@ -21,17 +21,22 @@ import {
   NewMessageActions,
   type NewMessageAlternateAction,
 } from "./NewMessageActions";
-import { useE2eeEligibility } from "./useE2eeEligibility";
+import {
+  type E2eeEligibilityState,
+  useE2eeEligibility,
+} from "./useE2eeEligibility";
 
 const GROUP_NAME_MAX = 100;
 
 const EMPTY_RECIPIENTS: readonly E2eeSelectedPerson[] = [];
-const DEFAULT_CHOICE: {
+interface MessageChoice {
   readonly forceGroup: boolean;
   readonly preferNewGroup: boolean;
   readonly chosenGroup: string | null;
   readonly preferUnencrypted: boolean;
-} = {
+}
+
+const DEFAULT_CHOICE: MessageChoice = {
   forceGroup: false,
   preferNewGroup: false,
   chosenGroup: null,
@@ -48,6 +53,154 @@ interface NewMessageFormProps {
   readonly createUnencrypted?:
     | ((wallets: string[]) => Promise<boolean>)
     | undefined;
+}
+
+function resolveExistingChat(
+  e2ee: UseE2eeResult,
+  profileIds: string[],
+  kind: "dm" | "group",
+  choice: MessageChoice
+) {
+  const { engine, profileId } = e2ee;
+  if (!engine || !profileId || e2ee.status !== "ready") {
+    return {
+      matchingGroups: [],
+      showMatches: false,
+      existing: null,
+      openingExisting: false,
+    };
+  }
+  if (kind === "dm") {
+    const peer = profileIds[0];
+    const existing = peer ? engine.findDm(peer) : null;
+    return {
+      matchingGroups: [],
+      showMatches: false,
+      existing,
+      openingExisting: Boolean(existing),
+    };
+  }
+
+  const members = new Set([profileId, ...profileIds]);
+  const matchingGroups = e2ee.conversations.filter(
+    (chat) =>
+      chat.kind === "group" &&
+      chat.status === "active" &&
+      !chat.splitView &&
+      hasExactMembers(chat, members)
+  );
+  const showMatches = !choice.preferNewGroup && matchingGroups.length > 0;
+  const existingGroup =
+    matchingGroups.length === 1
+      ? matchingGroups[0]
+      : matchingGroups.find((chat) => chat.g === choice.chosenGroup);
+
+  return {
+    matchingGroups,
+    showMatches,
+    existing: showMatches ? existingGroup?.g : null,
+    openingExisting: showMatches,
+  };
+}
+
+function canContinueUnencrypted({
+  legacyOpen,
+  openingExisting,
+  selectedCount,
+  walletCount,
+  status,
+  statuses,
+}: {
+  readonly legacyOpen: boolean;
+  readonly openingExisting: boolean;
+  readonly selectedCount: number;
+  readonly walletCount: number;
+  readonly status: UseE2eeResult["status"];
+  readonly statuses: readonly E2eeEligibilityState[];
+}) {
+  if (
+    !legacyOpen ||
+    openingExisting ||
+    selectedCount === 0 ||
+    selectedCount !== walletCount
+  )
+    return false;
+  if (["idle", "loading", "enrolling"].includes(status)) return false;
+  if (status !== "ready") return true;
+  return (
+    statuses.includes("NO_DEVICES") &&
+    statuses.every((value) => value === "OK" || value === "NO_DEVICES")
+  );
+}
+
+function getMessageAction({
+  openingExisting,
+  useUnencrypted,
+  hasUnavailable,
+  legacyClosedForDm,
+}: {
+  readonly openingExisting: boolean;
+  readonly useUnencrypted: boolean;
+  readonly hasUnavailable: boolean;
+  readonly legacyClosedForDm: boolean;
+}): {
+  readonly actionLabel: MessageKey;
+  readonly warning: "blocked" | "closed" | "retention" | null;
+} {
+  if (openingExisting)
+    return { actionLabel: "e2ee.new.openExisting", warning: null };
+  if (useUnencrypted)
+    return {
+      actionLabel: "e2ee.new.continueUnencrypted",
+      warning: "retention",
+    };
+  if (legacyClosedForDm)
+    return { actionLabel: "e2ee.new.start", warning: "closed" };
+  return {
+    actionLabel: "e2ee.new.start",
+    warning: hasUnavailable ? "blocked" : null,
+  };
+}
+
+function getAlternateActions({
+  hasMatches,
+  showMatches,
+  showLegacyChoice,
+  useUnencrypted,
+  choice,
+  setChoice,
+}: {
+  readonly hasMatches: boolean;
+  readonly showMatches: boolean;
+  readonly showLegacyChoice: boolean;
+  readonly useUnencrypted: boolean;
+  readonly choice: MessageChoice;
+  readonly setChoice: (choice: MessageChoice) => void;
+}): NewMessageAlternateAction[] {
+  const actions: NewMessageAlternateAction[] = [];
+  if (hasMatches) {
+    actions.push({
+      kind: "group",
+      label: showMatches ? "e2ee.new.newGroup" : "e2ee.new.viewGroups",
+      onClick: () =>
+        setChoice({
+          ...choice,
+          preferNewGroup: showMatches,
+          preferUnencrypted: false,
+        }),
+    });
+  }
+  if (showLegacyChoice) {
+    actions.push({
+      kind: "encryption",
+      label: useUnencrypted
+        ? "e2ee.new.useEncrypted"
+        : "e2ee.new.useUnencrypted",
+      onClick: () =>
+        setChoice({ ...choice, preferUnencrypted: !choice.preferUnencrypted }),
+    });
+  }
+  return actions;
 }
 
 export function NewMessageForm({
@@ -69,7 +222,7 @@ export function NewMessageForm({
     initialPeople.filter((person) => person.profileId !== selfProfileId)
   );
   const [choice, setChoice] = useState(DEFAULT_CHOICE);
-  const { forceGroup, preferNewGroup, chosenGroup, preferUnencrypted } = choice;
+  const { forceGroup, chosenGroup, preferUnencrypted } = choice;
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
@@ -90,44 +243,21 @@ export function NewMessageForm({
       status === "NO_DEVICES" || status === "POLICY" || status === "BLOCKED"
   );
   const kind = selected.length > 1 || forceGroup ? "group" : "dm";
-  const dmPeer = kind === "dm" ? selected[0] : undefined;
-  const existingDm = dmPeer && engine ? engine.findDm(dmPeer.profileId) : null;
-  const memberIds = new Set(profileIds);
-  if (e2ee.profileId) memberIds.add(e2ee.profileId);
-  const matchingGroups =
-    kind === "group" && engine && e2ee.profileId
-      ? e2ee.conversations.filter(
-          (chat) =>
-            chat.kind === "group" &&
-            chat.status === "active" &&
-            !chat.splitView &&
-            hasExactMembers(chat, memberIds)
-        )
-      : [];
-  const showMatches = !preferNewGroup && matchingGroups.length > 0;
-  const existingGroup =
-    matchingGroups.length === 1
-      ? matchingGroups[0]?.g
-      : matchingGroups.find((chat) => chat.g === chosenGroup)?.g;
-  const existing = existingDm ?? (showMatches ? existingGroup : undefined);
-  const openingExisting = Boolean(existingDm) || showMatches;
+  const { matchingGroups, showMatches, existing, openingExisting } =
+    resolveExistingChat(e2ee, profileIds, kind, choice);
   const wallets = selected.flatMap((person) =>
     person.wallet ? [person.wallet] : []
   );
-  const setupPending = ["idle", "loading", "enrolling"].includes(e2ee.status);
-  const canUseUnencrypted =
-    Boolean(createUnencrypted) &&
-    now > 0 &&
-    !isLegacyDmClosed(now) &&
-    !openingExisting &&
-    selected.length > 0 &&
-    wallets.length === selected.length &&
-    !setupPending &&
-    (!engine ||
-      (hasUnavailable &&
-        statuses.every(
-          (status) => status === "OK" || status === "NO_DEVICES"
-        )));
+  const legacyClosed =
+    Boolean(createUnencrypted) && now > 0 && isLegacyDmClosed(now);
+  const canUseUnencrypted = canContinueUnencrypted({
+    legacyOpen: Boolean(createUnencrypted) && now > 0 && !legacyClosed,
+    openingExisting,
+    selectedCount: selected.length,
+    walletCount: wallets.length,
+    status: e2ee.status,
+    statuses,
+  });
   const showLegacyChoice = canUseUnencrypted && selected.length > 1;
   const useUnencrypted =
     canUseUnencrypted &&
@@ -212,46 +342,21 @@ export function NewMessageForm({
     setCreating(false);
   };
 
-  let actionLabel: MessageKey = "e2ee.new.start";
-  if (openingExisting) actionLabel = "e2ee.new.openExisting";
-  else if (useUnencrypted) actionLabel = "e2ee.new.continueUnencrypted";
-  const showBlocked = hasUnavailable && !openingExisting && !useUnencrypted;
-  const showClosed =
-    showBlocked &&
-    kind === "dm" &&
-    Boolean(createUnencrypted) &&
-    now > 0 &&
-    isLegacyDmClosed(now) &&
-    statuses.includes("NO_DEVICES");
-
-  let warning: "blocked" | "closed" | "retention" | null = null;
-  if (useUnencrypted) warning = "retention";
-  else if (showClosed) warning = "closed";
-  else if (showBlocked) warning = "blocked";
-
-  const alternateActions: NewMessageAlternateAction[] = [];
-  if (matchingGroups.length > 0) {
-    alternateActions.push({
-      kind: "group",
-      label: showMatches ? "e2ee.new.newGroup" : "e2ee.new.viewGroups",
-      onClick: () =>
-        setChoice({
-          ...choice,
-          preferNewGroup: showMatches,
-          preferUnencrypted: false,
-        }),
-    });
-  }
-  if (showLegacyChoice) {
-    alternateActions.push({
-      kind: "encryption",
-      label: useUnencrypted
-        ? "e2ee.new.useEncrypted"
-        : "e2ee.new.useUnencrypted",
-      onClick: () =>
-        setChoice({ ...choice, preferUnencrypted: !preferUnencrypted }),
-    });
-  }
+  const { actionLabel, warning } = getMessageAction({
+    openingExisting,
+    useUnencrypted,
+    hasUnavailable,
+    legacyClosedForDm:
+      legacyClosed && kind === "dm" && statuses.includes("NO_DEVICES"),
+  });
+  const alternateActions = getAlternateActions({
+    hasMatches: matchingGroups.length > 0,
+    showMatches,
+    showLegacyChoice,
+    useUnencrypted,
+    choice,
+    setChoice,
+  });
 
   return (
     <form

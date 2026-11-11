@@ -140,6 +140,13 @@ export default function DirectMessageRecipients({
     }
   }
 
+  let placeholder: string | undefined;
+  if (dismissibleResults) {
+    placeholder = t(locale, "e2ee.new.searchLabel");
+  } else if (selected.length > 0) {
+    placeholder = t(locale, "quickDm.recipientAddMore");
+  }
+
   return (
     <div
       onBlur={(event) => {
@@ -213,16 +220,7 @@ export default function DirectMessageRecipients({
             // Enter in recipient search must not accidentally create a conversation.
             if (event.key === "Enter") event.preventDefault();
           }}
-          placeholder={
-            selected.length || dismissibleResults
-              ? t(
-                  locale,
-                  dismissibleResults
-                    ? "e2ee.new.searchLabel"
-                    : "quickDm.recipientAddMore"
-                )
-              : undefined
-          }
+          placeholder={placeholder}
           autoComplete="off"
           autoCapitalize="off"
           spellCheck={false}
