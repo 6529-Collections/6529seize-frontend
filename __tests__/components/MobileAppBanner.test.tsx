@@ -1,9 +1,11 @@
+import { runInNewContext } from "node:vm";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Capacitor } from "@capacitor/core";
+import { SMALL_WEB_STARTUP_SCRIPT } from "@/components/layout/smallWebStartup";
 import MobileAppBanner from "@/components/mobile-app/MobileAppBanner";
 import { MOBILE_APP_ANDROID, MOBILE_APP_IOS } from "@/constants/constants";
+import { MOBILE_APP_DISMISSAL_KEY } from "@/helpers/mobileAppLinks";
 
-const MOBILE_APP_DISMISSAL_KEY = "6529-mobile-banner-dismissed-until";
 const MOBILE_APP_DISMISSAL_MS = 7 * 24 * 60 * 60 * 1000;
 
 let pathname = "/";
@@ -152,6 +154,47 @@ test("does not show in the mobile app", () => {
   render(<MobileAppBanner />);
   expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
 });
+
+test.each([
+  { ua: "iPhone Safari" },
+  { ua: "Android Mobile Chrome/140" },
+  { ua: "iPhone Safari", path: "/%61uth/callback" },
+  { ua: "iPhone Safari", path: "/%invalid" },
+  { ua: "iPhone Safari", dismissal: "future" },
+  { ua: "iPhone Safari", dismissal: "Infinity" },
+  { ua: "iPhone Safari", native: true },
+  { ua: "iPhone Electron" },
+])(
+  "reserves startup space when the hydrated banner renders: %j",
+  ({ ua, path = "/safe-collecting", dismissal, native = false }) => {
+    pathname = path;
+    jest.spyOn(navigator, "userAgent", "get").mockReturnValue(ua);
+    jest.mocked(Capacitor.isNativePlatform).mockReturnValue(native);
+    if (dismissal) {
+      localStorage.setItem(
+        MOBILE_APP_DISMISSAL_KEY,
+        dismissal === "future" ? String(Date.now() + 60_000) : dismissal
+      );
+    }
+
+    const setAttribute = jest.fn();
+    runInNewContext(SMALL_WEB_STARTUP_SCRIPT, {
+      innerWidth: 390,
+      navigator,
+      location: { pathname },
+      localStorage,
+      document: {
+        documentElement: { hasAttribute: () => native, setAttribute },
+      },
+    });
+    render(<MobileAppBanner />);
+
+    const reserved = setAttribute.mock.calls.some(
+      ([name]) => name === "data-small-web-banner"
+    );
+    expect(reserved).toBe(screen.queryByRole("complementary") !== null);
+  }
+);
 
 test("uses Google Play on Android", () => {
   jest
