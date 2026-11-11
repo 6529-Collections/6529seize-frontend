@@ -20,6 +20,7 @@ jest.mock("@/components/e2ee/ui/E2eeProfileLink", () => ({
 jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
   useE2eeEmojis: () => ({
     sources: new Map([["gm", "data:image/png;base64,aGVsbG8="]]),
+    native: new Map(),
   }),
 }));
 
@@ -88,6 +89,25 @@ it("renders Markdown and GFM with the real parser", () => {
     "b",
   ]);
   expect(screen.getByRole("separator")).toBeInTheDocument();
+});
+
+it("keeps a linked image label inside its authored link and standalone images linked", () => {
+  const { container } = render(
+    <E2eeMarkdown
+      {...props}
+      text="[![Photo](https://example.com/photo.png)](https://example.com/post)\n\n![Standalone](https://example.com/standalone.png)"
+    />
+  );
+  expect(screen.getByRole("link", { name: "Photo" })).toHaveAttribute(
+    "href",
+    "https://example.com/post"
+  );
+  expect(screen.getByRole("link", { name: "Standalone" })).toHaveAttribute(
+    "href",
+    "https://example.com/standalone.png"
+  );
+  expect(screen.getAllByRole("link")).toHaveLength(2);
+  expect(container.querySelector("a a,img")).toBeNull();
 });
 
 it("keeps member mentions and catalog emoji in prose and leaves code literal", async () => {

@@ -53,6 +53,7 @@ const PUBLIC_LINK_PLUGINS: PluggableList = [
 ];
 const identity = (children: ReactNode) => children;
 const RenderingContext = createContext({ renderText: identity });
+const MarkdownLinkContext = createContext(false);
 
 /** Shared paragraph typography, including authored empty lines. */
 export function MarkdownParagraph({
@@ -179,13 +180,16 @@ export function MarkdownLink({
       rel="noopener noreferrer nofollow ugc"
       className="tw-break-all tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-2 hover:tw-decoration-primary-300 focus-visible:tw-rounded focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
     >
-      {children}
+      <MarkdownLinkContext.Provider value={true}>
+        {children}
+      </MarkdownLinkContext.Provider>
     </a>
   );
 }
 
 function ImageLink({ src, alt, title }: ComponentPropsWithoutRef<"img">) {
   const locale = useBrowserLocale();
+  const insideLink = useContext(MarkdownLinkContext);
   const href = typeof src === "string" ? src : undefined;
   if (!href) return <span>{alt}</span>;
   let label = alt;
@@ -200,6 +204,7 @@ function ImageLink({ src, alt, title }: ComponentPropsWithoutRef<"img">) {
       ? t(locale, "e2ee.message.imageLinkFrom", { host })
       : t(locale, "e2ee.message.imageLink");
   }
+  if (insideLink) return <span>{label}</span>;
   return (
     <MarkdownLink href={href} title={title}>
       {label}
