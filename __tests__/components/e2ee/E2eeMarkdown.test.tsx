@@ -20,6 +20,7 @@ jest.mock("@/components/e2ee/ui/E2eeProfileLink", () => ({
 jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
   useE2eeEmojis: () => ({
     sources: new Map([["gm", "data:image/png;base64,aGVsbG8="]]),
+    native: new Map(),
   }),
 }));
 
@@ -90,6 +91,25 @@ it("renders Markdown and GFM with the real parser", () => {
   expect(screen.getByRole("separator")).toBeInTheDocument();
 });
 
+it("keeps a linked image label inside its authored link and standalone images linked", () => {
+  const { container } = render(
+    <E2eeMarkdown
+      {...props}
+      text="[![Photo](https://example.com/photo.png)](https://example.com/post)\n\n![Standalone](https://example.com/standalone.png)"
+    />
+  );
+  expect(screen.getByRole("link", { name: "Photo" })).toHaveAttribute(
+    "href",
+    "https://example.com/post"
+  );
+  expect(screen.getByRole("link", { name: "Standalone" })).toHaveAttribute(
+    "href",
+    "https://example.com/standalone.png"
+  );
+  expect(screen.getAllByRole("link")).toHaveLength(2);
+  expect(container.querySelector("a a,img")).toBeNull();
+});
+
 it("keeps member mentions and catalog emoji in prose and leaves code literal", async () => {
   const { container } = render(
     <E2eeMarkdown
@@ -133,6 +153,21 @@ it("renders URLs and images as explicit safe anchors without resource elements",
   expect(
     container.querySelector("img, iframe, video, audio, source, script, link")
   ).toBeNull();
+});
+
+it("keeps mentioned members as labels in a compact preview inside a notification link", () => {
+  const { container } = render(
+    <a href="/messages/encrypted/group">
+      <E2eeMarkdown
+        {...props}
+        preview
+        text="**@bob** [Link](https://example.com) ![Image](https://example.com/image.png)"
+      />
+    </a>
+  );
+  expect(container.querySelector("strong")).toHaveTextContent("@bob");
+  expect(screen.getAllByRole("link")).toHaveLength(1);
+  expect(container.querySelector("a a,img,iframe,input")).toBeNull();
 });
 
 it("preserves blank lines and isolates footnotes even when the same message renders twice", () => {
