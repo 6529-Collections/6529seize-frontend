@@ -3368,6 +3368,8 @@ export const EN_US_ROOT_MESSAGES = {
   "drop.upload.invalidFile": "Could not add {file}",
   "drop.upload.empty": "Choose a file that is not empty.",
   "drop.upload.tooLarge": "Media files must be 500 MB or smaller.",
+  "drop.upload.limitReached":
+    "You have reached the upload limit for the last 24 hours. Try again later.",
   "drop.upload.imageTooLarge":
     "Image files must be {limit} MiB or smaller. Export a smaller image and try again.",
   "drop.upload.submitFailed": "Couldn't submit this drop.",
@@ -3657,6 +3659,8 @@ export const EN_US_ROOT_MESSAGES = {
   "nextgen.loadError.burnProof": "The burn proof could not be loaded.",
   "nextgen.loadError.retry": "Try again",
   "auth.sessionUpgrade.action": "Upgrade Authentication",
+  "auth.signIn.rateLimited":
+    "Too many sign-in attempts. Wait a moment, then try again.",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
   "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
   "waves.signIn.post": "Sign in to 6529 to post",

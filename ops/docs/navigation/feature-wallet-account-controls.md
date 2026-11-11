@@ -329,6 +329,9 @@ account-dependent controls load. No additional account cache is used.
   target account, then revisit account controls.
 - If wallet controls crash, use wallet error-boundary actions: `Try Again`,
   then `Clear Storage & Reload`.
+- If signing in shows "Too many sign-in attempts. Wait a moment, then try
+  again.", the sign-in service limits how often it is asked from one network
+  address. Wait a moment, then choose `Sign message` again.
 - If an action shows "Nothing was sent: the signed-in profile changed in
   another tab", another tab switched or signed out a profile while this tab
   still showed the previous one. The tab then shows the profile now signed in;
