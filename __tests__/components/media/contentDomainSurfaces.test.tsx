@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { fireEvent, render, renderHook, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
 import NFTHTMLRenderer from "@/components/nft-image/renderers/NFTHTMLRenderer";
@@ -7,6 +7,8 @@ import { getHtmlMediaGatewayFallbackUrls } from "@/components/nft-image/utils/ga
 import { getDropForgeStorageLocationInfo } from "@/components/drop-forge/drop-forge-storage-location.helpers";
 import { getOpenableMediaUrl } from "@/components/drop-forge/craft/craft-claim-helpers";
 import { canPreviewAttachmentInline } from "@/components/drops/view/item/content/attachments/DropAttachmentDisplay.view";
+import UnsupportedMediaLink from "@/components/drops/view/item/content/media/UnsupportedMediaLink";
+import { useMediaActions } from "@/components/drops/view/item/content/media/useMediaActions";
 import { resolveTrustedEmbedAssetUrl } from "@/components/profile-cms/site-renderer/data";
 import { getSafeExternalUrl } from "@/components/the-memes/MemePageAdditionalDetails";
 import TimelineMedia, { MediaType } from "@/components/timeline/TimelineMedia";
@@ -112,6 +114,26 @@ function renderTimelineHtml(url: string) {
   );
 }
 
+/** Opens through the unsupported-media link (two presses) and the media actions. */
+function openedUrls(mediaUrl: string): Array<string | URL | undefined> {
+  const open = jest.spyOn(window, "open").mockImplementation(() => null);
+  try {
+    const link = render(<UnsupportedMediaLink media_url={mediaUrl} />);
+    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByRole("button"));
+    link.unmount();
+    renderHook(() =>
+      useMediaActions({ url: mediaUrl, fallbackFileName: "media" })
+    ).result.current.openMedia?.();
+    expect(open.mock.calls.every((call) => call[2] === "noopener,noreferrer")).toBe(
+      true
+    );
+    return open.mock.calls.map((call) => call[0]);
+  } finally {
+    open.mockRestore();
+  }
+}
+
 function cmsAsset(uri: string): CmsAssetV1 {
   return {
     id: "asset",
@@ -181,6 +203,23 @@ describe("with the previous resolver endpoint, outputs are unchanged", () => {
     expect(resolveTrustedEmbedAssetUrl(cmsAsset(`ipfs://${CID_V0}/a.html`))).toBe(
       `https://media.6529.io/ipfs/${CID_V0}/a.html`
     );
+  });
+
+  it("opens unsupported media and media actions exactly as before", () => {
+    // The unsupported-media link resolves the URL first, which drops the
+    // query, as it does on main; the media action opens it as stored.
+    expect(openedUrls(`https://media.6529.io/ipfs/${CID_V0}/a.html?seed=1`)).toEqual([
+      `https://media.6529.io/ipfs/${CID_V0}/a.html`,
+      `https://media.6529.io/ipfs/${CID_V0}/a.html?seed=1`,
+    ]);
+    expect(openedUrls(`ipfs://${CID_V0}/a.html`)).toEqual([
+      `https://media.6529.io/ipfs/${CID_V0}/a.html`,
+      `https://media.6529.io/ipfs/${CID_V0}/a.html`,
+    ]);
+    expect(openedUrls("https://cdn.example/file.xyz")).toEqual([
+      "https://cdn.example/file.xyz",
+      "https://cdn.example/file.xyz",
+    ]);
   });
 
   it("puts proposal-card HTML on the resolver path host", () => {
@@ -350,6 +389,32 @@ describe("with the content-domain resolver endpoint", () => {
         copyValue: `https://media.6529usercontent.com/ipfs/${CID_V0}`,
       })
     );
+  });
+
+  it("opens unsupported media and media actions on the per-CID host", () => {
+    for (const input of [
+      `https://media.6529.io/ipfs/${CID_V0}/a.html?seed=1`,
+      `https://ipfs.6529.io/ipfs/${CID_V0}/a.html?seed=1`,
+      `https://media.6529usercontent.com/ipfs/${CID_V0}/a.html?seed=1`,
+    ]) {
+      expect(openedUrls(input)).toEqual([
+        `${ISOLATED}/a.html?seed=1`,
+        `${ISOLATED}/a.html?seed=1`,
+      ]);
+    }
+    expect(openedUrls(`ipfs://${CID_V0}/a.html`)).toEqual([
+      `${ISOLATED}/a.html`,
+      `${ISOLATED}/a.html`,
+    ]);
+    // Third-party gateways resolve to the path host and open per CID.
+    expect(openedUrls(`https://ipfs.io/ipfs/${CID_V0}/a.html`)).toEqual([
+      `${ISOLATED}/a.html`,
+      `https://ipfs.io/ipfs/${CID_V0}/a.html`,
+    ]);
+    expect(openedUrls("https://cdn.example/file.xyz")).toEqual([
+      "https://cdn.example/file.xyz",
+      "https://cdn.example/file.xyz",
+    ]);
   });
 
   it("embeds profile-site HTML on its per-CID host and still refuses other hosts", () => {
