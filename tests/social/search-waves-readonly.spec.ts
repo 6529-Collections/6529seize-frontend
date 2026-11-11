@@ -361,13 +361,18 @@ async function expectSearchResultEmojis(result: Locator) {
   await expect(emoji).toHaveCSS("width", "20px");
   await expect(emoji).toHaveCSS("height", "20px");
   await expect(
-    result.locator('strong img[alt="Emoji :el_fafo_angy:"]')
+    result
+      .getByRole("strong")
+      .getByRole("img", { name: "Emoji :el_fafo_angy:" })
   ).toBeVisible();
-  await expect(result.locator("mark").first()).toHaveText(/hello/i);
+  await expect(result.getByText("hello", { exact: true })).toHaveJSProperty(
+    "tagName",
+    "MARK"
+  );
   await expect(result).toContainText("😄");
   await expect(result).toContainText(":unknown_search_emoji:");
-  await expect(result.locator("code")).toHaveText(":el_fafo_angy:");
-  await expect(result.locator("code img")).toHaveCount(0);
+  await expect(result.getByRole("code")).toHaveText(":el_fafo_angy:");
+  await expect(result.getByRole("code").getByRole("img")).toHaveCount(0);
 }
 
 async function exerciseAdvancedSearch(
