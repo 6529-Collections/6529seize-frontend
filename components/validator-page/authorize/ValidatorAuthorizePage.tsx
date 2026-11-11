@@ -96,7 +96,7 @@ function KeyCodes({ shown }: { readonly shown: Shown }) {
     <div className="tw-flex tw-flex-col tw-gap-2">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-          Validator key
+          {t(shown.locale, "validator.authorize.keyCodes.label")}
         </span>
         <TestNetworkTag shown={shown} />
       </div>
@@ -138,13 +138,20 @@ function DraftRows({ shown }: { readonly shown: Shown }) {
   const percents = sharePercents(draft.keys.map((key) => key.share));
   return (
     <dl className="tw-m-0 tw-flex tw-flex-col tw-gap-3">
-      <Row label="Account">
+      <Row label={t(locale, "validator.authorize.row.account")}>
         <span className="tw-block tw-break-all tw-font-mono tw-text-sm tw-leading-6">
           {draft.account}
         </span>
       </Row>
       {draft.keys.length > 0 && (
-        <Row label={draft.keys.length === 1 ? "Key" : "Keys"}>
+        <Row
+          label={t(
+            locale,
+            draft.keys.length === 1
+              ? "validator.authorize.row.keys.one"
+              : "validator.authorize.row.keys.other"
+          )}
+        >
           <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1 tw-p-0">
             {draft.keys.map((key, index) => (
               <li
@@ -157,7 +164,7 @@ function DraftRows({ shown }: { readonly shown: Shown }) {
                 <span>{percents[index]}</span>
                 {key.mine && (
                   <span className="tw-text-sm tw-text-primary-300">
-                    this validator
+                    {t(locale, "validator.authorize.row.keys.mine")}
                   </span>
                 )}
                 <span className="tw-basis-full tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-400">
@@ -173,7 +180,9 @@ function DraftRows({ shown }: { readonly shown: Shown }) {
           version: String(grant.message.authVersion),
         })}
       </Row>
-      <Row label="Purpose">{grant.message.purpose}</Row>
+      <Row label={t(locale, "validator.authorize.row.purpose")}>
+        {grant.message.purpose}
+      </Row>
     </dl>
   );
 }
@@ -213,10 +222,10 @@ function DraftWarnings({ shown }: { readonly shown: Shown }) {
 /** The heading names the validator's own keys only when the link marks one. */
 function introHeading({ draft, locale }: Shown, mine: number): string {
   if (mine > 1) {
-    return "Authorize these validator keys";
+    return t(locale, "validator.authorize.heading.mine.other");
   }
   if (mine === 1) {
-    return "Authorize this validator key";
+    return t(locale, "validator.authorize.heading.mine.one");
   }
   return draft.keys.length > 1
     ? t(locale, "validator.authorize.heading.unmarked.other")
@@ -224,16 +233,16 @@ function introHeading({ draft, locale }: Shown, mine: number): string {
 }
 
 function DraftIntro({ shown }: { readonly shown: Shown }) {
-  const { draft } = shown;
+  const { draft, locale } = shown;
   const mine = draft.keys.filter((key) => key.mine).length;
   if (draft.keys.length === 0) {
     return (
       <>
         <TestNetworkTag shown={shown} />
-        <h2 className={HEADING}>Stop this account&apos;s keys</h2>
-        <p className={TEXT}>
-          No key will sign for this account from the day it counts.
-        </p>
+        <h2 className={HEADING}>
+          {t(locale, "validator.authorize.stop.heading")}
+        </h2>
+        <p className={TEXT}>{t(locale, "validator.authorize.stop.body")}</p>
       </>
     );
   }
@@ -399,6 +408,7 @@ function SignatureCard({
   readonly signature: string;
   readonly shown: Shown;
 }) {
+  const { locale } = shown;
   const box = useRef<HTMLParagraphElement>(null);
   const [copied, setCopied] = useState<"copied" | "select" | null>(null);
 
@@ -428,12 +438,11 @@ function SignatureCard({
           className="tw-size-7 tw-flex-none tw-text-success"
         />
         <h2 id="authorize-copy" className={HEADING}>
-          Copy the signature
+          {t(locale, "validator.authorize.signature.heading")}
         </h2>
       </div>
       <p className={TEXT}>
-        Paste it into your validator&apos;s Authorize step, in the box for the
-        signature.
+        {t(locale, "validator.authorize.signature.instructions")}
       </p>
       <p
         ref={box}
@@ -446,11 +455,16 @@ function SignatureCard({
         onClick={() => void copy()}
         className={`${PRIMARY_BUTTON} tw-border-0`}
       >
-        Copy signature
+        {t(locale, "validator.authorize.signature.copy")}
       </button>
       {copied && (
         <Notice>
-          {copied === "copied" ? "Copied." : "Select the text and copy it."}
+          {t(
+            locale,
+            copied === "copied"
+              ? "validator.authorize.signature.copied"
+              : "validator.authorize.signature.selectToCopy"
+          )}
         </Notice>
       )}
       <p className={SMALL}>{signedSummary(shown)}</p>

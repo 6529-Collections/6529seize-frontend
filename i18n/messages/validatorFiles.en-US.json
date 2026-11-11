@@ -1,0 +1,6 @@
+{
+  "validator.files.publisher.label": "Publisher",
+  "validator.files.publisher.none": "None",
+  "validator.files.checksumSource": "Each SHA-256 comes from 6529's signed list of releases. This page checks that signature before it lists a file. The publisher is the name your system should show when it opens the file or, for an archive, the program inside it; this page doesn't check it, so check it yourself.",
+  "validator.files.download.label": "Download {file}"
+}

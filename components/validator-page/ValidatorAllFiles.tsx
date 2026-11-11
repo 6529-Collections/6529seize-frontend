@@ -2,6 +2,9 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/validator-files";
 import type { ValidatorRelease } from "@/lib/validator-page/releaseFeed";
 import {
   formatFileSize,
@@ -18,6 +21,8 @@ const CELL =
   "tw-border-0 tw-border-solid tw-border-white/[0.06] tw-align-middle lg:tw-border-b lg:tw-px-3 lg:tw-py-3";
 const MOBILE_LABEL =
   "tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500 lg:tw-hidden";
+// Rendered on the server, in the locale the server renders.
+const LOCALE = DEFAULT_LOCALE;
 const HEAD =
   "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.08] tw-px-3 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400";
 
@@ -54,7 +59,7 @@ function Publisher({
   readonly note: string | null;
 }) {
   if (!publisher) {
-    return <span>None</span>;
+    return <span>{t(LOCALE, "validator.files.publisher.none")}</span>;
   }
   return (
     <span className="tw-flex tw-flex-col max-lg:tw-items-end">
@@ -112,6 +117,7 @@ export default function ValidatorAllFiles({
   const files = listReleaseFiles(release);
   const { checksums } = groupReleaseFiles(release);
   const commit = shortCommit(release.commit);
+  const publisherLabel = t(LOCALE, "validator.files.publisher.label");
   return (
     <div className="tw-flex tw-flex-col tw-gap-6">
       <p className={`tw-m-0 ${BODY}`}>
@@ -141,7 +147,7 @@ export default function ValidatorAllFiles({
               SHA-256
             </th>
             <th scope="col" className={HEAD}>
-              Publisher
+              {publisherLabel}
             </th>
             <th scope="col" className={HEAD}>
               <span className="tw-sr-only">Download</span>
@@ -187,7 +193,7 @@ export default function ValidatorAllFiles({
                     />
                   </span>
                 </Cell>
-                <Cell label="Publisher" className="tw-text-iron-300">
+                <Cell label={publisherLabel} className="tw-text-iron-300">
                   <Publisher
                     publisher={entry.publisher}
                     note={entry.publisherNote}
@@ -197,7 +203,9 @@ export default function ValidatorAllFiles({
                   <a
                     href={getReleaseDownloadPath(release, entry.file)}
                     className={`${SECONDARY_BUTTON} max-lg:tw-w-full`}
-                    aria-label={`Download ${entry.file.name}`}
+                    aria-label={t(LOCALE, "validator.files.download.label", {
+                      file: entry.file.name,
+                    })}
                   >
                     <ArrowDownTrayIcon
                       aria-hidden="true"
@@ -212,11 +220,7 @@ export default function ValidatorAllFiles({
         </tbody>
       </table>
       <p className={`tw-m-0 ${BODY}`}>
-        Each SHA-256 comes from 6529&apos;s signed list of releases. This page
-        checks that signature before it lists a file. The publisher is the name
-        your system should show when it opens the file or, for an archive, the
-        program inside it; this page doesn&apos;t check it, so check it
-        yourself.
+        {t(LOCALE, "validator.files.checksumSource")}
       </p>
       <div>
         <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">

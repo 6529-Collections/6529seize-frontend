@@ -8,6 +8,11 @@ import { FEED_SIGNING_KEYS, type FeedSigningKey } from "./feedSigningKeys";
 // bytes as received), `r || s` in hex, by a key the file names by address.
 const DOMAIN = Buffer.from("6529 Validator releases v1\0", "ascii");
 const ALGORITHM = "ecdsa-secp256k1-sha256";
+// The validator's own limit: the feed and its signature fit one gossip
+// message. The live feed is about 30 KiB and grows with each release; the
+// producer drops the oldest test releases to stay under it. A larger feed
+// is refused here as every validator refuses it, so the download pages show
+// their error state once the last good feed is an hour old.
 const MAX_FEED_BYTES = 56 * 1024;
 const MAX_SIGNATURE_FILE_BYTES = 1024;
 const SIGNATURE = /^0x[0-9a-fA-F]{128}$/;
@@ -24,15 +29,21 @@ function publicKeyOf(key: FeedSigningKey): KeyObject | null {
     return null;
   }
   const point = Buffer.from(key.publicKey, "hex");
-  const keyObject = createPublicKey({
-    key: {
-      kty: "EC",
-      crv: "secp256k1",
-      x: point.subarray(1, 33).toString("base64url"),
-      y: point.subarray(33).toString("base64url"),
-    },
-    format: "jwk",
-  });
+  let keyObject: KeyObject;
+  try {
+    keyObject = createPublicKey({
+      key: {
+        kty: "EC",
+        crv: "secp256k1",
+        x: point.subarray(1, 33).toString("base64url"),
+        y: point.subarray(33).toString("base64url"),
+      },
+      format: "jwk",
+    });
+  } catch {
+    // Well-formed hex that is not a point on the curve.
+    return null;
+  }
   publicKeys.set(key.publicKey, keyObject);
   return keyObject;
 }

@@ -105,11 +105,16 @@ grant (the draft link, v1), so no server ever sees it. The page:
   counts only there.
 
 Nothing is stored or sent. The page is public, so the password gate never
-locks it. The code is in `lib/validator-page/authorize/`. Its new copy is
-in the `validator-authorize` message namespace
-(`i18n/messages/validatorAuthorize.en-US.json`, en-US only); the rest of
-the page, the checks' problem list and the other `/validator` pages are
-still English-only strings in their components, with no other locale.
+locks it. The code is in `lib/validator-page/authorize/`. Its headings,
+labels, signed-draft rows, stop text, signature card and copy states are in
+the `validator-authorize` message namespace
+(`i18n/messages/validatorAuthorize.en-US.json`, en-US only, other locales
+fall back to it). The All files table's publisher column, its explanatory
+paragraph and the download labels are in the `validator-files` namespace
+(`i18n/messages/validatorFiles.en-US.json`, en-US only). Still English-only
+strings in their components, with no other locale: the authorize page's
+introduction, wallet step and no-link text, the checks' problem list, and
+the rest of the other `/validator` pages.
 
 ## Releases
 
@@ -144,8 +149,15 @@ missing signature, one that does not verify, or a feed whose `sequence` is
 lower than one the server has already served counts as a failed read: the
 last good copy stays for up to an hour, then the pages say the release
 list could not be loaded, offer no download, and `releases.json` answers
-503. The `sequence` floor lives in the server's memory and starts again
-when it restarts.
+503. The `sequence` floor is kept per server instance: each instance
+remembers the highest `sequence` it has served in its own memory, instances
+do not share it, and it starts again when an instance restarts.
+
+The feed may be at most 56 KiB, the validator's own limit (it must fit one
+gossip message with its signature). The live feed is about 30 KiB and grows
+with each release; the producer drops the oldest test releases to stay
+under the limit. A larger feed is refused here as every validator refuses
+it, so the pages fall back to the error state above.
 
 The SHA-256 on the pages therefore comes from the signed feed. The
 "Publisher" column of All files says which name the visitor's system
