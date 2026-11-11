@@ -114,6 +114,24 @@ HD highlights when the original is selected. Choose
 - `Open in browser` / `Open in new tab` and `Download media` deliberately access
   the original. In the native app, downloads go directly to a temporary native
   file and the share sheet, without loading the file into the image viewer.
+- `Open in browser` / `Open in new tab` appears only for `https:` media (and
+  IPFS/Arweave media through the 6529 media resolver). The new tab opens
+  without a link back to the page or a referrer.
+- A file the app cannot show appears as an `Unknown file` card. It can be
+  opened (after a second press, `Open anyway — may be unsafe`) only when it
+  is `https:` or IPFS/Arweave media through the 6529 media resolver; any
+  other link is shown as text with nothing to open.
+- `Download media` and attachment downloads save a file under a type and
+  extension the app decides. A document, data, archive or media extension
+  (for example `.docx`, `.zip`, `.csv`, `.heic`) is kept; the file is saved
+  as that media type only when its content confirms the format, otherwise as
+  a plain download that is never opened in the browser. A file with no or an
+  unknown extension takes the format its content shows. Files whose last
+  extension can run or render active content (for example `.html`, `.svg`,
+  `.exe`, `invoice.pdf.exe`), content that is an HTML, SVG or XML document
+  under a non-text name, and files with no recognisable format are saved as
+  `.bin`. File names drop path separators, control characters and reserved
+  names.
 - GIF previews use a versioned animation-preserving resize path. The worker can
   reduce preview resolution to retain every frame within its output budget.
   GIFs that exceed processing limits fall back to a legacy preview, which may

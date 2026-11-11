@@ -41,6 +41,11 @@ jest.mock("wagmi", () => ({
   useAccount: jest.fn(),
   usePublicClient: jest.fn(),
   useWalletClient: jest.fn(),
+  useEnsAddress: jest.fn(() => ({
+    data: undefined,
+    isLoading: false,
+    isError: false,
+  })),
 }));
 jest.mock("next/image", () => ({
   __esModule: true,

@@ -3,6 +3,7 @@
  */
 import { privateKeyToAccount, type PrivateKeyAccount } from "viem/accounts";
 
+import { publicEnv } from "@/config/env";
 import type { ApiE2eeDevice } from "@/lib/e2ee/api-types";
 import {
   buildGrant,
@@ -212,6 +213,25 @@ describe("verifyGrant (contract 2.2)", () => {
       verified: true,
       via: "eoa",
       reason: null,
+    });
+  });
+
+  describe("in the production build", () => {
+    const baseEndpoint = publicEnv.BASE_ENDPOINT;
+    beforeEach(() => {
+      publicEnv.BASE_ENDPOINT = "https://6529.io";
+    });
+    afterEach(() => {
+      publicEnv.BASE_ENDPOINT = baseEndpoint;
+    });
+
+    it("keeps a grant signed for staging.6529.io acceptable but never verified", async () => {
+      await expect(verifyGrant(deviceRecord(), { atMs })).resolves.toEqual({
+        ok: true,
+        verified: false,
+        via: "eoa",
+        reason: "unrecognized-origin",
+      });
     });
   });
 

@@ -602,11 +602,13 @@ const getNativeRefreshTokenCleanupAddresses = (
 export const clearAllWalletAuth = async (): Promise<void> => {
   const accounts = getStoredAccounts();
   const previousActiveAddress = getActiveAddressFromStorage();
+  const signedOutAddresses = getNativeRefreshTokenCleanupAddresses(accounts);
   await Promise.all(
-    getNativeRefreshTokenCleanupAddresses(accounts).map((address) =>
-      removeNativeRefreshToken(address)
-    )
+    signedOutAddresses.map((address) => removeNativeRefreshToken(address))
   );
+  for (const address of signedOutAddresses) {
+    safeLocalStorage.removeItem(getAddressRoleStorageKey(address));
+  }
   persistAccountsWithActive([], null);
   emitWalletAccountsUpdated();
   if (previousActiveAddress) {
