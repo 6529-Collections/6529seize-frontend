@@ -21,14 +21,15 @@ import {
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
+  WAVE_HEADER_ACTION_CLASSES,
+  WAVE_HEADER_ACTION_SURFACE_CLASSES,
+} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
+import {
   getTimeZoneCityName,
   LOCAL_TIME_ZONE_PREFERENCE,
   UTC_TIME_ZONE_PREFERENCE,
   type DisplayTimeZonePreference,
 } from "@/lib/display-time-zone/displayTimeZone";
-
-const HEADER_BUTTON_CLASSES =
-  "tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 data-[open]:tw-bg-iron-800 data-[open]:tw-text-white desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-ring-white/10";
 
 const CHIP_CLASSES =
   "tw-flex tw-h-8 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/15 tw-text-xs tw-font-semibold tw-text-primary-300";
@@ -208,12 +209,14 @@ export default function DisplayTimeZoneSwitch({
           <PopoverButton
             aria-label={switchLabel}
             {...tooltipProps}
-            className={HEADER_BUTTON_CLASSES}
+            className={WAVE_HEADER_ACTION_CLASSES}
           >
-            <ClockIcon
-              aria-hidden="true"
-              className="tw-h-4 tw-w-4 tw-flex-shrink-0"
-            />
+            <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+              <ClockIcon
+                aria-hidden="true"
+                className="tw-size-4 tw-flex-shrink-0"
+              />
+            </span>
           </PopoverButton>
         )}
         <PopoverPanel

@@ -32,6 +32,9 @@ The official Announcements wave uses the same blue outlined megaphone tile in
 the wave list, active thread header, right-sidebar `About`, and mobile `About`.
 These surfaces show the tile even when Announcements has a saved wave picture.
 
+In non-DM `About` headers, available Score, Quality, Hot, and Wave REP statistics
+use up to two compact columns, with each label beside its icon and value.
+
 ## Entry Points
 
 1. Open an active wave, select the `Show right sidebar` icon in the desktop/tablet header (or the
@@ -66,6 +69,10 @@ and the right-sidebar toggle. Add REP is also available in the right sidebar's
 `About` section, alongside the full trust information and sharing. Existing
 contributors see `Edit REP`.
 On compact web, REP stays in `About` and sharing remains in `More wave actions`.
+The desktop and tablet Add/Edit REP control has a subtle border and transparent
+surface, keeping it quieter than the white `Join` action.
+The gallery toggle, message search, time display, and right-sidebar controls use
+the same hover-label styling as Profile Waves Feed.
 
 Unavailable submission actions show a lock icon at every width. Hover, focus,
 or select the lock to read the full restriction reason. The Memes `How to Submit`

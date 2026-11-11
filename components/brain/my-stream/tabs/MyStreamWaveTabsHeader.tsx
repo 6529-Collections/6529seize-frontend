@@ -46,6 +46,10 @@ import CompactWaveActions from "./CompactWaveActions";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { BRAIN_RIGHT_SIDEBAR_ID } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 import { PlaintextDmEncryptionNotice } from "@/components/e2ee/plaintext/PlaintextDmEncryptionNotice";
+import {
+  WAVE_HEADER_ACTION_CLASSES,
+  WAVE_HEADER_ACTION_SURFACE_CLASSES,
+} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
 
 const TRUNCATION_EPSILON_PX = 1;
 const WAVE_SCORE_LEARN_MORE_HREF = "/network/wave-score";
@@ -455,17 +459,20 @@ export default function MyStreamWaveTabsHeader({
   return (
     <>
       <div
-        className={`${headerClassName} ${isDirectMessage ? "" : headerMinHeight}`}
+        className={`${headerClassName} tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 ${isDirectMessage ? "" : headerMinHeight}`}
       >
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 tw-self-start tw-pt-0.5">
           {showBackButton && (
             <button
               type="button"
               onClick={handleMobileBack}
-              className="tw-flex tw-h-9 tw-items-center tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-px-1.5 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50 sm:-tw-ml-2.5 sm:tw-px-2.5"
+              className="tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50 sm:-tw-ml-2.5 sm:desktop-hover:tw-h-9"
               aria-label="Go back"
             >
-              <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 sm:tw-h-6 sm:tw-w-6" />
+              <ArrowLeftIcon
+                aria-hidden="true"
+                className="tw-size-4 tw-flex-shrink-0"
+              />
             </button>
           )}
           <MyStreamWaveHeaderIdentity
@@ -502,9 +509,11 @@ export default function MyStreamWaveTabsHeader({
             aria-label={searchMessagesLabel}
             data-tooltip-id={headerActionsTooltipId}
             data-tooltip-content={searchMessagesLabel}
-            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-ring-white/10"
+            className={WAVE_HEADER_ACTION_CLASSES}
           >
-            <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+            <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+              <MagnifyingGlassIcon className="tw-size-4 tw-flex-shrink-0" />
+            </span>
           </button>
           <DisplayTimeZoneSwitch
             variant={isCompact ? "compact" : "header"}
@@ -517,7 +526,7 @@ export default function MyStreamWaveTabsHeader({
             data-tooltip-content={
               isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
             }
-            className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-ring-white/10"
+            className={WAVE_HEADER_ACTION_CLASSES}
             aria-label={
               isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
             }
@@ -527,19 +536,24 @@ export default function MyStreamWaveTabsHeader({
             aria-expanded={isRightSidebarOpen}
             aria-pressed={isRightSidebarOpen}
           >
-            <ChevronDoubleLeftIcon
-              strokeWidth={2}
-              aria-hidden="true"
-              className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
-                isRightSidebarOpen
-                  ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
-                  : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
-              }`}
-            />
+            <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+              <ChevronDoubleLeftIcon
+                strokeWidth={2}
+                aria-hidden="true"
+                className={`tw-size-4 tw-flex-shrink-0 tw-transition tw-duration-300 ${
+                  isRightSidebarOpen
+                    ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
+                    : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
+                }`}
+              />
+            </span>
           </button>
         </div>
       </div>
-      <MyStreamActionTooltip id={headerActionsTooltipId} />
+      <MyStreamActionTooltip
+        id={headerActionsTooltipId}
+        variant="wave-header"
+      />
     </>
   );
 }

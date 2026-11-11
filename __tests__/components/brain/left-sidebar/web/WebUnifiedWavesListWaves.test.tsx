@@ -181,10 +181,14 @@ it.each([false, true])(
     renderWebWaves({ isCollapsed });
 
     const createButton = screen.getByRole("button", {
-      name: "Create wave",
-      exact: true,
+      name: /^Create wave$/,
     });
     expect(createButton).toHaveAttribute("data-tooltip-content", "Create wave");
+    if (isCollapsed) {
+      expect(within(createButton).queryByText("Create wave")).toBeNull();
+    } else {
+      expect(within(createButton).getByText("Create wave")).toBeVisible();
+    }
     fireEvent.click(createButton);
     expect(mockOpenWave).toHaveBeenCalledTimes(1);
   }

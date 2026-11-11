@@ -387,7 +387,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
           ? "wave.navigation.waveSections"
           : "wave.navigation.appSections"
       )}
-      className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-900 tw-px-2 sm:tw-px-4 md:tw-px-6"
+      className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-2 sm:tw-px-4 md:tw-px-6"
     >
       {isWaveNavigationLoading ? (
         <div className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-1.5 tw-overflow-hidden tw-px-0.5">
@@ -637,7 +637,10 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   >
                     {t(locale, "competitions.title")}
                   </span>
-                  <TabCountBadge count={activeCompetitionCount} />
+                  <TabCountBadge
+                    count={activeCompetitionCount}
+                    variant="wave"
+                  />
                 </TabButton>
               )}
               {shouldShowCurationTabs &&

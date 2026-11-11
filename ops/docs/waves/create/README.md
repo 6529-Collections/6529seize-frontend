@@ -19,7 +19,7 @@ Use this area to create:
   `/messages/{waveId}`.
 - Use `/waves?create=wave` as the direct web link for creating a Wave.
 - Desktop wave-create controls are available on:
-  - `/waves` and `/waves/{waveId}` Waves panel (plus icon named `Create wave` in both sidebar modes)
+  - `/waves` and `/waves/{waveId}` Waves panel (`Create wave` with a plus icon when expanded; plus icon only when collapsed)
   - `/waves` empty-content placeholder (`Create Wave`)
 - Desktop `/messages` routes support wave-create mode by URL only
   (`?create=wave`).

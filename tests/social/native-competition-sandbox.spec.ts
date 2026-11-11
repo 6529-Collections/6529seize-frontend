@@ -6672,6 +6672,22 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
   }, testInfo) => {
     const app = testInfo.project.name === "web-mobile-chromium";
     await installCompetitionApi(page);
+    // Keep this an overflow fixture as labels and control styling evolve.
+    await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "overflow-highlights",
+            name: "Community highlights",
+            wave_id: WAVE,
+            group_id: composerSandboxConstants.previewGroupId,
+            created_at: 1,
+            updated_at: 1,
+            priority_order: 1,
+          },
+        ],
+      })
+    );
     if (app)
       await installSurfaceSimulation(
         page.context(),
@@ -6732,6 +6748,15 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       exact: true,
     });
     await expect(create).toBeInViewport({ ratio: 1 });
+    const createSurface = page
+      .getByRole("button", { name: "Open create menu", exact: true })
+      .locator("span")
+      .first();
+    await expect(createSurface).toHaveCSS("border-top-width", "0px");
+    await expect(createSurface).toHaveCSS(
+      "background-color",
+      "rgba(0, 0, 0, 0)"
+    );
     const fadeBounds = await rightFade.boundingBox();
     const createBounds = await create.boundingBox();
     expect(fadeBounds).not.toBeNull();
@@ -6806,6 +6831,15 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     );
     await expect(active).toHaveCSS("height", "32px");
     await expect(active).toHaveCSS("border-radius", "9999px");
+    const decisionSurface = collection
+      .getByRole("link", { name: "Decision", exact: true })
+      .locator("span")
+      .first();
+    await expect(decisionSurface).toHaveCSS("border-top-width", "0px");
+    await expect(decisionSurface).toHaveCSS(
+      "background-color",
+      "rgba(0, 0, 0, 0)"
+    );
     const activePanel = collection.getByRole("tabpanel", {
       name: "Active and upcoming",
       exact: true,

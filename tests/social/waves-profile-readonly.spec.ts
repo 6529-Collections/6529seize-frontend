@@ -2166,6 +2166,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       exact: true,
     });
     await expect(details).toBeVisible();
+    await expect(details).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(details).toHaveCSS("border-top-width", "0px");
+    await expect(details).toHaveCSS("box-shadow", "none");
     const header = page
       .getByRole("button", {
         name: compact ? "Wave details" : "Show right sidebar",
@@ -2193,6 +2196,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       await page.keyboard.press("Escape");
     } else {
       await expect(details).toHaveText("");
+      const join = header.getByRole("button", { name: /^Join / });
+      if (await join.count()) {
+        await expect(join).toHaveCSS("background-color", "rgb(236, 236, 238)");
+        await expect(join).toHaveCSS("border-top-width", "1px");
+      }
       if (await headerRep.count()) {
         await expect(headerRep).toBeVisible();
       }
@@ -2257,9 +2265,79 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         expect(scoreBox?.height).toBeGreaterThanOrEqual(24);
         expect(scoreBox?.width).toBeGreaterThanOrEqual(24);
       }
+
+      const feedShortcut = page.getByRole("link", {
+        name: "Profile Waves Feed",
+        exact: true,
+      });
+      await feedShortcut.hover();
+      const feedTooltip = page.getByRole("tooltip").filter({
+        hasText: "Profile Waves Feed",
+      });
+      await expect(feedTooltip).toBeVisible();
+      const tooltipAppearance = await feedTooltip.evaluate((tooltip) => {
+        const style = getComputedStyle(tooltip);
+        return Object.fromEntries(
+          [
+            "background-color",
+            "border-top-color",
+            "border-top-style",
+            "border-top-width",
+            "border-radius",
+            "box-shadow",
+            "color",
+            "font-size",
+            "font-weight",
+            "padding",
+          ].map((property) => [property, style.getPropertyValue(property)])
+        );
+      });
+      const galleryToggle = header.getByRole("button", {
+        name: /^Switch to (gallery|chat) view$/,
+      });
+      const utilityControls = [
+        header.getByRole("button", {
+          name: "Search messages in this wave",
+          exact: true,
+        }),
+        header.getByRole("button", { name: /^Time display:/ }),
+        details,
+      ];
+      if (await galleryToggle.count()) {
+        utilityControls.unshift(galleryToggle);
+      }
+      for (const control of utilityControls) {
+        const label = await control.getAttribute("data-tooltip-content");
+        expect(label).not.toBeNull();
+        await control.hover();
+        const tooltip = page.getByRole("tooltip").filter({ hasText: label! });
+        await expect(tooltip).toHaveText(label!);
+        for (const [property, value] of Object.entries(tooltipAppearance)) {
+          await expect(tooltip).toHaveCSS(property, value);
+        }
+      }
     }
 
     await details.click();
+    if (!compact) {
+      await page.mouse.move(0, 0);
+      const openToggle = page.getByRole("button", {
+        name: "Hide right sidebar",
+        exact: true,
+      });
+      await expect(openToggle).toHaveAttribute("aria-pressed", "true");
+      await expect(openToggle).toHaveCSS("color", "rgb(82, 139, 255)");
+      await expect(
+        page
+          .getByRole("link", { name: "Profile Waves Feed", exact: true })
+          .locator(":scope > span")
+      ).toHaveCSS("background-color", "rgb(28, 28, 33)");
+      await expect(
+        page
+          .getByRole("link", { name: "Profile Waves Feed", exact: true })
+          .locator(":scope > span")
+      ).toHaveCSS("border-top-width", "0px");
+    }
     const aboutPanel = page
       .getByRole("complementary", { name: "Wave details" })
       .or(page.getByRole("dialog", { name: "Wave details" }));
@@ -2285,6 +2363,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("button", { name: /^(Share wave|Copy wave link)$/ })
     ).toBeVisible();
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "wave-utility-controls-hierarchy"
+    );
   });
 
   test("handles legacy wave query links without mutation", async ({ page }) => {

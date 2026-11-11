@@ -17,6 +17,11 @@ Select the wave name to open **About**. Desktop also provides **Show right
 sidebar**. About includes the creator, creation date, share control, and current
 pinned drop with its content and media. Eligible viewers can add or edit REP.
 
+Header search, clock, and sidebar toggles use transparent, borderless icon
+buttons with a dark hover surface and visible blue keyboard focus. The open
+sidebar toggle stays blue. Create wave and Join keep white primary styling;
+Joined and other secondary actions retain their borders and dark surfaces.
+
 ## User Journey
 
 1. Open a wave and select its name.
@@ -29,8 +34,16 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
 
 - The section order is About, REP, Configuration. Desktop and mobile use the
   same compact pill styling for these sections.
+- In REP, summary labels and values use matching text sizes, and Your REP,
+  Positive, and Negative sit in separate subtle cells. Contributors and Activity
+  use pill buttons. Category search filters categories; select one to view its
+  contributors.
 - Configuration owns wave access, chat availability, links, slow mode, replies,
   curation management, chat history deletion and personal display preferences.
+- Chat setting rows use spacing without individual divider lines; section
+  dividers remain. Empty Guidelines has no extra line below its heading.
+  Boosted-drop display choices have a borderless container and quiet dark
+  unselected options; the selected option keeps its blue indication.
 - Shared changes use administrator gear controls. Personal controls retain their
   own authentication requirements.
 - On mobile, configuration gears open their editor inside the information

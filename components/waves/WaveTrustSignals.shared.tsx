@@ -110,7 +110,7 @@ const isSidebarVariant = (variant: WaveTrustSignalsVariant): boolean =>
   variant === "sidebar" || isInlineSidebarVariant(variant);
 
 const INLINE_STAT_TONE_CLASSES =
-  "tw-text-[#e2e8f0]/[0.85] desktop-hover:hover:tw-text-[#e2e8f0]/[0.95]";
+  "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";
 
 type VisibilityTone = "excellent" | "healthy" | "low" | "default";
 type VisibilityToneContext = "inline-sidebar" | "inline-header" | "default";
@@ -303,7 +303,7 @@ const getChipLabelClasses = (variant: WaveTrustSignalsVariant): string => {
 
 const getIconClasses = (variant: WaveTrustSignalsVariant): string => {
   if (isInlineSidebarVariant(variant)) {
-    return "tw-size-[13px] tw-flex-shrink-0 tw-opacity-[0.64]";
+    return "tw-size-[13px] tw-flex-shrink-0";
   }
 
   if (isInlineHeaderVariant(variant)) {

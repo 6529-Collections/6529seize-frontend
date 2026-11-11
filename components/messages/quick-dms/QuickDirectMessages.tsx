@@ -46,7 +46,8 @@ import type { QuickDmState } from "./QuickDirectMessagesUtils";
 const QUICK_DM_BASE_POSITION_CLASS =
   "tailwind-scope tw-fixed tw-right-6 tw-z-[70]";
 const QUICK_DM_PANEL_POSITION_CLASS = `${QUICK_DM_BASE_POSITION_CLASS} tw-bottom-24 xl:tw-bottom-6`;
-const QUICK_DM_LAUNCHER_BASE_POSITION_CLASS = `${QUICK_DM_BASE_POSITION_CLASS} tw-transition-[bottom] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
+// Inline wave sidebar width (22rem) plus the existing right inset (1.5rem).
+const QUICK_DM_LAUNCHER_BASE_POSITION_CLASS = `${QUICK_DM_BASE_POSITION_CLASS} tw-transition-[bottom] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none xl:[body:has([data-testid=brain-right-sidebar-slot][data-state=open])_&]:tw-right-[23.5rem]`;
 const QUICK_DM_LAUNCHER_RESTING_POSITION_CLASS = "tw-bottom-24 xl:tw-bottom-6";
 const QUICK_DM_LAUNCHER_LIFTED_POSITION_CLASS = "tw-bottom-32 xl:tw-bottom-32";
 // Right inset (tw-right-6) + launcher diameter (tw-size-14) + breathing room.
@@ -129,7 +130,11 @@ const useIsQuickDmLauncherCoveringInteractive = ({
       childList: true,
       subtree: true,
     });
-    globalThis.document.addEventListener("scroll", debouncedMeasureOverlap, true);
+    globalThis.document.addEventListener(
+      "scroll",
+      debouncedMeasureOverlap,
+      true
+    );
     globalThis.window.addEventListener("resize", debouncedMeasureOverlap);
 
     return () => {
@@ -169,11 +174,12 @@ export default function QuickDirectMessages() {
   const waves = directMessages.list;
   const isVisible = Boolean(isDesktop && connectedProfile?.handle && showWaves);
   const isPanelOpen = isVisible && state.view !== "closed";
-  const isLauncherCoveringInteractive =
-    useIsQuickDmLauncherCoveringInteractive({
+  const isLauncherCoveringInteractive = useIsQuickDmLauncherCoveringInteractive(
+    {
       isEnabled: isVisible && state.view === "closed",
       launcherButtonRef,
-    });
+    }
+  );
   const selectedWave = useMemo(
     () => waves.find((wave) => wave.id === state.waveId) ?? null,
     [state.waveId, waves]

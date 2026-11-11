@@ -18,9 +18,9 @@ mobile viewports.
 
 ## Entry Points
 
-- `/waves` and `/waves/{waveId}`: click the plus icon in the desktop Waves
-  panel, named `Create wave`, in either expanded or collapsed mode. The mobile
-  Waves list keeps its labeled Create wave button.
+- `/waves` and `/waves/{waveId}`: select `Create wave` beside the plus icon in the
+  expanded desktop Waves panel. The collapsed rail keeps a plus icon named
+  `Create wave`. The mobile Waves list keeps its labeled Create wave button.
 - Global Search: find Create wave, New wave, or Start a wave. Search opens
   `/waves/create`, which is also a direct link on web and in the app.
 - `/waves`: click `Create Wave` in the empty-content placeholder.
@@ -35,9 +35,9 @@ mobile viewports.
 3. The current URL keeps the same path/context and sets `create=wave`.
 4. While signed out, Connect to create a wave explains wallet connection. The
    create URL remains open after connecting. If the identity has no profile
-   handle, a compact `Create your
-   profile first` dialog opens instead. `Go to Identity` starts profile setup;
-   closing returns to the current page. Completing profile setup returns to
+   handle, a compact `Create your profile first` dialog opens instead.
+   `Go to Identity` starts profile setup; closing returns to the current page.
+   Completing profile setup returns to
    `/waves/create` for a standalone wave; subwave entry returns to its parent wave.
 5. With a profile handle, the `Create Wave` dialog opens above the current page
    context while the underlying list/content view remains visible. At widths

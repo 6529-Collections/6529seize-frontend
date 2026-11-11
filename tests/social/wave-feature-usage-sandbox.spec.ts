@@ -249,6 +249,7 @@ test("foreground visibility signals and an occluding overlay interrupt exposure 
 
 test("sidebar collection and search controls count deliberate use without query content", async ({
   page,
+  isMobile,
 }) => {
   await page.goto("/waves/private-wave");
   await page
@@ -260,8 +261,20 @@ test("sidebar collection and search controls count deliberate use without query 
   await expect(collectionFilter).toHaveCSS("border-top-width", "0px");
   await expect(collectionFilter).toHaveCSS(
     "background-color",
-    "rgb(19, 19, 22)"
+    "rgba(19, 19, 22, 0.75)"
   );
+  await expect(collectionFilter).toHaveCSS("padding", "3px");
+  const allCollection = collectionFilter.getByRole("button", {
+    name: "All",
+    exact: true,
+  });
+  await expect(allCollection).toHaveCSS("font-size", "13px");
+  await expect(allCollection).toHaveCSS("font-weight", "500");
+  await expect(allCollection).toHaveCSS(
+    "min-height",
+    isMobile ? "44px" : "34px"
+  );
+  await expect(allCollection).toHaveCSS("background-color", "rgb(38, 39, 43)");
   const searchButton = page.getByRole("button", {
     name: "Find a wave…",
     exact: true,

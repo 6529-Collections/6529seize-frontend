@@ -11,6 +11,10 @@ import {
 import { usePathname } from "next/navigation";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
+import {
+  WAVE_HEADER_ACTION_CLASSES,
+  WAVE_HEADER_ACTION_SURFACE_CLASSES,
+} from "../waves/WaveHeaderActions";
 
 /**
  * WebLeftSidebar
@@ -93,12 +97,15 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
                 onMouseDown={(event) => event.preventDefault()}
                 aria-label={expandLabel}
                 title={expandLabel}
-                className="tw-relative tw-z-10 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
+                className={`tw-relative tw-z-10 ${WAVE_HEADER_ACTION_CLASSES}`}
               >
-                <ChevronDoubleRightIcon
-                  strokeWidth={2}
-                  className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition-all tw-duration-300 tw-ease-in-out group-hover:desktop-hover:hover:tw-text-white"
-                />
+                <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+                  <ChevronDoubleRightIcon
+                    strokeWidth={2}
+                    aria-hidden="true"
+                    className="tw-size-4 tw-flex-shrink-0"
+                  />
+                </span>
               </button>
             </div>
           )}

@@ -55,7 +55,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
           actionsClassName="tw-flex tw-flex-shrink-0 tw-self-start tw-items-center tw-gap-x-2 tw-pt-0.5 md:tw-shrink-0"
           renderLeadingActions={renderHeaderLeadingActions}
         />
-        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800">
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06]">
           <div className="tw-min-w-0 tw-flex-1">
             <MyStreamWaveDesktopTabs
               activeTab={activeContentTab}

@@ -60,7 +60,7 @@ export default function WaveRepButton({
         size={variant === "compact" ? null : "sm"}
         className={
           variant === "compact"
-            ? `${WAVE_REP_BUTTON_BORDER_CLASSES} tw-h-8 tw-rounded-md tw-px-2 tw-text-[11px] tw-leading-4`
+            ? `${WAVE_REP_BUTTON_BORDER_CLASSES} tw-h-8 tw-rounded-lg !tw-bg-transparent tw-px-2 tw-text-xs tw-leading-4 !tw-text-iron-200 active:!tw-bg-black desktop-hover:hover:!tw-border-iron-600 desktop-hover:hover:!tw-bg-iron-900 desktop-hover:hover:!tw-text-white`
             : WAVE_REP_BUTTON_BORDER_CLASSES
         }
       >

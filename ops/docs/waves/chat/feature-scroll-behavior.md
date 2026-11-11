@@ -4,6 +4,7 @@
 
 Wave chat keeps you on the newest drops while you stay at bottom.
 If you scroll up, it keeps your place and stops forced jumps.
+The message list fades gently at its top edge beneath the header.
 
 On Apple mobile only, new drops can stay pending until you return to bottom.
 

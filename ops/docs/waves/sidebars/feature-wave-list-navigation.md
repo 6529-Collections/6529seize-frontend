@@ -41,10 +41,10 @@ Wave and DM rows in the left list control which thread is open.
   later messages do not scroll to it again.
 - On desktop pointer devices, the Waves list uses a slim iron scrollbar for
   dragging and track clicks. Touch devices keep their native scrolling behavior.
-- `All`, `Pinned`, and `Joined` are peer collections on a dark surface without
-  an outer border in one sticky row. The search icon on the right is transparent
-  at rest and gains a dark background on hover. The collection group matches the search
-  button height, including the larger touch controls. Switch directly without
+- `All`, `Pinned`, and `Joined` are peer collections in a compact dark segmented
+  group with a subtle inset outline and a filled selected option. Small-screen
+  and touch layouts use larger tab targets. The search icon on the right is
+  transparent at rest and gains a dark background on hover. Switch directly without
   scrolling through pinned waves.
   Each collection remembers its scroll position; selecting another wave enables
   active-row reveal again. Signed-out visitors see an `All Waves` label on the
@@ -57,11 +57,14 @@ Wave and DM rows in the left list control which thread is open.
   `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
 - The feed tooltip reads `Profile Waves Feed`. Its header shortcut uses the same
   transparent resting surface, rounded corners and dark hover surface on desktop
-  and smaller screens. Touch devices keep a larger target. Create uses a solid white plus
-  icon button named `Create wave` in both desktop sidebar modes. Both have
+  and smaller screens. Touch devices keep a larger target. Create uses a solid white
+  button with a plus icon and visible `Create wave` label in the expanded sidebar;
+  the collapsed rail keeps only the plus icon. Both have
   visible keyboard focus and larger touch targets. The feed content header has a
   `Discover Waves` link with a compass to `/discover`; the sidebar keeps the two section-specific `View all` links.
-  The collapsed rail retains its icon-only feed link.
+  The collapsed rail retains its icon-only feed link on a dark tile without
+  a border. On desktop, the selected feed icon stays blue. Both layouts keep
+  visible blue keyboard focus.
 - Browser back/forward keeps the active row and URL in sync.
 - Joined waves load in batches without skipping a wave when new activity moves
   it higher in the list. The order uses recent wave activity, including joined,
@@ -80,8 +83,8 @@ Wave and DM rows in the left list control which thread is open.
 
 The discovery sections have independent heights. Expanding and collapsing uses
 a short reveal and rotating chevron.
-Reduced-motion preferences disable these transitions. The feed icon is blue
-when the desktop feed is active or its button is hovered or keyboard-focused.
+Reduced-motion preferences disable these transitions. Utility icons brighten
+on hover and show a dark hover surface; their resting header surface is transparent.
 
 - `Worth Checking Out` appears first, followed by `Active Votes`, as independently
   collapsible sections above the wave collections. Both default to expanded
@@ -111,13 +114,16 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   the same browser/device. The old shared tab preference is no longer used.
 - Announcements keeps its megaphone, timestamp, unread state and score shield in a compact row.
   A row-sized placeholder reserves space while Announcements is first loading.
-- Active Votes rows include the wave score shield; select it for score details without opening the wave.
+- Expanded wave rows and Active Votes show a shield beside the muted score
+  number. Select the score for details without opening the wave. Keyboard focus
+  remains visible, and hover brightens the score.
 - Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
   with score shields overlapping the bottom-right corner of each avatar.
   The section keeps its own compact height independently of the vote list.
-- Create wave uses a solid white plus icon button in both expanded and collapsed
-  desktop Waves panels, including signed-out visits. Its accessible name and
-  hover tooltip read `Create wave`. The mobile Waves list keeps its visible label.
+- Create wave uses a solid white button in both desktop sidebar modes, including
+  signed-out visits. The expanded panel shows a plus icon and `Create wave` label;
+  the collapsed rail shows the plus icon only. Its accessible name and hover
+  tooltip read `Create wave`. The mobile Waves list keeps its visible label.
 - Each heading has a separate `View all` link aligned to the right, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
