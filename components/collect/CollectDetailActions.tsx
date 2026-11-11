@@ -7,6 +7,7 @@ import Button from "@/components/utils/button/Button";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
 import type { SupportedLocale } from "@/i18n/locales";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { t } from "@/i18n/messages";
 import { fetchCollectAssets } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
@@ -57,6 +58,7 @@ interface CollectDetailActionsProps {
   readonly locale: SupportedLocale;
   readonly onMarketChange?: () => void;
   readonly mobileSticky?: boolean;
+  readonly desktopCard?: boolean;
   readonly hideMarketLink?: boolean;
 }
 
@@ -207,10 +209,14 @@ function DetailTrade({
 }
 
 function DetailActions(props: CollectDetailActionsProps) {
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const cardLayout =
+    props.mobileSticky === true || (props.desktopCard === true && isDesktop);
   const viewMarket = props.hideMarketLink ? null : (
     <CollectMarketButton
       locale={props.locale}
-      mobileRow={props.mobileSticky ?? false}
+      mobileRow={cardLayout}
+      fullWidth={cardLayout}
       onClick={() =>
         revealMarketDepth(
           {
@@ -226,8 +232,7 @@ function DetailActions(props: CollectDetailActionsProps) {
   );
   const inlineLookup = useCollectDetailAsset(props.collection, props.tokenId);
   const hideFallbackActions =
-    inlineLookup.data !== undefined ||
-    (Boolean(props.mobileSticky) && inlineLookup.isPending);
+    inlineLookup.data !== undefined || (cardLayout && inlineLookup.isPending);
   const [action, setAction] = useState<CollectTradeAction | null>(null);
   const [purchaseSession, setPurchaseSession] = useState(0);
   const opener = useRef<HTMLButtonElement | null>(null);
@@ -254,7 +259,7 @@ function DetailActions(props: CollectDetailActionsProps) {
     });
   };
   const renderSupportingActions = (assetKey: string | undefined) => {
-    if (props.mobileSticky)
+    if (cardLayout)
       return (
         <CollectDetailSupportingActions
           assetKey={assetKey}
@@ -296,12 +301,16 @@ function DetailActions(props: CollectDetailActionsProps) {
     );
   };
   return (
-    <CollectDetailPanel framed={props.mobileSticky ?? false}>
+    <CollectDetailPanel
+      framed={cardLayout}
+      wrapContent={props.desktopCard === true}
+    >
       <CollectDetailLayout.Provider
         value={
-          props.mobileSticky
+          cardLayout
             ? {
-                marketLink: viewMarket,
+                marketLink: props.mobileSticky ? viewMarket : null,
+                stickyActions: props.mobileSticky === true,
                 offerAction: (
                   <button
                     type="button"
@@ -347,10 +356,10 @@ function DetailActions(props: CollectDetailActionsProps) {
               >
                 {t(props.locale, OFFER_MESSAGE_KEY)}
               </button>
-              {!props.mobileSticky && renderSupportingActions(assetKey)}
+              {!cardLayout && renderSupportingActions(assetKey)}
             </>
           )}
-          {...(props.mobileSticky ? { renderSupportingActions } : {})}
+          {...(cardLayout ? { renderSupportingActions } : {})}
           {...(props.onMarketChange
             ? { onMarketChange: props.onMarketChange }
             : {})}
@@ -448,14 +457,24 @@ export default function CollectDetailActions(props: CollectDetailActionsProps) {
 // production build's server HTML at 390 and 1280 px (PR #4589): framed =
 // CollectDetailLoading (44 px row + 16 px gap + 16 px line), unframed =
 // PendingTrade plus the fallback action row. Re-measure if either changes.
+// Desktop-only cards keep a separate market link (4 px margin + 44 px target).
 function CollectDetailActionsSpace({
   mobileSticky,
-}: Pick<CollectDetailActionsProps, "mobileSticky">) {
+  desktopCard,
+  hideMarketLink,
+}: Pick<
+  CollectDetailActionsProps,
+  "mobileSticky" | "desktopCard" | "hideMarketLink"
+>) {
+  let heightClassName = mobileSticky ? "tw-h-[76px]" : "tw-h-[108px]";
+  if (desktopCard && !mobileSticky) {
+    heightClassName += hideMarketLink ? " md:tw-h-[76px]" : " md:tw-h-[124px]";
+  }
   return (
     <div
       aria-hidden="true"
       data-testid="collect-detail-actions-space"
-      className={mobileSticky ? "tw-h-[76px]" : "tw-h-[108px]"}
+      className={heightClassName}
     />
   );
 }

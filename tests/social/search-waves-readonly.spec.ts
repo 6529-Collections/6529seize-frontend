@@ -1180,9 +1180,18 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       page.getByRole("combobox", { name: "Search 6529", exact: true })
     ).toHaveValue(local ? "hello " : "6529 ");
     await page.getByRole("tab", { name: /^Messages/ }).click();
-    const serialNo = /^Open message (\d+)/.exec(
-      (await firstResult.getAttribute("aria-label")) ?? ""
-    )?.[1];
+    // The result's name comes from `aria-label` or from the element(s) it
+    // is labelled by; read whichever names it.
+    const resultName = await firstResult.evaluate((element) => {
+      const direct = element.getAttribute("aria-label");
+      if (direct) return direct;
+      return (element.getAttribute("aria-labelledby") ?? "")
+        .split(/\s+/)
+        .map((id) => document.getElementById(id)?.textContent ?? "")
+        .join(" ")
+        .trim();
+    });
+    const serialNo = /^Open message (\d+)/.exec(resultName)?.[1];
     const targetWaveId = await firstResult.getAttribute("data-wave-id");
     expect(serialNo).toBeTruthy();
     expect(targetWaveId).toBeTruthy();

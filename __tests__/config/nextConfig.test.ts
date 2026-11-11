@@ -28,6 +28,10 @@ describe("shared Next config", () => {
     );
   });
 
+  it("keeps next dev and next build free of upgrade reminders", () => {
+    expect(sharedConfig(publicEnv, "").experimental?.agentUpgrade).toBe(false);
+  });
+
   it("does not publish production browser source maps by default", () => {
     expect(
       sharedConfig(publicEnv, "").productionBrowserSourceMaps
@@ -336,6 +340,115 @@ describe("image optimizer hardening", () => {
 
     expect(hostnames.filter((hostname) => hostname.startsWith("**."))).toEqual(
       []
+    );
+  });
+});
+
+describe("image optimizer inputs", () => {
+  const imageConfig = () => sharedConfig(publicEnv, "").images ?? {};
+  const isRemoteOptimizable = (url: string) =>
+    hasRemoteMatch([], imageConfig().remotePatterns ?? [], new URL(url));
+
+  it.each([
+    "https://6529.io/profile-cms/templates/quiet-signal.png",
+    "https://seize.io/6529.png",
+    "https://staging.6529.io/intern-no-bg.png",
+  ])("optimizes a first-party absolute image without a query: %s", (url) => {
+    expect(isRemoteOptimizable(url)).toBe(true);
+  });
+
+  it.each([
+    "https://6529.io/api/og-metadata/image?url=https://example.com/a.png",
+    "https://seize.io/6529.png?v=1",
+    "https://staging.6529.io/api/profile-cms/assets?url=https://d3lqz0a4bldqgf.cloudfront.net/images/a.webp",
+  ])("refuses a first-party absolute image with a query: %s", (url) => {
+    expect(isRemoteOptimizable(url)).toBe(false);
+  });
+
+  it.each([
+    // Passed through unchanged from API, NFT metadata and Alchemy fields, so
+    // a query string cannot be ruled out and stays allowed.
+    "https://i2c.seadn.io/ethereum/0xabc/token.png?w=500",
+    "https://d3lqz0a4bldqgf.cloudfront.net/pfp/user/avatar.png?d=1",
+    "https://res.cloudinary.com/alchemyapi/image/upload/thumbnailv2/eth-mainnet/example?x=1",
+    "https://arweave.net/Jv9qMwx8lfuPMch9S_aBFk9-ENL1lWtbEV4zqWytJAM?ext=png",
+    "https://ipfs.io/ipfs/QmeDsW26YAivUJkBeaPNXL5noD6QshdFzdMZjSHJ6eXVbi?filename=1.png",
+  ])("keeps query strings on pass-through media hosts: %s", (url) => {
+    expect(isRemoteOptimizable(url)).toBe(true);
+  });
+});
+
+describe("image optimizer media hosts on both domains", () => {
+  const CID = "QmeDsW26YAivUJkBeaPNXL5noD6QshdFzdMZjSHJ6eXVbi";
+  const envFor = (endpoint: string | undefined) =>
+    ({ ...publicEnv, MEDIA_RESOLVER_ENDPOINT: endpoint }) as PublicEnv;
+  const patternsFor = (endpoint: string | undefined) =>
+    sharedConfig(envFor(endpoint), "").images?.remotePatterns ?? [];
+
+  it.each([
+    undefined,
+    "https://media.6529.io",
+    "https://media.6529usercontent.com",
+  ])(
+    "allows resolver paths on both media hosts when the endpoint is %p",
+    (endpoint) => {
+      const patterns = patternsFor(endpoint);
+      for (const host of ["media.6529.io", "media.6529usercontent.com"]) {
+        expect(
+          hasRemoteMatch(
+            [],
+            patterns,
+            new URL(`https://${host}/ipfs/${CID}/1.png`)
+          )
+        ).toBe(true);
+        expect(
+          hasRemoteMatch([], patterns, new URL(`https://${host}/arweave/abc`))
+        ).toBe(true);
+        expect(
+          hasRemoteMatch(
+            [],
+            patterns,
+            new URL(`https://${host}/api/media/resolve`)
+          )
+        ).toBe(false);
+        expect(
+          hasRemoteMatch([], patterns, new URL(`http://${host}/ipfs/${CID}`))
+        ).toBe(false);
+      }
+      expect(
+        hasRemoteMatch(
+          [],
+          patterns,
+          new URL(
+            "https://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi.ipfs.6529usercontent.com/1.png"
+          )
+        )
+      ).toBe(false);
+    }
+  );
+
+  it("adds exactly one resolver-path pattern for the content-domain host", () => {
+    const patterns = patternsFor("https://media.6529.io");
+    expect(
+      patterns.filter(
+        (pattern) =>
+          !(pattern instanceof URL) &&
+          (pattern.hostname === "6529usercontent.com" ||
+            pattern.hostname.endsWith(".6529usercontent.com"))
+      )
+    ).toEqual([
+      {
+        protocol: "https",
+        port: "",
+        hostname: "media.6529usercontent.com",
+        pathname: "/{arweave,ipfs,ipns}/**",
+      },
+    ]);
+  });
+
+  it("produces the same patterns for either endpoint", () => {
+    expect(patternsFor("https://media.6529usercontent.com")).toEqual(
+      patternsFor("https://media.6529.io")
     );
   });
 });

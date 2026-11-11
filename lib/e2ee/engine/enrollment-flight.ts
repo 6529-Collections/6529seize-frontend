@@ -158,6 +158,7 @@ export class EnrollmentFlight {
       setStatus(
         this.ctx,
         code === "E2EE_SIGNATURE_REJECTED" ||
+          code === "E2EE_SIGNATURE_FAILED" ||
           code === "E2EE_LOGIN_GRANT_REJECTED"
           ? NEEDS_ENROLLMENT
           : "error",

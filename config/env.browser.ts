@@ -9,18 +9,20 @@ import type { PublicEnv } from "./env.schema";
 // rendering and Jest keep the validating `./env.ts`. The exports mirror
 // `./env.ts`.
 //
-// VERSION comes from the page, not the bundle: app/layout.tsx renders it as
-// `<html data-version>`. A baked VERSION gave this chunk a new name on every
-// deploy, even when no client code changed. The <html> start tag is parsed
-// before any script runs, so the attribute is there when this module loads.
+// The build stamp comes from the <html> attributes rendered by app/layout.tsx.
+// The start tag is parsed before any script runs, so these values are there
+// when this module loads.
 
+/** Decode the public environment validated and baked by the build. */
 function readBakedPublicEnv(): PublicEnv {
   const raw =
     typeof process === "undefined"
       ? undefined
       : process.env["PUBLIC_RUNTIME_BROWSER"];
   if (!raw) {
-    throw new Error("PUBLIC_RUNTIME_BROWSER is missing from this browser bundle");
+    throw new Error(
+      "PUBLIC_RUNTIME_BROWSER is missing from this browser bundle"
+    );
   }
   try {
     return JSON.parse(raw) as PublicEnv;
@@ -32,19 +34,17 @@ function readBakedPublicEnv(): PublicEnv {
   }
 }
 
-function readPageVersion(): string | undefined {
-  if (typeof document === "undefined") {
-    return undefined;
-  }
-  // <html data-version>
-  const version = document.documentElement.dataset["version"];
-  return version === "" ? undefined : version;
-}
-
+/** Restore the per-build values from the document that loaded this bundle. */
 function readPublicEnv(): PublicEnv {
   const baked = readBakedPublicEnv();
-  const version = readPageVersion();
-  return version === undefined ? baked : { ...baked, VERSION: version };
+  if (typeof document === "undefined") return baked;
+
+  const { version, releaseOrder } = document.documentElement.dataset;
+  return {
+    ...baked,
+    ...(version ? { VERSION: version } : {}),
+    ...(releaseOrder ? { VERSION_RELEASE_ORDER: releaseOrder } : {}),
+  };
 }
 
 export const publicEnv: PublicEnv = readPublicEnv();

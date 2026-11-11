@@ -19,13 +19,13 @@ import {
   ExclamationTriangleIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import WaveDropSearchResultPreview from "./WaveDropSearchResultPreview";
-import { DropAuthorSignedIndicator } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import {
-  isDropAuthorSigned,
-  withAuthorSignedLabel,
-} from "@/components/waves/drops/signature/dropAuthorSigned";
+  AuthorSignedLabel,
+  DropAuthorSignedIndicator,
+} from "@/components/waves/drops/signature/DropAuthorSignedMarker";
+import { isDropAuthorSigned } from "@/components/waves/drops/signature/dropAuthorSigned";
 import { MIN_WAVE_SEARCH_QUERY_LENGTH } from "./waveDropsSearch.utils";
 
 const SEARCH_EMPTY_STATUS_ID = "wave-drops-search-empty-status";
@@ -109,6 +109,7 @@ export default function MessageSearchResults({
 }) {
   const locale = useBrowserLocale();
   const zone = useDisplayTimeZone();
+  const resultLabelIdBase = useId();
   const {
     selectedWave: scopeWave,
     liveNormalizedQuery,
@@ -238,7 +239,7 @@ export default function MessageSearchResults({
             )}
           </div>
           <div className="tw-space-y-2">
-            {visibleResults.map((drop) => {
+            {visibleResults.map((drop, index) => {
               const serialNo = drop.serial_no;
               const author =
                 typeof drop.author.handle === "string" &&
@@ -271,19 +272,24 @@ export default function MessageSearchResults({
               // The row is one button, so its seal is static and the signed
               // status joins the button's name.
               const isAuthorSigned = isDropAuthorSigned(drop);
+              // The id comes from the row's position, never from drop data:
+              // `stableKey` is raw hash bytes and may hold white space, which
+              // would split the id list, and two drops can share a hash.
+              const labelId = `${resultLabelIdBase}-result-${index}`;
               return (
                 <button
                   key={drop.stableKey}
                   type="button"
                   data-wave-id={drop.wave.id}
                   onClick={() => onSelect(drop)}
-                  aria-label={withAuthorSignedLabel(
-                    locale,
-                    resultButtonLabel,
-                    drop
-                  )}
+                  aria-labelledby={labelId}
                   className="tw-group tw-flex tw-min-h-20 tw-w-full tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/80 tw-p-3 tw-text-left tw-transition tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800/80"
                 >
+                  <AuthorSignedLabel
+                    id={labelId}
+                    drop={drop}
+                    label={resultButtonLabel}
+                  />
                   <ProfileAvatar
                     pfpUrl={drop.author.pfp}
                     size={ProfileBadgeSize.MEDIUM}
@@ -307,7 +313,7 @@ export default function MessageSearchResults({
                         {formattedDate} {formattedTime}
                         {isAuthorSigned && (
                           <span className="tw-ml-1 tw-inline-flex tw-align-middle">
-                            <DropAuthorSignedIndicator />
+                            <DropAuthorSignedIndicator drop={drop} />
                           </span>
                         )}
                       </span>

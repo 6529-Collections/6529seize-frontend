@@ -44,6 +44,16 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     "Notifications inbox requires the local mock API runner."
   );
   test.beforeEach(async ({ page }) => {
+    await page.route("**/api/e2ee/emoji-pack", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "el_fafo_angy",
+            src: "data:image/webp;base64,UklGRkQAAABXRUJQVlA4IDgAAAAQAwCdASoYABgAPm0ylUekIyIhKAgAgA2JZQB2AACcyeAA/Mr//9NI/40j/jSPmLf/XwBTxIAAAA==",
+          },
+        ],
+      })
+    );
     await installArtworkNotificationImage(page);
     await page.route("**/api/profile-cms/assets?*", async (route) => {
       const source =
@@ -59,6 +69,123 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
         await route.fallback();
       }
     });
+  });
+  test("compact Markdown previews preserve formatting without fetching message URLs", async ({
+    page,
+  }, testInfo) => {
+    // The compact inbox is desktop-only; the mobile full-page flow is covered below.
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop compact inbox"
+    );
+    const longBold = "formatted ".repeat(30).trim();
+    const requests: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().includes("notification-markdown-canary"))
+        requests.push(request.url());
+    });
+    await page.route("**/*notification-markdown-canary*", (route) =>
+      route.abort()
+    );
+    await page.route("**/api/v2/notifications?*", async (route) => {
+      const response = await route.fetch();
+      const data = (await response.json()) as ApiNotificationsResponseV2;
+      const content = `**Bold** :el_fafo_angy: :fire: *italic* ~~gone~~ and \`code\`.\n\n**${longBold}**\n\n[Canary link](https://notification-markdown-canary.invalid/link) ![Canary image](https://notification-markdown-canary.invalid/image.png)`;
+      data.notifications = data.notifications.map((notification) => ({
+        ...notification,
+        related_drops: notification.related_drops.map(
+          ({ title: _title, ...drop }) => ({
+            ...drop,
+            content,
+          })
+        ),
+      }));
+      await route.fulfill({ response, json: data });
+    });
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const bell = page.getByRole("link", { name: "Notifications", exact: true });
+    await expect(bell).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await bell.focus();
+    await bell.press("ArrowDown");
+    const inbox = page.getByRole("region", {
+      name: "Notifications",
+      exact: true,
+    });
+    await expect(inbox).toBeVisible();
+    const row = inbox
+      .getByRole("link")
+      .filter({ hasText: "New reactions to your drop" });
+    await expect(row.getByText("Bold", { exact: true })).toHaveJSProperty(
+      "tagName",
+      "STRONG"
+    );
+    await expect(row.getByText("italic", { exact: true })).toHaveJSProperty(
+      "tagName",
+      "EM"
+    );
+    await expect(row.getByText("gone", { exact: true })).toHaveJSProperty(
+      "tagName",
+      "DEL"
+    );
+    await expect(row.getByText("code", { exact: true })).toHaveJSProperty(
+      "tagName",
+      "CODE"
+    );
+    const emoji = row.getByRole("img", { name: ":el_fafo_angy:" });
+    await expect(emoji).toBeVisible();
+    await expect(emoji).toHaveAttribute("src", /^data:image\/webp;base64,/u);
+    await expect(emoji).toHaveCSS("width", "16px");
+    await expect(emoji).toHaveCSS("height", "16px");
+    await expect(row).toContainText("🔥");
+    await expect(row.getByText(longBold, { exact: true })).toHaveJSProperty(
+      "tagName",
+      "STRONG"
+    );
+    await expect(row.getByText("Canary image", { exact: true })).toHaveCount(1);
+    await expect(
+      inbox
+        .getByRole("link")
+        .filter({ hasText: "New reactions to your drop" })
+        .locator(
+          "a,iframe,video,audio,input,img[src*='notification-markdown-canary']"
+        )
+    ).toHaveCount(0);
+    for (const width of [1440, 1100]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(inbox).toBeVisible();
+      await expect(row.getByText("Bold", { exact: true })).toBeVisible();
+      // Let the compositor paint the resized panel before taking visual evidence.
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+          })
+      );
+      const bounds = await row
+        .getByText("Bold", { exact: true })
+        .evaluate((strong) => {
+          const preview = strong.closest("p")!.parentElement!.parentElement!;
+          return {
+            height: preview.getBoundingClientRect().height,
+            width: preview.scrollWidth,
+            available: preview.clientWidth,
+          };
+        });
+      expect(bounds.height).toBeLessThanOrEqual(40);
+      expect(bounds.width).toBeLessThanOrEqual(bounds.available);
+      await expectNoHorizontalOverflow(page);
+      await captureSafeScreenshot(
+        page,
+        testInfo,
+        `markdown-notification-${width}`
+      );
+    }
+    expect(requests).toEqual([]);
+    await page.keyboard.press("Escape");
+    await expect(bell).toBeFocused();
   });
   test("desktop preview marks notifications read, preserves the route, restores focus, and opens a destination", async ({
     page,
@@ -81,6 +208,19 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       data.notifications = data.notifications.map((notification) => ({
         ...notification,
         related_wave: wave,
+        additional_context: {
+          ...notification.additional_context,
+          ...(notification.cause === ApiNotificationCause.DropReacted && {
+            reactors: [
+              { handle: "sandbox-bob", pfp: "/favicon.png", subscribed: false },
+              {
+                handle: "sandbox-carol",
+                pfp: "/favicon.png",
+                subscribed: false,
+              },
+            ],
+          }),
+        },
       }));
       const customReaction = data.notifications.find(
         (notification) =>
@@ -147,6 +287,11 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     const reactionRow = inbox.getByRole("link").filter({
       hasText: "New reactions to your drop",
     });
+    for (const handle of ["sandbox-bob", "sandbox-carol"]) {
+      await expect(
+        reactionRow.getByRole("img", { name: handle, exact: true })
+      ).toHaveCount(1);
+    }
     await expect(
       reactionRow.getByRole("img", { name: "Thumbs Up", exact: true })
     ).toHaveCount(1);
@@ -231,6 +376,12 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     expect(box!.y).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(page.viewportSize()!.width);
     await captureSafeScreenshot(page, testInfo, "desktop-notifications-inbox");
+    await reactionRow.scrollIntoViewIfNeeded();
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "distinct-notification-reactors"
+    );
     await inbox
       .getByRole("heading", { name: "Notifications", exact: true })
       .hover();

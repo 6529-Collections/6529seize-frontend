@@ -4,8 +4,10 @@ import { NextResponse } from "next/server";
 import { PROFILE_CMS_ASSET_CONTENT_SECURITY_POLICY } from "@/config/profileCmsAssetProxyHeaders";
 import {
   PROFILE_CMS_ASSET_PROXY_ALLOWED_HOSTS,
+  getProfileCmsAssetProxyUrl,
   isProfileCmsAssetProxyAllowedUrl,
 } from "@/lib/profile-cms/runtime/mediaProxy";
+import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 import {
   UrlGuardError,
   fetchPublicUrl,
@@ -29,6 +31,14 @@ const FETCH_OPTIONS: FetchPublicUrlOptions = {
 };
 
 const ERROR_CACHE_HEADERS = { "Cache-Control": "no-store" };
+
+// The emoji picker can load a couple of hundred emoji images at once through
+// this proxy; browsers then cache them for a day.
+const enforceRateLimit = createClientRateLimiter({
+  limit: 600,
+  windowMs: 60 * 1000,
+  errorMessage: "Too many CMS asset requests",
+});
 
 function jsonError(message: string, status: number): NextResponse {
   return NextResponse.json(
@@ -241,11 +251,55 @@ async function proxyAsset(url: URL): Promise<NextResponse> {
   }
 }
 
+/**
+ * CMS assets are static files, so a query string or fragment on the asset URL,
+ * or an extra parameter on the proxy URL, never selects different content.
+ * Such requests are sent to the one canonical proxy URL for the file instead
+ * of being fetched again.
+ */
+function getCanonicalProxyPath(
+  request: NextRequest,
+  assetUrl: URL
+): string | null {
+  const params = request.nextUrl.searchParams;
+  const hasOnlyUrlParam =
+    Array.from(params.keys()).every((key) => key === "url") &&
+    params.getAll("url").length === 1;
+  if (hasOnlyUrlParam && !assetUrl.search && !assetUrl.hash) {
+    return null;
+  }
+
+  const bareAssetUrl = new URL(assetUrl);
+  bareAssetUrl.search = "";
+  bareAssetUrl.hash = "";
+  return getProfileCmsAssetProxyUrl(bareAssetUrl.toString());
+}
+
+function redirectTo(path: string): NextResponse {
+  return new NextResponse(null, {
+    status: 308,
+    headers: {
+      Location: path,
+      "Cache-Control": "public, max-age=86400, s-maxage=86400",
+    },
+  });
+}
+
 // ts-prune-ignore-next: Next.js uses exported HTTP verb handlers via convention.
 export async function GET(request: NextRequest) {
   const parsed = parseAssetUrl(request.nextUrl.searchParams.get("url"));
   if (parsed instanceof NextResponse) {
     return parsed;
+  }
+
+  const canonicalPath = getCanonicalProxyPath(request, parsed);
+  if (canonicalPath) {
+    return redirectTo(canonicalPath);
+  }
+
+  const rateLimitResponse = enforceRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   return proxyAsset(parsed);

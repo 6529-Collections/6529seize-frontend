@@ -264,9 +264,45 @@ describe("mobile app links", () => {
       }
     );
 
-    it("keeps the app link scheme's existing path rules", () => {
-      expect(resolve("mobile6529://navigate/tools/app-wallets")).toBe(
-        "/tools/app-wallets?_t=123"
+    it.each([
+      "/tools/app-wallets",
+      "/app-wallets/0xabc",
+      "/accept-connection-sharing?connection_share_code=c&address=0x1",
+      "/open-mobile?path=/waves/1",
+      "/access",
+      "/restricted",
+      "/auth/callback",
+      "/api/version",
+      "/%61pi/version",
+    ])(
+      "keeps excluded route %s out of the app for navigate links too",
+      (path) => {
+        expect(resolve(`mobile6529://navigate${path}`)).toBeNull();
+      }
+    );
+
+    it.each([
+      ["/waves/1?tag=a", "/waves/1?tag=a&_t=123"],
+      ["/tools/subscriptions-report", "/tools/subscriptions-report?_t=123"],
+      ["/accessibility", "/accessibility?_t=123"],
+      ["", "/?_t=123"],
+    ])("still opens ordinary navigate route %s", (path, expected) => {
+      expect(resolve(`mobile6529://navigate${path}`)).toBe(expected);
+    });
+
+    it("still opens share-connection links on the accept page", () => {
+      expect(
+        resolve("mobile6529://share-connection?connection_share_code=c")
+      ).toBe("/accept-connection-sharing?connection_share_code=c&_t=123");
+    });
+
+    it("keeps a share code carried in the fragment for the accept page", () => {
+      expect(
+        resolve(
+          "mobile6529://share-connection?address=0xabc#connection_share_code=c"
+        )
+      ).toBe(
+        "/accept-connection-sharing?address=0xabc&_t=123#connection_share_code=c"
       );
     });
   });

@@ -1,25 +1,30 @@
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
+import { isDropAuthorSigned } from "./authorSignedClaim";
+import type { SealState, VerdictDrop } from "./dropSignatureVerdicts";
 
-type AuthorSignableDrop = Pick<ApiDrop, "id" | "is_author_signed">;
+export { isDropAuthorSigned } from "./authorSignedClaim";
 
-/** Positive-only: unsigned drops get no marker at all. */
-export const isDropAuthorSigned = (drop: AuthorSignableDrop): boolean =>
-  isSignedMessagesEnabled() &&
-  drop.is_author_signed === true &&
-  !drop.id.startsWith("temp-");
+const WITH_LABEL_KEYS = {
+  verified: "signedMessages.marker.withLabel",
+  failed: "signedMessages.marker.withLabelFailed",
+  pending: "signedMessages.marker.withLabelUnverified",
+  unverified: "signedMessages.marker.withLabelUnverified",
+  unlinked: "signedMessages.marker.withLabelUnlinked",
+} as const satisfies Record<SealState, string>;
 
 /**
  * The name of a control that is the whole drop card (so the seal inside it
- * is static), with "signed by its author" joined when the drop is.
+ * is static), with the drop's signed status joined when 6529.io marks it
+ * signed. "Signed by its author" is joined only once this browser verified
+ * the signature (`state`); until then it says signed, not yet verified.
  */
-export const withAuthorSignedLabel = (
+export const authorSignedLabel = (
   locale: SupportedLocale,
   label: string,
-  drop: AuthorSignableDrop
+  drop: VerdictDrop,
+  state: SealState
 ): string =>
   isDropAuthorSigned(drop)
-    ? t(locale, "signedMessages.marker.withLabel", { label })
+    ? t(locale, WITH_LABEL_KEYS[state], { label })
     : label;

@@ -31,6 +31,20 @@ The 6529 web resolver forms are:
 
 Implementations may allow a configurable resolver origin for local and staged environments, but production defaults to `https://media.6529.io`.
 
+### Separate content domain
+
+User-provided media can instead be served from a separate content domain, `6529usercontent.com`. The resolver endpoint alone selects it: with `MEDIA_RESOLVER_ENDPOINT=https://media.6529usercontent.com` the resolver forms above use `https://media.6529usercontent.com`, and HTML that the web app frames or opens uses one host per CID:
+
+- `https://<cidv1-base32>.ipfs.6529usercontent.com/<path?>`
+
+The label is the lower-case base32 CIDv1 (CIDv0 is converted to a dag-pb CIDv1) and must fit one DNS label. IPNS names, Arweave transactions and CIDs that cannot be converted keep the resolver path form. Images, video, audio, JSON and other fetches always use the path host.
+
+Both domains are recognized as input whichever endpoint is configured, and parse to the same native reference:
+
+- `media.6529.io`, `ipfs.6529.io`, `ipfs-cache.6529.io`
+- `media.6529usercontent.com`
+- `<cid>.ipfs.6529usercontent.com`
+
 ## Recognized External Fallback Gateways
 
 Recognized external gateway URLs must be parsed back to native form when possible.
@@ -108,7 +122,7 @@ Unrecognized HTTP(S) URLs return `recognized=false` and preserve `input`. Invali
 Copy/share surfaces should offer:
 
 - Native URI copy: `ipfs://...`, `ipns://...`, or `ar://...`
-- Web URL copy/open: `https://media.6529.io/...`
+- Web URL copy/open: the configured resolver (`https://media.6529.io/...` by default). With the separate content domain, "open" uses the per-CID host for IPFS content.
 - External fallback copy/open only where fallback or debug UI already exists.
 
 ## v1 Non-Goals

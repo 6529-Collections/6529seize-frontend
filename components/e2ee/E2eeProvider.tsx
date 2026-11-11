@@ -31,6 +31,7 @@ import {
   loadE2eeEngineModules,
 } from "./e2eeEngineLoader";
 import type { E2eeEngineSnapshot, E2eeEngineStore } from "./e2eeEngineStore";
+import { E2EE_REVOCATION_UNVERIFIED } from "./e2eeErrors";
 import { type E2eeEngineRun, startE2eeEngineRun } from "./e2eeEngineRun";
 import {
   hasE2eeEnrollmentMarker,
@@ -84,7 +85,9 @@ const updateEnrollmentMarker = (
   if (snapshot.status === "ready") {
     enrolled = true;
   } else if (snapshot.status === "needs-enrollment") {
-    enrolled = false;
+    // A device stopped on an unconfirmed revocation still holds its data,
+    // so sign-out keeps offering to remove it.
+    enrolled = snapshot.error === E2EE_REVOCATION_UNVERIFIED;
   }
   if (enrolled === null || hasE2eeEnrollmentMarker(profileId) === enrolled) {
     return;

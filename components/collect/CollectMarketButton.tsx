@@ -20,7 +20,7 @@ export default function CollectMarketButton({
       className={getButtonClasses({
         variant: "ghost",
         size: null,
-        className: `tw-min-h-11 tw-px-0 ${fullWidth ? "tw-w-full !tw-justify-between tw-text-sm" : "tw-text-[13px]"} ${mobileRow ? "tw-gap-1 !tw-font-medium" : "tw-gap-2 !tw-font-normal"}`,
+        className: `tw-min-h-11 tw-px-0 md:[[data-nft-card-page]_&]:!tw-bg-transparent ${fullWidth ? "tw-w-full !tw-justify-between tw-text-sm" : "tw-text-[13px]"} ${mobileRow ? "tw-gap-1 !tw-font-medium" : "tw-gap-2 !tw-font-normal"}`,
       })}
       onClick={onClick}
     >

@@ -25,6 +25,7 @@ import {
   formatE2eeWallet,
   formatSafetyCode,
   getMemberName,
+  isUnpairedDm,
   tCount,
 } from "../e2eeFormat";
 import { setE2eeChatMuted, useMutedE2eeChats } from "../e2eeMutedChats";
@@ -35,17 +36,34 @@ import { E2eeAddMembers } from "./E2eeAddMembers";
 
 const GROUP_NAME_MAX = 100;
 
+type MemberDevice = E2eeMember["devices"][number];
+
+/** Signature checked here and its wallet trusted for the member here. */
+const isVerifiedForMember = (device: MemberDevice): boolean =>
+  device.verified && device.walletPinned !== false;
+
+function deviceStatus(
+  locale: SupportedLocale,
+  device: MemberDevice,
+  name: string
+): string {
+  if (!device.verified) {
+    return t(locale, "e2ee.devices.unverified");
+  }
+  return device.walletPinned === false
+    ? t(locale, "e2ee.info.deviceNotPinned", { name })
+    : t(locale, "e2ee.devices.verified");
+}
+
 /** One translatable line per device: label, check status and wallet. */
 function deviceLine(
   locale: SupportedLocale,
-  device: E2eeMember["devices"][number]
+  device: MemberDevice,
+  name: string
 ): string {
   const params = {
     device: device.label,
-    status: t(
-      locale,
-      device.verified ? "e2ee.devices.verified" : "e2ee.devices.unverified"
-    ),
+    status: deviceStatus(locale, device, name),
   };
   const wallet = formatE2eeWallet(device.wallet);
   return wallet
@@ -285,7 +303,7 @@ function MemberRow({
               key={device.deviceKey}
               className="tw-flex tw-items-start tw-gap-1.5"
             >
-              {device.verified ? (
+              {isVerifiedForMember(device) ? (
                 <CheckBadgeIcon
                   aria-hidden="true"
                   className="tw-size-4 tw-text-emerald-300"
@@ -300,7 +318,11 @@ function MemberRow({
                 className="tw-text-iron-300"
                 title={device.wallet ?? undefined}
               >
-                {deviceLine(locale, device)}
+                {deviceLine(
+                  locale,
+                  device,
+                  isSelf ? t(locale, "e2ee.youObject") : name
+                )}
               </span>
             </li>
           ))}
@@ -399,7 +421,9 @@ export function E2eeConversationInfo({
             <span className="tw-font-semibold tw-text-iron-200">
               {t(
                 locale,
-                isGroup ? "e2ee.info.kind.group" : "e2ee.info.kind.dm"
+                isGroup || isUnpairedDm(conversation, selfProfileId)
+                  ? "e2ee.info.kind.group"
+                  : "e2ee.info.kind.dm"
               )}
             </span>
             <span>{t(locale, "e2ee.info.encryptedNote")}</span>

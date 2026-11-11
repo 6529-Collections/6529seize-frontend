@@ -43,6 +43,26 @@ it("keeps other inline trade surfaces unchanged", () => {
   expect(IntersectionObserver).not.toHaveBeenCalled();
 });
 
+it("shares the card action grid without installing a sticky duplicate", () => {
+  render(
+    <CollectDetailLayout.Provider
+      value={{
+        offerAction: <button>Make an offer</button>,
+        marketLink: null,
+        stickyActions: false,
+      }}
+    >
+      <CollectDetailActionRow primaryAction={<button>Collect</button>}>
+        <button>Make an offer</button>
+      </CollectDetailActionRow>
+    </CollectDetailLayout.Provider>
+  );
+  const actions = screen.getByTestId("collect-inline-actions");
+  expect(within(actions).getAllByRole("button")).toHaveLength(2);
+  expect(document.querySelector("[data-collect-sticky-actions]")).toBeNull();
+  expect(IntersectionObserver).not.toHaveBeenCalled();
+});
+
 it("duplicates the current actions only off screen and submits the original form", () => {
   const submit = jest.fn();
   const offer = jest.fn();
@@ -51,6 +71,7 @@ it("duplicates the current actions only off screen and submits the original form
       value={{
         offerAction: <button onClick={offer}>Make an offer</button>,
         marketLink: null,
+        stickyActions: true,
       }}
     >
       <form
@@ -98,7 +119,11 @@ it("keeps unlisted actions above the measured native navigation without adding C
   mockNative = true;
   render(
     <CollectDetailLayout.Provider
-      value={{ offerAction: <button>Make an offer</button>, marketLink: null }}
+      value={{
+        offerAction: <button>Make an offer</button>,
+        marketLink: null,
+        stickyActions: true,
+      }}
     >
       <CollectDetailActionRow>
         <button>Make an offer</button>
@@ -117,7 +142,11 @@ it("keeps unlisted actions above the measured native navigation without adding C
 it("uses the latest intersection when scrolling changes are delivered together", () => {
   render(
     <CollectDetailLayout.Provider
-      value={{ offerAction: <button>Make an offer</button>, marketLink: null }}
+      value={{
+        offerAction: <button>Make an offer</button>,
+        marketLink: null,
+        stickyActions: true,
+      }}
     >
       <CollectDetailActionRow>
         <button>Make an offer</button>

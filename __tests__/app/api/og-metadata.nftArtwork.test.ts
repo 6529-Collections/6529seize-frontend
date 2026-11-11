@@ -60,6 +60,9 @@ describe("NFT export artwork preparation", () => {
     expect(parsed.pathname).toBe("/api/og-metadata/image");
     expect(parsed.searchParams.get("url")).toBe(model.imageUrl);
     expect(parsed.searchParams.get("w")).toBe("960");
+    // Export stays lossless even for opaque artwork, which the proxy would
+    // otherwise serve as JPEG.
+    expect(parsed.searchParams.get("format")).toBe("png");
     expect(init.redirect).toBe("error");
   });
 
