@@ -63,11 +63,13 @@ GitHub secret of the same name into the Elastic Beanstalk environment.
 
 ### Open the pages to everyone
 
-Do either of these, then run `Web Deploy - PROD`:
+Set the `production` environment variable `VALIDATOR_PAGE_PUBLIC` to `true`,
+then run `Web Deploy - PROD`:
+`gh variable set VALIDATOR_PAGE_PUBLIC --env production --body true`.
 
-- set the `production` environment variable `VALIDATOR_PAGE_PUBLIC` to
-  `true`: `gh variable set VALIDATOR_PAGE_PUBLIC --env production --body true`;
-- or delete the secret: `gh secret delete VALIDATOR_PAGE_PASSWORD --env production`.
+Only the variable opens the pages. With the variable not `true`, a missing
+or empty `VALIDATOR_PAGE_PASSWORD` stops the deploy before the Elastic
+Beanstalk environment is updated, instead of opening the pages.
 
 The deploy then sets `VALIDATOR_PAGE_PUBLIC=true` on Elastic Beanstalk. To
 open the pages without a deploy, set that property on the environment
