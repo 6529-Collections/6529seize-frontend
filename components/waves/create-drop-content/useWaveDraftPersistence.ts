@@ -68,6 +68,7 @@ export const useWaveDraftPersistence = ({
   const [initialDraftJson] = useState<string | null>(() =>
     draftWaveId ? readRestorableWaveDraft(draftWaveId) : null
   );
+  const pendingSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!draftWaveId) {
@@ -79,11 +80,15 @@ export const useWaveDraftPersistence = ({
       clearWaveDraft(draftWaveId);
       return;
     }
-    const handle = setTimeout(
-      () => persistEditorState(draftWaveId, editorState),
-      400
-    );
-    return () => clearTimeout(handle);
+    const handle = setTimeout(() => {
+      pendingSaveRef.current = null;
+      persistEditorState(draftWaveId, editorState);
+    }, 400);
+    pendingSaveRef.current = handle;
+    return () => {
+      clearTimeout(handle);
+      if (pendingSaveRef.current === handle) pendingSaveRef.current = null;
+    };
   }, [editorState, draftWaveId, isMountEditor]);
 
   const flushBeforeTabLeave = useEffectEvent(() => {
@@ -96,6 +101,11 @@ export const useWaveDraftPersistence = ({
     let profileInvalidated = false;
     const invalidate = () => {
       profileInvalidated = true;
+      // Text typed before a profile switch or sign-out is not saved after it.
+      if (pendingSaveRef.current !== null) {
+        clearTimeout(pendingSaveRef.current);
+        pendingSaveRef.current = null;
+      }
     };
     globalThis.addEventListener(PROFILE_SWITCHED_EVENT, invalidate);
     return () => {

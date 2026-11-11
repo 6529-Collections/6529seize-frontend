@@ -15,10 +15,12 @@
 import type { CreateWaveConfig } from "@/types/waves.types";
 import type { Period } from "@/helpers/Types";
 import type { CreateDropConfig } from "@/entities/IDrop";
+import { removeMatchingStorageKeys } from "@/helpers/storage-keys.helpers";
 
 const STORAGE_KEY = "create-wave-drafts:v1";
+const SCOPED_STORAGE_KEY_PREFIX = "create-wave-drafts:v2:";
 const storageKey = (scope?: string): string =>
-  scope ? `create-wave-drafts:v2:${scope}` : STORAGE_KEY;
+  scope ? `${SCOPED_STORAGE_KEY_PREFIX}${scope}` : STORAGE_KEY;
 
 /** Only authoring text and references survive recovery; never credentials or files. */
 export const getCreateWaveTextDraft = (
@@ -247,6 +249,41 @@ export const upsertCreateWaveDraft = (
   ) {
     writeAll(readStoredDrafts().filter((existing) => existing.id !== draft.id));
   }
+};
+
+interface CreateWaveDraftOwner {
+  readonly wallet: string;
+  readonly profileId: string | null;
+}
+
+/** Scopes are `<primary wallet>:<profile id>`; a profile owns its id's scopes. */
+const isOwnedScope = (scope: string, owner: CreateWaveDraftOwner): boolean =>
+  scope === `${owner.wallet.toLowerCase()}:` ||
+  (!!owner.profileId && scope.endsWith(`:${owner.profileId}`));
+
+/**
+ * Removes drafts at sign-out: the owner's drafts, or with no owner every
+ * draft on this device, including older settings-only drafts.
+ */
+export const removeCreateWaveDrafts = (owner?: CreateWaveDraftOwner): void => {
+  const storage = getLocalStorage();
+  if (!storage) {
+    return;
+  }
+  const isRemoved = (key: string): boolean => {
+    if (!key.startsWith(SCOPED_STORAGE_KEY_PREFIX)) {
+      return !owner && key === STORAGE_KEY;
+    }
+    return (
+      !owner || isOwnedScope(key.slice(SCOPED_STORAGE_KEY_PREFIX.length), owner)
+    );
+  };
+  try {
+    removeMatchingStorageKeys(storage, isRemoved);
+  } catch {
+    // Storage that cannot be read holds nothing this can remove.
+  }
+  emitDraftsChanged();
 };
 
 export const deleteCreateWaveDraft = (id: string, scope?: string): void => {

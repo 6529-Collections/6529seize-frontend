@@ -16,6 +16,8 @@
  * image node is skipped entirely (matching today's behavior for that case).
  */
 
+import { removeMatchingStorageKeys } from "@/helpers/storage-keys.helpers";
+
 const STORAGE_PREFIX = "wave-draft:v1:";
 
 // A generous ceiling; a genuine chat draft is tiny. Guards against a
@@ -108,6 +110,22 @@ export const clearWaveDraft = (waveId: string): void => {
   const storage = getSessionStorage();
   try {
     storage?.removeItem(getWaveDraftStorageKey(waveId));
+  } catch {
+    /* ignore */
+  }
+};
+
+/**
+ * Removes every chat draft this tab holds. Drafts are keyed by wave only, so
+ * an explicit sign-out removes them all rather than guessing their owner.
+ */
+export const clearAllWaveDrafts = (): void => {
+  const storage = getSessionStorage();
+  if (!storage) {
+    return;
+  }
+  try {
+    removeMatchingStorageKeys(storage, (key) => key.startsWith(STORAGE_PREFIX));
   } catch {
     /* ignore */
   }

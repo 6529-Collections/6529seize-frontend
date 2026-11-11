@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { signOutWithE2eeChoice } from "@/components/e2ee/signout/e2eeSignOut";
+import { signOutAndRemoveLocalData } from "@/components/auth/signOutLocalData";
 import { useChainSwitcher } from "@/components/header/useChainSwitcher";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
@@ -205,7 +205,7 @@ export default function HeaderUserMenuDropdown({
                       onSignOutAll={() => {
                         void runMenuAction({
                           action: () =>
-                            signOutWithE2eeChoice(
+                            signOutAndRemoveLocalData(
                               "all",
                               seizeDisconnectAndLogoutAll
                             ),
@@ -473,7 +473,7 @@ export default function HeaderUserMenuDropdown({
                     onClick={() => {
                       void runMenuAction({
                         action: () =>
-                          signOutWithE2eeChoice(
+                          signOutAndRemoveLocalData(
                             "profile",
                             seizeDisconnectAndLogout
                           ),

@@ -3,6 +3,7 @@ import type { CreateDropConfig } from "@/entities/IDrop";
 import {
   deleteCreateWaveDraft,
   readCreateWaveDrafts,
+  removeCreateWaveDrafts,
   upsertCreateWaveDraft,
 } from "@/helpers/waves/create-wave-draft.helpers";
 
@@ -178,4 +179,38 @@ describe("create-wave-draft.helpers", () => {
     expect(readCreateWaveDrafts("other:profile")).toEqual([]);
     expect(readCreateWaveDrafts()).toEqual([]);
   });
+
+  it("removes only the signed-out profile's drafts", () => {
+    upsertCreateWaveDraft(makeDraft("mine", 100), "0xprimary:profile-a");
+    upsertCreateWaveDraft(makeDraft("no-profile", 100), "0xsigner:");
+    upsertCreateWaveDraft(makeDraft("theirs", 100), "0xother:profile-b");
+    upsertCreateWaveDraft(makeDraft("legacy", 100));
+
+    removeCreateWaveDrafts({ wallet: "0xSIGNER", profileId: "profile-a" });
+
+    expect(readStoredScope("0xprimary:profile-a")).toEqual([]);
+    expect(readStoredScope("0xsigner:")).toEqual([]);
+    expect(readStoredScope("0xother:profile-b")).toEqual(["theirs"]);
+    expect(readCreateWaveDrafts().map((draft) => draft.id)).toEqual(["legacy"]);
+  });
+
+  it("removes every draft, including settings-only ones, without an owner", () => {
+    upsertCreateWaveDraft(makeDraft("mine", 100), "0xprimary:profile-a");
+    upsertCreateWaveDraft(makeDraft("legacy", 100));
+    localStorage.setItem("unrelated", "kept");
+
+    removeCreateWaveDrafts();
+
+    expect(readStoredScope("0xprimary:profile-a")).toEqual([]);
+    expect(readCreateWaveDrafts()).toEqual([]);
+    expect(localStorage.getItem("unrelated")).toBe("kept");
+  });
 });
+
+/** Draft ids stored under one scope, without the settings-only fallback. */
+function readStoredScope(scope: string): string[] {
+  const raw = localStorage.getItem(`create-wave-drafts:v2:${scope}`);
+  return raw
+    ? (JSON.parse(raw) as { id: string }[]).map((draft) => draft.id)
+    : [];
+}

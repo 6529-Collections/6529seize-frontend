@@ -22,7 +22,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import HeaderQRScanner from "./share/HeaderQRScanner";
 import { useChainSwitcher } from "./useChainSwitcher";
-import { signOutWithE2eeChoice } from "@/components/e2ee/signout/e2eeSignOut";
+import { signOutAndRemoveLocalData } from "@/components/auth/signOutLocalData";
 import Link from "next/link";
 
 export default function AppUserConnect({
@@ -189,7 +189,7 @@ export default function AppUserConnect({
         onClick={() => {
           void runAsyncAndNavigate({
             action: () =>
-              signOutWithE2eeChoice("profile", seizeDisconnectAndLogout),
+              signOutAndRemoveLocalData("profile", seizeDisconnectAndLogout),
             errorMessage: "Failed to disconnect and logout",
           });
         }}
@@ -204,7 +204,7 @@ export default function AppUserConnect({
           onClick={() => {
             void runAsyncAndNavigate({
               action: () =>
-                signOutWithE2eeChoice("all", seizeDisconnectAndLogoutAll),
+                signOutAndRemoveLocalData("all", seizeDisconnectAndLogoutAll),
               errorMessage: "Failed to sign out all profiles",
             });
           }}

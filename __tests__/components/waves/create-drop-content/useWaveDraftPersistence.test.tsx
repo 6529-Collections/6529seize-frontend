@@ -200,6 +200,33 @@ describe("useWaveDraftPersistence", () => {
     expect(writeWaveDraftMock).not.toHaveBeenCalled();
   });
 
+  it("drops a pending save when the profile switches or signs out", () => {
+    const { rerender } = renderPersistence({
+      editorState: makeEditorState({ root: { text: "previous profile" } }),
+    });
+    act(() => {
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(writeWaveDraftMock).not.toHaveBeenCalled();
+
+    // Text typed after the change is saved as usual.
+    rerender({
+      activeDrop: null,
+      editorState: makeEditorState({ root: { text: "typed afterwards" } }),
+      dropEditorRefreshKey: 0,
+    });
+    act(() => {
+      jest.advanceTimersByTime(400);
+    });
+    expect(writeWaveDraftMock).toHaveBeenCalledWith(
+      WAVE_ID,
+      JSON.stringify({ root: { text: "typed afterwards" } })
+    );
+  });
+
   it.each(["reply", "edit"])(
     "does not flush %s content as a primary draft",
     (mode) => {
