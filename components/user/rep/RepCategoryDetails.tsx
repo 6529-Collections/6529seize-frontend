@@ -169,6 +169,8 @@ function EditableCategoryRows({
     activeProfileProxy?.created_by.handle ??
     activeProfileProxy?.created_by.primary_address;
   const firstRecipient = items[0]?.profile;
+  // The allowance endpoint returns rater-global remaining REP. The receiver
+  // selects rating stats only; it does not scope the credit budget.
   const allowanceTarget =
     direction === "given" && firstRecipient
       ? withRatingRecipientIdentity(
