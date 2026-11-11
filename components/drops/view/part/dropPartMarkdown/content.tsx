@@ -1,3 +1,4 @@
+import { MarkdownParagraph } from "@/components/markdown/MessageMarkdown";
 import type {
   ClassAttributes,
   HTMLAttributes,
@@ -27,7 +28,6 @@ import {
 } from "@/helpers/waves/drop-group-mentions";
 import { isAllowedMarkdownImageSource } from "./imageSource";
 import { isDirectImageUrl } from "./linkUtils";
-import { normalizeDropMarkdownContent } from "./normalizeContent";
 import { isPreviewableHrefSource } from "./sourcePositions";
 import {
   DropPartMarkdownImageGroup,
@@ -75,7 +75,6 @@ interface MarkdownContentRenderers {
       HTMLAttributes<HTMLParagraphElement> &
       ExtraProps
   ) => ReactNode;
-  readonly processContent: (content: string | null) => string | null;
 }
 
 type MarkdownImageElement = ReactElement<{
@@ -494,34 +493,14 @@ export const createMarkdownContentRenderers = ({
         ExtraProps,
       paragraphKey: string
     ) => {
-      const paragraphChildren = Children.toArray(paragraphParams.children);
-      const isBlankLineParagraph =
-        paragraphChildren.length > 0 &&
-        paragraphChildren.every(
-          (child) =>
-            typeof child === "string" &&
-            child.replaceAll("\u00a0", "").trim().length === 0
-        );
-
-      if (isBlankLineParagraph) {
-        return (
-          <p
-            key={paragraphKey}
-            aria-hidden="true"
-            className="word-break tw-my-1 tw-h-2 tw-leading-none"
-          >
-            {"\u00a0"}
-          </p>
-        );
-      }
-
       return (
-        <p
+        <MarkdownParagraph
           key={paragraphKey}
-          className={`word-break tw-mb-1.5 tw-mt-0 tw-whitespace-pre-wrap tw-break-words tw-font-normal tw-leading-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out last:tw-mb-0 ${textSizeClass}`}
+          textSizeClassName={textSizeClass}
+          renderText={customRenderer}
         >
-          {customRenderer(paragraphParams.children)}
-        </p>
+          {paragraphParams.children}
+        </MarkdownParagraph>
       );
     };
 
@@ -632,6 +611,5 @@ export const createMarkdownContentRenderers = ({
   return {
     customRenderer,
     renderParagraph,
-    processContent: normalizeDropMarkdownContent,
   };
 };
