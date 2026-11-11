@@ -34,8 +34,8 @@ their hashes supplied for reconciliation; supply alone cannot identify recipient
 The Launch page shows automation state, action progress, transaction links and
 recovery controls. Pausing cannot revoke signed/submitted transactions. A lost
 wallet outcome remains paused until its hash or safe cancellation is reconciled.
-The dedicated operations wave records actions and errors; errors tag the
-configured `@drops6529` group.
+On staging, `@drops6529` reports actions and errors in **Drop Forge Ops**.
+Errors tag the configured `@dropforgeops` group.
 
 Craft and contract-admin access remain distinct. Admin grants/revocations remain owner-only on chain. Automatic artist payment is
 separately opt-in and defaults Off. The hub's Automatic launch switch defaults Off; accepted plans keep their timed

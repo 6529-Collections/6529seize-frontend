@@ -8,18 +8,17 @@ import {
 describe("drop group mentions", () => {
   it("recognizes the configured Drop Forge alert group without requiring broadcast privileges", () => {
     expect(
-      getMentionedGroupsFromText("failure @Drops6529", false)
+      getMentionedGroupsFromText("failure @DropForgeOps", false)
     ).toEqual([ApiDropGroupMention.Drops6529]);
-    expect(getMentionedGroupsFromText("@drops6529extra", false)).toEqual(
-      []
-    );
+    expect(getMentionedGroupsFromText("@dropforgeopsextra", false)).toEqual([]);
+    expect(getMentionedGroupsFromText("@drops6529", false)).toEqual([]);
     expect(
       markGroupMentionTokens({
-        content: "@drops6529",
+        content: "@dropforgeops",
         group: ApiDropGroupMention.Drops6529,
         marker: "**",
       })
-    ).toBe("**@drops6529**");
+    ).toBe("**@dropforgeops**");
   });
 
   it("does not infer group mentions from raw part content", () => {

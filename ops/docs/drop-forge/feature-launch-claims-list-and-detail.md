@@ -289,7 +289,8 @@ A successful cancellation or reverted action leaves allocations outstanding.
 minting closes, **Deliver outstanding allocations after minting** requests a
 reviewed delivery. Neither operation credits recipients until execution is proven.
 Unknown evidence or changed claim configuration keeps the operation blocked.
-Failures are posted to the operations wave and tag `@drops6529`.
+In staging, `@drops6529` posts reports to **Drop Forge Ops**. Failure reports tag
+`@dropforgeops`.
 
 ## Automatic phase groups
 

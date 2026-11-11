@@ -47,7 +47,7 @@ These are internal operator controls and are not added to the public Help Bot co
 At 17:15 Europe/Athens, a one-time preview reports the calculated Research remainder
 and optional artist payment in the dedicated operations wave. It shows Off settings
 and payment-limit blocks rather than promising a transfer. Normal previews have no
-tags; verification warnings tag `@drops6529` once. A failed preview is not recalculated.
+tags; verification warnings tag `@dropforgeops` once. A failed preview is not recalculated.
 The preexisting mint-announcement waves are unchanged and receive no new posts.
 
 At 18:00, fresh checks compare the configured RPC's finalized minted total with

@@ -15,7 +15,7 @@ target is not automatic config.
 
 Status: original requirements retained as design context. The companion backend
 and this frontend now implement EMMA Process and Finalize, Craft Launch/Update
-Claim, coordinated manual controls and the @drops6529 group mention.
+Claim, coordinated manual controls and the @dropforgeops group mention.
 The implemented workflow supersedes earlier configuration/arm-time proposals.
 No deployment is included. Current user behavior is described in the
 [Craft-to-Launch flow](../../docs/drop-forge/flow-drop-forge-craft-to-launch.md).
@@ -28,7 +28,7 @@ durable preparation/execution state, and wave publication. Frontend displays
 authoritative state and sends authorized configuration/control requests.
 
 Confirmed scope includes a wave feed whose ID will be manually supplied in
-backend environment configuration/secrets; `@drops6529` with a manually
+backend environment configuration/secrets; `@dropforgeops` with a manually
 supplied profile-ID list; and investigation/fixes for reported EMMA phase
 download and finalize timeouts. Those values need not be collected in a new UI.
 Exact UI layout, endpoints, and several operational policies remain proposals.
@@ -115,9 +115,9 @@ before 17:40. Display each batch's actual backend due/deadline and late status.
    Its designated payee, verified accounting, wallet funding and configured limit
    are enforced by the backend.
 
-## FE-3: @drops6529 and wave visibility
+## FE-3: @dropforgeops and wave visibility
 
-1. Recognize `@drops6529` as a global group mention in composer suggestions,
+1. Recognize `@dropforgeops` as a global group mention in composer suggestions,
    token detection, posted-drop rendering, notification views, and edits/replies
    wherever existing global mention contracts require it.
 2. Consume the backend-generated mention enum/models. Backend resolves the
@@ -181,7 +181,7 @@ presented as currently available user functionality.
 | Pause with a submitted transaction | No false cancellation claim; outstanding transaction remains visible |
 | Manual conflicting action or stale tab | Conflict is explained and backend rejects unsafe replay/revision |
 | Delayed or missed phase transition | Timing status and recovery policy are visible without fake success |
-| Error wave post | `@drops6529` renders as a group mention; configured recipients are resolved by backend |
+| Error wave post | `@dropforgeops` renders as a group mention; configured recipients are resolved by backend |
 | Wave delivery outage | UI distinguishes reporting failure from transaction outcome |
 | Slow/special EMMA phase or finalize | Durable job/status recovery avoids blind repeat mutations |
 | Repeated download after preparation | Same completed version and expected output formats are returned |
