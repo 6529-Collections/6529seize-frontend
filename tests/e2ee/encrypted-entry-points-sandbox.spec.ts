@@ -16,6 +16,7 @@ import {
   selectedPerson,
 } from "../support/e2ee/e2eeUi";
 import { isMobileWebProject } from "../support/surfaceSimulation";
+import { expectUrlState } from "../support/urlState";
 
 /** The composer sandbox's plaintext DM fixture (between alice and bob here). */
 const PLAINTEXT_DM_WAVE_ID = "00000000-0000-4000-8000-000000000532";
@@ -137,7 +138,7 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     });
     await expect(entry).toHaveCount(1);
     await entry.click();
-    await expect(page).toHaveURL(/\/messages\/new$/);
+    await expectUrlState(page, (url) => url.pathname === "/messages/new");
     await expect(
       page.getByRole("heading", { name: "New message", exact: true })
     ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
@@ -173,11 +174,7 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
         hasText: "Doesn’t accept messages from you",
       })
     ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
-    await expect(page).toHaveURL(
-      (url) =>
-        url.pathname === ENCRYPTED_ROUTE &&
-        url.searchParams.get("create") === "dm"
-    );
+    await expectUrlState(page, (url) => url.pathname === "/messages/new");
     await expect(
       page.getByRole("button", { name: "Remove bob" })
     ).toBeVisible();

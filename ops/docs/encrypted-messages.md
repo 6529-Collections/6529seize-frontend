@@ -255,7 +255,8 @@ If someone cannot receive encrypted messages, the composer shows why and keeps
 the recipients and group name while you adjust the selection. Before the
 unencrypted messaging cutoff, the composer can offer **Continue unencrypted**
 after showing the retention warning. In a group, first choose **Use unencrypted
-chat instead**.
+chat instead**. If you used **More options** to start a group with one other
+person, **Use unencrypted DM instead** lets you continue as a direct message.
 
 A direct message has exactly two people. A device joins one only when you are
 one of the two people it names, the invitation comes from one of you, and
