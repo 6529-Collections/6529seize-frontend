@@ -3,7 +3,7 @@ import clsx from "clsx";
 export type CommonTabsActiveTone = "neutral" | "primary";
 
 export const CONNECTED_TAB_LIST_CLASSES =
-  "tw-gap-0.5 tw-rounded-lg tw-bg-iron-950/75 tw-p-[3px] tw-ring-1 tw-ring-inset tw-ring-white/[0.06]";
+  "tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/75 tw-p-0.5";
 
 export function getConnectedTabButtonClasses({
   isActive,
