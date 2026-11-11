@@ -160,8 +160,9 @@ export default function CollectOrdersView(props: CollectOrdersViewProps) {
                     </p>
                     {order.transactionHash && (
                       <p className="tw-m-0 tw-break-all tw-pb-2">
-                        {t(locale, "collect.trade.transactionHash")}:{" "}
-                        {order.transactionHash}
+                        {t(locale, "collect.orders.transactionHash", {
+                          hash: order.transactionHash,
+                        })}
                       </p>
                     )}
                   </details>

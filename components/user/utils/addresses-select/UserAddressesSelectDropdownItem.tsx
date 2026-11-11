@@ -1,6 +1,8 @@
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import type { ApiWallet } from "@/generated/models/ApiWallet";
 import { openUrlInNewTab } from "@/helpers/open-url.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useCopyToClipboard } from "react-use";
 
 export default function UserAddressesSelectDropdownItem({
@@ -10,6 +12,12 @@ export default function UserAddressesSelectDropdownItem({
   readonly wallet: ApiWallet;
   readonly onCopy?: (() => void) | undefined;
 }) {
+  const locale = useBrowserLocale();
+  const copyLabel = t(locale, "user.profile.identity.statements.copyAddress");
+  const openSeaLabel = t(
+    locale,
+    "user.profile.identity.statements.openOpenSeaAccount"
+  );
   const [_, copyToClipboard] = useCopyToClipboard();
   const getEnsOrWallet = () => wallet.display ?? wallet.wallet;
 
@@ -28,8 +36,8 @@ export default function UserAddressesSelectDropdownItem({
     <div className="tw-flex tw-h-full tw-items-center tw-gap-x-4 sm:tw-gap-x-2">
       <button
         onClick={copyAddress}
-        title="Copy address"
-        aria-label="Copy address"
+        title={copyLabel}
+        aria-label={copyLabel}
         className="tw-group tw-inline-flex tw-h-7 tw-w-7 tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-outline-0 focus:tw-outline-none focus-visible:tw-rounded-md focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
       >
         <svg
@@ -50,8 +58,8 @@ export default function UserAddressesSelectDropdownItem({
       <NftPurchasingGate>
         <button
           onClick={openOpensea}
-          title="Open in OpenSea"
-          aria-label="Open in OpenSea"
+          title={openSeaLabel}
+          aria-label={openSeaLabel}
           className="tw-group tw-inline-flex tw-h-7 tw-w-7 tw-cursor-pointer tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-outline-0 focus:tw-outline-none focus-visible:tw-rounded-md focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           <svg

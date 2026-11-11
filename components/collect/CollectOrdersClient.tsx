@@ -83,6 +83,7 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
       if (!profileId || !initialOperationId)
         throw new Error("MARKET_PROFILE_CHANGED");
       if (hideNftPurchasing) {
+        // Recovery can write to the API. Read the recorded receipt without reconciling it.
         const operation = initialBatch
           ? await fetchMarketBatch(initialOperationId, signal)
           : await fetchMarketOperation(initialOperationId, signal);

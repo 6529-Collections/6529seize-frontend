@@ -878,6 +878,7 @@ export const COLLECT_MESSAGES = {
   "collect.orders.private": "Connect to view your private order activity.",
   "collect.orders.inspect": "View order",
   "collect.orders.maker": "Wallet: {wallet}",
+  "collect.orders.transactionHash": "Transaction hash: {hash}",
   "collect.orders.updated": "Updated {time}",
   "collect.entry.collect": "Collect this artwork",
   "collect.entry.complete": "Complete my set",
