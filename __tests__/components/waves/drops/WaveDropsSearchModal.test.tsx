@@ -1,3 +1,10 @@
+import type { SupportedLocale } from "@/i18n/locales";
+
+let mockLocale: SupportedLocale = "en-US";
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => mockLocale,
+}));
+
 jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: () => ({
     findCustomEmoji: (id: string) =>
@@ -86,6 +93,7 @@ const setHookResult = (overrides: Record<string, unknown> = {}) => {
 describe("WaveDropsSearchModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockLocale = "en-US";
     setHookResult();
     mockUseQuery.mockReturnValue({
       data: [
@@ -188,7 +196,7 @@ describe("WaveDropsSearchModal", () => {
     const row = screen.getByRole("button", {
       name: "Open message 42 by alice",
     });
-    const emoji = screen.getByRole("img", { name: ":el_fafo_angy:" });
+    const emoji = screen.getByRole("img", { name: "Emoji :el_fafo_angy:" });
     expect(emoji).toHaveAttribute("src", "/custom-emoji.webp");
     expect(emoji.closest("strong")).not.toBeNull();
     expect(row.querySelector("mark")).toHaveTextContent("Wednesday");
@@ -228,7 +236,7 @@ describe("WaveDropsSearchModal", () => {
         { target: { value: "modern" } }
       );
       expect(
-        screen.getAllByRole("img", { name: ":el_fafo_angy:" })
+        screen.getAllByRole("img", { name: "Emoji :el_fafo_angy:" })
       ).toHaveLength(2);
       expect(
         screen.getByRole("button", { name: "Open message 42 by alice" })
@@ -239,6 +247,34 @@ describe("WaveDropsSearchModal", () => {
     } finally {
       consoleError.mockRestore();
     }
+  });
+
+  it.each([
+    ["en-US", "Emoji"],
+    ["en-GB", "Emoji"],
+    ["fr-FR", "Émoji"],
+    ["es-ES", "Emoji"],
+    ["de-DE", "Emoji"],
+  ] as const)("labels custom emojis in %s", (locale, label) => {
+    mockLocale = locale;
+    setHookResult({
+      drops: [{ ...result, parts: [{ content: "modern :el_fafo_angy:" }] }],
+    });
+    render(
+      <WaveDropsSearchModal
+        isOpen
+        onClose={jest.fn()}
+        wave={wave}
+        onSelectSerialNo={jest.fn()}
+        onSearchAll={jest.fn()}
+      />
+    );
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "modern" },
+    });
+    expect(
+      screen.getByRole("img", { name: `${label} :el_fafo_angy:` })
+    ).toBeInTheDocument();
   });
 
   it("names each result through one valid label id", () => {

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEmoji } from "@/contexts/EmojiContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import Image from "next/image";
 import { Children, Fragment, useEffect, type ReactNode } from "react";
 import Markdown, { type Components } from "react-markdown";
@@ -20,13 +22,14 @@ function SearchResultEmoji({
   readonly children: ReactNode;
 }) {
   const { findCustomEmoji, findNativeEmoji } = useEmoji();
+  const locale = useBrowserLocale();
   const emojiId = shortcode.slice(1, -1);
   const src = findCustomEmoji(emojiId)?.skins[0]?.src;
   if (src) {
     return (
       <Image
         src={src}
-        alt={shortcode}
+        alt={t(locale, "waves.drops.searchModal.result.emoji", { shortcode })}
         width={20}
         height={20}
         loading="lazy"

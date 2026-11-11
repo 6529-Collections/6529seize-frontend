@@ -352,7 +352,7 @@ async function installAdvancedSearchFixture(page: Page) {
 
 async function expectSearchResultEmojis(result: Locator) {
   const emoji = result.getByRole("img", {
-    name: ":el_fafo_angy:",
+    name: "Emoji :el_fafo_angy:",
     exact: true,
   });
   await expect(emoji).toBeVisible();
@@ -360,7 +360,9 @@ async function expectSearchResultEmojis(result: Locator) {
   await expect(emoji).toHaveJSProperty("naturalWidth", 20);
   await expect(emoji).toHaveCSS("width", "20px");
   await expect(emoji).toHaveCSS("height", "20px");
-  await expect(result.locator('strong img[alt=":el_fafo_angy:"]')).toBeVisible();
+  await expect(
+    result.locator('strong img[alt="Emoji :el_fafo_angy:"]')
+  ).toBeVisible();
   await expect(result.locator("mark").first()).toHaveText(/hello/i);
   await expect(result).toContainText("😄");
   await expect(result).toContainText(":unknown_search_emoji:");
@@ -1024,9 +1026,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     const voteCards = page.getByRole("link", { name: /^View wave / });
     if ((await voteCards.count()) > 0) {
       await expect(
-        voteCards
-          .first()
-          .getByText(/^(Next result |Voting ends |Voting open$)/)
+        voteCards.first().getByText(/^(Next result |Voting ends |Voting open$)/)
       ).toBeVisible();
     }
     await expectNoHorizontalOverflow(page);

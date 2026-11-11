@@ -30,6 +30,7 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.jso
 const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
+  "waves.drops.searchModal.result.emoji": "Émoji {shortcode}",
   "waves.historyGap.load": "Charger les messages manqués",
   "waves.historyGap.loaded": "Messages manqués chargés",
   "waves.historyGap.loading": "Chargement des messages manqués…",

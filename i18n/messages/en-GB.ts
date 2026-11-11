@@ -21,6 +21,7 @@ import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
   "waves.historyGap.load": "Load missed messages",
   "waves.historyGap.loaded": "Missed messages loaded",
   "waves.historyGap.loading": "Loading missed messages…",
