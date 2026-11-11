@@ -59,7 +59,8 @@ export const SMALL_WEB_STARTUP_SCRIPT = `(() => {
     try {
       dismissedUntil = Number(globalThis.localStorage.getItem(${JSON.stringify(MOBILE_APP_DISMISSAL_KEY)}));
     } catch {
-      // The banner is eligible when storage is unavailable on a fresh load.
+      // In-memory dismissals end with the previous document. A fresh load
+      // with blocked storage starts with an eligible banner.
     }
     if (!Number.isFinite(dismissedUntil) || dismissedUntil <= Date.now()) {
       root.setAttribute("data-small-web-banner", "true");

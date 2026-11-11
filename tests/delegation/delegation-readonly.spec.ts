@@ -251,6 +251,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     try {
       await page.goto("/safe-collecting/faq/register-delegation", {
         waitUntil: "commit",
+        timeout: RESPONSE_TIMEOUT_MS,
       });
       await expect(back).toBeInViewport();
       await expect(dismissBanner).toHaveCount(0);
