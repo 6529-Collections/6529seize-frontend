@@ -105,16 +105,26 @@ grant (the draft link, v1), so no server ever sees it. The page:
   counts only there.
 
 Nothing is stored or sent. The page is public, so the password gate never
-locks it. The code is in `lib/validator-page/authorize/`. Its headings,
-labels, signed-draft rows, stop text, signature card and copy states are in
-the `validator-authorize` message namespace
-(`i18n/messages/validatorAuthorize.en-US.json`, en-US only, other locales
-fall back to it). The All files table's publisher column, its explanatory
-paragraph and the download labels are in the `validator-files` namespace
-(`i18n/messages/validatorFiles.en-US.json`, en-US only). Still English-only
-strings in their components, with no other locale: the authorize page's
-introduction, wallet step and no-link text, the checks' problem list, and
-the rest of the other `/validator` pages.
+locks it. The code is in `lib/validator-page/authorize/`.
+
+Localization state (en-US source only; every other locale falls back to the
+en-US text):
+
+- `/validator/authorize`: all of the page's copy and accessible names are in
+  the `validator-authorize` message namespace
+  (`i18n/messages/validatorAuthorize.en-US.json`). Still English in code:
+  the checks' problem list (`lib/validator-page/authorize/`). The eyebrow
+  "6529 Validator" is the product name and stays as written.
+- `/validator`, All files (`ValidatorAllFiles.tsx`): the build line, table
+  headers and card labels, download and copy labels, the "Check a file"
+  steps and the SHA256SUMS note are in the `validator-files` namespace
+  (`i18n/messages/validatorFiles.en-US.json`). File names (`SHA256SUMS`) and
+  the shell commands stay as written in every language. Still English in
+  code: the file descriptions and system/CPU names from
+  `lib/validator-page/releaseFiles.ts`, and the "Copy"/"Copied" prefix of
+  `CopyChecksumButton.tsx`.
+- The other `/validator` pages and components are English-only strings in
+  their components.
 
 ## Releases
 

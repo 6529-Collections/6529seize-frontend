@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import "@/i18n/namespaces/validator-files";
 import type { ValidatorRelease } from "@/lib/validator-page/releaseFeed";
 import {
@@ -23,6 +23,8 @@ const MOBILE_LABEL =
   "tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500 lg:tw-hidden";
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
+// A file name, shown and run as it is in every language.
+const SHA256SUMS = "SHA256SUMS";
 const HEAD =
   "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.08] tw-px-3 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400";
 
@@ -77,14 +79,17 @@ function ChecksumCommands({ release }: { readonly release: ValidatorRelease }) {
     "<file>";
   const rows = [
     {
-      system: "Mac, in Terminal",
+      system: t(LOCALE, "validator.files.check.system.mac"),
       command: `shasum -a 256 ${fileFor("macos")}`,
     },
     {
-      system: "Windows, in PowerShell",
+      system: t(LOCALE, "validator.files.check.system.windows"),
       command: `Get-FileHash .\\${fileFor("windows")}`,
     },
-    { system: "Linux", command: `sha256sum ${fileFor("deb-x64")}` },
+    {
+      system: t(LOCALE, "validator.files.check.system.linux"),
+      command: `sha256sum ${fileFor("deb-x64")}`,
+    },
   ];
   return (
     <ul className="tw-m-0 tw-list-none tw-divide-y tw-divide-white/[0.06] tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-p-0">
@@ -118,39 +123,56 @@ export default function ValidatorAllFiles({
   const { checksums } = groupReleaseFiles(release);
   const commit = shortCommit(release.commit);
   const publisherLabel = t(LOCALE, "validator.files.publisher.label");
+  const sizeLabel = t(LOCALE, "validator.files.column.size");
+  const sha256Label = t(LOCALE, "validator.files.column.sha256");
+  const buildParams = {
+    version: (
+      <span key="version" className="tw-font-mono">
+        {release.version}
+      </span>
+    ),
+    date: release.publishedAt.slice(0, 10),
+    commit: (
+      <span key="commit" className="tw-font-mono">
+        {commit}
+      </span>
+    ),
+    releases: (
+      <Link key="releases" href="/validator/releases" className={LINK}>
+        {t(LOCALE, "validator.files.build.releasesLink")}
+      </Link>
+    ),
+  };
   return (
     <div className="tw-flex tw-flex-col tw-gap-6">
       <p className={`tw-m-0 ${BODY}`}>
-        Build <span className="tw-font-mono">{release.version}</span>, published{" "}
-        {release.publishedAt.slice(0, 10)}
-        {commit && (
-          <>
-            , commit <span className="tw-font-mono">{commit}</span>
-          </>
+        {tRich(
+          LOCALE,
+          commit
+            ? "validator.files.build.withCommit"
+            : "validator.files.build.withoutCommit",
+          buildParams
         )}
-        . Earlier builds are under{" "}
-        <Link href="/validator/releases" className={LINK}>
-          Releases
-        </Link>
-        .
       </p>
       <table className="tw-w-full tw-border-collapse tw-text-sm max-lg:tw-block">
         <thead className="max-lg:tw-hidden">
           <tr>
             <th scope="col" className={HEAD}>
-              File
+              {t(LOCALE, "validator.files.column.file")}
             </th>
             <th scope="col" className={HEAD}>
-              Size
+              {sizeLabel}
             </th>
             <th scope="col" className={HEAD}>
-              SHA-256
+              {sha256Label}
             </th>
             <th scope="col" className={HEAD}>
               {publisherLabel}
             </th>
             <th scope="col" className={HEAD}>
-              <span className="tw-sr-only">Download</span>
+              <span className="tw-sr-only">
+                {t(LOCALE, "validator.files.column.download")}
+              </span>
             </th>
           </tr>
         </thead>
@@ -174,12 +196,12 @@ export default function ValidatorAllFiles({
                   </span>
                 </td>
                 <Cell
-                  label="Size"
+                  label={sizeLabel}
                   className="tw-whitespace-nowrap tw-text-iron-300"
                 >
                   {formatFileSize(entry.file.size) ?? "–"}
                 </Cell>
-                <Cell label="SHA-256">
+                <Cell label={sha256Label}>
                   <span className="tw-inline-flex tw-items-center tw-gap-2">
                     <code
                       title={entry.file.sha256}
@@ -189,7 +211,9 @@ export default function ValidatorAllFiles({
                     </code>
                     <CopyChecksumButton
                       value={entry.file.sha256}
-                      label={`SHA-256 of ${entry.file.name}`}
+                      label={t(LOCALE, "validator.files.sha256.copyLabel", {
+                        file: entry.file.name,
+                      })}
                     />
                   </span>
                 </Cell>
@@ -211,7 +235,7 @@ export default function ValidatorAllFiles({
                       aria-hidden="true"
                       className="tw-size-4"
                     />
-                    Download
+                    {t(LOCALE, "validator.files.download.text")}
                   </a>
                 </td>
               </tr>
@@ -224,13 +248,10 @@ export default function ValidatorAllFiles({
       </p>
       <div>
         <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
-          Check a file
+          {t(LOCALE, "validator.files.check.heading")}
         </h3>
         <p className={`tw-mb-3 tw-mt-2 ${BODY}`}>
-          In the folder with the file, run the command for your system and
-          compare what it prints with the SHA-256 above. Windows prints capital
-          letters; the letters and digits must match. If they differ, delete the
-          file.
+          {t(LOCALE, "validator.files.check.body")}
         </p>
         <ChecksumCommands release={release} />
       </div>
@@ -239,19 +260,21 @@ export default function ValidatorAllFiles({
           <a
             href={getReleaseDownloadPath(release, checksums)}
             className={SECONDARY_BUTTON}
-            aria-label="Download SHA256SUMS"
+            aria-label={t(LOCALE, "validator.files.download.label", {
+              file: SHA256SUMS,
+            })}
           >
             <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
-            SHA256SUMS
+            {SHA256SUMS}
           </a>
           <p className={`tw-m-0 ${BODY}`}>
-            It lists the SHA-256 of every file. On Linux, in a folder with it
-            and your downloads, run{" "}
-            <code className={CODE}>
-              sha256sum --check --ignore-missing SHA256SUMS
-            </code>{" "}
-            to check them all. 6529 also signs the list of releases, and your
-            validator checks that signature before it tells you about a new one.
+            {tRich(LOCALE, "validator.files.checksums.body", {
+              command: (
+                <code key="command" className={CODE}>
+                  {`sha256sum --check --ignore-missing ${SHA256SUMS}`}
+                </code>
+              ),
+            })}
           </p>
         </div>
       )}
