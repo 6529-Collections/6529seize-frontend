@@ -599,6 +599,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     );
     await page.route(`${api}/api/profiles/*/rep/rating`, (route) => {
       const handle = new URL(route.request().url()).pathname.split("/")[3];
+      if (!handle) throw new Error("Missing profile identity in rating route");
       const { amount } = route.request().postDataJSON();
       saved.push({ handle, amount });
       if (handle === TARGET) alice = amount;

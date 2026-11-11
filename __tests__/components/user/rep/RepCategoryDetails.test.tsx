@@ -153,7 +153,7 @@ it("pins only your editable contribution, accepts negative values, and saves the
   );
   await user.type(amount, "-15");
   expect(amount).toHaveClass("tw-text-rose-400");
-  await user.click(screen.getByRole("button", { name: "Save", exact: true }));
+  await user.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() =>
     expect(post).toHaveBeenCalledWith({
       endpoint: "profiles/target/rep/rating",
@@ -181,9 +181,7 @@ it("validates the combined credit budget and releases credit before spending", a
   await user.type(alice, "100");
   await user.clear(bob);
   await user.type(bob, "40");
-  expect(
-    screen.getByRole("button", { name: "Save", exact: true })
-  ).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   expect(screen.getByRole("alert")).toHaveTextContent("credit limit");
   expect(alice).toHaveAccessibleDescription(/credit limit/);
   expect(alice).toHaveAttribute("aria-invalid", "true");
@@ -191,7 +189,7 @@ it("validates the combined credit budget and releases credit before spending", a
   await user.type(alice, "0");
   await user.clear(bob);
   await user.type(bob, "110");
-  await user.click(screen.getByRole("button", { name: "Save", exact: true }));
+  await user.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() => expect(post).toHaveBeenCalledTimes(2));
   expect(post.mock.calls.map(([request]) => request)).toEqual([
     {
@@ -221,12 +219,10 @@ it("retains failed edits and does not repeat successful writes after a partial s
   await user.type(alice, "0");
   await user.clear(bob);
   await user.type(bob, "100");
-  await user.click(screen.getByRole("button", { name: "Save", exact: true }));
+  await user.click(screen.getByRole("button", { name: "Save" }));
   await screen.findByRole("alert");
   await waitFor(() =>
-    expect(
-      screen.getByRole("button", { name: "Save", exact: true })
-    ).toBeEnabled()
+    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled()
   );
   expect(bob).toHaveValue("100");
   expect(onProfileRepModify).toHaveBeenCalledTimes(1);
@@ -236,7 +232,7 @@ it("retains failed edits and does not repeat successful writes after a partial s
     })
   );
   failBob = false;
-  await user.click(screen.getByRole("button", { name: "Save", exact: true }));
+  await user.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() => expect(post).toHaveBeenCalledTimes(3));
   expect(post.mock.calls.map(([request]) => request.endpoint)).toEqual([
     "profiles/alice/rep/rating",
@@ -266,9 +262,7 @@ it("explains an invalid amount on the field", async () => {
   await user.type(amount, "-");
   expect(amount).toHaveAttribute("aria-invalid", "true");
   expect(amount).toHaveAccessibleDescription(/Enter a whole number/);
-  expect(
-    screen.getByRole("button", { name: "Save", exact: true })
-  ).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
 });
 
 it("blocks a batch whose first write cannot clear a negative remaining allowance", async () => {
@@ -295,8 +289,6 @@ it("blocks a batch whose first write cannot clear a negative remaining allowance
   await user.clear(bob);
   await user.type(bob, "0");
   // Releasing 50 in total is enough, but the first release of 30 still leaves debt.
-  expect(
-    screen.getByRole("button", { name: "Save", exact: true })
-  ).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
   expect(post).not.toHaveBeenCalled();
 });
