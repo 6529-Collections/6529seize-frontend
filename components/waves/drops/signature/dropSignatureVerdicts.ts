@@ -1,4 +1,5 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropSignedEvents } from "@/generated/models/ApiDropSignedEvents";
 import {
   toDisplayedDropContent,
   verifyDropSignedEvents,
@@ -8,10 +9,17 @@ import {
 import {
   fetchAuthorWallets,
   fetchDropSignedEvents,
+  fetchDropsSignedEvents,
 } from "@/services/api/device-grants-api";
 import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 import { useCallback, useSyncExternalStore } from "react";
 import { isDropAuthorSigned } from "./authorSignedClaim";
+import { createRequestBudget, RateLimitedError } from "./requestBudget";
+import {
+  SIGNED_EVENTS_BATCH_MAX_DROPS,
+  splitSignedEventsBatch,
+  type BatchedSignedEvents,
+} from "./signedEventsBatch";
 
 /**
  * What a drop's seal may say, from this browser's own check:
@@ -46,10 +54,17 @@ interface Entry {
   readonly state: SealState;
 }
 
+/** A batch read's answer for one check, or why it has none. */
+type LoadedSignedEvents =
+  | BatchedSignedEvents
+  | { readonly kind: "failed"; readonly error: unknown };
+
 /** A check waiting for a free slot. */
 interface QueuedCheck {
   readonly drop: VerdictDrop;
   readonly key: string;
+  /** The drop's part of a batch read, once one includes this check. */
+  loaded?: Promise<LoadedSignedEvents> | undefined;
 }
 
 /** Most recently checked drops, oldest first; drops on screen are kept. */
@@ -57,25 +72,31 @@ const MAX_ENTRIES = 500;
 /**
  * Checks share the API's rate limit with loading the feed and posting, so
  * they stay well below it: at most 2 checks in flight and at most 2 requests
- * (a drop's signed events or an author's wallets) started per second.
+ * (a batch of signed events, one drop's signed events or an author's
+ * wallets) started per second. A 429 pauses every check for its Retry-After
+ * (5 s to 5 min); the affected seals stay pending and their checks continue
+ * after the pause. A check that fails for any other reason or times out
+ * (20 s) leaves the seal "unverified" for the rest of the page session and
+ * is never retried by itself; the Signature dialog is the retry.
  */
 const MAX_CONCURRENT_CHECKS = 2;
-const MAX_REQUESTS_PER_WINDOW = 2;
-const REQUEST_WINDOW_MS = 1000;
+const requestBudget = createRequestBudget({
+  maxRequestsPerWindow: 2,
+  windowMs: 1000,
+  minPauseMs: 5000,
+  maxPauseMs: 5 * 60_000,
+  timeoutMs: 20_000,
+});
 /**
- * A 429 pauses every check for its Retry-After, never less than this; the
- * affected seals stay pending and their checks continue after the pause.
+ * Checks that become due within this long of each other share one batch
+ * read of their signed events (up to SIGNED_EVENTS_BATCH_MAX_DROPS drops).
+ * Checks that become due while a batch read waits for its turn or runs go
+ * into the next one.
  */
-const MIN_RATE_LIMIT_PAUSE_MS = 5000;
-const MAX_RATE_LIMIT_PAUSE_MS = 5 * 60_000;
-/**
- * A check that fails for any other reason or times out leaves the seal
- * "unverified" for the rest of the page session and is never retried by
- * itself; the Signature dialog is the retry.
- */
-const REQUEST_TIMEOUT_MS = 20_000;
-/** Author wallet lists are reused for this long. */
+const BATCH_WINDOW_MS = 100;
+/** Author wallet lists are reused for this long, and at most this many. */
 const AUTHOR_WALLETS_TTL_MS = 5 * 60_000;
+const MAX_AUTHOR_WALLET_LISTS = 200;
 
 const entries = new Map<string, Entry>();
 const listeners = new Map<string, Set<() => void>>();
@@ -84,12 +105,16 @@ const queue = new Map<string, QueuedCheck>();
 /** How many visible seals want each drop checked. */
 const demand = new Map<string, number>();
 let running = 0;
-/** Start times of recent requests, oldest first. */
-const requestStarts: number[] = [];
-/** No request starts before this time (after a 429). */
-let pausedUntil = 0;
 let pumpTimer: ReturnType<typeof setTimeout> | null = null;
+let batchTimer: ReturnType<typeof setTimeout> | null = null;
+let batchReadRunning = false;
+/**
+ * An API without the batch read (404 or 405) is read one drop at a time for
+ * the rest of the page session.
+ */
+let batchReadUnsupported = false;
 const grantChecks: GrantCheckCache = new Map();
+/** By lower-case address, oldest first. */
 const authorWallets = new Map<
   string,
   { readonly at: number; readonly wallets: Promise<string[]> }
@@ -102,6 +127,11 @@ const contentKeys = new WeakMap<object, string>();
 function contentKey(drop: SignedContentDrop): string {
   let key = contentKeys.get(drop);
   if (key === undefined) {
+    // JSON.stringify keeps array order and object key insertion order, so
+    // equal content gives an equal key only because toDisplayedDropContent
+    // always builds its objects with the same keys in the same order. Build
+    // the key from such normalized values only, never from raw API objects,
+    // whose key order may differ between read paths.
     key = JSON.stringify([
       drop.wave.id,
       drop.author.primary_address,
@@ -183,82 +213,16 @@ export function recordDropSignatureVerdict(
   });
 }
 
-/** A request refused with 429: every check pauses, nothing failed. */
-class RateLimitedError extends Error {}
-
-const wait = (ms: number): Promise<void> =>
-  new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-
-/** Waits until a request may start: after any pause, within the budget. */
-async function takeRequestSlot(): Promise<void> {
-  for (;;) {
-    const now = Date.now();
-    while (
-      requestStarts.length > 0 &&
-      (now - (requestStarts[0] ?? now) >= REQUEST_WINDOW_MS ||
-        (requestStarts[0] ?? now) > now)
+/** Forgets author wallet lists past their time, and the oldest beyond the cap. */
+function forgetOldAuthorWallets(now: number): void {
+  for (const [address, cached] of authorWallets) {
+    if (
+      authorWallets.size < MAX_AUTHOR_WALLET_LISTS &&
+      now - cached.at < AUTHOR_WALLETS_TTL_MS
     ) {
-      requestStarts.shift();
-    }
-    const oldest = requestStarts[0];
-    const budgetWait =
-      requestStarts.length >= MAX_REQUESTS_PER_WINDOW && oldest !== undefined
-        ? oldest + REQUEST_WINDOW_MS - now
-        : 0;
-    const waitMs = Math.max(pausedUntil - now, budgetWait);
-    if (waitMs <= 0) {
-      requestStarts.push(now);
       return;
     }
-    await wait(waitMs);
-  }
-}
-
-/** The pause a 429 asks for (Retry-After in seconds or as a date). */
-function rateLimitPauseMs(error: unknown): number {
-  const headers =
-    typeof error === "object" && error !== null && "headers" in error
-      ? (error as { readonly headers?: { get?: unknown } }).headers
-      : undefined;
-  const value =
-    typeof headers?.get === "function"
-      ? (headers.get as (name: string) => string | null)("retry-after")
-      : null;
-  let requested = 0;
-  if (value !== null && value.trim() !== "") {
-    const seconds = Number(value);
-    requested = Number.isFinite(seconds)
-      ? seconds * 1000
-      : Date.parse(value) - Date.now();
-  }
-  return Math.min(
-    MAX_RATE_LIMIT_PAUSE_MS,
-    Math.max(
-      MIN_RATE_LIMIT_PAUSE_MS,
-      Number.isFinite(requested) ? requested : 0
-    )
-  );
-}
-
-/** One request within the budget, with its own timeout. */
-async function budgetedRequest<T>(
-  run: (signal: AbortSignal) => Promise<T>
-): Promise<T> {
-  await takeRequestSlot();
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-  try {
-    return await run(controller.signal);
-  } catch (error) {
-    if (getStructuredApiErrorStatus(error) === 429) {
-      pausedUntil = Math.max(pausedUntil, Date.now() + rateLimitPauseMs(error));
-      throw new RateLimitedError("rate limited");
-    }
-    throw error;
-  } finally {
-    clearTimeout(timer);
+    authorWallets.delete(address);
   }
 }
 
@@ -266,13 +230,15 @@ async function budgetedRequest<T>(
 function readAuthorWallets(primaryAddress: string): Promise<string[]> {
   const address = primaryAddress.toLowerCase();
   const now = Date.now();
+  forgetOldAuthorWallets(now);
   const cached = authorWallets.get(address);
   if (cached && now - cached.at < AUTHOR_WALLETS_TTL_MS) {
     return cached.wallets;
   }
-  const wallets = budgetedRequest((signal) =>
+  const wallets = requestBudget.request((signal) =>
     fetchAuthorWallets(primaryAddress, signal)
   );
+  authorWallets.delete(address);
   authorWallets.set(address, { at: now, wallets });
   wallets.catch(() => {
     if (authorWallets.get(address)?.wallets === wallets) {
@@ -302,11 +268,46 @@ function requeueAfterPause(drop: VerdictDrop, key: string): void {
   waiting.forEach(([dropId, check]) => queue.set(dropId, check));
 }
 
-async function checkDrop(drop: VerdictDrop, key: string): Promise<void> {
+/** The API has no batch read: an older API answers 404 or 405. */
+const isBatchReadMissing = (error: unknown): boolean => {
+  const status = getStructuredApiErrorStatus(error);
+  return status === 404 || status === 405;
+};
+
+/** The signed events of a drop the batch read could not give. */
+class SignedEventsUnavailableError extends Error {}
+
+/**
+ * A drop's signed events: from its batch read, or from the single-drop
+ * route when the batch named it truncated or the API has no batch read. A
+ * drop the caller cannot read, or a failed batch read, fails the check the
+ * way a failed single-drop read does.
+ */
+async function readSignedEvents({
+  drop,
+  loaded,
+}: QueuedCheck): Promise<ApiDropSignedEvents> {
+  const result: LoadedSignedEvents =
+    loaded === undefined ? { kind: "single" } : await loaded;
+  switch (result.kind) {
+    case "events":
+      return result.signedEvents;
+    case "single":
+      return requestBudget.request((signal) =>
+        fetchDropSignedEvents(drop.id, signal)
+      );
+    case "failed":
+      throw result.error;
+    case "unavailable":
+    case "missing":
+      throw new SignedEventsUnavailableError(result.kind);
+  }
+}
+
+async function checkDrop(check: QueuedCheck): Promise<void> {
+  const { drop, key } = check;
   try {
-    const signedEvents = await budgetedRequest((signal) =>
-      fetchDropSignedEvents(drop.id, signal)
-    );
+    const signedEvents = await readSignedEvents(check);
     const authorAddress = drop.author.primary_address;
     const wallets =
       authorAddress && signedEvents.events.length > 0
@@ -333,9 +334,129 @@ async function checkDrop(drop: VerdictDrop, key: string): Promise<void> {
   }
 }
 
+/** The oldest queued checks no batch read included yet, at most one batch. */
+function checksToBatch(): QueuedCheck[] {
+  const checks: QueuedCheck[] = [];
+  for (const check of queue.values()) {
+    if (checks.length === SIGNED_EVENTS_BATCH_MAX_DROPS) {
+      break;
+    }
+    if (check.loaded === undefined) {
+      checks.push(check);
+    }
+  }
+  return checks;
+}
+
+/** A settled batch read: what it says about each drop, or why it failed. */
+type BatchOutcome =
+  | { readonly byDrop: Map<string, BatchedSignedEvents> }
+  | { readonly error: unknown };
+
+/**
+ * One batch read within the budget. It settles, never rejects, so a check
+ * dropped from the queue before it starts never leaves a rejection unread.
+ * A response that is not a batch counts as a failed read.
+ */
+async function readBatchOutcome(
+  dropIds: readonly string[]
+): Promise<BatchOutcome> {
+  try {
+    const response = await requestBudget.run((signal) =>
+      fetchDropsSignedEvents(dropIds, signal)
+    );
+    return { byDrop: splitSignedEventsBatch(response, dropIds) };
+  } catch (error) {
+    return { error };
+  }
+}
+
+/** What one drop of a batch read gets once the read settled. */
+function loadedFor(dropId: string, outcome: BatchOutcome): LoadedSignedEvents {
+  if ("byDrop" in outcome) {
+    return outcome.byDrop.get(dropId) ?? { kind: "missing" };
+  }
+  return isBatchReadMissing(outcome.error)
+    ? { kind: "single" }
+    : { kind: "failed", error: outcome.error };
+}
+
+/**
+ * Reads the signed events of the oldest queued checks in one request, once
+ * a request may start (so checks that became due meanwhile join in).
+ */
+async function readBatch(): Promise<void> {
+  batchReadRunning = true;
+  try {
+    await requestBudget.takeSlot();
+    const checks = checksToBatch();
+    if (checks.length === 0) {
+      return;
+    }
+    const dropIds = checks.map(({ drop }) => drop.id);
+    const outcome = readBatchOutcome(dropIds);
+    checks.forEach((check) => {
+      check.loaded = outcome.then((settled) =>
+        loadedFor(check.drop.id, settled)
+      );
+    });
+    pump();
+    const settled = await outcome;
+    if ("error" in settled) {
+      afterFailedBatchRead(settled.error, checks);
+    }
+  } finally {
+    batchReadRunning = false;
+    pump();
+  }
+}
+
+function afterFailedBatchRead(
+  error: unknown,
+  checks: readonly QueuedCheck[]
+): void {
+  if (isBatchReadMissing(error)) {
+    batchReadUnsupported = true;
+    return;
+  }
+  if (error instanceof RateLimitedError) {
+    // Checks still queued are read again after the pause; those already
+    // started wait at the front of the queue (requeueAfterPause).
+    checks.forEach((check) => {
+      if (queue.get(check.drop.id) === check) {
+        check.loaded = undefined;
+      }
+    });
+  }
+}
+
+/** Starts a batch read soon if queued checks wait for their signed events. */
+function scheduleBatchRead(): void {
+  if (batchReadUnsupported || batchReadRunning || batchTimer !== null) {
+    return;
+  }
+  if (![...queue.values()].some((check) => check.loaded === undefined)) {
+    return;
+  }
+  batchTimer = setTimeout(() => {
+    batchTimer = null;
+    void readBatch();
+  }, BATCH_WINDOW_MS);
+}
+
+/** The oldest queued check whose signed events are on their way. */
+function nextCheckToStart(): QueuedCheck | undefined {
+  for (const check of queue.values()) {
+    if (batchReadUnsupported || check.loaded !== undefined) {
+      return check;
+    }
+  }
+  return undefined;
+}
+
 /** Starts queued checks into free slots, waiting out a pause first. */
 function pump(): void {
-  const pauseMs = pausedUntil - Date.now();
+  const pauseMs = requestBudget.pauseRemainingMs();
   if (pauseMs > 0) {
     pumpTimer ??= setTimeout(() => {
       pumpTimer = null;
@@ -344,18 +465,18 @@ function pump(): void {
     return;
   }
   while (running < MAX_CONCURRENT_CHECKS) {
-    const next = queue.entries().next().value;
+    const next = nextCheckToStart();
     if (next === undefined) {
-      return;
+      break;
     }
-    const [dropId, { drop, key }] = next;
-    queue.delete(dropId);
+    queue.delete(next.drop.id);
     running += 1;
-    void checkDrop(drop, key).finally(() => {
+    void checkDrop(next).finally(() => {
       running -= 1;
       pump();
     });
   }
+  scheduleBatchRead();
 }
 
 /**
