@@ -264,9 +264,10 @@ export default function DevicesPreferencesSettings() {
   const nowMs = useMinuteClock();
   const { revoke, isRevoking } = useRevokeDeviceGrant();
   const linkedRevocation = useLinkedDeviceRevocation();
-  // A ref blocks a second confirm before React re-renders the dialog.
-  const signingRef = useRef(false);
-  const [signingRevoke, setSigningRevoke] = useState(false);
+  // A ref blocks a second confirm before React re-renders the dialog; it is
+  // held from the check until the whole revoke has finished.
+  const revokingRef = useRef(false);
+  const [revokeInProgress, setRevokeInProgress] = useState(false);
   const [pendingRevoke, setPendingRevoke] = useState<ApiDeviceGrant | null>(
     null
   );
@@ -300,18 +301,21 @@ export default function DevicesPreferencesSettings() {
     ownKeys.has(pendingRevoke.device_key.toLowerCase());
 
   const confirmRevoke = async () => {
-    if (!canVerifyRevocation || !pendingRevoke || signingRef.current) return;
-    const linked = pendingLinkedDevice;
-    // A linked encryption device gets a signed revocation its devices can verify.
-    signingRef.current = true;
-    setSigningRevoke(true);
-    const signed = linked ? await linkedRevocation.sign(linked) : false;
-    signingRef.current = false;
-    setSigningRevoke(false);
-    if (await revoke(pendingRevoke)) {
-      setPendingRevoke(null);
-      if (linked) await linkedRevocation.finish(linked, pendingIsOwn, signed);
-      if (encryptionEnabled) void encryptionDevices.refetch();
+    if (!canVerifyRevocation || !pendingRevoke || revokingRef.current) return;
+    revokingRef.current = true;
+    setRevokeInProgress(true);
+    try {
+      const linked = pendingLinkedDevice;
+      // A linked encryption device gets a signed revocation its devices can verify.
+      const signed = linked ? await linkedRevocation.sign(linked) : false;
+      if (await revoke(pendingRevoke)) {
+        setPendingRevoke(null);
+        if (linked) await linkedRevocation.finish(linked, pendingIsOwn, signed);
+        if (encryptionEnabled) void encryptionDevices.refetch();
+      }
+    } finally {
+      revokingRef.current = false;
+      setRevokeInProgress(false);
     }
   };
 
@@ -455,7 +459,9 @@ export default function DevicesPreferencesSettings() {
       )}
       <MobileWrapperConfirmationDialog
         isOpen={pendingRevoke !== null && canVerifyRevocation}
-        onClose={() => !isRevoking && !signingRevoke && setPendingRevoke(null)}
+        onClose={() =>
+          !isRevoking && !revokeInProgress && setPendingRevoke(null)
+        }
         onConfirm={() => void confirmRevoke()}
         title={t(
           locale,
@@ -475,7 +481,7 @@ export default function DevicesPreferencesSettings() {
         )}
         confirmText={t(locale, "signedMessages.devices.revoke")}
         cancelText={t(locale, "signedMessages.devices.cancel")}
-        isConfirming={isRevoking || signingRevoke}
+        isConfirming={isRevoking || revokeInProgress}
         confirmVariant="destructive"
       >
         {local.failed ? (

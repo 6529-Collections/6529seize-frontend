@@ -1,7 +1,9 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
-import type { MessageKey } from "@/i18n/messages";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, type MessageKey } from "@/i18n/messages";
 import type { ApiE2eeDevice } from "@/lib/e2ee/api-types";
 import { useRemoveE2eeLocalData } from "../useRemoveE2eeLocalData";
 
@@ -12,8 +14,12 @@ import { useRemoveE2eeLocalData } from "../useRemoveE2eeLocalData";
  * browser's engine signs the device's revocation first when it is ready.
  * Revoking this browser's own device removes its encrypted messages here
  * (the engine does it when it signed; otherwise the local removal does).
+ * When signing another device's revocation was tried and did not succeed,
+ * a notice says that device keeps its history until it is removed there.
  */
 export function useLinkedDeviceRevocation() {
+  const locale = useBrowserLocale();
+  const { setToast } = useAuth();
   const { engine, status, thisDevice } = useE2ee();
   const removeLocal = useRemoveE2eeLocalData();
   const ready = status === "ready" && engine !== null;
@@ -49,15 +55,28 @@ export function useLinkedDeviceRevocation() {
 
   /**
    * Completes a confirmed revoke: this browser's own device, when the engine
-   * did not sign (and so did not clear) it, is removed locally.
+   * did not sign (and so did not clear) it, is removed locally. Another
+   * device whose revocation this browser tried but failed to sign keeps its
+   * history (the dialog promised deletion), so the user is told. With
+   * encrypted messages off here the dialog already said so.
    */
   const finish = async (
     device: ApiE2eeDevice,
     ownGrant: boolean,
     signed: boolean
   ): Promise<void> => {
-    if (!signed && isThisBrowser(device, ownGrant)) {
+    if (signed) {
+      return;
+    }
+    if (isThisBrowser(device, ownGrant)) {
       await removeLocal?.();
+    } else if (ready) {
+      setToast({
+        type: "warning",
+        message: t(locale, "e2ee.devices.revokeUnsignedNotice", {
+          label: device.label,
+        }),
+      });
     }
   };
 
