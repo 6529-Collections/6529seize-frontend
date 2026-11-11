@@ -398,12 +398,15 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     if (isMobile) await submissionGuidance.tap();
     else await submissionGuidance.click();
     const eligibility = page.getByRole("dialog", {
-      name: "How to submit to The Memes",
+      name: isMobile
+        ? "How to submit to The Memes"
+        : "Main Stage submission eligibility",
       exact: true,
     });
     await expect(
       eligibility.getByText("Unlock submissions", { exact: true })
     ).toBeVisible();
+    if (!isMobile) await expect(eligibility).toHaveCSS("opacity", "1");
     await expect(eligibility).toContainText("MemesNominee REP");
     await expect(eligibility).toContainText("50,000");
     await expect(
@@ -411,12 +414,23 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     ).toHaveAttribute("href", "/waves/0ecb95d0-d8f2-48e8-8137-bfa71ee8593c");
     await expectNoHorizontalOverflow(page);
     await expectAxeClean(page, { include: ['[role="dialog"]'] });
-    const closeEligibility = eligibility.getByRole("button", {
-      name: "Close",
-      exact: true,
+    const eligibilityScreenshot = testInfo.outputPath("guided-eligibility.png");
+    await page.screenshot({
+      path: eligibilityScreenshot,
+      style: "nextjs-portal{display:none!important}",
     });
-    if (isMobile) await closeEligibility.tap();
-    else await closeEligibility.click();
+    await testInfo.attach("guided-eligibility", {
+      path: eligibilityScreenshot,
+      contentType: "image/png",
+    });
+    if (isMobile) {
+      await eligibility
+        .getByRole("button", { name: "Close", exact: true })
+        .tap();
+    } else {
+      await expect(eligibility).toHaveAttribute("aria-modal", "false");
+      await submissionGuidance.press("Escape");
+    }
     await expect(eligibility).toHaveCount(0);
     await expect(submissionGuidance).toBeFocused();
     await expectNoHorizontalOverflow(page);
@@ -461,6 +475,65 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       page.getByRole("navigation", { name: "Profile sections" })
     ).toBeVisible();
     await expect(guidance).toHaveCount(0);
+  });
+
+  test("Guided welcome eligibility follows input capabilities and supports keyboard dismissal", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    await seedGettingStartedSession(page);
+    await installStatements(page, getSandboxApiOrigin(baseURL));
+    await openOwnProfile(page);
+    // A wide touch device still uses the sheet/dialog; a narrow mouse window
+    // still uses the desktop popover.
+    await page.setViewportSize({ width: isMobile ? 1280 : 600, height: 900 });
+    const trigger = page
+      .getByRole("region", {
+        name: "Getting started with your identity",
+        exact: true,
+      })
+      .getByRole("button", { name: /^How to submit to The Memes/ });
+    const eligibility = page.getByRole("dialog", {
+      name: isMobile
+        ? "How to submit to The Memes"
+        : "Main Stage submission eligibility",
+      exact: true,
+    });
+    await trigger.scrollIntoViewIfNeeded();
+    if (!isMobile) {
+      await trigger.hover();
+      await expect(eligibility).toBeVisible();
+      await eligibility.hover();
+      await expect(eligibility).toBeVisible();
+      await page
+        .getByRole("heading", { name: "Your profile is ready" })
+        .click();
+      await expect(eligibility).toHaveCount(0);
+    }
+    for (const key of ["Enter", "Space"]) {
+      await trigger.focus();
+      await trigger.press(key);
+      await expect(
+        eligibility.getByText("Unlock submissions", { exact: true })
+      ).toBeVisible();
+      if (isMobile) {
+        await expect(eligibility).toHaveAttribute("aria-modal", "true");
+        await eligibility
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+      } else {
+        await expect(eligibility).toBeFocused();
+        await page.keyboard.press("Tab");
+        await expect(
+          eligibility.getByRole("link", { name: "Get nominated", exact: true })
+        ).toBeFocused();
+        await page.keyboard.press("Escape");
+      }
+      await expect(eligibility).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    }
+    await expectNoHorizontalOverflow(page);
   });
 
   test("Guided welcome About shortcut preserves editor recovery and restores focus", async ({

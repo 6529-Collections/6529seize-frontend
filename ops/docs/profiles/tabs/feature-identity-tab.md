@@ -77,10 +77,14 @@ that flow instead.
   community decisions.
 - `The Memes Main Stage` opens the network's configured Main Stage Wave, where
   you can discover artwork the community is considering for future Meme Cards.
-- `How to submit to The Memes` opens a dialog with that title, containing the
-  existing `Unlock submissions` nomination and eligibility explanation. It
-  shows progress toward the `MemesNominee` REP requirement and a `Get nominated`
-  action. Closing the dialog returns focus to the card action. Nomination
+- `How to submit to The Memes` opens the existing `Unlock submissions`
+  nomination and eligibility popover on desktop, anchored to the action without
+  a modal backdrop. Hover or click opens it; Enter or Space opens it with focus,
+  Tab reaches `Get nominated`, and Escape closes it and restores trigger focus.
+  Touch-first devices and the native app keep the dialog or sheet titled
+  `How to submit to The Memes`; its close control returns focus to the action.
+  Both show progress toward the `MemesNominee` REP requirement and the same
+  `Get nominated` action. Nomination
   eligibility is separate from submission and does not guarantee selection. See
   [Wave Leaderboard Drop Entry and Eligibility](../../waves/leaderboard/feature-drop-entry-and-eligibility.md).
 - `Add an About statement`, marked `Optional`, opens the existing About editor

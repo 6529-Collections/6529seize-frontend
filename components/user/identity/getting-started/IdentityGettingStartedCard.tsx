@@ -2,7 +2,9 @@
 
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { MainStageNominationPopoverContent } from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
+import MainStageNominationPopover, {
+  MainStageNominationPopoverContent,
+} from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
@@ -10,7 +12,9 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { amIUser } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useCapacitor from "@/hooks/useCapacitor";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { t } from "@/i18n/messages";
 import {
   ArrowRightIcon,
@@ -73,6 +77,9 @@ function IdentityGettingStartedCardContent({
 }) {
   const locale = useBrowserLocale();
   const settings = useSeizeSettingsOptional();
+  const isTouchDevice = useIsTouchDevice();
+  const { isCapacitor } = useCapacitor();
+  const useTouchDialog = isTouchDevice || isCapacitor;
   const cardRef = useRef<HTMLElement>(null);
   const [isSubmissionGuideOpen, setIsSubmissionGuideOpen] = useState(false);
   const mainStageWaveId = settings?.seizeSettings.memes_wave_id?.trim();
@@ -167,23 +174,30 @@ function IdentityGettingStartedCardContent({
                 />
               </Link>
             )}
-            <button
-              type="button"
-              className={SECONDARY_ACTION_CLASS}
-              aria-haspopup="dialog"
-              onClick={() => setIsSubmissionGuideOpen(true)}
+            <MainStageNominationPopover
+              disabled={useTouchDialog}
+              focusOnKeyboardActivation={!useTouchDialog}
             >
-              <NextStepContent
-                title={t(locale, "identityGettingStarted.submission")}
-                description={t(
-                  locale,
-                  "identityGettingStarted.submissionDescription"
-                )}
-                icon={
-                  <PaintBrushIcon className="tw-size-4" aria-hidden="true" />
-                }
-              />
-            </button>
+              <button
+                type="button"
+                className={SECONDARY_ACTION_CLASS}
+                aria-haspopup="dialog"
+                onClick={() => {
+                  if (useTouchDialog) setIsSubmissionGuideOpen(true);
+                }}
+              >
+                <NextStepContent
+                  title={t(locale, "identityGettingStarted.submission")}
+                  description={t(
+                    locale,
+                    "identityGettingStarted.submissionDescription"
+                  )}
+                  icon={
+                    <PaintBrushIcon className="tw-size-4" aria-hidden="true" />
+                  }
+                />
+              </button>
+            </MainStageNominationPopover>
             <MobileWrapperDialog
               title={t(locale, "identityGettingStarted.submission")}
               isOpen={isSubmissionGuideOpen}

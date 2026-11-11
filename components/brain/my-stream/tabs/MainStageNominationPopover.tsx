@@ -25,6 +25,8 @@ const SEEKING_NOMINATION_ROUTE = getWavePathRoute(
 
 interface MainStageNominationPopoverProps {
   readonly children: ReactElement;
+  readonly disabled?: boolean | undefined;
+  readonly focusOnKeyboardActivation?: boolean | undefined;
 }
 
 function RepStatusCard({
@@ -223,6 +225,8 @@ export function MainStageNominationPopoverContent() {
 
 export default function MainStageNominationPopover({
   children,
+  disabled,
+  focusOnKeyboardActivation,
 }: MainStageNominationPopoverProps) {
   return (
     <HoverCard
@@ -233,6 +237,8 @@ export default function MainStageNominationPopover({
       delayHide={0}
       offset={12}
       openOnClick={true}
+      disabled={disabled}
+      focusOnKeyboardActivation={focusOnKeyboardActivation}
       triggerDisplay="inline-flex"
     >
       {children}

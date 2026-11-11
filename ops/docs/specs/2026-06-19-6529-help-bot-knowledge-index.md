@@ -50,8 +50,9 @@ Visitor inspection and existing proxy allocation permissions remain distinct.
 
 The `profiles.getting-started` record covers the first-profile welcome in the
 Identity tab: `Find a Wave` opens Discovery, Main Stage opens its configured
-Wave, and `How to submit to The Memes` opens a dialog with the existing
-`Unlock submissions` nomination guidance. An optional About shortcut opens the
+Wave, and `How to submit to The Memes` opens the existing `Unlock submissions`
+nomination popover on desktop, with hover, click and keyboard access. Touch-first
+devices and the native app keep the dialog or sheet. An optional About shortcut opens the
 existing editor. `How 6529 works` opens Join 6529.
 Its facts keep creation-session visibility, owner/proxy restrictions, dismissal,
 and the welcome's availability without Main Stage details explicit. About

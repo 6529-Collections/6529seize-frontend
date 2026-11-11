@@ -12,6 +12,8 @@ import { amIUser } from "@/helpers/Helpers";
 
 let mockHasHydrated = true;
 let mockActiveProxy = false;
+let mockIsTouchDevice = true;
+let mockIsCapacitor = false;
 let mockSettings: { seizeSettings: { memes_wave_id?: string } } | undefined;
 
 jest.mock("@/components/auth/Auth", () => ({
@@ -32,10 +34,20 @@ jest.mock("@/hooks/useHasHydrated", () => ({
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
+jest.mock("@/hooks/useIsTouchDevice", () => ({
+  __esModule: true,
+  default: () => mockIsTouchDevice,
+}));
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isCapacitor: mockIsCapacitor }),
+}));
 jest.mock("@/helpers/Helpers", () => ({ amIUser: jest.fn() }));
 jest.mock(
   "@/components/brain/my-stream/tabs/MainStageNominationPopover",
   () => ({
+    __esModule: true,
+    default: ({ children }: { readonly children: ReactNode }) => children,
     MainStageNominationPopoverContent: () => (
       <p>Nomination eligibility guidance</p>
     ),
@@ -96,6 +108,8 @@ describe("IdentityGettingStartedCard", () => {
     reducedMotion = false;
     mockHasHydrated = true;
     mockActiveProxy = false;
+    mockIsTouchDevice = true;
+    mockIsCapacitor = false;
     mockSettings = undefined;
     jest.mocked(amIUser).mockReturnValue(true);
     jest
@@ -173,21 +187,43 @@ describe("IdentityGettingStartedCard", () => {
     expect(screen.queryByRole("region")).not.toBeInTheDocument();
   });
 
-  it("opens the nomination explanation on request and keeps the welcome after closing it", () => {
+  it.each([
+    { touch: true, native: false },
+    { touch: false, native: true },
+  ])(
+    "keeps the nomination dialog for touch=$touch, native=$native",
+    ({ touch, native }) => {
+      mockIsTouchDevice = touch;
+      mockIsCapacitor = native;
+      markIdentityGettingStartedSession(profile.handle);
+      render(<IdentityGettingStartedCard profile={profile} />);
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Nomination eligibility guidance")
+      ).not.toBeInTheDocument();
+
+      fireEvent.click(
+        screen.getByRole("button", { name: /How to submit to The Memes/ })
+      );
+      expect(
+        screen.getByRole("dialog", { name: "How to submit to The Memes" })
+      ).toHaveTextContent("Nomination eligibility guidance");
+      fireEvent.click(screen.getByRole("button", { name: "Close" }));
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.getByRole("region")).toBeInTheDocument();
+      expect(hasIdentityGettingStartedSession("alice")).toBe(true);
+    }
+  );
+
+  it("delegates desktop submission guidance to the popover without opening the touch dialog", () => {
+    mockIsTouchDevice = false;
     markIdentityGettingStartedSession(profile.handle);
     render(<IdentityGettingStartedCard profile={profile} />);
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    expect(
-      screen.queryByText("Nomination eligibility guidance")
-    ).not.toBeInTheDocument();
 
     fireEvent.click(
       screen.getByRole("button", { name: /How to submit to The Memes/ })
     );
-    expect(
-      screen.getByRole("dialog", { name: "How to submit to The Memes" })
-    ).toHaveTextContent("Nomination eligibility guidance");
-    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getByRole("region")).toBeInTheDocument();
     expect(hasIdentityGettingStartedSession("alice")).toBe(true);
