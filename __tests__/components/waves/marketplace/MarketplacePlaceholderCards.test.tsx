@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
@@ -94,4 +95,19 @@ describe("Marketplace placeholder cards", () => {
       screen.getByTestId("marketplace-preview-unavailable-footer")
     ).toBeInTheDocument();
   });
+});
+
+it("keeps the unavailable preview visible without a marketplace link on iOS", () => {
+  const platform = jest.spyOn(Capacitor, "getPlatform").mockReturnValue("ios");
+  try {
+    render(
+      <MarketplaceUnavailableCard href="https://manifold.xyz/@creator/id/123" />
+    );
+    expect(
+      screen.getByTestId("marketplace-preview-unavailable-media")
+    ).toBeVisible();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  } finally {
+    platform.mockRestore();
+  }
 });

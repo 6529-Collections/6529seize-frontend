@@ -137,7 +137,10 @@ export default function SubscriptionCoverageSummary({
       : null;
   const showNextUnfunded = !!coverage?.next_unfunded && !deadline;
   const showChooseDrops =
-    isOwner && presentation.action === "choose_drops" && !pending;
+    showFundingPrompt &&
+    isOwner &&
+    presentation.action === "choose_drops" &&
+    !pending;
   const showActions = isOwner && !pending && (showChooseDrops || !!topUpAction);
   const neutralStatus =
     status === Status.EarlyWarning || (!isOwner && status !== Status.Covered);
