@@ -55,30 +55,37 @@ beforeEach(() => {
   jest.mocked(validateDropImageSignature).mockResolvedValue(undefined);
   jest.mocked(multiPartUpload).mockResolvedValue(ready);
 });
-it("keeps Send pending through validation, upload and processing, then retains the file", async () => {
-  const pending = deferred<ApiDropMedia>();
-  jest.mocked(multiPartUpload).mockReturnValue(pending.promise);
-  const file = image("still.AVIF");
-  const { result } = renderHook(() => useComposer("wave"));
-  act(() => result.current.handleFileChange([file]));
-  expect(result.current.isPreparingFiles).toBe(true);
-  await waitFor(() => expect(multiPartUpload).toHaveBeenCalled());
-  act(() => jest.mocked(multiPartUpload).mock.calls[0]![0].onProcessing?.());
-  expect(result.current.preparingFiles[0]?.phase).toBe("processing");
-  expect(result.current.files).toEqual([]);
-  await act(async () => pending.resolve(ready));
-  expect(result.current.isPreparingFiles).toBe(false);
-  expect(result.current.files).toEqual([file]);
-  expect(multiPartUpload).toHaveBeenCalledWith(
-    expect.objectContaining({ purpose: ApiMediaUploadPurpose.Chat })
-  );
-  expect(rememberPreparedDropImage).toHaveBeenCalledWith(
-    file,
-    ready,
-    "test-account",
-    ApiMediaUploadPurpose.Chat
-  );
-});
+it.each(["image/jpeg", "image/png", "image/gif", "image/webp", "image/avif"])(
+  "keeps Send pending through %s validation, upload and processing",
+  async (mimeType) => {
+    const pending = deferred<ApiDropMedia>();
+    jest.mocked(multiPartUpload).mockReturnValue(pending.promise);
+    const extension = mimeType.split("/")[1];
+    const file = new File(["image"], `still.${extension}`, { type: mimeType });
+    const { result } = renderHook(() => useComposer("wave"));
+    act(() => result.current.handleFileChange([file]));
+    expect(result.current.isPreparingFiles).toBe(true);
+    await waitFor(() => expect(multiPartUpload).toHaveBeenCalled());
+    act(() => jest.mocked(multiPartUpload).mock.calls[0]![0].onProcessing?.());
+    expect(result.current.preparingFiles[0]?.phase).toBe("processing");
+    expect(result.current.files).toEqual([]);
+    await act(async () => pending.resolve(ready));
+    expect(result.current.isPreparingFiles).toBe(false);
+    expect(result.current.files).toEqual([file]);
+    expect(multiPartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({
+        purpose: ApiMediaUploadPurpose.Chat,
+        waitForReady: true,
+      })
+    );
+    expect(rememberPreparedDropImage).toHaveBeenCalledWith(
+      file,
+      ready,
+      "test-account",
+      ApiMediaUploadPurpose.Chat
+    );
+  }
+);
 it("prepares and remembers a decision entry's file as a decision entry", async () => {
   const file = image("entry.avif");
   const { result } = renderHook(() =>
@@ -101,7 +108,14 @@ it("prepares and remembers a decision entry's file as a decision entry", async (
   );
 });
 it("preserves valid selections when another file fails", async () => {
-  jest.mocked(multiPartUpload).mockRejectedValue(new Error("Invalid AVIF"));
+  jest
+    .mocked(multiPartUpload)
+    .mockResolvedValueOnce(ready)
+    .mockRejectedValueOnce(
+      new Error(
+        "This image is too large to process. Reduce its dimensions and upload again."
+      )
+    );
   const valid = new File(["image"], "valid.png", { type: "image/png" });
   const invalid = image("corrupt.avif");
   const { result } = renderHook(() => useComposer("wave"));
@@ -110,7 +124,12 @@ it("preserves valid selections when another file fails", async () => {
   expect(result.current.isPreparingFiles).toBe(false);
   expect(result.current.preparingFiles).toEqual([]);
   expect(toast).toHaveBeenCalledWith(
-    expect.objectContaining({ title: "Could not add corrupt.avif" })
+    expect.objectContaining({
+      title: "Could not add corrupt.avif",
+      description:
+        "This image is too large to process. Reduce its dimensions and upload again.",
+      autoClose: false,
+    })
   );
 });
 it("reserves file-count capacity across simultaneous batches", async () => {

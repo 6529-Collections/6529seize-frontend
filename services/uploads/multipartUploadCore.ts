@@ -23,6 +23,7 @@ import { getApiAttachmentUploadMimeType } from "@/services/uploads/attachmentUpl
 import { t } from "@/i18n/messages";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { captureVideoPoster } from "./captureVideoPoster";
+import { ImageProcessingError } from "@/services/uploads/ImageProcessingError";
 
 const PART_SIZE = 5 * 1024 * 1024;
 const CONCURRENCY = 5;
@@ -231,7 +232,7 @@ function assertImageProcessingDidNotFail(
   response: ApiCompleteMultipartUploadResponse
 ): void {
   if (response.media_status === ApiDropMediaStatus.Failed) {
-    throw new Error(getImageProcessingFailedMessage(response));
+    throw new ImageProcessingError(getImageProcessingFailedMessage(response));
   }
 }
 

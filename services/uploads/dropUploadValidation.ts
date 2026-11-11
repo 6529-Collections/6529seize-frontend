@@ -6,6 +6,7 @@ import {
   validateAttachmentUploadFile,
 } from "@/services/uploads/attachmentUploadMimeType";
 import {
+  getContentType,
   getUnsupportedUploadToast,
   isSupportedUploadFile,
 } from "@/services/uploads/mediaUploadMimeType";
@@ -24,6 +25,12 @@ export function filterValidDropUploadFiles(
     if (!isSupportedUploadFile(file)) return false;
     try {
       if (file.size === 0) throw new Error(t(locale, "drop.upload.empty"));
+      if (
+        getContentType(file).startsWith("image/") &&
+        file.size > 256 * 1024 * 1024
+      ) {
+        throw new Error(t(locale, "drop.upload.imageTooLarge"));
+      }
       if (isAttachmentUploadFile(file)) {
         validateAttachmentUploadFile(file);
       } else if (file.size > 500 * 1024 * 1024) {

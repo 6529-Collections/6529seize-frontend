@@ -34,6 +34,7 @@ import {
 import { generateParts, toApiCreateDropParts } from "./part-builders";
 import { withClientDropId } from "@/services/api/client-drop-ids";
 import { getDropMediaUploadPurpose } from "@/services/uploads/mediaUploadPurpose";
+import { ImageProcessingError } from "@/services/uploads/ImageProcessingError";
 import {
   isReplyTargetUnavailableError,
   REPLY_TARGET_UNAVAILABLE_TOAST_ID,
@@ -672,8 +673,11 @@ export const useCreateDropSubmission = ({
     } catch (error) {
       setToast({
         type: "error",
-        title: "Couldn't submit this drop.",
-        description: "Please try again.",
+        title: t(locale, "drop.upload.submitFailed"),
+        description:
+          error instanceof ImageProcessingError
+            ? error.message
+            : t(locale, "tryAgain"),
         details: getToastErrorDetails(error),
       });
     } finally {

@@ -3,6 +3,8 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
 import type { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { isAttachmentUploadFile } from "@/services/uploads/attachmentUploadMimeType";
+import { getContentType } from "@/services/uploads/mediaUploadMimeType";
+import { ImageProcessingError } from "@/services/uploads/ImageProcessingError";
 import type React from "react";
 import {
   multiPartAttachmentUpload,
@@ -24,7 +26,7 @@ const generateMediaForPart = async (
     file: media,
     path: "drop",
     purpose,
-    waitForReady: false,
+    waitForReady: getContentType(media).startsWith("image/"),
     onProgress: (progress) =>
       setUploadingFiles((prev) =>
         prev.map((uf) => (uf.file === media ? { ...uf, progress } : uf))
@@ -106,6 +108,7 @@ export const generateParts = async (
       parts.map((part) => generatePart(part, setUploadingFiles, purpose))
     );
   } catch (error) {
+    if (error instanceof ImageProcessingError) throw error;
     const message = error instanceof Error ? error.message : String(error);
     if (
       message.includes("content_type") ||

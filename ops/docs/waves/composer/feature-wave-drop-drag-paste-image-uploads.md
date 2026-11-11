@@ -27,8 +27,8 @@ draft.
    formats below. Supported files from the same batch can still be added.
 3. Wait for image preparation to finish. An inline image shows a compact
    preview with an uploading indicator. Its frame keeps the same size when
-   uploading finishes. An AVIF selected for the tray uploads and
-   processes before its preview appears; the composer shows its progress.
+   uploading finishes. Every image selected for the tray uploads and passes
+   processing before its preview appears; the composer shows its progress.
 4. Add or edit the message. Sending and continuing a Storm wait for pending
    image preparation to finish.
 5. Send the drop, then select its image to open the image viewer.
@@ -40,7 +40,8 @@ draft.
 - Audio: MP3 (including `.mpeg` audio), WAV, AAC, and OGG.
 - 3D: GLB.
 - Attachments: PDF and CSV.
-- Media files must be non-empty and no larger than **500 MB**.
+- Files must be non-empty. Images are limited to **256 MiB**; other media is
+  limited to **500 MB**.
 - PDF files: up to **25 MB** and **100 pages**. CSV files: up to **50 MB**.
 - The file tray allows **eight files across the whole drop**, including its
   Storm parts. Excess files are skipped; existing selections are kept.
@@ -92,6 +93,10 @@ draft.
   Retrying the unchanged unsupported file will not help.
 - **Invalid, empty, oversized, or corrupt image:** the message names the file.
   Choose a complete file within its limits; export a smaller image if needed.
+  Image dimensions and animation frames also affect processing limits, even
+  when the compressed file is small. If the image is too large to process,
+  reduce its dimensions or frame count and select it again. Image validation
+  happens when the file is added; a failed image is not posted with the message.
 - **Upload or processing failure:** a failed inline placeholder or pending tray
   image is removed. Other text and files remain. Retry a valid file when the
   connection or service recovers.

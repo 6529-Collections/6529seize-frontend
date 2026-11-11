@@ -101,7 +101,7 @@ export function useDropFilePreparation({
     const prepareFile = async (file: File) => {
       await validateDropImageSignature(file, locale);
       if (!active()) return;
-      if (getContentType(file) === "image/avif") {
+      if (getContentType(file).startsWith("image/")) {
         setPreparation((current) => ({
           ...current,
           files: [
@@ -113,6 +113,7 @@ export function useDropFilePreparation({
           file,
           path: "drop",
           purpose,
+          waitForReady: true,
           signal: controller.signal,
           onProgress: (progress) => updateFile(file, { progress }),
           onProcessing: () =>

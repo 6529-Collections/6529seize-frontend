@@ -9,6 +9,20 @@ import {
 const file = (name: string, type = "") => new File(["content"], name, { type });
 
 describe("drop upload validation", () => {
+  it("rejects an image above the server's 256 MiB limit with recovery guidance", () => {
+    const image = file("large.jpg", "image/jpeg");
+    Object.defineProperty(image, "size", { value: 256 * 1024 * 1024 + 1 });
+    const setToast = jest.fn();
+    expect(filterValidDropUploadFiles([image], setToast)).toEqual([]);
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Could not add large.jpg",
+        description:
+          "Image files must be 256 MiB or smaller. Export a smaller image and try again.",
+        autoClose: false,
+      })
+    );
+  });
   it.each([
     "image/avif",
     "",
