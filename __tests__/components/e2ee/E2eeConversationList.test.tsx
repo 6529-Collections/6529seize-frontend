@@ -167,6 +167,7 @@ describe("encrypted conversation list", () => {
       const chats = [
         conversation({
           lastMessage: message({
+            id: "markdown-preview",
             senderProfileId: SELF_ID,
             text: "**Bold** *italic* ~~struck~~ [Link](https://preview.invalid)\n\n```js\nconsole.log('hi');\n```\n\n- first\n- second\n\n![Photo](https://preview.invalid/image.png)",
           }),
