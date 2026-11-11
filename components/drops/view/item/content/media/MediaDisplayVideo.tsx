@@ -16,6 +16,7 @@ import { useMediaActions } from "./useMediaActions";
 import { assignRef } from "./SeizeVideoPlayer.config";
 import { useChatVideoPlayback } from "./ChatVideoPlayback";
 import { useRememberedVideoPlayback } from "./VideoPlaybackMemory";
+import { getMediaPlaybackUrl } from "./mediaPlaybackUrl";
 
 interface Props {
   readonly src: string;
@@ -40,12 +41,13 @@ function getVideoPresentation(fillContainer: boolean, isInertPreview: boolean) {
 }
 
 const MediaDisplayVideo: React.FC<Props> = ({
-  src,
+  src: storedSrc,
   mimeType,
   showControls = false,
   isInertPreview = false,
   fillContainer = false,
 }) => {
+  const src = getMediaPlaybackUrl(storedSrc);
   const { isApp } = useDeviceInfo();
   const isMobileEnvironment = useMobileBatterySavings();
   const [wrapperRef, inView] = useInView<HTMLDivElement>({

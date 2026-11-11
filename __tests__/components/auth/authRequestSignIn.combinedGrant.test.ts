@@ -51,6 +51,7 @@ jest.mock("@/components/auth/authLoginE2eeDevice", () => ({
   adoptLoginE2eeDevice: (params: unknown) => mockAdopt(params),
 }));
 
+import { SignInRateLimitedError } from "@/components/auth/authErrors";
 import { createAuthRequestSignIn } from "@/components/auth/authRequestSignIn";
 import {
   buildDeviceGrantUrn,
@@ -534,6 +535,59 @@ describe("sign-in with a combined signing + encrypted messages grant (NC8)", () 
       expect(mockAdopt).not.toHaveBeenCalled();
       expect(e2ee.dispose).toHaveBeenCalled();
       expect(mockRecords.get(SIGNER)?.grant ?? null).toBeNull();
+    });
+  });
+
+  describe("when the sign-in endpoints answer 429", () => {
+    const RATE_LIMITED_TOAST = {
+      message: "Too many sign-in attempts. Wait a moment, then try again.",
+      type: "error",
+    };
+
+    it("asks for no other challenge after the first is refused", async () => {
+      const e2ee = preparedE2eeDevice();
+      const { getNonce, getSignature, setToast, signIn } = createSubject(
+        () => {
+          throw new SignInRateLimitedError();
+        }
+      );
+
+      await expect(
+        signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "auto" })
+      ).resolves.toEqual({ success: false });
+
+      expect(getNonce).toHaveBeenCalledTimes(1);
+      expect(getSignature).not.toHaveBeenCalled();
+      expect(setToast).toHaveBeenCalledWith(RATE_LIMITED_TOAST);
+      expect(e2ee.dispose).toHaveBeenCalled();
+    });
+
+    it("says so when the login request is refused", async () => {
+      loginMock.mockRejectedValueOnce(
+        Object.assign(new Error("Rate limit exceeded"), { status: 429 })
+      );
+      const { getNonce, setToast, signIn } = createSubject();
+
+      await expect(
+        signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "off" })
+      ).resolves.toEqual({ success: false });
+
+      expect(getNonce).toHaveBeenCalledTimes(1);
+      expect(loginMock).toHaveBeenCalledTimes(1);
+      expect(setToast).toHaveBeenCalledWith(RATE_LIMITED_TOAST);
+    });
+
+    it("keeps the generic message for other login failures", async () => {
+      loginMock.mockRejectedValueOnce(
+        Object.assign(new Error("Unauthorized"), { status: 401 })
+      );
+      const { setToast, signIn } = createSubject();
+
+      await signIn({ signerAddress: SIGNER, role: null, deviceGrantMode: "off" });
+
+      expect(setToast).toHaveBeenCalledWith(
+        expect.objectContaining({ title: "Couldn't authenticate." })
+      );
     });
   });
 });
