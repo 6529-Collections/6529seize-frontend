@@ -6,17 +6,19 @@ import { getMediaPlaybackUrl } from "./mediaPlaybackUrl";
  * Based on DropListItemContentMediaAudio but with optional controls.
  */
 function MediaDisplayAudio({
-  src,
+  src: storedSrc,
   showControls = false,
 }: {
   readonly src: string;
   readonly showControls?: boolean | undefined;
 }) {
+  // A stored first-party gateway link plays from the configured endpoint.
+  const src = getMediaPlaybackUrl(storedSrc);
   return (
     <div className="tw-h-full tw-w-full">
       {showControls ? (
         <audio controls preload="metadata" className="tw-w-full">
-          <source src={getMediaPlaybackUrl(src)} type="audio/mpeg" />
+          <source src={src} type="audio/mpeg" />
           Your browser does not support the audio element.
         </audio>
       ) : (
