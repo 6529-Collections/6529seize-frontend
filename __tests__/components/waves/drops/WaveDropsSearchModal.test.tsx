@@ -277,6 +277,32 @@ describe("WaveDropsSearchModal", () => {
     ).toBeInTheDocument();
   });
 
+  it.each([
+    "- modern :el_fafo_angy:",
+    "1. modern :el_fafo_angy:",
+    "#### modern :el_fafo_angy:",
+    "##### modern :el_fafo_angy:",
+    "###### modern :el_fafo_angy:",
+  ])("renders emojis in Markdown blocks: %s", (content) => {
+    setHookResult({ drops: [{ ...result, parts: [{ content }] }] });
+    render(
+      <WaveDropsSearchModal
+        isOpen
+        onClose={jest.fn()}
+        wave={wave}
+        onSelectSerialNo={jest.fn()}
+        onSearchAll={jest.fn()}
+      />
+    );
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "modern" },
+    });
+    expect(
+      screen.getByRole("img", { name: "Emoji :el_fafo_angy:" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("modern").tagName).toBe("MARK");
+  });
+
   it("names each result through one valid label id", () => {
     // Stable keys are raw hash bytes: they can hold white space and control
     // characters, which must not reach the id that names the result. Two
