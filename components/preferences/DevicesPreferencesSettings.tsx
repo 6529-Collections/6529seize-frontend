@@ -310,7 +310,13 @@ export default function DevicesPreferencesSettings() {
       const signed = linked ? await linkedRevocation.sign(linked) : false;
       if (await revoke(pendingRevoke)) {
         setPendingRevoke(null);
-        if (linked) await linkedRevocation.finish(linked, pendingIsOwn, signed);
+        if (linked) {
+          await linkedRevocation.finish(
+            linked,
+            { own: pendingIsOwn, label: pendingRevoke.device_label },
+            signed
+          );
+        }
         if (encryptionEnabled) void encryptionDevices.refetch();
       }
     } finally {

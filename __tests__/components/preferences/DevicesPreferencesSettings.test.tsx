@@ -304,14 +304,18 @@ describe("DevicesPreferencesSettings", () => {
       grant_id: grant().id,
       label: "Chrome on macOS",
     };
-    const setUp = (ready: boolean, grants = [grant(), phone]) => {
+    const setUp = (
+      ready: boolean,
+      grants = [grant(), phone],
+      devices = [linkedPhone, linkedThis]
+    ) => {
       mockEncryptionEnabled = true;
       mockAuth = { ...mockAuth, connectedProfile: { id: "profile" } };
       mockQuery = { ...mockQuery, data: grants };
       mockEncryptionQuery.mockReturnValue({
         isSuccess: true,
         refetch: jest.fn(),
-        data: [linkedPhone, linkedThis],
+        data: devices,
       });
       mockE2ee = {
         ...mockE2ee,
@@ -363,10 +367,16 @@ describe("DevicesPreferencesSettings", () => {
       expect(mockSetToast).not.toHaveBeenCalled();
     });
 
-    it("tells the user when another device's revocation could not be signed", async () => {
-      const order = setUp(true);
+    it("tells the user, by the grant's name, when another device's revocation could not be signed", async () => {
+      // The encrypted device was renamed; the notice uses the grant's name,
+      // as the revoke result does.
+      const order = setUp(
+        true,
+        [grant(), phone],
+        [{ ...linkedPhone, label: "Phone for chats" }, linkedThis]
+      );
       mockRevokeE2eeDevice.mockRejectedValueOnce(new Error("offline"));
-      await confirm("Safari on iPhone");
+      await confirm("Phone for chats");
       expect(order).toEqual(["grant"]);
       expect(mockRemoveLocal).not.toHaveBeenCalled();
       expect(mockSetToast).toHaveBeenCalledTimes(1);
@@ -375,6 +385,29 @@ describe("DevicesPreferencesSettings", () => {
         message:
           "Safari on iPhone was revoked, but this browser couldn’t sign the revocation of its encrypted messages. Its saved chat history stays on that device until it’s removed there.",
       });
+    });
+
+    it("lets the user confirm again after a revoke that failed", async () => {
+      setUp(true);
+      mockRevoke.mockResolvedValueOnce(false);
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Safari on iPhone" })
+      );
+      const button = within(screen.getByRole("dialog")).getByRole("button", {
+        name: "Revoke",
+      });
+      await act(async () => {
+        fireEvent.click(button);
+      });
+      expect(mockRevoke).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.click(button);
+      });
+      expect(mockRevokeE2eeDevice).toHaveBeenCalledTimes(2);
+      expect(mockRevoke).toHaveBeenCalledTimes(2);
+      expect(screen.queryByRole("dialog")).toBeNull();
     });
 
     it("says nothing more when that grant could not be revoked", async () => {

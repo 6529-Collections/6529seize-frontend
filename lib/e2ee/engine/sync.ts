@@ -170,14 +170,19 @@ export async function tryCatchUp(
 // Welcomes
 // ---------------------------------------------------------------------------
 
-/** Resolves a Welcome (joined or refused): acknowledged and no longer held. */
+/**
+ * Resolves a Welcome (joined or refused): acknowledged, then no longer held.
+ * When the acknowledgement fails the entry stays, so a redelivered Welcome
+ * keeps the time left in its window.
+ */
 async function ack(ctx: EngineContext, welcome: ApiE2eeWelcome): Promise<void> {
-  releaseHeldWelcome(ctx, welcome.id);
   try {
     await ctx.api.ackWelcome(ownDeviceKey(ctx), welcome.id);
   } catch {
     // Retried with the next inbox pull.
+    return;
   }
+  releaseHeldWelcome(ctx, welcome.id);
 }
 
 async function senderBlocked(

@@ -57,24 +57,25 @@ export function useLinkedDeviceRevocation() {
    * Completes a confirmed revoke: this browser's own device, when the engine
    * did not sign (and so did not clear) it, is removed locally. Another
    * device whose revocation this browser tried but failed to sign keeps its
-   * history (the dialog promised deletion), so the user is told. With
-   * encrypted messages off here the dialog already said so.
+   * history (the dialog promised deletion), so the user is told, by the
+   * grant's label as in the revoke result. With encrypted messages off here
+   * the dialog already said so.
    */
   const finish = async (
     device: ApiE2eeDevice,
-    ownGrant: boolean,
+    grant: { readonly own: boolean; readonly label: string },
     signed: boolean
   ): Promise<void> => {
     if (signed) {
       return;
     }
-    if (isThisBrowser(device, ownGrant)) {
+    if (isThisBrowser(device, grant.own)) {
       await removeLocal?.();
     } else if (ready) {
       setToast({
         type: "warning",
         message: t(locale, "e2ee.devices.revokeUnsignedNotice", {
-          label: device.label,
+          label: grant.label,
         }),
       });
     }

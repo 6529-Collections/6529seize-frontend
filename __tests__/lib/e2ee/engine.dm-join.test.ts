@@ -235,11 +235,13 @@ describe("E2EE engine: joining direct conversations", () => {
   });
 
   /** A DM from Alice's laptop whose other device (her phone) Bob's server lookups do not find. */
-  async function dmWithUnknownPhone() {
+  async function dmWithUnknownPhone(
+    withApi: (api: E2eeApiClient) => E2eeApiClient = (api) => api
+  ) {
     const alice = await addUser(world, "alice");
     const alicePhone = await addDevice(world, alice);
     const lookups = lookupFaults(world, "bob");
-    const bob = await addUser(world, "bob", { api: lookups.api });
+    const bob = await addUser(world, "bob", { api: withApi(lookups.api) });
     await settle(world);
     lookups.failing.set(keyOf(alicePhone), 404);
     const dm = await alice.primary.engine.createConversation({
@@ -286,6 +288,35 @@ describe("E2EE engine: joining direct conversations", () => {
     expect(bob.primary.engine.getConversation(dm)).toMatchObject({
       status: "active",
     });
+    expect(released()).toContain(welcomeId);
+  });
+
+  it("keeps holding an invitation back until its acknowledgement goes through", async () => {
+    const released = releasedByBob();
+    let ackFails = false;
+    const { bob, lookups, dm } = await dmWithUnknownPhone((api) => ({
+      ...api,
+      ackWelcome: async (...args: Parameters<E2eeApiClient["ackWelcome"]>) => {
+        if (ackFails) throw new Error("HTTP 503");
+        return api.ackWelcome(...args);
+      },
+    }));
+    const [welcomeId] = pendingWelcomes(world, bob.primary);
+    ackFails = true;
+    lookups.failing.clear();
+    world.clock.advance(6 * 60_000);
+    await settle(world);
+    // Joined, but the acknowledgement failed: still held, still delivered.
+    expect(bob.primary.engine.getConversation(dm)).toMatchObject({
+      status: "active",
+    });
+    expect(pendingWelcomes(world, bob.primary)).toEqual([welcomeId]);
+    expect(released()).not.toContain(welcomeId);
+
+    ackFails = false;
+    await bob.primary.engine.sync();
+    await settle(world);
+    expect(pendingWelcomes(world, bob.primary)).toEqual([]);
     expect(released()).toContain(welcomeId);
   });
 
