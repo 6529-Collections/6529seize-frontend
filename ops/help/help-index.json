@@ -3765,7 +3765,11 @@
         "6529 cannot recall copies outside its servers: your own exports, push notification previews already delivered to phones, and attachments already published to public IPFS."
       ],
       "canonical_path": "/messages",
-      "related_paths": ["/messages/new", "/messages/encrypted", "/messages/encrypted/new"],
+      "related_paths": [
+        "/messages/new",
+        "/messages/encrypted",
+        "/messages/encrypted/new"
+      ],
       "tags": ["messages", "encryption", "privacy"],
       "source_refs": [
         "ops/docs/encrypted-messages.md",

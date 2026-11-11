@@ -987,9 +987,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     const voteCards = page.getByRole("link", { name: /^View wave / });
     if ((await voteCards.count()) > 0) {
       await expect(
-        voteCards
-          .first()
-          .getByText(/^(Next result |Voting ends |Voting open$)/)
+        voteCards.first().getByText(/^(Next result |Voting ends |Voting open$)/)
       ).toBeVisible();
     }
     await expectNoHorizontalOverflow(page);
