@@ -146,11 +146,10 @@ it("keeps the chosen recipient in the unified composer when they need an unencry
       .mocked(createDirectMessageWave)
       .mockRejectedValueOnce(new Error("Request failed"));
     fireEvent.click(fallback);
-    await waitFor(() =>
-      expect(mockToast).toHaveBeenCalledWith(
-        expect.objectContaining({ type: "error" })
-      )
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Request failed"
     );
+    expect(mockToast).not.toHaveBeenCalled();
     expect(fallback).toBeEnabled();
     expect(screen.getByRole("button", { name: "Remove alice" })).toBeVisible();
 
@@ -161,6 +160,7 @@ it("keeps the chosen recipient in the unified composer when they need an unencry
     });
     expect(mockPush).toHaveBeenCalledWith("/messages/dm-1");
     expect(fallback).toBeEnabled();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   } finally {
     now.mockRestore();
   }

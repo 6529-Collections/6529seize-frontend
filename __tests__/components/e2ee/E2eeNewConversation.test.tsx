@@ -249,7 +249,7 @@ function pick(...handles: string[]) {
 function PlaintextCapableForm({
   create,
 }: {
-  readonly create: (wallets: string[]) => Promise<boolean>;
+  readonly create: (wallets: string[]) => Promise<string | null>;
 }) {
   return <NewMessageForm e2ee={useE2ee()} createUnencrypted={create} />;
 }
@@ -390,7 +390,7 @@ describe("unified new message", () => {
       { profileId: ALICE_ID, status: "OK" },
       { profileId: BOB_ID, status: "NO_DEVICES" },
     ]);
-    const create = jest.fn(async () => false);
+    const create = jest.fn(async () => "Request failed");
     render(
       <E2eeTestProvider value={contextFor(engine)}>
         <PlaintextCapableForm create={create} />
@@ -416,12 +416,16 @@ describe("unified new message", () => {
       identity(ALICE_ID, "alice").wallet,
       identity(BOB_ID, "bob").wallet,
     ]);
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Request failed"
+    );
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: "Use encrypted chat" })
       ).toBeEnabled()
     );
     fireEvent.click(screen.getByRole("button", { name: "Use encrypted chat" }));
+    expect(screen.queryByText("Request failed")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Group name (optional)")).toHaveValue(
       "Design review"
     );
@@ -444,7 +448,7 @@ describe("unified new message", () => {
       jest
         .mocked(engine.checkEligibility)
         .mockResolvedValue([{ profileId: ALICE_ID, status }]);
-      const create = jest.fn(async () => true);
+      const create = jest.fn(async () => null);
       render(
         <E2eeTestProvider value={contextFor(engine)}>
           <PlaintextCapableForm create={create} />
@@ -481,7 +485,7 @@ describe("unified new message", () => {
     jest
       .mocked(engine.checkEligibility)
       .mockResolvedValue([{ profileId: ALICE_ID, status: "NO_DEVICES" }]);
-    const create = jest.fn(async () => true);
+    const create = jest.fn(async () => null);
     render(
       <E2eeTestProvider value={contextFor(engine)}>
         <PlaintextCapableForm create={create} />

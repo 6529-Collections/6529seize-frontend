@@ -107,7 +107,8 @@ identities.
 
 - If search returns no rows, refine the query and keep typing.
 - If search fails, use `Retry search`. Selected recipients stay in place.
-- Creation failures also keep the selection so it can be adjusted or retried.
+- The unified composer shows creation failures in the form and keeps the
+  selection so it can be adjusted or retried.
 - If a recipient does not accept a new direct message from the creator, the UI
   explains that recipient's policy, for example "@alice only accepts new direct
   messages from members of a group they chose". The group is named only when

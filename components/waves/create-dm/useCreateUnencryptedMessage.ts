@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/components/auth/Auth";
 import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { getDirectMessageAdmissionErrorMessage } from "@/helpers/waves/direct-message-admission.helpers";
@@ -13,26 +12,20 @@ import { t } from "@/i18n/messages";
 export function useCreateUnencryptedMessage(onSuccess?: () => void) {
   const router = useRouter();
   const { isApp } = useDeviceInfo();
-  const { setToast } = useAuth();
   const locale = useBrowserLocale();
 
-  return async (addresses: string[]): Promise<boolean> => {
+  return async (addresses: string[]): Promise<string | null> => {
     try {
       const wave = await createDirectMessageWave({ addresses });
       onSuccess?.();
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
-      return true;
+      return null;
     } catch (error) {
-      const description =
+      return (
         getDirectMessageAdmissionErrorMessage(locale, error) ??
         getToastErrorDetails(error) ??
-        t(locale, "profilePreferences.dm.createRetry");
-      setToast({
-        type: "error",
-        title: t(locale, "quickDm.createError"),
-        description,
-      });
-      return false;
+        t(locale, "profilePreferences.dm.createRetry")
+      );
     }
   };
 }

@@ -1,5 +1,5 @@
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDate, formatTime } from "@/i18n/format";
+import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { E2eeConversation } from "@/lib/e2ee/types";
 import { getConversationTitle } from "../e2eeFormat";
@@ -54,8 +54,10 @@ export function ExistingGroupChoices({
               {getConversationTitle(locale, group, selfProfileId)}
               {several && (
                 <span className="tw-block tw-text-xs tw-text-iron-400">
-                  {formatDate(locale, group.updatedAt)} ·{" "}
-                  {formatTime(locale, group.updatedAt)}
+                  {formatDate(locale, group.updatedAt, {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                  })}
                 </span>
               )}
             </span>

@@ -40,9 +40,12 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const isTouchDevice = useIsTouchDevice();
   const locale = useBrowserLocale();
   const unifiedCompose = isE2eeEnabled();
-  const createLabel = unifiedCompose
-    ? t(locale, "quickDm.createModalTitle")
-    : "New direct message";
+  const createLabel = t(
+    locale,
+    unifiedCompose
+      ? "quickDm.createModalTitle"
+      : "quickDm.newDirectMessageAriaLabel"
+  );
 
   const shouldRenderCreateDirectMessage = !isApp;
 
@@ -76,7 +79,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
         sortedWaves={directMessages.list}
         isFetching={directMessages.isFetching}
         isFetchingNextPage={directMessages.isFetchingNextPage}
-        emptyMessage="No direct messages yet"
+        emptyMessage={t(locale, "quickDm.emptyTitle")}
       />
     );
   } else {
@@ -166,7 +169,7 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
           >
             {!isCollapsed && (
               <span className="tw-text-xl tw-font-semibold tw-text-iron-50">
-                Messages
+                {t(locale, "quickDm.listTitle")}
               </span>
             )}
             {shouldRenderCreateDirectMessage && (

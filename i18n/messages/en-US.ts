@@ -1499,6 +1499,7 @@ const QUICK_DM_MESSAGES = objectMessages("quickDm", {
   chatTitleFallback: "Messages",
   closeAriaLabel: "Close quick direct messages",
   newDirectMessageAriaLabel: "New direct message",
+  createDmLabel: "Create DM",
   createModalTitle: "New message",
   recipientLabel: "To:",
   recipientAddMore: "Add more",

@@ -168,10 +168,15 @@ function UnencryptedDirectMessage({
     if (creatingRef.current || selectedIdentities.length === 0) return;
     creatingRef.current = true;
     setIsCreating(true);
-    const created = await createUnencrypted(
+    const errorMessage = await createUnencrypted(
       selectedIdentities.map((person) => person.primary_wallet ?? person.wallet)
     );
-    if (!created) {
+    if (errorMessage !== null) {
+      setToast({
+        type: "error",
+        title: t(locale, "quickDm.createError"),
+        description: errorMessage,
+      });
       setIsCreating(false);
       creatingRef.current = false;
     }

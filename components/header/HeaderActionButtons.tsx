@@ -61,9 +61,10 @@ function HeaderActionButtonsContent() {
   }
 
   if (showMessagesButton) {
-    const label = unifiedCompose
-      ? t(locale, "quickDm.createModalTitle")
-      : "Create DM";
+    const label = t(
+      locale,
+      unifiedCompose ? "quickDm.createModalTitle" : "quickDm.createDmLabel"
+    );
     const icon = unifiedCompose ? (
       <PlusIcon aria-hidden="true" className="tw-size-5 tw-flex-shrink-0" />
     ) : (

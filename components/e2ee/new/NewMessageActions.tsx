@@ -17,7 +17,7 @@ export function NewMessageActions({
   canSubmit,
   creating,
   encrypted,
-  errorKey,
+  errorMessage,
   warning,
   alternateActions,
   onCancel,
@@ -26,7 +26,7 @@ export function NewMessageActions({
   readonly canSubmit: boolean;
   readonly creating: boolean;
   readonly encrypted: boolean;
-  readonly errorKey: MessageKey | null;
+  readonly errorMessage: string | null;
   readonly warning: "blocked" | "closed" | "retention" | null;
   readonly alternateActions: readonly NewMessageAlternateAction[];
   readonly onCancel: (() => void) | undefined;
@@ -50,9 +50,9 @@ export function NewMessageActions({
       className={`tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-pt-3 ${isKeyboardVisible ? "tw-pb-2" : "tw-pb-[max(0.75rem,env(safe-area-inset-bottom))]"}`}
     >
       {warningText && <E2eeBanner tone="warning">{warningText}</E2eeBanner>}
-      {errorKey && (
+      {errorMessage && (
         <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
-          {t(locale, errorKey)}
+          {errorMessage}
         </p>
       )}
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">

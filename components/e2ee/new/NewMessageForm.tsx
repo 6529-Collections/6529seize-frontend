@@ -51,7 +51,7 @@ interface NewMessageFormProps {
   readonly onCancel?: (() => void) | undefined;
   readonly onOpen?: (() => void) | undefined;
   readonly createUnencrypted?:
-    | ((wallets: string[]) => Promise<boolean>)
+    | ((wallets: string[]) => Promise<string | null>)
     | undefined;
 }
 
@@ -225,7 +225,7 @@ export function NewMessageForm({
   const { forceGroup, chosenGroup, preferUnencrypted } = choice;
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
-  const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [notice, setNotice] = useState<MessageKey | null>(null);
 
   const hasRecipients = selected.length > 0;
@@ -267,7 +267,7 @@ export function NewMessageForm({
 
   const resetAction = () => {
     setChoice({ ...DEFAULT_CHOICE, forceGroup });
-    setErrorKey(null);
+    setErrorMessage(null);
     setNotice(null);
   };
 
@@ -312,11 +312,13 @@ export function NewMessageForm({
     }
     sending.current = true;
     setCreating(true);
-    setErrorKey(null);
+    setErrorMessage(null);
     try {
       if (useUnencrypted && createUnencrypted) {
         // The displayed eligibility can predate the cutoff at the time of the click.
-        if (!isLegacyDmClosed()) await createUnencrypted(wallets);
+        if (!isLegacyDmClosed()) {
+          setErrorMessage(await createUnencrypted(wallets));
+        }
         return;
       }
       if (engine && allEligible) {
@@ -329,7 +331,9 @@ export function NewMessageForm({
         openChat(g);
       }
     } catch (error) {
-      setErrorKey(getE2eeActionErrorKey(error, "e2ee.new.createFailed"));
+      setErrorMessage(
+        t(locale, getE2eeActionErrorKey(error, "e2ee.new.createFailed"))
+      );
       const code = getE2eeErrorCode(error);
       if (
         code === "E2EE_POLICY" ||
@@ -357,7 +361,10 @@ export function NewMessageForm({
     showLegacyChoice,
     useUnencrypted,
     choice,
-    setChoice,
+    setChoice: (nextChoice) => {
+      setChoice(nextChoice);
+      setErrorMessage(null);
+    },
   });
 
   return (
@@ -452,7 +459,7 @@ export function NewMessageForm({
         canSubmit={canSubmit}
         creating={creating}
         encrypted={allEligible || openingExisting}
-        errorKey={errorKey}
+        errorMessage={errorMessage}
         warning={warning}
         alternateActions={alternateActions}
         onCancel={onCancel}
