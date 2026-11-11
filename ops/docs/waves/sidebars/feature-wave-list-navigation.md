@@ -41,10 +41,10 @@ Wave and DM rows in the left list control which thread is open.
   later messages do not scroll to it again.
 - On desktop pointer devices, the Waves list uses a slim iron scrollbar for
   dragging and track clicks. Touch devices keep their native scrolling behavior.
-- `All`, `Pinned`, and `Joined` are peer collections in a compact dark segmented
-  group with a subtle inset outline and a filled selected option. Small-screen
-  and touch layouts use larger tab targets. The search icon on the right is
-  transparent at rest and gains a dark background on hover. Switch directly without
+- `All`, `Pinned`, and `Joined` are equally wide collections in a dark segmented
+  group that fills the row beside search, with a subtle inset outline and a
+  filled selected option. Tabs have a 44px minimum height. The search icon on the
+  right is transparent at rest and gains a dark background on hover. Switch directly without
   scrolling through pinned waves.
   Each collection remembers its scroll position; selecting another wave enables
   active-row reveal again. Signed-out visitors see an `All Waves` label on the

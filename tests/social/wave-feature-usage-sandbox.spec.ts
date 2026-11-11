@@ -249,7 +249,6 @@ test("foreground visibility signals and an occluding overlay interrupt exposure 
 
 test("sidebar collection and search controls count deliberate use without query content", async ({
   page,
-  isMobile,
 }) => {
   await page.goto("/waves/private-wave");
   await page
@@ -270,15 +269,31 @@ test("sidebar collection and search controls count deliberate use without query 
   });
   await expect(allCollection).toHaveCSS("font-size", "13px");
   await expect(allCollection).toHaveCSS("font-weight", "500");
-  await expect(allCollection).toHaveCSS(
-    "min-height",
-    isMobile ? "44px" : "34px"
-  );
+  await expect(allCollection).toHaveCSS("min-height", "44px");
   await expect(allCollection).toHaveCSS("background-color", "rgb(38, 39, 43)");
   const searchButton = page.getByRole("button", {
     name: "Find a wave…",
     exact: true,
   });
+  const collectionLayout = await collectionFilter.evaluate((group) => {
+    const row = group.parentElement!;
+    const groupBounds = group.getBoundingClientRect();
+    const searchBounds = group.nextElementSibling!.getBoundingClientRect();
+    const widths = [...group.querySelectorAll("button")].map(
+      (tab) => tab.getBoundingClientRect().width
+    );
+    return {
+      unusedSpace:
+        searchBounds.left -
+        groupBounds.right -
+        Number.parseFloat(getComputedStyle(row).columnGap),
+      widthDifference: Math.max(...widths) - Math.min(...widths),
+      overflow: row.scrollWidth - row.clientWidth,
+    };
+  });
+  expect(collectionLayout.unusedSpace).toBeCloseTo(0, 0);
+  expect(collectionLayout.widthDifference).toBeLessThanOrEqual(1);
+  expect(collectionLayout.overflow).toBeLessThanOrEqual(0);
   const searchSurface = page
     .getByRole("button", { name: "Find a wave…", exact: true })
     .locator(":scope > span");

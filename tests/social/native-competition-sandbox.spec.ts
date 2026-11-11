@@ -3269,30 +3269,39 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(selectAll).toBeVisible();
       await expect(resetVotes).toHaveCount(0);
       await page.mouse.move(0, 0);
-      const createStyle = await page
-        .getByRole("button", { name: "Open create menu", exact: true })
-        .evaluate((button) => {
-          const style = getComputedStyle(button.querySelector("span")!);
-          return Object.fromEntries(
-            [
-              "height",
-              "background-color",
-              "border-color",
-              "border-radius",
-              "font-size",
-              "font-weight",
-              "padding-left",
-              "padding-right",
-              "color",
-            ].map((property) => [property, style.getPropertyValue(property)])
-          );
-        });
+      // My Votes keeps the bordered secondary surface; Create is now a ghost action.
+      await expect(
+        panel
+          .getByRole("button", { name: "Select all", exact: true })
+          .locator("span")
+      ).toHaveCSS("background-color", "rgb(28, 28, 33)");
+      await expect(
+        panel
+          .getByRole("button", { name: "Select all", exact: true })
+          .locator("span")
+      ).toHaveCSS("border-top-width", "1px");
+      const selectionStyle = await selectAll.evaluate((button) => {
+        const style = getComputedStyle(button.querySelector("span")!);
+        return Object.fromEntries(
+          [
+            "height",
+            "background-color",
+            "border-color",
+            "border-radius",
+            "font-size",
+            "font-weight",
+            "padding-left",
+            "padding-right",
+            "color",
+          ].map((property) => [property, style.getPropertyValue(property)])
+        );
+      });
       await selectAll.click();
       // Compare resting styles, not the hover state left by the selection click.
       await page.mouse.move(0, 0);
       for (const name of ["Deselect all", "Reset 1 vote"]) {
         const action = panel.getByRole("button", { name, exact: true });
-        for (const [property, value] of Object.entries(createStyle)) {
+        for (const [property, value] of Object.entries(selectionStyle)) {
           await expect(
             panel.getByRole("button", { name, exact: true }).locator("span")
           ).toHaveCSS(property, value);
@@ -7302,20 +7311,25 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       .getByRole("button", { name: "Find a wave…", exact: true })
       .filter({ visible: true })
       .locator("span");
-    await expect(filters).toHaveCSS("height", app ? "40px" : "36px");
+    await expect(filters).toHaveCSS("height", "50px");
     await expect(searchSurface).toHaveCSS("height", app ? "40px" : "36px");
     await expect
       .poll(async () => {
         const filterBox = await filters.boundingBox();
         const searchBox = await searchSurface.boundingBox();
         return filterBox && searchBox
-          ? Math.abs(filterBox.y - searchBox.y)
+          ? Math.abs(
+              filterBox.y +
+                filterBox.height / 2 -
+                (searchBox.y + searchBox.height / 2)
+            )
           : Number.POSITIVE_INFINITY;
       })
       .toBeLessThanOrEqual(1);
     if (app) await expect(search).toHaveCSS("height", "44px");
     for (const name of ["Pinned", "Joined", "All"]) {
       const filter = filters.getByRole("button", { name, exact: true });
+      await expect(filter).toHaveCSS("height", "44px");
       await filter.click();
       await expect(filter).toHaveAttribute("aria-pressed", "true");
     }
