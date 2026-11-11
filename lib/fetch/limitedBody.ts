@@ -153,15 +153,28 @@ async function cancelReader(
   }
 }
 
+type ReadLimitedTextOptions = {
+  /**
+   * Return the first `maxBytes` bytes and stop reading, instead of rejecting
+   * a longer body. Suits documents whose useful part comes first, such as the
+   * metadata in an HTML head.
+   */
+  readonly truncate?: boolean | undefined;
+};
+
 /**
  * Reads a Web body stream as text while enforcing a maximum byte count.
  */
 export async function readLimitedText(
   source: BodySource,
-  maxBytes: number
+  maxBytes: number,
+  options: ReadLimitedTextOptions = {}
 ): Promise<string> {
+  const truncate = options.truncate === true;
   if (!source.body) {
-    assertReadableSize(source.headers, maxBytes);
+    if (!truncate) {
+      assertReadableSize(source.headers, maxBytes);
+    }
     return "";
   }
 
@@ -171,11 +184,13 @@ export async function readLimitedText(
   let text = "";
 
   try {
-    try {
-      assertReadableSize(source.headers, maxBytes);
-    } catch (error) {
-      await cancelReader(reader);
-      throw error;
+    if (!truncate) {
+      try {
+        assertReadableSize(source.headers, maxBytes);
+      } catch (error) {
+        await cancelReader(reader);
+        throw error;
+      }
     }
     while (true) {
       const { done, value } = await reader.read();
@@ -187,10 +202,17 @@ export async function readLimitedText(
         continue;
       }
 
+      const remainingBytes = maxBytes - totalBytes;
       totalBytes += value.byteLength;
       if (totalBytes > maxBytes) {
         await cancelReader(reader);
-        throw new BodyTooLargeError(maxBytes);
+        if (!truncate) {
+          throw new BodyTooLargeError(maxBytes);
+        }
+        text += decoder.decode(value.subarray(0, remainingBytes), {
+          stream: true,
+        });
+        break;
       }
 
       text += decoder.decode(value, { stream: true });

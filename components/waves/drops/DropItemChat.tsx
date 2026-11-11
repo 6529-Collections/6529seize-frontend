@@ -2,7 +2,7 @@ import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { removeBaseEndpoint } from "@/helpers/Helpers";
+import { getInternalLinkPath } from "@/helpers/internalLink";
 import { useDrop } from "@/hooks/useDrop";
 import Link from "next/link";
 import ChatItemHrefButtons from "../ChatItemHrefButtons";
@@ -18,7 +18,14 @@ export default function DropItemChat({
 }) {
   const { isMemesSubmission } = useSeizeSettings();
   const { drop } = useDrop({ dropId });
-  const relativeLink = removeBaseEndpoint(href);
+  const internalLink = getInternalLinkPath(href);
+  const linkProps = internalLink
+    ? { href: internalLink }
+    : {
+        href,
+        target: "_blank",
+        rel: "noopener noreferrer nofollow",
+      };
   const artworkMedia = drop?.parts?.at(0)?.media?.at(0);
 
   const title =
@@ -27,7 +34,7 @@ export default function DropItemChat({
   const canOpenDrop = drop?.drop_type !== ApiDropType.Chat;
 
   if (!drop) {
-    return <Link href={relativeLink}>{href}</Link>;
+    return <Link {...linkProps}>{href}</Link>;
   }
 
   return (
@@ -45,7 +52,7 @@ export default function DropItemChat({
               )}
               <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100 sm:tw-text-lg">
                 {canOpenDrop ? (
-                  <Link className="tw-no-underline" href={relativeLink}>
+                  <Link className="tw-no-underline" {...linkProps}>
                     {title}
                   </Link>
                 ) : (
@@ -60,7 +67,7 @@ export default function DropItemChat({
           {drop && (
             <>
               <span className="tw-leading-0 -tw-mt-1 tw-mb-0 tw-text-[11px] tw-text-iron-500 tw-no-underline tw-transition tw-duration-300 tw-ease-out">
-                <Link className="tw-no-underline" href={relativeLink}>
+                <Link className="tw-no-underline" {...linkProps}>
                   {drop.wave.name}
                 </Link>
               </span>
@@ -82,7 +89,10 @@ export default function DropItemChat({
           )}
         </div>
       </div>
-      <ChatItemHrefButtons href={href} relativeHref={relativeLink} />
+      <ChatItemHrefButtons
+        href={href}
+        relativeHref={internalLink ?? undefined}
+      />
     </div>
   );
 }

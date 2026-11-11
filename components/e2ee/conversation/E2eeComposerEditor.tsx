@@ -13,10 +13,6 @@ import {
   type EditorState,
   type RangeSelection,
 } from "lexical";
-import {
-  $convertFromMarkdownString,
-  $convertToMarkdownString,
-} from "@lexical/markdown";
 import { EditorRefPlugin } from "@lexical/react/LexicalEditorRefPlugin";
 import {
   ComposerEditor,
@@ -24,7 +20,11 @@ import {
 } from "@/components/composer/ComposerEditor";
 import { ComposerEmojiContext } from "@/components/composer/ComposerEmojiContext";
 import ExampleTheme from "@/components/drops/create/lexical/ExampleTheme";
-import { E2EE_COMPOSER_TRANSFORMERS } from "./e2eeComposerTransformers";
+import {
+  E2EE_COMPOSER_TRANSFORMERS,
+  exportE2eeComposerMarkdown,
+  importE2eeComposerMarkdown,
+} from "./e2eeComposerTransformers";
 import EnterKeyPlugin from "@/components/drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import EditLastDropArrowUpPlugin from "@/components/waves/EditLastDropArrowUpPlugin";
 import { E2eeComposerEmojiPicker } from "./E2eeEmojiPicker";
@@ -96,11 +96,10 @@ export const E2eeComposerEditor = forwardRef<
     () => ({
       focus: () => editorRef.current?.focus(),
       blur: () => editorRef.current?.blur(),
-      getText: () =>
-        editorRef.current
-          ?.getEditorState()
-          .read(() => $convertToMarkdownString(E2EE_COMPOSER_TRANSFORMERS)) ??
-        "",
+      getText: () => {
+        const state = editorRef.current?.getEditorState();
+        return state ? exportE2eeComposerMarkdown(state) : "";
+      },
       replaceMention: (handle: string) =>
         editorRef.current?.update(() => {
           const selection = $getSelection();
@@ -119,10 +118,9 @@ export const E2eeComposerEditor = forwardRef<
     []
   );
 
-  const onEditorState = (state: EditorState) =>
+  const onEditorState = (state: EditorState) => {
+    props.onChange(exportE2eeComposerMarkdown(state));
     state.read(() => {
-      const markdown = $convertToMarkdownString(E2EE_COMPOSER_TRANSFORMERS);
-      props.onChange(markdown);
       const selection = $getSelection();
       if (
         $isRangeSelection(selection) &&
@@ -136,6 +134,7 @@ export const E2eeComposerEditor = forwardRef<
         props.onSelection("", null);
       }
     });
+  };
 
   const rememberSelection = () =>
     editorRef.current?.getEditorState().read(() => {
@@ -190,8 +189,7 @@ export const E2eeComposerEditor = forwardRef<
           namespace: "Encrypted message",
           nodes: COMPOSER_RICH_TEXT_NODES,
           theme: ExampleTheme,
-          editorState: () =>
-            $convertFromMarkdownString(props.value, E2EE_COMPOSER_TRANSFORMERS),
+          editorState: () => importE2eeComposerMarkdown(props.value),
           onError: (error) => {
             throw error;
           },

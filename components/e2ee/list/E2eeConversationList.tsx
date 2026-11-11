@@ -22,6 +22,7 @@ import {
   getDmPeer,
   getMemberName,
   getMessagePreview,
+  isUnpairedDm,
   tCount,
 } from "../e2eeFormat";
 import { useMutedE2eeChats } from "../e2eeMutedChats";
@@ -45,7 +46,10 @@ function ConversationAvatar({
   readonly title: string;
 }) {
   const peer = getDmPeer(conversation, selfProfileId);
-  if (peer || conversation.kind === "dm") {
+  if (
+    peer ||
+    (conversation.kind === "dm" && !isUnpairedDm(conversation, selfProfileId))
+  ) {
     return (
       <E2eeAvatar
         pfp={peer?.pfp ?? null}
@@ -104,7 +108,9 @@ function getRowPreview(
     message?.kind !== "message" ||
     message.deleted ||
     message.undecryptable ||
-    (conversation.kind !== "group" && message.senderProfileId !== selfProfileId)
+    (conversation.kind !== "group" &&
+      !isUnpairedDm(conversation, selfProfileId) &&
+      message.senderProfileId !== selfProfileId)
   ) {
     return preview;
   }

@@ -5,6 +5,7 @@ import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: () => ({
+    emojiMap: [],
     findNativeEmoji: () => null,
     loadEmojiData: () => Promise.resolve(),
   }),
@@ -103,5 +104,33 @@ describe("ShareDropsImageDialog status line", () => {
     await user.click(screen.getByRole("button", { name: "Copy text" }));
 
     expect(screen.getByRole("status")).toHaveTextContent("Text copied");
+  });
+
+  it("fits the preview card to a narrow preview area", () => {
+    // The dialog measures once on mount; the observer only has to exist.
+    const original = globalThis.ResizeObserver;
+    globalThis.ResizeObserver = class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    } as unknown as typeof ResizeObserver;
+    const width = jest
+      .spyOn(HTMLElement.prototype, "clientWidth", "get")
+      .mockReturnValue(270);
+    const height = jest
+      .spyOn(HTMLElement.prototype, "offsetHeight", "get")
+      .mockReturnValue(600);
+    try {
+      renderDialog();
+      const preview = screen.getByRole("region", { name: "Preview" });
+      const sizer = preview.firstElementChild?.firstElementChild as HTMLElement;
+      // Half of the 540px card fits 270px; the height follows the scale.
+      expect(sizer.style.width).toBe("270px");
+      expect(sizer.style.height).toBe("300px");
+    } finally {
+      width.mockRestore();
+      height.mockRestore();
+      globalThis.ResizeObserver = original;
+    }
   });
 });

@@ -7,6 +7,7 @@ import { isForbiddenAddress, parseIpv6Groups } from "@/lib/security/urlGuard";
 const DEFAULT_MAX_BUCKETS = 10_000;
 const UNIDENTIFIED_CLIENT_KEY = "unidentified";
 const UNIDENTIFIED_LIMIT_MULTIPLIER = 10;
+const OVERFLOW_LIMIT_MULTIPLIER = 10;
 const IPV6_PREFIX_GROUPS = 4;
 
 type RateLimitBucket = {
@@ -103,6 +104,10 @@ function getClientKey(headers: Headers): string | null {
  * Fixed-window, per-client limiter held in this server process. Requests
  * without a public client address (local development, internal callers)
  * share one larger budget.
+ *
+ * The table holds at most `maxBuckets` live windows and never drops a live
+ * window to make room. While it is full, new clients share one overflow
+ * budget (ten times the per-client limit) until windows expire.
  */
 export function createClientRateLimiter({
   limit,
@@ -111,6 +116,7 @@ export function createClientRateLimiter({
   maxBuckets = DEFAULT_MAX_BUCKETS,
 }: ClientRateLimiterOptions) {
   const buckets = new Map<string, RateLimitBucket>();
+  let overflow: RateLimitBucket = { count: 0, resetAt: 0 };
 
   function pruneExpiredBuckets(now: number): void {
     // Buckets are inserted when their window opens, so the oldest come first.
@@ -122,18 +128,23 @@ export function createClientRateLimiter({
     }
   }
 
-  function openBucket(key: string, now: number): RateLimitBucket {
+  /** Opens a window for `key`, or returns null when the table is full. */
+  function openBucket(key: string, now: number): RateLimitBucket | null {
+    // Expired buckets were pruned already, so every remaining one is live.
     buckets.delete(key);
-    while (buckets.size >= maxBuckets) {
-      const oldest = buckets.keys().next();
-      if (oldest.done) {
-        break;
-      }
-      buckets.delete(oldest.value);
+    if (buckets.size >= maxBuckets) {
+      return null;
     }
     const bucket: RateLimitBucket = { count: 0, resetAt: now + windowMs };
     buckets.set(key, bucket);
     return bucket;
+  }
+
+  function overflowBucket(now: number): RateLimitBucket {
+    if (overflow.resetAt <= now) {
+      overflow = { count: 0, resetAt: now + windowMs };
+    }
+    return overflow;
   }
 
   return function enforceClientRateLimit(
@@ -145,10 +156,14 @@ export function createClientRateLimiter({
 
     const clientKey = getClientKey(request.headers);
     const key = clientKey ?? UNIDENTIFIED_CLIENT_KEY;
-    const budget = clientKey ? limit : limit * UNIDENTIFIED_LIMIT_MULTIPLIER;
     const existing = buckets.get(key);
-    const bucket =
+    const tracked =
       existing && existing.resetAt > now ? existing : openBucket(key, now);
+    const bucket = tracked ?? overflowBucket(now);
+    let budget = clientKey ? limit : limit * UNIDENTIFIED_LIMIT_MULTIPLIER;
+    if (!tracked) {
+      budget = limit * OVERFLOW_LIMIT_MULTIPLIER;
+    }
 
     if (bucket.count + cost <= budget) {
       bucket.count += cost;

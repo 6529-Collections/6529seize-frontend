@@ -324,16 +324,6 @@ describe("more helper utilities", () => {
     expect(text).toContain("Jan");
     expect(printMintDate()).toBe("-");
   });
-
-  test("removeBaseEndpoint strips prefix", () => {
-    jest.resetModules();
-    jest.doMock("@/config/env", () => ({
-      publicEnv: { BASE_ENDPOINT: "https://api.example.com" },
-    }));
-
-    const { removeBaseEndpoint } = require("@/helpers/Helpers");
-    expect(removeBaseEndpoint("https://api.example.com/path")).toBe("/path");
-  });
 });
 
 describe("parseEmojis", () => {

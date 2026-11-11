@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import type { EmojiCategory } from "@/contexts/EmojiContext";
+import type { EmojiMartData } from "@emoji-mart/data";
 import {
   E2EE_EMOJI_PACK_PATH,
   parseE2eeEmojiPack,
@@ -18,22 +19,44 @@ import {
 
 interface EmojiState {
   readonly emojis: readonly E2eeCustomEmoji[];
+  readonly native: ReadonlyMap<string, string>;
   readonly failed: boolean;
 }
 interface EmojiContextValue {
   readonly sources: ReadonlyMap<string, string>;
+  readonly native: ReadonlyMap<string, string>;
   readonly categories: EmojiCategory[];
   readonly failed: boolean;
   readonly retry: () => void;
 }
-const EMPTY: EmojiState = { emojis: [], failed: false };
+const EMPTY: EmojiState = { emojis: [], native: new Map(), failed: false };
 const E2eeEmojiContext = createContext<EmojiContextValue>({
   sources: new Map(),
+  native: new Map(),
   categories: [],
   failed: false,
   retry: () => undefined,
 });
 let pack: Promise<E2eeCustomEmoji[]> | null = null;
+let nativePack: Promise<ReadonlyMap<string, string>> | null = null;
+
+async function loadNativePack(): Promise<ReadonlyMap<string, string>> {
+  const nativeModule = await import("@emoji-mart/data");
+  // This is the version-pinned, bundled package, never message-provided data.
+  const data = (
+    "default" in nativeModule ? nativeModule.default : nativeModule
+  ) as EmojiMartData;
+  const native = new Map<string, string>();
+  for (const [id, emoji] of Object.entries(data.emojis)) {
+    const glyph = emoji.skins[0]?.native;
+    if (glyph) native.set(id, glyph);
+  }
+  for (const [alias, id] of Object.entries(data.aliases)) {
+    const glyph = native.get(id);
+    if (glyph) native.set(alias, glyph);
+  }
+  return native;
+}
 
 async function fetchPack(): Promise<E2eeCustomEmoji[]> {
   const response = await fetch(E2EE_EMOJI_PACK_PATH, {
@@ -44,7 +67,7 @@ async function fetchPack(): Promise<E2eeCustomEmoji[]> {
   return parseE2eeEmojiPack(await response.json());
 }
 
-/** Loading depends only on mounting encrypted chat UI, never on message contents. */
+/** Load the whole catalog when chat or notification UI mounts, never by shortcode. */
 export function E2eeEmojiProvider({
   children,
 }: {
@@ -58,11 +81,15 @@ export function E2eeEmojiProvider({
     const load = async () => {
       try {
         pack ??= fetchPack();
-        const emojis = await pack;
-        if (current) setState({ emojis, failed: false });
+        nativePack ??= loadNativePack().catch(() => {
+          nativePack = null;
+          return new Map<string, string>();
+        });
+        const [emojis, native] = await Promise.all([pack, nativePack]);
+        if (current) setState({ emojis, native, failed: false });
       } catch {
         pack = null;
-        if (current) setState({ emojis: [], failed: true });
+        if (current) setState({ ...EMPTY, failed: true });
       }
     };
     void load();
@@ -73,6 +100,7 @@ export function E2eeEmojiProvider({
   const value = useMemo<EmojiContextValue>(
     () => ({
       sources: new Map(state.emojis.map(({ id, src }) => [id, src])),
+      native: state.native,
       categories: [
         {
           id: "6529",

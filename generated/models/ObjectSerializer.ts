@@ -14,6 +14,7 @@ export * from '../models/ApiAlchemyContractMetadataBatchRequest';
 export * from '../models/ApiAlchemyContractMetadataBatchResponse';
 export * from '../models/ApiAlchemyContractMetadataRequest';
 export * from '../models/ApiAlchemyContractMetadataResult';
+export * from '../models/ApiAllWavesPage';
 export * from '../models/ApiAppDeviceGrant';
 export * from '../models/ApiArchiveProfileCmsPackageRequest';
 export * from '../models/ApiArtistArtworkAlert';
@@ -362,6 +363,7 @@ export * from '../models/ApiDeleteMyWaveChatHistoryResponse';
 export * from '../models/ApiDeviceGrant';
 export * from '../models/ApiDeviceGrantFields';
 export * from '../models/ApiDeviceGrantProof';
+export * from '../models/ApiDeviceSecurityNotice';
 export * from '../models/ApiDeviceSignature';
 export * from '../models/ApiDeviceSignedEvent';
 export * from '../models/ApiDeviceSignedWriteRequest';
@@ -414,6 +416,7 @@ export * from '../models/ApiDropResolvedIdentityProfileV2';
 export * from '../models/ApiDropSearchPage';
 export * from '../models/ApiDropSearchStrategy';
 export * from '../models/ApiDropSignedEvents';
+export * from '../models/ApiDropSignedEventsBatch';
 export * from '../models/ApiDropSubscriptionActions';
 export * from '../models/ApiDropSubscriptionTargetAction';
 export * from '../models/ApiDropTraceItem';
@@ -1006,6 +1009,7 @@ import { ApiAlchemyContractMetadataBatchRequest } from '../models/ApiAlchemyCont
 import { ApiAlchemyContractMetadataBatchResponse } from '../models/ApiAlchemyContractMetadataBatchResponse';
 import { ApiAlchemyContractMetadataRequest , ApiAlchemyContractMetadataRequestChainEnum   } from '../models/ApiAlchemyContractMetadataRequest';
 import { ApiAlchemyContractMetadataResult , ApiAlchemyContractMetadataResultChainEnum      } from '../models/ApiAlchemyContractMetadataResult';
+import { ApiAllWavesPage } from '../models/ApiAllWavesPage';
 import { ApiAppDeviceGrant } from '../models/ApiAppDeviceGrant';
 import { ApiArchiveProfileCmsPackageRequest } from '../models/ApiArchiveProfileCmsPackageRequest';
 import { ApiArtistArtworkAlert } from '../models/ApiArtistArtworkAlert';
@@ -1354,6 +1358,7 @@ import { ApiDeleteMyWaveChatHistoryResponse } from '../models/ApiDeleteMyWaveCha
 import { ApiDeviceGrant } from '../models/ApiDeviceGrant';
 import { ApiDeviceGrantFields } from '../models/ApiDeviceGrantFields';
 import { ApiDeviceGrantProof } from '../models/ApiDeviceGrantProof';
+import { ApiDeviceSecurityNotice } from '../models/ApiDeviceSecurityNotice';
 import { ApiDeviceSignature } from '../models/ApiDeviceSignature';
 import { ApiDeviceSignedEvent } from '../models/ApiDeviceSignedEvent';
 import { ApiDeviceSignedWriteRequest } from '../models/ApiDeviceSignedWriteRequest';
@@ -1406,6 +1411,7 @@ import { ApiDropResolvedIdentityProfileV2             } from '../models/ApiDropR
 import { ApiDropSearchPage } from '../models/ApiDropSearchPage';
 import { ApiDropSearchStrategy } from '../models/ApiDropSearchStrategy';
 import { ApiDropSignedEvents } from '../models/ApiDropSignedEvents';
+import { ApiDropSignedEventsBatch } from '../models/ApiDropSignedEventsBatch';
 import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions';
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
@@ -1446,7 +1452,7 @@ import { ApiE2eeCompactBackupRequest } from '../models/ApiE2eeCompactBackupReque
 import { ApiE2eeCreateBackupRequest } from '../models/ApiE2eeCreateBackupRequest';
 import { ApiE2eeCreateBlobRequest } from '../models/ApiE2eeCreateBlobRequest';
 import { ApiE2eeCreateGroupRequest } from '../models/ApiE2eeCreateGroupRequest';
-import { ApiE2eeDevice     , ApiE2eeDeviceVerifiedViaEnum          } from '../models/ApiE2eeDevice';
+import { ApiE2eeDevice     , ApiE2eeDeviceVerifiedViaEnum           } from '../models/ApiE2eeDevice';
 import { ApiE2eeDeviceGrant } from '../models/ApiE2eeDeviceGrant';
 import { ApiE2eeDeviceGroup } from '../models/ApiE2eeDeviceGroup';
 import { ApiE2eeDeviceLookupRequest } from '../models/ApiE2eeDeviceLookupRequest';
@@ -2303,6 +2309,7 @@ let typeMap: {[index: string]: any} = {
     "ApiAlchemyContractMetadataBatchResponse": ApiAlchemyContractMetadataBatchResponse,
     "ApiAlchemyContractMetadataRequest": ApiAlchemyContractMetadataRequest,
     "ApiAlchemyContractMetadataResult": ApiAlchemyContractMetadataResult,
+    "ApiAllWavesPage": ApiAllWavesPage,
     "ApiAppDeviceGrant": ApiAppDeviceGrant,
     "ApiArchiveProfileCmsPackageRequest": ApiArchiveProfileCmsPackageRequest,
     "ApiArtistArtworkAlert": ApiArtistArtworkAlert,
@@ -2624,6 +2631,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDeviceGrant": ApiDeviceGrant,
     "ApiDeviceGrantFields": ApiDeviceGrantFields,
     "ApiDeviceGrantProof": ApiDeviceGrantProof,
+    "ApiDeviceSecurityNotice": ApiDeviceSecurityNotice,
     "ApiDeviceSignature": ApiDeviceSignature,
     "ApiDeviceSignedEvent": ApiDeviceSignedEvent,
     "ApiDeviceSignedWriteRequest": ApiDeviceSignedWriteRequest,
@@ -2671,6 +2679,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropResolvedIdentityProfileV2": ApiDropResolvedIdentityProfileV2,
     "ApiDropSearchPage": ApiDropSearchPage,
     "ApiDropSignedEvents": ApiDropSignedEvents,
+    "ApiDropSignedEventsBatch": ApiDropSignedEventsBatch,
     "ApiDropSubscriptionActions": ApiDropSubscriptionActions,
     "ApiDropTraceItem": ApiDropTraceItem,
     "ApiDropV2": ApiDropV2,

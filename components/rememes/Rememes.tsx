@@ -1,6 +1,7 @@
 "use client";
 
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
+import CollectionGridSkeleton from "@/components/collection-page/CollectionGridSkeleton";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import RememeImage from "@/components/nft-image/RememeImage";
@@ -299,7 +300,7 @@ export default function Rememes({
         <header className="tw-pb-5">
           <div className="tw-flex tw-flex-col tw-gap-4">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-              <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-2 sm:tw-w-auto sm:tw-justify-start">
+              <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-2 sm:tw-w-auto sm:tw-justify-start">
                 <div className="tw-hidden tw-min-w-0 tw-items-center tw-gap-2 xl:tw-flex">
                   <Image
                     unoptimized
@@ -319,7 +320,7 @@ export default function Rememes({
                     </span>
                   )}
                 </div>
-                <div className="tw-min-w-0 xl:tw-hidden">
+                <div className="tw-min-w-0 tw-max-w-full xl:tw-hidden [&>div>button]:tw-max-w-full">
                   <CollectionsDropdown
                     activePage="rememes"
                     variant="brand"
@@ -429,9 +430,12 @@ export default function Rememes({
         {rememesLoaded ? (
           printRememes()
         ) : (
-          <div className="tw-pt-3">
-            {t(locale, "rememes.loading.fetching")} <DotLoader />
-          </div>
+          <>
+            <div role="status" className="tw-sr-only">
+              {t(locale, "rememes.loading.fetching")} <DotLoader />
+            </div>
+            <CollectionGridSkeleton className={REMEMES_GRID_CLASS} />
+          </>
         )}
       </div>
       {totalResults > PAGE_SIZE && rememesLoaded && (
