@@ -147,7 +147,8 @@ export default function UserPageRepMobile({
 
       <MobileTabCards activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <AnimatePresence mode="wait">
+      {/* Keep the default REP panel visible while the section buttons hydrate. */}
+      <AnimatePresence initial={false} mode="wait">
         {activeTab === "rep" && (
           <motion.div
             role="region"
