@@ -201,6 +201,46 @@ describe("WaveDropsSearchModal", () => {
     });
   });
 
+  it("keeps adjacent repeated emoji segments uniquely keyed", () => {
+    const consoleError = jest.spyOn(console, "error");
+    try {
+      setHookResult({
+        drops: [
+          {
+            ...result,
+            parts: [
+              { content: ":el_fafo_angy::el_fafo_angy: modern :smile::smile:" },
+            ],
+          },
+        ],
+      });
+      render(
+        <WaveDropsSearchModal
+          isOpen
+          onClose={jest.fn()}
+          wave={wave}
+          onSelectSerialNo={jest.fn()}
+          onSearchAll={jest.fn()}
+        />
+      );
+      fireEvent.change(
+        screen.getByRole("combobox", { name: "Search messages" }),
+        { target: { value: "modern" } }
+      );
+      expect(
+        screen.getAllByRole("img", { name: ":el_fafo_angy:" })
+      ).toHaveLength(2);
+      expect(
+        screen.getByRole("button", { name: "Open message 42 by alice" })
+      ).toHaveTextContent("😄😄");
+      expect(consoleError.mock.calls.flat().join(" ")).not.toContain(
+        "same key"
+      );
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   it("names each result through one valid label id", () => {
     // Stable keys are raw hash bytes: they can hold white space and control
     // characters, which must not reach the id that names the result. Two

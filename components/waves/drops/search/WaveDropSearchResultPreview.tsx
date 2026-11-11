@@ -76,9 +76,9 @@ const highlightText = (
   query: string,
   renderEmojis = true
 ): ReactNode => {
-  const tokenParts = text.split(
-    renderEmojis ? TOKEN_PATTERN : LITERAL_TOKEN_PATTERN
-  );
+  const tokenParts = text
+    .split(renderEmojis ? TOKEN_PATTERN : LITERAL_TOKEN_PATTERN)
+    .filter(Boolean);
   let precedingText = "";
   return tokenParts.map((tokenPart) => {
     const isToken = TOKEN_PART_PATTERN.test(tokenPart);
