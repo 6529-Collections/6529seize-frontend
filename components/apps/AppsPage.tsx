@@ -3,7 +3,9 @@
 import {
   ComputerDesktopIcon,
   DevicePhoneMobileIcon,
+  ServerStackIcon,
 } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
@@ -65,6 +67,20 @@ export default function AppsPage() {
           >
             <DesktopAppDownloads />
           </AppPanel>
+
+          <Link
+            href="/validator"
+            aria-labelledby="6529-validator-heading"
+            aria-describedby="6529-validator-description"
+            className="tw-block tw-rounded-xl tw-no-underline tw-transition-colors hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400"
+          >
+            <AppPanel
+              id="6529-validator"
+              icon={ServerStackIcon}
+              title={t(APPS_LOCALE, "apps.validator.title")}
+              description={t(APPS_LOCALE, "apps.validator.description")}
+            />
+          </Link>
         </div>
       </div>
     </main>
@@ -83,7 +99,7 @@ function AppPanel({
   readonly icon: typeof DevicePhoneMobileIcon;
   readonly title: string;
   readonly description: string;
-  readonly children: ReactNode;
+  readonly children?: ReactNode;
   readonly mobile?: boolean;
 }) {
   const headingId = `${id}-heading`;
@@ -104,7 +120,10 @@ function AppPanel({
           <h2 id={headingId} className={ABOUT_SECTION_HEADING_CLASS_NAME}>
             {title}
           </h2>
-          <p className={`tw-m-0 ${ABOUT_SUPPORTING_TEXT_CLASS_NAME}`}>
+          <p
+            id={`${id}-description`}
+            className={`tw-m-0 ${ABOUT_SUPPORTING_TEXT_CLASS_NAME}`}
+          >
             {description}
           </p>
         </div>
