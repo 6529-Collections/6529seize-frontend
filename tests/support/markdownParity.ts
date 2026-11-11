@@ -1,4 +1,59 @@
-import { expect, type Locator, type Page } from "@playwright/test";
+import {
+  expect,
+  type Locator,
+  type Page,
+  type TestInfo,
+} from "@playwright/test";
+
+export const CONVERSATION_PREVIEW_MARKDOWN =
+  "**Bold** *italic* [Link](https://markdown-private-canary.invalid/preview)\n\n```js\nconsole.log('hi gelato3');\n```\n\n- first\n- second\n\n![Photo](https://markdown-private-canary.invalid/photo.png)";
+
+/** Both the inbox and desktop sidebar must keep previews readable on one line. */
+export async function checkConversationPreviews(
+  page: Page,
+  testInfo: TestInfo
+) {
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto(new URL("/messages/encrypted", page.url()).href, {
+      waitUntil: "domcontentloaded",
+    });
+    const rows = page
+      .getByRole("list", { name: "Encrypted chats", exact: true })
+      .getByRole("link")
+      .filter({ hasText: "console.log('hi gelato3');" });
+    await expect(rows.first()).toBeVisible({ timeout: 75_000 });
+    const count = await rows.count();
+    expect(count).toBe(width === 1440 ? 2 : 1);
+    for (let index = 0; index < count; index += 1) {
+      const row = rows.nth(index);
+      const preview = row.locator("code").locator("..");
+      await expect(row.locator("strong")).toHaveText("Bold");
+      await expect(row.locator("em")).toHaveText("italic");
+      await expect(row).toContainText(
+        "Link console.log('hi gelato3'); first second Photo"
+      );
+      await expect(row).not.toContainText("```");
+      await expect(preview.locator("a, img, pre, p, ul, input")).toHaveCount(0);
+      const geometry = await row.locator("code").evaluate((code) => {
+        const preview = code.parentElement!;
+        const bounds = preview.getBoundingClientRect();
+        return {
+          height: bounds.height,
+          right: bounds.right,
+          font: getComputedStyle(code).fontFamily,
+        };
+      });
+      expect(geometry.height).toBeLessThanOrEqual(24);
+      expect(geometry.right).toBeLessThanOrEqual(width);
+      expect(geometry.font).toContain("monospace");
+      await testInfo.attach(`conversation-preview-${width}-${index}`, {
+        body: await row.screenshot(),
+        contentType: "image/png",
+      });
+    }
+  }
+}
 
 /** Identical author input for ordinary and encrypted chat, including edit/reload. */
 export const MARKDOWN_PARITY_CASES = [

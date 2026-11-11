@@ -29,6 +29,7 @@ import { rehypeDropPreview } from "@/components/drops/view/part/dropPartMarkdown
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { rehypeScopeFootnoteLabel } from "./footnotes";
+import { rehypeInlinePreview } from "./inlinePreview";
 
 // Public drops support safe raster data images. Private messages keep the
 // default protocol policy; their images are explicit links, never resources.
@@ -277,12 +278,21 @@ const PREVIEW_COMPONENTS: Components = {
     <p className="tw-m-0 tw-text-sm tw-leading-5">{children}</p>
   ),
 };
+const INLINE_PREVIEW_COMPONENTS: Components = {
+  code: ({ children }) => (
+    <code className="tw-bg-transparent tw-p-0 tw-font-mono tw-text-inherit">
+      {children}
+    </code>
+  ),
+};
 
 interface MessageMarkdownProps {
   readonly text: string | null;
   readonly privacy: "public" | "private";
   /** Two-line, non-interactive notification content. Parse before shortening. */
   readonly preview?: boolean;
+  /** One-line conversation-list content; never render block or resource elements. */
+  readonly inlinePreview?: boolean;
   /** Longer expandable drop excerpts retain their public media behavior. */
   readonly collapsedPreview?: boolean;
   readonly messageId?: string | undefined;
@@ -300,6 +310,7 @@ export const MessageMarkdown = memo(
     text,
     privacy,
     preview = false,
+    inlinePreview = false,
     collapsedPreview = false,
     messageId = "message",
     className = "",
@@ -307,12 +318,14 @@ export const MessageMarkdown = memo(
     renderText = identity,
     textPlugins = EMPTY_PLUGINS,
   }: MessageMarkdownProps) => {
+    const locale = useBrowserLocale();
     const renderId = useId();
     const idPrefix = `${privacy === "private" ? "e2ee" : "user-content"}-${messageId}-${renderId}-`;
     const context = useMemo(() => ({ renderText }), [renderText]);
     const content = useMemo(
-      () => (preview ? text : normalizeDropMarkdownContent(text)),
-      [preview, text]
+      () =>
+        preview || inlinePreview ? text : normalizeDropMarkdownContent(text),
+      [preview, inlinePreview, text]
     );
     const plugins = useMemo<PluggableList>(
       () => [
@@ -330,8 +343,19 @@ export const MessageMarkdown = memo(
         rehypePreserveOrderedListDelimiter,
         ...(preview || collapsedPreview ? [rehypeDropPreview] : []),
         ...textPlugins,
+        ...(inlinePreview
+          ? [[rehypeInlinePreview, t(locale, "e2ee.message.imageLink")]]
+          : []),
       ],
-      [privacy, preview, collapsedPreview, textPlugins, idPrefix]
+      [
+        privacy,
+        preview,
+        inlinePreview,
+        collapsedPreview,
+        textPlugins,
+        idPrefix,
+        locale,
+      ]
     );
     const renderers = useMemo<Components>(
       () => ({
@@ -339,13 +363,15 @@ export const MessageMarkdown = memo(
         ...components,
         ...(privacy === "private" ? PRIVATE_COMPONENTS : {}),
         ...(preview ? PREVIEW_COMPONENTS : {}),
+        ...(inlinePreview ? INLINE_PREVIEW_COMPONENTS : {}),
       }),
-      [components, privacy, preview]
+      [components, privacy, preview, inlinePreview]
     );
+    const markdownClassName = `word-break tw-min-w-0 tw-max-w-full tw-break-words tw-text-iron-200 [&_pre]:tw-max-w-full [&_pre]:tw-overflow-x-auto [&_ul]:tw-list-disc [&_ul_ul]:tw-list-[circle] [&_ul_ul_ul]:tw-list-[square] ${preview ? "tw-line-clamp-2 tw-max-h-10 tw-overflow-hidden [&_*]:!tw-my-0 [&_*]:!tw-text-sm [&_*]:!tw-leading-5 [&_pre_code]:!tw-p-0" : ""} ${className}`;
     return (
       <RenderingContext.Provider value={context}>
         <Markdown
-          className={`word-break tw-min-w-0 tw-max-w-full tw-break-words tw-text-iron-200 [&_pre]:tw-max-w-full [&_pre]:tw-overflow-x-auto [&_ul]:tw-list-disc [&_ul_ul]:tw-list-[circle] [&_ul_ul_ul]:tw-list-[square] ${preview ? "tw-line-clamp-2 tw-max-h-10 tw-overflow-hidden [&_*]:!tw-my-0 [&_*]:!tw-text-sm [&_*]:!tw-leading-5 [&_pre_code]:!tw-p-0" : ""} ${className}`}
+          className={inlinePreview ? undefined : markdownClassName}
           skipHtml
           remarkPlugins={REMARK_PLUGINS}
           remarkRehypeOptions={{
