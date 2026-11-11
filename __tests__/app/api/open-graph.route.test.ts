@@ -2617,6 +2617,52 @@ describe("open-graph API route", () => {
       expect(execute).toHaveBeenCalledTimes(1);
     });
 
+    it("gives a fetch slot back after 20 s of admitted work and still caches the late result", async () => {
+      jest.useFakeTimers();
+      try {
+        const finishers = new Map<string, () => void>();
+        const execute = jest.fn(
+          (url: URL) =>
+            new Promise((resolve) => {
+              finishers.set(url.toString(), () =>
+                resolve({ data: { title: url.toString() } })
+              );
+            })
+        );
+        usePlan(execute);
+        const stuckUrl = (index: number) =>
+          `https://opensea.io/item/ethereum/stuck/${index}`;
+        const stuck = Array.from({ length: FETCH_SLOTS }, (_value, index) =>
+          GET(getFrom(stuckUrl(index)))
+        );
+        await jest.advanceTimersByTimeAsync(19_999);
+        const waiting = GET(getFrom("https://opensea.io/item/ethereum/waiting"));
+        await jest.advanceTimersByTimeAsync(0);
+        expect(execute).toHaveBeenCalledTimes(FETCH_SLOTS);
+
+        // At the deadline the slots are given back and the waiter is admitted.
+        await jest.advanceTimersByTimeAsync(1);
+        const stuckResponses = await Promise.all(stuck);
+        expect(stuckResponses.map((response) => response.status)).toEqual(
+          Array.from({ length: FETCH_SLOTS }, () => 503)
+        );
+        expect(execute).toHaveBeenCalledTimes(FETCH_SLOTS + 1);
+
+        // The late result is cached and served without new work.
+        finishers.get(stuckUrl(0))?.();
+        await jest.advanceTimersByTimeAsync(0);
+        const later = await GET(getFrom(stuckUrl(0)));
+        expect(later.status).toBe(200);
+        expect(await later.json()).toEqual({ title: stuckUrl(0) });
+        expect(execute).toHaveBeenCalledTimes(FETCH_SLOTS + 1);
+
+        finishers.get("https://opensea.io/item/ethereum/waiting")?.();
+        expect((await waiting).status).toBe(200);
+      } finally {
+        jest.useRealTimers();
+      }
+    });
+
     it("fetches preview pages only on ports 80 and 443, without the caller's abort signal", async () => {
       const controller = new AbortController();
       mockFetchPublicUrl.mockResolvedValueOnce(
