@@ -24,7 +24,8 @@ const cache = new LruTtlCache<string, CachedPreview>({
 const inFlight = new Map<string, Promise<GithubPreviewResponse>>();
 
 // A failed load leaves the cache as it was: a refresh that fails keeps the
-// still-valid snapshot, and failures themselves are never cached.
+// still-valid snapshot (and answers with it), and failures themselves are
+// never cached.
 const loadPreview = async (
   cacheKey: string,
   resource: ReturnType<typeof parseGithubResource>
@@ -59,10 +60,12 @@ export const resolveGithubPreview = async (
     return cached.preview;
   }
 
-  const pending = inFlight.get(cacheKey);
-  if (pending) {
+  const pending =
+    inFlight.get(cacheKey) ?? loadPreview(cacheKey, resource);
+  if (!cached) {
     return pending;
   }
 
-  return loadPreview(cacheKey, resource);
+  // A refresh that fails answers with the retained snapshot.
+  return pending.catch(() => cached.preview);
 };

@@ -850,7 +850,7 @@ describe("github-preview API route", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("keeps the valid snapshot when a refresh fails", async () => {
+  it("answers a failed refresh with the retained snapshot and keeps it", async () => {
     const url = "https://github.com/o/r/issues/14";
     fetchMock
       .mockResolvedValueOnce(
@@ -870,12 +870,26 @@ describe("github-preview API route", () => {
     const afterFailure = await GET(requestFor(url));
     now.mockRestore();
 
-    expect(refreshed.status).toBe(400);
+    expect(refreshed.status).toBe(200);
+    await expect(refreshed.json()).resolves.toMatchObject({
+      title: "Kept issue",
+      state: "open",
+    });
     await expect(afterFailure.json()).resolves.toMatchObject({
       title: "Kept issue",
       state: "open",
     });
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("still answers 400 when a first load fails with no snapshot", async () => {
+    const url = "https://github.com/o/r/issues/15";
+    fetchMock.mockRejectedValueOnce(new Error("GitHub unavailable"));
+
+    const response = await GET(requestFor(url, true));
+
+    expect(response.status).toBe(400);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("serves a recent snapshot to refresh requests instead of re-fetching", async () => {
