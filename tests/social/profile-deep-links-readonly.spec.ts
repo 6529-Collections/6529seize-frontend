@@ -740,6 +740,9 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       .getByRole("list", { name: "Collected cards", exact: true })
       .getByRole("link")
       .nth(6);
+    // The card's return link follows the address a render later: read it
+    // once it carries the closed Details state.
+    await expect(card).toHaveAttribute("href", /details%3Dclosed/);
     const href = await card.getAttribute("href");
     expect(href).not.toBeNull();
     await card.click();

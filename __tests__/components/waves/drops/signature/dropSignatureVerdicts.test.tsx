@@ -39,9 +39,11 @@ jest.mock(
 );
 
 const mockFetchSignedEvents = jest.fn();
+const mockFetchBatch = jest.fn();
 const mockFetchAuthorWallets = jest.fn();
 jest.mock("@/services/api/device-grants-api", () => ({
   fetchDropSignedEvents: (...args: unknown[]) => mockFetchSignedEvents(...args),
+  fetchDropsSignedEvents: (...args: unknown[]) => mockFetchBatch(...args),
   fetchAuthorWallets: (...args: unknown[]) => mockFetchAuthorWallets(...args),
 }));
 
@@ -93,6 +95,18 @@ const signedEventsFor = (dropId: string) => ({
   grants: [],
 });
 
+/** The batch read's answer for drops each signed as signedEventsFor says. */
+const batchFor = (dropIds: readonly string[]) => ({
+  drops: dropIds.map(signedEventsFor),
+  grants: [],
+  unavailable: [],
+  truncated_drop_ids: [],
+});
+
+/** The ids of each batch read so far. */
+const batchReads = () =>
+  mockFetchBatch.mock.calls.map(([dropIds]) => dropIds as string[]);
+
 /** This browser's verdict for a drop, read the way a seal reads it. */
 const stateOf = (drop: ReturnType<typeof aDrop>) => {
   const { result, unmount } = renderHook(() =>
@@ -103,15 +117,22 @@ const stateOf = (drop: ReturnType<typeof aDrop>) => {
   return state;
 };
 
-/** Lets pending promises and due timers run (fake timers). */
-const flush = async (ms = 0) => {
+/** Checks that become due together share one read after this window. */
+const BATCH_WINDOW_MS = 100;
+
+/**
+ * Lets pending promises and due timers run (fake timers); by default for
+ * the batch window, so checks due now have read their signed events.
+ */
+const flush = async (ms = BATCH_WINDOW_MS) => {
   await act(async () => {
     await jest.advanceTimersByTimeAsync(ms);
   });
 };
 
-/** Requests started so far: signed events plus identity lookups. */
+/** Requests started so far: signed-event reads plus identity lookups. */
 const requestCount = () =>
+  mockFetchBatch.mock.calls.length +
   mockFetchSignedEvents.mock.calls.length +
   mockFetchAuthorWallets.mock.calls.length;
 
@@ -142,6 +163,11 @@ describe("this browser's seal verdicts", () => {
       .mockReset()
       .mockImplementation((dropId: string) =>
         Promise.resolve(signedEventsFor(dropId))
+      );
+    mockFetchBatch
+      .mockReset()
+      .mockImplementation((dropIds: string[]) =>
+        Promise.resolve(batchFor(dropIds))
       );
     mockFetchAuthorWallets.mockReset().mockResolvedValue([AUTHOR]);
     mockVerify.mockReset().mockResolvedValue(signedVerdict);
@@ -174,10 +200,11 @@ describe("this browser's seal verdicts", () => {
     ).toBeNull();
     await flush();
     expect(mockVerify).toHaveBeenCalledTimes(1);
-    expect(mockFetchSignedEvents).toHaveBeenCalledWith(
-      drop.id,
+    expect(mockFetchBatch).toHaveBeenCalledWith(
+      [drop.id],
       expect.any(AbortSignal)
     );
+    expect(mockFetchSignedEvents).not.toHaveBeenCalled();
     expect(mockVerify).toHaveBeenCalledWith(
       signedEventsFor(drop.id),
       expect.objectContaining({
@@ -232,7 +259,7 @@ describe("this browser's seal verdicts", () => {
     expect(second.result.current).toEqual(["verified"]);
     // The same content as a new object (a refetch) is the same verdict.
     expect(stateOf({ ...drop })).toBe("verified");
-    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
+    expect(mockFetchBatch).toHaveBeenCalledTimes(1);
     expect(mockVerify).toHaveBeenCalledTimes(1);
   });
 
@@ -299,9 +326,12 @@ describe("this browser's seal verdicts", () => {
   });
 
   it("leaves a check that could not load unverified and never retries it by itself", async () => {
-    mockFetchSignedEvents.mockRejectedValue(
-      Object.assign(new Error("unavailable"), { status: 503 })
-    );
+    const unavailable = Object.assign(new Error("unavailable"), {
+      status: 503,
+    });
+    // The failed batch read is followed by one read of the drop alone.
+    mockFetchBatch.mockRejectedValue(unavailable);
+    mockFetchSignedEvents.mockRejectedValue(unavailable);
     const drop = aDrop();
     const first = renderHook(() => useDropSealStates([drop], true));
     await flush();
@@ -313,20 +343,28 @@ describe("this browser's seal verdicts", () => {
     const second = renderHook(() => useDropSealStates([drop], true));
     await flush(60 * 60_000);
     expect(second.result.current).toEqual(["unverified"]);
+    expect(mockFetchBatch).toHaveBeenCalledTimes(1);
     expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
   });
 
   it("leaves a timed-out check unverified and never retries it by itself", async () => {
-    mockFetchSignedEvents.mockImplementation(
-      (_dropId: string, signal: AbortSignal) =>
-        new Promise((_resolve, reject) => {
-          signal.addEventListener("abort", () => reject(new Error("aborted")));
-        })
-    );
+    const hang = (_ids: unknown, signal: AbortSignal) =>
+      new Promise((_resolve, reject) => {
+        signal.addEventListener("abort", () => reject(new Error("aborted")));
+      });
+    // The timed-out batch read is followed by one read of the drop alone,
+    // which times out too.
+    mockFetchBatch.mockImplementation(hang);
+    mockFetchSignedEvents.mockImplementation(hang);
     const drop = aDrop();
     const { result, unmount } = renderHook(() =>
       useDropSealStates([drop], true)
     );
+    await flush();
+    await flush(19_000);
+    expect(result.current).toEqual(["pending"]);
+    await flush(1000);
+    expect(result.current).toEqual(["pending"]);
     await flush(19_000);
     expect(result.current).toEqual(["pending"]);
     await flush(1000);
@@ -335,6 +373,7 @@ describe("this browser's seal verdicts", () => {
 
     renderHook(() => useDropSealStates([drop], true));
     await flush(60 * 60_000);
+    expect(mockFetchBatch).toHaveBeenCalledTimes(1);
     expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
   });
 
@@ -347,7 +386,7 @@ describe("this browser's seal verdicts", () => {
     const { result } = renderHook(() =>
       useDropSealStates([first, second], true)
     );
-    // Two signed-event reads use this second's budget; the lookup waits.
+    // One read brings both drops' signed events; one lookup serves both.
     await flush(1000);
     expect(mockFetchAuthorWallets).toHaveBeenCalledTimes(1);
     const [, signal] = mockFetchAuthorWallets.mock.calls[0] as [
@@ -355,7 +394,7 @@ describe("this browser's seal verdicts", () => {
       AbortSignal,
     ];
     // Not either check's signal: neither check's request owns it.
-    const checkSignals = mockFetchSignedEvents.mock.calls.map(
+    const checkSignals = mockFetchBatch.mock.calls.map(
       ([, checkSignal]) => checkSignal
     );
     expect(checkSignals).not.toContain(signal);
@@ -381,15 +420,16 @@ describe("this browser's seal verdicts", () => {
     pending.forEach((item) => item.resolve(signedVerdict));
     await flush(60_000);
     expect(hooks[0]!.result.current).toEqual(["verified"]);
-    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(2);
+    // One read brought all six drops' signed events; only two were checked.
+    expect(batchReads()).toEqual([drops.map(({ id }) => id)]);
     expect(mockVerify).toHaveBeenCalledTimes(2);
     expect(stateOf(drops[4])).toBe("pending");
 
-    // Shown again, a dropped check is queued again.
+    // Shown again, a dropped check is queued (and read) again.
     const again = renderHook(() => useDropSealStates([drops[4]], true));
     await flush(1000);
     expect(again.result.current).toEqual(["verified"]);
-    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(3);
+    expect(batchReads()).toEqual([drops.map(({ id }) => id), [drops[4].id]]);
   });
 
   it("drops a queued check when its seal leaves the viewport", async () => {
@@ -411,11 +451,8 @@ describe("this browser's seal verdicts", () => {
     pending.forEach((item) => item.resolve(signedVerdict));
     await flush(60_000);
     expect(stateOf(busy[1])).toBe("verified");
-    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(2);
-    expect(mockFetchSignedEvents).not.toHaveBeenCalledWith(
-      drop.id,
-      expect.anything()
-    );
+    expect(batchReads()).toEqual([busy.map(({ id }) => id)]);
+    expect(mockFetchSignedEvents).not.toHaveBeenCalled();
   });
 
   it("never runs two identical checks at once", async () => {
@@ -430,7 +467,7 @@ describe("this browser's seal verdicts", () => {
     await flush();
     expect(first.result.current).toEqual(["verified"]);
     expect(second.result.current).toEqual(["verified"]);
-    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
+    expect(batchReads()).toEqual([[drop.id]]);
   });
 
   it("checks nothing until the seal is seen, nor drops 6529.io marks unsigned", async () => {
@@ -442,14 +479,14 @@ describe("this browser's seal verdicts", () => {
     );
     await flush(5000);
     expect(result.current).toEqual(["pending", "pending"]);
-    expect(mockFetchSignedEvents).not.toHaveBeenCalled();
+    expect(mockFetchBatch).not.toHaveBeenCalled();
 
     rerender({ active: true });
     await flush(5000);
     expect(result.current[0]).toBe("verified");
-    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
-    expect(mockFetchSignedEvents).toHaveBeenCalledWith(
-      drop.id,
+    expect(mockFetchBatch).toHaveBeenCalledTimes(1);
+    expect(mockFetchBatch).toHaveBeenCalledWith(
+      [drop.id],
       expect.any(AbortSignal)
     );
   });
@@ -464,7 +501,7 @@ describe("this browser's seal verdicts", () => {
     const { result } = renderHook(() => useDropSealStates(drops, true));
     await flush(10_000);
     expect(mockVerify).toHaveBeenCalledTimes(2);
-    expect(mockFetchSignedEvents.mock.calls.map(([id]) => id)).toEqual([
+    expect(mockVerify.mock.calls.map(([data]) => data.drop_id)).toEqual([
       drops[0].id,
       drops[1].id,
     ]);
@@ -480,8 +517,10 @@ describe("this browser's seal verdicts", () => {
   });
 
   it("starts at most two requests per second, identity lookups included", async () => {
-    const author = anAuthor();
-    const drops = Array.from({ length: 6 }, () => aDrop({ author }));
+    // Six authors: one signed-event read and six identity lookups.
+    const drops = Array.from({ length: 6 }, () =>
+      aDrop({ author: anAuthor() })
+    );
     const { result } = renderHook(() => useDropSealStates(drops, true));
     await flush();
     expect(requestCount()).toBe(2);
@@ -492,8 +531,8 @@ describe("this browser's seal verdicts", () => {
     await flush(1000);
     expect(requestCount()).toBe(6);
     await flush(10_000);
-    // Six signed-event reads and one identity lookup.
     expect(requestCount()).toBe(7);
+    expect(mockFetchBatch).toHaveBeenCalledTimes(1);
     expect(result.current).toEqual(Array(6).fill("verified"));
   });
 
@@ -531,22 +570,22 @@ describe("this browser's seal verdicts", () => {
     async (_name, retryAfter, pauseMs) => {
       const drop = aDrop();
       const other = aDrop();
-      mockFetchSignedEvents.mockRejectedValueOnce(rateLimited(retryAfter));
+      mockFetchBatch.mockRejectedValueOnce(rateLimited(retryAfter));
       const { result } = renderHook(() =>
         useDropSealStates([drop, other], true)
       );
       await flush();
-      // The other check had already started; the 429 pauses what follows.
-      const startedBeforePause = mockFetchSignedEvents.mock.calls.length;
-      expect(result.current[0]).toBe("pending");
+      // Both drops were in the refused read; the 429 pauses what follows.
+      const startedBeforePause = mockFetchBatch.mock.calls.length;
+      expect(result.current).toEqual(["pending", "pending"]);
 
       await flush(pauseMs - 1);
-      expect(mockFetchSignedEvents).toHaveBeenCalledTimes(startedBeforePause);
+      expect(mockFetchBatch).toHaveBeenCalledTimes(startedBeforePause);
       expect(result.current[0]).toBe("pending");
 
       await flush(1);
       await flush();
-      expect(mockFetchSignedEvents.mock.calls.length).toBeGreaterThan(
+      expect(mockFetchBatch.mock.calls.length).toBeGreaterThan(
         startedBeforePause
       );
       await flush(5000);

@@ -566,6 +566,9 @@ describe("mobileLaunchTiming", () => {
     expect(sanitizers.sanitizeRouteFamily("/messages/create")).toBe(
       "/messages/create"
     );
+    expect(sanitizers.sanitizeRouteFamily("/messages/new")).toBe(
+      "/messages/new"
+    );
     expect(sanitizers.sanitizeRouteFamily("/waves/create")).toBe(
       "/waves/create"
     );

@@ -171,6 +171,10 @@ action.
    - `Logout`: sign out the active profile.
    - `Sign out all` (multi-profile web sessions only): clear all connected
      profiles in one visible transition without switching through them.
+   - Both remove unsent drafts from this browser for the profiles they sign
+     out: chat messages kept for a reload in this tab, and saved wave drafts
+     (with `Sign out all`, every saved wave draft on this device). A session
+     that expires and is signed in again keeps its drafts.
 7. During known-account switch handoff, active account state stays pinned to
    the stored active wallet until the new selection settles. Other tabs in the
    same browser profile follow that selection. A stale tab or an older session
@@ -270,7 +274,8 @@ tooltip with a short hover delay and right-side placement, without a native titl
 Avatar shields show this device's permissions: green when both are ready without
 renewal due, amber for partial setup or an approaching expiry, and neutral for
 off, unavailable or unresolved states. Connected-profile avatars carry smaller
-shields; they do not imply another physical device is set up.
+shields for the same device. An inactive profile shows Signed Posts as verified
+only when this device's key matches a recent server check for that profile.
 
 The mobile sidepanel prints the status beneath identity and above TDH: the
 connection dot belongs to the first row and the shield belongs to the permission
@@ -325,6 +330,11 @@ account-dependent controls load. No additional account cache is used.
   target account, then revisit account controls.
 - If wallet controls crash, use wallet error-boundary actions: `Try Again`,
   then `Clear Storage & Reload`.
+- If an action shows "Nothing was sent: the signed-in profile changed in
+  another tab", another tab switched or signed out a profile while this tab
+  still showed the previous one. The tab then shows the profile now signed in;
+  check it and try again. `Logout` and `Sign out all` are refused the same way
+  and sign nothing out until the tab has caught up.
 
 ## Limitations / Notes
 

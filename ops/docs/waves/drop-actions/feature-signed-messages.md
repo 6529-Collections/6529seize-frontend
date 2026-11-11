@@ -188,14 +188,11 @@ encrypted backup. See [Encrypted messages](../../encrypted-messages.md#renewal-a
 
 ## New-Device Alert
 
-The browser checks the profile's grants when a wave opens, when the app
-returns to focus, and every 10 minutes while visible. An active grant for
-another device can raise a notice above the composer. Choose **Got it**
-to clear that notice across devices as their grant lists refresh. Choose
-**Revoke** to remove the device's permission. The first list a browser sees
-for a wallet is its baseline. If the browser loses its local signing key but
-still remembers its grant, that grant does not trigger a new-device notice.
-Set up Signed Posts again to sign from that browser. Review existing grants in
+When another device is authorized to sign posts, an alert can appear above
+the Wave composer. If the same setup also enabled Encrypted DMs, the alert
+lists both permissions and can appear in either surface. Choose **This was me**
+once to clear the alert across devices as they refresh. **Revoke access**
+shows which permissions will stop. Review existing grants in
 **Device Permissions**.
 
 ## Checking a Drop's Signature
@@ -240,9 +237,12 @@ and checks the wallet's sign-in signature on the grant. The dialog shows:
 A drop that 6529.io marks as signed by its author shows a small seal right
 after its timestamp. When the seal comes into view, the browser fetches the
 drop's signed events and verifies them itself, as the **Signature** dialog
-does. Only drops 6529.io marks as signed are checked, at most three at a
-time; a check still waiting when its seal scrolls away is dropped and
-queued again if the seal returns. Verdicts are kept in memory for the page
+does. Seals that come into view within a moment of each other share one
+request for their signed events (up to 50 drops per request); a drop with a
+long edit history, or an API without that request, is read on its own. Only
+drops 6529.io marks as signed are checked, at most two at a time and at most
+two requests a second; a check still waiting when its seal scrolls away is
+dropped and queued again if the seal returns. Verdicts are kept in memory for the page
 session, and a check that fails to load or times out is not retried by
 itself (open the **Signature** dialog to try again). The seal's accessible
 name, tooltip and shape follow that check:

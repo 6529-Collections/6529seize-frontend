@@ -8,7 +8,9 @@ import {
   useWaveComposerDockElements,
 } from "@/components/waves/WaveComposerDockVisibility";
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { NEW_MESSAGE_ROUTE } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { t } from "@/i18n/messages";
@@ -17,6 +19,7 @@ import {
   useDmUnreadSummary,
 } from "@/services/dm-unread/DmUnreadStateProvider";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 import {
   Suspense,
   type RefObject,
@@ -149,6 +152,7 @@ const useIsQuickDmLauncherCoveringInteractive = ({
 };
 
 export default function QuickDirectMessages() {
+  const router = useRouter();
   const { connectedProfile, showWaves } = useAuth();
   const isDesktop = useIsQuickDmDesktop();
   const locale = useBrowserLocale();
@@ -301,12 +305,17 @@ export default function QuickDirectMessages() {
   }, [setAndStoreState]);
 
   const openCreateDirectMessage = useCallback(() => {
+    if (isE2eeEnabled()) {
+      setAndStoreState(CLOSED_STATE);
+      router.push(NEW_MESSAGE_ROUTE);
+      return;
+    }
     restoreFocusElementRef.current =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : panelRef.current;
     setIsCreateDirectMessageOpen(true);
-  }, []);
+  }, [router, setAndStoreState]);
 
   const closeCreateDirectMessage = useCallback(() => {
     setIsCreateDirectMessageOpen(false);

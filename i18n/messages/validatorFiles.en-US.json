@@ -1,0 +1,21 @@
+{
+  "validator.files.publisher.label": "Publisher",
+  "validator.files.publisher.none": "None",
+  "validator.files.checksumSource": "Each SHA-256 comes from 6529's signed list of releases. This page checks that signature before it lists a file. The publisher is the name your system should show when it opens the file or, for an archive, the program inside it; this page doesn't check it, so check it yourself.",
+  "validator.files.download.label": "Download {file}",
+  "validator.files.build.withCommit": "Build {version}, published {date}, commit {commit}. Earlier builds are under {releases}.",
+  "validator.files.build.withoutCommit": "Build {version}, published {date}. Earlier builds are under {releases}.",
+  "validator.files.build.releasesLink": "Releases",
+  "validator.files.column.file": "File",
+  "validator.files.column.size": "Size",
+  "validator.files.column.sha256": "SHA-256",
+  "validator.files.column.download": "Download",
+  "validator.files.sha256.copyLabel": "SHA-256 of {file}",
+  "validator.files.download.text": "Download",
+  "validator.files.check.heading": "Check a file",
+  "validator.files.check.body": "In the folder with the file, run the command for your system and compare what it prints with the SHA-256 above. Windows prints capital letters; the letters and digits must match. If they differ, delete the file.",
+  "validator.files.check.system.mac": "Mac, in Terminal",
+  "validator.files.check.system.windows": "Windows, in PowerShell",
+  "validator.files.check.system.linux": "Linux",
+  "validator.files.checksums.body": "It lists the SHA-256 of every file. On Linux, in a folder with it and your downloads, run {command} to check them all. 6529 also signs the list of releases, and your validator checks that signature before it tells you about a new one."
+}

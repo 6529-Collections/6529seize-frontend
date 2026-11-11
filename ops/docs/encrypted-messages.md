@@ -226,7 +226,10 @@ verify it. Revoking this browser's own grant clears its local encrypted history
 and keys right away. Another device deletes its history once it confirms the
 revocation came from a device of yours it trusts; otherwise (for example when
 encrypted messages are off in the browser you revoke from) it stops and keeps
-that history until it is removed there. The dialog says which applies. Reauthorizing
+that history until it is removed there. The dialog says which applies. If this
+browser cannot sign that revocation (for example the request fails), the grant
+is still revoked and a notice says that device keeps its history until it is
+removed there. Reauthorizing
 later creates a new device; it does not bring that deleted local history back.
 Earlier Signed Posts remain verifiable after revocation.
 
@@ -240,23 +243,26 @@ claiming your permissions are expiring.
 In the 6529 app, the back arrow to the left of the chat avatar returns to the
 encrypted messages list. It stays visible on iPad in portrait and landscape.
 
-1. Open `/messages/encrypted` and select **New encrypted chat**.
-2. Search for people and tap or click a result to add them. The search clears
-   and the person appears in the selected list. Each person shows whether they
-   can receive encrypted messages:
-   - **Can receive encrypted messages**
-   - **Doesn’t accept messages from you**: their direct-message setting does
-     not allow you.
-   - **Blocked**: one of you blocked the other.
-   - **Hasn’t turned on encrypted messages yet**: they have no device yet.
-3. Choose **Direct message** (one other person) or **Group** (several people,
-   optional name that only members can see).
-4. Select **Start encrypted chat**.
+1. Select **+** beside **Messages** to open **New message** at `/messages/new`.
+   On desktop, the chat list stays beside the form.
+2. Search in **To** and select the people you want to chat with. Each person
+   shows whether they can receive encrypted messages. You can retry a failed
+   check or remove someone while keeping the rest of the selection.
+3. Select **Start chat**. One recipient starts a direct message. With two or
+   more, you can enter an optional group name that only members can see. To
+   start a group with one other person and add people later, use **More options**.
+4. If you already have a matching encrypted DM or group on this device, select
+   **Open chat**. For several matching groups, choose one first. A group matches
+   when it has the same current members. If your chosen group stops matching,
+   choose again. **Start a new group** lets you create a separate chat with the
+   same people.
 
-If you already have an encrypted direct message with that person, the page
-offers **Open chat** instead. Your list and sidebar show one direct-message
-entry per person, including when you have left an earlier chat or started a
-replacement. Group chats remain separate.
+If someone cannot receive encrypted messages, the composer shows why and keeps
+the recipients and group name while you adjust the selection. Before the
+unencrypted messaging cutoff, the composer can offer **Continue unencrypted**
+after showing the retention warning. In a group, first choose **Use unencrypted
+chat instead**. If you used **More options** to start a group with one other
+person, **Use unencrypted DM instead** lets you continue as a direct message.
 
 A direct message has exactly two people. A device joins one only when you are
 one of the two people it names, the invitation comes from one of you, and
@@ -277,8 +283,8 @@ Two participants or devices can still start chats at the same time. They share
 one list entry once this device knows both chats, and both histories remain
 selectable. This does not impose a global server-side limit on MLS groups.
 
-From a plaintext direct message, **Start encrypted chat** opens this page with
-the same people already chosen. Earlier messages are not copied.
+From a plaintext direct message, **Start encrypted chat** opens the composer
+with the same people already chosen. A new encrypted chat starts with an empty history.
 
 ## Moving to stronger encryption
 
@@ -578,12 +584,13 @@ the same notice with **Add device** and **Ignore**). Adding it trusts that
 wallet for your profile on this device, so other devices signed by it are
 added too.
 
-When another device of yours is turned on, your other devices show which
-device was added and when, that it can read your encrypted messages, and
-**Revoke** or **This was me**. Devices that already existed when this device
-was set up, such as an earlier setup of this browser found again after its
-data was cleared, are never announced as new. Your own device changes are not repeated in
-each chat's timeline.
+When you authorize another device, the app can show a security alert on your
+other devices. The alert names the new device and the permissions it gained.
+A device set up for both Encrypted DMs and Signed Posts has one alert, which
+can appear in either Encrypted DMs or Waves. Choose **This was me** once to
+clear it across your devices as they refresh, or **Revoke access** if you
+do not recognize it. Your own device changes are not repeated in each chat's
+timeline.
 
 ## Encrypted backup
 

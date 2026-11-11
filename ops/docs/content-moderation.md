@@ -362,6 +362,9 @@ The list shows no message content. **Review evidence** opens one report:
 - The category, report time, sender and reporter profile ids, the reporter's
   note and the retention date.
 - **Place on hold** keeps the report past its retention until **Release hold**.
+  Releasing asks for confirmation first: the dialog names the report's
+  category and time, and says that the report then returns to its 180-day
+  retention, so its evidence may be deleted on schedule.
 
 Every list, opened report and hold change is recorded in an access log on the
 server. **Back to encrypted reports** returns to the list without reloading

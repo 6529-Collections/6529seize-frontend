@@ -1,5 +1,15 @@
 import type { E2eeConversation } from "@/lib/e2ee/types";
 
+export function hasExactMembers(
+  conversation: E2eeConversation,
+  profileIds: ReadonlySet<string>
+): boolean {
+  return (
+    conversation.members.length === profileIds.size &&
+    conversation.members.every((member) => profileIds.has(member.profileId))
+  );
+}
+
 /**
  * The active encrypted chat whose members are exactly this DM's members,
  * or null. It needs the engine already loaded on this browser (an enrolled
@@ -17,9 +27,7 @@ export function findEncryptedEquivalent(
   let best: E2eeConversation | null = null;
   for (const conversation of conversations) {
     const matches =
-      conversation.status === "active" &&
-      conversation.members.length === wanted.size &&
-      conversation.members.every((member) => wanted.has(member.profileId));
+      conversation.status === "active" && hasExactMembers(conversation, wanted);
     if (matches && (best === null || conversation.updatedAt > best.updatedAt)) {
       best = conversation;
     }

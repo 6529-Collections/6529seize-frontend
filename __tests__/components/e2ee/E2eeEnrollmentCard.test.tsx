@@ -94,6 +94,7 @@ const renderCard = () => {
 describe("E2eeEnrollmentCard turn-on", () => {
   beforeEach(() => {
     mockTurnOn.mockReset();
+    mockRemoveLocal.mockClear();
     mockCanSign = true;
     mockIsRemoteWallet = false;
     mockConnect.mockReset();
@@ -416,6 +417,7 @@ describe("E2eeEnrollmentCard upgrade copy (D172)", () => {
 
   beforeEach(() => {
     mockTurnOn.mockReset();
+    mockRemoveLocal.mockClear();
     mockCanSign = true;
   });
 

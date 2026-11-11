@@ -13,6 +13,7 @@ import {
   fetchJson,
   normalizeTarget,
   parseAcceptLanguage,
+  respondWithCardError,
   respondWithGuardError,
   sanitizeCacheKey,
   type CommonsFileTarget,
@@ -744,7 +745,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unsupported Wikimedia URL.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return respondWithCardError(message, 400);
   }
 
   const card = await buildCard(target, languages);

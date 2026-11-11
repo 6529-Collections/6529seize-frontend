@@ -61,7 +61,8 @@ async function signedDevice(
 
 /** Bob's real device revoked by another device the server lists under bob. */
 async function revokedBy(
-  pinnedWallet: (profileId: string, wallet: string) => boolean | null
+  pinnedWallet: (profileId: string, wallet: string) => boolean | null,
+  signatureVerifies = true
 ) {
   const target = await signedDevice(key(1), "bob");
   const revoker = await signedDevice(key(2), "bob");
@@ -80,7 +81,7 @@ async function revokedBy(
   const directory = new DeviceDirectory({
     api,
     now: () => NOW_MS,
-    verifyEd25519: () => true,
+    verifyEd25519: () => signatureVerifies,
     pinnedWallet,
   });
   return { directory, revoked, revoker };
@@ -232,24 +233,7 @@ describe("E2EE: own revocation by a device of an own-profile pin from before", (
   });
 
   it("refuses it when the signature does not verify", async () => {
-    const target = await signedDevice(key(1), "bob");
-    const revoker = await signedDevice(key(2), "bob");
-    const directory = new DeviceDirectory({
-      api: {
-        getDevice: jest.fn(async () => revoker.record),
-      } as unknown as E2eeApiClient,
-      now: () => NOW_MS,
-      verifyEd25519: () => false,
-    });
-    const revoked: ApiE2eeDevice = {
-      ...target.record,
-      revoked_at: NOW_MS - 60_000,
-      revocation: {
-        revoker_device_key: key(2),
-        revoked_at: NOW_SECONDS - 60,
-        signature: "0xsig",
-      },
-    };
+    const { directory, revoked, revoker } = await revokedBy(() => null, false);
     const ctx = legacyCtx(revoker.wallet);
     expect(
       await directory.ownRevocationVerified(revoked, (record) =>

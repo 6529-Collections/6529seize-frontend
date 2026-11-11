@@ -25,7 +25,7 @@ const emojiSource = "data:image/webp;base64,UklGRg==";
 const mockEmojiSources = new Map([["gm", emojiSource]]);
 jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
   E2eeEmojiProvider: ({ children }: { children: ReactNode }) => children,
-  useE2eeEmojis: () => ({ sources: mockEmojiSources }),
+  useE2eeEmojis: () => ({ sources: mockEmojiSources, native: new Map() }),
 }));
 const mockSearch = jest.fn(() => new URLSearchParams());
 jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
@@ -33,6 +33,12 @@ jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
 }));
 jest.mock("@/hooks/device-signing/useEnableSignedMessages", () => ({
   useEnableSignedMessages: () => ({ canEnable: false, isEnabling: false }),
+}));
+
+const mockOpenComposer = jest.fn();
+jest.mock("@/hooks/useCreateModalState", () => ({
+  __esModule: true,
+  default: () => ({ isApp: false, openDirectMessage: mockOpenComposer }),
 }));
 
 const mockPathname = jest.fn(() => "/messages");
@@ -449,8 +455,10 @@ describe("encrypted conversation list", () => {
       </E2eeTestProvider>
     );
     expect(screen.getByText("No encrypted chats yet")).toBeInTheDocument();
-    const links = screen.getAllByRole("link", { name: "New encrypted chat" });
-    expect(links[0]).toHaveAttribute("href", "/messages/encrypted/new");
+    const compose = screen.getByRole("button", { name: "New message" });
+    expect(compose).toHaveClass("lg:tw-hidden");
+    fireEvent.click(compose);
+    expect(mockOpenComposer).toHaveBeenCalledTimes(1);
   });
 });
 

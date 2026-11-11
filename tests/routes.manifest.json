@@ -493,6 +493,9 @@
     "/messages/encrypted/new": {
       "classification": "auth"
     },
+    "/messages/new": {
+      "classification": "auth"
+    },
     "/museum": {
       "classification": "crawlable",
       "family": "content-archive",

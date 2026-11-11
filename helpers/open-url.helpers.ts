@@ -1,7 +1,8 @@
 import { publicEnv } from "@/config/env";
 import {
   parseDecentralizedMediaRef,
-  to6529ResolverUrl,
+  toIsolatedHtmlUrl,
+  toIsolatedHtmlUrlFromInput,
 } from "@/lib/media/decentralized-media";
 
 const DECENTRALIZED_SCHEME = /^(?:ipfs|ipns|ar):\/\//i;
@@ -14,8 +15,10 @@ const getPageOrigin = (): string | null =>
 /**
  * The URL a "new tab" action may open, or null when it must not open it.
  *
- * - `https:` URLs open as they are.
- * - `ipfs://`, `ipns://` and `ar://` open through the app's media resolver.
+ * - `https:` URLs open as they are, except first-party media URLs, which open
+ *   on their per-CID host when the separate content domain is configured.
+ * - `ipfs://`, `ipns://` and `ar://` open through the app's media resolver
+ *   (the per-CID host for IPFS on the separate content domain).
  * - `http:` and `blob:` URLs open only on this page's own origin (local
  *   builds, and files decrypted in this tab).
  * - Every other scheme (`javascript:`, `data:`, `file:`, ...) is refused.
@@ -30,9 +33,7 @@ export function getOpenableUrl(
 
   if (DECENTRALIZED_SCHEME.test(trimmed)) {
     const ref = parseDecentralizedMediaRef(trimmed);
-    return ref
-      ? to6529ResolverUrl(ref, publicEnv.MEDIA_RESOLVER_ENDPOINT)
-      : null;
+    return ref ? toIsolatedHtmlUrl(ref, publicEnv.MEDIA_RESOLVER_ENDPOINT) : null;
   }
 
   const pageOrigin = getPageOrigin();
@@ -44,7 +45,10 @@ export function getOpenableUrl(
   }
 
   if (url.protocol === "https:") {
-    return url.href;
+    return toIsolatedHtmlUrlFromInput(
+      url.href,
+      publicEnv.MEDIA_RESOLVER_ENDPOINT
+    );
   }
   if (
     (url.protocol === "http:" || url.protocol === "blob:") &&

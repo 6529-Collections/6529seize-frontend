@@ -1,5 +1,6 @@
 import SignedMessagesNotice from "@/components/device-signing/SignedMessagesNotice";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
+import type { ApiDeviceSecurityNotice } from "@/generated/models/ApiDeviceSecurityNotice";
 import {
   act,
   fireEvent,
@@ -77,6 +78,17 @@ jest.mock("@/hooks/device-signing/useLocalDeviceKeys", () => ({
   useLocalDeviceKeys: () => mockLocal,
 }));
 
+let mockSecurityNotices: ApiDeviceSecurityNotice[] | null;
+const mockRemoveNotice = jest.fn();
+jest.mock("@/hooks/device-signing/useDeviceSecurityNotices", () => ({
+  deviceSecurityNoticeKey: (notice: ApiDeviceSecurityNotice) =>
+    notice.signing_grant_id ?? notice.encrypted_dm_device_key,
+  useDeviceSecurityNotices: () => ({
+    notices: mockSecurityNotices,
+    removeNotice: mockRemoveNotice,
+  }),
+}));
+
 let mockGrants: ApiDeviceGrant[] | undefined;
 const mockRevoke = jest.fn();
 const mockAcknowledge = jest.fn();
@@ -116,6 +128,7 @@ describe("SignedMessagesNotice", () => {
   beforeEach(() => {
     localStorage.clear();
     mockEnabled = true;
+    mockSecurityNotices = null;
     mockAccount = ADDRESS;
     mockLocal = { loaded: true, grant: null, publicKeys: [OWN_KEY] };
     mockGrants = [];
@@ -487,6 +500,31 @@ describe("SignedMessagesNotice", () => {
     });
   });
 
+  it("shows a server notice on the first Wave visit and hides this device's grant", () => {
+    mockLocal = { ...mockLocal, grant: grant() };
+    mockSecurityNotices = [
+      {
+        signing_grant_id: grant().id,
+        signing_device_key: OWN_KEY,
+        encrypted_dm_device_key: null,
+        device_label: "This browser",
+      },
+      {
+        signing_grant_id: otherDevice.id,
+        signing_device_key: otherDevice.device_key,
+        encrypted_dm_device_key: `0x${"ef".repeat(32)}`,
+        device_label: "6529 Desktop on Mac",
+      },
+    ];
+    render(<SignedMessagesNotice composerEmpty={false} />);
+    expect(
+      screen.getByText(
+        "6529 Desktop on Mac was authorized to read your encrypted DMs and sign posts as you."
+      )
+    ).toBeVisible();
+    expect(screen.queryByText(/This browser was authorized/)).toBeNull();
+  });
+
   describe("new-device alert", () => {
     beforeEach(() => {
       mockLocal = { ...mockLocal, grant: grant() };
@@ -512,7 +550,9 @@ describe("SignedMessagesNotice", () => {
           "Safari on iPhone is now authorized for Signed Posts. If this wasn’t you, revoke it."
         )
       ).toBeVisible();
-      expect(screen.getByRole("button", { name: "Revoke" })).toBeVisible();
+      expect(
+        screen.getByRole("button", { name: "Revoke access" })
+      ).toBeVisible();
     });
 
     it("neither alerts nor offers to turn on when this browser's keys could not be read", () => {
@@ -539,14 +579,18 @@ describe("SignedMessagesNotice", () => {
       mockLocal = { ...mockLocal, grant: ownGrant };
       mockGrants = [ownGrant];
       rerender(<SignedMessagesNotice composerEmpty />);
-      expect(screen.queryByRole("button", { name: "Revoke" })).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Revoke access" })
+      ).toBeNull();
 
       unmount();
       mockLocal = { loaded: true, grant: null, publicKeys: [] };
       const { rerender: rerenderAfterKeyLoss } = render(
         <SignedMessagesNotice composerEmpty />
       );
-      expect(screen.queryByRole("button", { name: "Revoke" })).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Revoke access" })
+      ).toBeNull();
       expect(screen.getByRole("button", { name: "Turn on" })).toBeVisible();
 
       mockGrants = [ownGrant, otherDevice];
@@ -556,7 +600,9 @@ describe("SignedMessagesNotice", () => {
           /^Firefox on Windows is now authorized for Signed Posts/
         )
       ).toBeVisible();
-      expect(screen.getByRole("button", { name: "Revoke" })).toBeVisible();
+      expect(
+        screen.getByRole("button", { name: "Revoke access" })
+      ).toBeVisible();
     });
 
     it("never alerts for this browser's own keys, revoked or expired grants", () => {
@@ -585,7 +631,7 @@ describe("SignedMessagesNotice", () => {
       mockRevoke.mockResolvedValue(true);
 
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "Revoke" }));
+        fireEvent.click(screen.getByRole("button", { name: "Revoke access" }));
       });
 
       expect(mockRevoke).toHaveBeenCalledWith(otherDevice);
@@ -602,7 +648,7 @@ describe("SignedMessagesNotice", () => {
       mockRevoke.mockResolvedValue(false);
 
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "Revoke" }));
+        fireEvent.click(screen.getByRole("button", { name: "Revoke access" }));
       });
       expect(
         screen.getByText(/is now authorized for Signed Posts/)
@@ -611,11 +657,11 @@ describe("SignedMessagesNotice", () => {
       expect(screen.queryByRole("button", { name: "Dismiss" })).toBeNull();
       mockAcknowledge.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "Got it" }));
+        fireEvent.click(screen.getByRole("button", { name: "This was me" }));
       });
-      expect(screen.getByRole("button", { name: "Got it" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "This was me" })).toBeVisible();
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "Got it" }));
+        fireEvent.click(screen.getByRole("button", { name: "This was me" }));
       });
       expect(mockAcknowledge).toHaveBeenCalledWith(otherDevice.id);
       expect(
@@ -628,11 +674,11 @@ describe("SignedMessagesNotice", () => {
       const { rerender } = render(<SignedMessagesNotice composerEmpty />);
       mockGrants = [otherDevice];
       rerender(<SignedMessagesNotice composerEmpty />);
-      expect(screen.getByRole("button", { name: "Got it" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "This was me" })).toBeVisible();
 
       mockGrants = [{ ...otherDevice, notice_acknowledged: true }];
       rerender(<SignedMessagesNotice composerEmpty />);
-      expect(screen.queryByRole("button", { name: "Got it" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "This was me" })).toBeNull();
       expect(mockAcknowledge).not.toHaveBeenCalled();
       expect(mockRevoke).not.toHaveBeenCalled();
     });

@@ -17,7 +17,8 @@ const RESOURCES_LINE = "Resources:";
 const MAINNET_CHAIN_ID = "1";
 // The server issues challenges valid for five minutes; allow for change.
 const MAX_CHALLENGE_LIFETIME_MS = 60 * 60 * 1000;
-// The longest statement today (a combined grant) is about 500 characters.
+// 2,000 characters per line leaves headroom above the longest structured
+// challenge statement issued today.
 const MAX_TEXT_LENGTH = 2000;
 const MAX_TOKEN_LENGTH = 200;
 // Printable text on one line: no control characters (line breaks included).
