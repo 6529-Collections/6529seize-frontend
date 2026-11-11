@@ -16,6 +16,10 @@ import { HttpFile } from '../http/http';
 export class ApiUpdateProxyActionRequest {
     'credit_amount'?: number;
     'end_time'?: number | null;
+    /**
+    * Replaces the wave scope of a CREATE_DROP_TO_WAVE grant. Omit to keep the stored scope. null is rejected with 400: a scope cannot be lifted back to \"every wave\" through update, only replaced; revoke the action to stop the proxy posting altogether. An empty list or duplicates are rejected with 400.
+    */
+    'wave_allowlist'?: Array<string>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -33,6 +37,12 @@ export class ApiUpdateProxyActionRequest {
             "baseName": "end_time",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "wave_allowlist",
+            "baseName": "wave_allowlist",
+            "type": "Array<string>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {

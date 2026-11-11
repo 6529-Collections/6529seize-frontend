@@ -17,6 +17,10 @@ import { HttpFile } from '../http/http';
 export class ApiCreateNewProfileProxyCreateWaveParticipationDropAction {
     'action_type': ApiProfileProxyActionType;
     'end_time': number | null;
+    /**
+    * Optional wave scope of the grant. Omitted or null grants posting in every wave the grantor can post in (legacy behaviour). A non-empty list restricts the proxy to creating and editing drops in exactly these waves; wave visibility and group gates still apply. An empty list, duplicates or non-string entries are rejected with 400 and nothing is created.
+    */
+    'wave_allowlist'?: Array<string>;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -34,6 +38,12 @@ export class ApiCreateNewProfileProxyCreateWaveParticipationDropAction {
             "baseName": "end_time",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "wave_allowlist",
+            "baseName": "wave_allowlist",
+            "type": "Array<string>",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
