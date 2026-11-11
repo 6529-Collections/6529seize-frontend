@@ -287,13 +287,23 @@ jobs:
             --version-labels "$COMMIT_SHA" \
             --output json)"
           version_count="$(jq '.ApplicationVersions | length' <<< "$application_version_json")"
+          # The AWS CLI reads a parameter that starts with file:// or fileb://
+          # from that file. Keep a commit subject a literal description.
+          description="$COMMIT_MESSAGE"
+          case "$description" in
+            [Ff][Ii][Ll][Ee]://* | [Ff][Ii][Ll][Ee][Bb]://*)
+              description="Commit: $description"
+              ;;
+            *)
+              ;;
+          esac
           case "$version_count" in
             0)
               aws elasticbeanstalk create-application-version \
                 --application-name "$BEANSTALK_APP_NAME" \
                 --source-bundle "S3Bucket=${AWS_BUCKET},S3Key=${source_bundle_key}" \
                 --version-label "$COMMIT_SHA" \
-                --description "$COMMIT_MESSAGE"
+                --description "$description"
               ;;
             1)
               existing_bucket="$(jq -r '.ApplicationVersions[0].SourceBundle.S3Bucket // ""' <<< "$application_version_json")"
@@ -315,20 +325,25 @@ jobs:
           ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}
           GITHUB_LINK_STATUS_PREVIEW_TOKEN: ${{ secrets.LINK_STATUS_PREVIEW_GITHUB_TOKEN }}
           # The password of the /validator pages. Setting the variable to
-          # true, or deleting the secret, opens them to everyone on the next
-          # deploy. See ops/docs/validator-download-page.md.
+          # true opens them to everyone on the next deploy; without it, a
+          # missing secret stops the deploy. See
+          # ops/docs/validator-download-page.md.
           VALIDATOR_PAGE_PASSWORD: ${{ secrets.VALIDATOR_PAGE_PASSWORD }}
           VALIDATOR_PAGE_PUBLIC: ${{ vars.VALIDATOR_PAGE_PUBLIC }}
         run: |
           set -euo pipefail
           printf '%s' "$ETHEREUM_RPC_URL" |
             node ops/scripts/validate-ethereum-rpc-url.cjs
-          # Elastic Beanstalk keeps a property the deploy does not send, so a
-          # missing password is sent as "public", never as an empty value.
-          if [ -z "$VALIDATOR_PAGE_PASSWORD" ] || [ "$VALIDATOR_PAGE_PUBLIC" = true ]; then
+          # Elastic Beanstalk keeps a property the deploy does not send, so
+          # the pages open only when the variable says so, never because the
+          # password went missing.
+          if [ "$VALIDATOR_PAGE_PUBLIC" = true ]; then
             VALIDATOR_PAGE_PUBLIC=true
-          else
+          elif [ -n "$VALIDATOR_PAGE_PASSWORD" ]; then
             VALIDATOR_PAGE_PUBLIC=false
+          else
+            echo "::error::VALIDATOR_PAGE_PASSWORD is empty and VALIDATOR_PAGE_PUBLIC is not true. Set the password secret in the production environment, or set VALIDATOR_PAGE_PUBLIC to true to open the validator pages on purpose."
+            exit 1
           fi
           option_settings="$(jq -cn \
             --arg ssr_client_id "$SSR_CLIENT_ID" \
@@ -442,12 +457,41 @@ jobs:
             --distribution-id "$ANNOUNCED_VERSION_DISTRIBUTION_ID" \
             --paths "/${ANNOUNCED_VERSION_OBJECT_KEY}"
 
-      # Record the live commit as a Sentry release (create, associate commits,
-      # finalize), as the build plugin did before config/sentryBuildRelease.ts
-      # kept the release out of the bundle. It runs only once Elastic Beanstalk
-      # serves this commit, so only live versions are finalized. The release
-      # name is the commit, the VERSION the runtime reports. Best effort:
-      # Sentry problems log a warning and never fail the deploy.
+      - name: Upload exact production version evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: production-version-evidence-${{ github.run_id }}
+          path: deployment-version-evidence.json
+          if-no-files-found: ignore
+          retention-days: 90
+
+  # Record the live commit as a Sentry release (create, associate commits,
+  # finalize), as the build plugin did before config/sentryBuildRelease.ts
+  # kept the release out of the bundle. It runs only after the deploy job
+  # succeeded, so only live versions are finalized. The release name is the
+  # commit, the VERSION the runtime reports. The sentry-cli binary comes from
+  # the build job, so this job runs it with the Sentry token alone: no AWS
+  # credentials, no OIDC token and no deployment environment. Best effort:
+  # Sentry problems log a warning and never fail the deploy.
+  record-sentry-release:
+    name: Record Sentry release
+    needs: build-upload-deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    continue-on-error: true
+    permissions:
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout exact production SHA
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
       - name: Download sentry-cli for the Sentry release
         continue-on-error: true
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
@@ -472,15 +516,6 @@ jobs:
             exit 0
           fi
           bash ops/scripts/sentry-release.sh "$cli" "$COMMIT_SHA"
-
-      - name: Upload exact production version evidence
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: production-version-evidence-${{ github.run_id }}
-          path: deployment-version-evidence.json
-          if-no-files-found: ignore
-          retention-days: 90
 
   notify-production-deployment:
     name: Notify production deployment outcome

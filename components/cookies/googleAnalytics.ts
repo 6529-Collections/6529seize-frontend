@@ -101,7 +101,15 @@ function getAnalyticsPageTitle(pageUrl: string): string {
   }
 }
 
-let analyticsDisabled = false;
+const analyticsWindow = (): Record<string, unknown> =>
+  globalThis as unknown as Record<string, unknown>;
+
+/**
+ * Reads the page's disable flag, the one gtag.js reads, so this module and
+ * gtag.js always agree. False where the flag was never set, as on the server.
+ */
+const isAnalyticsDisabled = (): boolean =>
+  analyticsWindow()[GOOGLE_ANALYTICS_DISABLE_FLAG] === true;
 
 /**
  * Turns page view reporting off or back on for this page. Withdrawing consent
@@ -110,10 +118,7 @@ let analyticsDisabled = false;
  * more while it is set.
  */
 export function setGoogleAnalyticsDisabled(disabled: boolean): void {
-  analyticsDisabled = disabled;
-  (globalThis as unknown as Record<string, unknown>)[
-    GOOGLE_ANALYTICS_DISABLE_FLAG
-  ] = disabled;
+  analyticsWindow()[GOOGLE_ANALYTICS_DISABLE_FLAG] = disabled;
 }
 
 const sanitizeReferrer = (referrer: string): string =>
@@ -164,7 +169,7 @@ function pinSanitizedPageOnNavigation(currentUrl: string): void {
     try {
       const gtag = getGtag();
       const url = getPageUrl();
-      if (!gtag || analyticsDisabled || url === pinnedUrl) {
+      if (!gtag || isAnalyticsDisabled() || url === pinnedUrl) {
         return;
       }
       gtag("set", {
@@ -300,7 +305,7 @@ function loadGoogleAnalytics(landing: PageSnapshot): void {
   let reportedUrl = landing.url;
   const reportNavigationBeforeReady = () => {
     const currentUrl = getPageUrl();
-    if (analyticsDisabled || currentUrl === reportedUrl) {
+    if (isAnalyticsDisabled() || currentUrl === reportedUrl) {
       return;
     }
     gtag("event", "page_view", {

@@ -11,22 +11,26 @@ export interface LeafOwner {
 
 /**
  * How long a direct-conversation Welcome may wait for a device the server
- * does not know yet, from when this device first held it back. A device
- * registered moments before it was added can briefly read as unknown, and
- * the directory keeps that answer for 5 minutes; 15 minutes allows two
- * fresh lookups after the first miss before the Welcome is refused.
+ * does not know yet, per engine session: counted from when this engine
+ * session first held it back, so a reload or restart starts it again. A
+ * device registered moments before it was added can briefly read as
+ * unknown, and the directory keeps that answer for 5 minutes; 15 minutes
+ * allows two fresh lookups after the first miss before the Welcome is
+ * refused.
  */
 export const DM_UNKNOWN_DEVICE_RETRY_MS = 15 * 60_000;
 
-const heldBack = new WeakMap<EngineContext, Map<string, number>>();
+/** When each held-back Welcome was first held back, per engine session. */
+const heldBack = new WeakMap<Pick<EngineContext, "now">, Map<string, number>>();
 
 /**
  * Whether a Welcome held back only for an unknown device may wait for a
- * later sync. Tracked in memory from the first time it was held back here,
- * not from the server's timestamp; once the window has passed it is not.
+ * later sync. Tracked in memory from the first time this engine session
+ * held it back, not from the server's timestamp; once the window has passed
+ * it is not.
  */
 export function retryWelcomeLater(
-  ctx: EngineContext,
+  ctx: Pick<EngineContext, "now">,
   welcomeId: string
 ): boolean {
   let seen = heldBack.get(ctx);
@@ -42,6 +46,17 @@ export function retryWelcomeLater(
   }
   seen.delete(welcomeId);
   return false;
+}
+
+/**
+ * Forgets a Welcome once it is resolved (joined or refused), so a held-back
+ * entry does not stay for the rest of the engine session.
+ */
+export function releaseHeldWelcome(
+  ctx: Pick<EngineContext, "now">,
+  welcomeId: string
+): void {
+  heldBack.get(ctx)?.delete(welcomeId);
 }
 
 /**

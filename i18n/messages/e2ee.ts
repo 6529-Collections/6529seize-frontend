@@ -762,6 +762,8 @@ export const E2EE_MESSAGES = {
     "The encrypted chat history and keys saved in this browser are deleted right away. An encrypted backup can restore the history it contains.",
   "e2ee.devices.revokeHistoryUnsigned":
     "That device stops receiving encrypted messages. Its saved chat history stays on it until it’s removed there, because encrypted messages aren’t on in this browser to confirm the revocation.",
+  "e2ee.devices.revokeUnsignedNotice":
+    "{label} was revoked, but this browser couldn’t sign the revocation of its encrypted messages. Its saved chat history stays on that device until it’s removed there.",
   "e2ee.deviceStatus.summary":
     "This device: signed posts {proof}; encrypted DMs {encryption}.",
   "e2ee.deviceStatus.expiring": " · expires {time}",

@@ -9,7 +9,7 @@ import { t } from "@/i18n/messages";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import { ApiAttachmentSafetyStatus } from "@/generated/models/ApiAttachmentSafetyStatus";
-import { DEFAULT_MEDIA_RESOLVER_ENDPOINT } from "@/lib/media/decentralized-media";
+import { FIRST_PARTY_MEDIA_RESOLVER_HOSTS } from "@/lib/media/decentralized-media";
 import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -66,9 +66,11 @@ export function canPreviewAttachmentInline(url: string): boolean {
 
   return (
     parsed.protocol === "https:" &&
-    [publicEnv.MEDIA_RESOLVER_ENDPOINT, DEFAULT_MEDIA_RESOLVER_ENDPOINT].some(
-      (endpoint) => getOrigin(endpoint) === parsed.origin
-    )
+    [
+      publicEnv.MEDIA_RESOLVER_ENDPOINT,
+      // Both media domains, whichever one the endpoint selects.
+      ...FIRST_PARTY_MEDIA_RESOLVER_HOSTS.map((host) => `https://${host}`),
+    ].some((endpoint) => getOrigin(endpoint) === parsed.origin)
   );
 }
 

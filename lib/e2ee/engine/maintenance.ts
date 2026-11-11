@@ -93,6 +93,8 @@ async function confirmedBadGrants(
     if (!member || unknown.has(key)) {
       continue;
     }
+    // One at a time: a lookup that cannot complete throws (RetryableError)
+    // and ends the pass before any further lookups start.
     const check = await ctx.directory.checkLeaf(
       { device_key: key, identity: member.identity, leaf: member.leaf },
       ctx.now()

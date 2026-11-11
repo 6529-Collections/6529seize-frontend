@@ -19,7 +19,7 @@ import {
   ExclamationTriangleIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import WaveDropSearchResultPreview from "./WaveDropSearchResultPreview";
 import {
   AuthorSignedLabel,
@@ -109,6 +109,7 @@ export default function MessageSearchResults({
 }) {
   const locale = useBrowserLocale();
   const zone = useDisplayTimeZone();
+  const resultLabelIdBase = useId();
   const {
     selectedWave: scopeWave,
     liveNormalizedQuery,
@@ -238,7 +239,7 @@ export default function MessageSearchResults({
             )}
           </div>
           <div className="tw-space-y-2">
-            {visibleResults.map((drop) => {
+            {visibleResults.map((drop, index) => {
               const serialNo = drop.serial_no;
               const author =
                 typeof drop.author.handle === "string" &&
@@ -271,7 +272,10 @@ export default function MessageSearchResults({
               // The row is one button, so its seal is static and the signed
               // status joins the button's name.
               const isAuthorSigned = isDropAuthorSigned(drop);
-              const labelId = `search-result-label-${drop.stableKey}`;
+              // The id comes from the row's position, never from drop data:
+              // `stableKey` is raw hash bytes and may hold white space, which
+              // would split the id list, and two drops can share a hash.
+              const labelId = `${resultLabelIdBase}-result-${index}`;
               return (
                 <button
                   key={drop.stableKey}

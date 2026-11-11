@@ -5,6 +5,7 @@ import { STREAM_NAMESPACE_MESSAGES } from "@/i18n/namespaces/stream";
 import { NETWORK_TDH_MESSAGES } from "@/i18n/namespaces/network-tdh";
 import { NETWORK_TDH_CONSOLIDATION_MESSAGES } from "@/i18n/namespaces/network-tdh-consolidation";
 import { VALIDATOR_AUTHORIZE_MESSAGES } from "@/i18n/namespaces/validator-authorize";
+import { VALIDATOR_FILES_MESSAGES } from "@/i18n/namespaces/validator-files";
 
 /**
  * The complete en-US source dictionary: the root dictionary plus every feature
@@ -25,6 +26,7 @@ export const EN_US_MESSAGES = {
   ...NETWORK_TDH_MESSAGES,
   ...NETWORK_TDH_CONSOLIDATION_MESSAGES,
   ...VALIDATOR_AUTHORIZE_MESSAGES,
+  ...VALIDATOR_FILES_MESSAGES,
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

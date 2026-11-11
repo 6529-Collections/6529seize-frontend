@@ -234,9 +234,12 @@ and checks the wallet's sign-in signature on the grant. The dialog shows:
 A drop that 6529.io marks as signed by its author shows a small seal right
 after its timestamp. When the seal comes into view, the browser fetches the
 drop's signed events and verifies them itself, as the **Signature** dialog
-does. Only drops 6529.io marks as signed are checked, at most three at a
-time; a check still waiting when its seal scrolls away is dropped and
-queued again if the seal returns. Verdicts are kept in memory for the page
+does. Seals that come into view within a moment of each other share one
+request for their signed events (up to 50 drops per request); a drop with a
+long edit history, or an API without that request, is read on its own. Only
+drops 6529.io marks as signed are checked, at most two at a time and at most
+two requests a second; a check still waiting when its seal scrolls away is
+dropped and queued again if the seal returns. Verdicts are kept in memory for the page
 session, and a check that fails to load or times out is not retried by
 itself (open the **Signature** dialog to try again). The seal's accessible
 name, tooltip and shape follow that check:

@@ -16,6 +16,12 @@ import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
  * cost, so this budget only keeps one address from taking the whole queue.
  * Every URL counts, cached or not, so the budget is the same however a caller
  * groups its URLs.
+ *
+ * The per-process table tracks at most 10,000 client addresses per window
+ * (`createClientRateLimiter`). When it is full, addresses already tracked
+ * keep their own budget, and new addresses share one overflow budget of ten
+ * times the per-client limit until tracked windows expire; past that budget
+ * they are answered 429 with `Retry-After`.
  */
 const PREVIEW_URLS_PER_CLIENT_WINDOW = 1200;
 const PREVIEW_CLIENT_WINDOW_MS = 60 * 1000;
@@ -29,11 +35,24 @@ const PREVIEW_CLIENT_WINDOW_MS = 60 * 1000;
  * The caller's abort signal applies only while it waits for a slot. Admitted
  * work runs to its own deadlines and its result is cached, so a viewer who
  * scrolls away still warms the preview for the next one.
+ *
+ * A full queue (256 waiting) or an expired wait answers 503 with
+ * `Retry-After: 5`; in a POST batch only the URLs that found no slot are
+ * reported as busy.
+ *
+ * Admitted work holds its slot for at most 20 s, the browser client's own
+ * timeout. Each outbound request in a preview has its own deadline (8 s for a
+ * page, 8 s for Alchemy, 4 s for token metadata), so ordinary previews finish
+ * well inside it. Work that runs longer gives its slot back at 20 s and the
+ * caller is answered as busy (503, or `busy` in a batch). The work itself is
+ * not cancelled: it is still bounded by its per-request deadlines, and a late
+ * result is cached for the next viewer.
  */
 const PREVIEW_FETCH_CONCURRENCY = 32;
 const PREVIEW_FETCH_MAX_PENDING = 256;
 const PREVIEW_FETCH_WAIT_MS = 10 * 1000;
 const PREVIEW_BUSY_RETRY_AFTER_SECONDS = 5;
+const PREVIEW_ADMITTED_WORK_DEADLINE_MS = 20 * 1000;
 
 /** Bytes of a preview page read for metadata; the rest is not downloaded. */
 export const PREVIEW_HTML_MAX_BYTES = 1024 * 1024;
@@ -84,9 +103,20 @@ export async function withPreviewFetchSlot<T>(
   work: () => Promise<T>
 ): Promise<T> {
   const release = await previewFetchAdmission.acquire(signal);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => {
+      reject(new AdmissionQueueError("timeout"));
+    }, PREVIEW_ADMITTED_WORK_DEADLINE_MS);
+  });
+  const running = work();
+  // Work that outlives the deadline still settles (and may cache its result);
+  // only its slot is given back early.
+  running.catch(() => undefined);
   try {
-    return await work();
+    return await Promise.race([running, deadline]);
   } finally {
+    clearTimeout(timer);
     release();
   }
 }

@@ -1,5 +1,8 @@
 import { ARWEAVE_GATEWAY_CSP_SOURCES } from "../lib/media/arweave-gateways";
-import { getMediaResolverSource } from "../lib/media/decentralized-media";
+import {
+  USER_CONTENT_CSP_SOURCES,
+  getMediaResolverSource,
+} from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_CSP_SOURCES } from "../lib/media/ipfs-gateways";
 import { PRODUCTION_ASSET_PREFIX } from "./assetPrefix";
 import { SENTRY_INGEST_HOSTNAME_PATTERN } from "./sentryIngest";
@@ -146,6 +149,13 @@ export function createSecurityHeaders(
   const mediaResolverSource = getMediaResolverSource(mediaResolverEndpoint);
   const configuredIpfsGatewaySource =
     getConfiguredIpfsGatewaySource(ipfsGatewayEndpoint);
+  // User-provided media may be served from the separate content domain (its
+  // path host and one host per CID). Both domains stay allowed whichever one
+  // the resolver endpoint selects, so switching or reverting it needs no
+  // policy change.
+  const userContentSources = USER_CONTENT_CSP_SOURCES.filter(
+    (source) => source !== mediaResolverSource
+  );
   const connectSrc = [
     "'self'",
     "blob:",
@@ -164,6 +174,7 @@ export function createSecurityHeaders(
     "https://*.google-analytics.com",
     "https://cloudflare-eth.com/",
     mediaResolverSource,
+    ...userContentSources,
     ...arweaveGatewaySources,
     ipfsGatewaySources,
     "https://rpc.walletconnect.com/v1/",
@@ -192,6 +203,7 @@ export function createSecurityHeaders(
     // OpenSea NFT previews use the original video while processing is pending.
     "https://i2c.seadn.io",
     mediaResolverSource,
+    ...userContentSources,
     ...arweaveGatewaySources,
     ipfsGatewaySources,
     configuredIpfsGatewaySource,
@@ -202,6 +214,7 @@ export function createSecurityHeaders(
   const frameSrc = [
     "'self'",
     mediaResolverSource,
+    ...userContentSources,
     "https://ipfs.io",
     "https://ipfs.io/ipfs/",
     configuredIpfsGatewaySource,

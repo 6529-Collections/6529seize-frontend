@@ -111,8 +111,18 @@ export function createAppWalletConnector(
     return configuredTransports?.[chainId] ?? http(APP_WALLET_FALLBACK_RPC_URL);
   }
 
+  // The chain and transports the cached client was built with.
+  let walletClientChainId: number | undefined;
+  let walletClientTransports: ConfiguredTransports;
+
   async function getOrCreateClient(chainId: number) {
-    if (walletClient) return walletClient;
+    if (
+      walletClient &&
+      walletClientChainId === chainId &&
+      walletClientTransports === configuredTransports
+    ) {
+      return walletClient;
+    }
 
     if (!decryptedPrivateKey) {
       throw new Error("No decrypted key found. Call connect() first.");
@@ -128,6 +138,8 @@ export function createAppWalletConnector(
       chain,
       transport: getTransport(chainId),
     });
+    walletClientChainId = chainId;
+    walletClientTransports = configuredTransports;
     currentChainId = chainId;
     return walletClient;
   }

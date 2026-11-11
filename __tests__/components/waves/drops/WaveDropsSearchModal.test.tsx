@@ -41,6 +41,7 @@ jest.mock("react-use", () => ({
 const wave = { id: "wave-1", name: "Design Wave" } as any;
 const result = {
   stableKey: "drop-1",
+  stableHash: "a1b2c3",
   serial_no: 42,
   wave: { id: "wave-1", name: "Design Wave" },
   title: null,
@@ -145,6 +146,48 @@ describe("WaveDropsSearchModal", () => {
     expect(screen.getByText("bob").tagName).toBe("MARK");
     fireEvent.click(screen.getByText("Documentation"));
     expect(onSelectSerialNo).toHaveBeenCalledWith(42);
+  });
+
+  it("names each result through one valid label id", () => {
+    // Stable keys are raw hash bytes: they can hold white space and control
+    // characters, which must not reach the id that names the result. Two
+    // drops can also share a hash, and each still needs its own label.
+    setHookResult({
+      drops: [
+        { ...result, stableKey: "k\u0007|\u001f e\n\tZ", stableHash: "0f1e2d" },
+        {
+          ...result,
+          stableKey: "q\r\n x",
+          stableHash: "0f1e2d",
+          serial_no: 43,
+        },
+      ],
+    });
+    render(
+      <WaveDropsSearchModal
+        isOpen
+        onClose={jest.fn()}
+        wave={wave}
+        onSelectSerialNo={jest.fn()}
+      />
+    );
+    fireEvent.change(screen.getByRole("combobox", { name: "Search messages" }), {
+      target: { value: "modern" },
+    });
+
+    const labelIds = [42, 43].map((serialNo) => {
+      const resultButton = screen.getByRole("button", {
+        name: `Open message ${serialNo} by alice`,
+      });
+      const labelId = resultButton.getAttribute("aria-labelledby") ?? "";
+      // One token: an id list splits on white space.
+      expect(labelId).toMatch(/^\S+$/);
+      expect(document.getElementById(labelId)).toHaveTextContent(
+        `Open message ${serialNo} by alice`
+      );
+      return labelId;
+    });
+    expect(new Set(labelIds).size).toBe(2);
   });
 
   it("requires three text characters but permits a valid filter-only search", () => {

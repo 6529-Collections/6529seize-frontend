@@ -220,7 +220,10 @@ verify it. Revoking this browser's own grant clears its local encrypted history
 and keys right away. Another device deletes its history once it confirms the
 revocation came from a device of yours it trusts; otherwise (for example when
 encrypted messages are off in the browser you revoke from) it stops and keeps
-that history until it is removed there. The dialog says which applies. Reauthorizing
+that history until it is removed there. The dialog says which applies. If this
+browser cannot sign that revocation (for example the request fails), the grant
+is still revoked and a notice says that device keeps its history until it is
+removed there. Reauthorizing
 later creates a new device; it does not bring that deleted local history back.
 Earlier Signed Posts remain verifiable after revocation.
 

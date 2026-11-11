@@ -274,10 +274,9 @@ function compareAttachments(
   if (signedIds.length !== shown.length) {
     return "mismatch";
   }
+  signedIds.sort(compareText);
   const shownIds = shown.map((id) => id.toLowerCase()).sort(compareText);
-  return signedIds
-    .sort(compareText)
-    .every((id, index) => id === shownIds[index])
+  return signedIds.every((id, index) => id === shownIds[index])
     ? "match"
     : "mismatch";
 }
