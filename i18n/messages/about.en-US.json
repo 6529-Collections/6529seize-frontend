@@ -365,6 +365,8 @@
   "apps.openMobile.back": "Back to 6529.io",
   "apps.desktop.title": "6529 Desktop",
   "apps.desktop.description": "Choose your operating system to see available downloads.",
+  "apps.validator.title": "6529 Validator",
+  "apps.validator.description": "Read more about 6529 validator",
   "apps.desktop.loading": "Loading desktop app downloads",
   "apps.desktop.error": "Desktop downloads are temporarily unavailable. Please try again.",
   "apps.desktop.retry": "Try again",

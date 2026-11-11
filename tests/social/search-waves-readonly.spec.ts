@@ -1088,6 +1088,21 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     ).toHaveCount(0);
   });
 
+  test("Pages search opens the Validator without a navigation entry", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/about/6529-apps");
+    const { searchInput } = await openHeaderSearch(page);
+    await searchInput.fill("validator");
+    await page.getByRole("tab", { name: /^Pages/ }).click();
+    const validator = page
+      .getByRole("option")
+      .locator('xpath=self::a[@href="/validator"]');
+    await expect(validator).toContainText("6529 Validator");
+    await validator.click();
+    await expect(page).toHaveURL(/\/validator$/);
+  });
+
   test("global header search preserves keyboard flow and page navigation", async ({
     page,
   }) => {
