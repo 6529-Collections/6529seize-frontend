@@ -255,6 +255,19 @@ const OTHER_SEARCH_WAVE_ID = "00000000-0000-4000-8000-000000000530";
 const OTHER_SEARCH_WAVE_NAME = "Another Search Wave";
 
 async function installAdvancedSearchFixture(page: Page) {
+  await page.route("**/api/profile-cms/assets?**", (route) => {
+    const assetUrl = new URL(route.request().url()).searchParams.get("url");
+    if (assetUrl?.endsWith("/6529-emoji/emoji-list.json")) {
+      return fulfillLocalReadOnlyFixture(route, { json: ["el_fafo_angy"] });
+    }
+    if (assetUrl?.endsWith("/6529-emoji/el_fafo_angy.webp")) {
+      return fulfillLocalReadOnlyFixture(route, {
+        contentType: "image/svg+xml",
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="9" fill="#ffcc00"/></svg>',
+      });
+    }
+    return route.fallback();
+  });
   const overview = {
     ...localFixtureWaveOverview,
     id: OTHER_SEARCH_WAVE_ID,
@@ -313,7 +326,8 @@ async function installAdvancedSearchFixture(page: Page) {
             wave: overview,
             author: { ...localFixtureProfile, handle: "alice", badges: {} },
             created_at: 1713744000000,
-            content: "hello from another wave",
+            content:
+              "hello **from :el_fafo_angy:** another wave :smile: :unknown_search_emoji: `:el_fafo_angy:`",
             parts_count: 1,
             media: [],
             attachments: [],
@@ -334,6 +348,24 @@ async function installAdvancedSearchFixture(page: Page) {
       },
     });
   });
+}
+
+async function expectSearchResultEmojis(result: Locator) {
+  const emoji = result.getByRole("img", {
+    name: ":el_fafo_angy:",
+    exact: true,
+  });
+  await expect(emoji).toBeVisible();
+  await expect(emoji).toHaveJSProperty("complete", true);
+  await expect(emoji).toHaveJSProperty("naturalWidth", 20);
+  await expect(emoji).toHaveCSS("width", "20px");
+  await expect(emoji).toHaveCSS("height", "20px");
+  await expect(result.locator('strong img[alt=":el_fafo_angy:"]')).toBeVisible();
+  await expect(result.locator("mark").first()).toHaveText(/hello/i);
+  await expect(result).toContainText("😄");
+  await expect(result).toContainText(":unknown_search_emoji:");
+  await expect(result.locator("code")).toHaveText(":el_fafo_angy:");
+  await expect(result.locator("code img")).toHaveCount(0);
 }
 
 async function exerciseAdvancedSearch(
@@ -378,6 +410,11 @@ async function exerciseAdvancedSearch(
       name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
     })
   ).toContainText(OTHER_SEARCH_WAVE_NAME);
+  await expectSearchResultEmojis(
+    page.getByRole("button", {
+      name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
+    })
+  );
   const continuation = page.waitForRequest((request) => {
     const url = new URL(request.url());
     return (
@@ -1137,6 +1174,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       .first();
     await expect(firstResult).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
     await expect(firstResult).toContainText("#");
+    if (local) await expectSearchResultEmojis(firstResult);
     await expect(page.getByRole("tab", { name: /^Messages/ })).toBeInViewport({
       ratio: 0.99,
     });

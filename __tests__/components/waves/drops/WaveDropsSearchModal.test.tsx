@@ -1,3 +1,13 @@
+jest.mock("@/contexts/EmojiContext", () => ({
+  useEmoji: () => ({
+    findCustomEmoji: (id: string) =>
+      id === "el_fafo_angy" ? { skins: [{ src: "/custom-emoji.webp" }] } : null,
+    findNativeEmoji: (id: string) =>
+      id === "smile" ? { skins: [{ native: "😄" }] } : null,
+    loadEmojiData: jest.fn(() => Promise.resolve()),
+  }),
+}));
+
 import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
@@ -148,6 +158,49 @@ describe("WaveDropsSearchModal", () => {
     expect(onSelectSerialNo).toHaveBeenCalledWith(42);
   });
 
+  it("renders emoji without breaking highlights or literal code", () => {
+    setHookResult({
+      drops: [
+        {
+          ...result,
+          parts: [
+            {
+              content:
+                "Wednesday **:el_fafo_angy:** :smile: :unknown_emoji: `:el_fafo_angy:`\n\n```\n:el_fafo_angy:\n```",
+            },
+          ],
+        },
+      ],
+    });
+    render(
+      <WaveDropsSearchModal
+        isOpen
+        onClose={jest.fn()}
+        wave={wave}
+        onSelectSerialNo={jest.fn()}
+        onSearchAll={jest.fn()}
+      />
+    );
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Search messages" }),
+      { target: { value: "Wednesday" } }
+    );
+    const row = screen.getByRole("button", {
+      name: "Open message 42 by alice",
+    });
+    const emoji = screen.getByRole("img", { name: ":el_fafo_angy:" });
+    expect(emoji).toHaveAttribute("src", "/custom-emoji.webp");
+    expect(emoji.closest("strong")).not.toBeNull();
+    expect(row.querySelector("mark")).toHaveTextContent("Wednesday");
+    expect(row).toHaveTextContent("😄 :unknown_emoji:");
+    const code = row.querySelectorAll("code");
+    expect(code).toHaveLength(2);
+    code.forEach((element) => {
+      expect(element).toHaveTextContent(":el_fafo_angy:");
+      expect(element.querySelector("img")).toBeNull();
+    });
+  });
+
   it("names each result through one valid label id", () => {
     // Stable keys are raw hash bytes: they can hold white space and control
     // characters, which must not reach the id that names the result. Two
@@ -171,9 +224,12 @@ describe("WaveDropsSearchModal", () => {
         onSelectSerialNo={jest.fn()}
       />
     );
-    fireEvent.change(screen.getByRole("combobox", { name: "Search messages" }), {
-      target: { value: "modern" },
-    });
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Search messages" }),
+      {
+        target: { value: "modern" },
+      }
+    );
 
     const labelIds = [42, 43].map((serialNo) => {
       const resultButton = screen.getByRole("button", {

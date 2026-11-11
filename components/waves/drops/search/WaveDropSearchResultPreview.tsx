@@ -1,12 +1,42 @@
 "use client";
 
-import { Children, Fragment, type ReactNode } from "react";
+import { useEmoji } from "@/contexts/EmojiContext";
+import Image from "next/image";
+import { Children, Fragment, useEffect, type ReactNode } from "react";
 import Markdown, { type Components } from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 
-const TOKEN_PATTERN = /(@\[[^\]]+\]|#\[[^\]]+\]|\$\[[^\]]+\])/g;
+const TOKEN_PATTERN = /(@\[[^\]]+\]|#\[[^\]]+\]|\$\[[^\]]+\]|:\w+:)/g;
+const LITERAL_TOKEN_PATTERN = /(@\[[^\]]+\]|#\[[^\]]+\]|\$\[[^\]]+\])/g;
 const TOKEN_PART_PATTERN = /^(?:@\[[^\]]+\]|#\[[^\]]+\]|\$\[[^\]]+\])$/;
+const EMOJI_PATTERN = /^:\w+:$/;
+
+function SearchResultEmoji({
+  shortcode,
+  children,
+}: {
+  readonly shortcode: string;
+  readonly children: ReactNode;
+}) {
+  const { findCustomEmoji, findNativeEmoji } = useEmoji();
+  const emojiId = shortcode.slice(1, -1);
+  const src = findCustomEmoji(emojiId)?.skins[0]?.src;
+  if (src) {
+    return (
+      <Image
+        src={src}
+        alt={shortcode}
+        width={20}
+        height={20}
+        loading="lazy"
+        unoptimized
+        className="tw-inline-block tw-size-5 tw-object-contain tw-align-middle"
+      />
+    );
+  }
+  return findNativeEmoji(emojiId)?.skins[0]?.native ?? children;
+}
 
 const getTokenDisplayValue = (token: string): string =>
   `${token.charAt(0)}${token.slice(2, -1)}`;
@@ -41,8 +71,14 @@ const highlightMatches = (
   return nodes;
 };
 
-const highlightText = (text: string, query: string): ReactNode => {
-  const tokenParts = text.split(TOKEN_PATTERN);
+const highlightText = (
+  text: string,
+  query: string,
+  renderEmojis = true
+): ReactNode => {
+  const tokenParts = text.split(
+    renderEmojis ? TOKEN_PATTERN : LITERAL_TOKEN_PATTERN
+  );
   let precedingText = "";
   return tokenParts.map((tokenPart) => {
     const isToken = TOKEN_PART_PATTERN.test(tokenPart);
@@ -56,6 +92,13 @@ const highlightText = (text: string, query: string): ReactNode => {
         </span>
       );
     }
+    if (renderEmojis && EMOJI_PATTERN.test(tokenPart)) {
+      return (
+        <SearchResultEmoji key={partKey} shortcode={tokenPart}>
+          {highlightMatches(tokenPart, query, `${partKey}-match`)}
+        </SearchResultEmoji>
+      );
+    }
     return (
       <Fragment key={partKey}>
         {highlightMatches(tokenPart, query, `${partKey}-match`)}
@@ -66,9 +109,14 @@ const highlightText = (text: string, query: string): ReactNode => {
 
 // Every inline Markdown renderer below decorates its own string children. We
 // intentionally leave already-rendered elements alone to avoid double marks.
-const decorateChildren = (children: ReactNode, query: string): ReactNode =>
+const decorateChildren = (
+  children: ReactNode,
+  query: string,
+  renderEmojis = true
+): ReactNode =>
   Children.map(children, (child) => {
-    if (typeof child === "string") return highlightText(child, query);
+    if (typeof child === "string")
+      return highlightText(child, query, renderEmojis);
     return child;
   });
 
@@ -96,7 +144,7 @@ const createComponents = ({
   br: () => <br />,
   code: ({ children }) => (
     <code className="tw-rounded tw-bg-iron-950 tw-px-1 tw-py-0.5 tw-font-mono tw-text-[0.9em] tw-text-iron-200">
-      {decorateChildren(children, query)}
+      {decorateChildren(children, query, false)}
     </code>
   ),
   del: ({ children }) => <del>{decorateChildren(children, query)}</del>,
@@ -183,6 +231,14 @@ export default function WaveDropSearchResultPreview({
   readonly imageFallback: string;
   readonly uncheckedLabel: string;
 }) {
+  const { loadEmojiData } = useEmoji();
+  const hasEmojiShortcodes = [title, ...parts.map((part) => part.content)].some(
+    (content) => /:\w+:/.test(content ?? "")
+  );
+  useEffect(() => {
+    if (hasEmojiShortcodes) void loadEmojiData();
+  }, [hasEmojiShortcodes, loadEmojiData]);
+
   const contentParts = parts
     .map((part) => part.content?.trim() ?? "")
     .filter(Boolean);
