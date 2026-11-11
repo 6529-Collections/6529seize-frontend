@@ -14,7 +14,10 @@ const mockAuth = jest.fn();
 const mockBalance = jest.fn();
 const mockWait = jest.fn();
 let mockAddress = sender;
-jest.mock("@wagmi/core", () => ({ getWalletClient: jest.fn() }));
+jest.mock("@wagmi/core", () => ({
+  ...jest.requireActual("@wagmi/core"),
+  getWalletClient: jest.fn(),
+}));
 jest.mock("wagmi", () => ({
   useConfig: () => ({}),
   usePublicClient: () => ({
