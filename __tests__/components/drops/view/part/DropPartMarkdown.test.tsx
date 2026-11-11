@@ -45,11 +45,14 @@ it("isolates all public footnote IDs without drop IDs and rejects authored HTML 
   )) {
     const target = anchor.getAttribute("href")?.slice(1);
     expect(container.querySelector(`[id="${target}"]`)).not.toBeNull();
-    const label = anchor.getAttribute("aria-describedby");
-    if (label)
-      expect(container.querySelector(`[id="${label}"]`)).toHaveTextContent(
-        "Footnotes"
-      );
+  }
+  for (const reference of references) {
+    expect(reference).toHaveAttribute("aria-describedby");
+    const label = reference.getAttribute("aria-describedby");
+    expect(label).toMatch(/^user-content-/);
+    expect(container.querySelector(`[id="${label}"]`)).toHaveTextContent(
+      "Footnotes"
+    );
   }
 });
 
