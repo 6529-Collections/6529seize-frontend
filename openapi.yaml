@@ -4736,6 +4736,94 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCommunityMembersPage"
+  /v3/community-memory/sources:
+    get:
+      tags:
+        - CommunityMemory
+      summary: List validated newsletter source records (public history)
+      description: >-
+        Returns the source records that published 6529 Daily Post editions were
+        validated against, ordered by event time then source id. Every
+        drop-backed record is re-joined to the live drop through the same public
+        filter the newsletter collector uses, so content that has since been
+        deleted, hidden, moderated or restricted is not republished. Records are
+        traceable through edition_id, source_id and the content fingerprint
+        captured at collection time. A reference being valid shows that the
+        source exists and is correctly identified; it does not assert that every
+        interpretation in the edition's prose is true.
+      operationId: listCommunityMemorySources
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache:
+          ttlSeconds: 60
+        typeImportGroup: community-memory
+        handler:
+          import: "@/api/community-memory/community-memory.handlers"
+          name: handleListCommunityMemorySources
+      parameters:
+        - name: wave_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: edition_id
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: from
+          in: query
+          required: false
+          description: Inclusive lower bound on event time, ISO-8601 or epoch milliseconds
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 40
+        - name: to
+          in: query
+          required: false
+          description: >-
+            Exclusive upper bound on event time, ISO-8601 or epoch milliseconds.
+            With from, the window may span at most 31 days.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 40
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Source page ordered by event time then source id
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCommunityMemorySourcePage"
+        "400":
+          description: Invalid filter, window, limit, or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
   /community-metrics:
     get:
       tags:
@@ -28676,6 +28764,103 @@ components:
         - xtdh_incoming
         - combined_tdh
         - combined_tdh_rate
+    ApiCommunityMemorySource:
+      type: object
+      additionalProperties: false
+      required:
+        - source_id
+        - kind
+        - canonical_url
+        - title
+        - author_handle
+        - wave_id
+        - wave_name
+        - observed_at
+        - time
+        - content_fingerprint
+        - provenance
+        - classification
+      properties:
+        source_id:
+          type: string
+        kind:
+          $ref: "#/components/schemas/ApiCommunityMemorySourceKind"
+        canonical_url:
+          type: string
+        title:
+          type: string
+          nullable: true
+        author_handle:
+          type: string
+          nullable: true
+        wave_id:
+          type: string
+          nullable: true
+        wave_name:
+          type: string
+          nullable: true
+        observed_at:
+          type: string
+          description: ISO-8601 time the collector read the record
+        time:
+          type: string
+          description: ISO-8601 event time (message, decision or first mint in window)
+        content_fingerprint:
+          type: string
+          description: sha256 hex of the collected content at observation time
+        provenance:
+          $ref: "#/components/schemas/ApiCommunityMemorySourceProvenance"
+        classification:
+          allOf:
+            - $ref: "#/components/schemas/ApiCommunityMemorySourceClassification"
+          nullable: true
+    ApiCommunityMemorySourceClassification:
+      type: string
+      description: >-
+        Derived at read time: WINNER and MINT records are OUTCOME, drops in 6529
+        team waves are ANNOUNCEMENT, other drops are DISCUSSION, identities
+        carry no classification. CORRECTION is reserved.
+      enum:
+        - ANNOUNCEMENT
+        - DISCUSSION
+        - CORRECTION
+        - OUTCOME
+    ApiCommunityMemorySourceKind:
+      type: string
+      enum:
+        - DROP
+        - WINNER
+        - MINT
+        - IDENTITY
+    ApiCommunityMemorySourcePage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCommunityMemorySource"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+    ApiCommunityMemorySourceProvenance:
+      type: object
+      additionalProperties: false
+      required:
+        - edition_id
+        - collected_at
+      properties:
+        edition_id:
+          type: string
+        collected_at:
+          type: string
+          description: ISO-8601 time of the collection run that produced the record
     ApiCommunityMetric:
       type: object
       required:

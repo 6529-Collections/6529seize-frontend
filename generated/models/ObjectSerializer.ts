@@ -222,6 +222,11 @@ export * from '../models/ApiCommunityMemberMinimal';
 export * from '../models/ApiCommunityMemberOverview';
 export * from '../models/ApiCommunityMembersPage';
 export * from '../models/ApiCommunityMembersSortOption';
+export * from '../models/ApiCommunityMemorySource';
+export * from '../models/ApiCommunityMemorySourceClassification';
+export * from '../models/ApiCommunityMemorySourceKind';
+export * from '../models/ApiCommunityMemorySourcePage';
+export * from '../models/ApiCommunityMemorySourceProvenance';
 export * from '../models/ApiCommunityMetric';
 export * from '../models/ApiCommunityMetricSample';
 export * from '../models/ApiCommunityMetrics';
@@ -1216,6 +1221,11 @@ import { ApiCommunityMemberMinimal } from '../models/ApiCommunityMemberMinimal';
 import { ApiCommunityMemberOverview } from '../models/ApiCommunityMemberOverview';
 import { ApiCommunityMembersPage } from '../models/ApiCommunityMembersPage';
 import { ApiCommunityMembersSortOption } from '../models/ApiCommunityMembersSortOption';
+import { ApiCommunityMemorySource             } from '../models/ApiCommunityMemorySource';
+import { ApiCommunityMemorySourceClassification } from '../models/ApiCommunityMemorySourceClassification';
+import { ApiCommunityMemorySourceKind } from '../models/ApiCommunityMemorySourceKind';
+import { ApiCommunityMemorySourcePage } from '../models/ApiCommunityMemorySourcePage';
+import { ApiCommunityMemorySourceProvenance } from '../models/ApiCommunityMemorySourceProvenance';
 import { ApiCommunityMetric } from '../models/ApiCommunityMetric';
 import { ApiCommunityMetricSample } from '../models/ApiCommunityMetricSample';
 import { ApiCommunityMetrics } from '../models/ApiCommunityMetrics';
@@ -2085,6 +2095,8 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCollectTdhTargetSearchWorkLimitEnum",
     "ApiCollectTdhTargetSearchStopReasonEnum",
     "ApiCommunityMembersSortOption",
+    "ApiCommunityMemorySourceClassification",
+    "ApiCommunityMemorySourceKind",
     "ApiCompetitionCapability",
     "ApiCompetitionComputedPhase",
     "ApiCompetitionDecisionStatus",
@@ -2504,6 +2516,9 @@ let typeMap: {[index: string]: any} = {
     "ApiCommunityMemberMinimal": ApiCommunityMemberMinimal,
     "ApiCommunityMemberOverview": ApiCommunityMemberOverview,
     "ApiCommunityMembersPage": ApiCommunityMembersPage,
+    "ApiCommunityMemorySource": ApiCommunityMemorySource,
+    "ApiCommunityMemorySourcePage": ApiCommunityMemorySourcePage,
+    "ApiCommunityMemorySourceProvenance": ApiCommunityMemorySourceProvenance,
     "ApiCommunityMetric": ApiCommunityMetric,
     "ApiCommunityMetricSample": ApiCommunityMetricSample,
     "ApiCommunityMetrics": ApiCommunityMetrics,
