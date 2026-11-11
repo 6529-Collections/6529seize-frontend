@@ -17,7 +17,12 @@ import {
   rollback,
   type EngineContext,
 } from "./context";
-import { dmParticipants, retryWelcomeLater, type LeafOwner } from "./dm-join";
+import {
+  dmParticipants,
+  releaseHeldWelcome,
+  retryWelcomeLater,
+  type LeafOwner,
+} from "./dm-join";
 import { RetryableError } from "./errors";
 import {
   addNotices,
@@ -165,7 +170,9 @@ export async function tryCatchUp(
 // Welcomes
 // ---------------------------------------------------------------------------
 
+/** Resolves a Welcome (joined or refused): acknowledged and no longer held. */
 async function ack(ctx: EngineContext, welcome: ApiE2eeWelcome): Promise<void> {
+  releaseHeldWelcome(ctx, welcome.id);
   try {
     await ctx.api.ackWelcome(ownDeviceKey(ctx), welcome.id);
   } catch {
