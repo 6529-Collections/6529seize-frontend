@@ -10,7 +10,10 @@ import {
 } from "react";
 import type { Components } from "react-markdown";
 import { useQueryClient } from "@tanstack/react-query";
-import { MessageMarkdown } from "@/components/markdown/MessageMarkdown";
+import {
+  MarkdownLink,
+  MessageMarkdown,
+} from "@/components/markdown/MessageMarkdown";
 
 import { useEmoji } from "@/contexts/EmojiContext";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
@@ -59,7 +62,15 @@ const ParagraphRenderer = (
 ) => useMarkdownRenderers().renderParagraph(props);
 const AnchorRenderer = (
   props: Parameters<MarkdownComponentsOptions["renderAnchor"]>[0]
-) => useMarkdownRenderers().renderAnchor(props);
+) => {
+  const { renderAnchor } = useMarkdownRenderers();
+  // Footnotes are local fragments, not destinations for public rich-link cards.
+  return props.href?.startsWith("#") ? (
+    <MarkdownLink {...props} />
+  ) : (
+    renderAnchor(props)
+  );
+};
 const ImageRenderer = (
   props: Parameters<MarkdownComponentsOptions["renderImage"]>[0]
 ) => useMarkdownRenderers().renderImage(props);

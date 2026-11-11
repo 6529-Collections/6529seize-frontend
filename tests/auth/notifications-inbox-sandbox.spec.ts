@@ -63,6 +63,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
   test("compact Markdown previews preserve formatting without fetching message URLs", async ({
     page,
   }, testInfo) => {
+    // The compact inbox is desktop-only; the mobile full-page flow is covered below.
     test.skip(
       testInfo.project.name !== "web-desktop-chromium",
       "Desktop compact inbox"

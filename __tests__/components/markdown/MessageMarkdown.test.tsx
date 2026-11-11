@@ -62,7 +62,7 @@ it("shares structural formatting between public and private messages", () => {
       </section>
     </>
   );
-  const bodies = container.querySelectorAll("section");
+  const bodies = container.children;
   const snapshot = (element: Element) =>
     [
       ...element.querySelectorAll(
@@ -75,3 +75,23 @@ it("shares structural formatting between public and private messages", () => {
     }));
   expect(snapshot(bodies[0]!)).toEqual(snapshot(bodies[1]!));
 });
+
+it.each(["public", "private"] as const)(
+  "announces task state without interactive checkboxes in %s previews",
+  (privacy) => {
+    const { container } = render(
+      <MessageMarkdown
+        privacy={privacy}
+        preview
+        text={"- [x] Complete\n- [ ] Pending"}
+      />
+    );
+    expect(screen.getByRole("img", { name: "Checked task" })).toHaveTextContent(
+      "☑"
+    );
+    expect(
+      screen.getByRole("img", { name: "Unchecked task" })
+    ).toHaveTextContent("☐");
+    expect(container.querySelector("input")).toBeNull();
+  }
+);

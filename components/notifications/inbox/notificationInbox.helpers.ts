@@ -48,7 +48,9 @@ export function getInboxPreview(notification: TypedNotification): string {
     drop?.title ??
     drop?.parts.map((part) => part.content ?? "").join(" ") ??
     "";
-  return content.replaceAll(/([@#])\[([^\[\]\r\n]+)\]/g, "$1$2").trim();
+  // Keep closing delimiters and reference definitions intact. The memoized
+  // renderer shortens the parsed tree; raw slicing can expose Markdown syntax.
+  return content.replaceAll(/([@#])\[([^[\]\r\n]+)\]/g, "$1$2").trim();
 }
 
 function getInboxCompetitionDestination(

@@ -28,6 +28,7 @@ import { rehypePreserveOrderedListDelimiter } from "@/components/drops/view/part
 import { rehypeDropPreview } from "@/components/drops/view/part/dropPartMarkdown/preview";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { rehypeScopeFootnoteLabel } from "./footnotes";
 
 // Public drops support safe raster data images. Private messages keep the
 // default protocol policy; their images are explicit links, never resources.
@@ -94,10 +95,18 @@ function Paragraph({ children }: ComponentPropsWithoutRef<"p">) {
 }
 
 function createHeading(Tag: "h1" | "h2" | "h3" | "h4" | "h5" | "h6") {
-  return function Heading({ children }: ComponentPropsWithoutRef<"h1">) {
+  return function Heading({
+    children,
+    node: _node,
+    className = "",
+    ...props
+  }: ComponentPropsWithoutRef<"h1"> & ExtraProps) {
     const { renderText } = useContext(RenderingContext);
     return (
-      <Tag className="word-break tw-break-words tw-text-iron-200">
+      <Tag
+        {...props}
+        className={`word-break tw-break-words tw-text-iron-200 ${className}`}
+      >
         {renderText(children)}
       </Tag>
     );
@@ -154,7 +163,7 @@ function Code({ children, className }: ComponentPropsWithoutRef<"code">) {
   );
 }
 
-function SafeLink({
+export function MarkdownLink({
   node: _node,
   href,
   children,
@@ -192,23 +201,22 @@ function ImageLink({ src, alt, title }: ComponentPropsWithoutRef<"img">) {
       : t(locale, "e2ee.message.imageLink");
   }
   return (
-    <SafeLink href={href} title={title}>
+    <MarkdownLink href={href} title={title}>
       {label}
-    </SafeLink>
+    </MarkdownLink>
   );
 }
 
 function Table({ children }: ComponentPropsWithoutRef<"table">) {
   const locale = useBrowserLocale();
   return (
-    <div
-      role="region"
+    <section
       aria-label={t(locale, "e2ee.message.markdownTable")}
       tabIndex={0}
       className="tw-max-w-full tw-overflow-x-auto focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
     >
       <table>{children}</table>
-    </div>
+    </section>
   );
 }
 
@@ -218,6 +226,21 @@ function PreviewImage({ alt }: ComponentPropsWithoutRef<"img">) {
   return (
     <span>
       {label.length > 0 ? label : t(locale, "e2ee.message.imageLink")}
+    </span>
+  );
+}
+
+function PreviewTask({ checked }: ComponentPropsWithoutRef<"input">) {
+  const locale = useBrowserLocale();
+  return (
+    <span
+      role="img"
+      aria-label={t(
+        locale,
+        checked ? "e2ee.message.taskChecked" : "e2ee.message.taskUnchecked"
+      )}
+    >
+      {checked ? "☑" : "☐"}
     </span>
   );
 }
@@ -233,24 +256,24 @@ const COMPONENTS: Components = {
   li: ListItem,
   blockquote: Blockquote,
   code: Code,
-  a: SafeLink,
+  a: MarkdownLink,
   img: ImageLink,
   table: Table,
 };
-const PRIVATE_COMPONENTS: Components = { a: SafeLink, img: ImageLink };
+const PRIVATE_COMPONENTS: Components = { a: MarkdownLink, img: ImageLink };
 // A notification row is already a link. Its body must never nest links,
 // interactive controls, embeds or remote images inside that destination.
 const PREVIEW_COMPONENTS: Components = {
   a: ({ children }) => <span>{children}</span>,
   img: PreviewImage,
-  input: ({ checked }) => <span>{checked ? "☑" : "☐"}</span>,
+  input: PreviewTask,
   table: ({ children }) => <table>{children}</table>,
   p: ({ children }) => (
     <p className="tw-m-0 tw-text-sm tw-leading-5">{children}</p>
   ),
 };
 
-export interface MessageMarkdownProps {
+interface MessageMarkdownProps {
   readonly text: string | null;
   readonly privacy: "public" | "private";
   /** Two-line, non-interactive notification content. Parse before shortening. */
@@ -259,9 +282,10 @@ export interface MessageMarkdownProps {
   readonly collapsedPreview?: boolean;
   readonly messageId?: string | undefined;
   readonly className?: string;
-  /** Trusted, local adapters for mentions and public rich media. */
+  /** Trusted local adapters. Keep objects/functions stable to avoid reparsing. */
   readonly components?: Components;
   readonly renderText?: (children: ReactNode) => ReactNode;
+  /** Module-level constants or memoized arrays of trusted prose decorators. */
   readonly textPlugins?: PluggableList;
 }
 
@@ -279,6 +303,7 @@ export const MessageMarkdown = memo(
     textPlugins = EMPTY_PLUGINS,
   }: MessageMarkdownProps) => {
     const renderId = useId();
+    const idPrefix = `${privacy === "private" ? "e2ee" : "user-content"}-${messageId}-${renderId}-`;
     const context = useMemo(() => ({ renderText }), [renderText]);
     const content = useMemo(
       () => (preview ? text : normalizeDropMarkdownContent(text)),
@@ -291,15 +316,17 @@ export const MessageMarkdown = memo(
           rehypeSanitize,
           {
             ...(privacy === "public" ? PUBLIC_SCHEMA : defaultSchema),
-            // remark scopes footnotes to this mounted instance before sanitization.
+            // Raw HTML is disabled and GFM has no authored-ID syntax. remark
+            // scopes generated note/reference IDs; avoid prefixing them twice.
             clobberPrefix: "",
           },
         ],
+        [rehypeScopeFootnoteLabel, idPrefix],
         rehypePreserveOrderedListDelimiter,
         ...(preview || collapsedPreview ? [rehypeDropPreview] : []),
         ...textPlugins,
       ],
-      [privacy, preview, collapsedPreview, textPlugins]
+      [privacy, preview, collapsedPreview, textPlugins, idPrefix]
     );
     const renderers = useMemo<Components>(
       () => ({
@@ -317,7 +344,7 @@ export const MessageMarkdown = memo(
           skipHtml
           remarkPlugins={REMARK_PLUGINS}
           remarkRehypeOptions={{
-            clobberPrefix: `${privacy === "private" ? "e2ee" : "user-content"}-${messageId}-${renderId}-`,
+            clobberPrefix: idPrefix,
           }}
           rehypePlugins={plugins}
           components={renderers}
