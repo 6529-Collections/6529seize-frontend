@@ -1378,7 +1378,7 @@ dependencies = [
  "openmls_traits",
  "serde",
  "serde_json",
- "sha3 0.11.0",
+ "sha3 0.12.0",
  "tls_codec",
  "wasm-bindgen",
  "zeroize",
