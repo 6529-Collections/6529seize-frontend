@@ -199,7 +199,7 @@ describe("device key loss", () => {
       await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("revoked");
 
       expect(mockRevokeDeviceGrant).toHaveBeenCalledTimes(1);
-      expect(mockRevokeDeviceGrant).toHaveBeenCalledWith(LOST_ID);
+      expect(mockRevokeDeviceGrant).toHaveBeenCalledWith(LOST_ID, mockJwt({ sub: ADDRESS, role: null }));
       expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
       // Nothing is left to revoke on a later grant.
       await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("none");
@@ -317,7 +317,7 @@ describe("device key loss", () => {
         mockRevokeDeviceGrant.mockResolvedValue(grant(LOST_ID));
 
         await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("revoked");
-        expect(mockRevokeDeviceGrant).toHaveBeenCalledWith(LOST_ID);
+        expect(mockRevokeDeviceGrant).toHaveBeenCalledWith(LOST_ID, mockJwt({ sub: ADDRESS, role: null }));
       });
 
       it("revokes nothing when the encrypted devices cannot be listed", async () => {
@@ -357,7 +357,7 @@ describe("device key loss", () => {
         mockCommonApiFetch.mockResolvedValue(e2eeMe());
         mockRevokeDeviceGrant.mockReset().mockResolvedValue(grant(LOST_ID));
         await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("revoked");
-        expect(mockRevokeDeviceGrant).toHaveBeenCalledWith(LOST_ID);
+        expect(mockRevokeDeviceGrant).toHaveBeenCalledWith(LOST_ID, mockJwt({ sub: ADDRESS, role: null }));
         expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
       };
 

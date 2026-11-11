@@ -41,8 +41,9 @@ interface SignedInAccount {
  */
 class AccountChangedError extends Error {}
 
-/** The subject wallet and role of the session token, when readable. */
+/** The session token, with its subject wallet and role, when readable. */
 function readSessionToken(): {
+  readonly token: string;
   readonly wallet: string;
   readonly role: string | null;
 } | null {
@@ -56,6 +57,7 @@ function readSessionToken(): {
       return null;
     }
     return {
+      token,
       wallet: sub.toLowerCase(),
       role: typeof role === "string" ? role : null,
     };
@@ -65,49 +67,69 @@ function readSessionToken(): {
 }
 
 /**
- * Whether the token requests are sent with now still acts as this account:
- * issued for its wallet, with no proxy role (a direct session's role is the
- * wallet's own profile or absent). The token itself is checked, not the
+ * The session token now in use when it acts as this account (issued for its
+ * wallet, with no proxy role: a direct session's role is the wallet's own
+ * profile or absent), else null. The token itself is checked, not the
  * stored account state, because another tab can switch the stored role
  * before the token in use changes, or the other way round.
  */
-function isStillSignedInAs(account: SignedInAccount): boolean {
+function accountSessionToken(account: SignedInAccount): string | null {
   const session = readSessionToken();
-  return (
+  const isAccount =
     session !== null &&
     session.wallet === account.wallet &&
     isDirectProfileAuthSession({
       authRole: session.role,
       profileId: account.profileId,
       hasActiveProxy: false,
-    })
-  );
+    });
+  return isAccount ? session.token : null;
 }
 
-function assertSignedInAs(account: SignedInAccount): void {
-  if (!isStillSignedInAs(account)) {
+/** The token validated as this account's own, or AccountChangedError. */
+function requireAccountSessionToken(account: SignedInAccount): string {
+  const validated = accountSessionToken(account);
+  if (validated === null) {
     throw new AccountChangedError("Signed-in account changed");
+  }
+  return validated;
+}
+
+/** The session token now is still exactly the one a request was sent with. */
+function assertSameSessionToken(
+  account: SignedInAccount,
+  sentWith: string
+): void {
+  const inUse = requireAccountSessionToken(account);
+  if (inUse !== sentWith) {
+    throw new AccountChangedError("Session token changed");
   }
 }
 
 /**
- * Runs one server call for this account, checking the session before and
- * after it (also when it fails), so an answer or an error produced under
- * another account never decides this account's record.
+ * Runs one server call for this account, bound to the session token just
+ * validated as its own: the call sends exactly that token, with no
+ * session-aware retry that could swap it. Before and after the call (also
+ * when it fails) the token in use must still be that one, and a 401 means
+ * the session changed. Otherwise AccountChangedError, so an answer or an
+ * error produced under another session never decides this account's record.
  */
 async function asAccount<T>(
   account: SignedInAccount,
-  call: () => Promise<T>
+  call: (sessionToken: string) => Promise<T>
 ): Promise<T> {
-  assertSignedInAs(account);
+  const token = requireAccountSessionToken(account);
   let result: T;
   try {
-    result = await call();
+    result = await call(token);
   } catch (error) {
-    assertSignedInAs(account);
+    assertSameSessionToken(account, token);
+    if (getStructuredApiErrorStatus(error) === 401) {
+      throw new AccountChangedError("Session token was rejected");
+    }
     throw error;
   }
-  assertSignedInAs(account);
+  assertSameSessionToken(account, token);
   return result;
 }
 
@@ -159,10 +181,12 @@ async function enrolledEncryptedDevice(
   grantId: string,
   account: SignedInAccount
 ): Promise<boolean> {
-  const me = await asAccount(account, () =>
+  const me = await asAccount(account, (sessionToken) =>
     commonApiFetch<ApiE2eeMe>({
       endpoint: "e2ee/me",
       errorMode: "structured",
+      includeWalletAuth: false,
+      headers: { Authorization: `Bearer ${sessionToken}` },
     })
   );
   // The server's own answer names the profile too.
@@ -194,7 +218,9 @@ async function isRevocable(
     return false;
   }
   // Only a list read as this account may say the grant is gone.
-  const grants = await asAccount(account, () => fetchDeviceGrants());
+  const grants = await asAccount(account, (sessionToken) =>
+    fetchDeviceGrants(undefined, sessionToken)
+  );
   const serverGrant = grants.find((grant) => grant.id === loss.grantId);
   const activeForNoteKey =
     serverGrant?.revoked_at === null &&
@@ -280,7 +306,9 @@ export async function revokeLostDeviceGrant(
         return "none";
       }
       try {
-        await asAccount(signedIn, () => revokeDeviceGrant(loss.grantId));
+        await asAccount(signedIn, (sessionToken) =>
+          revokeDeviceGrant(loss.grantId, sessionToken)
+        );
       } catch (error) {
         recordFailure(wallet, loss, error);
         return "failed";
