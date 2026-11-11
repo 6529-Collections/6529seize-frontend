@@ -217,8 +217,10 @@ export default function HeaderUserMenuDropdown({
                               seizeDisconnectAndLogoutAll
                             ),
                           pendingKey: "logout-all",
-                          errorMessage:
-                            "Failed to sign out all profiles. Please try again.",
+                          errorMessage: t(
+                            HEADER_USER_MENU_LOCALE,
+                            "auth.signOut.error.allProfilesRetry"
+                          ),
                         });
                       }}
                       actionsDisabled={pendingAction !== null}
@@ -485,7 +487,10 @@ export default function HeaderUserMenuDropdown({
                             seizeDisconnectAndLogout
                           ),
                         pendingKey: "logout",
-                        errorMessage: "Failed to sign out. Please try again.",
+                        errorMessage: t(
+                          HEADER_USER_MENU_LOCALE,
+                          "auth.signOut.error.retry"
+                        ),
                       });
                     }}
                     disabled={pendingAction !== null}
