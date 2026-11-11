@@ -85,8 +85,20 @@ it("keeps fenced code and subsequent parts as distinct Markdown blocks", () => {
       {
         ...drop,
         parts: [
-          { part_id: 1, media: [], content: "```js\nfirst();\n```" },
-          { part_id: 2, media: [], content: "**Second part**" },
+          {
+            part_id: 1,
+            media: [],
+            attachments: [],
+            quoted_drop: null,
+            content: "```js\nfirst();\n```",
+          },
+          {
+            part_id: 2,
+            media: [],
+            attachments: [],
+            quoted_drop: null,
+            content: "**Second part**",
+          },
         ],
       },
     ],
@@ -115,6 +127,8 @@ it("renders regular notification Markdown without truncating delimiters or nesti
           {
             part_id: 1,
             media: [],
+            attachments: [],
+            quoted_drop: null,
             content: `**${longBold}** *italic* ~~gone~~ and \`code\`.\n\n[Link](https://example.com) ![Image](https://example.com/image.png)`,
           },
         ],
