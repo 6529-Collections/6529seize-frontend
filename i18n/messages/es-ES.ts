@@ -37,6 +37,7 @@ import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
   "waves.historyGap.load": "Cargar mensajes pendientes",
   "waves.historyGap.loaded": "Mensajes pendientes cargados",
   "waves.historyGap.loading": "Cargando mensajes pendientes…",

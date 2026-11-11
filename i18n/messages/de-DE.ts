@@ -39,6 +39,7 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
   "waves.historyGap.load": "Verpasste Nachrichten laden",
   "waves.historyGap.loaded": "Verpasste Nachrichten geladen",
   "waves.historyGap.loading": "Verpasste Nachrichten werden geladen…",
