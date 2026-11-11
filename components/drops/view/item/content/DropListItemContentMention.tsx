@@ -37,7 +37,10 @@ export default function DropListItemContentMention({
           {label}
         </Link>
       ) : (
-        <span className="tw-font-medium tw-text-primary-400">{label}</span>
+        // Same look and click behaviour as the linked chip, without a link.
+        <span onClick={(e) => e.stopPropagation()} className={MENTION_CLASS_NAME}>
+          {label}
+        </span>
       )}
     </UserProfileTooltipWrapper>
   );

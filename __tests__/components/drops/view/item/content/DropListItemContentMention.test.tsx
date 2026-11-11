@@ -26,14 +26,25 @@ const mention = (handle: string): any => ({
   current_handle: handle,
 });
 
+/** Renders the mention inside a clickable parent, like a drop row. */
+const renderInClickableParent = (handle: string) => {
+  const onParentClick = jest.fn();
+  const result = render(
+    <div onClick={onParentClick}>
+      <DropListItemContentMention user={mention(handle)} />
+    </div>
+  );
+  return { ...result, onParentClick };
+};
+
 describe("DropListItemContentMention", () => {
   it("renders link and stops propagation", () => {
-    const user: any = { mentioned_profile_id: "1", handle_in_content: "bob" };
-    const { container } = render(<DropListItemContentMention user={user} />);
+    const { container, onParentClick } = renderInClickableParent("bob");
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/bob");
     expect(link).toHaveTextContent("@bob");
     fireEvent.click(link);
+    expect(onParentClick).not.toHaveBeenCalled();
     expect(
       container.querySelector('[data-testid="tooltip-wrapper"]')
     ).toBeInTheDocument();
@@ -66,5 +77,17 @@ describe("DropListItemContentMention", () => {
     render(<DropListItemContentMention user={mention(handle)} />);
     expect(screen.queryByRole("link")).toBeNull();
     expect(screen.getByText(`@${handle}`)).toBeInTheDocument();
+  });
+
+  it("styles the unlinked handle like a mention chip and keeps clicks inside it", () => {
+    render(<DropListItemContentMention user={mention("bob")} />);
+    const chipClassName = screen.getByRole("link").className;
+    const { onParentClick } = renderInClickableParent("..");
+
+    const text = screen.getByText("@..");
+    expect(text.tagName).toBe("SPAN");
+    expect(text.className).toBe(chipClassName);
+    fireEvent.click(text);
+    expect(onParentClick).not.toHaveBeenCalled();
   });
 });
