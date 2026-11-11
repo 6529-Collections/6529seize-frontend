@@ -103,6 +103,10 @@ describe("drop signature details", () => {
       DROP_ID,
       expect.any(AbortSignal)
     );
+    // The dialog reads the drop's full history through the single-drop route
+    // and passes no grantCheckCache: it is the manual retry, so it checks
+    // every grant afresh, and with a contract-wallet reader a grant's answer
+    // can differ from the seals' shared checks (made without one).
     expect(mockVerify).toHaveBeenCalledWith(signedEvents, {
       contractWallets: undefined,
       displayed: undefined,
