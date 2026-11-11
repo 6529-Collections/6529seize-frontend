@@ -43,6 +43,26 @@ function createBodySource(body: string, headers: Record<string, string> = {}) {
   };
 }
 
+/**
+ * Creates a stream that yields each byte chunk on its own read.
+ */
+function createChunkedBody(
+  chunks: Uint8Array[],
+  cancel: () => void = () => undefined
+): ReadableStream<Uint8Array> {
+  return new ReadableStream<Uint8Array>({
+    pull(controller) {
+      const next = chunks.shift();
+      if (next) {
+        controller.enqueue(next);
+      } else {
+        controller.close();
+      }
+    },
+    cancel,
+  });
+}
+
 describe("limitedBody", () => {
   it("reads text within the byte limit", async () => {
     const response = createBodySource("hello", {
@@ -75,19 +95,8 @@ describe("limitedBody", () => {
     const chunks = ["<head>ab", "cdef</head>", "never read"].map((chunk) =>
       new TextEncoder().encode(chunk)
     );
-    const body = new ReadableStream<Uint8Array>({
-      pull(controller) {
-        const next = chunks.shift();
-        if (next) {
-          controller.enqueue(next);
-        } else {
-          controller.close();
-        }
-      },
-      cancel,
-    });
     const source = {
-      body,
+      body: createChunkedBody(chunks, cancel),
       headers: new Headers({ "content-length": "999999" }),
     };
 
@@ -95,6 +104,28 @@ describe("limitedBody", () => {
       "<head>abcdef"
     );
     expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a multi-byte character split across chunks", async () => {
+    // "é" is two bytes in UTF-8 (0xC3 0xA9); the split falls between them.
+    const bytes = new TextEncoder().encode("café");
+    const source = {
+      body: createChunkedBody([bytes.subarray(0, 4), bytes.subarray(4)]),
+      headers: new Headers(),
+    };
+
+    await expect(readLimitedText(source, 16)).resolves.toBe("café");
+  });
+
+  it("flushes the decoder when the body ends inside a multi-byte character", async () => {
+    const bytes = new TextEncoder().encode("café");
+    const source = {
+      body: createChunkedBody([bytes.subarray(0, 4)]),
+      headers: new Headers(),
+    };
+
+    // The incomplete trailing sequence becomes U+FFFD instead of vanishing.
+    await expect(readLimitedText(source, 16)).resolves.toBe("caf\uFFFD");
   });
 
   it("parses JSON only after the bounded text read", async () => {

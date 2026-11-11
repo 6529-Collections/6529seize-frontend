@@ -114,9 +114,15 @@ loading.
   to 256 more wait for at most 10 seconds. Beyond either limit the preview
   request is answered `429` or `503` with a `Retry-After` header, and the link
   falls back to its plain presentation until a later load retries it.
+- Each server process tracks up to 10,000 client addresses per minute. When
+  that table is full, addresses already tracked keep their own budget and new
+  addresses share one overflow budget (ten times the per-address budget) until
+  the tracked windows end; beyond it they are answered `429` as above.
 - The browser waits up to 20 seconds for a preview batch. A preview that has
   started fetching on the server finishes and is cached even if the viewer
-  scrolls away or the browser stops waiting, so the next load gets it.
+  scrolls away or the browser stops waiting, so the next load gets it. A
+  preview still running after 20 seconds gives its server fetch slot back and
+  is answered as busy; it still finishes in the background and is cached.
 - Slow or redirect-heavy destinations can degrade preview quality or fall back to
   non-rich link states.
 - Link-preview chrome uses the app message catalog, but the wave preview stack

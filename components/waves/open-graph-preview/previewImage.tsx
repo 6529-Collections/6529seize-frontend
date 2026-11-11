@@ -29,6 +29,23 @@ const DIRECT_IMAGE_HOSTNAMES: ReadonlySet<string> = new Set(
 
 const RASTER_ICON_EXTENSION = /\.(?:png|jpe?g|webp|gif)$/i;
 
+let mediaResolverHost: {
+  readonly endpoint: string | undefined;
+  readonly hostname: string;
+} | null = null;
+
+/** The media resolver's hostname, parsed once per configured endpoint. */
+function getDirectMediaResolverHostname(): string {
+  const endpoint = publicEnv.MEDIA_RESOLVER_ENDPOINT;
+  if (mediaResolverHost?.endpoint !== endpoint) {
+    mediaResolverHost = {
+      endpoint,
+      hostname: getMediaResolverHostname(endpoint),
+    };
+  }
+  return mediaResolverHost.hostname;
+}
+
 /** Hosts the app already loads images from directly: its own and its CDNs. */
 function isDirectImageUrl(value: string): boolean {
   try {
@@ -41,8 +58,7 @@ function isDirectImageUrl(value: string): boolean {
       !url.password &&
       (DIRECT_IMAGE_HOSTNAMES.has(hostname) ||
         isFirstPartyMediaResolverHostname(hostname) ||
-        hostname ===
-          getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT))
+        hostname === getDirectMediaResolverHostname())
     );
   } catch {
     return false;

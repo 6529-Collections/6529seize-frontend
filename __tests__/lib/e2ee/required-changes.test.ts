@@ -11,6 +11,11 @@ import {
 
 const NOW = 1_800_000_000_000;
 const OWN = "0xown";
+/**
+ * This device joined well before any activity in these cases, so the join
+ * bound on idle time only applies where a case sets `joinedAt` itself.
+ */
+const JOINED_LONG_AGO = NOW - 4 * T_IDLE_MS;
 
 const ok = (expiresAt = NOW + 1e9): DeviceStatus => ({
   revoked: false,
@@ -26,7 +31,7 @@ function input(
     ownDeviceKey: OWN,
     ownProfileId: "me",
     ownIsAdmin: true,
-    joinedAt: 0,
+    joinedAt: JOINED_LONG_AGO,
     members: [
       { deviceKey: OWN, profileId: "me" },
       { deviceKey: "0xb1", profileId: "bob" },
@@ -242,7 +247,7 @@ describe("required changes (contract 8.2, 8.4)", () => {
       now: NOW,
       leaving: new Set<string>(),
       badGrants: new Set<string>(),
-      deviceStatus: new Map(),
+      deviceStatus: new Map<string, DeviceStatus>(),
     };
     expect(isStrictRemoval("0xz", base)).toBe(false);
     expect(isStrictRemoval("0xz", { ...base, leaving: new Set(["0xz"]) })).toBe(

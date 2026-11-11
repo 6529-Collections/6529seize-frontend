@@ -7,9 +7,13 @@ import type { GroupRuntime } from "./store";
 
 type ConversationInput = Parameters<E2eeEngineExt["createConversation"]>[0];
 
+/** The fields the DM helpers read, picked from the stored group. */
 const dmIdentity = ({ record }: GroupRuntime) => ({
-  ...record.metadata,
-  ...record,
+  kind: record.metadata.kind,
+  admins: record.metadata.admins,
+  members: record.members,
+  status: record.status,
+  epoch: record.epoch,
 });
 
 /**

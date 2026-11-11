@@ -850,8 +850,7 @@ describe("github-preview API route", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("keeps the valid snapshot when a refresh fails", async () => {
-    const url = "https://github.com/o/r/issues/14";
+  const mockKeptIssueThen = (url: string, failure: () => Promise<Response>) =>
     fetchMock
       .mockResolvedValueOnce(
         jsonResponse({
@@ -861,21 +860,64 @@ describe("github-preview API route", () => {
           state_reason: null,
         })
       )
-      .mockRejectedValueOnce(new Error("GitHub unavailable"));
+      .mockImplementationOnce(failure);
 
-    const now = jest.spyOn(Date, "now").mockReturnValue(3_000_000);
+  it.each([
+    ["a network error", () => Promise.reject(new TypeError("fetch failed"))],
+    [
+      "a GitHub server error",
+      () => Promise.resolve(jsonResponse({}, { status: 503 })),
+    ],
+    ["rate limiting", () => Promise.resolve(jsonResponse({}, { status: 429 }))],
+  ])(
+    "answers a refresh that fails with %s with the retained snapshot",
+    async (_label, failure) => {
+      const url = "https://github.com/o/r/issues/14";
+      mockKeptIssueThen(url, failure);
+
+      const now = jest.spyOn(Date, "now").mockReturnValue(3_000_000);
+      await GET(requestFor(url));
+      now.mockReturnValue(3_030_000);
+      const refreshed = await GET(requestFor(url, true));
+      const afterFailure = await GET(requestFor(url));
+      now.mockRestore();
+
+      expect(refreshed.status).toBe(200);
+      await expect(refreshed.json()).resolves.toMatchObject({
+        title: "Kept issue",
+        state: "open",
+      });
+      await expect(afterFailure.json()).resolves.toMatchObject({
+        title: "Kept issue",
+        state: "open",
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    }
+  );
+
+  it("answers a refresh that finds the issue gone with an error", async () => {
+    const url = "https://github.com/o/r/issues/16";
+    mockKeptIssueThen(url, () =>
+      Promise.resolve(jsonResponse({}, { status: 404 }))
+    );
+
+    const now = jest.spyOn(Date, "now").mockReturnValue(4_000_000);
     await GET(requestFor(url));
-    now.mockReturnValue(3_030_000);
+    now.mockReturnValue(4_030_000);
     const refreshed = await GET(requestFor(url, true));
-    const afterFailure = await GET(requestFor(url));
     now.mockRestore();
 
     expect(refreshed.status).toBe(400);
-    await expect(afterFailure.json()).resolves.toMatchObject({
-      title: "Kept issue",
-      state: "open",
-    });
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("still answers 400 when a first load fails with no snapshot", async () => {
+    const url = "https://github.com/o/r/issues/15";
+    fetchMock.mockRejectedValueOnce(new TypeError("fetch failed"));
+
+    const response = await GET(requestFor(url, true));
+
+    expect(response.status).toBe(400);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("serves a recent snapshot to refresh requests instead of re-fetching", async () => {
