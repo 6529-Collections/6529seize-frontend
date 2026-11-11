@@ -14,9 +14,9 @@
 import { HttpFile } from '../http/http';
 
 export class ApiAvailableRatingCredit {
-    'cic_credit'?: number;
-    'rep_credit'?: number;
-    'wave_rep_credit'?: number;
+    'cic_credit': number;
+    'rep_credit': number;
+    'wave_rep_credit': number;
 
     static readonly discriminator: string | undefined = undefined;
 
