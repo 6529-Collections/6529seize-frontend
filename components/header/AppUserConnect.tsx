@@ -22,7 +22,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import HeaderQRScanner from "./share/HeaderQRScanner";
 import { useChainSwitcher } from "./useChainSwitcher";
-import { signOutWithE2eeChoice } from "@/components/e2ee/signout/e2eeSignOut";
+import { signOutAndRemoveLocalData } from "@/components/auth/signOutLocalData";
+import { DisplayedProfileChangedError } from "@/services/auth/displayed-wallet-guard";
 import Link from "next/link";
 
 export default function AppUserConnect({
@@ -65,9 +66,12 @@ export default function AppUserConnect({
       } else if (typeof error === "string") {
         errorDetails = error;
       }
-      const toastMessage = errorDetails
+      let toastMessage = errorDetails
         ? `${errorMessage}: ${errorDetails}`
         : errorMessage;
+      if (error instanceof DisplayedProfileChangedError) {
+        toastMessage = error.message;
+      }
       setToast({ message: toastMessage, type: "error" });
     } finally {
       onNavigate();
@@ -189,8 +193,8 @@ export default function AppUserConnect({
         onClick={() => {
           void runAsyncAndNavigate({
             action: () =>
-              signOutWithE2eeChoice("profile", seizeDisconnectAndLogout),
-            errorMessage: "Failed to disconnect and logout",
+              signOutAndRemoveLocalData("profile", seizeDisconnectAndLogout),
+            errorMessage: t(locale, "auth.signOut.error.disconnectAndLogout"),
           });
         }}
         className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
@@ -204,8 +208,8 @@ export default function AppUserConnect({
           onClick={() => {
             void runAsyncAndNavigate({
               action: () =>
-                signOutWithE2eeChoice("all", seizeDisconnectAndLogoutAll),
-              errorMessage: "Failed to sign out all profiles",
+                signOutAndRemoveLocalData("all", seizeDisconnectAndLogoutAll),
+              errorMessage: t(locale, "auth.signOut.error.allProfiles"),
             });
           }}
           className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"

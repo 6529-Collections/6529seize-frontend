@@ -104,7 +104,9 @@ describe("open-graph proxy-image route", () => {
     expect(result.body).toBe(body);
     expect(body.cancel).not.toHaveBeenCalled();
     expect(result.headers.get("content-type")).toBe("image/jpeg");
-    expect(result.headers.get("content-security-policy")).toBe("sandbox");
+    expect(result.headers.get("content-security-policy")).toBe(
+      "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+    );
   });
 
   it("marks proxied images as sandboxed and not sniffable", async () => {
@@ -112,7 +114,9 @@ describe("open-graph proxy-image route", () => {
 
     const result = await GET(requestFor(IMAGE_URL));
 
-    expect(result.headers.get("content-security-policy")).toBe("sandbox");
+    expect(result.headers.get("content-security-policy")).toBe(
+      "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+    );
     expect(result.headers.get("x-content-type-options")).toBe("nosniff");
   });
 

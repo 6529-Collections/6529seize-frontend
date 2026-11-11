@@ -12,6 +12,7 @@ import {
   getCmsPublicPath,
 } from "@/lib/profile-cms/runtime/routes";
 import { resolveCmsUri } from "@/lib/profile-cms/runtime/uri";
+import { toIsolatedHtmlUrlFromInput } from "@/lib/media/decentralized-media";
 import type {
   CmsPackageSignatureV1,
   CmsSourcePacketV1,
@@ -159,7 +160,13 @@ export function resolveTrustedEmbedAssetUrl(
     return null;
   }
 
-  return hasTrustedMediaResolverOrigin(url) ? url : null;
+  // Asset URIs on either media domain (path host or per-CID host) resolve to
+  // the configured resolver first, so only its origin is trusted here. IPFS
+  // embeds then load from their own per-CID origin when the separate content
+  // domain is configured.
+  return hasTrustedMediaResolverOrigin(url)
+    ? toIsolatedHtmlUrlFromInput(url, publicEnv.MEDIA_RESOLVER_ENDPOINT)
+    : null;
 }
 
 function hasTrustedMediaResolverOrigin(value: string): boolean {

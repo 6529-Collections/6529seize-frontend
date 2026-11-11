@@ -19,6 +19,9 @@ export class ApiE2eeMe {
     'profile_id': string;
     'devices': Array<ApiE2eeDevice>;
     'key_packages': Array<ApiE2eeKeyPackageStatus>;
+    /**
+    * Devices per grant version that may count toward the limit at once (see counts_toward_limit); enrolling another device beyond it returns E2EE_DEVICE_LIMIT.
+    */
     'max_devices': number;
     /**
     * Whether this server accepts encrypted attachments (E2EE_ATTACHMENTS_ENABLED); clients hide attaching while false

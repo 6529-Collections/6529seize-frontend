@@ -36,7 +36,8 @@ describe("UserAddressesSelectDropdownItem", () => {
     await userEvent.click(screen.getByLabelText("Open in OpenSea"));
     expect(window.open).toHaveBeenCalledWith(
       "https://opensea.io/0x123",
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
   });
 });

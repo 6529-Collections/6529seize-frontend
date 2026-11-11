@@ -103,19 +103,17 @@ export function useWebSocketHealth() {
     let action: HealthCheckAction = "none";
     let reason: string | null = null;
 
-    if (!currentToken && currentStatus !== WebSocketStatus.DISCONNECTED) {
+    if (!currentToken) {
+      // Signed out: a disconnected socket may still have a reconnect
+      // pending, so the provider is told to stand down in every status.
       currentDisconnect();
       action = "disconnect";
       reason = "missing-token";
-    } else if (currentToken && currentStatus === WebSocketStatus.DISCONNECTED) {
+    } else if (currentStatus === WebSocketStatus.DISCONNECTED) {
       currentConnect(currentToken);
       action = "connect";
       reason = "connect-while-disconnected";
-    } else if (
-      currentToken &&
-      currentStatus !== WebSocketStatus.DISCONNECTED &&
-      currentToken !== previousToken
-    ) {
+    } else if (currentToken !== previousToken) {
       // The provider keeps the socket for the same identity and replaces it
       // for any other (a profile switch) or while no session is settled.
       currentReauthenticate(currentToken);

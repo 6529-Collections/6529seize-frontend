@@ -2,6 +2,7 @@ import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import type { ApiDeviceSecurityNotice } from "@/generated/models/ApiDeviceSecurityNotice";
 import type { ApiE2eeAck } from "@/generated/models/ApiE2eeAck";
 import type { ApiDropSignedEvents } from "@/generated/models/ApiDropSignedEvents";
+import type { ApiDropSignedEventsBatch } from "@/generated/models/ApiDropSignedEventsBatch";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiRegisterDeviceGrantRequest } from "@/generated/models/ApiRegisterDeviceGrantRequest";
 import {
@@ -85,6 +86,23 @@ export const fetchDropSignedEvents = (
 ): Promise<ApiDropSignedEvents> =>
   commonApiFetch<ApiDropSignedEvents>({
     endpoint: `drops/${encodeURIComponent(dropId)}/signed-events`,
+    signal,
+    errorMode: "structured",
+  });
+
+/**
+ * The signed events of up to 50 drops in one read (only content events, at
+ * most 20 per drop; grants listed once for the batch). Ids the caller cannot
+ * read are listed in `unavailable`, drops with more events in
+ * `truncated_drop_ids`.
+ */
+export const fetchDropsSignedEvents = (
+  dropIds: readonly string[],
+  signal?: AbortSignal
+): Promise<ApiDropSignedEventsBatch> =>
+  commonApiFetch<ApiDropSignedEventsBatch>({
+    endpoint: "drops/signed-events",
+    params: { drop_ids: dropIds.join(",") },
     signal,
     errorMode: "structured",
   });

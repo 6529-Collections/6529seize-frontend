@@ -6,7 +6,11 @@ import {
   type ProposalCardDocumentInput,
 } from "@/lib/proposal-card/document";
 import { useMemo } from "react";
-import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
+import { publicEnv } from "@/config/env";
+import {
+  normalizeDecentralizedMediaUrl,
+  toIsolatedHtmlUrlFromInput,
+} from "@/lib/media/decentralized-media";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -17,9 +21,15 @@ export function ProposalCardPreview(props: ProposalCardDocumentInput) {
   const document = useMemo(() => {
     const isHtml =
       mimeType === "text/html" || mimeType === "application/xhtml+xml";
-    const source = isHtml
+    const resolverEndpoint = publicEnv.MEDIA_RESOLVER_ENDPOINT;
+    const canonicalHtml = isHtml
       ? canonicalizeInteractiveMediaUrl(mediaUrl)
-      : (normalizeDecentralizedMediaUrl(mediaUrl) ?? mediaUrl);
+      : null;
+    const source = isHtml
+      ? canonicalHtml &&
+        toIsolatedHtmlUrlFromInput(canonicalHtml, resolverEndpoint)
+      : (normalizeDecentralizedMediaUrl(mediaUrl, resolverEndpoint) ??
+        mediaUrl);
     if (!source) return null;
     try {
       return buildProposalCardDocument(
