@@ -41,9 +41,9 @@ function Cell({
     <td
       className={`${CELL} max-lg:tw-flex max-lg:tw-items-center max-lg:tw-justify-between max-lg:tw-gap-3 ${className}`}
     >
-      <span aria-hidden="true" className={MOBILE_LABEL}>
-        {label}
-      </span>
+      {/* The header row is hidden below 1024 px, so this label names the
+          cell there; it is hidden from 1024 px, where the header does. */}
+      <span className={MOBILE_LABEL}>{label}</span>
       {children}
     </td>
   );

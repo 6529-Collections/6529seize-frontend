@@ -15,7 +15,22 @@ describe("ValidatorAllFiles copy", () => {
 
   it("names the publisher column in the header and in each card label", () => {
     expect(html).toMatch(/<th scope="col"[^>]*>Publisher<\/th>/);
-    expect(html).toMatch(/<span aria-hidden="true"[^>]*>Publisher<\/span>/);
+    expect(html).toMatch(/<span class="[^"]*lg:tw-hidden">Publisher<\/span>/);
+  });
+
+  it("names each card cell for screen readers where the header row is hidden", () => {
+    // Below 1024 px the header row is display: none, so the cell labels are
+    // what names each value; from 1024 px they are display: none instead,
+    // so a column name is never read twice.
+    expect(html).toMatch(/<thead class="max-lg:tw-hidden">/);
+    const labels = [
+      ...html.matchAll(/<span([^>]*)>(Size|SHA-256|Publisher)<\/span>/g),
+    ];
+    expect(labels.length).toBeGreaterThan(0);
+    for (const [, attributes] of labels) {
+      expect(attributes).not.toContain("aria-hidden");
+      expect(attributes).toMatch(/ lg:tw-hidden"$/);
+    }
   });
 
   it("shows None for files without a code signature", () => {
@@ -43,8 +58,8 @@ describe("ValidatorAllFiles copy", () => {
       "Publisher",
       '<span class="tw-sr-only">Download</span>',
     ]);
-    expect(html).toMatch(/<span aria-hidden="true"[^>]*>Size<\/span>/);
-    expect(html).toMatch(/<span aria-hidden="true"[^>]*>SHA-256<\/span>/);
+    expect(html).toMatch(/<span class="[^"]*lg:tw-hidden">Size<\/span>/);
+    expect(html).toMatch(/<span class="[^"]*lg:tw-hidden">SHA-256<\/span>/);
     expect(html).toContain(
       'aria-label="Copy SHA-256 of 6529-Validator-0.1.0.dmg"'
     );
