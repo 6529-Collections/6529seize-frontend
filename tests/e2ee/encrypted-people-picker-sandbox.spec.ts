@@ -46,8 +46,8 @@ test.describe("Encrypted chat people picker @medium @local-only @e2ee", () => {
     const page = alice.page;
     await gotoPath(page, `${ENCRYPTED_ROUTE}/new`);
     const search = peopleSearch(page);
-    const result = page.getByRole("button", { name: "bob", exact: true });
-    const create = page.getByRole("button", { name: "Start encrypted chat" });
+    const result = page.getByRole("button", { name: /^bob Level/u });
+    const create = page.getByRole("button", { name: "Start chat" });
 
     await search.fill("bob");
     await expect(result).toBeVisible();
@@ -58,9 +58,9 @@ test.describe("Encrypted chat people picker @medium @local-only @e2ee", () => {
     await search.blur();
     await search.focus();
     await expect(result).toBeVisible();
-    await page.getByRole("heading", { name: "New encrypted chat" }).click();
+    await page.getByRole("heading", { name: "New message" }).click();
     await expect(result).toHaveCount(0);
-    await expect(page.getByText("No one selected yet.")).toBeVisible();
+    await expect(create).toBeDisabled();
 
     await search.focus();
     await expect(result).toBeVisible();
@@ -77,7 +77,7 @@ test.describe("Encrypted chat people picker @medium @local-only @e2ee", () => {
       timeout: E2EE_UI_TIMEOUT_MS,
     });
     await expect(search).toHaveValue("");
-    await expect(page.getByText("No one selected yet.")).toHaveCount(0);
+
     await expect(create).toBeEnabled();
 
     for (const key of ["Enter", "Space"]) {

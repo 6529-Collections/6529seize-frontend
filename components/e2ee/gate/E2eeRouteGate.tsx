@@ -49,7 +49,7 @@ export function E2eeRouteGate({ children, shell }: E2eeRouteGateProps) {
   return shell ? shell(content) : content;
 }
 
-function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
+export function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
   const locale = useBrowserLocale();
   switch (e2ee.status) {
     case "proxy":

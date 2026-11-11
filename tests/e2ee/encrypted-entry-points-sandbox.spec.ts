@@ -106,12 +106,8 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await expect(
       bobRow.getByText("Can receive encrypted messages")
     ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
-    await expect(
-      alice.page.getByRole("radio", { name: /^Direct message/u })
-    ).toBeChecked();
-    await alice.page
-      .getByRole("button", { name: "Start encrypted chat" })
-      .click();
+    await expect(alice.page.getByLabel("Group name (optional)")).toHaveCount(0);
+    await alice.page.getByRole("button", { name: "Start chat" }).click();
     await expect(composer(alice.page)).toBeVisible({
       timeout: E2EE_UI_TIMEOUT_MS,
     });
@@ -134,7 +130,16 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await e2eeSandboxControls.block(baseURL, "dave", "alice");
 
     const { page } = alice;
-    await gotoPath(page, `${ENCRYPTED_ROUTE}/new`);
+    await gotoPath(page, ENCRYPTED_ROUTE);
+    const entry = page.getByRole("button", {
+      name: "New message",
+      exact: true,
+    });
+    await expect(entry).toHaveCount(1);
+    await entry.click();
+    await expect(
+      page.getByRole("dialog", { name: "New message" })
+    ).toBeVisible();
     await pickPerson(page, "carol", {
       expectedStatus: "Doesn’t accept messages from you",
     });
@@ -143,7 +148,7 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await pickPerson(page, "dave", {
       expectedStatus: "Doesn’t accept messages from you",
     });
-    const start = page.getByRole("button", { name: "Start encrypted chat" });
+    const start = page.getByRole("button", { name: "Start chat" });
     await expect(start).toBeDisabled();
     await expect(
       page.getByText(
@@ -164,7 +169,14 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
         hasText: "Doesn’t accept messages from you",
       })
     ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
-    await expect(page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}/new$`));
+    await expect(page).toHaveURL(
+      (url) =>
+        url.pathname === ENCRYPTED_ROUTE &&
+        url.searchParams.get("create") === "dm"
+    );
+    await expect(
+      page.getByRole("button", { name: "Remove bob" })
+    ).toBeVisible();
 
     const state = await e2eeSandboxControls.state(baseURL);
     for (const group of state.groups) {
