@@ -40,6 +40,12 @@ describe("toCsvCell", () => {
     expect(toCsvCell({ id: 1 })).toBe('"{""id"":1}"');
   });
 
+  it("writes text that already starts with an apostrophe as it is", () => {
+    expect(toCsvCell("'=SUM(A1)")).toBe("'=SUM(A1)");
+    expect(toCsvCell("'+1")).toBe("'+1");
+    expect(toCsvCell("'=1,2")).toBe('"\'=1,2"');
+  });
+
   it("quotes cells with commas, quotes and line breaks", () => {
     expect(toCsvCell("a,b")).toBe('"a,b"');
     expect(toCsvCell('say "hi"')).toBe('"say ""hi"""');
