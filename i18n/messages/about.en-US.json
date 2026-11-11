@@ -372,6 +372,7 @@
   "apps.desktop.downloadAriaLabel": "Download 6529 Desktop for {platform}, version {version}",
   "apps.desktop.download": "Download",
   "apps.desktop.mirror": "Arweave mirror",
+  "apps.desktop.mirrorPending": "Arweave mirror · Coming soon",
   "apps.desktop.fileDownloadAria": "Download 6529 Desktop for {platform}, version {version}, {file}",
   "apps.desktop.mirrorAria": "Arweave mirror for 6529 Desktop for {platform}, version {version}, {file}",
   "apps.desktop.macRequirement": "Requires macOS {version} or later",
