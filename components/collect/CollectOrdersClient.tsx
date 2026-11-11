@@ -51,6 +51,22 @@ export default function CollectOrdersClient(props: ReceiptLinkProps) {
     />
   );
 }
+function prioritizeLinkedReceipt(
+  orders: readonly ApiMarketOperationResult[],
+  linkedReceipt: ApiMarketOperationResult | undefined
+): readonly ApiMarketOperationResult[] {
+  if (!linkedReceipt) return orders;
+
+  const latestReceipt = orders.reduce(
+    (latest, operation) =>
+      operation.id === latest.id && operation.updated_at > latest.updated_at
+        ? operation
+        : latest,
+    linkedReceipt
+  );
+  return [latestReceipt, ...orders.filter(({ id }) => id !== linkedReceipt.id)];
+}
+
 function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
   const locale = useBrowserLocale();
   const { hideNftPurchasing } = useNftPurchasingVisibility();
@@ -188,23 +204,10 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
     )
       setSelected({ operation, cancel });
   };
-  const readOnlyReceipt =
-    hideNftPurchasing && linkedReceipt
-      ? ownOperations.reduce(
-          (latest, operation) =>
-            operation.id === latest.id &&
-            operation.updated_at > latest.updated_at
-              ? operation
-              : latest,
-          linkedReceipt.operation
-        )
-      : undefined;
-  const visibleOrders = readOnlyReceipt
-    ? [
-        readOnlyReceipt,
-        ...ownOperations.filter(({ id }) => id !== readOnlyReceipt.id),
-      ]
-    : ownOperations;
+  const readOnlyReceipt = hideNftPurchasing
+    ? linkedReceipt?.operation
+    : undefined;
+  const visibleOrders = prioritizeLinkedReceipt(ownOperations, readOnlyReceipt);
   if (activeProfileProxy)
     return (
       <p role="status" className="tw-p-6 tw-text-sm tw-text-iron-300">
