@@ -78,7 +78,9 @@ test.describe("Encrypted Markdown @medium @local-only @e2ee", () => {
     }
     const privateText =
       'Private links\n\n[Named link](https://markdown-private-canary.invalid/named)\n\nhttps://markdown-private-canary.invalid/plain\n\n![Private image](https://markdown-private-canary.invalid/image.png)\n\n<img src="https://markdown-private-canary.invalid/html.png">\n\n[Unsafe script](javascript:alert%281%29)\n\n[Unsafe data](data:text/html,private)\n\nA private note[^1].\n\n[^1]: Private footnote';
-    await composer(alice.page).fill(privateText);
+    const linkedImage =
+      "[![Linked photo](https://markdown-private-canary.invalid/linked-image.png)](https://markdown-private-canary.invalid/post)";
+    await composer(alice.page).fill(`${privateText}\n\n${linkedImage}`);
     await alice.page.getByRole("button", { name: "Send", exact: true }).click();
     const privateRow = messageRow(bob.page, "Private links");
     await revealNewestMessage(bob.page, privateRow);
@@ -96,6 +98,12 @@ test.describe("Encrypted Markdown @medium @local-only @e2ee", () => {
     await expect(
       privateRow.getByRole("link", { name: /Unsafe script|Unsafe data/ })
     ).toHaveCount(0);
+    await expect(
+      privateRow.getByRole("link", {
+        name: "Linked photo",
+        exact: true,
+      })
+    ).toHaveAttribute("href", "https://markdown-private-canary.invalid/post");
     await privateRow.getByRole("link", { name: "Named link" }).hover();
     await privateRow.getByRole("link", { name: "Named link" }).focus();
     const note = privateRow.getByRole("link", { name: "1", exact: true });
