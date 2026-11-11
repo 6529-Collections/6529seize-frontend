@@ -10,7 +10,7 @@ const DEVICE_GRANT_CHANGED_EVENT = "6529-device-grant-changed";
 const DAY_MS = 24 * 60 * 60 * 1000;
 export const GRANT_RENEWAL_WINDOW_MS = 14 * DAY_MS;
 /** Grants this close to expiry are not used, so the server never sees one expire mid-write. */
-const SIGNING_EXPIRY_MARGIN_MS = 60 * 1000;
+export const SIGNING_EXPIRY_MARGIN_MS = 60 * 1000;
 
 type DeviceGrantStatus = "none" | "active" | "renewal" | "expired";
 
@@ -260,14 +260,16 @@ export async function listLocalDevicePublicKeys(): Promise<string[]> {
   return records.map((record) => record.publicKeyHex.toLowerCase());
 }
 
-/** Imports a freshly granted app key, preserving an existing usable local grant. */
+/** Imports a shared key, replacing only the existing grant confirmed stale by the caller. */
 export async function installSharedDeviceKey(
-  record: StoredDeviceKey
+  record: StoredDeviceKey,
+  staleGrantId?: string
 ): Promise<void> {
   const address = normalizeAddress(record.address);
   const saved = await withDeviceKeyLock(address, async () => {
     const existing = await deviceKeyStorage.read(address);
-    if (existing && getUsableGrant(existing, Date.now())) return false;
+    const existingGrant = existing && getUsableGrant(existing, Date.now());
+    if (existingGrant && existingGrant.id !== staleGrantId) return false;
     if (!record.grant || !getUsableGrant(record, Date.now()))
       throw new Error("Invalid shared signing grant");
     await deviceKeyStorage.write({ ...record, address });

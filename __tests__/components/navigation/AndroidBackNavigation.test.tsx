@@ -187,16 +187,17 @@ it("returns the encrypted chat list to Messages", () => {
   expect(mockMinimize).not.toHaveBeenCalled();
 });
 
-it.each(["waves", "messages"])(
-  "returns a direct %s creation route to its list",
-  (route) => {
-    globalThis.history.replaceState(null, "", `/${route}/create`);
-    render(<AndroidBackNavigation />);
-    back();
-    expect(mockReplace).toHaveBeenCalledWith(`/${route}`);
-    expect(mockMinimize).not.toHaveBeenCalled();
-  }
-);
+it.each([
+  ["/waves/create", "/waves"],
+  ["/messages/create", "/messages"],
+  ["/messages/new", "/messages"],
+])("returns %s to its list", (pathname, parent) => {
+  globalThis.history.replaceState(null, "", pathname);
+  render(<AndroidBackNavigation />);
+  back();
+  expect(mockReplace).toHaveBeenCalledWith(parent);
+  expect(mockMinimize).not.toHaveBeenCalled();
+});
 
 it("returns to the wave list even without the optional stream provider", () => {
   mockStream = null;
