@@ -4,6 +4,8 @@ import {
   markdownSnapshot,
   markdownBody,
   revealNewestMessage,
+  CONVERSATION_PREVIEW_MARKDOWN,
+  checkConversationPreviews,
 } from "../support/markdownParity";
 import {
   closeE2eeUsers,
@@ -31,6 +33,31 @@ test.describe("Encrypted Markdown @medium @local-only @e2ee", () => {
   test.afterEach(async () => {
     await closeE2eeUsers(sessions);
     sessions = [];
+  });
+
+  test("formats conversation-list previews on desktop and mobile without loading Markdown URLs", async ({
+    browser,
+    baseURL,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    sessions = [alice, bob];
+    const requests: string[] = [];
+    alice.page.on("request", (request) => {
+      if (request.url().includes("markdown-private-canary"))
+        requests.push(request.url());
+    });
+    await enroll(alice);
+    await enroll(bob);
+    await startChat(alice, ["bob"]);
+    await composer(alice.page).fill(CONVERSATION_PREVIEW_MARKDOWN);
+    await alice.page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(
+      messageRow(alice.page, "console.log('hi gelato3');")
+    ).toBeVisible();
+    await checkConversationPreviews(alice.page, testInfo);
+    expect(requests).toEqual([]);
   });
 
   test("renders, receives, edits and reloads Markdown without fetching private URLs", async ({

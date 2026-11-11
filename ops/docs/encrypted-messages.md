@@ -86,8 +86,14 @@ shown as a link using its alternative text (or a label identifying the image hos
 open it. To show an image privately inside the chat, attach or paste the image
 so it is encrypted on your device.
 
-Custom emojis also render inline in the encrypted chat list and sidebar message
-previews, at a compact size that keeps each preview on one line.
+The encrypted chat list and sidebar show a one-line preview of the latest
+message. Bold, italics and strikethrough keep their formatting; inline and fenced
+code use compact monospace text. Paragraphs, headings, quotes, lists and tables
+collapse into one line. Links show their labels and Markdown images show their
+alternative text or **Image link**. Selecting the row opens the chat; preview
+links and images do not open or load separately. Long previews end with an
+ellipsis. Custom emojis render inline at a compact size, while code keeps emoji
+shortcodes literal.
 
 The emoji button sits inside the right edge of the message input, with attachments
 on the left and Send on the right. It uses the regular composer’s desktop emoji
