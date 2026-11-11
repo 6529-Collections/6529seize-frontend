@@ -881,9 +881,15 @@ export * from '../models/ApiWaveOverviewContextProfileContext';
 export * from '../models/ApiWaveOverviewContributor';
 export * from '../models/ApiWaveOverviewDescriptionDrop';
 export * from '../models/ApiWaveOverviewPage';
+export * from '../models/ApiWaveParticipation';
+export * from '../models/ApiWaveParticipationAction';
 export * from '../models/ApiWaveParticipationConfig';
+export * from '../models/ApiWaveParticipationConstraints';
+export * from '../models/ApiWaveParticipationDecision';
+export * from '../models/ApiWaveParticipationEvaluation';
 export * from '../models/ApiWaveParticipationIdentitySubmissionAllowDuplicates';
 export * from '../models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted';
+export * from '../models/ApiWaveParticipationReasonCode';
 export * from '../models/ApiWaveParticipationRequirement';
 export * from '../models/ApiWaveParticipationSubmissionStrategy';
 export * from '../models/ApiWaveParticipationSubmissionStrategyIdentityConf';
@@ -1875,9 +1881,15 @@ import { ApiWaveOverviewContextProfileContext } from '../models/ApiWaveOverviewC
 import { ApiWaveOverviewContributor } from '../models/ApiWaveOverviewContributor';
 import { ApiWaveOverviewDescriptionDrop } from '../models/ApiWaveOverviewDescriptionDrop';
 import { ApiWaveOverviewPage } from '../models/ApiWaveOverviewPage';
+import { ApiWaveParticipation } from '../models/ApiWaveParticipation';
+import { ApiWaveParticipationAction } from '../models/ApiWaveParticipationAction';
 import { ApiWaveParticipationConfig } from '../models/ApiWaveParticipationConfig';
+import { ApiWaveParticipationConstraints } from '../models/ApiWaveParticipationConstraints';
+import { ApiWaveParticipationDecision       } from '../models/ApiWaveParticipationDecision';
+import { ApiWaveParticipationEvaluation } from '../models/ApiWaveParticipationEvaluation';
 import { ApiWaveParticipationIdentitySubmissionAllowDuplicates } from '../models/ApiWaveParticipationIdentitySubmissionAllowDuplicates';
 import { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from '../models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted';
+import { ApiWaveParticipationReasonCode } from '../models/ApiWaveParticipationReasonCode';
 import { ApiWaveParticipationRequirement } from '../models/ApiWaveParticipationRequirement';
 import { ApiWaveParticipationSubmissionStrategy   } from '../models/ApiWaveParticipationSubmissionStrategy';
 import { ApiWaveParticipationSubmissionStrategyIdentityConf   } from '../models/ApiWaveParticipationSubmissionStrategyIdentityConf';
@@ -2269,8 +2281,11 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiWaveOutcomeCredit",
     "ApiWaveOutcomeSubType",
     "ApiWaveOutcomeType",
+    "ApiWaveParticipationAction",
+    "ApiWaveParticipationEvaluation",
     "ApiWaveParticipationIdentitySubmissionAllowDuplicates",
     "ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted",
+    "ApiWaveParticipationReasonCode",
     "ApiWaveParticipationRequirement",
     "ApiWaveParticipationSubmissionStrategyType",
     "ApiWaveScoreSort",
@@ -3097,7 +3112,10 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveOverviewContributor": ApiWaveOverviewContributor,
     "ApiWaveOverviewDescriptionDrop": ApiWaveOverviewDescriptionDrop,
     "ApiWaveOverviewPage": ApiWaveOverviewPage,
+    "ApiWaveParticipation": ApiWaveParticipation,
     "ApiWaveParticipationConfig": ApiWaveParticipationConfig,
+    "ApiWaveParticipationConstraints": ApiWaveParticipationConstraints,
+    "ApiWaveParticipationDecision": ApiWaveParticipationDecision,
     "ApiWaveParticipationSubmissionStrategy": ApiWaveParticipationSubmissionStrategy,
     "ApiWaveParticipationSubmissionStrategyIdentityConf": ApiWaveParticipationSubmissionStrategyIdentityConf,
     "ApiWavePoll": ApiWavePoll,
