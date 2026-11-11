@@ -101,6 +101,8 @@ export function useMediaActions({
       });
     } catch {
       if (!isCapacitor) {
+        // The fetch failed, so the bytes were never read: this fallback
+        // decides the saved name by the file name and declared type only.
         triggerDirectDownload(url, fileName, mimeType);
       }
     } finally {

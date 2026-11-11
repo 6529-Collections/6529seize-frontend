@@ -7,6 +7,9 @@ import { hasImageFileExtension } from "@/helpers/download-file-type.helpers";
  * showing a post never makes the viewer's browser call the app's endpoints.
  */
 const ENDPOINT_PREFIXES = ["/api/", "/_next/image"] as const;
+// Resolves relative paths when no site origin is known (a server render
+// without BASE_ENDPOINT): such a path is still same-site.
+const RELATIVE_BASE = "https://relative.invalid";
 
 const getOrigin = (value: string | undefined): string | null => {
   if (!value) {
@@ -44,15 +47,16 @@ export function isAllowedMarkdownImageSource(src: string): boolean {
   }
 
   const siteOrigins = getSiteOrigins();
+  const base = siteOrigins[0] ?? RELATIVE_BASE;
   let url: URL;
   try {
-    url = new URL(trimmed, siteOrigins[0]);
+    url = new URL(trimmed, base);
   } catch {
     // Not resolvable: the existing source check decides.
     return true;
   }
 
-  if (!siteOrigins.includes(url.origin)) {
+  if (url.origin !== RELATIVE_BASE && !siteOrigins.includes(url.origin)) {
     return true;
   }
 
