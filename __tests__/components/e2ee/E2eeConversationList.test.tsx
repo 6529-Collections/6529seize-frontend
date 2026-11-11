@@ -25,7 +25,7 @@ const emojiSource = "data:image/webp;base64,UklGRg==";
 const mockEmojiSources = new Map([["gm", emojiSource]]);
 jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
   E2eeEmojiProvider: ({ children }: { children: ReactNode }) => children,
-  useE2eeEmojis: () => ({ sources: mockEmojiSources }),
+  useE2eeEmojis: () => ({ sources: mockEmojiSources, native: new Map() }),
 }));
 const mockSearch = jest.fn(() => new URLSearchParams());
 jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
