@@ -60,6 +60,11 @@ describe("staging bundled browser runtime", () => {
     expect(tools["continue-on-error"]).toBeUndefined();
     expect(tools["timeout-minutes"]).toBe(5);
     expect(tools.run).toContain("sha256sum --check --strict");
+    expect(
+      tools.run.match(
+        /curl --proto '=https' --proto-redir '=https' --tlsv1\.2/gu
+      )
+    ).toHaveLength(2);
     expect(tools.run).toContain('echo "$tools_root/bin" >> "$GITHUB_PATH"');
     expect(tools.run.match(/(?:gh|jq)_digest=[a-f0-9]{64}/gu)).toHaveLength(4);
     expect(tools.run.indexOf("sha256sum --check --strict")).toBeLessThan(

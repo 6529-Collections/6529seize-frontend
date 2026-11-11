@@ -69,6 +69,7 @@ jobs:
         timeout-minutes: 5
         run: |
           set -euo pipefail
+          # Bump each tool's version and both architecture digests together.
           case "$(uname -m)" in
             x86_64)
               architecture=amd64
@@ -84,14 +85,18 @@ jobs:
           esac
           tools_root="$RUNNER_TEMP/staging-workflow-tools"
           mkdir -p "$tools_root/bin"
-          curl --fail --location --silent --show-error --retry 2 --max-time 60 \
+          curl --proto '=https' --proto-redir '=https' --tlsv1.2 \
+            --fail --location --silent --show-error --retry 2 --max-time 60 \
             "https://github.com/cli/cli/releases/download/v2.83.1/gh_2.83.1_linux_${architecture}.tar.gz" \
             --output "$tools_root/gh.tar.gz"
-          curl --fail --location --silent --show-error --retry 2 --max-time 60 \
+          curl --proto '=https' --proto-redir '=https' --tlsv1.2 \
+            --fail --location --silent --show-error --retry 2 --max-time 60 \
             "https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-linux-${architecture}" \
             --output "$tools_root/jq"
-          printf '%s  %s\n' "$gh_digest" "$tools_root/gh.tar.gz" "$jq_digest" "$tools_root/jq" \
-            | sha256sum --check --strict
+          {
+            printf '%s  %s\n' "$gh_digest" "$tools_root/gh.tar.gz"
+            printf '%s  %s\n' "$jq_digest" "$tools_root/jq"
+          } | sha256sum --check --strict
           tar -xzf "$tools_root/gh.tar.gz" -C "$tools_root" \
             "gh_2.83.1_linux_${architecture}/bin/gh"
           install -m 0755 "$tools_root/gh_2.83.1_linux_${architecture}/bin/gh" "$tools_root/bin/gh"
