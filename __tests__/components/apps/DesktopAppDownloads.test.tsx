@@ -79,8 +79,14 @@ describe("DesktopAppDownloads", () => {
         name: "Download 6529 Desktop for macOS, version 0.3.16, Apple silicon",
       })
     ).toHaveAttribute("href", "https://example.com/current.dmg");
+    expect(screen.getByText("Arweave mirror · Coming soon")).toBeVisible();
     expect(
-      screen.getByRole("link", { name: /Arweave mirror/ })
+      screen.queryByRole("link", {
+        name: /Arweave mirror.*0\.3\.16/,
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Arweave mirror.*0\.3\.15, Intel/ })
     ).toHaveAttribute("href", "https://arweave.net/mirror");
     expect(
       screen.queryByText(/DMG installer|EXE installer/)
