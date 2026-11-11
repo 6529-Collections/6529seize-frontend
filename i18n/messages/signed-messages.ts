@@ -53,7 +53,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.notice.restore.title":
     "Your browser cleared this site's saved keys",
   "signedMessages.notice.restore.body":
-    "This browser can no longer sign your posts. Turn Signed Posts on again with one signature, and the permission this browser had before is removed.",
+    "This browser can no longer sign your posts. Turn Signed Posts on again with one signature.",
   "signedMessages.notice.restore.action": "Turn on again",
   "signedMessages.notice.restore.replaced":
     "Signed Posts are on again. This browser's earlier permission was removed.",

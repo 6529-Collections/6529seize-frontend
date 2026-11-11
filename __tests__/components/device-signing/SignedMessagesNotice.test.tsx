@@ -190,7 +190,11 @@ describe("SignedMessagesNotice", () => {
         })
       ).toBeVisible();
       expect(
-        screen.getByText(/^This browser can no longer sign your posts\./)
+        // No promise about the earlier permission: whether it is removed
+        // depends on the cleanup (only a Signed Posts-only grant is).
+        screen.getByText(
+          "This browser can no longer sign your posts. Turn Signed Posts on again with one signature."
+        )
       ).toBeVisible();
       fireEvent.click(screen.getByRole("button", { name: "Turn on again" }));
       expect(setup).toHaveBeenCalledWith(

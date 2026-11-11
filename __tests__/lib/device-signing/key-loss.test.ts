@@ -21,13 +21,24 @@ jest.mock("@/services/api/device-grants-api", () => ({
   fetchDeviceGrants: () => mockFetchDeviceGrants(),
 }));
 
-/** The client's current session, as the auth storage reports it. */
+/** The client's stored account state, as the auth storage reports it. */
 let mockSession: {
   wallet: string;
   profileId: string;
   role: string | null;
 } = { wallet: "", profileId: "", role: null };
+/** The claims of the session token requests are actually sent with. */
+let mockToken: { sub: string; role: string | null } | null = null;
+
+/** An unsigned JWT with these claims; only its payload is ever read. */
+function mockJwt(claims: object): string {
+  const part = (value: object) =>
+    Buffer.from(JSON.stringify(value)).toString("base64url");
+  return `${part({ alg: "none", typ: "JWT" })}.${part(claims)}.signature`;
+}
+
 jest.mock("@/services/auth/auth.utils", () => ({
+  getAuthJwt: () => (mockToken === null ? null : mockJwt(mockToken)),
   getWalletAddress: () => mockSession.wallet,
   getWalletRole: () => mockSession.role,
   getConnectedWalletAccounts: () => [
@@ -41,6 +52,12 @@ jest.mock("@/services/auth/auth.utils", () => ({
     },
   ],
 }));
+
+/** Signs in as this account: stored state and the token in use agree. */
+const signInAs = (session: typeof mockSession) => {
+  mockSession = { ...session };
+  mockToken = { sub: session.wallet, role: session.role };
+};
 
 const mockCommonApiFetch = jest.fn();
 jest.mock("@/services/api/common-api", () => ({
@@ -126,7 +143,7 @@ describe("device key loss", () => {
       .mockResolvedValue([grant(NEW_ID, NEW_KEY), grant(LOST_ID)]);
     mockRevokeDeviceGrant.mockReset();
     mockCommonApiFetch.mockReset().mockResolvedValue(e2eeMe());
-    mockSession = { ...SESSION_A };
+    signInAs(SESSION_A);
     mockReportDeviceKeyStoreLoss.mockReset();
     mockEnrolled = false;
     mockStoredDevice = null;
@@ -332,7 +349,7 @@ describe("device key loss", () => {
         expect(readDeviceKeyLoss(ADDRESS)?.grantId).toBe(LOST_ID);
         expect(readDeviceKeyLoss(ADDRESS)?.revokeAttempts).toBeUndefined();
 
-        mockSession = { ...SESSION_A };
+        signInAs(SESSION_A);
         mockFetchDeviceGrants.mockResolvedValue([
           grant(NEW_ID, NEW_KEY),
           grant(LOST_ID),
@@ -346,7 +363,7 @@ describe("device key loss", () => {
 
       it("while the grant list loads never lets B's list drop A's record", async () => {
         mockFetchDeviceGrants.mockImplementationOnce(async () => {
-          mockSession = { ...SESSION_B };
+          signInAs(SESSION_B);
           // B's grants: A's lost grant is not among them.
           return [grant(`0x${"b".repeat(64)}`, NEW_KEY)];
         });
@@ -358,7 +375,7 @@ describe("device key loss", () => {
 
       it("while the encrypted devices load never lets B's answer end A's cleanup", async () => {
         mockCommonApiFetch.mockImplementationOnce(async () => {
-          mockSession = { ...SESSION_B };
+          signInAs(SESSION_B);
           // B has no encrypted messages: a permanent 4xx for B.
           throw { status: 404 };
         });
@@ -370,7 +387,7 @@ describe("device key loss", () => {
 
       it("while the revoke is sent never lets B's refusal end A's cleanup", async () => {
         mockRevokeDeviceGrant.mockImplementationOnce(async () => {
-          mockSession = { ...SESSION_B };
+          signInAs(SESSION_B);
           // Sent as B: A's grant is not B's to revoke.
           throw { status: 404 };
         });
@@ -382,13 +399,67 @@ describe("device key loss", () => {
       });
 
       it("reads nothing while another account is signed in", async () => {
-        mockSession = { ...SESSION_B };
+        signInAs(SESSION_B);
 
         await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
         expect(mockFetchDeviceGrants).not.toHaveBeenCalled();
         expect(mockCommonApiFetch).not.toHaveBeenCalled();
         expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
         await expectPendingUntilABack();
+      });
+    });
+
+    describe("a proxy token still in use for this wallet", () => {
+      // Another tab switched this wallet from acting for another profile
+      // back to its own: the stored role already reads direct, but requests
+      // still carry the proxy token.
+      const PROXY_TOKEN = { sub: ADDRESS, role: "proxy-profile" };
+
+      beforeEach(() => {
+        mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
+      });
+
+      const expectRunsOnceDirect = async () => {
+        expect(readDeviceKeyLoss(ADDRESS)?.grantId).toBe(LOST_ID);
+        expect(readDeviceKeyLoss(ADDRESS)?.revokeAttempts).toBeUndefined();
+        signInAs(SESSION_A);
+        mockFetchDeviceGrants.mockResolvedValue([
+          grant(NEW_ID, NEW_KEY),
+          grant(LOST_ID),
+        ]);
+        mockRevokeDeviceGrant.mockReset().mockResolvedValue(grant(LOST_ID));
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("revoked");
+        expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
+      };
+
+      it("reads nothing with a stale proxy token and a direct stored role", async () => {
+        mockToken = PROXY_TOKEN;
+        expect(mockSession.role).toBeNull();
+
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
+        expect(mockFetchDeviceGrants).not.toHaveBeenCalled();
+        expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
+        await expectRunsOnceDirect();
+      });
+
+      it("never lets the proxy's grant list drop the direct account's record", async () => {
+        mockFetchDeviceGrants.mockImplementationOnce(async () => {
+          mockToken = PROXY_TOKEN;
+          // The proxy's list: the direct account's lost grant is not in it.
+          return [grant(`0x${"c".repeat(64)}`, NEW_KEY)];
+        });
+
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
+        expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
+        await expectRunsOnceDirect();
+      });
+
+      it("reads nothing without a readable session token", async () => {
+        mockToken = null;
+
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
+        expect(mockFetchDeviceGrants).not.toHaveBeenCalled();
+        await expectRunsOnceDirect();
       });
     });
 

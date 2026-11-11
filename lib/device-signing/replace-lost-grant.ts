@@ -8,11 +8,8 @@ import {
   revokeDeviceGrant,
 } from "@/services/api/device-grants-api";
 import { isDirectProfileAuthSession } from "@/components/auth/auth-session-scope";
-import {
-  getConnectedWalletAccounts,
-  getWalletAddress,
-  getWalletRole,
-} from "@/services/auth/auth.utils";
+import { getAuthJwt } from "@/services/auth/auth.utils";
+import { jwtDecode } from "jwt-decode";
 import { listLocalDevicePublicKeys, readDeviceKey } from "./device-key-store";
 import {
   clearDeviceKeyLoss,
@@ -44,30 +41,47 @@ interface SignedInAccount {
  */
 class AccountChangedError extends Error {}
 
+/** The subject wallet and role of the session token, when readable. */
+function readSessionToken(): {
+  readonly wallet: string;
+  readonly role: string | null;
+} | null {
+  const token = getAuthJwt();
+  if (!token) {
+    return null;
+  }
+  try {
+    const { sub, role } = jwtDecode<{ sub?: unknown; role?: unknown }>(token);
+    if (typeof sub !== "string") {
+      return null;
+    }
+    return {
+      wallet: sub.toLowerCase(),
+      role: typeof role === "string" ? role : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 /**
- * Whether the client's current session still acts as this account: its
- * active wallet, that wallet's own profile, and no proxy role. Requests are
- * sent with the active session, so this is checked around each of them.
+ * Whether the token requests are sent with now still acts as this account:
+ * issued for its wallet, with no proxy role (a direct session's role is the
+ * wallet's own profile or absent). The token itself is checked, not the
+ * stored account state, because another tab can switch the stored role
+ * before the token in use changes, or the other way round.
  */
 function isStillSignedInAs(account: SignedInAccount): boolean {
-  if (getWalletAddress()?.toLowerCase() !== account.wallet) {
-    return false;
-  }
-  const stored = getConnectedWalletAccounts().find(
-    (candidate) => candidate.address.toLowerCase() === account.wallet
+  const session = readSessionToken();
+  return (
+    session !== null &&
+    session.wallet === account.wallet &&
+    isDirectProfileAuthSession({
+      authRole: session.role,
+      profileId: account.profileId,
+      hasActiveProxy: false,
+    })
   );
-  if (
-    stored?.profileId !== undefined &&
-    stored.profileId !== null &&
-    stored.profileId !== account.profileId
-  ) {
-    return false;
-  }
-  return isDirectProfileAuthSession({
-    authRole: stored ? stored.role : getWalletRole(),
-    profileId: account.profileId,
-    hasActiveProxy: false,
-  });
 }
 
 function assertSignedInAs(account: SignedInAccount): void {
@@ -227,9 +241,9 @@ function recordFailure(
  *
  * A loss recorded for another wallet or profile is left untouched, pending
  * until that account signs in again. Every server call is bracketed by a
- * check that the session is still this account, so a switch mid-cleanup
- * leaves the record pending instead of letting another account's answer
- * drop it. The record (keyed by wallet, like the
+ * check that the session token in use is still this account's own (its
+ * wallet, no proxy role), so a switch mid-cleanup leaves the record pending
+ * instead of letting another account's answer drop it. The record (keyed by wallet, like the
  * key store and the lock, and carrying the wallet's own profile) is cleared
  * only after a successful revoke; a transient failure keeps it for a later
  * attempt (at most MAX_LOST_GRANT_REVOKE_ATTEMPTS), and a permanent one
