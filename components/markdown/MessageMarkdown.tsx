@@ -344,7 +344,9 @@ export const MessageMarkdown = memo(
         ...(preview || collapsedPreview ? [rehypeDropPreview] : []),
         ...textPlugins,
         ...(inlinePreview
-          ? [[rehypeInlinePreview, t(locale, "e2ee.message.imageLink")]]
+          ? ([
+              [rehypeInlinePreview, t(locale, "e2ee.message.imageLink")],
+            ] satisfies PluggableList)
           : []),
       ],
       [
