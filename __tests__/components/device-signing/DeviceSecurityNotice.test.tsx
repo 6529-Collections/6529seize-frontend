@@ -109,7 +109,8 @@ describe("device security notices", () => {
     );
     const copy =
       "6529 Desktop on Mac was authorized to read your encrypted DMs and sign posts as you.";
-    expect(await mobileDms.findByText(copy)).toBeVisible();
+    const noticeGroup = await mobileDms.findByRole("group", { name: copy });
+    expect(within(noticeGroup).getByRole("alert")).toHaveTextContent(copy);
     expect(await mobileWave.findByText(copy)).toBeVisible();
     expect(await browserWave.findByText(copy)).toBeVisible();
 
