@@ -188,9 +188,17 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
     )
       setSelected({ operation, cancel });
   };
-  const readOnlyReceipt = hideNftPurchasing
-    ? linkedReceipt?.operation
-    : undefined;
+  const readOnlyReceipt =
+    hideNftPurchasing && linkedReceipt
+      ? ownOperations.reduce(
+          (latest, operation) =>
+            operation.id === latest.id &&
+            operation.updated_at > latest.updated_at
+              ? operation
+              : latest,
+          linkedReceipt.operation
+        )
+      : undefined;
   const visibleOrders = readOnlyReceipt
     ? [
         readOnlyReceipt,

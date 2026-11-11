@@ -552,6 +552,7 @@ it.each([false, true])(
           mediaMimeType="image/png"
           title="Sample artwork"
           price="1 ETH"
+          priceCurrency="ETH"
           compact={compact}
         />
       );
@@ -561,6 +562,9 @@ it.each([false, true])(
       expect(card).not.toHaveAttribute("role");
       expect(within(card).queryByRole("link")).not.toBeInTheDocument();
       expect(within(card).queryByRole("button")).not.toBeInTheDocument();
+      expect(
+        within(card).queryByText(/^(1(?: ETH)?|ETH)$/)
+      ).not.toBeInTheDocument();
       fireEvent.click(card);
       fireEvent.keyDown(card, { key: "Enter" });
       expect(open).not.toHaveBeenCalled();

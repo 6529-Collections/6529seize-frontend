@@ -73,12 +73,12 @@ first render.
   the identity block on smaller layouts. The current state and contextual
   action share the row's second line, and the whole row opens the relevant
   settings, upcoming-drops, or top-up section.
-- Open a subscription top-up notification. It links to `Top up`
-  (`/{user}/subscriptions#profile-subscriptions-top-up`); once loaded, the
-  dialog opens and focuses its heading in every owner coverage state, including
-  Not set up and No upcoming drops selected, without scrolling the page behind it.
-  Where Subscriptions are hidden (the iOS app outside the US) the tab
-  redirects to Identity and nothing scrolls.
+- On the web and Android, open a subscription top-up notification. It links to
+  `Top up` (`/{user}/subscriptions#profile-subscriptions-top-up`).
+  Once loaded, the dialog opens and focuses its heading in every owner coverage
+  state, including Not set up and No upcoming drops selected, without scrolling
+  the page behind it. The iOS app shows the read-only tab where available.
+  Where Subscriptions are hidden, the link redirects to Identity.
 - Use the subscription-awareness action on Home or a Meme card.
 - Use `Learn more` on the right of the `Subscription minting` heading at any
   screen size to open `/about/subscriptions`.
@@ -91,7 +91,8 @@ first render.
   and reconnecting effects does not reopen a dismissed sheet. Explicit deep links
   continue to open their section. Resizing to desktop closes an open sheet;
   tap the compact row to reopen it after returning to a smaller screen.
-  `#profile-subscriptions-top-up` opens and focuses the Top up dialog automatically.
+  On the web and Android, `#profile-subscriptions-top-up` opens and focuses the
+  Top up dialog automatically for the owner.
 
 ## Common Scenarios
 

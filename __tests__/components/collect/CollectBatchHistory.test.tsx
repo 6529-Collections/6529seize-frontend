@@ -92,6 +92,7 @@ jest.mock("@/components/collect/CollectOrdersView", () => ({
             Cancel {order.id}
           </button>
           <output>{String(order.cancellable)}</output>
+          {order.transactionHash && <span>{order.transactionHash}</span>}
         </div>
       ))}
     </div>
@@ -279,3 +280,37 @@ it.each([true, false])(
     }
   }
 );
+
+it("keeps a linked iOS receipt first and updates it when history records its transaction", () => {
+  const platform = jest.spyOn(Capacitor, "getPlatform").mockReturnValue("ios");
+  const transactionHash = `0x${"b".repeat(64)}`;
+  mockReceipt = batch;
+  mockHistory = [single];
+  const receiptPage = (
+    <CollectOrdersClient initialOperationId={batch.id} initialBatch />
+  );
+  try {
+    const { rerender } = render(receiptPage);
+    expect(screen.queryByText(transactionHash)).not.toBeInTheDocument();
+    mockHistory = [
+      single,
+      {
+        ...batch,
+        updated_at: batch.updated_at + 1000,
+        transaction_hash: transactionHash,
+      },
+    ];
+    rerender(
+      <CollectOrdersClient initialOperationId={batch.id} initialBatch />
+    );
+    expect(screen.getByText(transactionHash)).toBeVisible();
+    expect(
+      screen
+        .getAllByRole("button", { name: /^Inspect / })
+        .map((button) => button.textContent)
+    ).toEqual([`Inspect ${batch.id}`, "Inspect single"]);
+    expect(mockBatch).not.toHaveBeenCalled();
+  } finally {
+    platform.mockRestore();
+  }
+});
