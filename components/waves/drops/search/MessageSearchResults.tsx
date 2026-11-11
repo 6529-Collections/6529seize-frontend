@@ -271,7 +271,9 @@ export default function MessageSearchResults({
               // The row is one button, so its seal is static and the signed
               // status joins the button's name.
               const isAuthorSigned = isDropAuthorSigned(drop);
-              const labelId = `search-result-label-${drop.stableKey}`;
+              // `stableKey` is raw hash bytes and may hold white space, which
+              // would split the id list; the hex hash is a valid single id.
+              const labelId = `search-result-label-${drop.stableHash}`;
               return (
                 <button
                   key={drop.stableKey}
