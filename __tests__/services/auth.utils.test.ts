@@ -746,6 +746,37 @@ describe("auth.utils", () => {
     expect(storage.get("6529-wallet-active-address")).toBeUndefined();
   });
 
+  it("clearAllWalletAuth removes the stored role of every signed-out account", async () => {
+    const storage = setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0x111", "jwt-1", "refresh-1", "role-1");
+    setAuthJwt("0x222", "jwt-2", "refresh-2", "role-2");
+    storage.set("auth-role-0x333", "role-3");
+    expect(storage.get("auth-role-0x111")).toBe("role-1");
+    expect(storage.get("auth-role-0x222")).toBe("role-2");
+
+    await clearAllWalletAuth();
+
+    expect(storage.has("auth-role-0x111")).toBe(false);
+    expect(storage.has("auth-role-0x222")).toBe(false);
+    expect(storage.get("auth-role-0x333")).toBe("role-3");
+  });
+
+  it("invalidating an expired session keeps the account's stored role", async () => {
+    const storage = setupStorageMocks();
+    (jwtDecode as jest.Mock).mockReturnValue({ exp: 86400 * 2 });
+    jest.spyOn(Date, "now").mockReturnValue(0);
+
+    setAuthJwt("0x111", "jwt-1", "refresh-1", "role-1");
+
+    await invalidateAuthSessionForAddress("0x111");
+
+    expect(storage.get("auth-role-0x111")).toBe("role-1");
+    expect(getConnectedWalletAccounts()).toHaveLength(1);
+  });
+
   it("clearAllWalletAuth removes native token for legacy-only wallet address", async () => {
     const {
       removeNativeRefreshToken,
