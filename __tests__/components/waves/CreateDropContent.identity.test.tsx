@@ -669,7 +669,8 @@ describe("CreateDropContent identity picker flow", () => {
     expect(generateParts).toHaveBeenCalledWith(
       expect.any(Array),
       expect.any(Function),
-      ApiMediaUploadPurpose.DecisionEntry
+      ApiMediaUploadPurpose.DecisionEntry,
+      "en-US"
     );
   });
 
@@ -693,7 +694,8 @@ describe("CreateDropContent identity picker flow", () => {
     expect(generateParts).toHaveBeenCalledWith(
       expect.any(Array),
       expect.any(Function),
-      ApiMediaUploadPurpose.Chat
+      ApiMediaUploadPurpose.Chat,
+      "en-US"
     );
   });
 

@@ -3,6 +3,10 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
 import type { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { isAttachmentUploadFile } from "@/services/uploads/attachmentUploadMimeType";
+import { getContentType } from "@/services/uploads/mediaUploadMimeType";
+import { ImageProcessingError } from "@/services/uploads/ImageProcessingError";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type React from "react";
 import {
   multiPartAttachmentUpload,
@@ -14,7 +18,8 @@ import type { UploadingFile } from "./types";
 const generateMediaForPart = async (
   media: File,
   setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>,
-  purpose: ApiMediaUploadPurpose
+  purpose: ApiMediaUploadPurpose,
+  locale: SupportedLocale
 ) => {
   setUploadingFiles((prev) => [
     ...prev,
@@ -24,7 +29,8 @@ const generateMediaForPart = async (
     file: media,
     path: "drop",
     purpose,
-    waitForReady: false,
+    locale,
+    waitForReady: getContentType(media).startsWith("image/"),
     onProgress: (progress) =>
       setUploadingFiles((prev) =>
         prev.map((uf) => (uf.file === media ? { ...uf, progress } : uf))
@@ -62,13 +68,14 @@ const generateAttachmentForPart = async (
 const generatePart = async (
   part: CreateDropPart,
   setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>,
-  purpose: ApiMediaUploadPurpose
+  purpose: ApiMediaUploadPurpose,
+  locale: SupportedLocale
 ): Promise<CreateDropRequestPart> => {
   const mediaFiles = part.media.filter((file) => !isAttachmentUploadFile(file));
   const attachmentFiles = part.media.filter(isAttachmentUploadFile);
   const media = await Promise.all(
     mediaFiles.map((mediaFile) =>
-      generateMediaForPart(mediaFile, setUploadingFiles, purpose)
+      generateMediaForPart(mediaFile, setUploadingFiles, purpose, locale)
     )
   );
   const uploadedAttachments = await Promise.all(
@@ -82,7 +89,9 @@ const generatePart = async (
   if (badAttachment) {
     throw new Error(
       badAttachment.error_reason ??
-        `${badAttachment.file_name} failed attachment validation.`
+        t(locale, "drop.upload.attachmentValidationFailed", {
+          file: badAttachment.file_name,
+        })
     );
   }
   return {
@@ -99,21 +108,25 @@ const generatePart = async (
 export const generateParts = async (
   parts: CreateDropPart[],
   setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>,
-  purpose: ApiMediaUploadPurpose
+  purpose: ApiMediaUploadPurpose,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ): Promise<CreateDropRequestPart[]> => {
   try {
     return await Promise.all(
-      parts.map((part) => generatePart(part, setUploadingFiles, purpose))
+      parts.map((part) =>
+        generatePart(part, setUploadingFiles, purpose, locale)
+      )
     );
   } catch (error) {
+    if (error instanceof ImageProcessingError) throw error;
     const message = error instanceof Error ? error.message : String(error);
     if (
       message.includes("content_type") ||
       message.includes("Unsupported file type")
     ) {
-      throw new Error("File type not supported.");
+      throw new Error(t(locale, "drop.upload.unsupportedType"));
     }
-    throw new Error("Error uploading file. Please try again.");
+    throw new Error(t(locale, "drop.upload.uploadFailed"));
   }
 };
 
