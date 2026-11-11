@@ -332,7 +332,8 @@ account-dependent controls load. No additional account cache is used.
 - If an action shows "Nothing was sent: the signed-in profile changed in
   another tab", another tab switched or signed out a profile while this tab
   still showed the previous one. The tab then shows the profile now signed in;
-  check it and try again.
+  check it and try again. `Logout` and `Sign out all` are refused the same way
+  and sign nothing out until the tab has caught up.
 
 ## Limitations / Notes
 
