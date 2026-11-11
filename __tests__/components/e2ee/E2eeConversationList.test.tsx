@@ -161,6 +161,45 @@ describe("encrypted conversation list", () => {
   it.each([
     { name: "inbox", Component: E2eeConversationListPage },
     { name: "sidebar", Component: E2eeMessagesSection },
+  ])(
+    "formats Markdown in $name previews without nested links or resources",
+    ({ Component }) => {
+      const chats = [
+        conversation({
+          lastMessage: message({
+            senderProfileId: SELF_ID,
+            text: "**Bold** *italic* ~~struck~~ [Link](https://preview.invalid)\n\n```js\nconsole.log('hi');\n```\n\n- first\n- second\n\n![Photo](https://preview.invalid/image.png)",
+          }),
+        }),
+      ];
+      render(
+        <E2eeTestProvider
+          value={contextFor(createFakeE2eeEngine({ conversations: chats }))}
+        >
+          <Component />
+        </E2eeTestProvider>
+      );
+      const row = within(
+        screen.getByRole("list", { name: "Encrypted chats" })
+      ).getByRole("link");
+      expect(row).toHaveTextContent(
+        "You: Bold italic struck Link console.log('hi'); first second Photo"
+      );
+      expect(row.querySelector("strong")).toHaveTextContent("Bold");
+      expect(row.querySelector("em")).toHaveTextContent("italic");
+      expect(row.querySelector("del")).toHaveTextContent("struck");
+      expect(row.querySelector("code")).toHaveTextContent("console.log('hi');");
+      expect(
+        row.querySelector("a, img, input, pre, p, ul, li, div")
+      ).toBeNull();
+      expect(row).not.toHaveTextContent("https://preview.invalid");
+      expect(row).not.toHaveTextContent("```");
+    }
+  );
+
+  it.each([
+    { name: "inbox", Component: E2eeConversationListPage },
+    { name: "sidebar", Component: E2eeMessagesSection },
   ])("renders compact custom emojis in $name previews", ({ Component }) => {
     const chats = [
       conversation({
