@@ -150,14 +150,15 @@ describe("WaveDropsSearchModal", () => {
 
   it("names each result through one valid label id", () => {
     // Stable keys are raw hash bytes: they can hold white space and control
-    // characters, which must not reach the id that names the result.
+    // characters, which must not reach the id that names the result. Two
+    // drops can also share a hash, and each still needs its own label.
     setHookResult({
       drops: [
         { ...result, stableKey: "k\u0007|\u001f e\n\tZ", stableHash: "0f1e2d" },
         {
           ...result,
           stableKey: "q\r\n x",
-          stableHash: "3c4b5a",
+          stableHash: "0f1e2d",
           serial_no: 43,
         },
       ],
@@ -179,7 +180,8 @@ describe("WaveDropsSearchModal", () => {
         name: `Open message ${serialNo} by alice`,
       });
       const labelId = resultButton.getAttribute("aria-labelledby") ?? "";
-      expect(labelId).toMatch(/^[\w-]+$/);
+      // One token: an id list splits on white space.
+      expect(labelId).toMatch(/^\S+$/);
       expect(document.getElementById(labelId)).toHaveTextContent(
         `Open message ${serialNo} by alice`
       );
