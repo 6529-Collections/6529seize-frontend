@@ -44,7 +44,11 @@ jest.mock("next/server", () => ({
 
 import { GET } from "@/app/api/wikimedia-card/route";
 import { parseAcceptLanguage } from "@/app/api/wikimedia-card/target";
-import { fetchPublicUrl } from "@/lib/security/urlGuard";
+import {
+  UrlGuardError,
+  assertPublicUrl,
+  fetchPublicUrl,
+} from "@/lib/security/urlGuard";
 import type { NextRequest } from "next/server";
 
 const mockFetchPublicUrl = fetchPublicUrl as jest.Mock;
@@ -209,6 +213,45 @@ describe("wikimedia-card route", () => {
 
       expect(fresh.headers.get("vary")).toBe("Accept-Language");
       expect(cached.headers.get("vary")).toBe("Accept-Language");
+    });
+  });
+
+  describe("error responses", () => {
+    it.each([
+      ["a host outside Wikimedia", "https://example.com/wiki/Thing"],
+      ["a Wikipedia URL without a title", "https://en.wikipedia.org/other"],
+    ])("answers %s with 400 and no-store", async (_label, url) => {
+      const response = await GET(requestFor(url));
+
+      expect(response.status).toBe(400);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(mockFetchPublicUrl).not.toHaveBeenCalled();
+    });
+
+    it("answers a refused URL with its status and no-store", async () => {
+      jest
+        .mocked(assertPublicUrl)
+        .mockRejectedValueOnce(
+          new UrlGuardError("Host is not allowed.", "host-not-allowed", 403)
+        );
+
+      const response = await GET(
+        requestFor("https://en.wikipedia.org/wiki/Refused")
+      );
+
+      expect(response.status).toBe(403);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+    });
+
+    it("keeps cards free of no-store", async () => {
+      mockLocalizedSummary("https://en.wikipedia.org/wiki/Cacheable");
+
+      const response = await GET(
+        requestFor("https://en.wikipedia.org/wiki/Cacheable")
+      );
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("cache-control")).toBeNull();
     });
   });
 

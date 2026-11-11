@@ -26,14 +26,25 @@ const mention = (handle: string): any => ({
   current_handle: handle,
 });
 
+/** Renders the mention inside a clickable parent, like a drop row. */
+const renderInClickableParent = (handle: string) => {
+  const onParentClick = jest.fn();
+  const result = render(
+    <div onClick={onParentClick}>
+      <DropListItemContentMention user={mention(handle)} />
+    </div>
+  );
+  return { ...result, onParentClick };
+};
+
 describe("DropListItemContentMention", () => {
   it("renders link and stops propagation", () => {
-    const user: any = { mentioned_profile_id: "1", handle_in_content: "bob" };
-    const { container } = render(<DropListItemContentMention user={user} />);
+    const { container, onParentClick } = renderInClickableParent("bob");
     const link = screen.getByRole("link");
     expect(link).toHaveAttribute("href", "/bob");
     expect(link).toHaveTextContent("@bob");
     fireEvent.click(link);
+    expect(onParentClick).not.toHaveBeenCalled();
     expect(
       container.querySelector('[data-testid="tooltip-wrapper"]')
     ).toBeInTheDocument();
@@ -66,5 +77,19 @@ describe("DropListItemContentMention", () => {
     render(<DropListItemContentMention user={mention(handle)} />);
     expect(screen.queryByRole("link")).toBeNull();
     expect(screen.getByText(`@${handle}`)).toBeInTheDocument();
+  });
+
+  it("shows the unlinked handle as mention text, not as a control", () => {
+    const { onParentClick } = renderInClickableParent("..");
+
+    const text = screen.getByText("@..");
+    expect(text.tagName).toBe("SPAN");
+    // Same colour and weight as a mention chip, without the link's hover
+    // affordance: it opens nothing.
+    expect(text).toHaveClass("tw-font-medium", "tw-text-primary-400");
+    expect(text.className).not.toContain("hover:tw-underline");
+    // Plain text has no click handling of its own.
+    fireEvent.click(text);
+    expect(onParentClick).toHaveBeenCalledTimes(1);
   });
 });
