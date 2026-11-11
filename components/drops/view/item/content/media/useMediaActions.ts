@@ -101,8 +101,10 @@ export function useMediaActions({
       });
     } catch {
       if (!isCapacitor) {
-        // The fetch failed, so the bytes were never read: this fallback
-        // decides the saved name by the file name and declared type only.
+        // Any failure of the in-app download lands here (the fetch, or
+        // preparing and saving the file). This fallback does not use the
+        // file's bytes: it decides the saved name by the file name and
+        // declared type only.
         triggerDirectDownload(url, fileName, mimeType);
       }
     } finally {

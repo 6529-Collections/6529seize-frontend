@@ -10,6 +10,20 @@ const release = parseReleaseFeed(TEST_FEED).find(
   (entry) => entry.version === "0.1.0-test.2"
 )!;
 
+/**
+ * The text of server-rendered markup: tags and React text separators are
+ * dropped, repeating until nothing is left to drop.
+ */
+const textOf = (markup: string): string => {
+  let text = markup.replaceAll("<!-- -->", "");
+  let previous: string;
+  do {
+    previous = text;
+    text = text.replaceAll(/<[^>]+>/g, "");
+  } while (text !== previous);
+  return text;
+};
+
 describe("ValidatorAllFiles copy", () => {
   const html = renderToStaticMarkup(<ValidatorAllFiles release={release} />);
 
@@ -67,7 +81,7 @@ describe("ValidatorAllFiles copy", () => {
   });
 
   it("keeps the build line, the check steps and the SHA256SUMS block", () => {
-    const text = html.replaceAll("<!-- -->", "").replaceAll(/<[^>]+>/g, "");
+    const text = textOf(html);
     expect(text).toContain(
       "Build 0.1.0-test.2, published 2026-11-02, commit aaaaaaa. Earlier builds are under Releases."
     );
@@ -85,11 +99,11 @@ describe("ValidatorAllFiles copy", () => {
   });
 
   it("leaves the commit out when the release has none", () => {
-    const text = renderToStaticMarkup(
-      <ValidatorAllFiles release={{ ...release, commit: null }} />
-    )
-      .replaceAll("<!-- -->", "")
-      .replaceAll(/<[^>]+>/g, "");
+    const text = textOf(
+      renderToStaticMarkup(
+        <ValidatorAllFiles release={{ ...release, commit: null }} />
+      )
+    );
     expect(text).toContain(
       "Build 0.1.0-test.2, published 2026-11-02. Earlier builds are under Releases."
     );
