@@ -852,16 +852,17 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     });
     await combinedNotice.getByRole("button", { name: /^This was me/u }).click();
     await expect(combinedNotice).toHaveCount(0, { timeout: UI_TIMEOUT_MS });
-    // Fetch the account's notices again and continue to use the authorized device.
-    await Promise.all([
-      b.page.waitForResponse(
-        (response) =>
-          new URL(response.url()).pathname === "/api/device-security-notices" &&
-          response.ok(),
+    // Watch for a new request so a refetch already in flight cannot satisfy it.
+    const [reopenedNotices] = await Promise.all([
+      b.page.waitForRequest(
+        (request) =>
+          request.method() === "GET" &&
+          new URL(request.url()).pathname === "/api/device-security-notices",
         { timeout: UI_TIMEOUT_MS }
       ),
       openChat(b, dm),
     ]);
+    expect((await reopenedNotices.response())?.ok()).toBe(true);
     await expect(combinedNotice).toHaveCount(0);
 
     await sendEncrypted(a, beforeRevoke);
