@@ -231,6 +231,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     page,
     isMobile,
   }) => {
+    // Desktop Chromium never renders the mobile app banner.
     test.skip(!isMobile, "The mobile app banner only appears on mobile web.");
     let releaseScripts: () => void = () => undefined;
     const scriptsReady = new Promise<void>((resolve) => {
