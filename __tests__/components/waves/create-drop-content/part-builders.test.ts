@@ -5,6 +5,7 @@ import {
 } from "@/components/waves/create-wave/services/multiPartUpload";
 import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { ImageProcessingError } from "@/services/uploads/ImageProcessingError";
+import { MediaUploadRefusedError } from "@/services/uploads/MediaUploadRefusedError";
 
 jest.mock("@/components/waves/create-wave/services/multiPartUpload", () => ({
   multiPartUpload: jest.fn(),
@@ -65,6 +66,50 @@ describe("generateParts media purpose", () => {
         ApiMediaUploadPurpose.Chat
       )
     ).rejects.toBe(error);
+  });
+
+  it.each(["media", "attachment"] as const)(
+    "keeps the upload-limit message for a %s instead of the generic upload error",
+    async (kind) => {
+      const error = new MediaUploadRefusedError(
+        "You have reached the upload limit for the last 24 hours. Try again later."
+      );
+      const file =
+        kind === "media"
+          ? photo("a.jpg")
+          : new File(["%PDF"], "doc.pdf", { type: "application/pdf" });
+      if (kind === "media") {
+        jest.mocked(multiPartUpload).mockRejectedValueOnce(error);
+      } else {
+        jest.mocked(multiPartAttachmentUpload).mockRejectedValueOnce(error);
+      }
+      await expect(
+        generateParts(
+          [{ content: "keep this draft", quoted_drop: null, media: [file] }],
+          jest.fn(),
+          ApiMediaUploadPurpose.Chat,
+          "en-US"
+        )
+      ).rejects.toBe(error);
+      if (kind === "attachment") {
+        expect(multiPartAttachmentUpload).toHaveBeenCalledWith(
+          expect.objectContaining({ file, locale: "en-US" })
+        );
+      }
+    }
+  );
+
+  it("still reports other upload failures with the generic message", async () => {
+    jest
+      .mocked(multiPartUpload)
+      .mockRejectedValueOnce(new Error("Something went wrong"));
+    await expect(
+      generateParts(
+        [{ content: "x", quoted_drop: null, media: [photo("a.jpg")] }],
+        jest.fn(),
+        ApiMediaUploadPurpose.Chat
+      )
+    ).rejects.toThrow("Error uploading file. Please try again.");
   });
 
   it("retains asynchronous video posting", async () => {

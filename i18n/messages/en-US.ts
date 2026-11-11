@@ -2551,6 +2551,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "result.openInWave": "Open message {serialNo} by {author} in {wave}",
     "result.open": "Open message {serialNo} by {author}",
     "result.checked": "Checked task",
+    "result.emoji": "Emoji {shortcode}",
     "result.imageFallback": "image",
     "result.mediaOnly": "Message with media or an attachment",
     "result.serial": "Message #{serialNo}",
@@ -3371,6 +3372,11 @@ export const EN_US_ROOT_MESSAGES = {
   "drop.upload.invalidFile": "Could not add {file}",
   "drop.upload.empty": "Choose a file that is not empty.",
   "drop.upload.tooLarge": "Media files must be 500 MB or smaller.",
+  "drop.upload.tooLargeLimit": "Media files must be {limit} or smaller.",
+  "drop.upload.tooLargeNoLimit":
+    "This file is larger than the upload limit. Choose a smaller file.",
+  "drop.upload.limitReached":
+    "You have reached the upload limit for the last 24 hours. Try again later.",
   "drop.upload.imageTooLarge":
     "Image files must be {limit} MiB or smaller. Export a smaller image and try again.",
   "drop.upload.submitFailed": "Couldn't submit this drop.",
@@ -3660,6 +3666,8 @@ export const EN_US_ROOT_MESSAGES = {
   "nextgen.loadError.burnProof": "The burn proof could not be loaded.",
   "nextgen.loadError.retry": "Try again",
   "auth.sessionUpgrade.action": "Upgrade Authentication",
+  "auth.signIn.rateLimited":
+    "Too many sign-in attempts. Wait a moment, then try again.",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
   "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
   "waves.signIn.post": "Sign in to 6529 to post",
