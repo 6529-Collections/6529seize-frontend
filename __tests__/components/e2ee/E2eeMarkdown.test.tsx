@@ -135,6 +135,21 @@ it("renders URLs and images as explicit safe anchors without resource elements",
   ).toBeNull();
 });
 
+it("keeps mentioned members as labels in a compact preview inside a notification link", () => {
+  const { container } = render(
+    <a href="/messages/encrypted/group">
+      <E2eeMarkdown
+        {...props}
+        preview
+        text="**@bob** [Link](https://example.com) ![Image](https://example.com/image.png)"
+      />
+    </a>
+  );
+  expect(container.querySelector("strong")).toHaveTextContent("@bob");
+  expect(screen.getAllByRole("link")).toHaveLength(1);
+  expect(container.querySelector("a a,img,iframe,input")).toBeNull();
+});
+
 it("preserves blank lines and isolates footnotes even when the same message renders twice", () => {
   const { container } = render(
     <>

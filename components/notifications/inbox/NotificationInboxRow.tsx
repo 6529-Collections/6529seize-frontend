@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MessageMarkdown } from "@/components/markdown/MessageMarkdown";
 import NotificationEncryptedMessage from "@/components/brain/notifications/NotificationEncryptedMessage";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import BellIcon from "@/components/common/icons/BellIcon";
@@ -132,9 +133,14 @@ export default function NotificationInboxRow({
             </div>
           )}
           {preview && (
-            <p className="tw-mb-0 tw-mt-1 tw-line-clamp-2 tw-break-words tw-text-sm tw-leading-5 tw-text-iron-400">
-              {preview}
-            </p>
+            <div className="tw-mt-1 tw-break-words tw-text-sm tw-leading-5 tw-text-iron-400 [&_*]:!tw-text-inherit">
+              <MessageMarkdown
+                text={preview}
+                privacy="public"
+                preview
+                messageId={`notification-${notification.id}`}
+              />
+            </div>
           )}
           <div className="tw-mt-1 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
             <LocalDateTime

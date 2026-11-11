@@ -5,12 +5,48 @@ import { publicEnv } from "@/config/env";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
+import { E2eeMarkdown } from "@/components/e2ee/conversation/E2eeMarkdown";
 import { DropImageGalleryProvider } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { buildDropImageGalleryItems } from "@/components/drops/view/part/dropImageGallery";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
 const PARENTHESIZED_ORDERED_LIST_CLASS_NAME =
   "drop-markdown-ordered-list-paren";
+
+it("keeps public and encrypted adapter typography consistent", () => {
+  const text =
+    "# Heading\n\n**Bold** and *italic*.\n\n\nAfter a blank line.\n\n> Quote\n\n- First\n  - Nested\n\n`code`\n\n| Key |\n| --- |\n| Value |";
+  const { container } = render(
+    <>
+      <section aria-label="Public message">
+        <DropPartMarkdown
+          partContent={text}
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          onQuoteClick={jest.fn()}
+        />
+      </section>
+      <section aria-label="Encrypted message">
+        <E2eeMarkdown
+          text={text}
+          messageId="parity"
+          members={[]}
+          mentions={[]}
+          selfProfileId={null}
+        />
+      </section>
+    </>
+  );
+  const [regular, encrypted] = container.querySelectorAll("section");
+  const typography = (body: Element) =>
+    [...body.querySelectorAll("h1,p,blockquote,li,code,table")].map((node) => ({
+      tag: node.tagName,
+      text: node.textContent,
+      className: node.className,
+    }));
+  expect(typography(regular!)).toEqual(typography(encrypted!));
+});
 
 class MockIntersectionObserver {
   observe = jest.fn();

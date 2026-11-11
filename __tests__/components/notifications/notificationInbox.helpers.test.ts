@@ -141,14 +141,14 @@ it("renders mention and wave tokens as readable text across drop parts", () => {
   );
 });
 
-it("normalizes a title before truncating and handles missing drops", () => {
+it("normalizes a title without cutting Markdown source and handles missing drops", () => {
   const title = `@[GelatoGenesis] #[QUORUM] ${"x".repeat(260)}`;
   expect(
     getInboxPreview({
       ...replied,
       related_drops: [{ ...reply, title }],
     })
-  ).toBe(`@GelatoGenesis #QUORUM ${"x".repeat(260)}`.slice(0, 240));
+  ).toBe(`@GelatoGenesis #QUORUM ${"x".repeat(260)}`);
   expect(getInboxPreview({ ...replied, related_drops: [] })).toBe("");
 });
 
