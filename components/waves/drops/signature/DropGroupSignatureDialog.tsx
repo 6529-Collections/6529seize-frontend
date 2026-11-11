@@ -11,19 +11,28 @@ import {
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
-import { ChevronDownIcon, MinusCircleIcon } from "@heroicons/react/24/outline";
+import {
+  ChevronDownIcon,
+  MinusCircleIcon,
+  QuestionMarkCircleIcon,
+  ShieldCheckIcon as ShieldCheckOutlineIcon,
+  ShieldExclamationIcon,
+  UserMinusIcon,
+} from "@heroicons/react/24/outline";
 import { ShieldCheckIcon } from "@heroicons/react/16/solid";
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
+import { isDropAuthorSigned } from "./authorSignedClaim";
 import {
   DropSignatureVerification,
   SignatureDialogFrame,
 } from "./DropSignatureDialog";
-import { isDropAuthorSigned } from "./dropAuthorSigned";
+import {
+  useDropSealStates,
+  type SealState,
+  type VerdictDrop,
+} from "./dropSignatureVerdicts";
 
-export type GroupSignatureDrop = Pick<
-  ApiDrop,
-  "id" | "is_author_signed" | "title" | "parts" | "wave" | "author"
-> &
+export type GroupSignatureDrop = VerdictDrop &
   Partial<Pick<ApiDrop, "created_at">>;
 
 const EXCERPT_MAX_LENGTH = 80;
@@ -33,6 +42,26 @@ const TIME_FORMAT: Intl.DateTimeFormatOptions = {
   hour: "numeric",
   minute: "2-digit",
 };
+
+/** A row's status: "Signed by its author" only once this browser verified it. */
+const ROW_STATUS = {
+  verified: { key: "signedMessages.signature.signed", Icon: ShieldCheckIcon },
+  pending: {
+    key: "signedMessages.marker.pending",
+    Icon: ShieldCheckOutlineIcon,
+  },
+  unverified: {
+    key: "signedMessages.marker.unverified",
+    Icon: QuestionMarkCircleIcon,
+  },
+  unlinked: { key: "signedMessages.marker.unlinked", Icon: UserMinusIcon },
+  failed: { key: "signedMessages.marker.failed", Icon: ShieldExclamationIcon },
+} as const satisfies Record<SealState, unknown>;
+
+const UNSIGNED_ROW_STATUS = {
+  key: "signedMessages.signature.unsigned",
+  Icon: MinusCircleIcon,
+} as const;
 
 /** Replaces Markdown links with their text and drops images, in one pass. */
 function stripMarkdownLinks(line: string): string {
@@ -98,15 +127,15 @@ function GroupSignatureRow({
 }) {
   const panelId = useId();
   const signed = isDropAuthorSigned(drop);
+  const drops = useMemo(() => [drop], [drop]);
+  // The dialog is open, so posts marked signed are checked now.
+  const sealState = useDropSealStates(drops, signed)[0] ?? "pending";
   const excerpt =
     getDropExcerpt(drop) ?? t(locale, "signedMessages.group.postWithoutText");
-  const status = t(
-    locale,
-    signed
-      ? "signedMessages.signature.signed"
-      : "signedMessages.signature.unsigned"
-  );
-  const StatusIcon = signed ? ShieldCheckIcon : MinusCircleIcon;
+  const { key: statusKey, Icon: StatusIcon } = signed
+    ? ROW_STATUS[sealState]
+    : UNSIGNED_ROW_STATUS;
+  const status = t(locale, statusKey);
   return (
     <li className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0">
       <button

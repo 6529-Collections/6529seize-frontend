@@ -8,6 +8,12 @@ import {
   u32be,
   utf8Encode,
 } from "./bytes";
+import { isGifPickerFile } from "./gif-picker-files";
+import {
+  neutralImageName,
+  sniffImageMime,
+  stripImageMetadata,
+} from "./image-metadata";
 import type { PayloadAttachment } from "./payload";
 
 /**
@@ -24,6 +30,15 @@ export const PLAINTEXT_CHUNK_BYTES = BLOB_CHUNK_BYTES - GCM_TAG_BYTES;
 export const MAX_BLOB_BYTES = 25 * 1024 * 1024;
 /** Leave room for chunk authentication tags within the encrypted blob limit. */
 export const MAX_ATTACHMENT_FILE_BYTES = MAX_BLOB_BYTES - 64 * 1024;
+/** The most chunks `encryptMedia` writes: MAX_BLOB_BYTES of whole ciphertext chunks. */
+export const MAX_BLOB_CHUNKS = Math.ceil(MAX_BLOB_BYTES / BLOB_CHUNK_BYTES);
+/**
+ * The largest plaintext `encryptMedia` accepts (ciphertextSize <= MAX_BLOB_BYTES).
+ * Above MAX_ATTACHMENT_FILE_BYTES (the composer's limit) because history
+ * moved from unencrypted DMs is checked against the blob limit itself.
+ */
+export const MAX_ATTACHMENT_BYTES =
+  MAX_BLOB_BYTES - MAX_BLOB_CHUNKS * GCM_TAG_BYTES;
 
 const AAD_PREFIX = utf8Encode("6529-e2ee-blob-v1");
 
@@ -67,6 +82,18 @@ const importKey = (key: Uint8Array, usage: KeyUsage): Promise<CryptoKey> => {
     usage,
   ]);
 };
+
+/**
+ * Whether an attachment's declared size and chunk count are ones this app's
+ * sender can produce; anything larger is refused before any download.
+ */
+export const isWithinAttachmentLimits = (attachment: {
+  readonly size: number;
+  readonly chunks: number;
+}): boolean =>
+  attachment.size <= MAX_ATTACHMENT_BYTES &&
+  attachment.chunks >= 1 &&
+  attachment.chunks <= MAX_BLOB_CHUNKS;
 
 export const ciphertextSize = (plaintextBytes: number): number => {
   const chunks = Math.max(1, Math.ceil(plaintextBytes / PLAINTEXT_CHUNK_BYTES));
@@ -192,6 +219,9 @@ export async function downloadMedia(input: {
   attachment: PayloadAttachment;
   signal?: AbortSignal;
 }): Promise<Uint8Array> {
+  if (!isWithinAttachmentLimits(input.attachment)) {
+    throw new MediaError("E2EE_MEDIA_SIZE");
+  }
   const chunks: Uint8Array[] = [];
   for (let index = 0; index < input.attachment.chunks; index += 1) {
     input.signal?.throwIfAborted();
@@ -235,33 +265,76 @@ export const isSafeInlineImageMime = (mime: string): boolean =>
 export const localBlobType = (mime: string): string =>
   isSafeInlineImageMime(mime) ? mime.toLowerCase() : "application/octet-stream";
 
+/**
+ * Oriented pixel size; {} when not an image or the browser cannot tell;
+ * null when it fails to decode.
+ */
 async function imageSize(
-  file: File
-): Promise<{ width?: number; height?: number }> {
-  if (
-    !file.type.startsWith("image/") ||
-    typeof createImageBitmap !== "function"
-  ) {
+  bytes: Uint8Array,
+  mime: string
+): Promise<{ width?: number; height?: number } | null> {
+  if (!mime.startsWith("image/") || typeof createImageBitmap !== "function") {
     return {};
   }
   try {
-    const bitmap = await createImageBitmap(file);
+    const bitmap = await createImageBitmap(
+      new Blob([toArrayBuffer(bytes)], { type: mime })
+    );
     const size = { width: bitmap.width, height: bitmap.height };
     bitmap.close();
     return size;
   } catch {
-    return {};
+    return null;
   }
 }
 
-export async function mediaFromFile(file: File): Promise<MediaInput> {
-  const bytes = new Uint8Array(await file.arrayBuffer());
-  const size = await imageSize(file);
+interface FileMedia extends MediaInput {
+  /** The image was given a neutral name (counts towards `imageNumber`). */
+  readonly neutralName: boolean;
+}
+
+/**
+ * Bytes and details of a file to attach. A JPEG, PNG, WebP or GIF,
+ * recognised by its bytes whatever type the picker reported, goes without
+ * identifying metadata (image-metadata) and with the recognised type. Images
+ * get a neutral name (`imageNumber` tells images of one message apart)
+ * unless `keepName` (history moved from an unencrypted DM keeps the names
+ * already shown there). A GIF from the GIF picker is a public image: it is
+ * sent as downloaded, under its own name (gif-picker-files). Other files are
+ * sent as they are.
+ *
+ * Cleaning never blocks sending: when the cleaned copy does not decode but
+ * the original does, the original is sent; when neither decodes, the
+ * cleaned copy is sent without dimensions.
+ */
+export async function mediaFromFile(
+  file: File,
+  options: { readonly imageNumber?: number; readonly keepName?: boolean } = {}
+): Promise<FileMedia> {
+  const original = new Uint8Array(await file.arrayBuffer());
+  const picked = isGifPickerFile(file);
+  const sniffed = picked ? null : sniffImageMime(original);
+  const mime = sniffed ?? file.type;
+  const cleaned = sniffed === null ? original : stripImageMetadata(original);
+  let bytes = cleaned;
+  let size = await imageSize(cleaned, mime);
+  if (size === null && cleaned !== original) {
+    const originalSize = await imageSize(original, mime);
+    if (originalSize !== null) {
+      bytes = original;
+      size = originalSize;
+    }
+  }
+  const neutral =
+    picked || options.keepName === true
+      ? null
+      : neutralImageName(mime, options.imageNumber ?? 1);
   return {
     bytes,
-    mime: file.type,
-    name: file.name,
-    width: size.width,
-    height: size.height,
+    mime,
+    name: neutral ?? file.name,
+    neutralName: neutral !== null,
+    width: size?.width,
+    height: size?.height,
   };
 }

@@ -202,36 +202,69 @@ events and verifies them itself: it recomputes each event id from the stored
 fields and canonical body, checks the Ed25519 signature with the device key,
 and checks the wallet's sign-in signature on the grant. The dialog shows:
 
-- **Signed by its author** with the wallet, device key fingerprint, grant
-  expiry, the wallet-signature check, and whether the current content is the
-  signed version. A contract wallet's sign-in signature counts only when
+- **Signed by its author** with the wallet, device key fingerprint, where the
+  device was authorized (**Authorized from**), grant expiry, the
+  wallet-signature check, and whether the current content is the signed
+  version. The content shown must be the signed content: title and text,
+  media (by URL), attachments (by id), a quoted drop when one is shown, the
+  reply target when one is shown, and for an edit, that the edit names this
+  drop. A contract wallet's sign-in signature counts only when
   the wallet has contract code on Ethereum and its EIP-1271 check accepts
   the signature; the row then reads **Contract wallet: verified on Ethereum
   in your browser**.
 - **Couldn't verify this signature right now** with a neutral icon, never
   the signed seal, when the sign-in signature needs that contract-wallet
   check on Ethereum and it cannot run (no Ethereum connection, a failed
-  read, or a grant signed on another chain). An ordinary wallet whose
-  signature does not match reads **The signature could not be verified**.
+  read, or a grant signed on another chain). The same neutral state names
+  the origin when a 6529 Mobile or Desktop grant was authorized from
+  anywhere other than a 6529 site host or **6529 Desktop**. An ordinary
+  wallet whose signature does not match reads **The signature could not be
+  verified**.
 - **Not signed by its author** for drops sent without a device signature.
   Drops whose content moderation hides from you and anonymous decision
   entries also read this way: their signed events are not shared.
 - **The signature could not be verified** when stored signatures do not
   match, or when the wallet signed the grant anywhere but the 6529 app
-  (exactly 6529.io or staging.6529.io; other 6529.io hosts, such as the IPFS
-  and media gateways, never count). Signed messages are not turned on from a
-  sign-in challenge for any other host.
+  (exactly 6529.io; staging also accepts staging.6529.io; other 6529.io
+  hosts, such as the IPFS and media gateways, never count). Signed messages
+  are not turned on from a sign-in challenge for any other host.
 - **Couldn't check the signature right now.** with **Try again** when the
   signed events or the author's wallets cannot be loaded. A temporary failure
   is never reported as **The signature could not be verified**.
 
 ## Signed-By-Author Seal
 
-A drop whose current content is the version its author signed shows a small
-shield-check seal right after its timestamp. Its accessible name and tooltip
-are **Signed by its author**. Clicking it, or focusing it and pressing Enter
-or Space, opens the same **Signature** dialog, so the browser checks the
-signature itself; the seal only reflects what 6529.io reports.
+A drop that 6529.io marks as signed by its author shows a small seal right
+after its timestamp. When the seal comes into view, the browser fetches the
+drop's signed events and verifies them itself, as the **Signature** dialog
+does. Seals that come into view within a moment of each other share one
+request for their signed events (up to 50 drops per request); a drop with a
+long edit history, or an API without that request, is read on its own. Only
+drops 6529.io marks as signed are checked, at most two at a time and at most
+two requests a second; a check still waiting when its seal scrolls away is
+dropped and queued again if the seal returns. Verdicts are kept in memory for the page
+session, and a check that fails to load or times out is not retried by
+itself (open the **Signature** dialog to try again). The seal's accessible
+name, tooltip and shape follow that check:
+
+- **Checking the author's signature**: a faint outlined shield, until the
+  check finishes.
+- **Signed by its author**: the filled shield-check, only after the browser
+  verified the signature over the content shown.
+- **Signed, not yet verified**: a question mark, when the browser cannot
+  verify it here (a contract wallet, whose check on Ethereum runs only in the
+  dialog; an unrecognized origin; part of the signed post that cannot be
+  read with certainty; or a lookup that failed).
+- **Signed by a wallet that is not on this profile**: a person with a minus
+  sign, neutral, when the signing wallet is not one of the author's wallets
+  now (for example, it was removed from the profile), so the signature
+  cannot be attributed to this author. The dialog names the wallet.
+- **The signature doesn't match this post**: a shield with an exclamation
+  mark, when the signature does not verify or covers other content.
+
+Clicking the seal, or focusing it and pressing Enter or Space, opens the
+**Signature** dialog; its verdict, including a contract wallet checked on
+Ethereum, also updates the seal.
 
 - The seal is positive only. Unsigned drops show nothing: posts from the
   apps without an active signing grant, older posts, and any drop edited
@@ -243,13 +276,14 @@ signature itself; the seal only reflects what 6529.io reports.
   Memes and quick-vote cards. Activating it there opens the dialog without
   opening the linked or quoted drop.
 - Message search results and decision entry cards are single buttons, so
-  they show a static seal and add ", signed by its author" to the button's
-  name.
+  they show a static seal and add the drop's signed status to the button's
+  name: ", signed by its author" only once this browser verified it,
+  otherwise ", signed, not yet verified".
 - Reply-to lines and the composer's reply or quote preview show no
   timestamp and no seal.
 - On grouped chat rows, which have no header, a static seal appears beside
-  the timestamp revealed on hover or swipe; use the drop menu's
-  **Signature** item there.
+  the timestamp revealed on hover or swipe and follows the same check. Use
+  the drop menu's **Signature** item there.
 - A signed edit keeps the seal; an unsigned edit or a delete removes it. Live
   edits update the recipient's author-signature status along with the content,
   without requiring a reload.
@@ -265,17 +299,22 @@ signature itself; the seal only reflects what 6529.io reports.
 When consecutive chat posts by the same author render under one header (the
 chat's usual grouping), the header's seal stands for the whole group:
 
-- Every post author signed: the full seal, named for example **All 3 posts
-  signed by their author**.
-- Some posts signed: an outlined seal (a different shape, not only a
+- Every post verified by this browser: the full seal, named for example
+  **All 3 posts signed by their author**.
+- Some posts verified: an outlined seal (a different shape, not only a
   different color), named for example **2 of 3 posts signed by their
   author**.
-- No post signed: no seal on the header.
+- While posts are being checked: **Checking the signatures in this group**.
+  When a post's signature does not match: **A signature in this group
+  doesn't match its post**. When a post was signed by a wallet that is not
+  on the author's profile: **A post in this group was signed by a wallet
+  that is not on this profile**. When none could be verified here: **Signed
+  posts, not yet verified**.
+- No post marked signed: no seal on the header.
 - Activating the header seal opens **Signatures in this group**, which lists
   each post with its time, the first line of its text (or **Post without
-  text**) and its status. Opening a row checks that post's signature in the
-  browser, exactly like the single-drop dialog; posts are checked only when
-  their row is opened.
+  text**) and this browser's status for it. Opening a row shows that post's
+  full Signature details, exactly like the single-drop dialog.
 - Each grouped row keeps its own static seal beside its hover or swipe
   timestamp.
 - The count follows the group live: a new post joining the group or an

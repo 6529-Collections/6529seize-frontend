@@ -97,7 +97,8 @@ is blocked.
   Reconnect that profile using the
   [wallet account controls](../navigation/feature-wallet-account-controls.md#failure-and-recovery),
   then retry the action. Post keeps the draft when authentication fails; save
-  it before logging out or reloading. Reactions are not automatically retried
+  it before logging out or reloading. Logging out removes unsent drafts from
+  this browser. Reactions are not automatically retried
   after signing in.
 - Footer offers `Sign in to 6529 to post`:
   select it to open the wallet chooser, then use `Sign message` in the

@@ -40,6 +40,9 @@ jobs:
       MOBILE_APP_SCHEME: mobileStaging6529
       CORE_SCHEME: core6529
       IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
+      # User-provided media is served from the separate content domain on
+      # staging; production keeps the default (https://media.6529.io).
+      MEDIA_RESOLVER_ENDPOINT: https://media.6529usercontent.com
       GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}
       API_ENDPOINT: ${{ vars.STAGING_API_ENDPOINT || 'https://api.staging.6529.io' }}
       WS_ENDPOINT: ${{ vars.STAGING_WS_ENDPOINT || 'wss://ws.staging.6529.io' }}

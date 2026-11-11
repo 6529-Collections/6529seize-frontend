@@ -1,0 +1,11 @@
+# Files that control how the site is built, tested, deployed and installed.
+# Changes to them are reviewed by the maintainers. Ordinary application code
+# has no owner here; the main branch rules decide its reviews.
+
+/.github/ @6529-Collections/6529seize-maintainers
+/ops/iam/ @6529-Collections/6529seize-maintainers
+/bin/ @6529-Collections/6529seize-maintainers
+/scripts/public-package-policy.cjs @6529-Collections/6529seize-maintainers
+/scripts/run-secure-pnpm.cjs @6529-Collections/6529seize-maintainers
+/pnpm-workspace.yaml @6529-Collections/6529seize-maintainers
+/.npmrc @6529-Collections/6529seize-maintainers

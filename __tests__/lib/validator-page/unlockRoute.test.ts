@@ -86,6 +86,66 @@ describe("POST /validator/unlock", () => {
     expect(otherAddress.headers.get("set-cookie")).not.toBeNull();
   });
 
+  describe("shared budget of wrong passwords", () => {
+    beforeEach(() => {
+      jest.useFakeTimers({ now: new Date("2026-11-10T00:00:00.000Z") });
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    /** Sends `count` wrong passwords, ten per address so none is limited. */
+    async function failMany(
+      POST: UnlockRoute["POST"],
+      count: number,
+      firstOctet: number
+    ): Promise<void> {
+      for (let attempt = 0; attempt < count; attempt += 1) {
+        const ip = `${firstOctet}.0.${Math.floor(attempt / 10)}.1`;
+        const response = await POST(post({ password: "wrong" }, ip));
+        expect(response.headers.get("location")).toBe("/validator?gate=wrong");
+      }
+    }
+
+    it("pauses every unlock once 100 wrong passwords arrive from many addresses", async () => {
+      const { POST } = loadRoute();
+      await failMany(POST, 100, 20);
+
+      const blocked = await POST(post({ password: PASSWORD }, "9.9.9.9"));
+      expect(blocked.headers.get("location")).toBe("/validator?gate=wait");
+      expect(blocked.headers.get("set-cookie")).toBeNull();
+
+      jest.advanceTimersByTime(15 * 60 * 1000);
+      const later = await POST(post({ password: PASSWORD }, "9.9.9.9"));
+      expect(later.headers.get("location")).toBe("/validator");
+      expect(later.headers.get("set-cookie")).not.toBeNull();
+    });
+
+    it("does not spend the budget on right passwords", async () => {
+      const { POST } = loadRoute();
+      await failMany(POST, 99, 30);
+      for (let index = 0; index < 5; index += 1) {
+        const ok = await POST(post({ password: PASSWORD }, `40.0.0.${index}`));
+        expect(ok.headers.get("set-cookie")).not.toBeNull();
+      }
+
+      const lastWrong = await POST(post({ password: "wrong" }, "50.0.0.1"));
+      expect(lastWrong.headers.get("location")).toBe("/validator?gate=wrong");
+      const paused = await POST(post({ password: "wrong" }, "50.0.0.2"));
+      expect(paused.headers.get("location")).toBe("/validator?gate=wait");
+    });
+  });
+
+  it("treats an oversized form as a wrong password", async () => {
+    const { POST } = loadRoute();
+    const response = await POST(
+      post({ password: PASSWORD, next: "/validator", pad: "x".repeat(8192) })
+    );
+    expect(response.headers.get("location")).toBe("/validator?gate=wrong");
+    expect(response.headers.get("set-cookie")).toBeNull();
+  });
+
   it("sends a GET back to the page", () => {
     const { GET } = loadRoute();
     expect(GET().headers.get("location")).toBe("/validator");
