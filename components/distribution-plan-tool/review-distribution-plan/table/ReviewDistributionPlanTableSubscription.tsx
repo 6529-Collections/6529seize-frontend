@@ -7,6 +7,7 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { buildCsv } from "@/helpers/csv-export.helpers";
 import { useDropForgeProcess } from "@/hooks/useDropForgeProcess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -108,10 +109,10 @@ function downloadCsv(
   list: string,
   rows: Array<{ wallet: string; amount: number }>
 ) {
-  const csv = [
-    "address,value",
-    ...rows.map((row) => `${row.wallet},${row.amount}`),
-  ].join("\n");
+  const csv = buildCsv([
+    ["address", "value"],
+    ...rows.map(({ wallet, amount }) => [wallet, amount]),
+  ]);
   const url = URL.createObjectURL(
     new Blob([csv], { type: "text/csv;charset=utf-8;" })
   );

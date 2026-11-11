@@ -1,3 +1,5 @@
+import { openUrlInNewTab } from "@/helpers/open-url.helpers";
+
 const LEVEL_CLASSES: { minLevel: number; classes: string }[] = [
   { minLevel: 80, classes: "tw-text-[#55B075] tw-ring-[#55B075]" },
   { minLevel: 60, classes: "tw-text-[#AABE68] tw-ring-[#AABE68]" },
@@ -38,7 +40,7 @@ export default function UserLevel({
 
   const classes = `${getColorClasses()} ${getSizeClasses()}`;
   const openLevelsPage = () => {
-    window.open("/network/levels", "_blank");
+    openUrlInNewTab("/network/levels");
   };
 
   const content = showLabel ? `Level ${level}` : `${level}`;

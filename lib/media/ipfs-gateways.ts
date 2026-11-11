@@ -1,4 +1,5 @@
 import {
+  FIRST_PARTY_MEDIA_RESOLVER_HOSTS,
   IPFS_PATH_GATEWAY_HOSTS,
   IPFS_SUBDOMAIN_GATEWAY_SUFFIXES,
   canonicalizeGatewayHostname,
@@ -14,7 +15,7 @@ export const IPFS_GATEWAY_CSP_SOURCES = [
 ];
 
 export const IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES = [
-  "media.6529.io",
+  ...FIRST_PARTY_MEDIA_RESOLVER_HOSTS,
   ...IPFS_PATH_GATEWAY_HOSTS,
   ...IPFS_SUBDOMAIN_GATEWAY_SUFFIXES.map((suffix) => `**${suffix}`),
 ];

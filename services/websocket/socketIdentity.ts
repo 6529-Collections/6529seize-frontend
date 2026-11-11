@@ -29,3 +29,17 @@ export const getSocketIdentityKey = (
   }
   return `token:${getAuthTokenFingerprint(token)}`;
 };
+
+/** A short marker that recognises a credential seen before. */
+export const createCredentialMarker = (credential: string): string => {
+  let primary = 0;
+  let secondary = 5381;
+
+  for (let index = 0; index < credential.length; index += 1) {
+    const code = credential.codePointAt(index) ?? 0;
+    primary = (primary * 31 + code) % 2_147_483_647;
+    secondary = (secondary * 33 + code) % 2_147_483_647;
+  }
+
+  return `${credential.length}:${primary}:${secondary}`;
+};

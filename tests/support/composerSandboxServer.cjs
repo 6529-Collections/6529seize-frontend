@@ -2715,6 +2715,14 @@ const mockApiExactReadRoutes = new Map([
   ],
   ["/api/v2/official-waves", () => [localWaveOverview]],
   [
+    "/api/v2/waves/all",
+    () => ({
+      data: [localWaveOverview],
+      next_cursor: null,
+      snapshot_expires_at: Date.now() + 900000,
+    }),
+  ],
+  [
     "/api/v2/waves/joined",
     () => ({
       data: [],
@@ -3331,6 +3339,7 @@ function buildPublicRuntime() {
       ? {
           NEXT_PUBLIC_E2EE_DM_ENABLED: "true",
           NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
+          GIPHY_API_KEY: "e2ee-sandbox-fixture",
         }
       : {}),
     // Sandbox packs run the staging chat configuration (gap-only sync and

@@ -5,6 +5,7 @@ import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import { NEXTGEN_GENERATOR_BASE_URL } from "@/constants/constants";
 import type { NextGenToken } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
+import { openUrlInNewTab } from "@/helpers/open-url.helpers";
 import { useState } from "react";
 import { mainnet } from "wagmi/chains";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
@@ -105,7 +106,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    window.open(url, "_blank");
+    openUrlInNewTab(url);
   }
 
   return (

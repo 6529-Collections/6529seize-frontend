@@ -199,6 +199,28 @@ describe("BoundedResultCache", () => {
     abandonedJob.reject(new Error("aborted job"));
   });
 
+  it("keeps a committed job's entry after every caller leaves, so a returning caller joins it", async () => {
+    const cache = createCache();
+    const pending = deferred<CacheableResult<string>>();
+    let jobSignal: AbortSignal | undefined;
+    const job = jest.fn((signal: AbortSignal, commit: () => void) => {
+      jobSignal = signal;
+      commit();
+      return pending.promise;
+    });
+    const controller = new AbortController();
+
+    const abandoned = cache.load("a", job, controller.signal);
+    controller.abort(new Error("left"));
+    await expect(abandoned).rejects.toThrow("left");
+    expect(jobSignal?.aborted).toBe(false);
+
+    const returning = cache.load("a", job);
+    pending.resolve(result("done"));
+    await expect(returning).resolves.toBe("done");
+    expect(job).toHaveBeenCalledTimes(1);
+  });
+
   it("rejects an already aborted caller without starting a job", async () => {
     const cache = createCache();
     const controller = new AbortController();

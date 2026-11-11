@@ -5,12 +5,24 @@ import Link from "next/link";
 import { useRef, useState, type ReactNode } from "react";
 
 import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatList, formatPercent } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t, tRich, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/validator-authorize";
 import {
+  groupedPublicKey,
+  isImplausibleAuthVersion,
   keyCode,
   sharePercents,
   shortAddress,
+  unmarkedKeys,
 } from "@/lib/validator-page/authorize/display";
 import type { Draft } from "@/lib/validator-page/authorize/draftLink";
+import {
+  grantNetwork,
+  type GrantTypedData,
+} from "@/lib/validator-page/authorize/typedData";
 
 import ValidatorPageFrame, { ValidatorPageHeader } from "../ValidatorPageFrame";
 import { BODY, LINK, PRIMARY_BUTTON, TEXT_BUTTON } from "../validatorStyles";
@@ -28,8 +40,15 @@ function Notice({
   tone = "plain",
 }: {
   readonly children: ReactNode;
-  readonly tone?: "plain" | "error";
+  readonly tone?: "plain" | "warning" | "error";
 }) {
+  if (tone === "warning") {
+    return (
+      <p className="tw-m-0 tw-text-base tw-leading-7 tw-text-amber-300">
+        {children}
+      </p>
+    );
+  }
   if (tone === "error") {
     return (
       <p
@@ -48,29 +67,38 @@ function Notice({
   );
 }
 
-function TestNetworkTag({ draft }: { readonly draft: Draft }) {
-  if (draft.network === "mainnet") {
+/** The draft as the page shows it, from what the wallet will sign. */
+type Shown = {
+  readonly draft: Draft;
+  readonly grant: GrantTypedData;
+  /** From the domain salt that is signed, never from the link's label. */
+  readonly network: "mainnet" | "test";
+  readonly locale: SupportedLocale;
+};
+
+function TestNetworkTag({ shown }: { readonly shown: Shown }) {
+  if (shown.network === "mainnet") {
     return null;
   }
   return (
     <span className="tw-inline-flex tw-items-center tw-self-start tw-rounded-full tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-text-amber-300">
-      Test network
+      {t(shown.locale, "validator.authorize.network.test")}
     </span>
   );
 }
 
-function KeyCodes({ draft }: { readonly draft: Draft }) {
-  const mine = draft.keys.filter((key) => key.mine);
+function KeyCodes({ shown }: { readonly shown: Shown }) {
+  const mine = shown.draft.keys.filter((key) => key.mine);
   if (mine.length === 0) {
-    return <TestNetworkTag draft={draft} />;
+    return <TestNetworkTag shown={shown} />;
   }
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         <span className="tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
-          Validator key
+          {t(shown.locale, "validator.authorize.keyCodes.label")}
         </span>
-        <TestNetworkTag draft={draft} />
+        <TestNetworkTag shown={shown} />
       </div>
       <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1 tw-p-0">
         {mine.map((key) => (
@@ -105,20 +133,25 @@ function Row({
   );
 }
 
-function DraftRows({ draft }: { readonly draft: Draft }) {
+function DraftRows({ shown }: { readonly shown: Shown }) {
+  const { draft, grant, locale } = shown;
   const percents = sharePercents(draft.keys.map((key) => key.share));
-  const purpose = (
-    JSON.parse(draft.typedDataJson) as { message: { purpose: string } }
-  ).message.purpose;
   return (
     <dl className="tw-m-0 tw-flex tw-flex-col tw-gap-3">
-      <Row label="Account">
+      <Row label={t(locale, "validator.authorize.row.account")}>
         <span className="tw-block tw-break-all tw-font-mono tw-text-sm tw-leading-6">
           {draft.account}
         </span>
       </Row>
       {draft.keys.length > 0 && (
-        <Row label={draft.keys.length === 1 ? "Key" : "Keys"}>
+        <Row
+          label={t(
+            locale,
+            draft.keys.length === 1
+              ? "validator.authorize.row.keys.one"
+              : "validator.authorize.row.keys.other"
+          )}
+        >
           <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1 tw-p-0">
             {draft.keys.map((key, index) => (
               <li
@@ -131,49 +164,94 @@ function DraftRows({ draft }: { readonly draft: Draft }) {
                 <span>{percents[index]}</span>
                 {key.mine && (
                   <span className="tw-text-sm tw-text-primary-300">
-                    this validator
+                    {t(locale, "validator.authorize.row.keys.mine")}
                   </span>
                 )}
+                <span className="tw-basis-full tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-400">
+                  {groupedPublicKey(key.pubkey)}
+                </span>
               </li>
             ))}
           </ul>
         </Row>
       )}
-      <Row label="Authorization">#{draft.authVersion.toString()}</Row>
-      <Row label="Purpose">{purpose}</Row>
+      <Row label={t(locale, "validator.authorize.version.label")}>
+        {t(locale, "validator.authorize.version.value", {
+          version: String(grant.message.authVersion),
+        })}
+      </Row>
+      <Row label={t(locale, "validator.authorize.row.purpose")}>
+        {grant.message.purpose}
+      </Row>
     </dl>
   );
 }
 
-function DraftIntro({ draft }: { readonly draft: Draft }) {
+/** What to weigh before signing that the checks can't decide. */
+function DraftWarnings({ shown }: { readonly shown: Shown }) {
+  const { draft, locale } = shown;
+  const others = unmarkedKeys(draft.keys);
+  const version = draft.authVersion;
+  const percent = formatPercent(locale, others.fraction, 2);
+  return (
+    <>
+      {others.count === 1 && (
+        <Notice tone="warning">
+          {t(locale, "validator.authorize.keys.unmarked.one", { percent })}
+        </Notice>
+      )}
+      {others.count > 1 && (
+        <Notice tone="warning">
+          {t(locale, "validator.authorize.keys.unmarked.other", {
+            count: others.count,
+            percent,
+          })}
+        </Notice>
+      )}
+      {isImplausibleAuthVersion(version) && (
+        <Notice tone="warning">
+          {t(locale, "validator.authorize.version.implausible", {
+            version: version.toString(),
+          })}
+        </Notice>
+      )}
+    </>
+  );
+}
+
+/** The heading names the validator's own keys only when the link marks one. */
+function introHeading({ draft, locale }: Shown, mine: number): string {
+  if (mine > 1) {
+    return t(locale, "validator.authorize.heading.mine.other");
+  }
+  if (mine === 1) {
+    return t(locale, "validator.authorize.heading.mine.one");
+  }
+  return draft.keys.length > 1
+    ? t(locale, "validator.authorize.heading.unmarked.other")
+    : t(locale, "validator.authorize.heading.unmarked.one");
+}
+
+function DraftIntro({ shown }: { readonly shown: Shown }) {
+  const { draft, locale } = shown;
   const mine = draft.keys.filter((key) => key.mine).length;
   if (draft.keys.length === 0) {
     return (
       <>
-        <TestNetworkTag draft={draft} />
-        <h2 className={HEADING}>Stop this account&apos;s keys</h2>
-        <p className={TEXT}>
-          No key will sign for this account from the day it counts.
-        </p>
+        <TestNetworkTag shown={shown} />
+        <h2 className={HEADING}>
+          {t(locale, "validator.authorize.stop.heading")}
+        </h2>
+        <p className={TEXT}>{t(locale, "validator.authorize.stop.body")}</p>
       </>
     );
   }
   return (
     <>
-      <KeyCodes draft={draft} />
-      <h2 className={HEADING}>
-        {mine > 1
-          ? "Authorize these validator keys"
-          : "Authorize this validator key"}
-      </h2>
-      <p className={TEXT}>
-        Your wallet signs one message that lets the 6529 Validator on your
-        computer sign for this account. It costs no gas and moves nothing.
-      </p>
-      <p className={TEXT}>
-        Check that your validator&apos;s screen shows the same key code. If it
-        doesn&apos;t, or someone sent you this link, stop here.
-      </p>
+      <KeyCodes shown={shown} />
+      <h2 className={HEADING}>{introHeading(shown, mine)}</h2>
+      <p className={TEXT}>{t(locale, "validator.authorize.intro.body")}</p>
+      <p className={TEXT}>{t(locale, "validator.authorize.intro.check")}</p>
     </>
   );
 }
@@ -185,44 +263,51 @@ function Address({ address }: { readonly address: string }) {
   return <span className="tw-whitespace-nowrap">{shortAddress(address)}</span>;
 }
 
-function AnotherWallet({ session }: { readonly session: Session }) {
+function AnotherWallet({
+  session,
+  locale,
+}: {
+  readonly session: Session;
+  readonly locale: SupportedLocale;
+}) {
   return (
     <button
       type="button"
       onClick={() => void session.connectAnother()}
       className={`${TEXT_BUTTON} -tw-ml-1 tw-self-start`}
     >
-      Use another wallet
+      {t(locale, "validator.authorize.wallet.another")}
     </button>
   );
 }
 
 const SIGNING_NOTICE: Readonly<
   Partial<
-    Record<Signing["status"], { text: ReactNode; tone: "plain" | "error" }>
+    Record<Signing["status"], { key: MessageKey; tone: "plain" | "error" }>
   >
 > = {
-  rejected: {
-    text: "You cancelled in your wallet. Nothing was signed.",
-    tone: "plain",
-  },
-  failed: { text: "Your wallet didn't sign. Try again.", tone: "error" },
+  rejected: { key: "validator.authorize.sign.rejected", tone: "plain" },
+  failed: { key: "validator.authorize.sign.failed", tone: "error" },
 };
 
-function signLabel(waiting: boolean, again: boolean): string {
+function signLabel(waiting: boolean, again: boolean): MessageKey {
   if (waiting) {
-    return "Waiting for your wallet";
+    return "validator.authorize.sign.waiting";
   }
-  return again ? "Sign again" : "Sign in your wallet";
+  return again
+    ? "validator.authorize.sign.again"
+    : "validator.authorize.sign.first";
 }
 
 /** Connect, the wrong wallet, a Safe, or the Sign button. */
 function WalletStep({
   session,
   draft,
+  locale,
 }: {
   readonly session: Session;
   readonly draft: Draft;
+  readonly locale: SupportedLocale;
 }) {
   const { account, signing } = session;
   if (!account) {
@@ -232,7 +317,7 @@ function WalletStep({
         onClick={session.connect}
         className={`${PRIMARY_BUTTON} tw-border-0`}
       >
-        Connect wallet
+        {t(locale, "validator.authorize.wallet.connect")}
       </button>
     );
   }
@@ -240,10 +325,9 @@ function WalletStep({
     return (
       <>
         <Notice tone="error">
-          A vault such as a Safe can&apos;t sign in this version. Connect the
-          ordinary wallet you use on 6529.io.
+          {t(locale, "validator.authorize.wallet.safe")}
         </Notice>
-        <AnotherWallet session={session} />
+        <AnotherWallet session={session} locale={locale} />
       </>
     );
   }
@@ -251,25 +335,27 @@ function WalletStep({
     return (
       <>
         <Notice tone="error">
-          Connect <Address address={draft.account} />, the wallet your validator
-          asked for. This wallet is <Address address={account} />.
+          {tRich(locale, "validator.authorize.wallet.wrong", {
+            expected: <Address key="expected" address={draft.account} />,
+            connected: <Address key="connected" address={account} />,
+          })}
         </Notice>
-        <AnotherWallet session={session} />
+        <AnotherWallet session={session} locale={locale} />
       </>
     );
   }
-  const notice =
-    signing.status === "mismatch"
-      ? {
-          text: (
-            <>
-              This signature isn&apos;t from <Address address={draft.account} />
-              . Your validator won&apos;t take it.
-            </>
-          ),
-          tone: "error" as const,
-        }
-      : SIGNING_NOTICE[signing.status];
+  const listed = SIGNING_NOTICE[signing.status];
+  let notice: { text: ReactNode; tone: "plain" | "error" } | undefined;
+  if (signing.status === "mismatch") {
+    notice = {
+      text: tRich(locale, "validator.authorize.sign.mismatch", {
+        expected: <Address key="expected" address={draft.account} />,
+      }),
+      tone: "error",
+    };
+  } else if (listed) {
+    notice = { text: t(locale, listed.key), tone: listed.tone };
+  }
   const again = signing.status === "rejected" || signing.status === "mismatch";
   return (
     <>
@@ -280,18 +366,54 @@ function WalletStep({
         disabled={signing.status === "wallet"}
         className={`${PRIMARY_BUTTON} tw-border-0 ${DISABLED}`}
       >
-        {signLabel(signing.status === "wallet", again)}
+        {t(locale, signLabel(signing.status === "wallet", again))}
       </button>
       <p className={SMALL}>
-        {draft.keys.length > 0
-          ? "Your wallet shows the same words. Each key's public key ends in its code. Signing costs no gas."
-          : "Your wallet shows the same words. Signing costs no gas."}
+        {t(
+          locale,
+          draft.keys.length > 0
+            ? "validator.authorize.sign.note.keys"
+            : "validator.authorize.sign.note.stop"
+        )}
       </p>
     </>
   );
 }
 
-function SignatureCard({ signature }: { readonly signature: string }) {
+/** What the signature authorizes, as signed, whoever made the link. */
+function signedSummary({ draft, grant, network, locale }: Shown): string {
+  const params = {
+    account: shortAddress(draft.account),
+    version: String(grant.message.authVersion),
+    codes: formatList(
+      locale,
+      draft.keys.map((key) => keyCode(key.pubkey))
+    ),
+  };
+  let summary: string;
+  if (draft.keys.length === 0) {
+    summary = t(locale, "validator.authorize.signed.stop", params);
+  } else if (draft.keys.length === 1) {
+    summary = t(locale, "validator.authorize.signed.keys.one", params);
+  } else {
+    summary = t(locale, "validator.authorize.signed.keys.other", params);
+  }
+  const sentences = [summary];
+  if (network === "test") {
+    sentences.push(t(locale, "validator.authorize.signed.network.test"));
+  }
+  sentences.push(t(locale, "validator.authorize.signed.nothingSent"));
+  return sentences.join(" ");
+}
+
+function SignatureCard({
+  signature,
+  shown,
+}: {
+  readonly signature: string;
+  readonly shown: Shown;
+}) {
+  const { locale } = shown;
   const box = useRef<HTMLParagraphElement>(null);
   const [copied, setCopied] = useState<"copied" | "select" | null>(null);
 
@@ -321,12 +443,11 @@ function SignatureCard({ signature }: { readonly signature: string }) {
           className="tw-size-7 tw-flex-none tw-text-success"
         />
         <h2 id="authorize-copy" className={HEADING}>
-          Copy the signature
+          {t(locale, "validator.authorize.signature.heading")}
         </h2>
       </div>
       <p className={TEXT}>
-        Paste it into your validator&apos;s Authorize step, in the box for the
-        signature.
+        {t(locale, "validator.authorize.signature.instructions")}
       </p>
       <p
         ref={box}
@@ -339,54 +460,53 @@ function SignatureCard({ signature }: { readonly signature: string }) {
         onClick={() => void copy()}
         className={`${PRIMARY_BUTTON} tw-border-0`}
       >
-        Copy signature
+        {t(locale, "validator.authorize.signature.copy")}
       </button>
       {copied && (
         <Notice>
-          {copied === "copied" ? "Copied." : "Select the text and copy it."}
+          {t(
+            locale,
+            copied === "copied"
+              ? "validator.authorize.signature.copied"
+              : "validator.authorize.signature.selectToCopy"
+          )}
         </Notice>
       )}
-      <p className={SMALL}>
-        The signature only works on your validator, for this authorization.
-        Nothing was sent anywhere.
-      </p>
+      <p className={SMALL}>{signedSummary(shown)}</p>
     </section>
   );
 }
 
 // Opened without a validator's link: what the page is for, how to get
 // here from the validator, and the one check before signing.
-function NoLink() {
+const NO_LINK_STEPS: readonly MessageKey[] = [
+  "validator.authorize.noLink.step.open",
+  "validator.authorize.noLink.step.address",
+  "validator.authorize.noLink.step.scan",
+  "validator.authorize.noLink.step.sign",
+];
+
+function NoLink({ locale }: { readonly locale: SupportedLocale }) {
   return (
     <section className={CARD}>
-      <h2 className={HEADING}>Sign for your validator on your phone</h2>
-      <p className={TEXT}>
-        This page lets the wallet on your phone authorize a 6529 Validator that
-        runs on your computer. Your wallet signs one message. It costs no gas
-        and moves nothing.
-      </p>
+      <h2 className={HEADING}>
+        {t(locale, "validator.authorize.noLink.heading")}
+      </h2>
+      <p className={TEXT}>{t(locale, "validator.authorize.noLink.body")}</p>
       <ol className="tw-m-0 tw-flex tw-flex-col tw-gap-2 tw-pl-5 tw-text-base tw-leading-7 tw-text-iron-300">
-        <li>
-          On your computer, open 6529 Validator and go to Authorize, or to
-          Keys, then Add a computer.
-        </li>
-        <li>
-          Choose your phone as the wallet, and paste its address.
-        </li>
-        <li>
-          Scan the code it shows with your phone, or open its link here.
-        </li>
-        <li>Sign here, then paste the signature into your validator.</li>
+        {NO_LINK_STEPS.map((key) => (
+          <li key={key}>{t(locale, key)}</li>
+        ))}
       </ol>
-      <p className={TEXT}>
-        Sign only if the key code on this page matches the one on your
-        computer.
-      </p>
+      <p className={TEXT}>{t(locale, "validator.authorize.noLink.check")}</p>
       <p className={SMALL}>
-        <Link href="/validator" className={LINK}>
-          What is the 6529 Validator?
-        </Link>{" "}
-        Read about it and download it there.
+        {tRich(locale, "validator.authorize.noLink.about", {
+          link: (
+            <Link key="about" href="/validator" className={LINK}>
+              {t(locale, "validator.authorize.noLink.aboutLink")}
+            </Link>
+          ),
+        })}
       </p>
     </section>
   );
@@ -394,35 +514,42 @@ function NoLink() {
 
 function AuthorizeBody() {
   const session = useAuthorizeSession();
+  const locale = useBrowserLocale();
   const { draft, review, signing } = session;
 
   if (draft === undefined) {
     return null;
   }
   if (draft === null) {
-    return <NoLink />;
+    return <NoLink locale={locale} />;
   }
   if (draft === "bad" || !review) {
     return (
       <section className={CARD}>
         <Notice tone="error">
-          This link is incomplete or damaged. Scan the code again, or copy the
-          link again from your validator.
+          {t(locale, "validator.authorize.link.bad")}
         </Notice>
       </section>
     );
   }
+  const shown: Shown = {
+    draft,
+    grant: review.grant,
+    network: grantNetwork(review.grant.domain.salt),
+    locale,
+  };
   if (signing.status === "signed") {
-    return <SignatureCard signature={signing.signature} />;
+    return <SignatureCard signature={signing.signature} shown={shown} />;
   }
   return (
     <section className={CARD}>
-      <DraftIntro draft={draft} />
-      <DraftRows draft={draft} />
+      <DraftIntro shown={shown} />
+      <DraftRows shown={shown} />
+      <DraftWarnings shown={shown} />
       {review.problems.length > 0 ? (
         <>
           <Notice tone="error">
-            Don&apos;t sign this. It isn&apos;t a 6529 Validator authorization.
+            {t(locale, "validator.authorize.problems.heading")}
           </Notice>
           <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-1 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-400">
             {review.problems.map((problem) => (
@@ -431,7 +558,7 @@ function AuthorizeBody() {
           </ul>
         </>
       ) : (
-        <WalletStep session={session} draft={draft} />
+        <WalletStep session={session} draft={draft} locale={locale} />
       )}
     </section>
   );
@@ -439,12 +566,13 @@ function AuthorizeBody() {
 
 /** 6529.io/validator/authorize: a phone signs a validator's authorization. */
 export default function ValidatorAuthorizePage() {
+  const locale = useBrowserLocale();
   return (
     <ValidatorPageFrame>
       <div className="tw-mx-auto tw-max-w-md tw-pt-2 sm:tw-pt-10">
         <ValidatorPageHeader
           eyebrow="6529 Validator"
-          title="Authorize your validator"
+          title={t(locale, "validator.authorize.page.title")}
         />
         <AuthorizeBody />
       </div>

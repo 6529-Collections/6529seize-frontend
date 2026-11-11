@@ -10,6 +10,7 @@ import { useEditingDrop } from "@/contexts/EditingDropContext";
 import {
   clearWaveDraft,
   readRestorableWaveDraft,
+  WAVE_DRAFTS_CLEARED_EVENT,
   writeWaveDraft,
 } from "@/helpers/waves/wave-draft.helpers";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
@@ -68,6 +69,7 @@ export const useWaveDraftPersistence = ({
   const [initialDraftJson] = useState<string | null>(() =>
     draftWaveId ? readRestorableWaveDraft(draftWaveId) : null
   );
+  const pendingSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!draftWaveId) {
@@ -79,11 +81,15 @@ export const useWaveDraftPersistence = ({
       clearWaveDraft(draftWaveId);
       return;
     }
-    const handle = setTimeout(
-      () => persistEditorState(draftWaveId, editorState),
-      400
-    );
-    return () => clearTimeout(handle);
+    const handle = setTimeout(() => {
+      pendingSaveRef.current = null;
+      persistEditorState(draftWaveId, editorState);
+    }, 400);
+    pendingSaveRef.current = handle;
+    return () => {
+      clearTimeout(handle);
+      if (pendingSaveRef.current === handle) pendingSaveRef.current = null;
+    };
   }, [editorState, draftWaveId, isMountEditor]);
 
   const flushBeforeTabLeave = useEffectEvent(() => {
@@ -96,10 +102,18 @@ export const useWaveDraftPersistence = ({
     let profileInvalidated = false;
     const invalidate = () => {
       profileInvalidated = true;
+      // Text typed before a profile switch, or before a sign-out cleared this
+      // tab's drafts, is not saved after it.
+      if (pendingSaveRef.current !== null) {
+        clearTimeout(pendingSaveRef.current);
+        pendingSaveRef.current = null;
+      }
     };
     globalThis.addEventListener(PROFILE_SWITCHED_EVENT, invalidate);
+    globalThis.addEventListener(WAVE_DRAFTS_CLEARED_EVENT, invalidate);
     return () => {
       globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, invalidate);
+      globalThis.removeEventListener(WAVE_DRAFTS_CLEARED_EVENT, invalidate);
       // Fast tab/history changes can leave before the 400ms autosave runs.
       // Flush during teardown while this primary editor still owns its draft.
       if (!profileInvalidated) flushBeforeTabLeave();
