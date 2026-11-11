@@ -47,6 +47,10 @@ export async function refreshProfileRatingLists(
   }
 ): Promise<void> {
   if (matter === "REP") {
+    // Every recipient-keyed allowance includes the same rater-global budget.
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_REP_RATINGS],
+    });
     void queryClient.invalidateQueries({
       queryKey: [QueryKey.PROFILE_REP_CATEGORY_CONTRIBUTORS],
     });

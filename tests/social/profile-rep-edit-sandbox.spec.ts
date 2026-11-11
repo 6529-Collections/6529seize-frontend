@@ -556,14 +556,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("owner edits receivers in a category and keeps Manage given available", async ({
+  test("owner retries failed receiver edits without repeating attempts changes and keeps Manage given available", async ({
     page,
     baseURL,
   }) => {
     const api = getSandboxApiOrigin(baseURL);
     let alice = 30;
     let bob = 20;
-    const saved: { handle: string; amount: number }[] = [];
+    let failAlice = true;
+    const attempts: { handle: string; amount: number }[] = [];
     await page.route(
       `${api}/api/profiles/*/rep/categories/*/contributors?*`,
       (route) =>
@@ -595,13 +596,25 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         })
     );
     await page.route(`${api}/api/profiles/*/rep/ratings/received?*`, (route) =>
-      route.fulfill({ json: { ...allowance, rep_rates_left_for_rater: 80 } })
+      route.fulfill({
+        json: {
+          ...allowance,
+          rep_rates_left_for_rater: 120 - Math.abs(alice) - Math.abs(bob),
+        },
+      })
     );
     await page.route(`${api}/api/profiles/*/rep/rating`, (route) => {
       const handle = new URL(route.request().url()).pathname.split("/")[3];
       if (!handle) throw new Error("Missing profile identity in rating route");
       const { amount } = route.request().postDataJSON();
-      saved.push({ handle, amount });
+      attempts.push({ handle, amount });
+      if (handle === TARGET && failAlice) {
+        failAlice = false;
+        return route.fulfill({
+          status: 503,
+          json: { error: "Rating unavailable" },
+        });
+      }
       if (handle === TARGET) alice = amount;
       else bob = amount;
       return route.fulfill({ json: {} });
@@ -628,16 +641,29 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(first).toHaveValue("30");
-    await first.fill("0");
-    await second.fill("100");
+    await first.fill("110");
+    await second.fill("0");
+    await panel.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(panel.getByRole("alert")).toContainText(
+      "Couldn't update this Rep rating."
+    );
+    await expect(
+      panel.getByRole("button", { name: "Save", exact: true })
+    ).toBeEnabled();
+    await expect(first).toHaveValue("110");
+    expect(attempts).toEqual([
+      { handle: "following-artist-1", amount: 0 },
+      { handle: TARGET, amount: 110 },
+    ]);
     await panel.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByText("Rep updated.", { exact: true })).toBeVisible();
-    expect(saved).toEqual([
-      { handle: TARGET, amount: 0 },
-      { handle: "following-artist-1", amount: 100 },
+    expect(attempts).toEqual([
+      { handle: "following-artist-1", amount: 0 },
+      { handle: TARGET, amount: 110 },
+      { handle: TARGET, amount: 110 },
     ]);
-    await expect(second).toHaveValue("100");
-    await second.press("Escape");
+    await expect(first).toHaveValue("110");
+    await first.press("Escape");
     await expect(
       rep.getByRole("button", { name: /Manage given/ })
     ).toBeVisible();

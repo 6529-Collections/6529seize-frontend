@@ -63,13 +63,18 @@ const createTestSetup = () => {
 };
 
 describe("ReactQueryWrapper context", () => {
-  it("invalidates REP allowances for a target without a handle", () => {
+  it("invalidates shared REP credit across recipients, including a target without a handle", () => {
     const { client, ctx } = createTestSetup();
     const key = [
       QueryKey.PROFILE_REP_RATINGS,
       { handleOrWallet: "0xabc", rater: "viewer" },
     ];
+    const otherRecipientKey = [
+      QueryKey.PROFILE_REP_RATINGS,
+      { handleOrWallet: "other-recipient", rater: "viewer" },
+    ];
     client.setQueryData(key, { rep_rates_left_for_rater: 80 });
+    client.setQueryData(otherRecipientKey, { rep_rates_left_for_rater: 80 });
     act(() =>
       ctx.onProfileRepModify({
         targetProfile: { handle: null, query: "0xAbC" } as ApiIdentity,
@@ -78,6 +83,7 @@ describe("ReactQueryWrapper context", () => {
       })
     );
     expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    expect(client.getQueryState(otherRecipientKey)?.isInvalidated).toBe(true);
     expect(client.resetQueries).toHaveBeenCalledWith({
       predicate: expect.any(Function),
       queryKey: [
