@@ -2636,7 +2636,9 @@ describe("open-graph API route", () => {
           GET(getFrom(stuckUrl(index)))
         );
         await jest.advanceTimersByTimeAsync(19_999);
-        const waiting = GET(getFrom("https://opensea.io/item/ethereum/waiting"));
+        const waiting = GET(
+          getFrom("https://opensea.io/item/ethereum/waiting")
+        );
         await jest.advanceTimersByTimeAsync(0);
         expect(execute).toHaveBeenCalledTimes(FETCH_SLOTS);
 

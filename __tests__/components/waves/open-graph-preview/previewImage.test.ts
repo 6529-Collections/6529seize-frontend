@@ -22,7 +22,7 @@ import { publicEnv } from "@/config/env";
 import { getMediaResolverHostname } from "@/lib/media/decentralized-media";
 import { getLinkPreviewImageSrc } from "@/components/waves/open-graph-preview/previewImage";
 
-const mutableEnv = publicEnv as { MEDIA_RESOLVER_ENDPOINT?: string };
+const mutableEnv = publicEnv as { MEDIA_RESOLVER_ENDPOINT: string | undefined };
 
 describe("getLinkPreviewImageSrc media resolver host", () => {
   it("loads resolver images directly and parses the resolver endpoint once", () => {

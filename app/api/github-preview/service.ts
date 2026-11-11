@@ -60,8 +60,7 @@ export const resolveGithubPreview = async (
     return cached.preview;
   }
 
-  const pending =
-    inFlight.get(cacheKey) ?? loadPreview(cacheKey, resource);
+  const pending = inFlight.get(cacheKey) ?? loadPreview(cacheKey, resource);
   if (!cached) {
     return pending;
   }

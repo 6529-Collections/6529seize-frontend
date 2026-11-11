@@ -38,7 +38,10 @@ export default function DropListItemContentMention({
         </Link>
       ) : (
         // Same look and click behaviour as the linked chip, without a link.
-        <span onClick={(e) => e.stopPropagation()} className={MENTION_CLASS_NAME}>
+        <span
+          onClick={(e) => e.stopPropagation()}
+          className={MENTION_CLASS_NAME}
+        >
           {label}
         </span>
       )}
