@@ -229,6 +229,8 @@ export interface E2eeEngine {
   // state (synchronous snapshots) + change subscription
   getStatus(): E2eeEngineStatus;
   getError(): string | null;
+  /** Locally held device key, available before the server device list loads. */
+  getLocalDeviceKey(): string | null;
   getThisDevice(): E2eeDeviceInfo | null;
   getDevices(): E2eeDeviceInfo[];
   /** Whether the server accepts encrypted attachments (false until known). */
