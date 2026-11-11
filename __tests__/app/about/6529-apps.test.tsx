@@ -67,6 +67,9 @@ describe("6529 Apps page", () => {
     expect(validatorLink).toHaveAccessibleDescription(
       "Read more about 6529 validator"
     );
+    expect(
+      screen.queryByRole("region", { name: "6529 Validator" })
+    ).not.toBeInTheDocument();
     expect(validatorLink).toContainElement(
       screen.getByRole("heading", { level: 2, name: "6529 Validator" })
     );

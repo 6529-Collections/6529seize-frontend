@@ -79,6 +79,7 @@ export default function AppsPage() {
               icon={ServerStackIcon}
               title={t(APPS_LOCALE, "apps.validator.title")}
               description={t(APPS_LOCALE, "apps.validator.description")}
+              linked
             />
           </Link>
         </div>
@@ -94,6 +95,7 @@ function AppPanel({
   description,
   children,
   mobile = false,
+  linked = false,
 }: {
   readonly id: string;
   readonly icon: typeof DevicePhoneMobileIcon;
@@ -101,13 +103,15 @@ function AppPanel({
   readonly description: string;
   readonly children?: ReactNode;
   readonly mobile?: boolean;
+  readonly linked?: boolean;
 }) {
   const headingId = `${id}-heading`;
+  const Panel = linked ? "div" : "section";
 
   return (
-    <section
+    <Panel
       id={id}
-      aria-labelledby={headingId}
+      aria-labelledby={linked ? undefined : headingId}
       className={`${ABOUT_CARD_CLASS_NAME} ${mobile ? "tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-5 tw-p-5 sm:tw-p-6" : "tw-overflow-hidden"}`}
     >
       <div
@@ -121,7 +125,7 @@ function AppPanel({
             {title}
           </h2>
           <p
-            id={`${id}-description`}
+            id={linked ? `${id}-description` : undefined}
             className={`tw-m-0 ${ABOUT_SUPPORTING_TEXT_CLASS_NAME}`}
           >
             {description}
@@ -131,6 +135,6 @@ function AppPanel({
       <div className={mobile ? "tw-min-w-0 tw-max-w-full" : undefined}>
         {children}
       </div>
-    </section>
+    </Panel>
   );
 }
