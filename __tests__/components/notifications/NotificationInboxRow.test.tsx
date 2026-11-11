@@ -61,6 +61,49 @@ const drop = {
   wave: { id: "wave", is_direct_message: false, picture: "wave.png" },
 } as ApiDrop;
 
+it("keeps plain-text titles literal in notification previews", () => {
+  const title = "# **Literal title** <tag>";
+  const notification = {
+    ...reaction(1, "alice", null),
+    related_drops: [{ ...drop, title }],
+  };
+  const { container } = render(
+    <NotificationInboxRow
+      notification={notification}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.getByText(title)).toBeInTheDocument();
+  expect(container.querySelector("h1,strong,tag,a a")).toBeNull();
+});
+
+it("keeps fenced code and subsequent parts as distinct Markdown blocks", () => {
+  const notification = {
+    ...reaction(1, "alice", null),
+    related_drops: [
+      {
+        ...drop,
+        parts: [
+          { part_id: 1, media: [], content: "```js\nfirst();\n```" },
+          { part_id: 2, media: [], content: "**Second part**" },
+        ],
+      },
+    ],
+  };
+  render(
+    <NotificationInboxRow
+      notification={notification}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.getByText("first();").tagName).toBe("CODE");
+  const second = screen.getByText("Second part");
+  expect(second.tagName).toBe("STRONG");
+  expect(second.closest("pre,code")).toBeNull();
+});
+
 it("renders regular notification Markdown without truncating delimiters or nesting links", () => {
   const longBold = "formatted ".repeat(30).trim();
   const notification = {

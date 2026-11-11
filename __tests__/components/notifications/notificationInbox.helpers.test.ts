@@ -137,7 +137,7 @@ it("renders mention and wave tokens as readable text across drop parts", () => {
     ],
   } as ApiDrop;
   expect(getInboxPreview({ ...replied, related_drops: [drop] })).toBe(
-    "@GelatoGenesis when block screenshot feature? Ideas from #QUORUM. Keep [ordinary brackets] and @all."
+    "@GelatoGenesis when block screenshot feature?\n\nIdeas from #QUORUM. Keep [ordinary brackets] and @all."
   );
 });
 

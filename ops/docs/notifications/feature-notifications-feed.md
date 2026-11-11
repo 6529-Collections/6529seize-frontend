@@ -42,7 +42,9 @@ their text code instead. Mentions and wave tags
 in previews appear as `@handle` and `#wave`, without storage brackets.
 
 Regular and encrypted message previews render Markdown formatting, including
-bold, italic, strikethrough, lists, and code, within two compact lines. Links
+bold, italic, strikethrough, lists, and code, within two compact lines. Drop titles
+keep their original plain-text formatting, and separate message parts retain
+their Markdown block boundaries. Links
 and images appear as labels in the preview; selecting the row opens the related
 message. Previewing does not load linked pages, embedded content, or message
 images. Encrypted previews remain available only from this device's local history.

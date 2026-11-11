@@ -16,6 +16,7 @@ import {
 import NotificationInboxReactions from "./NotificationInboxReactions";
 import {
   getInboxDestination,
+  getInboxDrop,
   getInboxPreview,
   getInboxSummary,
 } from "./notificationInbox.helpers";
@@ -78,6 +79,7 @@ export default function NotificationInboxRow({
     pfpUrl = notification.related_wave?.pfp;
   }
   const preview = getInboxPreview(notification);
+  const previewIsTitle = typeof getInboxDrop(notification)?.title === "string";
   let reactions: string[] = [];
   if (group) {
     reactions = group.notifications.map(
@@ -134,12 +136,18 @@ export default function NotificationInboxRow({
           )}
           {preview && (
             <div className="tw-mt-1 tw-break-words tw-text-sm tw-leading-5 tw-text-iron-400 [&_*]:!tw-text-inherit">
-              <MessageMarkdown
-                text={preview}
-                privacy="public"
-                preview
-                messageId={`notification-${notification.id}`}
-              />
+              {previewIsTitle ? (
+                <p className="tw-m-0 tw-line-clamp-2 tw-max-h-10 tw-overflow-hidden">
+                  {preview}
+                </p>
+              ) : (
+                <MessageMarkdown
+                  text={preview}
+                  privacy="public"
+                  preview
+                  messageId={`notification-${notification.id}`}
+                />
+              )}
             </div>
           )}
           <div className="tw-mt-1 tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
