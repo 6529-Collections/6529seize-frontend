@@ -69,10 +69,12 @@ export const resolveGithubPreview = async (
   // A refresh that fails for a transient reason (timeout, network, rate
   // limit, GitHub server error) answers with the retained snapshot. Any other
   // failure, such as a resource that is no longer public, is answered as is.
-  return pending.catch((error: unknown) => {
+  try {
+    return await pending;
+  } catch (error) {
     if (isTransientGithubError(error)) {
       return cached.preview;
     }
     throw error;
-  });
+  }
 };
