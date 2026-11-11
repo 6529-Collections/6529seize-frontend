@@ -31,7 +31,7 @@ wasm-bindgen = "=0.2.129"
 js-sys = "0.3"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-base64 = "0.22"
+base64 = "0.23"
 hex = "0.4"
 ed25519-dalek = { version = "2", default-features = false, features = ["std", "zeroize"] }
 aes-gcm = "0.10"
