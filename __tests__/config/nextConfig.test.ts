@@ -377,3 +377,65 @@ describe("image optimizer inputs", () => {
     expect(isRemoteOptimizable(url)).toBe(true);
   });
 });
+
+describe("image optimizer media hosts on both domains", () => {
+  const CID = "QmeDsW26YAivUJkBeaPNXL5noD6QshdFzdMZjSHJ6eXVbi";
+  const envFor = (endpoint: string | undefined) =>
+    ({ ...publicEnv, MEDIA_RESOLVER_ENDPOINT: endpoint }) as PublicEnv;
+  const patternsFor = (endpoint: string | undefined) =>
+    sharedConfig(envFor(endpoint), "").images?.remotePatterns ?? [];
+
+  it.each([undefined, "https://media.6529.io", "https://media.6529usercontent.com"])(
+    "allows resolver paths on both media hosts when the endpoint is %p",
+    (endpoint) => {
+      const patterns = patternsFor(endpoint);
+      for (const host of ["media.6529.io", "media.6529usercontent.com"]) {
+        expect(
+          hasRemoteMatch([], patterns, new URL(`https://${host}/ipfs/${CID}/1.png`))
+        ).toBe(true);
+        expect(
+          hasRemoteMatch([], patterns, new URL(`https://${host}/arweave/abc`))
+        ).toBe(true);
+        expect(
+          hasRemoteMatch([], patterns, new URL(`https://${host}/api/media/resolve`))
+        ).toBe(false);
+        expect(
+          hasRemoteMatch([], patterns, new URL(`http://${host}/ipfs/${CID}`))
+        ).toBe(false);
+      }
+      expect(
+        hasRemoteMatch(
+          [],
+          patterns,
+          new URL(
+            "https://bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi.ipfs.6529usercontent.com/1.png"
+          )
+        )
+      ).toBe(false);
+    }
+  );
+
+  it("adds exactly one resolver-path pattern for the content-domain host", () => {
+    const patterns = patternsFor("https://media.6529.io");
+    expect(
+      patterns.filter(
+        (pattern) =>
+          !(pattern instanceof URL) &&
+          pattern.hostname.includes("6529usercontent.com")
+      )
+    ).toEqual([
+      {
+        protocol: "https",
+        port: "",
+        hostname: "media.6529usercontent.com",
+        pathname: "/{arweave,ipfs,ipns}/**",
+      },
+    ]);
+  });
+
+  it("produces the same patterns for either endpoint", () => {
+    expect(patternsFor("https://media.6529usercontent.com")).toEqual(
+      patternsFor("https://media.6529.io")
+    );
+  });
+});
