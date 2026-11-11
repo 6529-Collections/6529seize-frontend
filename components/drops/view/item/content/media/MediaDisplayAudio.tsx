@@ -1,4 +1,5 @@
 import React from "react";
+import { getMediaPlaybackUrl } from "./mediaPlaybackUrl";
 
 /**
  * Audio display component without interactive modal functionality.
@@ -15,7 +16,7 @@ function MediaDisplayAudio({
     <div className="tw-h-full tw-w-full">
       {showControls ? (
         <audio controls preload="metadata" className="tw-w-full">
-          <source src={src} type="audio/mpeg" />
+          <source src={getMediaPlaybackUrl(src)} type="audio/mpeg" />
           Your browser does not support the audio element.
         </audio>
       ) : (
