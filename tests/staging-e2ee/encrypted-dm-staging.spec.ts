@@ -844,6 +844,27 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     ).toBeVisible({ timeout: DEVICE_ADD_TIMEOUT_MS });
     await openChatFromList(b2, dm, a.user.handle, DEVICE_ADD_TIMEOUT_MS);
 
+    const combinedNotice = b.page.getByRole("group", {
+      name: /was authorized to read your encrypted DMs and sign posts as you/u,
+    });
+    await expect(combinedNotice).toBeVisible({
+      timeout: DEVICE_ADD_TIMEOUT_MS,
+    });
+    await combinedNotice.getByRole("button", { name: /^This was me/u }).click();
+    await expect(combinedNotice).toHaveCount(0, { timeout: UI_TIMEOUT_MS });
+    // Watch for a new request so a refetch already in flight cannot satisfy it.
+    const [reopenedNotices] = await Promise.all([
+      b.page.waitForRequest(
+        (request) =>
+          request.method() === "GET" &&
+          new URL(request.url()).pathname === "/api/device-security-notices",
+        { timeout: UI_TIMEOUT_MS }
+      ),
+      openChat(b, dm),
+    ]);
+    expect((await reopenedNotices.response())?.ok()).toBe(true);
+    await expect(combinedNotice).toHaveCount(0);
+
     await sendEncrypted(a, beforeRevoke);
     await expectDecrypted(b, beforeRevoke);
     await expectDecrypted(b2, beforeRevoke);
