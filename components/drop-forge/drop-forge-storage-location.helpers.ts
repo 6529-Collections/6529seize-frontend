@@ -3,6 +3,7 @@ import {
   DecentralizedMediaRef,
   parseDecentralizedMediaRef,
   to6529ResolverUrl,
+  toIsolatedHtmlUrl,
 } from "@/lib/media/decentralized-media";
 
 type DropForgeStorageProvider = "arweave" | "ipfs";
@@ -37,7 +38,11 @@ const buildLocationInfo = (
   ref: DecentralizedMediaRef
 ): DropForgeStorageLocationInfo => {
   const displayValue = toRootIdentifier(ref.id);
-  const openUrl = to6529ResolverUrl(ref, publicEnv.MEDIA_RESOLVER_ENDPOINT);
+  const resolverEndpoint = publicEnv.MEDIA_RESOLVER_ENDPOINT;
+  // Opening uses the per-CID host when the separate content domain is
+  // configured; the copied value stays the resolver's path URL.
+  const openUrl = toIsolatedHtmlUrl(ref, resolverEndpoint);
+  const resolverUrl = to6529ResolverUrl(ref, resolverEndpoint);
 
   return {
     rawValue,
@@ -47,7 +52,7 @@ const buildLocationInfo = (
     providerBadgeLabel:
       ref.protocol === "arweave" ? null : ref.protocol.toUpperCase(),
     openUrl,
-    copyValue: openUrl,
+    copyValue: resolverUrl,
   };
 };
 

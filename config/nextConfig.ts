@@ -16,6 +16,7 @@ import { HTML_LIMITED_BOT_UA_RE } from "next/dist/shared/lib/router/utils/html-b
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
 import {
   DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  FIRST_PARTY_MEDIA_RESOLVER_HOSTS,
   IPFS_PATH_GATEWAY_HOSTS,
   getMediaResolverHostname,
 } from "../lib/media/decentralized-media";
@@ -62,9 +63,12 @@ const FIRST_PARTY_IMAGE_HOSTNAMES = new Set<string>([
 ]);
 
 function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
+  // Both media resolver hosts (6529.io and the separate content domain) stay
+  // allowed whichever one the endpoint selects, so stored URLs keep working.
   const resolverHostnames = new Set([
     getMediaResolverHostname(DEFAULT_MEDIA_RESOLVER_ENDPOINT),
     getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT),
+    ...FIRST_PARTY_MEDIA_RESOLVER_HOSTS,
   ]);
   const gatewayHostnames = new Set([
     ...ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES,

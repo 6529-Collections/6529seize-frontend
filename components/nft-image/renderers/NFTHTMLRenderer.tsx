@@ -7,7 +7,7 @@ import type { BaseRendererProps } from "@/components/nft-image/types/renderer-pr
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import { useEffect, useMemo, useState } from "react";
 import {
-  getMediaGatewayFallbackUrls,
+  getHtmlMediaGatewayFallbackUrls,
   shouldUseIframeFallbackTimeout,
 } from "@/components/nft-image/utils/gateway-fallback";
 import { getNFTMediaRendererAttributes } from "@/components/nft-image/media-renderer-marker";
@@ -29,7 +29,7 @@ export default function NFTHTMLRenderer(props: Readonly<BaseRendererProps>) {
   const src = repaired ? MEEBITS_445_VIEWER_PATH : originalSrc;
   const animationClassName = styles["nftAnimation"] ?? "";
   const urls = useMemo(
-    () => (src ? getMediaGatewayFallbackUrls(src) : []),
+    () => (src ? getHtmlMediaGatewayFallbackUrls(src) : []),
     [src]
   );
   const [activeIndex, setActiveIndex] = useState(0);

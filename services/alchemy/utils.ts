@@ -2,9 +2,13 @@ import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "@/lib/media/static-image-hosts";
 import { isArweaveGatewayRuntimeHost } from "@/lib/media/arweave-gateways";
 import { getAddress } from "viem";
 import {
-  DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  getMediaResolverSource,
+  hasIsolatedHtmlHosts,
+  isContentDomainMediaHostname,
+  isFirstPartyMediaHostname,
   normalizeDecentralizedMediaUrl,
 } from "@/lib/media/decentralized-media";
+import { publicEnv } from "@/config/env";
 
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type {
@@ -115,12 +119,40 @@ function normaliseImageUrl(value: unknown): string | null {
   }
 }
 
+// First-party media URLs on the separate content domain (and, once that
+// domain is configured, on the previous 6529.io hosts) are rewritten to the
+// configured resolver, like every other media URL the app builds. Other URLs
+// are returned unchanged.
+function toConfiguredFirstPartyImage(source: unknown): unknown {
+  if (typeof source !== "string") {
+    return source;
+  }
+  const endpoint = publicEnv.MEDIA_RESOLVER_ENDPOINT;
+  const trimmed = source.trim();
+  try {
+    const { hostname } = new URL(trimmed);
+    const rewrite =
+      isContentDomainMediaHostname(hostname) ||
+      (hasIsolatedHtmlHosts(endpoint) && isFirstPartyMediaHostname(hostname));
+    return rewrite
+      ? (normalizeDecentralizedMediaUrl(trimmed, endpoint) ?? trimmed)
+      : source;
+  } catch {
+    return source;
+  }
+}
+
 function pickOriginalImage(...sources: unknown[]): string | null {
   for (const source of sources) {
     const imageUrl =
-      normaliseImageUrl(source) ??
+      normaliseImageUrl(toConfiguredFirstPartyImage(source)) ??
       (typeof source === "string"
-        ? normaliseImageUrl(normalizeDecentralizedMediaUrl(source))
+        ? normaliseImageUrl(
+            normalizeDecentralizedMediaUrl(
+              source,
+              publicEnv.MEDIA_RESOLVER_ENDPOINT
+            )
+          )
         : null);
     if (!imageUrl) {
       continue;
@@ -132,7 +164,8 @@ function pickOriginalImage(...sources: unknown[]): string | null {
       !url.port &&
       !url.username &&
       !url.password &&
-      (url.origin === DEFAULT_MEDIA_RESOLVER_ENDPOINT ||
+      (url.origin ===
+        getMediaResolverSource(publicEnv.MEDIA_RESOLVER_ENDPOINT) ||
         STATIC_IMAGE_HOSTS.has(url.hostname) ||
         isArweaveGatewayRuntimeHost(url.hostname))
     ) {
