@@ -25,8 +25,8 @@ const currentLocale = () => {
  */
 export function useLostDeviceGrantCleanup(
   queryClient: QueryClient,
-  wallet: string | null,
-  profileId: string | null
+  wallet: string | null | undefined,
+  profileId: string | null | undefined
 ): void {
   useEffect(() => {
     if (!wallet || !profileId) {

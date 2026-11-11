@@ -268,12 +268,9 @@ export default function Auth({
     activeProfileProxy?.id,
     isDirectProfileSession
   );
-  // Lost grants are cleaned up only for the signed-in wallet's own profile.
-  useLostDeviceGrantCleanup(
-    queryClient,
-    isDirectProfileSession && isAddressAuthorized ? (address ?? null) : null,
-    connectedProfile?.id ?? null
-  );
+  const cleanupWallet =
+    isDirectProfileSession && isAddressAuthorized ? address : null;
+  useLostDeviceGrantCleanup(queryClient, cleanupWallet, connectedProfile?.id);
 
   useEffect(() => {
     const activeProxy = resolveActiveProfileProxy({
