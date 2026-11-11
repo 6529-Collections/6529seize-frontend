@@ -7,8 +7,12 @@ import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import { SortDirection } from "@/entities/ISort";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import type { CommonSelectItemProps, CommonSelectProps } from "../CommonSelect";
+import {
+  getConnectedTabButtonClasses,
+  type CommonTabsActiveTone,
+} from "./connectedTabStyles";
 
-export type CommonTabsActiveTone = "neutral" | "primary";
+export type { CommonTabsActiveTone } from "./connectedTabStyles";
 
 function getTabButtonClasses({
   isActive,
@@ -25,6 +29,9 @@ function getTabButtonClasses({
   readonly fill: boolean;
   readonly size: "sm" | "md" | "tabs";
 }) {
+  if (variant === "connected") {
+    return getConnectedTabButtonClasses({ isActive, fill, activeTone });
+  }
   if (variant === "filter") {
     return getButtonClasses({
       variant: isActive ? "filterSelected" : "filter",
@@ -121,7 +128,10 @@ export default function CommonTabsTab<T, U = unknown>(
         "tw-flex",
         variant === "filter" || variant === "sub-view"
           ? "tw-flex-none"
-          : clsx("tw-rounded-lg tw-p-[1px]", fill && "tw-flex-1")
+          : clsx(
+              variant !== "connected" && "tw-rounded-lg tw-p-[1px]",
+              fill && "tw-flex-1"
+            )
       )}
     >
       <button

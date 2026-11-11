@@ -258,7 +258,7 @@ export default function UserPageCollectedStats({
               className={getButtonClasses({
                 variant: "tertiary",
                 size: "sm",
-                className: `${COLLECTED_ACTION_CLASS} !tw-px-3 !tw-text-xs tw-no-underline hover:tw-no-underline`,
+                className: `${COLLECTED_ACTION_CLASS} !tw-min-h-9 !tw-px-3 !tw-text-xs tw-no-underline hover:tw-no-underline`,
               })}
             />
           </span>

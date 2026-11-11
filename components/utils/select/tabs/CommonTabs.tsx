@@ -3,6 +3,7 @@ import clsx from "clsx";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { CommonSelectItem, CommonSelectProps } from "../CommonSelect";
 import CommonTabsTab, { type CommonTabsActiveTone } from "./CommonTabsTab";
+import { CONNECTED_TAB_LIST_CLASSES } from "./connectedTabStyles";
 
 type CommonTabsProps<T, U> = CommonSelectProps<T, U> & {
   readonly isItemDisabled?:
@@ -154,7 +155,9 @@ export default function CommonTabs<T, U = unknown>(
           className={clsx(
             "tw-flex tw-flex-nowrap",
             !isCompact &&
+              variant !== "connected" &&
               "tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-800",
+            variant === "connected" && CONNECTED_TAB_LIST_CLASSES,
             variant === "filter" && "tw-gap-1.5",
             variant === "sub-view" && "tw-gap-1",
             fill && !isCompact ? "tw-min-w-full" : "tw-w-fit"

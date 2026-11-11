@@ -36,6 +36,7 @@ interface CommonSelectDefaultProps<T, U> {
   readonly size?: "sm" | "md" | "tabs" | undefined;
   readonly variant?:
     | "default"
+    | "connected"
     | "editorial"
     | "toolbar"
     | "filter"
