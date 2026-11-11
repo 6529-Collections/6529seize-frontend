@@ -257,6 +257,7 @@ export async function getSessionNonce({
       chain_id: "1",
       ...deviceGrantParams,
     },
+    errorMode: "structured",
   });
 }
 
@@ -273,8 +274,6 @@ export async function loginWithSessionV2({
   readonly role: string | null;
   readonly deviceLabel?: string | undefined;
 }): Promise<SessionLoginResponse> {
-  const roleBody = role === null ? {} : { role };
-  const deviceLabelBody = deviceLabel ? { device_label: deviceLabel } : {};
   const response = await commonApiPost<
     SessionLoginRequest,
     SessionLoginResponse
@@ -285,10 +284,11 @@ export async function loginWithSessionV2({
       server_signature: serverSignature,
       client_signature: clientSignature,
       client_address: signerAddress,
-      ...roleBody,
-      ...deviceLabelBody,
+      ...(role === null ? {} : { role }),
+      ...(deviceLabel ? { device_label: deviceLabel } : {}),
     },
     credentials: getSessionCredentialsMode(),
+    errorMode: "structured",
   });
   clearSessionRefreshFailureForSession(response);
   return response;
