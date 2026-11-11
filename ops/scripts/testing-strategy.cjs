@@ -315,11 +315,12 @@ const TEXT_SECRET_PATTERNS = [
     // Accepted trade-off: a real secret VALUE that itself begins with one
     // of these identifier prefixes would be suppressed — vanishingly
     // unlikely for generated credentials, and the value must also sit on
-    // a line naming one of these specific keys. A bare `undefined` (a test
-    // clearing the variable) is not a value either.
+    // a line naming one of these specific keys.
     name: "named-secret-assignment",
     pattern:
-      /\b(?:ANTHROPIC_API_KEY|OPENROUTER_API_KEY|STAGING_AUTH|STAGING_API_KEY|AWS_SECRET_ACCESS_KEY|AWS_ACCESS_KEY_ID|SENTRY_AUTH_TOKEN|ALCHEMY_API_KEY|SSR_CLIENT_SECRET)\b[ \t]*[:=][ \t]*['"]?(?!z\.|process\.|publicEnv\.|privateEnv\.|serverEnv\.|import\.|env\.|undefined\b)[A-Za-z0-9_./+=:@-]{8,}/i,
+      /\b(?:ANTHROPIC_API_KEY|OPENROUTER_API_KEY|STAGING_AUTH|STAGING_API_KEY|AWS_SECRET_ACCESS_KEY|AWS_ACCESS_KEY_ID|SENTRY_AUTH_TOKEN|ALCHEMY_API_KEY|SSR_CLIENT_SECRET)\b[ \t]*[:=][ \t]*['"]?(?!z\.|process\.|publicEnv\.|privateEnv\.|serverEnv\.|import\.|env\.)[A-Za-z0-9_./+=:@-]{8,}/i,
+    // A bare `undefined` (a test clearing the variable) is not a value.
+    ignoreMatch: isUndefinedAssignment,
   },
   {
     name: "authorization-bearer-token",
@@ -333,7 +334,7 @@ const TEXT_SECRET_PATTERNS = [
     // Classic, OAuth, user-to-server, server-to-server, refresh and
     // fine-grained GitHub tokens.
     name: "github-token",
-    pattern: /\b(?:gh[pousr]|github_pat)_[A-Za-z0-9_]{20,}/,
+    pattern: /\b(?:gh[pousr]|github_pat)_\w{20,}/,
   },
   {
     // Long-term (AKIA) and temporary (ASIA) AWS access key IDs.
@@ -372,7 +373,7 @@ const TEXT_SECRET_PATTERNS = [
     // Ethereum RPC endpoints that carry their API key in the path.
     name: "rpc-url-with-key",
     pattern:
-      /\b[a-z0-9-]+\.(?:g\.alchemy\.com\/v2|infura\.io\/v3|quiknode\.pro)\/[A-Za-z0-9_-]{16,}/i,
+      /\b[a-z0-9-]+\.(?:g\.alchemy\.com\/v2|infura\.io\/v3|quiknode\.pro)\/[\w-]{16,}/i,
   },
   {
     // Three-part base64url token starting with the JWT header prefix
@@ -866,7 +867,11 @@ function lineNumberForIndex(text, index) {
   return text.slice(0, index).split(/\r\n|\r|\n/).length;
 }
 
-function lineNumbersForPattern(text, pattern) {
+function isUndefinedAssignment(match) {
+  return /[:=][ \t]*['"]?undefined$/i.test(match);
+}
+
+function lineNumbersForPattern(text, pattern, ignoreMatch) {
   const flags = pattern.flags.includes("g")
     ? pattern.flags
     : `${pattern.flags}g`;
@@ -874,7 +879,9 @@ function lineNumbersForPattern(text, pattern) {
   const lineNumbers = [];
   let match = matcher.exec(text);
   while (match?.index !== undefined) {
-    lineNumbers.push(lineNumberForIndex(text, match.index));
+    if (!ignoreMatch?.(match[0])) {
+      lineNumbers.push(lineNumberForIndex(text, match.index));
+    }
     if (match[0].length === 0) {
       matcher.lastIndex += 1;
     }
@@ -911,10 +918,15 @@ function findNpmAuthTokenLines(text) {
 
 function scanTextForSecrets(text, filePath) {
   const findings = [];
-  for (const { name, pattern, findLines } of TEXT_SECRET_PATTERNS) {
+  for (const {
+    name,
+    pattern,
+    findLines,
+    ignoreMatch,
+  } of TEXT_SECRET_PATTERNS) {
     const lineNumbers = findLines
       ? findLines(text)
-      : lineNumbersForPattern(text, pattern);
+      : lineNumbersForPattern(text, pattern, ignoreMatch);
     for (const line of lineNumbers) {
       findings.push({
         file: displayPath(filePath),
@@ -1306,24 +1318,34 @@ function workflowSecurityFindingsForText(text, filePath) {
   return findings;
 }
 
+// Flow-style mappings put several keys on one line: `with: { cache: pnpm }`.
+const FLOW_CACHE_ENTRY =
+  /[{,]\s*['"]?(cache|cache-dependency-path|package-manager-cache)['"]?\s*:\s*['"]?([^\s,'"}]*)/gi;
+
 function isWorkflowCacheLine(line) {
   const entry = line.startsWith("- ") ? line.slice(2).trim() : line;
   const separatorIndex = entry.indexOf(":");
   if (entry.startsWith("#") || separatorIndex === -1) {
     return false;
   }
+  const content = entry.replace(/\s#.*$/, "");
+  if (/\bactions\/cache\b/i.test(content)) {
+    return true;
+  }
+  for (const [, flowKey, flowValue] of content.matchAll(FLOW_CACHE_ENTRY)) {
+    if (
+      flowKey.toLowerCase() !== "package-manager-cache" ||
+      flowValue.toLowerCase() !== "false"
+    ) {
+      return true;
+    }
+  }
   const key = stripBoundaryQuotes(
     entry.slice(0, separatorIndex).trim()
   ).toLowerCase();
   const value = stripBoundaryQuotes(
-    entry
-      .slice(separatorIndex + 1)
-      .replace(/\s#.*$/, "")
-      .trim()
+    content.slice(separatorIndex + 1).trim()
   ).toLowerCase();
-  if (key === "uses") {
-    return value.startsWith("actions/cache");
-  }
   if (key === "package-manager-cache") {
     return value !== "false";
   }

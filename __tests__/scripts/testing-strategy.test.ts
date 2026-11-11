@@ -1410,12 +1410,19 @@ describe("testing strategy CI security checks", () => {
     [
       "a feature branch",
       "feature/x",
-      "refs/remotes/origin/main,refs/remotes/origin/1a-staging",
+      [
+        "--exclude-reachable-from",
+        "refs/remotes/origin/main,refs/remotes/origin/1a-staging",
+      ],
     ],
-    ["the staging branch", "1a-staging", "refs/remotes/origin/main"],
-    ["the default branch", "main", "refs/remotes/origin/1a-staging"],
+    [
+      "the staging branch",
+      "1a-staging",
+      ["--exclude-reachable-from", "refs/remotes/origin/main"],
+    ],
+    ["the default branch", "main", []],
   ])(
-    "leaves out shared branches other than %s",
+    "chooses which shared branches to leave out when pushing %s",
     (_label, pushedBranch, expectedExclusions) => {
       const scan = pushScanStep();
       gitIn(tempDir, "init", "--quiet");
@@ -1455,11 +1462,58 @@ describe("testing strategy CI security checks", () => {
         "HEAD",
         "--output",
         "test-results/push-secret-scan.json",
-        "--exclude-reachable-from",
-        expectedExclusions,
+        ...expectedExclusions,
       ]);
     }
   );
+
+  it("scans commits that reached both shared branches before any run started", () => {
+    // A feature branch adds a value and removes it again, is merged into
+    // 1a-staging and into main, and only then do the three push runs check
+    // out. Every run already sees both shared branches holding the commits.
+    const scan = pushScanStep();
+    gitIn(tempDir, "init", "--quiet");
+    const base = commitFiles(tempDir, "Base", { "README.md": "# Fixture\n" });
+    gitIn(tempDir, "checkout", "--quiet", "-b", "feature");
+    commitFiles(tempDir, "Add settings", {
+      "config/app.json": `{"token":"${FAKE_GITHUB_TOKEN}"}\n`,
+    });
+    const featureHead = commitFiles(tempDir, "Remove token", {
+      "config/app.json": '{"token":""}\n',
+    });
+    gitIn(tempDir, "checkout", "--quiet", "-b", "staging", base);
+    gitIn(tempDir, "merge", "--quiet", "--no-ff", "--no-edit", "feature");
+    const stagingHead = gitIn(tempDir, "rev-parse", "HEAD");
+    gitIn(tempDir, "checkout", "--quiet", "main");
+    gitIn(tempDir, "merge", "--quiet", "--no-ff", "--no-edit", "feature");
+    const mainHead = gitIn(tempDir, "rev-parse", "HEAD");
+    gitIn(tempDir, "update-ref", "refs/remotes/origin/main", mainHead);
+    gitIn(tempDir, "update-ref", "refs/remotes/origin/1a-staging", stagingHead);
+    fs.mkdirSync(path.join(tempDir, "ops", "scripts"), { recursive: true });
+    fs.copyFileSync(
+      path.join(process.cwd(), "ops", "scripts", "testing-strategy.cjs"),
+      path.join(tempDir, "ops", "scripts", "testing-strategy.cjs")
+    );
+    const runPush = (pushedBranch: string, head: string, before: string) => {
+      gitIn(tempDir, "checkout", "--quiet", "--detach", head);
+      return childProcess.spawnSync("bash", ["-c", scan?.run ?? ""], {
+        cwd: tempDir,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          PUSH_BEFORE: before,
+          DEFAULT_BRANCH: "main",
+          PUSHED_BRANCH: pushedBranch,
+        },
+      }).status;
+    };
+
+    expect({
+      feature: runPush("feature", featureHead, "0".repeat(40)),
+      staging: runPush("1a-staging", stagingHead, base),
+      main: runPush("main", mainHead, base),
+    }).toEqual({ feature: 0, staging: 0, main: 1 });
+  });
 
   it("accepts a read-only pull_request workflow", () => {
     fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
@@ -1677,6 +1731,26 @@ describe("testing strategy CI security checks", () => {
         "          package-manager-cache: true",
       ],
     ],
+    [
+      "a flow-style cache input",
+      [
+        "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0",
+        "        with: { node-version: '22.17.1', package-manager-cache: false, cache: pnpm }",
+      ],
+    ],
+    [
+      "a flow-style cache step",
+      [
+        "      - { uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809, with: { path: x, key: y } }",
+      ],
+    ],
+    [
+      "flow-style automatic package manager caching",
+      [
+        "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0",
+        "        with: { package-manager-cache: true }",
+      ],
+    ],
   ])("flags %s in a production release workflow", (_label, steps) => {
     fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
       recursive: true,
@@ -1713,6 +1787,8 @@ describe("testing strategy CI security checks", () => {
       "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0",
       "        with:",
       "          package-manager-cache: false",
+      "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0",
+      "        with: { node-version: '22.17.1', package-manager-cache: false }",
       '      - run: aws s3 cp a b --cache-control "no-store"',
     ];
     fs.writeFileSync(

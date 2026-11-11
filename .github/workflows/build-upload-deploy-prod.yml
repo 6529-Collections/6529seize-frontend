@@ -294,6 +294,8 @@ jobs:
             [Ff][Ii][Ll][Ee]://* | [Ff][Ii][Ll][Ee][Bb]://*)
               description="Commit: $description"
               ;;
+            *)
+              ;;
           esac
           case "$version_count" in
             0)
