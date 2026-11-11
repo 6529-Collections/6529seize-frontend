@@ -108,6 +108,17 @@ const closeSession = (session: PageSession) => {
 };
 
 describe("seal checks on an API without the batch read", () => {
+  beforeAll(() => {
+    // Testing Library is not loaded here, so React is told directly that
+    // updates run inside act(), never on the real-time scheduler.
+    (
+      globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }
+    ).IS_REACT_ACT_ENVIRONMENT = true;
+    // Loading the store once here compiles it (slow on a cold cache)
+    // outside the tests' own time limit.
+    newPageSession();
+  }, 120_000);
+
   beforeEach(() => {
     jest.useFakeTimers();
     mockFetchSignedEvents
@@ -167,15 +178,17 @@ describe("seal checks on an API without the batch read", () => {
       );
     const session = newPageSession();
 
+    // The failed batch's drop is read on its own once.
     const failedStates = showSeals(session, [aDrop()]);
     await flush(session, 10_000);
-    expect(failedStates()).toEqual(["unverified"]);
+    expect(failedStates()).toEqual(["verified"]);
+    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
 
     const nextStates = showSeals(session, [aDrop()]);
     await flush(session, 10_000);
     expect(nextStates()).toEqual(["verified"]);
     expect(mockFetchBatch).toHaveBeenCalledTimes(2);
-    expect(mockFetchSignedEvents).not.toHaveBeenCalled();
+    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
     closeSession(session);
   });
 });

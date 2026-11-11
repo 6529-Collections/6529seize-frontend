@@ -139,6 +139,20 @@ describe("the seal checks' request budget", () => {
     expect(started.get("c")).toBe(5500);
   });
 
+  it("lets a slot that was given back unused go to the next caller", async () => {
+    const budget = newBudget();
+    const started = new Map<string, number>();
+    startTimes(budget, ["a", "b"], started);
+    const unused = budget.takeSlot();
+    await jest.advanceTimersByTimeAsync(1000);
+    (await unused)();
+    startTimes(budget, ["c", "d"], started);
+    await jest.advanceTimersByTimeAsync(0);
+    // Without the slot given back, "d" would wait until 2000.
+    expect(started.get("c")).toBe(1000);
+    expect(started.get("d")).toBe(1000);
+  });
+
   it("aborts a request that takes longer than its timeout", async () => {
     const budget = newBudget();
     const result = budget.request(

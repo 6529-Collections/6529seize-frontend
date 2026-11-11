@@ -9,11 +9,34 @@ jest.mock("@/lib/device-signing/feature", () => ({
 const mockFetchSignedEvents = jest.fn();
 const mockFetchBatch = jest.fn();
 const mockFetchAuthorWallets = jest.fn();
-jest.mock("@/services/api/device-grants-api", () => ({
-  fetchDropSignedEvents: (...args: unknown[]) => mockFetchSignedEvents(...args),
-  fetchDropsSignedEvents: (...args: unknown[]) => mockFetchBatch(...args),
-  fetchAuthorWallets: (...args: unknown[]) => mockFetchAuthorWallets(...args),
-}));
+/** When each request of the current test started. */
+const mockRequestTimes: number[] = [];
+jest.mock("@/services/api/device-grants-api", () => {
+  const started =
+    (fetch: () => jest.Mock) =>
+    (...args: unknown[]) => {
+      mockRequestTimes.push(Date.now());
+      return fetch()(...args);
+    };
+  return {
+    fetchDropSignedEvents: started(() => mockFetchSignedEvents),
+    fetchDropsSignedEvents: started(() => mockFetchBatch),
+    fetchAuthorWallets: started(() => mockFetchAuthorWallets),
+  };
+});
+
+const serverError = () =>
+  Object.assign(new Error("Server error"), { status: 500 });
+
+/** No second of the test started more than two requests. */
+const expectWithinBudget = () => {
+  mockRequestTimes.forEach((time) => {
+    expect(
+      mockRequestTimes.filter((other) => other >= time && other < time + 1000)
+        .length
+    ).toBeLessThanOrEqual(2);
+  });
+};
 
 const mockVerify = jest.fn();
 jest.mock("@/lib/device-signing/verify-signed-events", () => ({
@@ -110,6 +133,7 @@ describe("seal checks reading signed events in batches", () => {
       );
     mockFetchAuthorWallets.mockReset().mockResolvedValue([AUTHOR]);
     mockVerify.mockReset().mockResolvedValue(signedVerdict);
+    mockRequestTimes.length = 0;
   });
 
   afterEach(async () => {
@@ -257,23 +281,129 @@ describe("seal checks reading signed events in batches", () => {
   );
 
   it.each([
+    ["answers 500", () => Promise.reject(serverError())],
     [
-      "fails",
-      () => Promise.reject(Object.assign(new Error("x"), { status: 500 })),
+      "times out",
+      (_dropIds: string[], signal: AbortSignal) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener("abort", () => reject(new Error("aborted")));
+        }),
     ],
+    ["fails on the network", () => Promise.reject(new TypeError("Failed"))],
     ["is not a batch", () => Promise.resolve({ drops: "none" })],
   ])(
-    "treats a read that %s as a failed lookup, not a failed verification",
+    "reads each post of a batch that %s through the single-drop route, within the budget",
     async (_name, respond) => {
       mockFetchBatch.mockImplementation(respond);
-      const drops = [aDrop(), aDrop()];
+      const drops = Array.from({ length: 4 }, () => aDrop());
       const { result } = renderHook(() => useDropSealStates(drops, true));
-      await flush(10_000);
-      expect(result.current).toEqual(["unverified", "unverified"]);
-      expect(mockVerify).not.toHaveBeenCalled();
-      expect(mockFetchSignedEvents).not.toHaveBeenCalled();
+      await flush(60_000);
+
+      expect(result.current).toEqual(Array(4).fill("verified"));
+      expect(mockFetchBatch).toHaveBeenCalledTimes(1);
+      expect(mockFetchSignedEvents.mock.calls.map(([id]) => id)).toEqual(
+        drops.map(({ id }) => id)
+      );
+      expect(verifiedData().get(drops[0].id)).toEqual(
+        signedEventsFor(drops[0].id)
+      );
+      expectWithinBudget();
     }
   );
+
+  it("leaves only the post whose own read also fails unverified, never failed", async () => {
+    mockFetchBatch.mockRejectedValue(serverError());
+    const drops = [aDrop(), aDrop(), aDrop()];
+    mockFetchSignedEvents.mockImplementation((dropId: string) =>
+      dropId === drops[1].id
+        ? Promise.reject(serverError())
+        : Promise.resolve(signedEventsFor(dropId))
+    );
+    const { result } = renderHook(() => useDropSealStates(drops, true));
+    await flush(60_000);
+    expect(result.current).toEqual(["verified", "unverified", "verified"]);
+
+    // One fallback read per post: the failed one is not retried by itself.
+    await flush(60 * 60_000);
+    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(3);
+    expect(mockFetchBatch).toHaveBeenCalledTimes(1);
+    expectWithinBudget();
+  });
+
+  it("tries the batch read again for posts due after a failed one", async () => {
+    mockFetchBatch.mockRejectedValueOnce(serverError());
+    const first = [aDrop(), aDrop()];
+    renderHook(() => useDropSealStates(first, true));
+    await flush(60_000);
+    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(2);
+
+    const later = [aDrop(), aDrop()];
+    const { result } = renderHook(() => useDropSealStates(later, true));
+    await flush(60_000);
+    expect(result.current).toEqual(["verified", "verified"]);
+    expect(batchReads()).toEqual([
+      first.map(({ id }) => id),
+      later.map(({ id }) => id),
+    ]);
+    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(2);
+  });
+
+  it("falls back only for posts still wanted when the failed batch settles", async () => {
+    let failBatch!: () => void;
+    mockFetchBatch.mockImplementation(
+      () =>
+        new Promise((_resolve, reject) => {
+          failBatch = () => reject(serverError());
+        })
+    );
+    const [kept, left] = [aDrop(), aDrop()];
+    // Two checks in flight are taken by other posts, so these two wait.
+    let releaseVerify!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      releaseVerify = resolve;
+    });
+    mockVerify.mockImplementation(() => gate.then(() => signedVerdict));
+    const busy = [aDrop(), aDrop()];
+    renderHook(() => useDropSealStates(busy, true));
+    renderHook(() => useDropSealStates([kept], true));
+    const leaving = renderHook(() => useDropSealStates([left], true));
+    await flush();
+    leaving.unmount();
+    failBatch();
+    releaseVerify();
+    await flush(60_000);
+    const singleReads = mockFetchSignedEvents.mock.calls.map(([id]) => id);
+    expect(singleReads).toContain(kept.id);
+    expect(singleReads).not.toContain(left.id);
+  });
+
+  it("gives a batch read's slot back when its seals left before it could start", async () => {
+    const start = Date.now();
+    const startedAt = () => mockRequestTimes.map((time) => time - start);
+    // A read and a lookup at 100 use this second's two starts.
+    renderHook(() => useDropSealStates([aDrop()], true));
+    await flush(150);
+    expect(startedAt()).toEqual([100, 100]);
+
+    // This seal's read waits for a slot at 1100, but the seal leaves first.
+    const leaving = aDrop();
+    const { rerender } = renderHook(
+      ({ near }) => useDropSealStates([leaving], near),
+      { initialProps: { near: true } }
+    );
+    await flush(150);
+    rerender({ near: false });
+    await flush(850);
+    expect(startedAt()).toEqual([100, 100]);
+
+    // With that slot given back, the next read and lookup both start at once.
+    const next = aDrop();
+    const { result } = renderHook(() => useDropSealStates([next], true));
+    await flush(150);
+    expect(startedAt()).toEqual([100, 100, 1250, 1250]);
+    expect(result.current).toEqual(["verified"]);
+    expect(batchReads().flat()).not.toContain(leaving.id);
+  });
 
   it("reads an author's wallets again once the cached list expires", async () => {
     const author = anAuthor();

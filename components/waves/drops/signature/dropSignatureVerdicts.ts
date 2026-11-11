@@ -279,9 +279,9 @@ class SignedEventsUnavailableError extends Error {}
 
 /**
  * A drop's signed events: from its batch read, or from the single-drop
- * route when the batch named it truncated or the API has no batch read. A
- * drop the caller cannot read, or a failed batch read, fails the check the
- * way a failed single-drop read does.
+ * route when the batch named it truncated, the batch read failed or the API
+ * has no batch read. A drop the caller cannot read fails the check the way
+ * a failed single-drop read does.
  */
 async function readSignedEvents({
   drop,
@@ -371,14 +371,21 @@ async function readBatchOutcome(
   }
 }
 
-/** What one drop of a batch read gets once the read settled. */
+/**
+ * What one drop of a batch read gets once the read settled. A 429 keeps the
+ * check pending until the pause ends. Any other failure (an API without the
+ * batch read, a server error, a timeout, a network error or a response that
+ * is not a batch) sends the drop to the single-drop route once, so one
+ * failed read never decides a whole batch; only a drop whose own read also
+ * fails is left unverified.
+ */
 function loadedFor(dropId: string, outcome: BatchOutcome): LoadedSignedEvents {
   if ("byDrop" in outcome) {
     return outcome.byDrop.get(dropId) ?? { kind: "missing" };
   }
-  return isBatchReadMissing(outcome.error)
-    ? { kind: "single" }
-    : { kind: "failed", error: outcome.error };
+  return outcome.error instanceof RateLimitedError
+    ? { kind: "failed", error: outcome.error }
+    : { kind: "single" };
 }
 
 /**
@@ -388,9 +395,14 @@ function loadedFor(dropId: string, outcome: BatchOutcome): LoadedSignedEvents {
 async function readBatch(): Promise<void> {
   batchReadRunning = true;
   try {
-    await requestBudget.takeSlot();
+    if (checksToBatch().length === 0) {
+      return;
+    }
+    const giveBackSlot = await requestBudget.takeSlot();
+    // Seals may have left the viewport while the read waited for its slot.
     const checks = checksToBatch();
     if (checks.length === 0) {
+      giveBackSlot();
       return;
     }
     const dropIds = checks.map(({ drop }) => drop.id);
@@ -420,8 +432,8 @@ function afterFailedBatchRead(
     return;
   }
   if (error instanceof RateLimitedError) {
-    // Checks still queued are read again after the pause; those already
-    // started wait at the front of the queue (requeueAfterPause).
+    // Checks still queued are read in a batch again after the pause; those
+    // already started wait at the front of the queue (requeueAfterPause).
     checks.forEach((check) => {
       if (queue.get(check.drop.id) === check) {
         check.loaded = undefined;

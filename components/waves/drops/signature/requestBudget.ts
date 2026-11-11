@@ -22,9 +22,10 @@ interface RequestBudget {
   /**
    * Waits until a request may start: after any pause and within the budget.
    * The slot is reserved before waiting, so callers start in call order and
-   * two callers woken at the same moment never share one slot.
+   * two callers woken at the same moment never share one slot. Resolves to
+   * a function that gives the slot back when no request was started in it.
    */
-  readonly takeSlot: () => Promise<void>;
+  readonly takeSlot: () => Promise<() => void>;
   /**
    * Runs a request whose slot was taken, with its own timeout. A 429 pauses
    * every request and is rethrown as a RateLimitedError.
@@ -119,19 +120,21 @@ export function createRequestBudget({
     }
   };
 
-  const takeSlot = async (): Promise<void> => {
+  const takeSlot = async (): Promise<() => void> => {
     const start = reserveStart(Date.now());
+    const giveBack = () => releaseStart(start);
     const delay = start - Date.now();
     if (delay <= 0) {
-      return;
+      return giveBack;
     }
     await wait(delay);
     if (pausedUntil > Date.now()) {
       // A 429 arrived while this caller waited: its reserved start falls
       // inside the pause, so it reserves a start after the pause instead.
       releaseStart(start);
-      await takeSlot();
+      return await takeSlot();
     }
+    return giveBack;
   };
 
   const pauseFor = (error: unknown): void => {

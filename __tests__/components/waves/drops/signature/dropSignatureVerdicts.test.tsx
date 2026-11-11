@@ -326,9 +326,12 @@ describe("this browser's seal verdicts", () => {
   });
 
   it("leaves a check that could not load unverified and never retries it by itself", async () => {
-    mockFetchBatch.mockRejectedValue(
-      Object.assign(new Error("unavailable"), { status: 503 })
-    );
+    const unavailable = Object.assign(new Error("unavailable"), {
+      status: 503,
+    });
+    // The failed batch read is followed by one read of the drop alone.
+    mockFetchBatch.mockRejectedValue(unavailable);
+    mockFetchSignedEvents.mockRejectedValue(unavailable);
     const drop = aDrop();
     const first = renderHook(() => useDropSealStates([drop], true));
     await flush();
@@ -341,20 +344,27 @@ describe("this browser's seal verdicts", () => {
     await flush(60 * 60_000);
     expect(second.result.current).toEqual(["unverified"]);
     expect(mockFetchBatch).toHaveBeenCalledTimes(1);
+    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
   });
 
   it("leaves a timed-out check unverified and never retries it by itself", async () => {
-    mockFetchBatch.mockImplementation(
-      (_dropIds: string[], signal: AbortSignal) =>
-        new Promise((_resolve, reject) => {
-          signal.addEventListener("abort", () => reject(new Error("aborted")));
-        })
-    );
+    const hang = (_ids: unknown, signal: AbortSignal) =>
+      new Promise((_resolve, reject) => {
+        signal.addEventListener("abort", () => reject(new Error("aborted")));
+      });
+    // The timed-out batch read is followed by one read of the drop alone,
+    // which times out too.
+    mockFetchBatch.mockImplementation(hang);
+    mockFetchSignedEvents.mockImplementation(hang);
     const drop = aDrop();
     const { result, unmount } = renderHook(() =>
       useDropSealStates([drop], true)
     );
     await flush();
+    await flush(19_000);
+    expect(result.current).toEqual(["pending"]);
+    await flush(1000);
+    expect(result.current).toEqual(["pending"]);
     await flush(19_000);
     expect(result.current).toEqual(["pending"]);
     await flush(1000);
@@ -364,6 +374,7 @@ describe("this browser's seal verdicts", () => {
     renderHook(() => useDropSealStates([drop], true));
     await flush(60 * 60_000);
     expect(mockFetchBatch).toHaveBeenCalledTimes(1);
+    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
   });
 
   it("gives the shared identity lookup its own timeout", async () => {
