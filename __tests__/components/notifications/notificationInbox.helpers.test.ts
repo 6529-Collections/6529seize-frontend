@@ -137,18 +137,18 @@ it("renders mention and wave tokens as readable text across drop parts", () => {
     ],
   } as ApiDrop;
   expect(getInboxPreview({ ...replied, related_drops: [drop] })).toBe(
-    "@GelatoGenesis when block screenshot feature? Ideas from #QUORUM. Keep [ordinary brackets] and @all."
+    "@GelatoGenesis when block screenshot feature?\n\nIdeas from #QUORUM. Keep [ordinary brackets] and @all."
   );
 });
 
-it("normalizes a title before truncating and handles missing drops", () => {
+it("normalizes a title without cutting Markdown source and handles missing drops", () => {
   const title = `@[GelatoGenesis] #[QUORUM] ${"x".repeat(260)}`;
   expect(
     getInboxPreview({
       ...replied,
       related_drops: [{ ...reply, title }],
     })
-  ).toBe(`@GelatoGenesis #QUORUM ${"x".repeat(260)}`.slice(0, 240));
+  ).toBe(`@GelatoGenesis #QUORUM ${"x".repeat(260)}`);
   expect(getInboxPreview({ ...replied, related_drops: [] })).toBe("");
 });
 

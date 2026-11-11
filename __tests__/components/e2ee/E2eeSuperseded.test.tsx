@@ -39,7 +39,7 @@ jest.mock("@/components/e2ee/gate/E2eeRenewalBanner", () => ({
 }));
 jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
   E2eeEmojiProvider: ({ children }: { children: ReactNode }) => children,
-  useE2eeEmojis: () => ({ sources: new Map() }),
+  useE2eeEmojis: () => ({ sources: new Map(), native: new Map() }),
 }));
 jest.mock("next/navigation", () => ({
   usePathname: () => "/messages/encrypted/0x",
