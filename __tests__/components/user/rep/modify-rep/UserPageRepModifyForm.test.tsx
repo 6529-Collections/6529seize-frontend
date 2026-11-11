@@ -1,6 +1,5 @@
 import { AuthContext, type AuthContextType } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import Modal from "@/components/user/rep/modify-rep/UserPageRepModifyModal";
 import UserPageRepModifyForm from "@/components/user/rep/modify-rep/UserPageRepModifyForm";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
@@ -61,9 +60,14 @@ function Wrapper({ children }: { readonly children: ReactNode }) {
   );
 }
 
-function renderModal() {
+function renderEditor() {
   return render(
-    <Modal profile={profile} category="Artist" onClose={onClose} />,
+    <UserPageRepModifyForm
+      profile={profile}
+      category="Artist"
+      onCancel={onClose}
+      onSuccess={onClose}
+    />,
     { wrapper: Wrapper }
   );
 }
@@ -89,31 +93,19 @@ beforeEach(() => {
   });
 });
 
-it("prefills the current contribution in a named dialog and labels the input", async () => {
-  renderModal();
-  expect(
-    await screen.findByRole("dialog", { name: "Add Rep to alice" })
-  ).toBeInTheDocument();
+it("prefills the current contribution and labels the input", () => {
+  renderEditor();
   expect(
     screen.getByRole("textbox", { name: /Your total Rep for Artist\s*:/ })
   ).toHaveValue("20");
   expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
 });
 
-it.each(["Cancel", "Close"])(
-  "closes through the shared dialog using %s",
-  async (name) => {
-    renderModal();
-    await userEvent.click(await screen.findByRole("button", { name }));
-    await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
-  }
-);
-
-it("closes on Escape", async () => {
-  renderModal();
-  await screen.findByRole("dialog");
-  await userEvent.keyboard("{Escape}");
-  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+it("cancels the form without saving", async () => {
+  renderEditor();
+  await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+  expect(onClose).toHaveBeenCalledTimes(1);
+  expect(post).not.toHaveBeenCalled();
 });
 
 it("keeps the form read-only and Save disabled until the allowance loads", async () => {
@@ -122,7 +114,7 @@ it("keeps the form read-only and Save disabled until the allowance loads", async
     category: "Artist",
   });
   allocation.mockReturnValue({ ...ready, repState: null, isFetching: true });
-  const { rerender } = renderModal();
+  const { rerender } = renderEditor();
   expect(await screen.findByRole("status")).toHaveTextContent(
     "Loading your Rep allowance"
   );
@@ -132,7 +124,14 @@ it("keeps the form read-only and Save disabled until the allowance loads", async
   fireEvent.submit(input.closest("form")!);
   expect(requestAuth).not.toHaveBeenCalled();
   allocation.mockReturnValue(ready);
-  rerender(<Modal profile={profile} category="Artist" onClose={onClose} />);
+  rerender(
+    <UserPageRepModifyForm
+      profile={profile}
+      category="Artist"
+      onCancel={onClose}
+      onSuccess={onClose}
+    />
+  );
   expect(input).toHaveValue("20");
   expect(input).not.toHaveAttribute("readonly");
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
@@ -143,7 +142,7 @@ it("shows a retryable allowance error and blocks submission, even with cached da
     ...allocation.getMockImplementation()!({ profile, category: "Artist" }),
     isError: true,
   });
-  renderModal();
+  renderEditor();
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Couldn't load your Rep allowance."
   );
@@ -155,7 +154,7 @@ it("shows a retryable allowance error and blocks submission, even with cached da
 });
 
 it("clamps non-proxy input on blur and blocks out-of-range form submission", async () => {
-  renderModal();
+  renderEditor();
   const input = await screen.findByRole("textbox");
   fireEvent.change(input, { target: { value: "101" } });
   expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
@@ -169,7 +168,7 @@ it("clamps non-proxy input on blur and blocks out-of-range form submission", asy
 });
 
 it("saves the desired total, shows the existing toast and refreshes profile data", async () => {
-  renderModal();
+  renderEditor();
   fireEvent.change(await screen.findByRole("textbox"), {
     target: { value: "30" },
   });
@@ -194,7 +193,7 @@ it("saves the desired total, shows the existing toast and refreshes profile data
 
 it("preserves proxy amounts and includes the proxy when refreshing", async () => {
   activeProfileProxy = proxy;
-  renderModal();
+  renderEditor();
   const input = await screen.findByRole("textbox");
   fireEvent.change(input, { target: { value: "150" } });
   fireEvent.blur(input);
@@ -209,9 +208,9 @@ it("preserves proxy amounts and includes the proxy when refreshing", async () =>
   );
 });
 
-it("keeps the dialog open and the draft intact after a save failure", async () => {
+it("keeps the editor open and the draft intact after a save failure", async () => {
   post.mockRejectedValue(new Error("Request failed"));
-  renderModal();
+  renderEditor();
   const input = await screen.findByRole("textbox");
   fireEvent.change(input, { target: { value: "30" } });
   await userEvent.click(screen.getByRole("button", { name: "Save" }));
@@ -230,7 +229,7 @@ it("keeps the dialog open and the draft intact after a save failure", async () =
 
 it("does not submit if authentication is declined", async () => {
   requestAuth.mockResolvedValue({ success: false });
-  renderModal();
+  renderEditor();
   fireEvent.change(await screen.findByRole("textbox"), {
     target: { value: "30" },
   });
@@ -244,7 +243,7 @@ it("does not submit if authentication is declined", async () => {
 
 it("preserves the draft and allows retry when authentication rejects", async () => {
   requestAuth.mockRejectedValueOnce(new Error("Authentication unavailable"));
-  renderModal();
+  renderEditor();
   const input = await screen.findByRole("textbox");
   fireEvent.change(input, { target: { value: "30" } });
   await userEvent.click(screen.getByRole("button", { name: "Save" }));
@@ -261,7 +260,7 @@ it("preserves the draft and allows retry when authentication rejects", async () 
 });
 
 it("does not overwrite an edited amount when the allowance refreshes", async () => {
-  const { rerender } = renderModal();
+  const { rerender } = renderEditor();
   const input = await screen.findByRole("textbox");
   fireEvent.change(input, { target: { value: "30" } });
   const state = allocation.getMockImplementation()!({
@@ -272,12 +271,19 @@ it("does not overwrite an edited amount when the allowance refreshes", async () 
     ...state,
     repState: { ...state.repState!, rater_contribution: 25 },
   });
-  rerender(<Modal profile={profile} category="Artist" onClose={onClose} />);
+  rerender(
+    <UserPageRepModifyForm
+      profile={profile}
+      category="Artist"
+      onCancel={onClose}
+      onSuccess={onClose}
+    />
+  );
   expect(input).toHaveValue("30");
 });
 
 it("saves a manually entered zero without a separate removal control", async () => {
-  renderModal();
+  renderEditor();
   fireEvent.change(await screen.findByRole("textbox"), {
     target: { value: "0" },
   });
@@ -295,7 +301,7 @@ it("saves a manually entered zero without a separate removal control", async () 
 });
 
 it("does not interpret an incomplete minus sign as removal", async () => {
-  renderModal();
+  renderEditor();
   const input = await screen.findByRole("textbox");
   fireEvent.change(input, { target: { value: "-" } });
   expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
@@ -309,7 +315,7 @@ it("does not submit after the editor leaves during authentication", async () => 
       finishAuth = resolve;
     })
   );
-  const { unmount } = renderModal();
+  const { unmount } = renderEditor();
   const input = await screen.findByRole("textbox");
   fireEvent.change(input, { target: { value: "30" } });
   await userEvent.click(screen.getByRole("button", { name: "Save" }));

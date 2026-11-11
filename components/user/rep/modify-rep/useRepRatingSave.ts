@@ -13,7 +13,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import { useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
 
-export interface RepRatingUpdate {
+interface RepRatingUpdate {
   readonly profile: ApiIdentity;
   readonly category: string;
   readonly amount: number;

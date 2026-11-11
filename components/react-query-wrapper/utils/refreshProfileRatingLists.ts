@@ -46,6 +46,12 @@ export async function refreshProfileRatingLists(
     readonly rater?: string | null;
   }
 ): Promise<void> {
+  if (matter === "REP") {
+    void queryClient.invalidateQueries({
+      queryKey: [QueryKey.PROFILE_REP_CATEGORY_CONTRIBUTORS],
+    });
+    void queryClient.invalidateQueries({ queryKey: ["REP_CONTRIBUTORS"] });
+  }
   const actor = profileProxy?.created_by;
   const givenAliases = actor
     ? [actor.id, actor.handle, actor.primary_address]

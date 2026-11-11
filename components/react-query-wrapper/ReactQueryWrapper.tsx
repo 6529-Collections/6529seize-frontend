@@ -463,10 +463,6 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.REP_CATEGORIES],
     });
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.PROFILE_REP_CATEGORY_CONTRIBUTORS],
-    });
-    void queryClient.invalidateQueries({ queryKey: ["REP_CONTRIBUTORS"] });
     invalidateRepCategoryAnalytics(queryClient);
     invalidateProfileRaters({
       profile: targetProfile,

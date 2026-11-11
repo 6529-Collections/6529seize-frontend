@@ -95,6 +95,12 @@ describe("ReactQueryWrapper context", () => {
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.GLOBAL_REP_CATEGORY_OVERVIEW],
     });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.PROFILE_REP_CATEGORY_CONTRIBUTORS],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["REP_CONTRIBUTORS"],
+    });
   });
 
   it("sets profile data in query cache", () => {
