@@ -473,14 +473,15 @@ async function exerciseAdvancedSearch(
       name: `Remove wave filter ${OTHER_SEARCH_WAVE_NAME}`,
     })
     .click();
-  await page
-    .getByRole("button", {
-      name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
-    })
-    .click();
-  await expect(page).toHaveURL(
-    new RegExp(`/waves/${OTHER_SEARCH_WAVE_ID}\\?serialNo=43`)
-  );
+  // Chat consumes the serial target and removes it from the URL after opening.
+  await Promise.all([
+    page.waitForURL(new RegExp(`/waves/${OTHER_SEARCH_WAVE_ID}\\?serialNo=43`)),
+    page
+      .getByRole("button", {
+        name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
+      })
+      .click(),
+  ]);
 }
 
 async function installSidebarScoreFixture(
@@ -1167,6 +1168,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     );
     const wavesTab = page.getByRole("tab", { name: /^Waves/ });
     await expect(wavesTab).toBeFocused();
+    await expect(wavesTab).toHaveAttribute("aria-selected", "true");
     await wavesTab.press(
       testInfo.project.use.isMobile ? "ArrowRight" : "ArrowDown"
     );
