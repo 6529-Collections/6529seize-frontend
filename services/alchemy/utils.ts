@@ -2,9 +2,11 @@ import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "@/lib/media/static-image-hosts";
 import { isArweaveGatewayRuntimeHost } from "@/lib/media/arweave-gateways";
 import { getAddress } from "viem";
 import {
-  DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  getMediaResolverSource,
+  isFirstPartyMediaResolverHostname,
   normalizeDecentralizedMediaUrl,
 } from "@/lib/media/decentralized-media";
+import { publicEnv } from "@/config/env";
 
 import { isValidEthAddress } from "@/helpers/Helpers";
 import type {
@@ -120,7 +122,12 @@ function pickOriginalImage(...sources: unknown[]): string | null {
     const imageUrl =
       normaliseImageUrl(source) ??
       (typeof source === "string"
-        ? normaliseImageUrl(normalizeDecentralizedMediaUrl(source))
+        ? normaliseImageUrl(
+            normalizeDecentralizedMediaUrl(
+              source,
+              publicEnv.MEDIA_RESOLVER_ENDPOINT
+            )
+          )
         : null);
     if (!imageUrl) {
       continue;
@@ -132,7 +139,9 @@ function pickOriginalImage(...sources: unknown[]): string | null {
       !url.port &&
       !url.username &&
       !url.password &&
-      (url.origin === DEFAULT_MEDIA_RESOLVER_ENDPOINT ||
+      (url.origin ===
+        getMediaResolverSource(publicEnv.MEDIA_RESOLVER_ENDPOINT) ||
+        isFirstPartyMediaResolverHostname(url.hostname) ||
         STATIC_IMAGE_HOSTS.has(url.hostname) ||
         isArweaveGatewayRuntimeHost(url.hostname))
     ) {

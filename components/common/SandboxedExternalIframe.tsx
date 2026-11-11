@@ -1,11 +1,13 @@
 "use client";
 
 import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
+import { publicEnv } from "@/config/env";
 import { requestElementFullScreen } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useFullScreenSupported } from "@/hooks/useFullScreenSupported";
 import { t } from "@/i18n/messages";
+import { toIsolatedHtmlUrlFromInput } from "@/lib/media/decentralized-media";
 import { ArrowsPointingOutIcon } from "@heroicons/react/24/outline";
 import React, {
   useCallback,
@@ -167,7 +169,12 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
     }
 
     const baseProps = {
-      src: canonicalSrc,
+      // IPFS HTML on the separate content domain loads from its own per-CID
+      // origin; with any other resolver this is the canonical URL itself.
+      src: toIsolatedHtmlUrlFromInput(
+        canonicalSrc,
+        publicEnv.MEDIA_RESOLVER_ENDPOINT
+      ),
       sandbox: DEFAULT_SANDBOX,
       // Fullscreen is allowed so the parent viewer can expand the isolated frame itself.
       allow: "fullscreen",

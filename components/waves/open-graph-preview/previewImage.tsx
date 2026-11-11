@@ -7,7 +7,10 @@ import Image, { type ImageProps } from "next/image";
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { publicEnv } from "@/config/env";
 import { getInternalLinkPath } from "@/helpers/internalLink";
-import { getMediaResolverHostname } from "@/lib/media/decentralized-media";
+import {
+  getMediaResolverHostname,
+  isFirstPartyMediaResolverHostname,
+} from "@/lib/media/decentralized-media";
 import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "@/lib/media/static-image-hosts";
 
 const IMAGE_PROXY_PATH = "/api/og-metadata/image";
@@ -37,6 +40,7 @@ function isDirectImageUrl(value: string): boolean {
       !url.username &&
       !url.password &&
       (DIRECT_IMAGE_HOSTNAMES.has(hostname) ||
+        isFirstPartyMediaResolverHostname(hostname) ||
         hostname ===
           getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT))
     );
