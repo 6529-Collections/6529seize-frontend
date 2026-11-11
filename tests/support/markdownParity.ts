@@ -27,23 +27,35 @@ export async function checkConversationPreviews(
     expect(count).toBe(width === 1440 ? 2 : 1);
     for (let index = 0; index < count; index += 1) {
       const row = rows.nth(index);
-      const preview = row.locator("code").locator("..");
-      await expect(row.locator("strong")).toHaveText("Bold");
-      await expect(row.locator("em")).toHaveText("italic");
+      await expect(row.getByText("Bold", { exact: true })).toHaveJSProperty(
+        "tagName",
+        "STRONG"
+      );
+      await expect(row.getByText("italic", { exact: true })).toHaveJSProperty(
+        "tagName",
+        "EM"
+      );
       await expect(row).toContainText(
         "Link console.log('hi gelato3'); first second Photo"
       );
       await expect(row).not.toContainText("```");
-      await expect(preview.locator("a, img, pre, p, ul, input")).toHaveCount(0);
-      const geometry = await row.locator("code").evaluate((code) => {
-        const preview = code.parentElement!;
-        const bounds = preview.getBoundingClientRect();
-        return {
-          height: bounds.height,
-          right: bounds.right,
-          font: getComputedStyle(code).fontFamily,
-        };
-      });
+      await expect(
+        row
+          .getByText("console.log('hi gelato3');", { exact: true })
+          .locator("..")
+          .locator("a, img, pre, p, ul, input")
+      ).toHaveCount(0);
+      const geometry = await row
+        .getByText("console.log('hi gelato3');", { exact: true })
+        .evaluate((code) => {
+          const preview = code.parentElement!;
+          const bounds = preview.getBoundingClientRect();
+          return {
+            height: bounds.height,
+            right: bounds.right,
+            font: getComputedStyle(code).fontFamily,
+          };
+        });
       expect(geometry.height).toBeLessThanOrEqual(24);
       expect(geometry.right).toBeLessThanOrEqual(width);
       expect(geometry.font).toContain("monospace");
