@@ -196,7 +196,14 @@ const WEBP_VP8L = riffChunk(
   Uint8Array.of(0x2f, 29, 0x40, 0x04, 0x00, 9, 9, 9)
 );
 
-function webp(orientation = 3) {
+/** A VP8L payload of `length` bytes: the 5-byte header, then filler. */
+function vp8lPayload(length: number): Uint8Array {
+  const payload = Uint8Array.from({ length }, (_, index) => (index * 7) & 0xff);
+  payload.set([0x2f, 29, 0x40, 0x04, 0x00]);
+  return payload;
+}
+
+function webp(orientation = 3, image = WEBP_VP8L) {
   const flags = 0x20 | 0x08 | 0x04; // ICC, EXIF, XMP
   const vp8x = riffChunk(
     "VP8X",
@@ -206,7 +213,7 @@ function webp(orientation = 3) {
     ascii("WEBP"),
     vp8x,
     WEBP_ICCP,
-    WEBP_VP8L,
+    image,
     riffChunk("EXIF", tiffWithGps(orientation)),
     riffChunk("XMP ", ascii("<x:xmpmeta>Owner</x:xmpmeta>"))
   );
@@ -338,6 +345,33 @@ describe("stripImageMetadata", () => {
     expect(webpInfo(output).flags & 0x08).toBe(0);
     expect(contains(output, ascii("EXIF"))).toBe(false);
   });
+
+  // RIFF pads each odd-sized chunk to an even length; the chunks after it
+  // (here the orientation EXIF) must stay aligned.
+  it.each([11, 12, 13, 255])(
+    "keeps a WebP image chunk with a %i-byte payload aligned",
+    (length) => {
+      const image = riffChunk("VP8L", vp8lPayload(length));
+      expect(image.length).toBe(8 + length + (length % 2));
+      const input = webp(3, image);
+      const output = stripImageMetadata(input);
+      expect(output).not.toBe(input);
+      const at = indexOf(output, image);
+      expect(at).toBeGreaterThanOrEqual(12);
+      expect(at % 2).toBe(0);
+      const next = at + image.length;
+      expect(output.subarray(next, next + 4)).toEqual(ascii("EXIF"));
+      expect(webpInfo(output)).toEqual({
+        flags: 0x20 | 0x08,
+        orientation: 3,
+        riffSizeOk: true,
+      });
+      for (const gone of [GPS_TAG, ascii("Owner"), ascii("XMP ")]) {
+        expect(contains(output, gone)).toBe(false);
+      }
+      expect(stripImageMetadata(output)).toBe(output);
+    }
+  );
 
   it("returns an image without metadata unchanged", () => {
     const clean = jpeg({ extras: false });

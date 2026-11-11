@@ -9,7 +9,12 @@
  * stored successor only while that is a usable DM with the same person.
  */
 import type { E2eeApiClient } from "@/lib/e2ee/api";
-import { DM_UNKNOWN_DEVICE_RETRY_MS } from "@/lib/e2ee/engine/dm-join";
+import * as dmJoin from "@/lib/e2ee/engine/dm-join";
+import {
+  DM_UNKNOWN_DEVICE_RETRY_MS,
+  releaseHeldWelcome,
+  retryWelcomeLater,
+} from "@/lib/e2ee/engine/dm-join";
 import { MlsClient } from "@/lib/e2ee/mls-adapter";
 import type { GroupMetadata } from "@/lib/e2ee/wasm-types";
 import { createFakeApiClient } from "@/tests/support/e2ee/fakeDeliveryService.cjs";
@@ -97,6 +102,7 @@ describe("E2EE engine: joining direct conversations", () => {
 
   afterEach(() => {
     for (const device of world.devices) device.engine.dispose();
+    jest.restoreAllMocks();
   });
 
   it("joins a group invitation with three people as before", async () => {
@@ -229,11 +235,13 @@ describe("E2EE engine: joining direct conversations", () => {
   });
 
   /** A DM from Alice's laptop whose other device (her phone) Bob's server lookups do not find. */
-  async function dmWithUnknownPhone() {
+  async function dmWithUnknownPhone(
+    withApi: (api: E2eeApiClient) => E2eeApiClient = (api) => api
+  ) {
     const alice = await addUser(world, "alice");
     const alicePhone = await addDevice(world, alice);
     const lookups = lookupFaults(world, "bob");
-    const bob = await addUser(world, "bob", { api: lookups.api });
+    const bob = await addUser(world, "bob", { api: withApi(lookups.api) });
     await settle(world);
     lookups.failing.set(keyOf(alicePhone), 404);
     const dm = await alice.primary.engine.createConversation({
@@ -258,6 +266,70 @@ describe("E2EE engine: joining direct conversations", () => {
       dmPeer: { profileId: "alice" },
     });
     expect(pendingWelcomes(world, bob.primary)).toEqual([]);
+  });
+
+  /** Welcome ids Bob's engine released from its held-back invitations. */
+  const releasedByBob = () => {
+    const release = jest.spyOn(dmJoin, "releaseHeldWelcome");
+    return () =>
+      release.mock.calls.flatMap(([ctx, welcomeId]) =>
+        "profileId" in ctx && ctx.profileId === "bob" ? [welcomeId] : []
+      );
+  };
+
+  it("stops holding an invitation back once it joins", async () => {
+    const released = releasedByBob();
+    const { bob, lookups, dm } = await dmWithUnknownPhone();
+    const [welcomeId] = pendingWelcomes(world, bob.primary);
+    expect(released()).not.toContain(welcomeId);
+    lookups.failing.clear();
+    world.clock.advance(6 * 60_000);
+    await settle(world);
+    expect(bob.primary.engine.getConversation(dm)).toMatchObject({
+      status: "active",
+    });
+    expect(released()).toContain(welcomeId);
+  });
+
+  it("keeps holding an invitation back until its acknowledgement goes through", async () => {
+    const released = releasedByBob();
+    let ackFails = false;
+    const { bob, lookups, dm } = await dmWithUnknownPhone((api) => ({
+      ...api,
+      ackWelcome: async (...args: Parameters<E2eeApiClient["ackWelcome"]>) => {
+        if (ackFails) throw new Error("HTTP 503");
+        return api.ackWelcome(...args);
+      },
+    }));
+    const [welcomeId] = pendingWelcomes(world, bob.primary);
+    ackFails = true;
+    lookups.failing.clear();
+    world.clock.advance(6 * 60_000);
+    await settle(world);
+    // Joined, but the acknowledgement failed: still held, still delivered.
+    expect(bob.primary.engine.getConversation(dm)).toMatchObject({
+      status: "active",
+    });
+    expect(pendingWelcomes(world, bob.primary)).toEqual([welcomeId]);
+    expect(released()).not.toContain(welcomeId);
+
+    ackFails = false;
+    await bob.primary.engine.sync();
+    await settle(world);
+    expect(pendingWelcomes(world, bob.primary)).toEqual([]);
+    expect(released()).toContain(welcomeId);
+  });
+
+  it("stops holding an invitation back once it is refused inside the window", async () => {
+    const released = releasedByBob();
+    const { bob, dm } = await dmWithUnknownPhone();
+    const [welcomeId] = pendingWelcomes(world, bob.primary);
+    expect(released()).not.toContain(welcomeId);
+    (world.ds.state["blocks"] as Set<string>).add("bob>alice");
+    await settle(world);
+    expect(bob.primary.engine.getConversation(dm)).toBeNull();
+    expect(pendingWelcomes(world, bob.primary)).toEqual([]);
+    expect(released()).toContain(welcomeId);
   });
 
   it("refuses and acknowledges it once the device stays unknown past the window", async () => {
@@ -305,6 +377,47 @@ describe("E2EE engine: joining direct conversations", () => {
     });
     expect(bob.primary.engine.findDm("alice")).toBe(g);
     expect(pendingWelcomes(world, bob.primary)).toEqual([]);
+  });
+});
+
+describe("E2EE engine: the window for held-back invitations", () => {
+  const session = (start: number) => {
+    let now = start;
+    return {
+      ctx: { now: () => now },
+      advance: (ms: number) => {
+        now += ms;
+      },
+    };
+  };
+
+  it("counts from the first hold-back in this engine session", () => {
+    const { ctx, advance } = session(1_000);
+    expect(retryWelcomeLater(ctx, "w1")).toBe(true);
+    advance(DM_UNKNOWN_DEVICE_RETRY_MS - 1);
+    expect(retryWelcomeLater(ctx, "w1")).toBe(true);
+    advance(1);
+    expect(retryWelcomeLater(ctx, "w1")).toBe(false);
+    // Another engine session starts its own window.
+    expect(retryWelcomeLater(session(1_000).ctx, "w1")).toBe(true);
+  });
+
+  it("forgets an invitation once it is released", () => {
+    const { ctx, advance } = session(1_000);
+    expect(retryWelcomeLater(ctx, "w1")).toBe(true);
+    expect(retryWelcomeLater(ctx, "w2")).toBe(true);
+    releaseHeldWelcome(ctx, "w1");
+    advance(DM_UNKNOWN_DEVICE_RETRY_MS);
+    // A released entry is gone: the same id would start a new window.
+    expect(retryWelcomeLater(ctx, "w1")).toBe(true);
+    // The other entry is untouched and its window has passed.
+    expect(retryWelcomeLater(ctx, "w2")).toBe(false);
+  });
+
+  it("does nothing for an invitation that was never held back", () => {
+    const { ctx } = session(1_000);
+    expect(() => releaseHeldWelcome(ctx, "w1")).not.toThrow();
+    expect(retryWelcomeLater(ctx, "w1")).toBe(true);
   });
 });
 
