@@ -66,7 +66,7 @@ export default function MyStreamWavePending({
       style={isApp ? waveViewStyle : undefined}
     >
       {!isApp && (
-        <div className="tw-flex tw-shrink-0 tw-items-start tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-2 tw-py-3 sm:tw-px-4 md:tw-py-2.5">
+        <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-2 tw-py-3 sm:tw-px-4 md:tw-py-2.5">
           <button
             type="button"
             aria-label={t(
@@ -76,12 +76,9 @@ export default function MyStreamWavePending({
                 : "waves.loadingBack"
             )}
             onClick={() => activeWave.set(null, { isDirectMessage })}
-            className="tw-flex tw-h-9 tw-min-w-8 tw-shrink-0 tw-items-center tw-border-0 tw-bg-transparent tw-px-1.5 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:-tw-ml-2.5 sm:tw-px-2.5 lg:tw-hidden"
+            className="tw-mt-0.5 tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:-tw-ml-2.5 sm:desktop-hover:tw-h-9 lg:tw-hidden"
           >
-            <ArrowLeftIcon
-              aria-hidden="true"
-              className="tw-size-5 sm:tw-size-6"
-            />
+            <ArrowLeftIcon aria-hidden="true" className="tw-size-4" />
           </button>
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-[13px] tw-pt-0.5">
             <div className="tw-size-9 tw-shrink-0 tw-self-start tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
