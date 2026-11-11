@@ -40,7 +40,11 @@ until that entry wins. Explicit drop hiding, platform moderation, and ordinary
 notification filters remain effective.
 
 The `profiles.identity-tab` record covers the existing-category Rep editor,
-its permission rules, stable allowance loading, retry action, and dismissal.
+its desktop inline panel and mobile sheet, pinned You contribution, owner Given
+category editing, permission rules, allowance loading, retry action and dismissal.
+Grant Rep uses one label across layouts. Category saves keep the category open;
+partial failures retain only unsaved drafts for retry. The Identity log names
+NIC explicitly and puts neutral running totals after each change.
 It also covers desktop/mobile NIC Received/Given, owner Given management with
 highest totals first by default and optional most-recently-adjusted ordering,
 REP category selection, total replacement, manually entered zero removal and

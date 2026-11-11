@@ -252,6 +252,19 @@ const USER_COLLECTED_STATS_BOOST_MESSAGES = objectMessages(
 );
 
 const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
+  "panel.open": "Open REP category {category}",
+  "panel.contributors": "View {count} for {category}",
+  "panel.panel": "{category} REP details",
+  "panel.you": "You",
+  "panel.amountFor": "REP for {name}",
+  "panel.loadingAmount": "Loading…",
+  "panel.openGlobal": "Open category ↗",
+  "panel.yourRep": "Your REP",
+  "panel.total": "Total",
+  "panel.creditLimit":
+    "Available REP: {amount}. Reduce the amount to stay within your credit limit.",
+  "panel.saveRecovery":
+    "Saved changes are kept. Review the remaining values and try again.",
   "loading.details": "Loading REP category details",
   "pill.openGlobalAriaLabel": "Open global REP category {category}",
   "pill.editAriaLabel": "Edit REP category {category}",
@@ -295,7 +308,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "grant.assignedRepLabel": "Your REP assigned to {name}:",
   "grant.availableRep": "Your available REP: {amount}",
   "grant.assignedRep": "Your REP assigned to {name}: {amount}",
-  "grant.actions.grant": "Grant REP",
+  "grant.actions.grant": "Grant Rep",
   "grant.actions.cancel": "Cancel",
   "grant.toast.updated": "REP updated.",
   "grant.toast.updateFailed": "Couldn't update this REP rating.",

@@ -9,10 +9,11 @@ import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { useContext, useMemo, useState } from "react";
 import { canManageGivenRatings } from "../ratingsManagement";
-import RepCategoryPill from "../RepCategoryPill";
+import RepCategoryList from "../RepCategoryList";
 import RepDirectionToggle from "../RepDirectionToggle";
 import RatingContributorsControl from "../RatingContributorsControl";
-import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
 import { getCanEditRep, type RepDirection } from "../UserPageRep.helpers";
 
@@ -22,7 +23,6 @@ export default function UserPageRepHeader({
   profile,
   repDirection,
   onOpenOverviewContributors,
-  onOpenCategoryContributors,
   onOpenGlobalCategory,
   onRepDirectionChange,
   loading,
@@ -36,7 +36,6 @@ export default function UserPageRepHeader({
   readonly profile: ApiIdentity;
   readonly repDirection: RepDirection;
   readonly onOpenOverviewContributors: () => void;
-  readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
   readonly onOpenGlobalCategory: (category: string) => void;
   readonly onRepDirectionChange: (direction: RepDirection) => void;
   readonly loading: boolean;
@@ -51,20 +50,6 @@ export default function UserPageRepHeader({
     canManageGivenRatings(profile, connectedProfile, activeProfileProxy);
 
   const visibleCategories = categories.slice(0, visibleCount);
-  const hiddenLoadedCategoryCount = Math.max(
-    categories.length - visibleCount,
-    0
-  );
-  const hasMore = hiddenLoadedCategoryCount > 0 || hasNextPage;
-  let loadMoreLabel = "Load more";
-  if (hiddenLoadedCategoryCount > 0) {
-    loadMoreLabel = `+${hiddenLoadedCategoryCount} more`;
-  } else if (isFetchingNextPage) {
-    loadMoreLabel = "Loading...";
-  }
-  const isLoadMoreDisabled =
-    isFetchingNextPage && hiddenLoadedCategoryCount === 0;
-
   const canEditRep = useMemo(
     () =>
       getCanEditRep({
@@ -75,7 +60,7 @@ export default function UserPageRepHeader({
     [connectedProfile, profile, activeProfileProxy]
   );
 
-  const [editCategory, setEditCategory] = useState<string | null>(null);
+  const locale = useBrowserLocale();
   const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
 
   return (
@@ -161,32 +146,21 @@ export default function UserPageRepHeader({
                       aria-hidden="true"
                       className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
                     />
-                    <span>Add new</span>
+                    <span>{t(locale, "user.profile.rep.rep.grantAction")}</span>
                   </Button>
                 )}
               </div>
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10">
-                {visibleCategories.map((cat) => (
-                  <RepCategoryPill
-                    key={cat.category}
-                    category={cat}
-                    canEdit={canEditRep && repDirection === "received"}
-                    onEdit={setEditCategory}
-                    onOpenGlobalCategory={onOpenGlobalCategory}
-                    onOpenContributors={onOpenCategoryContributors}
-                    direction={repDirection}
-                  />
-                ))}
-                {hasMore && (
-                  <Button
-                    variant="secondary"
-                    onClick={onShowMore}
-                    disabled={isLoadMoreDisabled}
-                  >
-                    {loadMoreLabel}
-                  </Button>
-                )}
-              </div>
+              <RepCategoryList
+                key={`${profile.id ?? profile.query ?? profile.display}:${repDirection}`}
+                profile={profile}
+                categories={categories}
+                direction={repDirection}
+                visibleCount={visibleCount}
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                onShowMore={onShowMore}
+                onOpenGlobalCategory={onOpenGlobalCategory}
+              />
             </div>
           )}
 
@@ -211,14 +185,6 @@ export default function UserPageRepHeader({
             )}
         </div>
       </div>
-
-      {canEditRep && editCategory && (
-        <UserPageRepModifyModal
-          profile={profile}
-          category={editCategory}
-          onClose={() => setEditCategory(null)}
-        />
-      )}
 
       <GrantRepDialog
         profile={profile}

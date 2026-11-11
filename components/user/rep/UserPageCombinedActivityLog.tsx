@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { IdentityActivityContext } from "@/components/profile-activity/IdentityActivityContext";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import ProfileActivityLogs from "@/components/profile-activity/ProfileActivityLogs";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
@@ -31,17 +32,19 @@ export default function UserPageCombinedActivityLog({
   );
 
   return (
-    <div className="tw-group/profile-activity" data-typography="identity">
-      <ProfileActivityLogs
-        initialParams={params}
-        withFilters={true}
-        withMatterFilter={withMatterFilter}
-        enabled={enabled}
-      >
-        <h3 className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 lg:tw-text-xl lg:tw-normal-case lg:tw-tracking-normal lg:tw-text-iron-100">
-          Activity Log
-        </h3>
-      </ProfileActivityLogs>
-    </div>
+    <IdentityActivityContext value={true}>
+      <div className="tw-group/profile-activity" data-typography="identity">
+        <ProfileActivityLogs
+          initialParams={params}
+          withFilters={true}
+          withMatterFilter={withMatterFilter}
+          enabled={enabled}
+        >
+          <h3 className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 lg:tw-text-xl lg:tw-normal-case lg:tw-tracking-normal lg:tw-text-iron-100">
+            Activity Log
+          </h3>
+        </ProfileActivityLogs>
+      </div>
+    </IdentityActivityContext>
   );
 }

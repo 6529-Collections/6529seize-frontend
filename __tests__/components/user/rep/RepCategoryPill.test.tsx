@@ -16,31 +16,29 @@ const category: ApiRepCategory = {
 };
 
 describe("RepCategoryPill", () => {
-  it("opens the global category from the label", () => {
-    const onOpenGlobalCategory = jest.fn();
+  it("opens category details from the label", () => {
+    const onOpenContributors = jest.fn();
 
     render(
       <RepCategoryPill
         category={category}
         canEdit={false}
         onEdit={() => undefined}
-        onOpenGlobalCategory={onOpenGlobalCategory}
-        onOpenContributors={() => undefined}
+        onOpenContributors={onOpenContributors}
       />
     );
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Open global REP category Dev extraordinaire",
+        name: "Open REP category Dev extraordinaire",
       })
     );
 
-    expect(onOpenGlobalCategory).toHaveBeenCalledWith("Dev extraordinaire");
+    expect(onOpenContributors).toHaveBeenCalledWith(category);
   });
 
   it("keeps edit and contributor actions separate", () => {
     const onEdit = jest.fn();
-    const onOpenGlobalCategory = jest.fn();
     const onOpenContributors = jest.fn();
 
     render(
@@ -48,7 +46,6 @@ describe("RepCategoryPill", () => {
         category={category}
         canEdit
         onEdit={onEdit}
-        onOpenGlobalCategory={onOpenGlobalCategory}
         onOpenContributors={onOpenContributors}
       />
     );
@@ -60,12 +57,11 @@ describe("RepCategoryPill", () => {
     );
     fireEvent.click(
       screen.getByRole("button", {
-        name: "View all raters for Dev extraordinaire",
+        name: "View 2 raters for Dev extraordinaire",
       })
     );
 
     expect(onEdit).toHaveBeenCalledWith("Dev extraordinaire");
     expect(onOpenContributors).toHaveBeenCalledWith(category);
-    expect(onOpenGlobalCategory).not.toHaveBeenCalled();
   });
 });

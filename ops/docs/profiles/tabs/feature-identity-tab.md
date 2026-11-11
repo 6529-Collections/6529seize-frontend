@@ -19,7 +19,7 @@ It combines `Rep` and `NIC` on one route.
 
 Desktop (`>= lg`):
 
-- Left: Rep direction toggle, summary, categories, received-only grant/edit
+- Left: Rep direction toggle, summary, categories, grant and category edit
   actions, activity log
 - Right: NIC summary, ID statements, and `Rate NIC` entry point
 
@@ -65,11 +65,14 @@ Mobile (`< lg`):
 - Direction-specific contributor labels:
   - `Received`: `rater` / `raters`
   - `Given`: `receiver` / `receivers`
-- Each category pill shows category, score, top-contributor avatars, and
-  direction-aware contributor count.
-- Contribution badge copy is direction-aware:
-  - `Received`: `My Rate`
-  - `Given`: `To Me`
+- Category tags stay on one line, showing the category name, total, optional
+  pencil, top-contributor avatars and rater/receiver count. Long names truncate.
+- Select a tag to open its category list. Desktop expands below that row of
+  tags; mobile and the native app use a draggable bottom sheet. One category
+  opens at a time. Select the same tag again, press Escape, or close the sheet.
+- Lists show linked profiles and amounts, highest first. Long lists scroll;
+  `Load more` retrieves additional contributors. `Open category ↗` opens the
+  global category view.
 - Category list starts at 5 items.
 - `+N more` reveals 10 additional already-loaded categories at a time.
 - When the visible list reaches the end of the categories already loaded in the
@@ -82,13 +85,13 @@ Mobile (`< lg`):
   other direction's list back to 5 immediately.
 - Opening a different profile route resets both directions to that profile's
   own category list, beginning again at 5 visible items.
-- If editing is allowed in `Received`:
-  - category pill opens edit for that category
-  - `Add new` (desktop) or `Grant Rep` (mobile) opens grant dialog
-- In `Given`, category pencils stay hidden. The connected owner can open
-  `Manage given` beside the receiver count; visitors can open the receiver list
-  without adjustment controls. Category receiver counts open the same list
-  filtered to that category.
+- `Grant Rep` opens the existing category selection flow on every layout.
+- In `Received`, eligible viewers edit their own pinned `You` row. The pencil
+  opens the category with that field focused. Your own Received view is read-only.
+- In your own `Given` view outside proxy mode, each receiver's amount is editable
+  inside the category. `Manage given` remains available in the summary for
+  recipient-based management, using the same saving and allowance rules.
+- Signed-out visitors and viewers without rating permission see read-only lists.
 - Empty states are direction-aware:
   - Desktop: `This identity hasn't received any rep yet.` /
     `This identity hasn't given any rep yet.`
@@ -125,17 +128,20 @@ Mobile (`< lg`):
 
 ### Edit an existing Rep category
 
-- In `Received`, eligible signed-in viewers can select a category's pencil to
-  edit their total contribution. The pencil is hidden on their own profile and
-  when signed out; authorized proxies act for the grantor.
-- The editor uses a centered dialog on desktop and a draggable bottom sheet on
-  mobile, with the same dismissal behavior as `Grant Rep` and `Rate NIC`.
-- Allowance loading keeps the panel size stable. The amount becomes editable
-  when the current contribution and allowance load. If loading fails, use
-  `Try again`; `Save` stays disabled until the allowance is available.
-- Enter zero and select `Save` to remove an existing rating.
-- `Save` updates the total contribution and refreshes the profile. `Cancel`,
-  the close button, and Escape dismiss the editor and return focus to the pencil.
+- Open a tag or its pencil. In another profile's `Received` view, your current
+  contribution appears in a pinned `You` row, or zero if none exists. Authorized
+  proxies use their grantor's contribution and allowance.
+- Type the desired total, including negative integers. Enter zero to remove a
+  rating. Other people's received contributions are read-only.
+- A changed field reveals `Your REP`, the old and new values, `Cancel` and `Save`.
+  Enter saves. Escape or Cancel discards the draft; Escape again closes the list.
+- In your own `Given` category, edit one or more receiver amounts. The footer
+  shows the old total struck through and the new total. Save applies those
+  changes sequentially, returning released credit before spending it elsewhere.
+- Fields wait for the allowance to load. On failure, use `Try again`. Save is
+  unavailable for invalid amounts or a combined allocation beyond the allowance.
+- The category stays open after saving. Totals, counts and activity refresh.
+  Failed edits remain for retry; successful writes are kept if a later write fails.
 
 ### Localization fallback debt
 
@@ -217,6 +223,11 @@ Management is available to the connected owner outside proxy mode; existing
 proxy allocation entry points and permissions are unchanged.
 
 ## Activity Log Behavior
+
+- Entries are compact rows separated by thin dividers.
+- NIC changes explicitly name NIC, including historical activity stored as CIC.
+- REP changes put the category before Rep and the recipient. The running total
+  appears at the end in neutral grey. Added amounts are green; reductions are rose.
 
 - The NIC log shows NIC rating edits and identity changes. REP and wave REP
   rating edits are excluded. The log-type and direction filters still apply.

@@ -16,6 +16,8 @@ import { t } from "@/i18n/messages";
 import { RateMatter } from "@/types/enums";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useContext } from "react";
+import { IdentityActivityContext } from "../../IdentityActivityContext";
 import ProfileActivityLogItemAction from "./utils/ProfileActivityLogItemAction";
 
 enum ProfileActivityLogRateType {
@@ -50,6 +52,7 @@ export default function ProfileActivityLogRate({
   readonly log: ProfileActivityLogRatingEdit;
   readonly user: string | null;
 }) {
+  const compact = useContext(IdentityActivityContext);
   const isSystemAdjustment =
     log.contents.change_reason ===
     ProfileActivityLogRatingEditContentChangeReason.LOST_TDH;
@@ -80,6 +83,12 @@ export default function ProfileActivityLogRate({
       return "tw-text-iron-500";
     }
   };
+
+  // Historical activity payloads still name NIC as CIC.
+  const matterLabel =
+    compact && String(log.contents.rating_matter) === "CIC"
+      ? "NIC"
+      : LOG_MATTER_STR[log.contents.rating_matter];
 
   const handleOrWallet = log.target_profile_handle ?? "";
 
@@ -119,15 +128,17 @@ export default function ProfileActivityLogRate({
       >
         {changeStr}
       </span>
-      <span
-        className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-semibold sm:tw-text-base ${PROFILE_ACTIVITY_EMPHASIS}`}
-      >
-        (total {newRatingStr})
-      </span>
+      {!compact && (
+        <span
+          className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-semibold sm:tw-text-base ${PROFILE_ACTIVITY_EMPHASIS}`}
+        >
+          (total {newRatingStr})
+        </span>
+      )}
       {(log.contents.rating_matter === RateMatter.REP ||
         log.contents.rating_matter === RateMatter.WAVE_REP) && (
         <span
-          className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
+          className={`${compact ? "tw-break-words" : "tw-whitespace-nowrap"} tw-text-sm tw-font-medium tw-text-iron-300 sm:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
         >
           {log.contents.rating_category}
         </span>
@@ -135,7 +146,7 @@ export default function ProfileActivityLogRate({
       <span
         className={`tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300 empty:tw-hidden sm:tw-text-base ${PROFILE_ACTIVITY_BODY}`}
       >
-        {LOG_MATTER_STR[log.contents.rating_matter]}
+        {matterLabel}
       </span>
 
       <ProfileActivityLogItemAction action={TO_FROM[ratingType]} />
@@ -145,6 +156,12 @@ export default function ProfileActivityLogRate({
         tabTarget={tabTarget}
         textClassName={`tw-text-sm sm:tw-text-base tw-font-semibold tw-text-iron-100 ${PROFILE_ACTIVITY_EMPHASIS}`}
       />
+
+      {compact && (
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-tabular-nums tw-text-iron-400">
+          (total {newRatingStr})
+        </span>
+      )}
 
       {!!proxyHandle && !isSelfProxy && (
         <Link

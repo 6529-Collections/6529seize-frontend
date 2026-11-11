@@ -53,6 +53,36 @@ async function installCategories(page: Page, api: string) {
   await page.route(`${api}/api/**identities/*/subscriptions`, (route) =>
     route.fulfill({ json: { actions: [] } })
   );
+  await page.route(
+    `${api}/api/profiles/*/rep/categories/*/contributors?*`,
+    (route) =>
+      route.fulfill({
+        json: {
+          data: [
+            {
+              profile: {
+                id: "00000000-0000-4000-8000-000000000531",
+                handle: "playwright",
+                primary_address: "0x0000000000000000000000000000000000000529",
+                pfp: "/icon-512.png",
+              },
+              contribution: 20,
+            },
+            {
+              profile: {
+                id: "other-rater",
+                handle: "other-rater",
+                primary_address: "0x0000000000000000000000000000000000000530",
+                pfp: "/icon-512.png",
+              },
+              contribution: 10,
+            },
+          ],
+          page: 1,
+          next: false,
+        },
+      })
+  );
   await page.route(`${api}/api/profiles/*/rep/categories?*`, (route) =>
     route.fulfill({
       json: {
@@ -118,9 +148,12 @@ async function openOwnerProfile(page: Page) {
   if (await nativeProfileLink.isVisible()) await nativeProfileLink.click();
   else {
     await accountMenu.press("Enter");
-    await page.getByRole("link", { name: "Profile", exact: true }).click();
+    const ownerLink = page.getByRole("link", { name: "Profile", exact: true });
+    await expect(ownerLink).toHaveAttribute("href", "/playwright");
+    await ownerLink.click();
   }
   await page.waitForURL(/\/playwright$/, {
+    waitUntil: "domcontentloaded",
     timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   });
   await expect(
@@ -128,10 +161,14 @@ async function openOwnerProfile(page: Page) {
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
 }
 
-function dialogPanel(page: Page) {
+function categoryPanel(page: Page) {
   return page
-    .getByRole("dialog", { name: `Add Rep to ${TARGET}`, exact: true })
-    .locator(".mobile-wrapper-dialog");
+    .getByRole("region", { name: `${CATEGORY} REP details`, exact: true })
+    .or(
+      page
+        .getByRole("dialog", { name: CATEGORY, exact: true })
+        .locator(".mobile-wrapper-dialog")
+    );
 }
 
 const allowance = {
@@ -157,28 +194,38 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await installCategories(page, getSandboxApiOrigin(baseURL));
   });
 
-  test("keeps cold loading stable, restores pencil focus, and saves the current total", async ({
+  test("loads an inline contribution, restores pencil focus, and saves the desired total", async ({
     page,
     baseURL,
     isMobile,
-  }) => {
-    let resolveAllowance: () => void = () => {};
-    const ready = new Promise<void>((resolve) => {
-      resolveAllowance = resolve;
-    });
+  }, testInfo) => {
     const api = getSandboxApiOrigin(baseURL);
+    let release: () => void = () => undefined;
+    const ready = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let rating = 20;
+    const saved: unknown[] = [];
     await page.route(
       `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
       async (route) => {
         await ready;
-        await route.fulfill({ json: allowance });
+        await route.fulfill({
+          json: {
+            ...allowance,
+            rating_stats: [
+              { ...allowance.rating_stats[0], rater_contribution: rating },
+            ],
+          },
+        });
       }
     );
-    const saved: unknown[] = [];
     await page.route(
       `${api}/api/profiles/${TARGET}/rep/rating`,
       async (route) => {
-        saved.push(route.request().postDataJSON());
+        const body = route.request().postDataJSON();
+        saved.push(body);
+        rating = body.amount;
         await route.fulfill({ json: {} });
       }
     );
@@ -188,51 +235,73 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       exact: true,
     });
     await pencil.click();
-    const dialog = page.getByRole("dialog", {
-      name: `Add Rep to ${TARGET}`,
+    const panel = categoryPanel(page);
+    const input = panel.getByRole("textbox", {
+      name: "REP for playwright",
       exact: true,
     });
-    const input = dialog.getByRole("textbox", {
-      name: /Your total Rep for Artist/,
-    });
-    await expect(dialog.getByRole("status")).toHaveText(
-      "Loading your Rep allowance…"
-    );
     await expect(input).toHaveAttribute("readonly");
     await expect(
-      dialog.getByRole("button", { name: "Save", exact: true })
-    ).toBeDisabled();
-    // WebKit can report no animations before the entry transition starts.
-    // Wait for Headless UI to finish entering before measuring the panel.
-    await expect(
-      page
-        .getByRole("dialog", {
-          name: `Add Rep to ${TARGET}`,
-          exact: true,
-        })
-        .locator(".mobile-wrapper-dialog")
-        .locator("..")
-    ).not.toHaveAttribute("data-enter");
-    const loadingBox = await dialogPanel(page).boundingBox();
-    resolveAllowance();
+      panel.getByRole("button", { name: "Save", exact: true })
+    ).toHaveCount(0);
+    const loadingHeight = (await input.boundingBox())?.height;
+    release();
     await expect(input).toHaveValue("20");
-    const loadedBox = await dialogPanel(page).boundingBox();
-    expect(loadedBox).toEqual(loadingBox);
+    expect((await input.boundingBox())?.height).toBeCloseTo(
+      loadingHeight ?? 0,
+      2
+    );
     if (!isMobile) await expect(input).toBeFocused();
     await expectNoHorizontalOverflow(page);
-    await page.keyboard.press("Escape");
-    await expect(dialog).toBeHidden();
+    await input.press("Escape");
+    await expect(panel).toBeHidden();
     await expect(pencil).toBeFocused();
     await pencil.click();
     await expect(input).toHaveValue("20");
     await input.fill("30");
-    await dialog.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(dialog).toBeHidden();
-    expect(saved).toEqual([{ amount: 30, category: CATEGORY }]);
+    await expect(panel.getByRole("status")).toHaveText("Your REP 20 → 30");
+    const originalViewport = page.viewportSize();
+    if (originalViewport) {
+      await page.setViewportSize({
+        width: isMobile ? 1280 : 900,
+        height: originalViewport.height,
+      });
+      await expect(panel).toBeHidden();
+      await page.setViewportSize(originalViewport);
+      await expect(input).toHaveValue("30");
+    }
+    if (isMobile) {
+      const viewportBottom = await page.evaluate(
+        () =>
+          (globalThis.visualViewport?.offsetTop ?? 0) +
+          (globalThis.visualViewport?.height ?? innerHeight)
+      );
+      // The sheet enters from below the viewport; measure its settled position.
+      await expect
+        .poll(async () => {
+          const box = await panel
+            .getByRole("button", { name: "Save", exact: true })
+            .boundingBox();
+          return box ? box.y + box.height : Number.POSITIVE_INFINITY;
+        })
+        .toBeLessThanOrEqual(viewportBottom);
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("rep-category-draft.png"),
+      fullPage: true,
+    });
+    await input.press("Escape");
+    await expect(input).toHaveValue("20");
+    await expect(panel).toBeVisible();
+    await input.fill("30");
+    await input.press("Enter");
     await expect(page.getByText("Rep updated.", { exact: true })).toBeVisible();
+    await expect(input).toHaveValue("30");
+    expect(saved).toEqual([{ amount: 30, category: CATEGORY }]);
+    await expect(panel).toBeVisible();
   });
 
-  test("shows allowance failure, retries, and retains the same panel geometry", async ({
+  test("keeps the amount unavailable on allowance failure and recovers on retry", async ({
     page,
     baseURL,
   }) => {
@@ -254,32 +323,24 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         exact: true,
       })
       .click();
-    const dialog = page.getByRole("dialog", {
-      name: `Add Rep to ${TARGET}`,
-      exact: true,
-    });
-    await expect(dialog.getByRole("alert")).toHaveText(
+    const panel = categoryPanel(page);
+    const input = panel.getByRole("textbox");
+    await expect(panel.getByRole("alert")).toContainText(
       "Couldn't load your Rep allowance.",
       { timeout: 15000 }
     );
-    await expect(
-      dialog.getByRole("button", { name: "Save", exact: true })
-    ).toBeDisabled();
-    const errorBox = await dialogPanel(page).boundingBox();
+    await expect(input).toHaveAttribute("readonly");
     fail = false;
-    await dialog
-      .getByRole("button", { name: "Try again", exact: true })
-      .click();
-    await expect(dialog.getByRole("textbox")).toHaveValue("20");
-    expect(await dialogPanel(page).boundingBox()).toEqual(errorBox);
-    await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
-    await expect(dialog).toBeHidden();
+    await panel.getByRole("button", { name: "Try again", exact: true }).click();
+    await expect(input).toHaveValue("20");
+    await expect(input).not.toHaveAttribute("readonly");
+    await input.press("Escape");
+    await expect(panel).toBeHidden();
   });
 
   test("keeps a Grant REP draft through delayed loading and reads its saved total after reload", async ({
     page,
     baseURL,
-    isMobile,
   }) => {
     const api = getSandboxApiOrigin(baseURL);
     let rating = 20;
@@ -361,7 +422,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await openProfile(page);
     await page
       .getByRole("button", {
-        name: isMobile ? "Grant Rep" : "Add new",
+        name: "Grant Rep",
         exact: true,
       })
       .click();
@@ -379,21 +440,21 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       await amount.press("Tab");
       await expect(amount).toHaveValue("35");
       await expect(
-        grant.getByRole("button", { name: "Grant REP", exact: true })
+        grant.getByRole("button", { name: "Grant Rep", exact: true })
       ).toBeDisabled();
     } finally {
       releaseAllowance();
     }
     await expect(
-      grant.getByRole("button", { name: "Grant REP", exact: true })
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
     ).toBeEnabled();
     await expect(amount).toHaveValue("35");
-    await grant.getByRole("button", { name: "Grant REP", exact: true }).click();
+    await grant.getByRole("button", { name: "Grant Rep", exact: true }).click();
     await expect(grant).toBeHidden();
     expect(saved).toEqual([{ amount: 35, category: CATEGORY }]);
     await expect(
       page.getByRole("button", {
-        name: `Open global REP category ${CATEGORY}`,
+        name: `Open REP category ${CATEGORY}`,
         exact: true,
       })
     ).toContainText("35");
@@ -406,12 +467,158 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await pencil.click();
-    await expect(
-      page
-        .getByRole("dialog", { name: `Add Rep to ${TARGET}`, exact: true })
-        .getByRole("textbox")
-    ).toHaveValue("35");
+    await expect(categoryPanel(page).getByRole("textbox")).toHaveValue("35");
     expect(saved).toHaveLength(1);
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("reaches all sixty categories across server pages without wrapping tags", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    const api = getSandboxApiOrigin(baseURL);
+    const pages: number[] = [];
+    await page.route(`${api}/api/profiles/*/rep/categories?*`, (route) => {
+      const pageNumber = Number(
+        new URL(route.request().url()).searchParams.get("page")
+      );
+      pages.push(pageNumber);
+      const start = (pageNumber - 1) * 25;
+      return route.fulfill({
+        json: {
+          data: Array.from(
+            { length: Math.min(25, 60 - start) },
+            (_, index) => ({
+              category: `Category ${start + index + 1}`,
+              total_rep: 10,
+              contributor_count: 1,
+              top_contributors: [],
+              authenticated_user_contribution: null,
+            })
+          ),
+          page: pageNumber,
+          next: pageNumber < 3,
+        },
+      });
+    });
+    if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
+    await seedSession(page, null);
+    await page.goto(`/${TARGET}`, { waitUntil: "domcontentloaded" });
+    const rep = page
+      .getByRole("region", { name: "REP", exact: true })
+      .filter({ visible: true });
+    await expect(
+      rep.getByRole("button", {
+        name: "Open REP category Category 1",
+        exact: true,
+      })
+    ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    for (let step = 0; step < 6; step += 1) {
+      await rep
+        .getByRole("button", { name: /^\+\d+ more$|^Load more$/ })
+        .click();
+    }
+    await expect(
+      rep.getByRole("button", {
+        name: "Open REP category Category 60",
+        exact: true,
+      })
+    ).toBeVisible();
+    expect(new Set(pages)).toEqual(new Set([1, 2, 3]));
+    const heights = await rep
+      .locator("[data-rep-tag]")
+      .evaluateAll((tags) =>
+        tags.map((tag) => tag.getBoundingClientRect().height)
+      );
+    expect(heights.every((height) => height === 36)).toBe(true);
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("owner edits receivers in a category and keeps Manage given available", async ({
+    page,
+    baseURL,
+  }) => {
+    const api = getSandboxApiOrigin(baseURL);
+    let alice = 30;
+    let bob = 20;
+    const saved: { handle: string; amount: number }[] = [];
+    await page.route(
+      `${api}/api/profiles/*/rep/categories/*/contributors?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            data: [
+              {
+                profile: {
+                  id: "alice",
+                  handle: TARGET,
+                  primary_address: "0x1",
+                  pfp: "/icon-512.png",
+                },
+                contribution: alice,
+              },
+              {
+                profile: {
+                  id: "bob",
+                  handle: "following-artist-1",
+                  primary_address: "0x2",
+                  pfp: "/icon-512.png",
+                },
+                contribution: bob,
+              },
+            ],
+            page: 1,
+            next: false,
+          },
+        })
+    );
+    await page.route(`${api}/api/profiles/*/rep/ratings/received?*`, (route) =>
+      route.fulfill({ json: { ...allowance, rep_rates_left_for_rater: 80 } })
+    );
+    await page.route(`${api}/api/profiles/*/rep/rating`, (route) => {
+      const handle = new URL(route.request().url()).pathname.split("/")[3];
+      const { amount } = route.request().postDataJSON();
+      saved.push({ handle, amount });
+      if (handle === TARGET) alice = amount;
+      else bob = amount;
+      return route.fulfill({ json: {} });
+    });
+    await seedSession(page, null);
+    await openOwnerProfile(page);
+    const rep = page
+      .getByRole("region", { name: "REP", exact: true })
+      .filter({ visible: true });
+    await rep.getByRole("button", { name: "Given", exact: true }).click();
+    await rep
+      .getByRole("button", {
+        name: `Open REP category ${CATEGORY}`,
+        exact: true,
+      })
+      .click();
+    const panel = categoryPanel(page);
+    const first = panel.getByRole("textbox", {
+      name: `REP for ${TARGET}`,
+      exact: true,
+    });
+    const second = panel.getByRole("textbox", {
+      name: "REP for following-artist-1",
+      exact: true,
+    });
+    await expect(first).toHaveValue("30");
+    await first.fill("0");
+    await second.fill("100");
+    await panel.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(page.getByText("Rep updated.", { exact: true })).toBeVisible();
+    expect(saved).toEqual([
+      { handle: TARGET, amount: 0 },
+      { handle: "following-artist-1", amount: 100 },
+    ]);
+    await expect(second).toHaveValue("100");
+    await second.press("Escape");
+    await expect(
+      rep.getByRole("button", { name: /Manage given/ })
+    ).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
 
@@ -522,10 +729,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         exact: true,
       })
       .click();
-    const dialog = page.getByRole("dialog", {
-      name: `Add Rep to ${TARGET}`,
-      exact: true,
-    });
+    const dialog = categoryPanel(page);
     await expect(
       dialog.getByText("You are acting as proxy for:", { exact: false })
     ).toBeVisible();
@@ -537,7 +741,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     expect(raters).toContain("grantor");
     await input.fill("30");
     await dialog.getByRole("button", { name: "Save", exact: true }).click();
-    await expect(dialog).toBeHidden();
+    await expect(page.getByText("Rep updated.", { exact: true })).toBeVisible();
+    await expect(dialog).toBeVisible();
     expect(saved).toEqual([{ amount: 30, category: CATEGORY }]);
   });
 });

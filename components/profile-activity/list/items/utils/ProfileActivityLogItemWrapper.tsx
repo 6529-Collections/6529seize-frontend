@@ -11,7 +11,8 @@ import { useIdentity } from "@/hooks/useIdentity";
 import { parseDecentralizedMediaRef } from "@/lib/media/decentralized-media";
 import { ProfileActivityLogType } from "@/types/enums";
 import Image from "next/image";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { IdentityActivityContext } from "../../../IdentityActivityContext";
 import ProfileActivityLogItemTimeAgo from "./ProfileActivityLogItemTimeAgo";
 
 export default function ProfileActivityLogItemWrapper({
@@ -23,6 +24,7 @@ export default function ProfileActivityLogItemWrapper({
   readonly children: React.ReactNode;
   readonly user: string | null;
 }) {
+  const compact = useContext(IdentityActivityContext);
   const isArchived = log.type === ProfileActivityLogType.PROFILE_ARCHIVED;
 
   const getHandleOrWallet = (): string => {
@@ -49,8 +51,16 @@ export default function ProfileActivityLogItemWrapper({
   const [failedAvatarSrc, setFailedAvatarSrc] = useState<string | null>(null);
 
   return (
-    <div className="tw-group tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-p-4 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 hover:tw-border-white/[0.12] hover:tw-bg-iron-900/80">
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
+    <div
+      className={
+        compact
+          ? "tw-group tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/70 tw-py-3 last:tw-border-b-0"
+          : "tw-group tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-p-4 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 hover:tw-border-white/[0.12] hover:tw-bg-iron-900/80"
+      }
+    >
+      <div
+        className={`tw-flex tw-justify-between tw-gap-x-3 ${compact ? "tw-flex-col tw-gap-y-1" : "tw-items-start"}`}
+      >
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-x-3">
           <div
             className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${isArchived ? "" : "tw-pl-9"}`}
@@ -86,7 +96,11 @@ export default function ProfileActivityLogItemWrapper({
             {children}
           </div>
         </div>
-        <div className="tw-flex-shrink-0 tw-pl-3">
+        <div
+          className={
+            compact ? "tw-self-end tw-pl-9" : "tw-flex-shrink-0 tw-pl-3"
+          }
+        >
           <ProfileActivityLogItemTimeAgo log={log} />
         </div>
       </div>

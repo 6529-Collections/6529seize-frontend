@@ -12,7 +12,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { canManageGivenRatings } from "./ratingsManagement";
 import RatingContributorsControl from "./RatingContributorsControl";
 import type { RepDirection } from "./UserPageRep.helpers";
-import RepCategoryPill from "./RepCategoryPill";
+import RepCategoryList from "./RepCategoryList";
 import RepDirectionToggle from "./RepDirectionToggle";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
@@ -59,9 +59,7 @@ export default function MobileRepTabContent({
   isFetchingNextPage,
   onGrantRep,
   onOpenOverviewContributors,
-  onEditCategory,
   onOpenGlobalCategory,
-  onOpenCategoryContributors,
 }: {
   readonly profile: ApiIdentity;
   readonly overview: ApiRepOverview | null;
@@ -77,30 +75,13 @@ export default function MobileRepTabContent({
   readonly isFetchingNextPage: boolean;
   readonly onGrantRep: () => void;
   readonly onOpenOverviewContributors: () => void;
-  readonly onEditCategory: (category: string) => void;
   readonly onOpenGlobalCategory: (category: string) => void;
-  readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const canManage =
     repDirection === "given" &&
     canManageGivenRatings(profile, connectedProfile, activeProfileProxy);
-  const hiddenLoadedCategoryCount = Math.max(
-    categories.length - visibleCount,
-    0
-  );
-  const hasMore = hiddenLoadedCategoryCount > 0 || hasNextPage;
-  let loadMoreLabel = t(locale, "user.profile.rep.categories.loadMore");
-  if (hiddenLoadedCategoryCount > 0) {
-    loadMoreLabel = t(locale, "user.profile.rep.categories.more", {
-      count: formatInteger(locale, hiddenLoadedCategoryCount),
-    });
-  } else if (isFetchingNextPage) {
-    loadMoreLabel = t(locale, "user.profile.rep.categories.loadingMore");
-  }
-  const isLoadMoreDisabled =
-    isFetchingNextPage && hiddenLoadedCategoryCount === 0;
 
   return (
     <>
@@ -211,31 +192,18 @@ export default function MobileRepTabContent({
       </div>
 
       {categories.length > 0 && (
-        <div>
-          <div className="tw-flex tw-flex-wrap tw-gap-2">
-            {categories.slice(0, visibleCount).map((cat) => (
-              <RepCategoryPill
-                key={cat.category}
-                category={cat}
-                canEdit={canEditRep && repDirection === "received"}
-                onEdit={onEditCategory}
-                onOpenGlobalCategory={onOpenGlobalCategory}
-                onOpenContributors={onOpenCategoryContributors}
-                direction={repDirection}
-                compact
-              />
-            ))}
-            {hasMore && (
-              <Button
-                variant="secondary"
-                onClick={onShowMore}
-                disabled={isLoadMoreDisabled}
-              >
-                {loadMoreLabel}
-              </Button>
-            )}
-          </div>
-        </div>
+        <RepCategoryList
+          key={`${profile.id ?? profile.query ?? profile.display}:${repDirection}`}
+          profile={profile}
+          categories={categories}
+          direction={repDirection}
+          visibleCount={visibleCount}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          onShowMore={onShowMore}
+          onOpenGlobalCategory={onOpenGlobalCategory}
+          mobile
+        />
       )}
 
       {categories.length === 0 && (
