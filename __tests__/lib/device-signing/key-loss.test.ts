@@ -17,6 +17,7 @@ jest.mock("@/lib/device-signing/device-key-store", () => ({
 const mockRevokeDeviceGrant = jest.fn();
 const mockFetchDeviceGrants = jest.fn();
 jest.mock("@/services/api/device-grants-api", () => ({
+  DEVICE_GRANTS_LIST_LIMIT: 100,
   revokeDeviceGrant: (...args: unknown[]) => mockRevokeDeviceGrant(...args),
   fetchDeviceGrants: () => mockFetchDeviceGrants(),
 }));
@@ -64,6 +65,8 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: (...args: unknown[]) => mockCommonApiFetch(...args),
   getStructuredApiErrorStatus: (error: unknown) =>
     (error as { status?: number }).status,
+  getStructuredApiErrorCode: (error: unknown) =>
+    (error as { code?: string }).code,
 }));
 
 const mockReportDeviceKeyStoreLoss = jest.fn();
@@ -270,6 +273,63 @@ describe("device key loss", () => {
           })
         );
         await expectDroppedWithoutRevoke();
+      });
+    });
+
+    describe("decisions the cleanup defers", () => {
+      beforeEach(() => {
+        mockReadDeviceKey.mockResolvedValue({ grant: grant(NEW_ID, NEW_KEY) });
+      });
+
+      /** Pending, uncounted, not revoked; runs once the answer is complete. */
+      const expectDeferredThenRevoked = async () => {
+        expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
+        expect(readDeviceKeyLoss(ADDRESS)?.grantId).toBe(LOST_ID);
+        expect(readDeviceKeyLoss(ADDRESS)?.revokeAttempts).toBeUndefined();
+
+        mockFetchDeviceGrants.mockResolvedValue([
+          grant(NEW_ID, NEW_KEY),
+          grant(LOST_ID),
+        ]);
+        mockCommonApiFetch.mockResolvedValue(e2eeMe());
+        mockRevokeDeviceGrant.mockResolvedValue(grant(LOST_ID));
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("revoked");
+        expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
+      };
+
+      it("keeps a lost grant beyond the list's 100 newest pending", async () => {
+        // The profile has 100 newer grants; the lost one is older than all.
+        mockFetchDeviceGrants.mockResolvedValue(
+          Array.from({ length: 100 }, (_, index) =>
+            grant(`0x${index.toString(16).padStart(64, "a")}`, NEW_KEY)
+          )
+        );
+
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
+        await expectDeferredThenRevoked();
+      });
+
+      it("still drops a lost grant missing from a list that is complete", async () => {
+        mockFetchDeviceGrants.mockResolvedValue(
+          Array.from({ length: 99 }, (_, index) =>
+            grant(`0x${index.toString(16).padStart(64, "a")}`, NEW_KEY)
+          )
+        );
+
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("none");
+        expect(mockRevokeDeviceGrant).not.toHaveBeenCalled();
+        expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
+      });
+
+      it("waits while encrypted messages are off (404 E2EE_DISABLED)", async () => {
+        mockCommonApiFetch.mockRejectedValue({
+          status: 404,
+          code: "E2EE_DISABLED",
+        });
+
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
+        await expect(revokeLostDeviceGrant(ACCOUNT)).resolves.toBe("failed");
+        await expectDeferredThenRevoked();
       });
     });
 

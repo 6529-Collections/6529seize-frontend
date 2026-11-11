@@ -24,10 +24,14 @@ const boundToSession = (sessionToken: string | undefined) =>
         headers: { Authorization: `Bearer ${sessionToken}` },
       };
 
+/** The most grants the list returns (the newest); there is no paging. */
+export const DEVICE_GRANTS_LIST_LIMIT = 100;
+
 /**
  * The device grants of the authenticated profile's wallets, newest first. The
- * API returns at most the 100 newest, including expired and revoked ones.
- * With a session token, the request is bound to exactly that token.
+ * API returns at most the DEVICE_GRANTS_LIST_LIMIT newest, including expired
+ * and revoked ones. With a session token, the request is bound to exactly
+ * that token.
  */
 export const fetchDeviceGrants = (
   signal?: AbortSignal,

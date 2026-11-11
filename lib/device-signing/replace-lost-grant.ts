@@ -1,9 +1,11 @@
 import type { ApiE2eeMe } from "@/generated/models/ApiE2eeMe";
 import {
   commonApiFetch,
+  getStructuredApiErrorCode,
   getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
 import {
+  DEVICE_GRANTS_LIST_LIMIT,
   fetchDeviceGrants,
   revokeDeviceGrant,
 } from "@/services/api/device-grants-api";
@@ -35,11 +37,17 @@ interface SignedInAccount {
 }
 
 /**
+ * The cleanup cannot decide yet. The loss stays pending, without counting
+ * an attempt, and is tried again on a later sign-in, page load or grant.
+ */
+class CleanupDeferredError extends Error {}
+
+/**
  * The session changed to another wallet or profile around a server call, so
  * its answer may belong to that other account and must not decide this one's
  * record.
  */
-class AccountChangedError extends Error {}
+class AccountChangedError extends CleanupDeferredError {}
 
 /** The session token, with its subject wallet and role, when readable. */
 function readSessionToken(): {
@@ -181,14 +189,27 @@ async function enrolledEncryptedDevice(
   grantId: string,
   account: SignedInAccount
 ): Promise<boolean> {
-  const me = await asAccount(account, (sessionToken) =>
-    commonApiFetch<ApiE2eeMe>({
-      endpoint: "e2ee/me",
-      errorMode: "structured",
-      includeWalletAuth: false,
-      headers: { Authorization: `Bearer ${sessionToken}` },
-    })
-  );
+  let me: ApiE2eeMe;
+  try {
+    me = await asAccount(account, (sessionToken) =>
+      commonApiFetch<ApiE2eeMe>({
+        endpoint: "e2ee/me",
+        errorMode: "structured",
+        includeWalletAuth: false,
+        headers: { Authorization: `Bearer ${sessionToken}` },
+      })
+    );
+  } catch (error) {
+    // Encrypted messages are off for now: whether this grant enrolled a
+    // device cannot be known, so nothing is revoked until they answer.
+    if (
+      getStructuredApiErrorStatus(error) === 404 &&
+      getStructuredApiErrorCode(error) === "E2EE_DISABLED"
+    ) {
+      throw new CleanupDeferredError("Encrypted messages are unavailable");
+    }
+    throw error;
+  }
   // The server's own answer names the profile too.
   if (me.profile_id !== account.profileId) {
     throw new AccountChangedError("Signed-in profile changed");
@@ -222,6 +243,11 @@ async function isRevocable(
     fetchDeviceGrants(undefined, sessionToken)
   );
   const serverGrant = grants.find((grant) => grant.id === loss.grantId);
+  // The list holds only the newest grants: a grant missing from a full list
+  // may simply be older, so it is not known to be gone.
+  if (!serverGrant && grants.length >= DEVICE_GRANTS_LIST_LIMIT) {
+    throw new CleanupDeferredError("Grant list may be truncated");
+  }
   const activeForNoteKey =
     serverGrant?.revoked_at === null &&
     serverGrant.device_key.toLowerCase() === noteKey;
@@ -241,9 +267,10 @@ function recordFailure(
   loss: DeviceKeyLoss,
   error: unknown
 ): void {
-  if (error instanceof AccountChangedError) {
-    // The session moved to another account around a call: leave it pending
-    // for this account's next sign-in, without counting an attempt.
+  if (error instanceof CleanupDeferredError) {
+    // The session moved to another account around a call, the grant list may
+    // not reach the lost grant, or encrypted messages are off: leave it
+    // pending for a later attempt, without counting one.
     return;
   }
   const attempts = (loss.revokeAttempts ?? 0) + 1;
