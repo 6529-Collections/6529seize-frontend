@@ -2,8 +2,8 @@ import Link from "next/link";
 import type { MentionedUser } from "@/entities/IDrop";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
 
-const MENTION_CLASS_NAME =
-  "tw-no-underline tw-font-medium tw-text-primary-400 desktop-hover:hover:tw-underline desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out";
+const MENTION_TEXT_CLASS_NAME = "tw-font-medium tw-text-primary-400";
+const MENTION_CLASS_NAME = `tw-no-underline ${MENTION_TEXT_CLASS_NAME} desktop-hover:hover:tw-underline desktop-hover:hover:tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out`;
 
 /**
  * The profile path for a mentioned handle: one encoded path segment, so the
@@ -37,13 +37,9 @@ export default function DropListItemContentMention({
           {label}
         </Link>
       ) : (
-        // Same look and click behaviour as the linked chip, without a link.
-        <span
-          onClick={(e) => e.stopPropagation()}
-          className={MENTION_CLASS_NAME}
-        >
-          {label}
-        </span>
+        // Mention colour and weight, but plain text: it opens nothing, so it
+        // has no hover affordance and no click handling.
+        <span className={MENTION_TEXT_CLASS_NAME}>{label}</span>
       )}
     </UserProfileTooltipWrapper>
   );

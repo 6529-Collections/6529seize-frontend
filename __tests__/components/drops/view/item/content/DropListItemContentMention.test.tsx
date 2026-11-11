@@ -79,15 +79,17 @@ describe("DropListItemContentMention", () => {
     expect(screen.getByText(`@${handle}`)).toBeInTheDocument();
   });
 
-  it("styles the unlinked handle like a mention chip and keeps clicks inside it", () => {
-    render(<DropListItemContentMention user={mention("bob")} />);
-    const chipClassName = screen.getByRole("link").className;
+  it("shows the unlinked handle as mention text, not as a control", () => {
     const { onParentClick } = renderInClickableParent("..");
 
     const text = screen.getByText("@..");
     expect(text.tagName).toBe("SPAN");
-    expect(text.className).toBe(chipClassName);
+    // Same colour and weight as a mention chip, without the link's hover
+    // affordance: it opens nothing.
+    expect(text).toHaveClass("tw-font-medium", "tw-text-primary-400");
+    expect(text.className).not.toContain("hover:tw-underline");
+    // Plain text has no click handling of its own.
     fireEvent.click(text);
-    expect(onParentClick).not.toHaveBeenCalled();
+    expect(onParentClick).toHaveBeenCalledTimes(1);
   });
 });
