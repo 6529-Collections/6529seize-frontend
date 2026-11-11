@@ -1,3 +1,11 @@
+jest.mock("@/contexts/EmojiContext", () => ({
+  useEmoji: () => ({
+    findCustomEmoji: () => null,
+    findNativeEmoji: () => null,
+    loadEmojiData: jest.fn(() => Promise.resolve()),
+  }),
+}));
+
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import type {
   HeaderSearchModalItemType,
