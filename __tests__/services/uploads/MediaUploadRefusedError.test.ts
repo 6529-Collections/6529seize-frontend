@@ -1,8 +1,9 @@
 import axios from "axios";
 import { commonApiPost } from "@/services/api/common-api";
 import {
+  getUploadFailureMessage,
   MediaUploadRefusedError,
-  toMediaUploadRefusedError,
+  toUploadRequestError,
 } from "@/services/uploads/MediaUploadRefusedError";
 import {
   multipartAttachmentUploadCore,
@@ -32,17 +33,26 @@ const axiosPutMock = axios.put as jest.Mock;
 const LIMIT_MESSAGE =
   "You have reached the upload limit for the last 24 hours. Try again later.";
 const SIZE_MESSAGE = "Media files must be 500 MB or smaller.";
+const SIZE_WITHOUT_LIMIT =
+  "This file is larger than the upload limit. Choose a smaller file.";
 
 /** The error `commonApiPost` throws in structured mode. */
 function apiError(status: number, body: Record<string, unknown>): Error {
+  return rawApiError(status, String(body["error"] ?? ""), JSON.stringify(body));
+}
+
+function rawApiError(status: number, message: string, body: string): Error {
   const headers = new Headers();
-  return Object.assign(new Error(String(body["error"] ?? "")), {
+  return Object.assign(new Error(message), {
     name: "ApiError",
     status,
     headers,
-    response: { status, headers, body: JSON.stringify(body) },
+    response: { status, headers, body },
   });
 }
+
+const HTML_PAGE = "<html><body><h1>502 Bad Gateway</h1></body></html>";
+const GENERIC_MESSAGE = "Error uploading file. Please try again.";
 
 const uploadLimitError = () =>
   apiError(429, {
@@ -80,17 +90,51 @@ beforeEach(() => {
   axiosPutMock.mockResolvedValue({ headers: { etag: '"etag"' } });
 });
 
-describe("toMediaUploadRefusedError", () => {
+describe("toUploadRequestError", () => {
   it("names the rolling upload limit", () => {
-    const mapped = toMediaUploadRefusedError(uploadLimitError(), "en-US");
+    const mapped = toUploadRequestError(uploadLimitError(), "en-US");
     expect(mapped).toBeInstanceOf(MediaUploadRefusedError);
     expect((mapped as Error).message).toBe(LIMIT_MESSAGE);
   });
 
   it("names the media size limit", () => {
-    const mapped = toMediaUploadRefusedError(tooLargeError(), "en-US");
+    const mapped = toUploadRequestError(tooLargeError(), "en-US");
     expect(mapped).toBeInstanceOf(MediaUploadRefusedError);
     expect((mapped as Error).message).toBe(SIZE_MESSAGE);
+  });
+
+  it("uses the limit the server sends", () => {
+    const mapped = toUploadRequestError(
+      apiError(413, { max_bytes: 262144000, code: "MEDIA_TOO_LARGE" }),
+      "en-US"
+    );
+    expect((mapped as Error).message).toBe(
+      "Media files must be 250 MB or smaller."
+    );
+  });
+
+  it.each([undefined, 0, -1, "500", Number.NaN])(
+    "names no number when the limit is %p",
+    (maxBytes) => {
+      const mapped = toUploadRequestError(
+        apiError(413, { max_bytes: maxBytes, code: "MEDIA_TOO_LARGE" }),
+        "en-US"
+      );
+      expect(mapped).toBeInstanceOf(MediaUploadRefusedError);
+      expect((mapped as Error).message).toBe(SIZE_WITHOUT_LIMIT);
+    }
+  );
+
+  it("never keeps a body that is not JSON as the message", () => {
+    const mapped = toUploadRequestError(
+      rawApiError(502, HTML_PAGE, HTML_PAGE),
+      "en-US"
+    );
+    expect(mapped).not.toBeInstanceOf(MediaUploadRefusedError);
+    expect((mapped as Error).message).toBe(GENERIC_MESSAGE);
+    expect(getUploadFailureMessage(mapped, "Upload failed")).toBe(
+      "Upload failed"
+    );
   });
 
   it.each([
@@ -102,7 +146,7 @@ describe("toMediaUploadRefusedError", () => {
     ],
     ["a legacy string error", "Upload limit reached"],
   ])("returns %s unchanged", (_label, error) => {
-    expect(toMediaUploadRefusedError(error, "en-US")).toBe(error);
+    expect(toUploadRequestError(error, "en-US")).toBe(error);
   });
 });
 
@@ -155,6 +199,17 @@ describe("upload refusals are shown, not retried", () => {
     );
   });
 
+  it("shows the generic upload message for an HTML error page", async () => {
+    commonApiPostMock.mockRejectedValueOnce(
+      rawApiError(502, HTML_PAGE, HTML_PAGE)
+    );
+
+    await expect(
+      multipartUploadCore({ file: video(), endpoints: mediaEndpoints })
+    ).rejects.toThrow(GENERIC_MESSAGE);
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
+  });
+
   it("passes other start failures through with their message", async () => {
     commonApiPostMock.mockRejectedValueOnce(
       apiError(400, { error: "Invalid content type" })
@@ -163,5 +218,20 @@ describe("upload refusals are shown, not retried", () => {
     await expect(
       multipartUploadCore({ file: video(), endpoints: mediaEndpoints })
     ).rejects.toThrow("Invalid content type");
+  });
+});
+
+describe("getUploadFailureMessage", () => {
+  it("keeps refusal and local messages and hides API failures", () => {
+    expect(
+      getUploadFailureMessage(new MediaUploadRefusedError("limit"), "fallback")
+    ).toBe("limit");
+    expect(
+      getUploadFailureMessage(new Error("Empty file uploads"), "fallback")
+    ).toBe("Empty file uploads");
+    expect(
+      getUploadFailureMessage(apiError(500, { error: "x" }), "fallback")
+    ).toBe("fallback");
+    expect(getUploadFailureMessage("raw", "fallback")).toBe("fallback");
   });
 });

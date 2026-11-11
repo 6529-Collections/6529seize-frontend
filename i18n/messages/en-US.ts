@@ -3368,6 +3368,9 @@ export const EN_US_ROOT_MESSAGES = {
   "drop.upload.invalidFile": "Could not add {file}",
   "drop.upload.empty": "Choose a file that is not empty.",
   "drop.upload.tooLarge": "Media files must be 500 MB or smaller.",
+  "drop.upload.tooLargeLimit": "Media files must be {limit} or smaller.",
+  "drop.upload.tooLargeNoLimit":
+    "This file is larger than the upload limit. Choose a smaller file.",
   "drop.upload.limitReached":
     "You have reached the upload limit for the last 24 hours. Try again later.",
   "drop.upload.imageTooLarge":

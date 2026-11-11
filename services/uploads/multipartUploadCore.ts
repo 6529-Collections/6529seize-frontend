@@ -24,7 +24,7 @@ import { t } from "@/i18n/messages";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { captureVideoPoster } from "./captureVideoPoster";
 import { ImageProcessingError } from "@/services/uploads/ImageProcessingError";
-import { toMediaUploadRefusedError } from "@/services/uploads/MediaUploadRefusedError";
+import { toUploadRequestError } from "@/services/uploads/MediaUploadRefusedError";
 
 const PART_SIZE = 5 * 1024 * 1024;
 const CONCURRENCY = 5;
@@ -78,7 +78,8 @@ export {
  * Awaits an upload start or completion request made in structured error
  * mode. The upload-limit and media-size refusals become a
  * MediaUploadRefusedError with a localized message; neither is retried,
- * because asking again right away would be refused the same way.
+ * because asking again right away would be refused the same way. An error
+ * body that is not JSON is never shown: see toUploadRequestError.
  */
 async function withUploadRefusalMessage<T>(
   request: Promise<T>,
@@ -87,7 +88,7 @@ async function withUploadRefusalMessage<T>(
   try {
     return await request;
   } catch (error) {
-    throw toMediaUploadRefusedError(error, locale);
+    throw toUploadRequestError(error, locale);
   }
 }
 
