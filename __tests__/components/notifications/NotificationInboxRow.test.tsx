@@ -14,6 +14,8 @@ import type {
 } from "@/types/feed.types";
 import { isGroupedReactionsItem } from "@/types/feed.types";
 
+const originalFetch = globalThis.fetch;
+const inlineEmoji = "data:image/png;base64,aGVsbG8=";
 const mockLoadEmojiData = jest.fn(async () => {});
 const mockFindCustomEmoji = jest.fn();
 const mockFindNativeEmoji = jest.fn();
@@ -34,6 +36,10 @@ jest.mock("@/hooks/e2ee/useEncryptedNotificationPreview", () => ({
   useEncryptedNotificationPreview: jest.fn(),
 }));
 beforeEach(() => {
+  globalThis.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    json: async () => [{ id: "el_fafo_angy", src: inlineEmoji }],
+  });
   mockFindCustomEmoji.mockReturnValue(null);
   mockFindNativeEmoji.mockImplementation((id: string) =>
     id === "fire" ? { name: "Fire", skins: [{ native: "🔥" }] } : null
@@ -41,6 +47,9 @@ beforeEach(() => {
   jest
     .mocked(useEncryptedNotificationPreview)
     .mockReturnValue({ preview: null, needsSetup: false });
+});
+afterEach(() => {
+  globalThis.fetch = originalFetch;
 });
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
@@ -179,6 +188,67 @@ function reaction(
     additional_context: { reaction: reactionCode },
   };
 }
+
+it.each(["regular", "encrypted-inbox", "encrypted-feed"])(
+  "loads catalog emoji outside chat for %s previews without turning message URLs into resources",
+  async (surface) => {
+    const content =
+      "**:el_fafo_angy:** 😀 :not_in_catalog: `:el_fafo_angy:` [Link](https://example.com/private) ![Image](https://example.com/private.png)";
+    jest
+      .mocked(useEncryptedNotificationPreview)
+      .mockReturnValue({ preview: content, needsSetup: false });
+    const encrypted: INotificationEncryptedMessage = {
+      id: 12,
+      created_at: 12,
+      read_at: null,
+      cause: ApiNotificationCause.E2EeMessage,
+      additional_context: { encrypted_group: "0xgroup" },
+    };
+    const regular = {
+      ...reaction(1, "alice", null),
+      related_drops: [
+        {
+          ...drop,
+          parts: [
+            {
+              part_id: 1,
+              media: [],
+              attachments: [],
+              quoted_drop: null,
+              content,
+            },
+          ],
+        },
+      ],
+    };
+    const { container } = render(
+      surface === "encrypted-feed" ? (
+        <NotificationEncryptedMessage notification={encrypted} />
+      ) : (
+        <NotificationInboxRow
+          notification={surface === "regular" ? regular : encrypted}
+          handle="viewer"
+          onOpen={jest.fn()}
+        />
+      )
+    );
+    const image = await screen.findByRole("img", { name: ":el_fafo_angy:" });
+    expect(image).toHaveAttribute("src", inlineEmoji);
+    expect(image).toHaveAttribute("width", "16");
+    expect(image).toHaveAttribute("height", "16");
+    expect(image.closest("strong")).not.toBeNull();
+    expect(container).toHaveTextContent("😀 :not_in_catalog:");
+    const code = container.querySelector("code");
+    expect(code).toHaveTextContent(":el_fafo_angy:");
+    expect(code?.querySelector("img")).toBeNull();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(
+      container.querySelector(
+        "a a,iframe,video,audio,input,img[src*='example.com']"
+      )
+    ).toBeNull();
+  }
+);
 
 it("groups reactors, keeps mixed read state, and opens every distinct unread ID", () => {
   const onOpen = jest.fn();

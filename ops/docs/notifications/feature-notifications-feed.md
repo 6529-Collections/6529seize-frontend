@@ -48,6 +48,11 @@ their Markdown block boundaries. Links
 and images appear as labels in the preview; selecting the row opens the related
 message. Previewing does not load linked pages, embedded content, or message
 images. Encrypted previews remain available only from this device's local history.
+Known custom emoji shortcodes render as compact emoji images in regular and
+encrypted previews, including encrypted rows on the full notifications page.
+Unicode emoji keep their normal appearance. Unknown shortcodes remain readable
+as text, and code spans keep shortcodes literal. Encrypted previews use the full
+trusted emoji catalog without requesting individual emoji from the message.
 
 Grouped reactions and returned voting credits use the wave picture as their
 main image. A single reaction uses the person's profile picture. The bell is

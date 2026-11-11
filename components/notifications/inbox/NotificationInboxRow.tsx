@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageMarkdown } from "@/components/markdown/MessageMarkdown";
+import NotificationMarkdownPreview from "@/components/notifications/NotificationMarkdownPreview";
 import NotificationEncryptedMessage from "@/components/brain/notifications/NotificationEncryptedMessage";
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import BellIcon from "@/components/common/icons/BellIcon";
@@ -141,10 +141,8 @@ export default function NotificationInboxRow({
                   {preview}
                 </p>
               ) : (
-                <MessageMarkdown
+                <NotificationMarkdownPreview
                   text={preview}
-                  privacy="public"
-                  preview
                   messageId={`notification-${notification.id}`}
                 />
               )}

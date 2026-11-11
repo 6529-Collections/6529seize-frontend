@@ -44,7 +44,7 @@ async function fetchPack(): Promise<E2eeCustomEmoji[]> {
   return parseE2eeEmojiPack(await response.json());
 }
 
-/** Loading depends only on mounting encrypted chat UI, never on message contents. */
+/** Load the whole catalog when chat or notification UI mounts, never by shortcode. */
 export function E2eeEmojiProvider({
   children,
 }: {

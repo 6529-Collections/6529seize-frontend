@@ -44,6 +44,16 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     "Notifications inbox requires the local mock API runner."
   );
   test.beforeEach(async ({ page }) => {
+    await page.route("**/api/e2ee/emoji-pack", (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "el_fafo_angy",
+            src: "data:image/webp;base64,UklGRkQAAABXRUJQVlA4IDgAAAAQAwCdASoYABgAPm0ylUekIyIhKAgAgA2JZQB2AACcyeAA/Mr//9NI/40j/jSPmLf/XwBTxIAAAA==",
+          },
+        ],
+      })
+    );
     await installArtworkNotificationImage(page);
     await page.route("**/api/profile-cms/assets?*", async (route) => {
       const source =
@@ -80,7 +90,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await page.route("**/api/v2/notifications?*", async (route) => {
       const response = await route.fetch();
       const data = (await response.json()) as ApiNotificationsResponseV2;
-      const content = `**Bold** *italic* ~~gone~~ and \`code\`.\n\n**${longBold}**\n\n[Canary link](https://notification-markdown-canary.invalid/link) ![Canary image](https://notification-markdown-canary.invalid/image.png)`;
+      const content = `**Bold** :el_fafo_angy: *italic* ~~gone~~ and \`code\`.\n\n**${longBold}**\n\n[Canary link](https://notification-markdown-canary.invalid/link) ![Canary image](https://notification-markdown-canary.invalid/image.png)`;
       data.notifications = data.notifications.map((notification) => ({
         ...notification,
         related_drops: notification.related_drops.map(
@@ -124,6 +134,11 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       "tagName",
       "CODE"
     );
+    const emoji = row.getByRole("img", { name: ":el_fafo_angy:" });
+    await expect(emoji).toBeVisible();
+    await expect(emoji).toHaveAttribute("src", /^data:image\/webp;base64,/u);
+    await expect(emoji).toHaveCSS("width", "16px");
+    await expect(emoji).toHaveCSS("height", "16px");
     await expect(row.getByText(longBold, { exact: true })).toHaveJSProperty(
       "tagName",
       "STRONG"
