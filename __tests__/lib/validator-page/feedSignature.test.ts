@@ -2,7 +2,10 @@
 import { publicKeyToAddress } from "viem/accounts";
 
 import { isFeedSignatureValid } from "@/lib/validator-page/feedSignature";
-import { FEED_SIGNING_KEYS } from "@/lib/validator-page/feedSigningKeys";
+import {
+  FEED_SIGNING_KEYS,
+  type FeedSigningKey,
+} from "@/lib/validator-page/feedSigningKeys";
 
 import { TEST_FEED } from "./fixtures";
 import { signFeed, TEST_FEED_SIGNING_KEY } from "./feedSigning";
@@ -104,6 +107,19 @@ describe("isFeedSignatureValid", () => {
       `${new TextDecoder().decode(signFeed(FEED))}${" ".repeat(1024)}`
     );
     expect(isFeedSignatureValid(FEED, padded, KEYS)).toBe(false);
+  });
+
+  it("returns not verified for a listed key that is not a curve point", () => {
+    const offCurve: FeedSigningKey = {
+      address: TEST_FEED_SIGNING_KEY.address,
+      publicKey: `04${"00".repeat(31)}01${"00".repeat(31)}01`,
+    };
+    expect(() =>
+      isFeedSignatureValid(FEED, signFeed(FEED), [offCurve])
+    ).not.toThrow();
+    expect(isFeedSignatureValid(FEED, signFeed(FEED), [offCurve])).toBe(false);
+    // A well-formed key still verifies afterwards.
+    expect(isFeedSignatureValid(FEED, signFeed(FEED), KEYS)).toBe(true);
   });
 
   it("refuses a feed larger than a validator reads", () => {

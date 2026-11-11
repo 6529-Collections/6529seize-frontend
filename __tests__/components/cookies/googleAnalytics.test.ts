@@ -306,6 +306,21 @@ describe("scheduleGoogleAnalytics", () => {
     expect(queuedCommands()).toHaveLength(queuedBefore + 1);
   });
 
+  it("follows the page's disable flag when it is set directly", () => {
+    cancel = scheduleGoogleAnalytics(hasConsent);
+    window.dispatchEvent(new Event("pointerdown"));
+    const queuedBefore = queuedCommands().length;
+    const flags = globalThis as unknown as Record<string, unknown>;
+
+    flags[DISABLE_FLAG] = true;
+    window.history.pushState(null, "", "/network");
+    expect(queuedCommands()).toHaveLength(queuedBefore);
+
+    flags[DISABLE_FLAG] = false;
+    window.history.pushState(null, "", "/about");
+    expect(queuedCommands()).toHaveLength(queuedBefore + 1);
+  });
+
   it("keeps the landing page and adds the current one after an early navigation", () => {
     cancel = scheduleGoogleAnalytics(hasConsent);
     window.history.pushState(null, "", "/second?tab=all");

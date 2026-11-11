@@ -1,9 +1,15 @@
 import { getAddress } from "viem";
-import { getWalletSignatureAudience } from "@/services/wallet-signatures/structured-wallet-signatures";
 
 /** The plain sign-in statement the API issues for the website. */
 export const SIWE_SIGN_IN_STATEMENT =
   "Sign in to 6529. This request does not create a blockchain transaction, cost gas, or approve tokens.";
+
+/**
+ * The API host the test environment calls (`API_ENDPOINT` in jest.setup.js),
+ * written out so the fixture does not reuse the code under test to build the
+ * value it is checked against.
+ */
+const TEST_API_AUDIENCE = "api.test.6529.io";
 
 const ISSUED_AT = "2026-11-10T14:32:52.000Z";
 const EXPIRES_AT = "2026-11-10T14:37:52.000Z";
@@ -50,7 +56,7 @@ export const appSignInChallenge = ({
   address,
   clientType = "native",
   origin = globalThis.location.origin,
-  audience = getWalletSignatureAudience(),
+  audience = TEST_API_AUDIENCE,
   chainId = 1,
   extraLines = [],
 }: {

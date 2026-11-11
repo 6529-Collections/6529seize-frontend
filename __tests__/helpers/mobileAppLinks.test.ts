@@ -295,6 +295,16 @@ describe("mobile app links", () => {
         resolve("mobile6529://share-connection?connection_share_code=c")
       ).toBe("/accept-connection-sharing?connection_share_code=c&_t=123");
     });
+
+    it("keeps a share code carried in the fragment for the accept page", () => {
+      expect(
+        resolve(
+          "mobile6529://share-connection?address=0xabc#connection_share_code=c"
+        )
+      ).toBe(
+        "/accept-connection-sharing?address=0xabc&_t=123#connection_share_code=c"
+      );
+    });
   });
 
   describe("isCurrentNativeLinkLocation", () => {
