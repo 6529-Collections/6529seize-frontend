@@ -36,7 +36,8 @@ pattern can differ.
    `https://d3lqz0a4bldqgf.cloudfront.net` and the media resolver
    (`MEDIA_RESOLVER_ENDPOINT`, `https://media.6529.io` by default, or
    `https://media.6529usercontent.com` when user-provided media is served
-   from the separate content domain).
+   from the separate content domain). The staging build uses the separate
+   content domain; production uses the default.
 4. In CloudFront mode, the root layout also preconnects to
    `https://dnclu2fna0b2b.cloudfront.net`.
 5. If bundle files load, hydration completes and interactive controls work.
