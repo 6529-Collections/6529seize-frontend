@@ -38,9 +38,10 @@ On staging, `@drops6529` reports actions and errors in **Drop Forge Ops**.
 Errors tag the configured `@dropforgeops` group.
 
 Craft and contract-admin access remain distinct. Admin grants/revocations remain owner-only on chain. Automatic artist payment is
-separately opt-in and defaults Off. The hub's Automatic launch switch defaults Off; accepted plans keep their timed
-reports while execution is disabled. Environment configuration must enable tracking
-before Launch requests can be accepted. Coordinated manual controls remain available.
+separately opt-in and defaults Off. The hub's **Automatic launch** switch also
+defaults Off. Accepted plans keep their timed reports while execution is disabled.
+**EMMA preparation** controls whether Process and Finalize can start or advance
+through its checkpoints. Coordinated manual controls remain available.
 
 Related: [Craft](feature-craft-claims-list-and-detail.md),
 [Launch](feature-launch-claims-list-and-detail.md),

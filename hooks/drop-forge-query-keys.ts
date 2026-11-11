@@ -3,3 +3,8 @@ export const forgeLaunchKey = (contract: string, claim: number) => [
   contract.toLowerCase(),
   claim,
 ];
+
+export const forgeSettingsKey = (address?: string | null) => [
+  "drop-forge-settings",
+  address?.toLowerCase(),
+];

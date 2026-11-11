@@ -9,6 +9,7 @@ import {
   forgeProcessKey,
   useDropForgeProcess,
 } from "@/hooks/useDropForgeProcess";
+import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -34,6 +35,8 @@ export default function ProcessAndFinalize({
   const { requestAuth } = useAuth();
   const queryClient = useQueryClient();
   const operation = useDropForgeProcess(contract, claim, plan);
+  const preparationOff =
+    useDropForgeSettings().data?.preparation_enabled === false;
   const request = useRef<{ key: string; id: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +56,14 @@ export default function ProcessAndFinalize({
     }
   }, [completed, job, onCompleted]);
   async function run() {
-    if (pending || completed || requiresReset || !hasRequiredInputs) return;
+    if (
+      preparationOff ||
+      pending ||
+      completed ||
+      requiresReset ||
+      !hasRequiredInputs
+    )
+      return;
     setSubmitting(true);
     setError(null);
     try {
@@ -86,12 +96,17 @@ export default function ProcessAndFinalize({
     | "dropForge.process"
     | "dropForge.completed"
     | "dropForge.resumeAuth"
+    | "dropForge.settings.preparationPaused"
     | "dropForge.processing" = "dropForge.process";
   if (pending) label = "dropForge.processing";
   if (completed) label = "dropForge.completed";
   if (awaitingAuth && !pending) label = "dropForge.resumeAuth";
+  if (preparationOff && job?.status === JobStatus.Pending)
+    label = "dropForge.settings.preparationPaused";
   let statusMessage = "";
-  if (pending) {
+  if (preparationOff && !completed) {
+    statusMessage = t(locale, "dropForge.settings.preparationOff");
+  } else if (pending) {
     statusMessage = `${Math.min((job?.step ?? 0) + 1, 5)} / 5`;
   } else if (!hasRequiredInputs) {
     statusMessage = t(locale, "dropForge.inputsMissing");
@@ -113,12 +128,13 @@ export default function ProcessAndFinalize({
           completed ||
           requiresReset ||
           !hasRequiredInputs ||
+          preparationOff ||
           operation.isLoading
         }
-        aria-busy={pending}
+        aria-busy={pending && !preparationOff}
         className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-medium tw-text-white disabled:tw-opacity-50"
       >
-        {pending && <CircleLoader />}
+        {pending && !preparationOff && <CircleLoader />}
         {t(locale, label)}
       </button>
       <div

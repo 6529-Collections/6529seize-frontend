@@ -363,6 +363,7 @@ export * from '../models/ApiDeleteMyWaveChatHistoryResponse';
 export * from '../models/ApiDeviceGrant';
 export * from '../models/ApiDeviceGrantFields';
 export * from '../models/ApiDeviceGrantProof';
+export * from '../models/ApiDeviceSecurityNotice';
 export * from '../models/ApiDeviceSignature';
 export * from '../models/ApiDeviceSignedEvent';
 export * from '../models/ApiDeviceSignedWriteRequest';
@@ -1378,6 +1379,7 @@ import { ApiDeleteMyWaveChatHistoryResponse } from '../models/ApiDeleteMyWaveCha
 import { ApiDeviceGrant } from '../models/ApiDeviceGrant';
 import { ApiDeviceGrantFields } from '../models/ApiDeviceGrantFields';
 import { ApiDeviceGrantProof } from '../models/ApiDeviceGrantProof';
+import { ApiDeviceSecurityNotice } from '../models/ApiDeviceSecurityNotice';
 import { ApiDeviceSignature } from '../models/ApiDeviceSignature';
 import { ApiDeviceSignedEvent } from '../models/ApiDeviceSignedEvent';
 import { ApiDeviceSignedWriteRequest } from '../models/ApiDeviceSignedWriteRequest';
@@ -2684,6 +2686,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDeviceGrant": ApiDeviceGrant,
     "ApiDeviceGrantFields": ApiDeviceGrantFields,
     "ApiDeviceGrantProof": ApiDeviceGrantProof,
+    "ApiDeviceSecurityNotice": ApiDeviceSecurityNotice,
     "ApiDeviceSignature": ApiDeviceSignature,
     "ApiDeviceSignedEvent": ApiDeviceSignedEvent,
     "ApiDeviceSignedWriteRequest": ApiDeviceSignedWriteRequest,

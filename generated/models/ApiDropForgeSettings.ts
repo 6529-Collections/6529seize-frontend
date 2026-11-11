@@ -16,18 +16,19 @@ import { HttpFile } from '../http/http';
 export class ApiDropForgeSettings {
     'revision': number;
     'automation_enabled': boolean;
+    'preparation_enabled': boolean;
+    'max_artist_payment_eth': string | null;
     'pay_artist_enabled': boolean;
     'updated_by': string | null;
     'updated_at': number;
     'can_edit': boolean;
+    'can_edit_preparation': boolean;
     'can_top_up': boolean;
     'chain_id': number;
     'contract': string;
     'signer_address': string;
     'ens_name': string | null;
     'balance_wei': string | null;
-    'execution_available': boolean;
-    'artist_payment_available': boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -44,6 +45,18 @@ export class ApiDropForgeSettings {
             "name": "automation_enabled",
             "baseName": "automation_enabled",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "preparation_enabled",
+            "baseName": "preparation_enabled",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "max_artist_payment_eth",
+            "baseName": "max_artist_payment_eth",
+            "type": "string",
             "format": ""
         },
         {
@@ -67,6 +80,12 @@ export class ApiDropForgeSettings {
         {
             "name": "can_edit",
             "baseName": "can_edit",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "can_edit_preparation",
+            "baseName": "can_edit_preparation",
             "type": "boolean",
             "format": ""
         },
@@ -104,18 +123,6 @@ export class ApiDropForgeSettings {
             "name": "balance_wei",
             "baseName": "balance_wei",
             "type": "string",
-            "format": ""
-        },
-        {
-            "name": "execution_available",
-            "baseName": "execution_available",
-            "type": "boolean",
-            "format": ""
-        },
-        {
-            "name": "artist_payment_available",
-            "baseName": "artist_payment_available",
-            "type": "boolean",
             "format": ""
         }    ];
 

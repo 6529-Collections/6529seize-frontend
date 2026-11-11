@@ -137,8 +137,11 @@ async function expectDropForgeDenied(
   await expectNoMainButtons(page, DROP_FORGE_WRITE_ACTIONS);
   await expect(
     page.getByRole("switch", {
-      name: /Automatic launch|Automatic artist payment/,
+      name: /Automatic launch|Automatic artist payment|EMMA preparation/,
     })
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("textbox", { name: "Maximum ETH per payout" })
   ).toHaveCount(0);
   await expect(
     page.getByRole("heading", { name: "Contract Admins" })

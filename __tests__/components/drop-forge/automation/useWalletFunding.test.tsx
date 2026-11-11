@@ -41,17 +41,18 @@ const settings: ApiDropForgeSettings = {
   revision: 0,
   automation_enabled: false,
   pay_artist_enabled: false,
+  preparation_enabled: false,
+  max_artist_payment_eth: null,
   updated_by: null,
   updated_at: 0,
   can_edit: false,
+  can_edit_preparation: false,
   can_top_up: true,
   chain_id: 1,
   contract: recipient,
   signer_address: recipient,
   ens_name: null,
   balance_wei: "0",
-  execution_available: true,
-  artist_payment_available: false,
 };
 beforeEach(() => {
   jest.clearAllMocks();

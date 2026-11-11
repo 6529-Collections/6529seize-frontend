@@ -1,35 +1,59 @@
 "use client";
-import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useId, useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { formatEther } from "viem";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useAuth } from "@/components/auth/Auth";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import {
-  getForgeSettings,
-  saveForgeSettings,
-} from "@/services/api/drop-forge-settings";
+import { saveForgeSettings } from "@/services/api/drop-forge-settings";
+import type { ApiDropForgeSettingsRequest } from "@/generated/models/ApiDropForgeSettingsRequest";
+import { forgeSettingsKey } from "@/hooks/drop-forge-query-keys";
+import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { getAddressEtherscanLink } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import Button from "@/components/utils/button/Button";
 import WalletFunding from "./WalletFunding";
+
+const switches = [
+  {
+    field: "automation_enabled",
+    label: "dropForge.settings.launch",
+    permission: "can_edit",
+  },
+  {
+    field: "preparation_enabled",
+    label: "dropForge.settings.preparation",
+    permission: "can_edit_preparation",
+  },
+  {
+    field: "pay_artist_enabled",
+    label: "dropForge.settings.artist",
+    permission: "can_edit",
+  },
+] as const;
 
 export default function LaunchAutomationSettings() {
   const locale = useBrowserLocale();
   const { address } = useSeizeConnectContext();
   const { requestAuth } = useAuth();
   const client = useQueryClient();
-  const key = ["drop-forge-settings", address?.toLowerCase()];
-  const query = useQuery({
-    queryKey: key,
-    queryFn: getForgeSettings,
-    retry: false,
-    enabled: !!address,
-  });
+  const key = forgeSettingsKey(address);
+  const query = useDropForgeSettings();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [limitDraft, setLimitDraft] = useState<{
+    key: string;
+    value: string;
+  } | null>(null);
+  const [limitError, setLimitError] = useState<string | null>(null);
+  const limitId = useId();
   const settings = query.data;
+  const limitKey = `${address ?? ""}:${settings?.revision ?? 0}`;
+  const paymentLimit =
+    limitDraft?.key === limitKey
+      ? limitDraft.value
+      : (settings?.max_artist_payment_eth ?? "");
   async function copyAddress() {
     if (!settings) return;
     try {
@@ -41,16 +65,15 @@ export default function LaunchAutomationSettings() {
   async function refresh() {
     if ((await requestAuth()).success) await query.refetch();
   }
-  async function change(artist: boolean, checked: boolean) {
-    if (!settings?.can_edit || saving) return;
+  async function change(input: Omit<ApiDropForgeSettingsRequest, "revision">) {
+    if (!settings || saving) return;
     setSaving(true);
     setError(null);
     try {
       if (!(await requestAuth()).success) return;
       const updated = await saveForgeSettings({
         revision: settings.revision,
-        automation_enabled: artist ? settings.automation_enabled : checked,
-        pay_artist_enabled: artist ? checked : settings.pay_artist_enabled,
+        ...input,
       });
       client.setQueryData(key, updated);
     } catch (e) {
@@ -61,6 +84,26 @@ export default function LaunchAutomationSettings() {
       setSaving(false);
     }
   }
+  function savePaymentLimit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!settings?.can_edit || saving) return;
+    const cap = paymentLimit.trim() || null;
+    if (cap === settings.max_artist_payment_eth) return;
+    if (
+      cap !== null &&
+      (!/^(?:\d{1,59}\.\d{1,18}|\d{1,59})$/.test(cap) || !/[1-9]/.test(cap))
+    ) {
+      setLimitError(t(locale, "dropForge.settings.invalidPaymentLimit"));
+      return;
+    }
+    if (cap === null && settings.pay_artist_enabled) {
+      setLimitError(t(locale, "dropForge.settings.disablePaymentToClear"));
+      return;
+    }
+    setLimitError(null);
+    void change({ max_artist_payment_eth: cap });
+  }
+
   return (
     <section
       aria-labelledby="launch-automation-heading"
@@ -106,44 +149,39 @@ export default function LaunchAutomationSettings() {
       {settings && (
         <div className="tw-mt-5 tw-grid tw-gap-4 lg:tw-grid-cols-2">
           <div className="tw-space-y-4">
-            {[false, true].map((artist) => {
-              const checked = artist
-                ? settings.pay_artist_enabled
-                : settings.automation_enabled;
-              const unavailable = artist
-                ? !settings.artist_payment_available
-                : !settings.execution_available;
+            {switches.map(({ field, label, permission }) => {
+              const checked = settings[field];
+              const needsLimit =
+                field === "pay_artist_enabled" &&
+                !settings.max_artist_payment_eth &&
+                !checked;
               return (
                 <label
-                  key={String(artist)}
+                  key={field}
                   className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-bg-iron-900 tw-p-4"
                 >
                   <span className="tw-text-sm tw-font-medium tw-text-iron-100">
-                    {t(
-                      locale,
-                      artist
-                        ? "dropForge.settings.artist"
-                        : "dropForge.settings.launch"
-                    )}
+                    {t(locale, label)}
                   </span>
                   <span className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-300">
-                    {t(
-                      locale,
-                      checked
-                        ? "dropForge.settings.on"
-                        : "dropForge.settings.off"
-                    )}
+                    <span aria-hidden="true">
+                      {t(
+                        locale,
+                        checked
+                          ? "dropForge.settings.on"
+                          : "dropForge.settings.off"
+                      )}
+                    </span>
                     <input
                       type="checkbox"
                       role="switch"
                       checked={checked}
-                      disabled={
-                        !settings.can_edit ||
-                        saving ||
-                        (unavailable && !checked)
+                      disabled={!settings[permission] || saving || needsLimit}
+                      aria-describedby={
+                        needsLimit ? `${limitId}-hint` : undefined
                       }
                       onChange={(event) =>
-                        void change(artist, event.target.checked)
+                        void change({ [field]: event.target.checked })
                       }
                       className="tw-size-5 tw-accent-primary-400"
                     />
@@ -151,19 +189,71 @@ export default function LaunchAutomationSettings() {
                 </label>
               );
             })}
+            <form
+              onSubmit={savePaymentLimit}
+              className="tw-rounded-lg tw-bg-iron-900 tw-p-4"
+            >
+              <label
+                htmlFor={limitId}
+                className="tw-text-sm tw-font-medium tw-text-iron-100"
+              >
+                {t(locale, "dropForge.settings.paymentLimit")}
+              </label>
+              <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                <input
+                  id={limitId}
+                  type="text"
+                  inputMode="decimal"
+                  value={paymentLimit}
+                  onChange={(event) => {
+                    setLimitError(null);
+                    setLimitDraft({ key: limitKey, value: event.target.value });
+                  }}
+                  aria-invalid={!!limitError}
+                  aria-describedby={limitError ? `${limitId}-error` : undefined}
+                  disabled={!settings.can_edit || saving}
+                  className="tw-min-w-0 tw-flex-1 tw-rounded-md tw-border tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 disabled:tw-opacity-60"
+                />
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  size="sm"
+                  disabled={
+                    !settings.can_edit ||
+                    saving ||
+                    paymentLimit.trim() ===
+                      (settings.max_artist_payment_eth ?? "")
+                  }
+                >
+                  {t(locale, "dropForge.settings.savePaymentLimit")}
+                </Button>
+              </div>
+              {limitError && (
+                <p
+                  id={`${limitId}-error`}
+                  role="alert"
+                  className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-rose-300"
+                >
+                  {limitError}
+                </p>
+              )}
+              {!settings.max_artist_payment_eth && (
+                <p
+                  id={`${limitId}-hint`}
+                  className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400"
+                >
+                  {t(locale, "dropForge.settings.paymentUnavailable")}
+                </p>
+              )}
+            </form>
             {!settings.can_edit && (
               <p className="tw-text-sm tw-text-iron-400">
-                {t(locale, "dropForge.settings.readOnly")}
-              </p>
-            )}
-            {!settings.execution_available && (
-              <p className="tw-text-sm tw-text-amber-300">
-                {t(locale, "dropForge.settings.unavailable")}
-              </p>
-            )}
-            {!settings.artist_payment_available && (
-              <p className="tw-text-sm tw-text-iron-400">
-                {t(locale, "dropForge.settings.paymentUnavailable")}
+                {t(
+                  locale,
+                  settings.can_edit_preparation
+                    ? "dropForge.settings.launchReadOnly"
+                    : "dropForge.settings.readOnly"
+                )}
               </p>
             )}
             <p className="tw-text-sm tw-text-iron-400">

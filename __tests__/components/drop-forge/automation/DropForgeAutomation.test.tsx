@@ -20,6 +20,7 @@ import {
   startForgeProcess,
 } from "@/services/api/drop-forge-api";
 import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
+import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
 import {
   ApiDropForgeJobKindEnum as JobKind,
@@ -39,6 +40,7 @@ const mockRequestAuth = jest.fn().mockResolvedValue({ success: true });
 jest.mock("@/components/drop-forge/drop-forge-config", () => ({
   useDropForgeMintingConfig: () => ({ contract: "0xcreator" }),
 }));
+jest.mock("@/hooks/useDropForgeSettings");
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
@@ -88,6 +90,9 @@ const launch = (initialized: boolean, metadata = "published") =>
 beforeEach(() => {
   jest.clearAllMocks();
   mockRequestAuth.mockResolvedValue({ success: true });
+  jest.mocked(useDropForgeSettings).mockReturnValue({
+    data: { preparation_enabled: true },
+  } as ReturnType<typeof useDropForgeSettings>);
 });
 it.each([
   [1, "https://etherscan.io"],
@@ -191,6 +196,36 @@ it.each<[number, string]>([
   fireEvent.click(button);
   expect(latestForgeProcess).not.toHaveBeenCalled();
   expect(mockRequestAuth).not.toHaveBeenCalled();
+  expect(startForgeProcess).not.toHaveBeenCalled();
+});
+
+it("shows a paused checkpoint while EMMA preparation is Off", async () => {
+  jest.mocked(useDropForgeSettings).mockReturnValue({
+    data: { preparation_enabled: false },
+  } as ReturnType<typeof useDropForgeSettings>);
+  jest.mocked(latestForgeProcess).mockResolvedValue({
+    id: "job",
+    contract: "0xcreator",
+    claim_id: 123,
+    kind: JobKind.ProcessAll,
+    status: JobStatus.Pending,
+    step: 2,
+    updated_at: 1,
+  } as ApiDropForgeJob);
+  renderUI(
+    <ProcessAndFinalize
+      contract="0xcreator"
+      claim={123}
+      plan="plan"
+      phaseIds={["p0", "p1", "p2"]}
+    />
+  );
+  expect(
+    await screen.findByRole("button", { name: "Preparation paused" })
+  ).toBeDisabled();
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "EMMA preparation is Off"
+  );
   expect(startForgeProcess).not.toHaveBeenCalled();
 });
 

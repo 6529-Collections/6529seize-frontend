@@ -1,23 +1,27 @@
 # Launch Automation and Wallet Funding
 
 The `/drop-forge` hub shows Launch Automation to everyone with Drop Forge access.
-Both switches start Off. The contract owner and configured claims administrators
-can change them; ordinary on-chain admins and distribution administrators can
-view the settings and fund the operational wallet.
+All three switches start Off. The creator contract owner and configured claims
+administrators can change all four settings. Configured distribution administrators
+can also change **EMMA preparation**. Every authorized Drop Forge user sees the
+current values, with controls disabled when they lack edit access.
 
 Automatic launch controls new initialization, claim updates and airdrops for
 tracked launches. Turning it Off retains the scheduled reports: due actions are
 reported as skipped because automation is disabled, without marking them completed.
 Submitted transactions continue confirmation tracking. Turning it back On resumes
 eligible work within its window; missed phases are not replayed automatically.
-The environment must be configured for execution before this switch can be enabled.
-EMMA's Process and Finalize remains a separate operator-triggered workflow.
+EMMA preparation controls **Process and Finalize**. Turning it Off blocks new
+jobs and pauses pending jobs after their current step. Turning it back On
+continues processing from the saved checkpoint.
 
 Automatic artist payment is a separate opt-in. Research and optional artist payment
 become eligible at 18:00 Europe/Athens the day after minting, one hour after Public
 closes. Artist payment uses the final paid-mint and redeemed-subscription accounting,
 the 50% artist share and the recorded payment address/designated payee. Missing or
-incomplete accounting defers payment. The payment limit must be configured first.
+incomplete accounting defers payment. Set **Maximum ETH per payout** before
+enabling payments. The worker uses the saved limit before submitting each payout.
+Turn off automatic artist payments before clearing the limit.
 The wallet needs both payout funds and gas; mint proceeds still go to the configured
 payment receiver. Manual Pay Artist remains available and records its transaction
 hash so automation can verify completion instead of sending another payment.
@@ -38,9 +42,6 @@ If a settings save conflicts with another administrator's change, refresh before
 trying again. A missing wallet balance or ENS name does not mean the address changed.
 If a top-up result is uncertain, inspect its transaction before making another
 transfer. Funding does not grant access to edit settings or manage contract admins.
-
-All new labels are message-backed; untranslated locales use en-US fallback.
-These are internal operator controls and are not added to the public Help Bot corpus.
 
 ## Post-mint evidence and preview
 
