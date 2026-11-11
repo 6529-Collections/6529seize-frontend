@@ -37,8 +37,9 @@ choose a platform before asking.
    macOS, or Linux yourself to choose another platform; phones, tablets and
    unrecognized devices start with all desktop sections collapsed.
 4. Choose the version appropriate for your OS, then the architecture or package
-   format. `Download` opens the installer directly. An `Arweave mirror` appears
-   when a mirror has been published.
+   format. `Download` opens the installer directly. Each installer shows
+   `Arweave mirror · Coming soon` until its mirror is published, then shows a
+   clickable `Arweave mirror` link.
 
 ## Common Scenarios
 
@@ -100,7 +101,7 @@ keep both notice variants hidden.
 - The mobile and desktop sections span the page width. Accordion headers show
   only the operating system; version and compatibility appear after expanding.
   Compact download rows show architectures for Windows/macOS and package names
-  for Linux, with a quieter optional mirror link. macOS 12 compatibility is
+  for Linux, with a secondary mirror link or status. macOS 12 compatibility is
   explained once below its version, without a duplicate badge.
 - Accordions use a short height/fade and chevron transition in supporting
   browsers. Reduced-motion preferences disable it; older browsers retain the

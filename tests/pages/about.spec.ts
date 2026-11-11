@@ -12,6 +12,7 @@ test.describe("About Pages @smoke @medium @large", () => {
     page,
     isMobile,
   }) => {
+    const legacyMirrorUrl = "https://arweave.net/" + "a".repeat(43);
     await page.addInitScript(() => {
       Object.defineProperty(navigator, "userAgentData", {
         configurable: true,
@@ -26,12 +27,26 @@ test.describe("About Pages @smoke @medium @large", () => {
       "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/**",
       async (route) => {
         const url = route.request().url();
+        const legacy = /(?:latest-macos-12\.yml|links\/0\.3\.15\.json)$/.test(
+          url
+        );
+        const version = legacy ? "0.3.15" : "0.3.18";
         if (url.endsWith(".json")) {
-          await route.fulfill({ json: { version: "0.3.18", files: [] } });
+          await route.fulfill({
+            json: {
+              version,
+              files: legacy
+                ? [
+                    {
+                      url: "6529-DESKTOP-mac-arm64-0.3.15.dmg",
+                      arweaveUrl: legacyMirrorUrl,
+                    },
+                  ]
+                : [],
+            },
+          });
           return;
         }
-        const legacy = url.endsWith("latest-macos-12.yml");
-        const version = legacy ? "0.3.15" : "0.3.18";
         const file = url.includes("/win/")
           ? `6529-DESKTOP-win-x64-${version}.exe`
           : url.includes("/linux/")
@@ -64,27 +79,60 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expect(
       mac.getByText("Last compatible version for macOS 12 Monterey")
     ).toBeVisible();
+    const currentRelease = mac
+      .getByRole("heading", { name: "Version 0.3.18", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    const legacyRelease = mac
+      .getByRole("heading", { name: "Version 0.3.15", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    const currentDownload = currentRelease.getByRole("link", {
+      name: /^Download .*version 0\.3\.18, Apple silicon$/,
+    });
+    const legacyDownloadName = /^Download .*version 0\.3\.15, Apple silicon$/;
+    const legacyDownload = legacyRelease.getByRole("link", {
+      name: legacyDownloadName,
+    });
+    const legacyMirror = legacyRelease.getByRole("link", {
+      name: /^Arweave mirror .*version 0\.3\.15, Apple silicon$/,
+    });
+    await expect(currentDownload).toHaveAttribute(
+      "href",
+      /6529-DESKTOP-mac-arm64-0\.3\.18\.dmg$/
+    );
+    await expect(legacyDownload).toHaveAttribute(
+      "href",
+      /6529-DESKTOP-mac-arm64-0\.3\.15\.dmg$/
+    );
     await expect(
-      mac.getByRole("link", { name: /version 0.3.15, Apple silicon/ })
-    ).toHaveAttribute("href", /6529-DESKTOP-mac-arm64-0\.3\.15\.dmg$/);
+      currentRelease.getByText("Arweave mirror · Coming soon")
+    ).toBeVisible();
+    await expect(legacyMirror).toHaveAttribute("href", legacyMirrorUrl);
     await expect(mac.getByText(/Keep your existing app data/)).toBeVisible();
     if (!isMobile) {
-      const download = mac.getByRole("link", {
-        name: /version 0.3.15, Apple silicon/,
-      });
-      const contentBox = await mac
-        .getByRole("link", { name: /version 0.3.15, Apple silicon/ })
-        .locator("xpath=ancestor::section[1]")
-        .boundingBox();
-      const downloadBox = await download.boundingBox();
+      const { color, backgroundColor } = await currentDownload.evaluate(
+        (link) => {
+          const style = getComputedStyle(link);
+          return { color: style.color, backgroundColor: style.backgroundColor };
+        }
+      );
+      await currentDownload.hover();
+      await expect(currentDownload).toHaveCSS("color", color);
+      await expect(currentDownload).not.toHaveCSS(
+        "background-color",
+        backgroundColor
+      );
+
+      const contentBox = await legacyRelease.boundingBox();
+      const mirrorBox = await legacyMirror.boundingBox();
       expect(contentBox).not.toBeNull();
-      expect(downloadBox).not.toBeNull();
-      if (contentBox && downloadBox) {
-        expect(Math.round(downloadBox.x + downloadBox.width)).toBe(
+      expect(mirrorBox).not.toBeNull();
+      if (contentBox && mirrorBox) {
+        expect(Math.round(mirrorBox.x + mirrorBox.width)).toBe(
           Math.round(contentBox.x + contentBox.width)
         );
       }
     }
+    await expectNoHorizontalOverflow(page);
     const windows = page
       .getByText("Windows", { exact: true })
       .locator("xpath=ancestor::summary");
@@ -94,7 +142,7 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expect(
       mac
         .getByRole("link", {
-          name: /version 0.3.15, Apple silicon/,
+          name: legacyDownloadName,
           includeHidden: true,
         })
         .locator("xpath=ancestor::*[@inert]")
