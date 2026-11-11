@@ -11,6 +11,8 @@ import CommonProfileLink from "@/components/user/utils/CommonProfileLink";
 import type { ProfileActivityLogRatingEdit } from "@/entities/IProfile";
 import { ProfileActivityLogRatingEditContentChangeReason } from "@/entities/IProfile";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { RateMatter } from "@/types/enums";
@@ -52,6 +54,7 @@ export default function ProfileActivityLogRate({
   readonly log: ProfileActivityLogRatingEdit;
   readonly user: string | null;
 }) {
+  const locale = useBrowserLocale();
   const compact = useContext(IdentityActivityContext);
   const isSystemAdjustment =
     log.contents.change_reason ===
@@ -68,11 +71,15 @@ export default function ProfileActivityLogRate({
 
   const change = log.contents.new_rating - log.contents.old_rating;
   const isChangePositive = change > 0;
-  const changeStr = formatNumberWithCommas(Math.abs(change));
+  const changeStr = compact
+    ? formatInteger(locale, Math.abs(change))
+    : formatNumberWithCommas(Math.abs(change));
 
   const isNewRatingPositive = log.contents.new_rating > 0;
   const isNewRatingNegative = log.contents.new_rating < 0;
-  const newRatingStr = formatNumberWithCommas(log.contents.new_rating);
+  const newRatingStr = compact
+    ? formatInteger(locale, log.contents.new_rating)
+    : formatNumberWithCommas(log.contents.new_rating);
 
   const getTotalRatingClass = () => {
     if (isNewRatingPositive) {
@@ -87,7 +94,7 @@ export default function ProfileActivityLogRate({
   // Historical activity payloads still name NIC as CIC.
   const matterLabel =
     compact && String(log.contents.rating_matter) === "CIC"
-      ? "NIC"
+      ? LOG_MATTER_STR[RateMatter.NIC]
       : LOG_MATTER_STR[log.contents.rating_matter];
 
   const handleOrWallet = log.target_profile_handle ?? "";
@@ -132,7 +139,9 @@ export default function ProfileActivityLogRate({
         <span
           className={`${getTotalRatingClass()} tw-whitespace-nowrap tw-text-sm tw-font-semibold sm:tw-text-base ${PROFILE_ACTIVITY_EMPHASIS}`}
         >
-          (total {newRatingStr})
+          {t(DEFAULT_LOCALE, "profileActivity.rate.runningTotal", {
+            total: newRatingStr,
+          })}
         </span>
       )}
       {(log.contents.rating_matter === RateMatter.REP ||
@@ -159,7 +168,9 @@ export default function ProfileActivityLogRate({
 
       {compact && (
         <span className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-tabular-nums tw-text-iron-400">
-          (total {newRatingStr})
+          {t(locale, "profileActivity.rate.runningTotal", {
+            total: newRatingStr,
+          })}
         </span>
       )}
 

@@ -144,7 +144,7 @@ beforeEach(() => {
 it("pins only your editable contribution, accepts negative values, and saves the desired total", async () => {
   const user = userEvent.setup();
   setup(target, "received");
-  const amount = await screen.findByRole("textbox", { name: "REP for owner" });
+  const amount = await screen.findByRole("textbox", { name: "You" });
   await waitFor(() => expect(amount).toHaveValue("0"));
   expect(screen.getAllByRole("textbox")).toHaveLength(1);
   expect(screen.getByRole("link", { name: "You" })).toHaveAttribute(
@@ -175,8 +175,8 @@ it("makes the owner's received categories read-only", async () => {
 it("validates the combined credit budget and releases credit before spending", async () => {
   const user = userEvent.setup();
   setup(owner, "given");
-  const alice = await screen.findByRole("textbox", { name: "REP for alice" });
-  const bob = screen.getByRole("textbox", { name: "REP for bob" });
+  const alice = await screen.findByRole("textbox", { name: "alice" });
+  const bob = screen.getByRole("textbox", { name: "bob" });
   await user.clear(alice);
   await user.type(alice, "100");
   await user.clear(bob);
@@ -185,10 +185,12 @@ it("validates the combined credit budget and releases credit before spending", a
     screen.getByRole("button", { name: "Save", exact: true })
   ).toBeDisabled();
   expect(screen.getByRole("alert")).toHaveTextContent("credit limit");
+  expect(alice).toHaveAccessibleDescription(/credit limit/);
+  expect(alice).toHaveAttribute("aria-invalid", "true");
   await user.clear(alice);
   await user.type(alice, "0");
   await user.clear(bob);
-  await user.type(bob, "100");
+  await user.type(bob, "110");
   await user.click(screen.getByRole("button", { name: "Save", exact: true }));
   await waitFor(() => expect(post).toHaveBeenCalledTimes(2));
   expect(post.mock.calls.map(([request]) => request)).toEqual([
@@ -198,7 +200,7 @@ it("validates the combined credit budget and releases credit before spending", a
     },
     {
       endpoint: "profiles/bob/rep/rating",
-      body: { amount: 100, category: "Artist" },
+      body: { amount: 110, category: "Artist" },
     },
   ]);
 });
@@ -213,8 +215,8 @@ it("retains failed edits and does not repeat successful writes after a partial s
     return successfulWrite?.(request);
   });
   setup(owner, "given");
-  const alice = await screen.findByRole("textbox", { name: "REP for alice" });
-  const bob = screen.getByRole("textbox", { name: "REP for bob" });
+  const alice = await screen.findByRole("textbox", { name: "alice" });
+  const bob = screen.getByRole("textbox", { name: "bob" });
   await user.clear(alice);
   await user.type(alice, "0");
   await user.clear(bob);
@@ -227,6 +229,12 @@ it("retains failed edits and does not repeat successful writes after a partial s
     ).toBeEnabled()
   );
   expect(bob).toHaveValue("100");
+  expect(onProfileRepModify).toHaveBeenCalledTimes(1);
+  expect(onProfileRepModify).toHaveBeenCalledWith(
+    expect.objectContaining({
+      targetProfile: expect.objectContaining({ handle: "alice" }),
+    })
+  );
   failBob = false;
   await user.click(screen.getByRole("button", { name: "Save", exact: true }));
   await waitFor(() => expect(post).toHaveBeenCalledTimes(3));
@@ -249,3 +257,46 @@ it.each([
     expect(screen.queryByRole("link", { name: "You" })).not.toBeInTheDocument();
   }
 );
+
+it("explains an invalid amount on the field", async () => {
+  const user = userEvent.setup();
+  setup(target, "received");
+  const amount = await screen.findByRole("textbox", { name: "You" });
+  await user.clear(amount);
+  await user.type(amount, "-");
+  expect(amount).toHaveAttribute("aria-invalid", "true");
+  expect(amount).toHaveAccessibleDescription(/Enter a whole number/);
+  expect(
+    screen.getByRole("button", { name: "Save", exact: true })
+  ).toBeDisabled();
+});
+
+it("blocks a batch whose first write cannot clear a negative remaining allowance", async () => {
+  const user = userEvent.setup();
+  allocation.mockReturnValue({
+    repState: {
+      category: "Artist",
+      rater_contribution: 30,
+      rating: 50,
+      contributor_count: 2,
+    },
+    heroAvailableRep: -40,
+    proxyAvailableCredit: null,
+    minMaxValues: { min: 10, max: -10 },
+    isError: false,
+    isFetching: false,
+    retry: jest.fn(),
+  });
+  setup(owner, "given");
+  const alice = await screen.findByRole("textbox", { name: "alice" });
+  const bob = screen.getByRole("textbox", { name: "bob" });
+  await user.clear(alice);
+  await user.type(alice, "0");
+  await user.clear(bob);
+  await user.type(bob, "0");
+  // Releasing 50 in total is enough, but the first release of 30 still leaves debt.
+  expect(
+    screen.getByRole("button", { name: "Save", exact: true })
+  ).toBeDisabled();
+  expect(post).not.toHaveBeenCalled();
+});

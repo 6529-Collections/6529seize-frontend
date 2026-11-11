@@ -10,13 +10,13 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import { formatInteger } from "@/i18n/format";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getIdentityQueryOptions } from "@/services/api/identity-query";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useId, useRef, useState } from "react";
 import { useRepRatingSave } from "./modify-rep/useRepRatingSave";
 import {
   canManageGivenRatings,
@@ -42,18 +42,19 @@ type CategoryContributor = {
 function ContributorIdentity({
   contributor,
   you = false,
+  labelId,
 }: {
   readonly contributor: CategoryContributor;
   readonly you?: boolean;
+  readonly labelId?: string;
 }) {
   const locale = useBrowserLocale();
   const identity =
     contributor.profile.handle ?? contributor.profile.primary_address;
-  return (
-    <Link
-      href={`/${encodeURIComponent(identity)}`}
-      className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-    >
+  const className =
+    "tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+  const content = (
+    <>
       <span
         className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-700 tw-text-xs"
         aria-hidden="true"
@@ -71,13 +72,22 @@ function ContributorIdentity({
             className="tw-size-full tw-object-cover"
           />
         ) : (
-          identity.charAt(0).toUpperCase()
+          (identity || t(locale, "rep.categories.panel.you"))
+            .charAt(0)
+            .toUpperCase()
         )}
       </span>
-      <span className="tw-truncate">
+      <span id={labelId} className="tw-truncate">
         {you ? t(locale, "rep.categories.panel.you") : identity}
       </span>
+    </>
+  );
+  return identity ? (
+    <Link href={`/${encodeURIComponent(identity)}`} className={className}>
+      {content}
     </Link>
+  ) : (
+    <span className={className}>{content}</span>
   );
 }
 
@@ -102,6 +112,37 @@ function CategoryRows({
   ));
 }
 
+function getAmountValidation({
+  value,
+  current,
+  withinAllowance,
+  validNumbers,
+  descriptionId,
+  formId,
+}: {
+  readonly value: string;
+  readonly current: number;
+  readonly withinAllowance: boolean;
+  readonly validNumbers: boolean;
+  readonly descriptionId: string;
+  readonly formId: string;
+}) {
+  const changed = !isRatingValue(value) || Number(value) !== current;
+  const invalidNumber = changed && !isRatingValue(value);
+  const overLimit = changed && validNumbers && !withinAllowance;
+  return {
+    changed,
+    invalid: invalidNumber || overLimit,
+    describedBy: [
+      descriptionId,
+      invalidNumber ? `${formId}-invalid-number` : null,
+      overLimit ? `${formId}-credit-limit` : null,
+    ]
+      .filter(Boolean)
+      .join(" "),
+  };
+}
+
 function EditableCategoryRows({
   profile,
   category,
@@ -120,9 +161,13 @@ function EditableCategoryRows({
   readonly onRefresh: () => Promise<unknown>;
 }) {
   const locale = useBrowserLocale();
+  const formId = useId();
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const rater = activeProfileProxy?.created_by ?? connectedProfile;
+  const proxyIdentity =
+    activeProfileProxy?.created_by.handle ??
+    activeProfileProxy?.created_by.primary_address;
   const firstRecipient = items[0]?.profile;
   const allowanceTarget =
     direction === "given" && firstRecipient
@@ -160,7 +205,11 @@ function EditableCategoryRows({
         profile: {
           id: rater.id,
           handle: rater.handle,
-          primary_address: connectedProfile?.wallets?.[0]?.wallet ?? "",
+          primary_address:
+            activeProfileProxy?.created_by.primary_address ??
+            connectedProfile?.primary_wallet ??
+            connectedProfile?.wallets?.[0]?.wallet ??
+            "",
           pfp: rater.pfp,
         },
         contribution: current,
@@ -177,25 +226,28 @@ function EditableCategoryRows({
     direction === "received"
       ? rows.filter((row) => row === ownContributor)
       : rows;
-  const changes = editableRows.filter(
-    (row) =>
-      drafts[row.profile.id] !== undefined &&
-      (!isRatingValue(drafts[row.profile.id] ?? "") ||
-        Number(drafts[row.profile.id]) !== row.contribution)
-  );
+  const getCreditDelta = (row: CategoryContributor) =>
+    Math.abs(Number(drafts[row.profile.id])) - Math.abs(row.contribution);
+  // Release credit first, using the same order for validation and saving.
+  const changes = editableRows
+    .filter(
+      (row) =>
+        drafts[row.profile.id] !== undefined &&
+        (!isRatingValue(drafts[row.profile.id] ?? "") ||
+          Number(drafts[row.profile.id]) !== row.contribution)
+    )
+    .toSorted((a, b) => getCreditDelta(a) - getCreditDelta(b));
   const validNumbers = changes.every((row) =>
     isRatingValue(drafts[row.profile.id] ?? "")
   );
-  const creditDelta = changes.reduce(
-    (sum, row) =>
-      sum +
-      Math.abs(Number(drafts[row.profile.id])) -
-      Math.abs(row.contribution),
-    0
-  );
+  let creditUsed = 0;
+  const givenWithinAllowance = changes.every((row) => {
+    creditUsed += getCreditDelta(row);
+    return creditUsed <= heroAvailableRep;
+  });
   const withinAllowance =
     direction === "given"
-      ? creditDelta <= heroAvailableRep
+      ? givenWithinAllowance
       : changes.every((row) => {
           const amount = Number(drafts[row.profile.id]);
           return (
@@ -212,6 +264,12 @@ function EditableCategoryRows({
       (sum, row) => sum + Number(drafts[row.profile.id]) - row.contribution,
       0
     );
+  const updateDraft = (id: string, rawValue: string) => {
+    let value = rawValue === "0-" || rawValue === "-0" ? "-" : rawValue;
+    if (value.length > 1 && value.startsWith("0")) value = value.slice(1);
+    if (/^-?\d*$/.test(value))
+      setDrafts((previous) => ({ ...previous, [id]: value }));
+  };
   const reset = () => {
     setDrafts({});
     setPrepareError(false);
@@ -247,17 +305,7 @@ function EditableCategoryRows({
           row,
         }))
       );
-      // Return released credit before spending it on another receiver.
-      updates.sort(
-        (a, b) =>
-          Math.abs(a.amount) -
-          Math.abs(a.row.contribution) -
-          (Math.abs(b.amount) - Math.abs(b.row.contribution))
-      );
-      await save(updates, (update) => {
-        const saved = updates.find((item) => item.profile === update.profile);
-        if (saved) savedIds.add(saved.row.profile.id);
-      });
+      await save(updates, (update) => savedIds.add(update.row.profile.id));
     } catch {
       setPrepareError(true);
     } finally {
@@ -289,36 +337,59 @@ function EditableCategoryRows({
       }}
       aria-busy={busy}
     >
-      {activeProfileProxy && (
+      {activeProfileProxy && proxyIdentity && (
         <p className="tw-m-0 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-400">
-          {t(locale, "rep.categories.edit.proxy")}{" "}
-          <Link
-            href={`/${encodeURIComponent(activeProfileProxy.created_by.handle ?? "")}`}
-            className="tw-text-primary-300"
-          >
-            {activeProfileProxy.created_by.handle}
-          </Link>
+          {tRich(locale, "rep.categories.edit.proxy", {
+            name: (
+              <Link
+                key="proxy-profile"
+                href={`/${encodeURIComponent(proxyIdentity)}`}
+                className="tw-text-primary-300"
+              >
+                {proxyIdentity}
+              </Link>
+            ),
+          })}
         </p>
       )}
       <div className="tw-max-h-[min(50dvh,24rem)] tw-overflow-y-auto tw-overscroll-contain">
         {rows.map((row, index) => {
+          const you = direction === "received" && index === 0;
           const editable = direction === "given" || row === ownContributor;
           const value = drafts[row.profile.id] ?? String(row.contribution);
-          const changed =
-            !isRatingValue(value) || Number(value) !== row.contribution;
           const negative = value.startsWith("-");
+          const nameId = `${formId}-${row.profile.id}-name`;
+          const descriptionId = `${formId}-${row.profile.id}-description`;
+          const validation = getAmountValidation({
+            value,
+            current: row.contribution,
+            withinAllowance,
+            validNumbers,
+            descriptionId,
+            formId,
+          });
           let color = "tw-text-iron-200";
-          if (changed) color = "tw-text-primary-300";
+          if (validation.changed) color = "tw-text-primary-300";
           if (negative) color = "tw-text-rose-400";
           return (
             <div
               key={row.profile.id}
-              className={`tw-flex tw-h-[52px] tw-items-center tw-gap-3 tw-px-3 lg:tw-h-10 ${direction === "received" && index === 0 ? "tw-sticky tw-top-0 tw-z-10 tw-rounded-lg tw-bg-[#172436]" : ""}`}
+              className={`tw-flex tw-h-[52px] tw-items-center tw-gap-3 tw-px-3 lg:tw-h-10 ${you ? "tw-sticky tw-top-0 tw-z-10 tw-rounded-lg tw-bg-[#172436]" : ""}`}
             >
               <ContributorIdentity
                 contributor={row}
-                you={direction === "received" && index === 0}
+                labelId={nameId}
+                you={you}
               />
+              {editable && (
+                <span id={descriptionId} className="tw-sr-only">
+                  {t(locale, "rep.categories.panel.amountFor", {
+                    name: you
+                      ? t(locale, "rep.categories.panel.you")
+                      : (row.profile.handle ?? row.profile.primary_address),
+                  })}
+                </span>
+              )}
               {editable ? (
                 <input
                   ref={index === 0 ? inputRef : undefined}
@@ -326,27 +397,15 @@ function EditableCategoryRows({
                   data-autofocus={(index === 0 && focusInput > 0) || undefined}
                   inputMode="numeric"
                   autoComplete="off"
-                  aria-label={t(locale, "rep.categories.panel.amountFor", {
-                    name: row.profile.handle ?? row.profile.primary_address,
-                  })}
-                  aria-invalid={
-                    changed && (!isRatingValue(value) || !withinAllowance)
-                  }
+                  aria-labelledby={nameId}
+                  aria-describedby={validation.describedBy}
+                  aria-invalid={validation.invalid}
                   readOnly={!ready || busy}
                   value={ready ? value : ""}
                   placeholder={t(locale, "rep.categories.panel.loadingAmount")}
-                  onChange={(event) => {
-                    const rawValue = event.currentTarget.value;
-                    let inputValue =
-                      rawValue === "0-" || rawValue === "-0" ? "-" : rawValue;
-                    if (inputValue.length > 1 && inputValue.startsWith("0"))
-                      inputValue = inputValue.slice(1);
-                    if (/^-?\d*$/.test(inputValue))
-                      setDrafts((previous) => ({
-                        ...previous,
-                        [row.profile.id]: inputValue,
-                      }));
-                  }}
+                  onChange={(event) =>
+                    updateDraft(row.profile.id, event.currentTarget.value)
+                  }
                   className={`tw-h-9 tw-w-28 tw-min-w-0 tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-2 tw-text-right tw-text-base tw-tabular-nums focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-h-8 lg:tw-text-sm ${color}`}
                 />
               ) : (
@@ -360,6 +419,15 @@ function EditableCategoryRows({
           );
         })}
       </div>
+      {!validNumbers && (
+        <p
+          id={`${formId}-invalid-number`}
+          role="alert"
+          className="tw-m-0 tw-px-3 tw-py-2 tw-text-sm tw-text-rose-400"
+        >
+          {t(locale, "rep.categories.panel.invalidNumber")}
+        </p>
+      )}
       {isError && (
         <div
           role="alert"
@@ -418,6 +486,7 @@ function EditableCategoryRows({
           </div>
           {validNumbers && !withinAllowance && (
             <p
+              id={`${formId}-credit-limit`}
               role="alert"
               className="tw-m-0 tw-w-full tw-text-xs tw-text-rose-400"
             >

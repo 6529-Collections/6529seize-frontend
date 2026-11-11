@@ -237,7 +237,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await pencil.click();
     const panel = categoryPanel(page);
     const input = panel.getByRole("textbox", {
-      name: "REP for playwright",
+      name: "You",
       exact: true,
     });
     await expect(input).toHaveAttribute("readonly");
@@ -479,6 +479,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
   }) => {
     const api = getSandboxApiOrigin(baseURL);
     const pages: number[] = [];
+    const longCategory =
+      "A very long community category name that must truncate";
     await page.route(`${api}/api/profiles/*/rep/categories?*`, (route) => {
       const pageNumber = Number(
         new URL(route.request().url()).searchParams.get("page")
@@ -490,10 +492,20 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
           data: Array.from(
             { length: Math.min(25, 60 - start) },
             (_, index) => ({
-              category: `Category ${start + index + 1}`,
-              total_rep: 10,
-              contributor_count: 1,
-              top_contributors: [],
+              category:
+                start + index === 0
+                  ? longCategory
+                  : `Category ${start + index + 1}`,
+              total_rep: 1380,
+              contributor_count: 60,
+              top_contributors: Array.from({ length: 4 }, (_, contributor) => ({
+                profile: {
+                  id: `rater-${contributor}`,
+                  handle: `rater-${contributor}`,
+                  pfp: "/icon-512.png",
+                },
+                contribution: 10,
+              })),
               authenticated_user_contribution: null,
             })
           ),
@@ -510,7 +522,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .filter({ visible: true });
     await expect(
       rep.getByRole("button", {
-        name: "Open REP category Category 1",
+        name: `Open REP category ${longCategory}`,
         exact: true,
       })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
@@ -527,11 +539,20 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     ).toBeVisible();
     expect(new Set(pages)).toEqual(new Set([1, 2, 3]));
     const heights = await rep
-      .locator("[data-rep-tag]")
+      .getByRole("button", { name: /^Open REP category / })
+      .locator("..")
       .evaluateAll((tags) =>
         tags.map((tag) => tag.getBoundingClientRect().height)
       );
     expect(heights.every((height) => height === 36)).toBe(true);
+    const tagFits = await rep
+      .getByRole("button", {
+        name: `Open REP category ${longCategory}`,
+        exact: true,
+      })
+      .locator("..")
+      .evaluate((tag) => tag.scrollWidth <= tag.clientWidth + 1);
+    expect(tagFits).toBe(true);
     await expectNoHorizontalOverflow(page);
   });
 
@@ -598,11 +619,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .click();
     const panel = categoryPanel(page);
     const first = panel.getByRole("textbox", {
-      name: `REP for ${TARGET}`,
+      name: TARGET,
       exact: true,
     });
     const second = panel.getByRole("textbox", {
-      name: "REP for following-artist-1",
+      name: "following-artist-1",
       exact: true,
     });
     await expect(first).toHaveValue("30");
@@ -731,7 +752,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .click();
     const dialog = categoryPanel(page);
     await expect(
-      dialog.getByText("You are acting as proxy for:", { exact: false })
+      dialog.getByText("You are acting as proxy for: grantor", { exact: true })
     ).toBeVisible();
     await expect(
       dialog.getByRole("link", { name: "grantor", exact: true })

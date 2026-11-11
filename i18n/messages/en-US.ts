@@ -257,6 +257,8 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "panel.panel": "{category} REP details",
   "panel.you": "You",
   "panel.amountFor": "REP for {name}",
+  "panel.invalidNumber":
+    "Enter a whole number, including a minus sign for negative REP.",
   "panel.loadingAmount": "Loading…",
   "panel.openGlobal": "Open category ↗",
   "panel.yourRep": "Your REP",
@@ -2740,6 +2742,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
 } as const);
 
 const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
+  runningTotal: "(total {total})",
   "matter.waveRep": "Wave REP",
 } as const);
 
@@ -5041,6 +5044,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_REP_MODAL_MESSAGES,
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
+  "profileActivity.heading": "Activity Log",
   "profileActivity.loading": "Loading activity log",
   "profileActivity.loadError": "Unable to load activity log.",
   "profileActivity.retry": "Retry",

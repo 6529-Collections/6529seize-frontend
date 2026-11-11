@@ -68,7 +68,7 @@ it("puts the neutral running total last on Identity reductions and names NIC", (
       new_rating: 560,
     },
   };
-  const { container } = render(
+  render(
     <IdentityActivityContext value={true}>
       <ProfileActivityLogRate log={log} user={null} />
     </IdentityActivityContext>
@@ -76,5 +76,10 @@ it("puts the neutral running total last on Identity reductions and names NIC", (
   expect(screen.getByText("NIC")).toBeInTheDocument();
   expect(screen.getByText("440")).toHaveClass("tw-text-rose-400");
   expect(screen.getByText("(total 560)")).toHaveClass("tw-text-iron-400");
-  expect(container.textContent).toMatch(/reduced440NICfrombob\(total 560\)/);
+  expect(
+    screen
+      .getByText("bob")
+      .compareDocumentPosition(screen.getByText("(total 560)")) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy();
 });

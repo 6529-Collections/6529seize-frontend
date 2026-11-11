@@ -45,9 +45,9 @@ export function useRepRatingSave() {
   const isCurrentSession = () =>
     mounted.current && principal === principalRef.current;
 
-  const save = async (
-    updates: readonly RepRatingUpdate[],
-    onSaved?: (update: RepRatingUpdate) => void
+  const save = async <Update extends RepRatingUpdate>(
+    updates: readonly Update[],
+    onSaved?: (update: Update) => void
   ): Promise<boolean> => {
     if (lock.current || updates.length === 0) return false;
     lock.current = true;
@@ -62,6 +62,7 @@ export function useRepRatingSave() {
         setToast({ message, type: "error" });
         return false;
       }
+      // Writes are sequential: category batches release credit before spending it.
       for (const update of updates) {
         if (!isCurrentSession()) return false;
         const identity =
