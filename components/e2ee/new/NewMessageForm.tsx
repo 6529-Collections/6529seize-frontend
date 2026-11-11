@@ -314,6 +314,7 @@ export function NewMessageForm({
       if (useUnencrypted && createUnencrypted) {
         // The displayed eligibility can predate the cutoff at the time of the click.
         if (!isLegacyDmClosed()) {
+          // The unencrypted callback navigates to the DM on success.
           setErrorMessage(await createUnencrypted(wallets));
         }
         return;

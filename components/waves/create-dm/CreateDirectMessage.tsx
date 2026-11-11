@@ -25,9 +25,12 @@ import DirectMessageRecipients, {
 } from "./DirectMessageRecipients";
 import { useCreateUnencryptedMessage } from "./useCreateUnencryptedMessage";
 
-interface CreateDirectMessageProps {
+interface DirectMessagePageProps {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
+}
+
+interface CreateDirectMessageProps extends DirectMessagePageProps {
   readonly onSuccess?: (() => void) | undefined;
   readonly presentation?: "page" | "modal";
 }
@@ -51,7 +54,7 @@ function DirectMessagePageHeader({ onBack }: { readonly onBack: () => void }) {
   );
 }
 
-function UnifiedDirectMessage({ profile, onBack }: CreateDirectMessageProps) {
+function UnifiedDirectMessage({ profile, onBack }: DirectMessagePageProps) {
   const e2ee = useE2ee();
   const { isApp } = useDeviceInfo();
   const { waveViewStyle } = useLayout();
@@ -91,7 +94,7 @@ function UnifiedDirectMessage({ profile, onBack }: CreateDirectMessageProps) {
 
 export default function CreateDirectMessage(props: CreateDirectMessageProps) {
   return isE2eeEnabled() ? (
-    <UnifiedDirectMessage {...props} />
+    <UnifiedDirectMessage profile={props.profile} onBack={props.onBack} />
   ) : (
     <UnencryptedDirectMessage {...props} />
   );
