@@ -314,6 +314,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   getStatus = () => this.ctx.store.status;
   getError = () => this.ctx.store.error;
   getUpgrade = () => this.ctx.store.upgrade;
+  getLocalDeviceKey = () => this.ctx.device?.deviceKey ?? null;
   getThisDevice = () => this.ctx.store.thisDevice;
   getAttachmentsEnabled = () => this.ctx.store.attachmentsEnabled;
   getDevices = () => this.ctx.store.devices;

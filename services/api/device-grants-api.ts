@@ -1,4 +1,6 @@
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
+import type { ApiDeviceSecurityNotice } from "@/generated/models/ApiDeviceSecurityNotice";
+import type { ApiE2eeAck } from "@/generated/models/ApiE2eeAck";
 import type { ApiDropSignedEvents } from "@/generated/models/ApiDropSignedEvents";
 import type { ApiDropSignedEventsBatch } from "@/generated/models/ApiDropSignedEventsBatch";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -32,6 +34,32 @@ export const registerAppDeviceGrant = (
   commonApiPost<ApiRegisterDeviceGrantRequest, ApiDeviceGrant>({
     endpoint: "device-grants",
     body: request,
+    errorMode: "structured",
+  });
+
+/** A null result means this server still uses the legacy notice flows. */
+export async function fetchDeviceSecurityNotices(
+  signal?: AbortSignal
+): Promise<ApiDeviceSecurityNotice[] | null> {
+  try {
+    return await commonApiFetch<ApiDeviceSecurityNotice[]>({
+      endpoint: "device-security-notices",
+      signal,
+      cache: "no-store",
+      errorMode: "structured",
+    });
+  } catch (error) {
+    if (getStructuredApiErrorStatus(error) === 404) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+export const acknowledgeEncryptedDmDevice = (deviceKey: string) =>
+  commonApiPost<Record<string, never>, ApiE2eeAck>({
+    endpoint: `e2ee/devices/${encodeURIComponent(deviceKey)}/acknowledge`,
+    body: {},
     errorMode: "structured",
   });
 
