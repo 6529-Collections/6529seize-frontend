@@ -196,9 +196,18 @@ describe("navigation.helpers", () => {
       expect(getMessageIdFromPathname("/messages/dm-123")).toBe("dm-123");
     });
 
-    it("returns null for messages create route", () => {
-      expect(getMessageIdFromPathname("/messages/create")).toBeNull();
-    });
+    it.each(["/messages/create", "/messages/new"])(
+      "does not read %s as a plaintext wave id",
+      (pathname) => {
+        expect(getMessageIdFromPathname(pathname)).toBeNull();
+        expect(
+          getActiveWaveIdFromUrl({
+            pathname,
+            searchParams: new URLSearchParams("wave=dm-123"),
+          })
+        ).toBeNull();
+      }
+    );
 
     it("never reads encrypted chat routes as a plaintext wave id", () => {
       expect(getMessageIdFromPathname("/messages/encrypted")).toBeNull();
@@ -228,9 +237,7 @@ describe("navigation.helpers", () => {
 
     it("recognizes encrypted pathnames", () => {
       expect(isEncryptedMessagesPathname("/messages/encrypted")).toBe(true);
-      expect(isEncryptedMessagesPathname("/messages/encrypted/new")).toBe(
-        true
-      );
+      expect(isEncryptedMessagesPathname("/messages/encrypted/new")).toBe(true);
       expect(isEncryptedMessagesPathname("/messages/encrypted-x")).toBe(false);
       expect(isEncryptedMessagesPathname("/messages/dm-1")).toBe(false);
       expect(isEncryptedMessagesPathname(null)).toBe(false);
@@ -291,11 +298,12 @@ describe("navigation.helpers", () => {
       );
     });
 
-    it("hides the dock while composing a new direct message", () => {
-      expect(
-        hidesMobileBottomNavigation({ pathname: "/messages/create" })
-      ).toBe(true);
-    });
+    it.each(["/messages/create", "/messages/new"])(
+      "hides the dock on %s",
+      (pathname) => {
+        expect(hidesMobileBottomNavigation({ pathname })).toBe(true);
+      }
+    );
   });
 
   describe("usesReverseMobileBottomNavigationScroll", () => {

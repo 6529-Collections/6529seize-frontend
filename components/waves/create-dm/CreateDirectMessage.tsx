@@ -5,12 +5,14 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { NewMessageForm } from "@/components/e2ee/new/NewMessageForm";
+import { E2eePageShell } from "@/components/e2ee/ui/E2eePageShell";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import Button from "@/components/utils/button/Button";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { getMessagesBaseRoute } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -49,31 +51,40 @@ function DirectMessagePageHeader({ onBack }: { readonly onBack: () => void }) {
   );
 }
 
-function UnifiedDirectMessage({
-  profile,
-  onBack,
-  onSuccess,
-  presentation = "page",
-}: CreateDirectMessageProps) {
+function UnifiedDirectMessage({ profile, onBack }: CreateDirectMessageProps) {
   const e2ee = useE2ee();
   const { isApp } = useDeviceInfo();
   const { waveViewStyle } = useLayout();
-  const createUnencrypted = useCreateUnencryptedMessage(onSuccess);
-  const page = presentation === "page";
+  const locale = useBrowserLocale();
+  const createUnencrypted = useCreateUnencryptedMessage();
+  const form = (
+    <NewMessageForm
+      key={profile.id}
+      e2ee={e2ee}
+      selfProfileId={profile.id ?? undefined}
+      createUnencrypted={createUnencrypted}
+      onCancel={onBack}
+    />
+  );
+
+  if (!isApp) {
+    return (
+      <E2eePageShell
+        title={t(locale, "quickDm.createModalTitle")}
+        backHref={getMessagesBaseRoute(false)}
+        backLabel={t(locale, "quickDm.backAriaLabel")}
+      >
+        {form}
+      </E2eePageShell>
+    );
+  }
 
   return (
     <div
-      style={page && isApp ? waveViewStyle : undefined}
-      className={`tailwind-scope tw-flex tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-col tw-bg-black tw-text-iron-50 ${page && isApp ? "tw-flex-none" : "tw-flex-1"} ${page && !isApp ? "tw-h-[70dvh]" : ""}`}
+      style={waveViewStyle}
+      className="tailwind-scope tw-flex tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-none tw-flex-col tw-bg-black tw-text-iron-50"
     >
-      {page && !isApp && <DirectMessagePageHeader onBack={onBack} />}
-      <NewMessageForm
-        key={profile.id}
-        e2ee={e2ee}
-        selfProfileId={profile.id ?? undefined}
-        createUnencrypted={createUnencrypted}
-        onOpen={onSuccess}
-      />
+      {form}
     </div>
   );
 }

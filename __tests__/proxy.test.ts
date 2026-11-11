@@ -398,6 +398,7 @@ describe("proxy", () => {
       `/messages/${WAVE_ID}`,
       "/waves/create",
       "/messages/create",
+      "/messages/new",
     ])("keeps %s behind staging access control", async (path) => {
       const fetchMock = mockFetchStatus(200);
 

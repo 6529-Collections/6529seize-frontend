@@ -3618,7 +3618,8 @@
       "keywords": ["direct", "message", "messages", "dm", "private", "wave"],
       "facts": [
         "Direct-message waves live under /messages and individual message threads use /messages/{waveId}.",
-        "New message opens at /messages/create in the app or with create=dm on web. Web uses a bottom sheet below 768px and a centered dialog on larger screens. It starts compactly and grows with search results; resizing preserves the query and selected people. The app screen has a back action and hides the floating tab bar.",
+        "With encrypted chats available, the plus beside Messages opens New message at /messages/new on web and in the app. The chat list stays visible beside the form on desktop. The app screen has a back action and hides the floating tab bar.",
+        "Builds without encrypted chats use /messages/create in the app or a dialog or sheet on web.",
         "In the To: field, search by handle with at least 3 characters. Results stay visible after the keyboard closes, show level and positive TDH, and have selection circles. Tap a result to toggle it; selected people appear as removable avatar chips inside the field. Backspace in an empty field removes the last person.",
         "In builds without encrypted chats, the bottom action reads Message followed by the person's handle, or Message followed by the number of people for a group. It reads Message and stays disabled with no recipients, then reads Creating... during submission. Failures preserve recipients for retry; a failed search offers Retry search.",
         "Direct-message recipient search ranks exact, prefix, and substring handle matches before ENS or auto-wallet matches, then orders each match group from highest to lowest profile level.",
@@ -3626,7 +3627,7 @@
         "Direct-message content stays gated until wallet and profile prerequisites are resolved."
       ],
       "canonical_path": "/messages",
-      "related_paths": ["/messages/create"],
+      "related_paths": ["/messages/new", "/messages/create"],
       "tags": ["waves", "messages"],
       "source_refs": [
         "ops/docs/waves/create/feature-direct-message-creation.md"
@@ -3683,7 +3684,7 @@
         "The Encrypted DMs composer keeps attachments to the left and the emoji button inside the message input. The emoji picker opens beside its button on desktop and in the regular mobile slide panel. Emoji selections preserve the draft and caret and do not update ordinary reaction history. Desktop Enter sends and Shift+Enter adds a line. On mobile web and in the app, Return does not submit; use Send. Arrow Up from an empty composer with no reply, edit or attachment in progress edits your latest eligible message. On mobile web and in the app, an accepted send removes input focus and dismisses the keyboard. A failed send restores the draft without deliberately dismissing the keyboard, and a delayed send leaves a newly started draft alone. Dismissing the native keyboard also removes input focus.",
         "Encrypted messages appear in the bell inbox and All notifications feed even without local keys. Known senders use the normal clickable avatar, handle, level and badges; older entries without sender details use a lock and New encrypted message. The server stores sender identity and opaque chat/message references, never plaintext. A ready device previews only the exact referenced message readable in its local history, with a lock indicator. Missing history or old entries without a sequence stay generic. Without setup the action is Set up Encrypted DMs; otherwise Open encrypted chat. Direct messages and wave activity preferences apply. In-app creation has no 60-second cooldown; pushes are separate. Missing historical notifications are not backfilled.",
         "The shared desktop avatar tooltip combines wallet connection status with Signed Posts and Encrypted DMs states and expiry detail when due, with bold on/off and a short hover delay. The mobile sidepanel prints connection status on one row and a shield beside permission states on the next, above TDH. Green means both ready without renewal due; amber means partial setup or renewal due; neutral covers off, unavailable or unresolved states. Connected-profile avatars also show smaller shields. Disconnecting a wallet does not revoke local grants.",
-        "Encrypted chats appear under Messages as an Encrypted section at /messages/encrypted, with this browser's devices at /messages/encrypted/devices. Select the plus beside Messages to start a new message. Select the open chat again in the messages side pane to return to the encrypted inbox.",
+        "Encrypted chats appear under Messages as an Encrypted section at /messages/encrypted, with this browser's devices at /messages/encrypted/devices. Select the plus beside Messages to open the New message page at /messages/new. Select the open chat again in the messages side pane to return to the encrypted inbox.",
         "Encrypted direct messages show one list and sidebar entry per person. If a chat was left or replaced, Chat history above the timeline opens earlier histories, including messages imported into them. Search and messages belong to the selected history. Open current chat returns to the active chat; Continue encrypted chat starts a replacement if no usable chat remains, subject to current message preferences and device availability. Old links still open their original history. Histories are not deleted or copied together. Group chats remain separate.",
         "In New message, search in To and select recipients to see their encrypted-message eligibility. Start chat creates an encrypted DM with one person or a group with two or more, with an optional group name. More options lets you start a group with one other person. Open chat reuses an existing encrypted DM or a group with exactly these members on the current device. With several group matches, choose one. Start a new group creates a separate chat with the same members.",
         "In the 6529 app, the back arrow to the left of the encrypted chat avatar returns to the encrypted messages list. It remains visible on iPad in portrait and landscape.",
@@ -3758,7 +3759,7 @@
         "6529 cannot recall copies outside its servers: your own exports, push notification previews already delivered to phones, and attachments already published to public IPFS."
       ],
       "canonical_path": "/messages",
-      "related_paths": ["/messages/encrypted", "/messages/encrypted/new"],
+      "related_paths": ["/messages/new", "/messages/encrypted", "/messages/encrypted/new"],
       "tags": ["messages", "encryption", "privacy"],
       "source_refs": [
         "ops/docs/encrypted-messages.md",

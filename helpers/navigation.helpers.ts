@@ -51,11 +51,23 @@ interface SearchParamsLike {
 export type RouteSearchParams = Record<string, string | string[] | undefined>;
 
 const CREATE_SEGMENT = "create";
+const NEW_MESSAGE_SEGMENT = "new";
+export const NEW_MESSAGE_ROUTE = `/messages/${NEW_MESSAGE_SEGMENT}`;
+
+export const isMessageComposePathname = (
+  pathname: string | null | undefined
+): boolean =>
+  pathname === NEW_MESSAGE_ROUTE ||
+  pathname === `${NEW_MESSAGE_ROUTE}/` ||
+  pathname === "/messages/create" ||
+  pathname === "/messages/create/";
+
 // `/messages/encrypted/...` belongs to end-to-end encrypted chats (D109); it
 // must never be read as a plaintext direct-message wave id.
 const ENCRYPTED_SEGMENT = "encrypted";
 const RESERVED_MESSAGES_SEGMENTS: ReadonlySet<string> = new Set([
   CREATE_SEGMENT,
+  NEW_MESSAGE_SEGMENT,
   ENCRYPTED_SEGMENT,
 ]);
 const ENCRYPTED_STATIC_SEGMENTS: ReadonlySet<string> = new Set([
@@ -181,7 +193,7 @@ export const hidesMobileBottomNavigation = ({
   // Creation routes own their bottom actions; hide the floating dock so it
   // doesn't overlap those controls.
   isWaveCreatePathname(pathname) ||
-  pathname === "/messages/create" ||
+  isMessageComposePathname(pathname) ||
   getWaveIdFromPathname(pathname) !== null ||
   getMessageIdFromPathname(pathname) !== null ||
   // An encrypted conversation is a full-height thread with its own composer.
@@ -214,6 +226,9 @@ export const getActiveWaveIdFromUrl = ({
   pathname: string | null | undefined;
   searchParams?: SearchParamsLike | null | undefined;
 }): string | null => {
+  if (isMessageComposePathname(pathname)) {
+    return null;
+  }
   const waveIdFromPath = getWaveIdFromPathname(pathname);
   if (waveIdFromPath) {
     return waveIdFromPath;

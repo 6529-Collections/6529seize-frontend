@@ -49,7 +49,6 @@ interface NewMessageFormProps {
   readonly initialPeople?: readonly E2eeSelectedPerson[] | undefined;
   readonly fromLegacyChat?: boolean | undefined;
   readonly onCancel?: (() => void) | undefined;
-  readonly onOpen?: (() => void) | undefined;
   readonly createUnencrypted?:
     | ((wallets: string[]) => Promise<string | null>)
     | undefined;
@@ -209,7 +208,6 @@ export function NewMessageForm({
   initialPeople = EMPTY_RECIPIENTS,
   fromLegacyChat = false,
   onCancel,
-  onOpen,
   createUnencrypted,
 }: NewMessageFormProps) {
   const locale = useBrowserLocale();
@@ -300,7 +298,6 @@ export function NewMessageForm({
   };
 
   const openChat = (g: string) => {
-    onOpen?.();
     router.push(getEncryptedConversationRoute(g));
   };
 

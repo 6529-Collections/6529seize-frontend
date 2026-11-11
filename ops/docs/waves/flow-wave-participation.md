@@ -11,16 +11,17 @@ same context.
 - Discovery and list surfaces: `/`, `/waves`, and `/messages`
 - Standard wave thread: `/waves/{waveId}`
 - Direct-message thread: `/messages/{waveId}`
-- App create routes: `/waves/create` and `/messages/create`
+- Create routes: `/waves/create` in the app and `/messages/new` for the unified
+  composer.
 
 ## Routes and URL State
 
 - Discovery and list surfaces: `/`, `/waves`, and `/messages`
 - Standard wave thread: `/waves/{waveId}`
 - Direct-message thread: `/messages/{waveId}`
-- App create routes: `/waves/create` and `/messages/create`
-- Web create mode uses query state on stream routes:
-  `create=wave` or `create=dm`
+- The unified message composer opens at `/messages/new`.
+- Web wave creation uses `create=wave` query state on stream routes. Builds
+  without encrypted chats use `create=dm` for direct messages on web.
 - Legacy profile alias: `/{user}/waves` redirects to `/{user}`
 - Legacy wave route: `/waves?wave={waveId}` redirects to `/waves/{waveId}` and
   keeps other query params
@@ -40,8 +41,7 @@ same context.
 - Open a shared single-drop link using `drop={dropId}`.
 - Start create-wave from desktop create controls (`create=wave`) or
   `/waves/create` in app mode.
-- Start create-DM from desktop create controls (`create=dm`) or
-  `/messages/create` in app mode.
+- Select **+** beside **Messages** to open the unified composer.
 
 ## User Journey
 

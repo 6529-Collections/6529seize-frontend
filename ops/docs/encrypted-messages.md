@@ -237,7 +237,8 @@ claiming your permissions are expiring.
 In the 6529 app, the back arrow to the left of the chat avatar returns to the
 encrypted messages list. It stays visible on iPad in portrait and landscape.
 
-1. Select **+** beside **Messages**.
+1. Select **+** beside **Messages** to open **New message** at `/messages/new`.
+   On desktop, the chat list stays beside the form.
 2. Search in **To** and select the people you want to chat with. Each person
    shows whether they can receive encrypted messages. You can retry a failed
    check or remove someone while keeping the rest of the selection.

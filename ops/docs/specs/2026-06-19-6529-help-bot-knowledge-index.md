@@ -353,11 +353,10 @@ system sharing, confirmed clipboard fallback, silent cancellation, temporary
 drop availability, and the existing Main Stage, Quorum, and direct-message URL
 rules. Sharing a direct-message URL does not grant conversation access.
 
-The direct-message record covers **New message**, its responsive web bottom sheet
-and desktop dialog, its **To** recipient field,
-search results that remain visible after keyboard dismissal, removable recipient
-chips, selection circles, and the **Message** action for one person or a group.
-It also describes retry behavior and the native screen's hidden tab bar.
+The direct-message record covers **New message** at `/messages/new`, its **To**
+field, and removable recipient chips. It also describes retry behavior and the
+native screen's hidden tab bar. Builds without encrypted chats use the web
+dialog and the **Message** action.
 
 The Memes submission profile and wallet signing record covers the EIP-712
 **Submit a Meme Card to The Memes** action, readable artwork and destination,

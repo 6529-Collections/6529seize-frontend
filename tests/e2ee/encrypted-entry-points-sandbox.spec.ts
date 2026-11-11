@@ -137,9 +137,13 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     });
     await expect(entry).toHaveCount(1);
     await entry.click();
+    await expect(page).toHaveURL(/\/messages\/new$/);
     await expect(
-      page.getByRole("dialog", { name: "New message" })
-    ).toBeVisible();
+      page.getByRole("heading", { name: "New message", exact: true })
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await expect(page.getByRole("dialog", { name: "New message" })).toHaveCount(
+      0
+    );
     await pickPerson(page, "carol", {
       expectedStatus: "Doesn’t accept messages from you",
     });
