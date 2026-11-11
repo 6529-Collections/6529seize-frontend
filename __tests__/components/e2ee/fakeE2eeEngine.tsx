@@ -170,6 +170,7 @@ export function createFakeE2eeEngine(
     getStatus: () => state.status,
     getError: () => state.error,
     getUpgrade: () => state.upgrade,
+    getLocalDeviceKey: () => state.thisDevice?.deviceKey ?? null,
     getThisDevice: () => state.thisDevice,
     getDevices: () => state.devices,
     getAttachmentsEnabled: () => state.attachmentsEnabled,

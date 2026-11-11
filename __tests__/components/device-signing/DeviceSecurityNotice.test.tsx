@@ -6,6 +6,7 @@ import {
   acknowledgeDeviceGrant,
   acknowledgeEncryptedDmDevice,
   fetchDeviceSecurityNotices,
+  revokeDeviceGrant,
 } from "@/services/api/device-grants-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -35,13 +36,15 @@ jest.mock("@/hooks/e2ee/useE2ee", () => ({
     profileId: "profile",
     status: "ready",
     devices: [],
-    thisDevice: { deviceKey: "0xOWN" },
+    thisDevice: null,
+    localDeviceKey: "0xOWN",
   }),
 }));
 jest.mock("@/services/api/device-grants-api", () => ({
   acknowledgeDeviceGrant: jest.fn(),
   acknowledgeEncryptedDmDevice: jest.fn(),
   fetchDeviceSecurityNotices: jest.fn(),
+  revokeDeviceGrant: jest.fn(),
 }));
 
 const combined: ApiDeviceSecurityNotice = {
@@ -159,7 +162,35 @@ describe("device security notices", () => {
     expect(onHandled).not.toHaveBeenCalled();
   });
 
-  it("ignores this DM device and keeps a standalone notice visible after a failed acknowledgment", async () => {
+  it("keeps a combined alert retryable after the API rejects revocation", async () => {
+    jest
+      .mocked(revokeDeviceGrant)
+      .mockRejectedValueOnce(new Error())
+      .mockResolvedValueOnce(
+        {} as Awaited<ReturnType<typeof revokeDeviceGrant>>
+      );
+    const onHandled = jest.fn();
+    render(<DeviceSecurityNotice notice={combined} onHandled={onHandled} />);
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Revoke access for 6529 Desktop on Mac",
+      })
+    );
+    const dialog = within(screen.getByRole("dialog"));
+    const confirm = dialog.getByRole("button", { name: "Revoke access" });
+    fireEvent.click(confirm);
+    expect(await dialog.findByRole("alert")).toHaveTextContent(
+      "Couldn’t revoke the device. Try again."
+    );
+    expect(onHandled).not.toHaveBeenCalled();
+
+    fireEvent.click(confirm);
+    await waitFor(() => expect(onHandled).toHaveBeenCalledWith(combined));
+    expect(revokeDeviceGrant).toHaveBeenCalledTimes(2);
+    expect(revokeDeviceGrant).toHaveBeenLastCalledWith("0xgrant");
+  });
+
+  it("hides the local device before the device list loads and keeps an unacknowledged notice visible", async () => {
     const standalone: ApiDeviceSecurityNotice = {
       device_label: "6529 Mobile",
       signing_grant_id: null,
@@ -182,6 +213,9 @@ describe("device security notices", () => {
     );
     const action = await screen.findByRole("button", { name: /^This was me/u });
     expect(screen.queryByText(/This device was authorized/)).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Revoke access for This device" })
+    ).toBeNull();
     expect(
       screen.getByRole("button", { name: "Revoke access for 6529 Mobile" })
     ).toHaveAccessibleDescription(

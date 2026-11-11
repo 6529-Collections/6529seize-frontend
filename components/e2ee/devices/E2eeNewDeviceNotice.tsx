@@ -43,8 +43,10 @@ function AuthenticatedE2eeDeviceNotice({
 }) {
   const locale = useBrowserLocale();
   const zone = useDisplayTimeZone();
-  const { engine, devices, profileId, status, thisDevice } = useE2ee();
-  const canShowNotices = status === "ready" || status === "device-limit";
+  const { engine, devices, profileId, status, localDeviceKey } = useE2ee();
+  const ownDeviceKey = localDeviceKey?.toLowerCase();
+  const canShowNotices =
+    (status === "ready" && !!ownDeviceKey) || status === "device-limit";
   const { notices, removeNotice } = useDeviceSecurityNotices(canShowNotices);
   const { newDevices, acknowledge } = useE2eeNewDevices(
     profileId,
@@ -57,8 +59,7 @@ function AuthenticatedE2eeDeviceNotice({
     const pending = notices.filter(
       (notice) =>
         notice.encrypted_dm_device_key !== null &&
-        notice.encrypted_dm_device_key.toLowerCase() !==
-          thisDevice?.deviceKey.toLowerCase()
+        notice.encrypted_dm_device_key.toLowerCase() !== ownDeviceKey
     );
     if (!pending.length) {
       return null;
