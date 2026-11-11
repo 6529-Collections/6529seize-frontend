@@ -300,6 +300,15 @@ export function isFirstPartyMediaResolverHostname(hostname: string): boolean {
   );
 }
 
+/** Whether `hostname` is a media host of the separate content domain. */
+export function isContentDomainMediaHostname(hostname: string): boolean {
+  const normalized = canonicalizeGatewayHostname(hostname);
+  return (
+    normalized === USER_CONTENT_MEDIA_HOST ||
+    isUserContentIpfsHostname(normalized)
+  );
+}
+
 /**
  * Whether `hostname` belongs to the app's own media gateway on either domain:
  * the path hosts, the older 6529.io gateway names, or a per-CID host.
@@ -500,16 +509,22 @@ function parseIpfsSubdomainGatewayUrl(
 
   const cid = hostname.slice(0, -suffix.length);
   const pathParts = splitPath(url.pathname);
-  // A per-CID host of the content domain serves `/ipfs/<cid>/…` from that
-  // other CID (absolute paths in art made for path gateways).
+  const own = makeParsed("ipfs", cid, pathParts, getUrlWarnings(url));
+  // The host label must itself be a CID before any path is considered.
+  if (!own) return null;
+
+  // A per-CID host of the content domain serves `/ipfs/<cid>/…` (exact,
+  // lower-case segment) from that other CID: absolute paths in art made for
+  // path gateways. Any other path is served from the host's own CID.
+  const nestedCid = pathParts[1];
   const nested =
     suffix === USER_CONTENT_IPFS_HOST_SUFFIX &&
-    pathParts[0]?.toLowerCase() === "ipfs" &&
-    pathParts[1] &&
-    looksLikeIpfsCid(pathParts[1])
-      ? makeParsed("ipfs", pathParts[1], pathParts.slice(2), getUrlWarnings(url))
+    pathParts[0] === "ipfs" &&
+    nestedCid &&
+    looksLikeIpfsCid(nestedCid)
+      ? makeParsed("ipfs", nestedCid, pathParts.slice(2), getUrlWarnings(url))
       : null;
-  return nested ?? makeParsed("ipfs", cid, pathParts, getUrlWarnings(url));
+  return nested ?? own;
 }
 
 function parseArweaveGatewayUrl(url: URL): ParsedDecentralizedMedia | null {

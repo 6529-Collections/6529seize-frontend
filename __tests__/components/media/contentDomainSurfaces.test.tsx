@@ -5,6 +5,7 @@ import NFTHTMLRenderer from "@/components/nft-image/renderers/NFTHTMLRenderer";
 import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
 import { getHtmlMediaGatewayFallbackUrls } from "@/components/nft-image/utils/gateway-fallback";
 import { getDropForgeStorageLocationInfo } from "@/components/drop-forge/drop-forge-storage-location.helpers";
+import { getOpenableMediaUrl } from "@/components/drop-forge/craft/craft-claim-helpers";
 import { canPreviewAttachmentInline } from "@/components/drops/view/item/content/attachments/DropAttachmentDisplay.view";
 import { resolveTrustedEmbedAssetUrl } from "@/components/profile-cms/site-renderer/data";
 import { getSafeExternalUrl } from "@/components/the-memes/MemePageAdditionalDetails";
@@ -197,9 +198,42 @@ describe("with the previous resolver endpoint, outputs are unchanged", () => {
   });
 
   it("resolves token artwork on media.6529.io", () => {
-    expect(
-      processTokenUriMetadata({ image: `ipfs://${CID_V1}/a.png` })?.imageUrl
-    ).toBe(`https://media.6529.io/ipfs/${CID_V1}/a.png`);
+    const image = (value: string) =>
+      processTokenUriMetadata({ image: value })?.imageUrl;
+    expect(image(`ipfs://${CID_V1}/a.png`)).toBe(
+      `https://media.6529.io/ipfs/${CID_V1}/a.png`
+    );
+    // Previous hosts and third-party gateways stay exactly as stored.
+    expect(image(`https://ipfs.6529.io/ipfs/${CID_V1}/a.png?v=1`)).toBe(
+      `https://ipfs.6529.io/ipfs/${CID_V1}/a.png?v=1`
+    );
+    expect(image(`https://media.6529.io/ipfs/${CID_V1}/a.png?v=1`)).toBe(
+      `https://media.6529.io/ipfs/${CID_V1}/a.png?v=1`
+    );
+    expect(image(`https://arweave.net/${TX_ID}`)).toBe(
+      `https://arweave.net/${TX_ID}`
+    );
+    // Content-domain inputs are rewritten to the configured host.
+    expect(image(`https://media.6529usercontent.com/ipfs/${CID_V1}/a.png`)).toBe(
+      `https://media.6529.io/ipfs/${CID_V1}/a.png`
+    );
+    expect(image(`https://${CID_V1}.ipfs.6529usercontent.com/a.png`)).toBe(
+      `https://media.6529.io/ipfs/${CID_V1}/a.png`
+    );
+    expect(image("https://not-a-cid.ipfs.6529usercontent.com/a.png")).toBeNull();
+  });
+
+  it("opens stored Drop Forge media unchanged", () => {
+    for (const url of [
+      `https://media.6529.io/ipfs/${CID_V0}/a.html?seed=1`,
+      `https://ipfs.6529.io/ipfs/${CID_V0}/a.html`,
+      "https://example.com/a.html",
+    ]) {
+      expect(getOpenableMediaUrl(url)).toBe(url);
+    }
+    expect(getOpenableMediaUrl(`ipfs://${CID_V0}/a.html`)).toBe(
+      `https://media.6529.io/ipfs/${CID_V0}/a.html`
+    );
   });
 
   it("understands content-domain URLs as first-party input", () => {
@@ -398,14 +432,42 @@ describe("with the content-domain resolver endpoint", () => {
   });
 
   it("resolves token artwork on the content-domain path host", () => {
-    expect(
-      processTokenUriMetadata({ image: `ipfs://${CID_V1}/a.png` })?.imageUrl
-    ).toBe(`https://media.6529usercontent.com/ipfs/${CID_V1}/a.png`);
-    expect(
-      processTokenUriMetadata({
-        image: `https://media.6529usercontent.com/ipfs/${CID_V1}/a.png`,
-      })?.imageUrl
-    ).toBe(`https://media.6529usercontent.com/ipfs/${CID_V1}/a.png`);
+    const image = (value: string) =>
+      processTokenUriMetadata({ image: value })?.imageUrl;
+    for (const input of [
+      `ipfs://${CID_V1}/a.png`,
+      `https://media.6529usercontent.com/ipfs/${CID_V1}/a.png`,
+      `https://media.6529.io/ipfs/${CID_V1}/a.png`,
+      `https://ipfs.6529.io/ipfs/${CID_V1}/a.png`,
+      `https://${CID_V1}.ipfs.6529usercontent.com/a.png`,
+    ]) {
+      expect(image(input)).toBe(
+        `https://media.6529usercontent.com/ipfs/${CID_V1}/a.png`
+      );
+    }
+    expect(image(`https://arweave.net/${TX_ID}`)).toBe(
+      `https://arweave.net/${TX_ID}`
+    );
+  });
+
+  it("opens stored Drop Forge media on its per-CID host", () => {
+    for (const url of [
+      `https://media.6529.io/ipfs/${CID_V0}/a.html?seed=1`,
+      `https://ipfs.6529.io/ipfs/${CID_V0}/a.html?seed=1`,
+    ]) {
+      expect(getOpenableMediaUrl(url)).toBe(`${ISOLATED}/a.html?seed=1`);
+    }
+    // Native URIs resolve through the path host first, which drops the query
+    // as it does today.
+    expect(getOpenableMediaUrl(`ipfs://${CID_V0}/a.html?seed=1`)).toBe(
+      `${ISOLATED}/a.html`
+    );
+    expect(getOpenableMediaUrl(`https://media.6529.io/arweave/${TX_ID}`)).toBe(
+      `https://media.6529usercontent.com/arweave/${TX_ID}`
+    );
+    expect(getOpenableMediaUrl("https://example.com/a.html")).toBe(
+      "https://example.com/a.html"
+    );
   });
 
   it("treats both media hosts as first-party for previews and images", () => {
@@ -420,5 +482,38 @@ describe("with the content-domain resolver endpoint", () => {
       )
     ).toBe(false);
     expect(canPreviewAttachmentInline("https://example.com/a.pdf")).toBe(false);
+  });
+});
+
+describe("with another resolver endpoint", () => {
+  const OTHER_ENDPOINT = "https://resolver.example.test";
+
+  beforeEach(() => {
+    setEndpoint(OTHER_ENDPOINT);
+  });
+
+  it("keeps interactive media on media.6529.io, as before", () => {
+    expect(canonicalizeInteractiveMediaUrl(`ipfs://${CID_V0}/a.html`)).toBe(
+      `https://media.6529.io/ipfs/${CID_V0}/a.html`
+    );
+    expect(
+      canonicalizeInteractiveMediaUrl(
+        `https://ipfs.io/ipfs/${CID_V0}/a.html?seed=1`
+      )
+    ).toBe(`https://media.6529.io/ipfs/${CID_V0}/a.html?seed=1`);
+    expect(isInteractiveMediaAllowedHost("media.6529.io")).toBe(true);
+    expect(isInteractiveMediaAllowedHost("resolver.example.test")).toBe(false);
+  });
+
+  it("checks interactive previews against media.6529.io, as before", () => {
+    jest.isolateModules(() => {
+      const security = jest.requireActual<
+        typeof import("@/components/waves/memes/submission/constants/security")
+      >("@/components/waves/memes/submission/constants/security");
+      expect(security.INTERACTIVE_MEDIA_GATEWAY_BASE_URL).toEqual({
+        ipfs: "https://media.6529.io/ipfs/",
+        arweave: "https://media.6529.io/arweave/",
+      });
+    });
   });
 });

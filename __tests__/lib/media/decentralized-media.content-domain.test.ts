@@ -60,15 +60,36 @@ describe("first-party media hosts on both domains", () => {
     ).toEqual({ protocol: "arweave", id: TX_ID, path: "" });
   });
 
-  it("does not parse per-CID hosts with an invalid label or extra labels", () => {
-    expect(
-      parseDecentralizedMediaRef("https://not-a-cid.ipfs.6529usercontent.com/")
-    ).toBeNull();
+  it.each([
+    "https://not-a-cid.ipfs.6529usercontent.com",
+    "https://evil.ipfs.6529usercontent.com",
+    "https://a.b.ipfs.6529usercontent.com",
+    `https://a.${CID_V1}.ipfs.6529usercontent.com`,
+  ])("does not parse %s with an invalid label or extra labels", (origin) => {
+    for (const path of [
+      "/",
+      `/ipfs/${CID_V0}/x`,
+      `/IPFS/${CID_V0}/x`,
+      `/ipfs/${CID_V1}`,
+    ]) {
+      expect(parseDecentralizedMediaRef(`${origin}${path}`)).toBeNull();
+    }
+  });
+
+  it("serves only an exact lower-case /ipfs/ segment from another CID", () => {
     expect(
       parseDecentralizedMediaRef(
-        `https://a.${CID_V1}.ipfs.6529usercontent.com/`
+        `https://${CID_V1}.ipfs.6529usercontent.com/IPFS/${CID_V0}/x`
       )
-    ).toBeNull();
+    ).toEqual({ protocol: "ipfs", id: CID_V1, path: `IPFS/${CID_V0}/x` });
+    expect(
+      parseDecentralizedMediaRef(
+        `https://${CID_V1}.ipfs.6529usercontent.com/ipfs/not-a-cid/x`
+      )
+    ).toEqual({ protocol: "ipfs", id: CID_V1, path: "ipfs/not-a-cid/x" });
+  });
+
+  it("does not parse the content-domain apex as media", () => {
     expect(
       parseDecentralizedMediaRef(`https://6529usercontent.com/ipfs/${CID_V1}`)
     ).toBeNull();

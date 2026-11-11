@@ -5,6 +5,8 @@ import {
 } from "@/lib/media/arweave-gateways";
 import { getConfiguredIpfsGatewayHost } from "@/lib/media/ipfs-gateways";
 import {
+  DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  FIRST_PARTY_MEDIA_RESOLVER_HOSTS,
   getMediaResolverSource,
   isFirstPartyMediaHostname,
   isFirstPartyMediaResolverHostname,
@@ -14,9 +16,17 @@ import {
 import { publicEnv } from "@/config/env";
 
 const DEFAULT_INTERACTIVE_MEDIA_IPFS_HOSTS = ["ipfs.io", "www.ipfs.io"];
-// Canonical interactive media URLs use the configured resolver's path host.
-const getConfiguredMediaResolverSource = (): string =>
-  getMediaResolverSource(publicEnv.MEDIA_RESOLVER_ENDPOINT);
+// Canonical interactive media URLs use the configured resolver's path host
+// when it is one of the app's own media hosts (which the checks below
+// accept); any other endpoint keeps media.6529.io, as before.
+const getConfiguredMediaResolverSource = (): string => {
+  const source = getMediaResolverSource(publicEnv.MEDIA_RESOLVER_ENDPOINT);
+  return FIRST_PARTY_MEDIA_RESOLVER_HOSTS.some(
+    (host) => source === `https://${host}`
+  )
+    ? source
+    : DEFAULT_MEDIA_RESOLVER_ENDPOINT;
+};
 
 const INTERACTIVE_MEDIA_IPFS_HOSTS = new Set<string>(
   [
