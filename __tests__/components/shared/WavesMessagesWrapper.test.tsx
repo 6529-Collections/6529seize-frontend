@@ -8,6 +8,7 @@ let mockIsRightSidebarOpen = false;
 let mockEffectiveDropId: string | undefined;
 let mockSearchParams = new URLSearchParams();
 let mockIsEncryptedRoute = false;
+let mockPathname = "/waves";
 // The shared wave selection; undefined renders outside a MyStream provider.
 let mockSelectedWaveId: string | null | undefined;
 
@@ -51,12 +52,13 @@ jest.mock("framer-motion", () => {
 });
 
 jest.mock("next/navigation", () => ({
-  usePathname: () => "/waves",
+  usePathname: () => mockPathname,
   useRouter: () => ({ replace: mockRouterReplace }),
   useSearchParams: () => mockSearchParams,
 }));
 
 jest.mock("@/helpers/navigation.helpers", () => ({
+  ...jest.requireActual("@/helpers/navigation.helpers"),
   getActiveWaveIdFromUrl: () => mockWaveId,
   isEncryptedMessagesPathname: () => mockIsEncryptedRoute,
 }));
@@ -178,6 +180,7 @@ function renderWrapper({ defaultPath = "/waves" } = {}) {
 describe("WavesMessagesWrapper", () => {
   beforeEach(() => {
     mockBreakpoint = "LG";
+    mockPathname = "/waves";
     mockWaveId = null;
     mockIsRightSidebarOpen = false;
     mockEffectiveDropId = undefined;
@@ -222,6 +225,15 @@ describe("WavesMessagesWrapper", () => {
     expect(screen.getByTestId("main-content")).toBeInTheDocument();
     expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
     expect(mockChildMounted).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the new-message page as main content on small screens", () => {
+    mockBreakpoint = "S";
+    mockPathname = "/messages/new";
+    renderWrapper({ defaultPath: "/messages" });
+
+    expect(screen.getByTestId("main-content")).toBeInTheDocument();
+    expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
   });
 
   it("renders the direct profile feed query on small screens", () => {

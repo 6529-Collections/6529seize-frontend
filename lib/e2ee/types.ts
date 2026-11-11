@@ -271,6 +271,8 @@ export interface E2eeEngine {
     profileIds: string[];
     kind: "dm" | "group";
     name?: string | null;
+    /** Abort creation if any chosen recipient's key claim is refused. */
+    requireAllRecipients?: boolean;
   }): Promise<string>; // g
   findDm(profileId: string): string | null;
   send(

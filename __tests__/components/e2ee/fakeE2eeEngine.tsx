@@ -258,6 +258,7 @@ export function contextFor(
     store,
     backup: null,
     loadError: null,
+    requestEngine: jest.fn(),
     restart: jest.fn(),
     takeOverHere: jest.fn(),
     ...overrides,

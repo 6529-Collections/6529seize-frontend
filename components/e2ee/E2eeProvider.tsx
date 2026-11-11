@@ -178,16 +178,20 @@ function E2eeProviderEnabled({
   });
   const hasMarker = useEnrollmentMarker(profileId);
   const [setupSession, setSetupSession] = useState<string | null>(null);
+  const requestEngine = useCallback(
+    () => setSetupSession(sessionKey),
+    [sessionKey]
+  );
   useEffect(() => {
     const start = (event: Event) => {
       const scope = (event as CustomEvent<DeviceSetupScope | null>).detail;
       if (scope === "both" || scope === "dms") {
-        setSetupSession(sessionKey);
+        requestEngine();
       }
     };
     window.addEventListener(DEVICE_SETUP_EVENT, start);
     return () => window.removeEventListener(DEVICE_SETUP_EVENT, start);
-  }, [sessionKey]);
+  }, [requestEngine]);
   const wantsEngine =
     isEncryptedMessagesPathname(pathname) ||
     hasMarker ||
@@ -332,12 +336,14 @@ function E2eeProviderEnabled({
           : null,
       restart,
       takeOverHere,
+      requestEngine,
     };
   }, [
     activeKey,
     isProxy,
     loadState,
     profileId,
+    requestEngine,
     restart,
     sessionKey,
     takeOverHere,

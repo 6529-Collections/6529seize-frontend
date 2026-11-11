@@ -13,6 +13,7 @@ import { createBreakpoint } from "react-use";
 import {
   getActiveWaveIdFromUrl,
   isEncryptedMessagesPathname,
+  isMessageComposePathname,
 } from "@/helpers/navigation.helpers";
 import type { ApiDrop } from "../../generated/models/ApiDrop";
 import { DropSize } from "../../helpers/waves/drop.helpers";
@@ -202,7 +203,8 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   // is unreachable on mobile (the wave list renders instead of the form).
   // Trailing slashes are tolerated so a normalization change upstream cannot
   // silently re-break mobile reachability.
-  const isCreateRoute = isCreateWavePathname(pathname);
+  const isCreateRoute =
+    isCreateWavePathname(pathname) || isMessageComposePathname(pathname);
   // Encrypted chats (D109) have no wave id but are always the main content.
   const isEncryptedRoute = isEncryptedMessagesPathname(pathname);
   const canShowMainContent =
