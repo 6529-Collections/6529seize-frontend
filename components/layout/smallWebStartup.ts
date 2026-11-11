@@ -1,5 +1,10 @@
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import {
+  MOBILE_APP_DISMISSAL_KEY,
+  MOBILE_APP_EXCLUDED_ROUTES,
+  MOBILE_APP_USER_AGENTS,
+} from "@/helpers/mobileAppLinks";
+import {
   FINE_POINTER_STORAGE_KEY,
   isTouchFirstEnvironment,
 } from "@/helpers/touch-first.helpers";
@@ -40,20 +45,39 @@ export const SMALL_WEB_STARTUP_SCRIPT = `(() => {
     }
     const fine = savedMouse || matches("(any-pointer: fine)") || matches("(pointer: fine)");
     const hover = matches("(any-hover: hover)") || matches("(hover: hover)");
-    if (mobileDevice || (touch && (phone || (!fine && !hover)))) {
-      root.setAttribute("data-small-web-startup", "true");
+    if (!mobileDevice && !(touch && (phone || (!fine && !hover)))) return;
+    root.setAttribute("data-small-web-startup", "true");
+
+    const supportsApp = !${MOBILE_APP_USER_AGENTS.electron}.test(ua) &&
+      (${MOBILE_APP_USER_AGENTS.android}.test(ua) || ${MOBILE_APP_USER_AGENTS.ios}.test(ua) ||
+        (${MOBILE_APP_USER_AGENTS.mac}.test(ua) && nav.maxTouchPoints > 1));
+    if (!supportsApp) return;
+    const path = decodeURIComponent(globalThis.location.pathname);
+    if (${JSON.stringify(MOBILE_APP_EXCLUDED_ROUTES)}.some(route => path === route || path.startsWith(route + "/"))) return;
+
+    let dismissedUntil = 0;
+    try {
+      dismissedUntil = Number(globalThis.localStorage.getItem(${JSON.stringify(MOBILE_APP_DISMISSAL_KEY)}));
+    } catch {
+      // The banner is eligible when storage is unavailable on a fresh load.
+    }
+    if (!Number.isFinite(dismissedUntil) || dismissedUntil <= Date.now()) {
+      root.setAttribute("data-small-web-banner", "true");
     }
   } catch {
     // Detection failure leaves the ordinary server content available.
   }
 })();`;
 
-const pendingSmallWeb =
-  ':root[data-small-web-startup="true"]:not([data-native-runtime]) .layout-root[data-small="false"]';
+const smallWebStartupRoot =
+  ':root[data-small-web-startup="true"]:not([data-native-runtime])';
+const pendingSmallWebLayout = '.layout-root[data-small="false"]';
+const pendingSmallWeb = `${smallWebStartupRoot} ${pendingSmallWebLayout}`;
 
 // Correct the existing server shell, without hiding/remounting page content or
-// changing React's hydration markup. The hydrated small layout takes over when
-// data-small becomes true. Keep this CSS inline so slow bundles cannot flash.
+// changing React's hydration markup. The banner's 4rem row and 1px border are
+// reserved until the hydrated small layout takes over. Keep this CSS inline
+// so slow bundles cannot flash.
 export const SMALL_WEB_STARTUP_STYLES = `
 @media (max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px) {
   ${pendingSmallWeb} {
@@ -66,6 +90,9 @@ export const SMALL_WEB_STARTUP_STYLES = `
     --left-rail: 0px;
   }
   ${pendingSmallWeb} > [data-web-small-header] { display: block !important; }
+  ${smallWebStartupRoot}[data-small-web-banner="true"] ${pendingSmallWebLayout} > [data-web-small-header] {
+    padding-block-start: calc(4rem + 1px);
+  }
   ${pendingSmallWeb} > [data-web-sidebar] { display: none !important; }
   ${pendingSmallWeb} > .layout-main {
     padding-left: 0 !important;
