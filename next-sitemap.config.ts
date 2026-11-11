@@ -116,6 +116,7 @@ const EXACT_EXCLUDED_PATHS = new Set([
   "/error",
   "/messages",
   "/messages/create",
+  "/messages/new",
   "/nextgen/manager",
   "/notifications",
   "/open-mobile",

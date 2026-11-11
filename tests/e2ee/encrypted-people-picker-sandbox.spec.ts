@@ -8,7 +8,6 @@ import {
 } from "../support/e2ee/e2eeSandboxSession";
 import {
   enroll,
-  ENCRYPTED_ROUTE,
   gotoPath,
   peopleSearch,
   selectedPerson,
@@ -44,7 +43,7 @@ test.describe("Encrypted chat people picker @medium @local-only @e2ee", () => {
     await enroll(bob);
 
     const page = alice.page;
-    await gotoPath(page, `${ENCRYPTED_ROUTE}/new`);
+    await gotoPath(page, "/messages/new");
     const search = peopleSearch(page);
     const result = page.getByRole("button", { name: /^bob Level/u });
     const create = page.getByRole("button", { name: "Start chat" });

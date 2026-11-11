@@ -116,18 +116,20 @@ it("keeps the chosen recipient in the unified composer when they need an unencry
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false, gcTime: 0 } },
     });
-    const close = jest.fn();
     render(
       <E2eeTestProvider value={context}>
         <QueryClientProvider client={client}>
           <CreateDirectMessage
             profile={{ primary_wallet: self.wallet } as ApiIdentity}
-            presentation="modal"
-            onBack={close}
-            onSuccess={close}
+            onBack={jest.fn()}
           />
         </QueryClientProvider>
       </E2eeTestProvider>
+    );
+    expect(screen.getByRole("heading", { name: "New message" })).toBeVisible();
+    expect(screen.getByRole("link", { name: /back/i })).toHaveAttribute(
+      "href",
+      "/messages"
     );
     const input = screen.getByRole("textbox", { name: "To:" });
     fireEvent.change(input, { target: { value: "ali" } });
@@ -154,11 +156,12 @@ it("keeps the chosen recipient in the unified composer when they need an unencry
     expect(screen.getByRole("button", { name: "Remove alice" })).toBeVisible();
 
     fireEvent.click(fallback);
-    await waitFor(() => expect(close).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(mockPush).toHaveBeenCalledWith("/messages/dm-1")
+    );
     expect(createDirectMessageWave).toHaveBeenCalledWith({
       addresses: ["0xabc"],
     });
-    expect(mockPush).toHaveBeenCalledWith("/messages/dm-1");
     expect(fallback).toBeEnabled();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   } finally {

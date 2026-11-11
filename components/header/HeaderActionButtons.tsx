@@ -11,6 +11,7 @@ import useCreateModalState from "@/hooks/useCreateModalState";
 import {
   getActiveWaveIdFromUrl,
   getEncryptedMessagesRoute,
+  NEW_MESSAGE_ROUTE,
 } from "@/helpers/navigation.helpers";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -78,7 +79,7 @@ function HeaderActionButtonsContent() {
       // Full prefetch includes the composer beyond the messages loading boundary.
       return (
         <Link
-          href="/messages/create"
+          href={unifiedCompose ? NEW_MESSAGE_ROUTE : "/messages/create"}
           prefetch={true}
           aria-label={label}
           title={label}

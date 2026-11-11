@@ -49,7 +49,6 @@ interface NewMessageFormProps {
   readonly initialPeople?: readonly E2eeSelectedPerson[] | undefined;
   readonly fromLegacyChat?: boolean | undefined;
   readonly onCancel?: (() => void) | undefined;
-  readonly onOpen?: (() => void) | undefined;
   readonly createUnencrypted?:
     | ((wallets: string[]) => Promise<string | null>)
     | undefined;
@@ -104,14 +103,14 @@ function resolveExistingChat(
 }
 
 function canContinueUnencrypted({
-  legacyOpen,
+  legacySupported,
   openingExisting,
   selectedCount,
   walletCount,
   status,
   statuses,
 }: {
-  readonly legacyOpen: boolean;
+  readonly legacySupported: boolean;
   readonly openingExisting: boolean;
   readonly selectedCount: number;
   readonly walletCount: number;
@@ -119,7 +118,7 @@ function canContinueUnencrypted({
   readonly statuses: readonly E2eeEligibilityState[];
 }) {
   if (
-    !legacyOpen ||
+    !legacySupported ||
     openingExisting ||
     selectedCount === 0 ||
     selectedCount !== walletCount
@@ -137,12 +136,12 @@ function getMessageAction({
   openingExisting,
   useUnencrypted,
   hasUnavailable,
-  legacyClosedForDm,
+  fallbackClosed,
 }: {
   readonly openingExisting: boolean;
   readonly useUnencrypted: boolean;
   readonly hasUnavailable: boolean;
-  readonly legacyClosedForDm: boolean;
+  readonly fallbackClosed: boolean;
 }): {
   readonly actionLabel: MessageKey;
   readonly warning: "blocked" | "closed" | "retention" | null;
@@ -154,7 +153,7 @@ function getMessageAction({
       actionLabel: "e2ee.new.continueUnencrypted",
       warning: "retention",
     };
-  if (legacyClosedForDm)
+  if (fallbackClosed)
     return { actionLabel: "e2ee.new.start", warning: "closed" };
   return {
     actionLabel: "e2ee.new.start",
@@ -166,6 +165,7 @@ function getAlternateActions({
   hasMatches,
   showMatches,
   showLegacyChoice,
+  unencryptedLabel,
   useUnencrypted,
   choice,
   setChoice,
@@ -173,6 +173,7 @@ function getAlternateActions({
   readonly hasMatches: boolean;
   readonly showMatches: boolean;
   readonly showLegacyChoice: boolean;
+  readonly unencryptedLabel: MessageKey;
   readonly useUnencrypted: boolean;
   readonly choice: MessageChoice;
   readonly setChoice: (choice: MessageChoice) => void;
@@ -193,9 +194,7 @@ function getAlternateActions({
   if (showLegacyChoice) {
     actions.push({
       kind: "encryption",
-      label: useUnencrypted
-        ? "e2ee.new.useEncrypted"
-        : "e2ee.new.useUnencrypted",
+      label: useUnencrypted ? "e2ee.new.useEncrypted" : unencryptedLabel,
       onClick: () =>
         setChoice({ ...choice, preferUnencrypted: !choice.preferUnencrypted }),
     });
@@ -209,7 +208,6 @@ export function NewMessageForm({
   initialPeople = EMPTY_RECIPIENTS,
   fromLegacyChat = false,
   onCancel,
-  onOpen,
   createUnencrypted,
 }: NewMessageFormProps) {
   const locale = useBrowserLocale();
@@ -226,6 +224,7 @@ export function NewMessageForm({
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [legacyClosedAtSubmit, setLegacyClosedAtSubmit] = useState(false);
   const [notice, setNotice] = useState<MessageKey | null>(null);
 
   const hasRecipients = selected.length > 0;
@@ -246,20 +245,19 @@ export function NewMessageForm({
   const wallets = selected.flatMap((person) =>
     person.wallet ? [person.wallet] : []
   );
-  const legacyClosed =
-    Boolean(createUnencrypted) && now > 0 && isLegacyDmClosed(now);
-  const canUseUnencrypted = canContinueUnencrypted({
-    legacyOpen: Boolean(createUnencrypted) && now > 0 && !legacyClosed,
+  const legacyClosed = legacyClosedAtSubmit || isLegacyDmClosed(now);
+  const supportsFallback = canContinueUnencrypted({
+    legacySupported: Boolean(createUnencrypted) && now > 0,
     openingExisting,
     selectedCount: selected.length,
     walletCount: wallets.length,
     status: e2ee.status,
     statuses,
   });
-  const showLegacyChoice = canUseUnencrypted && selected.length > 1;
+  const canUseUnencrypted = supportsFallback && !legacyClosed;
+  const showLegacyChoice = canUseUnencrypted && kind === "group";
   const useUnencrypted =
-    canUseUnencrypted &&
-    (preferUnencrypted || (kind === "dm" && !showLegacyChoice));
+    canUseUnencrypted && (preferUnencrypted || kind === "dm");
   const showGroupName = selected.length > 1 && !showMatches && !useUnencrypted;
   const canSubmit =
     !creating &&
@@ -300,7 +298,6 @@ export function NewMessageForm({
   };
 
   const openChat = (g: string) => {
-    onOpen?.();
     router.push(getEncryptedConversationRoute(g));
   };
 
@@ -310,15 +307,19 @@ export function NewMessageForm({
       openChat(existing);
       return;
     }
+    // The displayed action can predate the cutoff at the time of the click.
+    if (useUnencrypted && isLegacyDmClosed()) {
+      setErrorMessage(null);
+      setLegacyClosedAtSubmit(true);
+      return;
+    }
     sending.current = true;
     setCreating(true);
     setErrorMessage(null);
     try {
       if (useUnencrypted && createUnencrypted) {
-        // The displayed eligibility can predate the cutoff at the time of the click.
-        if (!isLegacyDmClosed()) {
-          setErrorMessage(await createUnencrypted(wallets));
-        }
+        // The unencrypted callback navigates to the DM on success.
+        setErrorMessage(await createUnencrypted(wallets));
         return;
       }
       if (engine && allEligible) {
@@ -352,13 +353,16 @@ export function NewMessageForm({
     openingExisting,
     useUnencrypted,
     hasUnavailable,
-    legacyClosedForDm:
-      legacyClosed && kind === "dm" && statuses.includes("NO_DEVICES"),
+    fallbackClosed: legacyClosed && supportsFallback,
   });
   const alternateActions = getAlternateActions({
     hasMatches: matchingGroups.length > 0,
     showMatches,
     showLegacyChoice,
+    unencryptedLabel:
+      selected.length === 1
+        ? "e2ee.new.useUnencryptedDm"
+        : "e2ee.new.useUnencrypted",
     useUnencrypted,
     choice,
     setChoice: (nextChoice) => {

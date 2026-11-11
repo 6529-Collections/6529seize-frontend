@@ -237,7 +237,8 @@ claiming your permissions are expiring.
 In the 6529 app, the back arrow to the left of the chat avatar returns to the
 encrypted messages list. It stays visible on iPad in portrait and landscape.
 
-1. Select **+** beside **Messages**.
+1. Select **+** beside **Messages** to open **New message** at `/messages/new`.
+   On desktop, the chat list stays beside the form.
 2. Search in **To** and select the people you want to chat with. Each person
    shows whether they can receive encrypted messages. You can retry a failed
    check or remove someone while keeping the rest of the selection.
@@ -254,7 +255,8 @@ If someone cannot receive encrypted messages, the composer shows why and keeps
 the recipients and group name while you adjust the selection. Before the
 unencrypted messaging cutoff, the composer can offer **Continue unencrypted**
 after showing the retention warning. In a group, first choose **Use unencrypted
-chat instead**.
+chat instead**. If you used **More options** to start a group with one other
+person, **Use unencrypted DM instead** lets you continue as a direct message.
 
 A direct message has exactly two people. A device joins one only when you are
 one of the two people it names, the invitation comes from one of you, and

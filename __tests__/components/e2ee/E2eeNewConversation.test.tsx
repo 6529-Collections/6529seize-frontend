@@ -432,6 +432,32 @@ describe("unified new message", () => {
     expect(screen.getByRole("button", { name: "Start chat" })).toBeDisabled();
   });
 
+  it("offers an explicit unencrypted DM for a group with one recipient", async () => {
+    const engine = createFakeE2eeEngine();
+    jest
+      .mocked(engine.checkEligibility)
+      .mockResolvedValue([{ profileId: ALICE_ID, status: "NO_DEVICES" }]);
+    const create = jest.fn(async () => null);
+    render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <PlaintextCapableForm create={create} />
+      </E2eeTestProvider>
+    );
+    pick("alice");
+    fireEvent.click(screen.getByText("More options"));
+    fireEvent.click(screen.getByRole("checkbox", { name: /Create a group/ }));
+    expect(screen.getByRole("button", { name: "Start chat" })).toBeDisabled();
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Use unencrypted DM instead" })
+    );
+    expect(create).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continue unencrypted" })
+    );
+    expect(create).toHaveBeenCalledWith([identity(ALICE_ID, "alice").wallet]);
+    expect(engine.createConversation).not.toHaveBeenCalled();
+  });
+
   it.each([
     { status: "NO_DEVICES", afterCutoff: false, fallback: true },
     { status: "NO_DEVICES", afterCutoff: true, fallback: false },
@@ -499,5 +525,13 @@ describe("unified new message", () => {
     fireEvent.click(fallback);
     expect(create).not.toHaveBeenCalled();
     expect(engine.createConversation).not.toHaveBeenCalled();
+    expect(screen.getByText(/Unencrypted messaging has ended/)).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Continue unencrypted" })
+    ).toBeNull();
+    expect(screen.getByRole("button", { name: "Start chat" })).toBeDisabled();
+    expect(
+      screen.getByRole("list", { name: "People in this chat" })
+    ).toHaveTextContent("alice");
   });
 });

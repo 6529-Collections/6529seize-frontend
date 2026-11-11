@@ -307,10 +307,11 @@ export const E2EE_MESSAGES = {
   "e2ee.new.newGroup": "Start a new group",
   "e2ee.new.viewGroups": "View existing groups",
   "e2ee.new.useUnencrypted": "Use unencrypted chat instead",
+  "e2ee.new.useUnencryptedDm": "Use unencrypted DM instead",
   "e2ee.new.useEncrypted": "Use encrypted chat",
   "e2ee.new.continueUnencrypted": "Continue unencrypted",
   "e2ee.new.legacyClosed":
-    "Unencrypted messaging has ended. You can start a chat once this person turns on encrypted messages.",
+    "Unencrypted messaging has ended. Everyone in the chat needs to turn on encrypted messages.",
   "e2ee.new.creating": "Starting…",
   "e2ee.new.createFailed": "Couldn’t start the encrypted chat. Try again.",
   "e2ee.new.existingDm": "You already have an encrypted chat with {name}.",

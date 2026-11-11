@@ -4,6 +4,7 @@ import {
   getNotificationsRoute,
   getWaveRoute,
   getWavesBaseRoute,
+  NEW_MESSAGE_ROUTE,
 } from "@/helpers/navigation.helpers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -39,6 +40,7 @@ import {
   MALFORMED_WAVE_ROUTE,
 } from "@/lib/proxy/waveRoutes";
 import { handleValidatorPageGate } from "@/lib/validator-page/proxyGate";
+import { isE2eeFlagEnabled } from "@/config/e2eeFlag";
 import { publicEnv } from "./config/env";
 import { getApiBase } from "@/services/api/api-endpoints";
 import { API_AUTH_COOKIE } from "./constants/constants";
@@ -483,6 +485,18 @@ export default async function proxy(req: NextRequest) {
       return NextResponse.rewrite(notFoundUrl, {
         headers: UNCACHEABLE_RESPONSE_HEADERS,
       });
+    }
+
+    if (
+      isE2eeFlagEnabled(publicEnv.NEXT_PUBLIC_E2EE_DM_ENABLED) &&
+      (normalizedPathname === "/messages" ||
+        normalizedPathname.startsWith("/messages/")) &&
+      req.nextUrl.searchParams.get("create") === "dm"
+    ) {
+      const composerUrl = req.nextUrl.clone();
+      composerUrl.pathname = NEW_MESSAGE_ROUTE;
+      composerUrl.search = "";
+      return uncacheableRedirect(composerUrl);
     }
 
     const redirectTarget = normalizedPathname.startsWith("/my-stream")
