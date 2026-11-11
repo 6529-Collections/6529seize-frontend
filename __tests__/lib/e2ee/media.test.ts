@@ -228,10 +228,18 @@ describe("mediaFromFile", () => {
   );
   const hasPlace = (bytes: Uint8Array) =>
     new TextDecoder("latin1").decode(bytes).includes("51.5N");
-  const originalBitmap = globalThis.createImageBitmap;
+  // Restored exactly after each test, including when it was absent (node).
+  const originalBitmap = Object.getOwnPropertyDescriptor(
+    globalThis,
+    "createImageBitmap"
+  );
 
   afterEach(() => {
-    globalThis.createImageBitmap = originalBitmap;
+    if (originalBitmap) {
+      Object.defineProperty(globalThis, "createImageBitmap", originalBitmap);
+    } else {
+      Reflect.deleteProperty(globalThis, "createImageBitmap");
+    }
   });
 
   it("sends a photo without its metadata under a neutral name", async () => {
@@ -310,12 +318,16 @@ describe("mediaFromFile", () => {
 
   /** Decodes only the copies `decodes` accepts (by their bytes). */
   const mockDecoder = (decodes: (bytes: Uint8Array) => boolean) => {
-    globalThis.createImageBitmap = jest.fn(async (source: Blob) => {
-      if (decodes(new Uint8Array(await source.arrayBuffer()))) {
-        return { width: 4, height: 3, close: () => undefined };
-      }
-      throw new Error("decode failed");
-    }) as unknown as typeof createImageBitmap;
+    Object.defineProperty(globalThis, "createImageBitmap", {
+      configurable: true,
+      writable: true,
+      value: jest.fn(async (source: Blob) => {
+        if (decodes(new Uint8Array(await source.arrayBuffer()))) {
+          return { width: 4, height: 3, close: () => undefined };
+        }
+        throw new Error("decode failed");
+      }),
+    });
   };
 
   it("falls back to the original when only the original decodes", async () => {
@@ -348,6 +360,12 @@ describe("mediaFromFile", () => {
       expect(media.name).toBe("image.jpg");
     }
   );
+
+  it("leaves no decoder behind after a test that replaced it", () => {
+    expect(
+      Object.getOwnPropertyDescriptor(globalThis, "createImageBitmap")
+    ).toEqual(originalBitmap);
+  });
 
   it("numbers images and keeps names when asked to", async () => {
     const file = new File([photo], "moved.jpg", { type: "image/jpeg" });
