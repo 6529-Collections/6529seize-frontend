@@ -330,6 +330,62 @@ describe("seal checks reading signed events in batches", () => {
     expectWithinBudget();
   });
 
+  it("keeps a post whose fallback read failed unverified when re-shown, reading it again only once its content changes", async () => {
+    mockFetchBatch.mockRejectedValueOnce(serverError());
+    mockFetchSignedEvents.mockRejectedValueOnce(serverError());
+    const drop = aDrop();
+    const first = renderHook(() => useDropSealStates([drop], true));
+    await flush(60_000);
+    expect(first.result.current).toEqual(["unverified"]);
+    first.unmount();
+
+    // Seen again in the page session: no new read (the Signature dialog is
+    // the retry), and the seal still says not yet verified.
+    const again = renderHook(() => useDropSealStates([{ ...drop }], true));
+    await flush(60 * 60_000);
+    expect(again.result.current).toEqual(["unverified"]);
+    expect(mockFetchBatch).toHaveBeenCalledTimes(1);
+    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
+    again.unmount();
+
+    // Edited content is a new check: it joins a batch read like any other.
+    const edited = {
+      ...drop,
+      parts: [{ ...drop.parts[0], content: "gm, edited" }],
+    };
+    const { result } = renderHook(() => useDropSealStates([edited], true));
+    await flush(60_000);
+    expect(result.current).toEqual(["verified"]);
+    expect(batchReads()).toEqual([[drop.id], [drop.id]]);
+    expect(mockFetchSignedEvents).toHaveBeenCalledTimes(1);
+  });
+
+  it("reads each drop exactly once after a 429 that came while some of its batch had started", async () => {
+    mockFetchBatch.mockRejectedValueOnce(
+      Object.assign(new Error("Too many requests"), {
+        status: 429,
+        headers: { get: () => null },
+      })
+    );
+    const author = anAuthor();
+    const drops = Array.from({ length: 5 }, () => aDrop({ author }));
+    const { result } = renderHook(() => useDropSealStates(drops, true));
+    // Two checks started on the batch's answer, three were still queued.
+    await flush();
+    expect(result.current).toEqual(Array(5).fill("pending"));
+
+    await flush(60_000);
+    expect(result.current).toEqual(Array(5).fill("verified"));
+    const ids = drops.map(({ id }) => id);
+    const [, afterPause, ...more] = batchReads();
+    expect([...afterPause!].sort()).toEqual([...ids].sort());
+    expect(more).toEqual([]);
+    expect(mockFetchSignedEvents).not.toHaveBeenCalled();
+    expect(mockVerify.mock.calls.map(([data]) => data.drop_id).sort()).toEqual(
+      [...ids].sort()
+    );
+  });
+
   it("tries the batch read again for posts due after a failed one", async () => {
     mockFetchBatch.mockRejectedValueOnce(serverError());
     const first = [aDrop(), aDrop()];

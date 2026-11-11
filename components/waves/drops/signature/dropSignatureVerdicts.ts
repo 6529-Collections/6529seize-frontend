@@ -274,9 +274,6 @@ const isBatchReadMissing = (error: unknown): boolean => {
   return status === 404 || status === 405;
 };
 
-/** The signed events of a drop the batch read could not give. */
-class SignedEventsUnavailableError extends Error {}
-
 /**
  * A drop's signed events: from its batch read, or from the single-drop
  * route when the batch named it truncated, the batch read failed or the API
@@ -300,7 +297,8 @@ async function readSignedEvents({
       throw result.error;
     case "unavailable":
     case "missing":
-      throw new SignedEventsUnavailableError(result.kind);
+      // Settled like any failed read: "unverified" for the page session.
+      throw new Error(`Signed events ${result.kind}`);
   }
 }
 
@@ -506,6 +504,8 @@ function requestDropSignatureCheck(drop: VerdictDrop): void {
     return;
   }
   setEntry(drop.id, { key, state: "pending" });
+  // Always a new entry: no batch read has included it yet. The queue holds
+  // at most one entry per drop.
   queue.set(drop.id, { drop, key });
   pump();
 }
