@@ -556,7 +556,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("owner retries failed receiver edits without repeating attempts changes and keeps Manage given available", async ({
+  test("owner retries failed receiver edits without repeating successful writes and keeps Manage given available", async ({
     page,
     baseURL,
   }) => {
