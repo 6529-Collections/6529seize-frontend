@@ -153,6 +153,21 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expectNoHorizontalOverflow(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await expectNoHorizontalOverflow(page);
+
+    const validator = page.getByRole("link", {
+      name: "6529 Validator",
+    });
+    await expect(validator).toHaveAttribute("href", "/validator");
+    await expect(validator).toHaveAccessibleDescription(
+      "Read more about 6529 validator"
+    );
+    await expect(
+      validator.getByRole("region", { name: "6529 Validator" })
+    ).toHaveCount(0);
+    await expectKeyboardFocusOutline(page, validator);
+    // Hit the card padding to verify that the entire section is a link.
+    await validator.click({ position: { x: 12, y: 12 } });
+    await expect(page).toHaveURL(/\/validator$/);
   });
 
   test("should load the about index page", async ({ page }) => {
