@@ -11,6 +11,11 @@ import {
 
 const NOW = 1_800_000_000_000;
 const OWN = "0xown";
+/**
+ * This device joined well before any activity in these cases, so the join
+ * bound on idle time only applies where a case sets `joinedAt` itself.
+ */
+const JOINED_LONG_AGO = NOW - 4 * T_IDLE_MS;
 
 const ok = (expiresAt = NOW + 1e9): DeviceStatus => ({
   revoked: false,
@@ -25,6 +30,8 @@ function input(
     now: NOW,
     ownDeviceKey: OWN,
     ownProfileId: "me",
+    ownIsAdmin: true,
+    joinedAt: JOINED_LONG_AGO,
     members: [
       { deviceKey: OWN, profileId: "me" },
       { deviceKey: "0xb1", profileId: "bob" },
@@ -113,6 +120,54 @@ describe("required changes (contract 8.2, 8.4)", () => {
     expect(changes.idleRemovals).toEqual(["0xb1"]);
   });
 
+  it("proposes another person's idle device as a non-admin only after seeing it commit", () => {
+    const idle = NOW - T_IDLE_MS - 1;
+    const changes = computeRequiredChanges(
+      input({
+        ownIsAdmin: false,
+        members: [
+          { deviceKey: OWN, profileId: "me" },
+          { deviceKey: "0xa2", profileId: "me" },
+          { deviceKey: "0xb1", profileId: "bob" },
+          { deviceKey: "0xc1", profileId: "carol" },
+        ],
+        activity: {
+          [OWN]: { at: NOW, known: true },
+          // Own devices stay this device's to clean up.
+          "0xa2": { at: idle, known: false },
+          // Only the join time is known: the admins decide.
+          "0xb1": { at: idle, known: false },
+          // Seen committing, then nothing for 60 days.
+          "0xc1": { at: idle, known: true },
+        },
+      })
+    );
+    expect(changes.idleRemovals.sort()).toEqual(["0xa2", "0xc1"]);
+  });
+
+  it("counts idle time from this device's own join at the earliest", () => {
+    const changes = computeRequiredChanges(
+      input({
+        joinedAt: NOW - 10 * 86_400_000,
+        activity: {
+          [OWN]: { at: NOW, known: true },
+          // Times from the log may say long ago; this device joined 10 days ago.
+          "0xb1": { at: NOW - 3 * T_IDLE_MS, known: true },
+          "0xc1": { at: NOW - 3 * T_IDLE_MS, known: false },
+        },
+      })
+    );
+    expect(changes.idleRemovals).toEqual([]);
+    expect(
+      computeRequiredChanges(
+        input({
+          joinedAt: NOW - T_IDLE_MS - 1,
+          activity: { "0xb1": { at: NOW - 3 * T_IDLE_MS, known: true } },
+        })
+      ).idleRemovals
+    ).toEqual(["0xb1"]);
+  });
+
   it("is lenient when judging someone else's idle removal", () => {
     expect(mayBeIdle(undefined, NOW)).toBe(true);
     expect(mayBeIdle({ at: NOW, known: false }, NOW)).toBe(true);
@@ -192,7 +247,7 @@ describe("required changes (contract 8.2, 8.4)", () => {
       now: NOW,
       leaving: new Set<string>(),
       badGrants: new Set<string>(),
-      deviceStatus: new Map(),
+      deviceStatus: new Map<string, DeviceStatus>(),
     };
     expect(isStrictRemoval("0xz", base)).toBe(false);
     expect(isStrictRemoval("0xz", { ...base, leaving: new Set(["0xz"]) })).toBe(

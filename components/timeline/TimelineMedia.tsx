@@ -10,6 +10,7 @@ import { t } from "@/i18n/messages";
 import {
   parseDecentralizedMediaRef,
   to6529ResolverUrl,
+  toIsolatedHtmlUrlFromInput,
 } from "@/lib/media/decentralized-media";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -63,10 +64,17 @@ export default function TimelineMediaComponent(props: Readonly<Props>) {
   return <TimelineMediaPreview key={`${props.type}:${props.url}`} {...props} />;
 }
 
+// Frames and "open" links for first-party IPFS media use the per-CID host of
+// the separate content domain when it is configured; otherwise the source is
+// returned unchanged.
+function toHtmlSource(source: string): string {
+  return toIsolatedHtmlUrlFromInput(source, publicEnv.MEDIA_RESOLVER_ENDPOINT);
+}
+
 function getHistoricalMediaHref(url: string): string | null {
   for (const source of getHistoricalMediaSources(url)) {
     try {
-      const parsed = new URL(source);
+      const parsed = new URL(toHtmlSource(source));
       if (
         (parsed.protocol === "https:" || parsed.protocol === "http:") &&
         !parsed.username &&
@@ -210,7 +218,7 @@ function TimelineMediaPreview(props: Readonly<Props>) {
       <iframe
         key={activeSrc}
         className={styles["timelineMediaImage"]}
-        src={activeSrc}
+        src={activeSrc === undefined ? undefined : toHtmlSource(activeSrc)}
         sandbox="allow-scripts"
         title={t(locale, "timeline.media.htmlTitle", { label })}
         onErrorCapture={advance}

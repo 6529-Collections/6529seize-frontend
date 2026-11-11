@@ -16,6 +16,7 @@ import {
   MappingToolSubmitButton,
   MappingToolUpload,
 } from "./MappingToolControls";
+import { buildCsv } from "@/helpers/csv-export.helpers";
 import { parseCsvFile } from "./mappingToolCsv";
 import { downloadCsvFile } from "./mappingToolDownload";
 import styles from "./MappingTool.module.css";
@@ -102,7 +103,7 @@ export default function DelegationMappingTool() {
         }
       });
       downloadCsvFile(
-        out.map((address) => address.toLowerCase()).join("\n"),
+        buildCsv(out.map((address) => [address.toLowerCase()])),
         "output.csv"
       );
       setProcessing(false);

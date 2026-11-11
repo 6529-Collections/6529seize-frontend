@@ -3,6 +3,8 @@
 import { useAuth } from "@/components/auth/Auth";
 import { publicEnv } from "@/config/env";
 import { areEqualURLS } from "@/helpers/Helpers";
+import { getInternalLinkPath } from "@/helpers/internalLink";
+import { getNativeLinkDestination } from "@/helpers/mobileAppLinks";
 import { t } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -38,6 +40,15 @@ function getQRScannerErrorToastMessage({
   );
 }
 
+/**
+ * A scanned link to this site opens its path and query. The fragment is not
+ * carried into the app, as before.
+ */
+function getScannedSitePath(content: string): string | null {
+  const path = getInternalLinkPath(content);
+  return path === null ? null : path.split("#")[0]!;
+}
+
 function getDeviceSetupRoute(
   url: URL,
   content: string,
@@ -65,7 +76,6 @@ export default function HeaderQRScanner({
   readonly appSidebar?: boolean | undefined;
 }) {
   const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
-  const baseEndpoint = publicEnv.BASE_ENDPOINT;
 
   const { setToast } = useAuth();
   const capacitor = useCapacitor();
@@ -142,22 +152,9 @@ export default function HeaderQRScanner({
     }
   };
 
-  const handleDeviceSetupQRCode = (
-    url: URL,
-    content: string,
-    address: string
-  ) => {
-    const route = getDeviceSetupRoute(url, content, appScheme, address);
-    if (!route) {
-      setToast({ message: invalidQRCodeMessage, type: "error" });
-      return;
-    }
-    onScanSuccess();
-    router.push(route);
-  };
-
-  const handleConnectionShareQRCode = (content: string) => {
-    const route = getConnectionShareRoute({ content, appScheme });
+  // Only a route the destination helpers accepted is opened; anything else
+  // is reported as an unrecognised code.
+  const navigateToScannedRoute = (route: string | null) => {
     if (!route) {
       setToast({ message: invalidQRCodeMessage, type: "error" });
       return;
@@ -170,56 +167,30 @@ export default function HeaderQRScanner({
     try {
       const url = new URL(content);
       if (deviceSetupAddress !== undefined) {
-        handleDeviceSetupQRCode(url, content, deviceSetupAddress);
+        navigateToScannedRoute(
+          getDeviceSetupRoute(url, content, appScheme, deviceSetupAddress)
+        );
         return;
       }
-      let queryParams: Record<string, string | number> = {};
 
-      if (url.origin === baseEndpoint) {
-        const resolvedPath = `${url.pathname}${url.search}`;
-        onScanSuccess();
-        router.push(resolvedPath);
+      const siteOrigin = new URL(publicEnv.BASE_ENDPOINT).origin;
+      if (url.origin === siteOrigin) {
+        navigateToScannedRoute(getScannedSitePath(content));
       } else if (areEqualURLS(url.protocol, `${appScheme}:`)) {
         if (url.hostname === DeepLinkScope.SHARE_CONNECTION) {
-          handleConnectionShareQRCode(content);
+          navigateToScannedRoute(
+            getConnectionShareRoute({ content, appScheme })
+          );
           return;
         }
-        const resolvedUrl = content.replace(`${appScheme}://`, "");
-        const [scope, ...pathParts] = resolvedUrl.split("?")[0]?.split("/")!;
-
-        // Extract query params
-        const queryString = resolvedUrl.includes("?")
-          ? resolvedUrl.split("?")[1]
-          : "";
-        const searchParams = new URLSearchParams(queryString);
-        queryParams = Object.fromEntries(searchParams.entries());
-        queryParams["_t"] = Math.floor(Date.now() / 1000);
-
-        const stringQueryParams = Object.fromEntries(
-          Object.entries(queryParams).map(([key, value]) => [
-            key,
-            String(value),
-          ])
+        navigateToScannedRoute(
+          getNativeLinkDestination(
+            content,
+            appScheme,
+            siteOrigin,
+            Math.floor(Date.now() / 1000)
+          )
         );
-        const queryParamsString = new URLSearchParams(
-          stringQueryParams
-        ).toString();
-
-        if (scope !== DeepLinkScope.NAVIGATE) {
-          console.warn("Unknown Deep Link Scope", scope);
-          setToast({
-            message: invalidQRCodeMessage,
-            type: "error",
-          });
-          return;
-        }
-
-        // Navigate to the extracted path
-        onScanSuccess();
-        const routerPath = `/${pathParts.join("/")}${
-          queryParamsString ? `?${queryParamsString}` : ""
-        }`;
-        router.push(routerPath);
       } else {
         setToast({
           message: invalidQRCodeMessage,

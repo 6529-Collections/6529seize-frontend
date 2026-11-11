@@ -242,6 +242,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/support/composerSandboxServer.cjs",
         "components/waves/WavesMobile.tsx",
         "components/brain/BrainMobile.tsx",
+        "components/shared/WavesMessagesWrapper.tsx",
         "components/brain/my-stream/MyStreamWaveContent.tsx",
         "components/waves/drops/WaveDropActionsOpen.tsx",
         "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",

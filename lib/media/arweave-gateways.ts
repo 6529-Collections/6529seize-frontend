@@ -2,6 +2,7 @@ import {
   ARWEAVE_GATEWAY_HOSTS,
   ARWEAVE_TX_SUBDOMAIN_SUFFIXES,
   DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  FIRST_PARTY_MEDIA_RESOLVER_HOSTS,
   canonicalizeGatewayHostname,
   parseDecentralizedMediaRef,
 } from "./decentralized-media";
@@ -30,7 +31,7 @@ export const ARWEAVE_GATEWAY_CSP_SOURCES = dedupe([
 ]);
 
 export const ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES = dedupe([
-  "media.6529.io",
+  ...FIRST_PARTY_MEDIA_RESOLVER_HOSTS,
   ...ARWEAVE_GATEWAY_HOSTS.flatMap((hostname) => [hostname, `**.${hostname}`]),
   ...ADDITIONAL_CSP_HOSTS.flatMap((hostname) => [hostname, `**.${hostname}`]),
 ]);

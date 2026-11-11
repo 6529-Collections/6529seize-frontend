@@ -34,15 +34,16 @@ const notFoundResponse = () =>
   new Response(JSON.stringify({ message: "Not Found" }), { status: 404 });
 const requestFor = (url: string, refresh = false): NextRequest =>
   ({
+    headers: new Headers(),
     nextUrl: new URL(
       `https://app.local/api/github-preview?url=${encodeURIComponent(url)}${refresh ? "&refresh=1" : ""}`
     ),
   }) as NextRequest;
-const batchRequestFor = (urls: readonly string[]): Request =>
+const batchRequestFor = (urls: readonly string[]): NextRequest =>
   new Request("https://app.local/api/github-preview", {
     method: "POST",
     body: JSON.stringify({ urls }),
-  });
+  }) as unknown as NextRequest;
 const authorization = (init?: RequestInit) =>
   new Headers(init?.headers).get("authorization");
 const publicIssue = { title: PUBLIC_TITLE, state: "open" };
@@ -70,44 +71,43 @@ describe("GitHub preview public access boundary", () => {
     globalThis.fetch = originalFetch;
   });
 
-  it.each([
-    "github_pat_test",
-    "ghs_test",
-    "unrecognized-token-fixture",
-  ])("uses anonymous REST for unverified token type %s", async (token) => {
-    mockGithubToken = token;
-    fetchMock.mockImplementation(async (_url, init) => {
-      if (authorization(init)) {
-        return jsonResponse({ title: PRIVATE_MARKER });
-      }
-      return notFoundResponse();
-    });
-    const urls = [
-      "https://github.com/o/r",
-      issueUrl,
-      "https://github.com/o/r/pull/1",
-      "https://github.com/o/r/blob/main/secret.txt#L1-L3",
-      "https://github.com/o/r/tree/main/src",
-      "https://github.com/o/r/commit/abc123",
-      "https://github.com/o/r/releases/tag/v1",
-      "https://github.com/o/r/releases/latest",
-      "https://github.com/o/r/actions",
-      "https://github.com/o/r/actions/runs/1",
-      "https://github.com/o/r/actions/workflows/ci.yml",
-    ];
+  it.each(["github_pat_test", "ghs_test", "unrecognized-token-fixture"])(
+    "uses anonymous REST for unverified token type %s",
+    async (token) => {
+      mockGithubToken = token;
+      fetchMock.mockImplementation(async (_url, init) => {
+        if (authorization(init)) {
+          return jsonResponse({ title: PRIVATE_MARKER });
+        }
+        return notFoundResponse();
+      });
+      const urls = [
+        "https://github.com/o/r",
+        issueUrl,
+        "https://github.com/o/r/pull/1",
+        "https://github.com/o/r/blob/main/secret.txt#L1-L3",
+        "https://github.com/o/r/tree/main/src",
+        "https://github.com/o/r/commit/abc123",
+        "https://github.com/o/r/releases/tag/v1",
+        "https://github.com/o/r/releases/latest",
+        "https://github.com/o/r/actions",
+        "https://github.com/o/r/actions/runs/1",
+        "https://github.com/o/r/actions/workflows/ci.yml",
+      ];
 
-    for (const url of urls) {
-      const response = await route.GET(requestFor(url));
-      expect(await response.text()).not.toContain(PRIVATE_MARKER);
+      for (const url of urls) {
+        const response = await route.GET(requestFor(url));
+        expect(await response.text()).not.toContain(PRIVATE_MARKER);
+      }
+      const batch = await route.POST(batchRequestFor(urls.slice(0, 10)));
+      expect(await batch.text()).not.toContain(PRIVATE_MARKER);
+      expect(fetchMock).toHaveBeenCalled();
+      for (const [, init] of fetchMock.mock.calls) {
+        expect(authorization(init)).toBeNull();
+        expect(init?.cache).toBe("no-store");
+      }
     }
-    const batch = await route.POST(batchRequestFor(urls.slice(0, 10)));
-    expect(await batch.text()).not.toContain(PRIVATE_MARKER);
-    expect(fetchMock).toHaveBeenCalled();
-    for (const [, init] of fetchMock.mock.calls) {
-      expect(authorization(init)).toBeNull();
-      expect(init?.cache).toBe("no-store");
-    }
-  });
+  );
 
   it.each(["repo", "public_repo", "repo:status", "read:discussion", undefined])(
     "falls back anonymously when the classic token probe reports %s",
@@ -148,7 +148,9 @@ describe("GitHub preview public access boundary", () => {
     }
     expect(fetchMock).toHaveBeenCalledTimes(3);
     expect(
-      fetchMock.mock.calls.filter(([url]) => String(url).endsWith("/rate_limit"))
+      fetchMock.mock.calls.filter(([url]) =>
+        String(url).endsWith("/rate_limit")
+      )
     ).toHaveLength(1);
     for (const [, init] of fetchMock.mock.calls) {
       expect(authorization(init)).toBe(`Bearer ${CLASSIC_TOKEN}`);

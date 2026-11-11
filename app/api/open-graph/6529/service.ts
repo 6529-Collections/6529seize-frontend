@@ -56,7 +56,6 @@ import {
   resolveIdentityProfile,
   resolveProfileHref,
   selectHttpsImageUrl,
-  type AttributeRecord,
 } from "./previewHelpers";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -74,12 +73,6 @@ type NftRecord = Partial<BaseNFT> &
 
 type MemesRecord = NftRecord & Partial<ApiMemesExtendedData>;
 type LabRecord = NftRecord & Partial<LabExtendedData>;
-
-type MintingClaimRecord = {
-  readonly name?: string | null | undefined;
-  readonly image_url?: string | null | undefined;
-  readonly attributes?: readonly AttributeRecord[] | null | undefined;
-};
 
 type ResolvedTarget =
   | { readonly kind: "the-memes"; readonly id: string }
@@ -228,18 +221,13 @@ async function fetchTheMemesPreview(
   requestUrl: URL,
   context?: ApiContext
 ): Promise<SeizeCollectionLinkPreview> {
-  const [nft, extended, claim] = await Promise.all([
+  const [nft, extended] = await Promise.all([
     fetchFirstPageItem<MemesRecord>(
       "nfts",
       { contract: MEMES_CONTRACT, id },
       context
     ),
     fetchFirstPageItem<MemesRecord>("memes_extended_data", { id }, context),
-    fetchOptionalApiJson<MintingClaimRecord>(
-      `minting-claims/${encodeURIComponent(MEMES_CONTRACT)}/claims/${id}`,
-      undefined,
-      context
-    ),
   ]);
 
   const source = nft ?? extended;
@@ -253,11 +241,7 @@ async function fetchTheMemesPreview(
     source.artist_seize_handle,
     readAttributeValue(attributes, "SEIZE Artist Profile")
   );
-  const title = firstNonEmptyString(
-    claim?.name,
-    source.name,
-    `The Memes #${id}`
-  )!;
+  const title = firstNonEmptyString(source.name, `The Memes #${id}`)!;
   const isLiveMeme = extended?.recorded_in_tdh === false;
   const manifoldEditionSize = isLiveMeme
     ? await fetchTheMemesManifoldEditionSize(id)
@@ -312,7 +296,6 @@ async function fetchTheMemesPreview(
       source.thumbnail,
       source.scaled,
       source.image,
-      claim?.image_url,
       readMetadataString(metadata, "image_url"),
       readMetadataString(metadata, "image")
     ),
