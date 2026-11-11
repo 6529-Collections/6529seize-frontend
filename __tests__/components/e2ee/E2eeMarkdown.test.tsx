@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { E2eeMarkdown } from "@/components/e2ee/conversation/E2eeMarkdown";
+import { MessageMarkdown } from "@/components/markdown/MessageMarkdown";
 import { member } from "./fakeE2eeEngine";
 import type { SupportedLocale } from "@/i18n/locales";
 import { loadLocaleMessages } from "@/i18n/messages";
@@ -143,6 +144,21 @@ it("keeps image labels and omits footnotes and HTML resources in inline previews
   expect(
     container.querySelector("img,a,input,iframe,script,section,sup")
   ).toBeNull();
+});
+
+it("excludes footnote definitions through the shared renderer's real sanitizer", () => {
+  const { container } = render(
+    <MessageMarkdown
+      privacy="private"
+      inlinePreview
+      text={
+        "Visible[^note]\n\n[^note]: This definition must stay out of the chat list."
+      }
+    />
+  );
+  expect(container.textContent?.trim()).toBe("Visible");
+  expect(container).not.toHaveTextContent("This definition");
+  expect(container.querySelector("section,sup,a")).toBeNull();
 });
 
 it("keeps a linked image label inside its authored link and standalone images linked", () => {

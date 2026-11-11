@@ -68,12 +68,14 @@ function shortenText(value: string, budget: Budget): string {
   let text = value.replaceAll(/\s+/gu, " ");
   if (budget.whitespace) text = text.trimStart();
   if (text.length === 0) return "";
-  if (Array.from(text.trimEnd()).length > budget.remaining) {
+  const characters = Array.from(text);
+  const visibleLength = characters.length - Number(text.endsWith(" "));
+  if (visibleLength > budget.remaining) {
     budget.stopped = true;
-    return `${Array.from(text).slice(0, budget.remaining).join("").trimEnd()}…`;
+    return `${characters.slice(0, budget.remaining).join("").trimEnd()}…`;
   }
-  if (Array.from(text).length > budget.remaining) text = text.trimEnd();
-  budget.remaining -= Array.from(text).length;
+  if (characters.length > budget.remaining) text = text.trimEnd();
+  budget.remaining -= Math.min(characters.length, budget.remaining);
   budget.whitespace = text.endsWith(" ");
   return text;
 }
