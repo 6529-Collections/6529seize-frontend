@@ -5,12 +5,88 @@ import { publicEnv } from "@/config/env";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
+import { E2eeMarkdown } from "@/components/e2ee/conversation/E2eeMarkdown";
 import { DropImageGalleryProvider } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { buildDropImageGalleryItems } from "@/components/drops/view/part/dropImageGallery";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
 const PARENTHESIZED_ORDERED_LIST_CLASS_NAME =
   "drop-markdown-ordered-list-paren";
+
+it("isolates all public footnote IDs without drop IDs and rejects authored HTML IDs", () => {
+  const content =
+    'Note[^location]\n\n[^location]: Footnote\n\n# Heading {#location}\n\n<span id="location">HTML</span>';
+  const { container } = render(
+    <>
+      {[0, 1].map((index) => (
+        <DropPartMarkdown
+          key={index}
+          partContent={content}
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          onQuoteClick={jest.fn()}
+        />
+      ))}
+    </>
+  );
+  const ids = [...container.querySelectorAll("[id]")].map(
+    (element) => element.id
+  );
+  expect(ids.length).toBeGreaterThan(0);
+  expect(new Set(ids).size).toBe(ids.length);
+  expect(ids.every((id) => id.startsWith("user-content-"))).toBe(true);
+  expect(container.querySelector('[id="location"]')).toBeNull();
+  const references = [...container.querySelectorAll("sup a")];
+  expect(references).toHaveLength(2);
+  expect(new Set(references.map((a) => a.getAttribute("href"))).size).toBe(2);
+  for (const anchor of container.querySelectorAll(
+    "sup a,section[data-footnotes] li a"
+  )) {
+    const target = anchor.getAttribute("href")?.slice(1);
+    expect(container.querySelector(`[id="${target}"]`)).not.toBeNull();
+    const label = anchor.getAttribute("aria-describedby");
+    if (label)
+      expect(container.querySelector(`[id="${label}"]`)).toHaveTextContent(
+        "Footnotes"
+      );
+  }
+});
+
+it("keeps public and encrypted adapter typography consistent", () => {
+  const text =
+    "# Heading\n\n**Bold** and *italic*.\n\n\nAfter a blank line.\n\n> Quote\n\n- First\n  - Nested\n\n`code`\n\n| Key |\n| --- |\n| Value |";
+  const { container } = render(
+    <>
+      <section aria-label="Public message">
+        <DropPartMarkdown
+          partContent={text}
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          onQuoteClick={jest.fn()}
+        />
+      </section>
+      <section aria-label="Encrypted message">
+        <E2eeMarkdown
+          text={text}
+          messageId="parity"
+          members={[]}
+          mentions={[]}
+          selfProfileId={null}
+        />
+      </section>
+    </>
+  );
+  const [regular, encrypted] = container.children;
+  const typography = (body: Element) =>
+    [...body.querySelectorAll("h1,p,blockquote,li,code,table")].map((node) => ({
+      tag: node.tagName,
+      text: node.textContent,
+      className: node.className,
+    }));
+  expect(typography(regular!)).toEqual(typography(encrypted!));
+});
 
 class MockIntersectionObserver {
   observe = jest.fn();

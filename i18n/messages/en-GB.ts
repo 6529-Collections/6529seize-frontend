@@ -1205,6 +1205,8 @@ export const EN_GB_MESSAGES = {
   ...TRANSFER_MESSAGES,
   ...THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.message.taskChecked": "Checked task",
+  "e2ee.message.taskUnchecked": "Unchecked task",
   "e2ee.message.imageLink": "Image link",
   "e2ee.message.imageLinkFrom": "Image from {host}",
   "e2ee.message.markdownTable": "Message table",
