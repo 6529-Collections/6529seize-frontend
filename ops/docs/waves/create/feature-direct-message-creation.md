@@ -13,10 +13,9 @@ identities.
   content from its servers on 1 December 2026, except anything 6529 is
   legally required to keep
   ([Encrypted Messages](../../encrypted-messages.md#unencrypted-direct-messages)).
-- On builds with encrypted chats, the main action is **Start encrypted chat**,
-  which opens `/messages/encrypted/new` with the selected people. **Send
-  unencrypted instead** creates an unencrypted DM, under a warning that names
-  the deletion date. From 1 December 2026 only the encrypted choice remains.
+- When encrypted chats are available, the **+** beside **Messages** opens one
+  composer for new DMs and groups. It checks recipients as you select them.
+  See [Starting a chat](../../encrypted-messages.md#starting-a-chat).
 
 ## Location in the Site
 
@@ -28,9 +27,8 @@ identities.
 
 ## Entry Points
 
-- Click `Create DM` in the desktop `/messages` placeholder panel.
-- Click the paper-plane create action in desktop messages sidebar layouts.
-- Click app-header `Create DM` while in app `/messages` list context.
+- Select **+** beside **Messages** on web or in the app. On builds without
+  encrypted chats, use the paper-plane action or **Create DM**.
 - Open a supported web route URL that already includes `?create=dm`.
 - Open `/messages/create`.
 
@@ -64,13 +62,14 @@ identities.
    Results within each match group are ordered by profile level from highest to
    lowest.
 7. While loading, the search list shows skeleton rows; when empty, it shows
-   `No one found for “query”`. Results stay visible when the field loses focus
-   or the keyboard closes.
+   `No one found for “query”`. In the unified composer, selecting a result
+   clears the search, and moving focus away dismisses the results.
 8. Tap a result to toggle that person. Selected recipients have checked circles
    and appear as removable avatar chips inside the `To:` field.
-9. Use the bottom action: `Message handle` for one person or `Message 3 people`
-   for a group. The button switches to `Creating...` while submit runs.
-10. On success, the app opens `/messages/{waveId}`.
+9. On builds without encrypted chats, use **Message** followed by the handle
+   or number of recipients. When encrypted chats are available, choose the
+   action shown for the selected recipients.
+10. The app opens the conversation.
 
 ## Common Scenarios
 

@@ -3,10 +3,14 @@
 import { isAuthResolving } from "@/components/auth/authResolution";
 import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { E2eeMessagesSection } from "@/components/e2ee/sidebar/E2eeMessagesSection";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import React, { useContext, useEffect, useRef, type ReactNode } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
@@ -34,6 +38,11 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   const { connectedProfile, fetchingProfile } = useContext(AuthContext);
   const { openDirectMessage, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
+  const locale = useBrowserLocale();
+  const unifiedCompose = isE2eeEnabled();
+  const createLabel = unifiedCompose
+    ? t(locale, "quickDm.createModalTitle")
+    : "New direct message";
 
   const shouldRenderCreateDirectMessage = !isApp;
 
@@ -163,19 +172,23 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
             {shouldRenderCreateDirectMessage && (
               <div
                 data-tooltip-id="create-dm-tooltip"
-                data-tooltip-content="New direct message"
+                data-tooltip-content={createLabel}
               >
                 <Button
                   onClick={openDirectMessage}
-                  aria-label="New direct message"
-                  variant="primary"
+                  aria-label={createLabel}
+                  variant={unifiedCompose ? "action" : "primary"}
                   size={null}
                   className="tw-size-9 tw-p-0"
                 >
-                  <FontAwesomeIcon
-                    icon={faPaperPlane}
-                    className="tw-size-4 tw-flex-shrink-0"
-                  />
+                  {unifiedCompose ? (
+                    <PlusIcon aria-hidden="true" className="tw-size-5" />
+                  ) : (
+                    <FontAwesomeIcon
+                      icon={faPaperPlane}
+                      className="tw-size-4 tw-flex-shrink-0"
+                    />
+                  )}
                 </Button>
               </div>
             )}

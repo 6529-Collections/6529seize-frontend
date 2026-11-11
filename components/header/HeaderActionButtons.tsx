@@ -8,13 +8,21 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  getEncryptedMessagesRoute,
+} from "@/helpers/navigation.helpers";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 function HeaderActionButtonsContent() {
   const pathname = usePathname();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense
   const searchParams = useSearchParams();
   const { openWave, openDirectMessage, isApp } = useCreateModalState();
+  const locale = useBrowserLocale();
+  const unifiedCompose = isE2eeEnabled();
 
   const baseButtonClasses =
     "tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-800";
@@ -31,7 +39,10 @@ function HeaderActionButtonsContent() {
   const isOnMessagesRoute = pathname === "/messages" && !waveParam;
   const showWaveButton =
     !isOnWaveCreateRoute && (isOnWavesRoute || isWaveContext);
-  const showMessagesButton = isOnMessagesRoute || isMessagesContext;
+  const showMessagesButton =
+    isOnMessagesRoute ||
+    isMessagesContext ||
+    (isApp && unifiedCompose && pathname === getEncryptedMessagesRoute());
 
   if (showWaveButton) {
     const onCreateWave = openWave;
@@ -50,7 +61,12 @@ function HeaderActionButtonsContent() {
   }
 
   if (showMessagesButton) {
-    const icon = (
+    const label = unifiedCompose
+      ? t(locale, "quickDm.createModalTitle")
+      : "Create DM";
+    const icon = unifiedCompose ? (
+      <PlusIcon aria-hidden="true" className="tw-size-5 tw-flex-shrink-0" />
+    ) : (
       <FontAwesomeIcon
         icon={faPaperPlane}
         className="tw-size-[18px] tw-flex-shrink-0"
@@ -63,8 +79,8 @@ function HeaderActionButtonsContent() {
         <Link
           href="/messages/create"
           prefetch={true}
-          aria-label="Create DM"
-          title="Create DM"
+          aria-label={label}
+          title={label}
           className={baseButtonClasses}
         >
           {icon}
@@ -75,8 +91,8 @@ function HeaderActionButtonsContent() {
     return (
       <button
         type="button"
-        aria-label="Create DM"
-        title="Create DM"
+        aria-label={label}
+        title={label}
         onClick={openDirectMessage}
         className={baseButtonClasses}
       >

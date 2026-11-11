@@ -202,6 +202,7 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
       store: null,
       backup,
       loadError: null,
+      requestEngine: () => undefined,
       restart: () => undefined,
       takeOverHere: () => undefined,
     };

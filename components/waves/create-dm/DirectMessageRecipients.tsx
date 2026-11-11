@@ -9,20 +9,37 @@ import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { CheckIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
-import { useId, useRef, useState } from "react";
+import {
+  type KeyboardEvent,
+  type ReactNode,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 
-export const recipientKey = (person: CommunityMemberMinimal): string =>
-  (person.primary_wallet ?? person.wallet).toLowerCase();
+export type DirectMessageRecipient = Pick<
+  CommunityMemberMinimal,
+  "profile_id" | "primary_wallet" | "handle" | "display" | "pfp"
+> & { readonly wallet: string | null };
 
-export const recipientName = (person: CommunityMemberMinimal): string =>
-  person.handle ?? person.display ?? person.primary_wallet ?? person.wallet;
+export const recipientKey = (person: DirectMessageRecipient): string =>
+  (person.primary_wallet ?? person.wallet)?.toLowerCase() ??
+  person.profile_id ??
+  "";
+
+export const recipientName = (person: DirectMessageRecipient): string =>
+  person.handle ??
+  person.display ??
+  person.primary_wallet ??
+  person.wallet ??
+  "";
 
 function RecipientAvatar({
   person,
   small = false,
 }: {
-  readonly person: CommunityMemberMinimal;
+  readonly person: DirectMessageRecipient;
   readonly small?: boolean;
 }) {
   return (
@@ -70,18 +87,24 @@ export default function DirectMessageRecipients({
   onToggle,
   onRemove,
   disabled,
+  selectionStatus,
+  dismissibleResults = false,
 }: {
-  readonly selected: CommunityMemberMinimal[];
+  readonly selected: readonly DirectMessageRecipient[];
   readonly onToggle: (person: CommunityMemberMinimal) => void;
   readonly onRemove: (wallet: string) => void;
   readonly disabled: boolean;
+  readonly selectionStatus?: ReactNode;
+  readonly dismissibleResults?: boolean | undefined;
 }) {
   const locale = useBrowserLocale();
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
+  const [resultsOpen, setResultsOpen] = useState(false);
   const search = query.trim();
   const canSearch = search.length >= 3;
+  const showResults = canSearch && (!dismissibleResults || resultsOpen);
   const params = { param: search, only_profile_owners: "true", sort: "level" };
   const { data, isFetching, isError, refetch } = useQuery({
     queryKey: [QueryKey.PROFILE_SEARCH, params],
@@ -95,8 +118,15 @@ export default function DirectMessageRecipients({
     refetchOnWindowFocus: false,
   });
   const selectedKeys = new Set(selected.map(recipientKey));
+  const dismissSearch = (event: KeyboardEvent<HTMLElement>) => {
+    if (dismissibleResults && showResults && event.key === "Escape") {
+      event.preventDefault();
+      event.stopPropagation();
+      setResultsOpen(false);
+    }
+  };
   let searchStatus = "";
-  if (canSearch) {
+  if (showResults) {
     if (isFetching) {
       searchStatus = t(locale, "quickDm.recipientLoading");
     } else if (isError) {
@@ -111,7 +141,16 @@ export default function DirectMessageRecipients({
   }
 
   return (
-    <>
+    <div
+      onBlur={(event) => {
+        if (
+          dismissibleResults &&
+          !event.currentTarget.contains(event.relatedTarget)
+        ) {
+          setResultsOpen(false);
+        }
+      }}
+    >
       <div className="tw-flex tw-min-h-[50px] tw-flex-wrap tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-[7px] focus-within:tw-border-primary-400 focus-within:tw-ring-1 focus-within:tw-ring-primary-400">
         <label
           htmlFor={inputId}
@@ -154,8 +193,13 @@ export default function DirectMessageRecipients({
           type="text"
           value={query}
           disabled={disabled}
-          onChange={(event) => setQuery(event.target.value)}
+          onFocus={dismissibleResults ? () => setResultsOpen(true) : undefined}
+          onChange={(event) => {
+            setQuery(event.target.value);
+            if (dismissibleResults) setResultsOpen(true);
+          }}
           onKeyDown={(event) => {
+            dismissSearch(event);
             const last = selected.at(-1);
             if (
               event.key === "Backspace" &&
@@ -170,7 +214,14 @@ export default function DirectMessageRecipients({
             if (event.key === "Enter") event.preventDefault();
           }}
           placeholder={
-            selected.length ? t(locale, "quickDm.recipientAddMore") : undefined
+            selected.length || dismissibleResults
+              ? t(
+                  locale,
+                  dismissibleResults
+                    ? "e2ee.new.searchLabel"
+                    : "quickDm.recipientAddMore"
+                )
+              : undefined
           }
           autoComplete="off"
           autoCapitalize="off"
@@ -178,14 +229,15 @@ export default function DirectMessageRecipients({
           className="tw-h-[34px] tw-min-w-[90px] tw-flex-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-base tw-font-medium tw-text-iron-50 tw-caret-primary-300 tw-shadow-none tw-outline-none tw-ring-0 placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-ring-0"
         />
       </div>
+      {selectionStatus}
       <output aria-live="polite" aria-atomic="true" className="tw-sr-only">
         {searchStatus}
       </output>
-      {canSearch && isFetching && (
+      {showResults && isFetching && (
         <div className="tw-mt-5">
-          {[0, 1, 2].map((index) => (
+          {["first", "second", "third"].map((key) => (
             <div
-              key={index}
+              key={key}
               aria-hidden="true"
               className="tw-flex tw-h-[62px] tw-items-center tw-gap-3 tw-px-1.5 tw-py-2 motion-safe:tw-animate-pulse"
             >
@@ -198,7 +250,7 @@ export default function DirectMessageRecipients({
           ))}
         </div>
       )}
-      {canSearch && !isFetching && isError && (
+      {showResults && !isFetching && isError && (
         <div className="tw-py-8 tw-text-center tw-text-sm tw-text-iron-400">
           <p>{t(locale, "quickDm.recipientSearchError")}</p>
           <button
@@ -210,12 +262,12 @@ export default function DirectMessageRecipients({
           </button>
         </div>
       )}
-      {canSearch && !isFetching && !isError && data?.length === 0 && (
+      {showResults && !isFetching && !isError && data?.length === 0 && (
         <p className="tw-m-0 tw-break-words tw-px-2 tw-py-8 tw-text-center tw-text-sm tw-text-iron-400">
           {t(locale, "quickDm.recipientEmpty", { query: search })}
         </p>
       )}
-      {canSearch && !isFetching && !isError && (data?.length ?? 0) > 0 && (
+      {showResults && !isFetching && !isError && (data?.length ?? 0) > 0 && (
         <ul
           aria-label={t(locale, "quickDm.recipientPeople")}
           className="tw-mb-0 tw-mt-3 tw-list-none tw-p-0"
@@ -245,7 +297,20 @@ export default function DirectMessageRecipients({
                     details,
                   })}
                   disabled={disabled}
-                  onClick={() => onToggle(person)}
+                  onKeyDown={dismissSearch}
+                  onMouseDown={(event) => {
+                    // Safari can blur the search before the result's click.
+                    if (dismissibleResults && event.button === 0) {
+                      event.preventDefault();
+                    }
+                  }}
+                  onClick={() => {
+                    onToggle(person);
+                    if (dismissibleResults) {
+                      setQuery("");
+                      inputRef.current?.focus();
+                    }
+                  }}
                   className="tw-flex tw-min-h-[62px] tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-1.5 tw-py-2 tw-text-left tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-900 desktop-hover:hover:tw-bg-iron-950"
                 >
                   <RecipientAvatar person={person} />
@@ -277,6 +342,6 @@ export default function DirectMessageRecipients({
           })}
         </ul>
       )}
-    </>
+    </div>
   );
 }

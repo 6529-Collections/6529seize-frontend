@@ -11,6 +11,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
 
 const MessagesView: React.FC = () => {
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by app/messages page Suspense wrapper
@@ -42,13 +43,15 @@ const MessagesView: React.FC = () => {
           Choose a direct message conversation from the sidebar to view messages
           and continue the discussion.
         </p>
-        <Button onClick={openDirectMessage} variant="primary" size="md">
-          <FontAwesomeIcon
-            icon={faPaperPlane}
-            className="tw-size-4 tw-flex-shrink-0"
-          />
-          <span>Create DM</span>
-        </Button>
+        {!isE2eeEnabled() && (
+          <Button onClick={openDirectMessage} variant="primary" size="md">
+            <FontAwesomeIcon
+              icon={faPaperPlane}
+              className="tw-size-4 tw-flex-shrink-0"
+            />
+            <span>Create DM</span>
+          </Button>
+        )}
       </div>
     );
   }

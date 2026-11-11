@@ -6,9 +6,17 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+import { LEGACY_DM_DELETION_AT } from "@/components/e2ee/legacy/legacyDmRetention";
+import {
+  contextFor,
+  createFakeE2eeEngine,
+  E2eeTestProvider,
+} from "../../e2ee/fakeE2eeEngine";
 
 const mockPush = jest.fn();
 const mockToast = jest.fn();
+jest.mock("@/config/e2eeEnv", () => ({ isE2eeEnabled: jest.fn(() => false) }));
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ setToast: mockToast }),
@@ -85,12 +93,63 @@ function setup() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(isE2eeEnabled).mockReturnValue(false);
   jest.mocked(commonApiFetch).mockResolvedValue([alice, bob, self]);
   jest
     .mocked(createDirectMessageWave)
     .mockResolvedValue({ id: "dm-1" } as Awaited<
       ReturnType<typeof createDirectMessageWave>
     >);
+});
+
+it("keeps the chosen recipient in the unified composer when they need an unencrypted DM", async () => {
+  const now = jest
+    .spyOn(Date, "now")
+    .mockReturnValue(Date.parse(LEGACY_DM_DELETION_AT) - 60_000);
+  try {
+    jest.mocked(isE2eeEnabled).mockReturnValue(true);
+    const engine = createFakeE2eeEngine();
+    jest
+      .mocked(engine.checkEligibility)
+      .mockResolvedValue([{ profileId: "0xABC", status: "NO_DEVICES" }]);
+    const context = contextFor(engine);
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: 0 } },
+    });
+    const close = jest.fn();
+    render(
+      <E2eeTestProvider value={context}>
+        <QueryClientProvider client={client}>
+          <CreateDirectMessage
+            profile={{ primary_wallet: self.wallet } as ApiIdentity}
+            presentation="modal"
+            onBack={close}
+            onSuccess={close}
+          />
+        </QueryClientProvider>
+      </E2eeTestProvider>
+    );
+    const input = screen.getByRole("textbox", { name: "To:" });
+    fireEvent.change(input, { target: { value: "ali" } });
+    fireEvent.click(await screen.findByRole("button", { name: /alice Level/ }));
+    expect(context.requestEngine).toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Remove alice" })).toBeVisible();
+    expect(
+      await screen.findByText("Hasn’t turned on encrypted messages yet")
+    ).toBeVisible();
+    expect(screen.getByText(/deletes it from its servers/)).toBeVisible();
+    expect(mockPush).not.toHaveBeenCalled();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continue unencrypted" })
+    );
+    await waitFor(() => expect(close).toHaveBeenCalledTimes(1));
+    expect(createDirectMessageWave).toHaveBeenCalledWith({
+      addresses: ["0xabc"],
+    });
+    expect(mockPush).toHaveBeenCalledWith("/messages/dm-1");
+  } finally {
+    now.mockRestore();
+  }
 });
 
 it("keeps results after blur, toggles recipients, and removes the last chip with Backspace", async () => {
