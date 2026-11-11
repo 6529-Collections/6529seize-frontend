@@ -10,6 +10,7 @@ import { useEditingDrop } from "@/contexts/EditingDropContext";
 import {
   clearWaveDraft,
   readRestorableWaveDraft,
+  WAVE_DRAFTS_CLEARED_EVENT,
   writeWaveDraft,
 } from "@/helpers/waves/wave-draft.helpers";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
@@ -101,15 +102,18 @@ export const useWaveDraftPersistence = ({
     let profileInvalidated = false;
     const invalidate = () => {
       profileInvalidated = true;
-      // Text typed before a profile switch or sign-out is not saved after it.
+      // Text typed before a profile switch, or before a sign-out cleared this
+      // tab's drafts, is not saved after it.
       if (pendingSaveRef.current !== null) {
         clearTimeout(pendingSaveRef.current);
         pendingSaveRef.current = null;
       }
     };
     globalThis.addEventListener(PROFILE_SWITCHED_EVENT, invalidate);
+    globalThis.addEventListener(WAVE_DRAFTS_CLEARED_EVENT, invalidate);
     return () => {
       globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, invalidate);
+      globalThis.removeEventListener(WAVE_DRAFTS_CLEARED_EVENT, invalidate);
       // Fast tab/history changes can leave before the 400ms autosave runs.
       // Flush during teardown while this primary editor still owns its draft.
       if (!profileInvalidated) flushBeforeTabLeave();

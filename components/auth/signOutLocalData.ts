@@ -59,7 +59,10 @@ function removeSignedOutLocalData(
       account.profileId !== null &&
       remaining.some(({ profileId }) => profileId === account.profileId);
     if (!profileStillSignedIn) {
-      removeCreateWaveDrafts({ profileId: account.profileId });
+      removeCreateWaveDrafts({
+        wallet: account.address,
+        profileId: account.profileId,
+      });
     }
   }
   if (scope === "all" && remaining.length === 0) {
@@ -81,7 +84,10 @@ export async function signOutAndRemoveLocalData(
 ): Promise<void> {
   assertStoredWalletIsDisplayed();
   await signOutWithE2eeChoice(scope, async () => {
+    // Checked again after the encrypted-messages choice, which can stay open.
     assertStoredWalletIsDisplayed();
+    // The accounts connected now are the ones signed out: with Sign out all,
+    // a profile added in another tab while the choice was open goes too.
     const candidates = getAccountsToSignOut(scope);
     await signOut();
     removeSignedOutLocalData(scope, candidates);

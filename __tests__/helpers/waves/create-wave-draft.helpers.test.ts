@@ -187,12 +187,12 @@ describe("create-wave-draft.helpers", () => {
     upsertCreateWaveDraft(makeDraft("theirs", 100), "0xother:profile-b");
     upsertCreateWaveDraft(makeDraft("legacy", 100));
 
-    removeCreateWaveDrafts({ profileId: "profile-a" });
+    removeCreateWaveDrafts({ wallet: "0xSIGNER", profileId: "profile-a" });
 
     expect(readStoredScope("0xprimary:profile-a")).toEqual([]);
-    // Drafts saved without a profile id cannot be attributed and go too.
+    // A draft saved without a profile id goes only with its own wallet.
     expect(readStoredScope("0xsigner:")).toEqual([]);
-    expect(readStoredScope("0xprimary:")).toEqual([]);
+    expect(readStoredScope("0xprimary:")).toEqual(["no-profile-2"]);
     expect(readStoredScope("0xother:profile-b")).toEqual(["theirs"]);
     expect(readCreateWaveDrafts().map((draft) => draft.id)).toEqual(["legacy"]);
   });

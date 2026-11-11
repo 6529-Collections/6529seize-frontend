@@ -12,6 +12,7 @@ import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 
 jest.mock("@/helpers/waves/wave-draft.helpers", () => ({
+  WAVE_DRAFTS_CLEARED_EVENT: "6529-wave-drafts-cleared",
   clearWaveDraft: jest.fn(),
   readRestorableWaveDraft: jest.fn(),
   writeWaveDraft: jest.fn(),
@@ -200,7 +201,7 @@ describe("useWaveDraftPersistence", () => {
     expect(writeWaveDraftMock).not.toHaveBeenCalled();
   });
 
-  it("drops a pending save when the profile switches or signs out", () => {
+  it("drops a pending save when the profile switches", () => {
     const { rerender } = renderPersistence({
       editorState: makeEditorState({ root: { text: "previous profile" } }),
     });
