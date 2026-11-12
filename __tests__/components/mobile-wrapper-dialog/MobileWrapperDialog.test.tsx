@@ -262,7 +262,7 @@ describe("MobileWrapperDialog", () => {
         "bottom var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
       );
       expect(surface?.style.maxHeight).toBe(
-        "min(var(--mobile-wrapper-dialog-resting-height, calc(min(100vh, 100svh) - 10rem)), var(--mobile-wrapper-dialog-available-height, max(0px, calc(min(100vh, 100svh) - 4rem - var(--mobile-wrapper-dialog-keyboard-inset, 0px)))))"
+        "min(var(--mobile-wrapper-dialog-resting-height, calc(min(100vh, 100svh) - 10rem)), var(--mobile-wrapper-dialog-available-height, max(0px, calc(min(100vh, 100svh) - var(--mobile-wrapper-dialog-viewport-reserve, 4rem) - var(--mobile-wrapper-dialog-keyboard-inset, 0px)))))"
       );
       expect(surface?.style.transition).toBe(
         "max-height var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
@@ -309,7 +309,9 @@ describe("MobileWrapperDialog", () => {
           container?.style.getPropertyValue(
             "--mobile-wrapper-dialog-available-height"
           )
-        ).toBe(`max(0px, calc(${viewport.height}px - 4rem))`);
+        ).toBe(
+          `max(0px, calc(${viewport.height}px - var(--mobile-wrapper-dialog-viewport-reserve, 4rem)))`
+        );
         expect(container).toHaveAttribute(
           "data-mobile-dialog-keyboard-visible",
           "true"
