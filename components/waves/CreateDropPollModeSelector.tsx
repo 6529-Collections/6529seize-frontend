@@ -1,5 +1,10 @@
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import {
+  CONNECTED_TAB_INTERACTION_CLASSES,
+  CONNECTED_TAB_SURFACE_CLASSES,
+  getConnectedTabStateClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 import type { CreateDropPollDraft } from "./CreateDropPoll";
 
 interface CreateDropPollModeSelectorProps {
@@ -22,18 +27,14 @@ export default function CreateDropPollModeSelector({
       role="group"
       aria-label={t(locale, "waves.poll.composer.mode.groupLabel")}
       aria-describedby={descriptionId}
-      className="tw-flex tw-w-fit tw-flex-shrink-0 tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800/60 tw-p-0.5"
+      className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-flex tw-w-fit tw-flex-shrink-0 tw-items-center tw-border tw-border-solid tw-p-0.5`}
     >
       <button
         type="button"
         aria-pressed={!draft.multichoice}
         disabled={disabled}
         onClick={() => onChange({ ...draft, multichoice: false })}
-        className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 disabled:tw-cursor-not-allowed ${
-          draft.multichoice
-            ? "tw-bg-iron-800/60 tw-text-iron-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
-            : "tw-bg-iron-50 tw-text-iron-950 tw-shadow-sm"
-        }`}
+        className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: !draft.multichoice })}`}
       >
         {t(locale, "waves.poll.composer.mode.single")}
       </button>
@@ -42,11 +43,7 @@ export default function CreateDropPollModeSelector({
         aria-pressed={draft.multichoice}
         disabled={disabled}
         onClick={() => onChange({ ...draft, multichoice: true })}
-        className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-transition-all tw-duration-200 disabled:tw-cursor-not-allowed ${
-          draft.multichoice
-            ? "tw-bg-iron-50 tw-text-iron-950 tw-shadow-sm"
-            : "tw-bg-iron-800/60 tw-text-iron-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
-        }`}
+        className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: draft.multichoice })}`}
       >
         {t(locale, "waves.poll.composer.mode.multiple")}
       </button>

@@ -178,7 +178,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         renderTrailingActions={renderHeaderTrailingActions}
         renderOverflowMenuItems={renderHeaderOverflowMenuItems}
       />
-      <div className="tw-border-b tw-border-l-0 tw-border-t-0 tw-border-solid tw-border-iron-800">
+      <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800">
         <MyStreamWaveDesktopTabs
           activeTab={activeContentTab}
           wave={wave}

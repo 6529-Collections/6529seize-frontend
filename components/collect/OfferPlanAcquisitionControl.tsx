@@ -1,5 +1,10 @@
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import {
+  CONNECTED_TAB_INTERACTION_CLASSES,
+  CONNECTED_TAB_SURFACE_CLASSES,
+  getConnectedTabStateClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 
 export default function OfferPlanAcquisitionControl({
   title,
@@ -15,21 +20,20 @@ export default function OfferPlanAcquisitionControl({
   readonly onChange: (buying: boolean) => void;
 }) {
   const locale = useBrowserLocale();
-  const button =
-    "tw-min-h-11 tw-rounded-md tw-border-0 tw-px-3 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-40";
+  const button = `tw-min-h-11 tw-rounded-md tw-border-0 tw-px-3 tw-text-xs ${CONNECTED_TAB_INTERACTION_CLASSES}`;
   return (
     <div className="tw-mt-2">
       <div
         role="group"
         aria-label={t(locale, "collect.blend.acquireFor", { title })}
-        className="tw-inline-flex tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-p-0.5"
+        className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-inline-flex tw-border tw-border-solid tw-p-0.5`}
       >
         <button
           type="button"
           aria-pressed={!buying}
           disabled={disabled}
           onClick={() => onChange(false)}
-          className={`${button} ${buying ? "tw-bg-transparent tw-text-iron-400" : "tw-bg-iron-800 tw-text-iron-100"}`}
+          className={`${button} ${getConnectedTabStateClasses({ isActive: !buying })}`}
         >
           {t(locale, "collect.blend.offer")}
         </button>
@@ -38,7 +42,7 @@ export default function OfferPlanAcquisitionControl({
           aria-pressed={buying}
           disabled={disabled || !available}
           onClick={() => onChange(true)}
-          className={`${button} ${buying ? "tw-bg-iron-800 tw-text-iron-100" : "tw-bg-transparent tw-text-iron-400"}`}
+          className={`${button} ${getConnectedTabStateClasses({ isActive: buying })}`}
         >
           {t(locale, "collect.strategy.buy")}
         </button>

@@ -99,6 +99,7 @@ const createSidebarWave = (overrides: Record<string, unknown> = {}) =>
     hasCompetition: false,
     parentWaveId: null,
     hasSubwaves: false,
+    descriptionDrop: { contents: null, media: [] },
     latestDropTimestamp: 100,
     latestFollowedSubwaveDropTimestamp: null,
     firstUnreadDropSerialNo: null,

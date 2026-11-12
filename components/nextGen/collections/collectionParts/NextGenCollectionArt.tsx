@@ -26,6 +26,11 @@ import NextGenLoadError from "@/components/nextGen/NextGenLoadError";
 import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import {
+  CONNECTED_TAB_INTERACTION_CLASSES,
+  CONNECTED_TAB_SURFACE_CLASSES,
+  getConnectedTabStateClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 import { formatInteger } from "@/i18n/format";
 import {
   NextGenListFilters,
@@ -495,17 +500,15 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   </div>
                 )}
               </div>
-              <span className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-1">
+              <span
+                className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-inline-flex tw-items-center tw-gap-1 tw-border tw-border-solid tw-p-1`}
+              >
                 <button
                   type="button"
                   onClick={() => setSortDir(SortDirection.ASC)}
                   aria-label="Sort ascending"
                   aria-pressed={sortDir === SortDirection.ASC}
-                  className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
-                    sortDir === SortDirection.ASC
-                      ? "tw-bg-iron-700 tw-text-white"
-                      : "tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-white"
-                  }`}
+                  className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: sortDir === SortDirection.ASC })}`}
                 >
                   <FontAwesomeIcon
                     icon={faChevronUp}
@@ -518,11 +521,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   onClick={() => setSortDir(SortDirection.DESC)}
                   aria-label="Sort descending"
                   aria-pressed={sortDir === SortDirection.DESC}
-                  className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
-                    sortDir === SortDirection.DESC
-                      ? "tw-bg-iron-700 tw-text-white"
-                      : "tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-white"
-                  }`}
+                  className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: sortDir === SortDirection.DESC })}`}
                 >
                   <FontAwesomeIcon
                     icon={faChevronDown}

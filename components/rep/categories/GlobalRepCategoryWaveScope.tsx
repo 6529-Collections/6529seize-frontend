@@ -389,12 +389,11 @@ function SortControls({
   return (
     <div className="rep-category-sort tw-min-w-0 tw-max-w-full">
       <CommonTabs<GlobalRepCategorySort>
+        variant="connected"
+        connectedSize="sm"
         items={items}
         activeItem={sort}
-        filterLabel={t(
-          REP_CATEGORY_LOCALE,
-          "rep.categories.wave.sort.label"
-        )}
+        filterLabel={t(REP_CATEGORY_LOCALE, "rep.categories.wave.sort.label")}
         setSelected={onSortChange}
         size="sm"
         fill={false}

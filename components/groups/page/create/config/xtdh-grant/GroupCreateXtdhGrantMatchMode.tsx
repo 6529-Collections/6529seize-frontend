@@ -142,6 +142,8 @@ export default function GroupCreateXtdhGrantMatchMode({
         className="tw-w-fit tw-min-w-0 tw-max-w-full"
       >
         <CommonTabs<ApiGroupBeneficiaryGrantMatchMode>
+          variant="connected"
+          connectedSize="sm"
           items={MATCH_MODE_OPTIONS}
           activeItem={normalizedMode}
           setSelected={setMatchMode}
