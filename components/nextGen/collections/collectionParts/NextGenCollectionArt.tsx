@@ -141,8 +141,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     const sortDirParam = searchParams.get("sort_direction")?.toUpperCase();
     if (sortDirParam) {
       setSortDir(
-        Object.values(SortDirection).find((value) => value === sortDirParam) ??
-          SortDirection.DESC
+        Object.entries(SortDirection).find(
+          ([key]) => key === sortDirParam
+        )?.[1] ?? SortDirection.DESC
       );
     }
     const listedParam = searchParams.get("listed");
