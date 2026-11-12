@@ -168,11 +168,11 @@ function IdentityGettingStartedCardContent({
             <p className="tw-mb-6 tw-mt-0 tw-max-w-lg tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-400">
               {t(locale, "identityGettingStarted.introduction")}
             </p>
-            <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-2 @[20rem]/identity-guide:tw-grid-cols-2 @[30rem]/identity-guide:tw-flex @[30rem]/identity-guide:tw-flex-wrap @[30rem]/identity-guide:tw-gap-3">
+            <div className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-2 @[20rem]/identity-guide:tw-grid-cols-2 @[30rem]/identity-guide:tw-w-fit @[30rem]/identity-guide:tw-gap-3">
               <ButtonLink
                 href="/discover"
                 variant="primary"
-                size="xl"
+                size="lg"
                 className="tw-min-w-0"
               >
                 {t(locale, "identityGettingStarted.discover")}
@@ -183,7 +183,7 @@ function IdentityGettingStartedCardContent({
               </ButtonLink>
               <Link
                 href="/join-6529"
-                className="tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-650 hover:tw-bg-iron-900 hover:tw-text-white hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 @[30rem]/identity-guide:tw-px-4 motion-reduce:tw-transition-none"
+                className="tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-transparent tw-px-5 tw-py-2.5 tw-text-sm tw-font-semibold tw-text-iron-200 tw-no-underline tw-transition-colors hover:tw-border-iron-650 hover:tw-bg-iron-900 hover:tw-text-white hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
               >
                 {t(locale, "identityGettingStarted.guide")}
               </Link>

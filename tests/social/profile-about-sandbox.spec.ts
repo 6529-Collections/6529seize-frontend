@@ -411,7 +411,10 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           .boundingBox();
         expect(discoverBounds).not.toBeNull();
         expect(learnBounds).not.toBeNull();
-        expect(discoverBounds!.height).toBeGreaterThanOrEqual(48);
+        expect(discoverBounds!.height).toBeGreaterThanOrEqual(44);
+        expect(
+          Math.abs(discoverBounds!.height - learnBounds!.height)
+        ).toBeLessThanOrEqual(1);
         expect(
           Math.abs(discoverBounds!.width - learnBounds!.width)
         ).toBeLessThanOrEqual(1);
