@@ -166,5 +166,34 @@ test.describe("Encrypted Markdown @medium @local-only @e2ee", () => {
       viewport: innerWidth,
     }));
     expect(width.content).toBeLessThanOrEqual(width.viewport);
+
+    const pageCanary = "encrypted-dm-page-link-canary";
+    const pagePath = `/the-memes/1?source=${pageCanary}#card`;
+    const pageRequests: boolean[] = [];
+    bob.page.on("request", (request) => {
+      if (
+        request.url().includes(pageCanary) ||
+        request.postData()?.includes(pageCanary)
+      ) {
+        pageRequests.push(request.isNavigationRequest());
+      }
+    });
+    await bob.page.route(`**/the-memes/1?source=${pageCanary}`, (route) =>
+      route.fulfill({ contentType: "text/html", body: "<h1>The Memes</h1>" })
+    );
+    await composer(alice.page).fill(
+      `In-app link\n\n[Open The Memes](${pagePath})`
+    );
+    await alice.page.getByRole("button", { name: "Send", exact: true }).click();
+    const pageRow = messageRow(bob.page, "In-app link");
+    await revealNewestMessage(bob.page, pageRow);
+    const pageLink = pageRow.getByRole("link", { name: "Open The Memes" });
+    await expect(pageLink).toHaveAttribute("href", pagePath);
+    await pageLink.hover();
+    await pageLink.focus();
+    expect(pageRequests).toEqual([]);
+    await pageLink.click();
+    await expect(bob.page).toHaveURL(new URL(pagePath, baseURL).href);
+    expect(pageRequests).toEqual([true]);
   });
 });

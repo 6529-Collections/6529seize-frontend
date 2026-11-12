@@ -1,6 +1,45 @@
-import { getInternalLinkPath } from "@/helpers/internalLink";
+import {
+  getInternalLinkPath,
+  getInternalPageLinkPath,
+} from "@/helpers/internalLink";
 
 const SITE = "https://6529.io";
+
+describe("getInternalPageLinkPath", () => {
+  it.each([
+    ["http://6529.io/the-memes/1", SITE, "/the-memes/1"],
+    ["https://www.6529.io/the-memes/1", SITE, "/the-memes/1"],
+    [`${SITE}/waves/123?serialNo=7#part-2`, SITE, "/waves/123?serialNo=7#part-2"],
+    ["/vitalik.eth", SITE, "/vitalik.eth"],
+    [
+      "https://staging.6529.io/waves/123",
+      "https://staging.6529.io",
+      "/waves/123",
+    ],
+  ])("routes %s within %s", (href, siteUrl, path) => {
+    expect(getInternalPageLinkPath(href, siteUrl)).toBe(path);
+  });
+
+  it.each([
+    "/api/auth",
+    "/%61pi/auth",
+    "/the-memes/card.png",
+    "//elsewhere.example/waves/123",
+    "https://6529.io.other.example/waves/123",
+    "https://www.6529.io@other.example/waves/123",
+    "https://user@www.6529.io/waves/123",
+    "https://www.6529.io:8443/waves/123",
+    "http://6529.io/%2Felsewhere.example",
+  ])("keeps %s outside app page routing", (href) => {
+    expect(getInternalPageLinkPath(href, SITE)).toBeNull();
+  });
+
+  it("keeps a production URL pointed at production when opened from staging", () => {
+    expect(
+      getInternalPageLinkPath(`${SITE}/waves/123`, "https://staging.6529.io")
+    ).toBeNull();
+  });
+});
 
 describe("getInternalLinkPath", () => {
   it.each([
