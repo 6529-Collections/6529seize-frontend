@@ -102,9 +102,9 @@ are unavailable, the welcome and `Find a Wave` remain available.
 
 The card is tied to the browser session in which the profile was created. It
 can remain visible when you return to your own Identity tab in that session.
-Select the close control to dismiss it without confirmation. Dismissal does
-not change your profile or prevent you from exploring Waves; the card has no
-reopen action. You can open `/join-6529` separately for guidance.
+Select `Dismiss guide` (the labeled close control) to remove it without
+confirmation. Dismissal does not change your profile or prevent you from exploring
+Waves; the card has no reopen action. You can open `/join-6529` separately for guidance.
 
 Visitors, signed-out viewers, and active profile proxies do not see this card.
 An ordinary visit to an existing profile in a new browser session does not

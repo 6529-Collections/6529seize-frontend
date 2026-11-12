@@ -6433,7 +6433,7 @@
         "If the About shortcut cannot load the statement, its dialog says Couldn't load your About statement. Try again before editing. Select Retry; Loading your About statement… appears before the editor becomes available. A failed save keeps the editor open with its error guidance for revision or retry.",
         "How 6529 works opens /join-6529. You can also open that guide separately after dismissing the welcome.",
         "The card is visible only to the connected profile owner outside proxy mode during the browser session in which the profile was created. Visitors, signed-out viewers, active proxies and ordinary existing-profile visits in a new browser session do not see the creation welcome.",
-        "The close control dismisses the card without confirmation and does not change the profile. There is no reopen action for the card. It can remain visible when you return to your own Identity tab in the same creation session until dismissed.",
+        "The visible Dismiss guide button removes the card without confirmation and does not change the profile. There is no reopen action for the card. It can remain visible when you return to your own Identity tab in the same creation session until dismissed.",
         "The card stacks on phones and keeps its action descriptions visible. Missing Main Stage details do not prevent the welcome and Find a Wave action from appearing."
       ],
       "canonical_path": "/join-6529",

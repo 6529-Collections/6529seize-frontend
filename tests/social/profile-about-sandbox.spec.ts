@@ -362,11 +362,29 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       exact: true,
       includeHidden: true,
     });
-    for (const width of [1023, 1024, 320]) {
+    const dismissGuide = guidance.getByRole("button", {
+      name: "Dismiss guide",
+      exact: true,
+    });
+    await expect(dismissGuide).toHaveText("Dismiss guide");
+    for (const width of [768, 1023, 1024, 320]) {
       await page.setViewportSize({ width, height: 900 });
       await expect(allGuidance).toHaveCount(1);
       await expect(guidance).toBeVisible();
       await expectNoHorizontalOverflow(page);
+      const createdBounds = await guidance
+        .getByText("Profile created", { exact: true })
+        .boundingBox();
+      const dismissBounds = await dismissGuide.boundingBox();
+      expect(createdBounds).not.toBeNull();
+      expect(dismissBounds).not.toBeNull();
+      const separated =
+        createdBounds!.x + createdBounds!.width <= dismissBounds!.x ||
+        createdBounds!.y + createdBounds!.height <= dismissBounds!.y;
+      expect(separated, `Guide header controls overlap at ${width}px`).toBe(
+        true
+      );
+      expect(dismissBounds!.height).toBeGreaterThanOrEqual(44);
     }
     await page.setViewportSize({
       width: isMobile ? 320 : 1280,
@@ -463,12 +481,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await page.goBack();
     await expect(guidance).toHaveCount(1);
     await expect(guidance).toBeVisible();
-    await guidance
-      .getByRole("button", {
-        name: "Dismiss getting-started guidance",
-        exact: true,
-      })
-      .click();
+    await dismissGuide.click();
     await expect(guidance).toHaveCount(0);
     await page.reload();
     await expect(

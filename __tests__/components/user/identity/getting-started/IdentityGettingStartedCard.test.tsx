@@ -285,9 +285,9 @@ describe("IdentityGettingStartedCard", () => {
     const { unmount } = render(
       <IdentityGettingStartedCard profile={profile} />
     );
-    fireEvent.click(
-      screen.getByRole("button", { name: "Dismiss getting-started guidance" })
-    );
+    const dismissGuide = screen.getByRole("button", { name: "Dismiss guide" });
+    expect(dismissGuide).toHaveTextContent("Dismiss guide");
+    fireEvent.click(dismissGuide);
     flushFrames();
 
     expect(screen.queryByRole("region")).not.toBeInTheDocument();
