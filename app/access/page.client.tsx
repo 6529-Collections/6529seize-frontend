@@ -87,7 +87,18 @@ export default function AccessPage() {
 
   return (
     <main className={styles["login"]}>
-      {image && <LoginImage image={image} alt="" />}
+      {image ? (
+        <LoginImage image={image} alt="" />
+      ) : (
+        <Image
+          unoptimized
+          src="/6529.svg"
+          alt="6529"
+          width={128}
+          height={128}
+          className="tw-h-auto tw-max-w-[40vw]"
+        />
+      )}
       <div
         className={clsx(
           styles["loginPrompt"],

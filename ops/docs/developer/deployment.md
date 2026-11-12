@@ -123,6 +123,7 @@ When the API access gate asks for a team code, enter it and press Enter.
 Click **OK** on the `gm!` popup to continue to the original page, including
 its query string and fragment. Opening `/access` directly sends you to the
 home page after access is confirmed.
+The access page shows the 6529 logo when the API supplies no artwork.
 
 ## Staging crawler cards
 

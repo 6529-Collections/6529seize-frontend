@@ -39,6 +39,23 @@ describe("Access page", () => {
     fireEvent.keyDown(input, { key: "Enter" });
   }
 
+  it("shows the local logo when the access API omits artwork", async () => {
+    const readResponse = jest.fn(async () => ({ error: "Unauthorized" }));
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      json: readResponse,
+    });
+
+    render(<AccessPage />);
+
+    await waitFor(() => expect(readResponse).toHaveBeenCalled());
+    expect(screen.getByRole("img", { name: "6529" })).toHaveAttribute(
+      "src",
+      "/6529.svg"
+    );
+  });
+
   it("saves the code, shows gm!, then resumes navigation", async () => {
     fetchMock.mockResolvedValueOnce({
       ok: false,
