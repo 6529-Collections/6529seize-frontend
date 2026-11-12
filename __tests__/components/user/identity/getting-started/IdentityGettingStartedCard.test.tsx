@@ -286,7 +286,9 @@ describe("IdentityGettingStartedCard", () => {
       <IdentityGettingStartedCard profile={profile} />
     );
     const dismissGuide = screen.getByRole("button", { name: "Dismiss guide" });
-    expect(dismissGuide).toHaveTextContent("Dismiss guide");
+    expect(dismissGuide).toHaveAccessibleName("Dismiss guide");
+    expect(dismissGuide).toHaveTextContent(/^$/);
+    expect(screen.queryByText("Profile created")).not.toBeInTheDocument();
     fireEvent.click(dismissGuide);
     flushFrames();
 

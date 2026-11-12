@@ -356,7 +356,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     ).toBeVisible();
     await expect(
       guidance.getByText("Profile created", { exact: true })
-    ).toBeVisible();
+    ).toHaveCount(0);
     const allGuidance = page.getByRole("region", {
       name: "Getting started with your identity",
       exact: true,
@@ -366,25 +366,31 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       name: "Dismiss guide",
       exact: true,
     });
-    await expect(dismissGuide).toHaveText("Dismiss guide");
+    await expect(dismissGuide).toHaveText("");
+    await expect(dismissGuide).toHaveAttribute("title", "Dismiss guide");
     for (const width of [768, 1023, 1024, 320]) {
       await page.setViewportSize({ width, height: 900 });
       await expect(allGuidance).toHaveCount(1);
       await expect(guidance).toBeVisible();
       await expectNoHorizontalOverflow(page);
-      const createdBounds = await guidance
-        .getByText("Profile created", { exact: true })
-        .boundingBox();
+      const headingBounds = await guidance
+        .getByRole("heading", { name: "Your profile is ready", exact: true })
+        .evaluate((element) => {
+          const range = document.createRange();
+          range.selectNodeContents(element);
+          const box = range.getBoundingClientRect();
+          return { x: box.x, y: box.y, width: box.width, height: box.height };
+        });
       const dismissBounds = await dismissGuide.boundingBox();
-      expect(createdBounds).not.toBeNull();
       expect(dismissBounds).not.toBeNull();
       const separated =
-        createdBounds!.x + createdBounds!.width <= dismissBounds!.x ||
-        createdBounds!.y + createdBounds!.height <= dismissBounds!.y;
+        headingBounds.x + headingBounds.width <= dismissBounds!.x ||
+        headingBounds.y >= dismissBounds!.y + dismissBounds!.height;
       expect(separated, `Guide header controls overlap at ${width}px`).toBe(
         true
       );
       expect(dismissBounds!.height).toBeGreaterThanOrEqual(44);
+      expect(dismissBounds!.width).toBeGreaterThanOrEqual(44);
     }
     await page.setViewportSize({
       width: isMobile ? 320 : 1280,
@@ -456,6 +462,10 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       include: ['[aria-label="Getting started with your identity"]'],
     });
     const screenshotPath = testInfo.outputPath("guided-welcome.png");
+    // Capture the resting appearance after proving keyboard focus restoration.
+    await guidance
+      .getByRole("heading", { name: "Your profile is ready" })
+      .click();
     await guidance.screenshot({
       path: screenshotPath,
       style: "nextjs-portal{display:none!important}",

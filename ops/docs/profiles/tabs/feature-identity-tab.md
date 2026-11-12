@@ -62,7 +62,7 @@ Mobile (`< lg`):
 ## Getting Started After Profile Setup
 
 After you choose and save your first profile username, your own Identity tab
-shows `Profile created` and `Your profile is ready`. The welcome introduces
+shows `Your profile is ready`. The welcome introduces
 6529 as a network where people share ideas, create art, and decide what to build
 together. An About statement is optional; you can explore without adding one.
 
@@ -102,7 +102,7 @@ are unavailable, the welcome and `Find a Wave` remain available.
 
 The card is tied to the browser session in which the profile was created. It
 can remain visible when you return to your own Identity tab in that session.
-Select `Dismiss guide` (the labeled close control) to remove it without
+Select the X close control (accessible name `Dismiss guide`) to remove it without
 confirmation. Dismissal does not change your profile or prevent you from exploring
 Waves; the card has no reopen action. You can open `/join-6529` separately for guidance.
 

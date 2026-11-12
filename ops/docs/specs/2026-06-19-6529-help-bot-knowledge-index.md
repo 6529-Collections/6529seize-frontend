@@ -54,8 +54,8 @@ Wave, and `How to submit to The Memes` opens the existing `Unlock submissions`
 nomination popover on desktop, with hover, click and keyboard access. Touch-first
 devices and the native app keep the dialog or sheet. An optional About shortcut opens the
 existing editor. `How 6529 works` opens Join 6529.
-Its facts keep creation-session visibility, owner/proxy restrictions, the labeled
-`Dismiss guide` action, and the welcome's availability without Main Stage details
+Its facts keep creation-session visibility, owner/proxy restrictions, the X close
+control, and the welcome's availability without Main Stage details
 explicit. About
 guidance includes the initial loading wait, error and Retry states, the
 existing-statement edit label, and the optional and permanently public notice.
