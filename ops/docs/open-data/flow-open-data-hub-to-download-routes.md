@@ -76,10 +76,9 @@ download link.
   - `/open-data/team`
   - `/open-data/royalties`
 - Web sidebar includes direct links to all dataset routes.
-- Native app menu includes direct links to dataset routes under
-  `About -> Data & Developer Tools`; hub cards and direct URLs also work.
-- `Meme Subscriptions` can be hidden on the hub for native iOS app users outside
-  the US, but the direct route still works.
+- The native app menu lists datasets under `About -> Data & Developer Tools`.
+- The iOS app omits `Meme Subscriptions` from navigation and the hub in all
+  countries. The direct dataset route still works.
 
 ## Failure and Recovery
 

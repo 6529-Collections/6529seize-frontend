@@ -51,7 +51,8 @@ export const SMALL_WEB_STARTUP_SCRIPT = `(() => {
     const isIos = ${MOBILE_APP_USER_AGENTS.ios}.test(ua) ||
       (${MOBILE_APP_USER_AGENTS.mac}.test(ua) && nav.maxTouchPoints > 1);
     const isAndroid = ${MOBILE_APP_USER_AGENTS.android}.test(ua);
-    const isIosSafari = isIos && !isAndroid && ${MOBILE_APP_USER_AGENTS.safari}.test(ua) &&
+    const isIosSafari = isIos && !isAndroid &&
+      ${MOBILE_APP_USER_AGENTS.safariVersion}.test(ua) && ${MOBILE_APP_USER_AGENTS.safari}.test(ua) &&
       !${MOBILE_APP_USER_AGENTS.otherIosBrowser}.test(ua);
     if (${MOBILE_APP_USER_AGENTS.electron}.test(ua) || (!isAndroid && !isIos) || isIosSafari) return;
     const path = decodeURIComponent(globalThis.location.pathname);

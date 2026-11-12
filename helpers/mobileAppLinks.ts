@@ -12,7 +12,8 @@ export const MOBILE_APP_USER_AGENTS = {
   android: /Android/i,
   ios: /iPhone|iPad|iPod/i,
   mac: /Macintosh/i,
-  safari: /\bVersion\/[^\s]+.*\bSafari\//i,
+  safariVersion: /\bVersion\/\d/i,
+  safari: /\bSafari\//i,
   otherIosBrowser:
     /CriOS|FxiOS|EdgiOS|OPiOS|GSA|DuckDuckGo|YaBrowser|FBAN|FBAV|Instagram/i,
 };

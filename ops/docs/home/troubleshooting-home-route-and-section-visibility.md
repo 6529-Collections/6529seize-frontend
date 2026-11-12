@@ -90,7 +90,8 @@ This page covers:
 
 - Refresh `/` to rerun home queries.
 - Open `/network/health` directly if the heart shortcut is unavailable.
-- Open `/the-memes/mint` if latest-drop mint actions are unavailable.
+- On the web or Android, open `/the-memes/mint` if latest-drop mint actions are
+  unavailable. In the iOS app, that route opens The Memes collection.
 - Open `/the-memes/{id}` or `/the-memes/{id}/distribution` when latest-drop
   card links fail.
 - Open `/waves` when `Coming up` or `Most active waves`

@@ -28,6 +28,7 @@ export default function MobileAppBanner() {
       : getMobilePlatform(navigator.userAgent, navigator.maxTouchPoints);
   const isIosSafari =
     platform === "iOS" &&
+    MOBILE_APP_USER_AGENTS.safariVersion.test(navigator.userAgent) &&
     MOBILE_APP_USER_AGENTS.safari.test(navigator.userAgent) &&
     !MOBILE_APP_USER_AGENTS.otherIosBrowser.test(navigator.userAgent);
 
