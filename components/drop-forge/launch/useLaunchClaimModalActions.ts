@@ -245,10 +245,14 @@ export function useLaunchClaimModalActions({
       setMintingClaimActionPending(action);
 
       try {
-        const response = await upsertMemesMintingClaimAction(currentClaimId, {
-          action,
-          completed,
-        });
+        const response = await upsertMemesMintingClaimAction(
+          currentClaimId,
+          {
+            action,
+            completed,
+          },
+          forgeMintingContract
+        );
         if (isStaleClaimActionRequest()) {
           return;
         }
@@ -278,6 +282,7 @@ export function useLaunchClaimModalActions({
     },
     [
       claimId,
+      forgeMintingContract,
       isClaimsAdmin,
       mintingClaimActionTypes,
       requestAuth,

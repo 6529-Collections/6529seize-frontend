@@ -6,16 +6,16 @@ import {
 import { ApiDropForgeLaunchStateEnum as LaunchState } from "@/generated/models/ApiDropForgeLaunch";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
-import {
-  getForgeLaunch,
-  requestForgeLaunch,
-} from "@/services/api/drop-forge-api";
+import { requestForgeLaunch } from "@/services/api/drop-forge-api";
+import { DropForgeAutoLaunchPill } from "@/components/drop-forge/DropForgeAutoLaunchPill";
+import { useDropForgeLaunch } from "@/hooks/useDropForgeLaunch";
+import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 function launchLabel(
   initialized: boolean,
@@ -30,15 +30,6 @@ function launchLabel(
     ? ("dropForge.update" as const)
     : ("dropForge.launch" as const);
 }
-function launchStatus(
-  unpublished: boolean,
-  synced: boolean,
-  initialized: boolean
-) {
-  if (unpublished) return "dropForge.publishFirst" as const;
-  if (synced) return "dropForge.syncCurrent" as const;
-  return initialized ? ("dropForge.launched" as const) : null;
-}
 export default function CraftLaunchActions({
   claimId,
   metadata,
@@ -52,17 +43,15 @@ export default function CraftLaunchActions({
   const { requestAuth } = useAuth();
   const locale = useBrowserLocale();
   const client = useQueryClient();
-  const query = useQuery({
-    queryKey: forgeLaunchKey(contract, claimId),
-    queryFn: () => getForgeLaunch(contract, claimId),
-    refetchInterval: 5000,
-  });
+  const query = useDropForgeLaunch(claimId, true);
+  const settings = useDropForgeSettings();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const launch = query.data;
-  const initialized =
-    launch?.actions.find((it) => it.kind === ActionKind.Initialize)?.state ===
-    ActionState.Confirmed;
+  const initialization = launch?.actions.find(
+    (action) => action.kind === ActionKind.Initialize
+  );
+  const initialized = initialization?.state === ActionState.Confirmed;
   const staleMetadata =
     launch?.state === LaunchState.Blocked &&
     [
@@ -76,15 +65,31 @@ export default function CraftLaunchActions({
       ["PENDING", "RESERVED", "SIGNED"].includes(it.state)
   );
   const initializing =
-    !!launch && !initialized && ["ARMED", "RUNNING"].includes(launch.state);
+    initialization?.state === ActionState.Reserved ||
+    initialization?.state === ActionState.Signed ||
+    (initialization?.state === ActionState.Pending &&
+      (launch?.state === LaunchState.Armed ||
+        launch?.state === LaunchState.Running));
   const blocked =
     (launch?.state === LaunchState.Blocked && !staleMetadata) ||
     launch?.state === LaunchState.Cancelled;
   const pending =
     submitting || initializing || !!updating || launch?.manual_pending === true;
-  const synced = initialized && metadata === launch.metadata_location;
+  const published = !!metadata && !dirty;
+  const showAction = initialized
+    ? !!updating || (published && metadata !== launch?.metadata_location)
+    : initializing || !launch || launch.state === LaunchState.Draft;
+  const automaticLaunchOff =
+    !initialized && settings.data?.automation_enabled === false;
+  const disabled =
+    !!pending ||
+    !published ||
+    blocked ||
+    query.isLoading ||
+    !!query.error ||
+    (!initialized && settings.data?.automation_enabled !== true);
   async function run() {
-    if (pending || dirty || !metadata || blocked || synced) return;
+    if (disabled || !showAction) return;
     setSubmitting(true);
     setError(null);
     try {
@@ -98,44 +103,47 @@ export default function CraftLaunchActions({
       setSubmitting(false);
     }
   }
-  const status = launchStatus(dirty || !metadata, synced, initialized);
-  const failure = error ?? launch?.error ?? getToastErrorDetails(query.error);
+  const failure =
+    error ??
+    launch?.error ??
+    (!initialized ? initialization?.attempt_error : null) ??
+    getToastErrorDetails(query.error) ??
+    (!initialized ? getToastErrorDetails(settings.error) : null);
   return (
     <div className="tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-ring-1 tw-ring-iron-800">
-      <button
-        type="button"
-        onClick={() => {
-          void run();
-        }}
-        disabled={
-          !!pending ||
-          dirty ||
-          !metadata ||
-          synced ||
-          blocked ||
-          query.isLoading ||
-          !!query.error
-        }
-        aria-busy={!!pending}
-        className="tw-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-medium tw-text-white disabled:tw-opacity-50"
-      >
-        {pending && <CircleLoader />}
-        {t(
-          locale,
-          launchLabel(
-            initialized,
-            !!updating,
-            initializing || (submitting && !initialized),
-            launch?.manual_pending === true
-          )
-        )}
-      </button>
+      {launch && <DropForgeAutoLaunchPill />}
+      {showAction && (
+        <button
+          type="button"
+          onClick={() => {
+            void run();
+          }}
+          disabled={disabled}
+          aria-busy={!!pending}
+          className="tw-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-medium tw-text-white disabled:tw-opacity-50"
+        >
+          {pending && <CircleLoader />}
+          {t(
+            locale,
+            launchLabel(
+              initialized,
+              !!updating,
+              initializing || (submitting && !initialized),
+              launch?.manual_pending === true
+            )
+          )}
+        </button>
+      )}
       <div
         role="status"
         aria-live="polite"
         className="tw-text-sm tw-text-iron-300"
       >
-        {status && t(locale, status)}
+        {initialized && <div>{t(locale, "dropForge.claimInitialized")}</div>}
+        {automaticLaunchOff && (
+          <div>{t(locale, "dropForge.automaticLaunchOff")}</div>
+        )}
+        {!published && <div>{t(locale, "dropForge.publishFirst")}</div>}
       </div>
       {failure && (
         <p role="alert" className="tw-text-sm tw-text-error">

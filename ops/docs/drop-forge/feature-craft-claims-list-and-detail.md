@@ -93,8 +93,8 @@ The craft surface combines:
   - Publish image, animation, and metadata after saving draft changes.
   - Copy or open the resulting Arweave links once they exist.
 - Claim controls:
-  - `Launch` queues initialization immediately after publication and completed EMMA processing.
-  - `Update Claim` synchronizes republished metadata while retaining mint settings and completed allocations.
+  - `Launch` queues initialization after publication and completed EMMA processing when **Automatic launch** is on.
+  - `Update Claim` appears after you publish new metadata for an initialized claim. It retains mint settings and completed allocations.
 - Distribution review:
   - Inspect distribution photos and grouped phase summaries while preparing the
     claim for launch.

@@ -32,6 +32,7 @@ type AuthContextValue = ReturnType<typeof useAuth>;
 
 interface UseLaunchClaimDataEffectsParams {
   claimId: number;
+  forgeMintingContract: string;
   requestAuth: AuthContextValue["requestAuth"];
   setToast: AuthContextValue["setToast"];
   hasWallet: boolean;
@@ -45,6 +46,7 @@ interface UseLaunchClaimDataEffectsParams {
 
 export function useLaunchClaimDataEffects({
   claimId,
+  forgeMintingContract,
   requestAuth,
   setToast,
   hasWallet,
@@ -327,7 +329,8 @@ export function useLaunchClaimDataEffects({
           }
         }
 
-        const typesResponse = await getMemesMintingClaimActionTypes();
+        const typesResponse =
+          await getMemesMintingClaimActionTypes(forgeMintingContract);
         if (cancelled) return;
         setMintingClaimActionTypes(typesResponse.action_types ?? []);
       } catch {
@@ -341,7 +344,10 @@ export function useLaunchClaimDataEffects({
       }
 
       try {
-        const actionsResponse = await getMemesMintingClaimActions(claimId);
+        const actionsResponse = await getMemesMintingClaimActions(
+          claimId,
+          forgeMintingContract
+        );
         if (cancelled) return;
         setMintingClaimActions(actionsResponse);
         setMintingClaimActionsLoaded(true);
@@ -357,7 +363,18 @@ export function useLaunchClaimDataEffects({
     return () => {
       cancelled = true;
     };
-  }, [hasWallet, canAccessLaunchPage, isClaimsAdmin, claimId, requestAuth]);
+  }, [
+    hasWallet,
+    canAccessLaunchPage,
+    isClaimsAdmin,
+    claimId,
+    forgeMintingContract,
+    requestAuth,
+    setMintingClaimActionTypes,
+    setMintingClaimActions,
+    setMintingClaimActionsLoadFailed,
+    setMintingClaimActionsLoaded,
+  ]);
 
   useEffect(() => {
     if (permissionsLoading || isClaimsAdmin) return;

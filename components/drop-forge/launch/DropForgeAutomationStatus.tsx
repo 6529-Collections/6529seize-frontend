@@ -2,14 +2,10 @@
 import DropForgeActionGroups from "./DropForgeActionGroups";
 import { ApiDropForgeActionStateEnum as ActionState } from "@/generated/models/ApiDropForgeAction";
 import { useEffect, useEffectEvent, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useDropForgeLaunch } from "@/hooks/useDropForgeLaunch";
 import { useAuth } from "@/components/auth/Auth";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
-import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
-import {
-  getForgeLaunch,
-  finishForgeManual,
-} from "@/services/api/drop-forge-api";
+import { finishForgeManual } from "@/services/api/drop-forge-api";
 import { commonApiPost } from "@/services/api/common-api";
 import {
   ApiDropForgeControlRequestOperationEnum,
@@ -26,11 +22,7 @@ export default function DropForgeAutomationStatus({
   const { contract } = useDropForgeMintingConfig();
   const { requestAuth } = useAuth();
   const locale = useBrowserLocale();
-  const query = useQuery({
-    queryKey: forgeLaunchKey(contract, claimId),
-    queryFn: () => getForgeLaunch(contract, claimId),
-    refetchInterval: 5000,
-  });
+  const query = useDropForgeLaunch(claimId, true);
   const [hash, setHash] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

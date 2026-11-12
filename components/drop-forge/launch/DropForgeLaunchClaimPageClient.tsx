@@ -72,13 +72,14 @@ export default function DropForgeLaunchClaimPageClient({
   const refreshManualView = useCallback(() => {
     void refetchOnChainClaim().catch(() => undefined);
     if (canManageClaimActions) {
-      void getMemesMintingClaimActions(claimId)
+      void getMemesMintingClaimActions(claimId, forgeMintingContract)
         .then(setMintingClaimActions)
         .catch(() => undefined);
     }
   }, [
     refetchOnChainClaim,
     canManageClaimActions,
+    forgeMintingContract,
     claimId,
     setMintingClaimActions,
   ]);
@@ -121,6 +122,7 @@ export default function DropForgeLaunchClaimPageClient({
     safeClaimExternalUrl,
   } = useLaunchClaimDataEffects({
     claimId,
+    forgeMintingContract,
     requestAuth,
     setToast,
     hasWallet,

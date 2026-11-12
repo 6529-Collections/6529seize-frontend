@@ -16,7 +16,11 @@ export function DropForgeLaunchClaimPageView({
 }: Readonly<DropForgeLaunchClaimPageViewProps>) {
   return (
     <div className="tw-px-2 tw-pb-16 tw-pt-2 lg:tw-px-6 lg:tw-pt-8 xl:tw-px-8">
-      <DropForgeLaunchClaimHeader pageTitle={pageTitle} craftHref={craftHref} />
+      <DropForgeLaunchClaimHeader
+        pageTitle={pageTitle}
+        craftHref={craftHref}
+        claimId={contentProps.claimId}
+      />
       {loading && <p className="tw-text-iron-400">Loading…</p>}
       {error && (
         <p className="tw-text-red-400 tw-mb-4" role="alert">

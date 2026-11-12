@@ -91,7 +91,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockRequestAuth.mockResolvedValue({ success: true });
   jest.mocked(useDropForgeSettings).mockReturnValue({
-    data: { preparation_enabled: true },
+    data: { preparation_enabled: true, automation_enabled: true },
   } as ReturnType<typeof useDropForgeSettings>);
 });
 it.each([
@@ -167,6 +167,31 @@ it("offers Update Claim only for republished changes and retains state after loa
     await screen.findByRole("button", { name: "Updating…" })
   ).toBeDisabled();
   expect(requestForgeLaunch).toHaveBeenCalledWith("0xcreator", 123, true);
+});
+it("disables Launch and explains that Automatic launch is off", async () => {
+  jest.mocked(getForgeLaunch).mockResolvedValue(null);
+  jest.mocked(useDropForgeSettings).mockReturnValue({
+    data: { automation_enabled: false },
+  } as ReturnType<typeof useDropForgeSettings>);
+  renderUI(
+    <CraftLaunchActions claimId={123} metadata="published" dirty={false} />
+  );
+  await screen.findByText("Automatic launch is off.");
+  const launchButton = screen.getByRole("button", { name: "Launch" });
+  expect(launchButton).toBeDisabled();
+  fireEvent.click(launchButton);
+  expect(requestForgeLaunch).not.toHaveBeenCalled();
+});
+it("shows the Auto Launch pill and initialized state with current metadata", async () => {
+  jest.mocked(getForgeLaunch).mockResolvedValue(launch(true));
+  renderUI(
+    <CraftLaunchActions claimId={123} metadata="published" dirty={false} />
+  );
+  await screen.findByText("Claim initialized");
+  expect(screen.getByText("Auto Launch")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Update Claim" })
+  ).not.toBeInTheDocument();
 });
 it("prevents launch for unpublished or unsaved changes", async () => {
   jest.mocked(getForgeLaunch).mockResolvedValue(null);
