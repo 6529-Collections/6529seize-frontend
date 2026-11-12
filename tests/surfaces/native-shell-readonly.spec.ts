@@ -259,14 +259,13 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       });
       const source = new URL(page.url());
       const link = page.getByRole("link", { name: action, exact: true });
+      const purchaseActions = page.getByTestId("collected-purchase-actions");
       if (testInfo.project.name === "capacitor-ios-sim") {
         await expect(link).toHaveCount(0);
-        // The action wrapper must also disappear so it cannot leave a gap.
-        await expect(
-          page.locator('[data-profile-action="Complete my set"]')
-        ).toHaveCount(0);
+        await expect(purchaseActions).toHaveCount(0);
         continue;
       }
+      await expect(purchaseActions).toBeVisible();
       await link.scrollIntoViewIfNeeded();
       const destination = new URL(
         (await link.getAttribute("href"))!,
