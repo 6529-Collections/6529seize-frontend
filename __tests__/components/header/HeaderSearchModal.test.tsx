@@ -672,8 +672,14 @@ describe("HeaderSearchModal", () => {
   });
 
   it("keeps Validator out of newcomer search navigation", () => {
+    autoFlushDebounce = false;
     setup({ selectedCategory: "PAGES" });
     fireEvent.change(getSearchInput(), { target: { value: "validator" } });
+    expect(screen.getByText('Searching for "validator"')).toBeInTheDocument();
+    act(() => pendingDebounce?.());
+    expect(
+      screen.getByText('No matches in Pages for "validator"')
+    ).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Validator" })).toBeNull();
     expect(screen.queryByRole("link", { name: "6529 Validator" })).toBeNull();
   });
