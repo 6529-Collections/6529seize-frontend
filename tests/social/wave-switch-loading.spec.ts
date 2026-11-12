@@ -491,7 +491,14 @@ test("keeps the subwave title in place when parent navigation arrives", async ({
   const apiOrigin = getSandboxApiOrigin(baseURL);
   const overviewResponse = await page.request.get(`${apiOrigin}/api/v2/waves`);
   const parent = (await overviewResponse.json()).data[0];
-  const child = { ...parent, id: TARGET, name: NAME, parent_wave: parent };
+  const child = {
+    ...parent,
+    id: TARGET,
+    name: NAME,
+    parent_wave: parent,
+    // The full child fixture below has no description text.
+    description_drop: { contents: "", media: [] },
+  };
   const waveResponse = await page.request.get(
     `${apiOrigin}/api/waves/${TARGET}`
   );
