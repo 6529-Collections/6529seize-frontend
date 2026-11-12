@@ -39,6 +39,7 @@ describe("ClaimTransactionModal", () => {
           }}
           chain={sepolia}
           onClose={jest.fn()}
+          showAirdropSummary
         />
       );
       expect(
@@ -48,6 +49,22 @@ describe("ClaimTransactionModal", () => {
         screen.getByText("Copies: 27 · Recipient wallets: 3")
       ).toBeVisible();
     }
+  });
+
+  it("keeps the ordinary wallet dialog when automation is off", () => {
+    render(
+      <ClaimTransactionModal
+        state={{
+          status: "confirm_wallet",
+          actionLabel: "Airdrop Subscriptions",
+          airdrop: { quantity: "27", walletCount: 3 },
+        }}
+        chain={sepolia}
+        onClose={jest.fn()}
+      />
+    );
+    expect(screen.getByText("Confirm in your wallet")).toBeInTheDocument();
+    expect(screen.queryByText(/Recipient wallets/)).not.toBeInTheDocument();
   });
 
   it.each(SUPPORTED_LOCALES)("formats exact totals in %s", (locale) => {
@@ -62,6 +79,7 @@ describe("ClaimTransactionModal", () => {
         }}
         chain={sepolia}
         onClose={jest.fn()}
+        showAirdropSummary
       />
     );
     expect(screen.getByRole("dialog")).toHaveAccessibleDescription(

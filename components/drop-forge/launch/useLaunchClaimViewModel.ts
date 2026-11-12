@@ -34,6 +34,7 @@ import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
 interface UseLaunchClaimViewModelParams {
   claimId: number;
+  automaticLaunchEnabled: boolean;
   state: LaunchClaimState;
   manifoldClaim: ManifoldClaim | null | undefined;
   primaryStatus: ReturnType<
@@ -50,6 +51,7 @@ interface UseLaunchClaimViewModelParams {
 
 export function useLaunchClaimViewModel({
   claimId,
+  automaticLaunchEnabled,
   state,
   manifoldClaim,
   primaryStatus,
@@ -212,17 +214,17 @@ export function useLaunchClaimViewModel({
     mintingClaimActionsLoadFailed,
   ]);
   const { contract } = useDropForgeMintingConfig();
+  const hasSavedPlan =
+    mintingClaimActions?.claim_id === claimId &&
+    mintingClaimActions.contract.toLowerCase() === contract.toLowerCase() &&
+    mintingClaimActions.drop_forge_launch_exists === true;
   const savedLaunch = useQuery({
     queryKey: forgeLaunchKey(contract, claimId),
     queryFn: () => getForgeLaunch(contract, claimId),
-    enabled: claimId > 0,
+    enabled: claimId > 0 && (automaticLaunchEnabled || hasSavedPlan),
     refetchInterval: 5000,
   });
-  const coordinateManualWrites =
-    Boolean(savedLaunch.data) ||
-    (mintingClaimActions?.claim_id === claimId &&
-      mintingClaimActions.contract.toLowerCase() === contract.toLowerCase() &&
-      mintingClaimActions.drop_forge_launch_exists === true);
+  const coordinateManualWrites = Boolean(savedLaunch.data) || hasSavedPlan;
   const savedPhases =
     savedLaunch.data?.phases ?? (coordinateManualWrites ? undefined : null);
   const mintTimeline = useMemo(

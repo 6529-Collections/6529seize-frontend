@@ -35,31 +35,42 @@ import {
 
 const MIN_REFRESH_DURATION_MS = 1500;
 
-export default function DropForgeContractAdmins() {
+export default function DropForgeContractAdmins({
+  collapsible = false,
+}: Readonly<{ collapsible?: boolean }>) {
   const locale = useBrowserLocale();
   const [expanded, setExpanded] = useState(false);
   return (
-    <section className="tailwind-scope tw-mt-6 tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-6">
-      <details
-        className="tw-group"
-        onToggle={(event) => setExpanded(event.currentTarget.open)}
-      >
-        <summary className="tw-flex tw-min-h-10 tw-cursor-pointer tw-list-none tw-items-center tw-gap-3 tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
-          <ChevronRightIcon
-            aria-hidden="true"
-            className="tw-size-5 tw-shrink-0 tw-text-iron-400 tw-transition-transform group-open:tw-rotate-90"
-          />
-          <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
-            {t(locale, "dropForge.admins.heading")}
-          </h2>
-        </summary>
-        {expanded && <ContractAdminsContent />}
-      </details>
+    <section
+      aria-labelledby={collapsible ? undefined : "contract-admins-heading"}
+      className="tailwind-scope tw-mt-6 tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-6"
+    >
+      {collapsible ? (
+        <details
+          className="tw-group"
+          onToggle={(event) => setExpanded(event.currentTarget.open)}
+        >
+          <summary className="tw-flex tw-min-h-10 tw-cursor-pointer tw-list-none tw-items-center tw-gap-3 tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+            <ChevronRightIcon
+              aria-hidden="true"
+              className="tw-size-5 tw-shrink-0 tw-text-iron-400 tw-transition-transform group-open:tw-rotate-90"
+            />
+            <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+              {t(locale, "dropForge.admins.heading")}
+            </h2>
+          </summary>
+          {expanded && <ContractAdminsContent />}
+        </details>
+      ) : (
+        <ContractAdminsContent showHeading />
+      )}
     </section>
   );
 }
 
-function ContractAdminsContent() {
+function ContractAdminsContent({
+  showHeading = false,
+}: Readonly<{ showHeading?: boolean }>) {
   const locale = useBrowserLocale();
   const { contract, chain } = useDropForgeMintingConfig();
   const { address: activeWallet } = useSeizeConnectContext();
@@ -165,8 +176,18 @@ function ContractAdminsContent() {
   };
 
   return (
-    <div className="tw-mt-4">
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-3">
+    <div className={showHeading ? undefined : "tw-mt-4"}>
+      <div
+        className={`tw-flex tw-flex-wrap tw-items-center tw-gap-3 ${showHeading ? "tw-justify-between" : "tw-justify-end"}`}
+      >
+        {showHeading && (
+          <h2
+            id="contract-admins-heading"
+            className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50"
+          >
+            {t(locale, "dropForge.admins.heading")}
+          </h2>
+        )}
         <div className="tw-flex tw-items-center tw-gap-2">
           {canManageContractAdmins && (
             <Button

@@ -60,7 +60,7 @@ jest.mock("@/components/common/OnchainTransactionModal", () => ({
 }));
 
 function renderOpen() {
-  const view = render(<DropForgeContractAdmins />);
+  const view = render(<DropForgeContractAdmins collapsible />);
   const details = view.container.querySelector("details");
   if (!details) throw new Error("Contract Admins accordion missing");
   details.open = true;

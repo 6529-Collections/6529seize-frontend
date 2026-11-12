@@ -135,6 +135,12 @@ export default function DropForgeLaunchClaimPageClient({
     state: launchClaimState,
   });
 
+  const { data: automationSettings } = useDropForgeSettings();
+  const automaticLaunchEnabled =
+    automationSettings?.automation_enabled === true &&
+    automationSettings.contract.toLowerCase() ===
+      forgeMintingContract.toLowerCase();
+
   const {
     coordinateManualWrites,
     artistAirdropSummary,
@@ -168,6 +174,7 @@ export default function DropForgeLaunchClaimPageClient({
     payArtistAddressError,
   } = useLaunchClaimViewModel({
     claimId,
+    automaticLaunchEnabled,
     state: launchClaimState,
     manifoldClaim,
     primaryStatus,
@@ -213,12 +220,7 @@ export default function DropForgeLaunchClaimPageClient({
     payArtistResolvedAddressTrimmed,
     payArtistAddressValid,
   ]);
-  const { data: automationSettings } = useDropForgeSettings();
-  const coordinateWrites =
-    coordinateManualWrites ||
-    (automationSettings?.automation_enabled === true &&
-      automationSettings.contract.toLowerCase() ===
-        forgeMintingContract.toLowerCase());
+  const coordinateWrites = coordinateManualWrites || automaticLaunchEnabled;
   const executeManual = useDropForgeManualWrite(
     forgeMintingContract,
     claimId,
@@ -334,13 +336,16 @@ export default function DropForgeLaunchClaimPageClient({
 
   return (
     <>
-      <DropForgeAutomationStatus
-        claimId={claimId}
-        onConfirmedWork={refreshManualView}
-      />
+      {coordinateManualWrites && (
+        <DropForgeAutomationStatus
+          claimId={claimId}
+          onConfirmedWork={refreshManualView}
+        />
+      )}
       <DropForgeLaunchClaimPageView
         pageTitle={pageTitle}
         craftHref={`/drop-forge/craft/${claimId}`}
+        showAutoLaunch={coordinateManualWrites}
         loading={loading}
         error={error}
         rootsError={rootsError}
@@ -432,6 +437,7 @@ export default function DropForgeLaunchClaimPageClient({
         state={activeTxModal}
         chain={forgeMintingChain}
         onClose={closeActiveTxModal}
+        showAirdropSummary={coordinateWrites}
       />
     </>
   );

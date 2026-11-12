@@ -36,7 +36,9 @@ This area covers:
 - `Launch Claims` access is narrower: claims-admin or Drop Forge admin wallets.
 - Drop Forge admin means the active creator contract's owner or an approved
   on-chain admin. These wallets also have launch action-tracking access.
-- Every wallet that can see the landing route can see `Contract Admins`, with
+- Every wallet that can see the landing route can see `Contract Admins`. Its
+  controls are directly visible with Automatic launch Off. With Automatic
+  launch On, select the section heading to expand the controls. The section has
   the owner first. Add/Revoke controls are restricted to the owner and
   configured claims-admin wallets; the contract itself only accepts these
   changes from its owner.

@@ -9,6 +9,7 @@ export { DropForgeLaunchClaimPermissionFallbackView } from "@/components/drop-fo
 export function DropForgeLaunchClaimPageView({
   pageTitle,
   craftHref,
+  showAutoLaunch,
   loading,
   error,
   rootsError,
@@ -19,7 +20,7 @@ export function DropForgeLaunchClaimPageView({
       <DropForgeLaunchClaimHeader
         pageTitle={pageTitle}
         craftHref={craftHref}
-        claimId={contentProps.claimId}
+        showAutoLaunch={showAutoLaunch}
       />
       {loading && <p className="tw-text-iron-400">Loading…</p>}
       {error && (

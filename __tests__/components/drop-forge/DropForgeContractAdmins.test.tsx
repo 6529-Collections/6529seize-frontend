@@ -94,7 +94,7 @@ jest.mock("@/components/utils/input/ens-address/EnsAddressInput", () => ({
 }));
 
 function renderOpen() {
-  const view = render(<DropForgeContractAdmins />);
+  const view = render(<DropForgeContractAdmins collapsible />);
   const details = view.container.querySelector("details");
   if (!details) throw new Error("Contract Admins accordion missing");
   details.open = true;
@@ -113,6 +113,12 @@ beforeEach(() => {
 });
 afterEach(() => {
   jest.useRealTimers();
+});
+it("shows the ordinary admin controls without expanding a section when automation is off", () => {
+  render(<DropForgeContractAdmins />);
+  expect(screen.getByRole("region", { name: "Contract Admins" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "Add Admin" })).toBeVisible();
+  expect(screen.getAllByRole("listitem")).toHaveLength(2);
 });
 it("lists the owner first exactly once and never offers owner revocation", () => {
   renderOpen();
@@ -397,7 +403,7 @@ it("uses app tooltips instead of native titles for refresh and revoke", async ()
 });
 
 it("starts collapsed and loads the admin list only after expansion", () => {
-  const view = render(<DropForgeContractAdmins />);
+  const view = render(<DropForgeContractAdmins collapsible />);
   expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
   const details = view.container.querySelector("details");
   if (!details) throw new Error("Contract Admins accordion missing");

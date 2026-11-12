@@ -4,7 +4,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import Toggle from "react-toggle";
-import { DropForgeSavedPlanPill } from "@/components/drop-forge/DropForgeAutoLaunchPill";
+import { DropForgeAutoLaunchPill } from "@/components/drop-forge/DropForgeAutoLaunchPill";
 import DropForgeLaunchIcon from "@/components/common/icons/DropForgeLaunchIcon";
 import DropForgeExplorerLink from "@/components/drop-forge/DropForgeExplorerLink";
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
@@ -88,8 +88,12 @@ export function DropForgeLaunchClaimPermissionFallbackView({
 export function DropForgeLaunchClaimHeader({
   pageTitle,
   craftHref,
-  claimId,
-}: Readonly<{ pageTitle: string; craftHref: string; claimId: number }>) {
+  showAutoLaunch,
+}: Readonly<{
+  pageTitle: string;
+  craftHref: string;
+  showAutoLaunch: boolean;
+}>) {
   return (
     <div className="tw-mb-6">
       <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4">
@@ -112,7 +116,7 @@ export function DropForgeLaunchClaimHeader({
         <h1 className="tw-mb-0 tw-inline-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-center tw-gap-2 tw-text-center tw-text-2xl tw-font-semibold tw-text-iron-50 sm:tw-w-auto sm:tw-justify-start sm:tw-gap-3 sm:tw-text-left sm:tw-text-3xl">
           <DropForgeLaunchIcon className="tw-h-7 tw-w-7 tw-flex-shrink-0 sm:tw-h-8 sm:tw-w-8" />
           <span className="tw-break-words">{pageTitle}</span>
-          <DropForgeSavedPlanPill claimId={claimId} />
+          {showAutoLaunch && <DropForgeAutoLaunchPill />}
         </h1>
         <DropForgeLaunchPageTitleRight />
       </div>

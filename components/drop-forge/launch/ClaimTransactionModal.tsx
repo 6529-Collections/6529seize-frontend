@@ -11,10 +11,12 @@ export default function ClaimTransactionModal({
   state,
   chain,
   onClose,
+  showAirdropSummary = false,
 }: Readonly<{
   state: ClaimTxModalState | null;
   chain: Chain;
   onClose: () => void;
+  showAirdropSummary?: boolean;
 }>) {
   const locale = useBrowserLocale();
   if (!state) return null;
@@ -24,7 +26,7 @@ export default function ClaimTransactionModal({
       status={state.status}
       title={state.actionLabel ?? "Onchain Action"}
       subtitle={
-        state.airdrop
+        showAirdropSummary && state.airdrop
           ? t(locale, "dropForge.airdrop.summary", {
               quantity: formatDecimalString(locale, state.airdrop.quantity),
               wallets: formatInteger(locale, state.airdrop.walletCount),

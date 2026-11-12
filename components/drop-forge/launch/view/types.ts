@@ -184,6 +184,7 @@ export interface DropForgeLaunchClaimPageViewProps
     LaunchAirdropWriteProps {
   pageTitle: string;
   craftHref: string;
+  showAutoLaunch: boolean;
   loading: boolean;
   error: string | null;
   rootsError: string | null;
