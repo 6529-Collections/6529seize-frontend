@@ -16,7 +16,13 @@ export default function UserPageIdentityActivityLogList({
   const compact = useContext(IdentityActivityContext);
   return (
     <div className="tw-mt-4 md:tw-mt-6">
-      <div className={compact ? undefined : "tw-space-y-2.5"}>
+      <div
+        className={
+          compact
+            ? "tw-overflow-hidden tw-rounded-xl tw-bg-iron-950/70"
+            : "tw-space-y-2.5"
+        }
+      >
         {logs.map((log) => (
           <ProfileActivityLogItemWrapper key={log.id} log={log} user={user}>
             <ProfileActivityLogsItem log={log} user={user} />

@@ -52,7 +52,7 @@ function ContributorIdentity({
   const identity =
     contributor.profile.handle ?? contributor.profile.primary_address;
   const className =
-    "tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+    "tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
   const content = (
     <>
       <span
@@ -545,6 +545,7 @@ export default function RepCategoryDetails({
         signal,
       }),
     initialPageParam: 1,
+    staleTime: 5 * 60 * 1000,
     getNextPageParam: (page) => (page.next ? page.page + 1 : undefined),
   });
   const items = (query.data?.pages.flatMap((page) => page.data) ?? []).toSorted(

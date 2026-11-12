@@ -72,7 +72,7 @@ function setup(
       </QueryClientProvider>
     );
   }
-  render(
+  return render(
     <RepCategoryDetails
       profile={profile}
       category={category}
@@ -139,6 +139,30 @@ beforeEach(() => {
     );
     return undefined;
   });
+});
+
+it("reuses the contributor cache when a category is reopened within five minutes", async () => {
+  const view = setup(target, "received", null);
+  await screen.findByRole("link", { name: "alice" });
+  expect(fetchApi).toHaveBeenCalledTimes(1);
+  const clock = jest.spyOn(Date, "now").mockReturnValue(Date.now() + 60_000);
+  try {
+    view.rerender(<></>);
+    view.rerender(
+      <RepCategoryDetails
+        profile={target}
+        category={category}
+        direction="received"
+        focusInput={0}
+        onOpenGlobalCategory={jest.fn()}
+        onBusyChange={jest.fn()}
+      />
+    );
+    await screen.findByRole("link", { name: "alice" });
+    expect(fetchApi).toHaveBeenCalledTimes(1);
+  } finally {
+    clock.mockRestore();
+  }
 });
 
 it("pins only your editable contribution, accepts negative values, and saves the desired total", async () => {

@@ -54,7 +54,7 @@ export default function ProfileActivityLogItemWrapper({
     <div
       className={
         compact
-          ? "tw-group tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/70 tw-py-3 last:tw-border-b-0"
+          ? "tw-group tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/70 tw-px-3 tw-py-3 last:tw-border-b-0"
           : "tw-group tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-p-4 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 hover:tw-border-white/[0.12] hover:tw-bg-iron-900/80"
       }
     >

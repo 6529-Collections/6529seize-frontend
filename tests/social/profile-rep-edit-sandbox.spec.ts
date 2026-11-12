@@ -236,6 +236,18 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     });
     await pencil.click();
     const panel = categoryPanel(page);
+    if (isMobile) {
+      const overlay = page
+        .getByRole("dialog", { name: CATEGORY, exact: true })
+        .locator(":scope > .tw-fixed.tw-inset-0.tw-transform-gpu");
+      await expect(overlay).toBeVisible();
+      await expect(overlay).toHaveClass(/tw-bg-gray-700\/60/);
+      await expect(overlay).toHaveCSS(
+        "background-color",
+        "rgba(55, 65, 81, 0.6)"
+      );
+      await expect(overlay).toHaveCSS("opacity", "1");
+    }
     const input = panel.getByRole("textbox", {
       name: "You",
       exact: true,

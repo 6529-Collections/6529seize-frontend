@@ -205,7 +205,6 @@ export default function RepCategoryList({
           enableDragToClose
           fitVisualViewport
           surfaceClassName="tw-bg-iron-950"
-          overlayClassName="tw-bg-black/70"
           headerClassName="tw-pb-0 tw-pt-2"
           focusTitleOnOpen={(open?.focus ?? 0) === 0}
         >
