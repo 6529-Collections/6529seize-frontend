@@ -1,5 +1,7 @@
 "use client";
 
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
+
 import type { UserPageStatsInitialData } from "@/components/user/stats/userPageStats.types";
 import { SEARCH_PARAM_ACTIVITY } from "@/components/user/stats/activity/activity.helpers";
 import type { CollectedCollectionType } from "@/entities/IProfile";
@@ -262,30 +264,32 @@ export default function UserPageCollectedStats({
               })}
             />
           </span>
-          {isApp ? (
-            <ProfileCollectedActivityLink
-              data-profile-action="Manage orders"
-              href="/collect/orders"
-              activityKey="manage-orders"
-              className={getButtonClasses({
-                variant: "tertiary",
-                size: "sm",
-                className: `${COLLECTED_ACTION_CLASS} tw-no-underline hover:tw-no-underline`,
-              })}
-            >
-              {t(locale, "collect.entry.manage")}
-            </ProfileCollectedActivityLink>
-          ) : (
-            <ButtonLink
-              data-profile-action="Manage orders"
-              href="/collect/orders"
-              variant="tertiary"
-              size="sm"
-              className={COLLECTED_ACTION_CLASS}
-            >
-              {t(locale, "collect.entry.manage")}
-            </ButtonLink>
-          )}
+          <NftPurchasingGate>
+            {isApp ? (
+              <ProfileCollectedActivityLink
+                data-profile-action="Manage orders"
+                href="/collect/orders"
+                activityKey="manage-orders"
+                className={getButtonClasses({
+                  variant: "tertiary",
+                  size: "sm",
+                  className: `${COLLECTED_ACTION_CLASS} tw-no-underline hover:tw-no-underline`,
+                })}
+              >
+                {t(locale, "collect.entry.manage")}
+              </ProfileCollectedActivityLink>
+            ) : (
+              <ButtonLink
+                data-profile-action="Manage orders"
+                href="/collect/orders"
+                variant="tertiary"
+                size="sm"
+                className={COLLECTED_ACTION_CLASS}
+              >
+                {t(locale, "collect.entry.manage")}
+              </ButtonLink>
+            )}
+          </NftPurchasingGate>
         </div>
         <CollectedStatsDetailsPanel
           isOpen={isDetailsOpen}

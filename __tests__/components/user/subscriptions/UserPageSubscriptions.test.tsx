@@ -1,4 +1,3 @@
-import { Capacitor } from "@capacitor/core";
 import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserPageSubscriptions from "@/components/user/subscriptions/UserPageSubscriptions";
@@ -99,8 +98,8 @@ jest.mock(
   "@/components/user/subscriptions/UserPageSubscriptionsUpcoming",
   () => ({
     __esModule: true,
-    default: ({ memes_subscriptions, loading, error, readonly }: any) => (
-      <div data-testid="subscriptions-upcoming" data-readonly={readonly}>
+    default: ({ memes_subscriptions, loading, error }: any) => (
+      <div data-testid="subscriptions-upcoming">
         Upcoming Component - Memes: {memes_subscriptions?.length || 0}, Loading:{" "}
         {loading ? "true" : "false"}, Error: {error ? "true" : "false"}
       </div>
@@ -777,34 +776,5 @@ describe("UserPageSubscriptions", () => {
 
       expect(mockCommonApiFetch).not.toHaveBeenCalled();
     });
-  });
-
-  it("keeps an iOS owner's subscription settings, upcoming drops, and history read-only", async () => {
-    const platform = jest
-      .spyOn(Capacitor, "getPlatform")
-      .mockReturnValue("ios");
-    try {
-      renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {
-        connectedProfile: mockProfile,
-      });
-      await waitFor(() =>
-        expect(screen.getByTestId("subscriptions-upcoming")).toHaveAttribute(
-          "data-readonly",
-          "true"
-        )
-      );
-      expect(screen.getByTestId("subscriptions-mode")).toHaveTextContent(
-        "Readonly: true"
-      );
-      expect(screen.getByTestId("subscriptions-airdrop")).toHaveTextContent(
-        "Edit: false"
-      );
-      expect(screen.getByTestId("subscriptions-history")).toBeInTheDocument();
-      expect(
-        screen.queryByTestId("subscriptions-topup")
-      ).not.toBeInTheDocument();
-    } finally {
-      platform.mockRestore();
-    }
   });
 });

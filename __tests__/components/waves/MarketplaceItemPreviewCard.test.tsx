@@ -538,7 +538,7 @@ describe("MarketplaceItemPreviewCard", () => {
 });
 
 it.each([false, true])(
-  "shows the artwork without marketplace actions on iOS (compact=%s)",
+  "opens and copies the shared artwork link without a price action on iOS (compact=%s)",
   (compact) => {
     const platform = jest
       .spyOn(Capacitor, "getPlatform")
@@ -558,16 +558,23 @@ it.each([false, true])(
       );
       const card = screen.getByTestId("manifold-item-card");
       expect(screen.getByTestId("manifold-item-media")).toBeVisible();
-      expect(card).not.toHaveAttribute("tabindex");
-      expect(card).not.toHaveAttribute("role");
-      expect(within(card).queryByRole("link")).not.toBeInTheDocument();
-      expect(within(card).queryByRole("button")).not.toBeInTheDocument();
+      expect(card).toHaveAttribute("tabindex", "0");
+      expect(card).toHaveAccessibleName("Open on Manifold");
+      expect(within(card).getByRole("button", { name: /copy/i })).toBeVisible();
+      expect(
+        within(card).queryByTestId("marketplace-item-cta-link")
+      ).toBeNull();
       expect(
         within(card).queryByText(/^(1(?: ETH)?|ETH)$/)
       ).not.toBeInTheDocument();
       fireEvent.click(card);
       fireEvent.keyDown(card, { key: "Enter" });
-      expect(open).not.toHaveBeenCalled();
+      expect(open).toHaveBeenCalledTimes(2);
+      expect(open).toHaveBeenCalledWith(
+        "https://manifold.xyz/@creator/id/123",
+        "_blank",
+        "noopener,noreferrer"
+      );
     } finally {
       platform.mockRestore();
       open.mockRestore();

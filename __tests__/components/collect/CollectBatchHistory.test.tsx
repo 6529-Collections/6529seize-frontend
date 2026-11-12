@@ -1,4 +1,3 @@
-import { Capacitor } from "@capacitor/core";
 import CollectOrdersClient from "@/components/collect/CollectOrdersClient";
 import type CollectOrdersView from "@/components/collect/CollectOrdersView";
 import type CollectBatchController from "@/components/collect/CollectBatchController";
@@ -7,8 +6,6 @@ import { fetchRecoverableMarketOperation } from "@/components/collect/market-rec
 import { fetchRecoverableMarketBatch } from "@/components/collect/market-batch-recovery";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { ComponentProps } from "react";
-import { fetchMarketBatch } from "@/services/api/market-batch-api";
-import { fetchMarketOperation } from "@/services/api/market-api";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { batchFixture, PAYER } from "./market-batch.fixture";
 const batch = batchFixture().operation;
@@ -42,12 +39,6 @@ beforeEach(() => {
   mockAuth.activeProfileProxy = null;
   mockHistory = [batch, single];
 });
-jest.mock("@/services/api/market-batch-api", () => ({
-  fetchMarketBatch: jest.fn(),
-}));
-jest.mock("@/services/api/market-api", () => ({
-  fetchMarketOperation: jest.fn(),
-}));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => mockAuth,
 }));
@@ -92,7 +83,6 @@ jest.mock("@/components/collect/CollectOrdersView", () => ({
             Cancel {order.id}
           </button>
           <output>{String(order.cancellable)}</output>
-          {order.transactionHash && <span>{order.transactionHash}</span>}
         </div>
       ))}
     </div>
@@ -240,77 +230,3 @@ it.each([true, false])(
     expect(mockBatch).not.toHaveBeenCalled();
   }
 );
-
-it.each([true, false])(
-  "reads a linked pending order without entering recovery on iOS (batch=%s)",
-  async (initialBatch) => {
-    const platform = jest
-      .spyOn(Capacitor, "getPlatform")
-      .mockReturnValue("ios");
-    const order = initialBatch ? batch : single;
-    const fetch = initialBatch ? fetchMarketBatch : fetchMarketOperation;
-    mockHistory = [{ ...single, state: "LIVE" } as ApiMarketOperation];
-    mockReceipt = order;
-    jest.mocked(fetchMarketBatch).mockResolvedValue(batch);
-    jest.mocked(fetchMarketOperation).mockResolvedValue(single);
-    try {
-      render(
-        <CollectOrdersClient
-          initialOperationId={order.id}
-          initialBatch={initialBatch}
-        />
-      );
-      const query = mockQueries.find((value) =>
-        value.queryKey.includes("read-only")
-      );
-      const signal = new AbortController().signal;
-      expect(query).toBeDefined();
-      await expect(query?.queryFn({ signal })).resolves.toBe(order);
-      expect(fetch).toHaveBeenCalledWith(order.id, signal);
-      expect(
-        mockQueries.find((value) => value.queryKey.includes("live-receipts"))
-          ?.enabled
-      ).toBe(false);
-      expect(fetchRecoverableMarketOperation).not.toHaveBeenCalled();
-      expect(fetchRecoverableMarketBatch).not.toHaveBeenCalled();
-      expect(mockSingle).not.toHaveBeenCalled();
-      expect(mockBatch).not.toHaveBeenCalled();
-    } finally {
-      platform.mockRestore();
-    }
-  }
-);
-
-it("keeps a linked iOS receipt first and updates it when history records its transaction", () => {
-  const platform = jest.spyOn(Capacitor, "getPlatform").mockReturnValue("ios");
-  const transactionHash = `0x${"b".repeat(64)}`;
-  mockReceipt = batch;
-  mockHistory = [single];
-  const receiptPage = (
-    <CollectOrdersClient initialOperationId={batch.id} initialBatch />
-  );
-  try {
-    const { rerender } = render(receiptPage);
-    expect(screen.queryByText(transactionHash)).not.toBeInTheDocument();
-    mockHistory = [
-      single,
-      {
-        ...batch,
-        updated_at: batch.updated_at + 1000,
-        transaction_hash: transactionHash,
-      },
-    ];
-    rerender(
-      <CollectOrdersClient initialOperationId={batch.id} initialBatch />
-    );
-    expect(screen.getByText(transactionHash)).toBeVisible();
-    expect(
-      screen
-        .getAllByRole("button", { name: /^Inspect / })
-        .map((button) => button.textContent)
-    ).toEqual([`Inspect ${batch.id}`, "Inspect single"]);
-    expect(mockBatch).not.toHaveBeenCalled();
-  } finally {
-    platform.mockRestore();
-  }
-});

@@ -40,7 +40,6 @@ type AboutContentsNavGroup = {
 
 type AboutNavVisibilityOptions = {
   readonly hideSubscriptions: boolean;
-  readonly hideSubscriptionReports?: boolean | undefined;
   readonly appWalletsSupported?: boolean | undefined;
 };
 
@@ -300,15 +299,12 @@ function normalizeVisibilityOptions(
   if (typeof options === "boolean") {
     return {
       hideSubscriptions: options,
-      hideSubscriptionReports: options,
       appWalletsSupported: false,
     };
   }
 
   return {
     hideSubscriptions: options.hideSubscriptions,
-    hideSubscriptionReports:
-      options.hideSubscriptionReports ?? options.hideSubscriptions,
     appWalletsSupported: options.appWalletsSupported ?? false,
   };
 }
@@ -317,10 +313,7 @@ function isAboutNavItemVisible(
   item: AboutContentsNavItem,
   options: Required<AboutNavVisibilityOptions>
 ): boolean {
-  const hideSubscriptionItem = isAboutSectionNavItem(item)
-    ? options.hideSubscriptions
-    : options.hideSubscriptionReports;
-  if (item.requiresVisibleSubscriptions === true && hideSubscriptionItem) {
+  if (item.requiresVisibleSubscriptions === true && options.hideSubscriptions) {
     return false;
   }
 

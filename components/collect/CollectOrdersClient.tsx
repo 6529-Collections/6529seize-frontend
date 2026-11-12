@@ -7,13 +7,8 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiMarketOperationResult } from "@/generated/models/ApiMarketOperationResult";
 import { ApiMarketBatchOperationKindEnum } from "@/generated/models/ApiMarketBatchOperation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { t } from "@/i18n/messages";
-import {
-  fetchMarketBatch,
-  fetchMarketHistoryWithBatches,
-} from "@/services/api/market-batch-api";
-import { fetchMarketOperation } from "@/services/api/market-api";
+import { fetchMarketHistoryWithBatches } from "@/services/api/market-batch-api";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { fetchRecoverableMarketOperation } from "./market-recovery";
@@ -51,25 +46,8 @@ export default function CollectOrdersClient(props: ReceiptLinkProps) {
     />
   );
 }
-function prioritizeLinkedReceipt(
-  orders: readonly ApiMarketOperationResult[],
-  linkedReceipt: ApiMarketOperationResult | undefined
-): readonly ApiMarketOperationResult[] {
-  if (!linkedReceipt) return orders;
-
-  const latestReceipt = orders.reduce(
-    (latest, operation) =>
-      operation.id === latest.id && operation.updated_at > latest.updated_at
-        ? operation
-        : latest,
-    linkedReceipt
-  );
-  return [latestReceipt, ...orders.filter(({ id }) => id !== linkedReceipt.id)];
-}
-
 function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
   const locale = useBrowserLocale();
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const {
     connectedProfile,
     isAuthenticated,
@@ -87,29 +65,18 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
   } | null>(null);
   const [closedReceiptId, setClosedReceiptId] = useState<string | undefined>();
   const receipt = useQuery<ApiMarketOperationResult>({
-    queryKey: [
-      QueryKey.MARKET_OPERATION,
-      ...(hideNftPurchasing ? ["read-only"] : []),
-      ...(initialBatch ? ["BUY_BATCH"] : []),
-      connectedProfile?.id,
-      initialOperationId,
-    ],
-    queryFn: async ({ signal }) => {
+    queryKey: initialBatch
+      ? [
+          QueryKey.MARKET_OPERATION,
+          "BUY_BATCH",
+          connectedProfile?.id,
+          initialOperationId,
+        ]
+      : [QueryKey.MARKET_OPERATION, connectedProfile?.id, initialOperationId],
+    queryFn: ({ signal }) => {
       const profileId = connectedProfile?.id;
       if (!profileId || !initialOperationId)
         throw new Error("MARKET_PROFILE_CHANGED");
-      if (hideNftPurchasing) {
-        // Recovery can write to the API. Read the recorded receipt without reconciling it.
-        const operation = initialBatch
-          ? await fetchMarketBatch(initialOperationId, signal)
-          : await fetchMarketOperation(initialOperationId, signal);
-        if (
-          operation.profile_id !== profileId ||
-          operation.id !== initialOperationId
-        )
-          throw new Error("MARKET_PROFILE_CHANGED");
-        return operation;
-      }
       return initialBatch
         ? fetchRecoverableMarketBatch(initialOperationId, profileId, signal)
         : fetchRecoverableMarketOperation(
@@ -128,7 +95,7 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
     receipt.data.profile_id === connectedProfile?.id
       ? { operation: receipt.data, cancel: false }
       : null;
-  const selected = hideNftPurchasing ? null : (selection ?? linkedReceipt);
+  const selected = selection ?? linkedReceipt;
   const closeReceipt = () => {
     setClosedReceiptId(initialOperationId);
     setSelected(null);
@@ -168,13 +135,11 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
       if (!profileId) throw new Error("MARKET_PROFILE_CHANGED");
       return reconcileMarketHistory(savedOperations, profileId, signal);
     },
-    enabled: !hideNftPurchasing && canReadOrders && liveIds.length > 0,
+    enabled: canReadOrders && liveIds.length > 0,
     refetchInterval: 30_000,
   });
   const ownOperations = savedOperations.map((operation) => {
-    const latest = hideNftPurchasing
-      ? undefined
-      : reconciled.data?.find((item) => item.id === operation.id);
+    const latest = reconciled.data?.find((item) => item.id === operation.id);
     return latest &&
       latest.profile_id === connectedProfile?.id &&
       latest.updated_at >= operation.updated_at
@@ -182,32 +147,27 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
       : operation;
   });
   useEffect(() => {
-    if (!canReadOrders || hideNftPurchasing) return;
+    if (!canReadOrders) return;
     for (const operation of reconciled.data ?? [])
       if (operation.profile_id === connectedProfile?.id)
         recordMarketActivity(operation);
-  }, [reconciled.data, connectedProfile?.id, canReadOrders, hideNftPurchasing]);
+  }, [reconciled.data, connectedProfile?.id, canReadOrders]);
   useEffect(() => {
-    if (!canReadOrders || hideNftPurchasing) return;
+    if (!canReadOrders) return;
     for (const page of operations.data?.pages ?? [])
       for (const operation of page.operations)
         if (operation.profile_id === connectedProfile?.id)
           recordMarketActivity(operation);
-  }, [operations.data, connectedProfile?.id, canReadOrders, hideNftPurchasing]);
+  }, [operations.data, connectedProfile?.id, canReadOrders]);
   const select = (id: string, cancel: boolean) => {
     const operation = ownOperations.find((item) => item.id === id);
     if (
       canReadOrders &&
-      !hideNftPurchasing &&
       operation &&
       !(cancel && operation.kind === ApiMarketBatchOperationKindEnum.BuyBatch)
     )
       setSelected({ operation, cancel });
   };
-  const readOnlyReceipt = hideNftPurchasing
-    ? linkedReceipt?.operation
-    : undefined;
-  const visibleOrders = prioritizeLinkedReceipt(ownOperations, readOnlyReceipt);
   if (activeProfileProxy)
     return (
       <p role="status" className="tw-p-6 tw-text-sm tw-text-iron-300">
@@ -217,7 +177,7 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
   return (
     <>
       <CollectOrdersView
-        orders={visibleOrders.map((operation) =>
+        orders={ownOperations.map((operation) =>
           operation.kind === ApiMarketBatchOperationKindEnum.BuyBatch
             ? marketBatchOperationView(operation, locale)
             : marketOperationView(operation, locale)
@@ -232,8 +192,6 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
         onRetry={() => {
           void operations.refetch();
         }}
-        readOnly={hideNftPurchasing}
-        expandedOrderId={readOnlyReceipt?.id}
         onInspect={(id) => select(id, false)}
         onCancel={(id) => select(id, true)}
         hasMore={operations.hasNextPage}
@@ -250,10 +208,7 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
       {canReadOrders && (
         <CollectRulesPanel
           onOperation={(operation) => {
-            if (
-              !hideNftPurchasing &&
-              operation.profile_id === connectedProfile?.id
-            )
+            if (operation.profile_id === connectedProfile?.id)
               setSelected({ operation, cancel: false });
           }}
         />

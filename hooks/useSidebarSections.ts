@@ -117,12 +117,10 @@ function getNftsSection(hideNftPurchasing: boolean): SidebarSection {
 
 function getAboutSection(
   appWalletsSupported: boolean,
-  hideSubscriptions: boolean,
-  hideSubscriptionReports: boolean
+  hideSubscriptions: boolean
 ): SidebarSection {
   const aboutGroups = getVisibleAboutNavGroups({
     hideSubscriptions,
-    hideSubscriptionReports,
     appWalletsSupported,
   });
 
@@ -144,34 +142,23 @@ function getAboutSection(
 
 function buildSidebarSections(
   appWalletsSupported: boolean,
-  hideSubscriptions: boolean,
-  hideSubscriptionReports: boolean
+  hideSubscriptions: boolean
 ): SidebarSection[] {
   return [
     getNftsSection(hideSubscriptions),
     getMuseumSection(),
     getWavesSection(),
-    getAboutSection(
-      appWalletsSupported,
-      hideSubscriptions,
-      hideSubscriptionReports
-    ),
+    getAboutSection(appWalletsSupported, hideSubscriptions),
   ];
 }
 
 export function useSidebarSections(
   appWalletsSupported: boolean,
-  hideSubscriptions: boolean,
-  hideSubscriptionReports = hideSubscriptions
+  hideSubscriptions: boolean
 ): SidebarSection[] {
   return useMemo(
-    () =>
-      buildSidebarSections(
-        appWalletsSupported,
-        hideSubscriptions,
-        hideSubscriptionReports
-      ),
-    [appWalletsSupported, hideSubscriptions, hideSubscriptionReports]
+    () => buildSidebarSections(appWalletsSupported, hideSubscriptions),
+    [appWalletsSupported, hideSubscriptions]
   );
 }
 

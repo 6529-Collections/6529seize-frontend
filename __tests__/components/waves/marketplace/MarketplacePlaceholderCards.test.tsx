@@ -97,7 +97,7 @@ describe("Marketplace placeholder cards", () => {
   });
 });
 
-it("keeps the unavailable preview visible without a marketplace link on iOS", () => {
+it("preserves the original link when a marketplace preview fails on iOS", () => {
   const platform = jest.spyOn(Capacitor, "getPlatform").mockReturnValue("ios");
   try {
     render(
@@ -106,7 +106,10 @@ it("keeps the unavailable preview visible without a marketplace link on iOS", ()
     expect(
       screen.getByTestId("marketplace-preview-unavailable-media")
     ).toBeVisible();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "https://manifold.xyz/@creator/id/123"
+    );
   } finally {
     platform.mockRestore();
   }

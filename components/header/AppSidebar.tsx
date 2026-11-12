@@ -1,7 +1,4 @@
 "use client";
-import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import {
   Dialog,
@@ -76,17 +73,7 @@ export default function AppSidebar({
   const hasPendingModerationCases =
     (moderatorAccess.data?.needs_review_count ?? 0) > 0;
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const capacitor = useCapacitor();
-  const consent = useOptionalCookieConsent();
-  const sections = useSidebarSections(
-    appWalletsSupported,
-    hideNftPurchasing,
-    consent !== undefined &&
-      shouldHideSubscriptions({
-        capacitorIsIos: capacitor.isIos,
-        country: consent.country,
-      })
-  );
+  const sections = useSidebarSections(appWalletsSupported, hideNftPurchasing);
   const handleClose = useCallback(() => onClose(), [onClose]);
   const dialogRef = useRef<HTMLDivElement>(null);
   useAndroidBackLayer(open, dialogRef, handleClose);

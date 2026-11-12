@@ -1,8 +1,5 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
@@ -302,16 +299,7 @@ function ScopedHeaderSearchModal({
     !isMessagesCategory && isLiveSearchEligible && !isQuerySettled;
   const { appWalletsSupported } = useAppWallets();
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const capacitor = useCapacitor();
-  const consent = useCookieConsent();
-  const sections = useSidebarSections(
-    appWalletsSupported,
-    hideNftPurchasing,
-    shouldHideSubscriptions({
-      capacitorIsIos: capacitor.isIos,
-      country: consent.country,
-    })
-  );
+  const sections = useSidebarSections(appWalletsSupported, hideNftPurchasing);
   const sidebarPages = useMemo(
     () => mapSidebarSectionsToPages(sections),
     [sections]

@@ -10,8 +10,6 @@ import type { ReferencedNft } from "@/entities/IDrop";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { isMemesEcosystemContract } from "@/helpers/nft.helpers";
 import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
-import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
 import DropListItemContentNftDetails from "./DropListItemContentNftDetails";
@@ -21,7 +19,6 @@ export default function DropListItemContentNft({
 }: {
   readonly nft: ReferencedNft;
 }) {
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { data: nfts = [] } = useTokenMetadataQuery({
     tokens: contract && token ? [{ contract, tokenId: token }] : [],
     enabled: Boolean(contract && token),
@@ -57,29 +54,6 @@ export default function DropListItemContentNft({
   const nftHref = getNftHref();
   const target = getTarget();
 
-  const preview = (
-    <span className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2" ref={elementRef}>
-      <span className="tw-relative tw-h-64 tw-w-full">
-        {nft?.imageUrl && (
-          <Image
-            src={nft.imageUrl}
-            alt=""
-            fill
-            sizes="(max-width: 768px) 100vw, 50vw"
-            unoptimized
-            className="tw-h-full tw-w-full tw-object-contain tw-object-center"
-          />
-        )}
-      </span>
-      <DropListItemContentNftDetails
-        referencedNft={{ contract, token, name }}
-        nft={nft}
-      />
-    </span>
-  );
-
-  if (hideNftPurchasing && !nftHref.startsWith("/")) return preview;
-
   return (
     <Link
       onClick={(e) => e.stopPropagation()}
@@ -87,7 +61,24 @@ export default function DropListItemContentNft({
       className="tw-no-underline"
       target={target}
     >
-      {preview}
+      <span
+        className="tw-mt-2 tw-flex tw-flex-col tw-gap-y-2"
+        ref={elementRef}
+      >
+        <span className="tw-h-64 tw-w-full">
+          {nft?.imageUrl && (
+            <img
+              src={nft.imageUrl}
+              alt=""
+              className="tw-h-full tw-w-full tw-object-contain tw-object-center"
+            />
+          )}
+        </span>
+        <DropListItemContentNftDetails
+          referencedNft={{ contract, token, name }}
+          nft={nft}
+        />
+      </span>
     </Link>
   );
 }

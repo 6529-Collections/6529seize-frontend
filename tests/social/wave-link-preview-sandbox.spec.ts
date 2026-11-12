@@ -136,7 +136,7 @@ test.describe("Embedded wave preview sandbox @auth @local-only", () => {
     "Wave previews require the isolated mock API runner."
   );
 
-  test("keeps a shared NFT preview readable without marketplace actions on iOS", async ({
+  test("keeps a shared NFT preview openable and copyable without a price on iOS", async ({
     page,
     baseURL,
   }) => {
@@ -171,9 +171,13 @@ test.describe("Embedded wave preview sandbox @auth @local-only", () => {
       card.getByText("Sample listing", { exact: true })
     ).toBeVisible();
     await expect(card.getByTestId("manifold-item-media")).toBeVisible();
-    await expect(card.getByRole("link")).toHaveCount(0);
-    await expect(card.getByRole("button")).toHaveCount(0);
-    await expect(card).not.toHaveAttribute("tabindex");
+    await expect(card).toHaveAccessibleName("Open on Manifold");
+    await expect(card).toHaveAttribute("tabindex", "0");
+    await expect(
+      card.getByRole("button", { name: "Copy listing link" })
+    ).toBeVisible();
+    await expect(card.getByTestId("marketplace-item-cta-link")).toHaveCount(0);
+    await expect(card.getByText(/^(1(?: ETH)?|ETH)$/)).toHaveCount(0);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
