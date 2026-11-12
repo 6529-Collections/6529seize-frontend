@@ -404,7 +404,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     });
     await expect(
       guidance.getByText(
-        "Welcome to 6529. Start with a Wave—a space for conversation, art, and community decisions.",
+        "Welcome to 6529. Start with a Wave, a space for conversation, art, and community decisions.",
         { exact: true }
       )
     ).toBeVisible();
