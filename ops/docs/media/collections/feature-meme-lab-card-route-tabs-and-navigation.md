@@ -171,7 +171,7 @@ criteria.` even when unfiltered distribution data exists.
 - `Distribution Plan` link on card `Overview` is shown only when distribution
   is available for that card, and preserves supported non-default `locale`
   query values.
-- Marketplace shortcuts are hidden on iOS unless detected country is `US`.
+- Marketplace shortcuts are hidden in the iOS app.
 - Meme Lab trading is available from individual card pages. The set planner,
   Lowest listings and TDH tools continue to cover Memes, Gradients and Pebbles.
 - Card and distribution data are API-backed snapshots and can lag briefly.

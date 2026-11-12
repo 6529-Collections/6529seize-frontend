@@ -4,7 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
-import { useSubscriptionPageVisibility } from "@/hooks/useNftPurchasingVisibility";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
@@ -54,10 +54,9 @@ export default function UserPageTabs({
   const searchString = searchParams.toString();
   const isClientHydrated = useHasHydrated();
   // Subscriptions is omitted from the server HTML and the first hydration
-  // render (the server cannot identify the native shell), and on iOS until the
-  // country check allows purchasing.
+  // render, then stays hidden in the native iOS app.
   const { hideNftPurchasing, shouldRedirect: mayRedirectFromHiddenTab } =
-    useSubscriptionPageVisibility();
+    useNftPurchasingVisibility();
   const { showWaves, connectedProfile, fetchingProfile } = useAuth();
   const { address, connectionState } = useSeizeConnectContext();
   const { profile: viewedProfile } = useIdentity({

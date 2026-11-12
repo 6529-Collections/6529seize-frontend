@@ -117,7 +117,7 @@ context-aware `Back`).
 - In the app drawer header, only the connected profile avatar is a profile
   shortcut; handle/wallet text and level badge are informational.
 - Web sidebar and search-page catalogs can vary by runtime constraints:
-  iOS non-US hides subscription-related entries, and `App Wallets` appears only
+  the iOS app hides subscription-related entries, and `App Wallets` appears only
   when app-wallet support is enabled. `About` keeps network/reference routes in
   `Network & Reputation`, wallet/delegation routes in `Safe Collecting`,
   and open-data/tool routes in `Data & Developer Tools`. `Drop Forge` appears
