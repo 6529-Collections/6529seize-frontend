@@ -244,27 +244,27 @@ export default function UserPageCollectedStats({
       />
 
       <div ref={detailsScrollTargetRef} className="tw-scroll-mt-24">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-3 md:tw-px-5">
-          <span data-profile-action="Complete my set" className="tw-contents">
-            <CollectEntryLink
-              collection="memes"
-              intent={activeSeasonNumber === null ? "full_set" : "season"}
-              definitionId={
-                activeSeasonNumber === null
-                  ? undefined
-                  : String(activeSeasonNumber)
-              }
-              locale={locale}
-              complete
-              profileActivityKey={isApp ? "complete-set" : undefined}
-              className={getButtonClasses({
-                variant: "tertiary",
-                size: "sm",
-                className: `${COLLECTED_ACTION_CLASS} !tw-px-3 !tw-text-xs tw-no-underline hover:tw-no-underline`,
-              })}
-            />
-          </span>
-          <NftPurchasingGate>
+        <NftPurchasingGate>
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-3 md:tw-px-5">
+            <span data-profile-action="Complete my set" className="tw-contents">
+              <CollectEntryLink
+                collection="memes"
+                intent={activeSeasonNumber === null ? "full_set" : "season"}
+                definitionId={
+                  activeSeasonNumber === null
+                    ? undefined
+                    : String(activeSeasonNumber)
+                }
+                locale={locale}
+                complete
+                profileActivityKey={isApp ? "complete-set" : undefined}
+                className={getButtonClasses({
+                  variant: "tertiary",
+                  size: "sm",
+                  className: `${COLLECTED_ACTION_CLASS} !tw-px-3 !tw-text-xs tw-no-underline hover:tw-no-underline`,
+                })}
+              />
+            </span>
             {isApp ? (
               <ProfileCollectedActivityLink
                 data-profile-action="Manage orders"
@@ -289,8 +289,8 @@ export default function UserPageCollectedStats({
                 {t(locale, "collect.entry.manage")}
               </ButtonLink>
             )}
-          </NftPurchasingGate>
-        </div>
+          </div>
+        </NftPurchasingGate>
         <CollectedStatsDetailsPanel
           isOpen={isDetailsOpen}
           isLoading={isDetailsLoading}

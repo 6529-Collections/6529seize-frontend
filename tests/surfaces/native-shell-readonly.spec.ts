@@ -261,6 +261,10 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       const link = page.getByRole("link", { name: action, exact: true });
       if (testInfo.project.name === "capacitor-ios-sim") {
         await expect(link).toHaveCount(0);
+        // The action wrapper must also disappear so it cannot leave a gap.
+        await expect(
+          page.locator('[data-profile-action="Complete my set"]')
+        ).toHaveCount(0);
         continue;
       }
       await link.scrollIntoViewIfNeeded();
