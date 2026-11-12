@@ -1,6 +1,61 @@
-import { getInternalLinkPath } from "@/helpers/internalLink";
+import {
+  getInternalLinkPath,
+  getInternalPageLinkPath,
+} from "@/helpers/internalLink";
 
 const SITE = "https://6529.io";
+
+describe("getInternalPageLinkPath", () => {
+  it.each([
+    ["http://6529.io/the-memes/1", SITE, "/the-memes/1"],
+    ["https://www.6529.io/the-memes/1", SITE, "/the-memes/1"],
+    [`${SITE}/waves/123?serialNo=7#part-2`, SITE, "/waves/123?serialNo=7#part-2"],
+    ["/vitalik.eth", SITE, "/vitalik.eth"],
+    [
+      "https://staging.6529.io/waves/123",
+      "https://staging.6529.io",
+      "/waves/123",
+    ],
+  ])("routes %s within %s", (href, siteUrl, path) => {
+    expect(getInternalPageLinkPath(href, siteUrl)).toBe(path);
+  });
+
+  it.each([
+    "/api/auth",
+    "/%61pi/auth",
+    "/the-memes/card.png",
+    "//elsewhere.example/waves/123",
+    "https://6529.io.other.example/waves/123",
+    "https://www.6529.io@other.example/waves/123",
+    "https://user@www.6529.io/waves/123",
+    "https://www.6529.io:8443/waves/123",
+    "http://6529.io/%2Felsewhere.example",
+    "/\\elsewhere.example/waves/123",
+    "http://6529.io/\\elsewhere.example/waves/123",
+    "https://www.6529.io/%5Celsewhere.example/waves/123",
+    "https://www.6529.io/waves/..//elsewhere.example",
+    "http://6529.io/waves\n/123",
+    "https://www.6529.io/\t/elsewhere.example",
+    "http://6529.io/waves%0a/123",
+    "https://www.6529.io/waves%00/123",
+    "https://www.6529.io/bad%",
+    "javascript:alert(1)",
+    "data:text/html,hi",
+    "mobile6529://navigate/waves",
+    "blob:https://6529.io/waves",
+  ])("keeps %s outside app page routing", (href) => {
+    expect(getInternalPageLinkPath(href, SITE)).toBeNull();
+  });
+
+  it.each([SITE, "http://6529.io", "https://www.6529.io"])(
+    "keeps %s pointed at production when opened from staging",
+    (origin) => {
+      expect(
+        getInternalPageLinkPath(`${origin}/waves/123`, "https://staging.6529.io")
+      ).toBeNull();
+    }
+  );
+});
 
 describe("getInternalLinkPath", () => {
   it.each([

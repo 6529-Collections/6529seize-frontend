@@ -115,7 +115,7 @@ const UNIVERSAL_LINK_FILE_EXTENSION =
 /** Query parameter that makes a repeated link to the same page navigate again. */
 const NATIVE_LINK_TIMESTAMP_PARAM = "_t";
 
-function isUniversalLinkPath(pathname: string): boolean {
+export function isUniversalLinkPath(pathname: string): boolean {
   if (!isMobileAppDestination(pathname)) return false;
   let decoded: string;
   try {
