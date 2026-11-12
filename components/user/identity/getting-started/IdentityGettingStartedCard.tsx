@@ -53,7 +53,7 @@ function NextStepContent({
           {title}
         </span>
         <ArrowRightIcon
-          className="tw-size-3 tw-flex-none -tw-translate-x-2 tw-text-iron-600 tw-opacity-0 tw-transition-all group-focus-within/step:tw-translate-x-0 group-focus-within/step:tw-opacity-100 group-hover/step:tw-translate-x-0 group-hover/step:tw-text-emerald-400 group-hover/step:tw-opacity-100 motion-reduce:tw-transition-none touch-only:tw-translate-x-0 touch-only:tw-opacity-100"
+          className="tw-size-3 tw-flex-none -tw-translate-x-2 tw-text-iron-600 tw-opacity-0 tw-transition-all group-focus-within/step:tw-translate-x-0 group-focus-within/step:tw-opacity-100 group-hover/step:tw-translate-x-0 group-hover/step:tw-text-emerald-400 group-hover/step:tw-opacity-100 touch-only:tw-translate-x-0 touch-only:tw-opacity-100 motion-reduce:tw-transition-none"
           aria-hidden="true"
         />
       </span>
