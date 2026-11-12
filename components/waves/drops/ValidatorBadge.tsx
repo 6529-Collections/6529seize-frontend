@@ -47,9 +47,9 @@ const ValidatorMarkIcon = ({
 
 interface ValidatorBadgeData {
   readonly isValidator: boolean;
-  readonly lastQualifyingCycle?: number | null;
-  readonly qualifyingDays?: number | null;
-  readonly observedThroughCycle?: number | null;
+  readonly lastQualifyingCycle?: number | null | undefined;
+  readonly qualifyingDays?: number | null | undefined;
+  readonly observedThroughCycle?: number | null | undefined;
 }
 
 interface ValidatorBadgeProps {

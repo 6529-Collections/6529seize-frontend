@@ -22,19 +22,19 @@ export class ApiIdentityOverviewBadges {
     /**
     * Whether this profile has verified validator network participation. Null when validator data is unavailable.
     */
-    'is_validator'?: boolean;
+    'is_validator'?: boolean | null;
     /**
     * Last protocol cycle day when this profile qualified as a validator. Null when no qualifying participation exists.
     */
-    'validator_last_qualifying_cycle'?: number;
+    'validator_last_qualifying_cycle'?: number | null;
     /**
     * Count of distinct qualifying protocol cycle days. May be limited to available history coverage. Null when count is unavailable or incomplete.
     */
-    'validator_qualifying_days'?: number;
+    'validator_qualifying_days'?: number | null;
     /**
     * Protocol cycle day through which validator evidence has been observed. Indicates data freshness. Null when evidence source is unavailable.
     */
-    'validator_observed_through_cycle'?: number;
+    'validator_observed_through_cycle'?: number | null;
 
     static readonly discriminator: string | undefined = undefined;
 
