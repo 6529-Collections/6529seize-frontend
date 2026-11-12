@@ -113,7 +113,7 @@ export default function AccessPage() {
             enterKeyHint="go"
             aria-invalid={errorKey === "access.denied" || undefined}
             aria-describedby={errorKey ? "api-access-error" : undefined}
-            placeholder="********"
+            placeholder={t(locale, "access.codeInput.placeholder")}
             onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>): void => {
               if (event.key.toLowerCase() === "enter") {
                 void doLogin(event.currentTarget);
