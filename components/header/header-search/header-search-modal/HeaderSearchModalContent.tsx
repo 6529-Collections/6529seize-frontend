@@ -354,7 +354,7 @@ function ScopedHeaderSearchModal({
   const membershipNavigation = useMembershipNavigation();
   const pageCatalog = useMemo<PageSearchResult[]>(() => {
     const seen = new Set<string>();
-    return [
+    const pages: SidebarPageEntry[] = [
       ...DIRECT_NAVIGATION_PAGES,
       ...(!membershipNavigation.isPending
         ? [
@@ -369,7 +369,8 @@ function ScopedHeaderSearchModal({
       ...SEARCH_ONLY_PAGES,
       ...sidebarPages,
       ...dropForgePages,
-    ]
+    ];
+    return pages
       .filter((entry) => {
         if (seen.has(entry.href)) return false;
         seen.add(entry.href);

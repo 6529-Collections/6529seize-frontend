@@ -4,6 +4,9 @@ import AppSidebar from "@/components/header/AppSidebar";
 import type AppSidebarMenuItems from "@/components/header/AppSidebarMenuItems";
 import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
 
+let mockPathname = "/about";
+jest.mock("next/navigation", () => ({ usePathname: () => mockPathname }));
+
 let headerProps: any = null;
 let connectProps: any = null;
 let mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
@@ -133,6 +136,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         fetchingProfile: false,
       };
       mockConnectionState = "disconnected";
+      mockPathname = "/about";
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,
       });
@@ -155,6 +159,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         mockIsIos = isIos;
         mockConnectionState = "connected";
         mockMembershipAuth.isAuthenticated = true;
+        mockPathname = "/validator/status";
         render(<AppSidebar open onClose={jest.fn()} />);
         expect(
           getMenu()
@@ -165,6 +170,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
           path: "/validator",
           pending: false,
           emphasized: false,
+          active: true,
         });
       }
     );

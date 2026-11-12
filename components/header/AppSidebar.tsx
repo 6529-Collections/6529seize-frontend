@@ -125,7 +125,7 @@ export default function AppSidebar({
         emphasized: membershipNavigation.emphasized,
         active:
           pathname === membershipNavigation.href ||
-          pathname?.startsWith(`${membershipNavigation.href}/`) === true,
+          pathname.startsWith(`${membershipNavigation.href}/`),
       },
       sectionMap.get("about"),
       ...(showDropForge ? [dropForgeItem] : []),
