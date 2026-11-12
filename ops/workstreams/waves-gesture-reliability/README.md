@@ -46,8 +46,11 @@ synthetic coordinate tests alone are insufficient evidence for this symptom.
 
 A separate regression confirmed that disabling navigation while the outgoing
 180 ms settle was pending did not cancel its queued Back action. Cleanup now
-also follows `enabled`, as well as scope and unmount. Stale completion cannot
-navigate or leave a reused surface translated.
+also follows `enabled`, as well as scope and unmount. Disabling during an
+active drag clears feedback immediately: it cannot start another settle after
+layout cleanup. Stale completion cannot navigate or leave a reused surface
+translated. The active-drag disable regression reproduced this cleanup-order
+race before the immediate-clear guard was added.
 
 ## Motion and performance
 
@@ -67,7 +70,7 @@ scroll restoration code are unchanged.
 - Regression reproduction: browser thumb paths failed on both native simulations
   with the original ratio. Synthetic regressions also reproduced browser-owned
   movement committing and disabled navigation retaining a queued Back action.
-- After: 57 tests across six affected gesture, encrypted-message and transition
+- After: 100 tests across seven affected gesture, encrypted-message and transition
   suites passed.
 - Changed-line lint passed. React Doctor reported 100/100 with no issues.
 - Trusted Chromium touch coverage adds curved starts and vertical-first paths

@@ -329,31 +329,33 @@ for (const platform of ["ios", "android"] as const) {
       baseURL,
     }) => {
       for (const width of [360, 430]) {
-        await page.setViewportSize({ width, height: 840 });
-        await openWave(page);
-        const row = page
-          .getByTestId("wave-swipe-surface")
-          .locator("[data-wave-drop-id][data-reply-enabled=true]")
-          .first();
-        const vertical = await touchDrag(page, row, [
-          { x: 4, y: -24 },
-          { x: 8, y: -48 },
-          { x: 110, y: -52 },
-        ]);
-        await vertical.release();
-        await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
-        const curved = await touchDrag(page, row, [
-          { x: 13, y: 10 },
-          { x: 24, y: 15 },
-          { x: 48, y: 21 },
-          { x: 78, y: 29 },
-          { x: 110, y: 34 },
-        ]);
-        await curved.release();
-        await expect(page).toHaveURL(/\/waves$/);
-        await expect(
-          page.getByRole("button", { name: "Find a wave…", exact: true })
-        ).toBeVisible();
+        await test.step(`Phone width ${width}px`, async () => {
+          await page.setViewportSize({ width, height: 840 });
+          await openWave(page);
+          const row = page
+            .getByTestId("wave-swipe-surface")
+            .locator("[data-wave-drop-id][data-reply-enabled=true]")
+            .first();
+          const vertical = await touchDrag(page, row, [
+            { x: 4, y: -24 },
+            { x: 8, y: -48 },
+            { x: 110, y: -52 },
+          ]);
+          await vertical.release();
+          await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+          const curved = await touchDrag(page, row, [
+            { x: 13, y: 10 },
+            { x: 24, y: 15 },
+            { x: 48, y: 21 },
+            { x: 78, y: 29 },
+            { x: 110, y: 34 },
+          ]);
+          await curved.release();
+          await expect(page).toHaveURL(/\/waves$/);
+          await expect(
+            page.getByRole("button", { name: "Find a wave…", exact: true })
+          ).toBeVisible();
+        });
       }
       await expectNoUnsafeSandboxMutations(baseURL);
     });

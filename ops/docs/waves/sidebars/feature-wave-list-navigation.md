@@ -170,8 +170,8 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - On mobile web, select the feed icon to scan recent
   posts across public Profile Waves.
 - Select an inactive wave or DM row from the list by clicking the row body.
-- In the native app, open a standard wave and swipe right from the left edge of
-  the main content.
+- In the native app, swipe right across ordinary wave or direct-message content
+  to return to its list.
 - Use browser back/forward after navigating between rows.
 
 ## User Journey
@@ -181,8 +181,8 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 3. The app updates the active highlight and URL together.
 4. Select the active row body again to clear selection and return to section
    home.
-5. In the native app, an edge swipe right from a standard wave also clears the
-   active wave and restores the Waves list at its saved scroll position.
+5. In the native app, swiping right across wave or direct-message content also
+   clears the active conversation and restores its corresponding list.
 6. Use browser back/forward to revisit row selections while keeping the list
    and URL in sync.
 
@@ -196,7 +196,8 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   on the first activation; hovering or focusing either visual shows score
   details.
 - Active-row re-click returns to `/waves` or `/messages`.
-- Native-app edge swipe from `/waves/{waveId}` returns to `/waves`.
+- Native-app right swipe across conversation content returns from
+  `/waves/{waveId}` to `/waves`, or `/messages/{waveId}` to `/messages`.
 - Inside the `/waves` or `/messages` shell, row changes update URL/history in
   place and keep row highlight aligned.
 - Opening `/waves/{waveId}` directly keeps that wave visible and highlighted

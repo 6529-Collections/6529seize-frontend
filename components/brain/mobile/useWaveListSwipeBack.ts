@@ -61,9 +61,15 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
           element.style.removeProperty("will-change");
           settling.current = false;
         };
-        if (reducedMotion || typeof element.animate !== "function") {
+        // Disabling can cancel the active touch after layout cleanup has run.
+        // Do not start another settle on a surface that is no longer navigable.
+        if (
+          !enabled ||
+          reducedMotion ||
+          typeof element.animate !== "function"
+        ) {
           cleanup();
-          if (committed) navigateAfterWaveSwipe(navigate.current);
+          if (committed && enabled) navigateAfterWaveSwipe(navigate.current);
           return;
         }
         settling.current = committed;

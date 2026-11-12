@@ -332,6 +332,19 @@ it("does not acquire an ambiguous diagonal that never becomes horizontal", () =>
   expect(onReply).not.toHaveBeenCalled();
 });
 
+it("releases undecided diagonal reply movement without blocking the next gesture", () => {
+  const { target, onBack, onReply } = setup();
+  start(target);
+  move(target, 167, 110);
+  move(target, 165, 111);
+  end(target, 165);
+  expect(onReply).not.toHaveBeenCalled();
+  start(target);
+  move(target, 300);
+  end(target, 300);
+  expect(onBack).toHaveBeenCalledWith(true, 120);
+});
+
 it.each([false, true])(
   "relinquishes browser-owned movement after horizontal intent=%s",
   (owned) => {
@@ -342,6 +355,7 @@ it.each([false, true])(
       touches: [touch(310)],
       cancelable: false,
     });
+    fireEvent.touchCancel(target);
     end(target, 310);
     if (owned) expect(onBack).toHaveBeenCalledWith(false, 30);
     else expect(onBack).not.toHaveBeenCalled();
