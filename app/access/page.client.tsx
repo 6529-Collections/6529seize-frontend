@@ -77,6 +77,8 @@ export default function AccessPage() {
         secure: window.location.protocol === "https:",
         sameSite: "strict",
       });
+      // eslint-disable-next-line no-alert -- Keep the access confirmation before navigation.
+      window.alert(t(locale, "access.granted"));
       resumeAfterApiAccess(window.location);
     } catch {
       setErrorKey("access.verifyFailed");
@@ -85,7 +87,18 @@ export default function AccessPage() {
 
   return (
     <main className={styles["login"]}>
-      {image && <LoginImage image={image} alt="" />}
+      {image ? (
+        <LoginImage image={image} alt="" />
+      ) : (
+        <Image
+          unoptimized
+          src="/6529.svg"
+          alt="6529"
+          width={128}
+          height={128}
+          className="tw-h-auto tw-max-w-[40vw]"
+        />
+      )}
       <div
         className={clsx(
           styles["loginPrompt"],
@@ -107,15 +120,17 @@ export default function AccessPage() {
             }
           }}
         />
-        {errorKey && (
-          <p
-            id="api-access-error"
-            role="alert"
-            className="tw-bg-iron-950 tw-px-2 tw-text-sm tw-text-white"
-          >
-            {t(locale, errorKey)}
-          </p>
-        )}
+        <div className="tw-h-10 tw-w-4/5 tw-max-w-[400px] tw-shrink-0">
+          {errorKey && (
+            <p
+              id="api-access-error"
+              role="alert"
+              className="tw-m-0 tw-inline-block tw-bg-iron-950 tw-px-2 tw-text-sm tw-leading-5 tw-text-white"
+            >
+              {t(locale, errorKey)}
+            </p>
+          )}
+        </div>
       </div>
     </main>
   );
