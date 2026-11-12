@@ -86,6 +86,24 @@ it("returns to rest after reversal or native cancellation", () => {
   expect(onSwipeBack).not.toHaveBeenCalled();
 });
 
+it("recognizes a rightward thumb arc before scrolling can take ownership", () => {
+  const { content, surface, onIntentStart, onSwipeBack } = setup();
+  fireEvent.touchStart(content, { touches: [touch(160)] });
+  const scrollAllowed = fireEvent.touchMove(content, {
+    touches: [touch(173, 110)],
+  });
+  expect(scrollAllowed).toBe(false);
+  act(() => jest.advanceTimersByTime(20));
+  expect(surface.style.transform).toBe("translate3d(13px, 0, 0)");
+  expect(onIntentStart).toHaveBeenCalledTimes(1);
+  fireEvent.touchMove(content, { touches: [touch(270, 134)] });
+  fireEvent.touchEnd(content, {
+    touches: [],
+    changedTouches: [touch(270, 134)],
+  });
+  expect(onSwipeBack).toHaveBeenCalledTimes(1);
+});
+
 it("ignores disabled gestures, vertical scrolling, sliders and OS edges", () => {
   const { content, onSwipeBack } = setup(false);
   fireEvent.touchStart(content, { touches: [touch(160)] });
@@ -175,3 +193,42 @@ it("cancels and clears an active drag when its scope changes", () => {
   fireEvent.touchEnd(content, { touches: [], changedTouches: [touch(300)] });
   expect(onSwipeBack).not.toHaveBeenCalled();
 });
+
+it.each([false, true])(
+  "cancels navigation disabled in the same wave after release=%s",
+  async (released) => {
+    const { content, surface, onSwipeBack, onIntentStart, rerender } = setup();
+    let complete = () => {};
+    const finished = new Promise<void>((resolve) => {
+      complete = resolve;
+    });
+    const cancel = jest.fn();
+    Object.defineProperty(surface, "animate", {
+      value: jest.fn(() => ({ finished, cancel })),
+    });
+    fireEvent.touchStart(content, { touches: [touch(160)] });
+    fireEvent.touchMove(content, { touches: [touch(300)] });
+    act(() => jest.advanceTimersByTime(20));
+    if (released)
+      fireEvent.touchEnd(content, {
+        touches: [],
+        changedTouches: [touch(300)],
+      });
+    rerender(
+      <SwipeHarness
+        enabled={false}
+        onIntentStart={onIntentStart}
+        onSwipeBack={onSwipeBack}
+      />
+    );
+    fireEvent.touchEnd(content, { touches: [], changedTouches: [touch(300)] });
+    await act(async () => {
+      complete();
+      await finished;
+    });
+    expect(cancel).toHaveBeenCalledTimes(released ? 1 : 0);
+    expect(onSwipeBack).not.toHaveBeenCalled();
+    expect(surface.style.transform).toBe("");
+    expect(surface.style.willChange).toBe("");
+  }
+);

@@ -2,6 +2,7 @@ import { safeSessionStorage } from "@/helpers/safeSessionStorage";
 
 const PROFILE_CREATED_SESSION_PREFIX =
   "identity-getting-started-created-profile";
+const PROFILE_ARRIVAL_SESSION_PREFIX = "identity-getting-started-arrival";
 
 const normalizeProfileHandle = (
   handle: string | null | undefined
@@ -38,6 +39,29 @@ export const markIdentityGettingStartedSession = (
   }
 };
 
+export const requestIdentityGettingStartedArrival = (
+  handle: string | null | undefined
+) => {
+  const normalizedHandle = normalizeProfileHandle(handle);
+  if (normalizedHandle) {
+    safeSessionStorage.setItem(
+      `${PROFILE_ARRIVAL_SESSION_PREFIX}:${normalizedHandle}`,
+      "true"
+    );
+  }
+};
+
+export const consumeIdentityGettingStartedArrival = (
+  handle: string | null | undefined
+): boolean => {
+  const normalizedHandle = normalizeProfileHandle(handle);
+  if (!normalizedHandle) return false;
+  const key = `${PROFILE_ARRIVAL_SESSION_PREFIX}:${normalizedHandle}`;
+  if (safeSessionStorage.getItem(key) !== "true") return false;
+  safeSessionStorage.removeItem(key);
+  return true;
+};
+
 export const clearIdentityGettingStartedSession = (
   handle: string | null | undefined
 ) => {
@@ -45,4 +69,5 @@ export const clearIdentityGettingStartedSession = (
   if (key) {
     safeSessionStorage.removeItem(key);
   }
+  consumeIdentityGettingStartedArrival(handle);
 };
