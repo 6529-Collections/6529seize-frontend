@@ -33443,6 +33443,7 @@ components:
             - RESERVED
             - SIGNED
             - CONFIRMED
+            - SKIPPED
             - FAILED
             - CANCELLED
         phase:
@@ -33456,6 +33457,10 @@ components:
         recipients:
           type: integer
           description: Recipient count; transaction bytes are never returned
+        unfilled_tokens:
+          type: integer
+          minimum: 0
+          description: Requested subscription cards unavailable due to edition supply
         hash:
           type: string
           nullable: true

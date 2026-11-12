@@ -3295,6 +3295,9 @@ export const EN_US_ROOT_MESSAGES = {
   "dropForge.actionFailed": "Failed",
   "dropForge.actionSubmitted": "Submitted",
   "dropForge.actionSkipped": "Skipped — already completed on-chain",
+  "dropForge.actionSoldOut": "Skipped · sold out",
+  "dropForge.actionPartiallyFulfilled": "Partially fulfilled",
+  "dropForge.actionUnfilledCards": "{count} of the requested cards went unfilled",
   "dropForge.actionReadinessFailed": "Readiness check failed",
   "dropForge.actionRetryWindow":
     "Retries automatically while its execution window remains open. Later groups check their own readiness.",

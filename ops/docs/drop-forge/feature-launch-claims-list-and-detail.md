@@ -308,6 +308,14 @@ action and retries automatically while its execution window remains open.
 An earlier failed or expired action does not stop later groups from checking
 readiness. Outstanding deliveries remain visible and are never assumed complete.
 
+New Auto Launch plans airdrop subscriptions in the same wallet order as manual
+Launch. Phase 2 subscriptions are delivered first during the Phase 2 transition.
+Public subscriptions use the cards left after Phase 2 confirms, in separate
+transactions. **Partially fulfilled** shows how many requested cards went
+unfilled. **Skipped · sold out** appears on phase configurations and subscriber
+batches skipped after a confirmed sellout. The Completed toggles still track
+full delivery for each subscription group.
+
 Wave reports include successful transactions and their links, each failed attempt
 and error, and detected-complete skips. Missed windows are reported once and
 need operator reconciliation. An uncertain signed transaction still holds the

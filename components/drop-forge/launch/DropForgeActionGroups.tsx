@@ -13,6 +13,10 @@ import DropForgeTransactionRecovery from "./DropForgeTransactionRecovery";
 import DropForgeSupplyEvidence from "./DropForgeSupplyEvidence";
 
 function actionStatus(action: ApiDropForgeAction) {
+  if (action.state === State.Skipped)
+    return "dropForge.actionSoldOut" as const;
+  if (action.state === State.Confirmed && (action.unfilled_tokens ?? 0) > 0)
+    return "dropForge.actionPartiallyFulfilled" as const;
   if (action.state === State.Confirmed)
     return action.observed
       ? ("dropForge.actionSkipped" as const)
@@ -46,6 +50,7 @@ function ActionRow({
   onChange: () => Promise<unknown>;
 }>) {
   const locale = useBrowserLocale();
+  const unfilledCards = action.unfilled_tokens ?? 0;
   const explorer = (
     {
       1: "https://etherscan.io",
@@ -73,6 +78,13 @@ function ActionRow({
           </a>
         )}
       </div>
+      {unfilledCards > 0 && (
+        <p className="tw-my-1 tw-text-iron-400">
+          {t(locale, "dropForge.actionUnfilledCards", {
+            count: unfilledCards,
+          })}
+        </p>
+      )}
       {action.payment_amount_wei && action.payment_recipient && (
         <p className="tw-my-1 tw-break-all tw-text-iron-300">
           {t(locale, "dropForge.settings.paymentDetails", {

@@ -9178,8 +9178,8 @@
         "Launch claim detail pages use /drop-forge/launch/{id}.",
         "Configured claims admins, creator owner, and approved on-chain admins can use Launch completion tracking on the configured contract. The API verifies creator permissions on the relevant chain.",
         "The Auto Launch pill identifies a saved automation plan in Craft, the Launch list, and Launch detail.",
-        "Phase 2 and Public subscriber airdrops run in separate transactions during the Phase 2 transition. Each row is marked Completed after all its own batches confirm.",
-        "Drop Forge Ops reports issues from the 17:30, 18:28, 18:58, and 19:22 Athens time readiness checks for scheduled drops, including manual launches.",
+        "Phase 2 and Public subscriber airdrops run in separate transactions during the Phase 2 transition. New Auto Launch plans use manual Launch subscription rank and give Phase 2 the first allocation. The last eligible wallet can receive a partial allocation. Each row is marked Completed when the full group is delivered.",
+        "Drop Forge Ops reports partial subscriber airdrops and sold-out skips. Readiness checks at 17:30, 18:28, 18:58, and 19:22 Athens time also cover manual launches and verify sellouts on-chain.",
         "The signing wallet pays operation gas. Admin approval does not redirect mint revenue. Pay Artist is a direct ETH transfer from the signing wallet's balance plus gas, not a withdrawal from the mint-income wallet or contract.",
         "If the authorized wallet is disconnected, a launch on-chain action opens wallet connection and continues after connection succeeds when its transaction details are unchanged; refreshed details cancel the pending action so the user can review and retry.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."
