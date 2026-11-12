@@ -237,12 +237,12 @@ export default function UserPageRepNewRepSearch({
         endpoint: `profiles/${profile.query ?? ""}/rep/rating`,
         body: { amount, category },
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       setToast({
         message: t(locale, "rep.categories.grant.toast.updated"),
         type: "success",
       });
-      void onProfileRepModify({
+      await onProfileRepModify({
         targetProfiles: [profile],
         connectedProfile,
         profileProxy: activeProfileProxy ?? null,

@@ -24,6 +24,8 @@ const BROWSER_KEYBOARD_MIN_INSET = 100;
 
 const MOBILE_DIALOG_KEYBOARD_INSET =
   "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
+const MOBILE_DIALOG_VIEWPORT_RESERVE =
+  "var(--mobile-wrapper-dialog-viewport-reserve, 4rem)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
 // Animate layout offset with the surface height. A compositor transform can
@@ -176,7 +178,7 @@ function getDialogHeight({
       ? `calc(${viewportHeight} - 4rem)`
       : `calc(${viewportHeight} - 10rem)`;
   const keyboardAvailableHeight =
-    `max(0px, calc(${viewportHeight} - 4rem - ` +
+    `max(0px, calc(${viewportHeight} - ${MOBILE_DIALOG_VIEWPORT_RESERVE} - ` +
     `${MOBILE_DIALOG_KEYBOARD_INSET}))`;
 
   return `min(var(--mobile-wrapper-dialog-resting-height, ${restingHeight}), var(--mobile-wrapper-dialog-available-height, ${keyboardAvailableHeight}))`;
@@ -225,7 +227,9 @@ function getPanelClassNames({
     !isIos && "tw-transform-gpu",
     !isIos && "tw-will-change-transform",
     tabletModal && ["md:tw-w-full", maxWidthClass ?? "md:tw-max-w-md"],
-    tabletModal && desktopAlign === "top" && "md:tw-max-h-[calc(86vh-24px)]"
+    tabletModal &&
+      desktopAlign === "top" &&
+      "md:tw-max-h-[calc(100vh-var(--mobile-wrapper-dialog-viewport-reserve))]"
   );
 }
 
@@ -246,7 +250,7 @@ function getContainerClassNames(
     tabletModal && [
       "md:tw-inset-0 md:tw-p-6 md:[--mobile-wrapper-dialog-keyboard-inset:0px]",
       desktopAlign === "top"
-        ? "md:tw-items-start md:tw-pt-[14vh] md:[--mobile-wrapper-dialog-resting-height:calc(86vh-24px)]"
+        ? "md:tw-items-start md:tw-pt-[var(--mobile-wrapper-dialog-top-offset)] md:[--mobile-wrapper-dialog-resting-height:calc(100vh-var(--mobile-wrapper-dialog-viewport-reserve))] md:[--mobile-wrapper-dialog-top-offset:14vh] md:[--mobile-wrapper-dialog-viewport-reserve:calc(var(--mobile-wrapper-dialog-top-offset)+24px)]"
         : "md:tw-items-center md:tw-pt-0",
     ]
   );
@@ -559,7 +563,7 @@ export default function MobileWrapperDialog({
         } else {
           container.style.setProperty(
             "--mobile-wrapper-dialog-available-height",
-            `max(0px, calc(${viewport.height}px - 4rem))`
+            `max(0px, calc(${viewport.height}px - ${MOBILE_DIALOG_VIEWPORT_RESERVE}))`
           );
         }
         container.style.setProperty(

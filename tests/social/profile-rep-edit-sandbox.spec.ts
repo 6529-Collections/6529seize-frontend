@@ -2134,9 +2134,11 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       page,
       baseURL,
       isMobile,
-    }) => {
+    }, testInfo) => {
       const api = getSandboxApiOrigin(baseURL);
       if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
+      else if (count === 25)
+        await page.setViewportSize({ width: 900, height: 800 });
       await installCategories(page, api);
       await page.route(`${api}/api/profiles/*/rep/overview*`, (route) =>
         route.fulfill({
@@ -2217,6 +2219,44 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
             });
           expect(scroll.scrollHeight).toBeGreaterThan(scroll.clientHeight);
           expect(scroll.top).toBeGreaterThan(0);
+          if (!isMobile) {
+            // At the tablet breakpoint the fixed top offset still occupies
+            // layout space when the keyboard reduces the visual viewport.
+            await page.evaluate(() => {
+              const viewport = globalThis.visualViewport;
+              if (!viewport) throw new Error("Expected a visual viewport");
+              Object.defineProperty(viewport, "height", {
+                configurable: true,
+                value: globalThis.innerHeight - 300,
+              });
+              viewport.dispatchEvent(new Event("resize"));
+            });
+            try {
+              await expect
+                .poll(async () => {
+                  const bounds = await page
+                    .getByRole("dialog", { name, exact: true })
+                    .locator(".mobile-wrapper-dialog")
+                    .boundingBox();
+                  return bounds ? bounds.y + bounds.height : Infinity;
+                })
+                .toBeLessThanOrEqual(viewportHeight - 300 - 24 + 1);
+              await list.getByRole("link").last().scrollIntoViewIfNeeded();
+              await expect(list.getByRole("link").last()).toBeInViewport();
+              await page.screenshot({
+                path: testInfo.outputPath(
+                  `REP-${direction}-tablet-keyboard.png`
+                ),
+              });
+            } finally {
+              await page.evaluate(() => {
+                const viewport = globalThis.visualViewport;
+                if (!viewport) throw new Error("Expected a visual viewport");
+                Reflect.deleteProperty(viewport, "height");
+                viewport.dispatchEvent(new Event("resize"));
+              });
+            }
+          }
         }
         await expectNoHorizontalOverflow(page);
         await list.getByRole("button", { name: "Close", exact: true }).click();

@@ -286,7 +286,7 @@ show the profile-creation welcome.
    the category first:
    a recipient total can combine several separate category ratings. A list
    opened from a category skips that selection. The list, category choice, and
-   editor share one dialog: a sheet on mobile and a centered dialog on desktop.
+   editor share one dialog: a sheet on mobile and a top-aligned dialog on desktop.
 4. Enter the new total. To remove an existing rating, enter zero.
 5. Select `Save`. Successful updates return to the first page of the same
    receiver list, with refreshed values; removed ratings disappear. Use
