@@ -177,6 +177,7 @@ describe("IdentityGettingStartedCard", () => {
     expect(
       screen.getByRole("heading", { name: "Your profile is ready" })
     ).toBeInTheDocument();
+    expect(screen.getByText("Getting started", { exact: true })).toBeVisible();
     expect(screen.getByRole("link", { name: "Find a Wave" })).toHaveAttribute(
       "href",
       "/discover"
@@ -316,7 +317,7 @@ describe("IdentityGettingStartedCard", () => {
     );
     const dismissGuide = screen.getByRole("button", { name: "Dismiss guide" });
     expect(dismissGuide).toHaveAccessibleName("Dismiss guide");
-    expect(dismissGuide).toHaveTextContent(/^$/);
+    expect(dismissGuide).toHaveTextContent(/^Dismiss$/);
     expect(screen.queryByText("Profile created")).not.toBeInTheDocument();
     fireEvent.click(dismissGuide);
     flushFrames();

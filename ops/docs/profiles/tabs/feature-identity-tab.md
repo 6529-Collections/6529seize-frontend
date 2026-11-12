@@ -61,7 +61,7 @@ Mobile (`< lg`):
 ## Getting Started After Profile Setup
 
 After you choose and save your first profile username, your own Identity tab
-shows `Your profile is ready`. The welcome recommends starting with a Wave,
+shows a `Getting started` guide with `Your profile is ready`. The welcome recommends starting with a Wave,
 a space for conversation, art, and community decisions. About statements remain
 available through the
 [profile editor](../navigation/feature-header-summary.md).
@@ -92,12 +92,14 @@ that flow instead.
   at `/join-6529`.
 
 The welcome and exploration paths sit side by side on larger screens and stack
-on phones. Descriptions stay visible on smaller layouts. If Main Stage details
+on phones. The two main buttons share a row at equal widths on phones and stack
+at full width on very narrow screens. Exploration arrows and descriptions stay
+visible. If Main Stage details
 are unavailable, the welcome and `Find a Wave` remain available.
 
 The card is tied to the browser session in which the profile was created. It
 can remain visible when you return to your own Identity tab in that session.
-Select the X close control (accessible name `Dismiss guide`) to remove it without
+Select `Dismiss` in the guide's header (accessible name `Dismiss guide`) to remove it without
 confirmation. Dismissal does not change your profile or prevent you from exploring
 Waves; the card has no reopen action. You can open `/join-6529` separately for guidance.
 
@@ -236,7 +238,7 @@ show the profile-creation welcome.
    the receiver count from the `Manage given` button; only that button opens
    management. Recipients default to `Highest total first`, with adjustment
    controls on the right. Owners can use `Sort by` to choose `Most recently
-   adjusted`. Changing order returns to the start of that list; `Load more`
+adjusted`. Changing order returns to the start of that list; `Load more`
    continues in the selected order. Back preserves the choice while
    the dialog stays open; reopening management defaults to highest total first.
    Overview category ordering stays unchanged, by rating magnitude.

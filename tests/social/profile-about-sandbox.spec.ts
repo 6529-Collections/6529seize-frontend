@@ -369,12 +369,15 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       name: "Dismiss guide",
       exact: true,
     });
-    const minimumDismissSize = await page.evaluate(() =>
-      globalThis.matchMedia("(pointer: coarse)").matches ? 44 : 40
+    const minimumDismissHeight = await page.evaluate(() =>
+      globalThis.matchMedia("(pointer: coarse)").matches ? 44 : 32
     );
-    await expect(dismissGuide).toHaveText("");
+    await expect(
+      guidance.getByText("Getting started", { exact: true })
+    ).toBeVisible();
+    await expect(dismissGuide).toHaveText("Dismiss");
     await expect(dismissGuide).toHaveAttribute("title", "Dismiss guide");
-    for (const width of [768, 1023, 1024, 320]) {
+    for (const width of [768, 1023, 1024, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
       await expect(allGuidance).toHaveCount(1);
       await expect(guidance).toBeVisible();
@@ -395,8 +398,33 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       expect(separated, `Guide header controls overlap at ${width}px`).toBe(
         true
       );
-      expect(dismissBounds!.height).toBeGreaterThanOrEqual(minimumDismissSize);
-      expect(dismissBounds!.width).toBeGreaterThanOrEqual(minimumDismissSize);
+      expect(dismissBounds!.height).toBeGreaterThanOrEqual(
+        minimumDismissHeight
+      );
+      expect(dismissBounds!.width).toBeGreaterThanOrEqual(44);
+      if (width === 390 || width === 320) {
+        const discoverBounds = await guidance
+          .getByRole("link", { name: "Find a Wave", exact: true })
+          .boundingBox();
+        const learnBounds = await guidance
+          .getByRole("link", { name: "How 6529 works", exact: true })
+          .boundingBox();
+        expect(discoverBounds).not.toBeNull();
+        expect(learnBounds).not.toBeNull();
+        expect(
+          Math.abs(discoverBounds!.width - learnBounds!.width)
+        ).toBeLessThanOrEqual(1);
+        // Desktop retains its rail at this viewport; the two-up layout is a phone requirement.
+        if (width === 390 && isMobile) {
+          expect(
+            Math.abs(discoverBounds!.y - learnBounds!.y)
+          ).toBeLessThanOrEqual(1);
+        } else if (width === 320) {
+          expect(learnBounds!.y).toBeGreaterThanOrEqual(
+            discoverBounds!.y + discoverBounds!.height
+          );
+        }
+      }
     }
     await page.setViewportSize({
       width: isMobile ? 320 : 1280,
