@@ -1411,6 +1411,22 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await modal
       .getByRole("button", { name: "I Agree & Continue", exact: true })
       .click();
+    await modal
+      .getByRole("tab", { name: "Interactive HTML", exact: true })
+      .click();
+    const hosting = modal.getByRole("tablist", {
+      name: "Select hosting network",
+      exact: true,
+    });
+    const ipfs = hosting.getByRole("tab", { name: "IPFS", exact: true });
+    await expect(ipfs).toHaveCSS("font-size", "12px");
+    await expect(ipfs).toHaveCSS("height", "32px");
+    await hosting.getByRole("tab", { name: "Arweave", exact: true }).click();
+    await expect(
+      hosting.getByRole("tab", { name: "Arweave", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await ipfs.click();
+    await modal.getByRole("tab", { name: "Upload File", exact: true }).click();
     const checkbox = modal.getByRole("checkbox", {
       name: "Additional Action",
       exact: true,
@@ -5634,7 +5650,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             ...fixture.drops[0].author.badges,
             artist_of_main_stage_submissions: 1,
           },
-          wave_participation: { is_participant: true, is_winner: false },
+          wave_participation: {
+            is_participant: true,
+            is_winner: popup === "participant entries",
+          },
         },
         submission_context: {
           status: "ACTIVE",
@@ -5754,6 +5773,33 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await badge.click();
       const dialog = page.getByRole("dialog").last();
+      if (popup === "participant entries") {
+        const entryTabs = dialog.getByRole("tablist", {
+          name: /decision entries$/,
+        });
+        await expect(entryTabs.getByRole("tab")).toHaveCount(2);
+        for (const tab of await entryTabs.getByRole("tab").all()) {
+          await expect(tab).toHaveCSS("font-size", "12px");
+          await expect(tab).toHaveCSS("height", "28px");
+        }
+        const winning = entryTabs.getByRole("tab", {
+          name: "Winning entries",
+          exact: true,
+        });
+        await winning.click();
+        await expect(winning).toHaveAttribute("aria-selected", "true");
+        const active = entryTabs.getByRole("tab", {
+          name: "Active entries",
+          exact: true,
+        });
+        await active.click();
+        await expect(active).toHaveAttribute("aria-selected", "true");
+        await page.mouse.move(0, 0);
+        await expect(active).toHaveCSS("background-color", "rgb(38, 39, 43)");
+        await page.screenshot({
+          path: testInfo.outputPath("competition-entry-tabs.png"),
+        });
+      }
       if (popup === "artist submissions") {
         try {
           const loading = page
@@ -6101,9 +6147,49 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       expect(sandbox.requests[0]?.body).toMatchObject({ value: -25 });
       await expect(dialog.getByText("Saved", { exact: true })).toBeVisible();
       if (popup === "artist submissions") {
-        await dialog
-          .getByRole("tab", { name: "Minted to Memes", exact: true })
-          .click();
+        let releaseMintedCards: (() => void) | undefined;
+        const mintedCardsGate = new Promise<void>((resolve) => {
+          releaseMintedCards = resolve;
+        });
+        await page.route("**/api/nfts?**", async (route) => {
+          await mintedCardsGate;
+          return route.fallback();
+        });
+        try {
+          const panel = dialog.getByRole("tabpanel");
+          // The vote explanation is still collapsing after Save finishes.
+          // Compare the settled section with its replacement loading state.
+          await panel.evaluate(async (element) => {
+            const animations = element
+              .getAnimations({ subtree: true })
+              .filter((animation) =>
+                Number.isFinite(animation.effect?.getTiming().iterations)
+              );
+            await Promise.all(
+              animations.map((animation) =>
+                animation.finished.catch(() => undefined)
+              )
+            );
+          });
+          const previousPanel = await panel.boundingBox();
+          expect(previousPanel).not.toBeNull();
+          await dialog
+            .getByRole("tab", { name: "Minted to Memes", exact: true })
+            .click();
+          await expect(
+            panel.getByText("Loading minted memes...", { exact: true })
+          ).toBeVisible();
+          const loadingPanel = await panel.boundingBox();
+          expect(loadingPanel).not.toBeNull();
+          expect(
+            Math.abs(loadingPanel!.height - previousPanel!.height)
+          ).toBeLessThan(1);
+          await page.screenshot({
+            path: testInfo.outputPath("artist-tab-loading-stable-height.png"),
+          });
+        } finally {
+          releaseMintedCards?.();
+        }
         const winnerCard = dialog.getByTestId("trophy-item-winner");
         const olderCard = dialog.getByTestId("trophy-item-prevote");
         await expect(
@@ -12110,6 +12196,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             .getByRole("tab")
             .first()
         ).toHaveCSS("height", "32px");
+        if (name === "Sort options") {
+          await expect(
+            page
+              .getByRole("tablist", { name, exact: true })
+              .getByRole("tab")
+              .first()
+          ).toHaveCSS("font-size", "12px");
+        }
       }
       for (const view of ["List view", "Grid view"]) {
         await page.getByRole("tab", { name: view, exact: true }).click();

@@ -395,14 +395,13 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       await expect(tablist).toHaveCSS("border-radius", "8px");
       for (const tab of await tabs.all()) {
         await expect(tab).toHaveCSS("white-space", "nowrap");
-        await expect(tab).toHaveCSS("border-radius", "8px");
+        await expect(tab).toHaveCSS("border-radius", "6px");
+        await expect(tab).toHaveCSS("font-size", "13px");
         if (width < 640) {
           await expect(tab).toHaveCSS("flex-grow", "1");
-          await expect(tab).toHaveCSS("padding-left", "12px");
-          await expect(tab).toHaveCSS("padding-right", "12px");
-          await expect(tab).toHaveCSS("font-size", "12px");
-        } else {
-          await expect(tab).toHaveCSS("font-size", "14px");
+          const padding = width <= 360 ? "6px" : "12px";
+          await expect(tab).toHaveCSS("padding-left", padding);
+          await expect(tab).toHaveCSS("padding-right", padding);
         }
       }
       if (width < 640) {
@@ -411,15 +410,17 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
           widths: Array.from(node.querySelectorAll("button")).map(
             (tab) => tab.getBoundingClientRect().width
           ),
+          gap: Number.parseFloat(
+            getComputedStyle(node.firstElementChild!).columnGap
+          ),
         }));
         if (sizing.fits) {
           expect(
             Math.max(...sizing.widths) - Math.min(...sizing.widths)
           ).toBeLessThanOrEqual(1);
-          const filledWidth = sizing.widths.reduce(
-            (sum, value) => sum + value,
-            0
-          );
+          const filledWidth =
+            sizing.widths.reduce((sum, value) => sum + value, 0) +
+            sizing.gap * (sizing.widths.length - 1);
           const availableWidth = await tablist.evaluate((node) => {
             const style = getComputedStyle(node);
             return (
