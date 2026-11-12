@@ -19,7 +19,6 @@ import { t } from "@/i18n/messages";
 import {
   ArrowRightIcon,
   ArrowUpRightIcon,
-  CheckCircleIcon,
   PaintBrushIcon,
   PhotoIcon,
   XMarkIcon,
@@ -33,7 +32,7 @@ import {
 } from "./identityGettingStartedSession";
 
 const SECONDARY_ACTION_CLASS =
-  "tw-group/step tw-flex tw-min-h-16 tw-w-full tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2.5 tw-text-left tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-emerald-900/20 hover:tw-text-emerald-400 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none";
+  "tw-group/step tw-relative tw-isolate tw-flex tw-min-h-16 tw-w-full tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2.5 tw-text-left tw-text-iron-200 tw-no-underline tw-transition-colors before:tw-pointer-events-none before:tw-absolute before:tw-inset-x-0 before:tw-inset-y-0.5 before:-tw-z-10 before:tw-rounded-lg before:tw-border before:tw-border-solid before:tw-border-iron-200/[0.055] before:tw-bg-black/[0.17] before:tw-content-[''] hover:tw-bg-emerald-900/20 hover:tw-text-emerald-400 hover:tw-no-underline hover:before:tw-border-emerald-500/30 hover:before:tw-bg-emerald-950/20 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none";
 
 function NextStepContent({
   title,
@@ -46,19 +45,19 @@ function NextStepContent({
 }) {
   return (
     <>
-      <span className="tw-mt-0.5 tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center tw-text-iron-500 group-hover/step:tw-text-emerald-400">
+      <span className="tw-mt-0.5 tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center tw-text-iron-400 group-hover/step:tw-text-emerald-400">
         {icon}
       </span>
       <span className="tw-min-w-0 tw-flex-1">
         <span className="tw-block tw-text-sm tw-font-medium tw-leading-5">
           {title}
         </span>
-        <span className="tw-mt-1 tw-block tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
+        <span className="tw-mt-1 tw-block tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-300">
           {description}
         </span>
       </span>
       <ArrowRightIcon
-        className="tw-mt-0.5 tw-size-4 tw-flex-none tw-text-iron-500 group-hover/step:tw-text-emerald-400"
+        className="tw-mt-0.5 tw-size-4 tw-flex-none tw-text-iron-400 group-hover/step:tw-text-emerald-400"
         aria-hidden="true"
       />
     </>
@@ -127,7 +126,7 @@ function IdentityGettingStartedCardContent({
   return (
     <section
       ref={cardRef}
-      className={`tw-relative tw-scroll-mt-24 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-emerald-500/30 tw-bg-emerald-950/20 tw-bg-gradient-to-br tw-from-emerald-400/[0.04] tw-via-transparent tw-to-transparent tw-@container/identity-guide ${className ?? ""}`}
+      className={`tw-relative tw-scroll-mt-24 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-emerald-500/[0.16] tw-bg-iron-950 tw-bg-[radial-gradient(ellipse_at_0%_0%,rgba(16,185,129,0.045),transparent_55%),linear-gradient(135deg,rgba(6,78,59,0.3),transparent_58%)] tw-antialiased tw-@container/identity-guide before:tw-pointer-events-none before:tw-absolute before:tw-inset-x-0 before:tw-top-0 before:tw-h-px before:tw-bg-[linear-gradient(90deg,transparent_4%,rgba(52,211,153,0.72)_36%,rgba(52,211,153,0.25)_75%,transparent)] before:tw-content-[''] ${className ?? ""}`}
       aria-label={t(locale, "identityGettingStarted.region")}
     >
       <button
@@ -135,21 +134,33 @@ function IdentityGettingStartedCardContent({
         onClick={onDismiss}
         aria-label={t(locale, "identityGettingStarted.dismiss")}
         title={t(locale, "identityGettingStarted.dismiss")}
-        className="tw-absolute tw-right-2 tw-top-2 tw-z-10 tw-flex tw-size-11 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-emerald-500/60 tw-transition-colors hover:tw-bg-emerald-900/50 hover:tw-text-emerald-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
+        className="tw-absolute tw-right-2 tw-top-2 tw-z-10 tw-flex tw-size-11 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
       >
         <XMarkIcon className="tw-size-4" aria-hidden="true" />
       </button>
       <div className="tw-contents">
-        <CheckCircleIcon
-          className="tw-absolute tw-left-6 tw-top-4 tw-hidden tw-size-12 tw-rounded-full tw-border tw-border-solid tw-border-emerald-500/20 tw-bg-emerald-900/20 tw-p-2.5 tw-text-emerald-400 @[40rem]/identity-guide:tw-block"
+        <span
+          className="tw-absolute tw-left-6 tw-top-4 tw-hidden tw-size-12 tw-items-center tw-justify-center tw-rounded-full tw-bg-gradient-to-br tw-from-emerald-400 tw-to-emerald-600 tw-text-emerald-950 tw-shadow-[0_3px_12px_rgba(16,185,129,0.12)] @[40rem]/identity-guide:tw-flex"
           aria-hidden="true"
-        />
+        >
+          <svg
+            className="tw-size-6"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m20 6-11 11-5-5" />
+          </svg>
+        </span>
         <div className="tw-grid @[48rem]/identity-guide:tw-grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
           <div className="tw-min-w-0 tw-p-5 @[40rem]/identity-guide:tw-pl-24 sm:tw-py-6 sm:tw-pr-6">
             <h2 className="tw-m-0 tw-w-full tw-pr-10 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-white @[48rem]/identity-guide:tw-pr-0">
               {t(locale, "identityGettingStarted.title")}
             </h2>
-            <p className="tw-mb-0 tw-mt-2 tw-w-full tw-max-w-lg tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
+            <p className="tw-mb-0 tw-mt-2 tw-w-full tw-max-w-lg tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-300">
               {t(locale, "identityGettingStarted.introduction")}
             </p>
             <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-1">
@@ -162,15 +173,15 @@ function IdentityGettingStartedCardContent({
               </ButtonLink>
               <Link
                 href="/join-6529"
-                className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline hover:tw-bg-emerald-900/20 hover:tw-text-emerald-400 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline hover:tw-bg-emerald-900/20 hover:tw-text-emerald-400 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               >
                 {t(locale, "identityGettingStarted.guide")}
                 <ArrowUpRightIcon className="tw-size-4" aria-hidden="true" />
               </Link>
             </div>
           </div>
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-emerald-500/20 tw-px-5 tw-py-5 @[48rem]/identity-guide:tw-my-5 @[48rem]/identity-guide:tw-border-l @[48rem]/identity-guide:tw-border-t-0 @[48rem]/identity-guide:tw-py-0 sm:tw-px-6">
-            <p className="tw-mb-1 tw-mt-0 tw-px-2 tw-text-xs tw-font-medium tw-uppercase tw-leading-5 tw-tracking-wider tw-text-emerald-500/80 @[48rem]/identity-guide:tw-pr-8">
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-600/35 tw-px-5 tw-py-5 @[48rem]/identity-guide:tw-my-5 @[48rem]/identity-guide:tw-border-l @[48rem]/identity-guide:tw-border-t-0 @[48rem]/identity-guide:tw-py-0 sm:tw-px-6">
+            <p className="tw-mb-1 tw-mt-0 tw-px-2 tw-text-xs tw-font-medium tw-uppercase tw-leading-5 tw-tracking-wider tw-text-iron-300 @[48rem]/identity-guide:tw-pr-8">
               {t(locale, "identityGettingStarted.explore")}
             </p>
             {mainStageHref && (
