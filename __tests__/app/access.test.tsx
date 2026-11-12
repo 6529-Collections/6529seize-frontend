@@ -56,7 +56,7 @@ describe("Access page", () => {
     );
   });
 
-  it("saves the code, shows gm!, then resumes navigation", async () => {
+  it("saves the code and resumes navigation without a dialog", async () => {
     fetchMock.mockResolvedValueOnce({
       ok: false,
       status: 401,
@@ -74,12 +74,10 @@ describe("Access page", () => {
     );
     const [cookieWriteOrder = Infinity] = jest.mocked(Cookies.set).mock
       .invocationCallOrder;
-    expect(window.alert).toHaveBeenCalledWith("gm!");
-    const [alertOrder = 0] = jest.mocked(window.alert).mock.invocationCallOrder;
     const [resumeOrder = 0] =
       jest.mocked(resumeAfterApiAccess).mock.invocationCallOrder;
-    expect(cookieWriteOrder).toBeLessThan(alertOrder);
-    expect(alertOrder).toBeLessThan(resumeOrder);
+    expect(cookieWriteOrder).toBeLessThan(resumeOrder);
+    expect(window.alert).not.toHaveBeenCalled();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 

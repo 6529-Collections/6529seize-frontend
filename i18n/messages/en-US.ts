@@ -5091,7 +5091,6 @@ export const EN_US_ROOT_MESSAGES = {
   ...EULA_MESSAGES,
   "access.codeInput.label": "Team access code",
   "access.codeInput.placeholder": "Team Login",
-  "access.granted": "gm!",
   "access.denied": "Access Denied!",
   "access.verifyFailed": "Could not verify access. Please try again.",
   ...GLOBAL_ERROR_MESSAGES,

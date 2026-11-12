@@ -54,18 +54,15 @@ test.describe("Access Page", () => {
     await expect(page.getByRole("alert")).toHaveText("Access Denied!");
     expect(await input.boundingBox()).toEqual(inputPosition);
 
+    const dialogs: string[] = [];
+    page.on("dialog", async (dialog) => {
+      dialogs.push(dialog.type());
+      await dialog.dismiss();
+    });
     await input.fill(accessCode);
-    await Promise.all([
-      page.waitForEvent("dialog").then(async (dialog) => {
-        const pathBeforeConfirmation = new URL(page.url()).pathname;
-        await dialog.accept();
-        expect(dialog.type()).toBe("alert");
-        expect(dialog.message()).toBe("gm!");
-        expect(pathBeforeConfirmation).toBe("/access");
-      }),
-      input.press("Enter"),
-    ]);
+    await input.press("Enter");
 
     await expect(page).toHaveURL(path + hash);
+    expect(dialogs).toEqual([]);
   });
 });

@@ -1,5 +1,5 @@
 import { test as base } from "@playwright/test";
-import type { BrowserContext, Dialog, Page } from "@playwright/test";
+import type { BrowserContext, Page } from "@playwright/test";
 
 import {
   assertNoPageErrors,
@@ -78,17 +78,10 @@ async function submitStagingAccess(page: Page, goto: PageGoto) {
 
   await accessInput.waitFor({ state: "visible", timeout: 5000 });
   await accessInput.fill(STAGING_ACCESS_CODE);
-  // Accept the success dialog so navigation can continue.
-  const acceptDialog = (dialog: Dialog) => void dialog.accept();
-  page.on("dialog", acceptDialog);
-  try {
-    await accessInput.press("Enter");
-    await page
-      .waitForURL((url) => !isAccessPath(url), { timeout: 10000 })
-      .catch(() => undefined);
-  } finally {
-    page.off("dialog", acceptDialog);
-  }
+  await accessInput.press("Enter");
+  await page
+    .waitForURL((url) => !isAccessPath(url), { timeout: 10000 })
+    .catch(() => undefined);
 
   if (await isAccessGateVisible(page)) {
     if (!isStagingPage(page)) {
