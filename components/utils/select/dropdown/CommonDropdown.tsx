@@ -61,8 +61,14 @@ function getDefaultSizeClass(size: string) {
   return "tw-py-2.5 tw-text-xs";
 }
 
-function getContentClasses(isEditorial: boolean, isToolbar: boolean) {
-  let labelClassName = "tw-font-semibold tw-text-iron-500";
+function getContentClasses(
+  isEditorial: boolean,
+  isToolbar: boolean,
+  usesInlineContent: boolean
+) {
+  let labelClassName = usesInlineContent
+    ? "tw-font-semibold tw-text-iron-500"
+    : "tw-mr-1.5 tw-font-semibold tw-text-iron-500";
   if (isEditorial) {
     labelClassName =
       "tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-500";
@@ -169,7 +175,8 @@ export default function CommonDropdown<T, U = unknown>(
   }
   const { labelClassName, valueClassName } = getContentClasses(
     isEditorial,
-    isToolbar
+    isToolbar,
+    usesInlineContent
   );
   let chevronClassName = isEditorial
     ? "tw-pointer-events-none tw-inline-flex tw-shrink-0 tw-items-center tw-text-iron-500 group-hover:tw-text-iron-300"
@@ -202,9 +209,7 @@ export default function CommonDropdown<T, U = unknown>(
             }
           >
             {showFilterLabel && (
-              <span
-                className={`${labelClassName} ${usesInlineContent ? "" : "tw-mr-1.5"}`}
-              >
+              <span className={labelClassName}>
                 {filterLabel}:{usesInlineContent ? "" : " "}
               </span>
             )}

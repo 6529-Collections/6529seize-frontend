@@ -76,7 +76,11 @@ test("opens a public wave on a quiet chat frame before hydration", async ({
   ).toBeHidden();
 });
 
-async function installWaveList(page: Page, baseURL: string | undefined) {
+async function installWaveList(
+  page: Page,
+  baseURL: string | undefined,
+  emptyDescription = false
+) {
   await page.route("**/api/open-graph**", (route) =>
     route.fulfill({ json: {} })
   );
@@ -86,16 +90,32 @@ async function installWaveList(page: Page, baseURL: string | undefined) {
   expect(response.ok()).toBe(true);
   const body = await response.json();
   const first = body.data[0];
+  const description = emptyDescription
+    ? ""
+    : (first.description_drop?.contents ??
+      first.description_drop?.content ??
+      "");
   await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
         ...body,
-        data: [first, { ...first, id: TARGET, name: NAME }],
+        data: [
+          first,
+          {
+            ...first,
+            id: TARGET,
+            name: NAME,
+            ...(emptyDescription
+              ? { description_drop: { contents: "", media: [] } }
+              : {}),
+          },
+        ],
         next_cursor: null,
         snapshot_expires_at: Date.now() + 900000,
       },
     })
   );
+  return description;
 }
 
 async function monitorTargetPaints(page: Page) {
@@ -144,8 +164,12 @@ async function monitorTargetPaints(page: Page) {
   };
 }
 
-for (const app of [false, true]) {
-  test(`keeps cold and cached wave switches visible (${app ? "app" : "web"})`, async ({
+for (const { app, emptyDescription } of [
+  { app: false, emptyDescription: false },
+  { app: true, emptyDescription: false },
+  { app: false, emptyDescription: true },
+]) {
+  test(`keeps cold and cached wave switches visible (${app ? "app" : "web"})${emptyDescription ? " without a description" : ""}`, async ({
     page,
     baseURL,
   }, testInfo) => {
@@ -154,7 +178,7 @@ for (const app of [false, true]) {
       app && testInfo.project.name !== "web-mobile-chromium",
       "The native simulation uses the mobile viewport."
     );
-    await installWaveList(page, baseURL);
+    const description = await installWaveList(page, baseURL, emptyDescription);
     if (app)
       await installSurfaceSimulation(
         page.context(),
@@ -183,7 +207,22 @@ for (const app of [false, true]) {
     });
     await page.route(`**/api/waves/${TARGET}`, async (route) => {
       await gate;
-      await route.fallback();
+      const response = await route.fetch();
+      const wave = await response.json();
+      // Both responses describe the same wave. Keep the full response aligned
+      // with the overview instead of inheriting the sandbox's empty parts.
+      await route.fulfill({
+        response,
+        json: {
+          ...wave,
+          description_drop: {
+            ...wave.description_drop,
+            parts: [
+              { ...wave.description_drop.parts[0], content: description },
+            ],
+          },
+        },
+      });
     });
     try {
       await page.goto(`/waves/${SOURCE}?tab=chat`);
