@@ -1062,7 +1062,7 @@
         "expand"
       ],
       "facts": [
-        "The sidebar orders primary navigation as NFTs, Museum, Waves, DMs, Join 6529, and About, with gated Drop Forge after About.",
+        "The sidebar orders primary navigation as NFTs, Museum, Waves, DMs, Join 6529 (Validator for signed-in members with a profile), and About, with gated Drop Forge after About. The same slot and membership rule apply to desktop collapsed and expanded rails, mobile web, native app menus, and page search. The slot uses the existing navigation styling without a special highlight. While wallet/profile restoration is unresolved, the slot reserves space without showing the wrong action. Validator links to /validator and is not added to public navigation.",
         "Museum is a standalone web and app sidebar row linking to /museum/network; historical /museum gallery routes remain available from the Museum entry point.",
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
@@ -1269,7 +1269,7 @@
         "The footer link is labeled 6529 Apps, appears between License and API, and opens the internal route in the same tab.",
         "The page keeps 6529 Mobile iOS and Android store links together with versioned 6529 Desktop downloads for Windows, macOS, and Linux.",
         "A third full-width section, 6529 Validator, says Read more about 6529 validator. The entire section opens /validator in the same tab.",
-        "Header search finds 6529 Validator under Pages for validator, 6529 Validator, or /validator. The validator is a search-only result.",
+        "Signed-in members with a profile see Validator in the primary navigation slot between DMs and About and can find it under Pages for validator, 6529 Validator, or /validator. Newcomers see Join 6529 in navigation and search instead.",
         "The matching desktop OS expands automatically when detected; phones, tablets and unknown devices start collapsed. Expand Windows, macOS or Linux to see versions and download installers directly. Windows has x64/ARM64 EXEs; Linux has x64 AppImage, DEB and RPM installers.",
         "Download opens the installer directly. Each installer shows Arweave mirror · Coming soon until its mirror is published, then shows a clickable Arweave mirror link.",
         "Current Desktop releases require macOS 13+. macOS 12 Monterey has a separate last-compatible release feed, currently 0.3.15, for Intel and Apple silicon. If an update stops opening on macOS 12, reinstall that compatible app and keep existing application data.",
