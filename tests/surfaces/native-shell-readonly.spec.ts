@@ -243,10 +243,6 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
   test("calendar invites omit the mint URL only on iOS", async ({
     page,
   }, testInfo) => {
-    test.skip(
-      !isCapacitorSimulationProject(testInfo.project.name),
-      "Native calendar invite behavior"
-    );
     await gotoReady(page, "/meme-calendar");
 
     const mintUrl = /6529\.io%2Fthe-memes%2Fmint/i;
@@ -270,10 +266,6 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
   test("NextGen listing filters and direct listing URLs are gated on iOS", async ({
     page,
   }, testInfo) => {
-    test.skip(
-      !isCapacitorSimulationProject(testInfo.project.name),
-      "Native NextGen listing behavior"
-    );
     await gotoReady(
       page,
       "/nextgen/collection/pebbles/art?sort=listed_price&listed=true"
