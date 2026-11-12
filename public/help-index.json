@@ -6706,6 +6706,53 @@
       ]
     },
     {
+      "id": "profiles.getting-started",
+      "kind": "ui_affordance",
+      "title": "Getting started after profile setup",
+      "link_label": "Join 6529 guide",
+      "aliases": [
+        "profile created",
+        "your profile is ready",
+        "getting started card",
+        "first profile welcome",
+        "what to do after creating a profile",
+        "find a wave",
+        "how to submit to the memes",
+        "before you submit art"
+      ],
+      "keywords": [
+        "profile",
+        "identity",
+        "welcome",
+        "onboarding",
+        "getting started",
+        "discovery",
+        "about statement",
+        "nomination",
+        "main stage"
+      ],
+      "facts": [
+        "After you save your first profile username, your own Identity tab at /{user} shows a Getting started guide with Your profile is ready. The welcome recommends starting with a Wave, a space for conversation, art, and community decisions.",
+        "When successful profile setup finishes on Identity, the welcome waits until profile content is visible, then scrolls into view once without moving keyboard focus. Reduced-motion preferences prevent animated scrolling. Ordinary returns to Identity and page reloads do not repeat this arrival scroll. If you started setup while creating a Wave, you return to that flow instead.",
+        "Find a Wave opens /discover, where you can explore discussions and community decisions. Waves are spaces for conversations, creative work, and community decisions.",
+        "The Memes Main Stage opens the network's configured Main Stage Wave to browse art submitted to The Memes collection.",
+        "Before you submit art opens the existing Unlock submissions popover on desktop, anchored to the action without a modal backdrop. Hover or click opens it; Enter or Space opens it with focus, Tab reaches Get nominated, and Escape closes it and restores trigger focus. Touch-first devices and the native app keep the dialog or sheet titled Before you submit art, whose close control returns focus to the action. Both show progress toward the MemesNominee REP requirement and the same Get nominated action. Eligibility, submitting work, and community selection are separate stages; nomination does not guarantee selection.",
+        "How 6529 works opens /join-6529. You can also open that guide separately after dismissing the welcome. About statements are edited through Edit profile, outside the getting-started card.",
+        "The card is visible only to the connected profile owner outside proxy mode during the browser session in which the profile was created. Visitors, signed-out viewers, active proxies and ordinary existing-profile visits in a new browser session do not see the creation welcome.",
+        "Dismiss in the guide's header removes the card without confirmation and does not change the profile. Its accessible name and hover hint are Dismiss guide. There is no reopen action or Undo for the card. It can remain visible when you return to your own Identity tab in the same creation session until dismissed.",
+        "The card stacks on phones and keeps its action descriptions and arrows visible. The two main buttons share a row at equal widths on phones and stack at full width on very narrow screens. Missing Main Stage details do not prevent the welcome and Find a Wave action from appearing."
+      ],
+      "canonical_path": "/join-6529",
+      "related_paths": ["/{user}", "/discover", "/join-6529"],
+      "tags": ["profiles", "identity", "onboarding", "waves", "navigation"],
+      "source_refs": [
+        "ops/docs/profiles/tabs/feature-identity-tab.md",
+        "components/user/identity/getting-started/IdentityGettingStartedCard.tsx",
+        "components/brain/my-stream/tabs/MainStageNominationPopover.tsx",
+        "components/user/identity/getting-started/identityGettingStartedSession.ts"
+      ]
+    },
+    {
       "id": "profiles.identity-tab",
       "kind": "route",
       "title": "Profile Identity tab",

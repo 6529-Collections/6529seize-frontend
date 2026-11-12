@@ -37,6 +37,7 @@ import emmaSnapshotsMessages from "@/i18n/messages/emmaSnapshots.en-US.json";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
 import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
+import identityGettingStartedMessages from "@/i18n/messages/identityGettingStarted.en-US.json";
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
 import networkTdhSharedMessages from "@/i18n/messages/networkTdhShared.en-US.json";
 import networkTdhVerifyMessages from "@/i18n/messages/networkTdhVerify.en-US.json";
@@ -3647,6 +3648,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...DELEGATION_REGISTER_MESSAGES,
   ...DELEGATION_SUMMARY_MESSAGES,
   ...join6529Messages,
+  ...identityGettingStartedMessages,
   "nextgen.brand": "NextGen",
   "nextgen.navigation.featured": "Featured",
   "nextgen.navigation.collections": "Collections",

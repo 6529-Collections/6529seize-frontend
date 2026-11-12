@@ -6,7 +6,10 @@ import UserPageSetUpProfileHeader from "./UserPageSetUpProfileHeader";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { markIdentityGettingStartedSession } from "@/components/user/identity/getting-started/identityGettingStartedSession";
+import {
+  markIdentityGettingStartedSession,
+  requestIdentityGettingStartedArrival,
+} from "@/components/user/identity/getting-started/identityGettingStartedSession";
 import UserSettingsClassification from "@/components/user/settings/UserSettingsClassification";
 import UserSettingsPrimaryWallet from "@/components/user/settings/UserSettingsPrimaryWallet";
 import UserSettingsSave from "@/components/user/settings/UserSettingsSave";
@@ -16,6 +19,8 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useMutation } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -45,6 +50,7 @@ export default function UserPageSetUpProfile({
   const { onProfileEdit } = useContext(ReactQueryWrapperContext);
   const router = useRouter();
   const pathname = usePathname();
+  const locale = useBrowserLocale();
 
   const [userName, setUserName] = useState<string>(profile.handle ?? "");
 
@@ -83,12 +89,23 @@ export default function UserPageSetUpProfile({
       });
     },
     onSuccess: (updatedProfile) => {
-      if (!profile.handle?.trim() && updatedProfile.handle?.trim()) {
+      const returnPath = getWaveCreationReturnPath(globalThis.location.search);
+      const isNewProfile =
+        !profile.handle?.trim() && !!updatedProfile.handle?.trim();
+      if (isNewProfile) {
         markIdentityGettingStartedSession(updatedProfile.handle);
+        if (!returnPath) {
+          requestIdentityGettingStartedArrival(updatedProfile.handle);
+        }
       }
 
       setToast({
-        message: "Profile updated.",
+        message: t(
+          locale,
+          isNewProfile
+            ? "identityGettingStarted.created"
+            : "identityGettingStarted.updated"
+        ),
         type: "success",
       });
 
@@ -101,10 +118,7 @@ export default function UserPageSetUpProfile({
         }
         return `/${updatedHandle}`;
       })();
-      router.replace(
-        getWaveCreationReturnPath(globalThis.location.search) ?? newPath,
-        { scroll: false }
-      );
+      router.replace(returnPath ?? newPath, { scroll: false });
       onProfileEdit({
         profile: updatedProfile,
         previousProfile: null,

@@ -50,6 +50,21 @@ Back returns one step; Cancel discards the unsaved draft and closes management.
 Received and Given lists fit their content, share a height cap and scroll when needed.
 Visitor inspection and existing proxy allocation permissions remain distinct.
 
+The `profiles.getting-started` record covers the first-profile welcome in the
+Identity tab: `Find a Wave` opens Discovery, Main Stage opens its configured
+Wave, and `Before you submit art` opens the existing `Unlock submissions`
+nomination popover on desktop, with hover, click and keyboard access. Touch-first
+devices and the native app keep the dialog or sheet. `How 6529 works` opens
+Join 6529. About statements are edited through the profile editor.
+Its facts keep creation-session visibility, owner/proxy restrictions, the
+`Getting started` header and visible `Dismiss` control, and the welcome's availability without Main Stage details
+explicit.
+It also explains the one-time arrival scroll after profile content becomes
+visible following successful setup on Identity, reduced-motion support, unchanged
+keyboard focus, and no
+repeated scroll on ordinary return or reload. Setup entered from Wave creation
+returns to that flow instead.
+
 The search record covers punctuation-tolerant Wave names across site search,
 sidebar search, composer mentions and the message-search Wave picker. It explains
 all-term matching, partial names, relevance ordering, literal wildcard characters,
