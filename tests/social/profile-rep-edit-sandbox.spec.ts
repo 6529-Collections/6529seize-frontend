@@ -1884,10 +1884,10 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       await expect(
         list.getByRole("link", { name: recipientHandle })
       ).toHaveCount(0);
-      expect(requestedPages.slice(pagesBeforeRemoval)).toEqual([1]);
       await expect(
         list.getByRole("link", { name: "older-recipient" })
       ).toBeVisible();
+      expect(requestedPages.slice(pagesBeforeRemoval)).toEqual([1]);
       await expect(
         page
           .getByRole("region", {
