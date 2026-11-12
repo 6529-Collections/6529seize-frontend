@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { E2eeMarkdown } from "@/components/e2ee/conversation/E2eeMarkdown";
+import { MessageMarkdown } from "@/components/markdown/MessageMarkdown";
 import { member } from "./fakeE2eeEngine";
 import type { SupportedLocale } from "@/i18n/locales";
 import { loadLocaleMessages } from "@/i18n/messages";
@@ -89,6 +90,75 @@ it("renders Markdown and GFM with the real parser", () => {
     "b",
   ]);
   expect(screen.getByRole("separator")).toBeInTheDocument();
+});
+
+it("parses complete Markdown before shortening an inline preview", () => {
+  const { container } = render(
+    <span>
+      <E2eeMarkdown
+        {...props}
+        inlinePreview
+        text={`[**Readable label**](https://example.com/${"long-path".repeat(50)}) and **${"x".repeat(150)}**`}
+      />
+    </span>
+  );
+  expect(container.querySelectorAll("strong")[0]).toHaveTextContent(
+    "Readable label"
+  );
+  expect(container.textContent).toBe(`Readable label and ${"x".repeat(101)}…`);
+  expect(container.querySelector("span div, a")).toBeNull();
+});
+
+it("flattens blocks and keeps emoji literal inside preview code", () => {
+  const { container } = render(
+    <E2eeMarkdown
+      {...props}
+      inlinePreview
+      text={
+        "# Heading\n\n> quoted\n\n- [x] done\n- [ ] todo\n\n| Key | Value |\n| --- | --- |\n| a | b |\n\n```txt\n@bob :gm:\n```\n\n:gm:"
+      }
+    />
+  );
+  expect(container).toHaveTextContent(
+    "Heading quoted ☑ done ☐ todo Key Value a b @bob :gm:"
+  );
+  expect(container.querySelector("code")).toHaveTextContent("@bob :gm:");
+  expect(
+    container.querySelector("code img, code a, pre, input, table, h1, p")
+  ).toBeNull();
+  expect(screen.getAllByRole("img", { name: ":gm:" })).toHaveLength(1);
+});
+
+it("keeps image labels and omits footnotes and HTML resources in inline previews", () => {
+  const { container } = render(
+    <E2eeMarkdown
+      {...props}
+      inlinePreview
+      text={
+        '![Photo](https://preview.invalid/photo.png) ![](https://preview.invalid/blank.png)\n\nText[^1]\n\n[^1]: Hidden footnote\n\n<img src="https://preview.invalid/html.png">'
+      }
+    />
+  );
+  expect(container).toHaveTextContent("Photo Image link Text");
+  expect(container).not.toHaveTextContent("Hidden footnote");
+  expect(
+    container.querySelector("img,a,input,iframe,script,section,sup")
+  ).toBeNull();
+});
+
+it("excludes footnote definitions through the shared renderer's real sanitizer", () => {
+  const { container } = render(
+    <MessageMarkdown
+      privacy="private"
+      inlinePreview
+      text={
+        "Visible[^note]\n\n[^note]: This definition must stay out of the chat list."
+      }
+    />
+  );
+  expect(container.textContent?.trim()).toBe("Visible");
+  expect(container).not.toHaveTextContent("This definition");
+  expect(container.querySelector("section,sup,a")).toBeNull();
 });
 
 it("keeps a linked image label inside its authored link and standalone images linked", () => {

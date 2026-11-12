@@ -1,5 +1,6 @@
 import UserPlusIcon from "@heroicons/react/24/outline/UserPlusIcon";
 import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
+import ServerStackIcon from "@heroicons/react/24/outline/ServerStackIcon";
 
 import BellIcon from "@/components/common/icons/BellIcon";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
@@ -81,6 +82,12 @@ export const DIRECT_NAVIGATION_PAGES: SidebarPageEntry[] = [
 ];
 
 export const SEARCH_ONLY_PAGES: SidebarPageEntry[] = [
+  {
+    name: t(DEFAULT_LOCALE, "apps.validator.title"),
+    href: "/validator",
+    section: HEADER_SEARCH_LABELS.about,
+    icon: ServerStackIcon,
+  },
   {
     name: t(DEFAULT_LOCALE, "waves.sidebar.createWave"),
     href: "/waves/create",

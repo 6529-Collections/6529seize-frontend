@@ -85,6 +85,9 @@ DMs; the `in:` picker can include conversations you can read.
   - Open `Messages` for message text and author/Wave filters.
   - Message matches appear only in `Messages`; `All` previews the other categories.
   - Global results show the Wave name and open the matching message.
+  - Known custom emoji shortcodes render as compact images, and native emoji
+    shortcodes render as emoji. Unknown shortcodes and shortcodes inside code
+    remain text. Matching surrounding text stays highlighted.
 - Profile results:
   - Exact, prefix, and substring profile-handle matches appear in that order,
     before results that match only by ENS.
@@ -101,6 +104,8 @@ DMs; the `in:` picker can include conversations you can read.
     (`/about/6529-apps`), plus
     permission-gated operational routes such as `Drop Forge`, `Craft Claims`,
     or `Launch Claims`, subject to the current route catalog.
+  - `6529 Validator` (`/validator`) is searchable for `validator`,
+    `6529 Validator`, or `/validator` without a navigation entry.
 - Category persistence:
   - Selected category is remembered between openings.
   - `Clear` in site search resets category to `All`. In `Messages`, clearing text
