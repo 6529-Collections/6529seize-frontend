@@ -47,6 +47,13 @@ test.describe("Access Page", () => {
     await expect(page).toHaveTitle("Access Page");
 
     const input = page.getByRole("textbox", { name: "Team access code" });
+    await input.fill("invalid-test-access-code");
+    const inputPosition = await input.boundingBox();
+    expect(inputPosition).not.toBeNull();
+    await input.press("Enter");
+    await expect(page.getByRole("alert")).toHaveText("Access Denied!");
+    expect(await input.boundingBox()).toEqual(inputPosition);
+
     await input.fill(accessCode);
     await Promise.all([
       page.waitForEvent("dialog").then(async (dialog) => {
