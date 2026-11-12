@@ -51,7 +51,9 @@ test.describe("Access Page", () => {
     const inputPosition = await input.boundingBox();
     expect(inputPosition).not.toBeNull();
     await input.press("Enter");
-    await expect(page.getByRole("alert")).toHaveText("Access Denied!");
+    await expect(
+      page.getByRole("alert").filter({ hasText: /^Access Denied!$/ })
+    ).toHaveText("Access Denied!");
     expect(await input.boundingBox()).toEqual(inputPosition);
 
     await input.fill(accessCode);
