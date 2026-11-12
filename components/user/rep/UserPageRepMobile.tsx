@@ -21,7 +21,6 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { useParams } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
-import IdentityGettingStartedCard from "../identity/getting-started/IdentityGettingStartedCard";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 import GrantRepDialog from "./new-rep/GrantRepDialog";
@@ -139,8 +138,6 @@ export default function UserPageRepMobile({
 
   return (
     <div>
-      <IdentityGettingStartedCard profile={profile} className="tw-mb-4" />
-
       <MobileTabCards activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Keep the default REP panel visible while the section buttons hydrate. */}

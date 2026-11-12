@@ -275,6 +275,10 @@ export default function UserPageRep({
 
   return (
     <div className="tailwind-scope">
+      <IdentityGettingStartedCard
+        profile={profile}
+        className="tw-mb-4 lg:tw-mb-8"
+      />
       <div className="lg:tw-hidden">
         <UserPageRepMobile
           profile={profile}
@@ -296,10 +300,6 @@ export default function UserPageRep({
         />
       </div>
       <div className="tw-hidden lg:tw-block">
-        <IdentityGettingStartedCard
-          profile={profile}
-          className="tw-mb-6 lg:tw-mb-8"
-        />
         <div className="tw-grid tw-grid-cols-1 tw-gap-x-8 lg:tw-grid-cols-[minmax(0,2fr)_minmax(22rem,1fr)] xl:tw-gap-x-10">
           <div className="tw-min-w-0">
             <section aria-label={t(locale, "user.rate.repRegion")}>
