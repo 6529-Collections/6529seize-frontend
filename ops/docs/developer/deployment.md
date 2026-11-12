@@ -117,6 +117,13 @@ operations can queue unrelated requests. The variable must be present when the
 process starts, so it lives in the launch configuration rather than in
 application code. Keep the three launch paths in step when changing it.
 
+## API access gate
+
+When the API access gate asks for a team code, enter it and press Enter to
+continue to the original page. The return link keeps the original path and
+query string. Opening `/access` directly sends you to the home page after
+access is confirmed.
+
 ## Staging crawler cards
 
 Open Graph and crawler cards on staging intentionally require the visitor's

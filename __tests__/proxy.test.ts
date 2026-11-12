@@ -481,24 +481,24 @@ describe("proxy", () => {
         );
         expect(response).toEqual({
           kind: "redirect",
-          url: "https://staging.6529.io/access",
+          url: "https://staging.6529.io/access?returnTo=%2Fwaves",
         });
       } finally {
         delete process.env["STAGING_API_KEY"];
       }
     });
 
-    it("redirects to /access when the API answers 401", async () => {
+    it("preserves the requested page and query in the 401 redirect", async () => {
       mockFetchStatus(401);
       const request = createRequest("/waves");
-      request.nextUrl.search = "?tab=chat";
+      request.nextUrl.search = "?tab=chat&returnTo=%2Fother&tab=rules";
 
-      const response = await proxy(request);
-
-      expect(response).toEqual({
-        kind: "redirect",
-        url: "https://staging.6529.io/access",
-      });
+      const response = (await proxy(request)) as unknown as { url: string };
+      const destination = new URL(response.url);
+      expect(destination.pathname).toBe("/access");
+      expect(Array.from(destination.searchParams.entries())).toEqual([
+        ["returnTo", "/waves?tab=chat&returnTo=%2Fother&tab=rules"],
+      ]);
     });
 
     it("redirects to /restricted when the API answers 403", async () => {
@@ -551,7 +551,7 @@ describe("proxy", () => {
       expect(allowed).toEqual({ kind: "next" });
       expect(denied).toEqual({
         kind: "redirect",
-        url: "https://staging.6529.io/access",
+        url: "https://staging.6529.io/access?returnTo=%2Fwaves",
       });
       expect(fetchMock).toHaveBeenCalledTimes(2);
     });
@@ -653,7 +653,7 @@ describe("proxy", () => {
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(response).toEqual({
         kind: "redirect",
-        url: "https://6529.io/access",
+        url: "https://6529.io/access?returnTo=%2Fwaves",
       });
     });
 
