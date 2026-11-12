@@ -46,16 +46,26 @@ test.describe("Access Page", () => {
     expect(gateUrl.searchParams.get("returnTo")).toBe(path);
     await expect(page).toHaveTitle("Access Page");
 
-    const dialogs: string[] = [];
-    page.on("dialog", async (dialog) => {
-      dialogs.push(dialog.message());
-      await dialog.dismiss();
-    });
     const input = page.getByRole("textbox", { name: "Team access code" });
-    await input.fill(accessCode);
+    await input.fill("invalid-test-access-code");
+    const inputPosition = await input.boundingBox();
+    expect(inputPosition).not.toBeNull();
     await input.press("Enter");
+    await expect(page.getByRole("alert")).toHaveText("Access Denied!");
+    expect(await input.boundingBox()).toEqual(inputPosition);
+
+    await input.fill(accessCode);
+    await Promise.all([
+      page.waitForEvent("dialog").then(async (dialog) => {
+        const pathBeforeConfirmation = new URL(page.url()).pathname;
+        await dialog.accept();
+        expect(dialog.type()).toBe("alert");
+        expect(dialog.message()).toBe("gm!");
+        expect(pathBeforeConfirmation).toBe("/access");
+      }),
+      input.press("Enter"),
+    ]);
 
     await expect(page).toHaveURL(path + hash);
-    expect(dialogs).toEqual([]);
   });
 });

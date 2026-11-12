@@ -78,7 +78,7 @@ async function submitStagingAccess(page: Page, goto: PageGoto) {
 
   await accessInput.waitFor({ state: "visible", timeout: 5000 });
   await accessInput.fill(STAGING_ACCESS_CODE);
-  // Older deployments still show a success dialog before navigating.
+  // Accept the success dialog so navigation can continue.
   const acceptDialog = (dialog: Dialog) => void dialog.accept();
   page.on("dialog", acceptDialog);
   try {
