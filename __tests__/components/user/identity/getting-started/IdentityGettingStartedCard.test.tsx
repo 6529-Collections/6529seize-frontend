@@ -87,6 +87,8 @@ describe("IdentityGettingStartedCard", () => {
   const scrollIntoView = jest.fn();
   let nextFrameId = 1;
   let reducedMotion = false;
+  let isLaidOut = true;
+  const resizeObservers = new Map<ResizeObserver, ResizeObserverCallback>();
 
   function flushFrames() {
     act(() => {
@@ -96,12 +98,40 @@ describe("IdentityGettingStartedCard", () => {
     });
   }
 
+  function flushResizeObservers() {
+    act(() => {
+      [...resizeObservers].forEach(([observer, callback]) => {
+        callback([], observer);
+      });
+    });
+  }
+
   beforeEach(() => {
     sessionStorage.clear();
     frames.clear();
     scrollIntoView.mockClear();
     nextFrameId = 1;
     reducedMotion = false;
+    isLaidOut = true;
+    resizeObservers.clear();
+    jest.spyOn(Element.prototype, "getClientRects").mockImplementation(() => {
+      const boxes = isLaidOut ? [new DOMRect(0, 0, 320, 200)] : [];
+      return Object.assign(boxes, {
+        item: (index: number) => boxes[index] ?? null,
+      });
+    });
+    jest.spyOn(globalThis, "ResizeObserver").mockImplementation((callback) => {
+      const observer = {
+        observe: jest.fn(),
+        unobserve: jest.fn(),
+        disconnect: jest.fn(),
+      };
+      observer.disconnect.mockImplementation(() => {
+        resizeObservers.delete(observer);
+      });
+      resizeObservers.set(observer, callback);
+      return observer;
+    });
     mockHasHydrated = true;
     mockActiveProxy = false;
     mockIsTouchDevice = true;
@@ -158,7 +188,7 @@ describe("IdentityGettingStartedCard", () => {
       screen.queryByRole("link", { name: /The Memes Main Stage/ })
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /How to submit to The Memes/ })
+      screen.getByRole("button", { name: /Before you submit art/ })
     ).toHaveAttribute("aria-haspopup", "dialog");
     expect(
       screen.queryByRole("button", { name: /About statement/ })
@@ -202,10 +232,10 @@ describe("IdentityGettingStartedCard", () => {
       ).not.toBeInTheDocument();
 
       fireEvent.click(
-        screen.getByRole("button", { name: /How to submit to The Memes/ })
+        screen.getByRole("button", { name: /Before you submit art/ })
       );
       expect(
-        screen.getByRole("dialog", { name: "How to submit to The Memes" })
+        screen.getByRole("dialog", { name: "Before you submit art" })
       ).toHaveTextContent("Nomination eligibility guidance");
       fireEvent.click(screen.getByRole("button", { name: "Close" }));
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -220,7 +250,7 @@ describe("IdentityGettingStartedCard", () => {
     render(<IdentityGettingStartedCard profile={profile} />);
 
     fireEvent.click(
-      screen.getByRole("button", { name: /How to submit to The Memes/ })
+      screen.getByRole("button", { name: /Before you submit art/ })
     );
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -342,6 +372,51 @@ describe("IdentityGettingStartedCard", () => {
     flushFrames();
 
     expect(screen.getByRole("region")).toBeInTheDocument();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(consumeIdentityGettingStartedArrival(profile.handle)).toBe(false);
+  });
+
+  it("waits for a rendered guide before consuming its arrival request", () => {
+    isLaidOut = false;
+    markIdentityGettingStartedSession(profile.handle);
+    requestIdentityGettingStartedArrival(profile.handle);
+    render(<IdentityGettingStartedCard profile={profile} />);
+    flushFrames();
+
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(
+      sessionStorage.getItem("identity-getting-started-arrival:alice")
+    ).toBe("true");
+
+    isLaidOut = true;
+    flushResizeObservers();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    flushFrames();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(consumeIdentityGettingStartedArrival(profile.handle)).toBe(false);
+    expect(resizeObservers.size).toBe(0);
+    flushResizeObservers();
+    flushFrames();
+    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps arrival pending when the hidden startup guide unmounts", () => {
+    isLaidOut = false;
+    markIdentityGettingStartedSession(profile.handle);
+    requestIdentityGettingStartedArrival(profile.handle);
+    const { unmount } = render(
+      <IdentityGettingStartedCard profile={profile} />
+    );
+    flushFrames();
+    unmount();
+    expect(resizeObservers.size).toBe(0);
+    isLaidOut = true;
+    flushResizeObservers();
+    flushFrames();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+
+    render(<IdentityGettingStartedCard profile={profile} />);
+    flushFrames();
     expect(scrollIntoView).toHaveBeenCalledTimes(1);
     expect(consumeIdentityGettingStartedArrival(profile.handle)).toBe(false);
   });

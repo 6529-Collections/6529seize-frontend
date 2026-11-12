@@ -61,13 +61,14 @@ Mobile (`< lg`):
 ## Getting Started After Profile Setup
 
 After you choose and save your first profile username, your own Identity tab
-shows `Your profile is ready`. The welcome introduces
-6529 as a network where people share ideas, create art, and decide what to build
-together. About statements remain available through the
+shows `Your profile is ready`. The welcome recommends starting with a Wave,
+a space for conversation, art, and community decisions. About statements remain
+available through the
 [profile editor](../navigation/feature-header-summary.md).
 
-When successful profile setup finishes on Identity, the page scrolls the welcome
-into view once without moving keyboard focus. Reduced-motion preferences prevent
+When successful profile setup finishes on Identity, the welcome waits until
+profile content is visible, then scrolls into view once without moving keyboard
+focus. Reduced-motion preferences prevent
 animated scrolling. Returning to Identity or reloading the page does not repeat
 this arrival scroll. If you started setup while creating a Wave, you return to
 that flow instead.
@@ -76,13 +77,13 @@ that flow instead.
   at `/discover`. Waves are spaces for conversations, creative work, and
   community decisions.
 - `The Memes Main Stage` opens the network's configured Main Stage Wave, where
-  you can discover artwork the community is considering for future Meme Cards.
-- `How to submit to The Memes` opens the existing `Unlock submissions`
+  you can browse art submitted to The Memes collection.
+- `Before you submit art` opens the existing `Unlock submissions`
   nomination and eligibility popover on desktop, anchored to the action without
   a modal backdrop. Hover or click opens it; Enter or Space opens it with focus,
   Tab reaches `Get nominated`, and Escape closes it and restores trigger focus.
   Touch-first devices and the native app keep the dialog or sheet titled
-  `How to submit to The Memes`; its close control returns focus to the action.
+  `Before you submit art`; its close control returns focus to the action.
   Both show progress toward the `MemesNominee` REP requirement and the same
   `Get nominated` action. Nomination
   eligibility is separate from submission and does not guarantee selection. See

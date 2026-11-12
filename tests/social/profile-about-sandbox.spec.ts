@@ -89,6 +89,7 @@ async function observeGettingStartedScroll(page: Page) {
               behavior: typeof options === "object" ? options.behavior : null,
               block: typeof options === "object" ? options.block : null,
               focused: this.contains(document.activeElement),
+              rendered: this.getClientRects().length > 0,
             },
           ])
         );
@@ -110,6 +111,7 @@ async function getGettingStartedScrolls(page: Page) {
       behavior: ScrollBehavior | null;
       block: ScrollLogicalPosition | null;
       focused: boolean;
+      rendered: boolean;
     }[];
   });
 }
@@ -302,6 +304,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         behavior: isMobile ? "instant" : "smooth",
         block: "start",
         focused: false,
+        rendered: true,
       },
     ];
     await expect
@@ -398,12 +401,12 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     });
     await expect(
       guidance.getByText(
-        "Waves are spaces for conversations, creative work, and community decisions.",
+        "Welcome to 6529. Start with a Wave—a space for conversation, art, and community decisions.",
         { exact: true }
       )
     ).toBeVisible();
     await expect(
-      guidance.getByText("Learn how nomination and submission work.", {
+      guidance.getByText("Check nomination requirements for The Memes.", {
         exact: true,
       })
     ).toBeVisible();
@@ -417,13 +420,13 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       guidance.getByRole("link", { name: "Create a wave", exact: true })
     ).toHaveCount(0);
     const submissionGuidance = guidance.getByRole("button", {
-      name: /^How to submit to The Memes/,
+      name: /^Before you submit art/,
     });
     if (isMobile) await submissionGuidance.tap();
     else await submissionGuidance.click();
     const eligibility = page.getByRole("dialog", {
       name: isMobile
-        ? "How to submit to The Memes"
+        ? "Before you submit art"
         : "Main Stage submission eligibility",
       exact: true,
     });
@@ -516,10 +519,10 @@ test.describe("Profile editing @auth @medium @local-only", () => {
         name: "Getting started with your identity",
         exact: true,
       })
-      .getByRole("button", { name: /^How to submit to The Memes/ });
+      .getByRole("button", { name: /^Before you submit art/ });
     const eligibility = page.getByRole("dialog", {
       name: isMobile
-        ? "How to submit to The Memes"
+        ? "Before you submit art"
         : "Main Stage submission eligibility",
       exact: true,
     });

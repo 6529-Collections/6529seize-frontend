@@ -3,14 +3,13 @@
   "identityGettingStarted.dismiss": "Dismiss guide",
   "identityGettingStarted.created": "Profile created",
   "identityGettingStarted.title": "Your profile is ready",
-  "identityGettingStarted.introduction": "Welcome to 6529—a network where people share ideas, create art, and decide what to build together.",
+  "identityGettingStarted.introduction": "Welcome to 6529. Start with a Wave—a space for conversation, art, and community decisions.",
   "identityGettingStarted.discover": "Find a Wave",
-  "identityGettingStarted.wavesDescription": "Waves are spaces for conversations, creative work, and community decisions.",
   "identityGettingStarted.explore": "More to explore",
   "identityGettingStarted.mainStage": "The Memes Main Stage",
-  "identityGettingStarted.mainStageDescription": "Discover artwork the community is considering for future Meme Cards.",
-  "identityGettingStarted.submission": "How to submit to The Memes",
-  "identityGettingStarted.submissionDescription": "Learn how nomination and submission work.",
+  "identityGettingStarted.mainStageDescription": "Browse art submitted to The Memes collection.",
+  "identityGettingStarted.submission": "Before you submit art",
+  "identityGettingStarted.submissionDescription": "Check nomination requirements for The Memes.",
   "identityGettingStarted.guide": "How 6529 works",
   "identityGettingStarted.updated": "Profile updated."
 }

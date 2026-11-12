@@ -50,7 +50,7 @@ function NextStepContent({
         {icon}
       </span>
       <span className="tw-min-w-0 tw-flex-1">
-        <span className="tw-block tw-text-sm tw-font-semibold tw-leading-5">
+        <span className="tw-block tw-text-sm tw-font-medium tw-leading-5">
           {title}
         </span>
         <span className="tw-mt-1 tw-block tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
@@ -91,12 +91,18 @@ function IdentityGettingStartedCardContent({
     : null;
 
   useEffect(() => {
-    // Wait for the rendered target and let any route scroll run first.
-    const frame = globalThis.requestAnimationFrame(() => {
-      const card = cardRef.current;
-      if (!card || !consumeIdentityGettingStartedArrival(profile.handle)) {
-        return;
-      }
+    const card = cardRef.current;
+    if (!card) return;
+    let frame: number | undefined;
+
+    const reveal = () => {
+      frame = undefined;
+      // Native startup can mount this card under a hidden layout. Preserve the
+      // one-time request until scrolling can reach an actual rendered box.
+      if (card.getClientRects().length === 0) return;
+      observer.disconnect();
+      if (!consumeIdentityGettingStartedArrival(profile.handle)) return;
+
       const reduceMotion = globalThis.matchMedia(
         "(prefers-reduced-motion: reduce)"
       ).matches;
@@ -104,8 +110,18 @@ function IdentityGettingStartedCardContent({
         block: "start",
         behavior: reduceMotion ? "instant" : "smooth",
       });
+    };
+    const observer = new ResizeObserver(() => {
+      frame ??= globalThis.requestAnimationFrame(reveal);
     });
-    return () => globalThis.cancelAnimationFrame(frame);
+    observer.observe(card);
+    // Let the layout and any route scroll settle before the one-time reveal.
+    frame = globalThis.requestAnimationFrame(reveal);
+
+    return () => {
+      observer.disconnect();
+      if (frame !== undefined) globalThis.cancelAnimationFrame(frame);
+    };
   }, [profile.handle]);
 
   return (
@@ -128,24 +144,16 @@ function IdentityGettingStartedCardContent({
           className="tw-absolute tw-left-6 tw-top-4 tw-hidden tw-size-12 tw-rounded-full tw-border tw-border-solid tw-border-emerald-500/20 tw-bg-emerald-900/20 tw-p-2.5 tw-text-emerald-400 @[40rem]/identity-guide:tw-block"
           aria-hidden="true"
         />
-        <div className="tw-grid md:tw-grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+        <div className="tw-grid @[48rem]/identity-guide:tw-grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
           <div className="tw-min-w-0 tw-p-5 @[40rem]/identity-guide:tw-pl-24 sm:tw-py-6 sm:tw-pr-6">
-            <h2 className="tw-m-0 tw-w-full tw-pr-10 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-white md:tw-pr-0 lg:tw-text-2xl lg:tw-leading-8">
+            <h2 className="tw-m-0 tw-w-full tw-pr-10 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-white @[48rem]/identity-guide:tw-pr-0">
               {t(locale, "identityGettingStarted.title")}
             </h2>
             <p className="tw-mb-0 tw-mt-2 tw-w-full tw-max-w-lg tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
               {t(locale, "identityGettingStarted.introduction")}
             </p>
-            <p className="tw-mb-0 tw-mt-2 tw-max-w-lg tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
-              {t(locale, "identityGettingStarted.wavesDescription")}
-            </p>
             <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-1">
-              <ButtonLink
-                href="/discover"
-                variant="primary"
-                size="md"
-                className="tw-min-h-11 tw-justify-between tw-gap-5 !tw-border-white !tw-bg-white !tw-text-black desktop-hover:hover:!tw-bg-iron-100"
-              >
+              <ButtonLink href="/discover" variant="primary" size="lg">
                 {t(locale, "identityGettingStarted.discover")}
                 <ArrowRightIcon
                   className="tw-size-4 tw-flex-none"
@@ -154,15 +162,15 @@ function IdentityGettingStartedCardContent({
               </ButtonLink>
               <Link
                 href="/join-6529"
-                className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline hover:tw-bg-emerald-900/20 hover:tw-text-emerald-400 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline hover:tw-bg-emerald-900/20 hover:tw-text-emerald-400 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               >
                 {t(locale, "identityGettingStarted.guide")}
                 <ArrowUpRightIcon className="tw-size-4" aria-hidden="true" />
               </Link>
             </div>
           </div>
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-emerald-500/20 tw-p-5 sm:tw-p-6 md:tw-my-5 md:tw-border-l md:tw-border-t-0 md:tw-py-0">
-            <p className="tw-mb-1 tw-mt-0 tw-px-2 tw-text-xs tw-font-medium tw-uppercase tw-leading-5 tw-tracking-wider tw-text-emerald-500/80 md:tw-pr-8">
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-emerald-500/20 tw-px-5 tw-py-5 @[48rem]/identity-guide:tw-my-5 @[48rem]/identity-guide:tw-border-l @[48rem]/identity-guide:tw-border-t-0 @[48rem]/identity-guide:tw-py-0 sm:tw-px-6">
+            <p className="tw-mb-1 tw-mt-0 tw-px-2 tw-text-xs tw-font-medium tw-uppercase tw-leading-5 tw-tracking-wider tw-text-emerald-500/80 @[48rem]/identity-guide:tw-pr-8">
               {t(locale, "identityGettingStarted.explore")}
             </p>
             {mainStageHref && (
