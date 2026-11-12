@@ -17,7 +17,7 @@ context-aware `Back`).
 
 ## Entry Points
 
-- Web sidebar primary concepts (`NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`,
+- Web sidebar primary concepts (`NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529` (or `Validator` for members),
   `About`) plus gated `Drop Forge` when available and connected utility rows
   such as `Notifications`.
 - Small-screen header menu button (opens the sidebar in overlay mode).
@@ -63,7 +63,8 @@ context-aware `Back`).
   connected wallet has landing access.
 - Small-screen web: open overlay menu, pick a route, and continue after
   auto-close on navigation.
-- Join 6529 jump: use the primary `Join 6529` row to open `/join-6529`.
+- Membership jump: newcomers use `Join 6529` for `/join-6529`; signed-in
+  members with a profile use `Validator` for `/validator` in the same slot.
 - Museum jump: use the direct `Museum` row after `NFTs` to open
   `/museum/network` in web and app sidebars.
 - Desktop web share: use the standalone lower `Share` row on a supported route,
