@@ -1,3 +1,4 @@
+import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 import AccessPage from "@/app/access/page.client";
 import { API_AUTH_COOKIE } from "@/constants/constants";
 import { resumeAfterApiAccess } from "@/services/auth/api-access-redirect";
@@ -33,9 +34,9 @@ describe("Access page", () => {
     jest.restoreAllMocks();
   });
 
-  function submitCode() {
-    const input = screen.getByRole("textbox", { name: "Team access code" });
-    fireEvent.change(input, { target: { value: "team-code" } });
+  function submitCode(code = "team-code") {
+    const input = screen.getByLabelText("Team Login");
+    fireEvent.change(input, { target: { value: code } });
     fireEvent.keyDown(input, { key: "Enter" });
   }
 
@@ -56,7 +57,7 @@ describe("Access page", () => {
     );
   });
 
-  it("saves the code, shows gm!, then resumes navigation", async () => {
+  it("saves the code and resumes navigation without a dialog", async () => {
     fetchMock.mockResolvedValueOnce({
       ok: false,
       status: 401,
@@ -64,6 +65,9 @@ describe("Access page", () => {
     });
     fetchMock.mockResolvedValueOnce({ ok: true, status: 200 });
     render(<AccessPage />);
+    const input = screen.getByLabelText("Team Login");
+    expect(input).toHaveAttribute("placeholder", "********");
+    expect(input).toHaveAttribute("type", "password");
     submitCode();
 
     await waitFor(() => expect(resumeAfterApiAccess).toHaveBeenCalled());
@@ -74,12 +78,10 @@ describe("Access page", () => {
     );
     const [cookieWriteOrder = Infinity] = jest.mocked(Cookies.set).mock
       .invocationCallOrder;
-    expect(window.alert).toHaveBeenCalledWith("gm!");
-    const [alertOrder = 0] = jest.mocked(window.alert).mock.invocationCallOrder;
     const [resumeOrder = 0] =
       jest.mocked(resumeAfterApiAccess).mock.invocationCallOrder;
-    expect(cookieWriteOrder).toBeLessThan(alertOrder);
-    expect(alertOrder).toBeLessThan(resumeOrder);
+    expect(cookieWriteOrder).toBeLessThan(resumeOrder);
+    expect(window.alert).not.toHaveBeenCalled();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
@@ -89,6 +91,36 @@ describe("Access page", () => {
     await waitFor(() => expect(resumeAfterApiAccess).toHaveBeenCalled());
     expect(Cookies.set).not.toHaveBeenCalled();
     expect(window.alert).not.toHaveBeenCalled();
+  });
+
+  it("accepts only one verification at a time and allows another try after rejection", async () => {
+    const request = createDeferredPromise<Pick<Response, "ok" | "status">>();
+    render(<AccessPage />);
+    fetchMock.mockReturnValueOnce(request.promise);
+    const input = screen.getByLabelText("Team Login");
+
+    submitCode();
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(input).toHaveAttribute("readonly");
+    expect(screen.getByRole("status")).toHaveTextContent("Verifying code…");
+
+    request.resolve({ ok: false, status: 401 });
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Access Denied!"
+    );
+    expect(input).not.toHaveAttribute("readonly");
+
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200 });
+    submitCode("corrected-code");
+
+    await waitFor(() => expect(resumeAfterApiAccess).toHaveBeenCalledTimes(1));
+    expect(Cookies.set).toHaveBeenCalledWith(
+      API_AUTH_COOKIE,
+      "corrected-code",
+      expect.any(Object)
+    );
   });
 
   it.each([401, 403, 500])(
