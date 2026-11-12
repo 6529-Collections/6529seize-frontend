@@ -5143,7 +5143,7 @@ export const EN_US_ROOT_MESSAGES = {
   "navigation.nfts.memesCalendar": "Memes Calendar",
   ...EULA_MESSAGES,
   "access.codeInput.label": "Team Login",
-  "access.codeInput.placeholder": "********",
+  "access.codeInput.placeholder": "Enter password",
   "access.denied": "Access Denied!",
   "access.verifyFailed": "Could not verify access. Please try again.",
   "access.verifying": "Verifying code…",

@@ -40,7 +40,6 @@ export default function AccessPage() {
   >(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const verificationPending = useRef(false);
-  const feedbackKey = isVerifying ? "access.verifying" : errorKey;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -108,10 +107,10 @@ export default function AccessPage() {
       ) : (
         <Image
           unoptimized
-          src="/6529.svg"
+          src="/gradient-100.svg"
           alt="6529"
-          width={128}
-          height={128}
+          width={192}
+          height={192}
           className={accessStyles["logo"]}
         />
       )}
@@ -125,12 +124,17 @@ export default function AccessPage() {
           <input
             id="api-access-code"
             suppressHydrationWarning
-            type="password"
+            type="text"
+            autoCapitalize="none"
             autoComplete="off"
+            autoCorrect="off"
             enterKeyHint="go"
             readOnly={isVerifying}
+            spellCheck={false}
             aria-invalid={errorKey === "access.denied" || undefined}
-            aria-describedby={feedbackKey ? "api-access-feedback" : undefined}
+            aria-describedby={
+              errorKey ? "api-access-error" : "api-access-status"
+            }
             placeholder={t(locale, "access.codeInput.placeholder")}
             onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>): void => {
               if (event.key.toLowerCase() === "enter") {
@@ -140,20 +144,19 @@ export default function AccessPage() {
           />
           <div className={accessStyles["feedback"]}>
             {/* Measure all messages so even wrapped copy cannot move the field. */}
-            {FEEDBACK_MESSAGES.map((key) => {
-              const visible = key === feedbackKey;
-              const role = key === "access.verifying" ? "status" : "alert";
-              return (
-                <p
-                  key={key}
-                  id={visible ? "api-access-feedback" : undefined}
-                  role={visible ? role : undefined}
-                  aria-hidden={visible ? undefined : true}
-                >
-                  {t(locale, key)}
-                </p>
-              );
-            })}
+            {FEEDBACK_MESSAGES.map((key) => (
+              <p key={key} aria-hidden="true">
+                {t(locale, key)}
+              </p>
+            ))}
+            <p id="api-access-status" role="status">
+              {isVerifying ? t(locale, "access.verifying") : null}
+            </p>
+            {errorKey && (
+              <p id="api-access-error" role="alert">
+                {t(locale, errorKey)}
+              </p>
+            )}
           </div>
         </div>
       </div>

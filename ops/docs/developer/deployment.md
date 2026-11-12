@@ -119,11 +119,14 @@ application code. Keep the three launch paths in step when changing it.
 
 ## API access gate
 
-Enter your team code in the **Team Login** field and press Enter.
+Enter your team code in the **Team Login** field and press Enter. The field
+shows **Enter password** when empty and displays the characters as you type.
 Once the API accepts the code, the browser immediately opens the requested
 page, including its query string and fragment. Opening `/access` directly
 sends you to the home page after the code is accepted.
-The access page shows the 6529 logo when the API supplies no artwork.
+The access page centers artwork supplied by the API on a black background
+and keeps the login field at the bottom. When the API supplies no artwork,
+the page shows the white 6529 logo on black.
 
 ## Staging crawler cards
 

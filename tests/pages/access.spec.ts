@@ -53,8 +53,10 @@ test.describe("Access Page", () => {
 
     const input = page.getByLabel("Team Login", { exact: true });
     await expect(page.getByText("Team Login", { exact: true })).toBeVisible();
-    await expect(input).toHaveAttribute("placeholder", "********");
-    await expect(input).toHaveAttribute("type", "password");
+    await expect(input).toHaveAttribute("placeholder", "Enter password");
+    await expect(input).toHaveAttribute("type", "text");
+    await input.focus();
+    await expect(input).toHaveCSS("border-top-color", "rgb(209, 209, 209)");
     await input.fill("invalid-test-access-code");
     const inputPosition = await input.boundingBox();
     expect(inputPosition).not.toBeNull();
@@ -63,6 +65,7 @@ test.describe("Access Page", () => {
       page.getByRole("alert").filter({ hasText: /^Access Denied!$/ })
     ).toBeVisible();
     await expect(input).toHaveAttribute("aria-invalid", "true");
+    await expect(input).toHaveCSS("border-top-color", "rgb(255, 170, 164)");
     expect(await input.boundingBox()).toEqual(inputPosition);
 
     const dialogs: string[] = [];
