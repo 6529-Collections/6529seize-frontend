@@ -23,6 +23,12 @@ class GithubApiError extends Error {
   }
 }
 
+class GithubTimeoutError extends Error {
+  constructor() {
+    super("GitHub request timed out.");
+  }
+}
+
 const createAbortController = (): {
   readonly controller: AbortController;
   readonly cancel: () => void;
@@ -51,6 +57,17 @@ export const isGithubApiNotFoundError = (
   error: unknown
 ): error is GithubApiError =>
   error instanceof GithubApiError && error.status === 404;
+
+/**
+ * Failures that say nothing about the resource itself: a timeout, a network
+ * error, rate limiting or a GitHub server error. Anything else (not found,
+ * not public, an unexpected response) is a real answer about the resource.
+ */
+export const isTransientGithubError = (error: unknown): boolean =>
+  error instanceof GithubTimeoutError ||
+  error instanceof TypeError ||
+  (error instanceof GithubApiError &&
+    (error.status === 429 || error.status >= 500));
 
 const restHeaders = (githubToken?: string): Record<string, string> => {
   const headers: Record<string, string> = {
@@ -144,7 +161,7 @@ export const fetchGithubJson = async <T>(path: string): Promise<T> => {
     return (await response.json()) as T;
   } catch (error) {
     if (isAbortError(error)) {
-      throw new Error("GitHub request timed out.");
+      throw new GithubTimeoutError();
     }
 
     throw toGithubRequestError(error);
@@ -199,7 +216,7 @@ export const fetchGithubGraphql = async <T>(
     return body.data;
   } catch (error) {
     if (isAbortError(error)) {
-      throw new Error("GitHub request timed out.");
+      throw new GithubTimeoutError();
     }
 
     throw toGithubRequestError(error);

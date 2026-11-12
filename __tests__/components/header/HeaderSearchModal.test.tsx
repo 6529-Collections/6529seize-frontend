@@ -1,3 +1,11 @@
+jest.mock("@/contexts/EmojiContext", () => ({
+  useEmoji: () => ({
+    findCustomEmoji: () => null,
+    findNativeEmoji: () => null,
+    loadEmojiData: jest.fn(() => Promise.resolve()),
+  }),
+}));
+
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import type {
   HeaderSearchModalItemType,
@@ -662,6 +670,27 @@ describe("HeaderSearchModal", () => {
       await screen.findByRole("link", { name: "6529 Apps" })
     ).toHaveAttribute("href", "/about/6529-apps");
   });
+
+  it.each(["validator", "6529 Validator", "/validator"])(
+    "finds the search-only Validator page for %s without a sidebar entry",
+    async (query) => {
+      setup({
+        selectedCategory: "PAGES",
+        queryImpl: () => ({
+          isFetching: false,
+          data: [],
+          error: undefined,
+          refetch: jest.fn(() => Promise.resolve()),
+        }),
+      });
+
+      fireEvent.change(getSearchInput(), { target: { value: query } });
+
+      expect(
+        await screen.findByRole("link", { name: "6529 Validator" })
+      ).toHaveAttribute("href", "/validator");
+    }
+  );
 
   it("finds the Network Wave Score page by formula aliases", () => {
     setup();

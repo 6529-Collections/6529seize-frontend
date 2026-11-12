@@ -16,6 +16,13 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
 import { isAddress } from "viem";
 import TransferModalPfp from "../nft-transfer/TransferModalPfp";
+import {
+  displayWalletAddress,
+  type EnsVerificationNote,
+  getEnsVerificationNoteText,
+  useRecipientEnsLookup,
+  useRecipientEnsMatch,
+} from "./recipientSelectorEns";
 
 const MIN_SEARCH_LENGTH = 3;
 
@@ -282,10 +289,13 @@ function RecipientSearchDisplay({
   autoFocus,
   label,
   locale,
+  ensNote,
 }: {
   readonly query: string;
   readonly setQuery: (v: string) => void;
   readonly searchStatusText: string;
+  /** Why an ENS query could not be matched to a result, if it could not. */
+  readonly ensNote: EnsVerificationNote | null;
   readonly results: CommunityMemberMinimal[];
   readonly onPick: (r: CommunityMemberMinimal) => void;
   readonly resultsListRef: React.RefObject<HTMLDivElement | null>;
@@ -317,6 +327,14 @@ function RecipientSearchDisplay({
       <div className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
         {searchStatusText}
       </div>
+      {ensNote !== null && (
+        <p
+          role="status"
+          className="tw-m-0 tw-text-xs tw-leading-5 tw-text-amber-300"
+        >
+          {getEnsVerificationNoteText(locale, ensNote)}
+        </p>
+      )}
       <div
         ref={resultsListRef}
         className="tw-[scrollbar-gutter:stable] tw-min-h-0 tw-flex-1 tw-space-y-2 tw-overflow-auto tw-pr-3 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/20"
@@ -343,6 +361,11 @@ function RecipientSearchDisplay({
                   level: formatInteger(locale, r.level),
                 })}
               </div>
+              {ensNote !== null && r.wallet && (
+                <div className="tw-break-all tw-font-mono tw-text-[11px] tw-text-iron-300">
+                  {displayWalletAddress(r.wallet)}
+                </div>
+              )}
             </div>
           </button>
         ))}
@@ -443,6 +466,16 @@ export default function RecipientSelector({
     }
   }, [open]);
 
+  const debouncedQuery = useDebouncedValue(trimmedQuery, 350);
+  const enabled = open && debouncedQuery.length >= MIN_SEARCH_LENGTH;
+
+  const {
+    ensLookupName,
+    verifiedEnsAddress,
+    isEnsLookupPending,
+    hasLookupError,
+  } = useRecipientEnsLookup(enabled ? debouncedQuery : undefined);
+
   useEffect(() => {
     if (
       !selectedProfile ||
@@ -456,11 +489,15 @@ export default function RecipientSelector({
     const wallets = profile.wallets;
 
     if (pendingWalletMatch) {
-      const normalizedMatch = pendingWalletMatch.toLowerCase();
+      // A name selects the wallet it resolves to, never a wallet labelled
+      // with it.
+      const normalizedMatch = (
+        isAddress(pendingWalletMatch)
+          ? pendingWalletMatch
+          : (verifiedEnsAddress ?? "")
+      ).toLowerCase();
       const matchedWallet = wallets.find(
-        (w) =>
-          w.wallet.toLowerCase() === normalizedMatch ||
-          w.display?.toLowerCase() === normalizedMatch
+        (w) => !!normalizedMatch && w.wallet.toLowerCase() === normalizedMatch
       );
       if (matchedWallet) {
         onWalletSelect(matchedWallet.wallet);
@@ -479,10 +516,8 @@ export default function RecipientSelector({
     selectedWallet,
     pendingWalletMatch,
     onWalletSelect,
+    verifiedEnsAddress,
   ]);
-
-  const debouncedQuery = useDebouncedValue(trimmedQuery, 350);
-  const enabled = open && debouncedQuery.length >= MIN_SEARCH_LENGTH;
 
   const { data, isFetching } = useQuery<CommunityMemberMinimal[]>({
     queryKey: ["memberSearch", debouncedQuery],
@@ -542,6 +577,15 @@ export default function RecipientSelector({
     setResults(data ?? []);
   }, [enabled, data, setResults]);
 
+  const { isVerifiedEnsMatch, ensNote } = useRecipientEnsMatch({
+    ensLookupName,
+    verifiedEnsAddress,
+    isEnsLookupPending,
+    hasLookupError,
+    data,
+    results,
+  });
+
   useEffect(() => {
     if (
       selectedProfile ||
@@ -556,7 +600,9 @@ export default function RecipientSelector({
 
     const normalizedQuery = debouncedQuery.toLowerCase();
     const isExactAddress = isAddress(debouncedQuery);
-    const isLikelyEns = normalizedQuery.endsWith(".eth");
+    // A name counts only when it resolves on Ethereum to a wallet of the
+    // single result; the label the search matched on is never trusted.
+    const isLikelyEns = normalizedQuery.endsWith(".eth") && isVerifiedEnsMatch;
 
     if (!isExactAddress && !isLikelyEns) {
       return;
@@ -572,7 +618,14 @@ export default function RecipientSelector({
         onProfileSelect(result);
       }
     }
-  }, [data, debouncedQuery, trimmedQuery, selectedProfile, onProfileSelect]);
+  }, [
+    data,
+    debouncedQuery,
+    trimmedQuery,
+    selectedProfile,
+    onProfileSelect,
+    isVerifiedEnsMatch,
+  ]);
 
   useEffect(() => {
     const hasOverflow = (el: HTMLElement | null) =>
@@ -682,6 +735,7 @@ export default function RecipientSelector({
             onSearchChange?.(nextQuery);
           }}
           searchStatusText={searchStatusText}
+          ensNote={ensNote}
           results={results}
           onPick={(r) => {
             onProfileSelect(r);

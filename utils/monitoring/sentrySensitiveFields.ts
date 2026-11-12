@@ -4,8 +4,9 @@ const MODERATION_SENSITIVE_KEY_PATTERN =
   /(evidence|content_snapshot|preview|statement_value|moderator_note)/i;
 // x-origin-verify carries the secret that the production load balancer
 // requires from CloudFront (ops/scripts/production-origin-lock.sh).
+// accept-language describes the visitor's locale, like the culture context.
 const SENSITIVE_HEADER_NAME_PATTERN =
-  /^(authorization|cookie|set-cookie|x-api-key|x-auth-token|x-csrf-token|x-xsrf-token|proxy-authorization|x-forwarded-for|x-real-ip|cf-connecting-ip|x-origin-verify)$/i;
+  /^(authorization|cookie|set-cookie|x-api-key|x-auth-token|x-csrf-token|x-xsrf-token|proxy-authorization|x-forwarded-for|x-real-ip|cf-connecting-ip|x-origin-verify|accept-language)$/i;
 
 export const isSensitiveSentryField = (key: string): boolean =>
   SENSITIVE_KEY_FRAGMENT_PATTERN.test(key) ||

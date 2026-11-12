@@ -5,6 +5,7 @@ import {
   hasValidatorAccess,
   isAccessCookieValid,
   isPasswordCorrect,
+  isValidatorPath,
   sanitizeValidatorNextPath,
 } from "@/lib/validator-page/accessGate";
 
@@ -78,6 +79,29 @@ describe("validator page access gate", () => {
     expect(getValidatorGatePassword()).toBeNull();
     process.env["VALIDATOR_PAGE_PUBLIC"] = "false";
     expect(getValidatorGatePassword()).toBe(PASSWORD);
+  });
+
+  it.each([
+    "/validator",
+    "/validator/guide",
+    "/%76alidator/app-today.webp",
+    "/%76%61lidator",
+    "/validator%2Fapp-today.webp",
+    "//validator/app-today.webp",
+    "/validator/%E0%A4%A",
+    "/%76alidator/%E0%A4%A",
+  ])("treats %s as a /validator path", (path) => {
+    expect(isValidatorPath(path)).toBe(true);
+  });
+
+  it.each([
+    "/",
+    "/validatorx",
+    "/%76alidatorx",
+    "/waves/validator",
+    "/%E0%A4%A",
+  ])("leaves %s alone", (path) => {
+    expect(isValidatorPath(path)).toBe(false);
   });
 
   it.each([

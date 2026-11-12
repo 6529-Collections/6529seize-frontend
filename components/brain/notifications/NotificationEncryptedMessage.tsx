@@ -10,14 +10,12 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import { useEncryptedNotificationPreview } from "@/hooks/e2ee/useEncryptedNotificationPreview";
-import { E2eeMarkdown } from "@/components/e2ee/conversation/E2eeMarkdown";
+import NotificationMarkdownPreview from "@/components/notifications/NotificationMarkdownPreview";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { INotificationEncryptedMessage } from "@/types/feed.types";
 import NotificationTimestamp from "./subcomponents/NotificationTimestamp";
-
-const EMPTY = [] as const;
 
 export default function NotificationEncryptedMessage({
   notification,
@@ -128,13 +126,9 @@ export default function NotificationEncryptedMessage({
           {preview ? (
             <>
               {sender && <span className="tw-sr-only">{newMessageLabel} </span>}
-              <E2eeMarkdown
+              <NotificationMarkdownPreview
                 text={preview}
                 messageId={`notification-${notification.id}`}
-                members={EMPTY}
-                mentions={EMPTY}
-                selfProfileId={null}
-                preview
               />
             </>
           ) : (

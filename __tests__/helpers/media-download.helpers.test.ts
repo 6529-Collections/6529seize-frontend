@@ -65,6 +65,85 @@ it.each(["download", "share"])(
   }
 );
 
+it("names native downloads from the served format, not the remote name", async () => {
+  await downloadMediaUrl({
+    ...options,
+    url: "https://example.com/art/animation.html",
+    fileName: "animation.html",
+  });
+  const htmlPath = jest.mocked(Filesystem.downloadFile).mock.calls[0]?.[0].path;
+  expect(htmlPath).toMatch(/-animation\.bin$/);
+
+  await downloadMediaUrl({
+    ...options,
+    url: "https://example.com/videos/clip",
+    fileName: "clip",
+    mimeType: "video/mp4",
+  });
+  const videoPath = jest.mocked(Filesystem.downloadFile).mock.calls[1]?.[0]
+    .path;
+  expect(videoPath).toMatch(/-clip\.mp4$/);
+});
+
+describe("browser downloads", () => {
+  const originalCreateObjectURL = URL.createObjectURL;
+  const originalRevokeObjectURL = URL.revokeObjectURL;
+  let savedBlobs: Blob[];
+  let savedNames: string[];
+
+  beforeEach(() => {
+    savedBlobs = [];
+    savedNames = [];
+    URL.createObjectURL = jest.fn((blob: Blob) => {
+      savedBlobs.push(blob);
+      return "blob:http://localhost/saved";
+    });
+    URL.revokeObjectURL = jest.fn();
+    jest
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(function (this: HTMLAnchorElement) {
+        savedNames.push(this.download);
+      });
+  });
+
+  afterEach(() => {
+    URL.createObjectURL = originalCreateObjectURL;
+    URL.revokeObjectURL = originalRevokeObjectURL;
+    jest.restoreAllMocks();
+  });
+
+  const serve = (body: BlobPart, type: string) =>
+    jest.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      blob: async () => new Blob([body], { type }),
+    } as Response);
+
+  it("saves served HTML as an opaque file", async () => {
+    serve("<html><script>alert(1)</script></html>", "text/html");
+    await downloadMediaUrl({
+      url: "https://example.com/page.html",
+      fileName: "page.html",
+      isCapacitor: false,
+    });
+    expect(savedNames).toEqual(["page.bin"]);
+    expect(savedBlobs[0]?.type).toBe("application/octet-stream");
+  });
+
+  it("keeps an image's name and type", async () => {
+    serve(
+      new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      "image/png"
+    );
+    await downloadMediaUrl({
+      url: "https://example.com/photo.png",
+      fileName: "photo.png",
+      isCapacitor: false,
+    });
+    expect(savedNames).toEqual(["photo.png"]);
+    expect(savedBlobs[0]?.type).toBe("image/png");
+  });
+});
+
 it("keeps the original filename for a local decrypted object URL", () => {
   expect(
     getDownloadFilenameFromUrl("blob:https://6529.io/generated-id", "photo.png")

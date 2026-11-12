@@ -59,7 +59,7 @@ describe("hasMalformedWaveId", () => {
       expect(malformed(pathname)).toBe(false);
     });
 
-    it.each(["/waves/create", "/messages/create"])(
+    it.each(["/waves/create", "/messages/create", "/messages/new"])(
       "leaves the static route %s to the app",
       (pathname) => {
         expect(malformed(pathname)).toBe(false);
@@ -164,12 +164,13 @@ describe("hasMalformedWaveId", () => {
 // sibling) or skip the check entirely (a new nested shape) until the policy in
 // lib/proxy/waveRoutes.ts is updated to match.
 describe("wave route tree", () => {
-  it("has `create` as the only static sibling of [wave]", () => {
+  it("covers the known static siblings of [wave]", () => {
     expect(childDirectories("waves")).toEqual(["[wave]", "create"]);
     expect(childDirectories("messages")).toEqual([
       "[wave]",
       "create",
       "encrypted",
+      "new",
     ]);
   });
 

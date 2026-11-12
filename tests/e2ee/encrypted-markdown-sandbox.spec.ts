@@ -4,6 +4,8 @@ import {
   markdownSnapshot,
   markdownBody,
   revealNewestMessage,
+  CONVERSATION_PREVIEW_MARKDOWN,
+  checkConversationPreviews,
 } from "../support/markdownParity";
 import {
   closeE2eeUsers,
@@ -31,6 +33,31 @@ test.describe("Encrypted Markdown @medium @local-only @e2ee", () => {
   test.afterEach(async () => {
     await closeE2eeUsers(sessions);
     sessions = [];
+  });
+
+  test("formats conversation-list previews on desktop and mobile without loading Markdown URLs", async ({
+    browser,
+    baseURL,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    sessions = [alice, bob];
+    const requests: string[] = [];
+    alice.page.on("request", (request) => {
+      if (request.url().includes("markdown-private-canary"))
+        requests.push(request.url());
+    });
+    await enroll(alice);
+    await enroll(bob);
+    await startChat(alice, ["bob"]);
+    await composer(alice.page).fill(CONVERSATION_PREVIEW_MARKDOWN);
+    await alice.page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(
+      messageRow(alice.page, "console.log('hi gelato3');")
+    ).toBeVisible();
+    await checkConversationPreviews(alice.page, testInfo);
+    expect(requests).toEqual([]);
   });
 
   test("renders, receives, edits and reloads Markdown without fetching private URLs", async ({
@@ -78,7 +105,9 @@ test.describe("Encrypted Markdown @medium @local-only @e2ee", () => {
     }
     const privateText =
       'Private links\n\n[Named link](https://markdown-private-canary.invalid/named)\n\nhttps://markdown-private-canary.invalid/plain\n\n![Private image](https://markdown-private-canary.invalid/image.png)\n\n<img src="https://markdown-private-canary.invalid/html.png">\n\n[Unsafe script](javascript:alert%281%29)\n\n[Unsafe data](data:text/html,private)\n\nA private note[^1].\n\n[^1]: Private footnote';
-    await composer(alice.page).fill(privateText);
+    const linkedImage =
+      "[![Linked photo](https://markdown-private-canary.invalid/linked-image.png)](https://markdown-private-canary.invalid/post)";
+    await composer(alice.page).fill(`${privateText}\n\n${linkedImage}`);
     await alice.page.getByRole("button", { name: "Send", exact: true }).click();
     const privateRow = messageRow(bob.page, "Private links");
     await revealNewestMessage(bob.page, privateRow);
@@ -96,6 +125,12 @@ test.describe("Encrypted Markdown @medium @local-only @e2ee", () => {
     await expect(
       privateRow.getByRole("link", { name: /Unsafe script|Unsafe data/ })
     ).toHaveCount(0);
+    await expect(
+      privateRow.getByRole("link", {
+        name: "Linked photo",
+        exact: true,
+      })
+    ).toHaveAttribute("href", "https://markdown-private-canary.invalid/post");
     await privateRow.getByRole("link", { name: "Named link" }).hover();
     await privateRow.getByRole("link", { name: "Named link" }).focus();
     const note = privateRow.getByRole("link", { name: "1", exact: true });

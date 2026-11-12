@@ -5,6 +5,15 @@ export const DeepLinkScope = {
   SHARE_CONNECTION: "share-connection",
 } as const;
 
+export const MOBILE_APP_DISMISSAL_KEY = "6529-mobile-banner-dismissed-until";
+
+export const MOBILE_APP_USER_AGENTS = {
+  electron: /Electron/i,
+  android: /Android/i,
+  ios: /iPhone|iPad|iPod/i,
+  mac: /Macintosh/i,
+};
+
 /** Routes that stay in the browser for app links and universal links alike. */
 export const MOBILE_APP_EXCLUDED_ROUTES = [
   "/open-mobile",
@@ -33,11 +42,11 @@ export function getMobilePlatform(
   userAgent: string,
   maxTouchPoints = 0
 ): "iOS" | "Android" | null {
-  if (/Electron/i.test(userAgent)) return null;
-  if (/Android/i.test(userAgent)) return "Android";
+  if (MOBILE_APP_USER_AGENTS.electron.test(userAgent)) return null;
+  if (MOBILE_APP_USER_AGENTS.android.test(userAgent)) return "Android";
   if (
-    /iPhone|iPad|iPod/i.test(userAgent) ||
-    (/Macintosh/i.test(userAgent) && maxTouchPoints > 1)
+    MOBILE_APP_USER_AGENTS.ios.test(userAgent) ||
+    (MOBILE_APP_USER_AGENTS.mac.test(userAgent) && maxTouchPoints > 1)
   )
     return "iOS";
   return null;
@@ -162,7 +171,12 @@ function getNativeLinkPathname(
   )
     return null;
   const { host, pathname } = getCustomSchemeParts(url);
-  if (host === DeepLinkScope.NAVIGATE) return pathname || "/";
+  if (host === DeepLinkScope.NAVIGATE) {
+    // The app ignores navigate links to the routes kept out of it, as it
+    // does for universal links, and stays where it is.
+    const path = pathname || "/";
+    return isMobileAppDestination(path) ? path : null;
+  }
   if (host === DeepLinkScope.SHARE_CONNECTION)
     return "/accept-connection-sharing";
   return null;
@@ -170,10 +184,10 @@ function getNativeLinkPathname(
 
 /**
  * Maps a link the app was opened with to a root-relative destination, or null
- * to ignore it. Accepts `<scheme>://navigate/<path>`,
- * `<scheme>://share-connection?...` and https universal links / App Links on
- * the production hosts or the app's own shared staging origin, except paths
- * the association file keeps in the browser.
+ * to ignore it. Accepts `<scheme>://navigate/<path>` outside the excluded app
+ * routes, `<scheme>://share-connection?...` and https universal links / App
+ * Links on the production hosts or the app's own shared staging origin, except
+ * paths the association file keeps in the browser.
  */
 export function getNativeLinkDestination(
   value: string,

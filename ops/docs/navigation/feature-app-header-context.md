@@ -22,7 +22,7 @@ In the app layout, the header adapts to route and thread state. It controls:
 - Open any app-shell route.
 - Open a thread (`/waves/{waveId}`, `/waves?wave={waveId}`, or
   `/messages/{waveId}`).
-- Open create routes (`/waves/create`, `/messages/create`).
+- Open create routes (`/waves/create`, `/messages/new`).
 - Return to `/` to access the home-only health shortcut.
 
 ## User Journey
@@ -40,7 +40,7 @@ menu stays disabled. Search and menu controls become available after hydration.
 1. Header renders for the current app route.
 2. Left control resolves:
    - `Back` appears when an active wave exists, on `/waves/create` or
-     `/messages/create`, or on profile routes with valid in-app history.
+     `/messages/new`, or on profile routes with valid in-app history.
    - Otherwise a menu/avatar button appears.
 3. Menu/avatar button state:
    - Disconnected: menu icon.
@@ -50,7 +50,7 @@ menu stays disabled. Search and menu controls become available after hydration.
    - Tap opens [App Sidebar Menu](feature-app-sidebar-menu.md).
 4. Title resolves in this order:
    - `/waves/create` -> `Waves`
-   - `/messages/create` -> `New message`
+   - `/messages/new` -> `New message`
    - `/waves*` with no active wave -> `Waves`
    - `/messages*` with no active wave -> `Messages`
    - active wave -> loading spinner, then wave name

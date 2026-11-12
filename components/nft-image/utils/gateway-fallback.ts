@@ -3,6 +3,7 @@ import { publicEnv } from "@/config/env";
 import {
   getDecentralizedMediaFetchUrls,
   parseDecentralizedMediaRef,
+  toIsolatedHtmlUrlFromInput,
 } from "@/lib/media/decentralized-media";
 
 function dedupe(list: readonly string[]): string[] {
@@ -59,6 +60,24 @@ export function getMediaGatewayFallbackUrls(url: string): string[] {
     includeExternalFallbacks: true,
     resolverEndpoint: publicEnv.MEDIA_RESOLVER_ENDPOINT,
   });
+}
+
+/**
+ * Sources for framing HTML media, in order. With the separate content domain
+ * configured, IPFS HTML first loads from its own per-CID origin; the regular
+ * fallback chain follows. With any other resolver this equals
+ * `getMediaGatewayFallbackUrls`.
+ */
+export function getHtmlMediaGatewayFallbackUrls(url: string): string[] {
+  const urls = getMediaGatewayFallbackUrls(url);
+  const [first] = urls;
+  if (first === undefined) {
+    return urls;
+  }
+  return dedupe([
+    toIsolatedHtmlUrlFromInput(first, publicEnv.MEDIA_RESOLVER_ENDPOINT),
+    ...urls,
+  ]);
 }
 
 export function shouldUseIframeFallbackTimeout(url: string): boolean {
