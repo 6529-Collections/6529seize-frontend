@@ -5093,6 +5093,7 @@ export const EN_US_ROOT_MESSAGES = {
   "access.codeInput.placeholder": "********",
   "access.denied": "Access Denied!",
   "access.verifyFailed": "Could not verify access. Please try again.",
+  "access.verifying": "Verifying code…",
   ...GLOBAL_ERROR_MESSAGES,
   ...MAPPING_TOOL_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,

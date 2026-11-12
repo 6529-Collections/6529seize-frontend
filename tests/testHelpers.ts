@@ -18,7 +18,7 @@ type PageGoto = (...args: Parameters<Page["goto"]>) => ReturnType<Page["goto"]>;
 
 function getAccessCodeInput(page: Page) {
   return page
-    .getByRole("textbox", { name: /^(Team Login|Team access code)$/ })
+    .getByLabel(/^(Team Login|Team access code)$/)
     .or(page.getByPlaceholder("Team Login", { exact: true }))
     .first();
 }

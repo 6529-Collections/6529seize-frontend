@@ -51,17 +51,17 @@ test.describe("Access Page", () => {
     expect(gateUrl.pathname).toBe("/access");
     expect(gateUrl.searchParams.get("returnTo")).toBe(path);
 
-    const input = page.getByRole("textbox", {
-      name: "Team Login",
-      exact: true,
-    });
+    const input = page.getByLabel("Team Login", { exact: true });
     await expect(page.getByText("Team Login", { exact: true })).toBeVisible();
     await expect(input).toHaveAttribute("placeholder", "********");
+    await expect(input).toHaveAttribute("type", "password");
     await input.fill("invalid-test-access-code");
     const inputPosition = await input.boundingBox();
     expect(inputPosition).not.toBeNull();
     await input.press("Enter");
-    await expect(page.getByRole("alert")).toHaveText("Access Denied!");
+    await expect(
+      page.getByRole("alert").filter({ hasText: /^Access Denied!$/ })
+    ).toBeVisible();
     await expect(input).toHaveAttribute("aria-invalid", "true");
     expect(await input.boundingBox()).toEqual(inputPosition);
 

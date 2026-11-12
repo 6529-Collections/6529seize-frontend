@@ -29,15 +29,20 @@
 }
 
 .prompt {
+  --prompt-bottom: calc(
+    env(safe-area-inset-bottom, 0px) + var(--keyboard-inset)
+  );
   position: absolute;
   inset-inline: 0;
-  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--keyboard-inset));
+  bottom: var(--prompt-bottom);
   display: grid;
   box-sizing: border-box;
   width: min(100%, 25rem);
+  max-height: calc(100% - var(--prompt-bottom));
   margin-inline: auto;
   padding: 0.75rem 1rem;
-  place-items: center;
+  place-items: safe center;
+  overflow-y: auto;
   background: var(--surface);
   transition: bottom var(--native-keyboard-layout-transition-duration, 0ms)
     ease-out;
@@ -74,16 +79,27 @@
   border-color: var(--error-color);
 }
 
-.errorSlot {
-  height: 2.8em;
+.feedback {
+  display: grid;
+  min-height: 2.8em;
   margin-top: 0.4375rem;
   color: var(--error-color);
   font-size: 0.875rem;
   line-height: 1.4;
 }
 
-.errorSlot p {
+.feedback p {
+  grid-area: 1 / 1;
   margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.feedback p[aria-hidden="true"] {
+  visibility: hidden;
+}
+
+.feedback p[role="status"] {
+  color: #d1d1d1;
 }
 
 @media (orientation: landscape) and (min-aspect-ratio: 3/2) and (min-width: 34rem) {

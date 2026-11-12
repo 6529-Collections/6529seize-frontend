@@ -11,8 +11,14 @@ import { getStagingAuth } from "@/services/auth/auth.utils";
 import styles from "@/styles/Home.module.css";
 import Cookies from "js-cookie";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import accessStyles from "./AccessPage.module.css";
+
+const FEEDBACK_MESSAGES = [
+  "access.denied",
+  "access.verifyFailed",
+  "access.verifying",
+] as const;
 
 function probeApiAccess(
   code: string | null,
@@ -32,6 +38,9 @@ export default function AccessPage() {
   const [errorKey, setErrorKey] = useState<
     "access.denied" | "access.verifyFailed" | null
   >(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const verificationPending = useRef(false);
+  const feedbackKey = isVerifying ? "access.verifying" : errorKey;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -61,6 +70,10 @@ export default function AccessPage() {
   }, []);
 
   async function doLogin(target: HTMLInputElement): Promise<void> {
+    if (verificationPending.current) return;
+
+    verificationPending.current = true;
+    setIsVerifying(true);
     setErrorKey(null);
     target.select();
     const pass = target.value;
@@ -80,6 +93,9 @@ export default function AccessPage() {
       resumeAfterApiAccess(window.location);
     } catch {
       setErrorKey("access.verifyFailed");
+    } finally {
+      verificationPending.current = false;
+      setIsVerifying(false);
     }
   }
 
@@ -109,10 +125,12 @@ export default function AccessPage() {
           <input
             id="api-access-code"
             suppressHydrationWarning
-            type="text"
+            type="password"
+            autoComplete="off"
             enterKeyHint="go"
+            readOnly={isVerifying}
             aria-invalid={errorKey === "access.denied" || undefined}
-            aria-describedby={errorKey ? "api-access-error" : undefined}
+            aria-describedby={feedbackKey ? "api-access-feedback" : undefined}
             placeholder={t(locale, "access.codeInput.placeholder")}
             onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>): void => {
               if (event.key.toLowerCase() === "enter") {
@@ -120,12 +138,22 @@ export default function AccessPage() {
               }
             }}
           />
-          <div className={accessStyles["errorSlot"]}>
-            {errorKey && (
-              <p id="api-access-error" role="alert">
-                {t(locale, errorKey)}
-              </p>
-            )}
+          <div className={accessStyles["feedback"]}>
+            {/* Measure all messages so even wrapped copy cannot move the field. */}
+            {FEEDBACK_MESSAGES.map((key) => {
+              const visible = key === feedbackKey;
+              const role = key === "access.verifying" ? "status" : "alert";
+              return (
+                <p
+                  key={key}
+                  id={visible ? "api-access-feedback" : undefined}
+                  role={visible ? role : undefined}
+                  aria-hidden={visible ? undefined : true}
+                >
+                  {t(locale, key)}
+                </p>
+              );
+            })}
           </div>
         </div>
       </div>
