@@ -129,28 +129,37 @@ function IdentityGettingStartedCardContent({
           aria-hidden="true"
         />
         <div className="tw-grid md:tw-grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
-          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-content-start tw-items-start tw-gap-x-4 tw-p-5 @[40rem]/identity-guide:tw-pl-24 sm:tw-py-6 sm:tw-pr-6">
+          <div className="tw-min-w-0 tw-p-5 @[40rem]/identity-guide:tw-pl-24 sm:tw-py-6 sm:tw-pr-6">
             <h2 className="tw-m-0 tw-w-full tw-pr-10 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 md:tw-pr-0 lg:tw-text-2xl lg:tw-leading-8">
               {t(locale, "identityGettingStarted.title")}
             </h2>
             <p className="tw-mb-0 tw-mt-2 tw-w-full tw-max-w-lg tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-300">
               {t(locale, "identityGettingStarted.introduction")}
             </p>
-            <ButtonLink
-              href="/discover"
-              variant="primary"
-              size="md"
-              className="tw-mt-4 tw-min-h-11 tw-w-full tw-justify-between tw-gap-5 sm:tw-w-auto"
-            >
-              {t(locale, "identityGettingStarted.discover")}
-              <ArrowRightIcon
-                className="tw-size-4 tw-flex-none"
-                aria-hidden="true"
-              />
-            </ButtonLink>
-            <p className="tw-mb-0 tw-mt-3 tw-max-w-sm tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-300 md:tw-mt-4 md:tw-min-w-0 md:tw-flex-1 md:tw-basis-40 md:tw-self-center">
+            <p className="tw-mb-0 tw-mt-2 tw-max-w-lg tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-300">
               {t(locale, "identityGettingStarted.wavesDescription")}
             </p>
+            <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-1">
+              <ButtonLink
+                href="/discover"
+                variant="primary"
+                size="md"
+                className="tw-min-h-11 tw-justify-between tw-gap-5"
+              >
+                {t(locale, "identityGettingStarted.discover")}
+                <ArrowRightIcon
+                  className="tw-size-4 tw-flex-none"
+                  aria-hidden="true"
+                />
+              </ButtonLink>
+              <Link
+                href="/join-6529"
+                className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline hover:tw-text-iron-50 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              >
+                {t(locale, "identityGettingStarted.guide")}
+                <ArrowUpRightIcon className="tw-size-4" aria-hidden="true" />
+              </Link>
+            </div>
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-emerald-500/15 tw-p-5 sm:tw-p-6 md:tw-my-5 md:tw-border-l md:tw-border-t-0 md:tw-py-0">
             <p className="tw-mb-1 tw-mt-0 tw-px-2 tw-text-xs tw-font-medium tw-uppercase tw-leading-5 tw-tracking-wider tw-text-emerald-400/80 md:tw-pr-8">
@@ -206,15 +215,6 @@ function IdentityGettingStartedCardContent({
             </MobileWrapperDialog>
           </div>
         </div>
-      </div>
-      <div className="tw-flex tw-justify-end tw-px-5 tw-pb-2 sm:tw-pr-6">
-        <Link
-          href="/join-6529"
-          className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline hover:tw-text-iron-50 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-        >
-          {t(locale, "identityGettingStarted.guide")}
-          <ArrowUpRightIcon className="tw-size-4" aria-hidden="true" />
-        </Link>
       </div>
     </section>
   );
