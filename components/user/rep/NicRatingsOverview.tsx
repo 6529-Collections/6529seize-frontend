@@ -73,7 +73,7 @@ export default function NicRatingsOverview({
   );
   const scoreValue = (
     <div
-      className={`tw-text-3xl tw-font-semibold tw-tabular-nums tw-leading-none tw-tracking-tight tw-text-emerald-400 ${compact ? "" : "tw-col-start-1 tw-row-start-2"}`}
+      className={`tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-emerald-400 ${compact ? "" : "tw-col-start-1 tw-row-start-2"}`}
     >
       {score === undefined ? "—" : formatInteger(locale, score)}
     </div>

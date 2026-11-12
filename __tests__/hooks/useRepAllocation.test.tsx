@@ -111,6 +111,11 @@ it("reports the grantor error instead of falling back to the viewer, then retrie
   await waitFor(() => expect(result.current.isError).toBe(true));
   expect(result.current.repState).toBeNull();
   expect(result.current.heroAvailableRep).toBe(0);
+  expect(fetchApi).toHaveBeenCalledTimes(1);
+  expect(fetchApi).toHaveBeenCalledWith({
+    endpoint: "profiles/target/rep/ratings/received",
+    params: { rater: "grantor" },
+  });
   fetchApi.mockResolvedValue({
     rep_rates_left_for_rater: 80,
     rating_stats: [{ category: "Artist", rater_contribution: 20 }],

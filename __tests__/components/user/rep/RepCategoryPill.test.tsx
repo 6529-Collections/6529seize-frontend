@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@/components/common/OverlappingAvatars", () => ({
   __esModule: true,
-  default: () => <div data-testid="avatars" />,
+  default: () => <span data-testid="avatars" />,
 }));
 
 const category: ApiRepCategory = {
@@ -16,56 +16,41 @@ const category: ApiRepCategory = {
 };
 
 describe("RepCategoryPill", () => {
-  it("opens the global category from the label", () => {
-    const onOpenGlobalCategory = jest.fn();
-
-    render(
-      <RepCategoryPill
-        category={category}
-        canEdit={false}
-        onEdit={() => undefined}
-        onOpenGlobalCategory={onOpenGlobalCategory}
-        onOpenContributors={() => undefined}
-      />
-    );
-
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Open global REP category Dev extraordinaire",
-      })
-    );
-
-    expect(onOpenGlobalCategory).toHaveBeenCalledWith("Dev extraordinaire");
-  });
-
-  it("keeps edit and contributor actions separate", () => {
-    const onEdit = jest.fn();
-    const onOpenGlobalCategory = jest.fn();
+  it("opens category details from the label", () => {
     const onOpenContributors = jest.fn();
 
     render(
       <RepCategoryPill
         category={category}
-        canEdit
-        onEdit={onEdit}
-        onOpenGlobalCategory={onOpenGlobalCategory}
         onOpenContributors={onOpenContributors}
       />
     );
 
     fireEvent.click(
       screen.getByRole("button", {
-        name: "Edit REP category Dev extraordinaire",
-      })
-    );
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "View all raters for Dev extraordinaire",
+        name: "Open REP category Dev extraordinaire",
       })
     );
 
-    expect(onEdit).toHaveBeenCalledWith("Dev extraordinaire");
     expect(onOpenContributors).toHaveBeenCalledWith(category);
-    expect(onOpenGlobalCategory).not.toHaveBeenCalled();
+  });
+
+  it("opens category details from the count without an edit shortcut", () => {
+    const onOpenContributors = jest.fn();
+
+    render(
+      <RepCategoryPill
+        category={category}
+        onOpenContributors={onOpenContributors}
+      />
+    );
+
+    fireEvent.click(screen.getByText("2 raters"));
+
+    expect(onOpenContributors).toHaveBeenCalledWith(category);
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(
+      screen.queryByRole("button", { name: /^Edit REP category/ })
+    ).not.toBeInTheDocument();
   });
 });

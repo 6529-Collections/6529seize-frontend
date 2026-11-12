@@ -7,7 +7,6 @@ import type { ActivityLogParams } from "@/components/profile-activity/ProfileAct
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
-import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiRepCategoriesPage } from "@/generated/models/ApiRepCategoriesPage";
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -274,20 +273,6 @@ export default function UserPageRep({
     });
   };
 
-  const handleOpenCategoryContributors = (category: ApiRepCategory) => {
-    if (category.contributor_count <= 0) {
-      return;
-    }
-
-    setRepDialog({
-      type: "contributors",
-      scope: "category",
-      direction: repDirection,
-      category: category.category,
-      contributorCount: category.contributor_count,
-    });
-  };
-
   return (
     <div className="tailwind-scope">
       <IdentityGettingStartedCard
@@ -312,7 +297,6 @@ export default function UserPageRep({
           onOpenGlobalCategory={(category) =>
             setRepDialog({ type: "globalCategory", category })
           }
-          onOpenCategoryContributors={handleOpenCategoryContributors}
         />
       </div>
       <div className="tw-hidden lg:tw-block">
@@ -328,7 +312,6 @@ export default function UserPageRep({
                 onOpenGlobalCategory={(category) =>
                   setRepDialog({ type: "globalCategory", category })
                 }
-                onOpenCategoryContributors={handleOpenCategoryContributors}
                 onRepDirectionChange={setRepDirection}
                 loading={activeLoading}
                 visibleCount={activeVisibleCount}
@@ -387,6 +370,7 @@ export default function UserPageRep({
         onClose={() => setIsNicRateOpen(false)}
         noPadding
         tabletModal
+        desktopAlign="top"
         maxWidthClass="md:tw-max-w-md"
         headerClassName="tw-pb-5 tw-pt-4"
         headerVariant="minimal"

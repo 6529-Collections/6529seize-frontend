@@ -52,6 +52,8 @@ type MobileWrapperDialogProps = {
   /** Action-only sheets enter at their final position while the keyboard closes. */
   readonly avoidKeyboard?: boolean | undefined;
   readonly tabletModal?: boolean | undefined;
+  /** Keep opt-in desktop dialogs anchored while their content grows. */
+  readonly desktopAlign?: "center" | "top" | undefined;
   readonly showScrollbar?: boolean | undefined;
   readonly allowOverflow?: boolean | undefined;
   readonly maxWidthClass?: string | undefined;
@@ -187,13 +189,16 @@ function getBeforeLeaveProps(onBeforeLeave?: (() => void) | undefined) {
 function MobileDialogOverlay({
   onBeforeLeave,
   onAfterLeave,
+  keepMounted,
 }: {
   readonly onBeforeLeave?: (() => void) | undefined;
   readonly onAfterLeave: () => void;
+  readonly keepMounted: boolean;
 }) {
   return (
     <TransitionChild
       as={Fragment}
+      unmount={!keepMounted}
       {...getOverlayTransition()}
       {...getBeforeLeaveProps(onBeforeLeave)}
       afterLeave={onAfterLeave}
@@ -207,17 +212,20 @@ function getPanelClassNames({
   isIos,
   tabletModal,
   maxWidthClass,
+  desktopAlign,
 }: {
   readonly isIos: boolean;
   readonly tabletModal?: boolean | undefined;
   readonly maxWidthClass?: string | undefined;
+  readonly desktopAlign: "center" | "top";
 }) {
   return clsx(
     "tw-pointer-events-auto tw-relative tw-w-screen",
     !tabletModal && "md:tw-max-w-screen-md",
     !isIos && "tw-transform-gpu",
     !isIos && "tw-will-change-transform",
-    tabletModal && ["md:tw-w-full", maxWidthClass ?? "md:tw-max-w-md"]
+    tabletModal && ["md:tw-w-full", maxWidthClass ?? "md:tw-max-w-md"],
+    tabletModal && desktopAlign === "top" && "md:tw-max-h-[calc(86vh-24px)]"
   );
 }
 
@@ -229,11 +237,18 @@ function getDragPanelClassNames(canDragToClose: boolean) {
   );
 }
 
-function getContainerClassNames(tabletModal?: boolean | undefined) {
+function getContainerClassNames(
+  tabletModal: boolean | undefined,
+  desktopAlign: "center" | "top"
+) {
   return clsx(
     "tw-pointer-events-none tw-fixed tw-inset-x-0 tw-flex tw-max-w-full tw-justify-center tw-pt-10 [--mobile-wrapper-dialog-keyboard-inset:var(--native-keyboard-inset-bottom,0px)]",
-    tabletModal &&
-      "md:tw-inset-0 md:tw-items-center md:tw-p-6 md:tw-pt-0 md:[--mobile-wrapper-dialog-keyboard-inset:0px]"
+    tabletModal && [
+      "md:tw-inset-0 md:tw-p-6 md:[--mobile-wrapper-dialog-keyboard-inset:0px]",
+      desktopAlign === "top"
+        ? "md:tw-items-start md:tw-pt-[14vh] md:[--mobile-wrapper-dialog-resting-height:calc(86vh-24px)]"
+        : "md:tw-items-center md:tw-pt-0",
+    ]
   );
 }
 
@@ -416,6 +431,7 @@ export default function MobileWrapperDialog({
   fitVisualViewport = false,
   avoidKeyboard = true,
   tabletModal,
+  desktopAlign = "center",
   showScrollbar,
   allowOverflow,
   maxWidthClass,
@@ -474,11 +490,12 @@ export default function MobileWrapperDialog({
     isIos,
     tabletModal,
     maxWidthClass,
+    desktopAlign,
   });
   const dragPanelClassNames = getDragPanelClassNames(canDragToClose);
   const hasDragHandle = showDragHandle ?? canDragToClose;
   const showTouchDragHandle = hasDragHandle && isTouchDevice;
-  const containerClassNames = getContainerClassNames(tabletModal);
+  const containerClassNames = getContainerClassNames(tabletModal, desktopAlign);
   const slideTransition = getSlideTransition(tabletModal);
   const panelStyle = getPanelStyle({
     canDragToClose,
@@ -622,6 +639,7 @@ export default function MobileWrapperDialog({
         <MobileDialogOverlay
           onBeforeLeave={onBeforeLeave}
           onAfterLeave={handleAfterLeave}
+          keepMounted={keepMounted}
         />
 
         <div

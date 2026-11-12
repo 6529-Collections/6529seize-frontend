@@ -16,10 +16,10 @@ const wait = require("@/helpers/Helpers").wait as jest.Mock;
 
 type ContextType = {
   onProfileRepModify: (params: {
-    targetProfile: ApiIdentity;
+    targetProfiles: readonly ApiIdentity[];
     connectedProfile: ApiIdentity | null;
     profileProxy: null;
-  }) => void;
+  }) => Promise<void>;
   setProfile: (profile: any) => void;
   setWaveDrops: (params: { waveDrops: any; waveId: string }) => void;
   waitAndInvalidateDrops: () => Promise<void>;
@@ -63,21 +63,27 @@ const createTestSetup = () => {
 };
 
 describe("ReactQueryWrapper context", () => {
-  it("invalidates REP allowances for a target without a handle", () => {
+  it("invalidates shared REP credit across recipients, including a target without a handle", async () => {
     const { client, ctx } = createTestSetup();
     const key = [
       QueryKey.PROFILE_REP_RATINGS,
       { handleOrWallet: "0xabc", rater: "viewer" },
     ];
+    const otherRecipientKey = [
+      QueryKey.PROFILE_REP_RATINGS,
+      { handleOrWallet: "other-recipient", rater: "viewer" },
+    ];
     client.setQueryData(key, { rep_rates_left_for_rater: 80 });
-    act(() =>
-      ctx.onProfileRepModify({
-        targetProfile: { handle: null, query: "0xAbC" } as ApiIdentity,
+    client.setQueryData(otherRecipientKey, { rep_rates_left_for_rater: 80 });
+    await act(async () => {
+      await ctx.onProfileRepModify({
+        targetProfiles: [{ handle: null, query: "0xAbC" } as ApiIdentity],
         connectedProfile: { handle: "viewer" } as ApiIdentity,
         profileProxy: null,
-      })
-    );
+      });
+    });
     expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    expect(client.getQueryState(otherRecipientKey)?.isInvalidated).toBe(true);
     expect(client.resetQueries).toHaveBeenCalledWith({
       predicate: expect.any(Function),
       queryKey: [
@@ -94,6 +100,12 @@ describe("ReactQueryWrapper context", () => {
     });
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.GLOBAL_REP_CATEGORY_OVERVIEW],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.PROFILE_REP_CATEGORY_CONTRIBUTORS],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["REP_CONTRIBUTORS"],
     });
   });
 

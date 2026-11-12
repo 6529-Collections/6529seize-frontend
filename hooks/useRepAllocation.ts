@@ -26,7 +26,9 @@ export function useRepAllocation({
 } {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const profileIdentity = (
-    profile.query ?? profile.handle ?? profile.display
+    profile.query ??
+    profile.handle ??
+    profile.display
   ).toLowerCase();
 
   const proxyQuery = useQuery<ApiProfileRepRatesState>({
@@ -62,7 +64,7 @@ export function useRepAllocation({
           ? { rater: connectedProfile.handle }
           : {},
       }),
-    enabled: !!connectedProfile?.handle,
+    enabled: !activeProfileProxy && !!connectedProfile?.handle,
   });
 
   const { data: proxyGrantorRepRates } = proxyQuery;

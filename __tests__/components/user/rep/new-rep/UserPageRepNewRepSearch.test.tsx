@@ -92,14 +92,12 @@ describe("UserPageRepNewRepSearch", () => {
       screen.getByRole("textbox", { name: "Category to grant REP for" }),
       "Art"
     );
-    await user.click(
-      await screen.findByRole("button", { name: "Art" })
-    );
+    await user.click(await screen.findByRole("button", { name: "Art" }));
     await user.clear(amount);
     await user.type(amount, "25");
     await user.tab();
     expect(amount).toHaveValue("25");
-    expect(screen.getByRole("button", { name: "Grant REP" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
 
     mockAllocation.mockReturnValue({
       ...allocation,
@@ -113,7 +111,7 @@ describe("UserPageRepNewRepSearch", () => {
     rerender(<UserPageRepNewRepSearch {...props} />);
 
     expect(amount).toHaveValue("25");
-    expect(screen.getByRole("button", { name: "Grant REP" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeEnabled();
   });
 
   it("prefills the saved rating and keeps edits through background refreshes", async () => {
@@ -177,17 +175,13 @@ describe("UserPageRepNewRepSearch", () => {
       name: "Your total REP for this category",
     });
     await user.type(search, "Art");
-    await user.click(
-      await screen.findByRole("button", { name: "Art" })
-    );
+    await user.click(await screen.findByRole("button", { name: "Art" }));
     await waitFor(() => expect(amount).toHaveValue("20"));
     await user.clear(amount);
     await user.type(amount, "30");
     await user.clear(search);
     await user.type(search, "Research");
-    await user.click(
-      await screen.findByRole("button", { name: "Research" })
-    );
+    await user.click(await screen.findByRole("button", { name: "Research" }));
     await waitFor(() => expect(amount).toHaveValue("7"));
   });
 
@@ -209,7 +203,7 @@ describe("UserPageRepNewRepSearch", () => {
     expect(
       screen.getByRole("textbox", { name: "Your total REP for this category" })
     ).toHaveValue("1");
-    expect(screen.getByRole("button", { name: "Grant REP" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
   });
 
   it("shows loading instead of the minimum-length prompt once three characters are entered", async () => {

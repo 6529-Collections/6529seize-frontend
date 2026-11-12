@@ -137,7 +137,7 @@ function RepContributorRow({
   return (
     <Link
       href={contributor.href}
-      className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-px-3 tw-py-2.5 tw-no-underline tw-transition-colors hover:tw-border-white/15 hover:tw-bg-white/[0.04]"
+      className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.03] tw-bg-white/[0.02] tw-px-3 tw-py-2.5 tw-no-underline tw-transition-colors hover:tw-border-white/5 hover:tw-bg-white/[0.04]"
     >
       <div
         className={`tw-flex tw-min-w-0 tw-items-center ${
@@ -166,7 +166,7 @@ function RepContributorRow({
         </p>
       </div>
 
-      <span className="tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-300 tw-transition-colors">
+      <span className="tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors">
         {formatNumberWithCommas(contributor.contribution)}
       </span>
     </Link>
@@ -303,6 +303,7 @@ export default function RepContributorsDialog({
       isOpen={isOpen}
       onClose={onClose}
       tabletModal
+      desktopAlign="top"
       noPadding
       fitVisualViewport
       maxWidthClass="md:tw-max-w-xl"
@@ -311,12 +312,6 @@ export default function RepContributorsDialog({
       headerClassName="tw-pb-2 tw-pt-4"
     >
       <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
-        <div className="tw-mb-4 tw-mt-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
-          <p className="tw-mb-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
-            {formatNumberWithCommas(contributorCount)} {contributorLabel}
-          </p>
-        </div>
-
         {contributorsQuery.isPending && (
           <div className="tw-flex tw-justify-center tw-py-12">
             <CircleLoader size={CircleLoaderSize.XXLARGE} />

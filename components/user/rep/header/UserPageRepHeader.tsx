@@ -5,14 +5,15 @@ import Button from "@/components/utils/button/Button";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { useContext, useMemo, useState } from "react";
 import { canManageGivenRatings } from "../ratingsManagement";
-import RepCategoryPill from "../RepCategoryPill";
+import RepCategoryList from "../RepCategoryList";
 import RepDirectionToggle from "../RepDirectionToggle";
 import RatingContributorsControl from "../RatingContributorsControl";
-import UserPageRepModifyModal from "../modify-rep/UserPageRepModifyModal";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t, tRich } from "@/i18n/messages";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
 import { getCanEditRep, type RepDirection } from "../UserPageRep.helpers";
 
@@ -22,7 +23,6 @@ export default function UserPageRepHeader({
   profile,
   repDirection,
   onOpenOverviewContributors,
-  onOpenCategoryContributors,
   onOpenGlobalCategory,
   onRepDirectionChange,
   loading,
@@ -36,7 +36,6 @@ export default function UserPageRepHeader({
   readonly profile: ApiIdentity;
   readonly repDirection: RepDirection;
   readonly onOpenOverviewContributors: () => void;
-  readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
   readonly onOpenGlobalCategory: (category: string) => void;
   readonly onRepDirectionChange: (direction: RepDirection) => void;
   readonly loading: boolean;
@@ -51,20 +50,6 @@ export default function UserPageRepHeader({
     canManageGivenRatings(profile, connectedProfile, activeProfileProxy);
 
   const visibleCategories = categories.slice(0, visibleCount);
-  const hiddenLoadedCategoryCount = Math.max(
-    categories.length - visibleCount,
-    0
-  );
-  const hasMore = hiddenLoadedCategoryCount > 0 || hasNextPage;
-  let loadMoreLabel = "Load more";
-  if (hiddenLoadedCategoryCount > 0) {
-    loadMoreLabel = `+${hiddenLoadedCategoryCount} more`;
-  } else if (isFetchingNextPage) {
-    loadMoreLabel = "Loading...";
-  }
-  const isLoadMoreDisabled =
-    isFetchingNextPage && hiddenLoadedCategoryCount === 0;
-
   const canEditRep = useMemo(
     () =>
       getCanEditRep({
@@ -75,7 +60,7 @@ export default function UserPageRepHeader({
     [connectedProfile, profile, activeProfileProxy]
   );
 
-  const [editCategory, setEditCategory] = useState<string | null>(null);
+  const locale = useBrowserLocale();
   const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
 
   return (
@@ -111,7 +96,7 @@ export default function UserPageRepHeader({
                 Total Rep
               </div>
               <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
-                {overview ? formatNumberWithCommas(overview.total_rep) : "—"}
+                {overview ? formatInteger(locale, overview.total_rep) : "—"}
               </div>
               <div className="tw-mt-3">
                 <RatingContributorsControl
@@ -136,19 +121,27 @@ export default function UserPageRepHeader({
                   {overview !== null &&
                     overview.authenticated_user_contribution !== null &&
                     overview.authenticated_user_contribution !== 0 && (
-                      <div className="tw-inline-flex tw-items-center tw-gap-x-1.5">
-                        <span className="tw-text-meta/4 tw-font-normal tw-text-iron-500">
-                          {repDirection === "given"
-                            ? "Assigned To You:"
-                            : "You Assigned:"}
-                        </span>
-                        <span className="tw-text-meta/4 tw-font-medium tw-text-iron-300">
-                          {overview.authenticated_user_contribution > 0 && "+"}
-                          {formatNumberWithCommas(
-                            overview.authenticated_user_contribution
-                          )}
-                        </span>
-                      </div>
+                      <span className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-text-meta/4 tw-font-normal tw-text-iron-400">
+                        {tRich(
+                          locale,
+                          repDirection === "given"
+                            ? "user.profile.rep.rep.assignedToYou"
+                            : "user.profile.rep.rep.youAssigned",
+                          {
+                            value: (
+                              <span
+                                key="value"
+                                className="tw-text-meta/4 tw-font-medium tw-text-iron-100"
+                              >
+                                {formatInteger(
+                                  locale,
+                                  overview.authenticated_user_contribution
+                                )}
+                              </span>
+                            ),
+                          }
+                        )}
+                      </span>
                     )}
                 </div>
                 {canEditRep && repDirection === "received" && (
@@ -161,32 +154,21 @@ export default function UserPageRepHeader({
                       aria-hidden="true"
                       className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
                     />
-                    <span>Add new</span>
+                    <span>{t(locale, "user.profile.rep.rep.grantAction")}</span>
                   </Button>
                 )}
               </div>
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10">
-                {visibleCategories.map((cat) => (
-                  <RepCategoryPill
-                    key={cat.category}
-                    category={cat}
-                    canEdit={canEditRep && repDirection === "received"}
-                    onEdit={setEditCategory}
-                    onOpenGlobalCategory={onOpenGlobalCategory}
-                    onOpenContributors={onOpenCategoryContributors}
-                    direction={repDirection}
-                  />
-                ))}
-                {hasMore && (
-                  <Button
-                    variant="secondary"
-                    onClick={onShowMore}
-                    disabled={isLoadMoreDisabled}
-                  >
-                    {loadMoreLabel}
-                  </Button>
-                )}
-              </div>
+              <RepCategoryList
+                key={`${profile.id ?? profile.query ?? profile.display}:${repDirection}`}
+                profile={profile}
+                categories={categories}
+                direction={repDirection}
+                visibleCount={visibleCount}
+                hasNextPage={hasNextPage}
+                isFetchingNextPage={isFetchingNextPage}
+                onShowMore={onShowMore}
+                onOpenGlobalCategory={onOpenGlobalCategory}
+              />
             </div>
           )}
 
@@ -211,14 +193,6 @@ export default function UserPageRepHeader({
             )}
         </div>
       </div>
-
-      {canEditRep && editCategory && (
-        <UserPageRepModifyModal
-          profile={profile}
-          category={editCategory}
-          onClose={() => setEditCategory(null)}
-        />
-      )}
 
       <GrantRepDialog
         profile={profile}

@@ -11,7 +11,8 @@ import { useIdentity } from "@/hooks/useIdentity";
 import { parseDecentralizedMediaRef } from "@/lib/media/decentralized-media";
 import { ProfileActivityLogType } from "@/types/enums";
 import Image from "next/image";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { IdentityActivityContext } from "../../../IdentityActivityContext";
 import ProfileActivityLogItemTimeAgo from "./ProfileActivityLogItemTimeAgo";
 
 export default function ProfileActivityLogItemWrapper({
@@ -23,6 +24,7 @@ export default function ProfileActivityLogItemWrapper({
   readonly children: React.ReactNode;
   readonly user: string | null;
 }) {
+  const compact = useContext(IdentityActivityContext);
   const isArchived = log.type === ProfileActivityLogType.PROFILE_ARCHIVED;
 
   const getHandleOrWallet = (): string => {
@@ -47,10 +49,19 @@ export default function ProfileActivityLogItemWrapper({
   const pfp = profile?.pfp ?? null;
   const avatarSrc = pfp ? getScaledImageUri(pfp, ImageScale.W_AUTO_H_50) : null;
   const [failedAvatarSrc, setFailedAvatarSrc] = useState<string | null>(null);
+  const timestampIndent = isArchived ? "" : "tw-pl-9";
 
   return (
-    <div className="tw-group tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-p-4 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 hover:tw-border-white/[0.12] hover:tw-bg-iron-900/80">
-      <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
+    <div
+      className={
+        compact
+          ? "tw-group tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/70 tw-p-4 last:tw-border-b-0"
+          : "tw-group tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900/60 tw-p-4 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 hover:tw-border-white/[0.12] hover:tw-bg-iron-900/80"
+      }
+    >
+      <div
+        className={`tw-flex tw-justify-between ${compact ? "tw-flex-col tw-gap-x-6 tw-gap-y-1 @2xl:tw-flex-row @2xl:tw-items-start" : "tw-items-start tw-gap-x-3"}`}
+      >
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-x-3">
           <div
             className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${isArchived ? "" : "tw-pl-9"}`}
@@ -70,10 +81,15 @@ export default function ProfileActivityLogItemWrapper({
                       failedAvatarSrc === avatarSrc
                     }
                     onError={() => setFailedAvatarSrc(avatarSrc)}
-                    className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700 tw-object-cover"
+                    className={`tw-h-6 tw-w-6 tw-flex-shrink-0 tw-bg-iron-700 tw-object-cover ${compact ? "tw-rounded-full" : "tw-rounded-md"}`}
                   />
                 ) : (
-                  <span className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-md tw-bg-iron-700" />
+                  <span
+                    aria-hidden="true"
+                    className={`tw-flex tw-h-6 tw-w-6 tw-flex-shrink-0 tw-items-center tw-justify-center tw-bg-iron-700 tw-text-xs tw-font-medium tw-text-iron-300 ${compact ? "tw-rounded-full" : "tw-rounded-md"}`}
+                  >
+                    {compact ? handleOrWallet.charAt(0).toUpperCase() : null}
+                  </span>
                 )}
                 <CommonProfileLink
                   handleOrWallet={handleOrWallet}
@@ -86,7 +102,13 @@ export default function ProfileActivityLogItemWrapper({
             {children}
           </div>
         </div>
-        <div className="tw-flex-shrink-0 tw-pl-3">
+        <div
+          className={
+            compact
+              ? `${timestampIndent} @2xl:tw-shrink-0 @2xl:tw-pl-0`
+              : "tw-flex-shrink-0 tw-pl-3"
+          }
+        >
           <ProfileActivityLogItemTimeAgo log={log} />
         </div>
       </div>
