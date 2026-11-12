@@ -44,9 +44,7 @@ export default function IdentityGettingStartedAboutAction({
   let editor: ReactNode;
   if (isPending) {
     editor = (
-      <output
-        className="tw-m-0 tw-block tw-text-sm tw-leading-6 tw-text-iron-300"
-      >
+      <output className="tw-m-0 tw-block tw-text-sm tw-leading-6 tw-text-iron-300">
         {t(locale, "identityGettingStarted.aboutLoading")}
       </output>
     );
@@ -85,7 +83,7 @@ export default function IdentityGettingStartedAboutAction({
         type="button"
         onClick={() => setIsOpen(true)}
         disabled={isPending}
-        className="tw-flex tw-min-h-11 tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-300 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
+        className="tw-flex tw-min-h-11 tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
       >
         <PencilSquareIcon
           className="tw-size-4 tw-flex-none"
