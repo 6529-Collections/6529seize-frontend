@@ -85,8 +85,8 @@ Transfer mode is part of the Native collected view (not a separate route).
    - On mobile, both `Overview` and both `Memes Breakdown By Season` sections
      start closed under `Collected` and `Activity Overview`. Tap a section title
      to open its table. Desktop starts with these sections open.
-   - `Complete my set` and `Manage orders` open collecting tools. In the native
-     app, the header Back button returns to the same Collected filters and page,
+   - `Complete my set` and `Manage orders` open collecting tools on the web
+     and Android. In the Android app, the header Back button returns to the same Collected filters and page,
      then restores focus and scroll to the action you opened.
 4. In `Details`, review:
    - `Collected` totals and per-season Meme tables

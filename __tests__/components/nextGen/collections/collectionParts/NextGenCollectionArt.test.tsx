@@ -2,9 +2,19 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import NextGenCollectionArt from '@/components/nextGen/collections/collectionParts/NextGenCollectionArt';
 
+let mockSearchParams = new URLSearchParams();
+let mockHideNftPurchasing = false;
+
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => mockSearchParams,
+}));
+
+jest.mock('@/hooks/useNftPurchasingVisibility', () => ({
+  useNftPurchasingVisibility: () => ({
+    hideNftPurchasing: mockHideNftPurchasing,
+    reservesNftPurchasingSpace: false,
+  }),
 }));
 
 jest.mock('@/services/api/common-api', () => ({
@@ -12,7 +22,13 @@ jest.mock('@/services/api/common-api', () => ({
 }));
 
 jest.mock('@/components/nextGen/collections/NextGenTokenList', () => (props: any) => (
-  <div data-testid="token-list" data-limit={String(props.limit)}>
+  <div
+    data-testid="token-list"
+    data-limit={String(props.limit)}
+    data-sort={props.sort}
+    data-listed={props.listed_type}
+    data-hide-market-listings={String(props.hideMarketListings)}
+  >
     <button type="button" onClick={() => props.setLoadFailed?.(true)}>
       fail list
     </button>
@@ -33,7 +49,7 @@ jest.mock('@/hooks/useBrowserLocale', () => ({
 }));
 jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   formatNameForUrl: (s: string) => s,
-  NextGenListFilters: { ID: "ID" },
+  NextGenListFilters: { ID: "ID", LISTED_PRICE: "Listed Price" },
   NextGenTokenListedType: { ALL: "ALL", LISTED: "LISTED", NOT_LISTED: "NOT_LISTED" },
 }));
 
@@ -43,6 +59,8 @@ const collection = { id: 1, name: 'Cool' } as any;
 
 describe('NextGenCollectionArt', () => {
   beforeEach(() => {
+    mockSearchParams = new URLSearchParams();
+    mockHideNftPurchasing = false;
     (commonApiFetch as jest.Mock).mockClear();
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
   });
@@ -73,6 +91,21 @@ describe('NextGenCollectionArt', () => {
     render(<NextGenCollectionArt collection={collection} />);
     await screen.findByTestId('token-list');
     expect(screen.queryByText('Traits')).toBeNull();
+  });
+
+  it('ignores incoming listing filters and price sorting when purchases are hidden', async () => {
+    mockHideNftPurchasing = true;
+    mockSearchParams = new URLSearchParams('sort=listed_price&listed=true');
+    render(<NextGenCollectionArt collection={collection} />);
+
+    const list = await screen.findByTestId('token-list');
+    expect(list).toHaveAttribute('data-sort', 'ID');
+    expect(list).toHaveAttribute('data-listed', 'ALL');
+    expect(list).toHaveAttribute('data-hide-market-listings', 'true');
+    expect(screen.queryByRole('combobox', { name: 'Listing status' })).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Sort: ID' }));
+    expect(screen.queryByRole('button', { name: 'Listed Price' })).toBeNull();
   });
 
   it('opens the Pebbles set planner from its native collection page', async () => {
