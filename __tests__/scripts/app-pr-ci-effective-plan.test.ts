@@ -1022,3 +1022,20 @@ it("does not select the live reaction browser lane for unrelated changes", () =>
     executePlan(["README.md"]).checks.playwright_drop_reactions.required
   ).toBe(false);
 });
+
+it.each([
+  "hooks/useMembershipNavigation.ts",
+  "components/layout/sidebar/WebSidebarNav.tsx",
+  "components/header/AppSidebar.tsx",
+  "components/header/AppSidebarMenuItems.tsx",
+  "tests/auth/session-recovery-sandbox.spec.ts",
+])(
+  "selects session recovery and membership navigation browser coverage for %s",
+  (file) => {
+    const input = plan([file]);
+    input.checks.playwright_critical_shell.required = false;
+    expect(
+      executeRawPlan(input).checks.playwright_critical_shell?.required
+    ).toBe(true);
+  }
+);

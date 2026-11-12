@@ -11,6 +11,14 @@ art destinations together while leaving `Waves` adjacent to `DMs`.
 When the connected wallet can access Drop Forge, the drawer lists it as a
 standalone row after `About`.
 
+The slot between `DMs` and `About` shows a subtly highlighted `Join 6529`
+link to `/join-6529` for signed-out visitors and wallets without a profile.
+Signed-in members with a profile see `Validator`, linking to `/validator`, in
+that same slot. While wallet or profile restoration is unresolved, the slot
+reserves its space without showing either action. The same rule applies to the
+collapsed and expanded web sidebar, mobile web menu, native app drawer, and
+page search. Public navigation never adds a Validator link.
+
 ## Location in the Site
 
 - App routes rendered with `AppLayout`, when header left control is menu/avatar

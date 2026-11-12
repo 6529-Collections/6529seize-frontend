@@ -25,7 +25,8 @@ import { t } from "@/i18n/messages";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
-import Join6529Icon from "../common/icons/Join6529Icon";
+import { useMembershipNavigation } from "@/hooks/useMembershipNavigation";
+import { usePathname } from "next/navigation";
 import WatchTowerIcon from "../common/icons/WatchTowerIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
@@ -69,6 +70,8 @@ export default function AppSidebar({
   readonly open: boolean;
   readonly onClose: () => void;
 }) {
+  const membershipNavigation = useMembershipNavigation();
+  const pathname = usePathname();
   const { appWalletsSupported } = useAppWallets();
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const moderatorAccess = useContentModeratorAccess();
@@ -115,9 +118,14 @@ export default function AppSidebar({
         icon: ChatBubbleIcon,
       },
       {
-        label: t(DEFAULT_LOCALE, "navigation.primary.join6529"),
-        path: "/join-6529",
-        icon: Join6529Icon,
+        label: membershipNavigation.label,
+        path: membershipNavigation.href,
+        icon: membershipNavigation.icon,
+        pending: membershipNavigation.isPending,
+        emphasized: membershipNavigation.emphasized,
+        active:
+          pathname === membershipNavigation.href ||
+          pathname?.startsWith(`${membershipNavigation.href}/`) === true,
       },
       sectionMap.get("about"),
       ...(showDropForge ? [dropForgeItem] : []),
@@ -146,7 +154,14 @@ export default function AppSidebar({
 
       return [item];
     });
-  }, [hasPendingModerationCases, sections, showDropForge, showModeration]);
+  }, [
+    hasPendingModerationCases,
+    membershipNavigation,
+    pathname,
+    sections,
+    showDropForge,
+    showModeration,
+  ]);
 
   // Close on right-to-left swipe
   useEffect(() => {

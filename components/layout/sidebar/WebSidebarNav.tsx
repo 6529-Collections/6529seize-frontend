@@ -12,7 +12,7 @@ import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
-import Join6529Icon from "@/components/common/icons/Join6529Icon";
+import { useMembershipNavigation } from "@/hooks/useMembershipNavigation";
 import WatchTowerIcon from "@/components/common/icons/WatchTowerIcon";
 import {
   DROP_FORGE_PATH,
@@ -56,6 +56,7 @@ const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
 >(({ isCollapsed = false }, ref) => {
+  const membershipNavigation = useMembershipNavigation();
   const pathname = usePathname();
   const safePathname = getSafePathname(pathname);
   const { connectedProfile } = useAuth();
@@ -448,16 +449,24 @@ const WebSidebarNav = React.forwardRef<
           />
         </li>
 
-        <li>
+        <li
+          className={
+            membershipNavigation.isPending
+              ? "tw-invisible [@media(scripting:none)]:tw-visible"
+              : undefined
+          }
+        >
           <WebSidebarNavItem
-            href="/join-6529"
-            icon={Join6529Icon}
+            href={membershipNavigation.href}
+            icon={membershipNavigation.icon}
             active={
-              safePathname === "/join-6529" ||
-              safePathname.startsWith("/join-6529/")
+              safePathname === membershipNavigation.href ||
+              safePathname.startsWith(`${membershipNavigation.href}/`)
             }
             collapsed={isCollapsed}
-            label={t(DEFAULT_LOCALE, "navigation.primary.join6529")}
+            label={membershipNavigation.label}
+            emphasized={membershipNavigation.emphasized}
+            animate={false}
           />
         </li>
 

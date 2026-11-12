@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "../testHelpers";
 import { useLocalSandboxMutationGuard } from "../support/localSandbox";
+import { isMobileSurfaceProject } from "../support/surfaceSimulation";
 
 const wallet = "0x0000000000000000000000000000000000000529";
 const expiredJwt = [
@@ -184,4 +185,115 @@ test.describe("Session recovery sandbox @auth @local-only", () => {
       )
     ).toBe(false);
   });
+  for (const membership of ["guest", "profileless", "member"] as const) {
+    test(`membership navigation preserves its slot for ${membership}`, async ({
+      page,
+    }, testInfo) => {
+      if (membership !== "guest") {
+        await page.addInitScript(
+          ({ address, jwt }) => {
+            localStorage.setItem("6529-wallet-active-address", address);
+            localStorage.setItem(
+              "6529-wallet-accounts",
+              JSON.stringify([
+                {
+                  address,
+                  jwt,
+                  role: null,
+                  refreshToken: null,
+                  authSessionVersion: "v2",
+                  profileId: null,
+                  profileHandle: null,
+                },
+              ])
+            );
+          },
+          { address: wallet, jwt: validJwt }
+        );
+      }
+      let releaseIdentity!: () => void;
+      const identityReady = new Promise<void>((resolve) => {
+        releaseIdentity = resolve;
+      });
+      await page.route(`**/api/identities/${wallet}`, async (route) => {
+        await identityReady;
+        const response = await route.fetch();
+        const identity = await response.json();
+        await route.fulfill({
+          response,
+          json: {
+            ...identity,
+            id: membership === "member" ? identity.id : null,
+            handle: membership === "member" ? identity.handle : null,
+            normalised_handle:
+              membership === "member" ? identity.normalised_handle : null,
+          },
+        });
+      });
+      await page.route("**/api/identities/*/activity", (route) =>
+        route.fulfill({ json: { date_samples: [] } })
+      );
+      try {
+        const response = await page.goto("/about", {
+          waitUntil: "domcontentloaded",
+        });
+        const html = await response!.text();
+        expect(html).toContain('href="/join-6529"');
+        expect(html).not.toContain('href="/validator"');
+        const openMenu = page.getByRole("button", {
+          name: /^(Open|Toggle) menu/,
+        });
+        const isOverlay = isMobileSurfaceProject(testInfo.project.name);
+        if (isOverlay) await openMenu.click();
+        const nav = page
+          .getByRole("navigation", { name: /^(Desktop|Primary) navigation$/ })
+          .filter({ visible: true });
+        await expect(nav).toBeVisible();
+        const about = nav.getByRole("button", { name: "About", exact: true });
+        const aboutBefore = await about.boundingBox();
+        if (membership !== "guest") {
+          await expect(
+            nav.getByRole("link", { name: "Join 6529" })
+          ).toBeHidden();
+          await expect(
+            nav.getByRole("link", { name: "Validator" })
+          ).toHaveCount(0);
+        }
+        releaseIdentity();
+        const label = membership === "member" ? "Validator" : "Join 6529";
+        const destination =
+          membership === "member" ? "/validator" : "/join-6529";
+        const link = nav.getByRole("link", { name: label, exact: true });
+        await expect(link).toBeVisible();
+        await expect(link).toHaveAttribute("href", destination);
+        expect(await about.boundingBox()).toEqual(aboutBefore);
+        await page.keyboard.press("Tab");
+        await link.focus();
+        await expect(link).toBeFocused();
+        expect(
+          await link.evaluate((element) => getComputedStyle(element).boxShadow)
+        ).not.toBe("none");
+        const dmBox = await nav
+          .getByRole("link", { name: "DMs", exact: true })
+          .boundingBox();
+        const linkBox = await link.boundingBox();
+        expect(linkBox!.y).toBeGreaterThanOrEqual(dmBox!.y + dmBox!.height);
+        expect(linkBox!.y - (dmBox!.y + dmBox!.height)).toBeLessThanOrEqual(8);
+        await link.click();
+        await expect(page).toHaveURL((url) => url.pathname === destination, {
+          timeout: 30_000,
+        });
+        // Route rendering and overlay dismissal finish after the URL updates.
+        if (isOverlay) {
+          await expect(nav).toBeHidden();
+          await openMenu.click();
+        }
+        await expect(
+          nav.getByRole("link", { name: label, exact: true })
+        ).toHaveAttribute("aria-current", "page");
+      } finally {
+        releaseIdentity();
+      }
+    });
+  }
 });

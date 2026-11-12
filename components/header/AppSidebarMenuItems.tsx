@@ -13,6 +13,9 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 type MenuItem = {
   readonly label: string;
+  readonly pending?: boolean;
+  readonly emphasized?: boolean;
+  readonly active?: boolean;
   readonly path?: string | undefined;
   readonly icon?: ElementType | undefined;
   readonly children?: MenuItem[] | undefined;
@@ -257,12 +260,20 @@ function TopLevelMenuItem({
       <Link
         href={item.path === "/profile" ? profilePath : item.path}
         onClick={onNavigate}
+        aria-current={item.active ? "page" : undefined}
+        title={item.active !== undefined ? item.label : undefined}
         aria-label={
           item.hasIndicator === true && item.indicatorLabel
             ? `${item.label}: ${item.indicatorLabel}`
             : undefined
         }
-        className="tw-flex tw-items-center tw-space-x-4 tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 active:tw-bg-iron-800"
+        className={clsx(
+          "tw-flex tw-items-center tw-space-x-4 tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 active:tw-bg-iron-800",
+          item.emphasized && !item.active && "tw-bg-white/5",
+          item.active !== undefined &&
+            "focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-iron-500 desktop-hover:hover:tw-bg-white/10",
+          item.active && "tw-bg-iron-800"
+        )}
       >
         <SidebarItemIconWithIndicator
           item={item}
@@ -318,7 +329,10 @@ export default function AppSidebarMenuItems({
     <>
       <ul className="tw-list-none tw-space-y-2 tw-pl-0">
         {visibleMenu.map((item) => (
-          <li key={item.label}>
+          <li
+            key={item.label}
+            className={item.pending ? "tw-invisible" : undefined}
+          >
             <TopLevelMenuItem
               item={item}
               onNavigate={onNavigate}

@@ -13,6 +13,7 @@ export interface RankedPageMatch {
 }
 
 export const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
+  "/validator": ["6529 Validator"],
   "/safe-collecting": ["delegation", "delegations", "Delegation Center"],
   "/safe-collecting/tap-guide": [
     "delegation",

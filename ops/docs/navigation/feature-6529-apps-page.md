@@ -43,9 +43,10 @@ choose a platform before asking.
    `Arweave mirror · Coming soon` until its mirror is published, then shows a
    clickable `Arweave mirror` link.
 5. Select anywhere in the `6529 Validator` section to read more and download
-   the validator from `/validator`. Header search also finds it under `Pages`
-   for `validator`, `6529 Validator`, or `/validator`; it has no separate
-   navigation entry.
+   the validator from `/validator`. Signed-in members with a profile also get
+   a direct `Validator` row in the primary navigation and can search `Pages`
+   for `validator`, `6529 Validator`, or `/validator`. Newcomers see `Join 6529`
+   in navigation and search instead.
 
 ## Common Scenarios
 

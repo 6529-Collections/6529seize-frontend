@@ -32,7 +32,7 @@ On web layouts, route switching is sidebar-first.
   reveal it; focus on other sidebar controls does not keep it visible after the
   pointer leaves. Touch layouts keep it visible. Expand and collapse use the same footprint.
 - Primary menu concepts are ordered `NFTs`, `Museum`, `Waves`, `DMs`,
-  `Join 6529`, and `About` so art destinations stay together while Waves and
+  `Join 6529` (or `Validator` for members), and `About` so art destinations stay together while Waves and
   DMs remain adjacent.
 - `NFTs` and `About` are expandable groups; `Museum`, `Waves`, `DMs`, and
   `Join 6529` are direct rows.
@@ -48,11 +48,19 @@ On web layouts, route switching is sidebar-first.
 - In the collapsed rail, the connected account avatar gets a visible hover
   highlight; the account menu still opens by click or keyboard activation.
 
+The slot between `DMs` and `About` shows a subtly highlighted `Join 6529`
+link to `/join-6529` for signed-out visitors and wallets without a profile.
+Signed-in members with a profile see `Validator`, linking to `/validator`, in
+that same slot. While wallet or profile restoration is unresolved, the slot
+reserves its space without showing either action. The same rule applies to the
+collapsed and expanded web sidebar, mobile web menu, native app drawer, and
+page search. Public navigation never adds a Validator link.
+
 ## Location in the Site
 
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Home entry: 6529 logo link to `/`.
-- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`,
+- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529` (or `Validator` for members),
   `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.

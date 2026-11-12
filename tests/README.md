@@ -56,6 +56,13 @@ browser tests for distinct rendering or navigation risks according to
 [AGENTS.md](../AGENTS.md#test-layer-selection), and register real browser packs
 in `tests/packs.manifest.cjs`.
 
+The session recovery sandbox also checks the Join 6529 / Validator slot using
+synthetic stored sessions on desktop and mobile. It holds identity restoration
+to verify hidden actions and stable neighboring rows, then checks newcomers,
+profileless wallets, members, keyboard focus, direct navigation, and active state.
+App PR CI selects this registered pack through the critical-shell lane for
+membership-navigation source changes.
+
 ## Pack registry
 
 The reaction sandbox covers live count and profile-list updates, desktop tooltip
