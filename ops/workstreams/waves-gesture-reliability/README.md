@@ -53,8 +53,8 @@ navigate or leave a reused surface translated.
 
 The existing direct DOM transform feedback, one animation frame per burst of
 touch moves, 160 ms cancellation settle, 180 ms completion settle, reduced-motion
-path and duplicate-transition suppression remain. No dependency, React state,
-listener or per-frame allocation was added to the recognizer. Its existing unit
+path and duplicate-transition suppression remain. No dependency, React state
+or listener was added to the recognizer. Its existing unit
 contract checks move coalescing and no React re-render during a drag.
 
 Reply distance, release timing, timestamp reveal, composer focus, visible action
