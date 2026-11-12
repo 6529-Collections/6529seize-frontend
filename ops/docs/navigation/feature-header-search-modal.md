@@ -104,6 +104,8 @@ DMs; the `in:` picker can include conversations you can read.
     (`/about/6529-apps`), plus
     permission-gated operational routes such as `Drop Forge`, `Craft Claims`,
     or `Launch Claims`, subject to the current route catalog.
+  - `6529 Validator` (`/validator`) is searchable for `validator`,
+    `6529 Validator`, or `/validator` without a navigation entry.
 - Category persistence:
   - Selected category is remembered between openings.
   - `Clear` in site search resets category to `All`. In `Messages`, clearing text

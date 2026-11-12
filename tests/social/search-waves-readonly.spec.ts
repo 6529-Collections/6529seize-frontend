@@ -327,7 +327,7 @@ async function installAdvancedSearchFixture(page: Page) {
             author: { ...localFixtureProfile, handle: "alice", badges: {} },
             created_at: 1713744000000,
             content:
-              "hello **from :el_fafo_angy:** another wave :smile: :unknown_search_emoji: `:el_fafo_angy:`",
+              "hello **from :el_fafo_angy:** another wave :smile: :unknown_search_emoji: `:el_fafo_angy:`\n\n- List :el_fafo_angy:\n\n#### Heading :el_fafo_angy:",
             parts_count: 1,
             media: [],
             attachments: [],
@@ -351,18 +351,26 @@ async function installAdvancedSearchFixture(page: Page) {
 }
 
 async function expectSearchResultEmojis(result: Locator) {
-  const emoji = result.getByRole("img", {
+  const emojis = result.getByRole("img", {
     name: "Emoji :el_fafo_angy:",
     exact: true,
   });
-  await expect(emoji).toBeVisible();
-  await expect(emoji).toHaveJSProperty("complete", true);
-  await expect(emoji).toHaveJSProperty("naturalWidth", 20);
-  await expect(emoji).toHaveCSS("width", "20px");
-  await expect(emoji).toHaveCSS("height", "20px");
+  await expect(emojis).toHaveCount(3);
+  for (const emoji of await emojis.all()) {
+    await expect(emoji).toBeVisible();
+    await expect(emoji).toHaveJSProperty("complete", true);
+    await expect(emoji).toHaveJSProperty("naturalWidth", 20);
+    await expect(emoji).toHaveCSS("width", "20px");
+    await expect(emoji).toHaveCSS("height", "20px");
+  }
   await expect(
     result
       .getByRole("strong")
+      .getByRole("img", { name: "Emoji :el_fafo_angy:" })
+  ).toHaveCount(2);
+  await expect(
+    result
+      .getByRole("listitem")
       .getByRole("img", { name: "Emoji :el_fafo_angy:" })
   ).toBeVisible();
   await expect(result.getByText("hello", { exact: true })).toHaveJSProperty(
@@ -465,14 +473,15 @@ async function exerciseAdvancedSearch(
       name: `Remove wave filter ${OTHER_SEARCH_WAVE_NAME}`,
     })
     .click();
-  await page
-    .getByRole("button", {
-      name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
-    })
-    .click();
-  await expect(page).toHaveURL(
-    new RegExp(`/waves/${OTHER_SEARCH_WAVE_ID}\\?serialNo=43`)
-  );
+  // Chat consumes the serial target and removes it from the URL after opening.
+  await Promise.all([
+    page.waitForURL(new RegExp(`/waves/${OTHER_SEARCH_WAVE_ID}\\?serialNo=43`)),
+    page
+      .getByRole("button", {
+        name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
+      })
+      .click(),
+  ]);
 }
 
 async function installSidebarScoreFixture(
@@ -1079,6 +1088,21 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     ).toHaveCount(0);
   });
 
+  test("Pages search opens the Validator without a navigation entry", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/about/6529-apps");
+    const { searchInput } = await openHeaderSearch(page);
+    await searchInput.fill("validator");
+    await page.getByRole("tab", { name: /^Pages/ }).click();
+    const validator = page
+      .getByRole("option")
+      .locator('xpath=self::a[@href="/validator"]');
+    await expect(validator).toContainText("6529 Validator");
+    await validator.click();
+    await expect(page).toHaveURL(/\/validator$/);
+  });
+
   test("global header search preserves keyboard flow and page navigation", async ({
     page,
   }) => {
@@ -1159,6 +1183,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     );
     const wavesTab = page.getByRole("tab", { name: /^Waves/ });
     await expect(wavesTab).toBeFocused();
+    await expect(wavesTab).toHaveAttribute("aria-selected", "true");
     await wavesTab.press(
       testInfo.project.use.isMobile ? "ArrowRight" : "ArrowDown"
     );

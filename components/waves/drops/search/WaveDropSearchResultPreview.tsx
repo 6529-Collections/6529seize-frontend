@@ -123,6 +123,15 @@ const decorateChildren = (
     return child;
   });
 
+const createCompactHeading = (query: string) =>
+  function CompactHeading({ children }: { readonly children?: ReactNode }) {
+    return (
+      <strong className="tw-block tw-text-sm tw-text-iron-100">
+        {decorateChildren(children, query)}
+      </strong>
+    );
+  };
+
 const createComponents = ({
   checkedLabel,
   imageFallback,
@@ -157,16 +166,11 @@ const createComponents = ({
       {decorateChildren(children, query)}
     </strong>
   ),
-  h2: ({ children }) => (
-    <strong className="tw-block tw-text-sm tw-text-iron-100">
-      {decorateChildren(children, query)}
-    </strong>
-  ),
-  h3: ({ children }) => (
-    <strong className="tw-block tw-text-sm tw-text-iron-100">
-      {decorateChildren(children, query)}
-    </strong>
-  ),
+  h2: createCompactHeading(query),
+  h3: createCompactHeading(query),
+  h4: createCompactHeading(query),
+  h5: createCompactHeading(query),
+  h6: createCompactHeading(query),
   img: ({ alt }) => (
     <span className="tw-italic tw-text-iron-400">
       [{alt?.trim() ? alt.trim() : imageFallback}]
@@ -177,7 +181,7 @@ const createComponents = ({
       {checked ? "☑" : "☐"}{" "}
     </span>
   ),
-  li: ({ children }) => <li>{children}</li>,
+  li: ({ children }) => <li>{decorateChildren(children, query)}</li>,
   ol: ({ children }) => (
     <ol className="tw-my-1 tw-list-decimal tw-pl-5">{children}</ol>
   ),
