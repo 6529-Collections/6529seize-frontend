@@ -240,6 +240,78 @@ async function readNotificationHistoryPushCount(page: Page) {
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
+  test("calendar invites omit the mint URL only on iOS", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native calendar invite behavior"
+    );
+    await gotoReady(page, "/meme-calendar");
+
+    const mintUrl = /6529\.io%2Fthe-memes%2Fmint/i;
+    const invites = [
+      page.getByRole("link", { name: "Add to Calendar", exact: true }).first(),
+      page
+        .getByRole("link", { name: "Add to Google Calendar", exact: true })
+        .first(),
+    ];
+
+    for (const invite of invites) {
+      await expect(invite).toBeVisible();
+      if (testInfo.project.name === "capacitor-ios-sim") {
+        await expect(invite).not.toHaveAttribute("href", mintUrl);
+      } else {
+        await expect(invite).toHaveAttribute("href", mintUrl);
+      }
+    }
+  });
+
+  test("NextGen listing filters and direct listing URLs are gated on iOS", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native NextGen listing behavior"
+    );
+    await gotoReady(
+      page,
+      "/nextgen/collection/pebbles/art?sort=listed_price&listed=true"
+    );
+
+    const listingStatus = page.getByRole("combobox", {
+      name: "Listing status",
+    });
+    const sort = page.getByRole("button", { name: /^Sort:/ });
+    const isIos = testInfo.project.name === "capacitor-ios-sim";
+    if (isIos) {
+      await expect(sort).toHaveText("Sort: ID");
+      await expectUrlState(
+        page,
+        (url) =>
+          url.searchParams.get("sort") === "id" &&
+          !url.searchParams.has("listed")
+      );
+      await expect(listingStatus).toHaveCount(0);
+    } else {
+      await expect(sort).toHaveText("Sort: Listed Price");
+      await expect(listingStatus).toBeVisible();
+    }
+    await sort.click();
+    await expect(
+      page.getByRole("button", { name: "Last Sale", exact: true })
+    ).toBeVisible();
+    const listedPrice = page.getByRole("button", {
+      name: "Listed Price",
+      exact: true,
+    });
+    if (isIos) {
+      await expect(listedPrice).toHaveCount(0);
+    } else {
+      await expect(listedPrice).toBeVisible();
+    }
+  });
+
   test("Collect Back restores the Collected filters and source action", async ({
     page,
   }, testInfo) => {

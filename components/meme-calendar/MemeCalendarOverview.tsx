@@ -5,6 +5,7 @@ import ClientOnly from "@/components/client-only/ClientOnly";
 import Button from "@/components/utils/button/Button";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useVisibleInterval } from "@/hooks/usePageVisibility";
 import type { PublishedMemesStatus } from "@/hooks/usePublishedMemes";
 import { formatInteger } from "@/i18n/format";
@@ -240,6 +241,7 @@ function MemeCalendarOverviewNextMintContent({
   publishedMemeIds = new Set<number>(),
   publishedMemesStatus,
 }: MemeCalendarOverviewNextMintProps) {
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const overviewInstanceId = useId();
   const calendarInviteTooltipId = buildTooltipId(
     overviewInstanceId,
@@ -339,9 +341,10 @@ function MemeCalendarOverviewNextMintContent({
           ),
           tooltipId: calendarInviteTooltipId,
         },
-        locale
+        locale,
+        { includeMintUrl: !hideNftPurchasing }
       ),
-    [calendarInviteTooltipId, locale, mintDetails]
+    [calendarInviteTooltipId, hideNftPurchasing, locale, mintDetails]
   );
 
   const nowMs = now.getTime();
@@ -568,6 +571,7 @@ function MemeCalendarOverviewUpcomingMints({
   displayTz,
   locale = DEFAULT_LOCALE,
 }: MemeCalendarOverviewUpcomingMintsProps) {
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const calendarInviteTooltipId = buildTooltipId(
     useId(),
     "meme-calendar-upcoming-invites"
@@ -717,7 +721,8 @@ function MemeCalendarOverviewUpcomingMints({
                             ),
                             tooltipId: calendarInviteTooltipId,
                           },
-                          locale
+                          locale,
+                          { includeMintUrl: !hideNftPurchasing }
                         ),
                       }}
                     ></td>
