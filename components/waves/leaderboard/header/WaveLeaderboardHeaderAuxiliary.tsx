@@ -242,7 +242,7 @@ export const HeaderViewModeTabs: React.FC<HeaderViewModeTabsProps> = ({
     ref={refObject}
     role="tablist"
     aria-label="Leaderboard view modes"
-    className={`tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center tw-whitespace-nowrap ${CONNECTED_TAB_LIST_CLASSES}`}
+    className={`tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center tw-whitespace-nowrap ${CONNECTED_TAB_LIST_CLASSES} ${isMainStage ? "" : "tw-backdrop-blur"}`}
   >
     {viewModes.map((mode) => {
       const label = getViewModeLabel(mode);

@@ -193,7 +193,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         role="tablist"
         ref={featureUsageRef}
         aria-label="Sort options"
-        className={`tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center ${CONNECTED_TAB_LIST_CLASSES}`}
+        className={`tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center ${CONNECTED_TAB_LIST_CLASSES} ${isMainStage ? "" : "tw-backdrop-blur"}`}
       >
         {items.map((item) => (
           <button
