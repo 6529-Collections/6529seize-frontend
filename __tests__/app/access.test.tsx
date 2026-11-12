@@ -112,19 +112,23 @@ describe("Access page", () => {
     render(<AccessPage />);
     fetchMock.mockReturnValueOnce(request.promise);
     const input = screen.getByLabelText("Team Login");
+    const status = screen.getByRole("status");
+    expect(status).toBeEmptyDOMElement();
 
     submitCode();
     fireEvent.keyDown(input, { key: "Enter" });
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(input).toHaveAttribute("readonly");
-    expect(screen.getByRole("status")).toHaveTextContent("Verifying code…");
+    expect(screen.getByRole("status")).toBe(status);
+    expect(status).toHaveTextContent("Verifying code…");
 
     request.resolve({ ok: false, status: 401 });
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Access Denied!"
     );
     expect(input).not.toHaveAttribute("readonly");
+    expect(status).toBeEmptyDOMElement();
 
     fetchMock.mockResolvedValueOnce({ ok: true, status: 200 });
     submitCode("corrected-code");
