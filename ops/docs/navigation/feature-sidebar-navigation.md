@@ -32,10 +32,10 @@ On web layouts, route switching is sidebar-first.
   reveal it; focus on other sidebar controls does not keep it visible after the
   pointer leaves. Touch layouts keep it visible. Expand and collapse use the same footprint.
 - Primary menu concepts are ordered `NFTs`, `Museum`, `Waves`, `DMs`,
-  `Join 6529`, and `About` so art destinations stay together while Waves and
+  `Join 6529` (or `Validator` for members), and `About` so art destinations stay together while Waves and
   DMs remain adjacent.
 - `NFTs` and `About` are expandable groups; `Museum`, `Waves`, `DMs`, and
-  `Join 6529` are direct rows.
+  the `Join 6529` / `Validator` slot are direct rows.
 - The `Museum` row opens `/museum/network` in one click.
 - The `Waves` sidebar row opens `/waves` in one click. `Discover Waves`
   remains a secondary Waves experience link and searchable destination.
@@ -48,11 +48,22 @@ On web layouts, route switching is sidebar-first.
 - In the collapsed rail, the connected account avatar gets a visible hover
   highlight; the account menu still opens by click or keyboard activation.
 
+The slot between `DMs` and `About` shows `Join 6529`
+link to `/join-6529` for signed-out visitors and wallets without a profile.
+The slot uses the same styling and hover behavior as the other navigation rows.
+If the profile lookup fails, the slot stays reserved; use the account area’s
+`Profile unavailable. Retry` control to recover.
+Signed-in members with a profile see `Validator`, linking to `/validator`, in
+that same slot. While wallet or profile restoration is unresolved, the slot
+reserves its space without showing either action. The same rule applies to the
+collapsed and expanded web sidebar, mobile web menu, native app drawer, and
+page search. Public navigation never adds a Validator link.
+
 ## Location in the Site
 
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Home entry: 6529 logo link to `/`.
-- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`,
+- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529` (or `Validator` for members),
   `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
@@ -88,7 +99,8 @@ On web layouts, route switching is sidebar-first.
 - Select direct rows or expand groups for nested routes.
 - Open `Museum` directly from the primary sidebar row.
 - Open `Waves` directly from the primary sidebar row.
-- Open `Join 6529` directly from the primary sidebar row.
+- Open `Join 6529` as a newcomer, or `Validator` as a signed-in member, from
+  the same primary sidebar slot.
 - Open `Discover Waves` from the Profile Waves Feed header or search.
 - Open `Drop Forge` from the standalone row after `About` when the current
   wallet can access `/drop-forge`.
@@ -109,7 +121,7 @@ On web layouts, route switching is sidebar-first.
    separate bottom section contains `Notifications` (when connected) directly
    above the account control.
 4. Open `NFTs` or `About` for nested routes; use the `Museum`, `Waves`, and
-   `Join 6529` rows for direct navigation.
+   `Join 6529` / `Validator` rows for direct navigation.
 5. In collapsed mode, hover a group row with a mouse or activate it by tap,
    click, or keyboard to open an anchored flyout submenu. The flyout preserves
    subsection labels such as `Network & Reputation`, `Safe Collecting`, or
@@ -130,9 +142,9 @@ On web layouts, route switching is sidebar-first.
   panel header or search for `/discover`.
 - Open `Museum`:
   use the primary `Museum` row for `/museum/network`.
-- Open `Join 6529`:
-  use the primary `Join 6529` row for the shareable onboarding guide at
-  `/join-6529`.
+- Open the membership row:
+  newcomers use `Join 6529` for the onboarding guide at `/join-6529`;
+  signed-in members with a profile use `Validator` for `/validator`.
 - Open `About > Network & Reputation` routes:
   `/network`, `/network/activity`, `/network/tdh`,
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
@@ -156,7 +168,8 @@ On web layouts, route switching is sidebar-first.
   `NFTs` keeps collection and NFT activity links, and `About` keeps subsection
   labels such as `Network & Reputation`, `Safe Collecting`, and
   `Data & Developer Tools` instead of flattening every route into one list.
-  `Museum`, `Waves`, and `Join 6529` remain direct rows in collapsed mode.
+  `Museum`, `Waves`, and the `Join 6529` / `Validator` slot remain direct rows
+  in collapsed mode.
 - Open `About` and `6529 Capital` routes from grouped links.
 - Click the connected `Notifications` bell in the bottom account section to
   open `/notifications`. On desktop, hover for a preview without navigating;
