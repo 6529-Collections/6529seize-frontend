@@ -206,7 +206,7 @@ function toMinimalWave({
     parentWaveId: wave.parentWaveId,
     hasSubwaves: wave.hasSubwaves,
     reserveDescriptionRow:
-      wave.descriptionDrop?.contents == null ||
+      wave.descriptionDrop.contents === null ||
       Boolean(getDescriptionPreviewText(wave.descriptionDrop.contents)),
     followedSubwavesCount: wave.followedSubwavesCount,
     latestFollowedSubwaveDropTimestamp: wave.latestFollowedSubwaveDropTimestamp,
