@@ -1,3 +1,4 @@
+import type { Page } from "@playwright/test";
 import { test, expect } from "../testHelpers";
 
 const STAGING_DEPLOYMENT_HOSTNAME = /^[a-z0-9-]*staging\.6529\.io$/;
@@ -7,6 +8,18 @@ function isStagingDeployment(baseURL: string | undefined): boolean {
     baseURL !== undefined &&
     STAGING_DEPLOYMENT_HOSTNAME.test(new URL(baseURL).hostname)
   );
+}
+
+async function openAccessGate(page: Page, entry: string): Promise<void> {
+  await Promise.all([
+    page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/api/" &&
+        response.status() === 401
+    ),
+    page.goto(entry),
+  ]);
+  await expect(page).toHaveTitle("Access Page");
 }
 
 // The staging check enters a real team access code.
@@ -33,39 +46,43 @@ test.describe("Access Page", () => {
     if (!accessCode) throw new Error("Staging access code is required.");
 
     await context.clearCookies();
-    await Promise.all([
-      page.waitForResponse(
-        (response) =>
-          new URL(response.url()).pathname === "/api/" &&
-          response.status() === 401
-      ),
-      page.goto(path + hash),
-    ]);
+    await openAccessGate(page, path + hash);
     const gateUrl = new URL(page.url());
     expect(gateUrl.pathname).toBe("/access");
     expect(gateUrl.searchParams.get("returnTo")).toBe(path);
-    await expect(page).toHaveTitle("Access Page");
 
-    const input = page.getByRole("textbox", { name: "Team access code" });
+    const input = page.getByLabel("Team Login", { exact: true });
+    await expect(page.getByText("Team Login", { exact: true })).toBeVisible();
+    await expect(input).toHaveAttribute("placeholder", "********");
+    await expect(input).toHaveAttribute("type", "password");
     await input.fill("invalid-test-access-code");
     const inputPosition = await input.boundingBox();
     expect(inputPosition).not.toBeNull();
     await input.press("Enter");
-    await expect(page.getByRole("alert")).toHaveText("Access Denied!");
+    await expect(
+      page.getByRole("alert").filter({ hasText: /^Access Denied!$/ })
+    ).toBeVisible();
+    await expect(input).toHaveAttribute("aria-invalid", "true");
     expect(await input.boundingBox()).toEqual(inputPosition);
 
+    const dialogs: string[] = [];
+    page.on("dialog", async (dialog) => {
+      dialogs.push(dialog.type());
+      await dialog.dismiss();
+    });
     await input.fill(accessCode);
-    await Promise.all([
-      page.waitForEvent("dialog").then(async (dialog) => {
-        const pathBeforeConfirmation = new URL(page.url()).pathname;
-        await dialog.accept();
-        expect(dialog.type()).toBe("alert");
-        expect(dialog.message()).toBe("gm!");
-        expect(pathBeforeConfirmation).toBe("/access");
-      }),
-      input.press("Enter"),
-    ]);
+    await input.press("Enter");
 
     await expect(page).toHaveURL(path + hash);
+    expect(dialogs).toEqual([]);
+
+    await test.step("opens the home page when accessed directly", async () => {
+      await context.clearCookies();
+      await openAccessGate(page, "/access");
+      await input.fill(accessCode);
+      await input.press("Enter");
+      await expect(page).toHaveURL("/");
+      expect(dialogs).toEqual([]);
+    });
   });
 });
