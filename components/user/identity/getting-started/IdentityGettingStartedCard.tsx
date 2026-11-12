@@ -33,7 +33,7 @@ import {
 } from "./identityGettingStartedSession";
 
 const SECONDARY_ACTION_CLASS =
-  "tw-group/step tw-flex tw-min-h-16 tw-w-full tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2.5 tw-text-left tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-bg-white/[0.03] hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none";
+  "tw-group/step tw-flex tw-min-h-16 tw-w-full tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2.5 tw-text-left tw-text-iron-300 tw-no-underline tw-transition-colors hover:tw-bg-emerald-900/20 hover:tw-text-emerald-400 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none";
 
 function NextStepContent({
   title,
@@ -46,19 +46,19 @@ function NextStepContent({
 }) {
   return (
     <>
-      <span className="tw-mt-0.5 tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center tw-text-iron-400">
+      <span className="tw-mt-0.5 tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center tw-text-iron-500 group-hover/step:tw-text-emerald-400">
         {icon}
       </span>
       <span className="tw-min-w-0 tw-flex-1">
         <span className="tw-block tw-text-sm tw-font-semibold tw-leading-5">
           {title}
         </span>
-        <span className="tw-mt-1 tw-block tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-300">
+        <span className="tw-mt-1 tw-block tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
           {description}
         </span>
       </span>
       <ArrowRightIcon
-        className="tw-mt-0.5 tw-size-4 tw-flex-none tw-text-iron-400"
+        className="tw-mt-0.5 tw-size-4 tw-flex-none tw-text-iron-500 group-hover/step:tw-text-emerald-400"
         aria-hidden="true"
       />
     </>
@@ -111,7 +111,7 @@ function IdentityGettingStartedCardContent({
   return (
     <section
       ref={cardRef}
-      className={`tw-relative tw-scroll-mt-24 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-emerald-500/25 tw-bg-emerald-950/20 tw-bg-gradient-to-br tw-from-emerald-400/[0.04] tw-via-transparent tw-to-transparent tw-@container/identity-guide ${className ?? ""}`}
+      className={`tw-relative tw-scroll-mt-24 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-emerald-500/30 tw-bg-emerald-950/20 tw-bg-gradient-to-br tw-from-emerald-400/[0.04] tw-via-transparent tw-to-transparent tw-@container/identity-guide ${className ?? ""}`}
       aria-label={t(locale, "identityGettingStarted.region")}
     >
       <button
@@ -119,24 +119,24 @@ function IdentityGettingStartedCardContent({
         onClick={onDismiss}
         aria-label={t(locale, "identityGettingStarted.dismiss")}
         title={t(locale, "identityGettingStarted.dismiss")}
-        className="tw-absolute tw-right-2 tw-top-2 tw-z-10 tw-flex tw-size-11 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors hover:tw-bg-emerald-400/5 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
+        className="tw-absolute tw-right-2 tw-top-2 tw-z-10 tw-flex tw-size-11 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-emerald-500/60 tw-transition-colors hover:tw-bg-emerald-900/50 hover:tw-text-emerald-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
       >
         <XMarkIcon className="tw-size-4" aria-hidden="true" />
       </button>
       <div className="tw-contents">
         <CheckCircleIcon
-          className="tw-absolute tw-left-6 tw-top-4 tw-hidden tw-size-12 tw-rounded-full tw-border tw-border-solid tw-border-emerald-400/20 tw-bg-emerald-400/[0.06] tw-p-2.5 tw-text-emerald-300 @[40rem]/identity-guide:tw-block"
+          className="tw-absolute tw-left-6 tw-top-4 tw-hidden tw-size-12 tw-rounded-full tw-border tw-border-solid tw-border-emerald-500/20 tw-bg-emerald-900/20 tw-p-2.5 tw-text-emerald-400 @[40rem]/identity-guide:tw-block"
           aria-hidden="true"
         />
         <div className="tw-grid md:tw-grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
           <div className="tw-min-w-0 tw-p-5 @[40rem]/identity-guide:tw-pl-24 sm:tw-py-6 sm:tw-pr-6">
-            <h2 className="tw-m-0 tw-w-full tw-pr-10 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50 md:tw-pr-0 lg:tw-text-2xl lg:tw-leading-8">
+            <h2 className="tw-m-0 tw-w-full tw-pr-10 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-white md:tw-pr-0 lg:tw-text-2xl lg:tw-leading-8">
               {t(locale, "identityGettingStarted.title")}
             </h2>
-            <p className="tw-mb-0 tw-mt-2 tw-w-full tw-max-w-lg tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-300">
+            <p className="tw-mb-0 tw-mt-2 tw-w-full tw-max-w-lg tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
               {t(locale, "identityGettingStarted.introduction")}
             </p>
-            <p className="tw-mb-0 tw-mt-2 tw-max-w-lg tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-300">
+            <p className="tw-mb-0 tw-mt-2 tw-max-w-lg tw-text-xs tw-font-normal tw-leading-5 tw-text-iron-400">
               {t(locale, "identityGettingStarted.wavesDescription")}
             </p>
             <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-1">
@@ -144,7 +144,7 @@ function IdentityGettingStartedCardContent({
                 href="/discover"
                 variant="primary"
                 size="md"
-                className="tw-min-h-11 tw-justify-between tw-gap-5"
+                className="tw-min-h-11 tw-justify-between tw-gap-5 !tw-border-white !tw-bg-white !tw-text-black desktop-hover:hover:!tw-bg-iron-100"
               >
                 {t(locale, "identityGettingStarted.discover")}
                 <ArrowRightIcon
@@ -154,15 +154,15 @@ function IdentityGettingStartedCardContent({
               </ButtonLink>
               <Link
                 href="/join-6529"
-                className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline hover:tw-text-iron-50 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline hover:tw-bg-emerald-900/20 hover:tw-text-emerald-400 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               >
                 {t(locale, "identityGettingStarted.guide")}
                 <ArrowUpRightIcon className="tw-size-4" aria-hidden="true" />
               </Link>
             </div>
           </div>
-          <div className="tw-flex tw-min-w-0 tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-emerald-500/15 tw-p-5 sm:tw-p-6 md:tw-my-5 md:tw-border-l md:tw-border-t-0 md:tw-py-0">
-            <p className="tw-mb-1 tw-mt-0 tw-px-2 tw-text-xs tw-font-medium tw-uppercase tw-leading-5 tw-tracking-wider tw-text-emerald-400/80 md:tw-pr-8">
+          <div className="tw-flex tw-min-w-0 tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-emerald-500/20 tw-p-5 sm:tw-p-6 md:tw-my-5 md:tw-border-l md:tw-border-t-0 md:tw-py-0">
+            <p className="tw-mb-1 tw-mt-0 tw-px-2 tw-text-xs tw-font-medium tw-uppercase tw-leading-5 tw-tracking-wider tw-text-emerald-500/80 md:tw-pr-8">
               {t(locale, "identityGettingStarted.explore")}
             </p>
             {mainStageHref && (
