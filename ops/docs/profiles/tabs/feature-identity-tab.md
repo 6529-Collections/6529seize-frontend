@@ -5,6 +5,8 @@
 `Identity` is the default profile tab at `/{user}`.
 It combines `Rep` and `NIC` on one route.
 
+- After first profile setup, the connected owner can use a getting-started card
+  above the Identity content to explore Waves and learn about The Memes.
 - Desktop shows both surfaces at the same time.
 - Rep and NIC support direction toggles: `Received` and `Given`.
 - Mobile switches between `REP`, `NIC`, and `ID Statements` subviews
@@ -55,6 +57,55 @@ Mobile (`< lg`):
 7. Review activity logs and apply filters.
 8. On mobile, switch between `REP`, `NIC`, and `ID Statements` as
    needed.
+
+## Getting Started After Profile Setup
+
+After you choose and save your first profile username, your own Identity tab
+shows a `Getting started` guide with `Your profile is ready`. The welcome recommends starting with a Wave,
+a space for conversation, art, and community decisions. About statements remain
+available through the
+[profile editor](../navigation/feature-header-summary.md).
+
+When successful profile setup finishes on Identity, the welcome waits until
+profile content is visible, then scrolls into view once without moving keyboard
+focus. Reduced-motion preferences prevent
+animated scrolling. Returning to Identity or reloading the page does not repeat
+this arrival scroll. If you started setup while creating a Wave, you return to
+that flow instead.
+
+- `Find a Wave` opens [Wave Discovery](../../waves/discovery/feature-discover-sections-and-search.md)
+  at `/discover`. Waves are spaces for conversations, creative work, and
+  community decisions.
+- `The Memes Main Stage` opens the network's configured Main Stage Wave, where
+  you can browse art submitted to The Memes collection.
+- `Before you submit art` opens the existing `Unlock submissions`
+  nomination and eligibility popover on desktop, anchored to the action without
+  a modal backdrop. Hover or click opens it; Enter or Space opens it with focus,
+  Tab reaches `Get nominated`, and Escape closes it and restores trigger focus.
+  Touch-first devices and the native app keep the dialog or sheet titled
+  `Before you submit art`; its close control returns focus to the action.
+  Both show progress toward the `MemesNominee` REP requirement and the same
+  `Get nominated` action. Nomination
+  eligibility is separate from submission and does not guarantee selection. See
+  [Wave Leaderboard Drop Entry and Eligibility](../../waves/leaderboard/feature-drop-entry-and-eligibility.md).
+- `How 6529 works` opens the [Join 6529 guide](../../navigation/feature-join-6529-journey.md)
+  at `/join-6529`.
+
+The welcome and exploration paths sit side by side on larger screens and stack
+on phones. The two main buttons share a row at equal widths on phones and stack
+at full width on very narrow screens. Exploration arrows and descriptions stay
+visible. If Main Stage details
+are unavailable, the welcome and `Find a Wave` remain available.
+
+The card is tied to the browser session in which the profile was created. It
+can remain visible when you return to your own Identity tab in that session.
+Select `Dismiss` in the guide's header (accessible name `Dismiss guide`) to remove it without
+confirmation. Dismissal does not change your profile or prevent you from exploring
+Waves; the card has no reopen action. You can open `/join-6529` separately for guidance.
+
+Visitors, signed-out viewers, and active profile proxies do not see this card.
+An ordinary visit to an existing profile in a new browser session does not
+show the profile-creation welcome.
 
 ## Rep Behavior
 
@@ -187,7 +238,7 @@ Mobile (`< lg`):
    the receiver count from the `Manage given` button; only that button opens
    management. Recipients default to `Highest total first`, with adjustment
    controls on the right. Owners can use `Sort by` to choose `Most recently
-   adjusted`. Changing order returns to the start of that list; `Load more`
+adjusted`. Changing order returns to the start of that list; `Load more`
    continues in the selected order. Back preserves the choice while
    the dialog stays open; reopening management defaults to highest total first.
    Overview category ordering stays unchanged, by rating magnitude.
@@ -283,6 +334,11 @@ proxy allocation entry points and permissions are unchanged.
 
 ## Limitations / Notes
 
+- Getting-started card messages use canonical `en-US` copy in locales without
+  translations. The reused nomination guidance retains its
+  existing English fallback copy. Actions and destinations remain available;
+  frontend localization maintainers can translate these surfaces in a later
+  profile localization pass.
 - The NIC activity loading-error message and `Retry` use `en-US` fallback copy
   where translations are unavailable; frontend localization maintainers can
   translate those message keys without changing this flow.
