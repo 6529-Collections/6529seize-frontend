@@ -504,6 +504,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     ).toBe(4);
     await input.press(blurKey);
     await expect(input).toHaveValue("123,945");
+    // Focus restores raw digits before selecting the replacement text.
+    await input.click();
+    await expect(input).toHaveValue("123945");
     await input.fill("-12345");
     await input.press(blurKey);
     await expect(input).toHaveValue("-12,345");

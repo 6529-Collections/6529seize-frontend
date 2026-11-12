@@ -107,7 +107,10 @@ export default function MobileRepTabContent({
             <span className="tw-text-xs tw-font-normal tw-text-iron-400">
               {tRich(locale, "user.profile.rep.rep.assignedToYou", {
                 value: (
-                  <span className="tw-text-xs tw-font-medium tw-text-iron-100">
+                  <span
+                    key="value"
+                    className="tw-text-xs tw-font-medium tw-text-iron-100"
+                  >
                     {formatInteger(
                       locale,
                       overview.authenticated_user_contribution
@@ -150,7 +153,10 @@ export default function MobileRepTabContent({
                       <span className="tw-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
                         {tRich(locale, "user.profile.rep.rep.youAssigned", {
                           value: (
-                            <span className="tw-font-medium tw-text-iron-100">
+                            <span
+                              key="value"
+                              className="tw-font-medium tw-text-iron-100"
+                            >
                               {formatInteger(
                                 locale,
                                 overview.authenticated_user_contribution

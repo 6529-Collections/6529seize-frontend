@@ -129,7 +129,10 @@ export default function UserPageRepHeader({
                             : "user.profile.rep.rep.youAssigned",
                           {
                             value: (
-                              <span className="tw-text-meta/4 tw-font-medium tw-text-iron-100">
+                              <span
+                                key="value"
+                                className="tw-text-meta/4 tw-font-medium tw-text-iron-100"
+                              >
                                 {formatInteger(
                                   locale,
                                   overview.authenticated_user_contribution

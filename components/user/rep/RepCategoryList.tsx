@@ -98,6 +98,8 @@ export default function RepCategoryList({
       visibleCount,
     });
   }, [open, mobile, active, joined, categories, visibleCount]);
+  // This subscription invalidates measured geometry asynchronously on width changes.
+  /* eslint-disable react-you-might-not-need-an-effect/no-initialize-state -- ResizeObserver callbacks do not initialize state in the effect. */
   useEffect(() => {
     const list = listRef.current;
     if (!list) return;
@@ -108,10 +110,10 @@ export default function RepCategoryList({
         setLayout(null);
       }
     });
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-initialize-state -- ResizeObserver invalidates measured geometry on later width changes, not during effect initialization.
     observer.observe(list);
     return () => observer.disconnect();
   }, []);
+  /* eslint-enable react-you-might-not-need-an-effect/no-initialize-state */
   const close = () => {
     if (busy) return;
     setOpen(null);
