@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import type { ApiGlobalRepCategoryOverview } from "@/generated/models/ApiGlobalRepCategoryOverview";
 import {
   expect,
@@ -173,10 +173,12 @@ function categoryPanel(page: Page) {
     );
 }
 
-async function expectDesktopRatingPosition(page: Page, dialog: Locator) {
+async function expectDesktopRatingPosition(page: Page, name: string) {
   const viewport = page.viewportSize();
   if (!viewport || viewport.width < 768) return;
-  const panel = dialog.locator(".mobile-wrapper-dialog");
+  const panel = page
+    .getByRole("dialog", { name, exact: true })
+    .locator(".mobile-wrapper-dialog");
   await expect
     .poll(async () => {
       const box = await panel.boundingBox();
@@ -207,7 +209,8 @@ async function expectDesktopTagJoin(page: Page, category: string) {
   await expect(tag.getByRole("region")).toHaveCount(0);
   const tagBox = await tag.boundingBox();
   const panelBox = await panel.boundingBox();
-  const bridgeBox = await panel
+  const bridgeBox = await page
+    .getByRole("region", { name: `${category} REP details`, exact: true })
     .locator(':scope > span[aria-hidden="true"]')
     .boundingBox();
   expect(tagBox).not.toBeNull();
@@ -325,10 +328,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(closeButton).toHaveCSS("border-radius", "8px");
-      await expect(closeButton.locator("span")).toHaveCSS(
-        "border-radius",
-        "8px"
-      );
+      await expect(
+        panel
+          .getByRole("button", { name: "Close", exact: true })
+          .locator("span")
+      ).toHaveCSS("border-radius", "8px");
       const overlay = page
         .getByRole("dialog", { name: CATEGORY, exact: true })
         .locator(":scope > .tw-fixed.tw-inset-0.tw-transform-gpu");
@@ -672,7 +676,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       })
       .click();
     const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
-    await expectDesktopRatingPosition(page, grant);
+    await expectDesktopRatingPosition(page, "Grant Rep");
     await grant
       .getByRole("textbox", { name: "Category to grant REP for", exact: true })
       .fill(CATEGORY);
@@ -695,7 +699,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByRole("button", { name: "Grant Rep", exact: true })
     ).toBeEnabled();
     await expect(amount).toHaveValue("35");
-    await expectDesktopRatingPosition(page, grant);
+    await expectDesktopRatingPosition(page, "Grant Rep");
     await grant.getByRole("button", { name: "Grant Rep", exact: true }).click();
     await expect(grant).toBeHidden();
     expect(saved).toEqual([{ amount: 35, category: CATEGORY }]);
@@ -830,7 +834,13 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     if (isMobile) {
       const tagBox = await longTag.boundingBox();
       const labelBox = await categoryLabel.boundingBox();
-      const chevronBox = await longTag.locator("svg").boundingBox();
+      const chevronBox = await rep
+        .getByRole("button", {
+          name: `Open REP category ${longCategory}`,
+          exact: true,
+        })
+        .locator("svg")
+        .boundingBox();
       expect(tagBox).not.toBeNull();
       expect(labelBox).not.toBeNull();
       expect(chevronBox).not.toBeNull();
@@ -847,12 +857,16 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     });
     await expect(longTag.getByRole("img")).toHaveCount(3);
     await expect(longTag.getByRole("link")).toHaveCount(0);
-    await expect(longTag.locator("button")).toHaveCount(0);
+    await expect(longTag.getByRole("button")).toHaveCount(0);
     await expect(longTag.getByText("60 raters", { exact: true })).toBeVisible();
     const avatarBox = await avatar.boundingBox();
     expect(avatarBox?.width).toBe(24);
     expect(avatarBox?.height).toBe(24);
-    const tagDividerBox = await longTag
+    const tagDividerBox = await rep
+      .getByRole("button", {
+        name: `Open REP category ${longCategory}`,
+        exact: true,
+      })
       .locator('span[aria-hidden="true"]')
       .boundingBox();
     const totalBox = await longTag
@@ -2164,7 +2178,7 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           .click();
         const name = direction === "Received" ? "All raters" : "REP Given";
         const list = page.getByRole("dialog", { name, exact: true });
-        await expectDesktopRatingPosition(page, list);
+        await expectDesktopRatingPosition(page, name);
         await expect(
           list.getByText(
             `${count} ${direction === "Received" ? "raters" : "receivers"}`,
@@ -2319,7 +2333,7 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           name: "Rate NIC",
           exact: true,
         });
-        await expectDesktopRatingPosition(page, rate);
+        await expectDesktopRatingPosition(page, "Rate NIC");
         await rate.getByRole("button", { name: "Cancel", exact: true }).click();
         await expect(rate).toBeHidden();
       }
@@ -2360,7 +2374,7 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         name: `NIC ${direction}`,
         exact: true,
       });
-      await expectDesktopRatingPosition(page, list);
+      await expectDesktopRatingPosition(page, `NIC ${direction}`);
       await expect(
         list.getByText(`1 ${direction === "Received" ? "rater" : "receiver"}`, {
           exact: true,
