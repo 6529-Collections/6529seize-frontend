@@ -119,7 +119,7 @@ application code. Keep the three launch paths in step when changing it.
 
 ## API access gate
 
-When the API access gate asks for a team code, enter it and press Enter.
+Enter your team code in the **Team Login** field and press Enter.
 Once the API accepts the code, the browser immediately opens the requested
 page, including its query string and fragment. Opening `/access` directly
 sends you to the home page after the code is accepted.

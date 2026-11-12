@@ -9,10 +9,10 @@ import { t } from "@/i18n/messages";
 import { resumeAfterApiAccess } from "@/services/auth/api-access-redirect";
 import { getStagingAuth } from "@/services/auth/auth.utils";
 import styles from "@/styles/Home.module.css";
-import clsx from "clsx";
 import Cookies from "js-cookie";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import accessStyles from "./AccessPage.module.css";
 
 function probeApiAccess(
   code: string | null,
@@ -84,9 +84,11 @@ export default function AccessPage() {
   }
 
   return (
-    <main className={styles["login"]}>
+    <main className={accessStyles["page"]}>
       {image ? (
-        <LoginImage image={image} alt="" />
+        <div className={accessStyles["artwork"]}>
+          <LoginImage image={image} alt="" />
+        </div>
       ) : (
         <Image
           unoptimized
@@ -94,40 +96,37 @@ export default function AccessPage() {
           alt="6529"
           width={128}
           height={128}
-          className="tw-h-auto tw-max-w-[40vw]"
+          className={accessStyles["logo"]}
         />
       )}
-      <div
-        className={clsx(
-          styles["loginPrompt"],
-          styles["loginPromptKeyboardAware"],
-          "tw-flex-col tw-gap-2"
-        )}
-      >
-        {/* Screenshots and browser extensions can set an inline caret style
-            before this input hydrates. */}
-        <input
-          suppressHydrationWarning
-          type="text"
-          aria-label={t(locale, "access.codeInput.label")}
-          aria-describedby={errorKey ? "api-access-error" : undefined}
-          placeholder={t(locale, "access.codeInput.placeholder")}
-          onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>): void => {
-            if (event.key.toLowerCase() === "enter") {
-              void doLogin(event.currentTarget);
-            }
-          }}
-        />
-        <div className="tw-h-10 tw-w-4/5 tw-max-w-[400px] tw-shrink-0">
-          {errorKey && (
-            <p
-              id="api-access-error"
-              role="alert"
-              className="tw-m-0 tw-inline-block tw-bg-iron-950 tw-px-2 tw-text-sm tw-leading-5 tw-text-white"
-            >
-              {t(locale, errorKey)}
-            </p>
-          )}
+      <div className={accessStyles["prompt"]}>
+        <div className={accessStyles["fields"]}>
+          <label htmlFor="api-access-code">
+            {t(locale, "access.codeInput.label")}
+          </label>
+          {/* Screenshots and browser extensions can set an inline caret style
+              before this input hydrates. */}
+          <input
+            id="api-access-code"
+            suppressHydrationWarning
+            type="text"
+            enterKeyHint="go"
+            aria-invalid={errorKey === "access.denied" || undefined}
+            aria-describedby={errorKey ? "api-access-error" : undefined}
+            placeholder="********"
+            onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>): void => {
+              if (event.key.toLowerCase() === "enter") {
+                void doLogin(event.currentTarget);
+              }
+            }}
+          />
+          <div className={accessStyles["errorSlot"]}>
+            {errorKey && (
+              <p id="api-access-error" role="alert">
+                {t(locale, errorKey)}
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </main>

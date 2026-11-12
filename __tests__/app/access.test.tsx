@@ -34,7 +34,7 @@ describe("Access page", () => {
   });
 
   function submitCode() {
-    const input = screen.getByRole("textbox", { name: "Team access code" });
+    const input = screen.getByRole("textbox", { name: "Team Login" });
     fireEvent.change(input, { target: { value: "team-code" } });
     fireEvent.keyDown(input, { key: "Enter" });
   }
@@ -64,6 +64,10 @@ describe("Access page", () => {
     });
     fetchMock.mockResolvedValueOnce({ ok: true, status: 200 });
     render(<AccessPage />);
+    expect(screen.getByLabelText("Team Login")).toHaveAttribute(
+      "placeholder",
+      "********"
+    );
     submitCode();
 
     await waitFor(() => expect(resumeAfterApiAccess).toHaveBeenCalled());

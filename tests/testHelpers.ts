@@ -14,9 +14,14 @@ const STAGING_HOSTNAME = "staging.6529.io";
 const STAGING_ACCESS_COOKIE_NAME = "x-6529-auth";
 const STAGING_ACCESS_CODE =
   process.env["PLAYWRIGHT_STAGING_ACCESS_CODE"] ?? process.env["STAGING_AUTH"];
-const ACCESS_INPUT_SELECTOR =
-  'input[aria-label="Team access code"], input[placeholder="Team Login"]';
 type PageGoto = (...args: Parameters<Page["goto"]>) => ReturnType<Page["goto"]>;
+
+function getAccessCodeInput(page: Page) {
+  return page
+    .getByRole("textbox", { name: /^(Team Login|Team access code)$/ })
+    .or(page.getByPlaceholder("Team Login", { exact: true }))
+    .first();
+}
 
 /** Unlocks the staging access gate on navigation; for extra pages too. */
 export async function installStagingAccessUnlock(page: Page) {
@@ -74,7 +79,7 @@ async function submitStagingAccess(page: Page, goto: PageGoto) {
     );
   }
 
-  const accessInput = page.locator(ACCESS_INPUT_SELECTOR).first();
+  const accessInput = getAccessCodeInput(page);
 
   await accessInput.waitFor({ state: "visible", timeout: 5000 });
   await accessInput.fill(STAGING_ACCESS_CODE);
@@ -121,9 +126,7 @@ async function isAccessGateVisible(page: Page) {
     return true;
   }
 
-  return page
-    .locator(ACCESS_INPUT_SELECTOR)
-    .first()
+  return getAccessCodeInput(page)
     .isVisible({ timeout: 500 })
     .catch(() => false);
 }
