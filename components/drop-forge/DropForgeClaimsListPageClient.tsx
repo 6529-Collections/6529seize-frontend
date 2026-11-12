@@ -430,7 +430,7 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
         />
       </div>
       <ClaimCardContent claim={claim} showLaunchFields />
-      <div className="tw-empty:hidden tw-mt-2">
+      <div className="tw-mt-2 empty:tw-hidden">
         <DropForgeSavedPlanPill claimId={claim.claim_id} />
       </div>
     </Link>
