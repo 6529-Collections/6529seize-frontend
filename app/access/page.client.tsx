@@ -77,6 +77,8 @@ export default function AccessPage() {
         secure: window.location.protocol === "https:",
         sameSite: "strict",
       });
+      // eslint-disable-next-line no-alert -- Keep the access confirmation before navigation.
+      window.alert(t(locale, "access.granted"));
       resumeAfterApiAccess(window.location);
     } catch {
       setErrorKey("access.verifyFailed");

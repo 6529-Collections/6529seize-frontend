@@ -119,10 +119,10 @@ application code. Keep the three launch paths in step when changing it.
 
 ## API access gate
 
-When the API access gate asks for a team code, enter it and press Enter to
-continue to the original page. The return link keeps the original path and
-query string. Opening `/access` directly sends you to the home page after
-access is confirmed.
+When the API access gate asks for a team code, enter it and press Enter.
+Click **OK** on the `gm!` popup to continue to the original page, including
+its query string and fragment. Opening `/access` directly sends you to the
+home page after access is confirmed.
 
 ## Staging crawler cards
 
