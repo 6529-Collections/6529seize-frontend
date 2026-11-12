@@ -1,54 +1,86 @@
-import { render, fireEvent, waitFor } from '@testing-library/react';
-import React from 'react';
-import AccessPage from '@/app/access/page';
-import { AuthContext } from '@/components/auth/Auth';
-import { useRouter } from 'next/navigation';
+import AccessPage from "@/app/access/page.client";
+import { API_AUTH_COOKIE } from "@/constants/constants";
+import { resumeAfterApiAccess } from "@/services/auth/api-access-redirect";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import Cookies from "js-cookie";
 
-jest.mock('next/image', () => ({ __esModule: true, default: (p: any) => <img alt="" {...p} /> }));
-jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
-
-// Mock TitleContext
-jest.mock('@/contexts/TitleContext', () => ({
-  useTitle: () => ({
-    title: 'Test Title',  
-    setTitle: jest.fn(),
-    notificationCount: 0,
-    setNotificationCount: jest.fn(),
-    setWaveData: jest.fn(),
-  }),
-  useSetTitle: jest.fn(),
-  useSetNotificationCount: jest.fn(),
-  useSetWaveData: jest.fn(),
-  TitleProvider: ({ children }: { children: React.ReactNode }) => children,
+jest.mock("@/contexts/TitleContext", () => ({ useSetTitle: jest.fn() }));
+jest.mock("@/hooks/useNativeKeyboard", () => ({
+  useNativeKeyboard: jest.fn(),
 }));
+jest.mock("@/services/auth/api-access-redirect", () => ({
+  resumeAfterApiAccess: jest.fn(),
+}));
+jest.mock("js-cookie", () => ({ get: jest.fn(), set: jest.fn() }));
 
+describe("Access page", () => {
+  const fetchMock = jest.fn();
+  const originalFetch = globalThis.fetch;
 
-const useRouterMock = useRouter as jest.Mock;
-
-const TestProvider: React.FC = ({ children }) => (
-  <AuthContext.Provider value={{ setTitle: jest.fn() } as any}>{children}</AuthContext.Provider>
-);
-
-describe('Access page', () => {
   beforeEach(() => {
-    global.fetch = jest.fn().mockResolvedValue({
+    jest.clearAllMocks();
+    globalThis.fetch = fetchMock;
+    jest.spyOn(window, "alert").mockImplementation(() => undefined);
+    fetchMock.mockReset().mockResolvedValue({
+      ok: false,
       status: 401,
-      json: () => Promise.resolve({ image: 'img.jpg' }),
-    }) as any;
-    useRouterMock.mockReturnValue({ push: jest.fn() });
-    // Avoid "alert is not implemented" errors from jsdom
-    global.alert = jest.fn();
+      json: async () => ({}),
+    });
   });
 
-  it('fetches image and triggers login on enter', async () => {
-    const { getByPlaceholderText } = render(
-      <TestProvider>
-        <AccessPage />
-      </TestProvider>
-    );
-    await waitFor(() => expect(fetch).toHaveBeenCalled());
-    const input = getByPlaceholderText('Team Login') as HTMLInputElement;
-    fireEvent.keyDown(input, { key: 'enter', target: input });
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+  afterEach(() => {
+    globalThis.fetch = originalFetch;
+    jest.restoreAllMocks();
   });
+
+  function submitCode() {
+    const input = screen.getByRole("textbox", { name: "Team access code" });
+    fireEvent.change(input, { target: { value: "team-code" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+  }
+
+  it("saves the code before resuming navigation, without a success alert", async () => {
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      json: async () => ({}),
+    });
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200 });
+    render(<AccessPage />);
+    submitCode();
+
+    await waitFor(() => expect(resumeAfterApiAccess).toHaveBeenCalled());
+    expect(Cookies.set).toHaveBeenCalledWith(
+      API_AUTH_COOKIE,
+      "team-code",
+      expect.objectContaining({ sameSite: "strict" })
+    );
+    const [cookieWriteOrder = Infinity] = jest.mocked(Cookies.set).mock
+      .invocationCallOrder;
+    const [resumeOrder = 0] =
+      jest.mocked(resumeAfterApiAccess).mock.invocationCallOrder;
+    expect(cookieWriteOrder).toBeLessThan(resumeOrder);
+    expect(window.alert).not.toHaveBeenCalled();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("resumes navigation immediately when access is already valid", async () => {
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200 });
+    render(<AccessPage />);
+    await waitFor(() => expect(resumeAfterApiAccess).toHaveBeenCalled());
+    expect(Cookies.set).not.toHaveBeenCalled();
+  });
+
+  it.each([401, 403, 500])(
+    "stays on the prompt after a %s response",
+    async (status) => {
+      render(<AccessPage />);
+      fetchMock.mockResolvedValueOnce({ ok: false, status });
+      submitCode();
+
+      expect(await screen.findByRole("alert")).toBeVisible();
+      expect(Cookies.set).not.toHaveBeenCalled();
+      expect(resumeAfterApiAccess).not.toHaveBeenCalled();
+    }
+  );
 });

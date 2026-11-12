@@ -93,6 +93,7 @@ describe("EULAConsentContext", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPathname = "/";
+    window.history.replaceState(null, "", "/");
     mockCapacitor = {
       isIos: true,
       isAndroid: false,
@@ -144,11 +145,12 @@ describe("EULAConsentContext", () => {
   );
 
   it.each([
-    { status: 401, route: "/access" },
+    { status: 401, route: "/access?returnTo=%2Fwaves%3Ftab%3Dchat#drop" },
     { status: 403, route: "/restricted" },
   ])(
     "routes a staging $status response to $route without unlocking the app",
     async ({ status, route }) => {
+      window.history.replaceState(null, "", "/waves?tab=chat#drop");
       commonApiFetch.mockRejectedValue({ status });
 
       renderProvider(<AppChild />);
@@ -336,7 +338,7 @@ describe("EULAConsentContext", () => {
     fireEvent.click(await screen.findByRole("button", { name: "Agree" }));
 
     await waitFor(() =>
-      expect(mockRouterReplace).toHaveBeenCalledWith("/access")
+      expect(mockRouterReplace).toHaveBeenCalledWith("/access?returnTo=%2F")
     );
     expect(screen.getByRole("dialog", { name: "EULA" })).toBeVisible();
     expect(screen.queryByTestId("app-child")).not.toBeInTheDocument();

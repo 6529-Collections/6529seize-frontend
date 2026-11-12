@@ -43,6 +43,7 @@ import { handleValidatorPageGate } from "@/lib/validator-page/proxyGate";
 import { isE2eeFlagEnabled } from "@/config/e2eeFlag";
 import { publicEnv } from "./config/env";
 import { getApiBase } from "@/services/api/api-endpoints";
+import { getApiAccessPath } from "@/services/auth/api-access-redirect";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
 const redirectMappings = [
@@ -395,9 +396,8 @@ async function accessDenial(
   });
 
   if (verdict === "unauthorized") {
-    req.nextUrl.pathname = "/access";
-    req.nextUrl.search = "";
-    return uncacheableRedirect(req.nextUrl);
+    const returnTo = req.nextUrl.pathname + req.nextUrl.search;
+    return uncacheableRedirect(new URL(getApiAccessPath(returnTo), req.url));
   }
 
   if (verdict === "restricted") {
