@@ -608,21 +608,6 @@ describe("SubscriptionCoverageSummary", () => {
     expect(document.getElementById("subscription-coverage-details")).toBeNull();
   });
 
-  it("shows the owner's coverage without prompting them to choose drops in read-only mode", () => {
-    renderSummary(
-      createCoverage({
-        status: ApiSubscriptionCoverageStatus.NoUpcomingSelections,
-      }),
-      { showFundingPrompt: false }
-    );
-    expect(
-      screen.getByRole("heading", { name: "No upcoming drops selected" })
-    ).toBeVisible();
-    expect(
-      screen.queryByRole("link", { name: "Choose drops" })
-    ).not.toBeInTheDocument();
-  });
-
   it("omits unavailable deadline guidance from the summary", () => {
     renderSummary(
       createCoverage({

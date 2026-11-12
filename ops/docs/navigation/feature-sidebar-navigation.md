@@ -215,9 +215,9 @@ On web layouts, route switching is sidebar-first.
   [Page Sharing and Device Connection](feature-share-modal.md).
 - `App Wallets` appears inside `About > Safe Collecting` only when
   app-wallet support is enabled.
-- The iOS app omits `NFTs > Collect` and the About Minting and Subscription
-  Minting entries. The read-only `Subscriptions Report` and
-  `Open Data > Meme Subscriptions Data` rows appear when country resolves to `US`.
+- The iOS app omits `NFTs > Collect`, the About Minting and Subscription Minting
+  entries, `Subscriptions Report`, and `Meme Subscriptions Data`. The two
+  read-only reports remain available through their direct links.
 
 ## Failure and Recovery
 

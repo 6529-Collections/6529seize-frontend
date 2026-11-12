@@ -117,7 +117,7 @@ export default function MarketplaceItemPreviewCard({
   const displayTitle = hasTitle ? normalizedTitle : DEFAULT_MARKETPLACE_TITLE;
   const marketplaceBrand = getMarketplaceBrand(href);
   const ctaAriaLabel = buildMarketplaceCtaLabel({
-    normalizedPrice: ariaPriceText,
+    normalizedPrice: hideNftPurchasing ? "" : ariaPriceText,
     marketplaceBrand,
   });
   const shouldShowDataHealthIcon =
@@ -141,15 +141,13 @@ export default function MarketplaceItemPreviewCard({
     event.preventDefault();
     openResolvedHref(resolvedPreviewHref);
   };
-  const sharedCardProps = hideNftPurchasing
-    ? undefined
-    : ({
-        role: "link",
-        tabIndex: 0,
-        onClick: handleCardClick,
-        onKeyDown: handleCardKeyDown,
-        "aria-label": ctaAriaLabel,
-      } as const);
+  const sharedCardProps = {
+    role: "link",
+    tabIndex: 0,
+    onClick: handleCardClick,
+    onKeyDown: handleCardKeyDown,
+    "aria-label": ctaAriaLabel,
+  } as const;
 
   if (compact) {
     return (
@@ -178,7 +176,7 @@ export default function MarketplaceItemPreviewCard({
               marketplaceBrand={marketplaceBrand}
             />
           )}
-          {!hideNftPurchasing && !hideActions && (
+          {!hideActions && (
             <MarketplaceOverlayActionButtons
               href={href}
               resolvedPreviewHref={resolvedPreviewHref}
@@ -210,7 +208,7 @@ export default function MarketplaceItemPreviewCard({
           displayTitle={displayTitle}
           ctaAriaLabel={ctaAriaLabel}
           hideActions={hideActions}
-          readOnly={hideNftPurchasing}
+          hidePriceAction={hideNftPurchasing}
           hasPrice={hasPrice}
           priceValueText={priceValueText}
           priceCurrencyText={priceCurrencyText || undefined}

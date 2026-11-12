@@ -34,12 +34,11 @@ download link.
 2. Pick a hub card:
    - `Network Metrics`
    - `6529bot Usage`
-   - `Meme Subscriptions` (can be hidden on native iOS outside US)
+   - `Meme Subscriptions` (web and Android)
    - `Rememes`
    - `Team`
    - `Royalties`
-3. If `Meme Subscriptions` is hidden on native iOS (non-`US` or country still
-   loading), open `/open-data/meme-subscriptions` directly.
+3. In the iOS app, open `/open-data/meme-subscriptions` directly.
 4. Wait for route content.
 5. Open a row link in a new tab.
 

@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { MOBILE_APP_ANDROID, MOBILE_APP_IOS } from "@/constants/constants";
 import {
   getMobilePlatform,
+  MOBILE_APP_USER_AGENTS,
   isMobileAppDestination,
 } from "@/helpers/mobileAppLinks";
 import {
@@ -25,10 +26,15 @@ export default function MobileAppBanner() {
     typeof navigator === "undefined"
       ? null
       : getMobilePlatform(navigator.userAgent, navigator.maxTouchPoints);
+  const isIosSafari =
+    platform === "iOS" &&
+    MOBILE_APP_USER_AGENTS.safari.test(navigator.userAgent) &&
+    !MOBILE_APP_USER_AGENTS.otherIosBrowser.test(navigator.userAgent);
 
   if (
     dismissed ||
     !platform ||
+    isIosSafari ||
     Capacitor.isNativePlatform() ||
     !isMobileAppDestination(pathname)
   )

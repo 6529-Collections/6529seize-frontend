@@ -169,24 +169,9 @@ provides another future result. It describes the voting result, not minting.
   below the title and creator, above `Your allowance` and subscriptions.
 - On phone browsers and the mobile app, still artwork fills the panel width
   at its natural aspect ratio and keeps its details below the image.
-- On iOS outside the US, the countdown `Mint` button is hidden.
-- On iOS outside the US, or while the iOS country check is still loading, The
-  Memes subscription row is not shown.
-- The Memes subscription row is not part of the server HTML or the first render
-  on any platform, because the page cannot yet tell whether it is the iOS app.
-  Where the server renders a page that includes it (Meme card and upcoming Meme
-  routes), a blank, invisible space of the row's height is reserved so the
-  content below does not jump, and the row replaces it right after the page
-  loads on web and Android. As soon as the page identifies the iOS app the space
-  is removed and nothing is shown while the country check loads, except on a
-  device whose last completed country check was US: there the blank space stays
-  through the check, so a US result swaps the row in without a shift, and a
-  non-US or unknown result removes the space. Without a US result remembered
-  (first launch, another country, a failed check, or unavailable browser
-  storage) nothing is shown while the check loads; a US result then inserts the
-  row, and a non-US, unknown, or failed result leaves nothing. The remembered
-  result only keeps the blank space; the row and its requests always wait for
-  the current check. The space holds no text, icons, links, or controls.
+- The iOS app hides the countdown `Mint` button and The Memes subscription row.
+  On the web and Android, the row appears after the page loads. A blank space
+  holds its place on pages that show it, then collapses in the iOS app.
 - Latest Drop and mapped Next Drop cards omit `Your allowance` while no wallet
   address is available, including during initial connection. Once connected,
   compact wrapping pills list each nonzero Phase 0, Phase 1, Phase 2,

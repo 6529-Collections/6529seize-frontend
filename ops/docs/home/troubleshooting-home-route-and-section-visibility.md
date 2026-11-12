@@ -70,7 +70,7 @@ This page covers:
   - Larger layouts: fixed in the hero region.
   - Small/mobile/app layouts: shown in header actions.
 - `Mint` button missing in latest-drop countdown:
-  - Hidden when device is iOS and country is not `US`.
+  - Hidden in the iOS app.
 
 ## Edge Cases
 

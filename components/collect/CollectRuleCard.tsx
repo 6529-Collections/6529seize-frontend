@@ -64,23 +64,17 @@ export default function CollectRuleCard({
       wallet.wallet.toLowerCase() === rule.definition.recipient.toLowerCase()
   );
   const update = useMutation({
-    mutationFn: (action: "pause" | "resume" | "reconcile") => {
-      if (hideNftPurchasing || !canMutate)
-        throw new Error("RULE_WALLET_CHANGED");
-      return action === "reconcile"
+    mutationFn: (action: "pause" | "resume" | "reconcile") =>
+      action === "reconcile"
         ? reconcileCollectRule(rule.id)
         : pauseCollectRule(rule.id, {
             expected_revision: rule.revision,
             paused: action === "pause",
-          });
-    },
+          }),
     onSuccess: onUpdated,
   });
   const inspect = useMutation({
-    mutationFn: (id: string) => {
-      if (hideNftPurchasing) throw new Error("RULE_WALLET_CHANGED");
-      return fetchMarketOperation(id);
-    },
+    mutationFn: (id: string) => fetchMarketOperation(id),
     onSuccess: onOperation,
   });
   const prepare = useMutation({
@@ -243,55 +237,53 @@ export default function CollectRuleCard({
           </li>
         ))}
       </ul>
-      {!hideNftPurchasing && !canMutate && (
+      {!canMutate && (
         <p className="tw-m-0 tw-text-sm tw-text-iron-300">
           {t(locale, "collect.trade.reconnect")}
         </p>
       )}
-      {!hideNftPurchasing && (
-        <div className="tw-flex tw-flex-wrap tw-gap-3">
-          {rule.pending_review && (
-            <Button
-              variant="primary"
-              disabled={busy}
-              onClick={() => {
-                if (rule.pending_review)
-                  inspect.mutate(rule.pending_review.operation_id);
-              }}
-            >
-              {t(locale, "collect.rules.pending")}
-            </Button>
-          )}
-          {(rule.state === ApiCollectRuleStateEnum.Active ||
-            rule.state === ApiCollectRuleStateEnum.Paused) && (
-            <Button
-              variant="secondary"
-              disabled={!canMutate || busy}
-              onClick={() =>
-                update.mutate(
-                  rule.state === ApiCollectRuleStateEnum.Active
-                    ? "pause"
-                    : "resume"
-                )
-              }
-            >
-              {t(
-                locale,
-                rule.state === ApiCollectRuleStateEnum.Active
-                  ? "collect.rules.pause"
-                  : "collect.rules.resume"
-              )}
-            </Button>
-          )}
+      <div className="tw-flex tw-flex-wrap tw-gap-3">
+        {rule.pending_review && (
+          <Button
+            variant="primary"
+            disabled={busy}
+            onClick={() => {
+              if (rule.pending_review)
+                inspect.mutate(rule.pending_review.operation_id);
+            }}
+          >
+            {t(locale, "collect.rules.pending")}
+          </Button>
+        )}
+        {(rule.state === ApiCollectRuleStateEnum.Active ||
+          rule.state === ApiCollectRuleStateEnum.Paused) && (
           <Button
             variant="secondary"
             disabled={!canMutate || busy}
-            onClick={() => update.mutate("reconcile")}
+            onClick={() =>
+              update.mutate(
+                rule.state === ApiCollectRuleStateEnum.Active
+                  ? "pause"
+                  : "resume"
+              )
+            }
           >
-            {t(locale, "collect.rules.refresh")}
+            {t(
+              locale,
+              rule.state === ApiCollectRuleStateEnum.Active
+                ? "collect.rules.pause"
+                : "collect.rules.resume"
+            )}
           </Button>
-        </div>
-      )}
+        )}
+        <Button
+          variant="secondary"
+          disabled={!canMutate || busy}
+          onClick={() => update.mutate("reconcile")}
+        >
+          {t(locale, "collect.rules.refresh")}
+        </Button>
+      </div>
       {(prepare.isError || update.isError || inspect.isError) && (
         <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-300">
           {t(locale, "collect.rules.error")}

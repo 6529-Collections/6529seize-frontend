@@ -60,10 +60,9 @@ export default function UserPageSubscriptions(
   const coverageQuery = useSubscriptionCoverage({ profileKey });
   const history = useSubscriptionHistory(profileKey);
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const canEditSubscriptions = isConnectedAccount && !hideNftPurchasing;
   const topUp = useSubscriptionDisclosure(
     "profile-subscriptions-top-up",
-    canEditSubscriptions && !coverageQuery.isLoading,
+    !hideNftPurchasing && isConnectedAccount && !coverageQuery.isLoading,
     "profile-subscriptions-top-up"
   );
   useScrollToHashOnMount("profile-subscriptions-overview", {
@@ -268,7 +267,8 @@ export default function UserPageSubscriptions(
                     />
                   }
                   topUpAction={
-                    canEditSubscriptions &&
+                    !hideNftPurchasing &&
+                    isConnectedAccount &&
                     !coverageQuery.isLoading && (
                       <SubscriptionTopUpButton
                         status={coverageQuery.data?.status}
@@ -281,7 +281,7 @@ export default function UserPageSubscriptions(
               </div>
             </section>
           </UserPageSubscriptionsSection>
-          {canEditSubscriptions && (
+          {!hideNftPurchasing && isConnectedAccount && (
             <UserPageSubscriptionsTopUp
               expanded={topUp.expanded}
               coverage={coverageQuery.data}
@@ -296,7 +296,7 @@ export default function UserPageSubscriptions(
               profileKey={profileKey}
               details={details}
               memes_subscriptions={memeSubscriptions}
-              readonly={!canEditSubscriptions}
+              readonly={!isConnectedAccount}
               refresh={refresh}
               loading={fetchingMemeSubscriptions}
               error={fetchErrors["upcoming"]}
@@ -308,7 +308,7 @@ export default function UserPageSubscriptions(
             <UserPageSubscriptionsSettings
               profileKey={profileKey}
               details={details}
-              readonly={!canEditSubscriptions}
+              readonly={!isConnectedAccount}
               refresh={refresh}
               airdrop={airdropResult}
               fetchingAirdrop={fetchingAirdropAddress}
