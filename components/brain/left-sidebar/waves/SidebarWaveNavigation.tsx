@@ -1,5 +1,6 @@
 "use client";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -22,9 +23,9 @@ const COLLECTION_LABELS = {
 } as const;
 
 const COLLECTION_GROUP_CLASSES =
-  "tw-m-0 tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-gap-0.5 tw-rounded-lg tw-border-0 tw-bg-iron-950/75 tw-p-[3px] tw-ring-1 tw-ring-inset tw-ring-white/[0.06]";
+  "tw-m-0 tw-flex tw-h-9 tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/75 tw-p-0.5 tw-ring-white/[0.06] touch-only:tw-h-10";
 const COLLECTION_TAB_CLASSES =
-  "tw-flex tw-min-h-11 tw-min-w-11 tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-[13px] tw-font-medium tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 motion-reduce:tw-transition-none max-[360px]:tw-px-1.5";
+  "tw-relative tw-flex tw-min-h-[30px] tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-2 tw-py-0 tw-text-xs tw-font-normal tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 touch-only:before:tw-absolute touch-only:before:tw-inset-x-0 touch-only:before:tw-top-1/2 touch-only:before:tw-h-11 touch-only:before:-tw-translate-y-1/2 touch-only:before:tw-content-[''] motion-reduce:tw-transition-none";
 const COLLECTION_SELECTED_CLASSES =
   "tw-bg-iron-800 tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/5 desktop-hover:hover:tw-bg-white/[0.14]";
 const COLLECTION_UNSELECTED_CLASSES =
@@ -107,7 +108,7 @@ export function SidebarWaveNavigationControls({
                 type="button"
                 onClick={closeSearch}
                 aria-label={t(locale, "waves.sidebar.closeSearch")}
-                className="tw-flex tw-size-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white"
+                className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-flex tw-size-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none`}
               >
                 <XMarkIcon className="tw-size-4" />
               </button>

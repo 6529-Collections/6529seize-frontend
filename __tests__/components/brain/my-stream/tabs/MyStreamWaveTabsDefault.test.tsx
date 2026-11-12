@@ -325,15 +325,15 @@ describe("MyStreamWaveTabsDefault", () => {
       </SidebarProvider>
     );
 
-    expect(
-      screen.getByRole("button", { name: "Search messages in this wave" })
-    ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
     const moreActionsButton = screen.getByRole("button", {
       name: "More wave actions",
     });
     expect(moreActionsButton).toHaveAttribute("aria-haspopup", "dialog");
     fireEvent.click(moreActionsButton);
+    expect(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("dialog", { name: "More wave actions" })
     ).toBeInTheDocument();
@@ -370,37 +370,45 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps the desktop view toggle behavior at medium breakpoint", () => {
-    mockUseBreakpoint.mockReturnValue("MD");
-    useContentTab.mockReturnValue({
-      activeContentTab: "CHAT",
-      setActiveContentTab: jest.fn(),
-    });
-    render(
-      <SidebarProvider>
-        <MyStreamWaveTabsDefault
-          wave={createWave(false)}
-          viewMode="chat"
-          onToggleViewMode={mockToggleViewMode}
-          showGalleryToggle={true}
-        />
-      </SidebarProvider>
-    );
+  it.each(["LG", "MD"])(
+    "keeps the view toggle available through More at %s",
+    (breakpoint) => {
+      mockUseBreakpoint.mockReturnValue(breakpoint);
+      useContentTab.mockReturnValue({
+        activeContentTab: "CHAT",
+        setActiveContentTab: jest.fn(),
+      });
+      render(
+        <SidebarProvider>
+          <MyStreamWaveTabsDefault
+            wave={createWave(false)}
+            viewMode="chat"
+            onToggleViewMode={mockToggleViewMode}
+            showGalleryToggle={true}
+          />
+        </SidebarProvider>
+      );
 
-    const galleryToggle = screen.getByRole("button", {
-      name: "Switch to gallery view",
-    });
-    expect(galleryToggle).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Search messages in this wave" })
-    ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Go back" })
-    ).toBeInTheDocument();
-
-    fireEvent.click(galleryToggle);
-    expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
-  });
+      expect(
+        screen.queryByRole("button", { name: "Switch to gallery view" })
+      ).toBeNull();
+      fireEvent.click(
+        screen.getByRole("button", { name: "More wave actions" })
+      );
+      const galleryToggle = screen.getByRole("button", {
+        name: "Switch to gallery view",
+      });
+      expect(galleryToggle).toBeInTheDocument();
+      fireEvent.click(galleryToggle);
+      expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
+      expect(
+        screen.queryByRole("dialog", { name: "More wave actions" })
+      ).toBeNull();
+      expect(
+        screen.getByRole("button", { name: "Search messages in this wave" })
+      ).toBeInTheDocument();
+    }
+  );
 
   it("opens wave information from the compact title and keeps search available", () => {
     mockUseBreakpoint.mockReturnValue("S");
@@ -420,13 +428,14 @@ describe("MyStreamWaveTabsDefault", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Search messages in this wave" })
-    ).toBeInTheDocument();
-    expect(
       screen.queryByText("A chill place to discuss drops")
     ).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "About Wave" }));
     expect(mockOpenInformation).toHaveBeenCalledWith("w1");
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    expect(
+      screen.getByRole("button", { name: "Search messages in this wave" })
+    ).toBeInTheDocument();
   });
 
   it("shows compact Drop on the Chat tab and opens the submit flow", () => {

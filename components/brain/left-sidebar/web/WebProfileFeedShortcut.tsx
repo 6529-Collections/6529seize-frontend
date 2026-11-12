@@ -76,7 +76,7 @@ export function WebProfileFeedShortcut({
 
   if (isCollapsed) {
     return (
-      <div className="tw-flex tw-items-center tw-justify-center tw-py-2">
+      <div className="tw-flex tw-h-11 tw-shrink-0 tw-items-center tw-justify-center">
         <Link
           href={href}
           ref={featureUsageRef}

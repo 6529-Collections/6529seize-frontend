@@ -42,8 +42,10 @@ Wave and DM rows in the left list control which thread is open.
 - On desktop pointer devices, the Waves list uses a slim iron scrollbar for
   dragging and track clicks. Touch devices keep their native scrolling behavior.
 - `All`, `Pinned`, and `Joined` are equally wide collections in a dark segmented
-  group that fills the row beside search, with a subtle inset outline and a
-  filled selected option. Tabs have a 44px minimum height. The search icon on the
+  group that fills the row beside search, with a subtle border and a
+  filled selected option. Tabs are 30px tall in a 36px group on desktop; touch
+  devices use 34px tabs in a 40px group with a larger 44px tap area. Labels use
+  compact, normal-weight type. The search icon on the
   right is transparent at rest and gains a dark background on hover. Switch directly without
   scrolling through pinned waves.
   Each collection remembers its scroll position; selecting another wave enables
@@ -124,6 +126,8 @@ on hover and show a dark hover surface; their resting header surface is transpar
   signed-out visits. The expanded panel shows a plus icon and `Create wave` label;
   the collapsed rail shows the plus icon only. Its accessible name and hover
   tooltip read `Create wave`. The mobile Waves list keeps its visible label.
+  Desktop sidebar buttons keep a compact visible surface on touch screens,
+  with a larger invisible tap area.
 - Each heading has a separate `View all` link aligned to the right, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.

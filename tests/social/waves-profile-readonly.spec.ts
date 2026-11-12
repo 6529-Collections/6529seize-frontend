@@ -2161,20 +2161,21 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await gotoReady(page, `/waves/${waveId}`);
 
     const compact = (page.viewportSize()?.width ?? 1280) < 768;
-    const details = page.getByRole("button", {
+    const header = page
+      .getByRole("main")
+      .locator("header")
+      .filter({ has: page.getByRole("heading", { level: 1 }) });
+    const utilityTrigger = header.getByRole("button", {
       name: compact ? "Wave details" : "Show right sidebar",
       exact: true,
     });
-    await expect(details).toBeVisible();
-    await expect(details).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-    await expect(details).toHaveCSS("border-top-width", "0px");
-    await expect(details).toHaveCSS("box-shadow", "none");
-    const header = page
-      .getByRole("button", {
-        name: compact ? "Wave details" : "Show right sidebar",
-        exact: true,
-      })
-      .locator("../..");
+    await expect(utilityTrigger).toBeVisible();
+    await expect(utilityTrigger).toHaveCSS(
+      "background-color",
+      "rgba(0, 0, 0, 0)"
+    );
+    await expect(utilityTrigger).toHaveCSS("border-top-width", "0px");
+    await expect(utilityTrigger).toHaveCSS("box-shadow", "none");
     await expect(header.getByRole("heading", { level: 1 })).toBeVisible();
     const headerRep = header.getByRole("button", {
       name: /Add Wave REP|Edit your Wave REP/,
@@ -2186,7 +2187,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const score = header.getByRole("button", { name: /^Wave score / });
     if (compact) {
       await expect(headerRep).toHaveCount(0);
-      await expect(score).toHaveCount(0);
+      if (await score.count()) await expect(score).toBeVisible();
       await header.getByRole("button", { name: "More wave actions" }).click();
       await expect(
         page
@@ -2195,7 +2196,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       ).toBeVisible();
       await page.keyboard.press("Escape");
     } else {
-      await expect(details).toHaveText("");
+      await expect(utilityTrigger).toHaveText("");
       const join = header.getByRole("button", { name: /^Join / });
       if (await join.count()) {
         await expect(join).toHaveCSS("background-color", "rgb(236, 236, 238)");
@@ -2292,20 +2293,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
           ].map((property) => [property, style.getPropertyValue(property)])
         );
       });
-      const galleryToggle = header.getByRole("button", {
-        name: /^Switch to (gallery|chat) view$/,
-      });
       const utilityControls = [
         header.getByRole("button", {
           name: "Search messages in this wave",
           exact: true,
         }),
-        header.getByRole("button", { name: /^Time display:/ }),
-        details,
+        header.getByRole("button", { name: "More wave actions", exact: true }),
+        utilityTrigger,
       ];
-      if (await galleryToggle.count()) {
-        utilityControls.unshift(galleryToggle);
-      }
       for (const control of utilityControls) {
         const label = await control.getAttribute("data-tooltip-content");
         expect(label).not.toBeNull();
@@ -2318,7 +2313,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       }
     }
 
-    await details.click();
+    await utilityTrigger.click();
     if (!compact) {
       await page.mouse.move(0, 0);
       const openToggle = page.getByRole("button", {

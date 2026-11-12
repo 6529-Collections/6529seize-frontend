@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  within,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
 import MyStreamWaveTabsMeme from "@/components/brain/my-stream/tabs/MyStreamWaveTabsMeme";
 import { SidebarProvider } from "@/hooks/useSidebarState";
@@ -314,7 +320,7 @@ describe("MyStreamWaveTabsMeme", () => {
     ).toBeInTheDocument();
   });
 
-  it("keeps compact actions right-aligned and opens information from the title", () => {
+  it("keeps compact actions right-aligned and opens information from the title", async () => {
     mockUseBreakpoint.mockReturnValue("S");
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -328,34 +334,39 @@ describe("MyStreamWaveTabsMeme", () => {
     );
 
     expect(screen.getByRole("button", { name: "Go back" })).toBeInTheDocument();
-    const searchButton = screen.getByRole("button", {
-      name: "Search messages in this wave",
-    });
-    const waveDetailsButton = screen.getByRole("button", {
-      name: "Wave details",
-    });
     const moreActionsButton = screen.getByRole("button", {
       name: "More wave actions",
     });
-    expect(waveDetailsButton).toBeInTheDocument();
-    expect(moreActionsButton.nextElementSibling).toBe(searchButton);
-    expect(searchButton.nextElementSibling).toBe(waveDetailsButton);
+    const submitButton = screen.getByRole("button", { name: "submit" });
+    expect(submitButton.nextElementSibling).toBe(moreActionsButton);
+    expect(moreActionsButton.nextElementSibling).toBe(
+      screen.getByRole("button", { name: "Wave details" })
+    );
     fireEvent.click(screen.getByRole("button", { name: "About Wave" }));
     expect(mockOpenInformation).toHaveBeenCalledWith("w1");
-    fireEvent.click(waveDetailsButton);
-    expect(
-      screen.getByRole("button", { name: "Hide details" })
-    ).toBeInTheDocument();
     fireEvent.click(moreActionsButton);
     const moreActionsDialog = screen.getByRole("dialog", {
       name: "More wave actions",
     });
     expect(moreActionsDialog).toBeInTheDocument();
     expect(
-      within(moreActionsDialog).queryByRole("button", { name: /details/i })
-    ).not.toBeInTheDocument();
+      within(moreActionsDialog).getByRole("button", {
+        name: "Search messages in this wave",
+      })
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Share wave" })
     ).toBeInTheDocument();
+    expect(
+      within(moreActionsDialog).queryByRole("button", { name: "Wave details" })
+    ).toBeNull();
+    fireEvent.click(
+      within(moreActionsDialog).getByRole("button", { name: "Close panel" })
+    );
+    await waitFor(() => expect(moreActionsDialog).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "Wave details" }));
+    expect(
+      screen.getByRole("button", { name: "Hide details" })
+    ).toHaveAttribute("aria-expanded", "true");
   });
 });

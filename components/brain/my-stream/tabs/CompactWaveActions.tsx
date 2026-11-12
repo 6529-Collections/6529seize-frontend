@@ -4,7 +4,7 @@ import type { CompactMenuItem } from "@/components/compact-menu";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState, type Ref } from "react";
 import { createPortal } from "react-dom";
 import {
   WAVE_HEADER_ACTION_CLASSES,
@@ -16,10 +16,13 @@ const COMPACT_ACTION_CLASSES =
 
 export default function CompactWaveActions({
   items,
+  triggerRef,
 }: {
   readonly items: readonly CompactMenuItem[];
+  readonly triggerRef?: Ref<HTMLButtonElement> | undefined;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const pendingActionRef = useRef<(() => void) | null>(null);
 
   const handleAction = (
     item: Exclude<CompactMenuItem, { readonly kind: "section" }>
@@ -29,7 +32,11 @@ export default function CompactWaveActions({
     }
 
     setIsOpen(false);
-    item.onSelect?.();
+    if (item.deferUntilClosed) {
+      pendingActionRef.current = item.onSelect ?? null;
+    } else {
+      item.onSelect?.();
+    }
   };
 
   const sheet =
@@ -41,6 +48,11 @@ export default function CompactWaveActions({
             setOpen={setIsOpen}
             label="More wave actions"
             hideOnDesktopHover={false}
+            onAfterLeave={() => {
+              const action = pendingActionRef.current;
+              pendingActionRef.current = null;
+              action?.();
+            }}
           >
             {items.map((item) => {
               if (item.kind === "section") {
@@ -118,6 +130,7 @@ export default function CompactWaveActions({
     <>
       <button
         type="button"
+        ref={triggerRef}
         aria-label="More wave actions"
         aria-haspopup="dialog"
         aria-expanded={isOpen}

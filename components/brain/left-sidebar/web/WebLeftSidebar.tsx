@@ -86,7 +86,13 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
           className={`tw-z-40 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-transition-colors tw-duration-500 ${isMessagesView ? "tw-no-scrollbar" : "desktop-hover:tw-scrollbar-thin desktop-hover:tw-scrollbar-track-iron-800 desktop-hover:tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"}`}
         >
           {isCollapsed && (
-            <div className="tw-sticky tw-top-2 tw-z-20 tw-flex tw-justify-center tw-py-2">
+            <div
+              className={`tw-sticky tw-z-20 tw-flex tw-justify-center ${
+                isMessagesView
+                  ? "tw-top-2 tw-py-2"
+                  : "tw-top-0 tw-h-11 tw-shrink-0 tw-items-center"
+              }`}
+            >
               <div
                 aria-hidden="true"
                 className="tw-pointer-events-none tw-absolute tw-inset-x-0 -tw-top-2 tw-h-[76px] tw-bg-[linear-gradient(180deg,rgba(0,0,0,1)_0%,rgba(0,0,0,0.96)_45%,rgba(0,0,0,0)_100%)]"

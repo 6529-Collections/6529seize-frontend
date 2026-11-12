@@ -380,7 +380,7 @@ const OverlaySidebar = ({
                     onClick={close}
                     ref={closeButtonRef}
                     data-autofocus
-                    className="tw-group tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-r-0 tw-border-solid tw-border-iron-650 tw-bg-iron-700 tw-shadow-[0_8px_20px_rgba(0,0,0,0.35)] tw-transition-all tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-600 desktop-hover:hover:tw-shadow-[0_12px_26px_rgba(0,0,0,0.45)] motion-reduce:tw-transition-none"
+                    className="tw-group tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-r-0 tw-border-solid tw-border-white/[0.08] tw-bg-iron-700 tw-shadow-md tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/[0.16] desktop-hover:hover:tw-bg-iron-600 motion-reduce:tw-transition-none"
                     aria-label={waveRightPanelText(
                       "waves.sidebar.rightPanel.close"
                     )}

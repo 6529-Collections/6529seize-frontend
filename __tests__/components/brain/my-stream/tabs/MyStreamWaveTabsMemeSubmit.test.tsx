@@ -38,11 +38,19 @@ const baseInfo = {
 
 const wave = { id: "w1" } as any;
 
-function renderComponent(info: any) {
+function renderComponent(info: any, iconOnly = false) {
   useWave.mockReturnValue(info);
-  return render(
-    <MyStreamWaveTabsMemeSubmit wave={wave} handleMemesSubmit={() => {}} />
-  );
+  const onSubmit = jest.fn();
+  return {
+    ...render(
+      <MyStreamWaveTabsMemeSubmit
+        wave={wave}
+        handleMemesSubmit={onSubmit}
+        iconOnly={iconOnly}
+      />
+    ),
+    onSubmit,
+  };
 }
 
 describe("MyStreamWaveTabsMemeSubmit", () => {
@@ -108,26 +116,32 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
     );
   });
 
-  it("renders not eligible state", () => {
-    renderComponent({
-      ...baseInfo,
-      participation: {
-        status: SubmissionStatus.ACTIVE,
-        isEligible: false,
-        startTime: 0,
-        endTime: 0,
-      },
-    });
-    const button = screen.getByRole("button", { name: "How to Submit" });
-    expect(button).toHaveAttribute("aria-haspopup", "dialog");
-    expect(button).not.toBeDisabled();
-    expect(screen.queryByTestId("info")).not.toBeInTheDocument();
-    expect(screen.queryByText("Not Eligible")).not.toBeInTheDocument();
-    expect(
-      screen.queryByText("Not Eligible to Submit")
-    ).not.toBeInTheDocument();
-    expect(screen.getByText("How to Submit")).toBeInTheDocument();
-  });
+  it.each([false, true])(
+    "renders not eligible state with iconOnly=%s",
+    (iconOnly) => {
+      renderComponent(
+        {
+          ...baseInfo,
+          participation: {
+            status: SubmissionStatus.ACTIVE,
+            isEligible: false,
+            startTime: 0,
+            endTime: 0,
+          },
+        },
+        iconOnly
+      );
+      const button = screen.getByRole("button", { name: "How to Submit" });
+      expect(button).toHaveAttribute("aria-haspopup", "dialog");
+      expect(button).not.toBeDisabled();
+      expect(screen.queryByTestId("info")).not.toBeInTheDocument();
+      expect(screen.queryByText("Not Eligible")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Not Eligible to Submit")
+      ).not.toBeInTheDocument();
+      expect(screen.getByText("How to Submit")).toBeInTheDocument();
+    }
+  );
 
   it("renders limit reached state", () => {
     renderComponent({
@@ -169,34 +183,42 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
     ).toHaveAccessibleDescription("You cannot submit at this time");
   });
 
-  it("renders active state with urgency and remaining badge", () => {
-    const now = Date.now();
-    useCountdown.mockReturnValue("3h");
-    renderComponent({
-      ...baseInfo,
-      participation: {
-        status: SubmissionStatus.ACTIVE,
-        isEligible: true,
-        hasReachedLimit: false,
-        remainingSubmissions: 2,
-        maxSubmissions: 5,
-        canSubmitNow: true,
-        isWithinPeriod: true,
-        startTime: now - 1000,
-        endTime: now + 3 * 60 * 60 * 1000,
-      },
-    });
-    const button = screen.getByRole("button", { name: /Submit Meme/ });
-    expect(button).toHaveAttribute(
-      "title",
-      expect.stringContaining("You have")
-    );
-    expect(button).toHaveClass("tw-h-8", "tw-text-xs");
-    expect(button).not.toBeDisabled();
-    expect(screen.getByText("Submit Meme")).toBeInTheDocument();
-    expect(screen.getByText("Closing 3h")).toHaveClass("tw-hidden");
-    expect(screen.getByText("2 Left")).toHaveClass("tw-hidden");
-  });
+  it.each([false, true])(
+    "renders active state with urgency and remaining badge with iconOnly=%s",
+    (iconOnly) => {
+      const now = Date.now();
+      useCountdown.mockReturnValue("3h");
+      const { onSubmit } = renderComponent(
+        {
+          ...baseInfo,
+          participation: {
+            status: SubmissionStatus.ACTIVE,
+            isEligible: true,
+            hasReachedLimit: false,
+            remainingSubmissions: 2,
+            maxSubmissions: 5,
+            canSubmitNow: true,
+            isWithinPeriod: true,
+            startTime: now - 1000,
+            endTime: now + 3 * 60 * 60 * 1000,
+          },
+        },
+        iconOnly
+      );
+      const button = screen.getByRole("button", { name: /Submit Meme/ });
+      expect(button).toHaveAttribute(
+        "title",
+        expect.stringContaining("You have")
+      );
+      expect(button).toHaveClass(iconOnly ? "tw-size-8" : "tw-h-8");
+      expect(button).not.toBeDisabled();
+      expect(screen.getByText("Submit Meme")).toBeInTheDocument();
+      expect(screen.getByText("Closing 3h")).toHaveClass("tw-hidden");
+      expect(screen.getByText("2 Left")).toHaveClass("tw-hidden");
+      fireEvent.click(button);
+      expect(onSubmit).toHaveBeenCalledTimes(1);
+    }
+  );
 
   describe("display time zone", () => {
     // The fields Date#toLocaleString() prints by default.

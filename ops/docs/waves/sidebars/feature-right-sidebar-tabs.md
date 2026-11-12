@@ -16,6 +16,7 @@ decision routes.
 Select the wave name to open **About**. Desktop also provides **Show right
 sidebar**. About includes the creator, creation date, share control, and current
 pinned drop with its content and media. Eligible viewers can add or edit REP.
+Pinned storms keep their reactions clearly separated from the part navigation.
 
 Header search, clock, and sidebar toggles use transparent, borderless icon
 buttons with a dark hover surface and visible blue keyboard focus. The open

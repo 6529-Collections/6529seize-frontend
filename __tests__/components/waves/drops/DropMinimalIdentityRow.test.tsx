@@ -142,7 +142,7 @@ describe("DropMinimalIdentityRow", () => {
       "0x1111111111111111111111111111111111111111"
     );
   });
-  it.each(["inline", "stacked"] as const)(
+  it.each(["inline", "stacked", "stacked-compact"] as const)(
     "keeps the author signed seal with the %s timestamp",
     (timestampLayout) => {
       render(

@@ -7,7 +7,9 @@ import MemesArtSubmissionModal from "@/components/waves/memes/LazyMemesArtSubmis
 import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import MyStreamWaveCreateActionsMenu from "./MyStreamWaveCreateActionsMenu";
-import MyStreamWaveTabsHeader from "./MyStreamWaveTabsHeader";
+import MyStreamWaveTabsHeader, {
+  type MyStreamWaveTabsHeaderActionContext,
+} from "./MyStreamWaveTabsHeader";
 import MyStreamWaveTabsMemeSubmit from "./MyStreamWaveTabsMemeSubmit";
 
 const useBreakpoint = createBreakpoint({ LG: 1024, MD: 768, S: 0 });
@@ -35,10 +37,13 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
     setIsMemesModalOpen(true);
   };
 
-  const renderHeaderLeadingActions = () => (
+  const renderHeaderTrailingActions = ({
+    isCondensed,
+  }: MyStreamWaveTabsHeaderActionContext) => (
     <MyStreamWaveTabsMemeSubmit
       handleMemesSubmit={handleMemesSubmit}
       wave={wave}
+      iconOnly={isCondensed}
     />
   );
 
@@ -53,7 +58,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
           headerActionsTooltipId={headerActionsTooltipId}
           headerClassName="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-overflow-x-hidden tw-px-2 tw-py-3 md:tw-py-2.5 sm:tw-gap-x-4 sm:tw-px-4"
           actionsClassName="tw-flex tw-flex-shrink-0 tw-self-start tw-items-center tw-gap-x-2 tw-pt-0.5 md:tw-shrink-0"
-          renderLeadingActions={renderHeaderLeadingActions}
+          renderTrailingActions={renderHeaderTrailingActions}
         />
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06]">
           <div className="tw-min-w-0 tw-flex-1">
