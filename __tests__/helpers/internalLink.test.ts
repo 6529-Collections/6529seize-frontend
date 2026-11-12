@@ -30,15 +30,31 @@ describe("getInternalPageLinkPath", () => {
     "https://user@www.6529.io/waves/123",
     "https://www.6529.io:8443/waves/123",
     "http://6529.io/%2Felsewhere.example",
+    "/\\elsewhere.example/waves/123",
+    "http://6529.io/\\elsewhere.example/waves/123",
+    "https://www.6529.io/%5Celsewhere.example/waves/123",
+    "https://www.6529.io/waves/..//elsewhere.example",
+    "http://6529.io/waves\n/123",
+    "https://www.6529.io/\t/elsewhere.example",
+    "http://6529.io/waves%0a/123",
+    "https://www.6529.io/waves%00/123",
+    "https://www.6529.io/bad%",
+    "javascript:alert(1)",
+    "data:text/html,hi",
+    "mobile6529://navigate/waves",
+    "blob:https://6529.io/waves",
   ])("keeps %s outside app page routing", (href) => {
     expect(getInternalPageLinkPath(href, SITE)).toBeNull();
   });
 
-  it("keeps a production URL pointed at production when opened from staging", () => {
-    expect(
-      getInternalPageLinkPath(`${SITE}/waves/123`, "https://staging.6529.io")
-    ).toBeNull();
-  });
+  it.each([SITE, "http://6529.io", "https://www.6529.io"])(
+    "keeps %s pointed at production when opened from staging",
+    (origin) => {
+      expect(
+        getInternalPageLinkPath(`${origin}/waves/123`, "https://staging.6529.io")
+      ).toBeNull();
+    }
+  );
 });
 
 describe("getInternalLinkPath", () => {
