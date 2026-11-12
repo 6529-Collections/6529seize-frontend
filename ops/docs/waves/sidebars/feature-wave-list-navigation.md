@@ -76,8 +76,8 @@ Wave and DM rows in the left list control which thread is open.
   available below the loaded rows. If loading fails, the existing rows stay
   available and `Retry` resumes loading. An expired list refreshes automatically
   without mixing its old and new batches. Newly joined waves appear on refresh.
-- In the native app, swipe right from the left edge of a standard wave detail
-  view to return to the Waves list.
+- In the native app, swipe right across ordinary wave or direct-message content
+  to return to its list. See [Touch Navigation in the Native App](../../navigation/flow-navigation-entry-and-switching.md#touch-navigation-in-the-native-app).
 
 ## Discovery and wave search
 
@@ -224,11 +224,9 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   touch target, so the score cannot intercept wave navigation. The link's
   accessible name includes the score; hover or keyboard focus exposes the score
   details card, while touch activation opens the wave.
-- Edge-swipe navigation applies only to native-app standard wave details. It is
-  disabled on web, direct messages, list routes, create overlays, and focused
-  drop views.
-- The gesture starts from the left edge and ignores sliders, editors, media
-  controls, and horizontally scrollable content so those interactions keep
+- Swipe-back navigation is disabled on web, list routes, create overlays, and
+  focused drop views. Screen edges remain available to the system or browser.
+  Sliders, editors, media controls, and horizontally scrollable content keep
   their normal touch behavior.
 - Browser-default behavior is kept for modified clicks such as Cmd/Ctrl-click,
   Shift/Alt-click, middle-click, and right-click/context menu.

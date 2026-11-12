@@ -32,6 +32,7 @@ function Harness({
       enabled: true,
       direction: 1,
       threshold: 100,
+      intentRatio: 1.2,
       flick: true,
       onMove,
       onEnd: onBack,
@@ -302,3 +303,52 @@ it("allows a deliberate mouse press immediately after a touch drag", () => {
   fireEvent.click(button, { detail: 1 });
   expect(onClick).toHaveBeenCalledTimes(1);
 });
+
+it("recognizes a rightward thumb arc without changing reply intent", () => {
+  const { target, onBack, onReply } = setup();
+  start(target);
+  const allowedScroll = move(target, 193, 110);
+  expect(allowedScroll).toBe(false);
+  move(target, 216, 118);
+  move(target, 300, 132);
+  end(target, 300);
+  expect(onBack).toHaveBeenCalledWith(true, 120);
+  expect(onReply).not.toHaveBeenCalled();
+
+  start(target);
+  const undecidedReply = move(target, 167, 110);
+  expect(undecidedReply).toBe(true);
+  expect(onReply).not.toHaveBeenCalled();
+  fireEvent.touchCancel(target);
+});
+
+it("does not acquire an ambiguous diagonal that never becomes horizontal", () => {
+  const { target, onBack, onReply } = setup();
+  start(target);
+  move(target, 190, 113);
+  move(target, 250, 170);
+  end(target, 310);
+  expect(onBack).not.toHaveBeenCalled();
+  expect(onReply).not.toHaveBeenCalled();
+});
+
+it.each([false, true])(
+  "relinquishes browser-owned movement after horizontal intent=%s",
+  (owned) => {
+    const { target, onBack } = setup();
+    start(target);
+    if (owned) move(target, 210);
+    fireEvent.touchMove(target, {
+      touches: [touch(310)],
+      cancelable: false,
+    });
+    end(target, 310);
+    if (owned) expect(onBack).toHaveBeenCalledWith(false, 30);
+    else expect(onBack).not.toHaveBeenCalled();
+    // A subsequent gesture must still work.
+    start(target);
+    move(target, 300);
+    end(target, 300);
+    expect(onBack).toHaveBeenLastCalledWith(true, 120);
+  }
+);

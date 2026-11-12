@@ -86,6 +86,9 @@ context-aware `Back`).
   content to return to its list. The view follows your finger. Reverse below the
   gesture threshold before releasing to cancel. A slow, short drag also stays
   in the conversation; a longer drag or quick flick completes the return.
+- A brief diagonal start can turn into a horizontal swipe. Once vertical
+  scrolling has started, that touch stays with scrolling; lift your finger
+  before starting a swipe back.
 - Encrypted conversations support the same rightward return to the encrypted
   messages list. The visible Back control remains available.
 - Inputs, links, buttons, voting sliders, media controls, selected text and

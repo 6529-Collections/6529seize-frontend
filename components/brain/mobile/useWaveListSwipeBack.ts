@@ -31,6 +31,9 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
       enabled,
       direction: 1,
       threshold: 100,
+      // Recognize a rightward thumb arc before the browser starts a scroll.
+      // Reply retains the recognizer's narrower default direction cone.
+      intentRatio: 1.2,
       flick: true,
       onStart: () => {
         animation.current?.cancel();
@@ -109,7 +112,7 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
       element?.style.removeProperty("transform");
       element?.style.removeProperty("will-change");
     };
-  }, [scope]);
+  }, [enabled, scope]);
 
   const onTouchStart = useCallback(
     (event: TouchEvent<HTMLElement>) => {
