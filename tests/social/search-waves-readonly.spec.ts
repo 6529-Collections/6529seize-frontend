@@ -1088,7 +1088,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     ).toHaveCount(0);
   });
 
-  test("Pages search opens the Validator without a navigation entry", async ({
+  test("Pages search keeps Validator out of newcomer navigation", async ({
     page,
   }) => {
     await gotoReady(page, "/about/6529-apps");
@@ -1098,9 +1098,17 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     const validator = page
       .getByRole("option")
       .locator('xpath=self::a[@href="/validator"]');
-    await expect(validator).toContainText("6529 Validator");
-    await validator.click();
-    await expect(page).toHaveURL(/\/validator$/);
+    await expect(
+      page.getByText('No matches in Pages for "validator"', { exact: true })
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    await expect(validator).toHaveCount(0);
+
+    await searchInput.fill("Join 6529");
+    const join = page.getByRole("option", { name: /^Join 6529/ });
+    await expect(join).toContainText("Join 6529");
+    await expect(join).toHaveAttribute("href", "/join-6529");
+    await join.click();
+    await expect(page).toHaveURL(/\/join-6529$/);
   });
 
   test("global header search preserves keyboard flow and page navigation", async ({

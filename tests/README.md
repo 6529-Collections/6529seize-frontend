@@ -64,6 +64,11 @@ keyboard focus, direct navigation, and active state.
 App PR CI selects this registered pack through the critical-shell lane for
 membership-navigation source changes.
 
+The deployed read-only search pack also checks that newcomer Pages searches
+exclude Validator after results settle and still navigate through Join 6529.
+Member search results are covered by the focused search unit tests, alongside
+the member navigation scenarios in the session recovery sandbox.
+
 ## Pack registry
 
 The reaction sandbox covers live count and profile-list updates, desktop tooltip
