@@ -17,7 +17,7 @@ context-aware `Back`).
 
 ## Entry Points
 
-- Web sidebar primary concepts (`NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`,
+- Web sidebar primary concepts (`NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529` (or `Validator` for members),
   `About`) plus gated `Drop Forge` when available and connected utility rows
   such as `Notifications`.
 - Small-screen header menu button (opens the sidebar in overlay mode).
@@ -63,7 +63,8 @@ context-aware `Back`).
   connected wallet has landing access.
 - Small-screen web: open overlay menu, pick a route, and continue after
   auto-close on navigation.
-- Join 6529 jump: use the primary `Join 6529` row to open `/join-6529`.
+- Membership jump: newcomers use `Join 6529` for `/join-6529`; signed-in
+  members with a profile use `Validator` for `/validator` in the same slot.
 - Museum jump: use the direct `Museum` row after `NFTs` to open
   `/museum/network` in web and app sidebars.
 - Desktop web share: use the standalone lower `Share` row on a supported route,
@@ -116,7 +117,7 @@ context-aware `Back`).
 - In the app drawer header, only the connected profile avatar is a profile
   shortcut; handle/wallet text and level badge are informational.
 - Web sidebar and search-page catalogs can vary by runtime constraints:
-  iOS non-US hides subscription-related entries, and `App Wallets` appears only
+  the iOS app hides subscription-related entries, and `App Wallets` appears only
   when app-wallet support is enabled. `About` keeps network/reference routes in
   `Network & Reputation`, wallet/delegation routes in `Safe Collecting`,
   and open-data/tool routes in `Data & Developer Tools`. `Drop Forge` appears

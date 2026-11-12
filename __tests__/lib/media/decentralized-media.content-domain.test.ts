@@ -9,6 +9,7 @@ import {
   resolveDecentralizedMediaInputs,
   toExternalFallbackUrls,
   toIsolatedHtmlUrl,
+  toConfiguredMediaPlaybackUrl,
   toIsolatedHtmlUrlFromInput,
 } from "@/lib/media/decentralized-media";
 
@@ -305,5 +306,82 @@ describe("with the content-domain resolver endpoint", () => {
     expect(
       resolved?.external_fallback_urls.some((url) => isOnDomain(url, "6529.io"))
     ).toBe(false);
+  });
+});
+
+describe("toConfiguredMediaPlaybackUrl", () => {
+  const storedInputs = [
+    `https://media.6529.io/ipfs/${CID_V1}/clip.mp4`,
+    `https://ipfs.6529.io/ipfs/${CID_V1}/clip.mp4`,
+    `https://ipfs-cache.6529.io/ipfs/${CID_V1}/clip.mp4`,
+    `https://${CID_V1}.ipfs.6529usercontent.com/clip.mp4`,
+    `https://media.6529.io/arweave/${TX_ID}`,
+    `https://media.6529.io/ipns/example.eth/song.mp3`,
+    "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_1/clip.mp4",
+    `https://ipfs.io/ipfs/${CID_V1}/clip.mp4`,
+    `https://arweave.net/${TX_ID}`,
+    `ipfs://${CID_V1}/clip.mp4`,
+  ];
+
+  it.each([undefined, "", PREVIOUS_ENDPOINT])(
+    "returns every input unchanged with endpoint %p",
+    (endpoint) => {
+      for (const input of storedInputs) {
+        expect(toConfiguredMediaPlaybackUrl(input, endpoint)).toBe(input);
+      }
+    }
+  );
+
+  it.each([
+    [
+      `https://media.6529.io/ipfs/${CID_V1}/clip.mp4`,
+      `https://media.6529usercontent.com/ipfs/${CID_V1}/clip.mp4`,
+    ],
+    [
+      `https://ipfs.6529.io/ipfs/${CID_V1}/clip.mp4`,
+      `https://media.6529usercontent.com/ipfs/${CID_V1}/clip.mp4`,
+    ],
+    [
+      `https://ipfs-cache.6529.io/ipfs/${CID_V0}`,
+      `https://media.6529usercontent.com/ipfs/${CID_V0}`,
+    ],
+    [
+      `https://${CID_V1}.ipfs.6529usercontent.com/clip.mp4`,
+      `https://media.6529usercontent.com/ipfs/${CID_V1}/clip.mp4`,
+    ],
+    [
+      `https://media.6529.io/arweave/${TX_ID}`,
+      `https://media.6529usercontent.com/arweave/${TX_ID}`,
+    ],
+    [
+      "https://media.6529.io/ipns/example.eth/song.mp3",
+      "https://media.6529usercontent.com/ipns/example.eth/song.mp3",
+    ],
+    [
+      `https://media.6529.io/ipfs/${CID_V1}/clip.mp4?t=1#start`,
+      `https://media.6529usercontent.com/ipfs/${CID_V1}/clip.mp4?t=1#start`,
+    ],
+  ])(
+    "plays %s from the content-domain path host",
+    (input, expected) => {
+      expect(toConfiguredMediaPlaybackUrl(input, CONTENT_DOMAIN_ENDPOINT)).toBe(
+        expected
+      );
+    }
+  );
+
+  it.each([
+    "https://d3lqz0a4bldqgf.cloudfront.net/drops/author_1/clip.mp4",
+    `https://ipfs.io/ipfs/${CID_V1}/clip.mp4`,
+    `https://arweave.net/${TX_ID}`,
+    `ipfs://${CID_V1}/clip.mp4`,
+    `http://media.6529.io/ipfs/${CID_V1}/clip.mp4`,
+    "https://media.6529.io/uploads/clip.mp4",
+    `https://media.6529usercontent.com/ipfs/${CID_V1}/clip.mp4`,
+    "not a url",
+  ])("leaves %s unchanged on the content domain", (input) => {
+    expect(toConfiguredMediaPlaybackUrl(input, CONTENT_DOMAIN_ENDPOINT)).toBe(
+      input
+    );
   });
 });

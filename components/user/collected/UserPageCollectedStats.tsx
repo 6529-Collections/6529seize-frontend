@@ -1,5 +1,7 @@
 "use client";
 
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
+
 import type { UserPageStatsInitialData } from "@/components/user/stats/userPageStats.types";
 import { SEARCH_PARAM_ACTIVITY } from "@/components/user/stats/activity/activity.helpers";
 import type { CollectedCollectionType } from "@/entities/IProfile";
@@ -242,51 +244,56 @@ export default function UserPageCollectedStats({
       />
 
       <div ref={detailsScrollTargetRef} className="tw-scroll-mt-24">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-3 md:tw-px-5">
-          <span data-profile-action="Complete my set" className="tw-contents">
-            <CollectEntryLink
-              collection="memes"
-              intent={activeSeasonNumber === null ? "full_set" : "season"}
-              definitionId={
-                activeSeasonNumber === null
-                  ? undefined
-                  : String(activeSeasonNumber)
-              }
-              locale={locale}
-              complete
-              profileActivityKey={isApp ? "complete-set" : undefined}
-              className={getButtonClasses({
-                variant: "tertiary",
-                size: "sm",
-                className: `${COLLECTED_ACTION_CLASS} !tw-px-3 !tw-text-xs tw-no-underline hover:tw-no-underline`,
-              })}
-            />
-          </span>
-          {isApp ? (
-            <ProfileCollectedActivityLink
-              data-profile-action="Manage orders"
-              href="/collect/orders"
-              activityKey="manage-orders"
-              className={getButtonClasses({
-                variant: "tertiary",
-                size: "sm",
-                className: `${COLLECTED_ACTION_CLASS} tw-no-underline hover:tw-no-underline`,
-              })}
-            >
-              {t(locale, "collect.entry.manage")}
-            </ProfileCollectedActivityLink>
-          ) : (
-            <ButtonLink
-              data-profile-action="Manage orders"
-              href="/collect/orders"
-              variant="tertiary"
-              size="sm"
-              className={COLLECTED_ACTION_CLASS}
-            >
-              {t(locale, "collect.entry.manage")}
-            </ButtonLink>
-          )}
-        </div>
+        <NftPurchasingGate>
+          <div
+            data-testid="collected-purchase-actions"
+            className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-3 md:tw-px-5"
+          >
+            <span data-profile-action="Complete my set" className="tw-contents">
+              <CollectEntryLink
+                collection="memes"
+                intent={activeSeasonNumber === null ? "full_set" : "season"}
+                definitionId={
+                  activeSeasonNumber === null
+                    ? undefined
+                    : String(activeSeasonNumber)
+                }
+                locale={locale}
+                complete
+                profileActivityKey={isApp ? "complete-set" : undefined}
+                className={getButtonClasses({
+                  variant: "tertiary",
+                  size: "sm",
+                  className: `${COLLECTED_ACTION_CLASS} !tw-px-3 !tw-text-xs tw-no-underline hover:tw-no-underline`,
+                })}
+              />
+            </span>
+            {isApp ? (
+              <ProfileCollectedActivityLink
+                data-profile-action="Manage orders"
+                href="/collect/orders"
+                activityKey="manage-orders"
+                className={getButtonClasses({
+                  variant: "tertiary",
+                  size: "sm",
+                  className: `${COLLECTED_ACTION_CLASS} tw-no-underline hover:tw-no-underline`,
+                })}
+              >
+                {t(locale, "collect.entry.manage")}
+              </ProfileCollectedActivityLink>
+            ) : (
+              <ButtonLink
+                data-profile-action="Manage orders"
+                href="/collect/orders"
+                variant="tertiary"
+                size="sm"
+                className={COLLECTED_ACTION_CLASS}
+              >
+                {t(locale, "collect.entry.manage")}
+              </ButtonLink>
+            )}
+          </div>
+        </NftPurchasingGate>
         <CollectedStatsDetailsPanel
           isOpen={isDetailsOpen}
           isLoading={isDetailsLoading}

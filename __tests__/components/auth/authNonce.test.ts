@@ -2,6 +2,7 @@ import {
   AuthenticationNonceError,
   InvalidSignerAddressError,
   NonceResponseValidationError,
+  SignInRateLimitedError,
 } from "@/components/auth/authErrors";
 import { getAuthNonce } from "@/components/auth/authNonce";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
@@ -72,6 +73,33 @@ describe("getAuthNonce", () => {
 
   it("wraps transport failures as nonce errors", async () => {
     mockedGetSessionNonce.mockRejectedValue(new Error("offline"));
+
+    await expect(getAuthNonce({ signerAddress })).rejects.toBeInstanceOf(
+      AuthenticationNonceError
+    );
+  });
+
+  it("reports too many sign-in attempts separately from transport failures", async () => {
+    mockedGetSessionNonce.mockRejectedValue(
+      Object.assign(new Error("Rate limit exceeded"), {
+        status: 429,
+        response: {
+          status: 429,
+          headers: new Headers({ "Retry-After": "6" }),
+          body: '{"error":"Rate limit exceeded","retryAfter":6}',
+        },
+      })
+    );
+
+    await expect(getAuthNonce({ signerAddress })).rejects.toBeInstanceOf(
+      SignInRateLimitedError
+    );
+  });
+
+  it("keeps other HTTP failures as nonce errors", async () => {
+    mockedGetSessionNonce.mockRejectedValue(
+      Object.assign(new Error("Service unavailable"), { status: 503 })
+    );
 
     await expect(getAuthNonce({ signerAddress })).rejects.toBeInstanceOf(
       AuthenticationNonceError

@@ -1,10 +1,10 @@
-import { SubscriptionPageGate } from "@/components/common/NftPurchasingGate";
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import UserPageTabs from "@/components/user/layout/UserPageTabs";
 import { USER_PAGE_TAB_IDS } from "@/components/user/layout/userTabs.config";
 import { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 
 let mockIsIos = true;
 const mockReplace = jest.fn();
@@ -70,14 +70,14 @@ function SubscriptionsPanel() {
 }
 
 // Mirrors the profile layout: the tab bar above the gated subscriptions panel,
-// both reading the real cookie-consent country lookup.
+// under the cookie consent provider with a deferred country lookup.
 function renderSubscriptionsDeepLink() {
   return render(
     <CookieConsentProvider>
       <UserPageTabs initialProfile={initialProfile} />
-      <SubscriptionPageGate placeholder={null}>
+      <NftPurchasingGate>
         <SubscriptionsPanel />
-      </SubscriptionPageGate>
+      </NftPurchasingGate>
     </CookieConsentProvider>
   );
 }
@@ -101,45 +101,22 @@ beforeEach(() => {
 });
 
 describe("profile subscriptions deep link with the country check", () => {
-  it("keeps a US iOS cold deep link in place and shows the tab once US resolves", async () => {
-    const resolveCountry = deferCountryCheck();
-    renderSubscriptionsDeepLink();
+  it.each(["US", "FR", ""])(
+    "redirects immediately on iOS and stays hidden after the lookup returns %j",
+    async (country) => {
+      const resolveCountry = deferCountryCheck();
+      renderSubscriptionsDeepLink();
 
-    expect(getTabIds()).not.toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
-    expect(mockMount).not.toHaveBeenCalled();
-    expect(mockReplace).not.toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledWith("/testuser");
+      expect(mockMount).not.toHaveBeenCalled();
 
-    resolveCountry("US");
+      await act(async () => resolveCountry(country));
 
-    expect(await screen.findByText("Subscription history")).toBeInTheDocument();
-    expect(getTabIds()).toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
-    expect(mockReplace).not.toHaveBeenCalled();
-  });
-
-  it("redirects iOS to Identity once the check returns a non-US country", async () => {
-    const resolveCountry = deferCountryCheck();
-    renderSubscriptionsDeepLink();
-    expect(mockReplace).not.toHaveBeenCalled();
-
-    resolveCountry("FR");
-
-    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/testuser"));
-    expect(mockMount).not.toHaveBeenCalled();
-    expect(getTabIds()).not.toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
-  });
-
-  it("redirects iOS to Identity when the check fails with an unknown country", async () => {
-    const consoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
-    fetchMock.mockRejectedValue(new Error("network down"));
-
-    renderSubscriptionsDeepLink();
-
-    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/testuser"));
-    expect(mockMount).not.toHaveBeenCalled();
-    consoleError.mockRestore();
-  });
+      expect(getTabIds()).not.toContain(USER_PAGE_TAB_IDS.SUBSCRIPTIONS);
+      expect(mockMount).not.toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it("does not make Android or web wait for the check", () => {
     mockIsIos = false;

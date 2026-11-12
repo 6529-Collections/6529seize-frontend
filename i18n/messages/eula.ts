@@ -10,6 +10,9 @@ export const EULA_MESSAGES = {
   "eula.modal.introduction":
     "To use 6529 Mobile, you must agree to our Terms of Service and EULA:",
   "eula.modal.agreementLabel": "End User License Agreement text",
+  "eula.modal.mintingReference":
+    "You acknowledge that you have read and accept the minting information below, which is incorporated into these Terms.",
+  "eula.modal.readMintingTerms": "Read the minting terms",
   "eula.modal.scrollToEnd": "Scroll to end of agreement",
   "eula.modal.tryAgain": "Try Again",
   "eula.modal.agree": "Agree",

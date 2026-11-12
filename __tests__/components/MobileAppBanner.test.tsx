@@ -1,9 +1,18 @@
+import { runInNewContext } from "node:vm";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Capacitor } from "@capacitor/core";
+import { SMALL_WEB_STARTUP_SCRIPT } from "@/components/layout/smallWebStartup";
 import MobileAppBanner from "@/components/mobile-app/MobileAppBanner";
 import { MOBILE_APP_ANDROID, MOBILE_APP_IOS } from "@/constants/constants";
+import { MOBILE_APP_DISMISSAL_KEY } from "@/helpers/mobileAppLinks";
 
-const MOBILE_APP_DISMISSAL_KEY = "6529-mobile-banner-dismissed-until";
+const IPHONE_SAFARI =
+  "Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Mobile/15E148 Safari/604.1";
+const IPAD_SAFARI =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15";
+const IPHONE_CHROME =
+  "Mozilla/5.0 (iPhone; CPU iPhone OS 26_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/140.0 Mobile/15E148 Safari/604.1";
+
 const MOBILE_APP_DISMISSAL_MS = 7 * 24 * 60 * 60 * 1000;
 
 let pathname = "/";
@@ -20,11 +29,12 @@ beforeEach(() => {
   pathname = "/";
   localStorage.clear();
   window.history.replaceState({}, "", "/");
-  jest.spyOn(navigator, "userAgent", "get").mockReturnValue("iPhone Safari");
+  jest.spyOn(navigator, "userAgent", "get").mockReturnValue(IPHONE_CHROME);
   jest.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
 });
 afterEach(() => {
   jest.restoreAllMocks();
+  Reflect.deleteProperty(navigator, "maxTouchPoints");
   jest.useRealTimers();
 });
 
@@ -152,6 +162,66 @@ test("does not show in the mobile app", () => {
   render(<MobileAppBanner />);
   expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
 });
+
+test.each([
+  { ua: IPHONE_SAFARI, expected: false },
+  { ua: IPAD_SAFARI, maxTouchPoints: 5, expected: false },
+  { ua: IPHONE_CHROME, expected: true },
+  {
+    ua: IPHONE_SAFARI.replace("Version/26.0", "Version/26.0 FxiOS/140"),
+    expected: true,
+  },
+  { ua: "Android Mobile Chrome/140" },
+  { ua: IPHONE_CHROME, path: "/%61uth/callback" },
+  { ua: IPHONE_CHROME, path: "/%invalid" },
+  { ua: IPHONE_CHROME, dismissal: "future" },
+  { ua: IPHONE_CHROME, dismissal: "Infinity" },
+  { ua: IPHONE_CHROME, native: true },
+  { ua: "iPhone Electron" },
+])(
+  "reserves startup space when the hydrated banner renders: %j",
+  ({
+    ua,
+    path = "/safe-collecting",
+    dismissal,
+    native = false,
+    expected,
+    maxTouchPoints = 1,
+  }) => {
+    pathname = path;
+    jest.spyOn(navigator, "userAgent", "get").mockReturnValue(ua);
+    Object.defineProperty(navigator, "maxTouchPoints", {
+      value: maxTouchPoints,
+      configurable: true,
+    });
+    jest.mocked(Capacitor.isNativePlatform).mockReturnValue(native);
+    if (dismissal) {
+      localStorage.setItem(
+        MOBILE_APP_DISMISSAL_KEY,
+        dismissal === "future" ? String(Date.now() + 60_000) : dismissal
+      );
+    }
+
+    const setAttribute = jest.fn();
+    runInNewContext(SMALL_WEB_STARTUP_SCRIPT, {
+      innerWidth: 390,
+      navigator,
+      location: { pathname },
+      localStorage,
+      document: {
+        documentElement: { hasAttribute: () => native, setAttribute },
+      },
+    });
+    render(<MobileAppBanner />);
+
+    const reserved = setAttribute.mock.calls.some(
+      ([name]) => name === "data-small-web-banner"
+    );
+    const visible = screen.queryByRole("complementary") !== null;
+    expect(reserved).toBe(visible);
+    if (expected !== undefined) expect(visible).toBe(expected);
+  }
+);
 
 test("uses Google Play on Android", () => {
   jest

@@ -6,7 +6,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { getMessagesBaseRoute } from "@/helpers/navigation.helpers";
 import { useRouter } from "next/navigation";
 
-export default function MessagesCreatePageClient() {
+export default function NewMessagePageClient() {
   const router = useRouter();
   const { connectedProfile } = useAuth();
 
