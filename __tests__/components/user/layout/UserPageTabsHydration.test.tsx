@@ -8,8 +8,6 @@ import { renderToString } from "react-dom/server";
 // Real platform detection and visibility hook: only the native bridge, the
 // country and the route are mocked.
 let mockNativePlatform: "ios" | "android" | "web" = "web";
-let mockCountry = "US";
-let mockIsCountryPending = false;
 let mockPathname = "/testuser/subscriptions";
 let mockShowWaves = false;
 let mockConnectedProfile: ApiIdentity | null = null;
@@ -37,12 +35,6 @@ jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
   useSearchParams: () => new URLSearchParams(),
   useParams: () => ({ user: "testuser" }),
-}));
-jest.mock("@/components/cookies/CookieConsentContext", () => ({
-  useCookieConsent: () => ({
-    country: mockCountry,
-    isCountryPending: mockIsCountryPending,
-  }),
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
@@ -100,19 +92,9 @@ async function hydrateFromServerHtml() {
   });
 }
 
-async function settleCountry(country: string) {
-  mockCountry = country;
-  mockIsCountryPending = false;
-  await act(async () => {
-    root?.render(tree());
-  });
-}
-
 beforeEach(() => {
   jest.clearAllMocks();
   mockNativePlatform = "web";
-  mockCountry = "US";
-  mockIsCountryPending = false;
   mockPathname = "/testuser/subscriptions";
   mockShowWaves = false;
   mockConnectedProfile = null;
@@ -192,41 +174,13 @@ describe("profile Subscriptions tab around hydration", () => {
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
-  it("keeps a hydrated iOS deep link in place while the country is pending, then shows the tab for US", async () => {
+  it("redirects a hydrated iOS subscriptions deep link to Identity", async () => {
     mockNativePlatform = "ios";
-    mockCountry = "";
-    mockIsCountryPending = true;
 
     await hydrateFromServerHtml();
 
     expect(tabIds()).not.toContain(SUBSCRIPTIONS);
-    expect(activeTabIds()).toEqual([]);
-    expect(mockReplace).not.toHaveBeenCalled();
-
-    await settleCountry("US");
-
-    expect(tabIds()).toContain(SUBSCRIPTIONS);
-    expect(activeTabIds()).toEqual([SUBSCRIPTIONS]);
-    expect(mockReplace).not.toHaveBeenCalled();
+    expect(activeTabIds()).toEqual([USER_PAGE_TAB_IDS.REP]);
+    expect(mockReplace).toHaveBeenCalledWith("/testuser");
   });
-
-  it.each([
-    ["a non-US country", "FR"],
-    ["an unknown country", ""],
-  ])(
-    "redirects a hydrated iOS deep link to Identity when the country resolves to %s",
-    async (_label, country) => {
-      mockNativePlatform = "ios";
-      mockCountry = "";
-      mockIsCountryPending = true;
-
-      await hydrateFromServerHtml();
-      expect(mockReplace).not.toHaveBeenCalled();
-
-      await settleCountry(country);
-
-      expect(mockReplace).toHaveBeenCalledWith("/testuser");
-      expect(tabIds()).not.toContain(SUBSCRIPTIONS);
-    }
-  );
 });

@@ -5,6 +5,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { ApiMarketBatchOperation } from "@/generated/models/ApiMarketBatchOperation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { t } from "@/i18n/messages";
 import { useQueries, useQueryClient, type Query } from "@tanstack/react-query";
 import Link from "next/link";
@@ -56,9 +57,11 @@ function completionTitle(activity: MarketActivity) {
 }
 /** Resumes only known operation IDs; it cannot open a wallet or submit a new purchase. */
 export default function MarketActivityTracker() {
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { connectedProfile, isAuthenticated, activeProfileProxy } = useAuth();
   const profileId =
     isAuthenticated && !activeProfileProxy ? connectedProfile?.id : undefined;
+  if (hideNftPurchasing) return null;
   return (
     <ProfileActivityTracker key={profileId ?? "public"} profileId={profileId} />
   );

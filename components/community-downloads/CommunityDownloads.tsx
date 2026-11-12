@@ -1,8 +1,7 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { useSetTitle } from "@/contexts/TitleContext";
-import useCapacitor from "@/hooks/useCapacitor";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import {
   BellIcon,
   ChartBarIcon,
@@ -38,8 +37,7 @@ function DownloadCard({ href, title, icon }: DownloadCardProps) {
 }
 
 export default function CommunityDownloads() {
-  const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing: hideSubscriptions } = useNftPurchasingVisibility();
   useSetTitle("Open Data");
 
   const items = [
@@ -53,7 +51,7 @@ export default function CommunityDownloads() {
       title: "6529bot Usage",
       icon: <CpuChipIcon className="tw-h-full tw-w-full" />,
     },
-    ...(!capacitor.isIos || country === "US"
+    ...(!hideSubscriptions
       ? [
           {
             href: "/open-data/meme-subscriptions",

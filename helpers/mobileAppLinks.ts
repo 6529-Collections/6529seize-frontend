@@ -12,6 +12,10 @@ export const MOBILE_APP_USER_AGENTS = {
   android: /Android/i,
   ios: /iPhone|iPad|iPod/i,
   mac: /Macintosh/i,
+  safariVersion: /\bVersion\/\d/i,
+  safari: /\bSafari\//i,
+  otherIosBrowser:
+    /CriOS|FxiOS|EdgiOS|OPiOS|GSA|DuckDuckGo|YaBrowser|FBAN|FBAV|Instagram/i,
 };
 
 /** Routes that stay in the browser for app links and universal links alike. */
