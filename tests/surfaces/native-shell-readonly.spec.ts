@@ -240,6 +240,70 @@ async function readNotificationHistoryPushCount(page: Page) {
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
+  test("calendar invites omit the mint URL only on iOS", async ({
+    page,
+  }, testInfo) => {
+    await gotoReady(page, "/meme-calendar");
+
+    const mintUrl = /6529\.io%2Fthe-memes%2Fmint/i;
+    const invites = [
+      page.getByRole("link", { name: "Add to Calendar", exact: true }).first(),
+      page
+        .getByRole("link", { name: "Add to Google Calendar", exact: true })
+        .first(),
+    ];
+
+    for (const invite of invites) {
+      await expect(invite).toBeVisible();
+      if (testInfo.project.name === "capacitor-ios-sim") {
+        await expect(invite).not.toHaveAttribute("href", mintUrl);
+      } else {
+        await expect(invite).toHaveAttribute("href", mintUrl);
+      }
+    }
+  });
+
+  test("NextGen listing filters and direct listing URLs are gated on iOS", async ({
+    page,
+  }, testInfo) => {
+    await gotoReady(
+      page,
+      "/nextgen/collection/pebbles/art?sort=listed_price&listed=true"
+    );
+
+    const listingStatus = page.getByRole("combobox", {
+      name: "Listing status",
+    });
+    const sort = page.getByRole("button", { name: /^Sort:/ });
+    const isIos = testInfo.project.name === "capacitor-ios-sim";
+    if (isIos) {
+      await expect(sort).toHaveText("Sort: ID");
+      await expectUrlState(
+        page,
+        (url) =>
+          url.searchParams.get("sort") === "id" &&
+          !url.searchParams.has("listed")
+      );
+      await expect(listingStatus).toHaveCount(0);
+    } else {
+      await expect(sort).toHaveText("Sort: Listed Price");
+      await expect(listingStatus).toBeVisible();
+    }
+    await sort.click();
+    await expect(
+      page.getByRole("button", { name: "Last Sale", exact: true })
+    ).toBeVisible();
+    const listedPrice = page.getByRole("button", {
+      name: "Listed Price",
+      exact: true,
+    });
+    if (isIos) {
+      await expect(listedPrice).toHaveCount(0);
+    } else {
+      await expect(listedPrice).toBeVisible();
+    }
+  });
+
   test("Collect Back restores the Collected filters and source action", async ({
     page,
   }, testInfo) => {
@@ -259,13 +323,13 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       });
       const source = new URL(page.url());
       const link = page.getByRole("link", { name: action, exact: true });
-      if (
-        testInfo.project.name === "capacitor-ios-sim" &&
-        action === "Complete my set"
-      ) {
+      const purchaseActions = page.getByTestId("collected-purchase-actions");
+      if (testInfo.project.name === "capacitor-ios-sim") {
         await expect(link).toHaveCount(0);
+        await expect(purchaseActions).toHaveCount(0);
         continue;
       }
+      await expect(purchaseActions).toBeVisible();
       await link.scrollIntoViewIfNeeded();
       const destination = new URL(
         (await link.getAttribute("href"))!,
@@ -305,9 +369,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       // A document navigation starts a fresh app history for each deep link.
       await gotoReady(page, path);
       const expectedPath =
-        testInfo.project.name === "capacitor-ios-sim" && path === "/collect"
-          ? "/the-memes"
-          : path;
+        testInfo.project.name === "capacitor-ios-sim" ? "/the-memes" : path;
       await expect(page).toHaveURL((url) => url.pathname === expectedPath);
       await expect(
         page.getByRole("navigation", {
@@ -325,8 +387,8 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     page,
   }, testInfo) => {
     test.skip(
-      !isCapacitorSimulationProject(testInfo.project.name),
-      "Native app Back contract"
+      testInfo.project.name !== "capacitor-android-sim",
+      "Orders remains available in the Android app"
     );
     await gotoReady(page, "/about");
     await expect(
@@ -1037,57 +1099,41 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     ).toHaveCount(0);
   });
 
-  test("iOS native simulation hides non-US subscription downloads", async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "capacitor-ios-sim",
-      "iOS subscription visibility is covered on the iOS Capacitor simulation"
-    );
+  for (const country of ["FR", "US", ""]) {
+    test(`iOS hides subscription downloads and redirects profile Subscriptions (${country || "unknown"})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "capacitor-ios-sim",
+        "iOS subscription visibility is covered on the iOS Capacitor simulation"
+      );
 
-    await mockCountryCheck(page, "FR");
-    const countryCheck = waitForCountryCheck(page);
+      await mockCountryCheck(page, country);
+      const countryCheck = waitForCountryCheck(page);
 
-    await gotoReady(page, "/open-data");
-    await countryCheck;
+      await gotoReady(page, "/open-data");
+      await countryCheck;
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Open Data" })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Network Metrics" })
+      ).toHaveAttribute("href", "/open-data/network-metrics");
+      await expect(
+        page.getByRole("link", { name: "Meme Subscriptions" })
+      ).toHaveCount(0);
 
-    await expect(
-      page.getByRole("heading", { level: 1, name: "Open Data" })
-    ).toBeVisible();
-    await expect(
-      page.getByRole("link", { name: "Network Metrics" })
-    ).toHaveAttribute("href", "/open-data/network-metrics");
-    await expect(
-      page.getByRole("link", { name: "Meme Subscriptions" })
-    ).toHaveCount(0);
-  });
-
-  test("iOS native simulation keeps US subscription downloads visible", async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "capacitor-ios-sim",
-      "iOS subscription visibility is covered on the iOS Capacitor simulation"
-    );
-
-    await mockCountryCheck(page, "US");
-    const countryCheck = waitForCountryCheck(page);
-
-    await gotoReady(page, "/open-data");
-    await countryCheck;
-
-    await expect(
-      page.getByRole("heading", { level: 1, name: "Open Data" })
-    ).toBeVisible();
-    const subscriptionsLink = page.getByRole("link", {
-      name: "Meme Subscriptions",
+      await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+      await expect(page).toHaveURL(
+        (url) => url.pathname === `/${PROFILE_HANDLE}`
+      );
+      await expect(
+        page
+          .getByRole("navigation", { name: "Profile sections" })
+          .getByRole("link", { name: "Subscriptions", exact: true })
+      ).toHaveCount(0);
     });
-    await expect(subscriptionsLink).toBeVisible();
-    await expect(subscriptionsLink).toHaveAttribute(
-      "href",
-      "/open-data/meme-subscriptions"
-    );
-  });
+  }
 
   test("Android native simulation keeps subscription downloads visible", async ({
     page,

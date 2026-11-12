@@ -12,7 +12,9 @@ timestamp access, cancellable native conversation return and Android Back layer
 ordering. They retain visible tap alternatives, permission and delivery-state
 restrictions, system-edge gestures and reduced-motion behavior. Reversal
 instructions require moving below the commit threshold before release. The shared
-Back record includes wave and direct-message detail routes.
+Back record includes wave and direct-message detail routes. The mobile
+bottom-navigation record covers temporary section-tab hiding while composing in
+short landscape iPhone chat viewports.
 
 The signing, encrypted-messages and connection-sharing records cover the shared
 permission consent flow, separate or combined grants, shared server device names,
@@ -366,11 +368,10 @@ system sharing, confirmed clipboard fallback, silent cancellation, temporary
 drop availability, and the existing Main Stage, Quorum, and direct-message URL
 rules. Sharing a direct-message URL does not grant conversation access.
 
-The direct-message record covers **New message**, its responsive web bottom sheet
-and desktop dialog, its **To** recipient field,
-search results that remain visible after keyboard dismissal, removable recipient
-chips, selection circles, and the **Message** action for one person or a group.
-It also describes retry behavior and the native screen's hidden tab bar.
+The direct-message record covers **New message** at `/messages/new`, its **To**
+field, and removable recipient chips. It also describes retry behavior and the
+native screen's hidden tab bar. Builds without encrypted chats use the web
+dialog and the **Message** action.
 
 The Memes submission profile and wallet signing record covers the EIP-712
 **Submit a Meme Card to The Memes** action, readable artwork and destination,
@@ -403,8 +404,15 @@ TDH and Unweighted TDH headers over This card and Total rows, its six sort
 metrics and separate direction arrows, identity filtering, 25-row pagination,
 and full-value CSV export. On narrow screens the list scrolls horizontally by
 swipe or keyboard, keeping labels and values on one line. Screens 768 px and
-wider use the sortable table.
+wider use the table grouped into This card and Total. Full column-label buttons
+start a new metric high to low and toggle the active direction, with persistent
+sort indicators, an active direction arrow, brighter values, keyboard access
+and announced sort directions.
 Compact values are presentation only.
+The Memes card record describes the six-property preview on phones and desktop,
+with **Show all N properties** and **Show fewer** controls. Between 640 and
+767 px, all properties remain visible without a disclosure; short lists have
+no disclosure.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
 The Meme card record places connection guidance first when needed, then Collect
@@ -414,8 +422,14 @@ row above the other controls. When Collect is present, the available List action
 Collect it takes the second slot, or Make an offer spans both slots if List is
 unavailable. Review offers remains available in the menu. Delivery controls appear
 below the actions once the required wallet is connected. View listings & offers
-has a separate navigation row below Supply details & rankings. Labels, action
-availability and wallet requirements stay unchanged.
+shares a desktop row with Marketplaces directly below the trading buttons,
+before supply statistics; smaller screens keep the separate navigation row
+below Supply details & rankings. On desktop, the Memes and Meme Lab
+card records place Mint date beside Mint price above their statistics, followed
+by Distribution Plan when available and Main Stage Submission for supported
+Memes. The Memes TDH rate remains with the supply statistics, including its
+Pending state. Smaller screens retain their original information order. Action
+availability, statistics and wallet requirements stay unchanged.
 Tabs and the off-screen action replacement stay sticky below 1024px, matching
 the single-column card layout; selected-listing review retains bottom-bar priority.
 Market browsing facts describe quiet periodic updates while visible and idle,
@@ -451,7 +465,10 @@ switching tabs retains the market selection and active review.
 
 Meme Lab card records include the shared Collect, Make an offer, List and Sell
 controls, exact-card eligibility checks, edition quantities and purchase delivery
-choices. Meme Lab trading is distinct from the Memes, Gradients and Pebbles
+choices. They describe the desktop connection header and List in More trading
+actions when Collect is available, plus the six-property desktop preview and
+Show all / Show fewer control. Smaller screens keep all Meme Lab properties
+visible and retain their existing trading layout. Meme Lab trading is distinct from the Memes, Gradients and Pebbles
 universe used by the set planner, Lowest listings and TDH tools.
 
 Collecting strategy records cover Collect now, At WETH offer, WETH + %, Ask − %,
@@ -1060,3 +1077,12 @@ emphasis, owner-only deadlines, original full-year date display, quiet facts, lo
 skeletons, original emerald switches, one amber funding boundary, compact phone
 history and the content-sized settings sheet. Real deadlines and funding
 calculations remain API-owned; application design-preview data is absent.
+
+Gradient, Meme Lab and ReMemes browse records describe responsive card
+placeholders that match loaded results, with loading statuses for screen
+readers. Meme Lab includes its individual collection route; ReMemes preserves
+its existing filter visibility while fetching.
+
+Primary navigation knowledge includes the shared Join 6529 / Validator slot: newcomers
+see Join, signed-in profiles see Validator, and unresolved sessions reserve the
+slot across desktop, mobile web, native menus, and page search.

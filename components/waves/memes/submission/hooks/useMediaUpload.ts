@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
+import { getUploadFailureMessage } from "@/services/uploads/MediaUploadRefusedError";
 
 export interface MediaUploadItem {
   id: string;
@@ -94,8 +95,7 @@ export function useMediaUpload(maxFiles: number = 4): UseMediaUploadReturn {
             )
           );
         } catch (error) {
-          const errorMsg =
-            error instanceof Error ? error.message : "Upload failed";
+          const errorMsg = getUploadFailureMessage(error, "Upload failed");
           if (item.previewUrl) {
             URL.revokeObjectURL(item.previewUrl);
             previewUrlsRef.current.delete(item.previewUrl);

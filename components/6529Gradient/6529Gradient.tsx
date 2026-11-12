@@ -3,6 +3,7 @@
 import Address from "@/components/address/Address";
 import { useAuth } from "@/components/auth/Auth";
 import CollectionSortControls from "@/components/collection-page/CollectionSortControls";
+import CollectionGridSkeleton from "@/components/collection-page/CollectionGridSkeleton";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -15,6 +16,7 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import type { NFT } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { areEqualAddresses, numberWithCommas } from "@/helpers/Helpers";
+import { t } from "@/i18n/messages";
 import { fetchAllPages } from "@/services/6529api";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -27,6 +29,8 @@ enum Sort {
 }
 
 const GRADIENT_SORT_OPTIONS = [Sort.ID, Sort.TDH] as const;
+const GRADIENT_GRID_CLASS =
+  "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5";
 const GRADIENT_SORT_LABELS: Record<Sort, string> = {
   [Sort.ID]: "ID",
   [Sort.TDH]: "TDH",
@@ -182,7 +186,7 @@ export default function GradientsComponent() {
 
   function printNfts() {
     return (
-      <div className="tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
+      <div className={GRADIENT_GRID_CLASS}>
         {nfts.map((nft) => printNft(nft))}
       </div>
     );
@@ -227,9 +231,13 @@ export default function GradientsComponent() {
         {nftsLoaded ? (
           printNfts()
         ) : (
-          <div className="tw-pb-5 tw-pt-4 tw-text-sm tw-text-iron-300">
-            Fetching <DotLoader />
-          </div>
+          <>
+            <div role="status" className="tw-sr-only">
+              {t(locale, "navigation.primary.loading.collections")}{" "}
+              <DotLoader />
+            </div>
+            <CollectionGridSkeleton className={GRADIENT_GRID_CLASS} />
+          </>
         )}
       </div>
     </div>

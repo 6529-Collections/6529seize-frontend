@@ -1,3 +1,20 @@
+import type { SupportedLocale } from "@/i18n/locales";
+
+let mockLocale: SupportedLocale = "en-US";
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => mockLocale,
+}));
+
+jest.mock("@/contexts/EmojiContext", () => ({
+  useEmoji: () => ({
+    findCustomEmoji: (id: string) =>
+      id === "el_fafo_angy" ? { skins: [{ src: "/custom-emoji.webp" }] } : null,
+    findNativeEmoji: (id: string) =>
+      id === "smile" ? { skins: [{ native: "😄" }] } : null,
+    loadEmojiData: jest.fn(() => Promise.resolve()),
+  }),
+}));
+
 import WaveDropsSearchModal from "@/components/waves/drops/search/WaveDropsSearchModal";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
@@ -41,6 +58,7 @@ jest.mock("react-use", () => ({
 const wave = { id: "wave-1", name: "Design Wave" } as any;
 const result = {
   stableKey: "drop-1",
+  stableHash: "a1b2c3",
   serial_no: 42,
   wave: { id: "wave-1", name: "Design Wave" },
   title: null,
@@ -75,6 +93,7 @@ const setHookResult = (overrides: Record<string, unknown> = {}) => {
 describe("WaveDropsSearchModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockLocale = "en-US";
     setHookResult();
     mockUseQuery.mockReturnValue({
       data: [
@@ -145,6 +164,188 @@ describe("WaveDropsSearchModal", () => {
     expect(screen.getByText("bob").tagName).toBe("MARK");
     fireEvent.click(screen.getByText("Documentation"));
     expect(onSelectSerialNo).toHaveBeenCalledWith(42);
+  });
+
+  it("renders emoji without breaking highlights or literal code", () => {
+    setHookResult({
+      drops: [
+        {
+          ...result,
+          parts: [
+            {
+              content:
+                "Wednesday **:el_fafo_angy:** :smile: :unknown_emoji: `:el_fafo_angy:`\n\n```\n:el_fafo_angy:\n```",
+            },
+          ],
+        },
+      ],
+    });
+    render(
+      <WaveDropsSearchModal
+        isOpen
+        onClose={jest.fn()}
+        wave={wave}
+        onSelectSerialNo={jest.fn()}
+        onSearchAll={jest.fn()}
+      />
+    );
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Search messages" }),
+      { target: { value: "Wednesday" } }
+    );
+    const row = screen.getByRole("button", {
+      name: "Open message 42 by alice",
+    });
+    const emoji = screen.getByRole("img", { name: "Emoji :el_fafo_angy:" });
+    expect(emoji).toHaveAttribute("src", "/custom-emoji.webp");
+    expect(emoji.closest("strong")).not.toBeNull();
+    expect(row.querySelector("mark")).toHaveTextContent("Wednesday");
+    expect(row).toHaveTextContent("😄 :unknown_emoji:");
+    const code = row.querySelectorAll("code");
+    expect(code).toHaveLength(2);
+    code.forEach((element) => {
+      expect(element).toHaveTextContent(":el_fafo_angy:");
+      expect(element.querySelector("img")).toBeNull();
+    });
+  });
+
+  it("keeps adjacent repeated emoji segments uniquely keyed", () => {
+    const consoleError = jest.spyOn(console, "error");
+    try {
+      setHookResult({
+        drops: [
+          {
+            ...result,
+            parts: [
+              { content: ":el_fafo_angy::el_fafo_angy: modern :smile::smile:" },
+            ],
+          },
+        ],
+      });
+      render(
+        <WaveDropsSearchModal
+          isOpen
+          onClose={jest.fn()}
+          wave={wave}
+          onSelectSerialNo={jest.fn()}
+          onSearchAll={jest.fn()}
+        />
+      );
+      fireEvent.change(
+        screen.getByRole("combobox", { name: "Search messages" }),
+        { target: { value: "modern" } }
+      );
+      expect(
+        screen.getAllByRole("img", { name: "Emoji :el_fafo_angy:" })
+      ).toHaveLength(2);
+      expect(
+        screen.getByRole("button", { name: "Open message 42 by alice" })
+      ).toHaveTextContent("😄😄");
+      expect(consoleError.mock.calls.flat().join(" ")).not.toContain(
+        "same key"
+      );
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
+  it.each([
+    ["en-US", "Emoji"],
+    ["en-GB", "Emoji"],
+    ["fr-FR", "Émoji"],
+    ["es-ES", "Emoji"],
+    ["de-DE", "Emoji"],
+  ] as const)("labels custom emojis in %s", (locale, label) => {
+    mockLocale = locale;
+    setHookResult({
+      drops: [{ ...result, parts: [{ content: "modern :el_fafo_angy:" }] }],
+    });
+    render(
+      <WaveDropsSearchModal
+        isOpen
+        onClose={jest.fn()}
+        wave={wave}
+        onSelectSerialNo={jest.fn()}
+        onSearchAll={jest.fn()}
+      />
+    );
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "modern" },
+    });
+    expect(
+      screen.getByRole("img", { name: `${label} :el_fafo_angy:` })
+    ).toBeInTheDocument();
+  });
+
+  it.each([
+    "- modern :el_fafo_angy:",
+    "1. modern :el_fafo_angy:",
+    "#### modern :el_fafo_angy:",
+    "##### modern :el_fafo_angy:",
+    "###### modern :el_fafo_angy:",
+  ])("renders emojis in Markdown blocks: %s", (content) => {
+    setHookResult({ drops: [{ ...result, parts: [{ content }] }] });
+    render(
+      <WaveDropsSearchModal
+        isOpen
+        onClose={jest.fn()}
+        wave={wave}
+        onSelectSerialNo={jest.fn()}
+        onSearchAll={jest.fn()}
+      />
+    );
+    fireEvent.change(screen.getByRole("combobox"), {
+      target: { value: "modern" },
+    });
+    expect(
+      screen.getByRole("img", { name: "Emoji :el_fafo_angy:" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("modern").tagName).toBe("MARK");
+  });
+
+  it("names each result through one valid label id", () => {
+    // Stable keys are raw hash bytes: they can hold white space and control
+    // characters, which must not reach the id that names the result. Two
+    // drops can also share a hash, and each still needs its own label.
+    setHookResult({
+      drops: [
+        { ...result, stableKey: "k\u0007|\u001f e\n\tZ", stableHash: "0f1e2d" },
+        {
+          ...result,
+          stableKey: "q\r\n x",
+          stableHash: "0f1e2d",
+          serial_no: 43,
+        },
+      ],
+    });
+    render(
+      <WaveDropsSearchModal
+        isOpen
+        onClose={jest.fn()}
+        wave={wave}
+        onSelectSerialNo={jest.fn()}
+      />
+    );
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Search messages" }),
+      {
+        target: { value: "modern" },
+      }
+    );
+
+    const labelIds = [42, 43].map((serialNo) => {
+      const resultButton = screen.getByRole("button", {
+        name: `Open message ${serialNo} by alice`,
+      });
+      const labelId = resultButton.getAttribute("aria-labelledby") ?? "";
+      // One token: an id list splits on white space.
+      expect(labelId).toMatch(/^\S+$/);
+      expect(document.getElementById(labelId)).toHaveTextContent(
+        `Open message ${serialNo} by alice`
+      );
+      return labelId;
+    });
+    expect(new Set(labelIds).size).toBe(2);
   });
 
   it("requires three text characters but permits a valid filter-only search", () => {

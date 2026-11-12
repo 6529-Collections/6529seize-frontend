@@ -1,6 +1,7 @@
-import type { NextRequest} from "next/server";
+import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { OPEN_GRAPH_PROXY_IMAGE_CONTENT_SECURITY_POLICY } from "@/config/openGraphProxyImageHeaders";
 import { discardResponse } from "@/lib/fetch/fetchDeadline";
 import {
   UrlGuardError,
@@ -11,7 +12,8 @@ import {
 
 const IMAGE_PROXY_TIMEOUT_MS = 5000;
 const ALLOWED_HOST_SUFFIXES = ["sinaimg.cn"] as const;
-const IMAGE_ACCEPT_HEADER = "image/avif,image/webp,image/png,image/jpeg;q=0.8,*/*;q=0.5";
+const IMAGE_ACCEPT_HEADER =
+  "image/avif,image/webp,image/png,image/jpeg;q=0.8,*/*;q=0.5";
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36";
 
@@ -32,11 +34,17 @@ function isProxyableImageType(
 
 function ensureHttpsDefaultPort(url: URL): void {
   if (url.protocol !== "https:") {
-    throw new UrlGuardError("Only HTTPS URLs are supported.", "unsupported-protocol");
+    throw new UrlGuardError(
+      "Only HTTPS URLs are supported.",
+      "unsupported-protocol"
+    );
   }
 
   if (url.port && url.port !== "443") {
-    throw new UrlGuardError("Only default HTTPS port is supported.", "host-not-allowed");
+    throw new UrlGuardError(
+      "Only default HTTPS port is supported.",
+      "host-not-allowed"
+    );
   }
 }
 
@@ -78,11 +86,17 @@ function mapGuardErrorToResponse(error: UrlGuardError): NextResponse {
     case "host-not-allowed":
     case "dns-lookup-failed":
     case "ip-not-allowed":
-      return NextResponse.json({ error: "Unsupported image host" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Unsupported image host" },
+        { status: 400 }
+      );
     case "timeout":
       return NextResponse.json({ error: "Upstream timeout" }, { status: 504 });
     default:
-      return NextResponse.json({ error: "Failed to fetch image" }, { status: 502 });
+      return NextResponse.json(
+        { error: "Failed to fetch image" },
+        { status: 502 }
+      );
   }
 }
 
@@ -91,7 +105,10 @@ export async function GET(request: NextRequest) {
   const target = request.nextUrl.searchParams.get("url");
 
   if (!target) {
-    return NextResponse.json({ error: "Missing url parameter" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing url parameter" },
+      { status: 400 }
+    );
   }
 
   const remoteResult = parseRemoteUrl(target);
@@ -106,7 +123,9 @@ export async function GET(request: NextRequest) {
 export const dynamic = "force-dynamic";
 // ts-prune-ignore-next: Next.js framework consumes this export via route conventions.
 export const revalidate = 0;
-function parseRemoteUrl(target: string): { url: URL } | { response: NextResponse } {
+function parseRemoteUrl(
+  target: string
+): { url: URL } | { response: NextResponse } {
   try {
     const parsed = parsePublicUrl(target, { allowedProtocols: ["https:"] });
     const guardResponse = ensureAllowedHttps(parsed);
@@ -119,7 +138,10 @@ function parseRemoteUrl(target: string): { url: URL } | { response: NextResponse
       return { response: mapGuardErrorToResponse(error) };
     }
     return {
-      response: NextResponse.json({ error: "Invalid image url" }, { status: 400 }),
+      response: NextResponse.json(
+        { error: "Invalid image url" },
+        { status: 400 }
+      ),
     };
   }
 }
@@ -159,11 +181,11 @@ async function proxyImage(remoteUrl: URL): Promise<NextResponse> {
       );
     }
 
-    // Defense in depth for anything that opens the proxied URL directly.
+    // next.config applies the same policy to every response on this path.
     const headers = new Headers({
       "content-type": contentType,
       "Cache-Control": "public, max-age=86400",
-      "Content-Security-Policy": "sandbox",
+      "Content-Security-Policy": OPEN_GRAPH_PROXY_IMAGE_CONTENT_SECURITY_POLICY,
       "X-Content-Type-Options": "nosniff",
     });
 
@@ -180,6 +202,9 @@ async function proxyImage(remoteUrl: URL): Promise<NextResponse> {
       return NextResponse.json({ error: "Upstream timeout" }, { status: 504 });
     }
 
-    return NextResponse.json({ error: "Failed to proxy image" }, { status: 502 });
+    return NextResponse.json(
+      { error: "Failed to proxy image" },
+      { status: 502 }
+    );
   }
 }

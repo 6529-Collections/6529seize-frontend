@@ -17,6 +17,7 @@ jest.mock("@/config/env", () => {
     "data-version",
     "0123456789abcdef0123456789abcdef01234567"
   );
+  document.documentElement.setAttribute("data-release-order", "1200");
   return jest.requireActual("@/config/env.browser");
 });
 jest.mock("next/navigation", () => ({
@@ -24,6 +25,10 @@ jest.mock("next/navigation", () => ({
 }));
 
 const PAGE_VERSION = "0123456789abcdef0123456789abcdef01234567";
+
+function Probe() {
+  return <span>{useIsVersionStale(1000) ? "stale" : "fresh"}</span>;
+}
 
 describe("useIsVersionStale in a browser bundle", () => {
   beforeEach(() => {
@@ -39,6 +44,7 @@ describe("useIsVersionStale in a browser bundle", () => {
 
   afterAll(() => {
     document.documentElement.removeAttribute("data-version");
+    document.documentElement.removeAttribute("data-release-order");
     if (previousBrowserRuntime === undefined) {
       delete process.env["PUBLIC_RUNTIME_BROWSER"];
     } else {
@@ -47,10 +53,6 @@ describe("useIsVersionStale in a browser bundle", () => {
   });
 
   it("reports the page's version to /api/version", async () => {
-    function Probe() {
-      return <span>{useIsVersionStale(1000) ? "stale" : "fresh"}</span>;
-    }
-
     const { findByText } = render(<Probe />);
     await act(async () => {
       jest.runOnlyPendingTimers();
@@ -60,8 +62,29 @@ describe("useIsVersionStale in a browser bundle", () => {
       cache: "no-store",
       headers: expect.objectContaining({
         "x-6529-client-version": PAGE_VERSION,
+        "x-6529-client-release-order": "1200",
       }),
     });
     expect(await findByText("fresh")).toBeInTheDocument();
   });
+
+  it.each([undefined, 1199, 1200, "1201junk", 1201])(
+    "requires a newer announcement order when an instance reports stale: %s",
+    async (order) => {
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
+        json: async () => ({
+          announced_version: "different-version",
+          announced_release_order: order,
+          stale: true,
+        }),
+      });
+
+      const { getByText } = render(<Probe />);
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(0);
+      });
+
+      expect(getByText(order === 1201 ? "stale" : "fresh")).toBeInTheDocument();
+    }
+  );
 });

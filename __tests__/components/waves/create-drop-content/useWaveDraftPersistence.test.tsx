@@ -12,6 +12,7 @@ import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 
 jest.mock("@/helpers/waves/wave-draft.helpers", () => ({
+  WAVE_DRAFTS_CLEARED_EVENT: "6529-wave-drafts-cleared",
   clearWaveDraft: jest.fn(),
   readRestorableWaveDraft: jest.fn(),
   writeWaveDraft: jest.fn(),
@@ -198,6 +199,33 @@ describe("useWaveDraftPersistence", () => {
     });
     unmount();
     expect(writeWaveDraftMock).not.toHaveBeenCalled();
+  });
+
+  it("drops a pending save when the profile switches", () => {
+    const { rerender } = renderPersistence({
+      editorState: makeEditorState({ root: { text: "previous profile" } }),
+    });
+    act(() => {
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT));
+    });
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(writeWaveDraftMock).not.toHaveBeenCalled();
+
+    // Text typed after the change is saved as usual.
+    rerender({
+      activeDrop: null,
+      editorState: makeEditorState({ root: { text: "typed afterwards" } }),
+      dropEditorRefreshKey: 0,
+    });
+    act(() => {
+      jest.advanceTimersByTime(400);
+    });
+    expect(writeWaveDraftMock).toHaveBeenCalledWith(
+      WAVE_ID,
+      JSON.stringify({ root: { text: "typed afterwards" } })
+    );
   });
 
   it.each(["reply", "edit"])(

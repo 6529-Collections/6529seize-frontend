@@ -1,4 +1,5 @@
 import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+import type { SupportedLocale } from "@/i18n/locales";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
@@ -15,6 +16,7 @@ import {
 const MAX_FILE_SIZE = 500 * 1024 * 1024;
 
 interface MultiPartUploadParams {
+  locale?: SupportedLocale | undefined;
   file: File;
   path: "drop" | "wave";
   /**
@@ -65,6 +67,7 @@ export async function multiPartUpload({
   onProcessing,
   waitForReady = true,
   signal,
+  locale,
 }: MultiPartUploadParams): Promise<ApiDropMedia> {
   if (signal?.aborted) {
     throw new DOMException("Upload aborted", "AbortError");
@@ -95,6 +98,7 @@ export async function multiPartUpload({
     waitForReady,
     signal,
     purpose,
+    locale,
   });
 
   const media: ApiDropMedia = {
@@ -119,6 +123,7 @@ export async function multiPartAttachmentUpload({
   file,
   onProgress,
   signal,
+  locale,
 }: Omit<MultiPartUploadParams, "path" | "purpose">): Promise<ApiAttachment> {
   if (!isAttachmentUploadFile(file)) {
     throw new Error("File type not supported.");
@@ -137,5 +142,6 @@ export async function multiPartAttachmentUpload({
     },
     onProgress: createProgressHandler(file, onProgress),
     signal,
+    locale,
   });
 }

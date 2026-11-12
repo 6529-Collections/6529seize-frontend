@@ -1,11 +1,13 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import Link from "next/link";
 
-import { removeBaseEndpoint } from "@/helpers/Helpers";
 import { useLinkPreviewVariant } from "../LinkPreviewContext";
 import { LinkPreviewCardLayout } from "../OpenGraphPreview";
 import type { MarketplaceTypePreviewProps } from "./common";
+import { resolvePreviewHref } from "./MarketplaceItemPreviewCard.utils";
 import {
   getMarketplaceContainerClass,
   MARKETPLACE_MEDIA_FRAME_CLASS,
@@ -16,12 +18,11 @@ export default function MarketplaceUnavailableCard({
   compact = false,
 }: MarketplaceTypePreviewProps) {
   const variant = useLinkPreviewVariant();
-  const relative = removeBaseEndpoint(href);
-  const isRelativeHref =
-    typeof relative === "string" && relative.startsWith("/");
-  const resolvedHref = isRelativeHref ? relative : href;
-  const target = isRelativeHref ? undefined : "_blank";
-  const rel = isRelativeHref ? undefined : "noopener noreferrer";
+  const unavailableLabel = t(
+    useBrowserLocale(),
+    "drop.media.previewUnavailable"
+  );
+  const { href: resolvedHref, target, rel } = resolvePreviewHref(href);
 
   return (
     <LinkPreviewCardLayout href={href} variant={variant} hideActions>
@@ -41,7 +42,7 @@ export default function MarketplaceUnavailableCard({
             data-testid="marketplace-preview-unavailable-media"
           >
             <span className="tw-text-center tw-text-sm tw-font-medium tw-text-iron-300">
-              Preview unavailable
+              {unavailableLabel}
             </span>
           </div>
           {!compact && (
@@ -50,7 +51,7 @@ export default function MarketplaceUnavailableCard({
               data-testid="marketplace-preview-unavailable-footer"
             >
               <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-white">
-                Preview unavailable
+                {unavailableLabel}
               </span>
               <span className="tw-inline-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/50 tw-text-white">
                 <svg

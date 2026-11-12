@@ -596,6 +596,17 @@ function teardownKeyboardListeners(): void {
   });
 }
 
+async function configureIosKeyboardAccessoryBar(): Promise<void> {
+  try {
+    await Keyboard.setAccessoryBarVisible({ isVisible: true });
+  } catch (error) {
+    console.error(
+      "[Native Keyboard] Error setting iOS accessory bar visibility:",
+      error
+    );
+  }
+}
+
 function ensureKeyboardListeners(): void {
   refreshPlatformState();
   const platformState = getCurrentState();
@@ -617,17 +628,6 @@ function ensureKeyboardListeners(): void {
 
   listenerSetupPromise = (async () => {
     try {
-      if (platformState.isIos) {
-        try {
-          await Keyboard.setAccessoryBarVisible({ isVisible: true });
-        } catch (error) {
-          console.error(
-            "[Native Keyboard] Error setting iOS accessory bar visibility:",
-            error
-          );
-        }
-      }
-
       const handles = await Promise.all([
         Keyboard.addListener("keyboardWillShow", (info) => {
           clearHiddenFallbackTimeout();
@@ -692,6 +692,11 @@ function ensureKeyboardListeners(): void {
       }
 
       listenerHandles = handles;
+
+      if (platformState.isIos) {
+        // Appearance configuration must not hold up keyboard event delivery.
+        void configureIosKeyboardAccessoryBar();
+      }
     } catch (error) {
       console.error("[Native Keyboard] Error setting up listeners:", error);
     } finally {

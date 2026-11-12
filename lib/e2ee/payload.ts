@@ -1,5 +1,6 @@
 import { isHex, randomBytes, utf8Decode, utf8Encode } from "./bytes";
 import { parseImported, type ImportedPayload } from "./imported-payload";
+import { isWithinAttachmentLimits } from "./media";
 
 /** Contract section 6: the JSON payload inside MLS application messages. */
 
@@ -124,7 +125,8 @@ function isAttachmentCore(value: Json): boolean {
     value["mime"].length <= 255 &&
     isNonNegativeInt(value["size"]) &&
     typeof value["name"] === "string" &&
-    charLength(value["name"]) <= MAX_NAME_CHARS
+    charLength(value["name"]) <= MAX_NAME_CHARS &&
+    isWithinAttachmentLimits({ size: value["size"], chunks: value["chunks"] })
   );
 }
 

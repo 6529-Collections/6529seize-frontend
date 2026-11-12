@@ -2,7 +2,7 @@
   container-type: inline-size;
 }
 
-.detailPanel:has([data-collect-detail-header], [data-collect-detail-utilities])
+.detailPanel:has([data-collect-inline-market-link])
   > .detailPanelContent
   > [data-collect-market-link],
 .detailPanel [data-collect-trade-status]:empty {

@@ -33,7 +33,7 @@ export function MemeLabReferences({
     <section aria-labelledby="meme-lab-references-heading" className="tw-pb-3">
       <h2
         id="meme-lab-references-heading"
-        className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100"
+        className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100 md:tw-text-base"
       >
         {t(locale, "memeLab.detail.references.title")}
       </h2>
@@ -166,7 +166,7 @@ export function MemeLabTimeline({
       aria-label={t(locale, "memeLab.detail.timeline.region")}
       className="tw-pb-5 tw-pt-3"
     >
-      <div className="tw-mx-auto tw-w-full md:tw-w-10/12">
+      <div className="tw-w-full">
         {nft && <Timeline nft={nft} steps={nftHistory} locale={locale} />}
       </div>
     </section>

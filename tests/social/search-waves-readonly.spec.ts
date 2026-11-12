@@ -255,6 +255,19 @@ const OTHER_SEARCH_WAVE_ID = "00000000-0000-4000-8000-000000000530";
 const OTHER_SEARCH_WAVE_NAME = "Another Search Wave";
 
 async function installAdvancedSearchFixture(page: Page) {
+  await page.route("**/api/profile-cms/assets?**", (route) => {
+    const assetUrl = new URL(route.request().url()).searchParams.get("url");
+    if (assetUrl?.endsWith("/6529-emoji/emoji-list.json")) {
+      return fulfillLocalReadOnlyFixture(route, { json: ["el_fafo_angy"] });
+    }
+    if (assetUrl?.endsWith("/6529-emoji/el_fafo_angy.webp")) {
+      return fulfillLocalReadOnlyFixture(route, {
+        contentType: "image/svg+xml",
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><circle cx="10" cy="10" r="9" fill="#ffcc00"/></svg>',
+      });
+    }
+    return route.fallback();
+  });
   const overview = {
     ...localFixtureWaveOverview,
     id: OTHER_SEARCH_WAVE_ID,
@@ -313,7 +326,8 @@ async function installAdvancedSearchFixture(page: Page) {
             wave: overview,
             author: { ...localFixtureProfile, handle: "alice", badges: {} },
             created_at: 1713744000000,
-            content: "hello from another wave",
+            content:
+              "hello **from :el_fafo_angy:** another wave :smile: :unknown_search_emoji: `:el_fafo_angy:`\n\n- List :el_fafo_angy:\n\n#### Heading :el_fafo_angy:",
             parts_count: 1,
             media: [],
             attachments: [],
@@ -334,6 +348,39 @@ async function installAdvancedSearchFixture(page: Page) {
       },
     });
   });
+}
+
+async function expectSearchResultEmojis(result: Locator) {
+  const emojis = result.getByRole("img", {
+    name: "Emoji :el_fafo_angy:",
+    exact: true,
+  });
+  await expect(emojis).toHaveCount(3);
+  for (const emoji of await emojis.all()) {
+    await expect(emoji).toBeVisible();
+    await expect(emoji).toHaveJSProperty("complete", true);
+    await expect(emoji).toHaveJSProperty("naturalWidth", 20);
+    await expect(emoji).toHaveCSS("width", "20px");
+    await expect(emoji).toHaveCSS("height", "20px");
+  }
+  await expect(
+    result
+      .getByRole("strong")
+      .getByRole("img", { name: "Emoji :el_fafo_angy:" })
+  ).toHaveCount(2);
+  await expect(
+    result
+      .getByRole("listitem")
+      .getByRole("img", { name: "Emoji :el_fafo_angy:" })
+  ).toBeVisible();
+  await expect(result.getByText("hello", { exact: true })).toHaveJSProperty(
+    "tagName",
+    "MARK"
+  );
+  await expect(result).toContainText("😄");
+  await expect(result).toContainText(":unknown_search_emoji:");
+  await expect(result.getByRole("code")).toHaveText(":el_fafo_angy:");
+  await expect(result.getByRole("code").getByRole("img")).toHaveCount(0);
 }
 
 async function exerciseAdvancedSearch(
@@ -378,6 +425,11 @@ async function exerciseAdvancedSearch(
       name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
     })
   ).toContainText(OTHER_SEARCH_WAVE_NAME);
+  await expectSearchResultEmojis(
+    page.getByRole("button", {
+      name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
+    })
+  );
   const continuation = page.waitForRequest((request) => {
     const url = new URL(request.url());
     return (
@@ -421,14 +473,15 @@ async function exerciseAdvancedSearch(
       name: `Remove wave filter ${OTHER_SEARCH_WAVE_NAME}`,
     })
     .click();
-  await page
-    .getByRole("button", {
-      name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
-    })
-    .click();
-  await expect(page).toHaveURL(
-    new RegExp(`/waves/${OTHER_SEARCH_WAVE_ID}\\?serialNo=43`)
-  );
+  // Chat consumes the serial target and removes it from the URL after opening.
+  await Promise.all([
+    page.waitForURL(new RegExp(`/waves/${OTHER_SEARCH_WAVE_ID}\\?serialNo=43`)),
+    page
+      .getByRole("button", {
+        name: `Open message 43 by alice in ${OTHER_SEARCH_WAVE_NAME}`,
+      })
+      .click(),
+  ]);
 }
 
 async function installSidebarScoreFixture(
@@ -987,9 +1040,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     const voteCards = page.getByRole("link", { name: /^View wave / });
     if ((await voteCards.count()) > 0) {
       await expect(
-        voteCards
-          .first()
-          .getByText(/^(Next result |Voting ends |Voting open$)/)
+        voteCards.first().getByText(/^(Next result |Voting ends |Voting open$)/)
       ).toBeVisible();
     }
     await expectNoHorizontalOverflow(page);
@@ -1035,6 +1086,29 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
         .getByRole("option")
         .locator('xpath=self::a[@href="/about/nft-delegation"]')
     ).toHaveCount(0);
+  });
+
+  test("Pages search keeps Validator out of newcomer navigation", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/about/6529-apps");
+    const { searchInput } = await openHeaderSearch(page);
+    await searchInput.fill("validator");
+    await page.getByRole("tab", { name: /^Pages/ }).click();
+    const validator = page
+      .getByRole("option")
+      .locator('xpath=self::a[@href="/validator"]');
+    await expect(
+      page.getByText('No matches in Pages for "validator"', { exact: true })
+    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    await expect(validator).toHaveCount(0);
+
+    await searchInput.fill("Join 6529");
+    const join = page.getByRole("option", { name: /^Join 6529/ });
+    await expect(join).toContainText("Join 6529");
+    await expect(join).toHaveAttribute("href", "/join-6529");
+    await join.click();
+    await expect(page).toHaveURL(/\/join-6529$/);
   });
 
   test("global header search preserves keyboard flow and page navigation", async ({
@@ -1117,6 +1191,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     );
     const wavesTab = page.getByRole("tab", { name: /^Waves/ });
     await expect(wavesTab).toBeFocused();
+    await expect(wavesTab).toHaveAttribute("aria-selected", "true");
     await wavesTab.press(
       testInfo.project.use.isMobile ? "ArrowRight" : "ArrowDown"
     );
@@ -1137,6 +1212,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       .first();
     await expect(firstResult).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
     await expect(firstResult).toContainText("#");
+    if (local) await expectSearchResultEmojis(firstResult);
     await expect(page.getByRole("tab", { name: /^Messages/ })).toBeInViewport({
       ratio: 0.99,
     });
@@ -1180,9 +1256,18 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       page.getByRole("combobox", { name: "Search 6529", exact: true })
     ).toHaveValue(local ? "hello " : "6529 ");
     await page.getByRole("tab", { name: /^Messages/ }).click();
-    const serialNo = /^Open message (\d+)/.exec(
-      (await firstResult.getAttribute("aria-label")) ?? ""
-    )?.[1];
+    // The result's name comes from `aria-label` or from the element(s) it
+    // is labelled by; read whichever names it.
+    const resultName = await firstResult.evaluate((element) => {
+      const direct = element.getAttribute("aria-label");
+      if (direct) return direct;
+      return (element.getAttribute("aria-labelledby") ?? "")
+        .split(/\s+/)
+        .map((id) => document.getElementById(id)?.textContent ?? "")
+        .join(" ")
+        .trim();
+    });
+    const serialNo = /^Open message (\d+)/.exec(resultName)?.[1];
     const targetWaveId = await firstResult.getAttribute("data-wave-id");
     expect(serialNo).toBeTruthy();
     expect(targetWaveId).toBeTruthy();

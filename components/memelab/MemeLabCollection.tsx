@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import CollectionGridSkeleton from "@/components/collection-page/CollectionGridSkeleton";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
 import Button from "@/components/utils/button/Button";
@@ -204,7 +205,14 @@ export default function LabCollection({
     }
 
     if (!nftsLoaded) {
-      return null;
+      return (
+        <>
+          <div role="status" className="tw-sr-only">
+            {t(locale, "memeLab.loading.fetching")}
+          </div>
+          <CollectionGridSkeleton className={COLLECTION_GRID_LIST_CLASS} />
+        </>
+      );
     }
 
     if (nfts.length === 0) {

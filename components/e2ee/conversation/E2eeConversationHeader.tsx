@@ -11,7 +11,12 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
 import { t } from "@/i18n/messages";
 import type { E2eeConversation } from "@/lib/e2ee/types";
-import { getConversationTitle, getDmPeer, tCount } from "../e2eeFormat";
+import {
+  getConversationTitle,
+  getDmPeer,
+  isUnpairedDm,
+  tCount,
+} from "../e2eeFormat";
 import { E2eeAvatar, E2eeAvatarStack } from "../ui/E2eeAvatar";
 import { E2eeBadge } from "../ui/E2eeBadge";
 import { E2eeProfileLink } from "../ui/E2eeProfileLink";
@@ -40,6 +45,7 @@ export function E2eeConversationHeader({
   const { isCapacitor } = useCapacitor();
   const title = getConversationTitle(locale, conversation, selfProfileId);
   const peer = getDmPeer(conversation, selfProfileId);
+  const unpaired = isUnpairedDm(conversation, selfProfileId);
   const others = conversation.members
     .filter((member) => member.profileId !== selfProfileId)
     .map((member) => ({
@@ -57,7 +63,7 @@ export function E2eeConversationHeader({
       >
         <ArrowLeftIcon aria-hidden="true" className="tw-size-5" />
       </Link>
-      {peer || conversation.kind === "dm" ? (
+      {peer || (conversation.kind === "dm" && !unpaired) ? (
         <E2eeProfileLink
           member={peer}
           avatar
@@ -81,7 +87,7 @@ export function E2eeConversationHeader({
             label={t(locale, "e2ee.badge.encrypted")}
             shortLabel={t(locale, "e2ee.badge.encryptedShort")}
           />
-          {conversation.kind === "group" ? (
+          {conversation.kind === "group" || unpaired ? (
             <span className="tw-text-xs tw-text-iron-400">
               {tCount(
                 locale,

@@ -1,3 +1,4 @@
+import "server-only";
 import { serverEnvSchema, type ServerEnv } from "./serverEnv.schema";
 
 if (globalThis.window !== undefined) {

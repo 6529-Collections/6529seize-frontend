@@ -61,6 +61,30 @@ describe("fetchAlchemyJson", () => {
     ).resolves.toEqual({ ok: false, status });
   });
 
+  it("sends a JSON body as a POST and keeps plain requests as GET", async () => {
+    mockFetch
+      .mockResolvedValueOnce(new Response('{"tokens":[]}'))
+      .mockResolvedValueOnce(new Response("{}"));
+    const signal = new AbortController().signal;
+
+    await fetchAlchemyJson(UPSTREAM_URL, {
+      maxBytes: 1024,
+      signal,
+      jsonBody: { tokens: [{ contractAddress: "0x1", tokenId: "1" }] },
+    });
+    await fetchAlchemyJson(UPSTREAM_URL, { maxBytes: 1024, signal });
+
+    const post = mockFetch.mock.calls[0]?.[1];
+    expect(post?.method).toBe("POST");
+    expect(post?.body).toBe(
+      '{"tokens":[{"contractAddress":"0x1","tokenId":"1"}]}'
+    );
+    expect(post?.headers).toEqual(
+      expect.objectContaining({ "Content-Type": "application/json" })
+    );
+    expect(mockFetch.mock.calls[1]?.[1]?.method).toBeUndefined();
+  });
+
   it("resolves network failures to 502", async () => {
     mockFetch.mockRejectedValueOnce(new TypeError("fetch failed"));
 

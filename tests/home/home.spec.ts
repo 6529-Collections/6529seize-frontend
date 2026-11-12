@@ -2228,7 +2228,12 @@ test("desktop account updates do not move utilities, including in short expanded
   });
   await page.route("**/api/version", async (route) => {
     await versionReady;
-    await route.fulfill({ json: { stale: true } });
+    const currentOrder = Number(
+      route.request().headers()["x-6529-client-release-order"] ?? "0"
+    );
+    await route.fulfill({
+      json: { stale: true, announced_release_order: currentOrder + 1 },
+    });
   });
   try {
     const response = await page.goto("/about", {

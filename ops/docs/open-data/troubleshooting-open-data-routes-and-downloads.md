@@ -19,14 +19,8 @@ or a download link does not open.
 
 ## `Meme Subscriptions` card is missing on `/open-data` (native iOS)
 
-- Meaning: this is a visibility rule on the hub card, not a route outage.
-- Why it happens:
-  - The card is hidden on native iOS when cookie-country is not `US`.
-  - The card can stay hidden briefly while country-check is still loading.
-- What to do:
-  1. Open `/open-data/meme-subscriptions` directly.
-  2. Wait for country-check to finish, then reopen `/open-data`.
-  3. Open `About -> Data & Developer Tools -> Meme Subscriptions Data` from the sidebar.
+Open the read-only dataset directly at `/open-data/meme-subscriptions`. The
+iOS app hides its hub card and sidebar link.
 
 ## `Failed to load community downloads. Please try again.`
 
