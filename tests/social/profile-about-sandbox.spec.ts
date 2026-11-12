@@ -411,13 +411,18 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           .boundingBox();
         expect(discoverBounds).not.toBeNull();
         expect(learnBounds).not.toBeNull();
+        expect(discoverBounds!.height).toBeGreaterThanOrEqual(48);
         expect(
           Math.abs(discoverBounds!.width - learnBounds!.width)
         ).toBeLessThanOrEqual(1);
         // Desktop retains its rail at this viewport; the two-up layout is a phone requirement.
         if (width === 390 && isMobile) {
           expect(
-            Math.abs(discoverBounds!.y - learnBounds!.y)
+            Math.abs(
+              discoverBounds!.y +
+                discoverBounds!.height / 2 -
+                (learnBounds!.y + learnBounds!.height / 2)
+            )
           ).toBeLessThanOrEqual(1);
         } else if (width === 320) {
           expect(learnBounds!.y).toBeGreaterThanOrEqual(
