@@ -111,62 +111,51 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     ].includes(s);
   }
 
-  useEffect(() => {
-    if (traitsLoaded && !routerLoaded && !reservesNftPurchasingSpace) {
-      setSelectedTraitValues(
-        parseSelectedTraits(searchParams?.get("traits") ?? "", traits)
-      );
-      const sortParam = searchParams?.get("sort");
-      if (sortParam) {
-        const sortQuery = sortParam as string;
-        const requestedSort =
-          NextGenListFilters[
-            sortQuery?.toUpperCase() as keyof typeof NextGenListFilters
-          ] || NextGenListFilters.ID;
-        const newSort =
-          hideNftPurchasing && requestedSort === NextGenListFilters.LISTED_PRICE
-            ? NextGenListFilters.ID
-            : requestedSort;
-        setSort(newSort);
-        if (isRaritySort(newSort)) {
-          const showNorm = searchParams?.get("show_normalised");
-          if (showNorm) {
-            setShowNormalised(showNorm === "true");
-          }
-          const showCount = searchParams?.get("show_trait_count");
-          if (showCount) {
-            setShowTraitCount(showCount === "true");
-          }
+  // Adopt the starting URL once the traits and native purchase policy are known.
+  if (traitsLoaded && !routerLoaded && !reservesNftPurchasingSpace) {
+    setSelectedTraitValues(
+      parseSelectedTraits(searchParams.get("traits") ?? "", traits)
+    );
+    const sortParam = searchParams.get("sort");
+    if (sortParam) {
+      const requestedSort =
+        NextGenListFilters[
+          sortParam.toUpperCase() as keyof typeof NextGenListFilters
+        ] || NextGenListFilters.ID;
+      const newSort =
+        hideNftPurchasing && requestedSort === NextGenListFilters.LISTED_PRICE
+          ? NextGenListFilters.ID
+          : requestedSort;
+      setSort(newSort);
+      if (isRaritySort(newSort)) {
+        const showNorm = searchParams.get("show_normalised");
+        if (showNorm) {
+          setShowNormalised(showNorm === "true");
+        }
+        const showCount = searchParams.get("show_trait_count");
+        if (showCount) {
+          setShowTraitCount(showCount === "true");
         }
       }
-      const sortDirParam = searchParams?.get("sort_direction");
-      if (sortDirParam) {
-        const sortDirQuery = sortDirParam as string;
-        setSortDir(
-          SortDirection[
-            sortDirQuery?.toUpperCase() as keyof typeof SortDirection
-          ] || SortDirection.DESC
-        );
-      }
-      const listedParam = searchParams?.get("listed");
-      if (!hideNftPurchasing && listedParam) {
-        const listedQuery = listedParam as string;
-        setListedType(
-          listedQuery === "true"
-            ? NextGenTokenListedType.LISTED
-            : NextGenTokenListedType.NOT_LISTED
-        );
-      }
-      setRouterLoaded(true);
     }
-  }, [
-    searchParams,
-    traits,
-    traitsLoaded,
-    routerLoaded,
-    hideNftPurchasing,
-    reservesNftPurchasingSpace,
-  ]);
+    const sortDirParam = searchParams.get("sort_direction");
+    if (sortDirParam) {
+      setSortDir(
+        SortDirection[
+          sortDirParam.toUpperCase() as keyof typeof SortDirection
+        ] || SortDirection.DESC
+      );
+    }
+    const listedParam = searchParams.get("listed");
+    if (!hideNftPurchasing && listedParam) {
+      setListedType(
+        listedParam === "true"
+          ? NextGenTokenListedType.LISTED
+          : NextGenTokenListedType.NOT_LISTED
+      );
+    }
+    setRouterLoaded(true);
+  }
 
   useEffect(() => {
     const controller = new AbortController();
