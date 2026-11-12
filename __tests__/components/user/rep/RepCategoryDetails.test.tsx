@@ -47,7 +47,7 @@ function setup(
 ) {
   const client = new QueryClient({
     defaultOptions: {
-      queries: { retry: false, gcTime: 0 },
+      queries: { retry: false, gcTime: Infinity },
       mutations: { retry: false },
     },
   });
