@@ -3,6 +3,8 @@
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
+import RatingInput from "@/components/user/utils/rate/RatingInput";
+import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiRepContributorsPage } from "@/generated/models/ApiRepContributorsPage";
@@ -13,6 +15,7 @@ import { formatInteger } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getIdentityQueryOptions } from "@/services/api/identity-query";
+import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
@@ -23,11 +26,7 @@ import {
   isRatingValue,
   withRatingRecipientIdentity,
 } from "./ratingsManagement";
-import {
-  getCanEditRep,
-  getContributorLabel,
-  type RepDirection,
-} from "./UserPageRep.helpers";
+import { getCanEditRep, type RepDirection } from "./UserPageRep.helpers";
 
 type CategoryContributor = {
   readonly profile: {
@@ -38,6 +37,13 @@ type CategoryContributor = {
   };
   readonly contribution: number;
 };
+
+const CATEGORY_ROW_CLASS =
+  "tw-flex tw-min-h-[60px] tw-items-center tw-gap-3 tw-px-3 tw-py-3";
+const CATEGORY_AMOUNT_CLASS =
+  "tw-h-9 tw-w-32 tw-min-w-0 tw-shrink-0 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-text-right tw-text-base lg:tw-text-sm";
+const READ_ONLY_AMOUNT_CLASS =
+  "tw-w-32 tw-min-w-0 tw-shrink-0 tw-px-3 tw-text-right tw-text-base lg:tw-text-sm";
 
 function ContributorIdentity({
   contributor,
@@ -98,13 +104,10 @@ function CategoryRows({
 }) {
   const locale = useBrowserLocale();
   return items.map((item) => (
-    <div
-      key={item.profile.id}
-      className="tw-flex tw-h-[52px] tw-items-center tw-gap-3 tw-px-3 lg:tw-h-10"
-    >
+    <div key={item.profile.id} className={CATEGORY_ROW_CLASS}>
       <ContributorIdentity contributor={item} />
       <span
-        className={`tw-shrink-0 tw-text-sm tw-tabular-nums ${item.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
+        className={`${READ_ONLY_AMOUNT_CLASS} ${item.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
       >
         {formatInteger(locale, item.contribution)}
       </span>
@@ -148,20 +151,22 @@ function EditableCategoryRows({
   category,
   direction,
   items,
-  focusInput,
+  autoSelectOwnAmount,
   onBusyChange,
-  onRefresh,
 }: {
   readonly profile: ApiIdentity;
   readonly category: ApiRepCategory;
   readonly direction: RepDirection;
   readonly items: readonly CategoryContributor[];
-  readonly focusInput: number;
+  readonly autoSelectOwnAmount: boolean;
   readonly onBusyChange: (busy: boolean) => void;
-  readonly onRefresh: () => Promise<unknown>;
 }) {
   const locale = useBrowserLocale();
   const formId = useId();
+  const formRef = useRef<HTMLFormElement>(null);
+  const ownAmountRef = useRef<HTMLInputElement>(null);
+  const didAutoSelect = useRef(false);
+  useKeyboardFocusScroll(formRef);
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const rater = activeProfileProxy?.created_by ?? connectedProfile;
@@ -194,36 +199,62 @@ function EditableCategoryRows({
   const [preparing, setPreparing] = useState(false);
   const [prepareError, setPrepareError] = useState(false);
   const submitting = useRef(false);
-  const inputRef = useRef<HTMLInputElement>(null);
   const busy = isSaving || preparing;
   const ready = !!repState && !isError;
-  useEffect(() => {
-    if (focusInput) inputRef.current?.focus({ preventScroll: true });
-  }, [focusInput]);
 
   const current = repState?.rater_contribution ?? 0;
-  const ownContributor: CategoryContributor | null = rater?.id
-    ? {
-        profile: {
-          id: rater.id,
-          handle: rater.handle,
-          primary_address:
-            activeProfileProxy?.created_by.primary_address ??
-            connectedProfile?.primary_wallet ??
-            connectedProfile?.wallets?.[0]?.wallet ??
-            "",
-          pfp: rater.pfp,
-        },
-        contribution: current,
-      }
-    : null;
+  // The loaded contributor page can establish an existing rating while the
+  // allowance loads. Once available, the rating state is authoritative.
+  const ownContribution =
+    repState?.rater_contribution ??
+    items.find((item) => item.profile.id === rater?.id)?.contribution ??
+    0;
+  const ownContributor: CategoryContributor | null =
+    rater?.id && ownContribution !== 0
+      ? {
+          profile: {
+            id: rater.id,
+            handle: rater.handle,
+            primary_address:
+              activeProfileProxy?.created_by.primary_address ??
+              connectedProfile?.primary_wallet ??
+              connectedProfile?.wallets?.[0]?.wallet ??
+              "",
+            pfp: rater.pfp,
+          },
+          contribution: ownContribution,
+        }
+      : null;
   const rows =
-    direction === "received" && ownContributor
+    direction === "received"
       ? [
-          ownContributor,
+          ...(ownContributor ? [ownContributor] : []),
           ...items.filter((item) => item.profile.id !== rater?.id),
         ]
       : items;
+  const hasOwnContribution = ownContributor !== null;
+  useEffect(() => {
+    if (
+      !autoSelectOwnAmount ||
+      direction !== "received" ||
+      !ready ||
+      !hasOwnContribution ||
+      didAutoSelect.current
+    )
+      return;
+    const input = ownAmountRef.current;
+    if (!input) return;
+    input.focus({ preventScroll: true });
+    // Focusing removes digit grouping; select after that render so typing
+    // replaces the complete raw amount rather than appending to it.
+    const frame = requestAnimationFrame(() => {
+      if (document.activeElement === input) {
+        input.select();
+        didAutoSelect.current = true;
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [autoSelectOwnAmount, direction, ready, hasOwnContribution]);
   const editableRows =
     direction === "received"
       ? rows.filter((row) => row === ownContributor)
@@ -287,7 +318,7 @@ function EditableCategoryRows({
     setPrepareError(false);
     const savedIds = new Set<string>();
     try {
-      // Fetch real recipient identities for the same cache invalidation used by Manage given.
+      // Fetch real recipient identities for the same cache invalidation used by All receivers.
       const updates = await Promise.all(
         changes.map(async (row) => ({
           profile:
@@ -312,7 +343,6 @@ function EditableCategoryRows({
       setPrepareError(true);
     } finally {
       if (savedIds.size > 0) {
-        await onRefresh();
         setDrafts((previous) =>
           Object.fromEntries(
             Object.entries(previous).filter(([id]) => !savedIds.has(id))
@@ -327,6 +357,7 @@ function EditableCategoryRows({
 
   return (
     <form
+      ref={formRef}
       onSubmit={(event) => {
         void submit(event);
       }}
@@ -355,8 +386,8 @@ function EditableCategoryRows({
         </p>
       )}
       <div className="tw-max-h-[min(50dvh,24rem)] tw-overflow-y-auto tw-overscroll-contain">
-        {rows.map((row, index) => {
-          const you = direction === "received" && index === 0;
+        {rows.map((row) => {
+          const you = direction === "received" && row === ownContributor;
           const editable = direction === "given" || row === ownContributor;
           const value = drafts[row.profile.id] ?? String(row.contribution);
           const negative = value.startsWith("-");
@@ -376,7 +407,7 @@ function EditableCategoryRows({
           return (
             <div
               key={row.profile.id}
-              className={`tw-flex tw-h-[52px] tw-items-center tw-gap-3 tw-px-3 lg:tw-h-10 ${you ? "tw-sticky tw-top-0 tw-z-10 tw-rounded-lg tw-bg-[#172436]" : ""}`}
+              className={`${CATEGORY_ROW_CLASS} ${you ? "tw-sticky tw-top-0 tw-z-10 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-primary-400/10" : ""}`}
             >
               <ContributorIdentity
                 contributor={row}
@@ -393,10 +424,8 @@ function EditableCategoryRows({
                 </span>
               )}
               {editable ? (
-                <input
-                  ref={index === 0 ? inputRef : undefined}
-                  type="text"
-                  data-autofocus={(index === 0 && focusInput > 0) || undefined}
+                <RatingInput
+                  ref={you ? ownAmountRef : undefined}
                   inputMode="numeric"
                   autoComplete="off"
                   aria-labelledby={nameId}
@@ -408,11 +437,11 @@ function EditableCategoryRows({
                   onChange={(event) =>
                     updateDraft(row.profile.id, event.currentTarget.value)
                   }
-                  className={`tw-h-9 tw-w-28 tw-min-w-0 tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-px-2 tw-text-right tw-text-base tw-tabular-nums focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-h-8 lg:tw-text-sm ${color}`}
+                  className={`${CATEGORY_AMOUNT_CLASS} tw-border-iron-700/60 tw-bg-iron-950/40 focus:tw-border-primary-400/40 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${color}`}
                 />
               ) : (
                 <span
-                  className={`tw-text-sm tw-tabular-nums ${row.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
+                  className={`${READ_ONLY_AMOUNT_CLASS} ${row.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
                 >
                   {formatInteger(locale, row.contribution)}
                 </span>
@@ -456,23 +485,21 @@ function EditableCategoryRows({
         </p>
       )}
       {changes.length > 0 && (
-        <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-bg-iron-800/60 tw-p-3">
-          <output className="tw-text-sm tw-tabular-nums tw-text-iron-300">
+        <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-3 tw-pb-1 tw-pt-4">
+          <output className="tw-text-sm tw-text-iron-400">
             {t(
               locale,
               direction === "received"
                 ? "rep.categories.panel.yourRep"
                 : "rep.categories.panel.total"
             )}{" "}
-            {direction === "given" ? (
-              <s>{formatInteger(locale, before)}</s>
-            ) : (
-              formatInteger(locale, before)
-            )}
+            {formatInteger(locale, before)}
             {" → "}
-            {validNumbers ? formatInteger(locale, after) : "—"}
+            <span className="tw-font-medium tw-text-primary-400">
+              {validNumbers ? formatInteger(locale, after) : "—"}
+            </span>
           </output>
-          <div className="tw-flex tw-gap-2">
+          <div className="tw-ml-auto tw-flex tw-gap-2">
             <Button variant="ghost" size="sm" onClick={reset} disabled={busy}>
               {t(locale, "rep.categories.edit.cancel")}
             </Button>
@@ -507,14 +534,16 @@ export default function RepCategoryDetails({
   profile,
   category,
   direction,
-  focusInput,
+  autoSelectOwnAmount = false,
+  busy = false,
   onOpenGlobalCategory,
   onBusyChange,
 }: {
   readonly profile: ApiIdentity;
   readonly category: ApiRepCategory;
   readonly direction: RepDirection;
-  readonly focusInput: number;
+  readonly autoSelectOwnAmount?: boolean;
+  readonly busy?: boolean;
   readonly onOpenGlobalCategory: (category: string) => void;
   readonly onBusyChange: (busy: boolean) => void;
 }) {
@@ -553,19 +582,22 @@ export default function RepCategoryDetails({
   );
   return (
     <div className="tw-min-w-0 tw-py-2">
-      <div className="tw-mb-2 tw-flex tw-min-h-9 tw-items-center tw-justify-between tw-gap-3 tw-px-3">
-        <span className="tw-text-xs tw-text-iron-400">
-          {formatInteger(locale, category.contributor_count)}{" "}
-          {getContributorLabel(direction, category.contributor_count)}
-        </span>
-        <button
-          type="button"
+      <div className="-tw-mt-1.5 tw-mb-1 tw-flex tw-justify-start lg:tw-justify-end lg:tw-pr-1.5">
+        <Button
+          variant="ghost"
+          size={null}
+          className="tw-min-h-11 tw-gap-1 tw-px-1 tw-text-xs tw-font-medium lg:tw-min-h-9 lg:tw-px-2"
+          aria-label={t(locale, "rep.categories.pill.openGlobalAriaLabel", {
+            category: category.category,
+          })}
+          disabled={busy}
           onClick={() => onOpenGlobalCategory(category.category)}
-          className="tw-min-h-9 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-xs tw-text-iron-300 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           {t(locale, "rep.categories.panel.openGlobal")}
-        </button>
+          <ArrowUpRightIcon className="tw-size-3.5" aria-hidden="true" />
+        </Button>
       </div>
+      <hr className="tw-mx-3 tw-mb-2 tw-mt-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5" />
       {query.isPending && (
         <output className="tw-block tw-px-3 tw-py-6 tw-text-sm tw-text-iron-400">
           {t(locale, "user.rate.loading")}
@@ -591,9 +623,8 @@ export default function RepCategoryDetails({
           category={category}
           direction={direction}
           items={items}
-          focusInput={focusInput}
+          autoSelectOwnAmount={autoSelectOwnAmount}
           onBusyChange={onBusyChange}
-          onRefresh={() => query.refetch()}
         />
       ) : (
         <div className="tw-max-h-[min(50dvh,24rem)] tw-overflow-y-auto tw-overscroll-contain">

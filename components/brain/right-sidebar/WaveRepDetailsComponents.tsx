@@ -119,7 +119,7 @@ export function SummaryStat({
       </p>
       <p
         title={value}
-        className={`tw-mb-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-tabular-nums ${toneClassName}`}
+        className={`tw-mb-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold ${toneClassName}`}
       >
         {value}
       </p>
@@ -164,7 +164,7 @@ export function CategoryRow({
         </span>
       </span>
       <span
-        className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-tabular-nums ${getRepTextClass(
+        className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold ${getRepTextClass(
           totalRep
         )}`}
       >

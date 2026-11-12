@@ -1,5 +1,6 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { refreshProfileRatingLists } from "@/components/react-query-wrapper/utils/refreshProfileRatingLists";
 import RepCategoryDetails from "@/components/user/rep/RepCategoryDetails";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
@@ -39,11 +40,13 @@ let rows: {
   profile: { id: string; handle: string; primary_address: string; pfp: null };
   contribution: number;
 }[];
+let ownContribution: number;
 
 function setup(
   profile: ApiIdentity,
   direction: "received" | "given",
-  viewer: ApiIdentity | null = owner
+  viewer: ApiIdentity | null = owner,
+  autoSelectOwnAmount = false
 ) {
   const client = new QueryClient({
     defaultOptions: {
@@ -51,6 +54,9 @@ function setup(
       mutations: { retry: false },
     },
   });
+  onProfileRepModify.mockImplementation((scope) =>
+    refreshProfileRatingLists(client, "REP", scope)
+  );
   function Wrapper({ children }: { readonly children: ReactNode }) {
     const auth = useContext(AuthContext);
     const queries = useContext(ReactQueryWrapperContext);
@@ -77,7 +83,7 @@ function setup(
       profile={profile}
       category={category}
       direction={direction}
-      focusInput={0}
+      autoSelectOwnAmount={autoSelectOwnAmount}
       onOpenGlobalCategory={jest.fn()}
       onBusyChange={jest.fn()}
     />,
@@ -87,6 +93,7 @@ function setup(
 
 beforeEach(() => {
   jest.clearAllMocks();
+  ownContribution = 20;
   rows = [
     {
       profile: {
@@ -108,10 +115,10 @@ beforeEach(() => {
     },
   ];
   requestAuth.mockResolvedValue({ success: true });
-  allocation.mockReturnValue({
+  allocation.mockImplementation(() => ({
     repState: {
       category: "Artist",
-      rater_contribution: 0,
+      rater_contribution: ownContribution,
       rating: 50,
       contributor_count: 2,
     },
@@ -121,7 +128,7 @@ beforeEach(() => {
     isError: false,
     isFetching: false,
     retry: jest.fn(),
-  });
+  }));
   fetchApi.mockImplementation(async ({ endpoint }) => {
     if (endpoint.startsWith("identities/")) {
       const handle = endpoint.slice("identities/".length);
@@ -153,7 +160,6 @@ it("reuses the contributor cache when a category is reopened within five minutes
         profile={target}
         category={category}
         direction="received"
-        focusInput={0}
         onOpenGlobalCategory={jest.fn()}
         onBusyChange={jest.fn()}
       />
@@ -169,13 +175,17 @@ it("pins only your editable contribution, accepts negative values, and saves the
   const user = userEvent.setup();
   setup(target, "received");
   const amount = await screen.findByRole("textbox", { name: "You" });
-  await waitFor(() => expect(amount).toHaveValue("0"));
+  await waitFor(() => expect(amount).toHaveValue("20"));
   expect(screen.getAllByRole("textbox")).toHaveLength(1);
   expect(screen.getByRole("link", { name: "You" })).toHaveAttribute(
     "href",
     "/owner"
   );
+  const readsBeforeTyping = fetchApi.mock.calls.length;
+  await user.clear(amount);
   await user.type(amount, "-15");
+  expect(fetchApi).toHaveBeenCalledTimes(readsBeforeTyping);
+  expect(post).not.toHaveBeenCalled();
   expect(amount).toHaveClass("tw-text-rose-400");
   await user.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() =>
@@ -185,7 +195,7 @@ it("pins only your editable contribution, accepts negative values, and saves the
     })
   );
   expect(onProfileRepModify).toHaveBeenCalledWith(
-    expect.objectContaining({ targetProfile: target })
+    expect.objectContaining({ targetProfiles: [target] })
   );
 });
 
@@ -194,6 +204,83 @@ it("makes the owner's received categories read-only", async () => {
   await screen.findByRole("link", { name: "alice" });
   expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   expect(screen.queryByRole("link", { name: "You" })).not.toBeInTheDocument();
+});
+
+it("does not add a You row when no REP has been given in the category", async () => {
+  ownContribution = 0;
+  rows = [
+    {
+      profile: {
+        id: "dana-id",
+        handle: "repqa-dana",
+        primary_address: "0x4",
+        pfp: null,
+      },
+      contribution: 5000,
+    },
+  ];
+  setup(target, "received", owner, true);
+  await screen.findByRole("link", { name: "repqa-dana" });
+  expect(screen.getAllByRole("link")).toHaveLength(1);
+  expect(screen.queryByRole("link", { name: "You" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Save" })
+  ).not.toBeInTheDocument();
+});
+
+it("keeps an existing negative contribution first and editable", async () => {
+  ownContribution = -20;
+  setup(target, "received");
+  const input = await screen.findByRole("textbox", { name: "You" });
+  expect(input).toHaveValue("-20");
+  expect(screen.getAllByRole("link")[0]).toHaveTextContent("You");
+});
+
+it("selects the existing desktop amount once so typing replaces it", async () => {
+  ownContribution = 12345;
+  const user = userEvent.setup();
+  setup(target, "received", owner, true);
+  const input = await screen.findByRole("textbox", { name: "You" });
+  await waitFor(() => {
+    expect(input).toHaveFocus();
+    expect(input).toHaveValue("12345");
+    expect((input as HTMLInputElement).selectionStart).toBe(0);
+    expect((input as HTMLInputElement).selectionEnd).toBe(5);
+  });
+  await user.keyboard("7");
+  expect(input).toHaveValue("7");
+  await user.keyboard("8");
+  expect(input).toHaveValue("78");
+});
+
+it("does not autofocus the mobile amount", async () => {
+  ownContribution = 12345;
+  setup(target, "received");
+  const input = await screen.findByRole("textbox", { name: "You" });
+  expect(input).toHaveValue("12,345");
+  expect(input).not.toHaveFocus();
+});
+
+it("removes the You row after saving zero", async () => {
+  const user = userEvent.setup();
+  post.mockImplementation(async () => {
+    ownContribution = 0;
+  });
+  setup(target, "received");
+  const input = await screen.findByRole("textbox", { name: "You" });
+  await user.clear(input);
+  await user.type(input, "0");
+  await user.click(screen.getByRole("button", { name: "Save" }));
+  await waitFor(() =>
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
+  );
+  expect(screen.queryByRole("link", { name: "You" })).not.toBeInTheDocument();
+  expect(screen.getAllByRole("link")).toHaveLength(2);
+  expect(post).toHaveBeenCalledWith({
+    endpoint: "profiles/target/rep/rating",
+    body: { amount: 0, category: "Artist" },
+  });
 });
 
 it("validates the combined credit budget and releases credit before spending", async () => {
@@ -252,7 +339,7 @@ it("retains failed edits and does not repeat successful writes after a partial s
   expect(onProfileRepModify).toHaveBeenCalledTimes(1);
   expect(onProfileRepModify).toHaveBeenCalledWith(
     expect.objectContaining({
-      targetProfile: expect.objectContaining({ handle: "alice" }),
+      targetProfiles: [expect.objectContaining({ handle: "alice" })],
     })
   );
   failBob = false;

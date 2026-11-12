@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 jest.mock("@/components/common/OverlappingAvatars", () => ({
   __esModule: true,
-  default: () => <div data-testid="avatars" />,
+  default: () => <span data-testid="avatars" />,
 }));
 
 const category: ApiRepCategory = {
@@ -22,8 +22,6 @@ describe("RepCategoryPill", () => {
     render(
       <RepCategoryPill
         category={category}
-        canEdit={false}
-        onEdit={() => undefined}
         onOpenContributors={onOpenContributors}
       />
     );
@@ -37,31 +35,22 @@ describe("RepCategoryPill", () => {
     expect(onOpenContributors).toHaveBeenCalledWith(category);
   });
 
-  it("keeps edit and contributor actions separate", () => {
-    const onEdit = jest.fn();
+  it("opens category details from the count without an edit shortcut", () => {
     const onOpenContributors = jest.fn();
 
     render(
       <RepCategoryPill
         category={category}
-        canEdit
-        onEdit={onEdit}
         onOpenContributors={onOpenContributors}
       />
     );
 
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "Edit REP category Dev extraordinaire",
-      })
-    );
-    fireEvent.click(
-      screen.getByRole("button", {
-        name: "View 2 raters for Dev extraordinaire",
-      })
-    );
+    fireEvent.click(screen.getByText("2 raters"));
 
-    expect(onEdit).toHaveBeenCalledWith("Dev extraordinaire");
     expect(onOpenContributors).toHaveBeenCalledWith(category);
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    expect(
+      screen.queryByRole("button", { name: /^Edit REP category/ })
+    ).not.toBeInTheDocument();
   });
 });

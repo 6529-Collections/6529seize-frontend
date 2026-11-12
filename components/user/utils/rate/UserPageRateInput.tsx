@@ -1,15 +1,16 @@
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import type { RefObject } from "react";
+import RatingInput from "./RatingInput";
 
 const INPUT_CLASS_NAME =
   "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
 
 const VARIANT_CLASSES = {
   compact:
-    "tw-bg-iron-900/60 tw-px-10 tw-py-3 tw-text-center tw-tabular-nums tw-text-2xl tw-font-medium tw-leading-tight tw-tracking-tight",
+    "tw-bg-iron-900/60 tw-px-10 tw-py-3 tw-text-center tw-text-2xl tw-font-medium tw-leading-tight tw-tracking-tight",
   form: "tw-bg-iron-900 tw-h-[46px] tw-py-3 tw-pl-16 tw-pr-4 tw-text-left tw-text-lg tw-font-medium tw-leading-5",
   tooltip:
-    "tw-bg-iron-900 tw-h-10 touch-only:tw-h-11 tw-px-10 tw-text-center tw-tabular-nums tw-text-base tw-font-medium tw-leading-6",
+    "tw-bg-iron-900 tw-h-10 touch-only:tw-h-11 tw-px-10 tw-text-center tw-text-base tw-font-medium tw-leading-6",
 };
 
 const getValueStr = (val: string): string => {
@@ -101,9 +102,8 @@ export default function UserPageRateInput({
           <span className="tw-h-7 tw-w-px tw-bg-iron-700/60" />
         )}
       </span>
-      <input
+      <RatingInput
         ref={inputRef}
-        type="text"
         data-rating-input="true"
         data-autofocus={autoFocus || undefined}
         id={inputId}

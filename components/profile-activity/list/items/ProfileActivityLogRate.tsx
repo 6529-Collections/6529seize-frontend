@@ -167,7 +167,7 @@ export default function ProfileActivityLogRate({
       />
 
       {compact && (
-        <span className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-tabular-nums tw-text-iron-400">
+        <span className="tw-whitespace-nowrap tw-text-sm tw-font-normal tw-text-iron-400">
           {t(locale, "profileActivity.rate.runningTotal", {
             total: newRatingStr,
           })}

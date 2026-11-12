@@ -2,10 +2,15 @@
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { AuthContext } from "@/components/auth/Auth";
+import { CompactMenu } from "@/components/compact-menu";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
+import {
+  COMPACT_ACTION_BUTTON_CLASS,
+  COMPACT_ACTION_CONTENT_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import type { ApiProfileRepRatesState } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiRatingWithProfileInfoAndLevel } from "@/generated/models/ApiRatingWithProfileInfoAndLevel";
@@ -170,7 +175,7 @@ function RecipientRatings({
               <span className="tw-min-w-0 tw-flex-1 tw-break-words tw-text-sm tw-text-iron-100">
                 {row.category}
               </span>
-              <span className="tw-text-sm tw-tabular-nums tw-text-iron-300">
+              <span className="tw-text-sm tw-text-iron-300">
                 {formatInteger(locale, row.rater_contribution)}
               </span>
               <Button
@@ -231,6 +236,10 @@ export default function ProfileRatingsDialog({
   const [isBusy, setIsBusy] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<RatingListOrder>("rating");
   const orderBy = canManage ? selectedOrder : "rating";
+  const sortLabel = t(
+    locale,
+    orderBy === "rating" ? "user.rate.highestFirst" : "user.rate.recentFirst"
+  );
   const viewRef = useRef<HTMLDivElement>(null);
   const listScroll = useRef(0);
   const listTrigger = useRef<HTMLButtonElement | null>(null);
@@ -343,6 +352,7 @@ export default function ProfileRatingsDialog({
       onBack={selection ? back : undefined}
       dismissible={!isBusy}
       tabletModal
+      desktopAlign="top"
       noPadding
       fitVisualViewport
       enableDragToClose
@@ -362,35 +372,47 @@ export default function ProfileRatingsDialog({
             </p>
           )}
           {canManage && (
-            <label className="tw-my-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
+            <div className="tw-my-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
               <span className="tw-shrink-0">
                 {t(locale, "user.rate.sortBy")}
               </span>
-              <span className="tw-relative tw-min-w-0">
-                <select
-                  aria-label={t(locale, "user.rate.sortGiven", { matter })}
-                  value={orderBy}
-                  disabled={isBusy}
-                  onChange={(event) => {
-                    const value = event.currentTarget.value;
-                    if (value === "rating" || value === "last_modified")
-                      changeOrder(value);
-                  }}
-                  className="tw-min-h-9 tw-w-full tw-min-w-0 tw-cursor-pointer tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm tw-font-medium tw-text-iron-100 [color-scheme:dark] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
-                >
-                  <option value="rating">
-                    {t(locale, "user.rate.highestFirst")}
-                  </option>
-                  <option value="last_modified">
-                    {t(locale, "user.rate.recentFirst")}
-                  </option>
-                </select>
-                <ChevronDownIcon
-                  aria-hidden="true"
-                  className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-400"
-                />
-              </span>
-            </label>
+              <CompactMenu
+                aria-label={`${t(locale, "user.rate.sortGiven", { matter })}: ${sortLabel}`}
+                className="tw-min-w-0 tw-max-w-full"
+                unstyledTrigger
+                triggerClassName={`${COMPACT_ACTION_BUTTON_CLASS} tw-min-h-11 tw-min-w-0 tw-max-w-full`}
+                trigger={
+                  <span
+                    className={`${COMPACT_ACTION_CONTENT_CLASS} tw-min-w-0 tw-max-w-full`}
+                  >
+                    <span className="tw-truncate">{sortLabel}</span>
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="tw-size-3.5 tw-shrink-0"
+                    />
+                  </span>
+                }
+                disabled={isBusy}
+                activeItemId={orderBy}
+                autoFocusItem={false}
+                anchor="bottom start"
+                menuClassName="tailwind-scope tw-z-[1100]"
+                menuWidthClassName="tw-w-64 tw-max-w-[calc(100vw-2rem)]"
+                itemClassName="tw-min-h-11"
+                items={[
+                  {
+                    id: "rating",
+                    label: t(locale, "user.rate.highestFirst"),
+                    onSelect: () => changeOrder("rating"),
+                  },
+                  {
+                    id: "last_modified",
+                    label: t(locale, "user.rate.recentFirst"),
+                    onSelect: () => changeOrder("last_modified"),
+                  },
+                ]}
+              />
+            </div>
           )}
           {!canManage && direction === "given" && (
             <p className="tw-mt-2 tw-text-xs tw-text-iron-400">
@@ -409,13 +431,15 @@ export default function ProfileRatingsDialog({
               {t(locale, "user.rate.empty")}
             </output>
           )}
-          <ul className="tw-m-0 tw-list-none tw-p-0">
+          <ul
+            className={`tw-m-0 tw-list-none tw-p-0 ${direction === "received" ? "tw-space-y-3" : ""}`}
+          >
             {items.map((row) => {
               const target = getRatingRecipient(row);
               return (
                 <li
                   key={row.profile_id}
-                  className="tw-flex tw-min-h-[72px] tw-min-w-0 tw-items-center tw-gap-3 tw-py-3 lg:tw-min-h-0 lg:tw-py-2"
+                  className={`tw-flex tw-min-h-[72px] tw-min-w-0 tw-items-center tw-gap-3 tw-py-3 lg:tw-min-h-0 lg:tw-py-2 ${direction === "received" ? "tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.03] tw-bg-white/[0.02] tw-px-3 tw-transition-colors hover:tw-border-white/5 hover:tw-bg-white/[0.04]" : ""}`}
                 >
                   <div className="tw-min-w-0 tw-flex-1 lg:tw-contents">
                     <Link
@@ -424,7 +448,7 @@ export default function ProfileRatingsDialog({
                     >
                       {target.display}
                     </Link>
-                    <span className="tw-block tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-300 lg:tw-shrink-0">
+                    <span className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 lg:tw-shrink-0">
                       <span className="lg:tw-hidden">
                         {t(locale, "user.rate.ratingAmount", {
                           value: formatInteger(locale, row.rating),

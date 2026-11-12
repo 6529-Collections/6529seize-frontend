@@ -184,7 +184,7 @@ it("saves the desired total, shows the existing toast and refreshes profile data
     type: "success",
   });
   expect(onProfileRepModify).toHaveBeenCalledWith({
-    targetProfile: profile,
+    targetProfiles: [profile],
     connectedProfile,
     profileProxy: null,
   });
@@ -201,7 +201,7 @@ it("preserves proxy amounts and includes the proxy when refreshing", async () =>
   await userEvent.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() =>
     expect(onProfileRepModify).toHaveBeenCalledWith({
-      targetProfile: profile,
+      targetProfiles: [profile],
       connectedProfile,
       profileProxy: proxy,
     })

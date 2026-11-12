@@ -222,6 +222,7 @@ export default function UserPageRepMobile({
         onClose={() => setIsNicRateOpen(false)}
         noPadding
         tabletModal
+        desktopAlign="top"
         maxWidthClass="md:tw-max-w-md"
         headerClassName="tw-pb-5 tw-pt-4"
         headerVariant="minimal"

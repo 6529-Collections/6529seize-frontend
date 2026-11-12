@@ -16,10 +16,10 @@ const wait = require("@/helpers/Helpers").wait as jest.Mock;
 
 type ContextType = {
   onProfileRepModify: (params: {
-    targetProfile: ApiIdentity;
+    targetProfiles: readonly ApiIdentity[];
     connectedProfile: ApiIdentity | null;
     profileProxy: null;
-  }) => void;
+  }) => Promise<void>;
   setProfile: (profile: any) => void;
   setWaveDrops: (params: { waveDrops: any; waveId: string }) => void;
   waitAndInvalidateDrops: () => Promise<void>;
@@ -63,7 +63,7 @@ const createTestSetup = () => {
 };
 
 describe("ReactQueryWrapper context", () => {
-  it("invalidates shared REP credit across recipients, including a target without a handle", () => {
+  it("invalidates shared REP credit across recipients, including a target without a handle", async () => {
     const { client, ctx } = createTestSetup();
     const key = [
       QueryKey.PROFILE_REP_RATINGS,
@@ -75,13 +75,13 @@ describe("ReactQueryWrapper context", () => {
     ];
     client.setQueryData(key, { rep_rates_left_for_rater: 80 });
     client.setQueryData(otherRecipientKey, { rep_rates_left_for_rater: 80 });
-    act(() =>
-      ctx.onProfileRepModify({
-        targetProfile: { handle: null, query: "0xAbC" } as ApiIdentity,
+    await act(async () => {
+      await ctx.onProfileRepModify({
+        targetProfiles: [{ handle: null, query: "0xAbC" } as ApiIdentity],
         connectedProfile: { handle: "viewer" } as ApiIdentity,
         profileProxy: null,
-      })
-    );
+      });
+    });
     expect(client.getQueryState(key)?.isInvalidated).toBe(true);
     expect(client.getQueryState(otherRecipientKey)?.isInvalidated).toBe(true);
     expect(client.resetQueries).toHaveBeenCalledWith({

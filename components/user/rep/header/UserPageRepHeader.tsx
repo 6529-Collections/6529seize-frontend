@@ -5,7 +5,6 @@ import Button from "@/components/utils/button/Button";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { PlusIcon } from "@heroicons/react/24/solid";
 import { useContext, useMemo, useState } from "react";
 import { canManageGivenRatings } from "../ratingsManagement";
@@ -13,7 +12,8 @@ import RepCategoryList from "../RepCategoryList";
 import RepDirectionToggle from "../RepDirectionToggle";
 import RatingContributorsControl from "../RatingContributorsControl";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { formatInteger } from "@/i18n/format";
+import { t, tRich } from "@/i18n/messages";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
 import { getCanEditRep, type RepDirection } from "../UserPageRep.helpers";
 
@@ -96,7 +96,7 @@ export default function UserPageRepHeader({
                 Total Rep
               </div>
               <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
-                {overview ? formatNumberWithCommas(overview.total_rep) : "—"}
+                {overview ? formatInteger(locale, overview.total_rep) : "—"}
               </div>
               <div className="tw-mt-3">
                 <RatingContributorsControl
@@ -121,19 +121,24 @@ export default function UserPageRepHeader({
                   {overview !== null &&
                     overview.authenticated_user_contribution !== null &&
                     overview.authenticated_user_contribution !== 0 && (
-                      <div className="tw-inline-flex tw-items-center tw-gap-x-1.5">
-                        <span className="tw-text-meta/4 tw-font-normal tw-text-iron-500">
-                          {repDirection === "given"
-                            ? "Assigned To You:"
-                            : "You Assigned:"}
-                        </span>
-                        <span className="tw-text-meta/4 tw-font-medium tw-text-iron-300">
-                          {overview.authenticated_user_contribution > 0 && "+"}
-                          {formatNumberWithCommas(
-                            overview.authenticated_user_contribution
-                          )}
-                        </span>
-                      </div>
+                      <span className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-text-meta/4 tw-font-normal tw-text-iron-400">
+                        {tRich(
+                          locale,
+                          repDirection === "given"
+                            ? "user.profile.rep.rep.assignedToYou"
+                            : "user.profile.rep.rep.youAssigned",
+                          {
+                            value: (
+                              <span className="tw-text-meta/4 tw-font-medium tw-text-iron-100">
+                                {formatInteger(
+                                  locale,
+                                  overview.authenticated_user_contribution
+                                )}
+                              </span>
+                            ),
+                          }
+                        )}
+                      </span>
                     )}
                 </div>
                 {canEditRep && repDirection === "received" && (

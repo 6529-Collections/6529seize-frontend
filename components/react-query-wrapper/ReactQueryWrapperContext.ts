@@ -64,14 +64,14 @@ export type ReactQueryWrapperContextType = {
     readonly profileProxy: ApiProfileProxy | null;
   }) => void;
   onProfileRepModify: ({
-    targetProfile,
+    targetProfiles,
     connectedProfile,
     profileProxy,
   }: {
-    readonly targetProfile: ApiIdentity;
+    readonly targetProfiles: readonly ApiIdentity[];
     readonly connectedProfile: ApiIdentity | null;
     readonly profileProxy: ApiProfileProxy | null;
-  }) => void;
+  }) => Promise<void>;
   onProfileEdit: ({
     profile,
     previousProfile,
@@ -123,7 +123,7 @@ export const ReactQueryWrapperContext =
     setWaveDrops: () => {},
     onProfileProxyModify: () => {},
     onProfileCICModify: () => {},
-    onProfileRepModify: () => {},
+    onProfileRepModify: () => Promise.resolve(),
     onProfileEdit: () => {},
     onProfileStatementAdd: () => {},
     onProfileStatementRemove: () => {},

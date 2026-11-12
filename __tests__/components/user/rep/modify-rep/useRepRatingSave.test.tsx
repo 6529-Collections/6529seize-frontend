@@ -55,6 +55,7 @@ function setup() {
 beforeEach(() => {
   jest.clearAllMocks();
   requestAuth.mockResolvedValue({ success: true });
+  onProfileRepModify.mockResolvedValue(undefined);
   post.mockResolvedValue(undefined);
 });
 
@@ -101,7 +102,32 @@ it("stops remaining writes if the principal changes during a batch", async () =>
   expect(onProfileRepModify).toHaveBeenCalledWith(
     expect.objectContaining({
       connectedProfile: owner,
-      targetProfile: updates[0]!.profile,
+      targetProfiles: [updates[0]!.profile],
     })
   );
+});
+
+it("keeps saving locked until the shared cache refresh finishes", async () => {
+  let finishRefresh!: () => void;
+  onProfileRepModify.mockReturnValueOnce(
+    new Promise<void>((resolve) => {
+      finishRefresh = resolve;
+    })
+  );
+  const { result } = setup();
+  let saving!: Promise<boolean>;
+  await act(async () => {
+    saving = result.current.save([updates[0]!]);
+  });
+  expect(onProfileRepModify).toHaveBeenCalledTimes(1);
+  expect(result.current.isSaving).toBe(true);
+  await act(async () => {
+    expect(await result.current.save([updates[1]!])).toBe(false);
+  });
+  expect(post).toHaveBeenCalledTimes(1);
+  await act(async () => {
+    finishRefresh();
+    expect(await saving).toBe(true);
+  });
+  expect(result.current.isSaving).toBe(false);
 });

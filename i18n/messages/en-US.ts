@@ -260,7 +260,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "panel.invalidNumber":
     "Enter a whole number, including a minus sign for negative REP.",
   "panel.loadingAmount": "Loading…",
-  "panel.openGlobal": "Open category ↗",
+  "panel.openGlobal": "Open category",
   "panel.yourRep": "Your REP",
   "panel.total": "Total",
   "panel.creditLimit":
@@ -268,7 +268,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "panel.saveRecovery":
     "Saved changes are kept. Review the remaining values and try again.",
   "loading.details": "Loading REP category details",
-  "pill.openGlobalAriaLabel": "Open global REP category {category}",
+  "pill.openGlobalAriaLabel": "Open category {category}",
   "pill.editAriaLabel": "Edit REP category {category}",
   "sidebar.otherTools": "Other Tools",
   "sidebar.repCategories": "REP Categories",
@@ -2754,9 +2754,9 @@ const USER_RATE_MESSAGES = objectMessages("user.rate", {
   given: "Given",
   direction: "{matter} direction",
   listTitle: "{matter} {direction}",
-  manageGiven: "Manage given",
-  manageGivenMatter: "Manage given {matter}",
-  manageRatingContributors: "Manage given {matter}: {contributors}",
+  manageGiven: "All receivers",
+  manageGivenMatter: "All {matter} receivers",
+  manageRatingContributors: "All {matter} receivers: {count}",
   viewRatingContributors: "View {matter} {direction}: {contributors}",
   highestFirst: "Highest total first",
   recentFirst: "Most recently adjusted",

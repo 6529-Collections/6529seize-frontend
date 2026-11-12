@@ -294,19 +294,6 @@ const createReactQueryContextValue = (
     );
   };
 
-  const invalidateProfileRepRatings = (profile: ApiIdentity) => {
-    const handles = new Set([
-      ...getHandlesFromProfile(profile),
-      (profile.query ?? profile.handle ?? profile.display).toLowerCase(),
-    ]);
-    invalidateQueries({
-      key: QueryKey.PROFILE_REP_RATINGS,
-      values: Array.from(handles, (h) => ({
-        handleOrWallet: h,
-      })),
-    });
-  };
-
   const invalidateProfileRaters = ({
     profile,
     matter,
@@ -359,7 +346,7 @@ const createReactQueryContextValue = (
     invalidateProfile(targetProfile);
     invalidateLogs();
     void refreshProfileRatingLists(queryClient, "NIC", {
-      targetProfile,
+      targetProfiles: [targetProfile],
       connectedProfile,
       profileProxy,
       rater,
@@ -435,55 +422,32 @@ const createReactQueryContextValue = (
     }
   };
 
-  const onProfileRepModify = ({
-    targetProfile,
+  const onProfileRepModify = async ({
+    targetProfiles,
     connectedProfile,
     profileProxy,
   }: {
-    readonly targetProfile: ApiIdentity;
+    readonly targetProfiles: readonly ApiIdentity[];
     readonly connectedProfile: ApiIdentity | null;
     readonly profileProxy: ApiProfileProxy | null;
-  }) => {
-    const targetHandleOrWallet = (
-      targetProfile.query ??
-      targetProfile.handle ??
-      targetProfile.display
-    ).toLowerCase();
-    invalidateProfile(targetProfile);
-    invalidateProfileRepRatings(targetProfile);
+  }): Promise<void> => {
+    if (targetProfiles.length === 0) return;
+    for (const targetProfile of targetProfiles) {
+      invalidateProfile(targetProfile);
+      invalidateProfileRaters({
+        profile: targetProfile,
+        matter: RateMatter.REP,
+        given: false,
+      });
+    }
     invalidateLogs();
-    void refreshProfileRatingLists(queryClient, "REP", {
-      targetProfile,
-      connectedProfile,
-      profileProxy,
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.REP_OVERVIEW],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.REP_CATEGORIES],
-    });
     invalidateRepCategoryAnalytics(queryClient);
-    invalidateProfileRaters({
-      profile: targetProfile,
-      matter: RateMatter.REP,
-      given: false,
-    });
 
     if (connectedProfile) {
       invalidateProfileRaters({
         profile: connectedProfile,
         matter: RateMatter.REP,
         given: true,
-      });
-      invalidateQueries({
-        key: QueryKey.PROFILE_REP_RATINGS,
-        values: [
-          {
-            rater: connectedProfile.handle,
-            handleOrWallet: targetHandleOrWallet,
-          },
-        ],
       });
     }
 
@@ -507,19 +471,6 @@ const createReactQueryContextValue = (
             handleOrWallet: profileProxy.granted_to.handle,
             matter: RateMatter.REP,
             given: false,
-          },
-        ],
-      });
-      invalidateQueries({
-        key: QueryKey.PROFILE_REP_RATINGS,
-        values: [
-          {
-            rater: profileProxy.created_by.handle,
-            handleOrWallet: targetHandleOrWallet,
-          },
-          {
-            rater: profileProxy.granted_to.handle,
-            handleOrWallet: targetHandleOrWallet,
           },
         ],
       });
@@ -548,6 +499,15 @@ const createReactQueryContextValue = (
         rater_representative: raterRepresentative,
       });
     }
+    await Promise.all([
+      refreshProfileRatingLists(queryClient, "REP", {
+        targetProfiles,
+        connectedProfile,
+        profileProxy,
+      }),
+      queryClient.invalidateQueries({ queryKey: [QueryKey.REP_OVERVIEW] }),
+      queryClient.invalidateQueries({ queryKey: [QueryKey.REP_CATEGORIES] }),
+    ]);
   };
 
   const onProfileEdit = ({

@@ -1,16 +1,12 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { commonApiPost } from "@/services/api/common-api";
-import { useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useRef, useState } from "react";
 
 interface RepRatingUpdate {
@@ -19,13 +15,12 @@ interface RepRatingUpdate {
   readonly amount: number;
 }
 
-/** Shared by category editing and Manage given. Each successful write refreshes its caches. */
+/** Shared by category editing and All receivers. Refresh successful writes once per batch. */
 export function useRepRatingSave() {
   const locale = useBrowserLocale();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
-  const queryClient = useQueryClient();
   const lock = useRef(false);
   const mounted = useRef(false);
   const principal = `${connectedProfile?.id ?? ""}:${activeProfileProxy?.id ?? ""}`;
@@ -53,6 +48,7 @@ export function useRepRatingSave() {
     lock.current = true;
     setIsSaving(true);
     setError(null);
+    const savedProfiles: ApiIdentity[] = [];
     try {
       const { success } = await requestAuth();
       if (!isCurrentSession()) return false;
@@ -73,22 +69,9 @@ export function useRepRatingSave() {
           endpoint: `profiles/${encodeURIComponent(identity)}/rep/rating`,
           body: { amount: update.amount, category: update.category },
         });
-        onProfileRepModify({
-          targetProfile: update.profile,
-          connectedProfile,
-          profileProxy: activeProfileProxy ?? null,
-        });
+        savedProfiles.push(update.profile);
         onSaved?.(update);
       }
-      await queryClient.refetchQueries(
-        { queryKey: [QueryKey.PROFILE_REP_RATINGS], type: "active" },
-        { cancelRefetch: false }
-      );
-      setToast({
-        message: t(locale, "rep.categories.edit.updated"),
-        type: "success",
-      });
-      return true;
     } catch (cause) {
       const message = t(locale, "rep.categories.edit.updateError");
       setError(message);
@@ -100,9 +83,27 @@ export function useRepRatingSave() {
       });
       return false;
     } finally {
-      lock.current = false;
-      setIsSaving(false);
+      try {
+        // A failed later write must still refresh the successful recipients
+        // and the shared credit budget before the remaining edits can retry.
+        if (savedProfiles.length > 0) {
+          await onProfileRepModify({
+            targetProfiles: savedProfiles,
+            connectedProfile,
+            profileProxy: activeProfileProxy ?? null,
+          });
+        }
+      } finally {
+        lock.current = false;
+        setIsSaving(false);
+      }
     }
+    if (!isCurrentSession()) return false;
+    setToast({
+      message: t(locale, "rep.categories.edit.updated"),
+      type: "success",
+    });
+    return true;
   };
   return { save, isSaving, error, clearError: () => setError(null) };
 }

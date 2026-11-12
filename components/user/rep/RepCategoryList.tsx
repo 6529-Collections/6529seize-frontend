@@ -7,6 +7,7 @@ import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import clsx from "clsx";
 import {
   useContext,
   useEffect,
@@ -18,8 +19,18 @@ import {
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import RepCategoryDetails from "./RepCategoryDetails";
 import RepCategoryPill from "./RepCategoryPill";
-import { canManageGivenRatings } from "./ratingsManagement";
-import { getCanEditRep, type RepDirection } from "./UserPageRep.helpers";
+import type { RepDirection } from "./UserPageRep.helpers";
+
+type CategoryLayout = {
+  readonly key: string;
+  readonly end: number;
+  readonly left: number;
+  readonly width: number;
+  readonly flushL: boolean;
+  readonly flushR: boolean;
+  readonly categories: readonly ApiRepCategory[];
+  readonly visibleCount: number;
+};
 
 export default function RepCategoryList({
   profile,
@@ -47,24 +58,60 @@ export default function RepCategoryList({
   const active = mobile ? !desktopViewport : desktopViewport;
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const panelId = useId();
-  const [open, setOpen] = useState<{ name: string; focus: number } | null>(
-    null
-  );
+  const [open, setOpen] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [rowEnd, setRowEnd] = useState(-1);
+  const [layout, setLayout] = useState<CategoryLayout | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLElement | null>(null);
-  const category = categories.find((item) => item.category === open?.name);
-  const canEdit =
-    direction === "given"
-      ? canManageGivenRatings(profile, connectedProfile, activeProfileProxy)
-      : getCanEditRep({
-          myProfile: connectedProfile,
-          targetProfile: profile,
-          activeProfileProxy,
-        });
+  const category = categories.find((item) => item.category === open);
   const visible = categories.slice(0, visibleCount);
   const hidden = Math.max(categories.length - visibleCount, 0);
+  // Hide the panel from layout while measuring the natural tag rows.
+  const joined =
+    !mobile &&
+    active &&
+    layout?.key === open &&
+    layout.categories === categories &&
+    layout.visibleCount === visibleCount
+      ? layout
+      : null;
+  useLayoutEffect(() => {
+    if (!open || mobile || !active || joined) return;
+    const list = listRef.current;
+    if (!list || list.clientWidth === 0) return;
+    const tags = Array.from(
+      list.querySelectorAll<HTMLElement>("[data-rep-tag]")
+    );
+    const index = tags.findIndex((tag) => tag.dataset["repTag"] === open);
+    const tag = tags[index];
+    if (!tag) return;
+    let end = index;
+    while (tags[end + 1]?.offsetTop === tag.offsetTop) end++;
+    setLayout({
+      key: open,
+      end,
+      left: tag.offsetLeft,
+      width: tag.offsetWidth,
+      flushL: tag.offsetLeft < 1,
+      flushR: Math.abs(tag.offsetLeft + tag.offsetWidth - list.clientWidth) < 1,
+      categories,
+      visibleCount,
+    });
+  }, [open, mobile, active, joined, categories, visibleCount]);
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    let width = list.clientWidth;
+    const observer = new ResizeObserver(() => {
+      if (list.clientWidth !== width) {
+        width = list.clientWidth;
+        setLayout(null);
+      }
+    });
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-initialize-state -- ResizeObserver invalidates measured geometry on later width changes, not during effect initialization.
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, []);
   const close = () => {
     if (busy) return;
     setOpen(null);
@@ -82,37 +129,14 @@ export default function RepCategoryList({
     document.addEventListener("keydown", escape);
     return () => document.removeEventListener("keydown", escape);
   }, [open, mobile, active, busy]);
-  useLayoutEffect(() => {
-    const list = listRef.current;
-    if (!list || mobile || !open || !active) return;
-    const measure = () => {
-      const tags = Array.from(
-        list.querySelectorAll<HTMLElement>("[data-rep-tag]")
-      );
-      const selected = tags.find((tag) => tag.dataset["repTag"] === open.name);
-      if (!selected) return;
-      const last = tags.findLastIndex(
-        (tag) => tag.offsetTop === selected.offsetTop
-      );
-      setRowEnd(last);
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(list);
-    return () => observer.disconnect();
-  }, [open, mobile, active, visibleCount, categories]);
-  const show = (name: string, edit: boolean) => {
+  const show = (name: string) => {
     if (busy) return;
     trigger.current =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
-    if (!edit && open?.name === name) close();
-    else
-      setOpen((previous) => ({
-        name,
-        focus: edit ? (previous?.focus ?? 0) + 1 : 0,
-      }));
+    if (open === name) close();
+    else setOpen(name);
   };
   const details =
     category && open ? (
@@ -121,7 +145,8 @@ export default function RepCategoryList({
         profile={profile}
         category={category}
         direction={direction}
-        focusInput={open.focus}
+        autoSelectOwnAmount={!mobile && active && joined !== null}
+        busy={busy}
         onBusyChange={setBusy}
         onOpenGlobalCategory={(name) => {
           if (busy) return;
@@ -137,44 +162,60 @@ export default function RepCategoryList({
     });
   else if (isFetchingNextPage)
     moreLabel = t(locale, "user.profile.rep.categories.loadingMore");
+  const panelEnd = Math.min(
+    joined?.end ?? layout?.end ?? visible.length - 1,
+    visible.length - 1
+  );
   const panel =
     !mobile && category ? (
       <section
         key="category-panel"
+        hidden={!joined}
         id={panelId}
         aria-label={t(locale, "rep.categories.panel.panel", {
           category: category.category,
         })}
-        className="tw-w-full tw-min-w-0 tw-basis-full tw-rounded-xl tw-bg-iron-900/70"
+        className={clsx(
+          "tw-relative tw-min-w-0 tw-basis-full tw-rounded-xl tw-bg-gradient-to-b tw-from-iron-900 tw-to-[#151518] tw-p-2.5 tw-shadow-[0_18px_40px_-18px_rgba(0,0,0,0.8)]",
+          joined?.flushL && "tw-rounded-tl-none",
+          joined?.flushR && "tw-rounded-tr-none"
+        )}
       >
+        <span
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute -tw-top-2 tw-h-2 tw-bg-iron-900"
+          style={{ left: joined?.left, width: joined?.width }}
+        >
+          {joined && !joined.flushL && (
+            <span className="tw-absolute tw-bottom-0 tw-right-full tw-size-2 tw-bg-[radial-gradient(circle_at_0_0,transparent_7.5px,#1c1c21_8px)]" />
+          )}
+          {joined && !joined.flushR && (
+            <span className="tw-absolute tw-bottom-0 tw-left-full tw-size-2 tw-bg-[radial-gradient(circle_at_100%_0,transparent_7.5px,#1c1c21_8px)]" />
+          )}
+        </span>
         {details}
       </section>
     ) : null;
   return (
     <>
       <div
-        ref={listRef}
-        className="tw-relative tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2"
+        ref={mobile ? undefined : listRef}
+        className="tw-relative tw-flex tw-min-w-0 tw-flex-wrap tw-items-start tw-gap-2"
       >
         {visible.flatMap((item, index) => [
-          <div
+          <RepCategoryPill
             key={`tag:${item.category}`}
-            data-rep-tag={item.category}
-            className="tw-min-w-0 tw-max-w-full"
-          >
-            <RepCategoryPill
-              category={item}
-              direction={direction}
-              canEdit={canEdit}
-              onEdit={(name) => show(name, true)}
-              onOpenContributors={(selected) => show(selected.category, false)}
-              compact={mobile}
-              isOpen={open?.name === item.category}
-              panelId={panelId}
-              disabled={busy}
-            />
-          </div>,
-          index === rowEnd ? panel : null,
+            category={item}
+            direction={direction}
+            onOpenContributors={(selected) => show(selected.category)}
+            compact={mobile}
+            isOpen={open === item.category}
+            isJoined={joined?.key === item.category}
+            panelId={panelId}
+            disabled={busy}
+          />,
+          // One stable key preserves drafts when the panel moves on resize.
+          index === panelEnd ? panel : null,
         ])}
         {(hidden > 0 || hasNextPage) && (
           <button
@@ -192,7 +233,7 @@ export default function RepCategoryList({
           id={panelId}
           title={category.category}
           titleActions={
-            <span className="tw-shrink-0 tw-text-sm tw-tabular-nums tw-text-iron-400">
+            <span className="tw-shrink-0 tw-text-sm tw-text-iron-400">
               {formatInteger(locale, category.total_rep)}
             </span>
           }
@@ -206,7 +247,7 @@ export default function RepCategoryList({
           fitVisualViewport
           surfaceClassName="tw-bg-iron-950"
           headerClassName="tw-pb-0 tw-pt-2"
-          focusTitleOnOpen={(open?.focus ?? 0) === 0}
+          focusTitleOnOpen
         >
           <div className="tw-px-3 tw-pb-4">{details}</div>
         </MobileWrapperDialog>

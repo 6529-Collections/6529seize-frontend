@@ -19,7 +19,7 @@ export default function UserPageIdentityActivityLogList({
       <div
         className={
           compact
-            ? "tw-overflow-hidden tw-rounded-xl tw-bg-iron-950/70"
+            ? "tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-@container"
             : "tw-space-y-2.5"
         }
       >

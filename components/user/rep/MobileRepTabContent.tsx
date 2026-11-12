@@ -4,7 +4,7 @@ import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatInteger, formatNumber } from "@/i18n/format";
+import { formatInteger } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import { RateMatter } from "@/types/enums";
 import { useContext } from "react";
@@ -95,7 +95,7 @@ export default function MobileRepTabContent({
             onRepDirectionChange={onRepDirectionChange}
           />
         </div>
-        <div className="tw-text-3xl tw-font-semibold tw-tabular-nums tw-leading-none tw-tracking-tight tw-text-primary-400">
+        <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
           {overview ? formatInteger(locale, overview.total_rep) : "—"}
         </div>
       </div>
@@ -104,17 +104,13 @@ export default function MobileRepTabContent({
         overview.authenticated_user_contribution !== null &&
         overview.authenticated_user_contribution !== 0 && (
           <div className="tw-mt-4 tw-flex tw-items-center tw-gap-1.5 tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/20 tw-bg-blue-400/5 tw-px-4 tw-py-2.5">
-            <span className="tw-text-xs tw-font-medium tw-text-iron-500">
+            <span className="tw-text-xs tw-font-normal tw-text-iron-400">
               {tRich(locale, "user.profile.rep.rep.assignedToYou", {
                 value: (
-                  <span className="tw-text-xs tw-font-semibold tw-text-iron-300">
-                    {formatNumber(
+                  <span className="tw-text-xs tw-font-medium tw-text-iron-100">
+                    {formatInteger(
                       locale,
-                      overview.authenticated_user_contribution,
-                      {
-                        maximumFractionDigits: 0,
-                        signDisplay: "exceptZero",
-                      }
+                      overview.authenticated_user_contribution
                     )}
                   </span>
                 ),
@@ -125,7 +121,7 @@ export default function MobileRepTabContent({
 
       <div className="tw-mt-4">
         <div className="tw-mb-4">
-          <div className="tw-flex tw-min-h-9 tw-items-center tw-gap-3">
+          <div className="tw-flex tw-min-h-9 tw-flex-wrap tw-items-center tw-gap-3">
             <div
               className={
                 canManage ? "tw-min-w-0 tw-flex-1" : "tw-flex-shrink-0"
@@ -141,36 +137,37 @@ export default function MobileRepTabContent({
               />
             </div>
             {canEditRep && repDirection === "received" && (
-              <div className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center">
+              <div className="tw-ml-auto tw-flex tw-min-w-0 tw-max-w-full tw-shrink-0 tw-items-center">
                 <UserPageRateWrapper
                   profile={profile}
                   type={RateMatter.REP}
                   hideOwnProfileMessage
                 >
-                  <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-start tw-gap-2 sm:tw-flex-nowrap sm:tw-justify-end sm:tw-gap-3">
+                  <div className="tw-flex tw-flex-nowrap tw-items-center tw-justify-start tw-gap-2 max-[360px]:tw-gap-0.5 sm:tw-justify-end sm:tw-gap-3">
                     {overview !== null &&
                     overview.authenticated_user_contribution !== null &&
                     overview.authenticated_user_contribution !== 0 ? (
-                      <span className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500">
+                      <span className="tw-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
                         {tRich(locale, "user.profile.rep.rep.youAssigned", {
                           value: (
-                            <span className="tw-font-semibold tw-text-iron-300">
-                              {formatNumber(
+                            <span className="tw-font-medium tw-text-iron-100">
+                              {formatInteger(
                                 locale,
-                                overview.authenticated_user_contribution,
-                                {
-                                  maximumFractionDigits: 0,
-                                  signDisplay: "exceptZero",
-                                }
+                                overview.authenticated_user_contribution
                               )}
                             </span>
                           ),
                         })}
                       </span>
                     ) : null}
-                    <Button variant="action" size="sm" onClick={onGrantRep}>
+                    <Button
+                      variant="action"
+                      size="sm"
+                      onClick={onGrantRep}
+                      className="max-[360px]:tw-px-1.5"
+                    >
                       <svg
-                        className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0 sm:tw-h-5 sm:tw-w-5"
+                        className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0 max-[360px]:tw-hidden sm:tw-h-5 sm:tw-w-5"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
