@@ -12,6 +12,10 @@ export const MOBILE_APP_USER_AGENTS = {
   android: /Android/i,
   ios: /iPhone|iPad|iPod/i,
   mac: /Macintosh/i,
+  safariVersion: /\bVersion\/\d/i,
+  safari: /\bSafari\//i,
+  otherIosBrowser:
+    /CriOS|FxiOS|EdgiOS|OPiOS|GSA|DuckDuckGo|YaBrowser|FBAN|FBAV|Instagram/i,
 };
 
 /** Routes that stay in the browser for app links and universal links alike. */
@@ -111,7 +115,7 @@ const UNIVERSAL_LINK_FILE_EXTENSION =
 /** Query parameter that makes a repeated link to the same page navigate again. */
 const NATIVE_LINK_TIMESTAMP_PARAM = "_t";
 
-function isUniversalLinkPath(pathname: string): boolean {
+export function isUniversalLinkPath(pathname: string): boolean {
   if (!isMobileAppDestination(pathname)) return false;
   let decoded: string;
   try {

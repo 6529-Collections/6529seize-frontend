@@ -182,6 +182,7 @@ function getArtworkHtml(
 
 function getScheduledMintTooltip({
   displayTz,
+  includeMintUrl,
   locale,
   mintInstantUtc,
   mintLabel,
@@ -191,6 +192,7 @@ function getScheduledMintTooltip({
   publishedMemesStatus,
 }: {
   readonly displayTz: DisplayTz;
+  readonly includeMintUrl: boolean;
   readonly locale: SupportedLocale;
   readonly mintInstantUtc: Date | undefined;
   readonly mintLabel: string | undefined;
@@ -219,7 +221,8 @@ function getScheduledMintTooltip({
         "currentColor",
         22,
         getCalendarInviteLabels(locale),
-        locale
+        locale,
+        { includeMintUrl }
       )
     : "";
   const tooltipTitle = t(locale, "memeCalendar.grid.tooltip.meme", {
@@ -251,7 +254,8 @@ function getMintTooltip(
   displayTz: DisplayTz,
   locale: SupportedLocale,
   publishedMemeIds: ReadonlySet<number>,
-  publishedMemesStatus: PublishedMemesStatus
+  publishedMemesStatus: PublishedMemesStatus,
+  includeMintUrl: boolean
 ): MintTooltip {
   if (details.historical.length > 0) {
     return {
@@ -272,6 +276,7 @@ function getMintTooltip(
 
   return getScheduledMintTooltip({
     displayTz,
+    includeMintUrl,
     locale,
     mintInstantUtc: details.mintInstantUtc,
     mintLabel: details.mintLabel,
@@ -297,6 +302,7 @@ function MonthDayCell({
   cellOffset,
   day,
   displayTz,
+  includeMintUrl,
   locale,
   month,
   onSelectDay,
@@ -364,7 +370,8 @@ function MonthDayCell({
     displayTz,
     locale,
     publishedMemeIds,
-    publishedMemesStatus
+    publishedMemesStatus,
+    includeMintUrl
   );
 
   return (
@@ -406,6 +413,7 @@ export function Month({
   onSelectDay,
   autoOpenYmd,
   displayTz,
+  includeMintUrl,
   timeZone,
   locale,
   publishedMemeIds,
@@ -484,6 +492,7 @@ export function Month({
               cellOffset={cellOffset}
               day={day}
               displayTz={displayTz}
+              includeMintUrl={includeMintUrl}
               locale={locale}
               month={month}
               onSelectDay={onSelectDay}

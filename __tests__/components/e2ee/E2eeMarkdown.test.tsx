@@ -225,6 +225,29 @@ it("renders URLs and images as explicit safe anchors without resource elements",
   ).toBeNull();
 });
 
+it("renders app page links as same-tab anchors without adding a remote resource", () => {
+  const { container } = render(
+    <E2eeMarkdown
+      {...props}
+      text={
+        "[Drop](https://test.6529.io/waves/123?serialNo=7#part-2)\n\n[The Memes](/the-memes/1)\n\n![Remote photo](https://test.6529.io/photo.png)"
+      }
+    />
+  );
+  const drop = screen.getByRole("link", { name: "Drop" });
+  expect(drop).toHaveAttribute("href", "/waves/123?serialNo=7#part-2");
+  expect(drop).not.toHaveAttribute("target");
+  expect(drop).toHaveAttribute("rel", "noopener noreferrer nofollow ugc");
+  const collection = screen.getByRole("link", { name: "The Memes" });
+  expect(collection).toHaveAttribute("href", "/the-memes/1");
+  expect(collection).not.toHaveAttribute("target");
+  expect(screen.getByRole("link", { name: "Remote photo" })).toHaveAttribute(
+    "target",
+    "_blank"
+  );
+  expect(container.querySelector("img, iframe, link")).toBeNull();
+});
+
 it("keeps mentioned members as labels in a compact preview inside a notification link", () => {
   const { container } = render(
     <a href="/messages/encrypted/group">
