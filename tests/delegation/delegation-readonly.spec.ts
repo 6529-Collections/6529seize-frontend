@@ -127,7 +127,11 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
 
     await expect(page).toHaveTitle("Safe Collecting | 6529.io");
     await expectHeading(page, "Safe Collecting");
-    if (!isMobile) {
+    if (isMobile) {
+      await expect(
+        page.getByRole("button", { name: "Open menu", exact: true })
+      ).toBeEnabled();
+    } else {
       // The desktop navigation stays disabled until hydration; SSR tab markup
       // is visible earlier, before its keyboard handler is attached.
       await expect(

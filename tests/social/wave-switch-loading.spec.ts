@@ -629,9 +629,10 @@ for (const app of [false, true]) {
       // Its Close control identifies the actual pending detail surface.
       const loadingClose = pending.getByRole("button", { name: "Close panel" });
       await expect(loadingClose).toBeVisible();
+      const viewportWidth = page.viewportSize()?.width ?? 1280;
       await expect(loadingClose).toHaveCSS(
         "border-top-width",
-        testInfo.project.name === "web-desktop-chromium" ? "0px" : "1px"
+        viewportWidth >= 640 ? "0px" : "1px"
       );
       await expect(
         pending.getByRole("button", { name: "Close panel" }).locator("svg")
