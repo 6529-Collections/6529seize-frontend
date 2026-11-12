@@ -53,8 +53,22 @@ describe("Access page", () => {
     await waitFor(() => expect(readResponse).toHaveBeenCalled());
     expect(screen.getByRole("img", { name: "6529" })).toHaveAttribute(
       "src",
-      "/6529.svg"
+      "/gradient-100.svg"
     );
+  });
+
+  it("uses artwork supplied by the access API instead of the local logo", async () => {
+    const artwork = "https://api.example.test/access-artwork.webp";
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      status: 401,
+      json: async () => ({ image: artwork }),
+    });
+
+    render(<AccessPage />);
+
+    expect(await screen.findByAltText("")).toHaveAttribute("src", artwork);
+    expect(screen.queryByRole("img", { name: "6529" })).not.toBeInTheDocument();
   });
 
   it("saves the code and resumes navigation without a dialog", async () => {
@@ -66,8 +80,8 @@ describe("Access page", () => {
     fetchMock.mockResolvedValueOnce({ ok: true, status: 200 });
     render(<AccessPage />);
     const input = screen.getByLabelText("Team Login");
-    expect(input).toHaveAttribute("placeholder", "********");
-    expect(input).toHaveAttribute("type", "password");
+    expect(input).toHaveAttribute("placeholder", "Enter password");
+    expect(input).toHaveAttribute("type", "text");
     submitCode();
 
     await waitFor(() => expect(resumeAfterApiAccess).toHaveBeenCalled());

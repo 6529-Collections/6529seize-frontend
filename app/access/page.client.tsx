@@ -108,10 +108,10 @@ export default function AccessPage() {
       ) : (
         <Image
           unoptimized
-          src="/6529.svg"
+          src="/gradient-100.svg"
           alt="6529"
-          width={128}
-          height={128}
+          width={192}
+          height={192}
           className={accessStyles["logo"]}
         />
       )}
@@ -125,10 +125,13 @@ export default function AccessPage() {
           <input
             id="api-access-code"
             suppressHydrationWarning
-            type="password"
+            type="text"
+            autoCapitalize="none"
             autoComplete="off"
+            autoCorrect="off"
             enterKeyHint="go"
             readOnly={isVerifying}
+            spellCheck={false}
             aria-invalid={errorKey === "access.denied" || undefined}
             aria-describedby={feedbackKey ? "api-access-feedback" : undefined}
             placeholder={t(locale, "access.codeInput.placeholder")}
