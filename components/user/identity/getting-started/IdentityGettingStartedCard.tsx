@@ -6,6 +6,7 @@ import MainStageNominationPopover, {
   MainStageNominationPopoverContent,
 } from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import MobileWrapperDialogCloseButton from "@/components/mobile-wrapper-dialog/MobileWrapperDialogCloseButton";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -21,7 +22,6 @@ import {
   ArrowUpRightIcon,
   PaintBrushIcon,
   PhotoIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -129,15 +129,12 @@ function IdentityGettingStartedCardContent({
       className={`tw-relative tw-scroll-mt-24 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-emerald-500/10 tw-bg-iron-950 tw-bg-gradient-to-br tw-from-emerald-900/20 tw-via-transparent tw-to-transparent tw-antialiased tw-@container/identity-guide before:tw-pointer-events-none before:tw-absolute before:tw-inset-x-0 before:tw-top-0 before:tw-h-px before:tw-bg-gradient-to-r before:tw-from-transparent before:tw-via-emerald-400/80 before:tw-to-transparent before:tw-content-[''] ${className ?? ""}`}
       aria-label={t(locale, "identityGettingStarted.region")}
     >
-      <button
-        type="button"
+      <MobileWrapperDialogCloseButton
         onClick={onDismiss}
-        aria-label={t(locale, "identityGettingStarted.dismiss")}
-        title={t(locale, "identityGettingStarted.dismiss")}
-        className="tw-absolute tw-right-2 tw-top-2 tw-z-10 tw-flex tw-size-11 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-colors hover:tw-bg-white/10 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
-      >
-        <XMarkIcon className="tw-size-4" aria-hidden="true" />
-      </button>
+        label={t(locale, "identityGettingStarted.dismiss")}
+        variant="minimal"
+        className="tw-absolute tw-right-2 tw-top-2 tw-z-10 tw-mr-0 tw-cursor-pointer [@media(pointer:coarse)]:tw-min-h-11 [@media(pointer:coarse)]:tw-min-w-11"
+      />
       <div className="tw-relative tw-z-0 tw-grid tw-grid-cols-1 tw-gap-8 tw-p-6 @[48rem]/identity-guide:tw-grid-cols-12 @[48rem]/identity-guide:tw-p-8 @[64rem]/identity-guide:tw-gap-12">
         <div className="tw-flex tw-min-w-0 tw-gap-4 @[48rem]/identity-guide:tw-col-span-7 @[48rem]/identity-guide:tw-gap-5">
           <span

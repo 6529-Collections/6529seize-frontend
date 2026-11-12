@@ -369,6 +369,9 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       name: "Dismiss guide",
       exact: true,
     });
+    const minimumDismissSize = await page.evaluate(() =>
+      globalThis.matchMedia("(pointer: coarse)").matches ? 44 : 40
+    );
     await expect(dismissGuide).toHaveText("");
     await expect(dismissGuide).toHaveAttribute("title", "Dismiss guide");
     for (const width of [768, 1023, 1024, 320]) {
@@ -392,8 +395,8 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       expect(separated, `Guide header controls overlap at ${width}px`).toBe(
         true
       );
-      expect(dismissBounds!.height).toBeGreaterThanOrEqual(44);
-      expect(dismissBounds!.width).toBeGreaterThanOrEqual(44);
+      expect(dismissBounds!.height).toBeGreaterThanOrEqual(minimumDismissSize);
+      expect(dismissBounds!.width).toBeGreaterThanOrEqual(minimumDismissSize);
     }
     await page.setViewportSize({
       width: isMobile ? 320 : 1280,
