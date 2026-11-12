@@ -239,6 +239,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   });
 
   test("NextGen collection art page exposes token browse links", async ({
+    isMobile,
     page,
   }) => {
     await gotoReady(page, "/nextgen/collection/pebbles/art");
@@ -246,6 +247,13 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
     await expect(page).toHaveTitle(/Art.*Pebbles|Pebbles.*Art|Pebbles/);
     await expect(page.getByRole("heading", { name: "The Art" })).toBeVisible();
     await expect(page.getByRole("button", { name: /^Sort:/ })).toBeVisible();
+    if (!isMobile) {
+      for (const name of ["Sort ascending", "Sort descending"]) {
+        const direction = page.getByRole("button", { name, exact: true });
+        await expect(direction).toHaveCSS("height", "36px");
+        await expect(direction).toHaveCSS("width", "36px");
+      }
+    }
     await expectCardsOrEmpty(
       page,
       page.locator('main a[href*="/nextgen/token/"]'),
