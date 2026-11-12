@@ -49,22 +49,9 @@ are documented in
 
 ## Entry Points
 
-On native iOS when the detected country is not `US` or is unknown, the tab and
-subscription actions are hidden. Direct links (including native deep links)
-return to the profile's Identity tab without displaying subscription content
-or an unavailable page. On iOS the return waits for the country check: the tab
-and content stay hidden while it loads, a US deep link then opens the
-`Subscriptions` tab in place, and a non-US, unknown, failed, or slow (over five
-seconds) check redirects. Web and Android never wait for the country check.
-
-In the iOS app, the profile tab can show existing subscriptions, without
-funding actions. The promotional subscription card is omitted from the
-profile header. On every platform the `Subscriptions` tab and its requests
-are left out of the server HTML and the first
-render, because the page cannot yet tell whether it is the iOS app. They appear
-right after the page loads where subscriptions are allowed. A direct
-`/{user}/subscriptions` link stays selected and does not redirect during that
-first render.
+The iOS app hides the `Subscriptions` tab and subscription actions. Direct
+links return to the profile's Identity tab without opening subscription content.
+On the web and Android, the tab appears after the page loads.
 
 - Open `/{user}/subscriptions` directly.
 - Open a profile and choose the `Subscriptions` tab.
@@ -73,12 +60,11 @@ first render.
   the identity block on smaller layouts. The current state and contextual
   action share the row's second line, and the whole row opens the relevant
   settings, upcoming-drops, or top-up section.
-- Open a subscription top-up notification. It links to `Top up`
-  (`/{user}/subscriptions#profile-subscriptions-top-up`); once loaded, the
-  dialog opens and focuses its heading in every owner coverage state, including
-  Not set up and No upcoming drops selected, without scrolling the page behind it.
-  Where Subscriptions are hidden (the iOS app outside the US) the tab
-  redirects to Identity and nothing scrolls.
+- On the web and Android, open a subscription top-up notification. It links to
+  `Top up` (`/{user}/subscriptions#profile-subscriptions-top-up`).
+  Once loaded, the dialog opens and focuses its heading in every owner coverage
+  state, including Not set up and No upcoming drops selected, without scrolling
+  the page behind it. On iOS, this link redirects to Identity.
 - Use the subscription-awareness action on Home or a Meme card.
 - Use `Learn more` on the right of the `Subscription minting` heading at any
   screen size to open `/about/subscriptions`.
@@ -91,7 +77,8 @@ first render.
   and reconnecting effects does not reopen a dismissed sheet. Explicit deep links
   continue to open their section. Resizing to desktop closes an open sheet;
   tap the compact row to reopen it after returning to a smaller screen.
-  `#profile-subscriptions-top-up` opens and focuses the Top up dialog automatically.
+  On the web and Android, `#profile-subscriptions-top-up` opens and focuses the
+  Top up dialog automatically for the owner.
 
 ## Common Scenarios
 
@@ -101,7 +88,7 @@ first render.
   - settings and upcoming-drop actions are enabled
   - `Top Up` is shown
 - Read-only mode:
-  - any non-owner context (for example viewing another profile)
+  - a non-owner context (for example viewing another profile)
   - saved settings and upcoming subscription choices are shown as read-only values
   - `Top Up` is hidden
 - Active proxy session:

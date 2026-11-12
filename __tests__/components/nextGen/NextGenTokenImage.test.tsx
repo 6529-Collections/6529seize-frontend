@@ -151,6 +151,21 @@ test("renders owner info button when show_owner_info is true", () => {
   expect(infoButton).toBeInTheDocument();
 });
 
+test("hides asking prices while retaining the artwork and owner control", () => {
+  render(
+    <NextGenTokenImage
+      token={{ ...token, price: 1, opensea_price: 1 }}
+      hideMarketListings
+      show_listing
+      show_owner_info
+    />
+  );
+
+  expect(screen.getByAltText("token")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "More info" })).toBeInTheDocument();
+  expect(screen.queryByText(/Listed for/)).not.toBeInTheDocument();
+});
+
 test("renders listing info when show_listing is true and price > 0", () => {
   const tokenWithPrice = {
     ...token,
