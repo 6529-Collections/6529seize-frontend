@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 
+import { getApiAccessReturnPath } from "@/services/auth/api-access-redirect";
 import type { NextRequest } from "next/server";
 
 const mockNext = jest.fn(() => ({ kind: "next" }));
@@ -491,14 +492,18 @@ describe("proxy", () => {
     it("preserves the requested page and query in the 401 redirect", async () => {
       mockFetchStatus(401);
       const request = createRequest("/waves");
-      request.nextUrl.search = "?tab=chat&returnTo=%2Fother&tab=rules";
+      const search = "?tab=chat&returnTo=%2Fother&tab=rules&label=one%20two";
+      request.nextUrl.search = search;
 
       const response = (await proxy(request)) as unknown as { url: string };
       const destination = new URL(response.url);
       expect(destination.pathname).toBe("/access");
       expect(Array.from(destination.searchParams.entries())).toEqual([
-        ["returnTo", "/waves?tab=chat&returnTo=%2Fother&tab=rules"],
+        ["returnTo", "/waves" + search],
       ]);
+      expect(getApiAccessReturnPath(destination.search, "")).toBe(
+        "/waves" + search
+      );
     });
 
     it("redirects to /restricted when the API answers 403", async () => {

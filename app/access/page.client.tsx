@@ -85,7 +85,7 @@ export default function AccessPage() {
 
   return (
     <main className={styles["login"]}>
-      {image && <LoginImage image={image} alt="access" />}
+      {image && <LoginImage image={image} alt="" />}
       <div
         className={clsx(
           styles["loginPrompt"],
@@ -93,11 +93,14 @@ export default function AccessPage() {
           "tw-flex-col tw-gap-2"
         )}
       >
+        {/* Screenshots and browser extensions can set an inline caret style
+            before this input hydrates. */}
         <input
+          suppressHydrationWarning
           type="text"
-          aria-label="Team access code"
+          aria-label={t(locale, "access.codeInput.label")}
           aria-describedby={errorKey ? "api-access-error" : undefined}
-          placeholder="Team Login"
+          placeholder={t(locale, "access.codeInput.placeholder")}
           onKeyDown={(event: React.KeyboardEvent<HTMLInputElement>): void => {
             if (event.key.toLowerCase() === "enter") {
               void doLogin(event.currentTarget);

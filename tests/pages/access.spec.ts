@@ -13,23 +13,26 @@ function isStagingDeployment(baseURL: string | undefined): boolean {
 test.use({ trace: "off", screenshot: "off", video: "off" });
 
 test.describe("Access Page", () => {
-  test("returns to the requested page after accepting the access code", async ({
+  test("preserves the requested page through API access when required", async ({
     context,
     baseURL,
   }) => {
-    test.skip(
-      !isStagingDeployment(baseURL),
-      "The access gate runs only on staging deployments."
-    );
+    const page = await context.newPage();
+    const path = "/the-memes?accessReturnCheck=1";
+    const hash = "#access-return-check";
+
+    if (!isStagingDeployment(baseURL)) {
+      await page.goto(path + hash);
+      await expect(page).toHaveURL(path + hash);
+      return;
+    }
+
     const accessCode =
       process.env["PLAYWRIGHT_STAGING_ACCESS_CODE"] ??
       process.env["STAGING_AUTH"];
     if (!accessCode) throw new Error("Staging access code is required.");
 
     await context.clearCookies();
-    const page = await context.newPage();
-    const path = "/the-memes?accessReturnCheck=1";
-    const hash = "#access-return-check";
     await Promise.all([
       page.waitForResponse(
         (response) =>
@@ -54,17 +57,5 @@ test.describe("Access Page", () => {
 
     await expect(page).toHaveURL(path + hash);
     expect(dialogs).toEqual([]);
-  });
-
-  test("allows the home page outside staging deployments", async ({
-    page,
-    baseURL,
-  }) => {
-    test.skip(
-      isStagingDeployment(baseURL),
-      "Staging deployments keep the access gate."
-    );
-    await page.goto("/");
-    await expect(page).not.toHaveURL(/\/access(?:[?#]|$)/);
   });
 });

@@ -22,7 +22,9 @@ export function getApiAccessReturnPath(search: string, hash: string): string {
     }
 
     // An HTTP redirect can carry the original fragment in the browser's URL.
-    return `${destination.pathname}${destination.search}${destination.hash || hash}`;
+    // Set it as a fragment so it cannot affect the destination's path or query.
+    destination.hash ||= hash;
+    return `${destination.pathname}${destination.search}${destination.hash}`;
   } catch {
     return "/";
   }

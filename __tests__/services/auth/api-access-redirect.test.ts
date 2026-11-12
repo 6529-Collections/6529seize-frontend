@@ -24,6 +24,12 @@ describe("API access return destination", () => {
     );
   });
 
+  it("keeps path-like fragments separate from the destination and query", () => {
+    expect(
+      returnFromGate("/the-memes?tab=activity", "//example.com?tab=chat")
+    ).toBe("/the-memes?tab=activity#//example.com?tab=chat");
+  });
+
   it("falls back to home for a direct visit", () => {
     expect(getApiAccessReturnPath("", "")).toBe("/");
   });
