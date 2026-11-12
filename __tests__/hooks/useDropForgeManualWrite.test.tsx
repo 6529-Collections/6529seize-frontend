@@ -47,6 +47,24 @@ afterEach(() => {
   jest.restoreAllMocks();
   jest.useRealTimers();
 });
+it("opens the wallet directly for a claim without a Drop Forge launch", async () => {
+  const { result } = renderHook(() =>
+    useDropForgeManualWrite("creator", 123, undefined, null, {
+      fingerprint: "manual",
+      coordinate: false,
+    })
+  );
+  const write = jest.fn();
+  await act(async () => {
+    await result.current(write, "phase1");
+  });
+  expect(write).toHaveBeenCalledTimes(1);
+  expect(mockAuth).not.toHaveBeenCalled();
+  expect(beginForgeManual).not.toHaveBeenCalled();
+  expect(finishForgeManual).not.toHaveBeenCalled();
+  expect(localStorage.getItem(key)).toBeNull();
+});
+
 it("registers the new hash with the category and lease of its write, ignoring pre-existing data", async () => {
   const hook = setup("old-hash");
   const write = jest.fn();

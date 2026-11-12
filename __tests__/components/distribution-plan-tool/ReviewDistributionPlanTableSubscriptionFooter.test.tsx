@@ -5,12 +5,19 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useMemo, useState } from "react";
 
+let mockPreparationEnabled = false;
 const mockDownload = jest.fn();
 const mockUseDownloader = jest.fn();
 const mockGetStagingAuth = jest.fn();
 const mockGetAuthJwt = jest.fn();
 const mockFetchAllPages = jest.fn();
 const mockDistributionAdminWallets = ["0x1"];
+
+jest.mock("@/hooks/useDropForgeSettings", () => ({
+  useDropForgeSettings: () => ({
+    data: { preparation_enabled: mockPreparationEnabled },
+  }),
+}));
 
 jest.mock(
   "@/components/distribution-plan-tool/review-distribution-plan/ProcessAndFinalize",
@@ -148,6 +155,7 @@ function createOverview(overrides?: Record<string, unknown>) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockPreparationEnabled = false;
   authCtx.setToast.mockClear();
   mockDownload.mockReset();
   mockUseDownloader.mockReset();
@@ -242,7 +250,7 @@ test("renders split admin controls after token id is confirmed", async () => {
     expect(
       screen.getByRole("button", { name: /distribution photos \(0\)/i })
     ).toBeInTheDocument();
-    expect(screen.getByText("Process and Finalize")).toBeInTheDocument();
+    expect(screen.getByText("Finalize Distribution")).toBeInTheDocument();
     expect(screen.getByText("Publish to GitHub")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /download artist airdrops csv/i })
@@ -421,7 +429,26 @@ test("resetSubscriptions posts data and shows toast directly", async () => {
   });
 });
 
+test("uses the original normalize request while EMMA preparation is off", async () => {
+  const user = userEvent.setup();
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+  const post = jest
+    .spyOn(require("@/services/api/common-api"), "commonApiPost")
+    .mockResolvedValue({});
+  render(<TestWrapper initialTokenId="123" />);
+  await user.click(
+    screen.getByRole("button", { name: "Finalize Distribution" })
+  );
+  expect(post).toHaveBeenCalledWith(
+    expect.objectContaining({
+      endpoint: expect.stringMatching(/\/123\/normalize$/),
+    })
+  );
+  expect(screen.queryByText("Process and Finalize")).not.toBeInTheDocument();
+});
+
 test("uses Process and Finalize instead of the synchronous normalize request", async () => {
+  mockPreparationEnabled = true;
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
   render(<TestWrapper initialTokenId="123" />);

@@ -39400,6 +39400,11 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiMintingClaimAction"
+        drop_forge_launch_exists:
+          type: boolean
+          description: >-
+            Whether this claim has a Drop Forge launch record in the current
+            environment.
     ApiMintingClaimActionTypesResponse:
       type: object
       required:

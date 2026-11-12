@@ -11,9 +11,12 @@ tracked launches. Turning it Off retains the scheduled reports: due actions are
 reported as skipped because automation is disabled, without marking them completed.
 Submitted transactions continue confirmation tracking. Turning it back On resumes
 eligible work within its window; missed phases are not replayed automatically.
-EMMA preparation controls **Process and Finalize**. Turning it Off blocks new
-jobs and pauses pending jobs after their current step. Turning it back On
-continues processing from the saved checkpoint.
+EMMA preparation controls how distributions are prepared. Off shows the original
+subscription downloads and **Finalize Distribution**. On shows **Process and
+Finalize**. Turning it Off pauses pending jobs after their current step. Turn it
+back On to continue from the saved checkpoint, or reset subscriptions after the
+current step ends to restart that claim manually. Automatic launch can use
+a finalized distribution from either mode.
 
 Automatic artist payment is a separate opt-in. Research and optional artist payment
 become eligible at 18:00 Europe/Athens the day after minting, one hour after Public

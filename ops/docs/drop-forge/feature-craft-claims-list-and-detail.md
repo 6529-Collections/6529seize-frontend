@@ -59,8 +59,9 @@ The craft surface combines:
    `Publish to Arweave`.
 8. After publish starts, watch the status pill until it returns to `Published`
    and published Arweave links are available.
-9. After EMMA Process and Finalize completes, click `Launch`. It queues
-   initialization immediately using the fixed mint calendar and shows progress.
+9. After finalizing the EMMA distribution and enabling Automatic launch, click
+   `Launch`. Either EMMA preparation mode can produce the finalized distribution.
+   Launch queues initialization immediately using the fixed mint calendar.
 10. After saving and republishing later metadata changes, click `Update Claim`.
     The update preserves active mint settings and completed allocations. Unsaved
     edits, pending/manual work or blocked execution disable conflicting requests.
@@ -93,7 +94,8 @@ The craft surface combines:
   - Publish image, animation, and metadata after saving draft changes.
   - Copy or open the resulting Arweave links once they exist.
 - Claim controls:
-  - `Launch` queues initialization after publication and completed EMMA processing when **Automatic launch** is on.
+  - `Launch` queues initialization after publication and distribution finalization
+    when **Automatic launch** is on.
   - `Update Claim` appears after you publish new metadata for an initialized claim. It retains mint settings and completed allocations.
 - Distribution review:
   - Inspect distribution photos and grouped phase summaries while preparing the

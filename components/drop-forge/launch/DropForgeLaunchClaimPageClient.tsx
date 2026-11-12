@@ -21,6 +21,7 @@ import {
   DropForgeLaunchClaimPermissionFallbackView,
 } from "@/components/drop-forge/launch/DropForgeLaunchClaimPageClient.view";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
+import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useLaunchClaimDataEffects } from "@/components/drop-forge/launch/useLaunchClaimDataEffects";
 import { useLaunchClaimModalActions } from "@/components/drop-forge/launch/useLaunchClaimModalActions";
@@ -135,6 +136,7 @@ export default function DropForgeLaunchClaimPageClient({
   });
 
   const {
+    coordinateManualWrites,
     artistAirdropSummary,
     teamAirdropSummary,
     subscriptionAirdropSections,
@@ -211,19 +213,32 @@ export default function DropForgeLaunchClaimPageClient({
     payArtistResolvedAddressTrimmed,
     payArtistAddressValid,
   ]);
+  const { data: automationSettings } = useDropForgeSettings();
+  const coordinateWrites =
+    coordinateManualWrites ||
+    (automationSettings?.automation_enabled === true &&
+      automationSettings.contract.toLowerCase() ===
+        forgeMintingContract.toLowerCase());
   const executeManual = useDropForgeManualWrite(
     forgeMintingContract,
     claimId,
     claimWrite.data,
     claimWrite.error,
-    connectedActionContextFingerprint
+    {
+      fingerprint: connectedActionContextFingerprint,
+      coordinate: coordinateWrites,
+    }
   );
   const executePayment = useDropForgeManualWrite(
     forgeMintingContract,
     claimId,
     payArtistWrite.data,
     payArtistWrite.error,
-    { fingerprint: connectedActionContextFingerprint, storageSuffix: "payment" }
+    {
+      fingerprint: connectedActionContextFingerprint,
+      storageSuffix: "payment",
+      coordinate: coordinateWrites,
+    }
   );
   const runConnectedAction = useConnectedAction({
     contextFingerprint: connectedActionContextFingerprint,

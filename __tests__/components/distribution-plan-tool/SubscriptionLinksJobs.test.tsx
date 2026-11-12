@@ -1,12 +1,19 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { SubscriptionLinks } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
 import { useDropForgeProcess } from "@/hooks/useDropForgeProcess";
+import { commonApiFetch } from "@/services/api/common-api";
+import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
+import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "@/components/distribution-plan-tool/review-distribution-plan/table/constants";
 import { forgeList } from "@/services/api/drop-forge-api";
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import {
   ReviewDistributionPlanTableItemType,
   type ReviewDistributionPlanTableItem,
 } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable.types";
+jest.mock("@/hooks/useDropForgeSettings", () => ({
+  useDropForgeSettings: jest.fn(),
+}));
+jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 jest.mock("@/hooks/useDropForgeProcess", () => ({
   useDropForgeProcess: jest.fn(),
 }));
@@ -52,6 +59,61 @@ const phase: ReviewDistributionPlanTableItem = {
   walletsCount: 1,
   spotsCount: 1,
 };
+beforeEach(() => {
+  jest.clearAllMocks();
+  jest.mocked(useDropForgeSettings).mockReturnValue({
+    data: { preparation_enabled: true },
+  } as ReturnType<typeof useDropForgeSettings>);
+});
+
+it.each([
+  [false, "Subscription Lists", "p0", 3],
+  [true, "Public Subscriptions", "public", 1],
+])(
+  "uses the legacy CSV download when EMMA preparation is off (public: %s)",
+  async (isPublic, label, phaseId, expectedFiles) => {
+    jest.mocked(useDropForgeSettings).mockReturnValue({
+      data: { preparation_enabled: false },
+    } as ReturnType<typeof useDropForgeSettings>);
+    jest.mocked(commonApiFetch).mockResolvedValue({
+      airdrops: [],
+      ...(isPublic ? {} : { airdrops_unconsolidated: [], allowlists: [] }),
+    });
+    const click = jest
+      .spyOn(HTMLAnchorElement.prototype, "click")
+      .mockImplementation(() => {});
+    Object.defineProperties(URL, {
+      createObjectURL: {
+        configurable: true,
+        value: jest.fn().mockReturnValue("blob:test"),
+      },
+      revokeObjectURL: { configurable: true, value: jest.fn() },
+    });
+    try {
+      render(
+        <SubscriptionLinks
+          plan={{ id: "plan" } as AllowlistDescription}
+          phase={
+            isPublic
+              ? { ...phase, phaseId: PUBLIC_SUBSCRIPTIONS_PHASE_ID }
+              : phase
+          }
+        />
+      );
+      fireEvent.click(screen.getByRole("button", { name: label }));
+      await waitFor(() => expect(click).toHaveBeenCalledTimes(expectedFiles));
+      expect(commonApiFetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: expect.stringMatching(new RegExp(`/123/plan/${phaseId}$`)),
+        })
+      );
+      expect(useDropForgeProcess).not.toHaveBeenCalled();
+    } finally {
+      click.mockRestore();
+    }
+  }
+);
+
 it.each([undefined, ["old0", "old1", "old2"]])(
   "never downloads a completed job with missing or stale phase evidence",
   (phase_ids) => {

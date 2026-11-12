@@ -33,6 +33,7 @@ import {
   SubscriptionFooterMain,
 } from "./ReviewDistributionPlanTableSubscriptionFooterMain";
 import { getForgePhaseIds } from "@/services/api/drop-forge-process-inputs";
+import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import ProcessAndFinalize from "../ProcessAndFinalize";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
 
@@ -51,6 +52,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     useContext(DistributionPlanToolContext);
   const { connectedProfile, setToast } = useContext(AuthContext);
   const { seizeSettings } = useSeizeSettings();
+  const { data: dropForgeSettings } = useDropForgeSettings();
   const distributionAdminWallets = useMemo(
     () =>
       Array.isArray(seizeSettings.distribution_admin_wallets)
@@ -556,15 +558,17 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         handleDownloadAirdrops(contract, confirmedTokenId, phase)
       }
       processingControl={
-        <ProcessAndFinalize
-          contract={contract}
-          claim={Number(confirmedTokenId)}
-          plan={distributionPlan?.id ?? ""}
-          phaseIds={getForgePhaseIds(phases)}
-          onCompleted={() => {
-            void refreshOverview(contract, confirmedTokenId);
-          }}
-        />
+        dropForgeSettings?.preparation_enabled === true ? (
+          <ProcessAndFinalize
+            contract={contract}
+            claim={Number(confirmedTokenId)}
+            plan={distributionPlan?.id ?? ""}
+            phaseIds={getForgePhaseIds(phases)}
+            onCompleted={() => {
+              void refreshOverview(contract, confirmedTokenId);
+            }}
+          />
+        ) : undefined
       }
       onFinalize={() => finalizeDistribution(contract, confirmedTokenId)}
       onUploadToGithub={() => uploadToGithub(contract, confirmedTokenId)}

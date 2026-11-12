@@ -49,7 +49,9 @@ export function useDropForgeManualWrite(
   claim: number,
   hash: string | undefined,
   error: unknown,
-  options: string | { fingerprint: string; storageSuffix: string } = ""
+  options:
+    | string
+    | { fingerprint: string; storageSuffix?: string; coordinate?: boolean } = ""
 ) {
   const { requestAuth, setToast } = useAuth();
   const locale = useBrowserLocale();
@@ -59,6 +61,8 @@ export function useDropForgeManualWrite(
     typeof options === "string" ? options : options.fingerprint;
   const storageSuffix =
     typeof options === "string" ? "" : options.storageSuffix;
+  const coordinate =
+    typeof options === "string" || options.coordinate !== false;
   const context = useRef({ fingerprint, hash });
   useEffect(() => {
     context.current = { fingerprint, hash };
@@ -80,6 +84,10 @@ export function useDropForgeManualWrite(
   );
   const execute = useCallback(
     async (write: () => void, label?: string) => {
+      if (!coordinate) {
+        write();
+        return;
+      }
       const captured = context.current.fingerprint;
       if (
         !(await requestAuth()).success ||
@@ -124,7 +132,7 @@ export function useDropForgeManualWrite(
         throw error_;
       }
     },
-    [requestAuth, contract, claim, key, cancel, locale]
+    [coordinate, requestAuth, contract, claim, key, cancel, locale]
   );
   useEffect(() => {
     const current = attempt.current;

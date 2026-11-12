@@ -218,9 +218,13 @@ export function useLaunchClaimViewModel({
     enabled: claimId > 0,
     refetchInterval: 5000,
   });
-  const savedPhases = savedLaunch.isSuccess
-    ? (savedLaunch.data?.phases ?? null)
-    : undefined;
+  const coordinateManualWrites =
+    savedLaunch.data != null ||
+    (mintingClaimActions?.claim_id === claimId &&
+      mintingClaimActions.contract.toLowerCase() === contract.toLowerCase() &&
+      mintingClaimActions.drop_forge_launch_exists === true);
+  const savedPhases =
+    savedLaunch.data?.phases ?? (coordinateManualWrites ? undefined : null);
   const mintTimeline = useMemo(
     () => (claimId > 0 ? getClaimTimelineDetails(claimId) : null),
     [claimId]
@@ -404,8 +408,7 @@ export function useLaunchClaimViewModel({
     isInitialized,
     missingRequiredInfo:
       missingRequiredInfo ||
-      !savedLaunch.isSuccess ||
-      phaseData.some((phase) => !phase.schedule),
+      (coordinateManualWrites && phaseData.some((phase) => !phase.schedule)),
     selectedPhaseIsUpdateAction,
     selectedPhaseMatchesOnChainConfig,
   });
@@ -452,6 +455,7 @@ export function useLaunchClaimViewModel({
   });
 
   return {
+    coordinateManualWrites,
     artistAirdropSummary,
     teamAirdropSummary,
     subscriptionAirdropSections,

@@ -29,7 +29,7 @@ The Memes token distribution outputs.
   - get phase-level `Subscription Lists` / `Public Subscriptions` downloads.
   - get footer controls: `Change Token ID`, `Reset Subscriptions`,
     `Artist Airdrops`, `Team Airdrops`, `Distribution Photos`,
-    `Process and Finalize`, `Publish to GitHub`.
+    `Finalize Distribution` or `Process and Finalize`, and `Publish to GitHub`.
 - Admin users must confirm token ID before footer actions and subscription
   downloads unlock.
 - `Confirm Token ID` is blocking (`backdrop="static"` and `keyboard={false}`).
@@ -41,16 +41,14 @@ The Memes token distribution outputs.
 2. Export baseline results (`JSON` / `CSV` / `Manifold`) for normal rows.
 3. If you are a subscriptions admin, confirm token ID.
 4. Use the footer controls to upload artist/team allocations and distribution photos.
-5. Click `Process and Finalize`. One background operation processes the three
-   ordered phase inputs and public subscriptions, then finalizes the distribution.
-6. Watch the loader until completed. Refresh restores durable progress; an
-   interrupted request does not mean processing failed. Correct a reported
-   failure before retrying. Your current authorization is used to capture EMMA
-   inputs. If access expires or is denied before capture, click `Sign in to resume`
-   to refresh access and continue the same job without losing saved progress.
-7. Download subscription CSV bundles from the completed phase rows. Downloads
-   read the stored lists and do not prepare or finalize again.
-8. Click `Publish to GitHub` when it becomes enabled and follow its modal.
+5. With **EMMA preparation** Off, download `Subscription Lists` for Phase 0,
+   Phase 1, and Phase 2 in order. Then download `Public Subscriptions` and
+   click `Finalize Distribution`.
+6. With **EMMA preparation** On, click `Process and Finalize` and wait for the
+   job to complete. Refresh restores saved progress. If authorization expires
+   before input capture, click `Sign in to resume`. The phase downloads then
+   read the saved CSV lists.
+7. Click `Publish to GitHub` when it becomes enabled and follow its modal.
 
 ## Subscriptions Action Rules
 
@@ -59,7 +57,8 @@ The Memes token distribution outputs.
   - non-`Public` phase downloads: `airdrops`, `airdrops_unconsolidated`,
     `allowlists`.
   - `Public` phase downloads: `airdrops` only.
-- `Reset Subscriptions` resets current `contract + token + plan` data.
+- `Reset Subscriptions` resets current `contract + token + plan` data. With
+  EMMA preparation Off, it can also clear a paused job once its current step ends.
 - `Artist Airdrops` and `Team Airdrops`:
   - each footer group provides upload, view, and CSV download controls for one
     airdrop phase.

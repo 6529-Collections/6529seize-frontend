@@ -12,6 +12,7 @@ confirms, then **Claim initialized**. The **Auto Launch** pill identifies a
 saved plan in Craft and in the Launch list and detail. The fixed mint calendar supplies the phase schedule; no separate
 per-drop time handoff is needed. Preparation, reporting access and sufficient
 remaining confirmation time must pass backend checks before launch is accepted.
+A distribution finalized manually in EMMA is eligible for Automatic launch.
 
 The worker replaces Actor 3's routine initialization and phase operations.
 Phase 0 allocations precede its 17:40 Europe/Athens window; Phase 1 subscriber
@@ -51,8 +52,10 @@ group. Passing checks stay quiet.
 Craft and contract-admin access remain distinct. Admin grants/revocations remain owner-only on chain. Automatic artist payment is
 separately opt-in and defaults Off. The hub's **Automatic launch** switch also
 defaults Off. Accepted plans keep their timed reports while execution is disabled.
-**EMMA preparation** controls whether Process and Finalize can start or advance
-through its checkpoints. Coordinated manual controls remain available.
+**EMMA preparation** switches between the original EMMA preparation controls
+and Process and Finalize. Manual Launch uses the standard mint calendar and the
+connected wallet for claims without an accepted plan when Automatic launch is Off.
+Claims with a saved launch plan use its schedule and coordinate manual writes.
 
 Related: [Craft](feature-craft-claims-list-and-detail.md),
 [Launch](feature-launch-claims-list-and-detail.md),
