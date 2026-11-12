@@ -26,7 +26,6 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import IdentityGettingStartedAboutAction from "./IdentityGettingStartedAboutAction";
 import {
   clearIdentityGettingStartedSession,
   consumeIdentityGettingStartedArrival,
@@ -208,8 +207,7 @@ function IdentityGettingStartedCardContent({
           </div>
         </div>
       </div>
-      <div className="tw-flex tw-flex-col tw-items-start tw-justify-between tw-px-5 tw-pb-2 @[40rem]/identity-guide:tw-pl-24 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-center sm:tw-gap-x-6 sm:tw-pr-6">
-        <IdentityGettingStartedAboutAction profile={profile} />
+      <div className="tw-flex tw-justify-end tw-px-5 tw-pb-2 sm:tw-pr-6">
         <Link
           href="/join-6529"
           className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-text-xs tw-font-medium tw-text-iron-300 tw-no-underline hover:tw-text-iron-50 hover:tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"

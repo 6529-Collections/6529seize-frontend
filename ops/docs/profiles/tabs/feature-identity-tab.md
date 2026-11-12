@@ -6,8 +6,7 @@
 It combines `Rep` and `NIC` on one route.
 
 - After first profile setup, the connected owner can use a getting-started card
-  above the Identity content to explore Waves, learn about The Memes, and add
-  an optional About statement.
+  above the Identity content to explore Waves and learn about The Memes.
 - Desktop shows both surfaces at the same time.
 - Rep and NIC support direction toggles: `Received` and `Given`.
 - Mobile switches between `REP`, `NIC`, and `ID Statements` subviews
@@ -64,7 +63,8 @@ Mobile (`< lg`):
 After you choose and save your first profile username, your own Identity tab
 shows `Your profile is ready`. The welcome introduces
 6529 as a network where people share ideas, create art, and decide what to build
-together. An About statement is optional; you can explore without adding one.
+together. About statements remain available through the
+[profile editor](../navigation/feature-header-summary.md).
 
 When successful profile setup finishes on Identity, the page scrolls the welcome
 into view once without moving keyboard focus. Reduced-motion preferences prevent
@@ -87,12 +87,6 @@ that flow instead.
   `Get nominated` action. Nomination
   eligibility is separate from submission and does not guarantee selection. See
   [Wave Leaderboard Drop Entry and Eligibility](../../waves/leaderboard/feature-drop-entry-and-eligibility.md).
-- `Add an About statement`, marked `Optional`, opens the existing About editor
-  directly. If you already have an About statement, the shortcut says
-  `Edit About statement`. It waits for the initial statement request before
-  becoming available. The dialog explains that statements are optional and
-  fully and permanently public. The same validation, saving, and error recovery
-  apply as in the [profile editor](../navigation/feature-header-summary.md).
 - `How 6529 works` opens the [Join 6529 guide](../../navigation/feature-join-6529-journey.md)
   at `/join-6529`.
 
@@ -326,11 +320,6 @@ proxy allocation entry points and permissions are unchanged.
 
 ## Failure and Recovery
 
-- If the getting-started About shortcut cannot load your statement, its dialog
-  shows `Couldn't load your About statement. Try again before editing.` and
-  `Retry`. Retrying shows `Loading your About statement…` before the editor
-  becomes available. A failed save keeps the editor open with the existing
-  error guidance so you can revise or retry.
 - Rep submit failures show an error toast and keep dialog values.
 - NIC submit failures show an error toast and keep entered value.
 - If loading a later categories page fails, already visible categories stay on
@@ -343,7 +332,7 @@ proxy allocation entry points and permissions are unchanged.
 ## Limitations / Notes
 
 - Getting-started card messages use canonical `en-US` copy in locales without
-  translations. The reused About editor and nomination guidance retain their
+  translations. The reused nomination guidance retains its
   existing English fallback copy. Actions and destinations remain available;
   frontend localization maintainers can translate these surfaces in a later
   profile localization pass.

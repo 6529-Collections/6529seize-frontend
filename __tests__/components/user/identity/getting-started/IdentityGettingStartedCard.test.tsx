@@ -75,10 +75,6 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => {
     ) : null;
   };
 });
-jest.mock(
-  "@/components/user/identity/getting-started/IdentityGettingStartedAboutAction",
-  () => () => <button type="button">Add an About statement</button>
-);
 
 const profile = Object.assign(new ApiIdentity(), {
   id: "alice-id",
@@ -164,6 +160,9 @@ describe("IdentityGettingStartedCard", () => {
     expect(
       screen.getByRole("button", { name: /How to submit to The Memes/ })
     ).toHaveAttribute("aria-haspopup", "dialog");
+    expect(
+      screen.queryByRole("button", { name: /About statement/ })
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByRole("link", { name: /Create a wave/ })
     ).not.toBeInTheDocument();

@@ -559,9 +559,10 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("Guided welcome About shortcut preserves editor recovery and restores focus", async ({
+  test("Guided welcome keeps About editing in the profile editor", async ({
     page,
     baseURL,
+    isMobile,
   }) => {
     await seedGettingStartedSession(page);
     await observeGettingStartedScroll(page);
@@ -572,24 +573,29 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       name: "Getting started with your identity",
       exact: true,
     });
-    const addAbout = guidance.getByRole("button", {
-      name: /^Add an About statement/,
-    });
-    await addAbout.click();
-    const dialog = page.getByRole("dialog", {
-      name: "Edit About",
+    const editProfile = page.getByRole("button", {
+      name: "Edit profile",
       exact: true,
     });
-    const input = dialog.getByRole("textbox", {
+    await expect(
+      guidance.getByRole("button", { name: /About statement/ })
+    ).toHaveCount(0);
+    await openAboutEditor(page);
+    const input = page.getByRole("textbox", {
       name: "About statement",
       exact: true,
     });
     await expect(input).toBeVisible();
     await input.fill("This introduction is cancelled.");
     await page.keyboard.press("Escape");
-    await expect(dialog).toHaveCount(0);
-    await expect(addAbout).toBeFocused();
-    await addAbout.click();
+    if (!isMobile) {
+      await page
+        .getByRole("button", { name: "Discard changes", exact: true })
+        .click();
+    }
+    await expect(input).toHaveCount(0);
+    await expect(editProfile).toBeFocused();
+    await openAboutEditor(page);
     await expect(input).toBeEmpty();
     const draft = "A new member exploring art and community decisions.";
     await input.fill(draft);
@@ -601,25 +607,24 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       }
       return route.fallback();
     });
-    const save = dialog.getByRole("button", { name: "Save", exact: true });
+    const save = page.getByRole("button", { name: "Save", exact: true });
     await save.click();
     await expect(
-      dialog.getByRole("heading", { name: "Couldn't save About", exact: true })
+      page.getByRole("heading", { name: "Couldn't save About", exact: true })
     ).toBeVisible();
     await expect(input).toHaveValue(draft);
     await expect(save).toBeEnabled();
     await save.click();
-    await expect(dialog).toHaveCount(0);
-    const editAbout = guidance.getByRole("button", {
-      name: /^Edit About statement/,
-    });
-    await expect(editAbout).toBeVisible();
-    await expect(editAbout).toBeFocused();
+    await expect(input).toHaveCount(0);
+    await expect(
+      guidance.getByRole("button", { name: /About statement/ })
+    ).toHaveCount(0);
+    await expect(editProfile).toBeFocused();
     await expect(page.getByText(draft, { exact: true })).toBeVisible();
-    await editAbout.click();
+    await openAboutEditor(page);
     await expect(input).toHaveValue(draft);
     await page.keyboard.press("Escape");
-    await expect(dialog).toHaveCount(0);
+    await expect(input).toHaveCount(0);
     expect(await getGettingStartedScrolls(page)).toEqual([]);
     await expectNoHorizontalOverflow(page);
   });
