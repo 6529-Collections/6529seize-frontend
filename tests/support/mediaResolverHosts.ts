@@ -14,7 +14,8 @@ const escapeRegExp = (value: string): string =>
 /**
  * Matches exactly `<media resolver origin><path>` on either media host, for
  * `page.route`, `toHaveAttribute` and request assertions. `path` starts with
- * `/` and is matched literally.
+ * `/` and is matched literally. The pattern is anchored at the end, so it does
+ * not allow a trailing query string.
  */
 export function mediaResolverUrlPattern(path: string): RegExp {
   if (!path.startsWith("/")) {

@@ -29,7 +29,10 @@ const PRODUCTION_BASE_ENDPOINT = "https://6529.io";
 const LOCAL_BASE_ENDPOINT = "http://localhost:3001";
 const ORIGINAL_PUBLIC_RUNTIME = process.env["PUBLIC_RUNTIME"];
 
-function loadProxy(baseEndpoint: string = STAGING_BASE_ENDPOINT): Proxy {
+function loadProxy(
+  baseEndpoint: string = STAGING_BASE_ENDPOINT,
+  encryptedMessages = false
+): Proxy {
   const runtime = JSON.parse(ORIGINAL_PUBLIC_RUNTIME ?? "{}") as Record<
     string,
     unknown
@@ -38,6 +41,7 @@ function loadProxy(baseEndpoint: string = STAGING_BASE_ENDPOINT): Proxy {
     ...runtime,
     BASE_ENDPOINT: baseEndpoint,
     API_ENDPOINT: "https://api.staging.example",
+    NEXT_PUBLIC_E2EE_DM_ENABLED: encryptedMessages ? "true" : "false",
   });
 
   let loaded: Proxy | undefined;
@@ -398,6 +402,7 @@ describe("proxy", () => {
       `/messages/${WAVE_ID}`,
       "/waves/create",
       "/messages/create",
+      "/messages/new",
     ])("keeps %s behind staging access control", async (path) => {
       const fetchMock = mockFetchStatus(200);
 
@@ -581,6 +586,31 @@ describe("proxy", () => {
       expect(retry.status).toBe(503);
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockNext).not.toHaveBeenCalled();
+      expect(mockRedirect).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("legacy compose links", () => {
+    it.each(["/messages", "/messages/5f207393-5418-4a75-8738-e40edb44a94d"])(
+      "opens the composer page from %s?create=dm with encrypted chats enabled",
+      async (pathname) => {
+        const encryptedProxy = loadProxy(STAGING_BASE_ENDPOINT, true);
+        const request = createRequest(pathname);
+        request.nextUrl.search = "?create=dm";
+
+        expect(await encryptedProxy(request)).toEqual({
+          kind: "redirect",
+          url: `${STAGING_BASE_ENDPOINT}/messages/new`,
+        });
+      }
+    );
+
+    it("preserves the legacy mode with encrypted chats disabled", async () => {
+      mockFetchStatus(200);
+      const request = createRequest("/messages");
+      request.nextUrl.search = "?create=dm";
+
+      expect(await proxy(request)).toEqual({ kind: "next" });
       expect(mockRedirect).not.toHaveBeenCalled();
     });
   });

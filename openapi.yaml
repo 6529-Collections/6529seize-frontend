@@ -3444,6 +3444,35 @@ paths:
           description: Not available to proxies
         "404":
           description: Grant is missing, revoked or belongs to another profile
+  /device-security-notices:
+    get:
+      tags:
+        - Authentication
+      summary: List pending new-device security notices owned by the caller
+      operationId: getDeviceSecurityNotices
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleGetDeviceSecurityNotices
+      responses:
+        "200":
+          description: Pending notices for the authenticated account
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiDeviceSecurityNotice"
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies
   /device-grants/{grantId}/acknowledge:
     post:
       tags:
@@ -9228,7 +9257,11 @@ paths:
         route returns all of them); and the grants of every listed event are in
         the top-level grants, once each, so each drop's own grants array is
         empty. Ids the caller cannot read, whether or not such a drop exists,
-        are listed in unavailable instead. Duplicate ids are answered once.
+        are listed in unavailable instead. Duplicate ids are answered once. For
+        a drop listed in truncated_drop_ids, the events left out may reference
+        grants that are not in grants, so the batch cannot verify that drop's
+        whole history: read it through GET /drops/{dropId}/signed-events
+        instead.
       operationId: getDropsSignedEvents
       security:
         - bearerAuth: []
@@ -10796,6 +10829,42 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/acknowledge:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Acknowledge a standalone Encrypted DM device notice
+      description: For a linked device use the signing grant acknowledgment.
+      operationId: e2eeAcknowledgeDeviceNotice
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeAcknowledgeDeviceNotice
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: Notice acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeAck"
+        "401":
+          description: Authentication required
+        "403":
+          description: Device is unavailable, linked, or not owned by the caller
+        "404":
+          description: Encrypted messages are disabled
   /e2ee/devices/{device_key}/label:
     post:
       tags:
@@ -15408,10 +15477,11 @@ paths:
         - Policies
       summary: Delete the EULA acceptance for a device
       operationId: deleteEulaConsent
-      security: []
+      security:
+        - bearerAuth: []
       x-6529-router:
         enabled: true
-        auth: none
+        auth: required
         handler:
           import: "@/api/policies/eula-consent.handlers"
           name: handleDeleteEulaConsent
@@ -15430,6 +15500,8 @@ paths:
                 $ref: "#/components/schemas/ApiDeleteEulaConsentResponse"
         "400":
           description: Invalid device identifier
+        "401":
+          description: Authentication required
   /policies/eula-consent/{deviceId}:
     get:
       tags:
@@ -32164,6 +32236,28 @@ components:
           description: >-
             SIWE Chain ID; 1 for app device grants, whose EIP-1271 contract
             wallet signatures are checked on Ethereum mainnet.
+    ApiDeviceSecurityNotice:
+      type: object
+      description: >-
+        An active device authorization awaiting the owner's acknowledgment. A
+        linked signing and encryption grant appears as a single notice.
+      required:
+        - device_label
+        - signing_grant_id
+        - signing_device_key
+        - encrypted_dm_device_key
+      properties:
+        device_label:
+          type: string
+        signing_grant_id:
+          type: string
+          nullable: true
+        signing_device_key:
+          type: string
+          nullable: true
+        encrypted_dm_device_key:
+          type: string
+          nullable: true
     ApiDeviceSignature:
       type: object
       additionalProperties: false

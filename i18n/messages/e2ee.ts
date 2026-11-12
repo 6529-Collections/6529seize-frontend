@@ -238,7 +238,6 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.rename.failed": "Couldn’t save the name. Try again.",
   "e2ee.devices.newDevice":
     "New device added {date}: {label} ({platform}). It can read your encrypted messages. If this wasn’t you, revoke it.",
-  "e2ee.devices.newDeviceConfirm": "This was me",
   "e2ee.devices.newDeviceRevoke": "Revoke {label}",
   "e2ee.devices.open": "Devices for encrypted messages",
 
@@ -297,6 +296,22 @@ export const E2EE_MESSAGES = {
   "e2ee.new.dmNeedsOne":
     "A direct message is with exactly one other person. Choose Group for more.",
   "e2ee.new.create": "Start encrypted chat",
+  "e2ee.new.start": "Start chat",
+  "e2ee.new.moreOptions": "More options",
+  "e2ee.new.forceGroup": "Create a group I can add people to later",
+  "e2ee.new.matches.one": "Existing group with these people",
+  "e2ee.new.matches.many": "Existing groups with these people",
+  "e2ee.new.matches.choose": "Choose a group to open.",
+  "e2ee.new.matches.changed":
+    "The selected group no longer matches. Choose a group to open.",
+  "e2ee.new.newGroup": "Start a new group",
+  "e2ee.new.viewGroups": "View existing groups",
+  "e2ee.new.useUnencrypted": "Use unencrypted chat instead",
+  "e2ee.new.useUnencryptedDm": "Use unencrypted DM instead",
+  "e2ee.new.useEncrypted": "Use encrypted chat",
+  "e2ee.new.continueUnencrypted": "Continue unencrypted",
+  "e2ee.new.legacyClosed":
+    "Unencrypted messaging has ended. Everyone in the chat needs to turn on encrypted messages.",
   "e2ee.new.creating": "Starting…",
   "e2ee.new.createFailed": "Couldn’t start the encrypted chat. Try again.",
   "e2ee.new.existingDm": "You already have an encrypted chat with {name}.",

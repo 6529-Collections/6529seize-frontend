@@ -1,4 +1,5 @@
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { t } from "@/i18n/messages";
 import {
   CONNECTED_TAB_INTERACTION_CLASSES,
@@ -12,11 +13,13 @@ function MobileTabButton({
   tab,
   label,
   activeTab,
+  disabled,
   onTabChange,
 }: {
   readonly tab: MobileTab;
   readonly label: string;
   readonly activeTab: MobileTab;
+  readonly disabled: boolean;
   readonly onTabChange: (tab: MobileTab) => void;
 }) {
   const isSelected = activeTab === tab;
@@ -27,6 +30,7 @@ function MobileTabButton({
   return (
     <button
       type="button"
+      disabled={disabled}
       aria-pressed={isSelected}
       onClick={() => onTabChange(tab)}
       className={`tw-flex tw-min-h-11 tw-min-w-0 tw-flex-auto tw-touch-manipulation tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-border-0 tw-px-1.5 tw-py-2 tw-text-center @[340px]:tw-px-2.5 ${CONNECTED_TAB_INTERACTION_CLASSES} ${buttonStateClasses}`}
@@ -46,6 +50,7 @@ export default function MobileTabCards({
   readonly onTabChange: (tab: MobileTab) => void;
 }) {
   const locale = useBrowserLocale();
+  const hasHydrated = useHasHydrated();
   return (
     <div
       role="group"
@@ -56,18 +61,21 @@ export default function MobileTabCards({
         tab="rep"
         label={t(locale, "user.profile.identity.mobileTabs.rep")}
         activeTab={activeTab}
+        disabled={!hasHydrated}
         onTabChange={onTabChange}
       />
       <MobileTabButton
         tab="nic"
         label={t(locale, "user.profile.identity.mobileTabs.nic")}
         activeTab={activeTab}
+        disabled={!hasHydrated}
         onTabChange={onTabChange}
       />
       <MobileTabButton
         tab="statements"
         label={t(locale, "user.profile.identity.mobileTabs.idStatements")}
         activeTab={activeTab}
+        disabled={!hasHydrated}
         onTabChange={onTabChange}
       />
     </div>

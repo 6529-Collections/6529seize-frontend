@@ -258,6 +258,54 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await expectHeading(page, "FAQ");
   });
 
+  test("keeps the FAQ return link in place while the mobile app banner hydrates", async ({
+    page,
+    isMobile,
+  }) => {
+    // Desktop Chromium never renders the mobile app banner.
+    test.skip(!isMobile, "The mobile app banner only appears on mobile web.");
+    let releaseScripts: () => void = () => undefined;
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route(
+      /\/_next\/static\/chunks\/[^?]+\.js(?:\?|$)/,
+      async (route) => {
+        await scriptsReady;
+        await route.continue();
+      }
+    );
+    const back = page.getByRole("link", { name: "All FAQ topics" });
+    const dismissBanner = page.getByRole("button", {
+      name: "Dismiss app banner for seven days",
+    });
+
+    try {
+      await page.goto("/safe-collecting/faq/register-delegation", {
+        waitUntil: "commit",
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+      await expect(back).toBeInViewport();
+      await expect(dismissBanner).toHaveCount(0);
+      const before = await back.boundingBox();
+      if (!before) throw new Error("The FAQ return link has no layout box");
+      await page.mouse.move(
+        before.x + before.width / 2,
+        before.y + before.height / 2
+      );
+      await page.mouse.down();
+      releaseScripts();
+      await expect(dismissBanner).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+      const after = await back.boundingBox();
+      expect(after?.y).toBeCloseTo(before.y, 0);
+      await page.mouse.up();
+      await expect(page).toHaveURL(/\/safe-collecting\/faq$/);
+      await expectHeading(page, "FAQ");
+    } finally {
+      releaseScripts();
+    }
+  });
+
   for (const article of ARTICLE_ROUTES) {
     test(`article route renders ${article.heading}`, async ({ page }) => {
       await gotoReady(page, article.path);

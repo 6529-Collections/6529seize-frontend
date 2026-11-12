@@ -5,6 +5,7 @@ import type { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPur
 import { isAttachmentUploadFile } from "@/services/uploads/attachmentUploadMimeType";
 import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 import { ImageProcessingError } from "@/services/uploads/ImageProcessingError";
+import { MediaUploadRefusedError } from "@/services/uploads/MediaUploadRefusedError";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type React from "react";
@@ -48,7 +49,8 @@ const generateMediaForPart = async (
 
 const generateAttachmentForPart = async (
   attachment: File,
-  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>
+  setUploadingFiles: React.Dispatch<React.SetStateAction<UploadingFile[]>>,
+  locale: SupportedLocale
 ) => {
   setUploadingFiles((prev) => [
     ...prev,
@@ -56,6 +58,7 @@ const generateAttachmentForPart = async (
   ]);
   return await multiPartAttachmentUpload({
     file: attachment,
+    locale,
     onProgress: (progress) =>
       setUploadingFiles((prev) =>
         prev.map((uf) => (uf.file === attachment ? { ...uf, progress } : uf))
@@ -80,7 +83,7 @@ const generatePart = async (
   );
   const uploadedAttachments = await Promise.all(
     attachmentFiles.map((attachment) =>
-      generateAttachmentForPart(attachment, setUploadingFiles)
+      generateAttachmentForPart(attachment, setUploadingFiles, locale)
     )
   );
   const badAttachment = uploadedAttachments.find(
@@ -118,7 +121,12 @@ export const generateParts = async (
       )
     );
   } catch (error) {
-    if (error instanceof ImageProcessingError) throw error;
+    if (
+      error instanceof ImageProcessingError ||
+      error instanceof MediaUploadRefusedError
+    ) {
+      throw error;
+    }
     const message = error instanceof Error ? error.message : String(error);
     if (
       message.includes("content_type") ||

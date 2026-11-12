@@ -35,6 +35,12 @@ jest.mock("@/hooks/device-signing/useEnableSignedMessages", () => ({
   useEnableSignedMessages: () => ({ canEnable: false, isEnabling: false }),
 }));
 
+const mockOpenComposer = jest.fn();
+jest.mock("@/hooks/useCreateModalState", () => ({
+  __esModule: true,
+  default: () => ({ isApp: false, openDirectMessage: mockOpenComposer }),
+}));
+
 const mockPathname = jest.fn(() => "/messages");
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname(),
@@ -151,6 +157,46 @@ describe("encrypted conversation list", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("End-to-end encrypted")).toBeInTheDocument();
   });
+
+  it.each([
+    { name: "inbox", Component: E2eeConversationListPage },
+    { name: "sidebar", Component: E2eeMessagesSection },
+  ])(
+    "formats Markdown in $name previews without nested links or resources",
+    ({ Component }) => {
+      const chats = [
+        conversation({
+          lastMessage: message({
+            id: "markdown-preview",
+            senderProfileId: SELF_ID,
+            text: "**Bold** *italic* ~~struck~~ [Link](https://preview.invalid)\n\n```js\nconsole.log('hi');\n```\n\n- first\n- second\n\n![Photo](https://preview.invalid/image.png)",
+          }),
+        }),
+      ];
+      render(
+        <E2eeTestProvider
+          value={contextFor(createFakeE2eeEngine({ conversations: chats }))}
+        >
+          <Component />
+        </E2eeTestProvider>
+      );
+      const row = within(
+        screen.getByRole("list", { name: "Encrypted chats" })
+      ).getByRole("link");
+      expect(row).toHaveTextContent(
+        "You: Bold italic struck Link console.log('hi'); first second Photo"
+      );
+      expect(row.querySelector("strong")).toHaveTextContent("Bold");
+      expect(row.querySelector("em")).toHaveTextContent("italic");
+      expect(row.querySelector("del")).toHaveTextContent("struck");
+      expect(row.querySelector("code")).toHaveTextContent("console.log('hi');");
+      expect(
+        row.querySelector("a, img, input, pre, p, ul, li, div")
+      ).toBeNull();
+      expect(row).not.toHaveTextContent("https://preview.invalid");
+      expect(row).not.toHaveTextContent("```");
+    }
+  );
 
   it.each([
     { name: "inbox", Component: E2eeConversationListPage },
@@ -449,8 +495,10 @@ describe("encrypted conversation list", () => {
       </E2eeTestProvider>
     );
     expect(screen.getByText("No encrypted chats yet")).toBeInTheDocument();
-    const links = screen.getAllByRole("link", { name: "New encrypted chat" });
-    expect(links[0]).toHaveAttribute("href", "/messages/encrypted/new");
+    const compose = screen.getByRole("button", { name: "New message" });
+    expect(compose).toHaveClass("lg:tw-hidden");
+    fireEvent.click(compose);
+    expect(mockOpenComposer).toHaveBeenCalledTimes(1);
   });
 });
 
