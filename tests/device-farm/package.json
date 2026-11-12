@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "mocha": "^11.1.0",
-    "webdriverio": "^9.12.2"
+    "webdriverio": "^10.2.0"
   },
   "bundleDependencies": true
 }
