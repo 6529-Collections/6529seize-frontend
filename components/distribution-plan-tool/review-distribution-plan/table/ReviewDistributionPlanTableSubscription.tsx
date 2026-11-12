@@ -38,7 +38,7 @@ export function SubscriptionLinks({ plan, phase }: SubscriptionLinksProps) {
   if (
     !isSubscriptionsAdmin(
       connectedProfile,
-      seizeSettings.distribution_admin_wallets ?? []
+      seizeSettings.distribution_admin_wallets
     ) ||
     phase.type !== ReviewDistributionPlanTableItemType.PHASE ||
     !confirmedTokenId

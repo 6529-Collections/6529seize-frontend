@@ -219,7 +219,7 @@ export function useLaunchClaimViewModel({
     refetchInterval: 5000,
   });
   const coordinateManualWrites =
-    savedLaunch.data != null ||
+    Boolean(savedLaunch.data) ||
     (mintingClaimActions?.claim_id === claimId &&
       mintingClaimActions.contract.toLowerCase() === contract.toLowerCase() &&
       mintingClaimActions.drop_forge_launch_exists === true);
