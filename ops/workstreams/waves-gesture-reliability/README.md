@@ -81,14 +81,23 @@ scroll restoration code are unchanged.
 - Staging API QA login succeeded through the agent-login skill with an existing
   dedicated account. The staging-backed Waves list rendered with the
   authenticated QA account. Screenshots were captured locally.
-- The no-push test app was built, installed and launched on a physical iPhone
-  over Wi-Fi.
-  Automated physical gestures could not run: the legacy runner profile expired,
-  and iOS 27 automation requires a privileged Remote XPC tunnel. A fresh runner
-  built successfully, but the required tunnel was not running. The app was
-  opened for manual testing. No phone screenshot, page-source or natural-thumb
-  reliability claim is made. Simulator app was built and launched; native UI
-  control permissions were unavailable.
+- The no-push test app was built, installed and exercised on a physical iPhone
+  over Wi-Fi, using the staging API and a dedicated QA account. Direct Xcode
+  Wi-Fi automation supplied real-device screenshots, native page source and
+  OS-injected touches without a privileged tunnel.
+- Physical standard-wave checks passed: the curved path above, straight drags,
+  short fast flicks and initial jitter navigate; short slow drags, pauses,
+  reversals, vertical-first scrolling and a second finger do not navigate.
+  Leftward reply opens its preview, Cancel reply dismisses it, and visible Back
+  remains available. With the keyboard open, curved Back works and an unsent
+  draft survives leaving and reopening the conversation. Only the QA draft was
+  then cleared; no content or reactions were published.
+- Physical checks cover the standard-wave runtime at 430 CSS px. Legacy and
+  encrypted DM destinations retain unit coverage; their physical runtimes were
+  not exercised. Android remains browser-simulated. OS-injected gestures on a
+  real phone establish runtime behavior, but do not measure this user's natural
+  thumb path or subjective comfort. The checklist below remains useful for that
+  final ergonomic assessment.
 
 ## Additional gestures: recommendations only
 
