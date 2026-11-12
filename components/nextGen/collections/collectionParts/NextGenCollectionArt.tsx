@@ -116,12 +116,12 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     setSelectedTraitValues(
       parseSelectedTraits(searchParams.get("traits") ?? "", traits)
     );
-    const sortParam = searchParams.get("sort");
+    const sortParam = searchParams.get("sort")?.toUpperCase();
     if (sortParam) {
       const requestedSort =
-        NextGenListFilters[
-          sortParam.toUpperCase() as keyof typeof NextGenListFilters
-        ] || NextGenListFilters.ID;
+        Object.entries(NextGenListFilters).find(
+          ([key]) => key === sortParam
+        )?.[1] ?? NextGenListFilters.ID;
       const newSort =
         hideNftPurchasing && requestedSort === NextGenListFilters.LISTED_PRICE
           ? NextGenListFilters.ID
@@ -138,12 +138,11 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
         }
       }
     }
-    const sortDirParam = searchParams.get("sort_direction");
+    const sortDirParam = searchParams.get("sort_direction")?.toUpperCase();
     if (sortDirParam) {
       setSortDir(
-        SortDirection[
-          sortDirParam.toUpperCase() as keyof typeof SortDirection
-        ] || SortDirection.DESC
+        Object.values(SortDirection).find((value) => value === sortDirParam) ??
+          SortDirection.DESC
       );
     }
     const listedParam = searchParams.get("listed");
