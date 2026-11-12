@@ -65,6 +65,8 @@ Badge state decides which section opens first.
   media indicator to see its format.
 - The category tabs fill the available width below 640px. They stay above the
   scrolling cards with a small clear edge beneath them.
+- When switching sections, the loading placeholder keeps the previous section's
+  height. Once results arrive, the modal fits the new content.
 - Both sections use one column on small screens, two on medium screens, and
   three on large screens.
 - Cards marked `Additional Action` indicate that the artist promised something

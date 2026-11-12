@@ -202,7 +202,9 @@ export default function CommonDropdown<T, U = unknown>(
             }
           >
             {showFilterLabel && (
-              <span className={labelClassName}>
+              <span
+                className={`${labelClassName} ${usesInlineContent ? "" : "tw-mr-1.5"}`}
+              >
                 {filterLabel}:{usesInlineContent ? "" : " "}
               </span>
             )}

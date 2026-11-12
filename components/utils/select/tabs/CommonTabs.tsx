@@ -22,6 +22,9 @@ export default function CommonTabs<T, U = unknown>(
     filterLabel,
     fill = true,
     variant = "default",
+    connectedSize,
+    connectedTypography,
+    connectedSpacing,
     isItemDisabled: isItemDisabledProp,
   } = props;
   const sortDirection =
@@ -185,6 +188,9 @@ export default function CommonTabs<T, U = unknown>(
               disabled={isItemDisabled(item)}
               fill={fill && !isCompact}
               variant={variant}
+              connectedSize={connectedSize}
+              connectedTypography={connectedTypography}
+              connectedSpacing={connectedSpacing}
               size={size}
               activeTone={activeTone}
             />

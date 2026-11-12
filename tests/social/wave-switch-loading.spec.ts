@@ -581,8 +581,14 @@ for (const app of [false, true]) {
       ).toBeVisible();
       // The route fallback can paint before the interactive query mounts.
       // Its Close control identifies the actual pending detail surface.
+      const loadingClose = pending.getByRole("button", { name: "Close panel" });
+      await expect(loadingClose).toBeVisible();
+      await expect(loadingClose).toHaveCSS(
+        "border-top-width",
+        testInfo.project.name === "web-desktop-chromium" ? "0px" : "1px"
+      );
       await expect(
-        pending.getByRole("button", { name: "Close panel" })
+        pending.getByRole("button", { name: "Close panel" }).locator("svg")
       ).toBeVisible();
       const uncoveredFrames = await page.evaluate(
         () =>

@@ -478,6 +478,16 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
         name: "xTDH Grant Beneficiary",
         exact: true,
       });
+      const statusTabs = selection.getByRole("tablist", {
+        name: "Filter by status",
+        exact: true,
+      });
+      await expect(statusTabs.getByRole("tab")).toHaveCount(4);
+      for (const tab of await statusTabs.getByRole("tab").all()) {
+        await expect(tab).toHaveCSS("font-size", "12px");
+        await expect(tab).toHaveCSS("height", "32px");
+        await expect(tab).toHaveCSS("padding-left", isMobile ? "4px" : "11px");
+      }
       const cards = selection.getByRole("button", {
         name: /Scroll collection /,
       });
@@ -680,6 +690,11 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     const identityModes = access.getByRole("tablist", {
       name: "Identity treatment",
     });
+    await expect(identityModes.getByRole("tab")).toHaveCount(2);
+    for (const tab of await identityModes.getByRole("tab").all()) {
+      await expect(tab).toHaveCSS("font-size", "12px");
+      await expect(tab).toHaveCSS("height", "32px");
+    }
     const modesBounds = await identityModes.boundingBox();
     if (mobile) {
       expect(modesBounds!.width).toBeCloseTo(emmaBounds.width, 0);
@@ -691,7 +706,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
         .boundingBox();
       expect(includedBounds!.width).toBeCloseTo(excludedBounds!.width, 0);
       expect(excludedBounds!.x + excludedBounds!.width).toBeCloseTo(
-        modesBounds!.x + modesBounds!.width - 5,
+        modesBounds!.x + modesBounds!.width - 3,
         0
       );
       expect(

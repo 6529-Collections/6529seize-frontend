@@ -435,6 +435,11 @@ export function defineCollectorsLeaderboardTests() {
     await farSort.click();
     await expect(farSort).toHaveAttribute("aria-pressed", "true");
     await expect(farSort).toBeInViewport({ ratio: 1 });
+    for (const name of ["Sort ascending", "Sort descending"]) {
+      const direction = page.getByRole("button", { name, exact: true });
+      await expect(direction).toHaveCSS("height", "28px");
+      await expect(direction).toHaveCSS("width", "28px");
+    }
     await expect(
       page.getByRole("button", { name: "Sort descending", exact: true })
     ).toHaveAttribute("aria-pressed", "true");

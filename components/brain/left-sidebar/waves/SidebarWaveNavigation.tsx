@@ -14,6 +14,10 @@ import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
+import {
+  CONNECTED_TAB_LIST_CLASSES,
+  getConnectedTabButtonClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 
 const COLLECTION_LABELS = {
   pinned: "waves.sidebar.pinned",
@@ -109,7 +113,7 @@ export function SidebarWaveNavigationControls({
             {navigation.canUseCollections ? (
               <fieldset
                 aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
-                className="tw-m-0 tw-flex tw-h-9 tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5 touch-only:tw-h-10"
+                className={`${CONNECTED_TAB_LIST_CLASSES} tw-m-0 tw-flex tw-h-9 tw-min-w-0 tw-flex-1 touch-only:tw-h-10`}
               >
                 {(["all", "pinned", "joined"] as const).map((tab) => (
                   <button
@@ -119,7 +123,12 @@ export function SidebarWaveNavigationControls({
                     aria-label={t(locale, COLLECTION_LABELS[tab])}
                     aria-pressed={navigation.collection === tab}
                     onClick={() => navigation.setCollection(tab)}
-                    className={`tw-inline-flex tw-min-h-7 tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white" : "tw-bg-transparent tw-text-iron-400"}`}
+                    className={getConnectedTabButtonClasses({
+                      isActive: navigation.collection === tab,
+                      fill: true,
+                      size: "xs",
+                      presentation: "sidebar",
+                    })}
                   >
                     {t(locale, COLLECTION_LABELS[tab])}
                   </button>

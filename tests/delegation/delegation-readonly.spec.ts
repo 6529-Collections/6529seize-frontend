@@ -120,12 +120,43 @@ async function expectWalletCanonical(page: Page, address = "") {
 
 test.describe("Delegation read-only coverage @surface @medium @large @readonly", () => {
   test("Safe Collecting exposes disconnected-safe choices and references", async ({
+    isMobile,
     page,
   }) => {
     await gotoReady(page, "/safe-collecting");
 
     await expect(page).toHaveTitle("Safe Collecting | 6529.io");
     await expectHeading(page, "Safe Collecting");
+    if (!isMobile) {
+      // The desktop navigation stays disabled until hydration; SSR tab markup
+      // is visible earlier, before its keyboard handler is attached.
+      await expect(
+        page.getByRole("button", { name: "NFTs", exact: true })
+      ).toBeEnabled();
+    }
+    const setupTabs = page.getByRole("tablist", {
+      name: "Setup path",
+      exact: true,
+    });
+    await expect(setupTabs.getByRole("tab")).toHaveCount(2);
+    for (const tab of await setupTabs.getByRole("tab").all()) {
+      await expect(tab).toHaveCSS("font-size", "14px");
+      await expect(tab).toHaveCSS("height", "40px");
+    }
+    const fresh = setupTabs.getByRole("tab", {
+      name: "Starting fresh",
+      exact: true,
+    });
+    const existing = setupTabs.getByRole("tab", {
+      name: "Already collecting",
+      exact: true,
+    });
+    await fresh.press("ArrowRight");
+    await expect(existing).toHaveAttribute("aria-selected", "true");
+    await expect(existing).toBeFocused();
+    await existing.press("ArrowLeft");
+    await expect(fresh).toHaveAttribute("aria-selected", "true");
+    await expect(fresh).toBeFocused();
     await expect(
       page.getByRole("heading", { name: "All tools", exact: true })
     ).toBeVisible();

@@ -10,6 +10,9 @@ import type { CommonSelectItemProps, CommonSelectProps } from "../CommonSelect";
 import {
   getConnectedTabButtonClasses,
   type CommonTabsActiveTone,
+  type ConnectedTabSize,
+  type ConnectedTabSpacing,
+  type ConnectedTabTypography,
 } from "./connectedTabStyles";
 
 export type { CommonTabsActiveTone } from "./connectedTabStyles";
@@ -21,6 +24,9 @@ function getTabButtonClasses({
   disabled,
   fill,
   size,
+  connectedSize,
+  connectedTypography,
+  connectedSpacing,
 }: {
   readonly isActive: boolean;
   readonly activeTone: CommonTabsActiveTone;
@@ -28,9 +34,19 @@ function getTabButtonClasses({
   readonly disabled: boolean;
   readonly fill: boolean;
   readonly size: "sm" | "md" | "tabs";
+  readonly connectedSize?: ConnectedTabSize | undefined;
+  readonly connectedTypography?: ConnectedTabTypography | undefined;
+  readonly connectedSpacing?: ConnectedTabSpacing | undefined;
 }) {
   if (variant === "connected") {
-    return getConnectedTabButtonClasses({ isActive, fill, activeTone });
+    return getConnectedTabButtonClasses({
+      isActive,
+      fill,
+      activeTone,
+      size: connectedSize ?? "md",
+      typography: connectedTypography ?? "default",
+      spacing: connectedSpacing ?? "default",
+    });
   }
   if (variant === "filter") {
     return getButtonClasses({
@@ -79,6 +95,9 @@ export default function CommonTabsTab<T, U = unknown>(
       readonly size?: "sm" | "md" | "tabs" | undefined;
       readonly activeTone?: CommonTabsActiveTone | undefined;
       readonly variant?: CommonSelectProps<T, U>["variant"];
+      readonly connectedSize?: ConnectedTabSize | undefined;
+      readonly connectedTypography?: ConnectedTabTypography | undefined;
+      readonly connectedSpacing?: ConnectedTabSpacing | undefined;
     }
   >
 ) {
@@ -94,6 +113,9 @@ export default function CommonTabsTab<T, U = unknown>(
     size = "md",
     activeTone = "neutral",
     variant = "default",
+    connectedSize,
+    connectedTypography,
+    connectedSpacing,
   } = props;
 
   const isActive = item.value === activeItem;
@@ -120,6 +142,9 @@ export default function CommonTabsTab<T, U = unknown>(
     disabled,
     fill,
     size,
+    connectedSize,
+    connectedTypography,
+    connectedSpacing,
   });
 
   return (
