@@ -1,6 +1,9 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "../testHelpers";
-import { useLocalSandboxMutationGuard } from "../support/localSandbox";
+import {
+  hideNextDevOverlay,
+  useLocalSandboxMutationGuard,
+} from "../support/localSandbox";
 import { isMobileSurfaceProject } from "../support/surfaceSimulation";
 
 const wallet = "0x0000000000000000000000000000000000000529";
@@ -185,10 +188,16 @@ test.describe("Session recovery sandbox @auth @local-only", () => {
       )
     ).toBe(false);
   });
-  for (const membership of ["guest", "profileless", "member"] as const) {
+  for (const membership of [
+    "guest",
+    "profileless",
+    "member",
+    "unavailable",
+  ] as const) {
     test(`membership navigation preserves its slot for ${membership}`, async ({
       page,
     }, testInfo) => {
+      await hideNextDevOverlay(page.context());
       if (membership !== "guest") {
         await page.addInitScript(
           ({ address, jwt }) => {
@@ -211,22 +220,30 @@ test.describe("Session recovery sandbox @auth @local-only", () => {
           { address: wallet, jwt: validJwt }
         );
       }
+      let identityUnavailable = membership === "unavailable";
       let releaseIdentity!: () => void;
       const identityReady = new Promise<void>((resolve) => {
         releaseIdentity = resolve;
       });
       await page.route(`**/api/identities/${wallet}`, async (route) => {
         await identityReady;
+        if (identityUnavailable) {
+          await route.fulfill({
+            status: 503,
+            json: { error: "Identity unavailable" },
+          });
+          return;
+        }
         const response = await route.fetch();
         const identity = await response.json();
         await route.fulfill({
           response,
           json: {
             ...identity,
-            id: membership === "member" ? identity.id : null,
-            handle: membership === "member" ? identity.handle : null,
+            id: membership !== "profileless" ? identity.id : null,
+            handle: membership !== "profileless" ? identity.handle : null,
             normalised_handle:
-              membership === "member" ? identity.normalised_handle : null,
+              membership !== "profileless" ? identity.normalised_handle : null,
           },
         });
       });
@@ -260,12 +277,32 @@ test.describe("Session recovery sandbox @auth @local-only", () => {
           ).toHaveCount(0);
         }
         releaseIdentity();
-        const label = membership === "member" ? "Validator" : "Join 6529";
-        const destination =
-          membership === "member" ? "/validator" : "/join-6529";
+        if (membership === "unavailable") {
+          const retry = page.getByRole("button", {
+            name: "Profile unavailable. Retry",
+          });
+          await expect(retry).toBeVisible({ timeout: 30_000 });
+          await expect(
+            nav.getByRole("link", { name: "Join 6529" })
+          ).toBeHidden();
+          await expect(
+            nav.getByRole("link", { name: "Validator" })
+          ).toHaveCount(0);
+          identityUnavailable = false;
+          await retry.click();
+        }
+        const isMember =
+          membership === "member" || membership === "unavailable";
+        const label = isMember ? "Validator" : "Join 6529";
+        const destination = isMember ? "/validator" : "/join-6529";
         const link = nav.getByRole("link", { name: label, exact: true });
         await expect(link).toBeVisible();
         await expect(link).toHaveAttribute("href", destination);
+        const background = await link.evaluate(
+          (element) => getComputedStyle(element).backgroundColor
+        );
+        await link.hover();
+        await expect(link).toHaveCSS("background-color", background);
         expect(await about.boundingBox()).toEqual(aboutBefore);
         await page.keyboard.press("Tab");
         await link.focus();

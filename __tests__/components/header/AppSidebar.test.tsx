@@ -169,7 +169,6 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         expect(getMenuItem("Validator")).toMatchObject({
           path: "/validator",
           pending: false,
-          emphasized: false,
           active: true,
         });
       }

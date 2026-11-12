@@ -14,7 +14,6 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 type MenuItem = {
   readonly label: string;
   readonly pending?: boolean;
-  readonly emphasized?: boolean;
   readonly active?: boolean;
   readonly path?: string | undefined;
   readonly icon?: ElementType | undefined;
@@ -267,13 +266,7 @@ function TopLevelMenuItem({
             ? `${item.label}: ${item.indicatorLabel}`
             : undefined
         }
-        className={clsx(
-          "tw-flex tw-items-center tw-space-x-4 tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 active:tw-bg-iron-800",
-          item.emphasized && !item.active && "tw-bg-white/5",
-          item.active !== undefined &&
-            "focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-iron-500 desktop-hover:hover:tw-bg-white/10",
-          item.active && "tw-bg-iron-800"
-        )}
+        className="tw-flex tw-items-center tw-space-x-4 tw-rounded-lg tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 active:tw-bg-iron-800"
       >
         <SidebarItemIconWithIndicator
           item={item}

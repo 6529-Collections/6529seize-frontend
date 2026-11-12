@@ -24,8 +24,6 @@ interface SidebarPrimaryItemProps {
   readonly iconSizeClass?: string | undefined;
   readonly label: string;
   readonly active?: boolean | undefined;
-  readonly emphasized?: boolean | undefined;
-  readonly animate?: boolean | undefined;
   readonly ariaCurrent?: React.AriaAttributes["aria-current"] | undefined;
   readonly collapsed?: boolean | undefined;
   readonly ariaExpanded?: boolean | undefined;
@@ -49,8 +47,6 @@ function WebSidebarNavItem({
   iconSizeClass,
   label,
   active,
-  emphasized = false,
-  animate = true,
   ariaCurrent,
   collapsed,
   ariaExpanded,
@@ -67,7 +63,7 @@ function WebSidebarNavItem({
 
   const content = (
     <div
-      className={`tw-flex tw-h-full tw-w-full tw-items-center ${animate ? "motion-safe:tw-animate-sidebar-control-in" : ""} ${
+      className={`tw-flex tw-h-full tw-w-full tw-items-center motion-safe:tw-animate-sidebar-control-in ${
         collapsed ? "" : "tw-gap-x-2"
       }`}
     >
@@ -118,18 +114,15 @@ function WebSidebarNavItem({
     ...(dataSection ? { "data-section": dataSection } : {}),
   } as const;
 
-  let linkColors = active
-    ? "tw-bg-transparent tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
-    : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white";
-  if (emphasized) {
-    linkColors = `tw-bg-white/5 ${active ? "tw-text-white" : "tw-text-iron-200"} active:tw-text-white desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-white`;
-  }
-
   if (href) {
     return (
       <Link
         href={href}
-        className={`tw-touch-action-manipulation tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-px-2 tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${linkColors}`}
+        className={`tw-touch-action-manipulation tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-px-2 tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${
+          active
+            ? "tw-bg-transparent tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
+            : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
+        }`}
         aria-current={active ? (ariaCurrent ?? "page") : undefined}
         {...commonProps}
       >

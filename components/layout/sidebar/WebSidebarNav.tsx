@@ -465,8 +465,6 @@ const WebSidebarNav = React.forwardRef<
             }
             collapsed={isCollapsed}
             label={membershipNavigation.label}
-            emphasized={membershipNavigation.emphasized}
-            animate={false}
           />
         </li>
 

@@ -266,17 +266,13 @@ describe("WebSidebarNav", () => {
   });
 
   it.each(["disconnected", "connected", "error"])(
-    "keeps Join highlighted for a newcomer (%s)",
+    "keeps Join active for a newcomer (%s)",
     (state) => {
       mockConnectionState = state;
       mockUsePathname.mockReturnValue("/join-6529");
       render(<WebSidebarNav isCollapsed={false} />);
       const join = screen.getByRole("link", { name: "Join 6529" });
       expect(join).toHaveAttribute("aria-current", "page");
-      expect(join).toHaveClass("tw-bg-white/5");
-      expect(
-        join.querySelector(".motion-safe\\:tw-animate-sidebar-control-in")
-      ).toBeNull();
       expect(join.closest("li")).not.toHaveClass("tw-invisible");
     }
   );

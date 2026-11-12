@@ -12,11 +12,15 @@ import { ServerStackIcon } from "@heroicons/react/24/outline";
 
 /** Use the same profile-backed membership decision as the auth provider. */
 export function useMembershipNavigation() {
-  const { isAuthenticated, fetchingProfile } = useAuth();
-  const { connectionState } = useSeizeConnectContext();
+  const { connectedProfile, isAuthenticated, fetchingProfile } = useAuth();
+  const { address, connectionState } = useSeizeConnectContext();
   const hasHydrated = useHasHydrated();
   const isPending =
-    !hasHydrated || isAuthResolving(connectionState, fetchingProfile);
+    !hasHydrated ||
+    isAuthResolving(connectionState, fetchingProfile) ||
+    // A successful profileless lookup still returns an identity. Null is unresolved,
+    // including a failed lookup; do not mistake that for a newcomer.
+    (!!address && !connectedProfile);
   // SSR and unresolved sessions must never publish a Validator navigation link.
   const isMember = !isPending && isAuthenticated === true;
 
@@ -31,7 +35,6 @@ export function useMembershipNavigation() {
       ),
       icon: isMember ? ServerStackIcon : Join6529Icon,
       isPending,
-      emphasized: !isMember,
     }),
     [isMember, isPending]
   );

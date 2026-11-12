@@ -122,7 +122,6 @@ export default function AppSidebar({
         path: membershipNavigation.href,
         icon: membershipNavigation.icon,
         pending: membershipNavigation.isPending,
-        emphasized: membershipNavigation.emphasized,
         active:
           pathname === membershipNavigation.href ||
           pathname.startsWith(`${membershipNavigation.href}/`),

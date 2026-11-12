@@ -1,24 +1,32 @@
 import { renderHook } from "@testing-library/react";
 import { useMembershipNavigation } from "@/hooks/useMembershipNavigation";
 
+let mockAddress: string | undefined;
+let mockConnectedProfile: { handle: string | null } | null = null;
 let mockAuthenticated = false;
 let mockFetching = false;
 let mockHydrated = true;
 let mockConnectionState = "disconnected";
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
+    connectedProfile: mockConnectedProfile,
     isAuthenticated: mockAuthenticated,
     fetchingProfile: mockFetching,
   }),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ connectionState: mockConnectionState }),
+  useSeizeConnectContext: () => ({
+    address: mockAddress,
+    connectionState: mockConnectionState,
+  }),
 }));
 jest.mock("@/hooks/useHasHydrated", () => ({
   useHasHydrated: () => mockHydrated,
 }));
 
 beforeEach(() => {
+  mockAddress = undefined;
+  mockConnectedProfile = null;
   mockAuthenticated = false;
   mockFetching = false;
   mockHydrated = true;
@@ -65,9 +73,21 @@ it("switches safely between member, profileless wallet, and logout", () => {
     href: "/join-6529",
     label: "Join 6529",
     isPending: false,
-    emphasized: true,
   });
   mockConnectionState = "disconnected";
   rerender();
   expect(result.current.href).toBe("/join-6529");
+});
+
+it("keeps a failed identity lookup unresolved until a successful profileless response", () => {
+  mockAddress = "0x1111111111111111111111111111111111111111";
+  mockConnectionState = "connected";
+  const { result, rerender } = renderHook(useMembershipNavigation);
+  expect(result.current).toMatchObject({ href: "/join-6529", isPending: true });
+  mockConnectedProfile = { handle: null };
+  rerender();
+  expect(result.current).toMatchObject({
+    href: "/join-6529",
+    isPending: false,
+  });
 });
