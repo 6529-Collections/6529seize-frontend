@@ -13,6 +13,8 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 
 type MenuItem = {
   readonly label: string;
+  readonly pending?: boolean;
+  readonly active?: boolean;
   readonly path?: string | undefined;
   readonly icon?: ElementType | undefined;
   readonly children?: MenuItem[] | undefined;
@@ -257,6 +259,8 @@ function TopLevelMenuItem({
       <Link
         href={item.path === "/profile" ? profilePath : item.path}
         onClick={onNavigate}
+        aria-current={item.active ? "page" : undefined}
+        title={item.active !== undefined ? item.label : undefined}
         aria-label={
           item.hasIndicator === true && item.indicatorLabel
             ? `${item.label}: ${item.indicatorLabel}`
@@ -318,7 +322,10 @@ export default function AppSidebarMenuItems({
     <>
       <ul className="tw-list-none tw-space-y-2 tw-pl-0">
         {visibleMenu.map((item) => (
-          <li key={item.label}>
+          <li
+            key={item.label}
+            className={item.pending ? "tw-invisible" : undefined}
+          >
             <TopLevelMenuItem
               item={item}
               onNavigate={onNavigate}

@@ -9,6 +9,12 @@ import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../../helpers/dropForgePermis
 
 jest.mock("focus-trap-react", () => jest.requireActual("focus-trap-react"));
 jest.mock("react-use");
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({
+    connectionState: "disconnected",
+    address: undefined,
+  }),
+}));
 
 const useQueryMock = jest.fn();
 const useRouterMock = jest.fn();
