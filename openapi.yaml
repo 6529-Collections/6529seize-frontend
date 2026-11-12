@@ -35764,6 +35764,21 @@ components:
         profile_wave_pfp:
           type: string
           nullable: true
+        is_validator:
+          type: boolean
+          description: Whether this profile has verified validator network participation. Null when validator data is unavailable.
+        validator_last_qualifying_cycle:
+          type: integer
+          format: int64
+          description: Last protocol cycle day when this profile qualified as a validator. Null when no qualifying participation exists.
+        validator_qualifying_days:
+          type: integer
+          format: int64
+          description: Count of distinct qualifying protocol cycle days. May be limited to available history coverage. Null when count is unavailable or incomplete.
+        validator_observed_through_cycle:
+          type: integer
+          format: int64
+          description: Protocol cycle day through which validator evidence has been observed. Indicates data freshness. Null when evidence source is unavailable.
     ApiIdentityOverviewContextProfileContext:
       type: object
       required:
