@@ -6,6 +6,7 @@ import { extractErrorDetails } from "@/utils/error-extractor";
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 import { publicEnv } from "@/config/env";
+import { notifyDesktopProfilesReady } from "@/services/auth/desktop-profile-storage";
 
 type ErrorProps = {
   readonly error: Error & { digest?: string | undefined };
@@ -13,6 +14,11 @@ type ErrorProps = {
 };
 
 export default function ErrorPage({ error, reset }: ErrorProps) {
+  useEffect(() => {
+    // The Electron desktop app shows its window once the page reports ready.
+    notifyDesktopProfilesReady();
+  }, []);
+
   useEffect(() => {
     if (!publicEnv.SENTRY_DSN) return;
     Sentry.captureException(error);

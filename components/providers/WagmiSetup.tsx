@@ -1,7 +1,14 @@
 "use client";
 
 import { Capacitor } from "@capacitor/core";
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
+import { DesktopProfileRecoveryContext } from "@/contexts/DesktopProfileRecoveryContext";
 import { mainnet, sepolia } from "viem/chains";
 import DeferredWagmiProvider from "./DeferredWagmiProvider";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
@@ -529,6 +536,8 @@ export default function WagmiSetup({
 
   // Server requests and the first hydration render get disconnected context.
   // Keep this instance local: wallet state must never cross server requests.
+  // 6529 Desktop must not reconnect a wallet while running signed out.
+  const recoveringDesktopProfiles = useContext(DesktopProfileRecoveryContext);
   const publicWagmiConfig = useMemo(
     () => createPublicWagmiConfig(chains),
     [chains]
@@ -721,7 +730,7 @@ export default function WagmiSetup({
       {/* The temporary config must not compete for Wagmi's reconnect lock. */}
       <DeferredWagmiProvider
         config={currentAdapter?.wagmiConfig ?? publicWagmiConfig}
-        reconnectOnMount={currentAdapter !== null}
+        reconnectOnMount={currentAdapter !== null && !recoveringDesktopProfiles}
       >
         {children}
         {appWalletPasswordModal.modal}

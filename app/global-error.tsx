@@ -13,6 +13,7 @@ import {
 import { publicEnv } from "@/config/env";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, tRich } from "@/i18n/messages";
+import { notifyDesktopProfilesReady } from "@/services/auth/desktop-profile-storage";
 import { extractErrorDetails } from "@/utils/error-extractor";
 import * as Sentry from "@sentry/nextjs";
 import { useEffect, useMemo } from "react";
@@ -51,6 +52,11 @@ export default function GlobalError({
   // useBrowserLocale only reads navigator (after hydration) and falls back to
   // en-US, so it is safe to use without any provider.
   const locale = useBrowserLocale();
+
+  useEffect(() => {
+    // The Electron desktop app shows its window once the page reports ready.
+    notifyDesktopProfilesReady();
+  }, []);
 
   useEffect(() => {
     if (!publicEnv.SENTRY_DSN) return;
