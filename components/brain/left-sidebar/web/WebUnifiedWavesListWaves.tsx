@@ -30,6 +30,7 @@ import {
   SIDEBAR_TOOLTIP_BORDER,
   SIDEBAR_TOOLTIP_STYLE,
 } from "../waves/SidebarCategoryLabel";
+import { SidebarPinnedWaves } from "../waves/SidebarPinnedWaves";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
 import { SidebarSubwavesToggle } from "../waves/SidebarSubwavesToggle";
 import SectionHeader from "../waves/SectionHeader";
@@ -296,10 +297,13 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   );
   const navigation = useSidebarWaveNavigation({
     waves: collectionWaves,
+    pinnedWaveOrder: streamWaves.pinnedWaveOrder,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     enabled: !isDirectMessage && !isCollapsed,
     activeContainerId: effectiveActiveParentWaveId ?? activeWaveId,
   });
+  const isPinnedCollection =
+    navigation.collection === "pinned" && !isDirectMessage && !isCollapsed;
   const collectionLoading =
     isLoading ||
     (navigation.collection === "pinned" &&
@@ -308,9 +312,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     () => getRows(announcementWaves),
     [announcementWaves, getRows]
   );
-  const activeContainerWaveId = isDirectMessage
-    ? null
-    : effectiveActiveParentWaveId;
+  const activeContainerWaveId =
+    isDirectMessage || isPinnedCollection ? null : effectiveActiveParentWaveId;
   const prioritizedAllWaves = useMemo(
     () =>
       prioritizeActiveWaveContainer(
@@ -437,7 +440,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   );
 
   const virtual = useVirtualizedWaves<AnimatedSidebarWaveTreeRow>({
-    items: virtualizedRows,
+    items: isPinnedCollection ? [] : virtualizedRows,
     key: virtualizedKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     listContainerRef,
@@ -445,8 +448,11 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     overscan: 5,
   });
   const revealStaticRows = useMemo(
-    () => [animatedAnnouncementRows],
-    [animatedAnnouncementRows]
+    () =>
+      isPinnedCollection
+        ? [animatedAnnouncementRows, animatedAllRows]
+        : [animatedAnnouncementRows],
+    [animatedAnnouncementRows, animatedAllRows, isPinnedCollection]
   );
   useRevealActiveSidebarWave({
     preserveScrollOnInteraction: !isDirectMessage,
@@ -463,7 +469,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     scrollToVirtualIndex: virtual.scrollToIndex,
     staticRows: revealStaticRows,
-    virtualRows: virtualizedRows,
+    virtualRows: isPinnedCollection ? [] : virtualizedRows,
   });
 
   const renderWaveRow = (
@@ -509,6 +515,91 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       />
     );
   };
+
+  const pinnedList =
+    isPinnedCollection &&
+    (virtualizedRows.length > 0 || streamWaves.hasPinnedWavesError) ? (
+      <SidebarPinnedWaves
+        key={navigation.scrollKey}
+        listRef={listContainerRef}
+        rows={virtualizedRows}
+        getRowHeight={getSidebarRowHeight}
+        renderRow={(row) =>
+          renderWaveRow(row, !hidePin, virtualizedParentsWithVisibleSubwaves)
+        }
+        onReorder={streamWaves.reorderPinnedWaves}
+        isSaving={streamWaves.isSavingPinnedWaveOrder}
+        hasLoadingError={streamWaves.hasPinnedWavesError}
+        onRetry={streamWaves.retryPinnedWaves}
+      />
+    ) : null;
+
+  const regularWaveList = (
+    <>
+      {virtualizedRows.length > 0 ? (
+        <section
+          ref={listContainerRef}
+          style={{
+            height: virtual.totalHeight,
+            position: "relative",
+          }}
+          aria-label={virtualizedAriaLabel}
+        >
+          {virtual.virtualItems.map((v: VirtualItem) => {
+            if (v.index === virtualizedRows.length) {
+              return (
+                <div
+                  key="sentinel"
+                  ref={sentinelRef}
+                  style={{
+                    position: "absolute",
+                    width: "100%",
+                    top: v.start,
+                    height: v.size,
+                  }}
+                />
+              );
+            }
+            const row = virtualizedRows[v.index];
+            if (!row || !isValidSidebarWave(row.wave)) {
+              console.warn("Invalid wave object at index", v.index, row?.wave);
+              return null;
+            }
+            return (
+              <SidebarWaveTreeRowTransition
+                key={row.key}
+                row={row}
+                rowHeight={getSidebarRowHeight(row)}
+                style={{
+                  position: "absolute",
+                  width: "100%",
+                  top: v.start,
+                  height: v.size,
+                }}
+              >
+                {renderWaveRow(
+                  row,
+                  !hidePin && !isCollapsed,
+                  virtualizedParentsWithVisibleSubwaves
+                )}
+              </SidebarWaveTreeRowTransition>
+            );
+          })}
+        </section>
+      ) : (
+        <div
+          ref={listContainerRef}
+          style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }}
+        >
+          {!isDirectMessage && !collectionLoading && (
+            <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
+              {t(locale, "waves.sidebar.collectionEmpty")}
+            </output>
+          )}
+        </div>
+      )}
+    </>
+  );
 
   return (
     <>
@@ -592,80 +683,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
           {navigation.searching && !isCollapsed ? (
             <SidebarWaveSearchResults navigation={navigation} />
           ) : (
-            <>
-              {virtualizedRows.length > 0 ? (
-                <section
-                  ref={listContainerRef}
-                  style={{
-                    height: virtual.totalHeight,
-                    position: "relative",
-                  }}
-                  aria-label={
-                    navigation.collection === "pinned" &&
-                    !isDirectMessage &&
-                    !isCollapsed
-                      ? t(locale, "waves.sidebar.pinned")
-                      : virtualizedAriaLabel
-                  }
-                >
-                  {virtual.virtualItems.map((v: VirtualItem) => {
-                    if (v.index === virtualizedRows.length) {
-                      return (
-                        <div
-                          key="sentinel"
-                          ref={sentinelRef}
-                          style={{
-                            position: "absolute",
-                            width: "100%",
-                            top: v.start,
-                            height: v.size,
-                          }}
-                        />
-                      );
-                    }
-                    const row = virtualizedRows[v.index];
-                    if (!row || !isValidSidebarWave(row.wave)) {
-                      console.warn(
-                        "Invalid wave object at index",
-                        v.index,
-                        row?.wave
-                      );
-                      return null;
-                    }
-                    return (
-                      <SidebarWaveTreeRowTransition
-                        key={row.key}
-                        row={row}
-                        rowHeight={getSidebarRowHeight(row)}
-                        style={{
-                          position: "absolute",
-                          width: "100%",
-                          top: v.start,
-                          height: v.size,
-                        }}
-                      >
-                        {renderWaveRow(
-                          row,
-                          !hidePin && !isCollapsed,
-                          virtualizedParentsWithVisibleSubwaves
-                        )}
-                      </SidebarWaveTreeRowTransition>
-                    );
-                  })}
-                </section>
-              ) : (
-                <div
-                  ref={listContainerRef}
-                  style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }}
-                >
-                  {!isDirectMessage && !collectionLoading && (
-                    <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
-                      {t(locale, "waves.sidebar.collectionEmpty")}
-                    </output>
-                  )}
-                </div>
-              )}
-            </>
+            (pinnedList ?? regularWaveList)
           )}
         </div>
       </div>

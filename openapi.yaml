@@ -21383,6 +21383,64 @@ paths:
                 $ref: "#/components/schemas/ApiWaveOverviewPage"
         "400":
           description: Invalid request
+  /v2/waves/pinned:
+    get:
+      tags:
+        - WavesV2
+      summary: List the current profile's pinned root waves in saved order
+      operationId: getPinnedWaves
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/pinned-waves.handlers"
+          name: handleGetPinnedWaves
+      responses:
+        "200":
+          description: Readable, non-DM root waves in saved pin order
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveOverview"
+        "401":
+          description: Authentication required
+        "403":
+          description: A non-proxy profile is required
+    put:
+      tags:
+        - WavesV2
+      summary: Save the current profile's pinned wave order
+      description: Reorders the readable pins while preserving the positions of other pins.
+      operationId: updatePinnedWaveOrder
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/pinned-waves.handlers"
+          name: handleUpdatePinnedWaveOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUpdatePinnedWaveOrder"
+      responses:
+        "200":
+          description: Saved order of the readable pins
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiPinnedWaveOrder"
+        "400":
+          description: Invalid order
+        "401":
+          description: Authentication required
+        "403":
+          description: A non-proxy profile is required
+        "409":
+          description: The pinned waves changed since they were loaded
   /v2/waves/joined:
     get:
       tags:
@@ -39940,6 +39998,15 @@ components:
           type: boolean
         designated_payee_name:
           type: string
+    ApiPinnedWaveOrder:
+      type: object
+      required:
+        - wave_ids
+      properties:
+        wave_ids:
+          type: array
+          items:
+            type: string
     ApiProfileActivityLog:
       type: object
       required:
@@ -43391,6 +43458,24 @@ components:
       properties:
         device_signature:
           $ref: "#/components/schemas/ApiDeviceSignature"
+    ApiUpdatePinnedWaveOrder:
+      type: object
+      required:
+        - previous_wave_ids
+        - wave_ids
+      properties:
+        previous_wave_ids:
+          description: The ordered wave IDs last read by the client.
+          type: array
+          items:
+            type: string
+          maxItems: 1000
+        wave_ids:
+          description: The same IDs in the requested order.
+          type: array
+          items:
+            type: string
+          maxItems: 1000
     ApiUpdateProfileNotificationCategories:
       type: object
       additionalProperties: false
