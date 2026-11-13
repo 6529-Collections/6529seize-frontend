@@ -221,6 +221,40 @@ test("unsupported contracts and missing card identifiers still make no roots req
 });
 
 describe("homepage roots scope", () => {
+  test("a pending read stays shared when one section leaves and another arrives", async () => {
+    const response = createDeferredPromise<MintingClaimsRootItem[]>();
+    fetchRoots.mockReturnValue(response.promise);
+    const { rerender, unmount } = render(
+      <>
+        <Consumer key="owner" card={573} name="owner" />
+        <Consumer key="leaving" card={573} name="leaving" />
+      </>,
+      { wrapper: MemesMintingRootsProvider }
+    );
+    rerender(
+      <>
+        <Consumer key="owner" card={573} name="owner" />
+      </>
+    );
+    rerender(
+      <>
+        <Consumer key="owner" card={573} name="owner" />
+        <Consumer key="arriving" card={573} name="arriving" />
+      </>
+    );
+    try {
+      expect(fetchRoots).toHaveBeenCalledTimes(1);
+    } finally {
+      await act(async () => response.resolve(rootsForPhase("Phase 1")));
+    }
+    for (const name of ["owner", "arriving"]) {
+      await waitFor(() =>
+        expect(screen.getByTestId(name)).toHaveTextContent("573:1")
+      );
+    }
+    unmount();
+  });
+
   test("late sections reuse a successful initial read without waiting or fetching again", async () => {
     fetchRoots.mockResolvedValueOnce(rootsForPhase("Phase 0"));
     const { rerender, unmount } = render(

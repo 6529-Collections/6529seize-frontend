@@ -936,12 +936,18 @@ test("homepage reuses fast roots after mint details mount @smoke @medium @large"
     );
     await page.goto("/", { waitUntil: "domcontentloaded" });
     await (await rootsResponse).finished();
-    await expect(page.locator('[data-home-section="Latest drop"]')).toHaveCount(
-      0
-    );
+    await expect(
+      page
+        .getByRole("main")
+        .first()
+        .locator('[data-home-section="Latest drop"]')
+    ).toHaveCount(0);
     expect(rootsRequests).toBe(1);
     releaseClaim();
-    const latest = page.locator('[data-home-section="Latest drop"]');
+    const latest = page
+      .getByRole("main")
+      .first()
+      .locator('[data-home-section="Latest drop"]');
     const image = latest.getByRole("img", {
       name: loadingTestArtwork.name,
       exact: true,
@@ -973,7 +979,10 @@ test("homepage reads fresh roots on same-card SPA return @smoke @medium @large",
     return route.fulfill({ json: [] });
   });
   await page.goto("/", { waitUntil: "domcontentloaded" });
-  const latest = page.locator('[data-home-section="Latest drop"]');
+  const latest = page
+    .getByRole("main")
+    .first()
+    .locator('[data-home-section="Latest drop"]');
   await expect(
     latest.getByText("All editions have been minted!", { exact: true })
   ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
@@ -1019,7 +1028,10 @@ for (const rootsStatus of [200, 503]) {
     const started = Date.now();
     try {
       await page.goto("/", { waitUntil: "domcontentloaded" });
-      const latest = page.locator('[data-home-section="Latest drop"]');
+      const latest = page
+        .getByRole("main")
+        .first()
+        .locator('[data-home-section="Latest drop"]');
       const image = latest.getByRole("img", {
         name: loadingTestArtwork.name,
         exact: true,
@@ -1114,7 +1126,10 @@ test("homepage keeps newer artwork when old roots finish after back navigation @
   });
   try {
     await page.goto("/", { waitUntil: "domcontentloaded" });
-    const latest = page.locator('[data-home-section="Latest drop"]');
+    const latest = page
+      .getByRole("main")
+      .first()
+      .locator('[data-home-section="Latest drop"]');
     await expect(
       latest.getByRole("img", { name: loadingTestArtwork.name, exact: true })
     ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
