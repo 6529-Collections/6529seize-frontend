@@ -68,9 +68,10 @@ remains distribution-admin-only.
 
 ### Launch Automation and collapsed admin list
 
-The Contract Admins accordion starts collapsed. Expand it to load the owner/admin
-list and use the existing controls; collapsing stops those reads. Launch Automation
-is visible to every authorized Drop Forge user and is documented in
+Contract Admins and Launch Automation start collapsed and open independently.
+Expand Contract Admins to load the owner and admin list. The contract link and
+admin controls share a row when space allows. Collapsing stops the admin reads.
+Launch Automation is visible to every authorized Drop Forge user and is documented in
 [Launch Automation and Wallet Funding](feature-launch-automation-settings.md).
 
 ## Location in the Site

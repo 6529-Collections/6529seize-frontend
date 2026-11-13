@@ -9,13 +9,11 @@ import {
 } from "@/components/drop-forge/drop-forge.constants";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
-import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import DropForgeContractAdmins from "@/components/drop-forge/contract-admins/DropForgeContractAdmins";
 import LaunchAutomationSettings from "@/components/drop-forge/automation/LaunchAutomationSettings";
 
 export default function DropForgePageClient() {
-  const { data: settings } = useDropForgeSettings();
   const {
     hasWallet,
     permissionsLoading,
@@ -105,9 +103,7 @@ export default function DropForgePageClient() {
         </Link>
       </div>
       <LaunchAutomationSettings />
-      <DropForgeContractAdmins
-        collapsible={settings?.automation_enabled === true}
-      />
+      <DropForgeContractAdmins collapsible />
     </div>
   );
 }

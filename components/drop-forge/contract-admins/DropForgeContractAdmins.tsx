@@ -22,6 +22,11 @@ import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { getAddressEtherscanLink } from "@/helpers/Helpers";
 import { CREATOR_ADMIN_ABI } from "./creator-admin-abi";
+import {
+  dropForgeSectionClassName,
+  dropForgeDisclosureClassName,
+  dropForgeIconButtonClassName,
+} from "../drop-forge-section-styles";
 import ContractAdminRow from "./ContractAdminRow";
 import {
   getAdminAddressError,
@@ -43,17 +48,17 @@ export default function DropForgeContractAdmins({
   return (
     <section
       aria-labelledby={collapsible ? undefined : "contract-admins-heading"}
-      className="tailwind-scope tw-mt-6 tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-6"
+      className={dropForgeSectionClassName}
     >
       {collapsible ? (
         <details
           className="tw-group"
           onToggle={(event) => setExpanded(event.currentTarget.open)}
         >
-          <summary className="tw-flex tw-min-h-10 tw-cursor-pointer tw-list-none tw-items-center tw-gap-3 tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+          <summary className={dropForgeDisclosureClassName}>
             <ChevronRightIcon
               aria-hidden="true"
-              className="tw-size-5 tw-shrink-0 tw-text-iron-400 tw-transition-transform group-open:tw-rotate-90"
+              className="tw-size-5 tw-shrink-0 tw-text-iron-400 group-open:tw-rotate-90 motion-safe:tw-transition-transform"
             />
             <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
               {t(locale, "dropForge.admins.heading")}
@@ -177,18 +182,27 @@ function ContractAdminsContent({
 
   return (
     <div className={showHeading ? undefined : "tw-mt-4"}>
-      <div
-        className={`tw-flex tw-flex-wrap tw-items-center tw-gap-3 ${showHeading ? "tw-justify-between" : "tw-justify-end"}`}
-      >
-        {showHeading && (
-          <h2
-            id="contract-admins-heading"
-            className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50"
+      {showHeading && (
+        <h2
+          id="contract-admins-heading"
+          className="tw-mb-3 tw-text-xl tw-font-semibold tw-text-iron-50"
+        >
+          {t(locale, "dropForge.admins.heading")}
+        </h2>
+      )}
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+        <p className="tw-m-0 tw-min-w-0 tw-break-all tw-text-sm tw-text-iron-400">
+          {chain.name} ·{" "}
+          <a
+            href={getAddressEtherscanLink(chain.id, contract)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tw-text-iron-400 tw-underline tw-decoration-iron-600 tw-underline-offset-2 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-200"
           >
-            {t(locale, "dropForge.admins.heading")}
-          </h2>
-        )}
-        <div className="tw-flex tw-items-center tw-gap-2">
+            {contract}
+          </a>
+        </p>
+        <div className="tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-2">
           {canManageContractAdmins && (
             <Button
               ref={addButtonRef}
@@ -213,7 +227,7 @@ function ContractAdminsContent({
             <Button
               variant="secondary"
               size="md"
-              className="tw-w-10 !tw-px-0"
+              className={dropForgeIconButtonClassName}
               aria-label={t(locale, "dropForge.admins.refresh")}
               loading={refreshing}
               hideChildrenWhenLoading
@@ -225,17 +239,6 @@ function ContractAdminsContent({
           </CustomTooltip>
         </div>
       </div>
-      <p className="tw-mt-2 tw-break-all tw-text-sm tw-text-iron-400">
-        {chain.name} ·{" "}
-        <a
-          href={getAddressEtherscanLink(chain.id, contract)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="tw-text-iron-400 tw-underline tw-decoration-iron-600 tw-underline-offset-2 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-200"
-        >
-          {contract}
-        </a>
-      </p>
       {listStatus}
       {canManageContractAdmins && addExpanded && (
         <form

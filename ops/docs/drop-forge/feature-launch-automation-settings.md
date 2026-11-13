@@ -1,7 +1,8 @@
 # Launch Automation and Wallet Funding
 
 The `/drop-forge` hub shows Launch Automation to everyone with Drop Forge access.
-All three switches start Off. The creator contract owner and configured claims
+The section starts collapsed and has a help icon beside refresh. All three
+automation settings default to Off. The creator contract owner and configured claims
 administrators can change all four settings. Configured distribution administrators
 can also change **EMMA preparation**. Every authorized Drop Forge user sees the
 current values, with controls disabled when they lack edit access.
@@ -22,15 +23,17 @@ Automatic artist payment is a separate opt-in. Research and optional artist paym
 become eligible at 18:00 Europe/Athens the day after minting, one hour after Public
 closes. Artist payment uses the final paid-mint and redeemed-subscription accounting,
 the 50% artist share and the recorded payment address/designated payee. Missing or
-incomplete accounting defers payment. Set **Maximum ETH per payout** before
-enabling payments. The worker uses the saved limit before submitting each payout.
-Turn off automatic artist payments before clearing the limit.
+incomplete accounting defers payment. Choose **Set limit**, enter a positive
+ETH amount, and select **Save & enable**. The worker checks that saved limit
+before submitting each payout. **Disable** keeps the saved limit, and
+**Re-enable** uses it again in one click.
 The wallet needs both payout funds and gas; mint proceeds still go to the configured
 payment receiver. Manual Pay Artist remains available and records its transaction
 hash so automation can verify completion instead of sending another payment.
 
 The wallet panel shows the configured address, a verified ENS name when available,
-an explorer link and ETH balance. Refresh updates those details. ENS is informational;
+an explorer link and ETH balance. Refresh updates those details.
+**Copy wallet address** confirms when the address has been copied. ENS is informational;
 the underlying configured address is always the destination.
 
 Top Up ETH is available to all Drop Forge administrators even while automation is
