@@ -1,6 +1,7 @@
 "use client";
 
 import clsx from "clsx";
+import { getPillTabClasses } from "@/components/common/pillTabStyles";
 import { getButtonClasses } from "@/components/utils/button/buttonStyles";
 import { useState } from "react";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
@@ -57,12 +58,7 @@ function getTabButtonClasses({
     });
   }
   if (variant === "sub-view") {
-    return clsx(
-      "tw-flex tw-h-8 tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-full tw-border-0 tw-px-3 tw-text-xs tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 motion-reduce:tw-transition-none",
-      isActive
-        ? "tw-bg-white/[0.08] tw-font-semibold tw-text-iron-50"
-        : "tw-bg-transparent tw-font-medium tw-text-iron-500 active:tw-bg-white/[0.06] desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200"
-    );
+    return getPillTabClasses({ active: isActive });
   }
   let dynamicClasses =
     "tw-bg-iron-950 tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-text-iron-100";

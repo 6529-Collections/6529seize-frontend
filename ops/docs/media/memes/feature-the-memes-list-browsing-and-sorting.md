@@ -49,7 +49,7 @@
 - At 1024px and wider on the web, the sort options, including Volume, use the
   editorial text style: white text and a blue underline for the selected
   option, with gray inactive text. The options spread across the available row
-  width. Sort direction uses up/down arrows with an unframed desktop toggle.
+  width. Sort direction uses up/down arrows with an unframed toggle at every screen size.
   The sort label stays visible at every screen size. Smaller screens and the
   native app keep the shared soft gray pills and light selected pill. Year and
   Season keep their framed dropdown triggers.

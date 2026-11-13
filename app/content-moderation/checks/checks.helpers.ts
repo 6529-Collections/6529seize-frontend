@@ -1,3 +1,4 @@
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import type { SupportedLocale } from "@/i18n/locales";
 import { ApiModerationAction } from "@/generated/models/ApiModerationAction";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -130,5 +131,7 @@ export function navigateChecks(params: URLSearchParams): void {
 
 export const checkControlClass =
   "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-opacity-50";
+export const checkSelectClass = `${DROPDOWN_FIELD_CLASSES} tw-min-h-11 tw-w-full tw-px-3 tw-py-2 tw-text-sm`;
+
 export const checkButtonClass =
   "tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-50";

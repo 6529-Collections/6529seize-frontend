@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useSearchParams } from "next/navigation";
 import { type ReactNode, useEffect, useId, useReducer, useState } from "react";
 import {
@@ -550,7 +551,7 @@ export default function ManifoldMintingWidget(
     return (
       <select
         id={mintCountControlId}
-        className="tw-h-11 tw-rounded-xl tw-border tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-text-sm tw-text-white focus:tw-border-primary-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-500/30"
+        className={`${DROPDOWN_FIELD_CLASSES} tw-h-11 tw-px-3 tw-text-sm`}
         value={safeMintCount}
         onChange={(e) => setMintCount(normalizeMintCount(e.target.value))}
       >

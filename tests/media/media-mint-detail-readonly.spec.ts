@@ -64,6 +64,16 @@ async function expectFullWidthTabDivider(page: Page, name: string) {
   );
 }
 
+async function expectProfileStyleTabs(navigation: Locator) {
+  await expect(navigation).toBeVisible();
+  await expect(navigation.getByRole("button").first()).toBeVisible();
+  for (const tab of await navigation.getByRole("button").all()) {
+    await expect(tab).toHaveCSS("font-size", "16px");
+    await expect(tab).toHaveCSS("font-weight", "500");
+    await expect(tab).toHaveCSS("height", "50px");
+  }
+}
+
 async function expectUniformMarketplaceIcons(page: Page) {
   const links = page.getByRole("link", {
     name: /^Open (OpenSea|Blur\.io|Manifold\.xyz|Rarible)$/,
@@ -1206,6 +1216,12 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     const season = page.getByRole("link", { name: "View SZN 1 cards" });
     for (const width of [390, 767, 768, 1600]) {
       await page.setViewportSize({ width, height: 1000 });
+      await expectProfileStyleTabs(
+        page.getByRole("navigation", {
+          name: "Meme page sections",
+          exact: true,
+        })
+      );
       await expect(properties).toHaveCSS(
         "font-size",
         width >= 768 ? "16px" : "12px"
@@ -1256,6 +1272,12 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     const nextCard = page.getByRole("link", { name: "Next NFT", exact: true });
     for (const width of [390, 767, 768, 1600]) {
       await page.setViewportSize({ width, height: 1000 });
+      await expectProfileStyleTabs(
+        page.getByRole("navigation", {
+          name: "Meme Lab page sections",
+          exact: true,
+        })
+      );
       await expect(labProperties).toHaveCSS(
         "font-size",
         width >= 768 ? "16px" : "12px"

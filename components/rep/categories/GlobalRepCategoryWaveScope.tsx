@@ -1,5 +1,7 @@
 "use client";
 
+import { getUnderlineTabClasses } from "@/components/common/underlineTabStyles";
+
 import { useAuth } from "@/components/auth/Auth";
 import CircleLoader, {
   CircleLoaderSize,
@@ -553,7 +555,7 @@ function WaveRepLoadedContent({
             REP_CATEGORY_LOCALE,
             "rep.categories.wave.sections.label"
           )}
-          className="rep-category-section-tabs tw-flex tw-gap-2"
+          className="rep-category-section-tabs tw-flex tw-gap-x-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
         >
           {WAVE_REP_TABS.map((tab) => (
             <button
@@ -561,11 +563,7 @@ function WaveRepLoadedContent({
               type="button"
               aria-pressed={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`rep-category-section-tab tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors ${
-                activeTab === tab.id
-                  ? "tw-border-white/20 tw-bg-white/10 tw-text-white"
-                  : "tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
-              }`}
+              className={`${getUnderlineTabClasses({ active: activeTab === tab.id, size: "sm" })} rep-category-section-tab tw-px-3 tw-py-3`}
             >
               {t(REP_CATEGORY_LOCALE, tab.labelKey)}
             </button>
