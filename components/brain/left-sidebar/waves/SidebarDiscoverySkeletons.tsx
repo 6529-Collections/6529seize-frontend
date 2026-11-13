@@ -20,7 +20,7 @@ export function SidebarRecommendationsSkeleton({
       >
         <div className="tw-mb-2 tw-h-4 tw-w-3/4 tw-rounded-md tw-bg-iron-800/60" />
         <div
-          className={`tw-flex tw-overflow-hidden tw-py-1 ${isTouchPreview ? "tw-gap-4" : "tw-gap-3"}`}
+          className={`tw-flex tw-overflow-hidden tw-py-1 [@media(any-hover:none)]:tw-pb-11 ${isTouchPreview ? "tw-gap-4" : "tw-gap-3"}`}
         >
           {[0, 1, 2, 3, 4, 5].map((item) => (
             <div

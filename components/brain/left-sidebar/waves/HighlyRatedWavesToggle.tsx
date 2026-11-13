@@ -378,6 +378,12 @@ function HighlyRatedWavePreviewLink({
             scoreLabel={scoreLabel}
           />
         )}
+        <span
+          aria-hidden="true"
+          className="tw-absolute tw-left-1/2 tw-top-full tw-mt-2.5 tw-hidden tw-h-7 tw-w-[calc(100%+0.75rem)] -tw-translate-x-1/2 tw-text-center tw-text-[11px] tw-font-normal tw-leading-[14px] tw-text-iron-400 [@media(any-hover:none)]:tw-block"
+        >
+          <span className="tw-line-clamp-2 tw-break-words">{wave.name}</span>
+        </span>
       </Link>
     </WaveScoreSummaryHoverCard>
   );
@@ -455,7 +461,7 @@ export function HighlyRatedWavesToggle({
     >
       <div
         ref={previewStripRef}
-        className={`tw-flex tw-min-w-0 tw-items-center ${isTouchPreview ? "tw-mr-2" : "tw-mr-1.5"} ${visiblePreviewItems.length === HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT ? "tw-justify-between" : "tw-justify-start"} ${isTouchPreview ? "tw-gap-x-4" : "tw-gap-x-3"}`}
+        className={`tw-flex tw-min-w-0 tw-items-center [@media(any-hover:none)]:tw-pb-10 ${isTouchPreview ? "tw-mr-2" : "tw-mr-1.5"} ${visiblePreviewItems.length === HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT ? "tw-justify-between" : "tw-justify-start"} ${isTouchPreview ? "tw-gap-x-4" : "tw-gap-x-3"}`}
       >
         {visiblePreviewItems.map((item) => (
           <HighlyRatedWavePreviewLink
