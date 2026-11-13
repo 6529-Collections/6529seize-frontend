@@ -168,6 +168,7 @@ export function SidebarPinnedWaves({
   getRowHeight,
   renderRow,
 }: SidebarPinnedWavesProps) {
+  // Both sidebar layouts mount this list inside MyStreamProvider.
   const { waves: streamWaves } = useMyStream();
   const {
     reorderPinnedWaves: onReorder,
@@ -194,6 +195,7 @@ export function SidebarPinnedWaves({
       isSaving ||
       saving.current ||
       from < 0 ||
+      from >= ids.length ||
       to < 0 ||
       from === to ||
       to >= ids.length
@@ -273,7 +275,10 @@ export function SidebarPinnedWaves({
                 controls={Boolean(onReorder) && ids.length > 1}
                 canMoveUp={!isSaving && index > 0}
                 canMoveDown={!isSaving && index < ids.length - 1}
-                onMove={(distance) => void move(index, index + distance)}
+                onMove={(distance) => {
+                  const from = ids.indexOf(group.id);
+                  void move(from, from + distance);
+                }}
                 renderRow={renderTransition}
               />
             ))}

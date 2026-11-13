@@ -97,9 +97,10 @@ function usePinnedWavesQuery(
   const query = useQuery<SidebarWave[], Error>({
     queryKey,
     queryFn: async ({ signal }) =>
-      (await pinnedWavesApi.getPinnedWaves(signal)).map(
-        mapApiWaveOverviewToSidebarWave
-      ),
+      (await pinnedWavesApi.getPinnedWaves(signal)).map((wave) => ({
+        ...mapApiWaveOverviewToSidebarWave(wave),
+        pinned: true,
+      })),
     enabled,
     staleTime: PINNED_WAVES_STALE_TIME,
     gcTime: PINNED_WAVES_GC_TIME,
