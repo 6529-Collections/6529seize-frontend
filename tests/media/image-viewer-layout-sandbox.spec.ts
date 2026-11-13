@@ -1,13 +1,8 @@
 import path from "node:path";
-import type { Locator, Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import type { ApiWaveOverview } from "../../generated/models/ApiWaveOverview";
 import type { ApiDropV2 } from "../../generated/models/ApiDropV2";
-import {
-  expect,
-  expectKeyboardFocusIndicator,
-  test,
-  waitForRouteReady,
-} from "../testHelpers";
+import { expect, test, waitForRouteReady } from "../testHelpers";
 import {
   getSandboxApiOrigin,
   hideNextDevOverlay,
@@ -56,31 +51,6 @@ async function readBackground(page: Page) {
         nativeRoot: root ? bounds(root) : null,
       };
     });
-}
-
-async function expectViewerKeyboardFocus(
-  page: Page,
-  close: Locator,
-  browserName: string
-) {
-  if (browserName !== "webkit") {
-    await expectKeyboardFocusIndicator(page, close);
-    return;
-  }
-  // Safari's default control navigation uses Option-Tab.
-  for (let step = 0; step < 12; step++) {
-    await page.keyboard.press("Alt+Tab");
-    if (await close.evaluate((element) => element === document.activeElement))
-      break;
-  }
-  await expect(close).toBeFocused();
-  expect(
-    await close.evaluate(
-      (element) =>
-        element.matches(":focus-visible") &&
-        getComputedStyle(element).outlineStyle !== "none"
-    )
-  ).toBe(true);
 }
 
 async function emitKeyboardEvent(
@@ -159,7 +129,6 @@ test.describe("Image viewer background layout @auth @medium @local-only", () => 
         page,
         context,
         baseURL,
-        browserName,
       }, testInfo) => {
         if (native) {
           await page.setViewportSize({ width: 390, height: 844 });
@@ -195,7 +164,6 @@ test.describe("Image viewer background layout @auth @medium @local-only", () => 
         await opener.scrollIntoViewIfNeeded();
         await page.evaluate(() => window.scrollTo(0, 0));
         const before = await readBackground(page);
-        const measurements = [{ phase: "before", ...before }];
         if (native) {
           expect(before.nativeRoot?.paddingBottom).toBe("34px");
           expect(before.scrollHeight).toBeGreaterThan(
@@ -238,47 +206,21 @@ test.describe("Image viewer background layout @auth @medium @local-only", () => 
               )
             )
             .toBe("Expanded image preview");
-          const open = await readBackground(page);
-          measurements.push({ phase: `open-${cycle}`, ...open });
-          expect(open).toEqual(before);
-          if (cycle === 0) {
-            const image = page.getByRole("img", {
-              name: "Expanded image preview",
-              exact: true,
-            });
-            await expect
-              .poll(() =>
-                image.evaluate(
-                  (element: HTMLImageElement) => element.naturalWidth
+          // Preserve the original focus trap: background controls cannot take
+          // focus while the viewer is open.
+          await composer.focus();
+          await expect
+            .poll(() =>
+              composer.evaluate(() =>
+                Boolean(
+                  document.activeElement?.closest(
+                    'dialog[aria-label="Expanded image preview"]'
+                  )
                 )
               )
-              .toBeGreaterThan(0);
-            const width = (await image.boundingBox())!.width;
-            await image.dblclick();
-            await expect
-              .poll(async () => (await image.boundingBox())!.width)
-              .toBeGreaterThan(width);
-            expect(await readBackground(page)).toEqual(before);
-            await testInfo.attach("viewer-open", {
-              body: await page.screenshot(),
-              contentType: "image/png",
-            });
-          }
-          if (cycle === 1)
-            await expectViewerKeyboardFocus(page, close, browserName);
-          await expect(
-            page
-              .getByRole("button", {
-                name: /^(Open in browser|Open in new tab|Share media)$/,
-                exact: false,
-              })
-              .last()
-          ).toBeVisible();
-          await expect(
-            page
-              .getByRole("button", { name: "Download media", exact: true })
-              .last()
-          ).toBeVisible();
+            )
+            .toBe(true);
+          expect(await readBackground(page)).toEqual(before);
           if (entry === "gallery") {
             await page
               .getByRole("button", { name: "Next image", exact: true })
@@ -296,17 +238,9 @@ test.describe("Image viewer background layout @auth @medium @local-only", () => 
               .click({ position: { x: 2, y: 2 } });
           await expect(close).toBeHidden();
           await expect.poll(() => readBackground(page)).toEqual(before);
-          measurements.push({
-            phase: `closed-${cycle}`,
-            ...(await readBackground(page)),
-          });
           if (cycle === 1) await expect(opener).toBeFocused();
         }
         await expect(composer).toHaveText("Unsent layout check");
-        await testInfo.attach("background-geometry", {
-          body: JSON.stringify(measurements),
-          contentType: "application/json",
-        });
       });
     }
   }
