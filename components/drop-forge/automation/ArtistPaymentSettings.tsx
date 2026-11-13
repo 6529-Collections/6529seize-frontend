@@ -87,51 +87,13 @@ export default function ArtistPaymentSettings({
             onSave={saveLimit}
           />
         ) : (
-          <div className="tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-3">
-            <div className="tw-min-w-0">
-              <p className="tw-m-0 tw-text-sm tw-text-iron-400">
-                {t(
-                  locale,
-                  savedLimit && !enabled
-                    ? "dropForge.settings.savedPaymentLimit"
-                    : "dropForge.settings.paymentLimit"
-                )}
-              </p>
-              <p className="tw-mb-0 tw-mt-1 tw-break-words tw-text-xl tw-font-semibold tw-text-iron-100">
-                {savedLimit ?? "0"} ETH
-              </p>
-            </div>
-            <div className="tw-flex tw-flex-wrap tw-gap-2">
-              <Button
-                variant={!savedLimit && !enabled ? "action" : "secondary"}
-                disabled={disabled}
-                onClick={() => setDraft(savedLimit ?? "")}
-              >
-                {t(
-                  locale,
-                  savedLimit
-                    ? "dropForge.settings.editPaymentLimit"
-                    : "dropForge.settings.setPaymentLimit"
-                )}
-              </Button>
-              {(enabled || savedLimit) && (
-                <Button
-                  variant={enabled ? "secondary" : "action"}
-                  disabled={disabled}
-                  onClick={() =>
-                    void onChange({ pay_artist_enabled: !enabled })
-                  }
-                >
-                  {t(
-                    locale,
-                    enabled
-                      ? "dropForge.settings.disablePayment"
-                      : "dropForge.settings.reenablePayment"
-                  )}
-                </Button>
-              )}
-            </div>
-          </div>
+          <PaymentLimitSummary
+            enabled={enabled}
+            savedLimit={savedLimit}
+            disabled={disabled}
+            onEdit={() => setDraft(savedLimit ?? "")}
+            onToggle={() => void onChange({ pay_artist_enabled: !enabled })}
+          />
         )}
       </div>
     </section>
@@ -208,5 +170,66 @@ function PaymentLimitForm({
         </div>
       </div>
     </form>
+  );
+}
+
+function PaymentLimitSummary({
+  enabled,
+  savedLimit,
+  disabled,
+  onEdit,
+  onToggle,
+}: Readonly<{
+  enabled: boolean;
+  savedLimit: ApiDropForgeSettings["max_artist_payment_eth"];
+  disabled: boolean;
+  onEdit: () => void;
+  onToggle: () => void;
+}>) {
+  const locale = useBrowserLocale();
+  return (
+    <div className="tw-flex tw-flex-wrap tw-items-end tw-justify-between tw-gap-3">
+      <div className="tw-min-w-0">
+        <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+          {t(
+            locale,
+            savedLimit && !enabled
+              ? "dropForge.settings.savedPaymentLimit"
+              : "dropForge.settings.paymentLimit"
+          )}
+        </p>
+        <p className="tw-mb-0 tw-mt-1 tw-break-words tw-text-xl tw-font-semibold tw-text-iron-100">
+          {savedLimit ?? "0"} ETH
+        </p>
+      </div>
+      <div className="tw-flex tw-flex-wrap tw-gap-2">
+        <Button
+          variant={!savedLimit && !enabled ? "action" : "secondary"}
+          disabled={disabled}
+          onClick={onEdit}
+        >
+          {t(
+            locale,
+            savedLimit
+              ? "dropForge.settings.editPaymentLimit"
+              : "dropForge.settings.setPaymentLimit"
+          )}
+        </Button>
+        {(enabled || savedLimit) && (
+          <Button
+            variant={enabled ? "secondary" : "action"}
+            disabled={disabled}
+            onClick={onToggle}
+          >
+            {t(
+              locale,
+              enabled
+                ? "dropForge.settings.disablePayment"
+                : "dropForge.settings.reenablePayment"
+            )}
+          </Button>
+        )}
+      </div>
+    </div>
   );
 }
