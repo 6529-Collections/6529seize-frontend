@@ -54,6 +54,7 @@ export function useUnreadDividerVisibility({
     function observeDivider(divider: Element | null) {
       if (divider === observedDivider) return;
       cancelVisibilityTimer();
+      hasSeenDivider = false;
       if (observedDivider) intersectionObserver?.unobserve(observedDivider);
       if (divider) intersectionObserver?.observe(divider);
       observedDivider = divider;

@@ -130,7 +130,7 @@ describe("WaveDropsScrollControls unread jump", () => {
   });
 
   it("starts a fresh visibility interval when chat replaces the divider", async () => {
-    const { moveDivider } = renderControls();
+    const { moveDivider, onDismissUnread } = renderControls();
     await moveDivider(-70);
     await moveDivider(40);
     act(() => jest.advanceTimersByTime(200));
@@ -141,5 +141,10 @@ describe("WaveDropsScrollControls unread jump", () => {
     expect(screen.getByRole("button", { name: JUMP_LABEL })).toBeVisible();
     act(() => jest.advanceTimersByTime(100));
     expect(screen.queryByRole("button", { name: JUMP_LABEL })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Replace divider" }));
+    await moveDivider(-70);
+    expect(onDismissUnread).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: JUMP_LABEL })).toBeVisible();
   });
 });
