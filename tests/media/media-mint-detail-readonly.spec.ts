@@ -1777,10 +1777,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
         await page.setViewportSize({ width, height: 1000 });
         await expect(external).toHaveCSS("font-size", "14px");
         await expectUniformMarketplaceIcons(page);
-        await expect(metadataTab).toHaveCSS(
-          "font-weight",
-          width >= 768 ? "500" : "600"
-        );
+        await expect(metadataTab).toHaveCSS("font-weight", "500");
         if (width >= 768) {
           await expectFullWidthTabDivider(page, "ReMemes page sections");
         }
