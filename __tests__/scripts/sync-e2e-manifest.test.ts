@@ -204,12 +204,12 @@ describe("E2E pack manifest", () => {
     const config = YAML.parse(workflow) as {
       jobs: Record<string, { steps?: { if?: string; run?: string }[] }>;
     };
-    const mediaStep = Object.values(config.jobs)
+    const mediaSteps = Object.values(config.jobs)
       .flatMap((job) => job.steps ?? [])
-      .find(
+      .filter(
         (step) => step.if === "matrix.lane == 'playwright-submission-artwork'"
       );
-    expect(mediaStep?.run?.trim().split("\n")).toEqual([
+    expect(mediaSteps.map((step) => step.run?.trim())).toEqual([
       "./bin/6529 run test:e2e:submission-artwork-sandbox",
       "./bin/6529 run test:e2e:image-viewer-layout-sandbox",
     ]);

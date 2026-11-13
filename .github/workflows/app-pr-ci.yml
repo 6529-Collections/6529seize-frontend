@@ -508,9 +508,14 @@ jobs:
         env:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/submission-artwork"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/submission-artwork"
-        run: |
-          ./bin/6529 run test:e2e:submission-artwork-sandbox
-          ./bin/6529 run test:e2e:image-viewer-layout-sandbox
+        run: ./bin/6529 run test:e2e:submission-artwork-sandbox
+
+      - name: Run image viewer layout browser regression pack
+        if: matrix.lane == 'playwright-submission-artwork'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/image-viewer-layout"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/image-viewer-layout"
+        run: ./bin/6529 run test:e2e:image-viewer-layout-sandbox
 
       - name: Run PDF attachment browser regression pack
         if: matrix.lane == 'playwright-pdf-attachments'
