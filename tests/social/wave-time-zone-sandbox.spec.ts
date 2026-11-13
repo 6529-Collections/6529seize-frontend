@@ -287,6 +287,12 @@ test.describe("Display time zone @auth @local-only", () => {
       await page.setViewportSize({ width, height: 900 });
       await expect(score).toBeInViewport({ ratio: 1 });
       await expect(
+        header.getByRole("button", {
+          name: "Search messages in this wave",
+          exact: true,
+        })
+      ).toBeInViewport({ ratio: 1 });
+      await expect(
         header.getByRole("button", { name: "Wave details", exact: true })
       ).toBeInViewport({ ratio: 1 });
       await expect
@@ -338,19 +344,23 @@ test.describe("Display time zone @auth @local-only", () => {
     });
     await expect(
       actions.getByRole("button", {
+        name: "Search messages in this wave",
+        exact: true,
+      })
+    ).toHaveCount(0);
+    await expect(
+      actions.getByRole("button", {
         name: "Switch to gallery view",
         exact: true,
       })
     ).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(actions).toHaveCount(0);
-    await more.click();
-    await actions
-      .getByRole("button", {
-        name: "Search messages in this wave",
-        exact: true,
-      })
-      .click();
+    const search = header.getByRole("button", {
+      name: "Search messages in this wave",
+      exact: true,
+    });
+    await search.click();
     const searchInput = page.getByPlaceholder("Search messages", {
       exact: true,
     });
@@ -362,7 +372,7 @@ test.describe("Display time zone @auth @local-only", () => {
     await expect(searchInput).toHaveAttribute("aria-expanded", "false");
     await page.keyboard.press("Escape");
     await expect(searchInput).toBeHidden();
-    await expect(more).toBeFocused();
+    await expect(search).toBeFocused();
     await header
       .getByRole("button", { name: "Wave details", exact: true })
       .click();

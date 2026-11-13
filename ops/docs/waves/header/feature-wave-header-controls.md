@@ -37,8 +37,8 @@ use up to two compact columns, with each label beside its icon and value.
 
 ## Entry Points
 
-1. Open an active wave, select the `Show right sidebar` icon in the desktop/tablet header (or
-   `More wave actions` → `Wave details` on compact web), then select `About`.
+1. Open an active wave, select the `Show right sidebar` icon in the desktop/tablet
+   header or `Wave details` on compact web, then select `About`.
 2. Use the top-right control row (`Join` / `Joined`, notification controls).
 3. Use header controls near the wave title, avatar, and metadata.
 4. Open the owner options menu (`⋮`) when available.
@@ -77,10 +77,11 @@ with compact submission icons; wider columns restore the submission labels.
 On mobile web, the available score also stays beside the name on one line,
 centered with the avatar. `Join` keeps its white surface, text label, accessible
 name, plus icon and touch target. `Wave details` stays visible beside `More wave
-actions` and opens the details panel in one click. Search remains inside More;
-selecting the name still opens `About`. In headers with less than 384px of usable
-width, the actions occupy their own row so the name, score, Join and details stay
-visible. Submission controls stay directly accessible. Direct messages do not
+actions` and opens the details panel in one click. Search stays directly visible
+before More and opens message search in one click; selecting the name still opens
+`About`. The header stays on one line, using the production dimensions: a 36px
+avatar, unchanged title typography, a 13px avatar-to-text gap, and 32px utility
+buttons separated by 8px gaps. Submission controls stay directly accessible. Direct messages do not
 show a Wave Score.
 
 The top-right controls start with `Join` when the viewer has not joined the
@@ -108,7 +109,7 @@ resting icon color and brightens on hover, since it opens guidance rather than
 acting as a disabled button. Other restricted submission controls
 keep their bordered surfaces.
 On the web, the Main Stage submit/help control sits before message search.
-Compact web keeps Search inside `More wave actions`, after submit/help.
+Compact web keeps Search directly visible after submit/help and before More.
 Add/Edit REP sits beside `Join` when both controls are shown.
 
 ### Join Call to Action

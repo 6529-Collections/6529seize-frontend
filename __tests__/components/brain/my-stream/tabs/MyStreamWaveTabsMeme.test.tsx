@@ -338,7 +338,11 @@ describe("MyStreamWaveTabsMeme", () => {
       name: "More wave actions",
     });
     const submitButton = screen.getByRole("button", { name: "submit" });
-    expect(submitButton.nextElementSibling).toBe(moreActionsButton);
+    const searchButton = screen.getByRole("button", {
+      name: "Search messages in this wave",
+    });
+    expect(submitButton.nextElementSibling).toBe(searchButton);
+    expect(searchButton.nextElementSibling).toBe(moreActionsButton);
     expect(moreActionsButton.nextElementSibling).toBe(
       screen.getByRole("button", { name: "Wave details" })
     );
@@ -350,10 +354,10 @@ describe("MyStreamWaveTabsMeme", () => {
     });
     expect(moreActionsDialog).toBeInTheDocument();
     expect(
-      within(moreActionsDialog).getByRole("button", {
+      within(moreActionsDialog).queryByRole("button", {
         name: "Search messages in this wave",
       })
-    ).toBeInTheDocument();
+    ).toBeNull();
     expect(
       screen.getByRole("button", { name: "Share wave" })
     ).toBeInTheDocument();

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveTabsDefault from "@/components/brain/my-stream/tabs/MyStreamWaveTabsDefault";
 import { AuthContext } from "@/components/auth/Auth";
@@ -330,10 +330,16 @@ describe("MyStreamWaveTabsDefault", () => {
       name: "More wave actions",
     });
     expect(moreActionsButton).toHaveAttribute("aria-haspopup", "dialog");
-    fireEvent.click(moreActionsButton);
     expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
-    ).toBeInTheDocument();
+        .nextElementSibling
+    ).toBe(moreActionsButton);
+    fireEvent.click(moreActionsButton);
+    expect(
+      within(
+        screen.getByRole("dialog", { name: "More wave actions" })
+      ).queryByRole("button", { name: "Search messages in this wave" })
+    ).toBeNull();
     expect(
       screen.getByRole("dialog", { name: "More wave actions" })
     ).toBeInTheDocument();

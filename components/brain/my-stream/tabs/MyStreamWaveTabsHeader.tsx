@@ -52,6 +52,8 @@ import { PlaintextDmEncryptionNotice } from "@/components/e2ee/plaintext/Plainte
 import {
   WAVE_HEADER_ACTION_CLASSES,
   WAVE_HEADER_ACTION_SURFACE_CLASSES,
+  WAVE_HEADER_COMPACT_ACTION_CLASSES,
+  WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES,
 } from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
 
 const TRUNCATION_EPSILON_PX = 1;
@@ -191,9 +193,9 @@ function MyStreamWaveHeaderIdentity({
   }
 
   return (
-    <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 md:tw-gap-x-[13px]">
+    <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-[13px]">
       <div
-        className={`tw-size-8 tw-flex-shrink-0 md:tw-size-9 ${showDescriptionPreview || wave.parent_wave ? "tw-self-start" : ""} ${
+        className={`tw-size-9 tw-flex-shrink-0 ${showDescriptionPreview || wave.parent_wave ? "tw-self-start" : ""} ${
           isAnnouncement
             ? "tw-rounded-lg"
             : "tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
@@ -400,17 +402,6 @@ export default function MyStreamWaveTabsHeader({
       : [];
   const headerOverflowMenuItems: CompactMenuItem[] = isCompact
     ? [
-        ...(isCompactWave
-          ? [
-              {
-                id: "search-wave",
-                label: searchMessagesLabel,
-                icon: <MagnifyingGlassIcon className="tw-size-4" />,
-                onSelect: openSearch,
-                deferUntilClosed: true,
-              },
-            ]
-          : []),
         displayTimeZoneMenuItem,
         ...(showShareAction
           ? [
@@ -428,10 +419,23 @@ export default function MyStreamWaveTabsHeader({
     ...externalOverflowMenuItems,
     ...headerOverflowMenuItems,
   ];
+  const compactActions =
+    isCompact && compactMenuItems.length > 0 ? (
+      <CompactWaveActions
+        items={compactMenuItems}
+        compactTrigger={isCompactWave}
+      />
+    ) : null;
   const backButtonSizeClass = isCompactWave
     ? `tw-size-8 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`
     : "tw-size-11 tw-self-start sm:-tw-ml-2.5 sm:desktop-hover:tw-h-9";
   const directTimeZoneVariant = isCompact ? "compact" : "header";
+  const utilityButtonClassName = isCompactWave
+    ? WAVE_HEADER_COMPACT_ACTION_CLASSES
+    : WAVE_HEADER_ACTION_CLASSES;
+  const utilitySurfaceClassName = isCompactWave
+    ? WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES
+    : WAVE_HEADER_ACTION_SURFACE_CLASSES;
 
   useLayoutEffect(() => {
     if (!showDescriptionPreview) {
@@ -482,10 +486,10 @@ export default function MyStreamWaveTabsHeader({
     <>
       <header
         ref={headerRef}
-        className={`${headerClassName} tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 ${isDirectMessage ? "" : headerMinHeight} ${isCompactWave ? "tw-flex-wrap tw-gap-y-2 tw-@container/wave-header" : ""}`}
+        className={`${headerClassName} tw-flex-nowrap tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 ${isDirectMessage ? "" : headerMinHeight}`}
       >
         <div
-          className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 ${isCondensed || isCompactWave ? "tw-self-center" : "tw-self-start tw-pt-0.5"} ${isCompactWave ? "tw-basis-full @[24rem]/wave-header:tw-basis-0" : ""}`}
+          className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 ${isCondensed || isCompactWave ? "tw-self-center" : "tw-self-start tw-pt-0.5"}`}
         >
           {showBackButton && (
             <button
@@ -518,11 +522,11 @@ export default function MyStreamWaveTabsHeader({
           <PlaintextDmEncryptionNotice wave={wave} compact={isCompact} />
         </div>
         <div
-          className={`${
+          className={
             isCondensed || isCompactWave
-              ? "tw-flex tw-shrink-0 tw-items-center tw-gap-x-2 touch-only:tw-gap-x-3"
+              ? "tw-flex tw-shrink-0 tw-items-center tw-gap-x-2 tw-self-center"
               : actionsClassName
-          } ${isCompactWave ? "tw-ml-auto" : ""}`}
+          }
         >
           <WaveJoinCta
             wave={wave}
@@ -532,40 +536,34 @@ export default function MyStreamWaveTabsHeader({
           {showWaveRepAction && <WaveRepButton wave={wave} variant="compact" />}
           {renderLeadingActions?.(actionContext)}
           {renderTrailingActions?.(actionContext)}
-          {isCompact && compactMenuItems.length > 0 && (
-            <CompactWaveActions
-              items={compactMenuItems}
-              triggerRef={isCompactWave ? searchTrigger : undefined}
+          {isDirectMessage && compactActions}
+          <button
+            type="button"
+            ref={searchTrigger}
+            onClick={openSearch}
+            onPointerEnter={preloadWaveDropsSearchModal}
+            onFocus={preloadWaveDropsSearchModal}
+            aria-label={searchMessagesLabel}
+            data-tooltip-id={headerActionsTooltipId}
+            data-tooltip-content={searchMessagesLabel}
+            className={utilityButtonClassName}
+          >
+            <span className={utilitySurfaceClassName}>
+              <MagnifyingGlassIcon className="tw-size-4 tw-flex-shrink-0" />
+            </span>
+          </button>
+          {!isDirectMessage && compactActions}
+          {!isCompact && !isDirectMessage && (
+            <WaveHeaderDisplayMenu
+              items={externalOverflowMenuItems}
+              tooltipId={headerActionsTooltipId}
             />
           )}
           {!isCompactWave && (
-            <>
-              <button
-                type="button"
-                ref={searchTrigger}
-                onClick={openSearch}
-                onPointerEnter={preloadWaveDropsSearchModal}
-                onFocus={preloadWaveDropsSearchModal}
-                aria-label={searchMessagesLabel}
-                data-tooltip-id={headerActionsTooltipId}
-                data-tooltip-content={searchMessagesLabel}
-                className={WAVE_HEADER_ACTION_CLASSES}
-              >
-                <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
-                  <MagnifyingGlassIcon className="tw-size-4 tw-flex-shrink-0" />
-                </span>
-              </button>
-              {!isCompact && !isDirectMessage && (
-                <WaveHeaderDisplayMenu
-                  items={externalOverflowMenuItems}
-                  tooltipId={headerActionsTooltipId}
-                />
-              )}
-              <DisplayTimeZoneSwitch
-                variant={isDirectMessage ? directTimeZoneVariant : "indicator"}
-                tooltipId={headerActionsTooltipId}
-              />
-            </>
+            <DisplayTimeZoneSwitch
+              variant={isDirectMessage ? directTimeZoneVariant : "indicator"}
+              tooltipId={headerActionsTooltipId}
+            />
           )}
           <button
             type="button"
@@ -574,7 +572,7 @@ export default function MyStreamWaveTabsHeader({
             data-tooltip-content={
               isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
             }
-            className={WAVE_HEADER_ACTION_CLASSES}
+            className={utilityButtonClassName}
             aria-label={
               isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
             }
@@ -584,7 +582,7 @@ export default function MyStreamWaveTabsHeader({
             aria-expanded={isRightSidebarOpen}
             aria-pressed={isRightSidebarOpen}
           >
-            <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+            <span className={utilitySurfaceClassName}>
               <ChevronDoubleLeftIcon
                 strokeWidth={2}
                 aria-hidden="true"

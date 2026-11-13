@@ -9,6 +9,8 @@ import { createPortal } from "react-dom";
 import {
   WAVE_HEADER_ACTION_CLASSES,
   WAVE_HEADER_ACTION_SURFACE_CLASSES,
+  WAVE_HEADER_COMPACT_ACTION_CLASSES,
+  WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES,
 } from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
 
 const COMPACT_ACTION_CLASSES =
@@ -17,9 +19,11 @@ const COMPACT_ACTION_CLASSES =
 export default function CompactWaveActions({
   items,
   triggerRef,
+  compactTrigger = false,
 }: {
   readonly items: readonly CompactMenuItem[];
   readonly triggerRef?: Ref<HTMLButtonElement> | undefined;
+  readonly compactTrigger?: boolean | undefined;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const pendingActionRef = useRef<(() => void) | null>(null);
@@ -136,9 +140,19 @@ export default function CompactWaveActions({
         aria-expanded={isOpen}
         data-compact-wave-actions-trigger="true"
         onClick={() => setIsOpen(true)}
-        className={WAVE_HEADER_ACTION_CLASSES}
+        className={
+          compactTrigger
+            ? WAVE_HEADER_COMPACT_ACTION_CLASSES
+            : WAVE_HEADER_ACTION_CLASSES
+        }
       >
-        <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+        <span
+          className={
+            compactTrigger
+              ? WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES
+              : WAVE_HEADER_ACTION_SURFACE_CLASSES
+          }
+        >
           <EllipsisVerticalIcon className="tw-size-5 tw-flex-shrink-0" />
         </span>
       </button>

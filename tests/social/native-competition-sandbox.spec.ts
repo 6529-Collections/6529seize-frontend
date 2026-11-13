@@ -1976,11 +1976,6 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await page.goto(`/waves/${MEMES_WAVE}?tab=chat`, {
         waitUntil: "domcontentloaded",
       });
-      if (testInfo.project.name === "web-mobile-chromium") {
-        await page
-          .getByRole("button", { name: "More wave actions", exact: true })
-          .click();
-      }
       await page
         .getByRole("button", {
           name: "Search messages in this wave",
@@ -2006,10 +2001,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(input).toBeHidden();
       await expect(
         page.getByRole("button", {
-          name:
-            testInfo.project.name === "web-mobile-chromium"
-              ? "More wave actions"
-              : "Search messages in this wave",
+          name: "Search messages in this wave",
           exact: true,
         })
       ).toBeFocused();
@@ -2108,33 +2100,27 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
               name: "More wave actions",
               exact: true,
             });
-            const followingControls =
-              testInfo.project.name === "web-mobile-chromium"
+            const followingControls = [
+              page.getByRole("button", {
+                name: "Search messages in this wave",
+                exact: true,
+              }),
+              more,
+              ...(testInfo.project.name === "web-mobile-chromium"
                 ? [
-                    more,
                     page.getByRole("button", {
                       name: "Wave details",
                       exact: true,
                     }),
                   ]
-                : [
-                    page.getByRole("button", {
-                      name: "Search messages in this wave",
-                      exact: true,
-                    }),
-                    more,
-                  ];
+                : []),
+            ];
             let previousBox = actionBox!;
             for (const control of followingControls) {
               const box = await control.boundingBox();
               expect(box).not.toBeNull();
               expect(
-                Math.abs(
-                  box!.x -
-                    previousBox.x -
-                    previousBox.width -
-                    (testInfo.project.name === "web-mobile-chromium" ? 12 : 8)
-                )
+                Math.abs(box!.x - previousBox.x - previousBox.width - 8)
               ).toBeLessThanOrEqual(1);
               expect(
                 Math.abs(
