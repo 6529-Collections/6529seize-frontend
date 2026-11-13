@@ -46,6 +46,7 @@ import {
   createConversation,
   findDm,
   leave,
+  leaveThisDevice,
   removeMember,
   rename,
   setAdmin,
@@ -90,7 +91,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     this.readSync = new ReadSync(ctx, {
       createSelfGroup: () =>
         createConversation(ctx, { profileIds: [], kind: "self" }, () => {}),
-      leave: (g) => leave(ctx, g, () => {}),
+      leaveThisDevice: (g) => leaveThisDevice(ctx, g),
     });
     ctx.readSync = this.readSync;
     this.controller = new EngineController(ctx, {

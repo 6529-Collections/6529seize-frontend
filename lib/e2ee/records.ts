@@ -56,6 +56,11 @@ export interface StoredReadSync {
   unsent: string[];
   /** When this device last created a self group (ms; once a day at most). */
   createdAt?: number;
+  /**
+   * Since when this device, with siblings but no self group, has waited to
+   * be added to theirs (ms; P60 §2 rule 1).
+   */
+  waitingSince?: number;
 }
 
 /**

@@ -27,6 +27,22 @@ const emptyClaim = (): ClaimedPackages => ({
   packages: [],
 });
 
+/**
+ * A self group admits only clients that support self groups, by the
+ * capability their KeyPackage lists (P60). A client built before them is
+ * skipped and never becomes a member that never acts; once it updates, its
+ * new KeyPackages say so and the next maintenance adds it.
+ */
+export function selfGroupPackages(
+  ctx: EngineContext,
+  packages: readonly ClaimedPackage[]
+): ClaimedPackage[] {
+  const mls = ctx.mls;
+  return mls
+    ? packages.filter((item) => mls.supportsSelfGroups(item.keyPackage))
+    : [];
+}
+
 /** device_key -> device record (leaf verification and roster_add). */
 export const claimedDevices = (
   packages: readonly ClaimedPackage[]

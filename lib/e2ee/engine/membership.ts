@@ -13,6 +13,7 @@ import {
   claimedDevices,
   claimKeyPackages,
   isUsableDevice,
+  selfGroupPackages,
   type ClaimedPackage,
 } from "./claims";
 import {
@@ -285,7 +286,7 @@ function creationMetadata(
   peer: string | undefined
 ): GroupMetadata {
   const dm = input.kind === "dm";
-  const metadata: GroupMetadata = {
+  return {
     v: 1,
     g: randomHex(32),
     kind: input.kind,
@@ -294,8 +295,6 @@ function creationMetadata(
     created_by: ctx.profileId,
     history: "from_join",
   };
-  // A self group's creation time picks the newest one (D175, P60 §2).
-  return input.kind === "self" ? { ...metadata, created: ctx.now() } : metadata;
 }
 
 /** Claims every target's KeyPackages (plus our siblings') before creating. */
@@ -354,11 +353,13 @@ export async function createConversation(
   }
   const metadata = creationMetadata(ctx, input, peer);
   const g = metadata.g;
-  const packages = await claimForCreation(
+  const claimed = await claimForCreation(
     ctx,
     targets,
     input.kind === "dm" || input.requireAllRecipients === true
   );
+  const packages =
+    input.kind === "self" ? selfGroupPackages(ctx, claimed) : claimed;
   const runtime = await createLocalGroup(ctx, metadata, predecessorG);
   const failure = await commitAdds(ctx, g, packages, () => {
     onDelayed(g);
@@ -571,9 +572,14 @@ async function handOverAdmin(
   );
 }
 
+/**
+ * Proposes removing this profile's devices from the group: all of them
+ * (leaving the chat), or with `onlyThisDevice` just this one.
+ */
 async function proposeLeave(
   ctx: EngineContext,
-  runtime: GroupRuntime
+  runtime: GroupRuntime,
+  onlyThisDevice = false
 ): Promise<boolean> {
   return ctx.queue.run(async () => {
     await catchUpGroup(ctx, runtime);
@@ -581,8 +587,13 @@ async function proposeLeave(
       return true;
     }
     const mls = requireMls(ctx);
+    const own = ownDeviceKey(ctx);
     const keys = runtime.record.members
-      .filter((member) => member.profileId === ctx.profileId)
+      .filter((member) =>
+        onlyThisDevice
+          ? member.deviceKey === own
+          : member.profileId === ctx.profileId
+      )
       .map((member) => member.deviceKey);
     const entries = mls.proposeRemove(runtime.record.g, keys);
     await checkpoint(ctx, { groups: [runtime] });
@@ -634,6 +645,24 @@ export async function leave(
   await handOverAdmin(ctx, runtime, onDelayed);
   for (let attempt = 0; attempt < 5; attempt += 1) {
     if (await proposeLeave(ctx, runtime)) {
+      return;
+    }
+  }
+  throw new E2eeError("E2EE_COMMIT_FAILED", "leave");
+}
+
+/**
+ * Removes only this device from a group, leaving the profile's other
+ * devices in it: how a device leaves an older self group once the handoff
+ * to the newer one is verified (D175, P60 §2 rule 3).
+ */
+export async function leaveThisDevice(
+  ctx: EngineContext,
+  g: string
+): Promise<void> {
+  const runtime = requireActiveGroup(ctx, g);
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    if (await proposeLeave(ctx, runtime, true)) {
       return;
     }
   }

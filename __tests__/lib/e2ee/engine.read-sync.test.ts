@@ -4,9 +4,12 @@
  * Integration: real OpenMLS WASM + fake delivery service. Read-state sync
  * between one user's own devices (D175, design P60).
  */
+import type { E2eeApiClient } from "@/lib/e2ee/api";
 import { base64ToBytes } from "@/lib/e2ee/bytes";
-import { DAY_MS, type EngineContext } from "@/lib/e2ee/engine/context";
+import type { EngineContext } from "@/lib/e2ee/engine/context";
 import { createConversation } from "@/lib/e2ee/engine/membership";
+import { MlsClient } from "@/lib/e2ee/mls-adapter";
+import { createFakeApiClient } from "@/tests/support/e2ee/fakeDeliveryService.cjs";
 import {
   addUser,
   createWorld,
@@ -57,6 +60,14 @@ async function addSyncDevice(
   return device;
 }
 
+async function waitUntil(check: () => boolean, ms = 10_000): Promise<void> {
+  const until = Date.now() + ms;
+  while (!check()) {
+    if (Date.now() > until) throw new Error("condition not met in time");
+    await new Promise((resolve) => setTimeout(resolve, 5));
+  }
+}
+
 /** The engine's internal context, to stage a self-group creation race. */
 const contextOf = (device: TestDevice): EngineContext =>
   (device.engine as unknown as { ctx: EngineContext }).ctx;
@@ -83,7 +94,8 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
   it("clears a chat on the phone after it is read on the laptop", async () => {
     const world = await createWorld();
     const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
-    expect(selfGroupsOf(world, "alice").length).toBeGreaterThan(0);
+    // The phone joined the laptop's self group rather than make its own.
+    expect(selfGroupsOf(world, "alice")).toHaveLength(1);
 
     await bob.primary.engine.send(g, { text: "one" });
     await bob.primary.engine.send(g, { text: "two" });
@@ -161,10 +173,7 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     laptop.engine.markRead(g);
     await settle(world);
     expect(unread(tablet, g)).toBe(0);
-    // The tablet made its own self group, which became the newest; a day
-    // later every device has left the older ones.
-    world.clock.advance(DAY_MS + 1_000);
-    await settle(world);
+    // Its siblings added it to their self group; it made none of its own.
     const [kept, ...others] = selfGroupsOf(world, "alice");
     expect(others).toEqual([]);
     expect(kept?.roster.size).toBe(3);
@@ -283,35 +292,212 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     expect(unread(alice.primary, g)).toBe(1);
   });
 
-  it("converges on the newest self group and leaves the older one a day later", async () => {
+  it("breaks creation races by group ID and leaves the other group, each device for itself", async () => {
     const world = await createWorld();
     const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
     const [first] = selfGroupsOf(world, "alice");
+    if (!first) throw new Error("no self group");
     // A second self group, as when two devices each create one at once.
-    world.clock.advance(1_000);
     const second = await createConversation(
       contextOf(phone),
       { profileIds: [], kind: "self" },
       () => {}
     );
     await settle(world);
-    const newer = dsGroups(world).find((group) => group.g === second);
-    expect(newer?.roster.size).toBe(2);
+    // Both devices were in both, so the handoff was verified at once: each
+    // left the group with the higher handle, for itself.
+    const [kept, ...others] = selfGroupsOf(world, "alice");
+    expect(others).toEqual([]);
+    expect(kept?.g).toBe([first.g, second].sort()[0]);
+    expect(kept?.roster.size).toBe(2);
 
     await bob.primary.engine.send(g, { text: "race" });
     await settle(world);
-    expect(unread(phone, g)).toBe(1);
-    const before = newer?.items.length ?? 0;
     laptop.engine.markRead(g);
     await settle(world);
     expect(unread(phone, g)).toBe(0);
-    // The position went to the newest self group.
-    expect(newer?.items.length ?? 0).toBeGreaterThan(before);
+  });
 
-    // A day after the newest was joined, both devices leave the older one.
-    world.clock.advance(DAY_MS + 1_000);
+  it("never cuts off a device that is not in the canonical self group yet", async () => {
+    const world = await createWorld();
+    const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const [old] = selfGroupsOf(world, "alice");
+    if (!old) throw new Error("no self group");
+    const phoneKey = phone.engine.getThisDevice()?.deviceKey ?? "";
+    const laptopKey = laptop.engine.getThisDevice()?.deviceKey ?? "";
+    // The phone's KeyPackages read as from a client without self groups,
+    // so a self group the laptop makes now holds only the laptop. Make one
+    // until its handle sorts first and it becomes the canonical group.
+    const capable = jest
+      .spyOn(MlsClient.prototype, "supportsSelfGroups")
+      .mockReturnValue(false);
+    let canonical = "";
+    for (
+      let tries = 0;
+      tries < 20 && !(canonical && canonical < old.g);
+      tries += 1
+    ) {
+      canonical = await createConversation(
+        contextOf(laptop),
+        { profileIds: [], kind: "self" },
+        () => {}
+      );
+      await settle(world);
+    }
+    expect(canonical < old.g).toBe(true);
+    // The phone is not in the canonical group, so the laptop stays in the
+    // old one, and its read still reaches the phone.
+    expect(old.roster.has(laptopKey)).toBe(true);
+    await bob.primary.engine.send(g, { text: "still heard" });
     await settle(world);
-    expect(first?.roster.size).toBe(0);
-    expect(newer?.roster.size).toBe(2);
+    expect(unread(phone, g)).toBe(1);
+    laptop.engine.markRead(g);
+    await settle(world);
+    expect(unread(phone, g)).toBe(0);
+
+    // Once the phone can be added, it is; then both leave the old group.
+    capable.mockRestore();
+    world.clock.advance(11 * 60_000);
+    await settle(world);
+    const kept = dsGroups(world).find((group) => group.g === canonical);
+    expect(kept?.roster.has(phoneKey)).toBe(true);
+    expect(old.roster.size).toBe(0);
+  });
+
+  it("does not add a client without self groups, and adds it once it updates", async () => {
+    const world = await createWorld();
+    const alice = await syncUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    await settle(world);
+    const [self] = selfGroupsOf(world, "alice");
+    if (!self) throw new Error("no self group");
+    // A phone whose client predates self groups: its KeyPackages lack the
+    // capability, so the laptop never adds it.
+    const capable = jest
+      .spyOn(MlsClient.prototype, "supportsSelfGroups")
+      .mockReturnValue(false);
+    const phone = await addSyncDevice(world, alice, { readSync: false });
+    const g = await bob.primary.engine.createConversation({
+      profileIds: ["alice"],
+      kind: "dm",
+    });
+    await settle(world);
+    const phoneKey = phone.engine.getThisDevice()?.deviceKey ?? "";
+    expect(self.roster.has(phoneKey)).toBe(false);
+    await bob.primary.engine.send(g, { text: "read me" });
+    await settle(world);
+    alice.primary.engine.markRead(g);
+    await settle(world);
+    expect(unread(phone, g)).toBe(1);
+
+    // The phone updates: the next maintenance adds it, and the laptop's
+    // snapshot catches it up.
+    capable.mockRestore();
+    world.clock.advance(11 * 60_000);
+    await settle(world);
+    expect(self.roster.has(phoneKey)).toBe(true);
+    expect(unread(phone, g)).toBe(0);
+  });
+
+  it("creates its own self group only when joining stalls, then settles on one", async () => {
+    const world = await createWorld();
+    const alice = await syncUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    await settle(world);
+    // The laptop is offline: nobody adds the tablet to its self group.
+    const laptopStorage = alice.primary.storage;
+    stopDevice(world, alice.primary);
+    const tablet = await addSyncDevice(world, alice);
+    await settle(world);
+    expect(selfGroupsOf(world, "alice")).toHaveLength(1);
+    world.clock.advance(3 * 60_000);
+    await settle(world);
+    expect(selfGroupsOf(world, "alice")).toHaveLength(2);
+
+    const laptop = await startDevice(world, "alice", alice.account, {
+      storage: laptopStorage,
+      enroll: false,
+      extra: { readSync: true },
+    });
+    alice.devices.push(laptop);
+    world.clock.advance(11 * 60_000);
+    await settle(world);
+    const [kept, ...others] = selfGroupsOf(world, "alice");
+    expect(others).toEqual([]);
+    expect(kept?.roster.size).toBe(2);
+    const g = await bob.primary.engine.createConversation({
+      profileIds: ["alice"],
+      kind: "dm",
+    });
+    await settle(world);
+    await bob.primary.engine.send(g, { text: "settled" });
+    await settle(world);
+    laptop.engine.markRead(g);
+    await settle(world);
+    expect(unread(tablet, g)).toBe(0);
+  });
+
+  it("keeps chats read while a batch is sending queued for the next one", async () => {
+    const world = await createWorld();
+    const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const second = await bob.primary.engine.createConversation({
+      profileIds: ["alice"],
+      kind: "group",
+      name: "Second",
+    });
+    await settle(world);
+    await bob.primary.engine.send(g, { text: "first chat" });
+    await bob.primary.engine.send(second, { text: "second chat" });
+    await settle(world);
+    expect(unread(phone, second)).toBe(1);
+
+    laptop.engine.markRead(g);
+    const gate = world.ds.hold(/\/messages$/);
+    const sending = laptop.engine.flushReadSync();
+    await waitUntil(() => gate.waiting() === 1);
+    // Read while the first batch is on its way.
+    laptop.engine.markRead(second);
+    gate.release();
+    await sending;
+    await settle(world);
+    expect(unread(phone, g)).toBe(0);
+    expect(unread(phone, second)).toBe(0);
+  });
+
+  it("sends nothing at all with sending off, not even when it joins", async () => {
+    const world = await createWorld();
+    const alice = await syncUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    await settle(world);
+    const g = await bob.primary.engine.createConversation({
+      profileIds: ["alice"],
+      kind: "dm",
+    });
+    await settle(world);
+    await bob.primary.engine.send(g, { text: "known" });
+    await settle(world);
+    const api = createFakeApiClient(world.ds, "alice") as E2eeApiClient;
+    const sentTo: string[] = [];
+    const spied: E2eeApiClient = {
+      ...api,
+      sendMessage: (group, body) => {
+        sentTo.push(group);
+        return api.sendMessage(group, body);
+      },
+    };
+    const off = await startDevice(world, "alice", alice.account, {
+      extra: { readSync: false, api: spied },
+    });
+    alice.devices.push(off);
+    await settle(world);
+    const [self] = selfGroupsOf(world, "alice");
+    const offKey = off.engine.getThisDevice()?.deviceKey ?? "";
+    expect(self?.roster.has(offKey)).toBe(true);
+    // It joined, holds a read position and is asked for state: still silent.
+    off.engine.markRead(g);
+    await settle(world);
+    await off.engine.flushReadSync();
+    await settle(world);
+    expect(sentTo).toEqual([]);
   });
 });

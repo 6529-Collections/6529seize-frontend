@@ -3,7 +3,12 @@ import { digestBytes, rosterDigest } from "../digests";
 import type { ApiE2eeDevice } from "../api-types";
 import type { E2eeUntrustedDevice } from "../types";
 import type { WasmCommitOps } from "../wasm-types";
-import { claimedDevices, claimKeyPackages, isUsableDevice } from "./claims";
+import {
+  claimedDevices,
+  claimKeyPackages,
+  isUsableDevice,
+  selfGroupPackages,
+} from "./claims";
 import { submitCommit, type CommitIntent, type CommitOutcome } from "./commit";
 import {
   isActive,
@@ -243,7 +248,11 @@ export function requiredChangesPlanner(options: {
       ops.include_pending_proposals = runtime.record.leaving.length > 0;
     }
     // The claimed record must still be trusted, not just the listed one.
-    const packages = await onlyTrustedPackages(ctx, claimed?.packages ?? []);
+    const trusted = await onlyTrustedPackages(ctx, claimed?.packages ?? []);
+    const packages =
+      runtime.record.metadata.kind === "self"
+        ? selfGroupPackages(ctx, trusted)
+        : trusted;
     if (packages.length > 0) {
       ops.add_key_packages = packages.map((item) => item.keyPackage);
     }

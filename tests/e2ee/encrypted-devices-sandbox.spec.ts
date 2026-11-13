@@ -31,6 +31,11 @@ import { isMobileWebProject } from "../support/surfaceSimulation";
 
 /** Other members add a new device after a random 5-30 s delay (8.4). */
 const DEVICE_ADD_TIMEOUT_MS = 30_000 + 2 * E2EE_SYNC_TIMEOUT_MS;
+/**
+ * A new device waits 2 minutes to be added to its siblings' self group
+ * before it makes its own (P60 §2 rule 1); then a sync pass carries it.
+ */
+const SELF_GROUP_JOIN_TIMEOUT_MS = 2 * 60_000 + 2 * E2EE_SYNC_TIMEOUT_MS;
 
 /**
  * Several devices per person in real browsers, each with its own storage
@@ -164,6 +169,7 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
       process.env["NEXT_PUBLIC_E2EE_READ_SYNC"] === "false",
       "Read-state sync is off for this run."
     );
+    test.setTimeout(600_000);
     const users = await resetE2eeSandbox(baseURL);
     const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
     const bobPhone = await openE2eeUser(
@@ -198,12 +204,15 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
       });
     }
 
-    // Reading on the laptop, then leaving the page, sends the position.
+    // Reading on the laptop, then leaving the page, sends the position. The
+    // laptop first waits to be added to the phone's self group and makes its
+    // own if that stalls (P60 §2); the sandbox has no WebSocket hints that
+    // would add it at once, so allow for that wait.
     await openConversationFromList(bobLaptop.page, "alice");
     await expectMessage(bobLaptop.page, "Read me on one device.");
     await hidePage(bobLaptop.page);
     await expect(unreadBadge(bobPhone.page, "alice")).toHaveCount(0, {
-      timeout: E2EE_SYNC_TIMEOUT_MS,
+      timeout: SELF_GROUP_JOIN_TIMEOUT_MS,
     });
 
     // A newer message stays unread on the phone.
