@@ -3,7 +3,7 @@ import { useId, type ChangeEvent, type ReactNode } from "react";
 
 export const STUDIO_CONTROL_CLASS =
   "tw-w-full tw-min-h-11 tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 focus:tw-border-primary-300 focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-300";
-export const STUDIO_SELECT_CLASS = `${DROPDOWN_FIELD_CLASSES} tw-w-full tw-min-h-11 tw-min-w-0 tw-px-3 tw-py-2.5 tw-text-sm`;
+const STUDIO_SELECT_CLASS = `${DROPDOWN_FIELD_CLASSES} tw-w-full tw-min-h-11 tw-min-w-0 tw-px-3 tw-py-2.5 tw-text-sm`;
 
 export function StudioButton({
   children,

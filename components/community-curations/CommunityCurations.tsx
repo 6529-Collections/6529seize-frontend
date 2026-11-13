@@ -146,6 +146,7 @@ export default function CommunityCurations({
   topContent,
 }: CommunityCurationsProps = {}) {
   const locale = useBrowserLocale();
+  const hasTopContent = Boolean(topContent);
   const { waveViewStyle } = useLayout();
   const scrollContainerRef = useRef<HTMLElement | null>(null);
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(
@@ -216,7 +217,7 @@ export default function CommunityCurations({
               {t(locale, "waves.profileFeed.description")}
             </p>
           </div>
-          <div className={Boolean(topContent) ? "max-lg:tw-hidden" : undefined}>
+          <div className={hasTopContent ? "max-lg:tw-hidden" : undefined}>
             <DiscoverWavesLink />
           </div>
         </div>
