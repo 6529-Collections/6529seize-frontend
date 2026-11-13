@@ -690,6 +690,7 @@ export * from '../models/ApiPageSortDirection';
 export * from '../models/ApiPageWithNextUriBase';
 export * from '../models/ApiPageWithoutCount';
 export * from '../models/ApiPaymentDetails';
+export * from '../models/ApiPinnedWaveOrder';
 export * from '../models/ApiProfileActivityLog';
 export * from '../models/ApiProfileActivityLogPage';
 export * from '../models/ApiProfileBlockState';
@@ -838,6 +839,7 @@ export * from '../models/ApiUnpublishProfileCmsPackageRequest';
 export * from '../models/ApiUpcomingMemeSubscriptionStatus';
 export * from '../models/ApiUpdateCompetitionRequest';
 export * from '../models/ApiUpdateDropRequest';
+export * from '../models/ApiUpdatePinnedWaveOrder';
 export * from '../models/ApiUpdateProfileNotificationCategories';
 export * from '../models/ApiUpdateProfilePreferences';
 export * from '../models/ApiUpdateProxyActionRequest';
@@ -1706,6 +1708,7 @@ import { ApiPageSortDirection } from '../models/ApiPageSortDirection';
 import { ApiPageWithNextUriBase } from '../models/ApiPageWithNextUriBase';
 import { ApiPageWithoutCount } from '../models/ApiPageWithoutCount';
 import { ApiPaymentDetails } from '../models/ApiPaymentDetails';
+import { ApiPinnedWaveOrder } from '../models/ApiPinnedWaveOrder';
 import { ApiProfileActivityLog } from '../models/ApiProfileActivityLog';
 import { ApiProfileActivityLogPage } from '../models/ApiProfileActivityLogPage';
 import { ApiProfileBlockState } from '../models/ApiProfileBlockState';
@@ -1854,6 +1857,7 @@ import { ApiUnpublishProfileCmsPackageRequest } from '../models/ApiUnpublishProf
 import { ApiUpcomingMemeSubscriptionStatus   , ApiUpcomingMemeSubscriptionStatusSourceEnum   } from '../models/ApiUpcomingMemeSubscriptionStatus';
 import { ApiUpdateCompetitionRequest } from '../models/ApiUpdateCompetitionRequest';
 import { ApiUpdateDropRequest } from '../models/ApiUpdateDropRequest';
+import { ApiUpdatePinnedWaveOrder } from '../models/ApiUpdatePinnedWaveOrder';
 import { ApiUpdateProfileNotificationCategories } from '../models/ApiUpdateProfileNotificationCategories';
 import { ApiUpdateProfilePreferences, ApiUpdateProfilePreferencesDirectMessagePolicyEnum    , ApiUpdateProfilePreferencesNotificationLevelEnum    } from '../models/ApiUpdateProfilePreferences';
 import { ApiUpdateProxyActionRequest } from '../models/ApiUpdateProxyActionRequest';
@@ -2987,6 +2991,7 @@ let typeMap: {[index: string]: any} = {
     "ApiPageWithNextUriBase": ApiPageWithNextUriBase,
     "ApiPageWithoutCount": ApiPageWithoutCount,
     "ApiPaymentDetails": ApiPaymentDetails,
+    "ApiPinnedWaveOrder": ApiPinnedWaveOrder,
     "ApiProfileActivityLog": ApiProfileActivityLog,
     "ApiProfileActivityLogPage": ApiProfileActivityLogPage,
     "ApiProfileBlockState": ApiProfileBlockState,
@@ -3119,6 +3124,7 @@ let typeMap: {[index: string]: any} = {
     "ApiUpcomingMemeSubscriptionStatus": ApiUpcomingMemeSubscriptionStatus,
     "ApiUpdateCompetitionRequest": ApiUpdateCompetitionRequest,
     "ApiUpdateDropRequest": ApiUpdateDropRequest,
+    "ApiUpdatePinnedWaveOrder": ApiUpdatePinnedWaveOrder,
     "ApiUpdateProfileNotificationCategories": ApiUpdateProfileNotificationCategories,
     "ApiUpdateProfilePreferences": ApiUpdateProfilePreferences,
     "ApiUpdateProxyActionRequest": ApiUpdateProxyActionRequest,

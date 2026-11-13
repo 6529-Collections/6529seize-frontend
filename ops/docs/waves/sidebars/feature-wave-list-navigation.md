@@ -74,6 +74,9 @@ Wave and DM rows in the left list control which thread is open.
   `Load more waves` to continue. Failed loads keep existing rows and offer
   `Retry`. Expired lists refresh automatically; newly created or newly accessible
   waves appear on refresh. Access permissions are checked for every batch.
+- `Pinned` uses the profile's saved order. Drag a row by its handle, or
+  open the reorder menu and choose `Move up` or `Move down`. A wave's subwaves
+  move with it.
 - Joined waves load in batches without skipping a wave when new activity moves
   it higher in the list. The order uses recent wave activity, including joined,
   unmuted subwaves. Muting a wave removes its own activity from the ordering.

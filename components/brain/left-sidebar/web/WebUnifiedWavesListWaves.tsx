@@ -30,6 +30,7 @@ import {
   SIDEBAR_TOOLTIP_BORDER,
   SIDEBAR_TOOLTIP_STYLE,
 } from "../waves/SidebarCategoryLabel";
+import { usePinnedSidebarList } from "../waves/SidebarPinnedWaves";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
 import { SidebarSubwavesToggle } from "../waves/SidebarSubwavesToggle";
 import SectionHeader from "../waves/SectionHeader";
@@ -296,10 +297,13 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   );
   const navigation = useSidebarWaveNavigation({
     waves: collectionWaves,
+    pinnedWaveOrder: streamWaves.pinnedWaveOrder,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     enabled: !isDirectMessage && !isCollapsed,
     activeContainerId: effectiveActiveParentWaveId ?? activeWaveId,
   });
+  const isPinnedCollection =
+    navigation.collection === "pinned" && !isDirectMessage && !isCollapsed;
   const collectionLoading =
     isLoading ||
     (navigation.collection === "pinned" &&
@@ -308,9 +312,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     () => getRows(announcementWaves),
     [announcementWaves, getRows]
   );
-  const activeContainerWaveId = isDirectMessage
-    ? null
-    : effectiveActiveParentWaveId;
+  const activeContainerWaveId =
+    isDirectMessage || isPinnedCollection ? null : effectiveActiveParentWaveId;
   const prioritizedAllWaves = useMemo(
     () =>
       prioritizeActiveWaveContainer(
@@ -437,14 +440,14 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   );
 
   const virtual = useVirtualizedWaves<AnimatedSidebarWaveTreeRow>({
-    items: virtualizedRows,
+    items: isPinnedCollection ? [] : virtualizedRows,
     key: virtualizedKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     listContainerRef,
     rowHeight: getSidebarRowHeight,
     overscan: 5,
   });
-  const revealStaticRows = useMemo(
+  const announcementRevealRows = useMemo(
     () => [animatedAnnouncementRows],
     [animatedAnnouncementRows]
   );
@@ -462,8 +465,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     filterKey: isDirectMessage ? navigation.scrollKey : navigation.viewKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     scrollToVirtualIndex: virtual.scrollToIndex,
-    staticRows: revealStaticRows,
-    virtualRows: virtualizedRows,
+    staticRows: announcementRevealRows,
+    virtualRows: isPinnedCollection ? [] : virtualizedRows,
+    fixedRows: isPinnedCollection ? virtualizedRows : [],
   });
 
   const renderWaveRow = (
@@ -509,6 +513,18 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       />
     );
   };
+
+  const pinnedList = usePinnedSidebarList(
+    isPinnedCollection,
+    navigation.scrollKey,
+    {
+      listRef: listContainerRef,
+      rows: virtualizedRows,
+      getRowHeight: getSidebarRowHeight,
+      renderRow: (row) =>
+        renderWaveRow(row, !hidePin, virtualizedParentsWithVisibleSubwaves),
+    }
+  );
 
   return (
     <>
@@ -593,20 +609,15 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
             <SidebarWaveSearchResults navigation={navigation} />
           ) : (
             <>
-              {virtualizedRows.length > 0 ? (
+              {pinnedList}
+              {!pinnedList && virtualizedRows.length > 0 && (
                 <section
                   ref={listContainerRef}
                   style={{
                     height: virtual.totalHeight,
                     position: "relative",
                   }}
-                  aria-label={
-                    navigation.collection === "pinned" &&
-                    !isDirectMessage &&
-                    !isCollapsed
-                      ? t(locale, "waves.sidebar.pinned")
-                      : virtualizedAriaLabel
-                  }
+                  aria-label={virtualizedAriaLabel}
                 >
                   {virtual.virtualItems.map((v: VirtualItem) => {
                     if (v.index === virtualizedRows.length) {
@@ -653,7 +664,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                     );
                   })}
                 </section>
-              ) : (
+              )}
+              {!pinnedList && virtualizedRows.length === 0 && (
                 <div
                   ref={listContainerRef}
                   style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }}
