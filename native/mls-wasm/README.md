@@ -126,8 +126,15 @@ node bench/bench.mjs [sizes...] [--reps N] [--suite S]          # the committed 
   for a group of one user's own devices that syncs read positions between
   them (D175, design P60). A `self` group may also carry `created`, its
   creation time in milliseconds, a non-negative integer. The kind never
-  changes. The module checks only the shape; the engine checks who may be a
+  changes. The module checks the shape; the engine checks who may be a
   member of a `self` group.
+- Leaves list the private-use extension type `0xF52A`
+  (`SELF_SYNC_EXTENSION`) in their capabilities, and a `self` group
+  requires it. A KeyPackage from a client built before self groups lacks
+  it, so such a device is never added to one (`BAD_KEY_PACKAGE`), while it
+  still joins ordinary chats. `keyPackageInfo(bytes)` reports a validated
+  KeyPackage's suite and `self_sync`, so the engine can skip such devices
+  before committing.
 - `exportState()` holds the signer, credential, the full OpenMLS storage, the
   pending own commit, a staged incoming commit, retained message keys of the
   last two epochs and this module's bookkeeping. Staged Welcomes are not
