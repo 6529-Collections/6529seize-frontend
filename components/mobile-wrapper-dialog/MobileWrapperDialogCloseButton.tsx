@@ -26,7 +26,7 @@ export default function MobileWrapperDialogCloseButton({
           : "tw-size-10",
         variant === "minimal"
           ? "tw-rounded-lg tw-text-iron-400"
-          : "tw-rounded-full tw-text-iron-300",
+          : "tw-rounded-lg tw-text-iron-300",
         variant === "minimal" && size === "default" && "-tw-mr-3",
         className
       )}
@@ -37,7 +37,7 @@ export default function MobileWrapperDialogCloseButton({
           "tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-transition-[background-color,border-color] tw-duration-150 tw-ease-out motion-reduce:tw-transition-none",
           variant === "minimal"
             ? "tw-rounded-lg tw-border-0 tw-bg-transparent group-active:tw-bg-iron-800 desktop-hover:group-hover:tw-bg-iron-900"
-            : "tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-white/[0.04] group-active:tw-bg-white/10 desktop-hover:group-hover:tw-border-iron-700 desktop-hover:group-hover:tw-bg-white/[0.08]"
+            : "tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-white/[0.04] group-active:tw-bg-white/10 desktop-hover:group-hover:tw-border-iron-700 desktop-hover:group-hover:tw-bg-white/[0.08]"
         )}
       >
         <svg

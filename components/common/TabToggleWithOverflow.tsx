@@ -7,6 +7,9 @@ import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { TAB_TOGGLE_WITH_OVERFLOW_MESSAGES } from "@/i18n/messages";
 import { CompactMenu } from "@/components/compact-menu";
 import TabButton from "./TabButton";
+import PillTab from "./PillTab";
+import { getPillTabClasses } from "./pillTabStyles";
+import { getUnderlineTabClasses } from "./underlineTabStyles";
 
 interface TabOption {
   readonly key: string;
@@ -41,14 +44,10 @@ const getTabStateClassName = ({
   readonly isCompactPills: boolean;
 }): string => {
   if (isCompactPills) {
-    return isActive
-      ? "tw-bg-white/[0.08] tw-font-semibold tw-text-iron-50"
-      : "tw-bg-transparent tw-font-medium tw-text-iron-500 active:tw-bg-white/[0.06] desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200";
+    return getPillTabClasses({ active: isActive });
   }
 
-  return isActive
-    ? "tw-border-primary-300 tw-font-medium tw-text-white"
-    : "tw-border-transparent tw-font-medium tw-text-iron-400 hover:tw-text-iron-200";
+  return getUnderlineTabClasses({ active: isActive, size: "sm" });
 };
 
 const OverflowTrigger: React.FC<OverflowTriggerProps> = ({
@@ -185,34 +184,53 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           fullWidth && "tw-flex-1"
         )}
       >
-        {visibleTabs.map((option, index) => (
-          <Button
-            role="tab"
-            aria-selected={activeKey === option.key}
-            aria-controls={option.panelId}
-            key={option.key}
-            type="button"
-            tabIndex={index === focusedTabIndex ? 0 : -1}
-            onClick={() => handleSelect(option.key)}
-            onKeyDown={(event) => handleVisibleTabKeyDown(event, index)}
-            ref={(element) => {
+        {visibleTabs.map((option, index) => {
+          const active = activeKey === option.key;
+          const buttonProps: React.ComponentProps<"button"> = {
+            role: "tab",
+            "aria-selected": active,
+            "aria-controls": option.panelId,
+            type: "button",
+            tabIndex: index === focusedTabIndex ? 0 : -1,
+            onClick: () => handleSelect(option.key),
+            onKeyDown: (event) => handleVisibleTabKeyDown(event, index),
+            ref: (element) => {
               tabRefs.current[index] = element;
-            }}
-            className={clsx(
-              "tw-whitespace-nowrap tw-border-solid tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-inset motion-reduce:tw-transition-none",
-              isCompactPills
-                ? "tw-inline-flex tw-h-8 tw-flex-none tw-items-center tw-rounded-full tw-border-0 tw-px-3 tw-text-xs focus-visible:tw-ring-1 focus-visible:tw-ring-iron-400/70"
-                : "-tw-mb-px tw-flex-1 tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-bg-transparent tw-py-3 tw-text-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
-              fullWidth && "tw-flex tw-justify-center tw-text-center",
-              getTabStateClassName({
-                isActive: activeKey === option.key,
-                isCompactPills,
-              })
-            )}
-          >
-            {option.label}
-          </Button>
-        ))}
+            },
+          };
+
+          if (isCompactPills) {
+            return (
+              <PillTab
+                {...buttonProps}
+                key={option.key}
+                active={active}
+                transition={transition}
+                className={
+                  fullWidth
+                    ? "tw-flex tw-justify-center tw-text-center"
+                    : undefined
+                }
+              >
+                {option.label}
+              </PillTab>
+            );
+          }
+
+          return (
+            <Button
+              {...buttonProps}
+              key={option.key}
+              className={clsx(
+                "-tw-mb-px tw-flex-1 tw-whitespace-nowrap tw-border-solid tw-py-3",
+                fullWidth && "tw-flex tw-justify-center tw-text-center",
+                getUnderlineTabClasses({ active, size: "sm" })
+              )}
+            >
+              {option.label}
+            </Button>
+          );
+        })}
       </div>
 
       {overflowTabs.length > 0 && (
@@ -222,10 +240,8 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           unstyledMenu
           unstyledItems
           triggerClassName={clsx(
-            "tw-whitespace-nowrap tw-border-solid tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-inset motion-reduce:tw-transition-none",
-            isCompactPills
-              ? "tw-inline-flex tw-h-8 tw-flex-none tw-items-center tw-rounded-full tw-border-0 tw-px-3 tw-text-xs focus-visible:tw-ring-1 focus-visible:tw-ring-iron-400/70"
-              : "-tw-mb-px tw-flex-1 tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-bg-transparent tw-py-3 tw-text-sm focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300",
+            "tw-whitespace-nowrap tw-border-solid",
+            !isCompactPills && "-tw-mb-px tw-flex-1 tw-py-3",
             getTabStateClassName({
               isActive: isActiveInOverflow,
               isCompactPills,
@@ -256,7 +272,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
           itemClassName="tw-block tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-transition-colors"
           inactiveItemClassName="tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-200"
           activeItemClassName={
-            isCompactPills ? "tw-text-iron-50" : "tw-text-primary-300"
+            isCompactPills ? "tw-text-iron-50" : "tw-text-iron-100"
           }
           focusItemClassName="tw-bg-iron-800 tw-text-iron-100"
           menuWidthClassName="tw-w-36"

@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import Button from "@/components/utils/button/Button";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -19,6 +20,7 @@ import type {
 
 export const COLLECT_INPUT_CLASS =
   "tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 touch-only:tw-text-base focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+export const COLLECT_SELECT_CLASS = `${DROPDOWN_FIELD_CLASSES} tw-block tw-min-h-11 tw-w-full tw-px-3 tw-py-2 tw-text-sm touch-only:tw-text-base`;
 
 interface CollectGoalFormProps {
   readonly draft: CollectGoalDraft;
@@ -208,7 +210,7 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
               disabled={props.loading}
               value={draft.horizonDays}
               onChange={(event) => change({ horizonDays: event.target.value })}
-              className={COLLECT_INPUT_CLASS}
+              className={COLLECT_SELECT_CLASS}
             >
               {[1, 30, 90, 365].map((days) => (
                 <option key={days} value={days}>

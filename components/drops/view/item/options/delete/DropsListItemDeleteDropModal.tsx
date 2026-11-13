@@ -160,7 +160,7 @@ export default function DropsListItemDeleteDropModal({
                       type="button"
                       onClick={closeModal}
                       disabled={mutating}
-                      className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950 tw-p-2 tw-text-iron-400 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-text-iron-50"
+                      className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-p-2 tw-text-iron-400 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-text-iron-50"
                     >
                       <span className="tw-sr-only tw-text-sm">Close</span>
                       <svg

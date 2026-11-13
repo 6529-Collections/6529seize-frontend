@@ -1,6 +1,6 @@
 import React from "react";
 import { TabCountBadge } from "./TabCountBadge";
-import TabButton from "./TabButton";
+import UnderlineTab from "./UnderlineTab";
 
 interface TabOption {
   readonly key: string;
@@ -29,13 +29,12 @@ export const TabToggle: React.FC<TabToggleProps> = ({
   fullWidth = false, // Default to false for backwards compatibility
   transition = false,
 }) => {
-  const Button = transition ? TabButton : "button";
   const hasActions = options.some(
     (option) => option.action !== undefined && option.action !== null
   );
 
   const renderTabButton = (option: TabOption, style?: React.CSSProperties) => (
-    <Button
+    <UnderlineTab
       key={option.key}
       onClick={() => onSelect(option.key)}
       onPointerEnter={option.onIntent}
@@ -45,12 +44,11 @@ export const TabToggle: React.FC<TabToggleProps> = ({
       aria-selected={activeKey === option.key}
       aria-controls={option.panelId}
       style={style}
-      className={`tw-relative tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none ${
+      active={activeKey === option.key}
+      size="sm"
+      transition={transition}
+      className={`tw-py-3 ${
         fullWidth ? "tw-flex tw-flex-1 tw-justify-center tw-text-center" : ""
-      } ${
-        activeKey === option.key
-          ? "tw-border-primary-300 tw-text-white"
-          : "tw-border-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200"
       }`}
     >
       <span className="tw-inline-flex tw-h-5 tw-items-center tw-gap-1 tw-align-middle tw-leading-5">
@@ -61,7 +59,7 @@ export const TabToggle: React.FC<TabToggleProps> = ({
       {option.hasIndicator && (
         <div className="tw-absolute -tw-right-1 tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
       )}
-    </Button>
+    </UnderlineTab>
   );
 
   if (!hasActions) {

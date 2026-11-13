@@ -2007,8 +2007,33 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       name: APP_SECTIONS_LABEL,
     });
     await expect(
-      feedNavigation.getByRole("link", { name: "Waves" })
+      feedNavigation.getByRole("link", { name: "Waves", exact: true })
     ).toHaveAttribute("href", "/waves");
+    const discoverLink = feedNavigation.getByRole("link", {
+      name: "Discover Waves",
+      exact: true,
+    });
+    await expect(discoverLink).toHaveAttribute("href", "/discover");
+    const backLinkBounds = await feedNavigation
+      .getByRole("link", { name: "Waves", exact: true })
+      .boundingBox();
+    const discoverLinkBounds = await discoverLink.boundingBox();
+    const navigationBounds = await feedNavigation.boundingBox();
+    expect(backLinkBounds).not.toBeNull();
+    expect(discoverLinkBounds).not.toBeNull();
+    expect(navigationBounds).not.toBeNull();
+    expect(
+      Math.abs(
+        backLinkBounds!.y +
+          backLinkBounds!.height / 2 -
+          (discoverLinkBounds!.y + discoverLinkBounds!.height / 2)
+      )
+    ).toBeLessThanOrEqual(1);
+    expect(
+      navigationBounds!.x +
+        navigationBounds!.width -
+        (discoverLinkBounds!.x + discoverLinkBounds!.width)
+    ).toBeLessThanOrEqual(1);
 
     const profileFeed = getProfileFeed(page);
     const feedPostButtons = profileFeed
@@ -2179,7 +2204,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       })
     ).toBeVisible();
     await expect(
-      feedNavigation.getByRole("link", { name: "Waves" })
+      feedNavigation.getByRole("link", { name: "Waves", exact: true })
     ).toBeVisible();
   });
 
