@@ -1,17 +1,13 @@
 import { Capacitor } from "@capacitor/core";
+import { isDesktopApp } from "@/helpers/desktop-shell";
 
 type E2eePlatform = "web" | "desktop" | "phone";
 
 const DESKTOP_GRANT_ORIGIN = "6529 Desktop";
 
-const isElectron = (): boolean =>
-  typeof navigator !== "undefined" &&
-  typeof navigator.userAgent === "string" &&
-  navigator.userAgent.includes("Electron");
-
 /** Device platform recorded with an encrypted-messages device (contract 4.1). */
 export function detectE2eePlatform(): E2eePlatform {
-  if (isElectron()) {
+  if (isDesktopApp()) {
     return "desktop";
   }
   try {

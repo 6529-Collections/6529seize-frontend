@@ -392,3 +392,25 @@ it("keeps action tracking usable without the visibility API and identifies nativ
     expect.objectContaining({ platform: "native" })
   );
 });
+
+it("identifies the bridge-based desktop app, whose user agent has no Electron", () => {
+  Object.defineProperty(window, "api", {
+    configurable: true,
+    value: { openExternal: jest.fn() },
+  });
+  Object.defineProperty(window, "nativeAuth", {
+    configurable: true,
+    value: { sessionLogin: jest.fn() },
+  });
+  try {
+    render(<Fixture />);
+    fireEvent.click(screen.getByText("Private collector name"));
+    expect(track).toHaveBeenCalledWith(
+      "Profile action clicked",
+      expect.objectContaining({ platform: "desktop_app" })
+    );
+  } finally {
+    Reflect.deleteProperty(window, "api");
+    Reflect.deleteProperty(window, "nativeAuth");
+  }
+});

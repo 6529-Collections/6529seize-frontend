@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { DesktopProfileRecoveryContext } from "@/contexts/DesktopProfileRecoveryContext";
+import { isDesktopApp } from "@/helpers/desktop-shell";
 import { mainnet, sepolia } from "viem/chains";
 import DeferredWagmiProvider from "./DeferredWagmiProvider";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
@@ -680,9 +681,8 @@ export default function WagmiSetup({
       return;
     }
 
-    const isDesktopApp = navigator.userAgent.includes("Electron");
     const loadForStoredSession = (): boolean => {
-      if (!isCapacitor && !isDesktopApp && !hasPersistedWalletSession()) {
+      if (!isCapacitor && !isDesktopApp() && !hasPersistedWalletSession()) {
         return false;
       }
 

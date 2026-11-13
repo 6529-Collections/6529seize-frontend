@@ -6,9 +6,11 @@
  * `store`) before page scripts run. Browsers and the mobile app never define
  * it, so every desktop branch is dead code on the web.
  *
- * Every desktop-only behaviour must go through this module: check
- * `isDesktopShell()` and reach the bridge through the typed accessors below.
- * Do not read `window.api` directly and do not sniff the user agent.
+ * Every desktop-only behaviour must go through this module. Use
+ * `isDesktopShell()` and the typed accessors below for anything that calls
+ * the bridge (sign-in, navigation, notifications), and `isDesktopApp()` for
+ * "is this the desktop app" decisions (layout, analytics, data sources). Do
+ * not read `window.api` directly and do not sniff the user agent elsewhere.
  */
 
 import type {
@@ -50,6 +52,22 @@ export function isDesktopShell(): boolean {
     hasBridgeMethod(shellWindow.api, "openExternal") &&
     hasBridgeMethod(shellWindow.nativeAuth, "sessionLogin")
   );
+}
+
+/** The Electron 6529 Desktop app's user agent contains "Electron". */
+const hasElectronUserAgent = (): boolean =>
+  typeof navigator !== "undefined" &&
+  typeof navigator.userAgent === "string" &&
+  navigator.userAgent.includes("Electron");
+
+/**
+ * True in any 6529 Desktop build: one that defines the desktop bridge, or the
+ * Electron app, recognised by its user agent. The bridge-based build has no
+ * "Electron" in its user agent. Never use this to decide whether to call the
+ * bridge; use `isDesktopShell()` for that.
+ */
+export function isDesktopApp(): boolean {
+  return isDesktopShell() || hasElectronUserAgent();
 }
 
 interface DesktopBridges {

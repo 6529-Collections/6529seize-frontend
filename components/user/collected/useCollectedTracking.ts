@@ -2,6 +2,7 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { isDesktopApp } from "@/helpers/desktop-shell";
 import { getProfileViewerContext } from "@/helpers/ProfileHelpers";
 import { trackAnalyticsEvent } from "@/services/analytics/mixpanel";
 import { observeAnalyticsSections } from "@/services/analytics/sectionVisibility";
@@ -23,7 +24,7 @@ import {
 
 function getPlatform() {
   if (Capacitor.isNativePlatform()) return "native";
-  if (navigator.userAgent.includes("Electron")) return "desktop_app";
+  if (isDesktopApp()) return "desktop_app";
   return globalThis.innerWidth < 768 ? "mobile_web" : "desktop_web";
 }
 
