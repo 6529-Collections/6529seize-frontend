@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode} from "react";
-import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 
 import UserPageSetUpProfile from "./UserPageSetUpProfile";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -15,6 +15,7 @@ export default function UserPageSetUpProfileWrapper({
   readonly children: ReactNode;
 }) {
   const { address } = useSeizeConnectContext();
+  const hasHydrated = useHasHydrated();
 
   const getShowSetUpProfile = () => {
     if (!address) return false;
@@ -27,16 +28,7 @@ export default function UserPageSetUpProfileWrapper({
     );
   };
 
-  const [showSetUpProfile, setShowSetUpProfile] = useState<boolean>(
-    getShowSetUpProfile()
-  );
-
-  useEffect(
-    () => setShowSetUpProfile(getShowSetUpProfile()),
-    [profile, address]
-  );
-
-  if (showSetUpProfile) {
+  if (hasHydrated && getShowSetUpProfile()) {
     return <UserPageSetUpProfile profile={profile} />;
   }
   return <>{children}</>;

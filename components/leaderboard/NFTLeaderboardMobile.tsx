@@ -1,6 +1,11 @@
 import { useEffect, useRef } from "react";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import FilterButton from "@/components/utils/button/FilterButton";
+import {
+  CONNECTED_TAB_INTERACTION_CLASSES,
+  CONNECTED_TAB_SURFACE_CLASSES,
+  getConnectedTabStateClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 import { SortDirection } from "@/entities/ISort";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -52,7 +57,9 @@ export function NFTLeaderboardMobileSort({
 
   return (
     <div className="tw-mb-2 tw-flex tw-items-center tw-gap-2 md:tw-hidden">
-      <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0.5">
+      <fieldset
+        className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-border-0 tw-p-0.5 tw-ring-1 tw-ring-inset`}
+      >
         <legend className="tw-sr-only">
           {t(locale, "theMemes.sorting.directionLegend")}
         </legend>
@@ -71,7 +78,7 @@ export function NFTLeaderboardMobileSort({
                   : "theMemes.sorting.descendingLabel"
               )}
               onClick={() => onDirection(value)}
-              className={`tw-m-0 tw-inline-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none lg:[body:not(.capacitor-native)_&]:tw-rounded-lg lg:[body:not(.capacitor-native)_&]:tw-duration-300 ${direction === value ? "tw-bg-iron-700 tw-text-white lg:[body:not(.capacitor-native)_&]:tw-bg-white/[0.12]" : "tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200 lg:[body:not(.capacitor-native)_&]:tw-text-iron-600 lg:[body:not(.capacitor-native)_&]:desktop-hover:hover:tw-text-iron-300"}`}
+              className={`tw-m-0 tw-inline-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: direction === value })}`}
             >
               <Icon
                 className="tw-size-[13px] lg:[body:not(.capacitor-native)_&]:tw-size-3.5 lg:[body:not(.capacitor-native)_&]:tw-stroke-[1.25]"

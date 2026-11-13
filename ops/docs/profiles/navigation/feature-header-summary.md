@@ -90,6 +90,10 @@ The **Website** action opens the profile's published custom website. Its home
 page can use a readable address such as `/{user}/studio`; the normal profile stays
 at `/{user}`. To create or edit a website, open `/{user}/cms/builder`.
 
+After first profile setup, the Identity tab's
+[getting-started card](../tabs/feature-identity-tab.md#getting-started-after-profile-setup)
+also offers a direct shortcut to add or edit an optional About statement.
+
 ## Common Scenarios
 
 - Display name fallback order: `handle` -> `display` -> primary wallet -> route

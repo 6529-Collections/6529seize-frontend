@@ -53,6 +53,11 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     for (const width of [390, 1023, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
       const editorial = width >= 1024 && !isNative;
+      for (const name of ["Sort ascending", "Sort descending"]) {
+        const direction = page.getByRole("button", { name, exact: true });
+        await expect(direction).toHaveCSS("height", "28px");
+        await expect(direction).toHaveCSS("width", editorial ? "24px" : "28px");
+      }
       await expect(age).toHaveAttribute("aria-pressed", "true");
       await expect(age).toHaveCSS(
         "background-color",
