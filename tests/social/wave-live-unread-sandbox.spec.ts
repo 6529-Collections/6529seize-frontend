@@ -105,6 +105,20 @@ test.describe("Live wave unread state @auth @local-only", () => {
     await expect(chat.getByLabel(/3 unread messages/)).toHaveText("3");
     await fixture.send(PERF_OPEN_WAVE_INDEX, 1, 0);
     await expect(chat.getByLabel(/4 unread messages/)).toHaveText("4");
+    const badge = chat.getByLabel(/4 unread messages/);
+    await expect(badge).toHaveCSS("top", "0px");
+    await expect(badge).toHaveCSS("background-color", "rgb(38, 39, 43)");
+    await expect(badge).toHaveCSS("box-shadow", "none");
+    const badgeOffset = await badge.evaluate((element) => {
+      const badgeBounds = element.getBoundingClientRect();
+      const labelBounds = element.parentElement!.getBoundingClientRect();
+      return Math.abs(
+        badgeBounds.y +
+          badgeBounds.height / 2 -
+          (labelBounds.y + labelBounds.height / 2)
+      );
+    });
+    expect(badgeOffset).toBeLessThanOrEqual(1);
     await expect(page).toHaveTitle(
       `${perfWaveName(PERF_OPEN_WAVE_INDEX)} | Brain`
     );
@@ -125,6 +139,24 @@ test.describe("Live wave unread state @auth @local-only", () => {
     ).toBeVisible();
     await expect(chat.getByLabel(/unread messages/)).toHaveCount(0);
     await expect.poll(() => reads.length).toBeGreaterThan(0);
+    const messages = page
+      .getByText(perfMessageText(44), { exact: true })
+      .last()
+      .locator("xpath=ancestor::div[@data-wave-drops-scroll-container='true']");
+    await expect(messages).toHaveCSS(
+      "mask-image",
+      /^linear-gradient\(.*24px\)$/
+    );
+    await messages.evaluate((element) => {
+      element.scrollTop = -120;
+    });
+    await expect
+      .poll(() => messages.evaluate((element) => element.scrollTop))
+      .toBeLessThan(0);
+    await page.screenshot({ path: testInfo.outputPath("chat-top-fade.png") });
+    await messages.evaluate((element) => {
+      element.scrollTop = 0;
+    });
     await setVisibility(page, "hidden");
     await fixture.send(PERF_OPEN_WAVE_INDEX, 1, 0);
     await expect(page).toHaveTitle(

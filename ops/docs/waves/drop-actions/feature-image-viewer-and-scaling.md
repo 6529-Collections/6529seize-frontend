@@ -64,6 +64,9 @@ HD highlights when the original is selected. Choose
    - `Reset zoom` appears after zooming in.
    - `Close` exits the modal.
 5. Close with the close button, backdrop click, or `Escape`.
+   Opening, navigating and closing the viewer keeps the background Wave header,
+   message input and conversation scroll position in place, including in the
+   iPhone app after dismissing the keyboard.
 
 ## Common Scenarios
 

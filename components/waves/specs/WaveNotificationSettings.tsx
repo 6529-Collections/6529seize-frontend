@@ -17,7 +17,7 @@ export default function WaveNotificationSettings({
 }: WaveRatingProps) {
   const settings = useWaveNotificationSettings(wave);
   const controlsClassName = compact
-    ? "tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs"
+    ? "tw-flex tw-items-center tw-gap-x-1.5 tw-text-xs touch-only:tw-gap-x-3"
     : "tw-grid tw-w-full tw-grid-cols-2 tw-gap-x-1.5 tw-text-xs";
 
   if (!settings.following || settings.isMuted) {

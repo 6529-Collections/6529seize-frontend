@@ -16,9 +16,10 @@ misled. Relative times such as `4m` or `3h` are unchanged.
 
 - Setting: `Preferences` > `Time Zone` (`/preferences?tab=time-zone`). It works
   signed out because the choice is saved on the device.
-- Wave switch: the clock button in the wave conversation header, next to the
-  gallery-view toggle. On compact wave headers it is an item in the header's
-  overflow menu. On phones, including the native app, it is an item in the
+- Wave switch: `More wave actions` in the desktop/tablet Wave conversation
+  header, alongside the eligible gallery/chat action. Direct messages retain
+  their clock button. On compact web headers it is an item in the header's
+  overflow menu. On phones, including the native app, it is also an item in the
   menu that opens when you press and hold a post.
 
 ## Setting
@@ -37,11 +38,12 @@ Changing the setting turns the wave switch off.
 
 ## Wave Switch
 
-1. Select the clock button in a wave header.
+1. Open `More wave actions` in a desktop/tablet Wave header (or the clock in a
+   direct-message header).
 2. Choose `UTC` (or `Local time` when the setting already is UTC). When the
    setting is a named zone, the first option shows it as `{City} · your
 setting`.
-3. While the switch is on, a `Times in UTC` chip replaces the clock button.
+3. While the switch is on, a `Times in UTC` chip stays visible in the header.
    Select the chip to change it, or `×` to show times in the saved setting
    again.
 
@@ -49,6 +51,10 @@ The switch lasts until the tab or the app is closed, then times go back to the
 saved setting. It applies to every wave, direct message and decision in that
 tab. Choosing an option announces `Times now shown in {zone}` to screen
 readers.
+
+Opening desktop/tablet `More wave actions` keeps focus on its trigger instead of
+automatically focusing a time option. Press Tab to enter the controls; keyboard
+focus remains visible, and Escape closes the popover.
 
 On compact headers and in the press-and-hold post menu on phones, the menu
 offers `Show times in UTC for now` and, while on, `Show times in {setting}

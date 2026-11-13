@@ -599,6 +599,11 @@ const WaveDropInner = ({
     drop,
     showAuthorInfo,
     authorHeader,
+    showStormPartIndicator:
+      showAuthorInfo &&
+      isStorm &&
+      timestampLayout === "stacked-compact" &&
+      identityMode === "default",
     shouldGroupWithPreviousDrop,
     isProfileView,
     activePartIndex,
