@@ -163,7 +163,10 @@ beforeEach(() => {
 test("loads all pins in saved order in one request", async () => {
   jest
     .mocked(pinnedWavesApi.getPinnedWaves)
-    .mockResolvedValue([createWave("wave-2"), createWave("wave-1")]);
+    .mockResolvedValue([
+      { ...createWave("wave-2"), pinned: false },
+      createWave("wave-1"),
+    ]);
   renderHook(() => usePinnedWavesServer(), { wrapper });
 
   const { signal } = new AbortController();
