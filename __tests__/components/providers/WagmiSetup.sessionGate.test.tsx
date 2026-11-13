@@ -311,6 +311,9 @@ describe("WagmiSetup wallet stack session gate", () => {
         )
       );
       expect(hasPersistedWalletSession).not.toHaveBeenCalled();
+      expect(createAppKitAdapter).toHaveBeenCalledWith(
+        expect.objectContaining({ isCapacitor: false })
+      );
     } finally {
       Reflect.deleteProperty(window, "api");
       Reflect.deleteProperty(window, "nativeAuth");
