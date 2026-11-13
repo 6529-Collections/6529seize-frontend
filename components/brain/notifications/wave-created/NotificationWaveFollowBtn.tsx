@@ -34,7 +34,9 @@ export default function NotificationWaveFollowBtn({
   );
   const following =
     followingOverride ?? wave.context_profile_context?.subscribed ?? false;
-  const { isPending, join, leave } = useWaveJoin(
+  // useWaveJoin requests auth and reports failures itself; it resolves true
+  // only when the membership actually changed.
+  const { isPending, toggle } = useWaveJoin(
     {
       id: wave.id,
       subscribed_actions: following ? WAVE_DEFAULT_SUBSCRIPTION_ACTIONS : [],
@@ -43,7 +45,7 @@ export default function NotificationWaveFollowBtn({
   );
 
   const onFollow = async (): Promise<void> => {
-    const changed = await (following ? leave() : join());
+    const changed = await toggle();
     if (changed) {
       setFollowingOverride(!following);
     }

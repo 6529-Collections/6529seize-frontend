@@ -12,13 +12,9 @@ export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
   const label = isSubscribed ? "Following" : "Follow";
   const canSubscribe = !!connectedProfile?.handle && !activeProfileProxy;
 
-  const onSubscribe = async (): Promise<void> => {
-    await toggle();
-  };
-
   return (
     <Button
-      onClick={onSubscribe}
+      onClick={toggle}
       disabled={!canSubscribe}
       loading={isPending}
       hideChildrenWhenLoading
