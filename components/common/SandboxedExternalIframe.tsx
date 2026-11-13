@@ -95,6 +95,8 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
 
   const frameClassName = useMemo(() => {
     const classes = [
+      "tw-absolute",
+      "tw-inset-0",
       "tw-block",
       "tw-h-full",
       "tw-w-full",
@@ -251,7 +253,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   return (
     <div ref={containerRef} className={containerClasses}>
       {banner}
-      <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden">
+      <div className="tw-relative tw-min-h-0 tw-flex-1 tw-overflow-hidden">
         {isVisible ? (
           <iframe
             {...iframeProps}
