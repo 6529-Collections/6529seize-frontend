@@ -34,7 +34,7 @@ type NicRateProps = {
   readonly locale?: SupportedLocale;
 };
 
-export function UserPageIdentityHeaderCICRateForm({
+function UserPageIdentityHeaderCICRateForm({
   profile,
   isTooltip,
   onSuccess,

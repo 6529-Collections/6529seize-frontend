@@ -47,7 +47,7 @@ type Contributor = {
   };
   readonly contribution: number;
 };
-export type CategoryContentLayout = (
+type CategoryContentLayout = (
   body: ReactNode,
   footer: ReactNode,
   resetOnEscape: () => boolean

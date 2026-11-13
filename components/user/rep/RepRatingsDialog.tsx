@@ -206,7 +206,9 @@ export default function RepRatingsDialog({
     direction === "given" &&
     canManageGivenRatings(profile, connectedProfile, activeProfileProxy);
   const identity = profile.query ?? profile.handle ?? profile.display;
-  const [selectedRating, setSelection] = useState<RatingSelection | null>(null);
+  const [selectedRating, setSelectedRating] = useState<RatingSelection | null>(
+    null
+  );
   const selection = canManage ? selectedRating : null;
   const [isOpen, setIsOpen] = useState(true);
   const [isBusy, setIsBusy] = useState(false);
@@ -229,9 +231,9 @@ export default function RepRatingsDialog({
   const back = () => {
     setIsBusy(false);
     if (selection?.category && !category) {
-      setSelection({ ...selection, category: null });
+      setSelectedRating({ ...selection, category: null });
     } else {
-      setSelection(null);
+      setSelectedRating(null);
     }
   };
   const handleSaveSuccess = () => {
@@ -405,7 +407,7 @@ export default function RepRatingsDialog({
                         listScroll.current =
                           viewRef.current?.parentElement?.scrollTop ?? 0;
                         listTrigger.current = event.currentTarget;
-                        setSelection({ recipient: target, category });
+                        setSelectedRating({ recipient: target, category });
                       }}
                     >
                       {t(locale, "user.rate.adjust")}
@@ -447,7 +449,7 @@ export default function RepRatingsDialog({
             category={category}
             editCategory={selection.category}
             onSelectCategory={(selectedCategory) =>
-              setSelection({ ...selection, category: selectedCategory })
+              setSelectedRating({ ...selection, category: selectedCategory })
             }
             onCancel={close}
             onSuccess={handleSaveSuccess}

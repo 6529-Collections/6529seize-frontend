@@ -164,7 +164,11 @@ function getOverlayTransition() {
   };
 }
 
-function getBottomPadding(noPadding?: boolean): string {
+function getBottomPadding(
+  noPadding?: boolean,
+  footer?: ReactNode
+): string | number {
+  if (footer !== undefined && footer !== null) return 0;
   return noPadding
     ? "env(safe-area-inset-bottom,0px)"
     : "calc(env(safe-area-inset-bottom,0px) + 1.5rem)";
@@ -496,7 +500,7 @@ export default function MobileWrapperDialog({
     onAfterLeave,
   });
 
-  const bottomPadding = getBottomPadding(noPadding);
+  const bottomPadding = getBottomPadding(noPadding, footer);
   const dialogHeight = getDialogHeight({
     tall,
     isCapacitor,
@@ -706,10 +710,7 @@ export default function MobileWrapperDialog({
                       <div
                         className={contentClassNames}
                         style={{
-                          paddingBottom:
-                            footer !== undefined && footer !== null
-                              ? 0
-                              : bottomPadding,
+                          paddingBottom: bottomPadding,
                         }}
                       >
                         <div

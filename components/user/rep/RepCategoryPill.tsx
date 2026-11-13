@@ -37,6 +37,9 @@ export default function RepCategoryPill({
   const contribution = category.authenticated_user_contribution;
   const hasContribution =
     showPersonalContribution && contribution !== null && contribution !== 0;
+  const compactHeightClass = hasContribution
+    ? "tw-flex-wrap tw-gap-y-1 tw-py-2"
+    : "tw-h-[46px]";
   const avatarCount = 3;
   const avatars = buildRepAvatarItems(category.top_contributors, avatarCount, {
     omitHref: !linkAvatars || disabled,
@@ -49,10 +52,8 @@ export default function RepCategoryPill({
         "tw-group/rep-category tw-pointer-events-none tw-relative tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-pl-[13px] tw-pr-[9px] tw-text-left tw-transition-colors tw-duration-200 tw-ease-out motion-reduce:tw-transition-none [&_a]:tw-pointer-events-auto",
         disabled ? "tw-opacity-50" : "desktop-hover:hover:tw-border-white/10",
         compact
-          ? "tw-min-h-[46px] tw-w-full tw-gap-x-1.5 tw-@container"
+          ? `tw-min-h-[46px] tw-w-full tw-gap-x-1.5 tw-@container ${compactHeightClass}`
           : "tw-h-[38px] tw-gap-3.5",
-        compact && !hasContribution && "tw-h-[46px]",
-        compact && hasContribution && "tw-flex-wrap tw-gap-y-1 tw-py-2",
         isOpen ? "tw-bg-[#17171B]" : "tw-bg-white/5",
         !disabled && !isOpen && "desktop-hover:hover:tw-bg-white/[0.085]",
         isJoined &&
