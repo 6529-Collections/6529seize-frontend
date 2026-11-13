@@ -162,7 +162,7 @@ function SortablePinnedWave({
   );
 }
 
-export function SidebarPinnedWaves({
+function SidebarPinnedWaves({
   listRef,
   rows,
   getRowHeight,
@@ -314,5 +314,28 @@ export function SidebarPinnedWaves({
         {status === "saved" && t(locale, "waves.sidebar.pinOrderSaved")}
       </output>
     </section>
+  );
+}
+
+export function usePinnedSidebarList(
+  showPins: boolean,
+  profileKey: string,
+  listRef: SidebarPinnedWavesProps["listRef"],
+  rows: SidebarPinnedWavesProps["rows"],
+  getRowHeight: SidebarPinnedWavesProps["getRowHeight"],
+  renderRow: SidebarPinnedWavesProps["renderRow"]
+) {
+  const { waves } = useMyStream();
+  if (!showPins || (rows.length === 0 && !waves.hasPinnedWavesError)) {
+    return null;
+  }
+  return (
+    <SidebarPinnedWaves
+      key={profileKey}
+      listRef={listRef}
+      rows={rows}
+      getRowHeight={getRowHeight}
+      renderRow={renderRow}
+    />
   );
 }
