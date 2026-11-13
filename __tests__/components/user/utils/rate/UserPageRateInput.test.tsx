@@ -10,7 +10,9 @@ function Harness({
   isProxy = false,
   variant = "form",
   clampOnBlur = true,
-}: Partial<Pick<InputProps, "minMax" | "isProxy" | "variant" | "clampOnBlur">> & {
+}: Partial<
+  Pick<InputProps, "minMax" | "isProxy" | "variant" | "clampOnBlur">
+> & {
   readonly initialValue?: string;
 }) {
   const [value, setValue] = useState(initialValue);
@@ -26,6 +28,7 @@ function Harness({
         clampOnBlur={clampOnBlur}
         inputId="test-rating"
       />
+      <output data-testid="raw-rating">{value}</output>
     </>
   );
 }
@@ -47,6 +50,50 @@ it.each(["compact", "form", "tooltip"] as const)(
     await user.tab();
     expect(screen.getByRole("button", { name: "Next control" })).toHaveFocus();
     expect(amount()).toHaveValue("0");
+  }
+);
+
+it.each([12345, -12345])(
+  "groups %s only while idle and keeps the raw draft unchanged",
+  async (value) => {
+    const user = userEvent.setup();
+    render(
+      <Harness
+        initialValue={String(value)}
+        minMax={{ min: -20000, max: 20000 }}
+      />
+    );
+    const grouped = value < 0 ? "-12,345" : "12,345";
+    expect(amount()).toHaveValue(grouped);
+    await user.click(amount());
+    expect(amount()).toHaveValue(String(value));
+    await user.tab();
+    expect(amount()).toHaveValue(grouped);
+    expect(screen.getByTestId("raw-rating")).toHaveTextContent(String(value));
+  }
+);
+
+it("formats a clamped amount without sending grouping separators to the draft", async () => {
+  const user = userEvent.setup();
+  render(<Harness minMax={{ min: -10000, max: 10000 }} />);
+  await user.clear(amount());
+  await user.type(amount(), "20000");
+  expect(amount()).toHaveValue("20000");
+  await user.tab();
+  expect(amount()).toHaveValue("10,000");
+  expect(screen.getByTestId("raw-rating")).toHaveTextContent("10000");
+});
+
+it.each(["-", "9007199254740993"])(
+  "does not round or replace the draft %s",
+  async (value) => {
+    const user = userEvent.setup();
+    render(<Harness isProxy initialValue={value} />);
+    expect(amount()).toHaveValue(value);
+    await user.click(amount());
+    await user.tab();
+    expect(amount()).toHaveValue(value);
+    expect(screen.getByTestId("raw-rating")).toHaveTextContent(value);
   }
 );
 

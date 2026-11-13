@@ -22,6 +22,7 @@ export default function GrantRepDialog({
       isOpen={isOpen}
       onClose={onClose}
       tabletModal
+      desktopAlign="top"
       maxWidthClass="md:tw-max-w-md"
       headerClassName="tw-mb-5"
       headerVariant="minimal"

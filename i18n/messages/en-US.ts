@@ -253,8 +253,23 @@ const USER_COLLECTED_STATS_BOOST_MESSAGES = objectMessages(
 );
 
 const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
+  "panel.open": "Open REP category {category}",
+  "panel.contributors": "View {count} for {category}",
+  "panel.panel": "{category} REP details",
+  "panel.you": "You",
+  "panel.amountFor": "REP for {name}",
+  "panel.invalidNumber":
+    "Enter a whole number, including a minus sign for negative REP.",
+  "panel.loadingAmount": "Loading…",
+  "panel.openGlobal": "Open category",
+  "panel.yourRep": "Your REP",
+  "panel.total": "Total",
+  "panel.creditLimit":
+    "Available REP: {amount}. Reduce the amount to stay within your credit limit.",
+  "panel.saveRecovery":
+    "Saved changes are kept. Review the remaining values and try again.",
   "loading.details": "Loading REP category details",
-  "pill.openGlobalAriaLabel": "Open global REP category {category}",
+  "pill.openGlobalAriaLabel": "Open category {category}",
   "pill.editAriaLabel": "Edit REP category {category}",
   "sidebar.otherTools": "Other Tools",
   "sidebar.repCategories": "REP Categories",
@@ -296,7 +311,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "grant.assignedRepLabel": "Your REP assigned to {name}:",
   "grant.availableRep": "Your available REP: {amount}",
   "grant.assignedRep": "Your REP assigned to {name}: {amount}",
-  "grant.actions.grant": "Grant REP",
+  "grant.actions.grant": "Grant Rep",
   "grant.actions.cancel": "Cancel",
   "grant.toast.updated": "REP updated.",
   "grant.toast.updateFailed": "Couldn't update this REP rating.",
@@ -2733,6 +2748,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
 } as const);
 
 const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
+  runningTotal: "(total {total})",
   "matter.waveRep": "Wave REP",
 } as const);
 
@@ -2744,15 +2760,19 @@ const USER_RATE_MESSAGES = objectMessages("user.rate", {
   given: "Given",
   direction: "{matter} direction",
   listTitle: "{matter} {direction}",
-  manageGiven: "Manage given",
-  manageGivenMatter: "Manage given {matter}",
-  manageRatingContributors: "Manage given {matter}: {contributors}",
+  manageGiven: "All receivers",
+  manageGivenMatter: "All {matter} receivers",
+  manageRatingContributors: "All {matter} receivers: {count}",
   viewRatingContributors: "View {matter} {direction}: {contributors}",
   highestFirst: "Highest total first",
   recentFirst: "Most recently adjusted",
   sortBy: "Sort by",
   sortGiven: "Sort given {matter}",
+  sortReceived: "Sort received {matter}",
   ratingAmount: "{value} {matter}",
+  amountFor: "{matter} amount for {name}",
+  available: "Available {matter}",
+  creditLimit: "These changes exceed your available {matter} ({amount}).",
   adjust: "Adjust",
   adjustFor: "Adjust {matter} for {name}",
   categoriesFor: "REP given to {name}",
@@ -5042,6 +5062,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_REP_MODAL_MESSAGES,
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
+  "profileActivity.heading": "Activity Log",
   "profileActivity.loading": "Loading activity log",
   "profileActivity.loadError": "Unable to load activity log.",
   "profileActivity.retry": "Retry",

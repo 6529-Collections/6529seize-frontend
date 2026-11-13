@@ -1,3 +1,4 @@
+import { IdentityActivityContext } from "@/components/profile-activity/IdentityActivityContext";
 import ProfileActivityLogRate from "@/components/profile-activity/list/items/ProfileActivityLogRate";
 import type { ProfileActivityLogRatingEdit } from "@/entities/IProfile";
 import { ProfileActivityLogRatingEditContentChangeReason } from "@/entities/IProfile";
@@ -55,4 +56,30 @@ describe("ProfileActivityLogRate", () => {
     render(<ProfileActivityLogRate log={baseLog} user={null} />);
     expect(screen.getByText("System Adjustment")).toBeInTheDocument();
   });
+});
+
+it("puts the neutral running total last on Identity reductions and names NIC", () => {
+  const log = {
+    ...baseLog,
+    contents: {
+      ...baseLog.contents,
+      rating_matter: "CIC" as RateMatter,
+      old_rating: 1000,
+      new_rating: 560,
+    },
+  };
+  render(
+    <IdentityActivityContext value={true}>
+      <ProfileActivityLogRate log={log} user={null} />
+    </IdentityActivityContext>
+  );
+  expect(screen.getByText("NIC")).toBeInTheDocument();
+  expect(screen.getByText("440")).toHaveClass("tw-text-rose-400");
+  expect(screen.getByText("(total 560)")).toHaveClass("tw-text-iron-400");
+  expect(
+    screen
+      .getByText("bob")
+      .compareDocumentPosition(screen.getByText("(total 560)")) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy();
 });

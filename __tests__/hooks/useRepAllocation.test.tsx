@@ -4,6 +4,7 @@ import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useContext, type ReactNode } from "react";
 
@@ -34,10 +35,16 @@ function setup(activeProfileProxy: ApiProfileProxy | null = null) {
       </QueryClientProvider>
     );
   }
-  return renderHook(
-    ({ target }) => useRepAllocation({ profile: target, category: "Artist" }),
+  const snapshots: ReturnType<typeof useRepAllocation>[] = [];
+  const hook = renderHook(
+    ({ target }) => {
+      const state = useRepAllocation({ profile: target, category: "Artist" });
+      snapshots.push(state);
+      return state;
+    },
     { wrapper: Wrapper, initialProps: { target: profile } }
   );
+  return { ...hook, client, snapshots };
 }
 
 beforeEach(() => jest.resetAllMocks());
@@ -64,6 +71,7 @@ it("keeps allowance caches separate for identities without handles", async () =>
   expect(fetchApi).toHaveBeenLastCalledWith({
     endpoint: "profiles/0xdef/rep/ratings/received",
     params: { rater: "viewer" },
+    signal: expect.any(AbortSignal),
   });
 });
 
@@ -111,6 +119,12 @@ it("reports the grantor error instead of falling back to the viewer, then retrie
   await waitFor(() => expect(result.current.isError).toBe(true));
   expect(result.current.repState).toBeNull();
   expect(result.current.heroAvailableRep).toBe(0);
+  expect(fetchApi).toHaveBeenCalledTimes(1);
+  expect(fetchApi).toHaveBeenCalledWith({
+    endpoint: "profiles/target/rep/ratings/received",
+    params: { rater: "grantor" },
+    signal: expect.any(AbortSignal),
+  });
   fetchApi.mockResolvedValue({
     rep_rates_left_for_rater: 80,
     rating_stats: [{ category: "Artist", rater_contribution: 20 }],
@@ -123,5 +137,52 @@ it("reports the grantor error instead of falling back to the viewer, then retrie
   expect(fetchApi).toHaveBeenLastCalledWith({
     endpoint: "profiles/target/rep/ratings/received",
     params: { rater: "grantor" },
+    signal: expect.any(AbortSignal),
   });
+});
+
+it("keeps contribution, available credit and limits consistent in every query-update render", async () => {
+  fetchApi.mockResolvedValue({
+    rep_rates_left_for_rater: 80,
+    rating_stats: [{ category: "Artist", rater_contribution: 20 }],
+  });
+  const { result, client, snapshots } = setup();
+  await waitFor(() => expect(result.current.minMaxValues.max).toBe(100));
+  snapshots.length = 0;
+  await act(async () => {
+    client.setQueryData(
+      [
+        QueryKey.PROFILE_REP_RATINGS,
+        { rater: "viewer", handleOrWallet: "target" },
+      ],
+      {
+        rep_rates_left_for_rater: 5,
+        rating_stats: [{ category: "Artist", rater_contribution: 100 }],
+      }
+    );
+  });
+  await waitFor(() => expect(result.current.heroAvailableRep).toBe(5));
+  expect(snapshots.length).toBeGreaterThan(0);
+  for (const state of snapshots) {
+    expect({
+      contribution: state.repState?.rater_contribution,
+      available: state.heroAvailableRep,
+      limits: state.minMaxValues,
+    }).toEqual({
+      contribution: 100,
+      available: 5,
+      limits: { min: -105, max: 105 },
+    });
+  }
+});
+
+it("cancels an in-flight allowance read when its editor unmounts", async () => {
+  fetchApi.mockImplementation(() => new Promise(() => {}));
+  const { unmount } = setup();
+  await waitFor(() => expect(fetchApi).toHaveBeenCalledTimes(1));
+  const signal = fetchApi.mock.calls[0]?.[0].signal;
+  expect(signal).toBeDefined();
+  expect(signal?.aborted).toBe(false);
+  unmount();
+  expect(signal?.aborted).toBe(true);
 });
