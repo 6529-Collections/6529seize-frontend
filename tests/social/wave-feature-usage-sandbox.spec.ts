@@ -257,7 +257,7 @@ test("sidebar collection and search controls count deliberate use without query 
   const collectionFilter = page.getByRole("group", {
     name: "Wave list filter",
   });
-  await expect(collectionFilter).toHaveCSS("border-top-width", "0px");
+  await expect(collectionFilter).toHaveCSS("border-top-width", "1px");
   await expect(collectionFilter).toHaveCSS(
     "background-color",
     "rgba(19, 19, 22, 0.75)"
@@ -267,9 +267,9 @@ test("sidebar collection and search controls count deliberate use without query 
     name: "All",
     exact: true,
   });
-  await expect(allCollection).toHaveCSS("font-size", "13px");
-  await expect(allCollection).toHaveCSS("font-weight", "500");
-  await expect(allCollection).toHaveCSS("min-height", "44px");
+  await expect(allCollection).toHaveCSS("font-size", "12px");
+  await expect(allCollection).toHaveCSS("font-weight", "600");
+  await expect(allCollection).toHaveCSS("min-height", "30px");
   await expect(allCollection).toHaveCSS("background-color", "rgb(38, 39, 43)");
   const searchButton = page.getByRole("button", {
     name: "Find a wave…",

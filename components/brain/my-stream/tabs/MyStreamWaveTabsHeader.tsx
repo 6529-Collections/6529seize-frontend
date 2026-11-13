@@ -65,6 +65,7 @@ export interface MyStreamWaveTabsHeaderActionContext {
   readonly activeContentTab: MyStreamWaveTab;
   readonly isCompact: boolean;
   readonly isCondensed: boolean;
+  readonly isNarrow: boolean;
   readonly tooltipId: string;
 }
 
@@ -116,6 +117,7 @@ const getWavePictureContributors = (wave: ApiWave): WavePictureContributors =>
   }));
 
 interface MyStreamWaveHeaderIdentityProps {
+  readonly isNarrow: boolean;
   readonly isRightSidebarOpen: boolean;
   readonly descriptionPreviewRef: React.RefObject<HTMLSpanElement | null>;
   readonly directMessageProfileHref: string | null;
@@ -143,6 +145,7 @@ function getWaveScoreLearnMoreHref({
 }
 
 function MyStreamWaveHeaderIdentity({
+  isNarrow,
   isRightSidebarOpen,
   descriptionPreviewRef,
   directMessageProfileHref,
@@ -164,10 +167,14 @@ function MyStreamWaveHeaderIdentity({
     <WaveTrustSignals
       waveRep={wave.wave_rep}
       waveScore={wave.wave_score}
-      variant="header-inline"
+      variant={isNarrow ? "header-avatar" : "header-inline"}
       mode="summary"
       learnMoreHref={waveScoreLearnMoreHref}
-      className="tw-shrink-0"
+      className={
+        isNarrow
+          ? "tw-absolute -tw-bottom-1.5 -tw-right-1 tw-z-10"
+          : "tw-shrink-0"
+      }
     />
   ) : null;
 
@@ -195,7 +202,7 @@ function MyStreamWaveHeaderIdentity({
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-[13px]">
       <div
-        className={`tw-size-9 tw-flex-shrink-0 ${showDescriptionPreview || wave.parent_wave ? "tw-self-start" : ""} ${
+        className={`tw-relative tw-size-9 tw-flex-shrink-0 ${showDescriptionPreview || wave.parent_wave ? "tw-self-start" : ""} ${
           isAnnouncement
             ? "tw-rounded-lg"
             : "tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
@@ -210,6 +217,7 @@ function MyStreamWaveHeaderIdentity({
             contributors={wavePictureContributors}
           />
         )}
+        {isNarrow && score}
       </div>
       {/* Offset the first line's leading to align its text with the avatar. */}
       <div
@@ -244,7 +252,7 @@ function MyStreamWaveHeaderIdentity({
               {wave.name}
             </button>
           </h1>
-          {score}
+          {!isNarrow && score}
         </div>
         {showDescriptionPreview && (
           <WaveDescriptionPopover
@@ -310,6 +318,7 @@ export default function MyStreamWaveTabsHeader({
   const isDirectMessage = getWaveIsDirectMessage(wave);
   const isCompactWave = isCompact && !isDirectMessage;
   const [headerRef, { width: headerWidth }] = useMeasure<HTMLElement>();
+  const isNarrow = isCompactWave && (headerWidth === 0 || headerWidth < 400);
   const isCondensed =
     !isCompact &&
     !isDirectMessage &&
@@ -393,6 +402,7 @@ export default function MyStreamWaveTabsHeader({
     activeContentTab,
     isCompact,
     isCondensed,
+    isNarrow,
     tooltipId: headerActionsTooltipId,
   };
   const externalOverflowMenuItems =
@@ -426,7 +436,7 @@ export default function MyStreamWaveTabsHeader({
       />
     ) : null;
   const backButtonSizeClass = isCompactWave
-    ? `tw-size-8 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`
+    ? `tw-h-8 tw-w-6 @[21rem]/wave-header:tw-w-8 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`
     : "tw-size-11 tw-self-start sm:-tw-ml-2.5 sm:desktop-hover:tw-h-9";
   const directTimeZoneVariant = isCompact ? "compact" : "header";
   const utilityButtonClassName = isCompactWave
@@ -435,6 +445,11 @@ export default function MyStreamWaveTabsHeader({
   const utilitySurfaceClassName = isCompactWave
     ? WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES
     : WAVE_HEADER_ACTION_SURFACE_CLASSES;
+  const centeredActionsClassName = `tw-flex tw-shrink-0 tw-self-center tw-items-center ${
+    isCompactWave
+      ? "tw-gap-x-0.5 @[21rem]/wave-header:tw-gap-x-2"
+      : "tw-gap-x-2"
+  }`;
 
   useLayoutEffect(() => {
     if (!showDescriptionPreview) {
@@ -485,7 +500,7 @@ export default function MyStreamWaveTabsHeader({
     <>
       <header
         ref={headerRef}
-        className={`${headerClassName} tw-flex-nowrap tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 ${showDescriptionPreview ? headerMinHeight : ""}`}
+        className={`${headerClassName} tw-flex-nowrap tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-@container/wave-header ${showDescriptionPreview ? headerMinHeight : ""}`}
       >
         <div
           className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 ${isCondensed || isCompactWave ? "tw-self-center" : "tw-self-start tw-pt-0.5"}`}
@@ -504,6 +519,7 @@ export default function MyStreamWaveTabsHeader({
             </button>
           )}
           <MyStreamWaveHeaderIdentity
+            isNarrow={isNarrow}
             isRightSidebarOpen={isRightSidebarOpen}
             descriptionPreviewRef={descriptionPreviewRef}
             directMessageProfileHref={directMessageProfileHref}
@@ -523,7 +539,7 @@ export default function MyStreamWaveTabsHeader({
         <div
           className={
             isCondensed || isCompactWave
-              ? "tw-flex tw-shrink-0 tw-items-center tw-gap-x-2 tw-self-center"
+              ? centeredActionsClassName
               : actionsClassName
           }
         >

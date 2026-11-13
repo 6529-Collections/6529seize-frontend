@@ -11,7 +11,7 @@ jest.mock("@/components/waves/drops/Drop", () => ({
 }));
 
 const makeWave = (dropId: string): ApiWave =>
-  ({ description_drop: { id: dropId, parts: [] } }) as ApiWave;
+  ({ description_drop: { id: dropId, parts: [] } }) as unknown as ApiWave;
 
 describe("BrainRightSidebarContent", () => {
   it("shows the current pinned drop instead of the overview", () => {

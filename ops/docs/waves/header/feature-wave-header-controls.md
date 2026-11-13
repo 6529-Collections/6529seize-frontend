@@ -74,15 +74,19 @@ An active temporary time override keeps its zone indicator and undo control
 visible beside the main actions. Columns of 640–767px keep the description teaser
 with compact submission icons; wider columns restore the submission labels.
 
-On mobile web, the available score also stays beside the name on one line,
-centered with the avatar. `Join` keeps its white surface, text label, accessible
-name, plus icon and touch target. `Wave details` stays visible beside `More wave
-actions` and opens the details panel in one click. Search stays directly visible
-before More and opens message search in one click; selecting the name still opens
-`About`. The header stays on one line, using the production dimensions: a 36px
-avatar, unchanged title typography, a 13px avatar-to-text gap, and 32px utility
-buttons separated by 8px gaps. Submission controls stay directly accessible. Direct messages do not
-show a Wave Score.
+On mobile web, the name stays centered beside the avatar and the available score
+stays visible. Narrow headers show the score as a small badge on the avatar,
+leaving more room for the name. `Join` keeps its white surface, text label,
+accessible name and plus icon. Search and `Wave details` stay directly visible
+beside `More wave actions`, with one-click access. The header remains on one row
+without horizontal scrolling. The avatar and title retain their regular sizes;
+very narrow columns use tighter utility spacing. Direct messages do not show a
+Wave Score.
+
+In narrow Main Stage headers, `How to Submit` is inside `More wave actions` and
+opens the existing nomination and eligibility guidance in a sheet. Eligible
+submission actions remain directly visible. Wider headers retain the direct
+submission-help lock. Selecting the Wave name still opens `About`.
 
 The top-right controls start with `Join` when the viewer has not joined the
 wave, then Add REP for eligible viewers, followed by the
@@ -109,7 +113,8 @@ resting icon color and brightens on hover, since it opens guidance rather than
 acting as a disabled button. Other restricted submission controls
 keep their bordered surfaces.
 On the web, the Main Stage submit/help control sits before message search.
-Compact web keeps Search directly visible after submit/help and before More.
+Compact web keeps Search directly visible before More; narrow Main Stage
+headers move submission help into More.
 Add/Edit REP sits beside `Join` when both controls are shown.
 
 ### Join Call to Action

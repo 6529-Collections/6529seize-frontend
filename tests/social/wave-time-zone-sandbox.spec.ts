@@ -297,11 +297,11 @@ test.describe("Display time zone @auth @local-only", () => {
       ).toBeInViewport({ ratio: 1 });
       await expect
         .poll(() =>
-          name.evaluate((button) => {
+          name.evaluate((button, expectBadge) => {
             const row = button.closest("h1")?.parentElement;
-            const score = row?.querySelector(
-              'button[aria-label^="Wave score"]'
-            );
+            const score = button
+              .closest("header")
+              ?.querySelector('button[aria-label^="Wave score"]');
             const avatar = row?.parentElement?.parentElement?.firstElementChild;
             if (!score || !avatar) return false;
             const nameBox = button.getBoundingClientRect();
@@ -309,13 +309,19 @@ test.describe("Display time zone @auth @local-only", () => {
             const avatarBox = avatar.getBoundingClientRect();
             return (
               nameBox.width >= 16 &&
-              scoreBox.x >= nameBox.right &&
-              Math.abs(
-                nameBox.y +
-                  nameBox.height / 2 -
-                  scoreBox.y -
-                  scoreBox.height / 2
-              ) <= 1 &&
+              (expectBadge
+                ? avatar.contains(score) &&
+                  scoreBox.left >= avatarBox.left &&
+                  scoreBox.right <= avatarBox.right + 5 &&
+                  scoreBox.bottom <= avatarBox.bottom + 7
+                : !avatar.contains(score) &&
+                  scoreBox.x >= nameBox.right &&
+                  Math.abs(
+                    nameBox.y +
+                      nameBox.height / 2 -
+                      scoreBox.y -
+                      scoreBox.height / 2
+                  ) <= 1) &&
               Math.abs(
                 nameBox.y +
                   nameBox.height / 2 -
@@ -323,7 +329,7 @@ test.describe("Display time zone @auth @local-only", () => {
                   avatarBox.height / 2
               ) <= 1
             );
-          })
+          }, width <= 375)
         )
         .toBe(true);
       await expectNoHorizontalOverflow(page);

@@ -2173,8 +2173,29 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         const submit = page.getByRole("button", {
           name: eligible ? /^Submit (Work|Meme)/ : "How to Submit",
         });
-        await expect(submit).toBeInViewport({ ratio: 1 });
-        if (!eligible && surface === "web") {
+        const mobileHelp =
+          !eligible &&
+          surface === "web" &&
+          testInfo.project.name === "web-mobile-chromium";
+        const submissionHelpDialogName = mobileHelp
+          ? "How to Submit"
+          : "Main Stage submission eligibility";
+        const moreActions = page.getByRole("button", {
+          name: "More wave actions",
+          exact: true,
+        });
+        const expectSubmissionAvailable = async () => {
+          if (mobileHelp && !(await submit.isVisible())) {
+            await moreActions.click();
+            await expect(submit).toBeInViewport({ ratio: 1 });
+            await page.keyboard.press("Escape");
+            await expect(moreActions).toBeFocused();
+          } else {
+            await expect(submit).toBeInViewport({ ratio: 1 });
+          }
+        };
+        await expectSubmissionAvailable();
+        if (!eligible && surface === "web" && !mobileHelp) {
           const more = page.getByRole("button", {
             name: "More wave actions",
             exact: true,
@@ -2196,6 +2217,22 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           actions.getByRole("button", { name: "My submissions" })
         ).toBeVisible();
         const expectHeaderPosition = async () => {
+          if (mobileHelp) {
+            const header = page.getByRole("main").locator("header");
+            await expect(
+              header.getByRole("button", { name: "How to Submit", exact: true })
+            ).toHaveCount(0);
+            for (const label of [
+              "Search messages in this wave",
+              "More wave actions",
+              "Wave details",
+            ]) {
+              await expect(
+                header.getByRole("button", { name: label, exact: true })
+              ).toBeInViewport({ ratio: 1 });
+            }
+            return;
+          }
           const actionBox = await submit.boundingBox();
           const nav =
             surface === "app"
@@ -2266,9 +2303,20 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             await expect(
               header.getByRole("button", { name: /^Join / })
             ).toBeInViewport({ ratio: 1 });
-            await expect(submit).toBeInViewport({ ratio: 1 });
+            if (mobileHelp && width <= 375) {
+              await expect(
+                header.getByRole("button", {
+                  name: "How to Submit",
+                  exact: true,
+                })
+              ).toHaveCount(0);
+            } else {
+              await expect(submit).toBeInViewport({ ratio: 1 });
+            }
             await expectNoHorizontalOverflow(page);
           }
+          if (mobileHelp)
+            await page.setViewportSize({ width: 375, height: 900 });
         }
         await expectNoHorizontalOverflow(page);
         await page.screenshot({
@@ -2276,6 +2324,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             `main-stage-leaderboard-${surface}-${eligible}.png`
           ),
         });
+        if (mobileHelp) await moreActions.click();
         await submit.click();
         if (eligible) {
           await expect(
@@ -2293,17 +2342,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           ).toHaveCount(0);
         } else {
           await expect(
-            page.getByRole("dialog", {
-              name: "Main Stage submission eligibility",
-            })
-          ).toBeVisible();
-          await expect(
-            page.getByText("Unlock submissions", { exact: true })
+            page
+              .getByRole("dialog", {
+                name: submissionHelpDialogName,
+              })
+              .getByText("Unlock submissions", { exact: true })
           ).toBeVisible();
           await page.keyboard.press("Escape");
           await expect(
             page.getByRole("dialog", {
-              name: "Main Stage submission eligibility",
+              name: submissionHelpDialogName,
             })
           ).toHaveCount(0);
         }
@@ -2320,7 +2368,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect(page).toHaveURL(
           new RegExp(`/waves/${MEMES_WAVE}\\?tab=chat`)
         );
-        await expect(submit).toBeInViewport({ ratio: 1 });
+        await expectSubmissionAvailable();
         await expectHeaderPosition();
         await sections
           .getByRole(surface === "app" ? "button" : "tab", {
@@ -2328,7 +2376,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             exact: true,
           })
           .click();
-        await expect(submit).toBeInViewport({ ratio: 1 });
+        await expectSubmissionAvailable();
         await expectHeaderPosition();
         await expectNoHorizontalOverflow(page);
         expect(sandbox.requests).toEqual([]);

@@ -15,6 +15,7 @@ const mockShare = jest.fn();
 const mockWriteText = jest.fn();
 const mockCopyToClipboard = jest.fn();
 const mockOpenInformation = jest.fn();
+let mockSubmissionEligible = true;
 
 jest.mock("@/contexts/WaveInformationContext", () => ({
   useWaveInformation: () => ({ open: mockOpenInformation }),
@@ -98,7 +99,13 @@ jest.mock(
 );
 
 jest.mock("@/hooks/useWave", () => ({
+  SubmissionStatus: {
+    ACTIVE: "ACTIVE",
+    ENDED: "ENDED",
+    NOT_STARTED: "NOT_STARTED",
+  },
   useWave: () => ({
+    participation: { status: "ACTIVE", isEligible: mockSubmissionEligible },
     isMemesWave: true,
     isRankWave: false,
     pauses: { filterDecisionsDuringPauses: (decisions: any) => decisions },
@@ -163,6 +170,7 @@ describe("MyStreamWaveTabsMeme", () => {
     }) as any;
 
   beforeEach(() => {
+    mockSubmissionEligible = true;
     mockPush.mockClear();
     mockUseBreakpoint.mockReturnValue("LG");
     useContentTab.mockReset();
