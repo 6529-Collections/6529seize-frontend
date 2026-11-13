@@ -216,7 +216,7 @@ export default function CommunityCurations({
               {t(locale, "waves.profileFeed.description")}
             </p>
           </div>
-          <div className={topContent ? "max-lg:tw-hidden" : undefined}>
+          <div className={Boolean(topContent) ? "max-lg:tw-hidden" : undefined}>
             <DiscoverWavesLink />
           </div>
         </div>
