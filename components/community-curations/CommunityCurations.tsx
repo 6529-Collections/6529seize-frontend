@@ -216,7 +216,9 @@ export default function CommunityCurations({
               {t(locale, "waves.profileFeed.description")}
             </p>
           </div>
-          <DiscoverWavesLink />
+          <div className={topContent ? "max-lg:tw-hidden" : undefined}>
+            <DiscoverWavesLink />
+          </div>
         </div>
 
         <div className="tw-mt-6">
