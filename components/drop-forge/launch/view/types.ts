@@ -128,6 +128,7 @@ interface LaunchAirdropWriteProps {
     entries: PhaseAirdrop[] | null;
     actionLabel: LaunchAirdropActionLabel | "Airdrop to Research";
     mintingClaimAction?: string | null;
+    manualCategory?: string;
   }) => void;
   subscriptionAirdropSections: LaunchSubscriptionAirdropSectionView[];
 }
@@ -183,6 +184,7 @@ export interface DropForgeLaunchClaimPageViewProps
     LaunchAirdropWriteProps {
   pageTitle: string;
   craftHref: string;
+  showAutoLaunch: boolean;
   loading: boolean;
   error: string | null;
   rootsError: string | null;

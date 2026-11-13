@@ -116,6 +116,7 @@ export function SubscriptionFooterMain({
   onShowUploadPhotos,
   onShowViewPhotos,
   onDownloadAirdrops,
+  processingControl,
   onFinalize,
   onUploadToGithub,
   onCloseGithubModal,
@@ -161,6 +162,7 @@ export function SubscriptionFooterMain({
   onShowUploadPhotos: () => void;
   onShowViewPhotos: () => void;
   onDownloadAirdrops: (phase: DistributionAirdropsPhase) => void;
+  processingControl?: ReactNode;
   onFinalize: () => void;
   onUploadToGithub: () => void;
   onCloseGithubModal: () => void;
@@ -373,36 +375,38 @@ export function SubscriptionFooterMain({
         </div>
       </div>
       <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
-        <button
-          onClick={onFinalize}
-          disabled={isFinalizing}
-          type="button"
-          className="tw-group tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-[#86efac] tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-[#86efac]/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-[#14532d] hover:tw-text-iron-100"
-        >
-          {renderStableButtonContent({
-            isLoading: isFinalizing,
-            loadingContent: (
-              <span className="tw-flex tw-items-center tw-gap-2">
-                <CircleLoader />
-                <span>Finalizing</span>
-              </span>
-            ),
-            idleContent: (
-              <>
-                Finalize Distribution
-                {isLoadingOverview ? (
-                  <span className="tw-ml-2">
-                    <CircleLoader />
-                  </span>
-                ) : (
-                  <span className="tw-ml-2">
-                    {overview?.is_normalized ? "✅" : "❌"}
-                  </span>
-                )}
-              </>
-            ),
-          })}
-        </button>
+        {processingControl ?? (
+          <button
+            onClick={onFinalize}
+            disabled={isFinalizing}
+            type="button"
+            className="tw-group tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-[#86efac] tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-[#86efac]/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-[#14532d] hover:tw-text-iron-100"
+          >
+            {renderStableButtonContent({
+              isLoading: isFinalizing,
+              loadingContent: (
+                <span className="tw-flex tw-items-center tw-gap-2">
+                  <CircleLoader />
+                  <span>Finalizing</span>
+                </span>
+              ),
+              idleContent: (
+                <>
+                  Finalize Distribution
+                  {isLoadingOverview ? (
+                    <span className="tw-ml-2">
+                      <CircleLoader />
+                    </span>
+                  ) : (
+                    <span className="tw-ml-2">
+                      {overview?.is_normalized ? "✅" : "❌"}
+                    </span>
+                  )}
+                </>
+              ),
+            })}
+          </button>
+        )}
         <span
           className="tw-inline-flex"
           title={githubUploadTooltip ?? undefined}

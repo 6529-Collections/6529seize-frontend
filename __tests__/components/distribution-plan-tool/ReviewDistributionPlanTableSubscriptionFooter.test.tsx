@@ -5,12 +5,27 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useMemo, useState } from "react";
 
+let mockPreparationEnabled = false;
 const mockDownload = jest.fn();
 const mockUseDownloader = jest.fn();
 const mockGetStagingAuth = jest.fn();
 const mockGetAuthJwt = jest.fn();
 const mockFetchAllPages = jest.fn();
 const mockDistributionAdminWallets = ["0x1"];
+
+jest.mock("@/hooks/useDropForgeSettings", () => ({
+  useDropForgeSettings: () => ({
+    data: { preparation_enabled: mockPreparationEnabled },
+  }),
+}));
+
+jest.mock(
+  "@/components/distribution-plan-tool/review-distribution-plan/ProcessAndFinalize",
+  () => ({
+    __esModule: true,
+    default: () => <button>Process and Finalize</button>,
+  })
+);
 
 jest.mock("react-use-downloader", () => ({
   __esModule: true,
@@ -140,6 +155,7 @@ function createOverview(overrides?: Record<string, unknown>) {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockPreparationEnabled = false;
   authCtx.setToast.mockClear();
   mockDownload.mockReset();
   mockUseDownloader.mockReset();
@@ -174,6 +190,11 @@ function TestWrapper({
   const distCtx = useMemo(
     () => ({
       distributionPlan: { id: "1", name: "Plan" },
+      phases: [
+        { id: "p0", name: "Phase 0" },
+        { id: "p1", name: "Phase 1" },
+        { id: "p2", name: "Phase 2" },
+      ],
       confirmedTokenId,
       setConfirmedTokenId,
     }),
@@ -408,42 +429,35 @@ test("resetSubscriptions posts data and shows toast directly", async () => {
   });
 });
 
-test("finalizeDistribution posts data and shows toast directly", async () => {
+test("uses the original normalize request while EMMA preparation is off", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
-  const commonApiPost = jest
-    .fn()
-    .mockResolvedValue({ success: true, message: "Normalized" });
-  jest
+  const post = jest
     .spyOn(require("@/services/api/common-api"), "commonApiPost")
-    .mockImplementation(commonApiPost);
+    .mockResolvedValue({});
+  render(<TestWrapper initialTokenId="123" />);
+  await user.click(
+    screen.getByRole("button", { name: "Finalize Distribution" })
+  );
+  expect(post).toHaveBeenCalledWith(
+    expect.objectContaining({
+      endpoint: expect.stringMatching(/\/123\/normalize$/),
+    })
+  );
+  expect(screen.queryByText("Process and Finalize")).not.toBeInTheDocument();
+});
 
-  jest
-    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
-    .mockResolvedValue(createOverview());
-
-  render(<TestWrapper />);
-
-  await user.click(screen.getByTestId("confirm-token-id-button"));
-
-  await waitFor(() => {
-    expect(screen.getByText("Finalize Distribution")).toBeInTheDocument();
-  });
-
-  await user.click(screen.getByText("Finalize Distribution"));
-
-  await waitFor(() => {
-    expect(commonApiPost).toHaveBeenCalledWith(
-      expect.objectContaining({
-        endpoint: expect.stringContaining("/normalize"),
-      })
-    );
-    expect(authCtx.setToast).toHaveBeenCalledWith({
-      type: "success",
-      title: "Distribution normalized.",
-      description: "Normalized",
-    });
-  });
+test("uses Process and Finalize instead of the synchronous normalize request", async () => {
+  mockPreparationEnabled = true;
+  const user = userEvent.setup();
+  (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
+  render(<TestWrapper initialTokenId="123" />);
+  await user.click(
+    screen.getByRole("button", { name: "Process and Finalize" })
+  );
+  expect(
+    jest.requireMock("@/services/api/common-api").commonApiPost
+  ).not.toHaveBeenCalled();
 });
 
 test("upload artist airdrops posts csv data and shows success toast", async () => {
