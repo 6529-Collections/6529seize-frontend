@@ -23,6 +23,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { Bars3Icon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { useRef, useState, type ReactNode, type RefObject } from "react";
 import type { AnimatedSidebarWaveTreeRow } from "@/hooks/useAnimatedSidebarWaveRows";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
@@ -39,12 +40,6 @@ interface SidebarPinnedWavesProps {
   readonly rows: readonly AnimatedSidebarWaveTreeRow[];
   readonly getRowHeight: (row: AnimatedSidebarWaveTreeRow) => number;
   readonly renderRow: (row: AnimatedSidebarWaveTreeRow) => ReactNode;
-  readonly onReorder?:
-    | ((previous: readonly string[], next: readonly string[]) => Promise<void>)
-    | undefined;
-  readonly isSaving?: boolean | undefined;
-  readonly hasLoadingError?: boolean | undefined;
-  readonly onRetry?: (() => Promise<unknown>) | undefined;
 }
 
 function groupPinnedRows(
@@ -172,11 +167,14 @@ export function SidebarPinnedWaves({
   rows,
   getRowHeight,
   renderRow,
-  onReorder,
-  isSaving,
-  hasLoadingError,
-  onRetry,
 }: SidebarPinnedWavesProps) {
+  const { waves: streamWaves } = useMyStream();
+  const {
+    reorderPinnedWaves: onReorder,
+    isSavingPinnedWaveOrder: isSaving,
+    hasPinnedWavesError: hasLoadingError,
+    retryPinnedWaves: onRetry,
+  } = streamWaves;
   const locale = useBrowserLocale();
   const groups = groupPinnedRows(rows);
   const ids = groups.map((group) => group.id);
@@ -290,9 +288,7 @@ export function SidebarPinnedWaves({
         </DndContext>
         {hasLoadingError && (
           <div className="tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-3 tw-text-sm tw-text-iron-300">
-            <span role="status">
-              {t(locale, "waves.sidebar.pinsLoadError")}
-            </span>
+            <p role="alert">{t(locale, "waves.sidebar.pinsLoadError")}</p>
             <button
               type="button"
               className="tw-rounded-md tw-bg-iron-800 tw-px-3 tw-py-1 tw-text-iron-100"
@@ -309,9 +305,9 @@ export function SidebarPinnedWaves({
           {t(locale, "waves.sidebar.pinOrderSaveError")}
         </p>
       )}
-      <div role="status" className="tw-sr-only">
+      <output className="tw-sr-only">
         {status === "saved" && t(locale, "waves.sidebar.pinOrderSaved")}
-      </div>
+      </output>
     </section>
   );
 }

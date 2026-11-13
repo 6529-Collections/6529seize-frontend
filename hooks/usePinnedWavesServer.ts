@@ -430,12 +430,11 @@ function usePinnedWaveMutations(
 
 function reorderCachedPins(
   waves: SidebarWave[],
-  previousIds: readonly string[],
-  nextIds: readonly string[]
+  { from, to }: { from: readonly string[]; to: readonly string[] }
 ): SidebarWave[] {
   const byId = new Map(waves.map((wave) => [wave.id, wave]));
-  const affected = new Set(previousIds);
-  const replacements = nextIds.flatMap((id) => {
+  const affected = new Set(from);
+  const replacements = to.flatMap((id) => {
     const wave = byId.get(id);
     return wave ? [wave] : [];
   });
@@ -556,7 +555,10 @@ export function usePinnedWavesServer(
         ) {
           throw new Error("Invalid pinned wave order");
         }
-        const reordered = reorderCachedPins(cached, previousIds, nextIds);
+        const reordered = reorderCachedPins(cached, {
+          from: previousIds,
+          to: nextIds,
+        });
         queryClient.setQueryData(pinnedWavesQueryKey, reordered);
         try {
           await pinnedWavesApi.updateOrder({
@@ -578,7 +580,10 @@ export function usePinnedWavesServer(
               ) {
                 return current;
               }
-              return reorderCachedPins(current, nextIds, previousIds);
+              return reorderCachedPins(current, {
+                from: nextIds,
+                to: previousIds,
+              });
             }
           );
           throw saveError;

@@ -103,7 +103,10 @@ test("can reorder pins from the keyboard", async ({
   baseURL,
   isMobile,
 }) => {
-  test.skip(isMobile, "The mouse and touch paths have separate coverage.");
+  test.skip(
+    isMobile,
+    "This test uses desktop keyboard focus. Mobile touch dragging is tested separately."
+  );
   await installWaveListScrollFixture(page, baseURL);
   await page.goto("/waves", { waitUntil: "domcontentloaded" });
   await page

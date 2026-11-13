@@ -382,12 +382,9 @@ const UnifiedWavesListWaves = forwardRef<
       rowHeight: getSidebarRowHeight,
       overscan: VIRTUALIZATION_OVERSCAN,
     });
-    const revealStaticRows = useMemo(
-      () =>
-        isPinnedCollection
-          ? [animatedAnnouncementRows, animatedAllRows]
-          : [animatedAnnouncementRows],
-      [animatedAnnouncementRows, animatedAllRows, isPinnedCollection]
+    const announcementRevealRows = useMemo(
+      () => [animatedAnnouncementRows],
+      [animatedAnnouncementRows]
     );
     useRevealActiveSidebarWave({
       preserveScrollOnInteraction: !isDirectMessage,
@@ -403,8 +400,9 @@ const UnifiedWavesListWaves = forwardRef<
       filterKey: isDirectMessage ? navigation.scrollKey : navigation.viewKey,
       scrollContainerRef,
       scrollToVirtualIndex: virtual.scrollToIndex,
-      staticRows: revealStaticRows,
+      staticRows: announcementRevealRows,
       virtualRows: isPinnedCollection ? [] : virtualizedRows,
+      fixedRows: isPinnedCollection ? virtualizedRows : [],
     });
 
     const renderWaveRow = (
@@ -459,10 +457,6 @@ const UnifiedWavesListWaves = forwardRef<
           renderRow={(row) =>
             renderWaveRow(row, !hidePin, virtualizedParentsWithVisibleSubwaves)
           }
-          onReorder={streamWaves.reorderPinnedWaves}
-          isSaving={streamWaves.isSavingPinnedWaveOrder}
-          hasLoadingError={streamWaves.hasPinnedWavesError}
-          onRetry={streamWaves.retryPinnedWaves}
         />
       ) : null;
 

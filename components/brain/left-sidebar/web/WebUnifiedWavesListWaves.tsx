@@ -447,12 +447,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     rowHeight: getSidebarRowHeight,
     overscan: 5,
   });
-  const revealStaticRows = useMemo(
-    () =>
-      isPinnedCollection
-        ? [animatedAnnouncementRows, animatedAllRows]
-        : [animatedAnnouncementRows],
-    [animatedAnnouncementRows, animatedAllRows, isPinnedCollection]
+  const announcementRevealRows = useMemo(
+    () => [animatedAnnouncementRows],
+    [animatedAnnouncementRows]
   );
   useRevealActiveSidebarWave({
     preserveScrollOnInteraction: !isDirectMessage,
@@ -468,8 +465,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     filterKey: isDirectMessage ? navigation.scrollKey : navigation.viewKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     scrollToVirtualIndex: virtual.scrollToIndex,
-    staticRows: revealStaticRows,
+    staticRows: announcementRevealRows,
     virtualRows: isPinnedCollection ? [] : virtualizedRows,
+    fixedRows: isPinnedCollection ? virtualizedRows : [],
   });
 
   const renderWaveRow = (
@@ -527,10 +525,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         renderRow={(row) =>
           renderWaveRow(row, !hidePin, virtualizedParentsWithVisibleSubwaves)
         }
-        onReorder={streamWaves.reorderPinnedWaves}
-        isSaving={streamWaves.isSavingPinnedWaveOrder}
-        hasLoadingError={streamWaves.hasPinnedWavesError}
-        onRetry={streamWaves.retryPinnedWaves}
       />
     ) : null;
 
