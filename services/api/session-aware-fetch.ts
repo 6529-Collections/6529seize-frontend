@@ -7,6 +7,7 @@ import {
 } from "../auth/auth.utils";
 import { createAbortError } from "../auth/session-refresh-coordination.utils";
 import { recoverActiveSession } from "../auth/session-recovery-handler";
+import { fetchWithHomeArtworkStartup } from "@/lib/home-artwork/startup-fetch";
 
 export async function sessionAwareFetch(
   url: string,
@@ -18,7 +19,7 @@ export async function sessionAwareFetch(
     !manageWalletAuth ||
     /\/api\/auth\//.test(url)
   )
-    return fetch(url, init);
+    return fetchWithHomeArtworkStartup(url, init);
   const address = getWalletAddress();
   const initialJwt = getAuthJwt();
   const initialRole = getWalletRole();
@@ -29,7 +30,7 @@ export async function sessionAwareFetch(
     hasActiveSessionV2Auth({ address: address! }) &&
     (!suppliedAuth ||
       (initialJwt !== null && suppliedAuth === `Bearer ${initialJwt}`));
-  if (!managesSession) return fetch(url, init);
+  if (!managesSession) return fetchWithHomeArtworkStartup(url, init);
 
   const isCurrentAccount = () =>
     getWalletAddress() === address && getWalletRole() === initialRole;
@@ -49,7 +50,7 @@ export async function sessionAwareFetch(
     headers.set("Authorization", `Bearer ${token}`);
   };
   await updateAuth(false);
-  const response = await fetch(url, { ...init, headers });
+  const response = await fetchWithHomeArtworkStartup(url, { ...init, headers });
   const canReplayBody =
     init.body === undefined ||
     init.body === null ||
@@ -65,5 +66,5 @@ export async function sessionAwareFetch(
   );
   // common-api supplies replayable JSON/string bodies. Authentication rejects
   // before route handlers run, so those requests can be retried once.
-  return fetch(url, { ...init, headers });
+  return fetchWithHomeArtworkStartup(url, { ...init, headers });
 }
