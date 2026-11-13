@@ -262,7 +262,7 @@ test("sidebar collection and search controls count deliberate use without query 
     "background-color",
     "rgba(19, 19, 22, 0.75)"
   );
-  await expect(collectionFilter).toHaveCSS("padding", "3px");
+  await expect(collectionFilter).toHaveCSS("padding", "2px");
   const allCollection = collectionFilter.getByRole("button", {
     name: "All",
     exact: true,
