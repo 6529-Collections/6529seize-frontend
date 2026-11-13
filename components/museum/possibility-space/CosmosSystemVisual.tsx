@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 /* The nested visual branches mirror Cosmos's finite display grammar. */
 /* eslint-disable no-nested-ternary, sonarjs/cognitive-complexity, sonarjs/no-nested-conditional */
 
@@ -507,7 +508,7 @@ export function CosmosStateAtlas({
             <select
               value={counterDisplay}
               onChange={(event) => setCounterDisplay(event.target.value)}
-              className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
+              className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
             >
               <option>RGB</option>
               <option>White</option>
@@ -521,7 +522,7 @@ export function CosmosStateAtlas({
             <select
               value={counterChunk}
               onChange={(event) => setCounterChunk(Number(event.target.value))}
-              className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
+              className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
             >
               <option value="1">1</option>
               <option value="3">3</option>

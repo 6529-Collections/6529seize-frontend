@@ -1,5 +1,7 @@
 "use client";
 
+import { getUnderlineTabClasses } from "@/components/common/underlineTabStyles";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -97,11 +99,7 @@ export function MuseumNavigation() {
                 href={href}
                 prefetch={false}
                 aria-current={isActive ? "page" : undefined}
-                className={`tw-inline-flex tw-min-h-11 tw-items-center tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-text-sm tw-font-medium tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
-                  isActive
-                    ? "tw-border-primary-400 tw-text-primary-300"
-                    : "tw-border-transparent tw-text-iron-200 hover:tw-text-white"
-                }`}
+                className={`${getUnderlineTabClasses({ active: isActive, size: "sm" })} tw-inline-flex tw-min-h-11 tw-items-center`}
               >
                 {t(DEFAULT_LOCALE, labelKey)}
               </Link>

@@ -1,5 +1,7 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+
 import {
   faArrowCircleRight,
   faChevronDown,
@@ -315,9 +317,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   }
 
   const selectClassName =
-    "tw-cursor-pointer tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0 tw-pr-6 tw-text-sm tw-font-semibold tw-text-white focus:tw-outline-none";
-  const sortButtonClassName =
-    "tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+    "tw-cursor-pointer tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0 tw-pr-6 tw-text-sm tw-font-medium tw-text-inherit focus:tw-outline-none";
+  const sortButtonClassName = `${DROPDOWN_FIELD_CLASSES} tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm`;
   const sortMenuItemClassName =
     "tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-white tw-transition hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400";
   const sortMenuId = `nextgen-collection-art-sort-${props.collection.id}`;
@@ -398,10 +399,10 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                 }`}
               </Tooltip>
               {!hideNftPurchasing && (
-                <label className="tw-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm focus-within:tw-ring-2 focus-within:tw-ring-primary-400">
-                  <span className="tw-font-semibold tw-text-iron-300">
-                    Listing status
-                  </span>
+                <label
+                  className={`${DROPDOWN_FIELD_CLASSES} tw-flex tw-min-h-10 tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm focus-within:tw-ring-2 focus-within:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800`}
+                >
+                  <span>Listing status</span>
                   <span className="tw-relative tw-flex tw-items-center">
                     <select
                       value={listedType}

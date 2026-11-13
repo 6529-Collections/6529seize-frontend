@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 /* The nested branch selects one of the project's finite color-pass states. */
 /* eslint-disable no-nested-ternary, sonarjs/no-nested-conditional */
 
@@ -421,7 +422,7 @@ export function EmptyRoomsAmphitheater({
               <select
                 value={channel}
                 onChange={(event) => setChannel(event.target.value)}
-                className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
+                className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
               >
                 <option>Red</option>
                 <option>Green</option>

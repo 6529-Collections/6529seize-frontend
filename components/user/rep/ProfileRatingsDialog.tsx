@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_TRIGGER_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { AuthContext } from "@/components/auth/Auth";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -376,7 +377,7 @@ export default function ProfileRatingsDialog({
                     if (value === "rating" || value === "last_modified")
                       changeOrder(value);
                   }}
-                  className="tw-min-h-9 tw-w-full tw-min-w-0 tw-cursor-pointer tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm tw-font-medium tw-text-iron-100 [color-scheme:dark] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                  className={`${DROPDOWN_TRIGGER_CLASSES} tw-min-h-9 tw-w-full tw-min-w-0 tw-appearance-none tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm [color-scheme:dark]`}
                 >
                   <option value="rating">
                     {t(locale, "user.rate.highestFirst")}

@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  getUnderlineTabTextClasses,
+  UNDERLINE_TAB_TEXT_INDICATOR_CLASSES,
+} from "@/components/common/underlineTabStyles";
+
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ReactNode } from "react";
@@ -89,17 +94,11 @@ function TabButton({
         event.stopPropagation();
         onClick();
       }}
-      className={`tw-relative tw-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-t-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-text-sm tw-font-medium tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
-        active
-          ? "tw-text-iron-50"
-          : "tw-text-iron-500 desktop-hover:hover:tw-bg-white/[0.025] desktop-hover:hover:tw-text-iron-200"
-      }`}
+      className={`tw-relative tw-flex tw-flex-1 tw-items-center tw-justify-center tw-rounded-none tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-text-sm tw-font-medium tw-transition-colors tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${getUnderlineTabTextClasses(active)}`}
     >
       <span
         className={`tw-relative tw-inline-flex tw-py-3 ${
-          active
-            ? "after:tw-absolute after:tw-inset-x-0 after:-tw-bottom-px after:tw-h-px after:tw-bg-primary-400 after:tw-content-['']"
-            : ""
+          active ? UNDERLINE_TAB_TEXT_INDICATOR_CLASSES : ""
         }`}
       >
         {children}

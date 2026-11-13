@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 /* The visual branches expose the project's staged causal sequence. */
 /* eslint-disable no-nested-ternary, sonarjs/cognitive-complexity, sonarjs/no-nested-conditional */
 
@@ -527,7 +528,7 @@ export function PhototaxisCausalTrace({
             <select
               value={speed}
               onChange={(event) => setSpeed(Number(event.target.value))}
-              className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
+              className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
             >
               <option value="4">Slow</option>
               <option value="8">Steady</option>
@@ -539,7 +540,7 @@ export function PhototaxisCausalTrace({
             <select
               value={facade}
               onChange={(event) => setFacade(event.target.value)}
-              className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
+              className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
             >
               <option>Toxic A</option>
               <option>Toxic B</option>
@@ -555,7 +556,7 @@ export function PhototaxisCausalTrace({
             <select
               value={size}
               onChange={(event) => setSize(event.target.value)}
-              className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
+              className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
             >
               <option>Small</option>
               <option>Base</option>
@@ -566,7 +567,7 @@ export function PhototaxisCausalTrace({
             <select
               value={sensors}
               onChange={(event) => setSensors(event.target.value)}
-              className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
+              className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
             >
               <option>Linear</option>
               <option>Nonlinear</option>
@@ -577,7 +578,7 @@ export function PhototaxisCausalTrace({
             <select
               value={alignment}
               onChange={(event) => setAlignment(event.target.value)}
-              className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
+              className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
             >
               <option>Lawful</option>
               <option>Neutral</option>
@@ -589,7 +590,7 @@ export function PhototaxisCausalTrace({
             <select
               value={magnification}
               onChange={(event) => setMagnification(event.target.value)}
-              className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
+              className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
             >
               <option value="0.66">0.66×</option>
               <option value="1.0">1.0×</option>

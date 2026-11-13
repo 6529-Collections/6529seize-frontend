@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 /* Public token identifiers and traits are intentionally compared directly. */
 /* eslint-disable security/detect-possible-timing-attacks */
 
@@ -519,7 +520,7 @@ export function ComparisonSelector({
                   setResultPage("1");
                   setLinkCopied(false);
                 }}
-                className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
+                className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
               >
                 {traitNames.map((trait) => (
                   <option key={trait}>{trait}</option>
@@ -535,7 +536,7 @@ export function ComparisonSelector({
                   setResultPage("1");
                   setLinkCopied(false);
                 }}
-                className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
+                className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
               >
                 {values.map((value) => (
                   <option key={value}>{value}</option>

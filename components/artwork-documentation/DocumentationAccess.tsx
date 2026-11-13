@@ -22,7 +22,7 @@ import { useDocumentationActor } from "./DocumentationAuthGate";
 import {
   DocumentationButton,
   DocumentationNotice,
-  inputClass,
+  selectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -191,7 +191,7 @@ export default function DocumentationAccess({
         <label className="tw-block tw-text-sm tw-text-iron-300">
           {msg("role")}
           <select
-            className={`${inputClass} tw-mt-2`}
+            className={`${selectClass} tw-mt-2`}
             value={role}
             onChange={(event) => setRole(event.target.value)}
           >
