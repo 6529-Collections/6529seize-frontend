@@ -20,6 +20,8 @@ export const holdReverseScrollAnchor = (
   // Two holds would each correct the same insertion.
   activeHolds.get(container)?.();
 
+  // WaveDropsReverseContainer renders the list as the scroll container's
+  // first child; only its top sentinel follows.
   const content = container.firstElementChild;
   if (!content || typeof ResizeObserver === "undefined") {
     return () => undefined;

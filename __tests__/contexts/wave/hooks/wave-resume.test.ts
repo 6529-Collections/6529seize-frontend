@@ -391,6 +391,50 @@ it("splits the gap a second jump lands in", async () => {
   ]);
 });
 
+it("trims a gap when a window overlaps loaded posts on one side only", async () => {
+  around
+    .mockResolvedValueOnce(range(475, 525))
+    .mockResolvedValueOnce(range(510, 560));
+  const { result } = setupWithLatest();
+  await jumpTo(result, 500);
+  await jumpTo(result, 535);
+  expect(result.current.store.getData("wave")?.historyGaps).toEqual([
+    { newerThan: 1, olderThan: 475 },
+    { newerThan: 560, olderThan: 1000 },
+  ]);
+});
+
+it("discards a jump superseded by a newer one", async () => {
+  let finishFirst!: (drops: ApiDrop[]) => void;
+  around
+    .mockReturnValueOnce(
+      new Promise((resolve) => {
+        finishFirst = resolve;
+      })
+    )
+    .mockResolvedValueOnce(range(700, 750));
+  const { result } = setupWithLatest();
+  let first!: Promise<unknown>;
+  act(() => {
+    first = result.current.pagination.fetchNextPage({
+      waveId: "wave",
+      type: DropSize.LIGHT,
+      targetSerialNo: 500,
+    });
+  });
+  await jumpTo(result, 725);
+  await act(async () => {
+    finishFirst(range(475, 525));
+    await first;
+  });
+  const state = result.current.store.getData("wave");
+  expect(state?.drops.some((item) => item.serial_no === 500)).toBe(false);
+  expect(state?.historyGaps).toEqual([
+    { newerThan: 1, olderThan: 700 },
+    { newerThan: 750, olderThan: 1000 },
+  ]);
+});
+
 it("fills a gap forward from its oldest edge for a reader scrolling down", async () => {
   around.mockResolvedValue(range(475, 525));
   const { result } = setupWithLatest();
