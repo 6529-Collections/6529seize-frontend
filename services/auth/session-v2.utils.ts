@@ -1,9 +1,12 @@
 import { queueNativePushLogout } from "@/services/notifications/push-installation";
-import { Capacitor } from "@capacitor/core";
-import type { ApiRedeemConnectionShareResponse } from "@/generated/models/ApiRedeemConnectionShareResponse";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { getWalletAddress, setAuthJwt } from "./auth.utils";
+import { getAuthJwt, setAuthJwt } from "./auth.utils";
+import { getSessionClientType } from "./session-client-type";
+import {
+  parseDesktopSessionResponse,
+  requireDesktopNativeAuthMethod,
+} from "./desktop-native-auth";
 import {
   getNativeRefreshToken,
   getNativeRefreshRequestId,
@@ -48,6 +51,13 @@ import type {
   SessionWebResponse,
 } from "./session-v2.types";
 
+export { getSessionClientType } from "./session-client-type";
+export {
+  createConnectionShare,
+  createLegacyDesktopConnectionShare,
+  redeemConnectionShare,
+} from "./connection-share.utils";
+
 type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
 type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
 type SessionRefreshFailureCooldown = {
@@ -57,33 +67,6 @@ type SessionRefreshFailureCooldown = {
 type SessionRefreshInFlight =
   SessionRefreshEntry<SessionRefreshResponse | null>;
 
-interface CreateConnectionShareResponse {
-  readonly connection_share_code: string;
-  readonly expires_at: string;
-  readonly address: string;
-  readonly role: string | null;
-  readonly target_client_type: RefreshTokenSessionClientType;
-  readonly deep_link_path: string;
-}
-
-interface CreateLegacyDesktopConnectionShareResponse {
-  readonly refresh_token: string;
-  readonly address: string;
-  readonly role: string | null;
-  readonly deep_link_path: string;
-}
-
-type RedeemConnectionShareResponse = Omit<
-  ApiRedeemConnectionShareResponse,
-  "client_type"
-> & { readonly client_type?: RefreshTokenSessionClientType | undefined };
-
-interface NativeConnectionShareSourceProof {
-  readonly client_type: RefreshTokenSessionClientType;
-  readonly client_address: string;
-  readonly native_refresh_token: string;
-}
-
 const sessionRefreshInFlight = new Map<string, SessionRefreshInFlight>();
 const persistedNativeRefreshResponses = new WeakSet<SessionRefreshResponse>();
 const refreshedResponses = new WeakSet<SessionRefreshResponse>();
@@ -91,10 +74,6 @@ const sessionRefreshFailureCooldowns = new Map<
   string,
   SessionRefreshFailureCooldown
 >();
-
-export function getSessionClientType(): AuthSessionClientType {
-  return Capacitor.isNativePlatform() ? "native" : "web";
-}
 
 function getActiveFailureCooldown(
   key: string
@@ -145,7 +124,9 @@ function settleSessionRefreshConsumer(
 ): void {
   entry.activeConsumers = Math.max(0, entry.activeConsumers - 1);
   // Native callers cannot cancel rotation before its credential is persisted.
-  // Web cookies are transport-owned and retain their existing lock cancellation.
+  // Desktop refresh rotates in the shell, which stores the new credential
+  // itself, so it also runs to completion. Web cookies are transport-owned and
+  // retain their existing lock cancellation.
   if (
     key.startsWith("web:") &&
     entry.activeConsumers === 0 &&
@@ -274,6 +255,23 @@ export async function loginWithSessionV2({
   readonly role: string | null;
   readonly deviceLabel?: string | undefined;
 }): Promise<SessionLoginResponse> {
+  if (getSessionClientType() === "desktop") {
+    // The desktop shell calls the API itself and keeps the refresh token.
+    const sessionLogin = requireDesktopNativeAuthMethod("sessionLogin");
+    const desktopResponse = parseDesktopSessionResponse(
+      "sessionLogin",
+      await sessionLogin({
+        client_type: "desktop",
+        server_signature: serverSignature,
+        client_signature: clientSignature,
+        client_address: signerAddress,
+        ...(role === null ? {} : { role }),
+      })
+    );
+    clearSessionRefreshFailureForSession(desktopResponse);
+    return desktopResponse;
+  }
+
   const response = await commonApiPost<
     SessionLoginRequest,
     SessionLoginResponse
@@ -305,6 +303,10 @@ async function executeSessionRefreshV2({
   readonly clientType: AuthSessionClientType;
   readonly refreshKey: string;
 }): Promise<SessionRefreshResponse | null> {
+  if (clientType === "desktop") {
+    return await executeDesktopSessionRefresh({ address, abortSignal });
+  }
+
   if (clientType !== "web") {
     const nativeRefreshToken = await getNativeRefreshToken(address);
     if (abortSignal.aborted) {
@@ -389,6 +391,33 @@ async function executeSessionRefreshV2({
           }),
       }),
   });
+}
+
+/** Desktop refresh runs in the shell, which holds the refresh token. */
+async function executeDesktopSessionRefresh({
+  address,
+  abortSignal,
+}: {
+  readonly address: string;
+  readonly abortSignal: AbortSignal;
+}): Promise<SessionNativeResponse | null> {
+  const sessionRefresh = requireDesktopNativeAuthMethod("sessionRefresh");
+  const response = await executeSessionRefreshRequest({
+    abortSignal,
+    clientType: "desktop",
+    request: async () =>
+      parseDesktopSessionResponse(
+        "sessionRefresh",
+        await sessionRefresh({
+          client_type: "desktop",
+          client_address: address,
+        })
+      ),
+  });
+  if (response && response.address.toLowerCase() !== address.toLowerCase()) {
+    throw new Error("Session refresh returned a different wallet");
+  }
+  return response;
 }
 
 async function executeSessionRefreshRequest<T extends SessionRefreshResponse>({
@@ -644,87 +673,6 @@ export async function verifyActiveSessionV2WebSession({
   return await persistSessionResponse(refreshedSession);
 }
 
-async function getNativeConnectionShareSourceProof(): Promise<NativeConnectionShareSourceProof | null> {
-  const clientType = getSessionClientType();
-  if (clientType === "web") {
-    return null;
-  }
-
-  const address = getWalletAddress();
-  if (!address) {
-    throw new Error(
-      `Connection sharing requires an active ${clientType} session`
-    );
-  }
-
-  const nativeRefreshToken = await getNativeRefreshToken(address);
-  if (!nativeRefreshToken) {
-    throw new Error(
-      `Connection sharing requires an active ${clientType} session`
-    );
-  }
-
-  return {
-    client_type: clientType,
-    client_address: address,
-    native_refresh_token: nativeRefreshToken,
-  };
-}
-
-export async function createConnectionShare({
-  signal,
-  targetClientType = "native",
-  encryptedDeviceSetup,
-}: {
-  readonly signal?: AbortSignal | undefined;
-  readonly targetClientType?: RefreshTokenSessionClientType | undefined;
-  readonly encryptedDeviceSetup?: string | undefined;
-}): Promise<CreateConnectionShareResponse> {
-  const sourceProof = await getNativeConnectionShareSourceProof();
-  const body = sourceProof
-    ? {
-        target_client_type: targetClientType,
-        encrypted_device_setup: encryptedDeviceSetup,
-        ...sourceProof,
-      }
-    : {
-        target_client_type: targetClientType,
-        encrypted_device_setup: encryptedDeviceSetup,
-      };
-
-  return await commonApiPost<
-    {
-      readonly target_client_type: RefreshTokenSessionClientType;
-      readonly client_type?: RefreshTokenSessionClientType | undefined;
-      readonly client_address?: string | undefined;
-      readonly native_refresh_token?: string | undefined;
-    },
-    CreateConnectionShareResponse
-  >({
-    endpoint: "auth/connection-share",
-    body,
-    credentials: getSessionCredentialsMode(),
-    signal,
-  });
-}
-
-export async function createLegacyDesktopConnectionShare({
-  signal,
-}: {
-  readonly signal?: AbortSignal | undefined;
-}): Promise<CreateLegacyDesktopConnectionShareResponse> {
-  const sourceProof = await getNativeConnectionShareSourceProof();
-  return await commonApiPost<
-    Partial<NativeConnectionShareSourceProof>,
-    CreateLegacyDesktopConnectionShareResponse
-  >({
-    endpoint: "auth/connection-share/legacy-desktop",
-    body: sourceProof ?? {},
-    credentials: getSessionCredentialsMode(),
-    signal,
-  });
-}
-
 export async function logoutSessionV2({
   address,
   allSessions = false,
@@ -735,6 +683,10 @@ export async function logoutSessionV2({
   const clientType = getSessionClientType();
   if (clientType !== "web") {
     if (!address) {
+      return;
+    }
+    if (clientType === "desktop") {
+      await logoutDesktopSession({ address, allSessions });
       return;
     }
     // Native logout is local to this profile/device; device-wide logout uses
@@ -763,37 +715,23 @@ export async function logoutSessionV2({
   });
 }
 
-export async function redeemConnectionShare(
-  connectionShareCode: string,
-  targetClientType: RefreshTokenSessionClientType = "native"
-): Promise<
-  SessionNativeResponse &
-    Pick<RedeemConnectionShareResponse, "encrypted_device_setup">
-> {
-  const response = await commonApiPost<
-    {
-      readonly connection_share_code: string;
-      readonly target_client_type: RefreshTokenSessionClientType;
-    },
-    RedeemConnectionShareResponse
-  >({
-    endpoint: "auth/connection-share/redeem",
-    body: {
-      connection_share_code: connectionShareCode,
-      target_client_type: targetClientType,
-    },
-    credentials: getSessionCredentialsMode(),
-  });
-
-  return {
-    ...response,
-    role: response.role ?? null,
-    access_token_expires_at: new Date(
-      response.access_token_expires_at
-    ).toISOString(),
-    refresh_token_expires_at: new Date(
-      response.refresh_token_expires_at
-    ).toISOString(),
-    client_type: response.client_type ?? targetClientType,
-  };
+/** Revoke the desktop session in the shell, then drop its refresh token. */
+async function logoutDesktopSession({
+  address,
+  allSessions,
+}: {
+  readonly address: string;
+  readonly allSessions: boolean;
+}): Promise<void> {
+  try {
+    const sessionLogout = requireDesktopNativeAuthMethod("sessionLogout");
+    await sessionLogout({
+      access_token: getAuthJwt(),
+      client_type: "desktop",
+      client_address: address,
+      all_sessions: allSessions,
+    });
+  } finally {
+    await removeNativeRefreshToken(address);
+  }
 }
