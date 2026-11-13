@@ -670,7 +670,7 @@ const getContentBlock = ({
     >
       {showAuthorInfo && (
         <div
-          className={`tw-flex tw-w-full tw-items-start tw-gap-x-2 ${
+          className={`tw-flex tw-w-full tw-items-center tw-gap-x-2 md:tw-items-start ${
             inlineAuthorOnDesktop
               ? ""
               : "md:tw-block md:tw-w-auto md:tw-flex-shrink-0"

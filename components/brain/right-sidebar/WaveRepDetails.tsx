@@ -337,11 +337,11 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
         <div className="tw-overflow-hidden tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5">
           <div className="tw-flex tw-items-end tw-justify-between tw-gap-4 tw-px-2 tw-py-2.5">
             <div className="tw-min-w-0">
-              <p className="tw-mb-1 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500 sm:tw-tracking-[0.1em]">
+              <p className="tw-mb-1 tw-mt-0 tw-text-[13px] tw-font-medium tw-normal-case tw-leading-5 tw-tracking-normal tw-text-iron-500">
                 {detailText("waves.rep.details.summary.total")}
               </p>
               <p
-                className={`tw-mb-0 tw-text-xl tw-font-semibold tw-leading-none ${getRepTextClass(
+                className={`tw-mb-0 tw-mt-0 tw-text-[13px] tw-font-semibold tw-leading-5 ${getRepTextClass(
                   summary.totalRep
                 )}`}
               >
@@ -352,7 +352,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
               {getContributorCountLabel(summary.contributorCount)}
             </span>
           </div>
-          <div className="tw-grid tw-grid-cols-1 tw-gap-px tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-white/5 @[18rem]/rep:tw-grid-cols-3">
+          <div className="tw-grid tw-grid-cols-1 tw-gap-1 tw-border-0 tw-bg-transparent @[18rem]/rep:tw-grid-cols-3">
             <SummaryStat
               label={detailText("waves.rep.details.summary.yourRep")}
               value={
@@ -382,7 +382,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
         <div className="tw-mb-2 tw-flex tw-items-center tw-justify-between tw-gap-3">
           <h2
             id="wave-rep-categories-heading"
-            className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]"
+            className="tw-mb-0 !tw-text-[13px] !tw-font-medium tw-normal-case !tw-leading-5 tw-tracking-normal !tw-text-iron-400"
           >
             {detailText("waves.rep.details.categories.title")}
           </h2>
@@ -490,7 +490,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
       </section>
 
       <div className="tw-sticky tw-top-0 tw-z-20 tw-flex tw-flex-col tw-bg-iron-950/95 tw-backdrop-blur">
-        <fieldset className="tw-m-0 tw-grid tw-min-w-0 tw-grid-cols-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-p-0">
+        <fieldset className="tw-m-0 tw-flex tw-min-w-0 tw-gap-1 tw-border-0 tw-p-0">
           <legend className="tw-sr-only">
             {detailText("waves.rep.details.view.ariaLabel")}
           </legend>
@@ -498,10 +498,10 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             type="button"
             aria-pressed={activeView === "contributors"}
             onClick={() => setActiveView("contributors")}
-            className={`tw-cursor-pointer tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 !tw-text-sm tw-font-medium tw-transition ${
+            className={`tw-h-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-0 !tw-text-[13px] tw-font-medium tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-h-8 ${
               activeView === "contributors"
-                ? "tw-border-primary-300 tw-text-iron-100"
-                : "tw-border-transparent tw-text-iron-500 hover:tw-text-iron-300"
+                ? "tw-bg-white/[0.08] tw-text-white"
+                : "tw-bg-transparent tw-text-iron-500 hover:tw-text-iron-300"
             }`}
           >
             {detailText("waves.rep.details.view.contributors")}
@@ -510,10 +510,10 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             type="button"
             aria-pressed={activeView === "activity"}
             onClick={showActivity}
-            className={`tw-cursor-pointer tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 !tw-text-sm tw-font-medium tw-transition ${
+            className={`tw-h-11 tw-cursor-pointer tw-rounded-full tw-border-0 tw-px-3 tw-py-0 !tw-text-[13px] tw-font-medium tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:tw-h-8 ${
               activeView === "activity"
-                ? "tw-border-primary-300 tw-text-iron-100"
-                : "tw-border-transparent tw-text-iron-500 hover:tw-text-iron-300"
+                ? "tw-bg-white/[0.08] tw-text-white"
+                : "tw-bg-transparent tw-text-iron-500 hover:tw-text-iron-300"
             }`}
           >
             {detailText("waves.rep.details.view.activity")}
@@ -527,7 +527,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             <div className="tw-min-w-0">
               <h2
                 id="wave-rep-contributors-heading"
-                className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]"
+                className="tw-mb-0 !tw-text-[13px] !tw-font-medium tw-normal-case !tw-leading-5 tw-tracking-normal !tw-text-iron-400"
               >
                 {contributorHeading}
               </h2>
@@ -632,7 +632,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             <div>
               <h2
                 id="wave-rep-activity-heading"
-                className="tw-mb-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]"
+                className="tw-mb-0 !tw-text-[13px] !tw-font-medium tw-normal-case !tw-leading-5 tw-tracking-normal !tw-text-iron-400"
               >
                 {detailText("waves.rep.details.activity.title")}
               </h2>

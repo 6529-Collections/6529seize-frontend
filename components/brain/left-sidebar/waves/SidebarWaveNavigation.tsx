@@ -1,5 +1,6 @@
 "use client";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -102,7 +103,7 @@ export function SidebarWaveNavigationControls({
                 type="button"
                 onClick={closeSearch}
                 aria-label={t(locale, "waves.sidebar.closeSearch")}
-                className="tw-flex tw-size-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white"
+                className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-flex tw-size-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none`}
               >
                 <XMarkIcon className="tw-size-4" />
               </button>
@@ -148,9 +149,9 @@ export function SidebarWaveNavigationControls({
               title={findWaveLabel}
               aria-expanded={false}
               onClick={() => setSearchOpen(true)}
-              className="tw-group tw-ml-auto tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white touch-only:tw-size-11 touch-only:tw-rounded-none"
+              className="tw-group tw-ml-auto tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white touch-only:tw-size-11"
             >
-              <span className="tw-flex tw-size-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 desktop-hover:group-hover:tw-bg-iron-800 touch-only:tw-size-10">
+              <span className="tw-flex tw-size-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent desktop-hover:group-hover:tw-bg-iron-900 touch-only:tw-size-10">
                 <MagnifyingGlassIcon className="tw-size-4" aria-hidden="true" />
               </span>
             </button>

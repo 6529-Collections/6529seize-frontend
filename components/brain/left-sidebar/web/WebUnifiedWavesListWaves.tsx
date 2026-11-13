@@ -8,6 +8,7 @@ import {
 import { useSidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 
 import Button from "@/components/utils/button/Button";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -16,8 +17,7 @@ import { useLoadPersistedExpandedSubwaves } from "@/hooks/useLoadPersistedExpand
 import { useActiveSubwaveParentHint } from "@/hooks/useActiveSubwaveParentHint";
 import { useRevealActiveSidebarWave } from "@/hooks/useRevealActiveSidebarWave";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
@@ -63,7 +63,8 @@ import { t } from "@/i18n/messages";
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
 const WAVE_ROW_HEIGHT_DEFAULT = 62 as const;
-const WAVE_ROW_HEIGHT_COLLAPSED = 52 as const;
+const WAVE_ROW_HEIGHT_COLLAPSED = 44 as const;
+const DIRECT_MESSAGE_ROW_HEIGHT_COLLAPSED = 52 as const;
 const SUBWAVE_ROW_HEIGHT = 48 as const;
 const COLLAPSING_SUBWAVE_ROW_HEIGHT = 1 as const;
 const SUBWAVE_TOGGLE_ROW_HEIGHT = 38 as const;
@@ -106,12 +107,15 @@ function getVirtualizedKey({
 
 function getSectionClassName(isCollapsed: boolean) {
   return isCollapsed
-    ? "tw-flex tw-flex-col tw-items-center tw-gap-y-2"
+    ? "tw-flex tw-flex-col tw-items-center"
     : "tw-flex tw-flex-col";
 }
 
-function getBaseRowHeight(isCollapsed: boolean) {
-  return isCollapsed ? WAVE_ROW_HEIGHT_COLLAPSED : WAVE_ROW_HEIGHT_DEFAULT;
+function getBaseRowHeight(isCollapsed: boolean, isDirectMessage: boolean) {
+  if (!isCollapsed) return WAVE_ROW_HEIGHT_DEFAULT;
+  return isDirectMessage
+    ? DIRECT_MESSAGE_ROW_HEIGHT_COLLAPSED
+    : WAVE_ROW_HEIGHT_COLLAPSED;
 }
 
 interface WebUnifiedWavesListWavesProps {
@@ -141,20 +145,18 @@ function CreateWaveButton({
   return (
     <Button
       variant="primary"
-      size={null}
+      size={compact ? null : "xs"}
       onClick={onClick}
       aria-label={label}
       data-tooltip-id="create-wave-tooltip"
       data-tooltip-content={label}
-      className={
-        compact
-          ? "tw-size-8 tw-rounded-lg tw-p-0 touch-only:tw-size-11"
-          : "tw-h-8 tw-gap-2 tw-rounded-lg tw-px-3 tw-py-0 tw-text-xs touch-only:tw-h-11"
-      }
+      className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${
+        compact ? "tw-size-8 tw-p-0" : "tw-py-0"
+      }`}
     >
-      <FontAwesomeIcon
-        icon={faPlus}
-        className={compact ? "tw-size-4" : "-tw-ml-1 tw-size-4"}
+      <PlusIcon
+        className="tw-size-4 tw-flex-shrink-0"
+        strokeWidth={2}
         aria-hidden="true"
       />
       {!compact && <span>{label}</span>}
@@ -183,7 +185,7 @@ function WebWavesListHeader({
     }
 
     return (
-      <div className="tw-mb-3.5 tw-mt-2 tw-flex tw-justify-center tw-px-2">
+      <div className="tw-flex tw-h-11 tw-shrink-0 tw-items-center tw-justify-center tw-px-2">
         <CreateWaveButton onClick={onCreateWave} compact />
       </div>
     );
@@ -194,7 +196,7 @@ function WebWavesListHeader({
       label="Waves"
       paddingClassName={`${headerPaddingClassName} tw-pb-2`}
       rightContent={
-        <div className="tw-flex tw-items-center tw-gap-x-1.5">
+        <div className="tw-flex tw-items-center tw-gap-x-2">
           {showProfileFeedShortcut && (
             <WebProfileFeedShortcut basePath={basePath} isCollapsed={false} />
           )}
@@ -353,7 +355,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     isDirectMessage,
   });
   const sectionClassName = getSectionClassName(isCollapsed);
-  const rowHeight = getBaseRowHeight(isCollapsed);
+  const rowHeight = getBaseRowHeight(isCollapsed, isDirectMessage);
   const isMessageBasePath = basePath === "/messages";
   const getSidebarRowHeight = useCallback(
     (row: AnimatedSidebarWaveTreeRow) => {

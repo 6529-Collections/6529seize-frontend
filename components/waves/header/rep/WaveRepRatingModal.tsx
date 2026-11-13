@@ -311,6 +311,7 @@ export default function WaveRepRatingModal({
             </div>
             <UserRateAdjustmentHelper
               inLineValues={true}
+              valueLayout="inline"
               originalValue={currentRating}
               adjustedValue={amount}
               adjustmentType="Wave REP"
@@ -355,7 +356,7 @@ export default function WaveRepRatingModal({
             )}
             <Button
               onClick={onClose}
-              variant="secondary"
+              variant="ghost"
               size="lg"
               fullWidth
               className="tw-hidden md:tw-inline-flex md:tw-w-auto"

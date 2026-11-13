@@ -78,7 +78,7 @@ export const WaveDropsReverseContainer = forwardRef<
         {...{ [WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE]: "true" }}
         className={`tw-min-h-0 tw-flex-1 ${
           bottomPaddingClassName ?? "tw-pb-6"
-        } tw-no-scrollbar lg:tw-[scrollbar-gutter:stable] tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-bg-iron-950 tw-transition-[padding-bottom] tw-duration-300 tw-ease-out tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 motion-reduce:tw-transition-none hover:tw-scrollbar-thumb-iron-300 lg:tw-pr-2 lg:tw-scrollbar-thin ${containerClassName ?? ""}`}
+        } tw-no-scrollbar lg:tw-[scrollbar-gutter:stable] tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-bg-iron-950 tw-transition-[padding-bottom] tw-duration-300 tw-ease-out tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 [mask-image:linear-gradient(to_bottom,transparent,black_24px)] hover:tw-scrollbar-thumb-iron-300 motion-reduce:tw-transition-none lg:tw-pr-2 lg:tw-scrollbar-thin ${containerClassName ?? ""}`}
         style={bottomPaddingStyle}
       >
         <div className="tw-flex tw-flex-col">

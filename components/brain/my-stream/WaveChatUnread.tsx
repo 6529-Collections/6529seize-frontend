@@ -35,6 +35,7 @@ export function WaveChatUnreadBadge({ waveId }: { readonly waveId: string }) {
   return (
     <TabCountBadge
       count={count}
+      variant="wave"
       accessibleLabel={t(locale, key, {
         count: formatInteger(locale, count),
       })}

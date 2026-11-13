@@ -1,5 +1,6 @@
 "use client";
 
+import { usePublicWaveFeedReady } from "@/components/waves/PublicWaveFeedReady";
 import { ChatFileDropOverlay } from "@/components/composer/ChatFileDropOverlay";
 import { useChatFileDrop } from "@/hooks/useChatFileDrop";
 import { getNativeComposerStyle } from "@/components/waves/composerPresentation";
@@ -211,6 +212,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   waveViewStyleOverride,
   showLegacyDmBanner = true,
 }) => {
+  // Gallery replaces the chat that normally releases the public-feed loading cover.
+  usePublicWaveFeedReady(viewMode === "gallery");
   const dmUnreadConversation = useDmUnreadConversation(wave.id);
   const isDirectMessage = isWaveDirectMessage(wave.id, wave);
   const { fetchAroundSerialNo } = useMyStreamActions();

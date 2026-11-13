@@ -239,7 +239,7 @@ describe("WaveDropHeader", () => {
       mockSignedMessagesEnabled = true;
     });
 
-    it.each(["inline", "stacked"] as const)(
+    it.each(["inline", "stacked", "stacked-compact"] as const)(
       "sits beside the %s timestamp of an author signed drop",
       (timestampLayout) => {
         render(
