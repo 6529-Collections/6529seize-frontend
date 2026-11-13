@@ -983,7 +983,7 @@ test("homepage starts artwork lookups before hydration and reuses each response 
       .poll(() => requests)
       .toEqual({ artwork: 1, settings: 1, winner: 1 });
     await expect(
-      page.locator('main [data-home-section="Latest drop"]')
+      page.getByRole("main").locator('[data-home-section="Latest drop"]')
     ).toHaveCount(0);
     hydration.release();
     const artwork = page.getByRole("main").getByRole("img", {

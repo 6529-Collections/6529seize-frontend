@@ -120,6 +120,18 @@ describe("home artwork document startup", () => {
     expect(fetch).toHaveBeenCalledTimes(2);
   });
 
+  it("keeps the caller's response body readable while tracking cancellation", async () => {
+    const { browser } = launch();
+    const caller = new AbortController();
+    const response = await browser.__6529HomeArtworkStartup?.take(
+      `${API}/api/memes_latest`,
+      new Headers(),
+      caller.signal
+    );
+    expect(await response?.json()).toEqual({ id: 574 });
+    await settle();
+  });
+
   it("matches wallet and staging credentials before reusing the raw response", async () => {
     const address = "0x0000000000000000000000000000000000000529";
     const token = `e30.${btoa(JSON.stringify({ sub: address, exp: 10000000000 }))}.signature`;
@@ -141,6 +153,7 @@ describe("home artwork document startup", () => {
         })
       )
     ).toBeNull();
+    expect(fetch.mock.calls[0]?.[1].signal?.aborted).toBe(true);
     await settle();
   });
 
