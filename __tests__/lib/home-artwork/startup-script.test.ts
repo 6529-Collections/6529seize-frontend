@@ -10,6 +10,7 @@ function launch(
   options: {
     pathname?: string;
     apiBase?: string;
+    memesWaveOverride?: string;
     cookie?: string;
     storedSession?: boolean;
     useDevAuth?: boolean;
@@ -56,6 +57,7 @@ function launch(
   };
   const script = getHomeArtworkStartupScript({
     apiBase: options.apiBase ?? API,
+    memesWaveOverride: options.memesWaveOverride,
     useDevAuth: options.useDevAuth ?? false,
   });
   Reflect.deleteProperty(browser, "__6529HomeArtworkStartup");
@@ -110,12 +112,82 @@ describe("home artwork document startup", () => {
     await settle();
   });
 
+  it("uses the configured wave override for the winner lookup", async () => {
+    const override = "00000000-0000-4000-8000-000000000530";
+    const { fetch } = launch({ memesWaveOverride: override });
+    await settle();
+    expect(fetch.mock.calls[2]?.[0]).toBe(
+      `${API}/api/v2/waves/${override}/decisions?sort_direction=DESC&sort=decision_time&page=1&page_size=1`
+    );
+  });
+
+  it("adopts settings with the same decoded staging cookie header as the API client", async () => {
+    const { browser } = launch({ cookie: "x-6529-auth=stage%2Btoken%3D" });
+    const response = await browser.__6529HomeArtworkStartup?.take(
+      `${API}/api/settings`,
+      new Headers({ "x-6529-auth": "stage+token=" })
+    );
+    expect(await response?.json()).toEqual({ memes_wave_id: WAVE });
+    await settle();
+  });
+
+  it("adopts an authenticated response only for the same wallet token", async () => {
+    const address = "0x0000000000000000000000000000000000000529";
+    const token = `e30.${btoa(JSON.stringify({ sub: address, exp: 10000000000 }))}.signature`;
+    const { browser } = launch({
+      cookie: `__Host-wallet-auth=${token}`,
+      accountAddress: address,
+    });
+    const response = await browser.__6529HomeArtworkStartup?.take(
+      `${API}/api/memes_latest`,
+      new Headers({ Authorization: `Bearer ${token}` })
+    );
+    expect(await response?.json()).toEqual({ id: 574 });
+    await settle();
+  });
+
+  it.each(["refreshed", "anonymous"])(
+    "rejects and aborts an old token's response for a %s caller",
+    async (caller) => {
+      const address = "0x0000000000000000000000000000000000000529";
+      const payload = btoa(JSON.stringify({ sub: address, exp: 10000000000 }));
+      const { browser, fetch } = launch({
+        cookie: `__Host-wallet-auth=e30.${payload}.old-signature`,
+        accountAddress: address,
+      });
+      const headers = new Headers();
+      if (caller === "refreshed") {
+        headers.set("Authorization", `Bearer e30.${payload}.new-signature`);
+      }
+      expect(
+        browser.__6529HomeArtworkStartup?.take(
+          `${API}/api/memes_latest`,
+          headers
+        )
+      ).toBeNull();
+      expect(fetch.mock.calls[0]?.[1].signal?.aborted).toBe(true);
+      await settle();
+    }
+  );
+
   it("leaves the dependent winner request to the app once normal data consumption starts", async () => {
     const { browser, fetch } = launch();
     await browser.__6529HomeArtworkStartup?.take(
       `${API}/api/settings`,
       new Headers()
     );
+    await settle();
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not start a late winner lookup after the app misses adoption", async () => {
+    const { browser, fetch } = launch();
+    expect(
+      browser.__6529HomeArtworkStartup?.take(
+        `${API}/api/unrelated`,
+        new Headers()
+      )
+    ).toBeNull();
     await settle();
     expect(fetch).toHaveBeenCalledTimes(2);
   });

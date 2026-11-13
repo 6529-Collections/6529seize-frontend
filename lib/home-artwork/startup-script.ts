@@ -8,7 +8,7 @@ type StartupConfig = {
 
 // An inline literal stays independent of bundler-injected function helpers.
 // It starts only raw requests; the existing selection and auth flow consume them.
-const HOME_ARTWORK_STARTUP = String.raw`(function startHomeArtwork(config) {
+const HOME_ARTWORK_STARTUP = `(function startHomeArtwork(config) {
   if (location.pathname !== "/" || config.useDevAuth || Reflect.get(globalThis, "__6529LegacyBrowser") === true || Reflect.has(globalThis, "__6529HomeArtworkStartup") || typeof fetch !== "function") {
     return;
   }
@@ -133,6 +133,6 @@ export function getHomeArtworkStartupScript(config: StartupConfig): string {
   const serialized = JSON.stringify({
     ...config,
     walletAuthCookie: WALLET_AUTH_COOKIE,
-  }).replaceAll("<", "\\u003c");
+  }).replaceAll("<", String.raw`\u003c`);
   return `(${HOME_ARTWORK_STARTUP})(${serialized});`;
 }
