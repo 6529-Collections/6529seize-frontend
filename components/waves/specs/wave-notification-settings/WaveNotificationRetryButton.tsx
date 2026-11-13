@@ -1,4 +1,5 @@
 import Button from "@/components/utils/button/Button";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import { waveNotificationSettingsMessage } from "./waveNotificationSettings.messages";
 import type { WaveNotificationSettingsState } from "./useWaveNotificationSettings";
 
@@ -17,7 +18,8 @@ export default function WaveNotificationRetryButton({
         onClick={settings.onRetryClick}
         loading={settings.preferencesFetching}
         variant="tertiary"
-        size={compact ? "sm" : "md"}
+        size={compact ? "xs" : "md"}
+        className={compact ? COMPACT_ACTION_TOUCH_TARGET_CLASS : undefined}
         fullWidth={!compact}
         aria-label={waveNotificationSettingsMessage(
           "waves.notificationSettings.retry.ariaLabel"

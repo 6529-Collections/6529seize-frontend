@@ -199,7 +199,7 @@ export function NativeCompetitionContent({
       {!embedded && (
         <div
           data-competition-navigation="detail"
-          className="tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-2 sm:tw-px-4"
+          className="tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-2 sm:tw-px-4"
         >
           <div className="tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500">
             <TabToggle

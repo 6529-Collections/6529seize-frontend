@@ -281,13 +281,13 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
               >
                 <div className="tw-flex tw-h-full tw-items-center tw-justify-between tw-gap-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-[#0c1018] tw-px-3 tw-py-2.5 tw-shadow-sm tw-shadow-black/30 tw-transition-[background-color,border-color] tw-duration-200 desktop-hover:group-hover:tw-border-white/[0.14] desktop-hover:group-hover:tw-bg-[#0f1420]">
                   <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
-                    <span className="tw-whitespace-nowrap tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-[0.1em] tw-text-iron-500">
+                    <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-normal-case tw-tracking-normal tw-text-iron-500">
                       {buttonTitle}
                     </span>
 
                     <div className="tw-flex tw-items-center tw-gap-1.5">
                       <MemesWaveZapIcon className="tw-size-3.5 tw-flex-shrink-0 tw-fill-none tw-text-primary-400" />
-                      <span className="tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-iron-100">
+                      <span className="tw-truncate tw-text-xs tw-font-semibold tw-tracking-tight tw-text-iron-100">
                         {buttonValue}
                       </span>
                     </div>
@@ -298,7 +298,7 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
                       <span className="tw-text-xs tw-font-medium tw-text-primary-300">
                         {leftThisRoundText}
                       </span>
-                      <span className="tw-text-[11px] tw-font-normal tw-text-iron-500">
+                      <span className="tw-text-xs tw-font-normal tw-text-iron-500">
                         {unratedText}
                       </span>
                     </div>

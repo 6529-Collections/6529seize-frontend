@@ -835,9 +835,22 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       .filter({ visible: true });
     const score = votes.getByRole("button", { name: /^Wave score / }).first();
     await expect(score).toBeEnabled({ timeout: NAVIGATION_TIMEOUT_MS });
+    await expect(score).toHaveCSS("color", "rgb(147, 147, 159)");
+    await expect(
+      page
+        .getByRole("region", { name: "Active voting waves" })
+        .filter({ visible: true })
+        .getByRole("button", { name: /^Wave score / })
+        .first()
+        .locator("svg")
+    ).toBeVisible();
     await score.click();
     const details = page.getByRole("dialog", { name: "Wave score details" });
     await expect(details).toBeVisible();
+    await score.hover();
+    if (await page.evaluate(() => matchMedia("(any-hover: hover)").matches)) {
+      await expect(score).toHaveCSS("color", "rgb(206, 207, 212)");
+    }
     const searchToggle = page
       .getByRole("button", { name: "Find a wave…", exact: true })
       .filter({ visible: true });

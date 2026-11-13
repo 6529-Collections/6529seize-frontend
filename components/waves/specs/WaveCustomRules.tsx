@@ -252,6 +252,7 @@ export default function WaveCustomRules({
         />
       )}
       valueLabel={valueLabel}
+      showContentDivider={Boolean(customRules)}
       variant={isConfiguration ? "content" : "row"}
     />
   );
