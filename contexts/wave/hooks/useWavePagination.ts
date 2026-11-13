@@ -230,7 +230,8 @@ export function useWavePagination({
 
   /**
    * Stores a window of drops fetched around a target serial and marks the
-   * unloaded ranges between it and the loaded drops as history gaps.
+   * unloaded ranges between it and the loaded drops as history gaps. The
+   * store merges `drops` into the ones it holds; it does not replace them.
    */
   const storeTargetWindow = useCallback(
     (waveId: string, windowDrops: ApiDrop[]) => {

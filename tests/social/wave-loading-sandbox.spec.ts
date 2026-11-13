@@ -1566,9 +1566,12 @@ test("shared post loads only its surroundings and fills the rest as the reader s
   await expect(post(151)).toBeAttached();
   await expect(post(40)).toHaveCount(0);
   await expect(post(101)).toHaveCount(0);
-  expect(
-    await chat.getByText(/^Shared link fixture post d+$/).count()
-  ).toBeLessThan(100);
+  const rendered = await chat
+    .getByText(/^Shared link fixture post \d+$/)
+    .count();
+  expect(rendered).toBeGreaterThan(0);
+  // At most the 38 posts around the target and the 50 latest ones.
+  expect(rendered).toBeLessThanOrEqual(88);
 
   // Scroll down as a reader would; wheel input also ends the hold that keeps
   // the shared post in view.
