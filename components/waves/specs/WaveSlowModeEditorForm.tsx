@@ -1,3 +1,4 @@
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import {
   SLOW_MODE_UNITS,
   type SlowModeUnit,
@@ -57,7 +58,7 @@ export default function WaveSlowModeEditorForm({
         />
         <select
           aria-label="Slow mode unit"
-          className="tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none"
+          className={`${DROPDOWN_FIELD_CLASSES} tw-px-2.5 tw-py-2 tw-text-sm`}
           disabled={disabled}
           value={unit}
           onChange={(event) => {

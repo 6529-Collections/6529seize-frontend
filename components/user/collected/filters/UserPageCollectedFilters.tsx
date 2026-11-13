@@ -151,10 +151,7 @@ export default function UserPageCollectedFilters({
   };
 
   return (
-    <DropdownToolbar
-      size="sm"
-      className="tw-relative tw-w-full [&_button[aria-haspopup]>:last-child>svg]:!tw-size-4 [&_button[aria-haspopup]]:tw-font-medium desktop-hover:[&_button[role=tab]:hover]:tw-border-iron-700 desktop-hover:[&_button[role=tab]:hover]:tw-bg-iron-900 desktop-hover:[&_button[role=tab]:hover]:tw-text-iron-100 desktop-hover:[&_button[role=tab][aria-selected=true]:hover]:tw-border-iron-600 desktop-hover:[&_button[role=tab][aria-selected=true]:hover]:tw-bg-iron-700 [&_button[role=tab][aria-selected=true]]:tw-border-iron-600 [&_button[role=tab][aria-selected=true]]:tw-bg-iron-800 [&_button[role=tab][aria-selected=true]]:tw-font-semibold [&_button[role=tab][aria-selected=true]]:tw-text-iron-50 [&_button[role=tab]]:tw-border-iron-800 [&_button[role=tab]]:tw-bg-iron-950 [&_button[role=tab]]:tw-font-medium [&_button[role=tab]]:tw-text-iron-400"
-    >
+    <DropdownToolbar size="sm" className="tw-relative tw-w-full">
       <div
         ref={scrollContainerRef}
         className="tw-w-full tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
@@ -175,6 +172,9 @@ export default function UserPageCollectedFilters({
               )}
               size="sm"
               variant="filter"
+              tabsVariant="connected"
+              connectedSize="sm"
+              fill={false}
             />
 
             {activeMainTab === MainTab.NATIVE && (
