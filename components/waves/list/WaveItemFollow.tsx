@@ -4,12 +4,18 @@ import { useContext } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { AuthContext } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveJoin } from "@/hooks/waves/useWaveJoin";
+import { t } from "@/i18n/messages";
 
 export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { isJoined: isSubscribed, isPending, toggle } = useWaveJoin(wave);
-  const label = isSubscribed ? "Following" : "Follow";
+  const locale = useBrowserLocale();
+  const label = t(
+    locale,
+    isSubscribed ? "waves.join.listFollowing" : "waves.join.listFollow"
+  );
   const canSubscribe = !!connectedProfile?.handle && !activeProfileProxy;
 
   return (
