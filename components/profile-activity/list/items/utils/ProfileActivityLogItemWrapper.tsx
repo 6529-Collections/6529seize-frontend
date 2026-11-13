@@ -49,6 +49,11 @@ export default function ProfileActivityLogItemWrapper({
   const pfp = profile?.pfp ?? null;
   const avatarSrc = pfp ? getScaledImageUri(pfp, ImageScale.W_AUTO_H_50) : null;
   const [failedAvatarSrc, setFailedAvatarSrc] = useState<string | null>(null);
+  const unoptimized =
+    !parseDecentralizedMediaRef(pfp) ||
+    !avatarSrc ||
+    isGifImageUrl(avatarSrc) ||
+    failedAvatarSrc === avatarSrc;
   const timestampIndent = isArchived ? "" : "tw-pl-9";
 
   return (
@@ -70,16 +75,14 @@ export default function ProfileActivityLogItemWrapper({
               <span className="-tw-ml-9 tw-inline-flex tw-shrink-0 tw-items-center tw-gap-x-3">
                 {avatarSrc ? (
                   <Image
+                    // Avoid Safari reselecting a large srcset candidate on fallback.
+                    key={`${avatarSrc}:${unoptimized}`}
                     src={avatarSrc}
                     alt={handleOrWallet}
                     width={24}
                     height={24}
                     sizes="24px"
-                    unoptimized={
-                      !parseDecentralizedMediaRef(pfp) ||
-                      isGifImageUrl(avatarSrc) ||
-                      failedAvatarSrc === avatarSrc
-                    }
+                    unoptimized={unoptimized}
                     onError={() => setFailedAvatarSrc(avatarSrc)}
                     className={`tw-h-6 tw-w-6 tw-flex-shrink-0 tw-bg-iron-700 tw-object-cover ${compact ? "tw-rounded-full" : "tw-rounded-md"}`}
                   />

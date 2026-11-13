@@ -351,8 +351,8 @@ export default function UserPageRep({
 
       <ProfileRepContributorsDialog
         profile={profile}
-        identity={user}
         dialog={repDialog}
+        overview={activeOverview}
         onClose={() => setRepDialog(null)}
       />
 

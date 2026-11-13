@@ -174,23 +174,6 @@ const createReactQueryContextValue = (
     });
   };
 
-  const invalidateProfileRaterCICState = ({
-    profile,
-    rater,
-  }: {
-    profile: ApiIdentity;
-    rater: string;
-  }) => {
-    const handles = getHandlesFromProfile(profile);
-    invalidateQueries({
-      key: QueryKey.PROFILE_RATER_CIC_STATE,
-      values: handles.map((h) => ({
-        handle: h,
-        rater,
-      })),
-    });
-  };
-
   const invalidateProfileCICStatements = (profile: ApiIdentity) => {
     const handles = getHandlesFromProfile(profile);
     invalidateQueries({
@@ -332,45 +315,33 @@ const createReactQueryContextValue = (
     });
   };
 
-  const onProfileCICModify = ({
-    targetProfile,
+  const onProfileCICModify = async ({
+    targetProfiles,
     connectedProfile,
     rater,
     profileProxy,
   }: {
-    readonly targetProfile: ApiIdentity;
+    readonly targetProfiles: readonly ApiIdentity[];
     readonly connectedProfile: ApiIdentity | null;
     readonly rater: string | null;
     readonly profileProxy: ApiProfileProxy | null;
   }) => {
-    invalidateProfile(targetProfile);
+    if (targetProfiles.length === 0) return;
+    for (const targetProfile of targetProfiles) {
+      invalidateProfile(targetProfile);
+      invalidateProfileRaters({
+        profile: targetProfile,
+        matter: RateMatter.NIC,
+        given: false,
+      });
+    }
     invalidateLogs();
-    void refreshProfileRatingLists(queryClient, "NIC", {
-      targetProfiles: [targetProfile],
-      connectedProfile,
-      profileProxy,
-      rater,
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.CIC_OVERVIEW],
-    });
-    invalidateProfileRaters({
-      profile: targetProfile,
-      matter: RateMatter.NIC,
-      given: false,
-    });
 
     if (connectedProfile) {
       invalidateProfileRaters({
         profile: connectedProfile,
         matter: RateMatter.NIC,
         given: true,
-      });
-    }
-    if (rater) {
-      invalidateProfileRaterCICState({
-        profile: targetProfile,
-        rater: rater.toLowerCase(),
       });
     }
     if (profileProxy?.created_by.handle && profileProxy.granted_to.handle) {
@@ -420,6 +391,19 @@ const createReactQueryContextValue = (
         rater_representative: raterRepresentative,
       });
     }
+    await Promise.all([
+      refreshProfileRatingLists(queryClient, "NIC", {
+        targetProfiles,
+        connectedProfile,
+        profileProxy,
+        rater,
+      }),
+      queryClient.invalidateQueries({ queryKey: [QueryKey.CIC_OVERVIEW] }),
+      // NIC credit, like REP credit, is shared across every recipient.
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.PROFILE_RATER_CIC_STATE],
+      }),
+    ]);
   };
 
   const onProfileRepModify = async ({

@@ -1,5 +1,6 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import type { ApiGlobalRepCategoryOverview } from "@/generated/models/ApiGlobalRepCategoryOverview";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import {
   expect,
   expectAxeClean,
@@ -51,7 +52,11 @@ async function seedSession(page: Page, role: string | null) {
   );
 }
 
-async function installCategories(page: Page, api: string) {
+async function installCategories(
+  page: Page,
+  api: string,
+  getRating = () => 20
+) {
   await page.route(`${api}/api/**identities/*/subscriptions`, (route) =>
     route.fulfill({ json: { actions: [] } })
   );
@@ -91,9 +96,9 @@ async function installCategories(page: Page, api: string) {
         data: [
           {
             category: CATEGORY,
-            total_rep: 20,
+            total_rep: getRating(),
             contributor_count: 1,
-            authenticated_user_contribution: 20,
+            authenticated_user_contribution: getRating(),
             top_contributors: [],
           },
         ],
@@ -106,8 +111,8 @@ async function installCategories(page: Page, api: string) {
   await page.route(`${api}/api/profiles/*/rep/overview*`, (route) =>
     route.fulfill({
       json: {
-        total_rep: 20,
-        authenticated_user_contribution: 20,
+        total_rep: getRating(),
+        authenticated_user_contribution: getRating(),
         contributor_count: 1,
         contributors: { data: [], page: 1, next: false, count: 0 },
       },
@@ -173,22 +178,130 @@ function categoryPanel(page: Page) {
     );
 }
 
+async function getContributorRowPresentation(list: Locator) {
+  return list
+    .getByRole("link")
+    .first()
+    .evaluate((link) => {
+      const row =
+        link.parentElement?.tagName === "LI" ? link.parentElement : link;
+      const label = link.querySelector(".tw-truncate");
+      const avatar = link.querySelector('[aria-hidden="true"] > div');
+      if (!label || !avatar) throw new Error("Missing contributor identity");
+      const style = getComputedStyle(row);
+      const labelStyle = getComputedStyle(label);
+      return {
+        height: row.getBoundingClientRect().height,
+        background: style.backgroundColor,
+        border: style.borderTopWidth,
+        radius: style.borderRadius,
+        padding: style.padding,
+        fontSize: labelStyle.fontSize,
+        fontWeight: labelStyle.fontWeight,
+        avatarSize: avatar.getBoundingClientRect().width,
+        avatarRadius: getComputedStyle(avatar).borderRadius,
+      };
+    });
+}
+
+async function expectContributorHandleHover(list: Locator) {
+  const handle = list.getByRole("link").first().locator(".tw-truncate");
+  await handle.hover();
+  await expect(handle).toHaveCSS("color", "rgb(147, 147, 159)");
+  await expect(handle).toHaveCSS("text-decoration-line", "none");
+}
+
+async function expectStableRatingSave(
+  dialog: Locator,
+  sheet: Locator,
+  releaseSave: () => void
+) {
+  const save = dialog.getByRole("button", { name: "Save", exact: true });
+  // Compare resting positions, after the sheet's entrance has completed.
+  await save.click({ trial: true });
+  const controls = dialog.getByRole("button", { name: /^(Back|Close)$/ });
+  const controlCount = await controls.count();
+  const idleBounds = await sheet.boundingBox();
+  try {
+    await save.click();
+    await expect(save).toHaveAttribute("aria-busy", "true");
+    await sheet.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        )
+    );
+    const busyBounds = await sheet.boundingBox();
+    expect(idleBounds).not.toBeNull();
+    expect(busyBounds).not.toBeNull();
+    expect(busyBounds!.height).toBeCloseTo(idleBounds!.height, 0);
+    expect(busyBounds!.y).toBeCloseTo(idleBounds!.y, 0);
+    expect(controlCount).toBeGreaterThan(0);
+    await expect(controls).toHaveCount(controlCount);
+    for (const control of await controls.all())
+      await expect(control).toBeDisabled();
+  } finally {
+    releaseSave();
+  }
+}
+
+async function expectPersonalTagSpacing(
+  tag: Locator,
+  isMobile: boolean,
+  sameLine = false
+) {
+  const spacing = await tag.evaluate((element) => {
+    const id = element.getAttribute("aria-describedby");
+    const amount = id ? document.getElementById(id) : null;
+    const title = element.nextElementSibling;
+    if (!amount || !title) throw new Error("Missing personal REP amount");
+    const box = element.getBoundingClientRect();
+    const amountBox = amount.getBoundingClientRect();
+    const titleBox = title.getBoundingClientRect();
+    return {
+      height: box.height,
+      gap: amountBox.top - titleBox.bottom,
+      bottom: box.bottom - amountBox.bottom,
+      horizontalGap: amountBox.left - titleBox.right,
+      centerOffset:
+        amountBox.top +
+        amountBox.height / 2 -
+        titleBox.top -
+        titleBox.height / 2,
+    };
+  });
+  if (isMobile && sameLine) {
+    expect(spacing.height).toBe(46);
+    expect(spacing.centerOffset).toBeCloseTo(0, 0);
+    expect(spacing.horizontalGap).toBeCloseTo(6, 0);
+  } else if (isMobile) {
+    expect(spacing.height).toBeGreaterThan(46);
+    expect(spacing.height).toBeLessThanOrEqual(64);
+    expect(spacing.gap).toBeGreaterThanOrEqual(4);
+    expect(spacing.bottom).toBeGreaterThanOrEqual(8);
+  } else expect(spacing.height).toBe(38);
+}
+
 async function expectDesktopRatingPosition(page: Page, name: string) {
   const viewport = page.viewportSize();
   if (!viewport || viewport.width < 768) return;
   const panel = page
     .getByRole("dialog", { name, exact: true })
     .locator(".mobile-wrapper-dialog");
+  const isList = /^NIC (Given|Received)$/.test(name);
+  const top = isList ? 0.1 : 0.14;
   await expect
     .poll(async () => {
       const box = await panel.boundingBox();
-      return box ? Math.abs(box.y - viewport.height * 0.14) : Infinity;
+      return box ? Math.abs(box.y - viewport.height * top) : Infinity;
     })
     .toBeLessThanOrEqual(1);
   const box = await panel.boundingBox();
   expect(box).not.toBeNull();
   if (box) {
-    expect(box.height).toBeLessThanOrEqual(viewport.height * 0.86 - 24 + 1);
+    expect(box.height).toBeLessThanOrEqual(
+      isList ? viewport.height * 0.8 + 1 : viewport.height * 0.86 - 24 + 1
+    );
     expect(box.y + box.height).toBeLessThanOrEqual(viewport.height - 24 + 1);
   }
 }
@@ -200,6 +313,13 @@ async function expectDesktopTagJoin(page: Page, category: string) {
       exact: true,
     })
     .filter({ visible: true });
+  const surface = page
+    .getByRole("button", {
+      name: `Open REP category ${category}`,
+      exact: true,
+    })
+    .filter({ visible: true })
+    .locator("..");
   const panel = page.getByRole("region", {
     name: `${category} REP details`,
     exact: true,
@@ -224,9 +344,11 @@ async function expectDesktopTagJoin(page: Page, category: string) {
     expect(bridgeBox.y).toBeCloseTo(tagBox.y + tagBox.height, 0);
     expect(bridgeBox.height).toBe(8);
   }
-  for (const surface of [tag, panel]) {
-    await expect(surface).toHaveCSS("border-top-width", "0px");
-    await expect(surface).toHaveCSS("--tw-ring-shadow", "0 0 #0000");
+  await expect(surface).toHaveCSS("border-top-width", "1px");
+  await expect(surface).toHaveCSS("border-bottom-color", "rgba(0, 0, 0, 0)");
+  await expect(panel).toHaveCSS("border-top-width", "0px");
+  for (const item of [surface, panel]) {
+    await expect(item).toHaveCSS("--tw-ring-shadow", "0 0 #0000");
   }
 }
 
@@ -254,6 +376,168 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await installCategories(page, getSandboxApiOrigin(baseURL));
   });
 
+  test("signed-out viewers do not see personal amounts from stale REP responses", async ({
+    page,
+    isMobile,
+  }, testInfo) => {
+    // installCategories deliberately includes a nonzero authenticated contribution.
+    // The local preview can also return these stale fields without a login.
+    if (isMobile) await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/${TARGET}`, { waitUntil: "domcontentloaded" });
+    if (isMobile)
+      await page
+        .getByRole("button", { name: "Open menu", exact: true })
+        .click();
+    await expect(
+      page.getByRole("button", {
+        name: testInfo.project.name.startsWith("capacitor-")
+          ? "Connect"
+          : "Connect Wallet",
+        exact: true,
+      })
+    ).toBeVisible();
+    if (isMobile) await page.keyboard.press("Escape");
+    const rep = page
+      .getByRole("region", { name: "REP", exact: true })
+      .filter({ visible: true });
+    for (const direction of ["Received", "Given"]) {
+      await rep.getByRole("button", { name: direction, exact: true }).click();
+      await expect(
+        rep.getByRole("button", {
+          name: `Open REP category ${CATEGORY}`,
+          exact: true,
+        })
+      ).toBeVisible();
+      await expect(
+        page.getByText(/You assigned:|Assigned to you:/)
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Grant Rep", exact: true })
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Rate NIC", exact: true })
+      ).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test("links category avatars on desktop and expands the tag on touch", async ({
+    page,
+    baseURL,
+    isMobile,
+    browserName,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    await installCategories(page, api);
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) => route.fulfill({ json: allowance })
+    );
+    await page.route(`${api}/api/profiles/*/rep/categories?*`, (route) =>
+      route.fulfill({
+        json: {
+          data: [
+            {
+              category: CATEGORY,
+              total_rep: 20,
+              contributor_count: 1,
+              authenticated_user_contribution: 20,
+              top_contributors: [
+                {
+                  profile: {
+                    id: "00000000-0000-4000-8000-000000000531",
+                    handle: "playwright",
+                    primary_address:
+                      "0x0000000000000000000000000000000000000529",
+                    pfp: "/icon-512.png",
+                  },
+                  contribution: 20,
+                },
+              ],
+            },
+          ],
+          page: 1,
+          next: false,
+          count: 1,
+        },
+      })
+    );
+    if (isMobile) await page.setViewportSize({ width: 390, height: 844 });
+    await openProfile(page);
+    const toggle = page
+      .getByRole("button", {
+        name: `Open REP category ${CATEGORY}`,
+        exact: true,
+        includeHidden: true,
+      })
+      .filter({ visible: true });
+    const tag = page
+      .getByRole("button", {
+        name: `Open REP category ${CATEGORY}`,
+        exact: true,
+        includeHidden: true,
+      })
+      .filter({ visible: true })
+      .locator("..");
+    const avatar = tag.getByRole("img", { name: "playwright", exact: true });
+    const box = await avatar.boundingBox();
+    expect(box?.width).toBe(24);
+    expect(box?.height).toBe(24);
+    await expect(toggle.getByRole("link")).toHaveCount(0);
+    await toggle.click({ position: { x: 6, y: 6 } });
+    await expect(categoryPanel(page)).toBeVisible();
+    await expect(
+      categoryPanel(page).getByRole("link", { name: "You", exact: true })
+    ).toHaveAttribute("href", "/playwright");
+    await expectAxeClean(page, {
+      include: [isMobile ? '[role="dialog"]' : "[data-rep-tag]"],
+    });
+    await page.keyboard.press("Escape");
+    await expect(toggle).toBeFocused();
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    if (isMobile) {
+      await expect(tag.getByRole("link")).toHaveCount(0);
+      for (const width of [390, 1280]) {
+        await page.setViewportSize({ width, height: 844 });
+        const touchAvatar = await avatar.boundingBox();
+        expect(touchAvatar).not.toBeNull();
+        await page.touchscreen.tap(touchAvatar!.x + 12, touchAvatar!.y + 12);
+        await expect(categoryPanel(page)).toBeVisible();
+        await expect(page).toHaveURL(new RegExp(`/${TARGET}$`));
+        await expect(toggle).toHaveAttribute("aria-expanded", "true");
+        await expect(
+          categoryPanel(page).getByRole("link", { name: "You", exact: true })
+        ).toHaveAttribute("href", "/playwright");
+        await page.screenshot({
+          path: testInfo.outputPath(`rep-avatar-touch-${width}.png`),
+          animations: "disabled",
+        });
+        await page.keyboard.press("Escape");
+        await expect(toggle).toHaveAttribute("aria-expanded", "false");
+      }
+    } else {
+      const profile = tag.getByRole("link", {
+        name: "playwright",
+        exact: true,
+      });
+      await expect(profile).toHaveAttribute("href", "/playwright");
+      await expect(profile).not.toHaveAttribute("tabindex", "-1");
+      await toggle.focus();
+      await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
+      await expect(profile).toBeFocused();
+      await avatar.hover();
+      await expect(
+        page.getByRole("tooltip").filter({ hasText: "playwright · 20" })
+      ).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath("rep-avatar-desktop-link.png"),
+      });
+      await profile.click();
+      await expect(page).toHaveURL(/\/playwright$/);
+    }
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("loads an inline contribution, restores category focus, and saves the desired total", async ({
     page,
     baseURL,
@@ -266,6 +550,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     });
     let rating = 20;
     const saved: unknown[] = [];
+    await installCategories(page, api, () => rating);
     await page.route(
       `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
       async (route) => {
@@ -289,26 +574,77 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         await route.fulfill({ json: {} });
       }
     );
+    if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
     await openProfile(page);
     const repSummary = page
       .getByRole("region", { name: "REP", exact: true })
       .filter({ visible: true });
-    const assigned = repSummary.getByText(/^You assigned:/);
+    if (!isMobile) {
+      const categorySection = repSummary
+        .getByText(/^REP Categories$/i)
+        .locator("..")
+        .locator("..")
+        .locator("..");
+      await expect(categorySection).toHaveCSS("border-top-width", "1px");
+      await expect(categorySection).toHaveCSS(
+        "border-top-color",
+        "rgba(255, 255, 255, 0.1)"
+      );
+    }
+    // The profile summary precedes the per-category contribution indicators.
+    const assigned = repSummary.getByText(/^You assigned:/).first();
     await expect(assigned).toHaveText("You assigned: 20");
     if (isMobile) {
       await expect(assigned).toHaveCSS("white-space", "nowrap");
-      const assignedBox = await assigned.boundingBox();
-      const grantBox = await repSummary
-        .getByRole("button", { name: "Grant Rep", exact: true })
-        .boundingBox();
-      expect(assignedBox).not.toBeNull();
-      expect(grantBox).not.toBeNull();
-      if (assignedBox && grantBox) {
-        expect(assignedBox.y + assignedBox.height / 2).toBeCloseTo(
-          grantBox.y + grantBox.height / 2,
-          0
-        );
+      for (const width of [320, 768]) {
+        await page.setViewportSize({ width, height: 844 });
+        const assignedBox = await assigned.boundingBox();
+        const grantBox = await repSummary
+          .getByRole("button", { name: "Grant Rep", exact: true })
+          .boundingBox();
+        const headingBox = await repSummary
+          .getByRole("heading", { name: /^REP Categories$/i })
+          .boundingBox();
+        expect(assignedBox).not.toBeNull();
+        expect(grantBox).not.toBeNull();
+        expect(headingBox).not.toBeNull();
+        if (assignedBox && grantBox && headingBox) {
+          expect(headingBox.x).toBeLessThan(assignedBox.x);
+          expect(headingBox.y + headingBox.height / 2).toBeCloseTo(
+            grantBox.y + grantBox.height / 2,
+            0
+          );
+          if (assignedBox.y >= grantBox.y + grantBox.height) {
+            expect(assignedBox.y - grantBox.y - grantBox.height).toBeCloseTo(
+              8,
+              0
+            );
+            expect(assignedBox.x + assignedBox.width).toBeCloseTo(
+              grantBox.x + grantBox.width,
+              0
+            );
+          } else {
+            expect(assignedBox.x + assignedBox.width).toBeLessThanOrEqual(
+              grantBox.x
+            );
+            expect(assignedBox.y + assignedBox.height / 2).toBeCloseTo(
+              grantBox.y + grantBox.height / 2,
+              0
+            );
+          }
+        }
+        if (width === 768 && assignedBox && grantBox) {
+          expect(grantBox.x - assignedBox.x - assignedBox.width).toBeCloseTo(
+            8,
+            0
+          );
+          expect(assignedBox.y + assignedBox.height / 2).toBeCloseTo(
+            grantBox.y + grantBox.height / 2,
+            0
+          );
+        }
       }
+      await page.setViewportSize({ width: 320, height: 844 });
     }
     await expect(
       page.getByRole("button", { name: /^Edit REP category/ })
@@ -317,6 +653,21 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       name: `Open REP category ${CATEGORY}`,
       exact: true,
     });
+    await expect(categoryToggle).toHaveAccessibleDescription(
+      "You assigned: 20"
+    );
+    await expectPersonalTagSpacing(categoryToggle, isMobile);
+    if (isMobile) {
+      await page.setViewportSize({ width: 768, height: 844 });
+      await expectPersonalTagSpacing(categoryToggle, true, true);
+      await expectNoHorizontalOverflow(page);
+      await page.setViewportSize({ width: 320, height: 844 });
+    }
+    expect(
+      await categoryToggle.evaluate(
+        (tag) => tag.scrollWidth <= tag.clientWidth + 1
+      )
+    ).toBe(true);
     await categoryToggle.click();
     const panel = categoryPanel(page);
     await expect(panel.getByText(/^\d+ raters?$/, { exact: true })).toHaveCount(
@@ -356,6 +707,13 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     release();
     await expect(input).toHaveValue("20");
     if (!isMobile) {
+      const handle = panel
+        .getByRole("link", { name: "You", exact: true })
+        .getByText("You", { exact: true });
+      await handle.hover();
+      await expect(handle).toHaveCSS("text-decoration-line", "none");
+      await expect(handle).toHaveCSS("color", "rgb(147, 147, 159)");
+
       await expect
         .poll(() =>
           input.evaluate((field) => {
@@ -363,10 +721,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
             return { start: amount.selectionStart, end: amount.selectionEnd };
           })
         )
-        .toEqual({ start: 0, end: 2 });
+        .toEqual({ start: 2, end: 2 });
       await expect(input).toBeFocused();
       await input.press("3");
-      await expect(input).toHaveValue("3");
+      await expect(input).toHaveValue("203");
       await input.press("Escape");
       await expect(input).toHaveValue("20");
     }
@@ -374,9 +732,31 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       loadingHeight ?? 0,
       2
     );
+    const signOffset = await input.evaluate((field) => {
+      const bounds = field.getBoundingClientRect();
+      const paths = Array.from(
+        field.parentElement?.querySelectorAll<SVGPathElement>("svg path") ?? []
+      );
+      if (paths.length !== 2) throw new Error("Missing rating input signs");
+      // Measure the visible paths; their SVG boxes contain uneven empty space.
+      const edges = paths.flatMap((path) => {
+        const box = path.getBBox();
+        const matrix = path.getScreenCTM();
+        if (!matrix) throw new Error("Rating signs are not rendered");
+        return [
+          new DOMPoint(box.x, box.y).matrixTransform(matrix).y,
+          new DOMPoint(box.x + box.width, box.y + box.height).matrixTransform(
+            matrix
+          ).y,
+        ];
+      });
+      const center = (Math.min(...edges) + Math.max(...edges)) / 2;
+      return Math.abs(center - bounds.top - bounds.height / 2);
+    });
+    expect(signOffset).toBeLessThan(0.5);
     const inputSpacing = await input.evaluate((field) => {
       const bounds = field.getBoundingClientRect();
-      const row = field.parentElement?.getBoundingClientRect();
+      const row = field.closest("[data-rating-row]")?.getBoundingClientRect();
       if (!row) throw new Error("Missing contribution row");
       return {
         top: bounds.top - row.top,
@@ -384,16 +764,18 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         rowHeight: row.height,
       };
     });
-    expect(inputSpacing.top).toBeGreaterThanOrEqual(12);
-    expect(inputSpacing.bottom).toBeGreaterThanOrEqual(12);
+    expect(inputSpacing.top).toBeGreaterThanOrEqual(5);
+    expect(inputSpacing.bottom).toBeGreaterThanOrEqual(5);
     const otherAmount = panel.getByText("10", { exact: true });
     const inputBox = await input.boundingBox();
     const otherAmountBox = await otherAmount.boundingBox();
     expect(inputBox).not.toBeNull();
     expect(otherAmountBox).not.toBeNull();
     if (inputBox && otherAmountBox) {
-      expect(otherAmountBox.x).toBeCloseTo(inputBox.x, 2);
-      expect(otherAmountBox.width).toBeCloseTo(inputBox.width, 2);
+      expect(otherAmountBox.x + otherAmountBox.width).toBeCloseTo(
+        inputBox.x + inputBox.width,
+        2
+      );
       expect(otherAmountBox.height).toBeLessThan(inputBox.height);
     }
     await expect(otherAmount).toHaveCSS("border-top-width", "0px");
@@ -412,7 +794,25 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await categoryToggle.click();
     await expect(input).toHaveValue("20");
     await input.fill("30");
-    await expect(panel.getByRole("status")).toHaveText("Your REP 20 → 30");
+    await expect(panel.getByRole("status")).toHaveText("Total 20 → 30");
+    await expect(panel.getByText("+10", { exact: true })).toHaveCSS(
+      "color",
+      "rgb(52, 211, 153)"
+    );
+    await expect(input).toHaveCSS("color", "rgb(52, 211, 153)");
+    await expect(
+      panel.getByRole("status").getByText("30", { exact: true })
+    ).toHaveCSS("color", "rgb(52, 211, 153)");
+    await input.fill("10");
+    await expect(panel.getByText("−10", { exact: true })).toHaveCSS(
+      "color",
+      "rgb(251, 113, 133)"
+    );
+    await expect(input).toHaveCSS("color", "rgb(251, 113, 133)");
+    await expect(
+      panel.getByRole("status").getByText("10", { exact: true })
+    ).toHaveCSS("color", "rgb(251, 113, 133)");
+    await input.fill("30");
     const originalViewport = page.viewportSize();
     if (originalViewport) {
       await page.setViewportSize({
@@ -449,9 +849,137 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await input.fill("30");
     await input.press("Enter");
     await expect(page.getByText("Rep updated.", { exact: true })).toBeVisible();
-    await expect(input).toHaveValue("30");
     expect(saved).toEqual([{ amount: 30, category: CATEGORY }]);
-    await expect(panel).toBeVisible();
+    if (isMobile) {
+      await expect(panel).toBeHidden();
+      await expect(categoryToggle).toBeFocused();
+      await expect(categoryToggle).toHaveAccessibleDescription(
+        "You assigned: 30"
+      );
+    } else {
+      await expect(input).toHaveValue("30");
+      await expect(panel).toBeVisible();
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("rep-category-after-save.png"),
+    });
+  });
+
+  test("saving preserves desktop context and closes the mobile sheet when totals change the tag order", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    const api = getSandboxApiOrigin(baseURL);
+    let rating = 20;
+    const otherCategory = "Community Builder";
+    await page.route(`${api}/api/profiles/*/rep/categories?*`, (route) =>
+      route.fulfill({
+        json: {
+          data: [
+            {
+              category: CATEGORY,
+              total_rep: rating,
+              contributor_count: 1,
+              authenticated_user_contribution: rating,
+              top_contributors: [],
+            },
+            {
+              category: otherCategory,
+              total_rep: 40,
+              contributor_count: 1,
+              authenticated_user_contribution: null,
+              top_contributors: [],
+            },
+          ].toSorted((a, b) => b.total_rep - a.total_rep),
+          page: 1,
+          next: false,
+          count: 2,
+        },
+      })
+    );
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            ...allowance,
+            rating_stats: [
+              { ...allowance.rating_stats[0], rater_contribution: rating },
+            ],
+          },
+        })
+    );
+    await page.route(`${api}/api/profiles/${TARGET}/rep/rating`, (route) => {
+      const body = route.request().postDataJSON();
+      expect(body.category).toBe(CATEGORY);
+      rating = body.amount;
+      return route.fulfill({ json: {} });
+    });
+    await openProfile(page);
+    const rep = page
+      .getByRole("region", { name: "REP", exact: true, includeHidden: true })
+      .filter({ visible: true });
+    const editedTag = rep.getByRole("button", {
+      name: `Open REP category ${CATEGORY}`,
+      exact: true,
+      includeHidden: true,
+    });
+    const otherTag = rep.getByRole("button", {
+      name: `Open REP category ${otherCategory}`,
+      exact: true,
+      includeHidden: true,
+    });
+    await editedTag.click();
+    const panel = categoryPanel(page);
+    const input = panel.getByRole("textbox", { name: "You", exact: true });
+    const categoryTags = rep.getByRole("button", {
+      name: /^Open REP category /,
+      includeHidden: true,
+    });
+    const getTagOrder = () =>
+      categoryTags.evaluateAll((tags) =>
+        tags.map((tag) => tag.getAttribute("aria-label"))
+      );
+    for (const amount of [50, 10]) {
+      const orderBeforeSave = await getTagOrder();
+      await input.fill(String(amount));
+      await panel.getByRole("button", { name: "Save", exact: true }).click();
+      await expect(
+        rep
+          .getByRole("button", {
+            name: `Open REP category ${CATEGORY}`,
+            exact: true,
+            includeHidden: true,
+          })
+          .locator("..")
+          .getByText(String(amount), { exact: true })
+      ).toHaveCount(2);
+      await expect(otherTag).toHaveAttribute("aria-expanded", "false");
+      if (isMobile) {
+        await expect(editedTag).toHaveAttribute("aria-expanded", "false");
+        await expect(editedTag).toBeFocused();
+      } else {
+        await expect(editedTag).toHaveAttribute("aria-expanded", "true");
+        await expect(panel).toBeVisible();
+        await expect(input).toHaveValue(String(amount));
+        await expect(
+          panel.getByRole("button", { name: "Save", exact: true })
+        ).toHaveCount(0);
+        expect(await getTagOrder()).toEqual(orderBeforeSave);
+        await editedTag.click();
+      }
+      await expect(panel).toBeHidden();
+      await expect
+        .poll(getTagOrder)
+        .toEqual(
+          (amount === 50
+            ? [CATEGORY, otherCategory]
+            : [otherCategory, CATEGORY]
+          ).map((name) => `Open REP category ${name}`)
+        );
+      if (amount === 50) await editedTag.click();
+    }
   });
 
   test("groups idle REP amounts without changing drafts or fetching while typing", async ({
@@ -492,7 +1020,12 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     const readsBeforeTyping = reads;
     await input.click();
     await expect(input).toHaveValue("12345");
-    await input.press("End");
+    const selection = await input.evaluate((field) => ({
+      start: (field as HTMLInputElement).selectionStart,
+      end: (field as HTMLInputElement).selectionEnd,
+    }));
+    expect(selection.start).toBe(selection.end);
+    await input.press("ControlOrMeta+ArrowRight");
     await input.press("ArrowLeft");
     await input.press("ArrowLeft");
     await input.press("9");
@@ -504,7 +1037,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     ).toBe(4);
     await input.press(blurKey);
     await expect(input).toHaveValue("123,945");
-    // Focus restores raw digits before selecting the replacement text.
+    // Focus restores raw digits without selecting the amount.
     await input.click();
     await expect(input).toHaveValue("123945");
     await input.fill("-12345");
@@ -707,10 +1240,12 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(grant).toBeHidden();
     expect(saved).toEqual([{ amount: 35, category: CATEGORY }]);
     await expect(
-      page.getByRole("button", {
-        name: `Open REP category ${CATEGORY}`,
-        exact: true,
-      })
+      page
+        .getByRole("button", {
+          name: `Open REP category ${CATEGORY}`,
+          exact: true,
+        })
+        .locator("..")
     ).toContainText("35");
     await page.reload({ waitUntil: "domcontentloaded" });
     const categoryToggle = page.getByRole("button", {
@@ -760,7 +1295,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
                 },
                 contribution: 10,
               })),
-              authenticated_user_contribution: null,
+              authenticated_user_contribution:
+                start + index === 1 ? -12345 : null,
             })
           ),
           page: pageNumber,
@@ -780,6 +1316,23 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         exact: true,
       })
     ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    const personalTag = rep.getByRole("button", {
+      name: "Open REP category Art",
+      exact: true,
+    });
+    await expect(personalTag).toHaveAccessibleDescription(
+      "You assigned: -12,345"
+    );
+    await expectPersonalTagSpacing(personalTag, isMobile);
+    expect(
+      await personalTag.evaluate(
+        (tag) => tag.scrollWidth <= tag.clientWidth + 1
+      )
+    ).toBe(true);
+    await personalTag.scrollIntoViewIfNeeded();
+    await page.screenshot({
+      path: testInfo.outputPath("rep-personal-amount-tags.png"),
+    });
     for (let step = 0; step < 6; step += 1) {
       await rep
         .getByRole("button", { name: /^\+\d+ more$|^Load more$/ })
@@ -792,14 +1345,20 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       })
     ).toBeVisible();
     expect(new Set(pages)).toEqual(new Set([1, 2, 3]));
-    const heights = await rep
+    const tagSizes = await rep
       .getByRole("button", { name: /^Open REP category / })
       .evaluateAll((tags) =>
-        tags.map((tag) => tag.getBoundingClientRect().height)
+        tags.map((tag) => ({
+          height: tag.getBoundingClientRect().height,
+          personal: tag.hasAttribute("aria-describedby"),
+        }))
       );
-    expect(heights.every((height) => height === (isMobile ? 44 : 40))).toBe(
-      true
-    );
+    for (const { height, personal } of tagSizes) {
+      if (isMobile && personal) {
+        expect(height).toBeGreaterThan(46);
+        expect(height).toBeLessThanOrEqual(64);
+      } else expect(height).toBe(isMobile ? 46 : 38);
+    }
     if (isMobile) {
       const targetHeights = await rep
         .getByRole("button", {
@@ -818,21 +1377,28 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .evaluate((tag) => tag.scrollWidth <= tag.clientWidth + 1);
     expect(tagFits).toBe(true);
     await expectNoHorizontalOverflow(page);
-    const longTag = rep.getByRole("button", {
-      name: `Open REP category ${longCategory}`,
-      exact: true,
-    });
+    const longTag = rep
+      .getByRole("button", {
+        name: `Open REP category ${longCategory}`,
+        exact: true,
+      })
+      .locator("..");
     const categoryLabel = longTag.getByText(longCategory, { exact: true });
     const totalLabel = longTag.getByText("1,380", { exact: true });
     for (const label of [categoryLabel, totalLabel]) {
       await expect(label).toHaveCSS("font-size", "14px");
       await expect(label).toHaveCSS("font-weight", "500");
     }
-    await expect(categoryLabel).toHaveCSS("color", "rgb(255, 255, 255)");
+    await expect(categoryLabel).toHaveCSS("color", "rgb(239, 239, 241)");
     await expect(totalLabel).toHaveCSS("color", "rgb(147, 147, 159)");
     await expect(longTag).toHaveCSS(
       "background-color",
       "rgba(255, 255, 255, 0.05)"
+    );
+    await expect(longTag).toHaveCSS("border-top-width", "1px");
+    await expect(longTag).toHaveCSS(
+      "border-top-color",
+      "rgba(255, 255, 255, 0.06)"
     );
     if (isMobile) {
       const tagBox = await longTag.boundingBox();
@@ -842,6 +1408,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
           name: `Open REP category ${longCategory}`,
           exact: true,
         })
+        .locator("..")
         .locator("svg")
         .boundingBox();
       expect(tagBox).not.toBeNull();
@@ -851,7 +1418,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         expect(labelBox.x - tagBox.x).toBeGreaterThanOrEqual(12);
         expect(
           tagBox.x + tagBox.width - chevronBox.x - chevronBox.width
-        ).toBeGreaterThanOrEqual(12);
+        ).toBeGreaterThanOrEqual(10);
       }
     }
     const avatar = longTag.getByRole("img", {
@@ -859,35 +1426,43 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(longTag.getByRole("img")).toHaveCount(3);
-    await expect(longTag.getByRole("link")).toHaveCount(0);
-    await expect(longTag.getByRole("button")).toHaveCount(0);
+    await expect(longTag.getByRole("link")).toHaveCount(isMobile ? 0 : 3);
+    await expect(longTag.getByRole("button")).toHaveCount(1);
     await expect(longTag.getByText("60 raters", { exact: true })).toBeVisible();
     const avatarBox = await avatar.boundingBox();
     expect(avatarBox?.width).toBe(24);
     expect(avatarBox?.height).toBe(24);
-    const tagDividerBox = await rep
-      .getByRole("button", {
-        name: `Open REP category ${longCategory}`,
-        exact: true,
-      })
-      .locator('span[aria-hidden="true"]')
-      .boundingBox();
-    const totalBox = await longTag
-      .getByText("1,380", { exact: true })
-      .boundingBox();
-    expect(tagDividerBox).not.toBeNull();
+    await expect(
+      rep
+        .getByRole("button", {
+          name: `Open REP category ${longCategory}`,
+          exact: true,
+        })
+        .locator('span[aria-hidden="true"]')
+    ).toHaveCount(0);
+    const totalBox = await totalLabel.boundingBox();
     expect(totalBox).not.toBeNull();
-    if (tagDividerBox && avatarBox && totalBox) {
-      expect(
-        avatarBox.x - tagDividerBox.x - tagDividerBox.width
-      ).toBeGreaterThanOrEqual(12);
-      expect(
-        tagDividerBox.x - totalBox.x - totalBox.width
-      ).toBeGreaterThanOrEqual(12);
+    if (avatarBox && totalBox) {
+      expect(avatarBox.x - totalBox.x - totalBox.width).toBeGreaterThanOrEqual(
+        isMobile ? 6 : 14
+      );
     }
     if (!isMobile) {
+      const restingTagBox = await longTag.boundingBox();
       await avatar.hover();
       await expect(totalLabel).toHaveCSS("color", "rgb(206, 207, 212)");
+      await expect(longTag).toHaveCSS(
+        "border-top-color",
+        "rgba(255, 255, 255, 0.1)"
+      );
+      await expect(longTag).toHaveCSS(
+        "background-color",
+        // Chromium can round the transitioned alpha to an 8-bit color value.
+        /rgba\(255, 255, 255, 0\.08[56]\)/
+      );
+      const hoveredTagBox = await longTag.boundingBox();
+      expect(hoveredTagBox?.width).toBe(restingTagBox?.width);
+      expect(hoveredTagBox?.height).toBe(restingTagBox?.height);
       const tooltip = page.getByRole("tooltip").filter({
         hasText: "rater-0 · 10",
       });
@@ -926,16 +1501,35 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         await expect(artPanel).toBeVisible();
         await page.setViewportSize({ width: 1440, height: viewport.height });
         await expectDesktopTagJoin(page, "Art");
+        // Compact tags wrap differently from the previous dimensions. Compare
+        // against their natural closed layout rather than assuming Art and UX
+        // always share a row at this viewport width.
+        await art.click();
+        const ux = rep.getByRole("button", {
+          name: "Open REP category UX",
+          exact: true,
+        });
+        const naturalArt = await art.boundingBox();
+        const naturalUx = await ux.boundingBox();
+        expect(naturalArt).not.toBeNull();
+        expect(naturalUx).not.toBeNull();
+        await art.click();
+        await expectDesktopTagJoin(page, "Art");
         await expect
           .poll(async () => {
             const artBox = await art.boundingBox();
-            const uxBox = await rep
-              .getByRole("button", {
-                name: "Open REP category UX",
-                exact: true,
-              })
-              .boundingBox();
-            return artBox && uxBox ? Math.abs(artBox.y - uxBox.y) : Infinity;
+            const uxBox = await ux.boundingBox();
+            const panelBox = await artPanel.boundingBox();
+            if (!artBox || !uxBox || !panelBox || !naturalArt || !naturalUx)
+              return Infinity;
+            const shift =
+              naturalUx.y > naturalArt.y + 1 ? panelBox.height + 8 : 0;
+            return Math.max(
+              Math.abs(artBox.x - naturalArt.x),
+              Math.abs(artBox.y - naturalArt.y),
+              Math.abs(artBox.width - naturalArt.width),
+              Math.abs(uxBox.y - naturalUx.y - shift)
+            );
           })
           .toBeLessThanOrEqual(1);
         await art.click();
@@ -947,8 +1541,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       exact: true,
     });
     const closedTagBox = await categoryToggle.evaluate((tag) => ({
-      x: (tag as HTMLElement).offsetLeft,
-      y: (tag as HTMLElement).offsetTop,
+      x: tag.parentElement!.offsetLeft,
+      y: tag.parentElement!.offsetTop,
       width: tag.getBoundingClientRect().width,
       height: tag.getBoundingClientRect().height,
     }));
@@ -987,51 +1581,30 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     expect(actionBox).not.toBeNull();
     expect(detailsBox).not.toBeNull();
     if (actionBox && detailsBox) {
-      if (isMobile) {
-        expect(actionBox.x - detailsBox.x).toBeLessThanOrEqual(24);
-        const titleBox = await details
-          .getByRole("heading", { name: longCategory, exact: true })
-          .boundingBox();
-        expect(titleBox).not.toBeNull();
-        if (titleBox) {
-          const paddingLeft = await openGlobal.evaluate((button) =>
-            Number.parseFloat(getComputedStyle(button).paddingLeft)
-          );
-          expect(actionBox.x + paddingLeft).toBeCloseTo(titleBox.x, 0);
-          expect(actionBox.y).toBeGreaterThanOrEqual(
-            titleBox.y + titleBox.height
-          );
-        }
-      } else {
-        expect(
-          detailsBox.x + detailsBox.width - actionBox.x - actionBox.width
-        ).toBeLessThanOrEqual(24);
-      }
+      expect(actionBox.x - detailsBox.x).toBeLessThanOrEqual(24);
       expect(actionBox.x + actionBox.width).toBeLessThanOrEqual(
         detailsBox.x + detailsBox.width
       );
     }
     if (contributorBox && actionBox) {
-      expect(actionBox.y + actionBox.height).toBeLessThanOrEqual(
-        contributorBox.y
+      expect(actionBox.y).toBeGreaterThanOrEqual(
+        contributorBox.y + contributorBox.height
       );
     }
-    const divider = details.getByRole("separator");
-    await expect(divider).toBeVisible();
-    await expect(divider).toHaveCSS("border-top-width", "1px");
-    const dividerBox = await divider.boundingBox();
-    expect(dividerBox).not.toBeNull();
-    if (dividerBox && actionBox && contributorBox) {
-      expect(dividerBox.y).toBeGreaterThanOrEqual(
-        actionBox.y + actionBox.height
-      );
-      expect(dividerBox.y + dividerBox.height).toBeLessThan(contributorBox.y);
-    }
+    await expect(details.getByRole("separator")).toHaveCount(0);
+    await expect(
+      details
+        .getByRole("button", {
+          name: `Open category ${longCategory}`,
+          exact: true,
+        })
+        .locator('xpath=ancestor::div[contains(@class,"tw-border-t")][1]')
+    ).toHaveCSS("border-top-width", "1px");
     if (!isMobile) {
       await expectDesktopTagJoin(page, longCategory);
       const openTagBox = await categoryToggle.evaluate((tag) => ({
-        x: (tag as HTMLElement).offsetLeft,
-        y: (tag as HTMLElement).offsetTop,
+        x: tag.parentElement!.offsetLeft,
+        y: tag.parentElement!.offsetTop,
         width: tag.getBoundingClientRect().width,
         height: tag.getBoundingClientRect().height,
       }));
@@ -1044,13 +1617,25 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await details.screenshot({
       path: testInfo.outputPath("rep-open-category-top.png"),
     });
+    const profileResponse = await page.request.get(
+      `${api}/api/identities/${TARGET}`
+    );
+    expect(profileResponse.ok()).toBe(true);
+    const statsProfile: ApiProfileMin = await profileResponse.json();
     const globalOverview = {
       category: longCategory,
-      total_rep: 0,
-      pair_count: 0,
-      giver_count: 0,
-      recipient_count: 0,
-      top_recipients: [],
+      total_rep: 1380,
+      pair_count: 1,
+      giver_count: 1,
+      recipient_count: 1,
+      top_recipients: [
+        {
+          profile: statsProfile,
+          total_rep: 1380,
+          rater_count: 1,
+          last_modified: "2026-11-12T12:00:00Z",
+        },
+      ],
       top_givers: [],
       recently_updated: [],
     } satisfies ApiGlobalRepCategoryOverview;
@@ -1065,6 +1650,16 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       globalCategory.getByRole("heading", { name: longCategory, exact: true })
     ).toBeVisible();
+    const statsHandle = globalCategory.getByText(TARGET, { exact: true });
+    await expect(statsHandle).toBeVisible();
+    if (!isMobile) {
+      await statsHandle.hover();
+      await expect(statsHandle).toHaveCSS("color", "rgb(147, 147, 159)");
+      await expect(statsHandle).toHaveCSS("text-decoration-line", "none");
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("rep-category-stats-handle.png"),
+    });
     if (isMobile) {
       await expect(
         page
@@ -1144,6 +1739,27 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .getByRole("region", { name: "REP", exact: true })
       .filter({ visible: true });
     await rep.getByRole("button", { name: "Given", exact: true }).click();
+    // Stale personal fields must not duplicate the owner's outgoing total.
+    await expect(rep.getByText(/You assigned:|Assigned to you:/)).toHaveCount(
+      0
+    );
+    const ownCategory = rep.getByRole("button", {
+      name: `Open REP category ${CATEGORY}`,
+      exact: true,
+    });
+    await expect(ownCategory).not.toHaveAttribute("aria-describedby");
+    await expect(
+      rep
+        .getByRole("button", {
+          name: `Open REP category ${CATEGORY}`,
+          exact: true,
+        })
+        .locator("..")
+        .getByText("20", { exact: true })
+    ).toHaveCount(1);
+    await rep.screenshot({
+      path: testInfo.outputPath("own-given-category-summary.png"),
+    });
     await rep
       .getByRole("button", {
         name: `Open REP category ${CATEGORY}`,
@@ -1226,6 +1842,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       panel.getByRole("button", { name: "Save", exact: true })
     ).toBeEnabled();
     await expect(first).toHaveValue("110");
+    await expect(panel).toBeVisible();
     expect(attempts).toEqual([
       { handle: "following-artist-1", amount: 0 },
       { handle: TARGET, amount: 110 },
@@ -1237,8 +1854,13 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       { handle: TARGET, amount: 110 },
       { handle: TARGET, amount: 110 },
     ]);
-    await expect(first).toHaveValue("110");
-    await first.press("Escape");
+    if (isMobile) {
+      await expect(panel).toBeHidden();
+      await expect(ownCategory).toBeFocused();
+    } else {
+      await expect(first).toHaveValue("110");
+      await first.press("Escape");
+    }
     await expect(
       rep.getByRole("button", { name: /^All REP receivers:/ })
     ).toBeVisible();
@@ -1247,7 +1869,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
 
   test("keeps another profile's Given and the owner's Received categories read-only", async ({
     page,
+    isMobile,
   }, testInfo) => {
+    if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
     await openProfile(page);
     await page
       .getByRole("region", { name: "REP", exact: true })
@@ -1267,6 +1891,17 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       name: `Open REP category ${CATEGORY}`,
       exact: true,
     });
+    await expect(category).toHaveAccessibleDescription("Assigned to you: 20");
+    await expectPersonalTagSpacing(category, isMobile);
+    if (isMobile) {
+      await page.setViewportSize({ width: 768, height: 844 });
+      await expectPersonalTagSpacing(category, true, true);
+      await expectNoHorizontalOverflow(page);
+      await page.setViewportSize({ width: 320, height: 844 });
+    }
+    expect(
+      await category.evaluate((tag) => tag.scrollWidth <= tag.clientWidth + 1)
+    ).toBe(true);
     await category.click();
     const panel = categoryPanel(page);
     const amount = panel.getByText("10", { exact: true });
@@ -1313,6 +1948,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       page.getByRole("button", { name: /Edit REP category/ })
     ).toHaveCount(0);
+    await expect(page.getByText(/You assigned:|Assigned to you:/)).toHaveCount(
+      0
+    );
     await page
       .getByRole("button", {
         name: `Open REP category ${CATEGORY}`,
@@ -1325,6 +1963,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
   test("loads and saves the grantor contribution in proxy mode", async ({
     page,
     baseURL,
+    isMobile,
   }) => {
     const api = getSandboxApiOrigin(baseURL);
     const grantorId = "00000000-0000-4000-8000-000000000539";
@@ -1391,7 +2030,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await input.fill("30");
     await dialog.getByRole("button", { name: "Save", exact: true }).click();
     await expect(page.getByText("Rep updated.", { exact: true })).toBeVisible();
-    await expect(dialog).toBeVisible();
+    if (isMobile) await expect(dialog).toBeHidden();
+    else await expect(dialog).toBeVisible();
     expect(saved).toEqual([{ amount: 30, category: CATEGORY }]);
   });
 });
@@ -1421,6 +2061,10 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         await page.setViewportSize({ width: 320, height: 844 });
       let rating = 20;
       let failSave = true;
+      let releaseSave: () => void = () => undefined;
+      const saveGate = new Promise<void>((resolve) => {
+        releaseSave = resolve;
+      });
       const saved: unknown[] = [];
       const requestedPages: number[] = [];
       let recipientRepReads = 0;
@@ -1430,7 +2074,6 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       const identityGate = new Promise<void>((resolve) => {
         releaseIdentity = resolve;
       });
-      let checkParallelRead = matter === "NIC";
       if (matter === "NIC") {
         await page.route(
           `${api}/api/identities/${recipientHandle}`,
@@ -1542,21 +2185,33 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         }
       );
       await page.route(
-        `${api}/api/profiles/${recipientHandle}/rep/ratings/received?*`,
+        `${api}/api/profiles/*/rep/ratings/received?*`,
         (route) => {
-          recipientRepReads += 1;
+          const receiver = decodeURIComponent(
+            new URL(route.request().url()).pathname.split("/")[3]!
+          );
+          if (receiver === recipientHandle) recipientRepReads += 1;
+          const contribution =
+            receiver === "older-recipient"
+              ? 900
+              : receiver === "page-two-recipient"
+                ? 10
+                : rating;
           return route.fulfill({
             json: {
               ...allowance,
               rating_stats: [
-                { ...allowance.rating_stats[0], rater_contribution: rating },
+                {
+                  ...allowance.rating_stats[0],
+                  rater_contribution: contribution,
+                },
               ],
             },
           });
         }
       );
       await page.route(
-        `${api}/api/profiles/${recipientHandle}/cic/rating/*`,
+        `${api}/api/profiles/playwright/cic/rating/*`,
         (route) => {
           recipientNicReads += 1;
           return route.fulfill({
@@ -1569,9 +2224,10 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       );
       await page.route(
         `${api}/api/profiles/${recipientHandle}/${path}/rating`,
-        (route) => {
+        async (route) => {
           saved.push(route.request().postDataJSON());
           if (failSave) {
+            await saveGate;
             failSave = false;
             return route.fulfill({
               status: 503,
@@ -1641,18 +2297,35 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         name: `${matter} Given`,
         exact: true,
       });
-      await expect(list.getByRole("link").first()).toHaveText(
+      if (matter === "NIC") {
+        try {
+          await expect.poll(() => identityReads).toBe(1);
+          // The rater's allowance loads while the recipient identity is held.
+          await expect.poll(() => recipientNicReads).toBe(1);
+        } finally {
+          releaseIdentity();
+        }
+      }
+      const amount = () =>
+        list.getByRole("textbox", {
+          name: `${matter} amount for ${recipientHandle}${matter === "REP" ? ` (${CATEGORY})` : ""}`,
+          exact: true,
+        });
+      if (matter === "NIC") {
+        await expect(amount()).toHaveValue("20");
+        await expect(
+          list.getByRole("button", { name: /^Adjust / })
+        ).toHaveCount(0);
+      } else {
+        await expect(list.getByRole("textbox")).toHaveCount(0);
+      }
+      await expectDesktopRatingPosition(page, `${matter} Given`);
+      await expect(list.getByRole("link").first()).toHaveAccessibleName(
         "older-recipient"
       );
-      await expect(list.getByRole("link").nth(1)).toHaveText(recipientHandle);
-      if (isMobile) {
-        await expect(
-          list
-            .getByRole("listitem")
-            .filter({ hasText: recipientHandle })
-            .getByText(`20 ${matter}`, { exact: true })
-        ).toBeVisible();
-      }
+      await expect(list.getByRole("link").nth(1)).toHaveAccessibleName(
+        recipientHandle
+      );
       await list
         .getByRole("button", { name: "Load more", exact: true })
         .click();
@@ -1673,143 +2346,360 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         contentType: "image/png",
       });
 
-      const openEditor = async () => {
-        let readsBeforeCategoryEditor = recipientRepReads;
-        const nicReadsBeforeOpen = recipientNicReads;
-        await list
-          .getByRole("button", {
+      if (matter === "REP") {
+        const reopenAfterSave = async () => {
+          await expect(managementDialogs).toHaveCount(0);
+          await expect(manageGiven).toBeFocused();
+          await page.screenshot({
+            path: testInfo.outputPath("REP-receivers-save-closed.png"),
+          });
+          await manageGiven.click();
+          await expect(
+            list.getByRole("heading", { name: "REP Given", exact: true })
+          ).toBeVisible();
+        };
+        const openEditor = async () => {
+          let readsBeforeCategoryEditor = recipientRepReads;
+          await list
+            .getByRole("button", {
+              name: `Adjust ${matter} for ${recipientHandle}`,
+              exact: true,
+            })
+            .click();
+          if (matter === "REP") {
+            const categoryButton = page
+              .getByRole("dialog", {
+                name: `REP given to ${recipientHandle}`,
+                exact: true,
+              })
+              .getByRole("button", {
+                name: `Adjust REP (${CATEGORY}) for ${recipientHandle}`,
+                exact: true,
+              });
+            await expect(categoryButton).toBeVisible();
+            await expect(managementDialogs).toHaveCount(1);
+            readsBeforeCategoryEditor = recipientRepReads;
+            await categoryButton.click();
+          }
+          const editor = page.getByRole("dialog", {
+            name:
+              matter === "REP"
+                ? `Add Rep to ${recipientHandle}`
+                : `Adjust NIC for ${recipientHandle}`,
+            exact: true,
+          });
+          await expect(editor.getByRole("textbox")).toHaveValue(String(rating));
+          const cancelBox = await editor
+            .getByRole("button", { name: "Cancel", exact: true })
+            .boundingBox();
+          const saveBox = await editor
+            .getByRole("button", { name: "Save", exact: true })
+            .boundingBox();
+          expect(cancelBox).not.toBeNull();
+          expect(saveBox).not.toBeNull();
+          expect(cancelBox!.height).toBe(44);
+          expect(saveBox!.height).toBe(44);
+          expect(Math.abs(cancelBox!.y - saveBox!.y)).toBeLessThanOrEqual(1);
+          expect(cancelBox!.x + cancelBox!.width).toBeLessThanOrEqual(
+            saveBox!.x
+          );
+          const inputBox = await editor.getByRole("textbox").boundingBox();
+          expect(inputBox).not.toBeNull();
+          expect(
+            Math.abs(
+              saveBox!.x + saveBox!.width - inputBox!.x - inputBox!.width
+            )
+          ).toBeLessThanOrEqual(1);
+          expect(saveBox!.width).toBeLessThan(inputBox!.width / 2);
+          expect(cancelBox!.width).toBeLessThan(inputBox!.width / 2);
+          const bottomGap = await editor
+            .getByRole("button", { name: "Save", exact: true })
+            .evaluate((button) => {
+              const panel = button.closest(".mobile-wrapper-dialog");
+              if (!panel) throw new Error("Missing rating dialog panel");
+              return (
+                panel.getBoundingClientRect().bottom -
+                button.getBoundingClientRect().bottom
+              );
+            });
+          expect(bottomGap).toBeGreaterThanOrEqual(23);
+
+          await expect(managementDialogs).toHaveCount(1);
+          if (matter === "REP")
+            expect(recipientRepReads).toBe(readsBeforeCategoryEditor);
+          return editor;
+        };
+        let editor = await openEditor();
+        await expectAxeClean(page, { include: ['[role="dialog"]'] });
+        await editor.getByRole("textbox").fill("25");
+        await editor.getByRole("button", { name: "Back", exact: true }).click();
+        if (matter === "REP") {
+          const categories = page.getByRole("dialog", {
+            name: `REP given to ${recipientHandle}`,
+            exact: true,
+          });
+          await expect(
+            categories.getByRole("button", {
+              name: `Adjust REP (${CATEGORY}) for ${recipientHandle}`,
+              exact: true,
+            })
+          ).toBeVisible();
+          await categories
+            .getByRole("button", { name: "Back", exact: true })
+            .click();
+        }
+        await expect(
+          list.getByRole("heading", { name: `${matter} Given`, exact: true })
+        ).toBeVisible();
+        await expect(managementDialogs).toHaveCount(1);
+        await expect(
+          list.getByRole("button", {
             name: `Adjust ${matter} for ${recipientHandle}`,
             exact: true,
           })
-          .click();
-        if (checkParallelRead) {
-          try {
-            await expect.poll(() => identityReads).toBe(1);
-            // The allowance must arrive while the recipient identity is still held.
-            await expect
-              .poll(() => recipientNicReads)
-              .toBe(nicReadsBeforeOpen + 1);
-          } finally {
-            releaseIdentity();
-          }
-          checkParallelRead = false;
-        }
-        if (matter === "REP") {
-          const categoryButton = page
-            .getByRole("dialog", {
-              name: `REP given to ${recipientHandle}`,
-              exact: true,
-            })
-            .getByRole("button", {
-              name: `Adjust REP (${CATEGORY}) for ${recipientHandle}`,
-              exact: true,
-            });
-          await expect(categoryButton).toBeVisible();
-          await expect(managementDialogs).toHaveCount(1);
-          readsBeforeCategoryEditor = recipientRepReads;
-          await categoryButton.click();
-        }
-        const editor = page.getByRole("dialog", {
-          name:
-            matter === "REP"
-              ? `Add Rep to ${recipientHandle}`
-              : `Adjust NIC for ${recipientHandle}`,
-          exact: true,
-        });
-        await expect(editor.getByRole("textbox")).toHaveValue(String(rating));
-        const cancelBox = await editor
-          .getByRole("button", { name: "Cancel", exact: true })
-          .boundingBox();
-        const saveBox = await editor
-          .getByRole("button", { name: "Save", exact: true })
-          .boundingBox();
-        expect(cancelBox).not.toBeNull();
-        expect(saveBox).not.toBeNull();
-        expect(cancelBox!.height).toBe(44);
-        expect(saveBox!.height).toBe(44);
-        expect(Math.abs(cancelBox!.y - saveBox!.y)).toBeLessThanOrEqual(1);
-        expect(cancelBox!.x + cancelBox!.width).toBeLessThanOrEqual(saveBox!.x);
-        const inputBox = await editor.getByRole("textbox").boundingBox();
-        expect(inputBox).not.toBeNull();
-        expect(
-          Math.abs(saveBox!.x + saveBox!.width - inputBox!.x - inputBox!.width)
-        ).toBeLessThanOrEqual(1);
-        expect(saveBox!.width).toBeLessThan(inputBox!.width / 2);
-        expect(cancelBox!.width).toBeLessThan(inputBox!.width / 2);
-        const bottomGap = await editor
-          .getByRole("button", { name: "Save", exact: true })
-          .evaluate((button) => {
-            const panel = button.closest(".mobile-wrapper-dialog");
-            if (!panel) throw new Error("Missing rating dialog panel");
-            return (
-              panel.getBoundingClientRect().bottom -
-              button.getBoundingClientRect().bottom
-            );
-          });
-        expect(bottomGap).toBeGreaterThanOrEqual(23);
-        if (matter === "NIC")
-          expect(recipientNicReads).toBe(nicReadsBeforeOpen + 1);
-
-        await expect(managementDialogs).toHaveCount(1);
-        if (matter === "REP")
-          expect(recipientRepReads).toBe(readsBeforeCategoryEditor);
-        return editor;
-      };
-      let editor = await openEditor();
-      await expectAxeClean(page, { include: ['[role="dialog"]'] });
-      await editor.getByRole("textbox").fill("25");
-      await editor.getByRole("button", { name: "Back", exact: true }).click();
-      if (matter === "REP") {
-        const categories = page.getByRole("dialog", {
-          name: `REP given to ${recipientHandle}`,
-          exact: true,
-        });
+        ).toBeFocused();
         await expect(
-          categories.getByRole("button", {
-            name: `Adjust REP (${CATEGORY}) for ${recipientHandle}`,
+          list.getByRole("link", { name: "page-two-recipient", exact: true })
+        ).toBeVisible();
+        expect(requestedPages).toEqual([1, 2]);
+        expect(saved).toHaveLength(0);
+
+        editor = await openEditor();
+        await editor.getByRole("textbox").fill("26");
+        await editor
+          .getByRole("button", { name: "Cancel", exact: true })
+          .click();
+        await expect(managementDialogs).toHaveCount(0);
+        await expect(manageGiven).toBeFocused();
+        expect(saved).toHaveLength(0);
+        await manageGiven.click();
+        editor = await openEditor();
+        await editor.getByRole("textbox").fill("30");
+        const sheet = page
+          .getByRole("dialog", {
+            name: `Add Rep to ${recipientHandle}`,
             exact: true,
           })
+          .locator(".mobile-wrapper-dialog");
+        await expectStableRatingSave(editor, sheet, releaseSave);
+        await expect(
+          page.getByText("Please try again.", { exact: true }).first()
         ).toBeVisible();
-        await categories
-          .getByRole("button", { name: "Back", exact: true })
+        await expect(editor.getByRole("textbox")).toHaveValue("30");
+        await expect(managementDialogs).toHaveCount(1);
+        const pagesBeforeSave = requestedPages.length;
+        await editor.getByRole("button", { name: "Save", exact: true }).click();
+        await expect(managementDialogs).toHaveCount(0);
+        // Saving refreshes only page one, then dismisses the entire flow.
+        expect(requestedPages.slice(pagesBeforeSave)).toEqual([1]);
+        await reopenAfterSave();
+        await expect(
+          list.getByRole("link", { name: recipientHandle }).locator("..")
+        ).toContainText("30");
+        await expect(
+          page
+            .getByRole("region", {
+              name: matter,
+              exact: true,
+              includeHidden: true,
+            })
+            .filter({ visible: true })
+            .getByText("930", { exact: true })
+        ).toBeAttached();
+        await expect(
+          list.getByRole("link", { name: "page-two-recipient", exact: true })
+        ).toHaveCount(0);
+        const pagesBeforeLoadMore = requestedPages.length;
+        await list
+          .getByRole("button", { name: "Load more", exact: true })
           .click();
+        await expect(
+          list.getByRole("link", { name: "page-two-recipient", exact: true })
+        ).toBeVisible();
+        expect(requestedPages.slice(pagesBeforeLoadMore)).toEqual([2]);
+        editor = await openEditor();
+        await editor
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+        await expect(managementDialogs).toHaveCount(0);
+        const manageTrigger = section
+          .getByRole("button", {
+            name: new RegExp(`^All ${matter} receivers:`),
+          })
+          .filter({ visible: true });
+        await expect(manageTrigger).toBeFocused();
+        await openOwnerProfile(page);
+        await section
+          .getByRole("button", { name: "Given", exact: true })
+          .click();
+        await manageTrigger.click();
+        editor = await openEditor();
+        await editor.getByRole("textbox").fill("-15");
+        await editor.getByRole("button", { name: "Save", exact: true }).click();
+        await expect(managementDialogs).toHaveCount(0);
+        await reopenAfterSave();
+        await expect(
+          list.getByRole("link", { name: recipientHandle }).locator("..")
+        ).toContainText("-15");
+        await expect(
+          page
+            .getByRole("region", {
+              name: matter,
+              exact: true,
+              includeHidden: true,
+            })
+            .filter({ visible: true })
+            .getByText("885", { exact: true })
+        ).toBeAttached();
+        editor = await openEditor();
+        await expect(
+          editor.getByRole("button", { name: "Remove rating", exact: true })
+        ).toHaveCount(0);
+        await editor.getByRole("textbox").fill("0");
+        await expect(editor.getByRole("textbox")).toHaveValue("0");
+        expect(saved).toHaveLength(3);
+        const removeScreenshot = testInfo.outputPath(`${matter}-remove.png`);
+        await page.screenshot({ path: removeScreenshot });
+        await testInfo.attach(`${matter}-remove`, {
+          path: removeScreenshot,
+          contentType: "image/png",
+        });
+        const pagesBeforeRemoval = requestedPages.length;
+        await editor.getByRole("button", { name: "Save", exact: true }).click();
+        await expect(managementDialogs).toHaveCount(0);
+        expect(requestedPages.slice(pagesBeforeRemoval)).toEqual([1]);
+        await reopenAfterSave();
+        await expect(
+          list.getByRole("link", { name: recipientHandle })
+        ).toHaveCount(0);
+        await expect(
+          list.getByRole("link", { name: "older-recipient" })
+        ).toBeVisible();
+        await expect(
+          page
+            .getByRole("region", {
+              name: matter,
+              exact: true,
+              includeHidden: true,
+            })
+            .filter({ visible: true })
+            .getByText("900", { exact: true })
+        ).toBeAttached();
+        expect(saved).toEqual(
+          matter === "REP"
+            ? [
+                { amount: 30, category: CATEGORY },
+                { amount: 30, category: CATEGORY },
+                { amount: -15, category: CATEGORY },
+                { amount: 0, category: CATEGORY },
+              ]
+            : [{ amount: 30 }, { amount: 30 }, { amount: -15 }, { amount: 0 }]
+        );
+        await list.getByRole("button", { name: "Close", exact: true }).click();
+        await openOwnerProfile(page);
+        await section
+          .getByRole("button", { name: "Given", exact: true })
+          .click();
+        await manageTrigger.click();
+        await expect(
+          list.getByRole("link", { name: recipientHandle, exact: true })
+        ).toHaveCount(0);
+        await expect(
+          list.getByRole("link", { name: "older-recipient", exact: true })
+        ).toBeVisible();
+        await expectNoHorizontalOverflow(page);
+        return;
       }
-      await expect(
-        list.getByRole("heading", { name: `${matter} Given`, exact: true })
-      ).toBeVisible();
+      const repReadsBeforeEdit = recipientRepReads;
+      const nicReadsBeforeEdit = recipientNicReads;
+      await expectAxeClean(page, { include: ['[role="dialog"]'] });
+      await amount().fill("25");
+      if (isMobile && testInfo.project.name === "web-mobile-chromium") {
+        try {
+          await page.evaluate(() => {
+            Object.defineProperty(globalThis.visualViewport, "height", {
+              configurable: true,
+              value: globalThis.innerHeight - 300,
+            });
+            globalThis.visualViewport?.dispatchEvent(new Event("resize"));
+          });
+          await expect
+            .poll(async () =>
+              amount().evaluate(
+                (field) =>
+                  field.getBoundingClientRect().bottom <=
+                  (globalThis.visualViewport?.height ?? 0)
+              )
+            )
+            .toBe(true);
+          await expect
+            .poll(async () =>
+              list
+                .getByRole("button", { name: "Save", exact: true })
+                .evaluate(
+                  (button) =>
+                    button.getBoundingClientRect().bottom <=
+                    (globalThis.visualViewport?.height ?? 0)
+                )
+            )
+            .toBe(true);
+        } finally {
+          await page.evaluate(() => {
+            Reflect.deleteProperty(globalThis.visualViewport!, "height");
+            globalThis.visualViewport?.dispatchEvent(new Event("resize"));
+          });
+        }
+      }
+      const cancel = list.getByRole("button", { name: "Cancel", exact: true });
+      const save = list.getByRole("button", { name: "Save", exact: true });
+      const inputBox = await amount().boundingBox();
+      const cancelBox = await cancel.boundingBox();
+      const saveBox = await save.boundingBox();
+      expect(inputBox).not.toBeNull();
+      expect(inputBox!.width).toBe(isMobile ? 140 : 136);
+      expect(inputBox!.height).toBe(isMobile ? 44 : 36);
+      expect(cancelBox!.height).toBe(isMobile ? 44 : 34);
+      expect(saveBox!.height).toBe(isMobile ? 44 : 34);
+      expect(Math.abs(cancelBox!.y - saveBox!.y)).toBeLessThanOrEqual(1);
+      expect(cancelBox!.x + cancelBox!.width).toBeLessThanOrEqual(saveBox!.x);
+      const scroll = list.getByRole("link").first();
+      await scroll.scrollIntoViewIfNeeded();
+      await expect(save).toBeInViewport();
+      await cancel.click();
+      await expect(amount()).toHaveValue("20");
       await expect(managementDialogs).toHaveCount(1);
-      await expect(
-        list.getByRole("button", {
-          name: `Adjust ${matter} for ${recipientHandle}`,
-          exact: true,
-        })
-      ).toBeFocused();
+      await expect(save).toHaveCount(0);
       await expect(
         list.getByRole("link", { name: "page-two-recipient", exact: true })
       ).toBeVisible();
       expect(requestedPages).toEqual([1, 2]);
       expect(saved).toHaveLength(0);
-
-      editor = await openEditor();
-      await editor.getByRole("textbox").fill("26");
-      await editor.getByRole("button", { name: "Cancel", exact: true }).click();
+      expect(recipientRepReads).toBe(repReadsBeforeEdit);
+      expect(recipientNicReads).toBe(nicReadsBeforeEdit);
+      await amount().fill("26");
+      await list.getByRole("button", { name: "Close", exact: true }).click();
       await expect(managementDialogs).toHaveCount(0);
       await expect(manageGiven).toBeFocused();
       expect(saved).toHaveLength(0);
       await manageGiven.click();
-      editor = await openEditor();
-      await editor.getByRole("textbox").fill("30");
-      await editor.getByRole("button", { name: "Save", exact: true }).click();
+      await expect(amount()).toHaveValue("20");
+      await amount().fill("30");
+      await expectStableRatingSave(
+        list,
+        page
+          .getByRole("dialog", { name: "NIC Given", exact: true })
+          .locator(".mobile-wrapper-dialog"),
+        releaseSave
+      );
       await expect(
         page.getByText("Please try again.", { exact: true }).first()
       ).toBeVisible();
-      await expect(editor.getByRole("textbox")).toHaveValue("30");
+      await expect(amount()).toHaveValue("30");
       const pagesBeforeSave = requestedPages.length;
-      await editor.getByRole("button", { name: "Save", exact: true }).click();
-      await expect(editor).toBeHidden();
-      await expect(
-        list.getByRole("link", { name: recipientHandle }).locator("..")
-      ).toContainText("30");
+      await save.click();
+      await expect(managementDialogs).toHaveCount(1);
+      await expect(save).toHaveCount(0);
+      await expect(amount()).toHaveValue("30");
       await expect(
         page
           .getByRole("region", {
@@ -1831,8 +2721,7 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         list.getByRole("link", { name: "page-two-recipient", exact: true })
       ).toBeVisible();
       expect(requestedPages.slice(pagesBeforeSave)).toEqual([1, 2]);
-      editor = await openEditor();
-      await editor.getByRole("button", { name: "Close", exact: true }).click();
+      await list.getByRole("button", { name: "Close", exact: true }).click();
       await expect(managementDialogs).toHaveCount(0);
       const manageTrigger = section
         .getByRole("button", {
@@ -1848,13 +2737,11 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           .click();
       await section.getByRole("button", { name: "Given", exact: true }).click();
       await manageTrigger.click();
-      editor = await openEditor();
-      await editor.getByRole("textbox").fill("-15");
-      await editor.getByRole("button", { name: "Save", exact: true }).click();
-      await expect(editor).toBeHidden();
-      await expect(
-        list.getByRole("link", { name: recipientHandle }).locator("..")
-      ).toContainText("-15");
+      await amount().fill("-15");
+      await save.click();
+      await expect(managementDialogs).toHaveCount(1);
+      await expect(save).toHaveCount(0);
+      await expect(amount()).toHaveValue("-15");
       await expect(
         page
           .getByRole("region", {
@@ -1865,12 +2752,11 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           .filter({ visible: true })
           .getByText("885", { exact: true })
       ).toBeAttached();
-      editor = await openEditor();
       await expect(
-        editor.getByRole("button", { name: "Remove rating", exact: true })
+        list.getByRole("button", { name: "Remove rating", exact: true })
       ).toHaveCount(0);
-      await editor.getByRole("textbox").fill("0");
-      await expect(editor.getByRole("textbox")).toHaveValue("0");
+      await amount().fill("0");
+      await expect(amount()).toHaveValue("0");
       expect(saved).toHaveLength(3);
       const removeScreenshot = testInfo.outputPath(`${matter}-remove.png`);
       await page.screenshot({ path: removeScreenshot });
@@ -1879,8 +2765,9 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         contentType: "image/png",
       });
       const pagesBeforeRemoval = requestedPages.length;
-      await editor.getByRole("button", { name: "Save", exact: true }).click();
-      await expect(editor).toBeHidden();
+      await save.click();
+      await expect(managementDialogs).toHaveCount(1);
+      await expect(save).toHaveCount(0);
       await expect(
         list.getByRole("link", { name: recipientHandle })
       ).toHaveCount(0);
@@ -1898,16 +2785,12 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           .filter({ visible: true })
           .getByText("900", { exact: true })
       ).toBeAttached();
-      expect(saved).toEqual(
-        matter === "REP"
-          ? [
-              { amount: 30, category: CATEGORY },
-              { amount: 30, category: CATEGORY },
-              { amount: -15, category: CATEGORY },
-              { amount: 0, category: CATEGORY },
-            ]
-          : [{ amount: 30 }, { amount: 30 }, { amount: -15 }, { amount: 0 }]
-      );
+      expect(saved).toEqual([
+        { amount: 30 },
+        { amount: 30 },
+        { amount: -15 },
+        { amount: 0 },
+      ]);
       await list.getByRole("button", { name: "Close", exact: true }).click();
       await openOwnerProfile(page);
       if (matter === "NIC" && isMobile)
@@ -2001,6 +2884,9 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         name: `${matter} Given`,
         exact: true,
       });
+      const personNames = list
+        .getByRole("link")
+        .locator(":scope > span:last-child");
       const sort = list.getByRole("button", {
         name: new RegExp(`^Sort given ${matter}: `),
       });
@@ -2022,7 +2908,7 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       await expect(sort).toHaveAccessibleName(
         `Sort given ${matter}: Highest total first`
       );
-      await expect(list.getByRole("link")).toHaveText(["older-high", "middle"]);
+      await expect(personNames).toHaveText(["older-high", "middle"]);
       // Read both rectangles together so dialog entrance motion cannot skew them.
       const arrowGeometry = await sort.evaluate((trigger) => {
         const arrow = trigger.querySelector("svg");
@@ -2043,7 +2929,7 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       // Opening management fetches only the default order's first page.
       expect(requests).toEqual([{ orderBy: "rating", page: 1 }]);
       await loadMore.click();
-      await expect(list.getByRole("link")).toHaveText([
+      await expect(personNames).toHaveText([
         "older-high",
         "middle",
         "recent-low",
@@ -2082,21 +2968,21 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       );
       await expect(sortMenu).toBeHidden();
       await expect(sort).toBeFocused();
-      await expect(list.getByRole("link")).toHaveText(["recent-low", "middle"]);
+      await expect(personNames).toHaveText(["recent-low", "middle"]);
       expect(
         requests.filter((request) => request.orderBy === "last_modified")
       ).toEqual([{ orderBy: "last_modified", page: 1 }]);
       await loadMore.click();
-      await expect(list.getByRole("link")).toHaveText([
+      await expect(personNames).toHaveText([
         "recent-low",
         "middle",
         "older-high",
       ]);
       // Returning to a cached order starts at page one; Load more still works.
       await chooseSort("Highest total first");
-      await expect(list.getByRole("link")).toHaveText(["older-high", "middle"]);
+      await expect(personNames).toHaveText(["older-high", "middle"]);
       await loadMore.click();
-      await expect(list.getByRole("link")).toHaveText([
+      await expect(personNames).toHaveText([
         "older-high",
         "middle",
         "recent-low",
@@ -2107,7 +2993,7 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         )
       ).toHaveLength(2);
       await chooseSort("Most recently adjusted");
-      await expect(list.getByRole("link")).toHaveText(["recent-low", "middle"]);
+      await expect(personNames).toHaveText(["recent-low", "middle"]);
       expect(
         requests.filter(
           (request) => request.orderBy === "last_modified" && request.page === 2
@@ -2125,7 +3011,117 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       await expect(sort).toHaveAccessibleName(
         `Sort given ${matter}: Highest total first`
       );
-      await expect(list.getByRole("link").first()).toHaveText("older-high");
+      await expect(list.getByRole("link").first()).toHaveAccessibleName(
+        "older-high"
+      );
+    });
+  }
+
+  for (const matter of ["REP", "NIC"] as const) {
+    test(`${matter}: visitors can sort Received without gaining editing controls`, async ({
+      page,
+      baseURL,
+      isMobile,
+    }) => {
+      const api = getSandboxApiOrigin(baseURL);
+      const path = matter === "REP" ? "rep" : "cic";
+      const orders: string[] = [];
+      const people = [
+        {
+          profile_id: "old",
+          handle: "older-high",
+          wallets: [],
+          rating: 90,
+          last_modified: 1,
+        },
+        {
+          profile_id: "middle",
+          handle: "middle",
+          wallets: [],
+          rating: 50,
+          last_modified: 5,
+        },
+        {
+          profile_id: "recent",
+          handle: "recent-low",
+          wallets: [],
+          rating: 10,
+          last_modified: 9,
+        },
+      ];
+      await installCategories(page, api);
+      await page.route(`${api}/api/profiles/*/${path}/overview*`, (route) =>
+        route.fulfill({
+          json: {
+            [matter === "REP" ? "total_rep" : "total_cic"]: 150,
+            authenticated_user_contribution: null,
+            contributor_count: 3,
+            contributors: { data: [], page: 1, next: false },
+          },
+        })
+      );
+      await page.route(
+        `${api}/api/profiles/*/${path}/ratings/by-rater?*`,
+        (route) => {
+          const params = new URL(route.request().url()).searchParams;
+          expect(params.get("given")).toBe("false");
+          expect(params.get("order")).toBe("DESC");
+          expect(params.get("page")).toBe("1");
+          const order = params.get("order_by")!;
+          orders.push(order);
+          const data = people.toSorted((a, b) =>
+            order === "last_modified"
+              ? b.last_modified - a.last_modified
+              : b.rating - a.rating
+          );
+          return route.fulfill({ json: { data, page: 1, next: false } });
+        }
+      );
+      await openProfile(page);
+      if (isMobile && matter === "NIC")
+        await page
+          .getByRole("group", { name: "Identity sections", exact: true })
+          .getByRole("button", { name: "NIC", exact: true })
+          .click();
+      const section = page
+        .getByRole("region", { name: matter, exact: true })
+        .filter({ visible: true });
+      await section
+        .getByRole("button", {
+          name:
+            matter === "REP" ? "View 3 raters" : "View NIC Received: 3 raters",
+          exact: true,
+        })
+        .click();
+      const list = page.getByRole("dialog", {
+        name: matter === "REP" ? "All raters" : "NIC Received",
+        exact: true,
+      });
+      const names = list.getByRole("link").locator(".tw-truncate");
+      const sort = list.getByRole("button", {
+        name: new RegExp(`^Sort received ${matter}:`),
+      });
+      await expect(names).toHaveText(["older-high", "middle", "recent-low"]);
+      for (const [label, expected] of [
+        ["Most recently adjusted", ["recent-low", "middle", "older-high"]],
+        ["Highest total first", ["older-high", "middle", "recent-low"]],
+      ] as const) {
+        await sort.click();
+        await page
+          .getByRole("menu")
+          .getByRole("menuitem", { name: label, exact: true })
+          .click();
+        await expect(sort).toHaveAccessibleName(
+          `Sort received ${matter}: ${label}`
+        );
+        await expect(names).toHaveText([...expected]);
+      }
+      expect(orders).toContain("last_modified");
+      await expect(list.getByRole("textbox")).toHaveCount(0);
+      await expect(
+        list.getByRole("button", { name: /^(Adjust|Save|Cancel)/ })
+      ).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
     });
   }
 
@@ -2171,6 +3167,9 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         .getByRole("region", { name: "REP", exact: true })
         .filter({ visible: true });
       const heights: number[] = [];
+      const rowStyles: Awaited<
+        ReturnType<typeof getContributorRowPresentation>
+      >[] = [];
       for (const direction of ["Received", "Given"]) {
         await section
           .getByRole("button", { name: direction, exact: true })
@@ -2191,6 +3190,9 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           )
         ).toHaveCount(0);
         await expect(list.getByRole("link")).toHaveCount(count);
+        await expect(list.getByRole("textbox")).toHaveCount(0);
+        if (!isMobile) await expectContributorHandleHover(list);
+        rowStyles.push(await getContributorRowPresentation(list));
         const panel = await page
           .getByRole("dialog", { name, exact: true })
           .locator(".mobile-wrapper-dialog")
@@ -2258,11 +3260,27 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
             }
           }
         }
+        if (count === 2) {
+          await page.screenshot({
+            path: testInfo.outputPath(`REP-${direction}-contributors.png`),
+          });
+        }
         await expectNoHorizontalOverflow(page);
         await list.getByRole("button", { name: "Close", exact: true }).click();
         await expect(list).toBeHidden();
       }
       if (count === 25) expect(heights[0]).toBeCloseTo(heights[1]!, 0);
+      expect(rowStyles[1]).toEqual(rowStyles[0]);
+      expect(rowStyles[0]).toEqual(
+        expect.objectContaining({
+          border: "0px",
+          radius: "12px",
+          fontSize: "14px",
+          fontWeight: "500",
+          avatarSize: 28,
+          avatarRadius: "9999px",
+        })
+      );
     });
   }
 
@@ -2276,6 +3294,9 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
     await installCategories(page, api);
     const directions: string[] = [];
     const overviewDirections: string[] = [];
+    const rowStyles: Awaited<
+      ReturnType<typeof getContributorRowPresentation>
+    >[] = [];
     if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
     await page.route(`${api}/api/profiles/*/cic/overview*`, (route) => {
       const direction =
@@ -2285,7 +3306,8 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       return route.fulfill({
         json: {
           total_cic: direction === "outgoing" ? 1250 : 4100,
-          authenticated_user_contribution: null,
+          authenticated_user_contribution:
+            direction === "outgoing" ? null : 4100,
           contributor_count: 1,
           contributors: {
             data: [
@@ -2369,9 +3391,58 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         exact: true,
       });
       if (direction === "Received") {
-        await section
-          .getByRole("button", { name: "Rate NIC", exact: true })
-          .click();
+        const rateButton = section.getByRole("button", {
+          name: "Rate NIC",
+          exact: true,
+        });
+        const personalRating = section.getByText("Your rating: 4,100", {
+          exact: true,
+        });
+        await expect(personalRating).toBeVisible();
+        if (isMobile) {
+          for (const width of [320, 540, 768]) {
+            await page.setViewportSize({ width, height: 844 });
+            const rateBox = await rateButton.boundingBox();
+            const countBox = await contributorsButton.boundingBox();
+            const ratingBox = await personalRating.boundingBox();
+            expect(rateBox).not.toBeNull();
+            expect(countBox).not.toBeNull();
+            expect(ratingBox).not.toBeNull();
+            if (rateBox && countBox && ratingBox) {
+              expect(rateBox.x).toBeGreaterThanOrEqual(
+                countBox.x + countBox.width + 8
+              );
+              expect(rateBox.y + rateBox.height / 2).toBeCloseTo(
+                countBox.y + countBox.height / 2,
+                0
+              );
+              if (width === 320) {
+                expect(ratingBox.y).toBeGreaterThanOrEqual(
+                  rateBox.y + rateBox.height
+                );
+                expect(ratingBox.y - rateBox.y - rateBox.height).toBeCloseTo(
+                  8,
+                  0
+                );
+                expect(ratingBox.x + ratingBox.width).toBeCloseTo(
+                  rateBox.x + rateBox.width,
+                  0
+                );
+              } else {
+                expect(rateBox.x - ratingBox.x - ratingBox.width).toBeCloseTo(
+                  8,
+                  0
+                );
+                expect(ratingBox.y + ratingBox.height / 2).toBeCloseTo(
+                  rateBox.y + rateBox.height / 2,
+                  0
+                );
+              }
+            }
+          }
+          await page.setViewportSize({ width: 320, height: 844 });
+        }
+        await rateButton.click();
         const rate = page.getByRole("dialog", {
           name: "Rate NIC",
           exact: true,
@@ -2417,19 +3488,32 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         name: `NIC ${direction}`,
         exact: true,
       });
+      const closeButton = list.getByRole("button", {
+        name: "Close",
+        exact: true,
+      });
+      await expect(closeButton).toHaveCSS("border-radius", "8px");
+      await expect(
+        list.getByRole("button", { name: "Close", exact: true }).locator("span")
+      ).toHaveCSS("border-radius", "8px");
       await expectDesktopRatingPosition(page, `NIC ${direction}`);
       await expect(
         list.getByText(`1 ${direction === "Received" ? "rater" : "receiver"}`, {
           exact: true,
         })
-      ).toHaveCount(0);
+      ).toHaveCount(1);
+      await expect(list.getByRole("textbox")).toHaveCount(0);
+      if (!isMobile) await expectContributorHandleHover(list);
+      rowStyles.push(await getContributorRowPresentation(list));
       await expect(
         list.getByRole("link", { name: "another-profile" })
       ).toBeVisible();
       await expect(list.getByRole("button", { name: /Adjust/ })).toHaveCount(0);
       await expect(
-        list.getByRole("button", { name: /^Sort given / })
-      ).toHaveCount(0);
+        list.getByRole("button", {
+          name: new RegExp(`^Sort ${direction.toLowerCase()} NIC:`),
+        })
+      ).toHaveCount(1);
       const panel = await page
         .getByRole("dialog", { name: `NIC ${direction}`, exact: true })
         .locator(".mobile-wrapper-dialog")
@@ -2437,10 +3521,15 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       expect(panel?.height).toBeLessThan(
         (page.viewportSize()?.height ?? 720) * 0.6
       );
+      await page.screenshot({
+        path: testInfo.outputPath(`NIC-${direction}-contributors.png`),
+      });
       await list.getByRole("button", { name: "Close", exact: true }).click();
       await expect(list).toBeHidden();
     }
     expect(directions).toEqual(["false", "true"]);
+    expect(rowStyles[1]).toEqual(rowStyles[0]);
+    expect(rowStyles[0]?.avatarRadius).toBe("9999px");
     if (isMobile) {
       const sections = page.getByRole("group", {
         name: "Identity sections",
@@ -2483,7 +3572,35 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         .getByRole("button", { name: "ID Statements", exact: true })
         .click();
       const statements = page.getByRole("region", { name: /ID Statements$/ });
-      await expect(statements.getByText(/^[0-9,]+ statements?$/)).toBeVisible();
+      const statementCount = statements.getByText(/^[0-9,]+ statements?$/);
+      await expect(statementCount).toBeVisible();
+      await expect(statementCount).toHaveCSS("padding-left", "0px");
+      await expect(statementCount).toHaveCSS("padding-right", "0px");
+      for (const width of [320, 768]) {
+        await page.setViewportSize({ width, height: 844 });
+        const sectionBox = await statements.boundingBox();
+        expect(sectionBox).not.toBeNull();
+        for (const content of [
+          statements.getByRole("heading", { level: 3 }).first(),
+          statements.getByRole("heading", { level: 3 }).last(),
+          statements.getByRole("list").first(),
+        ]) {
+          const box = await content.boundingBox();
+          expect(box).not.toBeNull();
+          if (box && sectionBox) {
+            expect(box.x).toBeCloseTo(sectionBox.x, 0);
+            expect(box.x + box.width).toBeLessThanOrEqual(
+              sectionBox.x + sectionBox.width + 1
+            );
+          }
+        }
+        await expectNoHorizontalOverflow(page);
+      }
+      await page.setViewportSize({ width: 320, height: 844 });
+      await page.screenshot({
+        path: testInfo.outputPath("id-statements-mobile.png"),
+        fullPage: true,
+      });
       await sections.getByRole("button", { name: "NIC", exact: true }).click();
       await expect(section.getByText("4,100", { exact: true })).toBeVisible();
     }

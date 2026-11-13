@@ -36,6 +36,7 @@ const category: ApiRepCategory = {
 };
 const requestAuth = jest.fn();
 const onProfileRepModify = jest.fn();
+const onSuccess = jest.fn();
 let rows: {
   profile: { id: string; handle: string; primary_address: string; pfp: null };
   contribution: number;
@@ -46,7 +47,7 @@ function setup(
   profile: ApiIdentity,
   direction: "received" | "given",
   viewer: ApiIdentity | null = owner,
-  autoSelectOwnAmount = false
+  autoFocusOwnAmount = false
 ) {
   const client = new QueryClient({
     defaultOptions: {
@@ -83,9 +84,10 @@ function setup(
       profile={profile}
       category={category}
       direction={direction}
-      autoSelectOwnAmount={autoSelectOwnAmount}
+      autoFocusOwnAmount={autoFocusOwnAmount}
       onOpenGlobalCategory={jest.fn()}
       onBusyChange={jest.fn()}
+      onSuccess={onSuccess}
     />,
     { wrapper: Wrapper }
   );
@@ -197,6 +199,7 @@ it("pins only your editable contribution, accepts negative values, and saves the
   expect(onProfileRepModify).toHaveBeenCalledWith(
     expect.objectContaining({ targetProfiles: [target] })
   );
+  await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
 });
 
 it("makes the owner's received categories read-only", async () => {
@@ -237,7 +240,7 @@ it("keeps an existing negative contribution first and editable", async () => {
   expect(screen.getAllByRole("link")[0]).toHaveTextContent("You");
 });
 
-it("selects the existing desktop amount once so typing replaces it", async () => {
+it("focuses the existing desktop amount without selecting its digits", async () => {
   ownContribution = 12345;
   const user = userEvent.setup();
   setup(target, "received", owner, true);
@@ -245,13 +248,13 @@ it("selects the existing desktop amount once so typing replaces it", async () =>
   await waitFor(() => {
     expect(input).toHaveFocus();
     expect(input).toHaveValue("12345");
-    expect((input as HTMLInputElement).selectionStart).toBe(0);
+    expect((input as HTMLInputElement).selectionStart).toBe(5);
     expect((input as HTMLInputElement).selectionEnd).toBe(5);
   });
   await user.keyboard("7");
-  expect(input).toHaveValue("7");
+  expect(input).toHaveValue("123457");
   await user.keyboard("8");
-  expect(input).toHaveValue("78");
+  expect(input).toHaveValue("1234578");
 });
 
 it("does not autofocus the mobile amount", async () => {
@@ -336,6 +339,7 @@ it("retains failed edits and does not repeat successful writes after a partial s
     expect(screen.getByRole("button", { name: "Save" })).toBeEnabled()
   );
   expect(bob).toHaveValue("100");
+  expect(onSuccess).not.toHaveBeenCalled();
   expect(onProfileRepModify).toHaveBeenCalledTimes(1);
   expect(onProfileRepModify).toHaveBeenCalledWith(
     expect.objectContaining({
@@ -345,6 +349,7 @@ it("retains failed edits and does not repeat successful writes after a partial s
   failBob = false;
   await user.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() => expect(post).toHaveBeenCalledTimes(3));
+  await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
   expect(post.mock.calls.map(([request]) => request.endpoint)).toEqual([
     "profiles/alice/rep/rating",
     "profiles/bob/rep/rating",

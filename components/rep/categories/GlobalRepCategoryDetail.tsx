@@ -87,7 +87,7 @@ const PRESENTATION_CLASSNAME = `
   [&_.rep-category-preview-list]:!tw-gap-1.5 [&_.rep-category-preview-row]:!tw-gap-2 [&_.rep-category-preview-row]:!tw-rounded-lg [&_.rep-category-preview-row]:!tw-border [&_.rep-category-preview-row]:!tw-border-solid [&_.rep-category-preview-row]:!tw-border-white/[0.08] [&_.rep-category-preview-row]:!tw-bg-white/[0.04] [&_.rep-category-preview-row]:tw-transition-colors hover:[&_.rep-category-preview-row]:!tw-border-white/[0.12] hover:[&_.rep-category-preview-row]:!tw-bg-white/[0.06]
   [&_.rep-category-activity-row]:!tw-py-3
   [&_.rep-category-preview-section]:tw-px-0 sm:[&_.rep-category-preview-section]:tw-px-1 lg:[&_.rep-category-preview-section]:tw-px-2 [&_.rep-category-preview-title]:!tw-mb-3 [&_.rep-category-preview-title]:!tw-mt-0 [&_.rep-category-preview-title]:!tw-text-xs [&_.rep-category-preview-title]:!tw-font-semibold [&_.rep-category-preview-title]:!tw-uppercase [&_.rep-category-preview-title]:!tw-tracking-wider [&_.rep-category-preview-title]:!tw-text-iron-500
-  [&_.rep-category-preview-value]:!tw-font-normal [&_.rep-category-preview-value]:!tw-tracking-tight [&_.rep-category-preview-value]:!tw-text-iron-400 [&_.rep-category-profile-avatar]:!tw-h-7 [&_.rep-category-profile-avatar]:!tw-w-7 sm:[&_.rep-category-profile-avatar]:!tw-h-8 sm:[&_.rep-category-profile-avatar]:!tw-w-8 [&_.rep-category-profile-name]:!tw-text-iron-200
+  [&_.rep-category-preview-value]:!tw-font-normal [&_.rep-category-preview-value]:!tw-tracking-tight [&_.rep-category-preview-value]:!tw-text-iron-400 [&_.rep-category-profile-avatar]:!tw-h-7 [&_.rep-category-profile-avatar]:!tw-w-7 sm:[&_.rep-category-profile-avatar]:!tw-h-8 sm:[&_.rep-category-profile-avatar]:!tw-w-8
   md:[&_.rep-category-activity-grid]:!tw-gap-4
   [&_.rep-category-scope]:tw-w-fit [&_.rep-category-scope]:tw-max-w-full
   [&_.rep-category-section-tab]:!tw-rounded-none [&_.rep-category-section-tab]:!tw-border-x-0 [&_.rep-category-section-tab]:!tw-border-b-2 [&_.rep-category-section-tab]:!tw-border-t-0 [&_.rep-category-section-tab]:!tw-border-solid [&_.rep-category-section-tab]:!tw-border-transparent [&_.rep-category-section-tab]:!tw-bg-transparent [&_.rep-category-section-tab]:!tw-px-3 [&_.rep-category-section-tab]:!tw-py-3 [&_.rep-category-section-tab]:!tw-text-sm [&_.rep-category-section-tab]:!tw-font-medium [&_.rep-category-section-tab]:!tw-text-iron-500
@@ -115,7 +115,7 @@ function ProfileCell({
       <Link
         href={getProfileHref(profile)}
         prefetch={false}
-        className={`rep-category-profile tw-flex tw-min-w-0 tw-items-center tw-text-left tw-no-underline tw-decoration-iron-400/80 tw-underline-offset-2 hover:tw-underline focus-visible:tw-underline ${
+        className={`rep-category-profile tw-group/rep-category-profile tw-flex tw-min-w-0 tw-items-center tw-text-left tw-no-underline focus-visible:tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
           compact ? "tw-gap-2" : "tw-gap-3"
         }`}
       >
@@ -135,7 +135,7 @@ function ProfileCell({
             </span>
           )}
         </span>
-        <span className="rep-category-profile-name tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+        <span className="rep-category-profile-name tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors group-hover/rep-category-profile:tw-text-iron-400 group-focus-visible/rep-category-profile:tw-text-iron-400">
           {display}
         </span>
       </Link>

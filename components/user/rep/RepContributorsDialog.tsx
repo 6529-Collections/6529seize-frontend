@@ -9,13 +9,28 @@ import Button from "@/components/utils/button/Button";
 import type { ApiRepContributor } from "@/generated/models/ApiRepContributor";
 import type { ApiRepContributorsPage } from "@/generated/models/ApiRepContributorsPage";
 import type { ApiRatingWithProfileInfoAndLevel } from "@/generated/models/ApiRatingWithProfileInfoAndLevel";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { formatAddress, formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatAddress } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import ProfileAvatar, {
+  ProfileBadgeSize,
+} from "@/components/common/profile/ProfileAvatar";
+import {
+  RATING_CONTRIBUTOR_ROW_CLASS,
+  RATING_CONTRIBUTOR_IDENTITY_CLASS,
+  RATING_CONTRIBUTOR_NAME_CLASS,
+  RATING_CONTRIBUTOR_AMOUNT_CLASS,
+} from "./ratingContributorStyles";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { getContributorLabel, type RepDirection } from "./UserPageRep.helpers";
+import RatingSortSelect, { type RatingListOrder } from "./RatingSortSelect";
 
 const REP_CONTRIBUTORS_QUERY_KEY = "REP_CONTRIBUTORS";
 const REP_CONTRIBUTORS_PAGE_SIZE = 100;
@@ -61,16 +76,6 @@ type ApiRatingWithProfileInfoAndLevelPageWithPfp = Pick<
 
 function getRouteHref(handleOrWallet: string): string {
   return `/${encodeURIComponent(handleOrWallet.toLowerCase())}`;
-}
-
-function getAvatarFallback(display: string) {
-  const firstChar = display.trim().charAt(0).toUpperCase();
-
-  return (
-    <span className="tw-text-[0.6875rem] tw-font-semibold tw-text-iron-300">
-      {firstChar || "?"}
-    </span>
-  );
 }
 
 function getDialogTitle({
@@ -129,45 +134,33 @@ function mapCategoryContributor(
 
 function RepContributorRow({
   contributor,
-  showAvatar,
 }: {
   readonly contributor: RepContributorListItem;
-  readonly showAvatar: boolean;
 }) {
+  const locale = useBrowserLocale();
   return (
     <Link
       href={contributor.href}
-      className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.03] tw-bg-white/[0.02] tw-px-3 tw-py-2.5 tw-no-underline tw-transition-colors hover:tw-border-white/5 hover:tw-bg-white/[0.04]"
+      className={`${RATING_CONTRIBUTOR_ROW_CLASS} tw-group/rating-contributor tw-no-underline`}
     >
-      <div
-        className={`tw-flex tw-min-w-0 tw-items-center ${
-          showAvatar ? "tw-gap-3" : "tw-gap-0"
-        }`}
-      >
-        {showAvatar && (
-          <div className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
-            {contributor.pfpUrl ? (
-              // Profile avatars can come from arbitrary remote hosts, so this stays unoptimized.
-              <img
-                src={getScaledImageUri(
-                  contributor.pfpUrl,
-                  ImageScale.W_AUTO_H_50
-                )}
-                alt={`${contributor.display} profile`}
-                className="tw-h-full tw-w-full tw-object-cover"
-              />
-            ) : (
-              getAvatarFallback(contributor.display)
-            )}
-          </div>
-        )}
-        <p className="tw-mb-0 tw-mt-0 tw-whitespace-nowrap tw-text-left tw-text-sm tw-font-medium tw-text-iron-100">
+      <div className={RATING_CONTRIBUTOR_IDENTITY_CLASS}>
+        <span aria-hidden="true">
+          <ProfileAvatar
+            pfpUrl={contributor.pfpUrl}
+            size={ProfileBadgeSize.SMALL}
+            shape="circle"
+            alt=""
+            fallbackContent={contributor.display.charAt(0).toUpperCase()}
+          />
+        </span>
+        <span className={RATING_CONTRIBUTOR_NAME_CLASS}>
           {contributor.display}
-        </p>
+        </span>
       </div>
-
-      <span className="tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors">
-        {formatNumberWithCommas(contributor.contribution)}
+      <span
+        className={`${RATING_CONTRIBUTOR_AMOUNT_CLASS} ${contributor.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
+      >
+        {formatInteger(locale, contributor.contribution)}
       </span>
     </Link>
   );
@@ -179,12 +172,16 @@ async function fetchRepContributorPage({
   direction,
   category,
   pageParam,
+  orderBy,
+  signal,
 }: {
   readonly identity: string;
   readonly scope: RepContributorScope;
   readonly direction: RepDirection;
   readonly category: string | null;
   readonly pageParam: number;
+  readonly orderBy: RatingListOrder;
+  readonly signal: AbortSignal;
 }): Promise<RepContributorPage> {
   if (scope === "overview") {
     const page =
@@ -195,8 +192,9 @@ async function fetchRepContributorPage({
           page: pageParam.toString(),
           page_size: REP_CONTRIBUTORS_PAGE_SIZE.toString(),
           order: "DESC",
-          order_by: "rating",
+          order_by: orderBy,
         },
+        signal,
       });
 
     return {
@@ -219,6 +217,7 @@ async function fetchRepContributorPage({
       page: pageParam.toString(),
       page_size: REP_CONTRIBUTORS_PAGE_SIZE.toString(),
     },
+    signal,
   });
 
   return {
@@ -237,23 +236,55 @@ export default function RepContributorsDialog({
   contributorCount,
   onClose,
 }: RepContributorsDialogProps) {
+  const queryClient = useQueryClient();
+  const viewRef = useRef<HTMLDivElement>(null);
+  const [orderBy, setOrderBy] = useState<RatingListOrder>("rating");
   const trimmedCategory = category?.trim();
   let normalizedCategory = trimmedCategory ?? null;
   if (normalizedCategory === "") {
     normalizedCategory = null;
   }
-  const contributorsQuery = useInfiniteQuery({
-    queryKey: [
+  const getQueryKey = (order: RatingListOrder) =>
+    [
       REP_CONTRIBUTORS_QUERY_KEY,
-      { identity, scope, direction, category: normalizedCategory },
-    ],
-    queryFn: async ({ pageParam }: { pageParam: number }) =>
+      {
+        identity,
+        scope,
+        direction,
+        category: normalizedCategory,
+        orderBy: order,
+      },
+    ] as const;
+  const changeOrder = (next: RatingListOrder) => {
+    if (next === orderBy) return;
+    const key = getQueryKey(next);
+    const cached =
+      queryClient.getQueryState<InfiniteData<RepContributorPage, number>>(key);
+    if (cached?.data && cached.data.pages.length > 1) {
+      queryClient.setQueryData(
+        key,
+        {
+          ...cached.data,
+          pages: cached.data.pages.slice(0, 1),
+          pageParams: cached.data.pageParams.slice(0, 1),
+        },
+        { updatedAt: cached.dataUpdatedAt }
+      );
+    }
+    setOrderBy(next);
+    viewRef.current?.parentElement?.scrollTo({ top: 0 });
+  };
+  const contributorsQuery = useInfiniteQuery({
+    queryKey: getQueryKey(orderBy),
+    queryFn: async ({ pageParam, signal }) =>
       await fetchRepContributorPage({
         identity,
         scope,
         direction,
         category: normalizedCategory,
         pageParam,
+        orderBy,
+        signal,
       }),
     enabled: isOpen && (scope === "overview" || normalizedCategory !== null),
     initialPageParam: 1,
@@ -311,7 +342,17 @@ export default function RepContributorsDialog({
       showHeaderCloseButton
       headerClassName="tw-pb-2 tw-pt-4"
     >
-      <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
+      <div ref={viewRef} className="tw-px-4 tw-pb-6 sm:tw-px-6">
+        {scope === "overview" && (
+          <div className="tw-my-2">
+            <RatingSortSelect
+              matter="REP"
+              direction={direction}
+              value={orderBy}
+              onChange={changeOrder}
+            />
+          </div>
+        )}
         {contributorsQuery.isPending && (
           <div className="tw-flex tw-justify-center tw-py-12">
             <CircleLoader size={CircleLoaderSize.XXLARGE} />
@@ -343,12 +384,11 @@ export default function RepContributorsDialog({
         )}
 
         {items.length > 0 && (
-          <div className="tw-flex tw-flex-col tw-gap-3">
+          <div className="tw-flex tw-flex-col tw-gap-2">
             {items.map((contributor) => (
               <RepContributorRow
                 key={contributor.key}
                 contributor={contributor}
-                showAvatar={scope === "category"}
               />
             ))}
 

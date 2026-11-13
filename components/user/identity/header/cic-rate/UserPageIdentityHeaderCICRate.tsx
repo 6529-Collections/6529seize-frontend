@@ -84,8 +84,8 @@ export function UserPageIdentityHeaderCICRateForm({
         message: t(locale, "user.rate.updated", { matter: "NIC" }),
         type: "success",
       });
-      onProfileCICModify({
-        targetProfile: profile,
+      void onProfileCICModify({
+        targetProfiles: [profile],
         connectedProfile: connectedProfile ?? null,
         rater:
           activeProfileProxy?.created_by.handle ??

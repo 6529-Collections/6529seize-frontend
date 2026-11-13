@@ -171,7 +171,7 @@ function ContributorLink({
       <Link
         href={getProfileHref(contributor.profile)}
         prefetch={false}
-        className="rep-category-profile hover:tw-text-primary-200 tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline"
+        className="rep-category-profile tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-rounded-lg focus-visible:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
         <ContributorAvatar contributor={contributor} />
         <span className="tw-min-w-0 tw-break-words">

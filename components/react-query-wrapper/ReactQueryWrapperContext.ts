@@ -58,11 +58,11 @@ export type ReactQueryWrapperContextType = {
     readonly profileProxyId: string;
   }) => void;
   onProfileCICModify: (params: {
-    readonly targetProfile: ApiIdentity;
+    readonly targetProfiles: readonly ApiIdentity[];
     readonly connectedProfile: ApiIdentity | null;
     readonly rater: string | null;
     readonly profileProxy: ApiProfileProxy | null;
-  }) => void;
+  }) => Promise<void>;
   onProfileRepModify: ({
     targetProfiles,
     connectedProfile,
@@ -122,7 +122,7 @@ export const ReactQueryWrapperContext =
     setWave: () => {},
     setWaveDrops: () => {},
     onProfileProxyModify: () => {},
-    onProfileCICModify: () => {},
+    onProfileCICModify: async () => {},
     onProfileRepModify: () => Promise.resolve(),
     onProfileEdit: () => {},
     onProfileStatementAdd: () => {},
