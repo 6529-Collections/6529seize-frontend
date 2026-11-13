@@ -4,8 +4,8 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, setAuthJwt } from "./auth.utils";
 import { getSessionClientType } from "./session-client-type";
 import {
+  parseDesktopSessionResponse,
   requireDesktopNativeAuthMethod,
-  unwrapDesktopNativeAuthResult,
 } from "./desktop-native-auth";
 import {
   getNativeRefreshToken,
@@ -258,13 +258,16 @@ export async function loginWithSessionV2({
   if (getSessionClientType() === "desktop") {
     // The desktop shell calls the API itself and keeps the refresh token.
     const sessionLogin = requireDesktopNativeAuthMethod("sessionLogin");
-    const desktopResponse = await sessionLogin({
-      client_type: "desktop",
-      server_signature: serverSignature,
-      client_signature: clientSignature,
-      client_address: signerAddress,
-      ...(role === null ? {} : { role }),
-    });
+    const desktopResponse = parseDesktopSessionResponse(
+      "sessionLogin",
+      await sessionLogin({
+        client_type: "desktop",
+        server_signature: serverSignature,
+        client_signature: clientSignature,
+        client_address: signerAddress,
+        ...(role === null ? {} : { role }),
+      })
+    );
     clearSessionRefreshFailureForSession(desktopResponse);
     return desktopResponse;
   }
@@ -403,7 +406,8 @@ async function executeDesktopSessionRefresh({
     abortSignal,
     clientType: "desktop",
     request: async () =>
-      unwrapDesktopNativeAuthResult(
+      parseDesktopSessionResponse(
+        "sessionRefresh",
         await sessionRefresh({
           client_type: "desktop",
           client_address: address,

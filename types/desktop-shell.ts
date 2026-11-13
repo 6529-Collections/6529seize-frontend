@@ -158,6 +158,10 @@ export interface DesktopNativeAuth {
     readonly client_address: string;
     readonly role?: string | null | undefined;
   }) => Promise<DesktopNativeAuthSessionResponse>;
+  /**
+   * The only method that reports API failures as data. The others reject with
+   * an Error; the page validates every result either way.
+   */
   readonly sessionRefresh: (request: {
     readonly client_type?: DesktopSessionClientType | undefined;
     readonly client_address: string;

@@ -2,6 +2,9 @@ import type { ApiRedeemConnectionShareResponse } from "@/generated/models/ApiRed
 import { commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, getWalletAddress } from "./auth.utils";
 import {
+  parseDesktopConnectionShareResponse,
+  parseDesktopLegacyConnectionShareResponse,
+  parseDesktopSessionResponse,
   requireDesktopNativeAuthMethod,
   runDesktopNativeAuthRequest,
 } from "./desktop-native-auth";
@@ -90,16 +93,18 @@ export async function createConnectionShare({
     );
     return await runDesktopNativeAuthRequest({
       signal,
-      request: () =>
-        createDesktopConnectionShare({
-          access_token: getAuthJwt(),
-          target_client_type: targetClientType,
-          ...(encryptedDeviceSetup === undefined
-            ? {}
-            : { encrypted_device_setup: encryptedDeviceSetup }),
-          client_type: sourceProof.client_type,
-          client_address: sourceProof.client_address,
-        }),
+      request: async () =>
+        parseDesktopConnectionShareResponse(
+          await createDesktopConnectionShare({
+            access_token: getAuthJwt(),
+            target_client_type: targetClientType,
+            ...(encryptedDeviceSetup === undefined
+              ? {}
+              : { encrypted_device_setup: encryptedDeviceSetup }),
+            client_type: sourceProof.client_type,
+            client_address: sourceProof.client_address,
+          })
+        ),
     });
   }
 
@@ -142,12 +147,14 @@ export async function createLegacyDesktopConnectionShare({
     );
     return await runDesktopNativeAuthRequest({
       signal,
-      request: () =>
-        createDesktopLegacyConnectionShare({
-          access_token: getAuthJwt(),
-          client_type: sourceProof.client_type,
-          client_address: sourceProof.client_address,
-        }),
+      request: async () =>
+        parseDesktopLegacyConnectionShareResponse(
+          await createDesktopLegacyConnectionShare({
+            access_token: getAuthJwt(),
+            client_type: sourceProof.client_type,
+            client_address: sourceProof.client_address,
+          })
+        ),
     });
   }
 
@@ -177,11 +184,14 @@ export async function redeemConnectionShare(
       "redeemConnectionShare"
     );
     const { encrypted_device_setup, ...desktopResponse } =
-      await redeemDesktopConnectionShare({
-        access_token: getAuthJwt(),
-        connection_share_code: connectionShareCode,
-        target_client_type: targetClientType,
-      });
+      parseDesktopSessionResponse(
+        "redeemConnectionShare",
+        await redeemDesktopConnectionShare({
+          access_token: getAuthJwt(),
+          connection_share_code: connectionShareCode,
+          target_client_type: targetClientType,
+        })
+      );
     return {
       ...desktopResponse,
       encrypted_device_setup: encrypted_device_setup ?? null,

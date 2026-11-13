@@ -287,6 +287,108 @@ describe("desktop sessions through window.nativeAuth", () => {
     expect(commonApiPost).not.toHaveBeenCalled();
   });
 
+  describe("bridge result validation", () => {
+    const failure = {
+      kind: "native-auth-api-error",
+      status: 403,
+      message: "Forbidden",
+    };
+    const login = () =>
+      loginWithSessionV2({
+        serverSignature: "server-signature",
+        clientSignature: "client-signature",
+        signerAddress: ADDRESS,
+        role: null,
+      });
+    const cases = [
+      {
+        name: "sessionLogin",
+        mock: () => nativeAuth.sessionLogin,
+        call: login,
+      },
+      {
+        name: "createConnectionShare",
+        mock: () => nativeAuth.createConnectionShare,
+        call: () => createConnectionShare({}),
+      },
+      {
+        name: "createLegacyDesktopConnectionShare",
+        mock: () => nativeAuth.createLegacyDesktopConnectionShare,
+        call: () => createLegacyDesktopConnectionShare({}),
+      },
+      {
+        name: "redeemConnectionShare",
+        mock: () => nativeAuth.redeemConnectionShare,
+        call: () => redeemConnectionShare("share-code"),
+      },
+    ] as const;
+
+    it.each(cases)(
+      "turns a failure-shaped $name result into a status error",
+      async ({ mock, call }) => {
+        mock().mockResolvedValue(failure);
+
+        await expect(call()).rejects.toMatchObject({
+          status: 403,
+          message: "Forbidden",
+        });
+      }
+    );
+
+    it.each(cases)(
+      "rejects a malformed $name result",
+      async ({ name, mock, call }) => {
+        mock().mockResolvedValue({ address: ADDRESS });
+
+        await expect(call()).rejects.toThrow(
+          `Invalid desktop ${name} response`
+        );
+      }
+    );
+
+    it.each(cases)(
+      "rejects a non-object $name result",
+      async ({ mock, call }) => {
+        mock().mockResolvedValue(null);
+
+        await expect(call()).rejects.toThrow(
+          "Invalid desktop sign-in bridge response"
+        );
+      }
+    );
+
+    it("rejects a session that carries a refresh token into the page", async () => {
+      nativeAuth.sessionLogin.mockResolvedValue({
+        ...desktopSession(),
+        native_refresh_token: "leaked-refresh-token",
+      });
+
+      await expect(login()).rejects.toThrow(
+        "Invalid desktop sessionLogin response"
+      );
+    });
+
+    it("drops unknown fields from a session result", async () => {
+      nativeAuth.sessionLogin.mockResolvedValue({
+        ...desktopSession(),
+        unexpected: "value",
+      });
+
+      await expect(login()).resolves.toEqual(desktopSession());
+    });
+
+    it("keeps the device setup returned with a redeemed share", async () => {
+      nativeAuth.redeemConnectionShare.mockResolvedValue({
+        ...desktopSession(),
+        encrypted_device_setup: "v1.sealed",
+      });
+
+      await expect(redeemConnectionShare("share-code")).resolves.toMatchObject({
+        encrypted_device_setup: "v1.sealed",
+      });
+    });
+  });
+
   it("fails clearly when the shell lacks a sign-in method", async () => {
     setBridge("nativeAuth", { sessionLogin: jest.fn() });
 
