@@ -1,0 +1,2 @@
+export const darkInputClassName =
+  "tw-block tw-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-black/25 tw-bg-clip-padding tw-px-4 tw-py-2.5 tw-text-base tw-font-normal tw-leading-6 tw-text-iron-100 tw-shadow-none tw-transition-[border-color,background-color,box-shadow] placeholder:tw-text-iron-600 focus:tw-border-primary-400/70 focus:tw-bg-black/30 focus:tw-text-iron-50 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/20 disabled:tw-bg-black/20 disabled:tw-text-iron-500 disabled:tw-opacity-100";

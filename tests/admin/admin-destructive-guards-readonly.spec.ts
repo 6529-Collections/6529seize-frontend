@@ -52,6 +52,11 @@ const DROP_FORGE_WRITE_ACTIONS: readonly RegExp[] = [
   /^Record transaction$/,
   /^Cancel unsubmitted manual operation$/,
   /^Add Admin$/,
+  /^Set limit$/,
+  /^Edit limit$/,
+  /^Save & enable$/,
+  /^Re-enable$/,
+  /^Disable$/,
   /^Revoke admin /,
   /^Back to Drop Forge$/,
   /^View Claim/,
@@ -137,7 +142,7 @@ async function expectDropForgeDenied(
   await expectNoMainButtons(page, DROP_FORGE_WRITE_ACTIONS);
   await expect(
     page.getByRole("switch", {
-      name: /Automatic launch|Automatic artist payment|EMMA preparation/,
+      name: /Automatic launch|EMMA preparation/,
     })
   ).toHaveCount(0);
   await expect(
