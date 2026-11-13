@@ -70,7 +70,7 @@ An image drop keeps its place in the conversation when image processing finishes
 
 - Returning to a wave refreshes its latest messages together, while keeping the existing conversation and unsent draft.
 - If you were at bottom, the thread follows the latest messages. If you were reading older drops, it keeps your place; use the bottom control to return to latest.
-- After a long absence, missed history between the cached conversation and the latest page is marked by `Load missed messages`. It loads a page when you approach that boundary, or when you select the button. You can read current messages without waiting for the entire missing history.
+- After a long absence, missed history between the cached conversation and the latest page is marked by `Load missed messages`. It loads a page when you approach that boundary, or when you select the button. You can read current messages without waiting for the entire missing history. The same boundary appears after a jump to an old message; see [Wave Chat Serial Jump Navigation](feature-serial-jump-navigation.md).
 - If a missed-history request fails, use `Could not load missed messages. Try again`. Already loaded messages remain available.
 
 ## Failure and Recovery

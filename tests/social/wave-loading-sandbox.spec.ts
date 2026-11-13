@@ -1131,25 +1131,16 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
     } else if (strategy === "FIND_OLDER") {
       selected = drops.filter((drop) => drop.serial_no < serial);
     } else if (strategy === "FIND_NEWER") {
-      selected = drops.filter((drop) => drop.serial_no > serial);
+      // Like the API, return the posts nearest the serial, not the latest.
+      selected = drops
+        .filter((drop) => drop.serial_no > serial)
+        .slice(-(Number(params.get("limit")) || 50));
     }
     return route.fulfill({
       json: {
         ...feed,
         drops: selected.slice(0, Number(params.get("limit")) || 50),
       },
-    });
-  });
-  await page.route("**/api/drop-ids?**", (route) => {
-    const params = new URL(route.request().url()).searchParams;
-    const minimum = Number(params.get("min_serial_no"));
-    return route.fulfill({
-      json: drops
-        .filter((drop) => drop.serial_no >= minimum)
-        .map((drop) => ({
-          id: drop.id,
-          serial_no: drop.serial_no,
-        })),
     });
   });
   return {
@@ -1554,6 +1545,56 @@ test("shared post stays in view after URL cleanup and delayed loading", async ({
     .click();
   await expect(post(SHARED_POST_GUEST ? 151 : 152)).toBeInViewport();
   await expect(post(20)).not.toBeInViewport();
+});
+
+test("shared post loads only its surroundings and fills the rest as the reader scrolls down", async ({
+  page,
+  baseURL,
+}) => {
+  const { post } = await sharedPostFixture(page, baseURL);
+  const chat = page.getByRole("region", {
+    name: "Wave chat file upload area",
+    exact: true,
+  });
+  await page.goto(`/waves/${WAVE}?serialNo=20`, {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(post(20)).toBeInViewport({ timeout: 30000 });
+  // The fixture serves posts 2-39 around the target and 102-151 as the
+  // latest page. The 62 posts between them must not be loaded or rendered.
+  await expect(post(39)).toBeAttached();
+  await expect(post(151)).toBeAttached();
+  await expect(post(40)).toHaveCount(0);
+  await expect(post(101)).toHaveCount(0);
+  expect(await chat.locator('[id^="drop-"]').count()).toBeLessThan(100);
+
+  // Scroll down as a reader would; wheel input also ends the hold that keeps
+  // the shared post in view.
+  await chat.hover();
+  await expect(async () => {
+    await page.mouse.wheel(0, 400);
+    await expect(post(39)).toBeInViewport({ timeout: 500 });
+  }).toPass({ timeout: 20000 });
+
+  // Reaching the end of the loaded posts loads the next ones in reading
+  // order, below the reader, without moving what they are looking at.
+  await expect(post(40)).toBeAttached({ timeout: 10000 });
+  await expect(post(89)).toBeAttached();
+  await expect(post(39)).toBeInViewport();
+  // One page per approach: the rest of the gap waits for more scrolling.
+  await page.waitForTimeout(2000);
+  await expect(post(90)).toHaveCount(0);
+  await expect(post(39)).toBeInViewport();
+
+  await expect(async () => {
+    await page.mouse.wheel(0, 600);
+    await expect(post(101)).toBeAttached({ timeout: 500 });
+  }).toPass({ timeout: 30000 });
+  // The gap is closed: every post from the target to the latest is present.
+  for (const serial of [41, 60, 90, 101, 102]) {
+    await expect(post(serial)).toBeAttached();
+  }
+  await expectNoHorizontalOverflow(page);
 });
 
 test("copied shared post links settle in a separate tab and when reopened", async ({

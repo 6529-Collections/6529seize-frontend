@@ -5,6 +5,7 @@ import useWaveMessagesStore from "@/contexts/wave/hooks/useWaveMessagesStore";
 import { useWaveDataFetching } from "@/contexts/wave/hooks/useWaveDataFetching";
 import { useWavePagination } from "@/contexts/wave/hooks/useWavePagination";
 import {
+  fetchAroundSerialNoWaveMessages,
   fetchNewestWaveMessages,
   fetchWaveMessages,
 } from "@/contexts/wave/utils/wave-messages-utils";
@@ -16,9 +17,11 @@ jest.mock("@/contexts/wave/WaveEligibilityContext", () => ({
 }));
 jest.mock("@/contexts/wave/utils/wave-messages-utils", () => ({
   ...jest.requireActual("@/contexts/wave/utils/wave-messages-utils"),
+  fetchAroundSerialNoWaveMessages: jest.fn(),
   fetchNewestWaveMessages: jest.fn(),
   fetchWaveMessages: jest.fn(),
 }));
+const around = jest.mocked(fetchAroundSerialNoWaveMessages);
 const latest = jest.mocked(fetchNewestWaveMessages);
 const history = jest.mocked(fetchWaveMessages);
 
@@ -306,4 +309,152 @@ it("cancels every missed-history request when its wave is released", async () =>
   });
   expect(result.current.store.getData("wave")?.historyGaps).toEqual(gaps);
   expect(result.current.store.getData("wave")?.drops).toHaveLength(1);
+});
+
+const range = (from: number, to: number): ApiDrop[] =>
+  Array.from({ length: to - from + 1 }, (_, i) => drop(from + i));
+
+function setupWithLatest() {
+  const hook = setup();
+  act(() =>
+    hook.result.current.store.updateData({
+      key: "wave",
+      drops: range(1000, 1049).map((item) => fullDrop(item.serial_no)),
+    })
+  );
+  return hook;
+}
+
+const jumpTo = (
+  result: ReturnType<typeof setup>["result"],
+  targetSerialNo: number
+) =>
+  act(async () => {
+    await result.current.pagination.fetchNextPage({
+      waveId: "wave",
+      type: DropSize.LIGHT,
+      targetSerialNo,
+    });
+  });
+
+it("jumps to an old post by loading one window and leaving the rest as history gaps", async () => {
+  around.mockResolvedValue(range(475, 525));
+  const { result } = setupWithLatest();
+  await jumpTo(result, 500);
+  expect(around).toHaveBeenCalledTimes(1);
+  expect(around.mock.calls[0]?.slice(0, 2)).toEqual(["wave", 500]);
+  expect(history).not.toHaveBeenCalled();
+  const state = result.current.store.getData("wave");
+  // Post 1, the window and the latest page: nothing in between is loaded.
+  expect(state?.drops).toHaveLength(1 + 51 + 50);
+  expect(state?.drops.every((item) => item.type === DropSize.FULL)).toBe(true);
+  expect(state?.historyGaps).toEqual([
+    { newerThan: 1, olderThan: 475 },
+    { newerThan: 525, olderThan: 1000 },
+  ]);
+});
+
+it("jumps even when no older page remains", async () => {
+  around.mockResolvedValue(range(475, 525));
+  const { result } = setupWithLatest();
+  act(() =>
+    result.current.store.updateData({ key: "wave", hasNextPage: false })
+  );
+  await jumpTo(result, 500);
+  expect(
+    result.current.store
+      .getData("wave")
+      ?.drops.some((item) => item.serial_no === 500)
+  ).toBe(true);
+});
+
+it("adds no gap for a window that reaches loaded posts", async () => {
+  around.mockResolvedValue(range(960, 1010));
+  const { result } = setupWithLatest();
+  await jumpTo(result, 985);
+  const state = result.current.store.getData("wave");
+  expect(state?.historyGaps ?? []).toEqual([]);
+  expect(state?.drops.some((item) => item.serial_no === 960)).toBe(true);
+});
+
+it("splits the gap a second jump lands in", async () => {
+  around
+    .mockResolvedValueOnce(range(475, 525))
+    .mockResolvedValueOnce(range(700, 750));
+  const { result } = setupWithLatest();
+  await jumpTo(result, 500);
+  await jumpTo(result, 725);
+  expect(result.current.store.getData("wave")?.historyGaps).toEqual([
+    { newerThan: 1, olderThan: 475 },
+    { newerThan: 525, olderThan: 700 },
+    { newerThan: 750, olderThan: 1000 },
+  ]);
+});
+
+it("fills a gap forward from its oldest edge for a reader scrolling down", async () => {
+  around.mockResolvedValue(range(475, 525));
+  const { result } = setupWithLatest();
+  await jumpTo(result, 500);
+  const gap = { newerThan: 525, olderThan: 1000 };
+  latest.mockResolvedValueOnce({
+    drops: range(526, 575),
+    highestSerialNo: 575,
+  });
+  await act(async () => {
+    await result.current.pagination.fetchNextPage({
+      waveId: "wave",
+      type: DropSize.FULL,
+      gap,
+      direction: "newer",
+    });
+  });
+  expect(latest.mock.calls[0]?.slice(0, 3)).toEqual(["wave", 525, 50]);
+  expect(history).not.toHaveBeenCalled();
+  const remaining = { newerThan: 575, olderThan: 1000 };
+  expect(result.current.store.getData("wave")?.historyGaps).toEqual([
+    { newerThan: 1, olderThan: 475 },
+    remaining,
+  ]);
+  expect(
+    result.current.store
+      .getData("wave")
+      ?.drops.filter((item) => item.serial_no > 525 && item.serial_no < 1000)
+  ).toHaveLength(50);
+
+  // A short page means the gap is exhausted.
+  latest.mockResolvedValueOnce({
+    drops: range(576, 580),
+    highestSerialNo: 580,
+  });
+  await act(async () => {
+    await result.current.pagination.fetchNextPage({
+      waveId: "wave",
+      type: DropSize.FULL,
+      gap: remaining,
+      direction: "newer",
+    });
+  });
+  expect(result.current.store.getData("wave")?.historyGaps).toEqual([
+    { newerThan: 1, olderThan: 475 },
+  ]);
+});
+
+it("keeps a gap retryable when a forward page fails", async () => {
+  const { result } = setupWithLatest();
+  const gap = { newerThan: 1, olderThan: 1000 };
+  act(() =>
+    result.current.store.updateData({ key: "wave", historyGaps: [gap] })
+  );
+  latest.mockResolvedValueOnce({ drops: null, highestSerialNo: null });
+  let page: unknown;
+  await act(async () => {
+    page = await result.current.pagination.fetchNextPage({
+      waveId: "wave",
+      type: DropSize.FULL,
+      gap,
+      direction: "newer",
+    });
+  });
+  expect(page).toBeNull();
+  expect(result.current.store.getData("wave")?.historyGaps).toEqual([gap]);
 });
