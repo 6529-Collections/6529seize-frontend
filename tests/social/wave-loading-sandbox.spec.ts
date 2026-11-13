@@ -46,8 +46,8 @@ test("saves reordered pins across reload on desktop and mobile", async ({
   const list = page
     .getByRole("region", { name: "Pinned", exact: true })
     .filter({ visible: true });
-  const first = list.locator(`[data-sidebar-wave-id="${scrollWaveId(0)}"]`);
-  const second = list.locator(`[data-sidebar-wave-id="${scrollWaveId(1)}"]`);
+  const first = list.getByRole("link", { name: "Scroll wave 0", exact: true });
+  const second = list.getByRole("link", { name: "Scroll wave 1", exact: true });
   await expect(
     list.getByRole("button", { name: /^(Drag|Reorder) / })
   ).toHaveCount(0);
@@ -122,11 +122,10 @@ test("saves reordered pins across reload on desktop and mobile", async ({
   ).toHaveText(["Scroll wave 1", "Scroll wave 0"]);
   await expect(page).toHaveURL(/\/waves$/);
 
-  const firstWave = first.getByRole("link", { name: "Scroll wave 0" });
   if (isMobile) {
-    await firstWave.tap();
+    await first.tap();
   } else {
-    await firstWave.click();
+    await first.click();
   }
   await expect(page).toHaveURL(new RegExp(scrollWaveId(0)), {
     timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
