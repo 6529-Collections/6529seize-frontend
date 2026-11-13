@@ -703,6 +703,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       panel.getByRole("button", { name: "Save", exact: true })
     ).toHaveCount(0);
+    await expect(input).toHaveAttribute("inputmode", "text");
     const loadingHeight = (await input.boundingBox())?.height;
     release();
     await expect(input).toHaveValue("20");

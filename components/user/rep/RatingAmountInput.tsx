@@ -50,7 +50,7 @@ export default function RatingAmountInput({
         <RatingInput
           {...props}
           value={value}
-          inputMode="numeric"
+          inputMode="text"
           autoComplete="off"
           onFocus={onFocus}
           className={clsx(

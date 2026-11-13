@@ -178,6 +178,7 @@ it("pins only your editable contribution, accepts negative values, and saves the
   setup(target, "received");
   const amount = await screen.findByRole("textbox", { name: "You" });
   await waitFor(() => expect(amount).toHaveValue("20"));
+  expect(amount).toHaveAttribute("inputmode", "text");
   expect(screen.getAllByRole("textbox")).toHaveLength(1);
   expect(screen.getByRole("link", { name: "You" })).toHaveAttribute(
     "href",
@@ -346,6 +347,9 @@ it("retains failed edits and does not repeat successful writes after a partial s
       targetProfiles: [expect.objectContaining({ handle: "alice" })],
     })
   );
+  await user.clear(bob);
+  await user.type(bob, "100");
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   failBob = false;
   await user.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() => expect(post).toHaveBeenCalledTimes(3));
