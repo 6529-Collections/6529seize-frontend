@@ -6,6 +6,7 @@
  * rejoin through a normal MLS device add, new code, quota, turn off.
  */
 import { base64ToBytes, utf8Encode } from "@/lib/e2ee/bytes";
+import type { EngineContext } from "@/lib/e2ee/engine/context";
 import { E2eeBackupManager } from "@/lib/e2ee/backup/manager";
 import { createMemoryBackupStateStore } from "@/lib/e2ee/backup/state";
 import { generateRecoveryCode } from "@/lib/e2ee/backup/recovery-code";
@@ -46,6 +47,11 @@ function managerFor(
     scheduler: idleScheduler,
   });
 }
+
+/** A device's read position in `g`, from the engine's own records. */
+const readSeqOf = (device: TestDevice, g: string): number | undefined =>
+  (device.engine as unknown as { ctx: EngineContext }).ctx.store.groups.get(g)
+    ?.record.readSeq;
 
 const errorCode = async (promise: Promise<unknown>) => {
   try {
@@ -259,5 +265,130 @@ describe("E2EE encrypted history backup", () => {
     await expect(errorCode(backupC.restore(rotated.code))).resolves.toBe(
       "E2EE_BACKUP_NONE"
     );
+  });
+
+  it("backs up read positions with other changes, alone at most every 6 h, and restores them (P60 §5)", async () => {
+    const world = await createWorld();
+    const server = createFakeBackupServer(world.clock.now);
+    const alice = await addUser(world, "alice", { readSync: true });
+    const bob = await addUser(world, "bobreadspeer");
+    const a = alice.primary.engine;
+    const g = await a.createConversation({
+      profileIds: ["bobreadspeer"],
+      kind: "dm",
+    });
+    await settle(world);
+    await bob.primary.engine.send(g, { text: "one" });
+    await bob.primary.engine.send(g, { text: "two" });
+    await settle(world);
+    a.markRead(g);
+    bob.primary.engine.markRead(g);
+    await settle(world);
+    // Only a device with read-state sync on backs up read positions.
+    expect((await a.backupHistory()).reads?.[g]).toBeGreaterThan(0);
+    expect((await bob.primary.engine.backupHistory()).reads).toBeUndefined();
+
+    const backupA = managerFor(world, server, alice.primary);
+    await backupA.start();
+    const prepared = await backupA.prepareBackup();
+    await backupA.confirmBackup(prepared);
+    const chunks = () => server.generations("alice")[0]!.chunk_count;
+    const afterOn = chunks();
+
+    // A new message goes up; a read alone waits.
+    await bob.primary.engine.send(g, { text: "three" });
+    await settle(world);
+    await backupA.backupNow();
+    expect(chunks()).toBe(afterOn + 1);
+    a.markRead(g);
+    await settle(world);
+    expect(a.getConversation(g)?.unread).toBe(0);
+    await backupA.backupNow();
+    expect(chunks()).toBe(afterOn + 1);
+    // Six hours later the read goes up on its own, once.
+    world.clock.advance(6 * 60 * 60_000 + 1_000);
+    await backupA.backupNow();
+    expect(chunks()).toBe(afterOn + 2);
+    await backupA.backupNow();
+    expect(chunks()).toBe(afterOn + 2);
+
+    // One more message, unread, then the device is lost.
+    await bob.primary.engine.send(g, { text: "four" });
+    await settle(world);
+    await backupA.backupNow();
+    stopDevice(world, alice.primary);
+    stopDevice(world, bob.primary);
+
+    const fresh = await startDevice(world, "alice", alice.account, {
+      extra: { readSync: true },
+    });
+    alice.devices.push(fresh);
+    const backupB = managerFor(world, server, fresh);
+    await backupB.start();
+    await backupB.restore(prepared.code);
+    // Read up to "three" before; only "four" is unread after the restore.
+    expect(texts(fresh.engine.getMessages(g))).toEqual(
+      expect.arrayContaining(["one", "two", "three", "four"])
+    );
+    expect(fresh.engine.getConversation(g)?.unread).toBe(1);
+  });
+
+  it("never restores a read position past the chat's latest known message (prxt)", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice", { readSync: true });
+    const bob = await addUser(world, "bobcappeer");
+    const a = alice.primary.engine;
+    const g = await a.createConversation({
+      profileIds: ["bobcappeer"],
+      kind: "dm",
+    });
+    await settle(world);
+    await bob.primary.engine.send(g, { text: "one" });
+    await bob.primary.engine.send(g, { text: "two" });
+    await settle(world);
+    const history = await a.backupHistory();
+    const lastRestored = Math.max(...history.messages.map((m) => m.seq));
+    // The backup claims a read position far past what it holds.
+    history.reads = { [g]: lastRestored + 20 };
+
+    // A chat restored from the backup: capped at the last restored message.
+    stopDevice(world, alice.primary);
+    stopDevice(world, bob.primary);
+    const fresh = await startDevice(world, "alice", alice.account, {
+      extra: { readSync: true },
+    });
+    alice.devices.push(fresh);
+    await fresh.engine.importBackupHistory(history);
+    expect(fresh.engine.getConversation(g)?.status).toBe("restored");
+    expect(readSeqOf(fresh, g)).toBe(lastRestored);
+  });
+
+  it("caps a backed-up position at the server's last_seq for a chat already on the device (prxt)", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice", { readSync: true });
+    const bob = await addUser(world, "bobcappeer2");
+    const a = alice.primary.engine;
+    const g = await a.createConversation({
+      profileIds: ["bobcappeer2"],
+      kind: "dm",
+    });
+    await settle(world);
+    await bob.primary.engine.send(g, { text: "seen" });
+    await settle(world);
+    const history = await a.backupHistory();
+    const cursor = Math.max(...history.messages.map((m) => m.seq));
+    history.reads = { [g]: cursor + 50 };
+    expect(readSeqOf(alice.primary, g)).toBe(0);
+
+    await a.importBackupHistory(history);
+    // Moved to what the server lists for the chat, not to the backup's 50
+    // past it, so the next message still counts as unread.
+    const position = readSeqOf(alice.primary, g) ?? 0;
+    expect(position).toBeGreaterThanOrEqual(cursor);
+    expect(position).toBeLessThan(cursor + 50);
+    expect(a.getConversation(g)?.unread).toBe(0);
+    await bob.primary.engine.send(g, { text: "after the restore" });
+    await settle(world);
+    expect(a.getConversation(g)?.unread).toBe(1);
   });
 });

@@ -89,6 +89,12 @@ const DEFAULT_COMPACT_AT = 1000;
 const LIST_PAGE = 500;
 /** Appends retried after a 409 before falling back to the fork repair. */
 const APPEND_CONFLICT_RETRIES = 3;
+/**
+ * Read positions ride along with other changes; on their own they go up at
+ * most this often, so backup uploads do not become a second read-timing
+ * signal next to read-state sync (D175, P60 §5).
+ */
+const READS_ALONE_EVERY_MS = 6 * 60 * 60_000;
 
 const defaultScheduler: BackupScheduler = {
   setTimeout: (callback, ms) => globalThis.setTimeout(callback, ms),
@@ -413,12 +419,18 @@ export class E2eeBackupManager {
     local: BackupLocalState
   ): Promise<EncodedSegment[]> {
     const history = await this.deps.engine.backupHistory();
-    const pack = () =>
-      packSegments(
-        changedHistory(history, local),
+    const pack = () => {
+      const changed = changedHistory(history, local, false);
+      const readsDue =
+        changed.groups.length > 0 ||
+        changed.messages.length > 0 ||
+        this.now() - (local.readsAt ?? 0) >= READS_ALONE_EVERY_MS;
+      return packSegments(
+        readsDue ? changedHistory(history, local, true) : changed,
         MAX_SEGMENT_BYTES,
         this.now()
       );
+    };
     const segments = pack();
     if (segments.length === 0) {
       return segments;
@@ -576,6 +588,13 @@ export class E2eeBackupManager {
       local.messagePrints[messageKey(message.g, message.id)] =
         fingerprint(message);
     }
+    if (segment.reads.length > 0) {
+      local.readsSent = {
+        ...local.readsSent,
+        ...Object.fromEntries(segment.reads),
+      };
+      local.readsAt = this.now();
+    }
     let forked = false;
     if (link.index === 0) {
       // A new chain: everything before it is superseded once the snapshot
@@ -666,6 +685,8 @@ export class E2eeBackupManager {
               fingerprint(message),
             ])
           ),
+          readsSent: { ...history.reads },
+          readsAt: this.now(),
         };
         await this.deps.state.put(local);
         this.local = local;

@@ -38,7 +38,9 @@ const codeOf = async (promise: Promise<unknown>) => {
 
 describe("startE2eeBackup", () => {
   it("does nothing for an engine without backup support", () => {
-    expect(startE2eeBackup({}, { profileId: "profile-1", wallet: "0x1" })).toBeNull();
+    expect(
+      startE2eeBackup({}, { profileId: "profile-1", wallet: "0x1" })
+    ).toBeNull();
   });
 });
 
@@ -253,5 +255,60 @@ describe("E2EE backup envelope and chunks", () => {
       utf8Encode(JSON.stringify({ v: 2, groups: [{}], messages: [{ id: 1 }] }))
     );
     expect(bad).toMatchObject({ groups: [], messages: [] });
+  });
+
+  it("carries read positions; the highest per chat wins on merge (P60 §5)", () => {
+    const one = `0x${"ab".repeat(32)}`;
+    const two = `0x${"cd".repeat(32)}`;
+    const reads = Object.fromEntries(
+      Array.from({ length: 40 }, (_, i) => [
+        `0x${i.toString(16).padStart(64, "0")}`,
+        i + 1,
+      ])
+    );
+    const segments = packSegments(
+      { groups: [], messages: [], reads: { ...reads, [one]: 5 } },
+      2000,
+      1
+    );
+    expect(segments.length).toBeGreaterThan(1);
+    for (const segment of segments) {
+      expect(segment.json.length).toBeLessThanOrEqual(2000);
+    }
+    const decoded = segments.map((segment) => decodeSegment(segment.json));
+    const later = decodeSegment(
+      packSegments(
+        { groups: [], messages: [], reads: { [one]: 3, [two]: 9 } },
+        2000,
+        2
+      )[0]!.json
+    );
+    const merged = mergeSegments([...decoded, later]);
+    expect(Object.keys(merged.reads ?? {})).toHaveLength(42);
+    expect(merged.reads?.[one]).toBe(5);
+    expect(merged.reads?.[two]).toBe(9);
+    // Malformed positions are dropped; a segment without them has none.
+    const bad = decodeSegment(
+      utf8Encode(
+        JSON.stringify({
+          v: 2,
+          groups: [],
+          messages: [],
+          reads: [
+            [one, -1],
+            ["0x12", 4],
+            [two.toUpperCase().replace("0X", "0x"), 2],
+            "x",
+          ],
+        })
+      )
+    );
+    expect(bad.reads).toEqual([[two.toUpperCase().replace("0X", "0x"), 2]]);
+    expect(mergeSegments([bad]).reads).toEqual({ [two]: 2 });
+    const plain = decodeSegment(
+      utf8Encode(JSON.stringify({ v: 2, groups: [], messages: [] }))
+    );
+    expect(plain).not.toHaveProperty("reads");
+    expect(mergeSegments([plain])).not.toHaveProperty("reads");
   });
 });

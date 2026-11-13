@@ -20,6 +20,7 @@ import {
   requireMls,
 } from "./context";
 import { E2eeError } from "./errors";
+import { recountUnread } from "./history";
 import { sleep } from "./runtime";
 import type { GroupRuntime } from "./store";
 import { catchUpGroup } from "./sync";
@@ -540,7 +541,7 @@ export class ReadSync implements ReadSyncHooks {
         groups: [...groups, ...selfGroups],
         skipWasm: true,
       });
-      await inOrder(groups, (runtime) => this.recountUnread(runtime));
+      await inOrder(groups, (runtime) => recountUnread(this.ctx, runtime));
       if (groups.length > 0) {
         await checkpoint(this.ctx, { groups, skipWasm: true });
       }
@@ -609,23 +610,6 @@ export class ReadSync implements ReadSyncHooks {
     } catch {
       return null;
     }
-  }
-
-  /** Unread and mentions from saved history at the new read position. */
-  private async recountUnread(runtime: GroupRuntime): Promise<void> {
-    const history = runtime.record.history;
-    if (!history) {
-      this.ctx.store.touch(runtime.record.g);
-      return;
-    }
-    const fresh = await this.ctx.storage.historySummary(
-      this.ctx.profileId,
-      runtime.record.g,
-      runtime.record.readSeq
-    );
-    history.unread = fresh.unread;
-    history.mentions = fresh.mentions;
-    this.ctx.store.touch(runtime.record.g);
   }
 
   // -------------------------------------------------------------------------
