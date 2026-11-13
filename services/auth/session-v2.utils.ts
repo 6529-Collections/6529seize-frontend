@@ -1,5 +1,6 @@
 import { queueNativePushLogout } from "@/services/notifications/push-installation";
 import { Capacitor } from "@capacitor/core";
+import { isDesktopShell } from "@/helpers/desktop-shell";
 import type { ApiRedeemConnectionShareResponse } from "@/generated/models/ApiRedeemConnectionShareResponse";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
@@ -93,6 +94,9 @@ const sessionRefreshFailureCooldowns = new Map<
 >();
 
 export function getSessionClientType(): AuthSessionClientType {
+  if (isDesktopShell()) {
+    return "desktop";
+  }
   return Capacitor.isNativePlatform() ? "native" : "web";
 }
 
