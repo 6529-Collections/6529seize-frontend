@@ -22,6 +22,10 @@ export async function backupHistory(
   const out: BackupHistory = { groups: [], messages: [] };
   for (const runtime of ctx.store.groups.values()) {
     const record = runtime.record;
+    // A self group holds no history, only read-state sync (D175, P60).
+    if (record.metadata.kind === "self") {
+      continue;
+    }
     out.groups.push({
       g: record.g,
       metadata: structuredClone(record.metadata),

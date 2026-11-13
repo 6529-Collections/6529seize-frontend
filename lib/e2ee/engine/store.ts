@@ -295,12 +295,14 @@ export class EngineStore {
   getConversation(g: string): E2eeConversation | null {
     this.syncDirectoryVersion();
     const runtime = this.groups.get(g);
-    if (!runtime) {
+    const kind = runtime?.record.metadata.kind;
+    // A self group (read-state sync, D175) is never a conversation.
+    if (!runtime || kind === undefined || kind === "self") {
       return null;
     }
     let conversation = this.conversationCache.get(g);
     if (!conversation) {
-      conversation = this.buildConversation(runtime);
+      conversation = this.buildConversation(runtime, kind);
       this.conversationCache.set(g, conversation);
     }
     return conversation;
@@ -412,7 +414,10 @@ export class EngineStore {
     return lastIncomingSeq;
   }
 
-  private buildConversation(runtime: GroupRuntime): E2eeConversation {
+  private buildConversation(
+    runtime: GroupRuntime,
+    kind: E2eeConversation["kind"]
+  ): E2eeConversation {
     const record = runtime.record;
     const ordered = record.history
       ? []
@@ -449,7 +454,7 @@ export class EngineStore {
     return {
       dmPeer,
       g: record.g,
-      kind: record.metadata.kind,
+      kind,
       name: record.metadata.name,
       members,
       admins: [...record.metadata.admins],

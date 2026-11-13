@@ -179,11 +179,14 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
       page.getByRole("button", { name: "Remove bob" })
     ).toBeVisible();
 
+    // No group puts bob with anyone else. His own self group, which holds
+    // only his devices for read-state sync (D175), is not a chat.
     const state = await e2eeSandboxControls.state(baseURL);
     for (const group of state.groups) {
-      expect(
-        group.roster.some((entry) => entry.profile_id === users.bob.profileId)
-      ).toBe(false);
+      const profiles = new Set(group.roster.map((entry) => entry.profile_id));
+      expect(profiles.has(users.bob.profileId) && profiles.size > 1).toBe(
+        false
+      );
     }
     await gotoPath(bob.page, ENCRYPTED_ROUTE);
     await expect(bob.page.getByText("No encrypted chats yet")).toBeVisible({

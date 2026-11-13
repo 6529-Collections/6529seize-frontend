@@ -3335,10 +3335,16 @@ function buildPublicRuntime() {
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
     // Signed posts on too, so device setup offers the combined grant
     // ("Sign to enable both") that the E2EE pack signs in through.
+    // Read-state sync between one user's devices (D175) is on too; set the
+    // variable to "false" to run the pack without it.
     ...(isE2eeSandbox
       ? {
           NEXT_PUBLIC_E2EE_DM_ENABLED: "true",
           NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
+          NEXT_PUBLIC_E2EE_READ_SYNC:
+            process.env.NEXT_PUBLIC_E2EE_READ_SYNC === "false"
+              ? "false"
+              : "true",
           GIPHY_API_KEY: "e2ee-sandbox-fixture",
         }
       : {}),

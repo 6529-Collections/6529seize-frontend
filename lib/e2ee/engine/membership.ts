@@ -13,6 +13,7 @@ import {
   claimedDevices,
   claimKeyPackages,
   isUsableDevice,
+  selfGroupPackages,
   type ClaimedPackage,
 } from "./claims";
 import {
@@ -281,7 +282,7 @@ async function discardLocalGroup(ctx: EngineContext, g: string): Promise<void> {
 
 function creationMetadata(
   ctx: EngineContext,
-  input: { kind: "dm" | "group"; name?: string | null | undefined },
+  input: { kind: GroupMetadata["kind"]; name?: string | null | undefined },
   peer: string | undefined
 ): GroupMetadata {
   const dm = input.kind === "dm";
@@ -289,7 +290,7 @@ function creationMetadata(
     v: 1,
     g: randomHex(32),
     kind: input.kind,
-    name: dm ? null : normalizeName(input.name),
+    name: input.kind === "group" ? normalizeName(input.name) : null,
     admins: dm && peer !== undefined ? [ctx.profileId, peer] : [ctx.profileId],
     created_by: ctx.profileId,
     history: "from_join",
@@ -322,16 +323,24 @@ async function claimForCreation(
   return claim.packages;
 }
 
+/**
+ * Creates a conversation, or with kind "self" the self group of this
+ * profile's own devices (read-state sync, D175): its targets are ignored and
+ * only this device's trusted siblings are added.
+ */
 export async function createConversation(
   ctx: EngineContext,
-  input: Parameters<E2eeEngine["createConversation"]>[0],
+  input: Omit<Parameters<E2eeEngine["createConversation"]>[0], "kind"> & {
+    kind: GroupMetadata["kind"];
+  },
   onDelayed: (g: string) => void,
   /** The superseded conversation the new one continues (D172). */
   predecessorG?: string
 ): Promise<string> {
-  const targets = [...new Set(input.profileIds)].filter(
-    (id) => id !== ctx.profileId
-  );
+  const targets =
+    input.kind === "self"
+      ? []
+      : [...new Set(input.profileIds)].filter((id) => id !== ctx.profileId);
   const peer = targets[0];
   if (input.kind === "dm") {
     if (targets.length !== 1 || peer === undefined) {
@@ -344,11 +353,13 @@ export async function createConversation(
   }
   const metadata = creationMetadata(ctx, input, peer);
   const g = metadata.g;
-  const packages = await claimForCreation(
+  const claimed = await claimForCreation(
     ctx,
     targets,
     input.kind === "dm" || input.requireAllRecipients === true
   );
+  const packages =
+    input.kind === "self" ? selfGroupPackages(ctx, claimed) : claimed;
   const runtime = await createLocalGroup(ctx, metadata, predecessorG);
   const failure = await commitAdds(ctx, g, packages, () => {
     onDelayed(g);
@@ -561,9 +572,14 @@ async function handOverAdmin(
   );
 }
 
+/**
+ * Proposes removing this profile's devices from the group: all of them
+ * (leaving the chat), or with `onlyThisDevice` just this one.
+ */
 async function proposeLeave(
   ctx: EngineContext,
-  runtime: GroupRuntime
+  runtime: GroupRuntime,
+  onlyThisDevice = false
 ): Promise<boolean> {
   return ctx.queue.run(async () => {
     await catchUpGroup(ctx, runtime);
@@ -571,8 +587,13 @@ async function proposeLeave(
       return true;
     }
     const mls = requireMls(ctx);
+    const own = ownDeviceKey(ctx);
     const keys = runtime.record.members
-      .filter((member) => member.profileId === ctx.profileId)
+      .filter((member) =>
+        onlyThisDevice
+          ? member.deviceKey === own
+          : member.profileId === ctx.profileId
+      )
       .map((member) => member.deviceKey);
     const entries = mls.proposeRemove(runtime.record.g, keys);
     await checkpoint(ctx, { groups: [runtime] });
@@ -624,6 +645,24 @@ export async function leave(
   await handOverAdmin(ctx, runtime, onDelayed);
   for (let attempt = 0; attempt < 5; attempt += 1) {
     if (await proposeLeave(ctx, runtime)) {
+      return;
+    }
+  }
+  throw new E2eeError("E2EE_COMMIT_FAILED", "leave");
+}
+
+/**
+ * Removes only this device from a group, leaving the profile's other
+ * devices in it: how a device leaves an older self group once the handoff
+ * to the newer one is verified (D175, P60 §2 rule 3).
+ */
+export async function leaveThisDevice(
+  ctx: EngineContext,
+  g: string
+): Promise<void> {
+  const runtime = requireActiveGroup(ctx, g);
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    if (await proposeLeave(ctx, runtime, true)) {
       return;
     }
   }

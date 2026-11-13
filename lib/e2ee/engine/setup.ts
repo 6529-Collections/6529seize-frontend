@@ -80,6 +80,7 @@ export function createContext(options: E2eeEngineOptions): EngineContext {
     lastWakeAt: 0,
     openConversation: null,
     openUntil: 0,
+    readSync: null,
   };
   holder.ctx = ctx;
   return ctx;

@@ -41,6 +41,7 @@ import E2eeDesktopNotices from "./E2eeDesktopNotices";
 import { E2eeSignOutPromptHost } from "./signout/E2eeSignOutPromptHost";
 import { useE2eeEngineDeps } from "./useE2eeEngineDeps";
 import { useLoginE2eePrefetch } from "./useLoginE2eePrefetch";
+import { useE2eeReadSyncFlush } from "./useE2eeReadSyncFlush";
 
 interface E2eeProviderProps {
   readonly children: ReactNode;
@@ -348,6 +349,8 @@ function E2eeProviderEnabled({
     sessionKey,
     takeOverHere,
   ]);
+
+  useE2eeReadSyncFlush(value.engine);
 
   return (
     <E2eeContext.Provider value={value}>

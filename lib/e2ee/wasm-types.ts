@@ -85,11 +85,14 @@ export interface WasmModule {
 export interface GroupMetadata {
   v: 1;
   g: string;
-  kind: "dm" | "group";
+  /** "self": one user's own devices, for read-state sync (D175, P60). */
+  kind: "dm" | "group" | "self";
   name: string | null;
   admins: string[];
   created_by: string;
   history: "from_join";
+  /** Self groups: creation time (ms), to pick the newest (P60 §2). */
+  created?: number;
 }
 
 export interface WasmLeaf {
