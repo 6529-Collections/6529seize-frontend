@@ -1,7 +1,7 @@
 # Launch Automation and Wallet Funding
 
 The `/drop-forge` hub shows Launch Automation to everyone with Drop Forge access.
-The section starts collapsed and has a help icon beside refresh. All three
+The section starts collapsed and has a help dialog accessible from the info icon beside refresh. All three
 automation settings default to Off. The creator contract owner and configured claims
 administrators can change all four settings. Configured distribution administrators
 can also change **EMMA preparation**. Every authorized Drop Forge user sees the
@@ -24,9 +24,9 @@ become eligible at 18:00 Europe/Athens the day after minting, one hour after Pub
 closes. Artist payment uses the final paid-mint and redeemed-subscription accounting,
 the 50% artist share and the recorded payment address/designated payee. Missing or
 incomplete accounting defers payment. Choose **Set limit**, enter a positive
-ETH amount, and select **Save & enable**. The worker checks that saved limit
+ETH amount, and select **Save & Enable**. The worker checks that saved limit
 before submitting each payout. **Disable** keeps the saved limit, and
-**Re-enable** uses it again in one click.
+**Enable** uses it again in one click.
 The wallet needs both payout funds and gas; mint proceeds still go to the configured
 payment receiver. Manual Pay Artist remains available and records its transaction
 hash so automation can verify completion instead of sending another payment.
