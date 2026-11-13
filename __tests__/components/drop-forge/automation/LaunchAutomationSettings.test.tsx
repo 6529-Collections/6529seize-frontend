@@ -62,6 +62,27 @@ beforeEach(() => {
   jest.clearAllMocks();
   jest.mocked(getForgeSettings).mockResolvedValue(settings);
 });
+
+it("opens and closes help without expanding the settings", async () => {
+  show(false);
+  const title = "How Launch Automation works";
+  fireEvent.click(screen.getByRole("button", { name: title }));
+
+  const dialog = await screen.findByRole("dialog", { name: title });
+  expect(
+    within(dialog).getByText(/Off pauses new automated actions/)
+  ).toBeVisible();
+  expect(
+    within(dialog).getByText(/Off restores the original EMMA flow/)
+  ).toBeVisible();
+  fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
+
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Launch Automation" })
+  ).toHaveAttribute("aria-expanded", "false");
+});
+
 it("starts collapsed, then shows the settings and operational wallet", async () => {
   show(false);
   const disclosure = screen.getByRole("button", { name: "Launch Automation" });
@@ -158,7 +179,7 @@ it("saves a positive limit and enables payments in one request", async () => {
   show();
   fireEvent.click(await screen.findByRole("button", { name: "Set limit" }));
   const input = screen.getByRole("textbox", { name: "Maximum ETH per payout" });
-  const save = screen.getByRole("button", { name: "Save & enable" });
+  const save = screen.getByRole("button", { name: "Save & Enable" });
   fireEvent.change(input, { target: { value: "hello" } });
   expect(input).toHaveValue("");
   fireEvent.change(input, { target: { value: "0" } });
@@ -192,7 +213,7 @@ it("disables without clearing the saved cap, then re-enables with it", async () 
     .mockResolvedValueOnce({ ...enabled, revision: 2 });
   show();
   fireEvent.click(await screen.findByRole("button", { name: "Disable" }));
-  const reenable = await screen.findByRole("button", { name: "Re-enable" });
+  const reenable = await screen.findByRole("button", { name: "Enable" });
   expect(screen.getByText("Saved maximum ETH per payout")).toBeVisible();
   expect(screen.getByText("0.5 ETH")).toBeVisible();
   fireEvent.click(reenable);
