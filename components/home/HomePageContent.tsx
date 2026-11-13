@@ -10,8 +10,17 @@ import { NextMintLeadingSection } from "@/components/home/next-mint-leading/Next
 import { HeroHeader } from "./hero";
 import { LatestDropSection } from "./now-minting";
 import { useHomepageTracking } from "./useHomepageTracking";
+import { MemesMintingRootsProvider } from "@/contexts/MemesMintingRootsContext";
 
 export default function HomePageContent() {
+  return (
+    <MemesMintingRootsProvider>
+      <HomePageSections />
+    </MemesMintingRootsProvider>
+  );
+}
+
+function HomePageSections() {
   const { connectionState, hasValidWalletAuth } = useSeizeConnectContext();
   const mintStatus = useNowMintingStatus();
   const { rootRef, onClickCapture } = useHomepageTracking(hasValidWalletAuth);
