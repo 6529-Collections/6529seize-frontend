@@ -1065,7 +1065,8 @@ async function openLockedSubmissionRules(page: Page, draft: string) {
 async function expectSubmissionLockAppearance(
   page: Page,
   frameSize: 32 | 36,
-  hasTouch: boolean
+  hasTouch: boolean,
+  gap = 8
 ) {
   const lock = page.getByRole("button", { name: "Submit drop", exact: true });
   await expect(lock).toHaveCSS("width", `${frameSize}px`);
@@ -1082,7 +1083,7 @@ async function expectSubmissionLockAppearance(
   await expect(icon).toHaveAttribute("stroke-width", "1.5");
   await expect
     .poll(() =>
-      lock.evaluate((button) => {
+      lock.evaluate((button, expectedGap) => {
         const box = button.getBoundingClientRect();
         let row = button.parentElement;
         while (row) {
@@ -1096,8 +1097,8 @@ async function expectSubmissionLockAppearance(
             return (
               !!previous &&
               !!next &&
-              Math.abs(box.left - previous.right - 8) < 1 &&
-              Math.abs(next.left - box.right - 8) < 1 &&
+              Math.abs(box.left - previous.right - expectedGap) < 1 &&
+              Math.abs(next.left - box.right - expectedGap) < 1 &&
               [previous, next].every(
                 (peer) =>
                   Math.abs(peer.y + peer.height / 2 - box.y - box.height / 2) <
@@ -1108,24 +1109,27 @@ async function expectSubmissionLockAppearance(
           row = row.parentElement;
         }
         return false;
-      })
+      }, gap)
     )
     .toBe(true);
   if (hasTouch) {
     expect(
-      await lock.evaluate((button) => {
+      await lock.evaluate((button, expectedGap) => {
         const box = button.getBoundingClientRect();
         const x = box.x + box.width / 2;
         const y = box.y + box.height / 2;
+        // The approved 320px row keeps a 44px vertical target and the full
+        // visible button width; wider rows retain the 44px square target.
+        const horizontalOffset = expectedGap === 2 ? box.width / 2 - 1 : 21;
         return [
-          [x - 21, y],
-          [x + 21, y],
+          [x - horizontalOffset, y],
+          [x + horizontalOffset, y],
           [x, y - 21],
           [x, y + 21],
         ].every(([left, top]) =>
           button.contains(document.elementFromPoint(left!, top!))
         );
-      })
+      }, gap)
     ).toBe(true);
   }
 }
@@ -2015,11 +2019,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         page.getByRole("button", { name: "How to Submit", exact: true })
       ).toHaveCount(0);
       releaseDetail();
-      // This action belongs to the resolved Main Stage header. Its appearance
-      // proves that the header branch changed while the dialog was already open.
+      // The header's tooltip identity changes on resolution even when narrow
+      // screens keep submission help inside the closed More menu.
       await expect(
-        page.getByRole("button", { name: "How to Submit", exact: true })
-      ).toBeVisible();
+        page.getByRole("button", {
+          name: "Search messages in this wave",
+          exact: true,
+          includeHidden: true,
+        })
+      ).toHaveAttribute(
+        "data-tooltip-id",
+        `my-stream-wave-meme-header-actions-${MEMES_WAVE}`
+      );
       await expect(input).toBeFocused();
       await expect(input).toHaveValue("xx");
       await page.keyboard.press("Escape");
@@ -2717,8 +2728,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .poll(() =>
         pinned.evaluate((section) => {
           const links = Array.from(section.querySelectorAll("a"));
-          const avatar = links.find((link) =>
-            link.getAttribute("aria-label")?.startsWith("View ")
+          const avatar = links.find(
+            (link) =>
+              link.getAttribute("aria-label")?.startsWith("View ") &&
+              link.getBoundingClientRect().width > 0
           );
           const author = links.find(
             (link) =>
@@ -3036,7 +3049,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expectSubmissionLockAppearance(
         page,
         32,
-        Boolean(testInfo.project.use.hasTouch)
+        Boolean(testInfo.project.use.hasTouch),
+        width === 320 ? 2 : 8
       );
       await expectNoHorizontalOverflow(page);
     }

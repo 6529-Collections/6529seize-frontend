@@ -18,6 +18,7 @@ import { useCompactMode } from "@/contexts/CompactModeContext";
 import type { DropTimestampLayout } from "./drop.types";
 import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
 import { AnonymousAuthorName } from "./AnonymousDropAuthor";
+import WaveDropStormIndicator from "./WaveDropStormIndicator";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -188,12 +189,10 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
       </div>
 
       {isStorm && (
-        <div className="tw-relative tw-mt-2 tw-inline-flex">
-          <span className="tw-mb-1.5 tw-text-xs tw-text-iron-50">
-            {currentPartIndex + 1} /{" "}
-            <span className="tw-text-iron-400">{partsCount}</span>
-          </span>
-        </div>
+        <WaveDropStormIndicator
+          currentPartIndex={currentPartIndex}
+          partsCount={partsCount}
+        />
       )}
     </>
   );
