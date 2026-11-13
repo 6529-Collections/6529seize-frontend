@@ -1,6 +1,5 @@
 "use client";
 
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/museum";
 import type { MuseumHeldPosition } from "@/lib/museum/generative-studies";
@@ -498,7 +497,7 @@ export function CenturyAdjacencyLoom({
               <select
                 value={palette}
                 onChange={(event) => setPalette(event.target.value)}
-                className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
+                className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
               >
                 {["A", "B", "C", "D"].map((value) => (
                   <option key={value} value={value}>
@@ -573,7 +572,7 @@ export function CenturyAdjacencyLoom({
               <select
                 value={initialOrder}
                 onChange={(event) => setInitialOrder(event.target.value)}
-                className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-min-h-11 tw-w-full tw-px-3`}
+                className="tw-mt-2 tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-900 tw-px-3 tw-text-iron-100"
               >
                 <option value={CHAOS_ORDER}>
                   {t(locale, "museum.network.insideSystem.chaosOrder")}

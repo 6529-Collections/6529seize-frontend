@@ -1,6 +1,5 @@
 "use client";
 
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { museumResearchHref } from "@/lib/museum/publication/routes";
@@ -144,7 +143,7 @@ export function MuseumResearchBrowse({
             id="museum-research-filter"
             value={groupId}
             onChange={(event) => setGroupId(event.target.value)}
-            className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-block tw-min-h-11 tw-w-full tw-px-3 tw-py-2 tw-text-base`}
+            className="tw-mt-2 tw-block tw-min-h-11 tw-w-full tw-border tw-border-solid tw-border-iron-700 tw-bg-black tw-px-3 tw-py-2 tw-text-base tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400"
           >
             <option value="all">{labels.allSubjectsLabel}</option>
             {groups.map((group) => (
