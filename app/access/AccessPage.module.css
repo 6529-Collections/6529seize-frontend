@@ -101,7 +101,8 @@
   line-height: 1.4;
 }
 
-.feedback p {
+.feedback p,
+.status {
   grid-area: 1 / 1;
   margin: 0;
   overflow-wrap: anywhere;
@@ -111,7 +112,7 @@
   visibility: hidden;
 }
 
-.feedback p[role="status"] {
+.status {
   color: #d1d1d1;
 }
 

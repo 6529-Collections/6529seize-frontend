@@ -71,7 +71,7 @@ describe("Access page", () => {
     expect(screen.queryByRole("img", { name: "6529" })).not.toBeInTheDocument();
   });
 
-  it("saves the code and resumes navigation without a dialog", async () => {
+  it("saves the code and stays locked while navigation is pending", async () => {
     fetchMock.mockResolvedValueOnce({
       ok: false,
       status: 401,
@@ -95,6 +95,12 @@ describe("Access page", () => {
     const [resumeOrder = 0] =
       jest.mocked(resumeAfterApiAccess).mock.invocationCallOrder;
     expect(cookieWriteOrder).toBeLessThan(resumeOrder);
+    expect(input).toHaveAttribute("readonly");
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Opening page…");
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(status).toHaveTextContent("Opening page…");
     expect(window.alert).not.toHaveBeenCalled();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
@@ -103,6 +109,8 @@ describe("Access page", () => {
     fetchMock.mockResolvedValueOnce({ ok: true, status: 200 });
     render(<AccessPage />);
     await waitFor(() => expect(resumeAfterApiAccess).toHaveBeenCalled());
+    expect(screen.getByLabelText("Team Login")).toHaveAttribute("readonly");
+    expect(screen.getByRole("status")).toHaveTextContent("Opening page…");
     expect(Cookies.set).not.toHaveBeenCalled();
     expect(window.alert).not.toHaveBeenCalled();
   });
@@ -149,6 +157,9 @@ describe("Access page", () => {
       submitCode();
 
       expect(await screen.findByRole("alert")).toBeVisible();
+      expect(screen.getByLabelText("Team Login")).not.toHaveAttribute(
+        "readonly"
+      );
       expect(Cookies.set).not.toHaveBeenCalled();
       expect(window.alert).not.toHaveBeenCalled();
       expect(resumeAfterApiAccess).not.toHaveBeenCalled();

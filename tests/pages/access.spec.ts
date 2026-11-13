@@ -73,8 +73,30 @@ test.describe("Access Page", () => {
       dialogs.push(dialog.type());
       await dialog.dismiss();
     });
-    await input.fill(accessCode);
-    await input.press("Enter");
+    await test.step("keeps the field locked until the requested page opens", async () => {
+      const navigation = Promise.withResolvers<void>();
+      await page.route(
+        (url) => url.pathname + url.search === path,
+        async (route) => {
+          if (route.request().isNavigationRequest()) await navigation.promise;
+          await route.continue();
+        }
+      );
+      const openingStatus = page
+        .getByRole("status")
+        .filter({ hasText: /^Opening page…$/ });
+      try {
+        await input.fill(accessCode);
+        await page.keyboard.press("Enter");
+        await expect(openingStatus).toBeVisible();
+        await expect(input).not.toBeEditable();
+        await page.keyboard.press("Enter");
+        await expect(openingStatus).toBeVisible();
+        await expect(input).not.toBeEditable();
+      } finally {
+        navigation.resolve();
+      }
+    });
 
     await expect(page).toHaveURL(path + hash);
     expect(dialogs).toEqual([]);
