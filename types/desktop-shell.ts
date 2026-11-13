@@ -31,8 +31,7 @@ interface DesktopNotificationNavigationContext {
   readonly targetProfileHandle?: string | null | undefined;
 }
 
-export interface DesktopNotificationNavigatePayload
-  extends DesktopNotificationNavigationContext {
+export interface DesktopNotificationNavigatePayload extends DesktopNotificationNavigationContext {
   readonly path: string;
 }
 
@@ -212,16 +211,26 @@ export interface DesktopUpdater {
   readonly checkUpdates: () => void;
   readonly downloadUpdate: () => void;
   readonly installUpdate: () => void;
-  readonly onUpdateAvailable: (callback: DesktopShellListener<[DesktopUpdateInfo?]>) => void;
+  readonly onUpdateAvailable: (
+    callback: DesktopShellListener<[DesktopUpdateInfo?]>
+  ) => void;
   readonly offUpdateAvailable: (
     callback: DesktopShellListener<[DesktopUpdateInfo?]>
   ) => void;
-  readonly onUpdateNotAvailable: (callback: DesktopShellListener<[unknown?]>) => void;
-  readonly offUpdateNotAvailable: (callback: DesktopShellListener<[unknown?]>) => void;
+  readonly onUpdateNotAvailable: (
+    callback: DesktopShellListener<[unknown?]>
+  ) => void;
+  readonly offUpdateNotAvailable: (
+    callback: DesktopShellListener<[unknown?]>
+  ) => void;
   readonly onUpdateError: (callback: DesktopShellListener<[unknown?]>) => void;
   readonly offUpdateError: (callback: DesktopShellListener<[unknown?]>) => void;
-  readonly onUpdateProgress: (callback: DesktopShellListener<[unknown?]>) => void;
-  readonly offUpdateProgress: (callback: DesktopShellListener<[unknown?]>) => void;
+  readonly onUpdateProgress: (
+    callback: DesktopShellListener<[unknown?]>
+  ) => void;
+  readonly offUpdateProgress: (
+    callback: DesktopShellListener<[unknown?]>
+  ) => void;
   readonly onUpdateDownloaded: (
     callback: DesktopShellListener<[DesktopUpdateInfo?]>
   ) => void;
