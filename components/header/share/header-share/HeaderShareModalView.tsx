@@ -27,7 +27,7 @@ import {
 } from "react";
 import { Tooltip } from "react-tooltip";
 
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import {
   HEADER_SHARE_LOCALE,
   Mode,
@@ -51,6 +51,7 @@ const CONNECTION_SHARE_STATUS_KEYS = {
   unauthenticated: null,
 } as const;
 const COPY_FEEDBACK_DURATION_MS = 1500;
+const DEVICE_SETUP_FRAGMENT_MARKER = "#device_setup_key=";
 const TOOLTIP_STYLE = {
   zIndex: 10000,
   backgroundColor: "#1F2937",
@@ -59,6 +60,19 @@ const TOOLTIP_STYLE = {
   padding: "4px 8px",
 };
 
+function getModalTitleKey(
+  mode: Mode,
+  activeSubTab: SubMode,
+  hasSelectedConnectionMode: boolean
+): MessageKey {
+  if (mode !== Mode.CONNECT) return "headerShare.shareModal.title";
+  if (!hasSelectedConnectionMode) return "headerShare.connectModal.title";
+  return activeSubTab === SubMode.DESKTOP
+    ? "headerShare.connectModal.desktopTitle"
+    : "headerShare.connectModal.mobileTitle";
+}
+
+/** Show the share flow, including the secure Desktop link or Mobile QR code. */
 export function HeaderShareModalView({
   open,
   shouldRender,
@@ -121,11 +135,10 @@ export function HeaderShareModalView({
     };
   }, []);
 
-  const modalTitle = t(
-    HEADER_SHARE_LOCALE,
-    isConnectMode
-      ? "headerShare.connectModal.title"
-      : "headerShare.shareModal.title"
+  const modalTitleKey = getModalTitleKey(
+    mode,
+    activeSubTab,
+    connectionMode !== null
   );
   const closeAriaLabel = t(
     HEADER_SHARE_LOCALE,
@@ -274,15 +287,23 @@ export function HeaderShareModalView({
         ? "headerShare.connectionRefresh.loading"
         : "headerShare.connectionRefresh.unavailable"
     );
+    // A link with device setup material stays out of selectable text and
+    // tooltips; the QR code and the copy button still carry it.
+    const isSetupLink = url.includes(DEVICE_SETUP_FRAGMENT_MARKER);
+    let urlText = url || unavailableLabel;
+    if (url && isSetupLink) {
+      urlText = t(HEADER_SHARE_LOCALE, "headerShare.connectionRefresh.ready");
+    }
 
     return (
       <div className="tw-flex tw-h-10 tw-w-full tw-items-center tw-gap-2">
         <div className="tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-px-3">
           <div
+            data-testid="connection-share-url"
             className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-text-iron-400"
-            title={url || undefined}
+            title={url && !isSetupLink ? url : undefined}
           >
-            {url || unavailableLabel}
+            {urlText}
           </div>
           <button
             type="button"
@@ -591,9 +612,7 @@ export function HeaderShareModalView({
                 })}
               </h3>
               {activeSubTab === SubMode.DESKTOP ? (
-                <div className="tw-h-56">
-                  <DesktopConnectionLink url={link.url} />
-                </div>
+                <DesktopConnectionLink url={link.url} showVersionNotice />
               ) : (
                 <div className="tw-aspect-square tw-w-full tw-overflow-hidden tw-rounded-lg">
                   {renderQRCodeImage(
@@ -718,7 +737,7 @@ export function HeaderShareModalView({
               id="header-share-title"
               className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50"
             >
-              {modalTitle}
+              {t(HEADER_SHARE_LOCALE, modalTitleKey)}
             </h2>
             {isConnectMode && (
               <Link

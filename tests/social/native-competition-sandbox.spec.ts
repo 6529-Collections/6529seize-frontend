@@ -8,6 +8,7 @@ import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2Page
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { observeCachedChatResponse } from "../support/cachedChatResponse";
 import { expectCompetitionScroll } from "../support/competitionScroll";
+import { longPressMessage } from "../support/longPressMessage";
 import {
   expectNativeLeaderboardArtwork,
   expectNativeLeaderboardReady,
@@ -299,9 +300,11 @@ const competition = (id: string, title: string) => ({
   lifecycle: "PUBLISHED",
   computed_phase: "VOTING_OPEN",
   config_version: 1,
+  your_active_entries_count: 0,
   ...structuredClone(competitionRuleDefaults),
   participation: {
     ...structuredClone(competitionRuleDefaults.participation),
+    max_entries_per_participant: null as number | null,
     ends_at: null as number | null,
   },
   decisions: {
@@ -1471,6 +1474,22 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await modal
       .getByRole("button", { name: "I Agree & Continue", exact: true })
       .click();
+    await modal
+      .getByRole("tab", { name: "Interactive HTML", exact: true })
+      .click();
+    const hosting = modal.getByRole("tablist", {
+      name: "Select hosting network",
+      exact: true,
+    });
+    const ipfs = hosting.getByRole("tab", { name: "IPFS", exact: true });
+    await expect(ipfs).toHaveCSS("font-size", "12px");
+    await expect(ipfs).toHaveCSS("height", "32px");
+    await hosting.getByRole("tab", { name: "Arweave", exact: true }).click();
+    await expect(
+      hosting.getByRole("tab", { name: "Arweave", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await ipfs.click();
+    await modal.getByRole("tab", { name: "Upload File", exact: true }).click();
     const checkbox = modal.getByRole("checkbox", {
       name: "Additional Action",
       exact: true,
@@ -2011,6 +2030,99 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     }
   });
   for (const surface of ["web", "app"] as const) {
+    test(`locks Main Stage submission at three active entries (${surface})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "Native app simulation uses the mobile viewport."
+      );
+      if (surface === "app")
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const sandbox = await installCompetitionApi(
+        page,
+        false,
+        true,
+        MEMES_WAVE
+      );
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      sandbox.setCompetition("alpha", {
+        participation: {
+          ...competition("alpha", "Main Stage").participation,
+          max_entries_per_participant: 3,
+        },
+        your_active_entries_count: 3,
+      });
+      for (const tab of ["chat", "leaderboard"]) {
+        await page.goto(`/waves/${MEMES_WAVE}?tab=${tab}`, {
+          waitUntil: "domcontentloaded",
+        });
+        if (tab === "leaderboard") {
+          await expect(page).toHaveURL(
+            new RegExp(
+              `/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`
+            ),
+            { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+          );
+        }
+        await dismissNextDevTools(page);
+        const lock = page.getByRole("button", {
+          name: "Submission Limit Reached",
+          exact: true,
+        });
+        await expect(lock).toBeVisible();
+        await lock.press("Enter");
+        await expect(
+          page.getByRole("dialog", {
+            name: "Submission Limit Reached",
+            exact: true,
+          })
+        ).toBeVisible();
+        await expect(
+          page
+            .getByText(
+              "You have already submitted the maximum allowed (3 submissions)",
+              { exact: true }
+            )
+            .last()
+        ).toBeVisible();
+        await expect(
+          page.getByRole("dialog", {
+            name: "Submit Work to The Memes",
+            exact: true,
+          })
+        ).toHaveCount(0);
+        await page.keyboard.press("Escape");
+      }
+      sandbox.setCompetition("alpha", { your_active_entries_count: 2 });
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await expect(page).toHaveURL(
+        new RegExp(`/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`),
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      );
+      await expect(
+        page.getByRole("button", {
+          name: "Submission Limit Reached",
+          exact: true,
+        })
+      ).toHaveCount(0);
+      const submit = page.getByRole("button", { name: /^Submit (Work|Meme)/ });
+      await expect(submit).toBeVisible();
+      await submit.click();
+      await expect(
+        page.getByRole("dialog", {
+          name: "Submit Work to The Memes",
+          exact: true,
+        })
+      ).toBeVisible();
+      expect(sandbox.requests).toEqual([]);
+    });
+
     for (const eligible of [true, false]) {
       test(`keeps the Main Stage header action consistent in Chat and Leaderboard (${surface}, ${eligible ? "eligible" : "not eligible"})`, async ({
         page,
@@ -6032,7 +6144,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             ...fixture.drops[0].author.badges,
             artist_of_main_stage_submissions: 1,
           },
-          wave_participation: { is_participant: true, is_winner: false },
+          wave_participation: {
+            is_participant: true,
+            is_winner: popup === "participant entries",
+          },
         },
         submission_context: {
           status: "ACTIVE",
@@ -6152,6 +6267,33 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await badge.click();
       const dialog = page.getByRole("dialog").last();
+      if (popup === "participant entries") {
+        const entryTabs = dialog.getByRole("tablist", {
+          name: /decision entries$/,
+        });
+        await expect(entryTabs.getByRole("tab")).toHaveCount(2);
+        for (const tab of await entryTabs.getByRole("tab").all()) {
+          await expect(tab).toHaveCSS("font-size", "12px");
+          await expect(tab).toHaveCSS("height", "28px");
+        }
+        const winning = entryTabs.getByRole("tab", {
+          name: "Winning entries",
+          exact: true,
+        });
+        await winning.click();
+        await expect(winning).toHaveAttribute("aria-selected", "true");
+        const active = entryTabs.getByRole("tab", {
+          name: "Active entries",
+          exact: true,
+        });
+        await active.click();
+        await expect(active).toHaveAttribute("aria-selected", "true");
+        await page.mouse.move(0, 0);
+        await expect(active).toHaveCSS("background-color", "rgb(38, 39, 43)");
+        await page.screenshot({
+          path: testInfo.outputPath("competition-entry-tabs.png"),
+        });
+      }
       if (popup === "artist submissions") {
         try {
           const loading = page
@@ -6539,9 +6681,49 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       expect(sandbox.requests[0]?.body).toMatchObject({ value: -25 });
       await expect(dialog.getByText("Saved", { exact: true })).toBeVisible();
       if (popup === "artist submissions") {
-        await dialog
-          .getByRole("tab", { name: "Minted to Memes", exact: true })
-          .click();
+        let releaseMintedCards: (() => void) | undefined;
+        const mintedCardsGate = new Promise<void>((resolve) => {
+          releaseMintedCards = resolve;
+        });
+        await page.route("**/api/nfts?**", async (route) => {
+          await mintedCardsGate;
+          return route.fallback();
+        });
+        try {
+          const panel = dialog.getByRole("tabpanel");
+          // The vote explanation is still collapsing after Save finishes.
+          // Compare the settled section with its replacement loading state.
+          await panel.evaluate(async (element) => {
+            const animations = element
+              .getAnimations({ subtree: true })
+              .filter((animation) =>
+                Number.isFinite(animation.effect?.getTiming().iterations)
+              );
+            await Promise.all(
+              animations.map((animation) =>
+                animation.finished.catch(() => undefined)
+              )
+            );
+          });
+          const previousPanel = await panel.boundingBox();
+          expect(previousPanel).not.toBeNull();
+          await dialog
+            .getByRole("tab", { name: "Minted to Memes", exact: true })
+            .click();
+          await expect(
+            panel.getByText("Loading minted memes...", { exact: true })
+          ).toBeVisible();
+          const loadingPanel = await panel.boundingBox();
+          expect(loadingPanel).not.toBeNull();
+          expect(
+            Math.abs(loadingPanel!.height - previousPanel!.height)
+          ).toBeLessThan(1);
+          await page.screenshot({
+            path: testInfo.outputPath("artist-tab-loading-stable-height.png"),
+          });
+        } finally {
+          releaseMintedCards?.();
+        }
         const winnerCard = dialog.getByTestId("trophy-item-winner");
         const olderCard = dialog.getByTestId("trophy-item-prevote");
         await expect(
@@ -7701,175 +7883,207 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(sandbox.requests).toHaveLength(0);
   });
 
-  test("keeps joined waves complete across pagination failure, refresh, and the DMs round trip", async ({
-    page,
-  }, testInfo) => {
-    // This scenario exercises four independent page initializations on both
-    // desktop and the simulated native shell.
-    test.setTimeout(120000);
-    const app = testInfo.project.name === "web-mobile-chromium";
-    await installCompetitionApi(page);
-    if (app)
-      await installSurfaceSimulation(
-        page.context(),
-        "capacitor-ios-sim",
-        testInfo.project.use.baseURL
+  for (const collection of ["Joined", "All"] as const) {
+    test(`keeps ${collection.toLowerCase()} waves complete across pagination failure, refresh, and the DMs round trip`, async ({
+      page,
+    }, testInfo) => {
+      // This scenario exercises four independent page initializations on both
+      // desktop and the simulated native shell.
+      test.setTimeout(120000);
+      const loadMoreLabel =
+        collection === "Joined" ? "Load more joined waves" : "Load more waves";
+      const retryLabel =
+        collection === "Joined"
+          ? "Retry loading joined waves"
+          : "Retry loading all waves";
+      const regionLabel =
+        collection === "Joined"
+          ? "Following waves list"
+          : "All recent waves list";
+      const app = testInfo.project.name === "web-mobile-chromium";
+      await installCompetitionApi(page);
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const fixture = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
       );
-    const fixture = await page.request.get(
-      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
-    );
-    const { wave: overview } = await fixture.json();
-    const joined = Array.from({ length: 45 }, (_, index) => ({
-      ...overview,
-      id: `00000000-0000-4000-8000-${String(index + 700).padStart(12, "0")}`,
-      name: `Joined wave ${String(index + 1).padStart(2, "0")}`,
-      parent_wave: null,
-      has_subwaves: false,
-      last_drop_time: Date.now() - index * 1000,
-      context_profile_context: {
-        ...overview.context_profile_context,
-        subscribed: true,
-        pinned: index === 44,
-        followed_subwaves_count: 0,
-      },
-    }));
-    await page.route("**/api/v2/waves?**", async (route) => {
-      const params = new URL(route.request().url()).searchParams;
-      if (params.get("pinned") !== "PINNED") {
-        await route.fallback();
-        return;
-      }
-      await route.fulfill({
-        json: { data: [joined[44]], page: 1, next: false },
-      });
-    });
-    let failContinuation = true;
-    const requested: string[] = [];
-    const offsets = new Map([
-      ["joined-continuation-alpha", 20],
-      ["joined-continuation-beta", 40],
-    ]);
-    await page.route("**/api/v2/waves/joined?**", async (route) => {
-      const cursor = new URL(route.request().url()).searchParams.get("cursor");
-      requested.push(cursor ?? "first");
-      if (cursor && failContinuation) {
-        await route.fulfill({
-          status: 503,
-          json: { error: "Joined waves temporarily unavailable" },
-        });
-        return;
-      }
-      const offset = cursor ? offsets.get(cursor) : 0;
-      if (offset === undefined) {
-        await route.fulfill({ status: 400, json: { error: "Unknown cursor" } });
-        return;
-      }
-      await route.fulfill({
-        json: {
-          data: joined.slice(offset, offset + 20),
-          next_cursor:
-            offset === 0
-              ? "joined-continuation-alpha"
-              : offset === 20
-                ? "joined-continuation-beta"
-                : null,
-          snapshot_expires_at: Date.now() + 900000,
+      const { wave: overview } = await fixture.json();
+      const joined = Array.from({ length: 45 }, (_, index) => ({
+        ...overview,
+        id: `00000000-0000-4000-8000-${String(index + 700).padStart(12, "0")}`,
+        name: `Joined wave ${String(index + 1).padStart(2, "0")}`,
+        parent_wave: null,
+        has_subwaves: false,
+        last_drop_time: Date.now() - index * 1000,
+        context_profile_context: {
+          ...overview.context_profile_context,
+          subscribed: true,
+          pinned: index === 44,
+          followed_subwaves_count: 0,
         },
-      });
-    });
-    const selectJoined = async () => {
-      await page
-        .getByRole("button", { name: "Joined", exact: true })
-        .filter({ visible: true })
-        .click();
-    };
-    const finishPagination = async () => {
-      const lastWave = page
-        .getByRole("link", { name: "Joined wave 45", exact: true })
-        .filter({ visible: true });
-      for (let attempt = 0; attempt < 4; attempt += 1) {
-        await page
-          .getByRole("region", { name: "Following waves list", exact: true })
-          .evaluate((list) => {
-            let container = list.parentElement;
-            while (
-              container &&
-              !["auto", "scroll"].includes(
-                getComputedStyle(container).overflowY
-              )
-            )
-              container = container.parentElement;
-            if (container) container.scrollTop = container.scrollHeight;
-          });
-        const more = page.getByRole("button", {
-          name: "Load more joined waves",
-          exact: true,
+      }));
+      await page.route("**/api/v2/waves?**", async (route) => {
+        const params = new URL(route.request().url()).searchParams;
+        if (params.get("pinned") !== "PINNED") {
+          await route.fallback();
+          return;
+        }
+        await route.fulfill({
+          json: { data: [joined[44]], page: 1, next: false },
         });
-        if (await more.count()) {
-          // Reaching the button can itself start automatic pagination. The final
-          // response may remove it before Playwright finishes the click.
-          await more.click({ timeout: 1500 }).catch(async (error: unknown) => {
-            if (await more.count()) throw error;
+      });
+      let failContinuation = true;
+      const requested: string[] = [];
+      const offsets = new Map([
+        ["joined-continuation-alpha", 20],
+        ["joined-continuation-beta", 40],
+      ]);
+      await page.route(
+        `**/api/v2/waves/${collection.toLowerCase()}?**`,
+        async (route) => {
+          const cursor = new URL(route.request().url()).searchParams.get(
+            "cursor"
+          );
+          requested.push(cursor ?? "first");
+          if (cursor && failContinuation) {
+            await route.fulfill({
+              status: 503,
+              json: { error: "Joined waves temporarily unavailable" },
+            });
+            return;
+          }
+          const offset = cursor ? offsets.get(cursor) : 0;
+          if (offset === undefined) {
+            await route.fulfill({
+              status: 400,
+              json: { error: "Unknown cursor" },
+            });
+            return;
+          }
+          await route.fulfill({
+            json: {
+              data: joined.slice(offset, offset + 20),
+              next_cursor:
+                offset === 0
+                  ? "joined-continuation-alpha"
+                  : offset === 20
+                    ? "joined-continuation-beta"
+                    : null,
+              snapshot_expires_at: Date.now() + 900000,
+            },
           });
         }
-        if (await lastWave.count()) break;
-      }
-      await expect(lastWave).toBeVisible();
+      );
+      const selectCollection = async () => {
+        await page
+          .getByRole("button", { name: collection, exact: true })
+          .filter({ visible: true })
+          .click();
+      };
+      const finishPagination = async () => {
+        const lastWave = page
+          .getByRole("link", {
+            name: collection === "Joined" ? "Joined wave 45" : "Joined wave 44",
+            exact: true,
+          })
+          .filter({ visible: true });
+        for (let attempt = 0; attempt < 4; attempt += 1) {
+          await page
+            .getByRole("region", { name: regionLabel, exact: true })
+            .evaluate((list) => {
+              let container = list.parentElement;
+              while (
+                container &&
+                !["auto", "scroll"].includes(
+                  getComputedStyle(container).overflowY
+                )
+              )
+                container = container.parentElement;
+              if (container) container.scrollTop = container.scrollHeight;
+            });
+          const more = page.getByRole("button", {
+            name: loadMoreLabel,
+            exact: true,
+          });
+          if (await more.count()) {
+            // Reaching the button can itself start automatic pagination. The final
+            // response may remove it before Playwright finishes the click.
+            await more
+              .click({ timeout: 1500 })
+              .catch(async (error: unknown) => {
+                if (await more.count()) throw error;
+              });
+          }
+          if (await lastWave.count()) break;
+        }
+        await expect(lastWave).toBeVisible();
+        await expect(
+          page.getByRole("button", {
+            name: loadMoreLabel,
+            exact: true,
+          })
+        ).toHaveCount(0);
+      };
+      await page.goto("/waves", { waitUntil: "domcontentloaded" });
+      await page
+        .getByRole("button", { name: "Pinned", exact: true })
+        .filter({ visible: true })
+        .click();
       await expect(
-        page.getByRole("button", {
-          name: "Load more joined waves",
-          exact: true,
+        page.getByRole("link", { name: "Joined wave 45", exact: true })
+      ).toBeVisible();
+      await selectCollection();
+      const more = page.getByRole("button", {
+        name: loadMoreLabel,
+        exact: true,
+      });
+      await more.click();
+      const retry = page.getByRole("button", {
+        name: retryLabel,
+        exact: true,
+      });
+      await expect(retry).toBeVisible({ timeout: 30000 });
+      // All keeps pins reachable during a failure; Joined follows its loaded batches.
+      const pinnedWave = page.getByRole("link", {
+        name: "Joined wave 45",
+        exact: true,
+      });
+      if (collection === "Joined") await expect(pinnedWave).toHaveCount(0);
+      else await expect(pinnedWave).toBeVisible();
+      await expect(
+        page.getByRole("status").filter({
+          hasText:
+            collection === "Joined"
+              ? "Some joined waves could not be loaded."
+              : "Some waves could not be loaded.",
         })
-      ).toHaveCount(0);
-    };
-    await page.goto("/waves", { waitUntil: "domcontentloaded" });
-    await page
-      .getByRole("button", { name: "Pinned", exact: true })
-      .filter({ visible: true })
-      .click();
-    await expect(
-      page.getByRole("link", { name: "Joined wave 45", exact: true })
-    ).toBeVisible();
-    await selectJoined();
-    const more = page.getByRole("button", {
-      name: "Load more joined waves",
-      exact: true,
+      ).toBeVisible();
+      failContinuation = false;
+      await retry.click();
+      await finishPagination();
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await finishPagination();
+      // Both destinations rebuild the real sidebar and retain the saved collection.
+      await page.goto("/messages", { waitUntil: "domcontentloaded" });
+      await expect(page).toHaveURL(/\/messages$/);
+      await page.goto("/waves", { waitUntil: "domcontentloaded" });
+      await finishPagination();
+      expect(requested).toContain("joined-continuation-alpha");
+      expect(requested).toContain("joined-continuation-beta");
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `${collection.toLowerCase()}-waves-pagination.png`
+        ),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
     });
-    await more.click();
-    const retry = page.getByRole("button", {
-      name: "Retry loading joined waves",
-      exact: true,
-    });
-    await expect(retry).toBeVisible({ timeout: 30000 });
-    // The pin belongs to the final joined batch. It must not extend the first
-    // batch or make the list look complete while the continuation has failed.
-    await expect(
-      page.getByRole("link", { name: "Joined wave 45", exact: true })
-    ).toHaveCount(0);
-    await expect(
-      page
-        .getByRole("status")
-        .filter({ hasText: "Some joined waves could not be loaded." })
-    ).toBeVisible();
-    failContinuation = false;
-    await retry.click();
-    await finishPagination();
-    await page.reload({ waitUntil: "domcontentloaded" });
-    await finishPagination();
-    // Both destinations rebuild the real sidebar and retain the saved collection.
-    await page.goto("/messages", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/messages$/);
-    await page.goto("/waves", { waitUntil: "domcontentloaded" });
-    await finishPagination();
-    expect(requested).toContain("joined-continuation-alpha");
-    expect(requested).toContain("joined-continuation-beta");
-    await expectNoHorizontalOverflow(page);
-    await page.screenshot({
-      path: testInfo.outputPath("joined-waves-pagination.png"),
-      animations: "disabled",
-      style: "nextjs-portal { visibility: hidden; }",
-    });
-  });
+  }
 
   test("aligns Waves collection filters with the search control", async ({
     page,
@@ -9297,8 +9511,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           },
         })
       );
-      await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
-        route.fulfill({ json: { data: [main, bar], page: 1, next: false } })
+      await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
+        route.fulfill({
+          json: {
+            data: [main, bar],
+            page: 1,
+            next: false,
+            next_cursor: null,
+            snapshot_expires_at: Date.now() + 900000,
+          },
+        })
       );
       await page.route("**/api/v2/official-waves", (route) =>
         route.fulfill({ json: [main, bar] })
@@ -9496,8 +9718,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       { ...overview, id: WAVE, name: "Warmed Competition Wave" },
       { ...overview, id: targetWaveId, name: "Previously Unvisited Wave" },
     ];
-    await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
-      route.fulfill({ json: { data: waves, page: 1, next: false } })
+    await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
+      route.fulfill({
+        json: {
+          data: waves,
+          page: 1,
+          next: false,
+          next_cursor: null,
+          snapshot_expires_at: Date.now() + 900000,
+        },
+      })
     );
     await page.route("**/api/v2/official-waves", (route) =>
       route.fulfill({ json: waves })
@@ -11129,8 +11359,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         id: WAVE,
         name: "Selected competition wave",
       };
-      await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
-        route.fulfill({ json: { data: [targetWave], page: 1, next: false } })
+      await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
+        route.fulfill({
+          json: {
+            data: [targetWave],
+            page: 1,
+            next: false,
+            next_cursor: null,
+            snapshot_expires_at: Date.now() + 900000,
+          },
+        })
       );
       await page.route("**/api/v2/official-waves", (route) =>
         route.fulfill({ json: [targetWave] })
@@ -11894,6 +12132,104 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
+  for (const proposalCard of [false, true]) {
+    test(`keeps winner chat reply actions reachable for ${proposalCard ? "proposal" : "standard"} cards`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(page);
+      sandbox.onlyCompetition("alpha");
+      const presentation = proposalCard
+        ? [
+            {
+              id: 1,
+              data_key: "wave_display.proposals.card_recipe",
+              data_value:
+                '{"version":1,"layout":"summary","excerpt_max_characters":420,"show_media_thumbnail":false}',
+            },
+          ]
+        : [];
+      sandbox.setCompetition("alpha", { presentation });
+      await page.route(`**/api/v2/waves/${WAVE}/metadata`, (route) =>
+        route.fulfill({ json: presentation })
+      );
+      await page.route("**/api/waves/*/curations**", (route) =>
+        route.fulfill({ json: [] })
+      );
+      await page.route("**/api/drops/*/curations**", (route) =>
+        route.fulfill({ json: [] })
+      );
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${WAVE}/drops`
+      );
+      expect(response.ok()).toBe(true);
+      const fixture = await response.json();
+      const winner = {
+        ...fixture.drops[0],
+        drop_type: "SUBMISSION",
+        title: "Winner hover menu regression",
+        content: "Winner card reply and reaction actions remain available.",
+        media: [],
+        submission_context: {
+          status: "WINNER",
+          has_metadata: false,
+          won_at: 2000,
+          voting: {
+            is_open: false,
+            total_votes_given: 123,
+            current_calculated_vote: 123,
+            predicted_final_vote: 123,
+            voters_count: 0,
+            place: 1,
+          },
+        },
+      };
+      await page.route(`**/api/v2/waves/${WAVE}/drops?*`, (route) =>
+        route.fulfill({ json: { ...fixture, drops: [winner] } })
+      );
+      await page.goto(`/waves/${WAVE}?tab=chat&competition=alpha`);
+      const title = page.getByText(winner.title, { exact: true });
+      await expect(title).toBeVisible({ timeout: 30000 });
+      const row = page
+        .getByRole("tabpanel")
+        .locator(".tw-group")
+        .filter({ has: title });
+      await expect(row.getByTestId("proposal-card-context-label")).toHaveCount(
+        proposalCard ? 1 : 0
+      );
+      const isMobile = testInfo.project.name === "web-mobile-chromium";
+      const reply = page.getByRole("button", {
+        name: isMobile ? "Reply" : "Reply to drop",
+        exact: true,
+      });
+      if (isMobile) {
+        await longPressMessage(page, row);
+      } else {
+        await row.hover();
+        await expect(
+          row.getByRole("button", { name: "React with Thumbs up", exact: true })
+        ).toBeVisible();
+        // Visibility alone does not catch an ancestor clipping the button.
+        await reply.click({ trial: true });
+        await page.mouse.move(0, 0);
+        await reply.focus();
+        await page.keyboard.press("Shift+Tab");
+        await page.keyboard.press("Tab");
+        await expect(reply).toBeFocused();
+      }
+      await testInfo.attach("winner-chat-actions", {
+        body: await page.screenshot(),
+        contentType: "image/png",
+      });
+      await reply.click();
+      await expect(
+        page.getByRole("button", { name: "Cancel reply", exact: true })
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      expect(sandbox.requests).toEqual([]);
+    });
+  }
+
   for (const waveId of [MEMES_WAVE, WAVE]) {
     test(`renders winners without legacy drop or metadata loading in ${waveId === WAVE ? "QUORUM approval" : "Main Stage"}`, async ({
       page,
@@ -12460,6 +12796,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             .getByRole("tab")
             .first()
         ).toHaveCSS("height", "32px");
+        if (name === "Sort options") {
+          await expect(
+            page
+              .getByRole("tablist", { name, exact: true })
+              .getByRole("tab")
+              .first()
+          ).toHaveCSS("font-size", "12px");
+        }
       }
       for (const view of ["List view", "Grid view"]) {
         await page.getByRole("tab", { name: view, exact: true }).click();

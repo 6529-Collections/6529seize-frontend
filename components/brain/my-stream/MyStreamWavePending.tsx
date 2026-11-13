@@ -44,6 +44,7 @@ export default function MyStreamWavePending({
   const isDirectMessage =
     getMessageIdFromPathname(pathname) === waveId ||
     directMessages.list.some((wave) => wave.id === waveId);
+  const showDescriptionPreview = preview?.reserveDescriptionRow !== false;
   const hasProfileIdentity = Boolean(
     getDirectMessageProfileHref({
       isDirectMessage,
@@ -122,7 +123,7 @@ export default function MyStreamWavePending({
               {!isDirectMessage && (
                 <div
                   aria-hidden="true"
-                  className="tw-hidden tw-h-6 tw-items-center md:tw-flex"
+                  className={`tw-hidden tw-h-6 tw-items-center ${showDescriptionPreview ? "md:tw-flex" : ""}`}
                 >
                   <div className="tw-h-2 tw-w-40 tw-max-w-full tw-rounded-md tw-bg-iron-800" />
                 </div>

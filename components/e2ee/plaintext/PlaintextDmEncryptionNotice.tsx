@@ -26,24 +26,25 @@ export function useStartEncryptedChatFromDm(wave: ApiWave | null) {
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const [pending, setPending] = useState(false);
+  const profileId = connectedProfile?.id;
   const available =
     isE2eeEnabled() &&
     isPlaintextDmWave(wave) &&
-    connectedProfile !== null &&
+    Boolean(profileId) &&
     activeProfileProxy === null;
 
   const start = async () => {
-    if (!wave || !available || pending) {
+    if (!wave || !available || !profileId || pending) {
       return;
     }
     setPending(true);
     try {
-      const people = await resolveDmParticipants(
-        queryClient,
-        wave,
-        connectedProfile.id
-      );
-      setE2eeComposePrefill({ people, source: "dm" });
+      const people = await resolveDmParticipants(queryClient, wave, profileId);
+      setE2eeComposePrefill({
+        ownerProfileId: profileId,
+        people,
+        source: "dm",
+      });
       router.push(getNewEncryptedChatRoute());
     } catch {
       setToast({ type: "error", message: t(locale, "e2ee.plaintext.failed") });

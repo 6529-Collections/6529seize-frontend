@@ -105,6 +105,10 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const playwrightProfileDialogs = files.some(
     (file) =>
+      file.startsWith("components/user/identity/getting-started/") ||
+      file ===
+        "components/brain/my-stream/tabs/MainStageNominationPopover.tsx" ||
+      file === "i18n/messages/identityGettingStarted.en-US.json" ||
       file.startsWith("components/user/rep/") ||
       file.startsWith("components/user/user-page-header/about/") ||
       file === "components/user/user-page-header/UserPageHeaderClient.tsx" ||
@@ -170,6 +174,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "i18n/messages/competitions.ts",
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/social/wave-media-processing-sandbox.spec.ts",
+        "components/waves/drops/wave-drops-all/hooks/useDeferredNewestDrops.ts",
+        "components/waves/drops/wave-drops-all/index.tsx",
         "helpers/waves/drop-media-reconciliation.ts",
         "components/waves/drops/WaveDropPartContentMediaImage.tsx",
         "components/waves/drops/WaveDropPartContentMedias.tsx",
@@ -184,6 +190,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/drops/view/item/content/media/MediaDisplayImage.tsx",
         "components/memes/drops/MemeParticipationDrop.tsx",
         "components/memes/drops/MemeWinnerDrop.tsx",
+        "components/waves/drops/winner/DefaultWinnerDrop.tsx",
         "components/memes/drops/MemesLeaderboardDrop.tsx",
         "components/drops/view/item/content/media/ImageMediaModal.tsx",
         "components/drops/view/item/content/media/useOriginalImage.ts",
@@ -239,6 +246,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/support/composerSandboxServer.cjs",
         "components/waves/WavesMobile.tsx",
         "components/brain/BrainMobile.tsx",
+        "components/shared/WavesMessagesWrapper.tsx",
         "components/brain/my-stream/MyStreamWaveContent.tsx",
         "components/waves/drops/WaveDropActionsOpen.tsx",
         "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
@@ -330,14 +338,26 @@ function applyEffectiveAppPrCiPlan(plan) {
       ].includes(file)
   );
 
+  const membershipNavigationBrowser = files.some((file) =>
+    [
+      "hooks/useMembershipNavigation.ts",
+      "components/layout/sidebar/WebSidebarNav.tsx",
+      "components/layout/sidebar/nav/WebSidebarNavItem.tsx",
+      "components/header/AppSidebar.tsx",
+      "components/header/AppSidebarMenuItems.tsx",
+      "tests/auth/session-recovery-sandbox.spec.ts",
+    ].includes(file)
+  );
+
   const checks = {
     ...plan.checks,
-    playwright_critical_shell: playwrightProfileDialogs
-      ? check(
-          true,
-          "Profile editing changes require the profile dialog browser pack."
-        )
-      : baseChecks.playwright_critical_shell,
+    playwright_critical_shell:
+      playwrightProfileDialogs || membershipNavigationBrowser
+        ? check(
+            true,
+            "Profile editing and membership navigation changes require their browser regression packs."
+          )
+        : baseChecks.playwright_critical_shell,
     playwright_profile_nic: check(
       files.some(
         (file) =>

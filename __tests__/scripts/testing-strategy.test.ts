@@ -1,9 +1,88 @@
+import childProcess from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const YAML = require("yaml") as { parse: (text: string) => unknown };
+
+// Credential-shaped values are assembled at run time, so this file never
+// holds a literal that the scanner itself would report.
+const joined = (...parts: string[]) => parts.join("");
+const FAKE_CREDENTIALS: Array<[pattern: string, value: string]> = [
+  ["github-token", joined("gh", "s_", "A1b2".repeat(9))],
+  ["github-token", joined("github", "_pat_", "11AAAAAA", "x".repeat(30))],
+  ["aws-access-key-id", joined("AS", "IA", "ABCDEFGHIJKLMNOP")],
+  [
+    "sentry-auth-token",
+    joined("sntry", "s_", "Zm9vYmFyYmF6cXV4", "_", "c2VjcmV0".repeat(4)),
+  ],
+  ["npm-access-token", joined("np", "m_", "a1".repeat(18))],
+  ["slack-token", joined("xo", "xb-", "1234567890-abcdefghij")],
+  [
+    "chat-webhook-url",
+    joined(
+      "https://discord",
+      ".com/api/webhooks/",
+      "123456789012345678/",
+      "w".repeat(68)
+    ),
+  ],
+  ["model-provider-key", joined("sk-", "ant-api03-", "b".repeat(40))],
+  ["model-provider-key", joined("sk-", "or-v1-", "c".repeat(64))],
+  ["google-api-key", joined("AI", "za", "d".repeat(35))],
+  [
+    "rpc-url-with-key",
+    joined("https://eth-mainnet", ".g.alchemy.com/v2/", "e".repeat(32)),
+  ],
+  [
+    "rpc-url-with-key",
+    joined("https://mainnet", ".infura.io/v3/", "f".repeat(32)),
+  ],
+  ["private-key-block", joined("-----BEGIN PGP ", "PRIVATE KEY BLOCK-----")],
+];
+const FAKE_GITHUB_TOKEN = joined("gh", "p_", "Z9y8".repeat(9));
+
+function gitIn(cwd: string, ...args: string[]): string {
+  return childProcess
+    .execFileSync(
+      "git",
+      [
+        "-c",
+        "user.name=Scan test",
+        "-c",
+        "user.email=scan@example.test",
+        "-c",
+        "commit.gpgSign=false",
+        "-c",
+        "core.hooksPath=/dev/null",
+        "-c",
+        "init.defaultBranch=main",
+        ...args,
+      ],
+      { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }
+    )
+    .trim();
+}
+
+function commitFiles(
+  cwd: string,
+  message: string,
+  files: Record<string, string | null>
+): string {
+  for (const [file, content] of Object.entries(files)) {
+    const target = path.join(cwd, file);
+    if (content === null) {
+      fs.rmSync(target);
+      continue;
+    }
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, content);
+  }
+  gitIn(cwd, "add", "-A");
+  gitIn(cwd, "commit", "--quiet", "--allow-empty", "-m", message);
+  return gitIn(cwd, "rev-parse", "HEAD");
+}
 
 type RiskResult = {
   computed_floor: number;
@@ -45,6 +124,7 @@ const {
   classifyChangedFiles,
   createCiPlan,
   scanFilesForSecrets,
+  scanPushedRangeForSecrets,
   validateArtifactPointer,
   validateMutationRegistry,
   validateValidationManifest,
@@ -68,6 +148,20 @@ const {
     schema_version: string;
     ok: boolean;
     findings: Array<{ file: string; line: number; pattern: string }>;
+    skipped: Array<{ file: string; reason: string }>;
+  };
+  scanPushedRangeForSecrets: (
+    range: { from: string; to?: string; exclude?: string[] },
+    cwd?: string
+  ) => {
+    commits_scanned: number;
+    file_versions_scanned: number;
+    findings: Array<{
+      file: string;
+      line: number;
+      pattern: string;
+      commit: string | null;
+    }>;
     skipped: Array<{ file: string; reason: string }>;
   };
   validateArtifactPointer: (artifact: unknown, index: number) => string[];
@@ -357,7 +451,10 @@ describe("testing strategy CI plan", () => {
   });
 
   it("builds when the first-load budget or its checker changes", () => {
-    for (const file of ["scripts/perf-budget.json", "scripts/perf-budget.cjs"]) {
+    for (const file of [
+      "scripts/perf-budget.json",
+      "scripts/perf-budget.cjs",
+    ]) {
       expect(createCiPlan([file]).checks["build"]!.required).toBe(true);
     }
   });
@@ -656,6 +753,7 @@ describe("testing strategy CI plan", () => {
       },
       defaults: { run: { shell: "bash" } },
       strategy: {
+        "fail-fast": false,
         matrix: "${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}",
       },
     });
@@ -668,6 +766,11 @@ describe("testing strategy CI plan", () => {
         expect.objectContaining({
           name: "Run critical route-shell Playwright pack",
           if: "matrix.lane == 'playwright-critical-shell'",
+        }),
+        expect.objectContaining({
+          name: "Run own-profile Following browser regression pack",
+          if: "matrix.lane == 'playwright-critical-shell-profile'",
+          run: './bin/6529 run test:e2e:profile-following-sandbox --shard="$PROFILE_FOLLOWING_SHARD"',
         }),
       ])
     );
@@ -1027,6 +1130,391 @@ describe("testing strategy CI security checks", () => {
     expect(JSON.stringify(result)).not.toContain("fake_signature_segment");
   });
 
+  it.each(FAKE_CREDENTIALS)(
+    "reports a %s without returning its value",
+    (pattern, value) => {
+      fs.mkdirSync(path.join(tempDir, "config"), { recursive: true });
+      fs.writeFileSync(
+        path.join(tempDir, "config", "service.properties"),
+        `first=1\nvalue=${value}\n`
+      );
+
+      const result = scanFilesForSecrets(
+        ["config/service.properties"],
+        tempDir
+      );
+
+      expect(result.findings).toEqual([
+        { file: "config/service.properties", line: 2, pattern },
+      ]);
+      expect(JSON.stringify(result)).not.toContain(value);
+    }
+  );
+
+  it.each([
+    "const ghost_writer_function_name_here = true;",
+    "https://eth-mainnet.g.alchemy.com/v2/demo",
+    "https://eth-mainnet.g.alchemy.com/v2/${apiKey}",
+    "const prefix = 'AIza';",
+    "Use an xoxb- token from the Slack app settings.",
+    "SENTRY_AUTH_TOKEN: undefined,",
+    "-----BEGIN PUBLIC KEY-----",
+  ])("does not report the ordinary text %s", (line) => {
+    fs.writeFileSync(path.join(tempDir, "notes.md"), `${line}\n`);
+
+    expect(scanFilesForSecrets(["notes.md"], tempDir)).toMatchObject({
+      ok: true,
+      findings: [],
+    });
+  });
+
+  it("scans nested environment files and more text file types", () => {
+    fs.mkdirSync(path.join(tempDir, "apps", "site"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tempDir, "apps", "site", ".env.production"),
+      `GITHUB_TOKEN=${FAKE_GITHUB_TOKEN}\n`
+    );
+    fs.writeFileSync(
+      path.join(tempDir, "capture.har"),
+      `{"value":"${FAKE_GITHUB_TOKEN}"}\n`
+    );
+
+    const result = scanFilesForSecrets(
+      ["apps/site/.env.production", "capture.har"],
+      tempDir
+    );
+
+    expect(result.findings).toEqual([
+      { file: "apps/site/.env.production", line: 1, pattern: "github-token" },
+      { file: "capture.har", line: 1, pattern: "github-token" },
+    ]);
+  });
+
+  describe("pushed commit ranges", () => {
+    let base = "";
+
+    beforeEach(() => {
+      gitIn(tempDir, "init", "--quiet");
+      base = commitFiles(tempDir, "Base", { "README.md": "# Fixture\n" });
+    });
+
+    it("finds a value that a later commit in the range removed", () => {
+      const added = commitFiles(tempDir, "Add settings", {
+        "config/settings.json": `{\n  "token": "${FAKE_GITHUB_TOKEN}"\n}\n`,
+      });
+      commitFiles(tempDir, "Remove token", {
+        "config/settings.json": '{\n  "token": ""\n}\n',
+      });
+
+      const range = scanPushedRangeForSecrets({ from: base }, tempDir);
+
+      expect(scanFilesForSecrets(["config/settings.json"], tempDir).ok).toBe(
+        true
+      );
+      expect(range.commits_scanned).toBe(2);
+      expect(range.findings).toEqual([
+        {
+          file: "config/settings.json",
+          line: 2,
+          pattern: "github-token",
+          commit: added.slice(0, 12),
+        },
+      ]);
+      expect(JSON.stringify(range)).not.toContain(FAKE_GITHUB_TOKEN);
+    });
+
+    it("finds a value kept only in a file the range deletes", () => {
+      const added = commitFiles(tempDir, "Add notes", {
+        "notes/scratch.md": `token ${FAKE_GITHUB_TOKEN}\n`,
+      });
+      commitFiles(tempDir, "Delete notes", { "notes/scratch.md": null });
+
+      const range = scanPushedRangeForSecrets({ from: base }, tempDir);
+
+      expect(range.findings).toEqual([
+        {
+          file: "notes/scratch.md",
+          line: 1,
+          pattern: "github-token",
+          commit: added.slice(0, 12),
+        },
+      ]);
+    });
+
+    it("finds a value that only a merge resolution introduced", () => {
+      gitIn(tempDir, "checkout", "--quiet", "-b", "topic");
+      commitFiles(tempDir, "Topic change", { "topic.md": "topic\n" });
+      gitIn(tempDir, "checkout", "--quiet", "main");
+      commitFiles(tempDir, "Main change", { "main.md": "main\n" });
+      gitIn(tempDir, "merge", "--quiet", "--no-ff", "--no-commit", "topic");
+      fs.writeFileSync(
+        path.join(tempDir, "topic.md"),
+        `topic\nresolved ${FAKE_GITHUB_TOKEN}\n`
+      );
+      gitIn(tempDir, "add", "topic.md");
+      gitIn(tempDir, "commit", "--quiet", "--no-edit");
+      const merge = gitIn(tempDir, "rev-parse", "HEAD");
+
+      const range = scanPushedRangeForSecrets({ from: base }, tempDir);
+
+      expect(range.commits_scanned).toBe(3);
+      expect(range.findings).toEqual([
+        {
+          file: "topic.md",
+          line: 2,
+          pattern: "github-token",
+          commit: merge.slice(0, 12),
+        },
+      ]);
+    });
+
+    it("leaves out commits already on an excluded shared branch", () => {
+      commitFiles(tempDir, "Shared work", {
+        "shared.md": `shared ${FAKE_GITHUB_TOKEN}\n`,
+      });
+      gitIn(tempDir, "branch", "shared");
+      commitFiles(tempDir, "Own work", { "own.md": "own\n" });
+
+      expect(
+        scanPushedRangeForSecrets({ from: base, exclude: ["shared"] }, tempDir)
+      ).toMatchObject({ commits_scanned: 1, findings: [] });
+      expect(
+        scanPushedRangeForSecrets({ from: base }, tempDir).findings
+      ).toHaveLength(1);
+    });
+
+    it("skips binary content and non-text file types", () => {
+      commitFiles(tempDir, "Add assets", {
+        "public/logo.png": `PNG ${FAKE_GITHUB_TOKEN}\n`,
+        "data/blob.txt": `\u0000binary ${FAKE_GITHUB_TOKEN}\n`,
+      });
+
+      const range = scanPushedRangeForSecrets({ from: base }, tempDir);
+
+      expect(range.findings).toEqual([]);
+      expect(range.skipped).toEqual(
+        expect.arrayContaining([
+          { file: "public/logo.png", reason: "not-text-extension" },
+          { file: "data/blob.txt", reason: "binary" },
+        ])
+      );
+    });
+
+    it("scans only the head commit when the base is not a commit", () => {
+      commitFiles(tempDir, "Earlier", {
+        "earlier.md": `earlier ${FAKE_GITHUB_TOKEN}\n`,
+      });
+      commitFiles(tempDir, "Head", { "head.md": "head\n" });
+      const emptyTree = gitIn(tempDir, "hash-object", "-t", "tree", "--stdin");
+
+      expect(
+        scanPushedRangeForSecrets({ from: emptyTree }, tempDir)
+      ).toMatchObject({ commits_scanned: 1, findings: [] });
+    });
+
+    const runPushScan = (...extraArgs: string[]) => {
+      const output = path.join(tempDir, "report.json");
+      const run = childProcess.spawnSync(
+        process.execPath,
+        [
+          path.join(process.cwd(), "ops", "scripts", "testing-strategy.cjs"),
+          "scan-pushed-secrets",
+          "--from",
+          base,
+          ...extraArgs,
+          "--output",
+          output,
+        ],
+        { cwd: tempDir, encoding: "utf8" }
+      );
+      const report = JSON.parse(fs.readFileSync(output, "utf8")) as {
+        ok: boolean;
+        commits_scanned: number;
+        findings: unknown[];
+      };
+      return { run, report };
+    };
+
+    it("reports pushed findings once from the command line and fails", () => {
+      const added = commitFiles(tempDir, "Add key", {
+        "scripts/run.sh": `export GITHUB_TOKEN=${FAKE_GITHUB_TOKEN}\n`,
+      });
+
+      const { run, report } = runPushScan(
+        "--exclude-reachable-from",
+        "refs/heads/does-not-exist"
+      );
+
+      expect(run.status).toBe(1);
+      expect(run.stderr).toContain(
+        `scripts/run.sh:1 in commit ${added.slice(0, 12)}`
+      );
+      expect(run.stderr).not.toContain(FAKE_GITHUB_TOKEN);
+      expect(report).toMatchObject({ ok: false, commits_scanned: 1 });
+      expect(report.findings).toEqual([
+        {
+          file: "scripts/run.sh",
+          line: 1,
+          pattern: "github-token",
+          commit: added.slice(0, 12),
+        },
+      ]);
+    });
+
+    it("passes an ordinary push", () => {
+      commitFiles(tempDir, "Docs", { "docs/guide.md": "# Guide\n" });
+
+      const { run, report } = runPushScan();
+
+      expect(run.status).toBe(0);
+      expect(report).toMatchObject({
+        ok: true,
+        commits_scanned: 1,
+        findings: [],
+      });
+    });
+  });
+
+  const pushScanWorkflow = () =>
+    YAML.parse(
+      fs.readFileSync(
+        path.join(process.cwd(), ".github/workflows/push-secret-scan.yml"),
+        "utf8"
+      )
+    ) as {
+      concurrency?: unknown;
+      jobs: Record<
+        string,
+        { steps: Array<{ name?: string; run?: string; env?: object }> }
+      >;
+    };
+  const pushScanStep = () =>
+    pushScanWorkflow().jobs["push-secret-scan"]?.steps.find(
+      (step) => step.name === "Scan pushed changes for secrets"
+    );
+
+  it("scans each pushed commit range without cancelling earlier pushes", () => {
+    const scan = pushScanStep();
+
+    expect(pushScanWorkflow().concurrency).toBeUndefined();
+    expect(scan?.run).toContain(
+      "node ops/scripts/testing-strategy.cjs scan-pushed-secrets"
+    );
+    expect(scan?.run).not.toContain("scan-changed-secrets");
+    expect(scan?.env).toMatchObject({
+      PUSHED_BRANCH: "${{ github.ref_name }}",
+    });
+  });
+
+  it.each([
+    [
+      "a feature branch",
+      "feature/x",
+      [
+        "--exclude-reachable-from",
+        "refs/remotes/origin/main,refs/remotes/origin/1a-staging",
+      ],
+    ],
+    [
+      "the staging branch",
+      "1a-staging",
+      ["--exclude-reachable-from", "refs/remotes/origin/main"],
+    ],
+    ["the default branch", "main", []],
+  ])(
+    "chooses which shared branches to leave out when pushing %s",
+    (_label, pushedBranch, expectedExclusions) => {
+      const scan = pushScanStep();
+      gitIn(tempDir, "init", "--quiet");
+      const first = commitFiles(tempDir, "First", { "a.md": "a\n" });
+      commitFiles(tempDir, "Second", { "b.md": "b\n" });
+      gitIn(tempDir, "update-ref", "refs/remotes/origin/main", first);
+      gitIn(tempDir, "update-ref", "refs/remotes/origin/1a-staging", first);
+      const bin = path.join(tempDir, "fake-bin");
+      fs.mkdirSync(bin);
+      const recorded = path.join(tempDir, "node-args.txt");
+      fs.writeFileSync(
+        path.join(bin, "node"),
+        '#!/usr/bin/env bash\nprintf "%s\\n" "$@" > "$RECORDED_ARGS"\n',
+        { mode: 0o755 }
+      );
+
+      const run = childProcess.spawnSync("bash", ["-c", scan?.run ?? ""], {
+        cwd: tempDir,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          PATH: `${bin}${path.delimiter}${process.env["PATH"]}`,
+          PUSH_BEFORE: first,
+          DEFAULT_BRANCH: "main",
+          PUSHED_BRANCH: pushedBranch,
+          RECORDED_ARGS: recorded,
+        },
+      });
+
+      expect(run.status).toBe(0);
+      expect(fs.readFileSync(recorded, "utf8").trim().split("\n")).toEqual([
+        "ops/scripts/testing-strategy.cjs",
+        "scan-pushed-secrets",
+        "--from",
+        first,
+        "--to",
+        "HEAD",
+        "--output",
+        "test-results/push-secret-scan.json",
+        ...expectedExclusions,
+      ]);
+    }
+  );
+
+  it("scans commits that reached both shared branches before any run started", () => {
+    // A feature branch adds a value and removes it again, is merged into
+    // 1a-staging and into main, and only then do the three push runs check
+    // out. Every run already sees both shared branches holding the commits.
+    const scan = pushScanStep();
+    gitIn(tempDir, "init", "--quiet");
+    const base = commitFiles(tempDir, "Base", { "README.md": "# Fixture\n" });
+    gitIn(tempDir, "checkout", "--quiet", "-b", "feature");
+    commitFiles(tempDir, "Add settings", {
+      "config/app.json": `{"token":"${FAKE_GITHUB_TOKEN}"}\n`,
+    });
+    const featureHead = commitFiles(tempDir, "Remove token", {
+      "config/app.json": '{"token":""}\n',
+    });
+    gitIn(tempDir, "checkout", "--quiet", "-b", "staging", base);
+    gitIn(tempDir, "merge", "--quiet", "--no-ff", "--no-edit", "feature");
+    const stagingHead = gitIn(tempDir, "rev-parse", "HEAD");
+    gitIn(tempDir, "checkout", "--quiet", "main");
+    gitIn(tempDir, "merge", "--quiet", "--no-ff", "--no-edit", "feature");
+    const mainHead = gitIn(tempDir, "rev-parse", "HEAD");
+    gitIn(tempDir, "update-ref", "refs/remotes/origin/main", mainHead);
+    gitIn(tempDir, "update-ref", "refs/remotes/origin/1a-staging", stagingHead);
+    fs.mkdirSync(path.join(tempDir, "ops", "scripts"), { recursive: true });
+    fs.copyFileSync(
+      path.join(process.cwd(), "ops", "scripts", "testing-strategy.cjs"),
+      path.join(tempDir, "ops", "scripts", "testing-strategy.cjs")
+    );
+    const runPush = (pushedBranch: string, head: string, before: string) => {
+      gitIn(tempDir, "checkout", "--quiet", "--detach", head);
+      return childProcess.spawnSync("bash", ["-c", scan?.run ?? ""], {
+        cwd: tempDir,
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          PUSH_BEFORE: before,
+          DEFAULT_BRANCH: "main",
+          PUSHED_BRANCH: pushedBranch,
+        },
+      }).status;
+    };
+
+    expect({
+      feature: runPush("feature", featureHead, "0".repeat(40)),
+      staging: runPush("1a-staging", stagingHead, base),
+      main: runPush("main", mainHead, base),
+    }).toEqual({ feature: 0, staging: 0, main: 1 });
+  });
+
   it("accepts a read-only pull_request workflow", () => {
     fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
       recursive: true,
@@ -1194,6 +1682,155 @@ describe("testing strategy CI security checks", () => {
         "pull_request-write-permission",
       ])
     );
+  });
+
+  const releaseWorkflow = (steps: string[]) =>
+    [
+      "name: Release",
+      "on:",
+      "  workflow_dispatch:",
+      "permissions:",
+      "  contents: read",
+      "jobs:",
+      "  build:",
+      "    runs-on: ubuntu-latest",
+      "    steps:",
+      ...steps,
+      "      - run: ./bin/6529 ci",
+    ].join("\n");
+
+  it.each([
+    [
+      "a cache action",
+      [
+        "      - name: Restore pnpm store",
+        "        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4",
+        "        with:",
+        "          path: ~/.pnpm-store",
+      ],
+    ],
+    [
+      "a cache restore action",
+      [
+        "      - uses: 'actions/cache/restore@0400d5f644dc74513175e3cd8d07132dd4860809'",
+      ],
+    ],
+    [
+      "a setup action cache input",
+      [
+        "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0",
+        "        with:",
+        "          cache: pnpm",
+      ],
+    ],
+    [
+      "automatic package manager caching",
+      [
+        "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0",
+        "        with:",
+        "          package-manager-cache: true",
+      ],
+    ],
+    [
+      "a flow-style cache input",
+      [
+        "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0",
+        "        with: { node-version: '22.17.1', package-manager-cache: false, cache: pnpm }",
+      ],
+    ],
+    [
+      "a flow-style cache step",
+      [
+        "      - { uses: actions/cache/save@0400d5f644dc74513175e3cd8d07132dd4860809, with: { path: x, key: y } }",
+      ],
+    ],
+    [
+      "flow-style automatic package manager caching",
+      [
+        "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0",
+        "        with: { package-manager-cache: true }",
+      ],
+    ],
+  ])("flags %s in a production release workflow", (_label, steps) => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      path.join(
+        tempDir,
+        ".github",
+        "workflows",
+        "production-build-artifact.yml"
+      ),
+      releaseWorkflow(steps)
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [".github/workflows/production-build-artifact.yml"],
+      tempDir
+    );
+
+    expect(result.findings).toEqual([
+      expect.objectContaining({
+        file: ".github/workflows/production-build-artifact.yml",
+        pattern: "release-workflow-cache",
+      }),
+    ]);
+  });
+
+  it("accepts a release workflow that turns package manager caching off", () => {
+    fs.mkdirSync(path.join(tempDir, ".github", "workflows"), {
+      recursive: true,
+    });
+    const steps = [
+      "      # Restores no actions/cache entry.",
+      "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0",
+      "        with:",
+      "          package-manager-cache: false",
+      "      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0",
+      "        with: { node-version: '22.17.1', package-manager-cache: false }",
+      '      - run: aws s3 cp a b --cache-control "no-store"',
+    ];
+    fs.writeFileSync(
+      path.join(
+        tempDir,
+        ".github",
+        "workflows",
+        "build-upload-deploy-prod.yml"
+      ),
+      releaseWorkflow(steps)
+    );
+    fs.writeFileSync(
+      path.join(tempDir, ".github", "workflows", "coverage-floor.yml"),
+      releaseWorkflow([
+        "      - uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4",
+      ])
+    );
+
+    const result = validateWorkflowSecurityFiles(
+      [
+        ".github/workflows/build-upload-deploy-prod.yml",
+        ".github/workflows/coverage-floor.yml",
+      ],
+      tempDir
+    );
+
+    expect(result).toMatchObject({ ok: true, findings: [] });
+  });
+
+  it("keeps the checked-in production release workflows cache-free", () => {
+    const releaseWorkflows = [
+      ".github/workflows/build-upload-deploy-prod.yml",
+      ".github/workflows/production-artifact-metadata.yml",
+      ".github/workflows/production-artifact-verifier.yml",
+      ".github/workflows/production-build-artifact.yml",
+      ".github/workflows/publish-delegation-docs-content.yml",
+    ];
+
+    const result = validateWorkflowSecurityFiles(releaseWorkflows);
+
+    expect(result.checked_files).toEqual(releaseWorkflows);
+    expect(result).toMatchObject({ ok: true, findings: [] });
   });
 });
 

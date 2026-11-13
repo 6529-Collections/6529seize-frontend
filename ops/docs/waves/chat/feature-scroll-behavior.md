@@ -6,7 +6,10 @@ Wave chat keeps you on the newest drops while you stay at bottom.
 If you scroll up, it keeps your place and stops forced jumps.
 The message list fades gently at its top edge beneath the header.
 
-On Apple mobile only, new drops can stay pending until you return to bottom.
+On Apple mobile only, new drops from other people can stay pending until you
+return to bottom. Your own outgoing drops remain in the chat while sending and
+after they are saved, including text-only drops and drops with images.
+An image drop keeps its place in the conversation when image processing finishes.
 
 ## Location in the Site
 
@@ -29,7 +32,8 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 4. While pinned at visual bottom, incoming drops keep the view at latest.
 5. Scroll up to read history; the thread stops pinning and keeps your place.
 6. At top of loaded history, older pages load when available and a thin top loading bar appears.
-7. On Apple mobile while unpinned, newly arrived drops stay pending.
+7. On Apple mobile while unpinned, newly arrived drops from other people stay
+   pending. Sending your own drop does not reveal those pending incoming drops.
 8. The bottom control behavior changes by state:
    - Pending drops: button reveals pending drops and returns to latest.
    - No pending drops: button returns to latest when you are away from bottom.

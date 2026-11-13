@@ -239,6 +239,12 @@ const hydrateDropV2 = async ({
     ...(drop.is_author_signed ? { is_author_signed: true } : {}),
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
+    ...(drop.collapse_replies !== undefined
+      ? { collapse_replies: drop.collapse_replies }
+      : {}),
+    ...(drop.collapsed_reply_thread
+      ? { collapsed_reply_thread: drop.collapsed_reply_thread }
+      : {}),
     ...((drop.replies_count ?? 0) > 0
       ? { replies_count: drop.replies_count }
       : {}),
@@ -282,7 +288,8 @@ export const mapLeaderboardDropV2 = ({
     updated_at: drop.updated_at ?? null,
     title: drop.title ?? null,
     parts: [createBasePart(drop)],
-    parts_count: 1,
+    // The post's real part count: only its first part is loaded here.
+    parts_count: drop.parts_count,
     referenced_nfts: drop.referenced_nfts ?? [],
     mentioned_users: drop.mentioned_users ?? [],
     mentioned_groups: drop.mentioned_groups ?? [],
@@ -306,7 +313,7 @@ export const mapLeaderboardDropV2 = ({
   };
 };
 
-const hydrateDropsV2 = async ({
+export const hydrateDropsV2 = async ({
   drops,
   headers,
   wave,
@@ -404,6 +411,7 @@ export async function fetchWaveDropsFeedV2({
 }: FetchWaveDropsV2Props): Promise<ApiWaveDropsFeed> {
   const params: Record<string, string> = {
     limit: limit.toString(),
+    respect_drop_reply_collapse: "true",
   };
 
   if (typeof serialNoLimit === "number") {

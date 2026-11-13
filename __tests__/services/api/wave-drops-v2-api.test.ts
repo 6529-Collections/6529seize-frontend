@@ -1,5 +1,7 @@
+import { fetchDropReplyWindowV2 } from "@/services/api/drop-reply-window-api";
 import { fetchGlobalDropsSearchV2 } from "@/services/api/global-drops-search-api";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
+import { ApiDropSearchStrategy } from "@/generated/models/ApiDropSearchStrategy";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -618,6 +620,15 @@ describe("fetchWaveDropsFeedV2", () => {
     });
   });
 
+  it("keeps a leaderboard drop's real part count while loading only its first part", () => {
+    const drop = mapLeaderboardDropV2({
+      drop: { ...createDrop(1), parts_count: 3 } as unknown as ApiDropV2,
+      wave: waveMin,
+    });
+    expect(drop.parts).toHaveLength(1);
+    expect(drop.parts_count).toBe(3);
+  });
+
   it("maps V2 priority metadata into leaderboard legacy drops", () => {
     const priorityMetadata = [
       {
@@ -898,6 +909,85 @@ describe("fetchDropRepliesV2", () => {
     expect(result.drops[0]?.metadata).toEqual(priorityMetadata);
     expect(result.drops[0]?.top_raters).toEqual([]);
   });
+});
+
+describe("fetchDropReplyWindowV2", () => {
+  const signal = new AbortController().signal;
+  const makeReply = (serialNo: number) => ({
+    ...createDrop(1),
+    id: `reply-${serialNo}`,
+    serial_no: serialNo,
+  });
+
+  it("keeps an older linked reply and exposes cursors in both directions", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [50, 41, 40, 25, 13, 2].map(makeReply),
+    });
+
+    const result = await fetchDropReplyWindowV2({
+      parentDropId: "parent-drop",
+      serialNo: 40,
+      strategy: ApiDropSearchStrategy.Both,
+      limit: 2,
+      signal,
+    });
+
+    expect(result.drops.map((reply) => reply.serial_no)).toEqual([40, 25]);
+    expect(result.older).toBe(25);
+    expect(result.newer).toBe(40);
+    expect(commonApiFetchMock).toHaveBeenLastCalledWith({
+      endpoint: "v2/drops/parent-drop/replies",
+      params: {
+        limit: "3",
+        serial_no_limit: "40",
+        search_strategy: "FIND_BOTH",
+      },
+      signal,
+    });
+  });
+
+  it("keeps the closest newer replies when there are more to load", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [60, 51, 50].map(makeReply),
+    });
+
+    const result = await fetchDropReplyWindowV2({
+      parentDropId: "parent-drop",
+      serialNo: 40,
+      strategy: ApiDropSearchStrategy.Newer,
+      limit: 2,
+      signal,
+    });
+
+    expect(result.drops.map((reply) => reply.serial_no)).toEqual([51, 50]);
+    expect(result.newer).toBe(51);
+    expect(result.older).toBe(50);
+  });
+  it.each([ApiDropSearchStrategy.Older, ApiDropSearchStrategy.Newer])(
+    "stops pagination in the requested direction when %s repeats its boundary",
+    async (strategy) => {
+      commonApiFetchMock.mockResolvedValueOnce({
+        wave,
+        drops: [40, 40, 40].map(makeReply),
+      });
+
+      const result = await fetchDropReplyWindowV2({
+        parentDropId: "parent-drop",
+        serialNo: 40,
+        strategy,
+        limit: 2,
+        signal,
+      });
+
+      expect(result.drops).toEqual([]);
+      expect(result.newer).toBeNull();
+      expect(result.older).toBe(
+        strategy === ApiDropSearchStrategy.Newer ? 41 : null
+      );
+    }
+  );
 });
 
 describe("fetchBoostedDropsV2", () => {

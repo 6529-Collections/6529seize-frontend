@@ -5,9 +5,12 @@ import styles from "./CollectDetailActionRow.module.css";
 export default function CollectDetailPanel({
   children,
   framed = true,
+  wrapContent = false,
 }: {
   readonly children: ReactNode;
   readonly framed?: boolean;
+  // Responsive cards retain the controller and its draft when the frame changes.
+  readonly wrapContent?: boolean;
 }) {
   return (
     <div
@@ -28,8 +31,10 @@ export default function CollectDetailPanel({
         ]
       )}
     >
-      {framed ? (
-        <div className={styles["detailPanelContent"]}>{children}</div>
+      {framed || wrapContent ? (
+        <div className={framed ? styles["detailPanelContent"] : undefined}>
+          {children}
+        </div>
       ) : (
         children
       )}

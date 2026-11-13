@@ -2,6 +2,7 @@
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { t } from "@/i18n/messages";
 import type { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import CreateDirectMessage from "./CreateDirectMessage";
@@ -20,6 +21,7 @@ export default function CreateDirectMessageModal({
   profile,
 }: CreateDirectMessageModalProps) {
   const locale = useBrowserLocale();
+  if (isE2eeEnabled()) return null;
 
   return (
     <MobileWrapperDialog

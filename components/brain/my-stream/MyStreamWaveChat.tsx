@@ -15,7 +15,10 @@ import {
   WaveReplyThreadsProvider,
 } from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
 import { useCollapsedReplyThreadTarget } from "@/components/waves/drops/reply-threads/useCollapsedReplyThreadTarget";
-import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
+import {
+  getIndividuallyCollapsedThread,
+  isWaveRepliesCollapsed,
+} from "@/helpers/waves/collapsed-replies.helpers";
 import { DropMode } from "@/components/waves/dropComposer.types";
 import {
   UnreadDividerProvider,
@@ -301,23 +304,21 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const requestedScrollTarget =
     initialDropState?.waveId === wave.id ? initialDropState.serialNo : null;
   const collapseReplies = isWaveRepliesCollapsed(wave);
+  const replyThreadsEnabled = collapseReplies || !isDirectMessage;
   const replyThreadsStore = useExpandedReplyThreadsStore();
-  // A link to a collapsed reply opens its parent's thread instead.
+  // Resolve the thread to load while retaining the linked reply to reveal.
   const replyThreadTarget = useCollapsedReplyThreadTarget({
-    enabled: collapseReplies && viewMode !== "gallery",
+    enabled: viewMode !== "gallery" && replyThreadsEnabled,
+    collapseAll: collapseReplies,
     waveId: wave.id,
     serialNo: requestedScrollTarget,
   });
-  const scrollTarget =
-    replyThreadTarget?.parentSerialNo ?? requestedScrollTarget;
-
   useEffect(() => {
     if (!replyThreadTarget) {
       return;
     }
-    replyThreadsStore.setExpanded(replyThreadTarget.parentDropId, true);
     fetchAroundSerialNo(wave.id, replyThreadTarget.parentSerialNo);
-  }, [fetchAroundSerialNo, replyThreadTarget, replyThreadsStore, wave.id]);
+  }, [fetchAroundSerialNo, replyThreadTarget, wave.id]);
 
   let dividerTarget = firstUnreadSerialNo;
   if (initialDropState?.waveId === wave.id) {
@@ -417,12 +418,13 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onDropAddedToQueue = useCallback(() => {
     // Show a new reply where it lands: in its parent's thread.
     const replyTarget = activeDropRef.current;
-    if (
-      collapseReplies &&
-      replyTarget?.action === ActiveDropAction.REPLY &&
-      !replyTarget.drop.reply_to
-    ) {
-      replyThreadsStore.setExpanded(replyTarget.drop.id, true);
+    if (replyTarget?.action === ActiveDropAction.REPLY) {
+      const thread = getIndividuallyCollapsedThread(replyTarget.drop);
+      if (thread) {
+        replyThreadsStore.setExpanded(thread.id, true);
+      } else if (collapseReplies && !replyTarget.drop.reply_to) {
+        replyThreadsStore.setExpanded(replyTarget.drop.id, true);
+      }
     }
     setActiveDropForWave(null);
   }, [collapseReplies, replyThreadsStore, setActiveDropForWave]);
@@ -561,21 +563,18 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           <ChatFileDropOverlay description={getAcceptedUploadFormats(locale)} />
         )}
         <WaveReplyThreadsProvider
-          enabled={collapseReplies}
+          enabled={replyThreadsEnabled}
           wave={wave}
           store={replyThreadsStore}
         >
           <WaveDropsAllWithoutProvider
-            key={
-              replyThreadTarget
-                ? `${wave.id}-thread-${replyThreadTarget.parentSerialNo}`
-                : wave.id
-            }
+            key={[wave.id, replyThreadTarget?.replySerialNo].join(":")}
             waveId={wave.id}
             wave={wave}
             onReply={handleReply}
             activeDrop={activeDrop}
-            initialDrop={scrollTarget}
+            initialDrop={replyThreadTarget ? null : requestedScrollTarget}
+            initialThreadReply={replyThreadTarget}
             dividerSerialNo={dividerTarget}
             unreadCount={
               isDirectMessage
@@ -601,7 +600,9 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
               enabled={isDirectMessage}
               showBanner={showLegacyDmBanner}
             >
-              <CreateDropWaveWrapper>
+              <CreateDropWaveWrapper
+                iosMaxHeight={effectiveWaveViewStyle.height}
+              >
                 <PrivilegedDropCreator
                   activeDrop={activeDrop}
                   onCancelReplyQuote={onCancelReplyQuote}

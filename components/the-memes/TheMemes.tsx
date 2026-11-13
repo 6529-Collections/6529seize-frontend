@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  CONNECTED_TAB_INTERACTION_CLASSES,
+  CONNECTED_TAB_SURFACE_CLASSES,
+  getConnectedTabStateClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
+
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
 import CollectEntryLink from "@/components/collect/CollectEntryLink";
@@ -8,6 +14,11 @@ import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import TheMemesCard from "@/components/the-memes/TheMemesCard";
 import TheMemesSortButton from "@/components/the-memes/TheMemesSortButton";
+import {
+  THE_MEMES_CONTAINER_CLASS_NAME,
+  THE_MEMES_GRID_CLASS_NAME,
+  THE_MEMES_PAGE_CLASS_NAME,
+} from "@/components/the-memes/theMemesLayout";
 import useMemesSortVisibility from "@/components/the-memes/useMemesSortVisibility";
 import {
   getAllSeasonsLabel,
@@ -526,11 +537,7 @@ export default function TheMemesComponent({
           initialDataRef.current = undefined;
           setSortDir(direction);
         }}
-        className={`tw-m-0 tw-inline-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none lg:[body:not(.capacitor-native)_&]:tw-w-6 lg:[body:not(.capacitor-native)_&]:tw-rounded-lg lg:[body:not(.capacitor-native)_&]:tw-duration-300 ${
-          isActive
-            ? "tw-bg-iron-700 tw-text-white lg:[body:not(.capacitor-native)_&]:tw-bg-transparent"
-            : "tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200 lg:[body:not(.capacitor-native)_&]:tw-text-iron-600 lg:[body:not(.capacitor-native)_&]:desktop-hover:hover:tw-text-iron-300"
-        }`}
+        className={`tw-m-0 tw-inline-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-p-0 lg:[body:not(.capacitor-native)_&]:tw-w-6 lg:[body:not(.capacitor-native)_&]:tw-rounded-lg ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive })}`}
       >
         <Icon
           aria-hidden="true"
@@ -559,7 +566,7 @@ export default function TheMemesComponent({
     }
 
     return (
-      <div className="tw-grid tw-grid-cols-2 tw-gap-2.5 sm:tw-grid-cols-3 sm:tw-gap-4 sm:tw-pt-2 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
+      <div className={`${THE_MEMES_GRID_CLASS_NAME} sm:tw-pt-2`}>
         {nfts.map((nft) => printNft(nft))}
       </div>
     );
@@ -594,7 +601,7 @@ export default function TheMemesComponent({
           <h2 className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
             {formatInteger(locale, meme.meme)} - {meme.meme_name}
           </h2>
-          <div className="tw-grid tw-grid-cols-2 tw-gap-2.5 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5">
+          <div className={THE_MEMES_GRID_CLASS_NAME}>
             {memeNfts.map((nft) => printNft(nft))}
           </div>
         </section>
@@ -609,8 +616,8 @@ export default function TheMemesComponent({
       tokenIds={tokenIds}
       enabled={connectedProfile !== null}
     >
-      <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
-        <div className="tw-mx-auto tw-w-full tw-max-w-[1400px] tw-px-4 tw-pb-8 tw-pt-4 sm:tw-py-6 md:tw-px-6 md:tw-py-10 lg:tw-px-8">
+      <div className={THE_MEMES_PAGE_CLASS_NAME}>
+        <div className={THE_MEMES_CONTAINER_CLASS_NAME}>
           <header className="tw-pb-5 max-sm:tw-pb-2">
             <div className="tw-flex tw-flex-col tw-gap-4">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
@@ -681,7 +688,9 @@ export default function TheMemesComponent({
                 <span className="tw-shrink-0 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400">
                   {t(locale, "theMemes.sorting.sortBy")}
                 </span>
-                <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0.5 lg:[body:not(.capacitor-native)_&]:tw-h-7 lg:[body:not(.capacitor-native)_&]:tw-gap-0 lg:[body:not(.capacitor-native)_&]:tw-bg-transparent lg:[body:not(.capacitor-native)_&]:tw-p-0">
+                <fieldset
+                  className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-border-0 tw-p-0.5 tw-ring-1 tw-ring-inset lg:[body:not(.capacitor-native)_&]:tw-h-7 lg:[body:not(.capacitor-native)_&]:tw-gap-0 lg:[body:not(.capacitor-native)_&]:tw-bg-transparent lg:[body:not(.capacitor-native)_&]:tw-p-0 lg:[body:not(.capacitor-native)_&]:tw-ring-0`}
+                >
                   <legend className="tw-sr-only">
                     {t(locale, "theMemes.sorting.directionLegend")}
                   </legend>

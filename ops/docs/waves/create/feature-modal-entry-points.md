@@ -86,6 +86,8 @@ mobile viewports.
   Chat screen. Saving depends on browser storage and is delayed briefly after
   edits. Pictures and attachments must be added again. Older drafts restore
   settings only. Restoring opens the first screen; subwaves have no draft resume.
+  Signing the profile out removes its saved drafts from this device;
+  `Sign out all` removes every saved draft, including older ones.
 - On mobile, the sheet keeps its header and close control visible while the
   multi-step form scrolls within the available viewport.
 - Keyboard users can Tab to `Close` and activate it with Enter or Space, or press

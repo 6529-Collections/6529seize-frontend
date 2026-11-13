@@ -54,7 +54,10 @@ import {
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  isMessageComposePathname,
+} from "@/helpers/navigation.helpers";
 import {
   isProfilePreferencesEntry,
   PREFERENCES_ENTRY_SOURCE_PARAM,
@@ -478,8 +481,8 @@ export default function AppHeader() {
     pathname === "/messages" || pathname.startsWith("/messages/");
   const isHomeRoute = pathname === "/";
 
-  const isCreateRoute =
-    pathname === "/waves/create" || pathname === "/messages/create";
+  const isMessageCompose = isMessageComposePathname(pathname);
+  const isCreateRoute = pathname === "/waves/create" || isMessageCompose;
   const isInsideWave = !!waveId;
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
@@ -653,7 +656,7 @@ export default function AppHeader() {
             isInsideWave ? "tw-justify-start" : "tw-justify-center"
           )}
         >
-          {pathname === "/messages/create" ? (
+          {isMessageCompose ? (
             <h1 className="tw-m-0 tw-text-base tw-font-semibold tw-tracking-tight">
               {t(locale, "quickDm.createModalTitle")}
             </h1>
@@ -668,7 +671,7 @@ export default function AppHeader() {
             />
           )}
         </div>
-        {pathname === "/messages/create" ? (
+        {isMessageCompose ? (
           <span aria-hidden="true" className="tw-w-10 tw-flex-shrink-0" />
         ) : (
           <div

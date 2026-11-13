@@ -1,8 +1,6 @@
 "use client";
 
 import useCapacitor from "@/hooks/useCapacitor";
-import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
@@ -63,15 +61,8 @@ export function AboutContentsDropdown({
     "--about-contents-sticky-top": `${stickyTop}px`,
   };
   const { hideNftPurchasing: hideSubscriptions } = useNftPurchasingVisibility();
-  const consent = useOptionalCookieConsent();
   const groups = getVisibleAboutNavGroups({
     hideSubscriptions,
-    hideSubscriptionReports:
-      consent !== undefined &&
-      shouldHideSubscriptions({
-        capacitorIsIos: capacitor.isIos,
-        country: consent.country,
-      }),
     appWalletsSupported,
   });
   const normalizedCurrentHref = normalizeAboutHref(currentHref);

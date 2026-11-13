@@ -251,6 +251,37 @@ export class DeviceDirectory {
     return verification.ok && verification.verified;
   }
 
+  /**
+   * The device that signed `record`'s revocation, when the signature over
+   * the revocation digest verifies with that device's key; otherwise null.
+   */
+  private async signedRevoker(
+    record: ApiE2eeDevice
+  ): Promise<ApiE2eeDevice | null> {
+    const revocation = record.revocation;
+    if (record.revoked_at === null || !revocation) {
+      return null;
+    }
+    const digest = revokeDigest(
+      record.device_key,
+      revocation.revoker_device_key,
+      revocation.revoked_at
+    );
+    if (
+      !this.deps.verifyEd25519(
+        revocation.revoker_device_key,
+        digestBytes(digest),
+        revocation.signature
+      )
+    ) {
+      return null;
+    }
+    return revocation.revoker_device_key.toLowerCase() ===
+      record.device_key.toLowerCase()
+      ? record
+      : await this.getDevice(revocation.revoker_device_key);
+  }
+
   /** A revocation counts only when its signature verifies (2.4). */
   async revocationState(record: ApiE2eeDevice): Promise<RevocationState> {
     if (record.revoked_at === null || !record.revocation) {
@@ -261,33 +292,42 @@ export class DeviceDirectory {
     if (cached) {
       return cached;
     }
-    const revocation = record.revocation;
-    const digest = revokeDigest(
-      record.device_key,
-      revocation.revoker_device_key,
-      revocation.revoked_at
-    );
-    let state: RevocationState = "unverified";
-    if (
-      this.deps.verifyEd25519(
-        revocation.revoker_device_key,
-        digestBytes(digest),
-        revocation.signature
-      )
-    ) {
-      const revoker =
-        revocation.revoker_device_key.toLowerCase() === key
-          ? record
-          : await this.getDevice(revocation.revoker_device_key);
-      if (
-        revoker &&
-        (await this.trustedRevoker(revoker, record, revocation.revoked_at))
-      ) {
-        state = "verified";
-      }
-    }
+    const revokedAt = record.revocation.revoked_at;
+    const revoker = await this.signedRevoker(record);
+    const state: RevocationState =
+      revoker && (await this.trustedRevoker(revoker, record, revokedAt))
+        ? "verified"
+        : "unverified";
     this.revocations.set(key, state);
     return state;
+  }
+
+  /**
+   * This device's own revocation, before its local data is removed. Stricter
+   * than `revocationState`: the listed owner alone never counts. The
+   * signature must verify, and the revoker must be the device itself, or a
+   * device listed under the same profile that `isTrusted` accepts and whose
+   * grant this client verifies at the revocation time. Not cached.
+   */
+  async ownRevocationVerified(
+    record: ApiE2eeDevice,
+    isTrusted: (revoker: ApiE2eeDevice) => boolean
+  ): Promise<boolean> {
+    const revoker = await this.signedRevoker(record);
+    if (!revoker || !record.revocation) {
+      return false;
+    }
+    if (revoker.device_key.toLowerCase() === record.device_key.toLowerCase()) {
+      return true;
+    }
+    if (revoker.profile_id !== record.profile_id || !isTrusted(revoker)) {
+      return false;
+    }
+    const verification = await this.verify(
+      revoker,
+      record.revocation.revoked_at * 1000
+    );
+    return verification.ok && verification.verified;
   }
 
   /**

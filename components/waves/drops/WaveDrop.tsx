@@ -696,7 +696,7 @@ const WaveDropInner = ({
             timestamp={drop.created_at}
             variant={canUseTouchActionSheet ? "swipe" : "hover"}
             forceVisible={isRowPointerHovered}
-            authorSigned={isDropAuthorSigned(drop)}
+            signedDrop={isDropAuthorSigned(drop) ? drop : undefined}
           />
         )}
         <div

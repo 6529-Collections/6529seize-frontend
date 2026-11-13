@@ -101,15 +101,19 @@ the `More` menu.
 2. Confirm the avatar, handle and full wallet address. Under **Which app are you
    connecting?**, select **6529 Mobile** or **6529 Desktop**.
 3. Choose **Connect only**, or **Connect with Post Signing & DM Encryption**.
-   Secure setup asks for a wallet signature before preparing its link. On Desktop,
-   the secure option shows **Coming soon**. **Connect only** signs in the receiving
-   app with a short-lived, one-time code.
+   The modal title changes to **Connect 6529 Mobile** or **Connect 6529 Desktop**.
+   Secure Desktop setup shows the v0.4.0 minimum under the secure action, during
+   wallet signing, and below **Open in 6529 Desktop**. **Connect only** signs in
+   the receiving app with a short-lived, one-time code.
 4. Mobile shows a full-width QR. Desktop shows the 6529 logo and **Open in 6529
    Desktop** launch control, rather than a QR. The heading reads **Connect as
    {handle}**, with **with Post Signing & DM Encryption** for secure setup.
 5. Copy with the icon inside the link field. The adjacent refresh icon generates
    a new Connect-only code directly. For secure setup, refresh clears the displayed
-   link and returns to the wallet-signing state for a new signature.
+   link and returns to the wallet-signing state for a new signature. A secure
+   setup link is not shown as text or as a tooltip; the field reads
+   **Connection ready**, and the Mobile QR code or Desktop launch control and the
+   copy icon still carry the link.
 6. **Back** returns to the app and connection choices. The same row reminds you:
    **Use only on a device you own. This code works once.**
 
@@ -118,12 +122,17 @@ refresh are disabled during preparation; a failed preparation can be retried.
 The modal transitions smoothly between screen heights and scrolls on short
 screens without clipping the QR, controls or focus rings.
 
-The receiving app confirms the incoming account. Secure links also list
+The receiving app confirms the incoming account, showing its full wallet
+address. Every connection link names that address; a link without a valid one
+shows **Missing required parameters** and cannot be accepted, and the app
+accepts the connection only when the redeemed sign-in is for that same
+address. Secure links also list
 **Signed Posts** and **Encrypted DMs**, with **Accept and enable both** instead
 of **Accept connection**. One secure link both signs in and enrolls the app;
 registration does not occur merely because a QR was generated. Working receiver
-keys/history are preserved. Both connection types open Home after acceptance;
-secure setup completes before navigation. The source session remains connected. See
+keys and history are preserved. Successful acceptance opens Home. If secure
+setup fails after sign-in, the receiving app shows a recovery message and a
+link to Home. The source session remains connected. See
 [Encrypted messages setup](../encrypted-messages.md#setup-through-connection-sharing)
 for history, backup and capability limits.
 
@@ -162,7 +171,13 @@ No page-copy, social, or current-page Share actions appear in this dialog.
   Desktop. Opened anywhere else, the page shows a message and a home link
   instead of `Accept connection`. The page removes the link's one-time
   credential from the address bar as soon as it loads, so reloading it does not
-  reopen the connection; open the original link or QR code again instead.
+  reopen the connection; open the original link or QR code again instead. The
+  one-time code may travel in the query or in the URL fragment
+  (`#connection_share_code=`); the fragment wins when both are present.
+- `mobile6529://navigate/<path>` app links follow the same excluded routes as
+  universal links (for example `/accept-connection-sharing`, `/app-wallets`,
+  `/auth`, `/api`): the app ignores such a link and stays where it is.
+  Connection links use `mobile6529://share-connection` instead.
 - Connection preparation can show sign-in, authentication-upgrade, loading,
   or unavailable states without revealing page-sharing controls. These notice
   states retain the final connection area's footprint. The unframed loading

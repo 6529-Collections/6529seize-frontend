@@ -13,15 +13,28 @@ import {
   redeemConnectionShare,
 } from "@/services/auth/session-v2.utils";
 import { commonApiPost } from "@/services/api/common-api";
+import type {
+  acceptConnectionDeviceSetup,
+  ConnectionDeviceSetupOutcome,
+} from "@/lib/device-signing/connection-setup";
+import { reportConnectionShareSetup } from "@/utils/monitoring/connectionShareSetupMonitoring";
 import {
   canStoreAnotherWalletAccount,
   getConnectedWalletAccounts,
   setAuthJwt,
 } from "@/services/auth/auth.utils";
 
-const mockAcceptDeviceSetup = jest.fn(async (_input: unknown) => undefined);
+type DeviceSetupInput = Parameters<typeof acceptConnectionDeviceSetup>[0];
+const mockAcceptDeviceSetup = jest.fn(
+  async (_input: DeviceSetupInput): Promise<ConnectionDeviceSetupOutcome> =>
+    "reused"
+);
 jest.mock("@/lib/device-signing/connection-setup", () => ({
-  acceptConnectionDeviceSetup: (input: unknown) => mockAcceptDeviceSetup(input),
+  acceptConnectionDeviceSetup: (input: DeviceSetupInput) =>
+    mockAcceptDeviceSetup(input),
+}));
+jest.mock("@/utils/monitoring/connectionShareSetupMonitoring", () => ({
+  reportConnectionShareSetup: jest.fn(),
 }));
 
 // Mock TitleContext
@@ -105,6 +118,8 @@ const TestProvider: React.FC<{
 };
 
 const ACCEPT_CONNECTION_PATH = "/accept-connection-sharing";
+const ADDRESS = "0x1234567890123456789012345678901234567890";
+const OTHER_ADDRESS = "0x9999999999999999999999999999999999999999";
 const ORIGINAL_USER_AGENT = navigator.userAgent;
 const DESKTOP_APP_USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) 6529.io/1.0.0 Chrome/124.0.0.0 Electron/31.0.0 Safari/537.36";
@@ -130,7 +145,8 @@ describe("AcceptConnectionSharing page", () => {
 
   beforeEach(() => {
     mockAcceptDeviceSetup.mockReset();
-    mockAcceptDeviceSetup.mockResolvedValue(undefined);
+    mockAcceptDeviceSetup.mockResolvedValue("reused");
+    jest.mocked(reportConnectionShareSetup).mockClear();
     (useRouter as jest.Mock).mockReturnValue({ push: jest.fn() });
     (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
@@ -149,20 +165,23 @@ describe("AcceptConnectionSharing page", () => {
     });
   });
 
-  it("shows missing parameters message when connection share code is missing", () => {
+  it("shows missing parameters message when connection share code is missing", async () => {
     render(
       <TestProvider>
         <AcceptConnectionSharingPage />
       </TestProvider>
     );
-    expect(screen.getByText(/Missing required parameters/)).toBeInTheDocument();
+    // The fragment, which may carry the code, is read after mount.
+    expect(
+      await screen.findByText(/Missing required parameters/)
+    ).toBeInTheDocument();
   });
 
   it("includes provided address in the page", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (useSearchParams as jest.Mock).mockReturnValue(
       new URLSearchParams(
-        "connection_share_code=abc12345&address=0x123&role=client-role"
+        `connection_share_code=abc12345&address=${ADDRESS}&role=client-role`
       )
     );
     render(
@@ -171,13 +190,13 @@ describe("AcceptConnectionSharing page", () => {
       </TestProvider>
     );
     expect(screen.getByText(/Incoming connection/)).toBeInTheDocument();
-    expect(screen.getAllByText(/0x123/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(new RegExp(ADDRESS)).length).toBeGreaterThan(0);
   });
 
   it("does not redeem native connection shares in a web browser", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("connection_share_code=abc12345&address=0x123")
+      new URLSearchParams(`connection_share_code=abc12345&address=${ADDRESS}`)
     );
 
     render(
@@ -196,7 +215,7 @@ describe("AcceptConnectionSharing page", () => {
   it("allows connection share accept UI in the native app", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("connection_share_code=abc12345&address=0x123")
+      new URLSearchParams(`connection_share_code=abc12345&address=${ADDRESS}`)
     );
 
     render(
@@ -221,7 +240,7 @@ describe("AcceptConnectionSharing page", () => {
       );
       if (target === "desktop") setUserAgent(DESKTOP_APP_USER_AGENT);
       (useSearchParams as jest.Mock).mockReturnValue(
-        new URLSearchParams("connection_share_code=abc12345&address=0x123")
+        new URLSearchParams(`connection_share_code=abc12345&address=${ADDRESS}`)
       );
       (useSeizeConnectContext as jest.Mock).mockReturnValue({
         address: undefined,
@@ -231,7 +250,7 @@ describe("AcceptConnectionSharing page", () => {
       });
       (redeemConnectionShare as jest.Mock).mockResolvedValue({
         client_type: target,
-        address: "0x123",
+        address: ADDRESS,
         role: "server-role",
         access_token: "access-token",
         access_token_expires_at: "2026-06-10T00:00:00.000Z",
@@ -253,16 +272,16 @@ describe("AcceptConnectionSharing page", () => {
       await waitFor(() =>
         expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", target)
       );
-      expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith("0x123");
+      expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith(ADDRESS);
       expect(persistSessionResponse).toHaveBeenCalledWith(
         expect.objectContaining({
           client_type: target,
-          address: "0x123",
+          address: ADDRESS,
           role: "server-role",
           native_refresh_token: "native-refresh-token",
         })
       );
-      expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
+      expect(seizeAcceptConnection).toHaveBeenCalledWith(ADDRESS);
       expect(push).toHaveBeenCalledWith("/");
       expect(seizeConnect).not.toHaveBeenCalled();
       expect(mockAcceptDeviceSetup).not.toHaveBeenCalled();
@@ -275,14 +294,16 @@ describe("AcceptConnectionSharing page", () => {
     (useRouter as jest.Mock).mockReturnValue({ push });
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
     setUserAgent(DESKTOP_APP_USER_AGENT);
-    openConnectionLink("token=legacy-refresh&address=0x123&role=client-role");
+    openConnectionLink(
+      `token=legacy-refresh&address=${ADDRESS}&role=client-role`
+    );
     (useSeizeConnectContext as jest.Mock).mockReturnValue({
       address: undefined,
       seizeDisconnectAndLogout: jest.fn(),
       seizeAcceptConnection,
     });
     (commonApiPost as jest.Mock).mockResolvedValue({
-      address: "0x123",
+      address: ADDRESS,
       token: "legacy-access-token",
     });
 
@@ -294,28 +315,28 @@ describe("AcceptConnectionSharing page", () => {
 
     // The credential leaves the visible URL before the user acts on the page.
     expect(window.location.pathname).toBe(ACCEPT_CONNECTION_PATH);
-    expect(window.location.search).toBe("?address=0x123&role=client-role");
+    expect(window.location.search).toBe(`?address=${ADDRESS}&role=client-role`);
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
       expect(commonApiPost).toHaveBeenCalledWith({
         endpoint: "auth/redeem-refresh-token",
         body: {
-          address: "0x123",
+          address: ADDRESS,
           token: "legacy-refresh",
           role: "client-role",
         },
       })
     );
     expect(setAuthJwt).toHaveBeenCalledWith(
-      "0x123",
+      ADDRESS,
       "legacy-access-token",
       "legacy-refresh",
       "client-role"
     );
     expect(redeemConnectionShare).not.toHaveBeenCalled();
     expect(persistSessionResponse).not.toHaveBeenCalled();
-    expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
+    expect(seizeAcceptConnection).toHaveBeenCalledWith(ADDRESS);
     expect(push).toHaveBeenCalledWith("/");
   });
 
@@ -329,7 +350,9 @@ describe("AcceptConnectionSharing page", () => {
         isNativePlatform
       );
       setUserAgent(userAgent);
-      openConnectionLink("token=legacy-refresh&address=0x123&role=client-role");
+      openConnectionLink(
+        `token=legacy-refresh&address=${ADDRESS}&role=client-role`
+      );
 
       render(
         <TestProvider>
@@ -346,7 +369,9 @@ describe("AcceptConnectionSharing page", () => {
         screen.getByRole("link", { name: "Take me home" })
       ).toHaveAttribute("href", "/");
       expect(screen.queryByText("Accept connection")).not.toBeInTheDocument();
-      expect(window.location.search).toBe("?address=0x123&role=client-role");
+      expect(window.location.search).toBe(
+        `?address=${ADDRESS}&role=client-role`
+      );
       expect(commonApiPost).not.toHaveBeenCalled();
       expect(setAuthJwt).not.toHaveBeenCalled();
       expect(redeemConnectionShare).not.toHaveBeenCalled();
@@ -356,7 +381,7 @@ describe("AcceptConnectionSharing page", () => {
   it("does not accept a legacy token through a mobile share link in a web browser", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
     openConnectionLink(
-      "connection_share_code=abc12345&token=legacy-refresh&address=0x123"
+      `connection_share_code=abc12345&token=legacy-refresh&address=${ADDRESS}`
     );
 
     render(
@@ -371,17 +396,17 @@ describe("AcceptConnectionSharing page", () => {
       )
     ).toBeInTheDocument();
     expect(screen.queryByText("Accept connection")).not.toBeInTheDocument();
-    expect(window.location.search).toBe("?address=0x123");
+    expect(window.location.search).toBe(`?address=${ADDRESS}`);
   });
 
   it("redeems only the share code when a mobile link also carries a legacy token in the native app", async () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     openConnectionLink(
-      "connection_share_code=abc12345&token=legacy-refresh&address=0x123"
+      `connection_share_code=abc12345&token=legacy-refresh&address=${ADDRESS}`
     );
     (redeemConnectionShare as jest.Mock).mockResolvedValue({
       client_type: "native",
-      address: "0x123",
+      address: ADDRESS,
       role: null,
       access_token: "access-token",
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
@@ -395,7 +420,7 @@ describe("AcceptConnectionSharing page", () => {
       </TestProvider>
     );
 
-    expect(window.location.search).toBe("?address=0x123");
+    expect(window.location.search).toBe(`?address=${ADDRESS}`);
     fireEvent.click(screen.getByText("Accept connection"));
 
     await waitFor(() =>
@@ -407,23 +432,27 @@ describe("AcceptConnectionSharing page", () => {
 
   it("cleans the URL again when the same link is reopened on the mounted page", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
-    openConnectionLink("connection_share_code=abc12345&address=0x123&_t=1");
+    openConnectionLink(
+      `connection_share_code=abc12345&address=${ADDRESS}&_t=1`
+    );
     const { rerender } = render(
       <TestProvider>
         <AcceptConnectionSharingPage />
       </TestProvider>
     );
-    expect(window.location.search).toBe("?address=0x123&_t=1");
+    expect(window.location.search).toBe(`?address=${ADDRESS}&_t=1`);
 
     // A repeated deep link navigates to the same code with a new timestamp.
-    openConnectionLink("connection_share_code=abc12345&address=0x123&_t=2");
+    openConnectionLink(
+      `connection_share_code=abc12345&address=${ADDRESS}&_t=2`
+    );
     rerender(
       <TestProvider>
         <AcceptConnectionSharingPage />
       </TestProvider>
     );
 
-    expect(window.location.search).toBe("?address=0x123&_t=2");
+    expect(window.location.search).toBe(`?address=${ADDRESS}&_t=2`);
     expect(screen.getByText("Accept connection")).toBeInTheDocument();
   });
 
@@ -432,11 +461,13 @@ describe("AcceptConnectionSharing page", () => {
     const historyLength = window.history.length;
     (useRouter as jest.Mock).mockReturnValue({ push });
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
-    openConnectionLink("connection_share_code=abc12345&address=0x123&_t=1");
+    openConnectionLink(
+      `connection_share_code=abc12345&address=${ADDRESS}&_t=1`
+    );
     window.history.replaceState(null, "", `${window.location.href}#top`);
     (redeemConnectionShare as jest.Mock).mockResolvedValue({
       client_type: "native",
-      address: "0x123",
+      address: ADDRESS,
       role: null,
       access_token: "access-token",
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
@@ -450,7 +481,7 @@ describe("AcceptConnectionSharing page", () => {
       </TestProvider>
     );
 
-    expect(window.location.search).toBe("?address=0x123&_t=1");
+    expect(window.location.search).toBe(`?address=${ADDRESS}&_t=1`);
     expect(window.location.hash).toBe("#top");
     // Replacing the entry must not add a history entry or navigate.
     expect(window.history.length).toBe(historyLength);
@@ -466,7 +497,7 @@ describe("AcceptConnectionSharing page", () => {
 
   it("waits for hydration before choosing the Desktop flow, without a hydration mismatch", async () => {
     setUserAgent(DESKTOP_APP_USER_AGENT);
-    openConnectionLink("token=legacy-refresh&address=0x123");
+    openConnectionLink(`token=legacy-refresh&address=${ADDRESS}`);
     const page = (
       <TestProvider>
         <AcceptConnectionSharingPage />
@@ -489,7 +520,7 @@ describe("AcceptConnectionSharing page", () => {
 
       expect(container.textContent).toContain("Accept connection");
       expect(onRecoverableError).not.toHaveBeenCalled();
-      expect(window.location.search).toBe("?address=0x123");
+      expect(window.location.search).toBe(`?address=${ADDRESS}`);
     } finally {
       await act(async () => root?.unmount());
       container.remove();
@@ -498,7 +529,7 @@ describe("AcceptConnectionSharing page", () => {
 
   it("removes link credentials from the URL in a web browser", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
-    openConnectionLink("connection_share_code=abc12345&address=0x123");
+    openConnectionLink(`connection_share_code=abc12345&address=${ADDRESS}`);
 
     render(
       <TestProvider>
@@ -509,7 +540,7 @@ describe("AcceptConnectionSharing page", () => {
     expect(
       screen.getByText(/Open this connection link in the 6529 mobile app/)
     ).toBeInTheDocument();
-    expect(window.location.search).toBe("?address=0x123");
+    expect(window.location.search).toBe(`?address=${ADDRESS}`);
   });
 
   it("rejects a legacy desktop token response for a different address", async () => {
@@ -519,14 +550,16 @@ describe("AcceptConnectionSharing page", () => {
     (useRouter as jest.Mock).mockReturnValue({ push });
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
     setUserAgent(DESKTOP_APP_USER_AGENT);
-    openConnectionLink("token=legacy-refresh&address=0x123&role=client-role");
+    openConnectionLink(
+      `token=legacy-refresh&address=${ADDRESS}&role=client-role`
+    );
     (useSeizeConnectContext as jest.Mock).mockReturnValue({
       address: undefined,
       seizeDisconnectAndLogout: jest.fn(),
       seizeAcceptConnection,
     });
     (commonApiPost as jest.Mock).mockResolvedValue({
-      address: "0x999",
+      address: OTHER_ADDRESS,
       token: "legacy-access-token",
     });
 
@@ -553,7 +586,7 @@ describe("AcceptConnectionSharing page", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (getConnectedWalletAccounts as jest.Mock).mockReturnValue([
       {
-        address: "0x123",
+        address: ADDRESS,
         refreshToken: null,
         role: null,
         jwt: null,
@@ -562,10 +595,10 @@ describe("AcceptConnectionSharing page", () => {
       },
     ]);
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("connection_share_code=abc12345&address=0x123")
+      new URLSearchParams(`connection_share_code=abc12345&address=${ADDRESS}`)
     );
     (useSeizeConnectContext as jest.Mock).mockReturnValue({
-      address: "0x123",
+      address: ADDRESS,
       seizeDisconnectAndLogout: jest.fn(),
       seizeAcceptConnection: jest.fn(),
     });
@@ -584,7 +617,7 @@ describe("AcceptConnectionSharing page", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (canStoreAnotherWalletAccount as jest.Mock).mockReturnValue(false);
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("connection_share_code=abc12345&address=0x123")
+      new URLSearchParams(`connection_share_code=abc12345&address=${ADDRESS}`)
     );
 
     render(
@@ -601,7 +634,7 @@ describe("AcceptConnectionSharing page", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("Accept connection")).toBeDisabled();
     fireEvent.click(screen.getByText("Accept connection"));
-    expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith("0x123");
+    expect(canStoreAnotherWalletAccount).toHaveBeenCalledWith(ADDRESS);
     expect(redeemConnectionShare).not.toHaveBeenCalled();
     expect(persistSessionResponse).not.toHaveBeenCalled();
   });
@@ -613,7 +646,7 @@ describe("AcceptConnectionSharing page", () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (getConnectedWalletAccounts as jest.Mock).mockReturnValue([
       {
-        address: "0x123",
+        address: ADDRESS,
         refreshToken: null,
         role: null,
         jwt: null,
@@ -623,16 +656,16 @@ describe("AcceptConnectionSharing page", () => {
     ]);
     (canStoreAnotherWalletAccount as jest.Mock).mockReturnValue(true);
     (useSearchParams as jest.Mock).mockReturnValue(
-      new URLSearchParams("connection_share_code=abc12345&address=0x123")
+      new URLSearchParams(`connection_share_code=abc12345&address=${ADDRESS}`)
     );
     (useSeizeConnectContext as jest.Mock).mockReturnValue({
-      address: "0x999",
+      address: OTHER_ADDRESS,
       seizeDisconnectAndLogout: jest.fn(),
       seizeAcceptConnection,
     });
     (redeemConnectionShare as jest.Mock).mockResolvedValue({
       client_type: "native",
-      address: "0x123",
+      address: ADDRESS,
       role: "server-role",
       access_token: "access-token",
       access_token_expires_at: "2026-06-10T00:00:00.000Z",
@@ -657,7 +690,7 @@ describe("AcceptConnectionSharing page", () => {
       expect(redeemConnectionShare).toHaveBeenCalledWith("abc12345", "native")
     );
     expect(persistSessionResponse).toHaveBeenCalled();
-    expect(seizeAcceptConnection).toHaveBeenCalledWith("0x123");
+    expect(seizeAcceptConnection).toHaveBeenCalledWith(ADDRESS);
     expect(push).toHaveBeenCalledWith("/");
   });
   it.each(["native", "desktop"])(
@@ -671,7 +704,7 @@ describe("AcceptConnectionSharing page", () => {
         target === "native"
       );
       if (target === "desktop") setUserAgent(DESKTOP_APP_USER_AGENT);
-      openConnectionLink("connection_share_code=abc12345&address=0x123");
+      openConnectionLink(`connection_share_code=abc12345&address=${ADDRESS}`);
       window.history.replaceState(
         null,
         "",
@@ -682,7 +715,7 @@ describe("AcceptConnectionSharing page", () => {
         seizeConnect: connect,
       });
       (redeemConnectionShare as jest.Mock).mockResolvedValue({
-        address: "0x123",
+        address: ADDRESS,
         access_token: "access-token",
         role: null,
         client_type: target,
@@ -706,14 +739,337 @@ describe("AcceptConnectionSharing page", () => {
         expect(mockAcceptDeviceSetup).toHaveBeenCalledWith({
           envelope: "v1.ciphertext",
           secret: "private-unlock-secret",
-          wallet: "0x123",
+          wallet: ADDRESS,
           accessToken: "access-token",
           target,
+          onStage: expect.any(Function),
         })
       );
       await waitFor(() => expect(push).toHaveBeenCalledWith("/"));
-      expect(accept).toHaveBeenCalledWith("0x123");
+      expect(accept).toHaveBeenCalledWith(ADDRESS);
       expect(connect).not.toHaveBeenCalled();
     }
   );
+
+  it.each([
+    {
+      description: "the redeem response omits the setup",
+      envelope: null,
+      stage: "missing-envelope",
+      result: "failed",
+    },
+    {
+      description: "the encrypted setup cannot be opened",
+      envelope: "v1.ciphertext",
+      stage: "open-envelope",
+      result: "failed",
+    },
+    {
+      description: "setup reuses an earlier-suite device",
+      envelope: "v1.ciphertext",
+      stage: "read-local-device",
+      result: "legacy-device",
+    },
+  ] as const)(
+    "keeps the failure visible after sign-in when $description",
+    async ({ envelope, stage, result }) => {
+      const push = jest.fn();
+      const accept = jest.fn();
+      (useRouter as jest.Mock).mockReturnValue({ push });
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+      (useSeizeConnectContext as jest.Mock).mockReturnValue({
+        seizeAcceptConnection: accept,
+      });
+      openConnectionLink(`connection_share_code=abc12345&address=${ADDRESS}`);
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.href}#device_setup_key=private-unlock-secret`
+      );
+      (redeemConnectionShare as jest.Mock).mockResolvedValue({
+        address: ADDRESS,
+        access_token: "access-token",
+        role: null,
+        client_type: "native",
+        encrypted_device_setup: envelope,
+      });
+      mockAcceptDeviceSetup.mockImplementationOnce(async ({ onStage }) => {
+        if (stage !== "missing-envelope") onStage?.(stage);
+        if (result === "failed") throw new Error("Setup failed");
+        return result;
+      });
+
+      render(
+        <TestProvider>
+          <AcceptConnectionSharingPage />
+        </TestProvider>
+      );
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Accept and enable both" })
+      );
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        /Signed in, but device setup could not finish.*new setup link/i
+      );
+      expect(
+        screen.getByRole("link", { name: "Take me home" })
+      ).toHaveAttribute("href", "/");
+      expect(
+        screen.queryByRole("button", { name: "Accept and enable both" })
+      ).not.toBeInTheDocument();
+      expect(persistSessionResponse).toHaveBeenCalledTimes(1);
+      expect(accept).toHaveBeenCalledWith(ADDRESS);
+      expect(push).not.toHaveBeenCalled();
+      expect(mockAcceptDeviceSetup).toHaveBeenCalledTimes(envelope ? 1 : 0);
+      expect(reportConnectionShareSetup).toHaveBeenCalledWith(
+        result,
+        stage,
+        "native"
+      );
+    }
+  );
+
+  it("keeps the accepted link's key across redemption and reports pending enrollment", async () => {
+    const push = jest.fn();
+    const setToast = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push });
+    (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    openConnectionLink(
+      `connection_share_code=abc12345&address=${ADDRESS}&_t=1`
+    );
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.href}#device_setup_key=private-unlock-secret`
+    );
+    const response = {
+      address: ADDRESS,
+      access_token: "access-token",
+      role: null,
+      client_type: "native",
+      encrypted_device_setup: "v1.ciphertext",
+    };
+    const redemption = Promise.withResolvers<typeof response>();
+    (redeemConnectionShare as jest.Mock).mockReturnValue(redemption.promise);
+    mockAcceptDeviceSetup.mockResolvedValueOnce("pending-enrollment");
+
+    const { rerender } = render(
+      <TestProvider setToast={setToast}>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Accept and enable both" })
+    );
+    expect(redeemConnectionShare).toHaveBeenCalledTimes(1);
+
+    openConnectionLink(
+      `connection_share_code=abc12345&address=${ADDRESS}&_t=2`
+    );
+    rerender(
+      <TestProvider setToast={setToast}>
+        <AcceptConnectionSharingPage />
+      </TestProvider>
+    );
+    redemption.resolve(response);
+
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/"));
+    expect(mockAcceptDeviceSetup).toHaveBeenCalledWith(
+      expect.objectContaining({ secret: "private-unlock-secret" })
+    );
+    expect(setToast).toHaveBeenCalledWith({
+      type: "info",
+      message:
+        "Signed in. Encrypted DMs are still being set up on this device.",
+    });
+  });
+
+  describe("links must name the account they connect", () => {
+    beforeEach(() => {
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+    });
+
+    it.each([
+      ["without an address", "connection_share_code=abc12345"],
+      ["with an empty address", "connection_share_code=abc12345&address="],
+      [
+        "with a malformed address",
+        "connection_share_code=abc12345&address=0x123",
+      ],
+      [
+        "with a path in the address",
+        "connection_share_code=abc12345&address=..%2F..%2Fauth%2Flogout",
+      ],
+    ])("shows the invalid-link state for a link %s", (_case, query) => {
+      openConnectionLink(query);
+
+      render(
+        <TestProvider>
+          <AcceptConnectionSharingPage />
+        </TestProvider>
+      );
+
+      expect(
+        screen.getByText("Missing required parameters")
+      ).toBeInTheDocument();
+      expect(screen.queryByText("Accept connection")).not.toBeInTheDocument();
+      expect(window.location.search).not.toContain("connection_share_code");
+      expect(redeemConnectionShare).not.toHaveBeenCalled();
+    });
+
+    it("shows the full address on the card", () => {
+      openConnectionLink(`connection_share_code=abc12345&address=${ADDRESS}`);
+
+      render(
+        <TestProvider>
+          <AcceptConnectionSharingPage />
+        </TestProvider>
+      );
+
+      expect(screen.getByText(ADDRESS)).toBeInTheDocument();
+    });
+
+    it("refuses a redeemed session for another account", async () => {
+      const setToast = jest.fn();
+      const accept = jest.fn();
+      const push = jest.fn();
+      (useRouter as jest.Mock).mockReturnValue({ push });
+      (useSeizeConnectContext as jest.Mock).mockReturnValue({
+        seizeAcceptConnection: accept,
+      });
+      openConnectionLink(`connection_share_code=abc12345&address=${ADDRESS}`);
+      (redeemConnectionShare as jest.Mock).mockResolvedValue({
+        client_type: "native",
+        address: OTHER_ADDRESS,
+        role: null,
+        access_token: "access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      });
+
+      render(
+        <TestProvider setToast={setToast}>
+          <AcceptConnectionSharingPage />
+        </TestProvider>
+      );
+      fireEvent.click(screen.getByText("Accept connection"));
+
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          message: "Invalid connection response",
+          type: "error",
+        })
+      );
+      expect(persistSessionResponse).not.toHaveBeenCalled();
+      expect(accept).not.toHaveBeenCalled();
+      expect(push).not.toHaveBeenCalled();
+    });
+
+    it.each(["", "&address=0x123"])(
+      "does not offer a Desktop refresh-token link whose address is invalid (%s)",
+      (addressParam) => {
+        setUserAgent(DESKTOP_APP_USER_AGENT);
+        (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
+        openConnectionLink(`token=legacy-refresh${addressParam}`);
+
+        render(
+          <TestProvider>
+            <AcceptConnectionSharingPage />
+          </TestProvider>
+        );
+
+        expect(
+          screen.getByText("Missing required parameters")
+        ).toBeInTheDocument();
+        expect(screen.queryByText("Accept connection")).not.toBeInTheDocument();
+        expect(window.location.search).not.toContain("token");
+        expect(commonApiPost).not.toHaveBeenCalled();
+        expect(setAuthJwt).not.toHaveBeenCalled();
+      }
+    );
+  });
+
+  describe("share codes in the URL fragment", () => {
+    beforeEach(() => {
+      (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
+      (redeemConnectionShare as jest.Mock).mockResolvedValue({
+        client_type: "native",
+        address: ADDRESS,
+        role: null,
+        access_token: "access-token",
+        access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      });
+    });
+
+    it("accepts a code that only the fragment carries and removes it", async () => {
+      openConnectionLink(`address=${ADDRESS}&_t=1`);
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.href}#connection_share_code=fragment-code`
+      );
+
+      render(
+        <TestProvider>
+          <AcceptConnectionSharingPage />
+        </TestProvider>
+      );
+
+      expect(window.location.hash).toBe("");
+      fireEvent.click(await screen.findByText("Accept connection"));
+      await waitFor(() =>
+        expect(redeemConnectionShare).toHaveBeenCalledWith(
+          "fragment-code",
+          "native"
+        )
+      );
+    });
+
+    it("prefers the fragment code over a query code and keeps the setup key", async () => {
+      openConnectionLink(
+        `connection_share_code=query-code&address=${ADDRESS}&_t=1`
+      );
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.href}#connection_share_code=fragment-code&device_setup_key=private-unlock-secret`
+      );
+
+      render(
+        <TestProvider>
+          <AcceptConnectionSharingPage />
+        </TestProvider>
+      );
+
+      expect(window.location.hash).toBe("");
+      expect(window.location.search).toBe(`?address=${ADDRESS}&_t=1`);
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Accept and enable both" })
+      );
+      await waitFor(() =>
+        expect(redeemConnectionShare).toHaveBeenCalledWith(
+          "fragment-code",
+          "native"
+        )
+      );
+    });
+
+    it("does not show the invalid state before the fragment is read", () => {
+      openConnectionLink(`address=${ADDRESS}`);
+      window.history.replaceState(
+        null,
+        "",
+        `${window.location.href}#connection_share_code=fragment-code`
+      );
+
+      const { container } = render(
+        <TestProvider>
+          <AcceptConnectionSharingPage />
+        </TestProvider>
+      );
+
+      expect(container.textContent).not.toContain(
+        "Missing required parameters"
+      );
+    });
+  });
 });

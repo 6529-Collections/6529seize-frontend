@@ -315,8 +315,7 @@ export default function MyStreamWaveTabsHeader({
     !isDirectMessage &&
     headerWidth > 0 &&
     headerWidth < CONDENSED_HEADER_WIDTH_PX;
-  // Reserve the description row's space even when it is empty, matching the
-  // pending header so metadata cannot move the divider and chat tabs.
+  // Match the pending description row only when the loaded header has one.
   const headerMinHeight = wave.parent_wave
     ? "md:tw-min-h-[91px]"
     : "md:tw-min-h-[69px]";
@@ -486,7 +485,7 @@ export default function MyStreamWaveTabsHeader({
     <>
       <header
         ref={headerRef}
-        className={`${headerClassName} tw-flex-nowrap tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 ${isDirectMessage ? "" : headerMinHeight}`}
+        className={`${headerClassName} tw-flex-nowrap tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 ${showDescriptionPreview ? headerMinHeight : ""}`}
       >
         <div
           className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 ${isCondensed || isCompactWave ? "tw-self-center" : "tw-self-start tw-pt-0.5"}`}

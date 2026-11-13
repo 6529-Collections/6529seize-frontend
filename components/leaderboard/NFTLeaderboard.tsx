@@ -19,13 +19,13 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { DATA_TABLE_HEADER_TEXT_CLASS_NAME } from "@/components/utils/table/tableStyles";
 import Pagination from "../pagination/Pagination";
 import { SortDirection } from "@/entities/ISort";
 import type { CICType } from "@/entities/IProfile";
 import type { DBResponse } from "@/entities/IDBResponse";
 import { LeaderboardCollector } from "./LeaderboardCollector";
 import { LEADERBOARD_ROW_CLASS_NAME } from "./leaderboardTableStyles";
+import { CardCollectorsSortHeader } from "./CardCollectorsSortHeader";
 import {
   NFTLeaderboardMobileRows,
   NFTLeaderboardMobileSort,
@@ -35,12 +35,7 @@ import {
   SearchWalletsDisplay,
 } from "../searchModal/SearchModal";
 import { commonApiFetch } from "@/services/api/common-api";
-import {
-  faDownload,
-  faSpinner,
-  faSquareCaretUp,
-  faSquareCaretDown,
-} from "@fortawesome/free-solid-svg-icons";
+import { faDownload, faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 import {
   buildNftCollectorsCsv,
@@ -49,10 +44,15 @@ import {
 
 export { buildNftCollectorsCsv } from "./nftCollectorsCsv";
 
-const tableHeaderClassName = `tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-font-semibold tw-text-iron-400 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`;
+const tableHeaderClassName =
+  "tw-whitespace-nowrap tw-border-0 tw-px-3 tw-pb-2.5 tw-pt-3 tw-text-left tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500 first:tw-pl-0";
 
 const tableCellClassName =
-  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-100 md:tw-px-4 md:tw-py-3 md:tw-text-sm";
+  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-100 md:tw-border-b-0 md:tw-px-3 md:tw-py-3.5 md:tw-text-right md:tw-text-sm md:tw-tabular-nums md:last:tw-pr-0";
+
+function getMetricCellClassName(active: boolean) {
+  return `${tableCellClassName} ${active ? "md:tw-font-semibold md:tw-text-iron-100" : "md:tw-font-normal md:tw-text-iron-300"}`;
+}
 
 interface Props {
   contract: string;
@@ -217,16 +217,20 @@ export interface NftTDHRanked extends NftTDH {
 export function NftLeaderboardCollectorRow({
   children,
   lead,
+  balanceIsSorted = true,
 }: Readonly<{
   children?: ReactNode;
   lead: NftTDHRanked;
+  balanceIsSorted?: boolean;
 }>) {
   return (
-    <tr className={LEADERBOARD_ROW_CLASS_NAME}>
-      <td className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-100 md:tw-px-4 md:tw-py-3 md:tw-text-sm">
+    <tr
+      className={`${LEADERBOARD_ROW_CLASS_NAME} md:tw-border-0 md:tw-border-b md:tw-border-solid md:tw-border-iron-800 md:last:tw-border-b-0 md:even:tw-bg-transparent md:focus-within:tw-bg-iron-950 md:hover:tw-bg-iron-950`}
+    >
+      <td className="tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-leading-5 tw-text-iron-100 md:tw-w-14 md:tw-border-b-0 md:tw-py-3.5 md:tw-pl-0 md:tw-pr-3 md:tw-text-left md:tw-text-sm md:tw-font-normal md:tw-tabular-nums md:tw-text-iron-500">
         {numberWithCommas(lead.rank)}
       </td>
-      <td className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3">
+      <td className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 md:tw-border-b-0 md:tw-px-3 md:tw-py-3.5 md:[&_a:focus-visible]:tw-outline md:[&_a:focus-visible]:tw-outline-2 md:[&_a:focus-visible]:tw-outline-primary-400 md:[&_a>div:first-child]:tw-size-8 md:[&_a>div:first-child]:tw-border-white/5 md:[&_a]:tw-text-sm md:[&_a]:tw-font-normal md:[&_a]:tw-text-iron-300 md:group-focus-within:[&_a]:tw-text-iron-100 md:group-hover:[&_a]:tw-text-iron-100">
         <LeaderboardCollector
           handle={lead.handle}
           consolidationKey={lead.consolidation_key}
@@ -235,7 +239,9 @@ export function NftLeaderboardCollectorRow({
           level={lead.level}
         />
       </td>
-      <td className={`${tableCellClassName} tw-border-l`}>
+      <td
+        className={`${getMetricCellClassName(balanceIsSorted)} tw-border-l md:tw-border-l-0 md:tw-pl-10`}
+      >
         {numberWithCommas(lead.balance)}
       </td>
       {children}
@@ -494,69 +500,23 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
   const totalResults = leaderboardQuery.data?.count ?? 0;
   const fetchingLeaderboard = leaderboardQuery.isFetching;
 
-  function getCaretClassName(sortOption: Sort, sortDirection: SortDirection) {
-    const active =
-      sort.sort === sortOption && sort.sort_direction === sortDirection;
-    return `tw-h-3 tw-w-3 tw-transition-colors ${
-      active ? "tw-text-white" : "tw-text-iron-500 hover:tw-text-white"
-    }`;
-  }
-
-  function printSortControls(sortOption: Sort, label: string) {
-    return (
-      <span className="tw-flex tw-flex-col tw-items-center">
-        <button
-          type="button"
-          onClick={() =>
-            setSort({
-              sort: sortOption,
-              sort_direction: SortDirection.ASC,
-            })
-          }
-          className="tw-m-0 tw-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
-          aria-label={t(locale, "theMemes.detail.collectors.sortAscending", {
-            label,
-          })}
-        >
-          <FontAwesomeIcon
-            icon={faSquareCaretUp}
-            className={getCaretClassName(sortOption, SortDirection.ASC)}
-          />
-        </button>
-        <button
-          type="button"
-          onClick={() =>
-            setSort({
-              sort: sortOption,
-              sort_direction: SortDirection.DESC,
-            })
-          }
-          className="tw-m-0 tw-flex tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0"
-          aria-label={t(locale, "theMemes.detail.collectors.sortDescending", {
-            label,
-          })}
-        >
-          <FontAwesomeIcon
-            icon={faSquareCaretDown}
-            className={getCaretClassName(sortOption, SortDirection.DESC)}
-          />
-        </button>
-      </span>
-    );
-  }
-
   function printSortableHeader(
     label: string,
     sortOption: Sort,
+    accessibleLabel: string,
     className = ""
   ) {
     return (
-      <th scope="col" className={`${tableHeaderClassName} ${className}`}>
-        <span className="tw-flex tw-items-center tw-justify-center tw-gap-1.5">
-          {label}
-          {printSortControls(sortOption, label)}
-        </span>
-      </th>
+      <CardCollectorsSortHeader
+        label={label}
+        accessibleLabel={accessibleLabel}
+        locale={locale}
+        direction={sort.sort === sortOption ? sort.sort_direction : undefined}
+        onSort={(direction) =>
+          setSort({ sort: sortOption, sort_direction: direction })
+        }
+        className={className}
+      />
     );
   }
 
@@ -578,7 +538,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
       id="nft-leaderboard"
     >
       <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 max-md:tw-gap-x-2 max-md:tw-gap-y-1 md:tw-mb-4">
-        <h3 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-[17px] tw-font-semibold tw-leading-[22px] tw-text-iron-50 md:tw-flex-none md:tw-text-lg md:tw-leading-7 md:tw-text-iron-100">
+        <h3 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-[17px] tw-font-semibold tw-leading-[22px] tw-text-iron-50 md:tw-flex-none md:tw-text-base md:tw-leading-6 md:tw-text-iron-100">
           {t(locale, "theMemes.detail.collectors.leaderboardTitle")}
         </h3>
         <CollectorsCsvDownloadControls
@@ -640,36 +600,29 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
         <table className="tw-w-full tw-min-w-[23rem] tw-border-collapse md:tw-min-w-[1040px]">
           <thead>
             <tr>
-              <th
-                colSpan={2}
-                aria-hidden="true"
-                className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3"
-              />
+              <th colSpan={2} aria-hidden="true" className="tw-border-0" />
               <th
                 colSpan={3}
                 scope="colgroup"
-                className={`tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-l tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-font-semibold tw-text-iron-300 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
+                className="tw-relative tw-border-0 tw-pb-2 tw-pl-10 tw-pr-3 tw-pt-1 tw-text-center tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400 after:tw-absolute after:tw-bottom-0 after:tw-left-10 after:tw-right-0 after:tw-h-px after:tw-bg-iron-800 after:tw-content-['']"
               >
                 {t(locale, "theMemes.detail.collectors.thisCard")}
               </th>
               <th
                 colSpan={3}
                 scope="colgroup"
-                className={`tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-l tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 tw-text-center tw-font-semibold tw-text-iron-300 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
+                className="tw-relative tw-border-0 tw-pb-2 tw-pl-10 tw-pr-0 tw-pt-1 tw-text-center tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400 after:tw-absolute after:tw-bottom-0 after:tw-left-10 after:tw-right-0 after:tw-h-px after:tw-bg-iron-800 after:tw-content-['']"
               >
                 {t(locale, "theMemes.detail.collectors.total")}
               </th>
             </tr>
-            <tr>
-              <th
-                scope="col"
-                className={`tw-w-12 tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-center tw-font-semibold tw-text-iron-400 md:tw-w-20 md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
-              >
+            <tr className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800">
+              <th scope="col" className={`${tableHeaderClassName} tw-w-14`}>
                 {t(locale, "theMemes.detail.collectors.rank")}
               </th>
               <th
                 scope="col"
-                className={`tw-min-w-[11rem] tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-px-2 tw-py-2 tw-text-left tw-font-semibold tw-text-iron-400 md:tw-min-w-[18rem] md:tw-px-4 md:tw-py-3 ${DATA_TABLE_HEADER_TEXT_CLASS_NAME}`}
+                className={`${tableHeaderClassName} tw-min-w-[18rem]`}
               >
                 {totalResults > 0
                   ? t(locale, "theMemes.detail.collectors.collectorCount", {
@@ -680,28 +633,34 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
               {printSortableHeader(
                 t(locale, "theMemes.detail.collectors.balance"),
                 Sort.balance,
-                "tw-border-l"
+                t(locale, "theMemes.detail.collectors.cardBalance"),
+                "tw-pl-10"
               )}
               {printSortableHeader(
                 t(locale, "theMemes.detail.collectors.tdh"),
-                Sort.boosted_tdh
+                Sort.boosted_tdh,
+                t(locale, "theMemes.detail.collectors.cardTdh")
               )}
               {printSortableHeader(
                 t(locale, "theMemes.detail.collectors.unweightedTdh"),
-                Sort.tdh__raw
+                Sort.tdh__raw,
+                t(locale, "theMemes.detail.collectors.cardUnweightedTdh")
               )}
               {printSortableHeader(
                 t(locale, "theMemes.detail.collectors.balance"),
                 Sort.total_balance,
-                "tw-border-l"
+                t(locale, "theMemes.detail.collectors.totalBalance"),
+                "tw-pl-10"
               )}
               {printSortableHeader(
                 t(locale, "theMemes.detail.collectors.tdh"),
-                Sort.total_boosted_tdh
+                Sort.total_boosted_tdh,
+                t(locale, "theMemes.detail.collectors.totalTdh")
               )}
               {printSortableHeader(
                 t(locale, "theMemes.detail.collectors.unweightedTdh"),
-                Sort.total_tdh__raw
+                Sort.total_tdh__raw,
+                t(locale, "theMemes.detail.collectors.totalUnweightedTdh")
               )}
             </tr>
           </thead>
@@ -711,20 +670,39 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
                 <NftLeaderboardCollectorRow
                   key={lead.consolidation_key}
                   lead={lead}
+                  balanceIsSorted={sort.sort === Sort.balance}
                 >
-                  <td className={tableCellClassName}>
+                  <td
+                    className={getMetricCellClassName(
+                      sort.sort === Sort.boosted_tdh
+                    )}
+                  >
                     {numberWithCommas(Math.round(lead.boosted_tdh))}
                   </td>
-                  <td className={tableCellClassName}>
+                  <td
+                    className={getMetricCellClassName(
+                      sort.sort === Sort.tdh__raw
+                    )}
+                  >
                     {numberWithCommas(Math.round(lead.tdh__raw))}
                   </td>
-                  <td className={`${tableCellClassName} tw-border-l`}>
+                  <td
+                    className={`${getMetricCellClassName(sort.sort === Sort.total_balance)} md:tw-pl-10`}
+                  >
                     {numberWithCommas(lead.total_balance)}
                   </td>
-                  <td className={tableCellClassName}>
+                  <td
+                    className={getMetricCellClassName(
+                      sort.sort === Sort.total_boosted_tdh
+                    )}
+                  >
                     {numberWithCommas(Math.round(lead.total_boosted_tdh))}
                   </td>
-                  <td className={tableCellClassName}>
+                  <td
+                    className={getMetricCellClassName(
+                      sort.sort === Sort.total_tdh__raw
+                    )}
+                  >
                     {numberWithCommas(Math.round(lead.total_tdh__raw))}
                   </td>
                 </NftLeaderboardCollectorRow>
@@ -739,7 +717,7 @@ export default function NFTLeaderboard(props: Readonly<Props>) {
         </div>
       )}
       {totalResults > 0 && (
-        <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4 max-md:[&>span>button:first-child]:tw-size-9 max-md:[&>span>button:first-child]:tw-rounded-lg max-md:[&>span>button:first-child]:tw-border max-md:[&>span>button:first-child]:tw-border-solid max-md:[&>span>button:first-child]:tw-border-iron-800 max-md:[&>span>button:first-child]:tw-bg-iron-950 max-md:[&>span>button:first-child]:tw-text-iron-200 max-md:[&>span>button:last-child]:tw-size-9 max-md:[&>span>button:last-child]:tw-rounded-lg max-md:[&>span>button:last-child]:tw-border max-md:[&>span>button:last-child]:tw-border-solid max-md:[&>span>button:last-child]:tw-border-iron-800 max-md:[&>span>button:last-child]:tw-bg-iron-950 max-md:[&>span>button:last-child]:tw-text-iron-200 max-md:[&>span>button]:tw-text-sm max-md:[&>span>span]:tw-text-sm max-md:[&>span]:tw-gap-2 max-md:[&>span]:tw-text-sm max-md:[&>span]:tw-text-iron-400 max-md:[&_input]:tw-h-9 max-md:[&_input]:tw-w-12 max-md:[&_input]:tw-rounded-lg max-md:[&_input]:tw-border max-md:[&_input]:tw-border-solid max-md:[&_input]:tw-border-iron-800 max-md:[&_input]:tw-bg-iron-950 max-md:[&_input]:tw-text-center max-md:[&_input]:tw-text-sm max-md:[&_input]:tw-text-iron-100 max-md:[&_svg]:tw-w-3.5">
+        <div className="tw-flex tw-justify-center tw-pb-3 tw-pt-4 max-md:[&>span>button:first-child]:tw-size-9 max-md:[&>span>button:first-child]:tw-rounded-lg max-md:[&>span>button:first-child]:tw-border max-md:[&>span>button:first-child]:tw-border-solid max-md:[&>span>button:first-child]:tw-border-iron-800 max-md:[&>span>button:first-child]:tw-bg-iron-950 max-md:[&>span>button:first-child]:tw-text-iron-200 max-md:[&>span>button:last-child]:tw-size-9 max-md:[&>span>button:last-child]:tw-rounded-lg max-md:[&>span>button:last-child]:tw-border max-md:[&>span>button:last-child]:tw-border-solid max-md:[&>span>button:last-child]:tw-border-iron-800 max-md:[&>span>button:last-child]:tw-bg-iron-950 max-md:[&>span>button:last-child]:tw-text-iron-200 max-md:[&>span>button]:tw-text-sm max-md:[&>span>span]:tw-text-sm max-md:[&>span]:tw-gap-2 max-md:[&>span]:tw-text-sm max-md:[&>span]:tw-text-iron-400 md:[&>span]:tw-text-sm md:[&>span]:tw-text-iron-400 max-md:[&_input]:tw-h-9 max-md:[&_input]:tw-w-12 max-md:[&_input]:tw-rounded-lg max-md:[&_input]:tw-border max-md:[&_input]:tw-border-solid max-md:[&_input]:tw-border-iron-800 max-md:[&_input]:tw-bg-iron-950 max-md:[&_input]:tw-text-center max-md:[&_input]:tw-text-sm max-md:[&_input]:tw-text-iron-100 max-md:[&_svg]:tw-w-3.5">
           <Pagination
             page={page}
             pageSize={PAGE_SIZE}

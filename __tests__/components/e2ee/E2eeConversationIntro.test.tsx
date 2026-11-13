@@ -1,6 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { E2eeConversationIntro } from "@/components/e2ee/conversation/E2eeConversationIntro";
-import { conversation, DM_G, member, SELF_ID } from "./fakeE2eeEngine";
+import {
+  ALICE_ID,
+  conversation,
+  DM_G,
+  member,
+  SELF_ID,
+} from "./fakeE2eeEngine";
 
 describe("E2eeConversationIntro", () => {
   it("introduces a DM honestly and invites the first message", () => {
@@ -37,6 +43,25 @@ describe("E2eeConversationIntro", () => {
     expect(
       screen.getByRole("link", { name: "View bob's profile" })
     ).toHaveAttribute("href", "/bob");
+  });
+
+  it("introduces a DM holding someone else by its members, linking nobody", () => {
+    render(
+      <E2eeConversationIntro
+        conversation={conversation({
+          g: DM_G,
+          kind: "dm",
+          name: null,
+          admins: [SELF_ID, ALICE_ID],
+        })}
+        selfProfileId={SELF_ID}
+        empty
+      />
+    );
+    expect(
+      screen.getByRole("heading", { level: 2, name: "alice and bob" })
+    ).toBeVisible();
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
   });
 
   it("titles a group by name and drops the invitation once messages exist", () => {

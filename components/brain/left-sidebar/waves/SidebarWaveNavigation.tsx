@@ -15,21 +15,16 @@ import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
+import {
+  CONNECTED_TAB_LIST_CLASSES,
+  getConnectedTabButtonClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 
 const COLLECTION_LABELS = {
   pinned: "waves.sidebar.pinned",
   joined: "waves.sidebar.filterJoined",
   all: "waves.sidebar.filterAll",
 } as const;
-
-const COLLECTION_GROUP_CLASSES =
-  "tw-m-0 tw-flex tw-h-9 tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/75 tw-p-0.5 tw-ring-white/[0.06] touch-only:tw-h-10";
-const COLLECTION_TAB_CLASSES =
-  "tw-relative tw-flex tw-min-h-[30px] tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-2 tw-py-0 tw-text-xs tw-font-normal tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 touch-only:before:tw-absolute touch-only:before:tw-inset-x-0 touch-only:before:tw-top-1/2 touch-only:before:tw-h-11 touch-only:before:-tw-translate-y-1/2 touch-only:before:tw-content-[''] motion-reduce:tw-transition-none";
-const COLLECTION_SELECTED_CLASSES =
-  "tw-bg-iron-800 tw-text-iron-100 tw-ring-1 tw-ring-inset tw-ring-white/5 desktop-hover:hover:tw-bg-white/[0.14]";
-const COLLECTION_UNSELECTED_CLASSES =
-  "tw-bg-transparent tw-text-iron-400 active:tw-bg-iron-900 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100";
 
 export function SidebarWaveNavigationControls({
   navigation,
@@ -119,7 +114,7 @@ export function SidebarWaveNavigationControls({
             {navigation.canUseCollections ? (
               <fieldset
                 aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
-                className={COLLECTION_GROUP_CLASSES}
+                className={`${CONNECTED_TAB_LIST_CLASSES} tw-m-0 tw-flex tw-h-9 tw-min-w-0 tw-flex-1 touch-only:tw-h-10`}
               >
                 {(["all", "pinned", "joined"] as const).map((tab) => (
                   <button
@@ -129,7 +124,12 @@ export function SidebarWaveNavigationControls({
                     aria-label={t(locale, COLLECTION_LABELS[tab])}
                     aria-pressed={navigation.collection === tab}
                     onClick={() => navigation.setCollection(tab)}
-                    className={`${COLLECTION_TAB_CLASSES} ${navigation.collection === tab ? COLLECTION_SELECTED_CLASSES : COLLECTION_UNSELECTED_CLASSES}`}
+                    className={getConnectedTabButtonClasses({
+                      isActive: navigation.collection === tab,
+                      fill: true,
+                      size: "xs",
+                      presentation: "sidebar",
+                    })}
                   >
                     {t(locale, COLLECTION_LABELS[tab])}
                   </button>

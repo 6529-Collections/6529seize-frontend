@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { DropAuthorSignedIndicator } from "./signature/DropAuthorSignedMarker";
+import type { VerdictDrop } from "./signature/dropSignatureVerdicts";
 import WaveDropTime from "./time/WaveDropTime";
 import { GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX } from "./WaveDrop.helpers";
 
@@ -14,13 +15,13 @@ const GroupedDropTimestamp = ({
   timestamp,
   variant,
   forceVisible = false,
-  authorSigned = false,
+  signedDrop,
 }: {
   readonly swipeOffset?: number;
   readonly timestamp: number;
   readonly variant: "swipe" | "hover";
-  /** Shows the static "Signed by its author" seal beside the time. */
-  readonly authorSigned?: boolean;
+  /** An author-signed drop: shows its static seal, checked in this browser. */
+  readonly signedDrop?: VerdictDrop | undefined;
   /** Pointer-driven row hover for browsers whose CSS :hover never fires. */
   readonly forceVisible?: boolean;
 }) => {
@@ -52,7 +53,7 @@ const GroupedDropTimestamp = ({
     >
       <span className="tw-inline-flex tw-items-center tw-gap-x-1.5">
         {/* Before the time, so grouped timestamps stay right-aligned. */}
-        {authorSigned && <DropAuthorSignedIndicator />}
+        {signedDrop && <DropAuthorSignedIndicator drop={signedDrop} />}
         <WaveDropTime timestamp={timestamp} size="xs" variant="compactReveal" />
       </span>
     </div>

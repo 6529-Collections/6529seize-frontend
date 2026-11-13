@@ -40,7 +40,7 @@ jobs:
       agent_files_sync_required: ${{ steps.plan_outputs.outputs.agent_files_sync_required }}
       app_check_matrix: ${{ steps.plan_outputs.outputs.app_check_matrix }}
       core_playwright_required: ${{ steps.plan_outputs.outputs.core_playwright_required }}
-      all_mention_confirmation_required: ${{ steps.plan_outputs.outputs.all_mention_confirmation_required }}
+      composer_browser_required: ${{ steps.plan_outputs.outputs.composer_browser_required }}
       core_playwright_matrix: ${{ steps.plan_outputs.outputs.core_playwright_matrix }}
 
     steps:
@@ -220,10 +220,10 @@ jobs:
             { lane: "quality", label: "Quality and contracts", runner: defaultRunner },
           ];
           const corePlaywrightLanes = [];
-          const allMentionBrowserRequired = plan.changed_files.some((file) =>
-            /^(?:components\/waves\/CreateDrop\.tsx$|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|CreateDropSubmissionDialogs|useAllMentionConfirmation)\.|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
+          const composerBrowserRequired = plan.changed_files.some((file) =>
+            /^(?:components\/waves\/(?:CreateDrop\.tsx$|drops\/(?:WaveDrop(?:ReplyCollapseAction|ActionsMore|MobileMenu)\.tsx$|reply-threads\/|wave-drops-all\/))|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|CreateDropSubmissionDialogs|useAllMentionConfirmation|part-builders|useDropFilePreparation|useCreateDropSubmission)\.|components\/waves\/create-wave\/services\/multiPartUpload\.ts$|services\/uploads\/(?:multipartUploadCore|dropUploadValidation|ImageProcessingError)\.ts$|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
           );
-          write("all_mention_confirmation_required", String(allMentionBrowserRequired));
+          write("composer_browser_required", String(composerBrowserRequired));
           const collectBrowserRequired = plan.changed_files.some((file) =>
             /^(?:app\/collect\/|components\/collect\/|components\/nft-market-depth\/|components\/user\/collected\/|components\/nextGen\/|components\/6529Gradient\/|components\/the-memes\/|tests\/collect\/|generated\/models\/Api(?:Collect|Market))/.test(file) ||
             ["services/api/collect-api.ts", "services/api/collect-rules-api.ts", "services/api/market-api.ts", "components/common/RecipientSelector.tsx", "components/mobile-wrapper-dialog/MobileWrapperDialog.tsx", "i18n/messages/collect.ts", "openapi.yaml", ".github/workflows/app-pr-ci.yml"].includes(file)
@@ -232,12 +232,14 @@ jobs:
           if (plan.checks.build.required) {
             appCheckLanes.push({ lane: "build", label: "Production build", runner: buildRunner });
           }
-          if (plan.checks.playwright_smoke.required || collectBrowserRequired || allMentionBrowserRequired || plan.checks.playwright_artwork_documentation.required) {
+          if (plan.checks.playwright_smoke.required || collectBrowserRequired || composerBrowserRequired || plan.checks.playwright_artwork_documentation.required) {
             corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_native_competition?.required) {
-            for (const shard of [1, 2]) {
-              corePlaywrightLanes.push({ lane: "playwright-native-competition", label: `Native competitions shard ${shard}/2`, runner: defaultRunner, shard });
+            // Two shards ran 24-28 minutes against the 30-minute limit; four
+            // leave room for slow runners and retries.
+            for (const shard of [1, 2, 3, 4]) {
+              corePlaywrightLanes.push({ lane: "playwright-native-competition", label: `Native competitions shard ${shard}/4`, runner: defaultRunner, shard });
             }
           }
           if (plan.checks.playwright_submission_artwork?.required) {
@@ -395,7 +397,7 @@ jobs:
       run:
         shell: bash
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}
 
     env:
@@ -463,13 +465,13 @@ jobs:
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:smoke
 
-      - name: Run composer mention and send focus browser checks
-        if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.all_mention_confirmation_required == 'true'
+      - name: Run composer mention, image validation, send focus, and reply thread browser checks
+        if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.composer_browser_required == 'true'
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-all-mention"
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/all-mention"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/all-mention"
-        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention|keeps desktop keyboard focus|submits one exact-shape'
+        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention|keeps desktop keyboard focus|submits one exact-shape|collapses a single reply thread|opens an older nested reply link|waits for image validation'
 
       - name: Run Collect public browser pack
         if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.playwright_collect_required == 'true'
@@ -498,7 +500,7 @@ jobs:
           NEXT_DEV_TURBOPACK_FS_CACHE: "0"
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
-          NATIVE_COMPETITION_SHARD: "${{ matrix.shard }}/2"
+          NATIVE_COMPETITION_SHARD: "${{ matrix.shard }}/4"
         run: ./bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"
 
       - name: Run submission artwork browser regression pack

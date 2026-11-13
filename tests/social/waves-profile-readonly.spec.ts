@@ -8,6 +8,7 @@ import { ApiXTdhGrantTargetTokenMode } from "../../generated/models/ApiXTdhGrant
 import { fetchWaveDiscoveryPage } from "./waveDiscoveryPagination";
 import type { ApiXTdhGrantTokensPage } from "../../generated/models/ApiXTdhGrantTokensPage";
 import { expectUrlState } from "../support/urlState";
+import { mediaResolverUrlPattern } from "../support/mediaResolverHosts";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
@@ -220,6 +221,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         .or(controls.getByRole("tab", { name: "xTDH", exact: true }));
       await expect(sortControl).toHaveCount(1);
       await expect(sortControl).toBeDisabled();
+      await expect(sortControl).toHaveCSS("font-size", "14px");
+      await expect(sortControl).toHaveCSS(
+        "height",
+        (page.viewportSize()?.width ?? 1280) >= 1024 ? "32px" : "44px"
+      );
       loadingLayout = await skeleton.evaluate(measureCard);
       await expectNoHorizontalOverflow(page);
       await captureSafeScreenshot(
@@ -451,8 +457,12 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         },
       });
     });
+    // Token metadata resolves through the deployed build's media resolver
+    // (media.6529.io in production, the separate content domain on staging).
     await page.route(
-      "https://media.6529.io/arweave/fLAMSnWmzM9tAso6xMRSSPC2ZYaRoqjRnqGKaxk7vRQ",
+      mediaResolverUrlPattern(
+        "/arweave/fLAMSnWmzM9tAso6xMRSSPC2ZYaRoqjRnqGKaxk7vRQ"
+      ),
       (route) =>
         route.fulfill({
           json: {

@@ -1,3 +1,4 @@
+import { isFeedSignatureValid } from "./feedSignature";
 import {
   FEED_OBJECT_KEY,
   FEED_SIGNATURE_OBJECT_KEY,
@@ -47,7 +48,12 @@ export type ValidatorFeedSupport = {
 type FeedObject = Extract<BucketObject, { state: "found" }>;
 
 export type ReleaseFeedSnapshot = {
-  /** `missing` until the first signed feed is uploaded. */
+  /**
+   * `missing` until the first signed feed is uploaded. `error` when S3
+   * fails, or when the feed's signature is missing, does not verify with a
+   * key in `feedSigningKeys.ts`, or the feed is older than one already
+   * served: then the pages offer nothing.
+   */
   readonly state: "ok" | "missing" | "error";
   readonly feed: FeedObject | null;
   readonly signature: FeedObject | null;
@@ -339,9 +345,9 @@ function parseUnsafeVersions(json: unknown): Map<string, string> {
 }
 
 /**
- * Reads the release list out of the feed's JSON. The site only renders it;
- * validators check the feed's signature themselves. Invalid entries are
- * dropped rather than failing the whole page.
+ * Reads the release list out of the feed's JSON, once its signature has
+ * been checked (`fetchSnapshot`). Invalid entries are dropped rather than
+ * failing the whole page.
  *
  * Releases come out highest version first, as validators order them. Dates
  * play no part: a release and its last candidate can share a day, and the
@@ -408,9 +414,19 @@ export function getOfferedRelease(
   return newest?.unsafeReason === null ? newest : undefined;
 }
 
-function decodeFeed(
-  feed: FeedObject
-): Pick<ReleaseFeedSnapshot, "releases" | "support"> {
+type DecodedFeed = Pick<ReleaseFeedSnapshot, "releases" | "support"> & {
+  /** The feed's `sequence`; null when it has none the site can read. */
+  readonly sequence: number | null;
+};
+
+function readSequence(json: unknown): number | null {
+  const value = isRecord(json) ? json["sequence"] : null;
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
+    ? value
+    : null;
+}
+
+function decodeFeed(feed: FeedObject): DecodedFeed {
   try {
     const json: unknown = JSON.parse(
       new TextDecoder("utf-8", { fatal: true }).decode(feed.body)
@@ -418,9 +434,10 @@ function decodeFeed(
     return {
       releases: parseReleaseFeed(json),
       support: parseFeedSupport(json),
+      sequence: readSequence(json),
     };
   } catch {
-    return { releases: [], support: NO_SUPPORT };
+    return { releases: [], support: NO_SUPPORT, sequence: null };
   }
 }
 
@@ -432,27 +449,32 @@ type CachedSnapshot = {
 let cachedSnapshot: CachedSnapshot | null = null;
 let lastGoodSnapshot: CachedSnapshot | null = null;
 let inFlight: Promise<ReleaseFeedSnapshot> | null = null;
+// The highest `sequence` this server has accepted. As in a validator, a
+// signed feed with a lower one is an older list and is refused; the floor
+// starts again when the server does.
+let highestSequence = -1;
+
+function errorSnapshot(reason: string): ReleaseFeedSnapshot {
+  console.warn("[validator-page] release feed unavailable", reason);
+  return {
+    state: "error",
+    feed: null,
+    signature: null,
+    releases: [],
+    support: NO_SUPPORT,
+  };
+}
 
 async function fetchSnapshot(): Promise<ReleaseFeedSnapshot> {
   const [feed, signature] = await Promise.all([
     readReleaseObject(FEED_OBJECT_KEY),
     readReleaseObject(FEED_SIGNATURE_OBJECT_KEY),
   ]);
-  if (feed.state === "error" || signature.state === "error") {
-    let reason = "";
-    if (feed.state === "error") {
-      reason = feed.reason;
-    } else if (signature.state === "error") {
-      reason = signature.reason;
-    }
-    console.warn("[validator-page] release feed unavailable", reason);
-    return {
-      state: "error",
-      feed: null,
-      signature: null,
-      releases: [],
-      support: NO_SUPPORT,
-    };
+  if (feed.state === "error") {
+    return errorSnapshot(feed.reason);
+  }
+  if (signature.state === "error") {
+    return errorSnapshot(signature.reason);
   }
   if (feed.state === "missing") {
     return {
@@ -463,12 +485,23 @@ async function fetchSnapshot(): Promise<ReleaseFeedSnapshot> {
       support: NO_SUPPORT,
     };
   }
-  return {
-    state: "ok",
-    feed,
-    signature: signature.state === "found" ? signature : null,
-    ...decodeFeed(feed),
-  };
+  // Nothing of the feed is read before its signature checks out: the
+  // bucket holds the binaries and their hashes too, so the signature is
+  // what vouches for the hashes the pages show.
+  if (signature.state !== "found") {
+    return errorSnapshot("the feed has no signature");
+  }
+  if (!isFeedSignatureValid(feed.body, signature.body)) {
+    return errorSnapshot("the feed's signature does not verify");
+  }
+  const { sequence, ...decoded } = decodeFeed(feed);
+  if (sequence !== null) {
+    if (sequence < highestSequence) {
+      return errorSnapshot("the feed is older than one already served");
+    }
+    highestSequence = sequence;
+  }
+  return { state: "ok", feed, signature, ...decoded };
 }
 
 /**
@@ -507,4 +540,5 @@ export function resetReleaseFeedCacheForTests(): void {
   cachedSnapshot = null;
   lastGoodSnapshot = null;
   inFlight = null;
+  highestSequence = -1;
 }

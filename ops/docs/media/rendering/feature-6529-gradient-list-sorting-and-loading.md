@@ -7,6 +7,13 @@
 - The route rewrites sort values to lowercase and keeps only those two query
   keys.
 - The grid appears only after the full collection fetch finishes.
+- On individual Gradient pages, desktop details use 14px labels and values,
+  with 16px section headings. Previous/next controls use compact rounded corners
+  and visible keyboard focus. Smaller screens retain their existing controls.
+- On desktop, Gradient trading uses the shared card action row, with **Connect
+  wallet** above it. **View listings & offers** stays below the actions. When
+  **Collect** is available, **List** is in **More trading actions**; otherwise
+  **List** remains in the action row. Smaller screens keep their existing layout.
 
 ## Location in the Site
 
@@ -32,7 +39,8 @@
    controls.
 3. Query state resolves to defaults when needed: `sort=id`, `sort_dir=asc`.
 4. The route rewrites query state to `sort` and `sort_dir` only.
-5. While data is loading, the page shows `Fetching` with animated dots.
+5. While data is loading, card placeholders match the loaded grid's responsive
+   column count, spacing, and width. Screen readers receive a loading status.
 6. After loading finishes, cards render with token name, owner row, `TDH`, and
    rank.
 7. Signed-in owners can see `You own this NFT` on cards they own.
@@ -52,7 +60,7 @@
 - `TDH` ordering is intentionally inverted versus ID ordering:
   - `asc` shows higher TDH first.
   - `desc` shows lower TDH first.
-- While requests are in flight, users see `Fetching` with animated dots.
+- While requests are in flight, placeholders reserve the card grid's layout.
 - If the fetch returns no items, the grid renders with no dedicated empty-state
   message.
 - If the request fails, the grid is also empty and no inline error banner is

@@ -76,7 +76,11 @@ test("opens a public wave on a quiet chat frame before hydration", async ({
   ).toBeHidden();
 });
 
-async function installWaveList(page: Page, baseURL: string | undefined) {
+async function installWaveList(
+  page: Page,
+  baseURL: string | undefined,
+  emptyDescription = false
+) {
   await page.route("**/api/open-graph**", (route) =>
     route.fulfill({ json: {} })
   );
@@ -86,11 +90,32 @@ async function installWaveList(page: Page, baseURL: string | undefined) {
   expect(response.ok()).toBe(true);
   const body = await response.json();
   const first = body.data[0];
-  await page.route("**/api/v2/waves?**", (route) =>
+  const description = emptyDescription
+    ? ""
+    : (first.description_drop?.contents ??
+      first.description_drop?.content ??
+      "");
+  await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
     route.fulfill({
-      json: { ...body, data: [first, { ...first, id: TARGET, name: NAME }] },
+      json: {
+        ...body,
+        data: [
+          first,
+          {
+            ...first,
+            id: TARGET,
+            name: NAME,
+            ...(emptyDescription
+              ? { description_drop: { contents: "", media: [] } }
+              : {}),
+          },
+        ],
+        next_cursor: null,
+        snapshot_expires_at: Date.now() + 900000,
+      },
     })
   );
+  return description;
 }
 
 async function monitorTargetPaints(page: Page) {
@@ -139,8 +164,12 @@ async function monitorTargetPaints(page: Page) {
   };
 }
 
-for (const app of [false, true]) {
-  test(`keeps cold and cached wave switches visible (${app ? "app" : "web"})`, async ({
+for (const { app, emptyDescription } of [
+  { app: false, emptyDescription: false },
+  { app: true, emptyDescription: false },
+  { app: false, emptyDescription: true },
+]) {
+  test(`keeps cold and cached wave switches visible (${app ? "app" : "web"})${emptyDescription ? " without a description" : ""}`, async ({
     page,
     baseURL,
   }, testInfo) => {
@@ -149,7 +178,7 @@ for (const app of [false, true]) {
       app && testInfo.project.name !== "web-mobile-chromium",
       "The native simulation uses the mobile viewport."
     );
-    await installWaveList(page, baseURL);
+    const description = await installWaveList(page, baseURL, emptyDescription);
     if (app)
       await installSurfaceSimulation(
         page.context(),
@@ -178,7 +207,22 @@ for (const app of [false, true]) {
     });
     await page.route(`**/api/waves/${TARGET}`, async (route) => {
       await gate;
-      await route.fallback();
+      const response = await route.fetch();
+      const wave = await response.json();
+      // Both responses describe the same wave. Keep the full response aligned
+      // with the overview instead of inheriting the sandbox's empty parts.
+      await route.fulfill({
+        response,
+        json: {
+          ...wave,
+          description_drop: {
+            ...wave.description_drop,
+            parts: [
+              { ...wave.description_drop.parts[0], content: description },
+            ],
+          },
+        },
+      });
     });
     try {
       await page.goto(`/waves/${SOURCE}?tab=chat`);
@@ -395,12 +439,14 @@ for (const name of ["Sandbox Direct Message", "sandboxfriend"]) {
     await page.route("**/api/open-graph**", (route) =>
       route.fulfill({ json: {} })
     );
-    await page.route("**/api/v2/waves?**", (route) =>
+    await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
       route.fulfill({
         json: {
           data: [{ ...overview, id, name, is_dm_wave: true }],
           page: 1,
           next: false,
+          next_cursor: null,
+          snapshot_expires_at: Date.now() + 900000,
         },
       })
     );
@@ -445,7 +491,14 @@ test("keeps the subwave title in place when parent navigation arrives", async ({
   const apiOrigin = getSandboxApiOrigin(baseURL);
   const overviewResponse = await page.request.get(`${apiOrigin}/api/v2/waves`);
   const parent = (await overviewResponse.json()).data[0];
-  const child = { ...parent, id: TARGET, name: NAME, parent_wave: parent };
+  const child = {
+    ...parent,
+    id: TARGET,
+    name: NAME,
+    parent_wave: parent,
+    // The full child fixture below has no description text.
+    description_drop: { contents: "", media: [] },
+  };
   const waveResponse = await page.request.get(
     `${apiOrigin}/api/waves/${TARGET}`
   );
@@ -453,12 +506,14 @@ test("keeps the subwave title in place when parent navigation arrives", async ({
   await page.route("**/api/open-graph**", (route) =>
     route.fulfill({ json: {} })
   );
-  await page.route("**/api/v2/waves?**", (route) =>
+  await page.route(/\/api\/v2\/waves(?:\/all)?(?:\?|$)/, (route) =>
     route.fulfill({
       json: {
         data: [{ ...parent, has_subwaves: true }],
         page: 1,
         next: false,
+        next_cursor: null,
+        snapshot_expires_at: Date.now() + 900000,
       },
     })
   );
@@ -572,8 +627,15 @@ for (const app of [false, true]) {
       ).toBeVisible();
       // The route fallback can paint before the interactive query mounts.
       // Its Close control identifies the actual pending detail surface.
+      const loadingClose = pending.getByRole("button", { name: "Close panel" });
+      await expect(loadingClose).toBeVisible();
+      const viewportWidth = page.viewportSize()?.width ?? 1280;
+      await expect(loadingClose).toHaveCSS(
+        "border-top-width",
+        viewportWidth >= 640 ? "0px" : "1px"
+      );
       await expect(
-        pending.getByRole("button", { name: "Close panel" })
+        pending.getByRole("button", { name: "Close panel" }).locator("svg")
       ).toBeVisible();
       const uncoveredFrames = await page.evaluate(
         () =>

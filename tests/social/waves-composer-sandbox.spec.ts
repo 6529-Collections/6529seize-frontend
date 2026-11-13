@@ -383,6 +383,95 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  for (const outcome of ["ready", "failed"] as const) {
+    test(`waits for image validation and handles ${outcome} without posting early`, async ({
+      page,
+      baseURL,
+    }) => {
+      let uploads = 0;
+      let polls = 0;
+      let status: "processing" | "ready" | "failed" = "processing";
+      const error =
+        "This image is too large to process. Reduce its dimensions or animation frame count and upload again.";
+      await installDropImageUploadFixture(
+        page,
+        baseURL,
+        () => {
+          uploads += 1;
+        },
+        true
+      );
+      await page.route(
+        "**/drop-media/uploads/clipboard-image",
+        async (route) => {
+          polls += 1;
+          await route.fulfill({
+            json: {
+              media_url: `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/pasted-image.png`,
+              mime_type: "image/png",
+              media_upload_id: "clipboard-image",
+              media_status: status,
+              ...(status === "failed" ? { media_error: error } : {}),
+            },
+          });
+        }
+      );
+      await gotoSandboxWave(page);
+      await showDropActionsIfCollapsed(page);
+      const composer = page
+        .getByRole("textbox", { name: "Write a message" })
+        .last();
+      await composer.fill("Keep this image draft");
+      await showDropActionsIfCollapsed(page);
+      const chooserPromise = page.waitForEvent("filechooser");
+      await page
+        .getByRole("button", { name: "Attach files", exact: true })
+        .or(page.getByRole("button", { name: "Upload", exact: true }))
+        .click();
+      await (
+        await chooserPromise
+      ).setFiles({
+        name: "selected-image.png",
+        mimeType: "image/png",
+        buffer: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+          "base64"
+        ),
+      });
+      await expect.poll(() => polls).toBeGreaterThan(0);
+      const post = page
+        .getByRole("button", { name: "Post", exact: true })
+        .last();
+      await expect(post).toBeDisabled();
+      await expect(
+        page.getByRole("status").filter({ hasText: "Processing image" }).last()
+      ).toBeVisible();
+      await composer.press("Enter");
+      status = outcome;
+      if (outcome === "failed") {
+        await expect(page.getByText(error, { exact: true })).toBeVisible();
+        await expect(
+          page.getByText("Could not add selected-image.png", { exact: true })
+        ).toBeVisible();
+      } else {
+        await expect(
+          page.getByRole("button", { name: "Remove file" }).last()
+        ).toBeVisible();
+      }
+      await expect(post).toBeEnabled();
+      await expect(composer).toContainText("Keep this image draft");
+      expect(uploads).toBe(1);
+      expect(
+        (await fetchSandboxRequests(baseURL)).filter(
+          (request) =>
+            request.method === "POST" && request.path === "/api/drops"
+        )
+      ).toHaveLength(0);
+      await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+  }
+
   test("reserves a visible video preview without decoded metadata", async ({
     baseURL,
     page,
@@ -438,6 +527,235 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       page.getByRole("button", { name: "Post" }).last()
     ).toBeEnabled();
     await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("collapses a single reply thread and restores it inline", async ({
+    baseURL,
+    page,
+  }, testInfo) => {
+    const isMobile = Boolean(testInfo.project.use.isMobile);
+    const { payload, sourceDrop } = await loadSandboxDropFixture(page, baseURL);
+    const root = { id: String(sourceDrop["id"]), serial_no: 1 };
+    const directReply = {
+      ...sourceDrop,
+      id: "00000000-0000-4000-8000-000000000546",
+      serial_no: 2,
+      content: "Direct thread reply",
+      reply_to_drop: root,
+    };
+    const nestedReply = {
+      ...sourceDrop,
+      id: "00000000-0000-4000-8000-000000000547",
+      serial_no: 3,
+      content: "Nested thread reply",
+      reply_to_drop: { id: directReply.id, serial_no: 2 },
+    };
+    // Both action menus read memberships. The sandbox has no curations.
+    await page.route(`**/api/drops/${root.id}/curations`, async (route) => {
+      await route.fulfill({ json: [] });
+    });
+    let collapsed = false;
+    await page.route(
+      `**/api/drops/${root.id}/collapse-replies`,
+      async (route) => {
+        expect(route.request().method()).toBe("POST");
+        const body = route.request().postDataJSON() as {
+          collapse_replies: boolean;
+        };
+        expect(body.collapse_replies).toBe(!collapsed);
+        collapsed = body.collapse_replies;
+        await route.fulfill({
+          json: {
+            id: root.id,
+            collapse_replies: collapsed,
+            reply_placement_has_replies: true,
+          },
+        });
+      }
+    );
+    await page.route(
+      `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
+      async (route) => {
+        const params = new URL(route.request().url()).searchParams;
+        const hideReplies =
+          collapsed && params.get("respect_drop_reply_collapse") === "true";
+        await route.fulfill({
+          json: {
+            ...payload,
+            drops: [
+              {
+                ...sourceDrop,
+                collapse_replies: collapsed,
+                replies_count: collapsed ? 2 : 0,
+              },
+              ...(hideReplies ? [] : [directReply, nestedReply]),
+            ],
+          },
+        });
+      }
+    );
+    await page.route("**/api/v2/drops?**", async (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      if (params.get("parent_drop_id") !== root.id) {
+        await route.fallback();
+        return;
+      }
+      await route.fulfill({
+        json: {
+          count: 2,
+          page: 1,
+          next: false,
+          data: [nestedReply, directReply].map((reply) => ({
+            ...reply,
+            collapsed_reply_thread: root,
+          })),
+        },
+      });
+    });
+    await gotoSandboxWave(page);
+    const inlineReply = page.getByText("Nested thread reply", { exact: true });
+    await expect(inlineReply).toBeVisible();
+    const selectReplyPlacement = async (label: string) => {
+      const rootRow = page
+        .getByRole("main")
+        .locator('[data-serial-no="1"]')
+        .first();
+      if (isMobile) {
+        await rootRow.tap({ trial: true });
+        const box = await rootRow.boundingBox();
+        if (!box)
+          throw new Error("The top-level drop is outside the viewport.");
+        const session = await page.context().newCDPSession(page);
+        try {
+          await session.send("Input.dispatchTouchEvent", {
+            type: "touchStart",
+            touchPoints: [{ x: box.x + 24, y: box.y + 18 }],
+          });
+          const action = page
+            .getByRole("dialog")
+            .getByRole("button", { name: label, exact: true });
+          await expect(action).toBeVisible();
+          await session.send("Input.dispatchTouchEvent", {
+            type: "touchCancel",
+            touchPoints: [],
+          });
+          await action.tap();
+        } finally {
+          await session.detach();
+        }
+        return;
+      }
+      await rootRow.hover();
+      const trigger = rootRow.getByRole("button", { name: "More actions" });
+      await trigger.click();
+      await page
+        .getByRole("menu")
+        .getByRole("button", { name: label, exact: true })
+        .click();
+    };
+
+    await selectReplyPlacement("Collapse replies");
+    await expect(inlineReply).toHaveCount(0);
+    const showReplies = page.getByRole("button", { name: "Show 2 replies" });
+    if (isMobile) await showReplies.tap();
+    else await showReplies.press("Enter");
+    const thread = page.getByRole("list", { name: "Replies to this drop" });
+    await expect(
+      thread.getByText("Direct thread reply", { exact: true })
+    ).toBeVisible();
+    await expect(
+      thread.getByText("Nested thread reply", { exact: true })
+    ).toBeVisible();
+
+    await selectReplyPlacement("Show replies inline");
+    await expect(thread).toHaveCount(0);
+    await expect(inlineReply).toBeVisible();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("opens an older nested reply link and scrolls to its distinct highlight", async ({
+    baseURL,
+    page,
+  }) => {
+    const { payload, sourceDrop } = await loadSandboxDropFixture(page, baseURL);
+    const root = { id: String(sourceDrop["id"]), serial_no: 1 };
+    const makeReply = (serialNo: number, content: string) => ({
+      ...sourceDrop,
+      id: `00000000-0000-4000-8000-${String(serialNo).padStart(12, "0")}`,
+      serial_no: serialNo,
+      content,
+      reply_to_drop: root,
+      collapsed_reply_thread: root,
+    });
+    const earlierReplies = Array.from({ length: 24 }, (_, index) =>
+      makeReply(index + 2, `Earlier thread reply ${index + 1}`)
+    );
+    const directReply = earlierReplies.at(-1)!;
+    const target = {
+      ...makeReply(26, "Exact linked reply"),
+      reply_to_drop: { id: directReply.id, serial_no: directReply.serial_no },
+    };
+    const newerReplies = Array.from({ length: 55 }, (_, index) =>
+      makeReply(index + 27, `Newer thread reply ${index + 1}`)
+    )
+      .slice(0, 26)
+      .reverse();
+
+    await page.route(`**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`, (route) =>
+      route.fulfill({
+        json: {
+          ...payload,
+          drops: [{ ...sourceDrop, collapse_replies: true, replies_count: 80 }],
+        },
+      })
+    );
+    await page.route("**/api/v2/drops?**", async (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      if (params.get("serial_nos") === String(target.serial_no)) {
+        await route.fulfill({
+          json: {
+            page: 1,
+            next: false,
+            data: [{ ...target, wave: payload.wave }],
+          },
+        });
+      } else {
+        await route.fallback();
+      }
+    });
+    await page.route(`**/api/v2/drops/${root.id}/replies?**`, async (route) => {
+      const params = new URL(route.request().url()).searchParams;
+      expect(params.get("serial_no_limit")).toBe(String(target.serial_no));
+      const drops =
+        params.get("search_strategy") === "FIND_NEWER"
+          ? newerReplies
+          : [...newerReplies, target, ...earlierReplies.toReversed()];
+      await route.fulfill({ json: { ...payload, drops } });
+    });
+
+    await installExternalDataFixtures(page);
+    await installOpenGraphFixture(page);
+    await page.goto(`/waves/${SANDBOX_WAVE_ID}?serialNo=${target.serial_no}`, {
+      waitUntil: "domcontentloaded",
+    });
+    const thread = page.getByRole("list", { name: "Replies to this drop" });
+    const linked = thread.getByText("Exact linked reply", { exact: true });
+    await expect(linked).toBeInViewport({ ratio: 0.9 });
+    const emphasis = page
+      .getByRole("list", { name: "Replies to this drop" })
+      .locator('[class*="tw-bg-[#263d68]"]');
+    await expect(emphasis).toHaveCount(1);
+    await expect(emphasis.getByText("Exact linked reply")).toBeVisible();
+    const contextHighlight = page
+      .getByRole("main")
+      .locator('[class*="tw-bg-[#25263f]"]');
+    await expect(contextHighlight).toHaveCount(1);
+    await expect(contextHighlight.getByRole("list")).toHaveCount(0);
+    await page.getByRole("button", { name: "Show newer replies" }).click();
+    await expect(
+      thread.getByText("Newer thread reply 1", { exact: true })
+    ).toBeVisible();
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
@@ -1289,13 +1607,18 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 
   test("keeps the poll composer usable and submits its exact shape", async ({
     baseURL,
+    isMobile,
     page,
-  }) => {
+  }, testInfo) => {
     await resetSandboxRequests(baseURL);
     await gotoSandboxWave(page);
     await showDropActionsIfCollapsed(page);
 
-    await page.getByRole("button", { name: "Add poll" }).click();
+    const addPoll = page.getByRole("button", {
+      name: isMobile ? "Poll" : "Add poll",
+      exact: true,
+    });
+    await addPoll.click();
 
     const poll = page.getByTestId("create-drop-poll");
     await expect(poll).toBeVisible();
@@ -1318,7 +1641,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 
     await poll.getByRole("button", { name: "Remove poll" }).click();
     await expect(poll).toBeHidden();
-    await page.getByRole("button", { name: "Add poll" }).click();
+    await showDropActionsIfCollapsed(page);
+    await addPoll.click();
     await expect(poll).toBeVisible();
 
     const firstOption = page.getByRole("textbox", { name: "Poll option 1" });
@@ -1329,6 +1653,13 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     expect((await firstOption.boundingBox())?.width ?? 0).toBeGreaterThan(140);
 
     const multipleButton = page.getByRole("button", { name: "Multiple" });
+    for (const button of [
+      page.getByRole("button", { name: "Single", exact: true }),
+      multipleButton,
+    ]) {
+      await expect(button).toHaveCSS("font-size", "12px");
+      await expect(button).toHaveCSS("height", "24px");
+    }
     await multipleButton.click();
     await expect(multipleButton).toHaveAttribute("aria-pressed", "true");
 
@@ -1359,6 +1690,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       .fill(SANDBOX_POLL_QUESTION);
 
     await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("poll-connected-mode.png"),
+    });
     const postButton = page.getByRole("button", { name: "Post" }).last();
     await expect(postButton).toBeEnabled();
     await postButton.click();
@@ -1779,7 +2113,8 @@ async function installExternalDataFixtures(page: Page) {
 async function installDropImageUploadFixture(
   page: Page,
   baseURL: string | undefined,
-  onUploadStart: () => void
+  onUploadStart: () => void,
+  processing = false
 ) {
   const sandboxApiOrigin = getSandboxApiOrigin(baseURL);
   // Keep the mocked PUT same-origin so the browser can read its ETag.
@@ -1801,7 +2136,13 @@ async function installDropImageUploadFixture(
     if (pathname.endsWith("/completion")) {
       await route.fulfill({
         contentType: "application/json",
-        json: { media_url: mediaUrl, mime_type: "image/png" },
+        json: {
+          media_url: mediaUrl,
+          mime_type: "image/png",
+          ...(processing
+            ? { media_upload_id: "clipboard-image", media_status: "processing" }
+            : {}),
+        },
         status: 200,
       });
       return;

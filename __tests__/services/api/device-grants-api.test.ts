@@ -1,5 +1,8 @@
 import { commonApiFetch } from "@/services/api/common-api";
-import { fetchAuthorWallets } from "@/services/api/device-grants-api";
+import {
+  fetchAuthorWallets,
+  fetchDropsSignedEvents,
+} from "@/services/api/device-grants-api";
 
 jest.mock("@/services/api/common-api", () => ({
   ...jest.requireActual("@/services/api/common-api"),
@@ -53,4 +56,31 @@ describe("fetchAuthorWallets", () => {
       await expect(fetchAuthorWallets(PRIMARY)).rejects.toBe(error);
     }
   );
+});
+
+describe("fetchDropsSignedEvents", () => {
+  beforeEach(() => {
+    fetchMock.mockReset();
+  });
+
+  it("reads several drops' signed events in one request", async () => {
+    const batch = {
+      drops: [],
+      grants: [],
+      unavailable: [],
+      truncated_drop_ids: [],
+    };
+    fetchMock.mockResolvedValue(batch);
+    const signal = new AbortController().signal;
+
+    await expect(
+      fetchDropsSignedEvents(["drop-1", "drop-2"], signal)
+    ).resolves.toBe(batch);
+    expect(fetchMock).toHaveBeenCalledWith({
+      endpoint: "drops/signed-events",
+      params: { drop_ids: "drop-1,drop-2" },
+      signal,
+      errorMode: "structured",
+    });
+  });
 });

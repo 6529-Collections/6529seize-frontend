@@ -6,11 +6,20 @@ let mockHideActions = false;
 
 jest.mock("@/components/waves/ChatItemHrefButtons", () => ({
   __esModule: true,
-  default: ({ href, layout }: { href: string; layout: string }) => (
+  default: ({
+    href,
+    layout,
+    relativeHref,
+  }: {
+    href: string;
+    layout: string;
+    relativeHref?: string;
+  }) => (
     <div
       data-testid="chat-item-href-buttons"
       data-href={href}
       data-layout={layout}
+      data-relative-href={relativeHref ?? "none"}
     />
   ),
 }));
@@ -22,6 +31,24 @@ jest.mock("@/components/waves/LinkPreviewContext", () => ({
 describe("LinkHandlerFrame", () => {
   beforeEach(() => {
     mockHideActions = false;
+  });
+
+  it.each([
+    ["https://test.6529.io/waves/123?drop=1#part", "/waves/123?drop=1#part"],
+    ["https://test.6529.io//other.example/path", "none"],
+    ["https://test.6529.io/\\other.example/path", "none"],
+    ["https://example.com/tweet", "none"],
+  ])("passes the on-site path of %s to the actions", (href, expected) => {
+    render(
+      <LinkHandlerFrame href={href}>
+        <div>Preview</div>
+      </LinkHandlerFrame>
+    );
+
+    expect(screen.getByTestId("chat-item-href-buttons")).toHaveAttribute(
+      "data-relative-href",
+      expected
+    );
   });
 
   it("uses the full-width frame wrapper by default", () => {

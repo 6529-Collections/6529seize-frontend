@@ -27,6 +27,7 @@ import { appGrantToRequest } from "./app-grant-request";
 import {
   installSharedDeviceKey,
   readUsableDeviceGrant,
+  SIGNING_EXPIRY_MARGIN_MS,
 } from "./device-key-store";
 import { isEd25519Supported } from "./ed25519";
 import { DEFAULT_DEVICE_SCOPES } from "./grant-message";
@@ -173,6 +174,55 @@ function setupGrantId(
   );
 }
 
+export type ConnectionDeviceSetupStage =
+  | "open-envelope"
+  | "resolve-profile"
+  | "load-keys"
+  | "read-local-device"
+  | "register-grant"
+  | "adopt-encryption"
+  | "save-signing-key";
+
+export type ConnectionDeviceSetupOutcome =
+  | "reused"
+  | "legacy-device"
+  // Adoption saves the MLS keys locally. The engine registers the device afterward.
+  | "pending-enrollment";
+
+/** Distinguishes current-suite reuse from a legacy device that still needs upgrading. */
+function reusedDeviceOutcome(stored: StoredDevice | null) {
+  return isOldSuiteDevice(stored) ? "legacy-device" : "reused";
+}
+
+/** Verify with the redeemed session before changing either local key store. */
+async function checkExistingSigningGrant(
+  wallet: string,
+  accessToken: string,
+  signingSupported: boolean
+) {
+  if (!signingSupported) return { canReuse: true, staleGrantId: undefined };
+  const local = await readUsableDeviceGrant(wallet, Date.now());
+  if (!local) return { canReuse: false, staleGrantId: undefined };
+
+  const { grant } = local;
+  const grants = await commonApiFetch<ApiDeviceGrant[]>({
+    endpoint: "device-grants",
+    includeWalletAuth: false,
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+  const minExpiry = Date.now() + SIGNING_EXPIRY_MARGIN_MS;
+  const canReuse = grants.some(
+    (remote) =>
+      remote.id === grant.id &&
+      remote.wallet.toLowerCase() === grant.wallet.toLowerCase() &&
+      remote.device_key.toLowerCase() === grant.device_key.toLowerCase() &&
+      remote.revoked_at === null &&
+      remote.expires_at > minExpiry
+  );
+  return { canReuse, staleGrantId: canReuse ? undefined : grant.id };
+}
+
 /** Imports target-bound keys and registers the grant from the receiving app. */
 export async function acceptConnectionDeviceSetup(input: {
   readonly envelope: string;
@@ -180,13 +230,16 @@ export async function acceptConnectionDeviceSetup(input: {
   readonly wallet: string;
   readonly accessToken: string;
   readonly target: ConnectionSetupTarget;
-}): Promise<void> {
+  readonly onStage?: (stage: ConnectionDeviceSetupStage) => void;
+}): Promise<ConnectionDeviceSetupOutcome> {
+  input.onStage?.("open-envelope");
   const bundle = await openConnectionSetup(
     input.envelope,
     input.secret,
     input.wallet,
     input.target
   );
+  input.onStage?.("resolve-profile");
   const identity = await commonApiFetch<ApiIdentity>({
     endpoint: `identities/${encodeURIComponent(input.wallet)}`,
     includeWalletAuth: false,
@@ -198,6 +251,7 @@ export async function acceptConnectionDeviceSetup(input: {
     terms.expires_at * 1000 <= Date.now() + 60000
   )
     throw new Error("Device setup grant mismatch");
+  input.onStage?.("load-keys");
   const pair = (await isEd25519Supported())
     ? await importSigningPair(bundle.privateKey, terms.device_key)
     : null;
@@ -215,13 +269,18 @@ export async function acceptConnectionDeviceSetup(input: {
     const canReuseDevice = (stored: StoredDevice | null) =>
       stored?.registered === true &&
       (!canUpgradeSuite || !isOldSuiteDevice(stored));
+    input.onStage?.("read-local-device");
     const storage = getDefaultE2eeStorage();
-    if (
-      canReuseDevice(await storage.getDevice(identity.id)) &&
-      (!pair || (await readUsableDeviceGrant(input.wallet, Date.now())))
-    )
-      return;
+    const existing = await storage.getDevice(identity.id);
+    const signing = await checkExistingSigningGrant(
+      input.wallet,
+      input.accessToken,
+      pair !== null
+    );
+    if (canReuseDevice(existing) && signing.canReuse)
+      return reusedDeviceOutcome(existing);
 
+    input.onStage?.("register-grant");
     const grant = await commonApiPost<typeof bundle.request, ApiDeviceGrant>({
       endpoint: "device-grants",
       body: bundle.request,
@@ -233,12 +292,13 @@ export async function acceptConnectionDeviceSetup(input: {
       grant.wallet.toLowerCase() !== terms.wallet ||
       grant.device_key !== terms.device_key ||
       grant.revoked_at !== null ||
-      grant.expires_at <= Date.now() + 60000
+      grant.expires_at <= Date.now() + SIGNING_EXPIRY_MARGIN_MS
     )
       throw new Error("Device setup grant mismatch");
-    let adopted: boolean;
+    let outcome: ConnectionDeviceSetupOutcome = "pending-enrollment";
     try {
-      adopted = await device.adopt({
+      input.onStage?.("adopt-encryption");
+      const adopted = await device.adopt({
         profileId: identity.id,
         wallet: input.wallet,
         grantId,
@@ -248,17 +308,26 @@ export async function acceptConnectionDeviceSetup(input: {
         expiresAtSeconds: bundle.request.grant.expires_at,
         platform: input.target === "desktop" ? "desktop" : "phone",
       });
-      if (!adopted && !canReuseDevice(await storage.getDevice(identity.id)))
-        throw new Error("Device setup could not be saved");
-      if (pair)
-        await installSharedDeviceKey({
-          address: input.wallet.toLowerCase(),
-          publicKeyHex: grant.device_key,
-          keyPair: pair,
-          grant,
-          ownProfileId: identity.id,
-          lastSeq: 0,
-        });
+      if (!adopted) {
+        const current = await storage.getDevice(identity.id);
+        if (!canReuseDevice(current))
+          throw new Error("Device setup could not be saved");
+        outcome = reusedDeviceOutcome(current);
+      }
+      if (pair) {
+        input.onStage?.("save-signing-key");
+        await installSharedDeviceKey(
+          {
+            address: input.wallet.toLowerCase(),
+            publicKeyHex: grant.device_key,
+            keyPair: pair,
+            grant,
+            ownProfileId: identity.id,
+            lastSeq: 0,
+          },
+          signing.staleGrantId
+        );
+      }
     } catch (error) {
       await commonApiPost({
         endpoint: `device-grants/${grant.id}/revoke`,
@@ -268,11 +337,11 @@ export async function acceptConnectionDeviceSetup(input: {
       }).catch(() => undefined);
       throw error;
     }
-    if (adopted) {
-      setE2eeEnrollmentMarker(identity.id, true);
-      if (typeof globalThis.dispatchEvent === "function")
-        globalThis.dispatchEvent(new Event("storage"));
-    }
+    if (outcome !== "pending-enrollment") return outcome;
+    setE2eeEnrollmentMarker(identity.id, true);
+    if (typeof globalThis.dispatchEvent === "function")
+      globalThis.dispatchEvent(new Event("storage"));
+    return outcome;
   } finally {
     device.dispose();
   }

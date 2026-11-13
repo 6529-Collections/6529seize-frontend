@@ -63,7 +63,7 @@ export function MemeLabPageTabs({
   return (
     <nav
       aria-label={t(locale, "memeLab.detail.sections.tabs")}
-      className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
+      className="tw-relative tw-mb-8 tw-overflow-hidden tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 md:tw-w-full md:tw-border-white/10"
     >
       <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [scrollbar-width:none] [touch-action:pan-x] [&::-webkit-scrollbar]:tw-hidden">
         <div

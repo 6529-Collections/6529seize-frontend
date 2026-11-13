@@ -53,6 +53,10 @@ or plan in `Artwork`; see [Additional Action](feature-memes-submission.md#additi
 - The last airdrop row cannot be removed.
 - Address inputs accept ENS input, but submission requires resolved strict `0x`
   addresses.
+- Payment and airdrop address inputs show the address that will be used in
+  full, checksummed (`Address used: 0x...`). In a pasted `name - 0x...`
+  value, an ENS name is resolved again and the pasted address is ignored; any
+  other label leaves the field without an address.
 - Enabling `Designated Payee` relabels the address input to
   `Designated Payee Address *`.
 - Allowlist batches can be added/removed.

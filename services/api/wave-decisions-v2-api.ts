@@ -88,7 +88,8 @@ const mapDecisionDropV2 = ({
     updated_at: drop.updated_at ?? null,
     title: drop.title ?? null,
     parts: [createBasePart(drop)],
-    parts_count: 1,
+    // The post's real part count: only its first part is loaded here.
+    parts_count: drop.parts_count,
     referenced_nfts: drop.referenced_nfts ?? [],
     mentioned_users: drop.mentioned_users ?? [],
     mentioned_groups: drop.mentioned_groups ?? [],

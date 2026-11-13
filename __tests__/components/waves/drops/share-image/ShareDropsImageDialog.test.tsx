@@ -5,6 +5,7 @@ import { DropSize, type ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 jest.mock("@/contexts/EmojiContext", () => ({
   useEmoji: () => ({
+    emojiMap: [],
     findNativeEmoji: (id: string) =>
       id === "fire" ? { skins: [{ native: "🔥" }] } : null,
     loadEmojiData: () => Promise.resolve(),

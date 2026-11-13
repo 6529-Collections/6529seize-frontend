@@ -28,6 +28,7 @@ import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
   "waves.historyGap.load": "Cargar mensajes pendientes",
   "waves.historyGap.loaded": "Mensajes pendientes cargados",
   "waves.historyGap.loading": "Cargando mensajes pendientes…",
@@ -1300,4 +1301,9 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_TRANSFER_MESSAGES,
   ...ES_ES_THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...ES_ES_THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.message.taskChecked": "Tarea marcada",
+  "e2ee.message.taskUnchecked": "Tarea sin marcar",
+  "e2ee.message.imageLink": "Enlace de imagen",
+  "e2ee.message.imageLinkFrom": "Imagen de {host}",
+  "e2ee.message.markdownTable": "Tabla del mensaje",
 } satisfies Partial<Record<MessageKey, string>>;

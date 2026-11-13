@@ -30,6 +30,7 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.jso
 const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
+  "waves.drops.searchModal.result.emoji": "Émoji {shortcode}",
   "waves.historyGap.load": "Charger les messages manqués",
   "waves.historyGap.loaded": "Messages manqués chargés",
   "waves.historyGap.loading": "Chargement des messages manqués…",
@@ -1313,4 +1314,9 @@ export const FR_FR_MESSAGES = {
   ...FR_FR_TRANSFER_MESSAGES,
   ...FR_FR_THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...FR_FR_THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.message.taskChecked": "Tâche cochée",
+  "e2ee.message.taskUnchecked": "Tâche non cochée",
+  "e2ee.message.imageLink": "Lien vers l’image",
+  "e2ee.message.imageLinkFrom": "Image de {host}",
+  "e2ee.message.markdownTable": "Tableau du message",
 } satisfies Partial<Record<MessageKey, string>>;
