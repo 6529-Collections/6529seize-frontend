@@ -14,11 +14,17 @@ function renderControls() {
   function Chat() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [boundary, setBoundary] = useState<number | null>(UNREAD_SERIAL_NO);
+    const [revision, setRevision] = useState(0);
 
     return (
       <>
+        <button type="button" onClick={() => setRevision(revision + 1)}>
+          Replace divider
+        </button>
         <div ref={scrollContainerRef} data-testid="chat-scroll">
-          {boundary !== null && <UnreadDivider serialNo={boundary} />}
+          {boundary !== null && (
+            <UnreadDivider key={revision} serialNo={boundary} />
+          )}
           <div id={`drop-${UNREAD_SERIAL_NO}`}>First unread drop</div>
         </div>
         <WaveDropsScrollControls
@@ -39,16 +45,17 @@ function renderControls() {
 
   render(<Chat />);
   const scrollContainer = screen.getByTestId("chat-scroll");
-  const divider = screen.getByText("New Messages").parentElement!;
   const unreadDrop = screen.getByText("First unread drop");
   jest
     .spyOn(scrollContainer, "getBoundingClientRect")
     .mockReturnValue(new DOMRect(0, 0, 400, 200));
-  const dividerRect = jest.spyOn(divider, "getBoundingClientRect");
   const unreadDropRect = jest.spyOn(unreadDrop, "getBoundingClientRect");
 
   async function moveDivider(top: number) {
-    dividerRect.mockReturnValue(new DOMRect(0, top, 400, 20));
+    const divider = screen.getByText("New Messages").parentElement!;
+    jest
+      .spyOn(divider, "getBoundingClientRect")
+      .mockReturnValue(new DOMRect(0, top, 400, 20));
     unreadDropRect.mockReturnValue(new DOMRect(0, top + 20, 400, 30));
     // A chat update can change layout while the reader does nothing.
     await act(async () => {
@@ -96,5 +103,43 @@ describe("WaveDropsScrollControls unread jump", () => {
 
     expect(onDismissUnread).toHaveBeenCalledTimes(1);
     expect(screen.queryByText("New Messages")).toBeNull();
+  });
+
+  it("starts a fresh visibility interval after returning to the tab", async () => {
+    const visibility = jest.spyOn(document, "visibilityState", "get");
+    try {
+      const { moveDivider, onDismissUnread } = renderControls();
+      await moveDivider(-70);
+      await moveDivider(40);
+      act(() => jest.advanceTimersByTime(200));
+
+      visibility.mockReturnValue("hidden");
+      fireEvent(document, new Event("visibilitychange"));
+      act(() => jest.advanceTimersByTime(400));
+
+      visibility.mockReturnValue("visible");
+      fireEvent(document, new Event("visibilitychange"));
+      act(() => jest.advanceTimersByTime(200));
+      expect(screen.getByRole("button", { name: JUMP_LABEL })).toBeVisible();
+      await moveDivider(-70);
+
+      expect(onDismissUnread).not.toHaveBeenCalled();
+    } finally {
+      visibility.mockRestore();
+    }
+  });
+
+  it("starts a fresh visibility interval when chat replaces the divider", async () => {
+    const { moveDivider } = renderControls();
+    await moveDivider(-70);
+    await moveDivider(40);
+    act(() => jest.advanceTimersByTime(200));
+
+    fireEvent.click(screen.getByRole("button", { name: "Replace divider" }));
+    await moveDivider(40);
+    act(() => jest.advanceTimersByTime(200));
+    expect(screen.getByRole("button", { name: JUMP_LABEL })).toBeVisible();
+    act(() => jest.advanceTimersByTime(100));
+    expect(screen.queryByRole("button", { name: JUMP_LABEL })).toBeNull();
   });
 });

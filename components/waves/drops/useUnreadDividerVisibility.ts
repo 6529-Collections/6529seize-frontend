@@ -31,7 +31,13 @@ export function useUnreadDividerVisibility({
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer || unreadDividerSerialNo === null) return;
+    if (
+      !scrollContainer ||
+      unreadDividerSerialNo === null ||
+      !Number.isSafeInteger(unreadDividerSerialNo)
+    ) {
+      return;
+    }
 
     const serialNo = unreadDividerSerialNo;
     const selector = `[data-unread-divider="${serialNo}"]`;

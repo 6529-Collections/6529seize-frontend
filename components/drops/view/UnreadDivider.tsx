@@ -4,7 +4,7 @@ import { memo } from "react";
 
 interface UnreadDividerProps {
   readonly label?: string | undefined;
-  readonly serialNo?: number | undefined;
+  readonly serialNo: number;
 }
 
 const UnreadDivider = memo(function UnreadDivider({
