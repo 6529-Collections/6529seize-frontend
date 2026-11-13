@@ -871,6 +871,22 @@ const WAVE_COMPETITION_BADGE_MESSAGES = objectMessages(
   } as const
 );
 
+const VALIDATOR_BADGE_MESSAGES = objectMessages("validator", {
+  "badge.ariaLabel": "View validator details.",
+  "badge.tooltip": "6529 Validator",
+  "details.title": "{profile}'s validator status",
+  "details.profileFallback": "This member",
+  "details.close": "Close validator details",
+  "details.confirmed": "Confirmed validator participation",
+  "details.lastQualifying": "Last qualifying cycle",
+  "details.qualifyingDays": "Qualifying days",
+  "details.daysCount": "{count} days",
+  "details.dataThrough": "Data through",
+  "details.learnMore": "Learn about running a validator",
+  "details.dataNote":
+    "Validator status is verified from network participation evidence.",
+} as const);
+
 const WAVE_VOTE_RATIONALE_MESSAGES = objectMessages("waves.voteRationale", {
   explain: "Explain vote",
   explainAriaLabel: "Explain vote",
@@ -5147,6 +5163,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_DROP_ACTIONS_MESSAGES,
   ...WAVE_PROPOSAL_CARD_MESSAGES,
   ...WAVE_COMPETITION_BADGE_MESSAGES,
+  ...VALIDATOR_BADGE_MESSAGES,
   "waves.artistPreview.submissionCategories": "Submission categories",
   "waves.artistPreview.activeSubmissions": "Active Submissions",
   "waves.artistPreview.mintedMemes": "Minted to Memes",

@@ -19,6 +19,22 @@ export class ApiIdentityOverviewBadges {
     'profile_wave_id'?: string;
     'profile_wave_name'?: string;
     'profile_wave_pfp'?: string | null;
+    /**
+    * Whether this profile has verified validator network participation. Null when validator data is unavailable.
+    */
+    'is_validator'?: boolean | null;
+    /**
+    * Last protocol cycle day when this profile qualified as a validator. Null when no qualifying participation exists.
+    */
+    'validator_last_qualifying_cycle'?: number | null;
+    /**
+    * Count of distinct qualifying protocol cycle days. May be limited to available history coverage. Null when count is unavailable or incomplete.
+    */
+    'validator_qualifying_days'?: number | null;
+    /**
+    * Protocol cycle day through which validator evidence has been observed. Indicates data freshness. Null when evidence source is unavailable.
+    */
+    'validator_observed_through_cycle'?: number | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -54,6 +70,30 @@ export class ApiIdentityOverviewBadges {
             "baseName": "profile_wave_pfp",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "is_validator",
+            "baseName": "is_validator",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "validator_last_qualifying_cycle",
+            "baseName": "validator_last_qualifying_cycle",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "validator_qualifying_days",
+            "baseName": "validator_qualifying_days",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "validator_observed_through_cycle",
+            "baseName": "validator_observed_through_cycle",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {

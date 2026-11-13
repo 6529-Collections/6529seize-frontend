@@ -25,6 +25,8 @@ import {
   type WaveCompetitionPreviewTab,
 } from "./WaveCompetitionBadges";
 import { WaveCompetitionPreviewModal } from "./WaveCompetitionPreviewModal";
+import { ValidatorBadge, type ValidatorBadgeData } from "./ValidatorBadge";
+import { ValidatorDetailsPanel } from "./ValidatorDetailsPanel";
 import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
 
 interface DropAuthorBadgesProfile {
@@ -57,6 +59,10 @@ interface DropAuthorBadgesProfile {
     readonly profile_wave_id?: string | null;
     readonly profile_wave_name?: string | null;
     readonly profile_wave_pfp?: string | null;
+    readonly is_validator?: boolean | null;
+    readonly validator_last_qualifying_cycle?: number | null;
+    readonly validator_qualifying_days?: number | null;
+    readonly validator_observed_through_cycle?: number | null;
   } | null;
   readonly wave_participation?: {
     readonly is_participant: boolean;
@@ -176,11 +182,25 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
   const hasWaveCompetitionBadge =
     !!wave && !isMainStageWave && (isWaveParticipant || isWaveWinner);
 
+  // Validator badge data - extracted from profile badges
+  const validatorData: ValidatorBadgeData = React.useMemo(
+    () => ({
+      isValidator: profile.badges?.is_validator === true,
+      lastQualifyingCycle: profile.badges?.validator_last_qualifying_cycle,
+      qualifyingDays: profile.badges?.validator_qualifying_days,
+      observedThroughCycle: profile.badges?.validator_observed_through_cycle,
+    }),
+    [profile.badges]
+  );
+  const hasValidatorBadge = validatorData.isValidator;
+
   const modalUser = React.useMemo(() => toApiProfileMin(profile), [profile]);
   const [isWaveCompetitionPreviewOpen, setIsWaveCompetitionPreviewOpen] =
     React.useState(false);
   const [waveCompetitionTab, setWaveCompetitionTab] =
     React.useState<WaveCompetitionPreviewTab>("active");
+  const [isValidatorDetailsOpen, setIsValidatorDetailsOpen] =
+    React.useState(false);
 
   const {
     isModalOpen: isArtistPreviewOpen,
@@ -229,9 +249,21 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
     setIsWaveCompetitionPreviewOpen(false);
   }, []);
 
+  const onValidatorBadgeClick = React.useCallback(() => {
+    closeAllCustomTooltips();
+    setIsValidatorDetailsOpen(true);
+  }, []);
+
+  const onValidatorDetailsClose = React.useCallback(() => {
+    setIsValidatorDetailsOpen(false);
+  }, []);
+
   if (
     isAnonymousAuthor(profile) ||
-    (!hasActivityBadge && !hasProfileWaveBadge && !hasWaveCompetitionBadge)
+    (!hasActivityBadge &&
+      !hasProfileWaveBadge &&
+      !hasWaveCompetitionBadge &&
+      !hasValidatorBadge)
   ) {
     return null;
   }
@@ -269,6 +301,14 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
             wavePfp={profileWavePfp}
           />
         )}
+        {hasValidatorBadge && (
+          <ValidatorBadge
+            validator={validatorData}
+            onBadgeClick={onValidatorBadgeClick}
+            tooltipId={`${tooltipIdPrefix}-validator`}
+            size={size}
+          />
+        )}
       </div>
 
       {hasActivityBadge && !onArtistPreviewOpen && (
@@ -291,6 +331,15 @@ export const DropAuthorBadges: React.FC<DropAuthorBadgesProps> = ({
           hasWinningEntries={isWaveWinner}
           activeTab={waveCompetitionTab}
           onTabChange={setWaveCompetitionTab}
+        />
+      )}
+
+      {hasValidatorBadge && (
+        <ValidatorDetailsPanel
+          isOpen={isValidatorDetailsOpen}
+          onClose={onValidatorDetailsClose}
+          profileHandle={profile.handle ?? null}
+          validator={validatorData}
         />
       )}
     </>
