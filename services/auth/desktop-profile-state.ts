@@ -1,8 +1,9 @@
+import { jwtDecode } from "jwt-decode";
+import { isAddress } from "viem";
 import type { DesktopProfileState } from "@/types/desktop-shell";
 
 type DesktopProfile = DesktopProfileState["accounts"][number];
 
-const ADDRESS = /^0x[0-9a-f]{40}$/i;
 const MAX_DESKTOP_PROFILES = 5;
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -11,7 +12,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 function nullableString(value: unknown, limit: number): string | null {
   if (value === null || value === undefined) return null;
   if (typeof value !== "string" || value.length > limit) {
-    throw new Error("Invalid saved Desktop profile field");
+    throw new TypeError("Invalid saved Desktop profile field");
   }
   return value;
 }
@@ -19,12 +20,12 @@ function nullableString(value: unknown, limit: number): string | null {
 /** Copy only known fields; refresh credentials never enter the snapshot. */
 function parseDesktopProfile(value: unknown): DesktopProfile {
   if (!isRecord(value)) {
-    throw new Error("Invalid Desktop profile");
+    throw new TypeError("Invalid Desktop profile");
   }
   const account = value;
   const address = account["address"];
-  if (typeof address !== "string" || !ADDRESS.test(address)) {
-    throw new Error("Invalid Desktop profile address");
+  if (typeof address !== "string" || !isAddress(address, { strict: false })) {
+    throw new TypeError("Invalid Desktop profile address");
   }
   return {
     address: address.toLowerCase(),
@@ -77,4 +78,59 @@ export function getDesktopProfileMigrationState(
     accounts: retained,
     activeAddress: selected ? (active as string) : null,
   };
+}
+
+/** A JWT issued for this wallet: decodable, with `sub` equal to the address. */
+function isTokenForAddress(jwt: string, address: string): boolean {
+  try {
+    const { sub } = jwtDecode<{ readonly sub?: unknown }>(jwt);
+    return typeof sub === "string" && sub.toLowerCase() === address;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Validate the profiles the desktop shell returns before anything reaches
+ * page storage (the active profile's token becomes the auth cookie). Unlike
+ * the lenient page-side normalization, any problem rejects the whole
+ * snapshot: wrong shape, more than five profiles, an invalid or duplicate
+ * address, an active profile that is not listed, or a token that was not
+ * issued for its profile's address. Addresses are lower-cased.
+ */
+export function parseRestoredDesktopProfileState(
+  value: unknown
+): DesktopProfileState {
+  if (!isRecord(value) || value["version"] !== 1) {
+    throw new TypeError("Invalid restored Desktop profiles");
+  }
+  const rawAccounts: unknown = value["accounts"];
+  if (
+    !Array.isArray(rawAccounts) ||
+    rawAccounts.length > MAX_DESKTOP_PROFILES
+  ) {
+    throw new TypeError("Invalid restored Desktop profiles");
+  }
+  const accounts = (rawAccounts as readonly unknown[]).map(parseDesktopProfile);
+  const addresses = new Set(accounts.map((account) => account.address));
+  if (addresses.size !== accounts.length) {
+    throw new TypeError("Duplicate restored Desktop profile");
+  }
+  for (const account of accounts) {
+    if (
+      account.jwt !== null &&
+      !isTokenForAddress(account.jwt, account.address)
+    ) {
+      throw new TypeError("Restored Desktop profile token does not match");
+    }
+  }
+  const rawActive: unknown = value["activeAddress"];
+  if (rawActive !== null && typeof rawActive !== "string") {
+    throw new TypeError("Invalid restored active Desktop profile");
+  }
+  const activeAddress = rawActive === null ? null : rawActive.toLowerCase();
+  if (activeAddress !== null && !addresses.has(activeAddress)) {
+    throw new TypeError("Restored active Desktop profile is not listed");
+  }
+  return { version: 1, accounts, activeAddress };
 }

@@ -7,7 +7,9 @@ import {
   restoreDesktopProfileState,
 } from "@/services/auth/desktop-profile-restore";
 import { __resetDesktopProfileStorageForTests } from "@/services/auth/desktop-profile-storage";
+import { parseRestoredDesktopProfileState } from "@/services/auth/desktop-profile-state";
 import type { DesktopProfileState } from "@/types/desktop-shell";
+import { fakeJwt } from "@/__tests__/helpers/fakeJwt";
 
 jest.mock("@/services/auth/desktop-profile-restore", () => {
   const actual = jest.requireActual(
@@ -32,7 +34,7 @@ const SAVED: DesktopProfileState = {
     {
       address: ADDRESS,
       role: null,
-      jwt: "jwt",
+      jwt: fakeJwt({ sub: ADDRESS }),
       profileId: null,
       profileHandle: null,
       authSessionVersion: "v2",
@@ -80,7 +82,10 @@ describe("DesktopProfileStorageGate", () => {
     __resetDesktopProfileStorageForTests();
     nativeAuth = createNativeAuth();
     jest.mocked(getPageDesktopProfileState).mockReturnValue(EMPTY);
-    jest.mocked(restoreDesktopProfileState).mockClear();
+    jest.mocked(restoreDesktopProfileState).mockReset();
+    jest
+      .mocked(restoreDesktopProfileState)
+      .mockImplementation((saved) => parseRestoredDesktopProfileState(saved));
   });
 
   afterEach(() => {
@@ -144,16 +149,69 @@ describe("DesktopProfileStorageGate", () => {
     );
 
     expect(await screen.findByText("recovering")).toBeInTheDocument();
+    const message = screen.getByRole("alert");
+    expect(message).toHaveTextContent(
+      "Your saved profiles could not be opened"
+    );
     expect(restoreDesktopProfileState).toHaveBeenCalledWith(EMPTY);
     expect(nativeAuth.profilesReady).toHaveBeenCalled();
 
     const restart = screen.getByRole("button", {
       name: "Restart to restore profiles",
     });
+    expect(restart).toHaveAccessibleDescription(message.textContent ?? "");
     await act(async () => {
       restart.click();
     });
     expect(nativeAuth.restartProfileRestore).toHaveBeenCalledTimes(1);
+  });
+
+  it("runs signed out when the shell returns an invalid snapshot", async () => {
+    installDesktopShell();
+    nativeAuth.restoreProfiles.mockResolvedValue({
+      ...SAVED,
+      accounts: [
+        { ...SAVED.accounts[0], jwt: fakeJwt({ sub: `0x${"2".repeat(40)}` }) },
+      ],
+    });
+
+    render(
+      <DesktopProfileStorageGate>
+        <Child />
+      </DesktopProfileStorageGate>
+    );
+
+    expect(await screen.findByText("recovering")).toBeInTheDocument();
+    expect(restoreDesktopProfileState).toHaveBeenLastCalledWith(EMPTY);
+  });
+
+  it("returns focus to the focused element after a remount", async () => {
+    installDesktopShell();
+    let resolveRestore: (state: DesktopProfileState) => void = () => undefined;
+    nativeAuth.restoreProfiles.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRestore = resolve;
+      })
+    );
+
+    render(
+      <DesktopProfileStorageGate>
+        <button id="focus-target" type="button">
+          Target
+        </button>
+      </DesktopProfileStorageGate>
+    );
+    await waitFor(() => expect(nativeAuth.restoreProfiles).toHaveBeenCalled());
+    const before = screen.getByRole("button", { name: "Target" });
+    before.focus();
+
+    await act(async () => {
+      resolveRestore(SAVED);
+    });
+
+    const after = screen.getByRole("button", { name: "Target" });
+    expect(after).not.toBe(before);
+    expect(after).toHaveFocus();
   });
 
   it("only reports readiness on routes that do not sign in", async () => {

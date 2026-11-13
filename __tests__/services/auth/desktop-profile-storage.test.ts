@@ -8,8 +8,10 @@ import {
   retryDesktopProfileSave,
 } from "@/services/auth/desktop-profile-storage";
 import type { DesktopProfileState } from "@/types/desktop-shell";
+import { fakeJwt } from "@/__tests__/helpers/fakeJwt";
 
 const ADDRESS = `0x${"1".repeat(40)}`;
+const TOKEN = fakeJwt({ sub: ADDRESS });
 const EMPTY: DesktopProfileState = {
   version: 1,
   accounts: [],
@@ -21,7 +23,7 @@ const SAVED: DesktopProfileState = {
     {
       address: ADDRESS,
       role: null,
-      jwt: "jwt",
+      jwt: TOKEN,
       profileId: null,
       profileHandle: null,
       authSessionVersion: "v2",
@@ -58,7 +60,7 @@ const flush = async () => {
 const pageAccount = {
   address: ADDRESS,
   role: null,
-  jwt: "jwt",
+  jwt: TOKEN,
   profileId: null,
   profileHandle: null,
   authSessionVersion: "v2" as const,
@@ -107,6 +109,55 @@ describe("desktop profile storage", () => {
     await flush();
 
     expect(nativeAuth.saveProfiles).toHaveBeenCalledWith(SAVED);
+  });
+
+  it("saves a checksummed address lower-cased, with the active profile kept", async () => {
+    await initializeDesktopProfiles(EMPTY, jest.fn());
+    const checksummed = "0xAbCdEf0123456789aBcDeF0123456789AbCdEf01";
+
+    persistDesktopProfileAccounts(
+      [{ ...pageAccount, address: checksummed }],
+      checksummed
+    );
+    await flush();
+
+    expect(nativeAuth.saveProfiles).toHaveBeenCalledWith({
+      ...SAVED,
+      accounts: [{ ...SAVED.accounts[0], address: checksummed.toLowerCase() }],
+      activeAddress: checksummed.toLowerCase(),
+    });
+  });
+
+  it("never sends the shell an active profile that is not listed", async () => {
+    await initializeDesktopProfiles(EMPTY, jest.fn());
+
+    persistDesktopProfileAccounts([pageAccount], `0x${"9".repeat(40)}`);
+    await flush();
+
+    expect(nativeAuth.saveProfiles).toHaveBeenCalledWith({
+      ...SAVED,
+      activeAddress: null,
+    });
+  });
+
+  it("saves a change made during an in-flight save once, after it", async () => {
+    await initializeDesktopProfiles(EMPTY, jest.fn());
+    let finishFirstSave: () => void = () => undefined;
+    nativeAuth.saveProfiles.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        finishFirstSave = resolve;
+      })
+    );
+
+    persistDesktopProfileAccounts([pageAccount], ADDRESS);
+    persistDesktopProfileAccounts([], null);
+    finishFirstSave();
+    await flush();
+    await flush();
+
+    expect(nativeAuth.saveProfiles).toHaveBeenCalledTimes(2);
+    expect(nativeAuth.saveProfiles).toHaveBeenNthCalledWith(1, SAVED);
+    expect(nativeAuth.saveProfiles).toHaveBeenNthCalledWith(2, EMPTY);
   });
 
   it("reports a failed save and retries the latest snapshot", async () => {

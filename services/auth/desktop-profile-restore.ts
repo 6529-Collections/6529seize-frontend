@@ -4,7 +4,10 @@ import {
   getWalletAddress,
   persistAccountsWithActive,
 } from "./auth.utils";
-import { getDesktopProfileMigrationState } from "./desktop-profile-state";
+import {
+  getDesktopProfileMigrationState,
+  parseRestoredDesktopProfileState,
+} from "./desktop-profile-state";
 
 /** The page's saved profiles, as the snapshot the desktop shell accepts. */
 export function getPageDesktopProfileState(): DesktopProfileState {
@@ -22,16 +25,22 @@ export function getPageDesktopProfileState(): DesktopProfileState {
 }
 
 /**
- * Write the shell's profiles into page storage. Desktop session refresh
+ * Write the shell's profiles into page storage and return what was written.
+ * The shell's answer is untrusted: it is validated first and rejected whole
+ * if anything is wrong (see `parseRestoredDesktopProfileState`); addresses
+ * are lower-cased whichever case they were saved in. Desktop session refresh
  * tokens stay in the shell; only an older (pre-v2) session's refresh token
  * that this page already holds is kept.
  */
-export function restoreDesktopProfileState(state: DesktopProfileState): void {
+export function restoreDesktopProfileState(
+  saved: unknown
+): DesktopProfileState {
+  const state = parseRestoredDesktopProfileState(saved);
   const localAccounts = getConnectedWalletAccounts();
   persistAccountsWithActive(
     state.accounts.map((account) => {
       const local = localAccounts.find(
-        (saved) => saved.address.toLowerCase() === account.address
+        (stored) => stored.address.toLowerCase() === account.address
       );
       const keepsLegacyToken =
         account.authSessionVersion === null &&
@@ -43,6 +52,7 @@ export function restoreDesktopProfileState(state: DesktopProfileState): void {
     }),
     state.activeAddress
   );
+  return state;
 }
 
 /** Whether two snapshots hold the same profiles and active profile. */
