@@ -52,8 +52,8 @@ Wave and DM rows in the left list control which thread is open.
   active-row reveal again. Signed-out visitors see an `All Waves` label on the
   left and the same search icon on the right, without personal collection controls.
 - The `Waves` heading is plain text. Header actions sit at the far right:
-  feed, then create on desktop; feed only in the mobile list.
-  The app keeps create in its top bar.
+  feed, then create on desktop and mobile web. The native app's list shows
+  feed only and keeps create in its top bar.
 - Select the feed icon to open Profile Waves Feed. On desktop, it clears the
   selected wave; on mobile web and in the native app, it opens
   `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.

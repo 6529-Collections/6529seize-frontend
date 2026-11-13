@@ -6,6 +6,7 @@ import { useChatFileDrop } from "@/hooks/useChatFileDrop";
 import { getNativeComposerStyle } from "@/components/waves/composerPresentation";
 
 import { useAuth } from "@/components/auth/Auth";
+import SpinnerLoader from "@/components/common/SpinnerLoader";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
 import { LegacyDmComposerGate } from "@/components/e2ee/legacy/LegacyDmBanner";
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
@@ -145,7 +146,13 @@ const noop = () => {};
 
 const WaveGallery = dynamic<WaveGalleryProps>(
   () => import("@/components/waves/gallery").then((mod) => mod.WaveGallery),
-  { loading: () => null }
+  {
+    loading: () => (
+      <div className="tw-flex tw-h-full tw-items-center tw-justify-center">
+        <SpinnerLoader />
+      </div>
+    ),
+  }
 );
 
 const PrivilegedDropCreator = dynamic<PrivilegedDropCreatorProps>(
