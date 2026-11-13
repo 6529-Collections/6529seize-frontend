@@ -279,7 +279,11 @@ export function useWavePagination({
           targetSerialNo,
           controller.signal
         );
-        if (controller.signal.aborted || !windowDrops?.length) {
+        if (
+          controller.signal.aborted ||
+          windowDrops === null ||
+          windowDrops.length === 0
+        ) {
           return null;
         }
         storeTargetWindow(waveId, windowDrops);
