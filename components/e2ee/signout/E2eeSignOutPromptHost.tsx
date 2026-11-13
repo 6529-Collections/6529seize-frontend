@@ -59,6 +59,13 @@ async function removeLocalData(
 /** How long sign-out waits for the backup update. */
 const STEP_TIMEOUT_MS = 30_000;
 
+/** Fails unless the backup holds everything, not just a queued repair run. */
+async function backupComplete(backup: E2eeBackupManager): Promise<void> {
+  if (!(await backup.backupNow())) {
+    throw new Error("Encrypted backup is not complete");
+  }
+}
+
 /** Resolves true when `task` finished in time, false when it failed or timed out. */
 async function settlesInTime(task: () => Promise<unknown>): Promise<boolean> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -162,7 +169,7 @@ export function E2eeSignOutPromptHost({
     if (remove) {
       const flush =
         backup && !backupFailed && backup.getSnapshot().phase === "on";
-      if (flush && !(await settlesInTime(() => backup.backupNow()))) {
+      if (flush && !(await settlesInTime(() => backupComplete(backup)))) {
         // Keep the messages unless the user asks again knowing the backup
         // may be missing the latest ones.
         setPending(false);

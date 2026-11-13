@@ -609,7 +609,10 @@ encrypted copy of your message history so you can restore it on a new device.
 - Backups are incremental: after a change the device uploads only what
   changed, about 30 seconds later. **Back up now** uploads immediately and
   then shows "Backup is up to date." in the status line for a few seconds.
-  The section shows when the device last backed up and how much of the
+  If the upload needs another run (another device wrote to the backup at the
+  same moment), the status says "Backing up your history…" until that run
+  succeeds, never "up to date". A failed upload shows its error and is
+  retried about 5 minutes later. The section shows when the device last backed up and how much of the
   256 MB backup storage is used (in kB below 1 MB).
 - 6529 stores only encrypted data. It cannot read your messages, contact
   list or chat names, and cannot recover your recovery code. It can see that

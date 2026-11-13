@@ -68,7 +68,7 @@ function fakeManager(initial: E2eeBackupSnapshot) {
       }
       return { conversations: 2, messages: 5 };
     }),
-    backupNow: jest.fn(async () => undefined),
+    backupNow: jest.fn(async (): Promise<boolean> => true),
     turnOff: jest.fn(async () => {
       manager.set(snapshot({ phase: "off" }));
     }),
@@ -285,6 +285,32 @@ describe("E2eeBackupPanel", () => {
       expect(screen.getByText(text)).toBeInTheDocument();
     }
   );
+
+  it("says it is still backing up, not up to date, while a repair run is queued", async () => {
+    const manager = fakeManager(snapshot({ phase: "on", lastBackupAt: 2000 }));
+    // The upload needs another run (a conflict or fork repair): the manager
+    // marks the backup as still uploading and reports the run incomplete.
+    manager.backupNow.mockImplementation(async () => {
+      manager.set(
+        snapshot({ phase: "on", lastBackupAt: 2000, uploading: true })
+      );
+      return false;
+    });
+    renderPanel(manager);
+    fireEvent.click(screen.getByRole("button", { name: "Back up now" }));
+    await waitFor(() => expect(manager.backupNow).toHaveBeenCalledTimes(1));
+    expect(
+      await screen.findByText("Backing up your history…")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Backup is up to date.")).not.toBeInTheDocument();
+
+    // The queued run succeeds: only then does the status show the new time.
+    act(() => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+    });
+    expect(screen.queryByText("Backing up your history…")).not.toBeInTheDocument();
+    expect(screen.getByText(/^Last backed up /)).toBeInTheDocument();
+  });
 
   it("folds the back-up-now result into the status line and clears it (F-08)", async () => {
     jest.useFakeTimers();

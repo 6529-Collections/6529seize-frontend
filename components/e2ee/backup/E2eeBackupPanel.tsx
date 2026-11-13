@@ -514,8 +514,11 @@ export function E2eeBackupPanel() {
           onStartOver={() => setDialog({ kind: "start-over" })}
           onBackupNow={() =>
             void run(async () => {
-              await manager.backupNow();
-              showResult(t(locale, "e2ee.backup.upToDate"));
+              // Not complete (a repair run is queued): the status line says
+              // it is still backing up until that run succeeds.
+              if (await manager.backupNow()) {
+                showResult(t(locale, "e2ee.backup.upToDate"));
+              }
             })
           }
           onRetry={() => void run(() => manager.refresh())}

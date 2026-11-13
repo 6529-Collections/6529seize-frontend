@@ -315,14 +315,20 @@ export class E2eeBackupManager {
 
   // -- incremental backup ---------------------------------------------------------
 
-  /** Uploads what changed since the last run (no-op when backup is off). */
-  backupNow(): Promise<void> {
+  /**
+   * Uploads what changed since the last run (no-op when backup is off).
+   * Resolves true once everything is in the backup; false when nothing ran
+   * (backup off, device not ready) or another run is still needed (a
+   * conflict or fork repair, queued at once), so callers never report the
+   * backup as up to date before that run succeeds.
+   */
+  backupNow(): Promise<boolean> {
     return this.serial(async () => {
       if (!this.local) {
-        return;
+        return false;
       }
       try {
-        await this.runIncremental();
+        return await this.runIncremental();
       } catch (error) {
         const failure = toBackupError(error);
         this.update({ lastError: failure.code });
@@ -334,10 +340,11 @@ export class E2eeBackupManager {
     });
   }
 
-  private async runIncremental(): Promise<void> {
+  /** True when the run left everything in the backup (see backupNow). */
+  private async runIncremental(): Promise<boolean> {
     const local = this.local;
     if (!local || this.deps.engine.getStatus() !== "ready") {
-      return;
+      return false;
     }
     const deviceKey = this.deviceKey();
     this.update({ busy: true });
@@ -348,8 +355,10 @@ export class E2eeBackupManager {
           // The chain forked (a server without the append precondition) or
           // other devices kept appending first: the next run starts a new
           // chain with a full snapshot and compacts everything before it.
+          // Until it succeeds, the backup is still being written.
+          this.update({ uploading: true });
           this.schedule(0);
-          return;
+          return false;
         }
       }
       let backup: ApiE2eeBackup | null = null;
@@ -403,6 +412,7 @@ export class E2eeBackupManager {
         backupCreatedAt: active.created_at,
         backupUpdatedAt: active.updated_at,
       });
+      return true;
     } finally {
       this.update({ busy: false });
     }
