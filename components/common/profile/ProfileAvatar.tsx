@@ -14,6 +14,7 @@ interface ProfileAvatarProps {
   readonly size?: ProfileBadgeSize | undefined;
   readonly alt?: string | undefined;
   readonly fallbackContent?: ReactNode | undefined;
+  /** Nullish values keep the existing default image. */
   readonly imageContent?: ReactNode | undefined;
 }
 

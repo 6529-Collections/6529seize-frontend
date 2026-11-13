@@ -48,6 +48,7 @@ function ComingUpAvatarImage({ src }: { readonly src: string }) {
     // Extensionless IPFS URLs can also be animated AVIF, which Next does not
     // detect. Read only the signature before choosing the safe resize path.
     void fetch(src, {
+      credentials: "omit",
       headers: { Range: `bytes=0-${MEDIA_SIGNATURE_BYTE_COUNT - 1}` },
       signal: controller.signal,
     })
@@ -76,6 +77,7 @@ function ComingUpAvatarImage({ src }: { readonly src: string }) {
     };
   }, [eligible, src]);
 
+  // Starting the original while probing would download the oversized file.
   if (optimize === null) return null;
   const fallbackSrc = getScaledImageUri(src, ImageScale.W_AUTO_H_50);
 
@@ -114,6 +116,7 @@ export default function ComingUpAvatar({
   readonly pfpUrl: string | null | undefined;
 }) {
   const src = pfpUrl ? resolveIpfsUrlSync(pfpUrl) : null;
+  // The source key resets both format detection and crop sizing on changes.
   return (
     <ProfileAvatar
       pfpUrl={pfpUrl}

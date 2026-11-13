@@ -33,6 +33,7 @@ it("offers density-aware sizes for the extensionless static source", async () =>
     ipfs,
     expect.objectContaining({
       headers: { Range: "bytes=0-63" },
+      credentials: "omit",
     })
   );
   expect(image).toHaveAttribute("sizes", "28px");
@@ -50,6 +51,28 @@ it("offers density-aware sizes for the extensionless static source", async () =>
     "tw-w-7",
     "tw-rounded-lg"
   );
+});
+
+it("does not start the oversized original while identifying its format", async () => {
+  const probe = Promise.withResolvers<Response>();
+  fetchMock.mockReturnValue(probe.promise);
+  const { container } = render(<ComingUpAvatar pfpUrl={ipfs} />);
+  expect(container.querySelector("img")).toBeNull();
+  expect(container.firstElementChild).toHaveClass("tw-h-7", "tw-w-7");
+  await act(async () => probe.resolve(signatureResponse()));
+  expect(container.querySelector("img")).toHaveAttribute("sizes", "28px");
+  expect(container.querySelector("img")).not.toHaveAttribute("src", ipfs);
+});
+
+it("ignores a pending format result after the avatar source changes", async () => {
+  const probe = Promise.withResolvers<Response>();
+  fetchMock.mockReturnValue(probe.promise);
+  const { container, rerender } = render(<ComingUpAvatar pfpUrl={ipfs} />);
+  const replacement = "https://i.seadn.io/replacement.png";
+  rerender(<ComingUpAvatar pfpUrl={replacement} />);
+  await act(async () => probe.resolve(signatureResponse()));
+  expect(container.querySelector("img")).toHaveAttribute("src", replacement);
+  expect(container.querySelector("img")).not.toHaveAttribute("srcset");
 });
 
 it("resizes the original CDN source and keeps its existing failure fallback", async () => {
