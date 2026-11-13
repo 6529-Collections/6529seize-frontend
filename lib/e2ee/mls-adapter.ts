@@ -230,6 +230,23 @@ export class MlsClient {
     }
   }
 
+  /**
+   * Whether a KeyPackage (base64) comes from a client that supports self
+   * groups (P60). False when it does not say so, cannot be read, or this
+   * module predates self groups.
+   */
+  supportsSelfGroups(keyPackage: string): boolean {
+    try {
+      const info = this.module.keyPackageInfo?.(base64ToBytes(keyPackage));
+      return (
+        info !== undefined &&
+        (JSON.parse(info) as { self_sync?: unknown }).self_sync === true
+      );
+    } catch {
+      return false;
+    }
+  }
+
   dispose(): void {
     try {
       this.handle.free?.();

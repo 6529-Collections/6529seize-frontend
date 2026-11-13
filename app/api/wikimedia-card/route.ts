@@ -13,6 +13,7 @@ import {
   fetchJson,
   normalizeTarget,
   parseAcceptLanguage,
+  respondWithCardError,
   respondWithGuardError,
   sanitizeCacheKey,
   type CommonsFileTarget,
@@ -22,8 +23,17 @@ import {
 } from "./target";
 import { sanitizeHtmlToText } from "@/lib/text/html";
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 
 const CACHE_MAX_ITEMS = 1000;
+
+// Cards load once per distinct link and stay cached for hours, so a reader
+// stays far below this budget.
+const enforceRateLimit = createClientRateLimiter({
+  limit: 120,
+  windowMs: 60 * 1000,
+  errorMessage: "Too many Wikimedia preview requests",
+});
 
 const TTL_BY_KIND: Record<WikimediaCardResponse["kind"], number> = {
   article: 24 * 60 * 60 * 1000,
@@ -717,6 +727,11 @@ export async function GET(request: NextRequest) {
     return respondWithGuardError(error, "The provided URL is not allowed.");
   }
 
+  const rateLimitResponse = enforceRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   const languages = parseAcceptLanguage(request.headers.get("accept-language"));
   const cacheKey = buildCacheKey(sanitizeCacheKey(targetUrl), languages);
   const cached = cache.get(cacheKey);
@@ -730,7 +745,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unsupported Wikimedia URL.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return respondWithCardError(message, 400);
   }
 
   const card = await buildCard(target, languages);

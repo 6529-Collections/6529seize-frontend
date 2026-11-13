@@ -29,7 +29,7 @@ import { formatFileSizeLabel } from "@/lib/link-preview/filePreviewI18n";
 import {
   DocumentationButton,
   DocumentationNotice,
-  inputClass,
+  selectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 import {
@@ -563,7 +563,7 @@ export default function DocumentationUpload({
           <label className="tw-block tw-text-sm tw-text-iron-300">
             {msg("uploadRole")}
             <select
-              className={`${inputClass} tw-mt-2`}
+              className={`${selectClass} tw-mt-2`}
               disabled={busy}
               value={role}
               onChange={(event) => {
@@ -586,7 +586,7 @@ export default function DocumentationUpload({
             <label className="tw-block tw-text-sm tw-text-iron-300">
               {msg("visibility")}
               <select
-                className={`${inputClass} tw-mt-2`}
+                className={`${selectClass} tw-mt-2`}
                 disabled={busy || restrictedRoles.has(role)}
                 value={restrictedRoles.has(role) ? "restricted" : visibility}
                 onChange={(event) => setVisibility(event.target.value)}

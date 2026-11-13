@@ -14,7 +14,10 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { E2eeComposer } from "@/components/e2ee/conversation/E2eeComposer";
-import { E2EE_COMPOSER_TRANSFORMERS } from "@/components/e2ee/conversation/e2eeComposerTransformers";
+import {
+  E2EE_COMPOSER_TRANSFORMERS,
+  importE2eeComposerMarkdown,
+} from "@/components/e2ee/conversation/e2eeComposerTransformers";
 import { $convertFromMarkdownString } from "@lexical/markdown";
 import { getNearestEditorFromDOMNode } from "lexical";
 import {
@@ -50,6 +53,7 @@ jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
       ["gm", "data:image/png;base64,aGVsbG8="],
       ["gm-wave", "data:image/png;base64,aGVsbG8="],
     ]),
+    native: new Map(),
     categories: [],
     failed: false,
     retry: jest.fn(),
@@ -190,6 +194,14 @@ it("takes focus back after the mobile emoji panel gives it to its trigger", asyn
 const convoGroup = (engine: ReturnType<typeof createFakeE2eeEngine>) =>
   engine.state.conversations[0]!.g;
 
+it("keeps whitespace-only drafts empty and blocks sending them", () => {
+  const { engine, input } = setup();
+  setComposerText(input, "  \n  ");
+  expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
+  fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
+  expect(engine.send).not.toHaveBeenCalled();
+});
+
 it.each(["gm", "gm-wave"])(
   "renders known custom emojis inline and keeps unknown tokens in the encrypted payload: %s",
   async (id) => {
@@ -202,8 +214,9 @@ it.each(["gm", "gm-wave"])(
     );
     expect(input).toHaveTextContent(":unknown:");
     expect(
-      screen.queryByRole("button", { name: /GIF|Poll|Storm/i })
+      screen.queryByRole("button", { name: /Poll|Storm/i })
     ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add GIF" })).toBeVisible();
     fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
     await waitFor(() =>
       expect(engine.send).toHaveBeenCalledWith(
@@ -219,7 +232,8 @@ function setRecalledMessage(input: HTMLElement) {
   const editor = getNearestEditorFromDOMNode(input)!;
   act(() =>
     editor.update(
-      () => $convertFromMarkdownString("Hello :gm:", E2EE_COMPOSER_TRANSFORMERS),
+      () =>
+        $convertFromMarkdownString("Hello :gm:", E2EE_COMPOSER_TRANSFORMERS),
       { discrete: true }
     )
   );
@@ -314,6 +328,53 @@ it("inserts a custom shortcode into an edit and preserves the existing edit flow
       "Hello:gm: Bob"
     )
   );
+});
+
+it.each([false, true])(
+  "keeps rich Markdown and extra blank paragraphs when editing=%s",
+  async (editing) => {
+    const { engine, input, original } = setup(editing);
+    const editor = getNearestEditorFromDOMNode(input)!;
+    const text =
+      "# Heading\n\n**Bold** and *italic*\n\n\nAfter blank\n\n```ts\nconst answer = 42;\n```";
+    act(() =>
+      editor.update(() => importE2eeComposerMarkdown(text), { discrete: true })
+    );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: editing ? "Save" : "Send",
+      })
+    );
+    if (editing) {
+      await waitFor(() =>
+        expect(engine.edit).toHaveBeenCalledWith(
+          convoGroup(engine),
+          original.id,
+          text
+        )
+      );
+    } else {
+      await waitFor(() =>
+        expect(engine.send).toHaveBeenCalledWith(
+          convoGroup(engine),
+          expect.objectContaining({ text })
+        )
+      );
+    }
+  }
+);
+
+it("keeps restored code free of invisible spacing placeholders before copying", () => {
+  const { input } = setup(true);
+  const editor = getNearestEditorFromDOMNode(input)!;
+  const code = "const first = 1;\n\n\nconst last = 2;";
+  act(() =>
+    editor.update(
+      () => importE2eeComposerMarkdown(`Before\n\n\n\`\`\`ts\n${code}\n\`\`\``),
+      { discrete: true }
+    )
+  );
+  expect(input.querySelector("code")?.textContent).toBe(code);
 });
 
 it.each(["mobile browser", "native app"])(

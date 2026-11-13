@@ -4,6 +4,11 @@ import Image from "next/image";
 import { type KeyboardEvent, type ReactNode, useId, useState } from "react";
 
 import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
+import {
+  CONNECTED_TAB_INTERACTION_CLASSES,
+  CONNECTED_TAB_SURFACE_CLASSES,
+  getConnectedTabStateClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 import type { VisitorPlatform } from "@/lib/validator-page/detectSystem";
 import CopyChecksumButton from "./CopyChecksumButton";
 import { useVisitorPlatform } from "./useVisitorPlatform";
@@ -328,7 +333,7 @@ export default function ValidatorSteps({
         role="tablist"
         aria-label="Steps for your system"
         onKeyDown={onKeyDown}
-        className="tw-mb-4 tw-inline-flex tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/60 tw-p-1"
+        className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-mb-4 tw-inline-flex tw-border tw-border-solid tw-p-1`}
       >
         {SYSTEMS.map((entry) => {
           const selected = entry.key === system;
@@ -342,11 +347,7 @@ export default function ValidatorSteps({
               aria-controls={panelId}
               tabIndex={selected ? 0 : -1}
               onClick={() => setChosen(entry.key)}
-              className={`tw-min-h-9 tw-rounded-md tw-border-0 tw-px-4 tw-text-sm tw-font-medium tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
-                selected
-                  ? "tw-bg-iron-700 tw-text-white"
-                  : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-100"
-              }`}
+              className={`tw-min-h-9 tw-rounded-md tw-border-0 tw-px-4 tw-text-sm tw-font-medium ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: selected })}`}
             >
               {entry.label}
             </button>

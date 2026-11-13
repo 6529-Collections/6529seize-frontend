@@ -85,7 +85,7 @@ private `/tools/6529bot/admin` operator page.
   operator allowlist all pass.
 - The public `/tools` landing page does not list private operator or local-only
   routes.
-- On iOS outside the US, `Subscriptions Report` is hidden in web sidebar and
+- In the iOS app, `Subscriptions Report` is hidden in navigation and
   search.
 - On native app, the About drawer uses the same `Subscriptions Report` label
   when visible.

@@ -5,10 +5,12 @@ export default function MobileWrapperDialogBackButton({
   onClick,
   label,
   showLabel = false,
+  disabled = false,
 }: {
   readonly onClick: () => void;
   readonly label: string;
   readonly showLabel?: boolean;
+  readonly disabled?: boolean;
 }) {
   return (
     <button
@@ -16,8 +18,9 @@ export default function MobileWrapperDialogBackButton({
       title={label}
       aria-label={label}
       onClick={onClick}
+      disabled={disabled}
       className={clsx(
-        "tw-group -tw-ml-2 tw-inline-flex tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-[color,transform] tw-duration-150 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-scale-95 desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
+        "tw-group -tw-ml-2 tw-inline-flex tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-[color,transform] tw-duration-150 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-scale-95 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
         showLabel ? "tw-h-10 tw-gap-2 tw-pr-2" : "tw-size-10"
       )}
     >

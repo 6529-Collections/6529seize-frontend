@@ -209,6 +209,13 @@ pub fn h_tag(name: &str) -> String {
     codec::hex0x(&codec::tag(name))
 }
 
+/// A KeyPackage's suite and whether it supports self groups (JSON), after
+/// validating it. Lets the engine skip devices a self group cannot admit.
+#[wasm_bindgen(js_name = keyPackageInfo)]
+pub fn key_package_info(data: &[u8]) -> JsResult<String> {
+    crate::device::key_package_info(data).map_err(js_err)
+}
+
 /// Strict Ed25519 verification over 32 raw digest bytes. False on any
 /// malformed input.
 #[wasm_bindgen(js_name = verifyEd25519)]

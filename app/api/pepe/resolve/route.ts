@@ -25,6 +25,7 @@ import {
   readLimitedText,
 } from "@/lib/fetch/limitedBody";
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 import { loadHtmlMetadata } from "@/lib/security/htmlMetadata";
 import { UrlGuardError, fetchPublicUrl } from "@/lib/security/urlGuard";
 
@@ -33,6 +34,14 @@ export const HTML_RESPONSE_MAX_BYTES = 8 * 1024 * 1024;
 const JSON_RESPONSE_MAX_BYTES = 2 * 1024 * 1024;
 const HTML_ACCEPT_HEADER =
   "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+
+// Previews resolve once per distinct link; repeat views are served from the
+// browser and this process's cache, so a reader stays far below this budget.
+const enforceRateLimit = createClientRateLimiter({
+  limit: 120,
+  windowMs: 60 * 1000,
+  errorMessage: "Too many Pepe preview requests",
+});
 
 const readNumber = (value: string | undefined, fallback: number): number => {
   if (!value) {
@@ -688,6 +697,11 @@ export async function GET(request: NextRequest) {
     !["asset", "collection", "artist", "set"].includes(kind)
   ) {
     return errorResponse("invalid params", 400);
+  }
+
+  const rateLimitResponse = enforceRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   const cacheKey = `${kind}:${slug.toLowerCase()}`;

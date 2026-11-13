@@ -7,6 +7,7 @@ import { setE2eeChatMuted } from "@/components/e2ee/e2eeMutedChats";
 import { useE2eeUnreadSummary } from "@/hooks/e2ee/useE2ee";
 import {
   ALICE_ID,
+  BOB_ID,
   contextFor,
   conversation,
   createFakeE2eeEngine,
@@ -24,7 +25,7 @@ const emojiSource = "data:image/webp;base64,UklGRg==";
 const mockEmojiSources = new Map([["gm", emojiSource]]);
 jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
   E2eeEmojiProvider: ({ children }: { children: ReactNode }) => children,
-  useE2eeEmojis: () => ({ sources: mockEmojiSources }),
+  useE2eeEmojis: () => ({ sources: mockEmojiSources, native: new Map() }),
 }));
 const mockSearch = jest.fn(() => new URLSearchParams());
 jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
@@ -32,6 +33,12 @@ jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
 }));
 jest.mock("@/hooks/device-signing/useEnableSignedMessages", () => ({
   useEnableSignedMessages: () => ({ canEnable: false, isEnabling: false }),
+}));
+
+const mockOpenComposer = jest.fn();
+jest.mock("@/hooks/useCreateModalState", () => ({
+  __esModule: true,
+  default: () => ({ isApp: false, openDirectMessage: mockOpenComposer }),
 }));
 
 const mockPathname = jest.fn(() => "/messages");
@@ -154,6 +161,46 @@ describe("encrypted conversation list", () => {
   it.each([
     { name: "inbox", Component: E2eeConversationListPage },
     { name: "sidebar", Component: E2eeMessagesSection },
+  ])(
+    "formats Markdown in $name previews without nested links or resources",
+    ({ Component }) => {
+      const chats = [
+        conversation({
+          lastMessage: message({
+            id: "markdown-preview",
+            senderProfileId: SELF_ID,
+            text: "**Bold** *italic* ~~struck~~ [Link](https://preview.invalid)\n\n```js\nconsole.log('hi');\n```\n\n- first\n- second\n\n![Photo](https://preview.invalid/image.png)",
+          }),
+        }),
+      ];
+      render(
+        <E2eeTestProvider
+          value={contextFor(createFakeE2eeEngine({ conversations: chats }))}
+        >
+          <Component />
+        </E2eeTestProvider>
+      );
+      const row = within(
+        screen.getByRole("list", { name: "Encrypted chats" })
+      ).getByRole("link");
+      expect(row).toHaveTextContent(
+        "You: Bold italic struck Link console.log('hi'); first second Photo"
+      );
+      expect(row.querySelector("strong")).toHaveTextContent("Bold");
+      expect(row.querySelector("em")).toHaveTextContent("italic");
+      expect(row.querySelector("del")).toHaveTextContent("struck");
+      expect(row.querySelector("code")).toHaveTextContent("console.log('hi');");
+      expect(
+        row.querySelector("a, img, input, pre, p, ul, li, div")
+      ).toBeNull();
+      expect(row).not.toHaveTextContent("https://preview.invalid");
+      expect(row).not.toHaveTextContent("```");
+    }
+  );
+
+  it.each([
+    { name: "inbox", Component: E2eeConversationListPage },
+    { name: "sidebar", Component: E2eeMessagesSection },
   ])("renders compact custom emojis in $name previews", ({ Component }) => {
     const chats = [
       conversation({
@@ -181,6 +228,49 @@ describe("encrypted conversation list", () => {
     expect(emoji.parentElement).toHaveClass("tw-truncate");
     expect(row).toHaveTextContent("You: gm 😀 :unknown:");
     expect(row).toHaveAttribute("href", `/messages/encrypted/${GROUP_G}`);
+  });
+
+  it("lists a DM holding someone else as its own chat, by its members", () => {
+    const pair = {
+      kind: "dm" as const,
+      name: null,
+      admins: [SELF_ID, ALICE_ID],
+    };
+    const real = conversation({
+      ...pair,
+      g: DM_G,
+      members: [member(SELF_ID, "me"), member(ALICE_ID, "alice")],
+    });
+    // Sorts first by g, so it would have been the current chat with alice.
+    const crowded = conversation({
+      ...pair,
+      g: GROUP_G,
+      lastMessage: message({ id: "m3", senderProfileId: BOB_ID, text: "hi" }),
+    });
+    render(
+      <E2eeTestProvider
+        value={contextFor(
+          createFakeE2eeEngine({ conversations: [real, crowded] })
+        )}
+      >
+        <E2eeConversationListPage />
+      </E2eeTestProvider>
+    );
+    const list = screen.getByRole("list", { name: "Encrypted chats" });
+    const rows = within(list).getAllByRole("link");
+    expect(rows.map((row) => row.getAttribute("href")).sort()).toEqual(
+      [`/messages/encrypted/${DM_G}`, `/messages/encrypted/${GROUP_G}`].sort()
+    );
+    const crowdedRow = rows.find((row) =>
+      row.getAttribute("href")?.endsWith(GROUP_G)
+    );
+    expect(crowdedRow).toHaveTextContent("alice and bob");
+    expect(crowdedRow).toHaveTextContent("bob: hi");
+    const realRow = rows.find((row) =>
+      row.getAttribute("href")?.endsWith(DM_G)
+    );
+    expect(realRow).toHaveTextContent("alice");
+    expect(realRow).not.toHaveTextContent("bob");
   });
 
   it("marks a chat muted on this device and leaves it out of the badge", () => {
@@ -247,7 +337,9 @@ describe("encrypted conversation list", () => {
       expect(links[0]).toHaveAttribute("href", href);
       expect(links[0]).toHaveTextContent("2 unread messages");
     }
-    expect(within(sidebar!).getByRole("link", { current: "page" })).toBeVisible();
+    expect(
+      within(sidebar!).getByRole("link", { current: "page" })
+    ).toBeVisible();
   });
 
   it("opens the history with unread incoming messages when concurrent chats share a row", () => {
@@ -403,8 +495,10 @@ describe("encrypted conversation list", () => {
       </E2eeTestProvider>
     );
     expect(screen.getByText("No encrypted chats yet")).toBeInTheDocument();
-    const links = screen.getAllByRole("link", { name: "New encrypted chat" });
-    expect(links[0]).toHaveAttribute("href", "/messages/encrypted/new");
+    const compose = screen.getByRole("button", { name: "New message" });
+    expect(compose).toHaveClass("lg:tw-hidden");
+    fireEvent.click(compose);
+    expect(mockOpenComposer).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -443,7 +537,9 @@ describe("E2eeMessagesSection", () => {
           <E2eeMessagesSection collapsed={collapsed} />
         </E2eeTestProvider>
       );
-      const list = within(screen.getByRole("list", { name: "Encrypted chats" }));
+      const list = within(
+        screen.getByRole("list", { name: "Encrypted chats" })
+      );
       expect(list.getByRole("link", { current: "page" })).toHaveAttribute(
         "href",
         "/messages/encrypted"

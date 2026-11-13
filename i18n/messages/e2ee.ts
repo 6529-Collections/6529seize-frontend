@@ -4,6 +4,11 @@
  * codes only; every user-visible string lives here.
  */
 export const E2EE_MESSAGES = {
+  "e2ee.message.taskChecked": "Checked task",
+  "e2ee.message.taskUnchecked": "Unchecked task",
+  "e2ee.message.imageLink": "Image link",
+  "e2ee.message.imageLinkFrom": "Image from {host}",
+  "e2ee.message.markdownTable": "Message table",
   "e2ee.dm.history.label": "Chat history",
   "e2ee.dm.history.hint":
     "Previous chats with this person stay here. Unread counts include all active histories. Messages and search belong to the selected history.",
@@ -85,13 +90,17 @@ export const E2EE_MESSAGES = {
   "e2ee.signOut.title": "Sign out",
   "e2ee.signOut.titleAll": "Sign out of all profiles",
   "e2ee.signOut.body":
-    "Your encrypted messages stay saved in this browser unless you remove them.",
+    "Your encrypted chats and this browser’s encryption keys stay saved here, ready for your next sign-in, unless you remove them.",
   "e2ee.signOut.remove.label": "Remove encrypted messages from this browser",
   "e2ee.signOut.remove.help":
-    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile. Your history is lost unless backup is on.",
+    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile. You stay a member of your chats, but this browser must be set up again for encrypted messages and then counts as a new device. Your history is lost unless backup is on.",
+  "e2ee.signOut.remove.helpBackedUp":
+    "Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for this profile. You stay a member of your chats, but this browser must be set up again for encrypted messages and then counts as a new device. Your encrypted backup is up to date, so you can then restore this history with your recovery code.",
   "e2ee.signOut.remove.helpAll":
-    "Recommended on a shared computer. Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for every profile. Your history is lost unless backup is on.",
+    "Recommended on a shared computer. Deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved here for every profile. You stay a member of your chats, but this browser must be set up again for encrypted messages and then counts as a new device for each profile. Your history is lost unless backup is on.",
   "e2ee.signOut.confirm": "Sign out",
+  "e2ee.signOut.backupFailed":
+    "Couldn’t update your encrypted backup, so your encrypted messages were kept in this browser. To remove them anyway, select the option again and sign out. Your newest messages may then be lost.",
   "e2ee.signOut.removeFailed":
     "Couldn’t remove encrypted messages from this browser. Close any other 6529 tabs and try again. You’re still signed in.",
   "e2ee.enroll.identity": "You’ll sign as {name} with {wallet}.",
@@ -143,6 +152,16 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.waiting": "Waiting for your wallet signature…",
   "e2ee.enroll.rejected": "Signature cancelled.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
+  "e2ee.enroll.revocationUnverified":
+    "This device is listed as revoked, but the revocation couldn’t be confirmed here. It has stopped sending and receiving encrypted messages, and everything saved on it is kept. To use them here again, remove them from this browser below, then turn them on again; that deletes the history saved here, which only an encrypted backup can restore.",
+  "e2ee.enroll.removeLocal": "Remove encrypted messages from this browser",
+  "e2ee.enroll.removeLocalTitle":
+    "Remove encrypted messages from this browser?",
+  "e2ee.enroll.removeLocalBody":
+    "This deletes the encrypted chats, attachment keys, unsent messages and encryption keys saved in this browser. An encrypted backup can restore the history it contains. You can then turn encrypted messages on again as a new device.",
+  "e2ee.enroll.removeLocalConfirm": "Remove",
+  "e2ee.enroll.removeLocalFailed":
+    "Couldn’t remove encrypted messages from this browser. Try again.",
   "e2ee.upgrade.title": "Upgrade encrypted messages",
   "e2ee.upgrade.intro":
     "Encrypted messages are moving to stronger encryption. Confirm once in your wallet to continue; your messages stay on this device.",
@@ -195,6 +214,11 @@ export const E2EE_MESSAGES = {
     "Its wallet signature was checked on this device.",
   "e2ee.devices.unverifiedHint":
     "Its wallet signature couldn’t be checked on this device.",
+  "e2ee.devices.needsApproval": "Not added on this device",
+  "e2ee.devices.needsApprovalHint":
+    "Signed by wallet {wallet}, which this device hasn’t added for you. This device won’t add it to your encrypted chats until you add it. Add it only if you recognize it.",
+  "e2ee.devices.needsApprovalHintNoWallet":
+    "This device won’t add it to your encrypted chats until you add it. Add it only if you recognize it.",
   "e2ee.devices.revoke": "Revoke",
   "e2ee.devices.revokeAria": "Revoke {label}",
   "e2ee.devices.revokeConfirmTitle": "Revoke {label}?",
@@ -214,7 +238,6 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.rename.failed": "Couldn’t save the name. Try again.",
   "e2ee.devices.newDevice":
     "New device added {date}: {label} ({platform}). It can read your encrypted messages. If this wasn’t you, revoke it.",
-  "e2ee.devices.newDeviceConfirm": "This was me",
   "e2ee.devices.newDeviceRevoke": "Revoke {label}",
   "e2ee.devices.open": "Devices for encrypted messages",
 
@@ -273,6 +296,22 @@ export const E2EE_MESSAGES = {
   "e2ee.new.dmNeedsOne":
     "A direct message is with exactly one other person. Choose Group for more.",
   "e2ee.new.create": "Start encrypted chat",
+  "e2ee.new.start": "Start chat",
+  "e2ee.new.moreOptions": "More options",
+  "e2ee.new.forceGroup": "Create a group I can add people to later",
+  "e2ee.new.matches.one": "Existing group with these people",
+  "e2ee.new.matches.many": "Existing groups with these people",
+  "e2ee.new.matches.choose": "Choose a group to open.",
+  "e2ee.new.matches.changed":
+    "The selected group no longer matches. Choose a group to open.",
+  "e2ee.new.newGroup": "Start a new group",
+  "e2ee.new.viewGroups": "View existing groups",
+  "e2ee.new.useUnencrypted": "Use unencrypted chat instead",
+  "e2ee.new.useUnencryptedDm": "Use unencrypted DM instead",
+  "e2ee.new.useEncrypted": "Use encrypted chat",
+  "e2ee.new.continueUnencrypted": "Continue unencrypted",
+  "e2ee.new.legacyClosed":
+    "Unencrypted messaging has ended. Everyone in the chat needs to turn on encrypted messages.",
   "e2ee.new.creating": "Starting…",
   "e2ee.new.createFailed": "Couldn’t start the encrypted chat. Try again.",
   "e2ee.new.existingDm": "You already have an encrypted chat with {name}.",
@@ -420,6 +459,10 @@ export const E2EE_MESSAGES = {
   "e2ee.notice.deviceAdded": "{name} added a device",
   "e2ee.notice.deviceAddedWallet":
     "{name} added a device signed by wallet {wallet}",
+  "e2ee.notice.deviceAddedUnverified":
+    "{name} added a device signed by wallet {wallet}, which isn’t verified for {owner} on this device",
+  "e2ee.notice.deviceAddedUnverifiedNoWallet":
+    "{name} added a device that isn’t verified for {owner} on this device",
   "e2ee.notice.deviceRemoved": "{name} removed a device",
   "e2ee.notice.renamed": "{actor} renamed the chat to “{name}”",
   "e2ee.notice.renamedNoName": "{actor} renamed the chat",
@@ -430,6 +473,14 @@ export const E2EE_MESSAGES = {
   "e2ee.composer.placeholder": "Write an encrypted message",
   "e2ee.composer.send": "Send",
   "e2ee.composer.attach": "Attach files",
+  "e2ee.composer.gifPrivacy":
+    "GIF searches and previews connect to GIPHY and are not end-to-end encrypted. The GIF you send is encrypted as an attachment.",
+  "e2ee.composer.gifDownloading": "Downloading GIF…",
+  "e2ee.composer.cancelGif": "Cancel GIF download",
+  "e2ee.composer.gifFailed":
+    "Couldn’t download the GIF. Try again or attach a GIF file.",
+  "e2ee.composer.gifTooLarge":
+    "This GIF is larger than 25 MB. Choose a smaller GIF.",
   "e2ee.composer.dropArea": "Encrypted chat file upload area",
   "e2ee.composer.removeAttachment": "Remove {name}",
   "e2ee.composer.attachments": "Attachments",
@@ -464,6 +515,7 @@ export const E2EE_MESSAGES = {
   "e2ee.info.memberDevices": "Devices of {name}",
   "e2ee.info.deviceLine": "{device} · {status} · signed by wallet {wallet}",
   "e2ee.info.deviceLineNoWallet": "{device} · {status}",
+  "e2ee.info.deviceNotPinned": "Not verified for {name} on this device",
   "e2ee.info.addPeople": "Add people",
   "e2ee.info.addSearch": "Search people to add",
   "e2ee.info.addSubmit": "Add to chat",
@@ -723,7 +775,13 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.revokeEncryptionTitle":
     "Revoke access to encrypted DMs for {label}?",
   "e2ee.devices.revokeHistory":
-    "The app clears this device’s local encrypted chat history when it processes the revocation. An encrypted backup can restore the history it contains.",
+    "That device stops receiving encrypted messages. It deletes its saved chat history once it confirms the revocation came from a device of yours it trusts; otherwise the history stays on it until it’s removed there. An encrypted backup can restore the history it contains.",
+  "e2ee.devices.revokeHistoryThis":
+    "The encrypted chat history and keys saved in this browser are deleted right away. An encrypted backup can restore the history it contains.",
+  "e2ee.devices.revokeHistoryUnsigned":
+    "That device stops receiving encrypted messages. Its saved chat history stays on it until it’s removed there, because encrypted messages aren’t on in this browser to confirm the revocation.",
+  "e2ee.devices.revokeUnsignedNotice":
+    "{label} was revoked, but this browser couldn’t sign the revocation of its encrypted messages. Its saved chat history stays on that device until it’s removed there.",
   "e2ee.deviceStatus.summary":
     "This device: signed posts {proof}; encrypted DMs {encryption}.",
   "e2ee.deviceStatus.expiring": " · expires {time}",

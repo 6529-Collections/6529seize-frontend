@@ -10,9 +10,9 @@ import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import {
   getEncryptedDevicesRoute,
   getMessagesBaseRoute,
-  getNewEncryptedChatRoute,
 } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useCreateModalState from "@/hooks/useCreateModalState";
 import { t } from "@/i18n/messages";
 import { E2eeNewDeviceNotice } from "../devices/E2eeNewDeviceNotice";
 import { E2eeRenewalBanner } from "../gate/E2eeRenewalBanner";
@@ -24,35 +24,6 @@ import { useSyncEncryptedPush } from "./useSyncEncryptedPush";
 
 const ACTION_LINK_CLASS =
   "tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-text-xs tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
-
-export function E2eeNewChatLink({
-  compact = false,
-  iconOnlyOnMobile = false,
-}: {
-  readonly compact?: boolean | undefined;
-  /** Header use: the label shows from `sm` up, the icon alone below it. */
-  readonly iconOnlyOnMobile?: boolean | undefined;
-}) {
-  const locale = useBrowserLocale();
-  const label = t(locale, "e2ee.action.newChat");
-  return (
-    <Link
-      href={getNewEncryptedChatRoute()}
-      aria-label={compact ? label : undefined}
-      title={compact || iconOnlyOnMobile ? label : undefined}
-      className={`${ACTION_LINK_CLASS} tw-border-primary-500 tw-bg-primary-500 tw-text-white desktop-hover:hover:tw-bg-primary-600`}
-    >
-      <PlusIcon aria-hidden="true" className="tw-size-4" />
-      {compact ? null : (
-        <span
-          className={iconOnlyOnMobile ? "tw-sr-only sm:tw-not-sr-only" : ""}
-        >
-          {label}
-        </span>
-      )}
-    </Link>
-  );
-}
 
 function DevicesLink() {
   const locale = useBrowserLocale();
@@ -74,6 +45,7 @@ function DevicesLink() {
 export function E2eeConversationListPage() {
   const locale = useBrowserLocale();
   useSyncEncryptedPush();
+  const { isApp, openDirectMessage } = useCreateModalState();
   // Devices and new chats only make sense once this device is turned on.
   const { status } = useE2ee();
   const ready = status === "ready";
@@ -93,7 +65,20 @@ export function E2eeConversationListPage() {
         ready ? (
           <>
             <DevicesLink />
-            <E2eeNewChatLink iconOnlyOnMobile />
+            {!isApp && (
+              <button
+                type="button"
+                onClick={openDirectMessage}
+                aria-label={t(locale, "quickDm.createModalTitle")}
+                title={t(locale, "quickDm.createModalTitle")}
+                className={
+                  ACTION_LINK_CLASS +
+                  " tw-border-primary-500 tw-bg-primary-500 tw-text-white lg:tw-hidden"
+                }
+              >
+                <PlusIcon aria-hidden="true" className="tw-size-4" />
+              </button>
+            )}
           </>
         ) : null
       }
@@ -108,9 +93,7 @@ export function E2eeConversationListPage() {
                 icon={<LockClosedIcon className="tw-size-6" />}
                 title={t(locale, "e2ee.list.empty.title")}
                 body={t(locale, "e2ee.list.empty.body")}
-              >
-                <E2eeNewChatLink />
-              </E2eeCenteredMessage>
+              />
             ) : (
               <E2eeConversationList
                 conversations={conversations}

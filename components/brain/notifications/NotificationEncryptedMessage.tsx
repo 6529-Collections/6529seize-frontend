@@ -10,6 +10,7 @@ import UserCICAndLevel, {
 } from "@/components/user/utils/UserCICAndLevel";
 import { DropAuthorBadges } from "@/components/waves/drops/DropAuthorBadges";
 import { useEncryptedNotificationPreview } from "@/hooks/e2ee/useEncryptedNotificationPreview";
+import NotificationMarkdownPreview from "@/components/notifications/NotificationMarkdownPreview";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -121,11 +122,14 @@ export default function NotificationEncryptedMessage({
             className="tw-mt-0.5 tw-size-4 tw-shrink-0 tw-text-iron-400"
           />
         )}
-        <span className="tw-line-clamp-2 tw-min-w-0">
+        <div className="tw-line-clamp-2 tw-max-h-10 tw-min-w-0 tw-overflow-hidden">
           {preview ? (
             <>
               {sender && <span className="tw-sr-only">{newMessageLabel} </span>}
-              {preview}
+              <NotificationMarkdownPreview
+                text={preview}
+                messageId={`notification-${notification.id}`}
+              />
             </>
           ) : (
             actionLabel
@@ -136,7 +140,7 @@ export default function NotificationEncryptedMessage({
               className="tw-ml-1 tw-inline-block tw-size-3"
             />
           )}
-        </span>
+        </div>
       </Link>
     </article>
   );

@@ -217,6 +217,9 @@ export default function Leaderboard(
     return (
       <div className="tw-w-fit">
         <CommonTabs
+          variant="connected"
+          connectedSize="sm"
+          connectedTypography="body"
           items={TDH_VIEW_ITEMS}
           activeItem={props.tdhView}
           setSelected={props.setTdhView}

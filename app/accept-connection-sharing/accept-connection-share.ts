@@ -84,7 +84,11 @@ export async function acceptConnectionShare({
   readonly setToast: SetToast;
   readonly seizeAcceptConnection: (address: string) => void;
 }): Promise<ConnectionShareAcceptance> {
-  if (address && canStoreAnotherWalletAccount(address) === false) {
+  // A link that does not name its account is never redeemed.
+  if (!address) {
+    return "rejected";
+  }
+  if (canStoreAnotherWalletAccount(address) === false) {
     setToast({
       message: t(
         ACCEPT_CONNECTION_LOCALE,
@@ -108,10 +112,11 @@ export async function acceptConnectionShare({
     reportFailure("redeem");
     throw error;
   });
+  // The session must be for the account the link named and the user saw.
   const hasValidRedeemResponse =
     !!redeemResponse.address &&
     !!redeemResponse.access_token &&
-    (!address || areEqualAddresses(redeemResponse.address, address));
+    areEqualAddresses(redeemResponse.address, address);
   if (hasValidRedeemResponse === false) {
     reportFailure("invalid-response");
     setToast({

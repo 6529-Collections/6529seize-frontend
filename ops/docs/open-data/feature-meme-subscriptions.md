@@ -23,15 +23,8 @@ The page heading is `Meme Subscriptions Downloads`.
 
 ## Visibility Rules
 
-- The hub card is hidden when both are true:
-  - The user is in the native iOS app.
-  - Cookie-country is not `US`.
-- On native iOS, the hub card can be temporarily hidden while cookie-country is
-  still loading.
-- The iOS country rule affects hub-card and sidebar-link visibility.
-- The sidebar route link remains available outside restricted iOS visibility
-  contexts.
-- Direct navigation to `/open-data/meme-subscriptions` still works.
+- The iOS app hides the hub card and sidebar link.
+- The dataset is available directly at `/open-data/meme-subscriptions`.
 
 ## Data Source
 

@@ -1,3 +1,7 @@
+import {
+  DROPDOWN_FIELD_CLASSES,
+  DROPDOWN_CHEVRON_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useId } from "react";
@@ -114,14 +118,14 @@ export default function OfferPlanPricing({
                     event.currentTarget.click();
                   }
                 }}
-                className="tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                className={`${DROPDOWN_FIELD_CLASSES} tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-py-2 tw-text-left tw-text-sm`}
               >
                 <Description as="span" className="tw-min-w-0">
                   {t(locale, OFFER_METHODS[value.method])}
                 </Description>
                 <ChevronDownIcon
                   aria-hidden="true"
-                  className="tw-size-4 tw-shrink-0 tw-text-iron-400"
+                  className={DROPDOWN_CHEVRON_CLASSES}
                 />
               </ListboxButton>
               <ListboxOptions

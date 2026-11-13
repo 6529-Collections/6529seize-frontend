@@ -1,10 +1,5 @@
-import PrimaryRouteLoadingShell from "@/components/navigation/PrimaryRouteLoadingShell";
+import TheMemesLoadingSkeleton from "@/components/the-memes/TheMemesLoadingSkeleton";
 
 export default function Loading() {
-  return (
-    <PrimaryRouteLoadingShell
-      messageKey="navigation.primary.loading.collections"
-      variant="cards"
-    />
-  );
+  return <TheMemesLoadingSkeleton />;
 }

@@ -51,7 +51,9 @@ export function LeaderboardCollector(
         {pfpImg}
         {hasLevel ? (
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-1.5 md:tw-gap-2">
-            <span className="tw-min-w-0 tw-truncate">{display}</span>
+            <span className="tw-min-w-0 tw-truncate tw-font-semibold">
+              {display}
+            </span>
             <div className={styles["collectorLevel"]}>
               <UserCICAndLevel
                 level={props.level}
@@ -60,7 +62,9 @@ export function LeaderboardCollector(
             </div>
           </div>
         ) : (
-          <span className="tw-min-w-0 tw-truncate">{display}</span>
+          <span className="tw-min-w-0 tw-truncate tw-font-semibold">
+            {display}
+          </span>
         )}
       </a>
     </div>

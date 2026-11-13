@@ -14,6 +14,7 @@ import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.en-US.json"
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.en-US.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.en-US.json";
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.en-US.json";
+import appWalletRecoveryFilesMessages from "@/i18n/messages/appWalletRecoveryFiles.en-US.json";
 /* eslint max-lines: "off" */
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-US.json";
 
@@ -36,6 +37,7 @@ import emmaSnapshotsMessages from "@/i18n/messages/emmaSnapshots.en-US.json";
 import aboutMessages from "@/i18n/messages/about.en-US.json";
 import homeNewcomerMessages from "@/i18n/messages/homeNewcomer.en-US.json";
 import join6529Messages from "@/i18n/messages/join6529.en-US.json";
+import identityGettingStartedMessages from "@/i18n/messages/identityGettingStarted.en-US.json";
 import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
 import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import pageMetadataMessages from "@/i18n/messages/pageMetadata.en-US.json";
@@ -251,8 +253,23 @@ const USER_COLLECTED_STATS_BOOST_MESSAGES = objectMessages(
 );
 
 const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
+  "panel.open": "Open REP category {category}",
+  "panel.contributors": "View {count} for {category}",
+  "panel.panel": "{category} REP details",
+  "panel.you": "You",
+  "panel.amountFor": "REP for {name}",
+  "panel.invalidNumber":
+    "Enter a whole number, including a minus sign for negative REP.",
+  "panel.loadingAmount": "Loading…",
+  "panel.openGlobal": "Open category",
+  "panel.yourRep": "Your REP",
+  "panel.total": "Total",
+  "panel.creditLimit":
+    "Available REP: {amount}. Reduce the amount to stay within your credit limit.",
+  "panel.saveRecovery":
+    "Saved changes are kept. Review the remaining values and try again.",
   "loading.details": "Loading REP category details",
-  "pill.openGlobalAriaLabel": "Open global REP category {category}",
+  "pill.openGlobalAriaLabel": "Open category {category}",
   "pill.editAriaLabel": "Edit REP category {category}",
   "sidebar.otherTools": "Other Tools",
   "sidebar.repCategories": "REP Categories",
@@ -294,7 +311,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "grant.assignedRepLabel": "Your REP assigned to {name}:",
   "grant.availableRep": "Your available REP: {amount}",
   "grant.assignedRep": "Your REP assigned to {name}: {amount}",
-  "grant.actions.grant": "Grant REP",
+  "grant.actions.grant": "Grant Rep",
   "grant.actions.cancel": "Cancel",
   "grant.toast.updated": "REP updated.",
   "grant.toast.updateFailed": "Couldn't update this REP rating.",
@@ -460,6 +477,7 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "primary.waves": "Waves",
   "primary.dms": "DMs",
   "primary.join6529": "Join 6529",
+  "primary.validator": "Validator",
   "primary.about": "About",
   "primary.museum": "Museum",
   "about.overview": "Overview",
@@ -1184,12 +1202,14 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     collapseAddress: "Hide wallet details",
     fullAddress: "Full address",
     ensName: "ENS name",
+    copyAddress: "Copy address",
     copyFullAddress: "Copy full address",
     copyEnsName: "Copy ENS name",
     addressCopied: "Address copied",
     ensCopied: "ENS name copied",
     openEtherscan: "Open on Etherscan",
     openOpenSea: "Open on OpenSea",
+    openOpenSeaAccount: "Open in OpenSea",
     etherscan: "Etherscan",
     openSea: "OpenSea",
     confirmWallet: "Confirm in your wallet…",
@@ -1462,6 +1482,9 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   joinedRetry: "Retry",
   joinedRetryLabel: "Retry loading joined waves",
   joinedLoadMore: "Load more joined waves",
+  allLoadError: "Some waves could not be loaded.",
+  allRetryLabel: "Retry loading all waves",
+  allLoadMore: "Load more waves",
   announcementWavesAriaLabel: "Announcement waves",
   highlyRatedAriaLabel: "Worth checking out waves",
   pinnedAriaLabel: "Pinned waves",
@@ -1495,6 +1518,7 @@ const QUICK_DM_MESSAGES = objectMessages("quickDm", {
   chatTitleFallback: "Messages",
   closeAriaLabel: "Close quick direct messages",
   newDirectMessageAriaLabel: "New direct message",
+  createDmLabel: "Create DM",
   createModalTitle: "New message",
   recipientLabel: "To:",
   recipientAddMore: "Add more",
@@ -2544,6 +2568,7 @@ const WAVE_DROPS_SEARCH_MODAL_MESSAGES = objectMessages(
     "result.openInWave": "Open message {serialNo} by {author} in {wave}",
     "result.open": "Open message {serialNo} by {author}",
     "result.checked": "Checked task",
+    "result.emoji": "Emoji {shortcode}",
     "result.imageFallback": "image",
     "result.mediaOnly": "Message with media or an attachment",
     "result.serial": "Message #{serialNo}",
@@ -2723,6 +2748,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
 } as const);
 
 const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
+  runningTotal: "(total {total})",
   "matter.waveRep": "Wave REP",
 } as const);
 
@@ -2734,15 +2760,19 @@ const USER_RATE_MESSAGES = objectMessages("user.rate", {
   given: "Given",
   direction: "{matter} direction",
   listTitle: "{matter} {direction}",
-  manageGiven: "Manage given",
-  manageGivenMatter: "Manage given {matter}",
-  manageRatingContributors: "Manage given {matter}: {contributors}",
+  manageGiven: "All receivers",
+  manageGivenMatter: "All {matter} receivers",
+  manageRatingContributors: "All {matter} receivers: {count}",
   viewRatingContributors: "View {matter} {direction}: {contributors}",
   highestFirst: "Highest total first",
   recentFirst: "Most recently adjusted",
   sortBy: "Sort by",
   sortGiven: "Sort given {matter}",
+  sortReceived: "Sort received {matter}",
   ratingAmount: "{value} {matter}",
+  amountFor: "{matter} amount for {name}",
+  available: "Available {matter}",
+  creditLimit: "These changes exceed your available {matter} ({amount}).",
   adjust: "Adjust",
   adjustFor: "Adjust {matter} for {name}",
   categoriesFor: "REP given to {name}",
@@ -3364,6 +3394,19 @@ export const EN_US_ROOT_MESSAGES = {
   "drop.upload.invalidFile": "Could not add {file}",
   "drop.upload.empty": "Choose a file that is not empty.",
   "drop.upload.tooLarge": "Media files must be 500 MB or smaller.",
+  "drop.upload.tooLargeLimit": "Media files must be {limit} or smaller.",
+  "drop.upload.tooLargeNoLimit":
+    "This file is larger than the upload limit. Choose a smaller file.",
+  "drop.upload.limitReached":
+    "You have reached the upload limit for the last 24 hours. Try again later.",
+  "drop.upload.imageTooLarge":
+    "Image files must be {limit} MiB or smaller. Export a smaller image and try again.",
+  "drop.upload.submitFailed": "Couldn't submit this drop.",
+  "drop.upload.tryAgain": PLEASE_TRY_AGAIN,
+  "drop.upload.unsupportedType": "File type not supported.",
+  "drop.upload.uploadFailed": "Error uploading file. Please try again.",
+  "drop.upload.attachmentValidationFailed":
+    "{file} failed attachment validation.",
   "drop.upload.imagePreview": "Preview of {file}",
   "drop.upload.removeFile": "Remove file",
 
@@ -3422,6 +3465,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...studioTemplateDescriptions,
   ...profileCmsStudioUploadMessages,
   ...studioWalletImportMessages,
+  ...appWalletRecoveryFilesMessages,
   "nftActivity.loading": "Loading NFT activity…",
   "nftActivity.error": "Could not load NFT activity.",
   "nftActivity.moreError": "Could not load more NFT activity.",
@@ -3607,6 +3651,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...DELEGATION_REGISTER_MESSAGES,
   ...DELEGATION_SUMMARY_MESSAGES,
   ...join6529Messages,
+  ...identityGettingStartedMessages,
   "nextgen.brand": "NextGen",
   "nextgen.navigation.featured": "Featured",
   "nextgen.navigation.collections": "Collections",
@@ -3644,6 +3689,8 @@ export const EN_US_ROOT_MESSAGES = {
   "nextgen.loadError.burnProof": "The burn proof could not be loaded.",
   "nextgen.loadError.retry": "Try again",
   "auth.sessionUpgrade.action": "Upgrade Authentication",
+  "auth.signIn.rateLimited":
+    "Too many sign-in attempts. Wait a moment, then try again.",
   "auth.signModal.connectionUpdateRequired": "Connection Update Required",
   "auth.signModal.upgradeAuthentication": "Upgrade Authentication",
   "waves.signIn.post": "Sign in to 6529 to post",
@@ -3685,6 +3732,13 @@ export const EN_US_ROOT_MESSAGES = {
     "Your wallet, profile, or network changed. Select the profile again to continue.",
   "auth.proxySwitch.failed":
     "Couldn't switch profiles. Your current profile is still selected. Please try again.",
+  "auth.signOut.error.disconnectAndLogout": "Failed to disconnect and logout",
+  "auth.signOut.error.allProfiles": "Failed to sign out all profiles",
+  "auth.signOut.error.retry": "Failed to sign out. Please try again.",
+  "auth.signOut.error.allProfilesRetry":
+    "Failed to sign out all profiles. Please try again.",
+  "auth.displayedProfileChanged":
+    "Nothing was sent: the signed-in profile changed in another tab. Check the profile shown here and try again.",
   "auth.signModal.noGas":
     "Your signature will not cost any gas and is purely for authentication purposes.",
   "auth.signModal.connect": "Connect",
@@ -3726,6 +3780,9 @@ export const EN_US_ROOT_MESSAGES = {
   "navigation.primary.loading.network": "Loading network",
   "navigation.primary.loading.collections": "Loading collections",
   "navigation.primary.loading.notifications": "Loading notifications",
+  "ensAddressInput.addressUsed": "Address used: {address}",
+  "ensAddressInput.noAddressUsed":
+    "No address is used yet. Enter a full 0x wallet address or an ENS name that resolves.",
   "appWallet.validation.name.alphanumericSpaces":
     "Name can only contain alphanumeric characters and spaces",
   "appWallet.validation.password.minLength":
@@ -3769,6 +3826,41 @@ export const EN_US_ROOT_MESSAGES = {
   "appWallet.modal.importSuccess": "Wallet imported.",
   "appWallet.modal.sensitiveConfirmation":
     "Type {confirmation} to confirm {action}",
+  "appWallet.signing.messageTitle": "Sign this message?",
+  "appWallet.signing.typedDataTitle": "Sign this data?",
+  "appWallet.signing.transactionTitle": "Approve this transaction?",
+  "appWallet.signing.help":
+    "Check every detail. Approve only a request you started, and cancel if anything looks unfamiliar.",
+  "appWallet.signing.wallet": "Wallet",
+  "appWallet.signing.message": "Message",
+  "appWallet.signing.rawMessage": "Message (raw data)",
+  "appWallet.signing.primaryType": "Data type",
+  "appWallet.signing.domainName": "Requested by",
+  "appWallet.signing.verifyingContract": "Contract",
+  "appWallet.signing.typedDataContent": "Content",
+  "appWallet.signing.to": "To",
+  "appWallet.signing.newContract": "New contract deployment",
+  "appWallet.signing.value": "Amount",
+  "appWallet.signing.valueNative": "{amount} {symbol}",
+  "appWallet.signing.valueUnknownChain":
+    "{amount} in the smallest unit of the native token of chain ID {id}",
+  "appWallet.signing.valueUnknownNetwork":
+    "{amount} in the smallest unit of the native token of an unspecified network",
+  "appWallet.signing.network": "Network",
+  "appWallet.signing.networkName": "{name} (chain ID {id})",
+  "appWallet.signing.unknownNetwork": "Unknown network",
+  "appWallet.signing.notSpecified": "Not specified",
+  "appWallet.signing.callData": "Contract call",
+  "appWallet.signing.callDataNone": "None",
+  "appWallet.signing.callDataNoSelector":
+    "Yes, {count} bytes without a function selector",
+  "appWallet.signing.callDataCreation":
+    "Contract creation, {count} bytes of code",
+  "appWallet.signing.contentUnavailable":
+    "This content cannot be shown, so it cannot be signed here. Cancel this request.",
+  "appWallet.signing.callDataSelector": "Yes, function selector {selector}",
+  "appWallet.signing.sign": "Sign",
+  "appWallet.signing.approveTransaction": "Approve",
   "profileSetup.requiredTitle": "You need to set up a profile to continue.",
   "profileSetup.messagesDescription": "Create a profile to access messages.",
   "profileSetup.notificationsDescription":
@@ -3781,14 +3873,17 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.shareModal.closeAriaLabel": "Close share modal",
   "headerShare.shareModal.backdropAriaLabel": "Dismiss share modal",
   "headerShare.connectModal.title": "Connect Device",
+  "headerShare.connectModal.mobileTitle": "Connect 6529 Mobile",
+  "headerShare.connectModal.desktopTitle": "Connect 6529 Desktop",
   "headerShare.connectModal.chooseApp": "Which app are you connecting?",
   "headerShare.connectModal.only": "Connect only",
   "headerShare.connectModal.secure":
     "Connect with Post Signing & DM Encryption",
-  "headerShare.connectModal.desktopComingSoon": "Coming soon",
   "headerShare.connectModal.as": "Connect as {name}",
   "headerShare.connectModal.asSecure":
     "Connect as {name} with Post Signing & DM Encryption",
+  "headerShare.connectModal.desktopMinimumVersion":
+    "Requires 6529 Desktop {version} or later.",
   "headerShare.connectModal.back": "Back",
   "headerShare.connectModal.oneTime":
     "Use only on a device you own. This code works once.",
@@ -4137,6 +4232,10 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.topUp.validation.selectOption": "Select a top-up option",
   "subscriptions.topUp.validation.wallet":
     "You must have an active wallet connection to top up",
+  "subscriptions.topUp.validation.priceMismatch":
+    "The server lists a card price of {serverPrice} ETH but this page uses {localPrice} ETH, so nothing was sent. Refresh the page and try again.",
+  "subscriptions.topUp.validation.amountMismatch":
+    "This top-up amount does not match the selected number of cards, so nothing was sent. Refresh the page and try again.",
   "subscriptions.topUp.sendingTo": "Sending to",
   "subscriptions.notification.title": "Subscription coverage",
   "subscriptions.notification.earlyWarning":
@@ -4963,6 +5062,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_REP_MODAL_MESSAGES,
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
+  "profileActivity.heading": "Activity Log",
   "profileActivity.loading": "Loading activity log",
   "profileActivity.loadError": "Unable to load activity log.",
   "profileActivity.retry": "Retry",
@@ -5012,6 +5112,12 @@ export const EN_US_ROOT_MESSAGES = {
   "navigation.nfts.activity": "NFT Activity",
   "navigation.nfts.memesCalendar": "Memes Calendar",
   ...EULA_MESSAGES,
+  "access.codeInput.label": "Team Login",
+  "access.codeInput.placeholder": "Enter password",
+  "access.denied": "Access Denied!",
+  "access.verifyFailed": "Could not verify access. Please try again.",
+  "access.verifying": "Verifying code…",
+  "access.openingPage": "Opening page…",
   ...GLOBAL_ERROR_MESSAGES,
   ...MAPPING_TOOL_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,

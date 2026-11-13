@@ -182,6 +182,57 @@ describe("HeaderQRScanner", () => {
     }
   );
 
+  it("keeps the query of a scanned site link", async () => {
+    mockedCapacitor.mockReturnValue({ isCapacitor: true });
+    const push = jest.fn();
+    mockedRouter.mockReturnValue({ push });
+    mockedAuth.mockReturnValue({ setToast: jest.fn() });
+    (CapacitorBarcodeScanner.scanBarcode as jest.Mock).mockResolvedValue({
+      ScanResult: "https://test.6529.io/waves/123?drop=456#part-2",
+    });
+
+    render(<HeaderQRScanner onScanSuccess={jest.fn()} />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: getTriggerName() })
+    );
+
+    await waitFor(() =>
+      expect(push).toHaveBeenCalledWith("/waves/123?drop=456")
+    );
+  });
+
+  it.each([
+    "https://test.6529.io//other.example/path",
+    "https://test.6529.io/%2F%2Fother.example/path",
+    "testmobile6529://navigate//other.example/path",
+    "testmobile6529://navigate/%2F%2Fother.example/path",
+    "testmobile6529://other-scope/path",
+  ])("refuses the off-site destination %s", async (scanResult) => {
+    mockedCapacitor.mockReturnValue({ isCapacitor: true });
+    const push = jest.fn();
+    mockedRouter.mockReturnValue({ push });
+    const toast = jest.fn();
+    const onScan = jest.fn();
+    mockedAuth.mockReturnValue({ setToast: toast });
+    (CapacitorBarcodeScanner.scanBarcode as jest.Mock).mockResolvedValue({
+      ScanResult: scanResult,
+    });
+
+    render(<HeaderQRScanner onScanSuccess={onScan} />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: getTriggerName() })
+    );
+
+    await waitFor(() =>
+      expect(toast).toHaveBeenCalledWith({
+        message: t("en-US", "qrScanner.invalidCode"),
+        type: "error",
+      })
+    );
+    expect(push).not.toHaveBeenCalled();
+    expect(onScan).not.toHaveBeenCalled();
+  });
+
   it("shows toast on invalid scan result", async () => {
     mockedCapacitor.mockReturnValue({ isCapacitor: true });
     const push = jest.fn();

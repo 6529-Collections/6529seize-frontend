@@ -1,6 +1,7 @@
 import { preparePayload, loadMessage } from "./history";
 import type { ApiE2eeLogItem } from "../api-types";
 import { base64ToBytes } from "../bytes";
+import { parseCredentialIdentity } from "../grant";
 import { MlsError } from "../mls-adapter";
 import { decodePayload } from "../payload";
 import type { WasmProposalSummary, WasmStagedSummary } from "../wasm-types";
@@ -21,6 +22,7 @@ import { applyPayload, placeholderMessage, undecryptableId } from "./messages";
 import { credentialWallets, deriveCommitNotices } from "./notices";
 import { isStrictRemoval, mayBeIdle, type MemberRef } from "./required-changes";
 import type { GroupRuntime } from "./store";
+import { isTrustedMemberDevice } from "./trust";
 import { validateCommit, type AddedLeafRef } from "./validate";
 
 /** Contract 8.1: processing one log item in seq order. */
@@ -104,21 +106,57 @@ async function requiredRemovals(
   return out;
 }
 
-async function checkAddedLeaves(
-  ctx: EngineContext,
-  staged: WasmStagedSummary,
-  atMs: number
-): Promise<AddedLeafRef[]> {
-  const out: AddedLeafRef[] = [];
-  for (const leaf of staged.added) {
-    const check = await ctx.directory.checkLeaf(leaf, atMs);
-    out.push({
-      deviceKey: leaf.device_key.toLowerCase(),
-      profileId: check.profileId,
-      ok: check.ok,
-    });
+/** profile id -> wallets in the credentials of its current leaves. */
+function leafWallets(runtime: GroupRuntime): Map<string, Set<string>> {
+  const out = new Map<string, Set<string>>();
+  for (const member of runtime.record.members) {
+    const wallet = parseCredentialIdentity(member.identity)?.wallet;
+    if (member.profileId === null || !wallet) {
+      continue;
+    }
+    const wallets = out.get(member.profileId) ?? new Set<string>();
+    wallets.add(wallet);
+    out.set(member.profileId, wallets);
   }
   return out;
+}
+
+/**
+ * Checks the added leaves (2.3) and notes which acceptable ones this device
+ * has not verified for their owner: a grant not verified here, or a wallet
+ * not trusted for that person here. Such adds are accepted as before (the
+ * rules every client applies are unchanged) and only marked for the notice.
+ */
+async function checkAddedLeaves(
+  ctx: EngineContext,
+  runtime: GroupRuntime,
+  staged: WasmStagedSummary,
+  atMs: number
+): Promise<{ added: AddedLeafRef[]; unverified: Set<string> }> {
+  const added: AddedLeafRef[] = [];
+  const unverified = new Set<string>();
+  const wallets = leafWallets(runtime);
+  for (const leaf of staged.added) {
+    const check = await ctx.directory.checkLeaf(leaf, atMs);
+    const deviceKey = leaf.device_key.toLowerCase();
+    added.push({ deviceKey, profileId: check.profileId, ok: check.ok });
+    if (!check.ok || check.profileId === null || !check.record) {
+      continue;
+    }
+    const trusted = isTrustedMemberDevice(
+      ctx,
+      {
+        profileId: check.profileId,
+        deviceKey,
+        wallet: check.record.grant.wallet,
+      },
+      wallets.get(check.profileId) ?? new Set()
+    );
+    if (!trusted || check.verification?.verified !== true) {
+      unverified.add(deviceKey);
+    }
+  }
+  return { added, unverified };
 }
 
 const sameKeys = (
@@ -179,6 +217,7 @@ async function handleStagedCommit(
   const record = runtime.record;
   const g = record.g;
   let added: AddedLeafRef[];
+  let unverifiedAdds: Set<string>;
   let removed: MemberRef[];
   let committer: MemberRef;
   let required: Set<string>;
@@ -188,7 +227,12 @@ async function handleStagedCommit(
       deviceKey: staged.sender.device_key.toLowerCase(),
       profileId: await profileOfLeaf(ctx, staged.sender.device_key),
     };
-    added = await checkAddedLeaves(ctx, staged, item.created_at);
+    ({ added, unverified: unverifiedAdds } = await checkAddedLeaves(
+      ctx,
+      runtime,
+      staged,
+      item.created_at
+    ));
     removed = await leafRefs(ctx, staged.removed);
     required = await requiredRemovals(
       ctx,
@@ -256,6 +300,7 @@ async function handleStagedCommit(
       item.epoch === 0 &&
       committer.profileId === staged.metadata_before.created_by,
     addedWallets: credentialWallets(staged.added),
+    unverifiedAdds,
   });
   touchActivity(
     record,

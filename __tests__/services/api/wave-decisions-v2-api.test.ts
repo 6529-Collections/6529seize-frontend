@@ -94,6 +94,34 @@ describe("fetchWaveDecisionsV2", () => {
     }
   );
 
+  it("keeps a winner's real part count while loading only its first part", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      data: [
+        {
+          decision_time: 2000,
+          winners: [
+            {
+              place: 1,
+              awards: [],
+              drop: { ...createWinnerDrop(1, true), parts_count: 3 },
+            },
+          ],
+        },
+      ],
+      count: 1,
+      page: 1,
+      next: false,
+    });
+
+    const result = await fetchWaveDecisionsV2({
+      waveId: "wave-1",
+      params: { page: "1" },
+    });
+    const winner = result.data[0]?.winners[0]?.drop;
+    expect(winner?.parts).toHaveLength(1);
+    expect(winner?.parts_count).toBe(3);
+  });
+
   it.each([
     { scenario: "missing voter history", count: 0, available: false },
     { scenario: "recorded zero voters", count: 0, available: true },

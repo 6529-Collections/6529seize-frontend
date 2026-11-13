@@ -34,7 +34,7 @@ export function MemePageTimeline(props: {
     return (
       <section aria-label={t(locale, "theMemes.detail.timeline.region")}>
         <div className="tw-pb-5 tw-pt-3">
-          <div className="tw-w-full md:tw-mx-auto md:tw-w-10/12">
+          <div className="tw-w-full">
             {props.nft && (
               <Timeline nft={props.nft} steps={nftHistory} locale={locale} />
             )}

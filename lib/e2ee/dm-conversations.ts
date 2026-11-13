@@ -6,20 +6,33 @@ interface DmIdentity {
   readonly members: readonly { readonly profileId: string | null }[];
 }
 
-/** DM admins are the original pair, even after a participant leaves. */
+/** The two participants a DM's `admins` names, or null when it is not a pair. */
+export function getDmAdminPair(
+  admins: readonly string[]
+): ReadonlySet<string> | null {
+  const pair = new Set(admins);
+  return admins.length === 2 && pair.size === 2 ? pair : null;
+}
+
+/**
+ * A direct conversation has exactly two participants. DM admins are the
+ * original pair, even after a participant leaves; without a pair, the
+ * current members must be exactly two. Either way it includes you, and no
+ * member with a known profile is outside it.
+ */
 export function getDmPeerId(
   conversation: DmIdentity,
   selfProfileId: string | null
 ): string | null {
   if (conversation.kind !== "dm" || !selfProfileId) return null;
-  const original = new Set(conversation.admins);
   const current = new Set(
     conversation.members.flatMap((member) =>
       member.profileId === null ? [] : [member.profileId]
     )
   );
-  const pair = original.size === 2 ? original : current;
+  const pair = getDmAdminPair(conversation.admins) ?? current;
   if (pair.size !== 2 || !pair.has(selfProfileId)) return null;
+  if ([...current].some((id) => !pair.has(id))) return null;
   return [...pair].find((id) => id !== selfProfileId) ?? null;
 }
 

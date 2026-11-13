@@ -31,6 +31,7 @@ import {
   loadE2eeEngineModules,
 } from "./e2eeEngineLoader";
 import type { E2eeEngineSnapshot, E2eeEngineStore } from "./e2eeEngineStore";
+import { E2EE_REVOCATION_UNVERIFIED } from "./e2eeErrors";
 import { type E2eeEngineRun, startE2eeEngineRun } from "./e2eeEngineRun";
 import {
   hasE2eeEnrollmentMarker,
@@ -85,7 +86,9 @@ const updateEnrollmentMarker = (
   if (snapshot.status === "ready") {
     enrolled = true;
   } else if (snapshot.status === "needs-enrollment") {
-    enrolled = false;
+    // A device stopped on an unconfirmed revocation still holds its data,
+    // so sign-out keeps offering to remove it.
+    enrolled = snapshot.error === E2EE_REVOCATION_UNVERIFIED;
   }
   if (enrolled === null || hasE2eeEnrollmentMarker(profileId) === enrolled) {
     return;
@@ -176,16 +179,20 @@ function E2eeProviderEnabled({
   });
   const hasMarker = useEnrollmentMarker(profileId);
   const [setupSession, setSetupSession] = useState<string | null>(null);
+  const requestEngine = useCallback(
+    () => setSetupSession(sessionKey),
+    [sessionKey]
+  );
   useEffect(() => {
     const start = (event: Event) => {
       const scope = (event as CustomEvent<DeviceSetupScope | null>).detail;
       if (scope === "both" || scope === "dms") {
-        setSetupSession(sessionKey);
+        requestEngine();
       }
     };
     window.addEventListener(DEVICE_SETUP_EVENT, start);
     return () => window.removeEventListener(DEVICE_SETUP_EVENT, start);
-  }, [sessionKey]);
+  }, [requestEngine]);
   const wantsEngine =
     isEncryptedMessagesPathname(pathname) ||
     hasMarker ||
@@ -330,12 +337,14 @@ function E2eeProviderEnabled({
           : null,
       restart,
       takeOverHere,
+      requestEngine,
     };
   }, [
     activeKey,
     isProxy,
     loadState,
     profileId,
+    requestEngine,
     restart,
     sessionKey,
     takeOverHere,

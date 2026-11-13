@@ -21,6 +21,25 @@ describe("createTransientPlan", () => {
   >;
   const originalFetch = global.fetch;
   const mockFetch = jest.fn();
+  // Alchemy bodies are read through the byte-limited stream reader, so give
+  // the `json()` mocks a matching stream body.
+  const fetchWithStreamBody = async (...args: unknown[]) => {
+    const response = await mockFetch(...args);
+    if (typeof response?.json !== "function" || response.body) {
+      return response;
+    }
+    const text = JSON.stringify(await response.json());
+    return {
+      ...response,
+      headers: new Headers(),
+      body: new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode(text));
+          controller.close();
+        },
+      }),
+    };
+  };
   const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
 
   beforeEach(() => {
@@ -38,7 +57,7 @@ describe("createTransientPlan", () => {
       return response.json();
     });
     mockedGetAlchemyApiKey.mockReturnValue("test-alchemy-key");
-    global.fetch = mockFetch as unknown as typeof fetch;
+    global.fetch = fetchWithStreamBody as unknown as typeof fetch;
   });
 
   afterAll(() => {

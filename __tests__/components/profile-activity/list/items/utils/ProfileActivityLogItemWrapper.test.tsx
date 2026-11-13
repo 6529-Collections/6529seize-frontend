@@ -136,10 +136,18 @@ describe("ProfileActivityLogItemWrapper", () => {
     const image = screen.getByRole("img", { name: "alice" });
 
     fireEvent.error(image);
-    expect(image).toHaveAttribute("src", `https://media.6529.io/ipfs/${cid}`);
-    expect(image).not.toHaveAttribute("srcset");
-    fireEvent.error(image);
-    expect(image).toHaveAttribute("src", `https://media.6529.io/ipfs/${cid}`);
+    const fallback = screen.getByRole("img", { name: "alice" });
+    expect(fallback).toHaveAttribute(
+      "src",
+      `https://media.6529.io/ipfs/${cid}`
+    );
+    expect(fallback).not.toHaveAttribute("srcset");
+    fireEvent.error(fallback);
+    expect(screen.getByRole("img", { name: "alice" })).toBe(fallback);
+    expect(fallback).toHaveAttribute(
+      "src",
+      `https://media.6529.io/ipfs/${cid}`
+    );
     expect(screen.getByText("activity")).toBeVisible();
   });
 

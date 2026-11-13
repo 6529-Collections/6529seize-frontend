@@ -48,8 +48,11 @@ const HELLO_JITTER_MS = 60_000;
 const PAGE_SPACING_MS = 100;
 /** A device creates a self group at most once a day. */
 const CREATE_EVERY_MS = DAY_MS;
-/** Older self groups are left a day after the newest one was joined. */
-const LEAVE_OLDER_AFTER_MS = DAY_MS;
+/**
+ * P60 §2 rule 1: a device with siblings waits this long to be added to
+ * their self group before it creates one of its own.
+ */
+const JOIN_WAIT_MS = 2 * 60_000;
 /** Received positions kept for chats this device has not joined. */
 const MAX_RECEIVED = 2000;
 
@@ -76,31 +79,47 @@ const inOrder = <T>(
     Promise.resolve()
   );
 
-/** The canonical self group: the active one with the latest (created, g). */
+const activeSelfGroups = (ctx: EngineContext): GroupRuntime[] =>
+  [...ctx.store.groups.values()].filter(
+    (runtime) => isActive(runtime) && isSelfGroup(runtime.record)
+  );
+
+/**
+ * The canonical self group: the active one with the lowest handle. Group
+ * handles break creation races, so device clocks never matter (P60 §2).
+ */
 function canonicalSelfGroup(ctx: EngineContext): GroupRuntime | null {
-  let best: GroupRuntime | null = null;
-  for (const runtime of ctx.store.groups.values()) {
-    if (!isActive(runtime) || !isSelfGroup(runtime.record)) {
-      continue;
-    }
-    if (!best || newerSelfGroup(runtime.record, best.record)) {
-      best = runtime;
-    }
-  }
-  return best;
+  return activeSelfGroups(ctx).reduce<GroupRuntime | null>(
+    (best, runtime) =>
+      !best || runtime.record.g < best.record.g ? runtime : best,
+    null
+  );
 }
 
-function newerSelfGroup(a: StoredGroup, b: StoredGroup): boolean {
-  const createdA = a.metadata.created ?? 0;
-  const createdB = b.metadata.created ?? 0;
-  return createdA === createdB ? a.g > b.g : createdA > createdB;
+/**
+ * The handoff from `group` to `canonical` is verified when every other
+ * device of `group` is also in `canonical` (or already leaving): leaving
+ * `group` then cuts nobody off (P60 §2 rule 3).
+ */
+function handedOver(
+  group: GroupRuntime,
+  canonical: GroupRuntime,
+  own: string
+): boolean {
+  const moved = new Set(canonical.record.members.map((m) => m.deviceKey));
+  return group.record.members.every(
+    (member) =>
+      member.deviceKey === own ||
+      moved.has(member.deviceKey) ||
+      group.record.leaving.includes(member.deviceKey)
+  );
 }
 
 interface ReadSyncDeps {
   /** Creates a self group of this device and its trusted siblings. */
   createSelfGroup: () => Promise<string>;
-  /** Leaves a group (an older self group once a newer one is in use). */
-  leave: (g: string) => Promise<void>;
+  /** Removes only this device from a group (an older self group). */
+  leaveThisDevice: (g: string) => Promise<void>;
 }
 
 export class ReadSync implements ReadSyncHooks {
@@ -200,12 +219,13 @@ export class ReadSync implements ReadSyncHooks {
     if (!this.enabled || state.unsent.length === 0) {
       return;
     }
-    const target = this.sendableSelfGroup();
-    if (!target) {
+    const targets = this.sendTargets();
+    if (targets.length === 0) {
       return;
     }
+    const batch = new Set(state.unsent);
     const positions: ReadPosition[] = [];
-    for (const g of state.unsent) {
+    for (const g of batch) {
       const runtime = this.ctx.store.groups.get(g);
       if (
         runtime &&
@@ -215,9 +235,10 @@ export class ReadSync implements ReadSyncHooks {
         positions.push([g, runtime.record.readSeq]);
       }
     }
+    const pages = pagePositions(positions);
     try {
-      await inOrder(pagePositions(positions), (page) =>
-        this.send(target, "read", page)
+      await inOrder(targets, (target) =>
+        inOrder(pages, (page) => this.send(target, "read", page))
       );
     } catch {
       this.ctx.timers.arm(TIMER_SEND, RETRY_MS, () => {
@@ -227,8 +248,12 @@ export class ReadSync implements ReadSyncHooks {
     }
     this.lastSentAt = this.ctx.now();
     const sent = new Map(positions);
-    // A chat read further while this batch went out stays unsent.
+    // Chats read while this batch went out, and chats read further since
+    // it was built, stay queued for the next batch.
     state.unsent = state.unsent.filter((g) => {
+      if (!batch.has(g)) {
+        return true;
+      }
       const seq = sent.get(g);
       const runtime = this.ctx.store.groups.get(g);
       return (
@@ -241,23 +266,36 @@ export class ReadSync implements ReadSyncHooks {
   }
 
   /**
-   * The canonical self group, when this device may send into it: active,
-   * every member one of this profile's devices, none waiting for the
-   * user's "Add device" (P60 §2 rule 2).
+   * Where read state goes: the canonical self group, and each older one
+   * whose handoff to it is not verified yet, so a sibling not yet added to
+   * the canonical group still hears (P60 §2 rule 3). Only groups this
+   * device may send into: every member one of this profile's devices and
+   * none waiting for the user's "Add device" (rule 2).
    */
-  private sendableSelfGroup(): GroupRuntime | null {
-    const runtime = canonicalSelfGroup(this.ctx);
-    if (!runtime || runtime.record.pendingCommit) {
-      return null;
+  private sendTargets(): GroupRuntime[] {
+    const canonical = canonicalSelfGroup(this.ctx);
+    const own = this.ctx.device?.deviceKey;
+    if (!canonical || !own) {
+      return [];
     }
-    const trusted = runtime.record.members.every(
-      (member) =>
-        member.profileId === this.ctx.profileId &&
-        this.ctx.store.findUntrusted(member.deviceKey) === null
+    return [
+      canonical,
+      ...activeSelfGroups(this.ctx).filter(
+        (runtime) =>
+          runtime !== canonical && !handedOver(runtime, canonical, own)
+      ),
+    ].filter(
+      (runtime) =>
+        !runtime.record.pendingCommit &&
+        runtime.record.members.every(
+          (member) =>
+            member.profileId === this.ctx.profileId &&
+            this.ctx.store.findUntrusted(member.deviceKey) === null
+        )
     );
-    return trusted ? runtime : null;
   }
 
+  /** Sends one payload; nothing at all goes out with the flag off. */
   private send(
     runtime: GroupRuntime,
     t: ReadSyncType,
@@ -272,7 +310,9 @@ export class ReadSync implements ReadSyncHooks {
       r,
       ...(s ? { s } : {}),
     });
-    return this.sendRetrying(runtime, body, 2);
+    return this.enabled
+      ? this.sendRetrying(runtime, body, 2)
+      : Promise.resolve();
   }
 
   /** A commit can win the race for the epoch: encrypt again and resend. */
@@ -349,10 +389,13 @@ export class ReadSync implements ReadSyncHooks {
   }
 
   private scheduleSnapshot(g: string, key: string, delayMs: number): void {
+    if (!this.enabled) {
+      return;
+    }
     this.ctx.timers.arm(key, delayMs, () => {
       this.run(async () => {
-        const runtime = this.ctx.store.groups.get(g);
-        if (isActive(runtime) && this.sendableSelfGroup() === runtime) {
+        const runtime = this.sendTargets().find((item) => item.record.g === g);
+        if (runtime) {
           await this.sendSnapshot(runtime);
         }
       });
@@ -388,7 +431,7 @@ export class ReadSync implements ReadSyncHooks {
       // Someone else answered the hello: no need to answer it too.
       this.helloFrom = null;
       this.ctx.timers.cancel(TIMER_ANSWER);
-    } else if (payload.t === "hello") {
+    } else if (payload.t === "hello" && this.enabled) {
       this.helloFrom = senderDeviceKey;
       this.ctx.timers.arm(
         TIMER_ANSWER,
@@ -423,12 +466,14 @@ export class ReadSync implements ReadSyncHooks {
    * restored backup). Any group joined: received positions may now apply.
    */
   joined(runtime: GroupRuntime): void {
-    if (isSelfGroup(runtime.record)) {
+    if (isSelfGroup(runtime.record) && this.enabled) {
       const g = runtime.record.g;
       this.ctx.timers.arm(TIMER_HELLO, 0, () => {
         this.run(async () => {
-          const current = this.ctx.store.groups.get(g);
-          if (!isActive(current) || this.sendableSelfGroup() !== current) {
+          const current = this.sendTargets().find(
+            (item) => item.record.g === g
+          );
+          if (!current) {
             return;
           }
           await this.send(current, "hello", []);
@@ -575,7 +620,8 @@ export class ReadSync implements ReadSyncHooks {
     await this.apply();
     const canonical = canonicalSelfGroup(this.ctx);
     if (canonical) {
-      await this.leaveOlder(canonical);
+      await this.joinedSelfGroup();
+      await this.leaveHandedOver(canonical);
       if (
         this.enabled &&
         this.state().unsent.length > 0 &&
@@ -585,44 +631,73 @@ export class ReadSync implements ReadSyncHooks {
       }
       return;
     }
-    if (this.enabled && this.mayCreate()) {
+    if (this.enabled && (await this.mayCreate())) {
       const state = this.state();
       state.createdAt = this.ctx.now();
+      delete state.waitingSince;
       await this.persistDevice();
       await this.deps.createSelfGroup();
     }
   }
 
+  /** In a self group now: no longer waiting to be added to one. */
+  private async joinedSelfGroup(): Promise<void> {
+    const state = this.state();
+    if (state.waitingSince !== undefined) {
+      delete state.waitingSince;
+      await this.persistDevice();
+    }
+  }
+
   /**
    * P60 §2 rule 1: a device with no active self group creates one after a
-   * full sync (pending Welcomes processed first), at most once a day. A new
-   * device does not wait for its siblings: they join its newer group, which
-   * then wins (rule 3), so state flows without waiting for maintenance.
+   * full sync (pending Welcomes processed first), at most once a day. With
+   * siblings it first waits to be added to theirs, and creates its own only
+   * if that stalls for JOIN_WAIT_MS (rule 3 then settles which one stays).
    */
-  private mayCreate(): boolean {
+  private async mayCreate(): Promise<boolean> {
     const device = this.ctx.device;
     if (!device?.registered) {
       return false;
     }
+    const now = this.ctx.now();
     const createdAt = device.readSync?.createdAt;
-    return (
-      createdAt === undefined || this.ctx.now() - createdAt >= CREATE_EVERY_MS
+    if (createdAt !== undefined && now - createdAt < CREATE_EVERY_MS) {
+      return false;
+    }
+    const siblings = (
+      await this.ctx.directory.getProfileDevices(this.ctx.profileId)
+    ).filter(
+      (item) =>
+        item.device_key.toLowerCase() !== device.deviceKey &&
+        item.revoked_at === null
     );
+    if (siblings.length === 0) {
+      return true;
+    }
+    const state = this.state();
+    if (state.waitingSince === undefined) {
+      state.waitingSince = now;
+      await this.persistDevice();
+    }
+    return now - state.waitingSince >= JOIN_WAIT_MS;
   }
 
-  /** P60 §2 rule 3: older self groups are left a day after the newest. */
-  private async leaveOlder(canonical: GroupRuntime): Promise<void> {
-    if (this.ctx.now() - canonical.record.joinedAt < LEAVE_OLDER_AFTER_MS) {
+  /**
+   * P60 §2 rule 3: once every other device of an older self group is also
+   * in the canonical one, this device leaves the older group, for itself
+   * only. A device never added to the canonical group is never cut off.
+   */
+  private async leaveHandedOver(canonical: GroupRuntime): Promise<void> {
+    const own = this.ctx.device?.deviceKey;
+    if (!own || !canonical.record.members.some((m) => m.deviceKey === own)) {
       return;
     }
-    const older = [...this.ctx.store.groups.values()].filter(
-      (runtime) =>
-        runtime !== canonical &&
-        isActive(runtime) &&
-        isSelfGroup(runtime.record)
+    const older = activeSelfGroups(this.ctx).filter(
+      (runtime) => runtime !== canonical && handedOver(runtime, canonical, own)
     );
     await inOrder(older, (runtime) =>
-      this.deps.leave(runtime.record.g).catch(() => undefined)
+      this.deps.leaveThisDevice(runtime.record.g).catch(() => undefined)
     );
   }
 }

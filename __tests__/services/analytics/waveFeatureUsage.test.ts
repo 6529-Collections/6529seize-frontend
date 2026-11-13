@@ -208,6 +208,7 @@ it.each([
   ["/waves/create/", "/other"],
   ["/waves/create/step", "/other"],
   ["/messages/create", "/other"],
+  ["/messages/new", "/other"],
   ["/messages/create/", "/other"],
   ["/messages/create/step", "/other"],
   ["/waves/", "/waves"],

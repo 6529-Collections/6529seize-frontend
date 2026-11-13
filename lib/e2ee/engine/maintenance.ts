@@ -3,7 +3,12 @@ import { digestBytes, rosterDigest } from "../digests";
 import type { ApiE2eeDevice } from "../api-types";
 import type { E2eeUntrustedDevice } from "../types";
 import type { WasmCommitOps } from "../wasm-types";
-import { claimedDevices, claimKeyPackages, isUsableDevice } from "./claims";
+import {
+  claimedDevices,
+  claimKeyPackages,
+  isUsableDevice,
+  selfGroupPackages,
+} from "./claims";
 import { submitCommit, type CommitIntent, type CommitOutcome } from "./commit";
 import {
   isActive,
@@ -47,19 +52,22 @@ const isNetworkish = (error: unknown): boolean => {
   );
 };
 
+/**
+ * Member device statuses for this device's own proposals. A device the
+ * server does not find is left out and listed in `unknown`: "not found"
+ * alone is no reason to remove a leaf (it may be a lookup that is not up to
+ * date), so it is checked again on a later pass instead.
+ */
 async function deviceStatuses(
   ctx: EngineContext,
   runtime: GroupRuntime
-): Promise<Map<string, DeviceStatus>> {
+): Promise<{ statuses: Map<string, DeviceStatus>; unknown: Set<string> }> {
   const statuses = new Map<string, DeviceStatus>();
+  const unknown = new Set<string>();
   for (const member of runtime.record.members) {
     const device = await ctx.directory.getDevice(member.deviceKey);
     if (!device) {
-      statuses.set(member.deviceKey, {
-        revoked: false,
-        expiresAt: null,
-        badGrant: true,
-      });
+      unknown.add(member.deviceKey);
       continue;
     }
     const revoked =
@@ -71,7 +79,36 @@ async function deviceStatuses(
       badGrant: false,
     });
   }
-  return statuses;
+  return { statuses, unknown };
+}
+
+/**
+ * Leaves whose grant failed when this device joined, checked again now: a
+ * leaf whose device the server does not find, or that now passes, is not
+ * removed by this device (others may still remove it under the shared rules).
+ */
+async function confirmedBadGrants(
+  ctx: EngineContext,
+  runtime: GroupRuntime,
+  unknown: ReadonlySet<string>
+): Promise<Set<string>> {
+  const out = new Set<string>();
+  for (const key of runtime.record.badGrants) {
+    const member = runtime.record.members.find((m) => m.deviceKey === key);
+    if (!member || unknown.has(key)) {
+      continue;
+    }
+    // One at a time: a lookup that cannot complete throws (RetryableError)
+    // and ends the pass before any further lookups start.
+    const check = await ctx.directory.checkLeaf(
+      { device_key: key, identity: member.identity, leaf: member.leaf },
+      ctx.now()
+    );
+    if (!check.ok && check.reason !== "unknown-device") {
+      out.add(key);
+    }
+  }
+  return out;
 }
 
 const untrustedEntry = (
@@ -132,25 +169,32 @@ async function activeDevices(
   return out;
 }
 
+/** Required changes plus the leaves the server did not find this pass. */
+type GroupChanges = RequiredChanges & { unknownDevices: string[] };
+
 export async function groupChanges(
   ctx: EngineContext,
   runtime: GroupRuntime,
   options: { onlyOwnAdds: boolean }
-): Promise<RequiredChanges> {
+): Promise<GroupChanges> {
   const record = runtime.record;
-  return computeRequiredChanges({
+  const { statuses, unknown } = await deviceStatuses(ctx, runtime);
+  const changes = computeRequiredChanges({
     now: ctx.now(),
     ownDeviceKey: ownDeviceKey(ctx),
     ownProfileId: ctx.profileId,
+    ownIsAdmin: record.metadata.admins.includes(ctx.profileId),
+    joinedAt: record.joinedAt,
     members: record.members,
     leaving: new Set(record.leaving),
-    badGrants: new Set(record.badGrants),
-    deviceStatus: await deviceStatuses(ctx, runtime),
+    badGrants: await confirmedBadGrants(ctx, runtime, unknown),
+    deviceStatus: statuses,
     activity: record.activity,
     lastSelfUpdateAt: record.lastSelfUpdateAt,
     selfUpdateRequested: record.selfUpdateRequested,
     activeDevices: await activeDevices(ctx, runtime, options.onlyOwnAdds),
   });
+  return { ...changes, unknownDevices: [...unknown] };
 }
 
 export type Planner = (
@@ -204,7 +248,11 @@ export function requiredChangesPlanner(options: {
       ops.include_pending_proposals = runtime.record.leaving.length > 0;
     }
     // The claimed record must still be trusted, not just the listed one.
-    const packages = await onlyTrustedPackages(ctx, claimed?.packages ?? []);
+    const trusted = await onlyTrustedPackages(ctx, claimed?.packages ?? []);
+    const packages =
+      runtime.record.metadata.kind === "self"
+        ? selfGroupPackages(ctx, trusted)
+        : trusted;
     if (packages.length > 0) {
       ops.add_key_packages = packages.map((item) => item.keyPackage);
     }
@@ -390,7 +438,12 @@ export async function repairRoster(
     return;
   }
   const changes = await groupChanges(ctx, runtime, { onlyOwnAdds: true });
-  const excluded = new Set(changes.strictRemovals);
+  // A leaf the server does not know is left out of the signed roster, as
+  // before; it stays a leaf until a removal with a reason.
+  const excluded = new Set([
+    ...changes.strictRemovals,
+    ...changes.unknownDevices,
+  ]);
   const leaves = record.members
     .map((member) => member.deviceKey)
     .filter((key) => !excluded.has(key));

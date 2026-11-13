@@ -7,9 +7,36 @@ mod common;
 
 use common::*;
 use mls_wasm::codec::{self, MESSAGE_BUCKETS};
-use mls_wasm::device::CIPHERSUITE_AES256;
+use mls_wasm::device::{key_package_info, CIPHERSUITE_AES256, METADATA_EXTENSION};
 use mls_wasm::Code;
+use openmls::prelude::*;
+use openmls_basic_credential::SignatureKeyPair;
+use openmls_rust_crypto::OpenMlsRustCrypto;
 use serde_json::{json, Value};
+use tls_codec::Serialize as _;
+
+/// A KeyPackage as a client built before self groups makes it: its leaf
+/// lists the metadata extension but not the self-group capability.
+fn legacy_key_package() -> String {
+    let provider = OpenMlsRustCrypto::default();
+    let suite = CIPHERSUITE_AES256;
+    let signer = SignatureKeyPair::new(suite.signature_algorithm()).unwrap();
+    let credential = CredentialWithKey {
+        credential: BasicCredential::new(b"6529-e2ee-v1:legacy".to_vec()).into(),
+        signature_key: signer.public().into(),
+    };
+    let capabilities = Capabilities::builder()
+        .ciphersuites(vec![suite])
+        .extensions(vec![ExtensionType::Unknown(METADATA_EXTENSION)])
+        .credentials(vec![CredentialType::Basic])
+        .build();
+    let bundle = KeyPackage::builder()
+        .leaf_node_capabilities(capabilities)
+        .build(suite, &provider, &signer, credential)
+        .unwrap();
+    let bytes = bundle.key_package().tls_serialize_detached().unwrap();
+    codec::b64(&bytes)
+}
 
 /// Read-sync payloads are padded to this length (P60 §3) so every one
 /// encrypts into the same message bucket.
@@ -130,4 +157,45 @@ fn self_kind_cannot_change_and_unknown_kinds_still_fail() {
             .unwrap_err();
         assert_eq!(err.code, Code::BadMetadata, "{kind} {created}");
     }
+}
+
+#[test]
+fn self_groups_admit_only_key_packages_that_support_them() {
+    let mut ds = Ds::default();
+    let phone = Client::new("alice-phone");
+    let current = phone.key_package_on(CIPHERSUITE_AES256);
+    let legacy = legacy_key_package();
+
+    // The engine can tell the two apart before claiming them into a group.
+    let info = |kp: &str| parse(&key_package_info(&codec::unb64(kp, "kp").unwrap()).unwrap());
+    assert_eq!(info(&current)["self_sync"], true);
+    assert_eq!(info(&current)["ciphersuite"], u16::from(CIPHERSUITE_AES256));
+    assert_eq!(info(&legacy)["self_sync"], false);
+
+    let mut phone = phone;
+    let g = new_g(204);
+    let created = parse(
+        &phone
+            .dev
+            .create_group_for(CIPHERSUITE_AES256, &g, &self_metadata(&g, json!(1)))
+            .unwrap(),
+    );
+    ds.create_group(&g, created["commit_key"].as_str().unwrap());
+    phone.cursor.insert(g.clone(), 0);
+    let err = phone
+        .dev
+        .create_commit(&g, &json!({ "add_key_packages": [legacy] }).to_string())
+        .unwrap_err();
+    assert_eq!(err.code, Code::BadKeyPackage);
+
+    // The same older device can still join an ordinary chat.
+    let dm = new_g(205);
+    phone.create_group_on(&mut ds, &dm, "dm", CIPHERSUITE_AES256);
+    phone
+        .commit(
+            &mut ds,
+            &dm,
+            json!({ "add_key_packages": [legacy_key_package()] }),
+        )
+        .unwrap();
 }

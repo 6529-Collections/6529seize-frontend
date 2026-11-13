@@ -23,7 +23,17 @@ useLocalSandboxMutationGuard(
   "Requires the local mock API."
 );
 
-async function touchDrag(page: Page, target: Locator, dx: number, dy = 0) {
+interface TouchOffset {
+  readonly x: number;
+  readonly y: number;
+}
+
+async function touchDrag(
+  page: Page,
+  target: Locator,
+  movement: number | readonly TouchOffset[],
+  dy = 0
+) {
   await target.click({ trial: true });
   const box = await target.boundingBox();
   if (!box) throw new Error("Swipe target must be visible");
@@ -39,10 +49,17 @@ async function touchDrag(page: Page, target: Locator, dx: number, dy = 0) {
   await page.evaluate(
     () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
   );
-  for (let step = 1; step <= 8; step++) {
+  const path =
+    typeof movement === "number"
+      ? Array.from({ length: 8 }, (_, index) => ({
+          x: (movement * (index + 1)) / 8,
+          y: (dy * (index + 1)) / 8,
+        }))
+      : movement;
+  for (const offset of path) {
     await client.send("Input.dispatchTouchEvent", {
       type: "touchMove",
-      touchPoints: [{ x: x + (dx * step) / 8, y: y + (dy * step) / 8 }],
+      touchPoints: [{ x: x + offset.x, y: y + offset.y }],
     });
     await page.evaluate(
       () =>
@@ -60,7 +77,7 @@ async function touchDrag(page: Page, target: Locator, dx: number, dy = 0) {
     reverse: async () => {
       await client.send("Input.dispatchTouchEvent", {
         type: "touchMove",
-        touchPoints: [{ x: x + (dx > 0 ? 10 : -10), y }],
+        touchPoints: [{ x: x + ((path.at(-1)?.x ?? 0) > 0 ? 10 : -10), y }],
       });
     },
   };
@@ -78,6 +95,29 @@ async function openWave(page: Page) {
       .locator("[data-wave-drop-id][data-reply-enabled=true]")
       .first()
   ).toBeVisible();
+}
+
+async function keyboardEvent(page: Page, name: string, height = 0) {
+  await page.waitForFunction(
+    (eventName) =>
+      (
+        globalThis as typeof globalThis & {
+          __playwrightKeyboardListeners?: string[];
+        }
+      ).__playwrightKeyboardListeners?.includes(eventName),
+    name
+  );
+  const delivered = await page.evaluate(
+    ({ eventName, keyboardHeight }) =>
+      !dispatchEvent(
+        new CustomEvent(`playwright:${eventName}`, {
+          detail: { keyboardHeight },
+          cancelable: true,
+        })
+      ),
+    { eventName: name, keyboardHeight: height }
+  );
+  expect(delivered).toBe(true);
 }
 
 async function installMessageFixture(page: Page, baseURL: string | undefined) {
@@ -138,6 +178,104 @@ for (const platform of ["ios", "android"] as const) {
       await installMessageFixture(page, baseURL);
     });
 
+    if (platform === "ios") {
+      test("short landscape keeps the composer, reply preview and messages above the keyboard", async ({
+        page,
+        baseURL,
+      }) => {
+        await page.setViewportSize({ width: 932, height: 430 });
+        await openWave(page);
+        const tabs = page.getByRole("navigation", {
+          name: "Wave sections",
+          exact: true,
+        });
+        const editor = page.getByRole("textbox").last();
+        const cancelReply = page.getByRole("button", {
+          name: "Cancel reply",
+          exact: true,
+        });
+        const draft = "Unsent landscape QA draft";
+        await expect(tabs).toBeVisible();
+        await editor.fill(draft);
+
+        const expectKeyboardLayout = async () => {
+          await expect(editor).toBeFocused();
+          await keyboardEvent(page, "keyboardWillShow", 244);
+          await keyboardEvent(page, "keyboardDidShow", 244);
+          await expect
+            .poll(() =>
+              editor.evaluate(
+                (element) => element.getBoundingClientRect().bottom
+              )
+            )
+            .toBeLessThanOrEqual(186);
+          await expect(tabs).toBeHidden();
+          await expect
+            .poll(() =>
+              page
+                .getByRole("tabpanel")
+                .locator('[data-wave-drops-scroll-container="true"]')
+                .last()
+                .evaluate((element) => element.clientHeight)
+            )
+            .toBeGreaterThanOrEqual(24);
+          await expect(editor).toHaveText(draft);
+        };
+        const dismissKeyboard = async (expectReplyBlur = false) => {
+          await keyboardEvent(page, "keyboardWillHide");
+          await keyboardEvent(page, "keyboardDidHide");
+          await expect(tabs).toBeVisible();
+          if (expectReplyBlur) await expect(editor).not.toBeFocused();
+        };
+
+        await expectKeyboardLayout();
+        await dismissKeyboard();
+        for (const method of ["swipe", "sheet"] as const) {
+          const row = page
+            .getByTestId("wave-swipe-surface")
+            .locator("[data-wave-drop-id][data-reply-enabled=true]")
+            .last();
+          if (method === "swipe") {
+            const swipe = await touchDrag(page, row, -120);
+            await swipe.release();
+          } else {
+            await longPressMessage(page, row);
+            await page
+              .getByRole("dialog", { name: "Drop actions", exact: true })
+              .getByRole("button", { name: "Reply", exact: true })
+              .click();
+          }
+          await expect(cancelReply).toBeVisible();
+          await expectKeyboardLayout();
+          await expect
+            .poll(() =>
+              cancelReply.evaluate(
+                (element) => element.getBoundingClientRect().bottom
+              )
+            )
+            .toBeLessThanOrEqual(186);
+          await dismissKeyboard(true);
+          await expect(cancelReply).toBeVisible();
+          await cancelReply.click();
+          await expect(editor).toHaveText(draft);
+        }
+
+        await page.setViewportSize({ width: 430, height: 932 });
+        await editor.click();
+        await keyboardEvent(page, "keyboardWillShow", 388);
+        await keyboardEvent(page, "keyboardDidShow", 388);
+        await expect(tabs).toBeVisible();
+        await expect
+          .poll(() =>
+            editor.evaluate((element) => element.getBoundingClientRect().bottom)
+          )
+          .toBeLessThanOrEqual(544);
+        await dismissKeyboard();
+        await editor.fill("");
+        await expectNoUnsafeSandboxMutations(baseURL);
+      });
+    }
+
     test("wave-back follows interior touch, reverses and then commits without a second transition", async ({
       page,
       baseURL,
@@ -183,6 +321,42 @@ for (const platform of ["ios", "android"] as const) {
         "data-wave-navigation-transition"
       );
       await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+
+    test("curved thumb paths can return after a diagonal start without stealing a scroll", async ({
+      page,
+      baseURL,
+    }) => {
+      for (const width of [360, 430]) {
+        await test.step(`Phone width ${width}px`, async () => {
+          await page.setViewportSize({ width, height: 840 });
+          await openWave(page);
+          const row = page
+            .getByTestId("wave-swipe-surface")
+            .locator("[data-wave-drop-id][data-reply-enabled=true]")
+            .first();
+          const vertical = await touchDrag(page, row, [
+            { x: 4, y: -24 },
+            { x: 8, y: -48 },
+            { x: 110, y: -52 },
+          ]);
+          await vertical.release();
+          await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+          const curved = await touchDrag(page, row, [
+            { x: 13, y: 10 },
+            { x: 24, y: 15 },
+            { x: 48, y: 21 },
+            { x: 78, y: 29 },
+            { x: 110, y: 34 },
+          ]);
+          await curved.release();
+          await expect(page).toHaveURL(/\/waves$/);
+          await expect(
+            page.getByRole("button", { name: "Find a wave…", exact: true })
+          ).toBeVisible();
+        });
+      }
       await expectNoUnsafeSandboxMutations(baseURL);
     });
 
