@@ -913,6 +913,87 @@ test("homepage waits for initial settings and recovers from failed mint status @
   }
 });
 
+test("homepage reuses fast roots after mint details mount @smoke @medium @large", async ({
+  page,
+}) => {
+  await installComingUpFixture(page);
+  let releaseClaim!: () => void;
+  const claimReady = new Promise<void>((resolve) => {
+    releaseClaim = resolve;
+  });
+  await installCompletedMintStatus(page, claimReady);
+  await page.route(comingUpLeaderboardPattern, (route) =>
+    route.fulfill({ json: comingUpLeaderboard })
+  );
+  let rootsRequests = 0;
+  await page.route("**/api/minting-claims/*/*/roots", (route) => {
+    rootsRequests += 1;
+    return route.fulfill({ json: [] });
+  });
+  try {
+    const rootsResponse = page.waitForResponse(
+      "**/api/minting-claims/*/*/roots"
+    );
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await (await rootsResponse).finished();
+    await expect(page.locator('[data-home-section="Latest drop"]')).toHaveCount(
+      0
+    );
+    expect(rootsRequests).toBe(1);
+    releaseClaim();
+    const latest = page.locator('[data-home-section="Latest drop"]');
+    const image = latest.getByRole("img", {
+      name: loadingTestArtwork.name,
+      exact: true,
+    });
+    await expect(image).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect
+      .poll(() => image.evaluate((el: HTMLImageElement) => el.naturalWidth))
+      .toBeGreaterThan(0);
+    await expect(
+      latest.getByText("All editions have been minted!", { exact: true })
+    ).toBeVisible();
+    expect(rootsRequests).toBe(1);
+  } finally {
+    releaseClaim();
+  }
+});
+
+test("homepage reads fresh roots on same-card SPA return @smoke @medium @large", async ({
+  page,
+}) => {
+  await installComingUpFixture(page);
+  await installCompletedMintStatus(page);
+  await page.route(comingUpLeaderboardPattern, (route) =>
+    route.fulfill({ json: comingUpLeaderboard })
+  );
+  let rootsRequests = 0;
+  await page.route("**/api/minting-claims/*/*/roots", (route) => {
+    rootsRequests += 1;
+    return route.fulfill({ json: [] });
+  });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const latest = page.locator('[data-home-section="Latest drop"]');
+  await expect(
+    latest.getByText("All editions have been minted!", { exact: true })
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  expect(rootsRequests).toBe(1);
+  const documentStart = await page.evaluate(() => performance.timeOrigin);
+  await page.getByRole("link", { name: "Start here", exact: true }).click();
+  await page.waitForURL(/\/join-6529$/);
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(documentStart);
+  await page.goBack();
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(documentStart);
+  await expect(
+    latest.getByRole("img", { name: loadingTestArtwork.name, exact: true })
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  await expect.poll(() => rootsRequests).toBe(2);
+  await expect(
+    latest.getByText("All editions have been minted!", { exact: true })
+  ).toBeVisible();
+  expect(rootsRequests).toBe(2);
+});
+
 for (const rootsStatus of [200, 503]) {
   test(`homepage shares pending roots without delaying or replacing artwork (${rootsStatus}) @smoke @medium @large`, async ({
     page,
