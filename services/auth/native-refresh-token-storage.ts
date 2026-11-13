@@ -1,5 +1,6 @@
 import { TokenRefreshCancelledError } from "@/errors/authentication";
 import { Capacitor } from "@capacitor/core";
+import { getDesktopNativeAuth } from "@/helpers/desktop-shell";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 
 const NATIVE_REFRESH_TOKEN_KEY_PREFIX = "6529-native-refresh-token";
@@ -40,8 +41,17 @@ async function readStoredValue(key: string): Promise<string | null> {
   }
 }
 
+/**
+ * True when refresh tokens live outside the page: in the mobile app's secure
+ * storage, or in 6529 Desktop, where the shell keeps them and the page never
+ * reads or writes them.
+ */
 export function isNativeSecureStorageAvailable(): boolean {
-  return Capacitor.isNativePlatform();
+  return usesCapacitorSecureStorage() || getDesktopNativeAuth() !== null;
+}
+
+function usesCapacitorSecureStorage(): boolean {
+  return getDesktopNativeAuth() === null && Capacitor.isNativePlatform();
 }
 
 async function writeNativeRefreshToken({
@@ -51,7 +61,8 @@ async function writeNativeRefreshToken({
   readonly address: string;
   readonly refreshToken: string;
 }): Promise<void> {
-  if (!isNativeSecureStorageAvailable()) {
+  // The desktop shell persists its own refresh tokens during sign-in.
+  if (!usesCapacitorSecureStorage()) {
     return;
   }
   const key = getNativeRefreshTokenKey(address);
@@ -60,7 +71,8 @@ async function writeNativeRefreshToken({
 }
 
 async function readNativeRefreshToken(address: string): Promise<string | null> {
-  if (!isNativeSecureStorageAvailable()) {
+  // Desktop refresh tokens never enter the page.
+  if (!usesCapacitorSecureStorage()) {
     return null;
   }
   const key = getNativeRefreshTokenKey(address);
@@ -146,7 +158,15 @@ export function removeNativeRefreshToken(address: string): Promise<void> {
     // Keep this logout tombstone even if durable deletion fails: a late refresh
     // must never restore credentials after an explicit logout in this process.
     inMemoryNativeRefreshTokens.set(key, null);
-    if (!isNativeSecureStorageAvailable()) return;
+    const desktopNativeAuth = getDesktopNativeAuth();
+    if (desktopNativeAuth) {
+      await desktopNativeAuth.removeRefreshToken({
+        client_type: "desktop",
+        client_address: address,
+      });
+      return;
+    }
+    if (!usesCapacitorSecureStorage()) return;
     // Delete the credential before its recovery proof.
     await removeStoredValue(key);
     await removeStoredValue(`${key}:pending-refresh`);

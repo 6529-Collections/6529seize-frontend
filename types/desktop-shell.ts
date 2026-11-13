@@ -109,7 +109,7 @@ export interface DesktopNativeLegacyConnectionShareResponse {
 }
 
 /** API failures cross the bridge as plain data, then become errors again. */
-interface DesktopNativeAuthFailure {
+export interface DesktopNativeAuthFailure {
   readonly kind: "native-auth-api-error";
   readonly status: number;
   readonly message: string;
