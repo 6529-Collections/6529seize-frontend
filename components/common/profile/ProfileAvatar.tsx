@@ -14,6 +14,8 @@ interface ProfileAvatarProps {
   readonly size?: ProfileBadgeSize | undefined;
   readonly alt?: string | undefined;
   readonly fallbackContent?: ReactNode | undefined;
+  /** Nullish values keep the existing default image. */
+  readonly imageContent?: ReactNode | undefined;
 }
 
 const AVATAR_SIZE_CLASSES: Record<ProfileBadgeSize, string> = {
@@ -28,6 +30,7 @@ export default function ProfileAvatar({
   size = ProfileBadgeSize.MEDIUM,
   alt = "Profile picture",
   fallbackContent = null,
+  imageContent,
 }: ProfileAvatarProps) {
   return (
     <div
@@ -36,16 +39,17 @@ export default function ProfileAvatar({
       <div className="tw-h-full tw-w-full tw-rounded-lg">
         <div className="tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
           <div className="tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-text-center">
-            {pfpUrl ? (
-              // Profile avatars can come from arbitrary remote hosts, so this stays unoptimized.
-              <img
-                src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
-                alt={alt}
-                className="tw-h-full tw-w-full tw-bg-transparent tw-object-cover"
-              />
-            ) : (
-              fallbackContent
-            )}
+            {pfpUrl
+              ? (imageContent ?? (
+                  // Preserve arbitrary remote sources for callers without the Coming up opt-in.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
+                    alt={alt}
+                    className="tw-h-full tw-w-full tw-bg-transparent tw-object-cover"
+                  />
+                ))
+              : fallbackContent}
           </div>
         </div>
       </div>

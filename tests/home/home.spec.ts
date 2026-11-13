@@ -560,6 +560,80 @@ for (const cardCount of [1, 3]) {
   });
 }
 
+test.describe("Coming up avatar density", () => {
+  test.use({ deviceScaleFactor: 3 });
+
+  test("requests enough avatar pixels for the screen density @smoke @medium @large", async ({
+    page,
+  }, testInfo) => {
+    await installComingUpFixture(page);
+    const avatar =
+      "https://media.6529usercontent.com/ipfs/coming-up-avatar-fixture";
+    const optimizedWidths: number[] = [];
+    await page.route(avatar, (route) =>
+      route.fulfill({
+        status: 206,
+        contentType: "image/jpeg",
+        headers: { "access-control-allow-origin": "*" },
+        body: Buffer.from([0xff, 0xd8, 0xff]),
+      })
+    );
+    await page.route("**/_next/image?*", (route) => {
+      const url = new URL(route.request().url());
+      if (url.searchParams.get("url") !== avatar) return route.fallback();
+      const width = Number(url.searchParams.get("w"));
+      optimizedWidths.push(width);
+      return route.fulfill({
+        contentType: "image/svg+xml",
+        body: `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${width}"><rect width="100%" height="100%" fill="#5689bd"/></svg>`,
+      });
+    });
+    await page.route(comingUpLeaderboardPattern, (route) =>
+      route.fulfill({
+        json: {
+          ...comingUpLeaderboard,
+          drops: comingUpLeaderboard.drops.map((drop) => ({
+            ...drop,
+            author: { ...drop.author, pfp: avatar },
+          })),
+        },
+      })
+    );
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const section = page.getByRole("region", {
+      name: "Coming up",
+      exact: true,
+    });
+    const artist = section
+      .getByRole("link", { name: "coming-up-artist", exact: true })
+      .first();
+    const image = section
+      .getByRole("link", { name: "coming-up-artist", exact: true })
+      .first()
+      .locator("img");
+    await expect(image).toHaveJSProperty("complete", true);
+    await expect.poll(() => optimizedWidths.length).toBeGreaterThan(0);
+    for (const width of optimizedWidths) {
+      expect(width).toBeGreaterThanOrEqual(84);
+      expect(width).toBeLessThanOrEqual(128);
+    }
+    await expect
+      .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth))
+      .toBeGreaterThan(0);
+    await expect(image).toHaveCSS("width", "28px");
+    await expect(image).toHaveCSS("height", "28px");
+    await expect(image).toHaveCSS("object-fit", "cover");
+    await expect(image).toHaveAttribute("alt", "");
+    await expect(artist).toHaveAttribute("href", "/coming-up-artist");
+    await artist.focus();
+    await expect(artist).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+    await image.screenshot({
+      path: testInfo.outputPath("coming-up-avatar-dpr3.png"),
+    });
+  });
+});
+
 test("Coming Up keeps collaborator credits compact and accessible @smoke @medium @large", async ({
   page,
 }, testInfo) => {
@@ -586,7 +660,21 @@ test("Coming Up keeps collaborator credits compact and accessible @smoke @medium
       },
     })
   );
+  // A late discovery failure can shorten the page and clamp its scroll
+  // position while the cursor is over a credit. Keep this fixture local.
+  await page.route("**/api/v2/waves?*", (route) =>
+    route.fulfill({
+      json: { data: [], page: 1, count: 0, next: false },
+    })
+  );
+  const discoveryReady = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === "/api/v2/waves"
+  );
   await page.goto("/", { waitUntil: "domcontentloaded" });
+  await discoveryReady;
+  await expect(
+    page.getByRole("heading", { name: "Tired of bot replies?", exact: true })
+  ).toHaveCount(0);
   const section = page.getByRole("region", { name: "Coming up", exact: true });
   const more = section.getByRole("link", {
     name: "+3 more View all collaborators on this drop",
@@ -596,6 +684,12 @@ test("Coming Up keeps collaborator credits compact and accessible @smoke @medium
     "href",
     `/waves/${comingUpWave.id}?drop=coming-up-1`
   );
+  // Auth restoration adds the signed-out sections above these cards. Wait
+  // before measuring or hovering so that insertion cannot move the target.
+  await expect(
+    page.getByRole("region", { name: "How to start", exact: true })
+  ).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
   await more.scrollIntoViewIfNeeded();
   const layout = await more.evaluate((link) => {
     const credit = link.parentElement!.parentElement!.parentElement!;
