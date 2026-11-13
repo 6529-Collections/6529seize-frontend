@@ -151,7 +151,7 @@ export function SidebarWaveNavigationControls({
               title={findWaveLabel}
               aria-expanded={false}
               onClick={() => setSearchOpen(true)}
-              className="tw-group tw-ml-auto tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white touch-only:tw-size-11"
+              className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-group tw-ml-auto tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white touch-only:tw-size-11`}
             >
               <span className="tw-flex tw-size-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent desktop-hover:group-hover:tw-bg-iron-900 touch-only:tw-size-10">
                 <MagnifyingGlassIcon className="tw-size-4" aria-hidden="true" />
