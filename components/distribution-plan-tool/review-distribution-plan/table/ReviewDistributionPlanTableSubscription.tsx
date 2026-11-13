@@ -1,5 +1,5 @@
 "use client";
-
+import { ApiDropForgeJobStatusEnum as JobStatus } from "@/generated/models/ApiDropForgeJob";
 import { useContext, useState } from "react";
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
@@ -8,15 +8,118 @@ import { DistributionPlanToolContext } from "@/components/distribution-plan-tool
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { buildCsv } from "@/helpers/csv-export.helpers";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
+import { useDropForgeProcess } from "@/hooks/useDropForgeProcess";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import {
+  forgeProcessInputsMatch,
+  getForgePhaseIds,
+} from "@/services/api/drop-forge-process-inputs";
+import { forgeList } from "@/services/api/drop-forge-api";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import {
   ReviewDistributionPlanTableItemType,
   type ReviewDistributionPlanTableItem,
 } from "./ReviewDistributionPlanTable.types";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
+type SubscriptionLinksProps = Readonly<{
+  plan: AllowlistDescription;
+  phase: ReviewDistributionPlanTableItem;
+}>;
 
+export function SubscriptionLinks({ plan, phase }: SubscriptionLinksProps) {
+  const { connectedProfile } = useContext(AuthContext);
+  const { confirmedTokenId } = useContext(DistributionPlanToolContext);
+  const { seizeSettings } = useSeizeSettings();
+  const { data: settings } = useDropForgeSettings();
+  if (
+    !isSubscriptionsAdmin(
+      connectedProfile,
+      seizeSettings.distribution_admin_wallets
+    ) ||
+    phase.type !== ReviewDistributionPlanTableItemType.PHASE ||
+    !confirmedTokenId
+  )
+    return null;
+  return settings?.preparation_enabled === true ? (
+    <PreparedSubscriptionLinks plan={plan} phase={phase} />
+  ) : (
+    <ManualSubscriptionLinks
+      plan={plan}
+      phase={phase}
+      tokenId={confirmedTokenId}
+    />
+  );
+}
+
+function PreparedSubscriptionLinks({ plan, phase }: SubscriptionLinksProps) {
+  const { setToast } = useContext(AuthContext);
+  const { confirmedTokenId, phases } = useContext(DistributionPlanToolContext);
+  const locale = useBrowserLocale();
+  const operation = useDropForgeProcess(
+    MEMES_CONTRACT,
+    Number(confirmedTokenId),
+    plan.id
+  );
+  const [downloading, setDownloading] = useState(false);
+  const isPublic = phase.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
+  const phaseIds = getForgePhaseIds(phases);
+  const completed =
+    operation.data?.status === JobStatus.Completed &&
+    forgeProcessInputsMatch(operation.data, phaseIds);
+  async function download() {
+    const job = operation.data;
+    if (
+      job?.status !== JobStatus.Completed ||
+      !forgeProcessInputsMatch(job, phaseIds) ||
+      downloading
+    )
+      return;
+    setDownloading(true);
+    try {
+      const lists: Array<
+        "airdrops" | "airdrops_unconsolidated" | "allowlists"
+      > = isPublic
+        ? ["airdrops"]
+        : ["airdrops", "airdrops_unconsolidated", "allowlists"];
+      const savedLists = await Promise.all(
+        lists.map(async (list) => ({
+          list,
+          rows: await forgeList(job.id, isPublic ? "public" : phase.id, list),
+        }))
+      );
+      savedLists.forEach(({ list, rows }) =>
+        downloadCsv(phase.name, list, rows)
+      );
+    } catch (error) {
+      setToast({
+        type: "error",
+        message:
+          getToastErrorDetails(error) ?? t(locale, "dropForge.downloadError"),
+      });
+    } finally {
+      setDownloading(false);
+    }
+  }
+  return (
+    <button
+      type="button"
+      disabled={!completed || downloading}
+      onClick={() => {
+        void download();
+      }}
+      title={!completed ? t(locale, "dropForge.pendingLists") : undefined}
+      aria-busy={downloading}
+      className="tw-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white disabled:tw-opacity-50"
+    >
+      {downloading && <CircleLoader />}
+      {t(locale, downloading ? "dropForge.downloading" : "dropForge.download")}
+    </button>
+  );
+}
 interface WalletResult {
   wallet: string;
   amount: number;
@@ -28,30 +131,14 @@ interface SubscriptionResult {
   allowlists: WalletResult[];
 }
 
-export function SubscriptionLinks(
-  props: Readonly<{
-    plan: AllowlistDescription;
-    phase: ReviewDistributionPlanTableItem;
-  }>
-) {
-  const { connectedProfile, setToast } = useContext(AuthContext);
-  const { confirmedTokenId } = useContext(DistributionPlanToolContext);
-  const { seizeSettings } = useSeizeSettings();
-
+function ManualSubscriptionLinks({
+  plan,
+  phase,
+  tokenId,
+}: SubscriptionLinksProps & { tokenId: string }) {
+  const { setToast } = useContext(AuthContext);
   const [downloading, setDownloading] = useState(false);
-
-  if (
-    !isSubscriptionsAdmin(
-      connectedProfile,
-      seizeSettings.distribution_admin_wallets ?? []
-    ) ||
-    props.phase.type !== ReviewDistributionPlanTableItemType.PHASE ||
-    !confirmedTokenId
-  ) {
-    return <></>;
-  }
-
-  const isPublic = props.phase.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
+  const isPublic = phase.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
   const contract = MEMES_CONTRACT;
 
   const handleDownload = async () => {
@@ -59,10 +146,10 @@ export function SubscriptionLinks(
     try {
       const downloadResponse = await download(
         contract,
-        confirmedTokenId,
-        props.plan.id,
-        isPublic ? "public" : props.phase.id,
-        isPublic ? "public" : props.phase.name
+        tokenId,
+        plan.id,
+        isPublic ? "public" : phase.id,
+        isPublic ? "public" : phase.name
       );
       setToast({
         type: downloadResponse.success ? "success" : "error",
@@ -135,41 +222,35 @@ const download = async (
 
 const processResults = (phaseName: string, results: SubscriptionResult) => {
   if (phaseName === "public") {
-    downloadCSV(phaseName, results.airdrops, "airdrops");
+    downloadCsv(phaseName, "airdrops", results.airdrops);
   } else {
-    downloadCSV(phaseName, results.airdrops, "airdrops");
-    downloadCSV(
+    downloadCsv(phaseName, "airdrops", results.airdrops);
+    downloadCsv(
       phaseName,
-      results.airdrops_unconsolidated,
-      "airdrops_unconsolidated"
+      "airdrops_unconsolidated",
+      results.airdrops_unconsolidated
     );
-    downloadCSV(phaseName, results.allowlists, "allowlists");
+    downloadCsv(phaseName, "allowlists", results.allowlists);
   }
 };
 
-function convertToCSV(arr: WalletResult[]): string {
-  return buildCsv([
-    ["address", "value"],
-    ...arr.map(({ wallet, amount }) => [wallet, amount]),
-  ]);
-}
-
-function downloadCSV(
-  phaseName: string,
-  results: WalletResult[],
-  filename: string
+function downloadCsv(
+  phase: string,
+  list: string,
+  rows: Array<{ wallet: string; amount: number }>
 ) {
-  const csv = convertToCSV(results);
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-  link.href = url;
-  link.setAttribute(
-    "download",
-    `${phaseName.replaceAll(" ", "_").toLowerCase()}_${filename}.csv`
+  const csv = buildCsv([
+    ["address", "value"],
+    ...rows.map(({ wallet, amount }) => [wallet, amount]),
+  ]);
+  const url = URL.createObjectURL(
+    new Blob([csv], { type: "text/csv;charset=utf-8;" })
   );
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${phase.replaceAll(" ", "_").toLowerCase()}_${list}.csv`;
   document.body.appendChild(link);
   link.click();
-  document.body.removeChild(link);
+  link.remove();
   URL.revokeObjectURL(url);
 }

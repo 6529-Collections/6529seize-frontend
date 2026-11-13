@@ -25,12 +25,16 @@ import {
 import type { LaunchClaimState } from "@/components/drop-forge/launch/useLaunchClaimState";
 import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { ApiMintingClaimAction } from "@/generated/models/ApiMintingClaimAction";
-import { Time } from "@/helpers/time";
-import { buildMemesPhases as buildClaimPhases } from "@/hooks/useManifoldClaim";
+import { useQuery } from "@tanstack/react-query";
+import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
+import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
+import { getForgeLaunch } from "@/services/api/drop-forge-api";
+import { launchCalendarPhases } from "./launch-calendar";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
 interface UseLaunchClaimViewModelParams {
   claimId: number;
+  automaticLaunchEnabled: boolean;
   state: LaunchClaimState;
   manifoldClaim: ManifoldClaim | null | undefined;
   primaryStatus: ReturnType<
@@ -47,6 +51,7 @@ interface UseLaunchClaimViewModelParams {
 
 export function useLaunchClaimViewModel({
   claimId,
+  automaticLaunchEnabled,
   state,
   manifoldClaim,
   primaryStatus,
@@ -208,6 +213,20 @@ export function useLaunchClaimViewModel({
     mintingClaimActionsLoaded,
     mintingClaimActionsLoadFailed,
   ]);
+  const { contract } = useDropForgeMintingConfig();
+  const hasSavedPlan =
+    mintingClaimActions?.claim_id === claimId &&
+    mintingClaimActions.contract.toLowerCase() === contract.toLowerCase() &&
+    mintingClaimActions.drop_forge_launch_exists === true;
+  const savedLaunch = useQuery({
+    queryKey: forgeLaunchKey(contract, claimId),
+    queryFn: () => getForgeLaunch(contract, claimId),
+    enabled: claimId > 0 && (automaticLaunchEnabled || hasSavedPlan),
+    refetchInterval: 5000,
+  });
+  const coordinateManualWrites = Boolean(savedLaunch.data) || hasSavedPlan;
+  const savedPhases =
+    savedLaunch.data?.phases ?? (coordinateManualWrites ? undefined : null);
   const mintTimeline = useMemo(
     () => (claimId > 0 ? getClaimTimelineDetails(claimId) : null),
     [claimId]
@@ -216,7 +235,7 @@ export function useLaunchClaimViewModel({
   const phaseData = useMemo(() => {
     const scheduleByPhaseId = new Map(
       (mintTimeline
-        ? buildClaimPhases(Time.millis(mintTimeline.instantUtc.getTime()))
+        ? launchCalendarPhases(mintTimeline.instantUtc, savedPhases)
         : []
       ).map((phase) => [phase.id, phase])
     );
@@ -247,7 +266,7 @@ export function useLaunchClaimViewModel({
         schedule: scheduleByPhaseId.get("public"),
       },
     ];
-  }, [mintTimeline, roots]);
+  }, [mintTimeline, roots, savedPhases]);
   const autoSelectedPhase = useMemo(
     () =>
       getAutoSelectedLaunchPhase({
@@ -307,6 +326,7 @@ export function useLaunchClaimViewModel({
     setPhaseAllowlistWindows((prev) => {
       const next = { ...prev };
       for (const phase of phaseData) {
+        if (!phase.schedule) continue;
         if (!next[phase.key]) {
           next[phase.key] = {
             start: phase.schedule
@@ -388,7 +408,9 @@ export function useLaunchClaimViewModel({
     launchActionPending,
     selectedPhaseConfig,
     isInitialized,
-    missingRequiredInfo,
+    missingRequiredInfo:
+      missingRequiredInfo ||
+      (coordinateManualWrites && phaseData.some((phase) => !phase.schedule)),
     selectedPhaseIsUpdateAction,
     selectedPhaseMatchesOnChainConfig,
   });
@@ -435,6 +457,7 @@ export function useLaunchClaimViewModel({
   });
 
   return {
+    coordinateManualWrites,
     artistAirdropSummary,
     teamAirdropSummary,
     subscriptionAirdropSections,

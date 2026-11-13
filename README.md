@@ -235,4 +235,16 @@ policy, and safe handling of secrets or security-sensitive configuration.
 
 This project is licensed under the [Apache License 2.0](LICENSE).
 
+Internal Memes operator setup for the backend's queued distribution and launch
+handlers is maintained in the [backend setup guide](https://github.com/6529-Collections/6529seize-backend/blob/agent-prxt/drop-forge-auto-launch-requirements/docs/drop-forge-auto-launch-setup.md);
+see [Drop Forge operator docs](ops/docs/drop-forge/README.md) for the UI flow.
+Launch also displays RPC/database mint-count evidence and retry eligibility for
+post-mint Research and artist payment. The backend setup guide covers the one-time
+17:15 preview and the indexing prerequisite for 18:00 execution; every new report
+goes only to the dedicated operations wave, leaving existing mint announcements unchanged.
+
 Shared Memes calendar maintenance: [guide](shared/memes-calendar/README.md).
+
+Launch automation uses saved UTC phase windows from its backend launch ledger.
+Environment/contract policy and the reduced operator setup are documented in the
+[backend setup guide](https://github.com/6529-Collections/6529seize-backend/blob/agent-prxt/drop-forge-auto-launch-requirements/docs/drop-forge-auto-launch-setup.md).

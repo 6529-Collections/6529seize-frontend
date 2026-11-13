@@ -1,89 +1,62 @@
 # Drop Forge Craft-to-Launch Flow
 
-## Overview
+Actor 1 confirms the EMMA token, uploads allocation inputs and clicks **Process
+and Finalize**. The loader tracks one durable operation through ordered phase
+processing and finalization. Refresh restores progress. After completion, phase
+subscription lists are read-only downloads.
 
-This flow covers the normal handoff from claim preparation in craft routes to
-on-chain launch setup in launch routes.
+Actor 2 saves assets, metadata and traits at `/drop-forge/craft/{id}`, then
+publishes to Arweave. With **Automatic launch** on, **Launch** queues
+initialization immediately. The card shows **Initializing…** until the claim
+confirms, then **Claim initialized**. The **Auto Launch** pill identifies a
+saved plan in Craft and in the Launch list and detail. The fixed mint calendar supplies the phase schedule; no separate
+per-drop time handoff is needed. Preparation, reporting access and sufficient
+remaining confirmation time must pass backend checks before launch is accepted.
+A distribution finalized manually in EMMA is eligible for Automatic launch.
 
-## Location in the Site
+The worker replaces Actor 3's routine initialization and phase operations.
+Phase 0 allocations precede its 17:40 Europe/Athens window; Phase 1 subscriber
+airdrops run between 18:20 and 18:30. Between 18:50 and 19:00, Phase 2
+subscriber airdrops run first, then Public subscriber airdrops run in separate
+transactions. Each row is marked **Completed** when all its own batches confirm. Public configuration updates after Phase 2 closes at 19:20.
+Transactions can be delayed, so scheduled windows do not guarantee exact-second
+configuration activation. Errors remain visible and need operator review.
 
-- Starts in `/drop-forge`
-- Uses `/drop-forge/craft` and `/drop-forge/craft/{id}`
-- Continues in `/drop-forge/launch` and `/drop-forge/launch/{id}`
+After saving and republishing Craft metadata, **Update Claim** synchronizes the
+published version while preserving mint settings and completed allocations.
+Changing edition size or distribution after launching is outside this metadata
+operation and requires review.
 
-## Entry Points
+Contract admins retain manual controls at `/drop-forge/launch/{id}`. A backend
+lease pauses new automated submissions before the wallet prompt. After submission
+the hash is registered for canonical confirmation and exact allocation credit.
+Refresh retries a persisted hash. Compatible initialization/update already on
+chain is observed without another transaction; automation's completed airdrop
+flags appear in the existing manual controls. Transactions sent elsewhere need
+their hashes supplied for reconciliation; supply alone cannot identify recipients.
 
-- Open `/drop-forge` and pick a section card.
-- Open a craft or launch claim URL directly if you already know the claim ID.
+The Launch page shows automation state, action progress, transaction links and
+recovery controls. Pausing cannot revoke signed/submitted transactions. A lost
+wallet outcome remains paused until its hash or safe cancellation is reconciled.
+On staging, `@drops6529` reports actions and errors in **Drop Forge Ops**.
+Reports link to the Launch card and to the transaction when available. Mined
+transactions show the gas fee. Airdrop reports show wallet and token counts,
+and artist payment reports show the amount in ETH.
 
-## User Journey
+Drop Forge checks mint readiness at 17:30, 18:28, 18:58 and 19:22 Athens time
+on scheduled mint days, including manual launches. The first three checks
+verify the next mint window and the required airdrops. The last verifies
+that public minting is active. Problems alert the configured `@dropforgeops`
+group. Passing checks stay quiet.
 
-1. Open `/drop-forge`.
-2. Choose `Craft Claims`.
-3. Open a claim at `/drop-forge/craft/{id}`.
-4. Complete claim preparation:
-   - save image changes
-   - save animation changes
-   - save core information
-   - save metadata and traits
-5. Publish the claim to Arweave after all pending draft changes are saved.
-6. Open `/drop-forge/launch/{id}`.
-7. If the launch page still says `Finish crafting this claim before launching`,
-   return to the craft route and finish publishing first.
-8. After published metadata is available, launch can briefly show `Checking
-   Onchain` while it loads the live claim before settling on the next status
-   and phase.
-9. Use the page-header shortcut (`Go to Craft` from launch or `Go to Drop` from
-   craft when available) to move between the paired operational surfaces.
-10. After published metadata is available, initialize `Phase 0`.
-11. Continue with later phase updates and any required airdrops.
-12. Revisit the launch route as needed for metadata-only updates, phase-window
-    edits, or additional airdrop actions.
+Craft and contract-admin access remain distinct. Admin grants/revocations remain owner-only on chain. Automatic artist payment is
+separately opt-in and defaults Off. The hub's **Automatic launch** switch also
+defaults Off. Accepted plans keep their timed reports while execution is disabled.
+**EMMA preparation** switches between the original EMMA preparation controls
+and Process and Finalize. Manual Launch uses the standard mint calendar and the
+connected wallet for claims without an accepted plan when Automatic launch is Off.
+Claims with a saved launch plan use its schedule and coordinate manual writes.
 
-## Common Scenarios
-
-- Single-wallet operator:
-  - One wallet can sometimes see the landing route but only one of the two
-    section cards, depending on its role assignments.
-- Multi-role operator:
-  - A wallet with both craft and launch permissions can complete the whole flow
-    without switching wallets.
-- Launch-first handoff:
-  - Operators can open `/drop-forge/launch/{id}` first, then follow the inline
-    craft link when metadata is still unpublished.
-  - Once the launch page is open, `Go to Craft` provides the same handoff from
-    the page header.
-
-## Edge Cases
-
-- Craft and launch permissions are distinct. A user may need to switch wallets
-  between the two halves of the flow.
-- Published Arweave links can exist before the launch route has fetched its
-  on-chain state.
-- Research airdrop flow depends on the initialized claim plus the current
-  minted-total versus target edition-size delta, and that target is capped by
-  the active claim max.
-
-## Failure and Recovery
-
-- If permission fallback appears on either half of the flow, reconnect with a
-  wallet that has the required section access.
-- If publish fails in craft, resolve the draft or upload error first, then
-  retry `Publish to Arweave`.
-- If launch initialization fails, keep the claim page open, correct the phase
-  inputs, and retry the action.
-
-## Limitations / Notes
-
-- Craft is the source of truth for claim assets and metadata.
-- Launch does not replace craft editing; it consumes the published craft output.
-- There is no one-click cross-route automation from landing to completed launch.
-  The operator advances the workflow section by section.
-
-## Related Pages
-
-- [Drop Forge Index](README.md)
-- [Drop Forge Hub and Section Navigation](feature-drop-forge-hub-and-navigation.md)
-- [Craft Claims List and Detail](feature-craft-claims-list-and-detail.md)
-- [Launch Claims List and Detail](feature-launch-claims-list-and-detail.md)
-- [Docs Home](../README.md)
+Related: [Craft](feature-craft-claims-list-and-detail.md),
+[Launch](feature-launch-claims-list-and-detail.md),
+[EMMA](../emma/feature-subscriptions-distribution-review.md).
