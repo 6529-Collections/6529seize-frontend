@@ -63,8 +63,7 @@ export default function ArtistPaymentSettings({
         >
           {t(locale, "dropForge.settings.artist")}
         </h3>
-        <span
-          role="status"
+        <output
           className={`tw-rounded-full tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium ${enabled ? "tw-bg-emerald-500/15 tw-text-emerald-300" : "tw-bg-iron-800 tw-text-iron-300"}`}
         >
           {t(
@@ -73,7 +72,7 @@ export default function ArtistPaymentSettings({
               ? "dropForge.settings.paymentEnabled"
               : "dropForge.settings.paymentDisabled"
           )}
-        </span>
+        </output>
       </div>
       <div className="tw-mt-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3">
         {draft !== null && settings.can_edit ? (

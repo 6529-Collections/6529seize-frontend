@@ -228,7 +228,9 @@ it("confirms clipboard success and reports a clipboard rejection in the wallet p
     fireEvent.click(copy);
     await waitFor(() =>
       expect(
-        screen.getByText("Copied", { selector: '[role="status"]' })
+        screen
+          .getAllByRole("status")
+          .find((status) => status.textContent === "Copied")
       ).toBeInTheDocument()
     );
     expect(writeText).toHaveBeenCalledWith(settings.signer_address);

@@ -58,9 +58,9 @@ export default function CopyWalletAddressButton({
           </span>
         </span>
       </Button>
-      <span role="status" className="tw-sr-only">
+      <output className="tw-sr-only">
         {status === "copied" ? t(locale, "dropForge.settings.copied") : ""}
-      </span>
+      </output>
       <p
         aria-live="polite"
         className="tw-mb-0 tw-mt-1 tw-grid tw-text-xs tw-text-rose-300"
