@@ -864,6 +864,12 @@ for (const slowEndpoint of ["leaderboard", "settings"] as const) {
         exact: true,
       });
       await expect.poll(() => requests).toBe(1);
+      // Early lookups can precede hydration; start the slow-response clock once
+      // the app has mounted its normal request consumers.
+      await expect(page.getByRole("main").first().locator("..")).toHaveAttribute(
+        "data-sidebar-ready",
+        "true"
+      );
       await page.clock.fastForward(20_000);
       if (slowEndpoint === "leaderboard") {
         await expect(comingUp.getByRole("status")).toHaveText(

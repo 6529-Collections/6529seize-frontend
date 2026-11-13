@@ -65,6 +65,7 @@ const HOME_ARTWORK_STARTUP = `(function startHomeArtwork(config) {
     const entry = entries.get(url);
     if (!entry) return null;
     entries.delete(url);
+    clearTimeout(entry.timer);
     if (!active || location.pathname !== "/" || Date.now() - entry.startedAt >= maxAge || entry.headers !== headerKey(headers)) {
       entry.controller.abort();
       return null;
@@ -96,6 +97,7 @@ const HOME_ARTWORK_STARTUP = `(function startHomeArtwork(config) {
       headers: headerKey(headers),
       response,
       controller,
+      timer,
       startedAt: Date.now()
     });
     return response;

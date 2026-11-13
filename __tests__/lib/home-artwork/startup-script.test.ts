@@ -17,6 +17,7 @@ function launch(
     accountAddress?: string;
     failLatest?: boolean;
     latestResponse?: Response;
+    settingsResponse?: Promise<Response>;
   } = {}
 ) {
   let now = 0;
@@ -26,6 +27,9 @@ function launch(
     }
     if (options.latestResponse && url.endsWith("/memes_latest")) {
       return options.latestResponse;
+    }
+    if (options.settingsResponse && url.endsWith("/settings")) {
+      return options.settingsResponse;
     }
     return new Response(
       JSON.stringify(
@@ -190,6 +194,32 @@ describe("home artwork document startup", () => {
     ).toBeNull();
     await settle();
     expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("lets an adopted slow request finish beyond the speculative freshness deadline", async () => {
+    jest.useFakeTimers({ doNotFake: ["setImmediate"] });
+    let finish!: () => void;
+    const settingsResponse = new Promise<Response>((resolve) => {
+      finish = () =>
+        resolve(new Response(JSON.stringify({ memes_wave_id: WAVE })));
+    });
+    try {
+      const { browser, fetch, advance } = launch({ settingsResponse });
+      const response = browser.__6529HomeArtworkStartup?.take(
+        `${API}/api/settings`,
+        new Headers()
+      );
+      await settle();
+      advance(20_000);
+      jest.advanceTimersByTime(20_000);
+      expect(fetch.mock.calls[1]?.[1].signal?.aborted).toBe(false);
+      finish();
+      expect(await (await response)?.json()).toEqual({ memes_wave_id: WAVE });
+    } finally {
+      finish();
+      await settle();
+      jest.useRealTimers();
+    }
   });
 
   it("keeps the caller's response body readable while tracking cancellation", async () => {
