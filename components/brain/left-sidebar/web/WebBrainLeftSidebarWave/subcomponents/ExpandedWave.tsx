@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import Link from "next/link";
 import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
+import { PinnedWaveLinkContext } from "@/components/brain/left-sidebar/waves/PinnedWaveLinkContext";
 import {
   SidebarParentSubwaveConnector,
   SidebarSubwaveConnector,
@@ -79,6 +80,7 @@ export const ExpandedWave = ({
   showSubwaveConnector = false,
   onPrefetchSubwaves,
 }: ExpandedWaveProps) => {
+  const pinnedLinkProps = useContext(PinnedWaveLinkContext);
   const tooltipAttributes = showExpandedTooltip
     ? {
         "data-tooltip-id": tooltipId,
@@ -213,6 +215,7 @@ export const ExpandedWave = ({
             >
               <div className="-tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
                 <Link
+                  {...pinnedLinkProps}
                   href={href}
                   prefetch={false}
                   onClick={onClick}

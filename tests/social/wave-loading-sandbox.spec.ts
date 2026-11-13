@@ -46,14 +46,11 @@ test("saves reordered pins across reload on desktop and mobile", async ({
   const list = page
     .getByRole("region", { name: "Pinned", exact: true })
     .filter({ visible: true });
-  const first = list.getByRole("button", {
-    name: "Drag Scroll wave 0",
-    exact: true,
-  });
-  const second = list.getByRole("button", {
-    name: "Drag Scroll wave 1",
-    exact: true,
-  });
+  const first = list.locator(`[data-sidebar-wave-id="${scrollWaveId(0)}"]`);
+  const second = list.locator(`[data-sidebar-wave-id="${scrollWaveId(1)}"]`);
+  await expect(
+    list.getByRole("button", { name: /^(Drag|Reorder) / })
+  ).toHaveCount(0);
   await expect(first).toBeInViewport();
   await expect(second).toBeInViewport();
   const saved = page.waitForResponse(
@@ -62,17 +59,44 @@ test("saves reordered pins across reload on desktop and mobile", async ({
       response.request().method() === "PUT"
   );
   if (isMobile) {
+    const session = await page.context().newCDPSession(page);
+    const scroll = await sidebarScrollMetrics(list);
+    const swipeX = Math.round(scroll.x);
+    const swipeY = Math.round(scroll.y);
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x: swipeX, y: swipeY }],
+    });
+    for (const distance of [25, 50, 75, 100]) {
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: swipeX, y: swipeY - distance }],
+      });
+    }
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await expect
+      .poll(async () => (await sidebarScrollMetrics(list)).top)
+      .toBeGreaterThan(scroll.top);
+    await expect(
+      list.getByRole("link", { name: /^Scroll wave [01]$/ })
+    ).toHaveText(["Scroll wave 0", "Scroll wave 1"]);
+    await first.scrollIntoViewIfNeeded();
+    await sidebarScrollMetrics(list, 0);
+
     const box = await first.boundingBox();
     const target = await second.boundingBox();
-    if (!box || !target) throw new Error("Missing drag handles");
-    const session = await page.context().newCDPSession(page);
-    const x = Math.round(box.x + box.width / 2);
+    if (!box || !target) throw new Error("Missing pinned wave rows");
+    const x = Math.round(box.x + box.width * 0.75);
     const y = Math.round(box.y + box.height / 2);
     const endY = Math.round(target.y + target.height / 2);
     await session.send("Input.dispatchTouchEvent", {
       type: "touchStart",
       touchPoints: [{ x, y }],
     });
+    await expect(list.getByText("Position 1.", { exact: true })).toBeAttached();
     for (let step = 1; step <= 8; step++) {
       await session.send("Input.dispatchTouchEvent", {
         type: "touchMove",
@@ -96,6 +120,17 @@ test("saves reordered pins across reload on desktop and mobile", async ({
   await expect(
     list.getByRole("link", { name: /^Scroll wave [01]$/ })
   ).toHaveText(["Scroll wave 1", "Scroll wave 0"]);
+  await expect(page).toHaveURL(/\/waves$/);
+
+  const firstWave = first.getByRole("link", { name: "Scroll wave 0" });
+  if (isMobile) {
+    await firstWave.tap();
+  } else {
+    await firstWave.click();
+  }
+  await expect(page).toHaveURL(new RegExp(scrollWaveId(0)), {
+    timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+  });
 });
 
 test("can reorder pins from the keyboard", async ({
@@ -117,11 +152,11 @@ test("can reorder pins from the keyboard", async ({
   const list = page
     .getByRole("region", { name: "Pinned", exact: true })
     .filter({ visible: true });
-  const handle = list.getByRole("button", {
-    name: "Drag Scroll wave 0",
+  const wave = list.getByRole("link", {
+    name: "Scroll wave 0",
     exact: true,
   });
-  await handle.focus();
+  await wave.focus();
   await page.keyboard.press("Space");
   await expect(list.getByText("Position 1.", { exact: true })).toHaveCount(1);
   await page.keyboard.press("ArrowDown");
@@ -134,15 +169,9 @@ test("can reorder pins from the keyboard", async ({
   await expect(
     list.getByText("Pinned wave order saved.", { exact: true })
   ).toHaveCount(1);
-  const menu = list.getByRole("button", {
-    name: "Reorder Scroll wave 0",
-    exact: true,
-  });
-  await menu.press("Enter");
-  await page.getByRole("menuitem", { name: "Move up" }).press("Enter");
-  await expect(
-    list.getByRole("link", { name: /^Scroll wave [01]$/ })
-  ).toHaveText(["Scroll wave 0", "Scroll wave 1"]);
+  await expect(wave).toBeFocused();
+  await wave.press("Enter");
+  await expect(page).toHaveURL(new RegExp(scrollWaveId(0)));
 });
 
 for (const collection of ["All", "Pinned", "Joined"]) {

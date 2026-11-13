@@ -2,13 +2,14 @@
 
 import {
   DndContext,
-  DragOverlay,
+  KeyboardCode,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
+  type DragCancelEvent,
   type DragEndEvent,
 } from "@dnd-kit/core";
 import {
@@ -19,18 +20,25 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import { Bars3Icon, EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { useRef, useState, type ReactNode, type RefObject } from "react";
+import {
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+  type RefObject,
+  type TouchEvent,
+} from "react";
 import type { AnimatedSidebarWaveTreeRow } from "@/hooks/useAnimatedSidebarWaveRows";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { PinnedWaveLinkContext } from "./PinnedWaveLinkContext";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
 
 interface PinnedWaveGroup {
   readonly id: string;
-  readonly name: string;
   readonly parent: AnimatedSidebarWaveTreeRow;
   readonly children: AnimatedSidebarWaveTreeRow[];
 }
@@ -50,7 +58,6 @@ function groupPinnedRows(
     if (row.depth === 0 && row.rowType === "wave") {
       groups.push({
         id: row.wave.id,
-        name: row.wave.name,
         parent: row,
         children: [],
       });
@@ -61,28 +68,44 @@ function groupPinnedRows(
   return groups;
 }
 
-const ORDER_BUTTON_CLASS =
-  "tw-inline-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+function canDragFrom(target: EventTarget) {
+  return (
+    target instanceof Element &&
+    !target.closest("button, input, select, textarea, [role='button']")
+  );
+}
 
-const ORDER_MENU_ITEM_CLASS =
-  "tw-block tw-w-full tw-rounded-md tw-px-3 tw-py-2 tw-text-start data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400 disabled:tw-text-iron-500";
+function suppressDropClick({ activatorEvent }: DragEndEvent | DragCancelEvent) {
+  if (activatorEvent instanceof KeyboardEvent) return;
+
+  // dnd-kit stops the release click from bubbling, but the link still has a
+  // browser default action. Cancel it until the next pointer gesture.
+  const controller = new AbortController();
+  const options = { capture: true, signal: controller.signal };
+  const clear = () => controller.abort();
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (event.detail > 0) {
+        event.preventDefault();
+        clear();
+      }
+    },
+    options
+  );
+  document.addEventListener("pointerdown", clear, options);
+  globalThis.setTimeout(clear, 100);
+}
 
 function SortablePinnedWave({
   group,
   controls,
-  canMoveUp,
-  canMoveDown,
-  onMove,
   renderRow,
 }: {
   readonly group: PinnedWaveGroup;
   readonly controls: boolean;
-  readonly canMoveUp: boolean;
-  readonly canMoveDown: boolean;
-  readonly onMove: (distance: number) => void;
   readonly renderRow: (row: AnimatedSidebarWaveTreeRow) => ReactNode;
 }) {
-  const locale = useBrowserLocale();
   const {
     attributes,
     listeners,
@@ -94,71 +117,55 @@ function SortablePinnedWave({
   } = useSortable({ id: group.id, disabled: !controls });
   const { parent, children } = group;
 
+  function onMouseDown(event: MouseEvent<HTMLDivElement>) {
+    if (event.button === 0 && canDragFrom(event.target)) {
+      listeners?.["onMouseDown"]?.(event);
+    }
+  }
+
+  function onTouchStart(event: TouchEvent<HTMLDivElement>) {
+    if (canDragFrom(event.target)) {
+      listeners?.["onTouchStart"]?.(event);
+    }
+  }
+
+  const descriptionId = attributes["aria-describedby"];
+  const linkProps = useMemo(
+    () =>
+      listeners && {
+        ref: setActivatorNodeRef,
+        "aria-describedby": descriptionId,
+        "aria-keyshortcuts": "Space",
+        onKeyDown: (event: ReactKeyboardEvent<HTMLAnchorElement>) => {
+          listeners["onKeyDown"]?.(event);
+        },
+      },
+    [descriptionId, listeners, setActivatorNodeRef]
+  );
+
   return (
     <div
       ref={setNodeRef}
-      className="motion-reduce:tw-!transition-none tw-min-w-0"
+      className={`motion-reduce:tw-!transition-none tw-min-w-0 ${
+        isDragging ? "tw-relative tw-z-20 tw-bg-iron-950" : ""
+      }`}
       style={{
         transform: CSS.Translate.toString(transform),
         transition,
-        opacity: isDragging ? 0.45 : undefined,
       }}
     >
-      <div className="tw-flex tw-items-center">
-        <div className="tw-min-w-0 tw-flex-1">{renderRow(parent)}</div>
-        {controls && (
-          <div className="tw-mr-2 tw-flex tw-shrink-0 tw-gap-1">
-            <button
-              type="button"
-              ref={setActivatorNodeRef}
-              {...attributes}
-              {...listeners}
-              className={`${ORDER_BUTTON_CLASS} tw-cursor-grab tw-touch-none active:tw-cursor-grabbing`}
-              aria-label={t(locale, "waves.sidebar.dragWave", {
-                waveName: group.name,
-              })}
-            >
-              <Bars3Icon aria-hidden="true" className="tw-size-4" />
-            </button>
-            <Menu>
-              <MenuButton
-                type="button"
-                className={ORDER_BUTTON_CLASS}
-                aria-label={t(locale, "waves.sidebar.reorderWave", {
-                  waveName: group.name,
-                })}
-              >
-                <EllipsisVerticalIcon
-                  aria-hidden="true"
-                  className="tw-size-4"
-                />
-              </MenuButton>
-              <MenuItems
-                anchor="bottom end"
-                className="tw-z-[10000] tw-min-w-32 tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg"
-              >
-                <MenuItem disabled={!canMoveUp}>
-                  <button
-                    type="button"
-                    className={ORDER_MENU_ITEM_CLASS}
-                    onClick={() => onMove(-1)}
-                  >
-                    {t(locale, "waves.sidebar.movePinUp")}
-                  </button>
-                </MenuItem>
-                <MenuItem disabled={!canMoveDown}>
-                  <button
-                    type="button"
-                    className={ORDER_MENU_ITEM_CLASS}
-                    onClick={() => onMove(1)}
-                  >
-                    {t(locale, "waves.sidebar.movePinDown")}
-                  </button>
-                </MenuItem>
-              </MenuItems>
-            </Menu>
-          </div>
-        )}
+      <div
+        className={
+          controls
+            ? "tw-select-none [-webkit-touch-callout:none] [&_a]:tw-cursor-grab"
+            : undefined
+        }
+        onMouseDown={controls ? onMouseDown : undefined}
+        onTouchStart={controls ? onTouchStart : undefined}
+      >
+        <PinnedWaveLinkContext.Provider value={linkProps}>
+          {renderRow(parent)}
+        </PinnedWaveLinkContext.Provider>
       </div>
       {children.map(renderRow)}
     </div>
@@ -184,12 +191,20 @@ function SidebarPinnedWaves({
   const ids = groups.map((group) => group.id);
   const dragStartIds = useRef<readonly string[]>([]);
   const saving = useRef(false);
-  const [activeId, setActiveId] = useState<string | null>(null);
   const [status, setStatus] = useState<"saved" | "error" | null>(null);
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 8 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+      keyboardCodes: {
+        start: [KeyboardCode.Space],
+        end: [KeyboardCode.Space, KeyboardCode.Enter, KeyboardCode.Tab],
+        cancel: [KeyboardCode.Esc],
+      },
+    })
   );
 
   async function move(from: number, to: number) {
@@ -216,8 +231,9 @@ function SidebarPinnedWaves({
     }
   }
 
-  function endDrag({ active, over }: DragEndEvent) {
-    setActiveId(null);
+  function endDrag(event: DragEndEvent) {
+    suppressDropClick(event);
+    const { active, over } = event;
     if (
       !over ||
       ids.length !== dragStartIds.current.length ||
@@ -238,8 +254,6 @@ function SidebarPinnedWaves({
       </SidebarWaveTreeRowTransition>
     );
   }
-
-  const activeGroup = groups.find((group) => group.id === activeId);
 
   return (
     <section aria-label={t(locale, "waves.sidebar.pinned")}>
@@ -263,36 +277,22 @@ function SidebarPinnedWaves({
             },
           }}
           collisionDetection={closestCenter}
-          onDragStart={({ active }) => {
+          onDragStart={() => {
             dragStartIds.current = ids;
-            setActiveId(String(active.id));
           }}
           onDragEnd={endDrag}
-          onDragCancel={() => setActiveId(null)}
+          onDragCancel={suppressDropClick}
         >
           <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-            {groups.map((group, index) => (
+            {groups.map((group) => (
               <SortablePinnedWave
                 key={group.id}
                 group={group}
-                controls={Boolean(onReorder) && ids.length > 1}
-                canMoveUp={!isSaving && index > 0}
-                canMoveDown={!isSaving && index < ids.length - 1}
-                onMove={(distance) => {
-                  const from = ids.indexOf(group.id);
-                  void move(from, from + distance);
-                }}
+                controls={Boolean(onReorder) && !isSaving && ids.length > 1}
                 renderRow={renderTransition}
               />
             ))}
           </SortableContext>
-          <DragOverlay dropAnimation={null} zIndex={10001}>
-            {activeGroup && (
-              <div className="tw-pointer-events-none tw-mx-2 tw-max-w-full tw-truncate tw-rounded-lg tw-border tw-border-iron-600 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-text-iron-100 tw-shadow-lg">
-                {activeGroup.name}
-              </div>
-            )}
-          </DragOverlay>
         </DndContext>
         {hasLoadingError && (
           <div className="tw-flex tw-items-center tw-gap-2 tw-px-4 tw-py-3 tw-text-sm tw-text-iron-300">
