@@ -4,14 +4,30 @@
  * Integration: real OpenMLS WASM + fake delivery service. WebSocket hints,
  * polling fallback, stale-epoch re-encryption, roster repair and snapshots.
  */
-import { POLL_OPEN_MS } from "@/lib/e2ee/engine/controller";
+import type { EngineContext } from "@/lib/e2ee/engine/context";
+import {
+  type EngineController,
+  POLL_OPEN_MS,
+} from "@/lib/e2ee/engine/controller";
+import { newRuntime } from "@/lib/e2ee/engine/groups";
+import { queueMessage } from "@/lib/e2ee/engine/send";
 import {
   addUser,
   createWorld,
   realSleep,
   settle,
+  startDevice,
+  stopDevice,
   texts,
+  type TestDevice,
 } from "./support/harness";
+
+/** Engine internals, to stage a send left waiting in the outbox. */
+const internals = (device: TestDevice) =>
+  device.engine as unknown as {
+    ctx: EngineContext;
+    controller: EngineController;
+  };
 
 jest.setTimeout(120_000);
 
@@ -65,6 +81,142 @@ describe("E2EE engine: sync paths", () => {
       texts(bob.primary.engine.getMessages(g)).includes("polled")
     );
     bob.primary.engine.dispose();
+  });
+
+  it("never names the open conversation in its fast poll (D175)", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(
+      world,
+      "bob",
+      { polling: true },
+      { noWake: true }
+    );
+    const g = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    const other = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "group",
+      name: "Other",
+    });
+    try {
+      await waitFor(
+        () =>
+          bob.primary.engine.getConversation(g)?.status === "active" &&
+          bob.primary.engine.getConversation(other)?.status === "active"
+      );
+      await bob.primary.engine.idle();
+      const bobGets = () =>
+        world.ds.state.requests.filter(
+          (r) => r.profileId === "bob" && r.method === "GET"
+        );
+      const start = bobGets().length;
+      bob.primary.engine.setOpenConversation(g);
+      const listings = () =>
+        bobGets()
+          .slice(start)
+          .filter((r) => /^e2ee\/devices\/0x[0-9a-f]+\/groups$/.test(r.path))
+          .length;
+      // Several fast polls while nothing is new: only the device's group
+      // listing, never the open conversation's log or record.
+      await waitFor(() => listings() >= 3);
+      const named = (handle: string) =>
+        bobGets()
+          .slice(start)
+          .filter((r) => r.path.startsWith(`e2ee/groups/${handle}`));
+      expect(named(g)).toEqual([]);
+      // A new item in another chat is fetched for that chat only.
+      await alice.primary.engine.send(other, { text: "elsewhere" });
+      await waitFor(() =>
+        texts(bob.primary.engine.getMessages(other)).includes("elsewhere")
+      );
+      expect(named(other).length).toBeGreaterThan(0);
+      expect(named(g)).toEqual([]);
+      // The open chat is fetched once it has something new.
+      await alice.primary.engine.send(g, { text: "here" });
+      await waitFor(() =>
+        texts(bob.primary.engine.getMessages(g)).includes("here")
+      );
+    } finally {
+      bob.primary.engine.dispose();
+    }
+  });
+
+  it("flushes a waiting send on the next changed-groups pass, whichever chat is open", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob", {}, { noWake: true });
+    const opened = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    const other = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "group",
+      name: "Other",
+    });
+    await settle(world);
+    const { ctx, controller } = internals(bob.primary);
+    // A send left waiting in the outbox, as after a failed or delayed try.
+    await queueMessage(ctx, other, { text: "waiting" });
+    expect(ctx.store.groups.get(other)?.outbox.size).toBe(1);
+
+    const start = world.ds.state.requests.length;
+    const bobRequests = () =>
+      world.ds.state.requests.slice(start).filter((r) => r.profileId === "bob");
+    bob.primary.engine.setOpenConversation(opened);
+    await controller.syncChanged();
+    await bob.primary.engine.idle();
+    // The waiting send went out; nothing named the chat that was opened.
+    expect(ctx.store.groups.get(other)?.outbox.size).toBe(0);
+    expect(
+      bobRequests().some(
+        (r) => r.method === "POST" && r.path === `e2ee/groups/${other}/messages`
+      )
+    ).toBe(true);
+    expect(
+      bobRequests().filter((r) => r.path.startsWith(`e2ee/groups/${opened}`))
+    ).toEqual([]);
+    await alice.primary.engine.sync();
+    expect(texts(alice.primary.engine.getMessages(other))).toContain("waiting");
+    bob.primary.engine.dispose();
+  });
+
+  it("keeps listedThrough in memory only, so a reload catches up afresh", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    const g = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await settle(world);
+    // The commit that added Bob lies outside his delivery window, so his
+    // cursor stays behind the group's last_seq once he has caught up.
+    const record = (await bob.primary.storage.listGroups("bob")).find(
+      (item) => item.g === g
+    );
+    if (!record) throw new Error("no stored group");
+    expect(record).not.toHaveProperty("listedThrough");
+    expect(newRuntime(record).listedThrough).toBeUndefined();
+
+    stopDevice(world, bob.primary);
+    const start = world.ds.state.requests.length;
+    const restarted = await startDevice(world, "bob", bob.account, {
+      storage: bob.primary.storage,
+      enroll: false,
+    });
+    await restarted.engine.sync();
+    await restarted.engine.idle();
+    const fetches = world.ds.state.requests
+      .slice(start)
+      .filter(
+        (r) => r.profileId === "bob" && r.path === `e2ee/groups/${g}/log`
+      );
+    expect(fetches.length).toBeGreaterThan(0);
+    restarted.engine.dispose();
   });
 
   it("polls an opened conversation every 5 s even after a local lookup-resume event", async () => {
