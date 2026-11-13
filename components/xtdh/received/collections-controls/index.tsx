@@ -59,7 +59,12 @@ export function XtdhCollectionsControls({
       </div>
       <div className="tw-no-scrollbar tw-w-full tw-overflow-x-auto sm:tw-w-auto">
         <div className="tw-hidden lg:tw-block">
-          <CommonTabs {...sortProps} />
+          <CommonTabs
+            {...sortProps}
+            variant="connected"
+            connectedSize="sm"
+            connectedTypography="body"
+          />
         </div>
         <div className="lg:tw-hidden">
           <CommonDropdown {...sortProps} />

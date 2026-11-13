@@ -220,7 +220,10 @@ export const ArtistWinningArtworksContent: React.FC<
 
   if (isLoading) {
     return (
-      <div className="tw-flex tw-h-96 tw-items-center tw-justify-center">
+      <div
+        data-artist-preview-loading="true"
+        className="tw-flex tw-h-[var(--artist-preview-panel-height,24rem)] tw-min-h-24 tw-items-center tw-justify-center"
+      >
         <div className="tw-flex tw-flex-col tw-items-center tw-gap-4">
           <div className="tw-h-8 tw-w-8 tw-animate-spin tw-rounded-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-400"></div>
           <span className="tw-animate-fade-in-out tw-text-sm tw-text-iron-400">

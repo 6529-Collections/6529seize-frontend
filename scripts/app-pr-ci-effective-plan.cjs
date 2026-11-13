@@ -105,6 +105,10 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const playwrightProfileDialogs = files.some(
     (file) =>
+      file.startsWith("components/user/identity/getting-started/") ||
+      file ===
+        "components/brain/my-stream/tabs/MainStageNominationPopover.tsx" ||
+      file === "i18n/messages/identityGettingStarted.en-US.json" ||
       file.startsWith("components/user/rep/") ||
       file.startsWith("components/user/user-page-header/about/") ||
       file === "components/user/user-page-header/UserPageHeaderClient.tsx" ||

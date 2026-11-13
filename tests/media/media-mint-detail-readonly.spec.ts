@@ -1551,6 +1551,18 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await expect(
       page.getByRole("tab", { name: "Card Activity" })
     ).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
+      "font-size",
+      "12px"
+    );
+    await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
+      "border-radius",
+      "9999px"
+    );
+    await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
+      "height",
+      "32px"
+    );
     await expect(page.getByRole("tab", { name: "Timeline" })).toBeVisible();
     await expect(
       page.getByRole("region", { name: "The Memes card activity" })
@@ -1653,6 +1665,14 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     ).toHaveAttribute("href", "/meme-lab?locale=de-DE");
     await expectNavigation(page, "Meme Lab page sections");
     await expectNavigation(page, "Meme Lab history sections");
+    await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
+      "font-size",
+      "14px"
+    );
+    await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
+      "height",
+      "32px"
+    );
     await expect(page.getByRole("button", { name: "History" })).toHaveAttribute(
       "aria-pressed",
       "true"

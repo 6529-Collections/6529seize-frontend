@@ -510,6 +510,8 @@ function PaginatedTable({
       <div className="rep-category-sort-row tw-flex tw-flex-wrap tw-justify-end tw-gap-3">
         <div className="rep-category-sort tw-min-w-0 tw-max-w-full">
           <CommonTabs<GlobalRepCategorySort>
+            variant="connected"
+            connectedSize="sm"
             items={SORTS}
             activeItem={effectiveSort}
             filterLabel="Sort category rows"
@@ -631,6 +633,8 @@ export default function GlobalRepCategoryDetail({
         <div className="rep-category-scope-row tw-flex tw-items-center tw-justify-between tw-gap-3">
           <div className="rep-category-scope tw-min-w-0 tw-max-w-full">
             <CommonTabs<RepCategoryScope>
+              variant="connected"
+              connectedSize="sm"
               items={SCOPES}
               activeItem={activeScope}
               filterLabel="REP category scope"
