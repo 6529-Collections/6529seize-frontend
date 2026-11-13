@@ -185,10 +185,11 @@ export class EngineController {
   }
 
   /**
-   * Catches up only the groups the server lists as having new items. The
-   * open conversation's fast poll and its catch-up on open use this, so
-   * their requests are the same whichever chat is on screen and never name
-   * it: the server already knows which groups gained items (D175, P60 §1).
+   * Catches up only the groups the server lists as having new items, and
+   * flushes every group with sends still waiting. The open conversation's
+   * fast poll and its catch-up on open use this, so their requests are the
+   * same whichever chat is on screen and never name it: the server already
+   * knows which groups gained items (D175, P60 §1).
    */
   async syncChanged(): Promise<void> {
     if (!this.isReady()) {
@@ -204,17 +205,31 @@ export class EngineController {
         return isActive(runtime) && isBehind(runtime, known);
       })
       .map(([g]) => g);
-    await this.syncInOrder(behind);
+    await this.inOrder(behind, (g) => this.syncGroup(g));
+    // Sends still waiting from an earlier failed or delayed attempt go out
+    // on this pass too, in every group, whichever chat is open: a send is
+    // never tied to a chat being opened. (Catching up flushes those above.)
+    const caughtUp = new Set(behind);
+    const pending = [...this.ctx.store.groups]
+      .filter(
+        ([g, runtime]) =>
+          !caughtUp.has(g) && isActive(runtime) && runtime.outbox.size > 0
+      )
+      .map(([g]) => g);
+    await this.inOrder(pending, (g) => this.flush(g));
   }
 
   /**
-   * Catches up groups one after another, as the full pass does: every
-   * catch-up runs in the engine's serial queue anyway, and fetching them in
+   * Runs a group task one group after another, as the full pass does: every
+   * step runs in the engine's serial queue anyway, and running them in
    * parallel would only burst requests against the per-device rate limits.
    */
-  private syncInOrder(groups: readonly string[]): Promise<void> {
+  private inOrder(
+    groups: readonly string[],
+    step: (g: string) => Promise<unknown>
+  ): Promise<void> {
     return groups.reduce<Promise<void>>(
-      (previous, g) => previous.then(() => this.guard(this.syncGroup(g))),
+      (previous, g) => previous.then(() => this.guard(step(g))),
       Promise.resolve()
     );
   }

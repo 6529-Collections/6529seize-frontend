@@ -4,8 +4,13 @@
  * Integration: real OpenMLS WASM + fake delivery service. WebSocket hints,
  * polling fallback, stale-epoch re-encryption, roster repair and snapshots.
  */
-import { POLL_OPEN_MS } from "@/lib/e2ee/engine/controller";
+import type { EngineContext } from "@/lib/e2ee/engine/context";
+import {
+  type EngineController,
+  POLL_OPEN_MS,
+} from "@/lib/e2ee/engine/controller";
 import { newRuntime } from "@/lib/e2ee/engine/groups";
+import { queueMessage } from "@/lib/e2ee/engine/send";
 import {
   addUser,
   createWorld,
@@ -14,7 +19,15 @@ import {
   startDevice,
   stopDevice,
   texts,
+  type TestDevice,
 } from "./support/harness";
+
+/** Engine internals, to stage a send left waiting in the outbox. */
+const internals = (device: TestDevice) =>
+  device.engine as unknown as {
+    ctx: EngineContext;
+    controller: EngineController;
+  };
 
 jest.setTimeout(120_000);
 
@@ -129,6 +142,46 @@ describe("E2EE engine: sync paths", () => {
     } finally {
       bob.primary.engine.dispose();
     }
+  });
+
+  it("flushes a waiting send on the next changed-groups pass, whichever chat is open", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob", {}, { noWake: true });
+    const opened = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    const other = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "group",
+      name: "Other",
+    });
+    await settle(world);
+    const { ctx, controller } = internals(bob.primary);
+    // A send left waiting in the outbox, as after a failed or delayed try.
+    await queueMessage(ctx, other, { text: "waiting" });
+    expect(ctx.store.groups.get(other)?.outbox.size).toBe(1);
+
+    const start = world.ds.state.requests.length;
+    const bobRequests = () =>
+      world.ds.state.requests.slice(start).filter((r) => r.profileId === "bob");
+    bob.primary.engine.setOpenConversation(opened);
+    await controller.syncChanged();
+    await bob.primary.engine.idle();
+    // The waiting send went out; nothing named the chat that was opened.
+    expect(ctx.store.groups.get(other)?.outbox.size).toBe(0);
+    expect(
+      bobRequests().some(
+        (r) => r.method === "POST" && r.path === `e2ee/groups/${other}/messages`
+      )
+    ).toBe(true);
+    expect(
+      bobRequests().filter((r) => r.path.startsWith(`e2ee/groups/${opened}`))
+    ).toEqual([]);
+    await alice.primary.engine.sync();
+    expect(texts(alice.primary.engine.getMessages(other))).toContain("waiting");
+    bob.primary.engine.dispose();
   });
 
   it("keeps listedThrough in memory only, so a reload catches up afresh", async () => {
