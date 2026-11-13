@@ -517,10 +517,13 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const pinnedList = usePinnedSidebarList(
     isPinnedCollection,
     navigation.scrollKey,
-    listContainerRef,
-    virtualizedRows,
-    getSidebarRowHeight,
-    (row) => renderWaveRow(row, !hidePin, virtualizedParentsWithVisibleSubwaves)
+    {
+      listRef: listContainerRef,
+      rows: virtualizedRows,
+      getRowHeight: getSidebarRowHeight,
+      renderRow: (row) =>
+        renderWaveRow(row, !hidePin, virtualizedParentsWithVisibleSubwaves),
+    }
   );
 
   return (

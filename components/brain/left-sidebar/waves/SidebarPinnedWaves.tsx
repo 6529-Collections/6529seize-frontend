@@ -320,22 +320,11 @@ function SidebarPinnedWaves({
 export function usePinnedSidebarList(
   showPins: boolean,
   profileKey: string,
-  listRef: SidebarPinnedWavesProps["listRef"],
-  rows: SidebarPinnedWavesProps["rows"],
-  getRowHeight: SidebarPinnedWavesProps["getRowHeight"],
-  renderRow: SidebarPinnedWavesProps["renderRow"]
+  props: SidebarPinnedWavesProps
 ) {
   const { waves } = useMyStream();
-  if (!showPins || (rows.length === 0 && !waves.hasPinnedWavesError)) {
+  if (!showPins || (props.rows.length === 0 && !waves.hasPinnedWavesError)) {
     return null;
   }
-  return (
-    <SidebarPinnedWaves
-      key={profileKey}
-      listRef={listRef}
-      rows={rows}
-      getRowHeight={getRowHeight}
-      renderRow={renderRow}
-    />
-  );
+  return <SidebarPinnedWaves key={profileKey} {...props} />;
 }
