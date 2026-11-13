@@ -2185,7 +2185,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       })
     ).toBeVisible();
     await expect(
-      feedNavigation.getByRole("link", { name: "Waves" })
+      feedNavigation.getByRole("link", { name: "Waves", exact: true })
     ).toBeVisible();
   });
 
