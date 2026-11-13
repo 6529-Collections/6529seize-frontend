@@ -19,15 +19,14 @@ Use this area to create:
   `/messages/{waveId}`.
 - Use `/waves?create=wave` as the direct web link for creating a Wave.
 - Desktop wave-create controls are available on:
-  - `/waves` and `/waves/{waveId}` Waves panel (`Create wave`; plus icon when collapsed)
+  - `/waves` and `/waves/{waveId}` Waves panel (`Create wave` with a plus icon when expanded; plus icon only when collapsed)
   - `/waves` empty-content placeholder (`Create Wave`)
 - Desktop `/messages` routes support wave-create mode by URL only
   (`?create=wave`).
-- Desktop direct-message mode (`create=dm`) is supported on `/messages` and
-  `/messages/{waveId}`.
-- App create routes:
-  - wave: `/waves/create`
-  - direct message: `/messages/create`
+- The unified message composer opens at `/messages/new` on web and in the app.
+- Builds without encrypted chats use `create=dm` on web and `/messages/create`
+  in the app.
+- The app uses `/waves/create` for waves.
 - Success routes:
   - wave: `/waves/{waveId}`
   - direct message: `/messages/{waveId}`

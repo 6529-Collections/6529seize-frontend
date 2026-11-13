@@ -13,8 +13,8 @@ wallets count together.
 - `/collect`: opens the set planner, with **Lowest listings** and **TDH** tools.
 - `/collect/orders`: inspect trades, potential offers and receipts, and recover
   transactions.
-- The iOS app shows collection browsing and existing orders. The Collect
-  planner and purchase actions are available on the web and Android.
+- The Collect planner and **Manage orders** are available on the web and Android.
+  In the iOS app, direct Orders links open The Memes collection.
 - `/the-memes`, `/meme-lab`, `/6529-gradient` and `/nextgen/collection/pebbles`: browse artwork
   and open individual cards.
 
@@ -26,7 +26,7 @@ opens the full Memes set when no season is selected. Gradients opens the full
 Gradients set; Pebbles opens its trait-set planner. Collected and Pebbles Trait
 Sets also link to relevant collecting goals.
 
-In the native app, the header Back button returns from Collect or Manage orders
+In the Android app, the header Back button returns from Collect or Manage orders
 to the page you came from, keeping its URL filters. Returning to a
 [profile's Collected tab](../profiles/tabs/feature-collected-tab.md) through
 its collecting actions also restores focus and scroll to that action.

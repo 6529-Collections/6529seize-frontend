@@ -40,7 +40,7 @@ describe("CommonTabs", () => {
     }
   );
 
-  it.each(["default", "filter", "sub-view"] as const)(
+  it.each(["default", "filter", "sub-view", "connected"] as const)(
     "skips disabled tabs during arrow-key navigation (%s)",
     (variant) => {
       const setSelected = jest.fn();

@@ -17,6 +17,7 @@ import {
   getRangeLabel,
   toISO,
 } from "../meme-calendar.helpers";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import {
   getDateRangeLabel,
   getDivisionTitle,
@@ -43,6 +44,7 @@ export function SeasonView({
   publishedMemeIds,
   publishedMemesStatus,
 }: SeasonViewProps) {
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const seasonStart = getSeasonStartDate(seasonIndex);
 
   const months: Date[] = isSznOneIndex(seasonIndex)
@@ -70,6 +72,7 @@ export function SeasonView({
           onSelectDay={onSelectDay}
           autoOpenYmd={autoOpenYmd}
           displayTz={displayTz}
+          includeMintUrl={!hideNftPurchasing}
           timeZone={timeZone}
           locale={locale}
           publishedMemeIds={publishedMemeIds}

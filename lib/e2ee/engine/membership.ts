@@ -7,7 +7,7 @@ import {
 import { asE2eeApiError } from "../api-errors";
 import type { ApiE2eePolicyStatus } from "../api-types";
 import { randomHex } from "../bytes";
-import type { E2eeEligibility } from "../types";
+import type { E2eeEligibility, E2eeEngine } from "../types";
 import type { GroupMetadata } from "../wasm-types";
 import {
   claimedDevices,
@@ -169,6 +169,11 @@ async function commitAdds(
   return null;
 }
 
+/**
+ * This profile's other usable devices, claimed with a new chat. The claim
+ * alone never adds one: `trustedClaim` keeps only own devices signed by an
+ * own wallet or added with "Add device" (engine/trust.ts).
+ */
 async function ownSiblingDevices(ctx: EngineContext): Promise<string[]> {
   const own = ownDeviceKey(ctx);
   const out: string[] = [];
@@ -297,7 +302,7 @@ function creationMetadata(
 async function claimForCreation(
   ctx: EngineContext,
   targets: string[],
-  kind: GroupMetadata["kind"]
+  requireAllRecipients: boolean
 ): Promise<ClaimedPackage[]> {
   const siblings = await ownSiblingDevices(ctx);
   const claim = await trustedClaim(
@@ -313,7 +318,7 @@ async function claimForCreation(
   const refused = statuses.find((status) => status !== "OK");
   const allRefused =
     statuses.length > 0 && statuses.every((status) => status !== "OK");
-  if (refused && (kind === "dm" || allRefused)) {
+  if (refused && (requireAllRecipients || allRefused)) {
     throw new E2eeError(policyCode(refused));
   }
   return claim.packages;
@@ -326,10 +331,8 @@ async function claimForCreation(
  */
 export async function createConversation(
   ctx: EngineContext,
-  input: {
-    profileIds: string[];
+  input: Omit<Parameters<E2eeEngine["createConversation"]>[0], "kind"> & {
     kind: GroupMetadata["kind"];
-    name?: string | null;
   },
   onDelayed: (g: string) => void,
   /** The superseded conversation the new one continues (D172). */
@@ -351,7 +354,11 @@ export async function createConversation(
   }
   const metadata = creationMetadata(ctx, input, peer);
   const g = metadata.g;
-  const packages = await claimForCreation(ctx, targets, input.kind);
+  const packages = await claimForCreation(
+    ctx,
+    targets,
+    input.kind === "dm" || input.requireAllRecipients === true
+  );
   const runtime = await createLocalGroup(ctx, metadata, predecessorG);
   const failure = await commitAdds(ctx, g, packages, () => {
     onDelayed(g);

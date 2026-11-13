@@ -24,6 +24,17 @@ const mockWaveDropContent = jest.fn();
 const mockWaveDropHeader = jest.fn();
 const mockMutate = jest.fn();
 let mockEditMentionedGroups: ApiDropGroupMention[] = [];
+// Placement only: this browser's own check is covered in
+// dropSignatureVerdicts.test.tsx, so every seal here reads as verified.
+const mockUseDropSealStates = jest.fn(
+  (drops: readonly unknown[], _active: boolean) => drops.map(() => "verified")
+);
+jest.mock("@/components/waves/drops/signature/dropSignatureVerdicts", () => ({
+  useDropSealStates: (drops: readonly unknown[], active: boolean) =>
+    mockUseDropSealStates(drops, active),
+  readSealState: () => "verified",
+}));
+
 jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => {
   mockWaveDropActions(props);
   return <div data-testid="actions" />;
@@ -782,6 +793,11 @@ describe("WaveDrop", () => {
         { name: "Signed by its author" }
       )
     ).toBeInTheDocument();
+    // The row's own drop is what this browser checks for that seal.
+    expect(mockUseDropSealStates).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "current-grouped" })],
+      true
+    );
     unmount();
 
     renderGrouped(false);

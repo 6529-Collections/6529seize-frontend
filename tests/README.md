@@ -56,6 +56,19 @@ browser tests for distinct rendering or navigation risks according to
 [AGENTS.md](../AGENTS.md#test-layer-selection), and register real browser packs
 in `tests/packs.manifest.cjs`.
 
+The session recovery sandbox also checks the Join 6529 / Validator slot using
+synthetic stored sessions on desktop and mobile. It holds identity restoration
+to verify hidden actions and stable neighboring rows, then checks newcomers,
+profileless wallets, members, failed identity lookup/retry, steady hover backgrounds,
+keyboard focus, direct navigation, and active state.
+App PR CI selects this registered pack through the critical-shell lane for
+membership-navigation source changes.
+
+The deployed read-only search pack also checks that newcomer Pages searches
+exclude Validator after results settle and still navigate through Join 6529.
+Member search results are covered by the focused search unit tests, alongside
+the member navigation scenarios in the session recovery sandbox.
+
 ## Pack registry
 
 The reaction sandbox covers live count and profile-list updates, desktop tooltip
@@ -218,6 +231,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:edit-drop-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Drop edit sandbox against the local mock API.                                                         |
 | `test:e2e:native-competition-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Native competition context, parallel budgets and navigation against the local mock API.               |
 | `test:e2e:submission-artwork-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Submission artwork loading, GIF animation and HD controls in an isolated media sandbox.               |
+| `test:e2e:image-viewer-layout-sandbox`              | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Image viewer background geometry, focus restoration and gallery navigation in Chromium and WebKit.    |
 | `test:e2e:signature-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Signed participation sandbox that fails closed unsigned.                                              |
 | `test:e2e:session-recovery-sandbox`                 | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Expired session cold-start and foreground recovery against the local mock API.                        |
 | `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                                                                 |
@@ -342,7 +356,16 @@ Opt-in stateful staging packs:
   image popup dismissal, downloads and focus return, a group with a
   third user and a revoked second device that can no longer read new messages.
   It also checks sender profile links and levels, plus DM header profile
-  links. Its privacy checks ensure no request URL, body or sent WebSocket
+  links. Its Markdown comparison posts identical formatting, lists, code, tables
+  in ordinary and encrypted chats, captures both at desktop and phone widths,
+  and checks private footnote navigation and that private Markdown URLs cause
+  no automatic requests.
+  Ordinary chat uses a separate throwaway session so public traffic stays out
+  of the encrypted users' lifetime privacy evidence.
+  The same check covers formatted encrypted notification previews in the
+  desktop overview and on the notifications page, including fenced code and
+  bounded previews at desktop and phone widths.
+  Its privacy checks ensure no request URL, body or sent WebSocket
   frame contains any plaintext (raw, hex
   or base64 at any alignment), that the MLS WebAssembly module loads under the
   served CSP (`'wasm-unsafe-eval'` without `'unsafe-eval'`) and that the
@@ -410,10 +433,17 @@ false` because CI dev servers always start cold.
 - When the critical-shell check is selected, it runs as three parallel jobs.
   One job runs both route-shell halves and `test:e2e:session-recovery-sandbox`.
   The other two run `test:e2e:profile-following-sandbox` with Playwright
-  `--shard=1/2` and `--shard=2/2`. With the four projects in config order,
-  shard 1 runs desktop and mobile web, and shard 2 runs the Capacitor iOS and
-  Android simulators. As one serial job the pack reached the 30-minute limit,
-  and a single retry could cancel it.
+  `--shard=1/2` and `--shard=2/2`. Playwright splits the ordered test list by
+  count, not by project. Today each of the four projects has the same number
+  of tests, so shard 1 runs desktop and mobile web, and shard 2 runs the
+  Capacitor iOS and Android simulators. If project counts diverge, a shard can
+  straddle projects, but every test still runs exactly once. As one serial job
+  the pack reached the 30-minute limit, and a single retry could cancel it.
+- `test:e2e:native-competition-sandbox` runs as four Playwright shards
+  (`--shard=N/4`) in parallel jobs. With two shards, each job took 24–28
+  minutes against its 30-minute limit. The pack's desktop and mobile halves
+  are each dominated by `native-competition-sandbox.spec.ts`, so four
+  count-based shards come out within a few minutes of each other.
 - Browser matrix jobs do not cancel their siblings on failure, preserving each
   job's results. All selected jobs must still pass `Installed app checks`.
 - Museum selection: `scripts/museum-release-selection.cjs` maps each changed

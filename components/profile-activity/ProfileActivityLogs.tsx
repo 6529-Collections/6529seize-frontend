@@ -179,7 +179,8 @@ export default function ProfileActivityLogs({
                   activeItem={targetType}
                   filterLabel="Filter direction"
                   setSelected={onTargetType}
-                  size="sm"
+                  variant="connected"
+                  connectedSize="sm"
                 />
               </div>
             )}
@@ -204,7 +205,8 @@ export default function ProfileActivityLogs({
                   activeItem={matter}
                   filterLabel="Filter matter"
                   setSelected={onMatterChange}
-                  size="sm"
+                  variant="connected"
+                  connectedSize="sm"
                 />
               </div>
               {initialParams.handleOrWallet && (
@@ -214,7 +216,8 @@ export default function ProfileActivityLogs({
                     activeItem={targetType}
                     filterLabel="Filter direction"
                     setSelected={onTargetType}
-                    size="sm"
+                    variant="connected"
+                    connectedSize="sm"
                   />
                 </div>
               )}

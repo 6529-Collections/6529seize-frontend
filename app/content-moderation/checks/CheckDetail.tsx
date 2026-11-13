@@ -12,7 +12,7 @@ import { formatDate, formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
   checkButtonClass,
-  checkControlClass,
+  checkSelectClass,
   checkValueLabel,
 } from "./checks.helpers";
 import CheckEvidence, { InertEvidence } from "./CheckEvidence";
@@ -207,7 +207,7 @@ export default function CheckDetail({
           <label className="tw-mt-5 tw-block tw-space-y-2 tw-text-sm tw-text-iron-300 lg:tw-hidden">
             <span>{t(locale, "checks.sections")}</span>
             <select
-              className={checkControlClass}
+              className={checkSelectClass}
               value={section}
               onChange={(event) => setSection(event.target.value as Section)}
               aria-controls={`check-section-${section}`}

@@ -2,6 +2,8 @@
  * @jest-environment node
  */
 
+import type { NextRequest } from "next/server";
+
 const nextResponseJson = jest.fn(
   (body: unknown, init?: { status?: number | undefined }) => ({
     status: init?.status ?? 200,
@@ -39,8 +41,9 @@ describe("github-preview API route", () => {
     globalThis.fetch = originalFetch;
   });
 
-  const requestFor = (url: string, refresh = false) =>
+  const requestFor = (url: string, refresh = false, clientIp?: string) =>
     ({
+      headers: new Headers(clientIp ? { "x-forwarded-for": clientIp } : {}),
       nextUrl: new URL(
         `https://app.local/api/github-preview?url=${encodeURIComponent(url)}${
           refresh ? "&refresh=1" : ""
@@ -48,10 +51,15 @@ describe("github-preview API route", () => {
       ),
     }) as any;
 
-  const batchRequestFor = (urls: readonly unknown[]) =>
-    ({
-      json: async () => ({ urls }),
-    }) as unknown as Request;
+  const rawBatchRequestFor = (body: string, clientIp?: string) =>
+    new Request("https://app.local/api/github-preview", {
+      method: "POST",
+      headers: clientIp ? { "x-forwarded-for": clientIp } : {},
+      body,
+    }) as unknown as NextRequest;
+
+  const batchRequestFor = (urls: readonly unknown[], clientIp?: string) =>
+    rawBatchRequestFor(JSON.stringify({ urls }), clientIp);
 
   const jsonResponse = (body: unknown, init?: ResponseInit) =>
     new Response(JSON.stringify(body), {
@@ -276,7 +284,9 @@ describe("github-preview API route", () => {
     const constructorResponse = await GET(
       requestFor("https://github.com/o/r/constructor")
     );
-    const protoResponse = await GET(requestFor("https://github.com/o/r/__proto__"));
+    const protoResponse = await GET(
+      requestFor("https://github.com/o/r/__proto__")
+    );
 
     expect(constructorResponse.status).toBe(400);
     await expect(constructorResponse.json()).resolves.toMatchObject({
@@ -290,9 +300,8 @@ describe("github-preview API route", () => {
   });
 
   it("rejects unsupported GitHub resource kinds when building cache keys", async () => {
-    const { getResourceCacheKey } = await import(
-      "../../../app/api/github-preview/service/resource"
-    );
+    const { getResourceCacheKey } =
+      await import("../../../app/api/github-preview/service/resource");
 
     expect(() =>
       getResourceCacheKey({
@@ -821,16 +830,236 @@ describe("github-preview API route", () => {
         })
       );
 
+    const now = jest.spyOn(Date, "now").mockReturnValue(1_000_000);
     const initial = await GET(requestFor(url));
     const cached = await GET(requestFor(url));
+    now.mockReturnValue(1_020_000);
     const refreshed = await GET(requestFor(url, true));
+    const afterRefresh = await GET(requestFor(url));
+    now.mockRestore();
 
     await expect(initial.json()).resolves.toMatchObject({ state: "open" });
     await expect(cached.json()).resolves.toMatchObject({ state: "open" });
     await expect(refreshed.json()).resolves.toMatchObject({
       state: "closed_completed",
     });
+    // The refreshed snapshot replaces the cached one.
+    await expect(afterRefresh.json()).resolves.toMatchObject({
+      state: "closed_completed",
+    });
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  const mockKeptIssueThen = (url: string, failure: () => Promise<Response>) =>
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse({
+          html_url: url,
+          title: "Kept issue",
+          state: "open",
+          state_reason: null,
+        })
+      )
+      .mockImplementationOnce(failure);
+
+  it.each([
+    ["a network error", () => Promise.reject(new TypeError("fetch failed"))],
+    [
+      "a GitHub server error",
+      () => Promise.resolve(jsonResponse({}, { status: 503 })),
+    ],
+    ["rate limiting", () => Promise.resolve(jsonResponse({}, { status: 429 }))],
+  ])(
+    "answers a refresh that fails with %s with the retained snapshot",
+    async (_label, failure) => {
+      const url = "https://github.com/o/r/issues/14";
+      mockKeptIssueThen(url, failure);
+
+      const now = jest.spyOn(Date, "now").mockReturnValue(3_000_000);
+      await GET(requestFor(url));
+      now.mockReturnValue(3_030_000);
+      const refreshed = await GET(requestFor(url, true));
+      const afterFailure = await GET(requestFor(url));
+      now.mockRestore();
+
+      expect(refreshed.status).toBe(200);
+      await expect(refreshed.json()).resolves.toMatchObject({
+        title: "Kept issue",
+        state: "open",
+      });
+      await expect(afterFailure.json()).resolves.toMatchObject({
+        title: "Kept issue",
+        state: "open",
+      });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    }
+  );
+
+  it("answers a refresh that finds the issue gone with an error", async () => {
+    const url = "https://github.com/o/r/issues/16";
+    mockKeptIssueThen(url, () =>
+      Promise.resolve(jsonResponse({}, { status: 404 }))
+    );
+
+    const now = jest.spyOn(Date, "now").mockReturnValue(4_000_000);
+    await GET(requestFor(url));
+    now.mockReturnValue(4_030_000);
+    const refreshed = await GET(requestFor(url, true));
+    now.mockRestore();
+
+    expect(refreshed.status).toBe(400);
+  });
+
+  it("still answers 400 when a first load fails with no snapshot", async () => {
+    const url = "https://github.com/o/r/issues/15";
+    fetchMock.mockRejectedValueOnce(new TypeError("fetch failed"));
+
+    const response = await GET(requestFor(url, true));
+
+    expect(response.status).toBe(400);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("serves a recent snapshot to refresh requests instead of re-fetching", async () => {
+    const url = "https://github.com/o/r/issues/13";
+    fetchMock.mockImplementation(async () =>
+      jsonResponse({
+        html_url: url,
+        title: "Polled issue",
+        state: "open",
+        state_reason: null,
+      })
+    );
+
+    const now = jest.spyOn(Date, "now").mockReturnValue(2_000_000);
+    await GET(requestFor(url));
+    now.mockReturnValue(2_019_999);
+    for (let index = 0; index < 5; index += 1) {
+      const refreshed = await GET(requestFor(url, true));
+      await expect(refreshed.json()).resolves.toMatchObject({ state: "open" });
+    }
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    now.mockReturnValue(2_020_000);
+    await GET(requestFor(url, true));
+    await GET(requestFor(url, true));
+    now.mockRestore();
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    [
+      "an encoded slash in a file path",
+      "https://github.com/o/r/blob/main/a%2F..%2F..%2Fuser",
+    ],
+    [
+      "an encoded dot segment with a slash",
+      "https://github.com/o/r/blob/main/%2e%2e%2fsecret",
+    ],
+    [
+      "a backslash in a tree path",
+      "https://github.com/o/r/tree/main/src%5C..%5Cx",
+    ],
+    [
+      "an encoded slash in a commit ref",
+      "https://github.com/o/r/commit/..%2F..%2Fuser",
+    ],
+    [
+      "an encoded slash in a release tag",
+      "https://github.com/o/r/releases/tag/..%2F..%2Fuser",
+    ],
+    [
+      "an encoded slash in a workflow id",
+      "https://github.com/o/r/actions/workflows/..%2Fsecrets",
+    ],
+    ["an encoded slash in the owner", "https://github.com/o%2F..%2Fusers/r"],
+    [
+      "an encoded slash in the repository",
+      "https://github.com/o/r%2F..%2F..%2Fuser/issues/1",
+    ],
+  ])("rejects %s before fetching", async (_label, url) => {
+    const response = await GET(requestFor(url));
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toMatchObject({
+      error: "Only github.com repository URLs are supported.",
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("keeps ordinary encoded characters and slash-named release tags", async () => {
+    fetchMock
+      .mockResolvedValueOnce(
+        jsonResponse({
+          type: "file",
+          name: "my file.md",
+          path: "docs/my file.md",
+          size: 5,
+          encoding: "base64",
+          content: Buffer.from("hello").toString("base64"),
+        })
+      )
+      .mockResolvedValueOnce(
+        jsonResponse({
+          tag_name: "release/v1",
+          name: "Release v1",
+          draft: false,
+        })
+      );
+
+    const file = await GET(
+      requestFor("https://github.com/o/r/blob/main/docs/my%20file.md")
+    );
+    const release = await GET(
+      requestFor("https://github.com/o/r/releases/tag/release/v1")
+    );
+
+    expect(file.status).toBe(200);
+    expect(release.status).toBe(200);
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain(
+      "/repos/o/r/contents/docs/my%20file.md?ref=main"
+    );
+    expect(String(fetchMock.mock.calls[1]?.[0])).toContain(
+      "/repos/o/r/releases/tags/release%2Fv1"
+    );
+  });
+
+  it("rejects oversized and malformed batch bodies before fetching", async () => {
+    const oversized = await POST(
+      rawBatchRequestFor(
+        JSON.stringify({ urls: ["https://github.com/o/r".padEnd(17_000, "x")] })
+      )
+    );
+    const malformed = await POST(rawBatchRequestFor("{not json"));
+
+    expect(oversized.status).toBe(413);
+    expect(malformed.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("limits each client to its per-minute preview budget, counting batch URLs", async () => {
+    fetchMock.mockImplementation(async () =>
+      jsonResponse({ title: "Issue", state: "open", state_reason: null })
+    );
+    const urls = Array.from(
+      { length: 10 },
+      (_value, index) => `https://github.com/o/r/issues/${index + 100}`
+    );
+
+    for (let index = 0; index < 30; index += 1) {
+      const batch = await POST(batchRequestFor(urls, "8.8.4.40"));
+      expect(batch.status).toBe(200);
+    }
+    const limited = await GET(
+      requestFor("https://github.com/o/r/issues/100", false, "8.8.4.40")
+    );
+    const otherClient = await GET(
+      requestFor("https://github.com/o/r/issues/100", false, "8.8.4.41")
+    );
+
+    expect(limited.status).toBe(429);
+    expect(otherClient.status).toBe(200);
   });
 
   it("maps pull request state", async () => {

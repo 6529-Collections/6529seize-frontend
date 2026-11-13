@@ -50,8 +50,9 @@ when it is still available, ahead of the wave's latest remembered choice.
 
 ## Unread Chat Messages
 
-- On desktop and mobile web, `Chat` shows a blue unread-message badge, capped
-  at `99+`, using the same style as the Decisions count. Muted waves omit it.
+- On desktop and mobile web, `Chat` shows a quiet dark unread-message badge
+  inline with its label, capped at `99+`, using the same style as the Decisions
+  count. Muted waves omit it.
 - New messages remain unread while you use Leaderboard, Decisions, Settings,
   curations, or another section, including after returning to the browser tab.
 - While a non-chat section is selected, incoming chat messages do not add a
@@ -86,6 +87,10 @@ when it is still available, ahead of the wave's latest remembered choice.
 - In `Decisions`, the separate `+ Decision` action sits beside the
   collection filter pills and opens setup directly when you have creation
   permission. It is absent from other wave tabs.
+
+`+ Create` and `+ Decision` are borderless text actions with a dark hover
+surface. The selected tab retains its underline above a subtle row divider.
+A divider separates the wave identity and header actions from the main tab row.
 
 ## User Journey
 

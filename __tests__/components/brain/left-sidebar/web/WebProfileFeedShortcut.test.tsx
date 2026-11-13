@@ -26,15 +26,20 @@ describe("WebProfileFeedShortcut", () => {
     jest.clearAllMocks();
   });
 
-  it("keeps the desktop feed action selected", () => {
-    render(<WebProfileFeedShortcut basePath="/waves" isCollapsed={false} />);
+  it.each([false, true])(
+    "keeps the desktop feed action selected with isCollapsed=%s",
+    (isCollapsed) => {
+      render(
+        <WebProfileFeedShortcut basePath="/waves" isCollapsed={isCollapsed} />
+      );
 
-    const link = screen.getByRole("link", {
-      name: "Profile Waves Feed",
-    });
-    expect(link).toHaveAttribute("href", "/waves");
-    expect(link).toHaveAttribute("aria-current", "page");
-  });
+      const link = screen.getByRole("link", {
+        name: "Profile Waves Feed",
+      });
+      expect(link).toHaveAttribute("href", "/waves");
+      expect(link).toHaveAttribute("aria-current", "page");
+    }
+  );
 
   it("clears a selected wave from the desktop feed action while preserving modified clicks", () => {
     activeWaveId = "rare-pepe";

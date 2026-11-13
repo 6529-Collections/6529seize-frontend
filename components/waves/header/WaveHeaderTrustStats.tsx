@@ -142,7 +142,7 @@ export default function WaveHeaderTrustStats({
         WAVE_HEADER_TRUST_LOCALE,
         "waves.score.details.statsAriaLabel"
       )}
-      className={`tw-m-0 tw-grid tw-gap-x-[34px] tw-gap-y-[13px] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-px-[5px] tw-pt-[13px] ${
+      className={`tw-m-0 tw-grid tw-gap-x-2.5 tw-gap-y-[13px] tw-border-0 tw-px-0 tw-pt-[13px] min-[361px]:tw-gap-x-4 min-[361px]:tw-px-[5px] ${
         stats.length === 1 ? "tw-grid-cols-1" : "tw-grid-cols-2"
       }`}
     >
@@ -157,17 +157,17 @@ export default function WaveHeaderTrustStats({
           <div
             key={stat.id}
             aria-label={stat.ariaLabel}
-            className={`tw-flex tw-min-w-0 tw-flex-col tw-gap-y-[5px] ${
+            className={`tw-flex tw-min-w-0 tw-items-baseline tw-gap-x-1.5 ${
               fillsLastRow ? "tw-col-span-2" : ""
             }`}
           >
-            <dt className="tw-order-2 tw-truncate tw-text-[10px] tw-font-normal tw-leading-[13px] tw-tracking-[0.04em] tw-text-iron-500">
+            <dt className="tw-order-2 tw-shrink-0 tw-text-[13px] tw-font-normal tw-leading-5 tw-text-iron-500">
               {stat.label}
             </dt>
-            <dd className="tw-order-1 tw-m-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-[5px] tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50">
+            <dd className="tw-order-1 tw-m-0 tw-flex tw-min-w-0 tw-items-baseline tw-gap-x-[5px] tw-text-[13px] tw-font-medium tw-leading-5 tw-text-iron-50">
               <Icon
                 aria-hidden="true"
-                className={`tw-size-[13px] tw-flex-shrink-0 ${stat.iconClassName}`}
+                className={`tw-size-[13px] tw-flex-shrink-0 tw-self-center ${stat.iconClassName}`}
               />
               <span className="tw-truncate">{stat.value}</span>
             </dd>

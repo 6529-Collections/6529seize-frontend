@@ -124,6 +124,95 @@ describe("useNativeKeyboard", () => {
     expect(result.current.phase).toBe("visible");
   });
 
+  it("receives iOS keyboard events while accessory bar configuration is pending", async () => {
+    let finishAccessoryConfiguration: () => void = () => undefined;
+    const accessoryConfiguration = new Promise<void>((resolve) => {
+      finishAccessoryConfiguration = resolve;
+    });
+    mockSetAccessoryBarVisible.mockReturnValue(accessoryConfiguration);
+
+    const { result } = await renderNativeKeyboardHook();
+    await waitFor(() => {
+      expect(mockSetAccessoryBarVisible).toHaveBeenCalledTimes(1);
+    });
+
+    act(() => {
+      listeners["keyboardWillShow"]?.({ keyboardHeight: 388 });
+      listeners["keyboardDidShow"]?.({ keyboardHeight: 388 });
+    });
+
+    expect(result.current.isVisible).toBe(true);
+    expect(result.current.phase).toBe("visible");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        "--native-keyboard-inset-bottom"
+      )
+    ).toBe("388px");
+
+    await act(async () => {
+      finishAccessoryConfiguration();
+      await accessoryConfiguration;
+    });
+  });
+
+  it("reconnects listeners while an earlier accessory configuration is pending", async () => {
+    let finishAccessoryConfiguration: () => void = () => undefined;
+    const accessoryConfiguration = new Promise<void>((resolve) => {
+      finishAccessoryConfiguration = resolve;
+    });
+    mockSetAccessoryBarVisible.mockReturnValue(accessoryConfiguration);
+
+    const firstHook = await renderNativeKeyboardHook();
+    await waitFor(() => {
+      expect(mockSetAccessoryBarVisible).toHaveBeenCalledTimes(1);
+    });
+    firstHook.unmount();
+
+    const secondHook = renderHook(() => useNativeKeyboard());
+    await waitFor(() => {
+      expect(mockAddListener).toHaveBeenCalledTimes(8);
+    });
+    act(() => {
+      listeners["keyboardDidShow"]?.({ keyboardHeight: 388 });
+    });
+
+    expect(secondHook.result.current.isVisible).toBe(true);
+    expect(secondHook.result.current.keyboardHeight).toBe(388);
+
+    await act(async () => {
+      finishAccessoryConfiguration();
+      await accessoryConfiguration;
+    });
+  });
+
+  it("keeps iOS keyboard events active if accessory bar configuration fails", async () => {
+    const configurationError = new Error("Accessory bar configuration failed");
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    mockSetAccessoryBarVisible.mockRejectedValue(configurationError);
+
+    try {
+      const { result } = await renderNativeKeyboardHook();
+      await waitFor(() => {
+        expect(consoleError).toHaveBeenCalledWith(
+          "[Native Keyboard] Error setting iOS accessory bar visibility:",
+          configurationError
+        );
+      });
+
+      act(() => {
+        listeners["keyboardDidShow"]?.({ keyboardHeight: 388 });
+      });
+
+      expect(result.current.isVisible).toBe(true);
+      expect(result.current.keyboardHeight).toBe(388);
+      expect(result.current.phase).toBe("visible");
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   it("publishes only the keyboard inset not already removed by layout viewport resize", async () => {
     mockGetPlatform.mockReturnValue("android");
     const originalInnerHeight = globalThis.innerHeight;

@@ -1,6 +1,10 @@
 "use client";
 
 import CommonDropdownItemsWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsWrapper";
+import {
+  DROPDOWN_TRIGGER_CLASSES,
+  DROPDOWN_CHEVRON_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter } from "next/navigation";
@@ -51,15 +55,14 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
   };
 
   const triggerClassNames: Record<CollectionsDropdownVariant, string> = {
-    default:
-      "tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-py-3 tw-pl-3.5 tw-pr-10 tw-text-left tw-text-xs tw-font-semibold tw-text-iron-300 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-ring-iron-600 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 lg:tw-bg-iron-900",
+    default: `${DROPDOWN_TRIGGER_CLASSES} tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-py-3 tw-pl-3 tw-pr-9 tw-text-left tw-text-xs`,
     title:
       "tw-group tw-m-0 tw-inline-flex tw-min-w-0 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 tw-transition tw-duration-200 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 sm:tw-text-2xl md:tw-text-3xl",
     brand:
       "tw-group tw-m-0 tw-inline-flex tw-min-w-0 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-transition tw-duration-200 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400",
   };
   const iconClassNames: Record<CollectionsDropdownVariant, string> = {
-    default: "tw-h-5 tw-w-5",
+    default: DROPDOWN_CHEVRON_CLASSES,
     title:
       "tw-h-5 tw-w-5 tw-shrink-0 tw-text-iron-400 tw-transition-colors tw-duration-200 group-hover:tw-text-white md:tw-h-6 md:tw-w-6",
     brand:
@@ -103,7 +106,7 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
       {isDefaultVariant ? (
         <>
           {triggerContent}
-          <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 -tw-mr-1 tw-flex tw-items-center tw-pr-3.5">
+          <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-3 tw-flex tw-items-center">
             {chevron}
           </div>
         </>

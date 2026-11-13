@@ -48,6 +48,10 @@ pub fn supported_ciphersuite(code: u16) -> Result<Ciphersuite> {
 }
 /// Private-use GroupContext extension carrying the 3.5 metadata JSON.
 pub const METADATA_EXTENSION: u16 = 0xF529;
+/// Private-use extension type a leaf lists in its capabilities to say it
+/// supports self groups (read-state sync, D175, design P60). A self group
+/// requires it, so a device whose KeyPackage lacks it is never added.
+pub const SELF_SYNC_EXTENSION: u16 = 0xF52A;
 /// Exporter labels (contract 3.1).
 pub const LABEL_COMMIT_KEY: &str = "6529 commit key";
 pub const LABEL_ENTRY_WRAP: &str = "6529 entry wrap";
@@ -295,18 +299,31 @@ fn leaf_capabilities() -> Capabilities {
         .ciphersuites(SUPPORTED_CIPHERSUITES.to_vec())
         .extensions(vec![
             ExtensionType::Unknown(METADATA_EXTENSION),
+            ExtensionType::Unknown(SELF_SYNC_EXTENSION),
             ExtensionType::LastResort,
         ])
         .credentials(vec![CredentialType::Basic])
         .build()
 }
 
+/// Whether validated metadata bytes describe a self group.
+fn is_self_group(metadata: &[u8]) -> bool {
+    serde_json::from_slice::<Value>(metadata)
+        .ok()
+        .and_then(|meta| {
+            meta.get("kind")
+                .and_then(Value::as_str)
+                .map(|k| k == "self")
+        })
+        .unwrap_or(false)
+}
+
 fn group_context_extensions(metadata: &[u8]) -> Result<Extensions<GroupContext>> {
-    let required = RequiredCapabilitiesExtension::new(
-        &[ExtensionType::Unknown(METADATA_EXTENSION)],
-        &[],
-        &[CredentialType::Basic],
-    );
+    let mut extensions = vec![ExtensionType::Unknown(METADATA_EXTENSION)];
+    if is_self_group(metadata) {
+        extensions.push(ExtensionType::Unknown(SELF_SYNC_EXTENSION));
+    }
+    let required = RequiredCapabilitiesExtension::new(&extensions, &[], &[CredentialType::Basic]);
     Extensions::from_vec(vec![
         Extension::RequiredCapabilities(required),
         Extension::Unknown(METADATA_EXTENSION, UnknownExtension(metadata.to_vec())),
@@ -319,6 +336,29 @@ fn metadata_of(extensions: &Extensions<GroupContext>) -> Value {
         .unknown(METADATA_EXTENSION)
         .and_then(|ext| serde_json::from_slice::<Value>(&ext.0).ok())
         .unwrap_or(Value::Null)
+}
+
+fn supports_self_sync(capabilities: &Capabilities) -> bool {
+    capabilities
+        .extensions()
+        .contains(&ExtensionType::Unknown(SELF_SYNC_EXTENSION))
+}
+
+/// Facts about a KeyPackage the engine needs before claiming it into a
+/// group: its suite and whether it supports self groups (P60). The
+/// KeyPackage is validated (signature, lifetime, version) first.
+pub fn key_package_info(data: &[u8]) -> Result<String> {
+    let kp_in = KeyPackageIn::tls_deserialize_exact(data)
+        .map_err(|_| MlsError::new(Code::BadKeyPackage, "not a TLS KeyPackage"))?;
+    let provider = Provider::default();
+    let kp = kp_in
+        .validate(provider.crypto(), ProtocolVersion::Mls10)
+        .map_err(|e| MlsError::new(Code::BadKeyPackage, format!("{e:?}")))?;
+    Ok(json!({
+        "ciphersuite": u16::from(kp.ciphersuite()),
+        "self_sync": supports_self_sync(kp.leaf_node().capabilities()),
+    })
+    .to_string())
 }
 
 /// Validate the 3.5 metadata object and return its canonical bytes.
@@ -1028,6 +1068,10 @@ impl Device {
         let own_index = st.mls.own_leaf_index();
 
         // Adds: OpenMLS validates signatures, lifetime, version and suite.
+        let self_group = metadata_of(st.mls.extensions())
+            .get("kind")
+            .and_then(Value::as_str)
+            == Some("self");
         let mut key_packages = Vec::with_capacity(ops.add_key_packages.len());
         for b64 in &ops.add_key_packages {
             let bytes = codec::unb64(b64, "key package")?;
@@ -1044,6 +1088,13 @@ impl Device {
                 return Err(MlsError::new(
                     Code::BadKeyPackage,
                     "credential must be basic",
+                ));
+            }
+            // A self group admits only devices that support self groups.
+            if self_group && !supports_self_sync(kp.leaf_node().capabilities()) {
+                return Err(MlsError::new(
+                    Code::BadKeyPackage,
+                    "key package does not support self groups",
                 ));
             }
             key_packages.push(kp);

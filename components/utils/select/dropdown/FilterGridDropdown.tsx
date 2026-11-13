@@ -3,6 +3,10 @@
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useMemo, useRef, useState } from "react";
 import FilterGridDropdownItemsWrapper from "./FilterGridDropdownItemsWrapper";
+import {
+  DROPDOWN_CHEVRON_CLASSES,
+  DROPDOWN_TRIGGER_CLASSES,
+} from "./dropdownTriggerStyles";
 
 interface FilterGridDropdownItem<TValue extends string | number> {
   readonly value: TValue;
@@ -61,16 +65,12 @@ export default function FilterGridDropdown<TValue extends string | number>({
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
-          className={`${
-            disabled
-              ? "tw-text-iron-400 tw-opacity-50"
-              : "tw-text-iron-300 hover:tw-ring-iron-600"
-          } tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-py-3 tw-pl-3.5 tw-pr-10 tw-text-left tw-text-xs tw-font-semibold tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 lg:tw-bg-iron-900`}
+          className={`${DROPDOWN_TRIGGER_CLASSES} tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-py-3 tw-pl-3 tw-pr-9 tw-text-left tw-text-xs`}
         >
           {activeLabel}
-          <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 -tw-mr-1 tw-flex tw-items-center tw-pr-3.5">
+          <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-3 tw-flex tw-items-center">
             <ChevronDownIcon
-              className={`tw-h-5 tw-w-5 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${isOpen ? "tw-rotate-180" : ""}`}
+              className={`${DROPDOWN_CHEVRON_CLASSES} tw-transition-transform tw-duration-150 motion-reduce:tw-transition-none ${isOpen ? "tw-rotate-180" : ""}`}
               aria-hidden="true"
             />
           </div>

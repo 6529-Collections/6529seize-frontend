@@ -72,6 +72,12 @@ export interface WasmModule {
     paddedLen: number
   ): string;
   rosterDigest?(g: string, epoch: number, deviceKeysJson: string): string;
+  /**
+   * A validated KeyPackage's suite and whether it supports self groups
+   * (JSON `{ ciphersuite, self_sync }`, D175, P60). Absent in modules built
+   * before self groups.
+   */
+  keyPackageInfo?(data: Uint8Array): string;
   epochCommitment?(g: string, epoch: number, groupContextHash: string): string;
 }
 

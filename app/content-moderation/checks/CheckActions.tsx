@@ -20,7 +20,11 @@ import {
   clearPrivateModerationQueries,
 } from "@/services/content-moderation/content-moderation-query";
 import { CONTENT_MODERATOR_ACCESS_QUERY_KEY } from "@/hooks/content-moderation/useContentModeratorAccess";
-import { checkButtonClass, checkControlClass } from "./checks.helpers";
+import {
+  checkButtonClass,
+  checkControlClass,
+  checkSelectClass,
+} from "./checks.helpers";
 
 function moderationActionLabel(
   locale: SupportedLocale,
@@ -139,7 +143,7 @@ export default function CheckActions({
       <label className="tw-block tw-space-y-2 tw-text-sm tw-text-iron-300">
         <span>{t(locale, "checks.chooseAction")}</span>
         <select
-          className={checkControlClass}
+          className={checkSelectClass}
           value={action}
           required
           disabled={locked}

@@ -25,6 +25,7 @@ pub fn module_info() -> String {
         "ciphersuite": u16::from(device::CIPHERSUITE),
         "ciphersuites": device::SUPPORTED_CIPHERSUITES.map(u16::from),
         "metadata_extension": device::METADATA_EXTENSION,
+        "self_sync_extension": device::SELF_SYNC_EXTENSION,
         "state_format": "6529MLS1",
         "max_past_epochs": device::MAX_PAST_EPOCHS,
         "entry_buckets": codec::ENTRY_BUCKETS,

@@ -20,6 +20,7 @@ export default function MobileWrapperDialogHeader({
   titleRef,
   backLabel,
   closeLabel,
+  disabled = false,
 }: {
   readonly title: string | undefined;
   readonly variant?: "default" | "minimal" | undefined;
@@ -36,6 +37,7 @@ export default function MobileWrapperDialogHeader({
   readonly titleRef: Ref<HTMLElement>;
   readonly backLabel: string;
   readonly closeLabel: string;
+  readonly disabled?: boolean;
 }) {
   const hasHeaderDivider = showHeaderDivider ?? !!onBack;
 
@@ -56,7 +58,11 @@ export default function MobileWrapperDialogHeader({
       >
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
           {onBack && (
-            <MobileWrapperDialogBackButton onClick={onBack} label={backLabel} />
+            <MobileWrapperDialogBackButton
+              onClick={onBack}
+              label={backLabel}
+              disabled={disabled}
+            />
           )}
           <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3">
             {title && (
@@ -85,6 +91,7 @@ export default function MobileWrapperDialogHeader({
           <MobileWrapperDialogCloseButton
             onClick={onClose}
             label={closeLabel}
+            disabled={disabled}
             variant={variant}
             className={clsx(
               "tw-hidden md:tw-inline-flex",
@@ -96,6 +103,7 @@ export default function MobileWrapperDialogHeader({
           <MobileWrapperDialogCloseButton
             onClick={onClose}
             label={closeLabel}
+            disabled={disabled}
             variant={variant}
             className={clsx("tw-inline-flex", headerCloseButtonClassName)}
           />

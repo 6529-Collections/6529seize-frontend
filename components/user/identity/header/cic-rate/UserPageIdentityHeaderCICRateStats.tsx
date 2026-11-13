@@ -122,7 +122,7 @@ export default function UserPageIdentityHeaderCICRateStats({
             {item.label}
           </span>
           <span
-            className={`tw-ml-auto tw-whitespace-nowrap tw-text-xs tw-tabular-nums tw-font-medium ${item.valueColorClassName}`}>
+            className={`tw-ml-auto tw-whitespace-nowrap tw-text-xs tw-font-medium ${item.valueColorClassName}`}>
             {item.value}
           </span>
         </div>

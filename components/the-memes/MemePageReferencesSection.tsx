@@ -33,7 +33,7 @@ export default function MemePageReferencesSection({
           onClick={onToggle}
           aria-expanded={open}
           aria-controls={panelId}
-          className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-4 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-4 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-300 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 md:tw-text-base md:tw-text-iron-100"
         >
           {t(locale, "theMemes.detail.references.sectionTitle")}
           <ChevronDownIcon

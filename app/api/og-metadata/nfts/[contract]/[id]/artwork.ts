@@ -81,18 +81,21 @@ export const prepareNftArtworkImage = async (
   signal?: AbortSignal
 ): Promise<string> => {
   // This resolver always returns our image proxy. It validates public HTTPS
-  // sources; the proxy additionally guards DNS/redirects and normalizes to PNG.
-  const imageUrl = getNftArtworkImageUrl(model);
-  if (imageUrl === null) {
+  // sources; the proxy additionally guards DNS/redirects. Export stays
+  // lossless, so ask the proxy for PNG (its default for opaque stills is JPEG).
+  const proxyUrl = getNftArtworkImageUrl(model);
+  if (proxyUrl === null) {
     throw new Error("Artwork image is unavailable for export.");
   }
+  const imageUrl = new URL(proxyUrl);
+  imageUrl.searchParams.set("format", "png");
   const controller = new AbortController();
   const abort = () => controller.abort();
   signal?.addEventListener("abort", abort, { once: true });
   if (signal?.aborted) abort();
   const timeout = setTimeout(abort, FETCH_TIMEOUT_MS);
   try {
-    const response = await fetch(imageUrl, {
+    const response = await fetch(imageUrl.toString(), {
       signal: controller.signal,
       redirect: "error",
       headers: { Accept: "image/png" },

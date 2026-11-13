@@ -29,10 +29,10 @@ function MemeLabYourCardsTransferCard({
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-6 tw-gap-y-4 tw-px-4 tw-py-4 tw-@container">
           <div className="tw-flex tw-w-full tw-flex-none tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-3 @lg:tw-w-auto @lg:tw-justify-start">
             <div className={statClassName}>
-              <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
+              <span className="tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500 md:tw-text-xs md:tw-font-medium">
                 {isMobileDevice ? "Your Cards" : "Cards"}
               </span>
-              <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white">{`x${nftBalance}`}</span>
+              <span className="tw-whitespace-nowrap tw-text-sm tw-font-bold tw-text-white md:tw-font-semibold md:tw-text-iron-100">{`x${nftBalance}`}</span>
             </div>
           </div>
           {!isMobileDevice && (

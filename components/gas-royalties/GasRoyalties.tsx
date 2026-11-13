@@ -322,6 +322,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
             </h1>
             <div className="tw-w-fit tw-min-w-0 tw-max-w-full">
               <CommonTabs
+                variant="connected"
+                connectedSize="sm"
                 items={collectionFocusItems}
                 activeItem={props.focus}
                 setSelected={(focus) => {

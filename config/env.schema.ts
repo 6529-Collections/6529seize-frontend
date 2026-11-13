@@ -17,6 +17,7 @@ export const publicEnvSchema = z.object({
   NEXT_RUNTIME: z.string().optional(),
   VERSION: z.string().optional(),
   VERSION_BUILD_TIMESTAMP: z.string().optional(),
+  VERSION_RELEASE_ORDER: z.string().optional(),
   ASSETS_FROM_S3: z.enum(["true", "false"]).optional(),
 
   /**

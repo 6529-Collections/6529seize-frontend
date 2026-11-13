@@ -1,3 +1,4 @@
+import { getDmPeerId, isUsableDm } from "../dm-conversations";
 import type { E2eeEngineExt } from "../types";
 import { checkpoint, requireGroup, type EngineContext } from "./context";
 import type { ConversationCreator } from "./conversation-creation";
@@ -6,6 +7,33 @@ import { restartTargets } from "./membership";
 import type { GroupRuntime } from "./store";
 
 type ConversationInput = Parameters<E2eeEngineExt["createConversation"]>[0];
+
+/** The fields the DM helpers read, picked from the stored group. */
+const dmIdentity = ({ record }: GroupRuntime) => ({
+  kind: record.metadata.kind,
+  admins: record.metadata.admins,
+  members: record.members,
+  status: record.status,
+  epoch: record.epoch,
+});
+
+/**
+ * A stored successor continues a DM only while it is a usable DM with the
+ * same peer, so "continue" and "resend unsent" never route anywhere else.
+ */
+function continuesDm(
+  ctx: EngineContext,
+  runtime: GroupRuntime,
+  successor: GroupRuntime
+): boolean {
+  const peer = getDmPeerId(dmIdentity(runtime), ctx.profileId);
+  const next = dmIdentity(successor);
+  return (
+    peer !== null &&
+    getDmPeerId(next, ctx.profileId) === peer &&
+    isUsableDm(next, ctx.profileId)
+  );
+}
 
 /**
  * "Start again" for a conversation that cannot continue: a left or removed
@@ -42,8 +70,9 @@ export class ConversationRestarter {
     // in the store before its members are added, and a failed creation
     // discards it. A failed one is forgotten so a retry can create, and it
     // never leaves its link behind. Otherwise a stored successor that was
-    // fully set up and is still active is returned; one that is gone, no
-    // longer active (left, removed, invalid) or never finished is replaced.
+    // fully set up and is still active (for a DM: still a usable DM with the
+    // same peer) is returned; one that is gone, no longer active (left,
+    // removed, invalid), not that DM, or never finished is replaced.
     const key = runtime.record.g;
     const pending = this.inFlight.get(key);
     if (pending) {
@@ -66,7 +95,13 @@ export class ConversationRestarter {
       return null;
     }
     const successor = this.ctx.store.groups.get(g);
-    return successor?.record.status === "active" ? g : null;
+    if (successor?.record.status !== "active") {
+      return null;
+    }
+    return runtime.record.metadata.kind !== "dm" ||
+      continuesDm(this.ctx, runtime, successor)
+      ? g
+      : null;
   }
 
   private async continueSuperseded(
