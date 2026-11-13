@@ -89,6 +89,26 @@ describe("desktop-shell", () => {
     expect(isDesktopShell()).toBe(false);
   });
 
+  it("is false when stray globals are arrays or empty objects", () => {
+    setBridge("api", []);
+    setBridge("nativeAuth", []);
+    expect(isDesktopShell()).toBe(false);
+
+    setBridge("api", {});
+    setBridge("nativeAuth", {});
+    expect(isDesktopShell()).toBe(false);
+  });
+
+  it("is false when the expected bridge methods are not functions", () => {
+    setBridge("api", { openExternal: "https://example.com" });
+    setBridge("nativeAuth", { sessionLogin: jest.fn() });
+    expect(isDesktopShell()).toBe(false);
+
+    setBridge("api", { openExternal: jest.fn() });
+    setBridge("nativeAuth", { sessionLogin: true });
+    expect(isDesktopShell()).toBe(false);
+  });
+
   it("is true inside the desktop shell and returns each bridge", () => {
     const bridges = installDesktopBridges();
 
@@ -98,6 +118,16 @@ describe("desktop-shell", () => {
     expect(getDesktopNotifications()).toBe(bridges.notifications);
     expect(getDesktopUpdater()).toBe(bridges.updater);
     expect(getDesktopStore()).toBe(bridges.store);
+  });
+
+  it("reads the bridge live instead of caching the first answer", () => {
+    expect(isDesktopShell()).toBe(false);
+    const bridges = installDesktopBridges();
+    expect(getDesktopShellApi()).toBe(bridges.api);
+
+    clearBridges();
+    expect(isDesktopShell()).toBe(false);
+    expect(getDesktopShellApi()).toBeNull();
   });
 
   it("returns null for an optional bridge the shell does not provide", () => {

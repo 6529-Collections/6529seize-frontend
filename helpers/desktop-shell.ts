@@ -30,21 +30,25 @@ interface DesktopShellWindow {
 const getShellWindow = (): DesktopShellWindow | null =>
   typeof window === "undefined" ? null : (window as DesktopShellWindow);
 
-const isBridgeObject = (value: unknown): value is object =>
-  typeof value === "object" && value !== null;
+const isBridgeObject = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
+
+const hasBridgeMethod = (value: unknown, method: string): boolean =>
+  isBridgeObject(value) && typeof value[method] === "function";
 
 /**
- * True only inside 6529 Desktop: the shell API and the native sign-in bridge
- * are both present. Requiring both keeps an unrelated `window.api` (for
- * example from a browser extension) from switching a web visitor into
- * desktop sign-in. Always false during server rendering.
+ * True only inside 6529 Desktop: the shell API (`window.api.openExternal`)
+ * and the native sign-in bridge (`window.nativeAuth.sessionLogin`) are both
+ * present. Requiring two specific bridge methods keeps an unrelated
+ * `window.api` (for example from a browser extension) from switching a web
+ * visitor into desktop sign-in. Always false during server rendering.
  */
 export function isDesktopShell(): boolean {
   const shellWindow = getShellWindow();
   return (
     shellWindow !== null &&
-    isBridgeObject(shellWindow.api) &&
-    isBridgeObject(shellWindow.nativeAuth)
+    hasBridgeMethod(shellWindow.api, "openExternal") &&
+    hasBridgeMethod(shellWindow.nativeAuth, "sessionLogin")
   );
 }
 

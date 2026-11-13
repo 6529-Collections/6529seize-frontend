@@ -11,7 +11,10 @@
  * Read these objects only through `helpers/desktop-shell.ts`.
  */
 
-export type DesktopSessionClientType = "native" | "desktop";
+import type { RefreshTokenSessionClientType } from "@/services/auth/session-v2.types";
+
+/** Same union the session layer uses for refresh-token sessions. */
+export type DesktopSessionClientType = RefreshTokenSessionClientType;
 
 /**
  * Shell event listeners receive the host's event object first, then the
