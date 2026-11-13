@@ -1629,6 +1629,8 @@ const WAVE_JOIN_MESSAGES = objectMessages("waves.join", {
   actionTooltip: "Add this wave to your Joined list",
   joined: "Joined",
   joinedAnnouncement: "You joined {waveName}.",
+  listFollow: "Follow",
+  listFollowing: "Following",
   signInTooltip: "Connect a wallet to join this wave",
   joinErrorTitle: "Couldn't join this wave.",
   leaveErrorTitle: "Couldn't leave this wave.",
