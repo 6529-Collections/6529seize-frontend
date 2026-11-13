@@ -64,6 +64,9 @@ function groupPinnedRows(
 const ORDER_BUTTON_CLASS =
   "tw-inline-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
+const ORDER_MENU_ITEM_CLASS =
+  "tw-block tw-w-full tw-rounded-md tw-px-3 tw-py-2 tw-text-start data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400 disabled:tw-text-iron-500";
+
 function SortablePinnedWave({
   group,
   controls,
@@ -137,7 +140,7 @@ function SortablePinnedWave({
                 <MenuItem disabled={!canMoveUp}>
                   <button
                     type="button"
-                    className="tw-block tw-w-full tw-rounded-md tw-px-3 tw-py-2 tw-text-start data-[focus]:tw-bg-iron-800 disabled:tw-text-iron-500"
+                    className={ORDER_MENU_ITEM_CLASS}
                     onClick={() => onMove(-1)}
                   >
                     {t(locale, "waves.sidebar.movePinUp")}
@@ -146,7 +149,7 @@ function SortablePinnedWave({
                 <MenuItem disabled={!canMoveDown}>
                   <button
                     type="button"
-                    className="tw-block tw-w-full tw-rounded-md tw-px-3 tw-py-2 tw-text-start data-[focus]:tw-bg-iron-800 disabled:tw-text-iron-500"
+                    className={ORDER_MENU_ITEM_CLASS}
                     onClick={() => onMove(1)}
                   >
                     {t(locale, "waves.sidebar.movePinDown")}
