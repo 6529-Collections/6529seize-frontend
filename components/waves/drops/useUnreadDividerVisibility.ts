@@ -18,22 +18,23 @@ export function useUnreadDividerVisibility({
   scrollContainerRef,
   onDismissUnread,
 }: UseUnreadDividerVisibilityArgs) {
-  const [unreadPosition, setUnreadPosition] =
-    useState<UnreadPosition>("hidden");
+  const [position, setPosition] = useState<{
+    serialNo: number;
+    direction: "above" | "below";
+  } | null>(null);
   const dismissUnread = useCallback(() => {
     if (unreadDividerSerialNo === null) return;
-    setUnreadPosition("hidden");
+    setPosition(null);
     onDismissUnread();
   }, [onDismissUnread, unreadDividerSerialNo]);
   const autoDismissUnread = useEffectEvent(onDismissUnread);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer || unreadDividerSerialNo === null) {
-      setUnreadPosition("hidden");
-      return;
-    }
+    if (!scrollContainer || unreadDividerSerialNo === null) return;
 
+    const serialNo = unreadDividerSerialNo;
+    const selector = `[data-unread-divider="${serialNo}"]`;
     let observedDivider: Element | null = null;
     let visibleTimer: ReturnType<typeof setTimeout> | undefined;
     let hasSeenDivider = false;
@@ -44,18 +45,27 @@ export function useUnreadDividerVisibility({
       visibleTimer = undefined;
     }
 
-    function checkUnreadVisibility(confirmedDivider?: Element) {
+    function observeDivider(divider: Element | null) {
+      if (divider === observedDivider) return;
+      cancelVisibilityTimer();
+      if (observedDivider) intersectionObserver?.unobserve(observedDivider);
+      if (divider) intersectionObserver?.observe(divider);
+      observedDivider = divider;
+    }
+
+    function showJump(direction: "above" | "below") {
+      setPosition((current) =>
+        current?.serialNo === serialNo && current.direction === direction
+          ? current
+          : { serialNo, direction }
+      );
+    }
+
+    function checkUnreadVisibility() {
       if (hasAutoDismissed || !scrollContainer) return;
 
-      const divider = scrollContainer.querySelector(
-        `[data-unread-divider="${unreadDividerSerialNo}"]`
-      );
-      if (divider !== observedDivider) {
-        cancelVisibilityTimer();
-        if (observedDivider) intersectionObserver?.unobserve(observedDivider);
-        if (divider) intersectionObserver?.observe(divider);
-        observedDivider = divider;
-      }
+      const divider = scrollContainer.querySelector(selector);
+      observeDivider(divider);
 
       if (document.visibilityState !== "visible") {
         cancelVisibilityTimer();
@@ -63,16 +73,16 @@ export function useUnreadDividerVisibility({
       }
 
       if (!divider) {
-        if (!hasSeenDivider) setUnreadPosition("above");
+        if (!hasSeenDivider) showJump("above");
         return;
       }
 
       const viewport = scrollContainer.getBoundingClientRect();
       const rect = divider.getBoundingClientRect();
-      const fullyVisible =
-        rect.height > 0 &&
-        rect.top >= viewport.top &&
-        rect.bottom <= viewport.bottom;
+      if (rect.height <= 0 || viewport.height <= 0) {
+        cancelVisibilityTimer();
+        return;
+      }
 
       if (hasSeenDivider) {
         if (rect.bottom <= viewport.top || rect.top >= viewport.bottom) {
@@ -82,52 +92,64 @@ export function useUnreadDividerVisibility({
         return;
       }
 
-      if (!fullyVisible) {
+      if (rect.top < viewport.top || rect.bottom > viewport.bottom) {
         cancelVisibilityTimer();
-        setUnreadPosition(rect.top < viewport.top ? "above" : "below");
+        showJump(rect.top < viewport.top ? "above" : "below");
         return;
       }
 
       // Chat can briefly move the divider into view while rows load or resize.
       // Keep the jump available until the same divider stays fully visible.
-      if (divider === confirmedDivider) {
-        hasSeenDivider = true;
-        setUnreadPosition("hidden");
-      } else {
-        visibleTimer ??= setTimeout(() => {
-          visibleTimer = undefined;
-          checkUnreadVisibility(divider);
-        }, DIVIDER_VISIBLE_MS);
-      }
+      visibleTimer ??= setTimeout(() => {
+        visibleTimer = undefined;
+        if (
+          document.visibilityState !== "visible" ||
+          !scrollContainer.contains(divider)
+        ) {
+          return;
+        }
+        const current = divider.getBoundingClientRect();
+        const bounds = scrollContainer.getBoundingClientRect();
+        if (
+          current.height > 0 &&
+          current.top >= bounds.top &&
+          current.bottom <= bounds.bottom
+        ) {
+          hasSeenDivider = true;
+          setPosition(null);
+        }
+      }, DIVIDER_VISIBLE_MS);
     }
 
-    const check = () => {
-      checkUnreadVisibility();
-    };
     const intersectionObserver =
       typeof IntersectionObserver === "undefined"
         ? null
-        : new IntersectionObserver(check, {
+        : new IntersectionObserver(checkUnreadVisibility, {
             root: scrollContainer,
             threshold: [0, 1],
           });
-    const observer = new MutationObserver(check);
+    const observer = new MutationObserver(checkUnreadVisibility);
     observer.observe(scrollContainer, { childList: true, subtree: true });
-    scrollContainer.addEventListener("scroll", check, { passive: true });
-    document.addEventListener("visibilitychange", check);
-    check();
+    scrollContainer.addEventListener("scroll", checkUnreadVisibility, {
+      passive: true,
+    });
+    document.addEventListener("visibilitychange", checkUnreadVisibility);
+    checkUnreadVisibility();
 
     return () => {
       cancelVisibilityTimer();
-      scrollContainer.removeEventListener("scroll", check);
-      document.removeEventListener("visibilitychange", check);
+      scrollContainer.removeEventListener("scroll", checkUnreadVisibility);
+      document.removeEventListener("visibilitychange", checkUnreadVisibility);
       intersectionObserver?.disconnect();
       observer.disconnect();
     };
   }, [unreadDividerSerialNo, scrollContainerRef]);
 
-  const isUnreadVisible =
-    unreadPosition !== "hidden" && unreadDividerSerialNo !== null;
+  const unreadPosition: UnreadPosition =
+    position?.serialNo === unreadDividerSerialNo
+      ? position.direction
+      : "hidden";
+  const isUnreadVisible = unreadPosition !== "hidden";
 
   useEffect(() => {
     if (!isUnreadVisible) return;
