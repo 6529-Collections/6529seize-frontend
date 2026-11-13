@@ -113,13 +113,13 @@ export function SummaryStat({
   readonly toneClassName?: string | undefined;
 }) {
   return (
-    <div className="tw-min-w-0 tw-bg-iron-950 tw-px-2 tw-py-2">
-      <p className="tw-mb-0.5 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-tracking-[0.06em] tw-text-iron-500 sm:tw-tracking-[0.1em]">
+    <div className="tw-min-w-0 tw-rounded-lg tw-bg-iron-800/35 tw-px-2.5 tw-py-2">
+      <p className="tw-mb-2 tw-mt-0 tw-text-[13px] tw-font-medium tw-normal-case tw-leading-5 tw-tracking-normal tw-text-iron-500">
         {label}
       </p>
       <p
         title={value}
-        className={`tw-mb-0 tw-whitespace-nowrap tw-text-sm tw-font-semibold ${toneClassName}`}
+        className={`tw-mb-0 tw-mt-0 tw-break-all tw-text-[13px] tw-font-semibold tw-tabular-nums ${toneClassName}`}
       >
         {value}
       </p>
@@ -149,7 +149,7 @@ export function CategoryRow({
       aria-pressed={selected}
       title={label}
       onClick={onClick}
-      className={`tw-relative tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-border-0 tw-pl-3 tw-pr-1 tw-py-2 tw-text-left tw-transition before:tw-pointer-events-none before:tw-absolute before:tw-inset-y-0 before:tw-left-0 before:tw-w-0.5 before:tw-content-[''] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
+      className={`tw-relative tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-border-0 tw-py-2 tw-pl-3 tw-pr-1 tw-text-left tw-transition before:tw-pointer-events-none before:tw-absolute before:tw-inset-y-0 before:tw-left-0 before:tw-w-0.5 before:tw-content-[''] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
         selected
           ? "tw-bg-white/[0.045] before:tw-bg-primary-400"
           : "tw-bg-transparent before:tw-bg-transparent hover:tw-bg-white/[0.025]"
@@ -195,7 +195,7 @@ export function CategorySearch({
         placeholder={detailText(
           "waves.rep.details.categories.searchPlaceholder"
         )}
-        className="tw-h-10 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.015] tw-py-2 tw-pl-9 tw-pr-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-outline-none tw-transition placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-ring-1 focus:tw-ring-primary-400/30"
+        className="tw-h-10 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-py-2 tw-pl-9 tw-pr-3 tw-text-[13px] tw-font-medium tw-text-iron-100 tw-outline-none tw-transition-colors placeholder:tw-text-iron-400 focus:tw-border-primary-400 focus:tw-ring-2 focus:tw-ring-primary-400/30 desktop-hover:hover:tw-bg-iron-800"
       />
     </div>
   );
@@ -212,7 +212,7 @@ export function ContributorRow({
   return (
     <Link
       href={getProfileHref(contributor.profile)}
-      className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-1 tw-py-2.5 tw-no-underline tw-transition hover:tw-bg-white/[0.025] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+      className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-px-1 tw-py-2.5 tw-no-underline tw-transition hover:tw-bg-white/[0.025] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
     >
       <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-3">
         <ProfileAvatar
@@ -227,7 +227,7 @@ export function ContributorRow({
             </span>
           }
         />
-        <p className="tw-mb-0 tw-min-w-0 tw--translate-y-px tw-truncate tw-text-sm tw-font-medium tw-leading-none tw-text-white">
+        <p className="tw-m-0 tw-min-w-0 tw--translate-y-px tw-truncate tw-text-sm tw-font-medium tw-leading-none tw-text-white">
           {display}
         </p>
       </div>

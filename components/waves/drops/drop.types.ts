@@ -7,7 +7,7 @@ export interface DropInteractionParams {
 }
 
 export type DropIdentityMode = "default" | "minimal" | "hidden";
-export type DropTimestampLayout = "inline" | "stacked";
+export type DropTimestampLayout = "inline" | "stacked" | "stacked-compact";
 
 export const hasDropFooter = (
   footer: ReactNode | undefined

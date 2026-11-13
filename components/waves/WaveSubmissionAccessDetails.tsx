@@ -33,11 +33,11 @@ function SubmissionScope({
   const locale = useBrowserLocale();
   return (
     <>
-      <dl className="tw-m-0 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
+      <dl className="tw-m-0 tw-grid tw-grid-cols-[auto_minmax(0,1fr)] tw-items-center tw-gap-x-2">
         <dt className="tw-text-iron-400">
           {t(locale, "waves.access.submissionScope")}
         </dt>
-        <dd className="tw-m-0 tw-min-w-0 tw-max-w-full tw-font-medium tw-text-iron-100">
+        <dd className="tw-m-0 tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-justify-end tw-font-medium tw-text-iron-100">
           {group ? (
             <WaveGroupScope group={group} />
           ) : (

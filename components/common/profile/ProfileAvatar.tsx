@@ -15,6 +15,8 @@ interface ProfileAvatarProps {
   readonly shape?: "rounded" | "circle" | undefined;
   readonly alt?: string | undefined;
   readonly fallbackContent?: ReactNode | undefined;
+  /** Nullish values keep the existing default image. */
+  readonly imageContent?: ReactNode | undefined;
 }
 
 const AVATAR_SIZE_CLASSES: Record<ProfileBadgeSize, string> = {
@@ -30,6 +32,7 @@ export default function ProfileAvatar({
   shape = "rounded",
   alt = "Profile picture",
   fallbackContent = null,
+  imageContent,
 }: ProfileAvatarProps) {
   const radiusClass = shape === "circle" ? "tw-rounded-full" : "tw-rounded-lg";
   return (
@@ -43,16 +46,17 @@ export default function ProfileAvatar({
           <div
             className={`${radiusClass} tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-text-center`}
           >
-            {pfpUrl ? (
-              // Profile avatars can come from arbitrary remote hosts, so this stays unoptimized.
-              <img
-                src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
-                alt={alt}
-                className="tw-h-full tw-w-full tw-bg-transparent tw-object-cover"
-              />
-            ) : (
-              fallbackContent
-            )}
+            {pfpUrl
+              ? (imageContent ?? (
+                  // Preserve arbitrary remote sources for callers without the Coming up opt-in.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={getScaledImageUri(pfpUrl, ImageScale.W_AUTO_H_50)}
+                    alt={alt}
+                    className="tw-h-full tw-w-full tw-bg-transparent tw-object-cover"
+                  />
+                ))
+              : fallbackContent}
           </div>
         </div>
       </div>

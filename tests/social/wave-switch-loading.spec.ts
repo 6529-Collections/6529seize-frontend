@@ -283,9 +283,7 @@ for (const { app, emptyDescription } of [
       if (pendingHeader) {
         const readyHeader = await page
           .getByTestId("wave-content")
-          .getByRole("heading")
-          .first()
-          .locator("xpath=ancestor::div[contains(@class, 'tw-border-b')][1]")
+          .locator("header")
           .boundingBox();
         expect(readyHeader?.height).toBe(pendingHeader.height);
       }
@@ -561,9 +559,7 @@ test("keeps the subwave title in place when parent navigation arrives", async ({
     await expect(ready).toHaveText(NAME);
     const readyHeader = await page
       .getByTestId("wave-content")
-      .getByRole("heading")
-      .first()
-      .locator("xpath=ancestor::div[contains(@class, 'tw-border-b')][1]")
+      .locator("header")
       .boundingBox();
     expect(readyHeader?.height).toBe(pendingHeader?.height);
     const after = await ready.getByRole("button").boundingBox();

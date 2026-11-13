@@ -1,8 +1,6 @@
 "use client";
-import {
-  COMPACT_ACTION_BUTTON_CLASS,
-  COMPACT_ACTION_CONTENT_CLASS,
-} from "@/components/utils/button/compactActionButtonStyles";
+import { WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES } from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
+import { COMPACT_ACTION_BUTTON_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -131,7 +129,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   const canCreateCompetition = hub.permissions.create_competition;
   const createClassName = `${COMPACT_ACTION_BUTTON_CLASS} tw-no-underline hover:tw-no-underline ${isApp || isMobileViewport ? "tw-min-h-11" : "tw-h-8"}`;
   const createContent = (
-    <span className={COMPACT_ACTION_CONTENT_CLASS}>
+    <span className={WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES}>
       <PlusIcon className="-tw-ml-1 tw-size-4 tw-shrink-0" aria-hidden="true" />
       <span>{t(locale, "competitions.createAction")}</span>
     </span>
@@ -208,13 +206,15 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
             data-competition-filters-scroll
             className={`tw-scroll-px-10 tw-overflow-x-auto ${isApp ? "tw-no-scrollbar tw-overscroll-x-contain" : "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"}`}
           >
-            <TabToggleWithOverflow
-              variant="compactPills"
-              maxVisibleTabs={isApp ? 1 : tabOptions.length}
-              options={tabOptions}
-              activeKey={filter}
-              onSelect={selectFilter}
-            />
+            <div className="tw-w-max tw-pr-px">
+              <TabToggleWithOverflow
+                variant="compactPills"
+                maxVisibleTabs={isApp ? 1 : tabOptions.length}
+                options={tabOptions}
+                activeKey={filter}
+                onSelect={selectFilter}
+              />
+            </div>
           </div>
           <MobileTabsScrollControls
             scrollerRef={filtersScrollerRef}
