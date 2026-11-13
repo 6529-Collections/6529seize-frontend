@@ -61,6 +61,9 @@ export default function MyStreamWavePending({
   const descriptionRowHeightClass = preview?.parentWaveId
     ? "md:@[40rem]/wave-header:tw-min-h-[70px]"
     : "md:@[40rem]/wave-header:tw-min-h-12";
+  const backButtonSizeClass = isDirectMessage
+    ? "tw-mt-0.5 tw-size-11 tw-self-start sm:-tw-ml-2.5 sm:desktop-hover:tw-h-9"
+    : `tw-h-8 tw-w-6 @[21rem]/wave-header:tw-w-8 @[48rem]/wave-header:tw-mt-0.5 md:-tw-ml-2.5 md:tw-size-11 md:tw-self-start md:desktop-hover:tw-h-9 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`;
   const status = preview
     ? t(locale, "waves.loadingWave", { name: preview.name })
     : t(locale, "waves.loadingWaveUnknown");
@@ -82,7 +85,7 @@ export default function MyStreamWavePending({
                 : "waves.loadingBack"
             )}
             onClick={() => activeWave.set(null, { isDirectMessage })}
-            className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-hidden ${isDirectMessage ? "tw-mt-0.5 tw-size-11 tw-self-start sm:-tw-ml-2.5 sm:desktop-hover:tw-h-9" : `tw-h-8 tw-w-6 @[21rem]/wave-header:tw-w-8 @[48rem]/wave-header:tw-mt-0.5 md:-tw-ml-2.5 md:tw-size-11 md:tw-self-start md:desktop-hover:tw-h-9 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`}`}
+            className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-hidden ${backButtonSizeClass}`}
           >
             <ArrowLeftIcon aria-hidden="true" className="tw-size-4" />
           </button>
