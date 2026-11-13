@@ -8,6 +8,7 @@ import {
   getEncryptedMessagesRoute,
   getHomeRoute,
   getMessagesBaseRoute,
+  isMessageComposePathname,
   getWaveHomeRoute,
   isEncryptedMessagesPathname,
 } from "@/helpers/navigation.helpers";
@@ -66,7 +67,10 @@ function getParentRoute(url: URL): string | null {
       ? getMessagesBaseRoute(true)
       : getEncryptedMessagesRoute();
   }
-  if (url.pathname === "/waves/create" || url.pathname === "/messages/create") {
+  if (
+    url.pathname === "/waves/create" ||
+    isMessageComposePathname(url.pathname)
+  ) {
     return getWaveHomeRoute({
       isDirectMessage: url.pathname.startsWith("/messages"),
       isApp: true,

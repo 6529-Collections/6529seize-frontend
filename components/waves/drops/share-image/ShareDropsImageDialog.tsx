@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import {
   ArrowDownTrayIcon,
   ArrowUpOnSquareIcon,
@@ -12,7 +13,14 @@ import {
 } from "@heroicons/react/24/outline";
 import { ExclamationTriangleIcon } from "@heroicons/react/20/solid";
 import clsx from "clsx";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type RefObject,
+} from "react";
 import { createPortal } from "react-dom";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import {
@@ -55,7 +63,45 @@ const TIME_MODES: readonly ShareImageTimeMode[] = [
   "hidden",
   "zone",
 ];
-const PREVIEW_SCALE = 0.74;
+/** Preview scale before the preview area has been measured. */
+const DEFAULT_PREVIEW_SCALE = 0.74;
+
+/**
+ * Fits the fixed-width card into the preview area. A CSS scale shrinks what
+ * is drawn but not the space the card takes, so the wrapper is sized to the
+ * scaled width and height; otherwise the preview scrolls sideways and keeps
+ * empty space below the card. The exported PNG is unaffected.
+ */
+function usePreviewFit(
+  areaRef: RefObject<HTMLDivElement | null>,
+  cardRef: RefObject<HTMLDivElement | null>
+): { readonly scale: number; readonly height: number | null } {
+  const [fit, setFit] = useState<{
+    readonly scale: number;
+    readonly height: number | null;
+  }>({ scale: DEFAULT_PREVIEW_SCALE, height: null });
+
+  useEffect(() => {
+    const area = areaRef.current;
+    const card = cardRef.current;
+    if (!area || !card || typeof ResizeObserver === "undefined") return;
+    const update = () => {
+      const available = area.clientWidth;
+      const scale =
+        available > 0
+          ? Math.min(1, available / SHARE_IMAGE_WIDTH)
+          : DEFAULT_PREVIEW_SCALE;
+      setFit({ scale, height: card.offsetHeight });
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(area);
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, [areaRef, cardRef]);
+
+  return fit;
+}
 
 const BUTTON_BASE =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-px-3.5 tw-text-sm tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
@@ -86,6 +132,8 @@ export default function ShareDropsImageDialog({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+  const previewAreaRef = useRef<HTMLDivElement>(null);
+  const preview = usePreviewFit(previewAreaRef, cardRef);
   const titleId = useId();
   const zoneSelectId = useId();
   const timeDescriptionId = useId();
@@ -248,28 +296,36 @@ export default function ShareDropsImageDialog({
           className="tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-[#08080a] tw-p-4"
         >
           <div
-            className="tw-mx-auto tw-max-h-[34rem] tw-overflow-y-auto"
-            style={{
-              width: SHARE_IMAGE_WIDTH * PREVIEW_SCALE,
-              maxWidth: "100%",
-            }}
+            ref={previewAreaRef}
+            className="tw-max-h-[34rem] tw-overflow-y-auto tw-overflow-x-hidden [scrollbar-gutter:stable]"
           >
             <div
+              className="tw-relative tw-mx-auto tw-overflow-hidden"
               style={{
-                width: SHARE_IMAGE_WIDTH,
-                transform: `scale(${PREVIEW_SCALE})`,
-                transformOrigin: "top left",
+                width: SHARE_IMAGE_WIDTH * preview.scale,
+                height:
+                  preview.height === null
+                    ? undefined
+                    : preview.height * preview.scale,
               }}
             >
-              <ShareDropsImageCard
-                ref={cardRef}
-                wave={wave}
-                drops={drops}
-                messages={messages}
-                time={time}
-                include={include}
-                locale={locale}
-              />
+              <div
+                style={{
+                  width: SHARE_IMAGE_WIDTH,
+                  transform: `scale(${preview.scale})`,
+                  transformOrigin: "top left",
+                }}
+              >
+                <ShareDropsImageCard
+                  ref={cardRef}
+                  wave={wave}
+                  drops={drops}
+                  messages={messages}
+                  time={time}
+                  include={include}
+                  locale={locale}
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -339,7 +395,7 @@ export default function ShareDropsImageDialog({
                     onChange={(event) =>
                       setTime({ mode: "zone", timeZone: event.target.value })
                     }
-                    className="tw-min-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                    className={`${DROPDOWN_FIELD_CLASSES} tw-min-h-11 tw-w-full tw-appearance-none tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm`}
                   >
                     {deviceTimeZone && (
                       <option value={deviceTimeZone}>

@@ -2,6 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { useEncryptedNotificationPreview } from "@/hooks/e2ee/useEncryptedNotificationPreview";
 import type { INotificationEncryptedMessage } from "@/types/feed.types";
 import NotificationInboxRow from "@/components/notifications/inbox/NotificationInboxRow";
+import NotificationEncryptedMessage from "@/components/brain/notifications/NotificationEncryptedMessage";
 import { groupReactionNotifications } from "@/components/brain/notifications/utils/groupReactionNotifications";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -13,6 +14,8 @@ import type {
 } from "@/types/feed.types";
 import { isGroupedReactionsItem } from "@/types/feed.types";
 
+const originalFetch = globalThis.fetch;
+const inlineEmoji = "data:image/png;base64,aGVsbG8=";
 const mockLoadEmojiData = jest.fn(async () => {});
 const mockFindCustomEmoji = jest.fn();
 const mockFindNativeEmoji = jest.fn();
@@ -33,6 +36,10 @@ jest.mock("@/hooks/e2ee/useEncryptedNotificationPreview", () => ({
   useEncryptedNotificationPreview: jest.fn(),
 }));
 beforeEach(() => {
+  globalThis.fetch = jest.fn().mockResolvedValue({
+    ok: true,
+    json: async () => [{ id: "el_fafo_angy", src: inlineEmoji }],
+  });
   mockFindCustomEmoji.mockReturnValue(null);
   mockFindNativeEmoji.mockImplementation((id: string) =>
     id === "fire" ? { name: "Fire", skins: [{ native: "🔥" }] } : null
@@ -40,6 +47,9 @@ beforeEach(() => {
   jest
     .mocked(useEncryptedNotificationPreview)
     .mockReturnValue({ preview: null, needsSetup: false });
+});
+afterEach(() => {
+  globalThis.fetch = originalFetch;
 });
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
@@ -59,6 +69,104 @@ const drop = {
   parts: [{ content: "@[GelatoGenesis] in #[QUORUM]" }],
   wave: { id: "wave", is_direct_message: false, picture: "wave.png" },
 } as ApiDrop;
+
+it("keeps plain-text titles literal in notification previews", () => {
+  const title = "# **Literal title** <tag>";
+  const notification = {
+    ...reaction(1, "alice", null),
+    related_drops: [{ ...drop, title }],
+  };
+  const { container } = render(
+    <NotificationInboxRow
+      notification={notification}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.getByText(title)).toBeInTheDocument();
+  expect(container.querySelector("h1,strong,tag,a a")).toBeNull();
+});
+
+it("keeps fenced code and subsequent parts as distinct Markdown blocks", () => {
+  const notification = {
+    ...reaction(1, "alice", null),
+    related_drops: [
+      {
+        ...drop,
+        parts: [
+          {
+            part_id: 1,
+            media: [],
+            attachments: [],
+            quoted_drop: null,
+            content: "```js\nfirst();\n```",
+          },
+          {
+            part_id: 2,
+            media: [],
+            attachments: [],
+            quoted_drop: null,
+            content: "**Second part**",
+          },
+        ],
+      },
+    ],
+  };
+  render(
+    <NotificationInboxRow
+      notification={notification}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.getByText("first();").tagName).toBe("CODE");
+  const second = screen.getByText("Second part");
+  expect(second.tagName).toBe("STRONG");
+  expect(second.closest("pre,code")).toBeNull();
+});
+
+it("renders regular notification Markdown without truncating delimiters or nesting links", () => {
+  const longBold = "formatted ".repeat(30).trim();
+  const notification = {
+    ...reaction(1, "alice", null),
+    related_drops: [
+      {
+        ...drop,
+        parts: [
+          {
+            part_id: 1,
+            media: [],
+            attachments: [],
+            quoted_drop: null,
+            content: `**${longBold}** *italic* ~~gone~~ and \`code\`.\n\n[Link](https://example.com) ![Image](https://example.com/image.png)`,
+          },
+        ],
+      },
+    ],
+  };
+  const { container } = render(
+    <NotificationInboxRow
+      notification={notification}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+  expect(screen.getByText(longBold).tagName).toBe("STRONG");
+  expect(screen.getByText("italic").tagName).toBe("EM");
+  expect(screen.getByText("gone").tagName).toBe("DEL");
+  expect(screen.getByText("code").tagName).toBe("CODE");
+  expect(screen.getByText("Image")).toBeInTheDocument();
+  expect(screen.getAllByRole("link")).toHaveLength(1);
+  expect(screen.getByRole("link")).toHaveAttribute(
+    "href",
+    "/waves/wave?serialNo=42"
+  );
+  expect(
+    container.querySelector(
+      "a a,p p,iframe,video,audio,input,img[src*='example.com']"
+    )
+  ).toBeNull();
+});
 
 function reaction(
   id: number,
@@ -80,6 +188,67 @@ function reaction(
     additional_context: { reaction: reactionCode },
   };
 }
+
+it.each(["regular", "encrypted-inbox", "encrypted-feed"])(
+  "loads catalog emoji outside chat for %s previews without turning message URLs into resources",
+  async (surface) => {
+    const content =
+      "**:el_fafo_angy:** 😀 :fire: :+1: :not_in_catalog: `:el_fafo_angy: :fire:` [Link](https://example.com/private) ![Image](https://example.com/private.png)";
+    jest
+      .mocked(useEncryptedNotificationPreview)
+      .mockReturnValue({ preview: content, needsSetup: false });
+    const encrypted: INotificationEncryptedMessage = {
+      id: 12,
+      created_at: 12,
+      read_at: null,
+      cause: ApiNotificationCause.E2EeMessage,
+      additional_context: { encrypted_group: "0xgroup" },
+    };
+    const regular = {
+      ...reaction(1, "alice", null),
+      related_drops: [
+        {
+          ...drop,
+          parts: [
+            {
+              part_id: 1,
+              media: [],
+              attachments: [],
+              quoted_drop: null,
+              content,
+            },
+          ],
+        },
+      ],
+    };
+    const { container } = render(
+      surface === "encrypted-feed" ? (
+        <NotificationEncryptedMessage notification={encrypted} />
+      ) : (
+        <NotificationInboxRow
+          notification={surface === "regular" ? regular : encrypted}
+          handle="viewer"
+          onOpen={jest.fn()}
+        />
+      )
+    );
+    const image = await screen.findByRole("img", { name: ":el_fafo_angy:" });
+    expect(image).toHaveAttribute("src", inlineEmoji);
+    expect(image).toHaveAttribute("width", "16");
+    expect(image).toHaveAttribute("height", "16");
+    expect(image.closest("strong")).not.toBeNull();
+    expect(container).toHaveTextContent("😀 🔥 👍 :not_in_catalog:");
+    const code = container.querySelector("code");
+    expect(code).toHaveTextContent(":el_fafo_angy: :fire:");
+    expect(code?.querySelector("img")).toBeNull();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(
+      container.querySelector(
+        "a a,iframe,video,audio,input,img[src*='example.com']"
+      )
+    ).toBeNull();
+  }
+);
 
 it("groups reactors, keeps mixed read state, and opens every distinct unread ID", () => {
   const onOpen = jest.fn();
@@ -107,6 +276,79 @@ it("groups reactors, keeps mixed read state, and opens every distinct unread ID"
   expect(link).toHaveAttribute("href", "/waves/wave?serialNo=42");
   fireEvent.click(link);
   expect(onOpen).toHaveBeenCalledWith([2, 1]);
+});
+
+it("shows three reactors once when snapshots mix profile IDs and handle IDs", () => {
+  const notifications = ["alice", "bob", "carol", "alice", "bob"].map(
+    (handle, index) => {
+      const notification = reaction(index + 1, handle, null);
+      return {
+        ...notification,
+        related_identity: {
+          ...notification.related_identity,
+          id: index < 3 ? `profile-${handle}` : handle,
+        },
+      };
+    }
+  );
+  const onOpen = jest.fn();
+  render(
+    <NotificationInboxRow
+      notification={groupReactionNotifications(notifications)[0]!}
+      handle="viewer"
+      onOpen={onOpen}
+    />
+  );
+
+  expect(screen.getByText("alice, bob, carol")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("link"));
+  expect(onOpen).toHaveBeenCalledWith([1, 2, 3, 4, 5]);
+});
+
+it.each(["alice", "ALICE", " alice "])(
+  "matches reactor handles across ID formats regardless of case or whitespace (%s)",
+  (handle) => {
+    const notification = reaction(1, handle, null);
+    const first = {
+      ...notification,
+      related_identity: {
+        ...notification.related_identity,
+        id: "profile-alice",
+      },
+    };
+    render(
+      <NotificationInboxRow
+        notification={
+          groupReactionNotifications([first, reaction(2, "alice", null)])[0]!
+        }
+        handle="viewer"
+        onOpen={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("alice")).toBeInTheDocument();
+  }
+);
+
+it("keeps distinct reactors without handles and deduplicates them by profile ID", () => {
+  const notifications = ["alice", "bob", "alice"].map((id, index) => {
+    const notification = reaction(index + 1, id, null);
+    return {
+      ...notification,
+      related_identity: { ...notification.related_identity, handle: null },
+    };
+  });
+  render(
+    <NotificationInboxRow
+      notification={groupReactionNotifications(notifications)[0]!}
+      handle="viewer"
+      onOpen={jest.fn()}
+    />
+  );
+
+  expect(
+    screen.getByText("Unknown profile, Unknown profile")
+  ).toBeInTheDocument();
 });
 
 it("keeps single reactions readable and does not mark a read row again", () => {
@@ -423,3 +665,51 @@ it("links the sender avatar and handle separately from encrypted chat setup", ()
   fireEvent.click(setup);
   expect(onOpen).toHaveBeenCalledWith([13]);
 });
+
+it.each(["overview", "page"])(
+  "renders private Markdown in the notification %s without message links or resources",
+  (surface) => {
+    const longBold = "formatted ".repeat(30).trim();
+    jest.mocked(useEncryptedNotificationPreview).mockReturnValue({
+      preview: `\`\`\`js\nconsole.log("preview");\n\`\`\`\n\n**Bold** *italic* ~~struck~~ and \`code\`.\n\n**${longBold}**\n\n[Private link](https://private.invalid/link) ![Private image](https://private.invalid/image.png)\n\n<img src="https://private.invalid/html.png">\n\n- [x] Complete\n\n| Key | Value |\n| --- | --- |\n| A | B |`,
+      needsSetup: false,
+    });
+    const notification: INotificationEncryptedMessage = {
+      id: 14,
+      created_at: 14,
+      read_at: null,
+      cause: ApiNotificationCause.E2EeMessage,
+      additional_context: {
+        encrypted_group: "0xgroup",
+        encrypted_message_seq: 9,
+      },
+    };
+    const { container } = render(
+      surface === "overview" ? (
+        <NotificationInboxRow
+          notification={notification}
+          handle="viewer"
+          onOpen={jest.fn()}
+        />
+      ) : (
+        <NotificationEncryptedMessage notification={notification} />
+      )
+    );
+    expect(screen.getByText("Bold").tagName).toBe("STRONG");
+    expect(screen.getByText("italic").tagName).toBe("EM");
+    expect(screen.getByText("struck").tagName).toBe("DEL");
+    expect(screen.getByText("code").tagName).toBe("CODE");
+    expect(screen.getByText('console.log("preview");').tagName).toBe("CODE");
+    expect(screen.getByText(longBold).tagName).toBe("STRONG");
+    expect(screen.getByText("Private image")).toBeInTheDocument();
+    expect(screen.getByRole("table")).toBeInTheDocument();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(screen.getByRole("link")).toHaveAttribute(
+      "href",
+      "/messages/encrypted/0xgroup"
+    );
+    expect(
+      container.querySelector("a a,img,iframe,video,audio,source,input,script")
+    ).toBeNull();
+  }
+);

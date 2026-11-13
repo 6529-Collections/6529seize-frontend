@@ -17,6 +17,20 @@ beforeEach(() => {
 });
 
 describe("CreateDropWaveWrapper", () => {
+  it("uses the owning chat's measured height cap on iOS", () => {
+    mockIos = true;
+    const {
+      CreateDropWaveWrapper,
+    } = require("@/components/waves/CreateDropWaveWrapper");
+    render(
+      <CreateDropWaveWrapper iosMaxHeight="122px">
+        <div>child</div>
+      </CreateDropWaveWrapper>
+    );
+    const container = screen.getByText("child").parentElement as HTMLElement;
+    expect(container.style.maxHeight).toBe("122px");
+  });
+
   it("uses the layout viewport and keyboard inset for iOS max-height", () => {
     mockIos = true;
     const {

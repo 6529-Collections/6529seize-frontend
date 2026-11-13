@@ -87,7 +87,7 @@ export default function UserPageIdentityStatements({
     isLoading || group.length > 0;
 
   return (
-    <div className="tw-px-4 tw-pt-4 lg:tw-border-x-0 lg:tw-border-b-0 lg:tw-border-t lg:tw-border-solid lg:tw-border-white/10 lg:tw-px-6 lg:tw-pt-6">
+    <div className="tw-pt-4 lg:tw-border-x-0 lg:tw-border-b-0 lg:tw-border-t lg:tw-border-solid lg:tw-border-white/10 lg:tw-px-6 lg:tw-pt-6">
       <div>
         <UserPageIdentityStatementsConsolidatedAddresses profile={profile} />
       </div>

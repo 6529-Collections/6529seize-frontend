@@ -180,6 +180,41 @@ async function enqueue(
   });
 }
 
+/**
+ * Encrypts and uploads a message's files in order. Images are numbered so
+ * their neutral names ("image.jpg", "image-2.jpg") stay distinct; moved
+ * history (`keepNames`) keeps the names already shown in the old DM.
+ */
+async function uploadFiles(
+  ctx: EngineContext,
+  runtime: GroupRuntime,
+  files: readonly File[],
+  keepNames = false
+): Promise<PayloadAttachment[]> {
+  const attachments: PayloadAttachment[] = [];
+  let images = 0;
+  for (const file of files) {
+    // In order, one at a time: each image's number depends on the files
+    // before it, and attachments keep the order the files were picked in.
+    const media = await mediaFromFile(file, {
+      imageNumber: images + 1,
+      keepName: keepNames,
+    });
+    if (media.neutralName) {
+      images += 1;
+    }
+    attachments.push(
+      await uploadMedia({
+        api: ctx.api,
+        g: runtime.record.g,
+        deviceKey: ownDeviceKey(ctx),
+        media,
+      })
+    );
+  }
+  return attachments;
+}
+
 export async function queueMessage(
   ctx: EngineContext,
   g: string,
@@ -191,17 +226,7 @@ export async function queueMessage(
   }
 ): Promise<void> {
   const runtime = requireActiveGroup(ctx, g);
-  const attachments: PayloadAttachment[] = [];
-  for (const file of input.files ?? []) {
-    attachments.push(
-      await uploadMedia({
-        api: ctx.api,
-        g: runtime.record.g,
-        deviceKey: ownDeviceKey(ctx),
-        media: await mediaFromFile(file),
-      })
-    );
-  }
+  const attachments = await uploadFiles(ctx, runtime, input.files ?? []);
   const payload: MsgPayload = {
     v: 1,
     t: "msg",
@@ -269,17 +294,7 @@ export async function queueImported(
   if (await ctx.queue.run(() => duplicateImport(ctx, runtime, id, imp))) {
     return false;
   }
-  const attachments: PayloadAttachment[] = [];
-  for (const file of input.files ?? []) {
-    attachments.push(
-      await uploadMedia({
-        api: ctx.api,
-        g: runtime.record.g,
-        deviceKey: ownDeviceKey(ctx),
-        media: await mediaFromFile(file),
-      })
-    );
-  }
+  const attachments = await uploadFiles(ctx, runtime, input.files ?? [], true);
   const payload: MsgPayload = {
     v: 1,
     t: "msg",

@@ -22,8 +22,10 @@ import React, {
 } from "react";
 import { useAuth } from "../auth/Auth";
 import CookiesBanner from "./CookiesBanner";
-import { scheduleGoogleAnalytics } from "./googleAnalytics";
-import { rememberCountryHint } from "./usCountryHint";
+import {
+  scheduleGoogleAnalytics,
+  setGoogleAnalyticsDisabled,
+} from "./googleAnalytics";
 
 type CookieConsent = boolean | undefined;
 
@@ -75,8 +77,7 @@ export const getCookieConsentByName = (name: string): CookieConsent => {
   return undefined;
 };
 
-// Bound the first-load country lookup so a stalled request settles as an
-// unknown country instead of leaving purchasing visibility pending.
+// Bound the first-load cookie consent lookup so a stalled request can settle.
 const COUNTRY_CHECK_TIMEOUT_MS = 5_000;
 
 const rejectWhenAborted = (signal: AbortSignal): Promise<never> =>
@@ -138,8 +139,8 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
 
   // Google Analytics loads after first load, so a consent withdrawal or an
   // unmount can still stop it. A load cancelled before it started can be
-  // scheduled again by a later consent. Once gtag.js has loaded, withdrawal
-  // is a no-op here: a loaded script cannot be unloaded.
+  // scheduled again by a later consent. Once gtag.js has loaded, a loaded
+  // script cannot be unloaded, so withdrawal disables its reporting instead.
   const cancelPendingGoogleAnalytics = useCallback(() => {
     const cancel = cancelGoogleAnalyticsRef.current;
     cancelGoogleAnalyticsRef.current = undefined;
@@ -159,6 +160,7 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
         );
         setPerformanceConsent(performanceCookies);
 
+        setGoogleAnalyticsDisabled(performanceCookies !== true);
         if (performanceCookies) {
           loadPerformanceCookies();
         } else {
@@ -178,7 +180,6 @@ export const CookieConsentProvider: React.FC<CookieConsentProviderProps> = ({
           return;
         }
         setCountry(response.country);
-        rememberCountryHint(response.country);
         if (response.is_eu) {
           setShowCookieConsent(
             essentialCookies == undefined && performanceCookies == undefined

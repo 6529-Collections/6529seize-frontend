@@ -67,8 +67,8 @@ describe("TabToggleWithOverflow", () => {
     // Button label should show active label
     expect(screen.getByText("D")).toBeInTheDocument();
     expect(getByRole("button", { name: "More tabs" })).toHaveClass(
-      "tw-border-primary-300",
-      "tw-text-white"
+      "tw-border-primary-400",
+      "tw-text-iron-100"
     );
   });
 

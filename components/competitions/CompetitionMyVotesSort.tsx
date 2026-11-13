@@ -5,10 +5,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { CompactMenu } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
+import { COMPACT_ACTION_BUTTON_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import {
-  COMPACT_ACTION_BUTTON_CLASS,
-  COMPACT_ACTION_CONTENT_CLASS,
-} from "@/components/utils/button/compactActionButtonStyles";
+  DROPDOWN_FIELD_CLASSES,
+  DROPDOWN_CHEVRON_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { ApiCompetitionMyVotesSort } from "@/generated/models/ApiCompetitionMyVotesSort";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -48,12 +49,12 @@ export function CompetitionMyVotesSort({
   const triggerClassName = `${COMPACT_ACTION_BUTTON_CLASS} tw-max-w-full ${isMobile ? "tw-min-h-11" : "tw-h-8"}`;
   const trigger = (
     <span
-      className={`${COMPACT_ACTION_CONTENT_CLASS} tw-min-w-0 tw-max-w-full`}
+      className={`${DROPDOWN_FIELD_CLASSES} tw-inline-flex tw-h-8 tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-whitespace-nowrap tw-px-3 tw-text-xs group-focus-visible:tw-outline group-focus-visible:tw-outline-2 group-focus-visible:tw-outline-offset-2 group-focus-visible:tw-outline-primary-400 desktop-hover:group-hover:tw-bg-iron-800`}
     >
       <span className="tw-truncate">{labels[sort]}</span>
       <ChevronDownIcon
         aria-hidden="true"
-        className="tw-h-3.5 tw-w-3.5 tw-shrink-0"
+        className={DROPDOWN_CHEVRON_CLASSES}
       />
     </span>
   );

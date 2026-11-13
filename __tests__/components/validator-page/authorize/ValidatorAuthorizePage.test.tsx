@@ -1,6 +1,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 
 import ValidatorAuthorizePage from "@/components/validator-page/authorize/ValidatorAuthorizePage";
+import { groupedPublicKey } from "@/lib/validator-page/authorize/display";
+import { MAINNET_SALT } from "@/lib/validator-page/authorize/typedData";
 
 import fixture from "../../../lib/validator-page/authorize/fixture-grant.json";
 
@@ -50,6 +52,36 @@ const TEST_FRAGMENT = Buffer.concat([
   Buffer.alloc(32, 0x11),
   LINK_BYTES.subarray(2),
 ]).toString("base64url");
+
+/** A test network link that carries the mainnet salt. */
+const MAINNET_SALT_TEST_FRAGMENT = Buffer.concat([
+  Buffer.from([1, 1]),
+  Buffer.from(MAINNET_SALT.slice(2), "hex"),
+  LINK_BYTES.subarray(2),
+]).toString("base64url");
+
+// The account ends at byte 22; the fixture's authVersion, 3, is one byte.
+const VERSION_OFFSET = 22;
+
+function leb128(value: number): number[] {
+  const out: number[] = [];
+  let rest = value;
+  do {
+    const low = rest % 128;
+    rest = Math.floor(rest / 128);
+    out.push(rest === 0 ? low : low + 128);
+  } while (rest !== 0);
+  return out;
+}
+
+/** The fixture's draft with another authorization number. */
+function withAuthVersion(version: number): string {
+  return Buffer.concat([
+    LINK_BYTES.subarray(0, VERSION_OFFSET),
+    Buffer.from(leb128(version)),
+    LINK_BYTES.subarray(VERSION_OFFSET + 1),
+  ]).toString("base64url");
+}
 
 function open(fragment: string | null) {
   globalThis.history.replaceState(
@@ -153,15 +185,122 @@ describe("the authorize page", () => {
     expect(screen.getByText("#3")).toBeInTheDocument();
     expect(screen.getByText(PURPOSE)).toBeInTheDocument();
     expect(screen.queryByText("Test network")).not.toBeInTheDocument();
+    // Every key in full, grouped, beside its code.
+    expect(
+      screen.getByText(groupedPublicKey(fixture.this_key))
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(/^0x( [0-9a-f]{8}){12}$/)).toHaveLength(2);
+    // The other key holds half of the authorization.
+    expect(
+      screen.getByText(
+        "One key here isn't marked as this validator's. It holds 50% of this account's authorization. Sign only if you know it, for example as the key of your other computer."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/is far above the number/)
+    ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Connect wallet" }));
     expect(wallet.seizeConnect).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the en-US copy of the draft rows, intro and wallet step", async () => {
+    connect();
+    let finishSigning: (value: string) => void = () => undefined;
+    signTypedDataAsync.mockReturnValue(
+      new Promise<string>((resolve) => {
+        finishSigning = resolve;
+      })
+    );
+    open(FRAGMENT);
+    const rows = (await screen.findByText(PURPOSE)).closest("dl")!;
+    expect(
+      [...rows.querySelectorAll("dt")].map((label) => label.textContent)
+    ).toEqual(["Account", "Keys", "Authorization", "Purpose"]);
+    expect(
+      screen.getByText(
+        "Your wallet signs one message that lets the 6529 Validator on your computer sign for this account. It costs no gas and moves nothing."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Your wallet shows the same words. Each key's public key ends in its code. Signing costs no gas."
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Sign in your wallet" })
+    );
+    expect(
+      await screen.findByRole("button", { name: "Waiting for your wallet" })
+    ).toBeDisabled();
+    await act(async () => {
+      finishSigning(fixture.signature);
+    });
+  });
+
+  it("keeps the en-US copy of a stop's wallet step and the no-link about line", async () => {
+    connect();
+    const { unmount } = open(STOP_FRAGMENT);
+    expect(
+      await screen.findByText(
+        "Your wallet shows the same words. Signing costs no gas."
+      )
+    ).toBeInTheDocument();
+    unmount();
+
+    open(null);
+    const about = (
+      await screen.findByRole("link", { name: "What is the 6529 Validator?" })
+    ).closest("p");
+    expect(about).toHaveTextContent(
+      /^What is the 6529 Validator\? Read about it and download it there\.$/
+    );
   });
 
   it("tags a test network", async () => {
     open(TEST_FRAGMENT);
     expect(await screen.findByText("Test network")).toBeInTheDocument();
     expect(screen.getAllByText("9f3a2c71")).toHaveLength(2);
+  });
+
+  it("refuses a test network link that carries the mainnet salt", async () => {
+    open(MAINNET_SALT_TEST_FRAGMENT);
+    expect(
+      await screen.findByText(
+        "This link is incomplete or damaged. Scan the code again, or copy the link again from your validator."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Test network")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("warns about an authorization number far above any account's", async () => {
+    open(withAuthVersion(10_000_000));
+    expect(await screen.findByText("#10000000")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Authorization #10000000 is far above the number a validator drafts, which is one above the account's last authorization. A later authorization needs a larger number still. Don't sign unless you expected this number."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("warns when every key's share is held by keys not marked as this validator's", async () => {
+    const fragment = Buffer.concat([
+      LINK_BYTES.subarray(0, N_OFFSET + 1),
+      Buffer.from([0, 0]),
+      LINK_BYTES.subarray(N_OFFSET + 3),
+    ]).toString("base64url");
+    open(fragment);
+    expect(
+      await screen.findByText(
+        "2 keys here aren't marked as this validator's. Together they hold 100% of this account's authorization. Sign only if you know each of them, for example as the keys of your other computers."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Validator key")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Authorize these keys" })
+    ).toBeInTheDocument();
   });
 
   it("says plainly what a stop does", async () => {
@@ -244,11 +383,15 @@ describe("the authorize page", () => {
         "Paste it into your validator's Authorize step, in the box for the signature."
       )
     ).toBeInTheDocument();
+    // What was authorized, as signed: true whoever made the link.
     expect(
       screen.getByText(
-        "The signature only works on your validator, for this authorization. Nothing was sent anywhere."
+        `This signature authorizes the keys ${OTHER_CODE} and 9f3a2c71 for ${SHORT_ACCOUNT}, as authorization #3. Nothing was sent anywhere.`
       )
     ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/only works on your validator/)
+    ).not.toBeInTheDocument();
 
     const signed = signTypedDataAsync.mock.calls[0]![0];
     expect(signed.account).toBe(fixture.account);

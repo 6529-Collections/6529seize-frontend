@@ -7,6 +7,7 @@ import { documentationLanguageName } from "./DocumentationRecordValue";
 import {
   DocumentationButton,
   inputClass,
+  selectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -137,7 +138,7 @@ export default function LanguageTagCorrection({
           {msg("language")}
           <select
             ref={select}
-            className={`${inputClass} tw-mt-2`}
+            className={`${selectClass} tw-mt-2`}
             value={custom ? "__other__" : tag}
             aria-invalid={error && !custom}
             aria-describedby={error ? `${id}-error` : `${id}-help`}

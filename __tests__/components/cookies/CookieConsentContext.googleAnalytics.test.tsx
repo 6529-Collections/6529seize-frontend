@@ -2,7 +2,10 @@ import {
   CookieConsentProvider,
   useCookieConsent,
 } from "@/components/cookies/CookieConsentContext";
-import { scheduleGoogleAnalytics } from "@/components/cookies/googleAnalytics";
+import {
+  scheduleGoogleAnalytics,
+  setGoogleAnalyticsDisabled,
+} from "@/components/cookies/googleAnalytics";
 import {
   CONSENT_ESSENTIAL_COOKIE,
   CONSENT_PERFORMANCE_COOKIE,
@@ -29,8 +32,10 @@ jest.mock("@/components/auth/Auth", () => {
 
 jest.mock("@/components/cookies/googleAnalytics", () => ({
   scheduleGoogleAnalytics: jest.fn(),
+  setGoogleAnalyticsDisabled: jest.fn(),
 }));
 
+const mockSetDisabled = jest.mocked(setGoogleAnalyticsDisabled);
 const mockSchedule = scheduleGoogleAnalytics as jest.MockedFunction<
   typeof scheduleGoogleAnalytics
 >;
@@ -155,14 +160,18 @@ describe("CookieConsentProvider Google Analytics consent", () => {
     await act(async () => {
       screen.getByText("Test accept").click();
     });
+    expect(mockSetDisabled).toHaveBeenLastCalledWith(false);
     await act(async () => {
       screen.getByText("Test reject").click();
     });
+    // The loaded script stays, but it stops reporting at once.
+    expect(mockSetDisabled).toHaveBeenLastCalledWith(true);
     await act(async () => {
       screen.getByText("Test accept").click();
     });
 
     expect(mockSchedule).toHaveBeenCalledTimes(1);
+    expect(mockSetDisabled).toHaveBeenLastCalledWith(false);
   });
 
   it("cancels a pending load on unmount", () => {

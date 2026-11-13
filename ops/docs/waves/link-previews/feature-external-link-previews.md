@@ -67,6 +67,20 @@ loading.
   and fall back to regular clickable links.
 - Some URLs route to dedicated handlers first; this page only covers the generic
   external-card path.
+- Preview images, favicons, and video thumbnails on third-party hosts load
+  through the 6529 image proxy (`/api/og-metadata/image`) as still images, not
+  from the linked site. Images on 6529.io, the 6529 CDN and media hosts, and
+  the other image hosts the app already loads directly (for example YouTube
+  thumbnails) load directly.
+- The card uses the first favicon with a `.png`, `.jpg`, `.jpeg`, `.webp`, or
+  `.gif` file name (often the `apple-touch-icon`). Sites that list only `.ico`
+  or SVG icons show no favicon.
+- A card whose image is not HTTPS, or fails to load (including when the proxy
+  is busy), is shown without the image or with its usual placeholder; it does
+  not retry or show a broken image.
+- A card opens in the current tab only when its link is on the site's exact
+  origin and its path cannot be read as another host. Any other link, including
+  `https://6529.io//…`, opens in a new tab.
 - Generic external file cards never inline-render, iframe, download, scan, or
   proxy the file body.
 - External file links must not show `Scanned and validated`; that claim belongs
@@ -88,11 +102,27 @@ loading.
 
 ## Limitations / Notes
 
-- Generic preview fetch supports public HTTP(S) destinations only.
+- Generic preview fetch supports public HTTP(S) destinations on ports 80 and
+  443 only, on the first request and every redirect.
 - Card quality depends on metadata published by the destination.
 - Previews read page metadata (`meta`, `link`, `title`, and JSON-LD) from the
-  first 1 MiB of the page only; metadata placed after that on very large pages
-  is not used.
+  first 1 MiB of the page only; the rest is not downloaded, and metadata placed
+  after that on very large pages is not used.
+- Each client address can request up to 1,200 preview URLs a minute (every URL
+  in a batch counts; a batch larger than what is left is served up to that
+  budget). Each server process fetches up to 32 previews at once and lets up
+  to 256 more wait for at most 10 seconds. Beyond either limit the preview
+  request is answered `429` or `503` with a `Retry-After` header, and the link
+  falls back to its plain presentation until a later load retries it.
+- Each server process tracks up to 10,000 client addresses per minute. When
+  that table is full, addresses already tracked keep their own budget and new
+  addresses share one overflow budget (ten times the per-address budget) until
+  the tracked windows end; beyond it they are answered `429` as above.
+- The browser waits up to 20 seconds for a preview batch. A preview that has
+  started fetching on the server finishes and is cached even if the viewer
+  scrolls away or the browser stops waiting, so the next load gets it. A
+  preview still running after 20 seconds gives its server fetch slot back and
+  is answered as busy; it still finishes in the background and is cached.
 - Slow or redirect-heavy destinations can degrade preview quality or fall back to
   non-rich link states.
 - Link-preview chrome uses the app message catalog, but the wave preview stack

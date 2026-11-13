@@ -42,14 +42,12 @@ valid across tabs and contexts.
 4. During canonical-handle redirect, repeated query keys can be normalized into one comma-separated value per key.
 5. Tab visibility is resolved from current context:
    - `Brain` only when Waves is enabled.
-   - `Subscriptions` hidden on iOS when consent country is not `US`.
+   - `Subscriptions` is hidden in the iOS app.
    - `Proxy` only on your own profile.
 6. If the current tab is hidden, the app replaces the URL with the first
    visible tab and keeps the full query string.
-   - Direct `/{user}/subscriptions` links delay that fallback during the first
-     render, because the tab is added after the page loads. On iOS the delay
-     lasts until the country check settles, then the URL stays for `US` and
-     falls back otherwise.
+   - Direct `/{user}/subscriptions` links return to Identity after the page
+     loads in the iOS app.
    - Direct `/{user}/brain` links delay that fallback while client hydration,
      wallet reconnection, or connected-profile restoration is still resolving
      Brain access.
@@ -100,7 +98,7 @@ valid across tabs and contexts.
 - This flow covers route resolution and tab selection, not the full content
   behavior of each tab.
 - Tab visibility still depends on Waves availability, ownership context, and
-  iOS country gating for subscriptions.
+  whether the profile is open in the iOS app.
 - Canonical-handle redirects can normalize repeated query keys into a single
   comma-separated value per key.
 

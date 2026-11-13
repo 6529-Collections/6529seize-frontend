@@ -760,14 +760,6 @@ export const wait = async (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export const removeBaseEndpoint = (link: string) => {
-  const baseEndpoint = publicEnv.BASE_ENDPOINT;
-  if (!baseEndpoint) {
-    return link;
-  }
-  return link.replaceAll(baseEndpoint, "");
-};
-
 export async function fetchFileContent(filePath: string): Promise<string> {
   try {
     const res = await fetch(filePath);

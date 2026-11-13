@@ -21,14 +21,15 @@ import {
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
+  WAVE_HEADER_ACTION_CLASSES,
+  WAVE_HEADER_ACTION_SURFACE_CLASSES,
+} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
+import {
   getTimeZoneCityName,
   LOCAL_TIME_ZONE_PREFERENCE,
   UTC_TIME_ZONE_PREFERENCE,
   type DisplayTimeZonePreference,
 } from "@/lib/display-time-zone/displayTimeZone";
-
-const HEADER_BUTTON_CLASSES =
-  "tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 data-[open]:tw-bg-iron-800 data-[open]:tw-text-white desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-ring-white/10";
 
 const CHIP_CLASSES =
   "tw-flex tw-h-8 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-primary-400/45 tw-bg-primary-500/15 tw-text-xs tw-font-semibold tw-text-primary-300";
@@ -109,7 +110,7 @@ function SwitchOption({
         aria-label={title}
         aria-describedby={descriptionId}
         onChange={() => onSelect(choice.preference)}
-        className="tw-mt-0.5 tw-size-4 tw-flex-shrink-0 tw-accent-primary-400"
+        className="tw-form-radio tw-mt-0.5 tw-size-4 tw-flex-shrink-0 tw-cursor-pointer tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-800 tw-text-primary-400 focus:tw-ring-2 focus:tw-ring-primary-400 focus:tw-ring-offset-iron-950"
       />
       <span className="tw-min-w-0">
         <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-50">
@@ -129,15 +130,20 @@ function SwitchOption({
 /**
  * The wave header time switch. It shows times in UTC (or back in local time)
  * for this tab only, and turns into a "Times in UTC" chip with an undo button
- * while it is on. Variants: `header` for the wave header, and `compact` for
- * compact wave headers, where only a short chip renders and the switch itself
- * lives in the overflow menu (see `useDisplayTimeZoneMenuItem`).
+ * while it is on. `settings` embeds the same choices in More; `indicator`
+ * renders only the active chip and undo. `header` retains the clock trigger,
+ * and `compact` uses a short chip with the switch in the phone overflow menu.
  */
 export default function DisplayTimeZoneSwitch({
   variant = "header",
   tooltipId,
 }: {
-  readonly variant?: "header" | "compact" | undefined;
+  readonly variant?:
+    | "header"
+    | "compact"
+    | "indicator"
+    | "settings"
+    | undefined;
   readonly tooltipId?: string | undefined;
 }) {
   const locale = useBrowserLocale();
@@ -147,7 +153,7 @@ export default function DisplayTimeZoneSwitch({
     state,
     locale
   );
-  const radioName = "display-time-zone-switch";
+  const radioName = useId();
 
   const select = (preference: DisplayTimeZonePreference) => {
     const next = preference === state.preference ? null : preference;
@@ -158,9 +164,8 @@ export default function DisplayTimeZoneSwitch({
     );
   };
 
-  if (variant === "compact" && !isOverridden) {
-    // Compact headers switch from the overflow menu; nothing shows here
-    // until the switch is on.
+  if ((variant === "compact" || variant === "indicator") && !isOverridden) {
+    // The preferences live in More; only an active override needs header space.
     return null;
   }
 
@@ -168,9 +173,9 @@ export default function DisplayTimeZoneSwitch({
     zone: current.name,
   });
   const chipText =
-    variant === "header"
-      ? t(locale, "displayTimeZone.chip.label", { zone: current.name })
-      : current.name;
+    variant === "compact"
+      ? current.name
+      : t(locale, "displayTimeZone.chip.label", { zone: current.name });
   const tooltipProps = tooltipId
     ? { "data-tooltip-id": tooltipId, "data-tooltip-content": switchLabel }
     : {};
@@ -180,6 +185,66 @@ export default function DisplayTimeZoneSwitch({
   const settingTitle = isNamedZoneSetting
     ? t(locale, "displayTimeZone.switch.setting", { zone: setting.label })
     : setting.label;
+
+  const settings = (
+    <>
+      <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
+        <legend className="tw-mb-2 tw-px-1 tw-text-sm tw-font-semibold tw-text-iron-100">
+          <span className="tw-flex tw-items-center tw-gap-2">
+            {variant === "settings" && (
+              <ClockIcon aria-hidden="true" className="tw-size-4" />
+            )}
+            {t(locale, "displayTimeZone.switch.heading")}
+          </span>
+        </legend>
+        <div className="tw-space-y-1">
+          <SwitchOption
+            name={radioName}
+            choice={setting}
+            title={settingTitle}
+            description={choiceDescription(
+              setting,
+              locale,
+              state.deviceTimeZone
+            )}
+            checked={!isOverridden}
+            onSelect={select}
+          />
+          <SwitchOption
+            name={radioName}
+            choice={alternative}
+            title={alternative.label}
+            description={choiceDescription(
+              alternative,
+              locale,
+              state.deviceTimeZone
+            )}
+            checked={isOverridden}
+            onSelect={select}
+          />
+        </div>
+      </fieldset>
+      <p className="tw-mb-0 tw-mt-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-1 tw-pt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
+        {t(locale, "displayTimeZone.switch.note")}
+      </p>
+      <Link
+        href={getPreferencesHref({ tab: "time-zone" })}
+        className="tw-mt-1 tw-inline-flex tw-min-h-9 tw-items-center tw-gap-1 tw-rounded-md tw-px-1 tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400"
+      >
+        {t(locale, "displayTimeZone.switch.preferencesLink")}
+        <ChevronRightIcon aria-hidden="true" className="tw-size-3.5" />
+      </Link>
+    </>
+  );
+
+  if (variant === "settings") {
+    return (
+      <>
+        {settings}
+        <AnnouncementRegion text={announcement} />
+      </>
+    );
+  }
 
   return (
     <div className="tw-flex tw-flex-shrink-0 tw-items-center">
@@ -208,59 +273,21 @@ export default function DisplayTimeZoneSwitch({
           <PopoverButton
             aria-label={switchLabel}
             {...tooltipProps}
-            className={HEADER_BUTTON_CLASSES}
+            className={WAVE_HEADER_ACTION_CLASSES}
           >
-            <ClockIcon
-              aria-hidden="true"
-              className="tw-h-4 tw-w-4 tw-flex-shrink-0"
-            />
+            <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+              <ClockIcon
+                aria-hidden="true"
+                className="tw-size-4 tw-flex-shrink-0"
+              />
+            </span>
           </PopoverButton>
         )}
         <PopoverPanel
           anchor={{ to: "bottom end", gap: 8, padding: 16 }}
           className="tailwind-scope tw-z-[1030] tw-w-80 tw-max-w-[calc(100vw-2rem)] tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-3 tw-shadow-xl tw-shadow-black/60"
         >
-          <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
-            <legend className="tw-mb-2 tw-px-1 tw-text-sm tw-font-semibold tw-text-iron-100">
-              {t(locale, "displayTimeZone.switch.heading")}
-            </legend>
-            <div className="tw-space-y-1">
-              <SwitchOption
-                name={radioName}
-                choice={setting}
-                title={settingTitle}
-                description={choiceDescription(
-                  setting,
-                  locale,
-                  state.deviceTimeZone
-                )}
-                checked={!isOverridden}
-                onSelect={select}
-              />
-              <SwitchOption
-                name={radioName}
-                choice={alternative}
-                title={alternative.label}
-                description={choiceDescription(
-                  alternative,
-                  locale,
-                  state.deviceTimeZone
-                )}
-                checked={isOverridden}
-                onSelect={select}
-              />
-            </div>
-          </fieldset>
-          <p className="tw-mb-0 tw-mt-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-1 tw-pt-3 tw-text-xs tw-leading-5 tw-text-iron-400">
-            {t(locale, "displayTimeZone.switch.note")}
-          </p>
-          <Link
-            href={getPreferencesHref({ tab: "time-zone" })}
-            className="tw-mt-1 tw-inline-flex tw-min-h-9 tw-items-center tw-gap-1 tw-rounded-md tw-px-1 tw-text-xs tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400"
-          >
-            {t(locale, "displayTimeZone.switch.preferencesLink")}
-            <ChevronRightIcon aria-hidden="true" className="tw-size-3.5" />
-          </Link>
+          {settings}
         </PopoverPanel>
       </Popover>
       <AnnouncementRegion text={announcement} />

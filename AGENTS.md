@@ -39,7 +39,7 @@
 
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
@@ -229,9 +229,9 @@ is available, use it; otherwise read the relevant files in
 - Guard direct routes as well as inbound navigation. Collect returns to the
   corresponding collection, The Memes and NextGen mint routes return to their
   collections, and About Minting and Subscriptions return to `/about`.
-- Preserve Android and web behavior, ordinary user posts and links, NFT
-  browsing and history, and open-data reports. The existing regional rule still
-  controls access to profile subscription history and read-only reports.
+- Preserve Android and web behavior, user-shared Wave links, and NFT browsing.
+  Hide Orders and profile Subscriptions in the iOS app in every country.
+  Read-only reports remain reachable through their direct URLs.
 - Check US, non-US, and unknown-country iOS, Android, web, and direct links
   in focused tests.
 

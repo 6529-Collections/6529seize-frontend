@@ -1,6 +1,9 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useMemo } from "react";
+import { IdentityActivityContext } from "@/components/profile-activity/IdentityActivityContext";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import ProfileActivityLogs from "@/components/profile-activity/ProfileActivityLogs";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
@@ -18,6 +21,7 @@ export default function UserPageCombinedActivityLog({
   readonly withMatterFilter?: boolean;
   readonly layout?: "desktop" | "mobile";
 }) {
+  const locale = useBrowserLocale();
   const hasHydrated = useHasHydrated();
   const isDesktop = useMediaQuery("(min-width: 1024px)");
   const enabled =
@@ -31,17 +35,19 @@ export default function UserPageCombinedActivityLog({
   );
 
   return (
-    <div className="tw-group/profile-activity" data-typography="identity">
-      <ProfileActivityLogs
-        initialParams={params}
-        withFilters={true}
-        withMatterFilter={withMatterFilter}
-        enabled={enabled}
-      >
-        <h3 className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 lg:tw-text-xl lg:tw-normal-case lg:tw-tracking-normal lg:tw-text-iron-100">
-          Activity Log
-        </h3>
-      </ProfileActivityLogs>
-    </div>
+    <IdentityActivityContext value={true}>
+      <div className="tw-group/profile-activity" data-typography="identity">
+        <ProfileActivityLogs
+          initialParams={params}
+          withFilters={true}
+          withMatterFilter={withMatterFilter}
+          enabled={enabled}
+        >
+          <h3 className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 lg:tw-text-xl lg:tw-normal-case lg:tw-tracking-normal lg:tw-text-iron-100">
+            {t(locale, "profileActivity.heading")}
+          </h3>
+        </ProfileActivityLogs>
+      </div>
+    </IdentityActivityContext>
   );
 }

@@ -2,25 +2,37 @@
 
 import { publicEnv } from "@/config/env";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
-import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
+import { openUrlInNewTab } from "@/helpers/open-url.helpers";
+import {
+  normalizeDecentralizedMediaUrl,
+  toIsolatedHtmlUrlFromInput,
+} from "@/lib/media/decentralized-media";
 import {
   ArrowTopRightOnSquareIcon,
   ExclamationTriangleIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 
-const SAFE_URL_PROTOCOLS = new Set(["https:", "http:", "ipfs:", "ar:"]);
 const CONFIRM_RESET_MS = 2500;
 
+/**
+ * The link to offer: `https:` only, with `ipfs://`, `ipns://` and `ar://`
+ * resolved through the app's media resolver first. When the separate content
+ * domain is configured, first-party IPFS media (including stored URLs on the
+ * previous 6529.io hosts) opens on its per-CID host with its query and hash.
+ * Decided from the URL alone, so the server and the browser render the same
+ * control.
+ */
 function getSafeUrl(rawUrl: string): string | null {
   try {
+    const resolverEndpoint = publicEnv.MEDIA_RESOLVER_ENDPOINT;
+    const isolatedUrl = toIsolatedHtmlUrlFromInput(rawUrl, resolverEndpoint);
     const resolvedUrl =
-      normalizeDecentralizedMediaUrl(
-        rawUrl,
-        publicEnv.MEDIA_RESOLVER_ENDPOINT
-      ) ?? rawUrl;
+      isolatedUrl === rawUrl
+        ? (normalizeDecentralizedMediaUrl(rawUrl, resolverEndpoint) ?? rawUrl)
+        : isolatedUrl;
     const parsed = new URL(resolvedUrl);
-    if (SAFE_URL_PROTOCOLS.has(parsed.protocol)) {
+    if (parsed.protocol === "https:") {
       return parsed.toString();
     }
   } catch {
@@ -87,7 +99,7 @@ export default function UnsupportedMediaLink({
     }
 
     setConfirmOpen(false);
-    globalThis.window.open(safeUrl, "_blank", "noopener,noreferrer");
+    openUrlInNewTab(safeUrl);
   };
 
   if (!safeUrl || disableMediaInteraction) {

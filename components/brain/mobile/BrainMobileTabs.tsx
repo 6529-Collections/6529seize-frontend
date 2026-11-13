@@ -1,5 +1,6 @@
 "use client";
 import { useWaveChatPrefetch } from "@/hooks/competitions/useWaveChatPrefetch";
+import useCapacitor from "@/hooks/useCapacitor";
 
 import React, { useCallback, useMemo, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -163,6 +164,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       ? (selectedLegacyView as unknown as BrainView)
       : activeView;
   const { registerRef } = useLayout();
+  const { isIos } = useCapacitor();
   const { connectedProfile, isAuthenticated } = useAuth();
   const hasValidNotificationAuth = isAuthenticated === true;
   const shouldShowCurationTabs = Boolean(isApp && waveActive && wave?.id);
@@ -381,13 +383,16 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   return (
     <nav
       ref={setMobileTabsRef}
+      data-compact-keyboard-chat-tabs={
+        isIos && waveActive && isChatActive ? "true" : undefined
+      }
       aria-label={t(
         locale,
         waveActive
           ? "wave.navigation.waveSections"
           : "wave.navigation.appSections"
       )}
-      className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-900 tw-px-2 sm:tw-px-4 md:tw-px-6"
+      className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-2 sm:tw-px-4 md:tw-px-6"
     >
       {isWaveNavigationLoading ? (
         <div className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-1.5 tw-overflow-hidden tw-px-0.5">
@@ -637,7 +642,10 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   >
                     {t(locale, "competitions.title")}
                   </span>
-                  <TabCountBadge count={activeCompetitionCount} />
+                  <TabCountBadge
+                    count={activeCompetitionCount}
+                    variant="wave"
+                  />
                 </TabButton>
               )}
               {shouldShowCurationTabs &&

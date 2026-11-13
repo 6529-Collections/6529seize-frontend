@@ -2,6 +2,8 @@
 
 import { useCallback, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+import { NEW_MESSAGE_ROUTE } from "@/helpers/navigation.helpers";
 import useDeviceInfo from "./useDeviceInfo";
 import { useClientNavigation } from "./useClientNavigation";
 
@@ -58,6 +60,7 @@ export default function useCreateModalState() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
+  const unifiedCompose = isE2eeEnabled();
 
   const urlMode = useMemo<CreateModalMode>(
     () => getCreateModalMode(searchParams),
@@ -100,6 +103,10 @@ export default function useCreateModalState() {
 
   const updateMode = useCallback(
     (value: CreateModalMode) => {
+      if (unifiedCompose && value === CREATE_DIRECT_MESSAGE_VALUE) {
+        router.push(NEW_MESSAGE_ROUTE);
+        return;
+      }
       if (isApp) {
         if (value === CREATE_WAVE_VALUE) {
           router.push("/waves/create");
@@ -111,7 +118,7 @@ export default function useCreateModalState() {
 
       navigate(value, { replace: value === null });
     },
-    [isApp, navigate, router]
+    [isApp, navigate, router, unifiedCompose]
   );
 
   const openWave = useCallback(
@@ -126,6 +133,9 @@ export default function useCreateModalState() {
 
   const getHrefForMode = useCallback(
     (value: CreateModalMode) => {
+      if (unifiedCompose && value === CREATE_DIRECT_MESSAGE_VALUE) {
+        return NEW_MESSAGE_ROUTE;
+      }
       if (isApp) {
         if (value === CREATE_WAVE_VALUE) {
           return "/waves/create";
@@ -138,14 +148,14 @@ export default function useCreateModalState() {
 
       return buildDestination(value);
     },
-    [buildDestination, isApp, pathname]
+    [buildDestination, isApp, pathname, unifiedCompose]
   );
 
   return {
     mode: isApp ? urlMode : clientMode,
     isWaveModalOpen: !isApp && clientMode === CREATE_WAVE_VALUE,
     isDirectMessageModalOpen:
-      !isApp && clientMode === CREATE_DIRECT_MESSAGE_VALUE,
+      !unifiedCompose && !isApp && clientMode === CREATE_DIRECT_MESSAGE_VALUE,
     openWave,
     openDirectMessage,
     close,

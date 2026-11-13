@@ -2,7 +2,7 @@ import MemeCalendarPeriods from "@/components/the-memes/MemeCalendarPeriods";
 import { render, screen } from "@testing-library/react";
 
 describe("MemeCalendarPeriods", () => {
-  it("styles linked year like the linked season chip", () => {
+  it("keeps linked year and season styles aligned across breakpoints", () => {
     const yearHref = "/the-memes?year=4&sort=age&sort_dir=ASC";
 
     render(
@@ -27,6 +27,9 @@ describe("MemeCalendarPeriods", () => {
       "tw-bg-iron-900",
       "tw-px-2.5",
       "tw-text-iron-100",
+      "md:tw-border-0",
+      "md:tw-bg-transparent",
+      "md:tw-px-0",
     ]) {
       expect(seasonLink).toHaveClass(className);
       expect(yearLink).toHaveClass(className);

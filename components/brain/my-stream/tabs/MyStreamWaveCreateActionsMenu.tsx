@@ -1,9 +1,7 @@
 "use client";
 
-import {
-  COMPACT_ACTION_BUTTON_CLASS,
-  COMPACT_ACTION_CONTENT_CLASS,
-} from "@/components/utils/button/compactActionButtonStyles";
+import { WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES } from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
+import { COMPACT_ACTION_BUTTON_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 
 import { useState } from "react";
 import {
@@ -122,7 +120,7 @@ export default function MyStreamWaveCreateActionsMenu({
 
   const buttonClassName = `${COMPACT_ACTION_BUTTON_CLASS} ${isMobile ? "tw-min-h-11" : "tw-h-8"}`;
   const trigger = (
-    <span className={COMPACT_ACTION_CONTENT_CLASS}>
+    <span className={WAVE_HEADER_TEXT_ACTION_SURFACE_CLASSES}>
       <PlusIcon className="-tw-ml-1 tw-size-4 tw-shrink-0" aria-hidden="true" />
       <span>{t(locale, "waves.create.actions.create")}</span>
     </span>

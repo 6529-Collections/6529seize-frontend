@@ -154,12 +154,8 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   };
   const tooltipContent = getTooltipContent();
 
-  const getButtonStyles = () => {
-    if (isPinned) {
-      return "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-iron-100 active:tw-bg-transparent";
-    }
-    return "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-100 active:tw-bg-iron-700";
-  };
+  const buttonStyles =
+    "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-iron-900";
 
   const getAriaLabel = () => {
     return t(
@@ -184,7 +180,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
       <button
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
-        className={`${positionClasses} tw-flex ${sizeClasses} tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border-0 tw-transition-all tw-duration-200 ${opacityClass} ${getButtonStyles()} ${className ?? ""} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
+        className={`${positionClasses} tw-flex ${sizeClasses} tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border-0 tw-transition-all tw-duration-200 ${opacityClass} ${buttonStyles} ${className ?? ""} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
         aria-label={getAriaLabel()}
         data-tooltip-id={`wave-pin-${waveId}`}
         data-tooltip-content={tooltipContent}

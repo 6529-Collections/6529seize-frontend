@@ -52,6 +52,127 @@ async function seedSession(page: Page, role: string | null = null) {
   );
 }
 
+async function seedGettingStartedSession(page: Page, arrival = false) {
+  await seedSession(page);
+  await page.addInitScript((shouldArrive) => {
+    // Represent the successful creation session while keeping reload/dismiss real.
+    const fixtureKey = "playwright-getting-started-session-seeded";
+    if (sessionStorage.getItem(fixtureKey)) return;
+    sessionStorage.setItem(fixtureKey, "true");
+    sessionStorage.setItem(
+      "identity-getting-started-created-profile:playwright",
+      "true"
+    );
+    if (shouldArrive) {
+      sessionStorage.setItem(
+        "identity-getting-started-arrival:playwright",
+        "true"
+      );
+    }
+  }, arrival);
+}
+
+async function observeGettingStartedScroll(page: Page) {
+  await page.addInitScript(() => {
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function (options) {
+      if (
+        this.getAttribute("aria-label") === "Getting started with your identity"
+      ) {
+        const key = "playwright-guided-arrival-scrolls";
+        const previous = JSON.parse(sessionStorage.getItem(key) ?? "[]");
+        sessionStorage.setItem(
+          key,
+          JSON.stringify([
+            ...previous,
+            {
+              behavior: typeof options === "object" ? options.behavior : null,
+              block: typeof options === "object" ? options.block : null,
+              focused: this.contains(document.activeElement),
+              rendered: this.getClientRects().length > 0,
+            },
+          ])
+        );
+      }
+      originalScrollIntoView.call(this, options);
+    };
+  });
+}
+
+async function getGettingStartedScrolls(page: Page) {
+  return page.evaluate(async () => {
+    // Let scheduled arrival effects run before asserting the absence of a repeat.
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+    return JSON.parse(
+      sessionStorage.getItem("playwright-guided-arrival-scrolls") ?? "[]"
+    ) as {
+      behavior: ScrollBehavior | null;
+      block: ScrollLogicalPosition | null;
+      focused: boolean;
+      rendered: boolean;
+    }[];
+  });
+}
+
+async function installHostedWalletReads(page: Page) {
+  // Hosted wallet usage/discovery and contract reads are outside this fixture.
+  await page.route("https://api.web3modal.org/getWallets?*", (route) =>
+    route.fulfill({ json: { data: [], count: 0 } })
+  );
+  await page.route("https://api.web3modal.org/appkit/v1/config?*", (route) =>
+    route.fulfill({ json: { features: [] } })
+  );
+  await page.route(
+    "https://api.web3modal.org/appkit/v1/project-limits?*",
+    (route) =>
+      route.fulfill({
+        json: {
+          planLimits: {
+            tier: "starter",
+            isAboveMauLimit: false,
+            isAboveRpcLimit: false,
+          },
+        },
+      })
+  );
+  await page.route("https://rpc.walletconnect.org/v1/**", async (route) => {
+    const payload = route.request().postDataJSON() as
+      | { id: number; method: string }
+      | { id: number; method: string }[];
+    const respond = (call: { id: number; method: string }) => {
+      expect(call.method).toBe("eth_call");
+      return {
+        jsonrpc: "2.0",
+        id: call.id,
+        error: {
+          code: -32000,
+          message: "Contract reads are unavailable in this profile fixture",
+        },
+      };
+    };
+    await route.fulfill({
+      json: Array.isArray(payload) ? payload.map(respond) : respond(payload),
+    });
+  });
+}
+
+async function finishHostedWalletInitialization(
+  page: Page,
+  navigate: () => Promise<unknown>
+) {
+  const responses = ["config", "project-limits"].map((path) =>
+    page
+      .waitForResponse(
+        (response) => new URL(response.url()).pathname === `/appkit/v1/${path}`
+      )
+      .then((response) => response.finished())
+  );
+  await navigate();
+  await Promise.all(responses);
+}
+
 async function openOwnProfile(page: Page, expectOwnerAction = true) {
   // Exercise account-menu navigation; the direct-load test covers cold hydration.
   const profileLoaded = page.waitForResponse((response) =>
@@ -158,6 +279,398 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     );
   });
 
+  test("Guided welcome arrives once, respects motion preferences and preserves focus", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    await seedGettingStartedSession(page, true);
+    await observeGettingStartedScroll(page);
+    await page.emulateMedia({
+      reducedMotion: isMobile ? "reduce" : "no-preference",
+    });
+    await installStatements(page, getSandboxApiOrigin(baseURL));
+    await installHostedWalletReads(page);
+    await finishHostedWalletInitialization(page, () =>
+      page.goto("/playwright")
+    );
+    const guidance = page.getByRole("region", {
+      name: "Getting started with your identity",
+      exact: true,
+    });
+    await expect(guidance).toBeVisible();
+    const expectedScrolls = [
+      {
+        behavior: isMobile ? "instant" : "smooth",
+        block: "start",
+        focused: false,
+        rendered: true,
+      },
+    ];
+    await expect
+      .poll(() => getGettingStartedScrolls(page))
+      .toEqual(expectedScrolls);
+    // Keep the native scroll call real: the card must actually reach the viewport.
+    await expect
+      .poll(async () => {
+        const box = await guidance.boundingBox();
+        return box !== null && box.y >= 0 && box.y < 200;
+      })
+      .toBe(true);
+    expect(
+      await guidance.evaluate((element) =>
+        element.contains(document.activeElement)
+      )
+    ).toBe(false);
+    expect(
+      await page.evaluate(() =>
+        sessionStorage.getItem("identity-getting-started-arrival:playwright")
+      )
+    ).toBeNull();
+    await finishHostedWalletInitialization(page, () => page.reload());
+    await expect(guidance).toBeVisible();
+    expect(await getGettingStartedScrolls(page)).toEqual(expectedScrolls);
+    await guidance
+      .getByRole("link", { name: "Find a Wave", exact: true })
+      .click();
+    await page.waitForURL(/\/discover$/, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await page.goBack();
+    await expect(guidance).toBeVisible();
+    expect(await getGettingStartedScrolls(page)).toEqual(expectedScrolls);
+  });
+
+  test("Guided welcome explains paths, opens eligibility and keeps dismissal across reload", async ({
+    page,
+    baseURL,
+    isMobile,
+  }, testInfo) => {
+    await seedGettingStartedSession(page);
+    await installStatements(page, getSandboxApiOrigin(baseURL));
+    await openOwnProfile(page);
+    if (isMobile) await page.setViewportSize({ width: 320, height: 900 });
+    const guidance = page.getByRole("region", {
+      name: "Getting started with your identity",
+      exact: true,
+    });
+    await expect(
+      guidance.getByRole("heading", { name: "Your profile is ready" })
+    ).toBeVisible();
+    await expect(
+      guidance.getByText("Profile created", { exact: true })
+    ).toHaveCount(0);
+    const allGuidance = page.getByRole("region", {
+      name: "Getting started with your identity",
+      exact: true,
+      includeHidden: true,
+    });
+    const dismissGuide = guidance.getByRole("button", {
+      name: "Dismiss guide",
+      exact: true,
+    });
+    const minimumDismissHeight = await page.evaluate(() =>
+      globalThis.matchMedia("(pointer: coarse)").matches ? 44 : 32
+    );
+    await expect(
+      guidance.getByText("Getting started", { exact: true })
+    ).toBeVisible();
+    await expect(dismissGuide).toHaveText("Dismiss");
+    await expect(dismissGuide).toHaveAttribute("title", "Dismiss guide");
+    for (const width of [768, 1023, 1024, 390, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(allGuidance).toHaveCount(1);
+      await expect(guidance).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      const headingBounds = await guidance
+        .getByRole("heading", { name: "Your profile is ready", exact: true })
+        .evaluate((element) => {
+          const range = document.createRange();
+          range.selectNodeContents(element);
+          const box = range.getBoundingClientRect();
+          return { x: box.x, y: box.y, width: box.width, height: box.height };
+        });
+      const dismissBounds = await dismissGuide.boundingBox();
+      expect(dismissBounds).not.toBeNull();
+      const separated =
+        headingBounds.x + headingBounds.width <= dismissBounds!.x ||
+        headingBounds.y >= dismissBounds!.y + dismissBounds!.height;
+      expect(separated, `Guide header controls overlap at ${width}px`).toBe(
+        true
+      );
+      expect(dismissBounds!.height).toBeGreaterThanOrEqual(
+        minimumDismissHeight
+      );
+      expect(dismissBounds!.width).toBeGreaterThanOrEqual(44);
+      if (width === 390 || width === 320) {
+        const discoverBounds = await guidance
+          .getByRole("link", { name: "Find a Wave", exact: true })
+          .boundingBox();
+        const learnBounds = await guidance
+          .getByRole("link", { name: "How 6529 works", exact: true })
+          .boundingBox();
+        expect(discoverBounds).not.toBeNull();
+        expect(learnBounds).not.toBeNull();
+        expect(discoverBounds!.height).toBeGreaterThanOrEqual(44);
+        expect(
+          Math.abs(discoverBounds!.height - learnBounds!.height)
+        ).toBeLessThanOrEqual(1);
+        expect(
+          Math.abs(discoverBounds!.width - learnBounds!.width)
+        ).toBeLessThanOrEqual(1);
+        // Desktop retains its rail at this viewport; the two-up layout is a phone requirement.
+        if (width === 390 && isMobile) {
+          expect(
+            Math.abs(
+              discoverBounds!.y +
+                discoverBounds!.height / 2 -
+                (learnBounds!.y + learnBounds!.height / 2)
+            )
+          ).toBeLessThanOrEqual(1);
+        } else if (width === 320) {
+          expect(learnBounds!.y).toBeGreaterThanOrEqual(
+            discoverBounds!.y + discoverBounds!.height
+          );
+        }
+      }
+    }
+    await page.setViewportSize({
+      width: isMobile ? 320 : 1280,
+      height: 900,
+    });
+    await expect(
+      guidance.getByText(
+        "Welcome to 6529. Start with a Wave, a space for conversation, art, and community decisions.",
+        { exact: true }
+      )
+    ).toBeVisible();
+    await expect(
+      guidance.getByText("Check nomination requirements for The Memes.", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(
+      guidance.getByRole("link", { name: /^The Memes Main Stage/ })
+    ).toHaveAttribute("href", /^\/waves\//);
+    await expect(
+      guidance.getByRole("link", { name: "How 6529 works", exact: true })
+    ).toHaveAttribute("href", "/join-6529");
+    await expect(
+      guidance.getByRole("link", { name: "Create a wave", exact: true })
+    ).toHaveCount(0);
+    const submissionGuidance = guidance.getByRole("button", {
+      name: /^Before you submit art/,
+    });
+    if (isMobile) await submissionGuidance.tap();
+    else await submissionGuidance.click();
+    const eligibility = page.getByRole("dialog", {
+      name: isMobile
+        ? "Before you submit art"
+        : "Main Stage submission eligibility",
+      exact: true,
+    });
+    await expect(
+      eligibility.getByText("Unlock submissions", { exact: true })
+    ).toBeVisible();
+    if (!isMobile) await expect(eligibility).toHaveCSS("opacity", "1");
+    await expect(eligibility).toContainText("MemesNominee REP");
+    await expect(eligibility).toContainText("50,000");
+    await expect(
+      eligibility.getByRole("link", { name: "Get nominated", exact: true })
+    ).toHaveAttribute("href", "/waves/0ecb95d0-d8f2-48e8-8137-bfa71ee8593c");
+    await expectNoHorizontalOverflow(page);
+    await expectAxeClean(page, { include: ['[role="dialog"]'] });
+    const eligibilityScreenshot = testInfo.outputPath("guided-eligibility.png");
+    await page.screenshot({
+      path: eligibilityScreenshot,
+      style: "nextjs-portal{display:none!important}",
+    });
+    await testInfo.attach("guided-eligibility", {
+      path: eligibilityScreenshot,
+      contentType: "image/png",
+    });
+    if (isMobile) {
+      await eligibility
+        .getByRole("button", { name: "Close", exact: true })
+        .tap();
+    } else {
+      await expect(eligibility).toHaveAttribute("aria-modal", "false");
+      await submissionGuidance.press("Escape");
+    }
+    await expect(eligibility).toHaveCount(0);
+    await expect(submissionGuidance).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+    await expectAxeClean(page, {
+      include: ['[aria-label="Getting started with your identity"]'],
+    });
+    const screenshotPath = testInfo.outputPath("guided-welcome.png");
+    // Capture the resting appearance after proving keyboard focus restoration.
+    await guidance
+      .getByRole("heading", { name: "Your profile is ready" })
+      .click();
+    await guidance.screenshot({
+      path: screenshotPath,
+      style: "nextjs-portal{display:none!important}",
+    });
+    await testInfo.attach("guided-welcome", {
+      path: screenshotPath,
+      contentType: "image/png",
+    });
+    const findWave = guidance.getByRole("link", {
+      name: "Find a Wave",
+      exact: true,
+    });
+    await expect(findWave).toHaveAttribute("href", "/discover");
+    if (isMobile) await findWave.tap();
+    else {
+      await findWave.focus();
+      await expect(findWave).toBeFocused();
+      await findWave.press("Enter");
+    }
+    await page.waitForURL(/\/discover$/, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await page.goBack();
+    await expect(guidance).toHaveCount(1);
+    await expect(guidance).toBeVisible();
+    await dismissGuide.click();
+    await expect(guidance).toHaveCount(0);
+    await page.reload();
+    await expect(
+      page.getByRole("navigation", { name: "Profile sections" })
+    ).toBeVisible();
+    await expect(guidance).toHaveCount(0);
+  });
+
+  test("Guided welcome eligibility follows input capabilities and supports keyboard dismissal", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    await seedGettingStartedSession(page);
+    await installStatements(page, getSandboxApiOrigin(baseURL));
+    await openOwnProfile(page);
+    // A wide touch device still uses the sheet/dialog; a narrow mouse window
+    // still uses the desktop popover.
+    await page.setViewportSize({ width: isMobile ? 1280 : 600, height: 900 });
+    const trigger = page
+      .getByRole("region", {
+        name: "Getting started with your identity",
+        exact: true,
+      })
+      .getByRole("button", { name: /^Before you submit art/ });
+    const eligibility = page.getByRole("dialog", {
+      name: isMobile
+        ? "Before you submit art"
+        : "Main Stage submission eligibility",
+      exact: true,
+    });
+    await trigger.scrollIntoViewIfNeeded();
+    if (!isMobile) {
+      await trigger.hover();
+      await expect(eligibility).toBeVisible();
+      await eligibility.hover();
+      await expect(eligibility).toBeVisible();
+      await page
+        .getByRole("heading", { name: "Your profile is ready" })
+        .click();
+      await expect(eligibility).toHaveCount(0);
+    }
+    for (const key of ["Enter", "Space"]) {
+      await trigger.focus();
+      await trigger.press(key);
+      await expect(
+        eligibility.getByText("Unlock submissions", { exact: true })
+      ).toBeVisible();
+      if (isMobile) {
+        await expect(eligibility).toHaveAttribute("aria-modal", "true");
+        await eligibility
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+      } else {
+        await expect(eligibility).toBeFocused();
+        await page.keyboard.press("Tab");
+        await expect(
+          eligibility.getByRole("link", { name: "Get nominated", exact: true })
+        ).toBeFocused();
+        await page.keyboard.press("Escape");
+      }
+      await expect(eligibility).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    }
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("Guided welcome keeps About editing in the profile editor", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    await seedGettingStartedSession(page);
+    await observeGettingStartedScroll(page);
+    const api = getSandboxApiOrigin(baseURL);
+    await installStatements(page, api);
+    await openOwnProfile(page);
+    const guidance = page.getByRole("region", {
+      name: "Getting started with your identity",
+      exact: true,
+    });
+    const editProfile = page.getByRole("button", {
+      name: "Edit profile",
+      exact: true,
+    });
+    await expect(
+      guidance.getByRole("button", { name: /About statement/ })
+    ).toHaveCount(0);
+    await openAboutEditor(page);
+    const input = page.getByRole("textbox", {
+      name: "About statement",
+      exact: true,
+    });
+    await expect(input).toBeVisible();
+    await input.fill("This introduction is cancelled.");
+    await page.keyboard.press("Escape");
+    if (!isMobile) {
+      await page
+        .getByRole("button", { name: "Discard changes", exact: true })
+        .click();
+    }
+    await expect(input).toHaveCount(0);
+    await expect(editProfile).toBeFocused();
+    await openAboutEditor(page);
+    await expect(input).toBeEmpty();
+    const draft = "A new member exploring art and community decisions.";
+    await input.fill(draft);
+    let failNextSave = true;
+    await page.route(`${api}/api/profiles/*/cic/statements`, (route) => {
+      if (route.request().method() === "POST" && failNextSave) {
+        failNextSave = false;
+        return route.fulfill({ status: 400, json: { error: "Unavailable" } });
+      }
+      return route.fallback();
+    });
+    const save = page.getByRole("button", { name: "Save", exact: true });
+    await save.click();
+    await expect(
+      page.getByRole("heading", { name: "Couldn't save About", exact: true })
+    ).toBeVisible();
+    await expect(input).toHaveValue(draft);
+    await expect(save).toBeEnabled();
+    await save.click();
+    await expect(input).toHaveCount(0);
+    await expect(
+      guidance.getByRole("button", { name: /About statement/ })
+    ).toHaveCount(0);
+    await expect(editProfile).toBeFocused();
+    await expect(page.getByText(draft, { exact: true })).toBeVisible();
+    await openAboutEditor(page);
+    await expect(input).toHaveValue(draft);
+    await page.keyboard.press("Escape");
+    await expect(input).toHaveCount(0);
+    expect(await getGettingStartedScrolls(page)).toEqual([]);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("hydrates a saved owner session on a direct profile load and reload", async ({
     page,
     baseURL,
@@ -176,39 +689,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     });
     await seedSession(page);
     await installStatements(page, getSandboxApiOrigin(baseURL));
-    // Hosted wallet usage and contract reads are outside this profile fixture.
-    await page.route(
-      "https://api.web3modal.org/appkit/v1/project-limits?*",
-      (route) =>
-        route.fulfill({
-          json: {
-            planLimits: {
-              tier: "starter",
-              isAboveMauLimit: false,
-              isAboveRpcLimit: false,
-            },
-          },
-        })
-    );
-    await page.route("https://rpc.walletconnect.org/v1/**", async (route) => {
-      const payload = route.request().postDataJSON() as
-        | { id: number; method: string }
-        | { id: number; method: string }[];
-      const respond = (call: { id: number; method: string }) => {
-        expect(call.method).toBe("eth_call");
-        return {
-          jsonrpc: "2.0",
-          id: call.id,
-          error: {
-            code: -32000,
-            message: "Contract reads are unavailable in this profile fixture",
-          },
-        };
-      };
-      await route.fulfill({
-        json: Array.isArray(payload) ? payload.map(respond) : respond(payload),
-      });
-    });
+    await installHostedWalletReads(page);
     await page.goto("/playwright");
     const edit = page.getByRole("button", {
       name: "Edit profile",

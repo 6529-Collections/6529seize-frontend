@@ -1,6 +1,8 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { withDisplayTimeZoneDate } from "@/lib/display-time-zone/displayTimeZone";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -72,39 +74,45 @@ export function E2eeDmHistory({
           >
             {t(locale, "e2ee.dm.history.label")}
           </label>
-          <select
-            id={id}
-            value={conversation.g}
-            aria-describedby={`${id}-hint`}
-            onChange={(event) =>
-              router.push(getEncryptedConversationRoute(event.target.value))
-            }
-            className="tw-min-h-10 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
-          >
-            {thread.sessions.map((session, index) => (
-              <option key={session.g} value={session.g}>
-                {t(
-                  locale,
-                  session.g === current?.g
-                    ? "e2ee.dm.history.current"
-                    : "e2ee.dm.history.saved",
-                  {
-                    number: formatInteger(locale, index + 1),
-                    date: formatDate(
-                      locale,
-                      session.updatedAt,
-                      withDisplayTimeZoneDate(zone, {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })
-                    ),
-                    count: formatInteger(locale, session.unread),
-                  }
-                )}
-              </option>
-            ))}
-          </select>
+          <div className="tw-relative">
+            <select
+              id={id}
+              value={conversation.g}
+              aria-describedby={`${id}-hint`}
+              onChange={(event) =>
+                router.push(getEncryptedConversationRoute(event.target.value))
+              }
+              className={`${DROPDOWN_FIELD_CLASSES} tw-block tw-min-h-10 tw-w-full tw-min-w-0 tw-appearance-none tw-py-2 tw-pe-10 tw-ps-3 tw-text-sm`}
+            >
+              {thread.sessions.map((session, index) => (
+                <option key={session.g} value={session.g}>
+                  {t(
+                    locale,
+                    session.g === current?.g
+                      ? "e2ee.dm.history.current"
+                      : "e2ee.dm.history.saved",
+                    {
+                      number: formatInteger(locale, index + 1),
+                      date: formatDate(
+                        locale,
+                        session.updatedAt,
+                        withDisplayTimeZoneDate(zone, {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })
+                      ),
+                      count: formatInteger(locale, session.unread),
+                    }
+                  )}
+                </option>
+              ))}
+            </select>
+            <ChevronDownIcon
+              aria-hidden="true"
+              className="tw-pointer-events-none tw-absolute tw-end-3 tw-top-1/2 tw-size-4 -tw-translate-y-1/2 tw-text-iron-100"
+            />
+          </div>
           <p
             id={`${id}-hint`}
             className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"

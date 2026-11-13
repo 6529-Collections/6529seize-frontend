@@ -13,7 +13,9 @@ const mockWrite = jest.fn();
 const mockReceipt = jest.fn();
 const mockWallet = jest.fn();
 const mockInvalidate = jest.fn();
+// wagmi shares this module, so keep the rest of it real.
 jest.mock("@wagmi/core", () => ({
+  ...jest.requireActual("@wagmi/core"),
   getWalletClient: (...args: unknown[]) => mockWallet(...args),
 }));
 jest.mock("wagmi", () => ({

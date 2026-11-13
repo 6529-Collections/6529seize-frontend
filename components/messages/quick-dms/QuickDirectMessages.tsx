@@ -8,7 +8,9 @@ import {
   useWaveComposerDockElements,
 } from "@/components/waves/WaveComposerDockVisibility";
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { NEW_MESSAGE_ROUTE } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { t } from "@/i18n/messages";
@@ -17,6 +19,7 @@ import {
   useDmUnreadSummary,
 } from "@/services/dm-unread/DmUnreadStateProvider";
 import { ChatBubbleLeftRightIcon } from "@heroicons/react/24/outline";
+import { useRouter } from "next/navigation";
 import {
   Suspense,
   type RefObject,
@@ -46,7 +49,8 @@ import type { QuickDmState } from "./QuickDirectMessagesUtils";
 const QUICK_DM_BASE_POSITION_CLASS =
   "tailwind-scope tw-fixed tw-right-6 tw-z-[70]";
 const QUICK_DM_PANEL_POSITION_CLASS = `${QUICK_DM_BASE_POSITION_CLASS} tw-bottom-24 xl:tw-bottom-6`;
-const QUICK_DM_LAUNCHER_BASE_POSITION_CLASS = `${QUICK_DM_BASE_POSITION_CLASS} tw-transition-[bottom] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none`;
+// Inline wave sidebar width (22rem) plus the existing right inset (1.5rem).
+const QUICK_DM_LAUNCHER_BASE_POSITION_CLASS = `${QUICK_DM_BASE_POSITION_CLASS} tw-transition-[bottom] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none xl:[body:has([data-testid=brain-right-sidebar-slot][data-state=open])_&]:tw-right-[23.5rem]`;
 const QUICK_DM_LAUNCHER_RESTING_POSITION_CLASS = "tw-bottom-24 xl:tw-bottom-6";
 const QUICK_DM_LAUNCHER_LIFTED_POSITION_CLASS = "tw-bottom-32 xl:tw-bottom-32";
 // Right inset (tw-right-6) + launcher diameter (tw-size-14) + breathing room.
@@ -129,7 +133,11 @@ const useIsQuickDmLauncherCoveringInteractive = ({
       childList: true,
       subtree: true,
     });
-    globalThis.document.addEventListener("scroll", debouncedMeasureOverlap, true);
+    globalThis.document.addEventListener(
+      "scroll",
+      debouncedMeasureOverlap,
+      true
+    );
     globalThis.window.addEventListener("resize", debouncedMeasureOverlap);
 
     return () => {
@@ -149,6 +157,7 @@ const useIsQuickDmLauncherCoveringInteractive = ({
 };
 
 export default function QuickDirectMessages() {
+  const router = useRouter();
   const { connectedProfile, showWaves } = useAuth();
   const isDesktop = useIsQuickDmDesktop();
   const locale = useBrowserLocale();
@@ -169,11 +178,12 @@ export default function QuickDirectMessages() {
   const waves = directMessages.list;
   const isVisible = Boolean(isDesktop && connectedProfile?.handle && showWaves);
   const isPanelOpen = isVisible && state.view !== "closed";
-  const isLauncherCoveringInteractive =
-    useIsQuickDmLauncherCoveringInteractive({
+  const isLauncherCoveringInteractive = useIsQuickDmLauncherCoveringInteractive(
+    {
       isEnabled: isVisible && state.view === "closed",
       launcherButtonRef,
-    });
+    }
+  );
   const selectedWave = useMemo(
     () => waves.find((wave) => wave.id === state.waveId) ?? null,
     [state.waveId, waves]
@@ -301,12 +311,17 @@ export default function QuickDirectMessages() {
   }, [setAndStoreState]);
 
   const openCreateDirectMessage = useCallback(() => {
+    if (isE2eeEnabled()) {
+      setAndStoreState(CLOSED_STATE);
+      router.push(NEW_MESSAGE_ROUTE);
+      return;
+    }
     restoreFocusElementRef.current =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : panelRef.current;
     setIsCreateDirectMessageOpen(true);
-  }, []);
+  }, [router, setAndStoreState]);
 
   const closeCreateDirectMessage = useCallback(() => {
     setIsCreateDirectMessageOpen(false);

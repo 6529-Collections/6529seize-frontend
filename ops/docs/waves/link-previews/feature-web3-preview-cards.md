@@ -111,7 +111,9 @@ Only `https://` URLs match. Host must be apex or `www`.
 ## Common Scenarios
 
 - ENS cards show name/address context, records, ownership, and ENS/Etherscan links.
-- Marketplace cards show title/media/price.
+- Marketplace previews open the original link and offer a copy action. Full-size
+  cards show the artwork and title. If a preview is unavailable, its fallback
+  opens the original link. The iOS app omits the price button.
 - Marketplace cards can also show a data-health status badge when metadata is
   stale, errored, or unavailable.
 - On live `MEDIA_LINK_UPDATED` patches, marketplace cards prefer preview-image
@@ -138,12 +140,15 @@ Only `https://` URLs match. Host must be apex or `www`.
   trigger parent-card navigation.
 - OpenSea cards filter blocked OpenGraph-overlay image URLs.
 - OpenSea and Transient NFT previews can read public token metadata as a fallback.
-  Metadata larger than 64 MiB after decompression, slow downloads, or redirects
-  to non-public destinations are skipped; the existing preview fallback remains
-  available. Embedded artwork and missing or unusual JSON content types remain
-  supported within that limit.
-- NFT token metadata is read one document at a time per server process. Up to
-  32 other lookups can wait for at most 15 seconds before their download starts.
+  Metadata larger than 1 MiB after decompression, slow downloads, or redirects
+  to non-public destinations or to ports other than 80 and 443 are skipped; the
+  existing preview fallback remains available. Missing or unusual JSON content
+  types remain supported. Metadata that embeds artwork larger than that limit
+  yields no image from this lookup, so the card uses the page's own image or
+  the minimal preview.
+- NFT token metadata is read up to four documents at a time per server
+  process. Up to 32 other lookups can wait for at most 2 seconds before their
+  download starts.
   If that queue is full or the wait expires, the existing preview fallback is
   used; refreshing later can retry the metadata lookup.
 - Large previews can still be returned, but previews exceeding the in-memory

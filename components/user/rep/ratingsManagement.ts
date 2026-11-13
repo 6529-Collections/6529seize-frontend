@@ -22,6 +22,19 @@ export function isRatingValue(value: string): boolean {
   return /^-?\d+$/.test(value) && Number.isSafeInteger(Number(value));
 }
 
+/** Validate each prefix in release-before-spend order, including a negative budget. */
+export function isWithinRatingAllowance(
+  deltas: readonly number[],
+  available: number
+): boolean {
+  let used = 0;
+  for (const delta of deltas) {
+    used += delta;
+    if (!Number.isFinite(used) || used > available) return false;
+  }
+  return true;
+}
+
 export function getRatingRecipient(row: {
   readonly handle: string | null;
   readonly wallets: readonly string[];
