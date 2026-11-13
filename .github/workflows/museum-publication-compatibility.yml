@@ -78,7 +78,7 @@ jobs:
       publication_commit: ${{ steps.adapter.outputs.publication_commit }}
     steps:
       - name: Check out current frontend main
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           repository: 6529-Collections/6529seize-frontend
           ref: main
@@ -182,7 +182,7 @@ jobs:
       sweep_outcome: ${{ steps.sweep.outcome }}
     steps:
       - name: Check out current frontend main
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
           repository: 6529-Collections/6529seize-frontend
           ref: main
