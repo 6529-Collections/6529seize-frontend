@@ -124,12 +124,14 @@ export function SidebarWaveNavigationControls({
                     aria-label={t(locale, COLLECTION_LABELS[tab])}
                     aria-pressed={navigation.collection === tab}
                     onClick={() => navigation.setCollection(tab)}
-                    className={getConnectedTabButtonClasses({
-                      isActive: navigation.collection === tab,
-                      fill: true,
-                      size: "xs",
-                      presentation: "sidebar",
-                    })}
+                    className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${getConnectedTabButtonClasses(
+                      {
+                        isActive: navigation.collection === tab,
+                        fill: true,
+                        size: "xs",
+                        presentation: "sidebar",
+                      }
+                    )}`}
                   >
                     {t(locale, COLLECTION_LABELS[tab])}
                   </button>

@@ -16,6 +16,7 @@ import DropMinimalIdentityRow from "./DropMinimalIdentityRow";
 import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropContent from "./WaveDropContent";
 import WaveDropHeader from "./WaveDropHeader";
+import WaveDropStormIndicator from "./WaveDropStormIndicator";
 
 import WaveDropReply from "./WaveDropReply";
 
@@ -548,7 +549,7 @@ const getAuthorHeader = ({
         drop={drop}
         signatureGroup={signatureGroup}
         showWaveInfo={showWaveInfo}
-        isStorm={isStorm}
+        isStorm={isStorm && timestampLayout !== "stacked-compact"}
         currentPartIndex={activePartIndex}
         partsCount={drop.parts.length}
         showActionsButton={showActionsButton}
@@ -592,6 +593,7 @@ const getContentBlock = ({
   drop,
   showAuthorInfo,
   authorHeader,
+  showStormPartIndicator = false,
   shouldGroupWithPreviousDrop,
   isProfileView,
   activePartIndex,
@@ -622,6 +624,7 @@ const getContentBlock = ({
   readonly drop: ExtendedDrop;
   readonly showAuthorInfo: boolean;
   readonly authorHeader: React.ReactNode;
+  readonly showStormPartIndicator?: boolean;
   readonly shouldGroupWithPreviousDrop: boolean;
   readonly isProfileView: boolean;
   readonly activePartIndex: number;
@@ -670,7 +673,7 @@ const getContentBlock = ({
     >
       {showAuthorInfo && (
         <div
-          className={`tw-flex tw-w-full tw-items-center tw-gap-x-2 md:tw-items-start ${
+          className={`${showStormPartIndicator ? "tw-grid tw-grid-cols-[auto_minmax(0,1fr)]" : "tw-flex"} tw-w-full tw-items-center tw-gap-x-2 md:tw-items-start ${
             inlineAuthorOnDesktop
               ? ""
               : "md:tw-block md:tw-w-auto md:tw-flex-shrink-0"
@@ -684,6 +687,13 @@ const getContentBlock = ({
           >
             {authorHeader}
           </div>
+          {showStormPartIndicator && (
+            <WaveDropStormIndicator
+              currentPartIndex={activePartIndex}
+              partsCount={drop.parts.length}
+              className={`tw-col-start-2 ${inlineAuthorOnDesktop ? "" : "md:tw-hidden"}`}
+            />
+          )}
         </div>
       )}
       <div
@@ -698,6 +708,13 @@ const getContentBlock = ({
           inlineAuthorOnDesktop,
           authorHeader,
         })}
+        {showStormPartIndicator && !inlineAuthorOnDesktop && (
+          <WaveDropStormIndicator
+            currentPartIndex={activePartIndex}
+            partsCount={drop.parts.length}
+            className="tw-hidden md:tw-inline-flex"
+          />
+        )}
         <div
           className={`${getDropContentClass({
             showAuthorInfo,
