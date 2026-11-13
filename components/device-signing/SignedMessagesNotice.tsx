@@ -4,15 +4,19 @@ import Button from "@/components/utils/button/Button";
 import { faSignature } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import type { DisplayTimeZone } from "@/lib/display-time-zone/displayTimeZone";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 import {
   ExclamationTriangleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useId } from "react";
+import { getNewDeviceAlertCopy } from "@/components/preferences/devices-security/newDeviceAlert";
+import { useGrantReadsEncryptedDms } from "@/components/preferences/devices-security/useGrantReadsEncryptedDms";
 import { useDeviceSecurityState } from "./DeviceSecurityStatus";
 import { openDeviceSetup } from "./deviceSetup";
 import SignedMessagesEnableStatus from "./SignedMessagesEnableStatus";
@@ -30,19 +34,31 @@ interface NoticeCopy {
 /**
  * `withEncryption`: the action opens setup for signed posts and encrypted DMs
  * together, so the banner names both, as the setup dialog does.
+ * `newDeviceReadsDms`: the new device also has encrypted DMs, so its alert
+ * (the same one the encrypted inbox shows) names both.
  */
 function getNoticeCopy(
   locale: SupportedLocale,
   model: SignedMessagesNoticeModel,
-  withEncryption: boolean
+  {
+    withEncryption,
+    newDeviceReadsDms,
+    zone,
+  }: {
+    readonly withEncryption: boolean;
+    readonly newDeviceReadsDms: boolean;
+    readonly zone: DisplayTimeZone;
+  }
 ): NoticeCopy {
   switch (model.kind) {
     case "new-device":
       return {
-        title: t(locale, "signedMessages.notice.newDevice.message", {
+        ...getNewDeviceAlertCopy(locale, {
           label: model.grant.device_label,
+          createdAt: model.grant.created_at,
+          reach: newDeviceReadsDms ? "both" : "posts",
+          zone,
         }),
-        body: null,
         action: t(locale, "signedMessages.notice.newDevice.revoke"),
       };
     case "renew":
@@ -94,9 +110,11 @@ function SignedMessagesNoticeContent({
   hideRenewal,
 }: SignedMessagesNoticeProps) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const titleId = useId();
   const { canEnableEncryption } = useDeviceSecurityState();
   const {
+    address,
     model,
     canEnable,
     enable,
@@ -109,6 +127,10 @@ function SignedMessagesNoticeContent({
     revoke,
     isRevoking,
   } = useSignedMessagesNotice({ composerEmpty });
+  const newDeviceReadsDms = useGrantReadsEncryptedDms(
+    model?.kind === "new-device" ? model.grant : null,
+    address
+  );
 
   if (!model || (hideRenewal && model.kind === "renew")) {
     return null;
@@ -117,7 +139,11 @@ function SignedMessagesNoticeContent({
   if (!isAlert && !canEnable) {
     return null;
   }
-  const copy = getNoticeCopy(locale, model, canEnableEncryption);
+  const copy = getNoticeCopy(locale, model, {
+    withEncryption: canEnableEncryption,
+    newDeviceReadsDms,
+    zone,
+  });
   const iconClass = "tw-col-start-1 tw-row-start-1 tw-size-5 tw-shrink-0";
   const onAction = () => {
     if (model.kind === "new-device") {
@@ -178,7 +204,7 @@ function SignedMessagesNoticeContent({
       <div
         className={`tw-items-center tw-gap-1 ${
           isAlert
-            ? "tw-col-span-2 tw-col-start-2 tw-row-start-2 tw-grid tw-w-fit tw-max-w-full tw-grid-cols-2 sm:tw-col-span-1 sm:tw-col-start-3 sm:tw-row-start-1"
+            ? "tw-col-span-2 tw-col-start-2 tw-row-start-3 tw-grid tw-w-fit tw-max-w-full tw-grid-cols-2 sm:tw-col-span-1 sm:tw-col-start-3 sm:tw-row-start-1"
             : "tw-col-start-3 tw-row-start-1 tw-flex tw-flex-wrap"
         }`}
       >
@@ -190,7 +216,7 @@ function SignedMessagesNoticeContent({
             loading={isAcknowledging}
             disabled={isRevoking}
           >
-            {t(locale, "signedMessages.notice.newDevice.acknowledge")}
+            {t(locale, "devicesSecurity.newDevice.itWasMe")}
           </Button>
         )}
         <Button

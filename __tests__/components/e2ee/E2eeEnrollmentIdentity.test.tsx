@@ -24,6 +24,15 @@ describe("E2eeEnrollmentIdentity", () => {
     ).toBeInTheDocument();
   });
 
+  it("points to the tab where the permissions are revoked, by its name", () => {
+    renderWithAddress("0x5a30c2a1f2e1e7fd7a0d2b5e5d0cfa62c1b336eb");
+    expect(
+      screen.getByText(
+        "You can revoke these permissions in Preferences → Devices & security."
+      )
+    ).toBeInTheDocument();
+  });
+
   it("never echoes an invalid address", () => {
     renderWithAddress("<img src=x>");
     expect(

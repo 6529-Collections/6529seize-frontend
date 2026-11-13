@@ -151,7 +151,8 @@ describe("E2eeBackupPanel", () => {
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
-    expect(screen.getByText("Backup is on.")).toBeInTheDocument();
+    // The pill says On; no sentence repeats it.
+    expect(screen.queryByText("Backup is on.")).not.toBeInTheDocument();
     expect(screen.getByText("On")).toBeInTheDocument();
     expect(screen.queryByText("PQRS")).not.toBeInTheDocument();
   });

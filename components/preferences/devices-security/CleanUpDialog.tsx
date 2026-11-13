@@ -1,7 +1,10 @@
 "use client";
 
 import { useId, useState } from "react";
-import { E2eeDialog } from "@/components/e2ee/ui/E2eeDialog";
+import {
+  E2EE_DIALOG_SCROLL_REGION,
+  E2eeDialog,
+} from "@/components/e2ee/ui/E2eeDialog";
 import { tCount } from "@/components/e2ee/e2eeFormat";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -105,7 +108,9 @@ export function CleanUpDialog({
         </>
       }
     >
-      <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
+      <fieldset
+        className={`tw-m-0 tw-min-w-0 tw-border-0 tw-p-0 ${E2EE_DIALOG_SCROLL_REGION}`}
+      >
         <legend className="tw-sr-only">
           {t(locale, "devicesSecurity.cleanUp.listLabel")}
         </legend>

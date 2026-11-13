@@ -1,12 +1,6 @@
 "use client";
 
 import { useId, type ReactNode } from "react";
-import { useDeviceSecurityState } from "@/components/device-signing/DeviceSecurityStatus";
-import {
-  getDeviceSetupScope,
-  getDeviceSetupTitleKey,
-  openDeviceSetup,
-} from "@/components/device-signing/deviceSetup";
 import {
   BackupStatusPill,
   type BackupPillState,
@@ -73,8 +67,6 @@ export function BackupCard() {
   // Backup lives in the engine: wherever this card is, the engine runs.
   useRequestE2eeEngine();
   const e2ee = useE2ee();
-  const { proof, canEnableEncryption } = useDeviceSecurityState();
-  const setupScope = getDeviceSetupScope(proof, canEnableEncryption);
   switch (e2ee.status) {
     case "disabled":
     case "proxy":
@@ -128,22 +120,10 @@ export function BackupCard() {
       );
     case "needs-enrollment":
     case "enrolling":
+      // A note, not a second "Turn on": the This device card below holds
+      // the one action that turns encrypted DMs on.
       return (
-        <BackupStateCard
-          pill="unavailable"
-          bodyKey="devicesSecurity.backup.needsDms"
-          action={
-            setupScope === "both" || setupScope === "dms" ? (
-              <Button
-                variant="action"
-                size="sm"
-                onClick={() => openDeviceSetup(setupScope)}
-              >
-                {t(locale, getDeviceSetupTitleKey(setupScope, false))}
-              </Button>
-            ) : null
-          }
-        />
+        <BackupStateCard pill={null} bodyKey="devicesSecurity.backup.needsDms" />
       );
     case "device-limit":
       return (

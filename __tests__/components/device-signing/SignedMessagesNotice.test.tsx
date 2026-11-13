@@ -9,6 +9,12 @@ import {
 } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { E2EE_MESSAGES } from "@/i18n/messages/e2ee";
+import { formatE2eeDateTime } from "@/components/e2ee/e2eeFormat";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 import { contextFor, E2eeTestProvider } from "../e2ee/fakeE2eeEngine";
 
 const NOW = Date.UTC(2026, 9, 12, 12, 0);
@@ -17,6 +23,13 @@ const ADDRESS = "0x1111111111111111111111111111111111111111";
 const OWN_KEY = `0x${"aa".repeat(32)}`;
 
 let mockEnabled = true;
+jest.mock("@/hooks/useDisplayTimeZone", () => ({
+  useDisplayTimeZone: jest.fn(),
+}));
+const mockZone = useDisplayTimeZone as jest.MockedFunction<
+  typeof useDisplayTimeZone
+>;
+
 jest.mock("@/lib/device-signing/feature", () => ({
   isSignedMessagesEnabled: () => mockEnabled,
 }));
@@ -77,6 +90,22 @@ jest.mock("@/hooks/device-signing/useLocalDeviceKeys", () => ({
   useLocalDeviceKeys: () => mockLocal,
 }));
 
+// Whether the announced grant's device also has encrypted DMs (e2ee/me).
+let mockReadsDms = false;
+const mockReadsDmsHook = jest.fn();
+jest.mock(
+  "@/components/preferences/devices-security/useGrantReadsEncryptedDms",
+  () => ({
+    useGrantReadsEncryptedDms: (...args: unknown[]) => {
+      mockReadsDmsHook(...args);
+      return mockReadsDms;
+    },
+  })
+);
+
+const NEW_DEVICE_POSTS =
+  /^It can now post as you\. Set up on .+\. If this wasn’t you, revoke it\.$/u;
+
 let mockGrants: ApiDeviceGrant[] | undefined;
 const mockRevoke = jest.fn();
 const mockAcknowledge = jest.fn();
@@ -115,10 +144,13 @@ const otherDevice = grant({
 describe("SignedMessagesNotice", () => {
   beforeEach(() => {
     localStorage.clear();
+    mockZone.mockReturnValue(LOCAL_DISPLAY_TIME_ZONE);
     mockEnabled = true;
     mockAccount = ADDRESS;
     mockLocal = { loaded: true, grant: null, publicKeys: [OWN_KEY] };
     mockGrants = [];
+    mockReadsDms = false;
+    mockReadsDmsHook.mockReset();
     mockRequestGrant.mockReset().mockResolvedValue({ success: true });
     mockRevoke.mockReset();
     mockAcknowledge.mockReset();
@@ -492,6 +524,27 @@ describe("SignedMessagesNotice", () => {
       mockLocal = { ...mockLocal, grant: grant() };
     });
 
+    it("dates the alert in the display time zone, as the inbox's alert does", () => {
+      const auckland: DisplayTimeZone = {
+        timeZone: "Pacific/Auckland",
+        isLocal: false,
+      };
+      mockZone.mockReturnValue(auckland);
+      mockGrants = [];
+      const { rerender } = render(<SignedMessagesNotice composerEmpty />);
+      // Oct 11, 12:00 UTC is already Oct 12 in Auckland.
+      const createdAt = Date.UTC(2026, 9, 11, 12, 0);
+      mockGrants = [{ ...otherDevice, created_at: createdAt }];
+      rerender(<SignedMessagesNotice composerEmpty />);
+      const setUp = formatE2eeDateTime("en-US", createdAt, auckland);
+      expect(setUp).toMatch(/^Oct 12, 2026/u);
+      expect(
+        screen.getByText(
+          `It can now post as you. Set up on ${setUp}. If this wasn’t you, revoke it.`
+        )
+      ).toBeVisible();
+    });
+
     it("treats the first list as a baseline and alerts only for later grants", () => {
       mockGrants = [grant(), otherDevice];
       const { rerender } = render(
@@ -507,12 +560,34 @@ describe("SignedMessagesNotice", () => {
       mockGrants = [newDevice, grant(), otherDevice];
       rerender(<SignedMessagesNotice composerEmpty={false} />);
 
+      // The same words as the encrypted inbox's alert for a new device.
+      expect(
+        screen.getByRole("region", { name: "New device: Safari on iPhone" })
+      ).toBeVisible();
+      expect(screen.getByText(NEW_DEVICE_POSTS)).toBeVisible();
+      expect(screen.getByRole("button", { name: "Revoke" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "It was me" })).toBeVisible();
+      expect(mockReadsDmsHook).toHaveBeenLastCalledWith(newDevice, ADDRESS);
+    });
+
+    it("names both permissions when the new device also reads encrypted DMs", () => {
+      mockGrants = [];
+      const { rerender } = render(<SignedMessagesNotice composerEmpty />);
+      mockReadsDms = true;
+      mockGrants = [otherDevice];
+      rerender(<SignedMessagesNotice composerEmpty />);
+
       expect(
         screen.getByText(
-          "Safari on iPhone is now authorized for Signed Posts. If this wasn’t you, revoke it."
+          /^It can now post as you and read your encrypted DMs\. Set up on /u
         )
       ).toBeVisible();
-      expect(screen.getByRole("button", { name: "Revoke" })).toBeVisible();
+      expect(screen.queryByText(NEW_DEVICE_POSTS)).toBeNull();
+    });
+
+    it("asks about encrypted DMs only while a device is announced", () => {
+      render(<SignedMessagesNotice composerEmpty />);
+      expect(mockReadsDmsHook).toHaveBeenLastCalledWith(null, ADDRESS);
     });
 
     it("neither alerts nor offers to turn on when this browser's keys could not be read", () => {
@@ -552,9 +627,7 @@ describe("SignedMessagesNotice", () => {
       mockGrants = [ownGrant, otherDevice];
       rerenderAfterKeyLoss(<SignedMessagesNotice composerEmpty />);
       expect(
-        screen.getByText(
-          /^Firefox on Windows is now authorized for Signed Posts/
-        )
+        screen.getByText("New device: Firefox on Windows")
       ).toBeVisible();
       expect(screen.getByRole("button", { name: "Revoke" })).toBeVisible();
     });
@@ -573,7 +646,7 @@ describe("SignedMessagesNotice", () => {
       ];
       rerender(<SignedMessagesNotice composerEmpty />);
       expect(
-        screen.queryByText(/is now authorized for Signed Posts/)
+        screen.queryByText(/^New device: /u)
       ).toBeNull();
     });
 
@@ -590,7 +663,7 @@ describe("SignedMessagesNotice", () => {
 
       expect(mockRevoke).toHaveBeenCalledWith(otherDevice);
       expect(
-        screen.queryByText(/is now authorized for Signed Posts/)
+        screen.queryByText(/^New device: /u)
       ).toBeNull();
     });
 
@@ -605,21 +678,21 @@ describe("SignedMessagesNotice", () => {
         fireEvent.click(screen.getByRole("button", { name: "Revoke" }));
       });
       expect(
-        screen.getByText(/is now authorized for Signed Posts/)
+        screen.getByText(/^New device: /u)
       ).toBeVisible();
 
       expect(screen.queryByRole("button", { name: "Dismiss" })).toBeNull();
       mockAcknowledge.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "Got it" }));
+        fireEvent.click(screen.getByRole("button", { name: "It was me" }));
       });
-      expect(screen.getByRole("button", { name: "Got it" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "It was me" })).toBeVisible();
       await act(async () => {
-        fireEvent.click(screen.getByRole("button", { name: "Got it" }));
+        fireEvent.click(screen.getByRole("button", { name: "It was me" }));
       });
       expect(mockAcknowledge).toHaveBeenCalledWith(otherDevice.id);
       expect(
-        screen.queryByText(/is now authorized for Signed Posts/)
+        screen.queryByText(/^New device: /u)
       ).toBeNull();
     });
 
@@ -628,11 +701,11 @@ describe("SignedMessagesNotice", () => {
       const { rerender } = render(<SignedMessagesNotice composerEmpty />);
       mockGrants = [otherDevice];
       rerender(<SignedMessagesNotice composerEmpty />);
-      expect(screen.getByRole("button", { name: "Got it" })).toBeVisible();
+      expect(screen.getByRole("button", { name: "It was me" })).toBeVisible();
 
       mockGrants = [{ ...otherDevice, notice_acknowledged: true }];
       rerender(<SignedMessagesNotice composerEmpty />);
-      expect(screen.queryByRole("button", { name: "Got it" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "It was me" })).toBeNull();
       expect(mockAcknowledge).not.toHaveBeenCalled();
       expect(mockRevoke).not.toHaveBeenCalled();
     });

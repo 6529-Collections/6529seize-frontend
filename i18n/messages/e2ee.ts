@@ -48,6 +48,7 @@ export const E2EE_MESSAGES = {
   "e2ee.section.plaintext": "Direct messages",
   "e2ee.action.newChat": "New encrypted chat",
   "e2ee.action.devices": "Devices & security",
+  "e2ee.action.devicesShort": "Security",
   "e2ee.action.retry": "Try again",
   "e2ee.action.cancel": "Cancel",
   "e2ee.action.close": "Close",
@@ -105,7 +106,7 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.identityUnknown":
     "You’ll sign with the wallet connected to this profile.",
   "e2ee.enroll.manage":
-    "You can revoke these permissions in Preferences → Device Permissions.",
+    "You can revoke these permissions in Preferences → {tab}.",
   "e2ee.gate.noWallet":
     "Connect the wallet for this profile to use encrypted messages.",
 
@@ -248,9 +249,6 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.rename.save": "Save name",
   "e2ee.devices.rename.saved": "Device name saved.",
   "e2ee.devices.rename.failed": "Couldn’t save the name. Try again.",
-  "e2ee.devices.newDevice":
-    "New device added {date}: {label} ({platform}). It can read your encrypted messages. If this wasn’t you, revoke it.",
-  "e2ee.devices.newDeviceConfirm": "This was me",
   "e2ee.devices.newDeviceRevoke": "Revoke {label}",
   "e2ee.devices.open": "Devices & security",
 

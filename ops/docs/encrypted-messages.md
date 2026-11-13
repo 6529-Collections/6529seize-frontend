@@ -543,8 +543,9 @@ time your device sees someone. Compare safety codes and check the wallets in
 Preferences → **Devices & security** (`/preferences?tab=security`; the old
 `/messages/encrypted/devices` and `?tab=devices` links lead there) lists every
 device of your profile once, whether it can sign posts, read encrypted DMs or
-both. The encrypted inbox header's **Devices & security** button opens it, and
-opening the tab starts encrypted messages in that browser so backup can show.
+both. The encrypted inbox header's **Devices & security** button (**Security**
+on phones) opens it, and opening the tab starts encrypted messages in that
+browser so backup can show.
 
 - **This device** is pinned first, with its permissions as chips (a missing one
   shows dashed, for example **Encrypted DMs off**, next to a **Turn on…**
@@ -593,9 +594,14 @@ the same notice with **Add device** and **Ignore**). Adding it trusts that
 wallet for your profile on this device, so other devices signed by it are
 added too.
 
-When another device of yours is turned on, your other devices show which
-device was added and when, that it can read your encrypted messages, and
-**Revoke** or **This was me**. Devices that already existed when this device
+When another device of yours is turned on, your other devices show one alert
+for it, **New device: {name}**, at the top of **Devices & security**, in the
+encrypted inbox and in open encrypted chats. It says everything the device can
+now do (post as you, read your encrypted DMs, or both) and when it was set up,
+with **Revoke** (confirmed first) and **It was me**. On **Devices & security**
+the same device is marked **New** in the list until it's answered. The signed-posts alert
+above a wave's composer uses the same words for the same device, and answering
+either one clears the other. Devices that already existed when this device
 was set up, such as an earlier setup of this browser found again after its
 data was cleared, are never announced as new. Your own device changes are not repeated in
 each chat's timeline.
@@ -608,9 +614,10 @@ another device exists), **Unknown** or **Not available**, and the tab shows an
 amber dot while backup is off. With backup off the card explains the risk and
 the three steps, with **Set up backup**. Until encrypted messages run in this
 browser it says why instead: loading, open in another tab (**Use here**),
-couldn't start (**Try again**), unsupported browser, or **Turn on encrypted
-DMs** first. Backup keeps an encrypted copy of your message history so you can
-restore it on a new device.
+couldn't start (**Try again**), unsupported browser, or that encrypted DMs need
+turning on first (with the one **Turn on** button on the **This device** card).
+Backup keeps an encrypted copy of your message history so you can restore it on
+a new device.
 
 - **Set up backup** guides you through four steps:
   1. **Back up your encrypted messages** says why and what the code does.

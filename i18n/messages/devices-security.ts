@@ -123,4 +123,14 @@ export const DEVICES_SECURITY_MESSAGES = {
     "Encrypted messages and backup run in one tab at a time. They’re open in another 6529 tab.",
   "devicesSecurity.backup.failed":
     "Couldn’t check your backup. Your messages on this device aren’t affected.",
+
+  "devicesSecurity.newDevice.title": "New device: {label}",
+  "devicesSecurity.newDevice.both":
+    "It can now post as you and read your encrypted DMs. Set up on {date}. If this wasn’t you, revoke it.",
+  "devicesSecurity.newDevice.posts":
+    "It can now post as you. Set up on {date}. If this wasn’t you, revoke it.",
+  "devicesSecurity.newDevice.dms":
+    "It can now read your encrypted DMs. Set up on {date}. If this wasn’t you, revoke it.",
+  "devicesSecurity.newDevice.itWasMe": "It was me",
+  "devicesSecurity.row.new": "New",
 } as const;

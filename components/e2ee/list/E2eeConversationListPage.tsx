@@ -64,6 +64,11 @@ function DevicesLink() {
       className={`${ACTION_LINK_CLASS} tw-border-white/10 tw-bg-white/[0.07] tw-text-iron-100 desktop-hover:hover:tw-bg-white/10`}
     >
       <DevicePhoneMobileIcon aria-hidden="true" className="tw-size-4" />
+      {/* A short label on phones (no icon-only entry to backup), the full
+          one from sm; the accessible name contains both. */}
+      <span className="sm:tw-hidden">
+        {t(locale, "e2ee.action.devicesShort")}
+      </span>
       <span className="tw-hidden sm:tw-inline">
         {t(locale, "e2ee.action.devices")}
       </span>
@@ -84,7 +89,10 @@ export function E2eeConversationListPage() {
       title={showingSetup ? undefined : t(locale, "e2ee.title")}
       subtitle={
         ready ? (
-          <E2eeBadge label={t(locale, "e2ee.badge.encrypted")} />
+          <E2eeBadge
+            label={t(locale, "e2ee.badge.encrypted")}
+            shortLabel={t(locale, "e2ee.badge.encryptedShort")}
+          />
         ) : undefined
       }
       backHref={getMessagesBaseRoute(false)}

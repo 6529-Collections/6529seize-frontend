@@ -12,7 +12,7 @@ import type {
   PreparedBackup,
 } from "@/lib/e2ee/backup";
 import { tCount } from "../e2eeFormat";
-import { E2eeDialog } from "../ui/E2eeDialog";
+import { E2EE_DIALOG_SCROLL_REGION, E2eeDialog } from "../ui/E2eeDialog";
 import { CheckForm, type CodeGroup } from "./BackupCodeCheck";
 import { getBackupErrorKey } from "./e2eeBackupErrors";
 
@@ -223,14 +223,12 @@ function SaveBody({
   code,
   groups,
   onPaper,
-  canContinue,
   onSaved,
   onPaperChange,
 }: {
   readonly code: string;
   readonly groups: readonly CodeGroup[];
   readonly onPaper: boolean;
-  readonly canContinue: boolean;
   readonly onSaved: () => void;
   readonly onPaperChange: (onPaper: boolean) => void;
 }) {
@@ -289,11 +287,6 @@ function SaveBody({
       <p className="tw-m-0 tw-rounded-lg tw-bg-amber-500/10 tw-p-3 tw-text-xs tw-leading-5 tw-text-amber-100">
         {t(locale, "e2ee.backup.setup.save.private")}
       </p>
-      {canContinue ? null : (
-        <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-          {t(locale, "e2ee.backup.setup.save.hint")}
-        </p>
-      )}
     </div>
   );
 }
@@ -421,6 +414,7 @@ export function BackupSetupDialog({
 }) {
   const locale = useBrowserLocale();
   const formId = useId();
+  const saveHintId = useId();
   const groups: readonly CodeGroup[] = prepared.code
     .split("-")
     .map((value, index) => ({ number: index + 1, value }));
@@ -475,11 +469,15 @@ export function BackupSetupDialog({
     }
   };
 
-  const continueButton = (next: Step, disabled = false) => (
+  const continueButton = (
+    next: Step,
+    { disabled = false, describedBy }: { disabled?: boolean; describedBy?: string } = {}
+  ) => (
     <Button
       variant="action"
       size="md"
       disabled={disabled}
+      aria-describedby={describedBy}
       onClick={() => setStep(next)}
     >
       {t(locale, "e2ee.backup.setup.continue")}
@@ -520,17 +518,29 @@ export function BackupSetupDialog({
           code={prepared.code}
           groups={groups}
           onPaper={onPaper}
-          canContinue={canContinue}
           onSaved={() => setSaved(true)}
           onPaperChange={setOnPaper}
         />
       ),
       footer: (
         <>
+          {/* Why Continue waits, beside it: above it on phones, at the
+              start of the row from sm. */}
+          {canContinue ? null : (
+            <p
+              id={saveHintId}
+              className="tw-order-last tw-m-0 tw-text-xs tw-text-iron-400 sm:tw-order-first sm:tw-mr-auto sm:tw-self-center"
+            >
+              {t(locale, "e2ee.backup.setup.save.hint")}
+            </p>
+          )}
           <Button variant="secondary" size="md" onClick={() => setStep("why")}>
             {t(locale, "e2ee.backup.setup.back")}
           </Button>
-          {continueButton("check", !canContinue)}
+          {continueButton(
+            "check",
+            canContinue ? {} : { disabled: true, describedBy: saveHintId }
+          )}
         </>
       ),
     }),
@@ -590,7 +600,9 @@ export function BackupSetupDialog({
       scrollBody
       footer={content.footer}
     >
-      <div className="tw-flex tw-flex-col tw-gap-3">
+      <div
+        className={`tw-flex tw-flex-col tw-gap-3 ${E2EE_DIALOG_SCROLL_REGION}`}
+      >
         {showStep ? <StepLabel step={step} /> : null}
         {content.body}
         {/* The title changes in place from uploading to done or failed. */}

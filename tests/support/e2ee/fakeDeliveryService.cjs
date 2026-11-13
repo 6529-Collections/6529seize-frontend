@@ -296,6 +296,8 @@ function createFakeDeliveryService(options = {}) {
     welcomes: new Map(),
     deliveries: new Map(),
     blobs: new Map(),
+    /** History backup generations by lowercase backup id. */
+    backups: new Map(),
     reports: [],
     notifyLog: [],
     wakes: [],
@@ -595,13 +597,21 @@ function createFakeDeliveryService(options = {}) {
     ) {
       fail(400, "E2EE_BAD_SIGNATURE");
     }
-    const sharing = rosterProfilesSharing([target]);
-    device.revoked_at = now();
-    device.revocation = {
+    endDevice(device, {
       revoker_device_key: revoker,
       revoked_at: body.revoked_at,
       signature: lower(body.signature),
-    };
+    });
+    return device;
+  }
+
+  /** Revokes a device: off every roster, no key packages, members told. */
+  function endDevice(device, revocation) {
+    const target = device.device_key;
+    const profileId = device.profile_id;
+    const sharing = rosterProfilesSharing([target]);
+    device.revoked_at = now();
+    device.revocation = revocation;
     for (const group of s.groups.values()) {
       if (group.roster.has(target)) {
         removeFromRoster(group, target, group.epoch);
@@ -613,7 +623,6 @@ function createFakeDeliveryService(options = {}) {
       profile_id: profileId,
       device_key: target,
     });
-    return device;
   }
 
   /** Counts every suite, as the backend's status does. */
@@ -1419,6 +1428,162 @@ function createFakeDeliveryService(options = {}) {
     return record;
   }
 
+  // -- history backup ----------------------------------------------------------
+  // Same rules as the backend's /e2ee/backup* routes: one active and one
+  // pending generation per profile, server-assigned seq with the
+  // expected_seq append precondition, bucket-sized chunks and a quota. The
+  // envelope and chunks stay opaque here, as on the server.
+
+  const BACKUP_BUCKETS = [4096, 16384, 65536, 262144, 1048576];
+  const BACKUP_QUOTA_BYTES = 256 * 1024 * 1024;
+
+  const backupGenerations = (profileId) =>
+    [...s.backups.values()].filter((gen) => gen.profileId === profileId);
+  const backupUsage = (profileId) =>
+    backupGenerations(profileId).reduce((sum, gen) => sum + gen.backup.size, 0);
+
+  function ownBackup(profileId, backupId) {
+    const gen = s.backups.get(lower(backupId));
+    if (!gen || gen.profileId !== profileId) {
+      fail(404, "E2EE_NOT_FOUND");
+    }
+    return gen;
+  }
+
+  /** Drops the profile's generations except `keepId` (null: keep the active one). */
+  function dropBackups(profileId, keepId) {
+    for (const [id, gen] of s.backups) {
+      const kept = keepId === null ? gen.backup.active : id === keepId;
+      if (gen.profileId === profileId && !kept) {
+        s.backups.delete(id);
+      }
+    }
+  }
+
+  function backupStatus(profileId) {
+    const active = backupGenerations(profileId).find((gen) => gen.backup.active);
+    return {
+      backup: active ? { ...active.backup } : null,
+      used_bytes: backupUsage(profileId),
+      quota_bytes: BACKUP_QUOTA_BYTES,
+      max_chunk_bytes: 1048576,
+      chunk_buckets: BACKUP_BUCKETS,
+    };
+  }
+
+  function createBackup(profileId, body) {
+    requireOwnDevice(profileId, body.device_key);
+    // A new pending generation replaces an unfinished one.
+    dropBackups(profileId, null);
+    const backup = {
+      backup_id: body.backup_id,
+      envelope: body.envelope,
+      active: false,
+      chunk_count: 0,
+      size: 0,
+      next_seq: 1,
+      created_at: now(),
+      updated_at: now(),
+      activated_at: null,
+    };
+    s.backups.set(lower(body.backup_id), {
+      backup,
+      profileId,
+      chunks: new Map(),
+    });
+    return { ...backup };
+  }
+
+  function activateBackup(profileId, backupId, body) {
+    requireOwnDevice(profileId, body.device_key);
+    const gen = ownBackup(profileId, backupId);
+    dropBackups(profileId, lower(backupId));
+    gen.backup = {
+      ...gen.backup,
+      active: true,
+      activated_at: gen.backup.activated_at ?? now(),
+    };
+    return { ...gen.backup };
+  }
+
+  function appendBackupChunk(profileId, backupId, body) {
+    requireOwnDevice(profileId, body.device_key);
+    const gen = ownBackup(profileId, backupId);
+    const size = Buffer.from(String(body.data || ""), "base64").length;
+    if (!BACKUP_BUCKETS.includes(size)) {
+      fail(400, "E2EE_BAD_REQUEST");
+    }
+    if (
+      body.expected_seq !== undefined &&
+      body.expected_seq !== gen.backup.next_seq
+    ) {
+      fail(409, "E2EE_BACKUP_SEQ_CONFLICT");
+    }
+    if (backupUsage(profileId) + size > BACKUP_QUOTA_BYTES) {
+      fail(413, "E2EE_BACKUP_QUOTA");
+    }
+    const meta = { seq: gen.backup.next_seq, size, created_at: now() };
+    gen.chunks.set(meta.seq, { data: body.data, meta });
+    gen.backup = {
+      ...gen.backup,
+      next_seq: meta.seq + 1,
+      chunk_count: gen.backup.chunk_count + 1,
+      size: gen.backup.size + size,
+      updated_at: now(),
+    };
+    return { ...meta };
+  }
+
+  function listBackupChunks(profileId, backupId, query) {
+    const gen = ownBackup(profileId, backupId);
+    const afterSeq = Number(query.after_seq || 0);
+    const limit = Number(query.limit || 500);
+    const all = [...gen.chunks.values()]
+      .map((chunk) => chunk.meta)
+      .filter((meta) => meta.seq > afterSeq)
+      .sort((a, b) => a.seq - b.seq);
+    const items = all.slice(0, limit);
+    return {
+      items,
+      next_after_seq: all.length > limit ? items.at(-1).seq : null,
+    };
+  }
+
+  function getBackupChunk(profileId, backupId, seq) {
+    const chunk = ownBackup(profileId, backupId).chunks.get(seq);
+    if (!chunk) {
+      fail(404, "E2EE_NOT_FOUND");
+    }
+    return { seq, data: chunk.data };
+  }
+
+  function compactBackup(profileId, backupId, body) {
+    requireOwnDevice(profileId, body.device_key);
+    const gen = ownBackup(profileId, backupId);
+    // Deleting the current key while iterating a Map is safe.
+    for (const seq of gen.chunks.keys()) {
+      if (seq <= body.through_seq) {
+        gen.chunks.delete(seq);
+      }
+    }
+    const rest = [...gen.chunks.values()];
+    gen.backup = {
+      ...gen.backup,
+      chunk_count: rest.length,
+      size: rest.reduce((sum, chunk) => sum + chunk.meta.size, 0),
+    };
+    return { ...gen.backup };
+  }
+
+  function deleteBackups(profileId) {
+    for (const [id, gen] of s.backups) {
+      if (gen.profileId === profileId) {
+        s.backups.delete(id);
+      }
+    }
+    return {};
+  }
+
   // -- routing ------------------------------------------------------------------
 
   const routes = [
@@ -1534,19 +1699,42 @@ function createFakeDeliveryService(options = {}) {
         getChunk(c.profileId, blob, Number(index), lower(c.query.device_key)),
     ],
     ["POST", /^e2ee\/reports$/, (c) => report(c.profileId, c.body)],
-    // History backup: the sandbox reports "no backup", so the devices page
-    // shows backup as off. Backup writes and restores are covered by the
-    // real-WASM Jest integration test and are not simulated here.
+    // History backup: opaque generations and chunks, as on the server.
+    ["GET", /^e2ee\/backup$/, (c) => backupStatus(c.profileId)],
+    ["DELETE", /^e2ee\/backup$/, (c) => deleteBackups(c.profileId)],
+    ["POST", /^e2ee\/backups$/, (c) => createBackup(c.profileId, c.body)],
     [
       "GET",
-      /^e2ee\/backup$/,
-      () => ({
-        backup: null,
-        used_bytes: 0,
-        quota_bytes: 256 * 1024 * 1024,
-        max_chunk_bytes: 1048576,
-        chunk_buckets: [4096, 16384, 65536, 262144, 1048576],
-      }),
+      /^e2ee\/backups\/([^/]+)$/,
+      (c, [id]) => ({ ...ownBackup(c.profileId, decodeURIComponent(id)).backup }),
+    ],
+    [
+      "POST",
+      /^e2ee\/backups\/([^/]+)\/activate$/,
+      (c, [id]) => activateBackup(c.profileId, decodeURIComponent(id), c.body),
+    ],
+    [
+      "POST",
+      /^e2ee\/backups\/([^/]+)\/chunks$/,
+      (c, [id]) =>
+        appendBackupChunk(c.profileId, decodeURIComponent(id), c.body),
+    ],
+    [
+      "GET",
+      /^e2ee\/backups\/([^/]+)\/chunks$/,
+      (c, [id]) =>
+        listBackupChunks(c.profileId, decodeURIComponent(id), c.query),
+    ],
+    [
+      "GET",
+      /^e2ee\/backups\/([^/]+)\/chunks\/(\d+)$/,
+      (c, [id, seq]) =>
+        getBackupChunk(c.profileId, decodeURIComponent(id), Number(seq)),
+    ],
+    [
+      "POST",
+      /^e2ee\/backups\/([^/]+)\/compact$/,
+      (c, [id]) => compactBackup(c.profileId, decodeURIComponent(id), c.body),
     ],
   ];
 
@@ -1680,11 +1868,20 @@ function createFakeDeliveryService(options = {}) {
       }
       return null;
     },
-    /** NC8: the wallet's session revoked the grant (DN1 device list). */
+    /**
+     * NC8: the wallet's session revoked the grant (DN1 device list). Like
+     * the backend, the device that grant enrolled ends with it.
+     */
     revokeLoginGrant(grantId) {
-      const stored = s.loginGrants.get(lower(grantId));
+      const id = lower(grantId);
+      const stored = s.loginGrants.get(id);
       if (stored) {
         stored.revoked = true;
+      }
+      for (const device of s.devices.values()) {
+        if (device.grant_id === id && device.revoked_at === null) {
+          endDevice(device, null);
+        }
       }
     },
     subscribe(profileId, listener) {

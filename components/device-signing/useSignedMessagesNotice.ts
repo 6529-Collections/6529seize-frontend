@@ -181,6 +181,7 @@ export function useSignedMessagesNotice({
   );
 
   return {
+    address,
     model,
     canEnable,
     enable,
