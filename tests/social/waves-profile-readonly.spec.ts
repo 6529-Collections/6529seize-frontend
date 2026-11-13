@@ -221,6 +221,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         .or(controls.getByRole("tab", { name: "xTDH", exact: true }));
       await expect(sortControl).toHaveCount(1);
       await expect(sortControl).toBeDisabled();
+      await expect(sortControl).toHaveCSS("font-size", "14px");
+      await expect(sortControl).toHaveCSS(
+        "height",
+        (page.viewportSize()?.width ?? 1280) >= 1024 ? "32px" : "44px"
+      );
       loadingLayout = await skeleton.evaluate(measureCard);
       await expectNoHorizontalOverflow(page);
       await captureSafeScreenshot(

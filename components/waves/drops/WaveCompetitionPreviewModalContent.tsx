@@ -1,6 +1,11 @@
 "use client";
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import {
+  CONNECTED_TAB_INTERACTION_CLASSES,
+  CONNECTED_TAB_SURFACE_CLASSES,
+  getConnectedTabStateClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
@@ -44,10 +49,6 @@ const TabButton = ({
   const isActive = activeTab === tab;
   const accentTextClass =
     tab === "winners" ? "tw-text-emerald-200" : "tw-text-violet-200";
-  const webActiveClass =
-    tab === "winners"
-      ? "tw-bg-emerald-500/15 tw-text-emerald-200 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-      : "tw-bg-violet-500/15 tw-text-violet-200 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]";
   let className: string;
   if (isApp) {
     const stateClassName = isActive
@@ -55,10 +56,7 @@ const TabButton = ({
       : "tw-border-transparent tw-font-medium tw-text-iron-500 desktop-hover:hover:tw-text-iron-200";
     className = `tw-min-h-11 tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${stateClassName}`;
   } else {
-    const stateClassName = isActive
-      ? webActiveClass
-      : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-200";
-    className = `tw-flex-1 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${stateClassName}`;
+    className = `tw-flex-1 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive })}`;
   }
 
   return (
@@ -206,7 +204,7 @@ export const WaveCompetitionPreviewModalContent = ({
             className={
               isApp
                 ? "tw-flex tw-w-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06]"
-                : "tw-flex tw-h-10 tw-w-full tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1 sm:tw-w-auto"
+                : `${CONNECTED_TAB_SURFACE_CLASSES} tw-flex tw-h-10 tw-w-full tw-items-center tw-border tw-border-solid tw-p-1 sm:tw-w-auto`
             }
           >
             <TabButton

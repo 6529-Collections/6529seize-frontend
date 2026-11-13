@@ -187,9 +187,10 @@ export function DiscoverWaveControls({
           {currentLabel}
           <ChevronDownIcon className="tw-size-3" aria-hidden="true" />
         </Button>
-        <div className="tw-hidden tw-shrink-0 @[56rem]/discovery-controls:tw-block">
+        <div className="tw-hidden tw-shrink-0 @[56rem]/discovery-controls:tw-block [&_[role=tab]]:tw-font-semibold">
           <CommonTabs<DiscoverSort>
-            variant="filter"
+            variant="connected"
+            connectedSize="sm"
             items={SORT_OPTIONS.map((option) => ({
               key: option.value,
               value: option.value,

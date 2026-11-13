@@ -331,9 +331,12 @@ export default function CreateWaveInlineGroupXtdhGrant({
                 <div
                   ref={statusTabsRef}
                   data-group-criteria-tabs
-                  className="tw-min-w-0 tw-max-w-full max-[400px]:[&_[role=tab]]:tw-px-1"
+                  className="tw-min-w-0 tw-max-w-full"
                 >
                   <CommonTabs<ApiXTdhGrantStatus>
+                    variant="connected"
+                    connectedSize="sm"
+                    connectedSpacing="compact-mobile"
                     items={STATUS_ITEMS}
                     activeItem={selectedStatus}
                     setSelected={(status) =>

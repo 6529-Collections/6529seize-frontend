@@ -179,6 +179,7 @@ export default function ProfileActivityLogs({
                   activeItem={targetType}
                   filterLabel="Filter direction"
                   setSelected={onTargetType}
+                  variant="connected"
                   size="sm"
                 />
               </div>
@@ -204,6 +205,7 @@ export default function ProfileActivityLogs({
                   activeItem={matter}
                   filterLabel="Filter matter"
                   setSelected={onMatterChange}
+                  variant="connected"
                   size="sm"
                 />
               </div>
@@ -214,6 +216,7 @@ export default function ProfileActivityLogs({
                     activeItem={targetType}
                     filterLabel="Filter direction"
                     setSelected={onTargetType}
+                    variant="connected"
                     size="sm"
                   />
                 </div>

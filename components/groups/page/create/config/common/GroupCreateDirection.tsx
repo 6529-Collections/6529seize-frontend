@@ -25,6 +25,9 @@ export default function GroupCreateDirection({
   ];
   return (
     <CommonTabs
+      variant="connected"
+      connectedSize="sm"
+      connectedTypography="body"
       items={items}
       activeItem={direction}
       filterLabel="Identity Direction"
