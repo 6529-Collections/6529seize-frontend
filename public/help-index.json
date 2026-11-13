@@ -8050,7 +8050,7 @@
       "facts": [
         "Set-as-pinned-drop is a documented wave drop action.",
         "Pinning availability depends on permissions and wave/drop state.",
-        "The Pinned tab saves your wave order to your profile. Drag a wave by its handle or open the reorder menu and choose Move up or Move down. New pins go to the bottom.",
+        "The Pinned tab saves your wave order to your profile. Drag the wave row, or touch and hold it briefly before dragging on a touch screen. With a keyboard, focus the wave, press Space, use the arrow keys, and press Space again to save. New pins go to the bottom.",
         "Pinned wave navigation is separate from pinned drops inside a wave."
       ],
       "canonical_path": "/waves",
