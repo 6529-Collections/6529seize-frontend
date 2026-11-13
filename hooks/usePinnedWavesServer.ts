@@ -428,6 +428,23 @@ function usePinnedWaveMutations(
   return { pinMutation, unpinMutation };
 }
 
+function reorderCachedPins(
+  waves: SidebarWave[],
+  previousIds: readonly string[],
+  nextIds: readonly string[]
+): SidebarWave[] {
+  const byId = new Map(waves.map((wave) => [wave.id, wave]));
+  const affected = new Set(previousIds);
+  const replacements = nextIds.flatMap((id) => {
+    const wave = byId.get(id);
+    return wave ? [wave] : [];
+  });
+  let index = 0;
+  return waves.map((wave) =>
+    affected.has(wave.id) ? (replacements[index++] ?? wave) : wave
+  );
+}
+
 interface UsePinnedWavesServerOptions {
   readonly enabled?: boolean | undefined;
 }
@@ -532,12 +549,14 @@ export function usePinnedWavesServer(
         ) {
           throw new Error("Pinned wave order changed");
         }
-        const byId = new Map(currentVisible.map((wave) => [wave.id, wave]));
-        const nextVisible = nextIds.map((id) => byId.get(id)!);
-        let index = 0;
-        const reordered = cached.map((wave) =>
-          previous.has(wave.id) ? nextVisible[index++]! : wave
-        );
+        if (
+          nextIds.length !== previous.size ||
+          new Set(nextIds).size !== previous.size ||
+          nextIds.some((id) => !previous.has(id))
+        ) {
+          throw new Error("Invalid pinned wave order");
+        }
+        const reordered = reorderCachedPins(cached, previousIds, nextIds);
         queryClient.setQueryData(pinnedWavesQueryKey, reordered);
         try {
           await pinnedWavesApi.updateOrder({
@@ -545,10 +564,22 @@ export function usePinnedWavesServer(
             wave_ids: reordered.map((wave) => wave.id),
           });
         } catch (saveError) {
-          // Keep later pin/unpin updates if they already changed the cache.
           queryClient.setQueryData<SidebarWave[]>(
             pinnedWavesQueryKey,
-            (current) => (current === reordered ? cached : current)
+            (current) => {
+              if (!current) return current;
+              const currentIds = new Set(current.map((wave) => wave.id));
+              const expected = nextIds.filter((id) => currentIds.has(id));
+              const currentOrder = current.filter((wave) =>
+                previous.has(wave.id)
+              );
+              if (
+                currentOrder.some((wave, index) => wave.id !== expected[index])
+              ) {
+                return current;
+              }
+              return reorderCachedPins(current, nextIds, previousIds);
+            }
           );
           throw saveError;
         }

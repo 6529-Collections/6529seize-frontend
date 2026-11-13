@@ -3,6 +3,7 @@
 import {
   DndContext,
   DragOverlay,
+  KeyboardSensor,
   MouseSensor,
   TouchSensor,
   closestCenter,
@@ -15,6 +16,7 @@ import {
   arrayMove,
   useSortable,
   verticalListSortingStrategy,
+  sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -84,6 +86,7 @@ function SortablePinnedWave({
 }) {
   const locale = useBrowserLocale();
   const {
+    attributes,
     listeners,
     setNodeRef,
     setActivatorNodeRef,
@@ -106,12 +109,12 @@ function SortablePinnedWave({
       <div className="tw-flex tw-items-center">
         <div className="tw-min-w-0 tw-flex-1">{renderRow(parent)}</div>
         {controls && (
-          <div className="tw-mr-2 tw-flex tw-shrink-0">
+          <div className="tw-mr-2 tw-flex tw-shrink-0 tw-gap-1">
             <button
               type="button"
               ref={setActivatorNodeRef}
+              {...attributes}
               {...listeners}
-              tabIndex={-1}
               className={`${ORDER_BUTTON_CLASS} tw-cursor-grab tw-touch-none active:tw-cursor-grabbing`}
               aria-label={t(locale, "waves.sidebar.dragWave", {
                 waveName: group.name,
@@ -180,10 +183,11 @@ export function SidebarPinnedWaves({
   const dragStartIds = useRef<readonly string[]>([]);
   const saving = useRef(false);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<"saved" | "error" | null>(null);
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, { activationConstraint: { distance: 6 } })
+    useSensor(TouchSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   async function move(from: number, to: number) {
@@ -198,12 +202,12 @@ export function SidebarPinnedWaves({
     )
       return;
     saving.current = true;
-    setStatus("");
+    setStatus(null);
     try {
       await onReorder(ids, arrayMove(ids, from, to));
-      setStatus(t(locale, "waves.sidebar.pinOrderSaved"));
+      setStatus("saved");
     } catch {
-      setStatus(t(locale, "waves.sidebar.pinOrderSaveError"));
+      setStatus("error");
     } finally {
       saving.current = false;
     }
@@ -239,6 +243,22 @@ export function SidebarPinnedWaves({
       <div ref={listRef}>
         <DndContext
           sensors={sensors}
+          accessibility={{
+            screenReaderInstructions: {
+              draggable: t(locale, "waves.sidebar.dragInstructions"),
+            },
+            announcements: {
+              onDragStart: () => t(locale, "waves.sidebar.dragStarted"),
+              onDragOver: ({ over }) => {
+                const position = ids.indexOf(String(over?.id)) + 1;
+                return position > 0
+                  ? t(locale, "waves.sidebar.dragPosition", { position })
+                  : undefined;
+              },
+              onDragEnd: () => undefined,
+              onDragCancel: () => t(locale, "waves.sidebar.dragCancelled"),
+            },
+          }}
           collisionDetection={closestCenter}
           onDragStart={({ active }) => {
             dragStartIds.current = ids;
@@ -276,6 +296,7 @@ export function SidebarPinnedWaves({
             <button
               type="button"
               className="tw-rounded-md tw-bg-iron-800 tw-px-3 tw-py-1 tw-text-iron-100"
+              aria-label={t(locale, "waves.sidebar.pinsRetryLabel")}
               onClick={() => void onRetry?.()}
             >
               {t(locale, "waves.sidebar.joinedRetry")}
@@ -283,13 +304,13 @@ export function SidebarPinnedWaves({
           </div>
         )}
       </div>
-      <div
-        role="status"
-        className={
-          status ? "tw-px-4 tw-py-1 tw-text-xs tw-text-iron-300" : "tw-sr-only"
-        }
-      >
-        {status}
+      {status === "error" && !hasLoadingError && (
+        <p role="alert" className="tw-px-4 tw-py-1 tw-text-xs tw-text-iron-300">
+          {t(locale, "waves.sidebar.pinOrderSaveError")}
+        </p>
+      )}
+      <div role="status" className="tw-sr-only">
+        {status === "saved" && t(locale, "waves.sidebar.pinOrderSaved")}
       </div>
     </section>
   );

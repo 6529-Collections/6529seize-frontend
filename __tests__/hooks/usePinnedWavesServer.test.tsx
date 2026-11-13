@@ -119,6 +119,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   queryClientMock.cancelQueries.mockReset().mockResolvedValue(undefined);
   queryClientMock.getQueryData.mockReset();
+  queryClientMock.setQueryData.mockReset();
   pinMutateAsync = jest.fn().mockResolvedValue(undefined);
   unpinMutateAsync = jest.fn().mockResolvedValue(undefined);
   requestAuth.mockReset().mockResolvedValue({ success: true });
@@ -171,6 +172,33 @@ test("loads all pins in saved order in one request", async () => {
   ).resolves.toEqual([createWave("wave-2"), createWave("wave-1")]);
   expect(pinnedWavesApi.getPinnedWaves).toHaveBeenCalledTimes(1);
   expect(pinnedWavesApi.getPinnedWaves).toHaveBeenCalledWith(signal);
+});
+
+test("rolls back a failed reorder while preserving a pin added during the save", async () => {
+  const a = createWave("a");
+  const b = createWave("b");
+  const added = createWave("added");
+  let current = [a, b];
+  queryClientMock.getQueryData.mockImplementation(() => current);
+  queryClientMock.setQueryData.mockImplementation((_key, data) => {
+    current = typeof data === "function" ? data(current) : data;
+  });
+  jest.mocked(pinnedWavesApi.updateOrder).mockImplementationOnce(async () => {
+    current = [...current, added];
+    throw new Error("Conflict");
+  });
+  renderHook(() => usePinnedWavesServer(), { wrapper });
+  const { mutationFn } = useMutationMock.mock.calls[2][0];
+
+  await expect(
+    mutationFn({ previousIds: ["a", "b"], nextIds: ["b", "a"] })
+  ).rejects.toThrow("Conflict");
+
+  expect(pinnedWavesApi.updateOrder).toHaveBeenCalledWith({
+    previous_wave_ids: ["a", "b"],
+    wave_ids: ["b", "a"],
+  });
+  expect(current).toEqual([a, b, added]);
 });
 
 test("disables pinned and official wave reads while wallet auth is invalid", () => {

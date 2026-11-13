@@ -1452,6 +1452,12 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
     "Max {count} pinned waves. Unpin another wave first.",
   "pinControl.viewerChanged": "The active profile changed. Please try again.",
   dragWave: "Drag {waveName}",
+  dragInstructions:
+    "Press Space to pick up the wave. Use the arrow keys to move it, Space to drop, or Escape to cancel.",
+  dragStarted: "Picked up wave.",
+  dragPosition: "Position {position}.",
+  dragCancelled: "Reordering cancelled.",
+  pinsRetryLabel: "Retry loading pinned waves",
   reorderWave: "Reorder {waveName}",
   movePinUp: "Move up",
   movePinDown: "Move down",

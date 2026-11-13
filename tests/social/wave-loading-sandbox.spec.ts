@@ -98,6 +98,50 @@ test("saves reordered pins across reload on desktop and mobile", async ({
   ).toHaveText(["Scroll wave 1", "Scroll wave 0"]);
 });
 
+test("can reorder pins from the keyboard", async ({
+  page,
+  baseURL,
+  isMobile,
+}) => {
+  test.skip(isMobile, "The mouse and touch paths have separate coverage.");
+  await installWaveListScrollFixture(page, baseURL);
+  await page.goto("/waves", { waitUntil: "domcontentloaded" });
+  await page
+    .getByRole("group", { name: "Wave list filter" })
+    .getByRole("button", { name: "Pinned", exact: true })
+    .click();
+
+  const list = page
+    .getByRole("region", { name: "Pinned", exact: true })
+    .filter({ visible: true });
+  const handle = list.getByRole("button", {
+    name: "Drag Scroll wave 0",
+    exact: true,
+  });
+  await handle.focus();
+  await page.keyboard.press("Space");
+  await expect(list.getByText("Position 1.", { exact: true })).toHaveCount(1);
+  await page.keyboard.press("ArrowDown");
+  await expect(list.getByText("Position 2.", { exact: true })).toHaveCount(1);
+  await page.keyboard.press("Space");
+  await expect(
+    list.getByRole("link", { name: /^Scroll wave [01]$/ })
+  ).toHaveText(["Scroll wave 1", "Scroll wave 0"]);
+
+  await expect(
+    list.getByText("Pinned wave order saved.", { exact: true })
+  ).toHaveCount(1);
+  const menu = list.getByRole("button", {
+    name: "Reorder Scroll wave 0",
+    exact: true,
+  });
+  await menu.press("Enter");
+  await page.getByRole("menuitem", { name: "Move up" }).press("Enter");
+  await expect(
+    list.getByRole("link", { name: /^Scroll wave [01]$/ })
+  ).toHaveText(["Scroll wave 0", "Scroll wave 1"]);
+});
+
 for (const collection of ["All", "Pinned", "Joined"]) {
   test(`wave list stops automatic scrolling during incoming activity in ${collection}`, async ({
     page,
@@ -243,13 +287,21 @@ for (const collection of ["All", "Pinned", "Joined"]) {
     await page.screenshot({
       path: testInfo.outputPath("active-wave-reordered.png"),
     });
-    // Scrolling to the top confirms the receiving wave really moved there.
+    // Confirm the top row follows the collection’s ordering rule.
     await sidebarScrollMetrics(list, 0);
-    await expect(list.getByRole("link").first()).toHaveText(
-      `Scroll wave ${nextActive}`
+    const firstWave = list.getByRole("link").first();
+    await expect(firstWave).toHaveText(
+      collection === "Pinned" ? "Scroll wave 0" : `Scroll wave ${nextActive}`
     );
     await fixture.incoming(55);
-    await expect(list.getByRole("link").first()).toHaveText("Scroll wave 55");
+    if (collection === "Pinned") {
+      await expect(
+        list.getByRole("link", { name: "Scroll wave 55" })
+      ).toHaveAttribute("href", /divider=/);
+      await expect(firstWave).toHaveText("Scroll wave 0");
+    } else {
+      await expect(firstWave).toHaveText("Scroll wave 55");
+    }
     expect((await sidebarScrollMetrics(list)).top).toBe(0);
     // Exercise the track last so its native animation cannot overlap the
     // programmatic reset used by the activity-at-top assertion above.
