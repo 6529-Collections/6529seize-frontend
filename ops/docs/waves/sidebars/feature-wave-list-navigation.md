@@ -117,6 +117,11 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Active Votes rows include the wave score shield; select it for score details without opening the wave.
 - Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
   with score shields overlapping the bottom-right corner of each avatar.
+  When no input device supports hover, a small wave name appears below each
+  avatar, limited to two lines with an ellipsis for longer names. The name is
+  part of the same link, so tapping it opens the wave directly. Devices with
+  hover keep the avatar-only strip and existing name and score details on hover
+  or keyboard focus.
   The section keeps its own compact height independently of the vote list.
 - Create wave has a visible label in the expanded desktop Waves panel and mobile Waves list, including signed-out visits. The collapsed sidebar keeps the plus icon and accessible Create wave name.
 - Each heading has a separate `View all` link aligned to the right, available

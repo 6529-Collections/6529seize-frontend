@@ -6,6 +6,7 @@ import {
   render as rtlRender,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import type { UnifiedWavesListWavesHandle } from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "@/components/brain/left-sidebar/waves/UnifiedWavesListWaves";
@@ -667,7 +668,11 @@ it("keeps the overlaid score inside the wave link and opens details on hover", a
   expect(
     await screen.findByRole("dialog", { name: "Wave score details" })
   ).toBeInTheDocument();
-  expect(screen.getByText("Scored Discovery")).toBeInTheDocument();
+  expect(
+    within(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).getByText("Scored Discovery")
+  ).toBeInTheDocument();
   expect(screen.getByText("Last message")).toBeInTheDocument();
   expect(screen.getByText("1h")).toBeInTheDocument();
   expect(screen.getByText("Quality")).toBeInTheDocument();
@@ -722,7 +727,11 @@ it("uses no-message copy in the combined highly rated score card", async () => {
   expect(
     await screen.findByRole("dialog", { name: "Wave score details" })
   ).toBeInTheDocument();
-  expect(screen.getByText("Quiet Discovery")).toBeInTheDocument();
+  expect(
+    within(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).getByText("Quiet Discovery")
+  ).toBeInTheDocument();
   expect(screen.getByText("No messages yet")).toBeInTheDocument();
 });
 
@@ -757,7 +766,11 @@ it("opens the combined highly rated score card when the wave link receives focus
   expect(
     await screen.findByRole("dialog", { name: "Wave score details" })
   ).toBeInTheDocument();
-  expect(screen.getByText("Keyboard Discovery")).toBeInTheDocument();
+  expect(
+    within(
+      screen.getByRole("dialog", { name: "Wave score details" })
+    ).getByText("Keyboard Discovery")
+  ).toBeInTheDocument();
 });
 
 it("caps highly rated previews at six without rendering an overflow control", () => {

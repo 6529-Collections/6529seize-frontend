@@ -856,6 +856,71 @@ test("recommendation telemetry preserves active state before keyboard and pointe
   ).not.toContain("private-recommendation");
 });
 
+for (const width of [320, 430]) {
+  test(`recommendation names follow hover capability and stay compact at ${width}px`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/waves/private-wave?recommendations=long-names");
+    const recommendations = page.getByRole("region", {
+      name: "Worth Checking Out",
+      exact: true,
+    });
+    const names = [
+      "An exceptionally long recommendation name that cannot fit in the compact strip",
+      "AnExceptionallyLongUnbrokenRecommendationNameThatCannotFit",
+    ];
+    const canHover = await page.evaluate(
+      () => matchMedia("(any-hover: hover)").matches
+    );
+    for (const name of names) {
+      const link = recommendations.getByRole("link", {
+        name: `Open ${name}`,
+        exact: true,
+      });
+      await expect(link).toBeVisible();
+      const caption = link.getByText(name, { exact: true });
+      if (canHover) {
+        await expect(caption).toBeHidden();
+      } else {
+        await expect(caption).toBeVisible();
+        await expect(caption).toHaveCSS("-webkit-line-clamp", "2");
+        const bounds = await caption.boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.height).toBeLessThanOrEqual(28);
+        expect(
+          await caption.evaluate((element) => element.scrollHeight)
+        ).toBeGreaterThan(bounds!.height);
+        const sectionBounds = await recommendations.boundingBox();
+        expect(sectionBounds).not.toBeNull();
+        expect(bounds!.x).toBeGreaterThanOrEqual(sectionBounds!.x);
+        expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(
+          sectionBounds!.x + sectionBounds!.width
+        );
+        expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(
+          sectionBounds!.y + sectionBounds!.height
+        );
+      }
+    }
+    const firstLink = recommendations.getByRole("link", {
+      name: `Open ${names[0]}`,
+      exact: true,
+    });
+    await expect(firstLink).toHaveAttribute("aria-current", "page");
+    if (canHover) {
+      await firstLink.focus();
+      await firstLink.press("Enter");
+    } else {
+      await firstLink.getByText(names[0]!, { exact: true }).tap();
+    }
+    await expect(firstLink).not.toHaveAttribute("aria-current");
+    await testInfo.attach("compact-recommendation-names", {
+      body: await recommendations.screenshot(),
+      contentType: "image/png",
+    });
+  });
+}
+
 test("rapid consent regrant waits for all real SDK queue deletions", async ({
   page,
 }) => {
