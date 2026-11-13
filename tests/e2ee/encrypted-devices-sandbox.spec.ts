@@ -90,8 +90,10 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     sessions.push(bobLaptop);
     await enroll(bobLaptop);
 
-    // Bob's phone adds his own new device when it reconciles the open chat,
-    // and tells him a new device can read his messages.
+    // Bob's phone adds his own new device in its background maintenance,
+    // which runs for every chat on the first sync after this page load
+    // (never because a chat was opened), and tells him a new device can
+    // read his messages.
     await openConversation(bobPhone.page, g);
     await expect(bobPhone.page.getByText(NEW_DEVICE_NOTICE)).toBeVisible({
       timeout: E2EE_SYNC_TIMEOUT_MS,

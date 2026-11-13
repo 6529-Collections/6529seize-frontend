@@ -378,14 +378,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (key !== null && changed && this.ctx.store.status === "ready") {
       // Contract 12: an open conversation polls every 5 s, starting now.
       this.controller.restartPolling();
-      // 8.4 reconciliation on open: catch up, then look for missing devices.
-      // The catch-up fetches only groups with new items, and maintenance
-      // commits (and so fetches the log) only when a change is due, so
-      // opening a chat does not name it (D175, P60 §1).
-      this.background(async () => {
-        await this.controller.syncChanged();
-        await this.controller.maintain(key, { onlyIfDue: true });
-      });
+      // Catch up on open: only groups with new items are fetched, so
+      // opening a chat does not name it (D175, P60 §1). Looking for missing
+      // devices (8.4) is left to background maintenance, which runs for
+      // every group on its own schedule and on device events: a device
+      // lookup made because a chat was opened would name its members.
+      this.background(() => this.controller.syncChanged());
     }
   }
 

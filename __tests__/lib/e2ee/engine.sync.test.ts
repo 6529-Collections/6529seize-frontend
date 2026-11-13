@@ -144,6 +144,48 @@ describe("E2EE engine: sync paths", () => {
     }
   });
 
+  it("opening chats with a stale device cache looks up nobody in them (prxt)", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice", {}, { noWake: true });
+    const bob = await addUser(world, "bob");
+    const carol = await addUser(world, "carol");
+    const withBob = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    const withCarol = await alice.primary.engine.createConversation({
+      profileIds: ["carol"],
+      kind: "dm",
+    });
+    await settle(world);
+    // The 5-minute device cache is stale; background maintenance (every 10
+    // minutes per group) is not due yet.
+    world.clock.advance(6 * 60_000);
+    const keysOf = (profileId: string) =>
+      world.ds.devicesOf(profileId).map((device) => device.device_key);
+    const named = [
+      bob.profileId,
+      carol.profileId,
+      ...keysOf("bob"),
+      ...keysOf("carol"),
+    ];
+    const start = world.ds.state.requests.length;
+    alice.primary.engine.setOpenConversation(withBob);
+    await alice.primary.engine.idle();
+    alice.primary.engine.setOpenConversation(withCarol);
+    await alice.primary.engine.idle();
+    const lookups = world.ds.state.requests
+      .slice(start)
+      .filter(
+        (r) =>
+          r.profileId === "alice" &&
+          (r.path === "e2ee/devices/lookup" ||
+            named.some((value) => r.path.includes(value)))
+      );
+    expect(lookups).toEqual([]);
+    alice.primary.engine.dispose();
+  });
+
   it("flushes a waiting send on the next changed-groups pass, whichever chat is open", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");
