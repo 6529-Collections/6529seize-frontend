@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { test, expect } from "../testHelpers";
 
 const STAGING_DEPLOYMENT_HOSTNAME = /^[a-z0-9-]*staging\.6529\.io$/;
@@ -20,6 +20,21 @@ async function openAccessGate(page: Page, entry: string): Promise<void> {
     page.goto(entry),
   ]);
   await expect(page).toHaveTitle("Access Page");
+}
+
+async function submitStagingCode(input: Locator, code: string): Promise<void> {
+  // Playwright can snapshot the text field on failure even with tracing off.
+  await input.evaluate((element: HTMLInputElement, value) => {
+    element.focus();
+    element.value = value;
+    try {
+      element.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
+    } finally {
+      element.value = "";
+    }
+  }, code);
 }
 
 // The staging check enters a real team access code.
@@ -74,38 +89,46 @@ test.describe("Access Page", () => {
       await dialog.dismiss();
     });
     await test.step("keeps the field locked until the requested page opens", async () => {
-      const navigation = Promise.withResolvers<void>();
+      const isDestination = (url: URL) => url.pathname + url.search === path;
+      // A 204 ends the navigation without replacing the current document.
       await page.route(
-        (url) => url.pathname + url.search === path,
-        async (route) => {
-          if (route.request().isNavigationRequest()) await navigation.promise;
-          await route.continue();
-        }
+        isDestination,
+        (route) => route.fulfill({ status: 204 }),
+        { times: 1 }
       );
+      await Promise.all([
+        page.waitForResponse(
+          (response) =>
+            response.request().isNavigationRequest() &&
+            isDestination(new URL(response.url())) &&
+            response.status() === 204
+        ),
+        submitStagingCode(input, accessCode),
+      ]);
+
       const openingStatus = page
         .getByRole("status")
         .filter({ hasText: /^Opening page…$/ });
-      try {
-        await input.fill(accessCode);
-        await page.keyboard.press("Enter");
-        await expect(openingStatus).toBeVisible();
-        await expect(input).not.toBeEditable();
-        await page.keyboard.press("Enter");
-        await expect(openingStatus).toBeVisible();
-        await expect(input).not.toBeEditable();
-      } finally {
-        navigation.resolve();
-      }
+      await expect(openingStatus).toBeVisible();
+      await expect(input).not.toBeEditable();
+      await expect(input).toHaveValue("");
+      await page.keyboard.press("Enter");
+      await expect(openingStatus).toBeVisible();
+      await expect(input).not.toBeEditable();
     });
 
-    await expect(page).toHaveURL(path + hash);
-    expect(dialogs).toEqual([]);
+    await test.step("opens the original path, query and fragment", async () => {
+      await context.clearCookies();
+      await openAccessGate(page, path + hash);
+      await submitStagingCode(input, accessCode);
+      await expect(page).toHaveURL(path + hash);
+      expect(dialogs).toEqual([]);
+    });
 
     await test.step("opens the home page when accessed directly", async () => {
       await context.clearCookies();
       await openAccessGate(page, "/access");
-      await input.fill(accessCode);
-      await input.press("Enter");
+      await submitStagingCode(input, accessCode);
       await expect(page).toHaveURL("/");
       expect(dialogs).toEqual([]);
     });
