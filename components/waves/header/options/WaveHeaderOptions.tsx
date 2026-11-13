@@ -3,6 +3,10 @@
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
+import {
+  WAVE_HEADER_ACTION_CLASSES,
+  WAVE_HEADER_ACTION_SURFACE_CLASSES,
+} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
@@ -113,7 +117,7 @@ export default function WaveHeaderOptions({
         <button
           ref={buttonRef}
           type="button"
-          className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-all tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-iron-700 desktop-hover:tw-size-8 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-400"
+          className={WAVE_HEADER_ACTION_CLASSES}
           id="options-menu-0-button"
           aria-expanded={isOptionsOpen}
           aria-controls={panel.isInSheet ? panel.contentId : undefined}
@@ -126,10 +130,12 @@ export default function WaveHeaderOptions({
           <span className="tw-sr-only">
             {t(locale, "waves.header.ownerOptionsOpenLabel")}
           </span>
-          <EllipsisVerticalIcon
-            className="tw-size-5 tw-flex-shrink-0"
-            aria-hidden="true"
-          />
+          <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+            <EllipsisVerticalIcon
+              className="tw-size-5 tw-flex-shrink-0"
+              aria-hidden="true"
+            />
+          </span>
         </button>
         {optionsSurface}
       </div>

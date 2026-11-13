@@ -19,6 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TabToggle } from "@/components/common/TabToggle";
+import { TabCountBadge } from "@/components/common/TabCountBadge";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
@@ -429,7 +430,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
             badge:
               tab === MyStreamWaveTab.CHAT ? (
                 <WaveChatUnreadBadge waveId={wave.id} />
-              ) : undefined,
+              ) : (
+                <TabCountBadge count={badgeCount} variant="wave" />
+              ),
             onIntent: tab === MyStreamWaveTab.CHAT ? prefetchChat : undefined,
             label:
               nativeDefault &&

@@ -1,4 +1,5 @@
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import { SpeakerXMarkIcon as SpeakerXMarkOutlineIcon } from "@heroicons/react/24/outline";
 import { SpeakerXMarkIcon as SpeakerXMarkSolidIcon } from "@heroicons/react/24/solid";
@@ -32,9 +33,12 @@ export default function WaveMutedNotificationButton({
   const Icon = settings.isMuted
     ? SpeakerXMarkSolidIcon
     : SpeakerXMarkOutlineIcon;
+  const unmutedClasses = compact
+    ? "tw-border-iron-700 tw-bg-iron-800 tw-text-iron-300 enabled:desktop-hover:hover:tw-border-iron-600 enabled:desktop-hover:hover:tw-bg-iron-700"
+    : "tw-border-iron-700 tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";
   const stateClasses = settings.isMuted
     ? "tw-border-error/40 tw-bg-error/10 tw-text-error desktop-hover:hover:tw-bg-error/15 desktop-hover:hover:tw-text-error"
-    : "tw-border-iron-700 tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";
+    : unmutedClasses;
 
   return (
     <div className={compact ? "tw-inline-flex" : "tw-w-full"}>
@@ -44,10 +48,10 @@ export default function WaveMutedNotificationButton({
         onClick={settings.onMuteClick}
         data-tooltip-id={tooltipId}
         data-tooltip-content={settings.muteTooltip}
-        className={`tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-text-[13px] tw-font-semibold tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed ${stateClasses} ${
+        className={`tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-text-[13px] tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed motion-reduce:tw-transition-none ${stateClasses} ${
           compact
-            ? "tw-size-9 tw-gap-0 tw-px-0"
-            : "tw-h-10 tw-w-full tw-gap-2 tw-px-3 lg:tw-h-9"
+            ? `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-size-8 tw-gap-0 tw-p-0 tw-transition-colors tw-duration-150`
+            : "tw-h-10 tw-w-full tw-gap-2 tw-px-3 tw-transition tw-duration-300 tw-ease-out lg:tw-h-9"
         }`}
         aria-label={ariaLabel}
       >

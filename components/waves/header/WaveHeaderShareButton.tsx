@@ -2,6 +2,7 @@
 
 import { CheckIcon, LinkIcon, ShareIcon } from "@heroicons/react/24/outline";
 import Button from "@/components/utils/button/Button";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 
@@ -30,12 +31,12 @@ export default function WaveHeaderShareButton({
       <Button
         type="button"
         variant="tertiary"
-        size="sm"
+        size="xs"
         onClick={onClick}
         disabled={isSharing}
         aria-label={actionLabel}
         data-wave-link-action-mode={mode}
-        className="!tw-border-iron-700"
+        className={`!tw-border-iron-700 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`}
       >
         <Icon aria-hidden="true" className="tw-size-4 tw-shrink-0" />
         <span aria-hidden="true">{label}</span>

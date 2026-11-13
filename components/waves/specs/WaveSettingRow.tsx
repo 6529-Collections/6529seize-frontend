@@ -29,6 +29,7 @@ interface WaveSettingRowProps {
   readonly renderEditor: (controls: {
     readonly closeEditor: () => void;
   }) => ReactNode;
+  readonly showContentDivider?: boolean | undefined;
   readonly valueLabel: ReactNode;
   readonly variant?: "content" | "row" | undefined;
 }
@@ -68,6 +69,7 @@ export default function WaveSettingRow({
   label,
   onOpen,
   renderEditor,
+  showContentDivider = true,
   valueLabel,
   variant = "row",
 }: WaveSettingRowProps) {
@@ -308,7 +310,11 @@ export default function WaveSettingRow({
       aria-haspopup={panel.isInSheet ? undefined : "dialog"}
       title={editLabel}
       onClick={toggleEditor}
-      className="tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 sm:tw-size-7"
+      className={`tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-size-7 ${
+        editIcon === "gear"
+          ? "tw-text-iron-500/70 desktop-hover:hover:tw-text-iron-200"
+          : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300"
+      }`}
     >
       {editIconContent}
     </button>
@@ -323,7 +329,13 @@ export default function WaveSettingRow({
           </h2>
           {editButton}
         </div>
-        <div className="tw-mt-3 tw-min-w-0 tw-break-words tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
+        <div
+          className={`tw-mt-3 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100 ${
+            showContentDivider
+              ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-3"
+              : "tw-border-0"
+          }`}
+        >
           {valueLabel}
         </div>
         {editorSurface}
