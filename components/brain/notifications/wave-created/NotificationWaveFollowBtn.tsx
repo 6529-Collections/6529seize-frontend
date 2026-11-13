@@ -1,25 +1,16 @@
 "use client";
 
-import { useAuth } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
 import {
   FOLLOW_BUTTON_SIZES,
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
 import Button from "@/components/utils/button/Button";
-import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { useRecordWaveSidebarMembership } from "@/hooks/waves/useWaveSidebarMembership";
+import { useWaveJoin } from "@/hooks/waves/useWaveJoin";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import {
-  commonApiDeleteWithBody,
-  commonApiPost,
-} from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import { useContext, useState } from "react";
+import { useState } from "react";
 import {
   FollowBtnCheckIcon,
   FollowBtnPlusIcon,
@@ -36,100 +27,26 @@ export default function NotificationWaveFollowBtn({
   readonly followLabel?: string | undefined;
   readonly followingLabel?: string | undefined;
 }) {
-  const { setToast, requestAuth } = useAuth();
-  const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
-  const recordMembership = useRecordWaveSidebarMembership();
+  // Overview payloads carry membership as a flag; the local override keeps the
+  // button current until the notification refetches.
   const [followingOverride, setFollowingOverride] = useState<boolean | null>(
     null
   );
-  const [mutating, setMutating] = useState(false);
   const following =
     followingOverride ?? wave.context_profile_context?.subscribed ?? false;
-
-  const followMutation = useMutation({
-    mutationFn: async () => {
-      await commonApiPost<
-        ApiWaveSubscriptionActions,
-        ApiWaveSubscriptionActions
-      >({
-        endpoint: `waves/${wave.id}/subscriptions`,
-        body: {
-          actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
-        },
-      });
-      // Membership is confirmed before the optional all-messages preference.
-      recordMembership(wave.id, true);
-      await commonApiPost({
-        endpoint: `notifications/wave-subscription/${wave.id}`,
-        body: {},
-      });
+  const { isPending, join, leave } = useWaveJoin(
+    {
+      id: wave.id,
+      subscribed_actions: following ? WAVE_DEFAULT_SUBSCRIPTION_ACTIONS : [],
     },
-    onSuccess: () => {
-      setFollowingOverride(true);
-      onWaveFollowChange({
-        waveId: wave.id,
-        following: true,
-      });
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: "Couldn't follow this wave.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
-  });
-
-  const unFollowMutation = useMutation({
-    mutationFn: async () => {
-      await commonApiDeleteWithBody<
-        ApiWaveSubscriptionActions,
-        ApiWaveSubscriptionActions
-      >({
-        endpoint: `waves/${wave.id}/subscriptions`,
-        body: {
-          actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
-        },
-      });
-      // Record only after the final subscription request succeeds.
-      recordMembership(wave.id, false);
-    },
-    onSuccess: () => {
-      setFollowingOverride(false);
-      onWaveFollowChange({
-        waveId: wave.id,
-        following: false,
-      });
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: "Couldn't unfollow this wave.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
-  });
+    { subscribeToAllDrops: true }
+  );
 
   const onFollow = async (): Promise<void> => {
-    setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setMutating(false);
-      return;
+    const changed = await (following ? leave() : join());
+    if (changed) {
+      setFollowingOverride(!following);
     }
-    if (following) {
-      await unFollowMutation.mutateAsync();
-      return;
-    }
-    await followMutation.mutateAsync();
   };
 
   const label = following ? followingLabel : followLabel;
@@ -137,7 +54,7 @@ export default function NotificationWaveFollowBtn({
     <div className="tw-flex tw-items-center tw-gap-x-2">
       <Button
         onClick={onFollow}
-        loading={mutating}
+        loading={isPending}
         hideChildrenWhenLoading
         variant={following ? "secondary" : "primary"}
         size={FOLLOW_BUTTON_SIZES[size]}

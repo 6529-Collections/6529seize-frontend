@@ -1,115 +1,26 @@
 "use client";
 
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { AuthContext } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { useMutation } from "@tanstack/react-query";
-import {
-  commonApiDeleteWithBody,
-  commonApiPost,
-} from "@/services/api/common-api";
-import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
-import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
 import Button from "@/components/utils/button/Button";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { useRecordWaveSidebarMembership } from "@/hooks/waves/useWaveSidebarMembership";
+import { useWaveJoin } from "@/hooks/waves/useWaveJoin";
 
 export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
-  const { connectedProfile, activeProfileProxy, setToast, requestAuth } =
-    useContext(AuthContext);
-  const { onWaveFollowChange } = useContext(ReactQueryWrapperContext);
-  const recordMembership = useRecordWaveSidebarMembership();
-  const isSubscribed = !!wave.subscribed_actions.length;
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const { isJoined: isSubscribed, isPending, toggle } = useWaveJoin(wave);
   const label = isSubscribed ? "Following" : "Follow";
   const canSubscribe = !!connectedProfile?.handle && !activeProfileProxy;
 
-  const [mutating, setMutating] = useState(false);
-
-  const subscribeMutation = useMutation({
-    mutationFn: async () => {
-      await commonApiPost<
-        ApiWaveSubscriptionActions,
-        ApiWaveSubscriptionActions
-      >({
-        endpoint: `waves/${wave.id}/subscriptions`,
-        body: {
-          actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
-        },
-      });
-      recordMembership(wave.id, true);
-    },
-    onSuccess: () => {
-      onWaveFollowChange({
-        waveId: wave.id,
-        following: true,
-      });
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: "Couldn't follow this wave.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
-  });
-
-  const unSubscribeMutation = useMutation({
-    mutationFn: async () => {
-      await commonApiDeleteWithBody<
-        ApiWaveSubscriptionActions,
-        ApiWaveSubscriptionActions
-      >({
-        endpoint: `waves/${wave.id}/subscriptions`,
-        body: {
-          actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS,
-        },
-      });
-      // Record only after the final subscription request succeeds.
-      recordMembership(wave.id, false);
-    },
-    onSuccess: () => {
-      onWaveFollowChange({
-        waveId: wave.id,
-        following: false,
-      });
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: "Couldn't unfollow this wave.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
-  });
-
   const onSubscribe = async (): Promise<void> => {
-    setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setMutating(false);
-      return;
-    }
-    if (isSubscribed) {
-      await unSubscribeMutation.mutateAsync();
-      return;
-    }
-    await subscribeMutation.mutateAsync();
+    await toggle();
   };
 
   return (
     <Button
       onClick={onSubscribe}
       disabled={!canSubscribe}
-      loading={mutating}
+      loading={isPending}
       hideChildrenWhenLoading
       variant={isSubscribed ? "secondary" : "primary"}
       size="xs"
