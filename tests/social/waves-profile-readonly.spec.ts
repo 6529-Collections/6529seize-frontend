@@ -1835,11 +1835,30 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("tab", { name: "My Votes", exact: true })
     ).toHaveCount(0);
-    await expect(
-      page.getByRole("button", {
-        name: /^(How to Submit|Submit Work|Submit Work to The Memes)$/,
-      })
-    ).toBeVisible();
+    const submissionAction = page.getByRole("button", {
+      name: /^(How to Submit|Submit Work|Submit Work to The Memes)$/,
+    });
+    if (
+      testInfo.project.name === "web-mobile-chromium" &&
+      !(await submissionAction.isVisible())
+    ) {
+      // Narrow headers keep ineligible submission help in More. Preserve the
+      // same availability check without changing eligible submission behavior.
+      await page
+        .getByRole("button", { name: "More wave actions", exact: true })
+        .click();
+      const more = page.getByRole("dialog", {
+        name: "More wave actions",
+        exact: true,
+      });
+      await expect(
+        more.getByRole("button", { name: "How to Submit", exact: true })
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(more).toHaveCount(0);
+    } else {
+      await expect(submissionAction).toBeVisible();
+    }
 
     await waveTabs
       .getByRole("tab", { name: "Leaderboard", exact: true })
