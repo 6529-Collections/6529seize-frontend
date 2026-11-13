@@ -430,7 +430,10 @@ const DropsList = memo(
         if (unreadDividerSerialNo === null) return null;
         if (dropSerialNo !== unreadDividerSerialNo) return null;
         return (
-          <UnreadDivider key={`unread-divider-${unreadDividerSerialNo}`} />
+          <UnreadDivider
+            key={`unread-divider-${dropSerialNo}`}
+            serialNo={dropSerialNo}
+          />
         );
       },
       [unreadDividerSerialNo]
