@@ -478,7 +478,12 @@ test.describe("Profile NIC activity @local-only", () => {
           .getByRole("img", { name: "avatar-user", exact: true })
           .filter({ visible: true })
           .first();
-        await avatar.scrollIntoViewIfNeeded();
+        // The fallback replaces the image, so scroll its stable neighboring link.
+        await page
+          .getByRole("link", { name: "avatar-user", exact: true })
+          .filter({ visible: true })
+          .first()
+          .scrollIntoViewIfNeeded();
         await expect
           .poll(() =>
             avatar.evaluate((img: HTMLImageElement) => img.naturalWidth)
