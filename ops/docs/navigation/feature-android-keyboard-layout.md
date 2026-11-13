@@ -39,6 +39,10 @@ blank space.
 
 - Wave or message composing: bottom navigation hides while typing and returns
   after keyboard close, restoring reserve spacing.
+- On short iPhone screens in landscape, wave and message section tabs also hide
+  while the chat keyboard is open. The header and Back remain available, with
+  room below them for messages, the reply preview, and the composer. Dismiss the
+  keyboard to restore the section tabs.
 - Single-drop reply chat on iOS and Android: the full-screen chat panel docks
   above the keyboard, and composer bottom safe-area padding becomes `0` while
   the keyboard is open.
@@ -56,7 +60,13 @@ blank space.
 
 ## Edge Cases
 
-- Android keyboard show/hide updates are debounced to reduce rapid flicker.
+- On Android, the composer stays directly above the keyboard whether the app
+  window resizes or pans to keep the focused input visible. Space already made
+  available by the app window is counted once, even when keyboard events arrive
+  later, keeping recent messages visible without an extra blank gap. This also
+  applies to DMs, single-drop chat, and mobile dialogs. Layout follows Android's
+  viewport updates immediately, without an extra app animation that could make
+  the composer bounce as the keyboard opens.
 - On iOS, closed-state spacing returns as keyboard dismissal starts, while the
   native animation remains authoritative until the keyboard is fully closed.
   This prevents the composer from briefly touching the physical bottom before

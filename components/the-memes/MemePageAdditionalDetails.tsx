@@ -3,7 +3,10 @@
 import Download, { type DownloadLabels } from "@/components/download/Download";
 import { publicEnv } from "@/config/env";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
+import {
+  normalizeDecentralizedMediaUrl,
+  toIsolatedHtmlUrlFromInput,
+} from "@/lib/media/decentralized-media";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ComponentType, ReactNode, SVGProps } from "react";
@@ -48,10 +51,15 @@ function getSafeUrl(
 }
 
 export function getSafeExternalUrl(url: string): string | null {
+  const resolverEndpoint = publicEnv.MEDIA_RESOLVER_ENDPOINT;
   const resolvedUrl =
-    normalizeDecentralizedMediaUrl(url, publicEnv.MEDIA_RESOLVER_ENDPOINT) ??
-    url;
-  return getSafeUrl(resolvedUrl, SAFE_EXTERNAL_PROTOCOLS);
+    normalizeDecentralizedMediaUrl(url, resolverEndpoint) ?? url;
+  // Opened top-level: IPFS media gets its own per-CID origin when the
+  // separate content domain is configured.
+  return getSafeUrl(
+    toIsolatedHtmlUrlFromInput(resolvedUrl, resolverEndpoint),
+    SAFE_EXTERNAL_PROTOCOLS
+  );
 }
 
 function getSafeDownloadUrl(url: string): string | null {
@@ -65,7 +73,11 @@ export function AdditionalDetailsSection({
   title,
   icon,
   children,
+  compactMobile = false,
+  className = "",
 }: {
+  readonly compactMobile?: boolean;
+  readonly className?: string;
   readonly title: string;
   readonly icon: ComponentType<SVGProps<SVGSVGElement>>;
   readonly children: ReactNode;
@@ -73,16 +85,18 @@ export function AdditionalDetailsSection({
   const Icon = icon;
 
   return (
-    <section className="tw-space-y-6">
+    <section className={`tw-space-y-6 ${className}`}>
       <div className="tw-mb-2 tw-flex tw-items-center tw-gap-3">
         <Icon
           aria-hidden="true"
-          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
+          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500 md:[[data-nft-card-page]_&]:tw-hidden"
         />
-        <h3 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400">
+        <h3 className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-text-iron-400 md:[[data-nft-card-page]_&]:tw-text-base md:[[data-nft-card-page]_&]:tw-normal-case md:[[data-nft-card-page]_&]:tw-leading-6 md:[[data-nft-card-page]_&]:tw-text-iron-100">
           {title}
         </h3>
-        <div className="tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent" />
+        <div
+          className={`tw-h-px tw-min-w-10 tw-flex-grow tw-bg-gradient-to-r tw-from-iron-700 tw-to-transparent md:[[data-nft-card-page]_&]:tw-hidden ${compactMobile ? "tw-hidden sm:tw-block" : ""}`}
+        />
       </div>
       {children}
     </section>
@@ -91,7 +105,9 @@ export function AdditionalDetailsSection({
 
 export function ArweaveLinkRow({
   row,
+  compactMobile = false,
 }: {
+  readonly compactMobile?: boolean;
   readonly row: AdditionalDetailsMediaRow;
 }) {
   const safeExternalUrl = getSafeExternalUrl(row.url);
@@ -99,10 +115,10 @@ export function ArweaveLinkRow({
 
   return (
     <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-3 last:tw-border-b-0 md:tw-grid-cols-[4rem_minmax(10rem,16rem)_minmax(0,1fr)_auto] md:tw-items-center md:tw-gap-6">
-      <div className="tw-text-sm tw-font-semibold tw-uppercase tw-leading-5 tw-text-iron-500">
+      <div className="tw-text-sm tw-font-semibold tw-uppercase tw-leading-5 tw-text-iron-500 md:[[data-nft-card-page]_&]:tw-text-xs md:[[data-nft-card-page]_&]:tw-font-medium md:[[data-nft-card-page]_&]:tw-leading-4">
         {row.label}
       </div>
-      <div className="tw-min-w-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 md:tw-truncate">
+      <div className="tw-min-w-0 tw-text-base tw-font-medium tw-leading-6 tw-text-iron-100 md:tw-truncate md:[[data-nft-card-page]_&]:tw-text-sm md:[[data-nft-card-page]_&]:tw-leading-5">
         {row.title}
       </div>
       {safeExternalUrl ? (
@@ -111,14 +127,14 @@ export function ArweaveLinkRow({
           target="_blank"
           rel="noopener noreferrer"
           title={row.url}
-          className="tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-mono tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-400 tw-no-underline hover:tw-text-iron-100 md:tw-truncate md:tw-break-normal"
+          className={`tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-medium tw-no-underline hover:tw-text-iron-100 md:tw-truncate md:tw-break-normal ${compactMobile ? "tw-font-sans tw-text-xs tw-leading-[18px] tw-text-iron-500 sm:tw-font-mono sm:tw-text-sm sm:tw-leading-5 sm:tw-text-iron-400" : "tw-font-mono tw-text-sm tw-leading-5 tw-text-iron-400"}`}
         >
           {row.url}
         </Link>
       ) : (
         <span
           title={row.url}
-          className="tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-mono tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-500 md:tw-truncate md:tw-break-normal"
+          className={`tw-block tw-min-w-0 tw-max-w-full tw-break-all tw-font-medium tw-text-iron-500 md:tw-truncate md:tw-break-normal ${compactMobile ? "tw-font-sans tw-text-xs tw-leading-[18px] sm:tw-font-mono sm:tw-text-sm sm:tw-leading-5" : "tw-font-mono tw-text-sm tw-leading-5"}`}
         >
           {row.url}
         </span>
@@ -154,7 +170,11 @@ export function ArweaveLinkRow({
 export function MetadataCard({
   label,
   value,
+  compactMobile = false,
+  className = "",
 }: {
+  readonly compactMobile?: boolean;
+  readonly className?: string;
   readonly label: string;
   readonly value: string | number;
 }) {
@@ -162,12 +182,16 @@ export function MetadataCard({
   const tooltipId = buildTooltipId("meme-property", label, displayValue);
 
   return (
-    <div className="tw-flex tw-min-w-24 tw-flex-1 tw-flex-col tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2">
-      <span className="tw-mb-1 tw-block tw-truncate tw-text-xs tw-font-normal tw-uppercase tw-leading-4 tw-tracking-wide tw-text-iron-500">
+    <div
+      className={`tw-min-w-24 tw-flex-1 tw-flex-col tw-rounded-lg tw-border tw-border-solid tw-bg-iron-900 tw-px-3 md:[[data-nft-card-page]_&]:tw-border-transparent ${compactMobile ? "tw-border-transparent tw-py-2.5 sm:tw-border-iron-800 sm:tw-py-2" : "tw-border-iron-800 tw-py-2"} ${className || "tw-flex"}`}
+    >
+      <span
+        className={`tw-mb-1 tw-block tw-font-normal tw-uppercase tw-leading-4 tw-text-iron-500 md:[[data-nft-card-page]_&]:tw-text-sm md:[[data-nft-card-page]_&]:tw-normal-case md:[[data-nft-card-page]_&]:tw-leading-5 md:[[data-nft-card-page]_&]:tw-tracking-normal md:[[data-nft-card-page]_&]:tw-text-iron-400 ${compactMobile ? "tw-break-words tw-text-[10px] tw-tracking-[0.06em] sm:tw-truncate sm:tw-text-xs sm:tw-tracking-wide" : "tw-truncate tw-text-xs tw-tracking-wide"}`}
+      >
         {label}
       </span>
       <span
-        className="tw-truncate tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-200"
+        className={`tw-font-medium tw-text-iron-200 md:[[data-nft-card-page]_&]:tw-text-sm md:[[data-nft-card-page]_&]:tw-leading-5 md:[[data-nft-card-page]_&]:tw-text-iron-100 ${compactMobile ? "tw-break-words tw-text-[13px] tw-leading-[18px] sm:tw-truncate sm:tw-text-xs sm:tw-leading-4" : "tw-truncate tw-text-xs tw-leading-4"}`}
         data-tooltip-id={tooltipId}
       >
         {displayValue}
@@ -197,7 +221,7 @@ export function MetricBlock({
   return (
     <div>
       <div
-        className={`tw-mb-1 tw-text-sm tw-font-medium tw-leading-5 md:tw-mb-2 ${
+        className={`tw-mb-1 tw-text-sm tw-font-medium tw-leading-5 md:tw-mb-2 md:[[data-nft-card-page]_&]:tw-text-iron-400 ${
           highlightedLabel ? "tw-text-primary-400" : "tw-text-iron-400"
         }`}
       >
@@ -206,7 +230,7 @@ export function MetricBlock({
         )}
         {label}
       </div>
-      <div className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6">
+      <div className="tw-text-sm tw-font-semibold tw-leading-5 tw-text-white md:tw-text-lg md:tw-leading-6 md:[[data-nft-card-page]_&]:tw-text-sm md:[[data-nft-card-page]_&]:tw-leading-5 md:[[data-nft-card-page]_&]:tw-text-iron-100">
         {value}
       </div>
     </div>

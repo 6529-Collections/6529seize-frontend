@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { AuthContext } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
@@ -59,6 +60,7 @@ const NOTIFICATION_FILTERS: readonly NotificationFilterOption[] = [
     id: "reactions",
     cause: [
       ApiNotificationCause.DropVoted,
+      ApiNotificationCause.VotingCreditsReturned,
       DROP_POLL_VOTED_NOTIFICATION_CAUSE,
       ApiNotificationCause.DropReacted,
       ApiNotificationCause.DropBoosted,
@@ -67,8 +69,16 @@ const NOTIFICATION_FILTERS: readonly NotificationFilterOption[] = [
   },
   {
     id: "invites",
-    cause: [ApiNotificationCause.WaveCreated],
+    cause: [
+      ApiNotificationCause.WaveCreated,
+      ApiNotificationCause.MemeCollaboration,
+    ],
     labelKey: "notifications.filter.option.invites",
+  },
+  {
+    id: "artwork",
+    cause: [ApiNotificationCause.ArtistArtworkSubmitted],
+    labelKey: "artworkAlerts.label",
   },
   {
     id: "subscriptions",
@@ -302,7 +312,7 @@ export default function NotificationsCauseFilter({
           aria-expanded={isOpen}
           aria-haspopup={isMobileLayoutViewport ? "dialog" : "menu"}
           aria-controls={isDesktopOpen ? menuId : undefined}
-          className="tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
+          className={`${DROPDOWN_FIELD_CLASSES} tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-text-sm`}
         >
           <span className="tw-min-w-0 tw-truncate">{triggerLabel}</span>
           <ChevronDownIcon

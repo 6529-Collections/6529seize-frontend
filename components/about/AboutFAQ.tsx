@@ -1,3 +1,4 @@
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -169,13 +170,17 @@ export default function AboutFAQ() {
                   </ul>
                 </dd>
 
-                <dt>Network Identity Credits (NIC)</dt>
+                <dt>Network Identity Check (NIC)</dt>
                 <dd>
                   <ul>
                     <li>
-                      Represents your identity within and outside of 6529.
+                      Reflects the network&apos;s rating of whether your profile
+                      accurately represents your identity.
                     </li>
-                    <li>Helps the network understand you.</li>
+                    <li>
+                      Shown as one of five labels, from Inaccurate to Highly
+                      Accurate.
+                    </li>
                   </ul>
                 </dd>
               </dl>
@@ -340,16 +345,18 @@ export default function AboutFAQ() {
                 decentralization mission, and we value having them participate
                 in the network.
               </p>
-              <p>
-                Secondary market for the collection can be found here:{" "}
-                <a
-                  href="https://opensea.io/collection/6529-gradient"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Gradients.
-                </a>
-              </p>
+              <NftPurchasingGate>
+                <p>
+                  Secondary market for the collection can be found here:{" "}
+                  <a
+                    href="https://opensea.io/collection/6529-gradient"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Gradients.
+                  </a>
+                </p>
+              </NftPurchasingGate>
             </FAQQuestion>
 
             <FAQQuestion title="What is NextGen?">

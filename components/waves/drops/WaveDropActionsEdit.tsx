@@ -3,6 +3,7 @@
 import { useContext } from "react";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import DropActionTooltip from "./DropActionTooltip";
+import { useDropEditWindow } from "@/hooks/useDropEditWindow";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
@@ -19,10 +20,11 @@ export default function WaveDropActionsEdit({
 }: WaveDropActionsEditProps) {
   const { connectedProfile } = useContext(AuthContext);
 
-  // Only show edit for drop authors
-  if (connectedProfile?.handle !== drop.author.handle) {
-    return null;
-  }
+  const isAuthor =
+    !drop.author.is_anonymous &&
+    connectedProfile?.handle === drop.author.handle;
+  const canEdit = useDropEditWindow(drop, isAuthor);
+  if (!canEdit) return null;
 
   if (isDropdownItem) {
     return (

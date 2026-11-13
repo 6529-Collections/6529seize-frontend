@@ -470,6 +470,8 @@ export const baseGlobalIgnores = Object.freeze([
   "**/public",
   "**/coverage",
   "**/generated",
+  // Rust crate for the MLS WebAssembly module (cargo target dir, bench tool).
+  "native/**",
   // Bundled from config/env.schema.ts by scripts/build-env-schema.cjs.
   "config/env.schema.runtime.cjs",
   // Expand test lint coverage one subtree at a time; keep directory traversal
@@ -598,6 +600,49 @@ export const createEslintConfig = ({
       },
     },
 
+    // Wave, message and decision times render in the viewer's display time
+    // zone (Preferences > Time Zone, wave header switch). A zone-less date
+    // format there would show the device zone in screenshots, so require the
+    // display-zone helpers. Repeats the process.env rule, because a later
+    // no-restricted-syntax entry replaces the earlier one for these files.
+    {
+      files: [
+        "components/waves/**/*.{ts,tsx}",
+        "components/brain/**/*.{ts,tsx}",
+        "components/e2ee/**/*.{ts,tsx}",
+        "components/display-time-zone/**/*.{ts,tsx}",
+        "helpers/waves/**/*.{ts,tsx}",
+      ],
+      ignores: [
+        ...typeCheckedFileIgnores,
+        // Wave authors set decision dates in their own zone while creating.
+        "components/waves/create-wave/**",
+      ],
+      rules: {
+        "no-restricted-syntax": [
+          "error",
+          {
+            selector:
+              "MemberExpression[object.name='process'][property.name='env']",
+            message:
+              "Accessing process.env is restricted. Use environment variables safely.",
+          },
+          {
+            selector:
+              "CallExpression[callee.property.name=/^toLocale(Date|Time)String$/]",
+            message:
+              "Format wave times with the display time zone: use withDisplayTimeZone/withDisplayTimeZoneDate (lib/display-time-zone) with Intl or i18n/format helpers.",
+          },
+          {
+            selector:
+              "NewExpression[callee.object.name='Intl'][callee.property.name='DateTimeFormat']:not(:has(CallExpression[callee.name=/^withDisplayTimeZone/])):not(:has(Property[key.name='timeZone']))",
+            message:
+              "Intl.DateTimeFormat in wave code needs the display time zone: wrap its options in withDisplayTimeZone/withDisplayTimeZoneDate, or set an explicit timeZone.",
+          },
+        ],
+      },
+    },
+
     // These existing adapters form the raw environment boundary. Keep them
     // type-checked, and keep the env-access restriction on other config files.
     {
@@ -605,11 +650,11 @@ export const createEslintConfig = ({
         "config/alchemyEnv.ts",
         "config/assets.ts",
         "config/env.ts",
+        "config/env.browser.ts",
         "config/ethereumRpcEnv.ts",
         "config/museumPublicationEnv.server.ts",
         "config/nextConfig.ts",
         "config/nextPhase.ts",
-        "config/publicReviewDestinationEnv.server.ts",
         "config/reviewbotUsageEnv.ts",
         "config/runtimeConfig.ts",
         "config/serverEnv.ts",

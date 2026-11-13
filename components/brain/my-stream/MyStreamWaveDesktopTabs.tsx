@@ -19,24 +19,20 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TabToggle } from "@/components/common/TabToggle";
+import { TabCountBadge } from "@/components/common/TabCountBadge";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { isCompetitionSubmissionHistory } from "@/helpers/competition-lifecycle.helpers";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
-import {
-  getApproveWaveTabLabelsFromMetadata,
-  getWaveOutcomeVisibilityFromMetadata,
-} from "@/helpers/waves/wave-metadata.helpers";
+import { getApproveWaveTabLabelsFromMetadata } from "@/helpers/waves/wave-metadata.helpers";
 import { getCompetitionIdFromPathname } from "@/helpers/competition.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveCurationTabs } from "@/hooks/waves/useWaveCurationTabs";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
-import {
-  useApproveWaveCustomTabLabels,
-  useWaveOutcomeVisibility,
-} from "@/hooks/waves/useWaveMetadata";
+import { useApproveWaveCustomTabLabels } from "@/hooks/waves/useWaveMetadata";
 import { getProfileWaveIdentity, useProfileWave } from "@/hooks/useProfileWave";
 import { useWave } from "@/hooks/useWave";
 import { useWavePollSummary } from "@/hooks/useWaveHasPolls";
@@ -57,6 +53,8 @@ import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu"
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 import MobileTabsScrollControls from "./MobileTabsScrollControls";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
+import { useWaveChatPrefetch } from "@/hooks/competitions/useWaveChatPrefetch";
+import { WaveChatUnreadBadge } from "./WaveChatUnread";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -120,12 +118,13 @@ const TRAILING_TABS = [
 const TAB_LABELS: Record<
   Exclude<
     MyStreamWaveTab,
-    MyStreamWaveTab.CONFIGURATION | MyStreamWaveTab.ABOUT
+    | MyStreamWaveTab.CONFIGURATION
+    | MyStreamWaveTab.ABOUT
+    | MyStreamWaveTab.COMPETITIONS
   >,
   string
 > = {
   [MyStreamWaveTab.CHAT]: "Chat",
-  [MyStreamWaveTab.COMPETITIONS]: "Competitions",
   [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
   [MyStreamWaveTab.SUBMISSIONS]: "Submissions",
   [MyStreamWaveTab.SALES]: "Sales",
@@ -150,6 +149,8 @@ const getTabLabel = ({
   if (tab === MyStreamWaveTab.CONFIGURATION)
     return t(locale, "competitions.settings");
   if (tab === MyStreamWaveTab.ABOUT) return t(locale, "wave.navigation.about");
+  if (tab === MyStreamWaveTab.COMPETITIONS)
+    return t(locale, "competitions.title");
   if (isApproveWave && tab === MyStreamWaveTab.LEADERBOARD) {
     return approveLabels.approvals;
   }
@@ -274,6 +275,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const searchParams = useSearchParams();
   const { ref: featureUsageRef } = useWaveFeatureUsage("wave_tabs", wave.id);
   const pathname = usePathname();
+  const prefetchChat = useWaveChatPrefetch();
 
   const locale = useBrowserLocale();
   const { flat, nativeCompetition } = useCompetitionNavigation();
@@ -295,7 +297,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
   const waveApproveLabels = useApproveWaveCustomTabLabels(wave);
-  const waveOutcomesVisible = useWaveOutcomeVisibility(wave);
   const nativePresentation = useMemo(
     () =>
       (nativeDefault?.presentation ?? []).map((item, id) => ({ ...item, id })),
@@ -304,9 +305,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const approveLabels = nativeDefault
     ? getApproveWaveTabLabelsFromMetadata(nativePresentation)
     : waveApproveLabels;
-  const outcomesVisible = nativeDefault
-    ? getWaveOutcomeVisibilityFromMetadata(nativePresentation)
-    : waveOutcomesVisible;
   const selectedIsApprove = nativeDefault
     ? nativeDefault.type === ApiCompetitionType.Approve
     : isApproveWave;
@@ -418,7 +416,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
             return isMemesWave;
           }
           if (tab === MyStreamWaveTab.OUTCOME) {
-            return outcomesVisible;
+            return false;
           }
           return true;
         })
@@ -429,12 +427,24 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           else if (tab === MyStreamWaveTab.POLLS) badgeCount = unansweredPolls;
           return {
             key: tab,
-            label: getTabLabel({
-              approveLabels,
-              isApproveWave: selectedIsApprove,
-              tab,
-              locale,
-            }),
+            badge:
+              tab === MyStreamWaveTab.CHAT ? (
+                <WaveChatUnreadBadge waveId={wave.id} />
+              ) : (
+                <TabCountBadge count={badgeCount} variant="wave" />
+              ),
+            onIntent: tab === MyStreamWaveTab.CHAT ? prefetchChat : undefined,
+            label:
+              nativeDefault &&
+              tab === MyStreamWaveTab.LEADERBOARD &&
+              isCompetitionSubmissionHistory(nativeDefault)
+                ? t(locale, "competitions.submissions")
+                : getTabLabel({
+                    approveLabels,
+                    isApproveWave: selectedIsApprove,
+                    tab,
+                    locale,
+                  }),
             panelId: getContentTabPanelId(tab),
             badgeCount,
           };
@@ -442,15 +452,16 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     ],
     [
       availableTabs,
+      wave.id,
       approveLabels,
       isApproveWave,
       isCompetitionWave,
       isMemesWave,
       isCurationWave,
-      outcomesVisible,
       unansweredPolls,
       activeCompetitionCount,
       effectiveCompetitionId,
+      prefetchChat,
       nativeDefault,
       selectedIsApprove,
       locale,

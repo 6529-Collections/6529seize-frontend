@@ -1,11 +1,12 @@
 "use client";
 
+import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
-import { getTimeAgoShort } from "@/helpers/Helpers";
+import { WithDropAuthorSignedMarker } from "@/components/waves/drops/signature/DropAuthorSignedMarker";
 import type { ImageScale } from "@/helpers/image.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
@@ -19,6 +20,7 @@ import DropMinimalIdentityRow from "../DropMinimalIdentityRow";
 import { DropAuthorBadges } from "../DropAuthorBadges";
 import WaveDropActions from "../WaveDropActions";
 import WaveDropAuthorPfp from "../WaveDropAuthorPfp";
+import { AnonymousAuthorName } from "../AnonymousDropAuthor";
 import WaveDropContent from "../WaveDropContent";
 import WaveDropMetadata from "../WaveDropMetadata";
 import {
@@ -97,6 +99,7 @@ function EndedParticipationDropInner({
   embedDepth,
   maxEmbedDepth,
 }: EndedParticipationDropProps) {
+  const timeAgoShort = useTimeAgoShort();
   const isActiveDrop = activeDrop?.drop.id === drop.id;
   const router = useRouter();
   const identityProfile = getParticipationIdentityProfile({
@@ -121,7 +124,7 @@ function EndedParticipationDropInner({
     useDropActionInteractionMode();
   const mobileMenu = useWaveDropMobileMenu();
   const showIdentity = identityMode !== "hidden";
-  const isStackedTimestamp = timestampLayout === "stacked";
+  const isStackedTimestamp = timestampLayout !== "inline";
   const isChatProposal =
     contentPresentation === "proposalCard" && location === DropLocation.WAVE;
   const shouldOffsetRows =
@@ -193,24 +196,30 @@ function EndedParticipationDropInner({
         >
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
             <p className="tw-m-0 tw-inline-flex tw-h-5 tw-items-center tw-text-md tw-font-semibold tw-leading-5">
-              <Link
-                onClick={(e) =>
-                  handleNavigation(
-                    e,
-                    `/${drop.author.handle ?? drop.author.primary_address}`
-                  )
-                }
-                href={`/${drop.author.handle ?? drop.author.primary_address}`}
-                className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
-              >
-                {drop.author.handle ?? drop.author.primary_address}
-              </Link>
+              {drop.author.is_anonymous ? (
+                <AnonymousAuthorName />
+              ) : (
+                <Link
+                  onClick={(e) =>
+                    handleNavigation(
+                      e,
+                      `/${drop.author.handle ?? drop.author.primary_address}`
+                    )
+                  }
+                  href={`/${drop.author.handle ?? drop.author.primary_address}`}
+                  className="tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+                >
+                  {drop.author.handle ?? drop.author.primary_address}
+                </Link>
+              )}
             </p>
 
-            <UserCICAndLevel
-              level={drop.author.level}
-              size={UserCICAndLevelSize.SMALL}
-            />
+            {!drop.author.is_anonymous && (
+              <UserCICAndLevel
+                level={drop.author.level}
+                size={UserCICAndLevelSize.SMALL}
+              />
+            )}
 
             <DropAuthorBadges
               profile={drop.author}
@@ -224,13 +233,17 @@ function EndedParticipationDropInner({
 
             {!isStackedTimestamp && (
               <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
-                {getTimeAgoShort(drop.created_at)}
+                <WithDropAuthorSignedMarker drop={drop}>
+                  {timeAgoShort(drop.created_at)}
+                </WithDropAuthorSignedMarker>
               </p>
             )}
           </div>
           {isStackedTimestamp && (
             <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-none tw-text-iron-500">
-              {getTimeAgoShort(drop.created_at)}
+              <WithDropAuthorSignedMarker drop={drop}>
+                {timeAgoShort(drop.created_at)}
+              </WithDropAuthorSignedMarker>
             </p>
           )}
         </div>

@@ -12,13 +12,16 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "NextGen Admin",
       description: "NextGen",
       ogImage: getCollectionSocialCardImagePath("nextgen", {
-        subtitle: "Manage NextGen collections",
-        title: "NextGen Admin",
+        variant: "admin",
       }),
       ogImageAlt: "NextGen Admin social card",
     })
   );
 }
+
+// Renders per request: NextGenAdmin reads the query with useSearchParams()
+// outside a Suspense boundary, which a prerender cannot do.
+export const dynamic = "force-dynamic";
 
 export default function NextGenAdminPage() {
   return (

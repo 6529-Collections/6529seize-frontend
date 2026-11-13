@@ -3,6 +3,11 @@ import type { ReactNode, RefObject } from "react";
 import { createBreakpoint } from "react-use";
 import CommonDropdown from "./dropdown/CommonDropdown";
 import CommonTabs from "./tabs/CommonTabs";
+import type {
+  ConnectedTabSize,
+  ConnectedTabSpacing,
+  ConnectedTabTypography,
+} from "./tabs/connectedTabStyles";
 
 interface ChildComponentProps {
   onCopy?: (() => void) | undefined;
@@ -14,6 +19,7 @@ export interface CommonSelectItem<T, U = unknown> {
   readonly mobileLabel?: string | undefined;
   readonly value: T;
   readonly key: string;
+  readonly panelId?: string | undefined;
   readonly childrenProps?: U | undefined;
   readonly badge?: number | undefined;
 }
@@ -33,7 +39,17 @@ interface CommonSelectDefaultProps<T, U> {
   readonly disabled?: boolean | undefined;
   readonly theme?: "dark" | "light" | undefined;
   readonly size?: "sm" | "md" | "tabs" | undefined;
-  readonly variant?: "default" | "editorial" | "toolbar" | undefined;
+  readonly connectedSize?: ConnectedTabSize | undefined;
+  readonly connectedTypography?: ConnectedTabTypography | undefined;
+  readonly connectedSpacing?: ConnectedTabSpacing | undefined;
+  readonly variant?:
+    | "default"
+    | "connected"
+    | "editorial"
+    | "toolbar"
+    | "filter"
+    | "sub-view"
+    | undefined;
   readonly menuMinWidth?: number | undefined;
   readonly containerRef?: RefObject<HTMLDivElement | null> | undefined; // this is useful if you have horizontal scrolling and want to keep the dropdown in attached to its trigger
   readonly setSelected: (item: T) => void;
@@ -72,12 +88,15 @@ export type CommonSelectProps<T, U> =
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
-export default function CommonSelect<T, U = unknown>(
-  props: CommonSelectProps<T, U>
-) {
+export default function CommonSelect<T, U = unknown>({
+  tabsVariant,
+  ...props
+}: CommonSelectProps<T, U> & {
+  readonly tabsVariant?: CommonSelectProps<T, U>["variant"];
+}) {
   const breakpoint = useBreakpoint();
   if (breakpoint === "LG") {
-    return <CommonTabs {...props} />;
+    return <CommonTabs {...props} variant={tabsVariant ?? props.variant} />;
   } else {
     return <CommonDropdown {...props} />;
   }

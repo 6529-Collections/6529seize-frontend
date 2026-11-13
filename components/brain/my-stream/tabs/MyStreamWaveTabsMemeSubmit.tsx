@@ -7,24 +7,28 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import Button from "@/components/utils/button/Button";
-import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import WaveHeaderRestrictionButton, {
+  WAVE_HEADER_RESTRICTION_BUTTON_CLASS,
+} from "@/components/waves/header/WaveHeaderRestrictionButton";
 import MainStageNominationPopover from "./MainStageNominationPopover";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave, SubmissionStatus } from "@/hooks/useWave";
 import { useCountdown } from "@/hooks/useCountdown";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
+import { formatSubmissionWindowTime } from "../waveDropAction.helpers";
 
 interface MyStreamWaveTabsMemeSubmitProps {
   readonly wave: ApiWave;
   readonly handleMemesSubmit: () => void;
+  readonly iconOnly?: boolean;
 }
 
-const HEADER_ACTION_BUTTON_CLASS =
-  "tw-h-8 tw-min-w-8 tw-max-w-[2rem] tw-whitespace-nowrap tw-text-xs sm:tw-min-w-0 sm:tw-max-w-[11.5rem] lg:tw-max-w-[13.5rem] xl:tw-max-w-none";
+const HEADER_ACTION_BUTTON_CLASS = `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-h-8 tw-min-w-8 tw-max-w-[2rem] tw-whitespace-nowrap tw-text-xs sm:tw-min-w-0 sm:tw-max-w-[11.5rem] lg:tw-max-w-[13.5rem] xl:tw-max-w-none`;
 const HEADER_ACTION_BUTTON_TEXT_CLASS =
   "tw-sr-only tw-min-w-0 tw-truncate sm:tw-not-sr-only sm:tw-inline";
-const RESTRICTED_HEADER_BUTTON_CLASS =
-  "tw-h-8 tw-w-8 tw-min-w-8 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200";
-const NOT_ELIGIBLE_BUTTON_CLASS = `tw-group tw-flex tw-w-auto tw-cursor-help tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-[180ms] tw-ease-out desktop-hover:hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-px-2.5 ${HEADER_ACTION_BUTTON_CLASS}`;
+const NOT_ELIGIBLE_BUTTON_CLASS =
+  "tw-group tw-flex tw-cursor-help tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-[180ms] tw-ease-out desktop-hover:hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 const ACTIVE_LABEL_SUBMIT_MEME = "Submit Meme";
 
 const getActiveLabels = ({
@@ -88,9 +92,11 @@ const getActiveLabels = ({
 const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   wave,
   handleMemesSubmit,
+  iconOnly = false,
 }) => {
   // Get wave information including participation status
   const waveInfo = useWave(wave);
+  const zone = useDisplayTimeZone();
 
   // Get end time for ending soon countdown - must be called before any returns
   const endTimeForCountdown = waveInfo?.participation.endTime ?? null;
@@ -118,14 +124,14 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   // Closed state - submissions have ended
   if (isClosed) {
     const tooltipText = closingTime
-      ? `Submissions closed on ${new Date(closingTime).toLocaleString()}`
+      ? `Submissions closed on ${formatSubmissionWindowTime(closingTime, zone)}`
       : "Submissions are closed";
 
     return (
       <WaveHeaderRestrictionButton
         label="Submissions Closed"
         reason={tooltipText}
-        className={RESTRICTED_HEADER_BUTTON_CLASS}
+        className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
         data-testid="closed"
         data-full-width="false"
       >
@@ -137,14 +143,14 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   // Coming soon state - submissions haven't started
   if (isComingSoon) {
     const tooltipText = openingTime
-      ? `Submissions open on ${new Date(openingTime).toLocaleString()}`
+      ? `Submissions open on ${formatSubmissionWindowTime(openingTime, zone)}`
       : "Submissions will open soon";
 
     return (
       <WaveHeaderRestrictionButton
         label="Submissions Open Soon"
         reason={tooltipText}
-        className={RESTRICTED_HEADER_BUTTON_CLASS}
+        className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
         data-testid="info"
         data-full-width="false"
       >
@@ -160,11 +166,19 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         <button
           type="button"
           aria-haspopup="dialog"
-          className={NOT_ELIGIBLE_BUTTON_CLASS}
+          className={`${NOT_ELIGIBLE_BUTTON_CLASS} ${
+            iconOnly
+              ? `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-size-8 tw-min-w-8`
+              : `tw-w-auto sm:tw-px-2.5 ${HEADER_ACTION_BUTTON_CLASS}`
+          }`}
         >
-          <LockClosedIcon className="tw-size-4 tw-flex-shrink-0 tw-opacity-70 tw-transition-opacity tw-duration-[180ms] tw-ease-out group-hover:tw-opacity-100" />
+          <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
           <span
-            className={`${HEADER_ACTION_BUTTON_TEXT_CLASS} tw-border-x-0 tw-border-b tw-border-t-0 tw-border-dashed tw-border-iron-600/70 tw-pb-px tw-transition-colors group-hover:tw-border-iron-400/80`}
+            className={
+              iconOnly
+                ? "tw-sr-only"
+                : `${HEADER_ACTION_BUTTON_TEXT_CLASS} tw-border-x-0 tw-border-b tw-border-t-0 tw-border-dashed tw-border-iron-600/70 tw-pb-px tw-transition-colors group-hover:tw-border-iron-400/80`
+            }
           >
             How to Submit
           </span>
@@ -185,7 +199,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       <WaveHeaderRestrictionButton
         label="Submission Limit Reached"
         reason={tooltipText}
-        className={RESTRICTED_HEADER_BUTTON_CLASS}
+        className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
         data-testid="info"
         data-full-width="false"
       >
@@ -237,11 +251,11 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       remainingSubmissionCount === 1 ? "" : "s"
     } remaining`;
   } else if (isEndingVerySoon) {
-    tooltipText = `URGENT: Submissions closing in less than an hour! Ends at ${new Date(endTime).toLocaleString()}`;
+    tooltipText = `URGENT: Submissions closing in less than an hour! Ends at ${formatSubmissionWindowTime(endTime, zone)}`;
   } else if (isEndingHighlyUrgent) {
-    tooltipText = `Submissions closing in a few hours! Ends at ${new Date(endTime).toLocaleString()}`;
+    tooltipText = `Submissions closing in a few hours! Ends at ${formatSubmissionWindowTime(endTime, zone)}`;
   } else if (isEndingSoon) {
-    tooltipText = `Submissions closing soon! Ends on ${new Date(endTime).toLocaleString()}`;
+    tooltipText = `Submissions closing soon! Ends on ${formatSubmissionWindowTime(endTime, zone)}`;
   }
   const { activeLabelFull, activeLabelCompact } = getActiveLabels({
     canSubmit,
@@ -256,14 +270,16 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       <WaveHeaderRestrictionButton
         label="Submission Unavailable"
         reason={tooltipText}
-        className={RESTRICTED_HEADER_BUTTON_CLASS}
+        className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
       >
         <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
       </WaveHeaderRestrictionButton>
     );
   }
 
-  let activeIcon = <PlusIcon className="tw-size-4 tw-flex-shrink-0" />;
+  let activeIcon = (
+    <PlusIcon className="tw-size-4 tw-flex-shrink-0" strokeWidth={2} />
+  );
   if (isEndingVerySoon) {
     activeIcon = (
       <ClockIcon className="tw-text-red-500 tw-size-4 tw-flex-shrink-0 tw-animate-pulse" />
@@ -285,10 +301,20 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       variant="primary"
       size={null}
       title={tooltipText}
-      className={`${HEADER_ACTION_BUTTON_CLASS} tw-px-0 sm:tw-px-2.5`}
+      className={
+        iconOnly
+          ? `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-size-8 tw-p-0`
+          : `${HEADER_ACTION_BUTTON_CLASS} tw-px-0 sm:tw-px-2.5`
+      }
     >
       {activeIcon}
-      <div className="tw-sr-only tw-min-w-0 tw-items-center tw-gap-2 tw-whitespace-nowrap sm:tw-not-sr-only sm:tw-flex">
+      <div
+        className={
+          iconOnly
+            ? "tw-sr-only"
+            : "tw-sr-only tw-min-w-0 tw-items-center tw-gap-2 tw-whitespace-nowrap sm:tw-not-sr-only sm:tw-flex"
+        }
+      >
         {showSplitActiveLabels ? (
           <>
             <span className="xl:tw-hidden">{activeLabelCompact}</span>

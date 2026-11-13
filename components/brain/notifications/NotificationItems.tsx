@@ -113,6 +113,7 @@ function NotificationItemsComponent({
       case ApiNotificationCause.DropVoted:
       case DROP_POLL_VOTED_NOTIFICATION_CAUSE:
       case ApiNotificationCause.DropBoosted:
+      case ApiNotificationCause.ArtistArtworkSubmitted:
       case ApiNotificationCause.AllDrops:
         return Array.isArray(item.related_drops) && !!item.related_drops[0];
       case ApiNotificationCause.IdentitySubscribed:

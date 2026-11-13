@@ -3,7 +3,7 @@ import {
   useSeizeConnectContext,
 } from "@/components/auth/SeizeConnectContext";
 import * as authUtils from "@/services/auth/auth.utils";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 jest.mock("@reown/appkit/react", () => ({
@@ -47,11 +47,17 @@ jest.mock("@/hooks/useUnreadNotifications", () => ({
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
+  AUTH_STORAGE_KEYS: {
+    accounts: "6529-wallet-accounts",
+    activeAddress: "6529-wallet-active-address",
+    legacyAddress: "6529-wallet-address",
+  },
   canStoreAnotherWalletAccount: jest.fn(() => true),
   clearAgentLoginActiveAddress: jest.fn(),
   getAgentLoginActiveAddress: jest.fn(() => null),
   getConnectedWalletAccounts: jest.fn(() => []),
   getWalletAddress: jest.fn(() => null),
+  syncWalletAuthCookie: jest.fn(),
   isAuthAddressAuthorized: jest.fn(
     ({
       address,
@@ -168,6 +174,143 @@ describe("SeizeConnectContext switch sync guard", () => {
     await waitFor(() => {
       expect(screen.getByTestId("active-address")).toHaveTextContent(addressA);
     });
+  });
+
+  it("adopts another tab's selection without writing the old live wallet back", async () => {
+    const { useAppKitAccount } = require("@reown/appkit/react");
+    let selectedAddress: string | null = addressA;
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      address: addressA,
+      isConnected: true,
+      status: "connected",
+    });
+    jest
+      .mocked(authUtils.getWalletAddress)
+      .mockImplementation(() => selectedAddress);
+    jest
+      .mocked(authUtils.getConnectedWalletAccounts)
+      .mockReturnValue([
+        buildStoredAccount(addressA),
+        buildStoredAccount(addressB),
+      ]);
+    const switched = jest.fn();
+    globalThis.addEventListener(authUtils.PROFILE_SWITCHED_EVENT, switched);
+    try {
+      render(
+        <SeizeConnectProvider>
+          <AddressProbe />
+        </SeizeConnectProvider>
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("active-address")).toHaveTextContent(addressA)
+      );
+      selectedAddress = addressB;
+      const activeAddressChanged = new StorageEvent("storage");
+      Object.defineProperties(activeAddressChanged, {
+        key: { value: authUtils.AUTH_STORAGE_KEYS.activeAddress },
+        oldValue: { value: addressA },
+        newValue: { value: addressB },
+      });
+      act(() => globalThis.dispatchEvent(activeAddressChanged));
+      await waitFor(() =>
+        expect(screen.getByTestId("active-address")).toHaveTextContent(addressB)
+      );
+      expect(switched).toHaveBeenCalledTimes(1);
+      expect(authUtils.setActiveWalletAccount).not.toHaveBeenCalled();
+
+      // Logging out the selected account leaves the remaining saved account active.
+      selectedAddress = addressA;
+      jest
+        .mocked(authUtils.getConnectedWalletAccounts)
+        .mockReturnValue([buildStoredAccount(addressA)]);
+      const accountsChanged = new StorageEvent("storage");
+      Object.defineProperty(accountsChanged, "key", {
+        value: authUtils.AUTH_STORAGE_KEYS.accounts,
+      });
+      act(() => globalThis.dispatchEvent(accountsChanged));
+      await waitFor(() =>
+        expect(screen.getByTestId("active-address")).toHaveTextContent(addressA)
+      );
+      expect(switched).toHaveBeenCalledTimes(2);
+    } finally {
+      globalThis.removeEventListener(
+        authUtils.PROFILE_SWITCHED_EVENT,
+        switched
+      );
+    }
+  });
+
+  it("adopts the stored selection from a catch-up event without values", async () => {
+    const { useAppKitAccount } = require("@reown/appkit/react");
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      isConnected: false,
+      status: "disconnected",
+    });
+    let selectedAddress = addressA;
+    jest
+      .mocked(authUtils.getWalletAddress)
+      .mockImplementation(() => selectedAddress);
+    jest
+      .mocked(authUtils.getConnectedWalletAccounts)
+      .mockReturnValue([
+        buildStoredAccount(addressA),
+        buildStoredAccount(addressB),
+      ]);
+    render(
+      <SeizeConnectProvider>
+        <AddressProbe />
+      </SeizeConnectProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("active-address")).toHaveTextContent(addressA)
+    );
+
+    selectedAddress = addressB;
+    // The write check's catch-up carries only the key; storage is re-read.
+    act(() => {
+      globalThis.dispatchEvent(
+        new StorageEvent("storage", {
+          key: authUtils.AUTH_STORAGE_KEYS.activeAddress,
+        })
+      );
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("active-address")).toHaveTextContent(addressB)
+    );
+  });
+
+  it("ignores unrelated and synthetic storage notifications", async () => {
+    const { useAppKitAccount } = require("@reown/appkit/react");
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      isConnected: false,
+      status: "disconnected",
+    });
+    let selectedAddress = addressA;
+    jest
+      .mocked(authUtils.getWalletAddress)
+      .mockImplementation(() => selectedAddress);
+    jest
+      .mocked(authUtils.getConnectedWalletAccounts)
+      .mockReturnValue([buildStoredAccount(addressA)]);
+    render(
+      <SeizeConnectProvider>
+        <AddressProbe />
+      </SeizeConnectProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("active-address")).toHaveTextContent(addressA)
+    );
+    selectedAddress = addressB;
+    const unrelatedSettingChanged = new StorageEvent("storage");
+    Object.defineProperty(unrelatedSettingChanged, "key", {
+      value: "unrelated-setting",
+    });
+    act(() => {
+      globalThis.dispatchEvent(new Event("storage"));
+      globalThis.dispatchEvent(unrelatedSettingChanged);
+    });
+    expect(screen.getByTestId("active-address")).toHaveTextContent(addressA);
   });
 
   it("keeps unknown-wallet connect flow preferring live provider address", async () => {

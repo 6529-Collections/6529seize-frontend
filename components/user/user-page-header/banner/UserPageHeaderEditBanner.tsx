@@ -14,6 +14,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ImageScale } from "@/helpers/image.helpers";
 import { getAnimatedImagePreviewUri } from "@/helpers/gif-preview.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { getUploadFailureMessage } from "@/services/uploads/MediaUploadRefusedError";
 import {
   getBannerColorValue,
   getBannerImageUrl,
@@ -146,10 +147,10 @@ export default function UserPageHeaderEditBanner({
       });
       return uploaded.url;
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to upload banner image";
+      const message = getUploadFailureMessage(
+        error,
+        "Failed to upload banner image"
+      );
       setToast({ message, type: "error" });
       return null;
     }
@@ -215,18 +216,20 @@ export default function UserPageHeaderEditBanner({
   const form = (
     <form
       onSubmit={onSubmit}
-      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-4 sm:tw-px-6"
+      className="tw-flex tw-flex-col tw-gap-y-5 tw-px-5 sm:tw-px-6"
     >
       <CommonTabs<BannerEditMode>
         items={bannerTabs}
         activeItem={editMode}
         setSelected={setEditMode}
         filterLabel="Banner editor mode"
+        variant="sub-view"
         fill={false}
       />
 
       {editMode === "gradient" ? (
         <UserSettingsBackground
+          compact
           bgColor1={bgColor1}
           bgColor2={bgColor2}
           setBgColor1={setBgColor1}
@@ -234,6 +237,7 @@ export default function UserPageHeaderEditBanner({
         />
       ) : (
         <UserSettingsBannerImageInput
+          compact
           imageToShow={bannerPreviewUrl}
           setFile={setBannerFile}
         />
@@ -241,12 +245,13 @@ export default function UserPageHeaderEditBanner({
 
       <div className="tw-gap-x-3 md:tw-flex md:tw-flex-row-reverse">
         <UserSettingsSave
+          compact
           loading={isSaving}
           disabled={!haveChanges}
           responsiveWidthClassName="md:tw-w-auto"
         />
         <Button
-          variant="secondary"
+          variant="ghost"
           size="lg"
           disabled={isSaving}
           onClick={handleClose}
@@ -272,7 +277,9 @@ export default function UserPageHeaderEditBanner({
       onAfterLeave={onAfterLeave}
       tabletModal
       showHeaderCloseButton
-      showHeaderDivider
+      headerVariant="minimal"
+      headerClassName="!tw-px-5 tw-pb-5 sm:!tw-px-6"
+      titleClassName="!tw-text-base !tw-font-medium"
       showScrollbar
       maxWidthClass="md:tw-max-w-2xl"
       headerActions={

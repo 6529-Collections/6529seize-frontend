@@ -47,3 +47,75 @@ updates:
           - "@lexical/*"
         update-types:
           - "minor"
+  # The Appium bundle that device-farm-qa.yml packs with npm (not part of the
+  # pnpm workspace).
+  - package-ecosystem: "npm"
+    directory: "/tests/device-farm"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 3
+    versioning-strategy: "increase"
+    labels:
+      - "dependencies"
+      - "dependabot"
+    groups:
+      device-farm-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+      device-farm-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+  # The encrypted-chat WebAssembly crate. A lockfile update does not rebuild
+  # the committed binary: run `6529 run build:mls-wasm` (see
+  # native/mls-wasm/README.md) on the branch before merging.
+  - package-ecosystem: "cargo"
+    directory: "/native/mls-wasm"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "dependabot"
+    groups:
+      mls-wasm-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+      mls-wasm-minor:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "dependabot"
+      - "github-actions"
+    # Workflow pins are full commit SHAs with a version comment; Dependabot
+    # updates both together. Minor and patch bumps share one PR. Major bumps
+    # stay separate so each one gets its own review.
+    groups:
+      github-actions-minor-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

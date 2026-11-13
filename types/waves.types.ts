@@ -167,7 +167,7 @@ export enum CreateWaveOutcomeConfigWinnersCreditValueType {
   PERCENTAGE = "PERCENTAGE",
 }
 
-export interface CreateWaveOutcomeConfigWinner {
+interface CreateWaveOutcomeConfigWinner {
   readonly value: number;
 }
 
@@ -226,6 +226,8 @@ export interface SidebarWaveDescriptionDrop {
 }
 
 export interface SidebarWave {
+  readonly repliesCollapsed?: boolean;
+  readonly latestTopLevelDropTimestamp?: number | null;
   readonly id: string;
   readonly name: string;
   readonly type: ApiWaveType;
@@ -259,4 +261,5 @@ export interface SidebarWavesPage {
   readonly waves: SidebarWave[];
   readonly page: number;
   readonly next: boolean;
+  readonly nextCursor?: string | null;
 }

@@ -13,6 +13,8 @@ import {
 } from "@/helpers/waves/collapsed-replies.helpers";
 
 interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
+  readonly isError?: boolean;
+  readonly retryDropMessages?: DropMessagesResult["refetch"];
   readonly drops: Drop[];
   readonly allDropsCount: number;
   readonly loadMoreLocally: () => void;
@@ -35,6 +37,7 @@ interface AppendTrackingState {
   readonly hasInitialized: boolean;
   readonly previousTotal: number;
   readonly effectiveLimit: number;
+  readonly oldestRenderedSerialNo: number | null;
 }
 
 interface WaveMessagesSnapshot {
@@ -65,6 +68,7 @@ const createAppendTrackingState = (
   hasInitialized: false,
   previousTotal: 0,
   effectiveLimit,
+  oldestRenderedSerialNo: null,
 });
 
 const isSameAppendTrackingState = (
@@ -74,7 +78,8 @@ const isSameAppendTrackingState = (
   currentState.scopeKey === nextState.scopeKey &&
   currentState.hasInitialized === nextState.hasInitialized &&
   currentState.previousTotal === nextState.previousTotal &&
-  currentState.effectiveLimit === nextState.effectiveLimit;
+  currentState.effectiveLimit === nextState.effectiveLimit &&
+  currentState.oldestRenderedSerialNo === nextState.oldestRenderedSerialNo;
 
 const getScopedVirtualLimit = ({
   scopeKey,
@@ -144,6 +149,22 @@ const getNextVirtualLimitAfterAppend = ({
   return Math.min(totalDrops, currentLimit + pageSize);
 };
 
+/**
+ * Newer drops are inserted ahead of the rendered window. Grow the window by
+ * as many rows, so a page of newer drops cannot unmount a row the reader is
+ * looking at, such as the target of a shared link.
+ */
+const getRetainedVirtualLimit = ({
+  drops,
+  oldestRenderedSerialNo,
+}: {
+  readonly drops: readonly Drop[];
+  readonly oldestRenderedSerialNo: number | null;
+}): number =>
+  oldestRenderedSerialNo === null
+    ? 0
+    : drops.findIndex((drop) => drop.serial_no === oldestRenderedSerialNo) + 1;
+
 export function useVirtualizedWaveMessages(
   waveId: string,
   dropId: string | null,
@@ -151,13 +172,13 @@ export function useVirtualizedWaveMessages(
   wave?: ApiWave
 ): VirtualizedWaveMessages | undefined {
   const storedWaveMessages = useMyStreamWaveMessages(waveId);
-  const collapseReplies = dropId === null && isWaveRepliesCollapsed(wave);
+  const collapseAllReplies = isWaveRepliesCollapsed(wave);
   const fullWaveMessages = useMemo(
     () =>
-      collapseReplies && storedWaveMessages
-        ? withoutCollapsedReplies(storedWaveMessages)
+      dropId === null && storedWaveMessages
+        ? withoutCollapsedReplies(storedWaveMessages, collapseAllReplies)
         : storedWaveMessages,
-    [collapseReplies, storedWaveMessages]
+    [collapseAllReplies, dropId, storedWaveMessages]
   );
   const fullWaveMessagesForDrop = useDropMessages(waveId, dropId, wave);
   const fetchNextPageForDrop = fullWaveMessagesForDrop.fetchNextPage;
@@ -212,7 +233,7 @@ export function useVirtualizedWaveMessages(
       : null);
   const activeDropMessages = dropId ? fullWaveMessagesForDrop : null;
   const activeMessages = activeDropMessages ?? activeFullWaveMessages;
-  const hasActiveMessages = Boolean(activeMessages);
+  const hasActiveMessages = activeMessages !== null;
   const activeMessagesCount = activeMessages?.drops.length ?? 0;
   const virtualLimit = getScopedVirtualLimit({
     scopeKey,
@@ -222,13 +243,20 @@ export function useVirtualizedWaveMessages(
   const persistedEffectiveLimit = scopedAppendTrackingState.effectiveLimit;
   const baseVirtualLimit = Math.max(virtualLimit, persistedEffectiveLimit);
   const effectiveVirtualLimit = hasActiveMessages
-    ? getNextVirtualLimitAfterAppend({
-        currentLimit: baseVirtualLimit,
-        hasInitialized: scopedAppendTrackingState.hasInitialized,
-        pageSize,
-        previousTotal: scopedAppendTrackingState.previousTotal,
-        totalDrops: activeMessagesCount,
-      })
+    ? Math.max(
+        getNextVirtualLimitAfterAppend({
+          currentLimit: baseVirtualLimit,
+          hasInitialized: scopedAppendTrackingState.hasInitialized,
+          pageSize,
+          previousTotal: scopedAppendTrackingState.previousTotal,
+          totalDrops: activeMessagesCount,
+        }),
+        getRetainedVirtualLimit({
+          drops: activeMessages.drops,
+          oldestRenderedSerialNo:
+            scopedAppendTrackingState.oldestRenderedSerialNo,
+        })
+      )
     : baseVirtualLimit;
   const hasMoreLocal = hasActiveMessages
     ? activeMessagesCount > effectiveVirtualLimit
@@ -240,6 +268,10 @@ export function useVirtualizedWaveMessages(
         hasInitialized:
           scopedAppendTrackingState.hasInitialized || activeMessagesCount > 0,
         effectiveLimit: effectiveVirtualLimit,
+        oldestRenderedSerialNo:
+          activeMessages.drops[
+            Math.min(effectiveVirtualLimit, activeMessagesCount) - 1
+          ]?.serial_no ?? null,
       }
     : createAppendTrackingState(scopeKey, pageSize);
 
@@ -344,6 +376,8 @@ export function useVirtualizedWaveMessages(
 
   if (activeDropMessages) {
     return {
+      isError: activeDropMessages.isError,
+      retryDropMessages: activeDropMessages.refetch,
       hasNextPage: activeDropMessages.hasNextPage,
       id: waveId,
       isLoading: activeDropMessages.isFetching,
@@ -366,6 +400,7 @@ export function useVirtualizedWaveMessages(
     isLoading: visibleFullWaveMessages.isLoading,
     isLoadingNextPage: visibleFullWaveMessages.isLoadingNextPage,
     latestFetchedSerialNo: visibleFullWaveMessages.latestFetchedSerialNo,
+    historyGaps: visibleFullWaveMessages.historyGaps,
     drops: virtualizedDrops,
     allDropsCount,
     loadMoreLocally,

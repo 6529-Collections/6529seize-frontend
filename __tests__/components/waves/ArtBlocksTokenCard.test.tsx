@@ -148,14 +148,8 @@ describe("ArtBlocksTokenCard", () => {
     await user.click(openButton);
 
     const iframe = await screen.findByTitle("Test Project live render");
-    expect(iframe).toHaveAttribute(
-      "sandbox",
-      "allow-scripts allow-same-origin allow-pointer-lock"
-    );
-    expect(iframe).toHaveAttribute(
-      "src",
-      "https://live.artblocks.io/token/flagship-7"
-    );
+    expect(iframe).toHaveAttribute("sandbox", "allow-scripts");
+    expect(iframe).toHaveAttribute("src", "https://generator.artblocks.io/7");
     expect(iframe).toHaveAttribute("referrerpolicy", "no-referrer");
     expect(iframe).toHaveAttribute("allow", "autoplay; encrypted-media");
 
@@ -178,7 +172,9 @@ describe("ArtBlocksTokenCard", () => {
       "ab_card_live_open",
       expect.objectContaining({ dwell_bucket: expect.any(String) })
     );
-    expect(JSON.stringify(recordEvent.mock.calls)).not.toContain("flagship-7");
+    expect(JSON.stringify(recordEvent.mock.calls)).not.toContain(
+      "generator.artblocks.io"
+    );
     expect(JSON.stringify(recordEvent.mock.calls)).not.toContain(
       "https://www.artblocks.io"
     );

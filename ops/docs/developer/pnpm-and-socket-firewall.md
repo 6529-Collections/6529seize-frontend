@@ -83,6 +83,13 @@ To report or apply audit fixes, use the same secure wrapper path:
 6529 audit:fix
 ```
 
+The wrapper also accepts `6529 audit --prod --audit-level=high` (optionally
+with `--json`). The weekly **Dependency Audit** GitHub Actions workflow runs it
+against the lockfile and fails when a production package has a high or critical
+advisory with a published fix; advisories with no fix yet are listed in the run
+summary without failing it. `pnpm audit --ignore` and `--ignore-unfixable` stay
+blocked because they write `auditConfig` into `pnpm-workspace.yaml`.
+
 For an intentional dependency update, use:
 
 ```bash
@@ -203,8 +210,9 @@ The production workflow now:
 4. Packages `package.zip` from the standalone build output, including:
    `.next/standalone`, `.next/static`, `public/`, `Procfile`,
    `.ebextensions/`, and `.platform/`.
-5. Uploads `target/_next/static` and `package.zip` to S3 under the build
-   version path.
+5. Publishes new `target/_next/static` files to the shared static prefix and
+   uploads `package.zip` to S3 under the build version path (see
+   [Production static assets](deployment.md#production-static-assets)).
 6. Ensures the Elastic Beanstalk application version for the commit SHA exists.
    If a previous failed attempt already created the version with the expected
    S3 source bundle, the workflow reuses it and continues the deploy. If the

@@ -2,7 +2,6 @@
 
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { extractRetryAfterMs } from "@/helpers/reactions/reactionRateLimit";
-import { isDropReactionRequestTimeout } from "@/helpers/reactions/dropReactionRequestQueue";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 import { getAwsRumPageId } from "@/utils/monitoring/mobileLaunchTimingSanitizers";
 import * as Sentry from "@sentry/nextjs";
@@ -11,6 +10,7 @@ import {
   isExpectedProxyReactionPermissionDeniedError,
   isExpectedStaleDropNotFoundError,
   isExpectedWaveReactionDisabledError,
+  isReactionRequestOutcomeUncertain,
   toErrorMessage,
 } from "./dropReactionErrorClassification";
 
@@ -34,8 +34,9 @@ type ReactionDurationBucket =
   | "over_15s";
 interface ReactionMutationContext {
   readonly isCurrentOwner?: (() => boolean) | undefined;
-  timeoutRecoveryPending?: boolean;
-  timeoutConfirmedAt?: number;
+  requestRecoveryPending?: boolean;
+  requestConfirmedAt?: number;
+  requestFailureKind?: ReturnType<typeof classifyReactionError>["errorKind"];
   readonly mutationId: string;
   readonly dropMutationSeq: number;
   readonly dropId: string;
@@ -431,7 +432,8 @@ export function recordReactionRequestFailed(
   const result = recordSupersededResponse(context, now);
 
   const { statusCode, errorKind } = classifyReactionError(error);
-  context.timeoutRecoveryPending = isDropReactionRequestTimeout(error);
+  context.requestRecoveryPending = isReactionRequestOutcomeUncertain(error);
+  context.requestFailureKind = errorKind;
   const latencyMs = now - (context.requestSentAt ?? context.startedAt);
   const errorMessage = toErrorMessage(error);
   const retryAfterMs =
@@ -539,7 +541,7 @@ export function recordReactionRequestFailed(
 
   if (!shouldCaptureEvent(dedupeKey, now)) {
     context.failureCaptured = true;
-    if (!context.timeoutRecoveryPending) clearActiveIntentForContext(context);
+    if (!context.requestRecoveryPending) clearActiveIntentForContext(context);
     return result;
   }
 
@@ -564,18 +566,24 @@ export function recordReactionRequestFailed(
   });
 
   context.failureCaptured = true;
-  if (!context.timeoutRecoveryPending) clearActiveIntentForContext(context);
+  if (!context.requestRecoveryPending) clearActiveIntentForContext(context);
   return result;
 }
 
-export function recordReactionTimeoutReconciled(
+export function recordReactionFailureReconciled(
   context: ReactionMutationContext,
   outcome: "confirmed" | "unconfirmed" | "superseded"
 ): void {
-  context.timeoutRecoveryPending = false;
-  addReactionBreadcrumb("reaction.timeout_reconciled", context, { outcome });
+  context.requestRecoveryPending = false;
+  addReactionBreadcrumb(
+    context.requestFailureKind === "network"
+      ? "reaction.network_reconciled"
+      : "reaction.timeout_reconciled",
+    context,
+    { outcome }
+  );
   if (outcome === "confirmed") {
-    context.timeoutConfirmedAt = Date.now();
+    context.requestConfirmedAt = Date.now();
   } else {
     clearActiveIntentForContext(context);
   }
@@ -628,7 +636,7 @@ export function recordReactionRealtimeReconciliation(params: {
   // Queueing can outlast the reconciliation window. Start protection from
   // the request/confirmation, and keep it through out-of-order WS refetches.
   const reconciliationStartedAt =
-    context.timeoutConfirmedAt ??
+    context.requestConfirmedAt ??
     context.apiSucceededAt ??
     context.requestSentAt ??
     context.startedAt;
@@ -636,8 +644,8 @@ export function recordReactionRealtimeReconciliation(params: {
     now - reconciliationStartedAt <= RECONCILIATION_WINDOW_MS;
   if (
     !withinReconciliationWindow &&
-    !context.timeoutRecoveryPending &&
-    (context.timeoutConfirmedAt !== undefined ||
+    !context.requestRecoveryPending &&
+    (context.requestConfirmedAt !== undefined ||
       (context.realtimeReconciledAt !== null &&
         context.apiSucceededAt !== null))
   ) {
@@ -672,7 +680,7 @@ export function recordReactionRealtimeReconciliation(params: {
   }
 
   if (
-    context.timeoutRecoveryPending ||
+    context.requestRecoveryPending ||
     (context.requestSentAt === null && context.apiFailedAt === null) ||
     withinReconciliationWindow
   ) {

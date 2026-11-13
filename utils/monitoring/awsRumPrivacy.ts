@@ -1,4 +1,5 @@
 import type { Plugin, PluginContext } from "aws-rum-web";
+import { redactSensitiveQueryParams } from "./sensitiveQueryParams";
 
 const AWS_RUM_HTTP_EVENT_TYPE = "com.amazon.rum.http_event";
 const AWS_RUM_JS_ERROR_EVENT_TYPE = "com.amazon.rum.js_error_event";
@@ -28,7 +29,7 @@ function sanitizeAuthorUuidSegment(segment: string): string {
   return AUTHOR_UUID_SEGMENT.test(decodedSegment) ? "author_id" : segment;
 }
 
-export function sanitizeAwsRumUrl(value: string): string {
+function sanitizeAuthorUuidPath(value: string): string {
   let url: URL;
   try {
     url = new URL(value, "https://rum.local");
@@ -50,10 +51,16 @@ export function sanitizeAwsRumUrl(value: string): string {
     : `${url.pathname}${url.search}${url.hash}`;
 }
 
-function sanitizeWalletConnectTopic(value: string): string {
-  return value.replace(
-    WALLETCONNECT_STALE_TOPIC,
-    WALLETCONNECT_STALE_TOPIC_REPLACEMENT
+export function sanitizeAwsRumUrl(value: string): string {
+  return redactSensitiveQueryParams(sanitizeAuthorUuidPath(value));
+}
+
+function sanitizeJsErrorText(value: string): string {
+  return redactSensitiveQueryParams(
+    value.replace(
+      WALLETCONNECT_STALE_TOPIC,
+      WALLETCONNECT_STALE_TOPIC_REPLACEMENT
+    )
   );
 }
 
@@ -92,29 +99,28 @@ function sanitizeResourceEvent(eventData: object): object {
     : { ...eventData, targetUrl: sanitizedUrl };
 }
 
+// Inline-script errors report the document URL, including its query string.
+const JS_ERROR_TEXT_FIELDS = ["message", "stack", "filename"] as const;
+
 function sanitizeJsErrorEvent(eventData: object): object {
   if (!isRecord(eventData)) {
     return eventData;
   }
 
-  const message = eventData["message"];
-  const stack = eventData["stack"];
-  const sanitizedMessage =
-    typeof message === "string" ? sanitizeWalletConnectTopic(message) : message;
-  const sanitizedStack =
-    typeof stack === "string" ? sanitizeWalletConnectTopic(stack) : stack;
-
-  if (sanitizedMessage === message && sanitizedStack === stack) {
-    return eventData;
+  const sanitizedFields: UnknownRecord = {};
+  for (const field of JS_ERROR_TEXT_FIELDS) {
+    const value = eventData[field];
+    if (typeof value === "string") {
+      const sanitizedValue = sanitizeJsErrorText(value);
+      if (sanitizedValue !== value) {
+        sanitizedFields[field] = sanitizedValue;
+      }
+    }
   }
 
-  return {
-    ...eventData,
-    ...(typeof sanitizedMessage === "string"
-      ? { message: sanitizedMessage }
-      : {}),
-    ...(typeof sanitizedStack === "string" ? { stack: sanitizedStack } : {}),
-  };
+  return Object.keys(sanitizedFields).length === 0
+    ? eventData
+    : { ...eventData, ...sanitizedFields };
 }
 
 export function sanitizeAwsRumEvent(

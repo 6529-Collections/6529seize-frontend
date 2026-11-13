@@ -1,3 +1,4 @@
+import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
 import { renderHook } from "@testing-library/react";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useWaveParticipationVariant } from "@/hooks/waves/useWaveParticipationVariant";
@@ -42,3 +43,19 @@ describe("useWaveParticipationVariant", () => {
     expect(result.current).toBe(variant);
   });
 });
+
+it.each([
+  [[], "default"],
+  [[ApiCompetitionCapability.MainStage], "memes"],
+  [[ApiCompetitionCapability.Curation], "curation"],
+  [[ApiCompetitionCapability.Quorum], "quorum"],
+] as const)(
+  "uses explicit capabilities %s without inheriting the parent wave designation",
+  (capabilities, expected) => {
+    mockSettings({ memes: "shared-wave" });
+    const { result } = renderHook(() =>
+      useWaveParticipationVariant("shared-wave", capabilities)
+    );
+    expect(result.current).toBe(expected);
+  }
+);

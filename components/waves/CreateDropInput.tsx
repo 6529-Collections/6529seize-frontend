@@ -1,9 +1,12 @@
 "use client";
 
+import {
+  ComposerEditor,
+  COMPOSER_RICH_TEXT_NODES,
+} from "@/components/composer/ComposerEditor";
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
 import { $convertFromMarkdownString } from "@lexical/markdown";
 import type { FocusEvent } from "react";
-import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import {
   forwardRef,
   useImperativeHandle,
@@ -16,22 +19,6 @@ import type { EditorState, LexicalEditor } from "lexical";
 import { $getRoot } from "lexical";
 import { clearWaveDraft } from "@/helpers/waves/wave-draft.helpers";
 
-import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
-import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
-import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import { MarkdownShortcutPlugin } from "@/components/drops/create/lexical/plugins/MarkdownShortcutPlugin";
-
-import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
-import { ListNode, ListItemNode } from "@lexical/list";
-import { HeadingNode, QuoteNode } from "@lexical/rich-text";
-import { HorizontalRuleNode } from "@lexical/react/LexicalHorizontalRuleNode";
-import { ListPlugin } from "@lexical/react/LexicalListPlugin";
-import { TableCellNode, TableNode, TableRowNode } from "@lexical/table";
-import { CodeHighlightNode, CodeNode } from "@lexical/code";
-import { AutoLinkNode, LinkNode } from "@lexical/link";
-import { LinkPlugin } from "@lexical/react/LexicalLinkPlugin";
 import type {
   MentionedUser,
   MentionedWave,
@@ -64,19 +51,15 @@ import EnterKeyPlugin from "../drops/create/lexical/plugins/enter/EnterKeyPlugin
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
 import useCapacitor from "@/hooks/useCapacitor";
-import EmojiPlugin from "../drops/create/lexical/plugins/emoji/EmojiPlugin";
-import { EmojiNode } from "../drops/create/lexical/nodes/EmojiNode";
 import {
   CREATE_DROP_MARKDOWN_SHORTCUT_TRANSFORMERS,
   CREATE_DROP_MARKDOWN_TRANSFORMERS,
 } from "@/components/drops/create/lexical/transformers/createDropMarkdownTransformers";
-import PlainTextPastePlugin from "@/components/drops/create/lexical/plugins/PlainTextPastePlugin";
 import EditLastDropArrowUpPlugin from "./EditLastDropArrowUpPlugin";
-import RootBlockGuardPlugin from "@/components/drops/create/lexical/plugins/RootBlockGuardPlugin";
 import { $selectEndOfRootBlock } from "@/components/drops/create/lexical/utils/rootContent";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useDropComposerDensity } from "./CreateDropWaveWrapper";
+import { COMPOSER_INPUT_CLASS_NAME } from "./composerPresentation";
 import { MAX_DROP_PART_UTF16_UNITS } from "@/helpers/waves/drop-content-limits";
 
 export interface CreateDropInputHandles {
@@ -93,30 +76,36 @@ interface EditorCommandsPluginHandles {
   blur: () => void;
 }
 
-const EditorCommandsPlugin = forwardRef<EditorCommandsPluginHandles>(
-  (_props, ref) => {
-    const [editor] = useLexicalComposerContext();
+const EditorCommandsPlugin = forwardRef<
+  EditorCommandsPluginHandles,
+  { readonly isApp: boolean }
+>(({ isApp }, ref) => {
+  const [editor] = useLexicalComposerContext();
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        focus: () => editor.focus(),
-        blur: () => editor.blur(),
-        setMarkdown: (markdown: string) => {
-          editor.update(() => {
-            $convertFromMarkdownString(
-              markdown,
-              CREATE_DROP_MARKDOWN_TRANSFORMERS
-            );
-          });
-        },
-      }),
-      [editor]
-    );
+  useImperativeHandle(
+    ref,
+    () => ({
+      focus: () => {
+        // Lexical commits its focus asynchronously. Keep native keyboard
+        // activation inside the user's gesture, then restore its selection.
+        if (isApp) editor.getRootElement()?.focus({ preventScroll: true });
+        editor.focus();
+      },
+      blur: () => editor.blur(),
+      setMarkdown: (markdown: string) => {
+        editor.update(() => {
+          $convertFromMarkdownString(
+            markdown,
+            CREATE_DROP_MARKDOWN_TRANSFORMERS
+          );
+        });
+      },
+    }),
+    [editor, isApp]
+  );
 
-    return null;
-  }
-);
+  return null;
+});
 EditorCommandsPlugin.displayName = "EditorCommandsPlugin";
 
 /**
@@ -255,29 +244,15 @@ const CreateDropInput = forwardRef<
     const validationHelperTextId = useId();
     const showValidationError =
       hasValidationError && validationHelperText !== null;
-    const composerDensity = useDropComposerDensity();
-    const isCompact = composerDensity === "compact";
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
+        ...COMPOSER_RICH_TEXT_NODES,
         MentionNode,
         GroupMentionNode,
         HashtagNode,
         WaveMentionNode,
-        HeadingNode,
-        ListNode,
-        ListItemNode,
-        QuoteNode,
-        CodeNode,
-        CodeHighlightNode,
-        TableNode,
-        TableCellNode,
-        TableRowNode,
-        AutoLinkNode,
-        LinkNode,
-        HorizontalRuleNode,
         ImageNode,
-        EmojiNode,
       ],
       // A restored draft (JSON string) wins at creation; otherwise the live
       // editorState object. The draft is parsed inside a try/catch because a
@@ -428,114 +403,70 @@ const CreateDropInput = forwardRef<
     return (
       <>
         <div className={`tailwind-scope ${containerClassName ?? ""}`}>
-          <LexicalComposer initialConfig={editorConfig}>
-            <div className="tw-flex tw-items-end tw-gap-x-3">
-              <div className="tw-relative tw-w-full">
-                <RichTextPlugin
-                  contentEditable={
-                    <div className="tw-relative">
-                      <ContentEditable
-                        spellCheck={true}
-                        autoCorrect="on"
-                        ariaLabel={placeholderText}
-                        ariaDescribedBy={
-                          showValidationError
-                            ? validationHelperTextId
-                            : undefined
-                        }
-                        ariaRequired={isPollActive}
-                        aria-invalid={hasValidationError || undefined}
-                        style={{ touchAction: "manipulation" }}
-                        onBlur={onEditorBlur}
-                        className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[min(40vh,var(--composer-viewport-height,40vh))] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-pl-3 tw-font-normal tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${
-                          isCompact
-                            ? "tw-py-3 tw-text-sm tw-leading-5"
-                            : "tw-pb-2 tw-pt-3 tw-text-base tw-leading-6 sm:tw-text-sm"
-                        } ${
-                          submitting ? "tw-cursor-default tw-opacity-50" : ""
-                        } ${isCapacitor ? "tw-pr-[35px]" : "tw-pr-[40px]"}`}
-                      />
-                      <CreateDropEmojiPicker
-                        verticalAlignment={isCompact ? "center" : "top"}
-                      />
-                    </div>
-                  }
-                  placeholder={
-                    <span
-                      className={`editor-placeholder tw-block tw-max-w-[calc(100%-3.5rem)] tw-translate-y-0 tw-truncate sm:tw-translate-y-0.5 ${
-                        isCompact
-                          ? "tw-text-sm tw-leading-5"
-                          : "tw-text-base tw-leading-6 sm:tw-text-sm"
-                      } ${submitting ? "tw-opacity-50" : ""}`}
-                    >
-                      {placeholderText}
-                    </span>
-                  }
-                  ErrorBoundary={LexicalErrorBoundary}
-                />
-                <HistoryPlugin />
-                <OnChangePlugin
-                  onChange={onEditorStateChange}
-                  ignoreHistoryMergeTagChange={false}
-                />
-                {typeof initialEditorStateJson === "string" && (
-                  <NotifyInitialEditorStatePlugin
-                    onEditorState={onEditorStateChange}
-                  />
-                )}
-                <RootBlockGuardPlugin />
-                <NewMentionsPlugin
-                  waveId={waveId}
-                  onSelect={onMentionedUserAdded}
-                  canMentionAll={canMentionAll}
-                  ref={mentionsPluginRef}
-                />
-                <NewWaveMentionsPlugin
-                  onSelect={onMentionedWaveAdded}
-                  ref={waveMentionsPluginRef}
-                />
-                <NewHashtagsPlugin
-                  onSelect={onHashtagAdded}
-                  ref={hashtagPluginRef}
-                />
-                <MaxLengthPlugin maxLength={MAX_DROP_PART_UTF16_UNITS} />
-                <DragDropPastePlugin
-                  disabled={submitting}
-                  onAttachmentFiles={onAttachmentFiles}
-                />
-                <ListPlugin />
-                <PlainTextPastePlugin />
-                <MarkdownShortcutPlugin
-                  transformers={CREATE_DROP_MARKDOWN_SHORTCUT_TRANSFORMERS}
-                />
-                <TabIndentationPlugin />
-                <LinkPlugin validateUrl={validateUrl} />
-                <ClearEditorPlugin ref={clearEditorRef} />
-                <EditorCommandsPlugin ref={editorCommandsRef} />
-                <EditablePlugin
-                  editable={preserveKeyboardOnSubmit || !submitting}
-                />
-                <SubmissionLockPlugin
-                  locked={preserveKeyboardOnSubmit && submitting}
-                />
-                <InitialMarkdownPlugin
-                  initialMarkdown={initialMarkdown}
-                  initialMarkdownKey={initialMarkdownKey}
-                />
-                <EnterKeyPlugin
-                  handleSubmit={handleSubmit}
-                  canSubmitWithEnter={canSubmitWithEnter}
-                  disabled={submitting}
-                />
-                <EditLastDropArrowUpPlugin
-                  canEditLastDropWithArrow={canEditLastDropWithArrow}
-                  onRequestEditLastDrop={onRequestEditLastDrop}
-                  canUseArrowUpShortcut={canUseShortcutKeys}
-                />
-                <EmojiPlugin />
-              </div>
-            </div>
-          </LexicalComposer>
+          <ComposerEditor
+            initialConfig={editorConfig}
+            validateUrl={validateUrl}
+            placeholder={placeholderText}
+            onEditorState={onEditorStateChange}
+            transformers={CREATE_DROP_MARKDOWN_SHORTCUT_TRANSFORMERS}
+            inputProps={{
+              ariaDescribedBy: showValidationError
+                ? validationHelperTextId
+                : undefined,
+              ariaRequired: isPollActive,
+              "aria-invalid": hasValidationError || undefined,
+              onBlur: onEditorBlur,
+              className: `editor-input-one-liner tw-form-input ${COMPOSER_INPUT_CLASS_NAME} tw-font-normal tw-caret-primary-400 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 ${submitting ? "tw-cursor-default tw-opacity-50" : ""}`,
+            }}
+            picker={<CreateDropEmojiPicker verticalAlignment="center" />}
+          >
+            {typeof initialEditorStateJson === "string" && (
+              <NotifyInitialEditorStatePlugin
+                onEditorState={onEditorStateChange}
+              />
+            )}
+            <NewMentionsPlugin
+              waveId={waveId}
+              onSelect={onMentionedUserAdded}
+              canMentionAll={canMentionAll}
+              ref={mentionsPluginRef}
+            />
+            <NewWaveMentionsPlugin
+              onSelect={onMentionedWaveAdded}
+              ref={waveMentionsPluginRef}
+            />
+            <NewHashtagsPlugin
+              onSelect={onHashtagAdded}
+              ref={hashtagPluginRef}
+            />
+            <MaxLengthPlugin maxLength={MAX_DROP_PART_UTF16_UNITS} />
+            <DragDropPastePlugin
+              disabled={submitting}
+              onAttachmentFiles={onAttachmentFiles}
+            />
+            <ClearEditorPlugin ref={clearEditorRef} />
+            <EditorCommandsPlugin ref={editorCommandsRef} isApp={isCapacitor} />
+            <EditablePlugin
+              editable={preserveKeyboardOnSubmit || !submitting}
+            />
+            <SubmissionLockPlugin
+              locked={preserveKeyboardOnSubmit && submitting}
+            />
+            <InitialMarkdownPlugin
+              initialMarkdown={initialMarkdown}
+              initialMarkdownKey={initialMarkdownKey}
+            />
+            <EnterKeyPlugin
+              handleSubmit={handleSubmit}
+              canSubmitWithEnter={canSubmitWithEnter}
+              disabled={submitting}
+            />
+            <EditLastDropArrowUpPlugin
+              canEditLastDropWithArrow={canEditLastDropWithArrow}
+              onRequestEditLastDrop={onRequestEditLastDrop}
+              canUseArrowUpShortcut={canUseShortcutKeys}
+            />
+          </ComposerEditor>
         </div>
         {showValidationError && (
           <div

@@ -1,4 +1,8 @@
-import { GROUP_CREATE_PANEL_STYLES } from "../../GroupCreate.styles";
+import {
+  GROUP_CREATE_PANEL_STYLES,
+  GROUP_CREATE_TITLE_STYLES,
+  GROUP_CREATE_DESCRIPTION_STYLES,
+} from "../../GroupCreate.styles";
 import type { ApiCreateGroupDescription } from "@/generated/models/ApiCreateGroupDescription";
 import type { ApiGroupOwnsNft } from "@/generated/models/ApiGroupOwnsNft";
 import { ApiGroupOwnsNftNameEnum } from "@/generated/models/ApiGroupOwnsNft";
@@ -40,14 +44,12 @@ export default function GroupCreateCollections({
   return (
     <div className={GROUP_CREATE_PANEL_STYLES}>
       <div>
-        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
-          Collection Access
-        </p>
-        <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-500">
+        <p className={GROUP_CREATE_TITLE_STYLES}>Collection Access</p>
+        <p className={GROUP_CREATE_DESCRIPTION_STYLES}>
           Identity must own any token from these collections.
         </p>
       </div>
-      <div className="tw-mt-2 sm:tw-mt-4">
+      <div className="tw-mt-4">
         <div
           className={`tw-grid tw-grid-cols-2 tw-gap-3 ${singleRowOnDesktop ? "lg:tw-grid-cols-4" : ""}`}
         >
@@ -59,11 +61,12 @@ export default function GroupCreateCollections({
             return (
               <button
                 key={collection.enum}
+                data-group-criteria-card
                 type="button"
                 onClick={() => toggleCollection(collection.enum)}
                 className={`tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 tw-text-left tw-transition-colors ${
                   isSelected
-                    ? "tw-border-primary-500/50 tw-bg-primary-500/10 tw-text-primary-400"
+                    ? "tw-border-primary-500/50 tw-bg-iron-900 tw-text-primary-400"
                     : "tw-border-white/5 tw-bg-iron-900 tw-text-iron-300 hover:tw-border-white/10 hover:tw-bg-iron-800 hover:tw-text-iron-100"
                 }`}
               >

@@ -1,10 +1,10 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import React from "react";
 import CreateDropStormViewPart from "@/components/drops/create/utils/storm/CreateDropStormViewPart";
-import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+import { getPreparedDropImagePreview } from "@/services/uploads/prepareDropImage";
 
 jest.mock("@/services/uploads/prepareDropImage", () => ({
-  getPreparedDropImage: jest.fn(),
+  getPreparedDropImagePreview: jest.fn(),
 }));
 
 jest.mock("@/components/drops/view/part/DropPart", () =>
@@ -23,7 +23,7 @@ describe("CreateDropStormViewPart", () => {
   let revokeObjectURLMock: jest.Mock;
 
   beforeEach(() => {
-    jest.mocked(getPreparedDropImage).mockReset();
+    jest.mocked(getPreparedDropImagePreview).mockReset();
     createObjectURLMock = jest.fn(() => "blob:url");
     revokeObjectURLMock = jest.fn();
     (global as any).URL.createObjectURL = createObjectURLMock;
@@ -71,7 +71,7 @@ describe("CreateDropStormViewPart", () => {
   });
 
   it("uses the converted URL and MIME for a prepared AVIF Storm image", () => {
-    jest.mocked(getPreparedDropImage).mockReturnValue({
+    jest.mocked(getPreparedDropImagePreview).mockReturnValue({
       url: "https://media.example/photo.webp",
       mime_type: "image/webp",
     });

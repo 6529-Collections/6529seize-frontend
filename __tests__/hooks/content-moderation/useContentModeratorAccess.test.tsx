@@ -336,7 +336,7 @@ describe("useContentModeratorAccess refresh policy", () => {
     jest.useRealTimers();
   });
 
-  it("keeps access fresh for five minutes instead of refetching on every mount", async () => {
+  it("keeps access fresh for one minute instead of refetching on every mount", async () => {
     const client = new QueryClient();
     client.setQueryData(accessKey, access);
     const first = mountAccess(client);
@@ -348,7 +348,7 @@ describe("useContentModeratorAccess refresh policy", () => {
     second.unmount();
 
     client.setQueryData(accessKey, access, {
-      updatedAt: Date.now() - 5 * 60_000 - 1,
+      updatedAt: Date.now() - 60_000 - 1,
     });
     const stale = mountAccess(client);
     await waitFor(() =>
@@ -357,7 +357,7 @@ describe("useContentModeratorAccess refresh policy", () => {
     stale.unmount();
   });
 
-  it("refreshes a confirmed moderator every five minutes, not every minute", async () => {
+  it("refreshes a confirmed moderator every minute for pending manual-review attention", async () => {
     jest.useFakeTimers();
     const { unmount } = mountAccess(new QueryClient());
     await act(async () => {
@@ -366,7 +366,7 @@ describe("useContentModeratorAccess refresh policy", () => {
     expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      await jest.advanceTimersByTimeAsync(5 * 60_000 - 1);
+      await jest.advanceTimersByTimeAsync(60_000 - 1);
     });
     expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
 

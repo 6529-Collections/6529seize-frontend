@@ -12,6 +12,7 @@ interface CollapsedWaveProps {
   readonly isAnnouncement?: boolean | undefined;
   readonly isDropWave: boolean;
   readonly onMouseEnter?: (() => void) | undefined;
+  readonly onMouseLeave?: (() => void) | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   readonly showTooltip: boolean;
   readonly tooltipId: string;
@@ -64,6 +65,7 @@ export const CollapsedWave = ({
   isAnnouncement = false,
   isDropWave,
   onMouseEnter,
+  onMouseLeave,
   onClick,
   showTooltip,
   tooltipId,
@@ -81,7 +83,7 @@ export const CollapsedWave = ({
 
   return (
     <div
-      className={`tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-colors tw-duration-200 tw-ease-out ${
+      className={`tw-group tw-flex tw-h-full tw-min-h-11 tw-items-center tw-justify-center tw-transition-colors tw-duration-200 tw-ease-out ${
         isActive
           ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
           : "desktop-hover:hover:tw-bg-iron-900/70"
@@ -92,8 +94,9 @@ export const CollapsedWave = ({
         prefetch={false}
         aria-label={linkLabel}
         {...(onMouseEnter ? { onMouseEnter } : {})}
+        {...(onMouseLeave ? { onMouseLeave } : {})}
         onClick={onClick}
-        className="tw-flex tw-items-center tw-justify-center tw-no-underline"
+        className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-no-underline"
         {...(showTooltip ? { "data-tooltip-id": tooltipId } : {})}
       >
         <div className="tw-relative">

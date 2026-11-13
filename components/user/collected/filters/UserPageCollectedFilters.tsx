@@ -2,6 +2,7 @@
 
 import TransferToggle from "@/components/nft-transfer/TransferToggle";
 import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
+import DropdownToolbar from "@/components/utils/select/dropdown/DropdownToolbar";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonSelect from "@/components/utils/select/CommonSelect";
 import type { CollectionSeized, CollectionSort } from "@/entities/IProfile";
@@ -150,7 +151,7 @@ export default function UserPageCollectedFilters({
   };
 
   return (
-    <div className="tw-relative tw-w-full desktop-hover:[&_button[aria-haspopup]:hover]:tw-bg-iron-900 [&_button[aria-haspopup]:not(:focus-visible)]:tw-ring-iron-800 [&_button[aria-haspopup]>:last-child>svg]:tw-size-4 [&_button[aria-haspopup]]:tw-h-10 [&_button[aria-haspopup]]:tw-bg-iron-950 [&_button[aria-haspopup]]:tw-py-2 [&_button[aria-haspopup]]:tw-pl-3 [&_button[aria-haspopup]]:tw-pr-7 [&_button[aria-haspopup]]:tw-shadow-none">
+    <DropdownToolbar size="sm" className="tw-relative tw-w-full">
       <div
         ref={scrollContainerRef}
         className="tw-w-full tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
@@ -170,6 +171,10 @@ export default function UserPageCollectedFilters({
                 "user.collected.filters.view"
               )}
               size="sm"
+              variant="filter"
+              tabsVariant="connected"
+              connectedSize="sm"
+              fill={false}
             />
 
             {activeMainTab === MainTab.NATIVE && (
@@ -212,6 +217,7 @@ export default function UserPageCollectedFilters({
             {filters.collection !== CollectedCollectionType.NETWORK && (
               <UserAddressesSelectDropdown
                 wallets={profile.wallets ?? []}
+                variant="filter"
                 containerRef={containerRef}
                 onActiveAddress={() => undefined}
                 onAddressChange={onAddressChange}
@@ -229,7 +235,7 @@ export default function UserPageCollectedFilters({
             aria-label={getCollectedFilterMessage(
               "user.collected.filters.scrollLeft"
             )}
-            className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-start tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-500"
+            className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           >
             <FontAwesomeIcon
               icon={faChevronLeft}
@@ -247,7 +253,7 @@ export default function UserPageCollectedFilters({
             aria-label={getCollectedFilterMessage(
               "user.collected.filters.scrollRight"
             )}
-            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-500"
+            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-cursor-pointer tw-items-center tw-justify-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
           >
             <FontAwesomeIcon
               icon={faChevronRight}
@@ -256,6 +262,6 @@ export default function UserPageCollectedFilters({
           </button>
         </>
       )}
-    </div>
+    </DropdownToolbar>
   );
 }

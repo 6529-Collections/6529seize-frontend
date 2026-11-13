@@ -3,7 +3,6 @@
 import "@/lib/fetch/ssrFetch";
 import "@/components/drops/create/lexical/lexical.styles.css";
 import "@/styles/Home.module.css";
-import "@/styles/fonts.css";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -13,13 +12,18 @@ import "@/styles/wave-navigation-transition.css";
 import "@/styles/animations.css";
 import "@/styles/globals.css";
 
+import LegacyBrowserNotice from "@/components/legacy-browser/LegacyBrowserNotice";
+import {
+  LEGACY_BROWSER_FLAG_SCRIPT,
+  LEGACY_BROWSER_NOTICE_SCRIPT,
+  LEGACY_BROWSER_STYLES,
+  LEGACY_BROWSER_SYNTAX_SCRIPT,
+} from "@/components/legacy-browser/legacyBrowserGate";
 import VersionReloadScreen, {
   VERSION_RELOAD_STYLES,
 } from "@/components/version-update/VersionReloadScreen";
 import { VERSION_RELOAD_BOOTSTRAP_SCRIPT } from "@/components/version-update/versionReload";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
-import { NATIVE_IOS_BOOTSTRAP_SCRIPT } from "@/components/eula/nativeIosBootstrap";
-import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import {
@@ -37,17 +41,30 @@ import {
 import Providers from "@/components/providers/Providers";
 import RuntimeFavicon from "@/components/providers/RuntimeFavicon";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { getProductionAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
-import { CONSENT_EULA_COOKIE, NATIVE_IOS_COOKIE } from "@/constants/constants";
 import type { Viewport } from "next";
-import { cookies, headers } from "next/headers";
-import EnvironmentOriginProvider from "@/components/common/EnvironmentOriginContext";
-import { getRequestOrigin } from "@/config/requestOrigin";
+import localFont from "next/font/local";
 import { getMediaResolverSource } from "@/lib/media/decentralized-media";
-import Script from "next/script";
 
+// Any route that fetches while rendering stays request-time, so its data is
+// never frozen at build. Routes that fetch nothing are unaffected. Pages move
+// to ISR one by one with their own cache policy, which this blanket setting
+// blocks; see "Static Rendering Readiness" in
+// ops/docs/developer/next-config-runtime-rationale.md.
 export const fetchCache = "force-no-store";
+
+// Loaded here so every route preloads the font from the HTML instead of
+// discovering it from the stylesheet, with a size-adjusted fallback while it
+// swaps in. The variable name becomes the generated family name
+// ("Montserrat"), which font checks in tests rely on; styles use it through
+// --font-montserrat.
+const Montserrat = localFont({
+  src: "../assets/montserrat/Montserrat-VariableFont_wght.woff2",
+  display: "swap",
+  variable: "--font-montserrat",
+});
 
 export const metadata = getAppMetadata();
 const productionEnvironment = getProductionAppEnvironment();
@@ -59,25 +76,45 @@ export const viewport: Viewport = {
   maximumScale: 10,
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   readonly children: React.ReactNode;
 }) {
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
-  const [cookieStore, requestHeaders] = await Promise.all([
-    cookies(),
-    headers(),
-  ]);
-  const initialOrigin = getRequestOrigin(requestHeaders);
-  const initialIsIos = cookieStore.get(NATIVE_IOS_COOKIE)?.value === "true";
-  const initialEulaConsentVersion = cookieStore.get(CONSENT_EULA_COOKIE)?.value;
+  // The shell reads nothing from the request: every visitor gets the same
+  // HTML, and the browser decides native iOS, the EULA gate and NFT
+  // purchasing. A route that reads no request data and fetches nothing while
+  // it renders is prerendered. Wave and chat routes stay request-time in
+  // their own segments. See "Static Rendering Readiness" in
+  // ops/docs/developer/next-config-runtime-rationale.md.
 
   return (
     // Headless UI may add its focus-visible marker before React hydrates when
     // keyboard input arrives during startup. Keep that root-only mutation.
-    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
+    // The browser reads its build stamp from HTML so unchanged chunks keep
+    // their names across deploys.
+    <html
+      lang="en-US"
+      className={Montserrat.variable}
+      data-scroll-behavior="smooth"
+      data-version={publicEnv.VERSION}
+      data-release-order={publicEnv.VERSION_RELEASE_ORDER}
+      suppressHydrationWarning
+    >
       <head>
+        {/* First, before any bundle: browsers that cannot run the site (iOS
+            before 16.4) get a notice instead of a dead page. */}
+        <style dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_STYLES }} />
+        <script
+          dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_FLAG_SCRIPT }}
+        />
+        <script
+          dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_SYNTAX_SCRIPT }}
+        />
+        <script
+          dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_NOTICE_SCRIPT }}
+        />
         <style dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_STYLES }} />
         {/* Synchronous detection prevents a desktop paint before Next loads. */}
         <script
@@ -99,11 +136,6 @@ export default async function RootLayout({
         <script
           dangerouslySetInnerHTML={{ __html: VERSION_RELOAD_BOOTSTRAP_SCRIPT }}
         />
-        <Script
-          id="native-ios-platform-bootstrap"
-          strategy="beforeInteractive"
-          dangerouslySetInnerHTML={{ __html: NATIVE_IOS_BOOTSTRAP_SCRIPT }}
-        />
         <link
           data-runtime-favicon="png"
           rel="icon"
@@ -118,32 +150,37 @@ export default async function RootLayout({
           type="image/svg+xml"
           sizes="any"
         />
-        <link rel="preconnect" href={publicEnv.API_ENDPOINT} crossOrigin="" />
+        <link rel="preconnect" href={getApiBase()} crossOrigin="" />
         <link rel="preconnect" href="https://d3lqz0a4bldqgf.cloudfront.net" />
         <link
           rel="preconnect"
           href={getMediaResolverSource(publicEnv.MEDIA_RESOLVER_ENDPOINT)}
         />
         {isUsingStaticAssets && (
-          <link rel="preconnect" href="https://dnclu2fna0b2b.cloudfront.net" />
+          <>
+            <link
+              rel="preconnect"
+              href="https://dnclu2fna0b2b.cloudfront.net"
+            />
+            {/* Fonts are CORS requests and cannot reuse the connection above. */}
+            <link
+              rel="preconnect"
+              href="https://dnclu2fna0b2b.cloudfront.net"
+              crossOrigin=""
+            />
+          </>
         )}
       </head>
       {/* The touch-first helper may restore data-fine-pointer before hydration. */}
       <body suppressHydrationWarning>
+        <LegacyBrowserNotice baseEndpoint={publicEnv.BASE_ENDPOINT} />
         <VersionReloadScreen />
         <RuntimeFavicon />
         <MobileLaunchTimingReporter />
-        <AwsRumProvider>
-          <EnvironmentOriginProvider origin={initialOrigin}>
-            <Providers
-              initialIsIos={initialIsIos}
-              initialEulaConsentVersion={initialEulaConsentVersion}
-            >
-              <DynamicHeadTitle />
-              <LayoutWrapper>{children}</LayoutWrapper>
-            </Providers>
-          </EnvironmentOriginProvider>
-        </AwsRumProvider>
+        <Providers>
+          <DynamicHeadTitle />
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </Providers>
       </body>
     </html>
   );

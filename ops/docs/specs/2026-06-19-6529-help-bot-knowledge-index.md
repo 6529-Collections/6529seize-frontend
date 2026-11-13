@@ -7,6 +7,146 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The touch-menu, header-navigation and encrypted-chat records cover touch reply,
+timestamp access, cancellable native conversation return and Android Back layer
+ordering. They retain visible tap alternatives, permission and delivery-state
+restrictions, system-edge gestures and reduced-motion behavior. Reversal
+instructions require moving below the commit threshold before release. The shared
+Back record includes wave and direct-message detail routes. The mobile
+bottom-navigation record covers temporary section-tab hiding while composing in
+short landscape iPhone chat viewports.
+
+The signing, encrypted-messages and connection-sharing records cover the shared
+permission consent flow, separate or combined grants, shared server device names,
+renewal versus revocation, Desktop secure sharing's Coming soon gate, and exact
+local notification previews without an in-app cooldown. Composer help describes
+the shared rich-text editor, inline custom emojis, mobile Return/Send and keyboard
+clearance, while encrypted GIF/Poll/Storm remain unavailable. Notification help
+keeps new-device history limitations explicit and names the environment-specific
+Mobile/Staging push body.
+
+The `media.video-player` record covers preview frames and the video-icon fallback
+for Additional Media and Promo Video in submission details. Additional Media
+keeps original video downloads deferred until Play; Promo Video retains metadata
+preloading.
+
+The `waves.native-competitions` record covers optional anonymous submissions,
+their default-off creation setting, publication lock, per-entry winner reveal,
+continued anonymity across later draws, own-entry access, and submitters'
+responsibility for identifying information in authored content or metadata.
+Unrevealed entries bypass account blocks to prevent author identification;
+related author notifications also bypass account blocks and identity mutes
+until that entry wins. Explicit drop hiding, platform moderation, and ordinary
+notification filters remain effective.
+
+The `profiles.identity-tab` record covers the existing-category Rep editor,
+its desktop inline panel and mobile sheet, pinned You contribution, owner Given
+category editing, permission rules, allowance loading, retry action and dismissal.
+Grant Rep uses one label across layouts. Category saves keep the category open;
+partial failures retain only unsaved drafts for retry. The Identity log names
+NIC explicitly and puts neutral running totals after each change.
+It also covers desktop/mobile NIC Received/Given, owner Given management with
+highest totals first by default and optional most-recently-adjusted ordering,
+REP category selection, total replacement, manually entered zero removal and
+returning to the refreshed recipient list's first page after saving. `Load more`
+shows additional recipients; failed saves retain the draft and loaded pages.
+Back returns one step; Cancel discards the unsaved draft and closes management.
+Received and Given lists fit their content, share a height cap and scroll when needed.
+Visitor inspection and existing proxy allocation permissions remain distinct.
+
+The `profiles.getting-started` record covers the first-profile welcome in the
+Identity tab: `Find a Wave` opens Discovery, Main Stage opens its configured
+Wave, and `Before you submit art` opens the existing `Unlock submissions`
+nomination popover on desktop, with hover, click and keyboard access. Touch-first
+devices and the native app keep the dialog or sheet. `How 6529 works` opens
+Join 6529. About statements are edited through the profile editor.
+Its facts keep creation-session visibility, owner/proxy restrictions, the
+`Getting started` header and visible `Dismiss` control, and the welcome's availability without Main Stage details
+explicit.
+It also explains the one-time arrival scroll after profile content becomes
+visible following successful setup on Identity, reduced-motion support, unchanged
+keyboard focus, and no
+repeated scroll on ordinary return or reload. Setup entered from Wave creation
+returns to that flow instead.
+
+The search record covers punctuation-tolerant Wave names across site search,
+sidebar search, composer mentions and the message-search Wave picker. It explains
+all-term matching, partial names, relevance ordering, literal wildcard characters,
+and each surface's existing minimum-length and access rules.
+
+The `profiles.followers-tab` record points to the profile header's Followers
+dialog and private Following list. It covers own-profile authentication and
+proxy restrictions, total counts, pagination, profile navigation, unfollowing,
+and error recovery. The legacy followers URL remains a redirect.
+
+The `content-moderation.controls` record covers WatchTower's red Deleted pills,
+reasoned and confirmed resolution of open reports for a deleted post, retained
+evidence and history, and the distinction from Mark reviewed. Live originals
+have a dedicated post link; deleted posts hide that action and identify saved
+evidence without claiming expired evidence remains available. Saved previews
+include post titles and textual parts. Needs review is the default queue of
+unique subject-based cases covering user reports and pending checks, with a
+shared sidebar signal and summary/tab count and a compatible older
+open-reports link. Review case opens all outstanding cases on the left with the
+selected case highlighted and its reports, checks and evidence on the right.
+The Needs review only toggle applies review status immediately, preserving other
+applied filters. Filter checks opens advanced controls explicitly; edits remain
+pending until Apply filters synchronizes the results and toggle. Quick toggles
+preserve other drafts and the panel's open/closed state. Additional filters browse
+individual check history. Back to list appears on mobile; desktop uses the
+visible list without a redundant back button. Automated outcome is distinct
+from deletion and manual review status.
+
+The `home.overview` record also describes the shared hero artwork and copy, with
+Connect wallet followed by Start here for logged-out visitors. The hero uses a
+fixed selection of Meme cards #1–5, with #1 at the front, independent of mint state. The
+latest-drop slot follows the hero directly; the home page has no What is 6529?
+section.
+
+The `home.overview` record describes the shared discovery cards on the homepage:
+covers beside the content on mobile and filling the card behind a dark, image-tinted text
+fade on larger screens. Homepage
+cards retain wave descriptions and activity rather than showing latest chat
+messages or message authors. Explore Waves keeps its existing layout.
+
+The `home.overview` record describes the typography-only hero without artwork,
+while preserving the original copy, onboarding actions, and authentication rules.
+
+The `home.overview` record maps the first three How to start headings to the
+wallet flow, profile guide, and Waves. Collect or create has a plain heading and
+two inline links within its existing sentence: “Hold Meme Cards” opens
+`/the-memes` and “submit your own art” opens `/about/apply`, explaining submission
+eligibility and nominations for new artists. Restricted iOS visitors keep the
+browsing/community description without those links. The record includes the
+“Four steps into 6529.” introduction and the “Read the full guide” link.
+
+The `home.overview` record explains the Coming up full-width vertical card
+list below 768px, keyboard navigation through card links, tablet/desktop grid,
+and drop, profile and wave destinations. It also explains the optional next
+voting-result time in the visitor's local time zone, including daylight-saving
+adjustments, and omission when no future scheduled result is available. The
+label uses today, tomorrow, a weekday for two to six days ahead, or a short
+month/day for later dates. Its hover title retains the full local timestamp.
+
+The `home.overview` record also describes the homepage-only two-row countdown,
+with the complete phase heading above a dark timer row, zero-padded segments,
+and responsive wrapping. The countdown uses background contrast without outlines.
+Subscription awareness appears above the Latest Drop countdown. It keeps its
+toggle beside the title and its contextual action aligned right, with details
+below and a stacked fallback in narrow cards.
+The shared phase-selection and mint-action rules are unchanged.
+
+The `the-memes.minting` record explains that Latest Drop and mapped Next Drop
+cards omit Your allowance until a wallet address is available. Connected wallets
+retain allocation pills and distinct loading, unpublished, empty, and unavailable
+states; an allocation does not guarantee that it remains mintable.
+
+The `notifications.artist-artwork-alerts` record describes Artwork alerts in the Profile actions menu, its signed-in-only artist-badge visibility rule with an exception for already-enabled alerts, loading the saved state when the menu opens, independent opt-in, Main Stage-only scope, no-backfill boundary, anonymous-entry exclusion, delivery preferences, and recovery states. It links to the canonical artist artwork alerts guide and the Notifications route.
+
+The `waves.artist-submissions-popup` record explains the artist activity icon,
+Active Submissions promise badges, and the distinction between reading a badge,
+opening artwork, and casting a vote.
+
 The `waves.drop.editing` record covers author-only editing, the normal edit
 window, and unlimited editing of the wave's current pinned description drop.
 
@@ -15,28 +155,54 @@ The `about.6529-apps` record includes a concise `brief_answer` naming both
 page. The companion backend uses it for short availability/download requests
 such as "is there an app", "6529 app", and contextual "link?" replies.
 
-The `waves.native-competitions` record covers competition collections and links,
+The `waves.native-competitions` record covers decision collections and links,
 shared chat, independent credits, native entry content, draft/publication and
 terminal lifecycle rules. It qualifies availability rather than promising
 controls in every deployment, and retains the original-wave experience in its
 navigation guidance. Backend runtime continues consuming the published corpus.
-Its setup guidance identifies the Competition type desktop dropdown and
+Its setup guidance identifies the Decision type desktop dropdown and
 small-screen bottom sheet, including selection and dismissal behavior, and
 keyboard-aware name and description fields in the app's setup editor.
 Its navigation guidance distinguishes the app's compact collection and Votes
-pills from web tabs and the shared published-competition wave row. The collection
+pills from web tabs and the shared published-decision wave row. The collection
 uses More for its remaining choices.
 
+Competitions are now called decisions, and the scheduled winner-selection
+moments formerly called decisions are now called results. Help records use
+the new terms in titles and facts, keep `competition` and `competitions` as
+aliases and keywords so questions using the former name still match, and keep
+their existing record ids. Decision links use `/waves/{waveId}/decisions`;
+former `/competitions` links redirect permanently.
+
 The `waves.content-tabs` record describes steady tab rows with screen-reader
-loading announcements, section-specific loading, and destination-bound competition
+loading announcements, section-specific loading, and destination-bound decision
 controls. It also explains that app tabs already in view keep their position
 when selected. It does not promise instant data or a loading screen on every switch.
 
+The `messages.encrypted-chats` record covers profile links in DM headers and
+introductions, sender names and avatars, desktop profile cards, level and public
+author badges, profile-wave navigation, and linked member mentions. Those
+details come from public profile data; chat contents stay encrypted. Missing
+profile details do not prevent reading messages stored on the device.
+
+The `waves.leaderboard.sort-group-filters` record covers Main Stage's one-tap
+Additional Action checkbox, independent sorting and view selection, complete-result
+filtering including promises without plans, reset behavior, and empty/error recovery.
+It directs readers to artwork details for the optional plan and distinguishes the
+artist's promise from verification of approval or fulfillment.
+
 The Wave discovery record describes the independent Active Votes and Worth Checking Out
-sidebar sections, their explanations and view-all destinations. It covers the
-scrollable three-row voting window, pagination, compact empty/error states and
+sidebar sections, their explanations and view-all destinations. It describes
+quiet loading placeholders, explanations that appear with content, empty messages
+only after successful empty requests, and retry without discarding loaded votes.
+It covers the scrollable three-row voting window, pagination, compact empty/error states and
 independently persisted collapse preferences. Worth Checking Out comes first
 and retains its own compact preview height.
+The discovery and Network wave score records also describe returning from Score
+formula: the app header Back control restores the originating Discover URL and
+its selected sort and threshold; the page link provides the same return on web.
+The Memes Quick Vote record describes its persistent top-left close below 768px,
+top-right close at wider widths, matching loading header and focus restoration.
 
 The `delegation.wallet-checker` record covers linked-wallet reads with a
 six-counterparty cap, pair deduplication, relevant missing-reverse-link
@@ -50,10 +216,96 @@ selection from the roughly seven-day, 50,400-processed-block rule for profile
 retention after a split. The subscription record covers balance and setting
 merges, manual quantity precedence over All eligible, priority preservation,
 highest-TDH split routing, and finalized-allocation conflicts that need manual
-reconciliation. The subscriptions overview also explains that profile history
-sections start closed on phones and preserve user toggles during resizing or
-data refreshes. The profile subscription record also explains how tapping,
-hovering, or focusing the address reveals its full value on compact layouts.
+reconciliation. The subscriptions overview uses two zones: the status and funded-drop headline,
+followed by its existing explanation or funded-through line and owner actions;
+Subscription balance, available mints and Forecast use stay visible below.
+Covered is green, Plan a top up is neutral, Running low is amber and Action
+required is red. Visitors see neutral statuses except Covered and no owner
+controls. States without a status retain their existing explanation. Summary
+dates keep their full year, and supplied owner top-up deadlines retain UTC time.
+A supplied deadline appears once in the summary and is not repeated in Top up.
+Next unfunded remains in the facts only when a deadline has not already named
+that drop. Recommended amounts and projected outcomes stay in Top up.
+
+The original coverage gradient is used in every state. On phones, balance and
+Forecast use sit side by side with labels above their values and available mints
+under the balance; they stack below 384px. The owner refresh sits beside the
+balance label on phones and after the balance on desktop. It also refreshes
+coverage. A separate Refresh coverage control appears with the existing notice
+only after coverage is unavailable or a refresh failed. Forecast use opens the
+shared tooltip on hover, focus or tap, preserving its projection note and the
+Covered-owner explanation. Escape or tapping elsewhere dismisses it. There is
+no Details expander, and quantities and backend forecasts remain authoritative.
+
+Owners open the same Top up desktop dialog or mobile bottom sheet in every
+state, including new collectors. No inline amount form is displayed. Notification
+links open and focus the dialog. Top up is filled white for Action required,
+Running low and Not set up, and secondary otherwise. Only No upcoming drops
+selected shows Choose drops, followed by Top up; Choose drops scrolls to and
+focuses Upcoming Drops. Loading has no actions and visitors have no owner actions.
+The actions use consistent phone and desktop heights and padding.
+
+The Top up picker has compact horizontal cards in one column: a radio on the
+left, the original label and card count in the middle, and the ETH amount on the
+right. Selection adds blue fill, outline and amount, with subtle hover feedback
+and no movement. Transitions respect reduced motion. Recommended and Minimum
+retain supplied amounts and show their projected outcome before selection.
+Remaining Year and Epoch are directly visible; Show/Hide Deep Time Subscriptions
+retains Period, Era and Eon. Other keeps its input on the right and its ETH
+preview beneath the label. The original lightning submit button and recipient
+follow the choices. Closing restores focus and retains the draft. Existing
+transaction-status dialogs replace the picker during a transaction and return
+to it when success or error is dismissed.
+
+Upcoming Drops retains its owner-only mode explanation, initial three rows,
+per-row season, date or Minting Today label, Meme title, quantity and selection.
+Show More is centered; on phones it opens the full-list sheet. One amber Funded
+through boundary follows the supplied last funded drop, or Next unfunded
+precedes the first unfunded drop when no funded-through point exists. There are
+no repeated Unfunded tags or duplicate Top up links. This does not change saved
+selection or funding logic. Owners retain emerald switches, quantity pickers and
+mint-day locks. Visitors see non-interactive Subscribed or Not subscribed and
+plain selected / eligible quantities without dropdown arrows or chip backgrounds.
+
+Minting Today uses the existing matching-token-and-contract artwork, a blue
+label and a pulsing dot; reduced motion keeps the dot static. Missing or failed
+artwork leaves the row usable. Below 640px, the artwork sits above full-width
+text and controls align right with later rows, including when they wrap.
+From 640px artwork remains beside the text. More stays close to the Meme title
+and expands all original allocation details below 768px; desktop shows them
+inline. Other rows have no decorative dots. The panel keeps subtle row dividers
+and breathing room above the first row and around the footer.
+
+Subscription minting and Minting settings sit side by side from 1024px. Below
+that width, compact Minting settings and Subscription History rows appear after
+Upcoming Drops and open shared bottom sheets. Settings stack in a column inside
+the sheet. Desktop settings retain their separate labels, selected values,
+unchanged UTC Mode date, Eligibility and owner-only controls and descriptions.
+Visitors see values without switches or edit actions. The saved address uses
+the original short format with the full value available on hover, focus or tap,
+with or without ENS. Loading and failures do not invent saved values. Direct
+section links still open the matching sheet, but resizing alone does not open it.
+Learn more remains the small link at the right of Subscription minting.
+
+Subscription History stays inline on desktop and uses the same three pills
+inside its phone sheet. Redeemed is selected initially; Log History and Top Up
+History load when selected, with independent cached pages and transaction
+refreshes. Pills stay in one horizontally scrolling row, with a light active
+pill and transparent outlined inactive pills with faint hover fill. Arrow keys
+move between tabs. Entries retain every original title, quantity, address,
+balance, date and transaction link. Phone rows are compact; Balance after
+redemption starts on its own line, and time and the smaller Etherscan action do
+not create a separate tall footer. The Etherscan link uses the shared tooltip
+and its styles. Pagination returns to the active history after the requested
+page is ready; background refreshes do not scroll, and tab or profile changes
+cancel pending pagination scrolling.
+
+All five section anchors, exact top-up amounts, history records, pagination and
+owner, visitor, proxy and regional iOS rules remain represented. Failed reads
+are distinct from genuine zero balances or successful empty lists. Application
+preview controls and sample coverage data are absent; isolated automated test
+fixtures do not ship as page data.
+
 These remain frontend-owned facts published through the existing
 help-index sync and consumed by the existing backend loader.
 
@@ -63,15 +315,32 @@ menu in desktop and tablet sidebars.
 
 The `network.identities-leaderboard` record describes the mobile filter's vertical
 criteria list, individual editors, Back navigation, preserved drafts, and
-readiness guidance available from the information button. The footer shows the
-criteria summary without an editing label; the top summary appears only for a
-selected group. Included identities omit repeated empty import messages and
-show a combined count once identities are selected or imported. The xTDH grant
-search shows Clear filters only when its search fields or status differ from
-the defaults; clearing restores Granted without removing a selected grant.
+readiness guidance available from the information button. On mobile, the selected
+criteria summary is a filled card at the end of the list or editor, scrolling
+with the content while only the create action remains fixed. Desktop keeps the
+summary beside the action. Create Wave uses the matching mobile summary card
+in the form's scroll flow. The top summary appears only for a selected group.
+Both identity tabs omit repeated empty-selection and import messages, and the
+bottom summary retains the combined counts. The xTDH grant
+search shows Clear filters only when a collection name or grantor is set;
+clearing preserves the active status tab without removing a selected grant.
 On mobile, grant search fields and cards share one scroll area, with Load more
 after the last loaded card and sheet navigation and the bottom action accessible. Desktop retains
 the left-side criteria list, and saving still creates and applies a new group.
+
+The `the-memes.list-sorting` record explains the phone's sticky, horizontally
+scrollable sort controls, side-by-side Year and Season filters, bottom sheets,
+and square card previews. Existing sorting, query, and detail-page guidance
+continues to apply.
+
+The profile-header record describes the single desktop `Edit` action, the
+combined five-field editor, the existing smaller-screen field menu, and saving
+or clearing About statements. Profile media records use the same desktop editor
+and smaller-layout field menu. Keep these instructions aligned with the header.
+
+The drop-actions record covers current reactor names in desktop tooltips and
+Reactions dialogs, touch long press, live count updates, and closing and reopening
+details to retry a failed names request without reloading the thread.
 
 ## Problem Statement
 
@@ -103,11 +372,10 @@ system sharing, confirmed clipboard fallback, silent cancellation, temporary
 drop availability, and the existing Main Stage, Quorum, and direct-message URL
 rules. Sharing a direct-message URL does not grant conversation access.
 
-The direct-message record covers **New message**, its responsive web bottom sheet
-and desktop dialog, its **To** recipient field,
-search results that remain visible after keyboard dismissal, removable recipient
-chips, selection circles, and the **Message** action for one person or a group.
-It also describes retry behavior and the native screen's hidden tab bar.
+The direct-message record covers **New message** at `/messages/new`, its **To**
+field, and removable recipient chips. It also describes retry behavior and the
+native screen's hidden tab bar. Builds without encrypted chats use the web
+dialog and the **Message** action.
 
 The Memes submission profile and wallet signing record covers the EIP-712
 **Submit a Meme Card to The Memes** action, readable artwork and destination,
@@ -135,8 +403,39 @@ The card records preserve `focus=the-art` deep links to the Memes and Meme Lab
 **Overview**, where artwork details follow the description. The **Listings & offers**
 tab opens the market directly without another accordion. Primary and History tab changes keep the tab row visible and
 show the selected section from its top while deferred content loads.
+The Memes card record also describes the mobile Collectors list, with Balance,
+TDH and Unweighted TDH headers over This card and Total rows, its six sort
+metrics and separate direction arrows, identity filtering, 25-row pagination,
+and full-value CSV export. On narrow screens the list scrolls horizontally by
+swipe or keyboard, keeping labels and values on one line. Screens 768 px and
+wider use the table grouped into This card and Total. Full column-label buttons
+start a new metric high to low and toggle the active direction, with persistent
+sort indicators, an active direction arrow, brighter values, keyboard access
+and announced sort directions.
+Compact values are presentation only.
+The Memes card record describes the six-property preview on phones and desktop,
+with **Show all N properties** and **Show fewer** controls. Between 640 and
+767 px, all properties remain visible without a disclosure; short lists have
+no disclosure.
 The Listings and Offers record distinguishes direct **Collect** and **Sell**
 actions for one order from the explicit choice among multiple orders at a price.
+The Meme card record places connection guidance first when needed, then Collect
+and Make an offer beside the more-actions menu. Collect keeps its complete label
+and price; Make an offer can shrink. Very narrow panels place Collect on its own
+row above the other controls. When Collect is present, the available List action moves into the menu; without
+Collect it takes the second slot, or Make an offer spans both slots if List is
+unavailable. Review offers remains available in the menu. Delivery controls appear
+below the actions once the required wallet is connected. View listings & offers
+shares a desktop row with Marketplaces directly below the trading buttons,
+before supply statistics; smaller screens keep the separate navigation row
+below Supply details & rankings. On desktop, the Memes and Meme Lab
+card records place Mint date beside Mint price above their statistics, followed
+by Distribution Plan when available and Main Stage Submission for supported
+Memes. The Memes TDH rate remains with the supply statistics, including its
+Pending state. Smaller screens retain their original information order. Action
+availability, statistics and wallet requirements stay unchanged.
+Tabs and the off-screen action replacement stay sticky below 1024px, matching
+the single-column card layout; selected-listing review retains bottom-bar priority.
 Market browsing facts describe quiet periodic updates while visible and idle,
 paused for expanded order details, a chosen listing or open review as applicable.
 Healthy and empty states have no routine Refresh action; retrieval failures retain
@@ -170,7 +469,10 @@ switching tabs retains the market selection and active review.
 
 Meme Lab card records include the shared Collect, Make an offer, List and Sell
 controls, exact-card eligibility checks, edition quantities and purchase delivery
-choices. Meme Lab trading is distinct from the Memes, Gradients and Pebbles
+choices. They describe the desktop connection header and List in More trading
+actions when Collect is available, plus the six-property desktop preview and
+Show all / Show fewer control. Smaller screens keep all Meme Lab properties
+visible and retain their existing trading layout. Meme Lab trading is distinct from the Memes, Gradients and Pebbles
 universe used by the set planner, Lowest listings and TDH tools.
 
 Collecting strategy records cover Collect now, At WETH offer, WETH + %, Ask − %,
@@ -215,6 +517,11 @@ It distinguishes link composers from file sharing, includes Instagram's
 save/share-and-paste flow, and explains preparation failures and device-dependent
 share destinations.
 It does not claim automatic posting or successful publication after a handoff.
+
+The profile tab record covers immediate selection feedback, the persistent header,
+scroll preservation with natural settling for shorter content, and clearing
+Collected transfer selections when leaving that tab. It preserves shared
+`address` and `locale` parameters and describes the xTDH Granted default.
 
 The profile website studio records cover 39 editable templates (23 original
 compositions and 16 credited Memes inspirations), page and menu editing, image
@@ -276,6 +583,17 @@ environment; the help runtime continues to consume `/help-index.json`.
   prerequisite, and result.
 
 ## Source Ownership
+
+The artwork Review offers guidance places that action in the more-actions menu
+on artwork pages. It includes
+the responsive review layout: when a connection is required, wallet guidance and
+Connect wallet share the same top card as Make an offer, before the order list.
+The order list scrolls above quantity and Review exact terms, which remain visible
+at the bottom of the phone sheet and desktop dialog. Connected wallet details remain beside those bottom
+controls. The Meme trading block uses one initial loading placeholder before revealing its controls, without replacing them during background listing refreshes. Order selection and wallet authority remain unchanged.
+
+The NFT activity record describes both wide-screen columns and stacked rows on
+narrow screens, with the same activity information, links, filters and pagination.
 
 The Collect workflow record owns `/collect` and `/collect/orders`, profile-wide
 set scope, direct gift recipients, marketplace review and recovery, observed
@@ -704,3 +1022,71 @@ The media playback record also describes contained still artwork on the
 homepage, Meme detail, and expanded Wave submissions: the shared usable-screen
 height cap, desktop homepage details-height limit, natural-height full-width
 mobile homepage images without reserved gaps, and stable Meme image frame.
+
+## Meme collaborator invitations
+
+The Memes submission record covers multiple profile invitations, final consent,
+private pending names, accepted collaborator profile attribution, and the
+next-mint selection cutoff. The Craft documentation covers accepted collaborators as initial claim
+credits, admin editing of final mint artwork and traits, and Arweave publication
+of the saved claim without invitation checks. The frontend corpus records
+that pending invitations never delay voting or minting, and that attribution
+confers neither editing rights nor payment/airdrop arrangements.
+
+## Create Wave criteria navigation
+
+Create Wave access editing uses a vertical category list on smaller screens and
+touch devices. Selecting a category opens its fields; the shared Back control
+returns to the list and preserves the pending criteria. Desktop keeps its
+left-side criteria list. The help corpus distinguishes this from Configuration
+access editors, which retain their compact horizontal navigation.
+
+Create Wave also uses Network Filter’s concise Included copy and shared readiness
+tooltip. The editor omits Before editing and After editing captions and the default
+Everyone summary during editing, while preserving saved-group details, draft
+criteria, member previews, privacy, and save/cancel behavior. Configuration retains
+its existing comparison captions.
+
+Inside a Create Wave mobile category, the shared Back and Cancel actions occupy
+one row, with Back on the left and Cancel on the right; their behavior is unchanged.
+
+Create Wave and Network Filter omit the intermediate combined identity total in
+both Included and Excluded. The bottom criteria summary retains the counts, while
+individual source counts, limit warnings, import errors, and creator warnings remain.
+
+Create Wave and Network Filter use distinct stacked identity, EMMA, and CSV
+sections on phones and touch tablets. Search and upload controls remain visible,
+alongside source results, loading, errors, retry, and removal. Desktop retains its
+two-column import layout.
+
+Both Included and Excluded omit the empty EMMA and CSV source messages in Create
+Wave and Network Filter.
+
+Both identity tabs show a title above the search field: Find an identity to include
+or Find an identity to exclude. The placeholders are Search identities to
+include... and Search identities to exclude..., respectively.
+Create Wave and Network Filter omit empty-selection sentences in both tabs while
+preserving limits, errors, warnings, and the bottom criteria summary.
+
+Competition list corrections: My Votes includes only active nonzero votes; archived winner votes remain retained. Its help record explains Sort by: Your vote amount, Leaderboard position and Last voted, complete-list ordering, ties and missing data, browser persistence by competition and profile, reset-selection clearing and order refresh after successful votes. Winners paginate by win time newest first.
+
+Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. They distinguish sending a reply about a saved vote from posting one after a successful vote, and cover Slider / Numeric entry in competition submission popups. The My Votes record also describes compact phone and tablet rows, 16-pixel side padding, single-line titles and action labels, compact controls with unchanged labels on smaller rows, styled public-reply tooltips, controls that adapt to the available width, and Explain vote beside the amount control on tablet and desktop with the range hint underneath. Desktop controls stay to the right of the artwork and details.
+
+The subscriptions record distinguishes pending and failed reads from successfully
+loaded zero balances and empty lists. Failed balance, settings, airdrop-address
+and upcoming-drop reads show Unavailable and retain the existing Retry action.
+
+The subscriptions record also covers the two-zone summary, state-based action
+emphasis, owner-only deadlines, original full-year date display, quiet facts, loading
+skeletons, original emerald switches, one amber funding boundary, compact phone
+history and the content-sized settings sheet. Real deadlines and funding
+calculations remain API-owned; application design-preview data is absent.
+
+Gradient, Meme Lab and ReMemes browse records describe responsive card
+placeholders that match loaded results, with loading statuses for screen
+readers. Meme Lab includes its individual collection route; ReMemes preserves
+its existing filter visibility while fetching.
+
+Primary navigation knowledge includes the shared Join 6529 / Validator slot: newcomers
+see Join, signed-in profiles see Validator, and unresolved sessions reserve the
+slot across desktop, mobile web, native menus, and page search.

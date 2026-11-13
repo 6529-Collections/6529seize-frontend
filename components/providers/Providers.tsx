@@ -4,16 +4,20 @@
 // Component a Server Component renders becomes its own client reference in the
 // RSC payload, and each reference repeats the root layout's full chunk list in
 // the inline flight data of every HTML page.
+import { usePathname } from "next/navigation";
+
 import { WaveInformationProvider } from "@/contexts/WaveInformationContext";
+import { ShellSearchParamsProvider } from "@/contexts/ShellSearchParamsContext";
 import { VersionStatusProvider } from "@/contexts/VersionStatusContext";
 import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import Auth from "@/components/auth/Auth";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
+import DeviceSetupHost from "@/components/device-signing/DeviceSetupHost";
+import SignedWriteDecisionHost from "@/components/device-signing/SignedWriteDecisionHost";
 import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
-import { EULAConsentProvider } from "@/components/eula/EULAConsentContext";
-import { IpfsProvider } from "@/components/ipfs/IPFSContext";
+import E2eeProvider from "@/components/e2ee/E2eeProvider";
 import QuickDirectMessagesGate from "@/components/messages/quick-dms/QuickDirectMessagesGate";
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -30,25 +34,29 @@ import { TitleProvider } from "@/contexts/TitleContext";
 import { MyStreamProvider } from "@/contexts/wave/MyStreamContext";
 import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext";
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
+import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
+import { isValidatorAuthorizePath } from "@/lib/validator-page/authorize/paths";
 import { SeizeSettingsMode } from "@/types/enums";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
 import CapacitorSetup from "./CapacitorSetup";
+import EULAConsentStartup from "./EULAConsentStartup";
 import IpfsImageSetup from "./IpfsImageSetup";
 import LocaleMessagesGate from "./LocaleMessagesGate";
+import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MixpanelSetup from "./MixpanelSetup";
 import QueryClientSetup from "./QueryClientSetup";
 import WagmiSetup from "./WagmiSetup";
+import DocumentLanguage from "./DocumentLanguage";
+import AndroidBackNavigation from "@/components/navigation/AndroidBackNavigation";
 
 export default function Providers({
   children,
   enableVersionCheck = true,
-  enableWalletAuthentication = true,
+  enableWalletAuthentication: walletAuthenticationProp = true,
   enableCookieConsent = true,
   enableMyStream = true,
   settingsMode = SeizeSettingsMode.REMOTE,
-  initialIsIos = false,
-  initialEulaConsentVersion,
 }: {
   readonly children: React.ReactNode;
   readonly enableVersionCheck?: boolean;
@@ -56,9 +64,13 @@ export default function Providers({
   readonly enableCookieConsent?: boolean;
   readonly enableMyStream?: boolean;
   readonly settingsMode?: SeizeSettingsMode;
-  readonly initialIsIos?: boolean;
-  readonly initialEulaConsentVersion?: string | undefined;
 }) {
+  // A phone authorizing a validator connects a wallet only to sign the
+  // validator's grant; it doesn't sign in to 6529.io.
+  const pathname = usePathname();
+  const enableWalletAuthentication =
+    walletAuthenticationProp && !isValidatorAuthorizePath(pathname);
+
   const sharedProviders = (
     <TitleProvider>
       <HeaderProvider>
@@ -66,6 +78,7 @@ export default function Providers({
           <ViewProvider>
             <WaveInformationProvider>
               <NavigationHistoryProvider>
+                <AndroidBackNavigation />
                 <LocaleMessagesGate>{children}</LocaleMessagesGate>
               </NavigationHistoryProvider>
             </WaveInformationProvider>
@@ -85,46 +98,55 @@ export default function Providers({
               <RefreshProvider>
                 <SeizeSettingsProvider mode={settingsMode}>
                   <EmojiProvider>
-                    <IpfsProvider>
-                      <SeizeConnectProvider>
-                        <Auth
+                    <SeizeConnectProvider>
+                      <Auth
+                        enableWalletAuthentication={enableWalletAuthentication}
+                      >
+                        <AuthLaunchTimingReporter
                           enableWalletAuthentication={
                             enableWalletAuthentication
                           }
-                        >
-                          <AuthLaunchTimingReporter
-                            enableWalletAuthentication={
-                              enableWalletAuthentication
-                            }
-                          />
-                          {enableWalletAuthentication && (
-                            <MarketActivityTracker />
+                        />
+                        {enableWalletAuthentication && (
+                          <MarketActivityTracker />
+                        )}
+                        {enableWalletAuthentication &&
+                          isSignedMessagesEnabled() && (
+                            <SignedWriteDecisionHost />
                           )}
-                          <WaveEligibilityProvider>
-                            <NotificationsProvider>
-                              <CookieConsentProvider
-                                disabled={!enableCookieConsent}
-                              >
-                                <MixpanelSetup />
-                                <AppWebSocketProvider>
+                        <WaveEligibilityProvider>
+                          <NotificationsProvider>
+                            <CookieConsentProvider
+                              disabled={!enableCookieConsent}
+                            >
+                              <MixpanelSetup />
+                              <AwsRumProvider />
+                              <AppWebSocketProvider>
+                                {/* Encrypted chats (D109): inert unless the flag is on. */}
+                                <E2eeProvider>
+                                  {enableWalletAuthentication && (
+                                    <DeviceSetupHost />
+                                  )}
                                   <LayoutProvider>
-                                    {enableMyStream ? (
-                                      <MyStreamProvider>
-                                        {sharedProviders}
-                                        <QuickDirectMessagesGate />
-                                      </MyStreamProvider>
-                                    ) : (
-                                      sharedProviders
-                                    )}
+                                    <ShellSearchParamsProvider>
+                                      {enableMyStream ? (
+                                        <MyStreamProvider>
+                                          {sharedProviders}
+                                          <QuickDirectMessagesGate />
+                                        </MyStreamProvider>
+                                      ) : (
+                                        sharedProviders
+                                      )}
+                                    </ShellSearchParamsProvider>
                                   </LayoutProvider>
-                                  {enableVersionCheck && <NewVersionToast />}
-                                </AppWebSocketProvider>
-                              </CookieConsentProvider>
-                            </NotificationsProvider>
-                          </WaveEligibilityProvider>
-                        </Auth>
-                      </SeizeConnectProvider>
-                    </IpfsProvider>
+                                </E2eeProvider>
+                                {enableVersionCheck && <NewVersionToast />}
+                              </AppWebSocketProvider>
+                            </CookieConsentProvider>
+                          </NotificationsProvider>
+                        </WaveEligibilityProvider>
+                      </Auth>
+                    </SeizeConnectProvider>
                   </EmojiProvider>
                 </SeizeSettingsProvider>
               </RefreshProvider>
@@ -137,15 +159,13 @@ export default function Providers({
 
   return (
     <>
+      <DocumentLanguage />
       <CapacitorSetup />
-      <EULAConsentProvider
-        initialIsIos={initialIsIos}
-        initialConsentVersion={initialEulaConsentVersion}
-      >
+      <EULAConsentStartup>
         <EditingDropProvider>
           <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
         </EditingDropProvider>
-      </EULAConsentProvider>
+      </EULAConsentStartup>
     </>
   );
 }

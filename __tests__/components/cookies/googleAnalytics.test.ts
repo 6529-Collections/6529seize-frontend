@@ -1,4 +1,8 @@
-import { scheduleGoogleAnalytics } from "@/components/cookies/googleAnalytics";
+import {
+  normalizeAnalyticsUrl,
+  scheduleGoogleAnalytics,
+  setGoogleAnalyticsDisabled,
+} from "@/components/cookies/googleAnalytics";
 
 type AnalyticsWindow = typeof globalThis & {
   dataLayer?: unknown[];
@@ -16,6 +20,9 @@ const idleCallbackWindow = globalThis as unknown as IdleCallbackWindow;
 const GA_SCRIPT_URL =
   "https://www.googletagmanager.com/gtag/js?id=G-71NLVV3KY3";
 const LANDING_URL = "http://localhost/landing?section=top";
+// Page views carry the route family as their title, never document.title.
+const LANDING_TITLE = "/[user]";
+const DISABLE_FLAG = "ga-disable-G-71NLVV3KY3";
 
 const gtagScripts = (): HTMLScriptElement[] =>
   Array.from(document.head.querySelectorAll("script")).filter(
@@ -48,6 +55,7 @@ describe("scheduleGoogleAnalytics", () => {
     window.history.replaceState(null, "", "/landing?section=top#intro");
     document.title = "Landing";
     setReadyState("complete");
+    setGoogleAnalyticsDisabled(false);
   });
 
   afterEach(() => {
@@ -235,26 +243,82 @@ describe("scheduleGoogleAnalytics", () => {
       [
         "config",
         "G-71NLVV3KY3",
-        { cookie_expires: 31_536_000, send_page_view: false },
+        {
+          cookie_expires: 31_536_000,
+          send_page_view: false,
+          page_title: LANDING_TITLE,
+        },
       ],
       [
         "event",
         "page_view",
-        { page_location: LANDING_URL, page_title: "Landing" },
+        { page_location: LANDING_URL, page_title: LANDING_TITLE },
       ],
     ]);
   });
 
-  it("uses the landing title as it reads when gtag.js loads", () => {
+  it("reports the route family instead of the document title", () => {
+    window.history.replaceState(null, "", "/messages?wave=synthetic-wave");
+    document.title = "Ann, Bo | Messages";
     cancel = scheduleGoogleAnalytics(hasConsent);
-    document.title = "Landing (updated)";
     window.dispatchEvent(new Event("pointerdown"));
+    window.history.pushState(null, "", "/network");
 
-    expect(queuedCommands()[1]).toEqual([
+    expect(JSON.stringify(queuedCommands())).not.toContain("Ann");
+    expect(queuedCommands()).toContainEqual([
       "event",
       "page_view",
-      { page_location: LANDING_URL, page_title: "Landing (updated)" },
+      {
+        page_location: "http://localhost/messages?wave=synthetic-wave",
+        page_title: "/messages",
+      },
     ]);
+    expect(queuedCommands()).toContainEqual([
+      "set",
+      {
+        page_location: "http://localhost/network",
+        page_referrer: "http://localhost/messages?wave=synthetic-wave",
+        page_title: "/network",
+      },
+    ]);
+  });
+
+  it("stops page views and sets the gtag.js disable flag once consent is withdrawn", () => {
+    cancel = scheduleGoogleAnalytics(hasConsent);
+    window.dispatchEvent(new Event("pointerdown"));
+    const queuedBefore = queuedCommands().length;
+
+    setGoogleAnalyticsDisabled(true);
+    window.history.pushState(null, "", "/network");
+    gtagScripts()[0]?.dispatchEvent(new Event("load"));
+
+    expect(
+      (globalThis as unknown as Record<string, unknown>)[DISABLE_FLAG]
+    ).toBe(true);
+    expect(queuedCommands()).toHaveLength(queuedBefore);
+
+    setGoogleAnalyticsDisabled(false);
+    window.history.pushState(null, "", "/about");
+
+    expect(
+      (globalThis as unknown as Record<string, unknown>)[DISABLE_FLAG]
+    ).toBe(false);
+    expect(queuedCommands()).toHaveLength(queuedBefore + 1);
+  });
+
+  it("follows the page's disable flag when it is set directly", () => {
+    cancel = scheduleGoogleAnalytics(hasConsent);
+    window.dispatchEvent(new Event("pointerdown"));
+    const queuedBefore = queuedCommands().length;
+    const flags = globalThis as unknown as Record<string, unknown>;
+
+    flags[DISABLE_FLAG] = true;
+    window.history.pushState(null, "", "/network");
+    expect(queuedCommands()).toHaveLength(queuedBefore);
+
+    flags[DISABLE_FLAG] = false;
+    window.history.pushState(null, "", "/about");
+    expect(queuedCommands()).toHaveLength(queuedBefore + 1);
   });
 
   it("keeps the landing page and adds the current one after an early navigation", () => {
@@ -268,12 +332,16 @@ describe("scheduleGoogleAnalytics", () => {
       [
         "config",
         "G-71NLVV3KY3",
-        { cookie_expires: 31_536_000, send_page_view: false },
+        {
+          cookie_expires: 31_536_000,
+          send_page_view: false,
+          page_title: LANDING_TITLE,
+        },
       ],
       [
         "event",
         "page_view",
-        { page_location: LANDING_URL, page_title: "Landing" },
+        { page_location: LANDING_URL, page_title: LANDING_TITLE },
       ],
       [
         "event",
@@ -281,6 +349,7 @@ describe("scheduleGoogleAnalytics", () => {
         {
           page_location: "http://localhost/second?tab=all",
           page_referrer: LANDING_URL,
+          page_title: LANDING_TITLE,
         },
       ],
     ]);
@@ -312,14 +381,147 @@ describe("scheduleGoogleAnalytics", () => {
       [
         "event",
         "page_view",
-        { page_location: LANDING_URL, page_title: "Landing" },
+        { page_location: LANDING_URL, page_title: LANDING_TITLE },
       ],
       [
         "event",
         "page_view",
-        { page_location: "http://localhost/third", page_referrer: LANDING_URL },
+        {
+          page_location: "http://localhost/third",
+          page_referrer: LANDING_URL,
+          page_title: LANDING_TITLE,
+        },
       ],
     ]);
+  });
+
+  it("redacts link credentials from the page and referrer URLs it reports", () => {
+    const linkValue = "synthetic-link-value";
+    window.history.replaceState(
+      null,
+      "",
+      `/accept-connection-sharing?token=${linkValue}&address=0x1#intro`
+    );
+    jest
+      .spyOn(document, "referrer", "get")
+      .mockReturnValue(
+        `https://6529.io/accept-connection-sharing?connection_share_code=${linkValue}`
+      );
+    cancel = scheduleGoogleAnalytics(hasConsent);
+    window.history.replaceState(null, "", "/second?session=other-value");
+    window.dispatchEvent(new Event("pointerdown"));
+
+    const redactedLanding =
+      "http://localhost/accept-connection-sharing?token=[Filtered]&address=0x1";
+    const redactedSecond = "http://localhost/second?session=[Filtered]";
+    expect(queuedCommands()).toEqual([
+      [
+        "config",
+        "G-71NLVV3KY3",
+        {
+          cookie_expires: 31_536_000,
+          send_page_view: false,
+          page_title: LANDING_TITLE,
+          page_location: redactedSecond,
+          page_referrer:
+            "https://6529.io/accept-connection-sharing?connection_share_code=[Filtered]",
+        },
+      ],
+      [
+        "event",
+        "page_view",
+        {
+          page_location: redactedLanding,
+          page_title: "/:id",
+        },
+      ],
+      [
+        "event",
+        "page_view",
+        {
+          page_location: redactedSecond,
+          page_referrer: redactedLanding,
+          page_title: LANDING_TITLE,
+        },
+      ],
+    ]);
+    const queued = JSON.stringify(queuedCommands());
+    expect(queued).not.toContain(linkValue);
+    expect(queued).not.toContain("other-value");
+  });
+
+  it("reports encrypted chat pages without the chat id", () => {
+    const chat = `0x${"c".repeat(64)}`;
+    window.history.replaceState(null, "", `/messages/encrypted/${chat}`);
+    jest
+      .spyOn(document, "referrer", "get")
+      .mockReturnValue(`https://6529.io/messages/encrypted/${chat}?q=1`);
+    cancel = scheduleGoogleAnalytics(hasConsent);
+    window.dispatchEvent(new Event("pointerdown"));
+    window.history.pushState(
+      null,
+      "",
+      `/messages/encrypted/0x${"d".repeat(64)}`
+    );
+    window.history.pushState(null, "", "/messages/encrypted/new?to=alice");
+    window.history.pushState(null, "", "/network");
+
+    const chatUrl = "http://localhost/messages/encrypted/[chat]";
+    const CHAT_TITLE = "/messages/encrypted/_chat_";
+    const NEW_CHAT_TITLE = "/messages/encrypted/new";
+    expect(queuedCommands()).toEqual([
+      [
+        "config",
+        "G-71NLVV3KY3",
+        {
+          cookie_expires: 31_536_000,
+          send_page_view: false,
+          page_title: CHAT_TITLE,
+          page_location: chatUrl,
+          page_referrer: "https://6529.io/messages/encrypted/[chat]",
+        },
+      ],
+      [
+        "event",
+        "page_view",
+        { page_location: chatUrl, page_title: CHAT_TITLE },
+      ],
+      [
+        "set",
+        {
+          page_location: "http://localhost/messages/encrypted/new",
+          page_referrer: chatUrl,
+          page_title: NEW_CHAT_TITLE,
+        },
+      ],
+      [
+        "set",
+        {
+          page_location: "http://localhost/network",
+          page_referrer: "http://localhost/messages/encrypted/new",
+          page_title: "/network",
+        },
+      ],
+    ]);
+    expect(JSON.stringify(queuedCommands())).not.toMatch(/0x[cd]{8}|alice/u);
+  });
+
+  it("normalizes only encrypted chat paths", () => {
+    expect(
+      normalizeAnalyticsUrl(
+        `https://6529.io/messages/encrypted/0x${"e".repeat(64)}/info?x=1#top`
+      )
+    ).toBe("https://6529.io/messages/encrypted/[chat]");
+    expect(normalizeAnalyticsUrl("https://6529.io/messages/encrypted")).toBe(
+      "https://6529.io/messages/encrypted"
+    );
+    expect(
+      normalizeAnalyticsUrl("https://6529.io/messages/encrypted/devices")
+    ).toBe("https://6529.io/messages/encrypted/devices");
+    expect(normalizeAnalyticsUrl("https://6529.io/messages/abc?x=1")).toBe(
+      "https://6529.io/messages/abc?x=1"
+    );
+    expect(normalizeAnalyticsUrl("")).toBe("");
   });
 
   it("keeps page URLs and titles out of script source", () => {

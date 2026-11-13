@@ -15,6 +15,15 @@ export const WAVE_FOLLOWING_WAVES_PARAMS = {
 
 export const SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS = 60_000;
 
+/**
+ * The sidebar's quality-ranked discovery list changes slowly, so it refreshes
+ * every 5 minutes instead of every minute like the activity lists.
+ */
+export const SIDEBAR_HIGHLY_RATED_WAVES_PARAMS = {
+  pageSize: 10,
+  refetchIntervalMs: 5 * 60_000,
+} as const;
+
 export const WAVE_DROPS_PARAMS = {
   limit: 50,
 };

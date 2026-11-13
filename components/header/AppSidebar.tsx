@@ -1,20 +1,20 @@
 "use client";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import {
   Dialog,
   DialogPanel,
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { Fragment, useCallback, useEffect, useMemo } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { BuildingLibraryIcon } from "@heroicons/react/24/outline";
-import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useSidebarSections } from "@/hooks/useSidebarSections";
 import type { SidebarSection } from "@/components/navigation/navTypes";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -22,7 +22,8 @@ import { t } from "@/i18n/messages";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
-import Join6529Icon from "../common/icons/Join6529Icon";
+import { useMembershipNavigation } from "@/hooks/useMembershipNavigation";
+import { usePathname } from "next/navigation";
 import WatchTowerIcon from "../common/icons/WatchTowerIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
@@ -66,20 +67,19 @@ export default function AppSidebar({
   readonly open: boolean;
   readonly onClose: () => void;
 }) {
+  const membershipNavigation = useMembershipNavigation();
+  const pathname = usePathname();
   const { appWalletsSupported } = useAppWallets();
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const moderatorAccess = useContentModeratorAccess();
   const showModeration = moderatorAccess.data?.moderator === true;
-  const hasOpenModerationReports =
-    moderatorAccess.data?.has_open_reports === true;
-  const capacitor = useCapacitor();
-  const cookieConsent = useOptionalCookieConsent();
-  const sections = useSidebarSections(
-    appWalletsSupported,
-    capacitor.isIos,
-    cookieConsent === undefined ? "US" : cookieConsent.country
-  );
+  const hasPendingModerationCases =
+    (moderatorAccess.data?.needs_review_count ?? 0) > 0;
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const sections = useSidebarSections(appWalletsSupported, hideNftPurchasing);
   const handleClose = useCallback(() => onClose(), [onClose]);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(open, dialogRef, handleClose);
 
   const menu = useMemo(() => {
     const sectionMap = new Map(
@@ -105,9 +105,13 @@ export default function AppSidebar({
         icon: ChatBubbleIcon,
       },
       {
-        label: t(DEFAULT_LOCALE, "navigation.primary.join6529"),
-        path: "/join-6529",
-        icon: Join6529Icon,
+        label: membershipNavigation.label,
+        path: membershipNavigation.href,
+        icon: membershipNavigation.icon,
+        pending: membershipNavigation.isPending,
+        active:
+          pathname === membershipNavigation.href ||
+          pathname.startsWith(`${membershipNavigation.href}/`),
       },
       sectionMap.get("about"),
       ...(showDropForge ? [dropForgeItem] : []),
@@ -117,7 +121,7 @@ export default function AppSidebar({
               label: t(DEFAULT_LOCALE, "contentModeration.moderator.menu"),
               path: "/content-moderation",
               icon: WatchTowerIcon,
-              hasIndicator: hasOpenModerationReports,
+              hasIndicator: hasPendingModerationCases,
               indicatorLabel: t(
                 DEFAULT_LOCALE,
                 "contentModeration.moderator.openReportsIndicator"
@@ -136,7 +140,14 @@ export default function AppSidebar({
 
       return [item];
     });
-  }, [hasOpenModerationReports, sections, showDropForge, showModeration]);
+  }, [
+    hasPendingModerationCases,
+    membershipNavigation,
+    pathname,
+    sections,
+    showDropForge,
+    showModeration,
+  ]);
 
   // Close on right-to-left swipe
   useEffect(() => {
@@ -168,6 +179,7 @@ export default function AppSidebar({
   return (
     <Transition appear show={open} as={Fragment}>
       <Dialog
+        ref={dialogRef}
         as="div"
         className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden"
         onClose={handleClose}
@@ -198,7 +210,7 @@ export default function AppSidebar({
               <AppSidebarHeader onClose={handleClose} />
               <nav
                 aria-label={t(DEFAULT_LOCALE, "navigation.primary.ariaLabel")}
-                className="tw-flex-1 tw-overflow-y-auto tw-py-6 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
+                className="tw-flex-1 tw-overflow-y-auto tw-pb-6 tw-pt-2 tw-transition-colors tw-duration-500 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
               >
                 <div className="tw-flex tw-h-full tw-flex-col">
                   <div className="tw-flex-1 tw-px-2">

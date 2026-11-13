@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -52,18 +52,19 @@ const WebBrainLeftSidebarWave = ({
   const prefetchWaveData = usePrefetchWaveData();
   const { hasTouchScreen } = useDeviceInfo();
 
-  const { href, isActive, onMouseEnter, onClick } = useWaveNavigation({
-    basePath,
-    activeWaveId: activeWave.id,
-    setActiveWave: activeWave.set,
-    onHover,
-    prefetchWaveData,
-    pathname,
-    searchParams,
-    waveId: wave.id,
-    hasTouchScreen,
-    firstUnreadDropSerialNo: wave.firstUnreadDropSerialNo,
-  });
+  const { href, isActive, onMouseEnter, onMouseLeave, onClick } =
+    useWaveNavigation({
+      basePath,
+      activeWaveId: activeWave.id,
+      setActiveWave: activeWave.set,
+      onHover,
+      prefetchWaveData,
+      pathname,
+      searchParams,
+      waveId: wave.id,
+      hasTouchScreen,
+      firstUnreadDropSerialNo: wave.firstUnreadDropSerialNo,
+    });
 
   const formattedWaveName = useMemo(
     () =>
@@ -96,6 +97,7 @@ const WebBrainLeftSidebarWave = ({
         isAnnouncement={isAnnouncement}
         isDropWave={isDropWave}
         onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
         onClick={onClick}
         showTooltip={showCollapsedTooltip}
         tooltipId={tooltipId}
@@ -118,6 +120,7 @@ const WebBrainLeftSidebarWave = ({
       latestDropTimestamp={wave.newDropsCount.latestDropTimestamp}
       nameRef={nameRef}
       onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       onClick={onClick}
       showExpandedTooltip={showExpandedTooltip}
       showPin={showPin}
@@ -137,4 +140,6 @@ const WebBrainLeftSidebarWave = ({
   );
 };
 
-export default WebBrainLeftSidebarWave;
+// Rows re-render only when their own wave object or props change; live unread
+// values give the receiving wave a new object and leave the others alone.
+export default memo(WebBrainLeftSidebarWave);

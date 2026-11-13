@@ -36,7 +36,7 @@ the card has an explicit mapping, a `Main Stage Submission` action.
    card stays in countdown mode and switches to the next phase instead of
    immediately finalizing the whole mint.
 6. In countdown mode, the card can show a `Mint` button (depending on surface
-   settings and platform/country rules) that links to `/the-memes/mint`.
+   settings and platform rules) that links to `/the-memes/mint`.
 7. In the `Edition Details` accordion, users can open the card’s distribution
    page directly via `Distribution Plan` → `View`.
 8. For mapped cards, the same accordion ends with `Main Stage Submission` →
@@ -53,7 +53,16 @@ the card has an explicit mapping, a `Main Stage Submission` action.
   - Timer updates continuously
 - Home latest-drop details:
   - The countdown appears below drop metadata and the stats grid in the same
-    panel.
+    panel. Its first row shows the phase name and `Upcoming` or `Live` pill.
+    The second row shows `Starts In` or `Ends In` with the existing allowlist
+    information tooltip when applicable, and a timer with zero-padded numbers
+    and smaller unit labels. Mobile timers align left below the label, and
+    four-part timers use two balanced rows in the narrowest content slots.
+    The `Mint` button remains directly below the box. Reduced motion stops the
+    pill animation. Other countdown surfaces retain their existing layout and
+    timer formatting.
+  - The desktop countdown keeps its previous space in the details column so
+    compacting the visible box does not resize the adjacent artwork.
   - `Edition`, `Status`, `Mint price`, and `Floor` row behavior is documented
     in [Latest Drop Stats Grid](feature-latest-drop-stats-grid.md).
   - The `Edition Details` accordion always includes `Mint date`,
@@ -96,7 +105,7 @@ the card has an explicit mapping, a `Main Stage Submission` action.
   message.
 - On `/the-memes/mint`, the countdown card hides its own `Mint` button because
   the page already includes the mint widget/action flow.
-- On iOS outside the US, the countdown card hides the `Mint` button.
+- The countdown card hides the `Mint` button in the iOS app in every country.
 - On home, if the current mint is ended and next-drop data exists, the latest
   section switches to a `Next Drop` panel only after the drop is actually
   complete. If another phase still exists, home keeps the latest-drop countdown
@@ -107,6 +116,13 @@ the card has an explicit mapping, a `Main Stage Submission` action.
   and `Dimensions` instead of showing empty values.
 - At the exact phase start timestamp, the state changes from `Upcoming` to
   `Live`; at the exact phase end timestamp, it leaves the active countdown.
+  These transitions happen without a page refresh, even when the contract data
+  has not changed. Returning to a hidden tab or inactive app catches up to the
+  current phase timing.
+- A later scheduled phase stays `Upcoming` until its claim is configured onchain.
+  If its scheduled start passes before that update arrives, the `Mint` link is
+  hidden until the claim advances; the card does not announce an unopened phase
+  as `Live`.
 - During Europe/Athens daylight-saving transitions, UTC/local countdown values
   can shift by one hour while phase wall-clock targets stay fixed to Athens
   windows.
@@ -122,8 +138,9 @@ the card has an explicit mapping, a `Main Stage Submission` action.
 
 ## Limitations / Notes
 
-- Timing and phase labels are based on Manifold claim data and periodic polling,
-  so visible updates can lag a few seconds.
+- The configured claim's start and end times update the status automatically.
+  Supply changes and onchain configuration of a later phase still depend on
+  periodic contract reads, so those updates can lag a few seconds.
 - For multi-phase drops, countdown state follows the currently matched phase and
   can continue across phase boundaries until the drop is sold out or the final
   phase ends.

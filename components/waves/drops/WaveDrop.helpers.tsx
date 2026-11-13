@@ -16,9 +16,9 @@ import DropMinimalIdentityRow from "./DropMinimalIdentityRow";
 import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropContent from "./WaveDropContent";
 import WaveDropHeader from "./WaveDropHeader";
+import WaveDropStormIndicator from "./WaveDropStormIndicator";
 
 import WaveDropReply from "./WaveDropReply";
-import WaveDropTime from "./time/WaveDropTime";
 
 const GROUPING_TIME_DIFFERENCE_MS = 60_000;
 const TOUCH_MOVE_THRESHOLD_PX = 10;
@@ -75,7 +75,12 @@ const shouldGroupWithDrop = (
   currentDrop: ExtendedDrop,
   otherDrop: ExtendedDrop | null
 ): boolean => {
-  if (!otherDrop || currentDrop.parts.length > 1) {
+  if (
+    !otherDrop ||
+    currentDrop.parts.length > 1 ||
+    currentDrop.author.is_anonymous ||
+    otherDrop.author.is_anonymous
+  ) {
     return false;
   }
 
@@ -416,9 +421,25 @@ const handleTouchMoveInternal = ({
 const clampGroupedTimestampSwipeOffset = (offset: number): number =>
   Math.min(GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX, Math.max(0, offset));
 
+const getGroupedTimestampContentClass = (
+  showTimestamp: boolean,
+  isDragging: boolean
+): string => {
+  const base = "tw-relative tw-z-10";
+  if (!showTimestamp) return base;
+  return `${base} ${isDragging ? "tw-will-change-transform" : "tw-transition-transform tw-duration-150 tw-ease-out"}`;
+};
+
 const getGroupedTimestampContentStyle = (
-  offset: number
+  offset: number,
+  useTouchSwipeFeedback = false
 ): CSSProperties | undefined => {
+  if (useTouchSwipeFeedback) {
+    const restingTransform = offset > 0 ? `translateX(-${offset}px)` : "none";
+    return {
+      transform: `var(--message-swipe-transform, ${restingTransform})`,
+    };
+  }
   if (offset <= 0) {
     return undefined;
   }
@@ -435,10 +456,6 @@ const getGroupedTimestampActionStyle = (
 
   return { transform: `translateX(${offset}px)` };
 };
-
-const getGroupedTimestampOpacityStyle = (offset: number): CSSProperties => ({
-  opacity: Math.min(1, offset / GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX),
-});
 
 const releasePointerCapture = (
   event: React.PointerEvent<HTMLDivElement>,
@@ -493,53 +510,11 @@ const shouldShowGroupedDropTimestamp = ({
   !showAuthorInfo &&
   !isProfileView;
 
-const GroupedDropTimestamp = ({
-  swipeOffset = 0,
-  timestamp,
-  variant,
-  forceVisible = false,
-}: {
-  readonly swipeOffset?: number;
-  readonly timestamp: number;
-  readonly variant: "swipe" | "hover";
-  /** Pointer-driven row hover for browsers whose CSS :hover never fires. */
-  readonly forceVisible?: boolean;
-}) => {
-  // "swipe": revealed by the touch swipe gesture via inline opacity.
-  // "hover": desktop affordance — swiping would hijack text selection, so the
-  // timestamp reveals on row hover instead.
-  const isHoverVariant = variant === "hover";
-  let timestampStyle: CSSProperties | undefined;
-
-  if (isHoverVariant) {
-    timestampStyle = forceVisible ? { opacity: 1 } : undefined;
-  } else {
-    timestampStyle = getGroupedTimestampOpacityStyle(swipeOffset);
-  }
-
-  return (
-    <div
-      className={`tw-pointer-events-none tw-absolute tw-right-4 tw-top-1/2 tw-z-0 tw-flex tw-w-[9.25rem] -tw-translate-y-1/2 tw-justify-end tw-overflow-visible tw-text-right tw-transition-opacity tw-duration-150 ${
-        isHoverVariant
-          ? "tw-opacity-0 desktop-hover:group-hover:tw-opacity-100"
-          : ""
-      }`}
-      data-testid={
-        isHoverVariant
-          ? "grouped-drop-hover-timestamp"
-          : "grouped-drop-swipe-timestamp"
-      }
-      style={timestampStyle}
-    >
-      <WaveDropTime timestamp={timestamp} size="xs" variant="compactReveal" />
-    </div>
-  );
-};
-
 const getAuthorHeader = ({
   showAuthorInfo,
   identityMode,
   drop,
+  signatureGroup,
   showWaveInfo,
   isStorm,
   activePartIndex,
@@ -552,6 +527,7 @@ const getAuthorHeader = ({
   readonly showAuthorInfo: boolean;
   readonly identityMode: DropIdentityMode;
   readonly drop: ExtendedDrop;
+  readonly signatureGroup?: readonly ExtendedDrop[] | undefined;
   readonly showWaveInfo: boolean;
   readonly isStorm: boolean;
   readonly activePartIndex: number;
@@ -571,8 +547,9 @@ const getAuthorHeader = ({
     return (
       <WaveDropHeader
         drop={drop}
+        signatureGroup={signatureGroup}
         showWaveInfo={showWaveInfo}
-        isStorm={isStorm}
+        isStorm={isStorm && timestampLayout !== "stacked-compact"}
         currentPartIndex={activePartIndex}
         partsCount={drop.parts.length}
         showActionsButton={showActionsButton}
@@ -616,6 +593,7 @@ const getContentBlock = ({
   drop,
   showAuthorInfo,
   authorHeader,
+  showStormPartIndicator = false,
   shouldGroupWithPreviousDrop,
   isProfileView,
   activePartIndex,
@@ -646,6 +624,7 @@ const getContentBlock = ({
   readonly drop: ExtendedDrop;
   readonly showAuthorInfo: boolean;
   readonly authorHeader: React.ReactNode;
+  readonly showStormPartIndicator?: boolean;
   readonly shouldGroupWithPreviousDrop: boolean;
   readonly isProfileView: boolean;
   readonly activePartIndex: number;
@@ -694,7 +673,7 @@ const getContentBlock = ({
     >
       {showAuthorInfo && (
         <div
-          className={`tw-flex tw-w-full tw-items-start tw-gap-x-2 ${
+          className={`${showStormPartIndicator ? "tw-grid tw-grid-cols-[auto_minmax(0,1fr)]" : "tw-flex"} tw-w-full tw-items-center tw-gap-x-2 md:tw-items-start ${
             inlineAuthorOnDesktop
               ? ""
               : "md:tw-block md:tw-w-auto md:tw-flex-shrink-0"
@@ -708,6 +687,13 @@ const getContentBlock = ({
           >
             {authorHeader}
           </div>
+          {showStormPartIndicator && (
+            <WaveDropStormIndicator
+              currentPartIndex={activePartIndex}
+              partsCount={drop.parts.length}
+              className={`tw-col-start-2 ${inlineAuthorOnDesktop ? "" : "md:tw-hidden"}`}
+            />
+          )}
         </div>
       )}
       <div
@@ -722,6 +708,13 @@ const getContentBlock = ({
           inlineAuthorOnDesktop,
           authorHeader,
         })}
+        {showStormPartIndicator && !inlineAuthorOnDesktop && (
+          <WaveDropStormIndicator
+            currentPartIndex={activePartIndex}
+            partsCount={drop.parts.length}
+            className="tw-hidden md:tw-inline-flex"
+          />
+        )}
         <div
           className={`${getDropContentClass({
             showAuthorInfo,
@@ -763,20 +756,20 @@ const getContentBlock = ({
 export {
   GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX,
   GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO,
-  GroupedDropTimestamp,
+  GROUPED_TIMESTAMP_SWIPE_MAX_OFFSET_PX,
   type TimestampSwipeStart,
   clampGroupedTimestampSwipeOffset,
   clearLongPressTimeout,
   getAuthorHeader,
   getContentBlock,
   getGroupedTimestampActionStyle,
+  getGroupedTimestampContentClass,
   getGroupedTimestampContentStyle,
   getGroupingClass,
   getContentOffsetClass,
   getDropClasses,
   getPointerId,
   getPointerType,
-  getPrimaryTouch,
   getWaveDropOuterClass,
   handleTouchEndInternal,
   handleTouchMoveInternal,

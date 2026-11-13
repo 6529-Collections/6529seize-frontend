@@ -1,6 +1,7 @@
 "use client";
 
-import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
+import { competitionPresentationWave } from "@/helpers/competition-presentation.helpers";
+import MemesArtSubmissionModal from "@/components/waves/memes/LazyMemesArtSubmissionModal";
 import Button from "@/components/utils/button/Button";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -76,7 +77,14 @@ export function MemesArtResubmitAction({
   return (
     <MemesArtResubmitActionWithWave
       drop={drop}
-      wave={wave}
+      wave={
+        drop.competition_context?.data.competition
+          ? competitionPresentationWave(
+              wave,
+              drop.competition_context.data.competition
+            )
+          : wave
+      }
       variant={variant}
       onOpenModal={onOpenModal}
       onModalClose={onModalClose}

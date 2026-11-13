@@ -111,7 +111,9 @@ describe("useNativeKeyboard", () => {
         "--native-keyboard-inset-bottom"
       )
     ).toBe("320px");
-    expect(document.documentElement.dataset.nativeKeyboardVisible).toBe("true");
+    expect(document.documentElement.dataset["nativeKeyboardVisible"]).toBe(
+      "true"
+    );
 
     act(() => {
       listeners["keyboardDidShow"]?.({ keyboardHeight: 336 });
@@ -120,6 +122,95 @@ describe("useNativeKeyboard", () => {
     expect(result.current.isVisible).toBe(true);
     expect(result.current.keyboardHeight).toBe(336);
     expect(result.current.phase).toBe("visible");
+  });
+
+  it("receives iOS keyboard events while accessory bar configuration is pending", async () => {
+    let finishAccessoryConfiguration: () => void = () => undefined;
+    const accessoryConfiguration = new Promise<void>((resolve) => {
+      finishAccessoryConfiguration = resolve;
+    });
+    mockSetAccessoryBarVisible.mockReturnValue(accessoryConfiguration);
+
+    const { result } = await renderNativeKeyboardHook();
+    await waitFor(() => {
+      expect(mockSetAccessoryBarVisible).toHaveBeenCalledTimes(1);
+    });
+
+    act(() => {
+      listeners["keyboardWillShow"]?.({ keyboardHeight: 388 });
+      listeners["keyboardDidShow"]?.({ keyboardHeight: 388 });
+    });
+
+    expect(result.current.isVisible).toBe(true);
+    expect(result.current.phase).toBe("visible");
+    expect(
+      document.documentElement.style.getPropertyValue(
+        "--native-keyboard-inset-bottom"
+      )
+    ).toBe("388px");
+
+    await act(async () => {
+      finishAccessoryConfiguration();
+      await accessoryConfiguration;
+    });
+  });
+
+  it("reconnects listeners while an earlier accessory configuration is pending", async () => {
+    let finishAccessoryConfiguration: () => void = () => undefined;
+    const accessoryConfiguration = new Promise<void>((resolve) => {
+      finishAccessoryConfiguration = resolve;
+    });
+    mockSetAccessoryBarVisible.mockReturnValue(accessoryConfiguration);
+
+    const firstHook = await renderNativeKeyboardHook();
+    await waitFor(() => {
+      expect(mockSetAccessoryBarVisible).toHaveBeenCalledTimes(1);
+    });
+    firstHook.unmount();
+
+    const secondHook = renderHook(() => useNativeKeyboard());
+    await waitFor(() => {
+      expect(mockAddListener).toHaveBeenCalledTimes(8);
+    });
+    act(() => {
+      listeners["keyboardDidShow"]?.({ keyboardHeight: 388 });
+    });
+
+    expect(secondHook.result.current.isVisible).toBe(true);
+    expect(secondHook.result.current.keyboardHeight).toBe(388);
+
+    await act(async () => {
+      finishAccessoryConfiguration();
+      await accessoryConfiguration;
+    });
+  });
+
+  it("keeps iOS keyboard events active if accessory bar configuration fails", async () => {
+    const configurationError = new Error("Accessory bar configuration failed");
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    mockSetAccessoryBarVisible.mockRejectedValue(configurationError);
+
+    try {
+      const { result } = await renderNativeKeyboardHook();
+      await waitFor(() => {
+        expect(consoleError).toHaveBeenCalledWith(
+          "[Native Keyboard] Error setting iOS accessory bar visibility:",
+          configurationError
+        );
+      });
+
+      act(() => {
+        listeners["keyboardDidShow"]?.({ keyboardHeight: 388 });
+      });
+
+      expect(result.current.isVisible).toBe(true);
+      expect(result.current.keyboardHeight).toBe(388);
+      expect(result.current.phase).toBe("visible");
+    } finally {
+      consoleError.mockRestore();
+    }
   });
 
   it("publishes only the keyboard inset not already removed by layout viewport resize", async () => {
@@ -172,6 +263,207 @@ describe("useNativeKeyboard", () => {
       window.requestAnimationFrame = originalRequestAnimationFrame;
       window.cancelAnimationFrame = originalCancelAnimationFrame;
     }
+  });
+
+  describe("Android viewport and native event ordering", () => {
+    const viewportProperties = [
+      "innerHeight",
+      "innerWidth",
+      "visualViewport",
+    ] as const;
+    let originalDescriptors: PropertyDescriptorMap;
+    let layoutHeight: number;
+    let visualHeight: number;
+    let visualTop: number;
+    let viewportWidth: number;
+    let viewport: EventTarget;
+    let pendingFrame: FrameRequestCallback | null;
+    let input: HTMLInputElement;
+
+    const flushViewportResize = (layout: number, visual = layout, top = 0) => {
+      act(() => {
+        layoutHeight = layout;
+        visualHeight = visual;
+        visualTop = top;
+        globalThis.dispatchEvent(new Event("resize"));
+        viewport.dispatchEvent(new Event("resize"));
+        const callback = pendingFrame;
+        pendingFrame = null;
+        callback?.(0);
+      });
+    };
+    const readInset = () =>
+      document.documentElement.style.getPropertyValue(
+        "--native-keyboard-inset-bottom"
+      );
+
+    beforeEach(() => {
+      mockGetPlatform.mockReturnValue("android");
+      originalDescriptors = Object.getOwnPropertyDescriptors(globalThis);
+      layoutHeight = 800;
+      visualHeight = 800;
+      visualTop = 0;
+      viewportWidth = 400;
+      pendingFrame = null;
+      viewport = new EventTarget();
+      Object.defineProperties(viewport, {
+        height: { get: () => visualHeight },
+        width: { get: () => viewportWidth },
+        offsetTop: { get: () => visualTop },
+      });
+      Object.defineProperties(globalThis, {
+        innerHeight: { configurable: true, get: () => layoutHeight },
+        innerWidth: { configurable: true, get: () => viewportWidth },
+        visualViewport: { configurable: true, value: viewport },
+      });
+      jest
+        .spyOn(window, "requestAnimationFrame")
+        .mockImplementation((callback) => {
+          pendingFrame = callback;
+          return 1;
+        });
+      jest.spyOn(window, "cancelAnimationFrame").mockImplementation(() => {
+        pendingFrame = null;
+      });
+      input = document.createElement("input");
+      document.body.appendChild(input);
+    });
+
+    afterEach(() => {
+      __resetNativeKeyboardForTests();
+      input.remove();
+      jest.restoreAllMocks();
+      for (const property of viewportProperties) {
+        const descriptor = originalDescriptors[property];
+        if (descriptor) Object.defineProperty(globalThis, property, descriptor);
+        else Reflect.deleteProperty(globalThis, property);
+      }
+    });
+
+    it.each(["resize-first", "native-first"])(
+      "avoids a second keyboard gap with %s delivery",
+      async (order) => {
+        const { result } = await renderNativeKeyboardHook();
+        act(() => input.focus());
+        if (order === "native-first") {
+          act(() => listeners["keyboardWillShow"]?.({ keyboardHeight: 320 }));
+        }
+        flushViewportResize(480);
+        act(() => {
+          listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+          listeners["keyboardDidShow"]?.({ keyboardHeight: 320 });
+        });
+        expect(result.current.isVisible).toBe(true);
+        expect(readInset()).toBe("0px");
+        flushViewportResize(480);
+        expect(readInset()).toBe("0px");
+        expect(result.current.keyboardHeight).toBe(320);
+      }
+    );
+
+    it.each([
+      { layout: 800, inset: "320px" },
+      { layout: 600, inset: "120px" },
+      { layout: 480, inset: "0px" },
+    ])(
+      "subtracts layout shrink once at layout height $layout",
+      async ({ layout, inset }) => {
+        const { result } = await renderNativeKeyboardHook();
+        act(() => input.focus());
+        flushViewportResize(layout, 480);
+        expect(result.current.isVisible).toBe(true);
+        expect(result.current.keyboardHeight).toBe(320);
+        expect(readInset()).toBe(inset);
+      }
+    );
+
+    it.each(["viewport-first", "native-first"])(
+      "keeps a fully panned keyboard visible without adding another inset with %s delivery",
+      async (order) => {
+        const { result } = await renderNativeKeyboardHook();
+        act(() => input.focus());
+        if (order === "native-first") {
+          act(() => listeners["keyboardWillShow"]?.({ keyboardHeight: 320 }));
+        }
+        flushViewportResize(800, 480, 320);
+        expect(result.current.isVisible).toBe(true);
+        expect(result.current.keyboardHeight).toBe(320);
+        expect(readInset()).toBe("0px");
+        act(() => listeners["keyboardDidShow"]?.({ keyboardHeight: 320 }));
+        expect(readInset()).toBe("0px");
+        act(() => {
+          listeners["keyboardWillHide"]?.();
+          listeners["keyboardDidHide"]?.();
+        });
+        flushViewportResize(800);
+        expect(result.current.isVisible).toBe(false);
+        expect(readInset()).toBe("0px");
+      }
+    );
+
+    it("keeps the inset in the same frame as Android viewport panning", async () => {
+      await renderNativeKeyboardHook();
+      act(() => input.focus());
+      flushViewportResize(800, 480);
+
+      for (const top of [20, 100, 260, 320]) {
+        act(() => {
+          visualTop = top;
+          viewport.dispatchEvent(new Event("scroll"));
+        });
+        // Android has already panned the rendered viewport. Waiting for another
+        // animation frame leaves the previous inset applied on top of that pan.
+        expect(readInset()).toBe(`${320 - top}px`);
+      }
+    });
+
+    it.each([
+      { layout: 800, top: 100, inset: "220px" },
+      { layout: 600, top: 60, inset: "60px" },
+    ])(
+      "subtracts viewport panning and layout resize once at $layout/$top",
+      async ({ layout, top, inset }) => {
+        const { result } = await renderNativeKeyboardHook();
+        act(() => input.focus());
+        flushViewportResize(layout, 480, top);
+        expect(result.current.keyboardHeight).toBe(320);
+        expect(readInset()).toBe(inset);
+        act(() => listeners["keyboardDidShow"]?.({ keyboardHeight: 320 }));
+        expect(readInset()).toBe(inset);
+      }
+    );
+
+    it("tracks keyboard height changes and repeated close/reopen without losing the baseline", async () => {
+      const { result } = await renderNativeKeyboardHook();
+      act(() => input.focus());
+      for (const height of [320, 380, 280]) {
+        flushViewportResize(800 - height);
+        act(() => listeners["keyboardDidShow"]?.({ keyboardHeight: height }));
+        expect(result.current.keyboardHeight).toBe(height);
+        expect(readInset()).toBe("0px");
+        act(() => {
+          listeners["keyboardWillHide"]?.();
+          listeners["keyboardDidHide"]?.();
+        });
+        flushViewportResize(800);
+        expect(result.current.isVisible).toBe(false);
+        expect(readInset()).toBe("0px");
+      }
+    });
+
+    it("resets rotation geometry without treating a focused field as an open keyboard", async () => {
+      const { result } = await renderNativeKeyboardHook();
+      act(() => input.focus());
+      viewportWidth = 800;
+      flushViewportResize(400);
+      expect(result.current.isVisible).toBe(false);
+      viewportWidth = 400;
+      flushViewportResize(800);
+      flushViewportResize(480);
+      act(() => listeners["keyboardDidShow"]?.({ keyboardHeight: 320 }));
+      expect(result.current.isVisible).toBe(true);
+      expect(readInset()).toBe("0px");
+    });
   });
 
   it("keeps native iOS geometry authoritative through the hide lifecycle", async () => {
@@ -446,7 +738,7 @@ describe("useNativeKeyboard", () => {
         "--native-keyboard-inset-bottom"
       )
     ).toBe("0px");
-    expect(document.documentElement.dataset.nativeKeyboardVisible).toBe(
+    expect(document.documentElement.dataset["nativeKeyboardVisible"]).toBe(
       undefined
     );
 
@@ -457,7 +749,7 @@ describe("useNativeKeyboard", () => {
     expect(result.current.isVisible).toBe(false);
     expect(result.current.keyboardHeight).toBe(0);
     expect(result.current.phase).toBe("hidden");
-    expect(document.documentElement.dataset.nativeKeyboardVisible).toBe(
+    expect(document.documentElement.dataset["nativeKeyboardVisible"]).toBe(
       undefined
     );
   });
@@ -498,6 +790,37 @@ describe("useNativeKeyboard", () => {
       });
     }
   });
+
+  it.each([
+    { platform: "android", duration: "0ms" },
+    { platform: "ios", duration: "250ms" },
+  ])(
+    "uses $duration for $platform native keyboard events",
+    async ({ platform, duration }) => {
+      mockGetPlatform.mockReturnValue(platform);
+      const originalMatchMedia = globalThis.matchMedia;
+      Object.defineProperty(globalThis, "matchMedia", {
+        configurable: true,
+        value: jest.fn().mockReturnValue({ matches: false }),
+      });
+      try {
+        await renderNativeKeyboardHook();
+        for (const event of ["keyboardWillShow", "keyboardWillHide"]) {
+          act(() => listeners[event]?.({ keyboardHeight: 320 }));
+          expect(
+            document.documentElement.style.getPropertyValue(
+              "--native-keyboard-layout-transition-duration"
+            )
+          ).toBe(duration);
+        }
+      } finally {
+        Object.defineProperty(globalThis, "matchMedia", {
+          configurable: true,
+          value: originalMatchMedia,
+        });
+      }
+    }
+  );
 
   it("finishes hiding from the focus fallback when did-hide is missing", async () => {
     const { result } = await renderNativeKeyboardHook();
@@ -682,8 +1005,8 @@ describe("useNativeKeyboard", () => {
     firstHook.unmount();
     renderHook(() => useNativeKeyboard());
 
-    pendingStaleHandles.forEach((deferredHandle, index) => {
-      deferredHandle.resolve(staleSetupHandles[index]);
+    staleSetupHandles.forEach((handle, index) => {
+      pendingStaleHandles[index]?.resolve(handle);
     });
 
     await waitFor(() => {

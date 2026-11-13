@@ -57,6 +57,24 @@ beforeEach(() => {
 });
 
 describe('useDropMessages', () => {
+  it('leaves ATTACHMENT_STATUS_UPDATE to the app-wide realtime updater', () => {
+    const { useWebSocketMessage } = require('@/services/websocket/useWebSocketMessage');
+    const subscribedTypes: WsMessageType[] = [];
+    (useWebSocketMessage as jest.Mock).mockImplementation((type) => {
+      subscribedTypes.push(type);
+      return { isConnected: true };
+    });
+
+    renderHook(() => useDropMessages('wave-1', 'drop-1'), {
+      wrapper: createWrapper(),
+    });
+
+    expect(subscribedTypes).toContain(WsMessageType.DROP_UPDATE);
+    expect(subscribedTypes).not.toContain(
+      WsMessageType.ATTACHMENT_STATUS_UPDATE
+    );
+  });
+
   it('should return expected hook properties', () => {
     const { result } = renderHook(
       () => useDropMessages('wave-123', 'drop-456'),
@@ -102,7 +120,7 @@ describe('useDropMessages', () => {
     expect(fetchNextPage).toHaveBeenCalled();
   });
 
-  it('websocket callback debounces refetch', () => {
+  it('websocket callback debounces refetch', async () => {
     jest.useFakeTimers();
     const refetch = jest.fn().mockResolvedValue(undefined);
     useInfiniteQueryMock.mockReturnValue({
@@ -128,7 +146,11 @@ describe('useDropMessages', () => {
     });
 
     wsCallback({ wave: { id: 'wave-x' } });
-    jest.advanceTimersByTime(1000);
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(1000);
+    });
+    // Nothing is cached for the thread yet, so the first-page refresh falls
+    // back to the full refetch.
     expect(refetch).toHaveBeenCalled();
     unmount();
     jest.useRealTimers();

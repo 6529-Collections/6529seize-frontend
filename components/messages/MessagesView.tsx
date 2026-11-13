@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { E2eeRenewalBanner } from "@/components/e2ee/gate/E2eeRenewalBanner";
 import { usePathname, useSearchParams } from "next/navigation";
 import MyStreamWave from "../brain/my-stream/MyStreamWave";
 import BrainContent from "../brain/content/BrainContent";
@@ -10,12 +11,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 const MessagesView: React.FC = () => {
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by app/messages page Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
   const { openDirectMessage } = useCreateModalState();
 
   const serialisedWaveId = getActiveWaveIdFromUrl({ pathname, searchParams });
@@ -41,20 +46,29 @@ const MessagesView: React.FC = () => {
           Choose a direct message conversation from the sidebar to view messages
           and continue the discussion.
         </p>
-        <Button onClick={openDirectMessage} variant="primary" size="md">
-          <FontAwesomeIcon
-            icon={faPaperPlane}
-            className="tw-size-4 tw-flex-shrink-0"
-          />
-          <span>Create DM</span>
-        </Button>
+        {!isE2eeEnabled() && (
+          <Button onClick={openDirectMessage} variant="primary" size="md">
+            <FontAwesomeIcon
+              icon={faPaperPlane}
+              className="tw-size-4 tw-flex-shrink-0"
+            />
+            <span>{t(locale, "quickDm.createDmLabel")}</span>
+          </Button>
+        )}
       </div>
     );
   }
 
   return (
     <BrainContent activeDrop={null} onCancelReplyQuote={() => {}}>
-      {content}
+      {showPlaceholder ? (
+        <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col">
+          <E2eeRenewalBanner className="tw-mx-3 tw-mt-2" />
+          <div className="tw-min-h-0 tw-flex-1">{content}</div>
+        </div>
+      ) : (
+        content
+      )}
     </BrainContent>
   );
 };

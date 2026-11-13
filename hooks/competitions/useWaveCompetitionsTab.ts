@@ -2,10 +2,7 @@
 
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useEffect } from "react";
-import {
-  isMultiCompetitionEnabled,
-  isCompetitionAccessError,
-} from "@/helpers/competition.helpers";
+import { isCompetitionAccessError } from "@/helpers/competition.helpers";
 import {
   useCompetitionHub,
   useCompetitionList,
@@ -13,10 +10,7 @@ import {
 } from "./useCompetitionQueries";
 
 export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
-  const enabled =
-    isMultiCompetitionEnabled() &&
-    Boolean(wave) &&
-    !wave?.chat.scope.group?.is_direct_message;
+  const enabled = Boolean(wave) && !wave?.chat.scope.group?.is_direct_message;
   const waveId = wave?.id ?? "";
   const defaultCompetition = useDefaultCompetition(waveId, enabled);
   const hub = useCompetitionHub(waveId, enabled);

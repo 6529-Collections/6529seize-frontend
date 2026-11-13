@@ -3,6 +3,8 @@
 import { useAuth } from "@/components/auth/Auth";
 import { publicEnv } from "@/config/env";
 import { areEqualURLS } from "@/helpers/Helpers";
+import { getInternalLinkPath } from "@/helpers/internalLink";
+import { getNativeLinkDestination } from "@/helpers/mobileAppLinks";
 import { t } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -11,6 +13,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { getConnectionShareRoute } from "./connectionShareQr";
 import {
   getQRScannerErrorReason,
   isQRScannerAvailable,
@@ -37,15 +40,42 @@ function getQRScannerErrorToastMessage({
   );
 }
 
+/**
+ * A scanned link to this site opens its path and query. The fragment is not
+ * carried into the app, as before.
+ */
+function getScannedSitePath(content: string): string | null {
+  const path = getInternalLinkPath(content);
+  return path === null ? null : path.split("#")[0]!;
+}
+
+function getDeviceSetupRoute(
+  url: URL,
+  content: string,
+  appScheme: string,
+  address: string
+): string | null {
+  if (
+    !url.hash ||
+    url.searchParams.get("address")?.toLowerCase() !== address.toLowerCase()
+  ) {
+    return null;
+  }
+  return getConnectionShareRoute({ content, appScheme });
+}
+
 export default function HeaderQRScanner({
   onScanSuccess,
   appSidebar = false,
+  actionLabel,
+  deviceSetupAddress,
 }: {
   readonly onScanSuccess: () => void;
+  readonly actionLabel?: string;
+  readonly deviceSetupAddress?: string | undefined;
   readonly appSidebar?: boolean | undefined;
 }) {
   const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
-  const baseEndpoint = publicEnv.BASE_ENDPOINT ?? "https://6529.io";
 
   const { setToast } = useAuth();
   const capacitor = useCapacitor();
@@ -122,60 +152,45 @@ export default function HeaderQRScanner({
     }
   };
 
+  // Only a route the destination helpers accepted is opened; anything else
+  // is reported as an unrecognised code.
+  const navigateToScannedRoute = (route: string | null) => {
+    if (!route) {
+      setToast({ message: invalidQRCodeMessage, type: "error" });
+      return;
+    }
+    onScanSuccess();
+    router.push(route);
+  };
+
   const handleQRCode = (content: string) => {
     try {
       const url = new URL(content);
-      let path = "";
-      let queryParams: Record<string, string | number> = {};
-
-      if (url.origin === baseEndpoint) {
-        const resolvedPath = `${url.pathname}${url.search}`;
-        onScanSuccess();
-        router.push(resolvedPath);
-      } else if (areEqualURLS(url.protocol, `${appScheme}:`)) {
-        const resolvedUrl = content.replace(`${appScheme}://`, "");
-        const [scope, ...pathParts] = resolvedUrl.split("?")[0]?.split("/")!;
-
-        // Extract query params
-        const queryString = resolvedUrl.includes("?")
-          ? resolvedUrl.split("?")[1]
-          : "";
-        const searchParams = new URLSearchParams(queryString);
-        queryParams = Object.fromEntries(searchParams.entries());
-        queryParams["_t"] = Math.floor(Date.now() / 1000);
-
-        const stringQueryParams = Object.fromEntries(
-          Object.entries(queryParams).map(([key, value]) => [
-            key,
-            String(value),
-          ])
+      if (deviceSetupAddress !== undefined) {
+        navigateToScannedRoute(
+          getDeviceSetupRoute(url, content, appScheme, deviceSetupAddress)
         );
-        const queryParamsString = new URLSearchParams(
-          stringQueryParams
-        ).toString();
+        return;
+      }
 
-        switch (scope) {
-          case DeepLinkScope.NAVIGATE:
-            path = `/${pathParts.join("/")}`;
-            break;
-          case DeepLinkScope.SHARE_CONNECTION:
-            path = "/accept-connection-sharing";
-            break;
-          default:
-            console.warn("Unknown Deep Link Scope", scope);
-            setToast({
-              message: invalidQRCodeMessage,
-              type: "error",
-            });
-            return;
+      const siteOrigin = new URL(publicEnv.BASE_ENDPOINT).origin;
+      if (url.origin === siteOrigin) {
+        navigateToScannedRoute(getScannedSitePath(content));
+      } else if (areEqualURLS(url.protocol, `${appScheme}:`)) {
+        if (url.hostname === DeepLinkScope.SHARE_CONNECTION) {
+          navigateToScannedRoute(
+            getConnectionShareRoute({ content, appScheme })
+          );
+          return;
         }
-
-        // Navigate to the extracted path
-        onScanSuccess();
-        const routerPath = `${path}${
-          queryParamsString ? `?${queryParamsString}` : ""
-        }`;
-        router.push(routerPath);
+        navigateToScannedRoute(
+          getNativeLinkDestination(
+            content,
+            appScheme,
+            siteOrigin,
+            Math.floor(Date.now() / 1000)
+          )
+        );
       } else {
         setToast({
           message: invalidQRCodeMessage,
@@ -190,6 +205,19 @@ export default function HeaderQRScanner({
       });
     }
   };
+
+  if (actionLabel) {
+    return (
+      <button
+        type="button"
+        disabled={scanning}
+        onClick={startScan}
+        className="tw-min-h-11 tw-rounded-lg tw-border tw-border-iron-700 tw-bg-iron-800 tw-px-3 tw-text-sm tw-text-iron-100"
+      >
+        {actionLabel}
+      </button>
+    );
+  }
 
   if (appSidebar) {
     return (

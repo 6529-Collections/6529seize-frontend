@@ -11,11 +11,19 @@ art destinations together while leaving `Waves` adjacent to `DMs`.
 When the connected wallet can access Drop Forge, the drawer lists it as a
 standalone row after `About`.
 
+The slot between `DMs` and `About` shows `Join 6529`
+link to `/join-6529` for signed-out visitors and wallets without a profile.
+Signed-in members with a profile see `Validator`, linking to `/validator`, in
+that same slot. While wallet or profile restoration is unresolved, the slot
+reserves its space without showing either action. The same rule applies to the
+collapsed and expanded web sidebar, mobile web menu, native app drawer, and
+page search. Public navigation never adds a Validator link.
+
 ## Location in the Site
 
 - App routes rendered with `AppLayout`, when header left control is menu/avatar
   (not `Back`).
-- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`, and
+- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529` (or `Validator` for members), and
   `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
@@ -48,12 +56,13 @@ standalone row after `About`.
    - `Museum`
    - `Waves`
    - `DMs`
-   - `Join 6529`
+   - `Join 6529` for newcomers, or `Validator` for signed-in members
    - `About`
 5. Tap the connected profile avatar to open your own profile route
    (`/{normalized-handle}` with `/{walletAddress}` fallback), tap `Museum` for
-   `/museum/network`, tap `DMs` for `/messages`, tap `Join 6529` for
-   `/join-6529`, use the standalone `Drop Forge` row when present, or expand
+   `/museum/network`, tap `DMs` for `/messages`, or use the membership row:
+   `Join 6529` opens `/join-6529` for newcomers; `Validator` opens `/validator`
+   for signed-in members with a profile. Use `Drop Forge` when present, or expand
    grouped sections for nested routes. About opens to group headings first,
    then each group expands to its links.
 6. Drawer closes and route navigation runs.
@@ -64,16 +73,16 @@ standalone row after `About`.
 
 - Open `NFTs`:
   `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
-  `/nft-activity`, `/meme-calendar`.
-- On local development and shared staging, `NFTs` also includes
-  `6529 Stream — Review` after `ReMemes`. It opens
-  `/reviews/6529-stream` and is absent on production.
+  `/stream`, `/nft-activity`, `/meme-calendar`.
+- `NFTs > 6529 Stream` appears after `ReMemes` on every host. It opens
+  `/stream`, a short notice that 6529 Stream is being rebuilt.
 - Open `Waves`:
   `/waves` and `Discover Waves` at `/discover`.
 - Open `Museum`:
   `/museum/network`.
-- Open `Join 6529`:
-  `/join-6529`.
+- Open the membership row:
+  `Join 6529` opens `/join-6529` for newcomers; `Validator` opens `/validator`
+  for signed-in members with a profile.
 - Open `About > Network & Reputation`:
   `/network`, `/network/activity`, `/network/tdh`,
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
@@ -162,8 +171,6 @@ standalone row after `About`.
 ## Limitations / Notes
 
 - App-sidebar behavior is app-layout only.
-- The Stream review entry uses the same environment gate as its routes and is
-  never enabled by wallet state alone.
 - `Museum` is available from the app drawer rather than as a bottom-navigation
   tab; profile/account actions stay in account surfaces.
 - Search stays in the header search control, not in this drawer.
@@ -180,3 +187,8 @@ standalone row after `About`.
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Navigation Entry and Switching Flow](flow-navigation-entry-and-switching.md)
 - [Navigation and Shell Controls Troubleshooting](troubleshooting-navigation-and-shell-controls.md)
+
+## Private bookmarks
+
+The signed-in account actions include **Bookmarks** when the owner has accessible
+saved messages. It opens `/bookmarks`. See [Private Bookmarks](../waves/chat/feature-private-bookmarks.md).

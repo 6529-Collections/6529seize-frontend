@@ -1,4 +1,6 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
+import type { ApiAllWavesPage } from "@/generated/models/ApiAllWavesPage";
+import type { ApiJoinedWavesPage } from "@/generated/models/ApiJoinedWavesPage";
 import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import type { ApiProfileWaveActivity } from "@/generated/models/ApiProfileWaveActivity";
@@ -165,7 +167,7 @@ export const mapApiWaveOverviewToSidebarWave = (
     name: wave.name,
     createdAt: wave.created_at,
     creator: wave.creator,
-    type: wave.has_competition ? ApiWaveType.Rank : ApiWaveType.Chat,
+    type: ApiWaveType.Chat,
     picture: wave.pfp ?? null,
     contributors:
       wave.contributors?.map((contributor) => ({
@@ -183,6 +185,7 @@ export const mapApiWaveOverviewToSidebarWave = (
     totalDropsCount: wave.total_drops_count,
     isPrivate: wave.is_private,
     latestDropTimestamp: wave.last_drop_time,
+    repliesCollapsed: wave.replies_collapsed ?? false,
     latestFollowedSubwaveDropTimestamp:
       context?.latest_followed_subwave_activity_timestamp ?? null,
     firstUnreadDropSerialNo: context?.first_unread_drop_serial_no ?? null,
@@ -254,6 +257,7 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
     totalDropsCount: wave.metrics.drops_count,
     isPrivate: Boolean(wave.visibility.scope.group) && !isDirectMessage,
     latestDropTimestamp: wave.metrics.latest_drop_timestamp,
+    repliesCollapsed: wave.chat.replies?.collapsed ?? false,
     latestFollowedSubwaveDropTimestamp: null,
     firstUnreadDropSerialNo: wave.metrics.first_unread_drop_serial_no ?? null,
     firstUnreadFollowedSubwaveDropSerialNo: null,
@@ -268,6 +272,36 @@ export const mapApiWaveToSidebarWave = (wave: ApiWave): SidebarWave => {
     waveScore: wave.wave_score ?? null,
   };
 };
+
+interface FetchSnapshotWavesPageProps {
+  readonly cursor?: string | undefined;
+  readonly pageSize: number;
+  readonly signal?: AbortSignal | undefined;
+}
+
+async function fetchSnapshotWavesPage(
+  endpoint: "v2/waves/joined" | "v2/waves/all",
+  { cursor, pageSize, signal }: FetchSnapshotWavesPageProps
+): Promise<SidebarWavesPage> {
+  const response = await commonApiFetch<ApiJoinedWavesPage | ApiAllWavesPage>({
+    endpoint,
+    params: { page_size: String(pageSize), ...(cursor ? { cursor } : {}) },
+    signal,
+    errorMode: "structured",
+  });
+  return {
+    waves: response.data.map(mapApiWaveOverviewToSidebarWave),
+    page: 1,
+    next: response.next_cursor !== null,
+    nextCursor: response.next_cursor,
+  };
+}
+
+export const fetchJoinedWavesPage = (props: FetchSnapshotWavesPageProps) =>
+  fetchSnapshotWavesPage("v2/waves/joined", props);
+
+export const fetchAllWavesPage = (props: FetchSnapshotWavesPageProps) =>
+  fetchSnapshotWavesPage("v2/waves/all", props);
 
 export async function fetchWavesV2Page({
   page,

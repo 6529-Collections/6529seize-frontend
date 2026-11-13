@@ -10,31 +10,37 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { normalizeOptionalWaveId } from "@/helpers/waves/wave.helpers";
 import { mapApiWaveToSidebarWave, useWavesV2 } from "./useWavesV2";
 import {
+  SIDEBAR_HIGHLY_RATED_WAVES_PARAMS,
   SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
   WAVE_FOLLOWING_WAVES_PARAMS,
   WAVE_SCORE_DISCOVERY_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { usePinnedWavesServer } from "./usePinnedWavesServer";
-import { useWaveById } from "./useWaveById";
+import { useAnnouncementsWave } from "./useAnnouncementsWave";
+import { useAnnouncementWaveActivity } from "./useAnnouncementWaveActivity";
 import {
   getWaveSubwavesQueryOptions,
   useWaveSubwavesMap,
 } from "./useWaveSubwaves";
 import { useWavesListRefetch } from "./useWavesListRefetch";
 import { useShowFollowingWaves } from "./useShowFollowingWaves";
+import { useWaveSidebarMembership } from "./waves/useWaveSidebarMembership";
 import type { SidebarWave } from "@/types/waves.types";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   buildMainWaves,
   getActiveSidebarContext,
   getConnectedIdentity,
+  getFirstUnreadSerialNo,
+  getLatestKnownActivityTimestamp,
   getHasAuthenticatedProfile,
   getMainWavesFetching,
   getModeValue,
   getNonPinnedFilter,
   getShouldLoadMainWaves,
   getViewerIdentityKey,
+  getVisibleSidebarSubwaves,
   isKnownWaveForCurrentViewer,
   SIDEBAR_DISCOVERY_SECTION_ALL,
   SIDEBAR_DISCOVERY_SECTION_HIGHLY_RATED,
@@ -52,39 +58,11 @@ type EnhancedWave = SidebarWave & {
   readonly sidebarSection?: SidebarDiscoverySection;
 };
 
-const HIGHLY_RATED_QUERY_PAGE_SIZE = 10;
-
 // V2 overview, pinned, and announcement wave sources are root-wave
 // sources. This guard is defensive against stale or malformed cached data; it is
 // not intended to hide user-visible subwaves.
 const isExpectedRootSidebarWave = (wave: SidebarWave) =>
   wave.parentWaveId === null;
-
-const getLatestKnownActivityTimestamp = (
-  wave: Pick<
-    SidebarWave,
-    "latestDropTimestamp" | "latestFollowedSubwaveDropTimestamp"
-  >
-) =>
-  Math.max(
-    wave.latestDropTimestamp ?? 0,
-    wave.latestFollowedSubwaveDropTimestamp ?? 0
-  );
-
-const getFirstUnreadSerialNo = (
-  left: number | null,
-  right: number | null
-): number | null => {
-  if (left === null) {
-    return right;
-  }
-
-  if (right === null) {
-    return left;
-  }
-
-  return Math.min(left, right);
-};
 
 const noopWaveAction = (_waveId: string) => {};
 const noopListAction = () => {};
@@ -107,18 +85,21 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     isAuthenticated,
   } = useAuth();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
-  const { seizeSettings, isAnnouncementsWave } = useSeizeSettings();
+  const {
+    seizeSettings,
+    isAnnouncementsWave,
+    isLoaded: settingsLoaded,
+    loadError: settingsError,
+  } = useSeizeSettings();
   const isEnabled = options.enabled !== false;
   const activeWave = options.activeWave ?? null;
-  const activeSidebarContext = useMemo(
-    () => getActiveSidebarContext(activeWave),
-    [activeWave]
-  );
   const {
     pinnedIds,
     pinnedWaves: serverPinnedWaves,
     pinWave,
     unpinWave,
+    reorderPinnedWaves,
+    isSavingPinnedWaveOrder,
     isLoading: isPinnedWavesLoadingServer,
     isError: hasPinnedWavesErrorServer,
     refetch: refetchPinnedWaves,
@@ -154,6 +135,16 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     hasAuthenticatedProfile,
     hasValidWalletAuthorization,
   });
+  const leftWaveIds = useWaveSidebarMembership(viewerIdentityKey);
+  const activeSidebarContext = useMemo(
+    () =>
+      getActiveSidebarContext(
+        isJoinedMode && leftWaveIds.includes(activeWave?.id ?? "")
+          ? null
+          : activeWave
+      ),
+    [activeWave, isJoinedMode, leftWaveIds]
+  );
 
   const nonPinnedFilter = getNonPinnedFilter(isConnectedIdentity);
 
@@ -161,18 +152,20 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   const {
     waves: highlyRatedWaves,
     isFetching: isHighlyRatedWavesFetching,
+    status: recommendationsStatus,
+    retryLoading: retryRecommendations,
     refetch: highlyRatedWavesRefetch,
     refetchIfStale: highlyRatedWavesRefetchIfStale,
   } = useWavesV2({
     overviewType: WAVE_SCORE_DISCOVERY_PARAMS.overviewType,
-    pageSize: HIGHLY_RATED_QUERY_PAGE_SIZE,
+    pageSize: SIDEBAR_HIGHLY_RATED_WAVES_PARAMS.pageSize,
     following: false,
     directMessage: false,
     excludeFollowed: isConnectedIdentity ? true : undefined,
     pinned: nonPinnedFilter,
     scoreSort: ApiWaveScoreSort.Quality,
     viewerIdentityKey,
-    refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+    refetchInterval: SIDEBAR_HIGHLY_RATED_WAVES_PARAMS.refetchIntervalMs,
     refetchIntervalInBackground: false,
     enabled: shouldLoadMainWaves,
   });
@@ -184,14 +177,16 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     hasNextPage: hasAllActivityWavesNextPage,
     fetchNextPage: fetchNextAllActivityWavesPage,
     status: allActivityWavesStatus,
+    hasLoadingError: hasAllActivityWavesError,
+    retryLoading: retryAllActivityWaves,
     refetch: allActivityWavesRefetch,
     refetchIfStale: allActivityWavesRefetchIfStale,
   } = useWavesV2({
+    allSnapshot: true,
     overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: false,
     directMessage: false,
-    pinned: nonPinnedFilter,
     viewerIdentityKey,
     refetchInterval: isJoinedMode
       ? false
@@ -209,7 +204,10 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     status: followedActivityWavesStatus,
     refetch: followedActivityWavesRefetch,
     refetchIfStale: followedActivityWavesRefetchIfStale,
+    hasLoadingError: hasFollowedActivityWavesError,
+    retryLoading: retryFollowedActivityWaves,
   } = useWavesV2({
+    joinedSnapshot: true,
     overviewType: WAVE_FOLLOWING_WAVES_PARAMS.initialWavesOverviewType,
     pageSize: WAVE_FOLLOWING_WAVES_PARAMS.limit,
     following: isConnectedIdentity,
@@ -259,23 +257,13 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     allValue: hasAllActivityWavesNextPage,
     deferredValue: false,
   });
-  const fetchNextMainWavesPage = useCallback(() => {
-    if (!shouldLoadMainWaves) {
-      return;
-    }
-
-    if (isJoinedMode) {
-      fetchNextFollowedActivityWavesPage();
-      return;
-    }
-
-    fetchNextAllActivityWavesPage();
-  }, [
-    isJoinedMode,
+  const fetchNextMainWavesPage = getModeValue({
     shouldLoadMainWaves,
-    fetchNextAllActivityWavesPage,
-    fetchNextFollowedActivityWavesPage,
-  ]);
+    isJoinedMode,
+    joinedValue: fetchNextFollowedActivityWavesPage,
+    allValue: fetchNextAllActivityWavesPage,
+    deferredValue: noopListAction,
+  });
   const mainWavesStatus = getModeValue({
     shouldLoadMainWaves,
     isJoinedMode,
@@ -283,23 +271,13 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     allValue: allActivityWavesStatus,
     deferredValue: "pending",
   });
-  const mainWavesRefetch = useCallback(() => {
-    if (!shouldLoadMainWaves) {
-      return;
-    }
-
-    if (isJoinedMode) {
-      followedActivityWavesRefetch();
-      return;
-    }
-
-    allActivityWavesRefetch();
-  }, [
-    isJoinedMode,
+  const mainWavesRefetch = getModeValue({
     shouldLoadMainWaves,
-    allActivityWavesRefetch,
-    followedActivityWavesRefetch,
-  ]);
+    isJoinedMode,
+    joinedValue: followedActivityWavesRefetch,
+    allValue: allActivityWavesRefetch,
+    deferredValue: noopListAction,
+  });
   const trackedAnnouncementWave = useMemo(() => {
     if (!shouldLoadMainWaves) {
       return null;
@@ -319,9 +297,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     isLoading: rawAnnouncementQueryLoading,
     error: rawAnnouncementQueryError,
     refetch: announcementRefetch,
-  } = useWaveById(announcementsWaveId, {
-    enabled: shouldFetchAnnouncementWave,
-  });
+  } = useAnnouncementsWave(announcementsWaveId, shouldFetchAnnouncementWave);
   const announcementQueryLoading =
     shouldFetchAnnouncementWave && rawAnnouncementQueryLoading;
   const announcementQueryError = shouldFetchAnnouncementWave
@@ -334,7 +310,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
         : null,
     [fetchedAnnouncementWave]
   );
-  const announcementWave = useMemo(() => {
+  const announcementWaveSource = useMemo(() => {
     const resolvedWave =
       trackedAnnouncementWave ?? fetchedAnnouncementSidebarWave;
     if (
@@ -346,6 +322,11 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     }
     return resolvedWave;
   }, [trackedAnnouncementWave, fetchedAnnouncementSidebarWave]);
+
+  const announcementWave = useAnnouncementWaveActivity(
+    announcementWaveSource,
+    viewerIdentityKey
+  );
 
   // Create a map of mainWaves by ID for easy lookup
   const mainWavesMap = useMemo(() => {
@@ -426,10 +407,12 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
 
     const activeContainerWave = activeSidebarContext.containerWave;
     const activeContainerWaveId = activeContainerWave?.id ?? null;
+    // Joined follows its loaded snapshot. Eagerly adding older pins would
+    // conceal missing batches and push the pagination trigger past those pins.
     const sourceWaves = [
       ...(activeContainerWave ? [activeContainerWave] : []),
       ...mainWaves,
-      ...separatelyFetchedPinnedWaves,
+      ...(isJoinedMode ? [] : separatelyFetchedPinnedWaves),
     ];
 
     sourceWaves.forEach((wave) => {
@@ -618,8 +601,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
   );
 
   // Refresh all sources (main, pinned, announcements, subwaves): forced, or
-  // stale-only for reconnect and tab-resume resyncs.
-  const { refetchAllWaves, refreshStaleWaves } = useWavesListRefetch({
+  // stale-only on resync; or just the activity list for unknown-wave drops.
+  const refresh = useWavesListRefetch({
     shouldLoadMainWaves,
     isJoinedMode,
     highlyRated: {
@@ -644,8 +627,8 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     announcementWaveId: shouldFetchAnnouncementWave
       ? announcementsWaveId
       : null,
-    refetchAnnouncementWave: announcementRefetch,
   });
+  const { refetchAllWaves, refreshActivityList, refreshStaleWaves } = refresh;
 
   const topSectionWaveIds = useMemo(() => {
     const ids = new Set<string>();
@@ -669,25 +652,16 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       return [];
     }
 
-    const visibleSubwaves = new Map<string, SidebarWave>();
-    const activeSubwave = activeSidebarContext.subwave;
-    if (activeSubwave !== null) {
-      visibleSubwaves.set(activeSubwave.id, activeSubwave);
-    }
-
-    subwaves.forEach((wave) => {
-      if (
-        !isJoinedMode ||
-        wave.subscribed ||
-        wave.id === activeSubwave?.id ||
-        topSectionWaveIds.has(wave.parentWaveId ?? "")
-      ) {
-        // The overview is fresher than the temporary full-wave route context.
-        visibleSubwaves.set(wave.id, wave);
-      }
-    });
-
-    return [...combinedWaves, ...visibleSubwaves.values()];
+    return [
+      ...combinedWaves,
+      ...getVisibleSidebarSubwaves({
+        subwaves,
+        activeSubwave: activeSidebarContext.subwave,
+        isJoinedMode,
+        leftWaveIds,
+        topSectionWaveIds,
+      }),
+    ];
   }, [
     combinedWaves,
     activeSidebarContext.subwave,
@@ -695,6 +669,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     shouldLoadMainWaves,
     subwaves,
     topSectionWaveIds,
+    leftWaveIds,
   ]);
 
   // New drops counting logic has been removed and will be managed by context
@@ -725,9 +700,31 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       hasNextPage: hasMainWavesNextPage,
       fetchNextPage: fetchNextPageStable,
       status: mainWavesStatus,
+      hasLoadingError: isJoinedMode
+        ? hasFollowedActivityWavesError
+        : hasAllActivityWavesError,
+      retryLoading: isJoinedMode
+        ? retryFollowedActivityWaves
+        : retryAllActivityWaves,
+
+      recommendationsStatus: shouldLoadMainWaves
+        ? recommendationsStatus
+        : ("pending" as const),
+      retryRecommendations,
+      isAnnouncementsLoading:
+        (!settingsLoaded && !settingsError) ||
+        Boolean(
+          announcementsWaveId &&
+          !announcementWave &&
+          (!shouldLoadMainWaves || announcementQueryLoading)
+        ),
 
       // Pinned waves metadata - now includes ALL pinned waves with isPinned flag
       pinnedWaves: allPinnedWaves,
+      pinnedWaveOrder: pinnedIds,
+      reorderPinnedWaves,
+      isSavingPinnedWaveOrder,
+      retryPinnedWaves: refetchPinnedWaves,
       isPinnedWavesLoading,
       hasPinnedWavesError,
       trackedAnnouncementWave,
@@ -744,8 +741,9 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       mainWaves,
       missingPinnedIds,
       mainWavesRefetch: shouldLoadMainWaves ? mainWavesRefetch : noopListAction,
-      // Refetch all waves including main and pinned
+      // Refetch all waves including main and pinned, or just the activity list
       refetchAllWaves,
+      refreshActivityList,
       refreshStaleWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,
@@ -753,13 +751,27 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
     }),
     [
       allWaves,
+      recommendationsStatus,
+      retryRecommendations,
+      settingsLoaded,
+      settingsError,
+      announcementsWaveId,
       isMainWavesFetching,
       isMainWavesFetchingNextPage,
       hasMainWavesNextPage,
       fetchNextPageStable,
       mainWavesStatus,
+      isJoinedMode,
+      hasFollowedActivityWavesError,
+      hasAllActivityWavesError,
+      retryAllActivityWaves,
+      retryFollowedActivityWaves,
       mainWaves,
       allPinnedWaves,
+      pinnedIds,
+      reorderPinnedWaves,
+      isSavingPinnedWaveOrder,
+      refetchPinnedWaves,
       isPinnedWavesLoading,
       hasPinnedWavesError,
       trackedAnnouncementWave,
@@ -773,6 +785,7 @@ const useWavesList = (options: UseWavesListOptions = {}) => {
       missingPinnedIds,
       mainWavesRefetch,
       refetchAllWaves,
+      refreshActivityList,
       refreshStaleWaves,
       loadSubwavesForParent,
       prefetchSubwavesForParent,

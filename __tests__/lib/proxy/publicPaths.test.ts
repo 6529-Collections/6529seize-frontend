@@ -5,19 +5,20 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  isRetiredReviewDataPath,
   isStaticAssetPath,
   isUnservableDotPath,
   PUBLIC_IMAGE_DIRECTORIES,
   ROOT_PUBLIC_FILES,
+  ROUTE_GATED_PUBLIC_DIRECTORIES,
   SERVED_WELL_KNOWN_PATHS,
 } from "@/lib/proxy/publicPaths";
 
 const PUBLIC_DIR = path.join(process.cwd(), "public");
 const APP_DIR = path.join(process.cwd(), "app");
-// Generated before dev/build and handled by its own segment prefix.
-const GENERATED_PUBLIC_DIRECTORIES = new Set(["pdfjs"]);
-// Gated by proxy's exact `/review-data/6529-stream/` rule instead.
-const SPECIAL_PUBLIC_DIRECTORIES = new Set(["review-data"]);
+// Generated before dev/build (pdfjs) or by build:mls-wasm (e2ee), and handled
+// by their own segment prefixes.
+const GENERATED_PUBLIC_DIRECTORIES = new Set(["pdfjs", "e2ee"]);
 const IMAGE_FILE_PATTERN = /\.(?:jpe?g|png|gif|svg|webp)$/i;
 
 function listFiles(directory: string): string[] {
@@ -67,9 +68,44 @@ describe("public path contract", () => {
       (directory) =>
         !PUBLIC_IMAGE_DIRECTORIES.has(directory) &&
         !GENERATED_PUBLIC_DIRECTORIES.has(directory) &&
-        !SPECIAL_PUBLIC_DIRECTORIES.has(directory)
+        !ROUTE_GATED_PUBLIC_DIRECTORIES.has(directory)
     );
     expect(unclassified).toEqual([]);
+  });
+
+  it("puts each public directory in one class only", () => {
+    const routeGatedImages = [...ROUTE_GATED_PUBLIC_DIRECTORIES].filter(
+      (directory) =>
+        PUBLIC_IMAGE_DIRECTORIES.has(directory) ||
+        GENERATED_PUBLIC_DIRECTORIES.has(directory)
+    );
+    expect(routeGatedImages).toEqual([]);
+  });
+
+  it("lists only route-gated directories that exist", () => {
+    const missing = [...ROUTE_GATED_PUBLIC_DIRECTORIES].filter(
+      (directory) => !rootDirectories.includes(directory)
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it("keeps every file in a route-gated directory behind its route's gate", () => {
+    const passing = [...ROUTE_GATED_PUBLIC_DIRECTORIES]
+      .flatMap((directory) => listFiles(path.join(PUBLIC_DIR, directory)))
+      .map((file) => `/${file}`)
+      .filter((file) => isStaticAssetPath(file));
+    expect(passing).toEqual([]);
+    // The validator's screenshots stay with the /validator pages' gates.
+    expect(isStaticAssetPath("/validator/app-today.webp")).toBe(false);
+    expect(isStaticAssetPath("/validator/windows-uac.svg")).toBe(false);
+  });
+
+  it("lets the encrypted-chat WebAssembly module past the gate", () => {
+    const modules = listFiles(path.join(PUBLIC_DIR, "e2ee"))
+      .filter((file) => file.endsWith(".wasm"))
+      .map((file) => `/${file}`);
+    expect(modules.length).toBeGreaterThan(0);
+    expect(modules.filter((file) => !isStaticAssetPath(file))).toEqual([]);
   });
 
   it("lists only public image directories that exist", () => {
@@ -154,5 +190,32 @@ describe("isUnservableDotPath", () => {
     "/.well-known/apple-app-site-association",
   ])("leaves %s to normal routing", (pathname) => {
     expect(isUnservableDotPath(pathname)).toBe(false);
+  });
+});
+
+describe("isRetiredReviewDataPath", () => {
+  it.each([
+    "/review-data",
+    "/review-data/",
+    "/review-data/6529-stream/index.json",
+    "/review-data/6529-stream/versions/2026-09-09.1/sources/smart-contracts/core/StreamCore.sol",
+    "/review-data/other-review/index.json",
+    "/Review-Data/6529-stream/index.json",
+    "/%72eview-data/6529-stream/index.json",
+    "/review-data%2F6529-stream/index.json",
+    "//review-data/6529-stream/index.json",
+  ])("retires %s", (pathname) => {
+    expect(isRetiredReviewDataPath(pathname)).toBe(true);
+  });
+
+  it.each([
+    "/",
+    "/review-database",
+    "/reviews/6529-stream",
+    "/stream",
+    "/api/review-data",
+    "/%E0%A4%A",
+  ])("leaves %s to normal routing", (pathname) => {
+    expect(isRetiredReviewDataPath(pathname)).toBe(false);
   });
 });

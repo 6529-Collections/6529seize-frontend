@@ -1,4 +1,3 @@
-import UserPlusIcon from "@heroicons/react/24/outline/UserPlusIcon";
 import PlusIcon from "@heroicons/react/24/outline/PlusIcon";
 
 import BellIcon from "@/components/common/icons/BellIcon";
@@ -25,9 +24,13 @@ export enum CATEGORY {
   NFTS = "NFTS",
   WAVES = "WAVES",
   PAGES = "PAGES",
+  MESSAGES = "MESSAGES",
 }
 
-export type FilterableCategory = Exclude<CATEGORY, CATEGORY.ALL>;
+export type FilterableCategory = Exclude<
+  CATEGORY,
+  CATEGORY.ALL | CATEGORY.MESSAGES
+>;
 
 export const FILTERABLE_CATEGORIES: FilterableCategory[] = [
   CATEGORY.PAGES,
@@ -38,7 +41,8 @@ export const FILTERABLE_CATEGORIES: FilterableCategory[] = [
 
 export const isFilterableCategory = (
   category: CATEGORY
-): category is FilterableCategory => category !== CATEGORY.ALL;
+): category is FilterableCategory =>
+  category !== CATEGORY.ALL && category !== CATEGORY.MESSAGES;
 
 export const HEADER_SEARCH_LABELS = {
   about: t(DEFAULT_LOCALE, "navigation.primary.about"),
@@ -66,12 +70,6 @@ export const DIRECT_NAVIGATION_PAGES: SidebarPageEntry[] = [
     href: "/messages",
     section: HEADER_SEARCH_LABELS.main,
     icon: ChatBubbleIcon,
-  },
-  {
-    name: HEADER_SEARCH_LABELS.join6529,
-    href: "/join-6529",
-    section: HEADER_SEARCH_LABELS.main,
-    icon: UserPlusIcon,
   },
 ];
 

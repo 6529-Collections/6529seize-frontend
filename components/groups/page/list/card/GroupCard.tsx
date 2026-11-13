@@ -2,6 +2,7 @@
 
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
+import { getSafeCssColor } from "@/helpers/css-color.helpers";
 import { getRandomColorWithSeed } from "@/helpers/Helpers";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -27,10 +28,10 @@ export default function GroupCard({
   const router = useRouter();
 
   const banner1 =
-    group?.created_by.banner1_color ??
+    getSafeCssColor(group?.created_by.banner1_color) ??
     getRandomColorWithSeed(group?.created_by.handle ?? "");
   const banner2 =
-    group?.created_by.banner2_color ??
+    getSafeCssColor(group?.created_by.banner2_color) ??
     getRandomColorWithSeed(group?.created_by.handle ?? "");
 
   const cardLabel =

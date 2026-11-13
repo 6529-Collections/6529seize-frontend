@@ -1,15 +1,13 @@
 "use client";
 
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiDropId } from "@/generated/models/ApiDropId";
-import type { Drop } from "@/helpers/waves/drop.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDmWavesList from "@/hooks/useDmWavesList";
 import { useWaveById } from "@/hooks/useWaveById";
 import useWavesList from "@/hooks/useWavesList";
 import { usePathname } from "next/navigation";
 import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
+import { shouldResyncOnResume } from "@/helpers/resumeSync.helpers";
 import { useWebsocketStatus } from "@/services/websocket/useWebSocketMessage";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import type { ReactNode } from "react";
@@ -19,6 +17,7 @@ import React, {
   useContext,
   useEffect,
   useEffectEvent,
+  useInsertionEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -26,123 +25,30 @@ import React, {
   useSyncExternalStore,
 } from "react";
 import type { WaveMessages } from "./hooks/types";
-import type { ServerWaveFeedSeedResult } from "./server-wave-feed-seed";
 import { useActiveWaveManager } from "./hooks/useActiveWaveManager";
-import type { MinimalWave } from "./hooks/useEnhancedWavesListCore";
 import useEnhancedWavesListCore from "./hooks/useEnhancedWavesListCore";
 import { useRecentDirectMessagePrefetch } from "./hooks/useRecentDirectMessagePrefetch";
 import { useWaveDataManager } from "./hooks/useWaveDataManager";
 import type { Listener as WaveMessagesListener } from "./hooks/useWaveMessagesStore";
 import useWaveMessagesStore from "./hooks/useWaveMessagesStore";
-import type { NextPageProps } from "./hooks/useWavePagination";
-import type { ProcessIncomingDropType } from "./hooks/useWaveRealtimeUpdater";
 import { useWaveRealtimeUpdater } from "./hooks/useWaveRealtimeUpdater";
 import { useDmUnreadConversations } from "@/services/dm-unread/DmUnreadStateProvider";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
+import { WaveUnreadProvider } from "./WaveUnreadContext";
+import { WaveChatReadContext } from "./WaveChatReadContext";
 
-// Define nested structures for context data
-interface WavesContextData {
-  readonly isPinnedWavesLoading?: boolean;
-  readonly list: MinimalWave[];
-  readonly isFetching: boolean;
-  readonly isFetchingNextPage: boolean;
-  readonly hasNextPage: boolean;
-  readonly fetchNextPage: () => void;
-  readonly addPinnedWave: (id: string) => void;
-  readonly removePinnedWave: (id: string) => void;
-  readonly loadSubwavesForParent: (parentWaveId: string) => void;
-  readonly prefetchSubwavesForParent: (parentWaveId: string) => void;
-  readonly loadingSubwaveParentIds: readonly string[];
-  readonly markWaveRead: (waveId: string, readThroughSerialNo?: number) => void;
-  readonly restoreWaveUnreadCount: (waveId: string, count?: number) => void;
-}
-
-interface ActiveWaveSetOptions {
-  readonly isDirectMessage?: boolean | undefined;
-  readonly replace?: boolean | undefined;
-  readonly serialNo?: number | string | null | undefined;
-  readonly divider?: number | null | undefined;
-}
-
-interface ActiveWaveContextData {
-  readonly id: string | null;
-  readonly parentWaveId: string | null;
-  readonly set: (waveId: string | null, options?: ActiveWaveSetOptions) => void;
-}
-
-// Define the interface for the wave messages store functions
-interface WaveMessagesStoreData {
-  readonly getData: (key: string) => WaveMessages | undefined;
-  readonly subscribe: (key: string, listener: WaveMessagesListener) => void;
-  readonly unsubscribe: (key: string, listener: WaveMessagesListener) => void;
-}
-
-// Define the type for our context using nested structures
-interface MyStreamContextType {
-  readonly waves: WavesContextData;
-  readonly directMessages: WavesContextData;
-  readonly activeWave: ActiveWaveContextData;
-  readonly waveMessagesStore: WaveMessagesStoreData;
-  readonly requestMainWavesList: () => () => void;
-  readonly requestDirectMessagesList: () => () => void;
-  readonly registerWave: (waveId: string, syncNewest?: boolean) => void;
-  readonly serverFeedSeed: {
-    readonly registerPending: (
-      waveId: string,
-      promise: Promise<ServerWaveFeedSeedResult>
-    ) => void;
-    readonly clearPending: (
-      waveId: string,
-      promise: Promise<ServerWaveFeedSeedResult>
-    ) => void;
-    readonly replacePending: (
-      waveId: string,
-      expectedPromise: Promise<ServerWaveFeedSeedResult>,
-      promise: Promise<ServerWaveFeedSeedResult>
-    ) => boolean;
-    readonly expire: (
-      waveId: string,
-      expectedPromise: Promise<ServerWaveFeedSeedResult>
-    ) => void;
-    readonly apply: (params: {
-      readonly drops: ApiDrop[];
-      readonly hasNextPage: boolean;
-      readonly onReady: () => void;
-      readonly promise: Promise<ServerWaveFeedSeedResult>;
-      readonly waveId: string;
-    }) => boolean;
-    readonly completeInitialRegistration: (waveId: string) => void;
-  };
-  readonly fetchNextPageForWave: (
-    props: NextPageProps
-  ) => Promise<(ApiDrop | ApiDropId)[] | null>;
-  readonly fetchAroundSerialNo: (waveId: string, serialNo: number) => void;
-  readonly processIncomingDrop: (
-    drop: ApiDrop,
-    type: ProcessIncomingDropType
-  ) => Promise<void>;
-  readonly processDropRemoved: (waveId: string, dropId: string) => void;
-  readonly processDropsRemoved: (
-    waveId: string,
-    dropIds: readonly string[]
-  ) => void;
-  readonly refreshWaveMessages: (waveId: string) => void;
-  readonly applyOptimisticDropUpdate: ({
-    waveId,
-    dropId,
-    update,
-  }: {
-    waveId: string;
-    dropId: string;
-    update: (draft: Drop) => Drop | void;
-  }) => { rollback: () => void } | null;
-}
+import type {
+  ActiveWaveContextData,
+  ActiveWaveSetOptions,
+  MyStreamActionsContextType,
+  MyStreamContextType,
+  WavesContextData,
+} from "./MyStreamContext.types";
 
 interface MyStreamProviderProps {
   readonly children: ReactNode;
 }
 
-const BROWSER_RESUME_SYNC_COOLDOWN_MS = 1000;
 const MAIN_WAVES_LIST_IDLE_DELAY_MS = 1000;
 const MAIN_WAVES_LIST_IDLE_TIMEOUT_MS = 2500;
 
@@ -192,8 +98,11 @@ const scheduleAfterRouteIdle = (runTask: () => void): (() => void) => {
   };
 };
 
-// Create the context
+// Create the contexts
 const MyStreamContext = createContext<MyStreamContextType | null>(null);
+const MyStreamActionsContext = createContext<MyStreamActionsContextType | null>(
+  null
+);
 
 // Create a provider component
 export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
@@ -203,6 +112,20 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const pathname = usePathname() as string | null;
   const { activeWaveId, hasActiveWaveDropTarget, setActiveWave } =
     useActiveWaveManager();
+  const [displayedChatWaveId, setDisplayedChatWaveId] = useState<string | null>(
+    null
+  );
+  // During navigation, decline reads until the displayed Chat and route agree.
+  const activeReadWaveId =
+    displayedChatWaveId === activeWaveId ? displayedChatWaveId : null;
+  const registerChat = useCallback((waveId: string) => {
+    setDisplayedChatWaveId(waveId);
+    return () => {
+      setDisplayedChatWaveId((current) =>
+        current === waveId ? null : current
+      );
+    };
+  }, []);
   const [
     directMessagesListActivationCount,
     setDirectMessagesListActivationCount,
@@ -249,12 +172,17 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     () => new Set(dmWavesData.waves.map((wave) => wave.id)),
     [dmWavesData.waves]
   );
-  const wavesHookData = useEnhancedWavesListCore(activeWaveId, mainWavesData, {
-    enabled: isMainWavesListEnabled,
-    supportsPinning: true,
-    otherListWaveIds: dmWaveIds,
-    preserveBackendWaveOrder: true,
-  });
+  // Keep the selected wave live, but only its displayed Chat panel can read it.
+  const wavesHookData = useEnhancedWavesListCore(
+    activeReadWaveId,
+    mainWavesData,
+    {
+      enabled: isMainWavesListEnabled,
+      supportsPinning: true,
+      otherListWaveIds: dmWaveIds,
+      preserveBackendWaveOrder: true,
+    }
+  );
   const dmWavesHookData = useEnhancedWavesListCore(activeWaveId, dmWavesData, {
     enabled: isDirectMessagesListEnabled,
     supportsPinning: false,
@@ -265,7 +193,10 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const waveMessagesStore = useWaveMessagesStore();
   const websocketStatus = useWebsocketStatus();
   const prevIsActiveRef = useRef(isActive);
+  // When the lists and active wave last resynced (from any trigger), and
+  // when the browser tab was hidden, for the resume rule.
   const lastBrowserResumeSyncAtRef = useRef(0);
+  const hiddenSinceRef = useRef<number | null>(null);
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const markDirectMessageRead = useCallback(
     (waveId: string, readThroughSerialNo?: number) => {
@@ -287,6 +218,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const {
     registerWave,
+    activateWave,
     prefetchWave,
     syncNewestMessages,
     fetchNextPage,
@@ -303,13 +235,13 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
   const { clearWave } = waveMessagesStore;
   const refreshWaveMessages = useCallback(
-    (waveId: string) => {
+    async (waveId: string) => {
       if (!clearWave(waveId)) return;
       cancelWaveDataFetch(waveId);
       cancelPaginationFetch(waveId);
-      registerWave(waveId);
+      await activateWave(waveId);
     },
-    [cancelWaveDataFetch, cancelPaginationFetch, clearWave, registerWave]
+    [activateWave, cancelWaveDataFetch, cancelPaginationFetch, clearWave]
   );
   const refetchAllMainWaves = wavesHookData.refetchAllWaves;
   const refetchAllDmWaves = dmWavesHookData.refetchAllWaves;
@@ -385,8 +317,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   );
 
   // Instantiate the real-time updater hook
-  const { processIncomingDrop, processDropRemoved } = useWaveRealtimeUpdater({
+  const realtime = useWaveRealtimeUpdater({
     activeWaveId,
+    activeReadWaveId,
     getData: waveMessagesStore.getData,
     hasServerFeedSeed: waveMessagesStore.hasServerFeedSeed,
     isWaveInUse: waveMessagesStore.isWaveInUse,
@@ -397,7 +330,21 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     removeDrops: waveMessagesStore.removeDrops,
     removeWaveDeliveredNotifications,
     isWaveMuted,
+    refreshWaveMessages,
   });
+  const { processIncomingDrop, processDropRemoved, applyReplyPlacement } =
+    realtime;
+
+  // processIncomingDrop is rebuilt when the active wave, its mute state or
+  // wave eligibility changes. Expose a stable wrapper that always calls the
+  // latest implementation, so callers holding it never use a stale closure.
+  const processIncomingDropRef = useRef(processIncomingDrop);
+  useInsertionEffect(() => {
+    processIncomingDropRef.current = processIncomingDrop;
+  }, [processIncomingDrop]);
+  const stableProcessIncomingDrop = useCallback<
+    MyStreamActionsContextType["processIncomingDrop"]
+  >((...args) => processIncomingDropRef.current(...args), []);
 
   const setActiveWaveAndRegister = useCallback<ActiveWaveContextData["set"]>(
     (waveId, options) => {
@@ -434,6 +381,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   // flags only pre-filter: each hook's own load guard (auth and profile
   // readiness) stays the source of truth and no-ops while it is not ready.
   const syncActiveWaveAndRefreshStaleLists = useEffectEvent(() => {
+    lastBrowserResumeSyncAtRef.current = Date.now();
     syncActiveWave();
     if (isMainWavesListEnabled) {
       refreshStaleMainWaves();
@@ -443,19 +391,27 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     }
   });
 
-  const runBrowserResumeSync = useEffectEvent(() => {
+  // Every visible tab reacts to focus and visibility, so a resync runs only
+  // after the tab was hidden 30 s or more, or 60 s after the last one. Coming
+  // back online follows a real connectivity gap and always resyncs.
+  const runBrowserResumeSync = useEffectEvent((afterOffline: boolean) => {
     if (document.visibilityState !== "visible") {
       return;
     }
 
-    const now = Date.now();
-    const sinceLastBrowserResumeSyncMs =
-      now - lastBrowserResumeSyncAtRef.current;
-    if (sinceLastBrowserResumeSyncMs < BROWSER_RESUME_SYNC_COOLDOWN_MS) {
+    const hiddenSince = hiddenSinceRef.current;
+    hiddenSinceRef.current = null;
+    if (
+      !afterOffline &&
+      !shouldResyncOnResume({
+        now: Date.now(),
+        hiddenSince,
+        lastSyncAt: lastBrowserResumeSyncAtRef.current,
+      })
+    ) {
       return;
     }
 
-    lastBrowserResumeSyncAtRef.current = now;
     syncActiveWaveAndRefreshStaleLists();
   });
 
@@ -495,6 +451,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
 
   // An evicted wave gives up its requests, timers and per-wave state, so it
   // loads from scratch when it is opened again.
+  // Tombstone pruning can also evict never-cached waves. Both cancellation
+  // methods tolerate absent requests and state for those wave IDs.
   useEffect(
     () =>
       subscribeToEvictions((waveId) => {
@@ -544,20 +502,27 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       return;
     }
 
+    // The page loaded fresh data; the first focus has nothing to catch up.
+    lastBrowserResumeSyncAtRef.current = Date.now();
+    if (document.visibilityState !== "visible") {
+      hiddenSinceRef.current = Date.now();
+    }
+
     const handleVisibilityChange = () => {
       if (document.visibilityState !== "visible") {
+        hiddenSinceRef.current ??= Date.now();
         return;
       }
 
-      runBrowserResumeSync();
+      runBrowserResumeSync(false);
     };
 
     const handleFocus = () => {
-      runBrowserResumeSync();
+      runBrowserResumeSync(false);
     };
 
     const handleOnline = () => {
-      runBrowserResumeSync();
+      runBrowserResumeSync(true);
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
@@ -571,6 +536,63 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     };
   }, [isCapacitor]);
 
+  // Actions depend only on stable store and data-manager callbacks, so this
+  // value keeps its identity when drops arrive or wave lists change. The
+  // destructive store callbacks still rebind on a profile switch, so a caller
+  // holding an old one cannot change the new profile's cache.
+  const actionsValue = useMemo<MyStreamActionsContextType>(
+    () => ({
+      // Prepare the store data for the context (only read/subscribe parts)
+      waveMessagesStore: {
+        getData: waveMessagesStore.getData,
+        subscribe: waveMessagesStore.subscribe,
+        unsubscribe: waveMessagesStore.unsubscribe,
+      },
+      requestMainWavesList,
+      requestDirectMessagesList,
+      registerWave,
+      serverFeedSeed: {
+        registerPending: waveMessagesStore.registerPendingServerFeedSeed,
+        clearPending: waveMessagesStore.clearPendingServerFeedSeed,
+        replacePending: waveMessagesStore.replacePendingServerFeedSeed,
+        expire: waveMessagesStore.expireServerFeedSeed,
+        apply: waveMessagesStore.applyServerFeedSeed,
+        completeInitialRegistration:
+          waveMessagesStore.completeInitialServerFeedRegistration,
+      },
+      fetchNextPageForWave: fetchNextPage,
+      fetchAroundSerialNo,
+      processIncomingDrop: stableProcessIncomingDrop,
+      processDropRemoved,
+      processDropsRemoved: waveMessagesStore.removeDrops,
+      refreshWaveMessages,
+      applyReplyPlacement,
+      applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
+    }),
+    [
+      waveMessagesStore.getData,
+      waveMessagesStore.subscribe,
+      waveMessagesStore.unsubscribe,
+      requestMainWavesList,
+      requestDirectMessagesList,
+      registerWave,
+      waveMessagesStore.registerPendingServerFeedSeed,
+      waveMessagesStore.clearPendingServerFeedSeed,
+      waveMessagesStore.replacePendingServerFeedSeed,
+      waveMessagesStore.expireServerFeedSeed,
+      waveMessagesStore.applyServerFeedSeed,
+      waveMessagesStore.completeInitialServerFeedRegistration,
+      fetchNextPage,
+      fetchAroundSerialNo,
+      stableProcessIncomingDrop,
+      processDropRemoved,
+      waveMessagesStore.removeDrops,
+      refreshWaveMessages,
+      applyReplyPlacement,
+      waveMessagesStore.optimisticUpdateDrop,
+    ]
+  );
+
   // Create the context value using the nested structure
   const contextValue = useMemo<MyStreamContextType>(() => {
     const activeWaveParentId =
@@ -579,7 +601,17 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
         : null;
 
     const waves: WavesContextData = {
+      recommendationsStatus: mainWavesData.recommendationsStatus,
+      retryRecommendations: mainWavesData.retryRecommendations,
+      isAnnouncementsLoading: mainWavesData.isAnnouncementsLoading,
+      hasLoadingError: mainWavesData.hasLoadingError,
+      retryLoading: mainWavesData.retryLoading,
       isPinnedWavesLoading: mainWavesData.isPinnedWavesLoading,
+      hasPinnedWavesError: mainWavesData.hasPinnedWavesError,
+      retryPinnedWaves: mainWavesData.retryPinnedWaves,
+      pinnedWaveOrder: mainWavesData.pinnedWaveOrder,
+      reorderPinnedWaves: mainWavesData.reorderPinnedWaves,
+      isSavingPinnedWaveOrder: mainWavesData.isSavingPinnedWaveOrder,
       list: wavesHookData.waves,
       // A list still waiting for its first request reads as loading, so the
       // server render and first client frame show the loader, not "empty".
@@ -617,41 +649,26 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       set: setActiveWaveAndRegister,
     };
 
-    // Prepare the store data for the context (only read/subscribe parts)
-    const waveMessagesStoreData: WaveMessagesStoreData = {
-      getData: waveMessagesStore.getData,
-      subscribe: waveMessagesStore.subscribe,
-      unsubscribe: waveMessagesStore.unsubscribe,
-    };
-
     return {
+      ...actionsValue,
       waves,
       directMessages,
       activeWave,
-      waveMessagesStore: waveMessagesStoreData,
-      requestMainWavesList,
-      requestDirectMessagesList,
-      registerWave,
-      serverFeedSeed: {
-        registerPending: waveMessagesStore.registerPendingServerFeedSeed,
-        clearPending: waveMessagesStore.clearPendingServerFeedSeed,
-        replacePending: waveMessagesStore.replacePendingServerFeedSeed,
-        expire: waveMessagesStore.expireServerFeedSeed,
-        apply: waveMessagesStore.applyServerFeedSeed,
-        completeInitialRegistration:
-          waveMessagesStore.completeInitialServerFeedRegistration,
-      },
-      fetchNextPageForWave: fetchNextPage,
-      fetchAroundSerialNo,
-      processIncomingDrop,
-      processDropRemoved,
-      processDropsRemoved: waveMessagesStore.removeDrops,
-      refreshWaveMessages,
-      applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
     };
   }, [
+    actionsValue,
     wavesHookData.waves,
     mainWavesData.isPinnedWavesLoading,
+    mainWavesData.hasPinnedWavesError,
+    mainWavesData.retryPinnedWaves,
+    mainWavesData.pinnedWaveOrder,
+    mainWavesData.reorderPinnedWaves,
+    mainWavesData.isSavingPinnedWaveOrder,
+    mainWavesData.recommendationsStatus,
+    mainWavesData.retryRecommendations,
+    mainWavesData.isAnnouncementsLoading,
+    mainWavesData.hasLoadingError,
+    mainWavesData.retryLoading,
     isMainWavesListEnabled,
     wavesHookData.isFetching,
     wavesHookData.isFetchingNextPage,
@@ -679,31 +696,20 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     activeWaveId,
     resolvedActiveWaveData,
     setActiveWaveAndRegister,
-    requestMainWavesList,
-    requestDirectMessagesList,
-    waveMessagesStore.getData,
-    waveMessagesStore.subscribe,
-    waveMessagesStore.unsubscribe,
-    registerWave,
-    waveMessagesStore.registerPendingServerFeedSeed,
-    waveMessagesStore.clearPendingServerFeedSeed,
-    waveMessagesStore.replacePendingServerFeedSeed,
-    waveMessagesStore.expireServerFeedSeed,
-    waveMessagesStore.applyServerFeedSeed,
-    waveMessagesStore.completeInitialServerFeedRegistration,
-    fetchNextPage,
-    fetchAroundSerialNo,
-    processIncomingDrop,
-    processDropRemoved,
-    waveMessagesStore.removeDrops,
-    refreshWaveMessages,
-    waveMessagesStore.optimisticUpdateDrop,
   ]);
 
+  // Live unread values for the main list. Direct messages use the server's
+  // canonical unread state, which the list itself carries.
   return (
-    <MyStreamContext.Provider value={contextValue}>
-      {children}
-    </MyStreamContext.Provider>
+    <MyStreamActionsContext.Provider value={actionsValue}>
+      <WaveUnreadProvider value={wavesHookData.unreadSource}>
+        <MyStreamContext.Provider value={contextValue}>
+          <WaveChatReadContext.Provider value={registerChat}>
+            {children}
+          </WaveChatReadContext.Provider>
+        </MyStreamContext.Provider>
+      </WaveUnreadProvider>
+    </MyStreamActionsContext.Provider>
   );
 };
 
@@ -720,11 +726,29 @@ export const useMyStreamOptional = (): MyStreamContextType | null => {
   return useContext(MyStreamContext);
 };
 
+// Prefer these over useMyStream when a component only calls stream actions:
+// the actions value does not change when drops arrive, so callers skip the
+// re-render that every stream data change causes for useMyStream consumers.
+export const useMyStreamActions = (): MyStreamActionsContextType => {
+  const context = useContext(MyStreamActionsContext);
+  if (!context) {
+    throw new Error(
+      "useMyStreamActions must be used within a MyStreamProvider"
+    );
+  }
+  return context;
+};
+
+export const useMyStreamActionsOptional =
+  (): MyStreamActionsContextType | null => {
+    return useContext(MyStreamActionsContext);
+  };
+
 // Create the selector hook for wave messages
 export function useMyStreamWaveMessages(
   waveId: string | null | undefined
 ): WaveMessages | undefined {
-  const { waveMessagesStore } = useMyStream();
+  const { waveMessagesStore } = useMyStreamActions();
   const { getData, subscribe, unsubscribe } = waveMessagesStore;
 
   const getSnapshot = useCallback(

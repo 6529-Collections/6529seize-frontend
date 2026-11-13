@@ -25,6 +25,7 @@ import {
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
 import { getAuthJwt } from "@/services/auth/auth.utils";
+import { setNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { jwtDecode } from "jwt-decode";
 import type { ReactNode } from "react";
@@ -578,6 +579,109 @@ describe("useMarkWaveNotificationsRead", () => {
       headers: { Authorization: "Bearer jwt-a" },
     });
     expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+  });
+
+  it("refreshes the wave lists after a read unless the caller opts out", async () => {
+    const invalidateNotifications = jest.fn();
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    await expect(result.current("wave-1")).resolves.toBe("sent");
+    expect(invalidateNotifications).toHaveBeenLastCalledWith({
+      refreshWaveLists: true,
+      refreshNotifications: true,
+    });
+
+    await expect(
+      result.current("wave-1", { refreshWaveLists: false })
+    ).resolves.toBe("sent");
+    expect(invalidateNotifications).toHaveBeenLastCalledWith({
+      refreshWaveLists: false,
+      refreshNotifications: true,
+    });
+  });
+
+  describe("notification counts after a read", () => {
+    afterEach(() => {
+      setNotificationRealtimeState(false);
+    });
+
+    it("leaves the counts to the socket when it covers the reader", async () => {
+      const invalidateNotifications = jest.fn();
+      setActiveIdentity({
+        address: "0xAAA",
+        jwt: "jwt-a",
+        connectedProfileId: "profile-1",
+      });
+      setNotificationRealtimeState(true, ["profile-1"]);
+      const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+        wrapper: createWrapper(invalidateNotifications),
+      });
+
+      await expect(
+        result.current("wave-1", { refreshWaveLists: false })
+      ).resolves.toBe("sent");
+
+      // The server's IDENTITY_NOTIFICATIONS_CHANGED refreshes them instead.
+      expect(invalidateNotifications).toHaveBeenLastCalledWith({
+        refreshWaveLists: false,
+        refreshNotifications: false,
+      });
+    });
+
+    it.each([
+      ["the socket is down", false, ["profile-1"]],
+      ["the socket covers another profile only", true, ["profile-2"]],
+    ])(
+      "refreshes the counts itself when %s",
+      async (_label, connected, profileIds) => {
+        const invalidateNotifications = jest.fn();
+        setActiveIdentity({
+          address: "0xAAA",
+          jwt: "jwt-a",
+          connectedProfileId: "profile-1",
+        });
+        setNotificationRealtimeState(connected, profileIds);
+        const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+          wrapper: createWrapper(invalidateNotifications),
+        });
+
+        await expect(result.current("wave-1")).resolves.toBe("sent");
+
+        expect(invalidateNotifications).toHaveBeenLastCalledWith({
+          refreshWaveLists: true,
+          refreshNotifications: true,
+        });
+      }
+    );
+  });
+
+  it("refreshes the wave lists when any merged read asks for it", async () => {
+    const firstRequest = createDeferred();
+    const invalidateNotifications = jest.fn();
+    apiPostMock
+      .mockReturnValueOnce(firstRequest.promise)
+      .mockResolvedValueOnce(undefined);
+    setActiveIdentity({ address: "0xAAA", jwt: "jwt-a" });
+    const { result } = renderHook(() => useMarkWaveNotificationsRead(), {
+      wrapper: createWrapper(invalidateNotifications),
+    });
+
+    const first = result.current("wave-1", { refreshWaveLists: false });
+    // These two join one trailing read; one of them wants the lists.
+    const second = result.current("wave-1", { refreshWaveLists: false });
+    const third = result.current("wave-1");
+    firstRequest.resolve();
+    await expect(first).resolves.toBe("sent");
+    await expect(second).resolves.toBe("sent");
+    await expect(third).resolves.toBe("sent");
+
+    expect(invalidateNotifications.mock.calls).toEqual([
+      [{ refreshWaveLists: false, refreshNotifications: true }],
+      [{ refreshWaveLists: true, refreshNotifications: true }],
+    ]);
   });
 
   it("sends one trailing read after two calls for the same wave", async () => {

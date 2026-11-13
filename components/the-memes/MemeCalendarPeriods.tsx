@@ -17,12 +17,12 @@ import Link from "next/link";
 
 const SECONDARY_PERIOD_CLASS_NAME = "tw-hidden md:tw-flex";
 const PERIOD_SEPARATOR_CLASS_NAME =
-  "tw-text-xs tw-font-medium tw-text-iron-700";
+  "tw-text-xs tw-font-medium tw-text-iron-700 md:tw-text-iron-500";
 const PRIMARY_PERIOD_CHIP_CLASS_NAME =
-  "tw-inline-flex tw-min-h-6 tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100";
+  "tw-inline-flex tw-min-h-6 tw-items-center tw-gap-1 tw-rounded-md tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-py-0.5 tw-text-[10.5px] tw-font-semibold tw-leading-4 tw-text-iron-100 md:tw-rounded-none md:tw-border-0 md:tw-bg-transparent md:tw-px-0 md:tw-py-0 md:tw-text-xs md:[&>span:last-child]:tw-text-inherit";
 const PRIMARY_PERIOD_CHIP_LINK_CLASS_NAME = `${PRIMARY_PERIOD_CHIP_CLASS_NAME} tw-no-underline tw-transition-colors hover:tw-border-primary-400 hover:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`;
 const SECONDARY_PERIOD_ITEM_CLASS_NAME =
-  "tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-px-1.5 tw-py-0.5 tw-text-[10.5px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500";
+  "tw-inline-flex tw-items-center tw-gap-1 tw-rounded-md tw-px-1.5 tw-py-0.5 tw-text-[10.5px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 md:tw-px-0 md:tw-text-xs";
 
 export default function MemeCalendarPeriods({
   id,
@@ -51,7 +51,7 @@ export default function MemeCalendarPeriods({
   const secondaryPeriodContent = (label: string, number: number) => (
     <>
       <span>{label}</span>
-      <span className="tw-font-semibold tw-text-iron-300">
+      <span className="tw-font-semibold tw-text-iron-300 md:tw-font-medium md:tw-text-iron-500">
         {formatInteger(locale, number)}
       </span>
     </>

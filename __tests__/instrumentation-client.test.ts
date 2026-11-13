@@ -393,11 +393,32 @@ describe("instrumentation-client", () => {
     return config;
   };
 
+  // beforeSend and beforeSendTransaction load the event pipeline lazily and
+  // return a Promise; these tests exercise the pipeline's synchronous
+  // functions, loaded in the same module registry as instrumentation-client.
+  const loadSentryClientEventPipeline = () => {
+    let pipeline:
+      | typeof import("@/utils/monitoring/sentryClientEventPipeline")
+      | undefined;
+    jest.isolateModules(() => {
+      require("@/instrumentation-client");
+      pipeline = require("@/utils/monitoring/sentryClientEventPipeline");
+    });
+
+    const config = mockInit.mock.calls[0]?.[0];
+    expect(config).toBeDefined();
+    if (!pipeline) {
+      throw new Error("The Sentry client event pipeline did not load");
+    }
+
+    return { config, pipeline };
+  };
+
   const loadBeforeSend = () => {
-    const config = loadSentryConfig();
+    const { config, pipeline } = loadSentryClientEventPipeline();
     expect(typeof config.beforeSend).toBe("function");
 
-    return config.beforeSend as (
+    return pipeline.processSentryClientEvent as unknown as (
       event: Record<string, unknown>,
       hint?: Record<string, unknown>
     ) => BeforeSendResult;
@@ -424,10 +445,12 @@ describe("instrumentation-client", () => {
   };
 
   const loadBeforeSendTransaction = () => {
-    const config = loadSentryConfig();
+    const { config, pipeline } = loadSentryClientEventPipeline();
     expect(typeof config.beforeSendTransaction).toBe("function");
 
-    return config.beforeSendTransaction as (event: Record<string, unknown>) => {
+    return pipeline.processSentryClientTransaction as unknown as (
+      event: Record<string, unknown>
+    ) => {
       spans?: Array<{
         description?: string | undefined;
         data?: Record<string, unknown> | undefined;
@@ -1122,6 +1145,25 @@ describe("instrumentation-client", () => {
       name: "third-party-errors-filter",
     }));
     mockCaptureRouterTransitionStart.mockReset();
+  });
+
+  it("reports the runtime VERSION as the release", () => {
+    const previousRuntime = process.env["PUBLIC_RUNTIME"];
+    process.env["PUBLIC_RUNTIME"] = JSON.stringify({
+      ...JSON.parse(previousRuntime ?? "{}"),
+      VERSION: "0123456789abcdef0123456789abcdef01234567",
+    });
+    try {
+      expect(loadSentryConfig().release).toBe(
+        "0123456789abcdef0123456789abcdef01234567"
+      );
+    } finally {
+      if (previousRuntime === undefined) {
+        delete process.env["PUBLIC_RUNTIME"];
+      } else {
+        process.env["PUBLIC_RUNTIME"] = previousRuntime;
+      }
+    }
   });
 
   it("configures filtering for exclusively third-party frames", () => {
@@ -2689,16 +2731,16 @@ describe("instrumentation-client", () => {
     expect(result).not.toBeNull();
   });
 
-  it("drops exact MetaMask Mobile cyclic JSON timer noise", () => {
+  it("keeps ambiguous MetaMask Mobile cyclic JSON timer errors", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent();
 
     const result = beforeSend(event);
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
   });
 
-  it("drops exact MetaMask Mobile cyclic JSON timer noise with a Sentry browser helper frame", () => {
+  it("keeps ambiguous MetaMask Mobile cyclic JSON timer errors with a Sentry browser helper frame", () => {
     const beforeSend = loadBeforeSend();
     const event = createSentryRouteParameterizationEvent(
       [sentryBrowserHelperFrame, nativeJsonStringifyFrame],
@@ -2713,7 +2755,7 @@ describe("instrumentation-client", () => {
 
     const result = beforeSend(event);
 
-    expect(result).toBeNull();
+    expect(result).not.toBeNull();
   });
 
   it("keeps iOS WKWebView cyclic JSON timer errors without app context", () => {

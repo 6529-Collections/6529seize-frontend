@@ -1,0 +1,219 @@
+// en-US source strings for signed posts (device-key signed drop writes).
+// Other locales fall back to en-US while the feature is staged.
+export const SIGNED_MESSAGES_MESSAGES = {
+  "preferences.tabs.devices": "Device Permissions",
+  "signedMessages.enable.unavailable":
+    "Couldn't turn on signed posts. Please try again.",
+  "signedMessages.enable.reconnectWallet":
+    "Reconnect the wallet for this profile and try again.",
+  "signedMessages.enable.reconnect": "Reconnect wallet",
+  "signedMessages.enable.status.reconnecting": "Reconnecting your wallet…",
+  "signedMessages.enable.status.connecting":
+    "Connect your wallet to continue. If it's locked, unlock it first.",
+  "signedMessages.enable.status.switchingNetwork":
+    "Approve the switch to {network} in your wallet.",
+  "signedMessages.enable.status.waiting": "Check your wallet to sign",
+  "signedMessages.enable.status.slow":
+    "Open your wallet to finish signing. It may be locked.",
+  "signedMessages.enable.status.waitingRemote":
+    "Open your wallet app on your phone and approve the signature",
+  "signedMessages.enable.status.slowRemote":
+    "Don't see it? Open the wallet app on your phone. If nothing is waiting there, reconnect your wallet.",
+  "signedMessages.enable.status.stalled":
+    "Still nothing on your phone? Reconnect your wallet to pair it again. You'll be asked to sign again once it reconnects.",
+  "signedMessages.enable.status.rejected": "Signature cancelled.",
+  "signedMessages.enable.status.notConnected":
+    "Your wallet didn't connect. Unlock it and try again.",
+  "signedMessages.enable.status.networkSwitchCanceled":
+    "Network switch canceled. Switch your wallet to {network} to continue.",
+  "signedMessages.enable.error.wrongAccount":
+    "Your wallet is on a different account. Switch it to {address} to continue.",
+  "signedMessages.enable.error.wrongNetwork":
+    "Switch your wallet to {network}, then try again.",
+  "signedMessages.enable.error.connectFailed":
+    "Couldn't open your wallet. Please try again.",
+  "signedMessages.enable.error.deviceKey":
+    "This browser couldn't prepare its signing key. Please try again.",
+  "signedMessages.enable.error.challengeFailed":
+    "Couldn't reach 6529.io to start signing. Check your connection and try again.",
+  "signedMessages.enable.error.signatureFailed":
+    "Your wallet couldn't sign. Unlock it and try again.",
+  "signedMessages.enable.error.walletConnectSession":
+    "Couldn't reach the wallet app on your phone. Reconnect your wallet to pair it again, then approve the signature.",
+  "signedMessages.enable.error.signInFailed":
+    "Your wallet signed, but signed posts didn't turn on. Please try again.",
+  "signedMessages.enable.error.contextChanged":
+    "Your wallet or network changed while signing. Please try again.",
+  "signedMessages.notice.ariaLabel": "Signed posts",
+  "signedMessages.notice.dismiss": "Dismiss",
+  "signedMessages.notice.enable.title": "Turn on Signed Posts (one signature)",
+  "signedMessages.notice.enable.body":
+    "Your wallet signs once. This browser then signs your posts, edits, deletes and reactions for 180 days, so anyone can verify they came from you.",
+  "signedMessages.notice.enable.action": "Turn on",
+  "signedMessages.notice.renew.title": "Signed posts end on {date}",
+  "signedMessages.notice.renew.body":
+    "Renew with one signature to keep signing your messages in this browser.",
+  "signedMessages.notice.renew.action": "Renew",
+  "signedMessages.notice.expired.title":
+    "Signed posts have ended in this browser",
+  "signedMessages.notice.expired.body":
+    "Your messages are sent unsigned until you renew with one signature.",
+  "signedMessages.notice.newDevice.message":
+    "{label} is now authorized for Signed Posts. If this wasn’t you, revoke it.",
+  "signedMessages.notice.newDevice.revoke": "Revoke access",
+  "signedMessages.notice.newDevice.acknowledge": "This was me",
+  "deviceSecurity.notice.both":
+    "{label} was authorized to read your encrypted DMs and sign posts as you.",
+  "deviceSecurity.notice.posts": "{label} was authorized to sign posts as you.",
+  "deviceSecurity.notice.encryptedDms":
+    "{label} was authorized to read your encrypted DMs.",
+  "deviceSecurity.notice.acknowledgeLabel": "This was me · {label}",
+  "deviceSecurity.notice.revokeUnavailable":
+    "To revoke access, open Encrypted DMs on a device that can use them.",
+  "deviceSecurity.notice.revokeLabel": "Revoke access for {label}",
+  "deviceSecurity.notice.revokeTitle": "Revoke access for {label}?",
+  "deviceSecurity.notice.revoke.both":
+    "This device will stop signing posts and receiving encrypted DMs. The app clears its local encrypted chat history when it processes the revocation.",
+  "deviceSecurity.notice.revoke.posts":
+    "This device will lose permission to sign posts as you.",
+  "deviceSecurity.notice.revoke.encryptedDms":
+    "This device will stop receiving encrypted DMs. The app clears its local encrypted chat history when it processes the revocation.",
+  "signedMessages.notice.newDevice.acknowledgeError":
+    "Couldn’t acknowledge this device. Try again.",
+  "signedMessages.notice.enabled": "Signed posts are on in this browser.",
+  "signedMessages.revoke.success": "{label} can no longer post as you.",
+  "signedMessages.revoke.error":
+    "Couldn't revoke this device. Please try again.",
+  "signedMessages.devices.title": "Authorized devices",
+  "signedMessages.devices.description":
+    "Review which devices can sign your posts or access encrypted DMs, and when each permission expires.",
+  "signedMessages.devices.listLabel": "Devices",
+  "signedMessages.devices.thisDevice": "This device",
+  "signedMessages.devices.scopes": "Can {scopes}",
+  "signedMessages.devices.scope.post": "post",
+  "signedMessages.devices.scope.edit": "edit",
+  "signedMessages.devices.scope.delete": "delete",
+  "signedMessages.devices.scope.react": "react",
+  "signedMessages.devices.scope.vote": "vote",
+  "signedMessages.devices.wallet": "Wallet {address}",
+  "signedMessages.devices.origin": "Authorized from {origin}",
+  "signedMessages.devices.granted": "Added {date}",
+  "signedMessages.devices.expires": "Expires {date}",
+  "signedMessages.devices.expiredOn": "Expired {date}",
+  "signedMessages.devices.revokedOn": "Revoked {date}",
+  "signedMessages.devices.lastUsed": "Last used {date}",
+  "signedMessages.devices.neverUsed": "Not used yet",
+  "signedMessages.devices.status.active": "Active",
+  "signedMessages.devices.status.expired": "Expired",
+  "signedMessages.devices.status.revoked": "Revoked",
+  "signedMessages.devices.revoke": "Revoke",
+  "signedMessages.devices.revokeLabel": "Revoke {label}",
+  "signedMessages.devices.authorProof": "Signed Posts",
+  "signedMessages.devices.revokeProofTitle": "Revoke signed posts for {label}?",
+  "signedMessages.devices.revokeConfirm":
+    "This device will no longer sign your messages. Its earlier signatures stay verifiable.",
+  "signedMessages.devices.cancel": "Cancel",
+  "signedMessages.devices.empty": "No authorized devices yet.",
+  "signedMessages.devices.localUnreadable":
+    "This browser couldn't read its own keys, so it can't mark which device below is this one. Check a device's name and dates before you revoke it.",
+  "signedMessages.devices.revokeMaybeThisDevice":
+    "This browser couldn't read its own keys, so this may be the permission this browser uses.",
+  "signedMessages.devices.loading": "Loading devices",
+  "signedMessages.devices.error": "Couldn't load your devices.",
+  "signedMessages.devices.retry": "Try again",
+  "signedMessages.devices.enable": "Turn on Signed Posts in this browser",
+  "signedMessages.devices.enableOnDevice":
+    "Turn on Signed Posts on this device",
+  "signedMessages.devices.proxy":
+    "Switch to your own profile to manage devices.",
+  "signedMessages.marker.label": "Signed by its author",
+  "signedMessages.marker.pending": "Checking the author's signature",
+  "signedMessages.marker.unverified": "Signed, not yet verified",
+  "signedMessages.marker.unlinked":
+    "Signed by a wallet that is not on this profile",
+  "signedMessages.marker.failed": "The signature doesn't match this post",
+  "signedMessages.marker.withLabel": "{label}, signed by its author",
+  "signedMessages.marker.withLabelUnverified":
+    "{label}, signed, not yet verified",
+  "signedMessages.marker.withLabelUnlinked":
+    "{label}, signed by a wallet that is not on this profile",
+  "signedMessages.marker.withLabelFailed":
+    "{label}, the signature doesn't match this post",
+  "signedMessages.signature.menuItem": "Signature",
+  "signedMessages.signature.title": "Signature",
+  "signedMessages.signature.close": "Close",
+  "signedMessages.signature.loading": "Checking the signature…",
+  "signedMessages.signature.error": "Couldn't check the signature right now.",
+  "signedMessages.signature.retry": "Try again",
+  "signedMessages.signature.signed": "Signed by its author",
+  "signedMessages.signature.unsigned": "Not signed by its author",
+  "signedMessages.signature.invalid": "The signature could not be verified",
+  "signedMessages.signature.unverifiable":
+    "Couldn't verify this signature right now",
+  "signedMessages.signature.signedDescription":
+    "Your browser checked this signature itself, without relying on 6529.io.",
+  "signedMessages.signature.unsignedDescription":
+    "This post was sent without a device signature.",
+  "signedMessages.signature.invalidDescription":
+    "The stored signature does not match this post. Treat its authorship with caution.",
+  "signedMessages.signature.unverifiableDescription":
+    "This signature couldn't be checked right now, so this post isn't shown as signed. Try again later.",
+  "signedMessages.signature.wallet": "Wallet",
+  "signedMessages.signature.deviceKey": "Device key",
+  "signedMessages.signature.grantExpires": "Grant expires",
+  "signedMessages.signature.walletSignature": "Wallet signature",
+  "signedMessages.signature.walletVerified": "Verified in your browser",
+  "signedMessages.signature.contractWalletVerified":
+    "Contract wallet: verified on Ethereum in your browser",
+  "signedMessages.signature.origin": "Authorized from",
+  "signedMessages.signature.unrecognizedOriginDescription":
+    "This post's device was authorized from “{origin}”, which isn't a 6529 site or app, so this post isn't shown as signed.",
+  "signedMessages.signature.unlinkedWalletDescription":
+    "This post was signed by the wallet {wallet}, which is not one of its author's wallets now (for example, it was removed from the profile), so the signature can't be attributed to this author.",
+  "signedMessages.signature.unlinked":
+    "Signed by a wallet that is not on this profile",
+  "signedMessages.signature.currentContent": "Current content",
+  "signedMessages.signature.currentSigned": "The signed version",
+  "signedMessages.signature.currentUnsigned": "Changed without a signature",
+  "signedMessages.group.all.one": "{count} post signed by its author",
+  "signedMessages.group.all.other": "All {count} posts signed by their author",
+  "signedMessages.group.partial.one":
+    "{signed} of {count} post signed by its author",
+  "signedMessages.group.partial.other":
+    "{signed} of {count} posts signed by their author",
+  "signedMessages.group.pending": "Checking the signatures in this group",
+  "signedMessages.group.unverified": "Signed posts, not yet verified",
+  "signedMessages.group.unlinked":
+    "A post in this group was signed by a wallet that is not on this profile",
+  "signedMessages.group.failed":
+    "A signature in this group doesn't match its post",
+  "signedMessages.group.title": "Signatures in this group",
+  "signedMessages.group.description":
+    "Select a post to check its signature in your browser.",
+  "signedMessages.group.listLabel": "Posts in this group",
+  "signedMessages.group.postWithoutText": "Post without text",
+  "signedMessages.prompt.title.post": "Couldn't sign this post",
+  "signedMessages.prompt.title.edit": "Couldn't sign this edit",
+  "signedMessages.prompt.title.delete": "Couldn't sign this deletion",
+  "signedMessages.prompt.title.react": "Couldn't sign this reaction",
+  "signedMessages.prompt.failed":
+    "Nothing has been sent yet. This browser couldn't finish signing it. Try again, or send it without your signature.",
+  "signedMessages.prompt.rejected":
+    "Nothing has been sent yet. 6529.io didn't accept this browser's signature. Try again, or send it without your signature.",
+  "signedMessages.prompt.grantUnusable":
+    "Nothing has been sent yet. Signed posts are no longer on in this browser because this device’s permission was revoked or has expired. Turn them back on with one wallet signature, or send this without your signature.",
+  "signedMessages.prompt.failedShort":
+    "This browser couldn't sign it. Nothing has been sent yet.",
+  "signedMessages.prompt.rejectedShort":
+    "6529.io didn't accept the signature. Nothing has been sent yet.",
+  "signedMessages.prompt.grantUnusableShort":
+    "Signed posts are no longer on in this browser. Nothing has been sent yet.",
+  "signedMessages.prompt.retry": "Try again",
+  "signedMessages.prompt.sendUnsigned": "Send unsigned",
+  "signedMessages.prompt.saveUnsigned": "Save unsigned",
+  "signedMessages.prompt.doUnsigned": "Do it unsigned",
+  "signedMessages.prompt.enable": "Turn on Signed Posts",
+  "signedMessages.prompt.enableFailed":
+    "Couldn't turn on signed posts. Try again, or continue unsigned.",
+  "signedMessages.prompt.cancel": "Cancel",
+} as const;

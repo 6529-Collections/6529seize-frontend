@@ -43,6 +43,7 @@ threads.
 - [Wave Drop Open and Copy Links](feature-open-and-copy-links.md)
 - [Wave Drop Quote Link Cards (Same-Origin Serial Links)](feature-quote-link-cards.md)
 - [Wave Drop Selection Copy](feature-selection-copy.md)
+- [Share Posts as Image](feature-share-as-image.md)
 
 ### Menus and thread-state actions
 
@@ -50,8 +51,9 @@ threads.
 - [Wave Drop Set as Pinned Drop](feature-set-pinned-drop.md)
 - [Wave Drop Mark as Unread](feature-mark-as-unread.md)
 - [Wave Drop Artist Preview Modal](feature-artist-preview-modal.md)
-- [Wave Competition Participant and Winner Badges](feature-wave-competition-badges.md)
+- [Wave Decision Participant and Winner Badges](feature-wave-competition-badges.md)
 - [Wave Creator Badge](feature-wave-creator-badge.md)
+- [Signed Messages](feature-signed-messages.md)
 
 ### Connected behavior (owned in other areas)
 

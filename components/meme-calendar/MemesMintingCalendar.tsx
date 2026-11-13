@@ -34,13 +34,14 @@ export default function MemesMintingCalendar({
   const timezoneToggle = (
     <div className="tw-w-fit tw-max-w-full">
       <CommonTabs<DisplayTz>
+        variant="connected"
+        connectedSize="sm"
         items={timezoneItems}
         activeItem={displayTz}
         filterLabel={t(locale, "memeCalendar.timezone.regionLabel")}
         setSelected={setDisplayTz}
         size="sm"
         fill={false}
-        activeTone="primary"
       />
     </div>
   );

@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiCollapsedReplyThread } from '../models/ApiCollapsedReplyThread';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
@@ -26,6 +27,7 @@ import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTa
 import { ApiDropType } from '../models/ApiDropType';
 import { ApiDropViewerModerationContext } from '../models/ApiDropViewerModerationContext';
 import { ApiDropWinningContext } from '../models/ApiDropWinningContext';
+import { ApiMemeCollaboratorProfile } from '../models/ApiMemeCollaboratorProfile';
 import { ApiMentionedWave } from '../models/ApiMentionedWave';
 import { ApiProfileMin } from '../models/ApiProfileMin';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
@@ -34,10 +36,22 @@ import { HttpFile } from '../http/http';
 
 export class ApiDrop {
     /**
+    * Original submitter artist credit before accepted collaborator credits are appended.
+    */
+    'submission_artist'?: string;
+    /**
+    * Accepted collaborators only. Pending invitations are private.
+    */
+    'collaborators'?: Array<ApiMemeCollaboratorProfile>;
+    /**
     * False when a winner has no saved at-decision voter records. The voter count is then unknown, not zero. Omitted by older servers.
     */
     'voters_count_available'?: boolean;
     'id': string;
+    /**
+    * The client_drop_id sent when the drop was created. Present on the create response (including a retried create) and on the DROP_UPDATE broadcast for that creation, so the author\'s client can match its pending send. Omitted on other reads.
+    */
+    'client_drop_id'?: string | null;
     /**
     * Sequence number of the drop in Seize
     */
@@ -77,9 +91,22 @@ export class ApiDrop {
     'moderation'?: ApiDropModeration;
     'subscribed_actions': Array<ApiDropSubscriptionTargetAction>;
     'is_signed': boolean;
+    /**
+    * True when the drop\'s current content is the body of an author\'s device signed create or edit event, the same state as a non-null current_event_id from GET /drops/{dropId}/signed-events. False otherwise, including when the viewer cannot see the drop\'s content or its author is anonymous. Treat a missing value as false.
+    */
+    'is_author_signed'?: boolean;
     'reactions': Array<ApiDropReaction>;
     'boosts': number;
     'is_additional_action_promised': boolean | null;
+    /**
+    * Author-selected reply placement on a top-level chat drop.
+    */
+    'collapse_replies'?: boolean;
+    /**
+    * Whether any replies were present when the reply placement was saved. Included in reply placement updates.
+    */
+    'reply_placement_has_replies'?: boolean;
+    'collapsed_reply_thread'?: ApiCollapsedReplyThread;
     'hide_link_preview': boolean;
     'poll'?: ApiDropPoll;
     'nft_links'?: Array<ApiDropNftLink>;
@@ -89,6 +116,18 @@ export class ApiDrop {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "submission_artist",
+            "baseName": "submission_artist",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "collaborators",
+            "baseName": "collaborators",
+            "type": "Array<ApiMemeCollaboratorProfile>",
+            "format": ""
+        },
         {
             "name": "voters_count_available",
             "baseName": "voters_count_available",
@@ -100,6 +139,12 @@ export class ApiDrop {
             "baseName": "id",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "client_drop_id",
+            "baseName": "client_drop_id",
+            "type": "string",
+            "format": "uuid"
         },
         {
             "name": "serial_no",
@@ -264,6 +309,12 @@ export class ApiDrop {
             "format": ""
         },
         {
+            "name": "is_author_signed",
+            "baseName": "is_author_signed",
+            "type": "boolean",
+            "format": ""
+        },
+        {
             "name": "reactions",
             "baseName": "reactions",
             "type": "Array<ApiDropReaction>",
@@ -279,6 +330,24 @@ export class ApiDrop {
             "name": "is_additional_action_promised",
             "baseName": "is_additional_action_promised",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "collapse_replies",
+            "baseName": "collapse_replies",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "reply_placement_has_replies",
+            "baseName": "reply_placement_has_replies",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "collapsed_reply_thread",
+            "baseName": "collapsed_reply_thread",
+            "type": "ApiCollapsedReplyThread",
             "format": ""
         },
         {

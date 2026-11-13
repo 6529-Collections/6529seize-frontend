@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useSignMessage } from "wagmi";
@@ -153,7 +153,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
       );
 
       postFormData(
-        `${publicEnv.API_ENDPOINT}/api/nextgen/create_allowlist`,
+        `${getApiBase()}/api/nextgen/create_allowlist`,
         formData
       ).then((response) => {
         setUploading(false);

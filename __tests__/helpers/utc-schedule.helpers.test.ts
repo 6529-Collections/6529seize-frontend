@@ -147,3 +147,50 @@ describe("formatLocalScheduleTimes", () => {
     expect(localSchedule("UTC", SUMMER_MONDAY, [9])).toBeNull();
   });
 });
+
+describe("formatLocalScheduleTimes with a display time zone", () => {
+  it("writes the display zone instead of the device zone", () => {
+    // The device is in Los Angeles throughout; only the display zone changes.
+    const results = runInTimeZone<string | null>(
+      "America/Los_Angeles",
+      MODULE,
+      "formatLocalScheduleTimes",
+      [
+        // Local: unchanged, the device zone.
+        ["en-US", CHECKPOINT, MWF, SUMMER_MONDAY],
+        ["en-US", CHECKPOINT, MWF, SUMMER_MONDAY, { isLocal: true }],
+        // Displaying UTC: the equivalent would repeat "16:00 UTC".
+        [
+          "en-US",
+          CHECKPOINT,
+          MWF,
+          SUMMER_MONDAY,
+          { timeZone: "UTC", isLocal: false },
+        ],
+        [
+          "en-US",
+          CHECKPOINT,
+          MWF,
+          SUMMER_MONDAY,
+          { timeZone: "America/New_York", isLocal: false },
+        ],
+        // The weekday follows the display zone's calendar.
+        [
+          "en-US",
+          CHECKPOINT,
+          MWF,
+          WINTER_MONDAY,
+          { timeZone: "Pacific/Auckland", isLocal: false },
+        ],
+      ]
+    );
+
+    expect(results).toEqual([
+      "Mon, Wed, Fri 09:00 PDT",
+      "Mon, Wed, Fri 09:00 PDT",
+      null,
+      "Mon, Wed, Fri 12:00 EDT",
+      "Tue, Thu, Sat 05:00 GMT+13",
+    ]);
+  });
+});

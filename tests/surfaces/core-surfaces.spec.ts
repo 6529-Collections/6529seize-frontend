@@ -59,13 +59,21 @@ async function expectWaveScorePage(page: Page) {
 }
 
 async function expectTdhExplainer(page: Page) {
+  await waitForRouteReady(page, { readySelector: "main h1" });
+  // Shared staging has the Explained redesign before its rollout to main.
+  const explained =
+    (await page
+      .getByRole("main")
+      .locator('[data-explained-shell="tdh"]')
+      .count()) > 0;
   await expect(
     page.getByRole("heading", {
       level: 1,
-      name: "How TDH is calculated",
+      name: explained ? "Total Days Held" : "How TDH is calculated",
       exact: true,
     })
   ).toBeVisible();
+  return explained;
 }
 
 async function expectLinkHref(page: Page, name: string, href: string) {
@@ -216,7 +224,45 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
   test("TDH explainer links to network reference pages", async ({ page }) => {
     await gotoReady(page, "/network/tdh");
 
-    await expectTdhExplainer(page);
+    const explained = await expectTdhExplainer(page);
+    if (explained) {
+      const chapter = page.getByRole("region", {
+        name: /^\d+ pages to go deeper, then the shelf\.$/,
+      });
+      await expect(chapter).toBeVisible();
+      for (const [name, href] of [
+        [
+          "1 How it works Time, rarity, collections and you: models to move.",
+          "/network/tdh/how-it-works",
+        ],
+        ["S1 Specification Every rule, exactly.", "/network/tdh/specification"],
+        [
+          "S4 Versions and boosts Every boost schedule so far.",
+          "/network/tdh/historic-boosts",
+        ],
+        ["S5 Glossary Each word, one meaning.", "/network/tdh/glossary"],
+      ] as const) {
+        const link = chapter.getByRole("link", { name, exact: true });
+        await expect(link).toBeVisible();
+        await expect(link).toHaveAttribute("href", href);
+      }
+      await chapter
+        .getByRole("link", {
+          name: "1 How it works Time, rarity, collections and you: models to move.",
+          exact: true,
+        })
+        .click();
+      await expect(page).toHaveURL(/\/network\/tdh\/how-it-works$/);
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: "How TDH is calculated",
+          exact: true,
+        })
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+      return;
+    }
     await expect(
       page.getByRole("heading", {
         level: 2,

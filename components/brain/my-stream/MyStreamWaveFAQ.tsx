@@ -145,7 +145,7 @@ const VOTING_PHASES: readonly TimelinePhase[] = [
     timeClassName: "tw-text-iron-500",
     dotClassName: "tw-border-iron-500",
     description:
-      "You can add and remove TDH (Current Vote) to one or more submissions but it does not impact the final decision.",
+      "You can add and remove TDH (Current Vote) to one or more submissions but it does not impact the final result.",
   },
   {
     label: "Voting",
@@ -154,7 +154,7 @@ const VOTING_PHASES: readonly TimelinePhase[] = [
     dotClassName:
       "tw-border-primary-400 tw-shadow-[0_0_10px_rgba(59,130,246,0.35)]",
     description:
-      "You can add and remove TDH (Current Vote) to one more submissions, but it does impact the final decision as it starts counting towards the final 24HV. If you vote 100 TDH for the whole 24-hour period, it contributes 100 to the final vote. If you vote 100 TDH for 12 hours of the last 24 hours, it contributes 50 to the final vote.",
+      "You can add and remove TDH (Current Vote) to one more submissions, but it does impact the final result as it starts counting towards the final 24HV. If you vote 100 TDH for the whole 24-hour period, it contributes 100 to the final vote. If you vote 100 TDH for 12 hours of the last 24 hours, it contributes 50 to the final vote.",
   },
   {
     label: "Selection",

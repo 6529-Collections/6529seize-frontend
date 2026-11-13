@@ -1,7 +1,6 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import { readUsCountryHint } from "@/components/cookies/usCountryHint";
 import {
   getCanonicalNextMintNumber,
   isMintingToday,
@@ -23,7 +22,6 @@ import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
@@ -162,9 +160,8 @@ export default function LatestDropNextMintSubscribe(
   // The server and the first hydration render cannot tell it is the native
   // shell, and on iOS the country is unknown until the first lookup settles.
   // Until purchasing is allowed the row and its requests are omitted.
-  const { hideNftPurchasing, shouldRedirect: isRestricted } =
+  const { hideNftPurchasing, reservesNftPurchasingSpace } =
     useNftPurchasingVisibility();
-  const { isIos } = useCapacitor();
   const canQuerySubscriptions = !hideNftPurchasing;
 
   const profileKey = useMemo(
@@ -266,16 +263,12 @@ export default function LatestDropNextMintSubscribe(
   }
 
   if (hideNftPurchasing) {
-    // Blank space only, never purchasing UI. Before hydration the platform is
-    // unknown (isIos is still false), so the server HTML and first hydration
-    // render reserve the row's height to keep web and Android from jumping when
-    // the row replaces it. On iOS nothing is shown while the country check runs
-    // and after a restricted result, except that a device whose last completed
-    // check was US keeps the space through the pending window, so a US result
-    // swaps the row in without a shift. That hint is layout only: the row and
-    // its requests still wait for the real result.
-    const reservesSpace = !isIos || (!isRestricted && readUsCountryHint());
-    return reservesSpace ? <MemeSubscriptionAwarenessRowSpace /> : null;
+    // Blank space only, never purchasing UI: the server HTML and hydration
+    // render keep the row's height so web and Android do not jump when it
+    // mounts. The iOS app removes the space as soon as the platform is known.
+    return reservesNftPurchasingSpace ? (
+      <MemeSubscriptionAwarenessRowSpace />
+    ) : null;
   }
 
   return (

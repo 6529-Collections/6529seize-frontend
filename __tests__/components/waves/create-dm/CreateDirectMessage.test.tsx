@@ -6,9 +6,17 @@ import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+import { LEGACY_DM_DELETION_AT } from "@/components/e2ee/legacy/legacyDmRetention";
+import {
+  contextFor,
+  createFakeE2eeEngine,
+  E2eeTestProvider,
+} from "../../e2ee/fakeE2eeEngine";
 
 const mockPush = jest.fn();
 const mockToast = jest.fn();
+jest.mock("@/config/e2eeEnv", () => ({ isE2eeEnabled: jest.fn(() => false) }));
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ setToast: mockToast }),
@@ -26,7 +34,14 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
   QueryKey: { PROFILE_SEARCH: "PROFILE_SEARCH" },
 }));
-jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
+jest.mock("@/services/api/common-api", () => {
+  const actual = jest.requireActual("@/services/api/common-api");
+  return {
+    commonApiFetch: jest.fn(),
+    getStructuredApiErrorBody: actual.getStructuredApiErrorBody,
+    getStructuredApiErrorCode: actual.getStructuredApiErrorCode,
+  };
+});
 jest.mock("@/helpers/waves/waves.helpers", () => ({
   createDirectMessageWave: jest.fn(),
 }));
@@ -78,12 +93,80 @@ function setup() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(isE2eeEnabled).mockReturnValue(false);
   jest.mocked(commonApiFetch).mockResolvedValue([alice, bob, self]);
   jest
     .mocked(createDirectMessageWave)
     .mockResolvedValue({ id: "dm-1" } as Awaited<
       ReturnType<typeof createDirectMessageWave>
     >);
+});
+
+it("keeps the chosen recipient in the unified composer when they need an unencrypted DM", async () => {
+  const now = jest
+    .spyOn(Date, "now")
+    .mockReturnValue(Date.parse(LEGACY_DM_DELETION_AT) - 60_000);
+  try {
+    jest.mocked(isE2eeEnabled).mockReturnValue(true);
+    const engine = createFakeE2eeEngine();
+    jest
+      .mocked(engine.checkEligibility)
+      .mockResolvedValue([{ profileId: "0xABC", status: "NO_DEVICES" }]);
+    const context = contextFor(engine);
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false, gcTime: 0 } },
+    });
+    render(
+      <E2eeTestProvider value={context}>
+        <QueryClientProvider client={client}>
+          <CreateDirectMessage
+            profile={{ primary_wallet: self.wallet } as ApiIdentity}
+            onBack={jest.fn()}
+          />
+        </QueryClientProvider>
+      </E2eeTestProvider>
+    );
+    expect(screen.getByRole("heading", { name: "New message" })).toBeVisible();
+    expect(screen.getByRole("link", { name: /back/i })).toHaveAttribute(
+      "href",
+      "/messages"
+    );
+    const input = screen.getByRole("textbox", { name: "To:" });
+    fireEvent.change(input, { target: { value: "ali" } });
+    fireEvent.click(await screen.findByRole("button", { name: /alice Level/ }));
+    expect(engine.checkEligibility).toHaveBeenCalledWith(["0xABC"]);
+    expect(screen.getByRole("button", { name: "Remove alice" })).toBeVisible();
+    expect(
+      await screen.findByText("Hasn’t turned on encrypted messages yet")
+    ).toBeVisible();
+    expect(screen.getByText(/deletes it from its servers/)).toBeVisible();
+    expect(mockPush).not.toHaveBeenCalled();
+    const fallback = screen.getByRole("button", {
+      name: "Continue unencrypted",
+    });
+    jest
+      .mocked(createDirectMessageWave)
+      .mockRejectedValueOnce(new Error("Request failed"));
+    fireEvent.click(fallback);
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Request failed"
+    );
+    expect(mockToast).not.toHaveBeenCalled();
+    expect(fallback).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Remove alice" })).toBeVisible();
+
+    fireEvent.click(fallback);
+    await waitFor(() =>
+      expect(mockPush).toHaveBeenCalledWith("/messages/dm-1")
+    );
+    expect(createDirectMessageWave).toHaveBeenCalledWith({
+      addresses: ["0xabc"],
+    });
+    expect(fallback).toBeEnabled();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  } finally {
+    now.mockRestore();
+  }
 });
 
 it("keeps results after blur, toggles recipients, and removes the last chip with Backspace", async () => {
@@ -179,6 +262,36 @@ it("keeps recipients on creation failure and allows retry", async () => {
   expect(screen.getByRole("button", { name: "Remove alice" })).toBeVisible();
   await user.click(screen.getByRole("button", { name: "Message alice" }));
   expect(mockPush).toHaveBeenCalledWith("/messages/dm-1");
+});
+
+it("explains a refused recipient with localized copy from the error code", async () => {
+  const refusal = Object.assign(new Error("server copy"), {
+    status: 403,
+    response: {
+      status: 403,
+      body: JSON.stringify({
+        error: "server copy",
+        code: "DM_RECIPIENT_GROUP_MEMBERS_ONLY",
+        handle: "alice",
+      }),
+    },
+  });
+  jest.mocked(createDirectMessageWave).mockRejectedValueOnce(refusal);
+  const user = userEvent.setup();
+  const { input } = setup();
+  await user.type(input, "ali");
+  await user.click(await screen.findByRole("button", { name: /alice Level/ }));
+  await user.click(screen.getByRole("button", { name: "Message alice" }));
+
+  await waitFor(() =>
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "error",
+        description:
+          "@alice only accepts new direct messages from members of a group they chose.",
+      })
+    )
+  );
 });
 
 it("prevents duplicate creation and locks recipient editing while submitting", async () => {

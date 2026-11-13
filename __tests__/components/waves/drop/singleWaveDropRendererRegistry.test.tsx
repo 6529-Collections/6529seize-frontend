@@ -5,6 +5,7 @@ import { QuorumSingleWaveDrop } from "@/components/waves/drop/QuorumSingleWaveDr
 import { useWaveSingleWaveDropRendererSet } from "@/components/waves/drop/singleWaveDropRendererRegistry";
 import { useWaveParticipationVariant } from "@/hooks/waves/useWaveParticipationVariant";
 import type { WaveParticipationVariant } from "@/helpers/waves/wave-participation-presentation.helpers";
+import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
 
 jest.mock("@/hooks/waves/useWaveParticipationVariant", () => ({
   useWaveParticipationVariant: jest.fn(),
@@ -47,8 +48,25 @@ describe("useWaveSingleWaveDropRendererSet", () => {
         useWaveSingleWaveDropRendererSet("wave")
       );
 
-      expect(mockUseWaveParticipationVariant).toHaveBeenCalledWith("wave");
+      expect(mockUseWaveParticipationVariant).toHaveBeenCalledWith(
+        "wave",
+        undefined
+      );
       expect(result.current.SingleWaveDrop).toBe(renderer);
+    }
+  );
+
+  it.each([
+    { capabilities: [] },
+    { capabilities: [ApiCompetitionCapability.MainStage] },
+  ])(
+    "forwards explicit native capabilities $capabilities without inferring them from the parent",
+    ({ capabilities }) => {
+      renderHook(() => useWaveSingleWaveDropRendererSet("wave", capabilities));
+      expect(mockUseWaveParticipationVariant).toHaveBeenLastCalledWith(
+        "wave",
+        capabilities
+      );
     }
   );
 });

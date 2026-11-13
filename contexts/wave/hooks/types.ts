@@ -21,8 +21,16 @@ export type WaveMessages = {
   readonly hasNextPage: boolean;
   readonly drops: Drop[];
   readonly latestFetchedSerialNo: number | null;
+  readonly historyGaps?: readonly WaveHistoryGap[] | undefined;
 };
+
+export interface WaveHistoryGap {
+  readonly newerThan: number;
+  readonly olderThan: number;
+}
 
 export type WaveMessagesUpdate = Partial<WaveMessages> & {
   key: string;
+  /** Atomically settle this pending send with the single full drop in drops. */
+  readonly pendingDropId?: string | undefined;
 };

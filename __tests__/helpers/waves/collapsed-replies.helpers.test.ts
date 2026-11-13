@@ -43,6 +43,19 @@ describe("collapsed replies helpers", () => {
     expect(isReplyDrop(lightDrop("light-root", false))).toBe(false);
   });
 
+  it("keeps ordinary replies inline when only one thread is collapsed", () => {
+    const nested = {
+      ...fullDrop("nested", "reply"),
+      collapsed_reply_thread: { id: "root", serial_no: 1 },
+    };
+    const messages = {
+      drops: [fullDrop("root"), nested, fullDrop("inline", "other-root")],
+    };
+    expect(
+      withoutCollapsedReplies(messages, false).drops.map(({ id }) => id)
+    ).toEqual(["root", "inline"]);
+  });
+
   it("removes replies and keeps the same object when there are none", () => {
     const messages = {
       key: "wave-1",

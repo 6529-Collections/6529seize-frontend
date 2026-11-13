@@ -1,18 +1,6 @@
-import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ArtistPreviewAppWrapper from "@/components/waves/drops/ArtistPreviewAppWrapper";
-
-const mockKeyboardFocusScroll = jest.fn();
-
-jest.mock(
-  "@/components/waves/create-wave/hooks/useKeyboardFocusScroll",
-  () => ({
-    __esModule: true,
-    default: (ref: React.RefObject<HTMLElement | null>) =>
-      mockKeyboardFocusScroll(ref),
-  })
-);
 
 // Mock Headless UI components
 jest.mock("@headlessui/react", () => ({
@@ -29,11 +17,6 @@ jest.mock("@headlessui/react", () => ({
   ),
   Transition: ({ children, show }: any) => (show ? <>{children}</> : null),
   TransitionChild: ({ children }: any) => <>{children}</>,
-}));
-
-// Mock Heroicons
-jest.mock("@heroicons/react/24/outline", () => ({
-  XMarkIcon: (props: any) => <svg data-testid="x-mark-icon" {...props} />,
 }));
 
 describe("ArtistPreviewAppWrapper", () => {
@@ -65,7 +48,7 @@ describe("ArtistPreviewAppWrapper", () => {
 
     const closeButton = screen.getByLabelText("Close panel");
     expect(closeButton).toBeInTheDocument();
-    expect(screen.getByTestId("x-mark-icon")).toBeInTheDocument();
+    expect(closeButton.querySelector("svg")).toBeInTheDocument();
   });
 
   it("calls onClose when close button is clicked", () => {
@@ -149,14 +132,12 @@ describe("ArtistPreviewAppWrapper", () => {
       "tw-w-full",
       "tw-bg-[#0B0C0E]",
       "tw-rounded-t-2xl",
-      "tw-border-white/10"
-    );
-    expect(dialogPanel.style.maxHeight).toContain(
-      "--native-keyboard-inset-bottom"
+      "tw-border-white/10",
+      "tw-max-h-[85vh]"
     );
   });
 
-  it("tracks focused fields inside the native keyboard-aware layout", () => {
+  it("uses one height adjustment and the shared native keyboard motion", () => {
     render(
       <ArtistPreviewAppWrapper {...defaultProps}>
         <input aria-label="Vote amount" />
@@ -164,15 +145,14 @@ describe("ArtistPreviewAppWrapper", () => {
     );
 
     const layout = screen.getByTestId("artist-preview-app-layout");
-    const scrollRegion = screen.getByTestId("artist-preview-app-scroll");
-    const trackedRef = mockKeyboardFocusScroll.mock.calls.at(-1)?.[0];
-
     expect(layout.style.height).toContain("--native-keyboard-inset-bottom");
-    expect(layout.style.transform).toContain("--native-keyboard-inset-bottom");
+    expect(layout.style.transform).toBe("");
     expect(layout.style.transition).toContain(
       "--native-keyboard-layout-transition-duration"
     );
-    expect(trackedRef.current).toBe(scrollRegion);
+    expect(layout.style.transition).toContain(
+      "--native-keyboard-layout-transition-easing"
+    );
   });
 
   it("handles focus styles on close button", () => {

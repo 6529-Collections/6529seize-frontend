@@ -63,13 +63,36 @@ describe("WaveDropReply", () => {
     expect(within(fixedContainer).getByTestId("loading")).toBeInTheDocument();
   });
 
-  it("shows not found when author missing", () => {
-    hookData.isLoading = false;
-    hookData.drop = { author: { handle: null } } as any;
-    render(<WaveDropReply {...baseProps} />);
-    const fixedContainer = expectFixedContainer();
-    expect(within(fixedContainer).getByTestId("not-found")).toBeInTheDocument();
-  });
+  it.each(["Anonymous", null, ""])(
+    "shows anonymous reply attribution without profile navigation when handle is %s",
+    (handle) => {
+      hookData.drop = {
+        id: "d",
+        author: { handle, pfp: CDN_AVATAR_URL, is_anonymous: true },
+        serial_no: 1,
+        moderation: { status: ApiDropModerationStatus.Visible, can_view: true },
+      };
+      render(<WaveDropReply {...baseProps} />);
+      expect(screen.getByText("Anonymous")).toBeInTheDocument();
+      expect(screen.queryByRole("link")).not.toBeInTheDocument();
+      expect(screen.queryByRole("img")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("not-found")).not.toBeInTheDocument();
+      expect(screen.getByTestId("content")).toBeInTheDocument();
+    }
+  );
+
+  it.each([null, ""])(
+    "shows not found for a non-anonymous author whose handle is %s",
+    (handle) => {
+      hookData.isLoading = false;
+      hookData.drop = { author: { handle } } as any;
+      render(<WaveDropReply {...baseProps} />);
+      const fixedContainer = expectFixedContainer();
+      expect(
+        within(fixedContainer).getByTestId("not-found")
+      ).toBeInTheDocument();
+    }
+  );
 
   it("shows not found when drop is empty", () => {
     hookData.isLoading = false;

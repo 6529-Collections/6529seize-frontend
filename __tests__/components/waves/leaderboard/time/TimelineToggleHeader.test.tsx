@@ -3,6 +3,17 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { TimelineToggleHeader } from "@/components/waves/leaderboard/time/TimelineToggleHeader";
 import { SeizeSettingsProvider } from "@/contexts/SeizeSettingsContext";
 import type { ApiWaveDecisionPause } from "@/generated/models/ApiWaveDecisionPause";
+import { mockDefaultTimeZone } from "../../../../utils/timeZoneHydration";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
+
+let mockDisplayTimeZone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
+jest.mock("@/hooks/useDisplayTimeZone", () => ({
+  ...jest.requireActual("@/hooks/useDisplayTimeZone"),
+  useDisplayTimeZone: () => mockDisplayTimeZone,
+}));
 
 jest.mock("@/helpers/waves/time.utils", () => ({
   calculateTimeLeft: jest.fn(() => ({
@@ -31,9 +42,10 @@ describe("TimelineToggleHeader", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    mockDisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
   });
 
-  it("renders Decision Timeline when next decision time provided", () => {
+  it("renders Results timeline when next decision time provided", () => {
     const setIsOpen = jest.fn();
     render(
       <SeizeSettingsProvider>
@@ -45,13 +57,13 @@ describe("TimelineToggleHeader", () => {
         />
       </SeizeSettingsProvider>
     );
-    expect(screen.getByText("Decision Timeline")).toBeInTheDocument();
+    expect(screen.getByText("Results timeline")).toBeInTheDocument();
     expect(screen.getByText("Next winner")).toBeInTheDocument();
     expect(screen.getByText("Next winner").parentElement).toHaveClass(
       "tw-text-xs"
     );
     const toggle = screen.getByRole("button", {
-      name: "Toggle decision timeline",
+      name: "Toggle results timeline",
     });
     expect(toggle).toHaveAccessibleDescription(
       "Next winner in 1 hour, 2 minutes, 3 seconds"
@@ -89,14 +101,46 @@ describe("TimelineToggleHeader", () => {
     );
 
     expect(
-      screen.getByText(`Next decision after ${formattedDate}`)
+      screen.getByText(`Next result after ${formattedDate}`)
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Toggle decision timeline" })
-    ).toHaveAccessibleDescription(`Paused Next decision after ${formattedDate}`);
+      screen.getByRole("button", { name: "Toggle results timeline" })
+    ).toHaveAccessibleDescription(`Paused Next result after ${formattedDate}`);
     expect(
-      screen.queryByText(`Next decision after ${pauseEndDate}`)
+      screen.queryByText(`Next result after ${pauseEndDate}`)
     ).not.toBeInTheDocument();
+  });
+
+  it("dates the paused banner in the display zone", () => {
+    // 12:00 UTC on Apr 10 is already Apr 11 in Kiritimati (UTC+14).
+    const nextDecisionTime = Date.UTC(2026, 3, 10, 12, 0, 0);
+    const currentPause: ApiWaveDecisionPause = {
+      id: 1,
+      start_time: Date.UTC(2026, 3, 8, 12, 0, 0),
+      end_time: Date.UTC(2026, 3, 9, 12, 0, 0),
+    };
+    const renderHeader = () => (
+      <SeizeSettingsProvider>
+        <TimelineToggleHeader
+          isOpen={false}
+          setIsOpen={jest.fn()}
+          nextDecisionTime={nextDecisionTime}
+          timeLeft={timeLeft}
+          isPaused
+          currentPause={currentPause}
+        />
+      </SeizeSettingsProvider>
+    );
+
+    // Device in UTC: Apr 10. jest.restoreAllMocks in afterEach undoes it.
+    mockDefaultTimeZone("UTC");
+    const { rerender } = render(renderHeader());
+    expect(screen.getByText("Next result after Apr 10")).toBeInTheDocument();
+
+    mockDisplayTimeZone = { timeZone: "Pacific/Kiritimati", isLocal: false };
+    rerender(renderHeader());
+    // A bare date carries no zone label; only the day follows the zone.
+    expect(screen.getByText("Next result after Apr 11")).toBeInTheDocument();
   });
 
   it("shows no decision scheduled when paused without a next decision time", () => {
@@ -118,9 +162,9 @@ describe("TimelineToggleHeader", () => {
       </SeizeSettingsProvider>
     );
 
-    expect(screen.getByText("No decision scheduled")).toBeInTheDocument();
+    expect(screen.getByText("No result scheduled")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Toggle decision timeline" })
-    ).toHaveAccessibleDescription("Paused No decision scheduled");
+      screen.getByRole("button", { name: "Toggle results timeline" })
+    ).toHaveAccessibleDescription("Paused No result scheduled");
   });
 });

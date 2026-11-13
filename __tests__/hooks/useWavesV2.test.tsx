@@ -77,3 +77,36 @@ describe("useWavesV2 refetchIfStale", () => {
     expect(fetchWavesV2PageMock).not.toHaveBeenCalled();
   });
 });
+
+describe("useWavesV2 polled lists", () => {
+  it("keeps a list polled every minute fresh for that minute", async () => {
+    // The client default would treat the list as stale at once.
+    const { result } = renderHook(
+      () =>
+        useWavesV2({
+          overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
+          refetchInterval: 60_000,
+        }),
+      { wrapper: createWrapper(0) }
+    );
+    await waitFor(() => expect(result.current.status).toBe("success"));
+
+    act(() => {
+      result.current.refetchIfStale();
+    });
+
+    await waitFor(() => expect(result.current.isFetching).toBe(false));
+    expect(fetchWavesV2PageMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("leaves unpolled lists on the client default", async () => {
+    const { result } = renderWavesV2(0);
+    await waitFor(() => expect(result.current.status).toBe("success"));
+
+    act(() => {
+      result.current.refetchIfStale();
+    });
+
+    await waitFor(() => expect(fetchWavesV2PageMock).toHaveBeenCalledTimes(2));
+  });
+});

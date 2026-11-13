@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { commonApiFetch } from "@/services/api/common-api";
 import type { CreateWaveConfig } from "@/types/waves.types";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { useWaveConfig } from "./useWaveConfig";
 
 export function useSubwaveWaveConfig({
@@ -16,7 +15,7 @@ export function useSubwaveWaveConfig({
 }) {
   const waveConfig = useWaveConfig({
     initialViewGroupId: parentViewGroupId,
-    chatOnly: isMultiCompetitionEnabled(),
+    chatOnly: true,
   });
   const [parentAdminGroup, setParentAdminGroup] = useState<ApiGroupFull | null>(
     null

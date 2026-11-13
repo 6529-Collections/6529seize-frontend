@@ -56,5 +56,5 @@ export default function LazyWaveDropsSearchModal(
     return <CancelOnEscapeWhileLoading onEscape={onCancel} />;
   }
 
-  return <LoadedWaveDropsSearchModal {...props} />;
+  return <LoadedWaveDropsSearchModal key={props.wave.id} {...props} />;
 }

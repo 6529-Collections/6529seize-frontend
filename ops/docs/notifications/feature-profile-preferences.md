@@ -8,8 +8,15 @@ profiles, and submitted report history.
 
 ## Location in the Site
 
-Preferences is a dedicated page at `/preferences`. It contains three tabs:
-**Notifications & messages**, **Blocked Profiles**, and **Reports**.
+Preferences is a dedicated page at `/preferences`. It contains five tabs:
+**Notifications & Messages**, **Blocked Profiles**, **Reports**, **Device
+Permissions** (`/preferences?tab=devices`), and **Time Zone**
+(`/preferences?tab=time-zone`). Desktop uses the underlined tab row; narrow
+layouts use a two-column grid without horizontal scrolling.
+
+**Time Zone** chooses whether times show in local time, UTC or another zone. It
+is saved on the device and works signed out; see
+[Display Time Zone](../waves/header/feature-display-time-zone.md).
 
 ## Entry Points
 
@@ -29,7 +36,8 @@ The profile-header action is hidden while an active profile proxy is in use.
 ## User Journey
 
 1. Open your own profile and select **Preferences**.
-2. Choose **Notifications & messages**, **Blocked Profiles**, or **Reports**.
+2. Choose **Notifications & Messages**, **Blocked Profiles**, **Reports**,
+   **Device Permissions**, or **Time Zone**.
 3. Review or change the available settings for the active profile.
 4. When Preferences was opened from the profile header, return to the active
    profile with **Back to profile** on desktop or the standard back arrow in
@@ -48,13 +56,28 @@ profile is created.
 
 - `Everyone`
 - `People I follow`
+- `Members of a group I choose`
 - `Nobody`
+
+**Members of a group I choose** reuses network groups, so it can require a
+level, TDH, REP (overall or in one category), NIC, NFTs, or specific included
+and excluded profiles. Select **Choose group** to pick an existing group or
+build a new one with the same group builder used for Wave access. Membership is
+checked when someone starts a conversation, so daily TDH and REP changes apply.
+**People I follow can always message me** is on by default and also admits
+profiles you follow who are not in the group. **Save Changes** stays disabled
+until a group is chosen.
+
+Profiles you block can never start a new conversation with you, whichever
+option you choose, including people you follow.
 
 The policy applies only when a new exact participant set is created. Existing
 one-to-one and group conversations remain available even if one of their
 participants would not pass the current policy. A new group conversation must
-be accepted by every recipient; otherwise the creator sees the recipient's
-admission-policy error.
+be accepted by every recipient; otherwise the creator sees that recipient's
+admission notice, such as "@alice only accepts new direct messages from people
+they follow". A group is named in that notice only when it is public, and a
+block is shown as the generic "doesn't accept new direct messages" notice.
 
 ### Notifications
 
@@ -74,9 +97,27 @@ When `Essential only` is selected, the optional category controls collapse out
 of view. Their values are preserved and restored when the profile switches back
 to `All`.
 
+Encrypted DMs use the existing **Direct messages and wave activity** category,
+without an additional setting. In-app encrypted notifications have no 60-second
+cooldown; content-free phone pushes have their own throttle.
+
 Device-level push settings remain separate. Push delivery can only happen after
 an in-app notification is created, so a notification suppressed by these
 profile preferences cannot trigger a push.
+
+### Device Permissions
+
+**Authorized devices** lists signing and encrypted-DM permissions, including
+combined grants, with their status, wallet, added/expiry dates, last use and
+**This device** where applicable. You can rename any unrevoked device you own
+from a browser or app; the server name is shared across your devices.
+**Revoke** explains whether signing, encryption or both will stop before you
+confirm. Revoking this encryption device also clears its local encrypted history.
+
+The setup action names whichever permissions this device is missing and opens
+the shared consent dialog before a wallet request. It is omitted when both are
+on. See [Signed Posts](../waves/drop-actions/feature-signed-messages.md) and
+[Encrypted messages](../encrypted-messages.md#renewal-and-revocation).
 
 ### Blocks and Reports
 
@@ -92,6 +133,9 @@ internal moderation or AI detail.
   are connected.
 - Existing direct-message conversations remain available after the admission
   policy changes.
+- If the chosen group is deleted or hidden, Preferences warns that only people
+  you follow can start new conversations until you choose another group. New
+  conversations fall back to **People I follow** in the meantime.
 
 ## Failure and Recovery
 
@@ -106,7 +150,7 @@ profile-menu entries omit it and rely on the standard shell navigation.
 ## Limitations / Notes
 
 Profiles without stored preferences use `Everyone`, `All`, and all optional
-categories enabled. This preserves existing behavior when the backend is
+categories enabled. **People I follow can always message me** defaults to on. This preserves existing behavior when the backend is
 deployed before the frontend.
 
 ## Related Pages
@@ -114,3 +158,4 @@ deployed before the frontend.
 - [Notifications](README.md)
 - [Mobile Push Notifications](feature-mobile-push-notifications.md)
 - [Direct Message Creation](../waves/create/feature-direct-message-creation.md)
+- [Signed Messages](../waves/drop-actions/feature-signed-messages.md)

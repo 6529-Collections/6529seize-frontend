@@ -8,7 +8,6 @@ section look wrong.
 This page covers:
 - `Latest Drop` or `Next Drop`
 - `Coming up`
-- `Boosted Drops`
 - `Most active waves`
 - The health-heart shortcut to `/network/health`
 
@@ -28,7 +27,7 @@ This page covers:
 - Open `/`.
 - Wait for initial loading placeholders to settle.
 - Verify section order: header -> top slot (`Latest Drop` or `Next Drop`) ->
-  mission block -> `Coming up` -> `Boosted Drops` -> `Most active waves`.
+  mission block -> `Coming up` -> `Most active waves`.
 
 ## User Journey
 
@@ -55,22 +54,23 @@ This page covers:
 - `NEXT MINT` card missing in `Coming up`:
   - It is hidden when the current mint is ended.
   - It is hidden when next-winner title matches current mint title.
-- `Boosted Drops` missing:
-  - While loading, section shows `Loading...`.
-  - Hidden after load when boosted feed is empty or request fails.
+- `Boosted Drops` missing: it was removed from the homepage. Boosted-drop
+  preferences within Waves remain available.
+- `How to start` missing: it appears only after wallet state resolves without
+  valid authentication, like the hero actions.
 - `Most active waves` missing:
   - While loading, section shows skeleton cards.
   - Hidden when hot-waves is empty or request fails.
 - `/discover` was opened instead of `/`:
   - `/discover` is a dedicated active-wave discovery route, not the home page.
-  - Use `/` for `Latest Drop`, `Coming up`, `Boosted Drops`, and home
+  - Use `/` for `Latest Drop`, `Coming up`, and home
     `Most active waves`.
 - Health heart shortcut missing:
   - It appears only on `/`.
   - Larger layouts: fixed in the hero region.
   - Small/mobile/app layouts: shown in header actions.
 - `Mint` button missing in latest-drop countdown:
-  - Hidden when device is iOS and country is not `US`.
+  - Hidden in the iOS app.
 
 ## Edge Cases
 
@@ -90,16 +90,16 @@ This page covers:
 
 - Refresh `/` to rerun home queries.
 - Open `/network/health` directly if the heart shortcut is unavailable.
-- Open `/the-memes/mint` if latest-drop mint actions are unavailable.
+- On the web or Android, open `/the-memes/mint` if latest-drop mint actions are
+  unavailable. In the iOS app, that route opens The Memes collection.
 - Open `/the-memes/{id}` or `/the-memes/{id}/distribution` when latest-drop
   card links fail.
-- Open `/waves` when `Coming up`, `Boosted Drops`, or `Most active waves`
+- Open `/waves` when `Coming up` or `Most active waves`
   routes fail.
 - Open `/discover` when you need the dedicated 20-card discovery surface;
   return to `/` for the full home route.
 - For direct-message wave targets, retry from:
   - `/messages/{waveId}`
-  - `/messages/{waveId}?serialNo={serialNo}` for boosted-drop deep links.
 
 ## Limitations / Notes
 
@@ -114,7 +114,7 @@ This page covers:
 - [Home Index](README.md)
 - [Home Landing and Section Navigation Flow](flow-home-landing-and-section-navigation.md)
 - [Home Latest Drop and Coming Up](feature-home-latest-drop-and-coming-up.md)
-- [Home Boosted Drops and Most Active Waves](feature-home-discovery-grids.md)
+- [Home Waves Discovery](feature-home-discovery-grids.md)
 - [Network Routes and Health](../network/troubleshooting-network-routes-and-health.md)
 - [Navigation and Shell Controls](../navigation/troubleshooting-navigation-and-shell-controls.md)
 - [Media Routes and Minting](../media/troubleshooting-media-routes-and-minting.md)

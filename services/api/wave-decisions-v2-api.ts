@@ -65,6 +65,10 @@ const mapDecisionDropV2 = ({
   const replyTo = mapReplyToDrop(drop);
 
   return {
+    collaborators: drop.collaborators ?? [],
+    ...(drop.submission_artist !== undefined
+      ? { submission_artist: drop.submission_artist }
+      : {}),
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: ApiDropType.Winner,
@@ -84,7 +88,8 @@ const mapDecisionDropV2 = ({
     updated_at: drop.updated_at ?? null,
     title: drop.title ?? null,
     parts: [createBasePart(drop)],
-    parts_count: 1,
+    // The post's real part count: only its first part is loaded here.
+    parts_count: drop.parts_count,
     referenced_nfts: drop.referenced_nfts ?? [],
     mentioned_users: drop.mentioned_users ?? [],
     mentioned_groups: drop.mentioned_groups ?? [],
@@ -97,6 +102,7 @@ const mapDecisionDropV2 = ({
     ...(drop.moderation ? { moderation: drop.moderation } : {}),
     subscribed_actions: [],
     is_signed: drop.is_signed,
+    ...(drop.is_author_signed ? { is_author_signed: true } : {}),
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
     is_additional_action_promised:

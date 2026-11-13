@@ -53,7 +53,7 @@ These rules apply to non-curation thread composer flows in both `Post` and
 ## Server Payload Limits
 
 The server also checks the structure of new drops and edits, including wave
-description drops and competition submissions:
+description drops and decision submissions:
 
 - At most `250` parts per drop.
 - At most `20` media items and `20` attachments per part, with at most `100`

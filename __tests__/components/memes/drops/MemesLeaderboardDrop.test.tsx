@@ -95,17 +95,25 @@ jest.mock("@/components/memes/drops/MemeDropTraits", () => () => (
 ));
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
-  () => () => (
-    <div data-testid="media">
-      <button
-        type="button"
-        data-testid="media-preview"
-        onClick={(event) => event.stopPropagation()}
+  () =>
+    (props: {
+      readonly imageLoadingLayout?: string;
+      readonly autoAnimateGif?: boolean;
+    }) => (
+      <div
+        data-testid="media"
+        data-loading-layout={props.imageLoadingLayout}
+        data-auto-animation={String(Boolean(props.autoAnimateGif))}
       >
-        Open media preview
-      </button>
-    </div>
-  )
+        <button
+          type="button"
+          data-testid="media-preview"
+          onClick={(event) => event.stopPropagation()}
+        >
+          Open media preview
+        </button>
+      </div>
+    )
 );
 jest.mock(
   "@/components/drops/view/item/content/media/MediaDisplay",
@@ -113,9 +121,11 @@ jest.mock(
     (props: {
       readonly isInertPreview?: boolean;
       readonly disableMediaInteraction?: boolean;
+      readonly imageLoadingLayout?: string;
     }) => (
       <div
         data-testid="media"
+        data-loading-layout={props.imageLoadingLayout}
         data-inert-preview={String(props.isInertPreview)}
         data-disable-media-interaction={String(props.disableMediaInteraction)}
       />
@@ -206,7 +216,7 @@ const mockMemesArtSubmissionModal = jest.fn((p: any) =>
   ) : null
 );
 
-jest.mock("@/components/waves/memes/MemesArtSubmissionModal", () => ({
+jest.mock("@/components/waves/memes/LazyMemesArtSubmissionModal", () => ({
   __esModule: true,
   default: (p: any) => mockMemesArtSubmissionModal(p),
 }));
@@ -246,6 +256,10 @@ test("calls onDropClick when not touch screen", async () => {
   useIsMobileScreen.mockReturnValue(false);
   const onClick = jest.fn();
   render(<MemesLeaderboardDrop drop={drop} onDropClick={onClick} />);
+  expect(screen.getByTestId("media")).toHaveAttribute(
+    "data-loading-layout",
+    "artwork"
+  );
   await userEvent.click(screen.getByRole("button", { name: "Open T" }));
   expect(onClick).toHaveBeenCalledTimes(1);
   expect(onClick).toHaveBeenCalledWith(drop);
@@ -323,6 +337,14 @@ test.each([
     expect(authorLink.closest("button")).toBeNull();
     expect(screen.getByTestId("media").closest("[inert]")).toBeNull();
     await userEvent.click(authorLink);
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-loading-layout",
+      "artwork"
+    );
+    expect(screen.getByTestId("media")).toHaveAttribute(
+      "data-auto-animation",
+      "false"
+    );
     await userEvent.click(screen.getByTestId("media-preview"));
 
     expect(onDropClick).not.toHaveBeenCalled();
@@ -470,7 +492,7 @@ test("suppresses the click generated after a long press", async () => {
 
   longPressOptions.onInteractionStart();
   fireEvent.touchEnd(openButton);
-  await userEvent.click(openButton);
+  fireEvent.click(openButton, { detail: 1 });
 
   expect(startDropOpen).not.toHaveBeenCalled();
   expect(onDropClick).not.toHaveBeenCalled();

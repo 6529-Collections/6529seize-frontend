@@ -48,7 +48,14 @@
 | `timeline`            | `History` primary tab, `Timeline` sub-tab                  |
 
 - Missing or invalid `focus` opens `Overview`.
+- On desktop, a horizontal divider separates TDH breakdown from the
+  Stats/Boosts group in Overview.
+  Smaller screens keep their existing section styling.
 - The primary tabs are `Overview`, `Listings & offers`, `Collectors`, and `History`.
+  They keep the blue underline and full-width baseline. History sub-tabs use compact round pills, and
+  the activity-type dropdown is a compact framed button aligned to the right.
+- Card Activity rows stack on narrow screens while preserving their item,
+  wallet, total, date and transaction links.
 - `Your Transactions` appears only when the connected wallet has transactions
   for the card; otherwise the route falls back to `Card Activity`.
 
@@ -99,6 +106,101 @@
 
 ## Common Scenarios
 
+- On desktop, the artwork stays in the left column while the adjacent card
+  details scroll. It stops at the end of that section, before the tabs. On
+  smaller screens the artwork scrolls normally with the page.
+- Market actions sit in one bordered panel at every screen size.
+  When a wallet connection is required, its existing guidance and white Connect
+  wallet button lead the panel. The button shares the line in wider panels and
+  fills its own row in narrower panels. A divider separates this requirement
+  from the trading actions.
+  Collect keeps the shared blue action style, dimmed and non-interactive when
+  disabled, in both the panel and the bottom bar.
+  Delivery controls stay hidden while a wallet connection is required; after
+  connection, they appear below the main action row.
+- On phones and tablets, the latest card's countdown and Subscription Minting
+  panel appear above the artwork. Ownership, format switching and media actions
+  stay below the artwork. The tab row stays at the top while scrolling below 1024px;
+  swipe the row to reach all four tabs when needed.
+- Collect and Make an offer use 44px buttons. Collect keeps enough width for its
+  complete label and price; Make an offer uses the remaining space and can truncate
+  visually without changing its accessible name. In very narrow panels, Collect
+  fills the first row, with Make an offer and the square more-actions menu below.
+  Wider panels keep all three controls on one row. The bottom bar also keeps the
+  complete Collect label visible. When Collect
+  is present, the available List action is inside that menu. Without Collect,
+  Make an offer and the available List action share the row; when List is also
+  unavailable, Make an offer fills both labelled slots. Review offers remains
+  available inside the menu. All actions share one panel
+  background and retain their existing button styles.
+  On desktop, View listings & offers sits on the left of a row directly below
+  the trading buttons, with Marketplaces and its icons on the right. Mint date
+  and Mint price share the next row, followed by Distribution Plan and
+  Main Stage Submission when available. Edition size, reserve-adjusted supply,
+  Holding wallets and TDH rate follow below, before Supply details & rankings.
+  These fields keep their existing values, pending/unavailable states and link
+  availability rules. Smaller screens keep View listings & offers below
+  Supply details & rankings and marketplace shortcuts beside the market metrics.
+  View listings & offers still opens the Listings & offers tab.
+  On desktop, the Supply details & rankings chevron sits immediately beside its
+  label. It points down when closed and up when open, with details shown
+  underneath. Smaller screens retain their existing placement.
+  Each action keeps its existing availability and trading behavior.
+- Review offers keeps its dialog height stable while the initial offers load.
+  Muted placeholder rows appear first; the wallet and quantity form is revealed
+  with the available orders. On phones, the order list scrolls above a fixed
+  footer containing the wallet, quantity and Review exact terms controls. The
+  footer remains visible when selecting an order or scrolling to the last one.
+  Selecting an order and connecting a wallet work as before.
+- Below 1024px, when the inline market actions leave the screen, a bottom bar
+  repeats the available Collect and Make an offer actions. On desktop windows
+  with a visible left rail, the bar starts after that rail. On phones it spans
+  the screen. In the app it sits above bottom
+  navigation and stays behind open dialogs. While listings are selected in the
+  active Listings & offers tab, the selection review bar takes its place.
+  The card actions return when the selection is cleared or another tab opens.
+  Delivery, owner actions and the additional-actions menu remain in the inline section.
+- Long descriptions initially show five lines on phones. `Read more` reveals
+  the full description and `Show less` restores the preview.
+- Properties show the first six tiles on phones and desktop.
+  `Show all N properties` reveals the remainder and `Show fewer` restores the preview.
+  Desktop uses two rows of three tiles with a compact text-and-chevron control
+  below the grid, aligned to the right.
+  Short sections need no disclosure. Between 640 and 767 px, all properties
+  remain visible without a disclosure.
+- In `Collectors`, screens narrower than 768 px show a collector list with this
+  card's metrics in a `This card` row, with a `Total` row aligned underneath.
+  Each collector has one header row labelling the Balance, TDH and Unweighted TDH
+  columns above both rows of values. The stat block starts under the avatar. On very narrow
+  screens, the list scrolls horizontally so labels and values stay on one line.
+  Swipe sideways, or focus the list and use the arrow keys, to see all columns.
+  The collector's name has its own row above the values. Choose
+  Balance, TDH, Unweighted TDH, Total balance, Total TDH or Total unweighted TDH
+  in the scrolling sort bar; the separate arrows set ascending or descending
+  order. Choosing a metric keeps the current direction and highlights its values.
+- Use the search icon to filter by one or several identities; remove chips to
+  broaden the results.
+  Filtered results retain each collector's TDH rank. Pages contain 25 collectors.
+- Large mobile values use compact notation from 100,000, with exact displayed
+  values available to assistive technology. Download CSV exports all matching
+  collectors with full numeric values in the selected order. Its icon shows
+  a tooltip on hover or keyboard focus when the text label is hidden. The button
+  shows progress, announces completion, and reports a download failure for retry.
+- At 768 px and wider, the Collectors table shows the same information in
+  columns under `This card` and `Total`. Click a column label to sort high to
+  low; click the active label again to reverse direction. Every sortable label
+  has a visible indicator. The active column has a direction arrow and brighter
+  values. Headers work with Enter or Space and announce the next sort direction.
+  The table scrolls horizontally when its columns need more room. Sorting and
+  paging keep the previous rows visible while the next results load.
+- On desktop, section headings use a consistent compact style, and artwork,
+  supply, properties, and market values use the same text size as their labels.
+  The season and calendar periods form a text row; season and year keep their
+  collection-filter links and keyboard focus without chip backgrounds or borders.
+  In `History` > `Timeline`, changes use the full section width with a thin
+  vertical line, small markers, and horizontal dividers. Dates and metadata
+  links are quieter than the change names. Smaller screens keep their existing
+  typography and timeline cards.
 - In Overview, explore `More by {artist}` for up to four other published Meme
   Cards per credited artist directly after the description, before detailed metadata.
   Cards are ordered by newest card number first. Each preview
@@ -141,6 +243,8 @@
 
 ## Failure and Recovery
 
+- Timeline previews use [historical media fallbacks](../nft/feature-media-source-fallbacks.md#historical-timeline-previews)
+  when a recorded Arweave source fails.
 - If artist works cannot load, use their `Try again` button. A failed image
   displays `Artwork preview unavailable` while keeping its card link usable.
 - If a numeric ID resolves to fallback mode, use fallback timing details or return to `/the-memes` and open a nearby card.
@@ -192,6 +296,7 @@
   deferred shared-timeline debt.
 - Non-source locales fall back to `en-US` for this detail surface until
   reviewed translations are added.
+- Mobile disclosure labels use the same progressive localization fallback.
 - Primary tabs expose selected state with `aria-pressed`; History tabs use the
   shared tablist pattern with `aria-selected` and arrow-key navigation.
 - Deferred loading applies to artwork details, References, Collectors,
@@ -217,6 +322,14 @@
 - Remediation: add reviewed entries to the four locale dictionaries, then check
   visible and accessible names, long-label wrapping, and expansion controls in
   each locale.
+
+## Collectors Translation Follow-up
+
+- Collectors mobile labels use the `theMemes.detail.collectors.*` message keys.
+  New metric and sort labels currently use the `en-US` fallback in `en-GB`,
+  `fr-FR`, `es-ES` and `de-DE`; values use the selected locale's number formatting.
+  Frontend localization maintainers should add reviewed translations and check
+  longer labels at phone widths.
 
 ## Related Pages
 

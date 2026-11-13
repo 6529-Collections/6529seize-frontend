@@ -20,6 +20,8 @@ rolls back if the request fails.
 
 ## Entry Points
 
+- Submission and winner cards both support reactions and replies. On desktop,
+  hover the card to reveal its action bar; on touch, long-press its content.
 - Use quick-react buttons in the action bar/menu. Each button names its emoji
   in its accessible label and desktop tooltip, such as `React with Thumbs up`.
 - On desktop, hover an action or reach it with keyboard focus to read its label
@@ -58,7 +60,9 @@ rolls back if the request fails.
   not sync between devices.
 - Touch move inside the mobile emoji picker stays inside the picker dialog.
 - Reactions added or removed by other people appear live while the wave or
-  direct-message thread is open.
+  direct-message thread is open. Names in an open reaction tooltip or
+  **Reactions** dialog refresh with the counts. Reopening details checks the
+  current list without reloading the page.
 - Viewers can react even when a wave's chat group does not permit them to post.
 - Repeated clap taps in a short burst are merged into one rating request.
 - Rating values are clamped to each drop's allowed min/max range.
@@ -87,7 +91,8 @@ rolls back if the request fails.
   recovery attempt for that session and temporarily disables reaction actions.
   The failed reaction is not automatically replayed; retry after authentication
   succeeds.
-- If a reaction request times out, the app briefly checks the saved state. A
+- If a reaction request times out or its response is lost to a network error,
+  the app briefly checks the saved state. A
   saved reaction that matches your latest choice stays in
   place without an error or rollback. The app does not automatically retry the
   write.
@@ -95,8 +100,10 @@ rolls back if the request fails.
   and asks you to refresh and check before trying again. The original request may
   still have changed your reaction; repeating the same choice can undo that change.
 - If rating submit fails, optimistic rating state rolls back and users can retry.
-- Failures surface as toast errors; an unconfirmed timeout shows a warning.
+- Failures surface as toast errors; an unconfirmed timeout or network error shows a warning.
   Users stay in the same thread.
+- If reaction names cannot load, the chip keeps its count. Close and reopen
+  the tooltip or **Reactions** dialog to try loading the names again.
 
 ## Limitations / Notes
 

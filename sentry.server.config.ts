@@ -24,6 +24,9 @@ Sentry.init({
   // Only enable Sentry if a DSN is actually set
   enabled: Boolean(dsn),
 
+  // The build no longer injects a release (next.config.ts); use VERSION.
+  release: publicEnv.VERSION,
+
   // Error capture only: no performance integrations, OTel setup, or ESM hooks.
   // Omitting trace sampling also avoids enabling auto-performance integrations.
   skipOpenTelemetrySetup: true,

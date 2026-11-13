@@ -35,6 +35,14 @@ const PRODUCTION_READONLY_ENV = {
   PLAYWRIGHT_READONLY: "1",
 };
 
+// Writes throwaway QA data to staging, so the read-only guard is off.
+const STAGING_STATEFUL_ENV = {
+  PLAYWRIGHT_BASE_URL: "https://staging.6529.io",
+  PLAYWRIGHT_SKIP_WEB_SERVER: "1",
+  PLAYWRIGHT_ENV: "staging",
+  PLAYWRIGHT_READONLY: "0",
+};
+
 const COMPOSER_SANDBOX_ENV = {
   PLAYWRIGHT_ENV: "local",
   PLAYWRIGHT_COMPOSER_SANDBOX: "1",
@@ -51,12 +59,20 @@ const AUTH_SANDBOX_ENV = {
   ...COMPOSER_SANDBOX_ENV,
 };
 
-const PUBLIC_REVIEW_SANDBOX_ENV = {
-  PLAYWRIGHT_PUBLIC_REVIEW_SANDBOX: "1",
+// End-to-end encrypted DMs and groups (D109): several local browsers, each
+// a different dev-auth user, against the fake E2EE delivery service mounted
+// in the composer sandbox mock API.
+const E2EE_SANDBOX_ENV = {
   ...COMPOSER_SANDBOX_ENV,
+  PLAYWRIGHT_E2EE_SANDBOX: "1",
+  PLAYWRIGHT_BASE_URL: "http://localhost:3299",
+  PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3299",
+  PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4299",
+  NEXT_DEV_DIST_DIR: ".next-playwright-e2ee",
 };
 
 const READONLY_SPECS = {
+  bookmarks: ["tests/social/bookmarks-readonly.spec.ts"],
   social: ["tests/social/waves-profile-readonly.spec.ts"],
   inputDetection: ["tests/input/win8-touch-latch-readonly.spec.ts"],
   media: [
@@ -176,6 +192,41 @@ function museumPack(pack) {
 }
 
 const PACKS = [
+  {
+    ...sandboxPack(
+      "test:e2e:bookmarks-sandbox",
+      "Private bookmark menus, account isolation, and saved-page flow.",
+      ["tests/social/bookmarks-sandbox.spec.ts"],
+      {
+        PLAYWRIGHT_BASE_URL: "http://127.0.0.1:3307",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://127.0.0.1:3307",
+        PLAYWRIGHT_FORCE_WEB_SERVER: "1",
+        PLAYWRIGHT_WEB_SERVER_COMMAND:
+          "node tests/support/bookmarksSandboxServer.cjs",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  stagingPack(
+    "bookmarks",
+    "bookmarks",
+    "Private bookmarks route authentication guard.",
+    READONLY_SPECS.bookmarks,
+    { env: { ...STAGING_READONLY_ENV, USE_DEV_AUTH: "false" } }
+  ),
+  {
+    ...productionPack(
+      "bookmarks",
+      "Private bookmarks route authentication guard.",
+      READONLY_SPECS.bookmarks,
+      ["post-deploy", "manual"],
+      15,
+      [DESKTOP, MOBILE]
+    ),
+    env: { ...PRODUCTION_READONLY_ENV, USE_DEV_AUTH: "false" },
+  },
+
   {
     scriptKey: "test:e2e",
     description: "Full local suite on the desktop web shell.",
@@ -402,13 +453,6 @@ const PACKS = [
     [DESKTOP, MOBILE]
   ),
   sandboxPack(
-    "test:e2e:public-review-sandbox",
-    "Stream review feedback sandbox against the local mock API.",
-    ["tests/public-review/stream-review-feedback-sandbox.spec.ts"],
-    PUBLIC_REVIEW_SANDBOX_ENV,
-    [DESKTOP, MOBILE]
-  ),
-  sandboxPack(
     "test:e2e:reaction-sandbox",
     "Drop reaction sandbox against the local mock API.",
     ["tests/social/wave-reaction-sandbox.spec.ts"],
@@ -429,16 +473,55 @@ const PACKS = [
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
+        "tests/social/wave-loading-sandbox.spec.ts",
+        "tests/social/chat-render-budget-sandbox.spec.ts",
+        "tests/social/wave-live-unread-sandbox.spec.ts",
+        "tests/social/wave-media-processing-sandbox.spec.ts",
+        "tests/social/wave-time-zone-sandbox.spec.ts",
+        "tests/social/android-back-sandbox.spec.ts",
+        "tests/social/mobile-gestures-sandbox.spec.ts",
+        "tests/social/wave-share-image-sandbox.spec.ts",
       ],
       {
         ...AUTH_SANDBOX_ENV,
-        NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true",
         PLAYWRIGHT_BASE_URL: "http://localhost:3297",
         PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3297",
         PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4297",
         NEXT_DEV_DIST_DIR: ".next-playwright-native-competition",
       },
       [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  {
+    ...sandboxPack(
+      "test:e2e:submission-artwork-sandbox",
+      "Submission artwork loading, GIF animation and HD controls in an isolated media sandbox.",
+      ["tests/media/submission-artwork-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        PLAYWRIGHT_BASE_URL: "http://localhost:3297",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3297",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4297",
+        NEXT_DEV_DIST_DIR: ".next-playwright-submission-artwork",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  {
+    ...sandboxPack(
+      "test:e2e:image-viewer-layout-sandbox",
+      "Image viewer background geometry, focus restoration and gallery navigation in Chromium and WebKit.",
+      ["tests/media/image-viewer-layout-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        PLAYWRIGHT_BASE_URL: "http://localhost:3297",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3297",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4297",
+        NEXT_DEV_DIST_DIR: ".next-playwright-submission-artwork",
+      },
+      [DESKTOP, MOBILE, "web-desktop-webkit"]
     ),
     triggers: ["pr-ci", "manual"],
   },
@@ -478,6 +561,71 @@ const PACKS = [
   ),
   {
     ...sandboxPack(
+      "test:e2e:wave-link-preview-sandbox",
+      "Embedded wave preview readability in the sidebar and responsive chat.",
+      ["tests/social/wave-link-preview-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        NEXT_DEV_DIST_DIR: ".next-playwright-wave-link-preview",
+        PLAYWRIGHT_BASE_URL: "http://localhost:3316",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3316",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4316",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  sandboxPack(
+    "test:e2e:notifications-inbox-sandbox",
+    "Desktop notification preview, explicit read actions, and mobile navigation.",
+    ["tests/auth/notifications-inbox-sandbox.spec.ts"],
+    {
+      ...AUTH_SANDBOX_ENV,
+      NEXT_DEV_DIST_DIR: ".next-playwright-notifications-inbox",
+      PLAYWRIGHT_BASE_URL: "http://localhost:3309",
+      PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3309",
+      PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4309",
+    },
+    [DESKTOP, MOBILE]
+  ),
+  {
+    ...sandboxPack(
+      "test:e2e:profile-following-sandbox",
+      "Profile editing, Following, artist artwork alerts and REP editing dialogs, permissions and recovery.",
+      [
+        "tests/social/profile-following-sandbox.spec.ts",
+        "tests/social/profile-rep-edit-sandbox.spec.ts",
+        "tests/social/profile-about-sandbox.spec.ts",
+      ],
+      {
+        ...AUTH_SANDBOX_ENV,
+        USE_DEV_AUTH: "false",
+        NEXT_DEV_DIST_DIR: ".next-playwright-following",
+      },
+      [DESKTOP, MOBILE, "capacitor-ios-sim", "capacitor-android-sim"]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  {
+    ...sandboxPack(
+      "test:e2e:profile-nic-sandbox",
+      "Profile NIC activity filtering and cursor navigation across desktop, tablet and mobile.",
+      ["tests/social/profile-nic-activity-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        USE_DEV_AUTH: "false",
+        NEXTGEN_CHAIN_ID: "1",
+        PLAYWRIGHT_BASE_URL: "http://localhost:3304",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3304",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4304",
+        NEXT_DEV_DIST_DIR: ".next-playwright-nic",
+      },
+      [DESKTOP]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  {
+    ...sandboxPack(
       "test:e2e:wave-creation-sandbox",
       "Wave creation, permissions, and draft recovery on desktop and mobile.",
       ["tests/social/create-wave-sandbox.spec.ts"],
@@ -492,6 +640,31 @@ const PACKS = [
     ),
     triggers: ["pr-ci", "manual"],
   },
+  {
+    ...sandboxPack(
+      "test:e2e:e2ee-sandbox",
+      "Encrypted DMs and groups across several local browsers against the fake delivery service.",
+      ["tests/e2ee"],
+      E2EE_SANDBOX_ENV,
+      [DESKTOP, MOBILE]
+    ),
+    timeoutMinutes: 30,
+  },
+  sandboxPack(
+    "test:e2e:e2ee-picker-sandbox",
+    "Encrypted chat recipient selection in desktop Chromium and iPhone WebKit.",
+    ["tests/e2ee/encrypted-people-picker-sandbox.spec.ts"],
+    E2EE_SANDBOX_ENV,
+    [DESKTOP, "capacitor-ios-sim"]
+  ),
+
+  sandboxPack(
+    "test:e2e:metamask-bridge",
+    "Isolated WebKit MetaMask bridge attribution and application-error boundaries.",
+    ["tests/monitoring/metamask-bridge-filter.spec.ts"],
+    { PLAYWRIGHT_SKIP_WEB_SERVER: "1" },
+    ["web-desktop-webkit"]
+  ),
 
   localPack(
     "test:e2e:smoke:surface-matrix",
@@ -557,6 +730,7 @@ const PACKS = [
   stagingPack("core", "", "Staging core surfaces on both web shells.", [
     "tests/surfaces",
     "tests/critical-shell",
+    "tests/pages/access.spec.ts",
     ...SMOKE_SPECS,
   ]),
   stagingPack(
@@ -677,6 +851,28 @@ const PACKS = [
       READONLY_SPECS.museumRights
     )
   ),
+  // Opt-in and stateful: throwaway QA wallets sign in, create test-only
+  // profiles and exchange encrypted messages (D109), or create a wave and post
+  // in it to check live unread badges. Manual trigger only, so
+  // the post-deploy `all` selection never runs it; dispatch it by alias.
+  {
+    scriptKey: "test:e2e:staging:e2ee",
+    alias: "e2ee-staging",
+    description:
+      "Encrypted DMs, device revocation and live wave unread badges for throwaway users (writes QA data).",
+    safety: "stateful",
+    environments: ["staging"],
+    triggers: ["manual"],
+    env: { ...STAGING_STATEFUL_ENV, PLAYWRIGHT_E2EE_STAGING: "1" },
+    specs: [
+      "tests/staging-e2ee/encrypted-dm-staging.spec.ts",
+      "tests/staging-e2ee/wave-unread-staging.spec.ts",
+    ],
+    projects: [DESKTOP],
+    workers: 1,
+    traceOff: true,
+    timeoutMinutes: 75,
+  },
 
   productionPack(
     "home-readonly",
@@ -800,6 +996,7 @@ const PACKS = [
     "Combined production-safe release validation.",
     [
       "tests/home/home.spec.ts",
+      ...READONLY_SPECS.bookmarks,
       ...READONLY_SPECS.social,
       ...READONLY_SPECS.media,
       ...READONLY_SPECS.delegation,

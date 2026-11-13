@@ -31,11 +31,17 @@ Entry behavior differs by wave type:
   - Empty curation lists can show `Drop`.
   - Both entry points open the curation `Drop Artwork` modal.
 - Memes waves:
-  - Desktop (non-compact header mode): use `Submit Work to The Memes` in the
-    meme tabs header.
-  - Native app wave header: use the icon-only submit action; when it becomes a
-    lock, select it to see the restriction reason.
-  - Mobile leaderboard: use header `Drop` when logged in and eligible.
+  - Chat and Leaderboard use the same Main Stage submission control in the top
+    wave header, above the tabs. On web, use `Submit Work to The Memes` (or the
+    compact `Submit Work` label) to open the artwork submission form.
+  - If participation eligibility is missing, use `How to Submit` in that same
+    header to open nomination guidance. Submission timing and limit restrictions
+    also stay in the header.
+  - The native app uses the icon-only equivalent in its top wave header in
+    both views; select a lock to see the restriction reason or nomination help.
+  - `My submissions` appears in the leaderboard toolbar when you have entries.
+    Main Stage has no
+    separate `Drop` button beside the leaderboard sort controls.
 
 ## User Journey
 
@@ -46,13 +52,16 @@ Entry behavior differs by wave type:
    - participation eligibility
    - submission window (`NOT_STARTED`, `ACTIVE`, `ENDED`)
    - per-user submission limits
+   - active submissions in the selected decision; winning, withdrawn, and
+     deleted submissions do not use capacity, and other decisions have separate
+     limits
 3. The app renders the wave-specific entry control.
 4. If blocked, the UI uses one of these states:
    - hidden controls
    - restriction controls that reveal why submission is unavailable
    - empty-state restriction message
 5. After a standard or Quorum submission is saved, a confirmation checks its
-   competition entry directly. A confirmed entry offers **View my entry**.
+   decision entry directly. A confirmed entry offers **View my entry**.
 6. On ordinary wave leaderboards, **My submissions** opens your active and
    winning entries in that wave without changing the leaderboard sort or filters.
    It appears as a text button beside the entry action in the toolbar. On
@@ -88,6 +97,22 @@ Entry behavior differs by wave type:
   desktop, tablet, and phone. Their details card retains the full reason,
   including opening or closing dates and submission limits. The Memes
   `How to Submit` helper keeps its desktop label.
+- In ordinary Rank and Approve Chat headers, that details card also shows the
+  submission access group and a `View submission rules` link to Settings.
+  The rules link preserves a decision selected before entering Chat, including
+  when copied or opened in a new tab.
+  Group and signing details use that decision or the current default.
+  Loading and unavailable states keep the rules link usable.
+  Hidden and direct-message groups show only `Private group`. These details
+  appear on demand; restricted submissions do not add an access panel to chat.
+- When the submission period or decision has ended, the lock remains and
+  its card says `Submission period has ended`, with `Closed {date}` when the
+  closing date is known. The submission group appears on one compact row above
+  `View submission rules`. This explains closure without claiming that the
+  viewer fails the group requirements; a public group does not reopen submissions.
+  An early decision end uses the earlier closing date. If no closing date is
+  available, the card omits the date. An already-open card updates when the
+  submission deadline passes and catches up when the page becomes visible again.
 - Available Memes desktop submit labels are responsive: compact desktop widths
   can show `Submit Work`, while extra-wide desktop shows
   `Submit Work to The Memes`.
@@ -106,9 +131,12 @@ Entry behavior differs by wave type:
   restriction case.
 - In non-empty leaderboards, blocked users may see no restriction text; the
   entry controls can simply be absent.
-- Memes entry surfaces differ by viewport (`Submit Work to The Memes` on
-  desktop tabs, an icon-only action in the native app header, and leaderboard
-  `Drop` on mobile).
+- Main Stage keeps its submission control in the top wave header when switching
+  between Chat and Leaderboard on desktop, mobile web, and the native app.
+  `My submissions` stays available to signed-in users on their own profile in
+  the leaderboard toolbar when they have entries, including when they cannot
+  currently submit. A confirmed empty lookup hides it; a failed lookup still
+  allows retry.
 - Memes desktop urgency/remaining badges are visible only on extra-wide desktop;
   compact desktop and app headers keep submit-state guidance behind the
   restriction icon or short label.
@@ -123,18 +151,20 @@ Entry behavior differs by wave type:
 - If curation `Drop Artwork` modal closes accidentally, reopen from header
   `Drop Art` or empty-state `Drop`.
 - If a create panel/modal opens but submit fails, retry from the same surface.
-- If the artwork was saved but its competition entry cannot be confirmed, use
+- If the artwork was saved but its decision entry cannot be confirmed, use
   **Check again** or **View artwork** before submitting another copy. **Check
   again** reads the saved entry; it does not submit another drop.
-- **My submissions** remains available to signed-in users on their own profile,
-  even when they cannot currently submit. Proxy mode hides this personal control.
+- **My submissions** is available on your own signed-in profile even when you
+  cannot currently submit. Native decisions show it when you have entries,
+  hide it after an empty lookup, and keep it available after a failed lookup
+  for retry. Proxy mode hides this personal control.
 - If wave timing or eligibility changed while viewing, refresh leaderboard to
   re-evaluate entry controls.
 
 ## Limitations / Notes
 
 - This page owns entry gating, start controls and ordinary-wave submission recovery.
-- The Memes keeps its specialized submission flow. Native competitions have
+- The Memes keeps its specialized submission flow. Native decisions have
   their own [entry confirmation and My submissions](../competitions/feature-competitions.md).
 - Full submit format and validation rules live in curation and memes submission
   pages.

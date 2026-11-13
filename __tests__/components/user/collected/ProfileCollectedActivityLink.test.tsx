@@ -98,6 +98,26 @@ describe("ProfileCollectedActivityLink", () => {
     );
   });
 
+  it("keeps the Collect goal alongside the profile return context", () => {
+    render(
+      <ProfileCollectedActivityLink
+        href="/collect?collection=memes&intent=season&definition=2"
+        activityKey="complete-set"
+      >
+        Complete my set
+      </ProfileCollectedActivityLink>
+    );
+    const destination = new URL(
+      screen.getByRole("link").getAttribute("href")!,
+      "https://6529.io"
+    );
+    expect(destination.searchParams.get("intent")).toBe("season");
+    expect(destination.searchParams.get("definition")).toBe("2");
+    expect(destination.searchParams.get("returnTo")).toBe(
+      "/Shelby/collected?activity=distributions&details=open&distribution-page=2&page=3#collected-activity-complete-set"
+    );
+  });
+
   it("restores focus and scroll to the originating activity link", () => {
     const originalScroll = Element.prototype.scrollIntoView;
     const scroll = jest.fn();

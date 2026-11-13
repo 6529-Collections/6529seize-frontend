@@ -27,63 +27,117 @@ Wave and DM rows in the left list control which thread is open.
 - A wave opened from a direct link is temporarily added to the sidebar route
   context when it is outside the loaded list, including in `Joined`. This does
   not pin or join the wave.
+- Successfully leaving the open wave removes it from `Joined` without closing
+  its content. It stays removed while switching collections in the current
+  page session; joining again restores it. A parent stays visible if you still
+  belong to one of its subwaves. A failed leave keeps the joined row.
 - When the direct link targets a subwave, its visible root parent is surfaced,
   its subwaves are loaded, the parent opens, and the active child row is
   highlighted.
 - Navigating to a wave scrolls its active row into the nearest visible position.
-- `All`, `Pinned`, and `Joined` are peer collections in one sticky row, with
-  a separate search icon on the right. The collection group matches the search
-  button height, including the larger touch controls. Switch directly without
+- Incoming messages update badges and recent-activity ordering without moving
+  the Waves list's scroll position, including messages in the open wave.
+  Opening another wave reveals its row once after the list finishes loading;
+  later messages do not scroll to it again.
+- On desktop pointer devices, the Waves list uses a slim iron scrollbar for
+  dragging and track clicks. Touch devices keep their native scrolling behavior.
+- `All`, `Pinned`, and `Joined` are equally wide collections in a dark segmented
+  group that fills the row beside search, with a subtle border and a
+  filled selected option. Tabs are 30px tall in a 36px group on desktop; touch
+  devices use 34px tabs in a 40px group with a larger 44px tap area. Labels use
+  compact, normal-weight type. The search icon on the
+  right is transparent at rest and gains a dark background on hover. Switch directly without
   scrolling through pinned waves.
   Each collection remembers its scroll position; selecting another wave enables
   active-row reveal again. Signed-out visitors see an `All Waves` label on the
   left and the same search icon on the right, without personal collection controls.
 - The `Waves` heading is plain text. Header actions sit at the far right:
-  feed, then create on desktop; feed only in the mobile list.
-  The app keeps create in its top bar.
+  feed, then create on desktop and mobile web. The native app's list shows
+  feed only and keeps create in its top bar.
 - Select the feed icon to open Profile Waves Feed. On desktop, it clears the
   selected wave; on mobile web and in the native app, it opens
   `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
-- The feed tooltip reads `Profile Waves Feed`. Create keeps a compact white
-  button with a dark plus. Both have visible keyboard focus and larger touch
-  targets. The feed content header has a `Discover Waves` link with a compass
-  to `/discover`; the sidebar keeps the two section-specific `View all` links.
-  The collapsed rail retains its icon-only feed link.
+- The feed tooltip reads `Profile Waves Feed`. Its header shortcut uses the same
+  transparent resting surface, rounded corners and dark hover surface on desktop
+  and smaller screens. Touch devices keep a larger target. Create uses a solid white
+  button with a plus icon and visible `Create wave` label in the expanded sidebar;
+  the collapsed rail keeps only the plus icon. Both have
+  visible keyboard focus and larger touch targets. The feed content header has a
+  `Discover Waves` link with a compass to `/discover`; the sidebar keeps the two section-specific `View all` links.
+  The collapsed rail retains its icon-only feed link on a dark tile without
+  a border. On desktop, the selected feed icon stays blue. Both layouts keep
+  visible blue keyboard focus.
 - Browser back/forward keeps the active row and URL in sync.
-- In the native app, swipe right from the left edge of a standard wave detail
-  view to return to the Waves list.
+- `All` includes pinned, joined, unjoined, and quiet accessible waves. Subwaves
+  are reached by expanding their parent. It loads in stable batches so new
+  activity cannot skip a wave between pages. Scroll near the bottom or select
+  `Load more waves` to continue. Failed loads keep existing rows and offer
+  `Retry`. Expired lists refresh automatically; newly created or newly accessible
+  waves appear on refresh. Access permissions are checked for every batch.
+- `Pinned` uses the profile's saved order. Drag the wave row, or touch and hold
+  the row briefly before dragging on a touch screen. With a keyboard, focus the
+  wave, press Space, use the arrow keys, and press Space again to save. A wave's
+  subwaves move with it.
+- Joined waves load in batches without skipping a wave when new activity moves
+  it higher in the list. The order uses recent wave activity, including joined,
+  unmuted subwaves. Muting a wave removes its own activity from the ordering.
+- In `Joined`, pinned waves appear when their batch loads in activity order.
+  Older pins do not appear ahead of unloaded joined waves. Use `Pinned` to see
+  saved pins without loading more of `Joined`.
+- More joined waves load near the bottom. `Load more joined waves` is also
+  available below the loaded rows. If loading fails, the existing rows stay
+  available and `Retry` resumes loading. An expired list refreshes automatically
+  without mixing its old and new batches. Newly joined waves appear on refresh.
+- In the native app, swipe right across ordinary wave or direct-message content
+  to return to its list. See [Touch Navigation in the Native App](../../navigation/flow-navigation-entry-and-switching.md#touch-navigation-in-the-native-app).
 
 ## Discovery and wave search
 
 The discovery sections have independent heights. Expanding and collapsing uses
 a short reveal and rotating chevron.
-Reduced-motion preferences disable these transitions. The feed icon is blue
-when the desktop feed is active or its button is hovered or keyboard-focused.
+Reduced-motion preferences disable these transitions. Utility icons brighten
+on hover and show a dark hover surface; their resting header surface is transparent.
 
 - `Worth Checking Out` appears first, followed by `Active Votes`, as independently
-  collapsible sections above the wave collections. Both start expanded.
+  collapsible sections above the wave collections. Both default to expanded
+  once browser preferences load; saved closed sections stay closed from the
+  first render when reopening or refreshing the page.
 - Active Votes has a scrollable window three compact rows tall, with named
-  TDH votes and their voting end or next decision. Scroll to browse the list;
+  TDH votes and their voting end or next result. Scroll to browse the list;
   more pages load near the bottom, with a `Load more` button as a fallback.
   A thin scrollbar and bottom fade indicate more content below. The count stays
   visible when collapsed. The description and view-all link stay outside the list.
-- Each expanded section starts with its own short explanation, available to
+- Each expanded section shows its short explanation together with loaded content, available to
   signed-in and signed-out visitors. Active Votes says “Community decisions
   powered by TDH.” Worth Checking Out says “Highly rated waves you don’t follow.”
-  Signed-out visitors see “Highly rated waves.”
-- Empty Active Votes shows `No active TDH votes right now.` in a compact area.
+  The same wording appears for signed-out visitors.
+- While content first loads, each expanded section shows quiet placeholders shaped
+  like its avatars or three vote rows. Descriptions, loading sentences and empty
+  messages stay hidden; screen readers receive a loading announcement. Titles,
+  collapse controls and `View all` links remain available.
+- Empty Worth Checking Out shows only `No recommendations right now.` after a
+  successful request. Empty Active Votes shows only `No active TDH votes right now.` in a compact area.
   Loading and request failures are separate states; failed pages can be retried
-  without discarding previously loaded votes. Both view-all links remain available.
+  without discarding previously loaded votes or their description. Recommendations
+  also offer `Try again` after a failed request. Both view-all links remain available.
 - Each heading toggles only its own section. The chevron beside the title points down when open
   and right when closed. Both collapse preferences persist locally in this browser
   across visits, including signed-out visits, and are shared across profiles on
   the same browser/device. The old shared tab preference is no longer used.
 - Announcements keeps its megaphone, timestamp, unread state and score shield in a compact row.
-- Active Votes rows include the wave score shield; select it for score details without opening the wave.
+  A row-sized placeholder reserves space while Announcements is first loading.
+- Expanded wave rows and Active Votes show a shield beside the muted score
+  number. Select the score for details without opening the wave. Keyboard focus
+  remains visible, and hover brightens the score.
 - Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
   with score shields overlapping the bottom-right corner of each avatar.
   The section keeps its own compact height independently of the vote list.
-- Create wave has a visible label in the expanded desktop Waves panel and mobile Waves list, including signed-out visits. The collapsed sidebar keeps the plus icon and accessible Create wave name.
+- Create wave uses a solid white button in both desktop sidebar modes, including
+  signed-out visits. The expanded panel shows a plus icon and `Create wave` label;
+  the collapsed rail shows the plus icon only. Its accessible name and hover
+  tooltip read `Create wave`. The mobile Waves list keeps its visible label.
+  Desktop sidebar buttons keep a compact visible surface on touch screens,
+  with a larger invisible tap area.
 - Each heading has a separate `View all` link aligned to the right, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
@@ -110,9 +164,14 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   while the page is running. Refresh starts with an empty search and restores
   the last selected All / Pinned / Joined collection. The list area below the tabs shows a small centered spinner only while the
   selected collection has no rows and is loading. Existing rows refresh silently;
-  an empty message appears only after loading finishes.
-- This uses the existing name matching. Typo tolerance and relevance changes
-  are outside this redesign. Unread state, pin controls and subwaves remain on
+  an empty message appears only after loading finishes. Wallet restoration keeps
+  an empty list pending even before an address is available. Once wallet and
+  profile loading settle, a genuinely empty guest or connected list can show
+  its empty message.
+- Wave search ignores spaces, dashes, apostrophes, and letter case, and ranks
+  the closest name matches first. See
+  [Wave name matching](../../navigation/feature-header-search-modal.md#wave-name-matching)
+  for examples and ordering. Unread state, pin controls and subwaves remain on
   normal collection rows; the DM list retains its existing behavior.
 
 ## Location in the Site
@@ -130,8 +189,8 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - On mobile web, select the feed icon to scan recent
   posts across public Profile Waves.
 - Select an inactive wave or DM row from the list by clicking the row body.
-- In the native app, open a standard wave and swipe right from the left edge of
-  the main content.
+- In the native app, swipe right across ordinary wave or direct-message content
+  to return to its list.
 - Use browser back/forward after navigating between rows.
 
 ## User Journey
@@ -141,8 +200,8 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 3. The app updates the active highlight and URL together.
 4. Select the active row body again to clear selection and return to section
    home.
-5. In the native app, an edge swipe right from a standard wave also clears the
-   active wave and restores the Waves list at its saved scroll position.
+5. In the native app, swiping right across wave or direct-message content also
+   clears the active conversation and restores its corresponding list.
 6. Use browser back/forward to revisit row selections while keeping the list
    and URL in sync.
 
@@ -156,7 +215,8 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   on the first activation; hovering or focusing either visual shows score
   details.
 - Active-row re-click returns to `/waves` or `/messages`.
-- Native-app edge swipe from `/waves/{waveId}` returns to `/waves`.
+- Native-app right swipe across conversation content returns from
+  `/waves/{waveId}` to `/waves`, or `/messages/{waveId}` to `/messages`.
 - Inside the `/waves` or `/messages` shell, row changes update URL/history in
   place and keep row highlight aligned.
 - Opening `/waves/{waveId}` directly keeps that wave visible and highlighted
@@ -184,11 +244,9 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   touch target, so the score cannot intercept wave navigation. The link's
   accessible name includes the score; hover or keyboard focus exposes the score
   details card, while touch activation opens the wave.
-- Edge-swipe navigation applies only to native-app standard wave details. It is
-  disabled on web, direct messages, list routes, create overlays, and focused
-  drop views.
-- The gesture starts from the left edge and ignores sliders, editors, media
-  controls, and horizontally scrollable content so those interactions keep
+- Swipe-back navigation is disabled on web, list routes, create overlays, and
+  focused drop views. Screen edges remain available to the system or browser.
+  Sliders, editors, media controls, and horizontally scrollable content keep
   their normal touch behavior.
 - Browser-default behavior is kept for modified clicks such as Cmd/Ctrl-click,
   Shift/Alt-click, middle-click, and right-click/context menu.

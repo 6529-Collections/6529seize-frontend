@@ -23,7 +23,12 @@ and mobile, with natural wrapping for longer names. There is no separate
 The information button beside `ID Statements` opens a tooltip on hover, keyboard
 focus, or tap. It explains that statements are optional and permanently public,
 that social accounts are self-declared and unverified by 6529, and that the
-community rates statement accuracy. Escape or clicking outside dismisses it.
+community rates statement accuracy. Escape, clicking outside, or a page-scrolling
+gesture dismisses it. Automatic page adjustments keep the tooltip open and
+aligned with its information button; scrolling inside the tooltip also keeps it
+open.
+While the page is initially loading, the information button stays disabled until
+it can respond to hover, focus, and taps.
 
 ## Location in the Site
 
@@ -46,10 +51,11 @@ community rates statement accuracy. Escape or clicking outside dismisses it.
 2. Review the profile’s `Wallet`, then its `ID Statements` sections.
 3. If `Add` is visible, open the add-statements sheet on mobile or dialog on
    desktop.
-4. Review the visible note that statements are optional and fully and permanently
-   public, then choose one of the four compact statement groups. The note stays
-   visible in the entry forms. On mobile, `About identity statements` also
-   contains the social-account connection and verification disclaimer.
+4. Choose one of the four statement groups from the list. Each row has a circular
+   icon, a description, and a chevron. The information footer explains that
+   statements are optional and fully and permanently public, and that 6529 does
+   not connect to social accounts or verify posts. Both notes are visible on
+   desktop and mobile. The public-statement note stays visible in the entry forms.
 5. Choose a platform or statement type, enter a value, then select `Save`.
    For `Other` NFT accounts, enter both a short display name and a secure HTTPS
    URL.
@@ -60,8 +66,8 @@ community rates statement accuracy. Escape or clicking outside dismisses it.
 7. Select a URL-capable statement row to open its destination. Use the
    independent copy icon to copy its value; eligible owners can also delete it.
 8. On non-primary wallet rows, use `Set primary` when available.
-9. To link another wallet you control, select `Add another wallet` beside
-   `Wallet Checker`. This opens the guided setup at
+9. To link another wallet you control, select `Add another wallet` in the
+   `Wallet` section. This opens the guided setup at
    `/safe-collecting/build-consolidation`. Each wallet signs one transaction for
    its links: a single registration for one link, or one batch for several. A
    Delegation Manager signing for a cold vault sends one transaction per link
@@ -101,8 +107,9 @@ URLs, and contact details are not rewritten by mobile keyboards.
 - Opening a wallet row shows the full address and ENS name when available. Each
   dark value field is itself a copy control, and only one wallet row stays
   expanded at a time.
-- On mobile, expanded wallet rows show labeled `Open on Etherscan` and `Open on
-OpenSea` actions. Desktop retains compact external-link actions.
+- On mobile, expanded wallet rows show a labeled `Open on Etherscan` action.
+  `Open on OpenSea` is available on the web and Android. Desktop retains
+  compact external-link actions.
 - `Primary` badge marks the active primary wallet.
 - `Wallet Checker` is shown when the profile has a primary or consolidated
   wallet address.
@@ -115,10 +122,11 @@ OpenSea` actions. Desktop retains compact external-link actions.
   profile addresses. A failed settings refresh retains the last loaded limits;
   without known limits, the heading and wallet rows remain visible without a
   bare or guessed count.
-- `Wallet Checker` and `Add another wallet` share equal-width columns when both
-  are available. The wallet helper sentence wraps naturally with the available
-  width.
-- `Add another wallet` is shown beside `Wallet Checker` only when the connected
+- Wallet actions use compact buttons sized to their labels and wrap onto another
+  row when needed. `Wallet Checker` and `Safe Collecting` are grouped together
+  as secondary tools. The owner's `Add another wallet` button follows this group,
+  wrapping below it when needed, followed by the wallet helper sentence.
+- `Add another wallet` is shown with `Wallet Checker` only when the connected
   wallet belongs to the viewed profile, no proxy profile is active, a primary
   or consolidated wallet address is available, and the profile has fewer than
   4 wallets. It opens the guided `Build a Consolidation` setup at
@@ -150,17 +158,19 @@ OpenSea` actions. Desktop retains compact external-link actions.
 - On mobile web and Capacitor, the add flow uses a scrollable, keyboard-aware
   sheet so the focused field and Save/Cancel actions remain reachable above the
   software keyboard as it opens and closes.
-- The mobile statement-group picker is content-sized at common phone heights,
-  keeps its close action in the sheet header, and supports swipe-down dismissal
-  without a decorative drag-handle stripe. Tablet and desktop keep the centered
-  modal and multi-column card presentation.
+- The statement-group picker shows one list of four rows with icons,
+  descriptions, and chevrons on all screen sizes. On mobile, it is content-sized
+  at common phone heights, keeps its close action in the sheet header, and
+  supports swipe-down dismissal without a decorative drag-handle stripe.
+  Tablet and desktop use a centered modal.
 - Empty statement groups are omitted after loading without showing a separate
   overall placeholder.
 
 ## Common Scenarios
 
 - Visitors expand consolidated wallet rows, copy exact addresses or ENS names,
-  and open the wallet on Etherscan or OpenSea without edit controls.
+  and open the wallet on Etherscan without edit controls. OpenSea is also
+  available on the web and Android.
 - Eligible profile owners see `Add`, `Delete`, and `Set primary` where those
   actions apply.
 - Owners can start wallet consolidation from `Add another wallet`. The wallets

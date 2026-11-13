@@ -1,7 +1,7 @@
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
 import { commonApiFetch } from "@/services/api/common-api";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 
 let mockIsIos = true;
 const mockReplace = jest.fn();
@@ -58,72 +58,25 @@ beforeEach(() => {
 });
 
 describe("NftPurchasingGate with the country check", () => {
-  it("keeps a US iOS cold deep link until the check returns US", async () => {
-    const resolveCountry = deferCountryCheck();
-    renderDeepLink();
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.objectContaining({ endpoint: "policies/country-check" })
-    );
-    expect(mockMount).not.toHaveBeenCalled();
-    expect(mockReplace).not.toHaveBeenCalled();
-
-    resolveCountry("US");
-
-    expect(
-      await screen.findByRole("button", { name: "Mint" })
-    ).toBeInTheDocument();
-    expect(mockReplace).not.toHaveBeenCalled();
-  });
-
-  it("redirects iOS once the check returns a non-US country", async () => {
-    const resolveCountry = deferCountryCheck();
-    renderDeepLink();
-    expect(mockReplace).not.toHaveBeenCalled();
-
-    resolveCountry("FR");
-
-    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/the-memes"));
-    expect(mockMount).not.toHaveBeenCalled();
-  });
-
-  it("redirects iOS when the country check fails", async () => {
-    const consoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
-    fetchMock.mockRejectedValue(new Error("network down"));
-
-    renderDeepLink();
-
-    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/the-memes"));
-    expect(mockMount).not.toHaveBeenCalled();
-    consoleError.mockRestore();
-  });
-
-  it("redirects iOS when the country check stalls past its timeout", async () => {
-    jest.useFakeTimers();
-    const consoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
-    try {
-      fetchMock.mockReturnValue(new Promise(() => {}));
+  it.each(["US", "FR", ""])(
+    "redirects before the country check resolves to %s",
+    async (country) => {
+      const resolveCountry = deferCountryCheck();
       renderDeepLink();
 
-      await act(async () => {
-        jest.advanceTimersByTime(4_999);
-      });
-      expect(mockReplace).not.toHaveBeenCalled();
-
-      await act(async () => {
-        jest.advanceTimersByTime(1);
-      });
+      expect(fetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({ endpoint: "policies/country-check" })
+      );
       expect(mockReplace).toHaveBeenCalledWith("/the-memes");
       expect(mockMount).not.toHaveBeenCalled();
-    } finally {
-      consoleError.mockRestore();
-      jest.useRealTimers();
+
+      await act(async () => resolveCountry(country));
+
+      expect(screen.queryByRole("button", { name: "Mint" })).toBeNull();
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+      expect(mockMount).not.toHaveBeenCalled();
     }
-  });
+  );
 
   it("does not make web wait for the country check", () => {
     mockIsIos = false;

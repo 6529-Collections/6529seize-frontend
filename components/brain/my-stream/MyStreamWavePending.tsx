@@ -1,5 +1,8 @@
 "use client";
 
+import WaveChatLoading from "@/components/waves/WaveChatLoading";
+import { usePublicWaveFeedReady } from "@/components/waves/PublicWaveFeedReady";
+
 import type { ReactNode } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
@@ -11,6 +14,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { t } from "@/i18n/messages";
 import WavePicture from "@/components/waves/WavePicture";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import { useLayout } from "./layout/LayoutContext";
 
 interface MyStreamWavePendingProps {
@@ -26,6 +30,7 @@ export default function MyStreamWavePending({
   onRetry,
   children,
 }: MyStreamWavePendingProps) {
+  usePublicWaveFeedReady(isError);
   const { waves, directMessages, activeWave } = useMyStream();
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();
@@ -40,6 +45,8 @@ export default function MyStreamWavePending({
   const isDirectMessage =
     getMessageIdFromPathname(pathname) === waveId ||
     directMessages.list.some((wave) => wave.id === waveId);
+  const showDescriptionPreview =
+    !isDirectMessage && preview?.reserveDescriptionRow !== false;
   const hasProfileIdentity = Boolean(
     getDirectMessageProfileHref({
       isDirectMessage,
@@ -49,8 +56,14 @@ export default function MyStreamWavePending({
     })
   );
   const identityOffset = preview?.parentWaveId
-    ? "md:tw-self-start md:-tw-mt-2"
-    : "md:tw-self-start md:-tw-mt-1.5";
+    ? "md:@[40rem]/wave-header:tw-self-start md:@[40rem]/wave-header:-tw-mt-2"
+    : "md:@[40rem]/wave-header:tw-self-start md:@[40rem]/wave-header:-tw-mt-1.5";
+  const descriptionRowHeightClass = preview?.parentWaveId
+    ? "md:@[40rem]/wave-header:tw-min-h-[70px]"
+    : "md:@[40rem]/wave-header:tw-min-h-12";
+  const backButtonSizeClass = isDirectMessage
+    ? "tw-mt-0.5 tw-size-11 tw-self-start sm:-tw-ml-2.5 sm:desktop-hover:tw-h-9"
+    : `tw-h-8 tw-w-6 @[21rem]/wave-header:tw-w-8 @[48rem]/wave-header:tw-mt-0.5 md:-tw-ml-2.5 md:tw-size-11 md:tw-self-start md:desktop-hover:tw-h-9 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`;
   const status = preview
     ? t(locale, "waves.loadingWave", { name: preview.name })
     : t(locale, "waves.loadingWaveUnknown");
@@ -62,7 +75,7 @@ export default function MyStreamWavePending({
       style={isApp ? waveViewStyle : undefined}
     >
       {!isApp && (
-        <div className="tw-flex tw-shrink-0 tw-items-start tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-2 tw-py-3 sm:tw-px-4 md:tw-py-2.5">
+        <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-2 tw-py-3 tw-@container/wave-header sm:tw-px-4 md:tw-py-2.5">
           <button
             type="button"
             aria-label={t(
@@ -72,14 +85,13 @@ export default function MyStreamWavePending({
                 : "waves.loadingBack"
             )}
             onClick={() => activeWave.set(null, { isDirectMessage })}
-            className="tw-flex tw-h-9 tw-min-w-8 tw-shrink-0 tw-items-center tw-border-0 tw-bg-transparent tw-px-1.5 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:-tw-ml-2.5 sm:tw-px-2.5 lg:tw-hidden"
+            className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-hidden ${backButtonSizeClass}`}
           >
-            <ArrowLeftIcon
-              aria-hidden="true"
-              className="tw-size-5 sm:tw-size-6"
-            />
+            <ArrowLeftIcon aria-hidden="true" className="tw-size-4" />
           </button>
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-[13px] tw-pt-0.5">
+          <div
+            className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-[13px] ${isDirectMessage ? "tw-pt-0.5" : "@[48rem]/wave-header:tw-pt-0.5"} ${showDescriptionPreview ? descriptionRowHeightClass : ""}`}
+          >
             <div className="tw-size-9 tw-shrink-0 tw-self-start tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
               {preview && (
                 <WavePicture
@@ -91,7 +103,9 @@ export default function MyStreamWavePending({
             </div>
             <div
               className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-col ${
-                hasProfileIdentity ? "" : identityOffset
+                hasProfileIdentity || !showDescriptionPreview
+                  ? ""
+                  : identityOffset
               }`}
             >
               {preview?.parentWaveId && (
@@ -101,9 +115,7 @@ export default function MyStreamWavePending({
               )}
               <div
                 className={
-                  hasProfileIdentity
-                    ? ""
-                    : "tw-flex tw-min-h-6 tw-items-center lg:tw-min-h-7"
+                  hasProfileIdentity ? "" : "tw-flex tw-min-h-6 tw-items-center"
                 }
               >
                 <h1 className="tw-m-0 tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
@@ -121,7 +133,7 @@ export default function MyStreamWavePending({
               {!isDirectMessage && (
                 <div
                   aria-hidden="true"
-                  className="tw-hidden tw-h-6 tw-items-center md:tw-flex"
+                  className={`tw-hidden tw-h-6 tw-items-center ${showDescriptionPreview ? "md:@[40rem]/wave-header:tw-flex" : ""}`}
                 >
                   <div className="tw-h-2 tw-w-40 tw-max-w-full tw-rounded-md tw-bg-iron-800" />
                 </div>
@@ -130,15 +142,12 @@ export default function MyStreamWavePending({
           </div>
         </div>
       )}
-      {children ?? (
-        <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden tw-p-4 sm:tw-px-6">
-          <p
-            role={isError ? "alert" : "status"}
-            className="tw-m-0 tw-text-sm tw-text-iron-400"
-          >
-            {isError ? t(locale, "waves.loadingError") : status}
-          </p>
-          {isError ? (
+      {children ??
+        (isError ? (
+          <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-p-4 sm:tw-px-6">
+            <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-400">
+              {t(locale, "waves.loadingError")}
+            </p>
             <button
               type="button"
               onClick={onRetry}
@@ -146,24 +155,14 @@ export default function MyStreamWavePending({
             >
               {t(locale, "waves.loadingRetry")}
             </button>
-          ) : (
-            <div aria-hidden="true" className="tw-mt-6 tw-space-y-7">
-              {["tw-w-3/4", "tw-w-1/2", "tw-w-2/3"].map((width) => (
-                <div key={width} className="tw-flex tw-gap-3">
-                  <div className="tw-size-9 tw-shrink-0 tw-rounded-full tw-bg-iron-900" />
-                  <div className="tw-min-w-0 tw-flex-1 tw-space-y-3 tw-pt-1">
-                    <div className="tw-h-2.5 tw-w-24 tw-rounded-md tw-bg-iron-800" />
-                    <div
-                      className={`tw-h-3 tw-rounded-md tw-bg-iron-900 ${width}`}
-                    />
-                    <div className="tw-h-3 tw-w-1/3 tw-rounded-md tw-bg-iron-900" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+          </div>
+        ) : (
+          <WaveChatLoading
+            showHeader={false}
+            showTabs={!isDirectMessage}
+            status={status}
+          />
+        ))}
     </div>
   );
 }

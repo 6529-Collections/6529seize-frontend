@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTiming";
 import {
   getAuthJwt,
@@ -6,6 +7,7 @@ import {
   getWalletAddress,
   getWalletRole,
 } from "../auth/auth.utils";
+import { assertWriteMatchesDisplayedWallet } from "../auth/displayed-wallet-guard";
 import { prepareSubmissionRequestKey } from "./submission-request-key";
 import { sessionAwareFetch } from "./session-aware-fetch";
 
@@ -33,9 +35,10 @@ export const getStructuredApiErrorStatus = (
   return typeof status === "number" ? status : undefined;
 };
 
-export const getStructuredApiErrorCode = (
+/** The parsed JSON body of a structured API error, when it is an object. */
+export const getStructuredApiErrorBody = (
   error: unknown
-): string | undefined => {
+): Readonly<Record<string, unknown>> | undefined => {
   if (typeof error !== "object" || error === null || !("response" in error)) {
     return undefined;
   }
@@ -56,12 +59,25 @@ export const getStructuredApiErrorCode = (
       return undefined;
     }
   }
-  if (typeof body !== "object" || body === null || !("code" in body)) {
-    return undefined;
-  }
-  const code = (body as { readonly code?: unknown }).code;
+  return typeof body === "object" && body !== null && !Array.isArray(body)
+    ? (body as Readonly<Record<string, unknown>>)
+    : undefined;
+};
+
+export const getStructuredApiErrorCode = (
+  error: unknown
+): string | undefined => {
+  const code = getStructuredApiErrorBody(error)?.["code"];
   return typeof code === "string" && code.trim().length > 0 ? code : undefined;
 };
+
+/** Header sets whose Authorization is the stored session this module added. */
+const storedSessionHeaders = new WeakSet<Record<string, string>>();
+
+const hasOwnAuthorization = (headers?: Record<string, string>): boolean =>
+  Object.keys(headers ?? {}).some(
+    (key) => key.toLowerCase() === "authorization"
+  );
 
 const getHeaders = (
   headers?: Record<string, string>,
@@ -70,12 +86,16 @@ const getHeaders = (
 ) => {
   const apiAuth = getStagingAuth();
   const walletAuth = includeWalletAuth ? getAuthJwt() : null;
-  return {
+  const result: Record<string, string> = {
     ...(contentType ? { "Content-Type": "application/json" } : {}),
     ...(apiAuth ? { "x-6529-auth": apiAuth } : {}),
     ...(walletAuth ? { Authorization: `Bearer ${walletAuth}` } : {}),
     ...(headers ?? {}),
   };
+  if (walletAuth && !hasOwnAuthorization(headers)) {
+    storedSessionHeaders.add(result);
+  }
+  return result;
 };
 
 const buildUrl = (
@@ -86,7 +106,7 @@ const buildUrl = (
 ): string => {
   let path = `/api/${endpoint}`;
   const apiEndpoint =
-    requestOrigin === "app" ? publicEnv.BASE_ENDPOINT : publicEnv.API_ENDPOINT;
+    requestOrigin === "app" ? publicEnv.BASE_ENDPOINT : getApiBase();
   let url = `${apiEndpoint}${path}`;
 
   if (params) {
@@ -368,6 +388,12 @@ const executeApiRequest = async <T>({
   credentials,
   cache,
 }: ExecuteApiRequestParams): Promise<T> => {
+  assertWriteMatchesDisplayedWallet({
+    url,
+    method,
+    headers,
+    usesStoredSession: manageWalletAuth && storedSessionHeaders.has(headers),
+  });
   const requestStartedAtMs = getRequestTimingNow();
   let status: RequestStatus = "unknown";
   const requestInit = createRequestInit({
@@ -632,6 +658,8 @@ export const commonApiDelete = async (param: {
   headers?: Record<string, string> | undefined;
   signal?: AbortSignal | undefined;
   errorMode?: ApiErrorMode | undefined;
+  /** Optional JSON body, for example a device signature. */
+  body?: object | undefined;
 }): Promise<void> => {
   const url = buildUrl(param.endpoint);
 
@@ -639,6 +667,7 @@ export const commonApiDelete = async (param: {
     url,
     method: "DELETE",
     headers: getHeaders(param.headers),
+    body: param.body === undefined ? undefined : JSON.stringify(param.body),
     signal: param.signal,
     parseJson: false,
     errorMode: param.errorMode ?? "legacy-string",

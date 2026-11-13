@@ -30,7 +30,9 @@ const KNOWN_PROJECTS = new Set([
   "capacitor-android-sim",
   "electron-shell-sim",
 ]);
-const KNOWN_SAFETY = new Set(["local", "readonly", "sandbox"]);
+// "stateful" packs write throwaway QA data to staging. They are opt-in:
+// manual trigger only, single worker, traces off.
+const KNOWN_SAFETY = new Set(["local", "readonly", "sandbox", "stateful"]);
 const KNOWN_ENVIRONMENTS = new Set(["local", "staging", "production"]);
 const KNOWN_TRIGGERS = new Set(["manual", "pr-ci", "post-deploy", "cron"]);
 const KNOWN_CHANGE_SCOPES = new Set(["museum"]);
@@ -64,6 +66,12 @@ const REMOTE_CONTRACTS = {
     PLAYWRIGHT_ENV: "production",
     PLAYWRIGHT_READONLY: "1",
   },
+};
+const STATEFUL_STAGING_CONTRACT = {
+  PLAYWRIGHT_BASE_URL: "https://staging.6529.io",
+  PLAYWRIGHT_SKIP_WEB_SERVER: "1",
+  PLAYWRIGHT_ENV: "staging",
+  PLAYWRIGHT_READONLY: "0",
 };
 
 function getPaths(root = DEFAULT_ROOT) {
@@ -129,16 +137,7 @@ function validateEnvironmentVariables(problems, pack) {
   }
 }
 
-function validateRemoteContract(problems, pack, environment) {
-  const expected = REMOTE_CONTRACTS[environment];
-  if (!expected) {
-    return;
-  }
-  if (pack.safety !== "readonly") {
-    problems.push(
-      `${packLabel(pack)}: ${environment} packs must use safety "readonly".`
-    );
-  }
+function validateDeployedShape(problems, pack, environment) {
   if (typeof pack.alias !== "string" || !pack.alias) {
     problems.push(
       `${packLabel(pack)}: ${environment} packs must declare an alias.`
@@ -154,6 +153,59 @@ function validateRemoteContract(problems, pack, environment) {
       `${packLabel(pack)}: ${environment} packs must select at least one project.`
     );
   }
+}
+
+/**
+ * Opt-in packs that write throwaway QA data: staging only, manual trigger
+ * only (so post-deploy and cron selections never run them), one worker, and
+ * traces off because traces can retain credentials and private page state.
+ */
+function validateStatefulContract(problems, pack, environment) {
+  if (environment !== "staging") {
+    problems.push(`${packLabel(pack)}: stateful packs must target staging.`);
+    return;
+  }
+  validateDeployedShape(problems, pack, environment);
+  if (pack.triggers?.length !== 1 || pack.triggers[0] !== "manual") {
+    problems.push(
+      `${packLabel(pack)}: stateful packs must use only the manual trigger.`
+    );
+  }
+  if (pack.workers !== 1) {
+    problems.push(`${packLabel(pack)}: stateful packs must set workers to 1.`);
+  }
+  if (pack.traceOff !== true) {
+    problems.push(`${packLabel(pack)}: stateful packs must turn traces off.`);
+  }
+  if (pack.changeScope !== undefined) {
+    problems.push(
+      `${packLabel(pack)}: stateful packs must not join change-scoped selection.`
+    );
+  }
+  for (const [key, value] of Object.entries(STATEFUL_STAGING_CONTRACT)) {
+    if (pack.env?.[key] !== value) {
+      problems.push(
+        `${packLabel(pack)}: stateful packs must set ${key}=${value}.`
+      );
+    }
+  }
+}
+
+function validateRemoteContract(problems, pack, environment) {
+  if (pack.safety === "stateful") {
+    validateStatefulContract(problems, pack, environment);
+    return;
+  }
+  const expected = REMOTE_CONTRACTS[environment];
+  if (!expected) {
+    return;
+  }
+  if (pack.safety !== "readonly") {
+    problems.push(
+      `${packLabel(pack)}: ${environment} packs must use safety "readonly".`
+    );
+  }
+  validateDeployedShape(problems, pack, environment);
   // The complete institutional desktop/mobile sweep is the sole deployed pack
   // allowed two Playwright workers; all smaller remote packs stay single-worker.
   const maxWorkers =

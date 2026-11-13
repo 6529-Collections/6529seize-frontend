@@ -171,8 +171,8 @@ export function get<T = unknown>(
   key: IDBValidKey,
   customStore?: StoreFn
 ): Promise<T | undefined> {
-  const useStore = customStore ?? defaultGetStore();
-  return useStore("readonly", (store) =>
+  const runInStore = customStore ?? defaultGetStore();
+  return runInStore("readonly", (store) =>
     promisifyRequest<T>(store.get(key) as unknown as RequestLike<T>)
   );
 }
@@ -182,8 +182,8 @@ export function set<T = unknown>(
   value: T,
   customStore?: StoreFn
 ): Promise<void> {
-  const useStore = customStore ?? defaultGetStore();
-  return useStore("readwrite", (store) => {
+  const runInStore = customStore ?? defaultGetStore();
+  return runInStore("readwrite", (store) => {
     store.put(value, key);
     return promisifyRequest<void>(
       store.transaction as unknown as RequestLike<void>
@@ -195,8 +195,8 @@ export function setMany(
   entries: Array<[IDBValidKey, unknown]>,
   customStore?: StoreFn
 ): Promise<void> {
-  const useStore = customStore ?? defaultGetStore();
-  return useStore("readwrite", (store) => {
+  const runInStore = customStore ?? defaultGetStore();
+  return runInStore("readwrite", (store) => {
     entries.forEach((entry) => store.put(entry[1], entry[0]));
     return promisifyRequest<void>(
       store.transaction as unknown as RequestLike<void>
@@ -208,8 +208,8 @@ export function getMany<T = unknown>(
   keys: IDBValidKey[],
   customStore?: StoreFn
 ): Promise<Array<T | undefined>> {
-  const useStore = customStore ?? defaultGetStore();
-  return useStore("readonly", (store) =>
+  const runInStore = customStore ?? defaultGetStore();
+  return runInStore("readonly", (store) =>
     Promise.all(
       keys.map((key) =>
         promisifyRequest<T>(store.get(key) as unknown as RequestLike<T>)
@@ -223,8 +223,8 @@ export function update<T = unknown>(
   updater: (oldValue: T | undefined) => T,
   customStore?: StoreFn
 ): Promise<void> {
-  const useStore = customStore ?? defaultGetStore();
-  return useStore(
+  const runInStore = customStore ?? defaultGetStore();
+  return runInStore(
     "readwrite",
     (store) =>
       new Promise((resolve, reject) => {
@@ -270,8 +270,8 @@ export function update<T = unknown>(
 }
 
 export function del(key: IDBValidKey, customStore?: StoreFn): Promise<void> {
-  const useStore = customStore ?? defaultGetStore();
-  return useStore("readwrite", (store) => {
+  const runInStore = customStore ?? defaultGetStore();
+  return runInStore("readwrite", (store) => {
     store.delete(key);
     return promisifyRequest<void>(
       store.transaction as unknown as RequestLike<void>
@@ -283,8 +283,8 @@ export function delMany(
   keys: IDBValidKey[],
   customStore?: StoreFn
 ): Promise<void> {
-  const useStore = customStore ?? defaultGetStore();
-  return useStore("readwrite", (store) => {
+  const runInStore = customStore ?? defaultGetStore();
+  return runInStore("readwrite", (store) => {
     keys.forEach((key) => store.delete(key));
     return promisifyRequest<void>(
       store.transaction as unknown as RequestLike<void>
@@ -293,8 +293,8 @@ export function delMany(
 }
 
 export function clear(customStore?: StoreFn): Promise<void> {
-  const useStore = customStore ?? defaultGetStore();
-  return useStore("readwrite", (store) => {
+  const runInStore = customStore ?? defaultGetStore();
+  return runInStore("readwrite", (store) => {
     store.clear();
     return promisifyRequest<void>(
       store.transaction as unknown as RequestLike<void>
@@ -317,8 +317,8 @@ function eachCursor(
 }
 
 export function keys(customStore?: StoreFn): Promise<IDBValidKey[]> {
-  const useStore = customStore ?? defaultGetStore();
-  return useStore("readonly", (store) => {
+  const runInStore = customStore ?? defaultGetStore();
+  return runInStore("readonly", (store) => {
     if (store.getAllKeys) {
       return promisifyRequest<IDBValidKey[]>(
         store.getAllKeys() as unknown as RequestLike<IDBValidKey[]>
@@ -332,8 +332,8 @@ export function keys(customStore?: StoreFn): Promise<IDBValidKey[]> {
 }
 
 export function values<T = unknown>(customStore?: StoreFn): Promise<T[]> {
-  const useStore = customStore ?? defaultGetStore();
-  return useStore("readonly", (store) => {
+  const runInStore = customStore ?? defaultGetStore();
+  return runInStore("readonly", (store) => {
     if (store.getAll) {
       return promisifyRequest<T[]>(
         store.getAll() as unknown as RequestLike<T[]>
@@ -349,8 +349,8 @@ export function values<T = unknown>(customStore?: StoreFn): Promise<T[]> {
 export function entries<T = unknown>(
   customStore?: StoreFn
 ): Promise<Array<[IDBValidKey, T]>> {
-  const useStore = customStore ?? defaultGetStore();
-  return useStore("readonly", (store) => {
+  const runInStore = customStore ?? defaultGetStore();
+  return runInStore("readonly", (store) => {
     if (store.getAll && store.getAllKeys) {
       return Promise.all([
         promisifyRequest<IDBValidKey[]>(

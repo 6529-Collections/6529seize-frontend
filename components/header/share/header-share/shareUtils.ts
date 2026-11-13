@@ -3,12 +3,6 @@ import { toDataURL } from "qrcode";
 import { publicEnv } from "@/config/env";
 import { stripCollectedReturnFromTokenRoute } from "@/helpers/profile-collected-navigation";
 import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
-import {
-  getRefreshToken,
-  getWalletAddress,
-  getWalletRole,
-  hasActiveSessionV2Auth,
-} from "@/services/auth/auth.utils";
 import type { createConnectionShare } from "@/services/auth/session-v2.utils";
 
 export type NativeConnectionShare = Awaited<
@@ -51,30 +45,6 @@ export type PageShareSystemShareAdapter = {
   readonly canShare: (shareData: PageShareData) => Promise<boolean>;
   readonly share: (shareData: PageShareData) => Promise<void>;
 };
-
-export function getLocalLegacyDesktopAuth(walletAddress: string): {
-  readonly refreshToken: string;
-  readonly role: string | null;
-} | null {
-  if (hasActiveSessionV2Auth({ address: walletAddress })) {
-    return null;
-  }
-
-  const activeWalletAddress = getWalletAddress();
-  if (activeWalletAddress?.toLowerCase() !== walletAddress.toLowerCase()) {
-    return null;
-  }
-
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) {
-    return null;
-  }
-
-  return {
-    refreshToken,
-    role: getWalletRole(),
-  };
-}
 
 export function isAbortError(error: unknown, signal?: AbortSignal): boolean {
   return (
@@ -275,33 +245,33 @@ export function buildNativeConnectionShareUrls({
   };
 }
 
-export function buildLegacyDesktopConnectionSharePath({
-  token,
-  address,
-  role,
-}: {
-  readonly token: string;
-  readonly address: string;
-  readonly role: string | null;
-}): string {
-  const shareParams = new URLSearchParams({
-    token,
-    address,
-  });
-  if (role) {
-    shareParams.set("role", role);
+export function buildDesktopConnectionShareLink(
+  share: NativeConnectionShare,
+  addressKey: string,
+  coreScheme: string
+): { readonly url: string; readonly expiresAt: number } | null {
+  const expiresAt = Date.parse(share.expires_at);
+  if (
+    share.target_client_type !== "desktop" ||
+    share.address.toLowerCase() !== addressKey ||
+    !share.connection_share_code ||
+    !Number.isFinite(expiresAt) ||
+    expiresAt <= Date.now()
+  ) {
+    return null;
   }
-  return `/accept-connection-sharing?${shareParams.toString()}`;
-}
 
-export function buildLegacyDesktopConnectionShareUrl({
-  coreScheme,
-  deepLinkPath,
-}: {
-  readonly coreScheme: string;
-  readonly deepLinkPath: string;
-}): string {
-  return `${coreScheme}://${DeepLinkScope.NAVIGATE}${deepLinkPath}`;
+  const params = new URLSearchParams({
+    connection_share_code: share.connection_share_code,
+    address: share.address,
+  });
+  return {
+    expiresAt,
+    url: buildNavigateDeepLinkUrl({
+      scheme: coreScheme,
+      routerPath: `/accept-connection-sharing?${params}`,
+    }),
+  };
 }
 
 export function buildNavigateDeepLinkUrl({
@@ -493,4 +463,53 @@ export function getFocusableElements(container: HTMLElement): HTMLElement[] {
       !element.hasAttribute("disabled") &&
       element.getAttribute("aria-hidden") !== "true"
   );
+}
+
+export function trapFocusInDialog(
+  event: KeyboardEvent,
+  dialog: HTMLDialogElement | null
+): void {
+  if (event.key !== "Tab") {
+    return;
+  }
+
+  if (!dialog) {
+    return;
+  }
+
+  const focusableElements = getFocusableElements(dialog);
+  if (focusableElements.length === 0) {
+    event.preventDefault();
+    dialog.focus();
+    return;
+  }
+
+  const firstElement = focusableElements[0];
+  const lastElement = focusableElements.at(-1);
+  if (!firstElement || !lastElement) {
+    event.preventDefault();
+    dialog.focus();
+    return;
+  }
+  const activeElement = document.activeElement as HTMLElement | null;
+  const activeInsideDialog = activeElement
+    ? dialog.contains(activeElement)
+    : false;
+
+  if (event.shiftKey) {
+    if (
+      !activeInsideDialog ||
+      activeElement === firstElement ||
+      activeElement === dialog
+    ) {
+      event.preventDefault();
+      lastElement.focus();
+    }
+    return;
+  }
+
+  if (!activeInsideDialog || activeElement === lastElement) {
+    event.preventDefault();
+    firstElement.focus();
+  }
 }

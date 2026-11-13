@@ -52,9 +52,7 @@ const RATING_MATTERS_WITH_API_FILTER: readonly RateMatter[] = [
 function shouldIncludeRatingMatter(
   matter: ActivityLogParams["matter"]
 ): matter is RatingMatterWithApiFilter {
-  return (
-    matter !== null && RATING_MATTERS_WITH_API_FILTER.includes(matter)
-  );
+  return matter !== null && RATING_MATTERS_WITH_API_FILTER.includes(matter);
 }
 
 export const convertActivityLogParams = ({
@@ -81,6 +79,10 @@ export const convertActivityLogParams = ({
 
   if (!params.handleOrWallet) {
     return converted;
+  }
+
+  if (params.matter === RateMatter.NIC) {
+    converted.activity_scope = "NIC";
   }
 
   if (params.targetType === ProfileActivityFilterTargetType.ALL) {

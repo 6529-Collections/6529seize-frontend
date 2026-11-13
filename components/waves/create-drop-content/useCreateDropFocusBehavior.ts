@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import type { MutableRefObject } from "react";
-import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
+import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { CreateDropInputHandles } from "../CreateDropInput";
 
@@ -19,40 +19,18 @@ export function useCreateDropFocusBehavior({
   focusOnInitialActiveDrop,
   createDropInputRef,
 }: UseCreateDropFocusBehaviorParams) {
-  const { isVisible: isKeyboardVisible } = useNativeKeyboard();
-  const isInitialMountRef = useRef(true);
-  const wasNativeKeyboardVisibleRef = useRef(false);
-
-  const scheduleMobileInputFocus = useCallback(
-    (delayMs: number) => {
-      let timeoutId: ReturnType<typeof setTimeout> | undefined;
-      const frameId = requestAnimationFrame(() => {
-        if (delayMs <= 0) {
-          createDropInputRef.current?.focus();
-          return;
-        }
-
-        timeoutId = setTimeout(() => {
-          createDropInputRef.current?.focus();
-        }, delayMs);
-      });
-
-      return () => {
-        cancelAnimationFrame(frameId);
-        if (timeoutId !== undefined) {
-          clearTimeout(timeoutId);
-        }
-      };
-    },
+  const blurInput = useCallback(
+    () => createDropInputRef.current?.blur(),
     [createDropInputRef]
   );
+  useBlurOnNativeKeyboardDismiss(blurInput, isApp && activeDrop !== null);
+  const isInitialMountRef = useRef(true);
 
   useLayoutEffect(() => {
     const isInitialMount = isInitialMountRef.current;
 
     if (!activeDrop) {
       isInitialMountRef.current = false;
-      wasNativeKeyboardVisibleRef.current = false;
       return;
     }
 
@@ -79,15 +57,10 @@ export function useCreateDropFocusBehavior({
         return;
       }
 
-      let cancelScheduledFocus: (() => void) | undefined;
-      const timer = setTimeout(() => {
-        cancelScheduledFocus = scheduleMobileInputFocus(300);
-      }, 200);
-
-      return () => {
-        clearTimeout(timer);
-        cancelScheduledFocus?.();
-      };
+      // iOS needs focus during the reply gesture's activation. Deferring it
+      // until after the reply animation can select the editor without an IME.
+      createDropInputRef.current?.focus();
+      return;
     }
 
     if (shouldFocusInitialActiveDrop) {
@@ -103,24 +76,5 @@ export function useCreateDropFocusBehavior({
       createDropInputRef.current?.focus();
     }, 100);
     return () => clearTimeout(timer);
-  }, [activeDrop, isApp, scheduleMobileInputFocus, focusOnInitialActiveDrop]);
-
-  useEffect(() => {
-    if (!isApp || !activeDrop) {
-      wasNativeKeyboardVisibleRef.current = false;
-      return;
-    }
-
-    if (isKeyboardVisible) {
-      wasNativeKeyboardVisibleRef.current = true;
-      return;
-    }
-
-    if (!wasNativeKeyboardVisibleRef.current) {
-      return;
-    }
-
-    wasNativeKeyboardVisibleRef.current = false;
-    createDropInputRef.current?.blur();
-  }, [activeDrop, createDropInputRef, isApp, isKeyboardVisible]);
+  }, [activeDrop, isApp, createDropInputRef, focusOnInitialActiveDrop]);
 }

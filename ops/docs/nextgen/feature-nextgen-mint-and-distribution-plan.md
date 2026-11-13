@@ -45,13 +45,8 @@ Use these collection routes to mint and review distribution data:
 
 ## Route Behavior
 
-- On native iOS when the detected country is not `US` or is unknown, `MINT`
-  and `BURN TO MINT` actions are hidden. Direct mint links return to the
-  collection page without showing mint controls. Countdown information and
-  distribution data remain available. US iOS, web, and Android keep their
-  existing mint behavior. On iOS the return waits for the country check, so a
-  US deep link stays on the mint page; a failed or empty check counts as
-  unknown.
+- The iOS app shows the countdown and distribution plan. Direct mint links
+  return to the collection without the mint or burn-to-mint controls.
 
 - Public phase `LIVE` always uses the standard mint widget.
 - Outside public phase `LIVE`, mint widget type comes from merkle config.

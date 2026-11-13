@@ -1,6 +1,6 @@
 "use client";
 
-import type { UserPageRepPropsRepRates } from "@/app/[user]/page";
+import type { UserPageRepPropsRepRates } from "@/app/[user]/(profile)/page";
 import type {
   ApiProfileRepRatesState,
   ProfileActivityLog,
@@ -21,10 +21,12 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useMemo } from "react";
+import { refreshProfileRatingLists } from "./utils/refreshProfileRatingLists";
 import type { ActivityLogParams } from "../profile-activity/ProfileActivityLogs";
 import { QueryKey } from "./query-keys";
 import { addDropToDrops } from "./utils/addDropsToDrops";
 import { increaseWavesOverviewDropsCount } from "./utils/increaseWavesOverviewDropsCount";
+import { invalidateRepCategoryAnalytics } from "./utils/invalidateRepCategoryAnalytics";
 import {
   WAVE_DROPS_PARAMS,
   WAVE_FOLLOWING_WAVES_PARAMS,
@@ -172,23 +174,6 @@ const createReactQueryContextValue = (
     });
   };
 
-  const invalidateProfileRaterCICState = ({
-    profile,
-    rater,
-  }: {
-    profile: ApiIdentity;
-    rater: string;
-  }) => {
-    const handles = getHandlesFromProfile(profile);
-    invalidateQueries({
-      key: QueryKey.PROFILE_RATER_CIC_STATE,
-      values: handles.map((h) => ({
-        handle: h,
-        rater,
-      })),
-    });
-  };
-
   const invalidateProfileCICStatements = (profile: ApiIdentity) => {
     const handles = getHandlesFromProfile(profile);
     invalidateQueries({
@@ -292,30 +277,6 @@ const createReactQueryContextValue = (
     );
   };
 
-  const invalidateProfileRepRatings = (profile: ApiIdentity) => {
-    const handles = getHandlesFromProfile(profile);
-    invalidateQueries({
-      key: QueryKey.PROFILE_REP_RATINGS,
-      values: handles.map((h) => ({
-        handleOrWallet: h,
-      })),
-    });
-  };
-
-  const invalidateRepCategoryAnalytics = () => {
-    [
-      QueryKey.GLOBAL_REP_CATEGORY_SEARCH,
-      QueryKey.GLOBAL_REP_CATEGORY_SUGGESTED,
-      QueryKey.GLOBAL_REP_CATEGORY_OVERVIEW,
-      QueryKey.GLOBAL_REP_CATEGORY_PAGE,
-      QueryKey.GLOBAL_REP_CATEGORY_WAVE_OVERVIEW,
-      QueryKey.GLOBAL_REP_CATEGORY_WAVES_PAGE,
-      QueryKey.GLOBAL_REP_CATEGORY_WAVE_CONTRIBUTORS_PAGE,
-    ].forEach((queryKey) => {
-      queryClient.invalidateQueries({ queryKey: [queryKey] });
-    });
-  };
-
   const invalidateProfileRaters = ({
     profile,
     matter,
@@ -354,27 +315,27 @@ const createReactQueryContextValue = (
     });
   };
 
-  const onProfileCICModify = ({
-    targetProfile,
+  const onProfileCICModify = async ({
+    targetProfiles,
     connectedProfile,
     rater,
     profileProxy,
   }: {
-    readonly targetProfile: ApiIdentity;
+    readonly targetProfiles: readonly ApiIdentity[];
     readonly connectedProfile: ApiIdentity | null;
     readonly rater: string | null;
     readonly profileProxy: ApiProfileProxy | null;
   }) => {
-    invalidateProfile(targetProfile);
+    if (targetProfiles.length === 0) return;
+    for (const targetProfile of targetProfiles) {
+      invalidateProfile(targetProfile);
+      invalidateProfileRaters({
+        profile: targetProfile,
+        matter: RateMatter.NIC,
+        given: false,
+      });
+    }
     invalidateLogs();
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.CIC_OVERVIEW],
-    });
-    invalidateProfileRaters({
-      profile: targetProfile,
-      matter: RateMatter.NIC,
-      given: false,
-    });
 
     if (connectedProfile) {
       invalidateProfileRaters({
@@ -383,12 +344,6 @@ const createReactQueryContextValue = (
         given: true,
       });
     }
-    if (rater) {
-      invalidateProfileRaterCICState({
-        profile: targetProfile,
-        rater: rater.toLowerCase(),
-      });
-    }
     if (profileProxy?.created_by.handle && profileProxy.granted_to.handle) {
       invalidateQueries({
         key: QueryKey.PROFILE,
@@ -436,32 +391,41 @@ const createReactQueryContextValue = (
         rater_representative: raterRepresentative,
       });
     }
+    await Promise.all([
+      refreshProfileRatingLists(queryClient, "NIC", {
+        targetProfiles,
+        connectedProfile,
+        profileProxy,
+        rater,
+      }),
+      queryClient.invalidateQueries({ queryKey: [QueryKey.CIC_OVERVIEW] }),
+      // NIC credit, like REP credit, is shared across every recipient.
+      queryClient.invalidateQueries({
+        queryKey: [QueryKey.PROFILE_RATER_CIC_STATE],
+      }),
+    ]);
   };
 
-  const onProfileRepModify = ({
-    targetProfile,
+  const onProfileRepModify = async ({
+    targetProfiles,
     connectedProfile,
     profileProxy,
   }: {
-    readonly targetProfile: ApiIdentity;
+    readonly targetProfiles: readonly ApiIdentity[];
     readonly connectedProfile: ApiIdentity | null;
     readonly profileProxy: ApiProfileProxy | null;
-  }) => {
-    invalidateProfile(targetProfile);
-    invalidateProfileRepRatings(targetProfile);
+  }): Promise<void> => {
+    if (targetProfiles.length === 0) return;
+    for (const targetProfile of targetProfiles) {
+      invalidateProfile(targetProfile);
+      invalidateProfileRaters({
+        profile: targetProfile,
+        matter: RateMatter.REP,
+        given: false,
+      });
+    }
     invalidateLogs();
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.REP_OVERVIEW],
-    });
-    queryClient.invalidateQueries({
-      queryKey: [QueryKey.REP_CATEGORIES],
-    });
-    invalidateRepCategoryAnalytics();
-    invalidateProfileRaters({
-      profile: targetProfile,
-      matter: RateMatter.REP,
-      given: false,
-    });
+    invalidateRepCategoryAnalytics(queryClient);
 
     if (connectedProfile) {
       invalidateProfileRaters({
@@ -469,15 +433,6 @@ const createReactQueryContextValue = (
         matter: RateMatter.REP,
         given: true,
       });
-      invalidateQueries({
-        key: QueryKey.PROFILE_REP_RATINGS,
-        values: [
-          {
-            rater: connectedProfile.handle,
-            handleOrWallet: targetProfile.handle,
-          },
-        ],
-      });
     }
 
     if (profileProxy?.created_by.handle && profileProxy.granted_to.handle) {
@@ -500,19 +455,6 @@ const createReactQueryContextValue = (
             handleOrWallet: profileProxy.granted_to.handle,
             matter: RateMatter.REP,
             given: false,
-          },
-        ],
-      });
-      invalidateQueries({
-        key: QueryKey.PROFILE_REP_RATINGS,
-        values: [
-          {
-            rater: profileProxy.created_by.handle,
-            handleOrWallet: targetProfile.handle,
-          },
-          {
-            rater: profileProxy.granted_to.handle,
-            handleOrWallet: targetProfile.handle,
           },
         ],
       });
@@ -541,6 +483,15 @@ const createReactQueryContextValue = (
         rater_representative: raterRepresentative,
       });
     }
+    await Promise.all([
+      refreshProfileRatingLists(queryClient, "REP", {
+        targetProfiles,
+        connectedProfile,
+        profileProxy,
+      }),
+      queryClient.invalidateQueries({ queryKey: [QueryKey.REP_OVERVIEW] }),
+      queryClient.invalidateQueries({ queryKey: [QueryKey.REP_CATEGORIES] }),
+    ]);
   };
 
   const onProfileEdit = ({
@@ -709,7 +660,7 @@ const createReactQueryContextValue = (
     queryClient.invalidateQueries({
       queryKey: [QueryKey.REP_CATEGORIES],
     });
-    invalidateRepCategoryAnalytics();
+    invalidateRepCategoryAnalytics(queryClient);
     queryClient.invalidateQueries({
       queryKey: [QueryKey.CIC_OVERVIEW],
     });

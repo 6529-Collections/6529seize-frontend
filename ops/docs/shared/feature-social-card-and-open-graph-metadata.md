@@ -29,14 +29,27 @@ the `1200x630` image dimensions and `summary_large_image` Twitter card.
 - `/api/og-metadata/drops/{id}` renders drop cards from API-backed drop
   metadata.
 - `/api/og-metadata/collections/{collection}` renders branded collection cards.
-  It has built-in defaults for `the-memes`, `meme-lab`, `6529-gradient`,
-  `rememes`, and `nextgen`, plus query overrides for `badge`, `image`,
-  `subtitle`, and `title`.
-- `/api/og-metadata/nfts/{contract}/{id}` renders branded NFT cards with query
-  overrides for `artist`, `badge`, `collection`, `image`, `subtitle`, and
-  `title`.
+  It has fixed text and artwork for `the-memes`, `meme-lab`, `6529-gradient`,
+  `rememes`, and `nextgen`; any other collection returns `404`. The query can
+  only select from a closed set: `variant` (`admin` for NextGen, `add` for
+  ReMemes, `mint` for The Memes), `view` (a fixed page label such as `Mint`
+  or `Trait Sets`), and, for `nextgen`, a numeric `collection` ID. The NextGen
+  collection name and artwork and the latest Memes mint title are read from the
+  collection API. The query never supplies card text, badges, or image URLs, and
+  unrecognized values are ignored.
+- `/api/og-metadata/nfts/{contract}/{id}` renders branded NFT cards. The path
+  must be a contract address and a decimal token ID (otherwise `400`). Title,
+  artist, collection, and artwork come only from the collection API (The Memes,
+  Meme Lab, 6529 Gradient, NextGen, and ReMemes); the only query parameter is
+  `format`. When the lookup fails, the card shows a neutral label for the
+  collection (for example `The Memes #542`, or `NFT #542` for other contracts)
+  and is cached for a shorter time. Explicit `format` exports need the artwork
+  from the same lookup (no client-supplied image is accepted): the lookup is
+  retried once on transient failures and may take up to 10 seconds, and an
+  export without artwork fails with `502` rather than returning a placeholder.
 - `/api/og-metadata/image?url={url}&w={width}` safely normalizes allowed remote
-  images to PNG for card rendering. Images retain their aspect ratio and fit
+  images for card rendering: JPEG, or PNG when the image has transparency
+  (the card renderer does not accept WebP). Images retain their aspect ratio and fit
   within the requested width (at most 1,200 pixels) and 12,000 pixels high,
   without cropping or enlarging smaller originals. GIF previews use the first
   frame. Only JPEG, PNG, GIF, and WebP sources are normalized; SVG and other
@@ -46,10 +59,16 @@ the `1200x630` image dimensions and `summary_large_image` Twitter card.
   - Each processed frame must be at most 512 million pixels, with neither
     dimension exceeding 65,536 pixels. Sources outside these limits do not
     produce a normalized preview.
-  - Images are processed one at a time per server process. Up to 32 requests can
-    wait for at most 15 seconds before downloading, so a card's banner, avatar,
-    and artwork can all render. A full queue or expired wait produces a
-    temporary `503` response with a one-second retry interval.
+  - Sources are fetched over HTTPS on port 443 only, including every redirect.
+  - Each server process downloads up to four sources at once, and up to 256
+    more requests can wait for at most 15 seconds before downloading. Up to
+    three images are decoded at once, and only after their bytes have arrived,
+    so a slow source host does not hold up other images. A download that has
+    started finishes and is cached even if every viewer waiting for it leaves. A full queue or expired
+    wait produces a temporary `503` response with a one-second retry interval.
+  - Each client address can make up to 3,000 image requests a minute, whatever width or
+    query string it asks for. Beyond that the route answers `429` with a
+    `Retry-After` header.
 
 ## Standard Route Contract
 
@@ -61,8 +80,10 @@ the `1200x630` image dimensions and `summary_large_image` Twitter card.
   `1200x630` in route metadata.
 - Use `getCollectionSocialCardImagePath` for collection-like pages.
 - Use `getNftSocialCardImagePath` for token, NFT, and token-detail pages.
-- Keep API-backed entity details in query parameters on the collection/NFT card
-  paths instead of creating one-off static OG image URLs.
+- Collection and NFT card paths carry only an identity or a fixed selector; the
+  card endpoints read entity details from the collection API. Do not add
+  free-text, badge, or image query parameters, and do not create one-off static
+  OG image URLs.
 - Profile, wave, and drop metadata can point directly at their dynamic endpoint
   because those endpoint families already own the entity-specific rendering.
 
@@ -98,7 +119,8 @@ the `1200x630` image dimensions and `summary_large_image` Twitter card.
 5. Provide useful fallback metadata when API data is missing: stable title,
    collection/badge label, and no broken image query.
 6. Add focused tests that assert title, `twitter.card`, Open Graph image
-   dimensions, endpoint pathname, query parameters, and missing-data fallback.
+   dimensions, endpoint pathname, that the card URL carries no display text or
+   artwork, and the missing-data fallback.
 7. For new or changed render endpoints, verify the PNG response in a browser or
    endpoint test and confirm dimensions remain `1200x630`.
 8. Update this page when a new route family becomes standardized.

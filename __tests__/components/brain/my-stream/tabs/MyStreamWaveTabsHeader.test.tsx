@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import MyStreamWaveTabsHeader from "@/components/brain/my-stream/tabs/MyStreamWaveTabsHeader";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import type { ReactNode } from "react";
@@ -8,6 +8,21 @@ const mockToggleRightSidebar = jest.fn();
 let mockConnectedProfile: { handle: string } | null = { handle: "alice" };
 let mockActiveProfileProxy: { created_by: { handle: string } } | null = null;
 let mockShowJoinCta = false;
+let mockHeaderWidth = 1040;
+const mockHeaderRef = jest.fn();
+
+jest.mock("react-use", () => ({
+  ...jest.requireActual("react-use"),
+  useMeasure: () => [mockHeaderRef, { width: mockHeaderWidth }],
+}));
+
+const mockOpenWaveSearch = jest.fn();
+jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveSearch", () => ({
+  useOpenMyStreamWaveSearch: () => ({
+    open: mockOpenWaveSearch,
+    trigger: { current: null },
+  }),
+}));
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/waves/wave-1",
@@ -125,18 +140,18 @@ describe("MyStreamWaveTabsHeader", () => {
   beforeEach(() => {
     mockIsRightSidebarOpen = false;
     mockToggleRightSidebar.mockClear();
+    mockOpenWaveSearch.mockClear();
     mockConnectedProfile = { handle: "alice" };
     mockActiveProfileProxy = null;
     mockShowJoinCta = false;
+    mockHeaderWidth = 1040;
   });
 
-  it("can expand Wave search into the site-wide search", async () => {
+  it("opens search through the stable tabs owner", () => {
     render(
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -148,15 +163,7 @@ describe("MyStreamWaveTabsHeader", () => {
     fireEvent.click(
       screen.getByRole("button", { name: "Search messages in this wave" })
     );
-    expect(
-      await screen.findByTestId("wave-drops-search-modal")
-    ).toBeInTheDocument();
-
-    fireEvent.click(screen.getByRole("button", { name: "Search all 6529" }));
-    expect(screen.queryByTestId("wave-drops-search-modal")).toBeNull();
-    expect(
-      await screen.findByTestId("header-search-modal")
-    ).toBeInTheDocument();
+    expect(mockOpenWaveSearch).toHaveBeenCalledTimes(1);
   });
 
   it("keeps the score in the identity and REP beside the header icon buttons", () => {
@@ -164,8 +171,6 @@ describe("MyStreamWaveTabsHeader", () => {
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -187,13 +192,47 @@ describe("MyStreamWaveTabsHeader", () => {
     ).toBe("");
   });
 
-  it("keeps the primary action first and places supplemental actions after REP", () => {
+  it("keeps score and actions reachable when the center panel is narrow", () => {
+    mockHeaderWidth = 600;
+    mockShowJoinCta = true;
+    const renderActions = jest.fn(() => null);
     render(
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+        renderTrailingActions={renderActions}
+      />
+    );
+
+    expect(renderActions).toHaveBeenCalledWith(
+      expect.objectContaining({ isCompact: false, isCondensed: true })
+    );
+    expect(screen.getByTestId("wave-score")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "About Follow The Repo" })
+    ).toHaveTextContent(wave.name);
+    expect(
+      screen.getByRole("button", { name: "Join Follow The Repo" })
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-description-preview")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Time display: local time" })
+    ).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    expect(screen.getByRole("radio", { name: /^Local time/ })).toBeChecked();
+    expect(screen.getByRole("radio", { name: /^UTC/ })).toBeInTheDocument();
+  });
+
+  it("places submission and supplemental actions after REP", () => {
+    render(
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -218,9 +257,9 @@ describe("MyStreamWaveTabsHeader", () => {
       name: "Switch to gallery view",
     });
 
-    expect(dropButton.parentElement?.firstElementChild).toBe(dropButton);
-    expect(dropButton.nextElementSibling).toBe(repButton);
-    expect(repButton.nextElementSibling).toBe(galleryButton);
+    expect(repButton.parentElement?.firstElementChild).toBe(repButton);
+    expect(repButton.nextElementSibling).toBe(dropButton);
+    expect(dropButton.nextElementSibling).toBe(galleryButton);
   });
 
   it("leads the header actions with Join for a wave the viewer has not joined", () => {
@@ -229,8 +268,6 @@ describe("MyStreamWaveTabsHeader", () => {
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -248,7 +285,9 @@ describe("MyStreamWaveTabsHeader", () => {
       name: "Join Follow The Repo",
     });
     expect(joinButton.parentElement?.firstElementChild).toBe(joinButton);
-    expect(joinButton.nextElementSibling).toBe(
+    const repButton = screen.getByRole("button", { name: "Add REP" });
+    expect(joinButton.nextElementSibling).toBe(repButton);
+    expect(repButton.nextElementSibling).toBe(
       screen.getByRole("button", { name: "Submit drop" })
     );
     expect(joinButton).toHaveAttribute("data-tooltip-id", "header-actions");
@@ -260,8 +299,6 @@ describe("MyStreamWaveTabsHeader", () => {
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact
         showBackButton
         headerActionsTooltipId="header-actions"
@@ -274,9 +311,29 @@ describe("MyStreamWaveTabsHeader", () => {
       name: "Join Follow The Repo",
     });
     expect(joinButton.parentElement).toBe(
-      screen.getByRole("button", { name: "Search messages in this wave" })
-        .parentElement
+      screen.getByRole("button", { name: "More wave actions" }).parentElement
     );
+    const search = screen.getByRole("button", {
+      name: "Search messages in this wave",
+    });
+    expect(search.nextElementSibling).toBe(
+      screen.getByRole("button", { name: "More wave actions" })
+    );
+    fireEvent.click(search);
+    expect(mockOpenWaveSearch).toHaveBeenCalledTimes(1);
+    const details = screen.getByRole("button", { name: "Wave details" });
+    expect(details).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(details);
+    expect(mockToggleRightSidebar).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
+    expect(
+      within(
+        screen.getByRole("dialog", { name: "More wave actions" })
+      ).queryByRole("button", { name: "Search messages in this wave" })
+    ).toBeNull();
+    expect(screen.getAllByRole("button", { name: "Wave details" })).toEqual([
+      details,
+    ]);
   });
 
   it.each(["logged out", "author", "proxy", "DM"])(
@@ -294,8 +351,6 @@ describe("MyStreamWaveTabsHeader", () => {
             chat: { scope: { group: { is_direct_message: state === "DM" } } },
           }}
           activeContentTab={MyStreamWaveTab.CHAT}
-          setActiveContentTab={jest.fn()}
-          onSelectCuration={jest.fn()}
           isCompact={false}
           showBackButton={false}
           headerActionsTooltipId="header-actions"
@@ -320,8 +375,6 @@ describe("MyStreamWaveTabsHeader", () => {
           },
         }}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -343,13 +396,11 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(parentLink).toHaveAttribute("href", "/waves/parent-wave");
   });
 
-  it("hides score actions in the compact mobile header", () => {
+  it("keeps the score visible in the compact mobile header without adding REP", () => {
     render(
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={true}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -358,7 +409,7 @@ describe("MyStreamWaveTabsHeader", () => {
       />
     );
 
-    expect(screen.queryByTestId("wave-score")).toBeNull();
+    expect(screen.getByTestId("wave-score")).toBeInTheDocument();
     expect(screen.queryByText("Add REP")).toBeNull();
   });
 
@@ -367,8 +418,6 @@ describe("MyStreamWaveTabsHeader", () => {
       <MyStreamWaveTabsHeader
         wave={wave}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"
@@ -417,8 +466,6 @@ describe("MyStreamWaveTabsHeader", () => {
             description_drop: { id: "drop-1", parts: [{ content }] },
           }}
           activeContentTab={MyStreamWaveTab.CHAT}
-          setActiveContentTab={jest.fn()}
-          onSelectCuration={jest.fn()}
           isCompact={false}
           showBackButton={false}
           headerActionsTooltipId="header-actions"
@@ -448,8 +495,6 @@ describe("MyStreamWaveTabsHeader", () => {
           },
         }}
         activeContentTab={MyStreamWaveTab.CHAT}
-        setActiveContentTab={jest.fn()}
-        onSelectCuration={jest.fn()}
         isCompact={false}
         showBackButton={false}
         headerActionsTooltipId="header-actions"

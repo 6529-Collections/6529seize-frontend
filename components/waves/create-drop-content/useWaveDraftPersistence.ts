@@ -1,20 +1,42 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { EditorState } from "lexical";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import {
   clearWaveDraft,
   readRestorableWaveDraft,
+  WAVE_DRAFTS_CLEARED_EVENT,
   writeWaveDraft,
 } from "@/helpers/waves/wave-draft.helpers";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 
+const persistEditorState = (
+  waveId: string,
+  editorState: EditorState | null
+) => {
+  let serialized: string | null = null;
+  try {
+    serialized = editorState ? JSON.stringify(editorState.toJSON()) : null;
+  } catch {
+    serialized = null;
+  }
+  if (serialized) writeWaveDraft(waveId, serialized);
+  else clearWaveDraft(waveId);
+};
+
 /**
- * Persist an in-progress chat message across a full reload (e.g. the
- * new-version toast). Keyed by wave and scoped to the PRIMARY composer:
+ * Persist an in-progress chat message across a reload or a temporary tab
+ * change. Keyed by wave and scoped to the PRIMARY composer:
  * the stream composer is a single instance whose `activeDrop` can flip to
  * reply/quote (see MyStreamWaveChat), so `draftWaveId` is derived live.
  * The autosave effect early-returns whenever it is null, which is what
- * guarantees reply/quote/edit content is never written under the primary
+ * guarantees submission/reply/quote/edit content is never written under the primary
  * wave key — no cross-mode bleed.
  *
  * Restoration happens only at editor-creation time (initialConfig), so the
@@ -26,11 +48,13 @@ import type { ActiveDropState } from "@/types/dropInteractionTypes";
  */
 export const useWaveDraftPersistence = ({
   waveId,
+  isDropMode,
   activeDrop,
   editorState,
   dropEditorRefreshKey,
 }: {
   readonly waveId: string;
+  readonly isDropMode: boolean;
   readonly activeDrop: ActiveDropState | null;
   readonly editorState: EditorState | null;
   readonly dropEditorRefreshKey: number;
@@ -38,12 +62,14 @@ export const useWaveDraftPersistence = ({
   readonly initialDraftJson: string | null;
 } => {
   const { editingDropId } = useEditingDrop();
-  const draftWaveId = activeDrop === null && !editingDropId ? waveId : null;
+  const draftWaveId =
+    !isDropMode && activeDrop === null && !editingDropId ? waveId : null;
   const mountRefreshKeyRef = useRef(dropEditorRefreshKey);
   const isMountEditor = dropEditorRefreshKey === mountRefreshKeyRef.current;
   const [initialDraftJson] = useState<string | null>(() =>
     draftWaveId ? readRestorableWaveDraft(draftWaveId) : null
   );
+  const pendingSaveRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!draftWaveId) {
@@ -56,24 +82,45 @@ export const useWaveDraftPersistence = ({
       return;
     }
     const handle = setTimeout(() => {
-      if (!editorState) {
-        clearWaveDraft(draftWaveId);
-        return;
-      }
-      let serialized: string | null = null;
-      try {
-        serialized = JSON.stringify(editorState.toJSON());
-      } catch {
-        serialized = null;
-      }
-      if (serialized) {
-        writeWaveDraft(draftWaveId, serialized);
-      } else {
-        clearWaveDraft(draftWaveId);
-      }
+      pendingSaveRef.current = null;
+      persistEditorState(draftWaveId, editorState);
     }, 400);
-    return () => clearTimeout(handle);
+    pendingSaveRef.current = handle;
+    return () => {
+      clearTimeout(handle);
+      if (pendingSaveRef.current === handle) pendingSaveRef.current = null;
+    };
   }, [editorState, draftWaveId, isMountEditor]);
 
-  return { initialDraftJson: isMountEditor ? initialDraftJson : null };
+  const flushBeforeTabLeave = useEffectEvent(() => {
+    // Reply/quote/edit content must never replace the primary composer draft.
+    // A restoring editor may not have reported its initial state yet.
+    if (draftWaveId && editorState)
+      persistEditorState(draftWaveId, editorState);
+  });
+  useLayoutEffect(() => {
+    let profileInvalidated = false;
+    const invalidate = () => {
+      profileInvalidated = true;
+      // Text typed before a profile switch, or before a sign-out cleared this
+      // tab's drafts, is not saved after it.
+      if (pendingSaveRef.current !== null) {
+        clearTimeout(pendingSaveRef.current);
+        pendingSaveRef.current = null;
+      }
+    };
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, invalidate);
+    globalThis.addEventListener(WAVE_DRAFTS_CLEARED_EVENT, invalidate);
+    return () => {
+      globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, invalidate);
+      globalThis.removeEventListener(WAVE_DRAFTS_CLEARED_EVENT, invalidate);
+      // Fast tab/history changes can leave before the 400ms autosave runs.
+      // Flush during teardown while this primary editor still owns its draft.
+      if (!profileInvalidated) flushBeforeTabLeave();
+    };
+  }, []);
+
+  return {
+    initialDraftJson: draftWaveId && isMountEditor ? initialDraftJson : null,
+  };
 };

@@ -245,6 +245,9 @@
         "web-desktop-chromium"
       ]
     },
+    "/bookmarks": {
+      "classification": "auth"
+    },
     "/buidl": {
       "classification": "crawlable",
       "family": "info"
@@ -323,17 +326,13 @@
       "classification": "crawlable",
       "family": "tools"
     },
-    "/safe-collecting/[...section]": {
+    "/delegation/[...section]": {
       "classification": "fixture",
       "family": "tools",
       "fixture": {
-        "staging": "/safe-collecting/tap-guide",
-        "production": "/safe-collecting/tap-guide"
+        "staging": "/delegation/wallet-architecture",
+        "production": "/delegation/wallet-architecture"
       }
-    },
-    "/safe-collecting": {
-      "classification": "crawlable",
-      "family": "tools"
     },
     "/discover": {
       "classification": "crawlable",
@@ -421,9 +420,6 @@
       "classification": "exempt",
       "exemptReason": "Error-boundary demonstration page; crawling it asserts a crash by design."
     },
-    "/feed": {
-      "classification": "auth"
-    },
     "/gm-or-die-small-mp4": {
       "classification": "exempt",
       "exemptReason": "Bare media-asset wrapper page, not a user surface."
@@ -483,6 +479,21 @@
       "classification": "auth"
     },
     "/messages/create": {
+      "classification": "auth"
+    },
+    "/messages/encrypted": {
+      "classification": "auth"
+    },
+    "/messages/encrypted/[group]": {
+      "classification": "auth"
+    },
+    "/messages/encrypted/devices": {
+      "classification": "auth"
+    },
+    "/messages/encrypted/new": {
+      "classification": "auth"
+    },
+    "/messages/new": {
       "classification": "auth"
     },
     "/museum": {
@@ -2051,185 +2062,17 @@
       "classification": "crawlable",
       "family": "system"
     },
-    "/reviews/[review]": {
+    "/safe-collecting": {
+      "classification": "crawlable",
+      "family": "tools"
+    },
+    "/safe-collecting/[...section]": {
       "classification": "fixture",
+      "family": "tools",
       "fixture": {
-        "staging": "/reviews/6529-stream",
-        "production": "/reviews/6529-stream"
-      },
-      "family": "public-review"
-    },
-    "/reviews/[review]/[page]": {
-      "classification": "fixture",
-      "fixture": {
-        "staging": "/reviews/6529-stream/for-artists",
-        "production": "/reviews/6529-stream/for-artists"
-      },
-      "family": "public-review"
-    },
-    "/reviews/[review]/feedback": {
-      "classification": "fixture",
-      "fixture": {
-        "staging": "/reviews/6529-stream/feedback",
-        "production": "/reviews/6529-stream/feedback"
-      },
-      "family": "public-review"
-    },
-    "/reviews/[review]/reference": {
-      "classification": "fixture",
-      "fixture": {
-        "staging": "/reviews/6529-stream/reference",
-        "production": "/reviews/6529-stream/reference"
-      },
-      "family": "public-review"
-    },
-    "/reviews/[review]/reference/declarations/[declarationKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
+        "staging": "/safe-collecting/tap-guide",
+        "production": "/safe-collecting/tap-guide"
       }
-    },
-    "/reviews/[review]/reference/definitions/[definitionKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
-      }
-    },
-    "/reviews/[review]/reference/definitions/[definitionKey]/errors/[declarationKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
-      }
-    },
-    "/reviews/[review]/reference/definitions/[definitionKey]/events/[declarationKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
-      }
-    },
-    "/reviews/[review]/reference/definitions/[definitionKey]/functions/[declarationKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
-      }
-    },
-    "/reviews/[review]/reference/interfaces/[definitionKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
-      }
-    },
-    "/reviews/[review]/reference/sources/[...source]": {
-      "classification": "fixture",
-      "fixture": {
-        "staging": "/reviews/6529-stream/reference/sources/smart-contracts/core/StreamCore.sol",
-        "production": "/reviews/6529-stream/reference/sources/smart-contracts/core/StreamCore.sol"
-      },
-      "family": "public-review"
-    },
-    "/reviews/[review]/versions/[version]": {
-      "classification": "fixture",
-      "fixture": {
-        "staging": "/reviews/6529-stream/versions/2026-09-09.1",
-        "production": "/reviews/6529-stream/versions/2026-09-09.1"
-      },
-      "family": "public-review"
-    },
-    "/reviews/[review]/versions/[version]/[page]": {
-      "classification": "fixture",
-      "fixture": {
-        "staging": "/reviews/6529-stream/versions/2026-09-09.1/for-artists",
-        "production": "/reviews/6529-stream/versions/2026-09-09.1/for-artists"
-      },
-      "family": "public-review"
-    },
-    "/reviews/[review]/versions/[version]/feedback": {
-      "classification": "fixture",
-      "fixture": {
-        "staging": "/reviews/6529-stream/versions/2026-09-09.1/feedback",
-        "production": "/reviews/6529-stream/versions/2026-09-09.1/feedback"
-      },
-      "family": "public-review"
-    },
-    "/reviews/[review]/versions/[version]/reference": {
-      "classification": "fixture",
-      "fixture": {
-        "staging": "/reviews/6529-stream/versions/2026-09-09.1/reference",
-        "production": "/reviews/6529-stream/versions/2026-09-09.1/reference"
-      },
-      "family": "public-review"
-    },
-    "/reviews/[review]/versions/[version]/reference/declarations/[declarationKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
-      }
-    },
-    "/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
-      }
-    },
-    "/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/errors/[declarationKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
-      }
-    },
-    "/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/events/[declarationKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
-      }
-    },
-    "/reviews/[review]/versions/[version]/reference/definitions/[definitionKey]/functions/[declarationKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
-      }
-    },
-    "/reviews/[review]/versions/[version]/reference/interfaces/[definitionKey]": {
-      "classification": "fixture",
-      "family": "public-review",
-      "fixtureOmissions": {
-        "staging": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key.",
-        "production": "No declaration or definition key has been qualified from the published reference manifest for this route; do not substitute a guessed key."
-      }
-    },
-    "/reviews/[review]/versions/[version]/reference/sources/[...source]": {
-      "classification": "fixture",
-      "fixture": {
-        "staging": "/reviews/6529-stream/versions/2026-09-09.1/reference/sources/smart-contracts/core/StreamCore.sol",
-        "production": "/reviews/6529-stream/versions/2026-09-09.1/reference/sources/smart-contracts/core/StreamCore.sol"
-      },
-      "family": "public-review"
-    },
-    "/sentry-example-page": {
-      "classification": "exempt",
-      "exemptReason": "Sentry integration test page; intentionally throws."
     },
     "/slide-page/6529-initiatives": {
       "classification": "exempt",
@@ -2309,6 +2152,32 @@
       "classification": "crawlable",
       "family": "tools"
     },
+    "/validator": {
+      "classification": "auth"
+    },
+    "/validator/authorize": {
+      "classification": "crawlable"
+    },
+    "/validator/guide": {
+      "classification": "auth"
+    },
+    "/validator/hardware": {
+      "classification": "auth"
+    },
+    "/validator/known-issues": {
+      "classification": "auth"
+    },
+    "/validator/locked": {
+      "classification": "exempt",
+      "exemptReason": "The password form that the /validator gate shows in place of a locked page; reached by rewrite, not by link."
+    },
+    "/validator/releases": {
+      "classification": "auth"
+    },
+    "/wave-not-found": {
+      "classification": "exempt",
+      "exemptReason": "Internal rewrite target for malformed wave ids; always answers 404."
+    },
     "/waves": {
       "classification": "crawlable",
       "family": "social"
@@ -2323,30 +2192,22 @@
         "staging": "The production Releases wave ID is not a qualified staging fixture."
       }
     },
+    "/waves/[wave]/decisions": {
+      "classification": "exempt",
+      "family": "social",
+      "exemptReason": "Native competition rollout requires an isolated mock API and explicit feature flag."
+    },
+    "/waves/[wave]/decisions/[decision]": {
+      "classification": "exempt",
+      "family": "social",
+      "exemptReason": "Native competition rollout requires scoped competition fixtures."
+    },
     "/waves/create": {
       "classification": "auth"
     },
     "/xtdh": {
       "classification": "crawlable",
       "family": "info"
-    },
-    "/waves/[wave]/competitions": {
-      "classification": "exempt",
-      "family": "social",
-      "exemptReason": "Native competition rollout requires an isolated mock API and explicit feature flag."
-    },
-    "/waves/[wave]/competitions/[competition]": {
-      "classification": "exempt",
-      "family": "social",
-      "exemptReason": "Native competition rollout requires scoped competition fixtures."
-    },
-    "/delegation/[...section]": {
-      "classification": "fixture",
-      "family": "tools",
-      "fixture": {
-        "staging": "/delegation/wallet-architecture",
-        "production": "/delegation/wallet-architecture"
-      }
     }
   }
 }

@@ -27,9 +27,15 @@ jest.mock("@/components/waves/drops/Drop", () => {
     DropLocation: {
       MY_STREAM: "MY_STREAM",
       WAVE: "WAVE",
+      PROFILE: "PROFILE",
     },
   };
 });
+
+let mockSignedMessagesEnabled = false;
+jest.mock("@/lib/device-signing/feature", () => ({
+  isSignedMessagesEnabled: () => mockSignedMessagesEnabled,
+}));
 
 jest.mock("@/components/waves/drops/LightDrop", () => ({
   __esModule: true,
@@ -90,6 +96,7 @@ jest.mock("@/components/home/boosted/BoostedDropCompactChatItem", () => ({
 
 describe("DropsList", () => {
   beforeEach(() => {
+    mockSignedMessagesEnabled = false;
     dropProps = [];
     lightProps = [];
     wrapperProps = [];
@@ -129,9 +136,133 @@ describe("DropsList", () => {
     expect(dropProps).toHaveLength(1);
     expect(lightProps).toHaveLength(1);
     expect(wrapperProps).toEqual([
-      expect.objectContaining({ rootMargin: "1200px 0px" }),
-      expect.objectContaining({ rootMargin: "1200px 0px" }),
+      expect.objectContaining({
+        rootMargin: "1200px 0px",
+        enableLongContentCollapse: true,
+      }),
+      expect.objectContaining({
+        rootMargin: "1200px 0px",
+        enableLongContentCollapse: true,
+      }),
     ]);
+  });
+
+  it("keeps full content in focused single-drop views", () => {
+    render(
+      <DropsList
+        scrollContainerRef={{ current: null }}
+        drops={
+          [
+            {
+              stableKey: "a",
+              serial_no: 1,
+              type: DropSize.FULL,
+              wave: { id: "w" },
+            },
+          ] as any
+        }
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        serialNo={null}
+        targetDropRef={null}
+        onQuoteClick={jest.fn()}
+        dropViewDropId="drop-1"
+      />
+    );
+
+    expect(wrapperProps[0].enableLongContentCollapse).toBe(false);
+  });
+
+  it("keeps full content outside Wave and direct-message timelines", () => {
+    render(
+      <DropsList
+        scrollContainerRef={{ current: null }}
+        drops={
+          [
+            {
+              stableKey: "a",
+              serial_no: 1,
+              type: DropSize.FULL,
+              wave: { id: "w" },
+            },
+          ] as any
+        }
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        serialNo={null}
+        targetDropRef={null}
+        onQuoteClick={jest.fn()}
+        dropViewDropId={null}
+        location={"PROFILE" as any}
+      />
+    );
+
+    expect(wrapperProps[0].enableLongContentCollapse).toBe(false);
+  });
+
+  describe("signature groups", () => {
+    const chatDrop = (serialNo: number, handle: string) => ({
+      stableKey: `drop-${serialNo}`,
+      id: `drop-${serialNo}`,
+      serial_no: serialNo,
+      type: DropSize.FULL,
+      drop_type: "CHAT",
+      wave: { id: "w" },
+      author: { handle, is_anonymous: false },
+      created_at: 1_000 * serialNo,
+      parts: [{ content: "hi" }],
+      reply_to: null,
+    });
+    const renderList = (location?: any) =>
+      render(
+        <DropsList
+          scrollContainerRef={{ current: null }}
+          // Waves list drops newest first.
+          drops={
+            [
+              chatDrop(3, "bob"),
+              chatDrop(2, "alice"),
+              chatDrop(1, "alice"),
+            ] as any
+          }
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={false}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          serialNo={null}
+          targetDropRef={null}
+          parentContainerRef={undefined}
+          onQuoteClick={jest.fn()}
+          dropViewDropId={null}
+          location={location}
+        />
+      );
+    const groupOf = (id: string) =>
+      dropProps
+        .filter((props) => props.drop.id === id)
+        .at(-1)
+        ?.signatureGroup?.map((drop: any) => drop.id);
+
+    it("gives a chat header its group of posts by the same author", () => {
+      mockSignedMessagesEnabled = true;
+      renderList();
+      expect(groupOf("drop-1")).toEqual(["drop-1", "drop-2"]);
+      expect(groupOf("drop-2")).toBeUndefined();
+      expect(groupOf("drop-3")).toBeUndefined();
+    });
+
+    it("gives no groups in profile views, where every post has a header", () => {
+      mockSignedMessagesEnabled = true;
+      renderList("PROFILE");
+      expect(groupOf("drop-1")).toBeUndefined();
+    });
   });
 
   it("hydrates historical light drops after serial scrolling settles", () => {
@@ -163,6 +294,90 @@ describe("DropsList", () => {
 
     expect(wrapperProps).toHaveLength(1);
     expect(wrapperProps[0].suspendLightDropHydration).toBe(false);
+  });
+
+  it("re-renders only the new row and its neighbour when a message arrives", () => {
+    const makeDrop = (index: number) =>
+      ({
+        id: `drop-${index}`,
+        stableKey: `drop-${index}`,
+        stableHash: `drop-${index}`,
+        serial_no: index + 1,
+        type: DropSize.FULL,
+        wave: { id: "w" },
+      }) as ExtendedDrop;
+    // Newest first, as the wave store hands them over.
+    const drops = Array.from({ length: 40 }, (_, index) =>
+      makeDrop(39 - index)
+    );
+    const props: ComponentProps<typeof DropsList> = {
+      scrollContainerRef: { current: null },
+      drops,
+      showWaveInfo: false,
+      activeDrop: null,
+      showReplyAndQuote: true,
+      onReply: jest.fn(),
+      onReplyClick: jest.fn(),
+      serialNo: null,
+      targetDropRef: null,
+      onQuoteClick: jest.fn(),
+      dropViewDropId: null,
+    };
+    const { rerender } = render(<DropsList {...props} />);
+    expect(dropProps).toHaveLength(40);
+
+    dropProps = [];
+    wrapperProps = [];
+    highlightProps = [];
+    const incoming = makeDrop(40);
+    rerender(<DropsList {...props} drops={[incoming, ...drops]} />);
+
+    // The new row, and the previous newest row whose next neighbour changed.
+    expect(dropProps.map((item) => item.drop.id).sort()).toEqual([
+      "drop-39",
+      "drop-40",
+    ]);
+    expect(wrapperProps).toHaveLength(2);
+    expect(highlightProps).toHaveLength(2);
+  });
+
+  it("gives a memoized row the target ref when it becomes the serial target", () => {
+    const drops = Array.from(
+      { length: 5 },
+      (_, index) =>
+        ({
+          id: `drop-${index}`,
+          stableKey: `drop-${index}`,
+          stableHash: `drop-${index}`,
+          serial_no: index + 1,
+          type: DropSize.FULL,
+          wave: { id: "w" },
+        }) as ExtendedDrop
+    );
+    const targetDropRef = { current: null };
+    const props: ComponentProps<typeof DropsList> = {
+      scrollContainerRef: { current: null },
+      drops,
+      showWaveInfo: false,
+      activeDrop: null,
+      showReplyAndQuote: true,
+      onReply: jest.fn(),
+      onReplyClick: jest.fn(),
+      serialNo: null,
+      targetDropRef,
+      onQuoteClick: jest.fn(),
+      dropViewDropId: null,
+    };
+    const { rerender } = render(<DropsList {...props} />);
+    highlightProps = [];
+    rerender(<DropsList {...props} serialNo={3} />);
+    const target = highlightProps.filter((item) => item.serialNo === 3).at(-1);
+    expect(target).toEqual(
+      expect.objectContaining({ active: true, ref: targetDropRef })
+    );
+    expect(
+      highlightProps.filter((item) => item.serialNo !== 3 && item.active)
+    ).toEqual([]);
   });
 
   it("only re-renders the old and new reply or quote targets", () => {

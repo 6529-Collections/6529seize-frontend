@@ -24,6 +24,15 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { act } from "react-dom/test-utils";
 
+jest.mock("@/helpers/waves/wave-draft.helpers", () => ({
+  ...jest.requireActual("@/helpers/waves/wave-draft.helpers"),
+  clearAllWaveDrafts: jest.fn(),
+}));
+jest.mock("@/helpers/waves/create-wave-draft.helpers", () => ({
+  ...jest.requireActual("@/helpers/waves/create-wave-draft.helpers"),
+  removeCreateWaveDrafts: jest.fn(),
+}));
+
 // Mock the Reown AppKit hooks
 jest.mock("@reown/appkit/react", () => ({
   useAppKit: jest.fn(() => ({
@@ -73,6 +82,7 @@ jest.mock("@/services/auth/auth.utils", () => ({
   getAgentLoginActiveAddress: jest.fn(() => null),
   getConnectedWalletAccounts: jest.fn(() => []),
   getWalletAddress: jest.fn(() => null),
+  syncWalletAuthCookie: jest.fn(),
   isAuthAddressAuthorized: jest.fn(
     ({
       address,
@@ -2093,6 +2103,17 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
 
     expect(mockDisconnect).toHaveBeenCalled();
     expect(authUtils.removeAuthJwt).toHaveBeenCalled();
+    // Forced logouts use this path too; only the account menus remove drafts.
+    expect(
+      jest.requireMock<{ clearAllWaveDrafts: jest.Mock }>(
+        "@/helpers/waves/wave-draft.helpers"
+      ).clearAllWaveDrafts
+    ).not.toHaveBeenCalled();
+    expect(
+      jest.requireMock<{ removeCreateWaveDrafts: jest.Mock }>(
+        "@/helpers/waves/create-wave-draft.helpers"
+      ).removeCreateWaveDrafts
+    ).not.toHaveBeenCalled();
   });
 });
 
@@ -2264,5 +2285,23 @@ describe("Fail-Fast Security Tests", () => {
 
     // Verify disconnect was successful before auth cleanup failure
     expect(mockDisconnect).toHaveBeenCalled();
+  });
+});
+
+describe("SeizeConnectProvider session cookie", () => {
+  it("syncs the session cookie from the stored session once on mount", async () => {
+    jest.clearAllMocks();
+    const { rerender } = renderWithProvider();
+
+    await waitFor(() => {
+      expect(authUtils.syncWalletAuthCookie).toHaveBeenCalledTimes(1);
+    });
+
+    rerender(
+      <SeizeConnectProvider>
+        <TestComponent />
+      </SeizeConnectProvider>
+    );
+    expect(authUtils.syncWalletAuthCookie).toHaveBeenCalledTimes(1);
   });
 });

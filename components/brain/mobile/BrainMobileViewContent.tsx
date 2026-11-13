@@ -3,10 +3,7 @@
 import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
 import { usePathname, useSearchParams } from "next/navigation";
-import {
-  isCompetitionPathname,
-  isMultiCompetitionEnabled,
-} from "@/helpers/competition.helpers";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import BrainMobileWaves from "./BrainMobileWaves";
@@ -44,11 +41,6 @@ const MyStreamWaveLeaderboard = dynamic(
 
 const MyStreamWaveSubmissions = dynamic(
   () => import("../my-stream/MyStreamWaveSubmissions"),
-  { loading: () => <BrainMobileViewLoadingFallback /> }
-);
-
-const MyStreamWaveOutcome = dynamic(
-  () => import("../my-stream/MyStreamWaveOutcome"),
   { loading: () => <BrainMobileViewLoadingFallback /> }
 );
 
@@ -109,7 +101,6 @@ interface BrainMobileViewContentProps {
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
   readonly isApproveWave?: boolean | undefined;
-  readonly outcomesVisible?: boolean | undefined;
   readonly hasPolls?: boolean | undefined;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onOpenQuickVote: () => void;
@@ -124,13 +115,6 @@ interface BrainMobileWaveViewProps {
 
 interface BrainMobileCompetitionWaveViewProps extends BrainMobileWaveViewProps {
   readonly isCompetitionWave: boolean;
-}
-
-interface BrainMobileOutcomeViewProps {
-  readonly isCompetitionWave: boolean;
-  readonly isCurationWave: boolean;
-  readonly outcomesVisible: boolean;
-  readonly wave: ApiWave | null | undefined;
 }
 
 interface BrainMobileCurationViewProps {
@@ -205,19 +189,6 @@ function BrainMobileWinnersView({
   );
 }
 
-function BrainMobileOutcomeView({
-  isCompetitionWave,
-  isCurationWave,
-  outcomesVisible,
-  wave,
-}: BrainMobileOutcomeViewProps) {
-  if (!isCompetitionWave || isCurationWave || !outcomesVisible || !wave) {
-    return null;
-  }
-
-  return <MyStreamWaveOutcome key={wave.id} wave={wave} />;
-}
-
 function BrainMobileMyVotesView({
   isCompetitionWave,
   onDropClick,
@@ -270,7 +241,7 @@ function assertUnreachable(_value: never): null {
 }
 
 export default function BrainMobileViewContent({
-  activeView,
+  activeView: requestedView,
   activeWaveId,
   activeAboutTab = SidebarTab.ABOUT,
   onAboutTabChange = ignoreAboutTabChange,
@@ -279,13 +250,16 @@ export default function BrainMobileViewContent({
   isMemesWave,
   isRankWave,
   isApproveWave = false,
-  outcomesVisible = true,
   hasPolls = false,
   onDropClick,
   onOpenQuickVote,
   onPrefetchQuickVote,
   wave,
 }: BrainMobileViewContentProps) {
+  const activeView =
+    requestedView === BrainView.OUTCOME
+      ? BrainView.CONFIGURATION
+      : requestedView;
   const isCompetitionRoute = isCompetitionPathname(usePathname());
   const search = useSearchParams();
   const isCompetitionWave = isRankWave || isApproveWave;
@@ -305,7 +279,6 @@ export default function BrainMobileViewContent({
   // a legacy mobile view here first would expose the wrong content and controls.
   if (
     !isCompetitionRoute &&
-    isMultiCompetitionEnabled() &&
     waveCompetitionTabs[activeView as unknown as MyStreamWaveTab] !== undefined
   )
     return children;
@@ -327,11 +300,7 @@ export default function BrainMobileViewContent({
         />
       );
     case BrainView.CONFIGURATION:
-      if (
-        isCompetitionRoute ||
-        (isMultiCompetitionEnabled() && search.get("competition"))
-      )
-        return children;
+      if (isCompetitionRoute || search.get("competition")) return children;
       return wave ? (
         <div className="tw-h-full tw-min-h-0 tw-overflow-y-auto">
           <BrainRightSidebarConfiguration wave={wave} />
@@ -363,15 +332,6 @@ export default function BrainMobileViewContent({
           isCompetitionWave={isCompetitionWave}
           wave={wave}
           onDropClick={onDropClick}
-        />
-      );
-    case BrainView.OUTCOME:
-      return (
-        <BrainMobileOutcomeView
-          isCompetitionWave={isCompetitionWave}
-          isCurationWave={isCurationWave}
-          outcomesVisible={outcomesVisible}
-          wave={wave}
         />
       );
     case BrainView.MY_VOTES:

@@ -21,6 +21,7 @@ import MemesSubmissionDocumentation, {
 } from "./MemesSubmissionDocumentation";
 import { SubmissionStep } from "./types/Steps";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
 import { useMemesSubmissionIdentity } from "./hooks/useMemesSubmissionIdentity";
 import { useResubmissionDelete } from "./hooks/useResubmissionDelete";
@@ -118,7 +119,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     submissionPhase,
     submissionError,
     isSubmitting,
-  } = useArtworkSubmissionMutation();
+  } = useArtworkSubmissionMutation(presentationCompetition(wave));
   const {
     replacementDrop,
     isDeletingOriginal,
@@ -291,6 +292,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       operationalData,
       isAdditionalActionPromised,
       acceptedAgreement,
+      collaborators,
       proposalFrame,
     } = form.getSubmissionData();
     if (
@@ -331,6 +333,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         {
           ...(media.selectedFile ? { imageFile: media.selectedFile } : {}),
           proposalFrame,
+          collaborators,
           ...(media.existingMedia
             ? { existingMedia: media.existingMedia }
             : {}),
@@ -366,6 +369,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
           mimeType: media.externalMimeType,
         },
         proposalFrame,
+        collaborators,
         traits,
         operationalData,
         isAdditionalActionPromised,

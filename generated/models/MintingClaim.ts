@@ -11,12 +11,14 @@
  * Do not edit the class manually.
  */
 
+import { ApiMemeCollaborationCredit } from '../models/ApiMemeCollaborationCredit';
 import { MintingClaimAnimationDetails } from '../models/MintingClaimAnimationDetails';
 import { MintingClaimAttribute } from '../models/MintingClaimAttribute';
 import { MintingClaimImageDetails } from '../models/MintingClaimImageDetails';
 import { HttpFile } from '../http/http';
 
 export class MintingClaim {
+    'collaboration_credit'?: ApiMemeCollaborationCredit;
     'drop_id': string;
     'contract': string;
     'claim_id': number;
@@ -42,6 +44,12 @@ export class MintingClaim {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "collaboration_credit",
+            "baseName": "collaboration_credit",
+            "type": "ApiMemeCollaborationCredit",
+            "format": ""
+        },
         {
             "name": "drop_id",
             "baseName": "drop_id",

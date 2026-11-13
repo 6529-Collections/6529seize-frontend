@@ -10,7 +10,7 @@ import {
   InvalidRoleStateError,
 } from "@/errors/authentication";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { getNodeEnv, publicEnv } from "@/config/env";
+import { isDevAuthEnabled } from "@/config/devAuth";
 
 interface ImmediateValidationParams {
   currentAddress: string;
@@ -20,6 +20,7 @@ interface ImmediateValidationParams {
   isConnected: boolean;
   operationId: string;
   abortSignal: AbortSignal;
+  shouldPersistRefreshedSession?: () => boolean;
 }
 
 interface ImmediateValidationCallbacks {
@@ -44,9 +45,14 @@ interface ImmediateValidationResult {
 const isOperationValid = (
   currentAddress: string,
   connectionAddress: string,
-  abortSignal: AbortSignal
+  abortSignal: AbortSignal,
+  shouldPersistRefreshedSession?: () => boolean
 ): boolean => {
-  return !abortSignal.aborted && currentAddress === connectionAddress;
+  return (
+    !abortSignal.aborted &&
+    currentAddress === connectionAddress &&
+    (shouldPersistRefreshedSession?.() ?? true)
+  );
 };
 
 // Helper function to create a cancelled result
@@ -191,10 +197,7 @@ export const validateAuthImmediate = async ({
   params: ImmediateValidationParams;
   callbacks: ImmediateValidationCallbacks;
 }): Promise<ImmediateValidationResult> => {
-  const nodeEnv = getNodeEnv();
-  const isDevLikeEnv = nodeEnv === "development" || nodeEnv === "test";
-
-  if (publicEnv.USE_DEV_AUTH === "true" && isDevLikeEnv) {
+  if (isDevAuthEnabled()) {
     return createValidationResult(
       true,
       false,
@@ -213,11 +216,20 @@ export const validateAuthImmediate = async ({
     isConnected,
     operationId,
     abortSignal,
+    shouldPersistRefreshedSession,
   } = params;
+
+  const isCurrentOperation = () =>
+    isOperationValid(
+      currentAddress,
+      connectionAddress,
+      abortSignal,
+      shouldPersistRefreshedSession
+    );
 
   try {
     // Early validation check
-    if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
+    if (!isCurrentOperation()) {
       return createCancelledResult();
     }
 
@@ -231,10 +243,13 @@ export const validateAuthImmediate = async ({
         operationId,
         abortSignal,
         activeProfileProxy,
+        ...(shouldPersistRefreshedSession
+          ? { shouldPersistRefreshedSession }
+          : {}),
       });
 
     // Post-validation check
-    if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
+    if (!isCurrentOperation()) {
       return createCancelledResult();
     }
 
@@ -249,7 +264,7 @@ export const validateAuthImmediate = async ({
     );
   } catch (error) {
     // Only handle errors if operation is still valid
-    if (!isOperationValid(currentAddress, connectionAddress, abortSignal)) {
+    if (!isCurrentOperation()) {
       return createCancelledResult();
     }
 

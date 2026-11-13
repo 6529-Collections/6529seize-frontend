@@ -45,7 +45,7 @@ jest.mock(
   })
 );
 
-jest.mock("@/components/waves/create-wave/CreateWaveModal", () => ({
+jest.mock("@/components/waves/create-wave/LazyCreateWaveModal", () => ({
   __esModule: true,
   default: (props: any) => {
     createWaveModalMock(props);
@@ -119,7 +119,7 @@ describe("MyStreamWaveCreateActionsMenu", () => {
       screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: /^New competition/ })
+      screen.queryByRole("button", { name: /^New decision/ })
     ).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: /^New subwave/ }));
 

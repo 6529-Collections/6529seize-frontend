@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import { SingleWaveDropLog } from "@/components/waves/drop/SingleWaveDropLog";
+import type { ApiDropVoteEditLog } from "@/generated/models/ApiDropVoteEditLog";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 jest.mock("next/link", () => ({
@@ -34,12 +36,38 @@ jest.mock("@/components/common/SystemAdjustmentPill", () => ({
 }));
 
 describe("SingleWaveDropLog", () => {
+  beforeEach(() => {
+    mobileMock.mockReturnValue(false);
+  });
   const baseLog: any = {
     created_at: Date.now(),
     invoker: { handle: "0xabc", pfp: "" },
     contents: { oldVote: 0, newVote: 1 },
     id: "1",
   };
+  it.each([false, true])(
+    "keeps historical rows without a timestamp in compact layout %s",
+    (compact) => {
+      mobileMock.mockReturnValue(compact);
+      const { container } = render(
+        <SingleWaveDropLog
+          log={{
+            ...baseLog,
+            created_at: null,
+            invoker_proxy: { id: "original-proxy" },
+          }}
+          creditType={ApiWaveCreditType.Rep}
+        />
+      );
+      expect(screen.getByText("0xabc")).toBeInTheDocument();
+      expect(screen.getByText("voted")).toBeInTheDocument();
+      expect(
+        screen.getByText((_, element) => element?.textContent === "1 Rep")
+      ).toBeInTheDocument();
+      expect(screen.queryByText("1h")).toBeNull();
+      expect(container.querySelector("svg")).toBeNull();
+    }
+  );
   it("renders desktop layout with pill", () => {
     render(
       <SingleWaveDropLog
@@ -66,3 +94,53 @@ describe("SingleWaveDropLog", () => {
     expect(container.querySelector(".tw-size-7")).toBeInTheDocument();
   });
 });
+
+test("renders a native Decision vote change with a wallet fallback for the voter", () => {
+  const log: ApiDropVoteEditLog = {
+    id: "native-change",
+    old_vote: 7,
+    new_vote: -3,
+    created_at: 1,
+    voter: {
+      id: "native-voter",
+      level: 0,
+      classification: ApiProfileClassification.Pseudonym,
+      badges: { artist_of_main_stage_submissions: 0, artist_of_memes: 0 },
+      primary_address: "0x1111111111111111111111111111111111111111",
+    },
+  };
+  render(<SingleWaveDropLog log={log} creditType={ApiWaveCreditType.Rep} />);
+  expect(
+    screen.getByRole("link", {
+      name: "0x1111111111111111111111111111111111111111",
+    })
+  ).toHaveAttribute("href", "/0x1111111111111111111111111111111111111111");
+  expect(screen.getByText("changed from")).toBeInTheDocument();
+  expect(
+    screen.getByText((_, element) => element?.textContent === "-3 Rep")
+  ).toBeInTheDocument();
+});
+
+test.each([undefined, "not-a-number", Number.POSITIVE_INFINITY])(
+  "does not render malformed legacy vote values as NaN: %s",
+  (invalid) => {
+    render(
+      <SingleWaveDropLog
+        log={
+          {
+            id: "legacy",
+            created_at: 1,
+            invoker: { id: "legacy-voter", handle: "legacy-voter", pfp: null },
+            contents: { oldVote: invalid, newVote: invalid },
+          } as unknown as import("@/generated/models/ApiWaveLog").ApiWaveLog
+        }
+        creditType={ApiWaveCreditType.Rep}
+      />
+    );
+    expect(screen.getByText("voted")).toBeInTheDocument();
+    expect(screen.queryByText(/NaN/)).not.toBeInTheDocument();
+    expect(
+      screen.getByText((_, element) => element?.textContent === "0 Rep")
+    ).toBeInTheDocument();
+  }
+);

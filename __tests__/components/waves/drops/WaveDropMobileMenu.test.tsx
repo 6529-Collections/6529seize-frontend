@@ -10,7 +10,7 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import useCapacitor from "@/hooks/useCapacitor";
 import { render, screen } from "@testing-library/react";
-import type { ComponentProps } from "react";
+import { useState, type ComponentProps } from "react";
 import userEvent from "@testing-library/user-event";
 
 jest.mock(
@@ -32,11 +32,16 @@ const addReactionMock = jest.fn((props: any) => (
 const mobileWrapperMock = jest.fn((props: any) =>
   props.isOpen ? (
     <div data-testid="wrapper" data-z-index={props.zIndexClassName}>
+      {props.titleActions}
       {props.children}
     </div>
   ) : null
 );
 
+let mockSignedMessagesEnabled = false;
+jest.mock("@/lib/device-signing/feature", () => ({
+  isSignedMessagesEnabled: () => mockSignedMessagesEnabled,
+}));
 jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
   useDropInteractionRules: jest.fn(),
 }));
@@ -123,7 +128,7 @@ const unauthenticatedAuth: AuthProviderValue = {
   requestSessionUpgrade: jest.fn(async () => ({ success: false })),
   ensureActiveSessionV2WebSession: jest.fn(async () => false),
   setToast: jest.fn(),
-  setActiveProfileProxy: jest.fn(async () => {}),
+  setActiveProfileProxy: jest.fn(() => Promise.resolve(false)),
 };
 
 const dropFixture = {
@@ -224,6 +229,43 @@ beforeEach(() => {
     isWinner: false,
     isVotingEnded: false,
   });
+});
+
+test("releases the native modal before handing reply focus to the composer", async () => {
+  mockedUseCapacitor.mockReturnValue({ isCapacitor: true } as ReturnType<
+    typeof useCapacitor
+  >);
+  const onReply = jest.fn(() => {
+    expect(screen.queryByTestId("wrapper")).not.toBeInTheDocument();
+  });
+  function Menu() {
+    const [open, setOpen] = useState(true);
+    return (
+      <AuthContext.Provider
+        value={{ connectedProfile: { handle: "alice" } } as AuthProviderValue}
+      >
+        <button type="button" onClick={() => setOpen(true)}>
+          Open actions
+        </button>
+        <WaveDropMobileMenu
+          drop={dropFixture}
+          isOpen={open}
+          showReplyAndQuote
+          longPressTriggered={false}
+          setOpen={setOpen}
+          onReply={onReply}
+          onAddReaction={jest.fn()}
+        />
+      </AuthContext.Provider>
+    );
+  }
+  render(<Menu />);
+  for (let opening = 1; opening <= 3; opening++) {
+    await userEvent.click(screen.getByRole("button", { name: /^Reply$/ }));
+    expect(onReply).toHaveBeenCalledTimes(opening);
+    await userEvent.click(screen.getByRole("button", { name: "Open actions" }));
+    expect(screen.getByTestId("wrapper")).toBeInTheDocument();
+  }
 });
 
 test("never opens an empty curation-only sheet when no removal is available", () => {
@@ -763,6 +805,74 @@ test("shows only copy link in the mobile menu for guests", () => {
   expect(screen.queryByTestId("clap")).toBeNull();
   expect(screen.queryByTestId("set-pinned-drop")).toBeNull();
   expect(screen.queryByTestId("delete")).toBeNull();
+});
+
+test("offers guests the time switch, which needs no sign-in", () => {
+  const drop = {
+    id: "1",
+    serial_no: 1,
+    wave: { id: "w" },
+    drop_type: ApiDropType.Chat,
+    author: { handle: "alice" },
+  } as any;
+
+  render(
+    <AuthContext.Provider
+      value={
+        {
+          connectedProfile: null,
+          activeProfileProxy: null,
+        } as any
+      }
+    >
+      <WaveDropMobileMenu
+        drop={drop}
+        isOpen
+        showReplyAndQuote
+        longPressTriggered={false}
+        setOpen={jest.fn()}
+        onReply={jest.fn()}
+        onAddReaction={jest.fn()}
+      />
+    </AuthContext.Provider>
+  );
+
+  expect(
+    screen.getByRole("button", { name: "Show times in UTC for now" })
+  ).toBeInTheDocument();
+});
+
+test("lets guests open the signature check from the mobile menu", () => {
+  mockSignedMessagesEnabled = true;
+  try {
+    const drop = {
+      id: "1",
+      serial_no: 1,
+      wave: { id: "w" },
+      drop_type: ApiDropType.Chat,
+      author: { handle: "alice" },
+    } as any;
+    render(
+      <AuthContext.Provider
+        value={{ connectedProfile: null, activeProfileProxy: null } as any}
+      >
+        <WaveDropMobileMenu
+          drop={drop}
+          isOpen
+          showReplyAndQuote
+          longPressTriggered={false}
+          setOpen={jest.fn()}
+          onReply={jest.fn()}
+          onAddReaction={jest.fn()}
+        />
+      </AuthContext.Provider>
+    );
+    expect(
+      screen.getByRole("button", { name: "Signature" })
+    ).toBeInTheDocument();
+  } finally {
+    mockSignedMessagesEnabled = false;
+  }
 });
 
 test("uses the single-drop mobile menu layer override", () => {

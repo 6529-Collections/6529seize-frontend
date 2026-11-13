@@ -1,6 +1,7 @@
-import { publicEnv } from "@/config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
 import { isProductionBuildPhase } from "@/config/nextPhase";
-import { getServerEnvOrThrow } from "@/config/serverEnv";
+import { getServerEnvOrThrow, getStagingApiKey } from "@/config/serverEnv";
+import { API_AUTH_COOKIE } from "@/constants/constants";
 import {
   generateClientSignature,
   generateWafSignature,
@@ -38,8 +39,9 @@ const originalFetch = getOriginalFetch();
 const isApiRequest = (url: string | URL): boolean => {
   const urlString = typeof url === "string" ? url : url.toString();
   try {
-    const parsedUrl = new URL(urlString, publicEnv.API_ENDPOINT);
-    return parsedUrl.origin === new URL(publicEnv.API_ENDPOINT).origin;
+    const apiBase = getApiBase();
+    const parsedUrl = new URL(urlString, apiBase);
+    return parsedUrl.origin === new URL(apiBase).origin;
   } catch {
     return false;
   }
@@ -140,6 +142,34 @@ const fetchApiWithDeadline = async (
   }
 };
 
+// Server-held staging access fills in only when the caller sent none; the
+// signed path still prefers the visitor's own access cookie.
+const applyServerStagingAccess = (headers: Headers): void => {
+  const stagingApiKey = getStagingApiKey();
+  if (stagingApiKey && !headers.has(API_AUTH_COOKIE)) {
+    headers.set(API_AUTH_COOKIE, stagingApiKey);
+  }
+};
+
+// fetch keeps custom headers across redirects, including cross-origin ones, so
+// a request that still carries the server staging key never follows one.
+const withServerKeyRedirectGuard = (
+  init: RequestInit | undefined,
+  headers: Headers
+): RequestInit => {
+  const stagingApiKey = getStagingApiKey();
+  const carriesServerKey =
+    stagingApiKey !== undefined &&
+    headers.get(API_AUTH_COOKIE) === stagingApiKey;
+  return {
+    ...init,
+    headers,
+    ...(carriesServerKey && init?.redirect !== "manual"
+      ? { redirect: "error" as const }
+      : {}),
+  };
+};
+
 const createSsrFetch =
   (includeWalletAuth: boolean): typeof fetch =>
   async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -168,7 +198,7 @@ const createSsrFetch =
       (input instanceof Request ? input.method : undefined) ??
       "GET"
     ).toUpperCase();
-    const path = extractPathFromUrl(url, publicEnv.API_ENDPOINT);
+    const path = extractPathFromUrl(url, getApiBase());
 
     if (!path) {
       return originalFetch(input, init);
@@ -184,6 +214,7 @@ const createSsrFetch =
     if (!includeWalletAuth) {
       enhancedHeaders.delete("Authorization");
     }
+    applyServerStagingAccess(enhancedHeaders);
 
     try {
       const env = getServerEnvOrThrow();
@@ -195,7 +226,7 @@ const createSsrFetch =
       );
       return fetchApiWithDeadline(
         input,
-        { ...init, headers: enhancedHeaders },
+        withServerKeyRedirectGuard(init, enhancedHeaders),
         method,
         path
       );
@@ -235,7 +266,7 @@ const createSsrFetch =
 
     return fetchApiWithDeadline(
       input,
-      { ...init, headers: enhancedHeaders },
+      withServerKeyRedirectGuard(init, enhancedHeaders),
       method,
       path
     );

@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import {
   getHistoryWaveTab,
+  getRememberedTab,
   rememberHistoryWaveTab,
   useWaveTabPreference,
   WAVE_TAB_STORAGE_KEY,
@@ -108,3 +109,10 @@ it.each([null, undefined])(
     expect(window.history.state).toEqual(state);
   }
 );
+
+it.each([
+  MyStreamWaveTab.OUTCOME,
+  { tab: MyStreamWaveTab.OUTCOME, competitionId: "alpha" },
+])("restores retired Outcome preferences as Settings (%j)", (saved) => {
+  expect(getRememberedTab(saved)).toBe(MyStreamWaveTab.CONFIGURATION);
+});

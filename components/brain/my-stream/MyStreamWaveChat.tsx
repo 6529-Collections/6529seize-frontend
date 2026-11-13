@@ -1,7 +1,14 @@
 "use client";
 
+import { usePublicWaveFeedReady } from "@/components/waves/PublicWaveFeedReady";
+import { ChatFileDropOverlay } from "@/components/composer/ChatFileDropOverlay";
+import { useChatFileDrop } from "@/hooks/useChatFileDrop";
+import { getNativeComposerStyle } from "@/components/waves/composerPresentation";
+
 import { useAuth } from "@/components/auth/Auth";
+import SpinnerLoader from "@/components/common/SpinnerLoader";
 import { useNotificationsContext } from "@/components/notifications/NotificationsContext";
+import { LegacyDmComposerGate } from "@/components/e2ee/legacy/LegacyDmBanner";
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
 import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
 import {
@@ -9,11 +16,11 @@ import {
   WaveReplyThreadsProvider,
 } from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
 import { useCollapsedReplyThreadTarget } from "@/components/waves/drops/reply-threads/useCollapsedReplyThreadTarget";
-import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
 import {
-  DropMode,
-  type DropComposerDensity,
-} from "@/components/waves/dropComposer.types";
+  getIndividuallyCollapsedThread,
+  isWaveRepliesCollapsed,
+} from "@/helpers/waves/collapsed-replies.helpers";
+import { DropMode } from "@/components/waves/dropComposer.types";
 import {
   UnreadDividerProvider,
   useUnreadDivider,
@@ -27,7 +34,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRead";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { t } from "@/i18n/messages";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
@@ -45,7 +52,7 @@ import {
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
 import { useDmUnreadConversation } from "@/services/dm-unread/DmUnreadStateProvider";
 import dynamic from "next/dynamic";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import React, {
   useCallback,
   useEffect,
@@ -75,7 +82,7 @@ interface MyStreamWaveChatProps {
   readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
   readonly onCloseChatSubmitDrop?: (() => void) | undefined;
   readonly waveViewStyleOverride?: React.CSSProperties | undefined;
-  readonly composerDensity?: DropComposerDensity | undefined;
+  readonly showLegacyDmBanner?: boolean;
 }
 
 interface WaveChatLeaveHandlerProps {
@@ -135,13 +142,17 @@ interface WaveLeaderboardCurationDropModalProps {
   readonly initialUrl?: string | null | undefined;
 }
 
-const NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING =
-  "var(--native-keyboard-composer-bottom-padding, max(env(safe-area-inset-bottom,0px), 0.5rem))";
 const noop = () => {};
 
 const WaveGallery = dynamic<WaveGalleryProps>(
   () => import("@/components/waves/gallery").then((mod) => mod.WaveGallery),
-  { loading: () => null }
+  {
+    loading: () => (
+      <div className="tw-flex tw-h-full tw-items-center tw-justify-center">
+        <SpinnerLoader />
+      </div>
+    ),
+  }
 );
 
 const PrivilegedDropCreator = dynamic<PrivilegedDropCreatorProps>(
@@ -206,23 +217,22 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   chatSubmitDropAction = null,
   onCloseChatSubmitDrop,
   waveViewStyleOverride,
-  composerDensity = "default",
+  showLegacyDmBanner = true,
 }) => {
-  const router = useRouter();
+  // Gallery replaces the chat that normally releases the public-feed loading cover.
+  usePublicWaveFeedReady(viewMode === "gallery");
   const dmUnreadConversation = useDmUnreadConversation(wave.id);
   const isDirectMessage = isWaveDirectMessage(wave.id, wave);
-  const { fetchAroundSerialNo } = useMyStream();
+  const { fetchAroundSerialNo } = useMyStreamActions();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by MyStreamWave Suspense wrapper
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const galleryContainerRef = useRef<HTMLDivElement>(null);
-  const dragCounterRef = useRef(0);
   const externalAttachmentDropTokenRef = useRef(0);
   const { connectedProfile, setToast } = useAuth();
   const { editingDropId } = useEditingDrop();
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
-  const [isDragDropActive, setIsDragDropActive] = useState(false);
   const [externalAttachmentDrop, setExternalAttachmentDrop] = useState<{
     readonly token: number;
     readonly files: File[];
@@ -301,23 +311,21 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const requestedScrollTarget =
     initialDropState?.waveId === wave.id ? initialDropState.serialNo : null;
   const collapseReplies = isWaveRepliesCollapsed(wave);
+  const replyThreadsEnabled = collapseReplies || !isDirectMessage;
   const replyThreadsStore = useExpandedReplyThreadsStore();
-  // A link to a collapsed reply opens its parent's thread instead.
+  // Resolve the thread to load while retaining the linked reply to reveal.
   const replyThreadTarget = useCollapsedReplyThreadTarget({
-    enabled: collapseReplies && viewMode !== "gallery",
+    enabled: viewMode !== "gallery" && replyThreadsEnabled,
+    collapseAll: collapseReplies,
     waveId: wave.id,
     serialNo: requestedScrollTarget,
   });
-  const scrollTarget =
-    replyThreadTarget?.parentSerialNo ?? requestedScrollTarget;
-
   useEffect(() => {
     if (!replyThreadTarget) {
       return;
     }
-    replyThreadsStore.setExpanded(replyThreadTarget.parentDropId, true);
     fetchAroundSerialNo(wave.id, replyThreadTarget.parentSerialNo);
-  }, [fetchAroundSerialNo, replyThreadTarget, replyThreadsStore, wave.id]);
+  }, [fetchAroundSerialNo, replyThreadTarget, wave.id]);
 
   let dividerTarget = firstUnreadSerialNo;
   if (initialDropState?.waveId === wave.id) {
@@ -354,8 +362,24 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     const href = params.toString()
       ? `${pathname}?${params.toString()}`
       : pathname || getHomeRoute();
-    router.replace(href, { scroll: false });
-  }, [initialDropState, pathname, router, searchParams, viewMode]);
+    // This is one-time URL cleanup, not navigation. A router replacement
+    // removes the document-only feed wrappers and remounts the chat at latest.
+    const previousState: unknown = globalThis.history.state;
+    globalThis.history.replaceState(null, "", href + globalThis.location.hash);
+    // Preserve visit-specific tab metadata, keeping Next's updated state.
+    const currentState: unknown = globalThis.history.state;
+    globalThis.history.replaceState(
+      {
+        ...(typeof previousState === "object" && previousState !== null
+          ? previousState
+          : {}),
+        ...(typeof currentState === "object" && currentState !== null
+          ? currentState
+          : {}),
+      },
+      ""
+    );
+  }, [initialDropState, pathname, searchParams, viewMode]);
 
   const { waveViewStyle } = useLayout();
   const effectiveWaveViewStyle = waveViewStyleOverride ?? waveViewStyle;
@@ -372,14 +396,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     ? "tw-mt-auto tw-bg-iron-950"
     : "tw-mt-auto tw-bg-iron-950 tw-pb-[env(safe-area-inset-bottom,0px)]";
   const composerContainerStyle = useMemo<React.CSSProperties | undefined>(
-    () =>
-      isApp
-        ? {
-            paddingBottom: NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING,
-            transition:
-              "padding-bottom var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)",
-          }
-        : undefined,
+    () => getNativeComposerStyle(isApp),
     [isApp]
   );
 
@@ -408,12 +425,13 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onDropAddedToQueue = useCallback(() => {
     // Show a new reply where it lands: in its parent's thread.
     const replyTarget = activeDropRef.current;
-    if (
-      collapseReplies &&
-      replyTarget?.action === ActiveDropAction.REPLY &&
-      !replyTarget.drop.reply_to
-    ) {
-      replyThreadsStore.setExpanded(replyTarget.drop.id, true);
+    if (replyTarget?.action === ActiveDropAction.REPLY) {
+      const thread = getIndividuallyCollapsedThread(replyTarget.drop);
+      if (thread) {
+        replyThreadsStore.setExpanded(thread.id, true);
+      } else if (collapseReplies && !replyTarget.drop.reply_to) {
+        replyThreadsStore.setExpanded(replyTarget.drop.id, true);
+      }
     }
     setActiveDropForWave(null);
   }, [collapseReplies, replyThreadsStore, setActiveDropForWave]);
@@ -478,25 +496,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       : null;
   const isChatSubmitFlowOpen = activeChatSubmitDropExperience !== null;
 
-  const shouldHandleContainerFileDrop = (
-    event: React.DragEvent<HTMLElement>
-  ): boolean => {
-    const target = event.target;
-    if (!(target instanceof Element)) {
-      return true;
-    }
-
-    return (
-      target.closest(
-        '[contenteditable="true"], input, textarea, [role="textbox"]'
-      ) === null
-    );
-  };
-
-  const isFileDragEvent = (event: React.DragEvent<HTMLElement>): boolean => {
-    return Array.from(event.dataTransfer.types).includes("Files");
-  };
-
   const filterSupportedFiles = (files: File[]) => {
     const supported: File[] = [];
     const unsupported: File[] = [];
@@ -510,69 +509,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     });
 
     return { supported, unsupported };
-  };
-
-  const resetDragDropState = useCallback(() => {
-    dragCounterRef.current = 0;
-    setIsDragDropActive(false);
-  }, []);
-
-  useEffect(() => {
-    globalThis.window.addEventListener("dragend", resetDragDropState);
-    globalThis.window.addEventListener("drop", resetDragDropState);
-
-    return () => {
-      globalThis.window.removeEventListener("dragend", resetDragDropState);
-      globalThis.window.removeEventListener("drop", resetDragDropState);
-    };
-  }, [resetDragDropState]);
-
-  const onContainerDragEnter = (event: React.DragEvent<HTMLElement>) => {
-    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    dragCounterRef.current += 1;
-    setIsDragDropActive(true);
-  };
-
-  const onContainerDragOver = (event: React.DragEvent<HTMLElement>) => {
-    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    event.dataTransfer.dropEffect = "copy";
-  };
-
-  const onContainerDragLeave = (event: React.DragEvent<HTMLElement>) => {
-    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    dragCounterRef.current = Math.max(0, dragCounterRef.current - 1);
-    if (dragCounterRef.current === 0) {
-      setIsDragDropActive(false);
-    }
-  };
-
-  const onContainerDrop = (event: React.DragEvent<HTMLElement>) => {
-    if (!isFileDragEvent(event) || !shouldHandleContainerFileDrop(event)) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    dragCounterRef.current = 0;
-    setIsDragDropActive(false);
-
-    const droppedFiles = Array.from(event.dataTransfer.files);
-    if (droppedFiles.length === 0) {
-      return;
-    }
-
-    handleExternalAttachmentFiles(droppedFiles);
   };
 
   const handleExternalAttachmentFiles = (files: File[]) => {
@@ -594,6 +530,8 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
       setToast(getUnsupportedUploadToast(unsupported, locale));
     }
   };
+
+  const fileDrop = useChatFileDrop({ onFiles: handleExternalAttachmentFiles });
 
   if (viewMode === "gallery") {
     return (
@@ -626,39 +564,24 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
         className={`${containerClassName} tw-relative`}
         style={effectiveWaveViewStyle}
         aria-label={t(locale, "waves.chat.fileUploadAreaAriaLabel")}
-        onDragEnter={onContainerDragEnter}
-        onDragOver={onContainerDragOver}
-        onDragLeave={onContainerDragLeave}
-        onDrop={onContainerDrop}
+        {...fileDrop.handlers}
       >
-        {isDragDropActive && (
-          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-40 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dotted tw-border-primary-400 tw-bg-iron-900/75 tw-p-6">
-            <div className="tw-max-w-3xl tw-p-4 tw-text-center">
-              <p className="tw-text-base tw-font-semibold tw-text-primary-300">
-                {t(locale, "drop.upload.dropHere")}
-              </p>
-              <p className="tw-mt-2 tw-text-xs tw-text-iron-300">
-                {getAcceptedUploadFormats(locale)}
-              </p>
-            </div>
-          </div>
+        {fileDrop.active && (
+          <ChatFileDropOverlay description={getAcceptedUploadFormats(locale)} />
         )}
         <WaveReplyThreadsProvider
-          enabled={collapseReplies}
+          enabled={replyThreadsEnabled}
           wave={wave}
           store={replyThreadsStore}
         >
           <WaveDropsAllWithoutProvider
-            key={
-              replyThreadTarget
-                ? `${wave.id}-thread-${replyThreadTarget.parentSerialNo}`
-                : wave.id
-            }
+            key={[wave.id, replyThreadTarget?.replySerialNo].join(":")}
             waveId={wave.id}
             wave={wave}
             onReply={handleReply}
             activeDrop={activeDrop}
-            initialDrop={scrollTarget}
+            initialDrop={replyThreadTarget ? null : requestedScrollTarget}
+            initialThreadReply={replyThreadTarget}
             dividerSerialNo={dividerTarget}
             unreadCount={
               isDirectMessage
@@ -679,27 +602,35 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             className={composerContainerClassName}
             style={composerContainerStyle}
           >
-            <CreateDropWaveWrapper composerDensity={composerDensity}>
-              <PrivilegedDropCreator
-                activeDrop={activeDrop}
-                onCancelReplyQuote={onCancelReplyQuote}
-                onReplyTargetUnavailable={onCancelReplyQuote}
-                onDropAddedToQueue={onDropAddedToQueue}
-                wave={wave}
-                dropId={null}
-                fixedDropMode={fixedDropMode}
-                externalAttachmentDrop={externalAttachmentDrop}
-                onExternalAttachmentDropConsumed={() =>
-                  setExternalAttachmentDrop(null)
-                }
-                onSubmitCurationUrl={chatCurationUrlSubmitHandler}
-                canSubmitCurationUrl={canSubmitChatCurationUrl}
-                curationUrlSubmitRestrictionMessage={
-                  chatCurationUrlSubmitRestrictionMessage
-                }
-                termsSignatureFlowEnabled={!isChatSubmitFlowOpen}
-              />
-            </CreateDropWaveWrapper>
+            <LegacyDmComposerGate
+              wave={wave}
+              enabled={isDirectMessage}
+              showBanner={showLegacyDmBanner}
+            >
+              <CreateDropWaveWrapper
+                iosMaxHeight={effectiveWaveViewStyle.height}
+              >
+                <PrivilegedDropCreator
+                  activeDrop={activeDrop}
+                  onCancelReplyQuote={onCancelReplyQuote}
+                  onReplyTargetUnavailable={onCancelReplyQuote}
+                  onDropAddedToQueue={onDropAddedToQueue}
+                  wave={wave}
+                  dropId={null}
+                  fixedDropMode={fixedDropMode}
+                  externalAttachmentDrop={externalAttachmentDrop}
+                  onExternalAttachmentDropConsumed={() =>
+                    setExternalAttachmentDrop(null)
+                  }
+                  onSubmitCurationUrl={chatCurationUrlSubmitHandler}
+                  canSubmitCurationUrl={canSubmitChatCurationUrl}
+                  curationUrlSubmitRestrictionMessage={
+                    chatCurationUrlSubmitRestrictionMessage
+                  }
+                  termsSignatureFlowEnabled={!isChatSubmitFlowOpen}
+                />
+              </CreateDropWaveWrapper>
+            </LegacyDmComposerGate>
           </div>
         )}
         {showFixedParticipationSubmit && (

@@ -1,5 +1,5 @@
 import WavesMessagesWrapper from "@/components/shared/WavesMessagesWrapper";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 
 let mockBreakpoint = "LG";
@@ -7,6 +7,10 @@ let mockWaveId: string | null = null;
 let mockIsRightSidebarOpen = false;
 let mockEffectiveDropId: string | undefined;
 let mockSearchParams = new URLSearchParams();
+let mockIsEncryptedRoute = false;
+let mockPathname = "/waves";
+// The shared wave selection; undefined renders outside a MyStream provider.
+let mockSelectedWaveId: string | null | undefined;
 
 const mockChildMounted = jest.fn();
 const mockCloseRightSidebar = jest.fn();
@@ -48,13 +52,15 @@ jest.mock("framer-motion", () => {
 });
 
 jest.mock("next/navigation", () => ({
-  usePathname: () => "/waves",
+  usePathname: () => mockPathname,
   useRouter: () => ({ replace: mockRouterReplace }),
   useSearchParams: () => mockSearchParams,
 }));
 
 jest.mock("@/helpers/navigation.helpers", () => ({
+  ...jest.requireActual("@/helpers/navigation.helpers"),
   getActiveWaveIdFromUrl: () => mockWaveId,
+  isEncryptedMessagesPathname: () => mockIsEncryptedRoute,
 }));
 
 jest.mock("@tanstack/react-query", () => ({
@@ -93,9 +99,13 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStreamOptional: () => ({
+  useMyStreamActionsOptional: () => ({
     requestMainWavesList: mockRequestMainWavesList,
   }),
+  useMyStreamOptional: () =>
+    mockSelectedWaveId === undefined
+      ? null
+      : { activeWave: { id: mockSelectedWaveId } },
 }));
 
 jest.mock("@/contexts/wave/WaveChatScrollContext", () => ({
@@ -149,7 +159,7 @@ jest.mock("@/components/brain/BrainDesktopDrop", () => ({
   default: () => <div data-testid="drop-overlay" />,
 }));
 
-jest.mock("@/components/waves/create-wave/CreateWaveModal", () => ({
+jest.mock("@/components/waves/create-wave/LazyCreateWaveModal", () => ({
   __esModule: true,
   default: () => <div data-testid="create-wave-modal" />,
 }));
@@ -170,10 +180,13 @@ function renderWrapper({ defaultPath = "/waves" } = {}) {
 describe("WavesMessagesWrapper", () => {
   beforeEach(() => {
     mockBreakpoint = "LG";
+    mockPathname = "/waves";
     mockWaveId = null;
     mockIsRightSidebarOpen = false;
     mockEffectiveDropId = undefined;
     mockSearchParams = new URLSearchParams();
+    mockIsEncryptedRoute = false;
+    mockSelectedWaveId = undefined;
     jest.clearAllMocks();
     mockUseQuery.mockReturnValue({ data: undefined, error: null });
   });
@@ -200,6 +213,27 @@ describe("WavesMessagesWrapper", () => {
       "true"
     );
     expect(mockChildMounted).not.toHaveBeenCalled();
+  });
+
+  it("mounts encrypted chat routes as main content on small screens", () => {
+    mockBreakpoint = "S";
+    mockWaveId = null;
+    mockIsEncryptedRoute = true;
+
+    renderWrapper({ defaultPath: "/messages" });
+
+    expect(screen.getByTestId("main-content")).toBeInTheDocument();
+    expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
+    expect(mockChildMounted).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the new-message page as main content on small screens", () => {
+    mockBreakpoint = "S";
+    mockPathname = "/messages/new";
+    renderWrapper({ defaultPath: "/messages" });
+
+    expect(screen.getByTestId("main-content")).toBeInTheDocument();
+    expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
   });
 
   it("renders the direct profile feed query on small screens", () => {
@@ -307,6 +341,91 @@ describe("WavesMessagesWrapper", () => {
     );
   });
 
+  it.each(["S", "LG"])(
+    "covers the wave immediately while fetching a deep-linked drop (%s)",
+    (breakpoint) => {
+      mockBreakpoint = breakpoint;
+      mockWaveId = "wave-1";
+      mockEffectiveDropId = "drop-1";
+      mockIsRightSidebarOpen = true;
+      const { rerender } = renderWrapper();
+      expect(
+        screen.getByRole("status", { name: "Loading…" })
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("main-content").parentElement).toHaveAttribute(
+        "inert"
+      );
+      expect(screen.getByTestId("right-sidebar")).toHaveAttribute(
+        "data-open",
+        "false"
+      );
+      // keepPreviousData may still contain a different drop; it must not flash.
+      mockUseQuery.mockReturnValue({
+        data: { id: "previous-drop" },
+        error: null,
+      });
+      rerender(
+        <WavesMessagesWrapper>
+          <MainContentProbe />
+        </WavesMessagesWrapper>
+      );
+      expect(screen.getByTestId("single-drop-loading")).toBeInTheDocument();
+      expect(screen.queryByTestId("drop-overlay")).not.toBeInTheDocument();
+      mockUseQuery.mockReturnValue({ data: { id: "drop-1" }, error: null });
+      rerender(
+        <WavesMessagesWrapper>
+          <MainContentProbe />
+        </WavesMessagesWrapper>
+      );
+      expect(screen.getByTestId("drop-overlay")).toBeInTheDocument();
+      expect(
+        screen.queryByTestId("single-drop-loading")
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it("keeps failed drop loads in the detail surface with retry and close actions", () => {
+    mockWaveId = "wave-1";
+    mockEffectiveDropId = "drop-1";
+    mockSearchParams.set("drop", "drop-1");
+    window.history.replaceState(null, "", "/waves?drop=drop-1&tab=chat");
+    const retry = jest.fn();
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      error: new Error("Unavailable"),
+      refetch: retry,
+    });
+    const { rerender } = renderWrapper();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "This content could not be loaded."
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(retry).toHaveBeenCalledTimes(1);
+    mockUseQuery.mockReturnValue({
+      data: undefined,
+      error: new Error("Unavailable"),
+      refetch: retry,
+      isFetching: true,
+    });
+    rerender(
+      <WavesMessagesWrapper>
+        <MainContentProbe />
+      </WavesMessagesWrapper>
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Loading…" })
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Close panel" }));
+    expect(window.location.pathname + window.location.search).toBe(
+      "/waves?tab=chat"
+    );
+    expect(mockRouterReplace).not.toHaveBeenCalled();
+  });
+
   it("suppresses the sidebar while a drop overlay is open", () => {
     mockWaveId = "wave-1";
     mockIsRightSidebarOpen = true;
@@ -359,5 +478,79 @@ describe("WavesMessagesWrapper", () => {
     expect(screen.getByTestId("right-sidebar")).toBe(controller);
     expect(controller).toHaveAttribute("data-open", "true");
     expect(controller).toHaveAttribute("data-wave-id", "wave-2");
+  });
+
+  describe("with a shared wave selection", () => {
+    const rerenderWrapper = (
+      rerender: ReturnType<typeof render>["rerender"],
+      defaultPath = "/waves"
+    ) =>
+      rerender(
+        <WavesMessagesWrapper defaultPath={defaultPath}>
+          <MainContentProbe />
+        </WavesMessagesWrapper>
+      );
+
+    it("opens the selected wave in the same render on small screens", () => {
+      mockBreakpoint = "S";
+      mockWaveId = null;
+      mockSelectedWaveId = null;
+      const { rerender } = renderWrapper();
+      expect(screen.getByTestId("left-sidebar")).toBeInTheDocument();
+      expect(screen.queryByTestId("main-content")).not.toBeInTheDocument();
+
+      // The selection changes with the history entry; the route still reads
+      // the list until the router commits its own update.
+      mockSelectedWaveId = "wave-1";
+      rerenderWrapper(rerender);
+
+      expect(screen.getByTestId("main-content")).toBeInTheDocument();
+      expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
+      expect(screen.getByTestId("right-sidebar")).toHaveAttribute(
+        "data-wave-id",
+        "wave-1"
+      );
+    });
+
+    it("returns to the list in the same render as the selection clears", () => {
+      mockBreakpoint = "S";
+      mockWaveId = "wave-1";
+      mockSelectedWaveId = "wave-1";
+      const { rerender } = renderWrapper();
+      expect(screen.getByTestId("main-content")).toBeInTheDocument();
+
+      mockSelectedWaveId = null;
+      rerenderWrapper(rerender);
+
+      expect(screen.getByTestId("left-sidebar")).toBeInTheDocument();
+      expect(screen.queryByTestId("main-content")).not.toBeInTheDocument();
+    });
+
+    it("keeps the selected wave once the route agrees", () => {
+      mockBreakpoint = "S";
+      mockWaveId = "wave-1";
+      mockSelectedWaveId = "wave-1";
+
+      renderWrapper();
+
+      expect(screen.getByTestId("main-content")).toBeInTheDocument();
+      expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
+    });
+
+    it("keeps Messages pages on the routed conversation", () => {
+      mockBreakpoint = "S";
+      mockWaveId = null;
+      mockSelectedWaveId = "dm-1";
+      const { rerender } = renderWrapper({ defaultPath: "/messages" });
+      expect(screen.getByTestId("left-sidebar")).toBeInTheDocument();
+      expect(screen.queryByTestId("main-content")).not.toBeInTheDocument();
+
+      mockWaveId = "dm-1";
+      mockSelectedWaveId = null;
+      rerenderWrapper(rerender, "/messages");
+
+      expect(screen.getByTestId("main-content")).toBeInTheDocument();
+      expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
+    });
   });
 });

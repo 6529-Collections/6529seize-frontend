@@ -1,5 +1,20 @@
+// Auth uses the mocked connection context below rather than a live Wagmi provider.
+jest.mock("@testing-library/react", () =>
+  jest.requireActual("@testing-library/react")
+);
 jest.mock("@/components/auth/useSessionRecovery", () => ({
   useSessionRecovery: jest.fn(),
+}));
+jest.mock("@/services/auth/displayed-wallet-guard", () => ({
+  showSignedInWallet: jest.fn(() => () => undefined),
+}));
+jest.mock("@/helpers/waves/wave-draft.helpers", () => ({
+  ...jest.requireActual("@/helpers/waves/wave-draft.helpers"),
+  clearAllWaveDrafts: jest.fn(),
+}));
+jest.mock("@/helpers/waves/create-wave-draft.helpers", () => ({
+  ...jest.requireActual("@/helpers/waves/create-wave-draft.helpers"),
+  removeCreateWaveDrafts: jest.fn(),
 }));
 import {
   act,
@@ -18,9 +33,24 @@ import { mockTitleContextModule } from "@/__tests__/utils/titleTestUtils";
 import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import type * as AuthUtilsModule from "@/services/auth/auth.utils";
+import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
 import type * as SessionV2Module from "@/services/auth/session-v2.utils";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { publicEnv } from "@/config/env";
+import {
+  appSignInChallenge,
+  siweSignInChallenge,
+} from "./signInChallengeFixtures";
+
+/** The challenge the API issues to this client type for a wallet. */
+const signInChallengeFor = (address: string): string =>
+  (
+    jest.requireMock("@/services/auth/session-v2.utils") as {
+      getSessionClientType: () => string;
+    }
+  ).getSessionClientType() === "native"
+    ? appSignInChallenge({ address })
+    : siweSignInChallenge({ address });
 
 const mockQueryClient = {
   getQueryData: jest.fn(),
@@ -519,10 +549,12 @@ describe("Auth component", () => {
     const sessionV2 = require("@/services/auth/session-v2.utils");
     sessionV2.getSessionClientType.mockReturnValue("web");
     sessionV2.getSessionNonce.mockReset();
-    sessionV2.getSessionNonce.mockResolvedValue({
-      signable_message: "sign this message exactly",
-      server_signature: "server-signature",
-    });
+    sessionV2.getSessionNonce.mockImplementation(
+      async ({ signerAddress }: { readonly signerAddress: string }) => ({
+        signable_message: signInChallengeFor(signerAddress),
+        server_signature: "server-signature",
+      })
+    );
     sessionV2.loginWithSessionV2.mockReset();
     sessionV2.persistSessionResponse.mockReset();
     sessionV2.persistSessionResponse.mockResolvedValue(true);
@@ -539,6 +571,166 @@ describe("Auth component", () => {
   afterEach(() => {
     publicEnv.USE_DEV_AUTH = ORIGINAL_USE_DEV_AUTH;
     jest.restoreAllMocks();
+  });
+
+  it("does not overwrite a newer saved profile while this tab still has stale context", async () => {
+    const oldAddress = "0x1111111111111111111111111111111111111111";
+    const chosenAddress = "0x2222222222222222222222222222222222222222";
+    walletAddress = oldAddress;
+    let storedActiveAddress = oldAddress;
+    const utils = require("@/services/auth/auth.utils");
+    utils.getWalletAddress.mockImplementation(() => storedActiveAddress);
+    utils.getAuthJwt.mockReturnValue("saved-access-token");
+    utils.hasActiveSessionV2Auth.mockReturnValue(true);
+    utils.setActiveWalletAccount.mockImplementation((address: string) => {
+      storedActiveAddress = address;
+      return true;
+    });
+    mockUseIdentity.mockReturnValue({
+      profile: {
+        id: "old-profile",
+        handle: "old-profile",
+        query: "old-profile",
+        primary_wallet: oldAddress,
+        wallets: [],
+      },
+      isLoading: false,
+    });
+    const validate = jest.mocked(validateAuthImmediate);
+    const pendingValidation =
+      createDeferredPromise<
+        Awaited<ReturnType<typeof validateAuthImmediate>>
+      >();
+    validate.mockReturnValueOnce(pendingValidation.promise);
+    render(
+      <ReactQueryWrapperContext.Provider
+        value={createReactQueryWrapperContextValue()}
+      >
+        <Auth>
+          <ShowAuthState />
+        </Auth>
+      </ReactQueryWrapperContext.Provider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("authenticated")).toHaveTextContent("true")
+    );
+    expect(utils.setActiveWalletAccount).not.toHaveBeenCalled();
+    const oldValidation = validate.mock.calls[0]![0].params;
+    validate.mockClear();
+    storedActiveAddress = chosenAddress;
+    const activeAddressChanged = new StorageEvent("storage");
+    Object.defineProperties(activeAddressChanged, {
+      key: { value: "6529-wallet-active-address" },
+      oldValue: { value: oldAddress },
+      newValue: { value: chosenAddress },
+    });
+    act(() => {
+      window.dispatchEvent(activeAddressChanged);
+    });
+    expect(utils.setActiveWalletAccount).not.toHaveBeenCalled();
+    expect(storedActiveAddress).toBe(chosenAddress);
+    expect(oldValidation.abortSignal.aborted).toBe(true);
+    expect(oldValidation.shouldPersistRefreshedSession?.()).toBe(false);
+    expect(validate).not.toHaveBeenCalled();
+    await act(async () => {
+      pendingValidation.resolve({
+        isValid: true,
+        validationCompleted: true,
+        wasCancelled: false,
+        shouldShowModal: false,
+        authRefreshOutcome: "not_attempted",
+      });
+      await pendingValidation.promise;
+    });
+  });
+
+  describe("Write checks", () => {
+    const renderAuthState = () =>
+      render(
+        <ReactQueryWrapperContext.Provider
+          value={createReactQueryWrapperContextValue()}
+        >
+          <Auth>
+            <ShowAuthState />
+          </Auth>
+        </ReactQueryWrapperContext.Provider>
+      );
+
+    it("reports the signed-in wallet this tab shows and resets on unmount", () => {
+      const { showSignedInWallet } = jest.requireMock<{
+        showSignedInWallet: jest.Mock;
+      }>("@/services/auth/displayed-wallet-guard");
+      const reset = jest.fn();
+      showSignedInWallet.mockImplementation(() => reset);
+      walletAddress = "0x1";
+
+      const { unmount } = renderAuthState();
+
+      expect(showSignedInWallet).toHaveBeenLastCalledWith("0x1");
+      expect(reset).not.toHaveBeenCalled();
+      unmount();
+      expect(reset).toHaveBeenCalled();
+    });
+
+    it.each([
+      ["a forced logout after a rejected stored session", "reset"],
+      ["an expired session invalidated for a new signature", "invalidate"],
+    ])("keeps drafts on %s", async (_case, path) => {
+      const drafts = {
+        chat: jest.requireMock<{ clearAllWaveDrafts: jest.Mock }>(
+          "@/helpers/waves/wave-draft.helpers"
+        ).clearAllWaveDrafts,
+        waves: jest.requireMock<{ removeCreateWaveDrafts: jest.Mock }>(
+          "@/helpers/waves/create-wave-draft.helpers"
+        ).removeCreateWaveDrafts,
+      };
+      walletAddress = "0x1111111111111111111111111111111111111111";
+      const authUtils = jest.requireMock<{
+        getAuthJwt: jest.Mock;
+        invalidateAuthSessionForAddress: jest.Mock;
+      }>("@/services/auth/auth.utils");
+      authUtils.getAuthJwt.mockReturnValue("rejected-jwt");
+      jest
+        .mocked(validateAuthImmediate)
+        .mockImplementationOnce(async ({ callbacks }) => {
+          if (path === "reset") {
+            callbacks.onReset();
+          } else {
+            await callbacks.onRemoveJwt();
+          }
+          return {
+            isValid: false,
+            validationCompleted: true,
+            authRefreshOutcome: "failed",
+            wasCancelled: false,
+            shouldShowModal: path !== "reset",
+          };
+        });
+
+      renderAuthState();
+
+      await waitFor(() =>
+        expect(
+          path === "reset"
+            ? mockSeizeDisconnectAndLogout
+            : authUtils.invalidateAuthSessionForAddress
+        ).toHaveBeenCalled()
+      );
+      expect(drafts.chat).not.toHaveBeenCalled();
+      expect(drafts.waves).not.toHaveBeenCalled();
+    });
+
+    it("reports no wallet while the shown wallet is not signed in", () => {
+      const { showSignedInWallet } = jest.requireMock<{
+        showSignedInWallet: jest.Mock;
+      }>("@/services/auth/displayed-wallet-guard");
+      walletAddress = "0x1";
+      connectedAccountsOverride = [];
+
+      renderAuthState();
+
+      expect(showSignedInWallet).toHaveBeenLastCalledWith(null);
+    });
   });
 
   describe("Basic functionality", () => {
@@ -1210,7 +1402,9 @@ describe("Auth component", () => {
       expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
         signerAddress: validAddress,
       });
-      expect(mockSignMessage).toHaveBeenCalledWith("sign this message exactly");
+      expect(mockSignMessage).toHaveBeenCalledWith(
+        signInChallengeFor(validAddress)
+      );
       expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
         serverSignature: "server-signature",
         clientSignature: "0xsignature",
@@ -1417,7 +1611,9 @@ describe("Auth component", () => {
       expect(sessionV2.getSessionNonce).toHaveBeenCalledWith({
         signerAddress: validAddress,
       });
-      expect(mockSignMessage).toHaveBeenCalledWith("sign this message exactly");
+      expect(mockSignMessage).toHaveBeenCalledWith(
+        signInChallengeFor(validAddress)
+      );
       await waitFor(() =>
         expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
           serverSignature: "server-signature",
@@ -1570,7 +1766,7 @@ describe("Auth component", () => {
       connectedAccountsOverride = [];
       const sessionV2 = require("@/services/auth/session-v2.utils");
       sessionV2.getSessionNonce.mockResolvedValue({
-        signable_message: "6529 Authentication\nDomain: app.6529.io",
+        signable_message: siweSignInChallenge({ address: validAddress }),
         server_signature: "server-signature",
       });
       const sessionResponse = {
@@ -1600,7 +1796,7 @@ describe("Auth component", () => {
         signerAddress: validAddress,
       });
       expect(mockSignMessage).toHaveBeenCalledWith(
-        "6529 Authentication\nDomain: app.6529.io"
+        siweSignInChallenge({ address: validAddress })
       );
       await waitFor(() =>
         expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
@@ -1623,7 +1819,7 @@ describe("Auth component", () => {
       connectedAccountsOverride = [];
       const sessionV2 = require("@/services/auth/session-v2.utils");
       sessionV2.getSessionNonce.mockResolvedValue({
-        signable_message: "6529 Authentication\nDomain: native",
+        signable_message: appSignInChallenge({ address: validAddress }),
         server_signature: "server-signature",
       });
       const sessionResponse = {
@@ -1656,7 +1852,7 @@ describe("Auth component", () => {
         signerAddress: validAddress,
       });
       expect(mockSignMessage).toHaveBeenCalledWith(
-        "6529 Authentication\nDomain: native"
+        appSignInChallenge({ address: validAddress })
       );
       await waitFor(() =>
         expect(sessionV2.loginWithSessionV2).toHaveBeenCalledWith({
@@ -2868,7 +3064,7 @@ describe("Auth component", () => {
       await userEvent.click(screen.getByText("Sign message"));
       await waitFor(() => {
         expect(mockSignMessage).toHaveBeenCalledWith(
-          "sign this message exactly"
+          signInChallengeFor("0x1111111111111111111111111111111111111111")
         );
       });
     });
@@ -2975,7 +3171,7 @@ describe("Auth component", () => {
 
       mockActiveChainId = 137;
       nonce.resolve({
-        signable_message: "sign this message exactly",
+        signable_message: signInChallengeFor(validAddress),
         server_signature: "server-signature",
       });
 
@@ -2990,8 +3186,13 @@ describe("Auth component", () => {
       const validAddress = "0x1111111111111111111111111111111111111111";
       walletAddress = validAddress;
       const authUtils = require("@/services/auth/auth.utils");
-      const removal = createDeferredPromise<void>();
-      authUtils.removeAuthJwt.mockReturnValueOnce(removal.promise);
+      authUtils.getWalletAddress.mockReturnValue(validAddress);
+      const nonce = createDeferredPromise<{
+        readonly signable_message: string;
+        readonly server_signature: string;
+      }>();
+      const sessionV2 = require("@/services/auth/session-v2.utils");
+      sessionV2.getSessionNonce.mockReturnValueOnce(nonce.promise);
       const { toast } = require("react-toastify");
 
       const Child = () => {
@@ -3023,18 +3224,19 @@ describe("Auth component", () => {
 
       fireEvent.click(screen.getByRole("button", { name: "switch profile" }));
       await waitFor(() => {
-        expect(authUtils.removeAuthJwt).toHaveBeenCalled();
+        expect(sessionV2.getSessionNonce).toHaveBeenCalled();
       });
 
       mockActiveChainId = 137;
-      removal.resolve();
+      nonce.resolve({
+        signable_message: signInChallengeFor(validAddress),
+        server_signature: "server-signature",
+      });
 
       await waitFor(() => {
         expect(toast).toHaveBeenCalled();
       });
-      expect(
-        require("@/services/auth/session-v2.utils").getSessionNonce
-      ).not.toHaveBeenCalled();
+      expect(authUtils.removeAuthJwt).not.toHaveBeenCalled();
       expect(mockSignMessage).not.toHaveBeenCalled();
       expect(mockSeizeDisconnect).not.toHaveBeenCalled();
     });
@@ -3098,7 +3300,7 @@ describe("Auth component", () => {
 
       mockActiveChainId = 137;
       nonce.resolve({
-        signable_message: "sign this message exactly",
+        signable_message: signInChallengeFor(validAddress),
         server_signature: "server-signature",
       });
 

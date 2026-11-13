@@ -1,11 +1,16 @@
 import { getAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
+import {
+  parseReleaseOrder,
+  VERSION_POLL_HEADERS,
+} from "@/lib/version/versionPoll";
+import { logVersionPoll } from "@/lib/version/versionPollLog.server";
 import { NextResponse } from "next/server";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store, must-revalidate" };
 const ANNOUNCED_VERSION_TIMEOUT_MS = 5_000;
 const ANNOUNCED_VERSION_CACHE_TTL_MS = 5_000;
-const CLIENT_VERSION_HEADER = "x-6529-client-version";
+const CLIENT_VERSION_HEADER = VERSION_POLL_HEADERS.version;
 const ANNOUNCED_VERSION_ALLOWED_HOSTS = new Set([
   "dnclu2fna0b2b.cloudfront.net",
 ]);
@@ -14,6 +19,7 @@ export const dynamic = "force-dynamic";
 
 type AnnouncedVersion = {
   readonly publishedAt: string | null;
+  readonly releaseOrder: number | null;
   readonly version: string;
 };
 
@@ -73,11 +79,15 @@ const normalizeAnnouncementEndpoint = (endpoint: string): string | null => {
   }
 };
 
+/** Pass ordered announcements through for comparison with the tab's build. */
 const shouldExposeAnnouncedVersion = (
   announcedVersion: AnnouncedVersion,
   currentVersion: string
 ): boolean => {
-  if (announcedVersion.version === currentVersion) {
+  if (
+    announcedVersion.releaseOrder !== null ||
+    announcedVersion.version === currentVersion
+  ) {
     return true;
   }
 
@@ -88,13 +98,11 @@ const shouldExposeAnnouncedVersion = (
     return false;
   }
 
-  // Production sets VERSION_BUILD_TIMESTAMP before the build; only newer
-  // announcements should stale that bundle. Local/custom configs without that
-  // timestamp still honor a valid ready announcement instead of suppressing all
-  // external announcements forever.
+  // Keep the timestamp check for older announcement documents.
   return buildTime === null || publishedTime > buildTime;
 };
 
+/** Read ready announcements and validate their optional rollout order. */
 const extractReadyVersion = (payload: unknown): AnnouncedVersion | null => {
   if (!isRecord(payload) || payload["ready"] !== true) {
     return null;
@@ -107,6 +115,7 @@ const extractReadyVersion = (payload: unknown): AnnouncedVersion | null => {
 
   return {
     publishedAt: normalizeVersion(payload["published_at"]),
+    releaseOrder: parseReleaseOrder(payload["release_order"]),
     version,
   };
 };
@@ -189,53 +198,82 @@ async function getAnnouncedVersion(
   return request.promise;
 }
 
+/** Require a strictly newer order for stamped clients and support older tabs. */
 const shouldRefreshClient = ({
   announcedVersion,
+  clientReleaseOrder,
   clientVersion,
   useAnnouncementGate,
   version,
 }: {
-  readonly announcedVersion: string | null;
+  readonly announcedVersion: AnnouncedVersion | null;
+  readonly clientReleaseOrder: number | null;
   readonly clientVersion: string | null;
   readonly useAnnouncementGate: boolean;
   readonly version: string;
 }): boolean => {
-  const currentClientVersion = clientVersion ?? version;
-
   // Production and any configured announcement endpoint fail closed. Only
   // local/staging without an announcement endpoint compare live instances.
-  const targetVersion = useAnnouncementGate
-    ? announcedVersion
-    : (announcedVersion ?? version);
+  if (!useAnnouncementGate) return version !== (clientVersion ?? version);
 
-  return targetVersion !== null && targetVersion !== currentClientVersion;
+  if (
+    !announcedVersion ||
+    announcedVersion.version === (clientVersion ?? version)
+  ) {
+    return false;
+  }
+
+  if (clientReleaseOrder === null) return true;
+
+  return (
+    announcedVersion.releaseOrder !== null &&
+    announcedVersion.releaseOrder > clientReleaseOrder
+  );
 };
 
+/** Compare against the tab's build even when a different instance answers. */
 const versionResponse = ({
   announcedVersion,
   clientVersion,
+  request,
   useAnnouncementGate,
   version,
 }: {
-  readonly announcedVersion: string | null;
+  readonly announcedVersion: AnnouncedVersion | null;
   readonly clientVersion: string | null;
+  readonly request: Request | undefined;
   readonly useAnnouncementGate: boolean;
   readonly version: string;
-}) =>
-  NextResponse.json(
+}) => {
+  const clientReleaseOrder = parseReleaseOrder(
+    clientVersion === null || clientVersion === version
+      ? publicEnv.VERSION_RELEASE_ORDER
+      : request?.headers.get(VERSION_POLL_HEADERS.releaseOrder)
+  );
+  const stale = shouldRefreshClient({
+    announcedVersion,
+    clientReleaseOrder,
+    clientVersion,
+    useAnnouncementGate,
+    version,
+  });
+  // Adoption telemetry: sampled, and only about the tab's build.
+  logVersionPoll(request?.headers, stale);
+  const announcedReleaseOrder = announcedVersion?.releaseOrder ?? null;
+  return NextResponse.json(
     {
-      announced_version: announcedVersion,
-      stale: shouldRefreshClient({
-        announcedVersion,
-        clientVersion,
-        useAnnouncementGate,
-        version,
-      }),
+      announced_version: announcedVersion?.version ?? null,
+      ...(announcedReleaseOrder !== null
+        ? { announced_release_order: announcedReleaseOrder }
+        : {}),
+      stale,
       version,
     },
     { headers: NO_STORE_HEADERS }
   );
+};
 
+/** Report the live instance version and whether the requesting tab can update. */
 export async function GET(request?: Request) {
   const version = getCurrentVersion();
   const clientVersion = normalizeVersion(
@@ -264,8 +302,9 @@ export async function GET(request?: Request) {
         shouldExposeAnnouncedVersion(announcedVersion, version)
       ) {
         return versionResponse({
-          announcedVersion: announcedVersion.version,
+          announcedVersion,
           clientVersion,
+          request,
           useAnnouncementGate,
           version,
         });
@@ -281,6 +320,7 @@ export async function GET(request?: Request) {
   return versionResponse({
     announcedVersion: null,
     clientVersion,
+    request,
     useAnnouncementGate,
     version,
   });

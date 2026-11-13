@@ -26,10 +26,10 @@ import {
   getCompetitionsRoute,
   isCompetitionPathname,
   getCompetitionIdFromPathname,
-  isMultiCompetitionEnabled,
 } from "@/helpers/competition.helpers";
 import {
   getLegacyCompetitionTab,
+  getSharedWaveTabRoute,
   waveCompetitionTabs,
 } from "@/helpers/default-competition.helpers";
 import {
@@ -37,15 +37,6 @@ import {
   getWavePathRoute,
   getActiveWaveIdFromUrl,
 } from "@/helpers/navigation.helpers";
-
-const getSharedWaveTabRoute = (pathname: string, tab: MyStreamWaveTab) => {
-  const waveId = getWaveIdFromPathname(pathname);
-  if (!waveId) return null;
-  const params = new URLSearchParams({ tab: tab.toLowerCase() });
-  const competitionId = getCompetitionIdFromPathname(pathname);
-  if (competitionId) params.set("competition", competitionId);
-  return `${getWavePathRoute(waveId)}?${params}`;
-};
 
 export enum WaveVotingState {
   NOT_STARTED = "NOT_STARTED",
@@ -68,7 +59,6 @@ type WaveTabParams = {
   isMemesWave: boolean;
   isCurationWave: boolean;
   isApproveWave?: boolean | undefined;
-  showOutcomeTab?: boolean | undefined;
   votingState: WaveVotingState;
   hasFirstDecisionPassed: boolean;
   transientPreferredTab?: MyStreamWaveTab | null;
@@ -93,8 +83,7 @@ interface ContentTabContextType {
 const buildMemesTabs = (
   votingState: WaveVotingState,
   hasFirstDecisionPassed: boolean,
-  hasPolls: boolean,
-  showOutcomeTab: boolean
+  hasPolls: boolean
 ) => {
   const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
   if (votingState === WaveVotingState.ENDED) {
@@ -109,9 +98,6 @@ const buildMemesTabs = (
   if (hasPolls) {
     tabs.push(MyStreamWaveTab.POLLS);
   }
-  if (showOutcomeTab) {
-    tabs.push(MyStreamWaveTab.OUTCOME);
-  }
   tabs.push(MyStreamWaveTab.FAQ);
   return tabs;
 };
@@ -120,8 +106,7 @@ const buildDefaultTabs = (
   votingState: WaveVotingState,
   hasFirstDecisionPassed: boolean,
   isCurationWave: boolean,
-  hasPolls: boolean,
-  showOutcomeTab: boolean
+  hasPolls: boolean
 ) => {
   const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
   if (votingState === WaveVotingState.ENDED) {
@@ -135,9 +120,6 @@ const buildDefaultTabs = (
   if (hasFirstDecisionPassed) {
     tabs.push(MyStreamWaveTab.WINNERS);
   }
-  if (!isCurationWave && showOutcomeTab) {
-    tabs.push(MyStreamWaveTab.OUTCOME);
-  }
   tabs.push(MyStreamWaveTab.MY_VOTES);
   if (hasPolls) {
     tabs.push(MyStreamWaveTab.POLLS);
@@ -145,11 +127,7 @@ const buildDefaultTabs = (
   return tabs;
 };
 
-const buildApproveTabs = (
-  isCurationWave: boolean,
-  hasPolls: boolean,
-  showOutcomeTab: boolean
-) => {
+const buildApproveTabs = (isCurationWave: boolean, hasPolls: boolean) => {
   const tabs: MyStreamWaveTab[] = [
     MyStreamWaveTab.CHAT,
     MyStreamWaveTab.LEADERBOARD,
@@ -160,10 +138,6 @@ const buildApproveTabs = (
   }
 
   tabs.push(MyStreamWaveTab.WINNERS);
-
-  if (!isCurationWave && showOutcomeTab) {
-    tabs.push(MyStreamWaveTab.OUTCOME);
-  }
 
   tabs.push(MyStreamWaveTab.MY_VOTES);
 
@@ -227,11 +201,13 @@ export const ContentTabProvider: React.FC<{
       ? (getHistoryWaveTab(routeWaveId) ?? rememberedTabs[routeWaveId])
       : undefined;
   const rememberedTab = getRememberedTab(remembered);
-  const requestedTab = competitionOnly
+  const outcomeLink = ["outcome", "outcomes"].includes(search.get("tab") ?? "");
+  const routeTab = competitionOnly
     ? getLegacyCompetitionTab(search.get("tab"))
     : Object.values(MyStreamWaveTab).find(
         (tab) => tab.toLowerCase() === search.get("tab")
       );
+  const requestedTab = outcomeLink ? MyStreamWaveTab.CONFIGURATION : routeTab;
   let initialTab = requestedTab ?? rememberedTab ?? MyStreamWaveTab.CHAT;
   if (competitionOnly) initialTab = requestedTab ?? MyStreamWaveTab.LEADERBOARD;
   else if (search.has("serialNo")) initialTab = MyStreamWaveTab.CHAT;
@@ -298,7 +274,6 @@ export const ContentTabProvider: React.FC<{
         isMemesWave,
         isCurationWave,
         isApproveWave = false,
-        showOutcomeTab = true,
         votingState,
         hasFirstDecisionPassed,
         transientPreferredTab,
@@ -311,21 +286,15 @@ export const ContentTabProvider: React.FC<{
           tabs.push(MyStreamWaveTab.POLLS);
         }
       } else if (isApproveWave) {
-        tabs = buildApproveTabs(isCurationWave, hasPolls, showOutcomeTab);
+        tabs = buildApproveTabs(isCurationWave, hasPolls);
       } else if (isMemesWave) {
-        tabs = buildMemesTabs(
-          votingState,
-          hasFirstDecisionPassed,
-          hasPolls,
-          showOutcomeTab
-        );
+        tabs = buildMemesTabs(votingState, hasFirstDecisionPassed, hasPolls);
       } else {
         tabs = buildDefaultTabs(
           votingState,
           hasFirstDecisionPassed,
           isCurationWave,
-          hasPolls,
-          showOutcomeTab
+          hasPolls
         );
       }
 
@@ -337,7 +306,6 @@ export const ContentTabProvider: React.FC<{
         tabs.push(
           MyStreamWaveTab.LEADERBOARD,
           MyStreamWaveTab.WINNERS,
-          MyStreamWaveTab.OUTCOME,
           MyStreamWaveTab.MY_VOTES
         );
       }
@@ -514,13 +482,13 @@ export const ContentTabProvider: React.FC<{
         navigateTab(`${pathname}?${params}`);
       }
       const competitionTab = waveCompetitionTabs[tab];
-      if (
-        waveId &&
-        isCompetitionRoute &&
-        tab === MyStreamWaveTab.COMPETITIONS
-      ) {
-        navigateTab(getCompetitionsRoute(waveId));
-        return true;
+      if (isCompetitionRoute && tab === MyStreamWaveTab.COMPETITIONS) {
+        // The explicit route remains authoritative while wave data registers.
+        const selectedWaveId = getWaveIdFromPathname(pathname);
+        if (selectedWaveId) {
+          navigateTab(getCompetitionsRoute(selectedWaveId));
+          return true;
+        }
       }
       if (
         waveId &&
@@ -615,7 +583,6 @@ export const ContentTabProvider: React.FC<{
     search.get("serialNo") === null &&
     !hasWaveDestination(search) &&
     rememberedTab !== undefined &&
-    isMultiCompetitionEnabled() &&
     (registeredWaveId !== routeWaveId || !registeredTabsReady) &&
     !(selection.routeToken === routeToken && selection.intentional)
   )

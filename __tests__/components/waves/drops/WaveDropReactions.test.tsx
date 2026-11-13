@@ -20,12 +20,13 @@ import {
   waitFor,
 } from "@testing-library/react";
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
 
 const mockQueryCacheFindAll = jest.fn(() => []);
 const mockSetQueryData = jest.fn();
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(() => ({
+  useMyStreamActions: jest.fn(() => ({
     applyOptimisticDropUpdate: jest.fn(() => ({ rollback: jest.fn() })),
   })),
 }));
@@ -59,7 +60,7 @@ jest.mock(
 );
 
 jest.mock("@tanstack/react-query", () => ({
-  useQuery: jest.fn(),
+  useQuery: jest.fn(() => ({ data: undefined, isLoading: false })),
   useQueryClient: jest.fn(() => ({
     getQueryCache: jest.fn(() => ({ findAll: mockQueryCacheFindAll })),
     setQueryData: mockSetQueryData,
@@ -207,6 +208,36 @@ const createDeferred = <T,>() => {
 };
 
 describe("WaveDropReactions", () => {
+  it("disables hidden details after a local last-reaction removal with unchanged parent data", async () => {
+    mockUseEmoji.mockReturnValue(
+      createEmojiContextValue([], () => ({ skins: [{ native: "👍" }] }))
+    );
+    const drop = createMockDrop({
+      reactions: [
+        {
+          reaction: ":+1:",
+          count: 1,
+          profiles: [{ id: "profile-1", handle: "alice" }],
+        },
+      ],
+      context_profile_context: { reaction: ":+1:" },
+    }) as unknown as ApiDrop;
+    const detailQuery = () =>
+      jest
+        .mocked(useQuery)
+        .mock.calls.findLast(
+          ([options]) => options.queryKey[0] === AppQueryKey.DROP_REACTIONS
+        )?.[0];
+    render(<WaveDropReactions drop={drop} />);
+    const chip = screen.getByRole("button");
+    fireEvent.mouseOver(chip);
+    await waitFor(() => expect(detailQuery()?.enabled).toBe(true));
+
+    fireEvent.click(chip);
+    await waitFor(() => expect(chip).not.toBeInTheDocument());
+    expect(drop.reactions[0]).toMatchObject({ count: 1 });
+    await waitFor(() => expect(detailQuery()?.enabled).toBe(false));
+  });
   it("keeps a stable chip synchronized with externally updated count and selection", async () => {
     mockUseEmoji.mockReturnValue(
       createEmojiContextValue([
@@ -248,61 +279,117 @@ describe("WaveDropReactions", () => {
     await waitFor(() => expect(originalButton).toHaveTextContent("1"));
     expect(originalButton).not.toHaveClass("tw-border-primary-500");
   });
-  it.each([null, ":wave:", ":gm:"])(
-    "reconciles a saved chip reaction after timeout (previous %s)",
-    async (previous) => {
-      mockUseEmoji.mockReturnValue(
-        createEmojiContextValue(
-          [
+  describe.each([
+    ["timeout", () => new DropReactionRequestTimeoutError()],
+    ["network", () => new TypeError("Failed to fetch")],
+    [
+      "response transfer",
+      () => new Error("Failed to parse response as JSON: Network error"),
+    ],
+  ])("uncertain %s outcome", (_kind, createError) => {
+    it.each([null, ":wave:", ":gm:"])(
+      "reconciles a saved chip reaction after an uncertain response (previous %s)",
+      async (previous) => {
+        mockUseEmoji.mockReturnValue(
+          createEmojiContextValue(
+            [
+              {
+                category: "people",
+                emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+              },
+            ],
+            () => null
+          )
+        );
+        const rollback = jest.fn();
+        getMyStreamMock().mockReturnValue({
+          applyOptimisticDropUpdate: jest.fn(() => ({ rollback })),
+        });
+        const drop = createMockDrop({
+          reactions: [
             {
-              category: "people",
-              emojis: [{ id: "gm", skins: [{ src: "/gm.png" }] }],
+              reaction: ":gm:",
+              profiles: [{ id: "another", handle: "another" }],
             },
           ],
-          () => null
-        )
+          context_profile_context: { reaction: previous },
+        });
+        const intended = previous === ":gm:" ? null : ":gm:";
+        const request =
+          intended === null
+            ? jest.mocked(commonApi.commonApiDelete)
+            : jest.mocked(commonApi.commonApiPost);
+        request.mockRejectedValueOnce(createError());
+        (fetchDropByIdBatched as jest.Mock).mockResolvedValue({
+          ...drop,
+          context_profile_context: { reaction: intended },
+          reactions: [
+            {
+              reaction: ":gm:",
+              profiles: [],
+              count: intended === null ? 1 : 2,
+            },
+          ],
+        });
+        render(<WaveDropReactions drop={drop as unknown as ApiDrop} />);
+        const button = screen.getAllByRole("button")[0]!;
+        await act(async () => {
+          fireEvent.click(button);
+        });
+        expect(setToastMock).not.toHaveBeenCalled();
+        expect(rollback).not.toHaveBeenCalled();
+        expect(request).toHaveBeenCalledTimes(1);
+        const reconciledButton = screen.getAllByRole("button")[0]!;
+        expect(reconciledButton).toHaveTextContent(
+          intended === null ? "1" : "2"
+        );
+        if (intended === null)
+          expect(reconciledButton).not.toHaveClass("tw-border-primary-500");
+        else expect(reconciledButton).toHaveClass("tw-border-primary-500");
+      }
+    );
+  });
+  it("keeps an unconfirmed network outcome bounded without rolling back or replaying the chip", async () => {
+    jest.useFakeTimers();
+    try {
+      mockUseEmoji.mockReturnValue(
+        createEmojiContextValue([], () => ({ skins: [{ native: "👍" }] }))
       );
       const rollback = jest.fn();
       getMyStreamMock().mockReturnValue({
         applyOptimisticDropUpdate: jest.fn(() => ({ rollback })),
       });
+      jest
+        .mocked(commonApi.commonApiPost)
+        .mockRejectedValueOnce(new TypeError("Failed to fetch"));
+      (fetchDropByIdBatched as jest.Mock).mockRejectedValue(
+        new Error("Offline")
+      );
       const drop = createMockDrop({
         reactions: [
-          {
-            reaction: ":gm:",
-            profiles: [{ id: "another", handle: "another" }],
-          },
+          { reaction: ":gm:", profiles: [{ id: "other", handle: "other" }] },
         ],
-        context_profile_context: { reaction: previous },
-      });
-      const intended = previous === ":gm:" ? null : ":gm:";
-      const request =
-        intended === null
-          ? jest.mocked(commonApi.commonApiDelete)
-          : jest.mocked(commonApi.commonApiPost);
-      request.mockRejectedValueOnce(new DropReactionRequestTimeoutError());
-      (fetchDropByIdBatched as jest.Mock).mockResolvedValue({
-        ...drop,
-        context_profile_context: { reaction: intended },
-        reactions: [
-          { reaction: ":gm:", profiles: [], count: intended === null ? 1 : 2 },
-        ],
-      });
-      render(<WaveDropReactions drop={drop as unknown as ApiDrop} />);
-      const button = screen.getAllByRole("button")[0]!;
+        context_profile_context: { reaction: null },
+      }) as unknown as ApiDrop;
+      render(<WaveDropReactions drop={drop} />);
       await act(async () => {
-        fireEvent.click(button);
+        fireEvent.click(screen.getAllByRole("button")[0]!);
+        await jest.advanceTimersByTimeAsync(9_000);
       });
-      expect(setToastMock).not.toHaveBeenCalled();
+      expect(setToastMock).toHaveBeenCalledWith({
+        title:
+          "Could not confirm your reaction. Refresh to check before trying again.",
+        type: "warning",
+        autoClose: 8_000,
+      });
       expect(rollback).not.toHaveBeenCalled();
-      expect(request).toHaveBeenCalledTimes(1);
-      const reconciledButton = screen.getAllByRole("button")[0]!;
-      expect(reconciledButton).toHaveTextContent(intended === null ? "1" : "2");
-      if (intended === null)
-        expect(reconciledButton).not.toHaveClass("tw-border-primary-500");
-      else expect(reconciledButton).toHaveClass("tw-border-primary-500");
+      expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+      expect(fetchDropByIdBatched).toHaveBeenCalledTimes(3);
+    } finally {
+      jest.useRealTimers();
     }
-  );
+  });
+
   it.each([true, false])(
     "keeps failure feedback scoped to the containing drop when its last chip disappears (drop visible: %s)",
     async (visible) => {
@@ -354,9 +441,9 @@ describe("WaveDropReactions", () => {
   const getMyStreamMock = () =>
     (
       require("@/contexts/wave/MyStreamContext") as {
-        useMyStream: jest.Mock;
+        useMyStreamActions: jest.Mock;
       }
-    ).useMyStream;
+    ).useMyStreamActions;
 
   beforeEach(() => {
     // Reset call history without removing default implementations

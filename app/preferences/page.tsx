@@ -1,6 +1,7 @@
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 import {
   isProfilePreferencesEntry,
   PREFERENCES_ENTRY_SOURCE_PARAM,
@@ -31,6 +32,10 @@ export default async function PreferencesPage({
     activeTab = "blocked-profiles";
   } else if (requestedTab === "reports") {
     activeTab = "reports";
+  } else if (requestedTab === "devices" && isSignedMessagesEnabled()) {
+    activeTab = "devices";
+  } else if (requestedTab === "time-zone") {
+    activeTab = "time-zone";
   }
   return (
     <PreferencesPageClient

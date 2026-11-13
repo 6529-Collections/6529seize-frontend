@@ -4,30 +4,25 @@ import Link from "next/link";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import type { UserPageTabConfig, UserPageTabKey } from "./userTabs.config";
+import { useUserPageNavigation } from "./UserPageNavigation";
+import { getUnderlineTabClasses } from "@/components/common/underlineTabStyles";
 
 interface UserPageTabProps {
   readonly tab: UserPageTabConfig;
   readonly activeTabId: UserPageTabKey;
 }
 
-export default function UserPageTab({
-  tab,
-  activeTabId,
-}: UserPageTabProps) {
+export default function UserPageTab({ tab, activeTabId }: UserPageTabProps) {
   const params = useParams();
   const searchParams = useSearchParams();
+  const navigation = useUserPageNavigation();
   const handleOrWallet = params["user"]?.toString() ?? "";
 
   const path = `/${handleOrWallet}/${tab.route}`;
 
   const isActive = tab.id === activeTabId;
 
-  const activeClasses =
-    "tw-flex tw-items-center tw-border-transparent tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-0";
-  const inActiveClasses =
-    "tw-flex tw-items-center tw-border-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-0 tw-transition tw-duration-300 tw-ease-out";
-
-  const classes = isActive ? activeClasses : inActiveClasses;
+  const classes = `${getUnderlineTabClasses({ active: isActive, externalIndicator: true })} tw-flex tw-items-center tw-py-4 tw-px-0`;
 
   const ref = useRef<HTMLAnchorElement>(null);
   const linkLabel = tab.badge ? `${tab.title} ${tab.badge}` : tab.title;
@@ -40,6 +35,9 @@ export default function UserPageTab({
   }
   if (localeParam) {
     tabQuery["locale"] = localeParam;
+  }
+  if (tab.route === "xtdh") {
+    tabQuery["tab"] = "granted";
   }
 
   useEffect(() => {
@@ -58,10 +56,15 @@ export default function UserPageTab({
       linkRect.right <= containerRect.right;
 
     if (!isVisible) {
-      activeLink.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
-        inline: "center",
+      scrollContainer.scrollBy({
+        left:
+          linkRect.left -
+          containerRect.left -
+          (containerRect.width - linkRect.width) / 2,
+        behavior: globalThis.matchMedia("(prefers-reduced-motion: reduce)")
+          .matches
+          ? "instant"
+          : "smooth",
       });
     }
   }, [isActive]);
@@ -69,6 +72,17 @@ export default function UserPageTab({
   return (
     <Link
       ref={ref}
+      scroll={false}
+      onNavigate={(event) => {
+        if (!navigation) return;
+        event.preventDefault();
+        if (isActive) return;
+        const queryString = new URLSearchParams(tabQuery).toString();
+        navigation.navigate(
+          queryString ? `${path}?${queryString}` : path,
+          tab.id
+        );
+      }}
       href={{
         pathname: path,
         query: tabQuery,

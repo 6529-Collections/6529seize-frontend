@@ -81,16 +81,8 @@ function UserPageHeaderAboutStatementContent({
 export default function UserPageHeaderAboutStatement({
   statement,
 }: {
-  readonly statement: CicStatement | null;
+  readonly statement: CicStatement;
 }) {
-  if (!statement) {
-    return (
-      <div className="tw-text-sm tw-italic tw-text-iron-500 tw-transition tw-duration-200 group-focus-within:tw-text-iron-300 group-hover:tw-text-iron-300">
-        {getUserProfileHeaderMessage("user.profileHeader.about.empty")}
-      </div>
-    );
-  }
-
   return (
     <UserPageHeaderAboutStatementContent
       key={`${statement.id}:${statement.statement_value}`}

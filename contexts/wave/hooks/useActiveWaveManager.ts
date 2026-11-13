@@ -3,7 +3,6 @@
 import { runWaveNavigationTransition } from "@/helpers/waves/wave-navigation-transition";
 import {
   getCompetitionRoute,
-  isMultiCompetitionEnabled,
   isCompetitionPathname,
 } from "@/helpers/competition.helpers";
 import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
@@ -16,10 +15,12 @@ import {
   getActiveWaveIdFromUrl,
   getWaveHomeRoute,
   getWaveRoute,
+  isEncryptedMessagesPathname,
 } from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useShellSearchParams } from "@/contexts/ShellSearchParamsContext";
+import { usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
 
 interface WaveNavigationOptions {
@@ -49,13 +50,19 @@ const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
     isOnWaves:
       !isCompetitionPathname(pathname) &&
       (pathname === "/waves" || pathname.startsWith("/waves/")),
-    isOnMessages: pathname === "/messages" || pathname.startsWith("/messages/"),
+    // Encrypted chats are separate routes: leaving them for a plaintext DM
+    // needs a router navigation, not a history-only wave switch.
+    isOnMessages:
+      (pathname === "/messages" || pathname.startsWith("/messages/")) &&
+      !isEncryptedMessagesPathname(pathname),
   };
 };
 
 export function useActiveWaveManager() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  // Wave and chat routes read the query in render; on other routes it arrives
+  // after hydration, together with the `?wave=` it qualifies.
+  const searchParams = useShellSearchParams(pathname);
   const { isApp } = useDeviceInfo();
   const { tabsRef } = useWaveTabPreference();
   const queryClient = useQueryClient();
@@ -70,8 +77,8 @@ export function useActiveWaveManager() {
     [pathname, searchParams]
   );
   const hasActiveWaveDropTarget = useMemo(() => {
-    const serialNo = searchParams.get("serialNo")?.trim() ?? "";
-    const drop = searchParams.get("drop")?.trim() ?? "";
+    const serialNo = searchParams?.get("serialNo")?.trim() ?? "";
+    const drop = searchParams?.get("drop")?.trim() ?? "";
     return serialNo.length > 0 || drop.length > 0;
   }, [searchParams]);
 
@@ -85,7 +92,6 @@ export function useActiveWaveManager() {
         waveId &&
         !isDirectMessage &&
         serialNo === undefined &&
-        isMultiCompetitionEnabled() &&
         typeof remembered === "object"
       ) {
         const selection = queryClient.getQueryData<ApiDefaultCompetition>(

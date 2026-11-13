@@ -4,6 +4,7 @@ import {
   getNotificationsRoute,
   getWaveRoute,
   getWavesBaseRoute,
+  NEW_MESSAGE_ROUTE,
 } from "@/helpers/navigation.helpers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -11,12 +12,22 @@ import { getAccessVerdict, isStagingDeployment } from "@/lib/proxy/accessProbe";
 import {
   plainNotFoundResponse,
   plainServiceUnavailableResponse,
+  UNCACHEABLE_RESPONSE_HEADERS,
 } from "@/lib/proxy/plainResponses";
 import {
+  isRetiredReviewDataPath,
   isStaticAssetPath,
   isUnservableDotPath,
 } from "@/lib/proxy/publicPaths";
+import {
+  hasMalformedWaveId,
+  MALFORMED_WAVE_ROUTE,
+} from "@/lib/proxy/waveRoutes";
+import { handleValidatorPageGate } from "@/lib/validator-page/proxyGate";
+import { isE2eeFlagEnabled } from "@/config/e2eeFlag";
 import { publicEnv } from "./config/env";
+import { getApiBase } from "@/services/api/api-endpoints";
+import { getApiAccessPath } from "@/services/auth/api-access-redirect";
 import { API_AUTH_COOKIE } from "./constants/constants";
 
 const redirectMappings = [
@@ -84,8 +95,6 @@ const redirectMappings = [
   { url: "/om/bug/report/", target: "/about/contact-us" },
 ];
 
-const STREAM_REVIEW_DATA_PREFIX = "/review-data/6529-stream/";
-
 // The access gate runs only on staging deployments, decided from the baked
 // BASE_ENDPOINT so request headers such as Host cannot switch it off.
 // Production and local development never call the API from proxy.
@@ -101,11 +110,25 @@ export const config = {
   matcher: ["/((?!_next/static|_next/image).*)"],
 };
 
-function isPublicStreamReviewDataPath(req: NextRequest, pathname: string) {
-  const rawPathname = new URL(req.url).pathname;
+// `/review-data` held the removed Stream review's generated files. Old links
+// get a plain 404 here instead of falling through to the profile catch-all.
+function isRetiredReviewDataRequest(req: NextRequest): boolean {
   return (
-    rawPathname === pathname && pathname.startsWith(STREAM_REVIEW_DATA_PREFIX)
+    isRetiredReviewDataPath(req.nextUrl.pathname) ||
+    isRetiredReviewDataPath(new URL(req.url).pathname)
   );
+}
+
+/**
+ * A redirect decided from the request itself (cookies, user agent, legacy
+ * query, or a failure) is never stored by the page edge cache or the browser.
+ * The fixed path redirects in `redirectMappings` stay cacheable.
+ */
+function uncacheableRedirect(url: URL, status: 301 | 307 = 307): NextResponse {
+  return NextResponse.redirect(url, {
+    status,
+    headers: UNCACHEABLE_RESPONSE_HEADERS,
+  });
 }
 
 function stripTrailingSlashes(value: string): string {
@@ -237,6 +260,10 @@ function resolveMyStreamRedirect(
     return undefined;
   }
 
+  return resolveLegacyStreamQueryRedirect(req);
+}
+
+function resolveLegacyStreamQueryRedirect(req: NextRequest): string {
   const params = new URLSearchParams(req.nextUrl.searchParams);
   const view = params.get("view") ?? undefined;
   const wave = params.get("wave") ?? undefined;
@@ -265,6 +292,19 @@ function resolveMyStreamRedirect(
     if (value !== null) destination.searchParams.set(key, value);
   }
   return `${destination.pathname}${destination.search}`;
+}
+
+// The old app home opened a wave with `/?wave=<id>`. `/` is prerendered
+// without its query, so the wave route serves these links, on every device.
+function resolveHomeWaveRedirect(
+  req: NextRequest,
+  normalizedPathname: string
+): string | undefined {
+  if (normalizedPathname !== "/" || !req.nextUrl.searchParams.get("wave")) {
+    return undefined;
+  }
+
+  return resolveLegacyStreamQueryRedirect(req);
 }
 
 function handleRedirects(req: NextRequest): NextResponse | undefined {
@@ -300,23 +340,23 @@ async function enforceAccessControl(
     return NextResponse.next();
   }
 
-  const authValue =
-    req.cookies.get(API_AUTH_COOKIE)?.value ?? publicEnv.STAGING_API_KEY ?? "";
+  // Only the visitor's own access cookie decides the gate; no server-held
+  // credential stands in for it.
+  const authValue = req.cookies.get(API_AUTH_COOKIE)?.value ?? "";
   const verdict = await getAccessVerdict({
-    apiEndpoint: publicEnv.API_ENDPOINT,
+    apiEndpoint: getApiBase(),
     authValue,
   });
 
   if (verdict === "unauthorized") {
-    req.nextUrl.pathname = "/access";
-    req.nextUrl.search = "";
-    return NextResponse.redirect(req.nextUrl);
+    const returnTo = req.nextUrl.pathname + req.nextUrl.search;
+    return uncacheableRedirect(new URL(getApiAccessPath(returnTo), req.url));
   }
 
   if (verdict === "restricted") {
     req.nextUrl.pathname = "/restricted";
     req.nextUrl.search = "";
-    return NextResponse.redirect(req.nextUrl);
+    return uncacheableRedirect(req.nextUrl);
   }
 
   // Fail closed: without a definitive answer the gate must not let pages through.
@@ -329,7 +369,10 @@ async function enforceAccessControl(
 
 export default async function proxy(req: NextRequest) {
   try {
-    if (isUnservableDotPath(req.nextUrl.pathname)) {
+    if (
+      isUnservableDotPath(req.nextUrl.pathname) ||
+      isRetiredReviewDataRequest(req)
+    ) {
       return plainNotFoundResponse();
     }
 
@@ -344,27 +387,58 @@ export default async function proxy(req: NextRequest) {
         ? pathname.slice(0, -1)
         : pathname;
 
+    // Wave routes stream their shell with a 200 before a page can call
+    // notFound(), so an id that cannot be a wave id is answered here: a
+    // rewrite to a route outside those boundaries renders the branded
+    // not-found page with a real 404 and keeps the visitor's URL. The query
+    // stays on the rewritten URL so Next's `_rsc` cache-busting check still
+    // matches on client navigations.
+    if (hasMalformedWaveId(normalizedPathname, req.nextUrl.searchParams)) {
+      const notFoundUrl = req.nextUrl.clone();
+      notFoundUrl.pathname = MALFORMED_WAVE_ROUTE;
+      return NextResponse.rewrite(notFoundUrl, {
+        headers: UNCACHEABLE_RESPONSE_HEADERS,
+      });
+    }
+
+    if (
+      isE2eeFlagEnabled(publicEnv.NEXT_PUBLIC_E2EE_DM_ENABLED) &&
+      (normalizedPathname === "/messages" ||
+        normalizedPathname.startsWith("/messages/")) &&
+      req.nextUrl.searchParams.get("create") === "dm"
+    ) {
+      const composerUrl = req.nextUrl.clone();
+      composerUrl.pathname = NEW_MESSAGE_ROUTE;
+      composerUrl.search = "";
+      return uncacheableRedirect(composerUrl);
+    }
+
     const redirectTarget = normalizedPathname.startsWith("/my-stream")
       ? resolveMyStreamRedirect(req, normalizedPathname)
-      : undefined;
+      : resolveHomeWaveRedirect(req, normalizedPathname);
 
     if (redirectTarget) {
       const clone = req.nextUrl.clone();
       const [pathnamePart, searchPart] = redirectTarget.split("?");
       clone.pathname = pathnamePart || "/";
       clone.search = searchPart ? `?${searchPart}` : "";
-      return NextResponse.redirect(clone, 301);
+      return uncacheableRedirect(clone, 301);
     }
 
-    if (
-      isStaticAssetPath(normalizedPathname) ||
-      isPublicStreamReviewDataPath(req, pathname)
-    ) {
+    if (isStaticAssetPath(normalizedPathname)) {
       return NextResponse.next();
+    }
+
+    const validatorGateResponse = handleValidatorPageGate(
+      req,
+      normalizedPathname
+    );
+    if (validatorGateResponse) {
+      return validatorGateResponse;
     }
 
     return await enforceAccessControl(req, normalizedPathname);
   } catch {
-    return NextResponse.redirect(new URL("/error", req.url));
+    return uncacheableRedirect(new URL("/error", req.url));
   }
 }

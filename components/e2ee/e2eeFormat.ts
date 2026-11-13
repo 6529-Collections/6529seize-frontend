@@ -1,0 +1,445 @@
+import { getAddress, isAddress } from "viem";
+import { shortenAddress } from "@/helpers/address.helpers";
+import { getCalendarDayIndex } from "@/helpers/timeDisplayHelpers";
+import {
+  formatDate,
+  formatInteger,
+  formatList,
+  formatTime,
+  selectPluralCategory,
+} from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t, type MessageKey } from "@/i18n/messages";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  withDisplayTimeZone,
+  withDisplayTimeZoneDate,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
+import { getDmPeerId } from "@/lib/e2ee/dm-conversations";
+import { safeAttachmentName } from "@/lib/e2ee/attachment-name";
+import type {
+  E2eeConversation,
+  E2eeMember,
+  E2eeMessage,
+} from "@/lib/e2ee/types";
+
+interface PluralKeys {
+  readonly one: MessageKey;
+  readonly other: MessageKey;
+}
+
+/** Plural-aware count copy with a locale-formatted `{count}`. */
+export function tCount(
+  locale: SupportedLocale,
+  keys: PluralKeys,
+  count: number,
+  params: Record<string, string | number> = {}
+): string {
+  const key =
+    selectPluralCategory(locale, count) === "one" ? keys.one : keys.other;
+  return t(locale, key, { ...params, count: formatInteger(locale, count) });
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Short checksummed wallet ("0xAbCd…1234"); empty for a non-address. */
+export function formatE2eeWallet(wallet: string | null | undefined): string {
+  if (!wallet || !isAddress(wallet, { strict: false })) {
+    return "";
+  }
+  return shortenAddress(getAddress(wallet));
+}
+
+/** The signing wallets a device notice carries (comma separated). */
+function formatNoticeWallets(
+  locale: SupportedLocale,
+  detail: string | undefined
+): string {
+  const wallets = [
+    ...new Set(
+      (detail ?? "")
+        .split(",")
+        .map((wallet) => formatE2eeWallet(wallet.trim()))
+        .filter((wallet) => wallet.length > 0)
+    ),
+  ];
+  return wallets.length > 0 ? formatList(locale, wallets) : "";
+}
+
+interface E2eeTimeOptions {
+  /** The display time zone; the device zone when omitted. */
+  readonly zone?: DisplayTimeZone | undefined;
+  /** Reference time for "today"; defaults to now. */
+  readonly now?: number | undefined;
+}
+
+const CLOCK_TIME: Intl.DateTimeFormatOptions = {
+  hour: "2-digit",
+  minute: "2-digit",
+};
+
+const FULL_DATE: Intl.DateTimeFormatOptions = {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+};
+
+/** The year of a `getCalendarDayIndex` day. */
+const getDayIndexYear = (dayIndex: number): number =>
+  new Date(dayIndex * DAY_MS).getUTCFullYear();
+
+/**
+ * Compact timestamp: time today, day and month this year, full date
+ * otherwise. Days follow the display zone, and a time outside the device zone
+ * names its zone ("05:06 PM UTC").
+ */
+export function formatE2eeTimestamp(
+  locale: SupportedLocale,
+  ms: number,
+  { zone = LOCAL_DISPLAY_TIME_ZONE, now = Date.now() }: E2eeTimeOptions = {}
+): string {
+  const day = getCalendarDayIndex(ms, zone.timeZone);
+  const today = getCalendarDayIndex(now, zone.timeZone);
+  if (day === today && Math.abs(now - ms) < DAY_MS) {
+    return formatTime(locale, ms, withDisplayTimeZone(zone, CLOCK_TIME));
+  }
+  if (getDayIndexYear(day) === getDayIndexYear(today)) {
+    return formatDate(
+      locale,
+      ms,
+      withDisplayTimeZoneDate(zone, { day: "numeric", month: "short" })
+    );
+  }
+  return formatDate(locale, ms, withDisplayTimeZoneDate(zone, FULL_DATE));
+}
+
+/**
+ * Calendar day of `ms` in the display zone, for grouping a timeline by day.
+ * Day helpers depend on the zone, so they run only in the client timeline,
+ * which renders after the engine starts in the browser (never during SSR).
+ */
+export function getE2eeDayKey(
+  ms: number,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
+): string {
+  return String(getCalendarDayIndex(ms, zone.timeZone));
+}
+
+/**
+ * Day separator label: Today, Yesterday, a weekday this week, else a date.
+ * The day changes at midnight in the display zone.
+ */
+export function getE2eeDayLabel(
+  locale: SupportedLocale,
+  ms: number,
+  { zone = LOCAL_DISPLAY_TIME_ZONE, now = Date.now() }: E2eeTimeOptions = {}
+): string {
+  const days =
+    getCalendarDayIndex(now, zone.timeZone) -
+    getCalendarDayIndex(ms, zone.timeZone);
+  if (days === 0) {
+    return t(locale, "e2ee.conversation.day.today");
+  }
+  if (days === 1) {
+    return t(locale, "e2ee.conversation.day.yesterday");
+  }
+  if (days > 1 && days < 7) {
+    return formatDate(
+      locale,
+      ms,
+      withDisplayTimeZoneDate(zone, { weekday: "long" })
+    );
+  }
+  return formatDate(
+    locale,
+    ms,
+    withDisplayTimeZoneDate(zone, { dateStyle: "medium" })
+  );
+}
+
+/** Date and time in the display zone, naming the zone outside the device's. */
+export function formatE2eeDateTime(
+  locale: SupportedLocale,
+  ms: number,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
+): string {
+  return formatDate(
+    locale,
+    ms,
+    withDisplayTimeZone(zone, { dateStyle: "medium", timeStyle: "short" })
+  );
+}
+
+export function findMember(
+  members: readonly E2eeMember[],
+  profileId: string | null
+): E2eeMember | null {
+  if (!profileId) {
+    return null;
+  }
+  return members.find((member) => member.profileId === profileId) ?? null;
+}
+
+/** The sender's file name made safe to show and save as (no bidi, paths). */
+export const attachmentDisplayName = (
+  locale: SupportedLocale,
+  name: string
+): string =>
+  safeAttachmentName(name, t(locale, "e2ee.message.attachment.unnamed"));
+
+/** Display name for a profile in a chat ("You" for the viewer). */
+export function getMemberName(
+  locale: SupportedLocale,
+  members: readonly E2eeMember[],
+  profileId: string | null,
+  selfProfileId: string | null
+): string {
+  if (profileId && profileId === selfProfileId) {
+    return t(locale, "e2ee.you");
+  }
+  const handle = findMember(members, profileId)?.handle;
+  return handle ?? t(locale, "e2ee.unknownMember");
+}
+
+const TITLE_NAME_LIMIT = 3;
+
+/** Chat title: the group name, else the other people's handles. */
+export function getConversationTitle(
+  locale: SupportedLocale,
+  conversation: E2eeConversation,
+  selfProfileId: string | null
+): string {
+  if (conversation.kind === "group" && conversation.name) {
+    return conversation.name;
+  }
+  if (
+    conversation.kind === "dm" &&
+    !isUnpairedDm(conversation, selfProfileId)
+  ) {
+    return (
+      getDmPeer(conversation, selfProfileId)?.handle ??
+      t(locale, "e2ee.unknownMember")
+    );
+  }
+  const others = conversation.members.filter(
+    (member) => member.profileId !== selfProfileId
+  );
+  if (others.length === 0) {
+    return t(locale, "e2ee.you");
+  }
+  const names = others.map(
+    (member) => member.handle ?? t(locale, "e2ee.unknownMember")
+  );
+  if (names.length <= TITLE_NAME_LIMIT) {
+    return formatList(locale, names);
+  }
+  return t(locale, "e2ee.conversation.titleMore", {
+    names: formatList(locale, names.slice(0, TITLE_NAME_LIMIT), {
+      style: "narrow",
+      type: "unit",
+    }),
+    count: formatInteger(locale, names.length - TITLE_NAME_LIMIT),
+  });
+}
+
+/** The other member of a DM, or null for groups. */
+export function getDmPeer(
+  conversation: E2eeConversation,
+  selfProfileId: string | null
+): E2eeMember | null {
+  if (conversation.kind !== "dm") {
+    return null;
+  }
+  return (
+    conversation.dmPeer ??
+    conversation.members.find(
+      (member) => member.profileId === getDmPeerId(conversation, selfProfileId)
+    ) ??
+    null
+  );
+}
+
+/**
+ * A DM that does not hold exactly its two participants, with someone else
+ * in it: shown like a group, by its members, never under one person's name.
+ */
+export function isUnpairedDm(
+  conversation: E2eeConversation,
+  selfProfileId: string | null
+): boolean {
+  return (
+    conversation.kind === "dm" &&
+    getDmPeer(conversation, selfProfileId) === null &&
+    conversation.members.some((member) => member.profileId !== selfProfileId)
+  );
+}
+
+const NOTICE_NAME_FALLBACK: MessageKey = "e2ee.someone";
+
+function noticeNames(
+  locale: SupportedLocale,
+  members: readonly E2eeMember[],
+  profileIds: readonly string[],
+  selfProfileId: string | null,
+  /** Mid-sentence objects read "alice removed you", not "removed You". */
+  asObject = false
+): string {
+  if (profileIds.length === 0) {
+    return t(locale, NOTICE_NAME_FALLBACK);
+  }
+  return formatList(
+    locale,
+    profileIds.map((id) =>
+      asObject && id === selfProfileId
+        ? t(locale, "e2ee.youObject")
+        : getMemberName(locale, members, id, selfProfileId)
+    )
+  );
+}
+
+/**
+ * "device_added" copy. A device not yet verified for its owner on this
+ * device says so plainly, naming who added it (`actor`) and whose it is
+ * (`owner.object`, the mid-sentence form: "you").
+ */
+function deviceAddedText(
+  locale: SupportedLocale,
+  notice: NonNullable<E2eeMessage["notice"]>,
+  actor: string,
+  owner: { readonly name: string; readonly object: string }
+): string {
+  const wallet = formatNoticeWallets(locale, notice.detail);
+  if (notice.unverified === true) {
+    return wallet
+      ? t(locale, "e2ee.notice.deviceAddedUnverified", {
+          name: actor,
+          wallet,
+          owner: owner.object,
+        })
+      : t(locale, "e2ee.notice.deviceAddedUnverifiedNoWallet", {
+          name: actor,
+          owner: owner.object,
+        });
+  }
+  return wallet
+    ? t(locale, "e2ee.notice.deviceAddedWallet", { name: owner.name, wallet })
+    : t(locale, "e2ee.notice.deviceAdded", { name: owner.name });
+}
+
+/** Timeline copy for a system notice (contract 8.6). */
+export function getNoticeText(
+  locale: SupportedLocale,
+  message: E2eeMessage,
+  members: readonly E2eeMember[],
+  selfProfileId: string | null
+): string {
+  const notice = message.notice;
+  if (!notice) {
+    return "";
+  }
+  const actorId = notice.actorProfileId;
+  const actor = actorId
+    ? getMemberName(locale, members, actorId, selfProfileId)
+    : t(locale, NOTICE_NAME_FALLBACK);
+  const targets = noticeNames(
+    locale,
+    members,
+    notice.targetProfileIds,
+    selfProfileId
+  );
+  const objects = noticeNames(
+    locale,
+    members,
+    notice.targetProfileIds,
+    selfProfileId,
+    true
+  );
+  const owner = notice.targetProfileIds[0] ?? actorId;
+  const ownerName = owner
+    ? getMemberName(locale, members, owner, selfProfileId)
+    : t(locale, NOTICE_NAME_FALLBACK);
+
+  switch (notice.type) {
+    case "created":
+      return t(locale, "e2ee.notice.created", { actor });
+    case "joined":
+      return actorId && !notice.targetProfileIds.includes(actorId)
+        ? t(locale, "e2ee.notice.added", { actor, targets: objects })
+        : t(locale, "e2ee.notice.joined", { targets });
+    case "left":
+      return t(locale, "e2ee.notice.left", {
+        actor: actorId ? actor : targets,
+      });
+    case "removed":
+      return actorId
+        ? t(locale, "e2ee.notice.removed", { actor, targets: objects })
+        : t(locale, "e2ee.notice.removedNoActor", { targets });
+    case "device_added":
+      return deviceAddedText(locale, notice, actor, {
+        name: ownerName,
+        object: noticeNames(
+          locale,
+          members,
+          owner ? [owner] : [],
+          selfProfileId,
+          true
+        ),
+      });
+    case "device_removed":
+      return t(locale, "e2ee.notice.deviceRemoved", { name: ownerName });
+    case "renamed":
+      return notice.detail
+        ? t(locale, "e2ee.notice.renamed", { actor, name: notice.detail })
+        : t(locale, "e2ee.notice.renamedNoName", { actor });
+    case "admins_changed":
+      return t(locale, "e2ee.notice.adminsChanged", { actor });
+    case "safety_code_changed":
+      return t(locale, "e2ee.notice.safetyCodeChanged");
+    default:
+      return "";
+  }
+}
+
+const PREVIEW_MAX_CHARS = 120;
+
+/** One-line preview of a chat's last message for lists. */
+export function getMessagePreview(
+  locale: SupportedLocale,
+  message: E2eeMessage | null,
+  members: readonly E2eeMember[],
+  selfProfileId: string | null
+): string {
+  if (!message) {
+    return t(locale, "e2ee.list.preview.none");
+  }
+  if (message.kind === "notice") {
+    return getNoticeText(locale, message, members, selfProfileId);
+  }
+  if (message.undecryptable) {
+    return t(locale, "e2ee.list.preview.undecryptable");
+  }
+  if (message.deleted) {
+    return t(locale, "e2ee.list.preview.deleted");
+  }
+  const text = message.text.replaceAll(/\s+/g, " ").trim();
+  if (text.length > 0) {
+    return text.length > PREVIEW_MAX_CHARS
+      ? `${text.slice(0, PREVIEW_MAX_CHARS)}…`
+      : text;
+  }
+  if (message.attachments.length > 0) {
+    return t(locale, "e2ee.list.preview.attachment");
+  }
+  return t(locale, "e2ee.list.preview.none");
+}
+
+/** "abcd efgh ijkl mnop" from the engine, normalized to 4 groups of 4. */
+export function formatSafetyCode(code: string): string[] {
+  const compact = code.replaceAll(/[^0-9a-f]/gi, "").toLowerCase();
+  const groups: string[] = [];
+  for (let index = 0; index < compact.length; index += 4) {
+    groups.push(compact.slice(index, index + 4));
+  }
+  return groups;
+}

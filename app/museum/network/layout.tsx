@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
-import { Suspense, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { MuseumShell } from "@/components/museum/MuseumShell";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -8,7 +8,6 @@ import { t } from "@/i18n/messages";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import { buildMuseumPageSourceCatalog } from "@/lib/museum/publication/pageSources";
 import type { MuseumSourceState } from "@/lib/museum/types";
-import MuseumNetworkLoading from "./loading";
 
 export const metadata: Metadata = getAppMetadata({
   title: t(DEFAULT_LOCALE, "museum.network.title"),
@@ -24,7 +23,9 @@ function museumSourceState(
   return status;
 }
 
-async function MuseumNetworkLayoutContent({
+// Keep this layout free of Suspense boundaries: a boundary above the page would
+// commit a 200 status before a detail route can answer with a real 404.
+export default async function MuseumNetworkLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   await connection();
@@ -44,15 +45,5 @@ async function MuseumNetworkLayoutContent({
     >
       {children}
     </MuseumShell>
-  );
-}
-
-export default function MuseumNetworkLayout({
-  children,
-}: Readonly<{ children: ReactNode }>) {
-  return (
-    <Suspense fallback={<MuseumNetworkLoading />}>
-      <MuseumNetworkLayoutContent>{children}</MuseumNetworkLayoutContent>
-    </Suspense>
   );
 }

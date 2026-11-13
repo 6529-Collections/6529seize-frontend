@@ -364,11 +364,24 @@ export enum WsMessageType {
   NOTIFICATION_IDENTITIES_SYNCED = "NOTIFICATION_IDENTITIES_SYNCED",
   IDENTITY_NOTIFICATIONS_CHANGED = "IDENTITY_NOTIFICATIONS_CHANGED",
   DM_UNREAD_STATE_CHANGED = "DM_UNREAD_STATE_CHANGED",
+  // The active profile's wave lists changed (followed, unfollowed, added).
+  WAVES_CHANGED = "WAVES_CHANGED",
+  // End-to-end encrypted chats (D109). Content-free wake hints; clients
+  // re-sync over REST.
+  E2EE_GROUP_EVENT = "E2EE_GROUP_EVENT",
+  E2EE_WELCOME = "E2EE_WELCOME",
+  E2EE_DEVICE_ADDED = "E2EE_DEVICE_ADDED",
+  E2EE_DEVICE_REVOKED = "E2EE_DEVICE_REVOKED",
+  E2EE_ROSTER_CHANGED = "E2EE_ROSTER_CHANGED",
 }
 
 export const WS_DROP_UPDATE_REASON_POLL_RESPONSE = "POLL_RESPONSE" as const;
 
-export type WsDropUpdateReason = typeof WS_DROP_UPDATE_REASON_POLL_RESPONSE;
+export const WS_DROP_UPDATE_REASON_REPLY_COLLAPSE = "REPLY_COLLAPSE" as const;
+
+export type WsDropUpdateReason =
+  | typeof WS_DROP_UPDATE_REASON_POLL_RESPONSE
+  | typeof WS_DROP_UPDATE_REASON_REPLY_COLLAPSE;
 
 export interface WsTypingMessage {
   readonly type: WsMessageType.USER_IS_TYPING;
@@ -396,6 +409,9 @@ export interface WsDropUpdateRefData {
   readonly author_id: string;
   readonly serial_no: number;
   readonly update_type: WsDropUpdateRefUpdateType;
+  readonly collapsed_reply_thread_id?: string;
+  readonly collapse_replies?: boolean;
+  readonly reply_placement_has_replies?: boolean;
   readonly reason?: string;
 }
 
@@ -440,6 +456,12 @@ export const isWsDropUpdateRefData = (
     Number.isSafeInteger(candidate.serial_no) &&
     candidate.serial_no >= 0 &&
     isWsDropUpdateRefUpdateType(candidate.update_type) &&
+    (candidate.collapsed_reply_thread_id === undefined ||
+      isNonEmptyWebSocketId(candidate.collapsed_reply_thread_id)) &&
+    (candidate.collapse_replies === undefined ||
+      typeof candidate.collapse_replies === "boolean") &&
+    (candidate.reply_placement_has_replies === undefined ||
+      typeof candidate.reply_placement_has_replies === "boolean") &&
     (candidate.reason === undefined || isNonEmptyWebSocketId(candidate.reason))
   );
 };

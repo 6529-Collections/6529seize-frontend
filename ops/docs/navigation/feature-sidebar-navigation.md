@@ -19,19 +19,23 @@ On web layouts, route switching is sidebar-first.
   nested route grouping shown in the expanded rail.
 - In collapsed rail mode, a mouse hover opens `NFTs` and `About` after a short
   intent delay; tap or click remains available for touch and pointer users.
+- Compact submenu icons have a small, vertically centered right chevron, 4px
+  beside the icon. Icon and chevron share the same muted colour and turn white
+  together on hover. Direct links have no submenu chevron.
 - Collapsed flyouts enter with a short opacity and horizontal-position reveal;
   reduced-motion preferences show them immediately without animation.
 - The 40px 6529 logo links to `/`; there is no labeled `Home` product row.
   Hover adds a subtle glow and a slight scale-up; reduced motion disables scaling.
 - A single-chevron toggle stays inside the sidebar’s right edge, vertically
   centered in both states (20px wide in both states).
-  Hover anywhere in the sidebar or focus a control to reveal it; touch layouts
-  keep it visible. Expand and collapse use the same footprint.
+  Hover anywhere in the sidebar or give the toggle itself keyboard focus to
+  reveal it; focus on other sidebar controls does not keep it visible after the
+  pointer leaves. Touch layouts keep it visible. Expand and collapse use the same footprint.
 - Primary menu concepts are ordered `NFTs`, `Museum`, `Waves`, `DMs`,
-  `Join 6529`, and `About` so art destinations stay together while Waves and
+  `Join 6529` (or `Validator` for members), and `About` so art destinations stay together while Waves and
   DMs remain adjacent.
 - `NFTs` and `About` are expandable groups; `Museum`, `Waves`, `DMs`, and
-  `Join 6529` are direct rows.
+  the `Join 6529` / `Validator` slot are direct rows.
 - The `Museum` row opens `/museum/network` in one click.
 - The `Waves` sidebar row opens `/waves` in one click. `Discover Waves`
   remains a secondary Waves experience link and searchable destination.
@@ -44,11 +48,22 @@ On web layouts, route switching is sidebar-first.
 - In the collapsed rail, the connected account avatar gets a visible hover
   highlight; the account menu still opens by click or keyboard activation.
 
+The slot between `DMs` and `About` shows `Join 6529`
+link to `/join-6529` for signed-out visitors and wallets without a profile.
+The slot uses the same styling and hover behavior as the other navigation rows.
+If the profile lookup fails, the slot stays reserved; use the account area’s
+`Profile unavailable. Retry` control to recover.
+Signed-in members with a profile see `Validator`, linking to `/validator`, in
+that same slot. While wallet or profile restoration is unresolved, the slot
+reserves its space without showing either action. The same rule applies to the
+collapsed and expanded web sidebar, mobile web menu, native app drawer, and
+page search. Public navigation never adds a Validator link.
+
 ## Location in the Site
 
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Home entry: 6529 logo link to `/`.
-- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`,
+- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529` (or `Validator` for members),
   `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
@@ -63,7 +78,13 @@ On web layouts, route switching is sidebar-first.
   125ms, including gated Drop Forge and WatchTower. Account pictures and fallback
   icons use a simple fade. Reduced motion shows controls immediately.
 - Local and staging environment badges are present in the initial page render;
-  production shows no environment badge.
+  production shows no environment badge. Desktop badges are centered over the
+  6529 logo without moving it or the navigation. Staging shows `STG`; local
+  shows `LCL` above the current browser port, or just `LCL` when no port is
+  present. Other non-production hosts keep their environment labels. The logo
+  remains a single Home link with environment and host information available to
+  assistive technology. Phone and tablet headers keep their inline badge beside
+  the logo, including the single-line `LCL:port` label locally.
 - The account control has the same footprint while loading, signed out, or
   showing a profile. Only the account placeholder shimmers; Search and Share
   do not wait for wallet initialization.
@@ -78,7 +99,8 @@ On web layouts, route switching is sidebar-first.
 - Select direct rows or expand groups for nested routes.
 - Open `Museum` directly from the primary sidebar row.
 - Open `Waves` directly from the primary sidebar row.
-- Open `Join 6529` directly from the primary sidebar row.
+- Open `Join 6529` as a newcomer, or `Validator` as a signed-in member, from
+  the same primary sidebar slot.
 - Open `Discover Waves` from the Profile Waves Feed header or search.
 - Open `Drop Forge` from the standalone row after `About` when the current
   wallet can access `/drop-forge`.
@@ -99,7 +121,7 @@ On web layouts, route switching is sidebar-first.
    separate bottom section contains `Notifications` (when connected) directly
    above the account control.
 4. Open `NFTs` or `About` for nested routes; use the `Museum`, `Waves`, and
-   `Join 6529` rows for direct navigation.
+   `Join 6529` / `Validator` rows for direct navigation.
 5. In collapsed mode, hover a group row with a mouse or activate it by tap,
    click, or keyboard to open an anchored flyout submenu. The flyout preserves
    subsection labels such as `Network & Reputation`, `Safe Collecting`, or
@@ -111,19 +133,18 @@ On web layouts, route switching is sidebar-first.
 
 - Open `NFTs` routes:
   `/the-memes`, `/6529-gradient`, `/nextgen`, `/meme-lab`, `/rememes`,
-  `/nft-activity`, `/meme-calendar`.
-- On local development and shared staging, open the pre-deployment Stream
-  review from `NFTs > 6529 Stream — Review`. It appears after `ReMemes` and
-  before `NFT Activity` and opens `/reviews/6529-stream`. It is absent on
-  production.
+  `/stream`, `/nft-activity`, `/meme-calendar`.
+- `NFTs > 6529 Stream` appears after `ReMemes` and before `NFT Activity` on
+  every host. It opens `/stream`, a short notice that 6529 Stream is being
+  rebuilt, with a link to the 6529-works repository.
 - Open `Waves` routes:
   use the primary `Waves` row for `/waves`; use `Discover Waves` in the Waves
   panel header or search for `/discover`.
 - Open `Museum`:
   use the primary `Museum` row for `/museum/network`.
-- Open `Join 6529`:
-  use the primary `Join 6529` row for the shareable onboarding guide at
-  `/join-6529`.
+- Open the membership row:
+  newcomers use `Join 6529` for the onboarding guide at `/join-6529`;
+  signed-in members with a profile use `Validator` for `/validator`.
 - Open `About > Network & Reputation` routes:
   `/network`, `/network/activity`, `/network/tdh`,
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
@@ -147,9 +168,14 @@ On web layouts, route switching is sidebar-first.
   `NFTs` keeps collection and NFT activity links, and `About` keeps subsection
   labels such as `Network & Reputation`, `Safe Collecting`, and
   `Data & Developer Tools` instead of flattening every route into one list.
-  `Museum`, `Waves`, and `Join 6529` remain direct rows in collapsed mode.
+  `Museum`, `Waves`, and the `Join 6529` / `Validator` slot remain direct rows
+  in collapsed mode.
 - Open `About` and `6529 Capital` routes from grouped links.
-- Open connected `Notifications` from the bottom account section.
+- Click the connected `Notifications` bell in the bottom account section to
+  open `/notifications`. On desktop, hover for a preview without navigating;
+  with the bell focused, press Arrow Down to enter the preview. The preview
+  opens after 100ms and closes 200ms after leaving both bell and preview,
+  unless keyboard focus remains inside the preview.
 - Open `Share` for copy, QR, X, Farcaster, and supported system-share actions
   using the exact current URL.
 - Select the connected avatar, then `Profile` (handle route first, wallet
@@ -202,9 +228,9 @@ On web layouts, route switching is sidebar-first.
   [Page Sharing and Device Connection](feature-share-modal.md).
 - `App Wallets` appears inside `About > Safe Collecting` only when
   app-wallet support is enabled.
-- On iOS, subscription-related rows show only when country resolves to `US`:
-  `Subscriptions Report`, `Open Data > Meme Subscriptions Data`,
-  and `About > Subscriptions`.
+- The iOS app omits `NFTs > Collect`, the About Minting and Subscription Minting
+  entries, `Subscriptions Report`, and `Meme Subscriptions Data`. The two
+  read-only reports remain available through their direct links.
 
 ## Failure and Recovery
 
@@ -230,9 +256,6 @@ On web layouts, route switching is sidebar-first.
 - Desktop-web sidebar search supports both `⌘K` and `Ctrl+K`.
 - Sidebar rows change with auth, device context, country gate, and runtime
   feature gates.
-- The Stream review item is controlled by the public-review environment gate,
-  not wallet state. Only loopback development and the exact shared staging
-  hostname enable it initially.
 - Native app primary switching is owned by
   [Mobile Bottom Navigation](feature-mobile-bottom-navigation.md).
 
@@ -247,3 +270,9 @@ On web layouts, route switching is sidebar-first.
 - [6529 Apps Page](feature-6529-apps-page.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [Network Index](../network/README.md)
+
+## Private bookmarks
+
+The account menu places **Bookmarks** below **Profile** and above **My artwork
+documentation** when the owner has accessible saved messages. See
+[Private Bookmarks](../waves/chat/feature-private-bookmarks.md).

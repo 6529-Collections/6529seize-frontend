@@ -1,5 +1,8 @@
 "use client";
 
+import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { getWaveSubmissionClosure } from "@/helpers/waves/submission-closure";
 import { useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -80,6 +83,8 @@ function getSubmissionStatus(
   if (!wave) return SubmissionStatus.NOT_STARTED;
 
   try {
+    if (getWaveSubmissionClosure(wave, now)) return SubmissionStatus.ENDED;
+
     const start = wave.participation.period?.min ?? null;
     const end = wave.participation.period?.max ?? null;
 
@@ -123,7 +128,7 @@ function getSubmissionStatus(
  * @returns An object containing processed wave information and state
  */
 export function useWave(wave: ApiWave | null | undefined): WaveInfo {
-  // Current time for all timestamp comparisons (consistent throughout the hook)
+  // Stable fallback timestamp for unset boundaries and pause calculations.
   const now = useMemo(() => Time.currentMillis(), []);
   const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
 
@@ -238,10 +243,12 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     [wave]
   );
 
-  const identityDropsCount = useMemo(
-    () => wave?.metrics.your_participation_drops_count ?? null,
-    [wave]
-  );
+  const identityDropsCount = useMemo(() => {
+    const competition = presentationCompetition(wave);
+    return competition
+      ? (competition.your_active_entries_count ?? null)
+      : (wave?.metrics.your_participation_drops_count ?? null);
+  }, [wave]);
 
   // Extract time period boundaries with proper defaults
   const participationStartTime = useMemo(
@@ -249,10 +256,14 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     [wave, now]
   );
 
-  const participationEndTime = useMemo(
-    () => wave?.participation.period?.max ?? now,
-    [wave, now]
-  );
+  const participationEndTime = useMemo(() => {
+    // A refreshed API snapshot may have ended after this hook was mounted.
+    const closure = wave
+      ? getWaveSubmissionClosure(wave, Time.currentMillis())
+      : null;
+    if (closure) return closure.closedAt ?? 0;
+    return wave?.participation.period?.max ?? now;
+  }, [wave, now]);
 
   const votingStartTime = useMemo(
     () => wave?.voting.period?.min ?? now,
@@ -279,8 +290,8 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
    * Determine the current status of the submission period
    */
   const submissionStatus = useMemo(
-    () => getSubmissionStatus(wave, now),
-    [wave, now]
+    () => getSubmissionStatus(wave, Time.currentMillis()),
+    [wave]
   );
 
   /**
@@ -386,9 +397,18 @@ export function useWave(wave: ApiWave | null | undefined): WaveInfo {
     isChatWave: wave?.wave.type === ApiWaveType.Chat,
     isRankWave: wave?.wave.type === ApiWaveType.Rank,
     isApproveWave: wave?.wave.type === ApiWaveType.Approve,
-    isMemesWave: isMemesWave(wave?.id.toLowerCase()),
-    isCurationWave: isCurationWave(wave?.id.toLowerCase()),
-    isQuorumWave: isQuorumWave(wave?.id.toLowerCase()),
+    isMemesWave:
+      presentationCompetition(wave)?.capabilities.includes(
+        ApiCompetitionCapability.MainStage
+      ) ?? isMemesWave(wave?.id.toLowerCase()),
+    isCurationWave:
+      presentationCompetition(wave)?.capabilities.includes(
+        ApiCompetitionCapability.Curation
+      ) ?? isCurationWave(wave?.id.toLowerCase()),
+    isQuorumWave:
+      presentationCompetition(wave)?.capabilities.includes(
+        ApiCompetitionCapability.Quorum
+      ) ?? isQuorumWave(wave?.id.toLowerCase()),
     isDm: !!wave?.chat?.scope?.group?.is_direct_message,
   };
 }

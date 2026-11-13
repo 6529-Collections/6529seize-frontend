@@ -13,6 +13,7 @@ import DropNotFound from "./DropNotFound";
 import { parseStandaloneMediaUrl } from "./media-utils";
 import { useDropContent } from "./useDropContent";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+import { AnonymousAuthorName } from "./AnonymousDropAuthor";
 
 interface WaveDropReplyProps {
   readonly dropId: string;
@@ -76,8 +77,11 @@ export default function WaveDropReply({
     const hasModeratedPresentation =
       drop.moderation?.status !== undefined &&
       drop.moderation.status !== ApiDropModerationStatus.Visible;
+    const authorHandle = drop.author.handle ?? "";
+    const hasVisibleAuthor =
+      authorHandle.length > 0 || drop.author.is_anonymous === true;
 
-    if (!drop.author.handle && !hasModeratedPresentation) {
+    if (!hasVisibleAuthor && !hasModeratedPresentation) {
       return renderFixedReplyContent(<DropNotFound />);
     }
 
@@ -91,17 +95,17 @@ export default function WaveDropReply({
           }
         }}
       >
-        {drop.author.handle
+        {hasVisibleAuthor
           ? renderFixedReplyContent(
               <div className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
                 <div className="tw-relative tw-z-10 tw-h-6 tw-w-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800">
-                  {drop.author.pfp ? (
+                  {drop.author.pfp && !drop.author.is_anonymous ? (
                     <Image
                       src={getScaledImageUri(
                         drop.author.pfp,
                         ImageScale.W_AUTO_H_50
                       )}
-                      alt={`${drop.author.handle}'s avatar`}
+                      alt={`${authorHandle}'s avatar`}
                       fill
                       sizes="24px"
                       className="tw-rounded-md tw-bg-transparent tw-object-contain"
@@ -112,12 +116,18 @@ export default function WaveDropReply({
                 </div>
                 <div className="tw-min-w-0 tw-flex-1">
                   <p className="tw-mb-0 tw-mt-0 tw-flex tw-min-w-0 tw-items-center xl:tw-pr-24">
-                    <Link
-                      href={`/${drop.author.handle}`}
-                      className="tw-mr-1 tw-flex-shrink-0 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
-                    >
-                      {drop.author.handle}
-                    </Link>
+                    {drop.author.is_anonymous ? (
+                      <span className="tw-mr-1 tw-flex-shrink-0 tw-text-sm tw-font-medium">
+                        <AnonymousAuthorName />
+                      </span>
+                    ) : (
+                      <Link
+                        href={`/${authorHandle}`}
+                        className="tw-mr-1 tw-flex-shrink-0 tw-text-sm tw-font-medium tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500"
+                      >
+                        {authorHandle}
+                      </Link>
+                    )}
                     <ContentDisplay
                       content={replyPreviewContent}
                       onClick={() => {

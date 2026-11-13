@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/museum";
 import type { MuseumMintedToken } from "@/lib/museum/generative-studies";
 import { CenturyAdjacencyLoom } from "./CenturySystemVisual";
 import {

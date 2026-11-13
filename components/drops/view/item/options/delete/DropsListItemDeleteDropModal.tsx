@@ -3,11 +3,12 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { commonApiDelete } from "@/services/api/common-api";
+import { deleteDrop } from "@/services/api/signed-drop-writes";
+import { isSignedWriteCancelled } from "@/lib/device-signing/signing-decision";
 import {
   Description,
   Dialog,
@@ -18,7 +19,8 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { useMutation } from "@tanstack/react-query";
-import { Fragment, useContext, useState } from "react";
+import { Fragment, useContext, useRef, useState } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { createPortal } from "react-dom";
 
 export default function DropsListItemDeleteDropModal({
@@ -34,7 +36,7 @@ export default function DropsListItemDeleteDropModal({
 }) {
   const { requestAuth, setToast } = useContext(AuthContext);
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
-  const { processDropRemoved } = useMyStream();
+  const { processDropRemoved } = useMyStreamActions();
 
   const contentType =
     drop.drop_type === ApiDropType.Participatory ? "Drop" : "Post";
@@ -42,9 +44,7 @@ export default function DropsListItemDeleteDropModal({
   const [mutating, setMutating] = useState(false);
   const deleteDropMutation = useMutation({
     mutationFn: async () =>
-      await commonApiDelete({
-        endpoint: `drops/${drop.id}`,
-      }),
+      await deleteDrop({ dropId: drop.id, waveId: drop.wave.id }),
     onSuccess: () => {
       setToast({
         message: `${contentType} deleted.`,
@@ -59,6 +59,10 @@ export default function DropsListItemDeleteDropModal({
       }
     },
     onError: (error) => {
+      // Cancelled at the signing prompt: nothing was sent.
+      if (isSignedWriteCancelled(error)) {
+        return;
+      }
       setToast({
         type: "error",
         title: `Couldn't delete this ${contentType.toLowerCase()}.`,
@@ -88,11 +92,18 @@ export default function DropsListItemDeleteDropModal({
     }
   };
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const dismissDelete = () => {
+    if (!mutating) closeModal();
+  };
+  useAndroidBackLayer(true, dialogRef, dismissDelete);
+
   return createPortal(
     <Transition appear show as={Fragment}>
       <Dialog
+        ref={dialogRef}
         className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1020] tw-cursor-default"
-        onClose={mutating ? () => undefined : closeModal}
+        onClose={dismissDelete}
       >
         <TransitionChild
           as={Fragment}
@@ -149,7 +160,7 @@ export default function DropsListItemDeleteDropModal({
                       type="button"
                       onClick={closeModal}
                       disabled={mutating}
-                      className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950 tw-p-2 tw-text-iron-400 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-text-iron-50"
+                      className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-950 tw-p-2 tw-text-iron-400 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-text-iron-50"
                     >
                       <span className="tw-sr-only tw-text-sm">Close</span>
                       <svg

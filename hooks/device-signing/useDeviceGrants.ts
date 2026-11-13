@@ -1,0 +1,158 @@
+"use client";
+
+import { useAuth } from "@/components/auth/Auth";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { forgetDeviceGrant } from "@/lib/device-signing/device-key-store";
+import {
+  acknowledgeDeviceGrant,
+  fetchDeviceGrants,
+  revokeDeviceGrant,
+} from "@/services/api/device-grants-api";
+import {
+  type QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
+
+/** Refreshes while visible and immediately when the client returns to focus. */
+export const DEVICE_GRANTS_REFRESH_MS = 10 * 60 * 1000;
+
+const forgetRevokedLocalGrants = async (
+  grants: readonly ApiDeviceGrant[]
+): Promise<void> => {
+  // Drops a local grant revoked from another device; other ids are no-ops.
+  await Promise.all(
+    grants
+      .filter((grant) => grant.revoked_at !== null)
+      .map((grant) => forgetDeviceGrant(grant.wallet, grant.id))
+  );
+};
+
+/** The device grants of the signed-in profile (null address: disabled). */
+export function useDeviceGrants(
+  address: string | null,
+  mode: "active" | "cache-only" = "active"
+) {
+  const active = mode === "active" && address !== null;
+  const query = useQuery({
+    queryKey: [QueryKey.DEVICE_GRANTS, address],
+    queryFn: ({ signal }) => fetchDeviceGrants(signal),
+    enabled: active,
+    staleTime: DEVICE_GRANTS_REFRESH_MS,
+    refetchOnWindowFocus: "always",
+    refetchInterval: DEVICE_GRANTS_REFRESH_MS,
+    refetchIntervalInBackground: false,
+    retry: 1,
+  });
+
+  const grants = query.data;
+  useEffect(() => {
+    if (active && grants) {
+      forgetRevokedLocalGrants(grants).catch(() => undefined);
+    }
+  }, [active, grants]);
+
+  return query;
+}
+
+function updateCachedDeviceGrant(
+  queryClient: QueryClient,
+  grantId: string,
+  update: (grant: ApiDeviceGrant) => ApiDeviceGrant
+) {
+  const cachedLists = queryClient.getQueriesData<ApiDeviceGrant[]>({
+    queryKey: [QueryKey.DEVICE_GRANTS],
+  });
+
+  for (const [queryKey] of cachedLists) {
+    const cached = queryClient.getQueryState<ApiDeviceGrant[]>(queryKey);
+    if (!cached?.data?.some((grant) => grant.id === grantId)) continue;
+
+    // Updating one grant does not verify the permissions of the entire list.
+    queryClient.setQueryData(
+      queryKey,
+      cached.data.map((grant) => (grant.id === grantId ? update(grant) : grant)),
+      { updatedAt: cached.dataUpdatedAt }
+    );
+  }
+}
+
+/** Acknowledges a device notice without changing the grant's permissions. */
+export function useAcknowledgeDeviceGrant() {
+  const locale = useBrowserLocale();
+  const { setToast } = useAuth();
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (grantId: string) => acknowledgeDeviceGrant(grantId),
+    onSuccess: (acknowledged) => {
+      updateCachedDeviceGrant(queryClient, acknowledged.id, (grant) => ({
+        ...grant,
+        notice_acknowledged: true,
+      }));
+    },
+  });
+
+  const acknowledge = useCallback(
+    async (grantId: string): Promise<boolean> => {
+      try {
+        await mutateAsync(grantId);
+        return true;
+      } catch {
+        setToast({
+          message: t(
+            locale,
+            "signedMessages.notice.newDevice.acknowledgeError"
+          ),
+          type: "error",
+        });
+        return false;
+      }
+    },
+    [locale, mutateAsync, setToast]
+  );
+
+  return { acknowledge, isAcknowledging: isPending };
+}
+
+/** Revokes a grant, updates the cached list and reports the outcome. */
+export function useRevokeDeviceGrant() {
+  const locale = useBrowserLocale();
+  const { setToast } = useAuth();
+  const queryClient = useQueryClient();
+  const { mutateAsync, isPending } = useMutation({
+    mutationFn: (grant: ApiDeviceGrant) => revokeDeviceGrant(grant.id),
+    onSuccess: async (revoked) => {
+      updateCachedDeviceGrant(queryClient, revoked.id, () => revoked);
+      await forgetRevokedLocalGrants([revoked]).catch(() => undefined);
+    },
+  });
+
+  const revoke = useCallback(
+    async (grant: ApiDeviceGrant): Promise<boolean> => {
+      try {
+        await mutateAsync(grant);
+        setToast({
+          message: t(locale, "signedMessages.revoke.success", {
+            label: grant.device_label,
+          }),
+          type: "success",
+        });
+        return true;
+      } catch {
+        setToast({
+          message: t(locale, "signedMessages.revoke.error"),
+          type: "error",
+        });
+        return false;
+      }
+    },
+    [locale, mutateAsync, setToast]
+  );
+
+  return { revoke, isRevoking: isPending };
+}

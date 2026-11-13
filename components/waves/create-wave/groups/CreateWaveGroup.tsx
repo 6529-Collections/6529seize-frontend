@@ -264,7 +264,7 @@ export default function CreateWaveGroup({
 
   return (
     <fieldset
-      className={`tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-y-3 tw-rounded-xl tw-border tw-border-solid tw-bg-iron-900/60 tw-p-4 sm:tw-p-5 ${
+      className={`tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-y-3 tw-rounded-xl tw-border tw-border-solid tw-bg-iron-900 tw-p-4 sm:tw-p-5 [&:has([data-mobile-group-editor])]:tw-rounded-none [&:has([data-mobile-group-editor])]:tw-border-x-0 [&:has([data-mobile-group-editor])]:tw-bg-transparent [&:has([data-mobile-group-editor])]:tw-px-0 ${
         hasError ? "tw-scroll-mb-32 tw-border-error/70" : "tw-border-white/5"
       }`}
       aria-labelledby={labelId}

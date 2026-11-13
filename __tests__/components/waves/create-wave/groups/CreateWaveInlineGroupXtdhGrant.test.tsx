@@ -1,16 +1,20 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
+import { useXtdhGrantsSearchQuery } from "@/hooks/useXtdhGrantsSearchQuery";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import type { ApiXTdhGrant } from "@/generated/models/ApiXTdhGrant";
 import { ApiGroupBeneficiaryGrantMatchMode } from "@/generated/models/ApiGroupBeneficiaryGrantMatchMode";
 import { ApiXTdhGrantStatus } from "@/generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetTokenMode } from "@/generated/models/ApiXTdhGrantTargetTokenMode";
+import GroupCreateXtdhGrantMatchMode from "@/components/groups/page/create/config/xtdh-grant/GroupCreateXtdhGrantMatchMode";
 import CreateWaveInlineGroupRuleEditor from "@/components/waves/create-wave/groups/CreateWaveInlineGroupRuleEditor";
 import {
   createEmptyInlineGroupPayload,
   CreateWaveInlineGroupRuleType,
 } from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
+
+jest.unmock("react-use");
 
 const mockSelectedGrant = {
   id: "grant-1",
@@ -28,7 +32,7 @@ jest.mock("@/hooks/useXtdhGrantQuery", () => ({
 }));
 
 jest.mock("@/hooks/useXtdhGrantsSearchQuery", () => ({
-  useXtdhGrantsSearchQuery: () => ({
+  useXtdhGrantsSearchQuery: jest.fn(() => ({
     grants: [mockSelectedGrant],
     totalCount: 1,
     hasNextPage: false,
@@ -38,7 +42,7 @@ jest.mock("@/hooks/useXtdhGrantsSearchQuery", () => ({
     isError: false,
     errorMessage: undefined,
     refetch: jest.fn(),
-  }),
+  })),
 }));
 
 jest.mock("@/components/utils/input/identity/IdentitySearch", () => ({
@@ -124,27 +128,85 @@ function TestEditor({
 }
 
 describe("CreateWaveInlineGroupXtdhGrant", () => {
-  it.each(["collection", "grantor", "status"] as const)(
-    "shows Clear filters only after changing the Network %s filter and restores defaults",
-    async (filter) => {
+  it.each([false, true])(
+    "preserves token requirement selection with shared tabs (quiet=%s)",
+    async (quiet) => {
       const user = userEvent.setup();
-      render(<TestEditor networkPresentation />);
+      const setMatchMode = jest.fn();
+      render(
+        <GroupCreateXtdhGrantMatchMode
+          quiet={quiet}
+          grant={{
+            ...mockSelectedGrant,
+            target_token_mode: ApiXTdhGrantTargetTokenMode.Include,
+          }}
+          matchMode={ApiGroupBeneficiaryGrantMatchMode.AnyToken}
+          setMatchMode={setMatchMode}
+        />
+      );
+
+      expect(
+        screen.getByRole("tablist", { name: "Token requirement" })
+      ).toBeInTheDocument();
+      const ownAny = screen.getByRole("tab", { name: "Own any" });
+      const ownAll = screen.getByRole("tab", { name: "Own all" });
+      expect(ownAny).toHaveAttribute("aria-selected", "true");
+      expect(ownAll).toHaveAttribute("aria-selected", "false");
+      await user.click(ownAll);
+      expect(setMatchMode).toHaveBeenLastCalledWith(
+        ApiGroupBeneficiaryGrantMatchMode.AllTokens
+      );
+      await user.click(ownAny);
+      expect(setMatchMode).toHaveBeenLastCalledWith(
+        ApiGroupBeneficiaryGrantMatchMode.AnyToken
+      );
+    }
+  );
+
+  it.each([false, true])(
+    "does not show Clear filters for status tabs alone (network=%s)",
+    async (networkPresentation) => {
+      const user = userEvent.setup();
+      render(<TestEditor networkPresentation={networkPresentation} />);
+      for (const status of ["Pending", "Revoked", "Failed", "Granted"]) {
+        await user.click(screen.getByRole("tab", { name: status }));
+        expect(
+          screen.queryByRole("button", { name: "Clear filters" })
+        ).not.toBeInTheDocument();
+      }
+    }
+  );
+
+  it.each([
+    { filter: "collection", networkPresentation: false },
+    { filter: "grantor", networkPresentation: false },
+    { filter: "collection", networkPresentation: true },
+    { filter: "grantor", networkPresentation: true },
+  ])(
+    "clears the $filter search while preserving status (network=$networkPresentation)",
+    async ({ filter, networkPresentation }) => {
+      const user = userEvent.setup();
+      render(<TestEditor networkPresentation={networkPresentation} />);
       const clearFilters = () =>
         screen.queryByRole("button", { name: "Clear filters" });
       expect(clearFilters()).not.toBeInTheDocument();
+      await user.click(screen.getByRole("tab", { name: "Pending" }));
 
       if (filter === "collection") {
         await user.type(
           screen.getByRole("textbox", { name: "Collection name" }),
           "Memes"
         );
-      } else if (filter === "grantor") {
+        await waitFor(() =>
+          expect(useXtdhGrantsSearchQuery).toHaveBeenLastCalledWith(
+            expect.objectContaining({ targetCollectionName: "Memes" })
+          )
+        );
+      } else {
         await user.type(
           screen.getByRole("textbox", { name: "Grantor" }),
           "alice"
         );
-      } else {
-        await user.click(screen.getByRole("button", { name: "Pending" }));
       }
 
       await user.click(screen.getByRole("button", { name: "Clear filters" }));
@@ -153,68 +215,91 @@ describe("CreateWaveInlineGroupXtdhGrant", () => {
         screen.getByRole("textbox", { name: "Collection name" })
       ).toHaveValue("");
       expect(screen.getByRole("textbox", { name: "Grantor" })).toHaveValue("");
-      expect(screen.getByRole("button", { name: "Granted" })).toHaveAttribute(
-        "aria-pressed",
+      expect(screen.getByRole("tab", { name: "Pending" })).toHaveAttribute(
+        "aria-selected",
         "true"
       );
-      expect(screen.getByRole("button", { name: "Granted" })).toHaveFocus();
+      expect(screen.getByRole("tab", { name: "Pending" })).toHaveFocus();
+      expect(useXtdhGrantsSearchQuery).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          grantor: null,
+          targetCollectionName: null,
+          statuses: [ApiXTdhGrantStatus.Pending],
+        })
+      );
       expect(
         screen.getByRole("status", { name: "Selected grant" })
       ).toHaveTextContent("none");
     }
   );
 
-  it("searches first, then shows controls for the selected grant", async () => {
-    const user = userEvent.setup();
-    render(<TestEditor />);
-    expect(
-      screen.getByRole("button", { name: "Clear filters" })
-    ).toBeInTheDocument();
+  it.each([false, true])(
+    "focuses the selected grant after the finder closes (network=%s)",
+    async (networkPresentation) => {
+      const user = userEvent.setup();
+      render(<TestEditor networkPresentation={networkPresentation} />);
+      const selection = screen.getByRole("group", {
+        name: "xTDH Grant Beneficiary",
+      });
+      expect(selection).not.toHaveFocus();
+      expect(
+        screen.queryByRole("button", { name: "Clear filters" })
+      ).not.toBeInTheDocument();
 
-    expect(
-      screen.queryByRole("textbox", { name: "Grant ID" })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Find grant" })
-    ).not.toBeInTheDocument();
-    expect(screen.getByText("Grantor search")).toBeInTheDocument();
+      expect(
+        screen.queryByRole("textbox", { name: "Grant ID" })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Find grant" })
+      ).not.toBeInTheDocument();
+      expect(screen.getByText("Grantor search")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Select grant-1" }));
+      await user.click(screen.getByRole("button", { name: "Select grant-1" }));
 
-    expect(
-      screen.getByRole("status", { name: "Selected grant" })
-    ).toHaveTextContent("grant-1");
-    expect(
-      screen.getByRole("status", { name: "Grant match mode" })
-    ).toHaveTextContent(ApiGroupBeneficiaryGrantMatchMode.AnyToken);
-    expect(screen.getByText("Selected grant grant-1")).toBeInTheDocument();
-    expect(screen.queryByText("Grantor search")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Change grant" })
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Remove grant" })
-    ).toBeInTheDocument();
+      expect(
+        screen.getByRole("status", { name: "Selected grant" })
+      ).toHaveTextContent("grant-1");
+      expect(
+        screen.getByRole("status", { name: "Grant match mode" })
+      ).toHaveTextContent(ApiGroupBeneficiaryGrantMatchMode.AnyToken);
+      expect(screen.getByText("Selected grant grant-1")).toBeInTheDocument();
+      expect(selection).toHaveFocus();
+      expect(screen.queryByText("Grantor search")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Change grant" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Remove grant" })
+      ).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Change grant" }));
+      await user.click(screen.getByRole("button", { name: "Change grant" }));
 
-    expect(screen.getByText("Grantor search")).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Cancel change" })
-    ).toHaveAttribute("aria-expanded", "true");
+      expect(screen.getByText("Grantor search")).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Cancel change" })
+      ).toHaveAttribute("aria-expanded", "true");
 
-    await user.click(screen.getByRole("button", { name: "Cancel change" }));
+      await user.click(screen.getByRole("button", { name: "Cancel change" }));
 
-    expect(screen.queryByText("Grantor search")).not.toBeInTheDocument();
+      expect(screen.queryByText("Grantor search")).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: "Remove grant" }));
+      expect(
+        screen.getByRole("button", { name: "Change grant" })
+      ).toHaveFocus();
+      await user.click(screen.getByRole("button", { name: "Change grant" }));
+      // Reselecting the same grant still transfers focus from the removed row.
+      await user.click(screen.getByRole("button", { name: "Select grant-1" }));
+      expect(selection).toHaveFocus();
+      await user.click(screen.getByRole("button", { name: "Remove grant" }));
+      expect(selection).not.toHaveFocus();
 
-    expect(
-      screen.getByRole("status", { name: "Selected grant" })
-    ).toHaveTextContent("none");
-    expect(screen.getByText("Grantor search")).toBeInTheDocument();
-    expect(
-      screen.queryByText("Selected grant grant-1")
-    ).not.toBeInTheDocument();
-  });
+      expect(
+        screen.getByRole("status", { name: "Selected grant" })
+      ).toHaveTextContent("none");
+      expect(screen.getByText("Grantor search")).toBeInTheDocument();
+      expect(
+        screen.queryByText("Selected grant grant-1")
+      ).not.toBeInTheDocument();
+    }
+  );
 });

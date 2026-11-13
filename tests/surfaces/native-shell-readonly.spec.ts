@@ -2,7 +2,9 @@ import { defineMobileVideoBatteryTest } from "../media/mobileVideoBatteryCases";
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
-import { gotoReady } from "../support/routeReadiness";
+import { gotoReady, RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+import { PROFILE_HANDLE } from "../social/profileReadonlyHelpers";
+import { expectUrlState } from "../support/urlState";
 import {
   isCapacitorSimulationProject,
   isElectronSimulationProject,
@@ -238,6 +240,196 @@ async function readNotificationHistoryPushCount(page: Page) {
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
+  test("calendar invites omit the mint URL only on iOS", async ({
+    page,
+  }, testInfo) => {
+    await gotoReady(page, "/meme-calendar");
+
+    const mintUrl = /6529\.io%2Fthe-memes%2Fmint/i;
+    const invites = [
+      page.getByRole("link", { name: "Add to Calendar", exact: true }).first(),
+      page
+        .getByRole("link", { name: "Add to Google Calendar", exact: true })
+        .first(),
+    ];
+
+    for (const invite of invites) {
+      await expect(invite).toBeVisible();
+      if (testInfo.project.name === "capacitor-ios-sim") {
+        await expect(invite).not.toHaveAttribute("href", mintUrl);
+      } else {
+        await expect(invite).toHaveAttribute("href", mintUrl);
+      }
+    }
+  });
+
+  test("NextGen listing filters and direct listing URLs are gated on iOS", async ({
+    page,
+  }, testInfo) => {
+    await gotoReady(
+      page,
+      "/nextgen/collection/pebbles/art?sort=listed_price&listed=true"
+    );
+
+    const listingStatus = page.getByRole("combobox", {
+      name: "Listing status",
+    });
+    const sort = page.getByRole("button", { name: /^Sort:/ });
+    const isIos = testInfo.project.name === "capacitor-ios-sim";
+    if (isIos) {
+      await expect(sort).toHaveText("Sort: ID");
+      await expectUrlState(
+        page,
+        (url) =>
+          url.searchParams.get("sort") === "id" &&
+          !url.searchParams.has("listed")
+      );
+      await expect(listingStatus).toHaveCount(0);
+    } else {
+      await expect(sort).toHaveText("Sort: Listed Price");
+      await expect(listingStatus).toBeVisible();
+    }
+    await sort.click();
+    await expect(
+      page.getByRole("button", { name: "Last Sale", exact: true })
+    ).toBeVisible();
+    const listedPrice = page.getByRole("button", {
+      name: "Listed Price",
+      exact: true,
+    });
+    if (isIos) {
+      await expect(listedPrice).toHaveCount(0);
+    } else {
+      await expect(listedPrice).toBeVisible();
+    }
+  });
+
+  test("Collect Back restores the Collected filters and source action", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native app Back contract"
+    );
+    for (const action of ["Manage orders", "Complete my set"]) {
+      await gotoReady(
+        page,
+        `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
+      );
+      await expect(
+        page.getByRole("main").locator('[data-profile-section="Filters"]')
+      ).toBeVisible({
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+      const source = new URL(page.url());
+      const link = page.getByRole("link", { name: action, exact: true });
+      const purchaseActions = page.getByTestId("collected-purchase-actions");
+      if (testInfo.project.name === "capacitor-ios-sim") {
+        await expect(link).toHaveCount(0);
+        await expect(purchaseActions).toHaveCount(0);
+        continue;
+      }
+      await expect(purchaseActions).toBeVisible();
+      await link.scrollIntoViewIfNeeded();
+      const destination = new URL(
+        (await link.getAttribute("href"))!,
+        page.url()
+      );
+      expect(destination.searchParams.has("returnTo")).toBe(true);
+      await link.click();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname ===
+          (action === "Manage orders" ? "/collect/orders" : "/collect")
+      );
+      await page.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(page).toHaveURL((url) => url.pathname === source.pathname);
+      await expectUrlState(page, (url) =>
+        ["collection", "szn", "details"].every(
+          (key) => url.searchParams.get(key) === source.searchParams.get(key)
+        )
+      );
+      await expect(
+        page.getByRole("link", { name: action, exact: true })
+      ).toBeFocused();
+      await expect(
+        page.getByRole("link", { name: action, exact: true })
+      ).toBeInViewport();
+    }
+  });
+
+  for (const path of ["/collect", "/collect/orders"]) {
+    test(`fresh ${path} does not offer a false Back destination`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        !isCapacitorSimulationProject(testInfo.project.name),
+        "Native app Back contract"
+      );
+      // A document navigation starts a fresh app history for each deep link.
+      await gotoReady(page, path);
+      const expectedPath =
+        testInfo.project.name === "capacitor-ios-sim" ? "/the-memes" : path;
+      await expect(page).toHaveURL((url) => url.pathname === expectedPath);
+      await expect(
+        page.getByRole("navigation", {
+          name: "Primary navigation",
+          exact: true,
+        })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Back", exact: true })
+      ).toHaveCount(0);
+    });
+  }
+
+  test("Back remains usable after returning from Orders to a profile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "capacitor-android-sim",
+      "Orders remains available in the Android app"
+    );
+    await gotoReady(page, "/about");
+    await expect(
+      page.getByRole("navigation", { name: "Primary navigation", exact: true })
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Search 6529", exact: true })
+      .click();
+    await page
+      .getByRole("combobox", { name: "Search 6529", exact: true })
+      .fill(PROFILE_HANDLE);
+    await page
+      .getByRole("option")
+      .filter({ hasText: PROFILE_HANDLE })
+      .first()
+      .click();
+    await page
+      .getByRole("navigation", { name: "Profile sections" })
+      .getByRole("link", { name: "Collected", exact: true })
+      .click();
+    await expect(
+      page.getByRole("main").locator('[data-profile-section="Filters"]')
+    ).toBeVisible({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
+    await page
+      .getByRole("link", { name: "Manage orders", exact: true })
+      .click();
+    await expectUrlState(page, (url) => url.pathname === "/collect/orders");
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expectUrlState(
+      page,
+      (url) => url.pathname === `/${PROFILE_HANDLE}/collected`
+    );
+    await expect(
+      page.getByRole("button", { name: "Back", exact: true })
+    ).toBeEnabled();
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expectUrlState(page, (url) => url.pathname === "/about");
+  });
+
   test("native profile artwork opens above the app header and closes back to the profile", async ({
     page,
   }, testInfo) => {
@@ -739,26 +931,16 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         "true"
       );
     }
-    const summaryIsCompact = (target = summary) =>
-      target.evaluate((element) => {
-        for (
-          let parent = element.parentElement;
-          parent;
-          parent = parent.parentElement
-        ) {
-          const style = getComputedStyle(parent);
-          if (
-            style.position === "absolute" &&
-            style.clip !== "auto" &&
-            parent.getBoundingClientRect().width <= 1
-          )
-            return true;
-        }
-        return false;
-      });
-    await expect.poll(summaryIsCompact).toBe(true);
-    // Compact the visual footer without removing its summary from the
-    // accessibility tree; preview actions become visible when focused.
+    // The mobile summary scrolls after the editor, as requested, instead of
+    // occupying or being visually hidden within the fixed action footer.
+    const summaryCard = filter
+      .getByRole("region", { name: "Level", exact: true })
+      .locator("[data-group-criteria-summary]");
+    await expect(summaryCard).toContainText("Level at least 10");
+    await expect
+      .poll(() => summaryCard.evaluate((element) => element.clientHeight))
+      .toBeGreaterThan(1);
+    await expect(summary).toBeVisible();
     await expect
       .poll(() => filter.ariaSnapshot())
       .toContain("Level at least 10");
@@ -809,7 +991,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(preview).toBeFocused();
     await expect(preview).toBeInViewport({ ratio: 1 });
     await input.focus();
-    await expect.poll(summaryIsCompact).toBe(true);
+    await expect(summary).toBeVisible();
     await filter.getByRole("button", { name: "Back", exact: true }).click();
     await filter
       .getByRole("group", { name: "Filter Network", exact: true })
@@ -887,57 +1069,71 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(page).toHaveURL((url) => !url.searchParams.has("group"));
   });
 
-  test("iOS native simulation hides non-US subscription downloads", async ({
+  test("a US IP leaves Collect available outside iOS only", async ({
     page,
   }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "capacitor-ios-sim",
-      "iOS subscription visibility is covered on the iOS Capacitor simulation"
-    );
+    await mockCountryCheck(page, "US");
+    await gotoReady(page, "/collect?collection=memes&intent=full_set");
 
-    await mockCountryCheck(page, "FR");
-    const countryCheck = waitForCountryCheck(page);
+    if (testInfo.project.name !== "capacitor-ios-sim") {
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === "/collect" &&
+          url.searchParams.get("intent") === "full_set"
+      );
+      await expect(
+        page.getByRole("form", { name: "Complete a full set", exact: true })
+      ).toBeVisible();
+      return;
+    }
 
-    await gotoReady(page, "/open-data");
-    await countryCheck;
-
+    await expect(page).toHaveURL((url) => url.pathname === "/the-memes");
     await expect(
-      page.getByRole("heading", { level: 1, name: "Open Data" })
+      page.getByRole("button", { name: "Collection: The Memes" })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Network Metrics" })
-    ).toHaveAttribute("href", "/open-data/network-metrics");
+      page.getByRole("link", { name: "Complete my set" })
+    ).toHaveCount(0);
     await expect(
-      page.getByRole("link", { name: "Meme Subscriptions" })
+      page.getByRole("button", { name: "Review purchase" })
     ).toHaveCount(0);
   });
 
-  test("iOS native simulation keeps US subscription downloads visible", async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "capacitor-ios-sim",
-      "iOS subscription visibility is covered on the iOS Capacitor simulation"
-    );
+  for (const country of ["FR", "US", ""]) {
+    test(`iOS hides subscription downloads and redirects profile Subscriptions (${country || "unknown"})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "capacitor-ios-sim",
+        "iOS subscription visibility is covered on the iOS Capacitor simulation"
+      );
 
-    await mockCountryCheck(page, "US");
-    const countryCheck = waitForCountryCheck(page);
+      await mockCountryCheck(page, country);
+      const countryCheck = waitForCountryCheck(page);
 
-    await gotoReady(page, "/open-data");
-    await countryCheck;
+      await gotoReady(page, "/open-data");
+      await countryCheck;
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Open Data" })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Network Metrics" })
+      ).toHaveAttribute("href", "/open-data/network-metrics");
+      await expect(
+        page.getByRole("link", { name: "Meme Subscriptions" })
+      ).toHaveCount(0);
 
-    await expect(
-      page.getByRole("heading", { level: 1, name: "Open Data" })
-    ).toBeVisible();
-    const subscriptionsLink = page.getByRole("link", {
-      name: "Meme Subscriptions",
+      await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+      await expect(page).toHaveURL(
+        (url) => url.pathname === `/${PROFILE_HANDLE}`
+      );
+      await expect(
+        page
+          .getByRole("navigation", { name: "Profile sections" })
+          .getByRole("link", { name: "Subscriptions", exact: true })
+      ).toHaveCount(0);
     });
-    await expect(subscriptionsLink).toBeVisible();
-    await expect(subscriptionsLink).toHaveAttribute(
-      "href",
-      "/open-data/meme-subscriptions"
-    );
-  });
+  }
 
   test("Android native simulation keeps subscription downloads visible", async ({
     page,

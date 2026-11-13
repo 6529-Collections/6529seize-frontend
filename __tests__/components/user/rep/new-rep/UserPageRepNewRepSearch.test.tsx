@@ -1,13 +1,19 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
+import { useContext } from "react";
+import { AuthContext } from "@/components/auth/Auth";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import userEvent from "@testing-library/user-event";
 import UserPageRepNewRepSearch from "@/components/user/rep/new-rep/UserPageRepNewRepSearch";
 import { getGrantRepCategoriesToDisplay } from "@/components/user/rep/new-rep/grantRepCategoryOptions";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useQuery } from "@tanstack/react-query";
-import { commonApiFetch } from "@/services/api/common-api";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { useRepAllocation } from "@/hooks/useRepAllocation";
 
 jest.mock("@tanstack/react-query", () => ({
-  useMutation: jest.fn().mockReturnValue({ mutateAsync: jest.fn() }),
+  useMutation: jest.requireActual<typeof import("@tanstack/react-query")>(
+    "@tanstack/react-query"
+  ).useMutation,
   useQuery: jest.fn(),
 }));
 
@@ -41,11 +47,7 @@ jest.mock(
   () => () => <div data-testid="loader" />
 );
 jest.mock("@/hooks/useRepAllocation", () => ({
-  useRepAllocation: () => ({
-    repState: null,
-    heroAvailableRep: 100,
-    minMaxValues: { min: -100, max: 100 },
-  }),
+  useRepAllocation: jest.fn(),
 }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn().mockResolvedValue(true),
@@ -53,12 +55,208 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 describe("UserPageRepNewRepSearch", () => {
+  const allocation = {
+    repState: null,
+    heroAvailableRep: 100,
+    proxyAvailableCredit: null,
+    minMaxValues: { min: -100, max: 100 },
+    isError: false,
+    isFetching: false,
+    retry: jest.fn(),
+  };
+  const mockAllocation = jest.mocked(useRepAllocation);
+
   beforeEach(() => {
+    mockAllocation.mockReturnValue(allocation);
     (commonApiFetch as jest.Mock).mockResolvedValue(true);
     (useQuery as jest.Mock).mockReturnValue({
       isFetching: false,
       data: ["MemesNominee"],
     });
+  });
+
+  it("keeps the grant locked and open until the shared rating refresh completes", async () => {
+    const user = userEvent.setup();
+    let finishRefresh = () => {};
+    const refresh = new Promise<void>((resolve) => {
+      finishRefresh = resolve;
+    });
+    const onProfileRepModify = jest.fn(() => refresh);
+    const onSuccess = jest.fn();
+    jest.mocked(commonApiPost).mockResolvedValue(undefined);
+    mockAllocation.mockReturnValue({
+      ...allocation,
+      repState: {
+        category: "Art",
+        rating: 0,
+        contributor_count: 0,
+        rater_contribution: 0,
+      },
+    });
+    (useQuery as jest.Mock).mockReturnValue({
+      isFetching: false,
+      data: ["Art"],
+    });
+    function Harness() {
+      const auth = useContext(AuthContext);
+      const queries = useContext(ReactQueryWrapperContext);
+      return (
+        <AuthContext.Provider
+          value={{ ...auth, requestAuth: async () => ({ success: true }) }}
+        >
+          <ReactQueryWrapperContext.Provider
+            value={{ ...queries, onProfileRepModify }}
+          >
+            <UserPageRepNewRepSearch
+              overview={null}
+              profile={{ query: "recipient" } as ApiIdentity}
+              onSuccess={onSuccess}
+            />
+          </ReactQueryWrapperContext.Provider>
+        </AuthContext.Provider>
+      );
+    }
+    render(<Harness />);
+    await user.type(
+      screen.getByRole("textbox", { name: "Category to grant REP for" }),
+      "Art"
+    );
+    await user.click(
+      await screen.findByRole("button", { name: "Art" })
+    );
+    const amount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    await user.clear(amount);
+    await user.type(amount, "25");
+    const grant = screen.getByRole("button", {
+      name: "Grant Rep",
+    });
+    await user.click(grant);
+    await waitFor(() => expect(onProfileRepModify).toHaveBeenCalledTimes(1));
+    expect(grant).toBeDisabled();
+    expect(amount).toHaveValue("25");
+    expect(onSuccess).not.toHaveBeenCalled();
+    await act(async () => {
+      finishRefresh();
+    });
+    await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves a typed amount when a delayed rating response arrives", async () => {
+    const user = userEvent.setup();
+    mockAllocation.mockReturnValue({
+      ...allocation,
+      minMaxValues: { min: 0, max: 0 },
+    });
+    (useQuery as jest.Mock).mockReturnValue({
+      isFetching: false,
+      data: ["Art"],
+    });
+    const props = {
+      overview: null,
+      profile: { query: "recipient" } as ApiIdentity,
+    };
+    const { rerender } = render(<UserPageRepNewRepSearch {...props} />);
+    const amount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    await user.type(
+      screen.getByRole("textbox", { name: "Category to grant REP for" }),
+      "Art"
+    );
+    await user.click(await screen.findByRole("button", { name: "Art" }));
+    await user.clear(amount);
+    await user.type(amount, "25");
+    await user.tab();
+    expect(amount).toHaveValue("25");
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
+
+    mockAllocation.mockReturnValue({
+      ...allocation,
+      repState: {
+        category: "Art",
+        rating: 0,
+        contributor_count: 0,
+        rater_contribution: 0,
+      },
+    });
+    rerender(<UserPageRepNewRepSearch {...props} />);
+
+    expect(amount).toHaveValue("25");
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeEnabled();
+  });
+
+  it("prefills the saved rating and keeps edits through background refreshes", async () => {
+    const user = userEvent.setup();
+    const props = {
+      overview: null,
+      profile: { query: "recipient" } as ApiIdentity,
+    };
+    const { rerender } = render(<UserPageRepNewRepSearch {...props} />);
+    const amount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    const repState = {
+      category: "Art",
+      rating: 20,
+      contributor_count: 1,
+      rater_contribution: 20,
+    };
+    mockAllocation.mockReturnValue({ ...allocation, repState });
+    rerender(<UserPageRepNewRepSearch {...props} />);
+    expect(amount).toHaveValue("20");
+
+    await user.clear(amount);
+    await user.type(amount, "35");
+    mockAllocation.mockReturnValue({
+      ...allocation,
+      repState: { ...repState },
+    });
+    rerender(<UserPageRepNewRepSearch {...props} />);
+
+    expect(amount).toHaveValue("35");
+  });
+
+  it("clears the previous category draft and prefills the next category", async () => {
+    const user = userEvent.setup();
+    (useQuery as jest.Mock).mockReturnValue({
+      isFetching: false,
+      data: ["Art", "Research"],
+    });
+    mockAllocation.mockImplementation(({ category }) => ({
+      ...allocation,
+      repState: category
+        ? {
+            category,
+            rating: 20,
+            contributor_count: 1,
+            rater_contribution: category === "Art" ? 20 : 7,
+          }
+        : null,
+    }));
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const search = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    const amount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    await user.type(search, "Art");
+    await user.click(await screen.findByRole("button", { name: "Art" }));
+    await waitFor(() => expect(amount).toHaveValue("20"));
+    await user.clear(amount);
+    await user.type(amount, "30");
+    await user.clear(search);
+    await user.type(search, "Research");
+    await user.click(await screen.findByRole("button", { name: "Research" }));
+    await waitFor(() => expect(amount).toHaveValue("7"));
   });
 
   it("lets users type an amount while category selection remains required", async () => {
@@ -69,14 +267,17 @@ describe("UserPageRepNewRepSearch", () => {
         profile={{ query: "recipient" } as ApiIdentity}
       />
     );
-    await user.clear(screen.getByRole("textbox", { name: "REP amount" }));
-    await user.type(screen.getByRole("textbox", { name: "REP amount" }), "1");
-    expect(screen.getByRole("textbox", { name: "REP amount" })).toHaveValue(
+    await user.clear(
+      screen.getByRole("textbox", { name: "Your total REP for this category" })
+    );
+    await user.type(
+      screen.getByRole("textbox", { name: "Your total REP for this category" }),
       "1"
     );
     expect(
-      screen.getByRole("button", { name: "Grant REP" })
-    ).toBeDisabled();
+      screen.getByRole("textbox", { name: "Your total REP for this category" })
+    ).toHaveValue("1");
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
   });
 
   it("shows loading instead of the minimum-length prompt once three characters are entered", async () => {

@@ -1,0 +1,270 @@
+{
+  "_DoNotApplyAsWritten": "Record of the live E3KTTDJUNHRYW9 config, not an input. The AWS CLI rejects this key, so the file cannot be applied as it is. Start every change from a fresh get-distribution-config and its ETag, and keep WebACLId and the X-Origin-Verify origin header from it. The header value lives only in SSM; the placeholder below is not it. See ops/docs/developer/cloudfront-page-cache.md#origin-lockdown.",
+  "CallerReference": "frontend-html-production",
+  "Comment": "6529.io frontend pages (Elastic Beanstalk load balancer, Node on port 3001)",
+  "Enabled": true,
+  "Aliases": {
+    "Quantity": 1,
+    "Items": ["6529.io"]
+  },
+  "ViewerCertificate": {
+    "ACMCertificateArn": "arn:aws:acm:us-east-1:987989283142:certificate/a6bd791c-7c84-4b2a-92e0-95c113bc767d",
+    "SSLSupportMethod": "sni-only",
+    "MinimumProtocolVersion": "TLSv1.2_2021"
+  },
+  "HttpVersion": "http2and3",
+  "IsIPV6Enabled": true,
+  "PriceClass": "PriceClass_All",
+  "Origins": {
+    "Quantity": 1,
+    "Items": [
+      {
+        "Id": "production-alb-https",
+        "DomainName": "seizeapp-env-node22.eba-dg2ywmgz.us-east-1.elasticbeanstalk.com",
+        "OriginPath": "",
+        "CustomHeaders": {
+          "Quantity": 1,
+          "Items": [
+            {
+              "HeaderName": "X-Origin-Verify",
+              "HeaderValue": "UNRESOLVED_PLACEHOLDER_read_from_SSM_/6529/frontend/production/origin-verify-header"
+            }
+          ]
+        },
+        "CustomOriginConfig": {
+          "HTTPPort": 80,
+          "HTTPSPort": 443,
+          "OriginProtocolPolicy": "https-only",
+          "OriginSslProtocols": {
+            "Quantity": 1,
+            "Items": ["TLSv1.2"]
+          },
+          "OriginReadTimeout": 60,
+          "OriginKeepaliveTimeout": 55
+        },
+        "ConnectionAttempts": 3,
+        "ConnectionTimeout": 10,
+        "OriginShield": {
+          "Enabled": false
+        }
+      }
+    ]
+  },
+  "DefaultCacheBehavior": {
+    "TargetOriginId": "production-alb-https",
+    "ViewerProtocolPolicy": "redirect-to-https",
+    "AllowedMethods": {
+      "Quantity": 7,
+      "Items": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+      "CachedMethods": {
+        "Quantity": 2,
+        "Items": ["GET", "HEAD"]
+      }
+    },
+    "Compress": true,
+    "CachePolicyId": "3d5e2933-ef97-4ca2-b075-14d8de39deff",
+    "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+    "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+    "SmoothStreaming": false,
+    "FieldLevelEncryptionId": "",
+    "LambdaFunctionAssociations": {
+      "Quantity": 0
+    },
+    "FunctionAssociations": {
+      "Quantity": 0
+    }
+  },
+  "CacheBehaviors": {
+    "Quantity": 5,
+    "Items": [
+      {
+        "PathPattern": "/_next/static/*",
+        "TargetOriginId": "production-alb-https",
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 2,
+          "Items": ["GET", "HEAD"],
+          "CachedMethods": {
+            "Quantity": 2,
+            "Items": ["GET", "HEAD"]
+          }
+        },
+        "Compress": true,
+        "CachePolicyId": "1ecaa93f-7a0c-42f7-8775-0700dadbda9c",
+        "OriginRequestPolicyId": "afacd8ea-6f91-46f3-8fb3-b0fec7c4d1fb",
+        "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+        "SmoothStreaming": false,
+        "FieldLevelEncryptionId": "",
+        "LambdaFunctionAssociations": {
+          "Quantity": 0
+        },
+        "FunctionAssociations": {
+          "Quantity": 0
+        }
+      },
+      {
+        "PathPattern": "/_next/image*",
+        "TargetOriginId": "production-alb-https",
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 2,
+          "Items": ["GET", "HEAD"],
+          "CachedMethods": {
+            "Quantity": 2,
+            "Items": ["GET", "HEAD"]
+          }
+        },
+        "Compress": false,
+        "CachePolicyId": "62848582-2076-4e33-894e-f6c575a59a64",
+        "OriginRequestPolicyId": "afacd8ea-6f91-46f3-8fb3-b0fec7c4d1fb",
+        "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+        "SmoothStreaming": false,
+        "FieldLevelEncryptionId": "",
+        "LambdaFunctionAssociations": {
+          "Quantity": 0
+        },
+        "FunctionAssociations": {
+          "Quantity": 0
+        }
+      },
+      {
+        "PathPattern": "/api/og-metadata/*",
+        "TargetOriginId": "production-alb-https",
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 2,
+          "Items": ["GET", "HEAD"],
+          "CachedMethods": {
+            "Quantity": 2,
+            "Items": ["GET", "HEAD"]
+          }
+        },
+        "Compress": true,
+        "CachePolicyId": "d1fd2602-5e5a-4a50-ac66-82af1ad19c52",
+        "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+        "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+        "SmoothStreaming": false,
+        "FieldLevelEncryptionId": "",
+        "LambdaFunctionAssociations": {
+          "Quantity": 0
+        },
+        "FunctionAssociations": {
+          "Quantity": 0
+        }
+      },
+      {
+        "PathPattern": "/validator*",
+        "TargetOriginId": "production-alb-https",
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 7,
+          "Items": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+          "CachedMethods": {
+            "Quantity": 2,
+            "Items": ["GET", "HEAD"]
+          }
+        },
+        "Compress": true,
+        "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+        "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+        "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+        "SmoothStreaming": false,
+        "FieldLevelEncryptionId": "",
+        "LambdaFunctionAssociations": {
+          "Quantity": 0
+        },
+        "FunctionAssociations": {
+          "Quantity": 0
+        }
+      },
+      {
+        "PathPattern": "/my-stream*",
+        "TargetOriginId": "production-alb-https",
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "AllowedMethods": {
+          "Quantity": 7,
+          "Items": ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"],
+          "CachedMethods": {
+            "Quantity": 2,
+            "Items": ["GET", "HEAD"]
+          }
+        },
+        "Compress": true,
+        "CachePolicyId": "4135ea2d-6df8-44a3-9df3-4b5a84be39ad",
+        "OriginRequestPolicyId": "216adef6-5c7f-47e4-b989-5492eafa07d3",
+        "ResponseHeadersPolicyId": "523c541d-ef9e-4d82-8b4f-11a94b76d5c8",
+        "SmoothStreaming": false,
+        "FieldLevelEncryptionId": "",
+        "LambdaFunctionAssociations": {
+          "Quantity": 0
+        },
+        "FunctionAssociations": {
+          "Quantity": 0
+        }
+      }
+    ]
+  },
+  "CustomErrorResponses": {
+    "Quantity": 11,
+    "Items": [
+      {
+        "ErrorCode": 400,
+        "ErrorCachingMinTTL": 0
+      },
+      {
+        "ErrorCode": 403,
+        "ErrorCachingMinTTL": 0
+      },
+      {
+        "ErrorCode": 404,
+        "ErrorCachingMinTTL": 0
+      },
+      {
+        "ErrorCode": 405,
+        "ErrorCachingMinTTL": 0
+      },
+      {
+        "ErrorCode": 414,
+        "ErrorCachingMinTTL": 0
+      },
+      {
+        "ErrorCode": 416,
+        "ErrorCachingMinTTL": 0
+      },
+      {
+        "ErrorCode": 500,
+        "ErrorCachingMinTTL": 0
+      },
+      {
+        "ErrorCode": 501,
+        "ErrorCachingMinTTL": 0
+      },
+      {
+        "ErrorCode": 502,
+        "ErrorCachingMinTTL": 0
+      },
+      {
+        "ErrorCode": 503,
+        "ErrorCachingMinTTL": 0
+      },
+      {
+        "ErrorCode": 504,
+        "ErrorCachingMinTTL": 0
+      }
+    ]
+  },
+  "Logging": {
+    "Enabled": false,
+    "IncludeCookies": false,
+    "Bucket": "",
+    "Prefix": ""
+  },
+  "Restrictions": {
+    "GeoRestriction": {
+      "RestrictionType": "none",
+      "Quantity": 0
+    }
+  },
+  "WebACLId": "arn:aws:wafv2:us-east-1:987989283142:global/webacl/seize-web-sanctions/5fcb32bd-7a1d-4718-88ed-5281335eaed6",
+  "DefaultRootObject": ""
+}

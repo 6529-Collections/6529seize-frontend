@@ -1,7 +1,10 @@
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import type { ReactElement } from "react";
+import { useId, type ReactElement } from "react";
 import { Tooltip } from "react-tooltip";
 
 interface DropVoteProgressingProps {
@@ -11,6 +14,8 @@ interface DropVoteProgressingProps {
   readonly subtle?: boolean | undefined;
   readonly compact?: boolean | undefined;
   readonly tooltipLabel?: string | undefined;
+  readonly tooltipPortal?: boolean | undefined;
+  readonly tooltipZIndex?: number | undefined;
   readonly numberFont?: "mono" | "sans" | undefined;
   readonly numberSize?: "mobile-xs" | "sm" | "body" | undefined;
   readonly numberWeight?: "bold" | "semibold" | undefined;
@@ -92,13 +97,20 @@ export default function DropVoteProgressing({
   projectedLabel,
   subtle = false,
   compact = false,
-  tooltipLabel = "Projected vote count at decision time",
+  tooltipLabel,
+  tooltipPortal = false,
+  tooltipZIndex = 99999,
   numberFont = "mono",
   numberSize = "sm",
   numberWeight = "bold",
   numberTracking,
   visualVariant = "default",
 }: DropVoteProgressingProps): ReactElement | null {
+  const portalId = useId();
+  const locale = useBrowserLocale();
+  const resolvedTooltipLabel =
+    tooltipLabel ?? t(locale, "waves.myVotes.projectedAtDecision");
+
   if (typeof current !== "number" || typeof projected !== "number") {
     return null;
   }
@@ -108,6 +120,10 @@ export default function DropVoteProgressing({
   if (!isProgressing) {
     return null;
   }
+
+  const tooltipId = tooltipPortal
+    ? `drop-vote-progress-${portalId}`
+    : `drop-vote-progress-${current}-${projected}`;
 
   const isPositiveProgressing = current < projected;
   const { color, arrowColor, wrapperClasses, valueClasses } = getVisualClasses(
@@ -130,6 +146,8 @@ export default function DropVoteProgressing({
   const numberTrackingClass =
     numberTracking === "normal" ? "!tw-tracking-normal" : "";
 
+  const TooltipComponent = tooltipPortal ? BodyPortalTooltip : Tooltip;
+
   return (
     <>
       <span
@@ -137,7 +155,7 @@ export default function DropVoteProgressing({
         style={{
           animationDuration: "2s",
         }}
-        data-tooltip-id={`drop-vote-progress-${current}-${projected}`}
+        data-tooltip-id={tooltipId}
       >
         <FontAwesomeIcon
           icon={faArrowRight}
@@ -149,11 +167,16 @@ export default function DropVoteProgressing({
           {projectedLabel ?? formatNumberWithCommas(projected)}
         </span>
       </span>
-      <Tooltip
-        id={`drop-vote-progress-${current}-${projected}`}
+      <TooltipComponent
+        id={tooltipId}
         place="top"
         offset={8}
         opacity={1}
+        className={
+          tooltipPortal
+            ? "tw-max-w-[min(20rem,calc(100vw-2rem))] tw-whitespace-normal tw-text-left tw-leading-5"
+            : ""
+        }
         style={{
           padding: "4px 8px",
           background: "#37373E",
@@ -162,12 +185,12 @@ export default function DropVoteProgressing({
           fontWeight: 500,
           borderRadius: "6px",
           boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          zIndex: 99999,
+          zIndex: tooltipZIndex,
           pointerEvents: "none",
         }}
       >
-        {tooltipLabel}: {formatNumberWithCommas(projected)}
-      </Tooltip>
+        {resolvedTooltipLabel}: {formatNumberWithCommas(projected)}
+      </TooltipComponent>
     </>
   );
 }

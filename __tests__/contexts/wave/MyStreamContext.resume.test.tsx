@@ -6,6 +6,7 @@ import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 
 const mockSetActiveWave = jest.fn();
 const mockRegisterWave = jest.fn();
+const mockActivateWave = jest.fn();
 const mockPrefetchWave = jest.fn();
 const mockRecentDmPrefetch = jest.fn();
 jest.mock("@/contexts/wave/hooks/useRecentDirectMessagePrefetch", () => ({
@@ -83,6 +84,7 @@ jest.mock("@/contexts/wave/hooks/useActiveWaveManager", () => ({
 jest.mock("@/contexts/wave/hooks/useWaveDataManager", () => ({
   useWaveDataManager: jest.fn(() => ({
     registerWave: mockRegisterWave,
+    activateWave: mockActivateWave,
     prefetchWave: mockPrefetchWave,
     syncNewestMessages: mockSyncNewestMessages,
     fetchNextPage: mockFetchNextPage,
@@ -339,7 +341,7 @@ describe("MyStreamProvider resume sync", () => {
     }
   );
 
-  it("does not let an old profile refresh cancel or restart the current profile's fetches", () => {
+  it("does not let an old profile refresh cancel or restart the current profile's fetches", async () => {
     useWaveMessagesStoreMock.mockImplementation(
       jest.requireActual("@/contexts/wave/hooks/useWaveMessagesStore").default
     );
@@ -357,19 +359,19 @@ describe("MyStreamProvider resume sync", () => {
     act(() =>
       globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT))
     );
-    mockRegisterWave.mockClear();
+    mockActivateWave.mockClear();
     mockCancelWaveDataFetch.mockClear();
     mockCancelPaginationFetch.mockClear();
 
-    act(() => staleRefresh("wave-1"));
+    await act(() => staleRefresh("wave-1"));
     expect(mockCancelWaveDataFetch).not.toHaveBeenCalled();
     expect(mockCancelPaginationFetch).not.toHaveBeenCalled();
-    expect(mockRegisterWave).not.toHaveBeenCalled();
+    expect(mockActivateWave).not.toHaveBeenCalled();
 
-    act(() => context!.refreshWaveMessages("wave-1"));
+    await act(() => context!.refreshWaveMessages("wave-1"));
     expect(mockCancelWaveDataFetch).toHaveBeenCalledWith("wave-1");
     expect(mockCancelPaginationFetch).toHaveBeenCalledWith("wave-1");
-    expect(mockRegisterWave).toHaveBeenCalledWith("wave-1");
+    expect(mockActivateWave).toHaveBeenCalledWith("wave-1");
   });
 
   it("registers selected waves before delegating active wave navigation", () => {
@@ -465,7 +467,7 @@ describe("MyStreamProvider resume sync", () => {
 
       expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: false });
       expect(useEnhancedWavesListCoreMock).toHaveBeenCalledWith(
-        "wave-1",
+        null,
         expect.anything(),
         expect.objectContaining({ enabled: false, supportsPinning: true })
       );
@@ -816,5 +818,87 @@ describe("MyStreamProvider resume sync", () => {
     expect(dmRefetch).not.toHaveBeenCalled();
     expect(mainRefreshStale).not.toHaveBeenCalled();
     expect(dmRefreshStale).not.toHaveBeenCalled();
+  });
+
+  describe("focus and visibility resync", () => {
+    let now = 1_000_000;
+    let nowSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      now = 1_000_000;
+      nowSpy = jest.spyOn(Date, "now").mockImplementation(() => now);
+    });
+
+    afterEach(() => {
+      nowSpy.mockRestore();
+    });
+
+    const renderRequested = () => {
+      const rendered = renderWithContext();
+      act(() => {
+        rendered.getContext().requestMainWavesList();
+      });
+      mainRefreshStale.mockClear();
+      mockRegisterWave.mockClear();
+      return rendered;
+    };
+
+    const focus = () =>
+      act(() => {
+        window.dispatchEvent(new Event("focus"));
+      });
+
+    const changeVisibility = (state: DocumentVisibilityState) => {
+      setDocumentVisibilityState(state);
+      act(() => {
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+    };
+
+    it("ignores window focus within a minute of loading or the last resync", () => {
+      renderRequested();
+      for (let index = 0; index < 10; index++) {
+        now += 5_000;
+        focus();
+      }
+      expect(mainRefreshStale).not.toHaveBeenCalled();
+      expect(mockRegisterWave).not.toHaveBeenCalled();
+    });
+
+    it("resyncs on focus once the last resync is a minute old, then waits again", () => {
+      renderRequested();
+      now += 60_000;
+      focus();
+      expect(mainRefreshStale).toHaveBeenCalledTimes(1);
+      expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true, {
+        skipInitialBackfill: undefined,
+      });
+
+      now += 30_000;
+      focus();
+      expect(mainRefreshStale).toHaveBeenCalledTimes(1);
+    });
+
+    it("resyncs on return after the tab was hidden 30 seconds", () => {
+      renderRequested();
+      changeVisibility("hidden");
+      now += 29_000;
+      changeVisibility("visible");
+      expect(mainRefreshStale).not.toHaveBeenCalled();
+
+      changeVisibility("hidden");
+      now += 30_000;
+      changeVisibility("visible");
+      expect(mainRefreshStale).toHaveBeenCalledTimes(1);
+    });
+
+    it("always resyncs when the browser comes back online", () => {
+      renderRequested();
+      now += 1_000;
+      act(() => {
+        window.dispatchEvent(new Event("online"));
+      });
+      expect(mainRefreshStale).toHaveBeenCalledTimes(1);
+    });
   });
 });

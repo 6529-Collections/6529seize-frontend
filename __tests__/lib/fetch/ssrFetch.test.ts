@@ -4,6 +4,7 @@ const mockNativeFetch = jest.fn();
 const mockGetAppCommonHeaders = jest.fn();
 let mockServerCredentialsAvailable = true;
 let mockProductionBuildPhase = false;
+let mockServerStagingApiKey: string | undefined;
 
 jest.mock("@/config/env", () => ({
   publicEnv: { API_ENDPOINT: "https://api.example.test" },
@@ -22,6 +23,7 @@ jest.mock("@/config/serverEnv", () => ({
       [signingValueKey]: "fixture-signing-value",
     };
   },
+  getStagingApiKey: () => mockServerStagingApiKey,
 }));
 jest.mock("@/helpers/server-signature.helpers", () => ({
   generateClientSignature: () => ({
@@ -103,6 +105,7 @@ describe("ssrFetch", () => {
     warnSpy = jest.spyOn(console, "warn").mockImplementation(() => undefined);
     mockServerCredentialsAvailable = true;
     mockProductionBuildPhase = false;
+    mockServerStagingApiKey = undefined;
     mockNativeFetch.mockResolvedValue(new Response(null, { status: 204 }));
     mockGetAppCommonHeaders.mockResolvedValue({
       Authorization: "Bearer viewer-wallet",
@@ -137,6 +140,99 @@ describe("ssrFetch", () => {
         "request-signature"
       );
       expect(headers.get("x-caller")).toBe("server-render");
+    });
+  });
+
+  describe("server-held staging access", () => {
+    it("sends the server staging key when no access value is present", async () => {
+      mockServerStagingApiKey = "server-staging-key";
+      mockGetAppCommonHeaders.mockResolvedValue({});
+      const { ssrFetch } = await loadSsrFetch();
+
+      await ssrFetch(API_URL);
+
+      expect(sentRequest().headers.get("x-6529-auth")).toBe(
+        "server-staging-key"
+      );
+    });
+
+    it("keeps an access value the caller already sent", async () => {
+      mockServerStagingApiKey = "server-staging-key";
+      mockGetAppCommonHeaders.mockResolvedValue({});
+      const { ssrFetch } = await loadSsrFetch();
+
+      await ssrFetch(API_URL, { headers: { "x-6529-auth": "caller-access" } });
+
+      expect(sentRequest().headers.get("x-6529-auth")).toBe("caller-access");
+    });
+
+    it("prefers the visitor's access cookie on the signed path", async () => {
+      mockServerStagingApiKey = "server-staging-key";
+      const { ssrFetch } = await loadSsrFetch();
+
+      await ssrFetch(API_URL);
+
+      expect(sentRequest().headers.get("x-6529-auth")).toBe(
+        "environment-access"
+      );
+    });
+
+    it("applies when SSR credentials are unavailable", async () => {
+      mockServerCredentialsAvailable = false;
+      mockServerStagingApiKey = "server-staging-key";
+      const { ssrFetch } = await loadSsrFetch();
+
+      await ssrFetch(API_URL);
+
+      expect(sentRequest().headers.get("x-6529-auth")).toBe(
+        "server-staging-key"
+      );
+    });
+
+    it("never follows a redirect while carrying the server staging key", async () => {
+      mockServerStagingApiKey = "server-staging-key";
+      mockGetAppCommonHeaders.mockResolvedValue({});
+      const { ssrFetch } = await loadSsrFetch();
+
+      await ssrFetch(API_URL);
+
+      expect(sentRequest().headers.get("x-6529-auth")).toBe(
+        "server-staging-key"
+      );
+      expect(sentRequest().redirect).toBe("error");
+    });
+
+    it("keeps a caller's manual redirect handling with the server staging key", async () => {
+      mockServerStagingApiKey = "server-staging-key";
+      mockGetAppCommonHeaders.mockResolvedValue({});
+      const { ssrFetch } = await loadSsrFetch();
+
+      await ssrFetch(API_URL, { redirect: "manual" });
+
+      expect(sentRequest().redirect).toBe("manual");
+    });
+
+    it("leaves redirects alone when the visitor's access value is sent", async () => {
+      mockServerStagingApiKey = "server-staging-key";
+      const { ssrFetch } = await loadSsrFetch();
+
+      await ssrFetch(API_URL);
+
+      expect(sentRequest().headers.get("x-6529-auth")).toBe(
+        "environment-access"
+      );
+      expect(sentRequest().redirect).toBe("follow");
+    });
+
+    it("never sends the server staging key to another origin", async () => {
+      mockServerStagingApiKey = "server-staging-key";
+      const { ssrFetch } = await loadSsrFetch();
+
+      await ssrFetch("https://elsewhere.example.test/api/thing");
+
+      const [input, init] = mockNativeFetch.mock.calls[0] ?? [];
+      expect(input).toBe("https://elsewhere.example.test/api/thing");
+      expect(init).toBeUndefined();
     });
   });
 

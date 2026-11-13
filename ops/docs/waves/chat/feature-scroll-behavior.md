@@ -4,8 +4,12 @@
 
 Wave chat keeps you on the newest drops while you stay at bottom.
 If you scroll up, it keeps your place and stops forced jumps.
+The message list fades gently at its top edge beneath the header.
 
-On Apple mobile only, new drops can stay pending until you return to bottom.
+On Apple mobile only, new drops from other people can stay pending until you
+return to bottom. Your own outgoing drops remain in the chat while sending and
+after they are saved, including text-only drops and drops with images.
+An image drop keeps its place in the conversation when image processing finishes.
 
 ## Location in the Site
 
@@ -23,16 +27,19 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 ## User Journey
 
 1. Open a wave or direct-message thread.
-2. During initial hydration, the thread shows a centered loader.
+2. Public waves can show server-rendered post text in the chat layout while the interactive thread initializes. Text and drop links remain readable without JavaScript. This content stays until the thread has rendered, including through wallet/profile restoration; it does not switch to a discovery-card skeleton. Returning to a previously opened wave or reloading its chat keeps the preview until that chat is ready again. Threads without a public preview show their loading state.
 3. If no drops exist, the thread shows `Start the conversation`.
 4. While pinned at visual bottom, incoming drops keep the view at latest.
 5. Scroll up to read history; the thread stops pinning and keeps your place.
 6. At top of loaded history, older pages load when available and a thin top loading bar appears.
-7. On Apple mobile while unpinned, newly arrived drops stay pending.
+7. On Apple mobile while unpinned, newly arrived drops from other people stay
+   pending. Sending your own drop does not reveal those pending incoming drops.
 8. The bottom control behavior changes by state:
    - Pending drops: button reveals pending drops and returns to latest.
    - No pending drops: button returns to latest when you are away from bottom.
 9. If unread control is also visible, unread and bottom controls render as a stacked pair.
+10. Long drops start with a shortened preview. Expanding or collapsing one
+    keeps the toggle at the same visual position while you read older history.
 
 ## Common Scenarios
 
@@ -46,21 +53,34 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 - Temporary outgoing drops can trigger short auto-scroll when users are pinned.
 - When older-page loading toggles on/off, scroll controls stay attached to the
   same thread container, so jump-to-latest/unread controls do not reset.
+- Expanding a long drop while pinned at latest keeps the thread at latest.
+- A long drop remembers whether it is expanded while virtual scrolling
+  temporarily replaces the card with a same-height placeholder.
 
 ## Edge Cases
 
 - Older-page loading requires both `hasNextPage` and at least 25 loaded drops.
 - Bottom control hides when you are at latest and no pending drops exist.
-- Layout changes can shift pin detection briefly; pin state recalculates as container size changes.
+- Other layout changes can shift pin detection briefly; pin state recalculates as container size changes.
 - On Apple mobile, pending count starts from the newest visible serial when you leave bottom and clears after re-pin.
 - Rapid pagination state flips can briefly toggle the top loading bar, but do
   not replace the active scroll container.
 
+## Returning to an Open Tab
+
+- Returning to a wave refreshes its latest messages together, while keeping the existing conversation and unsent draft.
+- If you were at bottom, the thread follows the latest messages. If you were reading older drops, it keeps your place; use the bottom control to return to latest.
+- After a long absence, missed history between the cached conversation and the latest page is marked by `Load missed messages`. It loads a page when you approach that boundary, or when you select the button. You can read current messages without waiting for the entire missing history.
+- If a missed-history request fails, use `Could not load missed messages. Try again`. Already loaded messages remain available.
+
 ## Failure and Recovery
+
+- If a drop's thread fails to load, an error and `Try again` replace the empty
+  conversation prompt. Already loaded replies remain visible during a failure.
 
 - If loading older pages fails, already loaded drops stay visible; scroll up again or refresh.
 - If pending/new-message controls appear out of sync, return to bottom and retry.
-- If scroll state feels stale after major layout changes, refresh the thread.
+- If scroll state feels stale after unrelated major layout changes, refresh the thread.
 
 ## Limitations / Notes
 
@@ -70,6 +90,22 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
   [Wave Chat Unread Divider and Jump Controls](feature-unread-divider-and-controls.md).
 - Keyboard and app-shell spacing behavior is documented in
   [Mobile Keyboard and Bottom Navigation Layout](../../navigation/feature-android-keyboard-layout.md).
+
+## Direct Post Links Without JavaScript
+
+A public `/waves/{waveId}?drop={dropId}` or `?serialNo={number}` link includes
+that selected post in the initial page HTML, even when it is older than the
+latest ten posts. The preview includes the author, publication date in UTC,
+plain-text content, images, and links to other attached media. A storm includes
+up to ten parts; longer storms offer guidance to connect and read the rest.
+Private, direct-message, moderated, inaccessible, and wrong-wave posts do not
+produce a public post preview. An unavailable selection does not substitute
+unrelated latest posts. Links without a post selection retain the recent feed.
+
+Browser loading states, the signed-out connect-wallet gate, and the interactive
+post overlay apply to these links as described in the User Journey section.
+Supported `locale` query values format the publication day for that locale;
+preview labels currently fall back to English where translations are missing.
 
 ## Related Pages
 

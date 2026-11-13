@@ -1,4 +1,5 @@
 "use client";
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
@@ -66,7 +67,7 @@ const subscribeToMinuteClock = (onStoreChange: () => void) => {
 
 export function LatestDropNextMintPanelSkeleton() {
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)] motion-reduce:[&_*]:tw-animate-none">
       <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 xl:tw-grid-cols-9">
         <div className="tw-flex tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
           <div className="tw-relative tw-min-h-[clamp(360px,65vw,640px)] tw-w-full tw-bg-iron-800/50 motion-safe:tw-animate-pulse" />
@@ -146,8 +147,8 @@ export default function LatestDropNextMintPanel({
       })
     : "—";
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
-      <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 xl:tw-grid-cols-9">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)] group-data-[home-next-drop]/home-next-drop:tw-border-white/[0.08] group-data-[home-next-drop]/home-next-drop:tw-shadow-none">
+      <div className="tw-grid tw-grid-cols-1 tw-items-stretch group-data-[home-next-drop]/home-next-drop:lg:tw-min-h-[min(clamp(480px,40vw,580px),calc(100svh_-_240px))] lg:tw-grid-cols-12 xl:tw-grid-cols-9">
         <div
           data-home-artwork-column
           data-home-artwork-is-image={isImage}
@@ -184,13 +185,13 @@ export default function LatestDropNextMintPanel({
           </HomeArtworkFrame>
         </div>
 
-        <div className="tw-relative tw-flex tw-min-w-0 tw-items-center tw-bg-iron-950 tw-p-5 md:tw-p-6 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
+        <div className="tw-relative tw-flex tw-min-w-0 tw-items-center tw-bg-iron-950 tw-p-5 group-data-[home-next-drop]/home-next-drop:tw-bg-transparent group-data-[home-next-drop]/home-next-drop:max-lg:tw-py-8 md:tw-p-6 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
           <div className="tw-flex tw-w-full tw-flex-col tw-gap-8">
             <div className="tw-flex tw-flex-col">
               <div className="tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-3">
                 <div className="tw-flex tw-items-center tw-gap-2">
                   <span className="tw-size-1.5 tw-rounded-full tw-bg-emerald-400/60" />
-                  <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-leading-5 tw-tracking-wider tw-text-emerald-400/70">
+                  <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-leading-5 tw-tracking-wider tw-text-emerald-400/70 group-data-[home-next-drop]/home-next-drop:tw-text-iron-300">
                     {t(locale, "home.nextMint.status")}
                   </span>
                 </div>
@@ -211,7 +212,7 @@ export default function LatestDropNextMintPanel({
               <Link
                 data-home-action="Open drop"
                 href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
-                className="tw-mt-3 tw-w-fit tw-max-w-full tw-text-balance tw-rounded-sm tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-3xl"
+                className="tw-mt-3 tw-w-fit tw-max-w-full tw-text-balance tw-rounded-sm tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-3xl"
               >
                 {title}
               </Link>
@@ -239,17 +240,17 @@ export default function LatestDropNextMintPanel({
                 />
               </div>
 
-              {nextMintCardId && (
-                <div className="tw-mt-8 tw-flex tw-flex-col tw-gap-3">
-                  {hasMappedMemeCard ? (
-                    <LatestDropAllowlistStatus tokenId={mappedMemeCardId} />
-                  ) : null}
-                  <LatestDropNextMintSubscribe tokenId={nextMintCardId} />
+              {(drop.collaborators?.length ?? 0) > 0 && (
+                <div className="tw-mt-4">
+                  <MemeCollaboratorCredits
+                    collaborators={drop.collaborators}
+                    layout="stacked"
+                  />
                 </div>
               )}
             </div>
 
-            <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-5">
+            <div className="tw-relative tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-5 group-data-[home-next-drop]/home-next-drop:before:tw-pointer-events-none group-data-[home-next-drop]/home-next-drop:before:tw-absolute group-data-[home-next-drop]/home-next-drop:before:tw-inset-x-0 group-data-[home-next-drop]/home-next-drop:before:-tw-top-4 group-data-[home-next-drop]/home-next-drop:before:tw-h-px group-data-[home-next-drop]/home-next-drop:before:tw-bg-white/[0.06] group-data-[home-next-drop]/home-next-drop:before:tw-content-['']">
               <div className="tw-col-span-2 sm:tw-col-span-1">
                 <NowMintingStatsItem
                   appearance="compact"
@@ -258,7 +259,7 @@ export default function LatestDropNextMintPanel({
                     <Link
                       data-home-action="Open wave"
                       href={`/waves/${drop.wave.id}`}
-                      className="tw-inline-flex tw-max-w-full tw-items-center tw-text-iron-200 tw-no-underline desktop-hover:hover:tw-text-iron-100"
+                      className="tw-inline-flex tw-max-w-full tw-items-center tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 motion-reduce:tw-transition-none"
                     >
                       <span className="tw-min-w-0 tw-truncate">
                         {drop.wave.name}
@@ -286,6 +287,15 @@ export default function LatestDropNextMintPanel({
                 />
               </div>
             </div>
+
+            {nextMintCardId !== null && (
+              <div className="tw-relative tw-flex tw-flex-col tw-gap-3 group-data-[home-next-drop]/home-next-drop:before:tw-pointer-events-none group-data-[home-next-drop]/home-next-drop:before:tw-absolute group-data-[home-next-drop]/home-next-drop:before:tw-inset-x-0 group-data-[home-next-drop]/home-next-drop:before:-tw-top-4 group-data-[home-next-drop]/home-next-drop:before:tw-h-px group-data-[home-next-drop]/home-next-drop:before:tw-bg-white/[0.06] group-data-[home-next-drop]/home-next-drop:before:tw-content-['']">
+                {hasMappedMemeCard ? (
+                  <LatestDropAllowlistStatus tokenId={mappedMemeCardId} />
+                ) : null}
+                <LatestDropNextMintSubscribe tokenId={nextMintCardId} />
+              </div>
+            )}
           </div>
         </div>
       </div>

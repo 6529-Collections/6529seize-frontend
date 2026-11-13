@@ -2,25 +2,11 @@
 
 import DelegationMappingTool from "@/components/mapping-tools/DelegationMappingTool";
 import { useSetTitle } from "@/contexts/TitleContext";
+import MappingToolInstructions from "@/components/mapping-tools/MappingToolInstructions";
 import styles from "@/styles/Home.module.css";
-import { useEffect, useState } from "react";
 
 export default function DelegationMappingToolPage() {
   useSetTitle("Delegation Mapping Tool | Tools");
-
-  const [html, setHtml] = useState("");
-
-  useEffect(() => {
-    fetch(
-      "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegation-mapping-tool/how-to-use.html"
-    ).then((response) => {
-      if (response.status === 200) {
-        response.text().then((htmlText) => {
-          setHtml(htmlText);
-        });
-      }
-    });
-  }, []);
 
   return (
     <main className={`${styles["main"]} tailwind-scope`}>
@@ -53,19 +39,7 @@ export default function DelegationMappingToolPage() {
           </div>
         </div>
       </div>
-      <div
-        id="how-to-use"
-        className="tw-mx-auto tw-w-full tw-px-3 tw-pb-5 tw-pt-1 sm:tw-max-w-[540px] md:tw-max-w-[720px] lg:tw-max-w-[960px] min-[1200px]:tw-max-w-[1050px] min-[1300px]:tw-max-w-[1150px] min-[1400px]:tw-max-w-[1250px] min-[1500px]:tw-max-w-[1280px]"
-      >
-        <div className="-tw-mx-3 tw-flex tw-flex-wrap">
-          <div
-            className={`${styles["htmlContainer"]} tw-w-full tw-px-3 sm:tw-ml-[8.333333%] sm:tw-w-10/12 md:tw-ml-[16.666667%] md:tw-w-8/12 lg:tw-ml-[25%] lg:tw-w-6/12`}
-            dangerouslySetInnerHTML={{
-              __html: html,
-            }}
-          ></div>
-        </div>
-      </div>
+      <MappingToolInstructions url="https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegation-mapping-tool/how-to-use.html" />
     </main>
   );
 }

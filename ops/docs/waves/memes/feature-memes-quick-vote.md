@@ -26,8 +26,12 @@ participatory submissions in the configured memes wave.
 ## User Journey
 
 1. Open quick vote from any available trigger.
-2. Quick vote opens a full dialog skeleton while it loads the unrated memes
-   queue and remembered vote amounts.
+2. Quick vote uses the submission already loaded with the Uncast Power counts,
+   so its artwork and vote controls can appear while the next submissions load.
+   Reopening within a minute keeps the current submission ready; after a longer
+   pause, quick vote refreshes its candidates. The close button
+   receives initial keyboard focus. A skeleton appears only when no usable
+   submission is available yet.
 3. Review the current meme preview, including artwork, title, description,
    author, and timestamp. Submission counts appear at the top; remaining voting
    power appears above the voting controls.
@@ -56,6 +60,10 @@ participatory submissions in the configured memes wave.
   Select `Change vote amount` to open it. Closing the editor keeps the typed
   draft for reopening on the same submission; typing alone does not save a
   remembered amount for later submissions.
+- Below 768px, the close button stays at the top left through loading, loaded,
+  error and restart states. The loading header reserves the same space as the
+  two-line submission counts. At 768px and wider, close stays at the top right.
+  Escape and clicking the backdrop close the dialog; focus returns to the opener.
 - In the native app's mobile layout, the dialog shrinks when the keyboard opens
   to keep the amount input and voting controls above it.
 - Remembered amounts appear above the control bar while custom entry is closed.
@@ -66,6 +74,11 @@ participatory submissions in the configured memes wave.
 - Video artwork starts automatically, muted and inline, when it becomes visible
   in Quick Vote on web or in the native app. Video autoplay stays off when the
   device is configured to reduce motion; playback controls remain available.
+- Interactive HTML artwork runs in the shared sandboxed frame. Without a touch
+  screen it starts loading as soon as the submission appears and shows
+  `Loading interactive media` until the piece finishes loading; large pieces
+  can take several seconds. On touch screens the submission's preview image
+  appears behind `Tap to load`, and the piece starts after you tap it.
 - Swipe chevrons appear only on touch screens in the mobile layout. In a narrow
   browser window without touch input, use the `Vote` and `Skip` buttons.
 - Custom amounts are normalized to a whole number and capped at the current
@@ -84,11 +97,14 @@ participatory submissions in the configured memes wave.
 
 ## Failure and Recovery
 
-- If quick vote cannot load the queue, the dialog shows
-  `Couldn't load your queue`, explains that quick vote could not reach the
-  leaderboard, and offers `Try again`.
-- If a vote submission fails, quick vote shows an error toast, refreshes the
-  queue state, and lets the user continue from the refreshed result.
+- A failed background request keeps the current submission and voting controls
+  available. If no usable submission can be loaded, the dialog shows
+  `Couldn't load quick vote` and offers `Try again`.
+- At the end of a skipped round, quick vote waits for the next discovery request
+  before showing the next round. Slow requests can take several seconds.
+- If a vote submission fails, quick vote shows the error inside the open dialog
+  as well as in a toast, restores the counts and voting power, and refreshes the
+  queue. The inline message clears when you vote or skip again.
 - If the trigger is missing, first confirm the current surface and state:
   quick vote is hidden when there are no unrated memes left, no remaining power
   left, or the user is outside the supported waves surfaces.

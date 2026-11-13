@@ -1,4 +1,4 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type BrowserContext, type Page } from "@playwright/test";
 
 export type SandboxRequest = {
   readonly method: string;
@@ -58,6 +58,29 @@ export async function dismissNextDevTools(page: Page) {
   }
 }
 
+/**
+ * Hides the `next dev` overlay (indicator and issue toasts) in every page of
+ * a context. It sits over bottom-left controls, such as the sidebar account
+ * button and the phone composer's attach button, and intercepts their
+ * clicks. It is not app UI; page errors are still asserted through the page
+ * diagnostics.
+ */
+export async function hideNextDevOverlay(context: BrowserContext) {
+  // A stylesheet, so the overlay element's own inline styles cannot undo it.
+  await context.addInitScript(() => {
+    const add = () => {
+      const style = document.createElement("style");
+      style.textContent = "nextjs-portal{display:none!important}";
+      (document.head ?? document.documentElement).append(style);
+    };
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", add, { once: true });
+    } else {
+      add();
+    }
+  });
+}
+
 export function useLocalSandboxMutationGuard(
   localTest: LocalSandboxTestApi,
   sandboxFlag: "PLAYWRIGHT_AUTH_SANDBOX" | "PLAYWRIGHT_COMPOSER_SANDBOX",
@@ -87,7 +110,7 @@ export function useLocalSandboxMutationGuard(
 }
 
 export async function installLocalSandboxBrowserMutationGuard(
-  page: Page,
+  page: Page | BrowserContext,
   baseURL: string | undefined
 ): Promise<LocalSandboxBrowserMutationGuard> {
   assertLocalSandboxBaseURL(baseURL);
@@ -179,9 +202,7 @@ export async function resetSandboxRequests(baseURL: string | undefined) {
   expect(response.ok).toBe(true);
 }
 
-export async function enableSandboxWaveGuidelines(
-  baseURL: string | undefined
-) {
+export async function enableSandboxWaveGuidelines(baseURL: string | undefined) {
   const response = await fetch(
     `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/guidelines`,
     { method: "POST" }
@@ -244,6 +265,7 @@ function isAllowedBlockedExternalWrite(url: URL) {
       url.pathname === "/g/collect") ||
     (url.hostname === "www.google-analytics.com" &&
       url.pathname === "/g/collect") ||
-    (url.hostname === "www.google.com" && url.pathname === "/g/collect")
+    (url.hostname === "www.google.com" && url.pathname === "/g/collect") ||
+    (url.hostname === "www.googletagmanager.com" && url.pathname === "/td")
   );
 }

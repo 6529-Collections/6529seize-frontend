@@ -1,4 +1,4 @@
-import { act, renderHook } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import React from "react";
 import useWavesList from "@/hooks/useWavesList";
 import { AuthContext } from "@/components/auth/Auth";
@@ -9,6 +9,12 @@ import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { recordWaveSidebarMembership } from "@/helpers/waves/wave-sidebar-membership";
+
+jest.mock("@/hooks/useAnnouncementWaveActivity", () => ({
+  useAnnouncementWaveActivity: jest.fn((wave) => wave),
+}));
 
 jest.mock("@/hooks/useWavesV2", () => {
   const actual = jest.requireActual("@/hooks/useWavesV2");
@@ -231,6 +237,7 @@ const announcementWave = createSidebarWave({
   latestDropTimestamp: 300,
 });
 const legacyAnnouncementWave = createLegacyApiWave("4", 300);
+const ANNOUNCEMENT_WAVE_STALE_TIME_MS = 10 * 60 * 1000;
 let announcementRefetchMock: jest.Mock;
 
 beforeEach(() => {
@@ -316,7 +323,10 @@ test("pauses all main wave sources when explicitly disabled", () => {
   expect(
     useWavesV2Mock.mock.calls.every(([args]) => args.enabled === false)
   ).toBe(true);
-  expect(useWaveByIdMock).toHaveBeenCalledWith(null, { enabled: false });
+  expect(useWaveByIdMock).toHaveBeenCalledWith(null, {
+    enabled: false,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
   expect(useWaveSubwavesMapMock).toHaveBeenCalledWith({
     parentWaveIds: [],
     viewerIdentityKey: null,
@@ -470,7 +480,8 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
         pinned: ApiWavesPinFilter.NotPinned,
         scoreSort: ApiWaveScoreSort.Quality,
         enabled: true,
-        refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+        // The discovery list refreshes every 5 minutes, not every minute.
+        refetchInterval: 5 * 60_000,
         refetchIntervalInBackground: false,
       }),
       expect.objectContaining({
@@ -478,7 +489,7 @@ test("combines main and pinned waves, filtering DMs and flagging pinned", () => 
         pageSize: 20,
         following: false,
         directMessage: false,
-        pinned: ApiWavesPinFilter.NotPinned,
+        allSnapshot: true,
         enabled: true,
         refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
         refetchIntervalInBackground: false,
@@ -518,14 +529,14 @@ test("keeps highly rated visible and polls followed activity when the bottom lis
         excludeFollowed: true,
         pinned: ApiWavesPinFilter.NotPinned,
         scoreSort: ApiWaveScoreSort.Quality,
-        refetchInterval: SIDEBAR_WAVES_OVERVIEW_REFETCH_INTERVAL_MS,
+        refetchInterval: 5 * 60_000,
       }),
       expect.objectContaining({
         overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
         pageSize: 20,
         following: false,
         enabled: false,
-        pinned: ApiWavesPinFilter.NotPinned,
+        allSnapshot: true,
         refetchInterval: false,
       }),
     ])
@@ -615,7 +626,7 @@ test("falls back to all waves when joined preference is persisted without a conn
   );
 });
 
-test("keeps top sections while the joined bottom list shows followed waves", () => {
+test("keeps discovery while the joined list uses only loaded followed waves", () => {
   useShowFollowingWavesMock.mockReturnValue([true]);
 
   const followedOld = createSidebarWave({
@@ -700,7 +711,6 @@ test("keeps top sections while the joined bottom list shows followed waves", () 
     "highly-rated-two",
     "highly-rated-three",
     "highly-rated-four",
-    "3",
     "followed-new",
     "followed-old",
   ]);
@@ -846,6 +856,93 @@ test("paginates only followed activity in joined mode", () => {
   expect(fetchNextAllActivityPage).not.toHaveBeenCalled();
 });
 
+test("keeps older pins behind the joined pagination boundary and retains a searched wave once loaded", () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+  const firstPage = Array.from({ length: 20 }, (_, index) =>
+    createSidebarWave({
+      id: `joined-${index}`,
+      latestDropTimestamp: 100 - index,
+      subscribed: true,
+    })
+  );
+  const searchedWave = createSidebarWave({
+    id: "searched-wave",
+    latestDropTimestamp: 50,
+    subscribed: true,
+  });
+  const olderPin = createSidebarWave({
+    id: "older-pin",
+    latestDropTimestamp: 10,
+    subscribed: true,
+    pinned: true,
+  });
+  let loadedJoinedWaves = firstPage;
+  const fetchNextJoinedPage = jest.fn(() => {
+    loadedJoinedWaves = [...firstPage, searchedWave, olderPin];
+  });
+  useWavesV2Mock.mockImplementation(
+    ({ joinedSnapshot }: { readonly joinedSnapshot?: boolean }) => ({
+      waves: joinedSnapshot ? loadedJoinedWaves : [],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: loadedJoinedWaves.length === firstPage.length,
+      fetchNextPage: fetchNextJoinedPage,
+      status: "success",
+      refetch: jest.fn(),
+    })
+  );
+  usePinnedWavesServerMock.mockReturnValue({
+    pinnedIds: [firstPage[0]!.id, olderPin.id],
+    pinnedWaves: [firstPage[0], olderPin],
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+    isLoading: false,
+    isError: false,
+    refetch: jest.fn(),
+  });
+
+  const { result, rerender } = renderHook(
+    ({ activeWave }) => useWavesList({ activeWave }),
+    { wrapper, initialProps: { activeWave: null as ApiWave | null } }
+  );
+  expect(result.current.waves.map((wave) => wave.id)).toEqual(
+    firstPage.map((wave) => wave.id)
+  );
+  expect(result.current.waves[0]).toEqual(
+    expect.objectContaining({ isPinned: true })
+  );
+  expect(result.current.pinnedWaves.map((wave) => wave.id)).toContain(
+    olderPin.id
+  );
+  expect(result.current.hasNextPage).toBe(true);
+
+  rerender({ activeWave: createLegacyApiWave(searchedWave.id, 50) });
+  expect(result.current.waves.map((wave) => wave.id)).toContain(
+    searchedWave.id
+  );
+  expect(result.current.waves.map((wave) => wave.id)).not.toContain(
+    olderPin.id
+  );
+
+  act(() => result.current.fetchNextPage());
+  rerender({ activeWave: null });
+  expect(fetchNextJoinedPage).toHaveBeenCalledTimes(1);
+  expect(result.current.waves.map((wave) => wave.id)).toEqual([
+    firstPage[0]!.id,
+    olderPin.id,
+    ...firstPage.slice(1).map((wave) => wave.id),
+    searchedWave.id,
+  ]);
+  expect(result.current.hasNextPage).toBe(false);
+
+  useShowFollowingWavesMock.mockReturnValue([false]);
+  rerender({ activeWave: null });
+  expect(result.current.waves.map((wave) => wave.id)).toEqual([
+    firstPage[0]!.id,
+    olderPin.id,
+  ]);
+});
+
 test("preserves top sections while joined mode filters bottom list roots and subwaves", () => {
   useShowFollowingWavesMock.mockReturnValue([true]);
 
@@ -889,7 +986,7 @@ test("preserves top sections while joined mode filters bottom list roots and sub
   useWavesV2Mock.mockImplementation(({ overviewType }) => ({
     waves:
       overviewType === ApiWavesOverviewType.RecentlyDroppedTo
-        ? [joinedParentWave, announcementWave]
+        ? [joinedPinnedWave, joinedParentWave, announcementWave]
         : [],
     isFetching: false,
     isFetchingNextPage: false,
@@ -940,7 +1037,6 @@ test("preserves top sections while joined mode filters bottom list roots and sub
 
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
     "4",
-    "unjoined-pinned",
     "joined-pinned",
     "joined-parent",
   ]);
@@ -951,7 +1047,6 @@ test("preserves top sections while joined mode filters bottom list roots and sub
 
   expect(result.current.waves.map((wave: any) => wave.id)).toEqual([
     "4",
-    "unjoined-pinned",
     "joined-pinned",
     "joined-parent",
     "joined-subwave",
@@ -1387,6 +1482,69 @@ test("surfaces and loads a direct-linked subwave under its parent in Joined", ()
   ]);
 });
 
+test("does not reinsert an explicitly left active root into Joined, while All keeps its route context", async () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+  useWavesV2Mock.mockReturnValue({ waves: [], status: "success" });
+  const activeWave = createLegacyApiWave("left-root", 500);
+  const { result, rerender } = renderHook(() => useWavesList({ activeWave }), {
+    wrapper,
+  });
+  expect(result.current.waves.map((wave) => wave.id)).toContain("left-root");
+  act(() =>
+    recordWaveSidebarMembership({
+      queryClient,
+      viewerIdentityKey: "0xabc:primary",
+      waveId: "left-root",
+      following: false,
+    })
+  );
+  await waitFor(() => expect(result.current.waves).toEqual([]));
+  useShowFollowingWavesMock.mockReturnValue([false]);
+  rerender();
+  expect(result.current.waves.map((wave) => wave.id)).toContain("left-root");
+});
+
+test("hides a left active subwave even under a joined pinned parent", async () => {
+  useShowFollowingWavesMock.mockReturnValue([true]);
+  const parent = createSidebarWave({
+    id: "parent",
+    latestDropTimestamp: 500,
+    subscribed: true,
+    pinned: true,
+  });
+  const child = {
+    ...createSidebarWave({ id: "child", latestDropTimestamp: 400 }),
+    parentWaveId: "parent",
+  };
+  useWavesV2Mock.mockReturnValue({ waves: [parent], status: "success" });
+  useWaveSubwavesMapMock.mockReturnValue({
+    subwaves: [child],
+    subwavesByParentId: new Map(),
+  });
+  const activeWave = {
+    ...createLegacyApiWave("child", 400),
+    parent_wave: createApiWaveOverview("parent", 500),
+  };
+  const { result } = renderHook(() => useWavesList({ activeWave }), {
+    wrapper,
+  });
+  expect(result.current.waves.map((wave) => wave.id)).toEqual([
+    "parent",
+    "child",
+  ]);
+  act(() =>
+    recordWaveSidebarMembership({
+      queryClient,
+      viewerIdentityKey: "0xabc:primary",
+      waveId: "child",
+      following: false,
+    })
+  );
+  await waitFor(() =>
+    expect(result.current.waves.map((wave) => wave.id)).toEqual(["parent"])
+  );
+});
+
 test("exposes loading parent ids while requested subwaves are fetching", () => {
   const parentWave = {
     ...createSidebarWave({ id: "parent", latestDropTimestamp: 500 }),
@@ -1722,6 +1880,73 @@ test("refreshes only stale sidebar sources on resync without forcing refetches",
   );
 });
 
+test("forces the lists but refreshes the announcement wave only once stale", () => {
+  const sources = mockStaleRefreshSources();
+  const refetchQueriesSpy = jest
+    .spyOn(queryClient, "refetchQueries")
+    .mockResolvedValue(undefined);
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+
+  act(() => {
+    result.current.refetchAllWaves();
+  });
+
+  // All activity, highly rated and pinned.
+  expect(sources.forcedRefetch).toHaveBeenCalledTimes(3);
+  expect(announcementRefetchMock).not.toHaveBeenCalled();
+  expect(refetchQueriesSpy).toHaveBeenCalledTimes(1);
+  expect(refetchQueriesSpy).toHaveBeenCalledWith(
+    {
+      queryKey: ["WAVE", { wave_id: "4" }],
+      exact: true,
+      type: "active",
+      stale: true,
+    },
+    { cancelRefetch: false }
+  );
+});
+
+test("refreshes only the activity list for drops in unknown waves", () => {
+  const sources = mockStaleRefreshSources();
+  const subwaveRefetch = jest.fn();
+  useWaveSubwavesMapMock.mockReturnValue({
+    subwaves: [],
+    subwavesByParentId: new Map(),
+    isFetching: false,
+    refetch: subwaveRefetch,
+  });
+  const allActivityRefetch = jest.fn();
+  const otherRefetch = jest.fn();
+  useWavesV2Mock.mockImplementation(({ following, overviewType }) => ({
+    waves: [mainWave],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    status: "success",
+    refetch:
+      overviewType === ApiWavesOverviewType.RecentlyDroppedTo && !following
+        ? allActivityRefetch
+        : otherRefetch,
+    refetchIfStale: jest.fn(),
+  }));
+  const refetchQueriesSpy = jest.spyOn(queryClient, "refetchQueries");
+
+  const { result } = renderHook(() => useWavesList(), { wrapper });
+  act(() => {
+    result.current.refreshActivityList();
+  });
+
+  expect(allActivityRefetch).toHaveBeenCalledTimes(1);
+  // Not highly rated, pinned, subwaves or the announcement wave.
+  expect(otherRefetch).not.toHaveBeenCalled();
+  expect(sources.forcedRefetch).not.toHaveBeenCalled();
+  expect(subwaveRefetch).not.toHaveBeenCalled();
+  expect(announcementRefetchMock).not.toHaveBeenCalled();
+  expect(refetchQueriesSpy).not.toHaveBeenCalled();
+});
+
 test("does not refresh any sidebar source while the list is disabled", () => {
   const sources = mockStaleRefreshSources();
   const refetchQueriesSpy = jest.spyOn(queryClient, "refetchQueries");
@@ -1784,7 +2009,10 @@ test("injects the announcement wave once and excludes it from pinned metadata", 
     )
   ).toBe(false);
   expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: true,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("preserves pin state for a legacy pinned announcement wave", () => {
@@ -1818,7 +2046,10 @@ test("preserves pin state for a legacy pinned announcement wave", () => {
   expect(result.current.announcementQueryError).toBeNull();
   expect(result.current.announcementRefetch).toBe(announcementRefetchMock);
   expect(result.current.pinnedWaves.map((wave: any) => wave.id)).toEqual(["3"]);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: false });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: false,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("reuses an overview announcement wave without enabling the fallback fetch", () => {
@@ -1862,13 +2093,18 @@ test("reuses an overview announcement wave without enabling the fallback fetch",
   expect(result.current.announcementQueryLoading).toBe(false);
   expect(result.current.announcementQueryError).toBeNull();
   expect(result.current.announcementRefetch).toBe(announcementRefetchMock);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: false });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: false,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("exposes fallback announcement query loading state when unresolved", () => {
   const loadingAnnouncementRefetch = jest.fn();
 
   useSeizeSettingsMock.mockReturnValue({
+    isLoaded: true,
+    loadError: null,
     seizeSettings: {
       announcements_wave_id: "4",
     },
@@ -1888,9 +2124,13 @@ test("exposes fallback announcement query loading state when unresolved", () => 
   expect(result.current.announcementWave).toBeNull();
   expect(result.current.trackedAnnouncementWave).toBeNull();
   expect(result.current.announcementQueryLoading).toBe(true);
+  expect(result.current.isAnnouncementsLoading).toBe(true);
   expect(result.current.announcementQueryError).toBeNull();
   expect(result.current.announcementRefetch).toBe(loadingAnnouncementRefetch);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: true,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("exposes fallback announcement query error when unresolved", () => {
@@ -1898,6 +2138,8 @@ test("exposes fallback announcement query error when unresolved", () => {
   const announcementQueryError = new Error("Failed to load announcement wave");
 
   useSeizeSettingsMock.mockReturnValue({
+    isLoaded: true,
+    loadError: null,
     seizeSettings: {
       announcements_wave_id: "4",
     },
@@ -1918,8 +2160,12 @@ test("exposes fallback announcement query error when unresolved", () => {
   expect(result.current.trackedAnnouncementWave).toBeNull();
   expect(result.current.announcementQueryLoading).toBe(false);
   expect(result.current.announcementQueryError).toBe(announcementQueryError);
+  expect(result.current.isAnnouncementsLoading).toBe(false);
   expect(result.current.announcementRefetch).toBe(failedAnnouncementRefetch);
-  expect(useWaveByIdMock).toHaveBeenCalledWith("4", { enabled: true });
+  expect(useWaveByIdMock).toHaveBeenCalledWith("4", {
+    enabled: true,
+    staleTime: ANNOUNCEMENT_WAVE_STALE_TIME_MS,
+  });
 });
 
 test("indicates loading when pinned wave is still loading", () => {
@@ -1934,4 +2180,73 @@ test("indicates loading when pinned wave is still loading", () => {
   });
   const { result } = renderHook(() => useWavesList(), { wrapper });
   expect(result.current.isPinnedWavesLoading).toBe(true);
+});
+
+test("keeps recommendation status independent of activity loading and exposes its own retry", () => {
+  const retryRecommendations = jest.fn();
+  let status = "pending";
+  useWavesV2Mock.mockImplementation(({ pageSize }) => ({
+    waves: [],
+    isFetching: false,
+    isFetchingNextPage: false,
+    hasNextPage: false,
+    fetchNextPage: jest.fn(),
+    refetch: jest.fn(),
+    status: pageSize === 10 ? status : "success",
+    retryLoading: retryRecommendations,
+  }));
+  const { result, rerender } = renderHook(() => useWavesList());
+  expect(result.current.recommendationsStatus).toBe("pending");
+  status = "error";
+  rerender();
+  expect(result.current.recommendationsStatus).toBe("error");
+  result.current.retryRecommendations();
+  expect(retryRecommendations).toHaveBeenCalledTimes(1);
+  status = "success";
+  rerender();
+  expect(result.current.recommendationsStatus).toBe("success");
+});
+test("reserves announcements while settings load and releases the space when none is configured", () => {
+  useSeizeSettingsMock.mockReturnValue({
+    seizeSettings: { announcements_wave_id: null },
+    isAnnouncementsWave: () => false,
+    isLoaded: false,
+    loadError: null,
+  });
+  const { result, rerender } = renderHook(() => useWavesList());
+  expect(result.current.isAnnouncementsLoading).toBe(true);
+  useSeizeSettingsMock.mockReturnValue({
+    seizeSettings: { announcements_wave_id: null },
+    isAnnouncementsWave: () => false,
+    isLoaded: true,
+    loadError: null,
+  });
+  rerender();
+  expect(result.current.isAnnouncementsLoading).toBe(false);
+});
+
+test("reserves deferred discovery until the mounted list enables requests, then settles errors", () => {
+  useSeizeSettingsMock.mockReturnValue({
+    seizeSettings: { announcements_wave_id: "4" },
+    isAnnouncementsWave: (id: string) => id === "4",
+    isLoaded: true,
+    loadError: null,
+  });
+  useWaveByIdMock.mockReturnValue({
+    wave: null,
+    isLoading: false,
+    error: new Error("Announcement unavailable"),
+    refetch: announcementRefetchMock,
+  });
+  const { result, rerender } = renderHook(
+    ({ enabled }) => useWavesList({ enabled }),
+    { initialProps: { enabled: false }, wrapper }
+  );
+  expect(result.current.recommendationsStatus).toBe("pending");
+  expect(result.current.isAnnouncementsLoading).toBe(true);
+  expect(result.current.announcementQueryError).toBeNull();
+  rerender({ enabled: true });
+  expect(result.current.recommendationsStatus).toBe("success");
+  expect(result.current.isAnnouncementsLoading).toBe(false);
+  expect(result.current.announcementQueryError).toBeInstanceOf(Error);
 });

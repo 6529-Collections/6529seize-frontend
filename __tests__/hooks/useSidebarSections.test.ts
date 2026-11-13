@@ -3,7 +3,7 @@ import { useSidebarSections } from "@/hooks/useSidebarSections";
 
 describe("useSidebarSections", () => {
   it("returns the menu IA groups with the Museum reading room link", () => {
-    const { result } = renderHook(() => useSidebarSections(false, false, "US"));
+    const { result } = renderHook(() => useSidebarSections(false, false));
 
     expect(result.current.map((section) => section.key)).toEqual([
       "nfts",
@@ -23,9 +23,15 @@ describe("useSidebarSections", () => {
       "NextGen",
       "Meme Lab",
       "ReMemes",
+      "6529 Stream",
       "NFT Activity",
       "Memes Calendar",
     ]);
+    expect(nftsSection?.items[6]).toEqual({
+      name: "6529 Stream",
+      href: "/stream",
+      activePathPrefixes: ["/stream/"],
+    });
 
     const wavesSection = result.current.find(
       (section) => section.key === "waves"
@@ -51,34 +57,8 @@ describe("useSidebarSections", () => {
     ]);
   });
 
-  it("inserts the Stream review after live collections only when enabled", () => {
-    const { result } = renderHook(() =>
-      useSidebarSections(false, false, "US", true)
-    );
-
-    const nftsSection = result.current.find(
-      (section) => section.key === "nfts"
-    );
-    expect(nftsSection?.items.map((item) => item.name)).toEqual([
-      "Collect",
-      "The Memes",
-      "6529 Gradient",
-      "NextGen",
-      "Meme Lab",
-      "ReMemes",
-      "6529 Stream — Review",
-      "NFT Activity",
-      "Memes Calendar",
-    ]);
-    expect(nftsSection?.items[6]).toEqual({
-      name: "6529 Stream — Review",
-      href: "/reviews/6529-stream",
-      activePathPrefixes: ["/reviews/6529-stream/"],
-    });
-  });
-
   it("does not include retired release notes links", () => {
-    const { result } = renderHook(() => useSidebarSections(false, false, "US"));
+    const { result } = renderHook(() => useSidebarSections(false, false));
 
     const allItems = result.current.flatMap((section) => [
       ...section.items,
@@ -92,7 +72,7 @@ describe("useSidebarSections", () => {
   });
 
   it("matches the shared About contents structure in the sidebar menu", () => {
-    const { result } = renderHook(() => useSidebarSections(false, false, "US"));
+    const { result } = renderHook(() => useSidebarSections(false, false));
 
     const aboutSection = result.current.find(
       (section) => section.key === "about"
@@ -210,7 +190,7 @@ describe("useSidebarSections", () => {
   });
 
   it("includes App Wallets inside About delegation and wallets when supported", () => {
-    const { result } = renderHook(() => useSidebarSections(true, false, "US"));
+    const { result } = renderHook(() => useSidebarSections(true, false));
 
     const aboutSection = result.current.find(
       (section) => section.key === "about"
@@ -229,8 +209,11 @@ describe("useSidebarSections", () => {
     );
   });
 
-  it("hides subscription-gated links for restricted iOS users", () => {
-    const { result } = renderHook(() => useSidebarSections(false, true, "DE"));
+  it("hides Collect and subscription-gated links for restricted iOS users", () => {
+    const { result } = renderHook(() => useSidebarSections(false, true));
+    expect(
+      result.current.find((section) => section.key === "nfts")?.items
+    ).not.toContainEqual(expect.objectContaining({ href: "/collect" }));
 
     const allItems = result.current.flatMap((section) => [
       ...section.items,

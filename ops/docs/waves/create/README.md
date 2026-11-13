@@ -2,12 +2,12 @@
 
 ## Overview
 
-For independently managed competitions in a shared wave, see
-[Competitions](../competitions/README.md).
+For independently managed decisions in a shared wave, see
+[Decisions](../competitions/README.md).
 
 Use this area to create:
 
-- new waves (`Chat`, `Rank`, and `Approve`)
+- new chat waves and subwaves
 - new direct messages
 
 ## Features
@@ -19,15 +19,14 @@ Use this area to create:
   `/messages/{waveId}`.
 - Use `/waves?create=wave` as the direct web link for creating a Wave.
 - Desktop wave-create controls are available on:
-  - `/waves` and `/waves/{waveId}` Waves panel (`Create wave`; plus icon when collapsed)
+  - `/waves` and `/waves/{waveId}` Waves panel (`Create wave` with a plus icon when expanded; plus icon only when collapsed)
   - `/waves` empty-content placeholder (`Create Wave`)
 - Desktop `/messages` routes support wave-create mode by URL only
   (`?create=wave`).
-- Desktop direct-message mode (`create=dm`) is supported on `/messages` and
-  `/messages/{waveId}`.
-- App create routes:
-  - wave: `/waves/create`
-  - direct message: `/messages/create`
+- The unified message composer opens at `/messages/new` on web and in the app.
+- Builds without encrypted chats use `create=dm` on web and `/messages/create`
+  in the app.
+- The app uses `/waves/create` for waves.
 - Success routes:
   - wave: `/waves/{waveId}`
   - direct message: `/messages/{waveId}`
@@ -40,22 +39,11 @@ Use this area to create:
 - Step pages:
   1. [Wave Creation Setup Step](feature-overview-step.md)
   2. [Wave Creation Group Access and Permissions](feature-groups-step.md)
-  3. [Wave Creation Schedule](feature-dates-step.md) (`Rank` and
-     `Approve`)
-  4. [Wave Creation Drop Settings](feature-drops-step.md) (`Rank` and
-     `Approve`)
-  5. [Wave Creation Voting Configuration](feature-voting-step.md) (`Rank` and
-     `Approve`)
-  6. [Wave Creation Outcomes Step](feature-outcomes-step.md) (`Rank` and
-     `Approve`)
-  7. [Wave Creation Guidelines Step](feature-rules-step.md)
-  8. [Wave Creation Description Step](feature-description-step.md)
-  9. [Final Overview](feature-final-overview-step.md)
-- Step path by wave type:
-  - Standalone `Chat`: `Start a chat wave -> Review`; access, picture, and guidelines are optional settings on the first screen. Chat subwaves retain the guided sequence.
-  - Scheduled `Rank`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
-  - `Perpetual Ranking`: `Setup -> Access -> Schedule -> Drops -> Voting -> Guidelines -> Description -> Overview`
-  - `Approve`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
+  3. [Wave Creation Guidelines Step](feature-rules-step.md)
+  4. [Wave Creation Description Step](feature-description-step.md)
+  5. [Final Overview](feature-final-overview-step.md)
+- Standalone waves use `Start a chat wave -> Review`; access, picture, and guidelines are optional settings on the first screen. Subwaves retain the guided sequence.
+- Add Rank or Approve decisions afterward through [decision setup](../competitions/feature-manage-competitions.md). Each decision owns its schedule, entries, votes, outcomes and appearance.
 
 The default path keeps the decisions most creators need visible. Less common
 customization is available from expandable sections named for their contents,
@@ -63,7 +51,7 @@ such as `Vote limits and behavior`. An expandable section shows `Customized`
 when saved or restored values differ from the defaults and opens as
 `Needs attention` when a hidden field fails validation.
 
-`Submission requirements` stays open, with all its controls visible.
+Decision submission requirements are configured in decision setup.
 
 ### Direct-Message Journey
 

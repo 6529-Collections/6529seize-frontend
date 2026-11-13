@@ -35,3 +35,7 @@ export function useCompetition() {
   if (!context) throw new Error("Competition provider is required");
   return context;
 }
+
+export function useOptionalCompetition() {
+  return useContext(CompetitionContext);
+}

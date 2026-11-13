@@ -8,6 +8,17 @@ import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submi
 const startDropOpen = jest.fn();
 let markdownProps: any;
 
+jest.mock("@/components/waves/MarketplacePreview", () => ({
+  __esModule: true,
+  default: ({ href, compact }: { href: string; compact: boolean }) => (
+    <div
+      data-testid="marketplace-preview"
+      data-href={href}
+      data-compact={String(compact)}
+    />
+  ),
+}));
+
 jest.mock("@/components/ipfs/IPFSContext", () => ({
   resolveIpfsUrlSync: (url: string) => url,
 }));
@@ -181,6 +192,73 @@ describe("WaveLeaderboardGridItem", () => {
     });
     useDropInteractionRules.mockReturnValue({ canShowVote: true });
   });
+
+  const marketplaceUrls = [
+    "https://www.transient.xyz/nfts/ethereum/0x29171a6d9471ff51f9501da8ef7373afeabd3eac/1",
+    "https://superrare.com/artwork/eth/0xb86268D8F8dcD24F2c49221B42CC78aB63a582A8/1",
+    "https://opensea.io/item/ethereum/0x48c3b8546c9e3f2cf8d81efc568e3e1a71720bc1/3",
+  ];
+
+  describe.each(["compact", "content_only"] as const)(
+    "%s NFT links",
+    (mode) => {
+      it.each(marketplaceUrls)("renders marketplace artwork for %s", (url) => {
+        render(
+          <WaveLeaderboardGridItem
+            drop={{ ...baseDrop, parts: [{ media: [], content: url }] }}
+            mode={mode}
+            onDropClick={jest.fn()}
+          />
+        );
+
+        expect(screen.getByTestId("marketplace-preview")).toHaveAttribute(
+          "data-href",
+          url
+        );
+        expect(screen.getByTestId("marketplace-preview")).toHaveAttribute(
+          "data-compact",
+          "true"
+        );
+        expect(screen.queryByTestId("media")).not.toBeInTheDocument();
+        expect(screen.getByRole("heading", { hidden: true })).toHaveClass(
+          ...(mode === "content_only" ? ["tw-sr-only"] : ["tw-line-clamp-3"])
+        );
+      });
+
+      it("keeps uploaded media ahead of a marketplace link", () => {
+        render(
+          <WaveLeaderboardGridItem
+            drop={{
+              ...baseDrop,
+              parts: [{ ...baseDrop.parts[0], content: marketplaceUrls[0] }],
+            }}
+            mode={mode}
+            onDropClick={jest.fn()}
+          />
+        );
+        expect(screen.getByTestId("media")).toBeInTheDocument();
+        expect(
+          screen.queryByTestId("marketplace-preview")
+        ).not.toBeInTheDocument();
+      });
+
+      it("keeps unsupported links as readable text", () => {
+        const url = "https://superrare.com/about";
+        render(
+          <WaveLeaderboardGridItem
+            drop={{ ...baseDrop, parts: [{ media: [], content: url }] }}
+            mode={mode}
+            onDropClick={jest.fn()}
+          />
+        );
+        expect(
+          screen.queryByTestId("marketplace-preview")
+        ).not.toBeInTheDocument();
+        expect(screen.getByRole("heading")).toHaveTextContent(url);
+        expect(screen.getByRole("heading")).not.toHaveClass("tw-sr-only");
+      });
+    }
+  );
 
   it("renders a bounded summary and preserves compact footer controls", () => {
     render(

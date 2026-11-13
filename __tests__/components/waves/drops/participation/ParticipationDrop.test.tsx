@@ -39,7 +39,10 @@ describe("ParticipationDrop", () => {
       />
     );
 
-    expect(useWaveParticipationRendererSet).toHaveBeenCalledWith("quorum-wave");
+    expect(useWaveParticipationRendererSet).toHaveBeenCalledWith(
+      "quorum-wave",
+      undefined
+    );
     expect(screen.getByTestId("resolved-renderer")).toHaveTextContent("drop-1");
   });
 });

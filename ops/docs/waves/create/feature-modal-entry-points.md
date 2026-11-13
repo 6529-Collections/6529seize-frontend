@@ -18,8 +18,9 @@ mobile viewports.
 
 ## Entry Points
 
-- `/waves` and `/waves/{waveId}`: click the labeled Create wave button in the
-  Waves panel, including the mobile Waves list. Collapsed sidebars keep the plus icon.
+- `/waves` and `/waves/{waveId}`: select `Create wave` beside the plus icon in the
+  expanded desktop Waves panel. The collapsed rail keeps a plus icon named
+  `Create wave`. The mobile Waves list keeps its labeled Create wave button.
 - Global Search: find Create wave, New wave, or Start a wave. Search opens
   `/waves/create`, which is also a direct link on web and in the app.
 - `/waves`: click `Create Wave` in the empty-content placeholder.
@@ -34,9 +35,9 @@ mobile viewports.
 3. The current URL keeps the same path/context and sets `create=wave`.
 4. While signed out, Connect to create a wave explains wallet connection. The
    create URL remains open after connecting. If the identity has no profile
-   handle, a compact `Create your
-   profile first` dialog opens instead. `Go to Identity` starts profile setup;
-   closing returns to the current page. Completing profile setup returns to
+   handle, a compact `Create your profile first` dialog opens instead.
+   `Go to Identity` starts profile setup; closing returns to the current page.
+   Completing profile setup returns to
    `/waves/create` for a standalone wave; subwave entry returns to its parent wave.
 5. With a profile handle, the `Create Wave` dialog opens above the current page
    context while the underlying list/content view remains visible. At widths
@@ -65,8 +66,8 @@ mobile viewports.
 - Existing query parameters (for example `wave` or `drop`) are preserved while
   opening and closing create-wave mode.
 - If the URL mode is `create=dm`, direct-message creation opens instead.
-- In collapsed sidebar mode, the create control remains icon-first; tooltip
-  labels appear only on hover-capable devices.
+- In both desktop sidebar modes, the create control uses a plus icon with an
+  accessible `Create wave` name; its tooltip appears on hover-capable devices.
 - On non-hover devices, tooltip labels are not shown for the create icon.
 - If an authenticated identity has no profile handle, create-wave controls stay
   available but open the profile-required dialog instead of the multi-step
@@ -85,6 +86,8 @@ mobile viewports.
   Chat screen. Saving depends on browser storage and is delayed briefly after
   edits. Pictures and attachments must be added again. Older drafts restore
   settings only. Restoring opens the first screen; subwaves have no draft resume.
+  Signing the profile out removes its saved drafts from this device;
+  `Sign out all` removes every saved draft, including older ones.
 - On mobile, the sheet keeps its header and close control visible while the
   multi-step form scrolls within the available viewport.
 - Keyboard users can Tab to `Close` and activate it with Enter or Space, or press
@@ -107,6 +110,6 @@ mobile viewports.
 - [Direct Message Creation](feature-direct-message-creation.md)
 - [Wave List Navigation](../sidebars/feature-wave-list-navigation.md)
 - [Wave Creation Group Access and Permissions](feature-groups-step.md)
-- [Wave Creation Schedule](feature-dates-step.md)
-- [Wave Creation Drop Settings](feature-drops-step.md)
+- [Wave Creation Schedule](../competitions/setup/feature-dates-step.md)
+- [Wave Creation Drop Settings](../competitions/setup/feature-drops-step.md)
 - [Docs Home](../../README.md)

@@ -1,0 +1,266 @@
+"use client";
+
+import { ArrowDownTrayIcon, DocumentIcon } from "@heroicons/react/24/outline";
+import { useEffect, useRef, useState } from "react";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import useCapacitor from "@/hooks/useCapacitor";
+import { downloadMediaUrl } from "@/helpers/media-download.helpers";
+import { useNearViewport } from "@/hooks/useNearViewport";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatNumber } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { isSafeInlineImageMime } from "@/lib/e2ee/media";
+import type { E2eeAttachment, E2eeEngine } from "@/lib/e2ee/types";
+import { attachmentDisplayName } from "../e2eeFormat";
+import Button from "@/components/utils/button/Button";
+import { ImagePreviewLoading } from "@/components/drops/view/item/content/media/ImagePreviewLoading";
+import { E2eeImageMedia } from "./E2eeImageMedia";
+import {
+  fitsInline,
+  prepareInlineImage,
+  withInlineImageSlot,
+} from "./e2eeInlineImage";
+
+const isInlineImage = (attachment: E2eeAttachment) =>
+  isSafeInlineImageMime(attachment.mime);
+
+/** A size the sender claims that is already too large skips the download. */
+const claimsTooLarge = (attachment: E2eeAttachment): boolean =>
+  attachment.width !== undefined &&
+  attachment.height !== undefined &&
+  !fitsInline(attachment.width, attachment.height);
+
+function formatFileSize(locale: SupportedLocale, bytes: number) {
+  if (bytes >= 1024 * 1024) {
+    return formatNumber(locale, bytes / (1024 * 1024), {
+      style: "unit",
+      unit: "megabyte",
+      maximumFractionDigits: 1,
+    });
+  }
+  return formatNumber(locale, Math.max(1, Math.round(bytes / 1024)), {
+    style: "unit",
+    unit: "kilobyte",
+  });
+}
+
+interface AttachmentProps {
+  readonly engine: E2eeEngine;
+  readonly g: string;
+  readonly messageId: string;
+  readonly attachment: E2eeAttachment;
+}
+
+type InlineState = "loading" | "ready" | "failed" | "tooLarge";
+
+/**
+ * Decrypted image, loaded through the engine into a local object URL. Its
+ * real dimensions are checked before it decodes; one above the pixel cap
+ * shows as a file to download instead.
+ */
+function InlineImage(props: AttachmentProps) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const near = useNearViewport(ref, "400px 0px");
+  return (
+    <span ref={ref} className="tw-block tw-max-w-full">
+      {near ? (
+        <InlineImageContent
+          key={`${props.g}:${props.messageId}:${props.attachment.blob}`}
+          {...props}
+        />
+      ) : (
+        <span className="tw-relative tw-block tw-h-64 tw-w-full">
+          <ImagePreviewLoading />
+        </span>
+      )}
+    </span>
+  );
+}
+
+function InlineImageContent(props: AttachmentProps) {
+  const { engine, g, messageId, attachment } = props;
+  const locale = useBrowserLocale();
+  const name = attachmentDisplayName(locale, attachment.name);
+  const tooLargeClaim = claimsTooLarge(attachment);
+  const [url, setUrl] = useState<string | null>(null);
+  const [attempt, setAttempt] = useState(0);
+  const [state, setState] = useState<InlineState>("loading");
+
+  const retry = () => {
+    setUrl(null);
+    setState("loading");
+    setAttempt((current) => current + 1);
+  };
+
+  useEffect(() => {
+    if (tooLargeClaim) {
+      return;
+    }
+    let cancelled = false;
+    const controller = new AbortController();
+    // Set by the cleanup while the load awaits; read through a call so the
+    // checks after each await are not narrowed away.
+    const isCancelled = () => cancelled;
+    let objectUrl: string | null = null;
+    const release = () => {
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+        objectUrl = null;
+      }
+    };
+    withInlineImageSlot(async () => {
+      if (isCancelled()) {
+        return;
+      }
+      const blob = await engine.getAttachment(
+        g,
+        messageId,
+        attachment.blob,
+        controller.signal
+      );
+      if (isCancelled()) {
+        return;
+      }
+      objectUrl = URL.createObjectURL(blob);
+      const fits = await prepareInlineImage(objectUrl);
+      if (isCancelled()) {
+        return;
+      }
+      if (!fits) {
+        release();
+        setState("tooLarge");
+        return;
+      }
+      setUrl(objectUrl);
+      setState("ready");
+    }).catch(() => {
+      if (!isCancelled()) {
+        release();
+        setState("failed");
+      }
+    });
+    return () => {
+      cancelled = true;
+      controller.abort();
+      release();
+    };
+  }, [engine, g, messageId, attachment.blob, tooLargeClaim, attempt]);
+
+  if (tooLargeClaim || state === "tooLarge") {
+    return (
+      <DownloadableFile
+        {...props}
+        note={t(locale, "e2ee.message.attachment.tooLarge")}
+      />
+    );
+  }
+  if (state === "failed") {
+    return (
+      <span className="tw-flex tw-h-64 tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-xl tw-bg-iron-900 tw-text-sm tw-text-iron-400">
+        {t(locale, "e2ee.message.attachment.failed", { name })}
+        <Button type="button" variant="tertiary" size="xs" onClick={retry}>
+          {t(locale, "drop.media.retry")}
+        </Button>
+      </span>
+    );
+  }
+  if (state === "loading" || !url) {
+    return (
+      <output className="tw-relative tw-block tw-h-64 tw-w-full">
+        <ImagePreviewLoading />
+        <span className="tw-sr-only">
+          {t(locale, "e2ee.message.attachment.loading")}
+        </span>
+      </output>
+    );
+  }
+  return (
+    <span className="tw-block tw-h-64 tw-w-full">
+      <E2eeImageMedia
+        key={url}
+        url={url}
+        name={name}
+        attachment={attachment}
+        onRetry={retry}
+      />
+    </span>
+  );
+}
+
+/** File chip with an on-demand decrypt-and-download. */
+function DownloadableFile({
+  engine,
+  g,
+  messageId,
+  attachment,
+  note,
+}: AttachmentProps & { readonly note?: string }) {
+  const locale = useBrowserLocale();
+  const { isCapacitor } = useCapacitor();
+  const name = attachmentDisplayName(locale, attachment.name);
+  const [pending, setPending] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  const download = async () => {
+    setPending(true);
+    setFailed(false);
+    try {
+      const blob = await engine.getAttachment(g, messageId, attachment.blob);
+      const objectUrl = URL.createObjectURL(blob);
+      try {
+        await downloadMediaUrl({ url: objectUrl, fileName: name, isCapacitor });
+      } finally {
+        URL.revokeObjectURL(objectUrl);
+      }
+    } catch {
+      setFailed(true);
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <span className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2">
+      <DocumentIcon
+        aria-hidden="true"
+        className="tw-size-5 tw-flex-shrink-0 tw-text-iron-400"
+      />
+      <span className="tw-flex tw-min-w-0 tw-flex-col">
+        <span className="tw-truncate tw-text-sm tw-text-iron-100">{name}</span>
+        <span className="tw-text-xs tw-text-iron-500">
+          {formatFileSize(locale, attachment.size)}
+        </span>
+        {note ? (
+          <span className="tw-text-xs tw-text-iron-400">{note}</span>
+        ) : null}
+        {failed ? (
+          <span role="alert" className="tw-text-xs tw-text-rose-300">
+            {t(locale, "e2ee.message.attachment.failed", { name })}
+          </span>
+        ) : null}
+      </span>
+      <button
+        type="button"
+        onClick={() => void download()}
+        disabled={pending}
+        aria-label={t(locale, "e2ee.message.attachment.download", { name })}
+        className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+      >
+        {pending ? (
+          <CircleLoader />
+        ) : (
+          <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
+        )}
+      </button>
+    </span>
+  );
+}
+
+export function E2eeAttachmentView(props: AttachmentProps) {
+  return isInlineImage(props.attachment) ? (
+    <InlineImage {...props} />
+  ) : (
+    <DownloadableFile {...props} />
+  );
+}

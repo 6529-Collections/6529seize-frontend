@@ -1,3 +1,11 @@
+jest.mock("@/contexts/EmojiContext", () => ({
+  useEmoji: () => ({
+    findCustomEmoji: () => null,
+    findNativeEmoji: () => null,
+    loadEmojiData: jest.fn(() => Promise.resolve()),
+  }),
+}));
+
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import type {
   HeaderSearchModalItemType,
@@ -17,6 +25,13 @@ let autoFlushDebounce = true;
 let pendingDebounce: (() => void) | null = null;
 
 const useQueryMock = jest.fn();
+const mockUseWaveDropsSearch = jest.fn();
+jest.mock("@/hooks/useWaveDropsSearch", () => ({
+  useWaveDropsSearch: (...args: unknown[]) => mockUseWaveDropsSearch(...args),
+}));
+jest.mock("@/hooks/useDebouncedValue", () => ({
+  useDebouncedValue: (value: unknown) => value,
+}));
 const useRouter = jest.fn();
 const usePathname = jest.fn();
 const useSearchParams = jest.fn();
@@ -249,6 +264,7 @@ interface SetupOptions {
     | "NFTS"
     | "WAVES"
     | "PAGES"
+    | "MESSAGES"
     | undefined;
   wavesReturn?:
     | {
@@ -294,11 +310,10 @@ function setup(options: SetupOptions = {}) {
   capacitorMock.mockReturnValue({ isIos: false });
   if (useActualSidebarSections) {
     useSidebarSectionsMock.mockImplementation(
-      (appWalletsSupported: boolean, isIos: boolean, country: string | null) =>
+      (appWalletsSupported: boolean, hideNftPurchasing: boolean) =>
         actualSidebarHooks.useSidebarSections(
           appWalletsSupported,
-          isIos,
-          country
+          hideNftPurchasing
         )
     );
   } else {
@@ -377,6 +392,13 @@ describe("HeaderSearchModal", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     sessionStorage.clear();
+    mockUseWaveDropsSearch.mockReturnValue({
+      drops: [],
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      hasNextPage: false,
+    });
     autoFlushDebounce = true;
     pendingDebounce = null;
     mockUseMyStreamOptional.mockReturnValue(null);
@@ -435,6 +457,10 @@ describe("HeaderSearchModal", () => {
     setup();
     const input = getSearchInput();
     fireEvent.change(input, { target: { value: "abc" } });
+    expect(mockUseWaveDropsSearch.mock.calls.at(-1)?.[0]).toMatchObject({
+      term: "abc",
+      enabled: false,
+    });
     expect(
       screen.getByRole("heading", { name: "Profiles" })
     ).toBeInTheDocument();
@@ -644,6 +670,44 @@ describe("HeaderSearchModal", () => {
       await screen.findByRole("link", { name: "6529 Apps" })
     ).toHaveAttribute("href", "/about/6529-apps");
   });
+
+  it("keeps Validator out of newcomer search navigation", () => {
+    autoFlushDebounce = false;
+    setup({ selectedCategory: "PAGES" });
+    fireEvent.change(getSearchInput(), { target: { value: "validator" } });
+    expect(screen.getByText('Searching for "validator"')).toBeInTheDocument();
+    act(() => pendingDebounce?.());
+    expect(
+      screen.getByText('No matches in Pages for "validator"')
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Validator" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "6529 Validator" })).toBeNull();
+  });
+
+  it.each(["validator", "6529 Validator", "/validator"])(
+    "finds the member Validator page for %s",
+    async (query) => {
+      useAuthMock.mockReturnValue({
+        connectedProfile: profile,
+        isAuthenticated: true,
+      });
+      setup({
+        selectedCategory: "PAGES",
+        queryImpl: () => ({
+          isFetching: false,
+          data: [],
+          error: undefined,
+          refetch: jest.fn(() => Promise.resolve()),
+        }),
+      });
+
+      fireEvent.change(getSearchInput(), { target: { value: query } });
+
+      expect(
+        await screen.findByRole("link", { name: "Validator" })
+      ).toHaveAttribute("href", "/validator");
+    }
+  );
 
   it("finds the Network Wave Score page by formula aliases", () => {
     setup();
@@ -1145,11 +1209,104 @@ describe("HeaderSearchModal", () => {
 
   it("keeps every result type visible before and after searching", () => {
     setup();
-    for (const label of ["All", "Pages", "NFTs", "Profiles", "Waves"]) {
+    for (const label of [
+      "All",
+      "Pages",
+      "NFTs",
+      "Profiles",
+      "Waves",
+      "Messages",
+    ]) {
       expect(
         screen.getAllByRole("tab", { name: new RegExp(`^${label} 0$`) })
       ).toHaveLength(2);
     }
+  });
+
+  it("searches all readable Waves only in Messages and opens the matched message", async () => {
+    mockUseWaveDropsSearch.mockReturnValue({
+      drops: [
+        {
+          stableKey: "global-drop",
+          serial_no: 42,
+          wave: { id: "target-wave", name: "Target Wave", is_dm_wave: true },
+          author: { handle: "alice", primary_address: "0x1", pfp: null },
+          parts: [{ content: "hello from all Waves" }],
+          created_at: 1713744000000,
+        },
+      ],
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      hasNextPage: false,
+    });
+    const { push, onClose, unmount } = setup({ selectedCategory: "MESSAGES" });
+    const input = screen.getByRole("combobox", { name: "Search messages" });
+    expect(
+      screen.queryByRole("button", { name: /^Remove wave filter/ })
+    ).not.toBeInTheDocument();
+    fireEvent.change(input, { target: { value: "hello" } });
+    expect(mockUseWaveDropsSearch.mock.calls.at(-1)?.[0]).toMatchObject({
+      wave: null,
+      term: "hello",
+      allowGlobalSearch: true,
+      enabled: true,
+    });
+    expect(
+      useQueryMock.mock.calls
+        .filter(([options]) =>
+          [QueryKey.PROFILE_SEARCH, QueryKey.NFTS_SEARCH].includes(
+            options.queryKey[0]
+          )
+        )
+        .every(([options]) => !options.enabled)
+    ).toBe(true);
+    await screen.findByRole("button", {
+      name: "Open message 42 by alice in Target Wave",
+    });
+    const resultStatus = document.getElementById(
+      "wave-drops-search-results-status"
+    );
+    expect(resultStatus).toHaveAttribute("role", "status");
+    expect(resultStatus).toHaveAttribute("aria-live", "polite");
+    expect(resultStatus).toHaveTextContent("hello");
+    fireEvent.click(screen.getByRole("button", { name: "Clear search" }));
+    expect(input).toHaveValue("");
+    screen
+      .getAllByRole("tab", { name: /^Messages/ })
+      .forEach((tab) => expect(tab).toHaveAttribute("aria-selected", "true"));
+    fireEvent.change(input, { target: { value: "hello" } });
+    const result = await screen.findByRole("button", {
+      name: "Open message 42 by alice in Target Wave",
+    });
+    expect(screen.getAllByRole("tab", { name: /^All 0$/ })).toHaveLength(2);
+    expect(screen.getAllByRole("tab", { name: /^Messages 1$/ })).toHaveLength(
+      2
+    );
+    fireEvent.click(result);
+    expect(push).toHaveBeenCalledWith("/messages/target-wave?serialNo=42");
+    expect(onClose).toHaveBeenCalled();
+    unmount();
+    const setActiveWave = jest.fn();
+    mockUseMyStreamOptional.mockReturnValue({
+      activeWave: { set: setActiveWave },
+    });
+    const inWave = setup({ selectedCategory: "MESSAGES" });
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Search messages" }),
+      { target: { value: "hello" } }
+    );
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Open message 42 by alice in Target Wave",
+      })
+    );
+    expect(setActiveWave).toHaveBeenCalledWith("target-wave", {
+      isDirectMessage: true,
+      serialNo: 42,
+    });
+    expect(inWave.push).not.toHaveBeenCalled();
+    expect(inWave.onClose).toHaveBeenCalled();
   });
 
   it("hides results from the previous query while the new query is settling", () => {

@@ -7,9 +7,7 @@ import { useCompetition } from "@/contexts/CompetitionContext";
 import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
-import MyStreamWaveMyVotes from "@/components/brain/my-stream/votes/MyStreamWaveMyVotes";
 import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
 import CompetitionMyVotes from "./CompetitionMyVotes";
 import CompetitionVoters from "./CompetitionVoters";
@@ -18,10 +16,8 @@ import CompetitionVoteActivity from "./CompetitionVoteActivity";
 const VOTE_TABS = ["mine", "all", "activity"] as const;
 
 function CompetitionPersonalVotes() {
-  const { competition, hub, wave } = useCompetition();
   const viewer = useCompetitionViewer();
   const locale = useBrowserLocale();
-  const navigateDrop = useCompetitionDropNavigation();
   if (!viewer)
     return (
       <div className="tw-flex tw-flex-col tw-items-start tw-gap-3 tw-p-4">
@@ -31,11 +27,7 @@ function CompetitionPersonalVotes() {
         <HeaderUserConnect label={t(locale, "competitions.connectWallet")} />
       </div>
     );
-  return hub.legacy_primary_competition_id === competition.id ? (
-    <MyStreamWaveMyVotes wave={wave} onDropClick={navigateDrop} />
-  ) : (
-    <CompetitionMyVotes />
-  );
+  return <CompetitionMyVotes />;
 }
 
 export default function CompetitionVotes({

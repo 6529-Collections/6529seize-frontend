@@ -82,7 +82,7 @@ describe("useBrainMobileActiveView", () => {
 
   it("opens competition deep links in Competitions even when Chat was restored", () => {
     const props = createProps({
-      pathname: "/waves/wave-1/competitions/first",
+      pathname: "/waves/wave-1/decisions/first",
       restoredView: BrainView.DEFAULT,
       isCompleted: false,
     });
@@ -246,7 +246,7 @@ describe("useBrainMobileActiveView", () => {
     expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
-  it("resets Outcome to default for approve curation waves", () => {
+  it("aliases Outcome selections to Settings for approve curation waves", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(
         createProps({
@@ -262,10 +262,10 @@ describe("useBrainMobileActiveView", () => {
       result.current.onViewChange(BrainView.OUTCOME);
     });
 
-    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+    expect(result.current.activeView).toBe(BrainView.CONFIGURATION);
   });
 
-  it("resets Outcome to default when outcome view is hidden", () => {
+  it("aliases Outcome selections to Settings regardless of retired visibility", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(
         createProps({
@@ -281,10 +281,10 @@ describe("useBrainMobileActiveView", () => {
       result.current.onViewChange(BrainView.OUTCOME);
     });
 
-    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+    expect(result.current.activeView).toBe(BrainView.CONFIGURATION);
   });
 
-  it("resets unavailable Outcome to Chat for completed rank curation waves", () => {
+  it("aliases Outcome selections to Settings for completed rank curation waves", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(
         createProps({
@@ -298,7 +298,20 @@ describe("useBrainMobileActiveView", () => {
       result.current.onViewChange(BrainView.OUTCOME);
     });
 
-    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+    expect(result.current.activeView).toBe(BrainView.CONFIGURATION);
+  });
+
+  it("restores a retired app Outcome view as Settings", () => {
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({
+          isApp: true,
+          restoredView: BrainView.OUTCOME,
+          wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+        })
+      )
+    );
+    expect(result.current.activeView).toBe(BrainView.CONFIGURATION);
   });
 
   it("keeps My Votes for authenticated normal rank waves", () => {

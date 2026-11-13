@@ -37,9 +37,9 @@ authentication requirement.
 Optional `family` and `projects` fields group intended sampling decisions;
 they do not schedule tests. Omitted projects impose no project restriction.
 The initial fixtures reuse existing browser examples, checked-in report slugs,
-Museum route contracts, and the September Stream publication. Some dynamic
-catalog/legacy-alias and reference-declaration routes still need qualified
-fixtures; their per-environment omissions make this remaining work explicit.
+and Museum route contracts. Some dynamic catalog and legacy-alias routes still
+need qualified fixtures; their per-environment omissions make this remaining
+work explicit.
 Recheck fixture availability when a browser consumer is introduced or changed.
 
 The scanner covers `page.ts`, `page.tsx`, `page.js`, and `page.jsx` under `app/`,
@@ -56,7 +56,35 @@ browser tests for distinct rendering or navigation risks according to
 [AGENTS.md](../AGENTS.md#test-layer-selection), and register real browser packs
 in `tests/packs.manifest.cjs`.
 
+The session recovery sandbox also checks the Join 6529 / Validator slot using
+synthetic stored sessions on desktop and mobile. It holds identity restoration
+to verify hidden actions and stable neighboring rows, then checks newcomers,
+profileless wallets, members, failed identity lookup/retry, steady hover backgrounds,
+keyboard focus, direct navigation, and active state.
+App PR CI selects this registered pack through the critical-shell lane for
+membership-navigation source changes.
+
+The deployed read-only search pack also checks that newcomer Pages searches
+exclude Validator after results settle and still navigate through Join 6529.
+Member search results are covered by the focused search unit tests, alongside
+the member navigation scenarios in the session recovery sandbox.
+
 ## Pack registry
+
+The reaction sandbox covers live count and profile-list updates, desktop tooltip
+and dialog overflow, recoverable detail-read failures, and mobile long press.
+It uses synthetic local data and checks that hidden lists do not refetch.
+App PR CI selects it when reaction components, hooks, API helpers, or its browser
+contract change.
+
+The native competition sandbox pack exercises Additional Action through the real
+Main Stage submission modal on desktop and phone. It checks the optional plan,
+length limit, checkbox draft preservation, review/preview and back navigation,
+keyboard exit, browser runtime errors, and horizontal overflow. Saved-artwork
+coverage checks the public plan, sidebar clearance, and restoration into the real
+resubmission modal. The isolated API fixture prevents real submissions; persistence
+payloads and resubmission metadata are also covered by focused unit tests. No
+application preview route is needed.
 
 `tests/packs.manifest.cjs` is the source of truth for Playwright package
 scripts, execution order, deployed-environment pack selection, aliases, safety
@@ -68,6 +96,27 @@ Use `seize run e2e:packs -- --env <environment> --trigger <trigger>` to resolve
 and run a non-empty pack set sequentially. Deployed-environment entries are
 validated as explicitly read-only and must use the exact approved base URL.
 Their artifacts can be preserved per pack with `--artifact-root <path>`.
+
+The restricted-submission fixture in that pack covers public chat, on-demand
+access details, copied competition rules links, and draft preservation through
+Settings. Keyboard coverage checks Enter/Space, Tab/Shift+Tab, Escape, and focus
+after routing. Available chat stays free of access panels. A wave without a
+default competition keeps its existing no-submission-action behavior. Only
+notification read acknowledgements are allowed for this fixture; posting fails
+closed.
+
+The same fixture covers an ended submission period with submission permission
+false: the lock explains closure and its date, shows a compact public group,
+and keeps keyboard navigation to the selected competition's rules usable.
+The fixture also checks closed-submission and open-voting schedule sections,
+inline status/detail alignment, and viewport containment on desktop and mobile.
+Closing-date expectations are literal in UTC, Los Angeles, Auckland, and
+Honolulu. Each timezone also checks that a manual closure date takes precedence
+over a distinct future scheduled deadline.
+The leaderboard card fixture also checks the gap between author and post text
+at phone, medium, and both sides of the desktop action-button breakpoint.
+The open-card deadline case advances the browser clock without navigation and
+checks that the restriction and supporting copy switch to the ended state.
 
 PR selection for `test:e2e:native-competition-sandbox` is owned by
 `scripts/app-pr-ci-effective-plan.cjs`. Its desktop and mobile scenarios cover
@@ -84,6 +133,62 @@ Keep those ownership rules covered in
 `__tests__/scripts/app-pr-ci-effective-plan.test.ts`; merely registering a
 pack here does not make a product-only PR select it.
 
+Submission artwork loading, GIF original fallback and HD controls run on both
+web viewports in `test:e2e:submission-artwork-sandbox`, in a separate PR CI job
+with its own server/build output. Shared image and artwork-renderer changes select
+this pack in addition to existing competition coverage. The artwork scenarios do
+not extend the competition job's test list or timeout budget.
+
+### Chat render budget
+
+`tests/social/chat-render-budget-sandbox.spec.ts` runs in the native
+competition pack. It measures the chat hot path per received message:
+components re-rendered and mounted, React commits, API requests,
+receive-to-row time, long tasks during a 50-message burst and own
+send-to-render time. Each test attaches `chat-perf-<scenario>.json` and logs
+one `chat-perf` line. `tests/support/chatPerf.ts` installs the probe (a React
+DevTools commit hook, socket receive marks, row and submit marks, a long-task
+observer) as an init script; nothing ships to users.
+`tests/support/chatPerfFixture.ts` supplies 30 followed waves and an open
+wave with 40 messages, then sends full `DROP_UPDATE` frames to the sockets
+the backend would use.
+
+PR CI asserts the render and request budgets (`BUDGETS` in the spec) on the
+development sandbox and reports long tasks and latency only. Lower a budget in
+the same PR that lowers the measured number. The scripted planner selects the
+pack for chat hot-path files (`scripts/app-pr-ci-effective-plan.cjs`).
+
+PR before/after numbers come from a production build. Start the loopback API
+alone, build with the fixture origins and dev auth off, serve the build, then
+run the spec against it. The spec signs in through the stored-account path,
+which works in both builds:
+
+    $env:PORT = "3297"
+    $env:PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT = "4297"
+    $env:PLAYWRIGHT_COMPOSER_SANDBOX_API_ONLY = "1"
+    $env:USE_DEV_AUTH = "false"
+    seize exec node tests/support/composerSandboxServer.cjs
+
+    $env:API_ENDPOINT = "http://127.0.0.1:4297"
+    $env:ALLOWLIST_API_ENDPOINT = "http://127.0.0.1:4297"
+    $env:WS_ENDPOINT = "ws://127.0.0.1:4297"
+    $env:BASE_ENDPOINT = "http://localhost:3297"
+    $env:USE_DEV_AUTH = "false"
+    $env:ASSETS_FROM_S3 = "false"
+    seize run build:ci
+    seize exec next start --port 3297 --hostname localhost
+
+    $env:PLAYWRIGHT_SKIP_WEB_SERVER = "1"
+    $env:PLAYWRIGHT_CHAT_PERF_PRODUCTION_SANDBOX = "1"
+    $env:PLAYWRIGHT_CHAT_PERF_REPORT_ONLY = "1"
+    seize run test:e2e:native-competition-sandbox --grep "Chat render budget"
+
+As with the artwork documentation pack, the production-sandbox flag bypasses
+CSP in this spec's browser contexts only, so the production bundle can reach
+the plain-HTTP fixture API. It does not validate CSP. Component names are
+minified in production builds; arm the probe with `names: true` on a
+development server to see which components render.
+
 <!-- BEGIN GENERATED: e2e-pack-table -->
 
 Generated from `tests/packs.manifest.cjs` by
@@ -91,6 +196,9 @@ Generated from `tests/packs.manifest.cjs` by
 
 | Pack                                                | Alias                         | Safety   | Environment | Triggers                  | Timeout | Description                                                                                           |
 | --------------------------------------------------- | ----------------------------- | -------- | ----------- | ------------------------- | ------- | ----------------------------------------------------------------------------------------------------- |
+| `test:e2e:bookmarks-sandbox`                        | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Private bookmark menus, account isolation, and saved-page flow.                                       |
+| `test:e2e:staging:bookmarks`                        | bookmarks                     | readonly | staging     | post-deploy, manual       | 15m     | Private bookmarks route authentication guard.                                                         |
+| `test:e2e:production:bookmarks`                     | bookmarks                     | readonly | production  | post-deploy, manual       | 15m     | Private bookmarks route authentication guard.                                                         |
 | `test:e2e`                                          | —                             | local    | local       | manual                    | 60m     | Full local suite on the desktop web shell.                                                            |
 | `test:e2e:all-projects`                             | —                             | local    | local       | manual                    | 90m     | Full local suite across every configured project.                                                     |
 | `test:e2e:ui`                                       | —                             | local    | local       | manual                    | 90m     | Playwright UI mode for local debugging.                                                               |
@@ -119,14 +227,22 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:artwork-documentation-sandbox`            | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Artwork documentation saving and upload recovery through the real editor with isolated HTTP fixtures. |
 | `test:e2e:pdf-attachments-sandbox`                  | —                             | sandbox  | local       | pr-ci, manual             | 15m     | PDF attachment scrolling, recovery and touch layout in WebKit.                                        |
 | `test:e2e:composer-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Waves composer sandbox against the local mock API.                                                    |
-| `test:e2e:public-review-sandbox`                    | —                             | sandbox  | local       | manual                    | 15m     | Stream review feedback sandbox against the local mock API.                                            |
 | `test:e2e:reaction-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Drop reaction sandbox against the local mock API.                                                     |
 | `test:e2e:edit-drop-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Drop edit sandbox against the local mock API.                                                         |
 | `test:e2e:native-competition-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Native competition context, parallel budgets and navigation against the local mock API.               |
+| `test:e2e:submission-artwork-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Submission artwork loading, GIF animation and HD controls in an isolated media sandbox.               |
+| `test:e2e:image-viewer-layout-sandbox`              | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Image viewer background geometry, focus restoration and gallery navigation in Chromium and WebKit.    |
 | `test:e2e:signature-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Signed participation sandbox that fails closed unsigned.                                              |
 | `test:e2e:session-recovery-sandbox`                 | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Expired session cold-start and foreground recovery against the local mock API.                        |
 | `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                                                                 |
+| `test:e2e:wave-link-preview-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Embedded wave preview readability in the sidebar and responsive chat.                                 |
+| `test:e2e:notifications-inbox-sandbox`              | —                             | sandbox  | local       | manual                    | 15m     | Desktop notification preview, explicit read actions, and mobile navigation.                           |
+| `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile editing, Following, artist artwork alerts and REP editing dialogs, permissions and recovery.  |
+| `test:e2e:profile-nic-sandbox`                      | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile NIC activity filtering and cursor navigation across desktop, tablet and mobile.               |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
+| `test:e2e:e2ee-sandbox`                             | —                             | sandbox  | local       | manual                    | 30m     | Encrypted DMs and groups across several local browsers against the fake delivery service.             |
+| `test:e2e:e2ee-picker-sandbox`                      | —                             | sandbox  | local       | manual                    | 15m     | Encrypted chat recipient selection in desktop Chromium and iPhone WebKit.                             |
+| `test:e2e:metamask-bridge`                          | —                             | sandbox  | local       | manual                    | 15m     | Isolated WebKit MetaMask bridge attribution and application-error boundaries.                         |
 | `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | pr-ci, manual             | 15m     | @smoke subset on desktop and mobile web shells.                                                       |
 | `test:e2e:surface-matrix`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Core surfaces on desktop and mobile web shells.                                                       |
 | `test:e2e:browser-diversity`                        | —                             | local    | local       | pr-ci, manual             | 15m     | Engine-diversity pass on Firefox and WebKit.                                                          |
@@ -153,6 +269,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:staging:museum-about`                     | museum-about                  | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum About proposition route smoke.                                                 |
 | `test:e2e:staging:museum-inside-system`             | museum-inside-system          | readonly | staging     | post-deploy, manual       | 30m     | Staging Network Museum Inside the System project and comparison sweep.                                |
 | `test:e2e:staging:museum-rights`                    | museum-rights                 | readonly | staging     | post-deploy, manual       | 15m     | Staging Network Museum rights education and object-license route sweep.                               |
+| `test:e2e:staging:e2ee`                             | e2ee-staging                  | stateful | staging     | manual                    | 75m     | Encrypted DMs, device revocation and live wave unread badges for throwaway users (writes QA data).    |
 | `test:e2e:production:home-readonly`                 | home-readonly                 | readonly | production  | post-deploy, manual       | 15m     | Production home-page read-only canary.                                                                |
 | `test:e2e:production:social-readonly`               | social-readonly               | readonly | production  | cron, manual, post-deploy | 15m     | Production waves and profile read-only canary.                                                        |
 | `test:e2e:production:media-readonly`                | media-readonly                | readonly | production  | cron, manual, post-deploy | 15m     | Production media and mint detail read-only canary.                                                    |
@@ -218,6 +335,49 @@ Remote read-only defaults:
 - Traces are disabled for staging and production by default because they can
   retain credentials or private page state.
 
+Opt-in stateful staging packs:
+
+- Safety `stateful` is the only exception to the read-only default. The
+  manifest validator allows it only for staging, with
+  `PLAYWRIGHT_READONLY=0`, the manual trigger alone, one worker and traces off,
+  so post-deploy (`all`), cron and PR lanes never select it. The runner never
+  parallelizes it.
+- `test:e2e:staging:e2ee` (alias `e2ee-staging`) proves encrypted DMs (D109)
+  between real users on staging. Each run generates throwaway wallets with
+  `ethers`; `tests/support/scriptedWallet.ts` injects them as an EIP-1193
+  wallet (announced through EIP-6963 and as `window.ethereum`) that answers in
+  the test process, so the private keys never enter the page, logs or
+  artifacts. Each user signs in through the real wallet modal, gets a
+  test-only `e2eeqa_*` profile, and enables encryption. A returning user's
+  sign-in grants both permissions (NC8). A new user who already has a
+  Signed Posts grant signs one EIP-712 `MlsDeviceGrant` from the enrollment
+  card and keeps their existing Signed Posts grant. The spec covers a DM in
+  both directions, file-picked and dropped images through the blob store,
+  image popup dismissal, downloads and focus return, a group with a
+  third user and a revoked second device that can no longer read new messages.
+  It also checks sender profile links and levels, plus DM header profile
+  links. Its Markdown comparison posts identical formatting, lists, code, tables
+  in ordinary and encrypted chats, captures both at desktop and phone widths,
+  and checks private footnote navigation and that private Markdown URLs cause
+  no automatic requests.
+  Ordinary chat uses a separate throwaway session so public traffic stays out
+  of the encrypted users' lifetime privacy evidence.
+  The same check covers formatted encrypted notification previews in the
+  desktop overview and on the notifications page, including fenced code and
+  bounded previews at desktop and phone widths.
+  Its privacy checks ensure no request URL, body or sent WebSocket
+  frame contains any plaintext (raw, hex
+  or base64 at any alignment), that the MLS WebAssembly module loads under the
+  served CSP (`'wasm-unsafe-eval'` without `'unsafe-eval'`) and that the
+  engine logs no errors. A route guard drops writes aimed at production 6529
+  hosts and fails the run if any occur.
+- The spec skips unless `PLAYWRIGHT_E2EE_STAGING=1` targets
+  `https://staging.6529.io`, and skips with a message when the deployed build
+  does not serve `/messages/encrypted` (built without
+  `NEXT_PUBLIC_E2EE_DM_ENABLED`). Dispatch it with the Staging E2E workflow's
+  `pack=e2ee-staging` input; the workflow runs it in its own step with the
+  repository staging access secret.
+
 Readiness checks must follow the behavior under test. A visible `main` can
 precede hydration, wallet restoration, and API-backed content. Give the
 specific rendered data or resolved wallet state the bounded data-readiness
@@ -245,6 +405,16 @@ App PR CI:
   in the installed quality lane for every pull request; test-helper
   typechecking and release-workflow contract suites run only when their owning
   paths change.
+- After that production build, `6529 run perf:budget` sums the gzip and
+  brotli bytes of first-load JavaScript for the root layout and a few key
+  routes, and fails when one grows past `scripts/perf-budget.json` plus a small
+  tolerance. Each file is compressed on its own and the sizes are added, so the
+  numbers are a stable gate for comparing builds, not the bytes a visitor
+  receives. The check evaluates the build's client reference manifests, so run
+  it only on builds of this repository. When a change shrinks the numbers, run
+  `6529 run perf:budget:update` after a local `6529 run base-build` and commit
+  the lower budget. Raise a budget only in a reviewed change that explains the
+  new bytes.
 - Selected quality/contracts, production-build, smoke-Playwright, and
   critical-shell-Playwright lanes run in parallel. The lightweight final
   `Installed app checks` job preserves the required branch-protection gate and
@@ -259,7 +429,23 @@ App PR CI:
   session that compiles every critical-shell route outgrows the 16 GB runner's
   memory. Those steps also set `NEXT_DEV_TURBOPACK_FS_CACHE=0`, which
   `next.config.ts` maps to `experimental.turbopackFileSystemCacheForDev:
-  false` because CI dev servers always start cold.
+false` because CI dev servers always start cold.
+- When the critical-shell check is selected, it runs as three parallel jobs.
+  One job runs both route-shell halves and `test:e2e:session-recovery-sandbox`.
+  The other two run `test:e2e:profile-following-sandbox` with Playwright
+  `--shard=1/2` and `--shard=2/2`. Playwright splits the ordered test list by
+  count, not by project. Today each of the four projects has the same number
+  of tests, so shard 1 runs desktop and mobile web, and shard 2 runs the
+  Capacitor iOS and Android simulators. If project counts diverge, a shard can
+  straddle projects, but every test still runs exactly once. As one serial job
+  the pack reached the 30-minute limit, and a single retry could cancel it.
+- `test:e2e:native-competition-sandbox` runs as four Playwright shards
+  (`--shard=N/4`) in parallel jobs. With two shards, each job took 24–28
+  minutes against its 30-minute limit. The pack's desktop and mobile halves
+  are each dominated by `native-competition-sandbox.spec.ts`, so four
+  count-based shards come out within a few minutes of each other.
+- Browser matrix jobs do not cancel their siblings on failure, preserving each
+  job's results. All selected jobs must still pass `Installed app checks`.
 - Museum selection: `scripts/museum-release-selection.cjs` maps each changed
   file to Museum page surfaces through the surface registry and import graph
   (copy keys and `public/museum` assets map through the sources that name
@@ -361,21 +547,18 @@ Surface matrix:
 - `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
   sandbox on both baseline web projects. It starts a mock API runtime,
   renders a real wave detail route, verifies attachment queue/remove behavior
-  and deterministic link previews, plus exact synthetic chat-drop and poll
-  submits. The poll flow covers its responsive layout, options, type, closing
+  and deterministic link previews, long-drop expansion at the latest scroll
+  position and expansion/collapse anchoring while reading older posts, including
+  delayed link previews. It preserves lists, clickable links, and paragraphs
+  in both disclosure states and checks nested quote keyboard and touch behavior, plus
+  exact synthetic chat-drop and poll submits. The poll flow
+  covers its responsive layout, options, type, closing
   time, audience, and anonymity controls. The mock API allows only those
   queryless `/api/drops` shapes, with signer
   limited to the configured sandbox wallet or the empty unsigned direct-contract
   form; upload and attachment endpoints still fail closed. It must run against a
   loopback base URL, but it is not a full network-isolation harness and is not a
   staging or production smoke pack.
-- `test:e2e:public-review-sandbox` runs the authenticated Stream review
-  feedback flow on both baseline web projects. It verifies the responsive
-  Show/Hide feedback control, the primary comment input, optional section,
-  category, severity and technical-detail controls, the Wave preview, and the
-  exact four-field review metadata submitted to the local mock API. The mock
-  permits one canonical review drop per test and rejects every other drop
-  mutation. It never writes to staging or production.
 - `test:e2e:reaction-sandbox` runs a local-only authenticated Waves reaction
   sandbox on desktop Chromium. It adds and removes the deterministic quick
   reaction on the synthetic sandbox drop, then verifies that only the exact
@@ -406,6 +589,37 @@ Surface matrix:
   external browser writes are blocked by a browser route guard. Known wallet and
   analytics SDK background writes are still blocked in-browser, but they do not
   fail the test. This pack must never run against staging or production.
+- `test:e2e:e2ee-picker-sandbox` runs the real encrypted-compose recipient
+  picker in desktop Chromium and iPhone WebKit. It checks completed taps,
+  selection and eligibility, search reset, Enter/Space activation, Escape and
+  outside dismissal. This is browser simulation; physical iPhone verification
+  remains separate. Like the other local E2EE pack, it is manually owned and
+  uses only the loopback delivery service.
+- `test:e2e:e2ee-sandbox` runs end-to-end encrypted DMs and groups (D109)
+  in several browser contexts at once, each a different local user (alice,
+  bob, carol, dave) or another device of the same user, against one Next dev
+  server whose public runtime turns `NEXT_PUBLIC_E2EE_DM_ENABLED` and
+  `NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES` on, so device setup offers the
+  combined grant ("Sign to enable both"). The
+  composer sandbox mock API mounts the in-memory fake delivery service
+  (`tests/support/e2ee/fakeDeliveryService.cjs`) at `/api/e2ee/*`, acting as
+  the profile whose wallet is the synthetic dev JWT's `sub`, and exposes
+  loopback-only `/__e2ee-sandbox/*` controls for DM policy, blocks, faults,
+  epoch fingerprint tampering, state reads and a plaintext scan of everything
+  the service received. It also serves the web sign-in with device grants
+  (`tests/support/e2ee/sandboxSignIn.cjs`: `/api/auth/session-nonce`,
+  `/api/auth/session-login`, `/api/device-grants`), so the real combined
+  sign-in, its challenge check and the sign-in grant registration run end to
+  end. Each context sets its dev wallet and JWT through the localhost-only
+  dev-auth test override (`services/auth/devAuthTestOverride.ts`) and answers
+  the one wallet signature with a throwaway viem key through the test signer
+  seams (`components/auth/signedMessagesTestSigner.ts` for the combined
+  sign-in, `components/e2ee/e2eeTestSigner.ts` for a separate encryption
+  grant); all are inert unless `USE_DEV_AUTH=true`, the build is
+  development-like and the page is on `localhost` or `127.0.0.1`. The sandbox has no WebSocket, so
+  engines poll (5 s with a chat open, 30 s otherwise) and specs use generous
+  `expect` timeouts. The DM spec also runs on mobile Chromium; the others are
+  desktop only. It must never run against staging or production.
 - `test:e2e:staging:smoke` runs the smoke surface matrix against staging.
 - `test:e2e:staging` runs the broader surface matrix against the same
   environment.
@@ -486,6 +700,15 @@ Surface matrix:
 
 Large-pack ownership:
 
+- `test:e2e:input-detection-readonly` keeps the Windows touch/mouse latch
+  assertions on a single hydrated message selected by serial number. Its
+  self-contained browser harness also covers row replacement during scrolling,
+  delayed replacement insertion, messages arriving during a touch gesture,
+  and avoiding author links when tapping the row wrapper. Trusted taps must
+  stay on the wave route; a row without safe padding fails explicitly. A tap is
+  bound to the hit-tested node, so a later replacement cannot reuse its offset.
+  The harness needs no application server; run it with
+  `PLAYWRIGHT_SKIP_WEB_SERVER=1 6529 exec playwright test tests/input/win8-touch-latch-readonly.spec.ts --project=web-desktop-chromium --grep 'Touch target harness'`.
 - `test:e2e`, `test:e2e:smoke`, and targeted single-route specs are ordinary
   PR-owner checks.
 - `test:e2e:surface-matrix` is owned by the PR owner for user-facing route,
@@ -577,7 +800,8 @@ Large-pack ownership:
   require separate package-build and runtime-smoke evidence.
 - `test:e2e:composer-sandbox` is owned by PR or train owners changing Waves
   composer input, attachment preview/removal, link preview rendering, dev-auth
-  composer eligibility, or local sandbox/mock API coverage. The pack may use
+  composer eligibility, long-drop timeline rendering, or local sandbox/mock API
+  coverage. The pack may use
   local synthetic auth and a mock API, and it may submit only the synthetic
   chat-drop shape modeled by the mock API with the bounded sandbox signer. It
   must never submit drops or upload files to staging or production. Treat it as
@@ -589,6 +813,12 @@ Large-pack ownership:
   coverage for drop reaction writes. The pack may use local synthetic auth and
   a mock API, but it must never allow broad `/api/drops/**` writes beyond the
   exact sandbox reaction endpoint and body.
+- `test:e2e:e2ee-sandbox` is owned by PR or train owners changing encrypted
+  messages (`lib/e2ee`, `components/e2ee`, `hooks/e2ee`,
+  `app/messages/encrypted`, the MLS WebAssembly module), device signing
+  (`lib/device-signing`, `components/device-signing`,
+  `hooks/device-signing`), the sign-in grant path, the dev-auth test
+  override, the composer sandbox mock API or the fake delivery service.
 - `test:e2e:production:readonly` is owned by the release captain or validation
   agent after a production deploy. It is a production-safe aggregate of the
   individual public read-only packs on desktop Chromium. Do
@@ -605,6 +835,11 @@ Large-pack ownership:
   native visibility, app-wallet fallback behavior, or viewport assumptions. Add
   new specs to the allowlist intentionally after verifying skip behavior across
   all three simulation projects.
+- `test:e2e:staging:e2ee` is owned by the encrypted messages owner and the
+  release coordinator, who dispatch it after a staging deploy that changes
+  encrypted messages, the wallet sign-in flow, the CSP or the delivery
+  service. It writes throwaway QA data to staging and must never be pointed at
+  production.
 - Large-pack failures belong to the PR or train owner until they are diagnosed
   as unrelated infrastructure. Do not quarantine, skip, or downgrade a failing
   large pack without recording the reason in the PR or release report.

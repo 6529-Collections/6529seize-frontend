@@ -1,10 +1,16 @@
 "use client";
 
 import { getTimeAgoShort } from "@/helpers/timeDisplayHelpers";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { formatDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
+import {
+  withDisplayTimeZone,
+  withDisplayTimeZoneDate,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 
 type LocalDateTimeFormat = "date" | "dateTime" | "relative";
 
@@ -15,6 +21,7 @@ interface LocalDateTimeProps {
   /** Pins the locale; defaults to the browser locale after hydration. */
   readonly locale?: SupportedLocale | undefined;
   readonly className?: string | undefined;
+  readonly "data-testid"?: string | undefined;
 }
 
 const DATE_OPTIONS = {
@@ -48,11 +55,20 @@ const getAbsoluteOptions = (
 const formatViewerLocal = (
   locale: SupportedLocale,
   date: Date,
-  format: LocalDateTimeFormat
-): string =>
-  format === "relative"
-    ? getTimeAgoShort(date.getTime())
-    : formatDate(locale, date, getAbsoluteOptions(format));
+  format: LocalDateTimeFormat,
+  zone: DisplayTimeZone
+): string => {
+  if (format === "relative") {
+    return getTimeAgoShort(date.getTime(), Date.now(), false, {
+      timeZone: zone.timeZone,
+    });
+  }
+  const options =
+    format === "date"
+      ? withDisplayTimeZoneDate(zone, DATE_OPTIONS)
+      : withDisplayTimeZone(zone, DATE_TIME_OPTIONS);
+  return formatDate(locale, date, options);
+};
 
 const formatUtcFallback = (
   locale: SupportedLocale,
@@ -62,7 +78,8 @@ const formatUtcFallback = (
   formatDate(locale, date, { ...getAbsoluteOptions(format), ...UTC_OPTIONS });
 
 /**
- * Shows an instant in the viewer's time zone without a hydration mismatch.
+ * Shows an instant in the display time zone (the viewer's own zone unless
+ * they chose UTC or another zone) without a hydration mismatch.
  * Server HTML and the hydration render show the same UTC-labelled fallback
  * (or, for relative time, a placeholder that names the UTC time to assistive
  * technology). The viewer-local text replaces it right after hydration, and
@@ -73,9 +90,11 @@ export default function LocalDateTime({
   format = "date",
   locale,
   className,
+  "data-testid": testId,
 }: LocalDateTimeProps) {
   const hasHydrated = useHasHydrated();
   const browserLocale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const date = toInstant(value);
   if (date === null) {
     return null;
@@ -86,8 +105,8 @@ export default function LocalDateTime({
 
   if (hasHydrated) {
     return (
-      <time dateTime={dateTime} className={className}>
-        {formatViewerLocal(resolvedLocale, date, format)}
+      <time data-testid={testId} dateTime={dateTime} className={className}>
+        {formatViewerLocal(resolvedLocale, date, format, zone)}
       </time>
     );
   }
@@ -96,7 +115,7 @@ export default function LocalDateTime({
   if (format === "relative") {
     // Relative time depends on the render time, so the server never guesses it.
     return (
-      <time dateTime={dateTime} className={className}>
+      <time data-testid={testId} dateTime={dateTime} className={className}>
         <span
           aria-hidden="true"
           className="tw-inline-block tw-h-3 tw-w-6 tw-rounded-sm tw-bg-iron-800 tw-align-middle"
@@ -107,7 +126,7 @@ export default function LocalDateTime({
   }
 
   return (
-    <time dateTime={dateTime} className={className}>
+    <time data-testid={testId} dateTime={dateTime} className={className}>
       {utcFallback}
     </time>
   );

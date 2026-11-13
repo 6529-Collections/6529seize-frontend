@@ -31,9 +31,20 @@ import {
 } from "./waveFeedTelemetry";
 import { useWaveLoadingState } from "./useWaveLoadingState";
 import type { WaveDataStoreUpdater, WaveMessagesUpdate } from "./types";
+import { addWaveHistoryGap, reconcileWaveSnapshot } from "../utils/wave-resume";
 
 const FETCH_NEWEST_LIMIT = 50;
 const MAX_FETCH_NEWEST_ITERATIONS = 20;
+/**
+ * Drops newer than a serial. `reachedPageLimit` is true when the fetch
+ * stopped at its page cap with more drops possibly left.
+ */
+interface NewestMessagesResult {
+  readonly drops: ApiDrop[] | null;
+  readonly highestSerialNo: number | null;
+  readonly reachedPageLimit: boolean;
+}
+
 const getNewestSyncAbortKey = (waveId: string): string =>
   `${waveId}-newest-sync`;
 
@@ -83,11 +94,12 @@ async function fetchNewestMessagesUntilCaughtUp({
   readonly signal: AbortSignal;
   readonly updateEligibility: UpdateEligibility;
   readonly waveId: string;
-}): Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }> {
+}): Promise<NewestMessagesResult> {
   let allFetchedDrops: ApiDrop[] = [];
   let currentSinceSerialNo = initialSinceSerialNo;
   let overallHighestSerialNo = initialSinceSerialNo;
   let iterations = 0;
+  let caughtUp = false;
 
   try {
     while (!signal.aborted && iterations < MAX_FETCH_NEWEST_ITERATIONS) {
@@ -104,16 +116,18 @@ async function fetchNewestMessagesUntilCaughtUp({
       throwIfAborted(signal);
 
       if (fetchedChunk === null) {
-        return { drops: null, highestSerialNo: null };
+        return { drops: null, highestSerialNo: null, reachedPageLimit: false };
       }
 
       if (fetchedChunk.length === 0) {
+        caughtUp = true;
         break;
       }
 
       allFetchedDrops = allFetchedDrops.concat(fetchedChunk);
 
       if (chunkHighestSerial === null) {
+        caughtUp = true;
         break;
       }
 
@@ -124,6 +138,7 @@ async function fetchNewestMessagesUntilCaughtUp({
       currentSinceSerialNo = chunkHighestSerial;
 
       if (fetchedChunk.length < FETCH_NEWEST_LIMIT) {
+        caughtUp = true;
         break;
       }
     }
@@ -133,6 +148,7 @@ async function fetchNewestMessagesUntilCaughtUp({
     return {
       drops: allFetchedDrops,
       highestSerialNo: overallHighestSerialNo,
+      reachedPageLimit: !caughtUp,
     };
   } catch (error: unknown) {
     if (isAbortError(error)) {
@@ -143,7 +159,7 @@ async function fetchNewestMessagesUntilCaughtUp({
       `[WaveDataFetching] Error during fetchNewest loop for ${waveId}:`,
       error
     );
-    return { drops: null, highestSerialNo: null };
+    return { drops: null, highestSerialNo: null, reachedPageLimit: false };
   }
 }
 
@@ -159,7 +175,7 @@ function useSyncNewestMessages({
       waveId: string,
       initialSinceSerialNo: number,
       signal: AbortSignal
-    ): Promise<{ drops: ApiDrop[] | null; highestSerialNo: number | null }> => {
+    ): Promise<NewestMessagesResult> => {
       const result = await fetchNewestMessagesUntilCaughtUp({
         initialSinceSerialNo,
         signal,
@@ -182,7 +198,8 @@ function useSyncExistingWaveNewestMessages({
   createController,
   getData,
   isCapacitor,
-  syncNewestMessages,
+  updateData,
+  updateEligibility,
 }: {
   readonly cleanupController: (
     waveId: string,
@@ -191,20 +208,32 @@ function useSyncExistingWaveNewestMessages({
   readonly createController: (waveId: string) => AbortController;
   readonly getData: WaveDataStoreUpdater["getData"];
   readonly isCapacitor: boolean;
-  readonly syncNewestMessages: ReturnType<typeof useSyncNewestMessages>;
+  readonly updateData: WaveDataStoreUpdater["updateData"];
+  readonly updateEligibility: UpdateEligibility;
 }) {
+  const inFlight = useRef(
+    new Map<
+      string,
+      {
+        controller: AbortController;
+        promise: Promise<void>;
+      }
+    >()
+  );
   return useCallback(
-    async (waveId: string): Promise<void> => {
+    (waveId: string): Promise<void> => {
+      const pending = inFlight.current.get(waveId);
+      if (pending && !pending.controller.signal.aborted) return pending.promise;
       const wave = getData(waveId);
       if (wave === undefined || wave.drops.length === 0) {
-        return;
+        return Promise.resolve();
       }
 
       const highestSerialNo = Math.max(
         ...wave.drops.map((drop) => drop.serial_no)
       );
       if (!Number.isFinite(highestSerialNo)) {
-        return;
+        return Promise.resolve();
       }
 
       const abortKey = getNewestSyncAbortKey(waveId);
@@ -216,51 +245,86 @@ function useSyncExistingWaveNewestMessages({
         loadSource: "background_sync",
       });
 
-      try {
-        const result = await syncNewestMessages(
-          waveId,
-          highestSerialNo,
-          controller.signal
-        );
-        if (result.drops === null) {
-          trackWaveFeedLoadFailure({
-            error: createWaveFeedUnavailableError(),
+      const promise = (async () => {
+        try {
+          const result = await fetchNewestWaveMessages(
+            waveId,
+            null,
+            FETCH_NEWEST_LIMIT,
+            controller.signal,
+            updateEligibility
+          );
+          throwIfAborted(controller.signal);
+          if (result.drops === null) {
+            trackWaveFeedLoadFailure({
+              error: createWaveFeedUnavailableError(),
+              hadCachedDrops: true,
+              isNative: isCapacitor,
+              loadSource: "background_sync",
+              remainedUnavailable: false,
+              startedAtMs: telemetryStartedAtMs,
+            });
+            return;
+          }
+
+          const current = getData(waveId);
+          if (!current) return;
+          const oldestFetchedSerialNo = Math.min(
+            ...result.drops.map((drop) => drop.serial_no)
+          );
+          const historyGaps =
+            oldestFetchedSerialNo > highestSerialNo &&
+            result.drops.length === FETCH_NEWEST_LIMIT
+              ? addWaveHistoryGap(current.historyGaps ?? [], {
+                  newerThan: highestSerialNo,
+                  olderThan: oldestFetchedSerialNo,
+                })
+              : current.historyGaps;
+          updateData({
+            key: waveId,
+            drops:
+              formatWaveMessages(
+                waveId,
+                reconcileWaveSnapshot(result.drops, wave.drops, current.drops)
+              ).drops ?? [],
+            latestFetchedSerialNo: result.highestSerialNo,
+            historyGaps,
+          });
+
+          trackWaveFeedLoadSuccess({
+            dropCount: result.drops.length,
+            hadCachedDrops: true,
+            isNative: isCapacitor,
+            loadSource: "background_sync",
+            startedAtMs: telemetryStartedAtMs,
+          });
+        } catch (error: unknown) {
+          trackWaveFeedLoadTerminalFromError({
+            error,
             hadCachedDrops: true,
             isNative: isCapacitor,
             loadSource: "background_sync",
             remainedUnavailable: false,
             startedAtMs: telemetryStartedAtMs,
           });
-          return;
+          throw error;
+        } finally {
+          cleanupController(abortKey, controller);
+          if (inFlight.current.get(waveId)?.controller === controller) {
+            inFlight.current.delete(waveId);
+          }
         }
-
-        trackWaveFeedLoadSuccess({
-          dropCount: result.drops.length,
-          hadCachedDrops: true,
-          isNative: isCapacitor,
-          loadSource: "background_sync",
-          startedAtMs: telemetryStartedAtMs,
-        });
-      } catch (error: unknown) {
-        trackWaveFeedLoadTerminalFromError({
-          error,
-          hadCachedDrops: true,
-          isNative: isCapacitor,
-          loadSource: "background_sync",
-          remainedUnavailable: false,
-          startedAtMs: telemetryStartedAtMs,
-        });
-        throw error;
-      } finally {
-        cleanupController(abortKey, controller);
-      }
+      })();
+      inFlight.current.set(waveId, { controller, promise });
+      return promise;
     },
     [
       cleanupController,
       createController,
       getData,
       isCapacitor,
-      syncNewestMessages,
+      updateData,
+      updateEligibility,
     ]
   );
 }
@@ -287,7 +351,8 @@ export function useWaveDataFetching({
     createController,
     getData,
     isCapacitor,
-    syncNewestMessages,
+    updateData,
+    updateEligibility,
   });
   const { clearInitialBackfillTimeout, scheduleNativeInitialBackfill } =
     useNativeInitialBackfill({
@@ -544,6 +609,7 @@ export function useWaveDataFetching({
 
   return {
     registerWave,
+    activateWave,
     prefetchWave,
     cancelWaveDataFetch,
     syncNewestMessages,

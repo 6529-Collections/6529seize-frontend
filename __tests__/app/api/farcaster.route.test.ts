@@ -15,6 +15,12 @@ jest.mock("next/server", () => ({
   NextRequest: class {},
 }));
 
+let mockWarpcastApiKey: string | undefined;
+
+jest.mock("@/config/serverEnv", () => ({
+  getFarcasterWarpcastApiKey: () => mockWarpcastApiKey,
+}));
+
 /**
  * Mock URL guard error used to exercise guard failure handling.
  */
@@ -44,12 +50,19 @@ const parsePublicUrlMock = jest.fn(createDefaultParsePublicUrl);
 const assertPublicUrlMock = jest.fn();
 const mockFetchPublicUrl = jest.fn();
 
-jest.mock("@/lib/security/urlGuard", () => ({
-  UrlGuardError: MockUrlGuardError,
-  parsePublicUrl: parsePublicUrlMock,
-  assertPublicUrl: assertPublicUrlMock,
-  fetchPublicUrl: mockFetchPublicUrl,
-}));
+jest.mock("@/lib/security/urlGuard", () => {
+  // The per-client limiter classifies forwarded addresses with the real
+  // helpers.
+  const actual = jest.requireActual("@/lib/security/urlGuard");
+  return {
+    isForbiddenAddress: actual.isForbiddenAddress,
+    parseIpv6Groups: actual.parseIpv6Groups,
+    UrlGuardError: MockUrlGuardError,
+    parsePublicUrl: parsePublicUrlMock,
+    assertPublicUrl: assertPublicUrlMock,
+    fetchPublicUrl: mockFetchPublicUrl,
+  };
+});
 
 const UrlGuardError = MockUrlGuardError;
 
@@ -133,6 +146,7 @@ describe("farcaster API route", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     mockFetch.mockReset();
+    mockWarpcastApiKey = undefined;
     global.fetch = mockFetch as unknown as typeof fetch;
     await loadRoute();
   });
@@ -147,6 +161,7 @@ describe("farcaster API route", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL("https://api.local/farcaster"),
     } as any;
 
@@ -180,6 +195,7 @@ describe("farcaster API route", () => {
     );
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://api.local/farcaster?url=https://warpcast.com/alice/0xabc"
       ),
@@ -198,8 +214,36 @@ describe("farcaster API route", () => {
     );
     const [requestUrl, init] = mockFetch.mock.calls[0];
     expect(requestUrl.toString()).toContain("/v2/cast");
+    expect(new URL(requestUrl.toString()).searchParams.has("key")).toBe(false);
     expect(init?.headers).toEqual(
       expect.objectContaining({ "user-agent": expect.any(String) })
+    );
+  });
+
+  it("adds the server-only Warpcast API key to Warpcast API requests", async () => {
+    mockWarpcastApiKey = "server-warpcast-key";
+    mockFetch.mockResolvedValueOnce(
+      createJsonResponse({
+        result: {
+          cast: {
+            hash: "0xabc",
+            text: "Hello",
+            author: { fid: 1, username: "alice" },
+          },
+        },
+      })
+    );
+
+    await GET({
+      headers: new Headers(),
+      nextUrl: new URL(
+        "https://api.local/farcaster?url=https://warpcast.com/alice/0xabc"
+      ),
+    } as unknown as Parameters<typeof GET>[0]);
+
+    const [requestUrl] = mockFetch.mock.calls[0];
+    expect(new URL(requestUrl.toString()).searchParams.get("key")).toBe(
+      "server-warpcast-key"
     );
   });
 
@@ -219,6 +263,7 @@ describe("farcaster API route", () => {
     );
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://api.local/farcaster?url=https://warpcast.com/bob"
       ),
@@ -258,6 +303,7 @@ describe("farcaster API route", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://api.local/farcaster?url=https://example.com/frame"
       ),
@@ -296,6 +342,7 @@ describe("farcaster API route", () => {
     );
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://api.local/farcaster?url=https://example.com/frame"
       ),
@@ -324,6 +371,7 @@ describe("farcaster API route", () => {
     );
 
     const response = await GET({
+      headers: new Headers(),
       nextUrl: new URL(
         "https://api.local/farcaster?url=https://example.com/broken"
       ),
@@ -346,6 +394,7 @@ describe("farcaster API route", () => {
     );
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://api.local/farcaster?url=https://example.com/image.png"
       ),
@@ -361,18 +410,22 @@ describe("farcaster API route", () => {
     });
   });
 
-  it("returns unsupported for oversized frame HTML responses", async () => {
+  it("reads frame metadata from the first 1 MiB of a longer page", async () => {
     mockFetchPublicUrl.mockResolvedValueOnce(
-      createResponse("<html></html>", {
-        headers: {
-          "content-length": `${8 * 1024 * 1024 + 1}`,
-          "content-type": "text/html",
-        },
-        url: "https://example.com/large-frame",
-      })
+      createResponse(
+        `<html><head><meta property="fc:frame" content="vNext"><meta property="fc:frame:image" content="/frame.png"><meta property="og:title" content="Long frame"></head><body>${"<p>filler</p>".repeat(200_000)}<meta property="fc:frame:button:1" content="Too late"></body></html>`,
+        {
+          headers: {
+            "content-length": `${8 * 1024 * 1024 + 1}`,
+            "content-type": "text/html",
+          },
+          url: "https://example.com/large-frame",
+        }
+      )
     );
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://api.local/farcaster?url=https://example.com/large-frame"
       ),
@@ -382,9 +435,16 @@ describe("farcaster API route", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
-      type: "unsupported",
+      type: "frame",
       canonicalUrl: "https://example.com/large-frame",
-      reason: "Farcaster frame response is too large to process safely.",
+      frame: {
+        frameUrl: "https://example.com/large-frame",
+        title: "Long frame",
+        siteName: undefined,
+        imageUrl: "https://example.com/frame.png",
+        // The button sits past the first 1 MiB, which is not read.
+        buttons: [],
+      },
     });
   });
 
@@ -392,6 +452,7 @@ describe("farcaster API route", () => {
     mockFetchPublicUrl.mockRejectedValueOnce(new Error("network failure"));
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://api.local/farcaster?url=https://example.com/frame"
       ),
@@ -411,6 +472,7 @@ describe("farcaster API route", () => {
     });
 
     const request = {
+      headers: new Headers(),
       nextUrl: new URL(
         "https://api.local/farcaster?url=https://example.com/frame"
       ),
@@ -421,5 +483,52 @@ describe("farcaster API route", () => {
     expect(response.status).toBe(403);
     const payload = await response.json();
     expect(payload).toEqual({ error: "blocked" });
+  });
+
+  it("charges each request against the shared per-client preview budget", async () => {
+    const fromClient = (forwardedFor: string) =>
+      ({
+        headers: new Headers({ "x-forwarded-for": forwardedFor }),
+        nextUrl: new URL("https://api.local/farcaster"),
+      }) as any;
+
+    for (let index = 0; index < 1200; index++) {
+      expect((await GET(fromClient("8.8.8.8"))).status).toBe(400);
+    }
+    const limited = await GET(fromClient("8.8.8.8"));
+    expect(limited.status).toBe(429);
+    await expect(limited.json()).resolves.toEqual({
+      error: "Too many link preview requests",
+    });
+    expect(nextResponseJson.mock.calls.at(-1)?.[1]).toEqual(
+      expect.objectContaining({
+        headers: expect.objectContaining({ "Retry-After": expect.any(String) }),
+      })
+    );
+    expect((await GET(fromClient("1.1.1.1"))).status).toBe(400);
+  });
+
+  it("limits frame fetches to ports 80 and 443 on every hop", async () => {
+    mockFetchPublicUrl.mockResolvedValueOnce(
+      createResponse("<html></html>", {
+        headers: { "content-type": "text/html" },
+        url: "https://example.com/frame",
+      })
+    );
+
+    await GET({
+      headers: new Headers(),
+      nextUrl: new URL(
+        "https://api.local/farcaster?url=https://example.com/frame"
+      ),
+    } as any);
+
+    expect(assertPublicUrlMock).toHaveBeenCalledWith(
+      new URL("https://example.com/frame"),
+      expect.objectContaining({ allowedPorts: [80, 443] })
+    );
+    expect(mockFetchPublicUrl.mock.calls[0]?.[2]).toEqual(
+      expect.objectContaining({ allowedPorts: [80, 443] })
+    );
   });
 });

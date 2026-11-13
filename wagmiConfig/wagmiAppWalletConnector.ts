@@ -6,12 +6,31 @@ import {
   PrivateKeyDecryptionError,
   WalletAuthenticationError,
 } from "@/errors/wallet-auth";
-import type { Address, Chain, Hex, WalletClient } from "viem";
-import { createWalletClient, fallback, http } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
-import { createConnector } from "wagmi";
+import { getAppWalletAvatarDataUri } from "@/helpers/app-wallet-avatar.helpers";
+import type {
+  Address,
+  Chain,
+  Hex,
+  LocalAccount,
+  PrivateKeyAccount,
+  Transport,
+  WalletClient,
+} from "viem";
+import { createWalletClient, http } from "viem";
+import { privateKeyToAccount, toAccount } from "viem/accounts";
+import {
+  type CreateConnectorFn,
+  createConnector as createWagmiConnector,
+} from "wagmi";
+import { APP_WALLET_CONNECTOR_TYPE } from "./appWalletConnectorType";
+import {
+  confirmAppWalletSigningRequest,
+  describeAppWalletMessage,
+  describeAppWalletTransaction,
+  describeAppWalletTypedData,
+} from "./appWalletSigningConfirmation";
 
-export const APP_WALLET_CONNECTOR_TYPE = "app-wallet";
+export { APP_WALLET_CONNECTOR_TYPE };
 
 interface CreateAppWalletConnectorOptions {
   appWallet: AppWallet;
@@ -21,6 +40,52 @@ type AppWalletAccountWithCapabilities = {
   address: Address;
   capabilities: Record<string, unknown>;
 };
+
+type ConfiguredTransports = Record<number, Transport> | undefined;
+
+// Used only when the wagmi config installing this connector has no transport
+// for the chain. viem's default public RPC is never placed first.
+const APP_WALLET_FALLBACK_RPC_URL = "https://rpc1.6529.io";
+
+/**
+ * Wraps the decrypted key so every message, typed-data signature and
+ * transaction waits for the app's own confirmation dialog. Raw hash signing
+ * and account delegations (EIP-7702) are not exposed.
+ */
+function createConfirmingAccount(
+  signer: PrivateKeyAccount,
+  chains: readonly Chain[]
+): LocalAccount {
+  const address = signer.address;
+  return toAccount({
+    address,
+    async signMessage({ message }) {
+      await confirmAppWalletSigningRequest(
+        describeAppWalletMessage(address, message)
+      );
+      return signer.signMessage({ message });
+    },
+    async signTypedData(parameters) {
+      await confirmAppWalletSigningRequest(
+        describeAppWalletTypedData(address, parameters as never, chains)
+      );
+      return signer.signTypedData(parameters as never);
+    },
+    async signTransaction(transaction, options) {
+      if (
+        "authorizationList" in transaction &&
+        Array.isArray(transaction.authorizationList) &&
+        transaction.authorizationList.length > 0
+      ) {
+        throw new Error("App wallets do not sign account delegations.");
+      }
+      await confirmAppWalletSigningRequest(
+        describeAppWalletTransaction(address, transaction, chains)
+      );
+      return signer.signTransaction(transaction, options as never);
+    },
+  });
+}
 
 type AppWalletConnectResult<withCapabilities extends boolean> = {
   accounts: withCapabilities extends true
@@ -38,25 +103,43 @@ export function createAppWalletConnector(
   let currentChainId: number = chains[0]?.id!;
 
   let decryptedPrivateKey: string | null = null;
+  let configuredTransports: ConfiguredTransports;
+
+  function getTransport(chainId: number): Transport {
+    // Reuse the transport, and so the RPC order, of the wagmi config this
+    // connector is installed on.
+    return configuredTransports?.[chainId] ?? http(APP_WALLET_FALLBACK_RPC_URL);
+  }
+
+  // The chain and transports the cached client was built with.
+  let walletClientChainId: number | undefined;
+  let walletClientTransports: ConfiguredTransports;
 
   async function getOrCreateClient(chainId: number) {
-    if (walletClient) return walletClient;
+    if (
+      walletClient &&
+      walletClientChainId === chainId &&
+      walletClientTransports === configuredTransports
+    ) {
+      return walletClient;
+    }
 
     if (!decryptedPrivateKey) {
       throw new Error("No decrypted key found. Call connect() first.");
     }
 
-    const account = privateKeyToAccount(ensureHexPrefix(decryptedPrivateKey));
+    const signer = privateKeyToAccount(ensureHexPrefix(decryptedPrivateKey));
+    const account = createConfirmingAccount(signer, chains);
 
     const chain = chains.find((c) => c.id === chainId);
 
     walletClient = createWalletClient({
       account,
       chain,
-      transport: fallback([http(), http("https://rpc1.6529.io")], {
-        retryCount: 3,
-      }),
+      transport: getTransport(chainId),
     });
+    walletClientChainId = chainId;
+    walletClientTransports = configuredTransports;
     currentChainId = chainId;
     return walletClient;
   }
@@ -66,9 +149,23 @@ export function createAppWalletConnector(
     return hexValue as Hex;
   }
 
+  // wagmi's createConnector, also keeping the transports of the wagmi config
+  // that installs this connector.
+  function createConnector<
+    provider,
+    properties extends Record<string, unknown>,
+  >(
+    connectorFn: CreateConnectorFn<provider, properties>
+  ): CreateConnectorFn<provider, properties> {
+    return createWagmiConnector<provider, properties>((config) => {
+      configuredTransports = config.transports;
+      return connectorFn(config);
+    });
+  }
+
   return createConnector(({ emitter }) => ({
     get icon() {
-      return `https://robohash.org/${options.appWallet.address}.png?size=64x64`;
+      return getAppWalletAvatarDataUri(options.appWallet.address);
     },
     get id() {
       return options.appWallet.address;
@@ -87,7 +184,7 @@ export function createAppWalletConnector(
       return [APP_WALLET_CONNECTOR_TYPE];
     },
     get iconUrl() {
-      return `https://robohash.org/${options.appWallet.address}.png?size=64x64`;
+      return getAppWalletAvatarDataUri(options.appWallet.address);
     },
     get walletConnectId() {
       return undefined; // Not a WalletConnect connector

@@ -1,0 +1,124 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "5a826f65056ae64cb5f6c789699d8533c98baaa4",
+  "coverage": [
+    {
+      "route": "/museum/6529-fund-szn1/gazers",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/gazers-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/6529-fund-szn1/gazers",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/gazers-820x1000-full.png"
+    },
+    {
+      "route": "/museum/6529-fund-szn1/gazers",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/candidate/gazers-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J07": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/text/gazers-1440x1000.txt",
+        "evidence/candidate/gazers-1440x1000-02.png",
+        "evidence/candidate/gazers-1440x1000-03.png",
+        "evidence/diff-candidate-vs-main.json"
+      ],
+      "findings": ["E-001", "E-002", "E-003", "E-004"],
+      "note": "The candidate changes no visible words: <main> text is identical to the baseline at all three viewports, and the lede, breadcrumb, artist line and essay read plainly. Scored relative to the baseline per the run record; the copy deficits that remain (work labels that read as the next frame's title, a plain-text third label, a generic frame name, an unattributed essay, and colour descriptions that can disagree with the live frame) are identical on main and filed as P3."
+    },
+    "J12": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/candidate/gazers-390x844-full.png",
+        "evidence/candidate/gazers-820x1000-full.png",
+        "evidence/candidate/text/gazers-390x844.txt"
+      ],
+      "findings": ["E-003"],
+      "note": "Only en-US is pinned. English copy wraps cleanly at 390, 820 and 1440 with no clipped or overlapping text, and the page text and iframe titles are unchanged from the baseline; no de-DE or other locale evidence exists, so expansion behaviour is not demonstrated."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "E-001",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/gazers-1440x1000-02.png",
+      "observation": "Pre-existing on main: the three works are labelled by 'GAZERS #788', 'GAZERS #566' and 'GAZERS #403', but each label sits below the frame it names. The first frame (#788) has no label above it, only the 'Gazers / Matt Kane' block. The two label headings are large bold uppercase and sit 36 px under their own frame and 24 px above the next frame (heading boxes measured at 1440 px), so 'GAZERS #788' reads as the title of the #566 work and 'GAZERS #566' as the title of the #403 work. The third label, 'GAZERS #403', is an ordinary body-size paragraph and sits closer to its own frame, so the three labels do not share one style or one position.",
+      "consequence": "A visitor can attach each title to the wrong artwork. Work numbers are the only identifier on the page, so this misattributes the live works.",
+      "change": "Give the three works one caption pattern, with the label next to its own frame and clearly nearer to it than to the next frame, for example 'Gazers #788, Matt Kane' as a caption under each frame, or the same heading above each frame including the first. Use the same element and style for all three, including #403.",
+      "acceptance_check": "At 1440, 820 and 390 px each of the three labels has the same style and is visibly closer to the frame it names than to any other frame; the first frame is labelled.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-002",
+      "targets": ["J07", "I3"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/candidate/gazers-1440x1000-03.png",
+      "observation": "Pre-existing on main: the essay under a bold 'Description' label has no author, source or credit, and the 'Description' label is a bold paragraph rather than a heading. Its tone is promotional rather than museum register in places ('coder extraordinaire', 'the very soul of the mission of artists and collectors alike', 'blazing squares of color and light'). The last line, 'lasting works that will exist long after we are gone', states permanence with no mechanism on the page.",
+      "consequence": "Readers cannot tell whose words the essay is or whether the claims come from the artist, 6529 or a third party. The permanence line reads as an unbacked claim on a page that does not show how the works persist.",
+      "change": "Attribute the essay (for example 'Text: <author or source>') and make 'Description' a heading or drop it. Trim promotional phrasing or quote it to its source, and attach the final line to Kane ('Kane has said he hopes...') only if a source supports it, otherwise remove it.",
+      "acceptance_check": "The essay carries an attribution line, the label is a heading or is gone, and no sentence asserts permanence without naming the mechanism or the source.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-003",
+      "targets": ["J07", "J12"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · all viewports · en-US",
+      "evidence": "evidence/diff-candidate-vs-main.json",
+      "observation": "Pre-existing on main: all three frames carry the same name, 'Museum artwork embed' (iframes[].title in automated-checks.json and the diff file, identical on main and the candidate). The name uses the implementation word 'embed', does not say which work it is, and is hard-coded English in the migrated page content.",
+      "consequence": "Assistive technology lists three identically named frames, so a listener cannot tell Gazers #788 from #566 or #403, and the name will not follow the locale when the page is localized.",
+      "change": "Name each frame after its work, for example title=\"Gazers #788 by Matt Kane, live generative artwork\", and move the string into the page's locale messages when this page is localized.",
+      "acceptance_check": "Each of the three iframes has a distinct title that includes the work number and artist; no title contains the word 'embed'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-004",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/6529-fund-szn1/gazers · default · 1440x1000 · en-US",
+      "evidence": "evidence/candidate/gazers-1440x1000-frame-3.png",
+      "observation": "Pre-existing on main: the essay describes each work's colours as if fixed ('Gazers 403 is warm with burnt sienna and marigold paired well with purple and green'), and also says the works change with the time of day (near-black at midnight, neon at noon). In the capture the #403 frame is dark crimson and black with a green diamond, which does not match the sentence, and the page never says what time those descriptions refer to.",
+      "consequence": "A visitor who sees the #403 frame in different colours than the text promises may think the text is wrong or the work failed to load.",
+      "change": "Say when each description applies, for example 'At midday, Gazers #403 is warm with burnt sienna and marigold...', or add one line before the essay saying the works change colour through the day and the descriptions refer to a stated time.",
+      "acceptance_check": "The essay either dates each colour description (time of day) or states once that the works change through the day and the descriptions are of a stated time.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The visible <main> text is identical to the baseline at all three viewports (mainTextIdentical true): the candidate adds no copy, no status text and no fallback wording.",
+    "Breadcrumb 'MUSEUM / 6529 FUND SZN1', H1 'GAZERS' and the one-sentence lede, which states what the works are in plain terms.",
+    "The 'Gazers / Matt Kane' title and artist line above the first work.",
+    "The essay's concrete description of the works (date assignment, frame rate tied to age, daily colour change, 29-day new moon), which the live frames bear out: they animate and match the #788 and #566 colour descriptions.",
+    "Frames render only the work, with no error, blocked or permission text, in the sandboxed candidate.",
+    "English copy wraps without clipping at 390, 820 and 1440 px."
+  ]
+}

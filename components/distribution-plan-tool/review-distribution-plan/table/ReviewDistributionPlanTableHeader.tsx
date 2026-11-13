@@ -7,15 +7,15 @@ import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/Ro
 import RoundedManifoldIconButton from "@/components/distribution-plan-tool/common/RoundedManifoldIconButton";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { buildCsvFromRecords } from "@/helpers/csv-export.helpers";
+import { downloadJsonFile } from "@/helpers/json-download.helpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { useContext, useEffect, useState } from "react";
 import type {
   FullResultWallet,
   ReviewDistributionPlanTablePhase,
 } from "./ReviewDistributionPlanTable.types";
-import {
-  FetchResultsType,
-} from "./ReviewDistributionPlanTable.types";
+import { FetchResultsType } from "./ReviewDistributionPlanTable.types";
 
 export default function ReviewDistributionPlanTableHeader({
   rows,
@@ -49,20 +49,11 @@ export default function ReviewDistributionPlanTableHeader({
 
   const downloadJson = (results: AllowlistResult[]) => {
     const data = JSON.stringify(getFullResults(results));
-    const blob = new Blob([data], { type: "application/json" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "results.json";
-    link.click();
+    downloadJsonFile(data, "results.json");
   };
 
   const downloadCsv = (results: AllowlistResult[]) => {
-    const fullResult = getFullResults(results);
-    const csv = [
-      Object.keys(fullResult[0]!).join(","),
-      ...fullResult.map((item) => Object.values(item).join(",")),
-    ].join("\n");
+    const csv = buildCsvFromRecords(getFullResults(results));
 
     const link = document.createElement("a");
     link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
@@ -80,10 +71,7 @@ export default function ReviewDistributionPlanTableHeader({
       address: row.wallet,
       value: row.amount,
     }));
-    const csv = [
-      Object.keys(fullResult[0]!).join(","),
-      ...fullResult.map((item) => Object.values(item).join(",")),
-    ].join("\n");
+    const csv = buildCsvFromRecords(fullResult);
 
     const link = document.createElement("a");
     link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
@@ -98,9 +86,8 @@ export default function ReviewDistributionPlanTableHeader({
     if (loadingType) return;
     setLoadingType(fetchType);
     const endpoint = `/allowlists/${distributionPlan.id}/results`;
-    const { success, data } = await distributionPlanApiFetch<AllowlistResult[]>(
-      endpoint
-    );
+    const { success, data } =
+      await distributionPlanApiFetch<AllowlistResult[]>(endpoint);
     setLoadingType(null);
     if (!success || !data) {
       return;
@@ -123,32 +110,32 @@ export default function ReviewDistributionPlanTableHeader({
     <DistributionPlanTableHeaderWrapper>
       <th
         scope="col"
-        className="tw-py-3 tw-pl-4 tw-pr-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px] sm:tw-pl-6"
+        className="tw-whitespace-nowrap tw-py-3 tw-pl-4 tw-pr-3 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400 sm:tw-pl-6"
       >
         Name
       </th>
 
       <th
         scope="col"
-        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]"
+        className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400"
       >
         Description
       </th>
       <th
         scope="col"
-        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]"
+        className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400"
       >
         Wallets
       </th>
       <th
         scope="col"
-        className="tw-px-3 tw-py-3 tw-whitespace-nowrap tw-text-left tw-text-[0.6875rem] tw-leading-[1.125rem] tw-font-medium tw-text-iron-400 tw-uppercase tw-tracking-[0.25px]"
+        className="tw-whitespace-nowrap tw-px-3 tw-py-3 tw-text-left tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-[1.125rem] tw-tracking-[0.25px] tw-text-iron-400"
       >
         Spots
       </th>
       <th
         scope="col"
-        className="tw-pl-3 tw-pr-4 tw-py-3 tw-gap-x-3 tw-whitespace-nowrap tw-flex tw-justify-start"
+        className="tw-flex tw-justify-start tw-gap-x-3 tw-whitespace-nowrap tw-py-3 tw-pl-3 tw-pr-4"
       >
         <RoundedJsonIconButton
           onClick={() => fetchResults(FetchResultsType.JSON)}

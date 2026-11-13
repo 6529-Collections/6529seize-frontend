@@ -1,17 +1,13 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useContext, useEffect, useState } from "react";
-import type { ApiProfileRaterCicState } from "@/entities/IProfile";
+import { useContext, useEffect, useId, useRef, useState } from "react";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { AuthContext } from "@/components/auth/Auth";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { commonApiPost } from "@/services/api/common-api";
+import { useMutation } from "@tanstack/react-query";
+import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
@@ -20,51 +16,64 @@ import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyAct
 import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateStats";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t, tRich } from "@/i18n/messages";
+
+import { isRatingValue } from "@/components/user/rep/ratingsManagement";
+
+import { useNicRatingState } from "./useNicRatingState";
 
 const CIC_FOCUS_RING_CLASS_NAME = "focus:tw-ring-primary-400";
 
-export default function UserPageIdentityHeaderCICRate({
-  profile,
-  isTooltip,
-  onSuccess,
-  onCancel,
-}: {
+type NicRateProps = {
   readonly profile: ApiIdentity;
   readonly isTooltip: boolean;
   readonly onSuccess?: () => void;
   readonly onCancel?: () => void;
+  readonly onBusyChange?: (busy: boolean) => void;
+  readonly locale?: SupportedLocale;
+};
+
+function UserPageIdentityHeaderCICRateForm({
+  profile,
+  isTooltip,
+  onSuccess,
+  onCancel,
+  onBusyChange,
+  ratingState,
+  locale = DEFAULT_LOCALE,
+}: NicRateProps & {
+  readonly ratingState: ReturnType<typeof useNicRatingState>;
 }) {
   const { address } = useSeizeConnectContext();
+  const inputId = useId();
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      onBusyChange?.(false);
+    };
+  }, [onBusyChange]);
+  const profileIdentity = profile.query ?? profile.handle ?? profile.display;
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
 
   const { onProfileCICModify } = useContext(ReactQueryWrapperContext);
 
-  const { data: currentCICState } = useQuery<ApiProfileRaterCicState>({
-    queryKey: [
-      QueryKey.PROFILE_RATER_CIC_STATE,
-      {
-        handle: profile?.handle?.toLowerCase(),
-        rater: activeProfileProxy?.created_by.handle ?? address?.toLowerCase(),
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<ApiProfileRaterCicState>({
-        endpoint: `profiles/${profile.query}/cic/rating/${
-          activeProfileProxy?.created_by.handle ?? address?.toLowerCase()
-        }`,
-      }),
-    enabled: !!address,
-    staleTime: 0,
-  });
+  const { data: currentCICState, isError, isFetching, refetch } = ratingState;
 
   const [mutating, setMutating] = useState<boolean>(false);
+  const setBusy = (busy: boolean) => {
+    setMutating(busy);
+    onBusyChange?.(busy);
+  };
 
   const updateCICMutation = useMutation({
     mutationFn: async (amount: number) => {
-      setMutating(true);
+      setBusy(true);
       return await commonApiPost({
-        endpoint: `profiles/${profile.query}/cic/rating`,
+        endpoint: `profiles/${encodeURIComponent(profileIdentity)}/cic/rating`,
         body: {
           amount,
         },
@@ -72,11 +81,11 @@ export default function UserPageIdentityHeaderCICRate({
     },
     onSuccess: () => {
       setToast({
-        message: "NIC rating updated.",
+        message: t(locale, "user.rate.updated", { matter: "NIC" }),
         type: "success",
       });
-      onProfileCICModify({
-        targetProfile: profile,
+      void onProfileCICModify({
+        targetProfiles: [profile],
         connectedProfile: connectedProfile ?? null,
         rater:
           activeProfileProxy?.created_by.handle ??
@@ -86,16 +95,8 @@ export default function UserPageIdentityHeaderCICRate({
       });
       onSuccess?.();
     },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: "Couldn't update this NIC rating.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    },
     onSettled: () => {
-      setMutating(false);
+      setBusy(false);
     },
   });
 
@@ -114,7 +115,7 @@ export default function UserPageIdentityHeaderCICRate({
 
   const [proxyAvailableCredit, setProxyAvailableCredit] = useState<
     number | null
-  >(getProxyAvailableCredit());
+  >(() => getProxyAvailableCredit());
 
   useEffect(
     () => setProxyAvailableCredit(getProxyAvailableCredit()),
@@ -160,67 +161,68 @@ export default function UserPageIdentityHeaderCICRate({
   const [minMaxValues, setMinMaxValues] = useState<{
     readonly min: number;
     readonly max: number;
-  }>(getMinMaxValues());
+  }>(() => getMinMaxValues());
 
   useEffect(
     () => setMinMaxValues(getMinMaxValues()),
     [currentCICState, proxyAvailableCredit]
   );
 
-  const [originalRating, setOriginalRating] = useState<number>(
-    currentCICState?.cic_rating_by_rater ?? 0
-  );
-
-  const [adjustedRatingStr, setAdjustedRatingStr] = useState<string>(
-    `${originalRating}`
-  );
-
-  useEffect(() => {
-    setOriginalRating(currentCICState?.cic_rating_by_rater ?? 0);
-    setAdjustedRatingStr(`${currentCICState?.cic_rating_by_rater ?? 0}`);
-  }, [currentCICState]);
+  const originalRating = currentCICState?.cic_rating_by_rater ?? 0;
+  const [draftRating, setDraftRating] = useState<string | null>(null);
+  const adjustedRatingStr = draftRating ?? String(originalRating);
+  const isUnavailable = !currentCICState || isError;
 
   const newRating = getStringAsNumberOrZero(adjustedRatingStr);
   const haveChanged = newRating !== originalRating;
   const isProxy = !!activeProfileProxy;
   const isValidValue =
-    isProxy || (newRating >= minMaxValues.min && newRating <= minMaxValues.max);
-  const isSaveDisabled = !haveChanged || !isValidValue;
+    isRatingValue(adjustedRatingStr) &&
+    (isProxy ||
+      (newRating >= minMaxValues.min && newRating <= minMaxValues.max));
+  const isSaveDisabled = isUnavailable || !haveChanged || !isValidValue;
 
-  const onSave = async () => {
-    const { success } = await requestAuth();
-    if (!success) {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (mutating || isSaveDisabled) return;
+    setBusy(true);
+    try {
+      const { success } = await requestAuth();
+      if (!mounted.current) return;
+      if (!success) {
+        setToast({
+          message: t(locale, "user.rate.loginRequired"),
+          type: "error",
+        });
+        return;
+      }
+      await updateCICMutation.mutateAsync(newRating);
+    } catch (error) {
       setToast({
-        message: "Log in to continue.",
         type: "error",
+        title: t(locale, "user.rate.updateError"),
+        description: t(locale, "user.rate.tryAgain"),
+        details: getToastErrorDetails(error),
       });
-      return;
+    } finally {
+      setBusy(false);
     }
-    if (!haveChanged || !isValidValue) {
-      return;
-    }
-
-    await updateCICMutation.mutateAsync(newRating);
-  };
-
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    await onSave();
   };
 
   const rateInput = (
     <div
-      className={`tw-relative tw-flex tw-w-full ${
-        isTooltip ? "tw-mt-2 sm:tw-max-w-[12rem]" : "tw-mt-2"
+      className={`tw-relative tw-flex tw-w-full tw-min-w-0 ${
+        isTooltip ? "tw-flex-1" : "tw-mt-2"
       }`}
     >
       <UserPageRateInput
-        value={adjustedRatingStr}
-        onChange={setAdjustedRatingStr}
+        value={currentCICState ? adjustedRatingStr : ""}
+        onChange={setDraftRating}
         minMax={minMaxValues}
         isProxy={isProxy}
-        variant={isTooltip ? "compact" : "form"}
-        inputId="nic-rating-input"
+        variant={isTooltip ? "tooltip" : "form"}
+        inputId={inputId}
+        readOnly={isUnavailable}
         focusRingClassName={CIC_FOCUS_RING_CLASS_NAME}
         required
       />
@@ -247,73 +249,106 @@ export default function UserPageIdentityHeaderCICRate({
           currentCICState?.cic_ratings_left_to_give_by_rater ?? 0
         }
       />
-      <form onSubmit={onSubmit} className="tw-mt-6">
+      {isError && (
+        <div role="alert" className="tw-mt-3 tw-text-sm tw-text-iron-300">
+          <p>{t(locale, "user.rate.loadError")}</p>
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={isFetching}
+            onClick={() => {
+              void refetch();
+            }}
+          >
+            {t(locale, "user.rate.retry")}
+          </Button>
+        </div>
+      )}
+      {!currentCICState && !isError && (
+        <output className="tw-sr-only">{t(locale, "user.rate.loading")}</output>
+      )}
+      <form
+        aria-busy={!currentCICState && !isError}
+        onSubmit={onSubmit}
+        className="tw-mt-6"
+      >
         {isTooltip ? (
           <>
-            <div className="tw-flex tw-flex-col tw-items-stretch tw-gap-3 sm:tw-flex-row sm:tw-items-end">
-              <div className="tw-min-w-0 tw-flex-1">
-                <label
-                  htmlFor="nic-rating-input"
-                  className="tw-block tw-text-sm tw-font-normal tw-text-iron-400 sm:tw-max-w-[12rem]"
-                >
-                  Your total NIC Rating of{" "}
-                  <span className="[overflow-wrap:anywhere]">
-                    {profile.query}:
-                  </span>
-                </label>
-                {rateInput}
-              </div>
-              <div className="tw-w-full tw-flex-shrink-0 sm:tw-w-auto">
-                <div className="tw-inline-flex tw-w-full tw-items-end tw-space-x-6 sm:tw-w-auto">
-                  <Button
-                    type="submit"
-                    disabled={isSaveDisabled}
-                    loading={mutating}
-                    variant="success"
-                    size="xl"
-                    fullWidth
-                    className="sm:tw-w-auto"
-                  >
-                    Rate
-                  </Button>
-                </div>
-              </div>
+            <label
+              htmlFor={inputId}
+              className="tw-block tw-text-sm tw-font-normal tw-text-iron-400 [overflow-wrap:anywhere]"
+            >
+              {t(locale, "user.rate.nic.label", { profile: profileIdentity })}
+            </label>
+            <div className="tw-mt-2 tw-flex tw-items-stretch tw-gap-3">
+              {rateInput}
+              <Button
+                type="submit"
+                disabled={isSaveDisabled}
+                loading={mutating}
+                variant="success"
+                size="md"
+                className="tw-shrink-0 !tw-text-xs touch-only:tw-h-11"
+              >
+                {t(locale, "user.rate.submit")}
+              </Button>
             </div>
             {adjustmentHelper}
           </>
         ) : (
           <>
             <label
-              htmlFor="nic-rating-input"
+              htmlFor={inputId}
               className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
             >
-              Your total NIC Rating of{" "}
-              <span className="tw-whitespace-nowrap">{profile.query}</span>
+              {tRich(locale, "user.rate.nic.label", {
+                profile: (
+                  <span key="profile" className="tw-break-all">
+                    {profileIdentity}
+                  </span>
+                ),
+              })}
             </label>
+            <p className="tw-text-xs tw-text-iron-400">
+              {t(locale, "user.rate.totalHelp")}
+            </p>
             {rateInput}
 
             {adjustmentHelper}
 
-            <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1">
+            <div className="tw-mt-7 tw-flex tw-justify-end tw-gap-3">
+              {onCancel && (
+                <Button
+                  onClick={onCancel}
+                  disabled={mutating}
+                  variant="ghost"
+                  size="lg"
+                >
+                  {t(locale, "user.rate.cancel")}
+                </Button>
+              )}
               <Button
                 type="submit"
                 disabled={isSaveDisabled}
                 loading={mutating}
                 variant="success"
-                size="xl"
-                fullWidth
+                size="lg"
               >
-                Rate
+                {t(locale, "user.rate.save")}
               </Button>
-              {onCancel && (
-                <Button onClick={onCancel} variant="ghost" size="lg" fullWidth>
-                  Cancel
-                </Button>
-              )}
             </div>
           </>
         )}
       </form>
     </div>
+  );
+}
+
+export default function UserPageIdentityHeaderCICRate(props: NicRateProps) {
+  const identity =
+    props.profile.query ?? props.profile.handle ?? props.profile.display;
+  const ratingState = useNicRatingState(identity);
+  return (
+    <UserPageIdentityHeaderCICRateForm {...props} ratingState={ratingState} />
   );
 }

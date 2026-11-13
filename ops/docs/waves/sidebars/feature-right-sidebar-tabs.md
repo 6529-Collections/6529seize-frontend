@@ -9,28 +9,42 @@ dismissible panel over the current wave view.
 ## Location in the Site
 
 Wave threads on `/waves/{waveId}` and `/messages/{waveId}`, including selected
-competition routes.
+decision routes.
 
 ## Entry Points
 
 Select the wave name to open **About**. Desktop also provides **Show right
 sidebar**. About includes the creator, creation date, share control, and current
 pinned drop with its content and media. Eligible viewers can add or edit REP.
+Pinned storms keep their reactions clearly separated from the part navigation.
+
+Header search, clock, and sidebar toggles use transparent, borderless icon
+buttons with a dark hover surface and visible blue keyboard focus. The open
+sidebar toggle stays blue. Create wave and Join keep white primary styling;
+Joined and other secondary actions retain their borders and dark surfaces.
 
 ## User Journey
 
 1. Open a wave and select its name.
 2. Read About or switch to REP or Configuration.
 3. On mobile, swipe down from the handle or header, select Close, tap outside,
-   press Escape, or use Back to return to the original view. The competition,
+   press Escape, or use Back to return to the original view. The decision,
    tab, curation, scroll and unfinished input remain in place.
 
 ## Common Scenarios
 
 - The section order is About, REP, Configuration. Desktop and mobile use the
   same compact pill styling for these sections.
+- In REP, summary labels and values use matching text sizes, and Your REP,
+  Positive, and Negative sit in separate subtle cells. Contributors and Activity
+  use pill buttons. Category search filters categories; select one to view its
+  contributors.
 - Configuration owns wave access, chat availability, links, slow mode, replies,
   curation management, chat history deletion and personal display preferences.
+- Chat setting rows use spacing without individual divider lines; section
+  dividers remain. Empty Guidelines has no extra line below its heading.
+  Boosted-drop display choices have a borderless container and quiet dark
+  unselected options; the selected option keeps its blue indication.
 - Shared changes use administrator gear controls. Personal controls retain their
   own authentication requirements.
 - On mobile, configuration gears open their editor inside the information
@@ -49,7 +63,7 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
   Configuration.
 - On tablet-sized layouts, the overlay side panel also keeps these editors
   inside the panel. Back or Escape returns to the selected information tab.
-- Competition access, rules, appearance and pauses belong to **Settings** in the
+- Decision access, rules, appearance and pauses belong to **Settings** in the
   main row. Voter lists and vote activity belong to **Votes**.
 - Information tabs support ArrowLeft, ArrowRight, Home and End. Mobile confines
   focus to the open panel and returns focus to its opener when it closes.
@@ -59,13 +73,13 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
 ## Edge Cases
 
 - A section that becomes unavailable falls back to About.
-- Opening information does not change the wave route or selected competition.
+- Opening information does not change the wave route or selected decision.
 - Missing wave data prevents the information content from rendering.
 
 ## Failure and Recovery
 
 Close the panel and reopen it after reloading the wave if wave information could
-not load. Competition-resource errors can be retried in their own main view.
+not load. Decision-resource errors can be retried in their own main view.
 
 ## Limitations / Notes
 
@@ -84,5 +98,5 @@ back to en-US. Legacy rule and voting-unit values retain English domain labels.
 - [Wave Right Sidebar Trending Drops](feature-right-sidebar-trending-drops.md)
 - [Wave Right Sidebar Group and Curation Management](feature-right-sidebar-group-management.md)
 - [Wave Content Tabs](../chat/feature-content-tabs.md)
-- [Wave Leaderboard Decision Timeline](../leaderboard/feature-decision-timeline.md)
+- [Wave Leaderboard Results Timeline](../leaderboard/feature-decision-timeline.md)
 - [Docs Home](../../README.md)

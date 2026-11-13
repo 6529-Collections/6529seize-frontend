@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import Link from "next/link";
 import BrainLeftSidebarWaveDropTime from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "@/components/brain/left-sidebar/waves/BrainLeftSidebarWavePin";
+import { PinnedWaveLinkContext } from "@/components/brain/left-sidebar/waves/PinnedWaveLinkContext";
 import {
   SidebarParentSubwaveConnector,
   SidebarSubwaveConnector,
@@ -34,6 +35,7 @@ interface ExpandedWaveProps {
   readonly latestDropTimestamp?: number | null | undefined;
   readonly nameRef: RefObject<HTMLDivElement | null>;
   readonly onMouseEnter?: (() => void) | undefined;
+  readonly onMouseLeave?: (() => void) | undefined;
   readonly onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
   readonly showExpandedTooltip: boolean;
   readonly showPin: boolean;
@@ -62,6 +64,7 @@ export const ExpandedWave = ({
   latestDropTimestamp,
   nameRef,
   onMouseEnter,
+  onMouseLeave,
   onClick,
   showExpandedTooltip,
   showPin,
@@ -77,6 +80,7 @@ export const ExpandedWave = ({
   showSubwaveConnector = false,
   onPrefetchSubwaves,
 }: ExpandedWaveProps) => {
+  const pinnedLinkProps = useContext(PinnedWaveLinkContext);
   const tooltipAttributes = showExpandedTooltip
     ? {
         "data-tooltip-id": tooltipId,
@@ -148,12 +152,17 @@ export const ExpandedWave = ({
     onMouseEnter?.();
   }, [onMouseEnter, scheduleSubwavePrefetch]);
 
+  const handleRowMouseLeave = useCallback(() => {
+    cancelSubwavePrefetch();
+    onMouseLeave?.();
+  }, [cancelSubwavePrefetch, onMouseLeave]);
+
   useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
 
   return (
     <div
       onMouseEnter={handleRowMouseEnter}
-      onMouseLeave={cancelSubwavePrefetch}
+      onMouseLeave={handleRowMouseLeave}
       role="group"
       className={`tw-group tw-relative tw-flex tw-items-center ${rowHeightClasses} ${rowGapClasses} ${rowPaddingClasses} ${rowVerticalPaddingClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
         isActive
@@ -206,6 +215,7 @@ export const ExpandedWave = ({
             >
               <div className="-tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
                 <Link
+                  {...pinnedLinkProps}
                   href={href}
                   prefetch={false}
                   onClick={onClick}

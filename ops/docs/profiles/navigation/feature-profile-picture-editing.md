@@ -8,7 +8,8 @@ The editor supports one source at a time:
 - one selected meme
 - one uploaded image file
 
-This flow is separate from banner editing.
+Desktop includes this field alongside the other profile fields. Smaller layouts
+keep the individual picture editor.
 
 ## Location in the Site
 
@@ -23,20 +24,26 @@ This flow is separate from banner editing.
   - the profile has a handle
   - you are viewing your own profile
   - no active profile proxy context
-- On smaller and touch-first layouts, use `Edit profile` and choose
+- On desktop, choose `Edit` beside `Preferences` and use the `Profile picture`
+  section in the combined profile editor.
+- On smaller layouts, use the circular `Edit profile` button and choose
   `Profile picture`.
-- On fine-pointer desktop layouts, use the avatar edit control
-  (`Edit profile picture`).
 
 ## User Journey
 
-1. Open your own profile and use the desktop avatar edit control, or choose
+1. Open your own profile and choose `Edit` on desktop, or
    `Edit profile` -> `Profile picture` on a smaller layout.
-2. The modal opens. If you already have a profile picture, the upload panel shows its preview.
+2. The modal opens. A saved or selected profile picture appears inside the
+   `Upload image` area, below Meme search, without a separate preview row.
 3. Choose one source:
-   - `Select Meme`: search and click a meme row.
-   - `Upload`: click to choose a file or drag and drop a file.
-4. Click `Save PFP`.
+   - `Select Meme` search is visible immediately above the upload control,
+     separated by `or`. Desktop and smaller layouts use the same compact field.
+   - On desktop, you can start typing while the Meme list loads; results use
+     the text you have already entered when they arrive.
+   - `Upload image` supports choosing a file or dragging and dropping it.
+     Both choices stay available after selecting an image, so you can switch sources.
+4. Click `Save` on desktop (which also saves other changed profile fields), or
+   `Save PFP` in the individual picture editor.
 5. On success, a `Profile updated` toast appears, the modal closes, and the
    header image refreshes.
 
@@ -45,27 +52,36 @@ This flow is separate from banner editing.
 - Meme search matches case-insensitive `#<id> <name>` text.
 - Selecting a meme clears any selected file.
 - Selecting a file clears any selected meme.
-- `Save PFP` is disabled until at least one valid source is selected.
+- The individual editor keeps `Save PFP` disabled until a source is selected.
+  Desktop enables `Save` when any profile field has a pending valid change.
 - Upload accepts `JPEG`, `JPG`, `PNG`, `GIF`, and `WEBP`.
 - While dragging a file over the upload area, the drop target highlights.
-- `Cancel` closes the modal when save is not in progress.
+- On desktop, closing with unsaved changes asks whether to discard them.
+  The individual picture editor retains its existing `Cancel` action.
 
 ## Edge Cases
 
 - If meme search has no matches, the dropdown opens with no rows.
-- If the meme list request is unavailable, `Select Meme` opens with no rows.
+- Desktop announces Meme loading and offers `Try again` if the list fails.
+  In the smaller individual editor, an unavailable list opens with no rows.
 - If an unsupported file type is chosen, users see `Invalid file type`.
 - If a local file exceeds 2MB, the upload panel shows:
   `File size must be less than 2MB`.
 - The file picker resets after each attempt, so users can select the same file
   again.
-- While save is running, `Cancel` is disabled and `Save PFP` shows a spinner.
-- While save is running, backdrop click, outside-click, and `Escape` can still
-  close the modal while the request continues.
+- While saving, action buttons show progress and prevent duplicate submission.
+  Desktop also disables close actions. The smaller individual editor retains
+  its existing backdrop and Escape dismissal behavior.
 
 ## Failure and Recovery
 
-- If authentication fails at save time, users see:
+- Desktop failures keep unsaved changes in the dialog with an error. If a
+  selected Meme already saved before another field failed, retry preserves it
+  and saves only the remaining changes.
+
+### Individual Picture Editor
+
+- Failed authentication shows:
   `You must be logged in to save settings`.
 - If no source is selected at save time, users see:
   `You must select an image`.
@@ -77,8 +93,8 @@ This flow is separate from banner editing.
   `Image is too large; max 2MB.`
 - For other upload/save failures, users see either the returned error or:
   `Upload failed. Please try again.`
-- After a failed save, the modal stays open so users can retry (unless they
-  already closed it with backdrop click or `Escape`).
+- After a failed save, the editor stays open for retry. The smaller individual
+  editor can still be dismissed with backdrop click or `Escape`.
 
 ## Limitations / Notes
 
@@ -87,6 +103,12 @@ This flow is separate from banner editing.
 - The editor supports one source at a time (meme or uploaded file).
 - The modal does not include crop or transform controls.
 - Maximum upload size is 2MB.
+- Uploaded files go to the 6529 API, which checks the file's contents and
+  pins the image on IPFS. A file whose contents are not a PNG, JPEG, GIF or
+  WebP image is rejected whatever its name, and the editor shows the server's
+  message.
+- Identifying metadata such as location, camera details and capture time is
+  removed from an uploaded picture before it is pinned.
 
 ## Related Pages
 

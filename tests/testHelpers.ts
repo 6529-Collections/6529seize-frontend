@@ -14,11 +14,17 @@ const STAGING_HOSTNAME = "staging.6529.io";
 const STAGING_ACCESS_COOKIE_NAME = "x-6529-auth";
 const STAGING_ACCESS_CODE =
   process.env["PLAYWRIGHT_STAGING_ACCESS_CODE"] ?? process.env["STAGING_AUTH"];
-const ACCESS_INPUT_SELECTOR =
-  'input[aria-label="Team access code"], input[placeholder="Team Login"]';
 type PageGoto = (...args: Parameters<Page["goto"]>) => ReturnType<Page["goto"]>;
 
-async function installStagingAccessUnlock(page: Page) {
+function getAccessCodeInput(page: Page) {
+  return page
+    .getByLabel(/^(Team Login|Team access code)$/)
+    .or(page.getByPlaceholder("Team Login", { exact: true }))
+    .first();
+}
+
+/** Unlocks the staging access gate on navigation; for extra pages too. */
+export async function installStagingAccessUnlock(page: Page) {
   const originalGoto = page.goto.bind(page) as PageGoto;
   const gotoWithAccessUnlock: PageGoto = async (...args) => {
     const response = await originalGoto(...args);
@@ -37,7 +43,8 @@ async function installStagingAccessUnlock(page: Page) {
   page.goto = gotoWithAccessUnlock as Page["goto"];
 }
 
-async function seedStagingAccessCookie(
+/** Seeds the staging access cookie; for contexts a spec creates itself. */
+export async function seedStagingAccessCookie(
   context: BrowserContext,
   baseURL?: string
 ) {
@@ -72,19 +79,11 @@ async function submitStagingAccess(page: Page, goto: PageGoto) {
     );
   }
 
-  const accessInput = page.locator(ACCESS_INPUT_SELECTOR).first();
+  const accessInput = getAccessCodeInput(page);
 
   await accessInput.waitFor({ state: "visible", timeout: 5000 });
   await accessInput.fill(STAGING_ACCESS_CODE);
-  const loginDialog = page
-    .waitForEvent("dialog", { timeout: 10000 })
-    .then(async (dialog) => {
-      await dialog.accept();
-    })
-    .catch(() => undefined);
-
   await accessInput.press("Enter");
-  await loginDialog;
   await page
     .waitForURL((url) => !isAccessPath(url), { timeout: 10000 })
     .catch(() => undefined);
@@ -127,9 +126,7 @@ async function isAccessGateVisible(page: Page) {
     return true;
   }
 
-  return page
-    .locator(ACCESS_INPUT_SELECTOR)
-    .first()
+  return getAccessCodeInput(page)
     .isVisible({ timeout: 500 })
     .catch(() => false);
 }

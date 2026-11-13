@@ -1,6 +1,19 @@
 import { ARWEAVE_GATEWAY_CSP_SOURCES } from "../lib/media/arweave-gateways";
-import { getMediaResolverSource } from "../lib/media/decentralized-media";
+import {
+  USER_CONTENT_CSP_SOURCES,
+  getMediaResolverSource,
+} from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_CSP_SOURCES } from "../lib/media/ipfs-gateways";
+import { PRODUCTION_ASSET_PREFIX } from "./assetPrefix";
+import { SENTRY_INGEST_HOSTNAME_PATTERN } from "./sentryIngest";
+
+/**
+ * The only scripts the asset CDN serves to this app are the build's
+ * `_next/static` files under the shared production prefix. The trailing slash
+ * makes the source a path prefix, so other paths on the CDN host (archived
+ * WordPress uploads, release metadata) cannot run as script.
+ */
+const PRODUCTION_SCRIPT_ASSET_SOURCE = `${PRODUCTION_ASSET_PREFIX}/_next/static/`;
 
 function isLocalhostHostname(hostname: string): boolean {
   return (
@@ -57,6 +70,41 @@ function getConfiguredIpfsGatewaySource(
   return getConfiguredConnectSource(ipfsGatewayEndpoint);
 }
 
+// The DSN key, hostname and project id are validated so a malformed DSN can
+// never inject extra directives or headers into the generated values. Only
+// Sentry's hosted ingest hosts are accepted; the read-only E2E guard ignores
+// CSP report POSTs to exactly those hosts (see config/sentryIngest.ts).
+const SENTRY_PUBLIC_KEY_PATTERN = /^[A-Za-z0-9]{16,64}$/;
+const SENTRY_PROJECT_PATH_PATTERN = /^\/(\d+)$/;
+const CSP_REPORT_GROUP = "csp-endpoint";
+
+// Browsers post CSP violation reports straight to Sentry's security endpoint,
+// derived from the public DSN, so reporting does not depend on this app being
+// reachable. Returns an empty string when the DSN is missing or unusable.
+function getSentrySecurityReportEndpoint(dsn: string | undefined): string {
+  if (!dsn) {
+    return "";
+  }
+
+  try {
+    const parsedUrl = new URL(dsn);
+    const projectId = SENTRY_PROJECT_PATH_PATTERN.exec(parsedUrl.pathname)?.[1];
+    if (
+      parsedUrl.protocol !== "https:" ||
+      parsedUrl.port !== "" ||
+      !projectId ||
+      !SENTRY_PUBLIC_KEY_PATTERN.test(parsedUrl.username) ||
+      !SENTRY_INGEST_HOSTNAME_PATTERN.test(parsedUrl.hostname)
+    ) {
+      return "";
+    }
+
+    return `https://${parsedUrl.hostname}/api/${projectId}/security/?sentry_key=${parsedUrl.username}`;
+  } catch {
+    return "";
+  }
+}
+
 function joinSources(sources: Array<string | false | undefined>): string {
   return sources.filter(Boolean).join(" ");
 }
@@ -71,7 +119,14 @@ function cspDirective(
 interface SecurityHeaderOptions {
   readonly allowInsecureLocalhostConnectSrc?: boolean | undefined;
   readonly allowUnsafeEval?: boolean | undefined;
+  /**
+   * Allow WebAssembly compilation (`'wasm-unsafe-eval'`) without allowing
+   * JavaScript eval. Only the end-to-end encrypted messages build (D109)
+   * needs it, for the MLS WebAssembly module.
+   */
+  readonly allowWasmUnsafeEval?: boolean | undefined;
   readonly webSocketEndpoint?: string | undefined;
+  readonly sentryDsn?: string | undefined;
 }
 
 export function createSecurityHeaders(
@@ -89,10 +144,18 @@ export function createSecurityHeaders(
     options.webSocketEndpoint,
     options.allowInsecureLocalhostConnectSrc
   );
+  const cspReportEndpoint = getSentrySecurityReportEndpoint(options.sentryDsn);
   const ipfsGatewaySources = IPFS_GATEWAY_CSP_SOURCES.join(" ");
   const mediaResolverSource = getMediaResolverSource(mediaResolverEndpoint);
   const configuredIpfsGatewaySource =
     getConfiguredIpfsGatewaySource(ipfsGatewayEndpoint);
+  // User-provided media may be served from the separate content domain (its
+  // path host and one host per CID). Both domains stay allowed whichever one
+  // the resolver endpoint selects, so switching or reverting it needs no
+  // policy change.
+  const userContentSources = USER_CONTENT_CSP_SOURCES.filter(
+    (source) => source !== mediaResolverSource
+  );
   const connectSrc = [
     "'self'",
     "blob:",
@@ -111,6 +174,7 @@ export function createSecurityHeaders(
     "https://*.google-analytics.com",
     "https://cloudflare-eth.com/",
     mediaResolverSource,
+    ...userContentSources,
     ...arweaveGatewaySources,
     ipfsGatewaySources,
     "https://rpc.walletconnect.com/v1/",
@@ -136,7 +200,10 @@ export function createSecurityHeaders(
     "https://6529-artwork-documentation-987989283142-us-east-1.s3.us-east-1.amazonaws.com",
     "https://*.cloudfront.net",
     "https://videos.files.wordpress.com",
+    // OpenSea NFT previews use the original video while processing is pending.
+    "https://i2c.seadn.io",
     mediaResolverSource,
+    ...userContentSources,
     ...arweaveGatewaySources,
     ipfsGatewaySources,
     configuredIpfsGatewaySource,
@@ -147,6 +214,7 @@ export function createSecurityHeaders(
   const frameSrc = [
     "'self'",
     mediaResolverSource,
+    ...userContentSources,
     "https://ipfs.io",
     "https://ipfs.io/ipfs/",
     configuredIpfsGatewaySource,
@@ -163,14 +231,14 @@ export function createSecurityHeaders(
     "https://verify.walletconnect.org",
     "https://secure.walletconnect.com",
     "https://d3lqz0a4bldqgf.cloudfront.net",
-    "https://www.youtube.com",
+    // Link-preview video embeds use youtube-nocookie.com; www.youtube.com is the
+    // only other host the client-side embed allowlist accepts.
     "https://www.youtube-nocookie.com",
-    "https://*.youtube.com",
+    "https://www.youtube.com",
     "https://artblocks.io",
     "https://*.artblocks.io",
+    // Google Workspace link previews only embed docs.google.com preview pages.
     "https://docs.google.com",
-    "https://drive.google.com",
-    "https://*.google.com",
   ];
   const contentSecurityPolicy = [
     cspDirective("default-src", ["'none'"]),
@@ -179,13 +247,16 @@ export function createSecurityHeaders(
       // Next.js bootstrap scripts, the consent-gated GA snippet, and imported
       // legacy WordPress pages still rely on inline script execution.
       "'unsafe-inline'",
-      "https://dnclu2fna0b2b.cloudfront.net",
+      PRODUCTION_SCRIPT_ASSET_SOURCE,
       "https://www.google-analytics.com",
       "https://www.googletagmanager.com",
       "https://dataplane.rum.us-east-1.amazonaws.com",
       // Keep eval available for local/dev tooling only; production dependencies
       // in this app do not require eval-like script execution.
       options.allowUnsafeEval && "'unsafe-eval'",
+      // Encrypted messages compile an MLS WebAssembly module; this keyword
+      // permits WebAssembly compilation only, not JavaScript eval.
+      options.allowWasmUnsafeEval && "'wasm-unsafe-eval'",
     ]),
     cspDirective("connect-src", connectSrc),
     cspDirective("font-src", [
@@ -198,6 +269,8 @@ export function createSecurityHeaders(
     ]),
     cspDirective("img-src", imgSrc),
     cspDirective("media-src", mediaSrc),
+    // default-src is 'none', which would otherwise block the web app manifest.
+    cspDirective("manifest-src", ["'self'"]),
     cspDirective("frame-src", frameSrc),
     cspDirective("style-src", [
       "'self'",
@@ -210,6 +283,17 @@ export function createSecurityHeaders(
       "https://cdn.jsdelivr.net",
     ]),
     cspDirective("object-src", ["'none'"]),
+    // No <base> tags and no cross-origin native form posts exist in the app, and
+    // framing is already same-origin only (see X-Frame-Options below).
+    cspDirective("base-uri", ["'self'"]),
+    cspDirective("form-action", ["'self'"]),
+    cspDirective("frame-ancestors", ["'self'"]),
+    ...(cspReportEndpoint
+      ? [
+          cspDirective("report-uri", [cspReportEndpoint]),
+          cspDirective("report-to", [CSP_REPORT_GROUP]),
+        ]
+      : []),
   ].join(" ");
 
   return [
@@ -221,6 +305,23 @@ export function createSecurityHeaders(
       key: "Content-Security-Policy",
       value: contentSecurityPolicy,
     },
+    ...(cspReportEndpoint
+      ? [
+          {
+            key: "Reporting-Endpoints",
+            value: `${CSP_REPORT_GROUP}="${cspReportEndpoint}"`,
+          },
+        ]
+      : []),
+    // Cross-origin pages that open or are opened by this site get no window
+    // reference to it. Popups this site opens itself keep `window.opener`,
+    // which the Base Account (Coinbase) wallet popup needs to answer; its SDK
+    // only rejects `same-origin`.
+    {
+      key: "Cross-Origin-Opener-Policy",
+      value: "same-origin-allow-popups",
+    },
+    // Legacy equivalent of frame-ancestors 'self' for browsers without CSP2.
     { key: "X-Frame-Options", value: "SAMEORIGIN" },
     { key: "X-Content-Type-Options", value: "nosniff" },
     { key: "Referrer-Policy", value: "same-origin" },

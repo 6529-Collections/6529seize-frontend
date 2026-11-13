@@ -54,6 +54,10 @@ export default function UserPageCollectedFiltersSortBy({
       setSelected={setSelected}
       sortDirection={direction}
       size="sm"
+      variant="filter"
+      tabsVariant="connected"
+      connectedSize="sm"
+      fill={false}
     />
   );
 }

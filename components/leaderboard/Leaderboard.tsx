@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { NETWORK_PAGE_TITLE_CLASSES } from "@/components/network/networkPageLayoutClasses";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { MemeSeason } from "@/entities/ISeason";
@@ -151,9 +151,7 @@ export default function Leaderboard(
   }, [content, collector]);
 
   useEffect(() => {
-    fetchUrl<ApiBlocksPage>(
-      `${publicEnv.API_ENDPOINT}/api/blocks?page_size=${1}`
-    )
+    fetchUrl<ApiBlocksPage>(apiUrl(`/api/blocks?page_size=${1}`))
       .then((response) => {
         if (response.data.length > 0) {
           const latestTDH = {
@@ -170,13 +168,18 @@ export default function Leaderboard(
 
     commonApiFetch<MemeSeason[]>({
       endpoint: "new_memes_seasons",
-    }).then((response) => {
-      setSeasons(response);
-    });
+    })
+      .then((response) => {
+        setSeasons(response);
+      })
+      .catch((reason: unknown) => {
+        console.error("Failed to fetch Meme seasons", reason);
+        setSeasons([]);
+      });
   }, []);
 
   useEffect(() => {
-    let url = `${publicEnv.API_ENDPOINT}/api/tdh_global_history?page_size=${1}`;
+    const url = apiUrl(`/api/tdh_global_history?page_size=${1}`);
     fetchUrl(url)
       .then((response: DBResponse) => {
         const tdhH = response.data[0];
@@ -214,6 +217,9 @@ export default function Leaderboard(
     return (
       <div className="tw-w-fit">
         <CommonTabs
+          variant="connected"
+          connectedSize="sm"
+          connectedTypography="body"
           items={TDH_VIEW_ITEMS}
           activeItem={props.tdhView}
           setSelected={props.setTdhView}

@@ -4,11 +4,25 @@ import AppSidebar from "@/components/header/AppSidebar";
 import type AppSidebarMenuItems from "@/components/header/AppSidebarMenuItems";
 import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
 
+let mockPathname = "/about";
+jest.mock("next/navigation", () => ({ usePathname: () => mockPathname }));
+
 let headerProps: any = null;
 let connectProps: any = null;
 let mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
+
+let mockMembershipAuth = {
+  connectedProfile: null,
+  isAuthenticated: false,
+  fetchingProfile: false,
+};
+let mockConnectionState = "disconnected";
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({ connectionState: mockConnectionState }),
+}));
+
 let mockModeratorAccess = {
-  data: { moderator: false, has_open_reports: false },
+  data: { moderator: false, has_open_reports: false, needs_review_count: 0 },
 };
 
 type AppSidebarMenuItemsProps = Parameters<typeof AppSidebarMenuItems>[0];
@@ -35,15 +49,19 @@ jest.mock("@/components/header/AppUserConnect", () => (props: any) => {
 });
 
 jest.mock("@/components/app-wallets/AppWalletsContext");
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => mockMembershipAuth,
+}));
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => mockDropForgePermissions,
 }));
 jest.mock("@/hooks/content-moderation/useContentModeratorAccess", () => ({
   useContentModeratorAccess: () => mockModeratorAccess,
 }));
+let mockIsIos = false;
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => ({ isIos: true }),
+  default: () => ({ isIos: mockIsIos }),
 }));
 
 let optionalCookieConsentCountry: string | undefined = "US";
@@ -112,12 +130,58 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
     };
 
     beforeEach(() => {
+      mockMembershipAuth = {
+        connectedProfile: null,
+        isAuthenticated: false,
+        fetchingProfile: false,
+      };
+      mockConnectionState = "disconnected";
+      mockPathname = "/about";
+      (useAppWallets as jest.Mock).mockReturnValue({
+        appWalletsSupported: false,
+      });
       headerProps = menuProps = connectProps = null;
       mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
       mockModeratorAccess = {
-        data: { moderator: false, has_open_reports: false },
+        data: {
+          moderator: false,
+          has_open_reports: false,
+          needs_review_count: 0,
+        },
       };
+      mockIsIos = false;
       setCookieCountry("US");
+    });
+
+    it.each([false, true])(
+      "uses the same membership slot in native iOS and Android menus (iOS=%s)",
+      (isIos) => {
+        mockIsIos = isIos;
+        mockConnectionState = "connected";
+        mockMembershipAuth.isAuthenticated = true;
+        mockPathname = "/validator/status";
+        render(<AppSidebar open onClose={jest.fn()} />);
+        expect(
+          getMenu()
+            .slice(0, 6)
+            .map((item) => item.label)
+        ).toEqual(["NFTs", "Museum", "Waves", "DMs", "Validator", "About"]);
+        expect(getMenuItem("Validator")).toMatchObject({
+          path: "/validator",
+          pending: false,
+          active: true,
+        });
+      }
+    );
+
+    it("keeps a pending menu row during profile restoration", () => {
+      mockConnectionState = "connected";
+      mockMembershipAuth.fetchingProfile = true;
+      render(<AppSidebar open onClose={jest.fn()} />);
+      expect(getMenuItem("Join 6529")).toMatchObject({
+        path: "/join-6529",
+        pending: true,
+      });
     });
 
     it("renders the menu IA with App Wallets under About when supported and handles close", () => {
@@ -155,6 +219,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         { label: "NextGen", path: "/nextgen" },
         { label: "Meme Lab", path: "/meme-lab" },
         { label: "ReMemes", path: "/rememes" },
+        { label: "6529 Stream", path: "/stream" },
         { label: "NFT Activity", path: "/nft-activity" },
         { label: "Memes Calendar", path: "/meme-calendar" },
       ]);
@@ -280,7 +345,11 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
     it("adds WatchTower with the open-report indicator for moderators", () => {
       mockModeratorAccess = {
-        data: { moderator: true, has_open_reports: true },
+        data: {
+          moderator: true,
+          has_open_reports: false,
+          needs_review_count: 1,
+        },
       };
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,
@@ -292,7 +361,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         expect.objectContaining({
           path: "/content-moderation",
           hasIndicator: true,
-          indicatorLabel: "Open reports need review",
+          indicatorLabel: "Cases need manual review",
         })
       );
     });
@@ -303,7 +372,11 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         canAccessLanding: true,
       };
       mockModeratorAccess = {
-        data: { moderator: true, has_open_reports: false },
+        data: {
+          moderator: true,
+          has_open_reports: false,
+          needs_review_count: 0,
+        },
       };
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,
@@ -341,6 +414,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
     });
 
     it("hides subscriptions in the About submenu for restricted iOS users", () => {
+      mockIsIos = true;
       setCookieCountry("DE");
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,
@@ -362,7 +436,8 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       );
     });
 
-    it("keeps subscriptions visible when the optional consent provider is absent", () => {
+    it("hides purchase navigation on iOS without the optional consent provider", () => {
+      mockIsIos = true;
       clearOptionalCookieConsent();
       (useAppWallets as jest.Mock).mockReturnValue({
         appWalletsSupported: false,
@@ -370,8 +445,12 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
 
       render(<AppSidebar open={true} onClose={() => {}} />);
 
+      expect(getMenuChildren("NFTs")).not.toContainEqual({
+        label: "Collect",
+        path: "/collect",
+      });
       expect(flattenMenuChildren(getMenuChildren("About"))).toEqual(
-        expect.arrayContaining([
+        expect.not.arrayContaining([
           expect.objectContaining({ label: "Subscription Minting" }),
         ])
       );

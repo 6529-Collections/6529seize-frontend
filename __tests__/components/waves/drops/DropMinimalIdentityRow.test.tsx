@@ -41,7 +41,34 @@ jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
   },
 }));
 
+jest.mock("@/lib/device-signing/feature", () => ({
+  isSignedMessagesEnabled: () => true,
+}));
+// Placement only: this browser's own check is covered in
+// dropSignatureVerdicts.test.tsx, so every seal here reads as verified.
+jest.mock("@/components/waves/drops/signature/dropSignatureVerdicts", () => ({
+  useDropSealStates: (drops: readonly unknown[]) => drops.map(() => "verified"),
+  readSealState: () => "verified",
+}));
+
+jest.mock("@/components/waves/drops/signature/DropSignatureDialog", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 describe("DropMinimalIdentityRow", () => {
+  it("does not instantiate badge or tooltip components for anonymous authors", () => {
+    const drop = {
+      id: "drop",
+      created_at: 1,
+      author: { is_anonymous: true, handle: "Anonymous" },
+      wave: { id: "wave" },
+    } as React.ComponentProps<typeof DropMinimalIdentityRow>["drop"];
+    render(<DropMinimalIdentityRow drop={drop} />);
+    expect(screen.getByText("Anonymous")).toBeInTheDocument();
+    expect(screen.queryByTestId("drop-author-badges")).toBeNull();
+    expect(screen.queryByTestId("tooltip-wrapper")).toBeNull();
+  });
   const createDrop = (
     handle: string | null,
     primaryAddress: string,
@@ -122,4 +149,23 @@ describe("DropMinimalIdentityRow", () => {
       "0x1111111111111111111111111111111111111111"
     );
   });
+  it.each(["inline", "stacked", "stacked-compact"] as const)(
+    "keeps the author signed seal with the %s timestamp",
+    (timestampLayout) => {
+      render(
+        <DropMinimalIdentityRow
+          drop={{
+            ...createDrop("alice", "0xabc", ApiProfileClassification.Pseudonym),
+            is_author_signed: true,
+          }}
+          timestampLayout={timestampLayout}
+        />
+      );
+
+      expect(
+        screen.getByRole("button", { name: "Signed by its author" })
+          .parentElement
+      ).toContainElement(screen.getByTestId("wave-drop-time"));
+    }
+  );
 });

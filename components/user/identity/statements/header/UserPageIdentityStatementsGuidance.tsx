@@ -7,6 +7,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -18,9 +19,29 @@ import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
+const subscribeToHydration = () => () => undefined;
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
+const PAGE_SCROLL_KEYS = new Set([
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "PageUp",
+  "PageDown",
+  "Home",
+  "End",
+  " ",
+]);
+
 /** Keeps guidance interactions and portal visibility under one React state. */
 export default function UserPageIdentityStatementsGuidance() {
   const locale = useBrowserLocale();
+  const hydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getClientSnapshot,
+    getServerSnapshot
+  );
   const tooltipId = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [layout, setLayout] = useState<ReturnType<
@@ -28,7 +49,6 @@ export default function UserPageIdentityStatementsGuidance() {
   > | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const openingBounds = useRef<DOMRect | null>(null);
   const isPointerOverTooltip = useRef(false);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined
@@ -41,13 +61,11 @@ export default function UserPageIdentityStatementsGuidance() {
 
   const open = () => {
     cancelHide();
-    openingBounds.current = buttonRef.current?.getBoundingClientRect() ?? null;
     setIsOpen(true);
   };
 
   const close = useCallback(() => {
     cancelHide();
-    openingBounds.current = null;
     isPointerOverTooltip.current = false;
     setIsOpen(false);
   }, [cancelHide]);
@@ -93,8 +111,26 @@ export default function UserPageIdentityStatementsGuidance() {
 
   useEffect(() => {
     if (!isOpen) return;
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
+    const isInsideTooltip = (target: EventTarget | null) =>
+      target instanceof Node && tooltipRef.current?.contains(target);
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        close();
+        return;
+      }
+      // Space activates the focused help button; it is not a page-scroll
+      // gesture there. Scrolling within the guidance also keeps it open.
+      const activatesButton =
+        event.key === " " &&
+        event.target instanceof Node &&
+        buttonRef.current?.contains(event.target);
+      if (
+        PAGE_SCROLL_KEYS.has(event.key) &&
+        !activatesButton &&
+        !isInsideTooltip(event.target)
+      ) {
+        close();
+      }
     };
     const handleOutsidePointer = (event: PointerEvent) => {
       const target = event.target;
@@ -106,28 +142,26 @@ export default function UserPageIdentityStatementsGuidance() {
         close();
       }
     };
-    const handleScroll = (event: Event) => {
-      if (
-        event.target instanceof Node &&
-        tooltipRef.current?.contains(event.target)
-      )
-        return;
-      const currentBounds = buttonRef.current?.getBoundingClientRect();
-      const initialBounds = openingBounds.current;
-      // Scrolling the trigger into view can dispatch its queued scroll event
-      // after the click. Dismiss only when scrolling moves it after opening.
-      if (
-        currentBounds?.x !== initialBounds?.x ||
-        currentBounds?.y !== initialBounds?.y
-      )
-        close();
+    const handleScrollGesture = (event: Event) => {
+      if (!isInsideTooltip(event.target)) close();
     };
-    window.addEventListener("keydown", handleEscape, true);
-    window.addEventListener("scroll", handleScroll, true);
+    // Browser scroll anchoring and pending scroll-into-view can move the page
+    // after activation. Reposition for those events; dismiss on user input.
+    // Pointer-based scrollbar use is covered by outside-pointer dismissal.
+    window.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("wheel", handleScrollGesture, {
+      capture: true,
+      passive: true,
+    });
+    window.addEventListener("touchmove", handleScrollGesture, {
+      capture: true,
+      passive: true,
+    });
     document.addEventListener("pointerdown", handleOutsidePointer);
     return () => {
-      window.removeEventListener("keydown", handleEscape, true);
-      window.removeEventListener("scroll", handleScroll, true);
+      window.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("wheel", handleScrollGesture, true);
+      window.removeEventListener("touchmove", handleScrollGesture, true);
       document.removeEventListener("pointerdown", handleOutsidePointer);
     };
   }, [close, isOpen]);
@@ -137,6 +171,7 @@ export default function UserPageIdentityStatementsGuidance() {
       <button
         ref={buttonRef}
         type="button"
+        disabled={!hydrated}
         aria-label={t(locale, "user.profile.identity.statements.help")}
         aria-expanded={isOpen}
         aria-describedby={isOpen ? tooltipId : undefined}

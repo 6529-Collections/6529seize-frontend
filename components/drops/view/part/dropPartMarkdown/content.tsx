@@ -1,3 +1,4 @@
+import { MarkdownParagraph } from "@/components/markdown/MessageMarkdown";
 import type {
   ClassAttributes,
   HTMLAttributes,
@@ -25,8 +26,8 @@ import {
   hasMentionedGroup,
   markGroupMentionTokens,
 } from "@/helpers/waves/drop-group-mentions";
+import { isAllowedMarkdownImageSource } from "./imageSource";
 import { isDirectImageUrl } from "./linkUtils";
-import { normalizeDropMarkdownContent } from "./normalizeContent";
 import { isPreviewableHrefSource } from "./sourcePositions";
 import {
   DropPartMarkdownImageGroup,
@@ -74,7 +75,6 @@ interface MarkdownContentRenderers {
       HTMLAttributes<HTMLParagraphElement> &
       ExtraProps
   ) => ReactNode;
-  readonly processContent: (content: string | null) => string | null;
 }
 
 type MarkdownImageElement = ReactElement<{
@@ -156,7 +156,7 @@ const getBareImageHref = (
   elementProps: MarkdownElementProps | null
 ): string | null => {
   const href = getSmartHref(elementProps);
-  if (!href || !isDirectImageUrl(href)) {
+  if (!href || !isDirectImageUrl(href) || !isAllowedMarkdownImageSource(href)) {
     return null;
   }
 
@@ -427,16 +427,16 @@ export const createMarkdownContentRenderers = ({
       }
     }
 
+    // Reuse text nodes during rerenders so touch targets and selections survive.
     return currentContent
       .split(splitter)
       .filter((part) => part !== "")
-      .map((part): ReactNode => {
+      .map((part, partIndex): ReactNode => {
         const partProps = values[part] ?? values[part.toLowerCase()];
         if (partProps) {
-          const randomId = getRandomObjectId();
           return (
             <DropListItemContentPart
-              key={randomId}
+              key={`part-${partIndex}-${partProps.type}-${partProps.match}`}
               part={
                 partProps.type === DropContentPartType.GROUP_MENTION
                   ? { ...partProps, match: part }
@@ -448,14 +448,14 @@ export const createMarkdownContentRenderers = ({
 
         const segments = part.split(customEmojiRegex);
         return segments.map(
-          (segment): ReactNode =>
+          (segment, segmentIndex): ReactNode =>
             isCustomEmojiToken(segment) ? (
-              <Fragment key={getRandomObjectId()}>
+              <Fragment key={`emoji-${partIndex}-${segmentIndex}-${segment}`}>
                 {renderEmoji(segment, areAllPartsEmojis)}
               </Fragment>
             ) : (
               <span
-                key={getRandomObjectId()}
+                key={`text-${partIndex}-${segmentIndex}`}
                 className={areAllPartsEmojis ? "emoji-text-node" : undefined}
               >
                 {segment}
@@ -490,36 +490,17 @@ export const createMarkdownContentRenderers = ({
     const renderP = (
       paragraphParams: ClassAttributes<HTMLParagraphElement> &
         HTMLAttributes<HTMLParagraphElement> &
-        ExtraProps
+        ExtraProps,
+      paragraphKey: string
     ) => {
-      const paragraphChildren = Children.toArray(paragraphParams.children);
-      const isBlankLineParagraph =
-        paragraphChildren.length > 0 &&
-        paragraphChildren.every(
-          (child) =>
-            typeof child === "string" &&
-            child.replaceAll("\u00a0", "").trim().length === 0
-        );
-
-      if (isBlankLineParagraph) {
-        return (
-          <p
-            key={getRandomObjectId()}
-            aria-hidden="true"
-            className="word-break tw-my-1 tw-h-2 tw-leading-none"
-          >
-            {"\u00a0"}
-          </p>
-        );
-      }
-
       return (
-        <p
-          key={getRandomObjectId()}
-          className={`word-break tw-mb-1.5 tw-mt-0 tw-whitespace-pre-wrap tw-break-words tw-font-normal tw-leading-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out last:tw-mb-0 ${textSizeClass}`}
+        <MarkdownParagraph
+          key={paragraphKey}
+          textSizeClassName={textSizeClass}
+          renderText={customRenderer}
         >
-          {customRenderer(paragraphParams.children)}
-        </p>
+          {paragraphParams.children}
+        </MarkdownParagraph>
       );
     };
 
@@ -537,7 +518,12 @@ export const createMarkdownContentRenderers = ({
 
     const flushTextChunk = () => {
       if (currentTextChunk.length > 0) {
-        elements.push(renderP({ children: currentTextChunk }));
+        elements.push(
+          renderP(
+            { children: currentTextChunk },
+            `text-chunk-${elements.length}`
+          )
+        );
         currentTextChunk = [];
       }
     };
@@ -625,6 +611,5 @@ export const createMarkdownContentRenderers = ({
   return {
     customRenderer,
     renderParagraph,
-    processContent: normalizeDropMarkdownContent,
   };
 };

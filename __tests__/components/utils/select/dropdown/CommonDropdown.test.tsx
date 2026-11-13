@@ -159,17 +159,17 @@ describe("CommonDropdown", () => {
         "tw-w-full",
         "tw-py-3",
         "tw-rounded-lg",
-        "tw-bg-iron-950",
+        "tw-bg-iron-900",
         "tw-ring-inset",
-        "tw-ring-iron-800"
+        "tw-ring-white/10"
       );
       expect(screen.getByText("Test Filter:")).toHaveClass(
         "tw-font-medium",
         "tw-text-iron-500"
       );
       expect(screen.getByText("Item 1")).toHaveClass(
-        "tw-font-semibold",
-        "tw-text-iron-200"
+        "tw-font-medium",
+        "tw-text-inherit"
       );
     });
 
@@ -242,20 +242,23 @@ describe("CommonDropdown", () => {
       expect(screen.queryByTestId("dropdown-items")).not.toBeInTheDocument();
     });
 
-    it("should call setSelected when item is selected", () => {
-      const mockSetSelected = jest.fn();
-      const props = { ...defaultProps, setSelected: mockSetSelected };
+    it.each(["default", "filter"] as const)(
+      "should call setSelected when item is selected (%s)",
+      (variant) => {
+        const mockSetSelected = jest.fn();
+        const props = { ...defaultProps, setSelected: mockSetSelected };
 
-      render(<CommonDropdown {...props} />);
+        render(<CommonDropdown {...props} variant={variant} />);
 
-      // Open dropdown
-      fireEvent.click(screen.getByRole("button"));
+        // Open dropdown
+        fireEvent.click(screen.getByRole("button"));
 
-      // Select item
-      fireEvent.click(screen.getByTestId("dropdown-item-item2"));
+        // Select item
+        fireEvent.click(screen.getByTestId("dropdown-item-item2"));
 
-      expect(mockSetSelected).toHaveBeenCalledWith("value2");
-    });
+        expect(mockSetSelected).toHaveBeenCalledWith("value2");
+      }
+    );
 
     it("should close dropdown after item selection", () => {
       render(<CommonDropdown {...defaultProps} />);
@@ -292,23 +295,27 @@ describe("CommonDropdown", () => {
       render(<CommonDropdown {...defaultProps} disabled={true} />);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("tw-opacity-50", "tw-text-iron-400");
+      expect(button).toHaveClass("disabled:tw-opacity-50", "tw-text-iron-300");
     });
   });
 
   describe("theming", () => {
-    it("should apply dark theme classes by default", () => {
+    it("uses the shared dark dropdown surface by default", () => {
       render(<CommonDropdown {...defaultProps} />);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("tw-bg-iron-800", "lg:tw-bg-iron-900");
+      expect(button).toHaveClass(
+        "tw-bg-iron-900",
+        "tw-font-medium",
+        "tw-ring-white/10"
+      );
     });
 
-    it("should apply light theme classes when theme is light", () => {
+    it("keeps the shared surface for existing light-theme callers", () => {
       render(<CommonDropdown {...defaultProps} theme="light" />);
 
       const button = screen.getByRole("button");
-      expect(button).toHaveClass("tw-bg-iron-800");
+      expect(button).toHaveClass("tw-bg-iron-900");
       expect(button).not.toHaveClass("lg:tw-bg-iron-900");
     });
   });

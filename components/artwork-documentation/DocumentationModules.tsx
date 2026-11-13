@@ -41,6 +41,7 @@ import {
 import {
   DocumentationButton,
   inputClass,
+  selectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 import DocumentationValueEditor, {
@@ -534,7 +535,7 @@ function DocumentationAnswerField(
                   <label className="tw-block tw-text-sm tw-text-iron-300">
                     {msg("answerStatus")}
                     <select
-                      className={`${inputClass} tw-mt-2`}
+                      className={`${selectClass} tw-mt-2`}
                       value={status}
                       onChange={(event) =>
                         update({
@@ -655,7 +656,7 @@ function AnswerVisibility({
     <label className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
       {msg("visibility")}
       <select
-        className={`${inputClass} !tw-w-auto !tw-max-w-full !tw-py-2 !tw-text-xs`}
+        className={`${selectClass} !tw-w-auto !tw-max-w-full !tw-py-2 !tw-text-xs`}
         disabled={disabled}
         value={value}
         onChange={(event) =>

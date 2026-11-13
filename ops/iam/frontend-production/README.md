@@ -15,6 +15,14 @@ version>/`, plus the exact `web_build/current-production-version.json` object.
   workflow independently requires an exact hexadecimal Git commit SHA.
   Failed multipart uploads may be aborted; original artifacts and their bucket
   cannot be deleted. The bucket uses SSE-S3, requiring no KMS permission.
+- Create and read objects under the shared static prefix
+  `seize-web/web_build/shared/_next/static/`, and list only that prefix.
+  Uploads must send `If-None-Match` (`s3:if-none-match` must be present), so
+  the role can add new content-hashed files but cannot replace or delete one
+  that earlier builds' pages load. Listing finds the names that already exist;
+  reading their stored SHA-256 checksums (`HeadObject` with checksum mode,
+  covered by `s3:GetObject`) lets the workflow compare them with the verified
+  files before writing; see `ops/scripts/publish-shared-static-assets.cjs`.
 - Describe/create application versions for `seize app`; describe/update only
   `seizeapp-env-node22` in `us-east-1`.
 - Read and invalidate only the existing announcement distribution `EKB17CMB021J6`.
@@ -22,6 +30,12 @@ version>/`, plus the exact `web_build/current-production-version.json` object.
   Before publishing, it requires the distribution domain to match the
   announcement endpoint. A lookup, mismatch, or invalidation failure fails the
   job instead of silently claiming publication success.
+- Read, invalidate, and read invalidation status only on the production page
+  distribution `E3KTTDJUNHRYW9`, so a deployment can purge the edge cache
+  once the new release answers. It cannot change or delete the distribution.
+  Installed as policy version `v16` on 2026-11-04 (`v15` is the rollback); the
+  `PRODUCTION_PAGE_DISTRIBUTION_ID` variable has been set since then. See
+  [page edge cache](../../docs/developer/cloudfront-page-cache.md).
 - Get/pass only the existing `ec2-seize-prod` role and read its instance
   profile. Passing is limited to Elastic Beanstalk and EC2. No IAM policy,
   credential, trust, service-linked-role, or identity writes are allowed.
@@ -111,6 +125,15 @@ Deploying application code or configuration can exercise those permissions
 indirectly. Runtime role reduction and separation remain follow-up work.
 
 ## Validation and rollout
+
+Install the shared static statements before the first deploy that publishes
+to the shared prefix; without them that deploy fails before Elastic Beanstalk
+changes. Simulate, in `us-east-1`: allowed `s3:PutObject` with
+`s3:if-none-match`, `s3:GetObject`, and `s3:ListBucket` with prefix
+`web_build/shared/_next/static/`; denied `s3:PutObject` without
+`s3:if-none-match`, `s3:DeleteObject` on the shared prefix, `s3:ListBucket`
+for `web_build/` or another prefix, and writes outside the prefix. Record the
+result as an amendment in `verification.json`.
 
 `manifest.json` records compact policy hashes and the inventory source commit.
 `verification.json` records installation and read-only validation; retain live

@@ -1,6 +1,5 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import DateCountdown from "@/components/date-countdown/DateCountdown";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import ButtonLink from "@/components/utils/button/ButtonLink";
@@ -15,10 +14,9 @@ import {
   getStatusFromDates,
   useCollectionMintCount,
 } from "@/components/nextGen/nextgen_helpers";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
@@ -89,7 +87,8 @@ export function NextGenBackToCollectionPageLink(
 }
 
 export function NextGenCountdown(props: Readonly<CountdownProps>) {
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const { hideNftPurchasing, reservesNftPurchasingSpace } =
+    useNftPurchasingVisibility();
   const pathname = usePathname() || "";
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
@@ -104,16 +103,29 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
   const [collectionLoaded, setCollectionLoaded] = useState(false);
 
   useEffect(() => {
-    const url = `${publicEnv.API_ENDPOINT}/api/nextgen/merkle_roots/${props.collection.merkle_root}`;
-    fetchUrl<CollectionWithMerkle>(url).then(
-      (response: CollectionWithMerkle) => {
-        if (response) {
-          setCollection(response);
-        }
-        setCollectionLoaded(true);
-      }
+    const controller = new AbortController();
+    const url = apiUrl(
+      `/api/nextgen/merkle_roots/${props.collection.merkle_root}`
     );
-  }, [props.collection]);
+    fetchUrl<CollectionWithMerkle | null>(url, { signal: controller.signal })
+      .then((response) => {
+        if (controller.signal.aborted) {
+          return;
+        }
+        setCollection(response ?? undefined);
+        setCollectionLoaded(true);
+      })
+      .catch(() => {
+        // The allowlist type only picks the button label. If it cannot be
+        // loaded, fall back to the default "MINT" label (the link still works)
+        // instead of leaving the loading placeholder up forever.
+        if (!controller.signal.aborted) {
+          setCollection(undefined);
+          setCollectionLoaded(true);
+        }
+      });
+    return () => controller.abort();
+  }, [props.collection.merkle_root]);
 
   function getButtonLabel() {
     if (collectionLoaded) {
@@ -144,6 +156,12 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
           >
             {getButtonLabel()}
           </ButtonLink>
+        )}
+        {/* Blank space with the large button's height (size="lg" is
+            tw-min-h-11 in buttonStyles.ts) while it may still mount, so the
+            countdown card does not grow after hydration. */}
+        {!hideMintBtn && hideNftPurchasing && reservesNftPurchasingSpace && (
+          <div aria-hidden="true" className="tw-h-11" />
         )}
         <DistributionLink collection={props.collection} />
       </div>
@@ -217,8 +235,7 @@ export function NextGenPhases(props: Readonly<PhaseProps>) {
 }
 
 export default function NextGenCollectionHeader(props: Readonly<Props>) {
-  const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const collectionMintCount = useCollectionMintCount(
     props.collection.id,
     true,
@@ -278,7 +295,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
             </span>
           )}
         </div>
-        {props.show_links && (!capacitor.isIos || country === "US") && (
+        {props.show_links && !hideNftPurchasing && (
           <div className="tw-flex tw-items-center tw-justify-end tw-gap-2 tw-py-2">
             <Link
               href={

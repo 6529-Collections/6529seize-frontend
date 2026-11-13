@@ -1,7 +1,22 @@
 /** @jest-environment node */
 import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
+import { isCloudFrontOriginFacingAddress } from "@/lib/security/cloudFrontOriginFacing";
+import ranges from "@/lib/security/cloudFrontOriginFacingRanges.json";
 
 const WINDOW_MS = 60_000;
+
+/** A host inside one of the published CloudFront origin-facing networks. */
+function edgeAddress(prefixIndex: number, host: number): string {
+  const [network = ""] = (ranges.ipv4[prefixIndex] ?? "").split("/");
+  const octets = network.split(".").map(Number);
+  octets[3] = (octets[3] ?? 0) + host;
+  const address = octets.join(".");
+  // Keeps the edge cases honest if the published ranges change shape.
+  if (!isCloudFrontOriginFacingAddress(address)) {
+    throw new Error(`${address} is outside ${ranges.ipv4[prefixIndex]}`);
+  }
+  return address;
+}
 
 function requestFrom(forwardedFor?: string): Pick<Request, "headers"> {
   const headers = new Headers();
@@ -97,18 +112,93 @@ describe("createClientRateLimiter", () => {
     ).toBe(1);
   });
 
+  it("buckets every spelling of an IPv4-mapped address with its IPv4 address", () => {
+    const enforce = createLimiter(1);
+
+    expect(
+      allowedCount(enforce, [
+        "8.8.8.8",
+        "::ffff:8.8.8.8",
+        "0:0:0:0:0:ffff:8.8.8.8",
+        "0000:0000:0000:0000:0000:ffff:8.8.8.8",
+        "::FFFF:8.8.8.8",
+        "0:0:0:0:0:FfFf:8.8.8.8",
+        "0000:0000:0000:0000:0000:FFFF:0808:0808",
+        "0:0::ffff:8.8.8.8",
+      ])
+    ).toBe(1);
+  });
+
+  it("does not merge distinct IPv4 addresses behind mapped spellings", () => {
+    const enforce = createLimiter(1);
+
+    expect(
+      allowedCount(enforce, [
+        "::ffff:8.8.8.8",
+        "0:0:0:0:0:ffff:8.8.4.4",
+        "0000:0000:0000:0000:0000:ffff:0101:0101",
+      ])
+    ).toBe(3);
+  });
+
+  it("skips mapped private and loopback IPv4 hops in every spelling", () => {
+    const enforce = createLimiter(1);
+
+    expect(
+      allowedCount(enforce, [
+        "8.8.8.8, ::ffff:10.0.0.1",
+        "8.8.8.8, 0:0:0:0:0:ffff:127.0.0.1",
+        "8.8.8.8, 0000:0000:0000:0000:0000:ffff:c0a8:0101",
+        "8.8.8.8, ::FFFF:169.254.169.254",
+      ])
+    ).toBe(1);
+  });
+
+  it("buckets IPv6 addresses with a dotted tail by their /64", () => {
+    const enforce = createLimiter(1);
+
+    expect(
+      allowedCount(enforce, [
+        "2a00:1450:0:0:0:0:8.8.8.8",
+        "2A00:1450::808:808",
+        "2a00:1450:0000:0000:ffff:ffff:1.2.3.4",
+      ])
+    ).toBe(1);
+  });
+
+  it("treats a dotted quad anywhere but the final group as unidentified", () => {
+    const enforce = createLimiter(1);
+    const malformed = [
+      "1.2.3.4::1",
+      "::1.2.3.4:5",
+      "1:2:3:4:1.2.3.4:6:7",
+      "::ffff:1.2.3",
+      "::ffff:01.2.3.4",
+    ];
+
+    // Malformed spellings share the larger unidentified budget (10x) rather
+    // than getting a bucket of their own, and they never reach a public one.
+    expect(allowedCount(enforce, [...malformed, ...malformed])).toBe(10);
+    expect(enforce(requestFrom(malformed[0]))?.status).toBe(429);
+    expect(enforce(requestFrom("8.8.8.8"))).toBeNull();
+  });
+
   it("buckets IPv6 clients by /64 across compressed spellings", () => {
     const enforce = createLimiter(1);
 
     expect(
       allowedCount(enforce, [
-        "2001:db8::abcd:1",
-        "2001:db8:0:0:1::",
-        "2001:0DB8:0000:0000:ffff:ffff:ffff:ffff",
+        "2a00:1450::abcd:1",
+        "2a00:1450:0:0:1::",
+        "2A00:1450:0000:0000:ffff:ffff:ffff:ffff",
       ])
     ).toBe(1);
     expect(
-      allowedCount(enforce, ["2001:db8:0:1::1", "2001:db8:1::1", "2001:db9::"])
+      allowedCount(enforce, [
+        "2a00:1450:0:1::1",
+        "2a00:1450:1::1",
+        "2a00:1451::",
+      ])
     ).toBe(3);
   });
 
@@ -129,12 +219,61 @@ describe("createClientRateLimiter", () => {
 
     expect(
       allowedCount(enforce, [
-        "2001:db8:5::1, ::1",
-        "2001:db8:5::2, 0000:0000:0000:0000:0000:0000:0000:0001",
-        "2001:db8:5::3, fe80::1",
-        "2001:db8:5::4, fd00::1",
+        "2a00:1450:5::1, ::1",
+        "2a00:1450:5::2, 0000:0000:0000:0000:0000:0000:0000:0001",
+        "2a00:1450:5::3, fe80::1",
+        "2a00:1450:5::4, fd00::1",
       ])
     ).toBe(1);
+  });
+
+  describe("behind a CloudFront edge", () => {
+    const EDGE_A = edgeAddress(0, 10);
+    const EDGE_B = edgeAddress(1, 20);
+
+    it("keys the viewer address the edge appended, whichever edge served it", () => {
+      const enforce = createLimiter(1);
+
+      expect(
+        allowedCount(enforce, [
+          `8.8.8.8, ${EDGE_A}`,
+          `8.8.8.8, ${EDGE_B}`,
+          `1.1.1.1, ${EDGE_A}`,
+        ])
+      ).toBe(2);
+    });
+
+    it("ignores client-supplied entries left of the edge-appended viewer", () => {
+      const enforce = createLimiter(1);
+
+      expect(
+        allowedCount(enforce, [
+          `9.9.9.9, 8.8.8.8, ${EDGE_A}`,
+          `1.0.0.1, 8.8.8.8, ${EDGE_A}, 172.31.4.20`,
+        ])
+      ).toBe(1);
+    });
+
+    it("trusts only one edge hop", () => {
+      const enforce = createLimiter(1);
+
+      // A viewer relayed by another CloudFront distribution is keyed on that
+      // distribution's edge, not on the address it chose to send.
+      expect(
+        allowedCount(enforce, [
+          `8.8.8.8, ${EDGE_B}, ${EDGE_A}`,
+          `1.1.1.1, ${EDGE_B}, ${EDGE_A}`,
+        ])
+      ).toBe(1);
+    });
+
+    it("keys on the edge itself when no usable viewer entry precedes it", () => {
+      const enforce = createLimiter(1);
+
+      expect(
+        allowedCount(enforce, [EDGE_A, `not-an-address, ${EDGE_A}`, EDGE_B])
+      ).toBe(2);
+    });
   });
 
   it("gives requests without a public client address one shared, larger budget", () => {
@@ -145,7 +284,7 @@ describe("createClientRateLimiter", () => {
       "::1",
       "10.0.0.1, 192.168.1.10",
       "8.8.8.8, not-an-address",
-      "2001:db8::1%eth0",
+      "2a00:1450::1%eth0",
     ];
 
     expect(
@@ -164,11 +303,35 @@ describe("createClientRateLimiter", () => {
     expect(enforce(client, 1)?.status).toBe(429);
   });
 
-  it("evicts the oldest client buckets when the bucket cap is reached", () => {
+  it("keeps live buckets when the table is full and charges new clients to a shared overflow budget", async () => {
     const enforce = createLimiter(1, 2);
 
     expect(allowedCount(enforce, ["8.8.8.8", "8.8.8.8"])).toBe(1);
-    expect(allowedCount(enforce, ["1.1.1.1", "9.9.9.9"])).toBe(2);
+    jest.advanceTimersByTime(10_000);
+    expect(allowedCount(enforce, ["1.1.1.1"])).toBe(1);
+
+    // The table is full: new clients share ten times one client's budget.
+    const newcomers = Array.from({ length: 11 }, (_v, i) => `9.9.9.${i}`);
+    expect(allowedCount(enforce, newcomers.slice(0, 10))).toBe(10);
+    const overflowing = enforce(requestFrom(newcomers[10]));
+    expect(overflowing?.status).toBe(429);
+    expect(overflowing?.headers.get("retry-after")).toBe("60");
+    expect(await overflowing?.json()).toEqual({
+      error: "Too many test requests",
+    });
+    // The tracked clients' windows were not reset to make room.
+    expect(enforce(requestFrom("8.8.8.8"))?.status).toBe(429);
+    expect(enforce(requestFrom("1.1.1.1"))?.status).toBe(429);
+  });
+
+  it("gives new clients their own buckets again once windows expire", () => {
+    const enforce = createLimiter(1, 2);
+
+    expect(allowedCount(enforce, ["8.8.8.8", "1.1.1.1"])).toBe(2);
+    expect(allowedCount(enforce, ["9.9.9.9", "9.9.9.9"])).toBe(2);
+
+    jest.advanceTimersByTime(WINDOW_MS);
+    expect(allowedCount(enforce, ["9.9.9.9", "9.9.9.9"])).toBe(1);
     expect(enforce(requestFrom("8.8.8.8"))).toBeNull();
   });
 });

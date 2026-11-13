@@ -1,5 +1,6 @@
 "use client";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
@@ -14,6 +15,10 @@ import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
+import {
+  CONNECTED_TAB_LIST_CLASSES,
+  getConnectedTabButtonClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 
 const COLLECTION_LABELS = {
   pinned: "waves.sidebar.pinned",
@@ -98,7 +103,7 @@ export function SidebarWaveNavigationControls({
                 type="button"
                 onClick={closeSearch}
                 aria-label={t(locale, "waves.sidebar.closeSearch")}
-                className="tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300"
+                className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-flex tw-size-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none`}
               >
                 <XMarkIcon className="tw-size-4" />
               </button>
@@ -109,7 +114,7 @@ export function SidebarWaveNavigationControls({
             {navigation.canUseCollections ? (
               <fieldset
                 aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
-                className="tw-m-0 tw-flex tw-h-9 tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5 touch-only:tw-h-10"
+                className={`${CONNECTED_TAB_LIST_CLASSES} tw-m-0 tw-flex tw-h-9 tw-min-w-0 tw-flex-1 touch-only:tw-h-10`}
               >
                 {(["all", "pinned", "joined"] as const).map((tab) => (
                   <button
@@ -119,7 +124,14 @@ export function SidebarWaveNavigationControls({
                     aria-label={t(locale, COLLECTION_LABELS[tab])}
                     aria-pressed={navigation.collection === tab}
                     onClick={() => navigation.setCollection(tab)}
-                    className={`tw-inline-flex tw-min-h-7 tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white" : "tw-bg-transparent tw-text-iron-400"}`}
+                    className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${getConnectedTabButtonClasses(
+                      {
+                        isActive: navigation.collection === tab,
+                        fill: true,
+                        size: "xs",
+                        presentation: "sidebar",
+                      }
+                    )}`}
                   >
                     {t(locale, COLLECTION_LABELS[tab])}
                   </button>
@@ -139,9 +151,9 @@ export function SidebarWaveNavigationControls({
               title={findWaveLabel}
               aria-expanded={false}
               onClick={() => setSearchOpen(true)}
-              className="tw-group tw-ml-auto tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white touch-only:tw-size-11 touch-only:tw-rounded-none"
+              className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-group tw-ml-auto tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white touch-only:tw-size-11`}
             >
-              <span className="tw-flex tw-size-full tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 desktop-hover:group-hover:tw-bg-iron-800 touch-only:tw-size-10">
+              <span className="tw-flex tw-size-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent desktop-hover:group-hover:tw-bg-iron-900 touch-only:tw-size-10">
                 <MagnifyingGlassIcon className="tw-size-4" aria-hidden="true" />
               </span>
             </button>

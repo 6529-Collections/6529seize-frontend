@@ -1,5 +1,11 @@
 import React from "react";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateDropContent from "@/components/waves/CreateDropContent";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -8,6 +14,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 
 const mockInputFocus = jest.fn();
+const mockInputBlur = jest.fn();
 const mockInputClear = jest.fn();
 const mockRequestAuth = jest.fn(async () => ({ success: true }));
 const mockSetToast = jest.fn();
@@ -16,6 +23,7 @@ const mockSetIsStormMode = jest.fn();
 const mockOnDropModeChange = jest.fn();
 const mockAddOptimisticDrop = jest.fn();
 let mockIsApp = false;
+let mockIsMobile = false;
 
 jest.mock("next/dynamic", () => () => () => null);
 
@@ -67,7 +75,11 @@ jest.mock("@/contexts/EditingDropContext", () => ({
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
-  default: jest.fn(() => ({ isApp: mockIsApp })),
+  default: jest.fn(() => ({
+    isApp: mockIsApp,
+    isMobileDevice: mockIsMobile,
+    hasTouchScreen: mockIsMobile,
+  })),
 }));
 
 jest.mock("@/components/waves/CreateDropReplyingWrapper", () => () => (
@@ -88,11 +100,15 @@ jest.mock("@/components/waves/CreateDropInput", () => {
           editorState: undefined,
         }),
         focus: mockInputFocus,
+        blur: mockInputBlur,
       }));
       return (
         <div
           data-testid="input"
           data-mode={props.isDropMode ? "drop" : "chat"}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") void props.onDrop();
+          }}
         />
       );
     }),
@@ -158,7 +174,7 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(() => ({
+  useMyStreamActions: jest.fn(() => ({
     processIncomingDrop: jest.fn(),
   })),
 }));
@@ -262,7 +278,7 @@ const renderSubject = ({
   return { submitDrop };
 };
 
-describe("CreateDropContent chat refocus", () => {
+describe("CreateDropContent submission focus", () => {
   const originalRequestAnimationFrame = (
     globalThis as typeof globalThis & {
       requestAnimationFrame?: typeof requestAnimationFrame;
@@ -278,6 +294,7 @@ describe("CreateDropContent chat refocus", () => {
     jest.clearAllMocks();
     mockRequestAuth.mockReset().mockResolvedValue({ success: true });
     mockIsApp = false;
+    mockIsMobile = false;
     globalThis.requestAnimationFrame = ((callback: FrameRequestCallback) => {
       callback(0);
       return 1;
@@ -299,24 +316,75 @@ describe("CreateDropContent chat refocus", () => {
     }
   });
 
-  it("focuses the editor after an accepted chat submit resets it", async () => {
-    const { submitDrop } = renderSubject({ isDropMode: false });
+  it.each(["desktop", "mobile browser", "native app"])(
+    "clears an accepted chat and dismisses only mobile input on %s",
+    async (platform) => {
+      mockIsApp = platform === "native app";
+      mockIsMobile = platform === "mobile browser";
+      const { submitDrop } = renderSubject({ isDropMode: false });
+      const submitButton = screen.getByRole("button", { name: "submit" });
 
-    await userEvent.click(screen.getByText("submit"));
+      await userEvent.click(submitButton);
 
-    await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
-    expect(submitDrop.mock.calls[0]?.[0].drop.drop_type).toBe(ApiDropType.Chat);
-    await waitFor(() => expect(mockInputFocus).toHaveBeenCalledTimes(1));
-    expect(mockInputClear).toHaveBeenCalled();
-    const clearOrder = mockInputClear.mock.invocationCallOrder[0];
-    const focusOrder = mockInputFocus.mock.invocationCallOrder[0];
-    if (clearOrder === undefined || focusOrder === undefined) {
-      throw new Error("Expected clear and focus to be called");
+      await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
+      expect(submitDrop.mock.calls[0]?.[0].drop.drop_type).toBe(
+        ApiDropType.Chat
+      );
+      await waitFor(() => expect(submitButton).toBeEnabled());
+      expect(mockInputClear).toHaveBeenCalled();
+      expect(mockSetDrop).toHaveBeenCalledWith(null);
+      expect(mockInputFocus).not.toHaveBeenCalled();
+      expect(mockInputBlur).toHaveBeenCalledTimes(
+        platform === "desktop" ? 0 : 1
+      );
     }
-    expect(clearOrder).toBeLessThan(focusOrder);
-  });
+  );
+
+  it.each(["desktop", "mobile browser", "native app"])(
+    "restores only desktop focus after an accepted keyboard submit on %s",
+    async (platform) => {
+      mockIsApp = platform === "native app";
+      mockIsMobile = platform === "mobile browser";
+      const { submitDrop } = renderSubject();
+
+      fireEvent.keyDown(screen.getByTestId("input"), { key: "Enter" });
+
+      await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "submit" })).toBeEnabled()
+      );
+      expect(mockInputFocus).toHaveBeenCalledTimes(
+        platform === "desktop" ? 1 : 0
+      );
+      expect(mockInputBlur).toHaveBeenCalledTimes(
+        platform === "desktop" ? 0 : 1
+      );
+      expect(mockInputClear).toHaveBeenCalled();
+    }
+  );
+
+  it.each(["refused", "failed"])(
+    "does not schedule keyboard refocus when a send is %s",
+    async (failure) => {
+      const submitDrop = jest.fn(async () => {
+        if (failure === "failed") throw new Error("Send failed");
+        return false;
+      });
+      renderSubject({ submitDrop });
+
+      fireEvent.keyDown(screen.getByTestId("input"), { key: "Enter" });
+
+      await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
+      await waitFor(() =>
+        expect(screen.getByRole("button", { name: "submit" })).toBeEnabled()
+      );
+      expect(mockInputFocus).not.toHaveBeenCalled();
+      expect(mockInputClear).not.toHaveBeenCalled();
+    }
+  );
 
   it("prevents a second submit while authentication is pending", async () => {
+    mockIsApp = true;
     let finishAuth: ((result: { success: boolean }) => void) | undefined;
     mockRequestAuth.mockImplementationOnce(
       () =>
@@ -332,27 +400,41 @@ describe("CreateDropContent chat refocus", () => {
     await userEvent.click(button);
     expect(mockRequestAuth).toHaveBeenCalledTimes(1);
     expect(mockInputClear).not.toHaveBeenCalled();
+    expect(mockInputBlur).not.toHaveBeenCalled();
     expect(screen.getByTestId("input")).toBe(input);
     await act(async () => finishAuth?.({ success: true }));
     await waitFor(() => expect(submitDrop).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(mockInputFocus).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(button).toBeEnabled());
+    expect(mockInputClear).toHaveBeenCalled();
+    expect(mockInputFocus).not.toHaveBeenCalled();
+    expect(mockInputBlur).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps the same draft when submission is not accepted", async () => {
-    renderSubject({ submitDrop: jest.fn(async () => false) });
-    const input = screen.getByTestId("input");
-    const button = screen.getByRole("button", { name: "submit" });
-    await userEvent.click(button);
-    await waitFor(() => expect(button).toBeEnabled());
-    expect(screen.getByTestId("input")).toBe(input);
-    expect(mockInputClear).not.toHaveBeenCalled();
-    expect(mockInputFocus).not.toHaveBeenCalled();
-  });
+  it.each(["refused", "failed"])(
+    "keeps the mobile draft and focus when submission is %s",
+    async (failure) => {
+      mockIsApp = true;
+      const submitDrop = jest.fn(async () => {
+        if (failure === "failed") throw new Error("Send failed");
+        return false;
+      });
+      renderSubject({ submitDrop });
+      const input = screen.getByTestId("input");
+      const button = screen.getByRole("button", { name: "submit" });
+      await userEvent.click(button);
+      await waitFor(() => expect(button).toBeEnabled());
+      expect(screen.getByTestId("input")).toBe(input);
+      expect(mockInputClear).not.toHaveBeenCalled();
+      expect(mockInputFocus).not.toHaveBeenCalled();
+      expect(mockInputBlur).not.toHaveBeenCalled();
+    }
+  );
 
   describe.each([
-    { surface: "web", isApp: false },
-    { surface: "native app", isApp: true },
-  ])("authentication recovery in $surface", ({ isApp }) => {
+    { surface: "web", isApp: false, isMobile: false },
+    { surface: "mobile browser", isApp: false, isMobile: true },
+    { surface: "native app", isApp: true, isMobile: false },
+  ])("authentication recovery in $surface", ({ isApp, isMobile }) => {
     it.each([
       {
         failure: "rejects with Safari's Load failed error",
@@ -379,6 +461,7 @@ describe("CreateDropContent chat refocus", () => {
       "preserves the draft and allows retry when authentication $failure",
       async ({ authenticate, expectedToasts }) => {
         mockIsApp = isApp;
+        mockIsMobile = isMobile;
         mockRequestAuth.mockImplementationOnce(authenticate);
         const { submitDrop } = renderSubject();
         const submitButton = screen.getByRole("button", { name: "submit" });
@@ -391,6 +474,7 @@ describe("CreateDropContent chat refocus", () => {
         expect(mockInputClear).not.toHaveBeenCalled();
         expect(mockSetDrop).not.toHaveBeenCalled();
         expect(mockInputFocus).not.toHaveBeenCalled();
+        expect(mockInputBlur).not.toHaveBeenCalled();
         expect(mockSetToast.mock.calls).toEqual(expectedToasts);
 
         await userEvent.click(submitButton);
@@ -405,8 +489,10 @@ describe("CreateDropContent chat refocus", () => {
             }),
           })
         );
-        await waitFor(() => expect(mockInputFocus).toHaveBeenCalledTimes(1));
+        await waitFor(() => expect(submitButton).toBeEnabled());
         expect(mockInputClear).toHaveBeenCalled();
+        expect(mockInputFocus).not.toHaveBeenCalled();
+        expect(mockInputBlur).toHaveBeenCalledTimes(isApp || isMobile ? 1 : 0);
       }
     );
   });

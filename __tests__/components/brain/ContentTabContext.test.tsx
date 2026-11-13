@@ -8,7 +8,6 @@ import {
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { CompetitionNavigationContext } from "@/contexts/CompetitionNavigationContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import * as competitionHelpers from "@/helpers/competition.helpers";
 import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
 
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
@@ -53,12 +52,12 @@ describe("ContentTabContext", () => {
     ["leaderboard", MyStreamWaveTab.LEADERBOARD],
     ["decisions", MyStreamWaveTab.WINNERS],
     ["votes", MyStreamWaveTab.MY_VOTES],
-    ["outcomes", MyStreamWaveTab.OUTCOME],
+    ["outcomes", MyStreamWaveTab.CONFIGURATION],
     ["rules", MyStreamWaveTab.CONFIGURATION],
   ])(
     "selects the wave-level %s tab on a flat default route",
     (tab, expected) => {
-      mockPathname = "/waves/hub/competitions/alpha";
+      mockPathname = "/waves/hub/decisions/alpha";
       mockSearch = new URLSearchParams({ tab });
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <CompetitionNavigationContext.Provider
@@ -93,7 +92,7 @@ describe("ContentTabContext", () => {
   );
 
   it("keeps a competition deep link selected and navigates Chat back to its wave", () => {
-    mockPathname = "/waves/chat-wave/competitions/first";
+    mockPathname = "/waves/chat-wave/decisions/first";
     const { result, rerender } = setup();
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.COMPETITIONS);
     expect(result.current.availableTabs).not.toContain(
@@ -109,7 +108,7 @@ describe("ContentTabContext", () => {
     mockPathname = "/waves/chat-wave";
     rerender();
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
-    mockPathname = "/waves/chat-wave/competitions/first";
+    mockPathname = "/waves/chat-wave/decisions/first";
     rerender();
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.COMPETITIONS);
   });
@@ -118,11 +117,11 @@ describe("ContentTabContext", () => {
     ["rules", MyStreamWaveTab.CONFIGURATION],
     ["decisions", MyStreamWaveTab.WINNERS],
     ["votes", MyStreamWaveTab.MY_VOTES],
-    ["outcomes", MyStreamWaveTab.OUTCOME],
+    ["outcomes", MyStreamWaveTab.CONFIGURATION],
   ])(
     "renders flat legacy %s before desktop tab availability is registered",
     (tab, expected) => {
-      mockPathname = "/waves/hub/competitions/alpha";
+      mockPathname = "/waves/hub/decisions/alpha";
       mockSearch = new URLSearchParams({ tab });
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <CompetitionNavigationContext.Provider
@@ -142,7 +141,7 @@ describe("ContentTabContext", () => {
   ])(
     "applies registered Configuration availability to flat legacy rules (available=%s)",
     (hasCompetitionConfiguration, expected) => {
-      mockPathname = "/waves/hub/competitions/alpha";
+      mockPathname = "/waves/hub/decisions/alpha";
       mockSearch = new URLSearchParams({ tab: "rules" });
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <CompetitionNavigationContext.Provider
@@ -205,7 +204,7 @@ describe("ContentTabContext", () => {
       expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
       act(() => result.current.setActiveContentTab(MyStreamWaveTab.WINNERS));
       expect(mockPush).toHaveBeenCalledWith(
-        `/waves/hub/competitions/${competitionId}?tab=decisions`,
+        `/waves/hub/decisions/${competitionId}?tab=decisions`,
         { scroll: false }
       );
       expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
@@ -252,8 +251,8 @@ describe("ContentTabContext", () => {
       hasFirstDecisionPassed: true,
     };
     act(() => result.current.updateAvailableTabs(waveTabs));
-    act(() => result.current.setActiveContentTab(MyStreamWaveTab.OUTCOME));
-    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.OUTCOME);
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.MY_VOTES));
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.MY_VOTES);
 
     mockSearch = new URLSearchParams({ competition: "newer" });
     rerender();
@@ -270,7 +269,7 @@ describe("ContentTabContext", () => {
   });
 
   it("keeps familiar wave tabs visible on competition routes", () => {
-    mockPathname = "/waves/legacy/competitions/primary";
+    mockPathname = "/waves/legacy/decisions/primary";
     const { result } = setup();
     act(() =>
       result.current.updateAvailableTabs({
@@ -288,7 +287,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.SUBMISSIONS,
       MyStreamWaveTab.WINNERS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.COMPETITIONS,
     ]);
@@ -296,7 +294,7 @@ describe("ContentTabContext", () => {
   });
 
   it("preserves a legacy competition view when its entry link includes a serial target", () => {
-    mockPathname = "/waves/legacy/competitions/primary";
+    mockPathname = "/waves/legacy/decisions/primary";
     mockSearch = new URLSearchParams("tab=decisions&serialNo=42");
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <ContentTabProvider competitionOnly>{children}</ContentTabProvider>
@@ -335,21 +333,21 @@ describe("ContentTabContext", () => {
     act(updateTabs);
     const familiarTabs = [...result.current.availableTabs];
     expect(familiarTabs).toContain(MyStreamWaveTab.WINNERS);
-    mockPathname = "/waves/hub/competitions/older";
+    mockPathname = "/waves/hub/decisions/older";
     mockSearch = new URLSearchParams("tab=leaderboard");
     rerender();
     act(updateTabs);
     expect(result.current.availableTabs).toEqual(familiarTabs);
     act(() => result.current.setActiveContentTab(MyStreamWaveTab.WINNERS));
     expect(mockPush).toHaveBeenLastCalledWith(
-      "/waves/hub/competitions/older?tab=decisions",
+      "/waves/hub/decisions/older?tab=decisions",
       { scroll: false }
     );
     act(() => result.current.setActiveContentTab(MyStreamWaveTab.COMPETITIONS));
-    expect(mockPush).toHaveBeenLastCalledWith("/waves/hub/competitions", {
+    expect(mockPush).toHaveBeenLastCalledWith("/waves/hub/decisions", {
       scroll: false,
     });
-    mockPathname = "/waves/hub/competitions";
+    mockPathname = "/waves/hub/decisions";
     mockSearch = new URLSearchParams();
     rerender();
     act(updateTabs);
@@ -379,7 +377,7 @@ describe("ContentTabContext", () => {
   });
 
   it("keeps the visible collection tab actionable before hub availability loads", () => {
-    mockPathname = "/waves/hub/competitions/older";
+    mockPathname = "/waves/hub/decisions/older";
     const { result } = setup();
     act(() =>
       result.current.updateAvailableTabs({
@@ -399,13 +397,25 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.COMPETITIONS
     );
     act(() => result.current.setActiveContentTab(MyStreamWaveTab.COMPETITIONS));
-    expect(mockPush).toHaveBeenCalledWith("/waves/hub/competitions", {
+    expect(mockPush).toHaveBeenCalledWith("/waves/hub/decisions", {
+      scroll: false,
+    });
+  });
+
+  it("routes the collection from the explicit competition URL before wave registration", () => {
+    mockPathname = "/waves/hub/decisions/older";
+    mockSearch = new URLSearchParams("tab=decisions");
+    const { result } = setup();
+
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.COMPETITIONS));
+
+    expect(mockPush).toHaveBeenCalledWith("/waves/hub/decisions", {
       scroll: false,
     });
   });
 
   it("keeps legacy competition tabs separate from the wave's remembered collection tab", () => {
-    mockPathname = "/waves/legacy/competitions/primary";
+    mockPathname = "/waves/legacy/decisions/primary";
     localStorage.setItem(
       "memes_wave_last_tab_by_id",
       JSON.stringify({ legacy: MyStreamWaveTab.COMPETITIONS })
@@ -431,14 +441,13 @@ describe("ContentTabContext", () => {
     expect(result.current.availableTabs).toEqual([
       MyStreamWaveTab.SUBMISSIONS,
       MyStreamWaveTab.WINNERS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
     ]);
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.SUBMISSIONS);
     act(() => result.current.setActiveContentTab(MyStreamWaveTab.WINNERS));
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.WINNERS);
     expect(mockPush).toHaveBeenCalledWith(
-      "/waves/legacy/competitions/primary?tab=decisions",
+      "/waves/legacy/decisions/primary?tab=decisions",
       { scroll: false }
     );
     expect(
@@ -521,7 +530,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.WINNERS,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.FAQ,
     ]);
   });
@@ -576,7 +584,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.FAQ,
     ]);
   });
@@ -632,7 +639,6 @@ describe("ContentTabContext", () => {
     expect(result.current.availableTabs).toEqual([
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.LEADERBOARD,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
     ]);
@@ -656,7 +662,6 @@ describe("ContentTabContext", () => {
     expect(result.current.availableTabs).toEqual([
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.LEADERBOARD,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
     ]);
@@ -685,7 +690,6 @@ describe("ContentTabContext", () => {
         hasAuthenticatedProfile: true,
         isMemesWave: false,
         isCurationWave: false,
-        showOutcomeTab: false,
         votingState: WaveVotingState.NOT_STARTED,
         hasFirstDecisionPassed: false,
       })
@@ -773,7 +777,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.SUBMISSIONS,
       MyStreamWaveTab.WINNERS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
     ]);
@@ -800,7 +803,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.WINNERS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
     ]);
@@ -827,7 +829,6 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.WINNERS,
-      MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
     ]);
@@ -843,7 +844,6 @@ describe("ContentTabContext", () => {
         isMemesWave: false,
         isCurationWave: false,
         isApproveWave: true,
-        showOutcomeTab: false,
         votingState: WaveVotingState.ENDED,
         hasFirstDecisionPassed: false,
       })
@@ -1221,7 +1221,7 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
     expect(result.current.availableTabs).not.toContain(MyStreamWaveTab.OUTCOME);
   });
-  it.each(["/waves/hub?tab=competitions", "/waves/hub/competitions"])(
+  it.each(["/waves/hub?tab=competitions", "/waves/hub/decisions"])(
     "preserves an explicitly opened collection when its navigation becomes hidden (%s)",
     (url) => {
       const [pathname, query] = url.split("?");
@@ -1279,9 +1279,6 @@ describe("remembered wave entries", () => {
   });
 
   it("shows a remembered competition section on the first destination render before tabs register", () => {
-    jest
-      .spyOn(competitionHelpers, "isMultiCompetitionEnabled")
-      .mockReturnValue(true);
     localStorage.setItem(
       "memes_wave_last_tab_by_id",
       JSON.stringify({
@@ -1316,9 +1313,6 @@ describe("remembered wave entries", () => {
   });
 
   it("honors a deliberate Chat selection while the destination tabs are still registering", () => {
-    jest
-      .spyOn(competitionHelpers, "isMultiCompetitionEnabled")
-      .mockReturnValue(true);
     localStorage.setItem(
       "memes_wave_last_tab_by_id",
       JSON.stringify({
@@ -1460,7 +1454,7 @@ describe("remembered wave entries", () => {
       })
     );
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.POLLS);
-    act(() => result.current.setActiveContentTab(MyStreamWaveTab.OUTCOME));
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.MY_VOTES));
     act(() =>
       result.current.updateAvailableTabs({
         ...rememberedWaveParams,
@@ -1468,7 +1462,7 @@ describe("remembered wave entries", () => {
         hasPolls: true,
       })
     );
-    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.OUTCOME);
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.MY_VOTES);
   });
 
   it("restores the Votes view for guests without changing storage", () => {
@@ -1504,7 +1498,7 @@ describe("remembered wave entries", () => {
     act(() => result.current.setActiveContentTab(MyStreamWaveTab.LEADERBOARD));
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
     expect(mockPush).toHaveBeenCalledWith(
-      "/waves/main-stage/competitions/primary?tab=leaderboard",
+      "/waves/main-stage/decisions/primary?tab=leaderboard",
       { scroll: false }
     );
     expect(
@@ -1518,9 +1512,6 @@ describe("remembered wave entries", () => {
   });
 
   it("keeps a serial-message visit in Chat after URL cleanup without losing remembered Leaderboard", () => {
-    const enabled = jest
-      .spyOn(competitionHelpers, "isMultiCompetitionEnabled")
-      .mockReturnValue(true);
     try {
       const saved = {
         "main-stage": {
@@ -1568,7 +1559,7 @@ describe("remembered wave entries", () => {
         JSON.parse(localStorage.getItem("memes_wave_last_tab_by_id")!)
       ).toEqual(saved);
     } finally {
-      enabled.mockRestore();
+      localStorage.clear();
     }
   });
 });

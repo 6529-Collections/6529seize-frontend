@@ -477,7 +477,9 @@ describe("Playwright read-only mutation guard", () => {
     "https://o123.ingest.us.sentry.io/api/456/envelope/?sentry_key=test",
     "https://o123.ingest.de.sentry.io/api/456/envelope/",
     "https://o123.ingest.us.sentry.io:443/api/456/envelope/",
-  ])("aborts a recognized Sentry envelope POST: %s", (url) => {
+    "https://o123.ingest.sentry.io/api/456/security/?sentry_key=0123456789abcdef0123456789abcdef",
+    "https://o123.ingest.us.sentry.io/api/456/security/?sentry_key=test",
+  ])("aborts a recognized Sentry envelope or CSP report POST: %s", (url) => {
     expect(
       decideReadonlyRequest({
         baseURL: "https://6529.io",
@@ -507,6 +509,11 @@ describe("Playwright read-only mutation guard", () => {
     "https://o123.ingest.us.sentry.io/api/project/envelope/",
     "https://o123.ingest.us.sentry.io/api/456/envelope-mutation/",
     "https://o123.ingest.us.sentry.io/api/0/projects/",
+    "https://o123.ingest.us.sentry.io/api/456/security",
+    "https://o123.ingest.us.sentry.io/api/456/security/extra",
+    "https://o123.ingest.us.sentry.io/api/project/security/",
+    "https://user@o123.ingest.us.sentry.io/api/456/security/",
+    "https://o123.ingest.us.sentry.io.example.com/api/456/security/",
   ])("records Sentry endpoint near-matches as blocked mutations: %s", (url) => {
     expect(
       decideReadonlyRequest({
@@ -641,6 +648,36 @@ describe("Playwright read-only mutation guard", () => {
       action: "block",
       reason: "non-allowlisted-mutation",
     });
+  });
+
+  it("aborts only the first-party collector's same-origin POST /e beacon", () => {
+    // tests/social/search-waves-readonly.spec.ts "late-loading vote scores
+    // cannot obstruct closing an empty wave search" failed on staging when
+    // the collector's beacon was treated as a mutation.
+    const decide = (method: string, url: string) =>
+      decideReadonlyRequest({
+        baseURL: "https://staging.6529.io",
+        method,
+        readonly: true,
+        url,
+      });
+
+    expect(decide("POST", "https://staging.6529.io/e")).toEqual({
+      action: "abort",
+      reason: "ignored-first-party-telemetry",
+    });
+    for (const [method, url] of [
+      ["PUT", "https://staging.6529.io/e"],
+      ["DELETE", "https://staging.6529.io/e"],
+      ["POST", "https://staging.6529.io/e/"],
+      ["POST", "https://staging.6529.io/e/write"],
+      ["POST", "https://staging.6529.io/e?write=1"],
+      ["POST", "https://staging.6529.io/events"],
+      ["POST", "https://example.com/e"],
+      ["POST", "https://6529.io/e"],
+    ] as const) {
+      expect(decide(method, url)).toMatchObject({ action: "block" });
+    }
   });
 
   it("blocks non-allowlisted external POSTs", () => {

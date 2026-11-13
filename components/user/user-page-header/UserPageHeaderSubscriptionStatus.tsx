@@ -111,6 +111,27 @@ function SubscriptionLoading({
   );
 }
 
+// Blank space with SubscriptionLoading's footprint while the status may still
+// appear (server HTML and hydration), so it
+// replaces the space without moving the header. Never shows purchasing UI.
+function SubscriptionSpace({
+  layout,
+}: Readonly<{ layout: SubscriptionStatusLayout }>) {
+  const isSubtle = layout !== "card";
+
+  return (
+    <div
+      aria-hidden="true"
+      data-testid="subscription-status-space"
+      className={clsx(
+        "tw-w-full",
+        isSubtle ? getSubtleLayoutClass(layout) : "tw-min-h-14 sm:tw-w-[22rem]",
+        "!tw-border-transparent"
+      )}
+    />
+  );
+}
+
 function SubscriptionUnknown({
   href,
   layout,
@@ -300,17 +321,23 @@ export default function UserPageHeaderSubscriptionStatus({
   layout?: SubscriptionStatusLayout;
 }>) {
   const locale = useBrowserLocale();
-  // Omitted from the server HTML and the first hydration render, and on iOS
-  // until the country check allows purchasing, so no request starts earlier.
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  // Start the coverage request only where the promotional row can be shown.
+  const { hideNftPurchasing, reservesNftPurchasingSpace } =
+    useNftPurchasingVisibility();
   const profileKey = profile.consolidation_key.trim();
   const profileHref = getProfileSubscriptionsHref(profile);
   const coverageQuery = useSubscriptionCoverage({
     enabled: !hideNftPurchasing,
     profileKey,
   });
-  if (hideNftPurchasing || !profileKey || !profileHref) {
+  if (!profileKey || !profileHref) {
     return null;
+  }
+
+  if (hideNftPurchasing) {
+    return reservesNftPurchasingSpace ? (
+      <SubscriptionSpace layout={layout} />
+    ) : null;
   }
 
   if (coverageQuery.isLoading) {

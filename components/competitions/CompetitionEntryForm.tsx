@@ -32,6 +32,7 @@ import { profileAndConsolidationsToProfileMin } from "@/helpers/ProfileHelpers";
 import { hasPendingInlineImageUploadDrop } from "@/helpers/waves/inline-image-upload.helpers";
 import { getCreateWaveDropRequest } from "@/components/waves/create-wave/services/createWaveDropRequest";
 import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import type { ApiCreateCompetitionEntryRequest } from "@/generated/models/ApiCreateCompetitionEntryRequest";
 import {
   createCompetitionEntry,
@@ -46,6 +47,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { COMPETITION_BUTTON, COMPETITION_INPUT } from "./CompetitionState";
 import { competitionSubmissionReceiptKey } from "@/helpers/competition-submission.helpers";
+import { getStructuredApiErrorCode } from "@/services/api/common-api";
 
 function getEntryReferences(
   snapshot: NonNullable<ReturnType<DropEditorHandles["getDropSnapshot"]>>,
@@ -99,7 +101,9 @@ export default function CompetitionEntryForm({
   const terms = acceptedTermsVersion === competition.config_version;
   const [canSubmit, setCanSubmit] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<"request" | "mediaReupload" | null>(
+    null
+  );
   const failureDescription = failed ? errorId : undefined;
   const pending = useRef<{
     fingerprint: string;
@@ -152,7 +156,7 @@ export default function CompetitionEntryForm({
     const snapshot = editor.current?.getDropSnapshot();
     if (!snapshot || hasPendingInlineImageUploadDrop(snapshot)) return;
     setBusy(true);
-    setFailed(false);
+    setFailed(null);
     const identity = { waveId: wave.id, competitionId: competition.id };
     try {
       if (!(await requestAuth()).success) return;
@@ -179,7 +183,10 @@ export default function CompetitionEntryForm({
           ? pending.current.request
           : null;
       if (!request) {
-        const content = await getCreateWaveDropRequest(snapshot);
+        const content = await getCreateWaveDropRequest(
+          snapshot,
+          ApiMediaUploadPurpose.DecisionEntry
+        );
         const drop = {
           ...content,
           ...getEntryReferences(
@@ -243,7 +250,12 @@ export default function CompetitionEntryForm({
       );
     } catch (error) {
       if (isRejectedCompetitionCommand(error)) pending.current = null;
-      setFailed(true);
+      setFailed(
+        getStructuredApiErrorCode(error) ===
+          "ANONYMOUS_SUBMISSION_MEDIA_REUPLOAD_REQUIRED"
+          ? "mediaReupload"
+          : "request"
+      );
       await invalidateCompetition(client, identity);
     } finally {
       setBusy(false);
@@ -265,6 +277,11 @@ export default function CompetitionEntryForm({
       <h2 id="native-entry-heading" className="tw-text-lg tw-text-iron-100">
         {t(locale, "competitions.submit")}
       </h2>
+      {competition.participation.anonymous_submissions && (
+        <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-300">
+          {t(locale, "competitions.anonymousSubmissionNotice")}
+        </p>
+      )}
       <label
         htmlFor="native-entry-title"
         className="tw-block tw-text-sm tw-text-iron-300"
@@ -297,6 +314,7 @@ export default function CompetitionEntryForm({
             wave={{ name: competition.title, image: wave.picture, id: wave.id }}
             waveId={wave.id}
             forceScreenType={CreateDropScreenType.DESKTOP}
+            mediaUploadPurpose={ApiMediaUploadPurpose.DecisionEntry}
             onSubmitDrop={() => undefined}
             onCanSubmitChange={setCanSubmit}
           />
@@ -392,7 +410,12 @@ export default function CompetitionEntryForm({
       )}
       {failed && (
         <p id={errorId} role="alert" className="tw-text-sm tw-text-red">
-          {t(locale, "competitions.failure")}
+          {t(
+            locale,
+            failed === "mediaReupload"
+              ? "competitions.anonymousMediaReupload"
+              : "competitions.failure"
+          )}
         </p>
       )}
       {!competition.permissions.submit && (

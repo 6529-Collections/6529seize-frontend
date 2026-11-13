@@ -1,8 +1,10 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
+
+import { skipToken, useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo, useState, type ReactNode } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -17,14 +19,17 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { PROFILE_PREFERENCES_HREF } from "@/helpers/preferences-navigation";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
+import { getDirectMessageAdmissionErrorMessage } from "@/helpers/waves/direct-message-admission.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
 import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useIdentity } from "@/hooks/useIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { toProfileIdentitySegment } from "@/helpers/profile-identity-segment";
 import { commonApiFetch } from "@/services/api/common-api";
 
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
@@ -37,6 +42,7 @@ import UserPageHeaderPfpWrapper from "./pfp/UserPageHeaderPfpWrapper";
 import UserPageHeaderStats from "./stats/UserPageHeaderStats";
 import UserPageHeaderSubscriptionStatus from "./UserPageHeaderSubscriptionStatus";
 import UserPageHeaderEditProfile from "./UserPageHeaderEditProfile";
+import UserPageHeaderEditProfileDesktop from "./UserPageHeaderEditProfileDesktop";
 import BlockedProfileHeaderIndicator from "./BlockedProfileHeaderIndicator";
 import ProfileHeaderRelationshipActions, {
   type ProfileAction,
@@ -50,6 +56,7 @@ import {
 import {
   USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS,
   USER_PAGE_HEADER_SURFACE_CLASS,
+  USER_PAGE_HEADER_TOUCH_TARGET_CLASS,
 } from "./user-page-header-surface";
 
 type Props = {
@@ -91,7 +98,7 @@ function ProfilePreferencesButton() {
       size="sm"
       href={PROFILE_PREFERENCES_HREF}
       aria-label={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
-      className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS}`}
+      className={`${USER_PAGE_HEADER_SURFACE_CLASS} ${USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS} ${USER_PAGE_HEADER_TOUCH_TARGET_CLASS}`}
     >
       <Cog6ToothIcon className="tw-size-4" aria-hidden="true" />
       <span>{t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}</span>
@@ -99,43 +106,26 @@ function ProfilePreferencesButton() {
   );
 }
 
-type MobileHeaderControlsProps = Readonly<{
-  aboutStatement: CicStatement | null;
-  banner1Color: string;
-  banner2Color: string;
-  canEdit: boolean;
+type ProfileHeaderControlsProps = Readonly<{
+  editProfileButton: ReactNode;
   canManageProfilePreferences: boolean;
   hasTouchScreen: boolean;
-  profile: ApiIdentity;
 }>;
 
-function MobileHeaderControls({
-  aboutStatement,
-  banner1Color,
-  banner2Color,
-  canEdit,
+function ProfileHeaderControls({
+  editProfileButton,
   canManageProfilePreferences,
   hasTouchScreen,
-  profile,
-}: MobileHeaderControlsProps) {
-  if (!canEdit && !canManageProfilePreferences) {
+}: ProfileHeaderControlsProps) {
+  if (editProfileButton === null && !canManageProfilePreferences) {
     return null;
   }
 
   return (
     <div
-      className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 tw-flex tw-items-center tw-gap-1 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${
-        hasTouchScreen ? "" : "sm:tw-hidden"
-      }`}
+      className={`tw-absolute tw-right-4 tw-top-3 tw-z-20 tw-flex tw-items-center tw-gap-1 sm:tw-right-6 sm:tw-top-4 md:tw-right-8 ${hasTouchScreen ? "min-[840px]:tw-hidden" : "sm:tw-hidden"}`}
     >
-      {canEdit ? (
-        <UserPageHeaderEditProfile
-          profile={profile}
-          statement={aboutStatement}
-          defaultBanner1={banner1Color}
-          defaultBanner2={banner2Color}
-        />
-      ) : null}
+      {editProfileButton}
       {canManageProfilePreferences ? (
         <ButtonLink
           variant="tertiary"
@@ -143,7 +133,7 @@ function MobileHeaderControls({
           href={PROFILE_PREFERENCES_HREF}
           aria-label={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
           title={t(DEFAULT_LOCALE, PROFILE_PREFERENCES_BUTTON_KEY)}
-          className="tw-group tw-size-11 !tw-rounded-full !tw-border-transparent !tw-bg-transparent !tw-p-1 !tw-shadow-none focus-visible:!tw-outline-none active:!tw-bg-transparent desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent sm:tw-size-10 sm:!tw-p-0.5 min-[840px]:tw-hidden"
+          className={`tw-group tw-size-11 !tw-rounded-full !tw-border-transparent !tw-bg-transparent !tw-p-1 !tw-shadow-none focus-visible:!tw-outline-none active:!tw-bg-transparent desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent sm:tw-size-10 sm:!tw-p-0.5 min-[840px]:tw-hidden ${USER_PAGE_HEADER_TOUCH_TARGET_CLASS}`}
         >
           <span className="tw-box-border tw-inline-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-black/75 tw-text-iron-100 tw-shadow-[0_8px_24px_rgba(0,0,0,0.32)] tw-transition-[background-color,border-color,color,transform] tw-duration-200 tw-ease-out group-focus-visible:tw-ring-2 group-focus-visible:tw-ring-primary-400 group-focus-visible:tw-ring-offset-2 group-focus-visible:tw-ring-offset-black group-active:tw-scale-95 group-active:tw-bg-black desktop-hover:group-hover:tw-border-white/25 desktop-hover:group-hover:tw-bg-black/90 desktop-hover:group-hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none">
             <Cog6ToothIcon className="tw-size-[1.125rem]" aria-hidden="true" />
@@ -154,19 +144,24 @@ function MobileHeaderControls({
   );
 }
 
-function SmallScreenPreferencesButton({ show }: Readonly<{ show: boolean }>) {
+function SmallScreenPreferencesButton({
+  show,
+  editProfileButton,
+}: Readonly<{ show: boolean; editProfileButton: ReactNode }>) {
   if (!show) {
     return null;
   }
 
   return (
-    <div className="tw-hidden tw-flex-none sm:tw-absolute sm:tw-right-0 sm:tw-top-6 sm:tw-block min-[840px]:tw-hidden">
+    <div className="tw-hidden tw-flex-none sm:tw-absolute sm:tw-right-0 sm:tw-top-6 sm:tw-flex sm:tw-items-center sm:tw-gap-2 min-[840px]:tw-hidden">
+      {editProfileButton}
       <ProfilePreferencesButton />
     </div>
   );
 }
 
 type ProfileHeaderActionColumnProps = Readonly<{
+  editProfileButton: ReactNode;
   canManageProfilePreferences: boolean;
   directMessageLoading: boolean;
   followHandle: string | null;
@@ -178,6 +173,7 @@ type ProfileHeaderActionColumnProps = Readonly<{
 }>;
 
 function ProfileHeaderActionColumn({
+  editProfileButton,
   canManageProfilePreferences,
   directMessageLoading,
   followHandle,
@@ -202,7 +198,8 @@ function ProfileHeaderActionColumn({
     >
       <div className="tw-flex tw-w-full tw-flex-wrap tw-items-end tw-gap-2 md:tw-w-auto md:tw-justify-end">
         {canManageProfilePreferences ? (
-          <div className="tw-hidden min-[840px]:tw-block">
+          <div className="tw-hidden tw-items-center tw-gap-2 min-[840px]:tw-flex">
+            {editProfileButton}
             <ProfilePreferencesButton />
           </div>
         ) : null}
@@ -237,10 +234,10 @@ function ProfileHeaderActionColumn({
 }
 
 type ProfileHeaderContentProps = Readonly<{
+  editProfileButton: ReactNode;
   aboutStatement: CicStatement | null;
   banner1Color: string;
   banner2Color: string;
-  canInlineEdit: boolean;
   canManageProfilePreferences: boolean;
   directMessageLoading: boolean;
   followHandle: string | null;
@@ -259,10 +256,10 @@ type ProfileHeaderContentProps = Readonly<{
 }>;
 
 function ProfileHeaderContent({
+  editProfileButton,
   aboutStatement,
   banner1Color,
   banner2Color,
-  canInlineEdit,
   canManageProfilePreferences,
   directMessageLoading,
   followHandle,
@@ -281,7 +278,7 @@ function ProfileHeaderContent({
 }: ProfileHeaderContentProps) {
   const identityPaddingClass =
     canManageProfilePreferences && !hasTouchScreen
-      ? "sm:tw-pr-36 min-[840px]:tw-pr-0"
+      ? "sm:tw-pr-60 min-[840px]:tw-pr-0"
       : "";
 
   return (
@@ -294,7 +291,7 @@ function ProfileHeaderContent({
             <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:tw-absolute sm:-tw-top-14 sm:tw-left-0 sm:tw-mt-0">
               <UserPageHeaderPfpWrapper
                 profile={profile}
-                canEdit={canInlineEdit}
+                canEdit={false}
                 profileLabel={profileLabel}
               >
                 <UserPageHeaderPfp
@@ -309,7 +306,7 @@ function ProfileHeaderContent({
             <div className="tw-min-w-0 tw-flex-1 tw-pb-1 sm:tw-pb-2 sm:tw-pt-2 lg:tw-pt-1">
               <UserPageHeaderName
                 profile={profile}
-                canEdit={canInlineEdit}
+                canEdit={false}
                 mainAddress={mainAddress}
                 level={profile.level}
                 profileEnabledAt={profileEnabledAt}
@@ -332,10 +329,12 @@ function ProfileHeaderContent({
           </div>
 
           <SmallScreenPreferencesButton
+            editProfileButton={editProfileButton}
             show={canManageProfilePreferences && !hasTouchScreen}
           />
 
           <ProfileHeaderActionColumn
+            editProfileButton={editProfileButton}
             canManageProfilePreferences={canManageProfilePreferences}
             directMessageLoading={directMessageLoading}
             followHandle={followHandle}
@@ -358,11 +357,7 @@ function ProfileHeaderContent({
 
         {showAbout ? (
           <div className="lg:tw-col-start-1 lg:tw-row-start-2 lg:tw-self-start lg:tw-pt-4">
-            <UserPageHeaderAbout
-              profile={profile}
-              statement={aboutStatement}
-              canEdit={canInlineEdit}
-            />
+            <UserPageHeaderAbout statement={aboutStatement} />
           </div>
         ) : null}
 
@@ -378,6 +373,86 @@ function ProfileHeaderContent({
   );
 }
 
+/**
+ * Reads the header's shared queries. This header streams in after the rest of
+ * the profile page, which can fill these queries first, so until it has
+ * hydrated it renders the server snapshot it was given. That keeps the
+ * hydration render identical to the server HTML.
+ */
+function useProfileHeaderData({
+  handleOrWallet,
+  profileId,
+  initialStatements,
+  initialProfileEnabledAt,
+  initialCmsWebsiteHref,
+  initialFollowersCount,
+}: {
+  readonly handleOrWallet: string;
+  readonly profileId: string | null | undefined;
+  readonly initialStatements: CicStatement[];
+  readonly initialProfileEnabledAt: string | null;
+  readonly initialCmsWebsiteHref: string | null | undefined;
+  readonly initialFollowersCount: number | null;
+}) {
+  const hasHydrated = useHasHydrated();
+  // Same endpoint as the server loader that primed this query, so a refresh
+  // never requests a differently encoded path for the same identity.
+  const statementsSegment = toProfileIdentitySegment(handleOrWallet);
+  // No initialData: an empty server snapshot (for example after a failed
+  // request) must not count as fresh data, or the client would skip its own
+  // fetch. Until data arrives the server snapshot below is shown instead.
+  const { data: statements } = useQuery<CicStatement[]>({
+    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, handleOrWallet],
+    queryFn:
+      statementsSegment === null
+        ? skipToken
+        : async () =>
+            await commonApiFetch<CicStatement[]>({
+              endpoint: `profiles/${statementsSegment}/cic/statements`,
+            }),
+    staleTime: 60_000,
+  });
+  const { data: enabledAt } = useQuery<string | null>({
+    queryKey: [QueryKey.PROFILE_HEADER, handleOrWallet, "enabledAt"],
+    queryFn: skipToken,
+  });
+  const { data: websiteHref } = useQuery<string | null>({
+    queryKey: [QueryKey.PROFILE_HEADER, handleOrWallet, "cmsWebsiteHref"],
+    queryFn: skipToken,
+  });
+  const { data: followers } = useQuery<ApiIncomingIdentitySubscriptionsPage>({
+    queryKey: [
+      QueryKey.IDENTITY_FOLLOWERS,
+      { profile_id: profileId, page_size: 1 },
+    ],
+    queryFn: () => {
+      if (!profileId) throw new Error("Missing profile ID for followers");
+      return commonApiFetch<ApiIncomingIdentitySubscriptionsPage>({
+        endpoint: `identity-subscriptions/incoming/IDENTITY/${profileId}`,
+        params: { page_size: "1" },
+      });
+    },
+    enabled: !!profileId,
+    staleTime: 60_000,
+  });
+
+  return {
+    // Before hydration, and until the client has statements of its own, show
+    // exactly what the server rendered.
+    statements: (hasHydrated ? statements : undefined) ?? initialStatements,
+    profileEnabledAt:
+      hasHydrated && enabledAt !== undefined
+        ? enabledAt
+        : initialProfileEnabledAt,
+    cmsWebsiteHref:
+      hasHydrated && websiteHref !== undefined
+        ? websiteHref
+        : initialCmsWebsiteHref,
+    followersCount:
+      (hasHydrated ? followers?.count : undefined) ?? initialFollowersCount,
+  };
+}
+
 export default function UserPageHeaderClient({
   profile: initialProfile,
   handleOrWallet,
@@ -385,9 +460,9 @@ export default function UserPageHeaderClient({
   defaultBanner1,
   defaultBanner2,
   initialStatements,
-  profileEnabledAt,
-  followersCount,
-  cmsWebsiteHref,
+  profileEnabledAt: initialProfileEnabledAt,
+  followersCount: initialFollowersCount,
+  cmsWebsiteHref: initialCmsWebsiteHref,
 }: Readonly<Props>) {
   const params = useParams();
   const router = useRouter();
@@ -397,8 +472,13 @@ export default function UserPageHeaderClient({
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
 
   const { address } = useSeizeConnectContext();
-  const { connectedProfile, activeProfileProxy, setToast } =
-    useContext(AuthContext);
+  const {
+    connectedProfile,
+    activeProfileProxy,
+    isDirectProfileSession,
+    setToast,
+  } = useContext(AuthContext);
+  const hasHydrated = useHasHydrated();
 
   const { profile: hydratedProfile } = useIdentity({
     handleOrWallet: normalizedHandleOrWallet,
@@ -440,39 +520,37 @@ export default function UserPageHeaderClient({
     [profile, address, connectedProfile?.handle]
   );
 
-  const canEdit = useMemo(
-    () => !!(profile.handle && isMyProfile && !activeProfileProxy),
-    [profile.handle, isMyProfile, activeProfileProxy]
+  const canEdit = Boolean(
+    hasHydrated &&
+    isDirectProfileSession === true &&
+    profile.handle &&
+    isMyProfile &&
+    !activeProfileProxy
   );
-  const canInlineEdit = canEdit && !hasTouchScreen;
 
-  const { data: statements } = useQuery<CicStatement[]>({
-    queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, normalizedHandleOrWallet],
-    queryFn: async () =>
-      await commonApiFetch<CicStatement[]>({
-        endpoint: `profiles/${normalizedHandleOrWallet}/cic/statements`,
-      }),
-    enabled: !!normalizedHandleOrWallet,
-    initialData: initialStatements,
-    staleTime: 60_000,
-  });
+  const { statements, profileEnabledAt, cmsWebsiteHref, followersCount } =
+    useProfileHeaderData({
+      handleOrWallet: normalizedHandleOrWallet,
+      profileId: profile.id,
+      initialStatements,
+      initialProfileEnabledAt,
+      initialCmsWebsiteHref,
+      initialFollowersCount,
+    });
 
   const aboutStatement = useMemo(
     () => getAboutStatement(statements),
     [statements]
   );
 
-  const showAbout = useMemo(
-    () => aboutStatement !== null || canEdit,
-    [aboutStatement, canEdit]
-  );
+  const showAbout = aboutStatement !== null;
 
   const websiteAction =
     cmsWebsiteHref && profile.handle
       ? { href: cmsWebsiteHref, handle: profile.handle }
       : null;
   const followHandle =
-    !isMyProfile && profile.handle && connectedProfile?.handle
+    hasHydrated && !isMyProfile && profile.handle && connectedProfile
       ? profile.handle
       : null;
   const profileBlockState = useProfileBlockState({
@@ -483,8 +561,12 @@ export default function UserPageHeaderClient({
   const profileModerationStatus = usePublicProfileModerationStatus(profile.id);
   const moderatorAccess = useContentModeratorAccess();
   const canModerateProfile =
-    !isMyProfile && !!profile.id && moderatorAccess.data?.moderator === true;
-  const canManageProfilePreferences = isMyProfile && !activeProfileProxy;
+    hasHydrated &&
+    !isMyProfile &&
+    !!profile.id &&
+    moderatorAccess.data?.moderator === true;
+  const canManageProfilePreferences =
+    hasHydrated && isMyProfile && !activeProfileProxy;
   const showSubscriptionStatus = canManageProfilePreferences;
 
   const handleCreateDirectMessage = async (
@@ -503,7 +585,9 @@ export default function UserPageHeaderClient({
       navigateToDirectMessage({ waveId: wave.id, router, isApp });
     } catch (error) {
       console.error(error);
-      const errorMessage = getToastErrorDetails(error);
+      const errorMessage =
+        getDirectMessageAdmissionErrorMessage(DEFAULT_LOCALE, error) ??
+        getToastErrorDetails(error);
       setToast({
         type: "error",
         title: getUserProfileHeaderMessage(
@@ -632,6 +716,19 @@ export default function UserPageHeaderClient({
     },
   };
 
+  const editProfileProps = {
+    profile,
+    statement: aboutStatement,
+    defaultBanner1: banner1Color,
+    defaultBanner2: banner2Color,
+  };
+  const editProfileButton = canEdit ? (
+    <UserPageHeaderEditProfileDesktop {...editProfileProps} />
+  ) : null;
+  const mobileEditProfileButton = canEdit ? (
+    <UserPageHeaderEditProfile {...editProfileProps} />
+  ) : null;
+
   return (
     <div className="tailwind-scope">
       <section
@@ -643,25 +740,21 @@ export default function UserPageHeaderClient({
             profile={profile}
             defaultBanner1={banner1Color}
             defaultBanner2={banner2Color}
-            canEdit={canInlineEdit}
+            canEdit={false}
             profileLabel={profileLabel}
           />
-          <MobileHeaderControls
-            aboutStatement={aboutStatement}
-            banner1Color={banner1Color}
-            banner2Color={banner2Color}
-            canEdit={canEdit}
+          <ProfileHeaderControls
+            editProfileButton={mobileEditProfileButton}
             canManageProfilePreferences={canManageProfilePreferences}
             hasTouchScreen={hasTouchScreen}
-            profile={profile}
           />
         </div>
 
         <ProfileHeaderContent
+          editProfileButton={editProfileButton}
           aboutStatement={aboutStatement}
           banner1Color={banner1Color}
           banner2Color={banner2Color}
-          canInlineEdit={canInlineEdit}
           canManageProfilePreferences={canManageProfilePreferences}
           directMessageLoading={directMessageLoading}
           followHandle={followHandle}

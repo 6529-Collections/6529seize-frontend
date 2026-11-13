@@ -4,6 +4,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
+import type { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { filterValidDropUploadFiles } from "@/services/uploads/dropUploadValidation";
 import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 import {
@@ -18,12 +19,18 @@ import { selectNewComposerFiles } from "./content-helpers";
 
 export function useDropFilePreparation({
   scopeKey: composerScope,
+  purpose,
   existingFiles,
   disabled,
   setToast,
   onFiles,
 }: {
   readonly scopeKey: string;
+  /**
+   * What the composer is posting when a file is added. A prepared upload is
+   * only reused for this purpose; posting with the other one uploads again.
+   */
+  readonly purpose: ApiMediaUploadPurpose;
   readonly existingFiles: readonly File[];
   readonly disabled: boolean;
   readonly setToast: (toast: AppToastInput) => void;
@@ -94,7 +101,7 @@ export function useDropFilePreparation({
     const prepareFile = async (file: File) => {
       await validateDropImageSignature(file, locale);
       if (!active()) return;
-      if (getContentType(file) === "image/avif") {
+      if (getContentType(file).startsWith("image/")) {
         setPreparation((current) => ({
           ...current,
           files: [
@@ -105,12 +112,15 @@ export function useDropFilePreparation({
         const media = await multiPartUpload({
           file,
           path: "drop",
+          purpose,
+          locale,
+          waitForReady: true,
           signal: controller.signal,
           onProgress: (progress) => updateFile(file, { progress }),
           onProcessing: () =>
             updateFile(file, { phase: "processing", progress: 100 }),
         });
-        if (active()) rememberPreparedDropImage(file, media, owner);
+        if (active()) rememberPreparedDropImage(file, media, owner, purpose);
       }
     };
     void (async () => {

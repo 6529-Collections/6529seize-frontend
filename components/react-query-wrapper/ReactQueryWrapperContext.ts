@@ -1,4 +1,4 @@
-import type { UserPageRepPropsRepRates } from "@/app/[user]/page";
+import type { UserPageRepPropsRepRates } from "@/app/[user]/(profile)/page";
 import type {
   ProfileActivityLog,
   RatingWithProfileInfoAndLevel,
@@ -58,20 +58,20 @@ export type ReactQueryWrapperContextType = {
     readonly profileProxyId: string;
   }) => void;
   onProfileCICModify: (params: {
-    readonly targetProfile: ApiIdentity;
+    readonly targetProfiles: readonly ApiIdentity[];
     readonly connectedProfile: ApiIdentity | null;
     readonly rater: string | null;
     readonly profileProxy: ApiProfileProxy | null;
-  }) => void;
+  }) => Promise<void>;
   onProfileRepModify: ({
-    targetProfile,
+    targetProfiles,
     connectedProfile,
     profileProxy,
   }: {
-    readonly targetProfile: ApiIdentity;
+    readonly targetProfiles: readonly ApiIdentity[];
     readonly connectedProfile: ApiIdentity | null;
     readonly profileProxy: ApiProfileProxy | null;
-  }) => void;
+  }) => Promise<void>;
   onProfileEdit: ({
     profile,
     previousProfile,
@@ -102,7 +102,15 @@ export type ReactQueryWrapperContextType = {
   }) => void;
   invalidateAll: () => void;
   invalidateAuthSensitiveQueries: () => void;
-  invalidateNotifications: () => void;
+  /**
+   * Refreshes notification queries (unless `refreshNotifications` is false)
+   * and, unless `refreshWaveLists` is false, the wave lists whose unread
+   * counts a read can change.
+   */
+  invalidateNotifications: (options?: {
+    readonly refreshWaveLists?: boolean;
+    readonly refreshNotifications?: boolean;
+  }) => void;
   invalidateIdentityTdhStats: (params: { identity: string }) => void;
 };
 
@@ -114,8 +122,8 @@ export const ReactQueryWrapperContext =
     setWave: () => {},
     setWaveDrops: () => {},
     onProfileProxyModify: () => {},
-    onProfileCICModify: () => {},
-    onProfileRepModify: () => {},
+    onProfileCICModify: async () => {},
+    onProfileRepModify: () => Promise.resolve(),
     onProfileEdit: () => {},
     onProfileStatementAdd: () => {},
     onProfileStatementRemove: () => {},

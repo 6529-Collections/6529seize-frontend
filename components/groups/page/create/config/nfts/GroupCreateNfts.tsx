@@ -1,4 +1,8 @@
-import { GROUP_CREATE_PANEL_STYLES } from "../../GroupCreate.styles";
+import {
+  GROUP_CREATE_PANEL_STYLES,
+  GROUP_CREATE_TITLE_STYLES,
+  GROUP_CREATE_DESCRIPTION_STYLES,
+} from "../../GroupCreate.styles";
 import type { NFTSearchResult } from "@/components/header/header-search/HeaderSearchModalItem";
 import {
   GRADIENT_CONTRACT,
@@ -104,14 +108,12 @@ export default function GroupCreateNfts({
   return (
     <div className={GROUP_CREATE_PANEL_STYLES}>
       <div>
-        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50">
-          Required NFTs
-        </p>
-        <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400">
+        <p className={GROUP_CREATE_TITLE_STYLES}>Required NFTs</p>
+        <p className={GROUP_CREATE_DESCRIPTION_STYLES}>
           {t(DEFAULT_LOCALE, "groups.nftOwnership.description")}
         </p>
       </div>
-      <div className="tw-mt-2 sm:tw-mt-4">
+      <div className="tw-mt-4">
         <GroupCreateNftsSelect onSelect={onSelect} selected={nfts} />
       </div>
       <GroupCreateNftsSelected

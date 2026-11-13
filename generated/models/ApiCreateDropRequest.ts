@@ -14,6 +14,7 @@
 import { ApiCreateDropPart } from '../models/ApiCreateDropPart';
 import { ApiCreateDropPollRequest } from '../models/ApiCreateDropPollRequest';
 import { ApiCreateMentionedWave } from '../models/ApiCreateMentionedWave';
+import { ApiDeviceSignature } from '../models/ApiDeviceSignature';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropMentionedUser } from '../models/ApiDropMentionedUser';
 import { ApiDropMetadata } from '../models/ApiDropMetadata';
@@ -30,9 +31,18 @@ export class ApiCreateDropRequest {
     'mentioned_groups'?: Array<ApiDropGroupMention>;
     'poll'?: ApiCreateDropPollRequest;
     /**
+    * Profile IDs invited to collaborate. Included in the signed payload. An empty array opts into managed artist credits.
+    */
+    'collaborator_ids'?: Array<string>;
+    /**
     * When true, create the drop with generated external link previews hidden. Omit or set to false to leave previews visible. Signature-required drops must include this field in the signed payload when present.
     */
     'hide_link_preview'?: boolean;
+    /**
+    * Optional client-generated UUID that makes the create idempotent. When the same author sends the same client_drop_id again with the same wave and content (a retry), the drop created the first time is returned instead of a new one. The same id with a different wave or content is rejected with 409. Without it, every create makes a new drop. Use the plain 8-4-4-4-12 UUID form. A retry is matched on wave and content only, so a retry carrying a fresh signature for the same content is answered too. Like every other body field, client_drop_id is part of the signed payload when present: adding it to a body that was signed without it fails the signature check.
+    */
+    'client_drop_id'?: string;
+    'device_signature'?: ApiDeviceSignature;
     'title'?: string | null;
     /**
     * Across all parts, runtime validation allows at most 50,000 JavaScript UTF-16 code units. Each part is also subject to the per-part UTF-16 and UTF-8 limits documented on ApiCreateDropPart. A drop may have at most 250 parts, and at most 100 media items and 100 attachments in total across all parts.
@@ -95,9 +105,27 @@ export class ApiCreateDropRequest {
             "format": ""
         },
         {
+            "name": "collaborator_ids",
+            "baseName": "collaborator_ids",
+            "type": "Array<string>",
+            "format": ""
+        },
+        {
             "name": "hide_link_preview",
             "baseName": "hide_link_preview",
             "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "client_drop_id",
+            "baseName": "client_drop_id",
+            "type": "string",
+            "format": "uuid"
+        },
+        {
+            "name": "device_signature",
+            "baseName": "device_signature",
+            "type": "ApiDeviceSignature",
             "format": ""
         },
         {

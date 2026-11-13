@@ -1,5 +1,10 @@
 "use client";
 
+import { DROPDOWN_TRIGGER_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -8,7 +13,7 @@ import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import CreateDropReplyingWrapper from "@/components/waves/CreateDropReplyingWrapper";
 import type { DropMutationBody } from "@/components/waves/create-drop-content/drop-submission.types";
 import { ProcessIncomingDropType } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
 import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -29,6 +34,7 @@ import React, {
 } from "react";
 import { createPortal } from "react-dom";
 import { getOptimisticDrop } from "../utils/getOptimisticDrop";
+import { withClientDropId } from "@/services/api/client-drop-ids";
 import {
   buildQuorumProposalMarkdown,
   EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
@@ -217,10 +223,18 @@ export default function QuorumProposalDropModal({
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
   const { isApp } = useDeviceInfo();
+  const locale = useBrowserLocale();
+  const nativeCompetition = presentationCompetition(wave);
+  const [acceptedTermsVersion, setAcceptedTermsVersion] = useState<
+    number | null
+  >(null);
+  const nativeTerms = nativeCompetition?.participation.terms ?? null;
+  const termsAccepted =
+    !nativeTerms || acceptedTermsVersion === nativeCompetition?.config_version;
   const { isSafeWallet, address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile } = useContext(AuthContext);
   const { addOptimisticDrop } = useContext(ReactQueryWrapperContext);
-  const { processIncomingDrop } = useMyStream();
+  const { processIncomingDrop } = useMyStreamActions();
   const { signDrop } = useDropSignature();
   const [values, setValues] = useState<QuorumProposalFormValues>(
     EMPTY_QUORUM_PROPOSAL_FORM_VALUES
@@ -311,7 +325,7 @@ export default function QuorumProposalDropModal({
     async (
       requestBody: ApiCreateDropRequest
     ): Promise<ApiCreateDropRequest | null> => {
-      if (!wave.participation.signature_required) {
+      if (nativeCompetition || !wave.participation.signature_required) {
         return requestBody;
       }
 
@@ -362,7 +376,12 @@ export default function QuorumProposalDropModal({
         document.dispatchEvent(event);
       });
     },
-    [wave.participation.signature_required, wave.participation.terms, signDrop]
+    [
+      nativeCompetition,
+      wave.participation.signature_required,
+      wave.participation.terms,
+      signDrop,
+    ]
   );
 
   const hideMobileKeyboard = useCallback(() => {
@@ -393,7 +412,7 @@ export default function QuorumProposalDropModal({
   }, [onClose]);
 
   const submitQuorumProposalDrop = useCallback(async () => {
-    if (submitting) {
+    if (submitting || !termsAccepted) {
       return;
     }
 
@@ -426,7 +445,8 @@ export default function QuorumProposalDropModal({
             }
           : undefined;
 
-      const requestBody: ApiCreateDropRequest = {
+      // The client_drop_id is part of the signed payload.
+      const requestBody = withClientDropId({
         wave_id: wave.id,
         ...(replyTo ? { reply_to: replyTo } : {}),
         drop_type: ApiDropType.Participatory,
@@ -445,7 +465,7 @@ export default function QuorumProposalDropModal({
         signature: null,
         is_safe_signature: isSafeWallet,
         signer_address: address ?? "",
-      };
+      });
 
       const updatedDropRequest = await getUpdatedDropRequest(requestBody);
       if (!updatedDropRequest) {
@@ -463,7 +483,7 @@ export default function QuorumProposalDropModal({
       if (optimisticDrop) {
         void addOptimisticDrop({ drop: optimisticDrop });
         setTimeout(() => {
-          processIncomingDrop(
+          void processIncomingDrop(
             optimisticDrop,
             ProcessIncomingDropType.DROP_INSERT
           );
@@ -497,6 +517,7 @@ export default function QuorumProposalDropModal({
     }
   }, [
     submitting,
+    termsAccepted,
     hasProposalContent,
     requestAuth,
     activeDrop,
@@ -533,7 +554,7 @@ export default function QuorumProposalDropModal({
                 event.target.value as QuorumProposalUrgency
               )
             }
-            className="tw-form-select tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-sm tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+            className={`${DROPDOWN_TRIGGER_CLASSES} tw-form-select tw-block tw-h-11 tw-w-full tw-px-3 tw-text-sm`}
           >
             <option value="">Select urgency</option>
             <option value="Low">Low</option>
@@ -658,6 +679,26 @@ export default function QuorumProposalDropModal({
                 </div>
               )}
 
+              {nativeTerms && isLastStep && (
+                <div className="tw-mt-4 tw-space-y-3 tw-text-sm tw-text-iron-300">
+                  <p className="tw-whitespace-pre-wrap">{nativeTerms}</p>
+                  <label className="tw-flex tw-items-start tw-gap-3">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      disabled={submitting}
+                      onChange={(event) =>
+                        setAcceptedTermsVersion(
+                          event.target.checked
+                            ? (nativeCompetition?.config_version ?? null)
+                            : null
+                        )
+                      }
+                    />
+                    <span>{t(locale, "competitions.terms")}</span>
+                  </label>
+                </div>
+              )}
               {showValidation && !hasProposalContent && (
                 <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-font-medium tw-text-error">
                   Add at least one proposal field before submitting.
@@ -681,7 +722,9 @@ export default function QuorumProposalDropModal({
                   <Button
                     onClick={onSubmitClick}
                     loading={submitting}
-                    disabled={submitting || !hasProposalContent}
+                    disabled={
+                      submitting || !hasProposalContent || !termsAccepted
+                    }
                     variant="primary"
                     size="md"
                     className="tw-px-5"

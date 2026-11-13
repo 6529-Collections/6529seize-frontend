@@ -14,8 +14,8 @@ right sidebar, and what users see for loading and empty states.
 
 ## Availability Rules
 
-- `Winners` appears only after the first decision time passes.
-- If first decision time is missing or still in the future, `Winners` is
+- `Winners` appears only after the first result time passes.
+- If first result time is missing or still in the future, `Winners` is
   hidden.
 - Before voting ends, `Leaderboard` and `Winners` can both be visible.
 - After voting ends, `Leaderboard` is removed; `Winners` can remain.
@@ -30,7 +30,12 @@ right sidebar, and what users see for loading and empty states.
 
 ## Main Thread Behavior
 
-### Single-decision waves
+Winner pages load by win time, newest first, with older winners available through
+**Load more**. Available cards stay visible while remaining entries load or retry.
+Cards appear with each winner page; background score refreshes keep loaded
+artwork visible. Opening a winner loads its full drop.
+
+### Single-result waves
 
 - Podium shows first, second, and third place when available.
 - First place is raised in the center, with second place on the left and third
@@ -48,28 +53,28 @@ right sidebar, and what users see for loading and empty states.
 - Podium can render fewer than three winners. Unfilled places use placeholders
   with the same card shape and stagger as the available winners.
 
-### Multi-decision waves
+### Multi-result waves
 
-- Winners render in decision-time groups.
-- Groups are ordered newest decision first.
-- Decision groups with zero winners are hidden.
-- If no decision has winners, empty state shows:
+- Winners render in result-time groups.
+- Groups are ordered newest result first.
+- Result groups with zero winners are hidden.
+- If no result has winners, empty state shows:
   - `No Winners Yet`
   - `No winners have been announced for this wave yet. Check back later!`
 
 ## Right Sidebar Behavior
 
-- `Winners` appears in sidebar tabs only after first decision time passes.
+- `Winners` appears in sidebar tabs only after first result time passes.
 - Loading state shows compact skeleton placeholders.
-- If no decision points are returned, sidebar empty state shows `No Winners Yet`.
-- Single-decision waves render compact winners from the first decision.
-- Multi-decision waves show a decision selector with date/time and winner
+- If no result points are returned, sidebar empty state shows `No Winners Yet`.
+- Single-result waves render compact winners from the first result.
+- Multi-result waves show a result selector with date/time and winner
   counts.
-- The selector defaults to the first returned decision point.
-- If the selected decision has zero winners, the list area is empty with no
+- The selector defaults to the first returned result point.
+- If the selected result has zero winners, the list area is empty with no
   extra message.
-- Single-decision waves can show the same empty list behavior when the first
-  decision exists but has zero winners.
+- Single-result waves can show the same empty list behavior when the first
+  result exists but has zero winners.
 
 ## Common Scenarios
 
@@ -83,7 +88,7 @@ right sidebar, and what users see for loading and empty states.
   explicit mapping returned in the V2 submission context; it never infers a
   Meme ID from winner order. The link is omitted when no mapping is known.
 - Mapped Main Stage winner cards also show the Meme card's scheduled `Mint date`
-  in the viewer's local timezone and locale. This is separate from the decision
+  in the viewer's local timezone and locale. This is separate from the result
   date shown above the winner group. The mint date is omitted when no explicit
   Meme card mapping is known.
 - A mapped Meme card page also shows a `Main Stage Submission` action beside
@@ -95,7 +100,9 @@ right sidebar, and what users see for loading and empty states.
 - Winner rank labels use ordinal place formatting (`1st`, `2nd`, `3rd`,
   `4th`, and so on).
 - Winner rows can show your vote value when you voted on that drop.
-- If the voter list at the decision time was not saved, the winner shows
+- Vote totals, voter avatars and controls, and your vote summary wrap onto
+  additional lines when they do not fit within a winner or approved-drop card.
+- If the voter list at the result time was not saved, the winner shows
   `Voters unavailable` instead of a zero voter count. Select it for an
   explanation, then select `Vote log` to inspect any recorded changes. The
   final score remains visible; current allocations do not reconstruct the
@@ -105,11 +112,11 @@ right sidebar, and what users see for loading and empty states.
 
 ## Loading, Failure, and Recovery
 
-- While decisions load, winners surfaces show loading placeholders.
+- While results load, winners surfaces show loading placeholders.
 - The main-thread podium loading state keeps the three-place layout and rank
   stagger.
 - There is no dedicated winners error panel.
-- If decision data is unavailable, winners can resolve to empty-state messaging.
+- If result data is unavailable, winners can resolve to empty-state messaging.
 - Refresh the current wave route and retry.
 - If one winner drop fails to open, close that overlay and open another winner.
 
@@ -117,7 +124,7 @@ right sidebar, and what users see for loading and empty states.
 
 - [Wave Leaderboards Index](README.md)
 - [Wave Content Tabs](../chat/feature-content-tabs.md)
-- [Wave Leaderboard Decision Timeline](feature-decision-timeline.md)
+- [Wave Leaderboard Results Timeline](feature-decision-timeline.md)
 - [Wave Outcome Lists](../feature-outcome-lists.md)
 - [Wave Right Sidebar Tabs](../sidebars/feature-right-sidebar-tabs.md)
 - [Wave Troubleshooting](../troubleshooting-wave-navigation-and-posting.md)

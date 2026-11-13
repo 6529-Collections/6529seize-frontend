@@ -1,4 +1,4 @@
-import { renderHook } from "@testing-library/react";
+import { fireEvent, renderHook } from "@testing-library/react";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 import { useRevealActiveSidebarWave } from "@/hooks/useRevealActiveSidebarWave";
 import type { SidebarWaveTreeRow } from "@/hooks/useSidebarWaveTree";
@@ -23,6 +23,131 @@ const createWaveRow = (
 });
 
 describe("useRevealActiveSidebarWave", () => {
+  it("does not reveal the same wave again when incoming activity reorders it", () => {
+    const activeRow = createWaveRow("active");
+    const otherRow = createWaveRow("other");
+    const scrollToVirtualIndex = jest.fn(() => true);
+    const scrollContainerRef = { current: document.createElement("div") };
+    const { rerender } = renderHook(
+      ({ virtualRows }) =>
+        useRevealActiveSidebarWave({
+          activeParentWaveId: null,
+          activeWaveId: "active",
+          scrollContainerRef,
+          scrollToVirtualIndex,
+          staticRows: [],
+          virtualRows,
+        }),
+      { initialProps: { virtualRows: [otherRow, activeRow] } }
+    );
+    expect(scrollToVirtualIndex).toHaveBeenLastCalledWith(1);
+    rerender({ virtualRows: [activeRow, otherRow] });
+    rerender({ virtualRows: [otherRow, activeRow] });
+    expect(scrollToVirtualIndex).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps reader input in control while the initial list is still loading", () => {
+    const activeRow = createWaveRow("active");
+    const scrollToVirtualIndex = jest.fn(() => true);
+    const scrollContainerRef = { current: document.createElement("div") };
+    const { rerender } = renderHook(
+      ({ isLoading }) =>
+        useRevealActiveSidebarWave({
+          activeParentWaveId: null,
+          activeWaveId: "active",
+          isLoading,
+          scrollContainerRef,
+          scrollToVirtualIndex,
+          staticRows: [],
+          virtualRows: [activeRow],
+        }),
+      { initialProps: { isLoading: true } }
+    );
+    fireEvent.wheel(scrollContainerRef.current);
+    rerender({ isLoading: false });
+    expect(scrollToVirtualIndex).not.toHaveBeenCalled();
+  });
+
+  it.each(["wheel", "touchStart", "pointerDown", "keyDown"] as const)(
+    "stops activity-driven reveals after %s and resumes on navigation",
+    (event) => {
+      const activeRow = createWaveRow("active");
+      const nextRow = createWaveRow("next");
+      const scrollToVirtualIndex = jest.fn(() => true);
+      const scrollContainerRef = { current: document.createElement("div") };
+      const { rerender } = renderHook(
+        ({ activeWaveId, virtualRows }) =>
+          useRevealActiveSidebarWave({
+            activeParentWaveId: null,
+            activeWaveId,
+            scrollContainerRef,
+            scrollToVirtualIndex,
+            staticRows: [],
+            virtualRows,
+          }),
+        {
+          initialProps: {
+            activeWaveId: "active",
+            virtualRows: [activeRow, nextRow],
+          },
+        }
+      );
+      fireEvent[event](scrollContainerRef.current);
+      rerender({ activeWaveId: "active", virtualRows: [nextRow, activeRow] });
+      rerender({ activeWaveId: "active", virtualRows: [activeRow, nextRow] });
+      expect(scrollToVirtualIndex).toHaveBeenCalledTimes(1);
+
+      rerender({ activeWaveId: "next", virtualRows: [activeRow, nextRow] });
+      expect(scrollToVirtualIndex).toHaveBeenLastCalledWith(1);
+      expect(scrollToVirtualIndex).toHaveBeenCalledTimes(2);
+    }
+  );
+
+  it("keeps direct-message reveals when interaction preservation is disabled", () => {
+    const activeRow = createWaveRow("active");
+    const scrollToVirtualIndex = jest.fn(() => true);
+    const scrollContainerRef = { current: document.createElement("div") };
+    const { rerender } = renderHook(
+      ({ virtualRows }) =>
+        useRevealActiveSidebarWave({
+          activeParentWaveId: null,
+          activeWaveId: "active",
+          preserveScrollOnInteraction: false,
+          scrollContainerRef,
+          scrollToVirtualIndex,
+          staticRows: [],
+          virtualRows,
+        }),
+      { initialProps: { virtualRows: [activeRow] } }
+    );
+    fireEvent.wheel(scrollContainerRef.current);
+    rerender({ virtualRows: [createWaveRow("newer"), activeRow] });
+    expect(scrollToVirtualIndex).toHaveBeenLastCalledWith(1);
+    expect(scrollToVirtualIndex).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not cancel delayed hydration for a programmatic scroll", () => {
+    const parent = createWaveRow("parent");
+    const scrollToVirtualIndex = jest.fn(() => true);
+    const scrollContainerRef = { current: document.createElement("div") };
+    const { rerender } = renderHook(
+      ({ virtualRows }) =>
+        useRevealActiveSidebarWave({
+          activeParentWaveId: "parent",
+          activeWaveId: "child",
+          scrollContainerRef,
+          scrollToVirtualIndex,
+          staticRows: [],
+          virtualRows,
+        }),
+      { initialProps: { virtualRows: [parent] } }
+    );
+    fireEvent.scroll(scrollContainerRef.current);
+    rerender({ virtualRows: [parent, createWaveRow("child", "parent")] });
+    expect(scrollToVirtualIndex).toHaveBeenLastCalledWith(1);
+    expect(scrollToVirtualIndex).toHaveBeenCalledTimes(2);
+  });
+
   it.each([true, false])(
     "preserves scroll across filter changes and resumes on navigation (empty Joined: %s)",
     (emptyJoined) => {
@@ -128,30 +253,47 @@ describe("useRevealActiveSidebarWave", () => {
     expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest" });
   });
 
-  it("reveals the active row again when hydrated rows move its position", () => {
+  it("waits for list hydration before revealing the active row at its final position", () => {
     const activeRow = createWaveRow("active");
     const scrollToVirtualIndex = jest.fn(() => true);
     const scrollContainerRef = {
       current: document.createElement("div"),
     } as React.RefObject<HTMLElement>;
     const { rerender } = renderHook(
-      ({ virtualRows }: { readonly virtualRows: SidebarWaveTreeRow[] }) =>
+      ({ virtualRows, isLoading }) =>
         useRevealActiveSidebarWave({
           activeParentWaveId: null,
           activeWaveId: "active",
+          isLoading,
           scrollContainerRef,
           scrollToVirtualIndex,
           staticRows: [],
           virtualRows,
         }),
-      { initialProps: { virtualRows: [activeRow] } }
+      { initialProps: { virtualRows: [activeRow], isLoading: true } }
     );
 
-    expect(scrollToVirtualIndex).toHaveBeenLastCalledWith(0);
-
-    rerender({ virtualRows: [createWaveRow("newer"), activeRow] });
+    expect(scrollToVirtualIndex).not.toHaveBeenCalled();
+    rerender({
+      virtualRows: [createWaveRow("newer"), activeRow],
+      isLoading: true,
+    });
+    expect(scrollToVirtualIndex).not.toHaveBeenCalled();
+    rerender({
+      virtualRows: [createWaveRow("newer"), activeRow],
+      isLoading: false,
+    });
 
     expect(scrollToVirtualIndex).toHaveBeenLastCalledWith(1);
-    expect(scrollToVirtualIndex).toHaveBeenCalledTimes(2);
+    expect(scrollToVirtualIndex).toHaveBeenCalledTimes(1);
+    // A later refetch or page must not restart the navigation reveal.
+    rerender({ virtualRows: [activeRow], isLoading: true });
+    rerender({ virtualRows: [activeRow], isLoading: false });
+    expect(scrollToVirtualIndex).toHaveBeenCalledTimes(1);
+
+    // Keep the completed reveal even if a reload temporarily removes all rows.
+    rerender({ virtualRows: [], isLoading: true });
+    rerender({ virtualRows: [activeRow], isLoading: false });
+    expect(scrollToVirtualIndex).toHaveBeenCalledTimes(1);
   });
 });

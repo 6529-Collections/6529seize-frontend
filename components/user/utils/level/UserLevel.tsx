@@ -1,3 +1,5 @@
+import { openUrlInNewTab } from "@/helpers/open-url.helpers";
+
 const LEVEL_CLASSES: { minLevel: number; classes: string }[] = [
   { minLevel: 80, classes: "tw-text-[#55B075] tw-ring-[#55B075]" },
   { minLevel: 60, classes: "tw-text-[#AABE68] tw-ring-[#AABE68]" },
@@ -11,11 +13,13 @@ export default function UserLevel({
   size = "base",
   asSpan = false,
   showLabel = true,
+  circle = false,
 }: {
   readonly level: number;
   readonly size?: "xxs" | "xs" | "sm" | "base" | undefined;
   readonly asSpan?: boolean | undefined;
   readonly showLabel?: boolean | undefined;
+  readonly circle?: boolean;
 }) {
   const getColorClasses = () =>
     LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= level)?.classes ??
@@ -36,11 +40,17 @@ export default function UserLevel({
 
   const classes = `${getColorClasses()} ${getSizeClasses()}`;
   const openLevelsPage = () => {
-    window.open("/network/levels", "_blank");
+    openUrlInNewTab("/network/levels");
   };
 
   const content = showLabel ? `Level ${level}` : `${level}`;
-  const sharedClasses = `tw-inline-flex tw-items-center tw-justify-center ${showLabel ? "tw-rounded-xl tw-px-2" : "tw-rounded-full tw-min-w-[2rem]"} tw-ring-inset ${classes}`;
+  const badgeShape = showLabel
+    ? "tw-rounded-xl tw-px-2"
+    : "tw-rounded-full tw-min-w-[2rem]";
+  const shape = circle
+    ? "tw-size-6 tw-shrink-0 tw-rounded-full !tw-p-0"
+    : badgeShape;
+  const sharedClasses = `tw-inline-flex tw-items-center tw-justify-center tw-ring-inset ${classes} ${shape}`;
 
   if (asSpan) {
     return <span className={sharedClasses}>{content}</span>;
@@ -48,6 +58,8 @@ export default function UserLevel({
 
   return (
     <button
+      type="button"
+      aria-label={`Level ${level}`}
       onClick={openLevelsPage}
       className={`tw-border-none tw-bg-transparent ${sharedClasses}`}
     >

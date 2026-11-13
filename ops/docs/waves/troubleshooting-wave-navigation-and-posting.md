@@ -57,6 +57,12 @@ is blocked.
 - Legacy link uses `/waves?wave={waveId}`:
   expected behavior is redirect to `/waves/{waveId}` while preserving other
   query values. Save the normalized URL after load.
+- Link shows `404 | PAGE NOT FOUND` instead of the wave:
+  the id in `/waves/{waveId}`, `/messages/{waveId}` or `?wave=` is not a wave
+  id. Wave ids are UUIDs such as `5f207393-5418-4a75-8738-e40edb44a94d`, so a
+  link cut short when copied or pasted ends here. Copy a fresh link from the
+  wave. See
+  [Legacy Route Redirects](../shared/feature-legacy-route-redirects.md#malformed-wave-ids-404).
 - Thread URL opens, then returns to `/waves` or `/messages`:
   the selected wave id is unavailable or stale. Reopen from sidebar/list and
   copy a fresh link.
@@ -91,7 +97,8 @@ is blocked.
   Reconnect that profile using the
   [wallet account controls](../navigation/feature-wallet-account-controls.md#failure-and-recovery),
   then retry the action. Post keeps the draft when authentication fails; save
-  it before logging out or reloading. Reactions are not automatically retried
+  it before logging out or reloading. Logging out removes unsent drafts from
+  this browser. Reactions are not automatically retried
   after signing in.
 - Footer offers `Sign in to 6529 to post`:
   select it to open the wallet chooser, then use `Sign message` in the
@@ -145,7 +152,7 @@ is blocked.
   tab availability changes by wave type and voting state. Chat-type waves hide
   the desktop tab row (`Chat`, `Leaderboard`, `Winners`, and related tabs).
 - `Winners` is missing:
-  it appears only after the first decision has passed.
+  it appears only after the first result has passed.
 - `Leaderboard` is missing:
   it can disappear after voting ends.
 - `Sales` is missing:

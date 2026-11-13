@@ -45,6 +45,20 @@ jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
   },
 }));
 jest.mock("@/helpers/Helpers", () => ({ cicToType: jest.fn(() => "TYPE") }));
+jest.mock("@/lib/device-signing/feature", () => ({
+  isSignedMessagesEnabled: () => true,
+}));
+// Placement only: this browser's own check is covered in
+// dropSignatureVerdicts.test.tsx, so every seal here reads as verified.
+jest.mock("@/components/waves/drops/signature/dropSignatureVerdicts", () => ({
+  useDropSealStates: (drops: readonly unknown[]) => drops.map(() => "verified"),
+  readSealState: () => "verified",
+}));
+
+jest.mock("@/components/waves/drops/signature/DropSignatureDialog", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 
 describe("ParticipationDropHeader", () => {
   const baseDrop: any = {
@@ -143,4 +157,30 @@ describe("ParticipationDropHeader", () => {
     expect(screen.queryByTestId("approval-badge")).toBeNull();
     expect(screen.queryByTestId("badge")).toBeNull();
   });
+  it.each(["inline", "stacked", "stacked-compact"] as const)(
+    "shows the author signed seal beside the %s timestamp",
+    (timestampLayout) => {
+      render(
+        <ParticipationDropHeader
+          drop={{ ...baseDrop, id: "d1", is_author_signed: true }}
+          showWaveInfo={false}
+          timestampLayout={timestampLayout}
+        />
+      );
+
+      expect(
+        screen.getByRole("button", { name: "Signed by its author" })
+          .parentElement
+      ).toContainElement(screen.getByTestId("time"));
+      const authorRow = screen.getByText("alice").closest("p")?.parentElement;
+      const timestampRow = screen.getByRole("button", {
+        name: "Signed by its author",
+      }).parentElement?.parentElement;
+      if (timestampLayout === "inline") {
+        expect(timestampRow).toBe(authorRow);
+      } else {
+        expect(timestampRow).not.toBe(authorRow);
+      }
+    }
+  );
 });

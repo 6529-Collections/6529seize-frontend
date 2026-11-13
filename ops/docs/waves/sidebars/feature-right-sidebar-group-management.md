@@ -4,13 +4,17 @@
 
 Wave details `Configuration` lets users inspect access groups. Editors can also
 manage them in place from the same consolidated view.
+Wave Configuration changes shared wave access and chat settings. Decision
+entry rules, voting rules, schedules, and awards are managed in the selected
+decision’s Settings and remain unchanged when the wave is edited.
 
 Users can:
 
-- review `Visibility`, `Chat access`, and `Admins` scopes; competition Drop and Vote access belong to Settings
+- review `Visibility`, `Chat access`, and `Admins` scopes; decision entry
+  and voting access are managed in decision Settings
 - follow visible `1 user` or `X users` counts to inspect both criteria and
   current members
-- open a prefilled group editor directly from each access-row gear
+- open a prefilled group editor from a `Visibility`, `Chat access`, or `Admins` gear
 - edit criteria and identities or choose a different existing group
 - make wave visibility public or align an eligible access row with Visibility
 - create, edit, delete, and reorder wave curations without leaving the thread
@@ -64,20 +68,20 @@ Users can:
 9. Visibility with a group also offers `Make wave public`. The app explains
    that everyone will be able to find and view the wave and requires explicit
    confirmation.
-10. When Visibility, Drop, Vote, and Chat access are all public, assigning a
-    Visibility group assigns that same group to Drop, Vote, and Chat access in
-    the same save. The Admins group is not changed.
-11. `Drop`, `Vote`, and `Chat access` offer `Use visibility criteria` when
-    their effective criteria differ from Visibility. Confirmation changes only
-    that row to the Visibility group; when Visibility is public, the selected
-    row becomes public too. `Admins` does not offer this shortcut.
+10. When Visibility and Chat access are both public, assigning a Visibility
+    group assigns that same group to Chat access in the same save. Admins and
+    decision Drop and Vote groups stay unchanged.
+11. `Chat access` offers `Use visibility criteria` when its effective criteria
+    differ from Visibility. Confirmation changes Chat to the Visibility group;
+    when Visibility is public, Chat becomes public too. `Admins` does not offer
+    this shortcut. Drop and Vote access are managed in decision Settings.
 12. Authenticate when prompted.
 13. Saving edited criteria creates a separate group and assigns that copy only
     to the access row whose gear was opened. The original group, other access
     rows, and other waves using it remain unchanged. Choosing an existing group
-    also changes only the selected access row, except for the fully public
-    Visibility cascade described above.
-14. The app verifies that an updated `Drop`, `Vote`, `Chat access`, or `Admins`
+    also changes only the selected access row, except for the public Chat
+    assignment described above.
+14. The app verifies that an updated `Chat access` or `Admins`
     group is contained in `Visibility` before saving.
 15. After success, the affected rows refresh.
 16. In `Curations`, administrators can create or delete curations, edit their
@@ -90,11 +94,11 @@ Users can:
 
 ## Common Scenarios
 
-- Restrict `Drop` or `Vote` to a specific group.
-- Restrict a fully public wave by assigning one Visibility group to all
-  non-admin access rows in one save.
+- Use decision Settings to inspect or change entry and voting groups.
+- Restrict a public wave and public Chat by assigning one Visibility group in
+  one save.
 - Make Visibility public with confirmation.
-- Align Drop, Vote, or Chat access with Visibility in one confirmed action.
+- Align Chat access with Visibility in one confirmed action.
 - Add or remove included and excluded identities while editing a copied group.
 - Create, edit, delete, or reorder wave curations.
 
@@ -107,7 +111,8 @@ Users can:
   audience need no warning, even when the group itself is different.
 - Parent visibility can change while subwaves exist. Opening a subwave always
   requires access to both waves.
-- Chat waves show only `Visibility`, `Chat access`, and `Admins`.
+- Configuration shows only `Visibility`, `Chat access`, and `Admins` for every
+  wave. Decision access rows are omitted.
 - `Chat access` controls who can chat only when chat is enabled; it does not
   show whether chat is currently enabled or disabled.
 - Chat waves require chat to stay enabled, so Configuration does not show a
@@ -131,10 +136,10 @@ Users can:
   included by default. The editor can turn off `Include me` from `Identities`.
 - Editing an already restricted row preserves its saved included and excluded
   identities instead of adding the editor automatically.
-- The Visibility cascade runs only when Visibility, Drop, Vote, and Chat access
-  are all public before the change. If any one of those rows is already
-  restricted, editing Visibility changes only Visibility and normal containment
-  validation applies.
+- Visibility also assigns Chat only when both are public before the change.
+  If either is already restricted, editing Visibility changes only Visibility
+  and normal shared-access containment validation applies. Decision groups
+  do not affect this behavior and are never reassigned by a wave edit.
 - Curation management is entirely hidden from viewers who cannot edit the wave.
 - Curation rows show an unavailable-group label when full group data is missing.
 - If no curations exist, administrators see the empty state and the create plus;
@@ -167,14 +172,14 @@ unavailable` without exposing the group id or treating the scope as public.
 ## Limitations / Notes
 
 - Editing controls require a non-proxy profile with wave edit permission.
-- Curation actions are separate from `Visibility`/`Drop`/`Vote`/
-  `Chat access`/`Admins` access scope rows.
+- Curation actions are separate from `Visibility`, `Chat access`, and `Admins`
+  access scope rows.
 - Include/exclude limits are enforced per group:
   - include list max: `10,000`
   - exclude list max: `1,000`
-- These containment rules apply to general access scopes, not curation groups:
-  every member who can drop, vote, chat, or administer must also be
-  able to view the Wave.
+- Wave edits validate shared access scopes: every member who can chat or
+  administer must also be able to view the wave. Decision Settings manage
+  entry and voting access. Curation groups have separate rules.
 
 ## Related Pages
 

@@ -4,7 +4,13 @@ import type { UserPageStatsInitialData } from "@/components/user/stats/userPageS
 import { CollectedCollectionType } from "@/entities/IProfile";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { cloneElement, isValidElement, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
@@ -35,10 +41,14 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 const mockReplace = jest.fn();
+const nativeReplaceState = globalThis.history.replaceState.bind(
+  globalThis.history
+);
+const mockRouterReplace = jest.fn();
 jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
   usePathname: () => "/punk6529/collected",
-  useRouter: () => ({ replace: mockReplace }),
+  useRouter: () => ({ replace: mockRouterReplace }),
 }));
 
 jest.mock(
@@ -142,15 +152,100 @@ const createDeferred = <T,>() => {
 
 describe("UserPageCollectedStats", () => {
   beforeEach(() => {
+    nativeReplaceState(null, "", "/punk6529/collected");
+    jest
+      .spyOn(globalThis.history, "replaceState")
+      .mockImplementation((data, unused, url) => {
+        nativeReplaceState(data, unused, url);
+        const href = globalThis.location.pathname + globalThis.location.search;
+        useSearchParamsMock.mockReturnValue(
+          new URLSearchParams(globalThis.location.search)
+        );
+        mockReplace(href);
+      });
     apiMock.mockClear();
     apiMock.mockResolvedValue({});
     mockReplace.mockReset();
+    mockRouterReplace.mockReset();
     useSearchParamsMock.mockReturnValue(new URLSearchParams());
     useDesktopSeasonRowCapacityMock.mockReturnValue({
       containerRef: { current: null },
       visibleSeasonCount: null,
       isDesktopLayout: false,
     });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("opens with a loading state and closes without waiting for its requests", async () => {
+    const pending = createDeferred<unknown>();
+    apiMock.mockReturnValue(pending.promise);
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData()}
+      />
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", { name: "Details" })
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading collection details"
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Hide Details" }));
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Details" })
+    ).toHaveAttribute("aria-expanded", "false");
+    expect(mockRouterReplace).not.toHaveBeenCalled();
+    await act(async () => {
+      pending.resolve([]);
+    });
+  });
+
+  it("composes rapid toggles from the current URL and preserves filters and the anchor", () => {
+    nativeReplaceState(
+      null,
+      "",
+      "/punk6529/collected?collection=memelab&page=3#collected-card-memelab-65"
+    );
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams(globalThis.location.search)
+    );
+    const { rerender } = renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData()}
+      />
+    );
+    // Hold the router subscription still to exercise repeated clicks before a render.
+    mockReplace.mockImplementation(() => undefined);
+    const button = screen.getByRole("button", { name: "Details" });
+    fireEvent.click(button);
+    fireEvent.click(button);
+    fireEvent.click(button);
+    expect(new URLSearchParams(globalThis.location.search).get("details")).toBe(
+      "open"
+    );
+    expect(globalThis.location.search).toContain("collection=memelab&page=3");
+    expect(globalThis.location.hash).toBe("#collected-card-memelab-65");
+    expect(mockRouterReplace).not.toHaveBeenCalled();
+    rerender(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData()}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: "Hide Details" })
+    ).toHaveAttribute("aria-expanded", "true");
+    rerender(<></>);
   });
 
   it("renders the new collected header metrics and season states", async () => {
@@ -728,7 +823,7 @@ describe("UserPageCollectedStats", () => {
       "owners-balances/consolidation/key",
       "owners-balances/consolidation/key/memes",
     ]);
-    expect(screen.getByTestId("details")).toHaveAttribute(
+    expect(await screen.findByTestId("details")).toHaveAttribute(
       "data-locale",
       "de-DE"
     );
@@ -763,6 +858,11 @@ describe("UserPageCollectedStats", () => {
 
   it("keeps Details closed on return without losing activity filters or pages", async () => {
     const user = userEvent.setup();
+    nativeReplaceState(
+      null,
+      "",
+      "/punk6529/collected?activity=wallet-activity&wallet-activity=mint&wallet-activity-page=2&page=3"
+    );
     useSearchParamsMock.mockReturnValue(
       new URLSearchParams(
         "activity=wallet-activity&wallet-activity=mint&wallet-activity-page=2&page=3"
@@ -778,18 +878,16 @@ describe("UserPageCollectedStats", () => {
     const result = renderWithQueryClient(ui);
     await user.click(screen.getByRole("button", { name: "Hide Details" }));
     expect(mockReplace).toHaveBeenCalledWith(
-      "/punk6529/collected?activity=wallet-activity&wallet-activity=mint&wallet-activity-page=2&page=3&details=closed",
-      { scroll: false }
+      "/punk6529/collected?activity=wallet-activity&wallet-activity=mint&wallet-activity-page=2&page=3&details=closed"
     );
     result.unmount();
     renderWithQueryClient(ui);
-    expect(
-      screen.getByRole("button", { name: "Details" })
-    ).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByTestId("details")).not.toBeInTheDocument();
-    await user.click(
-      screen.getByRole("button", { name: "Details" })
+    expect(screen.getByRole("button", { name: "Details" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
     );
+    expect(screen.queryByTestId("details")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Details" }));
     expect(mockReplace.mock.lastCall?.[0]).toContain("details=open");
     expect(mockReplace.mock.lastCall?.[0]).toContain("wallet-activity-page=2");
   });
@@ -813,7 +911,7 @@ describe("UserPageCollectedStats", () => {
     expect(
       screen.getByRole("button", { name: "Hide Details" })
     ).toBeInTheDocument();
-    expect(screen.getByTestId("details")).toHaveAttribute(
+    expect(await screen.findByTestId("details")).toHaveAttribute(
       "data-locale",
       "de-DE"
     );
@@ -839,7 +937,7 @@ describe("UserPageCollectedStats", () => {
 
       await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
 
-      expect(screen.getByTestId("details")).toHaveAttribute(
+      expect(await screen.findByTestId("details")).toHaveAttribute(
         "data-seasons",
         "0"
       );

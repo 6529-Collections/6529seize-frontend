@@ -1,7 +1,8 @@
 "use client";
 
 import type { FC } from "react";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { m, type MotionValue } from "framer-motion";
 
 export type SliderVisualState = {
@@ -106,6 +107,7 @@ export const SliderThumb: FC<SliderThumbProps> = ({
   tooltipBottomClassName,
   tooltipOffset,
 }) => {
+  const locale = useBrowserLocale();
   const boxShadow = getThumbBoxShadow(isDragging, visualState);
   const thumbScale = isMini
     ? getMiniThumbScale(isDragging, scale)
@@ -117,18 +119,25 @@ export const SliderThumb: FC<SliderThumbProps> = ({
       <div
         className={`tw-absolute ${tooltipBottomClassName} tw-left-1/2 tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-border tw-text-center tw-transition-transform tw-duration-200 tw-ease-out ${visualState.tooltipClasses}`}
         style={{
-          transform: `translateX(calc(-50% + ${tooltipOffset}%))`,
+          transform: `translateX(${tooltipOffset - 50}%)`,
         }}
       >
         <span className="tw-flex tw-min-w-0 tw-items-center tw-justify-center tw-gap-1">
-          <span className="tw-min-w-0 tw-truncate tw-leading-[14px]">
-            {formatNumberWithCommas(numericVoteValue)}
+          {/* The value always shows in full; the unit gives way when space runs out. */}
+          <span className="tw-shrink-0 tw-leading-[14px]">
+            {formatInteger(locale, numericVoteValue)}
           </span>
-          <span className="tw-sr-only">{label}</span>
+          <span className="tw-sr-only group-[.is-vote-panel]/inline-vote:tw-not-sr-only group-[.is-vote-panel]/inline-vote:tw-min-w-0 group-[.is-vote-panel]/inline-vote:tw-truncate group-[.is-vote-panel]/inline-vote:tw-font-medium">
+            {label}
+          </span>
         </span>
         {isMini && (
           <div
-            className={`tw-absolute tw-bottom-[-4px] tw-left-1/2 tw-h-2 tw-w-2 -tw-translate-x-1/2 tw-rotate-45 tw-border-b tw-border-r ${visualState.tooltipArrowClasses}`}
+            className={`tw-absolute tw-bottom-[-4px] tw-h-2 tw-w-2 -tw-translate-x-1/2 tw-rotate-45 tw-border-b tw-border-r ${visualState.tooltipArrowClasses}`}
+            // The bubble slides with the thumb, so the arrow follows the thumb within it.
+            style={{
+              left: `${Math.max(12, Math.min(88, 50 - tooltipOffset))}%`,
+            }}
           />
         )}
       </div>
@@ -159,6 +168,7 @@ export const SliderScaleLabels: FC<SliderScaleLabelsProps> = ({
   progressOriginPercentage,
   visualState,
 }) => {
+  const locale = useBrowserLocale();
   if (isMini) {
     return null;
   }
@@ -168,7 +178,7 @@ export const SliderScaleLabels: FC<SliderScaleLabelsProps> = ({
       <span
         className={`tw-max-w-[42%] tw-truncate tw-tabular-nums ${visualState.minLabelClasses}`}
       >
-        {formatNumberWithCommas(minValue)}
+        {formatInteger(locale, minValue)}
       </span>
       {showZeroScaleMarker && (
         <span
@@ -182,7 +192,7 @@ export const SliderScaleLabels: FC<SliderScaleLabelsProps> = ({
         className={`tw-max-w-[42%] tw-truncate tw-tabular-nums ${visualState.maxLabelClasses}`}
       >
         {visualState.maxLabelPrefix}
-        {formatNumberWithCommas(maxValue)}
+        {formatInteger(locale, maxValue)}
       </span>
     </div>
   );

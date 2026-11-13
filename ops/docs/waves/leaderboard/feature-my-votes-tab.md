@@ -1,18 +1,43 @@
-# Competition Votes
+# Decision Votes
 
 ## Overview
 
-`My Votes` lists drops where your current vote is not `0`.
+`My Votes` lists active submissions where your current vote is not `0`.
+Past winners are excluded; their historical vote records remain preserved.
+Use the compact sorting control beside **Select all**. It opens a dropdown on
+desktop and the shared bottom sheet below 1024px and in the app.
+The control shows the current order, with **Available in wave** on the same
+toolbar when a wave-wide balance is available. The controls wrap on narrow screens.
+**Reset votes** and the selected count appear only after you select a row;
+clearing the selection hides them again. Choose an order:
+
+- **Your vote amount** (the initial default): highest signed vote first, including
+  negative votes. Equal amounts keep the existing allocation-update order,
+  oldest first, with a stable artwork order when times match.
+- **Leaderboard position**: the decision's current position, highest-ranked
+  first. Ties follow its leaderboard order; entries without a rank come last.
+- **Last voted**: your most recent successfully cast or changed vote first.
+  Automatic credit adjustments and unchanged saves do not count as new votes.
+  Entries without a known vote-change time come last; equal times use a stable
+  artwork order. Older retained vote records have second-level precision.
+
+Each order covers all eligible votes, including pages not loaded yet. Your choice
+is remembered in this browser for the current decision and connected profile.
+Changing sort clears the reset selection and starts the selected order from its
+first page; it does not change a vote. The selector stays available during loading
+and retry, and is disabled while a vote is saving or a bulk reset is running.
+Saving a vote refreshes the loaded pages to reflect its new position before more
+rows load.
 You can update votes one row at a time, reset selected rows to `0`, or open a
 prefilled reply for explaining a vote.
 
 Open **Votes** in the wave's main row, then select **My Votes**. The other
 subtabs are **All votes**, with voter profiles and totals, and **Activity**, with
 vote changes. These three views use compact rounded pills below the main wave
-tabs on desktop, mobile web, and the app. Decision-pause notices appear below the
+tabs on desktop, mobile web, and the app. Notices that results are paused appear below the
 pills. Submission eligibility notices belong to Leaderboard and do not appear in
-Votes. Each view uses the selected competition,
-including the original competition in an older wave. Switching competition changes all three views.
+Votes. Each view uses the selected decision,
+including the original decision in an older wave. Switching decision changes all three views.
 Signed-out viewers can inspect public All votes and Activity; personal votes
 require a connected profile. My Votes rows span the full wave content pane,
 with padding inside each row for its controls.
@@ -42,7 +67,7 @@ while each profile loads. The placeholders stay still when reduced motion is ena
 - Open an eligible wave.
 - Switch to `Votes`, then `My Votes`.
 - Use rows or their checkboxes to select votes for reset, vote inputs to edit
-  votes, and `Explain` actions to explain them.
+  votes, and `Explain vote` actions to explain them.
 
 ## User Journey
 
@@ -56,15 +81,18 @@ while each profile loads. The placeholders stay still when reduced motion is ena
    route, including with `Enter` or `Space`. Checkboxes, vote controls, and
    profile links keep their own actions; selecting text does not toggle the row.
 5. Edit a vote, then submit with `Vote` or `Enter`.
-6. Optional: select `Explain` to open an inline reply composer prefilled as
+6. Optional: select `Explain vote` to open an inline reply composer prefilled as
    `Vote rationale (...)`.
 7. Select rows by clicking outside their controls, using the checkboxes beside
    the artwork, or using `Select all` / `Deselect all`,
    then `Reset votes`. Review the selected count in the confirmation dialog
    and confirm to set those votes to `0`, or cancel without changing them.
 8. Scroll to the bottom to load more rows.
+   A **Load more** button remains available if automatic loading fails.
 
 ## Common Scenarios
+
+On phones, the checkbox, a small artwork thumbnail, and the title with its author share the first line. Vote totals, voters, and rank appear below; long totals can wrap. Rows have 16-pixel side padding. Titles and author names stay on one line with an ellipsis when needed; action labels stay on one line. The amount and **Explain vote** sit side by side when space allows, with the allowed range underneath. In narrower rows, **Explain vote** sits beside the range below the amount. Tablet rows use a larger thumbnail with details beside it and controls below. On tablet and wide desktop rows, **Explain vote** stays immediately to the right of the amount control, with the allowed range underneath. Wide desktop rows keep this control group to the right of the artwork and details. Phone and tablet buttons use compact 36-pixel faces inside 44-pixel tap targets, keeping their existing **Save vote** (or **Vote** on legacy rows) and **Explain vote** labels. Inputs remain 44 pixels tall on phones and tablets, with 16-pixel text. Hovering or focusing **Explain vote** shows a styled tooltip explaining that it posts a public reply. Longer range hints can wrap. **Explain vote** is unavailable for a saved vote of zero and is omitted when you cannot chat in the wave. Opening it does not save a vote: review and send the public reply separately.
 
 - Rows use a subtle charcoal background. Hovering an unselected row lightens
   it further. Hovering or focusing the title highlights it in blue.
@@ -77,7 +105,7 @@ while each profile loads. The placeholders stay still when reduced motion is ena
   submitting it.
 - `Vote` is enabled only when the input is valid and changed.
 - `Vote` shows a spinner while the row request is running.
-- `Explain` opens the normal drop reply composer and does not submit or change a
+- `Explain vote` opens the normal drop reply composer and does not submit or change a
   vote by itself.
 - The prefilled reply includes the user's vote total at time of posting. If the
   current session just applied a vote change and that change differs from the
@@ -98,9 +126,17 @@ while each profile loads. The placeholders stay still when reduced motion is ena
 - When voting is closed, rows cannot be selected for reset; artwork and title
   buttons still open the drop.
 - `Select all` affects loaded rows only; rows loaded later are not auto-selected.
+- Artwork rows remain visible during background refreshes. Vote inputs load as
+  their rows approach the visible area.
 - Bulk reset runs one selected row at a time.
 
 ## Failure and Recovery
+
+- If the list fails to load or refresh, use **Try again** or choose another sort.
+  Existing rows stay visible during a failed background refresh.
+- If an entry preview is unavailable, its personal vote remains visible with
+  **Preview unavailable**, vote controls, and **Try again**. The entry's hidden
+  artwork and author details are not displayed.
 
 - If an All votes profile fails to load, its row keeps the rank and vote total
   and shows **Profile unavailable** with a compact **Try again** button. Retry
@@ -120,11 +156,11 @@ while each profile loads. The placeholders stay still when reduced motion is ena
 - This tab does not show drops where your current vote is already `0`.
 - Editing and reset still depend on wave voting permissions and backend
   validation.
-- `Explain` uses standard chat replies; it does not create a separate rationale
+- `Explain vote` uses standard chat replies; it does not create a separate rationale
   object or require dedicated backend support.
 - Vote totals, available votes, and maximum values use locale-aware number
   formatting. Focusing a vote input shows its editable digits without grouping.
-- Competition links use `tab=votes`; `voteTab=mine`, `voteTab=all`, or `voteTab=activity` preserves the subtab on reload and Back/Forward. Older `tab=voters` links open All votes.
+- Decision links use `tab=votes`; `voteTab=mine`, `voteTab=all`, or `voteTab=activity` preserves the subtab on reload and Back/Forward. Older `tab=voters` links open All votes.
 
 ## Related Pages
 

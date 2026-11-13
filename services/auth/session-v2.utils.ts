@@ -1,5 +1,6 @@
 import { queueNativePushLogout } from "@/services/notifications/push-installation";
 import { Capacitor } from "@capacitor/core";
+import type { ApiRedeemConnectionShareResponse } from "@/generated/models/ApiRedeemConnectionShareResponse";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getWalletAddress, setAuthJwt } from "./auth.utils";
@@ -39,34 +40,13 @@ import {
   type AuthSessionClientType,
   type SessionRefreshEntry,
 } from "./session-refresh-coordination.utils";
-
-type RefreshTokenSessionClientType = Exclude<AuthSessionClientType, "web">;
-
-interface SessionLoginRequest {
-  readonly client_type: AuthSessionClientType;
-  readonly server_signature: string;
-  readonly client_signature: string;
-  readonly client_address: string;
-  readonly role?: string | null;
-}
-
-interface SessionWebResponse {
-  readonly address: string;
-  readonly role: string | null;
-  readonly access_token: string;
-  readonly access_token_expires_at: string;
-  readonly client_type: "web";
-}
-
-interface SessionNativeResponse {
-  readonly address: string;
-  readonly role: string | null;
-  readonly access_token: string;
-  readonly access_token_expires_at: string;
-  readonly client_type: RefreshTokenSessionClientType;
-  readonly native_refresh_token: string;
-  readonly refresh_token_expires_at: string;
-}
+import type {
+  RefreshTokenSessionClientType,
+  SessionLoginRequest,
+  SessionNativeResponse,
+  SessionNonceDeviceGrantParams,
+  SessionWebResponse,
+} from "./session-v2.types";
 
 type SessionLoginResponse = SessionWebResponse | SessionNativeResponse;
 type SessionRefreshResponse = SessionWebResponse | SessionNativeResponse;
@@ -93,15 +73,10 @@ interface CreateLegacyDesktopConnectionShareResponse {
   readonly deep_link_path: string;
 }
 
-interface RedeemConnectionShareResponse {
-  readonly address: string;
-  readonly role: string | null;
-  readonly access_token: string;
-  readonly access_token_expires_at: string;
-  readonly client_type?: RefreshTokenSessionClientType | undefined;
-  readonly native_refresh_token: string;
-  readonly refresh_token_expires_at: string;
-}
+type RedeemConnectionShareResponse = Omit<
+  ApiRedeemConnectionShareResponse,
+  "client_type"
+> & { readonly client_type?: RefreshTokenSessionClientType | undefined };
 
 interface NativeConnectionShareSourceProof {
   readonly client_type: RefreshTokenSessionClientType;
@@ -258,23 +233,31 @@ async function rollbackUnpersistedSession(
 
 export async function getSessionNonce({
   signerAddress,
+  deviceGrant,
 }: {
   readonly signerAddress: string;
+  readonly deviceGrant?: SessionNonceDeviceGrantParams | undefined;
 }): Promise<ApiSessionNonceResponse> {
+  const clientType = getSessionClientType();
+  // Only web (SIWE) challenges can carry a device grant.
+  const deviceGrantParams =
+    deviceGrant && clientType === "web" ? deviceGrant : {};
   return await commonApiFetch<
     ApiSessionNonceResponse,
     {
       readonly signer_address: string;
       readonly client_type: AuthSessionClientType;
       readonly chain_id: string;
-    }
+    } & Partial<SessionNonceDeviceGrantParams>
   >({
     endpoint: "auth/session-nonce",
     params: {
       signer_address: signerAddress,
-      client_type: getSessionClientType(),
+      client_type: clientType,
       chain_id: "1",
+      ...deviceGrantParams,
     },
+    errorMode: "structured",
   });
 }
 
@@ -283,13 +266,14 @@ export async function loginWithSessionV2({
   clientSignature,
   signerAddress,
   role,
+  deviceLabel,
 }: {
   readonly serverSignature: string;
   readonly clientSignature: string;
   readonly signerAddress: string;
   readonly role: string | null;
+  readonly deviceLabel?: string | undefined;
 }): Promise<SessionLoginResponse> {
-  const roleBody = role === null ? {} : { role };
   const response = await commonApiPost<
     SessionLoginRequest,
     SessionLoginResponse
@@ -300,9 +284,11 @@ export async function loginWithSessionV2({
       server_signature: serverSignature,
       client_signature: clientSignature,
       client_address: signerAddress,
-      ...roleBody,
+      ...(role === null ? {} : { role }),
+      ...(deviceLabel ? { device_label: deviceLabel } : {}),
     },
     credentials: getSessionCredentialsMode(),
+    errorMode: "structured",
   });
   clearSessionRefreshFailureForSession(response);
   return response;
@@ -688,18 +674,22 @@ async function getNativeConnectionShareSourceProof(): Promise<NativeConnectionSh
 export async function createConnectionShare({
   signal,
   targetClientType = "native",
+  encryptedDeviceSetup,
 }: {
   readonly signal?: AbortSignal | undefined;
   readonly targetClientType?: RefreshTokenSessionClientType | undefined;
+  readonly encryptedDeviceSetup?: string | undefined;
 }): Promise<CreateConnectionShareResponse> {
   const sourceProof = await getNativeConnectionShareSourceProof();
   const body = sourceProof
     ? {
         target_client_type: targetClientType,
+        encrypted_device_setup: encryptedDeviceSetup,
         ...sourceProof,
       }
     : {
         target_client_type: targetClientType,
+        encrypted_device_setup: encryptedDeviceSetup,
       };
 
   return await commonApiPost<
@@ -776,7 +766,10 @@ export async function logoutSessionV2({
 export async function redeemConnectionShare(
   connectionShareCode: string,
   targetClientType: RefreshTokenSessionClientType = "native"
-): Promise<SessionNativeResponse> {
+): Promise<
+  SessionNativeResponse &
+    Pick<RedeemConnectionShareResponse, "encrypted_device_setup">
+> {
   const response = await commonApiPost<
     {
       readonly connection_share_code: string;
@@ -794,6 +787,13 @@ export async function redeemConnectionShare(
 
   return {
     ...response,
+    role: response.role ?? null,
+    access_token_expires_at: new Date(
+      response.access_token_expires_at
+    ).toISOString(),
+    refresh_token_expires_at: new Date(
+      response.refresh_token_expires_at
+    ).toISOString(),
     client_type: response.client_type ?? targetClientType,
   };
 }

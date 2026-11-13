@@ -2,6 +2,7 @@ const http = require("http");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
 const composerSandboxConstants = require("./composerSandboxConstants.json");
+const competitionRuleDefaults = require("./competitionRuleDefaults.json");
 
 require("dotenv").config();
 require("dotenv").config({ path: ".env.test" });
@@ -43,6 +44,7 @@ const SANDBOX_CREATED_WAVE_DROP_ID = "00000000-0000-4000-8000-000000000538";
 const SANDBOX_SUBMITTED_CHAT_DROP_ID = "00000000-0000-4000-8000-000000000539";
 const SANDBOX_SUBMITTED_POLL_ID = "00000000-0000-4000-8000-000000000545";
 const SANDBOX_SIGNATURE_WAVE_ID = "00000000-0000-4000-8000-000000000540";
+const SANDBOX_ACCESS_WAVE_ID = "00000000-0000-4000-8000-000000000566";
 const SANDBOX_SIGNATURE_WAVE_DESCRIPTION_DROP_ID =
   "00000000-0000-4000-8000-000000000541";
 const SANDBOX_CREATED_WAVE_NAME = "Sandbox Created Wave";
@@ -56,6 +58,7 @@ const SANDBOX_SCHEDULED_WAVE_DESCRIPTION =
   "Local-only scheduled rank wave description for Playwright.";
 const SANDBOX_SCHEDULED_OUTCOME_TITLE = "Sandbox manual outcome";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const SANDBOX_ALL_MENTION_CONTENT = "A wave announcement @all";
 const SANDBOX_POLL_QUESTION = "Which sandbox option do you prefer?";
 const SANDBOX_WAVE_GUIDELINES = Array.from(
   { length: 24 },
@@ -73,31 +76,26 @@ const SANDBOX_SIGNATURE_WAVE_DESCRIPTION =
   "Local-only signed drop sandbox wave for Playwright.";
 const SANDBOX_SIGNATURE_TERMS =
   "Local-only signature sandbox terms. Unsigned drops must not be submitted.";
-const PUBLIC_REVIEW_COMMENT =
-  "The recovery trigger needs clearer reviewer guidance.";
-const PUBLIC_REVIEW_WHY_IT_MATTERS = "Readers need to understand who can act.";
-const PUBLIC_REVIEW_SUGGESTED_CHANGE = "Clarify the trigger and eligible role.";
-const PUBLIC_REVIEW_METADATA_KEYS = [
-  "review_schema",
-  "type",
-  "severity",
-  "context",
-];
-const PUBLIC_REVIEW_CONTEXT_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CREATED_AT = 1713744000000;
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const publicScope = { group: null };
 const requests = [];
+let publicWavePreviewReads = 0;
 // Keep created groups for the lifetime of the local sandbox process so saved
 // wave drafts remain resolvable after the request log is reset between tests.
 let sandboxDropReaction = null;
 let sandboxWaveGuidelinesEnabled = false;
+let sandboxArtistActivityEnabled = false;
 let sandboxCreatedWaveType = "CHAT";
 let sandboxRuleGroupSequence = 0;
 const sandboxRuleGroups = new Map();
 const sandboxRuleGroupWallets = new Map();
 const MAX_REQUEST_BODY_BYTES = 16 * 1024;
+// Multi-user end-to-end encrypted messages (D109) for the E2EE pack only.
+const isE2eeSandbox = process.env.PLAYWRIGHT_E2EE_SANDBOX === "1";
+const e2eeSandboxApi = isE2eeSandbox
+  ? require("./e2ee/e2eeSandboxApi.cjs").createE2eeSandboxApi({ corsHeaders })
+  : null;
 
 function encodeJwtPart(value) {
   return Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -111,7 +109,7 @@ function buildSyntheticJwt() {
       sub: SANDBOX_WALLET.toLowerCase(),
       iat: 1760000000,
       exp: 2000000000,
-      role: "",
+      role: null,
     }),
     "",
   ].join(".");
@@ -133,6 +131,10 @@ const localProfile = {
   query: SANDBOX_HANDLE,
   handle: SANDBOX_HANDLE,
   normalised_handle: SANDBOX_HANDLE,
+  consolidation_key: "",
+  display: SANDBOX_HANDLE,
+  banner1: null,
+  banner2: null,
   pfp: null,
   banner1_color: null,
   banner2_color: null,
@@ -230,6 +232,12 @@ const sandboxPreviewGroup = {
     is_beneficiary_of_grant_match_mode: "ANY_TOKEN",
     is_beneficiary_of_grant: null,
   },
+};
+
+const sandboxSubmissionGroup = {
+  ...sandboxPreviewGroup,
+  id: "sandbox-submission-club",
+  name: "Sandbox Submission Club",
 };
 
 const sandboxGroupMembers = Array.from({ length: 25 }, (_, index) => {
@@ -469,6 +477,7 @@ const localDrop = {
   reactions: [],
   boosts: 0,
   is_signed: false,
+  collapse_replies: false,
   hide_link_preview: false,
   moderation: {
     status: "VISIBLE",
@@ -740,6 +749,34 @@ const signatureWave = {
   },
 };
 
+// Access fixture shared by SSR and client fetches. Only the existing notification
+// read acknowledgement is allowed; attempts to post to this wave fail closed.
+const accessWave = {
+  ...localWave,
+  id: SANDBOX_ACCESS_WAVE_ID,
+  name: "Local Access Sandbox Wave",
+  participation: {
+    ...localWave.participation,
+    authenticated_user_eligible: false,
+    scope: {
+      group: {
+        id: sandboxSubmissionGroup.id,
+        name: sandboxSubmissionGroup.name,
+        is_hidden: false,
+      },
+    },
+  },
+  wave: { ...localWave.wave, type: "RANK" },
+  metrics: { ...localWave.metrics, drops_count: 0 },
+};
+const accessWaveOverview = {
+  ...localWaveOverview,
+  id: SANDBOX_ACCESS_WAVE_ID,
+  name: accessWave.name,
+  total_drops_count: 0,
+  has_competition: true,
+};
+
 const dmWaveOverview = {
   ...localWaveOverview,
   id: SANDBOX_DM_WAVE_ID,
@@ -826,6 +863,9 @@ const mentionDrop = notificationDrop({
   content: "Mentioned @playwright inside the sandbox notification flow.",
 });
 
+// Keep the destination drop content stable while exercising compact title tokens.
+mentionDrop.title = "@[playwright] and #[QUORUM]";
+
 const reactionDrop = notificationDrop({
   id: SANDBOX_NOTIFICATION_REACTION_DROP_ID,
   serialNo: 3,
@@ -849,8 +889,117 @@ function notificationIdentity(handle, idSuffix) {
 const notificationActor = notificationIdentity("sandbox-alice", "541");
 const notificationReactorOne = notificationIdentity("sandbox-bob", "542");
 const notificationReactorTwo = notificationIdentity("sandbox-carol", "543");
+const artworkNotificationDrop = notificationDrop({
+  id: "00000000-0000-4000-8000-000000000560",
+  serialNo: 5,
+  content: "A study of light, motion and shared spaces.",
+  author: notificationActor,
+});
+artworkNotificationDrop.title = "Sandbox artwork";
+artworkNotificationDrop.drop_type = "SUBMISSION";
+artworkNotificationDrop.wave = notificationWaveOverview;
+artworkNotificationDrop.media = [
+  {
+    url: "https://6529.io/artwork-documentation/examples/an-alteration.png",
+    mime_type: "image/png",
+  },
+];
+
+const artworkCompetition = {
+  id: "10000000-0000-4000-8000-000000000001",
+  wave_id: SANDBOX_NOTIFICATION_WAVE_ID,
+  title: "The Memes – Main Stage",
+  description: "Local artwork notification preview.",
+  type: "RANK",
+  lifecycle: "PUBLISHED",
+  computed_phase: "VOTING_OPEN",
+  config_version: 1,
+  ...structuredClone(competitionRuleDefaults),
+  decisions: {
+    strategy: null,
+    next_decision_time: null,
+    winning_min_threshold: null,
+    winning_max_threshold: null,
+    winning_threshold_min_duration_ms: 0,
+    max_winners: null,
+    time_lock_ms: null,
+  },
+  winners: {
+    max_winners: null,
+    winning_min_threshold: null,
+    winning_max_threshold: null,
+    winning_threshold_min_duration_ms: 0,
+  },
+  outcome_config: [],
+  presentation: [],
+  capabilities: ["MAIN_STAGE"],
+  permissions: {
+    view: true,
+    submit: false,
+    vote: false,
+    administer: false,
+    edit_rules_after_activity: false,
+    edit_credit_rules: false,
+  },
+  created_at: CREATED_AT,
+  updated_at: CREATED_AT,
+  published_at: CREATED_AT,
+  ended_at: null,
+  cancelled_at: null,
+  archived_at: null,
+};
+const artworkEntry = {
+  id: "20000000-0000-4000-8000-000000000001",
+  wave_id: SANDBOX_NOTIFICATION_WAVE_ID,
+  competition_id: artworkCompetition.id,
+  drop_id: artworkNotificationDrop.id,
+  submitter: notificationActor,
+  status: "ACTIVE",
+  config_version: 1,
+  submitted_at: CREATED_AT,
+  rank: null,
+  won_at: null,
+  decision_id: null,
+};
+const artworkVoteSummary = {
+  rating: 100,
+  realtime_rating: 100,
+  rating_prediction: 100,
+  user_vote: 0,
+  rank: 1,
+  raters_count: 1,
+  top_raters: [{ profile: notificationReactorOne, rating: 100 }],
+  over_threshold_since_ms: null,
+};
+const artworkCompetitionPath = `/api/v3/waves/${SANDBOX_NOTIFICATION_WAVE_ID}/competitions/${artworkCompetition.id}`;
+const artworkEntryContext = {
+  entry: artworkEntry,
+  vote_summary: artworkVoteSummary,
+  awards: [],
+  drop: artworkNotificationDrop,
+  metadata: [],
+};
 
 const sandboxNotifications = [
+  {
+    id: 1005,
+    cause: "ARTIST_ARTWORK_SUBMITTED",
+    created_at: CREATED_AT + 1005,
+    read_at: null,
+    related_identity: notificationActor,
+    related_drops: [artworkNotificationDrop],
+    related_wave: notificationWaveOverview,
+    additional_context: {
+      artist_id: notificationActor.id,
+      wave_id: SANDBOX_NOTIFICATION_WAVE_ID,
+      drop_id: artworkNotificationDrop.id,
+      competition_id: "10000000-0000-4000-8000-000000000001",
+      entry_id: "20000000-0000-4000-8000-000000000001",
+      competition_title: "The Memes – Main Stage",
+      artwork_title: "Sandbox artwork",
+      submitted_at: CREATED_AT + 1005,
+    },
+  },
   {
     id: 1000,
     cause: "ALL_DROPS",
@@ -911,6 +1060,7 @@ const sandboxNotificationWaveIds = new Set([
   SANDBOX_NOTIFICATION_WAVE_ID,
   SANDBOX_CREATED_WAVE_ID,
   SANDBOX_SIGNATURE_WAVE_ID,
+  SANDBOX_ACCESS_WAVE_ID,
 ]);
 
 function notificationResponse(searchParams) {
@@ -1096,7 +1246,10 @@ function isExpectedChatDropParts(parts, hasPoll) {
   }
 
   if (parts.length === 1) {
-    return isExpectedChatDropPart(parts[0], SANDBOX_CHAT_DROP_CONTENT);
+    return (
+      isExpectedChatDropPart(parts[0], SANDBOX_CHAT_DROP_CONTENT) ||
+      isExpectedChatDropPart(parts[0], SANDBOX_ALL_MENTION_CONTENT)
+    );
   }
 
   return (
@@ -1133,10 +1286,21 @@ function isExpectedChatDropSignerAddress(signerAddress) {
   return signerAddress === "" || isSameAddress(signerAddress, SANDBOX_WALLET);
 }
 
+// The web sends a plain lowercase UUID with every drop create (API #2318).
+function isExpectedClientDropId(clientDropId) {
+  return (
+    typeof clientDropId === "string" &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(
+      clientDropId
+    )
+  );
+}
+
 function isExpectedChatDropBody(body) {
   const hasPoll = isPlainObject(body?.poll);
   if (
     !hasOnlyKeys(body, [
+      "client_drop_id",
       "drop_type",
       "is_safe_signature",
       "mentioned_groups",
@@ -1157,6 +1321,7 @@ function isExpectedChatDropBody(body) {
 
   return (
     body.wave_id === SANDBOX_WAVE_ID &&
+    isExpectedClientDropId(body.client_drop_id) &&
     body.drop_type === "CHAT" &&
     body.title === null &&
     body.signature === null &&
@@ -1169,128 +1334,13 @@ function isExpectedChatDropBody(body) {
     Array.isArray(body.mentioned_users) &&
     body.mentioned_users.length === 0 &&
     Array.isArray(body.mentioned_groups) &&
-    body.mentioned_groups.length === 0 &&
+    (body.parts[0]?.content === SANDBOX_ALL_MENTION_CONTENT
+      ? body.mentioned_groups.length === 1 && body.mentioned_groups[0] === "ALL"
+      : body.mentioned_groups.length === 0) &&
     Array.isArray(body.mentioned_waves) &&
     body.mentioned_waves.length === 0 &&
     Array.isArray(body.metadata) &&
     body.metadata.length === 0
-  );
-}
-
-function getMetadataValue(metadata, key) {
-  if (!Array.isArray(metadata)) {
-    return undefined;
-  }
-  const item = metadata.find(
-    (candidate) => isPlainObject(candidate) && candidate.data_key === key
-  );
-  return isPlainObject(item) ? item.data_value : undefined;
-}
-
-function parsePublicReviewContext(metadata) {
-  const contextJson = getMetadataValue(metadata, "context");
-  if (typeof contextJson !== "string") {
-    return null;
-  }
-
-  try {
-    const context = JSON.parse(contextJson);
-    return isPlainObject(context) ? context : null;
-  } catch {
-    return null;
-  }
-}
-
-function isExpectedPublicReviewMetadata(metadata) {
-  if (
-    !Array.isArray(metadata) ||
-    metadata.length !== PUBLIC_REVIEW_METADATA_KEYS.length ||
-    !metadata.every(
-      (item, index) =>
-        isPlainObject(item) &&
-        hasOnlyKeys(item, ["data_key", "data_value"]) &&
-        item.data_key === PUBLIC_REVIEW_METADATA_KEYS[index] &&
-        typeof item.data_value === "string"
-    )
-  ) {
-    return false;
-  }
-
-  const context = parsePublicReviewContext(metadata);
-  return (
-    getMetadataValue(metadata, "review_schema") === "1" &&
-    getMetadataValue(metadata, "type") === "product-or-ux" &&
-    getMetadataValue(metadata, "severity") === "medium" &&
-    context !== null &&
-    hasOnlyKeys(context, [
-      "submissionId",
-      "reviewId",
-      "reviewVersion",
-      "pageId",
-      "sectionId",
-    ]) &&
-    typeof context.submissionId === "string" &&
-    PUBLIC_REVIEW_CONTEXT_PATTERN.test(context.submissionId) &&
-    context.reviewId === "6529-stream" &&
-    context.reviewVersion === "2026-08-01.1" &&
-    context.pageId === "overview" &&
-    context.sectionId === "what-stream-is-designed-to-hold-together"
-  );
-}
-
-function isExpectedPublicReviewDropBody(body) {
-  if (
-    process.env.PLAYWRIGHT_PUBLIC_REVIEW_SANDBOX !== "1" ||
-    !hasOnlyKeys(body, [
-      "drop_type",
-      "hide_link_preview",
-      "is_safe_signature",
-      "mentioned_groups",
-      "mentioned_users",
-      "mentioned_waves",
-      "metadata",
-      "parts",
-      "referenced_nfts",
-      "signature",
-      "signer_address",
-      "title",
-      "wave_id",
-    ])
-  ) {
-    return false;
-  }
-
-  const expectedContent = [
-    "## Product or UX",
-    PUBLIC_REVIEW_COMMENT,
-    "**Review:** 6529 Stream Contract Review (2026-08-01.1)",
-    `**Page:** [Overview](${frontendBaseUrl}/reviews/6529-stream/versions/2026-08-01.1)`,
-    "**Suspected severity:** Medium",
-    "**Section:** What Stream is designed to hold together",
-    `### Why this matters\n\n${PUBLIC_REVIEW_WHY_IT_MATTERS}`,
-    `### Suggested change\n\n${PUBLIC_REVIEW_SUGGESTED_CHANGE}`,
-  ].join("\n\n");
-
-  return (
-    body.wave_id === SANDBOX_WAVE_ID &&
-    body.drop_type === "CHAT" &&
-    body.title === null &&
-    body.signature === null &&
-    body.is_safe_signature === false &&
-    isSameAddress(body.signer_address, SANDBOX_WALLET) &&
-    body.hide_link_preview === false &&
-    Array.isArray(body.parts) &&
-    body.parts.length === 1 &&
-    isExpectedChatDropPart(body.parts[0], expectedContent) &&
-    Array.isArray(body.referenced_nfts) &&
-    body.referenced_nfts.length === 0 &&
-    Array.isArray(body.mentioned_users) &&
-    body.mentioned_users.length === 0 &&
-    Array.isArray(body.mentioned_groups) &&
-    body.mentioned_groups.length === 0 &&
-    Array.isArray(body.mentioned_waves) &&
-    body.mentioned_waves.length === 0 &&
-    isExpectedPublicReviewMetadata(body.metadata)
   );
 }
 
@@ -1851,6 +1901,46 @@ function isExpectedCreateWaveConfig(wave) {
   );
 }
 
+function isExpectedCreateWaveHubBody(body) {
+  if (
+    !isPlainObject(body) ||
+    !hasOnlyAllowedKeys(
+      body,
+      [
+        "idempotency_key",
+        "name",
+        "picture",
+        "description_drop",
+        "visibility",
+        "chat",
+        "admin_group",
+        "admin_drop_deletion_enabled",
+      ],
+      ["parent_wave_id"]
+    )
+  )
+    return false;
+  const description = body.description_drop?.parts?.[0]?.content;
+  return (
+    typeof body.idempotency_key === "string" &&
+    /^[0-9a-f-]{36}$/i.test(body.idempotency_key) &&
+    typeof body.name === "string" &&
+    body.name.startsWith("Sandbox ") &&
+    body.name.length <= 250 &&
+    body.picture === null &&
+    typeof description === "string" &&
+    description.length <= 100000 &&
+    isExpectedDescriptionDrop(body.description_drop, description) &&
+    hasKnownSandboxGroupScope(body.visibility) &&
+    isExpectedCreateWaveChatConfig(body.chat) &&
+    hasOnlyKeys(body.admin_group, ["group_id"]) &&
+    isKnownSandboxGroupId(body.admin_group.group_id) &&
+    typeof body.admin_drop_deletion_enabled === "boolean" &&
+    (body.parent_wave_id === undefined ||
+      body.parent_wave_id === SANDBOX_WAVE_ID)
+  );
+}
+
 function isExpectedResumedDraftChatWaveBody(body) {
   if (
     !hasOnlyKeys(body, [
@@ -2219,10 +2309,7 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
 
   if (pathname === "/api/drops") {
     // The diagnostics reset bounds this synthetic chat submit to one accepted request.
-    return (
-      (isExpectedChatDropBody(body) || isExpectedPublicReviewDropBody(body)) &&
-      !hasAcceptedDropSubmit()
-    );
+    return isExpectedChatDropBody(body) && !hasAcceptedDropSubmit();
   }
 
   if (pathname === `/api/drops/${SANDBOX_SUBMITTED_CHAT_DROP_ID}`) {
@@ -2243,6 +2330,8 @@ function isKnownSandboxMutation(method, pathname, searchParams, body) {
   if (ruleGroupIdFromVisibilityPath(pathname)) {
     return isExpectedPublishAdminGroupBody(body);
   }
+
+  if (pathname === "/api/v3/waves") return isExpectedCreateWaveHubBody(body);
 
   if (pathname === "/api/waves") {
     return (
@@ -2379,9 +2468,10 @@ function loggedRequestBody(pathname, body) {
 
   if (pathname === "/api/drops") {
     const firstPart = Array.isArray(body.parts) ? body.parts[0] : null;
-    const reviewContext = parsePublicReviewContext(body.metadata);
     return {
       wave_id: typeof body.wave_id === "string" ? body.wave_id : null,
+      client_drop_id:
+        typeof body.client_drop_id === "string" ? body.client_drop_id : null,
       drop_type: typeof body.drop_type === "string" ? body.drop_type : null,
       content: isPlainObject(firstPart) ? firstPart.content : null,
       poll: isPlainObject(body.poll)
@@ -2419,9 +2509,6 @@ function loggedRequestBody(pathname, body) {
             isPlainObject(item) ? item.data_key : null
           )
         : [],
-      review_type: getMetadataValue(body.metadata, "type") ?? null,
-      review_severity: getMetadataValue(body.metadata, "severity") ?? null,
-      review_context: reviewContext,
       signature: body.signature,
       is_safe_signature: body.is_safe_signature,
       signer_address: body.signer_address,
@@ -2430,15 +2517,17 @@ function loggedRequestBody(pathname, body) {
     };
   }
 
-  if (pathname === "/api/waves") {
+  if (pathname === "/api/waves" || pathname === "/api/v3/waves") {
+    const nativeHub = pathname === "/api/v3/waves";
     const firstPart = Array.isArray(body.description_drop?.parts)
       ? body.description_drop.parts[0]
       : null;
     return {
       name: typeof body.name === "string" ? body.name : null,
-      admin_group_id: body.wave?.admin_group?.group_id ?? null,
+      admin_group_id:
+        body.admin_group?.group_id ?? body.wave?.admin_group?.group_id ?? null,
       description: isPlainObject(firstPart) ? firstPart.content : null,
-      wave_type: body.wave?.type ?? null,
+      wave_type: nativeHub ? "CHAT" : (body.wave?.type ?? null),
       decisions_strategy: body.wave?.decisions_strategy ?? null,
       voting_period_max: body.voting?.period?.max ?? null,
       participation_period_max: body.participation?.period?.max ?? null,
@@ -2467,6 +2556,15 @@ function loggedRequestBody(pathname, body) {
 
 function recordRequest(method, url, body) {
   const pathname = normalizedPath(url);
+  // The anonymous HTML preview asks for 10 + 1 drops; the streamed feed seed
+  // separately asks for 50 + 1 and must keep loading during client navigation.
+  if (
+    method === "GET" &&
+    pathname === `/api/v2/waves/${SANDBOX_WAVE_ID}/drops` &&
+    url.searchParams.get("limit") === "11"
+  ) {
+    publicWavePreviewReads += 1;
+  }
   if (pathname.startsWith("/__composer-sandbox")) {
     return undefined;
   }
@@ -2489,15 +2587,35 @@ function requestLog() {
 }
 
 function handleDiagnostics(method, pathname, res) {
+  if (
+    pathname === "/__composer-sandbox/artist-activity" &&
+    (method === "POST" || method === "DELETE")
+  ) {
+    sandboxArtistActivityEnabled = method === "POST";
+    writeJson(res, 200, { ok: true });
+    return true;
+  }
+  if (
+    pathname === "/__composer-sandbox/public-preview" &&
+    isSafeReadMethod(method)
+  ) {
+    writeJson(res, 200, { reads: publicWavePreviewReads });
+    return true;
+  }
   if (pathname === "/__composer-sandbox/requests" && isSafeReadMethod(method)) {
     writeJson(res, 200, { requests: requestLog() });
     return true;
   }
   if (pathname === "/__composer-sandbox/reset" && method === "POST") {
     requests.length = 0;
+    publicWavePreviewReads = 0;
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
+    sandboxArtistActivityEnabled = false;
     sandboxCreatedWaveType = "CHAT";
+    for (const notification of sandboxNotifications) {
+      notification.read_at = null;
+    }
     writeJson(res, 200, { ok: true });
     return true;
   }
@@ -2521,6 +2639,68 @@ function writeEmptyResponse(res, status) {
 
 const mockApiExactReadRoutes = new Map([
   [
+    `/api/v3/waves/${SANDBOX_NOTIFICATION_WAVE_ID}`,
+    () => ({
+      id: SANDBOX_NOTIFICATION_WAVE_ID,
+      name: notificationWave.name,
+      picture: null,
+      legacy_primary_competition_id: artworkCompetition.id,
+      permissions: { view: true, administer: false, create_competition: false },
+    }),
+  ],
+  [artworkCompetitionPath, () => artworkCompetition],
+  [
+    `${artworkCompetitionPath}/pauses`,
+    () => ({ data: [], has_more: false, next_cursor: null }),
+  ],
+  [
+    `${artworkCompetitionPath}/leaderboard`,
+    () => ({
+      data: [
+        {
+          competition_id: artworkCompetition.id,
+          entry_id: artworkEntry.id,
+          drop_id: artworkNotificationDrop.id,
+          rating: 100,
+          real_time_rating: 100,
+          rank: 1,
+          submitted_at: CREATED_AT,
+        },
+      ],
+      cards: [artworkEntryContext],
+      has_more: false,
+      next_cursor: null,
+    }),
+  ],
+  [`${artworkCompetitionPath}/entries/${artworkEntry.id}`, () => artworkEntry],
+  [
+    `${artworkCompetitionPath}/entry-contexts`,
+    () => ({ competition: artworkCompetition, data: [artworkEntryContext] }),
+  ],
+  [
+    `/api/v3/waves/${SANDBOX_NOTIFICATION_WAVE_ID}/drops/${artworkNotificationDrop.id}/competition-context`,
+    () => ({
+      competition: artworkCompetition,
+      entry: artworkEntry,
+      vote_summary: artworkVoteSummary,
+    }),
+  ],
+  [
+    `/api/v2/drops/${artworkNotificationDrop.id}`,
+    () => ({ drop: artworkNotificationDrop, wave: notificationWaveOverview }),
+  ],
+  [
+    `/api/v2/drops/${artworkNotificationDrop.id}/vote-summary`,
+    () => ({
+      vote_distribution: {
+        positive_total: 100,
+        negative_total: 0,
+        positive_votes: [{ voter: notificationReactorOne, vote: 100 }],
+        negative_votes: [],
+      },
+    }),
+  ],
+  [
     "/api/groups",
     () => [
       sandboxPreviewGroup,
@@ -2533,7 +2713,24 @@ const mockApiExactReadRoutes = new Map([
     "/api/v2/waves",
     () => ({ data: [localWaveOverview], page: 1, next: false }),
   ],
+  ["/api/v2/waves/pinned", () => []],
   ["/api/v2/official-waves", () => [localWaveOverview]],
+  [
+    "/api/v2/waves/all",
+    () => ({
+      data: [localWaveOverview],
+      next_cursor: null,
+      snapshot_expires_at: Date.now() + 900000,
+    }),
+  ],
+  [
+    "/api/v2/waves/joined",
+    () => ({
+      data: [],
+      next_cursor: null,
+      snapshot_expires_at: Date.now() + 900000,
+    }),
+  ],
   [
     `/api/v2/waves/${SANDBOX_WAVE_ID}/metadata`,
     () =>
@@ -2547,7 +2744,15 @@ const mockApiExactReadRoutes = new Map([
           ]
         : [],
   ],
-  [`/api/waves/${SANDBOX_DM_WAVE_ID}`, () => dmWave],
+  [
+    `/api/waves/${SANDBOX_DM_WAVE_ID}`,
+    () => e2eeSandboxApi?.decorateDirectMessageWave(dmWave) ?? dmWave,
+  ],
+  [`/api/waves/${SANDBOX_ACCESS_WAVE_ID}`, () => accessWave],
+  [
+    `/api/v2/waves/${SANDBOX_ACCESS_WAVE_ID}/drops`,
+    () => ({ wave: accessWaveOverview, drops: [] }),
+  ],
   [
     `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,
     () => ({ wave: dmWaveOverview, drops: [currentDirectMessageDrop()] }),
@@ -2582,11 +2787,52 @@ const mockApiExactReadRoutes = new Map([
   ],
   ["/api/v2/boosted-drops", () => emptyPage()],
   ["/api/v2/drops", () => emptyPage()],
+  ["/api/profile-logs", () => ({ ...emptyPage(), next_cursor: null })],
   ["/api/mention-aliases", () => []],
+  ["/api/content-moderation/blocked-profiles", () => []],
   ["/api/feed", () => []],
 ]);
 
 const mockApiPatternReadRoutes = [
+  // Current sandbox artworks have no managed collaboration record.
+  {
+    pattern: /^\/api\/drops\/[^/]+\/collaborations$/,
+    response: () => ({
+      managed: false,
+      closed: false,
+      artwork_hash: "",
+      terms_version: "",
+      acceptance_copy: "",
+      terms: null,
+      collaborators: [],
+      invitations: [],
+    }),
+  },
+  {
+    pattern: /^\/api\/profiles\/[^/]+\/(rep|cic)\/overview$/,
+    response: () => ({
+      total_rep: 0,
+      total_cic: 0,
+      authenticated_user_contribution: null,
+      contributor_count: 0,
+      contributors: emptyPage(),
+    }),
+  },
+  { pattern: /^\/api\/profiles\/[^/]+\/cic\/statements$/, response: () => [] },
+  {
+    pattern: /^\/api\/identities\/following-artist-0$/,
+    response: () => ({
+      ...localProfile,
+      id: "following-0",
+      handle: "following-artist-0",
+      normalised_handle: "following-artist-0",
+      query: "following-artist-0",
+      artist_of_prevote_cards: sandboxArtistActivityEnabled ? [1] : [],
+      wallets: [],
+      primary_wallet: "0x0000000000000000000000000000000000000001",
+      primary_address: "0x0000000000000000000000000000000000000001",
+    }),
+  },
   { pattern: /^\/api\/waves\/[^/]+$/, response: () => localWave },
   {
     pattern: /^\/api\/v2\/waves\/[^/]+\/drops$/,
@@ -2611,6 +2857,16 @@ const mockApiPatternReadRoutes = [
   { pattern: /^\/api\/v2\/waves\/[^/]+\/metadata$/, response: () => [] },
   { pattern: /^\/api\/v2\/drops\/[^/]+\/metadata$/, response: () => [] },
   { pattern: /^\/api\/v2\/drops\/[^/]+\/reactions$/, response: () => [] },
+  {
+    pattern: /^\/api\/identities\/profile-picture$/,
+    response: () => ({
+      ...localProfile,
+      query: "profile-picture",
+      handle: "profile-picture",
+      normalised_handle: "profile-picture",
+      pfp: "https://media.6529.io/ipfs/QmRT2Ur5E1GooeiCWxqToiQXnnok6drPYxuK8J3RLnaMg8",
+    }),
+  },
   { pattern: /^\/api\/identities\/[^/]+$/, response: () => localProfile },
   { pattern: /^\/api\/profiles\/[^/]+\/proxies$/, response: () => [] },
 ];
@@ -2671,6 +2927,8 @@ function handleGroupRead(pathname, res) {
     group = sandboxAdminGroup;
   } else if (groupId === sandboxPreviewGroup.id) {
     group = sandboxPreviewGroup;
+  } else if (groupId === sandboxSubmissionGroup.id) {
+    group = sandboxSubmissionGroup;
   }
   if (group) {
     return writeJsonResponse(res, group);
@@ -2681,6 +2939,22 @@ function handleGroupRead(pathname, res) {
 }
 
 function handleNotificationRead(pathname, url, res) {
+  if (pathname === "/api/v2/drops" && url.searchParams.has("ids")) {
+    const ids = url.searchParams.get("ids").split(",");
+    return writeJsonResponse(res, {
+      ...emptyPage(),
+      data: ids.includes(artworkNotificationDrop.id)
+        ? [artworkNotificationDrop]
+        : [],
+    });
+  }
+  if (pathname === "/api/v2/notifications/unread-count") {
+    return writeJsonResponse(res, {
+      unread_count: sandboxNotifications.filter(
+        (notification) => !notification.read_at
+      ).length,
+    });
+  }
   if (pathname !== "/api/v2/notifications") {
     return false;
   }
@@ -2758,6 +3032,19 @@ const mockApiKnownPostRoutes = [
     },
   },
   {
+    matches: (pathname) => pathname === "/api/v3/waves",
+    respond: (res, body) => {
+      sandboxCreatedWaveType = "CHAT";
+      return writeJsonResponse(res, {
+        id: SANDBOX_CREATED_WAVE_ID,
+        name: body.name,
+        picture: body.picture,
+        legacy_primary_competition_id: null,
+        permissions: { view: true, administer: true, create_competition: true },
+      });
+    },
+  },
+  {
     matches: (pathname) => pathname === "/api/waves",
     respond: (res, body) => {
       sandboxCreatedWaveType = body.wave.type;
@@ -2783,7 +3070,15 @@ const mockApiKnownPostRoutes = [
   },
   {
     matches: isNotificationMutationPath,
-    respond: (res) => writeEmptyResponse(res, 204),
+    respond: (res, _body, pathname) => {
+      const notificationId = notificationIdFromPath(pathname);
+      for (const notification of sandboxNotifications) {
+        if (!notificationId || String(notification.id) === notificationId) {
+          notification.read_at = Date.now();
+        }
+      }
+      return writeEmptyResponse(res, 204);
+    },
   },
   {
     matches: (pathname) => pathname === "/api/auth/session-logout",
@@ -2821,6 +3116,8 @@ function handleAllowedChatDropPost(method, pathname, body, requestKind, res) {
     return writeJsonResponse(res, submittedPollDrop);
   }
 
+  submittedChatDrop.created_at = Date.now();
+
   const parts = body.parts.map((part, index) => ({
     part_id: index + 1,
     content: part.content,
@@ -2850,7 +3147,7 @@ function handleAllowedChatDropEditPost(method, pathname, requestKind, res) {
 
   return writeJsonResponse(res, {
     ...submittedChatDrop,
-    updated_at: CREATED_AT + 3000,
+    updated_at: Date.now(),
     parts: [
       {
         ...submittedChatDrop.parts[0],
@@ -2985,6 +3282,11 @@ async function handleRequest(req, res) {
     return;
   }
 
+  // E2EE bodies exceed the composer body cap, so this layer reads its own.
+  if (await e2eeSandboxApi?.handle(req, res, { method, url, pathname })) {
+    return;
+  }
+
   if (handleDiagnostics(method, pathname, res)) {
     return;
   }
@@ -3028,14 +3330,25 @@ function buildPublicRuntime() {
     ALLOWLIST_API_ENDPOINT: mockApiOrigin,
     API_ENDPOINT: mockApiOrigin,
     BASE_ENDPOINT: frontendBaseUrl,
-    IPFS_API_ENDPOINT:
-      process.env.IPFS_API_ENDPOINT || "https://ipfs.6529.io/api/v0",
     IPFS_GATEWAY_ENDPOINT:
       process.env.IPFS_GATEWAY_ENDPOINT || "https://ipfs.6529.io/ipfs/",
     MEDIA_RESOLVER_ENDPOINT:
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
-    NEXT_PUBLIC_FEATURE_MULTI_COMPETITION:
-      process.env.NEXT_PUBLIC_FEATURE_MULTI_COMPETITION || "false",
+    // Signed posts on too, so device setup offers the combined grant
+    // ("Sign to enable both") that the E2EE pack signs in through.
+    ...(isE2eeSandbox
+      ? {
+          NEXT_PUBLIC_E2EE_DM_ENABLED: "true",
+          NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
+          GIPHY_API_KEY: "e2ee-sandbox-fixture",
+        }
+      : {}),
+    // Sandbox packs run the staging chat configuration (gap-only sync and
+    // batched reads); set the variable to "false" to run the production one.
+    NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC:
+      process.env.NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC === "false"
+        ? "false"
+        : "true",
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,
@@ -3085,9 +3398,6 @@ function startNextDev() {
     ...process.env,
     ...publicRuntime,
     __NEXT_EXPERIMENTAL_MCP_SERVER: "true",
-    PUBLIC_REVIEW_DISCUSSION_DESTINATIONS: JSON.stringify({
-      local: { "stream-review": SANDBOX_WAVE_ID },
-    }),
     PUBLIC_RUNTIME: JSON.stringify(publicRuntime),
     SEIZE_6529_COMMAND: "1",
     PORT: String(frontendPort),

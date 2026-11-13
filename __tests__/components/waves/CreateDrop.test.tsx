@@ -7,7 +7,12 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useKeyPressEvent } from "react-use";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { DropMutationBody } from "@/components/waves/create-drop-content/drop-submission.types";
+import { ApiCompetition } from "@/generated/models/ApiCompetition";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropRequest";
 import CreateDrop from "@/components/waves/CreateDrop";
 import { DropMode } from "@/components/waves/dropComposer.types";
 import { AuthContext } from "@/components/auth/Auth";
@@ -32,27 +37,47 @@ jest.mock("@/utils/monitoring/dropSubmissionMonitoring", () => ({
 const mockSetQueryData = jest.fn();
 const mockInvalidateQueries = jest.fn(() => Promise.resolve());
 const mockProcessDropRemoved = jest.fn();
+const mockRefreshWaveMessages = jest.fn();
 const mockProcessIncomingDrop = jest.fn();
 const mockApplyOptimisticDropUpdate = jest.fn();
+const mockSubmitCompetitionEntry = jest.fn();
+const mockUseCompetitionEntrySubmit = jest.fn(
+  (_competition: ApiCompetition | null) => mockSubmitCompetitionEntry
+);
+let mockUseRealMutation = false;
 
-jest.mock("@tanstack/react-query", () => ({
-  useQueryClient: () => ({
-    setQueryData: mockSetQueryData,
-    invalidateQueries: mockInvalidateQueries,
-  }),
-  useMutation: (options: any) => ({
-    mutateAsync: jest.fn(async (variables: any) => {
-      try {
-        const result = await options.mutationFn(variables);
-        options.onSuccess?.(result, variables, undefined);
-        return result;
-      } catch (error) {
-        options.onError?.(error, variables, undefined);
-        throw error;
-      }
-    }),
-  }),
+jest.mock("@/hooks/competitions/useCompetitionEntrySubmit", () => ({
+  useCompetitionEntrySubmit: (competition: ApiCompetition | null) =>
+    mockUseCompetitionEntrySubmit(competition),
 }));
+
+jest.mock("@tanstack/react-query", () => {
+  const actual = jest.requireActual<typeof import("@tanstack/react-query")>(
+    "@tanstack/react-query"
+  );
+  return {
+    ...actual,
+    useQueryClient: () => ({
+      setQueryData: mockSetQueryData,
+      invalidateQueries: mockInvalidateQueries,
+    }),
+    useMutation: (options: any) => {
+      if (mockUseRealMutation) return actual.useMutation(options);
+      return {
+        mutateAsync: jest.fn(async (variables: any) => {
+          try {
+            const result = await options.mutationFn(variables);
+            options.onSuccess?.(result, variables, undefined);
+            return result;
+          } catch (error) {
+            options.onError?.(error, variables, undefined);
+            throw error;
+          }
+        }),
+      };
+    },
+  };
+});
 jest.mock("@/hooks/useWave", () => ({ useWave: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
@@ -76,10 +101,11 @@ jest.mock("@/services/api/waves-v2-api", () => ({
   fetchWaveMetadata: jest.fn(),
 }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => ({
+  useMyStreamActions: () => ({
     applyOptimisticDropUpdate: mockApplyOptimisticDropUpdate,
     processDropRemoved: mockProcessDropRemoved,
     processIncomingDrop: mockProcessIncomingDrop,
+    refreshWaveMessages: mockRefreshWaveMessages,
   }),
 }));
 jest.mock("@/components/waves/CreateDropStormParts", () => () => (
@@ -217,6 +243,14 @@ jest.mock("@/components/waves/quorum/QuorumProposalDropModal", () => ({
 
 const useWaveMock = useWave as jest.MockedFunction<typeof useWave>;
 const commonApiPostMock = commonApiPost as jest.Mock;
+const UUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+// How long to wait for a send that is retried after the 1 s retry delay.
+const RETRY_WAIT_MS = 3_000;
+const sentClientDropIds = (): Array<string | undefined> =>
+  commonApiPostMock.mock.calls.map(
+    ([{ body }]: [{ body: ApiCreateDropRequest }]) => body.client_drop_id
+  );
 const fetchWaveMetadataMock = jest.mocked(fetchWaveMetadata);
 
 const wave = {
@@ -251,17 +285,53 @@ const mockPendingPosts = () => {
 describe("CreateDrop", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseRealMutation = false;
+    mockUseCompetitionEntrySubmit.mockImplementation(
+      () => mockSubmitCompetitionEntry
+    );
     mockApplyOptimisticDropUpdate.mockReturnValue(null);
     useWaveMock.mockReturnValue({
       isMemesWave: false,
       isCurationWave: false,
     } as any);
     commonApiPostMock.mockResolvedValue({ id: "server-drop", wave_id: "1" });
+    mockSubmitCompetitionEntry.mockResolvedValue({
+      id: "native-drop",
+      wave_id: "1",
+    });
     fetchWaveMetadataMock.mockResolvedValue([]);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it("preserves reply targets for a dialog-handled Escape and cancels on an ordinary Escape", () => {
+    const onCancelReplyQuote = jest.fn();
+    render(
+      <CreateDrop
+        activeDrop={null}
+        onCancelReplyQuote={onCancelReplyQuote}
+        onDropAddedToQueue={jest.fn()}
+        wave={wave}
+        dropId={null}
+        fixedDropMode={DropMode.CHAT}
+        privileges={{ chatRestriction: null, submissionRestriction: null }}
+      />
+    );
+    const onEscape = jest
+      .mocked(useKeyPressEvent)
+      .mock.calls.find(([key]) => key === "Escape")?.[1];
+    // The hook invokes the callback later with the original, now-handled event.
+    const handledEvent = new KeyboardEvent("keydown", {
+      key: "Escape",
+      cancelable: true,
+    });
+    handledEvent.preventDefault();
+    act(() => onEscape?.(handledEvent));
+    expect(onCancelReplyQuote).not.toHaveBeenCalled();
+    act(() => onEscape?.(new KeyboardEvent("keydown", { key: "Escape" })));
+    expect(onCancelReplyQuote).toHaveBeenCalledTimes(1);
   });
 
   it("processes queued drop and calls mutation", async () => {
@@ -290,7 +360,160 @@ describe("CreateDrop", () => {
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
   });
 
-  it("reports a caught submission failure and retains the error toast", async () => {
+  it.each([DropMode.CHAT, DropMode.PARTICIPATION])(
+    "routes %s submissions from a projected competition to the correct adapter",
+    async (mode) => {
+      const competition = Object.assign(new ApiCompetition(), {
+        id: "selected",
+        wave_id: wave.id,
+      });
+      render(
+        <CreateDrop
+          activeDrop={null}
+          onCancelReplyQuote={jest.fn()}
+          onDropAddedToQueue={jest.fn()}
+          wave={{ ...wave, competition }}
+          dropId={null}
+          fixedDropMode={mode}
+          privileges={{ chatRestriction: null, submissionRestriction: null }}
+        />
+      );
+
+      await userEvent.click(screen.getByText("submit current mode"));
+      await waitFor(() => expect(mockProcessIncomingDrop).toHaveBeenCalled());
+      expect(mockUseCompetitionEntrySubmit).toHaveBeenCalledWith(competition);
+      if (mode === DropMode.CHAT) {
+        expect(commonApiPostMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            endpoint: "drops",
+            body: expect.objectContaining({
+              wave_id: wave.id,
+              drop_type: "CHAT",
+            }),
+          })
+        );
+        expect(mockSubmitCompetitionEntry).not.toHaveBeenCalled();
+      } else {
+        expect(mockSubmitCompetitionEntry).toHaveBeenCalledWith(
+          expect.objectContaining({
+            wave_id: wave.id,
+            drop_type: "PARTICIPATORY",
+          })
+        );
+        expect(commonApiPostMock).not.toHaveBeenCalled();
+      }
+    }
+  );
+
+  it.each([
+    ["sibling", 7],
+    ["selected", 8],
+  ])(
+    "keeps queued native submissions bound before selecting %s version %s with the real mutation observer",
+    async (id, version) => {
+      mockUseRealMutation = true;
+      const original = Object.assign(new ApiCompetition(), {
+        id: "selected",
+        wave_id: wave.id,
+        config_version: 7,
+      });
+      const selected = Object.assign(new ApiCompetition(), {
+        ...original,
+        id,
+        config_version: version,
+      });
+      const firstDrop = Object.assign(new ApiDrop(), { id: "first-native" });
+      let releaseFirst!: (drop: ApiDrop) => void;
+      const firstPending = new Promise<ApiDrop>((resolve) => {
+        releaseFirst = resolve;
+      });
+      const submitOriginal = jest
+        .fn<Promise<ApiDrop>, [ApiCreateDropRequest]>()
+        .mockResolvedValue(
+          Object.assign(new ApiDrop(), { id: "queued-native" })
+        )
+        .mockImplementationOnce(() => firstPending);
+      const submitSelected = jest
+        .fn<Promise<ApiDrop>, [ApiCreateDropRequest]>()
+        .mockResolvedValue(
+          Object.assign(new ApiDrop(), { id: "selected-native" })
+        );
+      mockUseCompetitionEntrySubmit.mockImplementation((competition) =>
+        competition?.id === original.id &&
+        competition.config_version === original.config_version
+          ? submitOriginal
+          : submitSelected
+      );
+      const client = new QueryClient({
+        defaultOptions: { mutations: { retry: false } },
+      });
+      const onQueued = jest.fn();
+      const onDrained = jest.fn();
+      const composer = (competition: ApiCompetition) => (
+        <QueryClientProvider client={client}>
+          <ReactQueryWrapperContext.Consumer>
+            {(context) => (
+              <ReactQueryWrapperContext.Provider
+                value={{ ...context, waitAndInvalidateDrops: jest.fn() }}
+              >
+                <CreateDrop
+                  activeDrop={null}
+                  onCancelReplyQuote={jest.fn()}
+                  onDropAddedToQueue={onQueued}
+                  onAllDropsAdded={onDrained}
+                  wave={{ ...wave, competition }}
+                  dropId={null}
+                  fixedDropMode={DropMode.PARTICIPATION}
+                  privileges={{
+                    chatRestriction: null,
+                    submissionRestriction: null,
+                  }}
+                />
+              </ReactQueryWrapperContext.Provider>
+            )}
+          </ReactQueryWrapperContext.Consumer>
+        </QueryClientProvider>
+      );
+      const view = render(composer(original));
+      try {
+        await userEvent.click(screen.getByText("submit current mode"));
+        await waitFor(() => expect(submitOriginal).toHaveBeenCalledTimes(1));
+        await userEvent.click(screen.getByText("submit current mode"));
+        expect(onQueued).toHaveBeenCalledTimes(2);
+        expect(submitOriginal).toHaveBeenCalledTimes(1);
+        expect(onDrained).not.toHaveBeenCalled();
+        view.rerender(composer(selected));
+        expect(mockUseCompetitionEntrySubmit).toHaveBeenLastCalledWith(
+          selected
+        );
+        await act(async () => {
+          releaseFirst(firstDrop);
+          await firstPending;
+        });
+        await waitFor(() => expect(onDrained).toHaveBeenCalledTimes(1));
+        expect(submitOriginal).toHaveBeenCalledTimes(2);
+        expect(submitSelected).not.toHaveBeenCalled();
+        expect(commonApiPostMock).not.toHaveBeenCalled();
+        await userEvent.click(screen.getByText("submit current mode"));
+        await waitFor(() => expect(onDrained).toHaveBeenCalledTimes(2));
+        expect(submitOriginal).toHaveBeenCalledTimes(2);
+        expect(submitSelected).toHaveBeenCalledTimes(1);
+        expect(submitSelected).toHaveBeenCalledWith(
+          expect.objectContaining({
+            wave_id: wave.id,
+            drop_type: "PARTICIPATORY",
+          })
+        );
+        expect(commonApiPostMock).not.toHaveBeenCalled();
+      } finally {
+        releaseFirst(firstDrop);
+        view.unmount();
+        client.clear();
+      }
+    }
+  );
+
+  it("retries a failed send once with the same id, then reports it and keeps the error toast", async () => {
     const error = new TypeError("Failed to fetch");
     commonApiPostMock.mockRejectedValue(error);
     const setToast = jest.fn();
@@ -311,14 +534,205 @@ describe("CreateDrop", () => {
       </AuthContext.Provider>
     );
     await userEvent.click(screen.getByText("submit current mode"));
-    await waitFor(() =>
-      expect(mockReportDropSubmissionFailure).toHaveBeenCalledTimes(1)
+    await waitFor(
+      () => expect(mockReportDropSubmissionFailure).toHaveBeenCalledTimes(1),
+      { timeout: RETRY_WAIT_MS }
     );
     expect(mockReportDropSubmissionFailure).toHaveBeenCalledWith(error);
     expect(setToast).toHaveBeenCalledWith(
       expect.objectContaining({ type: "error" })
     );
+    expect(commonApiPostMock).toHaveBeenCalledTimes(2);
+    const [first, retry] = sentClientDropIds();
+    expect(first).toMatch(UUID);
+    expect(retry).toBe(first);
+  });
+
+  it("answers a timed-out send with the drop its retry returns, once", async () => {
+    const setToast = jest.fn();
+    const timeout = { status: 504, headers: new Headers() };
+    commonApiPostMock
+      .mockRejectedValueOnce(timeout)
+      .mockImplementationOnce(({ body }: { body: ApiCreateDropRequest }) =>
+        Promise.resolve({
+          id: "server-drop",
+          wave_id: "1",
+          client_drop_id: body.client_drop_id,
+        })
+      );
+    render(
+      <AuthContext.Provider
+        value={{ setToast } as unknown as React.ContextType<typeof AuthContext>}
+      >
+        <CreateDrop
+          activeDrop={null}
+          onCancelReplyQuote={() => {}}
+          onDropAddedToQueue={jest.fn()}
+          wave={wave}
+          dropId={null}
+          fixedDropMode={DropMode.CHAT}
+          privileges={{ chatRestriction: null, submissionRestriction: null }}
+        />
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit current mode"));
+
+    await waitFor(() => expect(mockProcessIncomingDrop).toHaveBeenCalled(), {
+      timeout: RETRY_WAIT_MS,
+    });
+    expect(commonApiPostMock).toHaveBeenCalledTimes(2);
+    const [first, retry] = sentClientDropIds();
+    expect(first).toMatch(UUID);
+    expect(retry).toBe(first);
+    expect(mockProcessIncomingDrop).toHaveBeenCalledTimes(1);
+    expect(mockProcessIncomingDrop).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "server-drop", client_drop_id: first }),
+      "DROP_INSERT",
+      { pendingDropId: null }
+    );
+    expect(mockReportDropSubmissionFailure).not.toHaveBeenCalled();
+    expect(setToast).not.toHaveBeenCalled();
+  });
+
+  it("hands a successful send to the stream without removing its pending row", async () => {
+    render(
+      <CreateDrop
+        activeDrop={null}
+        onCancelReplyQuote={jest.fn()}
+        onDropAddedToQueue={jest.fn()}
+        wave={wave}
+        dropId={null}
+        fixedDropMode={DropMode.CHAT}
+        privileges={{ chatRestriction: null, submissionRestriction: null }}
+      />
+    );
+    await userEvent.click(screen.getByText("submit optimistic drop"));
+    await waitFor(() =>
+      expect(mockProcessIncomingDrop).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "server-drop" }),
+        "DROP_INSERT",
+        { pendingDropId: "temp-rejected-drop" }
+      )
+    );
+    expect(mockProcessDropRemoved).not.toHaveBeenCalled();
+  });
+
+  it("shows a drop the API saved but could not return, without retrying", async () => {
+    const setToast = jest.fn();
+    commonApiPostMock.mockRejectedValue({
+      status: 409,
+      response: { body: { code: "DROP_SAVED_REFRESH" } },
+    });
+    render(
+      <AuthContext.Provider
+        value={{ setToast } as unknown as React.ContextType<typeof AuthContext>}
+      >
+        <CreateDrop
+          activeDrop={null}
+          onCancelReplyQuote={() => {}}
+          onDropAddedToQueue={jest.fn()}
+          wave={wave}
+          dropId={null}
+          fixedDropMode={DropMode.CHAT}
+          privileges={{ chatRestriction: null, submissionRestriction: null }}
+        />
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit optimistic drop"));
+
+    await waitFor(() =>
+      expect(mockRefreshWaveMessages).toHaveBeenCalledWith("1")
+    );
     expect(commonApiPostMock).toHaveBeenCalledTimes(1);
+    expect(mockProcessDropRemoved).toHaveBeenCalledWith(
+      "1",
+      "temp-rejected-drop"
+    );
+    expect(setToast).toHaveBeenCalledTimes(1);
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "success",
+        title: "Your drop was posted.",
+      })
+    );
+    expect(mockReportDropSubmissionFailure).not.toHaveBeenCalled();
+  });
+
+  it("counts a saved drop as sent and still reports all drops added", async () => {
+    const posts = mockPendingPosts();
+    const onAllDropsAdded = jest.fn();
+    render(
+      <AuthContext.Provider value={{ setToast: jest.fn() } as any}>
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            onAllDropsAdded={onAllDropsAdded}
+            wave={wave}
+            dropId={null}
+            fixedDropMode={DropMode.CHAT}
+            privileges={{ chatRestriction: null, submissionRestriction: null }}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    // Two drops queue up; the first is saved but not read back.
+    await userEvent.click(screen.getByText("submit optimistic drop"));
+    await userEvent.click(screen.getByText("submit current mode"));
+    await waitFor(() => expect(posts).toHaveLength(1));
+    posts[0]?.reject({
+      status: 409,
+      response: { body: { code: "DROP_SAVED_REFRESH" } },
+    });
+    await waitFor(() => expect(posts).toHaveLength(2));
+    expect(onAllDropsAdded).not.toHaveBeenCalled();
+    posts[1]?.resolve({ id: "server-drop", wave_id: "1" });
+
+    await waitFor(() => expect(onAllDropsAdded).toHaveBeenCalledTimes(1));
+    expect(mockRefreshWaveMessages).toHaveBeenCalledWith("1");
+    expect(mockReportDropSubmissionFailure).not.toHaveBeenCalled();
+  });
+
+  it("does not retry a client_drop_id the API reports as reused", async () => {
+    const setToast = jest.fn();
+    const reused = {
+      status: 409,
+      response: { body: { code: "CLIENT_DROP_ID_REUSED" } },
+    };
+    commonApiPostMock.mockRejectedValue(reused);
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    render(
+      <AuthContext.Provider
+        value={{ setToast } as unknown as React.ContextType<typeof AuthContext>}
+      >
+        <CreateDrop
+          activeDrop={null}
+          onCancelReplyQuote={() => {}}
+          onDropAddedToQueue={jest.fn()}
+          wave={wave}
+          dropId={null}
+          fixedDropMode={DropMode.CHAT}
+          privileges={{ chatRestriction: null, submissionRestriction: null }}
+        />
+      </AuthContext.Provider>
+    );
+
+    await userEvent.click(screen.getByText("submit current mode"));
+
+    await waitFor(() =>
+      expect(mockReportDropSubmissionFailure).toHaveBeenCalledWith(reused)
+    );
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
+    expect(mockRefreshWaveMessages).not.toHaveBeenCalled();
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "error" })
+    );
   });
 
   it("keeps a moderation-rejected optimistic drop until the wave is left", async () => {
@@ -1214,7 +1628,8 @@ describe("CreateDrop", () => {
     expect(onDropAdded).toHaveBeenCalledTimes(2);
     expect(posts).toHaveLength(1);
 
-    posts[0]?.reject(new Error("participatory failed"));
+    // A rejection, not a lost response, so the queue moves on without a retry.
+    posts[0]?.reject({ status: 400 });
     await waitFor(() => expect(posts).toHaveLength(2));
     expect(posts[1]?.body.drop_type).toBe("CHAT");
     expect(mockSetQueryData).not.toHaveBeenCalled();

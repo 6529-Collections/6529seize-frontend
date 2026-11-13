@@ -3,6 +3,16 @@ import { ActiveWaveVoteCard } from "@/components/waves/discovery/ActiveWaveVoteC
 import { ApiActiveWaveVote } from "@/generated/models/ApiActiveWaveVote";
 import { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
+
+let mockDisplayTimeZone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
+jest.mock("@/hooks/useDisplayTimeZone", () => ({
+  ...jest.requireActual("@/hooks/useDisplayTimeZone"),
+  useDisplayTimeZone: () => mockDisplayTimeZone,
+}));
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -35,7 +45,7 @@ function vote(end: number | null, decision: number | null): ApiActiveWaveVote {
 
 it.each([
   [100000, 200000, /^Voting ends /],
-  [200000, 100000, /^Next decision /],
+  [200000, 100000, /^Next result /],
   [null, null, /^Voting open$/],
 ] as const)(
   "shows the appropriate deadline beneath the name",
@@ -59,3 +69,17 @@ it.each([
     ).toBeTruthy();
   }
 );
+
+it("shows the next result time in the display time zone", () => {
+  mockDisplayTimeZone = { timeZone: "UTC", isLocal: false };
+  try {
+    render(
+      <ActiveWaveVoteCard vote={vote(null, Date.UTC(2026, 0, 1, 23, 59))} />
+    );
+    expect(
+      screen.getByText(/^Next result Jan 1, 11:59\sPM UTC$/)
+    ).toBeVisible();
+  } finally {
+    mockDisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
+  }
+});

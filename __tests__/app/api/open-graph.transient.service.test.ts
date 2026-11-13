@@ -2,9 +2,14 @@ jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
 import { createTransientPlan } from "@/app/api/open-graph/transient/service";
 import { getAlchemyApiKey } from "@/config/alchemyEnv";
+import { publicEnv } from "@/config/env";
 
 jest.mock("@/config/alchemyEnv", () => ({
   getAlchemyApiKey: jest.fn(),
+}));
+
+jest.mock("@/config/serverEnv", () => ({
+  getStagingApiKey: jest.fn(),
 }));
 
 describe("createTransientPlan", () => {
@@ -16,6 +21,25 @@ describe("createTransientPlan", () => {
   >;
   const originalFetch = global.fetch;
   const mockFetch = jest.fn();
+  // Alchemy bodies are read through the byte-limited stream reader, so give
+  // the `json()` mocks a matching stream body.
+  const fetchWithStreamBody = async (...args: unknown[]) => {
+    const response = await mockFetch(...args);
+    if (typeof response?.json !== "function" || response.body) {
+      return response;
+    }
+    const text = JSON.stringify(await response.json());
+    return {
+      ...response,
+      headers: new Headers(),
+      body: new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode(text));
+          controller.close();
+        },
+      }),
+    };
+  };
   const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
 
   beforeEach(() => {
@@ -33,7 +57,7 @@ describe("createTransientPlan", () => {
       return response.json();
     });
     mockedGetAlchemyApiKey.mockReturnValue("test-alchemy-key");
-    global.fetch = mockFetch as unknown as typeof fetch;
+    global.fetch = fetchWithStreamBody as unknown as typeof fetch;
   });
 
   afterAll(() => {
@@ -227,6 +251,51 @@ describe("createTransientPlan", () => {
     expect(warnSpy).not.toHaveBeenCalled();
   });
 
+  it("uses the backend proxy for Ethereum when the API key is unavailable", async () => {
+    mockedGetAlchemyApiKey.mockImplementation(() => {
+      throw new Error("ALCHEMY_API_KEY missing");
+    });
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        tokens: [
+          {
+            name: "Transient token",
+            description: "From the proxy",
+            image: {
+              originalUrl: "ipfs://QmExampleHash/transient.png",
+              contentType: "image/png",
+            },
+          },
+        ],
+      }),
+    });
+    const url =
+      "https://www.transient.xyz/nfts/ethereum/0xda48f4db41415fc2873efb487eec1068626fad60/8";
+
+    const plan = createTransientPlan(new URL(url), {
+      fetchHtml,
+      assertPublicUrl,
+      fetchTokenMetadata,
+    });
+    const result = await plan?.execute();
+
+    expect(result?.data).toEqual(
+      expect.objectContaining({
+        type: "transient.nft",
+        title: "Transient token",
+        image: expect.objectContaining({
+          url: "ipfs://QmExampleHash/transient.png",
+        }),
+      })
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      `${publicEnv.API_ENDPOINT}/alchemy-proxy/token-metadata`,
+      expect.objectContaining({ method: "POST" })
+    );
+    expect(fetchHtml).not.toHaveBeenCalled();
+  });
+
   it("falls back to OpenGraph preview when API key is unavailable", async () => {
     mockedGetAlchemyApiKey.mockImplementation(() => {
       throw new Error("ALCHEMY_API_KEY missing");
@@ -242,11 +311,11 @@ describe("createTransientPlan", () => {
       `,
       contentType: "text/html",
       finalUrl:
-        "https://www.transient.xyz/nfts/ethereum/0xda48f4db41415fc2873efb487eec1068626fad60/8",
+        "https://www.transient.xyz/nfts/base/0xda48f4db41415fc2873efb487eec1068626fad60/8",
     });
 
     const url =
-      "https://www.transient.xyz/nfts/ethereum/0xda48f4db41415fc2873efb487eec1068626fad60/8";
+      "https://www.transient.xyz/nfts/base/0xda48f4db41415fc2873efb487eec1068626fad60/8";
     const plan = createTransientPlan(new URL(url), {
       fetchHtml,
       assertPublicUrl,

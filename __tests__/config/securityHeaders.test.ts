@@ -1,5 +1,10 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
+import {
+  PRODUCTION_ASSET_HOSTNAME,
+  PRODUCTION_ASSET_PREFIX,
+  PRODUCTION_SHARED_ASSET_PATH,
+} from "@/config/assetPrefix";
 import { createSecurityHeaders } from "@/config/securityHeaders";
 
 function findFilesMatching(directory: string, pattern: RegExp): string[] {
@@ -53,6 +58,22 @@ function getContentSecurityPolicyFor(
 
   return header.value;
 }
+
+function getHeaderValue(
+  key: string,
+  options?: Parameters<typeof createSecurityHeaders>[3]
+): string | undefined {
+  return createSecurityHeaders(
+    "https://api.6529.io",
+    "https://ipfs.6529.io",
+    "",
+    options
+  ).find((candidate) => candidate.key === key)?.value;
+}
+
+const SENTRY_PUBLIC_KEY = "0123456789abcdef0123456789abcdef";
+const SENTRY_DSN = `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/456`;
+const SENTRY_SECURITY_ENDPOINT = `https://o123.ingest.us.sentry.io/api/456/security/?sentry_key=${SENTRY_PUBLIC_KEY}`;
 
 function getPermissionsPolicy(): string {
   const header = createSecurityHeaders(
@@ -118,6 +139,114 @@ describe("createSecurityHeaders CSP", () => {
     ).toEqual(["'none'"]);
   });
 
+  it("restricts base URIs, form targets and framing ancestors to the same origin", () => {
+    const policy = getContentSecurityPolicy();
+
+    expect(getDirectiveSources(policy, "base-uri")).toEqual(["'self'"]);
+    expect(getDirectiveSources(policy, "form-action")).toEqual(["'self'"]);
+    expect(getDirectiveSources(policy, "frame-ancestors")).toEqual(["'self'"]);
+  });
+
+  it("keeps the legacy same-origin framing header aligned with frame-ancestors", () => {
+    expect(getHeaderValue("X-Frame-Options")).toBe("SAMEORIGIN");
+  });
+
+  it("limits Google and YouTube frame sources to the hosts that are embedded", () => {
+    const frameSrc = getDirectiveSources(
+      getContentSecurityPolicy(),
+      "frame-src"
+    );
+
+    expect(frameSrc).toEqual(
+      expect.arrayContaining([
+        "https://docs.google.com",
+        "https://www.youtube-nocookie.com",
+        "https://www.youtube.com",
+      ])
+    );
+    expect(frameSrc).not.toContain("https://*.google.com");
+    expect(frameSrc).not.toContain("https://drive.google.com");
+    expect(frameSrc).not.toContain("https://*.youtube.com");
+    expect(
+      frameSrc.filter((source) => /google|youtube/.test(source)).sort()
+    ).toEqual([
+      "https://docs.google.com",
+      "https://www.youtube-nocookie.com",
+      "https://www.youtube.com",
+    ]);
+  });
+
+  it("omits violation reporting when no Sentry DSN is configured", () => {
+    const policy = getContentSecurityPolicy();
+
+    expect(policy).not.toContain("report-uri");
+    expect(policy).not.toContain("report-to");
+    expect(getHeaderValue("Reporting-Endpoints")).toBeUndefined();
+    expect(
+      getHeaderValue("Reporting-Endpoints", { sentryDsn: "" })
+    ).toBeUndefined();
+  });
+
+  it("reports violations to the Sentry security endpoint derived from the public DSN", () => {
+    const options = { sentryDsn: SENTRY_DSN };
+    const policy = getContentSecurityPolicy(options);
+
+    expect(getDirectiveSources(policy, "report-uri")).toEqual([
+      SENTRY_SECURITY_ENDPOINT,
+    ]);
+    expect(getDirectiveSources(policy, "report-to")).toEqual(["csp-endpoint"]);
+    expect(getHeaderValue("Reporting-Endpoints", options)).toBe(
+      `csp-endpoint="${SENTRY_SECURITY_ENDPOINT}"`
+    );
+  });
+
+  it("reports the security endpoint for regional Sentry ingest hosts", () => {
+    expect(
+      getDirectiveSources(
+        getContentSecurityPolicy({
+          sentryDsn: `https://${SENTRY_PUBLIC_KEY}@o123.ingest.de.sentry.io/789`,
+        }),
+        "report-uri"
+      )
+    ).toEqual([
+      `https://o123.ingest.de.sentry.io/api/789/security/?sentry_key=${SENTRY_PUBLIC_KEY}`,
+    ]);
+  });
+
+  it.each([
+    "not a url",
+    `http://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/456`,
+    "https://o123.ingest.us.sentry.io/456",
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/project`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/prefix/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io/456/extra`,
+    "https://short@o123.ingest.us.sentry.io/456",
+    `https://${SENTRY_PUBLIC_KEY};x@o123.ingest.us.sentry.io/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io;script-src/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io:8443/456`,
+    // Only Sentry's hosted ingest hosts: the read-only E2E guard ignores CSP
+    // report POSTs to those hosts and would block any other.
+    `https://${SENTRY_PUBLIC_KEY}@telemetry.example/456`,
+    `https://${SENTRY_PUBLIC_KEY}@sentry.io/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.eu.sentry.io/456`,
+    `https://${SENTRY_PUBLIC_KEY}@o123.ingest.us.sentry.io.example/456`,
+  ])(
+    "ignores a Sentry DSN that cannot form a safe report endpoint: %s",
+    (dsn) => {
+      const options = { sentryDsn: dsn };
+
+      expect(getContentSecurityPolicy(options)).not.toContain("report-uri");
+      expect(getHeaderValue("Reporting-Endpoints", options)).toBeUndefined();
+    }
+  );
+
+  it("lets the page load its own web app manifest and nothing else", () => {
+    expect(
+      getDirectiveSources(getContentSecurityPolicy(), "manifest-src")
+    ).toEqual(["'self'"]);
+  });
+
   it("allows passive artwork previews only from the two archive buckets without broadening active content", () => {
     const policy = getContentSecurityPolicy();
     const mediaSrc = getDirectiveSources(policy, "media-src");
@@ -135,6 +264,26 @@ describe("createSecurityHeaders CSP", () => {
     }
   });
 
+  it("allows OpenSea original video previews only on the observed HTTPS media host", () => {
+    const policy = getContentSecurityPolicy();
+    const mediaSrc = getDirectiveSources(policy, "media-src");
+    const openSeaOrigin = "https://i2c.seadn.io";
+
+    expect(mediaSrc).toContain(openSeaOrigin);
+    expect(mediaSrc).not.toEqual(
+      expect.arrayContaining(["https://*.seadn.io"])
+    );
+    expect(mediaSrc).not.toContain("http://i2c.seadn.io");
+    for (const broadSource of ["https:", "http:", "data:", "*"]) {
+      expect(mediaSrc).not.toContain(broadSource);
+    }
+    for (const directive of ["script-src", "frame-src", "object-src"]) {
+      expect(getDirectiveSources(policy, directive)).not.toContain(
+        openSeaOrigin
+      );
+    }
+  });
+
   it("omits unsafe-eval unless explicitly enabled for local tooling", () => {
     expect(
       getDirectiveSources(getContentSecurityPolicy(), "script-src")
@@ -146,6 +295,28 @@ describe("createSecurityHeaders CSP", () => {
         "script-src"
       )
     ).toContain("'unsafe-eval'");
+  });
+
+  it("adds wasm-unsafe-eval only when encrypted messages need WebAssembly", () => {
+    const defaultSources = getDirectiveSources(
+      getContentSecurityPolicy(),
+      "script-src"
+    );
+    expect(defaultSources).not.toContain("'wasm-unsafe-eval'");
+
+    const e2eeSources = getDirectiveSources(
+      getContentSecurityPolicy({ allowWasmUnsafeEval: true }),
+      "script-src"
+    );
+    expect(e2eeSources).toContain("'wasm-unsafe-eval'");
+    // WebAssembly compilation must not widen JavaScript eval.
+    expect(e2eeSources).not.toContain("'unsafe-eval'");
+    expect(
+      getDirectiveSources(
+        getContentSecurityPolicy({ allowWasmUnsafeEval: true }),
+        "connect-src"
+      )
+    ).not.toContain("'wasm-unsafe-eval'");
   });
 
   it("keeps inline script and style exceptions explicit", () => {
@@ -301,6 +472,61 @@ describe("createSecurityHeaders CSP", () => {
         "usb=()",
         "xr-spatial-tracking=()",
       ].join(", ")
+    );
+  });
+});
+
+describe("createSecurityHeaders opener policy", () => {
+  it("isolates the window from cross-origin openers but keeps its own popups", () => {
+    const headers = createSecurityHeaders(
+      "https://api.6529.io",
+      "https://ipfs.6529.io"
+    ).filter((header) => header.key === "Cross-Origin-Opener-Policy");
+
+    expect(headers).toEqual([
+      { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+    ]);
+  });
+});
+
+describe("createSecurityHeaders script sources on the asset CDN", () => {
+  const scriptAssetSource = `${PRODUCTION_ASSET_PREFIX}/_next/static/`;
+
+  it("allows only the build's static files from the asset CDN", () => {
+    const scriptSrc = getDirectiveSources(
+      getContentSecurityPolicy(),
+      "script-src"
+    );
+
+    expect(scriptSrc).toContain(scriptAssetSource);
+    expect(
+      scriptSrc.filter((source) => source.includes(PRODUCTION_ASSET_HOSTNAME))
+    ).toEqual([scriptAssetSource]);
+  });
+
+  it("matches the prefix the production deploy uploads static files to", () => {
+    const workflow = readFileSync(
+      join(process.cwd(), ".github/workflows/build-upload-deploy-prod.yml"),
+      "utf8"
+    );
+    const uploadPrefix = /SHARED_STATIC_PREFIX:\s*"([^"]+)"/.exec(
+      workflow
+    )?.[1];
+
+    expect(uploadPrefix).toBe(`${PRODUCTION_SHARED_ASSET_PATH}/_next/static`);
+    expect(scriptAssetSource).toBe(
+      `https://${PRODUCTION_ASSET_HOSTNAME}/${uploadPrefix}/`
+    );
+  });
+
+  it("keeps fonts and styles on the whole asset CDN host", () => {
+    const policy = getContentSecurityPolicy();
+
+    expect(getDirectiveSources(policy, "font-src")).toContain(
+      `https://${PRODUCTION_ASSET_HOSTNAME}`
+    );
+    expect(getDirectiveSources(policy, "style-src")).toContain(
+      `https://${PRODUCTION_ASSET_HOSTNAME}`
     );
   });
 });

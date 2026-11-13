@@ -49,16 +49,16 @@ const getStateClasses = (
   quiet: boolean
 ): string => {
   if (quiet && !isSelected) {
-    return `tw-border-transparent tw-bg-iron-800/60 ${interactive ? "tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800" : ""}`;
+    return `tw-border-transparent tw-bg-iron-900 ${interactive ? "tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800" : ""}`;
   }
   if (interactive && isSelected) {
-    return "tw-cursor-pointer tw-border-primary-400 tw-bg-primary-500/10";
+    return "tw-cursor-pointer tw-border-primary-400 tw-bg-iron-900";
   }
   if (interactive) {
     return "tw-cursor-pointer tw-border-iron-800 tw-bg-iron-900/70 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900";
   }
   if (isSelected) {
-    return "tw-border-primary-400 tw-bg-primary-500/10";
+    return "tw-border-primary-400 tw-bg-iron-900";
   }
   return "tw-border-iron-800 tw-bg-iron-900/60";
 };
@@ -256,7 +256,11 @@ export default function GroupCreateXtdhGrantRow({
   );
 
   return (
-    <ContainerTag className={rowClasses} {...interactiveProps}>
+    <ContainerTag
+      data-group-criteria-card
+      className={rowClasses}
+      {...interactiveProps}
+    >
       {rowContent}
     </ContainerTag>
   );

@@ -39,7 +39,7 @@
 
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
@@ -222,29 +222,18 @@ is available, use it; otherwise read the relevant files in
 
 ## Capacitor iOS NFT purchasing visibility
 
-- Preserve the current regional rule: restrict first-party minting and paid
-  Meme subscription surfaces on Capacitor iOS when the IP-derived country is
-  not `US`. An unknown country is restricted. This is the current product rule;
-  do not silently replace it with all-iOS blocking or App Store storefront logic.
-- Use `useNftPurchasingVisibility` for new or changed surfaces and
-  `NftPurchasingGate` to keep restricted components from mounting. Preserve the
-  existing `shouldHideSubscriptions` country normalization.
-- Completely omit restricted sections, copy, cards, actions, navigation/search
-  entries, and subscription-coverage notification controls. Do not leave empty
-  cards, disabled purchase buttons, or an unavailable banner.
-- Direct and deep-linked restricted pages redirect to an appropriate allowed
-  destination: profile subscriptions to Identity, NextGen mint to its collection,
-  and About Minting/Subscriptions to `/about`. Do not mount purchasing content
-  or start its requests/contract hooks before redirecting; keep it hidden during
-  server rendering and hydration too.
-- Check inbound first-party links as well as the destination. Apply the same
-  checks to new mint/subscription promotions and notification entry points.
-- Preserve US iOS, Android, and web behavior. Ordinary user-authored posts and
-  links, NFT browsing/history, calendar invitations, and open-data reports are
-  not subject to blanket word or link suppression. Hide purchase promotions
-  embedded in otherwise allowed pages without removing those pages.
-- Cover restricted iOS, unknown country, US iOS, Android, web, and direct-link
-  behavior in focused tests. See the mobile-testing skill's purchasing checklist.
+- Hide first-party NFT purchasing, offers, listing, minting, paid Meme
+  subscription actions, and purchase links in the iOS app in every country.
+  Use `useNftPurchasingVisibility` and `NftPurchasingGate` to omit actions and
+  keep purchase components and requests from starting during hydration.
+- Guard direct routes as well as inbound navigation. Collect returns to the
+  corresponding collection, The Memes and NextGen mint routes return to their
+  collections, and About Minting and Subscriptions return to `/about`.
+- Preserve Android and web behavior, user-shared Wave links, and NFT browsing.
+  Hide Orders and profile Subscriptions in the iOS app in every country.
+  Read-only reports remain reachable through their direct URLs.
+- Check US, non-US, and unknown-country iOS, Android, web, and direct links
+  in focused tests.
 
 ## Architecture Boundaries
 
@@ -253,6 +242,10 @@ is available, use it; otherwise read the relevant files in
 - New API calls should normally use `services/api/common-api.ts` helpers so
   staging auth, wallet JWT auth, URL construction, structured errors, abort
   handling, and monitoring stay consistent.
+- When code must build a 6529 API URL itself, use `apiUrl(path)` or
+  `getApiBase()` from `services/api/api-endpoints.ts`. Never read
+  `publicEnv.API_ENDPOINT` or hardcode the API host; the contract test
+  `__tests__/contracts/api-endpoint-boundary.test.ts` enforces this.
 - React Query cache keys and broad invalidation live in
   `components/react-query-wrapper/ReactQueryWrapper.tsx`. Reuse `QueryKey` and
   existing invalidation/update helpers before creating new cache patterns.

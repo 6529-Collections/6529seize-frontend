@@ -89,6 +89,18 @@ test("renders iframe when animation shown and link hidden", () => {
   expect(frame).toHaveAttribute("src", "anim.html");
 });
 
+test("sandboxes the generative animation iframe with scripts only", () => {
+  const tokenWithAnimation = { ...token, animation_url: "anim.html" };
+  render(
+    <NextGenTokenImage token={tokenWithAnimation} show_animation hide_link />
+  );
+  const frame = screen.getByTitle("token");
+  expect(frame).toHaveAttribute("sandbox", "allow-scripts");
+  expect(frame.getAttribute("sandbox")?.split(/\s+/)).not.toContain(
+    "allow-same-origin"
+  );
+});
+
 test("renders iframe within link when animation shown and link not hidden", () => {
   const tokenWithAnimation = { ...token, animation_url: "anim.html" };
   render(<NextGenTokenImage token={tokenWithAnimation} show_animation />);
@@ -97,6 +109,7 @@ test("renders iframe within link when animation shown and link not hidden", () =
   expect(link).toBeInTheDocument();
   expect(frame).toBeInTheDocument();
   expect(frame).toHaveAttribute("src", "anim.html");
+  expect(frame).toHaveAttribute("sandbox", "allow-scripts");
   expect(link).toContainElement(frame);
 });
 
@@ -136,6 +149,21 @@ test("renders owner info button when show_owner_info is true", () => {
 
   expect(link).toBeInTheDocument();
   expect(infoButton).toBeInTheDocument();
+});
+
+test("hides asking prices while retaining the artwork and owner control", () => {
+  render(
+    <NextGenTokenImage
+      token={{ ...token, price: 1, opensea_price: 1 }}
+      hideMarketListings
+      show_listing
+      show_owner_info
+    />
+  );
+
+  expect(screen.getByAltText("token")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "More info" })).toBeInTheDocument();
+  expect(screen.queryByText(/Listed for/)).not.toBeInTheDocument();
 });
 
 test("renders listing info when show_listing is true and price > 0", () => {

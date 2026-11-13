@@ -3,7 +3,6 @@
 import React from "react";
 import { useWaveSingleWaveDropRendererSet } from "./singleWaveDropRendererRegistry";
 import type { SingleWaveDropProps } from "../drops/participation/participationRenderer.types";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { useCompetitionDrop } from "@/hooks/competitions/useCompetitionDrop";
 
 function CompetitionSingleWaveDrop(props: SingleWaveDropProps) {
@@ -11,19 +10,19 @@ function CompetitionSingleWaveDrop(props: SingleWaveDropProps) {
   return <SingleWaveDropContent {...props} drop={drop} />;
 }
 
-export const SingleWaveDrop: React.FC<SingleWaveDropProps> = (props) =>
-  isMultiCompetitionEnabled() ? (
-    <CompetitionSingleWaveDrop {...props} />
-  ) : (
-    <SingleWaveDropContent {...props} />
-  );
+export const SingleWaveDrop: React.FC<SingleWaveDropProps> = (props) => (
+  <CompetitionSingleWaveDrop {...props} />
+);
 
 const SingleWaveDropContent: React.FC<SingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
   const { SingleWaveDrop: SingleWaveDropRenderer } =
-    useWaveSingleWaveDropRendererSet(initialDrop.wave.id);
+    useWaveSingleWaveDropRendererSet(
+      initialDrop.wave.id,
+      initialDrop.competition_context?.data.competition?.capabilities
+    );
 
   return <SingleWaveDropRenderer drop={initialDrop} onClose={onClose} />;
 };

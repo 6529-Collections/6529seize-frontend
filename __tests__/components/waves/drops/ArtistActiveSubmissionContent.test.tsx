@@ -4,6 +4,8 @@ import "@testing-library/jest-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ArtistActiveSubmissionContent } from "@/components/waves/drops/ArtistActiveSubmissionContent";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
+import { createMockDrop } from "@/__tests__/utils/editDropTestUtils";
+import { useSubmissionDrops } from "@/hooks/useUserArtSubmissions";
 import { mockDefaultTimeZone } from "@/__tests__/utils/timeZoneHydration";
 
 // Mock dependencies
@@ -149,7 +151,65 @@ describe("ArtistActiveSubmissionContent", () => {
     // Should render the submission titles
     expect(screen.getByText("Test Artwork 1")).toBeInTheDocument();
     expect(screen.getByText("Test Artwork 2")).toBeInTheDocument();
+    expect(screen.getByLabelText("Image - JPEG")).toBeInTheDocument();
+    expect(screen.getByLabelText("Image - PNG")).toBeInTheDocument();
+    // Reusing the leaderboard badge must not invent first place for unranked art.
+    expect(screen.queryByText("1st")).not.toBeInTheDocument();
   });
+
+  it.each([false, true])(
+    "shows the promise badge only for flagged submissions (app: %s)",
+    (isApp) => {
+      const submissionsWithDrops = [true, false, null].map(
+        (promised, index) => ({
+          ...mockSubmissions[0]!,
+          id: `promise-${index}`,
+          title: `Artwork ${index}`,
+          drop: createMockDrop({
+            id: `promise-${index}`,
+            is_additional_action_promised: promised,
+            rank: index === 0 ? 23 : null,
+          }),
+        })
+      );
+      jest.mocked(useSubmissionDrops).mockReturnValue({
+        submissionsWithDrops,
+        isLoading: false,
+        error: null,
+      });
+      const onClose = jest.fn();
+      renderWithProviders(
+        <ArtistActiveSubmissionContent
+          {...defaultProps}
+          isApp={isApp}
+          onClose={onClose}
+        />
+      );
+
+      const badges = screen.getAllByRole("button", {
+        name: "Additional Action",
+      });
+      expect(badges).toHaveLength(1);
+      const position = screen.getByText("23rd");
+      expect(position).toBeInTheDocument();
+      expect(position.querySelector("svg")).toHaveAttribute(
+        "aria-hidden",
+        "true"
+      );
+      expect(screen.queryByLabelText(/winner/i)).not.toBeInTheDocument();
+      expect(screen.queryByText("1st")).not.toBeInTheDocument();
+      expect(badges[0]).toHaveAccessibleDescription(
+        /The creator marked this submission as promising an extra action/
+      );
+      fireEvent.click(badges[0]!);
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByText("Artwork 0"));
+      expect(mockPush).toHaveBeenCalledWith("/test-path?drop=promise-0");
+      expect(onClose).toHaveBeenCalledTimes(1);
+    }
+  );
 
   it("shows loading state", () => {
     const {

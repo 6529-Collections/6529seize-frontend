@@ -1,26 +1,19 @@
 "use client";
 
 import {
-  createElement,
+  createContext,
   memo,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
-  useRef,
-  type ComponentPropsWithoutRef,
-  type ElementType,
-  type ReactNode,
 } from "react";
-import Markdown, {
-  defaultUrlTransform,
-  type Components,
-  type ExtraProps,
-} from "react-markdown";
-import rehypeExternalLinks from "rehype-external-links";
-import rehypeSanitize from "rehype-sanitize";
-import remarkGfm from "remark-gfm";
+import type { Components } from "react-markdown";
 import { useQueryClient } from "@tanstack/react-query";
-import type { PluggableList } from "unified";
+import {
+  MarkdownLink,
+  MessageMarkdown,
+} from "@/components/markdown/MessageMarkdown";
 
 import { useEmoji } from "@/contexts/EmojiContext";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
@@ -39,196 +32,52 @@ import {
 import { primeMarketplacePreviewCacheFromNftLinks } from "@/components/waves/marketplace/common";
 
 import { createMarkdownContentRenderers } from "./dropPartMarkdown/content";
-import { highlightCodeElement } from "./dropPartMarkdown/highlight";
 import {
   createLinkRenderer,
   DEFAULT_MAX_EMBED_DEPTH,
 } from "./dropPartMarkdown/linkHandlers";
-import { isSafeMarkdownImageSrc } from "./dropPartMarkdown/linkUtils";
-import { rehypePreserveOrderedListDelimiter } from "./dropPartMarkdown/orderedListDelimiter";
-
-const BreakComponent = () => <br />;
 
 const EMPTY_MENTIONED_GROUPS: ApiDropGroupMention[] = [];
 const EMOJI_SHORTCODE_REGEX = /:\w+:/;
 
-const mergeClassNames = (...classes: Array<string | undefined>): string =>
-  classes.filter(Boolean).join(" ");
+const normalizeStringArray = (values?: readonly string[]): string[] =>
+  values?.filter((value) => typeof value === "string" && value.length > 0) ??
+  [];
 
-const headingClassName = "tw-text-iron-200 tw-break-words word-break";
+type MarkdownComponentsOptions = Pick<
+  ReturnType<typeof createMarkdownContentRenderers>,
+  "renderParagraph"
+> &
+  Pick<ReturnType<typeof createLinkRenderer>, "renderAnchor" | "renderImage">;
 
-const normalizeStringArray = (values?: readonly string[]): string[] => {
-  if (!values || values.length === 0) {
-    return [];
-  }
-
-  return values.filter(
-    (value): value is string => typeof value === "string" && value.length > 0
+const MarkdownRenderersContext =
+  createContext<MarkdownComponentsOptions | null>(null);
+function useMarkdownRenderers() {
+  const renderers = useContext(MarkdownRenderersContext);
+  if (!renderers) throw new Error("Markdown renderers are unavailable");
+  return renderers;
+}
+const ParagraphRenderer = (
+  props: Parameters<MarkdownComponentsOptions["renderParagraph"]>[0]
+) => useMarkdownRenderers().renderParagraph(props);
+const AnchorRenderer = (
+  props: Parameters<MarkdownComponentsOptions["renderAnchor"]>[0]
+) => {
+  const { renderAnchor } = useMarkdownRenderers();
+  // Footnotes are local fragments, not destinations for public rich-link cards.
+  return props.href?.startsWith("#") ? (
+    <MarkdownLink {...props} />
+  ) : (
+    renderAnchor(props)
   );
 };
-
-type MarkdownRendererProps<T extends ElementType> =
-  ComponentPropsWithoutRef<T> &
-    ExtraProps & {
-      children?: ReactNode | undefined;
-      className?: string | undefined;
-    };
-
-type MarkdownCodeProps = MarkdownRendererProps<"code"> & {
-  inline?: boolean | undefined;
-};
-
-type MarkdownComponentsOptions = {
-  customRenderer: (content: ReactNode | undefined) => ReactNode;
-  renderParagraph: Components["p"];
-  renderAnchor: Components["a"];
-  renderImage: Components["img"];
-};
-
-const InlineCodeRenderer = ({
-  children,
-  className,
-  style,
-  ...props
-}: MarkdownCodeProps) => (
-  <code
-    {...props}
-    style={{ ...style, textOverflow: "unset" }}
-    className={mergeClassNames(
-      "tw-whitespace-pre-wrap tw-break-words tw-text-iron-200",
-      className
-    )}
-  >
-    {children}
-  </code>
-);
-
-const CodeBlockRenderer = ({
-  children,
-  className,
-  style,
-  ...props
-}: MarkdownCodeProps) => {
-  const codeRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (typeof globalThis.window === "undefined") {
-      return;
-    }
-
-    const element = codeRef.current;
-    if (!element) {
-      return;
-    }
-
-    if (element.textContent.trim() === "") {
-      return;
-    }
-
-    const language = /language-([\w+-]+)/.exec(element.className)?.[1] ?? null;
-
-    void (async () => {
-      try {
-        await highlightCodeElement(element, language);
-      } catch (error: unknown) {
-        console.error("[DropPartMarkdown] Failed to highlight code", error);
-      }
-    })();
-  });
-
-  return (
-    <code
-      {...props}
-      ref={codeRef}
-      style={{ ...style, textOverflow: "unset" }}
-      className={mergeClassNames(
-        "tw-whitespace-pre-wrap tw-break-words tw-text-iron-200",
-        className
-      )}
-    >
-      {children}
-    </code>
-  );
-};
-
-const CodeRenderer = ({ inline, ...props }: MarkdownCodeProps) =>
-  inline ? <InlineCodeRenderer {...props} /> : <CodeBlockRenderer {...props} />;
-
-const createMarkdownComponents = ({
-  customRenderer,
-  renderParagraph,
-  renderAnchor,
-  renderImage,
-}: MarkdownComponentsOptions): Components => {
-  const createHeadingRenderer = <T extends ElementType>(Tag: T) => {
-    const HeadingRenderer = ({
-      children,
-      className,
-      ...props
-    }: MarkdownRendererProps<T>) => {
-      const TagComponent = Tag;
-      const mergedProps = {
-        ...(props as Record<string, unknown>),
-        className: mergeClassNames(headingClassName, className),
-      };
-
-      return createElement(TagComponent, mergedProps, customRenderer(children));
-    };
-
-    HeadingRenderer.displayName = `MarkdownHeading(${
-      typeof Tag === "string" ? Tag : "component"
-    })`;
-
-    return HeadingRenderer;
-  };
-
-  const ListItemRenderer = ({
-    children,
-    className,
-    node: _node,
-    ...props
-  }: MarkdownRendererProps<"li">) => (
-    <li
-      {...props}
-      className={mergeClassNames(
-        "word-break tw-break-words tw-text-md tw-text-iron-200",
-        className
-      )}
-    >
-      {customRenderer(children)}
-    </li>
-  );
-
-  const BlockQuoteRenderer = ({
-    children,
-    className,
-    ...props
-  }: MarkdownRendererProps<"blockquote">) => (
-    <blockquote
-      {...props}
-      className={mergeClassNames(
-        "word-break tw-break-words tw-border-b-0 tw-border-l-4 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-l-iron-500 tw-pl-4 tw-text-iron-200",
-        className
-      )}
-    >
-      {customRenderer(children)}
-    </blockquote>
-  );
-
-  return {
-    h1: createHeadingRenderer("h1"),
-    h2: createHeadingRenderer("h2"),
-    h3: createHeadingRenderer("h3"),
-    h4: createHeadingRenderer("h4"),
-    h5: createHeadingRenderer("h5"),
-    ...(renderParagraph !== undefined ? { p: renderParagraph } : {}),
-    li: ListItemRenderer,
-    code: CodeRenderer,
-    ...(renderAnchor !== undefined ? { a: renderAnchor } : {}),
-    ...(renderImage !== undefined ? { img: renderImage } : {}),
-    br: BreakComponent,
-    blockquote: BlockQuoteRenderer,
-  } satisfies Components;
+const ImageRenderer = (
+  props: Parameters<MarkdownComponentsOptions["renderImage"]>[0]
+) => useMarkdownRenderers().renderImage(props);
+const PUBLIC_COMPONENTS: Components = {
+  p: ParagraphRenderer,
+  a: AnchorRenderer,
+  img: ImageRenderer,
 };
 
 export interface DropPartMarkdownProps {
@@ -238,6 +87,7 @@ export interface DropPartMarkdownProps {
   readonly referencedNfts: Array<ApiDropReferencedNFT>;
   readonly nftLinks?: readonly ApiDropNftLink[] | undefined;
   readonly partContent: string | null;
+  readonly collapsedPreview?: boolean | undefined;
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly textSize?: "sm" | "md" | undefined;
   readonly currentDropId?: string | undefined;
@@ -261,6 +111,7 @@ function DropPartMarkdown({
   referencedNfts,
   nftLinks,
   partContent,
+  collapsedPreview = false,
   onQuoteClick,
   textSize,
   currentDropId,
@@ -350,7 +201,7 @@ function DropPartMarkdown({
     ]
   );
 
-  const { customRenderer, renderParagraph, processContent } = useMemo(
+  const { customRenderer, renderParagraph } = useMemo(
     () =>
       createMarkdownContentRenderers({
         textSizeClass,
@@ -374,75 +225,13 @@ function DropPartMarkdown({
     ]
   );
 
-  const processedContent = useMemo(
-    () => processContent(partContent),
-    [processContent, partContent]
-  );
-
-  const rehypePlugins = useMemo<PluggableList>(
-    () => [
-      [
-        rehypeExternalLinks,
-        {
-          target: "_blank",
-          rel: ["noopener", "noreferrer", "nofollow"],
-          protocols: ["http", "https"],
-        },
-      ],
-      [
-        rehypeSanitize,
-        {
-          allowedTags: [
-            "p",
-            "br",
-            "strong",
-            "em",
-            "a",
-            "code",
-            "pre",
-            "blockquote",
-            "h1",
-            "h2",
-            "h3",
-            "h4",
-            "h5",
-            "h6",
-            "ul",
-            "ol",
-            "li",
-            "img",
-          ],
-          allowedAttributes: {
-            a: ["href", "title"],
-            img: ["src", "alt", "title"],
-            code: ["className"],
-            pre: ["className"],
-          },
-          protocols: {
-            cite: ["http", "https"],
-            href: ["http", "https", "irc", "ircs", "mailto", "xmpp"],
-            longDesc: ["http", "https"],
-            src: ["http", "https", "data"],
-          },
-        },
-      ],
-      // This trusted plugin only adds one static renderer-owned class.
-      rehypePreserveOrderedListDelimiter,
-    ],
-    []
-  );
-
-  const remarkPlugins = useMemo<PluggableList>(() => [remarkGfm], []);
-
-  const markdownComponents = useMemo<Components>(
-    () =>
-      createMarkdownComponents({
-        customRenderer,
-        renderParagraph,
-        renderAnchor,
-        renderImage,
-      }),
-    [customRenderer, renderAnchor, renderImage, renderParagraph]
+  const markdownRenderers = useMemo<MarkdownComponentsOptions>(
+    () => ({
+      renderParagraph,
+      renderAnchor,
+      renderImage,
+    }),
+    [renderAnchor, renderImage, renderParagraph]
   );
 
   return (
@@ -451,25 +240,17 @@ function DropPartMarkdown({
       previewToggle={linkPreviewToggleControl}
       onCardActionsActiveChange={onLinkCardActionsActiveChange}
     >
-      <Markdown
-        rehypePlugins={rehypePlugins}
-        remarkPlugins={remarkPlugins}
-        className="tw-w-full"
-        components={markdownComponents}
-        urlTransform={(url, key, node) => {
-          if (
-            key === "src" &&
-            node.tagName === "img" &&
-            isSafeMarkdownImageSrc(url)
-          ) {
-            return url;
-          }
-
-          return defaultUrlTransform(url);
-        }}
-      >
-        {processedContent}
-      </Markdown>
+      <MarkdownRenderersContext.Provider value={markdownRenderers}>
+        <MessageMarkdown
+          text={partContent}
+          privacy="public"
+          collapsedPreview={collapsedPreview}
+          messageId={currentDropId}
+          className="tw-w-full"
+          components={PUBLIC_COMPONENTS}
+          renderText={customRenderer}
+        />
+      </MarkdownRenderersContext.Provider>
     </LinkPreviewProvider>
   );
 }

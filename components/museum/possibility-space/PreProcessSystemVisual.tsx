@@ -6,6 +6,7 @@
 import { useMemo, useRef, type KeyboardEvent } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/museum";
 import type { MuseumExhaustiveLatticeVisualization } from "@/lib/museum/generative-studies";
 import {
   ComparisonMarker,

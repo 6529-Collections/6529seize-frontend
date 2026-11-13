@@ -326,7 +326,7 @@ export default function AboutApi() {
                   <b>Wave</b> - A channel within Brain. Think of it as a topic,
                   chatroom, or sub-community Waves can be public or private.
                   Access may differ: e.g. you might be able to view a wave but
-                  not post in it, or post but not participate in competitions.
+                  not post in it, or post but not participate in decisions.
                 </li>
                 <li>
                   <b>Drop</b> - A message inside a wave. Interaction rules
@@ -334,7 +334,7 @@ export default function AboutApi() {
                   vote on a PARTICIPATORY drop. Drops types are:
                   <ul>
                     <li>CHAT → a standard chat message</li>
-                    <li>PARTICIPATORY → a competition entry</li>
+                    <li>PARTICIPATORY → a decision entry</li>
                     <li>
                       WINNER → a previously participatory drop elected as a
                       winner

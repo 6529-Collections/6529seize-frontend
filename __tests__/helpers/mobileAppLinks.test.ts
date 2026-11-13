@@ -177,6 +177,55 @@ describe("mobile app links", () => {
       expect(resolve(value)).toBe(expected);
     });
 
+    it("routes a shared staging link within the staging app", () => {
+      expect(
+        getNativeLinkDestination(
+          "https://STAGING.6529.IO/waves/1?drop=2&tag=a&tag=b#drop-2",
+          "mobileStaging6529",
+          "https://staging.6529.io",
+          123
+        )
+      ).toBe("/waves/1?drop=2&tag=a&tag=b&_t=123#drop-2");
+    });
+
+    it.each([
+      "https://6529.io",
+      "https://prxtstaging.6529.io",
+      "https://staging.6529.io.example.com",
+      "http://localhost:3001",
+      "http://staging.6529.io",
+      "https://staging.6529.io:8443",
+    ])("rejects staging links from a different app origin %s", (appOrigin) => {
+      expect(
+        getNativeLinkDestination(
+          "https://staging.6529.io/waves/1",
+          "mobileStaging6529",
+          appOrigin,
+          123
+        )
+      ).toBeNull();
+    });
+
+    it.each([
+      "/auth/callback",
+      "/tools/app-wallets/import-wallet",
+      "/open-mobile",
+      "/api/version",
+      "/.well-known/apple-app-site-association",
+      "/favicon.svg",
+      "/bad%",
+      "//evil.example",
+    ])("keeps staging exclusion or unsafe path %s in the browser", (path) => {
+      expect(
+        getNativeLinkDestination(
+          `https://staging.6529.io${path}`,
+          "mobileStaging6529",
+          "https://staging.6529.io",
+          123
+        )
+      ).toBeNull();
+    });
+
     it.each([
       "https://evil.example/waves/1",
       "https://6529.io.evil.example/waves/1",
@@ -215,9 +264,45 @@ describe("mobile app links", () => {
       }
     );
 
-    it("keeps the app link scheme's existing path rules", () => {
-      expect(resolve("mobile6529://navigate/tools/app-wallets")).toBe(
-        "/tools/app-wallets?_t=123"
+    it.each([
+      "/tools/app-wallets",
+      "/app-wallets/0xabc",
+      "/accept-connection-sharing?connection_share_code=c&address=0x1",
+      "/open-mobile?path=/waves/1",
+      "/access",
+      "/restricted",
+      "/auth/callback",
+      "/api/version",
+      "/%61pi/version",
+    ])(
+      "keeps excluded route %s out of the app for navigate links too",
+      (path) => {
+        expect(resolve(`mobile6529://navigate${path}`)).toBeNull();
+      }
+    );
+
+    it.each([
+      ["/waves/1?tag=a", "/waves/1?tag=a&_t=123"],
+      ["/tools/subscriptions-report", "/tools/subscriptions-report?_t=123"],
+      ["/accessibility", "/accessibility?_t=123"],
+      ["", "/?_t=123"],
+    ])("still opens ordinary navigate route %s", (path, expected) => {
+      expect(resolve(`mobile6529://navigate${path}`)).toBe(expected);
+    });
+
+    it("still opens share-connection links on the accept page", () => {
+      expect(
+        resolve("mobile6529://share-connection?connection_share_code=c")
+      ).toBe("/accept-connection-sharing?connection_share_code=c&_t=123");
+    });
+
+    it("keeps a share code carried in the fragment for the accept page", () => {
+      expect(
+        resolve(
+          "mobile6529://share-connection?address=0xabc#connection_share_code=c"
+        )
+      ).toBe(
+        "/accept-connection-sharing?address=0xabc&_t=123#connection_share_code=c"
       );
     });
   });
@@ -254,6 +339,82 @@ describe("mobile app links", () => {
       expect(
         isCurrentNativeLinkLocation("/?_t=123", `${origin}/`, origin)
       ).toBe(true);
+    });
+  });
+
+  describe("on Android WebViews before Chromium 130", () => {
+    // Those parse custom-scheme URLs with an empty host and keep the host in
+    // the path, e.g. mobile6529://navigate/x -> host "", path "//navigate/x".
+    const RealURL = globalThis.URL;
+    class LegacyCustomSchemeURL extends RealURL {
+      constructor(value: string | URL, base?: string | URL) {
+        super(value, base);
+        const text = String(value);
+        const schemePrefix = /^(?:mobile6529|mobilestaging6529):\/\//i.exec(
+          text
+        );
+        if (!schemePrefix) {
+          return;
+        }
+        const legacy = new RealURL(
+          `https://legacy.invalid//${text.slice(schemePrefix[0].length)}`
+        );
+        Object.defineProperty(this, "hostname", { value: "" });
+        Object.defineProperty(this, "pathname", { value: legacy.pathname });
+      }
+    }
+
+    beforeEach(() => {
+      globalThis.URL = LegacyCustomSchemeURL as typeof URL;
+    });
+
+    afterEach(() => {
+      globalThis.URL = RealURL;
+    });
+
+    it("still opens the linked page", () => {
+      const result = new RealURL(
+        getNativeLinkDestination(
+          "mobile6529://navigate/messages/encrypted?x=1#m",
+          "mobile6529",
+          origin,
+          123
+        )!,
+        origin
+      );
+      expect(result.pathname).toBe("/messages/encrypted");
+      expect(result.searchParams.get("x")).toBe("1");
+      expect(result.hash).toBe("#m");
+    });
+
+    it("still opens connection sharing and nothing else", () => {
+      expect(
+        getNativeLinkDestination(
+          "mobile6529://share-connection?code=1",
+          "mobile6529",
+          origin,
+          123
+        )
+      ).toMatch(/^\/accept-connection-sharing\?/);
+      expect(
+        getNativeLinkDestination(
+          "mobile6529://evil/messages",
+          "mobile6529",
+          origin,
+          123
+        )
+      ).toBeNull();
+    });
+
+    it("preserves the configured staging scheme on an older WebView", () => {
+      expect(
+        getNativeLinkDestination(
+          "mobilestaging6529://navigate/messages/encrypted?x=1#m",
+          "mobileStaging6529",
+          origin,
+          123
+        )
+      ).toBe("/messages/encrypted?x=1&_t=123#m");
     });
   });
 });

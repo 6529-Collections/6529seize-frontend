@@ -1,8 +1,10 @@
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { ChevronDownIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { NftSocialCardFormat } from "@/components/providers/metadata";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { ArtworkShareDetails } from "./artworkShare";
@@ -25,6 +27,7 @@ export default function ArtworkShareDialog({
   const titleId = useId();
   const [format, setFormat] = useState<NftSocialCardFormat>("portrait");
   useBodyScrollLock({ reserveScrollbarGap: true });
+  useAndroidBackLayer(true, dialogRef, onClose);
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -86,7 +89,7 @@ export default function ArtworkShareDialog({
                     );
                     if (selected) setFormat(selected);
                   }}
-                  className="tw-min-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm tw-font-medium tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                  className={`${DROPDOWN_FIELD_CLASSES} tw-min-h-11 tw-w-full tw-appearance-none tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm`}
                 >
                   {FORMATS.map((value) => (
                     <option key={value} value={value}>

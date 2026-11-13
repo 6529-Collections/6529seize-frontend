@@ -1,0 +1,474 @@
+import { createSignedMessagesGrantRequest } from "@/components/auth/authSignedMessagesGrant";
+import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
+
+const ADDRESS = "0x1111111111111111111111111111111111111111";
+const SIGNATURE = `0x${"ab".repeat(65)}`;
+
+const mockPersistSessionResponse = jest.fn();
+const mockLoginWithSessionV2 = jest.fn();
+jest.mock("@/services/auth/session-v2.utils", () => ({
+  getSessionClientType: () => "web",
+  loginWithSessionV2: (...args: unknown[]) => mockLoginWithSessionV2(...args),
+  persistSessionResponse: (...args: unknown[]) =>
+    mockPersistSessionResponse(...args),
+}));
+jest.mock("@/services/auth/auth.utils", () => ({
+  canStoreAnotherWalletAccount: () => true,
+}));
+// The challenge format has its own tests (authRequestSignIn.challenge.test.ts);
+// the grant parsing is stubbed here too.
+jest.mock("@/components/auth/authNonce", () => ({
+  getSignInChallengeProblem: () => null,
+}));
+
+const GRANT = {
+  address: ADDRESS,
+  deviceKeyHex: `0x${"aa".repeat(32)}`,
+  scopes: ["post", "edit", "delete", "react"],
+  label: "Chrome on macOS",
+};
+let mockPreparedGrant: typeof GRANT | null = GRANT;
+let mockIsGrantChallenge = true;
+let mockIsAppPlatform = false;
+let mockAppGrantPossible = true;
+jest.mock("@/lib/device-signing/login-grant", () => ({
+  isAppGrantPlatform: () => mockIsAppPlatform,
+  isAppDeviceGrantPossible: () => mockAppGrantPossible,
+  carriesDeviceGrant: () => false,
+  isDeviceGrantChallenge: () => mockIsGrantChallenge,
+  isDeviceGrantPossible: () => true,
+  prepareLoginDeviceGrant: async () => mockPreparedGrant,
+  skipAutoDeviceGrant: jest.fn(),
+  storeLoginDeviceGrant: jest.fn(async () => true),
+  toDeviceGrantNonceParams: () => ({}),
+}));
+
+const E2EE_DEVICE = {
+  deviceKeyHex: `0x${"3d".repeat(32)}`,
+  ciphersuites: [0x004e],
+  adopt: jest.fn(async () => true),
+  dispose: jest.fn(),
+};
+let mockPreparedE2ee: typeof E2EE_DEVICE | null = null;
+jest.mock("@/lib/device-signing/login-e2ee", () => ({
+  prepareLoginE2eeDevice: async () => mockPreparedE2ee,
+  toE2eeNonceParams: () => ({ mls_device_key: "0x3d", mls_ciphersuites: "78" }),
+}));
+const mockAdopt = jest.fn(async (_params: unknown) => true);
+jest.mock("@/components/auth/authLoginE2eeDevice", () => ({
+  adoptLoginE2eeDevice: (params: unknown) => mockAdopt(params),
+}));
+const mockRequestAppGrant = jest.fn();
+jest.mock("@/components/auth/authAppSignedMessagesGrant", () => ({
+  requestAppSignedMessagesGrant: (...args: unknown[]) =>
+    mockRequestAppGrant(...args),
+}));
+
+const nonce = (): ApiSessionNonceResponse =>
+  ({
+    signable_message: "Sign in to 6529",
+    server_signature: "server",
+  }) as ApiSessionNonceResponse;
+
+interface SignatureResult {
+  signature: string | null;
+  userRejected: boolean;
+  failureToastShown: boolean;
+  error?: unknown;
+}
+
+const signed = (): SignatureResult => ({
+  signature: SIGNATURE,
+  userRejected: false,
+  failureToastShown: false,
+});
+
+const createSubject = ({
+  signatureResult = signed(),
+  ...overrides
+}: Partial<Parameters<typeof createSignedMessagesGrantRequest>[0]> & {
+  readonly signatureResult?: SignatureResult;
+} = {}) => {
+  let current = true;
+  const guard = {
+    isCurrent: () => current,
+    acceptCurrentState: () => current,
+  };
+  const getSignature = jest.fn(
+    async (_params: { message: string }): Promise<SignatureResult> =>
+      signatureResult
+  );
+  const deps = {
+    address: ADDRESS,
+    ownProfileId: "profile-1",
+    signAppGrant: jest.fn(),
+    canAuthenticate: true,
+    canSignActiveWallet: true,
+    createSigningAuthRequestGuard: jest.fn(() => guard),
+    createGetSignature: jest.fn(() => getSignature),
+    getNonce: jest.fn(async () => nonce()),
+    isActiveChainSupported: jest.fn(() => true),
+    setAuthLoadingState: jest.fn(),
+    setToast: jest.fn(),
+    ...overrides,
+  };
+  return {
+    deps,
+    getSignature,
+    request: createSignedMessagesGrantRequest(deps),
+    invalidateGuard: () => {
+      current = false;
+    },
+  };
+};
+
+describe("turn on signed messages", () => {
+  beforeEach(() => {
+    mockPreparedGrant = GRANT;
+    mockIsGrantChallenge = true;
+    mockIsAppPlatform = false;
+    mockAppGrantPossible = true;
+    mockRequestAppGrant.mockReset();
+    mockLoginWithSessionV2.mockReset().mockResolvedValue({
+      client_type: "web",
+      role: null,
+    });
+    mockPersistSessionResponse.mockReset().mockResolvedValue(true);
+  });
+
+  it("signs in the active wallet once with a device grant challenge", async () => {
+    const onSignatureRequested = jest.fn();
+    const { deps, getSignature, request } = createSubject();
+
+    await expect(request({ onSignatureRequested })).resolves.toEqual({
+      success: true,
+    });
+    expect(deps.getNonce).toHaveBeenCalledWith(
+      expect.objectContaining({ signerAddress: ADDRESS, deviceGrant: {} })
+    );
+    expect(getSignature).toHaveBeenCalledTimes(1);
+    expect(onSignatureRequested).toHaveBeenCalledTimes(1);
+    expect(jest.mocked(deps.setAuthLoadingState).mock.calls).toEqual([
+      ["signing"],
+      ["idle"],
+    ]);
+  });
+
+  it.each([
+    ["without an address", { address: undefined }],
+    ["for proxies or disabled wallet auth", { canAuthenticate: false }],
+  ])("reports unavailable %s", async (_case, overrides) => {
+    const { deps, request } = createSubject(overrides);
+    await expect(request()).resolves.toEqual({
+      success: false,
+      reason: "unavailable",
+    });
+    expect(deps.getNonce).not.toHaveBeenCalled();
+    expect(deps.setToast).not.toHaveBeenCalled();
+  });
+
+  it("names a missing live connection first: without one the network is unknown too", async () => {
+    // This used to return silently as an unsupported network.
+    const { deps, request } = createSubject({
+      canSignActiveWallet: false,
+      isActiveChainSupported: () => false,
+    });
+    await expect(request()).resolves.toEqual({
+      success: false,
+      reason: "wallet-disconnected",
+    });
+    expect(deps.setToast).toHaveBeenCalledWith({
+      message: "Reconnect the wallet for this profile and try again.",
+      type: "error",
+    });
+    expect(deps.getNonce).not.toHaveBeenCalled();
+  });
+
+  it("leaves the message to callers that report failures themselves", async () => {
+    const { deps, request } = createSubject({ canSignActiveWallet: false });
+    await expect(request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "wallet-disconnected",
+    });
+    expect(deps.setToast).not.toHaveBeenCalled();
+  });
+
+  it("reports an unsupported network without signing", async () => {
+    const { deps, request } = createSubject({
+      isActiveChainSupported: () => false,
+    });
+    await expect(request()).resolves.toEqual({
+      success: false,
+      reason: "wrong-network",
+    });
+    expect(deps.getNonce).not.toHaveBeenCalled();
+  });
+
+  it("calls a declined signature rejected and shows no toast when silent", async () => {
+    const { deps, request } = createSubject({
+      signatureResult: {
+        signature: null,
+        userRejected: true,
+        failureToastShown: false,
+      },
+    });
+    await expect(request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "rejected",
+    });
+    expect(deps.setToast).not.toHaveBeenCalled();
+    expect(jest.mocked(deps.createGetSignature).mock.calls[0]?.[0]).not.toBe(
+      deps.setToast
+    );
+  });
+
+  it("keeps the sign-in toasts for callers that do not report failures", async () => {
+    const { deps, request } = createSubject({
+      signatureResult: {
+        signature: null,
+        userRejected: true,
+        failureToastShown: false,
+      },
+    });
+    await request();
+    expect(deps.createGetSignature).toHaveBeenCalledWith(deps.setToast);
+    expect(deps.setToast).toHaveBeenCalledWith({
+      message: "Authentication was canceled in your wallet.",
+      type: "error",
+    });
+  });
+
+  it("tells a wallet error from a WalletConnect session that cannot reach the phone", async () => {
+    const failed = createSubject({
+      signatureResult: {
+        signature: null,
+        userRejected: false,
+        failureToastShown: true,
+        error: new Error("Wallet provider error"),
+      },
+    });
+    await expect(failed.request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "signature-failed",
+    });
+
+    const stale = createSubject({
+      signatureResult: {
+        signature: null,
+        userRejected: false,
+        failureToastShown: true,
+        error: Object.assign(new Error("Couldn't sign"), {
+          cause: new Error("No matching key. session topic doesn't exist: 9f"),
+        }),
+      },
+    });
+    await expect(stale.request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "walletconnect-session",
+    });
+  });
+
+  it("classifies a WebSocket relay error as a WalletConnect session problem", async () => {
+    // The enable flow shows phone pairing only for WalletConnect wallets.
+    const { request } = createSubject({
+      signatureResult: {
+        signature: null,
+        userRejected: false,
+        failureToastShown: true,
+        error: new Error("WebSocket connection closed abnormally"),
+      },
+    });
+    await expect(request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "walletconnect-session",
+    });
+  });
+
+  it("names a challenge request failure", async () => {
+    const { request } = createSubject({
+      getNonce: jest.fn(async () => {
+        throw new Error("network");
+      }),
+    });
+    await expect(request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "challenge-failed",
+    });
+  });
+
+  it("names a challenge that does not grant this browser's key", async () => {
+    mockIsGrantChallenge = false;
+    const { getSignature, request } = createSubject();
+    await expect(request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "challenge-mismatch",
+    });
+    expect(getSignature).not.toHaveBeenCalled();
+  });
+
+  it("names a device key that could not be prepared", async () => {
+    mockPreparedGrant = null;
+    const { deps, request } = createSubject();
+    await expect(request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "device-key",
+    });
+    expect(deps.getNonce).not.toHaveBeenCalled();
+  });
+
+  it("names a sign-in that failed after the wallet signed", async () => {
+    mockLoginWithSessionV2.mockRejectedValue(new Error("login failed"));
+    const { request } = createSubject();
+    await expect(request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "sign-in-failed",
+    });
+  });
+
+  it("names a network change while signing", async () => {
+    const subject = createSubject();
+    subject.getSignature.mockImplementation(async () => {
+      subject.invalidateGuard();
+      return signed();
+    });
+    await expect(subject.request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "context-changed",
+    });
+  });
+
+  it("resets the loading state when the wallet step throws", async () => {
+    const subject = createSubject();
+    subject.getSignature.mockRejectedValue(new Error("boom"));
+    await expect(subject.request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "signature-failed",
+    });
+    expect(subject.deps.setAuthLoadingState).toHaveBeenLastCalledWith("idle");
+  });
+
+  describe("with the encrypted-messages key (NC8 turn-on)", () => {
+    const GRANT_ID = `0x${"7".repeat(64)}`;
+
+    beforeEach(() => {
+      mockPreparedE2ee = null;
+      mockAdopt.mockClear();
+      mockLoginWithSessionV2.mockResolvedValue({
+        client_type: "web",
+        role: "profile-1",
+        device_grant: { id: GRANT_ID },
+      });
+    });
+
+    it("grants both keys with one signature and reports the handover", async () => {
+      mockPreparedE2ee = E2EE_DEVICE;
+      const { getSignature, request } = createSubject();
+
+      await expect(
+        request({ silent: true, encryptedMessages: true })
+      ).resolves.toEqual({
+        success: true,
+        e2ee: { grantId: GRANT_ID, grantSaved: true, adopted: true },
+      });
+      expect(getSignature).toHaveBeenCalledTimes(1);
+      expect(mockAdopt).toHaveBeenCalledWith(
+        expect.objectContaining({
+          storedGrantId: GRANT_ID,
+          ownProfileId: "profile-1",
+        })
+      );
+    });
+
+    it("signs nothing without an encrypted-messages key", async () => {
+      const { deps, getSignature, request } = createSubject();
+
+      await expect(
+        request({ silent: true, encryptedMessages: true })
+      ).resolves.toEqual({ success: false, reason: "device-key" });
+      expect(deps.getNonce).not.toHaveBeenCalled();
+      expect(getSignature).not.toHaveBeenCalled();
+    });
+
+    it("keeps Turn on signed messages free of the handover report", async () => {
+      mockPreparedE2ee = E2EE_DEVICE;
+      const { request } = createSubject();
+
+      await expect(request({ silent: true })).resolves.toEqual({
+        success: true,
+      });
+    });
+  });
+
+  describe("in 6529 Mobile and Desktop", () => {
+    beforeEach(() => {
+      mockIsAppPlatform = true;
+    });
+
+    it("asks for one app grant signature instead of a web sign-in", async () => {
+      mockRequestAppGrant.mockResolvedValue({ success: true });
+      const onSignatureRequested = jest.fn();
+      const { deps, getSignature, request } = createSubject();
+
+      await expect(request({ onSignatureRequested })).resolves.toEqual({
+        success: true,
+      });
+      expect(mockRequestAppGrant).toHaveBeenCalledWith({
+        address: ADDRESS,
+        ownProfileId: "profile-1",
+        signAppGrant: deps.signAppGrant,
+        onSignatureRequested,
+        encryptedMessages: false,
+      });
+      expect(deps.getNonce).not.toHaveBeenCalled();
+      expect(getSignature).not.toHaveBeenCalled();
+      expect(deps.setAuthLoadingState).toHaveBeenLastCalledWith("idle");
+    });
+
+    it("passes on a turn-on that needs the encrypted-messages key", async () => {
+      const e2ee = {
+        grantId: `0x${"7".repeat(64)}`,
+        grantSaved: true,
+        adopted: true,
+      };
+      mockRequestAppGrant.mockResolvedValue({ success: true, e2ee });
+      const { request } = createSubject();
+
+      await expect(
+        request({ silent: true, encryptedMessages: true })
+      ).resolves.toEqual({ success: true, e2ee });
+      expect(mockRequestAppGrant).toHaveBeenCalledWith(
+        expect.objectContaining({ encryptedMessages: true })
+      );
+    });
+
+    it("is unavailable while app grants are off", async () => {
+      mockAppGrantPossible = false;
+      const { request } = createSubject();
+      await expect(request({ silent: true })).resolves.toEqual({
+        success: false,
+        reason: "unavailable",
+      });
+      expect(mockRequestAppGrant).not.toHaveBeenCalled();
+    });
+
+    it("explains a failure unless the user declined or the caller reports it", async () => {
+      mockRequestAppGrant.mockResolvedValue({
+        success: false,
+        reason: "sign-in-failed",
+      });
+      const loud = createSubject();
+      await loud.request();
+      expect(loud.deps.setToast).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "error" })
+      );
+
+      mockRequestAppGrant.mockResolvedValue({
+        success: false,
+        reason: "rejected",
+      });
+      const declined = createSubject();
+      await declined.request();
+      expect(declined.deps.setToast).not.toHaveBeenCalled();
+    });
+  });
+});

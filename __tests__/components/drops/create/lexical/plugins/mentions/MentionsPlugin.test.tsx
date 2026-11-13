@@ -1,5 +1,5 @@
 import React, { createRef } from "react";
-import { render, act } from "@testing-library/react";
+import { render, act, fireEvent } from "@testing-library/react";
 import NewMentionsPlugin, {
   MentionTypeaheadOption,
   type NewMentionsPluginHandles,
@@ -11,6 +11,7 @@ const mockEditorState = {
   read: (callback: () => unknown) => callback(),
 };
 const mockEditor = {
+  getRootElement: () => null,
   getEditorState: () => mockEditorState,
   update: (callback: () => void) => callback(),
 };
@@ -112,12 +113,15 @@ describe("MentionsPlugin", () => {
 
   it("builds options from identities and exposes open state", () => {
     (useIdentitiesSearch as jest.Mock).mockReturnValue({
-      identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
+      identities: [
+        { id: "1", handle: "alice", display: "Alice", pfp: null, level: 42 },
+      ],
     });
     const ref = createRef<any>();
     render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} ref={ref} />);
     expect(capturedProps.options).toHaveLength(1);
     expect(capturedProps.options[0]).toBeInstanceOf(MentionTypeaheadOption);
+    expect(capturedProps.options[0].level).toBe(42);
     expect(capturedProps.anchorClassName).toBe("tailwind-scope tw-z-[1020]");
 
     act(() => {
@@ -128,6 +132,16 @@ describe("MentionsPlugin", () => {
       capturedProps.onClose();
     });
     expect(ref.current.isMentionsOpen()).toBe(false);
+  });
+
+  it("accepts cached identity results without a level", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({
+      identities: [{ id: "1", handle: "alice", display: "Alice", pfp: null }],
+    });
+    render(<NewMentionsPlugin waveId="w1" onSelect={jest.fn()} />);
+
+    expect(capturedProps.options[0].handle).toBe("alice");
+    expect(capturedProps.options[0].level).toBeNull();
   });
 
   it.each([
@@ -246,6 +260,36 @@ describe("MentionsPlugin", () => {
       throw new Error("Expected mention typeahead menu wrapper element");
     }
     expect(wrapper.props.className).toContain("tw-z-[1020]");
+  });
+
+  it("hides an open mention menu when another control takes focus", () => {
+    (useIdentitiesSearch as jest.Mock).mockReturnValue({ identities: [] });
+    const ref = createRef<NewMentionsPluginHandles>();
+    render(
+      <NewMentionsPlugin
+        waveId="w1"
+        onSelect={jest.fn()}
+        canMentionAll
+        ref={ref}
+      />
+    );
+    act(() => {
+      capturedProps.onQueryChange("all");
+      capturedProps.onOpen();
+    });
+    expect(ref.current?.isMentionsOpen()).toBe(true);
+    fireEvent.focusIn(document.body);
+    expect(ref.current?.isMentionsOpen()).toBe(false);
+    expect(
+      capturedProps.menuRenderFn(
+        { current: document.createElement("div") },
+        {
+          selectedIndex: 0,
+          selectOptionAndCleanUp: jest.fn(),
+          setHighlightedIndex: jest.fn(),
+        }
+      )
+    ).toBeNull();
   });
 
   it("adds @all option for admins and emits group mention", () => {

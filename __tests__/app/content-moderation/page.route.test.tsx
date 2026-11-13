@@ -41,8 +41,9 @@ describe("shared content moderation route", () => {
     ).rejects.toThrow("NEXT_NOT_FOUND");
   });
 
-  it("maps only supported tab slugs and defaults the root to Open reports", () => {
-    expect(getModerationTab()).toBe("OPEN");
+  it("maps only supported tab slugs and defaults the root and legacy report link to Needs review", () => {
+    expect(getModerationTab()).toBe("REVIEW");
+    expect(getModerationTab("open-reports")).toBe("REVIEW");
     expect(getModerationTab("unknown")).toBeNull();
     expect(getModerationTab("toString")).toBeNull();
     for (const slug of Object.values(MODERATION_TAB_SLUGS)) {

@@ -10,8 +10,48 @@ import type * as ContentTabContext from "@/components/brain/ContentTabContext";
 import { HeaderProvider, useHeaderContext } from "@/contexts/HeaderContext";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
 import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
+import { MyStreamWaveTab } from "@/types/waves.types";
+import type { ChatSubmitDropAction } from "@/components/brain/my-stream/chatSubmitDrop.types";
 import { useWaveData } from "@/hooks/useWaveData";
 import { CompetitionState } from "@/components/competitions/CompetitionState";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { ApiCompetition } from "@/generated/models/ApiCompetition";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+
+const mockUseCompetitionSubmissionWave = jest.fn(
+  (wave: ApiWave | null | undefined, enabled = true) => ({
+    wave:
+      wave && enabled
+        ? {
+            ...wave,
+            competition: Object.assign(new ApiCompetition(), {
+              id: "primary",
+              wave_id: wave.id,
+              presentation: [],
+              capabilities: [],
+            }),
+          }
+        : null,
+    pending: false,
+    retry: jest.fn(),
+  })
+);
+jest.mock("@/hooks/competitions/useCompetitionSubmissionWave", () => {
+  const { useMemo } = jest.requireActual<typeof import("react")>("react");
+
+  return {
+    useCompetitionSubmissionWave(
+      wave: ApiWave | null | undefined,
+      enabled = true
+    ) {
+      // Match the real hook's stable wave identity across header updates.
+      return useMemo(
+        () => mockUseCompetitionSubmissionWave(wave, enabled),
+        [wave, enabled]
+      );
+    },
+  };
+});
 
 jest.mock("@/hooks/competitions/useCompetitionEvents", () => ({
   useCompetitionEvents: jest.fn(),
@@ -31,6 +71,8 @@ const mockEditingDropState: {
   setEditingDropId: jest.fn(),
 };
 
+let mockActiveContentTab = "CHAT";
+
 jest.mock("@/contexts/EditingDropContext", () => ({
   useEditingDrop: () => mockEditingDropState,
   EditingDropProvider: ({ children }: { children: React.ReactNode }) =>
@@ -39,6 +81,13 @@ jest.mock("@/contexts/EditingDropContext", () => ({
 
 const mockRegisterWave = jest.fn();
 const mockUpdateAvailableTabs = jest.fn();
+const mockSetActiveContentTab = jest.fn();
+let mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.CONFIGURATION];
+const mockWaveTabs = jest.fn(
+  (_props: { readonly chatSubmitDropAction: ChatSubmitDropAction }) => (
+    <div data-testid="tabs" />
+  )
+);
 const mockCompleteInitialRegistration = jest.fn();
 const mockSetQueryData = jest.fn();
 const mockSetWaveData = jest.fn();
@@ -46,6 +95,9 @@ const mockSetViewMode = jest.fn();
 const mockToggleViewMode = jest.fn();
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+const mockSharedWaveTabs = jest.fn((_props: { showGalleryToggle: boolean }) => (
+  <div data-testid="tabs" />
+));
 const mockMemesArtSubmissionModal = jest.fn((props: any) =>
   props.isOpen ? <div data-testid="memes-submit-modal" /> : null
 );
@@ -54,7 +106,7 @@ let mockPathname = "/waves/wave-1";
 const mockWave = {
   id: "wave-1",
   name: "Wave 1",
-  chat: { authenticated_user_eligible: true },
+  chat: { authenticated_user_eligible: true, scope: { group: null } },
   voting: { authenticated_user_eligible: true },
   participation: {
     authenticated_user_eligible: true,
@@ -134,7 +186,9 @@ jest.mock("@/components/brain/ContentTabContext", () => ({
     "@/components/brain/ContentTabContext"
   ),
   useContentTab: () => ({
-    activeContentTab: "CHAT",
+    activeContentTab: mockActiveContentTab,
+    availableTabs: mockAvailableTabs,
+    setActiveContentTab: mockSetActiveContentTab,
     updateAvailableTabs: mockUpdateAvailableTabs,
   }),
 }));
@@ -243,7 +297,13 @@ jest.mock("@/components/waves/winners/WaveWinners", () => ({
 }));
 
 jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveTabs", () => ({
-  MyStreamWaveTabs: () => <div data-testid="tabs" />,
+  MyStreamWaveTabs: (props: {
+    readonly chatSubmitDropAction: ChatSubmitDropAction;
+    readonly showGalleryToggle: boolean;
+  }) => {
+    mockWaveTabs(props);
+    return mockSharedWaveTabs(props);
+  },
 }));
 
 jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
@@ -251,7 +311,7 @@ jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
   default: () => <div data-testid="competition-tabs" />,
 }));
 
-jest.mock("@/components/waves/memes/MemesArtSubmissionModal", () => ({
+jest.mock("@/components/waves/memes/LazyMemesArtSubmissionModal", () => ({
   __esModule: true,
   default: (props: any) => mockMemesArtSubmissionModal(props),
 }));
@@ -304,9 +364,11 @@ describe("MyStreamWave registration", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockIsApp = false;
+    mockActiveContentTab = "CHAT";
     mockWaveInfo = getDefaultMockWaveInfo();
     mockResolvedWave = mockWave;
     mockSearchParams = new URLSearchParams();
+    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.CONFIGURATION];
     mockPathname = "/waves/wave-1";
     window.history.replaceState(null, "", mockPathname);
   });
@@ -317,6 +379,10 @@ describe("MyStreamWave registration", () => {
 
     await waitFor(() => {
       expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
+      expect(mockUseCompetitionSubmissionWave).toHaveBeenCalledWith(
+        mockResolvedWave,
+        true
+      );
       expect(mockCompleteInitialRegistration).toHaveBeenCalledWith("wave-1");
       expect(mockUpdateAvailableTabs).toHaveBeenCalledWith(
         expect.objectContaining({ waveId: "wave-1" })
@@ -325,9 +391,31 @@ describe("MyStreamWave registration", () => {
   });
 
   it.each([
-    "/waves/wave-1/competitions",
-    "/waves/wave-1/competitions/alpha",
-    "/waves/wave-1/competitions/new",
+    { pathname: "/waves/wave-1", visible: true },
+    { pathname: "/waves/wave-1/decisions/alpha", visible: false },
+  ])(
+    "scopes the shared Chat gallery action on $pathname with a native submission target",
+    ({ pathname, visible }) => {
+      mockPathname = pathname;
+      mockResolvedWave = {
+        ...mockWave,
+        wave: { ...mockWave.wave, type: ApiWaveType.Chat },
+      };
+      renderWave();
+      expect(mockUseCompetitionSubmissionWave).toHaveBeenCalledWith(
+        mockResolvedWave,
+        true
+      );
+      expect(mockSharedWaveTabs).toHaveBeenCalledWith(
+        expect.objectContaining({ showGalleryToggle: visible })
+      );
+    }
+  );
+
+  it.each([
+    "/waves/wave-1/decisions",
+    "/waves/wave-1/decisions/alpha",
+    "/waves/wave-1/decisions/new",
   ])(
     "keeps the competition error route available on a missing wave (%s)",
     (pathname) => {
@@ -341,7 +429,7 @@ describe("MyStreamWave registration", () => {
   );
 
   it("renders the competition error and Retry without wave metadata", () => {
-    mockPathname = "/waves/wave-1/competitions/alpha";
+    mockPathname = "/waves/wave-1/decisions/alpha";
     mockResolvedWave = undefined;
     const retry = jest.fn();
     render(
@@ -353,7 +441,7 @@ describe("MyStreamWave registration", () => {
       </HeaderProvider>
     );
     expect(screen.getByRole("alert")).toHaveTextContent(
-      "This competition could not be loaded"
+      "This decision could not be loaded"
     );
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(retry).toHaveBeenCalledTimes(1);
@@ -395,7 +483,7 @@ describe("MyStreamWave registration", () => {
   );
 
   it.each([
-    "/waves/wave-1/competitions/alpha?tab=leaderboard",
+    "/waves/wave-1/decisions/alpha?tab=leaderboard",
     "/waves/wave-2?tab=chat",
     "/network?wave=wave-1",
   ])(
@@ -421,6 +509,29 @@ describe("MyStreamWave registration", () => {
     expect(useCompetitionEvents).toHaveBeenCalledWith("wave-1", false);
     expect(screen.queryByTestId("tabs")).not.toBeInTheDocument();
   });
+
+  it("keeps native rules navigation when Configuration is not registered", () => {
+    mockAvailableTabs = [MyStreamWaveTab.CHAT];
+    renderWave();
+    const action = mockWaveTabs.mock.calls.at(-1)?.[0].chatSubmitDropAction;
+    expect(action).toBeDefined();
+    expect(action?.onViewRules).toBeUndefined();
+  });
+
+  it.each([false, true])(
+    "retains existing local rules navigation for available web tabs or app mode: %s",
+    (isApp) => {
+      mockIsApp = isApp;
+      if (isApp) mockAvailableTabs = [MyStreamWaveTab.CHAT];
+      renderWave();
+      const action = mockWaveTabs.mock.calls.at(-1)?.[0].chatSubmitDropAction;
+      expect(action?.onViewRules).toBeDefined();
+      action?.onViewRules?.();
+      expect(mockSetActiveContentTab).toHaveBeenCalledWith(
+        MyStreamWaveTab.CONFIGURATION
+      );
+    }
+  );
 
   it("marks wave metadata as loaded for launch timing", async () => {
     renderWave();
@@ -462,23 +573,29 @@ describe("MyStreamWave registration", () => {
     });
   });
 
-  it("exposes the app header memes submit action", async () => {
-    mockIsApp = true;
-    mockWaveInfo = {
-      ...getDefaultMockWaveInfo(),
-      isMemesWave: true,
-    };
+  it.each(["CHAT", "LEADERBOARD"])(
+    "exposes the app header memes submit action on %s",
+    async (tab) => {
+      mockIsApp = true;
+      mockActiveContentTab = tab;
+      mockWaveInfo = {
+        ...getDefaultMockWaveInfo(),
+        isMemesWave: true,
+      };
 
-    renderWave();
+      renderWave();
 
-    await waitFor(() => {
-      expect(screen.getByTestId("header-action")).toHaveTextContent(
-        "Submit Work to The Memes"
+      await waitFor(() => {
+        expect(screen.getByTestId("header-action")).toHaveTextContent(
+          "Submit Work to The Memes"
+        );
+      });
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Open header action" })
       );
-    });
 
-    fireEvent.click(screen.getByRole("button", { name: "Open header action" }));
-
-    expect(screen.getByTestId("memes-submit-modal")).toBeInTheDocument();
-  });
+      expect(screen.getByTestId("memes-submit-modal")).toBeInTheDocument();
+    }
+  );
 });

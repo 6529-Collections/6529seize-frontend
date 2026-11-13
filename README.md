@@ -234,3 +234,5 @@ policy, and safe handling of secrets or security-sensitive configuration.
 ## License
 
 This project is licensed under the [Apache License 2.0](LICENSE).
+
+Shared Memes calendar maintenance: [guide](shared/memes-calendar/README.md).

@@ -1,5 +1,6 @@
 "use client";
 
+import HighlightDropWrapper from "@/components/drops/view/HighlightDropWrapper";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiDropType } from "@/generated/models/ApiDropType";
@@ -26,7 +27,6 @@ import type {
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WaveDrop from "./WaveDrop";
 import WinnerDrop from "./winner/WinnerDrop";
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { useCompetitionDrop } from "@/hooks/competitions/useCompetitionDrop";
 export type { DropInteractionParams } from "./drop.types";
 export { DropLocation } from "./drop.types";
@@ -36,6 +36,12 @@ interface DropProps {
   readonly previousDrop: DropType | null;
   readonly nextDrop: DropType | null;
   readonly showWaveInfo: boolean;
+  readonly messageHighlight?:
+    | {
+        readonly active: boolean;
+        readonly scrollContainer: HTMLDivElement | null;
+      }
+    | undefined;
   readonly activeDrop: ActiveDropState | null;
   readonly showReplyAndQuote: boolean;
   readonly location: DropLocation;
@@ -70,6 +76,8 @@ interface DropProps {
   readonly embedDepth?: number | undefined;
   readonly maxEmbedDepth?: number | undefined;
   readonly moderationPresentation?: "default" | "profile-activity" | undefined;
+  /** For a chat header: the posts grouped under it (header first). */
+  readonly signatureGroup?: readonly ExtendedDrop[] | undefined;
 }
 
 function CompetitionDrop(props: DropProps) {
@@ -78,11 +86,7 @@ function CompetitionDrop(props: DropProps) {
 }
 
 export default function Drop(props: DropProps) {
-  return isMultiCompetitionEnabled() ? (
-    <CompetitionDrop {...props} />
-  ) : (
-    <DropContent {...props} />
-  );
+  return <CompetitionDrop {...props} />;
 }
 
 function DropContent({
@@ -90,6 +94,7 @@ function DropContent({
   previousDrop,
   nextDrop,
   showWaveInfo,
+  messageHighlight,
   activeDrop,
   location,
   dropViewDropId,
@@ -121,6 +126,7 @@ function DropContent({
   embedDepth,
   maxEmbedDepth,
   moderationPresentation = "default",
+  signatureGroup,
 }: DropProps) {
   const canOpenDrop =
     drop.drop_type !== ApiDropType.Chat || location !== DropLocation.WAVE;
@@ -191,6 +197,7 @@ function DropContent({
     [ApiDropType.Chat]: (
       <WaveDrop
         drop={drop}
+        signatureGroup={signatureGroup}
         previousDrop={
           previousDrop?.type === DropSize.FULL ? previousDrop : null
         }
@@ -228,11 +235,11 @@ function DropContent({
     [drop, location, reserveMediaHeight, showVideoFullscreen]
   );
 
-  // Collapsed-reply waves show a drop's replies as a thread under it in the
-  // main stream; the thread itself never nests further threads.
+  // Each collapsed conversation has one thread under its top-level drop.
   const replyThreads = useWaveReplyThreads();
   const showReplyThread =
     replyThreads !== null &&
+    (replyThreads.collapseAll || drop.collapse_replies === true) &&
     location === DropLocation.WAVE &&
     dropViewDropId === null &&
     drop.drop_type === ApiDropType.Chat &&
@@ -268,15 +275,25 @@ function DropContent({
     ]
   );
 
+  const message = (
+    <ContentModerationDropGate
+      drop={drop}
+      presentation={moderationPresentation}
+      preserveGlobalContext={drop.drop_type === ApiDropType.Chat}
+    >
+      {components[drop.drop_type]}
+    </ContentModerationDropGate>
+  );
+
   return (
     <DropContext.Provider value={memoizedValue}>
-      <ContentModerationDropGate
-        drop={drop}
-        presentation={moderationPresentation}
-        preserveGlobalContext={drop.drop_type === ApiDropType.Chat}
-      >
-        {components[drop.drop_type]}
-      </ContentModerationDropGate>
+      {messageHighlight ? (
+        <HighlightDropWrapper {...messageHighlight}>
+          {message}
+        </HighlightDropWrapper>
+      ) : (
+        message
+      )}
       {showReplyThread && (
         <WaveDropReplyThread drop={drop} renderReply={renderThreadReply} />
       )}

@@ -1,192 +1,130 @@
 "use client";
 
-import type { HTMLAttributes, TouchEvent } from "react";
-import { useCallback, useMemo, useRef } from "react";
-
-const SWIPE_EDGE_WIDTH_PX = 32;
-const SWIPE_COMMIT_DISTANCE_PX = 80;
-const SWIPE_AXIS_LOCK_DISTANCE_PX = 12;
-const SWIPE_HORIZONTAL_DOMINANCE_RATIO = 1.5;
-
-const SWIPE_BACK_IGNORE_SELECTOR = [
-  "input",
-  "textarea",
-  "select",
-  "video",
-  "audio",
-  "canvas",
-  "[contenteditable='true']",
-  "[role='slider']",
-  "[data-wave-swipe-back-ignore='true']",
-  ".swiper",
-].join(",");
-
-type SwipeBackHandlers = Pick<
-  HTMLAttributes<HTMLDivElement>,
-  "onTouchStart" | "onTouchMove" | "onTouchEnd" | "onTouchCancel"
->;
+import { useCallback, useLayoutEffect, useRef } from "react";
+import type { TouchEvent } from "react";
+import { useHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
+import { navigateAfterWaveSwipe } from "@/helpers/waves/wave-navigation-transition";
 
 interface UseWaveListSwipeBackArgs {
   readonly enabled: boolean;
+  readonly scope?: string;
   readonly onIntentStart?: (() => void) | undefined;
   readonly onSwipeBack: () => void;
 }
 
-interface SwipeGesture {
-  readonly startX: number;
-  readonly startY: number;
-  currentX: number;
-  currentY: number;
-  intentStarted: boolean;
-}
-
-const isHorizontallyScrollable = (element: HTMLElement): boolean => {
-  if (element.scrollWidth <= element.clientWidth) {
-    return false;
-  }
-
-  const overflowX =
-    element.style.overflowX || globalThis.getComputedStyle(element).overflowX;
-  return overflowX === "auto" || overflowX === "scroll";
-};
-
-const shouldIgnoreSwipeTarget = ({
-  boundary,
-  target,
-}: {
-  readonly boundary: EventTarget;
-  readonly target: EventTarget;
-}): boolean => {
-  if (!(boundary instanceof HTMLElement) || !(target instanceof Element)) {
-    return true;
-  }
-
-  if (target.closest(SWIPE_BACK_IGNORE_SELECTOR)) {
-    return true;
-  }
-
-  let element = target instanceof HTMLElement ? target : target.parentElement;
-  while (element && element !== boundary) {
-    if (isHorizontallyScrollable(element)) {
-      return true;
-    }
-    element = element.parentElement;
-  }
-
-  return false;
-};
-
-export function useWaveListSwipeBack({
+export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
   enabled,
+  scope = "wave",
   onIntentStart,
   onSwipeBack,
-}: UseWaveListSwipeBackArgs): SwipeBackHandlers {
-  const gestureRef = useRef<SwipeGesture | null>(null);
-
-  const resetGesture = useCallback(() => {
-    gestureRef.current = null;
-  }, []);
-
-  const handleTouchStart = useCallback(
-    (event: TouchEvent<HTMLDivElement>) => {
-      resetGesture();
-
-      if (!enabled || event.touches.length !== 1) {
-        return;
-      }
-
-      const touch = event.touches[0];
-      if (
-        !touch ||
-        touch.clientX > SWIPE_EDGE_WIDTH_PX ||
-        shouldIgnoreSwipeTarget({
-          boundary: event.currentTarget,
-          target: event.target,
-        })
-      ) {
-        return;
-      }
-
-      gestureRef.current = {
-        startX: touch.clientX,
-        startY: touch.clientY,
-        currentX: touch.clientX,
-        currentY: touch.clientY,
-        intentStarted: false,
-      };
-    },
-    [enabled, resetGesture]
-  );
-
-  const handleTouchMove = useCallback(
-    (event: TouchEvent<HTMLDivElement>) => {
-      const gesture = gestureRef.current;
-      const touch = event.touches[0];
-      if (!gesture || event.touches.length !== 1 || !touch) {
-        resetGesture();
-        return;
-      }
-
-      gesture.currentX = touch.clientX;
-      gesture.currentY = touch.clientY;
-
-      const deltaX = gesture.currentX - gesture.startX;
-      const deltaY = gesture.currentY - gesture.startY;
-      const absoluteDeltaX = Math.abs(deltaX);
-      const absoluteDeltaY = Math.abs(deltaY);
-
-      if (
-        (deltaX < 0 && absoluteDeltaX >= SWIPE_AXIS_LOCK_DISTANCE_PX) ||
-        (absoluteDeltaY >= SWIPE_AXIS_LOCK_DISTANCE_PX &&
-          absoluteDeltaY > absoluteDeltaX)
-      ) {
-        resetGesture();
-        return;
-      }
-
-      if (
-        !gesture.intentStarted &&
-        deltaX >= SWIPE_AXIS_LOCK_DISTANCE_PX &&
-        deltaX >= absoluteDeltaY * SWIPE_HORIZONTAL_DOMINANCE_RATIO
-      ) {
-        gesture.intentStarted = true;
+}: UseWaveListSwipeBackArgs) {
+  const ref = useRef<T>(null);
+  const width = useRef(0);
+  const animation = useRef<Animation | null>(null);
+  const settling = useRef(false);
+  const navigate = useRef(onSwipeBack);
+  useLayoutEffect(() => {
+    navigate.current = onSwipeBack;
+  });
+  const startSwipe = useHorizontalSwipe(
+    {
+      enabled,
+      direction: 1,
+      threshold: 100,
+      // Recognize a rightward thumb arc before the browser starts a scroll.
+      // Reply retains the recognizer's narrower default direction cone.
+      intentRatio: 1.2,
+      flick: true,
+      onStart: () => {
+        animation.current?.cancel();
+        animation.current = null;
+        const measuredWidth = ref.current?.getBoundingClientRect().width ?? 0;
+        width.current =
+          measuredWidth > 0 ? measuredWidth : globalThis.innerWidth;
+        ref.current?.style.setProperty("will-change", "transform");
         onIntentStart?.();
-      }
+      },
+      onMove: (distance) => {
+        ref.current?.style.setProperty(
+          "transform",
+          `translate3d(${Math.min(distance, width.current)}px, 0, 0)`
+        );
+      },
+      onEnd: (committed, distance) => {
+        const element = ref.current;
+        if (!element) return;
+        const reducedMotion = globalThis.matchMedia(
+          "(prefers-reduced-motion: reduce)"
+        ).matches;
+        const cleanup = () => {
+          element.style.removeProperty("transform");
+          element.style.removeProperty("will-change");
+          settling.current = false;
+        };
+        // Disabling can cancel the active touch after layout cleanup has run.
+        // Do not start another settle on a surface that is no longer navigable.
+        if (
+          !enabled ||
+          reducedMotion ||
+          typeof element.animate !== "function"
+        ) {
+          cleanup();
+          if (committed && enabled) navigateAfterWaveSwipe(navigate.current);
+          return;
+        }
+        settling.current = committed;
+        const destination = committed ? width.current : 0;
+        element.style.transform = `translate3d(${destination}px, 0, 0)`;
+        const settle = element.animate(
+          [
+            {
+              transform: `translate3d(${Math.min(distance, width.current)}px, 0, 0)`,
+            },
+            { transform: `translate3d(${destination}px, 0, 0)` },
+          ],
+          {
+            duration: committed ? 180 : 160,
+            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          }
+        );
+        animation.current = settle;
+        void settle.finished.then(
+          () => {
+            if (animation.current !== settle) return;
+            if (committed) {
+              // Keep the outgoing screen out of view until the route changes.
+              navigateAfterWaveSwipe(navigate.current);
+            } else {
+              cleanup();
+            }
+          },
+          () => {
+            if (animation.current === settle) cleanup();
+          }
+        );
+      },
     },
-    [onIntentStart, resetGesture]
+    scope
   );
 
-  const handleTouchEnd = useCallback(
-    (event: TouchEvent<HTMLDivElement>) => {
-      const gesture = gestureRef.current;
-      if (!gesture) {
-        return;
-      }
+  useLayoutEffect(() => {
+    const element = ref.current;
+    return () => {
+      // The recognizer cancels its active touch first; clear any resulting settle.
+      const previousAnimation = animation.current;
+      animation.current = null;
+      previousAnimation?.cancel();
+      settling.current = false;
+      element?.style.removeProperty("transform");
+      element?.style.removeProperty("will-change");
+    };
+  }, [enabled, scope]);
 
-      const touch = event.changedTouches[0];
-      const endX = touch?.clientX ?? gesture.currentX;
-      const endY = touch?.clientY ?? gesture.currentY;
-      const deltaX = endX - gesture.startX;
-      const absoluteDeltaY = Math.abs(endY - gesture.startY);
-      resetGesture();
-
-      if (
-        deltaX >= SWIPE_COMMIT_DISTANCE_PX &&
-        deltaX >= absoluteDeltaY * SWIPE_HORIZONTAL_DOMINANCE_RATIO
-      ) {
-        onSwipeBack();
-      }
+  const onTouchStart = useCallback(
+    (event: TouchEvent<HTMLElement>) => {
+      if (!settling.current) startSwipe(event);
     },
-    [onSwipeBack, resetGesture]
+    [startSwipe]
   );
-
-  return useMemo(
-    () => ({
-      onTouchStart: handleTouchStart,
-      onTouchMove: handleTouchMove,
-      onTouchEnd: handleTouchEnd,
-      onTouchCancel: resetGesture,
-    }),
-    [handleTouchEnd, handleTouchMove, handleTouchStart, resetGesture]
-  );
+  return { ref, onTouchStart };
 }

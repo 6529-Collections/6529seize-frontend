@@ -28,7 +28,10 @@ import {
   m,
   useReducedMotion,
 } from "framer-motion";
-import { useContext, useState } from "react";
+import PreferenceRadioOption from "@/components/preferences/PreferenceRadioOption";
+import { useContext, useId, useState } from "react";
+import PreferenceToggle from "./PreferenceToggle";
+import ProfilePreferencesDirectMessageGroup from "./ProfilePreferencesDirectMessageGroup";
 
 const CATEGORY_KEYS = [
   "direct_messages",
@@ -42,6 +45,7 @@ const CATEGORY_KEYS = [
 const DM_OPTIONS = [
   DirectMessagePolicy.Everyone,
   DirectMessagePolicy.PeopleIFollow,
+  DirectMessagePolicy.GroupMembers,
   DirectMessagePolicy.Nobody,
 ] as const;
 
@@ -52,81 +56,56 @@ const NOTIFICATION_LEVELS = [
 
 const RADIO_GROUP_CLASSES = "tw-space-y-4";
 
-function PreferenceRadioOption({
-  name,
-  value,
-  checked,
-  label,
-  description,
-  onChange,
-}: {
-  readonly name: string;
-  readonly value: string;
-  readonly checked: boolean;
-  readonly label: string;
-  readonly description: string;
-  readonly onChange: () => void;
-}) {
-  return (
-    <label className="tw-group tw-relative tw-flex tw-w-full tw-cursor-pointer tw-rounded-lg">
-      <input
-        type="radio"
-        name={name}
-        value={value}
-        checked={checked}
-        aria-label={label}
-        onChange={onChange}
-        className="tw-peer tw-sr-only"
-      />
-      <span
-        className={`tw-flex tw-min-h-12 tw-w-full tw-items-start tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-px-4 tw-py-3.5 tw-shadow-sm tw-shadow-black/10 tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-900 peer-disabled:tw-cursor-not-allowed peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
-          checked
-            ? "tw-border-primary-500 tw-bg-primary-500/10"
-            : "tw-border-iron-800 tw-bg-transparent desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900/40"
-        }`}
-      >
-        <span
-          aria-hidden="true"
-          className={`tw-mt-0.5 tw-flex tw-size-4 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none ${
-            checked
-              ? "tw-border-primary-500 tw-bg-primary-500"
-              : "tw-border-iron-500 tw-bg-transparent group-hover:tw-border-iron-400"
-          }`}
-        >
-          <span
-            className={`tw-size-1.5 tw-rounded-full tw-bg-white tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
-              checked ? "tw-scale-100" : "tw-scale-0"
-            }`}
-          />
-        </span>
-        <span className="tw-min-w-0">
-          <span
-            className={`tw-block tw-text-sm tw-font-medium ${
-              checked ? "tw-text-iron-50" : "tw-text-iron-200"
-            }`}
-          >
-            {label}
-          </span>
-          <span
-            className={`tw-mt-0.5 tw-block tw-text-xs tw-leading-5 ${
-              checked ? "tw-text-primary-300" : "tw-text-iron-400"
-            }`}
-          >
-            {description}
-          </span>
-        </span>
-      </span>
-    </label>
-  );
-}
-
 const UPDATE_DM_POLICY: Record<DirectMessagePolicy, UpdateDirectMessagePolicy> =
   {
     [DirectMessagePolicy.Everyone]: UpdateDirectMessagePolicy.Everyone,
     [DirectMessagePolicy.PeopleIFollow]:
       UpdateDirectMessagePolicy.PeopleIFollow,
     [DirectMessagePolicy.Nobody]: UpdateDirectMessagePolicy.Nobody,
+    [DirectMessagePolicy.GroupMembers]: UpdateDirectMessagePolicy.GroupMembers,
   };
+
+/**
+ * Group-policy fields for the save request. Under the group policy the
+ * selected group is always sent, so a form that loaded before another session
+ * changed the group saves what this form shows. The one exception: the policy
+ * was already the group policy, the user did not touch the group, and the API
+ * reports that saved group as unavailable; resending it would only reject an
+ * unrelated save, and the API keeps it. The follow switch is sent with the
+ * group policy or when it changed, so saving the existing policies sends the
+ * same request shape as before.
+ */
+function getDirectMessageGroupUpdate(
+  original: ApiProfilePreferences,
+  current: ApiProfilePreferences
+): Pick<
+  ApiUpdateProfilePreferences,
+  "direct_message_group_id" | "direct_message_allow_people_i_follow"
+> {
+  const isGroupPolicy =
+    current.direct_message_policy === DirectMessagePolicy.GroupMembers;
+  const groupChanged =
+    current.direct_message_group_id !== original.direct_message_group_id;
+  const allowChanged =
+    current.direct_message_allow_people_i_follow !==
+    original.direct_message_allow_people_i_follow;
+  const keepsUnavailableSavedGroup =
+    original.direct_message_policy === DirectMessagePolicy.GroupMembers &&
+    !groupChanged &&
+    original.direct_message_group_unavailable;
+  return {
+    ...(current.direct_message_group_id &&
+    (groupChanged || (isGroupPolicy && !keepsUnavailableSavedGroup))
+      ? { direct_message_group_id: current.direct_message_group_id }
+      : {}),
+    ...(isGroupPolicy || allowChanged
+      ? {
+          direct_message_allow_people_i_follow:
+            current.direct_message_allow_people_i_follow,
+        }
+      : {}),
+  };
+}
 
 const UPDATE_NOTIFICATION_LEVEL: Record<
   NotificationLevel,
@@ -200,11 +179,17 @@ function ProfilePreferencesForm({
   const prefersReducedMotion = useReducedMotion() ?? false;
 
   const hasChanges = JSON.stringify(original) !== JSON.stringify(current);
+  const isGroupPolicy =
+    current.direct_message_policy === DirectMessagePolicy.GroupMembers;
+  const isMissingRequiredGroup =
+    isGroupPolicy && !current.direct_message_group_id;
+  const requiredGroupHintId = useId();
 
   const { mutateAsync: save, isPending: isSaving } = useMutation({
     mutationFn: async () => {
       const body: ApiUpdateProfilePreferences = {
         direct_message_policy: UPDATE_DM_POLICY[current.direct_message_policy],
+        ...getDirectMessageGroupUpdate(original, current),
         notification_level:
           UPDATE_NOTIFICATION_LEVEL[current.notification_level],
         notifications: current.notifications,
@@ -320,43 +305,16 @@ function ProfilePreferencesForm({
                 >
                   <div className="tw-mt-6 tw-space-y-1">
                     {CATEGORY_KEYS.map((key) => (
-                      <label
+                      <PreferenceToggle
                         key={key}
-                        htmlFor={`profile-notification-${key}`}
-                        className="tw-group tw-relative tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-rounded-lg tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 desktop-hover:hover:tw-bg-iron-800/30 motion-reduce:tw-transition-none"
-                      >
-                        <span className="tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-300">
-                          {t(
-                            locale,
-                            `profilePreferences.notifications.category.${key}`
-                          )}
-                        </span>
-                        <input
-                          id={`profile-notification-${key}`}
-                          type="checkbox"
-                          checked={current.notifications[key]}
-                          onChange={(event) =>
-                            updateCategory(key, event.target.checked)
-                          }
-                          className="tw-peer tw-sr-only"
-                        />
-                        <span
-                          aria-hidden="true"
-                          className={`tw-relative tw-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid tw-p-0.5 tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-900 peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
-                            current.notifications[key]
-                              ? "tw-border-emerald-400/60 tw-bg-emerald-500"
-                              : "tw-border-iron-600 tw-bg-iron-700"
-                          }`}
-                        >
-                          <span
-                            className={`tw-size-5 tw-rounded-full tw-bg-iron-50 tw-shadow-sm tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
-                              current.notifications[key]
-                                ? "tw-translate-x-5"
-                                : "tw-translate-x-0"
-                            }`}
-                          />
-                        </span>
-                      </label>
+                        id={`profile-notification-${key}`}
+                        checked={current.notifications[key]}
+                        label={t(
+                          locale,
+                          `profilePreferences.notifications.category.${key}`
+                        )}
+                        onChange={(checked) => updateCategory(key, checked)}
+                      />
                     ))}
                   </div>
                 </m.div>
@@ -394,35 +352,70 @@ function ProfilePreferencesForm({
                   `profilePreferences.dm.${option}.label`
                 );
 
+                // Every option keeps the same wrapper so the radio input is not
+                // remounted (and keyboard focus lost) when the group panel opens.
                 return (
-                  <PreferenceRadioOption
-                    key={option}
-                    name="direct-message-policy"
-                    value={option}
-                    checked={current.direct_message_policy === option}
-                    label={label}
-                    description={t(
-                      locale,
-                      `profilePreferences.dm.${option}.description`
-                    )}
-                    onChange={() =>
-                      setCurrent({
-                        ...current,
-                        direct_message_policy: option,
-                      })
-                    }
-                  />
+                  <div key={option}>
+                    <PreferenceRadioOption
+                      name="direct-message-policy"
+                      value={option}
+                      checked={current.direct_message_policy === option}
+                      label={label}
+                      description={t(
+                        locale,
+                        `profilePreferences.dm.${option}.description`
+                      )}
+                      onChange={() =>
+                        setCurrent({
+                          ...current,
+                          direct_message_policy: option,
+                        })
+                      }
+                    />
+                    {option === DirectMessagePolicy.GroupMembers &&
+                      isGroupPolicy && (
+                        <ProfilePreferencesDirectMessageGroup
+                          groupId={current.direct_message_group_id}
+                          requiredHintId={requiredGroupHintId}
+                          savedGroupUnavailable={
+                            current.direct_message_group_unavailable
+                          }
+                          allowPeopleIFollow={
+                            current.direct_message_allow_people_i_follow
+                          }
+                          onGroupChange={(group) =>
+                            setCurrent({
+                              ...current,
+                              direct_message_group_id: group.id,
+                              direct_message_group_unavailable: false,
+                            })
+                          }
+                          onAllowPeopleIFollowChange={(allow) =>
+                            setCurrent({
+                              ...current,
+                              direct_message_allow_people_i_follow: allow,
+                            })
+                          }
+                        />
+                      )}
+                  </div>
                 );
               })}
             </div>
           </fieldset>
+          <p className="tw-mb-0 tw-mt-4 tw-px-4 tw-text-xs tw-leading-5 tw-text-iron-500">
+            {t(locale, "profilePreferences.dm.blockNote")}
+          </p>
         </section>
       </div>
       <div className="tw-mx-4 tw-flex tw-justify-end tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-6 sm:tw-mx-6 lg:tw-mx-8">
         <Button
           type="button"
           onClick={() => void save()}
-          disabled={!hasChanges}
+          disabled={!hasChanges || isMissingRequiredGroup}
+          aria-describedby={
+            isMissingRequiredGroup ? requiredGroupHintId : undefined
+          }
           loading={isSaving}
           variant="action"
           size="md"

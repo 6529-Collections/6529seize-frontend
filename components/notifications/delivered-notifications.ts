@@ -1,4 +1,3 @@
-import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import {
   PushNotifications,
   type PushNotificationSchema,
@@ -58,9 +57,7 @@ export async function reconcileDeliveredNotifications(
           params: {
             limit: "1",
             id_less_than: String(id + 1),
-            ...(isMultiCompetitionEnabled()
-              ? { include_competitions: "true" }
-              : {}),
+            include_competitions: "true",
           },
           headers: { Authorization: `Bearer ${scope.authJwt}` },
           cache: "no-store",

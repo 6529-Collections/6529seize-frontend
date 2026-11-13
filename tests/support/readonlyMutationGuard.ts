@@ -1,6 +1,7 @@
 import type { BrowserContext, Route } from "@playwright/test";
 
 import mutationRegistry from "../../ops/testing-strategy/mutation-endpoint-registry.json";
+import { SENTRY_INGEST_HOSTNAME_PATTERN } from "../../config/sentryIngest";
 
 type MutationEndpoint = {
   id: string;
@@ -169,15 +170,17 @@ export function shouldUseReadonlyGuard(baseURL?: string) {
   return environment === "staging" || environment === "production";
 }
 
-function isSentryEnvelopePost(method: string, url: URL) {
+// Sentry SDK envelopes and browser-issued CSP violation reports (the
+// /security/ endpoint named by the CSP report-uri) are telemetry, not mutations.
+function isSentryIngestPost(method: string, url: URL) {
   return (
     method === "POST" &&
     url.protocol === "https:" &&
     url.port === "" &&
     url.username === "" &&
     url.password === "" &&
-    /^o[0-9]+\.ingest(?:\.(?:us|de))?\.sentry\.io$/.test(url.hostname) &&
-    /^\/api\/[0-9]+\/envelope\/$/.test(url.pathname)
+    SENTRY_INGEST_HOSTNAME_PATTERN.test(url.hostname) &&
+    /^\/api\/\d+\/(?:envelope|security)\/$/.test(url.pathname)
   );
 }
 
@@ -230,10 +233,23 @@ function isSameOrigin(url: URL, baseURL?: string) {
   return base?.origin === url.origin;
 }
 
-function isFirstPartyTelemetryEndpoint(url: URL, baseURL?: string) {
+// The first-party collector (services/analytics/telemetry/collector.ts)
+// sends page views and health counters as one same-origin `POST /e` beacon.
+// Only that exact method and path count; anything else on /e stays blocked.
+function isFirstPartyCollectorBeacon(method: string, url: URL) {
+  return method === "POST" && url.pathname === "/e" && url.search === "";
+}
+
+function isFirstPartyTelemetryEndpoint(
+  method: string,
+  url: URL,
+  baseURL?: string
+) {
   return (
     isSameOrigin(url, baseURL) &&
-    (url.pathname === "/monitoring" || url.pathname.startsWith("/monitoring/"))
+    (url.pathname === "/monitoring" ||
+      url.pathname.startsWith("/monitoring/") ||
+      isFirstPartyCollectorBeacon(method, url))
   );
 }
 
@@ -420,7 +436,7 @@ export function decideReadonlyRequest({
     };
   }
 
-  if (isFirstPartyTelemetryEndpoint(parsed, baseURL)) {
+  if (isFirstPartyTelemetryEndpoint(upperMethod, parsed, baseURL)) {
     return { action: "abort", reason: "ignored-first-party-telemetry" };
   }
 
@@ -441,7 +457,7 @@ export function decideReadonlyRequest({
   }
 
   if (
-    isSentryEnvelopePost(upperMethod, parsed) ||
+    isSentryIngestPost(upperMethod, parsed) ||
     isIgnoredExternalMutation(parsed)
   ) {
     return { action: "abort", reason: "ignored-external-sdk-endpoint" };

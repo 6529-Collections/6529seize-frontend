@@ -46,26 +46,6 @@ jest.mock(
   }
 );
 
-jest.mock("@/components/waves/create-wave/overview/type/CreateWaveType", () => {
-  return function MockCreateWaveType({ selected, onChange }: any) {
-    return (
-      <div data-testid="wave-type-input">
-        <select
-          data-testid="type-select"
-          value={selected || ""}
-          onChange={(e) => onChange(e.target.value as ApiWaveType)}
-        >
-          <option value="">Select type</option>
-          <option value="CHAT">Chat</option>
-          <option value="APPROVE">Approve</option>
-          <option value="RANK">Rank</option>
-        </select>
-        <div data-testid="current-type">Current: {selected || "none"}</div>
-      </div>
-    );
-  };
-});
-
 describe("CreateWaveOverview", () => {
   const mockOverview: WaveOverviewConfig = {
     name: "",
@@ -108,10 +88,10 @@ describe("CreateWaveOverview", () => {
     ).toBeVisible();
     expect(screen.getByTestId("wave-name-input")).toBeInTheDocument();
     expect(screen.getByTestId("wave-image-input")).toBeInTheDocument();
-    expect(screen.getByTestId("wave-type-input")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-type-input")).not.toBeInTheDocument();
   });
 
-  it("shows the ranking-mode selector for rank waves only", () => {
+  it("does not offer a wave-owned competition for restored Rank or Approve drafts", () => {
     const { rerender } = render(
       <CreateWaveOverview
         overview={{ ...mockOverview, type: ApiWaveType.Rank }}
@@ -120,8 +100,8 @@ describe("CreateWaveOverview", () => {
       />
     );
 
-    expect(screen.getByText("Perpetual Ranking")).toBeInTheDocument();
-    expect(screen.getByText("Announce Winners")).toBeInTheDocument();
+    expect(screen.queryByText("Perpetual Ranking")).toBeNull();
+    expect(screen.queryByText("Announce Winners")).toBeNull();
 
     rerender(
       <CreateWaveOverview
@@ -134,7 +114,7 @@ describe("CreateWaveOverview", () => {
     expect(screen.queryByText("Perpetual Ranking")).toBeNull();
   });
 
-  it("propagates ranking-mode changes", () => {
+  it("leaves competition scheduling to competition setup", () => {
     const onOngoingRankingChange = jest.fn();
     render(
       <CreateWaveOverview
@@ -145,8 +125,8 @@ describe("CreateWaveOverview", () => {
       />
     );
 
-    fireEvent.click(screen.getByText("Perpetual Ranking"));
-    expect(onOngoingRankingChange).toHaveBeenCalledWith(true);
+    expect(screen.queryByText("Perpetual Ranking")).toBeNull();
+    expect(onOngoingRankingChange).not.toHaveBeenCalled();
   });
 
   it("displays Wave Profile Picture as a subsection heading", () => {
@@ -184,7 +164,7 @@ describe("CreateWaveOverview", () => {
 
     expect(screen.getByDisplayValue("Test Wave")).toBeInTheDocument();
     expect(screen.getByText("Image: test.png")).toBeInTheDocument();
-    expect(screen.getByText("Current: CHAT")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-type-input")).not.toBeInTheDocument();
   });
 
   it("passes errors to name input component", () => {
@@ -238,7 +218,7 @@ describe("CreateWaveOverview", () => {
     });
   });
 
-  it("handles type selection changes correctly", () => {
+  it("does not expose Rank or Approve wave creation", () => {
     render(
       <CreateWaveOverview
         overview={mockOverview}
@@ -247,15 +227,8 @@ describe("CreateWaveOverview", () => {
       />
     );
 
-    const typeSelect = screen.getByTestId("type-select");
-    fireEvent.change(typeSelect, { target: { value: "APPROVE" } });
-
-    // Picking a type also records the explicit selection so the gate clears.
-    expect(mockSetOverview).toHaveBeenCalledWith({
-      ...mockOverview,
-      type: "APPROVE",
-      typeSelected: true,
-    });
+    expect(screen.queryByTestId("type-select")).not.toBeInTheDocument();
+    expect(mockSetOverview).not.toHaveBeenCalled();
   });
 
   it("preserves existing overview values when updating specific fields", () => {
@@ -348,6 +321,6 @@ describe("CreateWaveOverview", () => {
     // Should render without crashing
     expect(screen.getByTestId("wave-name-input")).toBeInTheDocument();
     expect(screen.getByTestId("wave-image-input")).toBeInTheDocument();
-    expect(screen.getByTestId("wave-type-input")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-type-input")).not.toBeInTheDocument();
   });
 });

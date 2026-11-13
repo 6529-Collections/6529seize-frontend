@@ -1,0 +1,869 @@
+jest.unmock("lexical");
+import { setComposerText, composerText } from "./composerTestUtils";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
+import { E2eeConversationView } from "@/components/e2ee/conversation/E2eeConversationView";
+import type { E2eeConversation, E2eeMessage } from "@/lib/e2ee/types";
+import {
+  ALICE_ID,
+  BOB_ID,
+  contextFor,
+  conversation,
+  createFakeE2eeEngine,
+  DM_G,
+  E2eeTestProvider,
+  GROUP_G,
+  message,
+  member,
+  SELF_ID,
+} from "./fakeE2eeEngine";
+import { SPLIT_VIEW_BANNER } from "../../../tests/support/e2ee/e2eeCopy";
+
+// jsdom has no element scrolling.
+Element.prototype.scrollTo = jest.fn();
+Element.prototype.scrollIntoView = jest.fn();
+
+const mockPush = jest.fn();
+const mockBlock = jest.fn(async () => undefined);
+const mutedChats = (): string[] =>
+  JSON.parse(
+    globalThis.localStorage.getItem(`6529:e2ee:muted:${SELF_ID}`) ?? "[]"
+  ) as string[];
+jest.mock("@/hooks/content-moderation/useProfileBlockState", () => ({
+  useProfileBlockState: () => ({ block: mockBlock }),
+}));
+jest.mock("@/components/e2ee/gate/E2eeRenewalBanner", () => ({
+  E2eeRenewalBanner: () => null,
+}));
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/messages/encrypted/0x",
+  useRouter: () => ({
+    push: mockPush,
+    replace: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+}));
+
+const timeline: E2eeMessage[] = [
+  message({
+    id: "n1",
+    seq: 1,
+    kind: "notice",
+    senderProfileId: null,
+    notice: {
+      type: "joined",
+      actorProfileId: SELF_ID,
+      targetProfileIds: [ALICE_ID],
+    },
+  }),
+  message({
+    id: "m1",
+    seq: 2,
+    text: "hello @me and @bob",
+    mentions: [SELF_ID, BOB_ID],
+    reactions: { "🔥": [ALICE_ID, BOB_ID] },
+  }),
+  message({ id: "m2", seq: 3, undecryptable: true }),
+  message({ id: "m3", seq: 4, deleted: true, senderProfileId: BOB_ID }),
+  message({
+    id: "m4",
+    seq: 5,
+    senderProfileId: SELF_ID,
+    text: "fixed typo",
+    editedAt: Date.UTC(2026, 9, 12, 11),
+    reply: "m1",
+  }),
+  message({
+    id: "m5",
+    seq: 6,
+    senderProfileId: SELF_ID,
+    text: "on its way",
+    pending: true,
+  }),
+];
+
+const renderView = (
+  convo: E2eeConversation = conversation(),
+  messages: E2eeMessage[] = timeline
+) => {
+  const engine = createFakeE2eeEngine({
+    conversations: [convo],
+    messages: { [convo.g]: messages },
+  });
+  render(
+    <E2eeTestProvider value={contextFor(engine)}>
+      <E2eeConversationView g={convo.g} />
+    </E2eeTestProvider>
+  );
+  return engine;
+};
+
+describe("E2eeConversationView", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    globalThis.localStorage.clear();
+  });
+
+  it("starts open-chat tracking when initial sync makes the conversation available", async () => {
+    const setOpenConversation = jest.fn((_g: string | null) => undefined);
+    const engine = Object.assign(createFakeE2eeEngine(), {
+      setOpenConversation,
+    });
+    const view = render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeConversationView g={GROUP_G} />
+      </E2eeTestProvider>
+    );
+    await waitFor(() => expect(engine.sync).toHaveBeenCalled());
+    expect(setOpenConversation).not.toHaveBeenCalled();
+    act(() => engine.update({ conversations: [conversation()] }));
+    await waitFor(() =>
+      expect(setOpenConversation).toHaveBeenCalledWith(GROUP_G)
+    );
+    expect(setOpenConversation).toHaveBeenCalledTimes(1);
+    view.unmount();
+    expect(setOpenConversation).toHaveBeenLastCalledWith(null);
+  });
+
+  it("handles each reply jump once and permits another jump to the same message", async () => {
+    const engine = renderView();
+    const reply = screen.getByRole("button", { name: /hello @me and @bob/u });
+    fireEvent.click(reply);
+    await waitFor(() =>
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(1)
+    );
+    const input = screen.getByRole("textbox", { name: "Encrypted message" });
+    act(() => {
+      input.focus();
+      engine.update({
+        messages: {
+          [GROUP_G]: [
+            ...timeline,
+            message({ id: "incoming", seq: 10, text: "incoming" }),
+          ],
+        },
+      });
+    });
+    expect(input).toHaveFocus();
+    expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(1);
+    fireEvent.click(reply);
+    await waitFor(() =>
+      expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(2)
+    );
+  });
+
+  it("announces paging progress, completion and failure while retaining the control", async () => {
+    const engine = renderView();
+    let resolve: (() => void) | undefined;
+    engine.loadHistory = jest.fn(
+      () =>
+        new Promise<void>((done) => {
+          resolve = done;
+        })
+    );
+    // The fixture engine now exposes paging; publish a fresh snapshot.
+    act(() =>
+      engine.update({
+        conversations: [conversation({ updatedAt: Date.now() })],
+      })
+    );
+    const older = await screen.findByRole("button", {
+      name: "Load older messages",
+    });
+    fireEvent.click(older);
+    expect(older).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByText("Loading messages…")).toHaveAttribute(
+      "role",
+      "status"
+    );
+    await act(async () => resolve?.());
+    expect(screen.getByText("Messages loaded.")).toHaveAttribute(
+      "role",
+      "status"
+    );
+    expect(older).toBeEnabled();
+    fireEvent.click(older);
+    expect(screen.getByText("Loading messages…")).toHaveAttribute(
+      "role",
+      "status"
+    );
+    expect(screen.queryByText("Messages loaded.")).toBeNull();
+    await act(async () => resolve?.());
+    expect(screen.getByText("Messages loaded.")).toHaveAttribute(
+      "role",
+      "status"
+    );
+    engine.loadHistory = jest.fn().mockRejectedValue(new Error("Read failed"));
+    fireEvent.click(older);
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Messages could not be loaded"
+      )
+    );
+    expect(screen.queryByText("Messages loaded.")).toBeNull();
+    expect(older).toBeEnabled();
+  });
+
+  it("renders the header with name, members and the encryption badge", () => {
+    renderView();
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Collectors" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("End-to-end encrypted")).toBeInTheDocument();
+    expect(screen.getByText("3 members")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Chat info" })
+    ).toBeInTheDocument();
+  });
+
+  it("offers one keyboard stop from above the timeline to the composer", () => {
+    renderView();
+    const skip = screen.getByRole("button", {
+      name: "Skip to message composer",
+    });
+    fireEvent.click(skip);
+    expect(screen.getByLabelText("Encrypted message")).toHaveFocus();
+  });
+
+  it("links the DM header name and avatar to the peer's profile", () => {
+    renderView(
+      conversation({
+        kind: "dm",
+        name: null,
+        members: conversation().members.slice(0, 2),
+      })
+    );
+    const heading = screen.getByRole("heading", { level: 1, name: "alice" });
+    expect(
+      within(heading).getByRole("link", { name: "alice" })
+    ).toHaveAttribute("href", "/alice");
+    expect(
+      screen.getAllByRole("link", { name: "View alice's profile" })[0]
+    ).toHaveAttribute("href", "/alice");
+  });
+
+  it("shows a DM holding someone else by its members, in the header and chat info", async () => {
+    renderView(
+      conversation({ kind: "dm", name: null, admins: [SELF_ID, ALICE_ID] })
+    );
+    const heading = screen.getByRole("heading", {
+      level: 1,
+      name: "alice and bob",
+    });
+    expect(within(heading).queryByRole("link")).toBeNull();
+    expect(screen.getByText("3 members")).toBeInTheDocument();
+    expect(
+      screen.getByText("You can’t send messages in this chat.")
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Chat info" }));
+    const dialog = await screen.findByRole("dialog", { name: "Chat info" });
+    expect(within(dialog).getByText("Group")).toBeInTheDocument();
+    expect(within(dialog).queryByText("Direct message")).toBeNull();
+  });
+
+  it("renders messages, notices and message states", () => {
+    renderView();
+    const log = screen.getByRole("list", { name: "Messages" });
+    expect(within(log).getByText("You added alice")).toBeInTheDocument();
+    expect(
+      within(log).getByText("Couldn’t decrypt this message")
+    ).toBeInTheDocument();
+    expect(within(log).getByText("Message deleted")).toBeInTheDocument();
+    expect(within(log).getByText("(edited)")).toBeInTheDocument();
+    expect(within(log).getByText("Sending…")).toBeInTheDocument();
+    expect(within(log).getByText("Reply to alice")).toBeInTheDocument();
+    // Mentions of members are highlighted, the viewer's more strongly.
+    expect(within(log).getByText("@me")).toHaveClass("tw-bg-primary-500/25");
+    expect(within(log).getByText("@bob")).toHaveClass("tw-font-semibold");
+    expect(within(log).getByRole("link", { name: "@bob" })).toHaveAttribute(
+      "href",
+      "/bob"
+    );
+    expect(
+      within(log).getByRole("button", {
+        name: "🔥: 2. Reacted by alice and bob",
+      })
+    ).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("marks the chat read while it is open", () => {
+    const engine = renderView();
+    expect(engine.markRead).toHaveBeenCalledWith(GROUP_G);
+  });
+
+  it("sends with Enter, keeping mentions of members", async () => {
+    const engine = renderView();
+    const input = screen.getByLabelText("Encrypted message");
+    // A trailing space closes the mention picker, so Enter sends.
+    setComposerText(input, "hi @alice ");
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 13 });
+    await waitFor(() =>
+      expect(engine.send).toHaveBeenCalledWith(GROUP_G, {
+        text: "hi @alice",
+        mentions: [ALICE_ID],
+        reply: null,
+        files: [],
+      })
+    );
+    expect(composerText(input)).toBe("");
+  });
+
+  it("keeps Shift+Enter as a new line", () => {
+    const engine = renderView();
+    const input = screen.getByLabelText("Encrypted message");
+    setComposerText(input, "line one");
+    fireEvent.keyDown(input, { key: "Enter", keyCode: 13, shiftKey: true });
+    expect(engine.send).not.toHaveBeenCalled();
+  });
+
+  it("previews a picked image on a canvas, never as a URL in the DOM", async () => {
+    const bitmap = { width: 200, height: 100, close: jest.fn() };
+    const createImageBitmapMock = jest.fn().mockResolvedValue(bitmap);
+    const drawImage = jest.fn();
+    Object.defineProperty(globalThis, "createImageBitmap", {
+      configurable: true,
+      value: createImageBitmapMock,
+    });
+    const getContext = jest
+      .spyOn(HTMLCanvasElement.prototype, "getContext")
+      .mockReturnValue({ drawImage } as unknown as CanvasRenderingContext2D);
+    try {
+      renderView();
+      const file = new File(["png"], "cat.png", { type: "image/png" });
+      const fileInput =
+        document.querySelector<HTMLInputElement>('input[type="file"]');
+      fireEvent.change(fileInput!, { target: { files: [file] } });
+      const attachments = screen.getByRole("list", { name: "Attachments" });
+      expect(within(attachments).getByText("cat.png")).toBeInTheDocument();
+      expect(attachments.querySelector("img")).toBeNull();
+      expect(attachments.querySelector("canvas")).toHaveAttribute(
+        "aria-hidden",
+        "true"
+      );
+      await waitFor(() => expect(bitmap.close).toHaveBeenCalled());
+      expect(createImageBitmapMock).toHaveBeenCalledWith(file);
+      // A 2:1 image covers the 96 px square: scaled to 192x96, centered.
+      expect(drawImage).toHaveBeenCalledWith(bitmap, -48, 0, 192, 96);
+    } finally {
+      getContext.mockRestore();
+      Reflect.deleteProperty(globalThis, "createImageBitmap");
+    }
+  });
+
+  it("offers member suggestions for @ mentions", () => {
+    renderView();
+    const input = screen.getByLabelText("Encrypted message") as HTMLDivElement;
+    setComposerText(input, "@al");
+    const listbox = screen.getByRole("listbox", { name: "Mention someone" });
+    fireEvent.click(within(listbox).getByRole("option", { name: /alice/ }));
+    expect(composerText(input)).toBe("@alice ");
+  });
+
+  it("reacts and reports from the message actions", async () => {
+    const engine = renderView();
+    const [firstActions] = screen.getAllByRole("button", {
+      name: "Message actions",
+    });
+    fireEvent.click(firstActions!);
+    fireEvent.click(
+      await screen.findByRole("menuitem", { name: "React with 👍" })
+    );
+    await waitFor(() =>
+      expect(engine.react).toHaveBeenCalledWith(GROUP_G, "m1", "👍", true)
+    );
+
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Message actions" })[0]!
+    );
+    fireEvent.click(
+      await screen.findByRole("menuitem", {
+        name: "Report illegal or severe harm",
+      })
+    );
+    const dialog = await screen.findByRole("dialog", {
+      name: "Report illegal or severe harm",
+    });
+    expect(
+      within(dialog).getByText(/Only this message is shared/)
+    ).toBeInTheDocument();
+    const categories = within(dialog).getByRole("group", {
+      name: "What does this message contain?",
+    });
+    expect(within(categories).getAllByRole("radio")).toHaveLength(4);
+    // Loading the complete report preview may read an evicted local record.
+    await waitFor(() =>
+      expect(
+        within(dialog).getByRole("button", { name: "Send report" })
+      ).toBeEnabled()
+    );
+    // A category is required.
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Send report" })
+    );
+    expect(
+      await within(dialog).findByText("Choose what the message contains.")
+    ).toBeInTheDocument();
+    expect(engine.report).not.toHaveBeenCalled();
+    fireEvent.click(
+      within(categories).getByRole("radio", {
+        name: "A credible threat of violence",
+      })
+    );
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Send report" })
+    );
+    await waitFor(() =>
+      expect(engine.report).toHaveBeenCalledWith(
+        GROUP_G,
+        "m1",
+        "CREDIBLE_THREAT_OF_VIOLENCE",
+        undefined,
+        { includeOriginal: false }
+      )
+    );
+  });
+
+  it.each(["left", "invalid", "active"] as const)(
+    "keeps safety actions for retained %s DM history without allowing message changes",
+    async (status) => {
+      const convo = conversation({
+        g: DM_G,
+        kind: "dm",
+        admins: [SELF_ID, ALICE_ID],
+        members: [member(SELF_ID, "me")],
+        status,
+      });
+      const engine = renderView(convo, [
+        message({
+          id: "old-peer",
+          g: DM_G,
+          text: "retained message",
+          reactions: { "🔥": [ALICE_ID] },
+        }),
+        message({
+          id: "old-self",
+          g: DM_G,
+          senderProfileId: SELF_ID,
+          text: "my old message",
+        }),
+      ]);
+      expect(
+        screen.queryByLabelText("Encrypted message")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getAllByRole("button", { name: "Message actions" })
+      ).toHaveLength(1);
+      expect(screen.getByRole("button", { name: /🔥/ })).toBeDisabled();
+      fireEvent.click(screen.getByRole("button", { name: "Message actions" }));
+      await screen.findByRole("menuitem", {
+        name: "Report illegal or severe harm",
+      });
+      expect(
+        screen.queryByRole("menuitem", { name: "Reply" })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("menuitem", { name: /React with/ })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("menuitem", { name: /^(Edit|Delete)$/ })
+      ).not.toBeInTheDocument();
+      fireEvent.click(screen.getByRole("menuitem", { name: /^Block / }));
+      const blockDialog = await screen.findByRole("dialog", {
+        name: /^Block /,
+      });
+      fireEvent.click(
+        within(blockDialog).getByRole("button", { name: "Block" })
+      );
+      await waitFor(() => expect(mockBlock).toHaveBeenCalledTimes(1));
+      fireEvent.click(screen.getByRole("button", { name: "Message actions" }));
+      fireEvent.click(
+        await screen.findByRole("menuitem", {
+          name: "Report illegal or severe harm",
+        })
+      );
+      const reportDialog = await screen.findByRole("dialog", {
+        name: "Report illegal or severe harm",
+      });
+      fireEvent.click(
+        within(reportDialog).getByRole("radio", {
+          name: "A credible threat of violence",
+        })
+      );
+      const submit = within(reportDialog).getByRole("button", {
+        name: "Send report",
+      });
+      await waitFor(() => expect(submit).toBeEnabled());
+      fireEvent.click(submit);
+      await waitFor(() =>
+        expect(engine.report).toHaveBeenCalledWith(
+          DM_G,
+          "old-peer",
+          "CREDIBLE_THREAT_OF_VIOLENCE",
+          undefined,
+          { includeOriginal: false }
+        )
+      );
+      expect(engine.react).not.toHaveBeenCalled();
+      expect(engine.send).not.toHaveBeenCalled();
+    }
+  );
+
+  it("puts mute, block and message settings before reporting", async () => {
+    renderView();
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Message actions" })[0]!
+    );
+    const items = (await screen.findAllByRole("menuitem")).map(
+      (item) => item.textContent
+    );
+    const at = (label: string) =>
+      items.findIndex((text) => text?.includes(label));
+    expect(at("Mute on this device")).toBeGreaterThanOrEqual(0);
+    expect(at("Block alice")).toBeGreaterThan(at("Mute on this device"));
+    expect(at("Choose who can message you")).toBeGreaterThan(at("Block alice"));
+    expect(at("Report illegal or severe harm")).toBeGreaterThan(
+      at("Choose who can message you")
+    );
+    expect(
+      screen.getByRole("menuitem", { name: "Choose who can message you" })
+    ).toHaveAttribute("href", "/preferences");
+
+    fireEvent.click(screen.getByRole("menuitem", { name: "Block alice" }));
+    const dialog = await screen.findByRole("dialog", {
+      name: "Block alice?",
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Block" }));
+    await waitFor(() => expect(mockBlock).toHaveBeenCalledTimes(1));
+  });
+
+  it("mutes the chat on this device from the message menu", async () => {
+    renderView();
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Message actions" })[0]!
+    );
+    fireEvent.click(
+      await screen.findByRole("menuitem", { name: "Mute on this device" })
+    );
+    expect(mutedChats()).toEqual([GROUP_G]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: "Message actions" })[0]!
+    );
+    fireEvent.click(
+      await screen.findByRole("menuitem", { name: "Unmute on this device" })
+    );
+    expect(mutedChats()).toEqual([]);
+  });
+
+  it("reserves the disabled attach control while attachments are unavailable", () => {
+    const engine = createFakeE2eeEngine({
+      conversations: [conversation()],
+      messages: { [GROUP_G]: timeline },
+      attachmentsEnabled: false,
+    });
+    render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeConversationView g={GROUP_G} />
+      </E2eeTestProvider>
+    );
+    expect(screen.getByRole("button", { name: "Attach files" })).toBeDisabled();
+    expect(document.querySelector('input[type="file"]')).toBeNull();
+  });
+
+  it("shows the delayed-change banner and blocks the composer", () => {
+    renderView(conversation({ delayed: true }));
+    expect(
+      screen.getByText(
+        "Group changes are delayed. Messages will send once the change goes through."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Sending is paused until the group change goes through.")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Encrypted message")
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps today's blocked composer for a stalled group change", () => {
+    renderView(conversation({ delayed: true, delayedReason: "commit" }));
+    expect(
+      screen.getByText(
+        "Group changes are delayed. Messages will send once the change goes through."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Sending is paused until the group change goes through.")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("textbox", { name: "Encrypted message" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the composer usable with neutral copy when sends keep failing", () => {
+    renderView(conversation({ delayed: true, delayedReason: "send" }));
+    expect(
+      screen.getByText(
+        "Messages aren’t sending right now. We’ll keep retrying, and you can keep writing."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/group change/u)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Encrypted message" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Attach files" })).toBeEnabled();
+  });
+
+  it("keeps the draft and focus when a send stall starts while typing", () => {
+    const convo = conversation();
+    const engine = renderView(convo);
+    const input = screen.getByRole("textbox", { name: "Encrypted message" });
+    act(() => input.focus());
+    setComposerText(input, "still typing");
+    expect(input).toHaveFocus();
+
+    act(() => engine.setDelayed(convo.g, "send"));
+
+    expect(
+      screen.getByText(
+        "Messages aren’t sending right now. We’ll keep retrying, and you can keep writing."
+      )
+    ).toBeInTheDocument();
+    const after = screen.getByRole("textbox", { name: "Encrypted message" });
+    expect(after).toBe(input);
+    expect(after).toHaveFocus();
+    expect(composerText(after)).toBe("still typing");
+  });
+
+  it("follows the delay reason: a stuck group change blocks, recovery restores", () => {
+    const convo = conversation();
+    const engine = renderView(convo);
+    const box = () =>
+      screen.queryByRole("textbox", { name: "Encrypted message" });
+
+    act(() => engine.setDelayed(convo.g, "send"));
+    expect(box()).toBeInTheDocument();
+
+    // A stuck commit wins when both apply.
+    act(() => engine.setDelayed(convo.g, "commit"));
+    expect(
+      screen.getByText(
+        "Group changes are delayed. Messages will send once the change goes through."
+      )
+    ).toBeInTheDocument();
+    expect(box()).not.toBeInTheDocument();
+
+    act(() => engine.setDelayed(convo.g, null));
+    expect(box()).toBeInTheDocument();
+    expect(
+      screen.queryByText(/delayed|aren’t sending/u)
+    ).not.toBeInTheDocument();
+  });
+
+  it("alerts on a possible split view and opens safety codes", async () => {
+    renderView(conversation({ splitView: true }));
+    expect(screen.getByText(SPLIT_VIEW_BANNER)).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Compare safety codes" })
+    );
+    const dialog = await screen.findByRole("dialog", { name: "Chat info" });
+    expect(
+      within(dialog).getByText("Safety code: abcd ef01 2345 6789")
+    ).toBeInTheDocument();
+    expect(
+      within(dialog).getByText(
+        "Compare this code with the other members in person or in another app you trust. If everyone sees the same code, everyone sees the same people and devices in this chat. Check the wallet shown with each device to know whose it is."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("pauses an invalid chat and restarts it with the same people", async () => {
+    const engine = renderView(conversation({ status: "invalid" }));
+    expect(
+      screen.getByText("This chat is paused because of an invalid change.")
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Start a new encrypted chat with the same people",
+      })
+    );
+    await waitFor(() => expect(engine.restart).toHaveBeenCalledWith(GROUP_G));
+    expect(mockPush).toHaveBeenCalledWith(`/messages/encrypted/${DM_G}`);
+  });
+
+  it("gives admins member management in the info panel", async () => {
+    const engine = renderView();
+    fireEvent.click(screen.getByRole("button", { name: "Chat info" }));
+    const dialog = await screen.findByRole("dialog", { name: "Chat info" });
+    expect(within(dialog).getByText("Admin")).toBeInTheDocument();
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Make alice an admin" })
+    );
+    await waitFor(() =>
+      expect(engine.setAdmin).toHaveBeenCalledWith(GROUP_G, ALICE_ID, true)
+    );
+    expect(within(dialog).getByLabelText("Group name")).toHaveValue(
+      "Collectors"
+    );
+    expect(
+      within(dialog).getByRole("button", { name: "Leave chat" })
+    ).toBeInTheDocument();
+  });
+
+  it("hides admin actions from non-admins", async () => {
+    renderView(conversation({ admins: [ALICE_ID] }));
+    fireEvent.click(screen.getByRole("button", { name: "Chat info" }));
+    const dialog = await screen.findByRole("dialog", { name: "Chat info" });
+    expect(
+      within(dialog).queryByRole("button", { name: /Remove alice/ })
+    ).not.toBeInTheDocument();
+    expect(
+      within(dialog).queryByLabelText("Group name")
+    ).not.toBeInTheDocument();
+  });
+
+  it("announces incoming messages but not the initial history", () => {
+    const engine = createFakeE2eeEngine({
+      conversations: [conversation()],
+      messages: { [GROUP_G]: timeline },
+    });
+    render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeConversationView g={GROUP_G} />
+      </E2eeTestProvider>
+    );
+    expect(
+      screen.queryByText("New message from alice")
+    ).not.toBeInTheDocument();
+    act(() =>
+      engine.update({
+        messages: {
+          [GROUP_G]: [...timeline, message({ id: "m9", seq: 9, text: "new" })],
+        },
+      })
+    );
+    expect(screen.getByText("New message from alice")).toBeInTheDocument();
+  });
+
+  it("reports a chat that is not on this device after syncing", async () => {
+    const engine = createFakeE2eeEngine();
+    render(
+      <E2eeTestProvider value={contextFor(engine)}>
+        <E2eeConversationView g={GROUP_G} />
+      </E2eeTestProvider>
+    );
+    expect(
+      await screen.findByText("Chat not found on this device")
+    ).toBeInTheDocument();
+    expect(engine.sync).toHaveBeenCalled();
+  });
+});
+
+it("Arrow Up edits the latest eligible own message, skipping pending, deleted and unreadable messages", async () => {
+  const engine = renderView(conversation(), [
+    ...timeline,
+    message({
+      id: "deleted-own",
+      seq: 7,
+      senderProfileId: SELF_ID,
+      deleted: true,
+    }),
+    message({
+      id: "unreadable-own",
+      seq: 8,
+      senderProfileId: SELF_ID,
+      undecryptable: true,
+    }),
+    message({ id: "other", seq: 9, senderProfileId: BOB_ID }),
+  ]);
+  const input = screen.getByLabelText("Encrypted message");
+  fireEvent.keyDown(input, { key: "ArrowUp", keyCode: 38, shiftKey: true });
+  expect(composerText(input)).toBe("");
+  setComposerText(input, "draft");
+  fireEvent.keyDown(input, { key: "ArrowUp", keyCode: 38 });
+  expect(composerText(input)).toBe("draft");
+  setComposerText(input, "");
+  fireEvent.keyDown(input, { key: "ArrowUp", keyCode: 38 });
+  expect(composerText(input)).toBe("fixed typo");
+  setComposerText(input, "fixed again");
+  fireEvent.click(screen.getByRole("button", { name: /^Save$/ }));
+  await waitFor(() =>
+    expect(engine.edit).toHaveBeenCalledWith(GROUP_G, "m4", "fixed again")
+  );
+});
+
+describe("encrypted chat file drops", () => {
+  const files = [
+    new File(["%PDF"], "dropped.pdf", { type: "application/pdf" }),
+  ];
+  const dataTransfer = () => ({ types: ["Files"], files, dropEffect: "none" });
+
+  it.each(["timeline", "composer"])(
+    "attaches a file dropped onto the %s exactly once through the encrypted engine",
+    async (target) => {
+      const engine = renderView();
+      const area = screen.getByRole("region", {
+        name: "Encrypted chat file upload area",
+      });
+      const input = screen.getByRole("textbox", { name: "Encrypted message" });
+      const dropTarget = target === "composer" ? input : area;
+      fireEvent.dragEnter(dropTarget, { dataTransfer: dataTransfer() });
+      expect(screen.getByText("Drop files here")).toBeVisible();
+      expect(fireEvent.drop(dropTarget, { dataTransfer: dataTransfer() })).toBe(
+        false
+      );
+      expect(screen.queryByText("Drop files here")).not.toBeInTheDocument();
+      expect(
+        within(screen.getByRole("list", { name: "Attachments" })).getAllByRole(
+          "listitem"
+        )
+      ).toHaveLength(1);
+      fireEvent.click(screen.getByRole("button", { name: "Send" }));
+      await waitFor(() =>
+        expect(engine.send).toHaveBeenCalledWith(
+          GROUP_G,
+          expect.objectContaining({ files })
+        )
+      );
+    }
+  );
+
+  it.each(["disabled", "editing", "paused"])(
+    "blocks drops when attachments are %s, without navigating away",
+    (mode) => {
+      const engine = renderView(
+        conversation(mode === "paused" ? { delayed: true } : {})
+      );
+      if (mode === "disabled")
+        act(() => engine.update({ attachmentsEnabled: false }));
+      if (mode === "editing") {
+        setComposerText(
+          screen.getByRole("textbox", { name: "Encrypted message" }),
+          ""
+        );
+        fireEvent.keyDown(
+          screen.getByRole("textbox", { name: "Encrypted message" }),
+          { key: "ArrowUp", keyCode: 38 }
+        );
+        expect(screen.getByText("Editing message")).toBeVisible();
+      }
+      const area = screen.getByRole("region", {
+        name: "Encrypted chat file upload area",
+      });
+      fireEvent.dragEnter(area, { dataTransfer: dataTransfer() });
+      expect(screen.queryByText("Drop files here")).not.toBeInTheDocument();
+      expect(fireEvent.drop(area, { dataTransfer: dataTransfer() })).toBe(
+        false
+      );
+      expect(
+        screen.queryByRole("list", { name: "Attachments" })
+      ).not.toBeInTheDocument();
+      expect(engine.send).not.toHaveBeenCalled();
+    }
+  );
+});

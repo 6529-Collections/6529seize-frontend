@@ -1,12 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import CompetitionHub from "@/components/competitions/CompetitionHub";
 
-let mockEnabled = true;
 let mockCanCreate = true;
 
 jest.mock("@/helpers/competition.helpers", () => ({
   ...jest.requireActual("@/helpers/competition.helpers"),
-  isMultiCompetitionEnabled: () => mockEnabled,
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionHub: () => ({
@@ -30,19 +28,18 @@ jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
 it.each([
   [true, true, true],
   [true, false, false],
-  [false, true, false],
+  [false, true, true],
   [false, false, false],
 ])(
-  "preserves competition creation permission and rollout gating (%s, %s)",
-  (enabled, canCreate, visible) => {
-    mockEnabled = enabled;
+  "preserves competition creation permission independently of retired rollout settings (%s, %s)",
+  (_enabled, canCreate, visible) => {
     mockCanCreate = canCreate;
     render(<CompetitionHub waveId="wave" embedded />);
     const action = screen.queryByRole("link", {
-      name: "Competition",
+      name: "Decision",
     });
     if (visible) {
-      expect(action).toHaveAttribute("href", "/waves/wave/competitions/new");
+      expect(action).toHaveAttribute("href", "/waves/wave/decisions/new");
       expect(screen.queryByRole("tab", { name: "Drafts" })).toBeNull();
     } else {
       expect(action).toBeNull();

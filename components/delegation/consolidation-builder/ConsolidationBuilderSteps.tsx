@@ -64,7 +64,8 @@ const STATUS_MESSAGE_KEYS = {
   upcoming: "delegation.consolidationBuilder.steps.status.upcoming",
 } as const satisfies Record<ConsolidationStepStatus, string>;
 
-const MESSAGE_CLASS_NAME = "tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300";
+const MESSAGE_CLASS_NAME =
+  "tw-m-0 tw-min-w-0 tw-max-w-full tw-text-sm tw-leading-6 tw-text-iron-300 [overflow-wrap:anywhere]";
 
 function getStepHint(
   step: ConsolidationStepProgress,

@@ -43,6 +43,18 @@ describe("getAppCommonHeaders", () => {
     expect(headers).toEqual({ Authorization: "Bearer wallet-token" });
   });
 
+  it("reads the session only from the prefixed host-only cookie", async () => {
+    const get = jest.fn((name: string) =>
+      name === "wallet-auth" ? { value: "other-token" } : undefined
+    );
+    (cookies as jest.Mock).mockResolvedValue({ get });
+
+    const headers = await getAppCommonHeaders();
+    expect(headers).toEqual({});
+    expect(get).toHaveBeenCalledWith("__Host-wallet-auth");
+    expect(get).not.toHaveBeenCalledWith("wallet-auth");
+  });
+
   it("includes both headers when both cookies exist", async () => {
     (cookies as jest.Mock).mockResolvedValue({
       get: (name: string) => {

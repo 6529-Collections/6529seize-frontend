@@ -2,9 +2,11 @@ import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import {
   TitleProvider,
   useSetWaveData,
-  useTitle,
+  useTitleText,
+  useTitleActions,
 } from "@/contexts/TitleContext";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useMemo, useState } from "react";
 
 let mockPathname = "/waves/wave-1";
 let mockSearchParams = new URLSearchParams("divider=841669");
@@ -37,7 +39,7 @@ function TitleHarness({
   } | null;
 }) {
   useSetWaveData(waveData);
-  const { title } = useTitle();
+  const { title } = useTitleText();
   return <div>{title}</div>;
 }
 
@@ -47,6 +49,26 @@ describe("TitleContext", () => {
     mockSearchParams = new URLSearchParams("divider=841669");
     mockActiveWaveId = "wave-1";
     document.title = "";
+  });
+
+  it("keeps a deep-linked submission title after wave hydration and unread updates", () => {
+    mockSearchParams = new URLSearchParams("drop=submission");
+    document.title = "TestIntern by @phoebeum";
+    const ui = (newItemsCount: number) => (
+      <TitleProvider>
+        <DynamicHeadTitle />
+        <TitleHarness
+          waveData={{ id: "wave-1", name: "Main Stage", newItemsCount }}
+        />
+      </TitleProvider>
+    );
+    const view = render(ui(0));
+    expect(document.title).toBe("TestIntern by @phoebeum");
+    view.rerender(ui(3));
+    expect(document.title).toBe("TestIntern by @phoebeum");
+    mockSearchParams = new URLSearchParams();
+    view.rerender(ui(3));
+    expect(document.title).toBe("(3 new messages) Main Stage | Brain");
   });
 
   it("resets the client title when leaving a wave for the meme calendar", async () => {
@@ -334,4 +356,66 @@ describe("TitleContext", () => {
       });
     }
   );
+});
+
+describe("TitleContext setters", () => {
+  beforeEach(() => {
+    mockPathname = "/waves/wave-1";
+    mockSearchParams = new URLSearchParams();
+    mockActiveWaveId = "wave-1";
+  });
+
+  it("does not re-render setter-only consumers when new messages change the title", () => {
+    let setterRenders = 0;
+    function SetterOnly() {
+      useTitleActions();
+      setterRenders += 1;
+      return null;
+    }
+    // Like the open wave, a component inside the tree pushes new counts.
+    function UnreadHarness() {
+      const [newItemsCount, setNewItemsCount] = useState(0);
+      const waveData = useMemo(
+        () => ({ id: "wave-1", name: "Main Stage", newItemsCount }),
+        [newItemsCount]
+      );
+      useSetWaveData(waveData);
+      const { title } = useTitleText();
+      return (
+        <button
+          type="button"
+          onClick={() => setNewItemsCount((count) => count + 1)}
+        >
+          {title}
+        </button>
+      );
+    }
+    render(
+      <TitleProvider>
+        <SetterOnly />
+        <UnreadHarness />
+      </TitleProvider>
+    );
+    const rendersAfterMount = setterRenders;
+
+    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByRole("button"));
+
+    expect(screen.getByRole("button")).toHaveTextContent(
+      "(2 new messages) Main Stage | Brain"
+    );
+    expect(setterRenders).toBe(rendersAfterMount);
+  });
+
+  it("requires a TitleProvider", () => {
+    function Orphan() {
+      useTitleActions();
+      return null;
+    }
+    jest.spyOn(console, "error").mockImplementation(() => {});
+    expect(() => render(<Orphan />)).toThrow(
+      "useTitleActions must be used within a TitleProvider"
+    );
+    jest.mocked(console.error).mockRestore();
+  });
 });

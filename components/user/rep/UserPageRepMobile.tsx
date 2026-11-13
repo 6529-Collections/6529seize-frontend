@@ -1,5 +1,8 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
 import { AuthContext } from "@/components/auth/Auth";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -18,15 +21,14 @@ import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { useParams } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
-import IdentityGettingStartedCard from "../identity/getting-started/IdentityGettingStartedCard";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
-import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "./new-rep/GrantRepDialog";
 import type { RepDirection } from "./UserPageRep.helpers";
 import { getCanEditRep, getCanEditNic } from "./UserPageRep.helpers";
 import MobileTabCards, { type MobileTab } from "./MobileTabCards";
 import MobileRepTabContent from "./MobileRepTabContent";
+import { useNicRatingsOverview } from "./useNicRatingsOverview";
 import MobileNicTabContent from "./MobileNicTabContent";
 import MobileStatementsTabContent from "./MobileStatementsTabContent";
 
@@ -52,7 +54,6 @@ export default function UserPageRepMobile({
   isFetchingNextPage,
   onOpenOverviewContributors,
   onOpenGlobalCategory,
-  onOpenCategoryContributors,
 }: {
   readonly profile: ApiIdentity;
   readonly overview: ApiRepOverview | null;
@@ -68,17 +69,17 @@ export default function UserPageRepMobile({
   readonly isFetchingNextPage: boolean;
   readonly onOpenOverviewContributors: () => void;
   readonly onOpenGlobalCategory: (category: string) => void;
-  readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
+  const locale = useBrowserLocale();
   const params = useParams();
   const user = params["user"]?.toString().toLowerCase() ?? null;
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { address } = useSeizeConnectContext();
 
+  const nicRatings = useNicRatingsOverview(profile, cicOverview);
   const [activeTab, setActiveTab] = useState<MobileTab>("rep");
   const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
-  const [editCategory, setEditCategory] = useState<string | null>(null);
 
   const canEditRep = useMemo(
     () =>
@@ -137,20 +138,14 @@ export default function UserPageRepMobile({
 
   return (
     <div>
-      <IdentityGettingStartedCard profile={profile} className="tw-mb-4" />
+      <MobileTabCards activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <MobileTabCards
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        overview={overview}
-        cicOverview={cicOverview}
-        profile={profile}
-        identityStatementCount={identityStatementCount}
-      />
-
-      <AnimatePresence mode="wait">
+      {/* Keep the default REP panel visible while the section buttons hydrate. */}
+      <AnimatePresence initial={false} mode="wait">
         {activeTab === "rep" && (
           <motion.div
+            role="region"
+            aria-label={t(locale, "user.rate.repRegion")}
             key="rep"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -172,9 +167,7 @@ export default function UserPageRepMobile({
               isFetchingNextPage={isFetchingNextPage}
               onGrantRep={() => setIsGrantRepOpen(true)}
               onOpenOverviewContributors={onOpenOverviewContributors}
-              onEditCategory={setEditCategory}
               onOpenGlobalCategory={onOpenGlobalCategory}
-              onOpenCategoryContributors={onOpenCategoryContributors}
             />
           </motion.div>
         )}
@@ -189,7 +182,7 @@ export default function UserPageRepMobile({
           >
             <MobileNicTabContent
               profile={profile}
-              cicOverview={cicOverview}
+              ratings={nicRatings}
               initialActivityLogParams={initialActivityLogParams}
               canEditNic={canEditNic}
               onRateNic={() => setIsNicRateOpen(true)}
@@ -208,6 +201,7 @@ export default function UserPageRepMobile({
             <MobileStatementsTabContent
               profile={profile}
               canEditStatements={canEditStatements}
+              statementCount={identityStatementCount}
             />
           </motion.div>
         )}
@@ -226,6 +220,7 @@ export default function UserPageRepMobile({
         onClose={() => setIsNicRateOpen(false)}
         noPadding
         tabletModal
+        desktopAlign="top"
         maxWidthClass="md:tw-max-w-md"
         headerClassName="tw-pb-5 tw-pt-4"
         headerVariant="minimal"
@@ -241,14 +236,6 @@ export default function UserPageRepMobile({
           </UserPageRateWrapper>
         </div>
       </MobileWrapperDialog>
-
-      {canEditRep && editCategory && (
-        <UserPageRepModifyModal
-          profile={profile}
-          category={editCategory}
-          onClose={() => setEditCategory(null)}
-        />
-      )}
     </div>
   );
 }

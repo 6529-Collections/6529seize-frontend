@@ -1,7 +1,7 @@
 "use client";
 
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useAuth } from "@/components/auth/Auth";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { getActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import { getMemeLabRouteHrefWithLocale } from "@/components/memelab/memeLabRouteParams";
 import { MemeLabCardVolumes } from "@/components/memelab/MemeLabCardHeader";
@@ -19,7 +19,7 @@ import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMELAB_CONTRACT, MEMES_CONTRACT } from "@/constants/constants";
 import { useTitle } from "@/contexts/TitleContext";
 import type { DBResponse } from "@/entities/IDBResponse";
@@ -77,7 +77,7 @@ export default function MemeLabPageComponent({
   const capacitor = useCapacitor();
 
   const { connectedProfile } = useAuth();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { setTitle } = useTitle();
 
   const focusParam = searchParams.get("focus");
@@ -212,7 +212,7 @@ export default function MemeLabPageComponent({
     const loadNft = async () => {
       try {
         const metaResponse = await fetchUrl<DBResponse<LabExtendedData>>(
-          `${publicEnv.API_ENDPOINT}/api/lab_extended_data?id=${nftId}`,
+          apiUrl(`/api/lab_extended_data?id=${nftId}`),
           { signal }
         );
         if (cancelled) {
@@ -228,7 +228,7 @@ export default function MemeLabPageComponent({
         setNftMeta(meta);
 
         const nftResponse = await fetchUrl<DBResponse<LabNFT>>(
-          `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${nftId}`,
+          apiUrl(`/api/nfts_memelab?id=${nftId}`),
           { signal }
         );
         if (cancelled) {
@@ -284,11 +284,11 @@ export default function MemeLabPageComponent({
     const abortController = new AbortController();
 
     fetchUrl<DBResponse<NFT>>(
-      `${
-        publicEnv.API_ENDPOINT
-      }/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${nft.meme_references.join(
-        ","
-      )}`,
+      apiUrl(
+        `/api/nfts?sort_direction=asc&contract=${MEMES_CONTRACT}&id=${nft.meme_references.join(
+          ","
+        )}`
+      ),
       { signal: abortController.signal }
     )
       .then((response) => {
@@ -322,9 +322,9 @@ export default function MemeLabPageComponent({
 
     if (wallets.length > 0 && nftId) {
       fetchUrl(
-        `${
-          publicEnv.API_ENDPOINT
-        }/api/transactions_memelab?wallet=${wallets.join(",")}&id=${nftId}`,
+        apiUrl(
+          `/api/transactions_memelab?wallet=${wallets.join(",")}&id=${nftId}`
+        ),
         { signal }
       )
         .then((response: DBResponse<Transaction>) => {
@@ -376,7 +376,9 @@ export default function MemeLabPageComponent({
 
     let cancelled = false;
     const abortController = new AbortController();
-    const initialUrlHistory = `${publicEnv.API_ENDPOINT}/api/nft_history/${MEMELAB_CONTRACT}/${nftId}`;
+    const initialUrlHistory = apiUrl(
+      `/api/nft_history/${MEMELAB_CONTRACT}/${nftId}`
+    );
 
     const loadHistory = () => {
       if (cancelled) {
@@ -436,6 +438,9 @@ export default function MemeLabPageComponent({
       >
         <div className="tw-w-fit tw-max-w-full">
           <CommonTabs<MEME_LAB_HISTORY_TAB>
+            variant="connected"
+            connectedSize="sm"
+            connectedTypography="body"
             items={visibleHistoryTabItems}
             activeItem={activeHistoryTab}
             filterLabel={t(locale, "memeLab.detail.sections.history")}
@@ -473,7 +478,7 @@ export default function MemeLabPageComponent({
       return (
         <>
           <MemeLabOverview nft={nft} />
-          {nft && <MemeLabAdditionalDetailsContent nft={nft} />}
+          {nft && <MemeLabAdditionalDetailsContent nft={nft} locale={locale} />}
         </>
       );
     }
@@ -509,7 +514,7 @@ export default function MemeLabPageComponent({
           <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
             <h3
               id="meme-lab-card-activity-heading"
-              className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg"
+              className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg md:tw-text-base md:tw-leading-6 md:tw-text-iron-100"
             >
               {t(locale, "memeLab.detail.tabs.cardActivity")}
             </h3>
@@ -541,7 +546,10 @@ export default function MemeLabPageComponent({
   }
 
   return (
-    <div className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white">
+    <div
+      data-nft-card-page
+      className="tailwind-scope tw-min-h-[calc(100vh-100px)] tw-border tw-border-y-0 tw-border-l-0 tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-text-white"
+    >
       <div className="tw-px-4 tw-py-4 md:tw-px-6 md:tw-pb-10 lg:tw-px-8">
         <header className="tw-pb-8">
           <div className="tw-flex tw-flex-col tw-gap-4">
@@ -633,7 +641,7 @@ export default function MemeLabPageComponent({
             <MemeLabStaticHeader
               nft={nft}
               nftMeta={nftMeta}
-              showMarketplaceLinks={!capacitor.isIos || country === "US"}
+              showMarketplaceLinks={!hideNftPurchasing}
               locale={locale}
               hasOwnershipContext={hasOwnershipContext}
               nftBalance={nftBalance}

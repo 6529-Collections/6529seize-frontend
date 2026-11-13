@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 
+import { getApiAccessReturnPath } from "@/services/auth/api-access-redirect";
 import type { NextRequest } from "next/server";
 
 const mockNext = jest.fn(() => ({ kind: "next" }));
@@ -9,11 +10,16 @@ const mockRedirect = jest.fn((url: URL) => ({
   kind: "redirect",
   url: url.toString(),
 }));
+const mockRewrite = jest.fn((url: URL) => ({
+  kind: "rewrite",
+  url: url.toString(),
+}));
 
 jest.mock("next/server", () => ({
   NextResponse: {
     next: () => mockNext(),
     redirect: (url: URL) => mockRedirect(url),
+    rewrite: (url: URL) => mockRewrite(url),
   },
 }));
 
@@ -24,7 +30,10 @@ const PRODUCTION_BASE_ENDPOINT = "https://6529.io";
 const LOCAL_BASE_ENDPOINT = "http://localhost:3001";
 const ORIGINAL_PUBLIC_RUNTIME = process.env["PUBLIC_RUNTIME"];
 
-function loadProxy(baseEndpoint: string = STAGING_BASE_ENDPOINT): Proxy {
+function loadProxy(
+  baseEndpoint: string = STAGING_BASE_ENDPOINT,
+  encryptedMessages = false
+): Proxy {
   const runtime = JSON.parse(ORIGINAL_PUBLIC_RUNTIME ?? "{}") as Record<
     string,
     unknown
@@ -33,6 +42,7 @@ function loadProxy(baseEndpoint: string = STAGING_BASE_ENDPOINT): Proxy {
     ...runtime,
     BASE_ENDPOINT: baseEndpoint,
     API_ENDPOINT: "https://api.staging.example",
+    NEXT_PUBLIC_E2EE_DM_ENABLED: encryptedMessages ? "true" : "false",
   });
 
   let loaded: Proxy | undefined;
@@ -91,6 +101,7 @@ describe("proxy", () => {
   beforeEach(() => {
     mockNext.mockClear();
     mockRedirect.mockClear();
+    mockRewrite.mockClear();
     jest.spyOn(console, "warn").mockImplementation(() => undefined);
     proxy = loadProxy();
   });
@@ -144,6 +155,57 @@ describe("proxy", () => {
     }
   );
 
+  describe("legacy home wave links", () => {
+    const DESKTOP_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)";
+    const IPHONE_UA =
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15";
+
+    it.each([
+      [DESKTOP_UA, "wave=wave", "/waves/wave"],
+      [IPHONE_UA, "wave=wave", "/waves/wave"],
+      [IPHONE_UA, "view=waves&wave=wave", "/waves/wave"],
+      [IPHONE_UA, "view=messages&wave=dm", "/messages/dm"],
+      [
+        DESKTOP_UA,
+        "wave=wave&drop=message///&serialNo=42/&tab=leaderboard",
+        "/waves/wave?drop=message&serialNo=42&tab=leaderboard",
+      ],
+    ])(
+      "sends %s /?%s to the wave route",
+      async (userAgent, query, destination) => {
+        const request = createRequest("/");
+        request.nextUrl.search = `?${query}`;
+        jest.mocked(request.headers.get).mockReturnValue(userAgent);
+        await proxy(request);
+        expect(mockRedirect).toHaveBeenCalledWith(
+          new URL(destination, request.url)
+        );
+      }
+    );
+
+    it.each(["", "?wave=", "?view=waves", "?view=messages", "?drop=message"])(
+      "leaves the prerendered home page to serve /%s",
+      async (search) => {
+        mockFetchStatus(200);
+        const request = createRequest("/");
+        request.nextUrl.search = search;
+        jest.mocked(request.headers.get).mockReturnValue(IPHONE_UA);
+        const response = await proxy(request);
+        expect(response).toEqual({ kind: "next" });
+        expect(mockRedirect).not.toHaveBeenCalled();
+      }
+    );
+
+    it("keeps a wave query on other pages for the app to read after hydration", async () => {
+      mockFetchStatus(200);
+      const request = createRequest("/the-memes");
+      request.nextUrl.search = "?wave=wave";
+      const response = await proxy(request);
+      expect(response).toEqual({ kind: "next" });
+      expect(mockRedirect).not.toHaveBeenCalled();
+    });
+  });
+
   it.each([
     "/pdfjs/5.4.296/pdf.worker.min.mjs",
     "/pdfjs/5.4.296/cmaps/Adobe-Japan1-UCS2.bcmap",
@@ -155,8 +217,12 @@ describe("proxy", () => {
     "/sitemap-0.xml",
     "/favicon.ico",
     "/favicon.svg",
+    "/apple-icon.png",
+    "/manifest.webmanifest",
+    "/icon-512-maskable.png",
     "/6529io.png",
     "/transient.avif",
+    "/video-preview-placeholder.svg",
     "/emojis/sgt_sob.webp",
     "/museum/research/editorial/example.png",
     "/profile-cms/templates/afterimage.png",
@@ -164,10 +230,6 @@ describe("proxy", () => {
     "/api/version",
     "/_next/data/build/page.json",
     "/error",
-    "/review-data/6529-stream/index.json",
-    "/review-data/6529-stream/versions/2026-07-27.1/reference-manifest.json",
-    "/review-data/6529-stream/versions/2026-07-27.1/definitions/record-shard.json",
-    "/review-data/6529-stream/versions/2026-07-27.1/sources/smart-contracts/StreamCore.sol",
   ])("serves %s without staging access-control fetches", async (path) => {
     const fetchMock = jest
       .spyOn(globalThis, "fetch")
@@ -182,12 +244,6 @@ describe("proxy", () => {
   });
 
   it.each([
-    "/review-data/6529-stream",
-    "/review-data/6529-stream-evil/index.json",
-    "/review-data/6529-streaming/index.json",
-    "/review-data/other-review/index.json",
-    "/review-data//6529-stream/index.json",
-    "/review-data/6529-stream%2Fversions/index.json",
     "/reviews/6529-stream",
     "/reviews/6529-stream/reference",
     // Static-looking suffixes outside real public files stay gated.
@@ -213,21 +269,6 @@ describe("proxy", () => {
     expect(mockRedirect).not.toHaveBeenCalled();
   });
 
-  it("keeps an encoded-slash request gated if Next exposes a decoded pathname", async () => {
-    const fetchMock = mockFetchStatus(200);
-
-    const response = await proxy(
-      createRequest("/review-data/6529-stream%2Fversions/index.json", {
-        nextUrlPathname: "/review-data/6529-stream/versions/index.json",
-      })
-    );
-
-    expect(response).toEqual({ kind: "next" });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(mockNext).toHaveBeenCalledTimes(1);
-    expect(mockRedirect).not.toHaveBeenCalled();
-  });
-
   it.each([
     "/.git/HEAD",
     "/.git/config",
@@ -240,6 +281,19 @@ describe("proxy", () => {
     "/%2Egit/HEAD",
     "/punk6529/.hidden",
     "/api/.env",
+    "/review-data",
+    "/review-data/6529-stream",
+    "/review-data/6529-stream/index.json",
+    "/review-data/6529-stream/versions/2026-07-27.1/reference-manifest.json",
+    "/review-data/6529-stream/versions/2026-07-27.1/definitions/record-shard.json",
+    "/review-data/6529-stream/versions/2026-09-09.1/sources/smart-contracts/core/StreamCore.sol",
+    "/review-data/6529-stream/versions/2026-09-09.1/knowledge/manifest.json",
+    "/review-data/other-review/index.json",
+    "/review-data//6529-stream/index.json",
+    "/review-data/6529-stream%2Fversions/index.json",
+    "/Review-Data/6529-stream/index.json",
+    "/%72eview-data/6529-stream/index.json",
+    "//review-data/6529-stream/index.json",
   ])("answers %s with a plain 404 before any other work", async (path) => {
     const fetchMock = jest
       .spyOn(globalThis, "fetch")
@@ -257,6 +311,130 @@ describe("proxy", () => {
     expect(fetchMock).not.toHaveBeenCalled();
     expect(mockNext).not.toHaveBeenCalled();
     expect(mockRedirect).not.toHaveBeenCalled();
+  });
+
+  describe("malformed wave ids", () => {
+    const WAVE_ID = "5f207393-5418-4a75-8738-e40edb44a94d";
+
+    async function expectRewrittenToNotFound(
+      request: NextRequest,
+      expectedSearch = ""
+    ) {
+      const fetchMock = jest
+        .spyOn(globalThis, "fetch")
+        .mockRejectedValue(new Error("access control should not run"));
+
+      const response = await proxy(request);
+
+      expect(response).toEqual({
+        kind: "rewrite",
+        url: `${new URL(request.url).origin}/wave-not-found${expectedSearch}`,
+      });
+      expect(mockRewrite).toHaveBeenCalledTimes(1);
+      expect(fetchMock).not.toHaveBeenCalled();
+      expect(mockNext).not.toHaveBeenCalled();
+      expect(mockRedirect).not.toHaveBeenCalled();
+    }
+
+    it.each([
+      "/waves/not-a-real-id",
+      "/waves/not-a-real-id/",
+      "/waves/5f207393-5418-4a75-8738-e40edb44a94",
+      "/waves/not-a-real-id/decisions",
+      "/waves/not-a-real-id/decisions/alpha",
+      "/messages/not-a-real-id",
+    ])(
+      "rewrites %s to the not-found route before the staging gate",
+      async (path) => {
+        await expectRewrittenToNotFound(createRequest(path));
+      }
+    );
+
+    it.each(["/waves", "/messages"])(
+      "rewrites a malformed legacy ?wave= link on %s",
+      async (path) => {
+        const request = createRequest(path);
+        request.nextUrl.search = "?wave=not-a-real-id&serialNo=4";
+
+        await expectRewrittenToNotFound(
+          request,
+          "?wave=not-a-real-id&serialNo=4"
+        );
+      }
+    );
+
+    it("keeps the query on client navigations so the _rsc check still matches", async () => {
+      const request = createRequest("/waves/not-a-real-id");
+      request.nextUrl.search = "?_rsc=abc123";
+
+      await expectRewrittenToNotFound(request, "?_rsc=abc123");
+    });
+
+    it("rewrites in production builds too", async () => {
+      proxy = loadProxy(PRODUCTION_BASE_ENDPOINT);
+
+      const response = await proxy(
+        createRequest("/waves/not-a-real-id", {
+          origin: PRODUCTION_BASE_ENDPOINT,
+        })
+      );
+
+      expect(response).toEqual({
+        kind: "rewrite",
+        url: "https://6529.io/wave-not-found",
+      });
+      expect(mockNext).not.toHaveBeenCalled();
+    });
+
+    it("does not rewrite the not-found route itself", async () => {
+      const fetchMock = mockFetchStatus(200);
+
+      const response = await proxy(createRequest("/wave-not-found"));
+
+      expect(response).toEqual({ kind: "next" });
+      expect(mockRewrite).not.toHaveBeenCalled();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      `/waves/${WAVE_ID}`,
+      `/waves/${WAVE_ID.toUpperCase()}`,
+      `/waves/${WAVE_ID}/decisions/alpha`,
+      `/messages/${WAVE_ID}`,
+      "/waves/create",
+      "/messages/create",
+      "/messages/new",
+    ])("keeps %s behind staging access control", async (path) => {
+      const fetchMock = mockFetchStatus(200);
+
+      const response = await proxy(createRequest(path));
+
+      expect(response).toEqual({ kind: "next" });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(mockNext).toHaveBeenCalledTimes(1);
+    });
+
+    it("leaves a drop deep link on a valid wave to the app", async () => {
+      const fetchMock = mockFetchStatus(200);
+      const request = createRequest(`/waves/${WAVE_ID}`);
+      request.nextUrl.search = "?drop=not-a-uuid&serialNo=abc";
+
+      const response = await proxy(request);
+
+      expect(response).toEqual({ kind: "next" });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
+    it("leaves a valid legacy ?wave= link to the page redirect", async () => {
+      const fetchMock = mockFetchStatus(200);
+      const request = createRequest("/waves");
+      request.nextUrl.search = `?wave=${WAVE_ID}`;
+
+      const response = await proxy(request);
+
+      expect(response).toEqual({ kind: "next" });
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
   });
 
   it.each([STAGING_BASE_ENDPOINT, PRODUCTION_BASE_ENDPOINT])(
@@ -291,17 +469,41 @@ describe("proxy", () => {
       );
     });
 
-    it("redirects to /access when the API answers 401", async () => {
+    it("probes with the visitor's cookie only, never a server-held key", async () => {
+      process.env["STAGING_API_KEY"] = "server-staging-key";
+      try {
+        const fetchMock = mockFetchStatus(401);
+
+        const response = await proxy(createRequest("/waves"));
+
+        expect(fetchMock).toHaveBeenCalledWith(
+          "https://api.staging.example/api/",
+          expect.objectContaining({ headers: { "x-6529-auth": "" } })
+        );
+        expect(response).toEqual({
+          kind: "redirect",
+          url: "https://staging.6529.io/access?returnTo=%2Fwaves",
+        });
+      } finally {
+        delete process.env["STAGING_API_KEY"];
+      }
+    });
+
+    it("preserves the requested page and query in the 401 redirect", async () => {
       mockFetchStatus(401);
       const request = createRequest("/waves");
-      request.nextUrl.search = "?tab=chat";
+      const search = "?tab=chat&returnTo=%2Fother&tab=rules&label=one%20two";
+      request.nextUrl.search = search;
 
-      const response = await proxy(request);
-
-      expect(response).toEqual({
-        kind: "redirect",
-        url: "https://staging.6529.io/access",
-      });
+      const response = (await proxy(request)) as unknown as { url: string };
+      const destination = new URL(response.url);
+      expect(destination.pathname).toBe("/access");
+      expect(Array.from(destination.searchParams.entries())).toEqual([
+        ["returnTo", "/waves" + search],
+      ]);
+      expect(getApiAccessReturnPath(destination.search, "")).toBe(
+        "/waves" + search
+      );
     });
 
     it("redirects to /restricted when the API answers 403", async () => {
@@ -354,7 +556,7 @@ describe("proxy", () => {
       expect(allowed).toEqual({ kind: "next" });
       expect(denied).toEqual({
         kind: "redirect",
-        url: "https://staging.6529.io/access",
+        url: "https://staging.6529.io/access?returnTo=%2Fwaves",
       });
       expect(fetchMock).toHaveBeenCalledTimes(2);
     });
@@ -389,6 +591,31 @@ describe("proxy", () => {
       expect(retry.status).toBe(503);
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(mockNext).not.toHaveBeenCalled();
+      expect(mockRedirect).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("legacy compose links", () => {
+    it.each(["/messages", "/messages/5f207393-5418-4a75-8738-e40edb44a94d"])(
+      "opens the composer page from %s?create=dm with encrypted chats enabled",
+      async (pathname) => {
+        const encryptedProxy = loadProxy(STAGING_BASE_ENDPOINT, true);
+        const request = createRequest(pathname);
+        request.nextUrl.search = "?create=dm";
+
+        expect(await encryptedProxy(request)).toEqual({
+          kind: "redirect",
+          url: `${STAGING_BASE_ENDPOINT}/messages/new`,
+        });
+      }
+    );
+
+    it("preserves the legacy mode with encrypted chats disabled", async () => {
+      mockFetchStatus(200);
+      const request = createRequest("/messages");
+      request.nextUrl.search = "?create=dm";
+
+      expect(await proxy(request)).toEqual({ kind: "next" });
       expect(mockRedirect).not.toHaveBeenCalled();
     });
   });
@@ -431,7 +658,7 @@ describe("proxy", () => {
       expect(fetchMock).toHaveBeenCalledTimes(1);
       expect(response).toEqual({
         kind: "redirect",
-        url: "https://6529.io/access",
+        url: "https://6529.io/access?returnTo=%2Fwaves",
       });
     });
 
@@ -444,5 +671,22 @@ describe("proxy", () => {
 
       expect(response.status).toBe(404);
     });
+
+    it.each([PRODUCTION_BASE_ENDPOINT, LOCAL_BASE_ENDPOINT])(
+      "answers retired review data with a plain 404 on %s",
+      async (baseEndpoint) => {
+        proxy = loadProxy(baseEndpoint);
+
+        const response = (await proxy(
+          createRequest(
+            "/review-data/6529-stream/versions/2026-09-09.1/sources/smart-contracts/core/StreamCore.sol",
+            { origin: baseEndpoint }
+          )
+        )) as Response;
+
+        expect(response.status).toBe(404);
+        expect(mockNext).not.toHaveBeenCalled();
+      }
+    );
   });
 });

@@ -1,6 +1,7 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import useWaveMessagesStore from "@/contexts/wave/hooks/useWaveMessagesStore";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
+import { legacyMergeDrops } from "../../../lib/chat-store/legacyMergeDrops";
 
 describe("useWaveMessagesStore", () => {
   const baseDrop = {
@@ -14,6 +15,91 @@ describe("useWaveMessagesStore", () => {
     title: "",
     type: "FULL",
   } as any;
+
+  it("commits a background burst without timers and paints the final state once on resume", () => {
+    const visibility = jest.spyOn(document, "visibilityState", "get");
+    visibility.mockReturnValue("hidden");
+    try {
+      const { result } = renderHook(() => useWaveMessagesStore());
+      const listener = jest.fn();
+      act(() => result.current.subscribe("wave1", listener));
+      listener.mockClear();
+      act(() => {
+        for (let serial = 1; serial <= 1000; serial++) {
+          result.current.updateData({
+            key: "wave1",
+            drops: [
+              {
+                ...baseDrop,
+                id: `burst-${serial}`,
+                serial_no: serial,
+                title: `Burst ${serial}`,
+              },
+            ],
+          });
+        }
+        result.current.removeDrop("wave1", "burst-500");
+        result.current.updateData({
+          key: "wave1",
+          drops: [
+            {
+              ...baseDrop,
+              id: "burst-500",
+              serial_no: 500,
+            },
+          ],
+        });
+      });
+      expect(result.current.getData("wave1")?.drops).toHaveLength(999);
+      expect(listener).not.toHaveBeenCalled();
+      act(() => {
+        visibility.mockReturnValue("visible");
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener.mock.calls[0]?.[0].drops).toHaveLength(999);
+    } finally {
+      visibility.mockRestore();
+    }
+  });
+
+  it("publishes a hidden-tab deletion on resume without requiring another update", () => {
+    const visibility = jest.spyOn(document, "visibilityState", "get");
+    try {
+      const { result } = renderHook(() => useWaveMessagesStore());
+      const listener = jest.fn();
+      act(() => {
+        result.current.updateData({ key: "wave1", drops: [baseDrop] });
+        result.current.subscribe("wave1", listener);
+      });
+      listener.mockClear();
+      act(() => {
+        visibility.mockReturnValue("hidden");
+        result.current.removeDrop("wave1", "d1");
+      });
+      expect(result.current.getData("wave1")?.drops).toEqual([]);
+      expect(listener).not.toHaveBeenCalled();
+      act(() => {
+        visibility.mockReturnValue("visible");
+        document.dispatchEvent(new Event("visibilitychange"));
+      });
+      expect(listener).toHaveBeenCalledTimes(1);
+      expect(listener).toHaveBeenCalledWith(
+        expect.objectContaining({ drops: [] })
+      );
+    } finally {
+      visibility.mockRestore();
+    }
+  });
+
+  it("does not resurrect a drop deleted before it enters the cache", () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    act(() => {
+      result.current.removeDrop("wave1", "d1");
+      result.current.updateData({ key: "wave1", drops: [baseDrop] });
+    });
+    expect(result.current.getData("wave1")?.drops).toEqual([]);
+  });
 
   it("allows subscription and updates data", async () => {
     const { result } = renderHook(() => useWaveMessagesStore());
@@ -33,6 +119,72 @@ describe("useWaveMessagesStore", () => {
         expect.objectContaining({ id: "wave1" })
       )
     );
+  });
+
+  it("prunes unknown-wave deletion metadata without admitting late stale writes", () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    act(() => {
+      for (let index = 0; index < 60; index++) {
+        result.current.removeDrop(`unknown-${index}`, "d1");
+      }
+      result.current.updateData({
+        key: "unknown-0",
+        drops: [{ ...baseDrop, id: "never-deleted" }],
+      });
+      result.current.updateData({ key: "unknown-59", drops: [baseDrop] });
+    });
+    expect(result.current.getData("unknown-0")).toBeUndefined();
+    expect(result.current.getData("unknown-59")?.drops).toEqual([]);
+    act(() => {
+      result.current.updateData({ key: "unknown-0", isLoading: true });
+      result.current.updateData({
+        key: "unknown-0",
+        drops: [{ ...baseDrop, id: "fresh-feed" }],
+      });
+    });
+    expect(result.current.getData("unknown-0")?.drops[0]?.id).toBe(
+      "fresh-feed"
+    );
+  });
+
+  it("rejects a deleted drop in a late first feed after its wave's tombstones were pruned", () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const evicted = jest.fn();
+    act(() => {
+      result.current.subscribeToEvictions(evicted);
+      result.current.removeDrop("pruned-wave", baseDrop.id);
+      for (let index = 0; index < 50; index++) {
+        result.current.removeDrop(`other-${index}`, baseDrop.id);
+      }
+    });
+    expect(evicted).toHaveBeenCalledWith("pruned-wave");
+
+    // This is the first feed, after pruning; it includes the deleted id.
+    act(() => {
+      result.current.updateData({ key: "pruned-wave", drops: [baseDrop] });
+    });
+    expect(result.current.getData("pruned-wave")).toBeUndefined();
+  });
+
+  it("retains a just-touched deletion at capacity and cancels only the oldest unknown wave", () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const evicted = jest.fn();
+    act(() => {
+      result.current.subscribeToEvictions(evicted);
+      for (let index = 0; index < 50; index++)
+        result.current.removeDrop(`unknown-${index}`, "d1");
+      result.current.removeDrop("unknown-0", "d2");
+      result.current.removeDrop("unknown-50", "d1");
+      result.current.updateData({ key: "unknown-0", drops: [baseDrop] });
+      result.current.updateData({
+        key: "unknown-1",
+        drops: [{ ...baseDrop, id: "never-deleted" }],
+      });
+    });
+    expect(evicted).toHaveBeenCalledTimes(1);
+    expect(evicted).toHaveBeenCalledWith("unknown-1");
+    expect(result.current.getData("unknown-0")?.drops).toEqual([]);
+    expect(result.current.getData("unknown-1")).toBeUndefined();
   });
 
   it("clears normal updates when a profile switch precedes deferred delivery", async () => {
@@ -265,7 +417,7 @@ describe("useWaveMessagesStore", () => {
     expect(merged?.drops.map((drop) => drop.id)).toEqual(
       expect.arrayContaining(["d1", "cached-older", "server-new"])
     );
-    expect(listener).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(listener).toHaveBeenCalledTimes(1));
     expect(result.current.hasServerFeedSeed("wave1")).toBe(true);
 
     act(() => result.current.completeInitialServerFeedRegistration("wave1"));
@@ -603,5 +755,108 @@ describe("useWaveMessagesStore", () => {
     expect(result.current.getData("wave1")?.drops).toHaveLength(1);
     act(() => result.current.removeDrops("wave1", ["d1"]));
     expect(result.current.getData("wave1")?.drops).toHaveLength(0);
+  });
+});
+
+describe("useWaveMessagesStore empty batches and lookups", () => {
+  const drop = (id: string, serialNo: number) =>
+    ({
+      id,
+      serial_no: serialNo,
+      wave: { id: "wave1" },
+      author: { handle: "a" },
+      parts: [{ content: id }],
+      metadata: [],
+      created_at: serialNo * 1000,
+      title: "",
+      type: "FULL",
+    }) as any;
+
+  const populated = () => {
+    const hook = renderHook(() => useWaveMessagesStore());
+    act(() => {
+      hook.result.current.updateData({
+        key: "wave1",
+        drops: [drop("d1", 1), drop("d2", 2), drop("d3", 3)],
+      });
+    });
+    return hook;
+  };
+
+  const ids = (drops: readonly { readonly id: string }[] | undefined) =>
+    drops?.map((item) => item.id);
+
+  it("keeps a populated wave on an empty standard batch, as the old merge did", () => {
+    const { result } = populated();
+    const before = result.current.getData("wave1")!.drops;
+    act(() => result.current.updateData({ key: "wave1", drops: [] }));
+    const after = result.current.getData("wave1")!.drops;
+    expect(ids(after)).toEqual(ids(legacyMergeDrops([...before], [])));
+    expect(ids(after)).toEqual(["d3", "d2", "d1"]);
+  });
+
+  it("keeps a populated wave on an empty preserve-existing seed, as the old merge did", () => {
+    const { result } = populated();
+    const before = result.current.getData("wave1")!.drops;
+    const seed = Promise.resolve({ ok: false as const, waveId: "wave1" });
+    act(() => {
+      result.current.registerPendingServerFeedSeed("wave1", seed);
+      expect(
+        result.current.applyServerFeedSeed({
+          waveId: "wave1",
+          drops: [],
+          hasNextPage: false,
+          promise: seed,
+        })
+      ).toBe(true);
+    });
+    const after = result.current.getData("wave1")!.drops;
+    expect(ids(after)).toEqual(ids(legacyMergeDrops([], [...before])));
+    expect(ids(after)).toEqual(["d3", "d2", "d1"]);
+  });
+
+  it.each(["standard", "preserve-existing"] as const)(
+    "gives an empty wave no drops when every copy is tombstoned (%s)",
+    (policy) => {
+      const { result } = renderHook(() => useWaveMessagesStore());
+      act(() => {
+        result.current.removeDrop("wave1", "d1");
+        if (policy === "standard") {
+          result.current.updateData({ key: "wave1", drops: [drop("d1", 1)] });
+        } else {
+          const seed = Promise.resolve({ ok: false as const, waveId: "wave1" });
+          result.current.registerPendingServerFeedSeed("wave1", seed);
+          result.current.applyServerFeedSeed({
+            waveId: "wave1",
+            drops: [drop("d1", 1)] as any,
+            hasNextPage: false,
+            promise: seed,
+          });
+        }
+      });
+      expect(result.current.getData("wave1")?.drops).toEqual([]);
+    }
+  );
+
+  it("never applies an optimistic edit to a drop the wave no longer shows", () => {
+    const { result } = populated();
+    act(() => result.current.removeDrop("wave1", "d2"));
+    expect(
+      result.current.optimisticUpdateDrop({
+        waveId: "wave1",
+        dropId: "d2",
+        update: (draft) => ({ ...draft, title: "edited" }),
+      })
+    ).toBeNull();
+    act(() => {
+      expect(result.current.clearWave("wave1")).toBe(true);
+    });
+    expect(
+      result.current.optimisticUpdateDrop({
+        waveId: "wave1",
+        dropId: "d1",
+        update: (draft) => ({ ...draft, title: "edited" }),
+      })
+    ).toBeNull();
   });
 });

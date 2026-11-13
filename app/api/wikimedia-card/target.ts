@@ -75,6 +75,9 @@ export const sanitizeCacheKey = (url: URL): string => {
   return clone.toString();
 };
 
+// Bounds the language list, which also scopes the response cache.
+const MAX_ACCEPT_LANGUAGE_ENTRIES = 5;
+
 export const parseAcceptLanguage = (header: string | null): string[] => {
   if (!header) {
     return ["en"];
@@ -93,7 +96,7 @@ export const parseAcceptLanguage = (header: string | null): string[] => {
   entries.sort((a, b) => b.q - a.q);
 
   const preferred = new Set<string>();
-  for (const entry of entries) {
+  for (const entry of entries.slice(0, MAX_ACCEPT_LANGUAGE_ENTRIES)) {
     if (!entry.lang) {
       continue;
     }
@@ -109,20 +112,24 @@ export const parseAcceptLanguage = (header: string | null): string[] => {
   return Array.from(preferred);
 };
 
+/** Error answers depend on the request, so no cache keeps them. */
+export const respondWithCardError = (message: string, status: number) =>
+  NextResponse.json(
+    { error: message },
+    { status, headers: { "Cache-Control": "no-store" } }
+  );
+
 export const respondWithGuardError = (
   error: unknown,
   fallbackMessage: string,
   fallbackStatus = 400
 ) => {
   if (error instanceof UrlGuardError) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: error.statusCode }
-    );
+    return respondWithCardError(error.message, error.statusCode);
   }
 
   const message = error instanceof Error ? error.message : fallbackMessage;
-  return NextResponse.json({ error: message }, { status: fallbackStatus });
+  return respondWithCardError(message, fallbackStatus);
 };
 
 const WIKIMEDIA_ALLOWED_HOSTS = new Set([

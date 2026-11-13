@@ -1,0 +1,283 @@
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
+import type { ReactNode } from "react";
+
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t, tRich } from "@/i18n/messages";
+import "@/i18n/namespaces/validator-files";
+import type { ValidatorRelease } from "@/lib/validator-page/releaseFeed";
+import {
+  formatFileSize,
+  getReleaseDownloadPath,
+  groupReleaseFiles,
+  listReleaseFiles,
+  shortCommit,
+  type ValidatorInstallerKind,
+} from "@/lib/validator-page/releaseFiles";
+import CopyChecksumButton from "./CopyChecksumButton";
+import { BODY, CODE, LINK, SECONDARY_BUTTON } from "./validatorStyles";
+
+const CELL =
+  "tw-border-0 tw-border-solid tw-border-white/[0.06] tw-align-middle lg:tw-border-b lg:tw-px-3 lg:tw-py-3";
+const MOBILE_LABEL =
+  "tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500 lg:tw-hidden";
+// Rendered on the server, in the locale the server renders.
+const LOCALE = DEFAULT_LOCALE;
+// A file name, shown and run as it is in every language.
+const SHA256SUMS = "SHA256SUMS";
+const HEAD =
+  "tw-whitespace-nowrap tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.08] tw-px-3 tw-py-2 tw-text-left tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400";
+
+function Cell({
+  label,
+  children,
+  className = "",
+}: {
+  readonly label: string;
+  readonly children: ReactNode;
+  readonly className?: string;
+}) {
+  return (
+    <td
+      className={`${CELL} max-lg:tw-flex max-lg:tw-items-center max-lg:tw-justify-between max-lg:tw-gap-3 ${className}`}
+    >
+      {/* The header row is hidden below 1024 px, so this label names the
+          cell there; it is hidden from 1024 px, where the header does. */}
+      <span className={MOBILE_LABEL}>{label}</span>
+      {children}
+    </td>
+  );
+}
+
+/**
+ * The publisher the system should name on one line, and Apple's
+ * notarization under it.
+ */
+function Publisher({
+  publisher,
+  note,
+}: {
+  readonly publisher: string | null;
+  readonly note: string | null;
+}) {
+  if (!publisher) {
+    return <span>{t(LOCALE, "validator.files.publisher.none")}</span>;
+  }
+  return (
+    <span className="tw-flex tw-flex-col max-lg:tw-items-end">
+      <span className="tw-whitespace-nowrap">{publisher}</span>
+      {note && <span className="tw-text-xs tw-text-iron-500">{note}</span>}
+    </span>
+  );
+}
+
+function ChecksumCommands({ release }: { readonly release: ValidatorRelease }) {
+  const { installers } = groupReleaseFiles(release);
+  // The commands name this release's own files, so they work as shown.
+  const fileFor = (kind: ValidatorInstallerKind): string =>
+    installers.find((installer) => installer.kind === kind)?.file.name ??
+    "<file>";
+  const rows = [
+    {
+      system: t(LOCALE, "validator.files.check.system.mac"),
+      command: `shasum -a 256 ${fileFor("macos")}`,
+    },
+    {
+      system: t(LOCALE, "validator.files.check.system.windows"),
+      command: `Get-FileHash .\\${fileFor("windows")}`,
+    },
+    {
+      system: t(LOCALE, "validator.files.check.system.linux"),
+      command: `sha256sum ${fileFor("deb-x64")}`,
+    },
+  ];
+  return (
+    <ul className="tw-m-0 tw-list-none tw-divide-y tw-divide-white/[0.06] tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-p-0">
+      {rows.map((row) => (
+        <li
+          key={row.system}
+          className="tw-flex tw-flex-col tw-gap-1 tw-px-4 tw-py-3 sm:tw-flex-row sm:tw-items-baseline sm:tw-gap-4"
+        >
+          <span className="tw-text-sm tw-font-medium tw-text-iron-200 sm:tw-w-44 sm:tw-flex-none">
+            {row.system}
+          </span>
+          <code className="tw-min-w-0 tw-break-all tw-font-mono tw-text-[13px] tw-leading-6 tw-text-iron-100">
+            {row.command}
+          </code>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/**
+ * Every file of the release in one table, the SHA-256 commands, and
+ * SHA256SUMS last. Below 1024 px each row is a card.
+ */
+export default function ValidatorAllFiles({
+  release,
+}: {
+  readonly release: ValidatorRelease;
+}) {
+  const files = listReleaseFiles(release);
+  const { checksums } = groupReleaseFiles(release);
+  const commit = shortCommit(release.commit);
+  const publisherLabel = t(LOCALE, "validator.files.publisher.label");
+  const sizeLabel = t(LOCALE, "validator.files.column.size");
+  const sha256Label = t(LOCALE, "validator.files.column.sha256");
+  const buildParams = {
+    version: (
+      <span key="version" className="tw-font-mono">
+        {release.version}
+      </span>
+    ),
+    date: release.publishedAt.slice(0, 10),
+    commit: (
+      <span key="commit" className="tw-font-mono">
+        {commit}
+      </span>
+    ),
+    releases: (
+      <Link key="releases" href="/validator/releases" className={LINK}>
+        {t(LOCALE, "validator.files.build.releasesLink")}
+      </Link>
+    ),
+  };
+  return (
+    <div className="tw-flex tw-flex-col tw-gap-6">
+      <p className={`tw-m-0 ${BODY}`}>
+        {tRich(
+          LOCALE,
+          commit
+            ? "validator.files.build.withCommit"
+            : "validator.files.build.withoutCommit",
+          buildParams
+        )}
+      </p>
+      <table className="tw-w-full tw-border-collapse tw-text-sm max-lg:tw-block">
+        <thead className="max-lg:tw-hidden">
+          <tr>
+            <th scope="col" className={HEAD}>
+              {t(LOCALE, "validator.files.column.file")}
+            </th>
+            <th scope="col" className={HEAD}>
+              {sizeLabel}
+            </th>
+            <th scope="col" className={HEAD}>
+              {sha256Label}
+            </th>
+            <th scope="col" className={HEAD}>
+              {publisherLabel}
+            </th>
+            <th scope="col" className={HEAD}>
+              <span className="tw-sr-only">
+                {t(LOCALE, "validator.files.column.download")}
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody className="max-lg:tw-grid max-lg:tw-gap-3">
+          {files.map((entry) => {
+            const label = [entry.system, entry.cpu].filter(Boolean).join(", ");
+            return (
+              <tr
+                key={entry.file.name}
+                className="max-lg:tw-flex max-lg:tw-flex-col max-lg:tw-gap-3 max-lg:tw-rounded-xl max-lg:tw-border max-lg:tw-border-solid max-lg:tw-border-white/[0.08] max-lg:tw-bg-iron-950/60 max-lg:tw-p-4"
+              >
+                <td className={`${CELL} max-lg:tw-block`}>
+                  <span className="tw-block tw-font-semibold tw-text-iron-50">
+                    {label}
+                  </span>
+                  <span className="tw-block tw-text-iron-400">
+                    {entry.what}
+                  </span>
+                  <span className="tw-block tw-break-all tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-300">
+                    {entry.file.name}
+                  </span>
+                </td>
+                <Cell
+                  label={sizeLabel}
+                  className="tw-whitespace-nowrap tw-text-iron-300"
+                >
+                  {formatFileSize(entry.file.size) ?? "–"}
+                </Cell>
+                <Cell label={sha256Label}>
+                  <span className="tw-inline-flex tw-items-center tw-gap-2">
+                    <code
+                      title={entry.file.sha256}
+                      className="tw-font-mono tw-text-xs tw-text-iron-200"
+                    >
+                      {entry.file.sha256.slice(0, 12)}…
+                    </code>
+                    <CopyChecksumButton
+                      value={entry.file.sha256}
+                      label={t(LOCALE, "validator.files.sha256.copyLabel", {
+                        file: entry.file.name,
+                      })}
+                    />
+                  </span>
+                </Cell>
+                <Cell label={publisherLabel} className="tw-text-iron-300">
+                  <Publisher
+                    publisher={entry.publisher}
+                    note={entry.publisherNote}
+                  />
+                </Cell>
+                <td className={`${CELL} lg:tw-text-right`}>
+                  <a
+                    href={getReleaseDownloadPath(release, entry.file)}
+                    className={`${SECONDARY_BUTTON} max-lg:tw-w-full`}
+                    aria-label={t(LOCALE, "validator.files.download.label", {
+                      file: entry.file.name,
+                    })}
+                  >
+                    <ArrowDownTrayIcon
+                      aria-hidden="true"
+                      className="tw-size-4"
+                    />
+                    {t(LOCALE, "validator.files.download.text")}
+                  </a>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <p className={`tw-m-0 ${BODY}`}>
+        {t(LOCALE, "validator.files.checksumSource")}
+      </p>
+      <div>
+        <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+          {t(LOCALE, "validator.files.check.heading")}
+        </h3>
+        <p className={`tw-mb-3 tw-mt-2 ${BODY}`}>
+          {t(LOCALE, "validator.files.check.body")}
+        </p>
+        <ChecksumCommands release={release} />
+      </div>
+      {checksums && (
+        <div className="tw-flex tw-flex-col tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-5 sm:tw-flex-row sm:tw-items-start sm:tw-gap-5">
+          <a
+            href={getReleaseDownloadPath(release, checksums)}
+            className={SECONDARY_BUTTON}
+            aria-label={t(LOCALE, "validator.files.download.label", {
+              file: SHA256SUMS,
+            })}
+          >
+            <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
+            {SHA256SUMS}
+          </a>
+          <p className={`tw-m-0 ${BODY}`}>
+            {tRich(LOCALE, "validator.files.checksums.body", {
+              command: (
+                <code key="command" className={CODE}>
+                  {`sha256sum --check --ignore-missing ${SHA256SUMS}`}
+                </code>
+              ),
+            })}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

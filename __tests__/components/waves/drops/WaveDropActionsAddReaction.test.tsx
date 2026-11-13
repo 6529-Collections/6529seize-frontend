@@ -7,6 +7,9 @@ import { DropSize } from "@/helpers/waves/drop.helpers";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ChatRestriction } from "@/hooks/useDropPriviledges";
 import * as commonApi from "@/services/api/common-api";
+jest.mock("@/components/waves/prepareEmojiMartData", () => ({
+  prepareEmojiMartData: jest.fn(),
+}));
 
 const applyOptimisticDropUpdateMock = jest.fn(() => ({ rollback: jest.fn() }));
 const setToastMock = jest.fn();
@@ -27,7 +30,7 @@ const mockGetEligibility = jest.fn();
 const mockUpdateEligibility = jest.fn();
 
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: jest.fn(() => ({
+  useMyStreamActions: jest.fn(() => ({
     applyOptimisticDropUpdate: applyOptimisticDropUpdateMock,
   })),
 }));

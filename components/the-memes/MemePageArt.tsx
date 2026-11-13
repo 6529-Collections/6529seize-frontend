@@ -4,10 +4,10 @@ import {
   AdditionalDetailsSection,
   ArweaveLinkRow,
   EmptyDetailsState,
-  MetadataCard,
   MetricBlock,
   type AdditionalDetailsMediaRow,
 } from "@/components/the-memes/MemePageAdditionalDetails";
+import MemePropertiesGrid from "@/components/the-memes/MemePropertiesGrid";
 import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-source";
 import type { IAttribute, NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
@@ -237,34 +237,37 @@ export function MemePageArt(props: {
   ];
 
   return (
-    <div className="tw-space-y-14 tw-pb-8 tw-pt-8">
+    <div className="tw-space-y-8 tw-pb-8 tw-pt-6 sm:tw-space-y-14 sm:tw-pt-8 md:tw-space-y-8">
       {mediaRows.length > 0 && (
         <AdditionalDetailsSection
+          compactMobile
           title={t(locale, "theMemes.detail.art.sections.arweaveLinks")}
           icon={LinkIcon}
         >
           <div>
             {mediaRows.map((row) => (
-              <ArweaveLinkRow row={row} key={`${row.label}-${row.url}`} />
+              <ArweaveLinkRow
+                compactMobile
+                row={row}
+                key={`${row.label}-${row.url}`}
+              />
             ))}
           </div>
         </AdditionalDetailsSection>
       )}
 
       <AdditionalDetailsSection
+        compactMobile
         title={t(locale, "theMemes.detail.art.sections.properties")}
         icon={SwatchIcon}
       >
         {propertyAttributes.length > 0 ? (
-          <div className="tw-grid tw-grid-cols-2 tw-gap-3 sm:tw-grid-cols-3 lg:tw-grid-cols-4">
-            {propertyAttributes.map((attribute) => (
-              <MetadataCard
-                key={attribute.trait_type}
-                label={attribute.trait_type}
-                value={attribute.value}
-              />
-            ))}
-          </div>
+          <MemePropertiesGrid
+            attributes={propertyAttributes}
+            locale={locale}
+            compactMobile
+            collapseOnMobile
+          />
         ) : (
           <EmptyDetailsState>
             {t(locale, "theMemes.detail.art.empty.noProperties")}
@@ -273,6 +276,7 @@ export function MemePageArt(props: {
       </AdditionalDetailsSection>
 
       <AdditionalDetailsSection
+        compactMobile
         title={t(locale, "theMemes.detail.art.sections.tdhBreakdown")}
         icon={ChartBarSquareIcon}
       >
@@ -288,8 +292,9 @@ export function MemePageArt(props: {
         </div>
       </AdditionalDetailsSection>
 
-      <div className="tw-grid tw-grid-cols-1 tw-gap-x-16 tw-gap-y-14 lg:tw-grid-cols-2">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-x-16 tw-gap-y-8 sm:tw-gap-y-14 md:tw-border-x-0 md:tw-border-b-0 md:tw-border-t md:tw-border-solid md:tw-border-iron-800 md:tw-pt-8 lg:tw-grid-cols-2">
         <AdditionalDetailsSection
+          compactMobile
           title={t(locale, "theMemes.detail.art.sections.stats")}
           icon={ChartBarIcon}
         >
@@ -301,6 +306,7 @@ export function MemePageArt(props: {
         </AdditionalDetailsSection>
 
         <AdditionalDetailsSection
+          compactMobile
           title={t(locale, "theMemes.detail.art.sections.boosts")}
           icon={BoltIcon}
         >

@@ -8,10 +8,10 @@ import {
 } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Image from "next/image";
-import Link from "next/link";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { CompactMenu } from "@/components/compact-menu";
+import DeviceSecurityStatus from "@/components/device-signing/DeviceSecurityStatus";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useNavigationHistoryContext } from "@/contexts/NavigationHistoryContext";
@@ -29,6 +29,10 @@ import { useAuth } from "../auth/Auth";
 import { getConnectionProfileIndicator } from "../auth/connection-state-indicator";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import BackButton from "../navigation/BackButton";
+import {
+  DEFAULT_BACK_HREF,
+  sanitizeReturnTo,
+} from "@/components/waves/discovery/wave-score-transparency/scoreUtils";
 import Spinner from "../utils/Spinner";
 import AppSidebar from "./AppSidebar";
 import HeaderSearchButton from "./header-search/HeaderSearchButton";
@@ -41,16 +45,19 @@ import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 import { useWaveInformation } from "@/contexts/WaveInformationContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import WavePicture from "@/components/waves/WavePicture";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
 import {
+  getProfileCollectedReturnContext,
   getProfileCollectedTokenReturnContext,
   PROFILE_COLLECTED_RETURN_PARAM,
 } from "@/helpers/profile-collected-navigation";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  isMessageComposePathname,
+} from "@/helpers/navigation.helpers";
 import {
   isProfilePreferencesEntry,
   PREFERENCES_ENTRY_SOURCE_PARAM,
@@ -59,12 +66,12 @@ import {
   getAppHeaderMoreMenuItems,
   type HeaderMoreMenuItem,
 } from "./app-header-more-menu-items";
-import {
-  type HeaderWavePreview,
-  useHeaderActiveWave,
-} from "./app-header-wave-preview";
-import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
-import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
+import { useHeaderActiveWave } from "./app-header-wave-preview";
+import HeaderTitleContent from "./AppHeaderTitleContent";
+import WaveHeaderRestrictionButton, {
+  WAVE_HEADER_RESTRICTION_SURFACE_CLASS,
+} from "@/components/waves/header/WaveHeaderRestrictionButton";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import WaveJoinCta from "@/components/waves/header/WaveJoinCta";
 import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 import { useProfileDoubleActivate } from "./useProfileDoubleActivate";
@@ -75,8 +82,7 @@ const COLLECTION_TITLES: Record<string, string> = {
   "meme-lab": "Meme Lab",
   nextgen: "NextGen",
 };
-const HEADER_RESTRICTION_BUTTON_CLASS =
-  "tw-size-9 tw-min-w-9 tw-rounded-lg tw-border-0 tw-bg-black tw-p-0 tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50";
+const HEADER_RESTRICTION_BUTTON_CLASS = `${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${WAVE_HEADER_RESTRICTION_SURFACE_CLASS} tw-size-9 tw-min-w-9`;
 
 interface HeaderConnectedAccount {
   readonly address: string;
@@ -215,91 +221,7 @@ const getHasUnreadOnOtherConnectedProfiles = ({
         0) > 0
   );
 
-const HeaderTitleContent = ({
-  displayWave,
-  activeWave,
-  isDm,
-  directMessageProfileHref,
-  previewText,
-  finalTitle,
-}: {
-  readonly displayWave: HeaderWavePreview | null;
-  readonly activeWave: ApiWave | null;
-  readonly isDm: boolean;
-  readonly directMessageProfileHref: string | null;
-  readonly previewText: string | null;
-  readonly finalTitle: ReactNode;
-}) => {
-  const information = useWaveInformation();
-  const locale = useBrowserLocale();
-  if (displayWave === null) {
-    return <span className="tw-text-sm tw-font-semibold">{finalTitle}</span>;
-  }
-
-  const wavePicture = (
-    <div className="tw-size-9 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-ring-1 tw-ring-white/30">
-      <WavePicture
-        name={displayWave.name}
-        picture={displayWave.picture}
-        contributors={displayWave.contributors}
-      />
-    </div>
-  );
-  const directMessageProfileLink =
-    activeWave !== null && isDm ? directMessageProfileHref : null;
-
-  return (
-    <div className="tw-flex tw-min-w-0 tw-max-w-[min(62vw,28rem)] tw-items-center tw-gap-2">
-      {directMessageProfileLink !== null ? (
-        <Link
-          href={directMessageProfileLink}
-          aria-label={`View ${displayWave.name}'s profile`}
-          className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-iron-50 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-white"
-        >
-          {wavePicture}
-          <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
-            {displayWave.name}
-          </span>
-        </Link>
-      ) : (
-        <>
-          {wavePicture}
-          <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-items-start">
-            <WaveParentNavigation
-              parentWave={activeWave?.parent_wave}
-              variant="compact-header"
-            />
-            {activeWave !== null && !isDm ? (
-              <button
-                type="button"
-                onClick={() => information?.open(activeWave.id)}
-                aria-haspopup="dialog"
-                aria-label={t(locale, "waves.information.open", {
-                  name: displayWave.name,
-                })}
-                className="tw-flex tw-min-h-6 tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              >
-                <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
-                  {displayWave.name}
-                </span>
-                {previewText && (
-                  <span className="tw-hidden tw-w-full tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 sm:tw-block">
-                    {previewText}
-                  </span>
-                )}
-              </button>
-            ) : (
-              <span className="tw-w-full tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold">
-                {displayWave.name}
-              </span>
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  );
-};
-
+/** Keep an unavailable drop action interactive so its restriction is readable. */
 const HeaderDropActionButton = ({
   action,
 }: {
@@ -321,10 +243,10 @@ const HeaderDropActionButton = ({
             aria-haspopup="dialog"
             className={clsx(
               "tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
-              HEADER_RESTRICTION_BUTTON_CLASS
+              `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-size-9 tw-min-w-9 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 desktop-hover:hover:tw-text-white`
             )}
           >
-            <LockClosedIcon className="tw-size-5 tw-flex-shrink-0" />
+            <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
             <span className="tw-sr-only">{action.compactLabel}</span>
           </button>
         </MainStageNominationPopover>
@@ -335,9 +257,11 @@ const HeaderDropActionButton = ({
       <WaveHeaderRestrictionButton
         label={action.label}
         reason={title}
+        accessWave={action.accessWave}
+        onViewRules={action.onViewRules}
         className={HEADER_RESTRICTION_BUTTON_CLASS}
       >
-        <LockClosedIcon className="tw-size-5 tw-flex-shrink-0" />
+        <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
         <span className="tw-sr-only">{action.compactLabel}</span>
       </WaveHeaderRestrictionButton>
     );
@@ -557,8 +481,8 @@ export default function AppHeader() {
     pathname === "/messages" || pathname.startsWith("/messages/");
   const isHomeRoute = pathname === "/";
 
-  const isCreateRoute =
-    pathname === "/waves/create" || pathname === "/messages/create";
+  const isMessageCompose = isMessageComposePathname(pathname);
+  const isCreateRoute = pathname === "/waves/create" || isMessageCompose;
   const isInsideWave = !!waveId;
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
@@ -585,20 +509,36 @@ export default function AppHeader() {
     connectedProfile?.handle
       ? `/${encodeURIComponent(connectedProfile.handle)}`
       : null;
+  const isNativeCollectRoute =
+    isCapacitor && (pathname === "/collect" || pathname === "/collect/orders");
   const profileCollectedReturnContext = isCapacitor
     ? getProfileCollectedTokenReturnContext({
         pathname,
         returnTo: searchParams.get(PROFILE_COLLECTED_RETURN_PARAM),
       })
     : null;
+  const collectProfileReturnContext = isNativeCollectRoute
+    ? getProfileCollectedReturnContext(
+        searchParams.get(PROFILE_COLLECTED_RETURN_PARAM)
+      )
+    : null;
+
+  const isWaveScorePage = isCapacitor && pathname === "/network/wave-score";
+  const waveScoreFallbackHref = canGoBack ? undefined : DEFAULT_BACK_HREF;
+  const waveScoreReturnTo = isWaveScorePage
+    ? (sanitizeReturnTo(searchParams.get("returnTo")) ?? waveScoreFallbackHref)
+    : undefined;
 
   const showBackButton =
     Boolean(information?.returnFromNavigation) ||
     isInsideWave ||
     isCreateRoute ||
     isProfileWavesFeedView ||
+    isWaveScorePage ||
     preferencesProfileReturnTo !== null ||
     profileCollectedReturnContext !== null ||
+    collectProfileReturnContext !== null ||
+    (isNativeCollectRoute && canGoBack) ||
     (isProfilePage && canGoBack);
   const pfpImage = (
     <div className="tw-relative tw-h-10 tw-w-10 tw-flex-shrink-0">
@@ -621,6 +561,9 @@ export default function AppHeader() {
           />
         )}
       </div>
+      {!menuOpen && hasValidWalletAuth && !activeProfileProxy && (
+        <DeviceSecurityStatus presentation="mobile-badge" />
+      )}
       {hasUnreadOnOtherConnectedProfiles && (
         <div
           className="tw-absolute tw-right-[-3px] tw-top-[-3px] tw-size-3 tw-rounded-full tw-bg-indigo-500 tw-shadow-sm"
@@ -686,6 +629,8 @@ export default function AppHeader() {
               returnTo={
                 preferencesProfileReturnTo ??
                 profileCollectedReturnContext?.href ??
+                collectProfileReturnContext?.href ??
+                waveScoreReturnTo ??
                 (isProfileWavesFeedView ? "/waves" : undefined)
               }
             />
@@ -711,7 +656,7 @@ export default function AppHeader() {
             isInsideWave ? "tw-justify-start" : "tw-justify-center"
           )}
         >
-          {pathname === "/messages/create" ? (
+          {isMessageCompose ? (
             <h1 className="tw-m-0 tw-text-base tw-font-semibold tw-tracking-tight">
               {t(locale, "quickDm.createModalTitle")}
             </h1>
@@ -726,21 +671,20 @@ export default function AppHeader() {
             />
           )}
         </div>
-        {pathname === "/messages/create" ? (
+        {isMessageCompose ? (
           <span aria-hidden="true" className="tw-w-10 tw-flex-shrink-0" />
         ) : (
           <div
             className={clsx(
               "tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end",
-              isMessagesRoute && !isInsideWave ? "tw-gap-x-2" : "tw-gap-x-0.5"
+              (isInsideWave && isWavesRoute) ||
+                (isMessagesRoute && !isInsideWave)
+                ? "tw-gap-x-2"
+                : "tw-gap-x-0.5"
             )}
           >
             {activeWave && isInsideWave && (
-              <WaveJoinCta
-                wave={activeWave}
-                variant="app-header"
-                className="tw-mr-1"
-              />
+              <WaveJoinCta wave={activeWave} variant="app-header" />
             )}
             <HeaderDropActionButton action={headerDropAction} />
             {isHomeRoute && (
@@ -748,7 +692,12 @@ export default function AppHeader() {
                 className={isCapacitor ? undefined : "md:tw-hidden"}
               />
             )}
-            <div className="tw-flex-shrink-0">
+            <div
+              className={clsx(
+                "tw-flex-shrink-0",
+                isInsideWave && isWavesRoute && "empty:tw-hidden"
+              )}
+            >
               <HeaderActionButtons />
             </div>
             {showPageShareAction && (

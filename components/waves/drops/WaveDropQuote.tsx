@@ -15,6 +15,7 @@ import Link from "next/link";
 import React, { useMemo } from "react";
 import DropNotFound from "./DropNotFound";
 import WaveDropTime from "./time/WaveDropTime";
+import { WithDropAuthorSignedMarker } from "./signature/DropAuthorSignedMarker";
 import {
   useWaveDropQuoteDisplay,
   WaveDropQuoteDisplayProvider,
@@ -23,6 +24,8 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import ProposalCardContent from "./proposal/ProposalCardContent";
 import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+import WaveDropLongContent from "./WaveDropLongContent";
+import { AnonymousAuthorName } from "./AnonymousDropAuthor";
 
 interface WaveDropQuoteProps {
   readonly drop: ApiDrop | null;
@@ -87,6 +90,7 @@ function handleQuoteKeyDown(
   event: React.KeyboardEvent<HTMLDivElement>,
   goToQuoteDrop: () => void
 ) {
+  if (event.target !== event.currentTarget) return;
   if (event.key !== "Enter" && event.key !== " ") return;
   event.preventDefault();
   event.stopPropagation();
@@ -120,9 +124,10 @@ const WaveDropQuoteProfilePicture: React.FC<
     );
   }
 
-  const resolvedPfp = drop.author.pfp
-    ? getScaledImageUri(drop.author.pfp, ImageScale.W_200_H_200)
-    : null;
+  const resolvedPfp =
+    drop.author.pfp && !drop.author.is_anonymous
+      ? getScaledImageUri(drop.author.pfp, ImageScale.W_200_H_200)
+      : null;
 
   if (resolvedPfp) {
     return (
@@ -167,16 +172,20 @@ function WaveDropQuoteBody({
             <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
               {quoteAuthorLabel && (
                 <p className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-md tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]">
-                  <Link
-                    href={`/${quoteAuthorLabel}`}
-                    className="tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-                  >
-                    {quoteAuthorLabel}
-                  </Link>
+                  {drop?.author.is_anonymous ? (
+                    <AnonymousAuthorName />
+                  ) : (
+                    <Link
+                      href={`/${quoteAuthorLabel}`}
+                      className="tw-rounded-sm tw-text-iron-200 tw-no-underline tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-500 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                    >
+                      {quoteAuthorLabel}
+                    </Link>
+                  )}
                 </p>
               )}
 
-              {!!drop && (
+              {!!drop && !drop.author.is_anonymous && (
                 <UserCICAndLevel
                   level={drop.author.level}
                   size={UserCICAndLevelSize.SMALL}
@@ -187,7 +196,9 @@ function WaveDropQuoteBody({
             {!!drop && (
               <div className="tw-flex tw-items-center tw-gap-x-2">
                 <div className="tw-size-[3px] tw-flex-shrink-0 tw-rounded-full tw-bg-iron-700"></div>
-                <WaveDropTime timestamp={drop.created_at} />
+                <WithDropAuthorSignedMarker drop={drop}>
+                  <WaveDropTime timestamp={drop.created_at} />
+                </WithDropAuthorSignedMarker>
               </div>
             )}
           </div>
@@ -293,31 +304,45 @@ const WaveDropQuoteContent: React.FC<WaveDropQuoteProps> = ({
     );
   }
 
+  const quotedPartContent = quotedPart?.content ?? "";
+  // Parent and quoted Markdown share one expansion provider. Keep their key
+  // namespaces separate even when a drop quotes one of its own parts.
+  const quoteExpansionKey = `quote:${drop?.id ?? "pending"}:${partId}`;
   const quoteContent =
     drop !== null &&
     drop.drop_type !== ApiDropType.Chat &&
     proposalCardPresentation === "proposalCard" ? (
       <ProposalCardContent drop={drop} density="compact" />
     ) : (
-      <WaveDropQuoteDisplayProvider flattenWhenAuthorSameAs={null}>
-        <DropPartMarkdownWithPropLogger
-          partContent={quotedPart?.content ?? ""}
-          mentionedUsers={drop?.mentioned_users ?? []}
-          mentionedGroups={drop?.mentioned_groups ?? []}
-          mentionedWaves={drop?.mentioned_waves ?? []}
-          referencedNfts={drop?.referenced_nfts ?? []}
-          nftLinks={drop?.nft_links}
-          textSize="sm"
-          onQuoteClick={onQuoteClick}
-          currentDropId={drop?.id}
-          embedPath={embedPath}
-          quotePath={effectiveQuotePath}
-          embedDepth={embedDepth}
-          maxEmbedDepth={maxEmbedDepth}
-          hideLinkPreviews={hideLinkPreviews}
-          onLinkCardActionsActiveChange={resolvedOnLinkCardActionsActiveChange}
-        />
-      </WaveDropQuoteDisplayProvider>
+      <WaveDropLongContent
+        content={quotedPartContent}
+        expansionKey={quoteExpansionKey}
+      >
+        {(collapsed) => (
+          <WaveDropQuoteDisplayProvider flattenWhenAuthorSameAs={null}>
+            <DropPartMarkdownWithPropLogger
+              collapsedPreview={collapsed}
+              partContent={quotedPartContent}
+              mentionedUsers={drop?.mentioned_users ?? []}
+              mentionedGroups={drop?.mentioned_groups ?? []}
+              mentionedWaves={drop?.mentioned_waves ?? []}
+              referencedNfts={drop?.referenced_nfts ?? []}
+              nftLinks={drop?.nft_links}
+              textSize="sm"
+              onQuoteClick={onQuoteClick}
+              currentDropId={drop?.id}
+              embedPath={embedPath}
+              quotePath={effectiveQuotePath}
+              embedDepth={embedDepth}
+              maxEmbedDepth={maxEmbedDepth}
+              hideLinkPreviews={hideLinkPreviews}
+              onLinkCardActionsActiveChange={
+                resolvedOnLinkCardActionsActiveChange
+              }
+            />
+          </WaveDropQuoteDisplayProvider>
+        )}
+      </WaveDropLongContent>
     );
 
   if (shouldFlattenQuote) {

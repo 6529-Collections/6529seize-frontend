@@ -15,18 +15,19 @@ Use this area for wave and direct-message tasks:
 - Discovery route: `/discover`
 - Waves list: `/waves`
 - Wave thread: `/waves/{waveId}`
-- Competitions: `/waves/{waveId}/competitions`
+- Decisions: `/waves/{waveId}/decisions`
 - Messages list: `/messages`
 - Direct-message thread: `/messages/{waveId}`
-- App create routes: `/waves/create` and `/messages/create`
+- Create routes: `/waves/create` in the app and `/messages/new` for the unified
+  composer.
 
 ## Query Coverage
 
 - Web wave-create mode (`create=wave`) uses the current stream route
   (for example `/waves`, `/waves/{waveId}`, `/messages`, or
   `/messages/{waveId}`).
-- Web direct-message mode (`create=dm`) is supported on `/messages` and
-  `/messages/{waveId}`.
+- Builds without encrypted chats support web direct-message mode (`create=dm`)
+  on `/messages` and `/messages/{waveId}`.
 - `drop={dropId}` opens a single-drop overlay in the current thread context.
 - If a URL contains both `drop` and `serialNo`, drop-open behavior is handled
   first.
@@ -74,13 +75,13 @@ Use this area for wave and direct-message tasks:
 - Legacy wave links: `/waves?wave={waveId}` redirect to `/waves/{waveId}` and
   keep other query values.
 - Legacy profile alias: `/{user}/waves` redirects to `/{user}`.
-- Route-shell behavior (header/back) for `/waves/create` and `/messages/create`
+- Route-shell behavior (header/back) for `/waves/create` and `/messages/new`
   is owned by Navigation docs.
 - Wave and direct-message creation form behavior is owned by Waves Create docs.
 
 ## Features
 
-- [Competitions](competitions/README.md): parallel Rank/Approve competitions,
+- [Decisions](competitions/README.md): parallel Rank/Approve decisions,
   independent votes and credits, administration and shared chat.
 
 - [Discovery](discovery/README.md): dedicated `/discover` route, card behavior,
@@ -107,7 +108,7 @@ Use this area for wave and direct-message tasks:
   top-voter views, and curation `Drop Art` / price-filter controls.
 - [Memes](memes/README.md): memes quick vote, submission flow,
   preview/submit states, and single-drop additional-info rendering.
-- [Outcome Lists](feature-outcome-lists.md): `Outcome` tab cards plus ranked-drop
+- [Outcome Lists](feature-outcome-lists.md): the Settings Outcomes block plus ranked-drop
   reward summaries in leaderboard and winners surfaces.
 
 ## Flows
@@ -132,3 +133,5 @@ Use this area for wave and direct-message tasks:
 - [Profiles Index](../profiles/README.md)
 - [Media Index](../media/README.md)
 - [Shared Index](../shared/README.md)
+
+- [Private Bookmarks](chat/feature-private-bookmarks.md): privately save messages and return to their conversations.

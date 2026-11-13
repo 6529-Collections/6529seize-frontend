@@ -21,6 +21,7 @@ import {
   preparePushInstallationRegistration,
 } from "@/services/notifications/push-installation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getPushPreparationFailureReason } from "@/services/notifications/push-installation-errors";
 import { extractErrorStatusCode as extractSharedErrorStatusCode } from "@/utils/errorStatus";
 import type { DevicePushData, PushRedirect } from "./device-push.types";
 
@@ -38,7 +39,8 @@ function parseDevicePushData(raw: unknown): DevicePushData | null {
     typeof target_profile_handle !== "string"
   )
     return null;
-  if (redirect !== "profile" && redirect !== "waves") return null;
+  if (redirect !== "profile" && redirect !== "waves" && redirect !== "e2ee")
+    return null;
   const data: DevicePushData = {
     notification_id,
     redirect: redirect as PushRedirect,
@@ -62,6 +64,9 @@ function parseDevicePushData(raw: unknown): DevicePushData | null {
   const competition_entry_id = o["competition_entry_id"];
   if (typeof competition_entry_id === "string")
     data.competition_entry_id = competition_entry_id;
+  const competition_drop_id = o["competition_drop_id"];
+  if (typeof competition_drop_id === "string")
+    data.competition_drop_id = competition_drop_id;
   const drop_id = o["drop_id"];
   if (typeof drop_id === "string") data.drop_id = drop_id;
   return data;
@@ -588,13 +593,14 @@ export const registerPushNotificationWithRetry = async (
       registrationJwt,
       connectedJwt ? profileId : undefined
     );
-  } catch {
+  } catch (error) {
     // Storage/proof failures must settle the shared registration promise without
     // logging potentially sensitive storage contents.
     Sentry.captureException(new Error("Push installation preparation failed"), {
       tags: {
         component: "NotificationsProvider",
         operation: "preparePushInstallationRegistration",
+        push_failure_reason: getPushPreparationFailureReason(error),
       },
       extra: { profile_id: profileId, platform: deviceInfo.platform },
     });

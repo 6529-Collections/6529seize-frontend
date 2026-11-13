@@ -1,11 +1,19 @@
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import { isDevAuthEnabled } from "@/config/devAuth";
 import { publicEnv } from "@/config/env";
 import { API_AUTH_COOKIE, MAX_CONNECTED_PROFILES } from "@/constants/constants";
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
+import { getDevAuthTestOverride } from "./devAuthTestOverride";
 import { removeNativeRefreshToken } from "./native-refresh-token-storage";
+import {
+  getWalletAuthCookieFor,
+  readWalletAuthCookie,
+  WALLET_AUTH_COOKIE,
+  writeWalletAuthCookie,
+} from "./wallet-auth-cookie";
 
-export const WALLET_AUTH_COOKIE = "wallet-auth";
+export { WALLET_AUTH_COOKIE };
 export const WALLET_ACCOUNTS_UPDATED_EVENT = "6529-wallet-accounts-updated";
 export const PROFILE_SWITCHED_EVENT = "6529-profile-switched";
 export const AUTH_TOKEN_CHANGED_EVENT = "6529-auth-token-changed";
@@ -37,11 +45,6 @@ export interface ConnectedWalletAccount {
   readonly profileHandle: string | null;
   readonly authSessionVersion?: AuthSessionVersion | null;
 }
-
-const COOKIE_OPTIONS = {
-  secure: true,
-  sameSite: "strict" as const,
-};
 
 const getJwtExpiration = (jwt: string): number => {
   const decodedJwt = jwtDecode<{
@@ -109,7 +112,7 @@ export const isAuthAddressAuthorized = ({
     return true;
   }
 
-  if (publicEnv.USE_DEV_AUTH !== "true") {
+  if (!isDevAuthEnabled()) {
     return false;
   }
 
@@ -153,34 +156,8 @@ const emitAuthTokenChangedIfChanged = (
 };
 
 const setWalletAuthCookie = (jwt: string | null): void => {
-  const previousJwt = Cookies.get(WALLET_AUTH_COOKIE) ?? null;
-
-  if (!jwt) {
-    Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
-    emitAuthTokenChangedIfChanged(previousJwt, null);
-    return;
-  }
-
-  try {
-    const jwtExpiration = getJwtExpiration(jwt);
-    const now = Math.floor(Date.now() / 1000);
-    const expiresInSeconds = jwtExpiration - now;
-    if (expiresInSeconds <= 0) {
-      Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
-      emitAuthTokenChangedIfChanged(previousJwt, null);
-      return;
-    }
-    const expiresInDays = expiresInSeconds / 86400;
-
-    Cookies.set(WALLET_AUTH_COOKIE, jwt, {
-      ...COOKIE_OPTIONS,
-      expires: expiresInDays,
-    });
-    emitAuthTokenChangedIfChanged(previousJwt, jwt);
-  } catch {
-    Cookies.remove(WALLET_AUTH_COOKIE, COOKIE_OPTIONS);
-    emitAuthTokenChangedIfChanged(previousJwt, null);
-  }
+  const previousJwt = readWalletAuthCookie();
+  emitAuthTokenChangedIfChanged(previousJwt, writeWalletAuthCookie(jwt));
 };
 
 const parseAccountsJson = (raw: string): unknown[] | null => {
@@ -343,13 +320,12 @@ const migrateLegacyStorageIfNeeded = (): void => {
   if (!legacyAddress || !legacyRefreshToken) return;
 
   const legacyRole = safeLocalStorage.getItem(WALLET_ROLE_STORAGE_KEY);
-  const legacyJwt = Cookies.get(WALLET_AUTH_COOKIE) ?? null;
 
   const legacyAccount: ConnectedWalletAccount = {
     address: legacyAddress,
     refreshToken: legacyRefreshToken,
     role: legacyRole,
-    jwt: legacyJwt,
+    jwt: getWalletAuthCookieFor(legacyAddress),
     profileId: null,
     profileHandle: null,
     authSessionVersion: null,
@@ -499,19 +475,37 @@ export const setAuthJwt = (
   return true;
 };
 
+// Browser staging access comes only from the visitor's access cookie.
+// Server-side requests get their fallback from lib/fetch/ssrFetch.
 export const getStagingAuth = (): string | null => {
-  return Cookies.get(API_AUTH_COOKIE) ?? publicEnv.STAGING_API_KEY ?? null;
+  return Cookies.get(API_AUTH_COOKIE) ?? null;
 };
 
 export const getAuthJwt = () => {
-  if (publicEnv.USE_DEV_AUTH === "true") {
-    return publicEnv.DEV_MODE_AUTH_JWT ?? null;
+  if (isDevAuthEnabled()) {
+    return getDevAuthTestOverride()?.jwt ?? publicEnv.DEV_MODE_AUTH_JWT ?? null;
   }
-  return (
-    Cookies.get(WALLET_AUTH_COOKIE) ??
-    getActiveAccountFromAccounts(getStoredAccounts())?.jwt ??
-    null
-  );
+  // The cookie is only trusted for the account this browser has signed in as.
+  const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
+  if (!activeAccount) {
+    return null;
+  }
+  return getWalletAuthCookieFor(activeAccount.address) ?? activeAccount.jwt;
+};
+
+/**
+ * Brings the session cookie in line with the active stored account: writes the
+ * cookie the server reads from the stored token and removes the cookie name
+ * used before it. Stored sessions therefore keep working after the cookie
+ * name changes. It does not announce a token change, because the token the
+ * app sends stays the same.
+ */
+export const syncWalletAuthCookie = (): void => {
+  if (isDevAuthEnabled()) {
+    return;
+  }
+  const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
+  writeWalletAuthCookie(activeAccount?.jwt ?? null);
 };
 
 export const hasActiveSessionV2Auth = ({
@@ -567,8 +561,12 @@ export const getRefreshToken = () => {
 };
 
 export const getWalletAddress = () => {
-  if (publicEnv.USE_DEV_AUTH === "true") {
-    return publicEnv.DEV_MODE_WALLET_ADDRESS ?? null;
+  if (isDevAuthEnabled()) {
+    return (
+      getDevAuthTestOverride()?.wallet ??
+      publicEnv.DEV_MODE_WALLET_ADDRESS ??
+      null
+    );
   }
   const activeAccount = getActiveAccountFromAccounts(getStoredAccounts());
   if (activeAccount?.address) return activeAccount.address;
@@ -604,11 +602,13 @@ const getNativeRefreshTokenCleanupAddresses = (
 export const clearAllWalletAuth = async (): Promise<void> => {
   const accounts = getStoredAccounts();
   const previousActiveAddress = getActiveAddressFromStorage();
+  const signedOutAddresses = getNativeRefreshTokenCleanupAddresses(accounts);
   await Promise.all(
-    getNativeRefreshTokenCleanupAddresses(accounts).map((address) =>
-      removeNativeRefreshToken(address)
-    )
+    signedOutAddresses.map((address) => removeNativeRefreshToken(address))
   );
+  for (const address of signedOutAddresses) {
+    safeLocalStorage.removeItem(getAddressRoleStorageKey(address));
+  }
   persistAccountsWithActive([], null);
   emitWalletAccountsUpdated();
   if (previousActiveAddress) {

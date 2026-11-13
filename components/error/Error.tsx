@@ -7,8 +7,7 @@ import {
   faChevronUp,
   faCopy,
 } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { AnimatePresence, motion } from "framer-motion";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useId, useMemo, useState } from "react";
@@ -95,12 +94,7 @@ export default function ErrorComponent({
         </p>
 
         {onReset && (
-          <Button
-            type="button"
-            onClick={onReset}
-            variant="primary"
-            size="md"
-          >
+          <Button type="button" onClick={onReset} variant="primary" size="md">
             Try Again
           </Button>
         )}
@@ -125,9 +119,9 @@ export default function ErrorComponent({
                   {isStacktraceExpanded ? "Hide Stacktrace" : "Show Stacktrace"}
                 </span>
                 {isStacktraceExpanded ? (
-                  <FontAwesomeIcon icon={faChevronUp} />
+                  <FontAwesomeSvgIcon icon={faChevronUp} />
                 ) : (
-                  <FontAwesomeIcon icon={faChevronDown} />
+                  <FontAwesomeSvgIcon icon={faChevronDown} />
                 )}
               </button>
               {isStacktraceExpanded && (
@@ -139,27 +133,21 @@ export default function ErrorComponent({
                   size="sm"
                 >
                   {isCopied ? "Copied" : "Copy"}{" "}
-                  {!isCopied && <FontAwesomeIcon icon={faCopy} />}
+                  {!isCopied && <FontAwesomeSvgIcon icon={faCopy} />}
                 </Button>
               )}
             </div>
-            <AnimatePresence>
-              {isStacktraceExpanded && (
-                <motion.div
-                  id={stacktraceContentId}
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
-                  className="tw-w-full tw-overflow-hidden"
-                >
-                  <div className="tw-max-h-[16rem] tw-w-full tw-max-w-full tw-overflow-auto tw-whitespace-pre-wrap tw-break-all tw-rounded-lg tw-bg-black tw-p-4 tw-font-mono tw-text-xs tw-leading-5 tw-text-gray-200">
-                    {digest && <div className="tw-mb-2">Digest: {digest}</div>}
-                    {resolvedStackTrace}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {isStacktraceExpanded && (
+              <div
+                id={stacktraceContentId}
+                className="tw-w-full tw-overflow-hidden motion-safe:tw-animate-fadeIn"
+              >
+                <div className="tw-max-h-[16rem] tw-w-full tw-max-w-full tw-overflow-auto tw-whitespace-pre-wrap tw-break-all tw-rounded-lg tw-bg-black tw-p-4 tw-font-mono tw-text-xs tw-leading-5 tw-text-gray-200">
+                  {digest && <div className="tw-mb-2">Digest: {digest}</div>}
+                  {resolvedStackTrace}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

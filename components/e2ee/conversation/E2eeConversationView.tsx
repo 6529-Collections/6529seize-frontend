@@ -1,0 +1,583 @@
+"use client";
+
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useWaveListSwipeBack } from "@/components/brain/mobile/useWaveListSwipeBack";
+import useCapacitor from "@/hooks/useCapacitor";
+import { ChatFileDropOverlay } from "@/components/composer/ChatFileDropOverlay";
+import { useChatFileDrop } from "@/hooks/useChatFileDrop";
+import { useAuth } from "@/components/auth/Auth";
+import Button from "@/components/utils/button/Button";
+import { getEncryptedMessagesRoute } from "@/helpers/navigation.helpers";
+import { useE2eeConversation, type UseE2eeResult } from "@/hooks/e2ee/useE2ee";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, type MessageKey } from "@/i18n/messages";
+import { isUsableDm } from "@/lib/e2ee/dm-conversations";
+import type {
+  E2eeConversation,
+  E2eeEngine,
+  E2eeEngineExt,
+  E2eeMessage,
+} from "@/lib/e2ee/types";
+import { E2eeNewDeviceNotice } from "../devices/E2eeNewDeviceNotice";
+import { getE2eeActionErrorKey } from "../e2eeErrors";
+import { findMember, getMemberName } from "../e2eeFormat";
+import { setE2eeChatMuted, useMutedE2eeChats } from "../e2eeMutedChats";
+import { E2eeLoadingState, E2eeRouteGate } from "../gate/E2eeRouteGate";
+import { E2eeConversationInfo } from "../info/E2eeConversationInfo";
+import { E2eeBanner } from "../ui/E2eeBanner";
+import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
+import {
+  E2eeCenteredMessage,
+  E2eePageShell,
+  useE2eeViewStyle,
+} from "../ui/E2eePageShell";
+import { E2eeBlockDialog } from "./E2eeBlockDialog";
+import { E2eeDmHistory } from "./E2eeDmHistory";
+import { E2eeComposer, type E2eeComposerHandle } from "./E2eeComposer";
+import { E2eeEmojiProvider } from "./E2eeEmojiProvider";
+import { E2eeContinuedNotice } from "./E2eeContinuedNotice";
+import { E2eeConversationBanners } from "./E2eeConversationBanners";
+import { E2eeUntrustedDeviceBanners } from "./E2eeUntrustedDeviceBanners";
+import { E2eeConversationHeader } from "./E2eeConversationHeader";
+import type { E2eeMessageActions } from "./E2eeMessageItem";
+import { E2eeReportDialog } from "./E2eeReportDialog";
+import { E2eeSearchPanel } from "./E2eeSearchPanel";
+import {
+  E2eeSupersededComposer,
+  useSupersededHandoff,
+} from "./E2eeSupersededComposer";
+import { E2eeTimeline } from "./E2eeTimeline";
+import {
+  type E2eeDroppedMessage,
+  useE2eeDroppedMessage,
+} from "./useE2eeDroppedMessage";
+
+const hasOpenConversationHint = (
+  engine: E2eeEngine
+): engine is E2eeEngine & Pick<E2eeEngineExt, "setOpenConversation"> =>
+  typeof (engine as Partial<E2eeEngineExt>).setOpenConversation === "function";
+
+/** Tells the engine which chat is on screen (faster polling) and marks reads. */
+function useOpenConversation(
+  engine: E2eeEngine,
+  g: string,
+  hasConversation: boolean,
+  lastSeq: number
+) {
+  useEffect(() => {
+    if (!hasOpenConversationHint(engine) || !hasConversation) {
+      return;
+    }
+    engine.setOpenConversation(g);
+    return () => engine.setOpenConversation(null);
+  }, [engine, g, hasConversation]);
+
+  useEffect(() => {
+    if (!hasConversation) {
+      return;
+    }
+    const markRead = () => {
+      if (document.visibilityState === "visible") {
+        engine.markRead(g);
+      }
+    };
+    markRead();
+    document.addEventListener("visibilitychange", markRead);
+    return () => document.removeEventListener("visibilitychange", markRead);
+  }, [engine, g, hasConversation, lastSeq]);
+}
+
+/** When a chat isn't in local state yet, sync once before calling it missing. */
+function useInitialSync(engine: E2eeEngine, missing: boolean): boolean {
+  const [synced, setSynced] = useState(false);
+  useEffect(() => {
+    if (!missing || synced) {
+      return;
+    }
+    const run = { cancelled: false };
+    const syncOnce = async () => {
+      try {
+        await engine.sync();
+      } catch {
+        // A failed sync still settles: the chat is shown as not found.
+      }
+      if (!run.cancelled) {
+        setSynced(true);
+      }
+    };
+    void syncOnce();
+    return () => {
+      run.cancelled = true;
+    };
+  }, [engine, missing, synced]);
+  return synced;
+}
+
+const getDisabledReasonKey = (
+  conversation: E2eeConversation,
+  selfProfileId: string | null
+): MessageKey | null => {
+  if (
+    conversation.status !== "active" ||
+    (conversation.kind === "dm" && !isUsableDm(conversation, selfProfileId))
+  ) {
+    return "e2ee.composer.unavailable";
+  }
+  // A group change that has not gone through holds sending back; a send
+  // that keeps failing does not, so writing (and focus) carries on (8.3).
+  if (conversation.delayed && conversation.delayedReason !== "send") {
+    return "e2ee.composer.blocked";
+  }
+  return null;
+};
+
+interface ConversationScreenProps {
+  readonly g: string;
+  readonly e2ee: UseE2eeResult & { readonly engine: E2eeEngine };
+}
+
+function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
+  const locale = useBrowserLocale();
+  const router = useRouter();
+  const { isCapacitor } = useCapacitor();
+  const style = useE2eeViewStyle();
+  const searchPanelId = useId();
+  const composerInputId = useId();
+  const { engine, profileId } = e2ee;
+  const { conversation, messages } = useE2eeConversation(g);
+  const { ref: swipeBackRef, onTouchStart } = useWaveListSwipeBack<HTMLElement>(
+    {
+      enabled: isCapacitor && conversation !== null,
+      scope: g,
+      onSwipeBack: () => {
+        const input = document.activeElement;
+        if (input instanceof HTMLElement) input.blur();
+        router.push(getEncryptedMessagesRoute(), { scroll: false });
+      },
+    }
+  );
+  const lastSeq = messages.at(-1)?.seq ?? 0;
+  useOpenConversation(engine, g, conversation !== null, lastSeq);
+  const synced = useInitialSync(engine, conversation === null);
+  const superseded = conversation?.status === "superseded";
+  const handoff = useSupersededHandoff(conversation !== null && !superseded);
+  const { announce } = handoff;
+
+  const [jumpTarget, setJump] = useState<{
+    id: string;
+    request: number;
+  } | null>(null);
+  const [replyToId, setReplyToId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<E2eeMessage | null>(null);
+  const [reportTarget, setReportTarget] = useState<E2eeMessage | null>(null);
+  const [discardTarget, setDiscardTarget] = useState<E2eeMessage | null>(null);
+  // Set when a discard succeeded: the outcome is announced and focus goes
+  // to the continue action once the dialog has closed.
+  const focusActionAfterDialog = useRef(false);
+  const [blockSender, setBlockSender] = useState<E2eeMessage | null>(null);
+  const { setToast } = useAuth();
+  const { dropped, dismiss: dismissDropped } = useE2eeDroppedMessage(
+    messages,
+    profileId
+  );
+  const [restoredDraft, setRestoredDraft] = useState<E2eeDroppedMessage | null>(
+    null
+  );
+  const muted = useMutedE2eeChats(profileId).has(g);
+  const [infoOpen, setInfoOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [actionErrorKey, setActionErrorKey] = useState<MessageKey | null>(null);
+
+  const composerRef = useRef<E2eeComposerHandle>(null);
+  const fileDrop = useChatFileDrop({
+    enabled:
+      conversation !== null &&
+      getDisabledReasonKey(conversation, profileId) === null &&
+      e2ee.attachmentsEnabled &&
+      editingId === null,
+    includeEditor: true,
+    onFiles: (files) => composerRef.current?.attachFiles(files),
+  });
+
+  const actions = useMemo<E2eeMessageActions>(() => {
+    const react = async (
+      message: E2eeMessage,
+      reaction: string,
+      on: boolean
+    ) => {
+      setActionErrorKey(null);
+      try {
+        await engine.react(message.g, message.id, reaction, on);
+      } catch (error) {
+        setActionErrorKey(
+          getE2eeActionErrorKey(error, "e2ee.message.actionFailed")
+        );
+      }
+    };
+    return {
+      // The composer moves focus to itself for reply and edit.
+      onReply: (message) => {
+        setEditingId(null);
+        setReplyToId(message.id);
+      },
+      onEdit: (message) => {
+        setReplyToId(null);
+        setEditingId(message.id);
+      },
+      onDelete: (message) => setDeleteTarget(message),
+      onReport: (message) => setReportTarget(message),
+      onBlock: (message) => setBlockSender(message),
+      onToggleMute: () => {
+        if (profileId) {
+          setE2eeChatMuted(profileId, g, !muted);
+        }
+      },
+      muted,
+      onReact: (message, reaction, on) => {
+        void react(message, reaction, on);
+      },
+      onJumpTo: (id) => {
+        const jump = async () => {
+          try {
+            await engine.loadHistory?.(g, { around: id });
+            setJump((previous) => ({
+              id,
+              request: (previous?.request ?? 0) + 1,
+            }));
+          } catch {
+            setActionErrorKey("e2ee.conversation.historyFailed");
+          }
+        };
+        void jump();
+      },
+      // D172: an unsent message leaves this read-only chat either way, so
+      // the outcome is announced here and focus moves to the continue action.
+      onResendUnsent: async (message) => {
+        await engine.resendUnsent(message.g, message.id);
+        announce(t(locale, "e2ee.unsent.resent"));
+        document.getElementById(composerInputId)?.focus();
+      },
+      onDiscardUnsent: (message) => setDiscardTarget(message),
+    };
+  }, [announce, composerInputId, engine, g, locale, muted, profileId]);
+
+  if (!conversation) {
+    return (
+      <E2eePageShell
+        title={t(locale, "e2ee.title")}
+        backHref={getEncryptedMessagesRoute()}
+        backLabel={t(locale, "e2ee.conversation.back")}
+      >
+        {synced ? (
+          <E2eeCenteredMessage
+            title={t(locale, "e2ee.conversation.notFound.title")}
+            body={t(locale, "e2ee.conversation.notFound.body")}
+          />
+        ) : (
+          <E2eeLoadingState label={t(locale, "e2ee.conversation.loading")} />
+        )}
+      </E2eePageShell>
+    );
+  }
+
+  const replyTo = replyToId
+    ? (messages.find((m) => m.id === replyToId) ?? null)
+    : null;
+  const editing = editingId
+    ? (messages.find((m) => m.id === editingId) ?? null)
+    : null;
+  const canAct =
+    conversation.status === "active" &&
+    (conversation.kind !== "dm" || isUsableDm(conversation, profileId));
+
+  return (
+    <section
+      ref={swipeBackRef}
+      onTouchStart={onTouchStart}
+      style={style}
+      className="tw-relative tw-flex tw-min-h-0 tw-w-full tw-flex-col tw-bg-black"
+      aria-label={t(locale, "e2ee.composer.dropArea")}
+      onDragEnterCapture={fileDrop.handlers.onDragEnter}
+      onDragOverCapture={fileDrop.handlers.onDragOver}
+      onDragLeaveCapture={fileDrop.handlers.onDragLeave}
+      onDropCapture={fileDrop.handlers.onDrop}
+    >
+      {fileDrop.active && <ChatFileDropOverlay />}
+      <E2eeConversationHeader
+        conversation={conversation}
+        selfProfileId={profileId}
+        searchOpen={searchOpen}
+        searchPanelId={searchPanelId}
+        onToggleSearch={() => setSearchOpen((open) => !open)}
+        onOpenInfo={() => setInfoOpen(true)}
+      />
+      <E2eeDmHistory
+        conversation={conversation}
+        conversations={e2ee.conversations}
+        selfProfileId={profileId}
+        engine={engine}
+      />
+      {searchOpen ? (
+        <div id={searchPanelId}>
+          <E2eeSearchPanel
+            engine={engine}
+            conversation={conversation}
+            selfProfileId={profileId}
+            onClose={() => setSearchOpen(false)}
+            onJumpTo={actions.onJumpTo}
+          />
+        </div>
+      ) : null}
+      <E2eeConversationBanners
+        conversation={conversation}
+        engine={engine}
+        onCompareSafetyCodes={() => setInfoOpen(true)}
+      />
+      <E2eeUntrustedDeviceBanners
+        conversation={conversation}
+        engine={engine}
+        selfProfileId={profileId}
+      />
+      <E2eeNewDeviceNotice className="tw-flex-shrink-0 tw-px-4 tw-pt-2" />
+      {superseded || getDisabledReasonKey(conversation, profileId) === null ? (
+        // One stop past the whole timeline for keyboard users.
+        <button
+          type="button"
+          onClick={() => document.getElementById(composerInputId)?.focus()}
+          className="tw-sr-only focus:tw-not-sr-only focus:tw-mx-4 focus:tw-my-1 focus:tw-self-start focus:tw-rounded-lg focus:tw-border-0 focus:tw-bg-iron-900 focus:tw-px-3 focus:tw-py-1.5 focus:tw-text-xs focus:tw-font-semibold focus:tw-text-iron-100 focus:tw-outline focus:tw-outline-2 focus:tw-outline-primary-400"
+        >
+          {t(
+            locale,
+            superseded
+              ? "e2ee.superseded.skipToAction"
+              : "e2ee.conversation.skipToComposer"
+          )}
+        </button>
+      ) : null}
+      <E2eeTimeline
+        conversation={conversation}
+        messages={messages}
+        engine={engine}
+        selfProfileId={profileId}
+        canAct={canAct}
+        actions={actions}
+        jumpToId={jumpTarget?.id ?? null}
+        jumpRequest={jumpTarget?.request ?? 0}
+        notice={
+          <E2eeContinuedNotice
+            conversation={conversation}
+            conversations={e2ee.conversations}
+            selfProfileId={profileId}
+          />
+        }
+      />
+      {actionErrorKey ? (
+        <p
+          role="alert"
+          className="tw-m-0 tw-flex-shrink-0 tw-px-4 tw-py-1 tw-text-xs tw-text-rose-300"
+        >
+          {t(locale, actionErrorKey)}
+        </p>
+      ) : null}
+      {dropped ? (
+        <div className="tw-flex-shrink-0 tw-px-4 tw-pb-2">
+          <E2eeBanner
+            tone="danger"
+            action={
+              <>
+                {dropped.text ? (
+                  <Button
+                    variant="secondary"
+                    size="xs"
+                    onClick={() => {
+                      setRestoredDraft(dropped);
+                      dismissDropped();
+                    }}
+                  >
+                    {t(locale, "e2ee.composer.dropped.restore")}
+                  </Button>
+                ) : null}
+                <Button variant="secondary" size="xs" onClick={dismissDropped}>
+                  {t(locale, "e2ee.action.dismiss")}
+                </Button>
+              </>
+            }
+          >
+            <span>{t(locale, "e2ee.composer.dropped.body")}</span>
+            {dropped.text ? (
+              <span className="tw-mt-0.5 tw-block tw-truncate tw-text-rose-200/80">
+                {t(locale, "e2ee.composer.dropped.quote", {
+                  text: dropped.text.replaceAll(/\s+/g, " ").trim(),
+                })}
+              </span>
+            ) : null}
+          </E2eeBanner>
+        </div>
+      ) : null}
+      {/* Focus inside here moves to the continue action if the chat turns read-only. */}
+      <div
+        className="tw-contents"
+        onFocus={handoff.onFocus}
+        onBlur={handoff.onBlur}
+      >
+        <output className="tw-sr-only">{handoff.announcement}</output>
+        {superseded ? (
+          <E2eeSupersededComposer
+            conversation={conversation}
+            conversations={e2ee.conversations}
+            selfProfileId={profileId}
+            engine={engine}
+            actionId={composerInputId}
+            takeFocus={handoff.takeFocus}
+          />
+        ) : (
+          <E2eeComposer
+            ref={composerRef}
+            restoredDraft={restoredDraft}
+            inputId={composerInputId}
+            conversation={conversation}
+            engine={engine}
+            selfProfileId={profileId}
+            onRequestEditLastMessage={() => {
+              if (!canAct || !profileId) return false;
+              const last = messages.findLast(
+                (message) =>
+                  message.kind === "message" &&
+                  message.senderProfileId === profileId &&
+                  !message.deleted &&
+                  !message.undecryptable &&
+                  !message.pending
+              );
+              if (!last) return false;
+              actions.onEdit(last);
+              return true;
+            }}
+            replyTo={replyTo}
+            onCancelReply={() => setReplyToId(null)}
+            editing={editing}
+            onCancelEdit={() => setEditingId(null)}
+            disabledReasonKey={getDisabledReasonKey(conversation, profileId)}
+            attachmentsEnabled={e2ee.attachmentsEnabled}
+          />
+        )}
+      </div>
+
+      <E2eeConversationInfo
+        open={infoOpen}
+        onClose={() => setInfoOpen(false)}
+        conversation={conversation}
+        engine={engine}
+        selfProfileId={profileId}
+      />
+      <E2eeReportDialog
+        engine={engine}
+        g={conversation.g}
+        message={reportTarget}
+        onClose={() => setReportTarget(null)}
+        onReported={() =>
+          setToast({
+            type: "success",
+            message: t(locale, "e2ee.report.success"),
+          })
+        }
+      />
+      <E2eeBlockDialog
+        target={
+          blockSender?.senderProfileId
+            ? {
+                profileId: blockSender.senderProfileId,
+                handle:
+                  findMember(conversation.members, blockSender.senderProfileId)
+                    ?.handle ?? null,
+                name: getMemberName(
+                  locale,
+                  conversation.members,
+                  blockSender.senderProfileId,
+                  profileId
+                ),
+              }
+            : null
+        }
+        onClose={() => setBlockSender(null)}
+        onBlocked={(name) =>
+          setToast({
+            type: "success",
+            message: t(locale, "e2ee.block.done", { name }),
+          })
+        }
+      />
+      <E2eeConfirmDialog
+        open={deleteTarget !== null}
+        title={t(locale, "e2ee.message.deleteConfirmTitle")}
+        body={t(locale, "e2ee.message.deleteConfirmBody")}
+        confirmLabel={t(locale, "e2ee.message.deleteConfirm")}
+        errorFallbackKey="e2ee.message.actionFailed"
+        onConfirm={async () => {
+          if (deleteTarget) {
+            await engine.remove(conversation.g, deleteTarget.id);
+          }
+        }}
+        onClose={() => setDeleteTarget(null)}
+      />
+      <E2eeConfirmDialog
+        open={discardTarget !== null}
+        title={t(locale, "e2ee.unsent.deleteConfirmTitle")}
+        body={t(locale, "e2ee.unsent.deleteConfirmBody")}
+        confirmLabel={t(locale, "e2ee.unsent.delete")}
+        errorFallbackKey="e2ee.unsent.deleteFailed"
+        onConfirm={async () => {
+          if (discardTarget) {
+            await engine.discardUnsent(discardTarget.g, discardTarget.id);
+            focusActionAfterDialog.current = true;
+          }
+        }}
+        onClose={() => {
+          setDiscardTarget(null);
+          if (focusActionAfterDialog.current) {
+            focusActionAfterDialog.current = false;
+            // Once the dialog has closed (the page is no longer inert and
+            // its focus return had nothing to go to): say so, move focus on.
+            globalThis.requestAnimationFrame(() => {
+              announce(t(locale, "e2ee.unsent.deleted"));
+              document.getElementById(composerInputId)?.focus();
+            });
+          }
+        }}
+      />
+    </section>
+  );
+}
+
+/** `/messages/encrypted/[group]`: one encrypted chat. */
+export function E2eeConversationView({ g }: { readonly g: string }) {
+  const locale = useBrowserLocale();
+  return (
+    <E2eeRouteGate
+      shell={(content) => (
+        <E2eePageShell
+          title={t(locale, "e2ee.title")}
+          backHref={getEncryptedMessagesRoute()}
+          backLabel={t(locale, "e2ee.conversation.back")}
+        >
+          {content}
+        </E2eePageShell>
+      )}
+    >
+      {(e2ee) => {
+        const { engine } = e2ee;
+        if (!engine) {
+          return (
+            <E2eeLoadingState label={t(locale, "e2ee.conversation.loading")} />
+          );
+        }
+        return (
+          <E2eeEmojiProvider>
+            <ConversationScreen key={g} g={g} e2ee={{ ...e2ee, engine }} />
+          </E2eeEmojiProvider>
+        );
+      }}
+    </E2eeRouteGate>
+  );
+}

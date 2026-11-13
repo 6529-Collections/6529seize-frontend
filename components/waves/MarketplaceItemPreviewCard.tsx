@@ -1,5 +1,6 @@
 "use client";
 
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import type { KeyboardEvent, MouseEvent } from "react";
 
 import { useLinkPreviewVariant } from "./LinkPreviewContext";
@@ -97,6 +98,7 @@ export default function MarketplaceItemPreviewCard({
   hideActions = false,
 }: MarketplaceItemPreviewCardProps) {
   const variant = useLinkPreviewVariant();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const resolvedPreviewHref = resolvePreviewHref(href);
   const normalizedPrice =
     typeof price === "string" ? normalizeSpaceSeparatedText(price) : "";
@@ -115,7 +117,7 @@ export default function MarketplaceItemPreviewCard({
   const displayTitle = hasTitle ? normalizedTitle : DEFAULT_MARKETPLACE_TITLE;
   const marketplaceBrand = getMarketplaceBrand(href);
   const ctaAriaLabel = buildMarketplaceCtaLabel({
-    normalizedPrice: ariaPriceText,
+    normalizedPrice: hideNftPurchasing ? "" : ariaPriceText,
     marketplaceBrand,
   });
   const shouldShowDataHealthIcon =
@@ -163,15 +165,17 @@ export default function MarketplaceItemPreviewCard({
             mediaUrl={mediaUrl}
             resolvedPreviewHref={resolvedPreviewHref}
           />
-          <MarketplaceCompactCta
-            resolvedPreviewHref={resolvedPreviewHref}
-            ctaAriaLabel={ctaAriaLabel}
-            hideActions={hideActions}
-            hasPrice={hasPrice}
-            priceValueText={priceValueText}
-            priceCurrencyText={priceCurrencyText || undefined}
-            marketplaceBrand={marketplaceBrand}
-          />
+          {!hideNftPurchasing && (
+            <MarketplaceCompactCta
+              resolvedPreviewHref={resolvedPreviewHref}
+              ctaAriaLabel={ctaAriaLabel}
+              hideActions={hideActions}
+              hasPrice={hasPrice}
+              priceValueText={priceValueText}
+              priceCurrencyText={priceCurrencyText || undefined}
+              marketplaceBrand={marketplaceBrand}
+            />
+          )}
           {!hideActions && (
             <MarketplaceOverlayActionButtons
               href={href}
@@ -204,6 +208,7 @@ export default function MarketplaceItemPreviewCard({
           displayTitle={displayTitle}
           ctaAriaLabel={ctaAriaLabel}
           hideActions={hideActions}
+          hidePriceAction={hideNftPurchasing}
           hasPrice={hasPrice}
           priceValueText={priceValueText}
           priceCurrencyText={priceCurrencyText || undefined}

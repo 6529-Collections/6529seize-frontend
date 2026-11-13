@@ -1,7 +1,6 @@
 "use client";
 
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import { SidebarIconTile } from "../waves/SidebarIconTile";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -34,16 +33,6 @@ function MasonryGridIcon() {
       <rect width="7" height="9" x="14" y="12" rx="1" />
       <rect width="7" height="5" x="3" y="16" rx="1" />
     </svg>
-  );
-}
-
-function ProfileFeedAvatar({ isActive }: { readonly isActive: boolean }) {
-  return (
-    <div className="tw-relative tw-size-8 tw-flex-shrink-0">
-      <SidebarIconTile variant={isActive ? "selected" : "neutral"}>
-        <MasonryGridIcon />
-      </SidebarIconTile>
-    </div>
   );
 }
 
@@ -87,13 +76,7 @@ export function WebProfileFeedShortcut({
 
   if (isCollapsed) {
     return (
-      <div
-        className={`tw-group tw-flex tw-items-center tw-justify-center tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
-          isActive
-            ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
-            : "desktop-hover:hover:tw-bg-iron-900/70"
-        }`}
-      >
+      <div className="tw-flex tw-h-11 tw-shrink-0 tw-items-center tw-justify-center">
         <Link
           href={href}
           ref={featureUsageRef}
@@ -102,11 +85,13 @@ export function WebProfileFeedShortcut({
           onClick={handleClick}
           aria-label={profileFeedLabel}
           aria-current={isActive ? "page" : undefined}
-          className="tw-flex tw-items-center tw-justify-center tw-no-underline"
+          className={WAVE_HEADER_ACTION_CLASSES}
           data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
           data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
         >
-          <ProfileFeedAvatar isActive={isActive} />
+          <span className="tw-inline-flex tw-size-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-transition-colors tw-duration-150 desktop-hover:group-hover:tw-bg-iron-800 touch-only:tw-size-10 motion-reduce:tw-transition-none">
+            <MasonryGridIcon />
+          </span>
         </Link>
       </div>
     );
@@ -121,7 +106,7 @@ export function WebProfileFeedShortcut({
       onClick={handleClick}
       aria-label={profileFeedLabel}
       aria-current={isActive ? "page" : undefined}
-      className={`${WAVE_HEADER_ACTION_CLASSES} ${isActive ? "tw-text-primary-300" : "tw-text-iron-300"}`}
+      className={WAVE_HEADER_ACTION_CLASSES}
       data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
       data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
     >

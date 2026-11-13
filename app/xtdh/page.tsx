@@ -16,6 +16,10 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
+// Renders per request: the received-xTDH filters read the query with
+// useSearchParams() outside a Suspense boundary, which a prerender cannot do.
+export const dynamic = "force-dynamic";
+
 export default function Page(): ReactElement {
   return (
     <main className={NETWORK_REFERENCE_PAGE_CLASSES}>

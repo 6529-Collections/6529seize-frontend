@@ -22,6 +22,10 @@ import {
 } from "@/helpers/waves/wave-submission-strategy.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import {
+  LOCAL_DISPLAY_TIME_ZONE,
+  type DisplayTimeZone,
+} from "@/lib/display-time-zone/displayTimeZone";
 
 export interface WaveRuleRow {
   readonly id: string;
@@ -86,10 +90,38 @@ export const formatFiniteNumber = (
     ? formatNumberWithCommas(value)
     : null;
 
-const formatDateTime = (value: number | null | undefined): string | null =>
-  typeof value === "number" && Number.isFinite(value)
+/** "2026-11-09 17:06" in `timeZone`, followed by its name: "... UTC". */
+const formatZonedDateTime = (value: number, timeZone: string): string => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZoneName: "short",
+  }).formatToParts(value);
+  const part = (type: Intl.DateTimeFormatPartTypes): string =>
+    parts.find((item) => item.type === type)?.value ?? "";
+  return `${part("year")}-${part("month")}-${part("day")} ${part("hour")}:${part("minute")} ${part("timeZoneName")}`;
+};
+
+/**
+ * A schedule instant as "YYYY-MM-DD HH:mm" in the display time zone. Outside
+ * the device zone it names the zone, as every displayed clock time does.
+ */
+const formatDateTime = (
+  value: number | null | undefined,
+  zone: DisplayTimeZone
+): string | null => {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    return null;
+  }
+  return zone.isLocal || zone.timeZone === undefined
     ? Time.millis(value).toLocaleDateTimeString()
-    : null;
+    : formatZonedDateTime(value, zone.timeZone);
+};
 
 export const formatDuration = (
   durationMs: number | null | undefined
@@ -120,15 +152,18 @@ export const formatDuration = (
   return parts.join(" ");
 };
 
-export const formatPeriod = ({
-  min,
-  max,
-}: {
-  readonly min: number | null | undefined;
-  readonly max: number | null | undefined;
-}): string => {
-  const minLabel = formatDateTime(min);
-  const maxLabel = formatDateTime(max);
+export const formatPeriod = (
+  {
+    min,
+    max,
+  }: {
+    readonly min: number | null | undefined;
+    readonly max: number | null | undefined;
+  },
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
+): string => {
+  const minLabel = formatDateTime(min, zone);
+  const maxLabel = formatDateTime(max, zone);
 
   if (minLabel !== null && maxLabel !== null) {
     return `${minLabel} to ${maxLabel}`;
@@ -425,7 +460,8 @@ export const getDecisionRows = (
         readonly is_rolling: boolean;
       }
     | null
-    | undefined
+    | undefined,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
 ): WaveRuleRow[] => {
   if (decisionsStrategy === null || decisionsStrategy === undefined) {
     return [];
@@ -439,12 +475,14 @@ export const getDecisionRows = (
   return [
     {
       id: "first-decision",
-      label: "First decision",
-      value: formatDateTime(decisionsStrategy.first_decision_time) ?? "Not set",
+      label: "First result",
+      value:
+        formatDateTime(decisionsStrategy.first_decision_time, zone) ??
+        "Not set",
     },
     {
       id: "decision-cadence",
-      label: "Decision cadence",
+      label: "Result cadence",
       value: cadenceLabel,
     },
   ];
@@ -458,7 +496,7 @@ const getDecisionCadenceLabel = ({
   readonly isRolling: boolean;
 }): string => {
   if (subsequentDecisions.length === 0) {
-    return "Single decision";
+    return "Single result";
   }
 
   if (isRolling) {
@@ -490,11 +528,17 @@ export const getOutcomeCountLabel = (count: number): string => {
   return count === 1 ? "1 outcome" : `${count} outcomes`;
 };
 
-export const getWavePeriod = (period: ApiIntRange | null | undefined): string =>
-  formatPeriod({
-    min: period?.min ?? null,
-    max: period?.max ?? null,
-  });
+export const getWavePeriod = (
+  period: ApiIntRange | null | undefined,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
+): string =>
+  formatPeriod(
+    {
+      min: period?.min ?? null,
+      max: period?.max ?? null,
+    },
+    zone
+  );
 
 export const getChatWaveSection = ({
   linksDisabled,

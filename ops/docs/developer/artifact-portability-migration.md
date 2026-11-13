@@ -8,7 +8,12 @@ package checksum, and the runtime-configuration values baked into the package.
 
 The portability scan inspects the exact extracted production bundle and records
 classifications, value digests, and bounded file evidence without exposing raw
-runtime values. Unknown inputs remain blockers. The report is descriptive:
+runtime values. The existing staging messaging flags
+`NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES`, `NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS`
+and `NEXT_PUBLIC_E2EE_DM_ENABLED` are classified as known environment-bound
+runtime inputs. Their values are still
+recorded and block cross-environment artifact reuse. Unknown inputs remain
+blockers. The report is descriptive:
 `NOT_PORTABLE` does not authorize staging-to-production reuse or promotion.
 Existing reports for older `environment-bound-v3` or dual-profile artifacts
 remain historical evidence; they are not inputs to the ordinary deployment
@@ -26,7 +31,7 @@ client graph, or the standalone server bundle:
 - the NextGen chain identifier;
 - the asset source switch (`ASSETS_FROM_S3`);
 - the announced-version endpoint;
-- AWS RUM, Mixpanel, and Sentry configuration, including the public-review profile;
+- AWS RUM, Mixpanel, and Sentry configuration;
 - any additional endpoint, feature flag, or profile value that changes the runtime
   graph or generated asset URLs by environment.
 
@@ -46,7 +51,7 @@ copied into the client bundle or the portability inventory.
    transformed, and indirectly generated configuration before activation.
 3. Start the identical package with two signed runtime configurations and prove that
    endpoint selection, chain selection, asset selection, announcement, telemetry,
-   Sentry, and public-review behavior are all runtime-controlled.
+   and Sentry behavior are all runtime-controlled.
 4. Bind one package digest to two distinct runtime-configuration digests in a new
    manifest contract. Keep exact source, content, toolchain, package, and runtime
    digests in the release evidence.

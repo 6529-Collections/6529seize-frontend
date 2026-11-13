@@ -101,14 +101,14 @@ it.each([
   ["winners", "decisions"],
   ["my_votes", "votes"],
   ["configuration", "rules"],
-  ["outcome", "outcomes"],
+  ["outcome", "rules"],
 ])(
   "resolves the default for an explicit %s destination",
   (tab, destination) => {
     mockSearch = new URLSearchParams({ tab });
     renderHook(() => useDefaultCompetitionNavigation(wave, true));
     expect(mockReplace).toHaveBeenCalledWith(
-      `/waves/wave/competitions/alpha?tab=${destination}&default=1`,
+      `/waves/wave/decisions/alpha?tab=${destination}&default=1`,
       { scroll: false }
     );
   }
@@ -132,7 +132,7 @@ it.each([
 });
 
 it("preserves explicit competition links across refresh and updates only the implicit context", () => {
-  mockPathname = "/waves/wave/competitions/older";
+  mockPathname = "/waves/wave/decisions/older";
   mockSearch = new URLSearchParams("tab=outcomes");
   const { rerender } = renderHook(() =>
     useDefaultCompetitionNavigation(wave, true)
@@ -141,13 +141,13 @@ it("preserves explicit competition links across refresh and updates only the imp
   mockSearch = new URLSearchParams("default=1&tab=outcomes");
   rerender();
   expect(mockReplace).toHaveBeenLastCalledWith(
-    "/waves/wave/competitions/alpha?default=1&tab=outcomes",
+    "/waves/wave/decisions/alpha?default=1&tab=rules",
     { scroll: false }
   );
   mockId = "beta";
   rerender();
   expect(mockReplace).toHaveBeenLastCalledWith(
-    "/waves/wave/competitions/beta?default=1&tab=outcomes",
+    "/waves/wave/decisions/beta?default=1&tab=rules",
     { scroll: false }
   );
 });
@@ -158,7 +158,7 @@ it("keeps zero competitions implicitly refreshable and returns an emptied detail
     useDefaultCompetitionNavigation(wave, true)
   );
   expect(mockReplace).not.toHaveBeenCalled();
-  mockPathname = "/waves/wave/competitions/alpha";
+  mockPathname = "/waves/wave/decisions/alpha";
   mockSearch = new URLSearchParams("default=1");
   rerender();
   expect(mockReplace).toHaveBeenCalledWith("/waves/wave?default=1&tab=chat", {
@@ -175,7 +175,7 @@ it("keeps zero competitions implicitly refreshable and returns an emptied detail
 it.each(["data-competition-command", "role"])(
   "pins an open command before an implicit context change (%s)",
   async (attribute) => {
-    mockPathname = "/waves/wave/competitions/alpha";
+    mockPathname = "/waves/wave/decisions/alpha";
     mockSearch = new URLSearchParams("default=1&tab=leaderboard");
     const { rerender } = renderHook(() =>
       useDefaultCompetitionNavigation(wave, true)
@@ -185,7 +185,7 @@ it.each(["data-competition-command", "role"])(
     document.body.append(command);
     await waitFor(() =>
       expect(mockReplace).toHaveBeenCalledWith(
-        "/waves/wave/competitions/alpha?tab=leaderboard",
+        "/waves/wave/decisions/alpha?tab=leaderboard",
         { scroll: false }
       )
     );
@@ -202,8 +202,8 @@ it.each([
   ["/waves/other-wave", "tab=leaderboard"],
   ["/my-stream", "wave=other-wave&tab=leaderboard"],
   ["/waves/other-wave", "tab=configuration&competition=alpha"],
-  ["/waves/other-wave/competitions/alpha", "tab=leaderboard&default=1"],
-  ["/waves/other-wave/competitions/alpha", "tab=leaderboard&restore=1"],
+  ["/waves/other-wave/decisions/alpha", "tab=leaderboard&default=1"],
+  ["/waves/other-wave/decisions/alpha", "tab=leaderboard&restore=1"],
 ])(
   "ignores stale wave data when the committed URL is %s?%s",
   (pathname, search) => {
@@ -230,7 +230,7 @@ it("does not restore an old wave's remembered tab after returning to the wave li
 });
 
 function setMarkedRestoreUrl(search = "tab=leaderboard&restore=1") {
-  mockPathname = "/waves/wave/competitions/alpha";
+  mockPathname = "/waves/wave/decisions/alpha";
   mockSearch = new URLSearchParams(search);
   window.history.replaceState(
     { retained: "history-value" },
@@ -254,10 +254,16 @@ it("waits for a fresh marked restoration and commits it without another route re
   expect(replaceState).not.toHaveBeenCalled();
   mockFetchedAfterMount = true;
   rerender();
-  expect(replaceState).toHaveBeenCalledWith(
-    { retained: "history-value" },
+  expect(replaceState).toHaveBeenNthCalledWith(
+    1,
+    null,
     "",
-    "/waves/wave/competitions/alpha?tab=leaderboard&divider=42"
+    "/waves/wave/decisions/alpha?tab=leaderboard&divider=42"
+  );
+  expect(replaceState).toHaveBeenNthCalledWith(
+    2,
+    { retained: "history-value" },
+    ""
   );
   expect(mockReplace).not.toHaveBeenCalled();
   replaceState.mockRestore();
@@ -332,7 +338,7 @@ it("ignores a fresh old-wave restoration after native Back commits the list URL"
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
-it("does not navigate on selection errors, disabled rollout or direct messages", () => {
+it("does not navigate on selection errors or direct messages", () => {
   mockError = true;
   const { rerender } = renderHook(() =>
     useDefaultCompetitionNavigation(wave, true)
@@ -340,11 +346,7 @@ it("does not navigate on selection errors, disabled rollout or direct messages",
   expect(mockReplace).not.toHaveBeenCalled();
   mockReplace.mockClear();
   mockError = false;
-  mockEnabled = false;
   rerender();
-  expect(mockReplace).not.toHaveBeenCalled();
-  mockReplace.mockClear();
-  mockEnabled = true;
   renderHook(() =>
     useDefaultCompetitionNavigation(
       {
@@ -362,7 +364,9 @@ it("maps the familiar legacy tabs and retains view parameters on implicit naviga
     MyStreamWaveTab.LEADERBOARD
   );
   expect(getLegacyCompetitionTab("decisions")).toBe(MyStreamWaveTab.WINNERS);
-  expect(getLegacyCompetitionTab("outcomes")).toBe(MyStreamWaveTab.OUTCOME);
+  expect(getLegacyCompetitionTab("outcomes")).toBe(
+    MyStreamWaveTab.CONFIGURATION
+  );
   expect(getLegacyCompetitionTab("votes")).toBe(MyStreamWaveTab.MY_VOTES);
   expect(
     getImplicitCompetitionRoute(
@@ -370,10 +374,10 @@ it("maps the familiar legacy tabs and retains view parameters on implicit naviga
       "alpha",
       new URLSearchParams("tab=votes")
     )
-  ).toBe("/waves/wave/competitions/alpha?tab=votes&default=1");
+  ).toBe("/waves/wave/decisions/alpha?tab=votes&default=1");
 });
 
-it.each(["/waves/wave/competitions", "/waves/wave/competitions/new"])(
+it.each(["/waves/wave/decisions", "/waves/wave/decisions/new"])(
   "never resolves collection/editor routes even with an implicit marker (%s)",
   (pathname) => {
     expect(
@@ -385,7 +389,7 @@ it.each(["/waves/wave/competitions", "/waves/wave/competitions/new"])(
 it.each(["alpha", "draft"])(
   "resolves the selected ID %s only when its URL explicitly requests default selection",
   (competitionId) => {
-    const pathname = `/waves/wave/competitions/${competitionId}`;
+    const pathname = `/waves/wave/decisions/${competitionId}`;
     expect(
       shouldResolveDefault(pathname, new URLSearchParams("default=1"))
     ).toBe(true);
@@ -394,10 +398,10 @@ it.each(["alpha", "draft"])(
 );
 
 it.each([
-  ["tab=configuration", "/waves/wave/competitions/alpha?tab=rules&default=1"],
+  ["tab=configuration", "/waves/wave/decisions/alpha?tab=rules&default=1"],
   [
     "tab=configuration&competition=older",
-    "/waves/wave/competitions/older?tab=rules",
+    "/waves/wave/decisions/older?tab=rules",
   ],
 ])(
   "canonicalizes the selected competition configuration alias (%s)",
@@ -428,7 +432,7 @@ it("restores remembered Leaderboard only after delayed default identity and tabs
   mockTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
   rerender();
   expect(mockReplace).toHaveBeenCalledWith(
-    "/waves/wave/competitions/alpha?tab=leaderboard",
+    "/waves/wave/decisions/alpha?tab=leaderboard",
     { scroll: false }
   );
 });
@@ -448,7 +452,7 @@ it("restores the ended legacy leaderboard as Submissions", () => {
   mockTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.SUBMISSIONS];
   renderHook(() => useDefaultCompetitionNavigation(wave, true));
   expect(mockReplace).toHaveBeenCalledWith(
-    "/waves/wave/competitions/alpha?tab=leaderboard",
+    "/waves/wave/decisions/alpha?tab=leaderboard",
     { scroll: false }
   );
 });
@@ -480,7 +484,7 @@ it("restores unqualified old preferences only to the immutable legacy primary", 
     useDefaultCompetitionNavigation(wave, true)
   );
   expect(mockReplace).toHaveBeenCalledWith(
-    "/waves/wave/competitions/alpha?tab=leaderboard",
+    "/waves/wave/decisions/alpha?tab=leaderboard",
     { scroll: false }
   );
   mockReplace.mockClear();
@@ -517,7 +521,7 @@ it.each([null, undefined])(
     mockLegacyPrimaryId = "alpha";
     rerender();
     expect(mockReplace).toHaveBeenCalledWith(
-      "/waves/wave/competitions/alpha?tab=leaderboard",
+      "/waves/wave/decisions/alpha?tab=leaderboard",
       { scroll: false }
     );
   }
@@ -550,7 +554,7 @@ it("cancels remembered navigation when a command opens before the destination co
     useDefaultCompetitionNavigation(wave, true)
   );
   expect(mockReplace).toHaveBeenCalledWith(
-    "/waves/wave/competitions/alpha?tab=leaderboard",
+    "/waves/wave/decisions/alpha?tab=leaderboard",
     { scroll: false }
   );
   const command = document.createElement("section");
@@ -576,7 +580,7 @@ it.each(["data-competition-command", "role"])(
       JSON.stringify({ wave: { tab: "LEADERBOARD", competitionId: "alpha" } })
     );
     renderHook(() => useDefaultCompetitionNavigation(wave, true));
-    const target = "/waves/wave/competitions/alpha?tab=leaderboard";
+    const target = "/waves/wave/decisions/alpha?tab=leaderboard";
     expect(mockReplace).toHaveBeenCalledWith(target, { scroll: false });
     // Commit the URL without a rerender, retaining the previous render's observer.
     window.history.replaceState(null, "", target);
@@ -587,7 +591,7 @@ it.each(["data-competition-command", "role"])(
       await Promise.resolve();
     });
     expect(mockReplace).toHaveBeenCalledTimes(1);
-    expect(window.location.pathname).toBe("/waves/wave/competitions/alpha");
+    expect(window.location.pathname).toBe("/waves/wave/decisions/alpha");
     expect(getHistoryWaveTab("wave")).toBeUndefined();
   }
 );

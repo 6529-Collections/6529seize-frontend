@@ -1,20 +1,26 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+
 import {
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
 } from "@/components/delegation/delegation-constants";
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { DELEGATION_ALL_ADDRESS, MEMES_CONTRACT } from "@/constants/constants";
 import type { Delegation } from "@/entities/IDelegation";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { fetchAllPages } from "@/services/6529api";
-import csvParser from "csv-parser";
 import { useEffect, useState } from "react";
 import {
+  MappingToolError,
+  type MappingToolErrorKind,
   MappingToolSubmitButton,
   MappingToolUpload,
 } from "./MappingToolControls";
+import { buildCsv } from "@/helpers/csv-export.helpers";
+import { parseCsvFile } from "./mappingToolCsv";
+import { downloadCsvFile } from "./mappingToolDownload";
 import styles from "./MappingTool.module.css";
 
 export default function DelegationMappingTool() {
@@ -25,8 +31,37 @@ export default function DelegationMappingTool() {
   const [delegations, setDelegations] = useState<Delegation[]>([]);
 
   const [csvData, setCsvData] = useState<string[]>([]);
+  const [error, setError] = useState<MappingToolErrorKind | null>(null);
+  function failProcessing(kind: MappingToolErrorKind) {
+    setError(kind);
+    setProcessing(false);
+  }
+
   function submit() {
+    setError(null);
     setProcessing(true);
+
+    const useCaseFilter = `&use_case=1,${useCase}`;
+    const collectionFilter = `&collection=${DELEGATION_ALL_ADDRESS},${collection}`;
+    const initialUrl = apiUrl(
+      `/api/delegations?${useCaseFilter}${collectionFilter}`
+    );
+
+    fetchAllPages<Delegation>(initialUrl)
+      .then((loadedDelegations) => {
+        setDelegations(loadedDelegations);
+        if (file) {
+          void parseCsvFile(
+            file,
+            (row) => row["_0"],
+            setCsvData,
+            () => failProcessing("fileReadFailed")
+          );
+        }
+      })
+      .catch(() => {
+        failProcessing("dataLoadFailed");
+      });
   }
 
   function getForAddress(address: string, collection: string, useCase: number) {
@@ -38,61 +73,6 @@ export default function DelegationMappingTool() {
     );
     return myDelegations;
   }
-
-  function downloadCsvFile(data: string[]) {
-    const csvString = data.map((d) => d.toLowerCase()).join("\n");
-
-    const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
-
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.setAttribute("href", url);
-    link.setAttribute("download", "output.csv");
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  useEffect(() => {
-    async function fetchDelegations(url: string) {
-      fetchAllPages<Delegation>(url).then((delegations) => {
-        setDelegations(delegations);
-        const reader = new FileReader();
-
-        reader.onload = async () => {
-          const data = reader.result;
-          const results: string[] = [];
-
-          const parser = csvParser({ headers: true })
-            .on("data", (row: Record<string, string>) => {
-              results.push(row["_0"]!);
-            })
-            .on("end", () => {
-              setCsvData(results);
-            })
-            .on("error", (err: Error) => {
-              console.error(err);
-            });
-
-          parser.write(data);
-          parser.end();
-        };
-
-        if (file) {
-          reader.readAsText(file);
-        }
-      });
-    }
-    if (processing) {
-      const useCaseFilter = `&use_case=1,${useCase}`;
-
-      const collectionFilter = `&collection=${DELEGATION_ALL_ADDRESS},${collection}`;
-      const initialUrl = `${publicEnv.API_ENDPOINT}/api/delegations?${useCaseFilter}${collectionFilter}`;
-      fetchDelegations(initialUrl);
-    }
-  }, [processing]);
 
   useEffect(() => {
     const out: string[] = [];
@@ -124,7 +104,10 @@ export default function DelegationMappingTool() {
           }
         }
       });
-      downloadCsvFile(out);
+      downloadCsvFile(
+        buildCsv(out.map((address) => [address.toLowerCase()])),
+        "output.csv"
+      );
       setProcessing(false);
     }
   }, [csvData]);
@@ -141,7 +124,7 @@ export default function DelegationMappingTool() {
         <div className="tw-w-full tw-px-3">
           <select
             id="delegation-collection"
-            className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
+            className={`${DROPDOWN_FIELD_CLASSES} tw-form-select tw-block tw-w-full`}
             value={collection}
             onChange={(e) => {
               setCollection(e.target.value);
@@ -172,7 +155,7 @@ export default function DelegationMappingTool() {
         <div className="tw-w-full tw-px-3">
           <select
             id="delegation-use-case"
-            className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
+            className={`${DROPDOWN_FIELD_CLASSES} tw-form-select tw-block tw-w-full`}
             value={useCase}
             onChange={(e) => {
               const newCase = Number.parseInt(e.target.value);
@@ -207,6 +190,7 @@ export default function DelegationMappingTool() {
         processing={processing}
         onSubmit={submit}
       />
+      <MappingToolError error={error} />
     </div>
   );
 }

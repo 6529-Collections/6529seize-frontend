@@ -1,6 +1,7 @@
 "use client";
 
 import type { WaveSingleWaveDropRendererSet } from "@/components/waves/drops/participation/participationRenderer.types";
+import type { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
 import type { WaveParticipationVariant } from "@/helpers/waves/wave-participation-presentation.helpers";
 import { useWaveParticipationVariant } from "@/hooks/waves/useWaveParticipationVariant";
 import { DefaultSingleWaveDrop } from "./DefaultSingleWaveDrop";
@@ -20,9 +21,10 @@ const SINGLE_WAVE_DROP_RENDERERS: Readonly<
 };
 
 export const useWaveSingleWaveDropRendererSet = (
-  waveId: string | null | undefined
+  waveId: string | null | undefined,
+  capabilities?: readonly ApiCompetitionCapability[]
 ): WaveSingleWaveDropRendererSet => {
-  const variant = useWaveParticipationVariant(waveId);
+  const variant = useWaveParticipationVariant(waveId, capabilities);
 
   return SINGLE_WAVE_DROP_RENDERERS[variant];
 };

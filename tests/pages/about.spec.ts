@@ -8,6 +8,168 @@ import {
 } from "../testHelpers";
 
 test.describe("About Pages @smoke @medium @large", () => {
+  test("shows direct desktop downloads and independent macOS 12 recovery", async ({
+    page,
+    isMobile,
+  }) => {
+    const legacyMirrorUrl = "https://arweave.net/" + "a".repeat(43);
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "userAgentData", {
+        configurable: true,
+        value: { platform: "macOS", mobile: false },
+      });
+      Object.defineProperty(navigator, "maxTouchPoints", {
+        configurable: true,
+        value: 0,
+      });
+    });
+    await page.route(
+      "https://6529bucket.s3.eu-west-1.amazonaws.com/6529-core-app/**",
+      async (route) => {
+        const url = route.request().url();
+        const legacy = /(?:latest-macos-12\.yml|links\/0\.3\.15\.json)$/.test(
+          url
+        );
+        const version = legacy ? "0.3.15" : "0.3.18";
+        if (url.endsWith(".json")) {
+          await route.fulfill({
+            json: {
+              version,
+              files: legacy
+                ? [
+                    {
+                      url: "6529-DESKTOP-mac-arm64-0.3.15.dmg",
+                      arweaveUrl: legacyMirrorUrl,
+                    },
+                  ]
+                : [],
+            },
+          });
+          return;
+        }
+        const file = url.includes("/win/")
+          ? `6529-DESKTOP-win-x64-${version}.exe`
+          : url.includes("/linux/")
+            ? `6529-DESKTOP-linux-x86_64-${version}.AppImage`
+            : `6529-DESKTOP-mac-arm64-${version}.dmg`;
+        await route.fulfill({
+          json: {
+            version,
+            files: [{ url: file }],
+            minimumSystemVersion: legacy ? "21.0.0" : "22.0.0",
+          },
+        });
+      }
+    );
+    await page.goto("/about/6529-apps", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const mac = page.getByRole("group").filter({
+      has: page.getByText("macOS", { exact: true }),
+    });
+    const macSummary = page
+      .getByText("macOS", { exact: true })
+      .locator("xpath=ancestor::summary");
+    await expect(macSummary).toHaveText("macOS");
+    if (isMobile) {
+      await expect(mac).not.toHaveAttribute("open");
+      await macSummary.click();
+    }
+    await expect(mac).toHaveAttribute("open");
+    await expect(mac.getByText("Requires macOS 13 or later")).toBeVisible();
+    await expect(
+      mac.getByText("Last compatible version for macOS 12 Monterey")
+    ).toBeVisible();
+    const currentRelease = mac
+      .getByRole("heading", { name: "Version 0.3.18", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    const legacyRelease = mac
+      .getByRole("heading", { name: "Version 0.3.15", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    const currentDownload = currentRelease.getByRole("link", {
+      name: /^Download .*version 0\.3\.18, Apple silicon$/,
+    });
+    const legacyDownloadName = /^Download .*version 0\.3\.15, Apple silicon$/;
+    const legacyDownload = legacyRelease.getByRole("link", {
+      name: legacyDownloadName,
+    });
+    const legacyMirror = legacyRelease.getByRole("link", {
+      name: /^Arweave mirror .*version 0\.3\.15, Apple silicon$/,
+    });
+    await expect(currentDownload).toHaveAttribute(
+      "href",
+      /6529-DESKTOP-mac-arm64-0\.3\.18\.dmg$/
+    );
+    await expect(legacyDownload).toHaveAttribute(
+      "href",
+      /6529-DESKTOP-mac-arm64-0\.3\.15\.dmg$/
+    );
+    await expect(
+      currentRelease.getByText("Arweave mirror · Coming soon")
+    ).toBeVisible();
+    await expect(legacyMirror).toHaveAttribute("href", legacyMirrorUrl);
+    await expect(mac.getByText(/Keep your existing app data/)).toBeVisible();
+    if (!isMobile) {
+      const { color, backgroundColor } = await currentDownload.evaluate(
+        (link) => {
+          const style = getComputedStyle(link);
+          return { color: style.color, backgroundColor: style.backgroundColor };
+        }
+      );
+      await currentDownload.hover();
+      await expect(currentDownload).toHaveCSS("color", color);
+      await expect(currentDownload).not.toHaveCSS(
+        "background-color",
+        backgroundColor
+      );
+
+      const contentBox = await legacyRelease.boundingBox();
+      const mirrorBox = await legacyMirror.boundingBox();
+      expect(contentBox).not.toBeNull();
+      expect(mirrorBox).not.toBeNull();
+      if (contentBox && mirrorBox) {
+        expect(Math.round(mirrorBox.x + mirrorBox.width)).toBe(
+          Math.round(contentBox.x + contentBox.width)
+        );
+      }
+    }
+    await expectNoHorizontalOverflow(page);
+    const windows = page
+      .getByText("Windows", { exact: true })
+      .locator("xpath=ancestor::summary");
+    await windows.focus();
+    await page.keyboard.press("Enter");
+    await expect(mac).not.toHaveAttribute("open");
+    await expect(
+      mac
+        .getByRole("link", {
+          name: legacyDownloadName,
+          includeHidden: true,
+        })
+        .locator("xpath=ancestor::*[@inert]")
+    ).toHaveCount(1);
+    await expect(
+      page.getByRole("link", { name: /Windows, version 0.3.18, x64/ })
+    ).toHaveAttribute("href", /win-x64-0\.3\.18\.exe$/);
+    await expectNoHorizontalOverflow(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expectNoHorizontalOverflow(page);
+
+    const validator = page.getByRole("link", {
+      name: "6529 Validator",
+    });
+    await expect(validator).toHaveAttribute("href", "/validator");
+    await expect(validator).toHaveAccessibleDescription(
+      "Read more about 6529 validator"
+    );
+    await expect(
+      validator.getByRole("region", { name: "6529 Validator" })
+    ).toHaveCount(0);
+    await expectKeyboardFocusOutline(page, validator);
+    // Hit the card padding to verify that the entire section is a link.
+    await validator.click({ position: { x: 12, y: 12 } });
+    await expect(page).toHaveURL(/\/validator$/);
+  });
+
   test("should load the about index page", async ({ page }) => {
     await page.goto("/about", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
@@ -80,6 +242,7 @@ test.describe("About Pages @smoke @medium @large", () => {
       .getByRole("button", { name: /Open About contents navigation/i })
       .click();
     const contentsMenu = page.getByRole("menu");
+    await expect(contentsMenu).toBeVisible();
     await expect(
       contentsMenu.getByRole("menuitem", { name: /prenodes/i })
     ).toHaveCount(0);
@@ -93,6 +256,43 @@ test.describe("About Pages @smoke @medium @large", () => {
       contentsMenu.getByRole("menuitem", { name: /Go to page: GDRC/i })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps About contents inactive until hydration makes the first click usable", async ({
+    page,
+  }) => {
+    let releaseScripts = () => {};
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route("**/*", async (route) => {
+      if (route.request().resourceType() === "script") await scriptsReady;
+      await route.continue();
+    });
+    try {
+      // A section whose copy is in the server HTML. Minting and Subscription
+      // Minting copy mounts only after hydration (purchasing content is never
+      // server-rendered), so it cannot show the pre-hydration state.
+      await page.goto("/about/faq", { waitUntil: "commit" });
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: "6529 FAQ",
+          exact: true,
+        })
+      ).toBeVisible();
+      const contents = page.getByRole("button", {
+        name: /Open About contents navigation/i,
+      });
+      await expect(contents).toBeDisabled();
+      releaseScripts();
+      await expect(contents).toBeEnabled();
+      await contents.click();
+      await expect(page.getByRole("menu")).toBeVisible();
+      await expect(contents).toHaveAttribute("aria-expanded", "true");
+    } finally {
+      releaseScripts();
+    }
   });
 
   test("should keep GDRC in view beside the narrow desktop menu", async ({

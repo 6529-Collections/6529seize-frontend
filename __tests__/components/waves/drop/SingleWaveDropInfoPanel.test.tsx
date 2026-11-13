@@ -5,6 +5,25 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 
 const mockUseDropInteractionRules = jest.fn();
 
+jest.mock(
+  "@/components/waves/memes/collaborations/MemeCollaborationPanel",
+  () => ({
+    MemeCollaborationPanel: ({
+      dropId,
+      authorId,
+    }: {
+      dropId: string;
+      authorId: string;
+    }) => (
+      <div
+        data-testid="collaboration-panel"
+        data-drop-id={dropId}
+        data-author-id={authorId}
+      />
+    ),
+  })
+);
+
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: (props: any) => <svg data-testid="fa" {...props} />,
 }));
@@ -43,6 +62,7 @@ jest.mock("@/hooks/drops/useDropInteractionRules", () => ({
 
 const baseDrop: any = {
   id: "drop-1",
+  author: { id: "A" },
   drop_type: ApiDropType.Participatory,
   rank: 1,
   rating: 10,
@@ -68,6 +88,73 @@ describe("SingleWaveDropInfoPanel", () => {
       isVotingEnded: false,
       isWinner: false,
     });
+  });
+
+  it.each([
+    { submission_artist: "", collaborators: [] },
+    { submission_artist: "Artist A", collaborators: [] },
+    {
+      submission_artist: undefined,
+      collaborators: [
+        { id: "B", handle: "artistB", display: "artistB", pfp: null },
+      ],
+    },
+  ])(
+    "mounts managed invitation controls with credit marker $submission_artist and accepted profiles $collaborators",
+    (collaboration) => {
+      render(
+        <SingleWaveDropInfoPanel drop={{ ...baseDrop, ...collaboration }} />
+      );
+      expect(screen.getByTestId("collaboration-panel")).toHaveAttribute(
+        "data-drop-id",
+        "drop-1"
+      );
+      expect(screen.getByTestId("collaboration-panel")).toHaveAttribute(
+        "data-author-id",
+        "A"
+      );
+    }
+  );
+
+  it.each([ApiDropType.Chat, ApiDropType.Winner])(
+    "does not load invitations for an ordinary %s drop",
+    (drop_type) => {
+      render(
+        <SingleWaveDropInfoPanel
+          drop={{ ...baseDrop, drop_type, collaborators: [] }}
+        />
+      );
+      expect(
+        screen.queryByTestId("collaboration-panel")
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it("loads eligibility for lightweight submissions without credit or metadata", () => {
+    render(
+      <SingleWaveDropInfoPanel
+        drop={{
+          ...baseDrop,
+          drop_type: ApiDropType.Participatory,
+          collaborators: [],
+        }}
+      />
+    );
+    expect(screen.getByTestId("collaboration-panel")).toBeInTheDocument();
+  });
+
+  it("does not mount invitation controls for restricted artwork", () => {
+    render(
+      <SingleWaveDropInfoPanel
+        drop={{
+          ...baseDrop,
+          submission_artist: "",
+          collaborators: [{ id: "B", handle: "artistB" }],
+          moderation: { can_view: false },
+        }}
+      />
+    );
+    expect(screen.queryByTestId("collaboration-panel")).not.toBeInTheDocument();
   });
 
   it("shows Vote and opens the modal when voting is unlocked", () => {

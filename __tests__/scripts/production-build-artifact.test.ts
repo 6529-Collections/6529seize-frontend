@@ -1,7 +1,13 @@
 import fs from "node:fs";
 import { spawnSync } from "node:child_process";
+import os from "node:os";
 import path from "node:path";
 import YAML from "yaml";
+import {
+  PRODUCTION_ASSET_HOSTNAME,
+  PRODUCTION_ASSET_PREFIX,
+  PRODUCTION_SHARED_ASSET_PATH,
+} from "@/config/assetPrefix";
 
 const read = (file: string) =>
   fs.readFileSync(
@@ -125,6 +131,41 @@ describe("production exact-artifact deployment contract", () => {
     expect(deploySource).not.toContain("NEXT_PUBLIC_ETHEREUM_RPC_URL");
   });
 
+  it("bakes signed messages on into production builds", () => {
+    expect(build.env.NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES).toBe("true");
+  });
+
+  it("enables app device grants in production builds", () => {
+    expect(build.env.NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS).toBe("true");
+  });
+
+  it("turns the encrypted messages flag on in production builds", () => {
+    // Encrypted DMs (D109) are on in production by owner decision
+    // (2026-10-31); switching them off is a one-line change to "false" here.
+    expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("true");
+  });
+
+  it("leaves gap-only chat sync off in production builds", () => {
+    // Production flips need the owner (WAVES-PLAN 0.7/0.8, C11).
+    expect(build.env).not.toHaveProperty("NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC");
+  });
+
+  it("leaves the app-socket PING off in production builds", () => {
+    // Production flips need the owner; the API must answer PING first.
+    expect(build.env).not.toHaveProperty("NEXT_PUBLIC_FEATURE_WS_PING");
+  });
+
+  it("generates the production sitemap under the fail-closed policy", () => {
+    const buildStep = build.jobs["build-production-artifact"].steps.find(
+      (step: { name?: string }) => step.name === "Build exact production bytes"
+    );
+
+    // build:ci runs the postbuild sitemap step with this environment.
+    expect(buildStep.run).toBe("./bin/6529 run build:ci");
+    expect(buildStep.env.SITEMAP_FAILURE_POLICY).toBe("fail");
+    expect(buildSource).not.toContain("SITEMAP_FAILURE_POLICY: fallback");
+  });
+
   it("keeps production manual and deploys only the independently verified artifact", () => {
     expect(deploy.name).toBe("Web Deploy - PROD");
     expect(deploy.on.push).toBeUndefined();
@@ -149,9 +190,11 @@ describe("production exact-artifact deployment contract", () => {
       '.artifact_contract == "production-deployment-v1"'
     );
     expect(deploySource).toContain(".schema_version == 1");
-    expect(deploySource).toContain("aws s3 cp production-artifact/target");
     expect(deploySource).toContain(
-      '--recursive --cache-control "public, max-age=31536000, immutable"'
+      "aws s3 cp production-artifact/target/package.zip"
+    );
+    expect(deploySource).toContain(
+      '"s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/package.zip"'
     );
     expect(deploySource).toContain(
       '--cache-control "no-store, max-age=0, must-revalidate"'
@@ -168,5 +211,439 @@ describe("production exact-artifact deployment contract", () => {
     );
     expect(deploySource).not.toMatch(/release[-_ ]bus/i);
     expect(deploySource).not.toMatch(/operation_id|authority/i);
+  });
+
+  it("records the Sentry release with the installed sentry-cli only once production is live", () => {
+    type Step = {
+      name?: string;
+      run?: string;
+      uses?: string;
+      env?: Record<string, string>;
+      with?: Record<string, unknown>;
+      "continue-on-error"?: boolean;
+      "timeout-minutes"?: number;
+    };
+    const indexIn = (steps: Step[], name: string) => {
+      const index = steps.findIndex((step) => step.name === name);
+      expect(index).toBeGreaterThanOrEqual(0);
+      return index;
+    };
+
+    // Build: hand the deploy the binary the frozen install verified.
+    const buildSteps: Step[] = build.jobs["build-production-artifact"].steps;
+    const stage =
+      buildSteps[
+        indexIn(buildSteps, "Stage installed sentry-cli for the Sentry release")
+      ]!;
+    const upload =
+      buildSteps[
+        indexIn(buildSteps, "Upload sentry-cli for the Sentry release")
+      ]!;
+    expect(
+      indexIn(buildSteps, "Stage installed sentry-cli for the Sentry release")
+    ).toBeGreaterThan(indexIn(buildSteps, "Install frozen dependencies"));
+    expect(stage.run).toContain("node ops/scripts/resolve-sentry-cli.cjs");
+    expect(stage.env ?? {}).not.toHaveProperty("SENTRY_AUTH_TOKEN");
+    expect(stage["continue-on-error"]).toBe(true);
+    expect(upload["continue-on-error"]).toBe(true);
+    expect(upload.with?.["name"]).toBe(
+      "production-sentry-cli-${{ github.run_id }}"
+    );
+
+    // Release job: only after the deploy job succeeded, never blocking, and
+    // with the Sentry token as its only credential.
+    const releaseJob = deploy.jobs["record-sentry-release"];
+    const steps: Step[] = releaseJob.steps;
+    expect(releaseJob.needs).toBe("build-upload-deploy");
+    expect(releaseJob.if).toBeUndefined();
+    expect(releaseJob["continue-on-error"]).toBe(true);
+    expect(releaseJob.environment).toBeUndefined();
+    expect(releaseJob.permissions).toEqual({
+      actions: "read",
+      contents: "read",
+    });
+    const releaseJobSource = JSON.stringify(releaseJob);
+    expect(releaseJobSource).not.toContain("configure-aws-credentials");
+    expect(releaseJobSource).not.toContain("id-token");
+    expect(releaseJobSource.match(/secrets\.[A-Z_]+/g)).toEqual([
+      "secrets.SENTRY_AUTH_TOKEN",
+    ]);
+    const deployJobSource = JSON.stringify(deploy.jobs["build-upload-deploy"]);
+    expect(deployJobSource).not.toContain("sentry-cli");
+    expect(deployJobSource).not.toContain("SENTRY_AUTH_TOKEN");
+    const download =
+      steps[indexIn(steps, "Download sentry-cli for the Sentry release")]!;
+    const recordIndex = indexIn(steps, "Record the Sentry release");
+    const record = steps[recordIndex]!;
+    expect(recordIndex).toBeGreaterThan(
+      indexIn(steps, "Download sentry-cli for the Sentry release")
+    );
+    expect(download["continue-on-error"]).toBe(true);
+    expect(download.with?.["name"]).toBe(upload.with?.["name"]);
+    expect(record["continue-on-error"]).toBe(true);
+    expect(record["timeout-minutes"]).toBeGreaterThan(0);
+    expect(record.run).toContain(
+      'bash ops/scripts/sentry-release.sh "$cli" "$COMMIT_SHA"'
+    );
+    expect(record.env?.["SENTRY_AUTH_TOKEN"]).toBe(
+      "${{ secrets.SENTRY_AUTH_TOKEN }}"
+    );
+    // The same org and project the build plugin used.
+    const nextConfig = fs.readFileSync(
+      path.join(process.cwd(), "next.config.ts"),
+      "utf8"
+    );
+    expect(nextConfig).toContain(`org: "${record.env?.["SENTRY_ORG"]}"`);
+    expect(nextConfig).toContain(
+      `project: "${record.env?.["SENTRY_PROJECT"]}"`
+    );
+    // Release name = github.sha = the VERSION the build bakes and the runtime
+    // reports to Sentry.
+    expect(deploy.env.COMMIT_SHA).toBe("${{ github.sha }}");
+    expect(deploy.jobs["build-production-artifact"].with.target_sha).toBe(
+      "${{ github.sha }}"
+    );
+    expect(buildSource).toContain("VERSION: ${{ inputs.target_sha }}");
+    // set-commits --auto reads the full local history at the deployed commit.
+    const checkout = steps.find(
+      (step) => step.name === "Checkout exact production SHA"
+    );
+    expect(checkout?.with?.["ref"]).toBe("${{ github.sha }}");
+    expect(checkout?.with?.["fetch-depth"]).toBe(0);
+    expect(checkout?.with?.["persist-credentials"]).toBe(false);
+    // Nothing is downloaded at deploy time.
+    expect(JSON.stringify([stage, download, record])).not.toMatch(
+      /\bnpx\b|\bcurl\b|\bwget\b|npm (i|install)\b|pnpm (add|dlx)\b/
+    );
+  });
+
+  it("installs release dependencies cold, with no Actions cache", () => {
+    type Step = {
+      name?: string;
+      uses?: string;
+      with?: Record<string, unknown>;
+    };
+    // Every workflow the production deploy runs, including reusable ones.
+    const releaseFiles = new Set(["build-upload-deploy-prod.yml"]);
+    for (const job of Object.values(deploy.jobs) as { uses?: string }[]) {
+      const local = /^\.\/\.github\/workflows\/([^/]+\.ya?ml)$/u.exec(
+        job.uses ?? ""
+      );
+      if (local?.[1]) releaseFiles.add(local[1]);
+    }
+    expect(releaseFiles).toEqual(
+      new Set([
+        "build-upload-deploy-prod.yml",
+        "production-build-artifact.yml",
+        "production-artifact-metadata.yml",
+        "production-artifact-verifier.yml",
+      ])
+    );
+    for (const file of releaseFiles) {
+      const source = read(file);
+      const workflow = YAML.parse(source) as {
+        jobs: Record<string, { steps?: Step[] }>;
+      };
+      expect(source).not.toContain("actions/cache");
+      expect(source).not.toContain("restore-keys");
+      expect(source).not.toContain("npm_config_store_dir");
+      for (const job of Object.values(workflow.jobs)) {
+        for (const step of job.steps ?? []) {
+          expect(step.with ?? {}).not.toHaveProperty("cache");
+          if (step.uses?.startsWith("actions/setup-node@")) {
+            expect(step.with?.["package-manager-cache"]).not.toBe(true);
+          }
+        }
+      }
+    }
+    const buildSteps: Step[] = build.jobs["build-production-artifact"].steps;
+    const setupNode = buildSteps.find((step) =>
+      step.uses?.startsWith("actions/setup-node@")
+    );
+    expect(setupNode?.with?.["package-manager-cache"]).toBe(false);
+    expect(
+      buildSteps.findIndex(
+        (step) => step.name === "Install frozen dependencies"
+      )
+    ).toBeGreaterThan(buildSteps.indexOf(setupNode!));
+  });
+
+  describe("Elastic Beanstalk application version description", () => {
+    const step = deploy.jobs["build-upload-deploy"].steps.find(
+      (candidate: { name?: string }) =>
+        candidate.name === "Ensure Elastic Beanstalk application version"
+    ) as { run: string };
+    const mockAws = `
+aws() {
+  case "$1:$2" in
+    elasticbeanstalk:describe-application-versions)
+      printf '{"ApplicationVersions":[]}\\n' ;;
+    elasticbeanstalk:create-application-version)
+      shift 2
+      while [ "$#" -gt 0 ]; do
+        if [ "$1" = --description ]; then printf '%s' "$2" > "$TEST_DESCRIPTION"; fi
+        shift
+      done ;;
+    *) return 99 ;;
+  esac
+}
+`;
+    const describeAs = (commitMessage: string) => {
+      const directory = fs.mkdtempSync(path.join(os.tmpdir(), "eb-version-"));
+      const output = path.join(directory, "description");
+      try {
+        const result = spawnSync("bash", ["-c", `${mockAws}\n${step.run}`], {
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            AWS_BUCKET: "test-bucket",
+            BEANSTALK_APP_NAME: "test app",
+            COMMIT_SHA: "a".repeat(40),
+            COMMIT_MESSAGE: commitMessage,
+            TEST_DESCRIPTION: output,
+          },
+        });
+        expect(result.status).toBe(0);
+        return fs.readFileSync(output, "utf8");
+      } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+      }
+    };
+
+    it.each([
+      "Merge pull request #4806 from 6529-Collections/claude/share-image",
+      "Fix file:// links in the docs",
+      "Use https://6529.io in examples",
+    ])("keeps an ordinary commit subject as is: %s", (subject) => {
+      expect(describeAs(subject)).toBe(subject);
+    });
+
+    it.each(["file:///etc/hostname", "fileb://package.zip", "FILE://x"])(
+      "keeps a subject that names a local file literal: %s",
+      (subject) => {
+        expect(describeAs(subject)).toBe(`Commit: ${subject}`);
+      }
+    );
+  });
+
+  describe("validator page access on deploy", () => {
+    const step = deploy.jobs["build-upload-deploy"].steps.find(
+      (candidate: { name?: string }) =>
+        candidate.name === "Deploy new version to Elastic Beanstalk"
+    ) as { run: string };
+    const mockAws = `
+aws() {
+  if [ "$1:$2" != elasticbeanstalk:update-environment ]; then return 99; fi
+  while [ "$#" -gt 0 ]; do
+    if [ "$1" = --option-settings ]; then printf '%s' "$2" > "$TEST_SETTINGS"; fi
+    shift
+  done
+}
+`;
+    const deployWith = (password: string, publicFlag: string) => {
+      const directory = fs.mkdtempSync(path.join(os.tmpdir(), "eb-deploy-"));
+      const settingsFile = path.join(directory, "settings.json");
+      try {
+        const result = spawnSync("bash", ["-c", `${mockAws}\n${step.run}`], {
+          cwd: process.cwd(),
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            ETHEREUM_RPC_URL: "https://rpc.example.test/",
+            SSR_CLIENT_ID: "client",
+            SSR_CLIENT_SECRET: "secret",
+            ALCHEMY_API_KEY: "alchemy",
+            GITHUB_LINK_STATUS_PREVIEW_TOKEN: "preview",
+            VALIDATOR_PAGE_PASSWORD: password,
+            VALIDATOR_PAGE_PUBLIC: publicFlag,
+            BEANSTALK_APP_NAME: "test app",
+            BEANSTALK_ENV_NAME: "test-env",
+            COMMIT_SHA: "a".repeat(40),
+            TEST_SETTINGS: settingsFile,
+          },
+        });
+        const settings = fs.existsSync(settingsFile)
+          ? (JSON.parse(fs.readFileSync(settingsFile, "utf8")) as Array<{
+              OptionName: string;
+              Value: string;
+            }>)
+          : null;
+        return { result, settings };
+      } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+      }
+    };
+    const option = (
+      settings: Array<{ OptionName: string; Value: string }> | null,
+      name: string
+    ) => settings?.find((entry) => entry.OptionName === name)?.Value;
+
+    it.each([
+      [
+        "the variable is true and a password is set",
+        "pw",
+        "true",
+        "true",
+        "pw",
+      ],
+      [
+        "the variable is true and no password is set",
+        "",
+        "true",
+        "true",
+        undefined,
+      ],
+      ["a password is set and the variable is unset", "pw", "", "false", "pw"],
+      [
+        "a password is set and the variable is false",
+        "pw",
+        "false",
+        "false",
+        "pw",
+      ],
+    ])(
+      "deploys when %s",
+      (_label, password, publicFlag, expectedPublic, expectedPassword) => {
+        const { result, settings } = deployWith(password, publicFlag);
+
+        expect(result.status).toBe(0);
+        expect(option(settings, "VALIDATOR_PAGE_PUBLIC")).toBe(expectedPublic);
+        expect(option(settings, "VALIDATOR_PAGE_PASSWORD")).toBe(
+          expectedPassword
+        );
+      }
+    );
+
+    it.each(["", "false", "TRUE"])(
+      "stops before updating the environment when the password is missing and the variable is %j",
+      (publicFlag) => {
+        const { result, settings } = deployWith("", publicFlag);
+
+        expect(result.status).not.toBe(0);
+        expect(result.stdout).toContain(
+          "::error::VALIDATOR_PAGE_PASSWORD is empty and VALIDATOR_PAGE_PUBLIC is not true."
+        );
+        expect(settings).toBeNull();
+      }
+    );
+  });
+
+  it("publishes static files create-only to the shared prefix pages load from", () => {
+    const steps: { name?: string; run?: string }[] =
+      deploy.jobs["build-upload-deploy"].steps;
+    const stepIndex = (name: string) => {
+      const index = steps.findIndex((step) => step.name === name);
+      expect(index).toBeGreaterThanOrEqual(0);
+      return index;
+    };
+    const sharedStaticPrefix = `${PRODUCTION_SHARED_ASSET_PATH}/_next/static`;
+
+    // Pages, workflow, and IAM must agree on one prefix.
+    expect(PRODUCTION_ASSET_PREFIX).toBe(
+      `https://${PRODUCTION_ASSET_HOSTNAME}/${PRODUCTION_SHARED_ASSET_PATH}`
+    );
+    expect(PRODUCTION_SHARED_ASSET_PATH).not.toMatch(
+      /^web_build\/[a-f0-9]{40}$/
+    );
+    expect(deploy.env.SHARED_STATIC_PREFIX).toBe(sharedStaticPrefix);
+    expect(deploy.env.AWS_BUCKET).toBe("seize-web");
+
+    const publish = steps.find(
+      (step) =>
+        step.name === "Publish verified static files to the shared prefix"
+    );
+    if (!publish?.run) {
+      throw new Error("missing shared static publish step");
+    }
+    expect(publish.run).toContain(
+      "node ops/scripts/publish-shared-static-assets.cjs"
+    );
+    expect(publish.run).toContain(
+      "--source production-artifact/target/_next/static"
+    );
+    expect(publish.run).toContain('--prefix "$SHARED_STATIC_PREFIX"');
+
+    // Static files are verified, then published, before any server serves
+    // pages that reference them.
+    expect(
+      stepIndex("Independently verify selected production bytes")
+    ).toBeLessThan(
+      stepIndex("Publish verified static files to the shared prefix")
+    );
+    expect(stepIndex("Refuse stale main or production downgrade")).toBeLessThan(
+      stepIndex("Publish verified static files to the shared prefix")
+    );
+    expect(
+      stepIndex("Publish verified static files to the shared prefix")
+    ).toBeLessThan(stepIndex("Deploy new version to Elastic Beanstalk"));
+    expect(stepIndex("Upload verified deployment bundle to S3")).toBeLessThan(
+      stepIndex("Ensure Elastic Beanstalk application version")
+    );
+
+    // No more full per-commit copies of unchanged static files.
+    expect(deploySource).not.toContain(
+      'aws s3 cp production-artifact/target "'
+    );
+    expect(deploySource).not.toMatch(/aws s3 (?:cp|sync)[^\n]*--recursive/);
+
+    const storage = JSON.parse(
+      fs.readFileSync(
+        path.join(
+          process.cwd(),
+          "ops",
+          "iam",
+          "frontend-production",
+          "FrontendProductionStorage.json"
+        ),
+        "utf8"
+      )
+    ) as {
+      Statement: {
+        Sid: string;
+        Action: string[];
+        Resource: string[];
+        Condition: Record<string, Record<string, unknown>>;
+      }[];
+    };
+    const statement = (sid: string) => {
+      const found = storage.Statement.find((entry) => entry.Sid === sid);
+      if (!found) {
+        throw new Error(`missing IAM statement ${sid}`);
+      }
+      return found;
+    };
+    const objects = `arn:aws:s3:::seize-web/${sharedStaticPrefix}/*`;
+    expect(statement("ProductionSharedStaticCreateOnly")).toEqual(
+      expect.objectContaining({
+        Action: ["s3:PutObject"],
+        Resource: [objects],
+        Condition: expect.objectContaining({
+          Null: { "s3:if-none-match": "false" },
+        }),
+      })
+    );
+    expect(statement("ProductionSharedStaticRead")).toEqual(
+      expect.objectContaining({ Action: ["s3:GetObject"], Resource: [objects] })
+    );
+    expect(statement("ProductionSharedStaticListing")).toEqual(
+      expect.objectContaining({
+        Action: ["s3:ListBucket"],
+        Resource: ["arn:aws:s3:::seize-web"],
+        Condition: expect.objectContaining({
+          StringLike: { "s3:prefix": [`${sharedStaticPrefix}/*`] },
+        }),
+      })
+    );
+    // Nothing may delete or replace shared objects.
+    for (const entry of storage.Statement) {
+      if (
+        entry.Resource.some((resource) =>
+          resource.includes("/web_build/shared/")
+        )
+      ) {
+        expect(entry.Action).not.toContain("s3:DeleteObject");
+        expect(entry.Action).not.toContain("s3:PutObjectAcl");
+      }
+    }
   });
 });

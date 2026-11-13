@@ -4,6 +4,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 import React, { useLayoutEffect, useRef, useState } from "react";
+import { useMeasure } from "react-use";
 import {
   ArrowLeftIcon,
   CheckIcon,
@@ -14,26 +15,23 @@ import {
   ShareIcon,
 } from "@heroicons/react/24/outline";
 import type { CompactMenuItem } from "@/components/compact-menu";
+import DisplayTimeZoneSwitch, {
+  useDisplayTimeZoneMenuItem,
+} from "@/components/display-time-zone/DisplayTimeZoneSwitch";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
-import type { SetActiveContentTab } from "@/components/brain/ContentTabContext";
-import LazyHeaderSearchModal from "@/components/header/header-search/LazyHeaderSearchModal";
-import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import {
-  getWaveHomeRoute,
-  getWavePathRoute,
-} from "@/helpers/navigation.helpers";
-import { isCompetitionPathname } from "@/helpers/competition.helpers";
+import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
-import { MyStreamWaveTab } from "@/types/waves.types";
-import LazyWaveDropsSearchModal, {
+import type { MyStreamWaveTab } from "@/types/waves.types";
+import { useOpenMyStreamWaveSearch } from "./MyStreamWaveSearch";
+import {
   preloadWaveDropsSearchModal,
   useWaveDropsSearchModalEarlyPreload,
 } from "@/components/waves/drops/search/LazyWaveDropsSearchModal";
@@ -45,25 +43,35 @@ import { useSidebarState } from "../../../../hooks/useSidebarState";
 import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
 import WaveRepButton from "@/components/waves/header/rep/WaveRepButton";
 import WaveJoinCta from "@/components/waves/header/WaveJoinCta";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import CompactWaveActions from "./CompactWaveActions";
+import WaveHeaderDisplayMenu from "./WaveHeaderDisplayMenu";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { BRAIN_RIGHT_SIDEBAR_ID } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
+import { PlaintextDmEncryptionNotice } from "@/components/e2ee/plaintext/PlaintextDmEncryptionNotice";
+import {
+  WAVE_HEADER_ACTION_CLASSES,
+  WAVE_HEADER_ACTION_SURFACE_CLASSES,
+  WAVE_HEADER_COMPACT_ACTION_CLASSES,
+  WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES,
+} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
 
 const TRUNCATION_EPSILON_PX = 1;
+const CONDENSED_HEADER_WIDTH_PX = 768;
+const DESCRIPTION_PREVIEW_MIN_WIDTH_PX = 640;
 const WAVE_SCORE_LEARN_MORE_HREF = "/network/wave-score";
-type OpenSearch = "site" | "wave" | null;
 
 export interface MyStreamWaveTabsHeaderActionContext {
   readonly activeContentTab: MyStreamWaveTab;
   readonly isCompact: boolean;
+  readonly isCondensed: boolean;
+  readonly isNarrow: boolean;
   readonly tooltipId: string;
 }
 
 interface MyStreamWaveTabsHeaderProps {
   readonly wave: ApiWave;
   readonly activeContentTab: MyStreamWaveTab;
-  readonly setActiveContentTab: SetActiveContentTab;
-  readonly onSelectCuration: (curationId: string | null) => void;
   readonly isCompact: boolean;
   readonly showBackButton: boolean;
   readonly headerActionsTooltipId: string;
@@ -109,6 +117,7 @@ const getWavePictureContributors = (wave: ApiWave): WavePictureContributors =>
   }));
 
 interface MyStreamWaveHeaderIdentityProps {
+  readonly isNarrow: boolean;
   readonly isRightSidebarOpen: boolean;
   readonly descriptionPreviewRef: React.RefObject<HTMLSpanElement | null>;
   readonly directMessageProfileHref: string | null;
@@ -136,6 +145,7 @@ function getWaveScoreLearnMoreHref({
 }
 
 function MyStreamWaveHeaderIdentity({
+  isNarrow,
   isRightSidebarOpen,
   descriptionPreviewRef,
   directMessageProfileHref,
@@ -152,17 +162,21 @@ function MyStreamWaveHeaderIdentity({
   const information = useWaveInformation();
   const locale = useBrowserLocale();
   const isAnnouncement = seizeSettings?.isAnnouncementsWave(wave.id) ?? false;
-  const score =
-    !isCompact && !isDirectMessage ? (
-      <WaveTrustSignals
-        waveRep={wave.wave_rep}
-        waveScore={wave.wave_score}
-        variant="header-inline"
-        mode="summary"
-        learnMoreHref={waveScoreLearnMoreHref}
-        className="tw-shrink-0"
-      />
-    ) : null;
+  const identityOffset = wave.parent_wave ? "md:-tw-mt-2" : "md:-tw-mt-1.5";
+  const score = !isDirectMessage ? (
+    <WaveTrustSignals
+      waveRep={wave.wave_rep}
+      waveScore={wave.wave_score}
+      variant={isNarrow ? "header-avatar" : "header-inline"}
+      mode="summary"
+      learnMoreHref={waveScoreLearnMoreHref}
+      className={
+        isNarrow
+          ? "tw-absolute -tw-bottom-1.5 -tw-right-1 tw-z-10"
+          : "tw-shrink-0"
+      }
+    />
+  ) : null;
 
   if (directMessageProfileHref) {
     return (
@@ -188,7 +202,7 @@ function MyStreamWaveHeaderIdentity({
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-[13px]">
       <div
-        className={`tw-size-9 tw-flex-shrink-0 tw-self-start ${
+        className={`tw-relative tw-size-9 tw-flex-shrink-0 ${showDescriptionPreview || wave.parent_wave ? "tw-self-start" : ""} ${
           isAnnouncement
             ? "tw-rounded-lg"
             : "tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950"
@@ -203,39 +217,44 @@ function MyStreamWaveHeaderIdentity({
             contributors={wavePictureContributors}
           />
         )}
+        {isNarrow && score}
       </div>
       {/* Offset the first line's leading to align its text with the avatar. */}
       <div
-        className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-col md:tw-self-start ${
-          wave.parent_wave ? "md:-tw-mt-2" : "md:-tw-mt-1.5"
+        className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-col ${
+          showDescriptionPreview ? `md:tw-self-start ${identityOffset}` : ""
         }`}
       >
         <WaveParentNavigation
           parentWave={wave.parent_wave}
           variant={isCompact ? "compact-header" : "header"}
         />
-        {!isCompact && (
-          <div className="tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-x-1.5 lg:tw-min-h-7">
-            <h1 className="tw-m-0 tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
-              <button
-                type="button"
-                onClick={() => information?.open(wave.id, false)}
-                aria-expanded={isRightSidebarOpen}
-                aria-controls={
-                  isRightSidebarOpen ? BRAIN_RIGHT_SIDEBAR_ID : undefined
-                }
-                aria-label={t(locale, "waves.information.open", {
-                  name: wave.name,
-                })}
-                className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-normal tw-leading-6 tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              >
-                {wave.name}
-              </button>
-            </h1>
-            {score}
-          </div>
-        )}
-        {showDescriptionPreview && !isCompact ? (
+        <div className="tw-flex tw-min-h-6 tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-1.5">
+          <h1 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+            <button
+              type="button"
+              onClick={() => {
+                if (isCompact) information?.open(wave.id);
+                else information?.open(wave.id, false);
+              }}
+              aria-haspopup={isCompact ? "dialog" : undefined}
+              aria-expanded={isCompact ? undefined : isRightSidebarOpen}
+              aria-controls={
+                !isCompact && isRightSidebarOpen
+                  ? BRAIN_RIGHT_SIDEBAR_ID
+                  : undefined
+              }
+              aria-label={t(locale, "waves.information.open", {
+                name: wave.name,
+              })}
+              className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-normal tw-leading-6 tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              {wave.name}
+            </button>
+          </h1>
+          {!isNarrow && score}
+        </div>
+        {showDescriptionPreview && (
           <WaveDescriptionPopover
             wave={wave}
             align="left"
@@ -257,22 +276,6 @@ function MyStreamWaveHeaderIdentity({
               )}
             </span>
           </WaveDescriptionPopover>
-        ) : (
-          isCompact && (
-            <h1 className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95">
-              <button
-                type="button"
-                onClick={() => information?.open(wave.id)}
-                aria-haspopup="dialog"
-                aria-label={t(locale, "waves.information.open", {
-                  name: wave.name,
-                })}
-                className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-normal tw-leading-6 tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              >
-                {wave.name}
-              </button>
-            </h1>
-          )
         )}
       </div>
     </div>
@@ -282,8 +285,6 @@ function MyStreamWaveHeaderIdentity({
 export default function MyStreamWaveTabsHeader({
   wave,
   activeContentTab,
-  setActiveContentTab,
-  onSelectCuration,
   isCompact,
   showBackButton,
   headerActionsTooltipId,
@@ -303,7 +304,9 @@ export default function MyStreamWaveTabsHeader({
   });
   const { isApp } = useDeviceInfo();
   const { connectedProfile, activeProfileProxy } = useAuth();
-  const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
+  const { open: openSearch, trigger: searchTrigger } =
+    useOpenMyStreamWaveSearch();
+  const displayTimeZoneMenuItem = useDisplayTimeZoneMenuItem();
 
   // Warm the wave search modal from the visitor's first interaction (or when
   // idle), so the first open does not wait on the network. The chunk stays out
@@ -312,10 +315,16 @@ export default function MyStreamWaveTabsHeader({
   const descriptionPreviewRef = useRef<HTMLSpanElement>(null);
   const [isDescriptionPreviewTruncated, setIsDescriptionPreviewTruncated] =
     useState(false);
-  const waveChatScroll = useWaveChatScrollOptional();
   const isDirectMessage = getWaveIsDirectMessage(wave);
-  // Reserve the description row's space even when it is empty, matching the
-  // pending header so metadata cannot move the divider and chat tabs.
+  const isCompactWave = isCompact && !isDirectMessage;
+  const [headerRef, { width: headerWidth }] = useMeasure<HTMLElement>();
+  const isNarrow = isCompactWave && (headerWidth === 0 || headerWidth < 400);
+  const isCondensed =
+    !isCompact &&
+    !isDirectMessage &&
+    headerWidth > 0 &&
+    headerWidth < CONDENSED_HEADER_WIDTH_PX;
+  // Match the pending description row only when the loaded header has one.
   const headerMinHeight = wave.parent_wave
     ? "md:tw-min-h-[91px]"
     : "md:tw-min-h-[69px]";
@@ -338,7 +347,11 @@ export default function MyStreamWaveTabsHeader({
   const wavePictureContributors = getWavePictureContributors(wave);
   const showShareAction = !isDirectMessage;
   const previewText = getWaveDescriptionPreviewText(wave);
-  const showDescriptionPreview = showShareAction && !!previewText;
+  const showDescriptionPreview =
+    showShareAction &&
+    !!previewText &&
+    !isCompact &&
+    (headerWidth === 0 || headerWidth >= DESCRIPTION_PREVIEW_MIN_WIDTH_PX);
   const {
     mode: waveLinkActionMode,
     label: waveLinkActionLabel,
@@ -367,23 +380,6 @@ export default function MyStreamWaveTabsHeader({
     router.push(newUrl, { scroll: false });
   };
 
-  const handleSearchSelect = (serialNo: number) => {
-    onSelectCuration(null);
-    setActiveContentTab(MyStreamWaveTab.CHAT);
-    if (waveChatScroll && !isCompetitionPathname(pathname)) {
-      waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
-      return;
-    }
-
-    const params = new URLSearchParams(searchParams.toString() || "");
-    params.delete("curation");
-    params.set("serialNo", String(serialNo));
-    const chatPath = isCompetitionPathname(pathname)
-      ? getWavePathRoute(wave.id)
-      : pathname;
-    router.replace(`${chatPath}?${params.toString()}`, { scroll: false });
-  };
-
   const searchMessagesLabel = "Search messages in this wave";
   const rightSidebarActionLabel = isRightSidebarOpen
     ? waveRightPanelText("waves.sidebar.rightPanel.controls.hide")
@@ -405,13 +401,17 @@ export default function MyStreamWaveTabsHeader({
   const actionContext: MyStreamWaveTabsHeaderActionContext = {
     activeContentTab,
     isCompact,
+    isCondensed,
+    isNarrow,
     tooltipId: headerActionsTooltipId,
   };
-  const externalOverflowMenuItems = isCompact
-    ? (renderOverflowMenuItems?.(actionContext) ?? [])
-    : [];
+  const externalOverflowMenuItems =
+    isCompact || !isDirectMessage
+      ? (renderOverflowMenuItems?.(actionContext) ?? [])
+      : [];
   const headerOverflowMenuItems: CompactMenuItem[] = isCompact
     ? [
+        displayTimeZoneMenuItem,
         ...(showShareAction
           ? [
               {
@@ -428,9 +428,31 @@ export default function MyStreamWaveTabsHeader({
     ...externalOverflowMenuItems,
     ...headerOverflowMenuItems,
   ];
+  const compactActions =
+    isCompact && compactMenuItems.length > 0 ? (
+      <CompactWaveActions
+        items={compactMenuItems}
+        compactTrigger={isCompactWave}
+      />
+    ) : null;
+  const backButtonSizeClass = isCompactWave
+    ? `tw-h-8 tw-w-6 @[21rem]/wave-header:tw-w-8 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`
+    : "tw-size-11 tw-self-start sm:-tw-ml-2.5 sm:desktop-hover:tw-h-9";
+  const directTimeZoneVariant = isCompact ? "compact" : "header";
+  const utilityButtonClassName = isCompactWave
+    ? WAVE_HEADER_COMPACT_ACTION_CLASSES
+    : WAVE_HEADER_ACTION_CLASSES;
+  const utilitySurfaceClassName = isCompactWave
+    ? WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES
+    : WAVE_HEADER_ACTION_SURFACE_CLASSES;
+  const centeredActionsClassName = `tw-flex tw-shrink-0 tw-self-center tw-items-center ${
+    isCompactWave
+      ? "tw-gap-x-0.5 @[21rem]/wave-header:tw-gap-x-2"
+      : "tw-gap-x-2"
+  }`;
 
   useLayoutEffect(() => {
-    if (!showDescriptionPreview || isCompact) {
+    if (!showDescriptionPreview) {
       const frameId = globalThis.requestAnimationFrame(() => {
         setIsDescriptionPreviewTruncated(false);
       });
@@ -472,25 +494,32 @@ export default function MyStreamWaveTabsHeader({
       globalThis.cancelAnimationFrame(frameId);
       observer.disconnect();
     };
-  }, [isCompact, previewText, showDescriptionPreview]);
+  }, [previewText, showDescriptionPreview]);
 
   return (
     <>
-      <div
-        className={`${headerClassName} ${isDirectMessage ? "" : headerMinHeight}`}
+      <header
+        ref={headerRef}
+        className={`${headerClassName} tw-flex-nowrap tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-@container/wave-header ${showDescriptionPreview ? headerMinHeight : ""}`}
       >
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 tw-self-start tw-pt-0.5">
+        <div
+          className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 ${isCondensed || isCompactWave ? "tw-self-center" : "tw-self-start tw-pt-0.5"}`}
+        >
           {showBackButton && (
             <button
               type="button"
               onClick={handleMobileBack}
-              className="tw-flex tw-h-9 tw-items-center tw-self-start tw-border-0 tw-bg-transparent tw-p-0 tw-px-1.5 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50 sm:-tw-ml-2.5 sm:tw-px-2.5"
+              className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50 ${backButtonSizeClass}`}
               aria-label="Go back"
             >
-              <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 sm:tw-h-6 sm:tw-w-6" />
+              <ArrowLeftIcon
+                aria-hidden="true"
+                className="tw-size-4 tw-flex-shrink-0"
+              />
             </button>
           )}
           <MyStreamWaveHeaderIdentity
+            isNarrow={isNarrow}
             isRightSidebarOpen={isRightSidebarOpen}
             descriptionPreviewRef={descriptionPreviewRef}
             directMessageProfileHref={directMessageProfileHref}
@@ -503,27 +532,54 @@ export default function MyStreamWaveTabsHeader({
             waveScoreLearnMoreHref={waveScoreLearnMoreHref}
             isDirectMessage={isDirectMessage}
           />
+          {/* Plaintext DMs (D109): quiet label + start an encrypted chat.
+              Renders nothing for other waves or with the flag off. */}
+          <PlaintextDmEncryptionNotice wave={wave} compact={isCompact} />
         </div>
-        <div className={actionsClassName}>
-          <WaveJoinCta wave={wave} tooltipId={headerActionsTooltipId} />
-          {renderLeadingActions?.(actionContext)}
+        <div
+          className={
+            isCondensed || isCompactWave
+              ? centeredActionsClassName
+              : actionsClassName
+          }
+        >
+          <WaveJoinCta
+            wave={wave}
+            tooltipId={headerActionsTooltipId}
+            compact={isCompactWave}
+          />
           {showWaveRepAction && <WaveRepButton wave={wave} variant="compact" />}
+          {renderLeadingActions?.(actionContext)}
           {renderTrailingActions?.(actionContext)}
-          {isCompact && compactMenuItems.length > 0 && (
-            <CompactWaveActions items={compactMenuItems} />
-          )}
+          {isDirectMessage && compactActions}
           <button
             type="button"
-            onClick={() => setOpenSearch("wave")}
+            ref={searchTrigger}
+            onClick={openSearch}
             onPointerEnter={preloadWaveDropsSearchModal}
             onFocus={preloadWaveDropsSearchModal}
             aria-label={searchMessagesLabel}
             data-tooltip-id={headerActionsTooltipId}
             data-tooltip-content={searchMessagesLabel}
-            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-ring-white/10"
+            className={utilityButtonClassName}
           >
-            <MagnifyingGlassIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+            <span className={utilitySurfaceClassName}>
+              <MagnifyingGlassIcon className="tw-size-4 tw-flex-shrink-0" />
+            </span>
           </button>
+          {!isDirectMessage && compactActions}
+          {!isCompact && !isDirectMessage && (
+            <WaveHeaderDisplayMenu
+              items={externalOverflowMenuItems}
+              tooltipId={headerActionsTooltipId}
+            />
+          )}
+          {!isCompactWave && (
+            <DisplayTimeZoneSwitch
+              variant={isDirectMessage ? directTimeZoneVariant : "indicator"}
+              tooltipId={headerActionsTooltipId}
+            />
+          )}
           <button
             type="button"
             onClick={toggleRightSidebar}
@@ -531,7 +587,7 @@ export default function MyStreamWaveTabsHeader({
             data-tooltip-content={
               isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
             }
-            className="tw-group tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-ring-white/10"
+            className={utilityButtonClassName}
             aria-label={
               isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
             }
@@ -541,32 +597,24 @@ export default function MyStreamWaveTabsHeader({
             aria-expanded={isRightSidebarOpen}
             aria-pressed={isRightSidebarOpen}
           >
-            <ChevronDoubleLeftIcon
-              strokeWidth={2}
-              aria-hidden="true"
-              className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition tw-duration-300 ${
-                isRightSidebarOpen
-                  ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
-                  : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
-              }`}
-            />
+            <span className={utilitySurfaceClassName}>
+              <ChevronDoubleLeftIcon
+                strokeWidth={2}
+                aria-hidden="true"
+                className={`tw-size-4 tw-flex-shrink-0 tw-transition tw-duration-300 ${
+                  isRightSidebarOpen
+                    ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
+                    : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
+                }`}
+              />
+            </span>
           </button>
         </div>
-      </div>
-      <MyStreamActionTooltip id={headerActionsTooltipId} />
-      <LazyWaveDropsSearchModal
-        isOpen={openSearch === "wave"}
-        onClose={() => setOpenSearch(null)}
-        wave={wave}
-        onSelectSerialNo={handleSearchSelect}
-        onSearchAll={() => setOpenSearch("site")}
+      </header>
+      <MyStreamActionTooltip
+        id={headerActionsTooltipId}
+        variant="wave-header"
       />
-      {openSearch === "site" && (
-        <LazyHeaderSearchModal
-          onClose={() => setOpenSearch(null)}
-          wave={null}
-        />
-      )}
     </>
   );
 }

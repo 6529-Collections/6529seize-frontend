@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MobileWaveSubwavesBar from "@/components/brain/mobile/MobileWaveSubwavesBar";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -49,6 +49,9 @@ jest.mock("@/components/waves/WavePicture", () => ({
   default: ({ name }: { readonly name: string }) => (
     <span data-testid={`picture-${name}`} />
   ),
+}));
+jest.mock("@heroicons/react/24/solid", () => ({
+  TrophyIcon: () => <span data-testid="competition-badge" />,
 }));
 
 const useWaveSubwavesMapMock = useWaveSubwavesMap as jest.Mock;
@@ -152,6 +155,31 @@ describe("MobileWaveSubwavesBar", () => {
     mockAddress = "0xABC";
     mockActiveProfileProxy = { id: "proxy-1" };
     mockSubwavesByParentId = new Map();
+  });
+
+  it("retains competition badges from explicit parent and native Chat child metadata", () => {
+    mockSubwavesByParentId.set("root-wave", {
+      subwaves: [createSubwave("native-child", { hasCompetition: true })],
+      isFetching: false,
+    });
+    render(
+      <MobileWaveSubwavesBar
+        wave={createApiWave({
+          id: "native-child",
+          parentWave: createParentOverview({ has_competition: true }),
+        })}
+      />
+    );
+    expect(
+      within(screen.getByRole("button", { name: "Open Main" })).getByTestId(
+        "competition-badge"
+      )
+    ).toBeInTheDocument();
+    expect(
+      within(
+        screen.getByRole("button", { name: "Open Subwave native-child" })
+      ).getByTestId("competition-badge")
+    ).toBeInTheDocument();
   });
 
   it("hides root waves with no subwaves", () => {

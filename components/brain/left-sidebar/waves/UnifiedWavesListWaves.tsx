@@ -1,4 +1,5 @@
 "use client";
+import { SidebarAnnouncementSkeleton } from "@/components/brain/left-sidebar/waves/SidebarDiscoverySkeletons";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
 import {
   SidebarWaveNavigationControls,
@@ -15,6 +16,7 @@ import React, {
 } from "react";
 import BrainLeftSidebarWave from "./BrainLeftSidebarWave";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
+import { usePinnedSidebarList } from "./SidebarPinnedWaves";
 import { SidebarWaveRowsSection } from "./SidebarWaveRowsSection";
 import { SidebarSubwavesToggle } from "./SidebarSubwavesToggle";
 import {
@@ -227,10 +229,14 @@ const UnifiedWavesListWaves = forwardRef<
     );
     const navigation = useSidebarWaveNavigation({
       waves: collectionWaves,
+      pinnedWaveOrder: streamWaves.pinnedWaveOrder,
       scrollContainerRef,
       enabled: !isDirectMessage,
       activeContainerId: effectiveActiveParentWaveId ?? activeWaveId,
+      activeWaveId,
     });
+    const isPinnedCollection =
+      navigation.collection === "pinned" && !isDirectMessage;
     const collectionLoading =
       isLoading ||
       (navigation.collection === "pinned" &&
@@ -244,7 +250,9 @@ const UnifiedWavesListWaves = forwardRef<
         getRows(
           prioritizeActiveWaveContainer(
             navigation.visibleWaves,
-            isDirectMessage ? null : effectiveActiveParentWaveId
+            isDirectMessage || isPinnedCollection
+              ? null
+              : effectiveActiveParentWaveId
           )
         ),
       [
@@ -252,6 +260,7 @@ const UnifiedWavesListWaves = forwardRef<
         effectiveActiveParentWaveId,
         getRows,
         isDirectMessage,
+        isPinnedCollection,
       ]
     );
     const animatedAnnouncementRows =
@@ -366,25 +375,34 @@ const UnifiedWavesListWaves = forwardRef<
     );
 
     const virtual = useVirtualizedWaves<AnimatedSidebarWaveTreeRow>({
-      items: virtualizedRows,
+      items: isPinnedCollection ? [] : virtualizedRows,
       key: virtualizedKey,
       scrollContainerRef,
       listContainerRef,
       rowHeight: getSidebarRowHeight,
       overscan: VIRTUALIZATION_OVERSCAN,
     });
-    const revealStaticRows = useMemo(
+    const announcementRevealRows = useMemo(
       () => [animatedAnnouncementRows],
       [animatedAnnouncementRows]
     );
     useRevealActiveSidebarWave({
+      preserveScrollOnInteraction: !isDirectMessage,
+      // Animated rows settle one render after their source list.
+      isLoading:
+        isLoading ||
+        streamWaves.isPinnedWavesLoading === true ||
+        allRows.length !== virtualizedRows.length ||
+        allRows.some((row, index) => row.key !== virtualizedRows[index]?.key),
       activeParentWaveId: effectiveActiveParentWaveId,
       activeWaveId: navigation.searching ? null : activeWaveId,
-      filterKey: navigation.scrollKey,
+      // Restoring the account is not a user filter change.
+      filterKey: isDirectMessage ? navigation.scrollKey : navigation.viewKey,
       scrollContainerRef,
       scrollToVirtualIndex: virtual.scrollToIndex,
-      staticRows: revealStaticRows,
-      virtualRows: virtualizedRows,
+      staticRows: announcementRevealRows,
+      virtualRows: isPinnedCollection ? [] : virtualizedRows,
+      fixedRows: isPinnedCollection ? virtualizedRows : [],
     });
 
     const renderWaveRow = (
@@ -428,6 +446,18 @@ const UnifiedWavesListWaves = forwardRef<
       );
     };
 
+    const pinnedList = usePinnedSidebarList(
+      isPinnedCollection,
+      navigation.scrollKey,
+      {
+        listRef: listContainerRef,
+        rows: virtualizedRows,
+        getRowHeight: getSidebarRowHeight,
+        renderRow: (row) =>
+          renderWaveRow(row, !hidePin, virtualizedParentsWithVisibleSubwaves),
+      }
+    );
+
     useImperativeHandle(ref, () => ({
       containerRef: virtual.containerRef,
       sentinelRef: virtual.sentinelRef,
@@ -455,6 +485,11 @@ const UnifiedWavesListWaves = forwardRef<
             paddingClassName="tw-px-4"
           />
         )}
+
+        {!isDirectMessage &&
+          !hideHeaders &&
+          announcementRows.length === 0 &&
+          streamWaves.isAnnouncementsLoading && <SidebarAnnouncementSkeleton />}
 
         {announcementRows.length > 0 && (
           <SidebarWaveRowsSection
@@ -484,7 +519,8 @@ const UnifiedWavesListWaves = forwardRef<
         )}
 
         {!hideHeaders &&
-          announcementRows.length > 0 &&
+          (announcementRows.length > 0 ||
+            (!isDirectMessage && streamWaves.isAnnouncementsLoading)) &&
           shouldShowBottomHeader && (
             <div
               className={`${firstSectionDividerSpacingClass} tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid ${sectionDividerColorClass}`}
@@ -495,6 +531,10 @@ const UnifiedWavesListWaves = forwardRef<
           <SidebarDiscovery
             scoreDetailsDisabled={navigation.searchOpen}
             previewItems={highlyRatedPreviewItems}
+            recommendationsStatus={
+              streamWaves.recommendationsStatus ?? "pending"
+            }
+            onRetryRecommendations={streamWaves.retryRecommendations}
             isTouchPreview={hasTouchScreen}
           />
         )}
@@ -510,18 +550,15 @@ const UnifiedWavesListWaves = forwardRef<
           <SidebarWaveSearchResults navigation={navigation} />
         ) : (
           <>
-            {virtualizedRows.length > 0 ? (
+            {pinnedList}
+            {!pinnedList && virtualizedRows.length > 0 && (
               <section
                 ref={listContainerRef}
                 style={{
                   height: virtual.totalHeight,
                   ...listContainerStyle,
                 }}
-                aria-label={
-                  navigation.collection === "pinned" && !isDirectMessage
-                    ? t(locale, "waves.sidebar.pinned")
-                    : virtualizedAriaLabel
-                }
+                aria-label={virtualizedAriaLabel}
               >
                 {virtual.virtualItems.map((v: VirtualItem) => {
                   if (v.index === virtualizedRows.length) {
@@ -573,7 +610,8 @@ const UnifiedWavesListWaves = forwardRef<
                   );
                 })}
               </section>
-            ) : (
+            )}
+            {!pinnedList && virtualizedRows.length === 0 && (
               <div ref={listContainerRef} style={emptyPlaceholderStyle}>
                 {!isDirectMessage && !collectionLoading && (
                   <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">

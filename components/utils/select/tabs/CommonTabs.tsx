@@ -3,6 +3,7 @@ import clsx from "clsx";
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 import type { CommonSelectItem, CommonSelectProps } from "../CommonSelect";
 import CommonTabsTab, { type CommonTabsActiveTone } from "./CommonTabsTab";
+import { CONNECTED_TAB_LIST_CLASSES } from "./connectedTabStyles";
 
 type CommonTabsProps<T, U> = CommonSelectProps<T, U> & {
   readonly isItemDisabled?:
@@ -20,6 +21,10 @@ export default function CommonTabs<T, U = unknown>(
     setSelected,
     filterLabel,
     fill = true,
+    variant = "default",
+    connectedSize,
+    connectedTypography,
+    connectedSpacing,
     isItemDisabled: isItemDisabledProp,
   } = props;
   const sortDirection =
@@ -27,6 +32,7 @@ export default function CommonTabs<T, U = unknown>(
   const disabled = "disabled" in props ? (props.disabled ?? false) : false;
   const size = "size" in props ? props.size : undefined;
   const activeTone = props.activeTone ?? "neutral";
+  const isCompact = variant === "filter" || variant === "sub-view";
   const isItemDisabled = useCallback(
     (item: CommonSelectItem<T, U>) =>
       disabled || isItemDisabledProp?.(item) === true,
@@ -150,8 +156,14 @@ export default function CommonTabs<T, U = unknown>(
       >
         <div
           className={clsx(
-            "tw-flex tw-flex-nowrap tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-800",
-            fill ? "tw-min-w-full" : "tw-w-fit"
+            "tw-flex tw-flex-nowrap",
+            !isCompact &&
+              variant !== "connected" &&
+              "tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-800",
+            variant === "connected" && CONNECTED_TAB_LIST_CLASSES,
+            variant === "filter" && "tw-gap-1.5",
+            variant === "sub-view" && "tw-gap-1",
+            fill && !isCompact ? "tw-min-w-full" : "tw-w-fit"
           )}
         >
           {items.map((item, i) => (
@@ -174,7 +186,11 @@ export default function CommonTabs<T, U = unknown>(
                 tabRefs.current.set(item.key, node);
               }}
               disabled={isItemDisabled(item)}
-              fill={fill}
+              fill={fill && !isCompact}
+              variant={variant}
+              connectedSize={connectedSize}
+              connectedTypography={connectedTypography}
+              connectedSpacing={connectedSpacing}
               size={size}
               activeTone={activeTone}
             />

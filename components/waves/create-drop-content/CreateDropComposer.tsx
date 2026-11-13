@@ -1,3 +1,4 @@
+import { COMPOSER_ROW_GAP_CLASS_NAME } from "../composerPresentation";
 import { CHAT_LINK_RESTRICTION_MESSAGE } from "@/helpers/waves/chat-link-restriction.helpers";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -18,7 +19,9 @@ import CreateDropPollDialog from "./CreateDropPollDialog";
 interface CreateDropComposerProps extends CreateDropLayoutProps {
   readonly initialDraftJson: string | null;
   readonly locale: SupportedLocale;
-  readonly submitWithResolvedAliases: () => Promise<void>;
+  readonly submitWithResolvedAliases: (
+    restoreFocusAfterSubmit?: boolean
+  ) => Promise<void>;
 }
 
 export default function CreateDropComposer({
@@ -135,7 +138,7 @@ export default function CreateDropComposer({
       </LazyMotion>
       <div
         ref={setActionsContainerRef}
-        className="tw-grid tw-w-full tw-flex-none tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center tw-gap-x-2 lg:tw-gap-x-3"
+        className={`tw-grid tw-w-full tw-flex-none tw-grid-cols-[auto_minmax(0,1fr)_auto] tw-items-center ${COMPOSER_ROW_GAP_CLASS_NAME}`}
       >
         <div className="tw-col-start-2 tw-row-start-1 tw-min-w-0">
           <SlowModeChatNotice wave={wave} isDropMode={isDropMode} />
@@ -194,7 +197,7 @@ export default function CreateDropComposer({
           hasValidationError={pollQuestionError !== null}
           validationHelperText={pollQuestionError}
           validationHelperClassName="tw-col-start-2 tw-row-start-3 tw-mb-0 tw-mt-2 tw-text-[11px] tw-font-medium tw-leading-4 tw-text-amber-200/90"
-          onDrop={submitWithResolvedAliases}
+          onDrop={() => submitWithResolvedAliases(true)}
         />
         <div
           className={`tw-col-start-3 tw-row-start-2 tw-self-end ${
@@ -204,7 +207,7 @@ export default function CreateDropComposer({
           <CreateDropSubmit
             submitting={submitting}
             canSubmit={canSubmit}
-            onDrop={submitWithResolvedAliases}
+            onDrop={() => submitWithResolvedAliases()}
             isDropMode={isDropMode}
             label={submitLabel}
             disabledTooltip={

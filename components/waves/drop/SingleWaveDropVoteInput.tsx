@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 interface SingleWaveDropVoteInputProps {
@@ -23,6 +25,52 @@ const MEMETIC_VALUES: number[] = [
 const QUICK_PERCENTAGES: number[] = [-100, -50, 50, 100];
 
 const getCurrentTimeMs = (): number => Date.now();
+
+const countDigits = (text: string): number => text.replaceAll(/\D/g, "").length;
+
+/** The vote as shown in the field, grouped the way the viewer's locale groups digits. */
+const formatVoteInputValue = (
+  locale: SupportedLocale,
+  value: number | string
+): string => {
+  if (value === "" || value === "-") {
+    return value;
+  }
+  const numeric = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(numeric)
+    ? formatInteger(locale, numeric)
+    : String(value);
+};
+
+/**
+ * Removes the locale's digit grouping (and any spaces) from typed or pasted
+ * text, so "5,000,000" (en) and "5.000.000" (de) both read as 5000000. A
+ * decimal mark is left in place, and parsing stops at it as before.
+ */
+const removeDigitGrouping = (locale: SupportedLocale, text: string): string => {
+  const group =
+    new Intl.NumberFormat(locale)
+      .formatToParts(11111)
+      .find((part) => part.type === "group")?.value ?? ",";
+  return text.replaceAll(group, "").replaceAll(/\s/g, "");
+};
+
+/** The caret position just after the `digits`-th digit of `text`. */
+const getCaretAfterDigits = (text: string, digits: number): number => {
+  if (digits <= 0) {
+    return text.startsWith("-") ? 1 : 0;
+  }
+  let seen = 0;
+  for (let index = 0; index < text.length; index += 1) {
+    if (/\d/.test(text.charAt(index))) {
+      seen += 1;
+      if (seen === digits) {
+        return index + 1;
+      }
+    }
+  }
+  return text.length;
+};
 
 const getInputShellClasses = (
   isPositiveVote: boolean,
@@ -101,12 +149,25 @@ export const SingleWaveDropVoteInput: React.FC<
   const pressStartTime = useRef<number | null>(null);
   const isPressed = useRef<boolean>(false);
   const voteValueRef = useRef<number | string>(voteValue);
+  // Separators move as digits are typed, so remember how many digits sat
+  // before the caret and restore that position after the reformat.
+  const pendingCaretRef = useRef<{
+    readonly input: HTMLInputElement;
+    readonly digits: number;
+  } | null>(null);
+  // Counts edits, so the caret is restored even when an edit (deleting a
+  // separator, say) leaves the value and its display unchanged.
+  const [caretEdit, setCaretEdit] = useState(0);
+  const displayValue = formatVoteInputValue(locale, voteValue);
   const allowsNegativeValues = minValue < 0;
   const quickPercentages = allowsNegativeValues
     ? QUICK_PERCENTAGES
     : QUICK_PERCENTAGES.filter((percentage) => percentage > 0);
   const mobileQuickPercentages = quickPercentages;
-  const inputPattern = allowsNegativeValues ? "-?[0-9]*" : "[0-9]*";
+  // Digits plus the grouping marks locales use (comma, period, spaces).
+  const inputPattern = allowsNegativeValues
+    ? String.raw`-?[0-9.,\s]*`
+    : String.raw`[0-9.,\s]*`;
   const numericVoteValue =
     typeof voteValue === "number" && Number.isFinite(voteValue)
       ? voteValue
@@ -231,7 +292,14 @@ export const SingleWaveDropVoteInput: React.FC<
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value;
+    const input = e.target;
+    const caret = input.selectionStart ?? input.value.length;
+    pendingCaretRef.current = {
+      input,
+      digits: countDigits(input.value.slice(0, caret)),
+    };
+    setCaretEdit((edit) => edit + 1);
+    const inputValue = removeDigitGrouping(locale, input.value);
 
     if (inputValue === "") {
       commitVoteValue(inputValue);
@@ -270,6 +338,16 @@ export const SingleWaveDropVoteInput: React.FC<
     voteValueRef.current = voteValue;
   }, [voteValue]);
 
+  useLayoutEffect(() => {
+    const pending = pendingCaretRef.current;
+    pendingCaretRef.current = null;
+    if (pending?.input !== document.activeElement) {
+      return;
+    }
+    const position = getCaretAfterDigits(pending.input.value, pending.digits);
+    pending.input.setSelectionRange(position, position);
+  }, [caretEdit, displayValue]);
+
   useEffect(() => {
     return () => {
       clearTimers();
@@ -294,7 +372,7 @@ export const SingleWaveDropVoteInput: React.FC<
             pattern={inputPattern}
             inputMode="numeric"
             className={`tw-h-8 tw-w-full tw-rounded-md tw-border tw-border-solid tw-bg-iron-950 tw-px-3 tw-pr-12 tw-text-base tw-font-semibold tw-tabular-nums tw-placeholder-iron-500 tw-shadow-inner tw-outline-none tw-transition-all tw-duration-300 tw-ease-out ${inputShellClasses} ${inputTextClasses} ${inputCaretClasses}`}
-            value={voteValue}
+            value={displayValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
           />
@@ -331,7 +409,7 @@ export const SingleWaveDropVoteInput: React.FC<
             pattern={inputPattern}
             inputMode="numeric"
             className={`tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-pr-14 tw-text-center tw-text-base tw-font-bold tw-tabular-nums tw-placeholder-iron-500 tw-outline-none tw-transition-colors ${inputTextClasses} ${inputCaretClasses}`}
-            value={voteValue}
+            value={displayValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
           />

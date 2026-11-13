@@ -37,10 +37,10 @@ export function isStagingDeployment(baseEndpoint: string): boolean {
 /**
  * The probe forwards only `x-6529-auth`, so that value is the whole per-visitor
  * input to the API's decision and serves directly as the in-process cache key.
- * It is not hashed: the process already holds these values (request cookies,
- * `STAGING_API_KEY`), the map never leaves memory, and a hash or HMAC here is
- * modelled by code scanning as weak password hashing. Capping the length
- * bounds memory; overlong values are not cached.
+ * It is not hashed: the process already holds these values (request
+ * cookies), the map never leaves memory, and a hash or HMAC here is modelled
+ * by code scanning as weak password hashing. Capping the length bounds
+ * memory; overlong values are not cached.
  */
 function getVerdictCacheKey(authValue: string): string | undefined {
   return authValue.length <= MAX_CACHEABLE_AUTH_VALUE_LENGTH

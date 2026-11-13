@@ -1,11 +1,11 @@
-import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
-import { TabToggle } from '@/components/common/TabToggle';
+import React from "react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { TabToggle } from "@/components/common/TabToggle";
 
-describe('TabToggle', () => {
+describe("TabToggle", () => {
   const options = [
-    { key: 'tab-1', label: 'Tab 1', panelId: 'panel-tab-1' },
-    { key: 'tab-2', label: 'Tab 2', panelId: 'panel-tab-2' },
+    { key: "tab-1", label: "Tab 1", panelId: "panel-tab-1" },
+    { key: "tab-2", label: "Tab 2", panelId: "panel-tab-2" },
   ];
 
   const setup = () => {
@@ -24,18 +24,42 @@ describe('TabToggle', () => {
     render(<Wrapper />);
   };
 
-  it('updates aria-selected when selecting different tabs', () => {
+  it("updates aria-selected when selecting different tabs", () => {
     setup();
 
-    const firstTab = screen.getByRole('tab', { name: 'Tab 1' });
-    const secondTab = screen.getByRole('tab', { name: 'Tab 2' });
+    const firstTab = screen.getByRole("tab", { name: "Tab 1" });
+    const secondTab = screen.getByRole("tab", { name: "Tab 2" });
 
-    expect(firstTab).toHaveAttribute('aria-selected', 'true');
-    expect(secondTab).toHaveAttribute('aria-selected', 'false');
+    expect(firstTab).toHaveAttribute("aria-selected", "true");
+    expect(secondTab).toHaveAttribute("aria-selected", "false");
 
     fireEvent.click(secondTab);
 
-    expect(firstTab).toHaveAttribute('aria-selected', 'false');
-    expect(secondTab).toHaveAttribute('aria-selected', 'true');
+    expect(firstTab).toHaveAttribute("aria-selected", "false");
+    expect(secondTab).toHaveAttribute("aria-selected", "true");
+  });
+
+  it("warms a tab on pointer entry and keyboard focus without selecting it", () => {
+    const intent = jest.fn();
+    const select = jest.fn();
+    render(
+      <TabToggle
+        options={[
+          {
+            key: "chat",
+            label: "Chat",
+            panelId: "chat-panel",
+            onIntent: intent,
+          },
+        ]}
+        activeKey="leaderboard"
+        onSelect={select}
+      />
+    );
+    const chat = screen.getByRole("tab", { name: "Chat" });
+    fireEvent.pointerEnter(chat);
+    fireEvent.focus(chat);
+    expect(intent).toHaveBeenCalledTimes(2);
+    expect(select).not.toHaveBeenCalled();
   });
 });

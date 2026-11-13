@@ -1,3 +1,8 @@
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.es-ES.json";
+import displayTimeZoneMessages from "@/i18n/messages/displayTimeZone.es-ES.json";
+import shareDropsImageMessages from "@/i18n/messages/shareDropsImage.es-ES.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.es-ES.json";
+import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.es-ES.json";
 import { ES_ES_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { ES_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { ES_ES_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
@@ -9,6 +14,7 @@ import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.es-ES
 import { ES_ES_DROP_REACTION_MESSAGES } from "@/i18n/messages/drop-reactions";
 import { ES_ES_NEW_VERSION_TOAST_MESSAGES } from "@/i18n/messages/new-version-toast";
 import { ES_ES_GLOBAL_ERROR_MESSAGES } from "@/i18n/messages/global-error";
+import { ES_ES_MAPPING_TOOL_MESSAGES } from "@/i18n/messages/mapping-tools";
 import { ES_ES_QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { ES_ES_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
 import { ES_ES_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
@@ -18,10 +24,28 @@ import { ES_ES_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { ES_ES_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { ES_ES_THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
 import stormComposerEsMessages from "@/i18n/messages/stormComposer.es-ES.json";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
+  "waves.historyGap.load": "Cargar mensajes pendientes",
+  "waves.historyGap.loaded": "Mensajes pendientes cargados",
+  "waves.historyGap.loading": "Cargando mensajes pendientes…",
+  "waves.historyGap.retry": "No se pudieron cargar los mensajes. Reintentar",
+
+  "waves.myVotes.sort": "Ordenar por",
+  "waves.myVotes.sort.voteAmount": "Tu cantidad de votos",
+  "waves.myVotes.sort.leaderboard": "Posición en la clasificación",
+  "waves.myVotes.sort.lastVoted": "Último voto",
+  "e2ee.profile.view": "Ver el perfil de {name}",
+  "e2ee.profile.viewUnknown": "Ver perfil",
+  "e2ee.profile.level": "Nivel {level}",
+  ...safeCollectingMessages,
+  ...displayTimeZoneMessages,
+  ...shareDropsImageMessages,
+  ...delegationTapGuideMessages,
+  ...networkTdhConsolidationMessages,
   ...ES_SUBMISSION_DISCOVERY_MESSAGES,
   ...ES_ES_DROP_REQUIREMENT_MESSAGES,
   ...ES_ES_DROP_METADATA_MESSAGES,
@@ -31,6 +55,8 @@ export const ES_ES_MESSAGES = {
   "singleDrop.shared": "Enlace compartido",
   "singleDrop.close": "Cerrar",
   "singleDrop.closeLabel": "Cerrar panel",
+  "singleDrop.loading": "Cargando…",
+  "singleDrop.loadError": "No se pudo cargar este contenido.",
   "singleDrop.showChat": "Mostrar chat",
   "singleDrop.hideChat": "Ocultar chat",
   "singleDrop.chatLabel": "Chat del drop",
@@ -227,6 +253,8 @@ export const ES_ES_MESSAGES = {
   "waves.drop.actions.copyFailed": "No se pudo copiar",
   "waves.drop.actions.menuLabel": "Acciones del drop",
   "waves.drop.actions.reactionPickerLabel": "Añadir una reacción al drop",
+  "waves.drop.actions.showMore": "Mostrar más",
+  "waves.drop.actions.showLess": "Mostrar menos",
   "media.video.captions": "Subtitulos",
   "media.video.download": "Descargar multimedia",
   "media.video.downloading": "Descargando multimedia",
@@ -599,6 +627,9 @@ export const ES_ES_MESSAGES = {
   "drop.media.saveDialogTitle": "Guardar imagen",
   "drop.media.processingFailed": "El procesamiento de la imagen fallo.",
   "drop.media.processingTimedOut": "El procesamiento de la imagen expiro.",
+  "media.interactive.frameTitle": "Contenido HTML interactivo",
+  "media.interactive.loading": "Cargando contenido interactivo",
+  "media.interactive.fullscreen": "Pantalla completa",
   "quickDm.regionAriaLabel": "Mensajes directos rápidos",
   "quickDm.openButtonAriaLabel": "Abrir mensajes directos rápidos",
   "quickDm.openButtonUnreadAriaLabel":
@@ -623,6 +654,7 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_CAPACITOR_CONNECT_MESSAGES,
   ...ES_ES_NEW_VERSION_TOAST_MESSAGES,
   ...ES_ES_GLOBAL_ERROR_MESSAGES,
+  ...ES_ES_MAPPING_TOOL_MESSAGES,
   "waves.chat.fileUploadAreaAriaLabel":
     "Área de carga de archivos del chat de wave",
   "waves.chat.guidelinesDialog.title": "Directrices de la wave",
@@ -639,6 +671,7 @@ export const ES_ES_MESSAGES = {
     "Inténtalo de nuevo antes de enviar tu mensaje.",
   ...stormComposerEsMessages,
   "waves.loadingStatus": "Cargando waves",
+  "waves.threadLoadError": "No se ha podido cargar este hilo.",
   "waves.gifPicker.open": "Añadir GIF",
   "waves.gifPicker.dialogTitle": "Busqueda de GIF",
   "waves.gifPicker.searchPlaceholder": "Buscar GIF",
@@ -1115,14 +1148,14 @@ export const ES_ES_MESSAGES = {
   "waves.leaderboard.grid.voteSummary.standard":
     "Voto actual: {current} {unit}. Proyección: {projected} {unit}.",
   "waves.leaderboard.timeline.toggle":
-    "Mostrar u ocultar la cronología de decisiones",
-  "waves.leaderboard.timeline.decisionTimeline": "Cronología de decisiones",
+    "Mostrar u ocultar la cronología de resultados",
+  "waves.leaderboard.timeline.decisionTimeline": "Cronología de resultados",
   "waves.leaderboard.timeline.announcementHistory": "Historial de anuncios",
   "waves.leaderboard.timeline.paused": "En pausa",
   "waves.leaderboard.timeline.nextDecisionAfter":
-    "Próxima decisión después del {date}",
+    "Próximo resultado después del {date}",
   "waves.leaderboard.timeline.noDecisionScheduled":
-    "No hay ninguna decisión programada",
+    "No hay ningún resultado programado",
   "waves.leaderboard.timeline.noUpcomingEvents": "No hay próximos eventos",
   "waves.leaderboard.phase.nextWinnersIn": "Próximos ganadores anunciados en",
   "waves.leaderboard.phase.countdown": "{hours} h {minutes} min",
@@ -1147,7 +1180,7 @@ export const ES_ES_MESSAGES = {
   "waves.poll.status.voted": "Votado",
   "waves.poll.status.updated": "Actualizado",
   "waves.composer.placeholder.createDrop": "Crear un drop",
-  "waves.composer.placeholder.writeChatMessage": "Escribe un mensaje de chat",
+  "waves.composer.placeholder.writeChatMessage": "Escribe un mensaje",
   "waves.composer.placeholder.dropReply": "Responder con un drop",
   "waves.composer.placeholder.postReply": "Publicar una respuesta",
   "waves.composer.placeholder.quoteDrop": "Citar un drop",
@@ -1268,4 +1301,9 @@ export const ES_ES_MESSAGES = {
   ...ES_ES_TRANSFER_MESSAGES,
   ...ES_ES_THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...ES_ES_THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.message.taskChecked": "Tarea marcada",
+  "e2ee.message.taskUnchecked": "Tarea sin marcar",
+  "e2ee.message.imageLink": "Enlace de imagen",
+  "e2ee.message.imageLinkFrom": "Imagen de {host}",
+  "e2ee.message.markdownTable": "Tabla del mensaje",
 } satisfies Partial<Record<MessageKey, string>>;

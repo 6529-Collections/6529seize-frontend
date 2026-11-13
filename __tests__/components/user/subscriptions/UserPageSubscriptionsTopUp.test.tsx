@@ -1,5 +1,7 @@
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { useSubscriptionDisclosure } from "@/components/user/subscriptions/useSubscriptionDisclosure";
 import UserPageSubscriptionsTopUp from "@/components/user/subscriptions/UserPageSubscriptionsTopUp";
 import {
   MEMES_MINT_PRICE,
@@ -95,13 +97,38 @@ describe("UserPageSubscriptionsTopUp", () => {
     waitSendTransaction.isError = false;
     waitSendTransaction.error = undefined;
     jest.clearAllMocks();
+    jest
+      .mocked(useSeizeConnectContext)
+      .mockReturnValue({ isConnected: true } as ReturnType<
+        typeof useSeizeConnectContext
+      >);
   });
 
-  it("sends transaction when 1 Card option is selected and Send is clicked", async () => {
+  it("keeps the original radio choices keyboard-selectable without sending ETH", async () => {
+    const user = userEvent.setup();
+    render(<UserPageSubscriptionsTopUp />);
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus()
+    );
+    const oneCard = screen.getByRole("radio", { name: "1 Card" });
+    await user.click(oneCard);
+    expect(oneCard).toBeChecked();
+    await user.keyboard("{ArrowRight}");
+    expect(screen.getByRole("radio", { name: "Other" })).toBeChecked();
+    expect(oneCard).not.toBeChecked();
+    expect(
+      screen.getByRole("spinbutton", { name: "Other card count" })
+    ).toHaveFocus();
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+  });
+
+  it("sends the selected amount from the top-up dialog", async () => {
     const user = userEvent.setup();
     render(<UserPageSubscriptionsTopUp />);
 
-    const oneCardOption = screen.getByRole("radio", { name: "1 Card" });
+    const oneCardOption = screen.getByRole("radio", {
+      name: "1 Card",
+    });
     await user.click(oneCardOption);
 
     const sendButton = screen.getByRole("button", {
@@ -115,6 +142,35 @@ describe("UserPageSubscriptionsTopUp", () => {
       to: SUBSCRIPTIONS_ADDRESS,
       value: parseEther(MEMES_MINT_PRICE.toString()),
     });
+  });
+
+  it("preserves the draft amount when closing and reopening the dialog", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<UserPageSubscriptionsTopUp expanded />);
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus()
+    );
+    await user.type(
+      screen.getByRole("spinbutton", { name: "Other card count" }),
+      "2"
+    );
+    expect(
+      screen.getByRole("button", { name: "Top up 0.13058 ETH" })
+    ).toBeEnabled();
+    rerender(<UserPageSubscriptionsTopUp expanded={false} />);
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    rerender(<UserPageSubscriptionsTopUp expanded />);
+    expect(screen.getByRole("dialog", { name: "Top up" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("spinbutton", { name: "Other card count" })
+    ).toHaveValue(2);
+    expect(screen.getByRole("radio", { name: "Other" })).toBeChecked();
+    expect(
+      screen.getByRole("button", { name: "Top up 0.13058 ETH" })
+    ).toBeEnabled();
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
   });
 
   it("shows success message when transaction succeeded", async () => {
@@ -191,13 +247,18 @@ describe("UserPageSubscriptionsTopUp", () => {
     const user = userEvent.setup();
     render(<UserPageSubscriptionsTopUp />);
 
-    const otherOption = screen.getByRole("radio", {
+    const otherOption = screen.getByRole("spinbutton", {
       name: "Other card count",
     });
     await user.click(otherOption);
 
     const countInput = screen.getByPlaceholderText("count");
     await user.type(countInput, "2");
+
+    expect(screen.getByRole("status")).toHaveTextContent("0.13058 ETH");
+    expect(screen.getByText("0.13058 ETH", { exact: true })).toBeVisible();
+    expect(countInput).toHaveAccessibleDescription("0.13058 ETH");
+    expect(screen.getByRole("status")).toHaveAttribute("aria-live", "polite");
 
     const sendButton = screen.getByRole("button", {
       name: "Top up 0.13058 ETH",
@@ -217,7 +278,7 @@ describe("UserPageSubscriptionsTopUp", () => {
     render(<UserPageSubscriptionsTopUp />);
 
     await user.click(
-      screen.getByRole("radio", {
+      screen.getByRole("spinbutton", {
         name: "Other card count",
       })
     );
@@ -234,6 +295,21 @@ describe("UserPageSubscriptionsTopUp", () => {
       value: parseEther(MEMES_MINT_PRICE.toString()),
     });
   });
+
+  it.each([new Date("2026-11-19T17:00:00Z"), null])(
+    "omits the extra deadline paragraph in Top up (deadline: %s)",
+    (deadline) => {
+      const coverage = {
+        next_unfunded: { token_id: 577, top_up_deadline: deadline },
+      } as ApiSubscriptionCoverage;
+      render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+      expect(screen.queryByText(/Top up by/)).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("No authoritative top-up deadline is available yet.")
+      ).not.toBeInTheDocument();
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    }
+  );
 
   it("uses the exact backend recommendation for the primary top-up", async () => {
     const user = userEvent.setup();
@@ -260,9 +336,24 @@ describe("UserPageSubscriptionsTopUp", () => {
 
     render(<UserPageSubscriptionsTopUp coverage={coverage} />);
 
+    const recommendation = screen.getByText(
+      "Funds 7 intended drops through The Memes #560"
+    );
+    const minimum = screen.getByText(
+      "Funds 1 intended drop through The Memes #554"
+    );
+    expect(recommendation).toBeVisible();
+    expect(minimum).toBeVisible();
+    expect(
+      screen.getByRole("radio", { name: /^Recommended/ })
+    ).toHaveAccessibleDescription(`0.17087 ETH ${recommendation.textContent}`);
+    expect(
+      screen.getByRole("radio", { name: /^Minimum for next drop/ })
+    ).toHaveAccessibleDescription(`0.04029 ETH ${minimum.textContent}`);
     await user.click(
       screen.getByRole("radio", { name: "Recommended - 3 Cards" })
     );
+    expect(minimum).toBeVisible();
     await user.click(
       screen.getByRole("button", { name: "Top up 0.17087 ETH" })
     );
@@ -275,6 +366,181 @@ describe("UserPageSubscriptionsTopUp", () => {
       to: SUBSCRIPTIONS_ADDRESS,
       value: parseEther("0.17087"),
     });
+  });
+
+  it("keeps wallet validation before sending any ETH", async () => {
+    jest
+      .mocked(useSeizeConnectContext)
+      .mockReturnValue({ isConnected: false } as ReturnType<
+        typeof useSeizeConnectContext
+      >);
+    render(<UserPageSubscriptionsTopUp />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("radio", { name: "1 Card" }));
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.06529 ETH" })
+    );
+    expect(
+      screen.getByRole("textbox", { name: "Transaction error details" })
+    ).toHaveValue("You must have an active wallet connection to top up");
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["more than the selected cards cost", 1, "1.5"],
+    ["less than the selected cards need", 3, "0.01"],
+    ["not an ETH amount", 1, "lots"],
+  ])(
+    "refuses a backend top-up that is %s",
+    async (_label, additionalMints, amountEth) => {
+      const coverage = {
+        recommended_top_up: {
+          target_fully_funded_drops: 2,
+          additional_mints: additionalMints,
+          amount_eth: amountEth,
+          projected_through: {
+            token_id: 560,
+            mint_at: new Date("2026-10-12T15:40:00Z"),
+          },
+        },
+      } as ApiSubscriptionCoverage;
+      render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+      const user = userEvent.setup();
+      await user.click(screen.getByRole("radio", { name: /^Recommended/ }));
+      await user.click(screen.getByRole("button", { name: /^Top up / }));
+
+      expect(
+        screen.getByRole("textbox", { name: "Transaction error details" })
+      ).toHaveValue(
+        "This top-up amount does not match the selected number of cards, so nothing was sent. Refresh the page and try again."
+      );
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    ["1 Card", /^Top up 0.06529 ETH$/],
+    ["Recommended", /^Top up /],
+  ])(
+    "refuses to send %s when the server card price differs from the shown price",
+    async (option, buttonName) => {
+      const coverage = {
+        mint_price_eth: "0.07",
+        recommended_top_up: {
+          target_fully_funded_drops: 1,
+          additional_mints: 1,
+          amount_eth: "0.06529",
+          projected_through: {
+            token_id: 560,
+            mint_at: new Date("2026-10-12T15:40:00Z"),
+          },
+        },
+      } as ApiSubscriptionCoverage;
+      render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+      const user = userEvent.setup();
+      await user.click(
+        screen.getByRole("radio", { name: new RegExp(`^${option}`) })
+      );
+      await user.click(screen.getByRole("button", { name: buttonName }));
+
+      expect(
+        screen.getByRole("textbox", { name: "Transaction error details" })
+      ).toHaveValue(
+        "The server lists a card price of 0.07 ETH but this page uses 0.06529 ETH, so nothing was sent. Refresh the page and try again."
+      );
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    }
+  );
+
+  it("sends when the server card price matches the shown price", async () => {
+    const coverage = {
+      mint_price_eth: "0.06529",
+    } as ApiSubscriptionCoverage;
+    render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("radio", { name: "1 Card" }));
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.06529 ETH" })
+    );
+
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther("0.06529"),
+    });
+  });
+
+  it("sends a backend top-up that needs exactly the selected cards", async () => {
+    const coverage = {
+      recommended_top_up: {
+        target_fully_funded_drops: 2,
+        additional_mints: 2,
+        amount_eth: "0.13058",
+        projected_through: {
+          token_id: 560,
+          mint_at: new Date("2026-10-12T15:40:00Z"),
+        },
+      },
+    } as ApiSubscriptionCoverage;
+    render(<UserPageSubscriptionsTopUp coverage={coverage} />);
+    const user = userEvent.setup();
+    await user.click(screen.getByRole("radio", { name: /^Recommended/ }));
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.13058 ETH" })
+    );
+
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther("0.13058"),
+    });
+  });
+
+  it("sends the exact minimum for partial funding, and omits a duplicate option", async () => {
+    const point = { token_id: 571, mint_at: new Date("2026-11-06T15:40:00Z") };
+    const coverage = {
+      minimum_top_up: {
+        additional_mints: 1,
+        amount_eth: "0.01587",
+        resulting_fully_funded_drops: 1,
+        projected_through: point,
+      },
+    } as ApiSubscriptionCoverage;
+    const { rerender } = render(
+      <UserPageSubscriptionsTopUp coverage={coverage} />
+    );
+    const user = userEvent.setup();
+    await user.click(
+      screen.getByRole("radio", { name: /^Minimum for next drop/ })
+    );
+    expect(
+      screen.getByText("Funds 1 intended drop through The Memes #571")
+    ).toBeVisible();
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.01587 ETH" })
+    );
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledWith({
+      chainId: SUBSCRIPTIONS_CHAIN.id,
+      to: SUBSCRIPTIONS_ADDRESS,
+      value: parseEther("0.01587"),
+    });
+    rerender(
+      <UserPageSubscriptionsTopUp
+        coverage={{
+          ...coverage,
+          recommended_top_up: {
+            amount_eth: "0.01587",
+            additional_mints: 1,
+            target_fully_funded_drops: 1,
+            projected_through: point,
+          },
+        }}
+      />
+    );
+    expect(
+      screen.queryByRole("radio", { name: /^Minimum for next drop/ })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^Recommended/ })).toBeVisible();
   });
 
   it("refreshes coverage after the submitted transaction is confirmed", async () => {
@@ -291,6 +557,53 @@ describe("UserPageSubscriptionsTopUp", () => {
     await waitFor(() => {
       expect(onTransactionConfirmed).toHaveBeenCalledTimes(1);
     });
+  });
+
+  it("hands focus to transaction status and returns to the picker after success", async () => {
+    const user = userEvent.setup();
+    const onTransactionConfirmed = jest.fn();
+    const view = () => (
+      <UserPageSubscriptionsTopUp
+        onCancel={jest.fn()}
+        onTransactionConfirmed={onTransactionConfirmed}
+      />
+    );
+    const { rerender } = render(view());
+    await user.click(screen.getByRole("radio", { name: "1 Card" }));
+    await user.click(
+      screen.getByRole("button", { name: "Top up 0.06529 ETH" })
+    );
+    sendTransaction.isPending = true;
+    rerender(view());
+    await waitFor(() =>
+      expect(screen.queryByRole("radio")).not.toBeInTheDocument()
+    );
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    expect(screen.getByText("Confirm in your wallet")).toBeVisible();
+    expect(screen.getByRole("dialog")).toContainElement(
+      document.activeElement as HTMLElement
+    );
+
+    sendTransaction.isPending = false;
+    sendTransaction.data = "0x123";
+    waitSendTransaction.isSuccess = true;
+    rerender(view());
+    expect(screen.getByText("Top Up Successful!")).toBeVisible();
+    sendTransaction.reset.mockClear();
+    await user.click(screen.getByRole("button", { name: "Close modal" }));
+    expect(sendTransaction.reset).toHaveBeenCalledTimes(1);
+    sendTransaction.data = undefined;
+    waitSendTransaction.isSuccess = false;
+    rerender(view());
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus()
+    );
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    expect(
+      screen.getByRole("button", { name: "Choose a top-up amount" })
+    ).toBeDisabled();
+    expect(sendTransaction.sendTransaction).toHaveBeenCalledTimes(1);
+    expect(onTransactionConfirmed).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -320,10 +633,26 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     } as ReturnType<typeof useCookieConsent>);
   }
 
+  function TopUpHarness() {
+    const topUp = useSubscriptionDisclosure(TOP_UP_ID);
+    return (
+      <>
+        <button type="button" onClick={() => topUp.setExpanded(true)}>
+          Top up
+        </button>
+        <a href={`#${TOP_UP_ID}`}>Open top-up link</a>
+        <UserPageSubscriptionsTopUp
+          expanded={topUp.expanded}
+          onCancel={() => topUp.setExpanded(false)}
+        />
+      </>
+    );
+  }
+
   function renderGated() {
     return (
       <NftPurchasingGate>
-        <UserPageSubscriptionsTopUp />
+        <TopUpHarness />
       </NftPurchasingGate>
     );
   }
@@ -346,6 +675,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     waitSendTransaction.isSuccess = false;
     waitSendTransaction.isError = false;
     waitSendTransaction.error = undefined;
+    jest.clearAllMocks();
     scrollIntoView = jest
       .spyOn(Element.prototype, "scrollIntoView")
       .mockImplementation(() => undefined);
@@ -358,44 +688,77 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     setHash("");
   });
 
-  it("renders the top-up section with the id the notification links to", () => {
-    render(<UserPageSubscriptionsTopUp />);
-
-    const section = screen.getByRole("region", { name: "Top up" });
-    expect(section).toHaveAttribute("id", TOP_UP_ID);
-    expect(section).toHaveClass("tw-scroll-mt-24");
-  });
-
-  it("scrolls to the section and focuses its heading for the top-up hash", async () => {
+  it("opens the notification hash as a focused dialog without scrolling the page", async () => {
     setHash(`#${TOP_UP_ID}`);
-    render(<UserPageSubscriptionsTopUp />);
-
-    await waitFor(() => {
-      expect(scrollIntoView).toHaveBeenCalledTimes(1);
-    });
-    expect(scrollIntoView.mock.contexts[0]).toBe(
-      screen.getByRole("region", { name: "Top up" })
+    render(renderGated());
+    const dialog = await screen.findByRole("dialog", { name: "Top up" });
+    expect(dialog).toHaveAttribute("id", TOP_UP_ID);
+    await waitFor(() =>
+      expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus()
     );
-    expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus();
     await settleFrames();
-    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 
-  it("neither scrolls nor moves focus on an ordinary load", async () => {
-    render(<UserPageSubscriptionsTopUp />);
-    await settleFrames();
+  it.each(["", "#profile-subscriptions-history"])(
+    "keeps the dialog closed and focus unchanged for an unrelated hash %s",
+    async (hash) => {
+      setHash(hash);
+      render(renderGated());
+      await settleFrames();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(scrollIntoView).not.toHaveBeenCalled();
+      expect(document.body).toHaveFocus();
+    }
+  );
 
-    expect(scrollIntoView).not.toHaveBeenCalled();
-    expect(document.body).toHaveFocus();
+  it("retains the custom amount and restores the opener after Close and Escape", async () => {
+    render(renderGated());
+    const user = userEvent.setup();
+    const opener = screen.getByRole("button", { name: "Top up" });
+    await user.click(opener);
+    await user.type(
+      screen.getByRole("spinbutton", { name: "Other card count" }),
+      "2"
+    );
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(opener).toHaveFocus();
+    await user.click(opener);
+    expect(
+      screen.getByRole("spinbutton", { name: "Other card count" })
+    ).toHaveValue(2);
+    expect(
+      screen.getByRole("button", { name: "Top up 0.13058 ETH" })
+    ).toBeEnabled();
+    await user.keyboard("{Escape}");
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(opener).toHaveFocus();
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
   });
 
-  it("ignores a hash that names another section", async () => {
-    setHash("#profile-subscriptions-history");
-    render(<UserPageSubscriptionsTopUp />);
-    await settleFrames();
-
+  it("opens repeated same-page hash links without scrolling or sending ETH", async () => {
+    render(renderGated());
+    const user = userEvent.setup();
+    const link = screen.getByRole("link", { name: "Open top-up link" });
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await user.click(link);
+      expect(
+        await screen.findByRole("dialog", { name: "Top up" })
+      ).toBeVisible();
+      expect(window.location.hash).toBe(`#${TOP_UP_ID}`);
+      await user.click(screen.getByRole("button", { name: "Close" }));
+      await waitFor(() =>
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+      );
+      expect(link).toHaveFocus();
+    }
     expect(scrollIntoView).not.toHaveBeenCalled();
-    expect(document.body).toHaveFocus();
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
   });
 
   it("never scrolls to or reveals the section on restricted iOS", async () => {
@@ -409,7 +772,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     expect(document.body).toHaveFocus();
   });
 
-  it("keeps the gated page unmounted and unscrolled until iOS proves a US country", async () => {
+  it("keeps the gated page unmounted and unscrolled before a non-US lookup settles", async () => {
     setEnvironment({ isIos: true, country: "", isCountryPending: true });
     setHash(`#${TOP_UP_ID}`);
     const { rerender } = render(renderGated());
@@ -427,7 +790,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     expect(document.body).toHaveFocus();
   });
 
-  it("scrolls once the country check resolves to US on iOS", async () => {
+  it("keeps the dialog closed when the country check resolves to US on iOS", async () => {
     setEnvironment({ isIos: true, country: "", isCountryPending: true });
     setHash(`#${TOP_UP_ID}`);
     const { rerender } = render(renderGated());
@@ -437,13 +800,43 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
     setEnvironment({ isIos: true, country: "US" });
     rerender(renderGated());
 
-    await waitFor(() => {
-      expect(scrollIntoView).toHaveBeenCalledTimes(1);
-    });
-    expect(screen.getByRole("heading", { name: "Top up" })).toHaveFocus();
+    await settleFrames();
+    expect(screen.queryByRole("dialog", { name: "Top up" })).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: "Top-up on 6529.io" })
+    ).toBeNull();
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 
-  it("scrolls for a late-mounting section on Android and web", async () => {
+  it.each(["US", "FR", ""])(
+    "omits the recommendation and payment controls on iOS (country: %s)",
+    async (country) => {
+      setEnvironment({ isIos: true, country });
+      const coverage = {
+        recommended_top_up: {
+          amount_eth: "0.78348",
+          additional_mints: 12,
+          target_fully_funded_drops: 7,
+          projected_through: {
+            token_id: 577,
+            mint_at: new Date("2026-11-20T17:00:00Z"),
+          },
+        },
+      } as ApiSubscriptionCoverage;
+      render(
+        <NftPurchasingGate>
+          <UserPageSubscriptionsTopUp expanded coverage={coverage} />
+        </NftPurchasingGate>
+      );
+      expect(screen.queryByText(/Recommended:/)).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(screen.queryByRole("radio")).not.toBeInTheDocument();
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    }
+  );
+
+  it("opens the dialog for a late-mounting section on Android and web", async () => {
     setHash(`#${TOP_UP_ID}`);
     const { rerender } = render(<p>Loading profile</p>);
     await settleFrames();
@@ -451,8 +844,7 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
 
     rerender(renderGated());
 
-    await waitFor(() => {
-      expect(scrollIntoView).toHaveBeenCalledTimes(1);
-    });
+    expect(await screen.findByRole("dialog", { name: "Top up" })).toBeVisible();
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 });

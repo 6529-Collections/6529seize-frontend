@@ -1,5 +1,7 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+
 import {
   faArrowCircleRight,
   faChevronDown,
@@ -22,8 +24,15 @@ import { SortDirection } from "@/entities/ISort";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader from "@/components/dotLoader/DotLoader";
+import NextGenLoadError from "@/components/nextGen/NextGenLoadError";
 import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import {
+  CONNECTED_TAB_INTERACTION_CLASSES,
+  CONNECTED_TAB_SURFACE_CLASSES,
+  getConnectedTabStateClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 import { formatInteger } from "@/i18n/format";
 import {
   NextGenListFilters,
@@ -38,6 +47,28 @@ interface Props {
   show_view_all?: boolean | undefined;
 }
 
+function parseSelectedTraits(
+  query: string,
+  traits: TraitValues[]
+): TraitValuePair[] {
+  const selectedTraits: TraitValuePair[] = [];
+  for (const pair of query.split(",")) {
+    const [trait, value] = pair.split(":");
+    if (
+      trait !== undefined &&
+      value !== undefined &&
+      traits.some(
+        (entry) =>
+          areEqualAddresses(entry.trait, trait) &&
+          entry.values.some((candidate) => areEqualAddresses(candidate, value))
+      )
+    ) {
+      selectedTraits.push({ trait, value });
+    }
+  }
+  return selectedTraits;
+}
+
 export default function NextGenCollectionArt(props: Readonly<Props>) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -45,6 +76,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   const initializedTraitFilterOpen = useRef(false);
 
   const locale = useBrowserLocale();
+  const { hideNftPurchasing, reservesNftPurchasingSpace } =
+    useNftPurchasingVisibility();
 
   useEffect(() => {
     if (globalThis.innerWidth <= 750) {
@@ -54,6 +87,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
 
   const [traits, setTraits] = useState<TraitValues[]>([]);
   const [traitsLoaded, setTraitsLoaded] = useState(false);
+  const [traitsFailed, setTraitsFailed] = useState(false);
+  const [traitsAttempt, setTraitsAttempt] = useState(0);
+  const [tokenListFailed, setTokenListFailed] = useState(false);
   const [routerLoaded, setRouterLoaded] = useState(false);
   const [selectedTraitValues, setSelectedTraitValues] = useState<
     TraitValuePair[]
@@ -82,83 +118,77 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     ].includes(s);
   }
 
-  function setTraitsQuery(q: string) {
-    if (q) {
-      const traitValues = q.split(",");
-      const selectedTraits: TraitValuePair[] = [];
-      traitValues.forEach((tv) => {
-        const [t, v] = tv.split(":");
-        if (
-          traits.some(
-            (tr) =>
-              areEqualAddresses(tr.trait, t) &&
-              tr.values.some((vl) => areEqualAddresses(vl, v))
-          )
-        ) {
-          selectedTraits.push({
-            trait: t!,
-            value: v!,
-          });
+  // Adopt the starting URL once the traits and native purchase policy are known.
+  if (traitsLoaded && !routerLoaded && !reservesNftPurchasingSpace) {
+    setSelectedTraitValues(
+      parseSelectedTraits(searchParams.get("traits") ?? "", traits)
+    );
+    const sortParam = searchParams.get("sort")?.toUpperCase();
+    if (sortParam) {
+      const requestedSort =
+        Object.entries(NextGenListFilters).find(
+          ([key]) => key === sortParam
+        )?.[1] ?? NextGenListFilters.ID;
+      const newSort =
+        hideNftPurchasing && requestedSort === NextGenListFilters.LISTED_PRICE
+          ? NextGenListFilters.ID
+          : requestedSort;
+      setSort(newSort);
+      if (isRaritySort(newSort)) {
+        const showNorm = searchParams.get("show_normalised");
+        if (showNorm) {
+          setShowNormalised(showNorm === "true");
         }
-      });
-      setSelectedTraitValues(selectedTraits);
-    } else {
-      setSelectedTraitValues([]);
+        const showCount = searchParams.get("show_trait_count");
+        if (showCount) {
+          setShowTraitCount(showCount === "true");
+        }
+      }
     }
+    const sortDirParam = searchParams.get("sort_direction")?.toUpperCase();
+    if (sortDirParam) {
+      setSortDir(
+        Object.entries(SortDirection).find(
+          ([key]) => key === sortDirParam
+        )?.[1] ?? SortDirection.DESC
+      );
+    }
+    const listedParam = searchParams.get("listed");
+    if (!hideNftPurchasing && listedParam) {
+      setListedType(
+        listedParam === "true"
+          ? NextGenTokenListedType.LISTED
+          : NextGenTokenListedType.NOT_LISTED
+      );
+    }
+    setRouterLoaded(true);
   }
 
   useEffect(() => {
-    if (traitsLoaded && !routerLoaded) {
-      setTraitsQuery(searchParams?.get("traits") ?? "");
-      const sortParam = searchParams?.get("sort");
-      if (sortParam) {
-        const sortQuery = sortParam as string;
-        const newSort =
-          NextGenListFilters[
-            sortQuery?.toUpperCase() as keyof typeof NextGenListFilters
-          ] || NextGenListFilters.ID;
-        setSort(newSort);
-        if (isRaritySort(newSort)) {
-          const showNorm = searchParams?.get("show_normalised");
-          if (showNorm) {
-            setShowNormalised(showNorm === "true");
-          }
-          const showCount = searchParams?.get("show_trait_count");
-          if (showCount) {
-            setShowTraitCount(showCount === "true");
-          }
+    const controller = new AbortController();
+    const loadTraits = async () => {
+      setTraitsFailed(false);
+      let response: TraitValues[];
+      try {
+        response = await commonApiFetch<TraitValues[]>({
+          endpoint: `nextgen/collections/${props.collection.id}/traits`,
+          signal: controller.signal,
+        });
+      } catch {
+        if (!controller.signal.aborted) {
+          setTraitsFailed(true);
         }
+        return;
       }
-      const sortDirParam = searchParams?.get("sort_direction");
-      if (sortDirParam) {
-        const sortDirQuery = sortDirParam as string;
-        setSortDir(
-          SortDirection[
-            sortDirQuery?.toUpperCase() as keyof typeof SortDirection
-          ] || SortDirection.DESC
-        );
+      if (controller.signal.aborted) {
+        return;
       }
-      const listedParam = searchParams?.get("listed");
-      if (listedParam) {
-        const listedQuery = listedParam as string;
-        setListedType(
-          listedQuery === "true"
-            ? NextGenTokenListedType.LISTED
-            : NextGenTokenListedType.NOT_LISTED
-        );
-      }
-      setRouterLoaded(true);
-    }
-  }, [searchParams, traitsLoaded, routerLoaded]);
-
-  useEffect(() => {
-    commonApiFetch<TraitValues[]>({
-      endpoint: `nextgen/collections/${props.collection.id}/traits`,
-    }).then((response) => {
       setTraits(response.filter((t) => t.trait !== "Collection Name"));
       setTraitsLoaded(true);
-    });
-  }, [props.collection.id]);
+    };
+    void loadTraits();
+    return () => controller.abort();
+  }, [props.collection.id, traitsAttempt]);
 
   useEffect(() => {
     if (!props.show_view_all && routerLoaded) {
@@ -287,9 +317,8 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
   }
 
   const selectClassName =
-    "tw-cursor-pointer tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0 tw-pr-6 tw-text-sm tw-font-semibold tw-text-white focus:tw-outline-none";
-  const sortButtonClassName =
-    "tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition hover:tw-border-white/20 hover:tw-bg-iron-800 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+    "tw-cursor-pointer tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0 tw-pr-6 tw-text-sm tw-font-medium tw-text-inherit focus:tw-outline-none";
+  const sortButtonClassName = `${DROPDOWN_FIELD_CLASSES} tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm`;
   const sortMenuItemClassName =
     "tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-white tw-transition hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400";
   const sortMenuId = `nextgen-collection-art-sort-${props.collection.id}`;
@@ -301,11 +330,12 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           <h2 className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-100 sm:tw-text-3xl">
             The Art
           </h2>
-          {totalResultsSet ? (
+          {totalResultsSet && (
             <span className="tw-inline-flex tw-rounded-full tw-bg-white/5 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-white/10">
               x{formatInteger(locale, totalResults)}
             </span>
-          ) : (
+          )}
+          {!totalResultsSet && !traitsFailed && !tokenListFailed && (
             <DotLoader />
           )}
         </div>
@@ -368,37 +398,39 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                     : ""
                 }`}
               </Tooltip>
-              <label className="tw-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm focus-within:tw-ring-2 focus-within:tw-ring-primary-400">
-                <span className="tw-font-semibold tw-text-iron-300">
-                  Listing status
-                </span>
-                <span className="tw-relative tw-flex tw-items-center">
-                  <select
-                    value={listedType}
-                    onChange={(event) =>
-                      setListedType(
-                        event.target.value as NextGenTokenListedType
-                      )
-                    }
-                    className={`${selectClassName} tw-[color-scheme:dark]`}
-                  >
-                    {Object.values(NextGenTokenListedType).map((lt) => (
-                      <option
-                        key={`listed-type-${lt}`}
-                        value={lt}
-                        className="tw-bg-black tw-text-white"
-                      >
-                        {lt}
-                      </option>
-                    ))}
-                  </select>
-                  <FontAwesomeIcon
-                    icon={faChevronDown}
-                    className="tw-pointer-events-none tw-absolute tw-right-0 tw-h-3 tw-w-3 tw-text-iron-400"
-                    aria-hidden="true"
-                  />
-                </span>
-              </label>
+              {!hideNftPurchasing && (
+                <label
+                  className={`${DROPDOWN_FIELD_CLASSES} tw-flex tw-min-h-10 tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm focus-within:tw-ring-2 focus-within:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800`}
+                >
+                  <span>Listing status</span>
+                  <span className="tw-relative tw-flex tw-items-center">
+                    <select
+                      value={listedType}
+                      onChange={(event) =>
+                        setListedType(
+                          event.target.value as NextGenTokenListedType
+                        )
+                      }
+                      className={`${selectClassName} tw-[color-scheme:dark]`}
+                    >
+                      {Object.values(NextGenTokenListedType).map((lt) => (
+                        <option
+                          key={`listed-type-${lt}`}
+                          value={lt}
+                          className="tw-bg-black tw-text-white"
+                        >
+                          {lt}
+                        </option>
+                      ))}
+                    </select>
+                    <FontAwesomeIcon
+                      icon={faChevronDown}
+                      className="tw-pointer-events-none tw-absolute tw-right-0 tw-h-3 tw-w-3 tw-text-iron-400"
+                      aria-hidden="true"
+                    />
+                  </span>
+                </label>
+              )}
               <div className="tw-relative" ref={sortMenuRef}>
                 <button
                   type="button"
@@ -423,24 +455,30 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                     className="tw-[margin-top:0.5rem] tw-absolute tw-right-0 tw-top-full tw-z-50 tw-min-w-[240px] tw-rounded-md tw-bg-iron-900 tw-p-1 tw-shadow-lg tw-ring-1 tw-ring-white/10"
                   >
                     <div>
-                      {Object.values(NextGenListFilters).map((lf) => (
-                        <Fragment key={`sort-filter-${lf}`}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSort(lf);
-                              setIsSortMenuOpen(false);
-                            }}
-                            className={sortMenuItemClassName}
-                          >
-                            {lf}
-                          </button>
-                          {(lf === NextGenListFilters.ID ||
-                            lf === NextGenListFilters.HIGHEST_SALE) && (
-                            <div className="tw-my-1 tw-h-px tw-bg-white/10" />
-                          )}
-                        </Fragment>
-                      ))}
+                      {Object.values(NextGenListFilters)
+                        .filter(
+                          (filter) =>
+                            !hideNftPurchasing ||
+                            filter !== NextGenListFilters.LISTED_PRICE
+                        )
+                        .map((lf) => (
+                          <Fragment key={`sort-filter-${lf}`}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSort(lf);
+                                setIsSortMenuOpen(false);
+                              }}
+                              className={sortMenuItemClassName}
+                            >
+                              {lf}
+                            </button>
+                            {(lf === NextGenListFilters.ID ||
+                              lf === NextGenListFilters.HIGHEST_SALE) && (
+                              <div className="tw-my-1 tw-h-px tw-bg-white/10" />
+                            )}
+                          </Fragment>
+                        ))}
                     </div>
                     <div className="tw-[margin-top:0.25rem] tw-space-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-px-2 tw-py-2">
                       <span className="tw-flex tw-items-center tw-gap-2">
@@ -463,17 +501,15 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   </div>
                 )}
               </div>
-              <span className="tw-inline-flex tw-items-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-1">
+              <span
+                className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-inline-flex tw-items-center tw-gap-1 tw-border tw-border-solid tw-p-1`}
+              >
                 <button
                   type="button"
                   onClick={() => setSortDir(SortDirection.ASC)}
                   aria-label="Sort ascending"
                   aria-pressed={sortDir === SortDirection.ASC}
-                  className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
-                    sortDir === SortDirection.ASC
-                      ? "tw-bg-iron-700 tw-text-white"
-                      : "tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-white"
-                  }`}
+                  className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: sortDir === SortDirection.ASC })}`}
                 >
                   <FontAwesomeIcon
                     icon={faChevronUp}
@@ -486,11 +522,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
                   onClick={() => setSortDir(SortDirection.DESC)}
                   aria-label="Sort descending"
                   aria-pressed={sortDir === SortDirection.DESC}
-                  className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
-                    sortDir === SortDirection.DESC
-                      ? "tw-bg-iron-700 tw-text-white"
-                      : "tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-white"
-                  }`}
+                  className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: sortDir === SortDirection.DESC })}`}
                 >
                   <FontAwesomeIcon
                     icon={faChevronDown}
@@ -602,6 +634,13 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
             </div>
           </aside>
         )}
+        {traitsFailed && !routerLoaded && (
+          <NextGenLoadError
+            className="tw-min-w-0"
+            message="nextgen.loadError.traits"
+            onRetry={() => setTraitsAttempt((current) => current + 1)}
+          />
+        )}
         {(routerLoaded || totalResultsSet) && (
           <div className="tw-min-w-0">
             <NextGenTokenList
@@ -613,10 +652,12 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               show_normalised={showNormalised}
               show_trait_count={showTraitCount}
               listed_type={listedType}
+              hideMarketListings={hideNftPurchasing}
               setTotalResults={(totalResults: number) => {
                 setTotalResults(totalResults);
                 setTotalResultsSet(true);
               }}
+              setLoadFailed={setTokenListFailed}
               show_pagination={!props.show_view_all}
             />
           </div>

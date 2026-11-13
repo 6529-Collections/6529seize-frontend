@@ -35,7 +35,15 @@ permissions:
 run-name: Mobile lab ${{ github.event.workflow_run.name || inputs.target }}
 
 concurrency:
-  group: mobile-lab-${{ github.event.workflow_run.name || inputs.target }}
+  # Automatic and manual measurements of the same site share one queue.
+  # workflow_run.name can contain the deployed SHA; path is the stable identity.
+  group: >-
+    mobile-lab-${{
+      github.event_name == 'workflow_dispatch' && inputs.target ||
+      github.event.workflow_run.path == '.github/workflows/deploy-staging.yml' && 'staging' ||
+      github.event.workflow_run.path == '.github/workflows/build-upload-deploy-prod.yml' && 'production' ||
+      'unexpected'
+    }}
   cancel-in-progress: false
 
 jobs:
@@ -54,7 +62,7 @@ jobs:
         id: target
         env:
           EVENT_NAME: ${{ github.event_name }}
-          DEPLOY_WORKFLOW: ${{ github.event.workflow_run.name }}
+          DEPLOY_WORKFLOW_PATH: ${{ github.event.workflow_run.path }}
           INPUT_TARGET: ${{ inputs.target }}
           INPUT_PAGES: ${{ inputs.pages }}
         run: |
@@ -62,10 +70,10 @@ jobs:
           if [ "$EVENT_NAME" = workflow_dispatch ]; then
             target="$INPUT_TARGET"
           else
-            case "$DEPLOY_WORKFLOW" in
-              "Web Deploy - STAGING") target=staging ;;
-              "Web Deploy - PROD") target=production ;;
-              *) echo "Unexpected workflow: $DEPLOY_WORKFLOW" >&2; exit 1 ;;
+            case "$DEPLOY_WORKFLOW_PATH" in
+              .github/workflows/deploy-staging.yml) target=staging ;;
+              .github/workflows/build-upload-deploy-prod.yml) target=production ;;
+              *) echo "Unexpected workflow: $DEPLOY_WORKFLOW_PATH" >&2; exit 1 ;;
             esac
           fi
           case "$target" in

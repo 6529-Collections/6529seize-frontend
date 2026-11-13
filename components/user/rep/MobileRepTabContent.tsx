@@ -1,123 +1,24 @@
-import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import Button from "@/components/utils/button/Button";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatInteger, formatNumber } from "@/i18n/format";
+import { formatInteger } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import { RateMatter } from "@/types/enums";
-import { ChevronRightIcon } from "@heroicons/react/24/solid";
-import { useMemo } from "react";
-import { buildRepAvatarItems } from "./buildRepAvatarItems";
-import type { RepDirection } from "./UserPageRep.helpers";
-import RepCategoryPill from "./RepCategoryPill";
+import { useContext } from "react";
+import { AuthContext } from "@/components/auth/Auth";
+import { canManageGivenRatings } from "./ratingsManagement";
+import RatingContributorsControl from "./RatingContributorsControl";
+import {
+  canShowPersonalRepContribution,
+  type RepDirection,
+} from "./UserPageRep.helpers";
+import RepCategoryList from "./RepCategoryList";
 import RepDirectionToggle from "./RepDirectionToggle";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
-
-function getContributorMessageKey(
-  repDirection: RepDirection,
-  isOneContributor: boolean
-) {
-  if (repDirection === "given") {
-    return isOneContributor
-      ? "user.profile.rep.contributors.receivers.one"
-      : "user.profile.rep.contributors.receivers.other";
-  }
-  return isOneContributor
-    ? "user.profile.rep.contributors.raters.one"
-    : "user.profile.rep.contributors.raters.other";
-}
-
-function getViewContributorsMessageKey(
-  repDirection: RepDirection,
-  isOneContributor: boolean
-) {
-  if (repDirection === "given") {
-    return isOneContributor
-      ? "user.profile.rep.contributors.viewReceivers.one"
-      : "user.profile.rep.contributors.viewReceivers.other";
-  }
-  return isOneContributor
-    ? "user.profile.rep.contributors.viewRaters.one"
-    : "user.profile.rep.contributors.viewRaters.other";
-}
-
-function RepContributorControl({
-  overview,
-  repDirection,
-  onOpenOverviewContributors,
-}: {
-  readonly overview: ApiRepOverview | null;
-  readonly repDirection: RepDirection;
-  readonly onOpenOverviewContributors: () => void;
-}) {
-  const locale = useBrowserLocale();
-  const repAvatarItems = useMemo(
-    () =>
-      buildRepAvatarItems(overview?.contributors.data ?? [], 3, {
-        omitHref: true,
-      }),
-    [overview?.contributors.data]
-  );
-
-  if (!overview) {
-    return null;
-  }
-
-  const pluralCategory = new Intl.PluralRules(locale).select(
-    overview.contributor_count
-  );
-  const isOneContributor = pluralCategory === "one";
-  const contributorMessageKey = getContributorMessageKey(
-    repDirection,
-    isOneContributor
-  );
-  const viewContributorsMessageKey = getViewContributorsMessageKey(
-    repDirection,
-    isOneContributor
-  );
-  const contributorCount = formatInteger(locale, overview.contributor_count);
-  const contributorContent = (
-    <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-      {repAvatarItems.length > 0 && (
-        <span className="tw-flex-shrink-0">
-          <OverlappingAvatars items={repAvatarItems} size="sm" maxCount={3} />
-        </span>
-      )}
-      <span className="tw-truncate tw-text-xs tw-font-medium tw-text-iron-300">
-        {t(locale, contributorMessageKey, { count: contributorCount })}
-      </span>
-    </span>
-  );
-
-  if (overview.contributor_count <= 0) {
-    return (
-      <span className="tw-flex tw-min-h-9 tw-flex-shrink-0 tw-items-center tw-px-1">
-        {contributorContent}
-      </span>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      aria-label={t(locale, viewContributorsMessageKey, {
-        count: contributorCount,
-      })}
-      onClick={onOpenOverviewContributors}
-      className="tw-flex tw-min-h-9 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.14] tw-bg-white/[0.04] tw-px-2.5 tw-py-1 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-1 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/[0.2] desktop-hover:hover:tw-bg-white/[0.07] motion-reduce:tw-transition-none"
-    >
-      {contributorContent}
-      <ChevronRightIcon
-        aria-hidden="true"
-        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500"
-      />
-    </button>
-  );
-}
 
 function RepEmptyState({
   loading,
@@ -161,9 +62,7 @@ export default function MobileRepTabContent({
   isFetchingNextPage,
   onGrantRep,
   onOpenOverviewContributors,
-  onEditCategory,
   onOpenGlobalCategory,
-  onOpenCategoryContributors,
 }: {
   readonly profile: ApiIdentity;
   readonly overview: ApiRepOverview | null;
@@ -179,45 +78,60 @@ export default function MobileRepTabContent({
   readonly isFetchingNextPage: boolean;
   readonly onGrantRep: () => void;
   readonly onOpenOverviewContributors: () => void;
-  readonly onEditCategory: (category: string) => void;
   readonly onOpenGlobalCategory: (category: string) => void;
-  readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
   const locale = useBrowserLocale();
-  const hiddenLoadedCategoryCount = Math.max(
-    categories.length - visibleCount,
-    0
-  );
-  const hasMore = hiddenLoadedCategoryCount > 0 || hasNextPage;
-  let loadMoreLabel = t(locale, "user.profile.rep.categories.loadMore");
-  if (hiddenLoadedCategoryCount > 0) {
-    loadMoreLabel = t(locale, "user.profile.rep.categories.more", {
-      count: formatInteger(locale, hiddenLoadedCategoryCount),
-    });
-  } else if (isFetchingNextPage) {
-    loadMoreLabel = t(locale, "user.profile.rep.categories.loadingMore");
-  }
-  const isLoadMoreDisabled =
-    isFetchingNextPage && hiddenLoadedCategoryCount === 0;
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const canManage =
+    repDirection === "given" &&
+    canManageGivenRatings(profile, connectedProfile, activeProfileProxy);
+  const showGrant = canEditRep && repDirection === "received";
 
   return (
     <>
+      <div className="tw-mt-6">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-1">
+          <h2 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400">
+            {t(locale, "user.profile.identity.mobileTabs.totalRep")}
+          </h2>
+          <RepDirectionToggle
+            repDirection={repDirection}
+            onRepDirectionChange={onRepDirectionChange}
+          />
+        </div>
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3">
+          <div className="tw-min-w-0 tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
+            {overview ? formatInteger(locale, overview.total_rep) : "—"}
+          </div>
+          <RatingContributorsControl
+            overview={overview}
+            direction={repDirection}
+            matter="REP"
+            compact
+            onClick={onOpenOverviewContributors}
+            canManage={canManage}
+          />
+        </div>
+      </div>
       {repDirection === "given" &&
+        canShowPersonalRepContribution(
+          profile,
+          activeProfileProxy?.created_by ?? connectedProfile
+        ) &&
         overview !== null &&
         overview.authenticated_user_contribution !== null &&
         overview.authenticated_user_contribution !== 0 && (
           <div className="tw-mt-4 tw-flex tw-items-center tw-gap-1.5 tw-rounded-xl tw-border tw-border-solid tw-border-blue-500/20 tw-bg-blue-400/5 tw-px-4 tw-py-2.5">
-            <span className="tw-text-xs tw-font-medium tw-text-iron-500">
+            <span className="tw-text-xs tw-font-normal tw-text-iron-400">
               {tRich(locale, "user.profile.rep.rep.assignedToYou", {
                 value: (
-                  <span className="tw-text-xs tw-font-semibold tw-text-iron-300">
-                    {formatNumber(
+                  <span
+                    key="value"
+                    className="tw-text-xs tw-font-medium tw-text-iron-100"
+                  >
+                    {formatInteger(
                       locale,
-                      overview.authenticated_user_contribution,
-                      {
-                        maximumFractionDigits: 0,
-                        signDisplay: "exceptZero",
-                      }
+                      overview.authenticated_user_contribution
                     )}
                   </span>
                 ),
@@ -226,101 +140,77 @@ export default function MobileRepTabContent({
           </div>
         )}
 
-      <div className="tw-mt-4">
-        <div className="tw-mb-4">
-          <div className="tw-flex tw-min-h-9 tw-items-center tw-gap-3">
-            <div className="tw-flex-shrink-0">
-              <RepContributorControl
-                overview={overview}
-                repDirection={repDirection}
-                onOpenOverviewContributors={onOpenOverviewContributors}
-              />
-            </div>
-            {canEditRep && repDirection === "received" && (
-              <div className="tw-ml-auto tw-flex tw-min-w-0 tw-items-center">
-                <UserPageRateWrapper
-                  profile={profile}
-                  type={RateMatter.REP}
-                  hideOwnProfileMessage
+      <div className="tw-mb-3 tw-mt-5 tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-3">
+        <h3
+          className={`tw-m-0 tw-flex tw-shrink-0 tw-items-center tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.05em] tw-text-iron-500 ${showGrant ? "tw-min-h-9" : ""}`}
+        >
+          {t(locale, "rep.categories.sidebar.repCategories")}
+        </h3>
+        {showGrant && (
+          <div className="tw-ml-auto tw-min-w-0 tw-flex-1">
+            <UserPageRateWrapper
+              profile={profile}
+              type={RateMatter.REP}
+              hideOwnProfileMessage
+            >
+              <div className="tw-flex tw-flex-row-reverse tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2 max-[360px]:tw-gap-x-0.5">
+                <Button
+                  variant="action"
+                  size="sm"
+                  onClick={onGrantRep}
+                  className="max-[360px]:tw-px-1.5"
                 >
-                  <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-start tw-gap-2 sm:tw-flex-nowrap sm:tw-justify-end sm:tw-gap-3">
-                    {overview !== null &&
-                    overview.authenticated_user_contribution !== null &&
-                    overview.authenticated_user_contribution !== 0 ? (
-                      <span className="tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-500">
-                        {tRich(locale, "user.profile.rep.rep.youAssigned", {
-                          value: (
-                            <span className="tw-font-semibold tw-text-iron-300">
-                              {formatNumber(
-                                locale,
-                                overview.authenticated_user_contribution,
-                                {
-                                  maximumFractionDigits: 0,
-                                  signDisplay: "exceptZero",
-                                }
-                              )}
-                            </span>
-                          ),
-                        })}
-                      </span>
-                    ) : null}
-                    <Button variant="action" size="sm" onClick={onGrantRep}>
-                      <svg
-                        className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0 sm:tw-h-5 sm:tw-w-5"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M12 5v14M5 12h14" />
-                      </svg>
-                      {t(locale, "user.profile.rep.rep.grantAction")}
-                    </Button>
-                  </div>
-                </UserPageRateWrapper>
+                  <svg
+                    className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0 max-[360px]:tw-hidden"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  {t(locale, "user.profile.rep.rep.grantAction")}
+                </Button>
+                {overview !== null &&
+                  overview.authenticated_user_contribution !== null &&
+                  overview.authenticated_user_contribution !== 0 && (
+                    <span className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-0.5 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
+                      {tRich(locale, "user.profile.rep.rep.youAssigned", {
+                        value: (
+                          <span
+                            key="value"
+                            className="tw-font-medium tw-text-iron-100"
+                          >
+                            {formatInteger(
+                              locale,
+                              overview.authenticated_user_contribution
+                            )}
+                          </span>
+                        ),
+                      })}
+                    </span>
+                  )}
               </div>
-            )}
+            </UserPageRateWrapper>
           </div>
-          <div className="tw-mt-3 tw-w-full sm:tw-w-fit">
-            <RepDirectionToggle
-              repDirection={repDirection}
-              onRepDirectionChange={onRepDirectionChange}
-              variant="tabs"
-              fill
-            />
-          </div>
-        </div>
+        )}
       </div>
-
       {categories.length > 0 && (
-        <div>
-          <div className="tw-flex tw-flex-wrap tw-gap-2">
-            {categories.slice(0, visibleCount).map((cat) => (
-              <RepCategoryPill
-                key={cat.category}
-                category={cat}
-                canEdit={canEditRep && repDirection === "received"}
-                onEdit={onEditCategory}
-                onOpenGlobalCategory={onOpenGlobalCategory}
-                onOpenContributors={onOpenCategoryContributors}
-                direction={repDirection}
-                compact
-              />
-            ))}
-            {hasMore && (
-              <Button
-                variant="secondary"
-                onClick={onShowMore}
-                disabled={isLoadMoreDisabled}
-              >
-                {loadMoreLabel}
-              </Button>
-            )}
-          </div>
-        </div>
+        <RepCategoryList
+          key={`${profile.id ?? profile.query ?? profile.display}:${repDirection}`}
+          profile={profile}
+          categories={categories}
+          direction={repDirection}
+          visibleCount={visibleCount}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
+          onShowMore={onShowMore}
+          onOpenGlobalCategory={onOpenGlobalCategory}
+          mobile
+        />
       )}
 
       {categories.length === 0 && (
@@ -329,6 +219,7 @@ export default function MobileRepTabContent({
 
       <div className="tw-mt-6">
         <UserPageCombinedActivityLog
+          layout="mobile"
           initialActivityLogParams={initialActivityLogParams}
           matter={RateMatter.REP}
           withMatterFilter={false}

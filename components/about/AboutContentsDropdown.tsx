@@ -1,12 +1,13 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
-import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import { useOptionalHeaderContext } from "@/contexts/HeaderContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import useCapacitor from "@/hooks/useCapacitor";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { AboutSection } from "@/types/enums";
@@ -51,8 +52,8 @@ export function AboutContentsDropdown({
   withDivider = true,
 }: AboutContentsDropdownProps) {
   const capacitor = useCapacitor();
+  const hasHydrated = useHasHydrated();
   const hasLeadingAction = Boolean(leadingAction);
-  const cookieConsent = useOptionalCookieConsent();
   const headerContext = useOptionalHeaderContext();
   const { appWalletsSupported } = useAppWallets();
   const { spaces } = useLayout();
@@ -60,13 +61,7 @@ export function AboutContentsDropdown({
   const stickyStyle: AboutContentsDropdownStyle = {
     "--about-contents-sticky-top": `${stickyTop}px`,
   };
-  const hideSubscriptions =
-    cookieConsent === undefined
-      ? false
-      : shouldHideSubscriptions({
-          capacitorIsIos: capacitor.isIos,
-          country: cookieConsent.country,
-        });
+  const { hideNftPurchasing: hideSubscriptions } = useNftPurchasingVisibility();
   const groups = getVisibleAboutNavGroups({
     hideSubscriptions,
     appWalletsSupported,
@@ -150,11 +145,12 @@ export function AboutContentsDropdown({
         data-testid="about-contents-menu-trigger"
       >
         <CompactMenu
+          disabled={!hasHydrated}
           aria-label={t(locale, "about.contents.triggerAriaLabel", {
             page: currentLabel,
           })}
           unstyledTrigger
-          triggerClassName="tw-inline-flex tw-min-h-10 tw-max-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-px-3 tw-py-2 tw-text-left tw-shadow-sm tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/60 hover:tw-bg-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+          triggerClassName={`${DROPDOWN_FIELD_CLASSES} tw-inline-flex tw-min-h-10 tw-max-w-full tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-left hover:tw-border-primary-400/60`}
           trigger={<AboutContentsDropdownTrigger currentLabel={currentLabel} />}
           items={items}
           activeItemId={activeItemId}
@@ -228,7 +224,7 @@ function AboutContentsDropdownTrigger({
 }) {
   return (
     <>
-      <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-50">
+      <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300">
         {currentLabel}
       </span>
       <ChevronDownIcon

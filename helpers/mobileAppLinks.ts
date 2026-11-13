@@ -5,6 +5,19 @@ export const DeepLinkScope = {
   SHARE_CONNECTION: "share-connection",
 } as const;
 
+export const MOBILE_APP_DISMISSAL_KEY = "6529-mobile-banner-dismissed-until";
+
+export const MOBILE_APP_USER_AGENTS = {
+  electron: /Electron/i,
+  android: /Android/i,
+  ios: /iPhone|iPad|iPod/i,
+  mac: /Macintosh/i,
+  safariVersion: /\bVersion\/\d/i,
+  safari: /\bSafari\//i,
+  otherIosBrowser:
+    /CriOS|FxiOS|EdgiOS|OPiOS|GSA|DuckDuckGo|YaBrowser|FBAN|FBAV|Instagram/i,
+};
+
 /** Routes that stay in the browser for app links and universal links alike. */
 export const MOBILE_APP_EXCLUDED_ROUTES = [
   "/open-mobile",
@@ -33,11 +46,11 @@ export function getMobilePlatform(
   userAgent: string,
   maxTouchPoints = 0
 ): "iOS" | "Android" | null {
-  if (/Electron/i.test(userAgent)) return null;
-  if (/Android/i.test(userAgent)) return "Android";
+  if (MOBILE_APP_USER_AGENTS.electron.test(userAgent)) return null;
+  if (MOBILE_APP_USER_AGENTS.android.test(userAgent)) return "Android";
   if (
-    /iPhone|iPad|iPod/i.test(userAgent) ||
-    (/Macintosh/i.test(userAgent) && maxTouchPoints > 1)
+    MOBILE_APP_USER_AGENTS.ios.test(userAgent) ||
+    (MOBILE_APP_USER_AGENTS.mac.test(userAgent) && maxTouchPoints > 1)
   )
     return "iOS";
   return null;
@@ -102,7 +115,7 @@ const UNIVERSAL_LINK_FILE_EXTENSION =
 /** Query parameter that makes a repeated link to the same page navigate again. */
 const NATIVE_LINK_TIMESTAMP_PARAM = "_t";
 
-function isUniversalLinkPath(pathname: string): boolean {
+export function isUniversalLinkPath(pathname: string): boolean {
   if (!isMobileAppDestination(pathname)) return false;
   let decoded: string;
   try {
@@ -117,9 +130,38 @@ function isUniversalLinkPath(pathname: string): boolean {
   );
 }
 
-function getNativeLinkPathname(url: URL, scheme: string): string | null {
+/**
+ * The host and path of a custom-scheme link. Android System WebView before
+ * Chromium 130 parses `mobile6529://navigate/x` with an empty host and the
+ * path `//navigate/x`; read the host from the path there, as current
+ * parsers do.
+ */
+function getCustomSchemeParts(url: URL): {
+  readonly host: string;
+  readonly pathname: string;
+} {
+  if (url.hostname || !url.pathname.startsWith("//")) {
+    return { host: url.hostname, pathname: url.pathname };
+  }
+  const rest = url.pathname.slice(2);
+  const slash = rest.indexOf("/");
+  return slash === -1
+    ? { host: rest.toLowerCase(), pathname: "" }
+    : { host: rest.slice(0, slash).toLowerCase(), pathname: rest.slice(slash) };
+}
+
+function getNativeLinkPathname(
+  url: URL,
+  scheme: string,
+  origin: string
+): string | null {
   if (url.protocol === "https:") {
-    return UNIVERSAL_LINK_HOSTS.has(url.hostname) &&
+    // Accept the shared staging host only while running on that same origin.
+    // Production keeps its existing host allowlist.
+    const isStagingLink =
+      url.hostname === "staging.6529.io" &&
+      url.origin === new URL(origin).origin;
+    return (UNIVERSAL_LINK_HOSTS.has(url.hostname) || isStagingLink) &&
       isUniversalLinkPath(url.pathname)
       ? url.pathname
       : null;
@@ -132,17 +174,24 @@ function getNativeLinkPathname(url: URL, scheme: string): string | null {
     )
   )
     return null;
-  if (url.hostname === DeepLinkScope.NAVIGATE) return url.pathname || "/";
-  if (url.hostname === DeepLinkScope.SHARE_CONNECTION)
+  const { host, pathname } = getCustomSchemeParts(url);
+  if (host === DeepLinkScope.NAVIGATE) {
+    // The app ignores navigate links to the routes kept out of it, as it
+    // does for universal links, and stays where it is.
+    const path = pathname || "/";
+    return isMobileAppDestination(path) ? path : null;
+  }
+  if (host === DeepLinkScope.SHARE_CONNECTION)
     return "/accept-connection-sharing";
   return null;
 }
 
 /**
  * Maps a link the app was opened with to a root-relative destination, or null
- * to ignore it. Accepts `<scheme>://navigate/<path>`,
- * `<scheme>://share-connection?...` and https universal links / App Links on
- * the 6529.io hosts, except paths the association file keeps in the browser.
+ * to ignore it. Accepts `<scheme>://navigate/<path>` outside the excluded app
+ * routes, `<scheme>://share-connection?...` and https universal links / App
+ * Links on the production hosts or the app's own shared staging origin, except
+ * paths the association file keeps in the browser.
  */
 export function getNativeLinkDestination(
   value: string,
@@ -153,7 +202,7 @@ export function getNativeLinkDestination(
   try {
     const url = new URL(value);
     if (url.username || url.password || url.port) return null;
-    const pathname = getNativeLinkPathname(url, scheme);
+    const pathname = getNativeLinkPathname(url, scheme, origin);
     if (!pathname) return null;
 
     // URLSearchParams preserves repeated parameters; fragments stay outside the query.

@@ -32,10 +32,13 @@ The official Announcements wave uses the same blue outlined megaphone tile in
 the wave list, active thread header, right-sidebar `About`, and mobile `About`.
 These surfaces show the tile even when Announcements has a saved wave picture.
 
+In non-DM `About` headers, available Score, Quality, Hot, and Wave REP statistics
+use up to two compact columns, with each label beside its icon and value.
+
 ## Entry Points
 
-1. Open an active wave, select the `Show right sidebar` icon in the desktop/tablet header (or the
-   `Wave details` icon on compact web), then select `About`.
+1. Open an active wave, select the `Show right sidebar` icon in the desktop/tablet
+   header or `Wave details` on compact web, then select `About`.
 2. Use the top-right control row (`Join` / `Joined`, notification controls).
 3. Use header controls near the wave title, avatar, and metadata.
 4. Open the owner options menu (`⋮`) when available.
@@ -59,17 +62,60 @@ identity block. The small shield and number beside the name show Wave Score
 when available. Hover, click, or use the keyboard to open its details card and
 `Learn more` link. No score space is left for waves without a score or for DMs.
 
+When the center column becomes narrow, including when a sidebar is open, the
+name and score stay together on one line. The description teaser remains visible
+until the center header is narrower than 640px; below that width, the name and
+score are centered beside the avatar. Select the wave name to read the full
+description in `About`. The action row
+stays on one line: `Join` and Add/Edit REP keep their labels, while submission
+actions use compact icons. `More wave actions` stays visible on desktop and tablet,
+with the eligible gallery/chat action and the existing time-display choices inside.
+An active temporary time override keeps its zone indicator and undo control
+visible beside the main actions. Columns of 640–767px keep the description teaser
+with compact submission icons; wider columns restore the submission labels.
+
+On mobile web, the name stays centered beside the avatar and the available score
+stays visible. Narrow headers show the score as a small badge on the avatar,
+leaving more room for the name. `Join` keeps its white surface, text label,
+accessible name and plus icon. Search and `Wave details` stay directly visible
+beside `More wave actions`, with one-click access. The header remains on one row
+without horizontal scrolling. The avatar and title retain their regular sizes;
+very narrow columns use tighter utility spacing. Direct messages do not show a
+Wave Score.
+
+In narrow Main Stage headers, `How to Submit` is inside `More wave actions` and
+opens the existing nomination and eligibility guidance in a sheet. Eligible
+submission actions remain directly visible. Wider headers retain the direct
+submission-help lock. Selecting the Wave name still opens `About`.
+
 The top-right controls start with `Join` when the viewer has not joined the
 wave, then Add REP for eligible viewers, followed by the
-create/submit action when available, chat/gallery toggle when supported, search,
-and the right-sidebar toggle. Add REP is also available in the right sidebar's
+create/submit action when available, search, `More wave actions`,
+and the right-sidebar toggle. Gallery/chat eligibility and the original action
+icons are preserved inside More. Add REP is also available in the right sidebar's
 `About` section, alongside the full trust information and sharing. Existing
 contributors see `Edit REP`.
 On compact web, REP stays in `About` and sharing remains in `More wave actions`.
+The desktop and tablet Add/Edit REP control has a subtle border and transparent
+surface, keeping it quieter than the white `Join` action.
+Add/Edit REP and the About panel's share or copy button use matching compact
+proportions, with larger touch areas around their visible surfaces.
+The More, message search, and right-sidebar controls use
+the same hover-label styling as Profile Waves Feed.
 
 Unavailable submission actions show a lock icon at every width. Hover, focus,
 or select the lock to read the full restriction reason. The Memes `How to Submit`
-helper keeps its desktop label and opens nomination guidance.
+helper keeps its label when space allows and opens nomination guidance. In a
+narrow center column and on phones it uses a transparent, borderless lock icon,
+with `How to Submit` retained as its accessible name. The native app's nomination
+helper uses the same borderless treatment. Its lock matches Search and More's
+resting icon color and brightens on hover, since it opens guidance rather than
+acting as a disabled button. Other restricted submission controls
+keep their bordered surfaces.
+On the web, the Main Stage submit/help control sits before message search.
+Compact web keeps Search directly visible before More; narrow Main Stage
+headers move submission help into More.
+Add/Edit REP sits beside `Join` when both controls are shown.
 
 ### Join Call to Action
 
@@ -91,6 +137,9 @@ helper keeps its desktop label and opens nomination guidance.
 - Subwaves have their own `Join`; joining a subwave does not join its parent.
 - The header and `About` buttons use the same join request and update the
   wave list immediately, including the `Joined` collection.
+- Leaving removes the open wave from `Joined` while keeping its content open.
+  A parent remains if you still belong to one of its subwaves. Failed requests
+  keep the joined row; joining again restores a wave you left.
 
 ## Permission Rules
 
@@ -120,7 +169,8 @@ helper keeps its desktop label and opens nomination guidance.
 8. Use `Back` in followers to return to `About`.
 9. Use pin to keep the wave in pinned lists (up to 20 total).
 10. Open the wave name to go to `/waves/{waveId}`.
-11. If edit-eligible on a non-DM wave, use pencil actions to rename or update
+11. Renaming the wave leaves decision titles and rules unchanged.
+    If edit-eligible on a non-DM wave, use pencil actions to rename or update
     picture.
 12. If author, open `⋮` for profile-wave actions and `Delete`. In the mobile
     sheet or tablet overlay, `Wave options` opens inside the same panel. The

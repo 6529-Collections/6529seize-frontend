@@ -34,12 +34,11 @@ download link.
 2. Pick a hub card:
    - `Network Metrics`
    - `6529bot Usage`
-   - `Meme Subscriptions` (can be hidden on native iOS outside US)
+   - `Meme Subscriptions` (web and Android)
    - `Rememes`
    - `Team`
    - `Royalties`
-3. If `Meme Subscriptions` is hidden on native iOS (non-`US` or country still
-   loading), open `/open-data/meme-subscriptions` directly.
+3. In the iOS app, open `/open-data/meme-subscriptions` directly.
 4. Wait for route content.
 5. Open a row link in a new tab.
 
@@ -77,10 +76,9 @@ download link.
   - `/open-data/team`
   - `/open-data/royalties`
 - Web sidebar includes direct links to all dataset routes.
-- Native app menu includes direct links to dataset routes under
-  `About -> Data & Developer Tools`; hub cards and direct URLs also work.
-- `Meme Subscriptions` can be hidden on the hub for native iOS app users outside
-  the US, but the direct route still works.
+- The native app menu lists datasets under `About -> Data & Developer Tools`.
+- The iOS app omits `Meme Subscriptions` from navigation and the hub in all
+  countries. The direct dataset route still works.
 
 ## Failure and Recovery
 

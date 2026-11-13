@@ -370,7 +370,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
           <div>
             <label
               htmlFor={rationaleSwitchId}
-              className="tw-flex tw-w-fit tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-2"
+              className="tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-2"
             >
               <span className="tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center">
                 <input
@@ -432,6 +432,9 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             >
               <div className="tw-min-h-0 tw-overflow-hidden">
                 <div className="tw-space-y-2 tw-pt-3">
+                  <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+                    {t(locale, "waves.voteRationale.publicReplyDescription")}
+                  </p>
                   <label
                     htmlFor={rationaleTextareaId}
                     className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400"

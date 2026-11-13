@@ -7,6 +7,9 @@ import { faExternalLinkSquare } from "@fortawesome/free-solid-svg-icons";
 import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { getTimelineMediaType } from "./timeline-media-type";
+
+type TimelineChange = NFTHistory["description"]["changes"][number];
 
 interface Props {
   nft: BaseNFT;
@@ -38,17 +41,6 @@ export default function Timeline(props: Readonly<Props>) {
     return t(locale, "timeline.date.utc", {
       date: formatDate(locale, date, TIMELINE_DATE_FORMAT),
     });
-  };
-
-  const getType = () => {
-    const format = props.nft.metadata?.animation_details?.format;
-    if (format === "HTML") {
-      return MediaType.HTML;
-    } else if (format === "MP4" || format === "MOV") {
-      return MediaType.VIDEO;
-    } else {
-      return MediaType.IMAGE;
-    }
   };
 
   const getKeyDisplay = (key: string) => {
@@ -108,7 +100,12 @@ export default function Timeline(props: Readonly<Props>) {
     return (
       <div className={FULL_WIDTH_COLUMN_CLASS_NAME}>
         <b>{label}:</b>{" "}
-        <a href={value} target="_blank" rel="noopener noreferrer">
+        <a
+          href={value}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="md:[[data-nft-card-page]_&]:tw-font-mono"
+        >
           {value}
         </a>
       </div>
@@ -165,14 +162,14 @@ export default function Timeline(props: Readonly<Props>) {
     return printImage(label, nonUndefined);
   }
 
-  function printAnimation(label: string, value: string) {
+  function printAnimation(label: string, value: string, format?: string) {
     return (
       <div
         className={`${FLEX_COLUMN_CLASS_NAME} tw-flex tw-flex-col tw-items-start tw-gap-1`}
       >
         <b>{label}:</b>
         <TimelineMediaComponent
-          type={getType()}
+          type={getTimelineMediaType(format)}
           url={value}
           label={label}
           locale={locale}
@@ -181,12 +178,25 @@ export default function Timeline(props: Readonly<Props>) {
     );
   }
 
-  function printFromToAnimation(from: string, to: string) {
+  function printFromToAnimation(
+    from: string,
+    to: string,
+    changes: TimelineChange[]
+  ) {
+    // A change records separate before/after formats; today's NFT metadata
+    // cannot identify either historical asset, particularly a removed animation.
+    const format = changes.find(
+      (change) => change.key === "animation_details::format"
+    );
     if (from && to) {
       return (
         <>
-          {printAnimation(t(locale, "timeline.fields.from"), from)}
-          {printAnimation(t(locale, "timeline.fields.to"), to)}
+          {printAnimation(
+            t(locale, "timeline.fields.from"),
+            from,
+            format?.from
+          )}
+          {printAnimation(t(locale, "timeline.fields.to"), to, format?.to)}
         </>
       );
     }
@@ -195,15 +205,19 @@ export default function Timeline(props: Readonly<Props>) {
       ? t(locale, "timeline.fields.removedAnimation")
       : t(locale, "timeline.fields.addedAnimation");
     const nonUndefined = from || to;
-    return printAnimation(label, nonUndefined);
+    return printAnimation(
+      label,
+      nonUndefined,
+      from ? format?.from : format?.to
+    );
   }
 
-  function printContent(change: { key: string; from: string; to: string }) {
+  function printContent(change: TimelineChange, changes: TimelineChange[]) {
     let content;
     if (isImage(change.key)) {
       content = printFromToImages(change.from, change.to);
     } else if (isAnimation(change.key)) {
-      content = printFromToAnimation(change.from, change.to);
+      content = printFromToAnimation(change.from, change.to, changes);
     } else if (isUrlKey(change.key)) {
       content = printFromToUrls(change.from, change.to);
     } else if (change.key.endsWith("(Added)")) {
@@ -291,7 +305,7 @@ export default function Timeline(props: Readonly<Props>) {
                         <div
                           className={`${FLEX_ROW_CLASS_NAME} tw-pb-4 tw-pt-1`}
                         >
-                          {printContent(change)}
+                          {printContent(change, step.description.changes)}
                         </div>
                       </li>
                     ))}

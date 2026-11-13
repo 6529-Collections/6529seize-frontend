@@ -21,7 +21,10 @@ load older notifications.
 
 ## Main Flow
 
-1. Open `/notifications`.
+1. Click the sidebar bell to open `/notifications`. On desktop you can also
+   hover over the bell (or focus it and press Arrow Down) to preview activity,
+   then select `View all notifications`. Direct URLs and the mobile bell also
+   open the full feed.
 2. Resolve access gates if shown:
    `Loading profile...`, `Reconnect wallet`, `Switch to primary profile`.
 3. Wait for `Loading notifications...`.
@@ -39,9 +42,9 @@ load older notifications.
    Reopening it preserves the current selection.
 10. Open rows to inspect drop context or actor activity.
 11. For grouped `New reactions` rows, review
-   reactors, reaction badges, and the related drop preview.
+    reactors, reaction badges, and the related drop preview.
 12. Use `Follow All` when present, or see
-   `Following All` when everyone in the group is already followed.
+    `Following All` when everyone in the group is already followed.
 13. Open drop content to route into wave or DM context with serial context.
 14. For grouped reactions, opening the related drop marks grouped
     notification IDs as read.

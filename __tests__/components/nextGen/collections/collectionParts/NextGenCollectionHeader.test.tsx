@@ -102,12 +102,20 @@ describe("NextGenCollectionHeader", () => {
   afterEach(() =>
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: false, shouldRedirect: false })
+      .mockReturnValue({
+        hideNftPurchasing: false,
+        shouldRedirect: false,
+        reservesNftPurchasingSpace: false,
+      })
   );
   it("retains countdown information without a mint CTA on restricted iOS", () => {
     jest
       .mocked(useNftPurchasingVisibility)
-      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+      .mockReturnValue({
+        hideNftPurchasing: true,
+        shouldRedirect: true,
+        reservesNftPurchasingSpace: false,
+      });
     const { container } = render(
       <NextGenCollectionHeader collection={collection} show_links={false} />
     );
@@ -157,5 +165,43 @@ describe("NextGenCollectionHeader", () => {
     expect(
       screen.getByRole("link", { name: "Loading mint details" })
     ).toBeInTheDocument();
+  });
+
+  it("falls back to the default mint label when the allowlist type cannot load", async () => {
+    (fetchUrl as jest.Mock).mockRejectedValue(
+      new Error("HTTP error! status: 500")
+    );
+    render(
+      <NextGenCollectionHeader
+        collection={collection}
+        show_links
+        collection_link={false}
+      />
+    );
+
+    const link = await screen.findByRole("link", { name: "MINT" });
+    expect(link).toHaveAttribute(
+      "href",
+      "/nextgen/collection/my-collection/mint"
+    );
+    expect(
+      screen.queryByRole("link", { name: "Loading mint details" })
+    ).toBeNull();
+  });
+
+  it("aborts the allowlist request on unmount", () => {
+    (fetchUrl as jest.Mock).mockReturnValue(new Promise(() => {}));
+    const { unmount } = render(
+      <NextGenCollectionHeader
+        collection={collection}
+        show_links
+        collection_link={false}
+      />
+    );
+    const [, init] = (fetchUrl as jest.Mock).mock.lastCall;
+    expect(init.signal.aborted).toBe(false);
+
+    unmount();
+    expect(init.signal.aborted).toBe(true);
   });
 });

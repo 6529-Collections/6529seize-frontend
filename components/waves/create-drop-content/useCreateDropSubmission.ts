@@ -17,6 +17,10 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { useDropSignature } from "@/hooks/drops/useDropSignature";
+import {
+  hideAndroidComposerKeyboard,
+  useDismissMobileComposer,
+} from "@/hooks/useDismissMobileComposer";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useMemo, useRef } from "react";
@@ -28,6 +32,10 @@ import {
   hasMetadataContent,
 } from "./content-helpers";
 import { generateParts, toApiCreateDropParts } from "./part-builders";
+import { withClientDropId } from "@/services/api/client-drop-ids";
+import { getDropMediaUploadPurpose } from "@/services/uploads/mediaUploadPurpose";
+import { ImageProcessingError } from "@/services/uploads/ImageProcessingError";
+import { MediaUploadRefusedError } from "@/services/uploads/MediaUploadRefusedError";
 import {
   isReplyTargetUnavailableError,
   REPLY_TARGET_UNAVAILABLE_TOAST_ID,
@@ -185,35 +193,25 @@ const addOptimisticDropWithAttachments = ({
   );
 };
 
-const hideAndroidKeyboard = async () => {
-  const { Capacitor } = await import("@capacitor/core");
-  if (Capacitor.getPlatform() !== "android") {
-    return;
-  }
-
-  const { Keyboard } = await import("@capacitor/keyboard");
-  await Keyboard.hide().catch(() => {});
-};
-
 const updateFocusAfterAcceptedSubmit = ({
   getMarkdown,
-  shouldKeepChatFocused,
+  isChatSubmit,
   isApp,
   createDropInputRef,
-  shouldRefocusAfterChatSubmitRef,
+  dismissMobileComposer,
 }: {
   readonly getMarkdown: string | null;
-  readonly shouldKeepChatFocused: boolean;
+  readonly isChatSubmit: boolean;
   readonly isApp: boolean;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
-  readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
+  readonly dismissMobileComposer: ReturnType<typeof useDismissMobileComposer>;
 }) => {
   if (getMarkdown?.length) {
     createDropInputRef.current?.clearEditorState();
   }
 
-  if (shouldKeepChatFocused) {
-    shouldRefocusAfterChatSubmitRef.current = true;
+  if (isChatSubmit) {
+    dismissMobileComposer(createDropInputRef.current);
     return;
   }
 
@@ -222,7 +220,7 @@ const updateFocusAfterAcceptedSubmit = ({
   }
 
   if (isApp) {
-    hideAndroidKeyboard().catch(() => {});
+    hideAndroidComposerKeyboard().catch(() => {});
   }
 };
 
@@ -282,6 +280,7 @@ export const useCreateDropSubmission = ({
   dropModeSessionScopeKey,
   isIdentityPickerAllowed,
   isApp,
+  isDesktop,
   requestAuth,
   setToast,
   signDrop,
@@ -303,7 +302,6 @@ export const useCreateDropSubmission = ({
   setIsStormMode,
   setMetadataOpenState,
   createDropInputRef,
-  shouldRefocusAfterChatSubmitRef,
 }: {
   readonly activeDrop: ActiveDropState | null;
   readonly wave: ApiWave;
@@ -329,6 +327,7 @@ export const useCreateDropSubmission = ({
   readonly dropModeSessionScopeKey: string;
   readonly isIdentityPickerAllowed: boolean;
   readonly isApp: boolean;
+  readonly isDesktop: boolean;
   readonly requestAuth: () => Promise<{ success: boolean }>;
   readonly setToast: (toast: AppToastInput) => void;
   readonly signDrop: ReturnType<typeof useDropSignature>["signDrop"];
@@ -350,7 +349,7 @@ export const useCreateDropSubmission = ({
   readonly finalizeAndAddDropPart: (
     markdownOverride: string | null
   ) => CreateDropConfig;
-  readonly refreshState: () => void;
+  readonly refreshState: (restoreFocusAfterSubmit?: boolean) => void;
   readonly setSubmitting: Dispatch<SetStateAction<boolean>>;
   readonly setUploadingFiles: Dispatch<SetStateAction<UploadingFile[]>>;
   readonly setFiles: Dispatch<SetStateAction<File[]>>;
@@ -360,8 +359,8 @@ export const useCreateDropSubmission = ({
     SetStateAction<ScopedValueState<boolean> | null>
   >;
   readonly createDropInputRef: MutableCurrentRef<CreateDropInputHandles | null>;
-  readonly shouldRefocusAfterChatSubmitRef: MutableCurrentRef<boolean>;
 }) => {
+  const dismissMobileComposer = useDismissMobileComposer();
   const {
     locale,
     pollDraft,
@@ -520,10 +519,11 @@ export const useCreateDropSubmission = ({
     });
   };
 
-  const prepareAndSubmitDrop = async (dropRequest: CreateDropConfig) => {
-    if (submitting) {
-      return;
-    }
+  const prepareAndSubmitDrop = async (
+    dropRequest: CreateDropConfig,
+    restoreFocusAfterSubmit = false
+  ) => {
+    if (submitting) return;
 
     if (
       isBlockedChatDropRequest({
@@ -550,21 +550,24 @@ export const useCreateDropSubmission = ({
 
       const generatedParts = await generateParts(
         dropRequest.parts,
-        setUploadingFiles
+        setUploadingFiles,
+        getDropMediaUploadPurpose(dropRequest),
+        locale
       );
       if (!generatedParts.length) {
-        setSubmitting(false);
         return;
       }
-      const requestBody = buildCreateDropRequest({
-        dropRequest,
-        generatedParts,
-        canMentionAll,
-        waveId: wave.id,
-      });
+      // The client_drop_id is part of the signed payload.
+      const requestBody = withClientDropId(
+        buildCreateDropRequest({
+          dropRequest,
+          generatedParts,
+          canMentionAll,
+          waveId: wave.id,
+        })
+      );
       const updatedDropRequest = await getUpdatedDropRequest(requestBody);
       if (!updatedDropRequest) {
-        setSubmitting(false);
         return;
       }
 
@@ -648,8 +651,7 @@ export const useCreateDropSubmission = ({
         return;
       }
 
-      const shouldKeepChatFocused =
-        updatedDropRequest.drop_type === ApiDropType.Chat;
+      const isChatSubmit = updatedDropRequest.drop_type === ApiDropType.Chat;
 
       addOptimisticDropWithAttachments({
         optimisticDrop,
@@ -659,22 +661,26 @@ export const useCreateDropSubmission = ({
       });
       updateFocusAfterAcceptedSubmit({
         getMarkdown,
-        shouldKeepChatFocused,
+        isChatSubmit,
         isApp,
         createDropInputRef,
-        shouldRefocusAfterChatSubmitRef,
+        dismissMobileComposer,
       });
       setFiles([]);
       if (isIdentityPickerAllowed) {
         disableIdentityPickerAutoOpen();
       }
       setIsStormMode(false);
-      refreshState();
+      refreshState(isChatSubmit && isDesktop && restoreFocusAfterSubmit);
     } catch (error) {
       setToast({
         type: "error",
-        title: "Couldn't submit this drop.",
-        description: "Please try again.",
+        title: t(locale, "drop.upload.submitFailed"),
+        description:
+          error instanceof ImageProcessingError ||
+          error instanceof MediaUploadRefusedError
+            ? error.message
+            : t(locale, "drop.upload.tryAgain"),
         details: getToastErrorDetails(error),
       });
     } finally {
@@ -693,7 +699,10 @@ export const useCreateDropSubmission = ({
     [files, isDropMode, metadata, wave.participation.required_media]
   );
 
-  const onDrop = async (markdownOverride?: string): Promise<void> => {
+  const onDrop = async (
+    markdownOverride?: string,
+    restoreFocusAfterSubmit = false
+  ): Promise<void> => {
     if (submitting) {
       return;
     }
@@ -744,7 +753,10 @@ export const useCreateDropSubmission = ({
       return;
     }
 
-    await prepareAndSubmitDrop(getUpdatedDrop(submissionMarkdown));
+    await prepareAndSubmitDrop(
+      getUpdatedDrop(submissionMarkdown),
+      restoreFocusAfterSubmit
+    );
   };
 
   const onGifDrop = async (gif: string): Promise<void> => {

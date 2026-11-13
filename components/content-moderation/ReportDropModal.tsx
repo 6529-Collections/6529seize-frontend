@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -41,7 +42,8 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, useId, useState } from "react";
+import { type ReactNode, useId, useRef, useState } from "react";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { useContentModerationDropGateContext } from "./ContentModerationDropGateContext";
 import {
   getReportDialogDescriptionKey,
@@ -529,12 +531,17 @@ export default function ReportDropModal({
     },
   });
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const dismissReport = () => {
+    if (!mutation.isPending && !withdrawMutation.isPending) closeModal();
+  };
+  useAndroidBackLayer(isOpen, dialogRef, dismissReport);
+
   return (
     <Dialog
+      ref={dialogRef}
       open={isOpen}
-      onClose={() => {
-        if (!mutation.isPending && !withdrawMutation.isPending) closeModal();
-      }}
+      onClose={dismissReport}
       className="tailwind-scope tw-relative tw-z-[1000]"
       aria-describedby={descriptionId}
     >
@@ -560,7 +567,7 @@ export default function ReportDropModal({
                 onClick={closeModal}
                 disabled={mutation.isPending || withdrawMutation.isPending}
                 aria-label={t(locale, "contentModeration.report.close")}
-                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
               >
                 <XMarkIcon aria-hidden="true" className="tw-size-5" />
               </button>
@@ -624,7 +631,7 @@ export default function ReportDropModal({
                                     .value as ApiContentModerationReportReason
                                 )
                               }
-                              className="tw-mt-2 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-text-iron-100 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+                              className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-w-full tw-px-3 tw-py-2.5 tw-text-sm`}
                             >
                               {REASONS.map((item) => (
                                 <option key={item.value} value={item.value}>

@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { MemesSingleWaveDrop } from "@/components/waves/drop/MemesSingleWaveDrop";
 
 jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
@@ -8,6 +8,9 @@ jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
 }));
 
 const mockApprovalStatus = jest.fn();
+const mockRefetchWave = jest.fn();
+let mockWaveError = false;
+let mockWaveFetching = false;
 let mockWrapperProps: any;
 let mockInfoPanelProps: any;
 
@@ -30,7 +33,10 @@ jest.mock("@/components/waves/drop/MemesSingleWaveDropInfoPanel", () => ({
 jest.mock("@/components/waves/drop/useSingleWaveDropData", () => ({
   useSingleWaveDropData: () => ({
     drop: { id: "d1", wave: { id: "w1" } },
-    wave: { id: "w1" },
+    wave: mockWaveError ? undefined : { id: "w1" },
+    isWaveError: mockWaveError,
+    isWaveFetching: mockWaveFetching,
+    refetchWave: mockRefetchWave,
     extendedDrop: { id: "d1", wave: { id: "w1" } },
   }),
 }));
@@ -46,6 +52,9 @@ jest.mock("@/hooks/waves/useWaveMetadata", () => ({
 
 describe("MemesSingleWaveDrop", () => {
   beforeEach(() => {
+    mockWaveError = false;
+    mockWaveFetching = false;
+    mockRefetchWave.mockClear();
     mockWrapperProps = undefined;
     mockInfoPanelProps = undefined;
     mockApprovalStatus.mockReset();
@@ -74,6 +83,36 @@ describe("MemesSingleWaveDrop", () => {
 
     expect(screen.getByTestId("wrapper")).toBeInTheDocument();
     expect(screen.getByTestId("info-panel")).toHaveAttribute("data-wave", "w1");
+  });
+
+  it("offers recovery when wave metadata fails instead of spinning indefinitely", () => {
+    mockWaveError = true;
+    const { rerender } = render(
+      <MemesSingleWaveDrop
+        drop={{ id: "d1", wave: { id: "w1" } } as any}
+        onClose={jest.fn()}
+      />
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "This content could not be loaded."
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(mockRefetchWave).toHaveBeenCalledTimes(1);
+    mockWaveFetching = true;
+    rerender(
+      <MemesSingleWaveDrop
+        drop={{ id: "d1", wave: { id: "w1" } } as any}
+        onClose={jest.fn()}
+      />
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("status", { name: "Loading…" })
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("wrapper")).not.toBeInTheDocument();
   });
 
   it("passes approval lock props into wrapper and info panel", () => {

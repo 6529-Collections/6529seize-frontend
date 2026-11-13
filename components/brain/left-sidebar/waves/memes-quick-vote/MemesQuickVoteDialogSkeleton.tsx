@@ -1,7 +1,14 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+
 function SkeletonBlock({ className }: { readonly className: string }) {
-  return <div className={`tw-animate-pulse tw-rounded ${className}`} />;
+  return (
+    <div
+      className={`tw-animate-pulse tw-rounded motion-reduce:tw-animate-none ${className}`}
+    />
+  );
 }
 
 function MemesQuickVoteDropHeaderSkeleton() {
@@ -65,6 +72,7 @@ function MemesQuickVoteActionBarSkeleton() {
 }
 
 export default function MemesQuickVoteDialogSkeleton() {
+  const locale = useBrowserLocale();
   return (
     <div
       role="status"
@@ -73,18 +81,10 @@ export default function MemesQuickVoteDialogSkeleton() {
       data-testid="quick-vote-loading-skeleton"
       className="tw-flex tw-h-full tw-flex-col md:tw-grid md:tw-min-h-0 md:tw-grid-cols-[minmax(0,1.22fr)_minmax(25rem,1fr)] md:tw-items-stretch"
     >
-      <p className="tw-sr-only">
-        Loading your next meme and your recent quick-vote amounts.
-      </p>
+      <p className="tw-sr-only">{t(locale, "memes.quickVote.loading")}</p>
 
       <div data-testid="quick-vote-preview-status" className="tw-hidden">
         <SkeletonBlock className="tw-h-8 tw-w-32 tw-rounded-full tw-bg-iron-800/60" />
-      </div>
-
-      <div className="tw-flex tw-items-center tw-justify-between tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/40 tw-px-4 tw-pb-3 tw-pt-[calc(env(safe-area-inset-top,0px)+0.75rem)] tw-backdrop-blur-xl md:tw-hidden">
-        <SkeletonBlock className="tw-size-10 tw-rounded-full tw-bg-iron-800/80" />
-        <SkeletonBlock className="tw-h-4 tw-w-28 tw-rounded-full tw-bg-iron-800/55" />
-        <div className="tw-size-10 tw-shrink-0" />
       </div>
 
       <div className="tw-relative tw-min-h-0 tw-flex-1 md:tw-contents">

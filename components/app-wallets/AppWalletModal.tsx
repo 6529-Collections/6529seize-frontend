@@ -1,17 +1,9 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
-import type { KeyboardEvent, ReactNode, RefObject } from "react";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
-import { createPortal } from "react-dom";
-import { EyeIcon, EyeSlashIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import type { RefObject } from "react";
+import { useCallback, useId, useRef, useState } from "react";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import {
   decryptData,
   getAppWalletNameError,
@@ -24,147 +16,10 @@ import { useAppWallets } from "./AppWalletsContext";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { DELEGATION_FIELD_CLASS_NAME } from "@/components/delegation/delegation-ui";
+import { AppWalletModalShell } from "./AppWalletModalShell";
 
 const LEGACY_UNLOCK_MIN_PASS_LENGTH = 6;
 const APP_WALLET_INPUT_CLASS_NAME = DELEGATION_FIELD_CLASS_NAME;
-const subscribeToHydration = () => () => undefined;
-const getHydratedSnapshot = () => true;
-const getServerHydratedSnapshot = () => false;
-
-function closeDialog(dialog: HTMLDialogElement) {
-  if (typeof dialog.close === "function" && dialog.open) {
-    dialog.close();
-    return;
-  }
-
-  dialog.removeAttribute("open");
-}
-
-function AppWalletModalShell(
-  props: Readonly<{
-    show: boolean;
-    title: string;
-    onHide: () => void;
-    dismissDisabled?: boolean;
-    children: ReactNode;
-    footer: ReactNode;
-  }>
-) {
-  const titleId = useId();
-  const isHydrated = useSyncExternalStore(
-    subscribeToHydration,
-    getHydratedSnapshot,
-    getServerHydratedSnapshot
-  );
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
-  const {
-    children,
-    dismissDisabled = false,
-    footer,
-    onHide,
-    show,
-    title,
-  } = props;
-
-  useEffect(() => {
-    if (typeof document === "undefined") {
-      return undefined;
-    }
-
-    const dialog = dialogRef.current;
-    if (!dialog) {
-      return undefined;
-    }
-
-    if (!show) {
-      closeDialog(dialog);
-      return undefined;
-    }
-
-    previouslyFocusedElementRef.current =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null;
-
-    if (typeof dialog.showModal === "function") {
-      if (!dialog.open) {
-        dialog.showModal();
-      }
-    } else {
-      dialog.setAttribute("open", "");
-    }
-    dialog
-      .querySelector<HTMLElement>(
-        "[autofocus], input:not([disabled]), button:not([disabled])"
-      )
-      ?.focus();
-
-    return () => {
-      closeDialog(dialog);
-      previouslyFocusedElementRef.current?.focus();
-      previouslyFocusedElementRef.current = null;
-    };
-  }, [isHydrated, show]);
-
-  if (!isHydrated) {
-    return null;
-  }
-
-  return createPortal(
-    <dialog
-      ref={dialogRef}
-      aria-modal="true"
-      aria-labelledby={titleId}
-      className="tailwind-scope tw-relative tw-m-0 tw-h-[100dvh] tw-max-h-none tw-w-screen tw-max-w-none tw-overflow-y-auto tw-border-none tw-bg-transparent tw-p-0 tw-text-inherit backdrop:tw-bg-black/75 backdrop:tw-backdrop-blur-sm"
-      onCancel={(event) => {
-        event.preventDefault();
-        if (!dismissDisabled) {
-          onHide();
-        }
-      }}
-    >
-      <button
-        type="button"
-        aria-label={t(DEFAULT_LOCALE, "appWallet.modal.close")}
-        className="tw-absolute tw-inset-0 tw-cursor-default tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0"
-        onClick={onHide}
-        disabled={dismissDisabled}
-        tabIndex={-1}
-      />
-      <div className="tw-relative tw-z-10 tw-flex tw-min-h-full tw-w-full tw-items-center tw-justify-center tw-px-4 tw-pb-[max(1rem,env(safe-area-inset-bottom,0px))] tw-pt-[max(1rem,env(safe-area-inset-top,0px))]">
-        <section className="tw-my-auto tw-w-full tw-max-w-md tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-text-iron-50 tw-shadow-2xl tw-shadow-black/60 tw-ring-1 tw-ring-white/5">
-          <header className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-px-5 tw-py-4 sm:tw-px-6">
-            <h2
-              id={titleId}
-              className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50"
-            >
-              {title}
-            </h2>
-            <button
-              type="button"
-              aria-label={t(DEFAULT_LOCALE, "appWallet.modal.close")}
-              onClick={onHide}
-              disabled={dismissDisabled}
-              className="tw--mr-2 tw-inline-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/5 active:tw-text-iron-100 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-100"
-            >
-              <XMarkIcon className="tw-size-5" aria-hidden="true" />
-            </button>
-          </header>
-          <div className="tw-px-5 tw-py-5 sm:tw-px-6">{children}</div>
-          <div
-            data-testid="app-wallet-modal-actions"
-            className="tw-flex tw-flex-col tw-justify-end tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-5 tw-py-4 sm:tw-flex-row sm:tw-px-6 [&>button]:tw-w-full sm:[&>button]:tw-w-auto"
-          >
-            {footer}
-          </div>
-        </section>
-      </div>
-    </dialog>,
-    document.body
-  );
-}
-
 const showAppWalletError = (
   timeoutRef: RefObject<NodeJS.Timeout | null>,
   setError: React.Dispatch<React.SetStateAction<string>>,
@@ -513,6 +368,7 @@ export function UnlockAppWalletModal(
   const inputRef = useRef<HTMLInputElement>(null);
   const walletPasswordId = useId();
   const feedbackId = useId();
+  const formId = useId();
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -532,12 +388,6 @@ export function UnlockAppWalletModal(
     setUnlocking(false);
     onHide();
   }, [onHide]);
-
-  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && canUnlock) {
-      handleUnlock();
-    }
-  };
 
   const showUnlockError = useCallback(() => {
     setUnlocking(false);
@@ -597,6 +447,7 @@ export function UnlockAppWalletModal(
 
   return (
     <AppWalletModalShell
+      layered
       show={show}
       onHide={() => handleHide()}
       dismissDisabled={unlocking}
@@ -613,10 +464,10 @@ export function UnlockAppWalletModal(
             {t(DEFAULT_LOCALE, "appWallet.modal.cancel")}
           </Button>
           <Button
-            type="button"
+            type="submit"
+            form={formId}
             disabled={!canUnlock}
             loading={unlocking}
-            onClick={handleUnlock}
             variant="action"
             size="md"
           >
@@ -628,7 +479,14 @@ export function UnlockAppWalletModal(
         </>
       }
     >
-      <div className="tw-space-y-5">
+      <form
+        id={formId}
+        className="tw-space-y-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (canUnlock) void handleUnlock();
+        }}
+      >
         <div>
           <label
             className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
@@ -662,7 +520,6 @@ export function UnlockAppWalletModal(
                   );
                 }
               }}
-              onKeyDown={handleKeyPress}
             />
             <button
               type="button"
@@ -715,7 +572,7 @@ export function UnlockAppWalletModal(
         >
           {error || t(DEFAULT_LOCALE, "appWallet.modal.unlockHelp")}
         </p>
-      </div>
+      </form>
     </AppWalletModalShell>
   );
 }

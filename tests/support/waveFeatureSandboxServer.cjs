@@ -10,7 +10,9 @@ const root = path.resolve(__dirname, "../..");
 const fixture = path.join(__dirname, "waveFeatureFixture.tsx");
 const port = Number(process.env.PORT || 3302);
 if (!Number.isInteger(port) || port < 1 || port > 65535)
-  throw new Error("Synthetic Wave fixture PORT must be an integer from 1 to 65535");
+  throw new Error(
+    "Synthetic Wave fixture PORT must be an integer from 1 to 65535"
+  );
 const fixtureExport = (names) =>
   `export { ${names} } from ${JSON.stringify(fixture)};`;
 const stubs = new Map([
@@ -20,7 +22,7 @@ const stubs = new Map([
   ],
   [
     "@/config/env",
-    'export const publicEnv = { NODE_ENV: "production", NEXT_PUBLIC_MIXPANEL_TOKEN: "synthetic-wave-feature-pilot" };',
+    'export const publicEnv = { NODE_ENV: "production", NEXT_PUBLIC_MIXPANEL_TOKEN: "synthetic-wave-feature-pilot" }; export const getNodeEnv = () => publicEnv.NODE_ENV;',
   ],
   ["@/components/auth/Auth", fixtureExport("AuthContext, useAuth")],
   ["@/components/auth/authContext", fixtureExport("AuthContext, useAuth")],
@@ -119,6 +121,12 @@ async function start() {
               };
             if (args.path === "./useDeviceInfo")
               return { path: "@/hooks/useDeviceInfo", namespace: "fixture" };
+            // config/devAuth.ts reads the env module through a relative path.
+            if (
+              args.path === "./env" &&
+              path.dirname(args.importer) === path.join(root, "config")
+            )
+              return { path: "@/config/env", namespace: "fixture" };
             if (stubs.has(args.path))
               return { path: args.path, namespace: "fixture" };
             if (
@@ -137,9 +145,8 @@ async function start() {
             if (args.path === "null-component")
               contents = "export default function Component() { return null; }";
             if (args.path === "sdk") {
-              const sdkPath = require.resolve(
-                "mixpanel-browser/dist/mixpanel-core.cjs.js"
-              );
+              const sdkPath =
+                require.resolve("mixpanel-browser/dist/mixpanel-core.cjs.js");
               contents = `import sdk from ${JSON.stringify(sdkPath)};
             const init = sdk.init.bind(sdk);
             sdk.init = (token, options) => init(token, {...options,
@@ -158,12 +165,12 @@ async function start() {
     tailwind({
       ...config,
       content: [
-        "components/brain/left-sidebar/waves/**/*.tsx",
+        "components/brain/left-sidebar/waves/**/*.{ts,tsx}",
         "components/brain/my-stream/MyStreamWave*Tabs.tsx",
         "components/brain/my-stream/MyStreamWaveTabOption.tsx",
         "components/common/TabToggle.tsx",
         "components/common/TabCountBadge.tsx",
-        "components/utils/select/**/*.tsx",
+        "components/utils/select/**/*.{ts,tsx}",
         "components/waves/leaderboard/header/WaveleaderboardSort.tsx",
       ],
     }),

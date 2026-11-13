@@ -20,7 +20,7 @@ jobs:
     permissions:
       contents: read
     outputs:
-      base_sha: ${{ github.event.pull_request.base.sha }}
+      base_sha: ${{ steps.merge_tree.outputs.base_sha }}
       risk_floor: ${{ steps.plan_outputs.outputs.risk_floor }}
       install_required: ${{ steps.plan_outputs.outputs.install_required }}
       lint_changed_required: ${{ steps.plan_outputs.outputs.lint_changed_required }}
@@ -40,6 +40,7 @@ jobs:
       agent_files_sync_required: ${{ steps.plan_outputs.outputs.agent_files_sync_required }}
       app_check_matrix: ${{ steps.plan_outputs.outputs.app_check_matrix }}
       core_playwright_required: ${{ steps.plan_outputs.outputs.core_playwright_required }}
+      composer_browser_required: ${{ steps.plan_outputs.outputs.composer_browser_required }}
       core_playwright_matrix: ${{ steps.plan_outputs.outputs.core_playwright_matrix }}
 
     steps:
@@ -52,14 +53,31 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Fetch exact base commit
+      # GitHub can build the run's merge commit (github.sha) on a newer base
+      # tip than the event payload's base snapshot. Take the base from the
+      # merge commit under test so every diff, the protected Museum policy and
+      # the exact merge-tree evidence describe the tree that CI checks.
+      - name: Resolve exact merge-tree base
+        id: merge_tree
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_REF: ${{ github.base_ref }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_MERGE_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          [[ "$BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
-          git fetch --no-tags origin "$BASE_SHA"
-          test "$(git rev-parse "${BASE_SHA}^{commit}")" = "$BASE_SHA"
+          [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::Run merge commit is not an exact 40-hex SHA: '${EXPECTED_MERGE_SHA}'."; exit 1; }
+          [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::PR head is not an exact 40-hex SHA: '${EXPECTED_HEAD_SHA}'."; exit 1; }
+          [[ -n "$BASE_REF" ]] || { echo "::error::PR base branch is empty."; exit 1; }
+          read -r merge_sha base_sha head_sha extra_parents <<< "$(git rev-list --parents --max-count=1 HEAD)"
+          test "$merge_sha" = "$EXPECTED_MERGE_SHA" || { echo "::error::Checked-out HEAD '${merge_sha}' is not the run's merge commit ${EXPECTED_MERGE_SHA}."; exit 1; }
+          [[ -n "${head_sha:-}" && -z "${extra_parents:-}" ]] || { echo "::error::Merge commit ${merge_sha} does not have exactly two parents."; exit 1; }
+          test "$head_sha" = "$EXPECTED_HEAD_SHA" || { echo "::error::Merge commit second parent ${head_sha} is not the PR head ${EXPECTED_HEAD_SHA}."; exit 1; }
+          [[ "$base_sha" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::Merge commit first parent is not an exact 40-hex SHA: '${base_sha}'."; exit 1; }
+          test "$(git rev-parse --verify "${base_sha}^{commit}")" = "$base_sha" || { echo "::error::Merge commit first parent ${base_sha} is not a local commit."; exit 1; }
+          # The base supplies protected policy, so it must be base-branch history.
+          git merge-base --is-ancestor "$base_sha" "refs/remotes/origin/${BASE_REF}" || { echo "::error::Merge commit first parent ${base_sha} is not on origin/${BASE_REF}."; exit 1; }
+          echo "Merge commit ${merge_sha} = base ${base_sha} (origin/${BASE_REF}) + PR head ${head_sha}"
+          echo "base_sha=${base_sha}" >> "$GITHUB_OUTPUT"
 
       - name: Install Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
@@ -76,7 +94,7 @@ jobs:
       # It uses Node built-ins and synthetic responses; no provider token is needed.
       - name: Verify Sentry workflow offline contracts
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ steps.merge_tree.outputs.base_sha }}
         run: |
           set -euo pipefail
           changed_audit_inputs="$(git diff --name-only --no-renames "${BASE_SHA}...HEAD" -- \
@@ -91,7 +109,7 @@ jobs:
 
       - name: Create CI plan and security reports
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ steps.merge_tree.outputs.base_sha }}
           UNTRUSTED_PR: ${{ github.event.pull_request.head.repo.full_name != github.repository }}
         run: |
           set -euo pipefail
@@ -111,7 +129,7 @@ jobs:
 
       - name: Apply protected Museum browser-lane floor
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ steps.merge_tree.outputs.base_sha }}
         run: |
           set -euo pipefail
           control_sha="$(git rev-parse "${BASE_SHA}^{commit}")"
@@ -202,25 +220,60 @@ jobs:
             { lane: "quality", label: "Quality and contracts", runner: defaultRunner },
           ];
           const corePlaywrightLanes = [];
+          const composerBrowserRequired = plan.changed_files.some((file) =>
+            /^(?:components\/waves\/(?:CreateDrop\.tsx$|drops\/(?:WaveDrop(?:ReplyCollapseAction|ActionsMore|MobileMenu)\.tsx$|reply-threads\/|wave-drops-all\/))|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|CreateDropSubmissionDialogs|useAllMentionConfirmation|part-builders|useDropFilePreparation|useCreateDropSubmission)\.|components\/waves\/create-wave\/services\/multiPartUpload\.ts$|services\/uploads\/(?:multipartUploadCore|dropUploadValidation|ImageProcessingError)\.ts$|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
+          );
+          write("composer_browser_required", String(composerBrowserRequired));
           const collectBrowserRequired = plan.changed_files.some((file) =>
-            /^(?:app\/collect\/|components\/collect\/|components\/user\/collected\/|components\/nextGen\/|components\/6529Gradient\/|components\/the-memes\/|tests\/collect\/|generated\/models\/Api(?:Collect|Market))/.test(file) ||
+            /^(?:app\/collect\/|components\/collect\/|components\/nft-market-depth\/|components\/user\/collected\/|components\/nextGen\/|components\/6529Gradient\/|components\/the-memes\/|tests\/collect\/|generated\/models\/Api(?:Collect|Market))/.test(file) ||
             ["services/api/collect-api.ts", "services/api/collect-rules-api.ts", "services/api/market-api.ts", "components/common/RecipientSelector.tsx", "components/mobile-wrapper-dialog/MobileWrapperDialog.tsx", "i18n/messages/collect.ts", "openapi.yaml", ".github/workflows/app-pr-ci.yml"].includes(file)
           );
           write("playwright_collect_required", String(collectBrowserRequired));
           if (plan.checks.build.required) {
             appCheckLanes.push({ lane: "build", label: "Production build", runner: buildRunner });
           }
-          if (plan.checks.playwright_smoke.required || collectBrowserRequired || plan.checks.playwright_artwork_documentation.required) {
+          if (plan.checks.playwright_smoke.required || collectBrowserRequired || composerBrowserRequired || plan.checks.playwright_artwork_documentation.required) {
             corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_native_competition?.required) {
-            corePlaywrightLanes.push({ lane: "playwright-native-competition", label: "Native competitions desktop and mobile", runner: defaultRunner });
+            // Two shards ran 24-28 minutes against the 30-minute limit; four
+            // leave room for slow runners and retries.
+            for (const shard of [1, 2, 3, 4]) {
+              corePlaywrightLanes.push({ lane: "playwright-native-competition", label: `Native competitions shard ${shard}/4`, runner: defaultRunner, shard });
+            }
+          }
+          if (plan.checks.playwright_submission_artwork?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-submission-artwork", label: "Submission artwork desktop and mobile", runner: defaultRunner });
+          }
+          if (plan.checks.playwright_profile_nic?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-profile-nic", label: "Profile NIC activity", runner: defaultRunner });
           }
           if (plan.checks.playwright_pdf_attachments?.required) {
             corePlaywrightLanes.push({ lane: "playwright-pdf-attachments", label: "PDF attachments in WebKit", runner: defaultRunner });
           }
           if (plan.checks.playwright_wave_feature_usage?.required) {
             corePlaywrightLanes.push({ lane: "playwright-wave-feature-usage", label: "Wave feature tracking desktop and mobile", runner: defaultRunner });
+          }
+          if (plan.checks.playwright_drop_reactions?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-drop-reactions", label: "Live drop reaction details", runner: defaultRunner });
+          }
+          const bookmarksBrowserRequired = plan.changed_files.some((file) =>
+            /^(?:app\/bookmarks\/|components\/bookmarks\/|components\/header\/user\/HeaderBookmarksLink|components\/waves\/drops\/WaveDropBookmarkAction|hooks\/drops\/useDropBookmark|services\/api\/drop-bookmarks|i18n\/messages\/bookmarks|tests\/social\/bookmarks-sandbox|tests\/support\/bookmarks|package\.json$|\.github\/workflows\/app-pr-ci\.yml$)/.test(file)
+          );
+          if (bookmarksBrowserRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-bookmarks", label: "Private bookmarks desktop and mobile", runner: defaultRunner });
+          }
+          const notificationsInboxRequired = plan.changed_files.some((file) =>
+            /^(?:components\/notifications\/inbox\/|components\/layout\/sidebar\/WebSidebar\.tsx$|tests\/auth\/notifications-inbox-sandbox|i18n\/messages\/notifications-inbox)/.test(file)
+          );
+          if (notificationsInboxRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-notifications-inbox", label: "Notifications inbox desktop and mobile", runner: defaultRunner });
+          }
+          const waveLinkPreviewRequired = plan.changed_files.some((file) =>
+            /^(?:components\/waves\/list\/WaveItem(?:Wide|Chat|Follow)\.tsx$|tests\/social\/wave-link-preview-sandbox\.spec\.ts$)/.test(file)
+          );
+          if (waveLinkPreviewRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-wave-link-preview", label: "Wave link previews desktop and mobile", runner: defaultRunner });
           }
           const waveCreationBrowserRequired = plan.changed_files.some((file) =>
             /^(?:app\/waves\/create\/|components\/waves\/create-wave\/|components\/drops\/create\/|helpers\/waves\/create-wave|tests\/social\/create-wave-sandbox)/.test(file) ||
@@ -242,6 +295,11 @@ jobs:
               label: "Playwright critical shell",
               runner: defaultRunner,
             });
+            // The profile pages pack is the longest critical-shell step. Two
+            // Playwright shards in parallel jobs leave room for a retry.
+            for (const shard of [1, 2]) {
+              corePlaywrightLanes.push({ lane: "playwright-critical-shell-profile", label: `Critical shell profile pages shard ${shard}/2`, runner: defaultRunner, shard });
+            }
           }
           if (plan.checks.playwright_museum.required) {
             appCheckLanes.push(
@@ -327,8 +385,8 @@ jobs:
       needs.plan.outputs.core_playwright_required == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
-    # The complete native pack needs room for its dev-server bootstrap and tests.
-    timeout-minutes: ${{ matrix.lane == 'playwright-native-competition' && 30 || 20 }}
+    # Allow full native and profile coverage to finish after dev-server bootstrap.
+    timeout-minutes: ${{ (matrix.lane == 'playwright-native-competition' || startsWith(matrix.lane, 'playwright-critical-shell')) && 30 || 20 }}
     permissions:
       contents: read
       issues: read
@@ -339,7 +397,7 @@ jobs:
       run:
         shell: bash
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.core_playwright_matrix) }}
 
     env:
@@ -353,7 +411,6 @@ jobs:
       NEXTGEN_CHAIN_ID: "1"
       MOBILE_APP_SCHEME: "mobile6529"
       CORE_SCHEME: "core6529"
-      IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
       IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
       GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}
       ASSETS_FROM_S3: "false"
@@ -408,6 +465,14 @@ jobs:
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:smoke
 
+      - name: Run composer mention, image validation, send focus, and reply thread browser checks
+        if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.composer_browser_required == 'true'
+        env:
+          NEXT_DEV_DIST_DIR: ".next-playwright-all-mention"
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/all-mention"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/all-mention"
+        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention|keeps desktop keyboard focus|submits one exact-shape|collapses a single reply thread|opens an older nested reply link|waits for image validation'
+
       - name: Run Collect public browser pack
         if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.playwright_collect_required == 'true'
         env:
@@ -417,6 +482,7 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/collect"
         run: |
           ./bin/6529 exec playwright test tests/collect/collect-public.spec.ts \
+            tests/collect/memelab-marketplace-public.spec.ts \
             --project=web-desktop-chromium \
             --project=web-mobile-chromium \
             --workers=1
@@ -431,9 +497,25 @@ jobs:
       - name: Run native competition browser regression pack
         if: matrix.lane == 'playwright-native-competition'
         env:
+          NEXT_DEV_TURBOPACK_FS_CACHE: "0"
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
-        run: ./bin/6529 run test:e2e:native-competition-sandbox
+          NATIVE_COMPETITION_SHARD: "${{ matrix.shard }}/4"
+        run: ./bin/6529 run test:e2e:native-competition-sandbox --shard="$NATIVE_COMPETITION_SHARD"
+
+      - name: Run submission artwork browser regression pack
+        if: matrix.lane == 'playwright-submission-artwork'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/submission-artwork"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/submission-artwork"
+        run: ./bin/6529 run test:e2e:submission-artwork-sandbox
+
+      - name: Run image viewer layout browser regression pack
+        if: matrix.lane == 'playwright-submission-artwork'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/image-viewer-layout"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/image-viewer-layout"
+        run: ./bin/6529 run test:e2e:image-viewer-layout-sandbox
 
       - name: Run PDF attachment browser regression pack
         if: matrix.lane == 'playwright-pdf-attachments'
@@ -441,6 +523,18 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/pdf-attachments"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/pdf-attachments"
         run: ./bin/6529 run test:e2e:pdf-attachments-sandbox
+
+      - name: Run private bookmarks browser pack
+        if: matrix.lane == 'playwright-bookmarks'
+        run: ./bin/6529 run test:e2e:bookmarks-sandbox
+
+      - name: Run notifications inbox browser pack
+        if: matrix.lane == 'playwright-notifications-inbox'
+        run: ./bin/6529 run test:e2e:notifications-inbox-sandbox
+
+      - name: Run wave link preview browser pack
+        if: matrix.lane == 'playwright-wave-link-preview'
+        run: ./bin/6529 run test:e2e:wave-link-preview-sandbox
 
       - name: Run isolated Wave feature tracking browser pack
         if: matrix.lane == 'playwright-wave-feature-usage'
@@ -455,6 +549,13 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/wave-creation"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/wave-creation"
         run: ./bin/6529 run test:e2e:wave-creation-sandbox
+
+      - name: Run drop reaction browser regression pack
+        if: matrix.lane == 'playwright-drop-reactions'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/drop-reactions"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/drop-reactions"
+        run: ./bin/6529 run test:e2e:reaction-sandbox
 
       - name: Run drop editing browser regression pack
         if: matrix.lane == 'playwright-drop-editing'
@@ -496,10 +597,27 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/session-recovery"
         run: ./bin/6529 run test:e2e:session-recovery-sandbox
 
+      # Each shard boots its own sandbox server; together they run every
+      # profile pages test once on all four projects.
+      - name: Run own-profile Following browser regression pack
+        if: matrix.lane == 'playwright-critical-shell-profile'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/profile-following"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/profile-following"
+          PROFILE_FOLLOWING_SHARD: "${{ matrix.shard }}/2"
+        run: ./bin/6529 run test:e2e:profile-following-sandbox --shard="$PROFILE_FOLLOWING_SHARD"
+
+      - name: Run profile NIC activity browser regression pack
+        if: matrix.lane == 'playwright-profile-nic'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/profile-nic"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/profile-nic"
+        run: ./bin/6529 run test:e2e:profile-nic-sandbox
+
       # A dev server killed by the kernel OOM killer exits without any output,
       # so record the container's memory peak and OOM-kill count.
       - name: Report browser lane memory pressure
-        if: always() && matrix.lane == 'playwright-critical-shell'
+        if: always() && startsWith(matrix.lane, 'playwright-critical-shell')
         run: |
           for file in memory.peak memory.max memory.events; do
             echo "== /sys/fs/cgroup/${file}"
@@ -511,7 +629,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: app-pr-ci-results-${{ matrix.lane }}-${{ github.event.pull_request.number || github.run_id }}
+          name: app-pr-ci-results-${{ matrix.lane }}${{ matrix.shard && format('-{0}', matrix.shard) || '' }}-${{ github.event.pull_request.number || github.run_id }}
           path: |
             test-results/**
             playwright-report/**
@@ -525,12 +643,16 @@ jobs:
       needs.plan.outputs.install_required == 'true' &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 60
+    # Museum recovery (25m), browser installation (10m), and browser phases
+    # (10m + 20m) need 65m; the optional lock-tool install adds at most 5m.
+    # Leave the remaining 5m for checkout/setup and evidence upload.
+    timeout-minutes: ${{ startsWith(matrix.lane, 'playwright-museum-') && 75 || 60 }}
     permissions:
       contents: read
       issues: read
     strategy:
-      fail-fast: true
+      # Finish build and quality evidence even when independent browser checks fail.
+      fail-fast: false
       matrix: ${{ fromJSON(needs.plan.outputs.app_check_matrix) }}
 
     env:
@@ -545,7 +667,6 @@ jobs:
       NEXTGEN_CHAIN_ID: "1"
       MOBILE_APP_SCHEME: "mobile6529"
       CORE_SCHEME: "core6529"
-      IPFS_API_ENDPOINT: "https://api-ipfs.6529.io"
       IPFS_GATEWAY_ENDPOINT: "https://ipfs.6529.io"
       GIPHY_API_KEY: ${{ vars.GIPHY_API_KEY }}
       ASSETS_FROM_S3: "false"
@@ -691,12 +812,12 @@ jobs:
             __tests__/scripts/frontend-deployment-workflows.test.ts \
             __tests__/scripts/museum-release-tier.test.ts \
             __tests__/scripts/museum-surface-registry.test.ts \
-            __tests__/scripts/package-public-review-artifacts.test.ts \
+            __tests__/scripts/package-web-artifact.test.ts \
             __tests__/scripts/production-build-artifact.test.ts \
             __tests__/scripts/production-artifact-metadata.test.ts \
             __tests__/scripts/production-artifact-verifier.test.ts \
             __tests__/scripts/deployment-e2e-workflows.test.ts \
-            __tests__/scripts/public-review-artifact-workflows.test.ts \
+            __tests__/scripts/web-artifact-workflows.test.ts \
             __tests__/scripts/sync-e2e-manifest.test.ts
 
       - name: Lint changed source
@@ -1027,6 +1148,14 @@ jobs:
           set -euo pipefail
           ./bin/6529 run build:ci
 
+      # Turbopack builds no longer print First Load JS. Compare the shared and
+      # per-route first-load JavaScript with scripts/perf-budget.json.
+      - name: Check first-load JavaScript budget
+        if: matrix.lane == 'build'
+        run: |
+          set -euo pipefail
+          ./bin/6529 run perf:budget --report test-results/app-pr-ci/perf-budget.json
+
       - name: Create exact PR merge-tree CI evidence
         if: matrix.lane == 'quality'
         env:
@@ -1039,15 +1168,15 @@ jobs:
           MUSEUM_BROWSER_REQUIRED: ${{ needs.plan.outputs.playwright_museum_required }}
         run: |
           set -euo pipefail
-          [[ "$EXPECTED_BASE_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]]
-          [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$DEPLOYMENT_CONTRACT_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$TEST_TYPECHECK_REQUIRED" =~ ^(true|false)$ ]]
-          [[ "$MUSEUM_BROWSER_REQUIRED" =~ ^(true|false)$ ]]
-          test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA"
-          test "$(git rev-parse HEAD^1)" = "$EXPECTED_BASE_SHA"
+          [[ "$EXPECTED_BASE_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::Plan base_sha is not an exact 40-hex SHA: '${EXPECTED_BASE_SHA}'."; exit 1; }
+          [[ "$EXPECTED_MERGE_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::Run merge commit is not an exact 40-hex SHA: '${EXPECTED_MERGE_SHA}'."; exit 1; }
+          [[ "$EXPECTED_HEAD_SHA" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::PR head is not an exact 40-hex SHA: '${EXPECTED_HEAD_SHA}'."; exit 1; }
+          [[ "$BUILD_REQUIRED" =~ ^(true|false)$ ]] || { echo "::error::Plan build_required is not a boolean: '${BUILD_REQUIRED}'."; exit 1; }
+          [[ "$DEPLOYMENT_CONTRACT_REQUIRED" =~ ^(true|false)$ ]] || { echo "::error::Plan deployment_contract_required is not a boolean: '${DEPLOYMENT_CONTRACT_REQUIRED}'."; exit 1; }
+          [[ "$TEST_TYPECHECK_REQUIRED" =~ ^(true|false)$ ]] || { echo "::error::Plan test_typecheck_required is not a boolean: '${TEST_TYPECHECK_REQUIRED}'."; exit 1; }
+          [[ "$MUSEUM_BROWSER_REQUIRED" =~ ^(true|false)$ ]] || { echo "::error::Plan playwright_museum_required is not a boolean: '${MUSEUM_BROWSER_REQUIRED}'."; exit 1; }
+          test "$(git rev-parse HEAD)" = "$EXPECTED_MERGE_SHA" || { echo "::error::Checked-out HEAD $(git rev-parse HEAD) is not the run's merge commit ${EXPECTED_MERGE_SHA}."; exit 1; }
+          test "$(git rev-parse HEAD^1)" = "$EXPECTED_BASE_SHA" || { echo "::error::Merge commit first parent $(git rev-parse HEAD^1) is not the plan base ${EXPECTED_BASE_SHA}."; exit 1; }
           rm -rf exact-pr-ci-evidence
           mkdir -p exact-pr-ci-evidence
           jq -e --arg base_sha "$EXPECTED_BASE_SHA" --arg head_sha "$EXPECTED_MERGE_SHA" '
@@ -1060,7 +1189,7 @@ jobs:
             (.selected_packs | type == "array") and
             (.source_commit | test("^[a-f0-9]{40}$")) and
             (.selection_digest | test("^[a-f0-9]{64}$"))
-          ' test-results/app-pr-ci/museum-release-selection.json >/dev/null
+          ' test-results/app-pr-ci/museum-release-selection.json >/dev/null || { echo "::error::Museum PR selection report is malformed or not bound to base ${EXPECTED_BASE_SHA} and merge ${EXPECTED_MERGE_SHA}."; exit 1; }
           selection_verifier="$MUSEUM_RELEASE_SELECTION_TOOL"
           if [ "$MUSEUM_RELEASE_SELECTION_CONTROL_AVAILABLE" != true ]; then
             selection_verifier="$GITHUB_WORKSPACE/scripts/museum-release-selection.cjs"
@@ -1145,19 +1274,41 @@ jobs:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-node22-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
 
+      - name: Ensure package-lock inspection tool
+        if: startsWith(matrix.lane, 'playwright-museum-')
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          # Custom Linux runners may omit psmisc. Provide fuser before an
+          # install timeout could leave apt holding locks needed by recovery.
+          if ! command -v fuser >/dev/null; then
+            sudo apt-get -o DPkg::Lock::Timeout=120 install --no-install-recommends -y psmisc
+          fi
+          command -v fuser >/dev/null
+
       - name: Install Playwright dependencies
         id: playwright_dependencies_primary
         if: startsWith(matrix.lane, 'playwright-museum-')
-        timeout-minutes: 3
+        timeout-minutes: 10
         continue-on-error: true
         run: ./bin/6529 exec playwright install-deps chromium
 
       - name: Retry Playwright dependencies
         id: playwright_dependencies_retry
         if: startsWith(matrix.lane, 'playwright-museum-') && steps.playwright_dependencies_primary.outcome != 'success'
-        timeout-minutes: 3
+        timeout-minutes: 15
         continue-on-error: true
-        run: ./bin/6529 exec playwright install-deps chromium
+        run: |
+          set -euo pipefail
+          # A timed-out install can leave apt-get running. Wait for it rather
+          # than deleting locks or killing another package-manager process.
+          sudo timeout 300 bash -euc '
+            command -v fuser >/dev/null
+            while fuser /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock >/dev/null 2>&1; do
+              sleep 2
+            done
+          '
+          ./bin/6529 exec playwright install-deps chromium
 
       - name: Verify Playwright dependencies
         if: startsWith(matrix.lane, 'playwright-museum-')

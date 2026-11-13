@@ -26,24 +26,48 @@ sections:
 ## User Journey
 
 1. Open `/`.
-2. The header shows:
-   - Label: `6529`
-   - Headline: `Building a decentralized network state`
-3. Logged-out visitors see two actions beneath the main headline:
-   - `Start here`, which opens `/join-6529`
-   - `Connect wallet`, which opens the wallet connection flow
-4. The latest-drop slot follows the newcomer actions directly.
-5. A heart shortcut is visible on `/`:
+2. The Montserrat hero shows a small `6529` label, the headline
+   `Building a decentralized network state`, and the subtitle
+   `A decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.`
+   The hero is a single left-aligned typography block without artwork or
+   illustration. The headline scales with the available width, and the
+   subtitle has a readable line length. No space is reserved for hero images.
+3. Logged-out visitors see two actions beneath the subtitle, in this order:
+   - `Connect wallet`, the primary action, opens the existing wallet connection flow.
+   - `Start here`, the secondary action, opens `/join-6529`.
+   - Mobile uses two equal-width buttons with 48px touch targets; larger layouts
+     keep the actions together beneath the copy.
+4. A heart shortcut is visible on `/`:
    - Larger layouts: fixed near the top-right of the hero area
    - Mobile/app small-screen layouts: in the top header actions
    - Accessible name: `Open network health dashboard`
    - Tooltip/title: `Network health`
-6. The latest-drop slot resolves independently.
-7. Below that slot, the mission block renders with:
-   - Heading: `6529 is a network society`
-   - Supporting mission paragraph
-   - Uppercase line: `The long-term goal is nation-scale positive impact.`
-   - Quote-card region labeled `Mission statement`
+5. The latest-drop slot follows the hero for every visitor and resolves
+   independently.
+6. Logged-out visitors see `How to start` after the latest-drop slot, with the
+   introduction “Four steps into 6529.” The steps appear in this order:
+   - `Connect wallet`: “Your wallet is your sign-in.” Opens the same wallet flow
+     as the hero button.
+   - `Create profile`: “Add a name, avatar, and bio.” Opens
+     `/join-6529#join-step-profile` to continue the existing onboarding flow.
+   - `Join a Wave`: “Chat, post, and vote.” Opens `/waves`.
+   - `Collect or create`: “Hold Meme Cards to earn voting weight, or submit your
+     own art.” The heading is plain text. Within the unchanged sentence,
+     `Hold Meme Cards` links to `/the-memes` and `submit your own art` links to
+     `/about/apply`, which explains eligibility and the nomination path for new
+     artists. There are no separate buttons below the description.
+   - The first three step headings are actions, with an arrow beside each title.
+     The community link keeps its `Browse Waves` hover title.
+   - `Read the full guide` opens `/join-6529`.
+   - Desktop shows four numbered columns. Mobile shows a vertical timeline.
+   - The collection/submission description is omitted during server rendering
+     and in the iOS app. Those
+     visitors see a browsing/community description without the two inline links.
+7. The mission block shows `6529 is a network society` beside the Bitcoin and
+   Ethereum sentence, with `human coordination itself,` emphasized. On mobile
+   the paragraph follows the heading. The long-term goal appears beneath it
+   in a quiet outlined label. The hero already contains the public-goods
+   definition, so it is not repeated here.
 8. Selecting the heart icon opens `/network/health`.
 
 ## Common Scenarios
@@ -51,17 +75,20 @@ sections:
 - Desktop/tablet: health shortcut is visible near the top-right.
 - Mobile/app small-screen: health shortcut is visible in the header action row.
 - Logged-out or unauthenticated: the compact newcomer actions appear before
-  the dashboard-style activity sections.
-- Authenticated: the current dashboard-first layout remains unchanged and the
-  newcomer actions are not shown.
+  the activity sections; How to start follows the latest-drop slot.
+- Authenticated: the same typography-only hero remains visible; the newcomer
+  actions and How to start are not shown. The latest-drop slot follows the
+  hero with the same spacing as for logged-out visitors.
 - Latest-drop data unavailable: mission block still renders below the slot.
 
 ## Edge Cases
 
-- On reduced-motion settings, heart animation is disabled.
+- The desktop homepage health shortcut stays still, with a subtle colour change
+  on hover and a visible keyboard-focus ring.
+- Reduced-motion settings make button colour changes immediate.
 - While wallet state is initializing or connecting, the page does not assume
-  the visitor is logged out. The newcomer actions appear once that state
-  resolves.
+  the visitor is logged out. The newcomer actions and steps appear once that
+  state resolves.
 - If a wallet is present but authentication is not valid, the newcomer
   actions remain available so the visitor can continue through onboarding.
 - The mission block has no interactive controls or outbound links.
@@ -81,14 +108,21 @@ sections:
 - Home activity remains public; the visitor actions provide onboarding entry
   points rather than gating the dashboard content.
 - Core interactive actions for home continue in sections below (`Latest Drop`,
-  `Coming up`, `Boosted Drops`, and `Most active waves`).
+  `Coming up` and Waves).
 
 ## Related Pages
 
 - [Home Index](README.md)
 - [Home Landing and Section Navigation Flow](flow-home-landing-and-section-navigation.md)
 - [Home Latest Drop and Coming Up](feature-home-latest-drop-and-coming-up.md)
-- [Home Boosted Drops and Most Active Waves](feature-home-discovery-grids.md)
+- [Home Waves Discovery](feature-home-discovery-grids.md)
 - [Home Route and Section Visibility Troubleshooting](troubleshooting-home-route-and-section-visibility.md)
 - [Network Health Dashboard](../network/feature-health-dashboard.md)
 - [Docs Home](../README.md)
+
+## Localization
+
+Hero, How to start, and mission copy use the message dictionary.
+The approved English copy currently falls back unchanged for en-GB, fr-FR,
+es-ES, and de-DE. The homepage localization follow-up owns translation review
+and layout verification for these headings, descriptions, and link labels.

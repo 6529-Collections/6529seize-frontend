@@ -254,6 +254,51 @@ test("sidebar collection and search controls count deliberate use without query 
   await page
     .getByRole("button", { name: "Enable synthetic telemetry" })
     .click();
+  const collectionFilter = page.getByRole("group", {
+    name: "Wave list filter",
+  });
+  await expect(collectionFilter).toHaveCSS("border-top-width", "1px");
+  await expect(collectionFilter).toHaveCSS(
+    "background-color",
+    "rgba(19, 19, 22, 0.75)"
+  );
+  await expect(collectionFilter).toHaveCSS("padding", "2px");
+  const allCollection = collectionFilter.getByRole("button", {
+    name: "All",
+    exact: true,
+  });
+  await expect(allCollection).toHaveCSS("font-size", "12px");
+  await expect(allCollection).toHaveCSS("font-weight", "600");
+  await expect(allCollection).toHaveCSS("min-height", "30px");
+  await expect(allCollection).toHaveCSS("background-color", "rgb(38, 39, 43)");
+  const searchButton = page.getByRole("button", {
+    name: "Find a wave…",
+    exact: true,
+  });
+  const collectionLayout = await collectionFilter.evaluate((group) => {
+    const row = group.parentElement!;
+    const groupBounds = group.getBoundingClientRect();
+    const searchBounds = group.nextElementSibling!.getBoundingClientRect();
+    const widths = [...group.querySelectorAll("button")].map(
+      (tab) => tab.getBoundingClientRect().width
+    );
+    return {
+      unusedSpace:
+        searchBounds.left -
+        groupBounds.right -
+        Number.parseFloat(getComputedStyle(row).columnGap),
+      widthDifference: Math.max(...widths) - Math.min(...widths),
+      overflow: row.scrollWidth - row.clientWidth,
+    };
+  });
+  expect(collectionLayout.unusedSpace).toBeCloseTo(0, 0);
+  expect(collectionLayout.widthDifference).toBeLessThanOrEqual(1);
+  expect(collectionLayout.overflow).toBeLessThanOrEqual(0);
+  const searchSurface = page
+    .getByRole("button", { name: "Find a wave…", exact: true })
+    .locator(":scope > span");
+  await expect(searchSurface).toHaveCSS("border-top-width", "0px");
+  await expect(searchSurface).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await page.getByRole("button", { name: "Pinned", exact: true }).hover();
   await page.getByRole("button", { name: "Pinned", exact: true }).focus();
   expect(
@@ -268,7 +313,14 @@ test("sidebar collection and search controls count deliberate use without query 
         (await featureEvents(page, "Wave Feature Activated", "pinned")).length
     )
     .toBe(1);
-  await page.getByRole("button", { name: "Find a wave…", exact: true }).click();
+  await searchButton.hover();
+  if (await page.evaluate(() => matchMedia("(any-hover: hover)").matches)) {
+    await expect(searchSurface).toHaveCSS(
+      "background-color",
+      "rgb(28, 28, 33)"
+    );
+  }
+  await searchButton.click();
   await page
     .getByRole("searchbox", { name: "Find a wave…" })
     .fill("private-search-content");

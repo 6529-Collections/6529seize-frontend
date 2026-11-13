@@ -65,12 +65,6 @@
   justify-content: center;
 }
 
-.loginPromptKeyboardAware {
-  bottom: calc(5px + var(--native-keyboard-inset-bottom, 0px));
-  transition: bottom
-    var(--native-keyboard-layout-transition-duration, 0ms) ease-out;
-}
-
 .loginPrompt input {
   padding-left: 10px;
   border: none;
@@ -92,7 +86,7 @@
 .htmlContainer h3,
 .htmlContainer h4,
 .htmlContainer h5 {
-  font-family: "Montserrat", sans-serif !important;
+  font-family: var(--font-montserrat, "Montserrat"), sans-serif !important;
   float: none;
 }
 .htmlContainer ul li {

@@ -10,6 +10,8 @@ import {
   getRandomColorWithSeed,
   numberWithCommas,
   numberWithCommasFromString,
+  requestElementFullScreen,
+  parseEmojis,
   parseIpfsUrl,
   parseIpfsUrlToGateway,
   parseNftDescriptionToHtml,
@@ -245,6 +247,17 @@ describe("enterArtFullScreen", () => {
     expect(webkitRequestFullscreen).toHaveBeenCalledTimes(1);
     expect(webkitRequestFullscreen.mock.contexts[0]).toBe(element);
   });
+
+  test("expands a given element without an id lookup", async () => {
+    const element = document.createElement("iframe");
+    document.body.append(element);
+    const requestFullscreen = jest.fn().mockResolvedValue(undefined);
+    setFullscreenRequest(element, "requestFullscreen", requestFullscreen);
+
+    await expect(requestElementFullScreen(element)).resolves.toBe(true);
+
+    expect(requestFullscreen.mock.contexts[0]).toBe(element);
+  });
 });
 
 describe("additional helper functions", () => {
@@ -311,14 +324,24 @@ describe("more helper utilities", () => {
     expect(text).toContain("Jan");
     expect(printMintDate()).toBe("-");
   });
+});
 
-  test("removeBaseEndpoint strips prefix", () => {
-    jest.resetModules();
-    jest.doMock("@/config/env", () => ({
-      publicEnv: { BASE_ENDPOINT: "https://api.example.com" },
-    }));
+describe("parseEmojis", () => {
+  test("replaces U+ code point tokens with the emoji character", () => {
+    expect(parseEmojis("Cat U+1F431")).toBe("Cat \u{1F431}");
+  });
 
-    const { removeBaseEndpoint } = require("@/helpers/Helpers");
-    expect(removeBaseEndpoint("https://api.example.com/path")).toBe("/path");
+  test("leaves code points that are not Unicode scalar values as written", () => {
+    expect(parseEmojis("U+110000")).toBe("U+110000");
+    expect(parseEmojis("U+D800")).toBe("U+D800");
+    // Over-long tokens stay whole, not a converted prefix plus leftover digits.
+    expect(parseEmojis("U+1000000")).toBe("U+1000000");
+    expect(parseEmojis("U+0001F431")).toBe("U+0001F431");
+  });
+
+  test("returns markup-like input as plain text", () => {
+    expect(parseEmojis('<img src=x onerror="alert(1)"> U+1F431')).toBe(
+      '<img src=x onerror="alert(1)"> \u{1F431}'
+    );
   });
 });

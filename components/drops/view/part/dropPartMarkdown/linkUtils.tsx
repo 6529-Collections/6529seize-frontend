@@ -1,7 +1,7 @@
 import type { AnchorHTMLAttributes } from "react";
 import type { ExtraProps } from "react-markdown";
 
-import { publicEnv } from "@/config/env";
+import { getInternalLinkPath } from "@/helpers/internalLink";
 import { isLikelyEnsTarget } from "@/lib/ens/detect";
 import { matchesDomainOrSubdomain } from "@/lib/url/domains";
 import { parseYoutubeLink } from "@/services/youtube/url";
@@ -162,20 +162,16 @@ const renderExternalOrInternalLink = (
   href: string,
   props: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps
 ) => {
-  const baseEndpoint = publicEnv.BASE_ENDPOINT || "";
-  const hasBaseEndpoint = baseEndpoint.length > 0;
-  const isExternalLink = hasBaseEndpoint && !href.startsWith(baseEndpoint);
+  const internalPath = getInternalLinkPath(href);
   const { onClick, ...restProps } = props;
   const anchorProps: AnchorHTMLAttributes<HTMLAnchorElement> & ExtraProps = {
     ...restProps,
-    href,
+    href: internalPath ?? href,
   };
 
-  if (isExternalLink) {
+  if (internalPath === null) {
     anchorProps.rel = "noopener noreferrer nofollow";
     anchorProps.target = "_blank";
-  } else if (hasBaseEndpoint) {
-    anchorProps.href = href.replace(baseEndpoint, "");
   }
 
   return (

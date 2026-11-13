@@ -23,6 +23,7 @@ import {
   setLatestVerifiedWaveReadIdentityByAddress,
 } from "@/hooks/useMarkWaveNotificationsRead.requests";
 import type {
+  InvalidateNotificationsRef,
   MarkWaveNotificationsReadOptions,
   MarkWaveNotificationsReadResult,
   WaveReadAddressEpoch,
@@ -51,7 +52,7 @@ export const useWaveReadCacheRefs = ({
     | WaveReadTemporaryProxyRoleIdentity
     | undefined;
   readonly verifiedIdentity: WaveReadVerifiedIdentity | undefined;
-  readonly invalidateNotifications: () => void;
+  readonly invalidateNotifications: InvalidateNotificationsRef["current"];
 }): WaveReadCacheRefs => {
   const invalidateNotificationsRef = useRef(invalidateNotifications);
   const latestAddressEpochRef = useRef<WaveReadAddressEpoch>(addressEpoch);
@@ -299,6 +300,10 @@ export const useClearWaveReadStateOnAddressChange = (
 export const useClearWaveReadStateOnLastUnmount = (
   addressKey: string | null
 ): void => {
+  // eslint-disable-next-line react-compiler/react-compiler -- Compiled regression test proves this opt-out prevents an incorrect mutable-global alias.
+  "use no memo";
+  // React Compiler aliases the deferred cleanup snapshot to the mutable global,
+  // then reads its address after it is cleared. Preserve this effect verbatim.
   const latestAddressKeyRef = useRef(addressKey);
 
   useLayoutEffect(() => {
@@ -352,16 +357,19 @@ const createWaveReadSendIntent = ({
   retryContext,
   readThroughSerialNo,
   onReadResponse,
+  refreshWaveLists,
 }: {
   readonly shouldSend: MarkWaveNotificationsReadOptions["shouldSend"];
   readonly retryContext: WaveReadSendRetryContext | undefined;
   readonly readThroughSerialNo: MarkWaveNotificationsReadOptions["readThroughSerialNo"];
   readonly onReadResponse: MarkWaveNotificationsReadOptions["onReadResponse"];
+  readonly refreshWaveLists: MarkWaveNotificationsReadOptions["refreshWaveLists"];
 }): WaveReadSendIntent => ({
   shouldSend,
   retryContext,
   readThroughSerialNo,
   onReadResponse,
+  refreshWaveLists,
 });
 
 const getWaveReadSendRetryContext = ({
@@ -442,6 +450,7 @@ const markTemporaryProxyRoleWaveRead = ({
           shouldSend: options?.shouldSend,
           readThroughSerialNo: options?.readThroughSerialNo,
           onReadResponse: options?.onReadResponse,
+          refreshWaveLists: options?.refreshWaveLists,
           retryContext: getWaveReadSendRetryContext({
             addressKey: latestVerifiedProxyRoleIdentity.addressKey,
             activeProfileProxyId:
@@ -477,6 +486,7 @@ const markTemporaryProxyRoleWaveRead = ({
     shouldSend: options?.shouldSend,
     readThroughSerialNo: options?.readThroughSerialNo,
     onReadResponse: options?.onReadResponse,
+    refreshWaveLists: options?.refreshWaveLists,
     queueIfBlocked: options?.queueIfBlocked ?? true,
   });
 };
@@ -534,6 +544,7 @@ export const markWaveReadFromCache = ({
           shouldSend: options?.shouldSend,
           readThroughSerialNo: options?.readThroughSerialNo,
           onReadResponse: options?.onReadResponse,
+          refreshWaveLists: options?.refreshWaveLists,
           retryContext: getWaveReadSendRetryContext({
             addressKey: verifiedCachedIdentity.addressKey,
             activeProfileProxyId,
@@ -568,6 +579,7 @@ export const markWaveReadFromCache = ({
           shouldSend: options?.shouldSend,
           readThroughSerialNo: options?.readThroughSerialNo,
           onReadResponse: options?.onReadResponse,
+          refreshWaveLists: options?.refreshWaveLists,
           retryContext: getWaveReadSendRetryContext({
             addressKey: latestVerifiedIdentity.addressKey,
             activeProfileProxyId,
@@ -609,6 +621,7 @@ export const markWaveReadFromCache = ({
     shouldSend: options?.shouldSend,
     readThroughSerialNo: options?.readThroughSerialNo,
     onReadResponse: options?.onReadResponse,
+    refreshWaveLists: options?.refreshWaveLists,
     queueIfBlocked,
   });
 };

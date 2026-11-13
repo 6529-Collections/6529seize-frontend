@@ -1,4 +1,5 @@
 "use client";
+import { SidebarAnnouncementSkeleton } from "@/components/brain/left-sidebar/waves/SidebarDiscoverySkeletons";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
 import {
   SidebarWaveNavigationControls,
@@ -7,6 +8,7 @@ import {
 import { useSidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 
 import Button from "@/components/utils/button/Button";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -15,8 +17,7 @@ import { useLoadPersistedExpandedSubwaves } from "@/hooks/useLoadPersistedExpand
 import { useActiveSubwaveParentHint } from "@/hooks/useActiveSubwaveParentHint";
 import { useRevealActiveSidebarWave } from "@/hooks/useRevealActiveSidebarWave";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { PlusIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
@@ -29,6 +30,7 @@ import {
   SIDEBAR_TOOLTIP_BORDER,
   SIDEBAR_TOOLTIP_STYLE,
 } from "../waves/SidebarCategoryLabel";
+import { usePinnedSidebarList } from "../waves/SidebarPinnedWaves";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
 import { SidebarSubwavesToggle } from "../waves/SidebarSubwavesToggle";
 import SectionHeader from "../waves/SectionHeader";
@@ -62,7 +64,8 @@ import { t } from "@/i18n/messages";
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
 const WAVE_ROW_HEIGHT_DEFAULT = 62 as const;
-const WAVE_ROW_HEIGHT_COLLAPSED = 52 as const;
+const WAVE_ROW_HEIGHT_COLLAPSED = 44 as const;
+const DIRECT_MESSAGE_ROW_HEIGHT_COLLAPSED = 52 as const;
 const SUBWAVE_ROW_HEIGHT = 48 as const;
 const COLLAPSING_SUBWAVE_ROW_HEIGHT = 1 as const;
 const SUBWAVE_TOGGLE_ROW_HEIGHT = 38 as const;
@@ -105,12 +108,15 @@ function getVirtualizedKey({
 
 function getSectionClassName(isCollapsed: boolean) {
   return isCollapsed
-    ? "tw-flex tw-flex-col tw-items-center tw-gap-y-2"
+    ? "tw-flex tw-flex-col tw-items-center"
     : "tw-flex tw-flex-col";
 }
 
-function getBaseRowHeight(isCollapsed: boolean) {
-  return isCollapsed ? WAVE_ROW_HEIGHT_COLLAPSED : WAVE_ROW_HEIGHT_DEFAULT;
+function getBaseRowHeight(isCollapsed: boolean, isDirectMessage: boolean) {
+  if (!isCollapsed) return WAVE_ROW_HEIGHT_DEFAULT;
+  return isDirectMessage
+    ? DIRECT_MESSAGE_ROW_HEIGHT_COLLAPSED
+    : WAVE_ROW_HEIGHT_COLLAPSED;
 }
 
 interface WebUnifiedWavesListWavesProps {
@@ -140,20 +146,18 @@ function CreateWaveButton({
   return (
     <Button
       variant="primary"
-      size={null}
+      size={compact ? null : "xs"}
       onClick={onClick}
       aria-label={label}
       data-tooltip-id="create-wave-tooltip"
       data-tooltip-content={label}
-      className={
-        compact
-          ? "tw-size-8 tw-rounded-lg tw-p-0 touch-only:tw-size-11"
-          : "tw-h-8 tw-gap-2 tw-rounded-lg tw-px-3 tw-py-0 tw-text-xs touch-only:tw-h-11"
-      }
+      className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${
+        compact ? "tw-size-8 tw-p-0" : "tw-py-0"
+      }`}
     >
-      <FontAwesomeIcon
-        icon={faPlus}
-        className={compact ? "tw-size-4" : "-tw-ml-1 tw-size-4"}
+      <PlusIcon
+        className="tw-size-4 tw-flex-shrink-0"
+        strokeWidth={2}
         aria-hidden="true"
       />
       {!compact && <span>{label}</span>}
@@ -182,7 +186,7 @@ function WebWavesListHeader({
     }
 
     return (
-      <div className="tw-mb-3.5 tw-mt-2 tw-flex tw-justify-center tw-px-2">
+      <div className="tw-flex tw-h-11 tw-shrink-0 tw-items-center tw-justify-center tw-px-2">
         <CreateWaveButton onClick={onCreateWave} compact />
       </div>
     );
@@ -193,7 +197,7 @@ function WebWavesListHeader({
       label="Waves"
       paddingClassName={`${headerPaddingClassName} tw-pb-2`}
       rightContent={
-        <div className="tw-flex tw-items-center tw-gap-x-1.5">
+        <div className="tw-flex tw-items-center tw-gap-x-2">
           {showProfileFeedShortcut && (
             <WebProfileFeedShortcut basePath={basePath} isCollapsed={false} />
           )}
@@ -293,10 +297,13 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   );
   const navigation = useSidebarWaveNavigation({
     waves: collectionWaves,
+    pinnedWaveOrder: streamWaves.pinnedWaveOrder,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     enabled: !isDirectMessage && !isCollapsed,
     activeContainerId: effectiveActiveParentWaveId ?? activeWaveId,
   });
+  const isPinnedCollection =
+    navigation.collection === "pinned" && !isDirectMessage && !isCollapsed;
   const collectionLoading =
     isLoading ||
     (navigation.collection === "pinned" &&
@@ -305,9 +312,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     () => getRows(announcementWaves),
     [announcementWaves, getRows]
   );
-  const activeContainerWaveId = isDirectMessage
-    ? null
-    : effectiveActiveParentWaveId;
+  const activeContainerWaveId =
+    isDirectMessage || isPinnedCollection ? null : effectiveActiveParentWaveId;
   const prioritizedAllWaves = useMemo(
     () =>
       prioritizeActiveWaveContainer(
@@ -352,7 +358,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     isDirectMessage,
   });
   const sectionClassName = getSectionClassName(isCollapsed);
-  const rowHeight = getBaseRowHeight(isCollapsed);
+  const rowHeight = getBaseRowHeight(isCollapsed, isDirectMessage);
   const isMessageBasePath = basePath === "/messages";
   const getSidebarRowHeight = useCallback(
     (row: AnimatedSidebarWaveTreeRow) => {
@@ -434,25 +440,34 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   );
 
   const virtual = useVirtualizedWaves<AnimatedSidebarWaveTreeRow>({
-    items: virtualizedRows,
+    items: isPinnedCollection ? [] : virtualizedRows,
     key: virtualizedKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     listContainerRef,
     rowHeight: getSidebarRowHeight,
     overscan: 5,
   });
-  const revealStaticRows = useMemo(
+  const announcementRevealRows = useMemo(
     () => [animatedAnnouncementRows],
     [animatedAnnouncementRows]
   );
   useRevealActiveSidebarWave({
+    preserveScrollOnInteraction: !isDirectMessage,
+    // Animated rows settle one render after their source list.
+    isLoading:
+      isLoading ||
+      streamWaves.isPinnedWavesLoading === true ||
+      allRows.length !== virtualizedRows.length ||
+      allRows.some((row, index) => row.key !== virtualizedRows[index]?.key),
     activeParentWaveId: effectiveActiveParentWaveId,
     activeWaveId: navigation.searching ? null : activeWaveId,
-    filterKey: navigation.scrollKey,
+    // Restoring the account is not a user filter change.
+    filterKey: isDirectMessage ? navigation.scrollKey : navigation.viewKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     scrollToVirtualIndex: virtual.scrollToIndex,
-    staticRows: revealStaticRows,
-    virtualRows: virtualizedRows,
+    staticRows: announcementRevealRows,
+    virtualRows: isPinnedCollection ? [] : virtualizedRows,
+    fixedRows: isPinnedCollection ? virtualizedRows : [],
   });
 
   const renderWaveRow = (
@@ -499,6 +514,18 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     );
   };
 
+  const pinnedList = usePinnedSidebarList(
+    isPinnedCollection,
+    navigation.scrollKey,
+    {
+      listRef: listContainerRef,
+      rows: virtualizedRows,
+      getRowHeight: getSidebarRowHeight,
+      renderRow: (row) =>
+        renderWaveRow(row, !hidePin, virtualizedParentsWithVisibleSubwaves),
+    }
+  );
+
   return (
     <>
       <div className="tw-flex tw-flex-col">
@@ -520,6 +547,13 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
         )}
 
         <div>
+          {!isDirectMessage &&
+            !hideHeaders &&
+            !isCollapsed &&
+            !hasAnnouncementRows &&
+            streamWaves.isAnnouncementsLoading && (
+              <SidebarAnnouncementSkeleton />
+            )}
           {hasAnnouncementRows && (
             <SidebarWaveRowsSection
               ariaLabel={t(
@@ -543,14 +577,23 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
               transitionClassName="tw-w-full"
             />
           )}
-          {hasAnnouncementRows && !hideHeaders && shouldShowBottomHeader && (
-            <div className="tw-mb-1 tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
-          )}
+          {(hasAnnouncementRows ||
+            (!isDirectMessage &&
+              !isCollapsed &&
+              streamWaves.isAnnouncementsLoading)) &&
+            !hideHeaders &&
+            shouldShowBottomHeader && (
+              <div className="tw-mb-1 tw-mt-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700" />
+            )}
 
           {!isDirectMessage && !hideHeaders && !isCollapsed && (
             <SidebarDiscovery
               scoreDetailsDisabled={navigation.searchOpen}
               previewItems={highlyRatedPreviewItems}
+              recommendationsStatus={
+                streamWaves.recommendationsStatus ?? "pending"
+              }
+              onRetryRecommendations={streamWaves.retryRecommendations}
               isTouchPreview={isTouchDevice}
             />
           )}
@@ -566,20 +609,15 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
             <SidebarWaveSearchResults navigation={navigation} />
           ) : (
             <>
-              {virtualizedRows.length > 0 ? (
+              {pinnedList}
+              {!pinnedList && virtualizedRows.length > 0 && (
                 <section
                   ref={listContainerRef}
                   style={{
                     height: virtual.totalHeight,
                     position: "relative",
                   }}
-                  aria-label={
-                    navigation.collection === "pinned" &&
-                    !isDirectMessage &&
-                    !isCollapsed
-                      ? t(locale, "waves.sidebar.pinned")
-                      : virtualizedAriaLabel
-                  }
+                  aria-label={virtualizedAriaLabel}
                 >
                   {virtual.virtualItems.map((v: VirtualItem) => {
                     if (v.index === virtualizedRows.length) {
@@ -626,7 +664,8 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                     );
                   })}
                 </section>
-              ) : (
+              )}
+              {!pinnedList && virtualizedRows.length === 0 && (
                 <div
                   ref={listContainerRef}
                   style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }}

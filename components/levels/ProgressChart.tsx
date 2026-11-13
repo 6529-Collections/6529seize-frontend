@@ -16,6 +16,7 @@ import levels from "@/constants/levels.json";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 import { useEffect, useState } from "react";
 
 ChartJS.register(

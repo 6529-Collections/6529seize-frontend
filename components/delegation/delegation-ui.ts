@@ -1,3 +1,4 @@
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 export const DELEGATION_PAGE_MAIN_CLASS_NAME =
   "tailwind-scope tw-min-h-[100dvh] tw-w-full tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-[#0D0D0F] tw-pb-5 tw-font-normal tw-text-iron-100";
 
@@ -18,6 +19,7 @@ export const DELEGATION_CARD_CLASS_NAME =
 
 export const DELEGATION_FIELD_CLASS_NAME =
   "tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/25 tw-px-3 tw-py-2 tw-text-base tw-leading-6 tw-text-iron-50 tw-shadow-none tw-outline-none tw-transition-colors placeholder:tw-text-iron-600 focus:tw-border-primary-400/70 focus:tw-bg-black/30 focus:tw-ring-2 focus:tw-ring-primary-400/20 disabled:tw-cursor-not-allowed disabled:tw-bg-black/20 disabled:tw-text-iron-500";
+export const DELEGATION_SELECT_CLASS_NAME = `${DROPDOWN_FIELD_CLASSES} tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-px-3 tw-py-2 tw-text-base tw-leading-6`;
 
 export const DELEGATION_FIELD_LABEL_CLASS_NAME =
   "tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200";

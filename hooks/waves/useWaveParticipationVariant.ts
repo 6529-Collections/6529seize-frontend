@@ -1,9 +1,11 @@
 "use client";
 
+import type { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
 import { useMemo } from "react";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import {
   resolveWaveParticipationVariant,
+  competitionParticipationVariant,
   type WaveParticipationVariant,
 } from "@/helpers/waves/wave-participation-presentation.helpers";
 
@@ -17,19 +19,22 @@ const WAVE_PARTICIPATION_VARIANT_OVERRIDES: Readonly<
 // which stay in separate modules so a list of drops never has to load the
 // single drop view (its chat composer and GIF picker).
 export const useWaveParticipationVariant = (
-  waveId: string | null | undefined
+  waveId: string | null | undefined,
+  capabilities?: readonly ApiCompetitionCapability[]
 ): WaveParticipationVariant => {
   const { isMemesWave, isCurationWave, isQuorumWave } = useSeizeSettings();
 
   return useMemo(
     () =>
-      resolveWaveParticipationVariant({
-        waveId,
-        overrides: WAVE_PARTICIPATION_VARIANT_OVERRIDES,
-        isMemesWave,
-        isCurationWave,
-        isQuorumWave,
-      }),
-    [isMemesWave, isCurationWave, isQuorumWave, waveId]
+      capabilities
+        ? competitionParticipationVariant(capabilities)
+        : resolveWaveParticipationVariant({
+            waveId,
+            overrides: WAVE_PARTICIPATION_VARIANT_OVERRIDES,
+            isMemesWave,
+            isCurationWave,
+            isQuorumWave,
+          }),
+    [capabilities, isMemesWave, isCurationWave, isQuorumWave, waveId]
   );
 };

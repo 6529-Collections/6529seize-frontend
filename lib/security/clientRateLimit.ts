@@ -1,14 +1,14 @@
 import { isIP } from "node:net";
 import { NextResponse } from "next/server";
 
-import { isForbiddenAddress } from "@/lib/security/urlGuard";
+import { isCloudFrontOriginFacingAddress } from "@/lib/security/cloudFrontOriginFacing";
+import { isForbiddenAddress, parseIpv6Groups } from "@/lib/security/urlGuard";
 
 const DEFAULT_MAX_BUCKETS = 10_000;
 const UNIDENTIFIED_CLIENT_KEY = "unidentified";
 const UNIDENTIFIED_LIMIT_MULTIPLIER = 10;
-const IPV6_GROUPS = 8;
+const OVERFLOW_LIMIT_MULTIPLIER = 10;
 const IPV6_PREFIX_GROUPS = 4;
-const IPV6_GROUP_PATTERN = /^[\da-f]{1,4}$/;
 
 type RateLimitBucket = {
   count: number;
@@ -29,48 +29,6 @@ type ForwardedAddress = {
   /** The rate-limit bucket key for this address. */
   readonly key: string;
 };
-
-/** Replaces a dotted IPv4 tail (as in `::ffff:1.2.3.4`) with two hex groups. */
-function expandEmbeddedIpv4(address: string): string | null {
-  const tailStart = address.lastIndexOf(":") + 1;
-  const tail = address.slice(tailStart);
-  if (!tail.includes(".")) {
-    return address;
-  }
-  if (isIP(tail) !== 4) {
-    return null;
-  }
-  const [a = 0, b = 0, c = 0, d = 0] = tail.split(".").map(Number);
-  const high = ((a << 8) | b).toString(16);
-  const low = ((c << 8) | d).toString(16);
-  return `${address.slice(0, tailStart)}${high}:${low}`;
-}
-
-/** Expands an IPv6 address to its eight 16-bit groups, or null if malformed. */
-function parseIpv6Groups(address: string): number[] | null {
-  const expanded = expandEmbeddedIpv4(address);
-  const halves = expanded?.split("::");
-  if (!halves || halves.length > 2) {
-    return null;
-  }
-  const [head = "", tail = ""] = halves;
-  const headGroups = head ? head.split(":") : [];
-  const tailGroups = tail ? tail.split(":") : [];
-  const missingGroups = IPV6_GROUPS - headGroups.length - tailGroups.length;
-  const isCompressed = halves.length === 2;
-  if (isCompressed ? missingGroups < 1 : missingGroups !== 0) {
-    return null;
-  }
-  const groups = [
-    ...headGroups,
-    ...Array.from({ length: isCompressed ? missingGroups : 0 }, () => "0"),
-    ...tailGroups,
-  ];
-  if (!groups.every((group) => IPV6_GROUP_PATTERN.test(group))) {
-    return null;
-  }
-  return groups.map((group) => Number.parseInt(group, 16));
-}
 
 function isIpv4MappedIpv6(groups: readonly number[]): boolean {
   return (
@@ -116,25 +74,40 @@ function parseForwardedAddress(
  * Node) appends its own private peer address. Client-supplied entries are
  * always to the left of the load balancer's, so walk from the right, skip
  * private infrastructure hops, and use the first public address.
+ *
+ * Behind CloudFront that first public address is the edge, and the edge
+ * appended the viewer address just to its left. Skip exactly one edge hop:
+ * a second edge address is a viewer that came through another CloudFront
+ * distribution, and trusting it would let that viewer pick its own key.
  */
 function getClientKey(headers: Headers): string | null {
   const entries = headers.get("x-forwarded-for")?.split(",") ?? [];
+  let edge: ForwardedAddress | null = null;
   for (let index = entries.length - 1; index >= 0; index -= 1) {
     const forwarded = parseForwardedAddress(entries[index]);
     if (!forwarded) {
-      return null;
+      return edge?.key ?? null;
     }
-    if (!isForbiddenAddress(forwarded.address)) {
-      return forwarded.key;
+    if (isForbiddenAddress(forwarded.address)) {
+      continue;
     }
+    if (!edge && isCloudFrontOriginFacingAddress(forwarded.address)) {
+      edge = forwarded;
+      continue;
+    }
+    return forwarded.key;
   }
-  return null;
+  return edge?.key ?? null;
 }
 
 /**
  * Fixed-window, per-client limiter held in this server process. Requests
  * without a public client address (local development, internal callers)
  * share one larger budget.
+ *
+ * The table holds at most `maxBuckets` live windows and never drops a live
+ * window to make room. While it is full, new clients share one overflow
+ * budget (ten times the per-client limit) until windows expire.
  */
 export function createClientRateLimiter({
   limit,
@@ -143,6 +116,7 @@ export function createClientRateLimiter({
   maxBuckets = DEFAULT_MAX_BUCKETS,
 }: ClientRateLimiterOptions) {
   const buckets = new Map<string, RateLimitBucket>();
+  let overflow: RateLimitBucket = { count: 0, resetAt: 0 };
 
   function pruneExpiredBuckets(now: number): void {
     // Buckets are inserted when their window opens, so the oldest come first.
@@ -154,18 +128,23 @@ export function createClientRateLimiter({
     }
   }
 
-  function openBucket(key: string, now: number): RateLimitBucket {
+  /** Opens a window for `key`, or returns null when the table is full. */
+  function openBucket(key: string, now: number): RateLimitBucket | null {
+    // Expired buckets were pruned already, so every remaining one is live.
     buckets.delete(key);
-    while (buckets.size >= maxBuckets) {
-      const oldest = buckets.keys().next();
-      if (oldest.done) {
-        break;
-      }
-      buckets.delete(oldest.value);
+    if (buckets.size >= maxBuckets) {
+      return null;
     }
     const bucket: RateLimitBucket = { count: 0, resetAt: now + windowMs };
     buckets.set(key, bucket);
     return bucket;
+  }
+
+  function overflowBucket(now: number): RateLimitBucket {
+    if (overflow.resetAt <= now) {
+      overflow = { count: 0, resetAt: now + windowMs };
+    }
+    return overflow;
   }
 
   return function enforceClientRateLimit(
@@ -177,10 +156,14 @@ export function createClientRateLimiter({
 
     const clientKey = getClientKey(request.headers);
     const key = clientKey ?? UNIDENTIFIED_CLIENT_KEY;
-    const budget = clientKey ? limit : limit * UNIDENTIFIED_LIMIT_MULTIPLIER;
     const existing = buckets.get(key);
-    const bucket =
+    const tracked =
       existing && existing.resetAt > now ? existing : openBucket(key, now);
+    const bucket = tracked ?? overflowBucket(now);
+    let budget = clientKey ? limit : limit * UNIDENTIFIED_LIMIT_MULTIPLIER;
+    if (!tracked) {
+      budget = limit * OVERFLOW_LIMIT_MULTIPLIER;
+    }
 
     if (bucket.count + cost <= budget) {
       bucket.count += cost;

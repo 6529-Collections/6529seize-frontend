@@ -1,7 +1,7 @@
 import {
   NEXTGEN_CHAIN_ID,
-  NEXTGEN_CORE,
-} from "@/components/nextGen/nextgen_contracts";
+  NEXTGEN_CORE_ADDRESSES,
+} from "@/components/nextGen/nextgen_addresses";
 import {
   DEFAULT_USER_PAGE_TAB,
   type UserPageTabKey,
@@ -56,7 +56,7 @@ export function isGradientsContract(contract: string) {
 }
 
 export function isNextgenContract(contract: string) {
-  return areEqualAddresses(contract, NEXTGEN_CORE[NEXTGEN_CHAIN_ID]);
+  return areEqualAddresses(contract, NEXTGEN_CORE_ADDRESSES[NEXTGEN_CHAIN_ID]);
 }
 
 export function isMemeLabContract(contract: string) {
@@ -236,14 +236,24 @@ export const enterArtFullScreen = async (
     return false;
   }
 
-  const element = globalThis.document.getElementById(
-    elementId
-  ) as FullscreenRequestElement | null;
+  const element = globalThis.document.getElementById(elementId);
 
   if (!element) {
     console.error(`Element with ID '${elementId}' not found.`);
     return false;
   }
+
+  return requestElementFullScreen(element);
+};
+
+/**
+ * Asks the browser to show `target` full screen, using a vendor-prefixed API
+ * when the standard one is missing. Failures are logged and resolve to false.
+ */
+export const requestElementFullScreen = async (
+  target: HTMLElement
+): Promise<boolean> => {
+  const element = target as FullscreenRequestElement;
 
   try {
     if (element.requestFullscreen !== undefined) {
@@ -388,10 +398,19 @@ export function containsEmojis(s: string) {
   return codePointRegex.test(s);
 }
 
+// Replaces "U+XXXX" tokens with the emoji character and returns plain text.
+// Callers must render the result as text (React escapes it), never as HTML.
 export function parseEmojis(s: string) {
-  const regex = /U\+([\dA-Fa-f]{1,6})/g;
-  return s.replaceAll(regex, (_, hexValue) => {
-    return `&#x${hexValue};`;
+  // Match the whole hex run so an over-long token such as U+1000000 is left
+  // as written instead of converting its first six digits.
+  const regex = /U\+([\dA-Fa-f]+)/g;
+  return s.replaceAll(regex, (match, hexValue: string) => {
+    const codePoint = Number.parseInt(hexValue, 16);
+    const isScalarValue =
+      hexValue.length <= 6 &&
+      codePoint <= 0x10ffff &&
+      (codePoint < 0xd800 || codePoint > 0xdfff);
+    return isScalarValue ? String.fromCodePoint(codePoint) : match;
   });
 }
 
@@ -739,14 +758,6 @@ export function getNameForContract(contract: string) {
 
 export const wait = async (ms: number): Promise<void> => {
   return new Promise((resolve) => setTimeout(resolve, ms));
-};
-
-export const removeBaseEndpoint = (link: string) => {
-  const baseEndpoint = publicEnv.BASE_ENDPOINT;
-  if (!baseEndpoint) {
-    return link;
-  }
-  return link.replaceAll(baseEndpoint, "");
 };
 
 export async function fetchFileContent(filePath: string): Promise<string> {

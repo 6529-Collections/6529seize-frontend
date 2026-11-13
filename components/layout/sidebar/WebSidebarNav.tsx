@@ -1,18 +1,21 @@
 "use client";
 
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import {
+  SIDEBAR_HOVER_CLOSE_DELAY_MS,
+  SIDEBAR_HOVER_OPEN_DELAY_MS,
+} from "@/constants/sidebar";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
-import Join6529Icon from "@/components/common/icons/Join6529Icon";
+import { useMembershipNavigation } from "@/hooks/useMembershipNavigation";
 import WatchTowerIcon from "@/components/common/icons/WatchTowerIcon";
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
 import {
   DROP_FORGE_PATH,
   DROP_FORGE_TITLE,
 } from "@/components/drop-forge/drop-forge.constants";
 import type { SidebarSection } from "@/components/navigation/navTypes";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { useSectionMap, useSidebarSections } from "@/hooks/useSidebarSections";
@@ -46,24 +49,20 @@ const getBrowserWindow = (): Window | undefined =>
 
 const getSafePathname = (pathname: string | null): string => pathname ?? "";
 
-const HOVER_OPEN_DELAY_MS = 100;
-const HOVER_CLOSE_DELAY_MS = 200;
-
 const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
 >(({ isCollapsed = false }, ref) => {
+  const membershipNavigation = useMembershipNavigation();
   const pathname = usePathname();
   const safePathname = getSafePathname(pathname);
-  const capacitor = useCapacitor();
-  const { country } = useCookieConsent();
   const { connectedProfile } = useAuth();
   const { appWalletsSupported } = useAppWallets();
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const moderatorAccess = useContentModeratorAccess();
   const showModeration = moderatorAccess.data?.moderator === true;
-  const hasOpenModerationReports =
-    moderatorAccess.data?.has_open_reports === true;
+  const hasPendingModerationCases =
+    (moderatorAccess.data?.needs_review_count ?? 0) > 0;
   const { hasUnread: hasUnreadMessages } = useUnreadIndicator({
     type: "messages",
     handle: connectedProfile?.handle ?? null,
@@ -88,11 +87,8 @@ const WebSidebarNav = React.forwardRef<
     undefined
   );
 
-  const sections = useSidebarSections(
-    appWalletsSupported,
-    capacitor.isIos,
-    country
-  );
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const sections = useSidebarSections(appWalletsSupported, hideNftPurchasing);
   const sectionMap = useSectionMap(sections);
   const nftsSection = sectionMap.get("nfts");
   const wavesSection = sectionMap.get("waves");
@@ -145,7 +141,7 @@ const WebSidebarNav = React.forwardRef<
     hoverCloseTimerRef.current = setTimeout(() => {
       hoverCloseTimerRef.current = undefined;
       closeSubmenu();
-    }, HOVER_CLOSE_DELAY_MS);
+    }, SIDEBAR_HOVER_CLOSE_DELAY_MS);
   }, [clearHoverCloseTimer, closeSubmenu]);
 
   useImperativeHandle(ref, () => ({ closeSubmenu }), [closeSubmenu]);
@@ -232,7 +228,7 @@ const WebSidebarNav = React.forwardRef<
       hoverOpenTimerRef.current = setTimeout(() => {
         hoverOpenTimerRef.current = undefined;
         openCollapsedSubmenu(sectionKey, trigger);
-      }, HOVER_OPEN_DELAY_MS);
+      }, SIDEBAR_HOVER_OPEN_DELAY_MS);
     },
     [
       clearHoverCloseTimer,
@@ -441,16 +437,22 @@ const WebSidebarNav = React.forwardRef<
           />
         </li>
 
-        <li>
+        <li
+          className={
+            membershipNavigation.isPending
+              ? "tw-invisible [@media(scripting:none)]:tw-visible"
+              : undefined
+          }
+        >
           <WebSidebarNavItem
-            href="/join-6529"
-            icon={Join6529Icon}
+            href={membershipNavigation.href}
+            icon={membershipNavigation.icon}
             active={
-              safePathname === "/join-6529" ||
-              safePathname.startsWith("/join-6529/")
+              safePathname === membershipNavigation.href ||
+              safePathname.startsWith(`${membershipNavigation.href}/`)
             }
             collapsed={isCollapsed}
-            label={t(DEFAULT_LOCALE, "navigation.primary.join6529")}
+            label={membershipNavigation.label}
           />
         </li>
 
@@ -482,7 +484,7 @@ const WebSidebarNav = React.forwardRef<
               }
               collapsed={isCollapsed}
               label={t(DEFAULT_LOCALE, "contentModeration.moderator.menu")}
-              hasIndicator={hasOpenModerationReports}
+              hasIndicator={hasPendingModerationCases}
               indicatorLabel={t(
                 DEFAULT_LOCALE,
                 "contentModeration.moderator.openReportsIndicator"

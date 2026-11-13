@@ -1,0 +1,67 @@
+import {
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
+  ShieldExclamationIcon,
+} from "@heroicons/react/24/outline";
+import type { ReactNode } from "react";
+import { hasContent } from "./hasContent";
+
+type BannerTone = "info" | "warning" | "danger";
+
+const TONE_CLASSES: Record<BannerTone, string> = {
+  info: "tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200",
+  warning: "tw-border-amber-500/40 tw-bg-amber-500/10 tw-text-amber-100",
+  danger: "tw-border-rose-500/40 tw-bg-rose-500/10 tw-text-rose-100",
+};
+
+const TONE_ICONS: Record<BannerTone, typeof InformationCircleIcon> = {
+  info: InformationCircleIcon,
+  warning: ExclamationTriangleIcon,
+  danger: ShieldExclamationIcon,
+};
+
+interface E2eeBannerProps {
+  readonly tone?: BannerTone | undefined;
+  readonly children: ReactNode;
+  readonly action?: ReactNode | undefined;
+  /** Danger banners interrupt (alert); others are polite status updates. */
+  readonly live?: boolean | undefined;
+  readonly className?: string | undefined;
+  readonly compactActions?: boolean | undefined;
+}
+
+export function E2eeBanner({
+  tone = "info",
+  children,
+  action,
+  live = true,
+  className = "",
+  compactActions = false,
+}: E2eeBannerProps) {
+  const Icon = TONE_ICONS[tone];
+  let role: "alert" | "status" | undefined;
+  if (live) {
+    role = tone === "danger" ? "alert" : "status";
+  }
+  return (
+    <div
+      role={role}
+      className={`tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2.5 tw-text-sm ${compactActions ? "@[48rem]/legacy-dm:tw-flex-row @[48rem]/legacy-dm:tw-items-center" : "sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-center"} ${TONE_CLASSES[tone]} ${className}`}
+    >
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-start tw-gap-2">
+        <Icon
+          aria-hidden="true"
+          className="tw-mt-0.5 tw-size-4 tw-flex-shrink-0"
+        />
+        <div className="tw-min-w-0 tw-flex-1 tw-break-words">{children}</div>
+      </div>
+      {hasContent(action) ? (
+        <div
+          className={`tw-max-w-full tw-flex-shrink-0 tw-flex-wrap tw-gap-2 ${compactActions ? "tw-grid tw-w-full tw-grid-cols-2 tw-items-stretch @[48rem]/legacy-dm:tw-flex @[48rem]/legacy-dm:tw-w-auto @[48rem]/legacy-dm:tw-max-w-[55%] @[48rem]/legacy-dm:tw-items-center @[48rem]/legacy-dm:tw-justify-end [&>*]:tw-w-full @[48rem]/legacy-dm:[&>*]:tw-w-auto [&>:last-child:nth-child(odd)]:tw-col-span-2" : "tw-flex tw-items-center"}`}
+        >
+          {action}
+        </div>
+      ) : null}
+    </div>
+  );
+}

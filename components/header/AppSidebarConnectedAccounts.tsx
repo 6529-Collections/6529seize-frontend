@@ -1,5 +1,6 @@
 "use client";
 
+import { ConnectedProfileDeviceBadge } from "@/components/device-signing/DeviceSecurityStatus";
 import { getConnectionProfileIndicator } from "@/components/auth/connection-state-indicator";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -71,6 +72,10 @@ function AppSidebarConnectedAccountAvatar({
             />
           )}
         </div>
+        <ConnectedProfileDeviceBadge
+          address={address}
+          profileId={profile?.id}
+        />
         {showUnreadBadge && (
           <div className="tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-sm">
             {unreadBadgeLabel}
@@ -159,12 +164,12 @@ export default function AppSidebarConnectedAccounts({
           type="button"
           onClick={handleAddAccount}
           disabled={seizeConnectOpen}
-          className="tw-group tw-touch-action-manipulation tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
+          className="tw-touch-action-manipulation tw-group tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
           aria-busy={seizeConnectOpen}
           aria-label={seizeConnectOpen ? openingAccountLabel : addAccountLabel}
           title={seizeConnectOpen ? openingAccountLabel : addAccountLabel}
         >
-          <span className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-500 tw-transition-colors tw-duration-150 desktop-hover:group-hover:tw-bg-iron-700 group-active:tw-bg-iron-700 motion-reduce:tw-transition-none">
+          <span className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-500 tw-transition-colors tw-duration-150 group-active:tw-bg-iron-700 desktop-hover:group-hover:tw-bg-iron-700 motion-reduce:tw-transition-none">
             {seizeConnectOpen ? (
               <ArrowPathIcon
                 className="tw-size-5 tw-animate-spin motion-reduce:tw-animate-none"

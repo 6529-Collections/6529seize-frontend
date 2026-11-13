@@ -1,3 +1,4 @@
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { type Drop, DropSize } from "@/helpers/waves/drop.helpers";
 
@@ -11,15 +12,32 @@ export const isReplyDrop = (drop: Drop): boolean =>
     ? Boolean(drop.reply_to)
     : drop.is_reply_drop === true;
 
-/**
- * Collapsed-reply waves show replies under the drop they answer. The API
- * already leaves them out of feed pages; this also catches realtime and
- * optimistic inserts. Returns the same object when nothing was removed.
- */
+/** Locate the root from a reply or from the root itself. */
+export const getIndividuallyCollapsedThread = (
+  drop: Pick<
+    ApiDrop,
+    | "id"
+    | "serial_no"
+    | "reply_to"
+    | "collapse_replies"
+    | "collapsed_reply_thread"
+  >
+): ApiDrop["collapsed_reply_thread"] =>
+  drop.collapsed_reply_thread ??
+  (!drop.reply_to && drop.collapse_replies
+    ? { id: drop.id, serial_no: drop.serial_no }
+    : undefined);
+
+/** Feed pages already exclude these replies. Filter realtime and pending inserts too. */
 export const withoutCollapsedReplies = <T extends { readonly drops: Drop[] }>(
-  messages: T
+  messages: T,
+  collapseAll = true
 ): T => {
-  const drops = messages.drops.filter((drop) => !isReplyDrop(drop));
+  const drops = messages.drops.filter((drop) =>
+    collapseAll
+      ? !isReplyDrop(drop)
+      : drop.type !== DropSize.FULL || !drop.collapsed_reply_thread
+  );
   return drops.length === messages.drops.length
     ? messages
     : { ...messages, drops };

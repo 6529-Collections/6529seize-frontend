@@ -1,3 +1,4 @@
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { renderHook, act } from "@testing-library/react";
 import { useWaveDataFetching } from "@/contexts/wave/hooks/useWaveDataFetching";
 import useWaveMessagesStore from "@/contexts/wave/hooks/useWaveMessagesStore";
@@ -52,16 +53,22 @@ jest.mock("@/contexts/wave/hooks/useWaveLoadingState", () => ({
   }),
 }));
 
+let mockUseRealAbortController = false;
 const cancelFetch = jest.fn();
 const createController = jest.fn(() => ({ signal: {} }) as AbortController);
 const cleanupController = jest.fn();
 
 jest.mock("@/contexts/wave/hooks/useWaveAbortController", () => ({
-  useWaveAbortController: () => ({
-    cancelFetch,
-    createController,
-    cleanupController,
-  }),
+  useWaveAbortController: (owner: "feed" | "pagination") => {
+    if (mockUseRealAbortController) {
+      return jest
+        .requireActual<
+          typeof import("@/contexts/wave/hooks/useWaveAbortController")
+        >("@/contexts/wave/hooks/useWaveAbortController")
+        .useWaveAbortController(owner);
+    }
+    return { cancelFetch, createController, cleanupController };
+  },
 }));
 
 export const fetchWaveMessages = jest.fn();
@@ -79,6 +86,7 @@ jest.mock("@/contexts/wave/utils/wave-messages-utils", () => ({
 
 describe("useWaveDataFetching", () => {
   afterEach(() => {
+    mockUseRealAbortController = false;
     jest.clearAllMocks();
     jest.useRealTimers();
   });
@@ -106,6 +114,141 @@ describe("useWaveDataFetching", () => {
     );
     return { result, updateData, getData, store };
   }
+
+  it("reuses a pending background sync through rapid tab registrations", async () => {
+    let finish!: (value: { drops: never[]; highestSerialNo: number }) => void;
+    fetchNewestWaveMessages.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+    );
+    const controller = new AbortController();
+    createController.mockReturnValueOnce(controller);
+    const { result } = setup({
+      wave1: { drops: [{ id: "cached", serial_no: 12 }] },
+    });
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+      result.current.registerWave("wave1", true);
+      result.current.registerWave("wave1", true);
+    });
+    expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(1);
+    expect(controller.signal.aborted).toBe(false);
+    expect(createController).toHaveBeenCalledTimes(1);
+    expect(fetchWaveMessages).not.toHaveBeenCalled();
+    await act(async () => {
+      finish({ drops: [], highestSerialNo: 12 });
+    });
+    fetchNewestWaveMessages.mockResolvedValueOnce({
+      drops: [],
+      highestSerialNo: 12,
+    });
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+    });
+    expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(2);
+  });
+
+  it("starts current-profile sync when the previous request was aborted", async () => {
+    let finish!: (value: {
+      drops: { id: string; serial_no: number }[];
+      highestSerialNo: number;
+    }) => void;
+    fetchNewestWaveMessages.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+    );
+    const previous = new AbortController();
+    createController
+      .mockReturnValueOnce(previous)
+      .mockReturnValueOnce(new AbortController());
+    const { result, updateData } = setup({
+      wave1: { drops: [{ id: "cached", serial_no: 12 }] },
+    });
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+    });
+    previous.abort();
+    fetchNewestWaveMessages.mockResolvedValueOnce({
+      drops: [],
+      highestSerialNo: 12,
+    });
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+    });
+    expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(2);
+    updateData.mockClear();
+    await act(async () => {
+      finish({
+        drops: [{ id: "old-profile", serial_no: 13 }],
+        highestSerialNo: 13,
+      });
+    });
+    expect(updateData).not.toHaveBeenCalled();
+  });
+
+  it("aborts and replaces a deduplicated newest sync on the real profile/proxy switch event", async () => {
+    mockUseRealAbortController = true;
+    type NewestResult = {
+      drops: { id: string; serial_no: number }[];
+      highestSerialNo: number;
+    };
+    let finishPrevious!: (value: NewestResult) => void;
+    let finishCurrent!: (value: NewestResult) => void;
+    fetchNewestWaveMessages
+      .mockReturnValueOnce(
+        new Promise((resolve) => {
+          finishPrevious = resolve;
+        })
+      )
+      .mockReturnValueOnce(
+        new Promise((resolve) => {
+          finishCurrent = resolve;
+        })
+      );
+    const { result, store, updateData } = setup({
+      wave1: { drops: [{ id: "previous-profile", serial_no: 12 }] },
+    });
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+    });
+    const previousSignal = fetchNewestWaveMessages.mock
+      .calls[0]?.[3] as AbortSignal;
+    act(() => {
+      globalThis.dispatchEvent(
+        new CustomEvent(PROFILE_SWITCHED_EVENT, {
+          detail: { profileProxy: { id: "new-proxy" } },
+        })
+      );
+    });
+    expect(previousSignal.aborted).toBe(true);
+    store["wave1"] = { drops: [{ id: "current-profile", serial_no: 2 }] };
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+    });
+    expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(2);
+    expect(fetchNewestWaveMessages.mock.calls[1]?.[1]).toBe(null);
+    const currentSignal = fetchNewestWaveMessages.mock
+      .calls[1]?.[3] as AbortSignal;
+    expect(currentSignal.aborted).toBe(false);
+    updateData.mockClear();
+    await act(async () => {
+      finishPrevious({
+        drops: [{ id: "stale-result", serial_no: 13 }],
+        highestSerialNo: 13,
+      });
+    });
+    expect(updateData).not.toHaveBeenCalled();
+    // The old finally block must not clear the replacement's dedup slot.
+    await act(async () => {
+      result.current.registerWave("wave1", true);
+    });
+    expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(2);
+    await act(async () => {
+      finishCurrent({ drops: [], highestSerialNo: 2 });
+    });
+  });
 
   it("does not start a duplicate initial request while a server seed is pending", async () => {
     let hasSeed = true;
@@ -136,7 +279,7 @@ describe("useWaveDataFetching", () => {
     expect(fetchWaveMessages).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps the initial guard until a queued seed commits, then syncs newer drops", async () => {
+  it("commits a seed without waiting for rendering, then syncs the latest page", async () => {
     jest.useFakeTimers();
     formatWaveMessages.mockImplementation(
       (
@@ -201,8 +344,8 @@ describe("useWaveDataFetching", () => {
       });
     });
 
-    expect(result.current.store.getData("wave1")).toBeUndefined();
-    expect(result.current.store.hasServerFeedSeed("wave1")).toBe(true);
+    expect(result.current.store.getData("wave1")?.drops[0]?.id).toBe("seed");
+    expect(result.current.store.hasServerFeedSeed("wave1")).toBe(false);
 
     await act(async () => {
       result.current.fetching.registerWave("wave1", true);
@@ -223,7 +366,7 @@ describe("useWaveDataFetching", () => {
     expect(fetchWaveMessages).not.toHaveBeenCalled();
     expect(fetchNewestWaveMessages).toHaveBeenCalledWith(
       "wave1",
-      1,
+      null,
       WAVE_DROPS_PARAMS.limit,
       expect.any(Object),
       expect.any(Function)
@@ -404,6 +547,7 @@ describe("useWaveDataFetching", () => {
     expect(res).toEqual({
       drops: [{ id: "d", serial_no: 11 }],
       highestSerialNo: 11,
+      reachedPageLimit: false,
     });
   });
 
@@ -419,7 +563,11 @@ describe("useWaveDataFetching", () => {
       new AbortController().signal
     );
     expect(updateData).not.toHaveBeenCalled();
-    expect(res).toEqual({ drops: null, highestSerialNo: null });
+    expect(res).toEqual({
+      drops: null,
+      highestSerialNo: null,
+      reachedPageLimit: false,
+    });
   });
 
   it("caps newest sync when every page is full", async () => {
@@ -450,6 +598,8 @@ describe("useWaveDataFetching", () => {
 
     expect(fetchNewestWaveMessages).toHaveBeenCalledTimes(20);
     expect(res.highestSerialNo).toBe(10 + 20 * 50);
+    // Newer drops may remain past the cap.
+    expect(res.reachedPageLimit).toBe(true);
   });
 
   it("uses a tracked controller for existing wave newest sync", async () => {
@@ -475,7 +625,7 @@ describe("useWaveDataFetching", () => {
     expect(createController).toHaveBeenCalledWith("wave1-newest-sync");
     expect(fetchNewestWaveMessages).toHaveBeenCalledWith(
       "wave1",
-      5,
+      null,
       50,
       newestSyncController.signal,
       expect.any(Function)
@@ -530,7 +680,7 @@ describe("useWaveDataFetching", () => {
 
     expect(fetchNewestWaveMessages).toHaveBeenCalledWith(
       "wave1",
-      5,
+      null,
       50,
       newestSyncController.signal,
       expect.any(Function)

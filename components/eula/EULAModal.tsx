@@ -4,8 +4,9 @@
 
 import { CURRENT_EULA_VERSION } from "@/constants/constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import { useEULAConsent } from "./useEULAConsent";
 import { useEffect, useId, useRef, useSyncExternalStore } from "react";
 import { faArrowDown } from "@fortawesome/free-solid-svg-icons";
@@ -266,21 +267,52 @@ export default function EULAModal() {
                         (allowlist) a future 6529 NFT based on owning one or
                         more current 6529 NFTs.
                       </p>
-                      <p>
-                        You acknowledge that you have read and accept the
-                        information on this webpage that explains this topic in
-                        more detail and that is incorporated by reference into
-                        these Terms.
-                      </p>
-                      <p>
-                        <a
-                          href="https://6529.io/about/minting"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          6529.io/about/minting
-                        </a>
-                      </p>
+                      <p>{t(DEFAULT_LOCALE, "eula.modal.mintingReference")}</p>
+                      <details>
+                        <summary className="tw-cursor-pointer tw-underline">
+                          {t(locale, "eula.modal.readMintingTerms")}
+                        </summary>
+                        <div lang={DEFAULT_LOCALE}>
+                          <p>
+                            {t(
+                              DEFAULT_LOCALE,
+                              "about.minting.eligibility.intro"
+                            )}
+                          </p>
+                          <dl>
+                            {(
+                              ["phase0", "phase1", "phase2", "public"] as const
+                            ).map((phase) => (
+                              <div key={phase}>
+                                <dt>
+                                  {t(
+                                    DEFAULT_LOCALE,
+                                    `about.minting.phases.${phase}.title`
+                                  )}
+                                </dt>
+                                <dd>
+                                  {t(
+                                    DEFAULT_LOCALE,
+                                    `about.minting.phases.${phase}.description`
+                                  )}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                          <p>
+                            {t(
+                              DEFAULT_LOCALE,
+                              "about.minting.eligibility.distribution.description"
+                            )}
+                          </p>
+                          <p>
+                            {t(
+                              DEFAULT_LOCALE,
+                              "about.minting.eligibility.subscriptionNote"
+                            )}
+                          </p>
+                        </div>
+                      </details>
                     </li>
                     <li>
                       <p>
@@ -686,7 +718,11 @@ export default function EULAModal() {
                   aria-label={t(locale, "eula.modal.scrollToEnd")}
                   className="tw-absolute tw-bottom-4 tw-right-4 tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-50 tw-p-2 tw-text-iron-950 tw-shadow-xl tw-transition tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white motion-reduce:tw-transition-none sm:tw-bottom-5 sm:tw-right-8"
                 >
-                  <FontAwesomeIcon icon={faArrowDown} height={16} width={16} />
+                  <FontAwesomeSvgIcon
+                    icon={faArrowDown}
+                    height={16}
+                    width={16}
+                  />
                 </button>
               )}
             </div>

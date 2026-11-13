@@ -23,6 +23,10 @@ import { createElement } from "react";
 
 let mockCountry = "US";
 let mockIsIos = false;
+let mockIsDesktop = false;
+jest.mock("@/hooks/useMediaQuery", () => ({
+  useMediaQuery: () => mockIsDesktop,
+}));
 const mockMemePageArt = jest.fn((..._args: unknown[]) => (
   <div data-testid="meme-page-art" />
 ));
@@ -137,6 +141,7 @@ beforeEach(() => {
   mockMemePageArt.mockClear();
   mockCountry = "US";
   mockIsIos = false;
+  mockIsDesktop = false;
 });
 
 afterEach(() => {
@@ -402,6 +407,87 @@ describe("MemePageReferencesSubMenu sorting", () => {
 });
 
 describe("MemePageLiveRightMenu distribution link", () => {
+  it("groups desktop mint information before supply without losing any live statistics", async () => {
+    mockIsDesktop = true;
+    const nft = createNft({
+      id: 5,
+      has_distribution: true,
+      mint_date: new Date("2026-11-09T00:00:00Z"),
+      mint_price: 0.06529,
+      hodl_rate: 12.71,
+    });
+    render(
+      <MemePageLiveRightMenu
+        show
+        nft={nft}
+        nftMeta={{
+          ...createMeta(),
+          edition_size: 310,
+          edition_size_ex_research: 159,
+          edition_size_ex_museum_and_research: 126,
+          hodlers: 88,
+          research_holdings: 151,
+          museum_holdings: 33,
+          burnt: 2,
+          edition_size_cleaned: 277,
+          ranked_collection_size: 571,
+          edition_size_ex_research_rank: 66,
+          edition_size_ex_museum_and_research_rank: 66,
+        }}
+      />
+    );
+    for (const value of [
+      "310",
+      "159",
+      "126",
+      "88",
+      "151",
+      "33",
+      "2",
+      "277",
+      "12.71",
+      "0.06529",
+      "Nov 9, 2026",
+    ]) {
+      expect(screen.getByText(value)).toBeInTheDocument();
+    }
+    expect(screen.getAllByText("Rank 66/571")).toHaveLength(2);
+    expect(screen.getAllByText("Mint date")).toHaveLength(1);
+    expect(screen.getAllByText("Mint price")).toHaveLength(1);
+    const date = screen.getByText("Mint date");
+    const price = screen.getByText("Mint price");
+    const distribution = screen.getByRole("link", {
+      name: "Distribution Plan",
+    });
+    const submission = await screen.findByRole("link", {
+      name: "Main Stage Submission",
+    });
+    const supply = screen.getByText("Edition size");
+    expect(date.compareDocumentPosition(price)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(price.compareDocumentPosition(distribution)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(distribution.parentElement).toBe(submission.parentElement);
+    expect(submission.compareDocumentPosition(supply)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(screen.getByText("TDH rate").closest("dl")).toBe(
+      supply.closest("dl")
+    );
+  });
+
+  it("retains desktop TDH rate when extended supply metadata is unavailable", () => {
+    mockIsDesktop = true;
+    render(
+      <MemePageLiveRightMenu show nft={createNft({ hodl_rate: 12.71 })} />
+    );
+    expect(screen.getByText("TDH rate")).toBeInTheDocument();
+    expect(screen.getByText("12.71")).toBeInTheDocument();
+    expect(screen.getByText("Mint date")).toBeInTheDocument();
+    expect(screen.getByText("Mint price")).toBeInTheDocument();
+  });
   it("preserves every artist handle when there are fewer artist names", () => {
     render(
       <MemePageLiveRightMenu
@@ -459,135 +545,158 @@ describe("MemePageLiveRightMenu distribution link", () => {
     expect(screen.queryByText("not available")).not.toBeInTheDocument();
   });
 
-  it("shows reserve-adjusted supply without ambiguous headline ranks", () => {
-    render(
-      <MemePageLiveRightMenu
-        show
-        nft={createNft()}
-        nftMeta={{
-          ...createMeta(),
-          edition_size: 310,
-          edition_size_ex_research: 50,
-          edition_size_ex_museum_and_research: 17,
-          research_holdings: 260,
-          hodlers: 97,
-          hodlers_rank: 480,
-        }}
-      />
-    );
-    expect(screen.getByText("Edition size")).toBeInTheDocument();
-    expect(screen.getByText("Ex. research")).toBeInTheDocument();
-    expect(screen.getByText("Ex. museum & research")).toBeInTheDocument();
-    expect(screen.getByText("Holding wallets")).toBeInTheDocument();
-    expect(screen.getByText("17")).toBeInTheDocument();
-    expect(screen.getByText("97")).toBeInTheDocument();
-    expect(screen.queryByText(/Rank 480/)).not.toBeInTheDocument();
-    expect(
-      screen.getByText("Supply details & rankings").closest("details")
-    ).not.toHaveAttribute("open");
-  });
-
-  it("shows shared ranks for excluded supply without presenting the TDH edition rank as raw supply", () => {
-    render(
-      <MemePageLiveRightMenu
-        show
-        nft={createNft()}
-        nftMeta={{
-          ...createMeta(),
-          collection_size: 498,
-          ranked_collection_size: 497,
-          edition_size_rank: 99,
-          edition_size_ex_research_rank: 1,
-          edition_size_ex_museum_and_research_rank: 1,
-        }}
-      />
-    );
-    expect(screen.getAllByText("Rank 1/497")).toHaveLength(2);
-    expect(screen.queryByText("Rank 99/497")).not.toBeInTheDocument();
-    expect(screen.queryByText("Edition size rank")).not.toBeInTheDocument();
-    expect(
-      screen.getByText(/Supply after exclusions ranks from smallest to largest/)
-    ).toBeInTheDocument();
-  });
-
-  it("shows unavailable reserve counts without inventing zero and preserves pending TDH", () => {
-    render(
-      <MemePageLiveRightMenu
-        show
-        nft={createNft({ hodl_rate: 22.65 })}
-        nftMeta={{
-          ...createMeta(),
-          recorded_in_tdh: false,
-          ranked_collection_size: 99,
-          edition_size_rank: -1,
-          edition_size_cleaned_rank: -1,
-          hodlers_rank: -1,
-          research_holdings: null,
-          edition_size_ex_research: null,
-          edition_size_ex_museum_and_research: null,
-        }}
-      />
-    );
-    expect(screen.getAllByText("Unranked")).toHaveLength(1);
-    expect(screen.getAllByText("Not yet available")).toHaveLength(3);
-    expect(screen.getByText("Pending")).toBeInTheDocument();
-    expect(screen.queryByText("22.65")).not.toBeInTheDocument();
-  });
-
-  it("formats live panel stats with the selected locale", () => {
-    const nft = createNft({
-      mint_date: new Date("2024-01-02T00:00:00.000Z"),
-      mint_price: 1234.5,
-      floor_price: 1.2345,
-      market_cap: 9876.54,
-      highest_offer: 2.5,
-      hodl_rate: 12.345,
-    });
-    const nftMeta = {
-      ...createMeta(),
-      collection_size: 1200,
-      edition_size: 1234,
-      edition_size_cleaned: 1200,
-      edition_size_cleaned_rank: 12,
-      hodlers: 5678,
-      hodlers_rank: 987,
-      percent_unique: 0.1234,
-      percent_unique_cleaned: 0.4567,
-    };
-
-    render(
-      <MemePageLiveRightMenu show nft={nft} nftMeta={nftMeta} locale="de-DE" />
-    );
-
-    expect(
-      screen.getByText(
-        formatDate("de-DE", nft.mint_date, {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-          timeZone: "UTC",
-        })
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getAllByText(formatInteger("de-DE", nftMeta.edition_size)).length
-    ).toBeGreaterThan(0);
-    expect(
-      screen.getByText(formatInteger("de-DE", nftMeta.hodlers))
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        formatNumber("de-DE", nft.mint_price, { maximumFractionDigits: 5 })
-      )
-    ).toBeInTheDocument();
-    for (const label of [
-      "theMemes.detail.live.market.floorPrice",
-      "theMemes.detail.live.market.highestOffer",
-      "theMemes.detail.live.market.marketCap",
-    ] as const) {
-      expect(screen.queryByText(t("de-DE", label))).not.toBeInTheDocument();
+  it.each([false, true])(
+    "shows reserve-adjusted supply without ambiguous headline ranks (desktop %s)",
+    (desktop) => {
+      mockIsDesktop = desktop;
+      render(
+        <MemePageLiveRightMenu
+          show
+          nft={createNft()}
+          nftMeta={{
+            ...createMeta(),
+            edition_size: 310,
+            edition_size_ex_research: 50,
+            edition_size_ex_museum_and_research: 17,
+            research_holdings: 260,
+            hodlers: 97,
+            hodlers_rank: 480,
+          }}
+        />
+      );
+      expect(screen.getByText("Edition size")).toBeInTheDocument();
+      expect(screen.getByText("Ex. research")).toBeInTheDocument();
+      expect(screen.getByText("Ex. museum & research")).toBeInTheDocument();
+      expect(screen.getByText("Holding wallets")).toBeInTheDocument();
+      expect(screen.getByText("17")).toBeInTheDocument();
+      expect(screen.getByText("97")).toBeInTheDocument();
+      expect(screen.queryByText(/Rank 480/)).not.toBeInTheDocument();
+      expect(
+        screen.getByText("Supply details & rankings").closest("details")
+      ).not.toHaveAttribute("open");
     }
-  });
+  );
+
+  it.each([false, true])(
+    "shows shared ranks for excluded supply without presenting the TDH edition rank as raw supply (desktop %s)",
+    (desktop) => {
+      mockIsDesktop = desktop;
+      render(
+        <MemePageLiveRightMenu
+          show
+          nft={createNft()}
+          nftMeta={{
+            ...createMeta(),
+            collection_size: 498,
+            ranked_collection_size: 497,
+            edition_size_rank: 99,
+            edition_size_ex_research_rank: 1,
+            edition_size_ex_museum_and_research_rank: 1,
+          }}
+        />
+      );
+      expect(screen.getAllByText("Rank 1/497")).toHaveLength(2);
+      expect(screen.queryByText("Rank 99/497")).not.toBeInTheDocument();
+      expect(screen.queryByText("Edition size rank")).not.toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /Supply after exclusions ranks from smallest to largest/
+        )
+      ).toBeInTheDocument();
+    }
+  );
+
+  it.each([false, true])(
+    "shows unavailable reserve counts without inventing zero and preserves pending TDH (desktop %s)",
+    (desktop) => {
+      mockIsDesktop = desktop;
+      render(
+        <MemePageLiveRightMenu
+          show
+          nft={createNft({ hodl_rate: 22.65 })}
+          nftMeta={{
+            ...createMeta(),
+            recorded_in_tdh: false,
+            ranked_collection_size: 99,
+            edition_size_rank: -1,
+            edition_size_cleaned_rank: -1,
+            hodlers_rank: -1,
+            research_holdings: null,
+            edition_size_ex_research: null,
+            edition_size_ex_museum_and_research: null,
+          }}
+        />
+      );
+      expect(screen.getAllByText("Unranked")).toHaveLength(1);
+      expect(screen.getAllByText("Not yet available")).toHaveLength(3);
+      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.queryByText("22.65")).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([false, true])(
+    "formats live panel stats with the selected locale (desktop %s)",
+    (desktop) => {
+      mockIsDesktop = desktop;
+      const nft = createNft({
+        mint_date: new Date("2024-01-02T00:00:00.000Z"),
+        mint_price: 1234.5,
+        floor_price: 1.2345,
+        market_cap: 9876.54,
+        highest_offer: 2.5,
+        hodl_rate: 12.345,
+      });
+      const nftMeta = {
+        ...createMeta(),
+        collection_size: 1200,
+        edition_size: 1234,
+        edition_size_cleaned: 1200,
+        edition_size_cleaned_rank: 12,
+        hodlers: 5678,
+        hodlers_rank: 987,
+        percent_unique: 0.1234,
+        percent_unique_cleaned: 0.4567,
+      };
+
+      render(
+        <MemePageLiveRightMenu
+          show
+          nft={nft}
+          nftMeta={nftMeta}
+          locale="de-DE"
+        />
+      );
+
+      expect(
+        screen.getByText(
+          formatDate("de-DE", nft.mint_date, {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+            timeZone: "UTC",
+          })
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getAllByText(formatInteger("de-DE", nftMeta.edition_size)).length
+      ).toBeGreaterThan(0);
+      expect(
+        screen.getByText(formatInteger("de-DE", nftMeta.hodlers))
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          formatNumber("de-DE", nft.mint_price, { maximumFractionDigits: 5 })
+        )
+      ).toBeInTheDocument();
+      for (const label of [
+        "theMemes.detail.live.market.floorPrice",
+        "theMemes.detail.live.market.highestOffer",
+        "theMemes.detail.live.market.marketCap",
+      ] as const) {
+        expect(screen.queryByText(t("de-DE", label))).not.toBeInTheDocument();
+      }
+    }
+  );
 
   it("formats collector percentages with the selected locale", () => {
     const nftMeta = {
@@ -652,17 +761,41 @@ describe("MemePageLiveRightMenu distribution link", () => {
 
     expect(screen.getByTestId("marketplace-links")).toBeInTheDocument();
     expect(
+      screen.getByRole("button", { name: "View listings & offers" })
+    ).toBeInTheDocument();
+    expect(
       screen.getByText("Mint price").parentElement?.parentElement
     ).toHaveClass("tw-flex", "tw-flex-wrap");
   });
 
-  it("hides marketplace links for non-US iOS", async () => {
-    mockCountry = "EE";
-    mockIsIos = true;
+  it.each([false, true])(
+    "hides marketplace links for non-US iOS (desktop %s)",
+    async (desktop) => {
+      mockCountry = "EE";
+      mockIsIos = true;
+      mockIsDesktop = desktop;
 
-    render(<MemePageLiveRightMenu show nft={createNft()} />);
+      render(<MemePageLiveRightMenu show nft={createNft()} />);
 
-    expect(screen.queryByTestId("marketplace-links")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("marketplace-links")).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "View listings & offers" })
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it("keeps one marketplace group and market navigation before supply on desktop", () => {
+    mockIsDesktop = true;
+    render(
+      <MemePageLiveRightMenu show nft={createNft()} nftMeta={createMeta()} />
+    );
+    const market = screen.getByRole("button", {
+      name: "View listings & offers",
+    });
+    expect(screen.getAllByTestId("marketplace-links")).toHaveLength(1);
+    expect(
+      market.compareDocumentPosition(screen.getByText("Edition size"))
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 });
 

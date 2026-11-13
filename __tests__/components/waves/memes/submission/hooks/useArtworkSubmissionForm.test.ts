@@ -20,9 +20,9 @@ jest.mock("@/components/waves/memes/traits/schema", () => ({
 }));
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
 jest.mock(
-  "@/components/waves/memes/submission/actions/validateInteractivePreview",
+  "@/services/api/interactive-preview-api",
   () => ({
-    validateInteractivePreview: jest.fn(),
+    requestInteractivePreviewValidation: jest.fn(),
   })
 );
 jest.mock("@/services/api/common-api", () => ({
@@ -31,8 +31,8 @@ jest.mock("@/services/api/common-api", () => ({
 
 const { useAuth } = require("@/components/auth/Auth");
 const {
-  validateInteractivePreview,
-} = require("@/components/waves/memes/submission/actions/validateInteractivePreview");
+  requestInteractivePreviewValidation,
+} = require("@/services/api/interactive-preview-api");
 const { commonApiFetch } = require("@/services/api/common-api");
 
 const createBioStatement = (statementValue: string): CicStatement => ({
@@ -114,7 +114,7 @@ describe("useArtworkSubmissionForm", () => {
     (useAuth as jest.Mock).mockReturnValue({
       connectedProfile: { handle: "alice", primary_wallet: "0xalice" },
     });
-    (validateInteractivePreview as jest.Mock).mockResolvedValue({
+    (requestInteractivePreviewValidation as jest.Mock).mockResolvedValue({
       ok: true,
       contentType: "text/html",
     });
@@ -215,6 +215,26 @@ describe("useArtworkSubmissionForm", () => {
       result.current.setAdditionalActionPromised(true);
     });
     expect(result.current.isAdditionalActionPromised).toBe(true);
+    act(() => {
+      result.current.setAdditionalActionPlan(
+        "If selected, hold a free exhibition."
+      );
+      result.current.setAdditionalActionPromised(false);
+      result.current.handleContinueFromArtwork();
+      result.current.handleBackToArtwork();
+    });
+    expect(result.current.operationalData.additional_action_plan).toBe(
+      "If selected, hold a free exhibition."
+    );
+    act(() => {
+      result.current.setAdditionalActionPromised(true);
+    });
+    expect(result.current.getSubmissionData()).toMatchObject({
+      isAdditionalActionPromised: true,
+      operationalData: {
+        additional_action_plan: "If selected, hold a free exhibition.",
+      },
+    });
   });
 
   it("preserves draft fields while syncing the read-only submitting profile", () => {
@@ -567,7 +587,7 @@ describe("useArtworkSubmissionForm", () => {
     expect(result.current.externalMediaError).toBeNull();
     expect(result.current.externalMediaPreviewUrl).toBe("");
     expect(result.current.externalMediaValidationStatus).toBe("idle");
-    expect(validateInteractivePreview).not.toHaveBeenCalled();
+    expect(requestInteractivePreviewValidation).not.toHaveBeenCalled();
   });
 
   it("rejects external previews that are not HTML files", () => {
@@ -586,7 +606,7 @@ describe("useArtworkSubmissionForm", () => {
     );
     expect(result.current.externalMediaPreviewUrl).toBe("");
     expect(result.current.externalMediaValidationStatus).toBe("invalid");
-    expect(validateInteractivePreview).not.toHaveBeenCalled();
+    expect(requestInteractivePreviewValidation).not.toHaveBeenCalled();
   });
 
   it("rejects external media hashes with query strings", () => {
@@ -605,7 +625,7 @@ describe("useArtworkSubmissionForm", () => {
     );
     expect(result.current.externalMediaPreviewUrl).toBe("");
     expect(result.current.externalMediaValidationStatus).toBe("invalid");
-    expect(validateInteractivePreview).not.toHaveBeenCalled();
+    expect(requestInteractivePreviewValidation).not.toHaveBeenCalled();
   });
 
   it("accepts external previews that resolve to HTML documents", async () => {
@@ -622,7 +642,7 @@ describe("useArtworkSubmissionForm", () => {
       expect(result.current.isExternalMediaValid).toBe(true);
     });
 
-    expect(validateInteractivePreview).toHaveBeenCalledWith({
+    expect(requestInteractivePreviewValidation).toHaveBeenCalledWith({
       provider: "ipfs",
       path: CID_V1,
     });
@@ -647,7 +667,7 @@ describe("useArtworkSubmissionForm", () => {
       expect(result.current.isExternalMediaValid).toBe(true);
     });
 
-    expect(validateInteractivePreview).toHaveBeenCalledWith({
+    expect(requestInteractivePreviewValidation).toHaveBeenCalledWith({
       provider: "ipfs",
       path: CID_V1,
     });
@@ -659,8 +679,40 @@ describe("useArtworkSubmissionForm", () => {
     );
   });
 
-  it("surfaces gateway validation errors from server action", async () => {
-    (validateInteractivePreview as jest.Mock).mockResolvedValue({
+  it("shows the retry message when the check itself fails", async () => {
+    // requestInteractivePreviewValidation throws for every non-2xx answer
+    // from the route (400, 403, 413, 415, 429, 5xx) and for network errors;
+    // the route's own error text never reaches the creator.
+    const consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    (requestInteractivePreviewValidation as jest.Mock).mockRejectedValue(
+      new Error("Interactive preview check failed with status 429")
+    );
+
+    const { result } = renderArtworkSubmissionForm();
+
+    act(() => {
+      result.current.setMediaSource("url");
+    });
+    act(() => {
+      result.current.setExternalMediaHash(CID_V1);
+    });
+
+    await waitFor(() => {
+      expect(result.current.externalMediaError).toBe(
+        "Unable to verify media URL. Try again later."
+      );
+    });
+
+    expect(result.current.isExternalMediaValid).toBe(false);
+    expect(result.current.externalMediaPreviewUrl).toBe("");
+    expect(result.current.externalMediaValidationStatus).toBe("invalid");
+    consoleErrorSpy.mockRestore();
+  });
+
+  it("surfaces gateway validation errors from the route", async () => {
+    (requestInteractivePreviewValidation as jest.Mock).mockResolvedValue({
       ok: false,
       reason: "Gateway returned 404.",
     });

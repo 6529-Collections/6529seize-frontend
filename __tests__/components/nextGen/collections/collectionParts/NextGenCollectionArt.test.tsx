@@ -1,9 +1,20 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import NextGenCollectionArt from '@/components/nextGen/collections/collectionParts/NextGenCollectionArt';
+
+let mockSearchParams = new URLSearchParams();
+let mockHideNftPurchasing = false;
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => mockSearchParams,
+}));
+
+jest.mock('@/hooks/useNftPurchasingVisibility', () => ({
+  useNftPurchasingVisibility: () => ({
+    hideNftPurchasing: mockHideNftPurchasing,
+    reservesNftPurchasingSpace: false,
+  }),
 }));
 
 jest.mock('@/services/api/common-api', () => ({
@@ -11,7 +22,17 @@ jest.mock('@/services/api/common-api', () => ({
 }));
 
 jest.mock('@/components/nextGen/collections/NextGenTokenList', () => (props: any) => (
-  <div data-testid="token-list" data-limit={String(props.limit)} />
+  <div
+    data-testid="token-list"
+    data-limit={String(props.limit)}
+    data-sort={props.sort}
+    data-listed={props.listed_type}
+    data-hide-market-listings={String(props.hideMarketListings)}
+  >
+    <button type="button" onClick={() => props.setLoadFailed?.(true)}>
+      fail list
+    </button>
+  </div>
 ));
 
 jest.mock('@fortawesome/react-fontawesome', () => ({
@@ -28,7 +49,7 @@ jest.mock('@/hooks/useBrowserLocale', () => ({
 }));
 jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   formatNameForUrl: (s: string) => s,
-  NextGenListFilters: { ID: "ID" },
+  NextGenListFilters: { ID: "ID", LISTED_PRICE: "Listed Price" },
   NextGenTokenListedType: { ALL: "ALL", LISTED: "LISTED", NOT_LISTED: "NOT_LISTED" },
 }));
 
@@ -38,6 +59,8 @@ const collection = { id: 1, name: 'Cool' } as any;
 
 describe('NextGenCollectionArt', () => {
   beforeEach(() => {
+    mockSearchParams = new URLSearchParams();
+    mockHideNftPurchasing = false;
     (commonApiFetch as jest.Mock).mockClear();
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1024 });
   });
@@ -57,7 +80,10 @@ describe('NextGenCollectionArt', () => {
     await screen.findByTestId('token-list');
     expect(screen.queryByRole('link', { name: /View All/i })).toBeNull();
     expect(screen.getByTestId('token-list')).toHaveAttribute('data-limit', 'undefined');
-    expect(commonApiFetch).toHaveBeenCalledWith({ endpoint: 'nextgen/collections/1/traits' });
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: 'nextgen/collections/1/traits',
+      signal: expect.any(AbortSignal),
+    });
   });
 
   it('hides filters on small screens', async () => {
@@ -65,6 +91,21 @@ describe('NextGenCollectionArt', () => {
     render(<NextGenCollectionArt collection={collection} />);
     await screen.findByTestId('token-list');
     expect(screen.queryByText('Traits')).toBeNull();
+  });
+
+  it('ignores incoming listing filters and price sorting when purchases are hidden', async () => {
+    mockHideNftPurchasing = true;
+    mockSearchParams = new URLSearchParams('sort=listed_price&listed=true');
+    render(<NextGenCollectionArt collection={collection} />);
+
+    const list = await screen.findByTestId('token-list');
+    expect(list).toHaveAttribute('data-sort', 'ID');
+    expect(list).toHaveAttribute('data-listed', 'ALL');
+    expect(list).toHaveAttribute('data-hide-market-listings', 'true');
+    expect(screen.queryByRole('combobox', { name: 'Listing status' })).toBeNull();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Sort: ID' }));
+    expect(screen.queryByRole('button', { name: 'Listed Price' })).toBeNull();
   });
 
   it('opens the Pebbles set planner from its native collection page', async () => {
@@ -95,5 +136,65 @@ describe('NextGenCollectionArt', () => {
 
     expect(await screen.findByText('x1,234')).toBeInTheDocument();
     expect(screen.getByText('x2,345')).toBeInTheDocument();
+  });
+
+  it('shows an accessible error instead of an endless spinner when traits fail to load', async () => {
+    (commonApiFetch as jest.Mock).mockRejectedValueOnce('HTTP error! status: 500');
+    render(<NextGenCollectionArt collection={collection} />);
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Collection traits could not be loaded.'
+    );
+    expect(screen.queryByTestId('loader')).toBeNull();
+    expect(screen.queryByTestId('token-list')).toBeNull();
+  });
+
+  it('retries loading traits', async () => {
+    (commonApiFetch as jest.Mock)
+      .mockRejectedValueOnce('HTTP error! status: 500')
+      .mockResolvedValueOnce([]);
+    render(<NextGenCollectionArt collection={collection} />);
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Try again' })
+    );
+
+    expect(await screen.findByTestId('token-list')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).toBeNull();
+    expect(commonApiFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores traits for a previous collection and aborts on unmount', async () => {
+    let resolveFirst: (value: unknown) => void = () => {};
+    (commonApiFetch as jest.Mock)
+      .mockReturnValueOnce(new Promise((resolve) => (resolveFirst = resolve)))
+      .mockResolvedValueOnce([
+        { trait: 'Palette', values: ['Blue'], value_counts: [{ key: 'Blue', count: 2 }] },
+      ]);
+    const { rerender, unmount } = render(
+      <NextGenCollectionArt collection={collection} />
+    );
+    rerender(<NextGenCollectionArt collection={{ ...collection, id: 2 }} />);
+
+    const [firstCall, secondCall] = (commonApiFetch as jest.Mock).mock.calls;
+    expect(firstCall[0].signal.aborted).toBe(true);
+    expect(secondCall[0].endpoint).toBe('nextgen/collections/2/traits');
+
+    expect(await screen.findByText('Palette')).toBeInTheDocument();
+    resolveFirst([
+      { trait: 'Stale', values: ['X'], value_counts: [{ key: 'X', count: 1 }] },
+    ]);
+    await Promise.resolve();
+    expect(screen.queryByText('Stale')).toBeNull();
+
+    unmount();
+    expect(secondCall[0].signal.aborted).toBe(true);
+  });
+
+  it('stops the count spinner when the token list reports a failure', async () => {
+    render(<NextGenCollectionArt collection={collection} />);
+    await userEvent.click(await screen.findByRole('button', { name: 'fail list' }));
+
+    expect(screen.queryByTestId('loader')).toBeNull();
   });
 });

@@ -14,6 +14,10 @@
 import { HttpFile } from '../http/http';
 
 export class ApiRedeemConnectionShareResponse {
+    /**
+    * One-time encrypted device setup, unlocked locally using the link fragment.
+    */
+    'encrypted_device_setup'?: string | null;
     'address': string;
     'role'?: string | null;
     'access_token': string;
@@ -27,6 +31,12 @@ export class ApiRedeemConnectionShareResponse {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "encrypted_device_setup",
+            "baseName": "encrypted_device_setup",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "address",
             "baseName": "address",

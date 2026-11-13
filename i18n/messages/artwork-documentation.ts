@@ -111,8 +111,6 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.module.rights": "Rights and people",
   "artworkDocumentation.module.preservation": "Preservation and display",
   "artworkDocumentation.module.interview": "Artist interview",
-  "artworkDocumentation.title": "Artwork documentation",
-  "artworkDocumentation.myWorks": "My artwork documentation",
   "artworkDocumentation.intro":
     "Your work has a history. Keep it with the work.",
   "artworkDocumentation.description":

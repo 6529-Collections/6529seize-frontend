@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useContext, useId, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
@@ -39,6 +39,8 @@ import {
   MEMES_NOMINEE_REQUIRED_REP,
 } from "@/helpers/waves/memes-nomination";
 import { getGrantRepCategoriesToDisplay } from "./grantRepCategoryOptions";
+
+import { isRatingValue } from "../ratingsManagement";
 
 const SEARCH_LENGTH = {
   MIN: 3,
@@ -87,7 +89,10 @@ export default function UserPageRepNewRepSearch({
 
   const [repSearch, setRepSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [amountStr, setAmountStr] = useState<string>("0");
+  const [amountDraft, setAmountDraft] = useState<{
+    readonly scope: string;
+    readonly value: string;
+  } | null>(null);
   const [mutating, setMutating] = useState<boolean>(false);
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -126,19 +131,33 @@ export default function UserPageRepNewRepSearch({
     category: selectedCategory,
   });
 
-  useEffect(() => {
-    if (repState) {
-      setAmountStr(`${repState.rater_contribution}`);
-    }
-  }, [repState]);
+  const amountScope = [
+    profile.id ?? profile.query ?? profile.display,
+    connectedProfile?.id,
+    activeProfileProxy?.id,
+  ].join(":");
+  const amountStr =
+    amountDraft?.scope === amountScope
+      ? amountDraft.value
+      : String(repState?.rater_contribution ?? 0);
+  const setAmountStr = (value: string) =>
+    setAmountDraft({ scope: amountScope, value });
 
   const amountNum = getStringAsNumberOrZero(amountStr);
   const isValidValue =
-    !!activeProfileProxy ||
-    (amountNum >= minMaxValues.min && amountNum <= minMaxValues.max);
+    isRatingValue(amountStr) &&
+    (!!activeProfileProxy ||
+      (amountNum >= minMaxValues.min && amountNum <= minMaxValues.max));
 
   const newRating = getStringAsNumberOrZero(amountStr);
   const haveChanged = newRating !== (repState?.rater_contribution ?? 0);
+  const isGrantDisabled =
+    !selectedCategory ||
+    !repState ||
+    !amountStr ||
+    !haveChanged ||
+    !isValidValue ||
+    mutating;
 
   // --- End derived rep state ---
 
@@ -218,19 +237,19 @@ export default function UserPageRepNewRepSearch({
         endpoint: `profiles/${profile.query ?? ""}/rep/rating`,
         body: { amount, category },
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       setToast({
         message: t(locale, "rep.categories.grant.toast.updated"),
         type: "success",
       });
-      onProfileRepModify({
-        targetProfile: profile,
+      await onProfileRepModify({
+        targetProfiles: [profile],
         connectedProfile,
         profileProxy: activeProfileProxy ?? null,
       });
       setSelectedCategory(null);
       setRepSearch("");
-      setAmountStr("0");
+      setAmountDraft(null);
       setIsOpen(false);
       onSuccess?.();
     },
@@ -251,14 +270,13 @@ export default function UserPageRepNewRepSearch({
   });
 
   const onGrantRep = async () => {
-    if (mutating || !selectedCategory || !amountStr || !profile.query) return;
+    if (isGrantDisabled || !selectedCategory || !profile.query) return;
     if (isHelpBotCreditRepCategory(selectedCategory)) {
       showHelpBotCreditRepCategoryError();
       return;
     }
     const amount = Number.parseInt(amountStr, 10);
     if (Number.isNaN(amount)) return;
-    if (!haveChanged) return;
     setMutating(true);
     try {
       const { success } = await requestAuth();
@@ -359,16 +377,9 @@ export default function UserPageRepNewRepSearch({
     setRepSearch(newValue);
     if (selectedCategory && newValue !== selectedCategory) {
       setSelectedCategory(null);
-      setAmountStr("");
+      setAmountDraft(null);
     }
   };
-
-  const isGrantDisabled =
-    !selectedCategory ||
-    !amountStr ||
-    !haveChanged ||
-    !isValidValue ||
-    mutating;
 
   return (
     <div className="tw-relative tw-max-w-full">
@@ -382,7 +393,7 @@ export default function UserPageRepNewRepSearch({
                     <dt className="tw-min-w-0 tw-break-words">
                       {t(locale, "rep.categories.grant.availableRepLabel")}
                     </dt>
-                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
+                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-text-iron-300">
                       {formatNumberWithCommas(heroAvailableRep)}
                     </dd>
                   </div>
@@ -392,7 +403,7 @@ export default function UserPageRepNewRepSearch({
                         name: profile.query ?? "",
                       })}
                     </dt>
-                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
+                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-text-iron-300">
                       {formatNumberWithCommas(
                         overview?.authenticated_user_contribution ?? 0
                       )}
@@ -503,6 +514,7 @@ export default function UserPageRepNewRepSearch({
                       onChange={setAmountStr}
                       minMax={minMaxValues}
                       isProxy={!!activeProfileProxy}
+                      clampOnBlur={!!repState}
                       variant="form"
                       inputId={amountInputId}
                     />

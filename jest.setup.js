@@ -74,6 +74,29 @@ globalThis.WritableStream = globalThis.WritableStream ?? WritableStream;
 globalThis.MessageChannel = TestMessageChannel;
 globalThis.MessagePort = globalThis.MessagePort ?? MessagePort;
 
+// jsdom does not implement Blob#text(), which every supported browser has. Read
+// through the FileReader that jsdom ships, captured here so tests that later
+// stub FileReader do not change how text() behaves.
+const JsdomFileReader = globalThis.FileReader;
+if (
+  typeof Blob !== "undefined" &&
+  typeof Blob.prototype.text !== "function" &&
+  JsdomFileReader
+) {
+  Object.defineProperty(Blob.prototype, "text", {
+    configurable: true,
+    writable: true,
+    value: function text() {
+      return new Promise((resolve, reject) => {
+        const reader = new JsdomFileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(reader.error);
+        reader.readAsText(this);
+      });
+    },
+  });
+}
+
 require("@testing-library/jest-dom");
 
 // Mock CSS module imports
@@ -146,10 +169,8 @@ if (!process.env.PUBLIC_RUNTIME) {
     NEXTGEN_CHAIN_ID: 1,
     MOBILE_APP_SCHEME: "testmobile6529",
     CORE_SCHEME: "testcore6529",
-    IPFS_API_ENDPOINT: "https://api-ipfs.test.6529.io",
     IPFS_GATEWAY_ENDPOINT: "https://ipfs.test.6529.io",
     MEDIA_RESOLVER_ENDPOINT: "https://media.6529.io",
-    IPFS_MFS_PATH: "testfiles",
     GIPHY_API_KEY: "test-giphy-api-key",
     WS_ENDPOINT: "wss://ws.test.6529.io",
     DEV_MODE_MEMES_WAVE_ID: "test-memes-wave-id",

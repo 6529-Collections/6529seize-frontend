@@ -1,6 +1,11 @@
 "use client";
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
+import { useAuth } from "@/components/auth/Auth";
+import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
+import { isDropReplyEligible } from "@/helpers/waves/drop-reply-eligibility";
+import { useSwipeToReply } from "@/hooks/useSwipeToReply";
+import { cancelHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
 import { useEditingDrop } from "@/contexts/EditingDropContext";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
@@ -28,20 +33,19 @@ import WaveDropReactions from "./WaveDropReactions";
 import {
   GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX,
   GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO,
-  GroupedDropTimestamp,
   type TimestampSwipeStart,
   clampGroupedTimestampSwipeOffset,
   clearLongPressTimeout,
   getAuthorHeader,
   getContentBlock,
   getGroupedTimestampActionStyle,
+  getGroupedTimestampContentClass,
   getGroupedTimestampContentStyle,
   getGroupingClass,
   getContentOffsetClass,
   getDropClasses,
   getPointerId,
   getPointerType,
-  getPrimaryTouch,
   getWaveDropOuterClass,
   handleTouchEndInternal,
   handleTouchMoveInternal,
@@ -59,6 +63,11 @@ import {
 import type { WaveDropProps } from "./WaveDrop.types";
 import { ModerationRejectedDeliveryStatus } from "./ModerationRejectedDeliveryStatus";
 import { useWaveDropModerationPresentation } from "./useWaveDropModerationPresentation";
+import { isDropAuthorSigned } from "./signature/dropAuthorSigned";
+import GroupedDropTimestamp from "./GroupedDropTimestamp";
+import ShareDropSelectOverlay from "./share-image/ShareDropSelectOverlay";
+import { useShareDropsSelection } from "./share-image/ShareDropsSelectionContext";
+import { SwipeReplyHint } from "./SwipeReplyHint";
 
 const WaveDropInner = ({
   drop,
@@ -88,6 +97,7 @@ const WaveDropInner = ({
   quotePath,
   embedDepth,
   maxEmbedDepth,
+  signatureGroup,
 }: WaveDropProps) => {
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
   const [isSlideUp, setIsSlideUp] = useState(false);
@@ -174,13 +184,46 @@ const WaveDropInner = ({
     shouldGroupWithPreviousDrop,
     isProfileView,
   });
-  const showGroupedTimestamp = shouldShowGroupedDropTimestamp({
-    shouldGroupWithPreviousDrop,
-    showAuthorInfo,
-    identityMode,
-    isProfileView,
-    location,
-  });
+  // Boolean() hands React Compiler a primitive. A plain helper result may
+  // alias showAuthorInfo, which later helpers receive, and the touch/pointer
+  // callbacks below depend on this value, so the compiler would otherwise
+  // skip memoizing this whole component.
+  const showGroupedTimestamp = Boolean(
+    shouldShowGroupedDropTimestamp({
+      shouldGroupWithPreviousDrop,
+      showAuthorInfo,
+      identityMode,
+      isProfileView,
+      location,
+    })
+  );
+  const { connectedProfile } = useAuth();
+  const { getEligibility } = useWaveEligibility();
+  const canSwipeReply =
+    canUseTouchActionSheet &&
+    location === DropLocation.WAVE &&
+    effectiveShowInteractions &&
+    showReplyAndQuote &&
+    !isEditing &&
+    !drop.id.startsWith("temp-") &&
+    Boolean(connectedProfile?.handle) &&
+    isDropReplyEligible(drop, getEligibility(drop.wave.id));
+  const { contentRef: swipeContentRef, onTouchStart: startReplySwipe } =
+    useSwipeToReply({
+      rootRef: dropRef,
+      scope: drop.id,
+      enabled:
+        canUseTouchActionSheet &&
+        !isEditing &&
+        (canSwipeReply || showGroupedTimestamp),
+      canReply: canSwipeReply,
+      onReply: () => handleOnReply(),
+      onStart: () => {
+        clearLongPressTimeout({ longPressTimeoutRef });
+        setLongPressTriggered(false);
+        setIsSlideUp(false);
+      },
+    });
   const {
     canUseMobileActionsSheet,
     showActionsButton,
@@ -219,6 +262,7 @@ const WaveDropInner = ({
 
   const handleLongPress = useCallback(() => {
     if (!allowLongPress || isEditing) return;
+    cancelHorizontalSwipe();
     markNextClickForSuppression();
     // Cancel any active edit mode first
     if (editingDropId) {
@@ -235,7 +279,7 @@ const WaveDropInner = ({
   ]);
 
   const handleTouchStart = useCallback(
-    (e: React.TouchEvent) => {
+    (e: React.TouchEvent<HTMLDivElement>) => {
       handleTouchStartInternal({
         allowLongPress,
         isEditing,
@@ -245,39 +289,13 @@ const WaveDropInner = ({
         onLongPress: handleLongPress,
       });
 
-      if (showGroupedTimestamp && canUseTouchActionSheet && !isEditing) {
-        const touch = getPrimaryTouch(e);
-        if (!touch) {
-          resetTimestampSwipe();
-          return;
-        }
-
-        timestampSwipeStartRef.current = {
-          x: touch.clientX,
-          y: touch.clientY,
-        };
-        setTimestampSwipeOffset(0);
-        setIsTimestampSwipeDragging(false);
-        return;
-      }
-
-      resetTimestampSwipe();
+      startReplySwipe(e);
     },
-    [
-      allowLongPress,
-      canUseTouchActionSheet,
-      handleLongPress,
-      isEditing,
-      resetTimestampSwipe,
-      showGroupedTimestamp,
-    ]
+    [allowLongPress, handleLongPress, isEditing, startReplySwipe]
   );
 
   const handleTouchEnd = useCallback(() => {
-    handleTouchEndInternal({
-      longPressTimeoutRef,
-      touchStartPosition,
-    });
+    handleTouchEndInternal({ longPressTimeoutRef, touchStartPosition });
     resetTimestampSwipe();
     releaseSuppressionAfterTouchEnd();
   }, [releaseSuppressionAfterTouchEnd, resetTimestampSwipe]);
@@ -290,62 +308,8 @@ const WaveDropInner = ({
         touchStartPosition,
         longPressTimeoutRef,
       });
-
-      const swipeStart = timestampSwipeStartRef.current;
-      if (
-        !swipeStart ||
-        !showGroupedTimestamp ||
-        !canUseTouchActionSheet ||
-        isEditing
-      ) {
-        return;
-      }
-
-      const touch = getPrimaryTouch(e);
-      if (!touch) {
-        return;
-      }
-
-      const swipeDeltaX = swipeStart.x - touch.clientX;
-      const deltaY = Math.abs(touch.clientY - swipeStart.y);
-      const isActivatedSwipe =
-        swipeDeltaX > GROUPED_TIMESTAMP_SWIPE_ACTIVATION_PX &&
-        swipeDeltaX > deltaY * GROUPED_TIMESTAMP_SWIPE_AXIS_RATIO;
-
-      if (!isActivatedSwipe && !isTimestampSwipeDragging) {
-        return;
-      }
-
-      if (swipeDeltaX <= 0 || deltaY > swipeDeltaX) {
-        resetTimestampSwipe();
-        return;
-      }
-
-      const nextOffset = clampGroupedTimestampSwipeOffset(swipeDeltaX);
-      if (nextOffset <= 0) {
-        return;
-      }
-
-      clearLongPressTimeout({ longPressTimeoutRef });
-      markNextClickForSuppression();
-      setLongPressTriggered(false);
-      setIsSlideUp(false);
-      setIsTimestampSwipeDragging(true);
-      setTimestampSwipeOffset(nextOffset);
-
-      if (e.cancelable) {
-        e.preventDefault();
-      }
     },
-    [
-      allowLongPress,
-      canUseTouchActionSheet,
-      isEditing,
-      isTimestampSwipeDragging,
-      markNextClickForSuppression,
-      resetTimestampSwipe,
-      showGroupedTimestamp,
-    ]
+    [allowLongPress]
   );
 
   const handlePointerDown = useCallback(
@@ -477,6 +441,8 @@ const WaveDropInner = ({
     showAuthorInfo,
     identityMode,
     drop,
+    // Profile views show a header on every post; each keeps its own seal.
+    signatureGroup: isProfileView ? undefined : signatureGroup,
     showWaveInfo,
     isStorm,
     activePartIndex,
@@ -616,14 +582,15 @@ const WaveDropInner = ({
     standaloneQuickRemoveCuration,
   });
 
-  const dropClasses = getDropClasses(
+  const isChoosingSharePosts = useShareDropsSelection()?.isSelecting ?? false;
+  const dropClasses = `${getDropClasses(
     isActiveDrop,
     groupingClass,
     location,
     drop.rank,
     isDrop,
     isModerationRejected
-  );
+  )}${isChoosingSharePosts ? " tw-relative" : ""}`;
 
   const contentBlock = getContentBlock({
     shouldShowReplyHeader,
@@ -632,6 +599,11 @@ const WaveDropInner = ({
     drop,
     showAuthorInfo,
     authorHeader,
+    showStormPartIndicator:
+      showAuthorInfo &&
+      isStorm &&
+      timestampLayout === "stacked-compact" &&
+      identityMode === "default",
     shouldGroupWithPreviousDrop,
     isProfileView,
     activePartIndex,
@@ -692,20 +664,21 @@ const WaveDropInner = ({
     location,
     isProfileView,
   });
-  const groupedTimestampTransitionClass = isTimestampSwipeDragging
-    ? "tw-will-change-transform"
-    : "tw-transition-transform tw-duration-150 tw-ease-out";
-  const swipeableContentClass = `tw-relative tw-z-10 ${
-    showGroupedTimestamp ? groupedTimestampTransitionClass : ""
-  }`;
-  const swipeableContentStyle =
-    getGroupedTimestampContentStyle(timestampSwipeOffset);
+  const swipeableContentClass = getGroupedTimestampContentClass(
+    showGroupedTimestamp,
+    isTimestampSwipeDragging
+  );
+  const swipeableContentStyle = getGroupedTimestampContentStyle(
+    timestampSwipeOffset,
+    canUseTouchActionSheet
+  );
 
   return (
     <div className={outerClass}>
       <div
         ref={dropRef}
         className={dropClasses}
+        data-reply-enabled={canSwipeReply || undefined}
         data-wave-drop-id={drop.stableHash}
         data-serial-no={drop.serial_no}
         onTouchStart={handleTouchStart}
@@ -720,15 +693,19 @@ const WaveDropInner = ({
         onPointerOut={handleRowPointerOut}
         onClickCapture={handleClickCapture}
       >
+        {isChoosingSharePosts && <ShareDropSelectOverlay drop={drop} />}
+        {canSwipeReply && <SwipeReplyHint />}
         {showGroupedTimestamp && (
           <GroupedDropTimestamp
             swipeOffset={timestampSwipeOffset}
             timestamp={drop.created_at}
             variant={canUseTouchActionSheet ? "swipe" : "hover"}
             forceVisible={isRowPointerHovered}
+            signedDrop={isDropAuthorSigned(drop) ? drop : undefined}
           />
         )}
         <div
+          ref={swipeContentRef}
           className={swipeableContentClass}
           data-testid={
             showGroupedTimestamp ? "grouped-drop-swipeable-content" : undefined
@@ -738,6 +715,7 @@ const WaveDropInner = ({
           {wrapContentOnly ? wrapContentOnly(contentBlock) : contentBlock}
           {moderationRejectedStatus}
           {canUseDesktopHoverActions &&
+            !isChoosingSharePosts &&
             effectiveShowInteractions &&
             showReplyAndQuote &&
             !showStandaloneActionsButton &&

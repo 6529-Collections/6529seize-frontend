@@ -5,6 +5,7 @@ import {
   getDownloadFilenameFromUrl,
   triggerDirectDownload,
 } from "@/helpers/media-download.helpers";
+import { getOpenableUrl, openUrlInNewTab } from "@/helpers/open-url.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useCallback, useState } from "react";
 
@@ -32,10 +33,14 @@ function getUrlExtension(url: string): string | null {
 function canOpenMediaInBrowser({
   mimeType,
   url,
+  isCapacitor,
 }: {
   readonly mimeType?: string | undefined;
   readonly url: string;
+  readonly isCapacitor: boolean;
 }): boolean {
+  // A local blob belongs to this WebView; an external native browser cannot read it.
+  if (isCapacitor && url.startsWith("blob:")) return false;
   if (mimeType) {
     const normalizedMimeType = (mimeType.split(";")[0] ?? "")
       .trim()
@@ -65,7 +70,9 @@ export function useMediaActions({
   const { isCapacitor } = useCapacitor();
   const [isDownloading, setIsDownloading] = useState(false);
   const fileName = getDownloadFilenameFromUrl(url, fallbackFileName);
-  const canOpen = canOpenMediaInBrowser({ mimeType, url });
+  const canOpen =
+    getOpenableUrl(url) !== null &&
+    canOpenMediaInBrowser({ mimeType, url, isCapacitor });
   let openLabel: string | undefined;
 
   if (canOpen) {
@@ -75,7 +82,7 @@ export function useMediaActions({
   }
 
   const openMedia = useCallback(() => {
-    globalThis.window.open(url, "_blank", "noopener,noreferrer");
+    openUrlInNewTab(url);
   }, [url]);
 
   const downloadMedia = useCallback(async () => {
@@ -90,15 +97,20 @@ export function useMediaActions({
         fileName,
         isCapacitor,
         dialogTitle,
+        mimeType,
       });
     } catch {
       if (!isCapacitor) {
-        triggerDirectDownload(url, fileName);
+        // Any failure of the in-app download lands here (the fetch, or
+        // preparing and saving the file). This fallback does not use the
+        // file's bytes: it decides the saved name by the file name and
+        // declared type only.
+        triggerDirectDownload(url, fileName, mimeType);
       }
     } finally {
       setIsDownloading(false);
     }
-  }, [dialogTitle, fileName, isCapacitor, isDownloading, url]);
+  }, [dialogTitle, fileName, isCapacitor, isDownloading, mimeType, url]);
 
   return {
     downloadMedia,

@@ -1,5 +1,7 @@
 "use client";
 
+import NotificationsLoading from "@/components/notifications/NotificationsLoading";
+
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import {
@@ -26,6 +28,8 @@ interface NotificationsProps {
 }
 
 const NOTIFICATION_CAUSE_PRIORITY: Record<NotificationCause, number> = {
+  [ApiNotificationCause.E2EeMessage]: 17,
+  [ApiNotificationCause.ArtistArtworkSubmitted]: 18,
   [ApiNotificationCause.IdentitySubscribed]: 0,
   [ApiNotificationCause.IdentityMentioned]: 1,
   [ApiNotificationCause.IdentityRep]: 2,
@@ -41,6 +45,8 @@ const NOTIFICATION_CAUSE_PRIORITY: Record<NotificationCause, number> = {
   [ApiNotificationCause.PriorityAlert]: 12,
   [ApiNotificationCause.SubscriptionCoverage]: 13,
   [ApiNotificationCause.CompetitionLifecycle]: 14,
+  [ApiNotificationCause.MemeCollaboration]: 15,
+  [ApiNotificationCause.VotingCreditsReturned]: 16,
 };
 
 const compareNotificationCause = (
@@ -110,6 +116,10 @@ export default function Notifications({
     };
   } else if (isApp) {
     bottomPaddingClassName = floatingDockClearanceClassName;
+  }
+
+  if (contentState.isLoadingProfile || contentState.showLoader) {
+    return <NotificationsLoading />;
   }
 
   return (

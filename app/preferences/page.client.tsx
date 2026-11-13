@@ -1,10 +1,14 @@
 "use client";
 
+import { getPreferencesUnderlineTabClasses } from "@/components/common/underlineTabStyles";
+
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
 import ContentPreferencesSettings from "@/components/preferences/ContentPreferencesSettings";
+import DevicesPreferencesSettings from "@/components/preferences/DevicesPreferencesSettings";
 import ReportsPreferencesSettings from "@/components/preferences/ReportsPreferencesSettings";
+import TimeZonePreferencesSettings from "@/components/preferences/TimeZonePreferencesSettings";
 import UserSetUpProfileCta from "@/components/user/utils/set-up-profile/UserSetUpProfileCta";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -13,10 +17,16 @@ import {
   type PreferencesRouteTab,
 } from "@/helpers/preferences-navigation";
 import { t } from "@/i18n/messages";
+import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
-export type PreferencesTab = "notifications" | "blocked-profiles" | "reports";
+export type PreferencesTab =
+  | "notifications"
+  | "blocked-profiles"
+  | "reports"
+  | "devices"
+  | "time-zone";
 
 const TABS: ReadonlyArray<{
   readonly id: PreferencesTab;
@@ -24,7 +34,9 @@ const TABS: ReadonlyArray<{
   readonly labelKey:
     | "preferences.tabs.notifications"
     | "preferences.tabs.blockedProfiles"
-    | "preferences.tabs.reports";
+    | "preferences.tabs.reports"
+    | "preferences.tabs.devices"
+    | "preferences.tabs.timeZone";
 }> = [
   {
     id: "notifications",
@@ -41,7 +53,21 @@ const TABS: ReadonlyArray<{
     routeTab: "reports",
     labelKey: "preferences.tabs.reports",
   },
+  {
+    id: "devices",
+    routeTab: "devices",
+    labelKey: "preferences.tabs.devices",
+  },
+  {
+    id: "time-zone",
+    routeTab: "time-zone",
+    labelKey: "preferences.tabs.timeZone",
+  },
 ];
+
+/** The Devices tab exists only while signed messages are enabled. */
+const getVisibleTabs = () =>
+  isSignedMessagesEnabled() ? TABS : TABS.filter((tab) => tab.id !== "devices");
 
 export default function PreferencesPageClient({
   activeTab,
@@ -63,13 +89,15 @@ export default function PreferencesPageClient({
     hasValidWalletAuth === true &&
     !connectedProfile?.handle;
   const canManagePreferences = Boolean(connectedProfile?.handle);
+  // The time zone is saved on this device, so it needs no profile or sign-in.
+  const isDeviceTab = activeTab === "time-zone";
   const profileHref = connectedProfile?.handle
     ? `/${encodeURIComponent(connectedProfile.handle)}`
     : null;
 
   return (
     <main className="tailwind-scope tw-min-h-dvh tw-w-full tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12">
-      <div className="tw-mx-auto tw-w-full tw-max-w-5xl">
+      <div className="tw-mx-auto tw-w-full tw-max-w-5xl tw-@container/preferences">
         <div>
           {!isCapacitor && returnToProfile && profileHref && (
             <Link
@@ -93,9 +121,9 @@ export default function PreferencesPageClient({
 
         <nav
           aria-label={t(locale, "preferences.tabs.ariaLabel")}
-          className="tw-mt-8 tw-flex tw-gap-x-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 lg:tw-gap-x-4"
+          className="tw-mt-8 tw-grid tw-grid-cols-2 tw-gap-2 @[42rem]/preferences:tw-flex @[42rem]/preferences:tw-gap-x-3 @[42rem]/preferences:tw-border-x-0 @[42rem]/preferences:tw-border-b @[42rem]/preferences:tw-border-t-0 @[42rem]/preferences:tw-border-solid @[42rem]/preferences:tw-border-iron-800 lg:@[42rem]/preferences:tw-gap-x-4"
         >
-          {TABS.map((tab) => {
+          {getVisibleTabs().map((tab) => {
             const isActive = tab.id === activeTab;
             return (
               <Link
@@ -105,11 +133,9 @@ export default function PreferencesPageClient({
                   fromProfile: returnToProfile,
                 })}
                 aria-current={isActive ? "page" : undefined}
-                className={`-tw-mb-px tw-flex tw-min-h-10 tw-items-center tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-px-1 tw-py-4 tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none ${
+                className={`tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-break-words tw-rounded-lg tw-px-2 tw-py-2 tw-text-center tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 @[42rem]/preferences:-tw-mb-px @[42rem]/preferences:tw-min-h-10 @[42rem]/preferences:tw-rounded-none @[42rem]/preferences:tw-border-x-0 @[42rem]/preferences:tw-border-b-2 @[42rem]/preferences:tw-border-t-0 @[42rem]/preferences:tw-border-solid @[42rem]/preferences:tw-px-1 @[42rem]/preferences:tw-py-4 @[42rem]/preferences:tw-text-left motion-reduce:tw-transition-none ${getPreferencesUnderlineTabClasses(
                   isActive
-                    ? "tw-border-primary-400 tw-text-iron-50"
-                    : "tw-border-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-100"
-                }`}
+                )}`}
               >
                 {t(locale, tab.labelKey)}
               </Link>
@@ -118,7 +144,8 @@ export default function PreferencesPageClient({
         </nav>
 
         <div className="tw-mt-6">
-          {isLoadingProfile && (
+          {isDeviceTab && <TimeZonePreferencesSettings />}
+          {!isDeviceTab && isLoadingProfile && (
             <output
               aria-label={t(locale, "profilePreferences.loading")}
               className="tw-flex tw-min-h-32 tw-items-center tw-justify-center tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
@@ -126,7 +153,7 @@ export default function PreferencesPageClient({
               <span className="tw-size-6 tw-animate-spin tw-rounded-full tw-border-2 tw-border-iron-600 tw-border-t-primary-400" />
             </output>
           )}
-          {needsProfile && (
+          {!isDeviceTab && needsProfile && (
             <section className="tw-flex tw-flex-col tw-items-center tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6 tw-text-center">
               <p className="tw-m-0 tw-text-sm tw-text-iron-400">
                 {t(locale, "preferences.createProfile")}
@@ -134,13 +161,16 @@ export default function PreferencesPageClient({
               <UserSetUpProfileCta className="tw-mt-4" />
             </section>
           )}
-          {!isLoadingProfile && !needsProfile && !canManagePreferences && (
-            <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6">
-              <p className="tw-m-0 tw-text-center tw-text-sm tw-text-iron-400">
-                {t(locale, "preferences.signIn")}
-              </p>
-            </section>
-          )}
+          {!isDeviceTab &&
+            !isLoadingProfile &&
+            !needsProfile &&
+            !canManagePreferences && (
+              <section className="tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-6">
+                <p className="tw-m-0 tw-text-center tw-text-sm tw-text-iron-400">
+                  {t(locale, "preferences.signIn")}
+                </p>
+              </section>
+            )}
           {canManagePreferences && activeTab === "blocked-profiles" ? (
             <ContentPreferencesSettings
               key={connectedProfile?.id ?? "signed-out"}
@@ -148,6 +178,13 @@ export default function PreferencesPageClient({
           ) : null}
           {canManagePreferences && activeTab === "reports" ? (
             <ReportsPreferencesSettings
+              key={connectedProfile?.id ?? "signed-out"}
+            />
+          ) : null}
+          {canManagePreferences &&
+          activeTab === "devices" &&
+          isSignedMessagesEnabled() ? (
+            <DevicesPreferencesSettings
               key={connectedProfile?.id ?? "signed-out"}
             />
           ) : null}

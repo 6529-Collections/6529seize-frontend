@@ -5,12 +5,91 @@ import { publicEnv } from "@/config/env";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 import DropPartMarkdown from "@/components/drops/view/part/DropPartMarkdown";
+import { E2eeMarkdown } from "@/components/e2ee/conversation/E2eeMarkdown";
 import { DropImageGalleryProvider } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { buildDropImageGalleryItems } from "@/components/drops/view/part/dropImageGallery";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 
 const PARENTHESIZED_ORDERED_LIST_CLASS_NAME =
   "drop-markdown-ordered-list-paren";
+
+it("isolates all public footnote IDs without drop IDs and rejects authored HTML IDs", () => {
+  const content =
+    'Note[^location]\n\n[^location]: Footnote\n\n# Heading {#location}\n\n<span id="location">HTML</span>';
+  const { container } = render(
+    <>
+      {[0, 1].map((index) => (
+        <DropPartMarkdown
+          key={index}
+          partContent={content}
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          onQuoteClick={jest.fn()}
+        />
+      ))}
+    </>
+  );
+  const ids = [...container.querySelectorAll("[id]")].map(
+    (element) => element.id
+  );
+  expect(ids.length).toBeGreaterThan(0);
+  expect(new Set(ids).size).toBe(ids.length);
+  expect(ids.every((id) => id.startsWith("user-content-"))).toBe(true);
+  expect(container.querySelector('[id="location"]')).toBeNull();
+  const references = [...container.querySelectorAll("sup a")];
+  expect(references).toHaveLength(2);
+  expect(new Set(references.map((a) => a.getAttribute("href"))).size).toBe(2);
+  for (const anchor of container.querySelectorAll(
+    "sup a,section[data-footnotes] li a"
+  )) {
+    const target = anchor.getAttribute("href")?.slice(1);
+    expect(container.querySelector(`[id="${target}"]`)).not.toBeNull();
+  }
+  for (const reference of references) {
+    expect(reference).toHaveAttribute("aria-describedby");
+    const label = reference.getAttribute("aria-describedby");
+    expect(label).toMatch(/^user-content-/);
+    expect(container.querySelector(`[id="${label}"]`)).toHaveTextContent(
+      "Footnotes"
+    );
+  }
+});
+
+it("keeps public and encrypted adapter typography consistent", () => {
+  const text =
+    "# Heading\n\n**Bold** and *italic*.\n\n\nAfter a blank line.\n\n> Quote\n\n- First\n  - Nested\n\n`code`\n\n| Key |\n| --- |\n| Value |";
+  const { container } = render(
+    <>
+      <section aria-label="Public message">
+        <DropPartMarkdown
+          partContent={text}
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          onQuoteClick={jest.fn()}
+        />
+      </section>
+      <section aria-label="Encrypted message">
+        <E2eeMarkdown
+          text={text}
+          messageId="parity"
+          members={[]}
+          mentions={[]}
+          selfProfileId={null}
+        />
+      </section>
+    </>
+  );
+  const [regular, encrypted] = container.children;
+  const typography = (body: Element) =>
+    [...body.querySelectorAll("h1,p,blockquote,li,code,table")].map((node) => ({
+      tag: node.tagName,
+      text: node.textContent,
+      className: node.className,
+    }));
+  expect(typography(regular!)).toEqual(typography(encrypted!));
+});
 
 class MockIntersectionObserver {
   observe = jest.fn();
@@ -205,6 +284,124 @@ beforeEach(() => {
 });
 
 describe("DropPartMarkdown", () => {
+  it.each(["\n", "\n\n"])(
+    "counts list items rather than generated HTML whitespace (%j)",
+    (separator) => {
+      render(
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          partContent={Array.from(
+            { length: 20 },
+            (_, index) => `- List item ${index + 1}`
+          ).join(separator)}
+          onQuoteClick={jest.fn()}
+          collapsedPreview
+        />
+      );
+      expect(screen.getAllByRole("listitem")).toHaveLength(10);
+      expect(screen.queryByText("List item 11")).not.toBeInTheDocument();
+    }
+  );
+
+  it("keeps lists, links and emphasis in the preview and restores the complete body", () => {
+    const partContent = [
+      "## Status update",
+      "",
+      "Original paragraph.",
+      "",
+      "3) **Finished** [Task 1](https://example.com/task-1) with *care* and `code`.",
+      ...Array.from(
+        { length: 20 },
+        (_, index) => `${index + 4}) Another formatted item ${index}.`
+      ),
+      "",
+      "[Final link](https://example.com/final)",
+    ].join("\n");
+    const props = {
+      mentionedUsers: [],
+      mentionedWaves: [],
+      referencedNfts: [],
+      partContent,
+      onQuoteClick: jest.fn(),
+      hideLinkPreviews: true,
+    };
+    const { container, rerender } = render(
+      <DropPartMarkdown {...props} collapsedPreview />
+    );
+    const expectPreview = () => {
+      expect(
+        screen.getByRole("heading", { name: "Status update" })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("list")).toHaveAttribute("start", "3");
+      expect(screen.getByRole("list")).toHaveClass(
+        PARENTHESIZED_ORDERED_LIST_CLASS_NAME
+      );
+      expect(screen.getByRole("link", { name: "Task 1" })).toHaveAttribute(
+        "href",
+        "https://example.com/task-1"
+      );
+      expect(container.querySelector("strong")).toHaveTextContent("Finished");
+      expect(container.querySelector("em")).toHaveTextContent("care");
+      expect(container.querySelector("code")).toHaveTextContent("code");
+      expect(
+        screen.queryByRole("link", { name: "Final link" })
+      ).not.toBeInTheDocument();
+    };
+    expectPreview();
+    rerender(<DropPartMarkdown {...props} />);
+    expect(screen.getAllByRole("listitem")).toHaveLength(21);
+    expect(screen.getByRole("link", { name: "Final link" })).toHaveAttribute(
+      "href",
+      "https://example.com/final"
+    );
+    rerender(<DropPartMarkdown {...props} collapsedPreview />);
+    expectPreview();
+  });
+
+  it("keeps existing media mounted and preserves bare-URL preview behavior on expansion", () => {
+    const props = {
+      mentionedUsers: [],
+      mentionedWaves: [],
+      referencedNfts: [],
+      onQuoteClick: jest.fn(),
+      partContent: `![Image](/one.png)\n\nhttps://example.com/article\n\n${"Long readable text. ".repeat(90)}`,
+    };
+    const { rerender } = render(
+      <DropPartMarkdown {...props} collapsedPreview />
+    );
+    const image = screen.getByRole("img", { name: "Drop media" });
+    expect(screen.getByTestId("link-preview")).toHaveAttribute(
+      "data-href",
+      "https://example.com/article"
+    );
+    rerender(<DropPartMarkdown {...props} />);
+    expect(screen.getByRole("img", { name: "Drop media" })).toBe(image);
+  });
+
+  it("shortens authored lines inside a formatted block without flattening it", () => {
+    const partContent = Array.from(
+      { length: 20 },
+      (_, i) => `> Line ${i + 1}`
+    ).join("\n");
+    const { container } = render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={partContent}
+        onQuoteClick={jest.fn()}
+        collapsedPreview
+      />
+    );
+    expect(container.querySelector("blockquote")).toHaveTextContent("Line 1");
+    expect(container.querySelector("blockquote")).not.toHaveTextContent(
+      "Line 20"
+    );
+    expect(container.querySelector("blockquote")?.textContent).toContain("\n");
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     publicEnv.BASE_ENDPOINT = originalBaseEndpoint ?? FALLBACK_BASE_ENDPOINT;
@@ -300,6 +497,60 @@ describe("DropPartMarkdown", () => {
     expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
   });
 
+  it("does not load same-site endpoints as markdown images", () => {
+    const site = new URL(publicEnv.BASE_ENDPOINT).origin;
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={`![a](/api/profiles/me.png) ![b](${site}/api/open-graph/x.png) ![c](/_next/image?url=x.png) ![d](/museum/art.png?size=large) ![e](/waves/abc)`}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
+  });
+
+  it("keeps same-site image files and images on other sites", () => {
+    const site = new URL(publicEnv.BASE_ENDPOINT).origin;
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={`![a](${site}/6529.png)\n\n![b](/museum/rooms/hall.webp)\n\n![c](/nextgen/token.jpg)\n\n![d](https://cdn.example.com/api/art.png)`}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(
+      screen
+        .getAllByRole("img", { name: "Drop media" })
+        .map((image) => image.getAttribute("src"))
+    ).toEqual([
+      `${site}/6529.png`,
+      "/museum/rooms/hall.webp",
+      "/nextgen/token.jpg",
+      "https://cdn.example.com/api/art.png",
+    ]);
+  });
+
+  it("shows a bare same-site endpoint URL as a link, not an image", () => {
+    const href = `${new URL(publicEnv.BASE_ENDPOINT).origin}/api/x/pixel.png`;
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={href}
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.queryByRole("img", { name: "Drop media" })).toBeNull();
+  });
+
   it("preserves whitespace between a markdown image and following text", () => {
     const { container } = render(
       <DropPartMarkdown
@@ -379,6 +630,44 @@ describe("DropPartMarkdown", () => {
     );
     expect(group?.querySelectorAll("img")).toHaveLength(2);
     expect(group?.querySelector(".tw-mt-2")).toBeNull();
+  });
+
+  it("preserves the paragraph and selected text across an incidental rerender", () => {
+    const props = {
+      mentionedUsers: [],
+      mentionedWaves: [],
+      referencedNfts: [],
+      partContent: "Keep this message selectable",
+      onQuoteClick: jest.fn(),
+    };
+    const { rerender } = render(
+      <DropPartMarkdown {...props} onLinkCardActionsActiveChange={jest.fn()} />
+    );
+    const original = screen.getByText(props.partContent);
+    const paragraph = original.closest("p");
+    const text = original.firstChild;
+    const selection = globalThis.getSelection();
+    if (!text || !selection)
+      throw new Error("Expected selectable message text");
+    const range = document.createRange();
+    range.setStart(text, 0);
+    range.setEnd(text, 4);
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    rerender(
+      <DropPartMarkdown
+        {...props}
+        onQuoteClick={jest.fn()}
+        onLinkCardActionsActiveChange={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText(props.partContent)).toBe(original);
+    expect(original.closest("p")).toBe(paragraph);
+    expect(original.firstChild).toBe(text);
+    expect(selection.toString()).toBe("Keep");
+    selection.removeAllRanges();
   });
 
   it("keeps grouped markdown images mounted across parent rerenders", () => {
@@ -1454,6 +1743,119 @@ describe("DropPartMarkdown", () => {
     expect(
       screen.queryByRole("button", { name: "Show link previews" })
     ).toBeNull();
+  });
+
+  // Characterizes the sanitize schema that existing drops render with, so a
+  // narrower schema shows up as a deliberate test change.
+  describe("sanitize schema", () => {
+    const renderPart = (partContent: string) =>
+      render(
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          partContent={partContent}
+          onQuoteClick={jest.fn()}
+        />
+      ).container;
+
+    it("keeps GFM tables with cell alignment", () => {
+      renderPart("| Left | Right |\n|:--|--:|\n| one | two |");
+
+      expect(screen.getByRole("table")).toBeInTheDocument();
+      expect(
+        screen.getAllByRole("columnheader").map((cell) => cell.textContent)
+      ).toEqual(["Left", "Right"]);
+      expect(screen.getByRole("cell", { name: "one" }).style.textAlign).toBe(
+        "left"
+      );
+      expect(screen.getByRole("cell", { name: "two" }).style.textAlign).toBe(
+        "right"
+      );
+    });
+
+    it("keeps strikethrough, rules, list start numbers and code languages", () => {
+      const container = renderPart(
+        "~~gone~~ text\n\n---\n\n3. three\n4. four\n\n```js\nconst a = 1;\n```"
+      );
+
+      expect(container.querySelector("del")).toHaveTextContent("gone");
+      expect(container.querySelector("hr")).not.toBeNull();
+      expect(screen.getByRole("list")).toHaveAttribute("start", "3");
+      expect(container.querySelector("pre code")).toHaveClass("language-js");
+    });
+
+    it("keeps GFM task list checkboxes read-only", () => {
+      renderPart("- [x] done\n- [ ] todo");
+
+      const checkboxes = screen.getAllByRole("checkbox");
+      expect(checkboxes).toHaveLength(2);
+      expect(checkboxes[0]).toBeChecked();
+      expect(checkboxes[0]).toBeDisabled();
+      expect(checkboxes[1]).not.toBeChecked();
+      expect(checkboxes[1]).toBeDisabled();
+    });
+
+    it("keeps footnotes and prefixes their ids", () => {
+      const container = renderPart("Note[^1]\n\n[^1]: The footnote.");
+
+      expect(container.querySelector("section[data-footnotes]")).not.toBeNull();
+      const ids = Array.from(container.querySelectorAll("[id]"), (el) => el.id);
+      expect(ids.length).toBeGreaterThan(0);
+      expect(ids.every((id) => id.startsWith("user-content-"))).toBe(true);
+    });
+
+    it("drops raw HTML while keeping the surrounding markdown", () => {
+      const container = renderPart(
+        [
+          "<script>alert(1)</script>",
+          "<img src=x onerror=alert(1)>",
+          '<iframe src="https://example.com"></iframe>',
+          "<details><summary>Sum</summary>\n\nBody\n\n</details>",
+          '<h2 id="custom">Raw heading</h2>',
+          '<span style="color:red">styled</span> inline',
+          "# Heading {#custom-id}",
+        ].join("\n\n")
+      );
+
+      for (const selector of [
+        "script",
+        "img",
+        "iframe",
+        "details",
+        "summary",
+        "h2",
+        "[onerror]",
+        "[style*='color']",
+        "[id]",
+      ]) {
+        expect(container.querySelector(selector)).toBeNull();
+      }
+      expect(screen.queryByText(/alert/)).toBeNull();
+      expect(screen.getByText("Body")).toBeInTheDocument();
+      expect(screen.getByText("styled")).toBeInTheDocument();
+      expect(
+        screen.getByRole("heading", { level: 1, name: "Heading {#custom-id}" })
+      ).toBeInTheDocument();
+    });
+
+    it("renders links only for allowed protocols", () => {
+      renderPart(
+        "[web](https://example.com) [mail](mailto:a@b.co) [js](javascript:alert(1)) [data](data:text/html;base64,PHA+) [vb](vbscript:x) [tel](tel:+123)"
+      );
+
+      expect(screen.getByRole("link", { name: "web" })).toHaveAttribute(
+        "href",
+        "https://example.com"
+      );
+      expect(screen.getByRole("link", { name: "mail" })).toHaveAttribute(
+        "href",
+        "mailto:a@b.co"
+      );
+      for (const name of ["js", "data", "vb", "tel"]) {
+        expect(screen.queryByRole("link", { name })).toBeNull();
+      }
+    });
   });
 });
 

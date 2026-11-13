@@ -303,6 +303,19 @@ describe("ExpandedWave", () => {
     }
   });
 
+  it("forwards hover enter and leave from the row", () => {
+    const onMouseEnter = jest.fn();
+    const onMouseLeave = jest.fn();
+    renderExpandedWave({ onMouseEnter, onMouseLeave });
+
+    const row = getWaveRow();
+    fireEvent.mouseEnter(row);
+    fireEvent.mouseLeave(row);
+
+    expect(onMouseEnter).toHaveBeenCalledTimes(1);
+    expect(onMouseLeave).toHaveBeenCalledTimes(1);
+  });
+
   it("cancels subwave prefetch when hover intent ends early", () => {
     jest.useFakeTimers();
     const onPrefetchSubwaves = jest.fn();

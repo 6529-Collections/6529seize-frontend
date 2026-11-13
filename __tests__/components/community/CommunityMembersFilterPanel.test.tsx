@@ -109,6 +109,7 @@ it("opens the mobile list with all eight criteria and readiness guidance on dema
   expect(
     within(choices)
       .getAllByRole("button")
+      .filter((button) => button.hasAttribute("data-criterion"))
       .map((button) => button.textContent)
   ).toEqual([
     "Identities",
@@ -198,30 +199,32 @@ it("preserves common criteria while visiting advanced criteria and submits the e
   await openCriterion(user, "Identities");
   expect(screen.getByRole("region", { name: "Identities" })).toBeVisible();
   expect(
-    screen.getByText("No identities are explicitly included.")
-  ).toBeInTheDocument();
+    screen.queryByText("No identities are explicitly included.")
+  ).not.toBeInTheDocument();
   expect(screen.queryByText("No allowlist added.")).not.toBeInTheDocument();
   expect(screen.queryByText("No CSV file added.")).not.toBeInTheDocument();
   expect(
     screen.queryByText("0 unique identities included")
   ).not.toBeInTheDocument();
   expect(
-    screen.queryByRole("heading", { name: "Find an identity to include" })
-  ).not.toBeInTheDocument();
+    screen.getByRole("heading", { name: "Find an identity to include" })
+  ).toBeVisible();
   expect(
     screen.getByRole("textbox", { name: "Find an identity to include" })
-  ).toBeVisible();
+  ).toHaveAttribute("placeholder", "Search identities to include...");
   await user.click(screen.getByRole("tab", { name: "Excluded" }));
   expect(screen.getByRole("tab", { name: "Excluded" })).toHaveAttribute(
     "aria-selected",
     "true"
   );
   expect(
-    screen.getByText("No identities are explicitly excluded.")
-  ).toBeInTheDocument();
-  expect(screen.getByText("No allowlist added.")).toBeVisible();
-  expect(screen.getByText("No CSV file added.")).toBeVisible();
-  expect(screen.getByText("0 unique identities excluded")).toBeVisible();
+    screen.queryByText("No identities are explicitly excluded.")
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("No allowlist added.")).not.toBeInTheDocument();
+  expect(screen.queryByText("No CSV file added.")).not.toBeInTheDocument();
+  expect(
+    screen.queryByText("0 unique identities excluded")
+  ).not.toBeInTheDocument();
   await openCriterion(user, /^Level(?: Configured)?$/);
   expect(
     screen.getByRole("spinbutton", { name: "Level at least" })
@@ -395,8 +398,12 @@ it("shows import results and errors while hiding the empty Included count", asyn
       { type: "text/csv" }
     )
   );
-  expect(await screen.findByText("2 unique identities included")).toBeVisible();
-  expect(screen.getByText("2 identities added")).toBeVisible();
+  expect(await screen.findByText("2 identities added")).toBeVisible();
+  expect(
+    screen.queryByText("2 unique identities included")
+  ).not.toBeInTheDocument();
+  expect(screen.getByText("2 explicitly included users")).toBeVisible();
+  expect(upload).toBeVisible();
   expect(screen.getByText("included.csv")).toBeVisible();
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Remove CSV file" }));
@@ -407,6 +414,6 @@ it("shows import results and errors while hiding the empty Included count", asyn
     screen.queryByText("0 unique identities included")
   ).not.toBeInTheDocument();
   expect(
-    screen.getByText("No identities are explicitly included.")
-  ).toBeVisible();
+    screen.queryByText("No identities are explicitly included.")
+  ).not.toBeInTheDocument();
 });

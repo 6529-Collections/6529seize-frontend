@@ -66,7 +66,7 @@ push to open the matching app route.
   - Tap handling accepts only payloads that include
     `notification_id`, `redirect`, `target_profile_id`, and
     `target_profile_handle`.
-  - Device-push redirect types are `profile` and `waves`.
+  - Device-push redirect types are `profile`, `waves`, and `e2ee`.
   - `profile` redirects can include `subroute` (`rep`, `identity`, or
     `subscriptions`);
     unknown subroutes fall back to profile root.
@@ -116,6 +116,18 @@ push to open the matching app route.
   - Android dots/counts depend on the launcher and remaining notifications;
     there is no guaranteed numeric unread badge.
 
+### Encrypted-message pushes
+
+Message pushes use title **New encrypted message** and body **Open 6529 Mobile
+to view** in production or **Open 6529 Staging to view** on staging. They disclose
+no sender, chat name or message text. Invitations say **You were added to an
+encrypted chat**. Push throttling is separate from in-app notification creation.
+
+An `e2ee` push opens `/messages/encrypted` for the target connected profile. The
+app refreshes the encrypted chat list, where the recipient can choose a chat.
+Without encryption setup the route offers setup. Enabling a new device does not transfer earlier
+history from another device. See [Encrypted messages](../encrypted-messages.md).
+
 ### Signing out on a phone
 
 - Signing out UserA removes UserA's push registration and identifiable delivered
@@ -148,9 +160,11 @@ push to open the matching app route.
   native push token. Other tokens and phones remain registered. Conflicting old
   records may still need support review, but cannot indefinitely prevent new-phone
   registration. A device ID alone never authorizes deleting all old profiles.
-- Signing out before the phone first registers for push requires a valid saved
-  native session. If that proof is missing or expires before the phone reconnects,
-  cleanup remains pending for that installation.
+- If sign-out happened before the phone first registered for push and its saved
+  session proof is missing or expired, connecting a fresh account session lets the
+  app retry the pending cleanup. The fresh login stays connected. Registration
+  resumes only after cleanup succeeds; unavailable or rejected proof keeps the
+  original cleanup pending.
 - An unreadable installation credential or unavailable native device identity
   stops setup without replacing credentials or discarding pending cleanup.
 - If secure-storage read/write fails with an unrecoverable error, that setup
@@ -179,7 +193,7 @@ push to open the matching app route.
 - Background cross-device reads update iOS badges; selective tray cleanup runs
   when the app executes reconciliation for that profile. This does not promise
   immediate background tray synchronization on either platform.
-- Device push tap redirects currently support `profile` and `waves` payload
+- Device push tap redirects support `profile`, `waves`, and `e2ee` payload
   types.
 - Push receive/tap issues do not surface a global blocking banner.
 - Registration retries run in the background; there is no per-attempt retry

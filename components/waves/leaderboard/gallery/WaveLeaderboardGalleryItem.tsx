@@ -389,27 +389,32 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                   {opensWholeCard ? title : drop.title}
                 </h3>
               )}
-              {drop.author.handle && opensWholeCard && (
+              {(drop.author.is_anonymous === true ||
+                (Boolean(drop.author.handle) && opensWholeCard)) && (
                 <span className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400">
-                  {drop.author.handle}
+                  {drop.author.is_anonymous
+                    ? t(locale, "competitions.anonymousAuthor")
+                    : drop.author.handle}
                 </span>
               )}
-              {drop.author.handle && !opensWholeCard && (
-                <UserProfileTooltipWrapper user={drop.author.handle}>
-                  <Link
-                    onClick={(e) => e.stopPropagation()}
-                    href={`/${drop.author.handle}`}
-                    aria-label={t(
-                      locale,
-                      "waves.leaderboard.grid.authorProfile",
-                      { author: drop.author.handle }
-                    )}
-                    className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
-                  >
-                    {drop.author.handle}
-                  </Link>
-                </UserProfileTooltipWrapper>
-              )}
+              {drop.author.handle &&
+                !opensWholeCard &&
+                !drop.author.is_anonymous && (
+                  <UserProfileTooltipWrapper user={drop.author.handle}>
+                    <Link
+                      onClick={(e) => e.stopPropagation()}
+                      href={`/${drop.author.handle}`}
+                      aria-label={t(
+                        locale,
+                        "waves.leaderboard.grid.authorProfile",
+                        { author: drop.author.handle }
+                      )}
+                      className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
+                    >
+                      {drop.author.handle}
+                    </Link>
+                  </UserProfileTooltipWrapper>
+                )}
             </div>
             <WaveLeaderboardIdentity
               drop={drop}

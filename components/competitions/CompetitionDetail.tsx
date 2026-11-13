@@ -1,12 +1,15 @@
 "use client";
 import clsx from "clsx";
+import { isCompetitionSubmissionHistory } from "@/helpers/competition-lifecycle.helpers";
+import { ApiCompetitionCapability } from "@/generated/models/ApiCompetitionCapability";
+import { competitionPresentationWave } from "@/helpers/competition-presentation.helpers";
+import MemesArtSubmissionModal from "@/components/waves/memes/LazyMemesArtSubmissionModal";
+import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
+import { WaveLeaderboardCurationDropModal } from "@/components/waves/leaderboard/create/WaveLeaderboardCurationDropModal";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
-import {
-  getWaveOutcomeVisibilityFromMetadata,
-  getApproveWaveTabLabelsFromMetadata,
-} from "@/helpers/waves/wave-metadata.helpers";
-import { useMemo, useState } from "react";
+import { getApproveWaveTabLabelsFromMetadata } from "@/helpers/waves/wave-metadata.helpers";
+import { useMemo, useState, type RefObject } from "react";
 import { WaveDisplayMetadataContext } from "@/contexts/WaveDisplayMetadataContext";
 import { TabToggle } from "@/components/common/TabToggle";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
@@ -25,13 +28,10 @@ import {
   COMPETITION_TABS,
   getCompetitionTab,
   getCompetitionsRoute,
-  isMultiCompetitionEnabled,
   isCompetitionAccessError,
 } from "@/helpers/competition.helpers";
-import { ContentTabProvider } from "@/components/brain/ContentTabContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import { CompetitionState } from "./CompetitionState";
 import CompetitionAdmin from "./CompetitionAdmin";
 import CompetitionResources from "./CompetitionResources";
@@ -43,10 +43,29 @@ import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 
 export function NativeCompetitionContent({
   embedded = false,
+  scrollContainerRef: providedScrollContainer,
 }: {
   readonly embedded?: boolean;
+  readonly scrollContainerRef?: RefObject<HTMLDivElement | null> | undefined;
 }) {
   const { competition, wave } = useCompetition();
+  const isMainStage = competition.capabilities.includes(
+    ApiCompetitionCapability.MainStage
+  );
+  const isCuration = competition.capabilities.includes(
+    ApiCompetitionCapability.Curation
+  );
+  const isQuorum = competition.capabilities.includes(
+    ApiCompetitionCapability.Quorum
+  );
+  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(
+    null
+  );
+  const localScrollContainerRef = useMemo(
+    () => ({ current: scrollContainer }),
+    [scrollContainer]
+  );
+  const scrollContainerRef = providedScrollContainer ?? localScrollContainerRef;
   const { isApp } = useDeviceInfo();
   const { waveViewStyle } = useLayout();
   const locale = useBrowserLocale();
@@ -65,20 +84,18 @@ export function NativeCompetitionContent({
     [wave.id, competition.presentation]
   );
   const presentation = displayMetadata.metadata;
-  const outcomesVisible = getWaveOutcomeVisibilityFromMetadata(presentation);
   const selectedTab = getCompetitionTab(
     search.get("edit") === "1" &&
       competition.lifecycle !== ApiCompetitionLifecycle.Draft
       ? "rules"
       : search.get("tab")
   );
-  const tab =
-    selectedTab === "outcomes" && !outcomesVisible
-      ? "leaderboard"
-      : selectedTab;
+  const tab = selectedTab;
   const approveLabels = getApproveWaveTabLabelsFromMetadata(presentation);
   const tabLabel = (value: (typeof COMPETITION_TABS)[number]) => {
     if (value === "rules") return t(locale, "competitions.settings");
+    if (value === "leaderboard" && isCompetitionSubmissionHistory(competition))
+      return t(locale, "competitions.submissions");
     if (competition.type === ApiCompetitionType.Approve) {
       if (value === "leaderboard") return approveLabels.approvals;
       if (value === "decisions") return approveLabels.approved;
@@ -86,15 +103,12 @@ export function NativeCompetitionContent({
     return t(locale, `competitions.${value}`);
   };
   const [entering, setEntering] = useState(false);
-  const mutationsEnabled = isMultiCompetitionEnabled();
   const pauses = useCompetitionPauseState({
     waveId: wave.id,
     competitionId: competition.id,
   });
   const paused = pauses.isSuccess ? pauses.data : null;
-  const tabOptions = COMPETITION_TABS.filter(
-    (value) => outcomesVisible || value !== "outcomes"
-  ).map((value) => ({
+  const tabOptions = COMPETITION_TABS.map((value) => ({
     key: value,
     label: tabLabel(value),
     panelId: `competition-${competition.id}-${value}`,
@@ -116,14 +130,28 @@ export function NativeCompetitionContent({
           {t(locale, "competitions.paused")}
         </output>
       )}
-      {tab === "leaderboard" &&
-        !search.get("entry") &&
-        !competition.permissions.submit && (
-          <p className="tw-text-sm tw-text-iron-400">
-            {t(locale, "competitions.submitClosed")}
-          </p>
-        )}
-      {mutationsEnabled && entering && (
+      {entering && isMainStage && (
+        <MemesArtSubmissionModal
+          isOpen
+          wave={competitionPresentationWave(wave, competition)}
+          onClose={() => setEntering(false)}
+        />
+      )}
+      {entering && isCuration && (
+        <WaveLeaderboardCurationDropModal
+          isOpen
+          wave={competitionPresentationWave(wave, competition)}
+          onClose={() => setEntering(false)}
+        />
+      )}
+      {entering && isQuorum && (
+        <WaveDropCreate
+          wave={competitionPresentationWave(wave, competition)}
+          onCancel={() => setEntering(false)}
+          onSuccess={() => setEntering(false)}
+        />
+      )}
+      {entering && !isMainStage && !isCuration && !isQuorum && (
         <CompetitionEntryForm
           key={competition.id}
           onClose={() => setEntering(false)}
@@ -132,19 +160,35 @@ export function NativeCompetitionContent({
     </>
   );
   if (
-    mutationsEnabled &&
-    competition.lifecycle === ApiCompetitionLifecycle.Draft &&
-    competition.permissions.administer
+    competition.permissions.administer &&
+    (competition.lifecycle === ApiCompetitionLifecycle.Draft ||
+      (search.get("edit") === "1" &&
+        competition.permissions.edit_rules_after_activity === true))
   )
     return (
-      <CompetitionDraftEditor
-        wave={wave}
-        competition={competition}
-        onClose={() => router.replace(getCompetitionsRoute(wave.id))}
-      />
+      <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-gap-5">
+        {competition.lifecycle === ApiCompetitionLifecycle.Draft && (
+          <CompetitionAdmin archiveOnly />
+        )}
+        <CompetitionDraftEditor
+          wave={wave}
+          competition={competition}
+          onClose={() => {
+            const params = new URLSearchParams(search.toString());
+            params.delete("edit");
+            params.set("tab", "rules");
+            router.replace(
+              competition.lifecycle === ApiCompetitionLifecycle.Draft
+                ? getCompetitionsRoute(wave.id)
+                : `${pathname}?${params.toString()}`
+            );
+          }}
+        />
+      </div>
     );
   return (
     <div
+      ref={providedScrollContainer ? undefined : setScrollContainer}
       style={embedded && isApp ? waveViewStyle : undefined}
       className={
         embedded
@@ -155,7 +199,7 @@ export function NativeCompetitionContent({
       {!embedded && (
         <div
           data-competition-navigation="detail"
-          className="tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-2 sm:tw-px-4"
+          className="tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-px-2 sm:tw-px-4"
         >
           <div className="tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500">
             <TabToggle
@@ -180,9 +224,9 @@ export function NativeCompetitionContent({
           <CompetitionResources
             key={tab}
             embedded={embedded}
+            scrollContainerRef={scrollContainerRef}
             tab={tab}
             onCreateDrop={
-              mutationsEnabled &&
               competition.permissions.submit &&
               competition.lifecycle === ApiCompetitionLifecycle.Published
                 ? () => setEntering((current) => !current)
@@ -210,10 +254,15 @@ export default function CompetitionDetail({
   readonly waveId: string;
   readonly competitionId: string;
 }) {
+  const [scrollContainer, setScrollContainer] = useState<HTMLDivElement | null>(
+    null
+  );
+  const scrollContainerRef = useMemo(
+    () => ({ current: scrollContainer }),
+    [scrollContainer]
+  );
   const { isApp } = useDeviceInfo();
   const { waveViewStyle } = useLayout();
-  const search = useSearchParams();
-  const tab = getCompetitionTab(search.get("tab"));
   const wave = useWaveData({
     waveId,
     onWaveNotFound: () => undefined,
@@ -249,21 +298,12 @@ export default function CompetitionDetail({
           wave: wave.data,
         }}
       >
-        {hub.data.legacy_primary_competition_id === competitionId &&
-        tab !== "rules" &&
-        tab !== "votes" ? (
-          <div className="tw-h-[70dvh]">
-            <ContentTabProvider competitionOnly>
-              <MyStreamWave waveId={waveId} competitionOnly />
-            </ContentTabProvider>
-          </div>
-        ) : (
-          <NativeCompetitionContent />
-        )}
+        <NativeCompetitionContent scrollContainerRef={scrollContainerRef} />
       </CompetitionProvider>
     );
   return (
-    <section
+    <div
+      ref={setScrollContainer}
       data-competition-detail
       style={isApp && isDraft ? waveViewStyle : undefined}
       className={`tw-h-full tw-min-h-0 tw-overflow-y-auto tw-px-4 tw-pt-4 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-white/10 hover:tw-scrollbar-thumb-white/15 sm:tw-px-6 sm:tw-pt-6 ${isDraft ? "tw-scroll-pb-24" : "tw-pb-4 sm:tw-pb-6"}`}
@@ -275,18 +315,14 @@ export default function CompetitionDetail({
           <nav>
             <CompetitionBackLink waveId={waveId} />
           </nav>
-          {!error &&
-            competition.data &&
-            !isDraft &&
-            hub.data &&
-            hub.data.legacy_primary_competition_id !== competitionId && (
-              <h1 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-xl tw-font-bold tw-leading-tight tw-text-iron-50 sm:tw-text-2xl">
-                {competition.data.title}
-              </h1>
-            )}
+          {!error && competition.data && !isDraft && hub.data && (
+            <h1 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-xl tw-font-bold tw-leading-tight tw-text-iron-50 sm:tw-text-2xl">
+              {competition.data.title}
+            </h1>
+          )}
         </header>
         {content}
       </div>
-    </section>
+    </div>
   );
 }

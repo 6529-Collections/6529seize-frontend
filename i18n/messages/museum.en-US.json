@@ -1,5 +1,4 @@
 {
-  "navigation.primary.museum": "Museum",
   "museum.network.eyebrow": "6529 Network Museum",
   "museum.network.title": "6529 Network Museum",
   "museum.network.description": "Art, research, and collection records from the 6529 Network Museum.",
@@ -898,7 +897,6 @@
   "museum.network.proposition.today.rights.action": "Visit the rights handbook",
   "museum.network.openMuseum.strip.relatedLabels.rightsRegistry": "Rights registry",
   "museum.network.openMuseum.strip.relatedLabels.legalCode": "Exact legal text",
-  "museum.network.loading": "Loading the Museum publication…",
   "museum.network.projects.eyebrow": "Projects and series",
   "museum.network.projects.works": "Works in this project",
   "museum.network.projects.related": "Related research and organizations",

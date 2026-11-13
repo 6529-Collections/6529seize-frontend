@@ -38,6 +38,7 @@ it("captures original status and ORB evidence without replacing it with a replay
     detach: jest.fn().mockResolvedValue(undefined),
   };
   const page = {
+    url: () => "https://staging.6529.io/museum/network/research",
     context: () => ({
       browser: () => ({ browserType: () => ({ name: () => "chromium" }) }),
       newCDPSession: async () => session,
@@ -76,6 +77,55 @@ it("captures original status and ORB evidence without replacing it with a replay
   expect(diagnostics.networkFailures?.join()).not.toContain("secret");
   expect(session.send).toHaveBeenCalledTimes(1);
   expect(session.send).toHaveBeenCalledWith("Network.enable");
+  const editorial = "https://staging.6529.io/museum/editorial/";
+  emit("Network.requestWillBeSent", {
+    requestId: "no-origin-document",
+    request: { url: `${editorial}unattributed.webp` },
+  });
+  emit("Network.requestWillBeSent", {
+    requestId: "origin-document",
+    documentURL: "https://staging.6529.io/museum/network/research",
+    request: {
+      url: `${editorial}attributed.webp?sig=private#access_token=secret`,
+    },
+  });
   await detach();
   expect(session.detach).toHaveBeenCalledTimes(1);
+  const evidence = diagnostics.networkFailures?.join();
+  expect(evidence).toContain(`${editorial}attributed.webp`);
+  expect(evidence).toContain('"pendingAtEnd":true');
+  expect(evidence).not.toContain("unattributed.webp");
+  expect(evidence).not.toContain("private");
+  expect(evidence).not.toContain("secret");
+});
+
+it("includes same-origin editorial images while excluding unrelated and cross-origin paths", () => {
+  const documentUrl = "https://staging.6529.io/museum/network/research";
+  const image =
+    "https://staging.6529.io/museum/research/editorial/magnum/work.webp";
+  for (const suffix of [
+    "?token=private#fragment",
+    "?sig=private#access_token=secret",
+    "?arbitrary=private#anything",
+  ]) {
+    expect(museumMediaEvidenceUrl(`${image}${suffix}`, documentUrl)).toBe(
+      image
+    );
+  }
+  expect(museumMediaEvidenceUrl(image)).toBeNull();
+  expect(
+    museumMediaEvidenceUrl(image, "https://6529.io/museum/network/research")
+  ).toBeNull();
+  expect(
+    museumMediaEvidenceUrl(
+      "https://staging.6529.io/profile/private.png",
+      documentUrl
+    )
+  ).toBeNull();
+  expect(
+    museumMediaEvidenceUrl(
+      "https://staging.6529.io/museum/config.json",
+      documentUrl
+    )
+  ).toBeNull();
 });

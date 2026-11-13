@@ -13,6 +13,7 @@ import {
   fetchJson,
   normalizeTarget,
   parseAcceptLanguage,
+  respondWithCardError,
   respondWithGuardError,
   sanitizeCacheKey,
   type CommonsFileTarget,
@@ -22,8 +23,17 @@ import {
 } from "./target";
 import { sanitizeHtmlToText } from "@/lib/text/html";
 import LruTtlCache from "@/lib/cache/lruTtl";
+import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 
 const CACHE_MAX_ITEMS = 1000;
+
+// Cards load once per distinct link and stay cached for hours, so a reader
+// stays far below this budget.
+const enforceRateLimit = createClientRateLimiter({
+  limit: 120,
+  windowMs: 60 * 1000,
+  errorMessage: "Too many Wikimedia preview requests",
+});
 
 const TTL_BY_KIND: Record<WikimediaCardResponse["kind"], number> = {
   article: 24 * 60 * 60 * 1000,
@@ -42,6 +52,27 @@ const sanitizeHtml = (value: string): string => {
   return sanitizeHtmlToText(value, { preserveTagSpacing: true })
     .replaceAll(/\s+/g, " ")
     .trim();
+};
+
+// The card text is localized, so cached cards are scoped to the language list.
+// A newline separates the fields because neither a header value nor a parsed
+// URL can contain one, so two different pairs never share a key.
+const buildCacheKey = (url: string, languages: readonly string[]): string =>
+  `${languages.join(",")}\n${url}`;
+
+const respondWithCard = (card: WikimediaCardResponse): NextResponse =>
+  NextResponse.json(card, { headers: { Vary: "Accept-Language" } });
+
+// Metadata-supplied links are only rendered when they are plain http(s) URLs.
+const toHttpUrl = (value: string | undefined): string | null => {
+  if (!value) {
+    return null;
+  }
+  try {
+    return parsePublicUrl(value.trim()).toString();
+  } catch {
+    return null;
+  }
 };
 
 const buildSummaryCard = async (
@@ -290,7 +321,7 @@ const buildCommonsCard = async (
     const credit = getMeta("Credit");
     const artist = getMeta("Artist");
     const licenseName = getMeta("LicenseShortName") ?? getMeta("UsageTerms");
-    const licenseUrl = metadata["LicenseUrl"]?.value ?? null;
+    const licenseUrl = toHttpUrl(metadata["LicenseUrl"]?.value);
     const requiresAttribution =
       (metadata["AttributionRequired"]?.value ?? "").toLowerCase() === "true";
 
@@ -696,13 +727,17 @@ export async function GET(request: NextRequest) {
     return respondWithGuardError(error, "The provided URL is not allowed.");
   }
 
-  const cacheKey = sanitizeCacheKey(targetUrl);
-  const cached = cache.get(cacheKey);
-  if (cached) {
-    return NextResponse.json(cached);
+  const rateLimitResponse = enforceRateLimit(request);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
   }
 
   const languages = parseAcceptLanguage(request.headers.get("accept-language"));
+  const cacheKey = buildCacheKey(sanitizeCacheKey(targetUrl), languages);
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    return respondWithCard(cached);
+  }
 
   let target: NormalizedTarget;
   try {
@@ -710,16 +745,19 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unsupported Wikimedia URL.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return respondWithCardError(message, 400);
   }
 
   const card = await buildCard(target, languages);
-  const ttl = TTL_BY_KIND[card.kind] ?? TTL_BY_KIND.unavailable;
+  // An unavailable card may be a transient upstream failure, so it is never
+  // cached (neither under the request key nor the canonical-URL alias).
+  if (card.kind !== "unavailable") {
+    const ttl = TTL_BY_KIND[card.kind];
+    cache.set(cacheKey, card, ttl);
+    cache.set(buildCacheKey(card.canonicalUrl, languages), card, ttl);
+  }
 
-  cache.set(cacheKey, card, ttl);
-  cache.set(card.canonicalUrl, card, ttl);
-
-  return NextResponse.json(card);
+  return respondWithCard(card);
 }
 
 export const dynamic = "force-dynamic";

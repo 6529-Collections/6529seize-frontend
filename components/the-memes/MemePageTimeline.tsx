@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { NFT, NFTHistory } from "@/entities/INFT";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -23,7 +23,9 @@ export function MemePageTimeline(props: {
       setNftHistory(response);
     }
     if (props.nft) {
-      const initialUrlHistory = `${publicEnv.API_ENDPOINT}/api/nft_history/${MEMES_CONTRACT}/${props.nft.id}`;
+      const initialUrlHistory = apiUrl(
+        `/api/nft_history/${MEMES_CONTRACT}/${props.nft.id}`
+      );
       fetchHistory(initialUrlHistory);
     }
   }, [props.nft]);
@@ -32,7 +34,7 @@ export function MemePageTimeline(props: {
     return (
       <section aria-label={t(locale, "theMemes.detail.timeline.region")}>
         <div className="tw-pb-5 tw-pt-3">
-          <div className="tw-w-full md:tw-mx-auto md:tw-w-10/12">
+          <div className="tw-w-full">
             {props.nft && (
               <Timeline nft={props.nft} steps={nftHistory} locale={locale} />
             )}

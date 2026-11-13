@@ -1,5 +1,8 @@
 import type { Locator, Page } from "@playwright/test";
 
+import type { ApiDrop } from "../../generated/models/ApiDrop";
+import type { ApiDropPoll } from "../../generated/models/ApiDropPoll";
+
 import {
   expect,
   expectNoHorizontalOverflow,
@@ -26,6 +29,22 @@ const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
 // Mirrors SANDBOX_EDITED_CHAT_DROP_CONTENT in tests/support/composerSandboxServer.cjs.
 const SANDBOX_EDITED_CHAT_DROP_CONTENT =
   "Local-only chat drop from Playwright. (edited)";
+// C10: the posted drop arrives already endorsed, so the edit can be seen to
+// clear the endorsements.
+const C10_POLL_OPTION = "Keep the original wording";
+const C10_POLL: ApiDropPoll = {
+  id: "00000000-0000-4000-8000-000000000c10",
+  options: [
+    { option_no: 1, option_string: C10_POLL_OPTION, votes: 1 },
+    { option_no: 2, option_string: "Change it", votes: 0 },
+  ],
+  voted: [1],
+  multichoice: false,
+  anonymous: false,
+  only_droppers_can_respond: false,
+  closing_time: Date.now() + 24 * 60 * 60 * 1000,
+  is_open: true,
+};
 
 test.describe.configure({ mode: "serial" });
 
@@ -73,9 +92,18 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
       });
     }
 
+    // C10 (intended, keep): endorsements of the old content do not carry
+    // over an edit. The backend clears reactions, poll votes and curations on
+    // edit (backend #2314): the edit deletes the drop's reactions, curations
+    // and its poll with its votes, and the edited drop comes back without
+    // them. The posted drop comes back with two reactions (one the viewer's)
+    // and a poll the viewer voted in; after the edit the row must show
+    // neither instead of keeping the old drop's state.
+    await installC10DropResponses(page);
+
     // Submit the sandbox drop we will edit: own-authored and inside the edit window.
     const composer = page
-      .getByRole("textbox", { name: "Write a chat message" })
+      .getByRole("textbox", { name: "Write a message" })
       .last();
     await composer.fill(SANDBOX_CHAT_DROP_CONTENT);
     // Real pointer click on purpose: regression coverage for the quick-DM
@@ -89,8 +117,8 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(submittedDrop).toContainText(SANDBOX_CHAT_DROP_CONTENT);
-    await expect(composer).toBeFocused();
     await expect(composer).toHaveText("");
+    await expectEndorsed(submittedDrop, true);
 
     // Escape cancels edit mode without any mutation reaching the API.
     await openDropEditor(page, submittedDrop, hasTouch);
@@ -162,6 +190,7 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(submittedDrop).toContainText(SANDBOX_EDITED_CHAT_DROP_CONTENT);
+    await expectEndorsed(submittedDrop, false);
     if (hasTouch) {
       await holdTouch(
         page,
@@ -226,6 +255,60 @@ test.describe("Wave drop edit local sandbox @auth @medium @local-only", () => {
   });
 });
 
+async function installC10DropResponses(page: Page) {
+  // The post returns the drop endorsed.
+  await page.route("**/api/drops", async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    const response = await route.fetch();
+    const drop = (await response.json()) as ApiDrop;
+    const context = drop.context_profile_context;
+    if (!context) throw new Error("The sandbox drop has no viewer context.");
+    const reactor = {
+      ...drop.author,
+      id: "c10-reactor",
+      handle: "c10-reactor",
+    };
+    const endorsed: ApiDrop = {
+      ...drop,
+      reactions: [{ reaction: ":+1:", profiles: [drop.author, reactor] }],
+      context_profile_context: { ...context, reaction: ":+1:" },
+      poll: C10_POLL,
+    };
+    return route.fulfill({ response, json: endorsed });
+  });
+  // The edit returns it as the backend does: no reactions and no poll (the
+  // API omits `poll` when the drop has none). Only the edit request matches.
+  await page.route(`**${SANDBOX_EDIT_PATH}`, async (route) => {
+    if (route.request().method() !== "POST") return route.fallback();
+    const response = await route.fetch();
+    const { poll: _poll, ...drop } = (await response.json()) as ApiDrop;
+    const context = drop.context_profile_context;
+    if (!context) throw new Error("The sandbox drop has no viewer context.");
+    const cleared: ApiDrop = {
+      ...drop,
+      reactions: [],
+      context_profile_context: { ...context, reaction: null },
+    };
+    return route.fulfill({ response, json: cleared });
+  });
+}
+
+async function expectEndorsed(submittedDrop: Locator, endorsed: boolean) {
+  const reactionChip = submittedDrop.getByRole("button", { name: /^👍 \d/ });
+  const voteCount = submittedDrop.getByText("1 vote", { exact: true });
+  const pollOption = submittedDrop.getByText(C10_POLL_OPTION, { exact: true });
+  if (endorsed) {
+    await expect(reactionChip).toHaveAccessibleName("👍 2");
+    // Voted: the poll shows its results.
+    await expect(pollOption).toBeVisible();
+    await expect(voteCount).toBeVisible();
+    return;
+  }
+  await expect(reactionChip).toHaveCount(0);
+  await expect(pollOption).toHaveCount(0);
+  await expect(voteCount).toHaveCount(0);
+}
+
 function dropEditor(submittedDrop: Locator): Locator {
   return submittedDrop.getByRole("textbox");
 }
@@ -258,14 +341,20 @@ async function openDropEditor(
     const container = page
       .getByRole("dialog", { name: "Drop actions", exact: true })
       .locator(".tw-pointer-events-none.tw-fixed.tw-inset-x-0");
-    await expect(container).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
+    // The sheet now uses a layout bottom offset, rather than a transform.
+    // Assert the same final-position guarantee while the keyboard closes.
+    const bottomOffset = () =>
+      container.evaluate((element) =>
+        Math.abs(window.innerHeight - element.getBoundingClientRect().bottom)
+      );
+    await expect.poll(bottomOffset).toBeLessThanOrEqual(1);
     await page.evaluate((previous) => {
       const style = document.documentElement.style;
       if (previous)
         style.setProperty("--native-keyboard-inset-bottom", previous);
       else style.removeProperty("--native-keyboard-inset-bottom");
     }, previousInset);
-    await expect(container).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 0)");
+    await expect.poll(bottomOffset).toBeLessThanOrEqual(1);
     await page.getByRole("button", { name: "Edit Message", exact: true }).tap();
     await expect(dropEditor(submittedDrop)).toBeVisible();
     return;
@@ -383,7 +472,7 @@ async function gotoSandboxWave(page: Page, nativeHeader: boolean) {
         })
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await expect(
-    page.getByRole("textbox", { name: "Write a chat message" }).last()
+    page.getByRole("textbox", { name: "Write a message" }).last()
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await dismissNextDevTools(page);
   await expectNoHorizontalOverflow(page);

@@ -1,4 +1,6 @@
 import { useAuth } from "@/components/auth/Auth";
+import { E2eeRenewalBanner } from "@/components/e2ee/gate/E2eeRenewalBanner";
+import SignedMessagesNotice from "@/components/device-signing/SignedMessagesNotice";
 import type { SelectableIdentityOption } from "@/components/utils/input/profile-search/getSelectableIdentity";
 import type { MissingRequirements } from "@/components/waves/utils/getMissingRequirements";
 import type {
@@ -10,6 +12,7 @@ import type {
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted } from "@/generated/models/ApiWaveParticipationIdentitySubmissionWhoCanBeSubmitted";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useDeviceSigningPrewarm } from "@/hooks/device-signing/useDeviceSigningPrewarm";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -103,7 +106,10 @@ export interface CreateDropLayoutProps {
   readonly handleRequestEditLastDrop: () => boolean;
   readonly initialMarkdown: string | null;
   readonly initialMarkdownKey: string | null;
-  readonly onDrop: (resolvedMarkdown?: string) => Promise<void>;
+  readonly onDrop: (
+    resolvedMarkdown?: string,
+    restoreFocusAfterSubmit?: boolean
+  ) => Promise<void>;
   readonly pollDraft: CreateDropPollDraft | null;
   readonly pollQuestionError: string | null;
   readonly pollValidationError: string | null;
@@ -132,6 +138,7 @@ export interface CreateDropLayoutProps {
   readonly suppressInitialHeightAnimation?: boolean | undefined;
 }
 
+/** Render the composer with draft restoration scoped to its posting mode. */
 export default function CreateDropLayout(props: CreateDropLayoutProps) {
   const {
     activeDrop,
@@ -161,14 +168,16 @@ export default function CreateDropLayout(props: CreateDropLayoutProps) {
     suppressInitialHeightAnimation = false,
   } = props;
   const { setToast } = useAuth();
+  const prewarmSigning = useDeviceSigningPrewarm();
   const { initialDraftJson } = useWaveDraftPersistence({
     waveId: wave.id,
+    isDropMode: props.isDropMode,
     activeDrop,
     editorState: props.editorState,
     dropEditorRefreshKey: props.dropEditorRefreshKey,
   });
   const locale = useBrowserLocale();
-  const submitWithResolvedAliases = async () => {
+  const submitWithResolvedAliases = async (restoreFocusAfterSubmit = false) => {
     let expansion: Awaited<
       ReturnType<CreateDropInputHandles["expandMentionAliases"]>
     >;
@@ -188,7 +197,10 @@ export default function CreateDropLayout(props: CreateDropLayoutProps) {
       return;
     }
     if (!expansion.completed) return;
-    await props.onDrop(exportComposerMarkdown(expansion.editorState));
+    await props.onDrop(
+      exportComposerMarkdown(expansion.editorState),
+      restoreFocusAfterSubmit
+    );
   };
   const isChatClosed =
     wave.wave.type === ApiWaveType.Chat && !wave.chat.enabled;
@@ -201,8 +213,20 @@ export default function CreateDropLayout(props: CreateDropLayoutProps) {
     );
   }
 
+  const isComposerEmpty =
+    !props.hasCurrentDraft && (props.drop?.parts.length ?? 0) === 0;
+
   return (
-    <div className="tw-flex tw-min-h-0 tw-flex-grow tw-flex-col">
+    <div
+      className="tw-flex tw-min-h-0 tw-flex-grow tw-flex-col"
+      onFocusCapture={prewarmSigning}
+    >
+      {showComposer && (
+        <SignedMessagesNotice composerEmpty={isComposerEmpty} hideRenewal />
+      )}
+      {showComposer && isComposerEmpty && (
+        <E2eeRenewalBanner className="tw-mb-2" />
+      )}
       <CreateDropReplyingWrapper
         activeDrop={activeDrop}
         submitting={submitting}

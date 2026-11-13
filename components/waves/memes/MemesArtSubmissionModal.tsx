@@ -1,5 +1,7 @@
 "use client";
 
+import { useCompetitionSubmissionWave } from "@/hooks/competitions/useCompetitionSubmissionWave";
+import { CompetitionState } from "@/components/competitions/CompetitionState";
 import {
   Dialog,
   DialogBackdrop,
@@ -8,11 +10,15 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import React, { Fragment } from "react";
+import React, { Fragment, useMemo, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MemesArtSubmissionContainer from "./submission/MemesArtSubmissionContainer";
+import { useDropDetailMetadata } from "@/components/waves/drop/useDropDetailMetadata";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
+import { t, type MessageKey } from "@/i18n/messages";
 
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
@@ -25,6 +31,7 @@ interface MemesArtSubmissionModalProps {
   readonly onSourceDropDeleted?: (() => void) | undefined;
 }
 
+/** Wait for complete saved metadata before initializing a resubmission, with retry and close available. */
 const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
   isOpen,
   wave,
@@ -32,15 +39,65 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
   sourceDrop,
   onSourceDropDeleted,
 }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useAndroidBackLayer(isOpen, dialogRef, onClose);
+  const locale = useBrowserLocale();
+  const { metadata, metadataState } = useDropDetailMetadata(sourceDrop, isOpen);
+  const hydratedSourceDrop = useMemo(
+    () => (sourceDrop && metadata ? { ...sourceDrop, metadata } : undefined),
+    [sourceDrop, metadata]
+  );
+  const target = useCompetitionSubmissionWave(wave, isOpen);
   const dialogTitle = sourceDrop
     ? "Resubmit Work to The Memes"
     : "Submit Work to The Memes";
+  let metadataMessageKey: MessageKey = "memes.submission.resubmit.loaded";
+  if (metadataState.status === "loading") {
+    metadataMessageKey = "memes.submission.resubmit.loading";
+  } else if (metadataState.status === "error") {
+    metadataMessageKey = "memes.submission.resubmit.loadError";
+  }
 
   if (typeof document === "undefined") return null;
+
+  let submissionContent = target.wave ? (
+    <MemesArtSubmissionContainer
+      onClose={onClose}
+      wave={target.wave}
+      sourceDrop={hydratedSourceDrop}
+      onSourceDropDeleted={onSourceDropDeleted}
+    />
+  ) : (
+    <CompetitionState error={!target.pending} retry={target.retry} />
+  );
+  if (sourceDrop && metadataState.status !== "ready") {
+    submissionContent = (
+      <div className="tw-space-y-4 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-iron-100">
+        <p className="tw-m-0">{t(locale, metadataMessageKey)}</p>
+        {metadataState.status === "error" && (
+          <button
+            type="button"
+            onClick={metadataState.retry}
+            className="tw-min-h-11 tw-rounded-lg tw-bg-iron-800 tw-px-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {t(locale, "memes.submission.resubmit.retry")}
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={onClose}
+          className="tw-min-h-11 tw-rounded-lg tw-bg-iron-800 tw-px-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          {t(locale, "singleDrop.close")}
+        </button>
+      </div>
+    );
+  }
 
   return createPortal(
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
+        ref={dialogRef}
         className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1020] tw-overflow-hidden"
         onClose={onClose}
       >
@@ -78,12 +135,17 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
             >
               <DialogTitle className="tw-sr-only">{dialogTitle}</DialogTitle>
               <div className="tw-flex tw-h-full tw-flex-col tw-overflow-hidden">
-                <MemesArtSubmissionContainer
-                  onClose={onClose}
-                  wave={wave}
-                  sourceDrop={sourceDrop}
-                  onSourceDropDeleted={onSourceDropDeleted}
-                />
+                {sourceDrop && (
+                  <span
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                    className="tw-sr-only"
+                  >
+                    {t(locale, metadataMessageKey)}
+                  </span>
+                )}
+                {submissionContent}
               </div>
             </DialogPanel>
           </TransitionChild>

@@ -19,6 +19,10 @@ type WaveConfigController = ReturnType<typeof useWaveConfig>;
 export default function CreateWaveStepContent({
   controller,
   isCompetition = false,
+  chatRestricted,
+  lockSubmissionStrategy = false,
+  lockOutcomeDefinitions = false,
+  lockVotingCredits = false,
   overviewLeading,
   isSubwave = false,
   parentWaveName,
@@ -31,6 +35,10 @@ export default function CreateWaveStepContent({
   readonly controller: WaveConfigController;
   readonly stepOverride?: CreateWaveStep;
   readonly isCompetition?: boolean;
+  readonly chatRestricted?: boolean | undefined;
+  readonly lockSubmissionStrategy?: boolean;
+  readonly lockOutcomeDefinitions?: boolean;
+  readonly lockVotingCredits?: boolean;
   /** Rendered above the Overview step's fields (e.g. saved drafts). */
   readonly overviewLeading?: ReactNode;
   readonly isSubwave?: boolean;
@@ -133,6 +141,7 @@ export default function CreateWaveStepContent({
     case CreateWaveStep.DROPS:
       return (
         <CreateWaveDrops
+          lockSubmissionStrategy={lockSubmissionStrategy}
           waveType={config.overview.type}
           drops={config.drops}
           errors={errors}
@@ -151,6 +160,7 @@ export default function CreateWaveStepContent({
     case CreateWaveStep.VOTING:
       return (
         <CreateWaveVoting
+          lockVotingCredits={lockVotingCredits}
           isCompetition={isCompetition}
           waveType={config.overview.type}
           selectedType={config.voting.type}
@@ -184,6 +194,7 @@ export default function CreateWaveStepContent({
     case CreateWaveStep.OUTCOMES:
       return (
         <CreateWaveOutcomes
+          lockDefinitions={lockOutcomeDefinitions}
           outcomes={config.outcomes}
           outcomeType={selectedOutcomeType}
           waveType={config.overview.type}
@@ -203,6 +214,7 @@ export default function CreateWaveStepContent({
       return (
         <CreateWaveReview
           isCompetition={isCompetition}
+          chatRestricted={chatRestricted}
           config={config}
           groupsCache={groupsCache}
           description={descriptionSnapshot}

@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 import { useReadContract } from "wagmi";
-import { wallTimeToUtcInstantInZone } from "@/components/meme-calendar/meme-calendar.helpers";
+import { mintPhaseWindowsForDay } from "../shared/memes-calendar/phases";
 import {
   MEMES_CONTRACT,
   NULL_ADDRESS,
@@ -13,6 +13,7 @@ import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRoot
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import { getMemesMintingRoots } from "@/services/api/memes-minting-claims-api";
+import { usePageVisible } from "@/hooks/usePageVisibility";
 import { isAddress, type Abi } from "viem";
 
 export enum ManifoldClaimStatus {
@@ -24,20 +25,6 @@ export enum ManifoldClaimStatus {
 export enum ManifoldPhase {
   ALLOWLIST = "Allowlist",
   PUBLIC = "Public Phase",
-}
-
-interface PhaseBoundary {
-  hour: number;
-  minute: number;
-  dayOffset?: number | undefined;
-}
-
-interface PhaseDefinition {
-  id: string;
-  name: string;
-  type: ManifoldPhase;
-  start: PhaseBoundary;
-  end: PhaseBoundary;
 }
 
 type MemesRootsState =
@@ -58,39 +45,9 @@ export interface MemePhase {
   end: Time;
 }
 
-const PHASE_DEFINITIONS: PhaseDefinition[] = [
-  {
-    id: "0",
-    name: "Phase 0 (Allowlist)",
-    type: ManifoldPhase.ALLOWLIST,
-    start: { hour: 17, minute: 40 },
-    end: { hour: 18, minute: 20 },
-  },
-  {
-    id: "1",
-    name: "Phase 1 (Allowlist)",
-    type: ManifoldPhase.ALLOWLIST,
-    start: { hour: 18, minute: 30 },
-    end: { hour: 18, minute: 50 },
-  },
-  {
-    id: "2",
-    name: "Phase 2 (Allowlist)",
-    type: ManifoldPhase.ALLOWLIST,
-    start: { hour: 19, minute: 0 },
-    end: { hour: 19, minute: 20 },
-  },
-  {
-    id: "public",
-    name: "Public Phase",
-    type: ManifoldPhase.PUBLIC,
-    start: { hour: 19, minute: 20 },
-    end: { hour: 17, minute: 0, dayOffset: 1 },
-  },
-];
-
 const ACTIVE_CLAIM_REFETCH_INTERVAL_MS = 5000;
 const INACTIVE_CLAIM_REFETCH_INTERVAL_MS = 10000;
+const MAX_TIMEOUT_MS = 2_147_483_647;
 const UINT_256_MAX = (1n << 256n) - 1n;
 
 function parseUnknownBigInt(value: unknown): bigint | null {
@@ -181,24 +138,12 @@ function getMemePhaseIdForRootPhase(
 }
 
 export function buildMemesPhases(mintDate: Time = Time.now()): MemePhase[] {
-  const resolveTime = ({
-    hour,
-    minute,
-    dayOffset = 0,
-  }: PhaseBoundary): Time => {
-    const reference = dayOffset === 0 ? mintDate : mintDate.plusDays(dayOffset);
-    const instant = wallTimeToUtcInstantInZone(
-      reference.toDate(),
-      hour,
-      minute
-    );
-    return Time.millis(instant.getTime());
-  };
-
-  return PHASE_DEFINITIONS.map(({ start, end, ...phase }) => ({
-    ...phase,
-    start: resolveTime(start),
-    end: resolveTime(end),
+  return mintPhaseWindowsForDay(mintDate.toDate()).map((phase) => ({
+    id: phase.id,
+    name: phase.isPublic ? "Public Phase" : `${phase.name} (Allowlist)`,
+    type: phase.isPublic ? ManifoldPhase.PUBLIC : ManifoldPhase.ALLOWLIST,
+    start: Time.millis(phase.start.getTime()),
+    end: Time.millis(phase.end.getTime()),
   }));
 }
 
@@ -253,6 +198,7 @@ interface ManifoldClaimReadValues {
 interface UseManifoldClaimResult {
   claim: ManifoldClaim | undefined;
   isFetching: boolean;
+  isError: boolean;
   refetch: () => Promise<unknown>;
 }
 
@@ -366,6 +312,8 @@ export function useManifoldClaim({
   const readMethod: ManifoldClaimReadMethod =
     chainId === mainnet.id ? "getClaimForToken" : "getClaim";
   const [claim, setClaim] = useState<ManifoldClaim | undefined>();
+  const [phaseBoundary, setPhaseBoundary] = useState(0);
+  const isPageVisible = usePageVisible();
   const [refetchInterval, setRefetchInterval] = useState<number>(
     ACTIVE_CLAIM_REFETCH_INTERVAL_MS
   );
@@ -559,24 +507,43 @@ export function useManifoldClaim({
     getMemePhase,
     getNextMemePhase,
     getStatus,
+    phaseBoundary,
+    isPageVisible,
   ]);
 
   useEffect(() => {
+    if (!isPageVisible || !claim || claim.isFinalized) {
+      return;
+    }
+
+    // Clock boundaries must advance even when polling returns identical data.
+    const boundarySeconds =
+      claim.status === ManifoldClaimStatus.UPCOMING
+        ? claim.startDate
+        : claim.endDate;
+    const delayMs = Math.max(0, boundarySeconds * 1000 - Date.now());
+    const timer = setTimeout(
+      () => setPhaseBoundary((previous) => previous + 1),
+      Math.min(delayMs, MAX_TIMEOUT_MS)
+    );
+    return () => clearTimeout(timer);
+  }, [claim, isPageVisible]);
+
+  useEffect(() => {
     if (readContract.error) {
-      setClaim((prevClaim) => {
-        if (!prevClaim) return;
-        return {
-          ...prevClaim,
-          isError: true,
-        };
-      });
       onError?.();
     }
   }, [readContract.error, onError]);
 
+  const claimWithError = useMemo(
+    () => (claim ? { ...claim, isError: !!readContract.error } : undefined),
+    [claim, readContract.error]
+  );
+
   return {
-    claim,
+    claim: claimWithError,
     isFetching: readContract.isFetching,
+    isError: !!readContract.error,
     refetch: async () => {
       await readContract.refetch();
     },

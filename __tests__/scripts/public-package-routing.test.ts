@@ -111,6 +111,27 @@ describe("public package policy", () => {
     ).not.toThrow();
     expect(() => policy.validateArguments(["audit", "--fix"])).not.toThrow();
     expect(() =>
+      policy.validateArguments([
+        "audit",
+        "--prod",
+        "--audit-level=high",
+        "--json",
+      ])
+    ).not.toThrow();
+    for (const option of [
+      "--registry=x",
+      "--audit-level=low",
+      "--audit-level",
+      "--ignore-registry-errors",
+      "--ignore-unfixable",
+      "--ignore=CVE-2026-0001",
+      "--config.userconfig=x",
+    ]) {
+      expect(() => policy.validateArguments(["audit", option])).toThrow(
+        "pnpm option is not allowed"
+      );
+    }
+    expect(() =>
       policy.validateArguments(["install", "--config.userconfig=x"])
     ).toThrow("pnpm option is not allowed");
     expect(() =>
@@ -576,6 +597,7 @@ describe("public package policy", () => {
       ["update", "reviewed-package"],
       ["audit"],
       ["audit", "--fix"],
+      ["audit", "--prod", "--audit-level=high", "--json"],
     ]) {
       expect(() => policy.validateArguments(args)).not.toThrow();
     }

@@ -92,8 +92,12 @@ afterEach(() => {
 });
 
 describe("profile header subscription status around hydration", () => {
-  it("renders nothing on the server and starts no request before the platform is known", () => {
-    expect(renderToString(tree())).toBe("");
+  it("renders only blank reserved space on the server and starts no request before the platform is known", () => {
+    const html = renderToString(tree());
+    expect(html).toContain('data-testid="subscription-status-space"');
+    expect(html).toContain('aria-hidden="true"');
+    expect(html).not.toContain("Loading subscription coverage");
+    expect(html).not.toContain("href=");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -104,22 +108,8 @@ describe("profile header subscription status around hydration", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("starts the coverage request once iOS resolves to US", async () => {
-    await hydrateFromServerHtml();
-    expect(fetchMock).not.toHaveBeenCalled();
-
-    await settleCountry("US");
-
-    expect(container).not.toBeEmptyDOMElement();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        endpoint: "subscriptions/consolidation/coverage/profile-key",
-      })
-    );
-  });
-
   it.each([
+    ["the US", "US"],
     ["a non-US country", "FR"],
     ["an unknown country", ""],
   ])(

@@ -2,7 +2,6 @@ import type { BrowserContext } from "@playwright/test";
 import {
   CONSENT_EULA_COOKIE,
   CURRENT_EULA_VERSION,
-  NATIVE_IOS_COOKIE,
 } from "../../constants/constants";
 
 const CAPACITOR_PROJECT_PLATFORMS: Record<string, "ios" | "android"> = {
@@ -73,6 +72,7 @@ export async function installSurfaceSimulation(
               { name: "addListener", rtype: "callback" },
               { name: "getLaunchUrl", rtype: "promise" },
               { name: "getState", rtype: "promise" },
+              { name: "minimizeApp", rtype: "promise" },
               { name: "removeAllListeners", rtype: "promise" },
               { name: "removeListener", rtype: "promise" },
             ],
@@ -143,6 +143,37 @@ export async function installSurfaceSimulation(
             : // Current surface simulations do not exercise native file URL conversion.
               (filePath: string) => filePath;
         let listenerIdCounter = 0;
+        const keyboardListeners = new Map<
+          string,
+          { eventName: string; remove: () => void }
+        >();
+        const appListeners = new Map<
+          string,
+          { eventName: string; remove: () => void }
+        >();
+        const nativeCalls: string[] = [];
+        let lastBackAt = 0;
+        Object.defineProperty(runtime, "__playwrightAppListeners", {
+          configurable: true,
+          get: () =>
+            Array.from(appListeners.values(), ({ eventName }) => eventName),
+        });
+        Object.defineProperty(runtime, "__playwrightNativeCalls", {
+          configurable: true,
+          get: () => nativeCalls,
+        });
+        Object.defineProperty(runtime, "__playwrightLastBackAt", {
+          configurable: true,
+          get: () => lastBackAt,
+        });
+        Object.defineProperty(runtime, "__playwrightKeyboardListeners", {
+          configurable: true,
+          get: () =>
+            Array.from(
+              keyboardListeners.values(),
+              ({ eventName }) => eventName
+            ),
+        });
         Object.defineProperty(runtime, "Capacitor", {
           configurable: true,
           writable: true,
@@ -167,9 +198,26 @@ export async function installSurfaceSimulation(
                 simulatedKey === "App.addListener" ||
                 simulatedKey === "Keyboard.addListener"
               ) {
-                return Promise.resolve(
-                  `playwright-${platform}-${pluginName}-${++listenerIdCounter}`
-                );
+                const callbackId = `playwright-${platform}-${pluginName}-${++listenerIdCounter}`;
+                if (typeof callback === "function") {
+                  const { eventName } = options as { eventName: string };
+                  const eventType = `playwright:${eventName}`;
+                  const listener = (event: Event) => {
+                    if (eventName === "backButton") lastBackAt = Date.now();
+                    callback((event as CustomEvent).detail);
+                    // Acknowledge callback delivery independently of layout.
+                    event.preventDefault();
+                  };
+                  globalThis.addEventListener(eventType, listener);
+                  const listeners =
+                    pluginName === "App" ? appListeners : keyboardListeners;
+                  listeners.set(callbackId, {
+                    eventName,
+                    remove: () =>
+                      globalThis.removeEventListener(eventType, listener),
+                  });
+                }
+                return Promise.resolve(callbackId);
               }
               return existingNativeCallback?.(
                 pluginName,
@@ -184,6 +232,31 @@ export async function installSurfaceSimulation(
               options: unknown
             ) => {
               const simulatedKey = `${pluginName}.${methodName}`;
+              if (
+                simulatedKey === "Keyboard.hide" ||
+                simulatedKey === "App.minimizeApp"
+              ) {
+                nativeCalls.push(simulatedKey);
+              }
+              if (
+                simulatedKey === "Keyboard.removeListener" ||
+                simulatedKey === "App.removeListener"
+              ) {
+                const { callbackId } = options as { callbackId: string };
+                const listeners =
+                  pluginName === "App" ? appListeners : keyboardListeners;
+                listeners.get(callbackId)?.remove();
+                listeners.delete(callbackId);
+              }
+              if (
+                simulatedKey === "Keyboard.removeAllListeners" ||
+                simulatedKey === "App.removeAllListeners"
+              ) {
+                const listeners =
+                  pluginName === "App" ? appListeners : keyboardListeners;
+                listeners.forEach(({ remove }) => remove());
+                listeners.clear();
+              }
               if (Object.hasOwn(simulatedNativeResponses, simulatedKey)) {
                 return Promise.resolve(simulatedNativeResponses[simulatedKey]);
               }
@@ -234,12 +307,6 @@ export async function installSurfaceSimulation(
 
 async function seedIosEulaConsent(context: BrowserContext, baseURL?: string) {
   await context.addCookies([
-    {
-      name: NATIVE_IOS_COOKIE,
-      value: "true",
-      url: baseURL ?? "http://localhost",
-      expires: Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60,
-    },
     {
       name: CONSENT_EULA_COOKIE,
       value: CURRENT_EULA_VERSION,

@@ -13,8 +13,12 @@ const mockCompetition = {
   title: "Test competition",
   lifecycle: "PUBLISHED",
   config_version: 4,
-  permissions: { administer: true },
+  permissions: {
+    administer: true,
+    edit_rules_after_activity: false,
+  },
 };
+const mockPush = jest.fn();
 const mockQuery = {
   data: {
     pages: [
@@ -48,7 +52,7 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ requestAuth: async () => ({ success: true }) }),
 }));
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: mockPush }),
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionResource: () => mockQuery,
@@ -57,6 +61,7 @@ jest.mock("@/helpers/competition.helpers", () => ({
   isMultiCompetitionEnabled: () => true,
   newCompetitionRequestKey: () => "request-key",
   getCompetitionRoute: jest.fn(),
+  getCompetitionsRoute: () => "/waves/wave/decisions",
 }));
 jest.mock("@/services/api/competitions-api", () => ({
   performCompetitionAction: jest.fn(),
@@ -68,12 +73,14 @@ jest.mock(
     (props: {
       children: ReactNode;
       title: string;
+      message: string;
       confirmDisabled: boolean;
       isConfirming: boolean;
       onConfirm: () => void;
       onClose: () => void;
     }) => (
       <div role="dialog" aria-label={props.title}>
+        <p>{props.message}</p>
         {props.children}
         <button
           disabled={props.confirmDisabled || props.isConfirming}
@@ -96,6 +103,9 @@ function setup(paused = false) {
 beforeEach(() => {
   jest.clearAllMocks();
   mockCompetition.permissions.administer = true;
+  mockCompetition.permissions.edit_rules_after_activity = false;
+  mockCompetition.lifecycle = "PUBLISHED";
+  mockCompetition.title = "Test competition";
   mockCompetition.config_version = 4;
   mockQuery.hasNextPage = false;
   jest
@@ -103,9 +113,22 @@ beforeEach(() => {
     .mockResolvedValue(mockCompetition as never);
   jest.mocked(invalidateCompetition).mockResolvedValue(undefined);
 });
-it("puts Pause outside Manage competition and requires a non-blank reason in its modal", async () => {
+it("offers the original rule editor only with the server permission", () => {
+  mockCompetition.permissions.edit_rules_after_activity = true;
+  const onEdit = jest.fn();
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <CompetitionAdmin paused={false} onEdit={onEdit} />
+    </QueryClientProvider>
+  );
+  fireEvent.click(
+    screen.getByRole("button", { name: "Edit decision rules" })
+  );
+  expect(onEdit).toHaveBeenCalledTimes(1);
+});
+it("puts Pause outside Manage decision and requires a non-blank reason in its modal", async () => {
   setup();
-  const pause = screen.getByRole("button", { name: "Pause decisions" });
+  const pause = screen.getByRole("button", { name: "Pause results" });
   expect(pause.closest("details")).toBeNull();
   expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   fireEvent.click(pause);
@@ -141,20 +164,20 @@ it("shows active and past pause reasons to non-administrators", () => {
   expect(screen.getByText("Paused")).toBeInTheDocument();
   expect(screen.getByText("Resumed")).toBeInTheDocument();
   expect(
-    screen.queryByRole("button", { name: "Pause decisions" })
+    screen.queryByRole("button", { name: "Pause results" })
   ).not.toBeInTheDocument();
-  expect(screen.queryByText("Manage competition")).not.toBeInTheDocument();
+  expect(screen.queryByText("Manage decision")).not.toBeInTheDocument();
 });
 it("resumes without requiring a new reason", async () => {
   setup(true);
-  fireEvent.click(screen.getByRole("button", { name: "Resume decisions" }));
+  fireEvent.click(screen.getByRole("button", { name: "Resume results" }));
   expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
   await waitFor(() =>
     expect(performCompetitionAction).toHaveBeenCalledWith(
       expect.anything(),
       "resume",
-      expect.objectContaining({ reason: "" })
+      { idempotency_key: "request-key", config_version: 4 }
     )
   );
 });
@@ -163,7 +186,7 @@ it("retains the reason and original request for a retry even if refreshed compet
     .mocked(performCompetitionAction)
     .mockRejectedValueOnce(new Error("Connection lost"));
   setup();
-  fireEvent.click(screen.getByRole("button", { name: "Pause decisions" }));
+  fireEvent.click(screen.getByRole("button", { name: "Pause results" }));
   fireEvent.change(screen.getByRole("textbox"), {
     target: { value: "Reviewing" },
   });
@@ -185,4 +208,142 @@ it("loads older pauses without losing the visible history", () => {
   fireEvent.click(screen.getByRole("button", { name: "Load more" }));
   expect(mockQuery.fetchNextPage).toHaveBeenCalled();
   expect(screen.getByText("Reviewing eligibility")).toBeInTheDocument();
+});
+
+it.each(["PUBLISHED", "DRAFT", "ENDED", "CANCELLED"])(
+  "requires the exact full name to archive a %s competition without a reason",
+  async (lifecycle) => {
+    mockCompetition.lifecycle = lifecycle;
+    setup();
+    const archive = screen.getByRole("button", {
+      name:
+        lifecycle === "PUBLISHED" ? "Archive and stop decision" : "Archive",
+    });
+    expect(archive).toHaveClass("tw-border-red");
+    fireEvent.click(archive);
+    expect(
+      screen.getByText(/This action is permanent and cannot be undone/)
+    ).toBeVisible();
+    expect(screen.queryByLabelText(/Reason/)).not.toBeInTheDocument();
+    const name = screen.getByRole("textbox", {
+      name: "Decision name to confirm archival",
+    });
+    expect(name).toBeRequired();
+    expect(name).toHaveAccessibleDescription(
+      /Type the full decision name below exactly/
+    );
+    const confirm = screen.getByRole("button", { name: "Confirm" });
+    expect(confirm).toBeDisabled();
+    for (const mismatch of [
+      "Test",
+      "test competition",
+      "Test Competition",
+      " Test competition",
+      "Test competition ",
+      "Test competition!",
+    ]) {
+      fireEvent.change(name, { target: { value: mismatch } });
+      expect(confirm).toBeDisabled();
+      fireEvent.click(confirm);
+      expect(performCompetitionAction).not.toHaveBeenCalled();
+    }
+    fireEvent.change(name, { target: { value: mockCompetition.title } });
+    expect(confirm).toBeEnabled();
+    fireEvent.change(name, { target: { value: "" } });
+    expect(confirm).toBeDisabled();
+    fireEvent.change(name, { target: { value: mockCompetition.title } });
+    fireEvent.click(confirm);
+    await waitFor(() =>
+      expect(performCompetitionAction).toHaveBeenCalledWith(
+        { waveId: "wave", competitionId: "competition" },
+        "archive",
+        { idempotency_key: "request-key", config_version: 4 }
+      )
+    );
+  }
+);
+
+it("clears the typed name when the archive dialog is reopened", () => {
+  setup();
+  const archive = screen.getByRole("button", {
+    name: "Archive and stop decision",
+  });
+  fireEvent.click(archive);
+  fireEvent.change(screen.getByRole("textbox"), {
+    target: { value: mockCompetition.title },
+  });
+  expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
+  fireEvent.click(screen.getByRole("button", { name: "Go back" }));
+  fireEvent.click(archive);
+  expect(screen.getByRole("textbox")).toHaveValue("");
+  expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+});
+
+it.each([
+  "Art  competition",
+  "Art\ncompetition",
+  "Art\r\ncompetition",
+  "Art\rcompetition",
+])(
+  "preserves exact whitespace in the displayed and typed name (%p)",
+  (title) => {
+    mockCompetition.title = title;
+    setup();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Archive and stop decision" })
+    );
+    const exactName = document.getElementById("competition-archive-exact-name");
+    const browserTitle = title.replace(/\r\n?/g, "\n");
+    expect(exactName?.textContent).toBe(browserTitle);
+    expect(exactName).toHaveClass("tw-whitespace-pre-wrap");
+    const name = screen.getByRole("textbox");
+    fireEvent.change(name, { target: { value: "Art competition" } });
+    expect(screen.getByRole("button", { name: "Confirm" })).toBeDisabled();
+    fireEvent.change(name, { target: { value: title } });
+    expect(name).toHaveValue(browserTitle);
+    expect(screen.getByRole("button", { name: "Confirm" })).toBeEnabled();
+  }
+);
+
+it("exposes only Archive beside draft setup and hides it from non-administrators", () => {
+  mockCompetition.lifecycle = "DRAFT";
+  const view = render(
+    <QueryClientProvider client={new QueryClient()}>
+      <CompetitionAdmin archiveOnly />
+    </QueryClientProvider>
+  );
+  expect(screen.getByRole("button", { name: "Archive" })).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Publish" })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText("Pause history")).not.toBeInTheDocument();
+  mockCompetition.permissions.administer = false;
+  view.rerender(
+    <QueryClientProvider client={new QueryClient()}>
+      <CompetitionAdmin archiveOnly />
+    </QueryClientProvider>
+  );
+  expect(
+    screen.queryByRole("button", { name: "Archive" })
+  ).not.toBeInTheDocument();
+});
+
+it("returns an archived draft to the collection even if invalidation updates its lifecycle", async () => {
+  mockCompetition.lifecycle = "DRAFT";
+  jest.mocked(invalidateCompetition).mockImplementation(async () => {
+    mockCompetition.lifecycle = "ARCHIVED";
+  });
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <CompetitionAdmin archiveOnly />
+    </QueryClientProvider>
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Archive" }));
+  fireEvent.change(screen.getByRole("textbox"), {
+    target: { value: mockCompetition.title },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Confirm" }));
+  await waitFor(() =>
+    expect(mockPush).toHaveBeenCalledWith("/waves/wave/decisions")
+  );
 });

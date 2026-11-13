@@ -120,12 +120,47 @@ async function expectWalletCanonical(page: Page, address = "") {
 
 test.describe("Delegation read-only coverage @surface @medium @large @readonly", () => {
   test("Safe Collecting exposes disconnected-safe choices and references", async ({
+    isMobile,
     page,
   }) => {
     await gotoReady(page, "/safe-collecting");
 
     await expect(page).toHaveTitle("Safe Collecting | 6529.io");
     await expectHeading(page, "Safe Collecting");
+    if (isMobile) {
+      await expect(
+        page.getByRole("button", { name: "Open menu", exact: true })
+      ).toBeEnabled();
+    } else {
+      // The desktop navigation stays disabled until hydration; SSR tab markup
+      // is visible earlier, before its keyboard handler is attached.
+      await expect(
+        page.getByRole("button", { name: "NFTs", exact: true })
+      ).toBeEnabled();
+    }
+    const setupTabs = page.getByRole("tablist", {
+      name: "Setup path",
+      exact: true,
+    });
+    await expect(setupTabs.getByRole("tab")).toHaveCount(2);
+    for (const tab of await setupTabs.getByRole("tab").all()) {
+      await expect(tab).toHaveCSS("font-size", "14px");
+      await expect(tab).toHaveCSS("height", "40px");
+    }
+    const fresh = setupTabs.getByRole("tab", {
+      name: "Starting fresh",
+      exact: true,
+    });
+    const existing = setupTabs.getByRole("tab", {
+      name: "Already collecting",
+      exact: true,
+    });
+    await fresh.press("ArrowRight");
+    await expect(existing).toHaveAttribute("aria-selected", "true");
+    await expect(existing).toBeFocused();
+    await existing.press("ArrowLeft");
+    await expect(fresh).toHaveAttribute("aria-selected", "true");
+    await expect(fresh).toBeFocused();
     await expect(
       page.getByRole("heading", { name: "All tools", exact: true })
     ).toBeVisible();
@@ -227,6 +262,54 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await expectHeading(page, "FAQ");
   });
 
+  test("keeps the FAQ return link in place while the mobile app banner hydrates", async ({
+    page,
+    isMobile,
+  }) => {
+    // Desktop Chromium never renders the mobile app banner.
+    test.skip(!isMobile, "The mobile app banner only appears on mobile web.");
+    let releaseScripts: () => void = () => undefined;
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route(
+      /\/_next\/static\/chunks\/[^?]+\.js(?:\?|$)/,
+      async (route) => {
+        await scriptsReady;
+        await route.continue();
+      }
+    );
+    const back = page.getByRole("link", { name: "All FAQ topics" });
+    const dismissBanner = page.getByRole("button", {
+      name: "Dismiss app banner for seven days",
+    });
+
+    try {
+      await page.goto("/safe-collecting/faq/register-delegation", {
+        waitUntil: "commit",
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+      await expect(back).toBeInViewport();
+      await expect(dismissBanner).toHaveCount(0);
+      const before = await back.boundingBox();
+      if (!before) throw new Error("The FAQ return link has no layout box");
+      await page.mouse.move(
+        before.x + before.width / 2,
+        before.y + before.height / 2
+      );
+      await page.mouse.down();
+      releaseScripts();
+      await expect(dismissBanner).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+      const after = await back.boundingBox();
+      expect(after?.y).toBeCloseTo(before.y, 0);
+      await page.mouse.up();
+      await expect(page).toHaveURL(/\/safe-collecting\/faq$/);
+      await expectHeading(page, "FAQ");
+    } finally {
+      releaseScripts();
+    }
+  });
+
   for (const article of ARTICLE_ROUTES) {
     test(`article route renders ${article.heading}`, async ({ page }) => {
       await gotoReady(page, article.path);
@@ -320,6 +403,33 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       )
     ).toBeVisible({ timeout: 20000 });
     await expectWalletCanonical(page, SYNTHETIC_EMPTY_WALLET);
+  });
+
+  test("guided instructions wrap full addresses at 375px without signing", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 375, height: 850 });
+    await gotoReady(page, "/safe-collecting/build-consolidation");
+    const main = pageMain(page);
+    await expect(main.getByText(/^0 of \d+ wallets$/)).toBeVisible({
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
+    await main
+      .getByRole("textbox", { name: "Wallet 1 address" })
+      .fill("0x0000000000000000000000000000000000000001");
+    await main
+      .getByRole("textbox", { name: "Wallet 2 address" })
+      .fill("0x0000000000000000000000000000000000000002");
+    await expect(main.getByText(/^Connect Wallet 1 \(/)).toBeVisible();
+    await expect(
+      main.getByText("Available once the earlier steps are confirmed.", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await expect(
+      main.getByRole("button", { name: /^Sign (Step|for) / })
+    ).toHaveCount(0);
   });
 
   test("guided consolidation plans without a wallet and signs nothing", async ({
@@ -449,3 +559,120 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     });
   }
 });
+
+// Representative browser cases cover each newly translated guide family.
+// Dictionary completeness and interpolation across every locale live in Jest.
+// Shared staging has the Explained TDH redesign before production/main. Keep
+// both exact copy contracts during rollout, selecting by the page's shell marker
+// rather than accepting either heading or skipping localization assertions.
+for (const guide of [
+  {
+    locale: "en-GB",
+    path: "/network/tdh/consolidation",
+    heading: "Combine your wallets",
+    link: "How your wallets fit together",
+    explained: {
+      heading: "Up to four wallets count as one collector.",
+      link: "Under the hood: why every pair must link both ways",
+      href: "/network/tdh/consolidation/design",
+    },
+  },
+  {
+    locale: "fr-FR",
+    path: "/safe-collecting",
+    heading: "Collectionner en sécurité",
+    link: "Configurer vos portefeuilles",
+    setup: {
+      fresh: "Partir de zéro",
+      existing: "Déjà collectionneur",
+      airdrops: "Choisir la destination des airdrops",
+    },
+  },
+  {
+    locale: "de-DE",
+    path: "/safe-collecting",
+    heading: "Sicher sammeln",
+    link: "Wallets einrichten",
+    setup: {
+      fresh: "Neu anfangen",
+      existing: "Du sammelst bereits",
+      airdrops: "Airdrop-Ziel wählen",
+    },
+  },
+  {
+    locale: "es-ES",
+    path: "/safe-collecting/tap-guide",
+    heading: "El Three Address Protocol",
+    link: "Configurar tus carteras",
+  },
+  {
+    locale: "de-DE",
+    path: "/network/tdh/consolidation/design",
+    heading: "So funktioniert die Wallet-Konsolidierung",
+    link: "Leitfaden für Sammler lesen",
+    explained: {
+      heading:
+        "Warum jedes Paar von Wallets in beide Richtungen verknüpft wird",
+      link: "2 Ihre Wallets",
+      href: "/network/tdh/consolidation",
+    },
+  },
+] as const) {
+  test.describe(`${guide.locale} collecting guide (${guide.path}) @surface @medium @large @readonly`, () => {
+    test.use({ locale: guide.locale });
+
+    test("renders translated guide copy on a narrow screen", async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 375, height: 850 });
+      await gotoReady(page, guide.path);
+      const main = pageMain(page);
+      await expect(
+        main.getByRole("heading", { level: 1 }).first()
+      ).toBeVisible();
+      const expected =
+        "explained" in guide &&
+        (await page
+          .getByRole("main")
+          .first()
+          .locator('[data-explained-shell="tdh"]')
+          .count()) > 0
+          ? guide.explained
+          : guide;
+      await expect(
+        main.getByRole("heading", {
+          level: 1,
+          name: expected.heading,
+          exact: true,
+        })
+      ).toBeVisible();
+      const link = main.getByRole("link", { name: expected.link, exact: true });
+      await expect(link).toBeVisible();
+      if ("href" in expected) {
+        await expect(link).toHaveAttribute("href", expected.href);
+      }
+      await expectNoHorizontalOverflow(page);
+      if ("setup" in guide) {
+        const airdrops = page.getByRole("link", {
+          name: guide.setup.airdrops,
+          exact: true,
+        });
+        await expect(airdrops).toBeVisible();
+        await expect(airdrops).toHaveAttribute(
+          "href",
+          "/safe-collecting/register-delegation?collection=MEMES&use_case=3"
+        );
+        await page
+          .getByRole("tab", { name: guide.setup.existing, exact: true })
+          .click();
+        await expectNoHorizontalOverflow(page);
+        await page.setViewportSize({ width: 320, height: 850 });
+        await expectNoHorizontalOverflow(page);
+        await page
+          .getByRole("tab", { name: guide.setup.fresh, exact: true })
+          .click();
+        await expectNoHorizontalOverflow(page);
+      }
+    });
+  });
+}

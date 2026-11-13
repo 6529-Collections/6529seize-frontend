@@ -4,11 +4,14 @@ import {
   ProcessIncomingDropType,
 } from "@/contexts/wave/hooks/useWaveRealtimeUpdater";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { getReactionDetailsVersion } from "@/components/waves/drops/reaction-utils";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { WsMessageType } from "@/helpers/Types";
 
 const mockSetQueriesData = jest.fn();
 const mockSetQueryData = jest.fn();
+const mockInvalidateQueries = jest.fn().mockResolvedValue(undefined);
 const mockCancelQueries = jest.fn().mockResolvedValue(undefined);
 const mockFindAll = jest.fn(() => []);
 const mockRefreshEligibility = jest.fn().mockResolvedValue(undefined);
@@ -79,6 +82,7 @@ jest.mock("@/contexts/wave/drop-visibility", () => ({
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: jest.fn(() => ({
     cancelQueries: mockCancelQueries,
+    invalidateQueries: mockInvalidateQueries,
     getQueryCache: () => ({
       findAll: mockFindAll,
     }),
@@ -196,6 +200,106 @@ describe("useWaveRealtimeUpdater", () => {
     );
   });
 
+  it.each([WsMessageType.DROP_UPDATE, WsMessageType.DROP_UPDATE_REF])(
+    "refreshes reply placement when the server omits reply presence (%s)",
+    (messageType) => {
+      const refreshWaveMessages = jest.fn();
+      const props = {
+        ...baseProps({ wave1: { drops: [], latestFetchedSerialNo: 10 } }),
+        refreshWaveMessages,
+      };
+      renderHook(() => useWaveRealtimeUpdater(props));
+      emitWebSocketMessage(
+        messageType,
+        messageType === WsMessageType.DROP_UPDATE
+          ? {
+              ...makeRealtimeDrop("root", "wave1", 9),
+              reason: "REPLY_COLLAPSE",
+            }
+          : {
+              drop_id: "root",
+              wave_id: "wave1",
+              serial_no: 9,
+              update_type: WsMessageType.DROP_UPDATE,
+              reason: "REPLY_COLLAPSE",
+            }
+      );
+      expect(refreshWaveMessages).toHaveBeenCalledWith("wave1");
+      expect(props.updateData).not.toHaveBeenCalled();
+    }
+  );
+
+  it("reports a failed reply placement refresh and allows a later refresh", async () => {
+    const error = new Error("Wave refresh failed");
+    const report = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    try {
+      const refreshWaveMessages = jest
+        .fn()
+        .mockRejectedValueOnce(error)
+        .mockResolvedValue(undefined);
+      const props = {
+        ...baseProps({ wave1: { drops: [], latestFetchedSerialNo: 10 } }),
+        refreshWaveMessages,
+      };
+      const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+      const change = { waveId: "wave1", dropId: "root", hasReplies: true };
+
+      await expect(result.current.applyReplyPlacement(change)).resolves.toBe(
+        false
+      );
+      expect(report).toHaveBeenCalledWith(
+        "Failed to refresh reply placement:",
+        error
+      );
+      await expect(result.current.applyReplyPlacement(change)).resolves.toBe(
+        true
+      );
+    } finally {
+      report.mockRestore();
+    }
+  });
+
+  it.each([WsMessageType.DROP_UPDATE, WsMessageType.DROP_UPDATE_REF])(
+    "updates an empty thread in place on a placement event (%s)",
+    (messageType) => {
+      const root = {
+        ...makeRealtimeDrop("root", "wave1", 9),
+        type: DropSize.FULL,
+        stableKey: "root-key",
+        stableHash: "root-hash",
+        collapse_replies: false,
+        replies_count: 2,
+      };
+      const refreshWaveMessages = jest.fn();
+      const props = {
+        ...baseProps({ wave1: { drops: [root], latestFetchedSerialNo: 10 } }),
+        refreshWaveMessages,
+      };
+      renderHook(() => useWaveRealtimeUpdater(props));
+      emitWebSocketMessage(messageType, {
+        ...(messageType === WsMessageType.DROP_UPDATE
+          ? makeRealtimeDrop("root", "wave1", 9)
+          : {
+              drop_id: "root",
+              wave_id: "wave1",
+              author_id: "author",
+              serial_no: 9,
+              update_type: WsMessageType.DROP_UPDATE,
+            }),
+        reason: "REPLY_COLLAPSE",
+        collapse_replies: true,
+        reply_placement_has_replies: false,
+      });
+      expect(props.updateData).toHaveBeenCalledWith({
+        key: "wave1",
+        drops: [{ ...root, collapse_replies: true, replies_count: 0 }],
+      });
+      expect(refreshWaveMessages).not.toHaveBeenCalled();
+    }
+  );
+
   it("keeps a collapsed thread's reply count when an update omits it", async () => {
     const store = {
       wave1: {
@@ -231,6 +335,76 @@ describe("useWaveRealtimeUpdater", () => {
         drops: [expect.objectContaining({ id: "root", replies_count: 4 })],
       })
     );
+  });
+
+  describe("author signature of a stored drop", () => {
+    const storeWithSignedDrop = () => ({
+      wave1: {
+        drops: [
+          {
+            id: "signed",
+            serial_no: 5,
+            type: "FULL",
+            wave: { id: "wave1" },
+            author: {},
+            stableKey: "signed",
+            stableHash: "signed",
+            updated_at: null,
+            is_author_signed: true,
+          },
+        ],
+        latestFetchedSerialNo: 10,
+      },
+    });
+
+    const emitUpdate = (overrides: Record<string, unknown>) =>
+      emitWebSocketMessage(WsMessageType.DROP_UPDATE, {
+        id: "signed",
+        serial_no: 5,
+        wave: { id: "wave1" },
+        author: {},
+        updated_at: null,
+        is_author_signed: false,
+        ...overrides,
+      });
+
+    const lastUpdatedDrop = (props: ReturnType<typeof baseProps>) =>
+      props.updateData.mock.calls.at(-1)?.[0].drops[0];
+
+    it("keeps it when an update of the same version arrives before the signature was stored", async () => {
+      const props = baseProps(storeWithSignedDrop());
+      renderHook(() => useWaveRealtimeUpdater(props));
+
+      emitUpdate({});
+      await flushPromises();
+
+      expect(lastUpdatedDrop(props)).toMatchObject({
+        id: "signed",
+        is_author_signed: true,
+      });
+    });
+
+    it("drops it when the content was edited without a signature", async () => {
+      const props = baseProps(storeWithSignedDrop());
+      renderHook(() => useWaveRealtimeUpdater(props));
+
+      emitUpdate({ updated_at: 2000 });
+      await flushPromises();
+
+      expect(lastUpdatedDrop(props).is_author_signed).toBe(false);
+    });
+
+    it("drops it when the viewer can no longer see the content", async () => {
+      const props = baseProps(storeWithSignedDrop());
+      renderHook(() => useWaveRealtimeUpdater(props));
+
+      emitUpdate({
+        moderation: { status: "MODERATOR_REMOVED", can_view: false },
+      });
+      await flushPromises();
+
+      expect(lastUpdatedDrop(props).is_author_signed).toBe(false);
+    });
   });
 
   it("fetches the exact canonical drop for a valid compact reference", async () => {
@@ -304,6 +478,86 @@ describe("useWaveRealtimeUpdater", () => {
 
     expect(fetchDropByIdBatched).toHaveBeenNthCalledWith(1, "existing-drop");
     expect(fetchDropByIdBatched).toHaveBeenNthCalledWith(2, "existing-drop");
+  });
+
+  it.each([
+    [WsMessageType.DROP_REACTION_UPDATE, 2, true],
+    [WsMessageType.DROP_REACTION_UPDATE, 3, false],
+    [WsMessageType.DROP_RATING_UPDATE, 2, false],
+  ])(
+    "refreshes unchanged-count details only for reaction events (%s, count %i)",
+    async (updateType, count, shouldRefetch) => {
+      const existingDrop = {
+        ...makeRealtimeDrop("existing-drop", "wave1", 10),
+        type: DropSize.FULL,
+        stableKey: "existing-drop",
+        stableHash: "existing-drop",
+        reactions: [{ reaction: ":gm:", count: 2, profiles: [] }],
+        context_profile_context: null,
+      };
+      const store = {
+        wave1: { drops: [existingDrop], latestFetchedSerialNo: 10 },
+      };
+      const props = baseProps(store);
+      fetchDropByIdBatched.mockResolvedValue({
+        ...existingDrop,
+        reactions: [{ reaction: ":gm:", count, profiles: [] }],
+      });
+      renderHook(() => useWaveRealtimeUpdater(props));
+
+      emitWebSocketMessage(WsMessageType.DROP_UPDATE_REF, {
+        drop_id: "existing-drop",
+        wave_id: "wave1",
+        serial_no: 10,
+        update_type: updateType,
+      });
+      await flushPromises();
+
+      if (updateType === WsMessageType.DROP_REACTION_UPDATE) {
+        expect(mockInvalidateQueries).toHaveBeenCalledTimes(1);
+        const invalidation = mockInvalidateQueries.mock.calls[0]![0];
+        expect(invalidation.queryKey).toEqual([
+          QueryKey.DROP_REACTIONS,
+          "existing-drop",
+        ]);
+        expect(
+          invalidation.predicate({
+            queryKey: [
+              QueryKey.DROP_REACTIONS,
+              "existing-drop",
+              "viewer",
+              getReactionDetailsVersion(existingDrop.reactions, null),
+            ],
+          })
+        ).toBe(shouldRefetch);
+      } else {
+        expect(mockInvalidateQueries).not.toHaveBeenCalled();
+      }
+    }
+  );
+
+  it("refreshes reaction details outside the cached chat stream", async () => {
+    const props = baseProps({});
+    fetchDropByIdBatched.mockResolvedValue({
+      ...makeRealtimeDrop("other-surface-drop", "wave1", 10),
+      reactions: [],
+    });
+    renderHook(() => useWaveRealtimeUpdater(props));
+
+    emitWebSocketMessage(WsMessageType.DROP_UPDATE_REF, {
+      drop_id: "other-surface-drop",
+      wave_id: "wave1",
+      serial_no: 10,
+      update_type: WsMessageType.DROP_REACTION_UPDATE,
+    });
+    await flushPromises();
+
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(mockInvalidateQueries).toHaveBeenCalledTimes(1);
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.DROP_REACTIONS, "other-surface-drop"],
+      predicate: expect.any(Function),
+    });
   });
 
   it("coalesces duplicate compact references into one follow-up sync", async () => {
@@ -639,13 +893,50 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.syncNewestMessages).toHaveBeenCalled();
   });
 
-  it("normalizes string serial numbers before inserting realtime drops", async () => {
+  it.each([false, true])(
+    "settles a POST before deferred processing when muted=%s",
+    async (muted) => {
+      const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
+      const props = baseProps(store);
+      props.isWaveMuted.mockReturnValue(muted);
+      let release!: () => void;
+      const refresh = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      mockRefreshEligibility.mockReturnValue(refresh);
+      const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+      const accepted = makeRealtimeDrop("accepted", "wave1", 11);
+      let completion!: Promise<void>;
+      act(() => {
+        completion = result.current.processIncomingDrop(
+          accepted,
+          ProcessIncomingDropType.DROP_INSERT,
+          { pendingDropId: "temp-pending" }
+        );
+      });
+      expect(props.updateData).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: "wave1",
+          pendingDropId: "temp-pending",
+          drops: [expect.objectContaining({ id: "accepted" })],
+        })
+      );
+      await act(async () => {
+        release();
+        await completion;
+      });
+    }
+  );
+
+  it("normalizes database numeric strings before inserting realtime drops", async () => {
     const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
     const props = baseProps(store);
     const { result } = renderHook(() => useWaveRealtimeUpdater(props));
     const drop: any = {
       id: "helpbot-reply",
       serial_no: "6831",
+      created_at: "1794293960499",
+      updated_at: "1794293961499",
       wave: { id: "wave1" },
       author: { handle: "help6529" },
     };
@@ -661,6 +952,8 @@ describe("useWaveRealtimeUpdater", () => {
     const insertedDrop = props.updateData.mock.calls[0][0].drops[0];
     expect(insertedDrop.serial_no).toBe(6831);
     expect(typeof insertedDrop.serial_no).toBe("number");
+    expect(insertedDrop.created_at).toBe(1794293960499);
+    expect(insertedDrop.updated_at).toBe(1794293961499);
   });
 
   it("handles aborted fetch without logging", async () => {
@@ -1621,5 +1914,79 @@ describe("useWaveRealtimeUpdater", () => {
     );
     act(() => jest.advanceTimersByTime(100));
     expect(props.removeDrops).toHaveBeenCalledTimes(1);
+  });
+
+  describe("ATTACHMENT_STATUS_UPDATE", () => {
+    const processingAttachment = {
+      attachment_id: "att-1",
+      file_name: "report.pdf",
+      mime_type: "application/pdf",
+      kind: "pdf",
+      status: "processing",
+    };
+    const readyAttachment = { ...processingAttachment, status: "ready" };
+    const buildStore = () => ({
+      wave1: {
+        drops: [
+          {
+            id: "d1",
+            type: DropSize.FULL,
+            stableKey: "d1",
+            stableHash: "d1",
+            parts: [{ part_id: 1, attachments: [processingAttachment] }],
+          },
+        ],
+        latestFetchedSerialNo: 1,
+      },
+    });
+
+    it("updates every cached drop query once and the active wave store", () => {
+      const store = buildStore();
+      const props = { ...baseProps(store), activeWaveId: "wave1" };
+      renderHook(() => useWaveRealtimeUpdater(props));
+      mockSetQueriesData.mockClear();
+
+      emitWebSocketMessage(
+        WsMessageType.ATTACHMENT_STATUS_UPDATE,
+        readyAttachment
+      );
+
+      expect(mockSetQueriesData).toHaveBeenCalledTimes(6);
+      expect(props.updateData).toHaveBeenCalledTimes(1);
+      expect(props.updateData).toHaveBeenCalledWith({
+        key: "wave1",
+        drops: [
+          expect.objectContaining({
+            parts: [{ part_id: 1, attachments: [readyAttachment] }],
+          }),
+        ],
+      });
+    });
+
+    it("still refreshes cached queries when no wave is active", () => {
+      const props = baseProps(buildStore());
+      renderHook(() => useWaveRealtimeUpdater(props));
+      mockSetQueriesData.mockClear();
+
+      emitWebSocketMessage(
+        WsMessageType.ATTACHMENT_STATUS_UPDATE,
+        readyAttachment
+      );
+
+      expect(mockSetQueriesData).toHaveBeenCalledTimes(6);
+      expect(props.updateData).not.toHaveBeenCalled();
+    });
+
+    it("does not touch the wave store when the attachment is not in it", () => {
+      const props = { ...baseProps(buildStore()), activeWaveId: "wave1" };
+      renderHook(() => useWaveRealtimeUpdater(props));
+
+      emitWebSocketMessage(WsMessageType.ATTACHMENT_STATUS_UPDATE, {
+        ...readyAttachment,
+        attachment_id: "other",
+      });
+
+      expect(props.updateData).not.toHaveBeenCalled();
+    });
   });
 });

@@ -8,6 +8,8 @@ import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/Ro
 import RoundedManifoldIconButton from "@/components/distribution-plan-tool/common/RoundedManifoldIconButton";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { buildCsvFromRecords } from "@/helpers/csv-export.helpers";
+import { downloadJsonFile } from "@/helpers/json-download.helpers";
 import { formatCount } from "@/helpers/format.helpers";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
@@ -75,20 +77,12 @@ export default function ReviewDistributionPlanTableRow({
 
   const downloadJson = (results: AllowlistResult[]) => {
     const data = JSON.stringify(getFullResults(results));
-    const blob = new Blob([data], { type: "application/json" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = getFileName("json");
-    link.click();
+    downloadJsonFile(data, getFileName("json"));
   };
 
   const downloadCsv = (results: AllowlistResult[]) => {
     const fullResult = getFullResults(results);
-    const csv = [
-      Object.keys(fullResult[0]!).join(","),
-      ...fullResult.map((item) => Object.values(item).join(",")),
-    ].join("\n");
+    const csv = buildCsvFromRecords(fullResult);
 
     const link = document.createElement("a");
     link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
@@ -126,12 +120,7 @@ export default function ReviewDistributionPlanTableRow({
       address: row.wallet,
       value: row.amount,
     }));
-    const csv = [
-      Object.keys(fullResult[0]!).join(","),
-      ...mergeAddressValues(fullResult).map((item) =>
-        Object.values(item).join(",")
-      ),
-    ].join("\n");
+    const csv = buildCsvFromRecords(mergeAddressValues(fullResult));
 
     const link = document.createElement("a");
     link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);

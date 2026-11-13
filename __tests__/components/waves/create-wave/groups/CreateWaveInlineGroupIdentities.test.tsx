@@ -104,6 +104,7 @@ function renderWithProfile({
   onIncludedWalletSourcesChange = jest.fn(),
   onExcludedWalletSourcesChange = jest.fn(),
   profile = connectedProfile,
+  showIdentityTotal = true,
 }: {
   readonly includedIdentities?: readonly CommunityMemberMinimal[];
   readonly excludedIdentities?: readonly CommunityMemberMinimal[];
@@ -114,6 +115,7 @@ function renderWithProfile({
   readonly onIncludedWalletSourcesChange?: jest.Mock;
   readonly onExcludedWalletSourcesChange?: jest.Mock;
   readonly profile?: ApiIdentity | null;
+  readonly showIdentityTotal?: boolean;
 } = {}) {
   render(
     <AuthContext.Provider
@@ -130,6 +132,7 @@ function renderWithProfile({
       }}
     >
       <CreateWaveInlineGroupIdentities
+        showIdentityTotal={showIdentityTotal}
         includedIdentities={includedIdentities}
         excludedIdentities={excludedIdentities}
         includedWalletSources={createEmptyInlineGroupWalletSources()}
@@ -154,6 +157,39 @@ function renderWithProfile({
 }
 
 describe("CreateWaveInlineGroupIdentities", () => {
+  it.each([
+    {
+      mode: "Included",
+      count: 10001,
+      message: "A group can include at most 10,000 identities.",
+    },
+    {
+      mode: "Excluded",
+      count: 1001,
+      message: "A group can exclude at most 1,000 identities.",
+    },
+  ])(
+    "keeps the $mode limit warning when the duplicate total is hidden",
+    async ({ mode, count, message }) => {
+      const user = userEvent.setup();
+      const identities = Array.from({ length: count }, (_, index) => ({
+        ...selectedCurrentUserIdentity,
+        wallet: `0x${index.toString(16).padStart(40, "0")}`,
+      }));
+      renderWithProfile({
+        includedIdentities: mode === "Included" ? identities : [],
+        excludedIdentities: mode === "Excluded" ? identities : [],
+        profile: null,
+        showIdentityTotal: false,
+      });
+      await user.click(screen.getByRole("tab", { name: mode }));
+      expect(screen.getByRole("status")).toHaveTextContent(message);
+      expect(
+        screen.queryByText(/unique identit(?:y|ies) (?:included|excluded)/)
+      ).not.toBeInTheDocument();
+    }
+  );
+
   it("passes selected identity wallets to the search field", () => {
     render(
       <CreateWaveInlineGroupIdentities

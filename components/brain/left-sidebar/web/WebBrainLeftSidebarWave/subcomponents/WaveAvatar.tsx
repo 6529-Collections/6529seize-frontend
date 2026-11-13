@@ -2,7 +2,7 @@ import WavePicture from "@/components/waves/WavePicture";
 import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 
 interface WaveAvatarProps {
   readonly isAnnouncement?: boolean | undefined;
@@ -32,7 +32,7 @@ const DropIcon = ({ className }: { readonly className: string }) => (
 const MAX_DISPLAY_COUNT = 99;
 const DROP_ICON_CLASSES = "tw-size-2.5 tw-flex-shrink-0 tw-text-[#E8D48A]";
 const UNREAD_BADGE_CLASSES =
-  "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-indigo-600 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_6px_14px_rgba(0,0,0,0.32)]";
+  "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-h-4 tw-min-w-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500 tw-px-1 tw-text-[10px] tw-font-medium tw-text-white tw-shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_6px_14px_rgba(0,0,0,0.32)]";
 const MUTED_BADGE_CLASSES =
   "tw-absolute tw-right-[-4px] tw-top-[-4px] tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-bg-red tw-text-white tw-shadow-sm";
 const MUTED_ICON_CLASSES = "tw-size-2.5 tw-flex-shrink-0";
@@ -135,7 +135,10 @@ export const WaveAvatar = ({
       {showBadge && <div className={UNREAD_BADGE_CLASSES}>{displayCount}</div>}
       {wave.isMuted && (
         <div className={MUTED_BADGE_CLASSES}>
-          <FontAwesomeIcon icon={faBellSlash} className={MUTED_ICON_CLASSES} />
+          <FontAwesomeSvgIcon
+            icon={faBellSlash}
+            className={MUTED_ICON_CLASSES}
+          />
         </div>
       )}
     </div>

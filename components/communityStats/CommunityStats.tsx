@@ -1,6 +1,6 @@
 "use client";
 
-import { publicEnv } from "@/config/env";
+import { apiUrl } from "@/services/api/api-endpoints";
 import {
   NETWORK_PAGE_TITLE_CLASSES,
   NETWORK_REFERENCE_SECTION_HEADING_CLASSES,
@@ -12,6 +12,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t as translate, type MessageKey } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 import { fetchUrl } from "@/services/6529api";
 import {
   BarElement,
@@ -132,7 +133,9 @@ export default function CommunityStats() {
   }
 
   useEffect(() => {
-    const url = `${publicEnv.API_ENDPOINT}/api/tdh_global_history?page_size=${pageSize}&page=${page}`;
+    const url = apiUrl(
+      `/api/tdh_global_history?page_size=${pageSize}&page=${page}`
+    );
     void fetchUrl<DBResponse<GlobalTDHHistory>>(url)
       .then((response) => {
         const tdhH = response.data.reverse();

@@ -1,10 +1,11 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { render, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import ReactQueryWrapper, {
   ReactQueryWrapperContext,
   QueryKey,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 jest.mock("@/helpers/Helpers", () => ({
   ...jest.requireActual("../../../helpers/Helpers"),
@@ -14,6 +15,17 @@ jest.mock("@/helpers/Helpers", () => ({
 const wait = require("@/helpers/Helpers").wait as jest.Mock;
 
 type ContextType = {
+  onProfileCICModify: (params: {
+    targetProfiles: readonly ApiIdentity[];
+    connectedProfile: ApiIdentity | null;
+    profileProxy: null;
+    rater: string | null;
+  }) => Promise<void>;
+  onProfileRepModify: (params: {
+    targetProfiles: readonly ApiIdentity[];
+    connectedProfile: ApiIdentity | null;
+    profileProxy: null;
+  }) => Promise<void>;
   setProfile: (profile: any) => void;
   setWaveDrops: (params: { waveDrops: any; waveId: string }) => void;
   waitAndInvalidateDrops: () => Promise<void>;
@@ -39,6 +51,7 @@ type ContextType = {
 const createTestSetup = () => {
   const client = new QueryClient();
   jest.spyOn(client, "invalidateQueries");
+  jest.spyOn(client, "resetQueries");
   jest.spyOn(client, "setQueryData");
   let ctx: ContextType;
   function Child() {
@@ -56,6 +69,91 @@ const createTestSetup = () => {
 };
 
 describe("ReactQueryWrapper context", () => {
+  it("refreshes NIC lists and shared credit once for a multi-recipient batch", async () => {
+    const { client, ctx } = createTestSetup();
+    const keys = ["alice", "bob"].map((handle) => [
+      QueryKey.PROFILE_RATER_CIC_STATE,
+      { handle, rater: "viewer" },
+    ]);
+    keys.forEach((key) =>
+      client.setQueryData(key, { cic_ratings_left_to_give_by_rater: 80 })
+    );
+    await act(async () => {
+      await ctx.onProfileCICModify({
+        targetProfiles: ["alice", "bob"].map(
+          (handle) => ({ handle, wallets: [] }) as unknown as ApiIdentity
+        ),
+        connectedProfile: { handle: "viewer" } as ApiIdentity,
+        profileProxy: null,
+        rater: "viewer",
+      });
+    });
+    keys.forEach((key) =>
+      expect(client.getQueryState(key)?.isInvalidated).toBe(true)
+    );
+    expect(client.resetQueries).toHaveBeenCalledTimes(1);
+    expect(client.resetQueries).toHaveBeenCalledWith({
+      predicate: expect.any(Function),
+      queryKey: [
+        QueryKey.PROFILE_RATING_LIST,
+        { matter: "NIC", direction: "given" },
+      ],
+    });
+    const sharedCreditRefreshes = jest
+      .mocked(client.invalidateQueries)
+      .mock.calls.filter(
+        ([filters]) =>
+          filters?.queryKey?.[0] === QueryKey.PROFILE_RATER_CIC_STATE
+      );
+    expect(sharedCreditRefreshes).toHaveLength(1);
+  });
+
+  it("invalidates shared REP credit across recipients, including a target without a handle", async () => {
+    const { client, ctx } = createTestSetup();
+    const key = [
+      QueryKey.PROFILE_REP_RATINGS,
+      { handleOrWallet: "0xabc", rater: "viewer" },
+    ];
+    const otherRecipientKey = [
+      QueryKey.PROFILE_REP_RATINGS,
+      { handleOrWallet: "other-recipient", rater: "viewer" },
+    ];
+    client.setQueryData(key, { rep_rates_left_for_rater: 80 });
+    client.setQueryData(otherRecipientKey, { rep_rates_left_for_rater: 80 });
+    await act(async () => {
+      await ctx.onProfileRepModify({
+        targetProfiles: [{ handle: null, query: "0xAbC" } as ApiIdentity],
+        connectedProfile: { handle: "viewer" } as ApiIdentity,
+        profileProxy: null,
+      });
+    });
+    expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    expect(client.getQueryState(otherRecipientKey)?.isInvalidated).toBe(true);
+    expect(client.resetQueries).toHaveBeenCalledWith({
+      predicate: expect.any(Function),
+      queryKey: [
+        QueryKey.PROFILE_RATING_LIST,
+        { matter: "REP", direction: "given" },
+      ],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [
+        QueryKey.PROFILE_RATING_LIST,
+        { matter: "REP", direction: "received" },
+      ],
+      predicate: expect.any(Function),
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.GLOBAL_REP_CATEGORY_OVERVIEW],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.PROFILE_REP_CATEGORY_CONTRIBUTORS],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["REP_CONTRIBUTORS"],
+    });
+  });
+
   it("sets profile data in query cache", () => {
     const { client, ctx } = createTestSetup();
     const profile = {
@@ -81,6 +179,9 @@ describe("ReactQueryWrapper context", () => {
   it("onIdentityFollowChange invalidates related queries", () => {
     const { client, ctx } = createTestSetup();
     act(() => ctx.onIdentityFollowChange());
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.IDENTITY_FOLLOWING],
+    });
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.IDENTITY_FOLLOWING_ACTIONS],
     });

@@ -5,6 +5,7 @@ import { TraitWrapper } from "./TraitWrapper";
 import type { TraitsData } from "../submission/types/TraitsData";
 
 type BooleanTraitProps = {
+  readonly readOnly?: boolean | undefined;
   readonly label: string;
   readonly field: keyof TraitsData;
   readonly className?: string | undefined;
@@ -19,7 +20,16 @@ type BooleanTraitProps = {
  * Similar to our solution for text and number inputs
  */
 export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
-  ({ label, field, traits, updateBoolean, className, error, onBlur }) => {
+  ({
+    label,
+    field,
+    traits,
+    updateBoolean,
+    className,
+    error,
+    onBlur,
+    readOnly,
+  }) => {
     // Use a ref to track the current value to avoid React re-render cycles
     const valueRef = useRef<boolean>(Boolean(traits[field]));
     // Use ref for UI state
@@ -125,6 +135,8 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
       >
         <div ref={uiStateRef} className="tw-flex tw-gap-1" data-field={field}>
           <button
+            disabled={readOnly}
+            aria-pressed={Boolean(traits[field])}
             onClick={handleYesClick}
             className={`yes-button tw-rounded-md tw-border-0 tw-px-3.5 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition-all ${
               traits[field]
@@ -136,6 +148,8 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
             Yes
           </button>
           <button
+            disabled={readOnly}
+            aria-pressed={traits[field] === false}
             onClick={handleNoClick}
             className={`no-button tw-rounded-md tw-border-0 tw-px-3.5 tw-py-1.5 tw-text-[11px] tw-font-semibold tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition-all ${
               traits[field] === false
@@ -156,7 +170,8 @@ export const BooleanTrait: React.FC<BooleanTraitProps> = React.memo(
       prevProps.field === nextProps.field &&
       prevProps.label === nextProps.label &&
       prevProps.traits[prevProps.field] === nextProps.traits[nextProps.field] &&
-      prevProps.error === nextProps.error
+      prevProps.error === nextProps.error &&
+      prevProps.readOnly === nextProps.readOnly
     );
   }
 );

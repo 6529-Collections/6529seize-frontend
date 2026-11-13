@@ -9,6 +9,9 @@ const OTHER_WAVE_ID = `${"f".repeat(8)}-${"1".repeat(4)}-4${"2".repeat(3)}-a${"3
 const TEST_AUTHOR_ID = `${"1".repeat(8)}-${"2".repeat(4)}-4${"3".repeat(3)}-8${"4".repeat(3)}-${"5".repeat(12)}`;
 const MEDIA_URL = `https://media.example.cloudfront.net/renditions/drops/author_${TEST_AUTHOR_ID}/file.m3u8`;
 let mockPathname = `/waves/${WAVE_ID}`;
+let mockPerformanceConsent: boolean | undefined = true;
+let mockStoredPerformanceConsent: boolean | undefined = undefined;
+let mockHasConsentProvider = true;
 
 type MockPluginContext = {
   record: (eventType: string, eventData: object) => void;
@@ -17,6 +20,14 @@ type MockPluginContext = {
 
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
+}));
+
+jest.mock("@/components/cookies/CookieConsentContext", () => ({
+  useOptionalCookieConsent: () =>
+    mockHasConsentProvider
+      ? { performanceConsent: mockPerformanceConsent }
+      : undefined,
+  getCookieConsentByName: () => mockStoredPerformanceConsent,
 }));
 
 jest.mock("aws-rum-web", () => {
@@ -76,10 +87,22 @@ jest.mock("aws-rum-web", () => {
         _region: string,
         config: MockPluginConfig
       ) => {
+        let cookiesAllowed = true;
         const instance = {
+          allowCookies: jest.fn((allow: boolean) => {
+            cookiesAllowed = allow;
+          }),
           disable: jest.fn(),
           recordEvent: jest.fn(),
           recordPageView: jest.fn(),
+          // Models a late SDK callback (for example a web-vitals candidate)
+          // whose session lookup rewrites the RUM cookies when allowed.
+          simulateLateSessionWrite: () => {
+            if (cookiesAllowed) {
+              document.cookie = "cwr_u=late-user; path=/";
+              document.cookie = "cwr_s=late-session; path=/";
+            }
+          },
         };
         const pluginContext: MockPluginContext = {
           record: instance.recordEvent,
@@ -112,6 +135,8 @@ type AwsRumHttpPluginConfig = {
 };
 
 type MockAwsRumInstance = {
+  readonly allowCookies: jest.Mock;
+  readonly simulateLateSessionWrite: () => void;
   readonly disable: jest.Mock;
   readonly recordEvent: jest.Mock;
   readonly recordPageView: jest.Mock;
@@ -121,10 +146,26 @@ type MockHttpPlugin = {
   readonly getLoadedContext: () => MockPluginContext;
 };
 
+const AWS_RUM_SAMPLING_STORAGE_KEY = "6529:aws-rum-session-sampled";
+
+const setAwsRumSessionCookie = (record: boolean): void => {
+  document.cookie = `cwr_s=${btoa(
+    JSON.stringify({ sessionId: "test-session", record, eventCount: 1 })
+  )}; path=/`;
+};
+
+const clearAwsRumSessionCookie = (): void => {
+  document.cookie = "cwr_s=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+};
+
 describe("AwsRumProvider", () => {
   let warnSpy: jest.SpyInstance;
+  let randomSpy: jest.SpyInstance;
 
   beforeEach(() => {
+    window.sessionStorage.clear();
+    clearAwsRumSessionCookie();
+    randomSpy = jest.spyOn(Math, "random").mockReturnValue(0);
     Object.assign(publicEnv, originalPublicEnv, {
       NODE_ENV: "production",
       AWS_RUM_APP_ID: "test-app-id",
@@ -133,6 +174,9 @@ describe("AwsRumProvider", () => {
       VERSION: "test-version",
     });
     mockPathname = `/waves/${WAVE_ID}`;
+    mockPerformanceConsent = true;
+    mockStoredPerformanceConsent = undefined;
+    mockHasConsentProvider = true;
     mockAwsRum.mockClear();
     mockFetchPlugin.mockClear();
     mockXhrPlugin.mockClear();
@@ -142,6 +186,9 @@ describe("AwsRumProvider", () => {
 
   afterEach(() => {
     warnSpy.mockRestore();
+    randomSpy.mockRestore();
+    window.sessionStorage.clear();
+    clearAwsRumSessionCookie();
     Object.assign(publicEnv, originalPublicEnv);
   });
 
@@ -161,7 +208,8 @@ describe("AwsRumProvider", () => {
       "test-version",
       "eu-west-1",
       expect.objectContaining({
-        sessionSampleRate: 0.5,
+        // The provider sampled the session before importing the SDK.
+        sessionSampleRate: 1,
         releaseId: "test-version",
         disableAutoPageView: true,
         telemetries: [],
@@ -406,10 +454,79 @@ describe("AwsRumProvider", () => {
     expect(mockAwsRum).not.toHaveBeenCalled();
   });
 
+  it("does not download or start AWS RUM for an unsampled session", async () => {
+    randomSpy.mockReturnValue(0.5);
+
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() =>
+      expect(window.sessionStorage.getItem(AWS_RUM_SAMPLING_STORAGE_KEY)).toBe(
+        "0"
+      )
+    );
+    expect(mockAwsRum).not.toHaveBeenCalled();
+    expect(mockFetchPlugin).not.toHaveBeenCalled();
+    expect(window.awsRum).toBeUndefined();
+  });
+
+  it("keeps a tab's stored sampling decision across reloads", async () => {
+    window.sessionStorage.setItem(AWS_RUM_SAMPLING_STORAGE_KEY, "0");
+
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(randomSpy).not.toHaveBeenCalled();
+    expect(mockAwsRum).not.toHaveBeenCalled();
+  });
+
+  it("joins a recorded AWS RUM session that another tab started", async () => {
+    window.sessionStorage.setItem(AWS_RUM_SAMPLING_STORAGE_KEY, "0");
+    setAwsRumSessionCookie(true);
+
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+    expect(randomSpy).not.toHaveBeenCalled();
+  });
+
+  it("stays out of an AWS RUM session the SDK did not sample", async () => {
+    setAwsRumSessionCookie(false);
+
+    render(
+      <AwsRumProvider>
+        <div>Child content</div>
+      </AwsRumProvider>
+    );
+
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 0);
+    });
+
+    expect(randomSpy).not.toHaveBeenCalled();
+    expect(mockAwsRum).not.toHaveBeenCalled();
+  });
+
   it("uses default AWS RUM values when optional env values are empty strings", async () => {
     publicEnv.AWS_RUM_REGION = "";
     publicEnv.AWS_RUM_SAMPLE_RATE = "";
     publicEnv.VERSION = "";
+    // Just under the 0.2 default sample rate.
+    randomSpy.mockReturnValue(0.19);
 
     render(
       <AwsRumProvider>
@@ -424,7 +541,7 @@ describe("AwsRumProvider", () => {
       "1.0.0",
       "us-east-1",
       expect.objectContaining({
-        sessionSampleRate: 0.2,
+        sessionSampleRate: 1,
         releaseId: "1.0.0",
       })
     );
@@ -432,6 +549,8 @@ describe("AwsRumProvider", () => {
 
   it("uses the default AWS RUM sample rate when the env value is invalid", async () => {
     publicEnv.AWS_RUM_SAMPLE_RATE = "not-a-number";
+    // Just over the 0.2 default sample rate.
+    randomSpy.mockReturnValue(0.21);
 
     render(
       <AwsRumProvider>
@@ -439,16 +558,12 @@ describe("AwsRumProvider", () => {
       </AwsRumProvider>
     );
 
-    await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
-
-    expect(mockAwsRum).toHaveBeenCalledWith(
-      "test-app-id",
-      "test-version",
-      "eu-west-1",
-      expect.objectContaining({
-        sessionSampleRate: 0.2,
-      })
+    await waitFor(() =>
+      expect(window.sessionStorage.getItem(AWS_RUM_SAMPLING_STORAGE_KEY)).toBe(
+        "0"
+      )
     );
+    expect(mockAwsRum).not.toHaveBeenCalled();
   });
 
   it("does not initialize AWS RUM after unmounting before the import resolves", async () => {
@@ -466,6 +581,120 @@ describe("AwsRumProvider", () => {
 
     expect(mockAwsRum).not.toHaveBeenCalled();
     expect(window.awsRum).toBeUndefined();
+  });
+
+  describe("performance consent", () => {
+    const setRumCookies = (): void => {
+      document.cookie = "cwr_u=test-user; path=/";
+      setAwsRumSessionCookie(true);
+    };
+    const hasCookie = (name: string): boolean =>
+      document.cookie
+        .split("; ")
+        .some((cookie) => cookie.startsWith(`${name}=`));
+
+    it("starts AWS RUM when performance cookies are accepted", async () => {
+      mockPerformanceConsent = true;
+
+      render(<AwsRumProvider />);
+
+      await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+    });
+
+    it("does not start AWS RUM and deletes its cookies when performance cookies are rejected", async () => {
+      mockPerformanceConsent = false;
+      setRumCookies();
+
+      render(<AwsRumProvider />);
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      expect(mockAwsRum).not.toHaveBeenCalled();
+      expect(window.awsRum).toBeUndefined();
+      expect(hasCookie("cwr_u")).toBe(false);
+      expect(hasCookie("cwr_s")).toBe(false);
+    });
+
+    it("waits while no performance choice has been made", async () => {
+      mockPerformanceConsent = undefined;
+      mockStoredPerformanceConsent = undefined;
+
+      const { rerender } = render(<AwsRumProvider />);
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      expect(mockAwsRum).not.toHaveBeenCalled();
+
+      // The regional default or the banner then accepts.
+      mockPerformanceConsent = true;
+      rerender(<AwsRumProvider />);
+
+      await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+    });
+
+    it("uses a stored acceptance before the consent provider reports it, without starting twice", async () => {
+      mockPerformanceConsent = undefined;
+      mockStoredPerformanceConsent = true;
+
+      const { rerender } = render(<AwsRumProvider />);
+      await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+
+      mockPerformanceConsent = true;
+      rerender(<AwsRumProvider />);
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      expect(mockAwsRum).toHaveBeenCalledTimes(1);
+      expect(getMockAwsRumInstance().disable).not.toHaveBeenCalled();
+    });
+
+    it("fails closed outside a cookie consent provider, even with a stored acceptance", async () => {
+      mockHasConsentProvider = false;
+      mockStoredPerformanceConsent = true;
+      setRumCookies();
+
+      render(<AwsRumProvider />);
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+      expect(mockAwsRum).not.toHaveBeenCalled();
+      expect(hasCookie("cwr_u")).toBe(false);
+      expect(hasCookie("cwr_s")).toBe(false);
+    });
+
+    it("stops AWS RUM and deletes its cookies after a later rejection", async () => {
+      mockPerformanceConsent = true;
+      const { rerender } = render(<AwsRumProvider />);
+      await waitFor(() => expect(mockAwsRum).toHaveBeenCalledTimes(1));
+      const awsRumInstance = getMockAwsRumInstance();
+      setRumCookies();
+
+      mockPerformanceConsent = false;
+      rerender(<AwsRumProvider />);
+
+      expect(awsRumInstance.allowCookies).toHaveBeenCalledWith(false);
+      expect(awsRumInstance.disable).toHaveBeenCalledTimes(1);
+      expect(
+        awsRumInstance.allowCookies.mock.invocationCallOrder[0]
+      ).toBeLessThan(awsRumInstance.disable.mock.invocationCallOrder[0] ?? 0);
+      expect(window.awsRum).toBeUndefined();
+      expect(hasCookie("cwr_u")).toBe(false);
+      expect(hasCookie("cwr_s")).toBe(false);
+
+      // A callback the SDK still runs after the rejection cannot bring the
+      // cookies back.
+      awsRumInstance.simulateLateSessionWrite();
+      expect(hasCookie("cwr_u")).toBe(false);
+      expect(hasCookie("cwr_s")).toBe(false);
+
+      mockPathname = `/waves/${OTHER_WAVE_ID}`;
+      rerender(<AwsRumProvider />);
+      expect(awsRumInstance.recordPageView).toHaveBeenCalledTimes(1);
+    });
   });
 
   it("disables AWS RUM and clears the global instance on unmount", async () => {

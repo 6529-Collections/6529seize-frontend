@@ -1,4 +1,11 @@
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import React from "react";
 import MyStreamWaveMyVotesReset from "@/components/brain/my-stream/votes/MyStreamWaveMyVotesReset";
 import { AuthContext } from "@/components/auth/Auth";
@@ -42,7 +49,11 @@ const rqContext = { onDropRateChange: jest.fn() } as any;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  useQueryClientMock.mockReturnValue({ invalidateQueries, setQueriesData });
+  useQueryClientMock.mockReturnValue({
+    invalidateQueries,
+    setQueriesData,
+    getQueryData: jest.fn(),
+  });
   useMutationMock.mockImplementation((config: any) => ({
     mutateAsync: async (param: any) => {
       const result = { id: param.dropId, wave: { id: "wave-1" } };
@@ -114,6 +125,10 @@ test("shows wave available votes when provided", () => {
 
   expect(screen.getByText(/Available in wave/)).toBeInTheDocument();
   expect(screen.getByText("10,463")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: /^Reset / })
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Select all" })).toBeEnabled();
 });
 
 test("hides available votes when missing", () => {
@@ -162,7 +177,9 @@ test("resets votes for selected drops", async () => {
   expect(onResettingChange).not.toHaveBeenCalled();
   expect(removeSelected).not.toHaveBeenCalled();
   expect(invalidateQueries).not.toHaveBeenCalled();
-  fireEvent.click(within(dialog).getByRole("button", { name: "Reset 2 votes" }));
+  fireEvent.click(
+    within(dialog).getByRole("button", { name: "Reset 2 votes" })
+  );
 
   await waitFor(() =>
     expect(onResettingChange).toHaveBeenNthCalledWith(2, false)
@@ -288,7 +305,9 @@ test("cleans up and invalidates once when a later reset fails", async () => {
   expect(onResettingChange).not.toHaveBeenCalled();
   expect(removeSelected).not.toHaveBeenCalled();
   expect(invalidateQueries).not.toHaveBeenCalled();
-  fireEvent.click(within(dialog).getByRole("button", { name: "Reset 2 votes" }));
+  fireEvent.click(
+    within(dialog).getByRole("button", { name: "Reset 2 votes" })
+  );
 
   await waitFor(() =>
     expect(onResettingChange).toHaveBeenNthCalledWith(2, false)
@@ -329,4 +348,99 @@ test("cleans up and invalidates once when a later reset fails", async () => {
     "data-total-count",
     "0"
   );
+});
+
+test.each([
+  { haveDrops: false, isVotingClosed: false },
+  { haveDrops: true, isVotingClosed: true },
+])(
+  "keeps sorting available when reset controls are unavailable (%j)",
+  (state) => {
+    render(
+      <AuthContext.Provider value={auth}>
+        <MyStreamWaveMyVotesReset
+          {...state}
+          toolbarContent={<button type="button">Your vote amount</button>}
+          waveId="wave-1"
+          selected={new Set()}
+          allItemsSelected={false}
+          onToggleSelectAll={jest.fn()}
+          removeSelected={jest.fn()}
+          onResettingChange={jest.fn()}
+        />
+      </AuthContext.Provider>
+    );
+    expect(
+      screen.getByRole("button", { name: "Your vote amount" })
+    ).toBeEnabled();
+    expect(
+      screen.queryByRole("button", { name: "Select all" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Reset votes" })
+    ).not.toBeInTheDocument();
+  }
+);
+
+test("keeps reset progress visible until completion when the last selection disappears", async () => {
+  let finishReset: (() => void) | undefined;
+  useMutationMock.mockReturnValue({
+    mutateAsync: () =>
+      new Promise<void>((resolve) => {
+        finishReset = resolve;
+      }),
+  });
+  const props = {
+    waveId: "wave-1",
+    allItemsSelected: false,
+    toolbarContent: <button type="button">Your vote amount</button>,
+    onToggleSelectAll: jest.fn(),
+    removeSelected: jest.fn(),
+    onResettingChange: jest.fn(),
+  };
+  const { rerender } = render(
+    <AuthContext.Provider value={auth}>
+      <MyStreamWaveMyVotesReset
+        {...props}
+        haveDrops
+        selected={new Set(["a"])}
+      />
+    </AuthContext.Provider>
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Reset 1 vote" }));
+  const dialog = await screen.findByRole("dialog", { name: "Reset 1 vote?" });
+  fireEvent.click(within(dialog).getByRole("button", { name: "Reset vote" }));
+  await waitFor(() => expect(finishReset).toBeDefined());
+  await waitFor(() =>
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  );
+
+  rerender(
+    <AuthContext.Provider value={auth}>
+      <MyStreamWaveMyVotesReset
+        {...props}
+        haveDrops={false}
+        selected={new Set()}
+      />
+    </AuthContext.Provider>
+  );
+  expect(screen.getByRole("button", { name: "Reset votes" })).toBeDisabled();
+  expect(screen.getByText("Resetting…")).toBeInTheDocument();
+  expect(screen.getByTestId("progress")).toHaveAttribute(
+    "data-is-resetting",
+    "true"
+  );
+  expect(screen.getByTestId("progress")).toHaveAttribute(
+    "data-total-count",
+    "1"
+  );
+
+  await act(async () => finishReset?.());
+  expect(
+    screen.queryByRole("button", { name: /^Reset / })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Your vote amount" })
+  ).toBeEnabled();
+  expect(props.onResettingChange).toHaveBeenLastCalledWith(false);
 });

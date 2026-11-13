@@ -1,3 +1,4 @@
+import { getStagingVideoFixtures } from "./stagingVideoFixtures";
 import { expect, test } from "../testHelpers";
 import { gotoReady } from "../support/routeReadiness";
 
@@ -6,14 +7,21 @@ export function defineMobileVideoBatteryTest(
   title: string,
   isSupportedProject: (name: string) => boolean
 ) {
-  test(`${title} @surface @medium @readonly`, async ({ page }, testInfo) => {
+  test(`${title} @surface @medium @readonly`, async ({
+    baseURL,
+    page,
+  }, testInfo) => {
     // Desktop/Electron retain their existing buffering policy. The mobile web
     // caller also keeps its existing staging-only video fixture qualification.
     test.skip(
       !isSupportedProject(testInfo.project.name),
       "This source-unload contract applies to mobile battery-saving environments"
     );
-    await gotoReady(page, "/the-memes/549");
+    const tokenId =
+      baseURL && new URL(baseURL).hostname === "staging.6529.io"
+        ? (await getStagingVideoFixtures(page)).portrait.id
+        : 549;
+    await gotoReady(page, `/the-memes/${tokenId}`);
     const video = page.getByLabel("Video player", { exact: true });
     await video.scrollIntoViewIfNeeded();
     await expect

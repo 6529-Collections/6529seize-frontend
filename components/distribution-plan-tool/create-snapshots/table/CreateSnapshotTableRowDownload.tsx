@@ -5,6 +5,8 @@ import { DistributionPlanToolContext } from "@/components/distribution-plan-tool
 import { FetchResultsType } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable.types";
 import type { DistributionPlanSnapshotToken } from "@/components/allowlist-tool/allowlist-tool.types";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
+import { buildCsvFromRecords } from "@/helpers/csv-export.helpers";
+import { downloadJsonFile } from "@/helpers/json-download.helpers";
 import RoundedJsonIconButton from "@/components/distribution-plan-tool/common/RoundedJsonIconButton";
 import RoundedCsvIconButton from "@/components/distribution-plan-tool/common/RoundedCsvIconButton";
 import { distributionPlanApiFetch } from "@/services/distribution-plan-api";
@@ -27,19 +29,11 @@ export default function CreateSnapshotTableRowDownload({
 
   const downloadJson = (results: DistributionPlanSnapshotToken[]) => {
     const data = JSON.stringify(results);
-    const blob = new Blob([data], { type: "application/json" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "results.json";
-    link.click();
+    downloadJsonFile(data, "results.json");
   };
 
   const downloadCsv = (results: DistributionPlanSnapshotToken[]) => {
-    const csv = [
-      Object.keys(results[0]!).join(","),
-      ...results.map((item) => Object.values(item).join(",")),
-    ].join("\n");
+    const csv = buildCsvFromRecords(results);
 
     const link = document.createElement("a");
     link.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);

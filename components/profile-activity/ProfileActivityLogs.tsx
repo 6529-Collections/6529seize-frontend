@@ -1,6 +1,7 @@
 "use client";
 
-import { PROFILE_ACTIVITY_META } from "./profileActivityTypography";
+import ProfileActivityLogsResults from "./ProfileActivityLogsResults";
+import ProfileNicActivityLogs from "./ProfileNicActivityLogs";
 
 import type { ProfileActivityLog } from "@/entities/IProfile";
 import type { CountlessPage } from "@/helpers/Types";
@@ -8,8 +9,6 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
-import ProfileActivityLogsList from "./list/ProfileActivityLogsList";
-import ProfileActivityLogsSkeleton from "./ProfileActivityLogsSkeleton";
 
 import { useActiveGroup } from "@/contexts/ActiveGroupContext";
 import { convertActivityLogParams } from "@/helpers/profile-logs.helpers";
@@ -21,7 +20,6 @@ import {
 import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import type { CommonSelectItem } from "../utils/select/CommonSelect";
 import CommonTabs from "../utils/select/tabs/CommonTabs";
-import CommonTablePagination from "../utils/table/paginator/CommonTablePagination";
 
 export interface ActivityLogParams {
   readonly page: number;
@@ -60,6 +58,8 @@ export interface ActivityLogParamsConverted {
   readonly log_type: string;
   include_incoming?: string | undefined;
   rating_matter?: string | undefined;
+  activity_scope?: "NIC";
+  cursor?: string;
   profile?: string | undefined;
   target?: string | undefined;
   group_id?: string | undefined;
@@ -70,12 +70,14 @@ export default function ProfileActivityLogs({
   withFilters,
   withMatterFilter = false,
   disableActiveGroup = false,
+  enabled = true,
   children,
 }: {
   readonly initialParams: ActivityLogParams;
   readonly withFilters: boolean;
   readonly withMatterFilter?: boolean | undefined;
   readonly disableActiveGroup?: boolean | undefined;
+  readonly enabled?: boolean | undefined;
   readonly children?: React.ReactNode | undefined;
 }) {
   const { activeGroupId } = useActiveGroup();
@@ -115,44 +117,19 @@ export default function ProfileActivityLogs({
     setCurrentPage(1);
   };
 
-  const [params, setParams] = useState<ActivityLogParamsConverted>(
-    convertActivityLogParams({
-      params: {
-        page: currentPage,
-        pageSize: initialParams.pageSize,
-        logTypes: selectedFilters,
-        matter,
-        targetType,
-        handleOrWallet: initialParams.handleOrWallet,
-        groupId: activeGroupId,
-      },
-      disableActiveGroup: !!disableActiveGroup,
-    })
-  );
-
-  useEffect(() => {
-    setParams(
-      convertActivityLogParams({
-        params: {
-          page: currentPage,
-          pageSize: initialParams.pageSize,
-          logTypes: selectedFilters,
-          matter,
-          targetType,
-          handleOrWallet: initialParams.handleOrWallet,
-          groupId: activeGroupId,
-        },
-        disableActiveGroup: !!disableActiveGroup,
-      })
-    );
-  }, [
-    currentPage,
-    selectedFilters,
-    initialParams.handleOrWallet,
-    targetType,
-    activeGroupId,
-    matter,
-  ]);
+  const params = convertActivityLogParams({
+    params: {
+      page: currentPage,
+      pageSize: initialParams.pageSize,
+      logTypes: selectedFilters,
+      matter,
+      targetType,
+      handleOrWallet: initialParams.handleOrWallet,
+      groupId: activeGroupId,
+    },
+    disableActiveGroup,
+  });
+  const isProfileNic = params.activity_scope === "NIC";
 
   const { isLoading, data: logs } = useQuery<CountlessPage<ProfileActivityLog>>(
     {
@@ -171,6 +148,7 @@ export default function ProfileActivityLogs({
           params: params,
         }),
       placeholderData: keepPreviousData,
+      enabled: enabled && !isProfileNic,
     }
   );
 
@@ -201,7 +179,8 @@ export default function ProfileActivityLogs({
                   activeItem={targetType}
                   filterLabel="Filter direction"
                   setSelected={onTargetType}
-                  size="sm"
+                  variant="connected"
+                  connectedSize="sm"
                 />
               </div>
             )}
@@ -226,7 +205,8 @@ export default function ProfileActivityLogs({
                   activeItem={matter}
                   filterLabel="Filter matter"
                   setSelected={onMatterChange}
-                  size="sm"
+                  variant="connected"
+                  connectedSize="sm"
                 />
               </div>
               {initialParams.handleOrWallet && (
@@ -236,7 +216,8 @@ export default function ProfileActivityLogs({
                     activeItem={targetType}
                     filterLabel="Filter direction"
                     setSelected={onTargetType}
-                    size="sm"
+                    variant="connected"
+                    connectedSize="sm"
                   />
                 </div>
               )}
@@ -254,38 +235,19 @@ export default function ProfileActivityLogs({
           </div>
         )}
       </div>
-      {logs ? (
-        <div>
-          {logs?.data.length ? (
-            <div className="tw-flow-root tw-scroll-py-3 tw-overflow-x-auto tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
-              <ProfileActivityLogsList
-                logs={logs.data}
-                user={initialParams.handleOrWallet}
-              />
-              <CommonTablePagination
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                totalPages={null}
-                haveNextPage={logs.next}
-                small={!!initialParams.handleOrWallet}
-                showTopBorder={false}
-                className="tw-pt-6"
-              />
-            </div>
-          ) : (
-            <div className="tw-py-4">
-              <span
-                className={`${
-                  initialParams.handleOrWallet ? "tw-px-2 sm:tw-px-3" : ""
-                } tw-text-sm tw-font-normal tw-italic tw-text-iron-500 ${PROFILE_ACTIVITY_META}`}
-              >
-                No Activity Log
-              </span>
-            </div>
-          )}
-        </div>
+      {isProfileNic ? (
+        <ProfileNicActivityLogs
+          params={params}
+          user={initialParams.handleOrWallet}
+          enabled={enabled}
+        />
       ) : (
-        <ProfileActivityLogsSkeleton />
+        <ProfileActivityLogsResults
+          logs={logs}
+          user={initialParams.handleOrWallet}
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+        />
       )}
     </div>
   );

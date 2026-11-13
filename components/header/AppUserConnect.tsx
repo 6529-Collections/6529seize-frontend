@@ -1,3 +1,6 @@
+import DeviceSetupMenuAction from "@/components/device-signing/DeviceSetupMenuAction";
+import { isDeviceSecurityStatusEnabled } from "@/components/device-signing/DeviceSecurityStatus";
+import HeaderBookmarksLink from "./user/HeaderBookmarksLink";
 import {
   faPlugCircleMinus,
   faPlugCirclePlus,
@@ -19,6 +22,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import HeaderQRScanner from "./share/HeaderQRScanner";
 import { useChainSwitcher } from "./useChainSwitcher";
+import { signOutAndRemoveLocalData } from "@/components/auth/signOutLocalData";
+import { DisplayedProfileChangedError } from "@/services/auth/displayed-wallet-guard";
 import Link from "next/link";
 
 export default function AppUserConnect({
@@ -28,6 +33,7 @@ export default function AppUserConnect({
 }) {
   const {
     address,
+    hasValidWalletAuth,
     isConnected,
     connectedAccounts,
     seizeConnectFresh,
@@ -35,7 +41,7 @@ export default function AppUserConnect({
     seizeDisconnectAndLogout,
     seizeDisconnectAndLogoutAll,
   } = useSeizeConnectContext();
-  const { setToast } = useContext(AuthContext);
+  const { activeProfileProxy, setToast } = useContext(AuthContext);
   const locale = useBrowserLocale();
   const [isPushSettingsOpen, setIsPushSettingsOpen] = useState(false);
   const [isOpeningConnection, setIsOpeningConnection] = useState(false);
@@ -60,9 +66,12 @@ export default function AppUserConnect({
       } else if (typeof error === "string") {
         errorDetails = error;
       }
-      const toastMessage = errorDetails
+      let toastMessage = errorDetails
         ? `${errorMessage}: ${errorDetails}`
         : errorMessage;
+      if (error instanceof DisplayedProfileChangedError) {
+        toastMessage = error.message;
+      }
       setToast({ message: toastMessage, type: "error" });
     } finally {
       onNavigate();
@@ -135,6 +144,7 @@ export default function AppUserConnect({
 
   const authorizedButtons = (
     <>
+      <HeaderBookmarksLink onClose={onNavigate} />
       <Link
         href="/preferences"
         onClick={onNavigate}
@@ -147,6 +157,13 @@ export default function AppUserConnect({
         />
         <span>{t(locale, "profilePreferences.button")}</span>
       </Link>
+      {isDeviceSecurityStatusEnabled() && (
+        <DeviceSetupMenuAction
+          mobile
+          onClose={onNavigate}
+          showStatus={!hasValidWalletAuth || Boolean(activeProfileProxy)}
+        />
+      )}
       <button
         type="button"
         onClick={() => setIsPushSettingsOpen(true)}
@@ -175,8 +192,9 @@ export default function AppUserConnect({
       <button
         onClick={() => {
           void runAsyncAndNavigate({
-            action: seizeDisconnectAndLogout,
-            errorMessage: "Failed to disconnect and logout",
+            action: () =>
+              signOutAndRemoveLocalData("profile", seizeDisconnectAndLogout),
+            errorMessage: t(locale, "auth.signOut.error.disconnectAndLogout"),
           });
         }}
         className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
@@ -189,8 +207,9 @@ export default function AppUserConnect({
         <button
           onClick={() => {
             void runAsyncAndNavigate({
-              action: seizeDisconnectAndLogoutAll,
-              errorMessage: "Failed to sign out all profiles",
+              action: () =>
+                signOutAndRemoveLocalData("all", seizeDisconnectAndLogoutAll),
+              errorMessage: t(locale, "auth.signOut.error.allProfiles"),
             });
           }}
           className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"

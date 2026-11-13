@@ -20,11 +20,27 @@ if (typeof window !== "undefined") {
 }
 
 import React from "react";
-import { render, screen, waitFor, act } from "@testing-library/react";
+import {
+  render,
+  renderHook,
+  screen,
+  waitFor,
+  act,
+  fireEvent,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropsAll from "@/components/waves/drops/wave-drops-all";
+import {
+  useExpandedReplyThreadsStore,
+  useWaveReplyThreads,
+} from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
 import { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import {
+  fetchDropReplyThreadTarget,
+  type DropReplyThreadTarget,
+} from "@/services/api/drop-reply-thread-target-api";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 
 const BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY =
@@ -32,6 +48,16 @@ const BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY =
 
 // Mock hooks and dependencies
 jest.mock("@/hooks/useVirtualizedWaveDrops");
+jest.mock(
+  "@/components/waves/drops/reply-threads/WaveReplyThreadsContext",
+  () => ({
+    ...jest.requireActual(
+      "@/components/waves/drops/reply-threads/WaveReplyThreadsContext"
+    ),
+    useWaveReplyThreads: jest.fn(() => null),
+  })
+);
+jest.mock("@/services/api/drop-reply-thread-target-api");
 jest.mock("@/hooks/useScrollBehavior");
 jest.mock("@/hooks/useWaveIsTyping");
 jest.mock("@/hooks/useWaveBoostedDrops");
@@ -189,6 +215,8 @@ const createMockDrop = (overrides: Partial<ApiDrop> = {}): ApiDrop =>
   }) as ApiDrop;
 
 type WaveMessagesMock = {
+  isError?: boolean;
+  retryDropMessages?: () => void;
   isLoading?: boolean | undefined;
   isLoadingNextPage?: boolean | undefined;
   hasNextPage?: boolean | undefined;
@@ -354,12 +382,12 @@ function setupMocks(options: MockSetupOptions = {}) {
 }
 
 interface RenderOptions {
-  waveId?: string | undefined;
-  dropId?: string | null | undefined;
-  onReply?: jest.Mock | undefined;
+  waveId?: string;
+  dropId?: string | null;
+  onReply?: jest.Mock;
   onQuote?: jest.Mock | undefined;
-  activeDrop?: ActiveDropState | null | undefined;
-  initialDrop?: number | null | undefined;
+  activeDrop?: ActiveDropState | null;
+  initialDrop?: number | null;
   unreadCount?: number | undefined;
   onDropContentClick?: jest.Mock | undefined;
   winningThreshold?: number | null | undefined;
@@ -419,7 +447,7 @@ describe("WaveDropsAll", () => {
 
       renderComponent();
 
-      expect(screen.getByTestId("circle-loader")).toBeInTheDocument();
+      expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
       expect(screen.queryByTestId("empty-placeholder")).not.toBeInTheDocument();
     });
 
@@ -434,7 +462,7 @@ describe("WaveDropsAll", () => {
 
       renderComponent();
 
-      expect(screen.getByTestId("circle-loader")).toBeInTheDocument();
+      expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
       expect(screen.queryByTestId("drops-list")).not.toBeInTheDocument();
     });
 
@@ -466,6 +494,30 @@ describe("WaveDropsAll", () => {
       expect(screen.getByTestId("empty-placeholder")).toBeInTheDocument();
       expect(screen.queryByTestId("drops-list")).not.toBeInTheDocument();
     });
+
+    it.each([false, true])(
+      "shows thread recovery without losing cached drops (cached: %s)",
+      (cached) => {
+        const retryDropMessages = jest.fn();
+        setupMocks({
+          waveMessages: {
+            isError: true,
+            retryDropMessages,
+            drops: cached ? [createMockDrop()] : [],
+          },
+        });
+        renderComponent({ dropId: "target-drop" });
+        expect(screen.getByRole("alert")).toHaveTextContent(
+          "This thread could not be loaded."
+        );
+        expect(
+          screen.queryByTestId("empty-placeholder")
+        ).not.toBeInTheDocument();
+        expect(!!screen.queryByTestId("drops-list")).toBe(cached);
+        fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+        expect(retryDropMessages).toHaveBeenCalledTimes(1);
+      }
+    );
   });
 
   describe("Content Rendering", () => {
@@ -784,6 +836,26 @@ describe("WaveDropsAll", () => {
   });
 
   describe("Navigation and Quote Handling", () => {
+    it("keeps row navigation callbacks stable when a message arrives", () => {
+      const firstDrop = createMockDrop({ id: "first", serial_no: 1 });
+      const newDrop = createMockDrop({ id: "new", serial_no: 2 });
+      const { getWaveMessages, setWaveMessages } = setupMocks({
+        waveMessages: { drops: [firstDrop] },
+      });
+      const { props, rerender } = renderComponent();
+      const { onQuoteClick, onReplyClick } = dropsProps;
+
+      setWaveMessages({
+        ...getWaveMessages(),
+        drops: [newDrop, firstDrop],
+      });
+      rerender(<WaveDropsAll {...props} />);
+
+      expect(dropsProps.drops).toEqual([newDrop, firstDrop]);
+      expect(dropsProps.onQuoteClick).toBe(onQuoteClick);
+      expect(dropsProps.onReplyClick).toBe(onReplyClick);
+    });
+
     it("navigates to different wave when quote is from another wave", () => {
       const mockDrop = createMockDrop({
         wave: {
@@ -844,6 +916,61 @@ describe("WaveDropsAll", () => {
         expect(dropsProps.suspendLightDropHydration).toBe(false);
       });
     });
+
+    it("opens a quoted reply after the initial link is removed from the URL", async () => {
+      const { result } = renderHook(useExpandedReplyThreadsStore);
+      const waveId = "current-wave";
+      const store = result.current;
+      const replyThreads = {
+        waveId,
+        store,
+        collapseAll: true,
+        getWave: jest.fn<ApiWave, []>(),
+      };
+      const wave = { ...createMockDrop().wave, id: waveId };
+      setupMocks({
+        waveMessages: { drops: [createMockDrop({ wave, serial_no: 10 })] },
+      });
+      const lookup = Promise.withResolvers<DropReplyThreadTarget | null>();
+      const target = {
+        parentDropId: "thread-root",
+        parentSerialNo: 4,
+        replySerialNo: 42,
+      };
+      const abortLookup = jest.fn();
+      const replyThreadsMock = jest.mocked(useWaveReplyThreads);
+      replyThreadsMock.mockReturnValue(replyThreads);
+      jest
+        .mocked(fetchDropReplyThreadTarget)
+        .mockReturnValueOnce(lookup.promise);
+
+      try {
+        const { props, rerender } = renderComponent({
+          waveId,
+          initialDrop: 10,
+        });
+        MockAbortController.mockImplementationOnce(() => ({
+          abort: abortLookup,
+          signal: mockSignal,
+        }));
+        act(() => {
+          dropsProps.onQuoteClick(createMockDrop({ wave, serial_no: 42 }));
+        });
+        expect(fetchDropReplyThreadTarget).toHaveBeenCalledWith(
+          expect.objectContaining({ waveId, serialNo: 42 })
+        );
+
+        replyThreadsMock.mockReturnValue({ ...replyThreads });
+        rerender(<WaveDropsAll {...props} initialDrop={null} />);
+        expect(abortLookup).not.toHaveBeenCalled();
+
+        await act(async () => lookup.resolve(target));
+        expect(store.getLinkedReply()).toEqual(target);
+        expect(store.isExpanded(target.parentDropId)).toBe(true);
+      } finally {
+        replyThreadsMock.mockReturnValue(null);
+      }
+    });
   });
 
   describe("Scroll Behavior Integration", () => {
@@ -856,7 +983,8 @@ describe("WaveDropsAll", () => {
       renderComponent();
 
       expect(scrollButtonProps.isAtBottom).toBe(false);
-      expect(scrollButtonProps.scrollToBottom).toBe(mockForcePinToBottom);
+      act(() => scrollButtonProps.scrollToBottom());
+      expect(mockForcePinToBottom).toHaveBeenCalled();
     });
 
     it("calls forcePinToBottom when scroll button is clicked", async () => {
@@ -928,6 +1056,72 @@ describe("WaveDropsAll", () => {
       expect(mockScrollToVisualBottom).toHaveBeenCalled();
     });
 
+    it("keeps a pending shared target through URL cleanup and incoming messages", async () => {
+      const existingDrop = createMockDrop({ id: "drop-50", serial_no: 50 });
+      const { setWaveMessages } = setupMocks({
+        waveMessages: { drops: [existingDrop] },
+        scrollBehavior: { shouldPinToBottom: true },
+      });
+      mockFetchNextPage.mockReturnValue(new Promise(() => {}));
+      const { rerender, props } = renderComponent({ initialDrop: 10 });
+      rerender(<WaveDropsAll {...props} initialDrop={null} />);
+      setWaveMessages({
+        isLoading: false,
+        isLoadingNextPage: false,
+        hasNextPage: false,
+        drops: [createMockDrop({ id: "drop-51", serial_no: 51 }), existingDrop],
+      });
+      rerender(<WaveDropsAll {...props} initialDrop={null} />);
+      act(() => {
+        jest.advanceTimersByTime(150);
+      });
+      expect(mockFetchNextPage).toHaveBeenCalledWith(
+        expect.objectContaining({ targetSerialNo: 10 }),
+        null
+      );
+      expect(dropsProps.suspendLightDropHydration).toBe(true);
+      expect(mockScrollToVisualBottom).not.toHaveBeenCalled();
+    });
+
+    it("accepts another shared target in the same mounted wave", async () => {
+      setupMocks({
+        waveMessages: { drops: [createMockDrop({ serial_no: 50 })] },
+      });
+      mockWaitAndRevealDrop.mockResolvedValue(false);
+      const { rerender, props } = renderComponent();
+      rerender(<WaveDropsAll {...props} initialDrop={10} />);
+      await waitFor(() =>
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 15000)
+      );
+      rerender(<WaveDropsAll {...props} initialDrop={null} />);
+      rerender(<WaveDropsAll {...props} initialDrop={20} />);
+      await waitFor(() =>
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(20, 15000)
+      );
+    });
+
+    it("cancels a pending bottom scroll when a shared target arrives", () => {
+      const existingDrop = createMockDrop({ id: "drop-50", serial_no: 50 });
+      const { setWaveMessages } = setupMocks({
+        waveMessages: { drops: [existingDrop] },
+        scrollBehavior: { shouldPinToBottom: true },
+      });
+      mockFetchNextPage.mockReturnValue(new Promise(() => {}));
+      const { rerender, props } = renderComponent();
+      setWaveMessages({
+        isLoading: false,
+        isLoadingNextPage: false,
+        hasNextPage: false,
+        drops: [createMockDrop({ id: "drop-51", serial_no: 51 }), existingDrop],
+      });
+      rerender(<WaveDropsAll {...props} />);
+      rerender(<WaveDropsAll {...props} initialDrop={10} />);
+      act(() => {
+        jest.advanceTimersByTime(150);
+      });
+      expect(mockScrollToVisualBottom).not.toHaveBeenCalled();
+    });
+
     it("does not scroll to bottom for temp drops when user is reading", () => {
       const tempDrop = createMockDrop({ id: "temp-123", serial_no: 1 });
 
@@ -969,7 +1163,8 @@ describe("WaveDropsAll", () => {
 
       // Verify scroll button receives isAtBottom state
       expect(scrollButtonProps.isAtBottom).toBe(true);
-      expect(scrollButtonProps.scrollToBottom).toBe(mockForcePinToBottom);
+      act(() => scrollButtonProps.scrollToBottom());
+      expect(mockForcePinToBottom).toHaveBeenCalled();
     });
 
     it("integrates with useScrollBehavior hook for scroll intent detection", async () => {
@@ -1344,7 +1539,7 @@ describe("WaveDropsAll", () => {
       expect(dropsProps.suspendLightDropHydration).toBe(true);
 
       await waitFor(() => {
-        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 15000);
       });
 
       await waitFor(() => {
@@ -1352,84 +1547,250 @@ describe("WaveDropsAll", () => {
       });
     });
 
-    it("keeps light drop hydration suspended until successful target scroll settles", async () => {
-      setupMocks({
-        waveMessages: {
-          drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
-          hasNextPage: true,
-          isLoading: false,
-          isLoadingNextPage: false,
-        },
-      });
+    it.each([true, false])(
+      "keeps hydration suspended until scrolling settles (smooth reaches target: %s)",
+      async (smoothReachesTarget) => {
+        setupMocks({
+          waveMessages: {
+            drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+            hasNextPage: true,
+            isLoading: false,
+            isLoadingNextPage: false,
+          },
+        });
 
-      mockFetchNextPage.mockResolvedValueOnce([]);
-      mockWaitAndRevealDrop.mockResolvedValueOnce(true);
+        mockFetchNextPage.mockResolvedValueOnce([]);
+        mockWaitAndRevealDrop.mockResolvedValueOnce(true);
 
-      renderComponent({ initialDrop: 10 });
+        renderComponent({ initialDrop: 10 });
 
-      const targetElement = document.createElement("div");
-      const scrollTo = jest.fn();
-      mockScrollContainerRef.current.style.flexDirection = "column-reverse";
-      Object.defineProperty(mockScrollContainerRef.current, "clientHeight", {
-        configurable: true,
-        value: 400,
-      });
-      Object.defineProperty(mockScrollContainerRef.current, "scrollHeight", {
-        configurable: true,
-        value: 1000,
-      });
-      mockScrollContainerRef.current.scrollTop = 20;
-      mockScrollContainerRef.current.scrollTo = scrollTo;
-      Object.defineProperty(
-        mockScrollContainerRef.current,
-        "getBoundingClientRect",
-        {
+        const targetElement = document.createElement("div");
+        const scrollTo = jest.fn();
+        mockScrollContainerRef.current.style.flexDirection = "column-reverse";
+        Object.defineProperty(mockScrollContainerRef.current, "clientHeight", {
+          configurable: true,
+          value: 400,
+        });
+        Object.defineProperty(mockScrollContainerRef.current, "scrollHeight", {
+          configurable: true,
+          value: 1000,
+        });
+        mockScrollContainerRef.current.scrollTop = 20;
+        mockScrollContainerRef.current.scrollTo = scrollTo;
+        Object.defineProperty(
+          mockScrollContainerRef.current,
+          "getBoundingClientRect",
+          {
+            configurable: true,
+            value: () => ({
+              top: 100,
+              bottom: 500,
+              height: 400,
+              left: 0,
+              right: 300,
+              width: 300,
+            }),
+          }
+        );
+        Object.defineProperty(targetElement, "getBoundingClientRect", {
           configurable: true,
           value: () => ({
-            top: 100,
-            bottom: 500,
-            height: 400,
+            top: smoothReachesTarget ? 150 : -500,
+            bottom: smoothReachesTarget ? 210 : -440,
+            height: 60,
             left: 0,
             right: 300,
             width: 300,
           }),
-        }
-      );
-      Object.defineProperty(targetElement, "getBoundingClientRect", {
-        configurable: true,
-        value: () => ({
-          top: 150,
-          bottom: 210,
-          height: 60,
-          left: 0,
-          right: 300,
-          width: 300,
-        }),
-      });
-      dropsProps.targetDropRef.current = targetElement;
-
-      expect(dropsProps.suspendLightDropHydration).toBe(true);
-
-      await waitFor(() => {
-        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
-      });
-
-      await waitFor(() => {
-        expect(scrollTo).toHaveBeenCalledWith({
-          behavior: "smooth",
-          top: -100,
         });
-      });
-      expect(dropsProps.suspendLightDropHydration).toBe(true);
+        dropsProps.targetDropRef.current = targetElement;
 
-      act(() => {
-        jest.advanceTimersByTime(600);
-      });
+        expect(dropsProps.suspendLightDropHydration).toBe(true);
 
-      await waitFor(() => {
+        await waitFor(() => {
+          expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 15000);
+        });
+
+        await waitFor(() => {
+          expect(scrollTo).toHaveBeenCalledWith({
+            behavior: "smooth",
+            top: smoothReachesTarget ? -100 : -600,
+          });
+        });
+        expect(dropsProps.suspendLightDropHydration).toBe(true);
+
+        act(() => {
+          jest.advanceTimersByTime(600);
+        });
+
+        if (!smoothReachesTarget) {
+          expect(scrollTo).toHaveBeenLastCalledWith({
+            behavior: "auto",
+            top: -600,
+          });
+        }
+        await waitFor(() => {
+          expect(dropsProps.suspendLightDropHydration).toBe(false);
+        });
+      }
+    );
+
+    it.each(["wheel", "touchstart", "pointerdown", "keydown"])(
+      "keeps a settled target visible through layout changes until %s input",
+      async (event) => {
+        const visibilityCallbacks: (() => void)[] = [];
+        const disconnect = jest.fn();
+        const originalObserver = globalThis.IntersectionObserver;
+        globalThis.IntersectionObserver = jest
+          .fn()
+          .mockImplementation((callback: IntersectionObserverCallback) => {
+            const instance = {
+              root: null,
+              rootMargin: "0px",
+              thresholds: [0, 1],
+              takeRecords: () => [],
+              observe: jest.fn(),
+              unobserve: jest.fn(),
+              disconnect,
+            };
+            visibilityCallbacks.push(() => callback([], instance));
+            return instance;
+          });
+        try {
+          setupMocks({
+            waveMessages: {
+              drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+              hasNextPage: true,
+              isLoading: false,
+              isLoadingNextPage: false,
+            },
+          });
+          mockFetchNextPage.mockResolvedValueOnce([]);
+          mockWaitAndRevealDrop.mockResolvedValueOnce(true);
+          renderComponent({ initialDrop: 10 });
+
+          const container = mockScrollContainerRef.current;
+          const target = document.createElement("div");
+          const content = document.createElement("div");
+          content.appendChild(target);
+          container.appendChild(content);
+          container.style.flexDirection = "column-reverse";
+          let scrollHeight = 1000;
+          let targetTop = 150;
+          Object.defineProperties(container, {
+            clientHeight: { configurable: true, value: 400 },
+            scrollHeight: { configurable: true, get: () => scrollHeight },
+            getBoundingClientRect: {
+              configurable: true,
+              value: () => ({ top: 100, bottom: 500, height: 400 }),
+            },
+          });
+          target.getBoundingClientRect = () =>
+            ({ top: targetTop, bottom: targetTop + 60, height: 60 }) as DOMRect;
+          const scrollTo = jest.fn();
+          container.scrollTo = scrollTo;
+          dropsProps.targetDropRef.current = target;
+          await waitFor(() => expect(scrollTo).toHaveBeenCalled());
+          await act(async () => {
+            await jest.advanceTimersByTimeAsync(600);
+          });
+          expect(dropsProps.suspendLightDropHydration).toBe(false);
+          scrollTo.mockClear();
+
+          act(() => visibilityCallbacks.forEach((callback) => callback()));
+          expect(scrollTo).not.toHaveBeenCalled();
+          // A selected row can move even when the total list height is unchanged.
+          targetTop = -500;
+          act(() => visibilityCallbacks.forEach((callback) => callback()));
+          expect(scrollTo).toHaveBeenCalledWith({
+            behavior: "auto",
+            top: -600,
+          });
+
+          scrollTo.mockClear();
+          act(() =>
+            container.dispatchEvent(new Event(event, { bubbles: true }))
+          );
+          expect(disconnect).toHaveBeenCalled();
+          scrollHeight = 1400;
+          act(() => visibilityCallbacks.forEach((callback) => callback()));
+          expect(scrollTo).not.toHaveBeenCalled();
+        } finally {
+          globalThis.IntersectionObserver = originalObserver;
+        }
+      }
+    );
+
+    it.each([false, true])(
+      "keeps the selected serial anchored when hydration replaces its row (separate commits: %s)",
+      async (separateCommits) => {
+        setupMocks({
+          waveMessages: {
+            drops: [createMockDrop({ id: "drop-50", serial_no: 50 })],
+            hasNextPage: true,
+            isLoading: false,
+            isLoadingNextPage: false,
+          },
+        });
+        mockFetchNextPage.mockResolvedValueOnce([]);
+        mockWaitAndRevealDrop.mockResolvedValueOnce(true);
+        renderComponent({ initialDrop: 10 });
+
+        const container = mockScrollContainerRef.current;
+        document.body.appendChild(container);
+        container.style.flexDirection = "column-reverse";
+        Object.defineProperties(container, {
+          clientHeight: { configurable: true, value: 400 },
+          scrollHeight: { configurable: true, value: 1000 },
+          getBoundingClientRect: {
+            configurable: true,
+            value: () => ({ top: 100, bottom: 500, height: 400 }),
+          },
+        });
+        const target = document.createElement("div");
+        target.id = "drop-10";
+        target.getBoundingClientRect = () =>
+          ({ top: 150, bottom: 210, height: 60 }) as DOMRect;
+        container.appendChild(target);
+        dropsProps.targetDropRef.current = target;
+        const scrollTo = jest.fn();
+        container.scrollTo = scrollTo;
+        await waitFor(() => expect(scrollTo).toHaveBeenCalled());
+        await act(async () => {
+          await jest.advanceTimersByTimeAsync(600);
+        });
         expect(dropsProps.suspendLightDropHydration).toBe(false);
-      });
-    });
+        scrollTo.mockClear();
+
+        // FULL drop content has a different React key from its LIGHT placeholder.
+        // The ref is cleared with serialTarget; recovery must use the serial ID.
+        dropsProps.targetDropRef.current = null;
+        const hydratedTarget = document.createElement("div");
+        hydratedTarget.id = "drop-10";
+        hydratedTarget.getBoundingClientRect = () =>
+          ({ top: -500, bottom: -440, height: 60 }) as DOMRect;
+        if (separateCommits) {
+          await act(async () => {
+            target.remove();
+          });
+          expect(scrollTo).not.toHaveBeenCalled();
+        }
+        await act(async () => {
+          if (separateCommits) container.appendChild(hydratedTarget);
+          else target.replaceWith(hydratedTarget);
+        });
+        expect(scrollTo).toHaveBeenCalledWith({ behavior: "auto", top: -600 });
+
+        scrollTo.mockClear();
+        act(() =>
+          container.dispatchEvent(new Event("wheel", { bubbles: true }))
+        );
+        await act(async () => {
+          hydratedTarget.replaceWith(target);
+        });
+        expect(scrollTo).not.toHaveBeenCalled();
+      }
+    );
 
     it("waits beyond three seconds for a delayed target row to render", async () => {
       setupMocks({
@@ -1475,7 +1836,7 @@ describe("WaveDropsAll", () => {
       );
 
       await waitFor(() => {
-        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 15000);
       });
 
       await act(async () => {
@@ -1592,7 +1953,7 @@ describe("WaveDropsAll", () => {
       dropsProps.targetDropRef.current = targetElement;
 
       await waitFor(() => {
-        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10);
+        expect(mockWaitAndRevealDrop).toHaveBeenCalledWith(10, 15000);
       });
 
       await waitFor(() => {
@@ -1645,7 +2006,7 @@ describe("WaveDropsAll", () => {
       renderComponent();
 
       // Should show the loader instead of the empty placeholder while hydrating
-      expect(screen.getByTestId("circle-loader")).toBeInTheDocument();
+      expect(screen.getByTestId("wave-chat-loading")).toBeInTheDocument();
       expect(screen.queryByTestId("drops-list")).not.toBeInTheDocument();
       expect(screen.queryByTestId("empty-placeholder")).not.toBeInTheDocument();
     });

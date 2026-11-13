@@ -1,10 +1,12 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { UNDERLINE_TAB_INDICATOR_CLASSES } from "@/components/common/underlineTabStyles";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   faChevronLeft,
@@ -12,14 +14,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useParams, usePathname, useSearchParams } from "next/navigation";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import UserPageTab from "./UserPageTab";
 import {
   DEFAULT_USER_PAGE_TAB,
@@ -36,11 +31,9 @@ import {
 import { getUserProfileTabsMessage } from "./user-tabs.messages";
 import { useUserPageTabFallbackRedirect } from "./useUserPageTabFallbackRedirect";
 import { useUserPageTabIndicator } from "./useUserPageTabIndicator";
+import { useUserPageNavigation } from "./UserPageNavigation";
 
 const DEFAULT_TAB = DEFAULT_USER_PAGE_TAB;
-const subscribeToClientRender = () => () => undefined;
-const getClientRenderSnapshot = () => true;
-const getServerRenderSnapshot = () => false;
 
 const resolveTabFromPath = (pathname: string): UserPageTabKey => {
   const segments = pathname.split("/").filter(Boolean);
@@ -55,13 +48,14 @@ export default function UserPageTabs({
   readonly initialProfile: ApiIdentity;
 }) {
   const pathname = usePathname();
+  const navigation = useUserPageNavigation();
   const params = useParams();
   const handleOrWallet = params["user"]?.toString() ?? "";
   const searchParams = useSearchParams();
   const searchString = searchParams.toString();
+  const isClientHydrated = useHasHydrated();
   // Subscriptions is omitted from the server HTML and the first hydration
-  // render (the server cannot identify the native shell), and on iOS until the
-  // country check allows purchasing.
+  // render, then stays hidden in the native iOS app.
   const { hideNftPurchasing, shouldRedirect: mayRedirectFromHiddenTab } =
     useNftPurchasingVisibility();
   const { showWaves, connectedProfile, fetchingProfile } = useAuth();
@@ -73,22 +67,28 @@ export default function UserPageTabs({
   const resolvedViewedProfile = viewedProfile ?? initialProfile;
 
   const isOwnProfile = useMemo(() => {
-    return isOwnProfileRoute({
-      connectedProfile,
-      handleOrWallet,
-    });
-  }, [connectedProfile, handleOrWallet]);
+    return (
+      isClientHydrated &&
+      isOwnProfileRoute({ connectedProfile, handleOrWallet })
+    );
+  }, [connectedProfile, handleOrWallet, isClientHydrated]);
 
   const hasProfileWave = Boolean(resolvedViewedProfile.profile_wave_id);
 
   const visibilityContext = useMemo<UserPageVisibilityContext>(
     () => ({
-      showWaves,
+      showWaves: isClientHydrated && showWaves,
       hasProfileWave,
       hideSubscriptions: hideNftPurchasing,
       isOwnProfile,
     }),
-    [hasProfileWave, hideNftPurchasing, isOwnProfile, showWaves]
+    [
+      hasProfileWave,
+      hideNftPurchasing,
+      isClientHydrated,
+      isOwnProfile,
+      showWaves,
+    ]
   );
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -97,11 +97,6 @@ export default function UserPageTabs({
   const [canScrollRight, setCanScrollRight] = useState(false);
   const { activeIndicator, updateActiveIndicator } =
     useUserPageTabIndicator(contentContainerRef);
-  const isClientHydrated = useSyncExternalStore(
-    subscribeToClientRender,
-    getClientRenderSnapshot,
-    getServerRenderSnapshot
-  );
 
   const resolvedTabFromPath = useMemo<UserPageTabKey>(
     () => resolveTabFromPath(pathname),
@@ -169,7 +164,7 @@ export default function UserPageTabs({
     [resolvedTabFromPath, visibleTabs]
   );
 
-  const activeTab = useMemo<UserPageTabKey>(() => {
+  const resolvedActiveTab = useMemo<UserPageTabKey>(() => {
     // While the redirect is deferred the URL stays on the hidden tab, so no
     // other tab is highlighted as current.
     if (resolvedTabIsVisible || shouldSuppressSubscriptionsRedirect) {
@@ -186,6 +181,7 @@ export default function UserPageTabs({
     shouldSuppressSubscriptionsRedirect,
     visibleTabs,
   ]);
+  const activeTab = navigation?.pendingTab ?? resolvedActiveTab;
 
   useUserPageTabFallbackRedirect({
     handleOrWallet,
@@ -253,13 +249,25 @@ export default function UserPageTabs({
   const scrollLeft = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    container.scrollBy({ left: -150, behavior: "smooth" });
+    container.scrollBy({
+      left: -150,
+      behavior: globalThis.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
+        ? "instant"
+        : "smooth",
+    });
   };
 
   const scrollRight = () => {
     const container = scrollContainerRef.current;
     if (!container) return;
-    container.scrollBy({ left: 150, behavior: "smooth" });
+    container.scrollBy({
+      left: 150,
+      behavior: globalThis.matchMedia("(prefers-reduced-motion: reduce)")
+        .matches
+        ? "instant"
+        : "smooth",
+    });
   };
 
   return (
@@ -287,7 +295,7 @@ export default function UserPageTabs({
           ))}
           <span
             aria-hidden="true"
-            className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-h-0.5 tw-w-px tw-origin-left tw-bg-primary-400 tw-transition-[transform,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
+            className={UNDERLINE_TAB_INDICATOR_CLASSES}
             style={{
               opacity: activeIndicator.visible ? 1 : 0,
               transform: `translate3d(${activeIndicator.left}px, 0, 0) scaleX(${activeIndicator.width})`,

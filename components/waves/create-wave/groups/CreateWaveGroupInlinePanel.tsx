@@ -20,6 +20,8 @@ export default function CreateWaveGroupInlinePanel(
       collapseOnClickAway={false}
       showChooseGroup={false}
       isWaveAccessEditor={true}
+      mobileCriteriaNavigation
+      simplifyCriteriaCopy
     />
   );
 }

@@ -41,6 +41,10 @@ jest.mock("@lexical/react/LexicalHistoryPlugin", () => ({
 jest.mock("@lexical/react/LexicalOnChangePlugin", () => ({
   OnChangePlugin: () => <div />,
 }));
+jest.mock(
+  "@/components/drops/create/lexical/plugins/SelectAllContentsPlugin",
+  () => ({ __esModule: true, default: () => null })
+);
 jest.mock("@/components/drops/create/lexical/plugins/MarkdownShortcutPlugin", () => ({
   MarkdownShortcutPlugin: () => <div />,
 }));
@@ -185,9 +189,9 @@ it("shows chat message placeholder for the base chat composer", () => {
   );
 
   expect(screen.getByTestId("placeholder")).toHaveTextContent(
-    "Write a chat message"
+    "Write a message"
   );
-  expect(screen.getByText("Write a chat message")).toHaveClass("tw-truncate");
+  expect(screen.getByText("Write a message")).toHaveClass("tw-truncate");
 });
 
 it("renders validation helper text when provided", () => {

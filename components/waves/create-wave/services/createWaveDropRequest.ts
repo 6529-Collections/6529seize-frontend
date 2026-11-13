@@ -1,13 +1,15 @@
 import type { CreateDropConfig } from "@/entities/IDrop";
 import type { ApiCreateWaveDropRequest } from "@/generated/models/ApiCreateWaveDropRequest";
+import type { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { toApiCreateDropPart } from "../../utils/createDropRequestPart";
 import { generateDropPart } from "./waveMediaService";
 
 export const getCreateWaveDropRequest = async (
-  drop: CreateDropConfig
+  drop: CreateDropConfig,
+  purpose: ApiMediaUploadPurpose
 ): Promise<ApiCreateWaveDropRequest> => {
   const dropParts = await Promise.all(
-    drop.parts.map((part) => generateDropPart(part))
+    drop.parts.map((part) => generateDropPart(part, purpose))
   );
 
   return {

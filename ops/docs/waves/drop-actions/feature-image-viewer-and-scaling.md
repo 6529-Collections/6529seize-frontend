@@ -14,6 +14,13 @@ small loader until the original is ready; **View optimized** switches back or
 cancels a pending switch. Moving to another image resets this choice. Thread images have no HD control or GIF badge. In the Memes submission artwork
 view, the HD control is always visible for both still images and GIFs, including
 on touch devices. The initial artwork and popup share the selected quality.
+On desktop, GIF artwork in the single-submission view tries animated previews
+first. If those previews are unavailable, the original animation loads
+automatically; no HD click is needed. Mobile browsers, tablets, and the native
+mobile app keep bounded previews and require HD to load the original. The
+improved artwork loading indicator is shared across all platforms.
+HD highlights when the original is selected. Choose
+**View optimized** to return to the preview or cancel the original load.
 
 ## Location in the Site
 
@@ -36,6 +43,15 @@ on touch devices. The initial artwork and popup share the selected quality.
    wide and tall and constrained to the available space, while their preview loads. It
    disappears when the preview is ready; failed previews use the existing
    retry or unavailable state. Reduced-motion settings disable the pulse. The placeholder uses a fallback size, not the GIF’s actual dimensions.
+   GIF artwork in submission, leaderboard, participation, and winner cards instead
+   shows a subtle backdrop filling the reserved media frame with a centered spinner.
+   In the single-submission view on every platform, this same indicator stays
+   visible while an original loads until the animation is ready, without a separate
+   “Loading original GIF” stage. An available fallback preview stays behind it.
+   Reduced-motion settings disable the spin; HD remains available during loading.
+   These frames are reserved viewing space, not the GIF's measured dimensions.
+   Card previews keep their existing GIF processing limits and do not load the
+   original animation automatically.
 3. Click or tap the image to open the modal viewer.
 4. Zoom the image and use modal controls:
    - `Open in Browser` opens the source URL in a new tab.
@@ -48,6 +64,9 @@ on touch devices. The initial artwork and popup share the selected quality.
    - `Reset zoom` appears after zooming in.
    - `Close` exits the modal.
 5. Close with the close button, backdrop click, or `Escape`.
+   Opening, navigating and closing the viewer keeps the background Wave header,
+   message input and conversation scroll position in place, including in the
+   iPhone app after dismissing the keyboard.
 
 ## Common Scenarios
 
@@ -64,7 +83,7 @@ on touch devices. The initial artwork and popup share the selected quality.
   including inside single-drop views.
 - Touch devices show a static loading placeholder for attachment images.
 - Non-touch devices show an animated pulse placeholder for attachment images.
-- Competition-style artwork panels center image content in the frame.
+- Decision-style artwork panels center image content in the frame.
 
 ## Edge Cases
 
@@ -90,21 +109,49 @@ on touch devices. The initial artwork and popup share the selected quality.
   generate its responsive preview. Next may pass through source bytes for
   animations in other raster formats or when it cannot re-encode a valid image.
 - If no supported preview is available, the image frame stays in place and shows
-  `Preview unavailable`. Thread images retry briefly while new uploads process,
-  then offer `Retry`; the viewer offers `Retry preview`.
+  `Preview unavailable`. First-party thread images retry about every eleven
+  seconds for about a minute, then offer `Retry`; the viewer offers `Retry preview`.
+  A submitted message and its text stay visible while its image processes.
+  Once processing completes, a delayed update does not return that image to
+  the processing placeholder.
 - `Open in browser` / `Open in new tab` and `Download media` deliberately access
   the original. In the native app, downloads go directly to a temporary native
   file and the share sheet, without loading the file into the image viewer.
+- `Open in browser` / `Open in new tab` appears only for `https:` media (and
+  IPFS/Arweave media through the 6529 media resolver). The new tab opens
+  without a link back to the page or a referrer.
+- A file the app cannot show appears as an `Unknown file` card. It can be
+  opened (after a second press, `Open anyway — may be unsafe`) only when it
+  is `https:` or IPFS/Arweave media through the 6529 media resolver; any
+  other link is shown as text with nothing to open.
+- `Download media` and attachment downloads save a file under a type and
+  extension the app decides. A document, data, archive or media extension
+  (for example `.docx`, `.zip`, `.csv`, `.heic`) is kept; the file is saved
+  as that media type only when its content confirms the format, otherwise as
+  a plain download that is never opened in the browser. A file with no or an
+  unknown extension takes the format its content shows. Files whose last
+  extension can run or render active content (for example `.html`, `.svg`,
+  `.exe`, `invoice.pdf.exe`), content that is an HTML, SVG or XML document
+  under a non-text name, and files with no recognisable format are saved as
+  `.bin`. File names drop path separators, control characters and reserved
+  names.
 - GIF previews use a versioned animation-preserving resize path. The worker can
   reduce preview resolution to retain every frame within its output budget.
   GIFs that exceed processing limits fall back to a legacy preview, which may
-  be static. Choose **View original** with the popup toolbar's HD icon if the
-  preview does not animate. The original loads only after that action and may
-  use more bandwidth and device memory.
+  be static. In the desktop single-submission artwork view and its popup, unavailable
+  animated previews automatically load the original GIF. An available legacy
+  preview stays visible until the original is ready. This can use more
+  bandwidth and device memory. Choosing **View optimized** prevents another
+  automatic switch for that artwork. Mobile browsers, tablets, native mobile apps,
+  feeds, grids, thread images, and supplemental
+  images keep their optimized previews; choose **View original** with the popup
+  toolbar's HD icon to load their original GIF deliberately.
 - If loading the original fails, the viewer restores its preview, announces the
   failure, and lets you try again. The HD button shows a warning icon and its
   tooltip explains the failure. Selecting it retries and restores the HD icon;
   no playback controls or messages cover the artwork.
+  An automatic desktop submission GIF load is attempted once per artwork view; a failure
+  does not repeatedly reload the original when the popup is opened.
 - If a fullscreen request is denied or interrupted, the modal stays open and
   the other image actions continue to work.
 - If fullscreen is unavailable, users can still open the source in a new tab.

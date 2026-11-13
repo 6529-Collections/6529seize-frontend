@@ -1,3 +1,6 @@
+import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-GB.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-GB.json";
+import networkTdhConsolidationMessages from "@/i18n/messages/networkTdhConsolidation.en-GB.json";
 import { EN_US_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { EN_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
@@ -14,10 +17,23 @@ import { EN_US_THE_MEMES_COLLECTORS_MESSAGES as EN_GB_THE_MEMES_COLLECTORS_MESSA
 import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
-import type { MessageKey } from "@/i18n/messages/en-US";
+import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
+  "waves.historyGap.load": "Load missed messages",
+  "waves.historyGap.loaded": "Missed messages loaded",
+  "waves.historyGap.loading": "Loading missed messages…",
+  "waves.historyGap.retry": "Could not load missed messages. Try again",
+
+  "waves.myVotes.sort": "Sort by",
+  "waves.myVotes.sort.voteAmount": "Your vote amount",
+  "waves.myVotes.sort.leaderboard": "Leaderboard position",
+  "waves.myVotes.sort.lastVoted": "Last voted",
+  ...safeCollectingMessages,
+  ...delegationTapGuideMessages,
+  ...networkTdhConsolidationMessages,
   "network.groupFilter.filter": "Filter",
   "network.groupFilter.all": "All filters",
   "network.groupFilter.level": "Level",
@@ -36,6 +52,8 @@ export const EN_GB_MESSAGES = {
   "singleDrop.shared": "Link shared",
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
+  "singleDrop.loading": "Loading…",
+  "singleDrop.loadError": "This content could not be loaded.",
   "singleDrop.showChat": "Show chat",
   "singleDrop.hideChat": "Hide chat",
   "singleDrop.chatLabel": "Drop chat",
@@ -229,6 +247,8 @@ export const EN_GB_MESSAGES = {
   "linkPreview.twitter.article.read": "Read article: {title}",
   "waves.drop.actions.menuLabel": "Drop actions",
   "waves.drop.actions.reactionPickerLabel": "Add reaction to drop",
+  "waves.drop.actions.showMore": "Show more",
+  "waves.drop.actions.showLess": "Show less",
   "media.video.captions": "Captions",
   "media.video.download": "Download media",
   "media.video.downloading": "Downloading media",
@@ -593,6 +613,9 @@ export const EN_GB_MESSAGES = {
   "drop.media.saveDialogTitle": "Save image",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
+  "media.interactive.frameTitle": "Interactive HTML media",
+  "media.interactive.loading": "Loading interactive media",
+  "media.interactive.fullscreen": "Full screen",
   "quickDm.regionAriaLabel": "Quick direct messages",
   "quickDm.openButtonAriaLabel": "Open quick direct messages",
   "quickDm.openButtonUnreadAriaLabel":
@@ -629,6 +652,7 @@ export const EN_GB_MESSAGES = {
   "waves.chat.guidelinesDialog.loadErrorDescription":
     "Please try again before sending your message.",
   "waves.loadingStatus": "Loading waves",
+  "waves.threadLoadError": "This thread could not be loaded.",
   "waves.gifPicker.open": "Add GIF",
   "waves.gifPicker.dialogTitle": "GIF search",
   "waves.gifPicker.searchPlaceholder": "Search GIFs",
@@ -645,7 +669,7 @@ export const EN_GB_MESSAGES = {
   "waves.poll.status.voted": "Voted",
   "waves.poll.status.updated": "Updated",
   "waves.composer.placeholder.createDrop": "Create a drop",
-  "waves.composer.placeholder.writeChatMessage": "Write a chat message",
+  "waves.composer.placeholder.writeChatMessage": "Write a message",
   "waves.composer.placeholder.dropReply": "Drop a reply",
   "waves.composer.placeholder.postReply": "Post a reply",
   "waves.composer.placeholder.quoteDrop": "Quote a drop",
@@ -769,6 +793,8 @@ export const EN_GB_MESSAGES = {
   "waves.create.groups.editAccess.chatLabel": "Chat",
   "waves.create.groups.editAccess.description":
     "The current criteria are prefilled. Saving creates a new group and changes only {groupLabel} access.",
+  "waves.create.groups.editAccess.validationDescription":
+    "Everyone with chat or admin access must also be able to view the wave.",
   "waves.create.groups.editAccess.loading": "Loading current criteria…",
   "waves.create.groups.editAccess.loadErrorTitle":
     "Couldn't load the current criteria.",
@@ -1085,12 +1111,12 @@ export const EN_GB_MESSAGES = {
   "waves.voteDetails.trigger.one": "View voters and vote log for {count} voter",
   "waves.voteDetails.trigger.other":
     "View voters and vote log for {count} voters",
-  "waves.leaderboard.timeline.toggle": "Toggle decision timeline",
-  "waves.leaderboard.timeline.decisionTimeline": "Decision Timeline",
+  "waves.leaderboard.timeline.toggle": "Toggle results timeline",
+  "waves.leaderboard.timeline.decisionTimeline": "Results timeline",
   "waves.leaderboard.timeline.announcementHistory": "Announcement history",
   "waves.leaderboard.timeline.paused": "Paused",
-  "waves.leaderboard.timeline.nextDecisionAfter": "Next decision after {date}",
-  "waves.leaderboard.timeline.noDecisionScheduled": "No decision scheduled",
+  "waves.leaderboard.timeline.nextDecisionAfter": "Next result after {date}",
+  "waves.leaderboard.timeline.noDecisionScheduled": "No result scheduled",
   "waves.leaderboard.timeline.noUpcomingEvents": "No upcoming events",
   "waves.leaderboard.phase.nextWinnersIn": "Next winners announced in",
   "waves.leaderboard.phase.countdown": "{hours}h {minutes}m",
@@ -1157,4 +1183,9 @@ export const EN_GB_MESSAGES = {
   ...TRANSFER_MESSAGES,
   ...THE_MEMES_MINT_SUCCESS_MESSAGES,
   ...THE_MEMES_MINT_PROGRESS_MESSAGES,
+  "e2ee.message.taskChecked": "Checked task",
+  "e2ee.message.taskUnchecked": "Unchecked task",
+  "e2ee.message.imageLink": "Image link",
+  "e2ee.message.imageLinkFrom": "Image from {host}",
+  "e2ee.message.markdownTable": "Message table",
 } satisfies Partial<Record<MessageKey, string>>;

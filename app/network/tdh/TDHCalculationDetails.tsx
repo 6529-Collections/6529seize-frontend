@@ -2,6 +2,7 @@ import Link from "next/link";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/network-tdh";
 import TDHSection, { TDH_FOCUS, TDH_TEXT } from "./TDHSection";
 
 const FAQ_KEYS = ["sale", "transfer", "new", "set", "rate", "xtdh"] as const;

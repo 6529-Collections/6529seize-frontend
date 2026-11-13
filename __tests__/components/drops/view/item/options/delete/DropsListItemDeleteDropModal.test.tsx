@@ -9,7 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 
 jest.mock("@tanstack/react-query");
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => ({ processDropRemoved: jest.fn() }),
+  useMyStreamActions: () => ({ processDropRemoved: jest.fn() }),
 }));
 
 // Mock fetch
@@ -103,6 +103,29 @@ describe("DropsListItemDeleteDropModal", () => {
       type: "warning",
     });
     expect(rq.invalidateDrops).toHaveBeenCalled();
+  });
+
+  it("shows no error when the delete was cancelled at the signing prompt", async () => {
+    const { SignedWriteCancelledError } = jest.requireActual(
+      "@/lib/device-signing/signing-decision"
+    );
+    const cancelled = new SignedWriteCancelledError();
+    useMutationMock.mockImplementationOnce((opts) => ({
+      mutateAsync: async () => {
+        opts.onError?.(cancelled);
+        opts.onSettled?.();
+        throw cancelled;
+      },
+    }));
+    const user = userEvent.setup();
+    renderModal();
+
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Delete" })).toBeEnabled()
+    );
+    expect(auth.setToast).not.toHaveBeenCalled();
   });
 
   it("shows a recoverable error when deletion fails", async () => {

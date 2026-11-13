@@ -23,6 +23,11 @@ import {
 import { SubmissionPosition } from "./SubmissionPosition";
 import type { WaveCompetitionPreviewTab } from "./WaveCompetitionBadges";
 import Button from "@/components/utils/button/Button";
+import {
+  AuthorSignedLabel,
+  DropAuthorSignedIndicator,
+} from "@/components/waves/drops/signature/DropAuthorSignedMarker";
+import { isDropAuthorSigned } from "@/components/waves/drops/signature/dropAuthorSigned";
 
 interface WaveCompetitionEntriesProps {
   readonly authorId: string;
@@ -159,6 +164,12 @@ export const WaveCompetitionEntries = ({
           const media = getFirstMedia(drop);
           const entryText = getEntryText(drop);
           const title = getEntryTitle(drop, untitledLabel);
+          // The card is one button, so its seal is static and the signed
+          // status joins the button's name.
+          const entryLabel = t(locale, "waves.competitionBadges.openEntry", {
+            title,
+          });
+          const entryLabelId = `competition-entry-label-${drop.id}`;
           const showVote =
             drop.drop_type === ApiDropType.Participatory && drop.voting_open;
 
@@ -169,9 +180,7 @@ export const WaveCompetitionEntries = ({
             >
               <button
                 type="button"
-                aria-label={t(locale, "waves.competitionBadges.openEntry", {
-                  title,
-                })}
+                aria-labelledby={entryLabelId}
                 onClick={() => onDropClick(drop)}
                 className={`tw-group tw-relative tw-flex tw-w-full tw-flex-1 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-p-0 tw-text-left focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
                   isApp
@@ -179,6 +188,11 @@ export const WaveCompetitionEntries = ({
                     : "tw-mb-3 tw-rounded-lg tw-border-iron-800 tw-bg-iron-950/50 tw-shadow-lg tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-shadow-xl"
                 }`}
               >
+                <AuthorSignedLabel
+                  id={entryLabelId}
+                  drop={drop}
+                  label={entryLabel}
+                />
                 <div
                   className={`tw-relative tw-aspect-square tw-w-full tw-overflow-hidden ${
                     isApp ? "tw-bg-black/25" : "tw-bg-iron-950/50"
@@ -249,6 +263,9 @@ export const WaveCompetitionEntries = ({
                   <div className="tw-mt-auto tw-flex tw-items-center tw-gap-2 tw-text-xs tw-text-iron-500">
                     <CalendarDaysIcon className="tw-size-4 tw-flex-shrink-0" />
                     <span>{formatDate(locale, drop.created_at)}</span>
+                    {isDropAuthorSigned(drop) && (
+                      <DropAuthorSignedIndicator drop={drop} />
+                    )}
                   </div>
                 </div>
               </button>

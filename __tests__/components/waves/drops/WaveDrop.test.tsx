@@ -5,6 +5,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import {
   EditingDropProvider,
@@ -23,6 +24,17 @@ const mockWaveDropContent = jest.fn();
 const mockWaveDropHeader = jest.fn();
 const mockMutate = jest.fn();
 let mockEditMentionedGroups: ApiDropGroupMention[] = [];
+// Placement only: this browser's own check is covered in
+// dropSignatureVerdicts.test.tsx, so every seal here reads as verified.
+const mockUseDropSealStates = jest.fn(
+  (drops: readonly unknown[], _active: boolean) => drops.map(() => "verified")
+);
+jest.mock("@/components/waves/drops/signature/dropSignatureVerdicts", () => ({
+  useDropSealStates: (drops: readonly unknown[], active: boolean) =>
+    mockUseDropSealStates(drops, active),
+  readSealState: () => "verified",
+}));
+
 jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => {
   mockWaveDropActions(props);
   return <div data-testid="actions" />;
@@ -77,6 +89,9 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => (props: any) => {
 });
 
 jest.mock("@/hooks/isMobileDevice");
+jest.mock("@/lib/device-signing/feature", () => ({
+  isSignedMessagesEnabled: () => true,
+}));
 jest.mock("@/hooks/useHasTouchInput", () => ({
   __esModule: true,
   default: jest.fn(() => false),
@@ -741,6 +756,59 @@ describe("WaveDrop", () => {
     expect(timestamp.querySelector("p")).toHaveClass("tw-whitespace-nowrap");
   });
 
+  it("shows the labelled author signed seal beside a grouped message's timestamp", () => {
+    const previousGroupedDrop = {
+      ...drop,
+      id: "previous-grouped",
+      created_at: 1_700_000_000_000,
+      stableHash: "previous-grouped",
+    };
+    const renderGrouped = (isAuthorSigned: boolean) =>
+      renderWithEditingDropProvider(
+        <WaveDrop
+          drop={{
+            ...drop,
+            id: "current-grouped",
+            created_at: 1_700_000_040_000,
+            stableHash: "current-grouped",
+            is_author_signed: isAuthorSigned,
+          }}
+          previousDrop={previousGroupedDrop}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={true}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+        />
+      );
+
+    const { unmount } = renderGrouped(true);
+    expect(
+      within(screen.getByTestId("grouped-drop-hover-timestamp")).getByRole(
+        "img",
+        { name: "Signed by its author" }
+      )
+    ).toBeInTheDocument();
+    // The row's own drop is what this browser checks for that seal.
+    expect(mockUseDropSealStates).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "current-grouped" })],
+      true
+    );
+    unmount();
+
+    renderGrouped(false);
+    expect(
+      within(screen.getByTestId("grouped-drop-hover-timestamp")).queryByRole(
+        "img",
+        { name: "Signed by its author" }
+      )
+    ).not.toBeInTheDocument();
+  });
+
   it("does not hijack mouse drags for the timestamp swipe on desktop", () => {
     const previousGroupedDrop = {
       ...drop,
@@ -841,23 +909,29 @@ describe("WaveDrop", () => {
     ).parentElement!;
     act(() => {
       fireEvent.touchStart(dropRoot, {
-        changedTouches: [{ clientX: 220, clientY: 40 }],
-        targetTouches: [{ clientX: 220, clientY: 40 }],
-        touches: [{ clientX: 220, clientY: 40 }],
+        changedTouches: [{ identifier: 1, clientX: 220, clientY: 40 }],
+        targetTouches: [{ identifier: 1, clientX: 220, clientY: 40 }],
+        touches: [{ identifier: 1, clientX: 220, clientY: 40 }],
       });
       fireEvent.touchMove(dropRoot, {
-        changedTouches: [{ clientX: 48, clientY: 44 }],
-        targetTouches: [{ clientX: 48, clientY: 44 }],
-        touches: [{ clientX: 48, clientY: 44 }],
+        changedTouches: [{ identifier: 1, clientX: 48, clientY: 44 }],
+        targetTouches: [{ identifier: 1, clientX: 48, clientY: 44 }],
+        touches: [{ identifier: 1, clientX: 48, clientY: 44 }],
       });
     });
 
+    act(() => {
+      jest.advanceTimersByTime(20);
+    });
+    expect(dropRoot.style.getPropertyValue("--message-swipe-transform")).toBe(
+      "translate3d(-148px, 0, 0)"
+    );
     expect(
-      screen.getByTestId("grouped-drop-swipeable-content").style.transform
-    ).toBe("translateX(-148px)");
-    expect(
-      screen.getByTestId("grouped-drop-swipe-timestamp").style.opacity
+      dropRoot.style.getPropertyValue("--message-swipe-time-opacity")
     ).toBe("1");
+    expect(
+      screen.getByTestId("grouped-drop-swipe-timestamp")
+    ).toBeInTheDocument();
 
     act(() => {
       jest.advanceTimersByTime(600);
@@ -865,7 +939,7 @@ describe("WaveDrop", () => {
     expect(mobileMenuProps).toBeUndefined();
 
     fireEvent.touchEnd(dropRoot);
-    fireEvent.click(content);
+    fireEvent.click(content, { detail: 1 });
 
     expect(onDropContentClick).not.toHaveBeenCalled();
   });
