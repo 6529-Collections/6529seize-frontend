@@ -612,11 +612,27 @@ couldn't start (**Try again**), unsupported browser, or **Turn on encrypted
 DMs** first. Backup keeps an encrypted copy of your message history so you can
 restore it on a new device.
 
-- **Set up backup** shows a recovery code once: 14 groups of 4 letters and
-  numbers. Select **Copy code** or **Download as text file**, store it
-  somewhere safe (for example a password manager), tick **I saved my recovery
-  code somewhere safe**, then select **Turn on backup**. Closing the dialog
-  before that turns nothing on and discards the code.
+- **Set up backup** guides you through four steps:
+  1. **Back up your encrypted messages** says why and what the code does.
+  2. **Save your recovery code** shows it once, in 14 numbered groups of 4
+     letters and numbers. **Continue** unlocks after **Copy code**, **Download
+     as text file** or **I wrote it down on paper instead**.
+  3. **Check your saved code** asks for two random groups (or **Paste the
+     whole code instead**), checked in your browser with nothing sent. Case,
+     spaces and dashes don't matter, and O/0 and I/L are treated alike. A
+     wrong group is named; after three misses it suggests saving the code
+     again, and **See the code again** goes back. **Turn on backup** creates
+     the backup.
+  4. **Backing up your messages** shows progress. You can close the dialog:
+     the upload keeps going while 6529 stays open in that tab, and the card
+     shows the same progress. It ends with **Backup is on** and how many chats
+     and messages it holds. If the upload stops, **Backup didn't finish**
+     offers **Try again**; the same code keeps working and the upload carries
+     on from where it stopped (it also retries by itself).
+
+  Closing the dialog before step 3 turns nothing on and discards the code.
+  **Replace recovery code** uses the same steps, starting with **Replace your
+  recovery code**.
 - What is backed up: messages you have on this device (text, edits,
   deletions, reactions, notices), the chat names and members needed to show
   them, and references to attachments with their keys. Never the device's
@@ -624,8 +640,30 @@ restore it on a new device.
 - Backups are incremental: after a change the device uploads only what
   changed, about 30 seconds later. **Back up now** uploads immediately and
   then shows "Backup is up to date." in the status line for a few seconds.
-  The section shows when the device last backed up and how much of the
-  256 MB backup storage is used (in kB below 1 MB).
+  The section shows when the device last backed up, how many chats and
+  messages this device has in the backup, and how much of the 256 MB backup
+  storage is used (in kB below 1 MB). While an upload runs it shows progress
+  and asks you to keep 6529 open in that tab. If an upload needs another run
+  (another device wrote to the backup at the same moment), it keeps showing
+  progress until that run succeeds, never "up to date"; the setup dialog's
+  **Try again** likewise says **Backup is on** only then. A failed upload
+  shows its error and is retried about 5 minutes later.
+- Reminders while backup is off (or a backup from another device isn't
+  restored here):
+  - turning on encrypted DMs ends with **One more step: back up your
+    messages** (or restore), with **Set up backup** and **Later**;
+  - the encrypted inbox shows **Back up your encrypted messages** with **Set
+    up backup** and **Remind me in 7 days**, then **Remind me in 30 days**.
+    It never blocks reading or sending, and comes back if the browser
+    clears its data;
+  - the account security status adds **Encrypted backup: off**, and its
+    shield turns amber;
+  - the **Devices & security** tab shows an amber dot;
+  - signing out with encrypted messages in this browser says chats removed
+    here can't be restored, with **Set up backup first**.
+
+  **Set up backup** in any of them opens Devices & security and starts the
+  steps (or **Restore messages** when a backup exists).
 - 6529 stores only encrypted data. It cannot read your messages, contact
   list or chat names, and cannot recover your recovery code. It can see that
   you have a backup, its size and when it changes.

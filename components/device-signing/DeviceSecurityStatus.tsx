@@ -12,6 +12,8 @@ import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessagesAccount";
 import { useE2ee, type E2eeUiStatus } from "@/hooks/e2ee/useE2ee";
+import { useE2eeBackup } from "@/hooks/e2ee/useE2eeBackup";
+import type { E2eeBackupPhase } from "@/lib/e2ee/backup/manager-types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { formatRelativeTime } from "@/i18n/format";
@@ -73,12 +75,41 @@ function getProofStatus(
   return status === "expired" ? "expired" : "on";
 }
 
+type BackupLineState = "on" | "off" | "elsewhere";
+
+/**
+ * The status line's backup state. It only matters where encrypted DMs are
+ * on, and is unknown (null) until backup has loaded. "elsewhere": a backup
+ * exists, but this browser isn't in it yet.
+ */
+export function getBackupLineState(
+  encrypted: string,
+  backupPhase: E2eeBackupPhase | undefined
+): BackupLineState | null {
+  if (encrypted !== "on") {
+    return null;
+  }
+  switch (backupPhase) {
+    case "on":
+      return "on";
+    case "off":
+      return "off";
+    case "available":
+      return "elsewhere";
+    case "loading":
+    case "error":
+    case undefined:
+      return null;
+  }
+}
+
 export function useDeviceSecurityState() {
   const address = useSignedMessagesAccount();
   const local = useLocalDeviceKeys(address);
   const remote = useDeviceGrants(address);
   const now = useMinuteClock();
   const encryption = useE2ee();
+  const { snapshot: backupSnapshot } = useE2eeBackup();
   const grant =
     remote.data?.find((item) => item.id === local.grant?.id) ?? null;
   const matchesLocalKey =
@@ -115,9 +146,11 @@ export function useDeviceSecurityState() {
       : null;
   const canEnableEncryption =
     encryption.status === "idle" || encryption.status === "needs-enrollment";
+  const backup = getBackupLineState(encrypted, backupSnapshot?.phase);
   return {
     proof,
     encrypted,
+    backup,
     canEnableEncryption,
     proofRenewal,
     encryptionRenewal,
@@ -128,6 +161,7 @@ export function useDeviceSecurityState() {
 export function DeviceSecurityDetails({
   proof,
   encrypted,
+  backup,
   proofRenewal,
   encryptionRenewal,
   inline = false,
@@ -179,6 +213,16 @@ export function DeviceSecurityDetails({
         })}
         {formatExpiry(encryptionRenewal)}
       </span>
+      {backup === null ? null : (
+        <span>
+          {tRich(locale, "e2ee.deviceStatus.backupLine", {
+            status:
+              backup === "elsewhere"
+                ? t(locale, "e2ee.deviceStatus.backupElsewhere")
+                : formatStatus(backup),
+          })}
+        </span>
+      )}
     </span>
   );
 }
@@ -249,12 +293,16 @@ function ShieldIcon({
   readonly details: SecurityDetails;
   readonly size?: "inline" | "badge" | "compact";
 }) {
-  const { proof, encrypted, proofRenewal, encryptionRenewal } = details;
+  const { proof, encrypted, backup, proofRenewal, encryptionRenewal } =
+    details;
   const complete = proof === "on" && encrypted === "on";
   const partial = proof === "on" || encrypted === "on";
   const renewalDue = proofRenewal !== null || encryptionRenewal !== null;
-  const healthy = complete && !renewalDue;
-  const attention = renewalDue || (partial && !complete);
+  // Encrypted DMs without a backup are one browser wipe from being lost.
+  // Either way this browser's chats aren't backed up.
+  const backupOff = backup === "off" || backup === "elsewhere";
+  const healthy = complete && !renewalDue && !backupOff;
+  const attention = renewalDue || (partial && !complete) || backupOff;
   let statusColor = "tw-text-iron-400";
   if (healthy) statusColor = "tw-text-green";
   if (attention) statusColor = "tw-text-amber-300";
@@ -398,6 +446,8 @@ function InactiveProfileBadge({
       details={{
         proof,
         encrypted,
+        // Another profile's backup isn't known in this browser.
+        backup: null,
         proofRenewal:
           grant && grantStatus === "renewal" ? grant.expires_at - now : null,
         encryptionRenewal: null,

@@ -11,8 +11,14 @@ import {
   removeAllE2eeLocalData,
   removeE2eeProfileLocalData,
 } from "@/lib/e2ee/local-data";
+import { takeE2eeBackupSetupRequest } from "@/components/e2ee/backup/backupSetupRequest";
 import type { E2eeBackupManager, E2eeBackupSnapshot } from "@/lib/e2ee/backup";
-import { SELF_ID } from "./fakeE2eeEngine";
+import {
+  contextFor,
+  createFakeE2eeEngine,
+  E2eeTestProvider,
+  SELF_ID,
+} from "./fakeE2eeEngine";
 
 jest.mock("@/lib/e2ee/local-data", () => ({
   removeAllE2eeLocalData: jest.fn(async () => undefined),
@@ -22,12 +28,32 @@ jest.mock("@/lib/e2ee/local-data", () => ({
 const removeAll = removeAllE2eeLocalData as jest.Mock;
 const removeProfile = removeE2eeProfileLocalData as jest.Mock;
 
-function renderHost(releaseEngines = jest.fn(async () => undefined)) {
-  render(
+function renderHost(
+  releaseEngines = jest.fn(async () => undefined),
+  backupPhase: E2eeBackupSnapshot["phase"] | null = null
+) {
+  const host = (
     <E2eeSignOutPromptHost
       profileId={SELF_ID}
       releaseEngines={releaseEngines}
     />
+  );
+  if (backupPhase === null) {
+    render(host);
+    return releaseEngines;
+  }
+  // Stable, as the real manager's snapshot is.
+  const snapshot = { phase: backupPhase } as E2eeBackupSnapshot;
+  const backup = {
+    getSnapshot: () => snapshot,
+    subscribe: () => () => undefined,
+  } as unknown as E2eeBackupManager;
+  render(
+    <E2eeTestProvider
+      value={contextFor(createFakeE2eeEngine(), { backup })}
+    >
+      {host}
+    </E2eeTestProvider>
   );
   return releaseEngines;
 }
@@ -80,6 +106,41 @@ describe("E2eeSignOutPromptHost", () => {
       globalThis.localStorage.getItem(`6529:e2ee:enrolled:${SELF_ID}`)
     ).toBeNull();
     expect(globalThis.localStorage.getItem("6529:e2ee:muted:other")).toBeNull();
+  });
+
+  it("offers to set up backup first while it is off", async () => {
+    takeE2eeBackupSetupRequest();
+    setE2eeEnrollmentMarker(SELF_ID, true);
+    renderHost(undefined, "off");
+    const signOut = jest.fn(async () => undefined);
+    let done: Promise<void> = Promise.resolve();
+    act(() => {
+      done = signOutWithE2eeChoice("profile", signOut);
+    });
+    expect(
+      await screen.findByText(
+        "Encrypted backup is off, so chats removed from this browser can’t be restored."
+      )
+    ).toBeVisible();
+    const setUp = screen.getByRole("link", { name: "Set up backup first" });
+    expect(setUp).toHaveAttribute("href", "/preferences?tab=security");
+    await userEvent.click(setUp);
+    await act(() => done);
+    // Signing out was cancelled; setup is waiting on Devices & security.
+    expect(signOut).not.toHaveBeenCalled();
+    expect(takeE2eeBackupSetupRequest()).toBe(true);
+  });
+
+  it("says nothing about backup while it is on", async () => {
+    setE2eeEnrollmentMarker(SELF_ID, true);
+    renderHost(undefined, "on");
+    act(() => {
+      void signOutWithE2eeChoice("profile", jest.fn(async () => undefined));
+    });
+    await screen.findByRole("checkbox", {
+      name: "Remove encrypted messages from this browser",
+    });
+    expect(screen.queryByText(/Encrypted backup is off/)).toBeNull();
   });
 
   it("normal sign-out: removal is off by default", async () => {
@@ -190,9 +251,13 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
       options.backupNow ??
       jest.fn(async () => {
         order.push("backup");
+        return true;
       });
+    // Stable, as the real manager's snapshot is.
+    const current = options.snapshot ?? snapshot();
     const backup = {
-      getSnapshot: () => options.snapshot ?? snapshot(),
+      getSnapshot: () => current,
+      subscribe: () => () => undefined,
       backupNow,
     } as unknown as E2eeBackupManager;
     const value: E2eeContextValue = {
@@ -287,6 +352,19 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     expect(backupNow).toHaveBeenCalledTimes(1);
     expect(removeProfile).toHaveBeenCalledWith(SELF_ID);
     expect(run.signOut).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the messages while the backup update still needs another run", async () => {
+    // A conflict or fork repair is queued: the backup isn't complete yet.
+    const backupNow = jest.fn(async () => false);
+    const run = renderWithEngine({ backupNow });
+    await userEvent.click(await removeBox());
+    await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Couldn’t update your encrypted backup"
+    );
+    expect(removeProfile).not.toHaveBeenCalled();
+    expect(run.signOut).not.toHaveBeenCalled();
   });
 
   it("leaves the backup and local data alone when removal is not chosen", async () => {

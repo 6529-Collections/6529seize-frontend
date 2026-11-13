@@ -628,6 +628,87 @@ export const E2EE_MESSAGES = {
   "e2ee.backup.action.retry": "Try again",
   "e2ee.backup.more": "More backup options",
   "e2ee.backup.upToDate": "Backup is up to date.",
+  "e2ee.backup.status.keepOpen": "Keep 6529 open in this tab until it finishes.",
+  "e2ee.backupNudge.title": "Back up your encrypted messages",
+  "e2ee.backupNudge.body":
+    "These chats are saved only on your devices. If this browser clears its data, they’re gone. Setup takes about a minute.",
+  "e2ee.backupNudge.restoreTitle":
+    "Restore your encrypted messages on this browser",
+  "e2ee.backupNudge.restoreBody":
+    "You have a backup from another device. Enter its recovery code to bring your chats here and keep this browser backed up.",
+  "e2ee.backupNudge.snoozeWeek": "Remind me in 7 days",
+  "e2ee.backupNudge.snoozeMonth": "Remind me in 30 days",
+  "e2ee.setupDone.titleBoth": "Signed posts and encrypted DMs are on",
+  "e2ee.setupDone.titleDms": "Encrypted DMs are on",
+  "e2ee.setupDone.until": "In this browser until {date}.",
+  "e2ee.setupDone.backupTitle": "One more step: back up your messages",
+  "e2ee.setupDone.backupBody":
+    "Browsers sometimes clear a site’s data. A backup and its recovery code let you get your encrypted chats back.",
+  "e2ee.setupDone.restoreTitle": "One more step: restore your messages",
+  "e2ee.setupDone.restoreBody":
+    "You have an encrypted backup from another device. Enter its recovery code to bring your chats to this browser.",
+  "e2ee.setupDone.later": "Later",
+  "e2ee.deviceStatus.backupLine": "Encrypted backup: {status}",
+  "e2ee.deviceStatus.backupElsewhere": "not restored here",
+  "e2ee.signOut.backupOff":
+    "Encrypted backup is off, so chats removed from this browser can’t be restored.",
+  "e2ee.signOut.setUpBackup": "Set up backup first",
+  "e2ee.backup.counts.chats.one": "{count} chat",
+  "e2ee.backup.counts.chats.other": "{count} chats",
+  "e2ee.backup.counts.messages.one": "{count} message",
+  "e2ee.backup.counts.messages.other": "{count} messages",
+  "e2ee.backup.setup.step": "Step {step} of {total}",
+  "e2ee.backup.setup.notNow": "Not now",
+  "e2ee.backup.setup.continue": "Continue",
+  "e2ee.backup.setup.back": "Back",
+  "e2ee.backup.setup.why.title": "Back up your encrypted messages",
+  "e2ee.backup.setup.why.risk":
+    "Right now your encrypted chats are saved only on your devices. If this browser clears its data and no other device has them, they’re gone.",
+  "e2ee.backup.setup.why.copy":
+    "Backup keeps an encrypted copy with 6529. Only your recovery code can open it. 6529 can’t read it and can’t recover the code for you.",
+  "e2ee.backup.setup.why.auto":
+    "New messages are added automatically while 6529 is open in this browser.",
+  "e2ee.backup.setup.why.next":
+    "Next you’ll get a 56-character recovery code. Have a password manager or a pen ready.",
+  "e2ee.backup.setup.replace.title": "Replace your recovery code",
+  "e2ee.backup.setup.replace.body":
+    "You’ll get a new code, and 6529 makes a new backup from this browser. When it finishes uploading, your old code stops working.",
+  "e2ee.backup.setup.replace.loss":
+    "Messages that are in your backup but not on this browser won’t be in the new backup.",
+  "e2ee.backup.setup.save.body":
+    "This code is the only way to open your backup on a new device. It’s shown once and isn’t stored anywhere.",
+  "e2ee.backup.setup.save.copied":
+    "Copied. Paste it into your password manager now.",
+  "e2ee.backup.setup.save.paper": "I wrote it down on paper instead",
+  "e2ee.backup.setup.save.private":
+    "Keep it private. Anyone with this code who can also sign in to your profile can read your backup.",
+  "e2ee.backup.setup.save.hint": "Copy or download the code to continue.",
+  "e2ee.backup.setup.check.title": "Check your saved code",
+  "e2ee.backup.setup.check.body":
+    "Open the code where you saved it and enter groups {first} and {second}. This checks you can find it later.",
+  "e2ee.backup.setup.check.pasteBody":
+    "Paste or type the whole code from where you saved it. It’s checked here, in your browser.",
+  "e2ee.backup.setup.check.group": "Group {number}",
+  "e2ee.backup.setup.check.paste": "Paste the whole code instead",
+  "e2ee.backup.setup.check.typeGroups": "Enter two groups instead",
+  "e2ee.backup.setup.check.seeAgain": "See the code again",
+  "e2ee.backup.setup.check.wrongGroup":
+    "That doesn’t match group {number}. Check your saved code.",
+  "e2ee.backup.setup.check.wrongCode":
+    "That doesn’t match your recovery code. Check it and try again.",
+  "e2ee.backup.setup.check.giveUp":
+    "Can’t find it? Go back and save the code again.",
+  "e2ee.backup.setup.upload.title": "Backing up your messages",
+  "e2ee.backup.setup.upload.background":
+    "You can close this window. Backup keeps going while 6529 is open in this tab, and Devices & security shows its progress.",
+  "e2ee.backup.setup.done.title": "Backup is on",
+  "e2ee.backup.setup.done.summary": "Last backup just now · {counts}",
+  "e2ee.backup.setup.done.body":
+    "On a new device, open Devices & security and choose Restore messages. You’ll need your recovery code.",
+  "e2ee.backup.setup.done.action": "Done",
+  "e2ee.backup.setup.failed.title": "Backup didn’t finish",
+  "e2ee.backup.setup.failed.body":
+    "Couldn’t upload your backup. Check your connection, then try again. You keep the same recovery code, and the upload carries on from where it stopped.",
   "e2ee.backup.startOver.title": "Start a new backup without restoring?",
   "e2ee.backup.startOver.body":
     "Without the code, your current backup can’t be opened. Starting over deletes it, including messages that aren’t on this browser. You can’t undo this.",
@@ -641,10 +722,6 @@ export const E2EE_MESSAGES = {
     "You revoked {count} devices after this backup was set up. If any of them ever restored the backup, it may still hold its key. A new code makes that key useless.",
   "e2ee.backup.code.title": "Save your recovery code",
   "e2ee.backup.code.newTitle": "Save your new recovery code",
-  "e2ee.backup.code.description":
-    "This code is the only way to restore your messages on a new device. Store it somewhere safe, like a password manager. It’s shown only once, and 6529 can’t recover it for you.",
-  "e2ee.backup.code.replaceNote":
-    "When the new backup finishes uploading, your old code stops working. Messages that are in your backup but not on this browser won’t be in the new backup.",
   "e2ee.backup.code.label": "Recovery code",
   "e2ee.backup.code.copy": "Copy code",
   "e2ee.backup.code.copied": "Recovery code copied.",
@@ -655,7 +732,6 @@ export const E2EE_MESSAGES = {
   "e2ee.backup.code.fileHeading": "6529 encrypted messages: recovery code",
   "e2ee.backup.code.fileNote":
     "Keep this private. With this code, anyone who can sign in to your 6529 profile can read your backed-up messages.",
-  "e2ee.backup.code.saved": "I saved my recovery code somewhere safe",
   "e2ee.backup.code.confirm": "Turn on backup",
   "e2ee.backup.code.confirmNew": "Use the new code",
   "e2ee.backup.restore.title": "Restore messages",

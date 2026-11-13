@@ -41,6 +41,23 @@ export interface E2eeBackupSnapshot {
   readonly uploading: boolean;
   /** Last failure code of a background run (UI maps it to copy). */
   readonly lastError: BackupFailureCode | null;
+  /**
+   * What this device has in the backup (chats and messages), from its
+   * local record; absent while it holds no backup.
+   */
+  readonly counts?: BackupCounts | null;
+  /** Upload progress of the current run in segments; absent when idle. */
+  readonly progress?: BackupProgress | null;
+}
+
+export interface BackupCounts {
+  readonly chats: number;
+  readonly messages: number;
+}
+
+export interface BackupProgress {
+  readonly done: number;
+  readonly total: number;
 }
 
 export interface PreparedBackup {

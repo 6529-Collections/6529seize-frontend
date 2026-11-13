@@ -68,7 +68,7 @@ function fakeManager(initial: E2eeBackupSnapshot) {
       }
       return { conversations: 2, messages: 5 };
     }),
-    backupNow: jest.fn(async () => undefined),
+    backupNow: jest.fn(async (): Promise<boolean> => true),
     turnOff: jest.fn(async () => {
       manager.set(snapshot({ phase: "off" }));
     }),
@@ -106,7 +106,7 @@ describe("E2eeBackupPanel", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows the recovery code once and turns backup on only after the user confirms saving it", async () => {
+  it("explains backup off, then sets it up through the guided steps", async () => {
     const manager = fakeManager(snapshot());
     renderPanel(manager);
     expect(
@@ -122,28 +122,63 @@ describe("E2eeBackupPanel", () => {
       )
     ).toHaveLength(3);
     fireEvent.click(screen.getByRole("button", { name: "Set up backup" }));
-    const dialog = await screen.findByRole("dialog", {
-      name: "Save your recovery code",
+    const why = await screen.findByRole("dialog", {
+      name: "Back up your encrypted messages",
     });
-    expect(dialog).toHaveTextContent(CODE);
-    const confirm = within(dialog).getByRole("button", {
-      name: "Turn on backup",
-    });
-    expect(confirm).toBeDisabled();
+    fireEvent.click(within(why).getByRole("button", { name: "Continue" }));
+    const save = screen.getByRole("dialog", { name: "Save your recovery code" });
+    expect(
+      within(save).getAllByRole("listitem").map((item) => item.textContent)
+    ).toHaveLength(14);
     fireEvent.click(
-      screen.getByRole("checkbox", {
-        name: "I saved my recovery code somewhere safe",
+      within(save).getByRole("checkbox", {
+        name: "I wrote it down on paper instead",
       })
     );
-    expect(confirm).toBeEnabled();
-    fireEvent.click(confirm);
+    fireEvent.click(within(save).getByRole("button", { name: "Continue" }));
+    const check = screen.getByRole("dialog", { name: "Check your saved code" });
+    fireEvent.click(
+      within(check).getByRole("button", { name: "Paste the whole code instead" })
+    );
+    fireEvent.change(within(check).getByLabelText("Recovery code"), {
+      target: { value: CODE },
+    });
+    expect(manager.confirmBackup).not.toHaveBeenCalled();
+    fireEvent.click(within(check).getByRole("button", { name: "Turn on backup" }));
     await waitFor(() => expect(manager.confirmBackup).toHaveBeenCalledTimes(1));
+    const done = await screen.findByRole("dialog", { name: "Backup is on" });
+    fireEvent.click(within(done).getByRole("button", { name: "Done" }));
     await waitFor(() =>
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     );
     expect(screen.getByText("Backup is on.")).toBeInTheDocument();
     expect(screen.getByText("On")).toBeInTheDocument();
-    expect(screen.queryByText(CODE)).not.toBeInTheDocument();
+    expect(screen.queryByText("PQRS")).not.toBeInTheDocument();
+  });
+
+  it("shows what the backup holds and the upload's progress", () => {
+    const manager = fakeManager(
+      snapshot({
+        phase: "on",
+        lastBackupAt: 2000,
+        counts: { chats: 38, messages: 1240 },
+      })
+    );
+    renderPanel(manager);
+    expect(screen.getByText("38 chats, 1,240 messages")).toBeInTheDocument();
+    act(() =>
+      manager.set(
+        snapshot({
+          phase: "on",
+          uploading: true,
+          progress: { done: 3, total: 4 },
+        })
+      )
+    );
+    expect(screen.getByRole("progressbar")).toHaveAttribute("value", "75");
+    expect(
+      screen.getByText("Keep 6529 open in this tab until it finishes.")
+    ).toBeInTheDocument();
   });
 
   it("restores with the code and explains a wrong code", async () => {
@@ -225,7 +260,7 @@ describe("E2eeBackupPanel", () => {
       fireEvent.click(replace[0]!);
       expect(
         await screen.findByRole("dialog", {
-          name: "Save your new recovery code",
+          name: "Replace your recovery code",
         })
       ).toBeInTheDocument();
     });
@@ -295,6 +330,35 @@ describe("E2eeBackupPanel", () => {
     }
   );
 
+  it("says it is still backing up, not up to date, while a repair run is queued", async () => {
+    const manager = fakeManager(snapshot({ phase: "on", lastBackupAt: 2000 }));
+    // The upload needs another run (a conflict or fork repair): the manager
+    // marks the backup as still uploading and reports the run incomplete.
+    manager.backupNow.mockImplementation(async () => {
+      manager.set(
+        snapshot({ phase: "on", lastBackupAt: 2000, uploading: true })
+      );
+      return false;
+    });
+    renderPanel(manager);
+    fireEvent.click(screen.getByRole("button", { name: "Back up now" }));
+    await waitFor(() => expect(manager.backupNow).toHaveBeenCalledTimes(1));
+    expect(
+      await screen.findByRole("progressbar", {
+        name: "Backing up your history…",
+      })
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/^Last backed up /)).not.toBeInTheDocument();
+    expect(screen.queryByText("Backup is up to date.")).not.toBeInTheDocument();
+
+    // The queued run succeeds: only then does the status show the new time.
+    act(() => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+    });
+    expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+    expect(screen.getByText(/^Last backed up /)).toBeInTheDocument();
+  });
+
   it("folds the back-up-now result into the status line and clears it (F-08)", async () => {
     jest.useFakeTimers();
     try {
@@ -339,7 +403,7 @@ describe("E2eeBackupPanel", () => {
       })
     );
     const code = await screen.findByRole("dialog", {
-      name: "Save your new recovery code",
+      name: "Replace your recovery code",
     });
     expect(manager.prepareBackup).toHaveBeenCalledTimes(1);
     expect(code).toHaveTextContent(
@@ -368,12 +432,12 @@ describe("E2eeBackupPanel", () => {
     );
     expect(confirm).toBeEnabled();
     expect(
-      screen.queryByRole("dialog", { name: "Save your new recovery code" })
+      screen.queryByRole("dialog", { name: "Replace your recovery code" })
     ).not.toBeInTheDocument();
 
     fireEvent.click(confirm);
     expect(
-      await screen.findByRole("dialog", { name: "Save your new recovery code" })
+      await screen.findByRole("dialog", { name: "Replace your recovery code" })
     ).toBeInTheDocument();
     expect(manager.prepareBackup).toHaveBeenCalledTimes(2);
   });
@@ -383,7 +447,60 @@ describe("E2eeBackupPanel", () => {
     renderPanel(manager);
     act(() => requestE2eeBackupSetup());
     expect(
-      await screen.findByRole("dialog", { name: "Save your recovery code" })
+      await screen.findByRole("dialog", {
+        name: "Back up your encrypted messages",
+      })
+    ).toBeInTheDocument();
+  });
+
+  it("takes a setup request made before it mounted, once", async () => {
+    requestE2eeBackupSetup();
+    const manager = fakeManager(snapshot());
+    const { unmount } = renderPanel(manager);
+    expect(
+      await screen.findByRole("dialog", {
+        name: "Back up your encrypted messages",
+      })
+    ).toBeInTheDocument();
+    unmount();
+    renderPanel(fakeManager(snapshot()));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("keeps a request made while backup loads until the phase is known, then opens setup once", async () => {
+    const manager = fakeManager(snapshot({ phase: "loading" }));
+    requestE2eeBackupSetup();
+    renderPanel(manager);
+    // Still loading, in two steps: nothing opens and nothing is taken.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    act(() => manager.set(snapshot({ phase: "loading", busy: true })));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(manager.prepareBackup).not.toHaveBeenCalled();
+
+    act(() => manager.set(snapshot({ phase: "off" })));
+    expect(
+      await screen.findByRole("dialog", {
+        name: "Back up your encrypted messages",
+      })
+    ).toBeInTheDocument();
+    // The event listener and the phase check never both act on it.
+    act(() => manager.set(snapshot({ phase: "off", busy: false })));
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(manager.prepareBackup).toHaveBeenCalledTimes(1);
+  });
+
+  it("opens restore for a setup request while a backup from another device exists", async () => {
+    renderPanel(fakeManager(snapshot({ phase: "available" })));
+    act(() => requestE2eeBackupSetup());
+    expect(
+      await screen.findByRole("dialog", { name: "Restore messages" })
     ).toBeInTheDocument();
   });
 

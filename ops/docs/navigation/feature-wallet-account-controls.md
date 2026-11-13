@@ -268,7 +268,9 @@ with bold on/off states and expiry detail when renewal is due. It uses the norma
 tooltip with a short hover delay and right-side placement, without a native title.
 
 Avatar shields show this device's permissions: green when both are ready without
-renewal due, amber for partial setup or an approaching expiry, and neutral for
+renewal due and encrypted backup is on, amber for partial setup, an approaching
+expiry, or encrypted DMs without backup (the status then adds **Encrypted
+backup: off**), and neutral for
 off, unavailable or unresolved states. Connected-profile avatars carry smaller
 shields; they do not imply another physical device is set up.
 
