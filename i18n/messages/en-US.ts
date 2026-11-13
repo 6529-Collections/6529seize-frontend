@@ -5147,6 +5147,7 @@ export const EN_US_ROOT_MESSAGES = {
   "access.denied": "Access Denied!",
   "access.verifyFailed": "Could not verify access. Please try again.",
   "access.verifying": "Verifying code…",
+  "access.openingPage": "Opening page…",
   ...GLOBAL_ERROR_MESSAGES,
   ...MAPPING_TOOL_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,

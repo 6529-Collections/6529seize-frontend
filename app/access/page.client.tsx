@@ -6,7 +6,11 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import { t } from "@/i18n/messages";
-import { resumeAfterApiAccess } from "@/services/auth/api-access-redirect";
+import { createFetchDeadline } from "@/lib/fetch/fetchDeadline";
+import {
+  redirectToRestrictedAccess,
+  resumeAfterApiAccess,
+} from "@/services/auth/api-access-redirect";
 import { getStagingAuth } from "@/services/auth/auth.utils";
 import styles from "@/styles/Home.module.css";
 import Cookies from "js-cookie";
@@ -14,16 +18,16 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import accessStyles from "./AccessPage.module.css";
 
+const OPENING_PAGE_STATUS = "access.openingPage";
 const FEEDBACK_MESSAGES = [
   "access.denied",
   "access.verifyFailed",
   "access.verifying",
+  OPENING_PAGE_STATUS,
 ] as const;
+const ACCESS_VERIFICATION_TIMEOUT_MS = 10_000;
 
-function probeApiAccess(
-  code: string | null,
-  signal: AbortSignal | null = null
-) {
+function probeApiAccess(code: string | null, signal: AbortSignal) {
   return fetch(apiUrl("/api/"), {
     headers: code === null ? {} : { "x-6529-auth": code },
     signal,
@@ -38,15 +42,25 @@ export default function AccessPage() {
   const [errorKey, setErrorKey] = useState<
     "access.denied" | "access.verifyFailed" | null
   >(null);
-  const [isVerifying, setIsVerifying] = useState(false);
-  const verificationPending = useRef(false);
+  const [statusKey, setStatusKey] = useState<
+    "access.verifying" | typeof OPENING_PAGE_STATUS | null
+  >(null);
+  const submissionLocked = useRef(false);
 
   useEffect(() => {
     const controller = new AbortController();
     void probeApiAccess(getStagingAuth(), controller.signal)
       .then(async (response) => {
-        if (response.ok && !controller.signal.aborted) {
-          resumeAfterApiAccess(window.location);
+        if (
+          (response.ok || response.status === 403) &&
+          !controller.signal.aborted
+        ) {
+          if (submissionLocked.current) return;
+          if (response.status === 403)
+            redirectToRestrictedAccess(window.location);
+          else resumeAfterApiAccess(window.location);
+          submissionLocked.current = true;
+          setStatusKey(OPENING_PAGE_STATUS);
         } else if (response.status === 401) {
           const data: unknown = await response.json();
           if (
@@ -69,33 +83,47 @@ export default function AccessPage() {
   }, []);
 
   async function doLogin(target: HTMLInputElement): Promise<void> {
-    if (verificationPending.current) return;
+    if (submissionLocked.current) return;
 
-    verificationPending.current = true;
-    setIsVerifying(true);
+    submissionLocked.current = true;
+    setStatusKey("access.verifying");
     setErrorKey(null);
     target.select();
     const pass = target.value;
+    const deadline = createFetchDeadline(
+      null,
+      ACCESS_VERIFICATION_TIMEOUT_MS,
+      () => new Error("Access verification timed out")
+    );
     try {
-      const response = await probeApiAccess(pass);
-      if (!response.ok) {
-        setErrorKey(
-          response.status === 401 ? "access.denied" : "access.verifyFailed"
-        );
+      const response = await deadline.run(() =>
+        probeApiAccess(pass, deadline.signal)
+      );
+      if (response.status === 403) {
+        redirectToRestrictedAccess(window.location);
+        setStatusKey(OPENING_PAGE_STATUS);
         return;
       }
-      Cookies.set(API_AUTH_COOKIE, pass, {
-        expires: 7,
-        secure: window.location.protocol === "https:",
-        sameSite: "strict",
-      });
-      resumeAfterApiAccess(window.location);
+      if (response.ok) {
+        Cookies.set(API_AUTH_COOKIE, pass, {
+          expires: 7,
+          secure: window.location.protocol === "https:",
+          sameSite: "strict",
+        });
+        resumeAfterApiAccess(window.location);
+        setStatusKey(OPENING_PAGE_STATUS);
+        return;
+      }
+      setErrorKey(
+        response.status === 401 ? "access.denied" : "access.verifyFailed"
+      );
     } catch {
       setErrorKey("access.verifyFailed");
     } finally {
-      verificationPending.current = false;
-      setIsVerifying(false);
+      deadline.dispose();
     }
+    submissionLocked.current = false;
+    setStatusKey(null);
   }
 
   return (
@@ -129,7 +157,7 @@ export default function AccessPage() {
             autoComplete="off"
             autoCorrect="off"
             enterKeyHint="go"
-            readOnly={isVerifying}
+            readOnly={statusKey !== null}
             spellCheck={false}
             aria-invalid={errorKey === "access.denied" || undefined}
             aria-describedby={
@@ -149,9 +177,9 @@ export default function AccessPage() {
                 {t(locale, key)}
               </p>
             ))}
-            <p id="api-access-status" role="status">
-              {isVerifying ? t(locale, "access.verifying") : null}
-            </p>
+            <output id="api-access-status" className={accessStyles["status"]}>
+              {statusKey ? t(locale, statusKey) : null}
+            </output>
             {errorKey && (
               <p id="api-access-error" role="alert">
                 {t(locale, errorKey)}

@@ -1,8 +1,17 @@
 import { createDeferredPromise } from "@/__tests__/utils/deferredPromise";
 import AccessPage from "@/app/access/page.client";
 import { API_AUTH_COOKIE } from "@/constants/constants";
-import { resumeAfterApiAccess } from "@/services/auth/api-access-redirect";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  redirectToRestrictedAccess,
+  resumeAfterApiAccess,
+} from "@/services/auth/api-access-redirect";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import Cookies from "js-cookie";
 
 jest.mock("@/contexts/TitleContext", () => ({ useSetTitle: jest.fn() }));
@@ -10,6 +19,7 @@ jest.mock("@/hooks/useNativeKeyboard", () => ({
   useNativeKeyboard: jest.fn(),
 }));
 jest.mock("@/services/auth/api-access-redirect", () => ({
+  redirectToRestrictedAccess: jest.fn(),
   resumeAfterApiAccess: jest.fn(),
 }));
 jest.mock("js-cookie", () => ({ get: jest.fn(), set: jest.fn() }));
@@ -71,7 +81,7 @@ describe("Access page", () => {
     expect(screen.queryByRole("img", { name: "6529" })).not.toBeInTheDocument();
   });
 
-  it("saves the code and resumes navigation without a dialog", async () => {
+  it("saves the code and stays locked while navigation is pending", async () => {
     fetchMock.mockResolvedValueOnce({
       ok: false,
       status: 401,
@@ -95,6 +105,12 @@ describe("Access page", () => {
     const [resumeOrder = 0] =
       jest.mocked(resumeAfterApiAccess).mock.invocationCallOrder;
     expect(cookieWriteOrder).toBeLessThan(resumeOrder);
+    expect(input).toHaveAttribute("readonly");
+    const status = screen.getByRole("status");
+    expect(status).toHaveTextContent("Opening page…");
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(status).toHaveTextContent("Opening page…");
     expect(window.alert).not.toHaveBeenCalled();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
@@ -103,6 +119,8 @@ describe("Access page", () => {
     fetchMock.mockResolvedValueOnce({ ok: true, status: 200 });
     render(<AccessPage />);
     await waitFor(() => expect(resumeAfterApiAccess).toHaveBeenCalled());
+    expect(screen.getByLabelText("Team Login")).toHaveAttribute("readonly");
+    expect(screen.getByRole("status")).toHaveTextContent("Opening page…");
     expect(Cookies.set).not.toHaveBeenCalled();
     expect(window.alert).not.toHaveBeenCalled();
   });
@@ -141,7 +159,64 @@ describe("Access page", () => {
     );
   });
 
-  it.each([401, 403, 500])(
+  it.each(["initial probe", "code submission"] as const)(
+    "opens the restricted page on 403 during the %s",
+    async (phase) => {
+      if (phase === "initial probe") {
+        fetchMock.mockResolvedValueOnce({ ok: false, status: 403 });
+      }
+      render(<AccessPage />);
+      if (phase === "code submission") {
+        fetchMock.mockResolvedValueOnce({ ok: false, status: 403 });
+        submitCode();
+      }
+
+      await waitFor(() =>
+        expect(redirectToRestrictedAccess).toHaveBeenCalled()
+      );
+      expect(screen.getByLabelText("Team Login")).toHaveAttribute("readonly");
+      expect(Cookies.set).not.toHaveBeenCalled();
+      expect(resumeAfterApiAccess).not.toHaveBeenCalled();
+    }
+  );
+
+  it("unlocks the field and allows a retry when verification stalls", async () => {
+    jest.useFakeTimers();
+    try {
+      const request = createDeferredPromise<Pick<Response, "ok" | "status">>();
+      render(<AccessPage />);
+      let signal: AbortSignal | null | undefined;
+      fetchMock.mockImplementationOnce((_url: string, init: RequestInit) => {
+        signal = init.signal;
+        return request.promise;
+      });
+      submitCode();
+
+      const input = screen.getByLabelText("Team Login");
+      expect(input).toHaveAttribute("readonly");
+      await act(async () => jest.advanceTimersByTimeAsync(10_000));
+
+      expect(signal?.aborted).toBe(true);
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "Could not verify access"
+      );
+      expect(input).not.toHaveAttribute("readonly");
+      fetchMock.mockResolvedValueOnce({ ok: true, status: 200 });
+      submitCode("corrected-code");
+      await waitFor(() =>
+        expect(resumeAfterApiAccess).toHaveBeenCalledTimes(1)
+      );
+      await act(async () => {
+        request.resolve({ ok: true, status: 200 });
+      });
+      expect(resumeAfterApiAccess).toHaveBeenCalledTimes(1);
+      expect(Cookies.set).toHaveBeenCalledTimes(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it.each([401, 500])(
     "stays on the prompt after a %s response",
     async (status) => {
       render(<AccessPage />);
@@ -149,6 +224,9 @@ describe("Access page", () => {
       submitCode();
 
       expect(await screen.findByRole("alert")).toBeVisible();
+      expect(screen.getByLabelText("Team Login")).not.toHaveAttribute(
+        "readonly"
+      );
       expect(Cookies.set).not.toHaveBeenCalled();
       expect(window.alert).not.toHaveBeenCalled();
       expect(resumeAfterApiAccess).not.toHaveBeenCalled();

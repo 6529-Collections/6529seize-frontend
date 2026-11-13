@@ -121,9 +121,12 @@ application code. Keep the three launch paths in step when changing it.
 
 Enter your team code in the **Team Login** field and press Enter. The field
 shows **Enter password** when empty and displays the characters as you type.
-Once the API accepts the code, the browser immediately opens the requested
-page, including its query string and fragment. Opening `/access` directly
-sends you to the home page after the code is accepted.
+The field stays locked while the page shows **Verifying code…** and then
+**Opening page…**. If verification fails, you can edit the code and retry.
+If the API reports that access is restricted, the browser opens `/restricted`.
+After a successful check, the browser opens the requested page, including its
+query string and fragment. Opening `/access` directly sends you to the home
+page after the code is accepted.
 The access page centers artwork supplied by the API on a black background
 and keeps the login field at the bottom. When the API supplies no artwork,
 the page shows the white 6529 logo on black.

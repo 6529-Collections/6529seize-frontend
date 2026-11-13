@@ -33,3 +33,7 @@ export function getApiAccessReturnPath(search: string, hash: string): string {
 export function resumeAfterApiAccess(location: Location): void {
   location.replace(getApiAccessReturnPath(location.search, location.hash));
 }
+
+export function redirectToRestrictedAccess(location: Location): void {
+  location.replace("/restricted");
+}
