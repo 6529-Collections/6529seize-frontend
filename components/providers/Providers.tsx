@@ -11,6 +11,7 @@ import { ShellSearchParamsProvider } from "@/contexts/ShellSearchParamsContext";
 import { VersionStatusProvider } from "@/contexts/VersionStatusContext";
 import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import Auth from "@/components/auth/Auth";
+import DesktopProfileStorageGate from "@/components/desktop/DesktopProfileStorageGate";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
 import DeviceSetupHost from "@/components/device-signing/DeviceSetupHost";
@@ -163,7 +164,13 @@ export default function Providers({
       <CapacitorSetup />
       <EULAConsentStartup>
         <EditingDropProvider>
-          <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
+          <ActiveGroupProvider>
+            {/* Inert on the web. Inside 6529 Desktop it restores and saves
+                the signed-in profiles kept by the shell. */}
+            <DesktopProfileStorageGate enabled={enableWalletAuthentication}>
+              {appProviders}
+            </DesktopProfileStorageGate>
+          </ActiveGroupProvider>
         </EditingDropProvider>
       </EULAConsentStartup>
     </>

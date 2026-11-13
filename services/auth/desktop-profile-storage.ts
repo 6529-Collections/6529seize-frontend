@@ -1,0 +1,157 @@
+import { getDesktopNativeAuth } from "@/helpers/desktop-shell";
+import { getDesktopProfileMigrationState } from "./desktop-profile-state";
+import type {
+  DesktopNativeAuth,
+  DesktopProfileState,
+} from "@/types/desktop-shell";
+
+/**
+ * Keeps the desktop shell's encrypted copy of the signed-in profiles in step
+ * with the page. The page's own storage depends on the local server's port,
+ * so the shell's copy is what survives a port change or a reinstall.
+ */
+
+type SaveStatus = "idle" | "failed" | "retrying";
+
+interface SavableAccount {
+  readonly address: string;
+  readonly role: string | null;
+  readonly jwt: string | null;
+  readonly profileId: string | null;
+  readonly profileHandle: string | null;
+  readonly authSessionVersion?: "v2" | null | undefined;
+}
+
+let initialization: Promise<void> | null = null;
+let initialized = false;
+let unsavedState: DesktopProfileState | null = null;
+let saveAttempt: Promise<void> | null = null;
+let saveStatus: SaveStatus = "idle";
+const listeners = new Set<() => void>();
+
+function setSaveStatus(status: SaveStatus): void {
+  if (saveStatus === status) return;
+  saveStatus = status;
+  listeners.forEach((listener) => listener());
+}
+
+export const getDesktopProfileSaveStatus = (): SaveStatus => saveStatus;
+export const getDesktopProfileServerSaveStatus = (): SaveStatus => "idle";
+
+export function subscribeDesktopProfileSaveStatus(
+  listener: () => void
+): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+const reportSaveFailure = () => {
+  console.error("Could not persist Desktop profiles");
+};
+
+async function saveLatestDesktopProfiles(
+  nativeAuth: DesktopNativeAuth
+): Promise<void> {
+  const state = unsavedState;
+  if (!state) return;
+  try {
+    await nativeAuth.saveProfiles(state);
+    // Clear only the snapshot the shell acknowledged; a newer change made
+    // meanwhile stays queued and is saved next.
+    if (unsavedState === state) unsavedState = null;
+    setSaveStatus("idle");
+  } catch (error: unknown) {
+    setSaveStatus("failed");
+    throw error;
+  } finally {
+    saveAttempt = null;
+    // Save a change queued meanwhile. The catch above has already set
+    // "failed" on a failure, so a failing save is not retried in a loop.
+    if (unsavedState && saveStatus !== "failed") {
+      retryDesktopProfileSave().catch(reportSaveFailure);
+    }
+  }
+}
+
+/** Retry the latest complete snapshot, never an older pre-logout state. */
+export function retryDesktopProfileSave(): Promise<void> {
+  const nativeAuth = getDesktopNativeAuth();
+  if (!initialized || !nativeAuth || !unsavedState) return Promise.resolve();
+  if (saveAttempt) return saveAttempt;
+  if (saveStatus === "failed") setSaveStatus("retrying");
+  saveAttempt = saveLatestDesktopProfiles(nativeAuth);
+  return saveAttempt;
+}
+
+/** Tell the shell the first screen is ready (the Electron app shows its window then). */
+export function notifyDesktopProfilesReady(): void {
+  const nativeAuth = getDesktopNativeAuth();
+  if (!nativeAuth) return;
+  void Promise.resolve()
+    .then(() => nativeAuth.profilesReady())
+    .catch(() => {
+      console.error("Could not announce Desktop profile readiness");
+    });
+}
+
+export async function restartDesktopProfileRestore(): Promise<void> {
+  const nativeAuth = getDesktopNativeAuth();
+  if (!nativeAuth) throw new Error("Desktop profile restart is unavailable");
+  await nativeAuth.restartProfileRestore();
+}
+
+/**
+ * Ask the shell for its saved profiles, offering the page's current ones for
+ * a first-run merge. `restore` validates the untrusted result and writes it
+ * into page storage before any save is allowed, so start-up never echoes the
+ * state back to the shell; if it throws, the restore counts as failed.
+ */
+export function initializeDesktopProfiles(
+  current: DesktopProfileState,
+  restore: (state: unknown) => void
+): Promise<void> {
+  const nativeAuth = getDesktopNativeAuth();
+  if (!nativeAuth) return Promise.resolve();
+  initialization ??= restoreDesktopProfiles(nativeAuth, current, restore);
+  return initialization;
+}
+
+async function restoreDesktopProfiles(
+  nativeAuth: DesktopNativeAuth,
+  current: DesktopProfileState,
+  restore: (state: unknown) => void
+): Promise<void> {
+  try {
+    restore(await nativeAuth.restoreProfiles(current));
+    initialized = true;
+  } catch (error: unknown) {
+    initialization = null;
+    throw error;
+  }
+}
+
+/**
+ * Save the page's profiles to the shell after every account change. The
+ * snapshot goes through the same normalization as a restore (lower-cased
+ * addresses, active profile kept only if listed, refresh tokens removed), so
+ * the shell always receives a state it accepts.
+ */
+export function persistDesktopProfileAccounts(
+  accounts: readonly SavableAccount[],
+  activeAddress: string | null
+): void {
+  if (!initialized || !getDesktopNativeAuth()) return;
+  unsavedState = getDesktopProfileMigrationState({ accounts, activeAddress });
+  retryDesktopProfileSave().catch(reportSaveFailure);
+}
+
+export function __resetDesktopProfileStorageForTests(): void {
+  initialization = null;
+  initialized = false;
+  unsavedState = null;
+  saveAttempt = null;
+  saveStatus = "idle";
+  listeners.clear();
+}
