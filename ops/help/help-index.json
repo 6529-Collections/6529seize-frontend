@@ -9407,13 +9407,19 @@
       "keywords": ["access", "restricted", "permissions", "wallet"],
       "facts": [
         "The Access page lives at /access.",
+        "Enter the team access code in Team Login and press Enter. The field stays locked while Verifying code… or Opening page… is shown, and unlocks if verification fails.",
+        "If verification times out, edit the code and try again. If access is restricted, the browser opens /restricted.",
         "Use it when users ask where access-related app entry or permission information is surfaced.",
         "Specific feature permissions still belong to the relevant product area, such as Waves, Delegation, or profile editing."
       ],
       "canonical_path": "/access",
       "related_paths": ["/restricted"],
       "tags": ["access", "navigation"],
-      "source_refs": ["app/access/page.tsx", "app/access/page.client.tsx"]
+      "source_refs": [
+        "app/access/page.tsx",
+        "app/access/page.client.tsx",
+        "ops/docs/developer/deployment.md"
+      ]
     },
     {
       "id": "profiles.cms-pages",

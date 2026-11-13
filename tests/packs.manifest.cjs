@@ -714,6 +714,7 @@ const PACKS = [
   stagingPack("core", "", "Staging core surfaces on both web shells.", [
     "tests/surfaces",
     "tests/critical-shell",
+    "tests/pages/access.spec.ts",
     ...SMOKE_SPECS,
   ]),
   stagingPack(
