@@ -8,9 +8,6 @@ import {
 } from "@/hooks/usePinnedWavesServer";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
-import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
-import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
-import { ApiWavesPinFilter } from "@/generated/models/ApiWavesPinFilter";
 import {
   getAuthJwt,
   getWalletAddress,
@@ -19,7 +16,12 @@ import {
 import { pinnedWavesApi } from "@/services/api/pinned-waves-api";
 
 jest.mock("@/services/api/pinned-waves-api", () => ({
-  pinnedWavesApi: { pinWave: jest.fn(), unpinWave: jest.fn() },
+  pinnedWavesApi: {
+    getPinnedWaves: jest.fn(),
+    updateOrder: jest.fn(),
+    pinWave: jest.fn(),
+    unpinWave: jest.fn(),
+  },
 }));
 
 jest.mock("@/services/auth/auth.utils", () => ({
@@ -52,7 +54,7 @@ jest.mock("@/services/api/waves-v2-api", () => {
 
   return {
     ...actual,
-    fetchWavesV2Page: jest.fn(),
+    mapApiWaveOverviewToSidebarWave: jest.fn((wave) => wave),
   };
 });
 
@@ -61,7 +63,7 @@ const useQueryMock = useQuery as jest.Mock;
 const useQueryClientMock = useQueryClient as jest.Mock;
 const useSeizeConnectContextMock = useSeizeConnectContext as jest.Mock;
 const useSeizeSettingsOptionalMock = useSeizeSettingsOptional as jest.Mock;
-const fetchWavesV2PageMock = fetchWavesV2Page as jest.Mock;
+
 const useOfficialWavesMock = require("@/hooks/useOfficialWaves")
   .useOfficialWaves as jest.Mock;
 
@@ -98,26 +100,8 @@ const createWave = (id: string) =>
     pinned: true,
   }) as any;
 
-const createWavesPage = ({
-  page,
-  count,
-  next,
-  startIndex = 0,
-}: {
-  readonly page: number;
-  readonly count: number;
-  readonly next: boolean;
-  readonly startIndex?: number;
-}) => ({
-  waves: Array.from({ length: count }, (_, index) =>
-    createWave(`wave-${startIndex + index}`)
-  ),
-  page,
-  next,
-});
-
 const getPinnedWavesQueryOptions = (): {
-  readonly queryFn: () => Promise<unknown>;
+  readonly queryFn: (options: { signal: AbortSignal }) => Promise<unknown>;
   readonly queryKey: readonly unknown[];
 } => {
   const firstCall = useQueryMock.mock.calls[0];
@@ -133,6 +117,9 @@ let unpinMutateAsync: jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  queryClientMock.cancelQueries.mockReset().mockResolvedValue(undefined);
+  queryClientMock.getQueryData.mockReset();
+  queryClientMock.setQueryData.mockReset();
   pinMutateAsync = jest.fn().mockResolvedValue(undefined);
   unpinMutateAsync = jest.fn().mockResolvedValue(undefined);
   requestAuth.mockReset().mockResolvedValue({ success: true });
@@ -173,26 +160,48 @@ beforeEach(() => {
   });
 });
 
-test("keeps the pinned cache key at the logical limit but requests API pages of 20", async () => {
-  fetchWavesV2PageMock.mockResolvedValue(
-    createWavesPage({ page: 1, count: 1, next: false })
-  );
-
+test("loads all pins in saved order in one request", async () => {
+  jest
+    .mocked(pinnedWavesApi.getPinnedWaves)
+    .mockResolvedValue([
+      { ...createWave("wave-2"), pinned: false },
+      createWave("wave-1"),
+    ]);
   renderHook(() => usePinnedWavesServer(), { wrapper });
 
-  const queryOptions = getPinnedWavesQueryOptions();
-  expect((queryOptions.queryKey[1] as { page_size: number }).page_size).toBe(
-    MAX_PINNED_WAVES
-  );
+  const { signal } = new AbortController();
+  await expect(
+    getPinnedWavesQueryOptions().queryFn({ signal })
+  ).resolves.toEqual([createWave("wave-2"), createWave("wave-1")]);
+  expect(pinnedWavesApi.getPinnedWaves).toHaveBeenCalledTimes(1);
+  expect(pinnedWavesApi.getPinnedWaves).toHaveBeenCalledWith(signal);
+});
 
-  await queryOptions.queryFn();
-
-  expect(fetchWavesV2PageMock).toHaveBeenCalledWith({
-    page: 1,
-    pageSize: 20,
-    overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
-    pinned: ApiWavesPinFilter.Pinned,
+test("rolls back a failed reorder while preserving a pin added during the save", async () => {
+  const a = createWave("a");
+  const b = createWave("b");
+  const added = createWave("added");
+  let current = [a, b];
+  queryClientMock.getQueryData.mockImplementation(() => current);
+  queryClientMock.setQueryData.mockImplementation((_key, data) => {
+    current = typeof data === "function" ? data(current) : data;
   });
+  jest.mocked(pinnedWavesApi.updateOrder).mockImplementationOnce(async () => {
+    current = [...current, added];
+    throw new Error("Conflict");
+  });
+  renderHook(() => usePinnedWavesServer(), { wrapper });
+  const { mutationFn } = useMutationMock.mock.calls[2][0];
+
+  await expect(
+    mutationFn({ previousIds: ["a", "b"], nextIds: ["b", "a"] })
+  ).rejects.toThrow("Conflict");
+
+  expect(pinnedWavesApi.updateOrder).toHaveBeenCalledWith({
+    previous_wave_ids: ["a", "b"],
+    wave_ids: ["b", "a"],
+  });
+  expect(current).toEqual([a, b, added]);
 });
 
 test("disables pinned and official wave reads while wallet auth is invalid", () => {
@@ -235,47 +244,6 @@ test("disables pinned and official wave reads without clearing cache when deferr
     enabled: false,
   });
   expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
-});
-
-test("fetches pinned waves across multiple API pages", async () => {
-  fetchWavesV2PageMock
-    .mockResolvedValueOnce(
-      createWavesPage({ page: 1, count: 20, next: true, startIndex: 0 })
-    )
-    .mockResolvedValueOnce(
-      createWavesPage({ page: 2, count: 3, next: false, startIndex: 20 })
-    );
-
-  renderHook(() => usePinnedWavesServer(), { wrapper });
-
-  const result = await getPinnedWavesQueryOptions().queryFn();
-
-  expect((result as any[]).map((wave) => wave.id)).toEqual([
-    ...Array.from({ length: 20 }, (_, index) => `wave-${index}`),
-    "wave-20",
-    "wave-21",
-    "wave-22",
-  ]);
-  expect(fetchWavesV2PageMock).toHaveBeenNthCalledWith(
-    1,
-    expect.objectContaining({ page: 1, pageSize: 20 })
-  );
-  expect(fetchWavesV2PageMock).toHaveBeenNthCalledWith(
-    2,
-    expect.objectContaining({ page: 2, pageSize: 20 })
-  );
-});
-
-test("does not turn anonymous overview results into pins or paginate through public waves", async () => {
-  fetchWavesV2PageMock.mockResolvedValue({
-    page: 1,
-    next: true,
-    waves: [{ ...createWave("public-wave"), pinned: false }],
-  });
-  renderHook(() => usePinnedWavesServer(), { wrapper });
-
-  await expect(getPinnedWavesQueryOptions().queryFn()).resolves.toEqual([]);
-  expect(fetchWavesV2PageMock).toHaveBeenCalledTimes(1);
 });
 
 test("excludes unpinned entries already present in the pinned cache", () => {
@@ -370,7 +338,7 @@ test.each([null, "invalid-jwt", createAuthJwt("proxy-1")])(
     expect(pinMutateAsync).not.toHaveBeenCalled();
     expect(unpinMutateAsync).not.toHaveBeenCalled();
     expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
-    for (const [options] of useMutationMock.mock.calls) {
+    for (const [options] of useMutationMock.mock.calls.slice(0, 2)) {
       expect(() => options.mutationFn("wave")).toThrow(
         "The active profile changed"
       );
@@ -432,29 +400,6 @@ test.each(["pinWave", "unpinWave"] as const)(
   }
 );
 
-test("stops fetching pinned waves once the pinned limit is reached", async () => {
-  fetchWavesV2PageMock.mockImplementation(({ page }) =>
-    Promise.resolve(
-      createWavesPage({
-        page,
-        count: 20,
-        next: true,
-        startIndex: (page - 1) * 20,
-      })
-    )
-  );
-
-  renderHook(() => usePinnedWavesServer(), { wrapper });
-
-  const result = await getPinnedWavesQueryOptions().queryFn();
-
-  expect(result as any[]).toHaveLength(MAX_PINNED_WAVES);
-  expect(fetchWavesV2PageMock).toHaveBeenCalledTimes(5);
-  expect(fetchWavesV2PageMock).not.toHaveBeenCalledWith(
-    expect.objectContaining({ page: 6 })
-  );
-});
-
 test("keeps raw pinned ids but ignores a legacy announcement pin for budget checks", async () => {
   const pinnedWaves = [
     createWave("announcement-wave"),
@@ -511,12 +456,12 @@ test("keeps raw pinned ids but ignores official pins for budget checks", async (
   expect(pinMutateAsync).toHaveBeenCalledWith("new-wave");
 });
 
-test("refetches pinned waves on window focus only once they are stale", () => {
+test("refreshes saved order on window focus even when the cache is fresh", () => {
   renderHook(() => usePinnedWavesServer(), { wrapper });
 
   expect(useQueryMock).toHaveBeenCalledWith(
     expect.objectContaining({
-      refetchOnWindowFocus: true,
+      refetchOnWindowFocus: "always",
       staleTime: 5 * 60 * 1000,
     })
   );
@@ -594,14 +539,16 @@ test.each([
     );
     renderHook(() => usePinnedWavesServer(), { wrapper });
     const { onMutate } = useMutationMock.mock.calls[index][0];
-    const operation = onMutate("wave");
+    const operation = expect(onMutate("wave")).rejects.toThrow(
+      "The active profile changed"
+    );
     if (switchType === "wallet") {
       jest.mocked(getWalletAddress).mockReturnValue("0xdef");
     } else {
       jest.mocked(getAuthJwt).mockReturnValue(createAuthJwt("other-profile"));
     }
     finishCancellation();
-    await expect(operation).rejects.toThrow("The active profile changed");
+    await operation;
     expect(queryClientMock.setQueryData).not.toHaveBeenCalled();
     expect(pinnedWavesApi.pinWave).not.toHaveBeenCalled();
     expect(pinnedWavesApi.unpinWave).not.toHaveBeenCalled();

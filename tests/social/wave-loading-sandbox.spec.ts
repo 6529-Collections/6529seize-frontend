@@ -31,6 +31,148 @@ import {
 // Headless Chromium otherwise hides the native scrollbar we need to exercise.
 test.use({ launchOptions: { ignoreDefaultArgs: ["--hide-scrollbars"] } });
 
+test("saves reordered pins across reload on desktop and mobile", async ({
+  page,
+  baseURL,
+  isMobile,
+}) => {
+  await installWaveListScrollFixture(page, baseURL);
+  await page.goto("/waves", { waitUntil: "domcontentloaded" });
+  await page
+    .getByRole("group", { name: "Wave list filter" })
+    .getByRole("button", { name: "Pinned", exact: true })
+    .click();
+
+  const list = page
+    .getByRole("region", { name: "Pinned", exact: true })
+    .filter({ visible: true });
+  const first = list.getByRole("link", { name: "Scroll wave 0", exact: true });
+  const second = list.getByRole("link", { name: "Scroll wave 1", exact: true });
+  await expect(
+    list.getByRole("button", { name: /^(Drag|Reorder) / })
+  ).toHaveCount(0);
+  await expect(first).toBeInViewport();
+  await expect(second).toBeInViewport();
+  const saved = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/v2/waves/pinned") &&
+      response.request().method() === "PUT"
+  );
+  if (isMobile) {
+    const session = await page.context().newCDPSession(page);
+    const scroll = await sidebarScrollMetrics(list);
+    const swipeX = Math.round(scroll.x);
+    const swipeY = Math.round(scroll.y);
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x: swipeX, y: swipeY }],
+    });
+    for (const distance of [25, 50, 75, 100]) {
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x: swipeX, y: swipeY - distance }],
+      });
+    }
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await expect
+      .poll(async () => (await sidebarScrollMetrics(list)).top)
+      .toBeGreaterThan(scroll.top);
+    await expect(
+      list.getByRole("link", { name: /^Scroll wave [01]$/ })
+    ).toHaveText(["Scroll wave 0", "Scroll wave 1"]);
+    await first.scrollIntoViewIfNeeded();
+    await sidebarScrollMetrics(list, 0);
+
+    const box = await first.boundingBox();
+    const target = await second.boundingBox();
+    if (!box || !target) throw new Error("Missing pinned wave rows");
+    const x = Math.round(box.x + box.width * 0.75);
+    const y = Math.round(box.y + box.height / 2);
+    const endY = Math.round(target.y + target.height / 2);
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [{ x, y }],
+    });
+    await expect(list.getByText("Position 1.", { exact: true })).toBeAttached();
+    for (let step = 1; step <= 8; step++) {
+      await session.send("Input.dispatchTouchEvent", {
+        type: "touchMove",
+        touchPoints: [{ x, y: Math.round(y + ((endY - y) * step) / 8) }],
+      });
+    }
+    await session.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await session.detach();
+  } else {
+    await first.dragTo(second, { steps: 8 });
+  }
+  expect((await saved).ok()).toBe(true);
+  await expect(
+    list.getByRole("link", { name: /^Scroll wave [01]$/ })
+  ).toHaveText(["Scroll wave 1", "Scroll wave 0"]);
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(
+    list.getByRole("link", { name: /^Scroll wave [01]$/ })
+  ).toHaveText(["Scroll wave 1", "Scroll wave 0"]);
+  await expect(page).toHaveURL(/\/waves$/);
+
+  if (isMobile) {
+    await first.tap();
+  } else {
+    await first.click();
+  }
+  await expect(page).toHaveURL(new RegExp(scrollWaveId(0)), {
+    timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+  });
+});
+
+test("can reorder pins from the keyboard", async ({
+  page,
+  baseURL,
+  isMobile,
+}) => {
+  test.skip(
+    isMobile,
+    "This test uses desktop keyboard focus. Mobile touch dragging is tested separately."
+  );
+  await installWaveListScrollFixture(page, baseURL);
+  await page.goto("/waves", { waitUntil: "domcontentloaded" });
+  await page
+    .getByRole("group", { name: "Wave list filter" })
+    .getByRole("button", { name: "Pinned", exact: true })
+    .click();
+
+  const list = page
+    .getByRole("region", { name: "Pinned", exact: true })
+    .filter({ visible: true });
+  const wave = list.getByRole("link", {
+    name: "Scroll wave 0",
+    exact: true,
+  });
+  await wave.focus();
+  await page.keyboard.press("Space");
+  await expect(list.getByText("Position 1.", { exact: true })).toHaveCount(1);
+  await page.keyboard.press("ArrowDown");
+  await expect(list.getByText("Position 2.", { exact: true })).toHaveCount(1);
+  await page.keyboard.press("Space");
+  await expect(
+    list.getByRole("link", { name: /^Scroll wave [01]$/ })
+  ).toHaveText(["Scroll wave 1", "Scroll wave 0"]);
+
+  await expect(
+    list.getByText("Pinned wave order saved.", { exact: true })
+  ).toHaveCount(1);
+  await expect(wave).toBeFocused();
+  await wave.press("Enter");
+  await expect(page).toHaveURL(new RegExp(scrollWaveId(0)));
+});
+
 for (const collection of ["All", "Pinned", "Joined"]) {
   test(`wave list stops automatic scrolling during incoming activity in ${collection}`, async ({
     page,
@@ -122,8 +264,8 @@ for (const collection of ["All", "Pinned", "Joined"]) {
     ];
     const before = (await sidebarScrollMetrics(list)).top;
 
-    // Wait for each visible receiving row to move to the top before checking
-    // the viewport: a pre-update assertion would miss the regression.
+    // The activity feeds move a receiving row to the top. Saved pins keep
+    // their position after the live update.
     for (const receivingWave of [firstReceiving, secondReceiving]) {
       const receivingLink = list.getByRole("link", {
         name: `Scroll wave ${receivingWave}`,
@@ -131,7 +273,12 @@ for (const collection of ["All", "Pinned", "Joined"]) {
       });
       await expect(receivingLink).toBeInViewport();
       await fixture.incoming(receivingWave);
-      await expect(receivingLink).not.toBeInViewport();
+      if (collection === "Pinned") {
+        await expect(receivingLink).toHaveAttribute("href", /divider=/);
+        await expect(receivingLink).toBeInViewport();
+      } else {
+        await expect(receivingLink).not.toBeInViewport();
+      }
       expect((await sidebarScrollMetrics(list)).top).toBe(before);
     }
     await page.screenshot({
@@ -151,9 +298,15 @@ for (const collection of ["All", "Pinned", "Joined"]) {
     await expect(page).toHaveURL(new RegExp(scrollWaveId(nextActive)));
     const afterNavigation = (await sidebarScrollMetrics(list)).top;
     await fixture.incoming(nextActive);
-    await expect(
-      list.getByRole("link", { name: `Scroll wave ${nextActive}`, exact: true })
-    ).not.toBeInViewport();
+    const openedWave = list.getByRole("link", {
+      name: `Scroll wave ${nextActive}`,
+      exact: true,
+    });
+    if (collection === "Pinned") {
+      await expect(openedWave).toBeInViewport();
+    } else {
+      await expect(openedWave).not.toBeInViewport();
+    }
     expect((await sidebarScrollMetrics(list)).top).toBe(afterNavigation);
     await testInfo.attach("scroll-position-after-activity", {
       body: JSON.stringify({
@@ -165,13 +318,21 @@ for (const collection of ["All", "Pinned", "Joined"]) {
     await page.screenshot({
       path: testInfo.outputPath("active-wave-reordered.png"),
     });
-    // Scrolling to the top confirms the receiving wave really moved there.
+    // Confirm the top row follows the collection’s ordering rule.
     await sidebarScrollMetrics(list, 0);
-    await expect(list.getByRole("link").first()).toHaveText(
-      `Scroll wave ${nextActive}`
+    const firstWave = list.getByRole("link").first();
+    await expect(firstWave).toHaveText(
+      collection === "Pinned" ? "Scroll wave 0" : `Scroll wave ${nextActive}`
     );
     await fixture.incoming(55);
-    await expect(list.getByRole("link").first()).toHaveText("Scroll wave 55");
+    if (collection === "Pinned") {
+      await expect(
+        list.getByRole("link", { name: "Scroll wave 55" })
+      ).toHaveAttribute("href", /divider=/);
+      await expect(firstWave).toHaveText("Scroll wave 0");
+    } else {
+      await expect(firstWave).toHaveText("Scroll wave 55");
+    }
     expect((await sidebarScrollMetrics(list)).top).toBe(0);
     // Exercise the track last so its native animation cannot overlap the
     // programmatic reset used by the activity-at-top assertion above.

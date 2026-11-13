@@ -1466,6 +1466,15 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   "pinControl.limitTooltip":
     "Max {count} pinned waves. Unpin another wave first.",
   "pinControl.viewerChanged": "The active profile changed. Please try again.",
+  dragInstructions:
+    "While focused on the wave, press Space to pick it up. Use the arrow keys to move it, Space to drop, or Escape to cancel.",
+  dragStarted: "Picked up wave.",
+  dragPosition: "Position {position}.",
+  dragCancelled: "Reordering cancelled.",
+  pinsRetryLabel: "Retry loading pinned waves",
+  pinOrderSaved: "Pinned wave order saved.",
+  pinOrderSaveError: "Couldn’t save the pinned wave order. Please try again.",
+  pinsLoadError: "Couldn’t load pinned waves.",
   highlyRated: "Worth Checking Out",
   highlyRatedInfoTooltip: "Highly rated waves you don’t follow yet.",
   "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",

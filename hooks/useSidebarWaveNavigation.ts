@@ -26,8 +26,16 @@ function selectSidebarCollection(
   collection: WaveSidebarCollection,
   leftWaveIds: readonly string[],
   activeContainerId?: string | null,
-  activeWaveId?: string | null
+  activeWaveId?: string | null,
+  pinnedWaveOrder?: readonly string[]
 ): MinimalWave[] {
+  if (collection === "pinned" && pinnedWaveOrder) {
+    const byId = new Map(waves.map((wave) => [wave.id, wave]));
+    return pinnedWaveOrder.flatMap((id) => {
+      const wave = byId.get(id);
+      return wave?.isPinned ? [wave] : [];
+    });
+  }
   return waves
     .filter((wave) => {
       if (collection === "pinned") return wave.isPinned;
@@ -61,12 +69,14 @@ export function useSidebarWaveNavigation({
   enabled = true,
   activeContainerId,
   activeWaveId,
+  pinnedWaveOrder,
 }: {
   readonly waves: readonly MinimalWave[];
   readonly scrollContainerRef: RefObject<HTMLElement | null>;
   readonly enabled?: boolean;
   readonly activeContainerId?: string | null | undefined;
   readonly activeWaveId?: string | null | undefined;
+  readonly pinnedWaveOrder?: readonly string[] | undefined;
 }) {
   const viewer = useWaveDiscoveryViewer();
   const leftWaveIds = useWaveSidebarMembership(viewer.key);
@@ -107,10 +117,19 @@ export function useSidebarWaveNavigation({
             collection,
             leftWaveIds,
             activeContainerId,
-            activeWaveId
+            activeWaveId,
+            pinnedWaveOrder
           )
         : [...waves],
-    [waves, collection, enabled, leftWaveIds, activeContainerId, activeWaveId]
+    [
+      waves,
+      collection,
+      enabled,
+      leftWaveIds,
+      activeContainerId,
+      activeWaveId,
+      pinnedWaveOrder,
+    ]
   );
   const positions = useRef(new Map<string, number>());
   const viewKey = searching ? "search:" + queryText.trim() : collection;

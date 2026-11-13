@@ -607,6 +607,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       hasLoadingError: mainWavesData.hasLoadingError,
       retryLoading: mainWavesData.retryLoading,
       isPinnedWavesLoading: mainWavesData.isPinnedWavesLoading,
+      hasPinnedWavesError: mainWavesData.hasPinnedWavesError,
+      retryPinnedWaves: mainWavesData.retryPinnedWaves,
+      pinnedWaveOrder: mainWavesData.pinnedWaveOrder,
+      reorderPinnedWaves: mainWavesData.reorderPinnedWaves,
+      isSavingPinnedWaveOrder: mainWavesData.isSavingPinnedWaveOrder,
       list: wavesHookData.waves,
       // A list still waiting for its first request reads as loading, so the
       // server render and first client frame show the loader, not "empty".
@@ -654,6 +659,11 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     actionsValue,
     wavesHookData.waves,
     mainWavesData.isPinnedWavesLoading,
+    mainWavesData.hasPinnedWavesError,
+    mainWavesData.retryPinnedWaves,
+    mainWavesData.pinnedWaveOrder,
+    mainWavesData.reorderPinnedWaves,
+    mainWavesData.isSavingPinnedWaveOrder,
     mainWavesData.recommendationsStatus,
     mainWavesData.retryRecommendations,
     mainWavesData.isAnnouncementsLoading,

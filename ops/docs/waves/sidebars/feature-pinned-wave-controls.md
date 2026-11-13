@@ -36,9 +36,13 @@ independent and do not sync.
 
 1. Open `/waves/{waveId}` and select `Pin wave` from the header or wave row.
 2. The wave appears in the `Pinned` collection. Use its tab beside `Joined` and `All`.
-3. Unpin from either control to remove it from the `Pinned` collection.
-4. If 100 ordinary waves are already pinned, pinning is blocked until you unpin one.
-5. In native app small-screen mode, opened threads are added to local shortcuts
+3. Drag a wave row to change its position in `Pinned`. On a touch screen, hold
+   the row briefly before dragging. With a keyboard, focus the wave and press
+   Space, use the arrow keys to move it, then press Space again to save. The
+   order syncs across devices. New pins and re-pins go to the bottom.
+4. Unpin from either control to remove it from the `Pinned` collection.
+5. If 100 ordinary waves are already pinned, pinning is blocked until you unpin one.
+6. In native app small-screen mode, opened threads are added to local shortcuts
    (newest first, max 20).
 
 ## Common Scenarios
