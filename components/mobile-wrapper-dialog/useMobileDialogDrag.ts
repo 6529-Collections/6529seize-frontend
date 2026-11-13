@@ -163,6 +163,7 @@ export function useMobileDialogDrag({
   useEffect(() => {
     if (dismissible || dismissTimerRef.current === null) return;
     // Cancelling this external timer must also undo its animated gesture offset.
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-adjust-state-on-prop-change, react-you-might-not-need-an-effect/no-derived-state -- Revoking a scheduled external dismissal must cancel its timer and restore gesture state.
     resetDrag();
   }, [dismissible, resetDrag]);
 
