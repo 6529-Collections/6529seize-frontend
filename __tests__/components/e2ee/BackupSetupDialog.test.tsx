@@ -46,8 +46,9 @@ function fakeManager() {
           failUpload = reject;
         })
     ),
-    backupNow: jest.fn(async () => {
+    backupNow: jest.fn(async (): Promise<boolean> => {
       manager.set({ uploading: false, lastError: null });
+      return true;
     }),
     finish: () => act(() => finishUpload?.()),
     fail: (error: unknown) => act(() => failUpload?.(error)),
@@ -223,6 +224,72 @@ describe("BackupSetupDialog", () => {
     fireEvent.click(button("Try again"));
     await screen.findByRole("dialog", { name: "Backup is on" });
     expect(manager.backupNow).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps uploading after Try again until a queued repair run succeeds", async () => {
+    const { manager } = renderDialog();
+    await toCheckStep();
+    fireEvent.change(screen.getByLabelText("Group 4"), {
+      target: { value: "PQRS" },
+    });
+    fireEvent.change(screen.getByLabelText("Group 11"), {
+      target: { value: "JKMN" },
+    });
+    fireEvent.click(button("Turn on backup"));
+    await screen.findByRole("dialog", { name: "Backing up your messages" });
+    manager.fail(new BackupError("E2EE_RATE_LIMITED"));
+    await screen.findByRole("dialog", { name: "Backup didn’t finish" });
+    // The retry's upload needs another run (a conflict or fork repair).
+    manager.backupNow.mockImplementationOnce(async () => {
+      manager.set({ uploading: true, lastError: null });
+      return false;
+    });
+    fireEvent.click(button("Try again"));
+    await waitFor(() => expect(manager.backupNow).toHaveBeenCalledTimes(1));
+    expect(
+      await screen.findByRole("dialog", { name: "Backing up your messages" })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Backup is on" })).toBeNull();
+
+    // The queued run succeeds: only then is the backup on.
+    act(() =>
+      manager.set({
+        uploading: false,
+        lastBackupAt: Date.now(),
+        counts: { chats: 38, messages: 1240 },
+      })
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "Backup is on" })
+    ).toHaveTextContent("38 chats, 1,240 messages");
+  });
+
+  it("shows a queued repair run's failure with Try again", async () => {
+    const { manager } = renderDialog();
+    await toCheckStep();
+    fireEvent.change(screen.getByLabelText("Group 4"), {
+      target: { value: "PQRS" },
+    });
+    fireEvent.change(screen.getByLabelText("Group 11"), {
+      target: { value: "JKMN" },
+    });
+    fireEvent.click(button("Turn on backup"));
+    await screen.findByRole("dialog", { name: "Backing up your messages" });
+    manager.fail(new BackupError("E2EE_RATE_LIMITED"));
+    await screen.findByRole("dialog", { name: "Backup didn’t finish" });
+    manager.backupNow.mockImplementationOnce(async () => {
+      manager.set({ uploading: true, lastError: null });
+      return false;
+    });
+    fireEvent.click(button("Try again"));
+    await screen.findByRole("dialog", { name: "Backing up your messages" });
+    act(() => manager.set({ lastError: "E2EE_RATE_LIMITED" }));
+    const failed = await screen.findByRole("dialog", {
+      name: "Backup didn’t finish",
+    });
+    expect(within(failed).getByRole("alert")).toHaveTextContent(
+      "Too many backup requests"
+    );
   });
 
   it("returns to the check when the backup couldn't be created", async () => {

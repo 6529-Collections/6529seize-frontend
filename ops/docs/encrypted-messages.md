@@ -643,7 +643,11 @@ restore it on a new device.
   The section shows when the device last backed up, how many chats and
   messages this device has in the backup, and how much of the 256 MB backup
   storage is used (in kB below 1 MB). While an upload runs it shows progress
-  and asks you to keep 6529 open in that tab.
+  and asks you to keep 6529 open in that tab. If an upload needs another run
+  (another device wrote to the backup at the same moment), it keeps showing
+  progress until that run succeeds, never "up to date"; the setup dialog's
+  **Try again** likewise says **Backup is on** only then. A failed upload
+  shows its error and is retried about 5 minutes later.
 - Reminders while backup is off (or a backup from another device isn't
   restored here):
   - turning on encrypted DMs ends with **One more step: back up your

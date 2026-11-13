@@ -251,6 +251,7 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
       options.backupNow ??
       jest.fn(async () => {
         order.push("backup");
+        return true;
       });
     // Stable, as the real manager's snapshot is.
     const current = options.snapshot ?? snapshot();
@@ -351,6 +352,19 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     expect(backupNow).toHaveBeenCalledTimes(1);
     expect(removeProfile).toHaveBeenCalledWith(SELF_ID);
     expect(run.signOut).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the messages while the backup update still needs another run", async () => {
+    // A conflict or fork repair is queued: the backup isn't complete yet.
+    const backupNow = jest.fn(async () => false);
+    const run = renderWithEngine({ backupNow });
+    await userEvent.click(await removeBox());
+    await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Couldn’t update your encrypted backup"
+    );
+    expect(removeProfile).not.toHaveBeenCalled();
+    expect(run.signOut).not.toHaveBeenCalled();
   });
 
   it("leaves the backup and local data alone when removal is not chosen", async () => {

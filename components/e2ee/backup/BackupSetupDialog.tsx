@@ -298,6 +298,20 @@ function SaveBody({
   );
 }
 
+/**
+ * Where an upload stands once Try again left it to a queued run (a conflict
+ * or fork repair): running until that run ends, then done or failed.
+ */
+function queuedUploadState(snapshot: E2eeBackupSnapshot): UploadState {
+  if (snapshot.busy) {
+    return "running";
+  }
+  if (snapshot.lastError !== null) {
+    return "failed";
+  }
+  return snapshot.uploading ? "running" : "done";
+}
+
 /** Step 4: the upload, then done (with counts) or failed (with Try again). */
 function uploadContent(
   locale: SupportedLocale,
@@ -417,7 +431,9 @@ export function BackupSetupDialog({
     () => checkGroups ?? pickCheckGroups(groups.length)
   );
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
-  const [upload, setUpload] = useState<UploadState>("running");
+  // "queued": Try again ended with another run queued; the snapshot tells
+  // the rest.
+  const [upload, setUpload] = useState<UploadState | "queued">("running");
   const [pending, setPending] = useState(false);
   const snapshot = useSyncExternalStore(
     manager.subscribe,
@@ -449,8 +465,8 @@ export function BackupSetupDialog({
     setErrorKey(null);
     setUpload("running");
     try {
-      await manager.backupNow();
-      setUpload("done");
+      // Done only once everything is uploaded, not while a run is queued.
+      setUpload((await manager.backupNow()) ? "done" : "queued");
     } catch (error) {
       setUpload("failed");
       setErrorKey(getBackupErrorKey(error));
@@ -469,6 +485,9 @@ export function BackupSetupDialog({
       {t(locale, "e2ee.backup.setup.continue")}
     </Button>
   );
+
+  const shownUpload =
+    upload === "queued" ? queuedUploadState(snapshot) : upload;
 
   const contents: Record<Step, () => StepContent> = {
     why: () => ({
@@ -546,16 +565,20 @@ export function BackupSetupDialog({
     }),
     upload: () =>
       uploadContent(locale, {
-        upload,
+        upload: shownUpload,
         snapshot,
-        errorKey,
+        errorKey:
+          errorKey ??
+          (shownUpload === "failed" && snapshot.lastError !== null
+            ? getBackupErrorKey(snapshot.lastError)
+            : null),
         pending,
         onClose,
         onRetry: () => void retry(),
       }),
   };
   const content = contents[step]();
-  const showStep = step !== "upload" || upload === "running";
+  const showStep = step !== "upload" || shownUpload === "running";
 
   return (
     <E2eeDialog
