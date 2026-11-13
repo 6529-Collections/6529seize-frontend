@@ -4,18 +4,29 @@ import type { CompactMenuItem } from "@/components/compact-menu";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState, type Ref } from "react";
 import { createPortal } from "react-dom";
+import {
+  WAVE_HEADER_ACTION_CLASSES,
+  WAVE_HEADER_ACTION_SURFACE_CLASSES,
+  WAVE_HEADER_COMPACT_ACTION_CLASSES,
+  WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES,
+} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
 
 const COMPACT_ACTION_CLASSES =
   "tw-flex tw-min-h-12 tw-w-full tw-select-none tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-text-base tw-font-semibold tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
 
 export default function CompactWaveActions({
   items,
+  triggerRef,
+  compactTrigger = false,
 }: {
   readonly items: readonly CompactMenuItem[];
+  readonly triggerRef?: Ref<HTMLButtonElement> | undefined;
+  readonly compactTrigger?: boolean | undefined;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const pendingActionRef = useRef<(() => void) | null>(null);
 
   const handleAction = (
     item: Exclude<CompactMenuItem, { readonly kind: "section" }>
@@ -25,7 +36,11 @@ export default function CompactWaveActions({
     }
 
     setIsOpen(false);
-    item.onSelect?.();
+    if (item.deferUntilClosed) {
+      pendingActionRef.current = item.onSelect ?? null;
+    } else {
+      item.onSelect?.();
+    }
   };
 
   const sheet =
@@ -37,6 +52,11 @@ export default function CompactWaveActions({
             setOpen={setIsOpen}
             label="More wave actions"
             hideOnDesktopHover={false}
+            onAfterLeave={() => {
+              const action = pendingActionRef.current;
+              pendingActionRef.current = null;
+              action?.();
+            }}
           >
             {items.map((item) => {
               if (item.kind === "section") {
@@ -114,14 +134,27 @@ export default function CompactWaveActions({
     <>
       <button
         type="button"
+        ref={triggerRef}
         aria-label="More wave actions"
         aria-haspopup="dialog"
         aria-expanded={isOpen}
         data-compact-wave-actions-trigger="true"
         onClick={() => setIsOpen(true)}
-        className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.05] tw-text-iron-200 tw-transition-colors tw-duration-150 hover:tw-border-white/10 hover:tw-bg-white/[0.08] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+        className={
+          compactTrigger
+            ? WAVE_HEADER_COMPACT_ACTION_CLASSES
+            : WAVE_HEADER_ACTION_CLASSES
+        }
       >
-        <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
+        <span
+          className={
+            compactTrigger
+              ? WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES
+              : WAVE_HEADER_ACTION_SURFACE_CLASSES
+          }
+        >
+          <EllipsisVerticalIcon className="tw-size-5 tw-flex-shrink-0" />
+        </span>
       </button>
       {sheet}
     </>

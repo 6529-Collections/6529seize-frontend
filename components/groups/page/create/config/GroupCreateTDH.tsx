@@ -52,6 +52,8 @@ export default function GroupCreateTDH({
           </div>
           <div data-group-criteria-tabs>
             <CommonTabs
+              variant="connected"
+              connectedSize="sm"
               items={modes}
               activeItem={tdh.inclusion_strategy}
               setSelected={(strategy) =>

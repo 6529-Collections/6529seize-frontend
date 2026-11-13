@@ -383,6 +383,95 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  for (const outcome of ["ready", "failed"] as const) {
+    test(`waits for image validation and handles ${outcome} without posting early`, async ({
+      page,
+      baseURL,
+    }) => {
+      let uploads = 0;
+      let polls = 0;
+      let status: "processing" | "ready" | "failed" = "processing";
+      const error =
+        "This image is too large to process. Reduce its dimensions or animation frame count and upload again.";
+      await installDropImageUploadFixture(
+        page,
+        baseURL,
+        () => {
+          uploads += 1;
+        },
+        true
+      );
+      await page.route(
+        "**/drop-media/uploads/clipboard-image",
+        async (route) => {
+          polls += 1;
+          await route.fulfill({
+            json: {
+              media_url: `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/pasted-image.png`,
+              mime_type: "image/png",
+              media_upload_id: "clipboard-image",
+              media_status: status,
+              ...(status === "failed" ? { media_error: error } : {}),
+            },
+          });
+        }
+      );
+      await gotoSandboxWave(page);
+      await showDropActionsIfCollapsed(page);
+      const composer = page
+        .getByRole("textbox", { name: "Write a message" })
+        .last();
+      await composer.fill("Keep this image draft");
+      await showDropActionsIfCollapsed(page);
+      const chooserPromise = page.waitForEvent("filechooser");
+      await page
+        .getByRole("button", { name: "Attach files", exact: true })
+        .or(page.getByRole("button", { name: "Upload", exact: true }))
+        .click();
+      await (
+        await chooserPromise
+      ).setFiles({
+        name: "selected-image.png",
+        mimeType: "image/png",
+        buffer: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+          "base64"
+        ),
+      });
+      await expect.poll(() => polls).toBeGreaterThan(0);
+      const post = page
+        .getByRole("button", { name: "Post", exact: true })
+        .last();
+      await expect(post).toBeDisabled();
+      await expect(
+        page.getByRole("status").filter({ hasText: "Processing image" }).last()
+      ).toBeVisible();
+      await composer.press("Enter");
+      status = outcome;
+      if (outcome === "failed") {
+        await expect(page.getByText(error, { exact: true })).toBeVisible();
+        await expect(
+          page.getByText("Could not add selected-image.png", { exact: true })
+        ).toBeVisible();
+      } else {
+        await expect(
+          page.getByRole("button", { name: "Remove file" }).last()
+        ).toBeVisible();
+      }
+      await expect(post).toBeEnabled();
+      await expect(composer).toContainText("Keep this image draft");
+      expect(uploads).toBe(1);
+      expect(
+        (await fetchSandboxRequests(baseURL)).filter(
+          (request) =>
+            request.method === "POST" && request.path === "/api/drops"
+        )
+      ).toHaveLength(0);
+      await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+  }
+
   test("reserves a visible video preview without decoded metadata", async ({
     baseURL,
     page,
@@ -1518,13 +1607,18 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 
   test("keeps the poll composer usable and submits its exact shape", async ({
     baseURL,
+    isMobile,
     page,
-  }) => {
+  }, testInfo) => {
     await resetSandboxRequests(baseURL);
     await gotoSandboxWave(page);
     await showDropActionsIfCollapsed(page);
 
-    await page.getByRole("button", { name: "Add poll" }).click();
+    const addPoll = page.getByRole("button", {
+      name: isMobile ? "Poll" : "Add poll",
+      exact: true,
+    });
+    await addPoll.click();
 
     const poll = page.getByTestId("create-drop-poll");
     await expect(poll).toBeVisible();
@@ -1547,7 +1641,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 
     await poll.getByRole("button", { name: "Remove poll" }).click();
     await expect(poll).toBeHidden();
-    await page.getByRole("button", { name: "Add poll" }).click();
+    await showDropActionsIfCollapsed(page);
+    await addPoll.click();
     await expect(poll).toBeVisible();
 
     const firstOption = page.getByRole("textbox", { name: "Poll option 1" });
@@ -1558,6 +1653,13 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     expect((await firstOption.boundingBox())?.width ?? 0).toBeGreaterThan(140);
 
     const multipleButton = page.getByRole("button", { name: "Multiple" });
+    for (const button of [
+      page.getByRole("button", { name: "Single", exact: true }),
+      multipleButton,
+    ]) {
+      await expect(button).toHaveCSS("font-size", "12px");
+      await expect(button).toHaveCSS("height", "24px");
+    }
     await multipleButton.click();
     await expect(multipleButton).toHaveAttribute("aria-pressed", "true");
 
@@ -1588,6 +1690,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       .fill(SANDBOX_POLL_QUESTION);
 
     await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("poll-connected-mode.png"),
+    });
     const postButton = page.getByRole("button", { name: "Post" }).last();
     await expect(postButton).toBeEnabled();
     await postButton.click();
@@ -2008,7 +2113,8 @@ async function installExternalDataFixtures(page: Page) {
 async function installDropImageUploadFixture(
   page: Page,
   baseURL: string | undefined,
-  onUploadStart: () => void
+  onUploadStart: () => void,
+  processing = false
 ) {
   const sandboxApiOrigin = getSandboxApiOrigin(baseURL);
   // Keep the mocked PUT same-origin so the browser can read its ETag.
@@ -2030,7 +2136,13 @@ async function installDropImageUploadFixture(
     if (pathname.endsWith("/completion")) {
       await route.fulfill({
         contentType: "application/json",
-        json: { media_url: mediaUrl, mime_type: "image/png" },
+        json: {
+          media_url: mediaUrl,
+          mime_type: "image/png",
+          ...(processing
+            ? { media_upload_id: "clipboard-image", media_status: "processing" }
+            : {}),
+        },
         status: 200,
       });
       return;

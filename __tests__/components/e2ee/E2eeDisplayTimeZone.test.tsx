@@ -25,7 +25,7 @@ jest.mock("@/hooks/useDisplayTimeZone", () => ({
 }));
 jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
   E2eeEmojiProvider: ({ children }: { children: ReactNode }) => children,
-  useE2eeEmojis: () => ({ sources: new Map() }),
+  useE2eeEmojis: () => ({ sources: new Map(), native: new Map() }),
 }));
 
 const originalScrollTo = Element.prototype.scrollTo;

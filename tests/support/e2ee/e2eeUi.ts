@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from "@playwright/test";
+import { escapeRegExp } from "lodash";
 
 import { dismissNextDevTools } from "../localSandbox";
 import {
@@ -110,7 +111,14 @@ export async function pickPerson(
   await scope
     .getByPlaceholder(options.searchLabel ?? "Search people", { exact: true })
     .fill(handle);
-  await scope.getByRole("button", { name: handle, exact: true }).click();
+  await scope
+    .getByRole("button", {
+      name: options.searchLabel
+        ? handle
+        : new RegExp(String.raw`^${escapeRegExp(handle)} Level\b`, "u"),
+      exact: Boolean(options.searchLabel),
+    })
+    .click();
   const row = selectedPerson(scope, handle, options.listLabel);
   await expect(row).toBeVisible();
   await expect(
@@ -146,19 +154,20 @@ export async function startChat(
 ): Promise<string> {
   const { page } = session;
   await gotoPath(page, `${ENCRYPTED_ROUTE}/new`);
-  await expect(
-    page.getByRole("heading", { name: "New encrypted chat" })
-  ).toBeVisible({ timeout: FIRST_LOAD_TIMEOUT_MS });
+  await expect(page.getByRole("heading", { name: "New message" })).toBeVisible({
+    timeout: FIRST_LOAD_TIMEOUT_MS,
+  });
   for (const handle of people) {
     await pickPerson(page, handle);
   }
-  if (options.kind === "group") {
-    await page.getByRole("radio", { name: /^Group/u }).check();
+  if (options.kind === "group" && people.length === 1) {
+    await page.getByText("More options", { exact: true }).click();
+    await page.getByRole("checkbox", { name: /Create a group/ }).check();
   }
   if (options.name) {
     await page.getByLabel("Group name (optional)").fill(options.name);
   }
-  await page.getByRole("button", { name: "Start encrypted chat" }).click();
+  await page.getByRole("button", { name: "Start chat" }).click();
   await expect(page).toHaveURL(CONVERSATION_URL, {
     timeout: E2EE_UI_TIMEOUT_MS,
   });

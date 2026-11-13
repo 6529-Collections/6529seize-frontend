@@ -16,7 +16,10 @@ import {
   useSyncExternalStore,
 } from "react";
 import { useAuth } from "@/components/auth/Auth";
-import type { RequestSignedMessagesGrant } from "@/components/auth/authSignedMessagesGrant";
+import type {
+  RequestSignedMessagesGrant,
+  SignedMessagesGrantFailure,
+} from "@/components/auth/authSignedMessagesGrant";
 import SignedMessagesEnableStatus from "@/components/device-signing/SignedMessagesEnableStatus";
 import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -28,10 +31,12 @@ import { faSignature } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import useCapacitor from "@/hooks/useCapacitor";
 import Button from "@/components/utils/button/Button";
+import { isWalletConnectSessionError } from "@/helpers/wallet-error.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeEngine, E2eeEngineStatus } from "@/lib/e2ee/types";
 import {
+  E2EE_REVOCATION_UNVERIFIED,
   E2EE_SIGNATURE_REJECTED,
   getE2eeErrorCode,
   isE2eeSignatureRejection,
@@ -40,6 +45,7 @@ import { tCount } from "../e2eeFormat";
 import { isSafariBrowser } from "../e2eePlatform";
 import { useE2eeUpgradeCount } from "../useE2eeUpgrade";
 import { turnOnWithCombinedSignIn } from "./e2eeCombinedTurnOn";
+import { E2eeRemoveLocalData } from "./E2eeRemoveLocalData";
 
 const POINTS: readonly {
   readonly key: MessageKey;
@@ -69,18 +75,57 @@ function getPermissionPointKey(
 }
 
 const ENROLL_REJECTED_KEY: MessageKey = "e2ee.enroll.rejected";
+const REVOCATION_UNVERIFIED_KEY: MessageKey =
+  "e2ee.enroll.revocationUnverified";
+
+/**
+ * Choose enrollment feedback. The shared wallet flow handles session failures
+ * so it can offer reconnect only for a remote wallet.
+ */
+function getEnrollmentFailure(
+  error: unknown,
+  upgrading: boolean
+): { reason: SignedMessagesGrantFailure; errorKey: MessageKey | null } {
+  if (isE2eeSignatureRejection(error)) {
+    return { reason: "rejected", errorKey: ENROLL_REJECTED_KEY };
+  }
+  if (
+    getE2eeErrorCode(error) === "E2EE_SIGNATURE_FAILED" &&
+    isWalletConnectSessionError(error)
+  ) {
+    // The shared wallet flow chooses recovery or signing-error copy.
+    return { reason: "walletconnect-session", errorKey: null };
+  }
+  return {
+    reason: "signature-failed",
+    errorKey: upgrading ? "e2ee.upgrade.failed" : "e2ee.enroll.failed",
+  };
+}
+
+/**
+ * Feedback for a failed turn-on. Still listed as revoked: a neutral notice
+ * says what to do instead of a failure alert.
+ */
+function getEnrollmentFeedback(
+  error: unknown,
+  upgrading: boolean
+): {
+  reason: SignedMessagesGrantFailure;
+  errorKey: MessageKey | null;
+  noticeKey: MessageKey | null;
+} {
+  const failure = getEnrollmentFailure(error, upgrading);
+  if (getE2eeErrorCode(error) === E2EE_REVOCATION_UNVERIFIED) {
+    return {
+      reason: failure.reason,
+      errorKey: null,
+      noticeKey: REVOCATION_UNVERIFIED_KEY,
+    };
+  }
+  return { ...failure, noticeKey: null };
+}
 
 const subscribeNever = () => () => undefined;
-
-const getEnrollErrorKey = (error: unknown, upgrading: boolean): MessageKey => {
-  if (
-    isE2eeSignatureRejection(error) ||
-    getE2eeErrorCode(error) === E2EE_SIGNATURE_REJECTED
-  ) {
-    return ENROLL_REJECTED_KEY;
-  }
-  return upgrading ? "e2ee.upgrade.failed" : "e2ee.enroll.failed";
-};
 
 /** Upgrade copy (D172) replaces first-time copy for encrypted DMs alone. */
 const getSignLabelKey = (
@@ -359,14 +404,10 @@ export function E2eeEnrollmentCard({
             return { success: true };
         }
       } catch (error) {
-        setNoticeKey(null);
-        setErrorKey(getEnrollErrorKey(error, upgrading));
-        return {
-          success: false,
-          reason: isE2eeSignatureRejection(error)
-            ? "rejected"
-            : "signature-failed",
-        };
+        const feedback = getEnrollmentFeedback(error, upgrading);
+        setNoticeKey(feedback.noticeKey);
+        setErrorKey(feedback.errorKey);
+        return { success: false, reason: feedback.reason };
       } finally {
         setPending(false);
       }
@@ -541,6 +582,8 @@ function EnrollmentFeedback({
   if (declined) statusKey = ENROLL_REJECTED_KEY;
   else if (noticeKey) statusKey = noticeKey;
   else if (waiting && flow.status === null) statusKey = "e2ee.enroll.waiting";
+  else if (engineError === E2EE_REVOCATION_UNVERIFIED)
+    statusKey = REVOCATION_UNVERIFIED_KEY;
 
   return (
     <>
@@ -559,6 +602,9 @@ function EnrollmentFeedback({
       >
         {statusKey ? t(locale, statusKey) : null}
       </output>
+      {engineError === E2EE_REVOCATION_UNVERIFIED ? (
+        <E2eeRemoveLocalData />
+      ) : null}
       {failureKey ? (
         <p
           role="alert"

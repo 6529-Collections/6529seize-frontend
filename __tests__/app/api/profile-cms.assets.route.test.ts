@@ -95,7 +95,11 @@ jest.mock("@/lib/security/urlGuard", () => {
     }
   }
 
+  const actual = jest.requireActual("@/lib/security/urlGuard");
   return {
+    // The client rate limiter classifies forwarded addresses with these.
+    isForbiddenAddress: actual.isForbiddenAddress,
+    parseIpv6Groups: actual.parseIpv6Groups,
     UrlGuardError: MockUrlGuardError,
     fetchPublicUrl: mockFetchPublicUrl,
     parsePublicUrl: jest.fn((value: string | null | undefined) => {
@@ -115,7 +119,7 @@ let GET: GetHandler;
 const ALLOWED_IMAGE_URL =
   "https://d3lqz0a4bldqgf.cloudfront.net/images/scaled_x1000/0x33FD426905f149f8376e227d0C9D3340AaD17aF1/1.WEBP";
 const ALLOWED_JSON_URL =
-  "https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/emoji-list.json?t=1";
+  "https://d3lqz0a4bldqgf.cloudfront.net/6529-emoji/emoji-list.json";
 
 describe("profile CMS asset route", () => {
   beforeAll(async () => {
@@ -334,14 +338,58 @@ describe("profile CMS asset route", () => {
       "Unsupported CMS asset URL"
     );
   });
+
+  it.each([
+    ["a query string on the asset URL", `${ALLOWED_JSON_URL}?t=1`, ""],
+    ["a fragment on the asset URL", `${ALLOWED_JSON_URL}#v2`, ""],
+    ["an extra proxy parameter", ALLOWED_JSON_URL, "&v=2"],
+  ])(
+    "sends %s to the canonical proxy URL without fetching",
+    async (_label, target, extraQuery) => {
+      const response = await GET(createRequest(target, { extraQuery }));
+
+      expect(response.status).toBe(308);
+      expect(response.headers.get("location")).toBe(
+        `/api/profile-cms/assets?url=${encodeURIComponent(ALLOWED_JSON_URL)}`
+      );
+      expect(mockFetchPublicUrl).not.toHaveBeenCalled();
+    }
+  );
+
+  it("limits each client to its per-minute asset budget", async () => {
+    mockFetchPublicUrl.mockImplementation(async () =>
+      createUpstreamResponse("image-bytes", {
+        headers: { "content-length": "11", "content-type": "image/webp" },
+        status: 200,
+      })
+    );
+
+    let response: { readonly status: number } | undefined;
+    for (let index = 0; index < 601; index += 1) {
+      response = await GET(
+        createRequest(ALLOWED_IMAGE_URL, { clientIp: "8.8.4.50" })
+      );
+    }
+    const otherClient = await GET(
+      createRequest(ALLOWED_IMAGE_URL, { clientIp: "8.8.4.51" })
+    );
+
+    expect(response?.status).toBe(429);
+    expect(otherClient.status).toBe(200);
+    expect(mockFetchPublicUrl).toHaveBeenCalledTimes(601);
+  });
 });
 
-function createRequest(target: string): NextRequest {
+function createRequest(
+  target: string,
+  { clientIp, extraQuery = "" }: { clientIp?: string; extraQuery?: string } = {}
+): NextRequest {
   return {
+    headers: new Headers(clientIp ? { "x-forwarded-for": clientIp } : {}),
     nextUrl: new URL(
-      `https://6529.io/api/profile-cms/assets?url=${encodeURIComponent(target)}`
+      `https://6529.io/api/profile-cms/assets?url=${encodeURIComponent(target)}${extraQuery}`
     ),
-  } as NextRequest;
+  } as unknown as NextRequest;
 }
 
 function createUpstreamResponse(
@@ -373,8 +421,9 @@ async function expectJsonError(
   message: string
 ): Promise<void> {
   const response = await GET({
+    headers: new Headers(),
     nextUrl: new URL(requestUrl),
-  } as NextRequest);
+  } as unknown as NextRequest);
 
   expect(response.status).toBe(status);
   await expect(response.json()).resolves.toEqual({ error: message });

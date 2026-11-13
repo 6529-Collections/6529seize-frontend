@@ -1,8 +1,5 @@
 "use client";
 
-import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import GroupedLinkIndex, {
@@ -26,16 +23,8 @@ export default function AboutIndex() {
   const locale = DEFAULT_LOCALE;
   const { appWalletsSupported } = useAppWallets();
   const { hideNftPurchasing: hideSubscriptions } = useNftPurchasingVisibility();
-  const consent = useOptionalCookieConsent();
-  const capacitor = useCapacitor();
   const groups = getVisibleAboutNavGroups({
     hideSubscriptions,
-    hideSubscriptionReports:
-      consent !== undefined &&
-      shouldHideSubscriptions({
-        capacitorIsIos: capacitor.isIos,
-        country: consent.country,
-      }),
     appWalletsSupported,
   });
   const indexGroups: GroupedLinkIndexGroup[] = groups.map((group) => ({

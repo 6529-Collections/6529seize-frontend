@@ -99,7 +99,8 @@ export function printCalendarInvites(
   fontColor: string = "currentColor",
   size: number = 22,
   labels: CalendarInviteLabels = DEFAULT_CALENDAR_INVITE_LABELS,
-  locale = "en-US"
+  locale = "en-US",
+  { includeMintUrl = true }: { readonly includeMintUrl?: boolean } = {}
 ): string {
   // Normalize to mint instant in UTC
   const utcDay = startOfUtcDay(dateOrInstant);
@@ -112,7 +113,10 @@ export function printCalendarInvites(
   const title = `Meme ${formatMint(mintNumber, locale)}`;
   const fullLocal = formatFullDateTime(mintStartUtc, "local", locale);
   const fullUtc = formatFullDateTime(mintStartUtc, "utc", locale);
-  const desc = `${title} — ${fullLocal} / ${fullUtc}\n\nhttps://6529.io/the-memes/mint`;
+  const schedule = `${title} — ${fullLocal} / ${fullUtc}`;
+  const desc = includeMintUrl
+    ? `${schedule}\n\nhttps://6529.io/the-memes/mint`
+    : schedule;
 
   const gUrl = createGoogleCalendarUrl(mintStartUtc, mintEndUtc, title, desc);
   const icsUrl = createIcsDataUrl(mintStartUtc, mintEndUtc, title, desc);

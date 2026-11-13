@@ -39,15 +39,8 @@ Native app menu navigation links only to `/open-data`.
 
 ## Visibility Rules
 
-- `Meme Subscriptions` is shown when either condition is true:
-  - The user is not in the native iOS app.
-  - Country check returns `US`.
-- `Meme Subscriptions` is hidden on native iOS when cookie-country is not `US`.
-- On native iOS, the card can be temporarily hidden while cookie-country is
-  still loading.
-- The iOS country rule affects the hub card only.
-- Direct navigation to `/open-data/meme-subscriptions` still works when the
-  card is hidden.
+- The iOS app hides the `Meme Subscriptions` card.
+- The dataset is available directly at `/open-data/meme-subscriptions`.
 
 ## States on the Hub
 

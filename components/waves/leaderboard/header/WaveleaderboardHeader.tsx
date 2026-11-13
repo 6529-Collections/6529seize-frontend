@@ -481,7 +481,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             waveId={wave.id}
             onViewModeChange={onViewModeChange}
           />
-          <div ref={sortControlRef} className="tw-flex-shrink-0">
+          <div ref={sortControlRef} className="tw-min-w-0">
             <WaveleaderboardSort
               isMainStage={showAdditionalActionFilter}
               sort={sort}

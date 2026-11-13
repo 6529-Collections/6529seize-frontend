@@ -40,6 +40,7 @@ import type { DelegationToastState } from "./DelegationToast";
 import {
   DELEGATION_CARD_CLASS_NAME,
   DELEGATION_FIELD_CLASS_NAME,
+  DELEGATION_SELECT_CLASS_NAME,
   DELEGATION_FIELD_LABEL_CLASS_NAME,
 } from "./delegation-ui";
 
@@ -150,7 +151,7 @@ export function DelegationFormSelect(
   return (
     <select
       {...selectProps}
-      className={`${DELEGATION_FIELD_CLASS_NAME} ${className ?? ""}`}
+      className={`${DELEGATION_SELECT_CLASS_NAME} ${className ?? ""}`}
     >
       {children}
     </select>

@@ -29,10 +29,7 @@ export default function RatingContributorsControl({
   const locale = useBrowserLocale();
   const maxCount = compact ? 3 : 5;
   const avatars = useMemo(
-    () =>
-      buildRepAvatarItems(overview?.contributors.data ?? [], maxCount, {
-        omitHref: true,
-      }),
+    () => buildRepAvatarItems(overview?.contributors.data ?? [], maxCount),
     [overview?.contributors.data, maxCount]
   );
   if (!overview) return null;
@@ -49,20 +46,11 @@ export default function RatingContributorsControl({
     `user.profile.rep.contributors.${countKey}.${suffix}`,
     { count }
   );
-  const separateManageAction = compact && canManage;
   const avatarGroup = avatars.length > 0 && (
     <OverlappingAvatars items={avatars} size="sm" maxCount={maxCount} />
   );
   const content = (
-    <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-      {avatarGroup}
-      <span className="tw-text-xs tw-font-medium">
-        {canManage && !separateManageAction && (
-          <>{t(locale, "user.rate.manageGiven")} · </>
-        )}
-        {countLabel}
-      </span>
-    </span>
+    <span className="tw-text-xs tw-font-medium">{countLabel}</span>
   );
   if (matter === "REP" && overview.contributor_count <= 0) {
     return (
@@ -79,7 +67,7 @@ export default function RatingContributorsControl({
   if (canManage) {
     accessibleName = t(locale, "user.rate.manageRatingContributors", {
       matter,
-      contributors: countLabel,
+      count,
     });
   } else if (matter === "NIC") {
     accessibleName = t(locale, "user.rate.viewRatingContributors", {
@@ -96,41 +84,19 @@ export default function RatingContributorsControl({
       className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-500 tw-transition-colors group-hover:tw-text-iron-300 motion-reduce:tw-transition-none"
     />
   );
-  if (separateManageAction) {
-    return (
-      <div className="tw-flex tw-min-h-11 tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2">
-        {avatarGroup}
-        <span className="tw-inline-flex tw-items-center tw-gap-2">
-          <span className="tw-text-xs tw-font-medium tw-text-iron-300">
-            {countLabel}
-          </span>
-          <span aria-hidden="true" className="tw-text-iron-500">
-            ·
-          </span>
-          <button
-            type="button"
-            aria-label={accessibleName}
-            onClick={onClick}
-            className={buttonClassName}
-          >
-            <span className="tw-text-xs tw-font-medium tw-text-iron-100">
-              {t(locale, "user.rate.manageGiven")}
-            </span>
-            {chevron}
-          </button>
-        </span>
-      </div>
-    );
-  }
   return (
-    <button
-      type="button"
-      aria-label={accessibleName}
-      onClick={onClick}
-      className={buttonClassName}
-    >
-      {content}
-      {chevron}
-    </button>
+    <div className="tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-gap-2">
+      {avatarGroup}
+      <button
+        type="button"
+        aria-label={accessibleName}
+        aria-haspopup="dialog"
+        onClick={onClick}
+        className={buttonClassName}
+      >
+        {content}
+        {chevron}
+      </button>
+    </div>
   );
 }

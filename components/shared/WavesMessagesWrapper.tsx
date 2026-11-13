@@ -13,6 +13,7 @@ import { createBreakpoint } from "react-use";
 import {
   getActiveWaveIdFromUrl,
   isEncryptedMessagesPathname,
+  isMessageComposePathname,
 } from "@/helpers/navigation.helpers";
 import type { ApiDrop } from "../../generated/models/ApiDrop";
 import { DropSize } from "../../helpers/waves/drop.helpers";
@@ -28,7 +29,10 @@ import BrainRightSidebar, {
 import CreateWaveModal from "../waves/create-wave/LazyCreateWaveModal";
 import { isCreateWavePathname } from "@/helpers/waves/create-wave-route.helpers";
 import { WaveChatScrollProvider } from "@/contexts/wave/WaveChatScrollContext";
-import { useMyStreamActionsOptional } from "@/contexts/wave/MyStreamContext";
+import {
+  useMyStreamActionsOptional,
+  useMyStreamOptional,
+} from "@/contexts/wave/MyStreamContext";
 import { useClosingDropId } from "@/hooks/useClosingDropId";
 import {
   DROP_DETAIL_STALE_TIME_MS,
@@ -97,6 +101,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const { isWaveModalOpen, close } = useCreateModalState();
   const requestMainWavesList =
     useMyStreamActionsOptional()?.requestMainWavesList;
+  const selectedWaveId = useMyStreamOptional()?.activeWave.id;
   const isWavesSurface = defaultPath === "/waves";
 
   // Waves pages read the main list even when the sidebar is hidden (mobile
@@ -112,8 +117,16 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
   const rawDropId = searchParams.get("drop");
+  // Waves pages render the shared wave selection. A wave switch sets it in the
+  // same event that writes the history entry and it renders before the next
+  // paint, while the router's pathname follows in a later transition. Follow
+  // the selection there so the phone layout never keeps the list over a URL
+  // that already names the next wave. Messages pages render the routed
+  // conversation, so they follow the route.
   const waveId =
-    getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
+    (isWavesSurface && selectedWaveId !== undefined
+      ? selectedWaveId
+      : getActiveWaveIdFromUrl({ pathname, searchParams })) ?? undefined;
   const informationOpen =
     information?.request?.overlay && information.request.waveId === waveId;
   const informationWave = useWaveById(waveId ?? null, {
@@ -190,7 +203,8 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   // is unreachable on mobile (the wave list renders instead of the form).
   // Trailing slashes are tolerated so a normalization change upstream cannot
   // silently re-break mobile reachability.
-  const isCreateRoute = isCreateWavePathname(pathname);
+  const isCreateRoute =
+    isCreateWavePathname(pathname) || isMessageComposePathname(pathname);
   // Encrypted chats (D109) have no wave id but are always the main content.
   const isEncryptedRoute = isEncryptedMessagesPathname(pathname);
   const canShowMainContent =

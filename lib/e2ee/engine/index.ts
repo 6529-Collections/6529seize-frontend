@@ -30,6 +30,7 @@ import { UnsentMessages } from "./unsent";
 import { EngineController } from "./controller";
 import {
   confirmOwnRejection,
+  markRevocationUnverified,
   needsNewDevice,
   refreshMe,
   renewalDue,
@@ -38,7 +39,7 @@ import {
 } from "./enroll";
 import { backupHistory, importBackupHistory } from "./backup";
 import { EnrollmentFlight, NEEDS_ENROLLMENT } from "./enrollment-flight";
-import { E2eeError, errorMessage } from "./errors";
+import { E2EE_REVOCATION_UNVERIFIED, E2eeError, errorMessage } from "./errors";
 import {
   addMembers,
   checkEligibility,
@@ -61,7 +62,12 @@ import {
   supported,
 } from "./setup";
 import { toE2eeMessage } from "./store";
-import { approveDevice, ignoreUntrustedDevice } from "./trust";
+import {
+  approveDevice,
+  findApprovalTarget,
+  ignoreUntrustedDevice,
+  isTrustedMemberDevice,
+} from "./trust";
 
 /** Contract section 12 engine: framework-agnostic, one instance per profile. */
 
@@ -77,6 +83,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   constructor(ctx: EngineContext) {
     this.ctx = ctx;
+    ctx.store.memberTrust = (member) => isTrustedMemberDevice(ctx, member);
     this.controller = new EngineController(ctx, {
       refreshMe: () => this.refreshMe(),
       onOwnRevoked: () => this.onOwnRejected(),
@@ -125,6 +132,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
       if (!restored) {
         setStatus(this.ctx, NEEDS_ENROLLMENT);
         await this.enrollment.startFromLoginGrant();
+        return;
+      }
+      if (this.ctx.device?.revocationUnverified === true) {
+        // Stopped until the user acts (see recheckRevocation).
+        setStatus(this.ctx, NEEDS_ENROLLMENT, E2EE_REVOCATION_UNVERIFIED);
         return;
       }
       setStatus(this.ctx, "ready");
@@ -184,17 +196,23 @@ class E2eeEngineImpl implements E2eeEngineExt {
       return;
     }
     const result = await refreshMe(this.ctx);
-    if (result.ownRevoked && !this.isDisposed()) {
+    if (this.isDisposed()) {
+      return;
+    }
+    if (result.ownRevocation === "verified") {
       await this.wipe();
+    } else if (result.ownRevocation === "unverified") {
+      await this.suspend(E2EE_REVOCATION_UNVERIFIED);
     }
   }
 
   /**
    * The server refused this device (E2EE_NOT_YOUR_DEVICE, or a revocation
-   * hint). Only a revocation that /e2ee/me confirms for this profile wipes
-   * the state; an expired or unlisted device keeps it (enroll() renews or
-   * resumes it), and an unconfirmed refusal changes nothing. A disposed
-   * engine never acts: its account may already have changed.
+   * hint). Only a revocation that /e2ee/me lists for this profile and that
+   * verifies here wipes the state. A listed revocation that does not verify,
+   * or an expired or unlisted device, stops the device and keeps its data
+   * (enroll() renews or resumes it); an unconfirmed refusal changes nothing.
+   * A disposed engine never acts: its account may already have changed.
    */
   private async onOwnRejected(): Promise<void> {
     if (this.isDisposed()) {
@@ -208,8 +226,45 @@ class E2eeEngineImpl implements E2eeEngineExt {
       await this.wipe();
       return;
     }
+    await this.suspend(
+      verdict === "revoked-unverified" ? E2EE_REVOCATION_UNVERIFIED : null
+    );
+  }
+
+  /**
+   * Stops using this device (no sync, no sends, no timers) and keeps every
+   * local record: the device key, history, outbox and trust stay for
+   * enroll(). An unverified revocation is remembered, so a reload stays
+   * stopped without contacting the server.
+   */
+  private async suspend(code: string | null): Promise<void> {
     this.controller.stopBackground();
-    setStatus(this.ctx, NEEDS_ENROLLMENT);
+    this.ctx.timers.cancelAll();
+    setStatus(this.ctx, NEEDS_ENROLLMENT, code);
+    if (code === E2EE_REVOCATION_UNVERIFIED) {
+      await this.ctx.queue.run(() => markRevocationUnverified(this.ctx, true));
+    }
+  }
+
+  /**
+   * Turning encrypted messages on again after an unverified revocation
+   * checks the listing once: still unverified keeps the device stopped (and
+   * fails), a verified one removes the local data, and a device no longer
+   * listed as revoked resumes.
+   */
+  private async recheckRevocation(): Promise<void> {
+    if (this.ctx.device?.revocationUnverified !== true) {
+      return;
+    }
+    const { ownRevocation } = await refreshMe(this.ctx);
+    if (ownRevocation === "unverified") {
+      throw new E2eeError(E2EE_REVOCATION_UNVERIFIED);
+    }
+    if (ownRevocation === "verified") {
+      await this.wipe();
+      return;
+    }
+    await this.ctx.queue.run(() => markRevocationUnverified(this.ctx, false));
   }
 
   /**
@@ -259,6 +314,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   getStatus = () => this.ctx.store.status;
   getError = () => this.ctx.store.error;
   getUpgrade = () => this.ctx.store.upgrade;
+  getLocalDeviceKey = () => this.ctx.device?.deviceKey ?? null;
   getThisDevice = () => this.ctx.store.thisDevice;
   getAttachmentsEnabled = () => this.ctx.store.attachmentsEnabled;
   getDevices = () => this.ctx.store.devices;
@@ -271,6 +327,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   // -- lifecycle --------------------------------------------------------------
 
   async enroll(): Promise<void> {
+    await this.recheckRevocation();
     await this.enrollment.run(true);
   }
 
@@ -631,7 +688,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
    */
   async trustDevice(deviceKey: string): Promise<void> {
     this.requireReady();
-    const target = this.ctx.store.findUntrusted(deviceKey.toLowerCase());
+    const target = findApprovalTarget(this.ctx, deviceKey.toLowerCase());
     if (!target) {
       return;
     }

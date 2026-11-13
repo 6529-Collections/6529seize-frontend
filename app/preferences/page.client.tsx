@@ -1,5 +1,7 @@
 "use client";
 
+import { getPreferencesUnderlineTabClasses } from "@/components/common/underlineTabStyles";
+
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
@@ -131,11 +133,9 @@ export default function PreferencesPageClient({
                   fromProfile: returnToProfile,
                 })}
                 aria-current={isActive ? "page" : undefined}
-                className={`tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-break-words tw-rounded-lg tw-px-2 tw-py-2 tw-text-center tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 @[42rem]/preferences:-tw-mb-px @[42rem]/preferences:tw-min-h-10 @[42rem]/preferences:tw-rounded-none @[42rem]/preferences:tw-border-x-0 @[42rem]/preferences:tw-border-b-2 @[42rem]/preferences:tw-border-t-0 @[42rem]/preferences:tw-border-solid @[42rem]/preferences:tw-px-1 @[42rem]/preferences:tw-py-4 @[42rem]/preferences:tw-text-left motion-reduce:tw-transition-none ${
+                className={`tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-break-words tw-rounded-lg tw-px-2 tw-py-2 tw-text-center tw-text-sm tw-font-semibold tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 @[42rem]/preferences:-tw-mb-px @[42rem]/preferences:tw-min-h-10 @[42rem]/preferences:tw-rounded-none @[42rem]/preferences:tw-border-x-0 @[42rem]/preferences:tw-border-b-2 @[42rem]/preferences:tw-border-t-0 @[42rem]/preferences:tw-border-solid @[42rem]/preferences:tw-px-1 @[42rem]/preferences:tw-py-4 @[42rem]/preferences:tw-text-left motion-reduce:tw-transition-none ${getPreferencesUnderlineTabClasses(
                   isActive
-                    ? "tw-bg-primary-500/10 tw-text-primary-300 @[42rem]/preferences:tw-border-primary-400 @[42rem]/preferences:tw-bg-transparent @[42rem]/preferences:tw-text-iron-50"
-                    : "tw-text-iron-300 @[42rem]/preferences:tw-border-transparent @[42rem]/preferences:tw-text-iron-400 desktop-hover:hover:tw-text-iron-50 @[42rem]/preferences:desktop-hover:hover:tw-text-iron-100"
-                }`}
+                )}`}
               >
                 {t(locale, tab.labelKey)}
               </Link>

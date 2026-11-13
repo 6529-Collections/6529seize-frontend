@@ -216,6 +216,10 @@ export const CONTENT_MODERATION_MESSAGES = {
     "Deleted {date} unless placed on hold",
   "contentModeration.moderator.encryptedReports.hold": "Place on hold",
   "contentModeration.moderator.encryptedReports.release": "Release hold",
+  "contentModeration.moderator.encryptedReports.releaseConfirmTitle":
+    "Release this hold?",
+  "contentModeration.moderator.encryptedReports.releaseConfirmBody":
+    "Report: {category}, reported {date}. Releasing the hold returns it to its 180-day retention, so the reported message and report details may then be deleted on schedule.",
   "contentModeration.moderator.encryptedReports.holdHelp":
     "A report on hold is kept past its 180-day retention until you release it.",
   "contentModeration.moderator.encryptedReports.holdFailed":

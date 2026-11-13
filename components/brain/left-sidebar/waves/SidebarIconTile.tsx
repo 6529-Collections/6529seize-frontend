@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export function SidebarIconTile({
+function SidebarIconTile({
   variant,
   children,
 }: {
