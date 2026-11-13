@@ -1,6 +1,7 @@
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import type { RefObject } from "react";
 import RatingInput from "./RatingInput";
+import RatingInputSigns from "./RatingInputSigns";
 
 const INPUT_CLASS_NAME =
   "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
@@ -78,26 +79,9 @@ export default function UserPageRateInput({
         aria-hidden="true"
         className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-flex tw-items-center tw-gap-3 tw-text-iron-500"
       >
-        <span
-          className={`tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-0.5 ${variant === "compact" ? "" : "tw-translate-y-0.5"}`}
-        >
-          <svg className="tw-size-3.5" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 5V19M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-          <svg className="tw-size-3.5" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M5 12H19"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </svg>
-        </span>
+        <RatingInputSigns
+          className={variant === "compact" ? "" : "tw-translate-y-0.5"}
+        />
         {variant === "form" && (
           <span className="tw-h-7 tw-w-px tw-bg-iron-700/60" />
         )}

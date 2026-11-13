@@ -341,7 +341,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 {detailText("waves.rep.details.summary.total")}
               </p>
               <p
-                className={`tw-mb-0 tw-mt-0 tw-text-[13px] tw-font-semibold tw-leading-5 ${getRepTextClass(
+                className={`tw-mb-0 tw-mt-0 tw-text-[13px] tw-font-semibold tw-tabular-nums tw-leading-5 ${getRepTextClass(
                   summary.totalRep
                 )}`}
               >

@@ -119,7 +119,7 @@ export function SummaryStat({
       </p>
       <p
         title={value}
-        className={`tw-mb-0 tw-mt-0 tw-break-all tw-text-[13px] tw-font-semibold ${toneClassName}`}
+        className={`tw-mb-0 tw-mt-0 tw-break-all tw-text-[13px] tw-font-semibold tw-tabular-nums ${toneClassName}`}
       >
         {value}
       </p>

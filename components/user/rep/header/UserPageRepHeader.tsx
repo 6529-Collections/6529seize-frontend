@@ -15,7 +15,11 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
-import { getCanEditRep, type RepDirection } from "../UserPageRep.helpers";
+import {
+  canShowPersonalRepContribution,
+  getCanEditRep,
+  type RepDirection,
+} from "../UserPageRep.helpers";
 
 export default function UserPageRepHeader({
   overview,
@@ -49,7 +53,6 @@ export default function UserPageRepHeader({
     repDirection === "given" &&
     canManageGivenRatings(profile, connectedProfile, activeProfileProxy);
 
-  const visibleCategories = categories.slice(0, visibleCount);
   const canEditRep = useMemo(
     () =>
       getCanEditRep({
@@ -110,67 +113,68 @@ export default function UserPageRepHeader({
             </div>
           </div>
 
-          {(visibleCategories.length > 0 ||
-            (canEditRep && repDirection === "received")) && (
-            <div className="tw-mt-5 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5">
-              <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-3">
-                <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
-                  <div className="tw-text-[11px]/4 tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
-                    Rep Categories
-                  </div>
-                  {overview !== null &&
-                    overview.authenticated_user_contribution !== null &&
-                    overview.authenticated_user_contribution !== 0 && (
-                      <span className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-text-meta/4 tw-font-normal tw-text-iron-400">
-                        {tRich(
-                          locale,
-                          repDirection === "given"
-                            ? "user.profile.rep.rep.assignedToYou"
-                            : "user.profile.rep.rep.youAssigned",
-                          {
-                            value: (
-                              <span
-                                key="value"
-                                className="tw-text-meta/4 tw-font-medium tw-text-iron-100"
-                              >
-                                {formatInteger(
-                                  locale,
-                                  overview.authenticated_user_contribution
-                                )}
-                              </span>
-                            ),
-                          }
-                        )}
-                      </span>
-                    )}
+          <div className="tw-mt-5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-5">
+            <div className="tw-mb-4 tw-flex tw-items-center tw-justify-between tw-gap-3">
+              <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2">
+                <div className="tw-text-[11px]/4 tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
+                  {t(locale, "rep.categories.sidebar.repCategories")}
                 </div>
-                {canEditRep && repDirection === "received" && (
-                  <Button
-                    variant="action"
-                    size="sm"
-                    onClick={() => setIsGrantRepOpen(true)}
-                  >
-                    <PlusIcon
-                      aria-hidden="true"
-                      className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
-                    />
-                    <span>{t(locale, "user.profile.rep.rep.grantAction")}</span>
-                  </Button>
-                )}
+                {canShowPersonalRepContribution(
+                  profile,
+                  activeProfileProxy?.created_by ?? connectedProfile
+                ) &&
+                  overview !== null &&
+                  overview.authenticated_user_contribution !== null &&
+                  overview.authenticated_user_contribution !== 0 && (
+                    <span className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-text-meta/4 tw-font-normal tw-text-iron-400">
+                      {tRich(
+                        locale,
+                        repDirection === "given"
+                          ? "user.profile.rep.rep.assignedToYou"
+                          : "user.profile.rep.rep.youAssigned",
+                        {
+                          value: (
+                            <span
+                              key="value"
+                              className="tw-text-meta/4 tw-font-medium tw-text-iron-100"
+                            >
+                              {formatInteger(
+                                locale,
+                                overview.authenticated_user_contribution
+                              )}
+                            </span>
+                          ),
+                        }
+                      )}
+                    </span>
+                  )}
               </div>
-              <RepCategoryList
-                key={`${profile.id ?? profile.query ?? profile.display}:${repDirection}`}
-                profile={profile}
-                categories={categories}
-                direction={repDirection}
-                visibleCount={visibleCount}
-                hasNextPage={hasNextPage}
-                isFetchingNextPage={isFetchingNextPage}
-                onShowMore={onShowMore}
-                onOpenGlobalCategory={onOpenGlobalCategory}
-              />
+              {canEditRep && repDirection === "received" && (
+                <Button
+                  variant="action"
+                  size="sm"
+                  onClick={() => setIsGrantRepOpen(true)}
+                >
+                  <PlusIcon
+                    aria-hidden="true"
+                    className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0"
+                  />
+                  <span>{t(locale, "user.profile.rep.rep.grantAction")}</span>
+                </Button>
+              )}
             </div>
-          )}
+            <RepCategoryList
+              key={`${profile.id ?? profile.query ?? profile.display}:${repDirection}`}
+              profile={profile}
+              categories={categories}
+              direction={repDirection}
+              visibleCount={visibleCount}
+              hasNextPage={hasNextPage}
+              isFetchingNextPage={isFetchingNextPage}
+              onShowMore={onShowMore}
+              onOpenGlobalCategory={onOpenGlobalCategory}
+            />
+          </div>
 
           {categories.length === 0 &&
             !loading &&

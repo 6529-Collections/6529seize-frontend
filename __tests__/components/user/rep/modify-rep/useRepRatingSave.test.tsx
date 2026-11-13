@@ -1,6 +1,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useRepRatingSave } from "@/components/user/rep/modify-rep/useRepRatingSave";
+import { useRatingSave } from "@/components/user/rep/modify-rep/useRatingSave";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiPost } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -11,6 +12,7 @@ jest.mock("@/services/api/common-api", () => ({ commonApiPost: jest.fn() }));
 const post = jest.mocked(commonApiPost);
 const requestAuth = jest.fn();
 const onProfileRepModify = jest.fn();
+const onProfileCICModify = jest.fn();
 const owner = { id: "owner", handle: "owner" } as ApiIdentity;
 const updates = ["alice", "bob"].map((handle) => ({
   profile: { id: handle, query: handle, handle } as ApiIdentity,
@@ -18,7 +20,7 @@ const updates = ["alice", "bob"].map((handle) => ({
   amount: 0,
 }));
 
-function setup() {
+function setup(matter?: "REP" | "NIC") {
   let viewer = owner;
   const client = new QueryClient();
   function Wrapper({ children }: { readonly children: ReactNode }) {
@@ -35,14 +37,19 @@ function setup() {
             setToast: jest.fn(),
           }}
         >
-          <ReactQueryWrapperContext value={{ ...queries, onProfileRepModify }}>
+          <ReactQueryWrapperContext
+            value={{ ...queries, onProfileRepModify, onProfileCICModify }}
+          >
             {children}
           </ReactQueryWrapperContext>
         </AuthContext>
       </QueryClientProvider>
     );
   }
-  const hook = renderHook(useRepRatingSave, { wrapper: Wrapper });
+  const hook = renderHook(
+    matter ? () => useRatingSave(matter) : useRepRatingSave,
+    { wrapper: Wrapper }
+  );
   return {
     ...hook,
     switchProfile: () => {
@@ -56,7 +63,60 @@ beforeEach(() => {
   jest.clearAllMocks();
   requestAuth.mockResolvedValue({ success: true });
   onProfileRepModify.mockResolvedValue(undefined);
+  onProfileCICModify.mockResolvedValue(undefined);
   post.mockResolvedValue(undefined);
+});
+
+it.each(["REP", "NIC"] as const)(
+  "keeps confirmed %s writes after a later failure",
+  async (matter) => {
+    post
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error("Unavailable"));
+    const { result } = setup(matter);
+    const onSaved = jest.fn();
+    await act(async () => {
+      expect(await result.current.save(updates, onSaved)).toBe(false);
+    });
+    expect(onSaved).toHaveBeenCalledTimes(1);
+    expect(onSaved).toHaveBeenCalledWith(updates[0]);
+    expect(post.mock.calls.map(([request]) => request.endpoint)).toEqual([
+      `profiles/alice/${matter === "REP" ? "rep" : "cic"}/rating`,
+      `profiles/bob/${matter === "REP" ? "rep" : "cic"}/rating`,
+    ]);
+    expect(post.mock.calls[0]![0].body).toEqual(
+      matter === "REP" ? { amount: 0, category: "Artist" } : { amount: 0 }
+    );
+    expect(
+      matter === "REP" ? onProfileRepModify : onProfileCICModify
+    ).toHaveBeenCalledWith(
+      expect.objectContaining({ targetProfiles: [updates[0]!.profile] })
+    );
+    expect(result.current.isSaving).toBe(false);
+    expect(result.current.error).not.toBeNull();
+  }
+);
+
+it("saves every category but refreshes each affected profile only once", async () => {
+  const { result } = setup();
+  const onSaved = jest.fn();
+  const changes = [
+    updates[0]!,
+    { ...updates[0]!, category: "Collector", amount: 100 },
+    updates[1]!,
+  ];
+  await act(async () => {
+    expect(await result.current.save(changes, onSaved)).toBe(true);
+  });
+  expect(requestAuth).toHaveBeenCalledTimes(1);
+  expect(post).toHaveBeenCalledTimes(3);
+  expect(onSaved.mock.calls.map(([update]) => update)).toEqual(changes);
+  expect(onProfileRepModify).toHaveBeenCalledTimes(1);
+  expect(onProfileRepModify).toHaveBeenCalledWith(
+    expect.objectContaining({
+      targetProfiles: updates.map(({ profile }) => profile),
+    })
+  );
 });
 
 it("does not write when the principal changes while authentication is pending", async () => {

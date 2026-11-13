@@ -1,9 +1,8 @@
 "use client";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
-import RatingInput from "@/components/user/utils/rate/RatingInput";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
@@ -17,102 +16,101 @@ import { commonApiFetch } from "@/services/api/common-api";
 import { getIdentityQueryOptions } from "@/services/api/identity-query";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
 import Image from "next/image";
-import { useContext, useEffect, useId, useRef, useState } from "react";
+import Link from "next/link";
+import {
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import RatingAmountInput from "./RatingAmountInput";
+import RatingEditorFooter from "./RatingEditorFooter";
+import RatingEditorErrors from "./RatingEditorErrors";
 import { useRepRatingSave } from "./modify-rep/useRepRatingSave";
 import {
   canManageGivenRatings,
   isRatingValue,
+  isWithinRatingAllowance,
   withRatingRecipientIdentity,
 } from "./ratingsManagement";
 import { getCanEditRep, type RepDirection } from "./UserPageRep.helpers";
 
-type CategoryContributor = {
+type Contributor = {
   readonly profile: {
     readonly id: string;
     readonly handle: string | null;
-    readonly primary_address: string;
     readonly pfp: string | null;
+    readonly primary_address: string;
   };
   readonly contribution: number;
 };
+type CategoryContentLayout = (
+  body: ReactNode,
+  footer: ReactNode,
+  resetOnEscape: () => boolean
+) => ReactNode;
 
-const CATEGORY_ROW_CLASS =
-  "tw-flex tw-min-h-[60px] tw-items-center tw-gap-3 tw-px-3 tw-py-3";
-const CATEGORY_AMOUNT_CLASS =
-  "tw-h-9 tw-w-32 tw-min-w-0 tw-shrink-0 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-text-right tw-text-base lg:tw-text-sm";
-const READ_ONLY_AMOUNT_CLASS =
-  "tw-w-32 tw-min-w-0 tw-shrink-0 tw-px-3 tw-text-right tw-text-base lg:tw-text-sm";
+function getCategoryRows(
+  items: Contributor[],
+  pinOwnRow: boolean,
+  ownContributor: Contributor | null,
+  raterId: string | null | undefined
+) {
+  if (!pinOwnRow) return items;
+  const others = items.filter((row) => row.profile.id !== raterId);
+  return ownContributor ? [ownContributor, ...others] : others;
+}
 
 function ContributorIdentity({
-  contributor,
-  you = false,
+  row,
+  you,
   labelId,
 }: {
-  readonly contributor: CategoryContributor;
-  readonly you?: boolean;
-  readonly labelId?: string;
+  readonly row: Contributor;
+  readonly you: boolean;
+  readonly labelId: string;
 }) {
   const locale = useBrowserLocale();
-  const identity =
-    contributor.profile.handle ?? contributor.profile.primary_address;
-  const className =
-    "tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
-  const content = (
-    <>
+  const identity = row.profile.handle ?? row.profile.primary_address;
+  return (
+    <Link
+      href={`/${encodeURIComponent(identity)}`}
+      className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-min-h-0"
+    >
       <span
-        className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-700 tw-text-xs"
         aria-hidden="true"
+        className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-700 tw-text-xs"
       >
-        {contributor.profile.pfp ? (
+        {row.profile.pfp ? (
           <Image
             unoptimized
             width={24}
             height={24}
-            src={getScaledImageUri(
-              contributor.profile.pfp,
-              ImageScale.W_AUTO_H_50
-            )}
+            src={getScaledImageUri(row.profile.pfp, ImageScale.W_AUTO_H_50)}
             alt=""
             className="tw-size-full tw-object-cover"
           />
         ) : (
-          (identity || t(locale, "rep.categories.panel.you"))
-            .charAt(0)
-            .toUpperCase()
+          identity.charAt(0).toUpperCase()
         )}
       </span>
       <span id={labelId} className="tw-truncate">
         {you ? t(locale, "rep.categories.panel.you") : identity}
       </span>
-    </>
-  );
-  return identity ? (
-    <Link href={`/${encodeURIComponent(identity)}`} className={className}>
-      {content}
     </Link>
-  ) : (
-    <span className={className}>{content}</span>
   );
 }
 
-function CategoryRows({
-  items,
-}: {
-  readonly items: readonly CategoryContributor[];
-}) {
-  const locale = useBrowserLocale();
-  return items.map((item) => (
-    <div key={item.profile.id} className={CATEGORY_ROW_CLASS}>
-      <ContributorIdentity contributor={item} />
-      <span
-        className={`${READ_ONLY_AMOUNT_CLASS} ${item.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
-      >
-        {formatInteger(locale, item.contribution)}
-      </span>
-    </div>
-  ));
+function defaultLayout(body: ReactNode, footer: ReactNode) {
+  return (
+    <>
+      {body}
+      {footer}
+    </>
+  );
 }
 
 function getAmountValidation({
@@ -134,7 +132,6 @@ function getAmountValidation({
   const invalidNumber = changed && !isRatingValue(value);
   const overLimit = changed && validNumbers && !withinAllowance;
   return {
-    changed,
     invalid: invalidNumber || overLimit,
     describedBy: [
       descriptionId,
@@ -146,26 +143,33 @@ function getAmountValidation({
   };
 }
 
-function EditableCategoryRows({
+export default function RepCategoryDetails({
   profile,
   category,
   direction,
-  items,
-  autoSelectOwnAmount,
+  autoFocusOwnAmount = false,
+  busy: externalBusy = false,
+  onOpenGlobalCategory,
   onBusyChange,
+  onSuccess,
+  renderContent = defaultLayout,
 }: {
   readonly profile: ApiIdentity;
   readonly category: ApiRepCategory;
   readonly direction: RepDirection;
-  readonly items: readonly CategoryContributor[];
-  readonly autoSelectOwnAmount: boolean;
+  readonly autoFocusOwnAmount?: boolean;
+  readonly busy?: boolean;
+  readonly onOpenGlobalCategory: (category: string) => void;
   readonly onBusyChange: (busy: boolean) => void;
+  readonly onSuccess?: (() => void) | undefined;
+  readonly renderContent?: CategoryContentLayout | undefined;
 }) {
   const locale = useBrowserLocale();
   const formId = useId();
   const formRef = useRef<HTMLFormElement>(null);
   const ownAmountRef = useRef<HTMLInputElement>(null);
-  const didAutoSelect = useRef(false);
+  const didAutoFocus = useRef(false);
+  const submitting = useRef(false);
   useKeyboardFocusScroll(formRef);
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -173,382 +177,6 @@ function EditableCategoryRows({
   const proxyIdentity =
     activeProfileProxy?.created_by.handle ??
     activeProfileProxy?.created_by.primary_address;
-  const firstRecipient = items[0]?.profile;
-  // The allowance endpoint returns rater-global remaining REP. The receiver
-  // selects rating stats only; it does not scope the credit budget.
-  const allowanceTarget =
-    direction === "given" && firstRecipient
-      ? withRatingRecipientIdentity(
-          profile,
-          firstRecipient.handle ?? firstRecipient.primary_address
-        )
-      : profile;
-  const {
-    repState,
-    minMaxValues,
-    heroAvailableRep,
-    isError,
-    isFetching,
-    retry,
-  } = useRepAllocation({
-    profile: allowanceTarget,
-    category: category.category,
-  });
-  const { save, isSaving, error, clearError } = useRepRatingSave();
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const [preparing, setPreparing] = useState(false);
-  const [prepareError, setPrepareError] = useState(false);
-  const submitting = useRef(false);
-  const busy = isSaving || preparing;
-  const ready = !!repState && !isError;
-
-  const current = repState?.rater_contribution ?? 0;
-  // The loaded contributor page can establish an existing rating while the
-  // allowance loads. Once available, the rating state is authoritative.
-  const ownContribution =
-    repState?.rater_contribution ??
-    items.find((item) => item.profile.id === rater?.id)?.contribution ??
-    0;
-  const ownContributor: CategoryContributor | null =
-    rater?.id && ownContribution !== 0
-      ? {
-          profile: {
-            id: rater.id,
-            handle: rater.handle,
-            primary_address:
-              activeProfileProxy?.created_by.primary_address ??
-              connectedProfile?.primary_wallet ??
-              connectedProfile?.wallets?.[0]?.wallet ??
-              "",
-            pfp: rater.pfp,
-          },
-          contribution: ownContribution,
-        }
-      : null;
-  const rows =
-    direction === "received"
-      ? [
-          ...(ownContributor ? [ownContributor] : []),
-          ...items.filter((item) => item.profile.id !== rater?.id),
-        ]
-      : items;
-  const hasOwnContribution = ownContributor !== null;
-  useEffect(() => {
-    if (
-      !autoSelectOwnAmount ||
-      direction !== "received" ||
-      !ready ||
-      !hasOwnContribution ||
-      didAutoSelect.current
-    )
-      return;
-    const input = ownAmountRef.current;
-    if (!input) return;
-    input.focus({ preventScroll: true });
-    // Focusing removes digit grouping; select after that render so typing
-    // replaces the complete raw amount rather than appending to it.
-    const frame = requestAnimationFrame(() => {
-      if (document.activeElement === input) {
-        input.select();
-        didAutoSelect.current = true;
-      }
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [autoSelectOwnAmount, direction, ready, hasOwnContribution]);
-  const editableRows =
-    direction === "received"
-      ? rows.filter((row) => row === ownContributor)
-      : rows;
-  const getCreditDelta = (row: CategoryContributor) =>
-    Math.abs(Number(drafts[row.profile.id])) - Math.abs(row.contribution);
-  // Release credit first, using the same order for validation and saving.
-  const changes = editableRows
-    .filter(
-      (row) =>
-        drafts[row.profile.id] !== undefined &&
-        (!isRatingValue(drafts[row.profile.id] ?? "") ||
-          Number(drafts[row.profile.id]) !== row.contribution)
-    )
-    .toSorted((a, b) => getCreditDelta(a) - getCreditDelta(b));
-  const validNumbers = changes.every((row) =>
-    isRatingValue(drafts[row.profile.id] ?? "")
-  );
-  let creditUsed = 0;
-  const givenWithinAllowance = changes.every((row) => {
-    creditUsed += getCreditDelta(row);
-    return creditUsed <= heroAvailableRep;
-  });
-  const withinAllowance =
-    direction === "given"
-      ? givenWithinAllowance
-      : changes.every((row) => {
-          const amount = Number(drafts[row.profile.id]);
-          return (
-            !!activeProfileProxy ||
-            (amount >= minMaxValues.min && amount <= minMaxValues.max)
-          );
-        });
-  const canSave =
-    ready && validNumbers && withinAllowance && changes.length > 0 && !busy;
-  const before = direction === "received" ? current : category.total_rep;
-  const after =
-    before +
-    changes.reduce(
-      (sum, row) => sum + Number(drafts[row.profile.id]) - row.contribution,
-      0
-    );
-  const updateDraft = (id: string, rawValue: string) => {
-    let value = rawValue === "0-" || rawValue === "-0" ? "-" : rawValue;
-    if (value.length > 1 && value.startsWith("0")) value = value.slice(1);
-    if (/^-?\d*$/.test(value))
-      setDrafts((previous) => ({ ...previous, [id]: value }));
-  };
-  const reset = () => {
-    setDrafts({});
-    setPrepareError(false);
-    clearError();
-  };
-
-  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!canSave || submitting.current) return;
-    submitting.current = true;
-    onBusyChange(true);
-    setPreparing(true);
-    setPrepareError(false);
-    const savedIds = new Set<string>();
-    try {
-      // Fetch real recipient identities for the same cache invalidation used by All receivers.
-      const updates = await Promise.all(
-        changes.map(async (row) => ({
-          profile:
-            direction === "received"
-              ? profile
-              : withRatingRecipientIdentity(
-                  await queryClient.fetchQuery(
-                    getIdentityQueryOptions({
-                      handleOrWallet:
-                        row.profile.handle ?? row.profile.primary_address,
-                    })
-                  ),
-                  row.profile.handle ?? row.profile.primary_address
-                ),
-          amount: Number(drafts[row.profile.id]),
-          category: category.category,
-          row,
-        }))
-      );
-      await save(updates, (update) => savedIds.add(update.row.profile.id));
-    } catch {
-      setPrepareError(true);
-    } finally {
-      if (savedIds.size > 0) {
-        setDrafts((previous) =>
-          Object.fromEntries(
-            Object.entries(previous).filter(([id]) => !savedIds.has(id))
-          )
-        );
-      }
-      setPreparing(false);
-      onBusyChange(false);
-      submitting.current = false;
-    }
-  };
-
-  return (
-    <form
-      ref={formRef}
-      onSubmit={(event) => {
-        void submit(event);
-      }}
-      onKeyDownCapture={(event) => {
-        if (event.key === "Escape" && changes.length > 0 && !busy) {
-          event.preventDefault();
-          event.stopPropagation();
-          reset();
-        }
-      }}
-      aria-busy={busy}
-    >
-      {activeProfileProxy && proxyIdentity && (
-        <p className="tw-m-0 tw-px-3 tw-py-2 tw-text-xs tw-text-iron-400">
-          {tRich(locale, "rep.categories.edit.proxy", {
-            name: (
-              <Link
-                key="proxy-profile"
-                href={`/${encodeURIComponent(proxyIdentity)}`}
-                className="tw-text-primary-300"
-              >
-                {proxyIdentity}
-              </Link>
-            ),
-          })}
-        </p>
-      )}
-      <div className="tw-max-h-[min(50dvh,24rem)] tw-overflow-y-auto tw-overscroll-contain">
-        {rows.map((row) => {
-          const you = direction === "received" && row === ownContributor;
-          const editable = direction === "given" || row === ownContributor;
-          const value = drafts[row.profile.id] ?? String(row.contribution);
-          const negative = value.startsWith("-");
-          const nameId = `${formId}-${row.profile.id}-name`;
-          const descriptionId = `${formId}-${row.profile.id}-description`;
-          const validation = getAmountValidation({
-            value,
-            current: row.contribution,
-            withinAllowance,
-            validNumbers,
-            descriptionId,
-            formId,
-          });
-          let color = "tw-text-iron-200";
-          if (validation.changed) color = "tw-text-primary-300";
-          if (negative) color = "tw-text-rose-400";
-          return (
-            <div
-              key={row.profile.id}
-              className={`${CATEGORY_ROW_CLASS} ${you ? "tw-sticky tw-top-0 tw-z-10 tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-primary-400/10" : ""}`}
-            >
-              <ContributorIdentity
-                contributor={row}
-                labelId={nameId}
-                you={you}
-              />
-              {editable && (
-                <span id={descriptionId} className="tw-sr-only">
-                  {t(locale, "rep.categories.panel.amountFor", {
-                    name: you
-                      ? t(locale, "rep.categories.panel.you")
-                      : (row.profile.handle ?? row.profile.primary_address),
-                  })}
-                </span>
-              )}
-              {editable ? (
-                <RatingInput
-                  ref={you ? ownAmountRef : undefined}
-                  inputMode="numeric"
-                  autoComplete="off"
-                  aria-labelledby={nameId}
-                  aria-describedby={validation.describedBy}
-                  aria-invalid={validation.invalid}
-                  readOnly={!ready || busy}
-                  value={ready ? value : ""}
-                  placeholder={t(locale, "rep.categories.panel.loadingAmount")}
-                  onChange={(event) =>
-                    updateDraft(row.profile.id, event.currentTarget.value)
-                  }
-                  className={`${CATEGORY_AMOUNT_CLASS} tw-border-iron-700/60 tw-bg-iron-950/40 focus:tw-border-primary-400/40 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${color}`}
-                />
-              ) : (
-                <span
-                  className={`${READ_ONLY_AMOUNT_CLASS} ${row.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
-                >
-                  {formatInteger(locale, row.contribution)}
-                </span>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      {!validNumbers && (
-        <p
-          id={`${formId}-invalid-number`}
-          role="alert"
-          className="tw-m-0 tw-px-3 tw-py-2 tw-text-sm tw-text-rose-400"
-        >
-          {t(locale, "rep.categories.panel.invalidNumber")}
-        </p>
-      )}
-      {isError && (
-        <div
-          role="alert"
-          className="tw-px-3 tw-py-2 tw-text-sm tw-text-iron-300"
-        >
-          {t(locale, "rep.categories.edit.loadError")}{" "}
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={retry}
-            loading={isFetching}
-          >
-            {t(locale, "rep.categories.edit.retry")}
-          </Button>
-        </div>
-      )}
-      {(error !== null || prepareError) && (
-        <p
-          role="alert"
-          className="tw-m-0 tw-px-3 tw-py-2 tw-text-sm tw-text-rose-400"
-        >
-          {error ?? t(locale, "rep.categories.edit.updateError")}{" "}
-          {t(locale, "rep.categories.panel.saveRecovery")}
-        </p>
-      )}
-      {changes.length > 0 && (
-        <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-3 tw-pb-1 tw-pt-4">
-          <output className="tw-text-sm tw-text-iron-400">
-            {t(
-              locale,
-              direction === "received"
-                ? "rep.categories.panel.yourRep"
-                : "rep.categories.panel.total"
-            )}{" "}
-            {formatInteger(locale, before)}
-            {" → "}
-            <span className="tw-font-medium tw-text-primary-400">
-              {validNumbers ? formatInteger(locale, after) : "—"}
-            </span>
-          </output>
-          <div className="tw-ml-auto tw-flex tw-gap-2">
-            <Button variant="ghost" size="sm" onClick={reset} disabled={busy}>
-              {t(locale, "rep.categories.edit.cancel")}
-            </Button>
-            <Button
-              variant="action"
-              size="sm"
-              type="submit"
-              loading={busy}
-              disabled={!canSave}
-            >
-              {t(locale, "rep.categories.edit.save")}
-            </Button>
-          </div>
-          {validNumbers && !withinAllowance && (
-            <p
-              id={`${formId}-credit-limit`}
-              role="alert"
-              className="tw-m-0 tw-w-full tw-text-xs tw-text-rose-400"
-            >
-              {t(locale, "rep.categories.panel.creditLimit", {
-                amount: formatInteger(locale, heroAvailableRep),
-              })}
-            </p>
-          )}
-        </div>
-      )}
-    </form>
-  );
-}
-
-export default function RepCategoryDetails({
-  profile,
-  category,
-  direction,
-  autoSelectOwnAmount = false,
-  busy = false,
-  onOpenGlobalCategory,
-  onBusyChange,
-}: {
-  readonly profile: ApiIdentity;
-  readonly category: ApiRepCategory;
-  readonly direction: RepDirection;
-  readonly autoSelectOwnAmount?: boolean;
-  readonly busy?: boolean;
-  readonly onOpenGlobalCategory: (category: string) => void;
-  readonly onBusyChange: (busy: boolean) => void;
-}) {
-  const locale = useBrowserLocale();
-  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const canEdit =
     direction === "given"
       ? canManageGivenRatings(profile, connectedProfile, activeProfileProxy)
@@ -580,31 +208,249 @@ export default function RepCategoryDetails({
   const items = (query.data?.pages.flatMap((page) => page.data) ?? []).toSorted(
     (a, b) => b.contribution - a.contribution
   );
-  return (
-    <div className="tw-min-w-0 tw-py-2">
-      <div className="-tw-mt-1.5 tw-mb-1 tw-flex tw-justify-start lg:tw-justify-end lg:tw-pr-1.5">
-        <Button
-          variant="ghost"
-          size={null}
-          className="tw-min-h-11 tw-gap-1 tw-px-1 tw-text-xs tw-font-medium lg:tw-min-h-9 lg:tw-px-2"
-          aria-label={t(locale, "rep.categories.pill.openGlobalAriaLabel", {
-            category: category.category,
+  // This endpoint's remaining credit is rater-global. For Given we only need
+  // that budget, so a stable identity avoids an extra request as rows arrive.
+  const {
+    repState,
+    heroAvailableRep,
+    minMaxValues,
+    isError,
+    isFetching,
+    retry,
+  } = useRepAllocation({
+    profile,
+    category: category.category,
+    enabled: canEdit,
+  });
+  const { save, isSaving, error, clearError } = useRepRatingSave();
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [preparing, setPreparing] = useState(false);
+  const [prepareError, setPrepareError] = useState(false);
+  const busy = externalBusy || preparing || isSaving;
+  const ready = !!repState && !isError;
+  const ownContribution =
+    repState?.rater_contribution ??
+    items.find((row) => row.profile.id === rater?.id)?.contribution ??
+    0;
+  const ownContributor: Contributor | null =
+    canEdit && rater?.id && ownContribution !== 0
+      ? {
+          profile: {
+            id: rater.id,
+            handle: rater.handle,
+            pfp: rater.pfp,
+            primary_address:
+              activeProfileProxy?.created_by.primary_address ??
+              connectedProfile?.primary_wallet ??
+              connectedProfile?.wallets?.[0]?.wallet ??
+              "",
+          },
+          contribution: ownContribution,
+        }
+      : null;
+  const rows = getCategoryRows(
+    items,
+    direction === "received" && canEdit,
+    ownContributor,
+    rater?.id
+  );
+  const hasOwnContribution = ownContributor !== null;
+  useEffect(() => {
+    if (
+      !autoFocusOwnAmount ||
+      direction !== "received" ||
+      !ready ||
+      !hasOwnContribution ||
+      didAutoFocus.current
+    )
+      return;
+    const input = ownAmountRef.current;
+    if (!input) return;
+    input.focus({ preventScroll: true });
+    didAutoFocus.current = true;
+  }, [autoFocusOwnAmount, direction, ready, hasOwnContribution]);
+  const editableRows = canEdit
+    ? rows.filter((row) => direction === "given" || row === ownContributor)
+    : [];
+  const creditDelta = (row: Contributor) =>
+    Math.abs(Number(drafts[row.profile.id])) - Math.abs(row.contribution);
+  const changes = editableRows
+    .filter(
+      (row) =>
+        drafts[row.profile.id] !== undefined &&
+        (!isRatingValue(drafts[row.profile.id] ?? "") ||
+          Number(drafts[row.profile.id]) !== row.contribution)
+    )
+    .toSorted((a, b) => creditDelta(a) - creditDelta(b));
+  const validNumbers = changes.every((row) =>
+    isRatingValue(drafts[row.profile.id] ?? "")
+  );
+  const withinAllowance =
+    direction === "given"
+      ? isWithinRatingAllowance(changes.map(creditDelta), heroAvailableRep)
+      : changes.every(
+          (row) =>
+            !!activeProfileProxy ||
+            (Number(drafts[row.profile.id]) >= minMaxValues.min &&
+              Number(drafts[row.profile.id]) <= minMaxValues.max)
+        );
+  const canSave =
+    ready && validNumbers && withinAllowance && changes.length > 0 && !busy;
+  const before = category.total_rep;
+  const after =
+    before +
+    changes.reduce(
+      (sum, row) => sum + Number(drafts[row.profile.id]) - row.contribution,
+      0
+    );
+  const reset = () => {
+    setDrafts({});
+    setPrepareError(false);
+    clearError();
+  };
+  const resetOnEscape = () => {
+    if (busy) return true;
+    if (changes.length === 0) return false;
+    reset();
+    return true;
+  };
+  const updateDraft = (id: string, raw: string) => {
+    let value = raw === "0-" || raw === "-0" ? "-" : raw;
+    if (value.length > 1 && value.startsWith("0")) value = value.slice(1);
+    if (/^-?\d*$/.test(value))
+      setDrafts((previous) => ({ ...previous, [id]: value }));
+  };
+  const submit = async () => {
+    if (!canSave || submitting.current) return;
+    submitting.current = true;
+    setPreparing(true);
+    setPrepareError(false);
+    onBusyChange(true);
+    const savedIds = new Set<string>();
+    let succeeded = false;
+    try {
+      const updates = await Promise.all(
+        changes.map(async (row) => ({
+          profile:
+            direction === "received"
+              ? profile
+              : withRatingRecipientIdentity(
+                  await queryClient.fetchQuery({
+                    ...getIdentityQueryOptions({
+                      handleOrWallet:
+                        row.profile.handle ?? row.profile.primary_address,
+                    }),
+                    staleTime: 5 * 60 * 1000,
+                  }),
+                  row.profile.handle ?? row.profile.primary_address
+                ),
+          amount: Number(drafts[row.profile.id]),
+          category: category.category,
+          row,
+        }))
+      );
+      succeeded = await save(updates, (update) =>
+        savedIds.add(update.row.profile.id)
+      );
+    } catch {
+      setPrepareError(true);
+    } finally {
+      if (savedIds.size > 0)
+        setDrafts((previous) =>
+          Object.fromEntries(
+            Object.entries(previous).filter(([id]) => !savedIds.has(id))
+          )
+        );
+      setPreparing(false);
+      submitting.current = false;
+      onBusyChange(false);
+    }
+    if (succeeded) onSuccess?.();
+  };
+  const openCategory = (
+    <Button
+      variant="ghost"
+      size={null}
+      className="tw-min-h-11 tw-gap-1 tw-px-0 tw-text-xs tw-font-medium lg:tw-min-h-[34px]"
+      disabled={busy}
+      aria-label={t(locale, "rep.categories.pill.openGlobalAriaLabel", {
+        category: category.category,
+      })}
+      onClick={() => onOpenGlobalCategory(category.category)}
+    >
+      {t(locale, "rep.categories.panel.openGlobal")}
+      <ArrowUpRightIcon className="tw-size-3.5" aria-hidden="true" />
+    </Button>
+  );
+  const footer = canEdit ? (
+    <RatingEditorFooter
+      matter="REP"
+      formId={formId}
+      editable
+      changed={changes.length > 0}
+      before={before}
+      after={validNumbers ? after : null}
+      available={ready ? heroAvailableRep : null}
+      busy={busy}
+      canSave={canSave}
+      onCancel={reset}
+      idleAction={openCategory}
+    >
+      <RatingEditorErrors
+        formId={formId}
+        matter="REP"
+        validNumbers={validNumbers}
+        withinAllowance={withinAllowance}
+        changed={changes.length > 0}
+        available={heroAvailableRep}
+        error={error}
+        prepareError={prepareError}
+      />
+    </RatingEditorFooter>
+  ) : (
+    <div className="tw-min-h-[50px] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-2.5 tw-py-2">
+      {openCategory}
+    </div>
+  );
+  const body = (
+    <form
+      id={formId}
+      ref={formRef}
+      className="tw-min-w-0"
+      aria-busy={busy}
+      onSubmit={(event) => {
+        event.preventDefault();
+        void submit();
+      }}
+      onKeyDownCapture={(event) => {
+        if (event.key === "Escape" && changes.length > 0 && resetOnEscape()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }}
+    >
+      {activeProfileProxy && (
+        <p className="tw-m-0 tw-px-2.5 tw-py-2 tw-text-xs tw-text-iron-400">
+          {tRich(locale, "rep.categories.edit.proxy", {
+            name: (
+              <Link
+                key="proxy-profile"
+                href={`/${encodeURIComponent(proxyIdentity ?? "")}`}
+                className="tw-text-primary-300"
+              >
+                {proxyIdentity}
+              </Link>
+            ),
           })}
-          disabled={busy}
-          onClick={() => onOpenGlobalCategory(category.category)}
-        >
-          {t(locale, "rep.categories.panel.openGlobal")}
-          <ArrowUpRightIcon className="tw-size-3.5" aria-hidden="true" />
-        </Button>
-      </div>
-      <hr className="tw-mx-3 tw-mb-2 tw-mt-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5" />
+        </p>
+      )}
       {query.isPending && (
-        <output className="tw-block tw-px-3 tw-py-6 tw-text-sm tw-text-iron-400">
+        <output className="tw-block tw-px-2.5 tw-py-5 tw-text-sm tw-text-iron-400">
           {t(locale, "user.rate.loading")}
         </output>
       )}
       {query.isLoadingError && (
-        <div role="alert" className="tw-p-3 tw-text-sm tw-text-iron-300">
+        <p role="alert" className="tw-px-2.5 tw-text-sm tw-text-iron-300">
           {t(locale, "user.rate.loadError")}{" "}
           <Button
             variant="ghost"
@@ -615,29 +461,90 @@ export default function RepCategoryDetails({
           >
             {t(locale, "user.rate.retry")}
           </Button>
-        </div>
+        </p>
       )}
-      {canEdit && (direction === "received" || items.length > 0) ? (
-        <EditableCategoryRows
-          profile={profile}
-          category={category}
-          direction={direction}
-          items={items}
-          autoSelectOwnAmount={autoSelectOwnAmount}
-          onBusyChange={onBusyChange}
-        />
-      ) : (
-        <div className="tw-max-h-[min(50dvh,24rem)] tw-overflow-y-auto tw-overscroll-contain">
-          <CategoryRows items={items} />
-        </div>
-      )}
-      {query.isSuccess && items.length === 0 && !canEdit && (
-        <p className="tw-px-3 tw-text-sm tw-text-iron-400">
+      <div className="tw-max-h-[min(50dvh,24rem)] tw-overflow-y-auto tw-overscroll-contain">
+        {rows.map((row) => {
+          const you = direction === "received" && row === ownContributor;
+          const editable = canEdit && (direction === "given" || you);
+          const value = drafts[row.profile.id] ?? String(row.contribution);
+          const descriptionId = `${formId}-${row.profile.id}-description`;
+          const validation = getAmountValidation({
+            value,
+            current: row.contribution,
+            withinAllowance,
+            validNumbers,
+            descriptionId,
+            formId,
+          });
+          return (
+            <div
+              key={row.profile.id}
+              data-rating-row
+              className={`tw-flex tw-min-h-[50px] tw-min-w-0 tw-items-center tw-gap-2 tw-pb-[5px] tw-pl-2.5 tw-pr-1.5 tw-pt-[5px] ${you ? "tw-sticky tw-top-0 tw-z-10 tw-bg-[#17171B]" : ""}`}
+            >
+              <ContributorIdentity
+                row={row}
+                you={you}
+                labelId={`${formId}-${row.profile.id}-name`}
+              />
+              {editable ? (
+                <>
+                  <span id={descriptionId} className="tw-sr-only">
+                    {t(locale, "rep.categories.panel.amountFor", {
+                      name: you
+                        ? t(locale, "rep.categories.panel.you")
+                        : (row.profile.handle ?? row.profile.primary_address),
+                    })}
+                  </span>
+                  <RatingAmountInput
+                    ref={you ? ownAmountRef : undefined}
+                    originalAmount={row.contribution}
+                    value={ready ? value : ""}
+                    aria-labelledby={`${formId}-${row.profile.id}-name`}
+                    aria-describedby={validation.describedBy}
+                    aria-invalid={validation.invalid}
+                    readOnly={!ready || busy}
+                    placeholder={t(
+                      locale,
+                      "rep.categories.panel.loadingAmount"
+                    )}
+                    onChange={(event) =>
+                      updateDraft(row.profile.id, event.currentTarget.value)
+                    }
+                  />
+                </>
+              ) : (
+                <span
+                  className={`tw-shrink-0 tw-text-right tw-text-sm tw-font-medium ${row.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
+                >
+                  {formatInteger(locale, row.contribution)}
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {query.isSuccess && rows.length === 0 && (
+        <p className="tw-px-2.5 tw-text-sm tw-text-iron-400">
           {t(locale, "user.rate.empty")}
         </p>
       )}
+      {canEdit && isError && (
+        <p role="alert" className="tw-px-2.5 tw-text-sm tw-text-iron-300">
+          {t(locale, "rep.categories.edit.loadError")}{" "}
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={retry}
+            loading={isFetching}
+          >
+            {t(locale, "rep.categories.edit.retry")}
+          </Button>
+        </p>
+      )}
       {query.isFetchNextPageError && (
-        <p role="alert" className="tw-px-3 tw-text-sm tw-text-iron-400">
+        <p role="alert" className="tw-px-2.5 tw-text-sm tw-text-iron-400">
           {t(locale, "user.rate.loadError")}
         </p>
       )}
@@ -659,6 +566,7 @@ export default function RepCategoryDetails({
           )}
         </Button>
       )}
-    </div>
+    </form>
   );
+  return renderContent(body, footer, resetOnEscape);
 }

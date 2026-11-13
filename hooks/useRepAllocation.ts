@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
+import { useContext, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -12,9 +12,11 @@ import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyAct
 export function useRepAllocation({
   profile,
   category,
+  enabled = true,
 }: {
   readonly profile: ApiIdentity;
   readonly category: string | null;
+  readonly enabled?: boolean;
 }): {
   repState: RatingStats | null;
   heroAvailableRep: number;
@@ -31,164 +33,66 @@ export function useRepAllocation({
     profile.display
   ).toLowerCase();
 
-  const proxyQuery = useQuery<ApiProfileRepRatesState>({
+  const rater = activeProfileProxy
+    ? activeProfileProxy.created_by.handle
+    : connectedProfile?.handle;
+  const allocation = useQuery<ApiProfileRepRatesState>({
     queryKey: [
       QueryKey.PROFILE_REP_RATINGS,
-      {
-        rater: activeProfileProxy?.created_by.handle,
-        handleOrWallet: profileIdentity,
-      },
+      { rater, handleOrWallet: profileIdentity },
     ],
-    queryFn: async () =>
-      await commonApiFetch<ApiProfileRepRatesState>({
+    queryFn: ({ signal }) =>
+      commonApiFetch<ApiProfileRepRatesState>({
         endpoint: `profiles/${profileIdentity}/rep/ratings/received`,
-        params: activeProfileProxy?.created_by.handle
-          ? { rater: activeProfileProxy.created_by.handle }
-          : {},
+        params: rater ? { rater } : {},
+        signal,
       }),
-    enabled: !!activeProfileProxy?.created_by.handle,
+    enabled: enabled && !!rater,
   });
-
-  const connectedQuery = useQuery<ApiProfileRepRatesState>({
-    queryKey: [
-      QueryKey.PROFILE_REP_RATINGS,
-      {
-        rater: connectedProfile?.handle,
-        handleOrWallet: profileIdentity,
-      },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<ApiProfileRepRatesState>({
-        endpoint: `profiles/${profileIdentity}/rep/ratings/received`,
-        params: connectedProfile?.handle
-          ? { rater: connectedProfile.handle }
-          : {},
-      }),
-    enabled: !activeProfileProxy && !!connectedProfile?.handle,
-  });
-
-  const { data: proxyGrantorRepRates } = proxyQuery;
-  const { data: connectedProfileRepRates } = connectedQuery;
-  const activeQuery = activeProfileProxy ? proxyQuery : connectedQuery;
-
-  const getRepState = (): RatingStats | null => {
-    if (!category) return null;
-
-    if (activeProfileProxy && proxyGrantorRepRates) {
-      const target = proxyGrantorRepRates.rating_stats.find(
-        (s) => s.category === category
-      );
-      return (
-        target ?? {
-          category,
-          rating: 0,
-          contributor_count: 0,
-          rater_contribution: 0,
-        }
-      );
-    }
-
-    if (activeProfileProxy) return null;
-
-    if (connectedProfileRepRates) {
-      const target = connectedProfileRepRates.rating_stats.find(
-        (s) => s.category === category
-      );
-      return (
-        target ?? {
-          category,
-          rating: 0,
-          contributor_count: 0,
-          rater_contribution: 0,
-        }
-      );
-    }
-
-    return null;
-  };
-
-  const getProxyAvailableCredit = (): number | null => {
-    const repProxy = activeProfileProxy?.actions.find(
-      (a) => a.action_type === ApiProfileProxyActionType.AllocateRep
+  const data = allocation.data;
+  // Derive the contribution and limits from one query snapshot. Mirroring each
+  // value in state briefly paired new credit with an old contribution/limit.
+  const repState = useMemo((): RatingStats | null => {
+    if (!category || !data) return null;
+    return (
+      data.rating_stats.find((item) => item.category === category) ?? {
+        category,
+        rating: 0,
+        contributor_count: 0,
+        rater_contribution: 0,
+      }
     );
-    if (!repProxy) return null;
-    return Math.max(
-      (repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0),
-      0
-    );
-  };
-
-  const getHeroAvailableRep = (): number => {
-    if (activeProfileProxy) {
-      return proxyGrantorRepRates?.rep_rates_left_for_rater ?? 0;
-    }
-    return connectedProfileRepRates?.rep_rates_left_for_rater ?? 0;
-  };
-
-  const [repState, setRepState] = useState<RatingStats | null>(getRepState());
-  const [proxyAvailableCredit, setProxyAvailableCredit] = useState<
-    number | null
-  >(getProxyAvailableCredit());
-  const [heroAvailableRep, setHeroAvailableRep] = useState<number>(
-    getHeroAvailableRep()
+  }, [category, data]);
+  const repProxy = activeProfileProxy?.actions.find(
+    (action) => action.action_type === ApiProfileProxyActionType.AllocateRep
   );
-
-  useEffect(() => {
-    setRepState(getRepState());
-  }, [
-    category,
-    proxyGrantorRepRates,
-    activeProfileProxy,
-    connectedProfileRepRates,
-  ]);
-
-  useEffect(
-    () => setProxyAvailableCredit(getProxyAvailableCredit()),
-    [activeProfileProxy]
-  );
-
-  useEffect(
-    () => setHeroAvailableRep(getHeroAvailableRep()),
-    [activeProfileProxy, proxyGrantorRepRates, connectedProfileRepRates]
-  );
-
-  const getMinValue = (): number => {
-    const currentRep = repState?.rater_contribution ?? 0;
-    const minHeroRep = 0 - (Math.abs(currentRep) + heroAvailableRep);
-    if (typeof proxyAvailableCredit !== "number") return minHeroRep;
-    const minProxyRep = currentRep - proxyAvailableCredit;
-    return Math.abs(minHeroRep) < Math.abs(minProxyRep)
-      ? minHeroRep
-      : minProxyRep;
-  };
-
-  const getMaxValue = (): number => {
-    const currentRep = repState?.rater_contribution ?? 0;
+  const proxyAvailableCredit = repProxy
+    ? Math.max((repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0), 0)
+    : null;
+  const heroAvailableRep = data?.rep_rates_left_for_rater ?? 0;
+  const currentRep = repState?.rater_contribution ?? 0;
+  const minMaxValues = useMemo(() => {
+    const minHeroRep = -(Math.abs(currentRep) + heroAvailableRep);
     const maxHeroRep = Math.abs(currentRep) + heroAvailableRep;
-    if (typeof proxyAvailableCredit !== "number") return maxHeroRep;
-    const maxProxyRep = currentRep + proxyAvailableCredit;
-    return Math.min(maxHeroRep, maxProxyRep);
-  };
-
-  const [minMaxValues, setMinMaxValues] = useState<{
-    readonly min: number;
-    readonly max: number;
-  }>({ min: getMinValue(), max: getMaxValue() });
-
-  useEffect(
-    () => setMinMaxValues({ min: getMinValue(), max: getMaxValue() }),
-    [repState, proxyGrantorRepRates, proxyAvailableCredit, heroAvailableRep]
-  );
+    if (proxyAvailableCredit === null)
+      return { min: minHeroRep, max: maxHeroRep };
+    const minProxyRep = currentRep - proxyAvailableCredit;
+    return {
+      min:
+        Math.abs(minHeroRep) < Math.abs(minProxyRep) ? minHeroRep : minProxyRep,
+      max: Math.min(maxHeroRep, currentRep + proxyAvailableCredit),
+    };
+  }, [currentRep, heroAvailableRep, proxyAvailableCredit]);
 
   return {
     repState,
     heroAvailableRep,
     proxyAvailableCredit,
     minMaxValues,
-    isError: activeQuery.isError,
-    isFetching: activeQuery.isFetching,
+    isError: allocation.isError,
+    isFetching: allocation.isFetching,
     retry: () => {
-      void activeQuery.refetch();
+      void allocation.refetch();
     },
   };
 }

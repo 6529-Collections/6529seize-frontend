@@ -15,6 +15,12 @@ jest.mock("@/helpers/Helpers", () => ({
 const wait = require("@/helpers/Helpers").wait as jest.Mock;
 
 type ContextType = {
+  onProfileCICModify: (params: {
+    targetProfiles: readonly ApiIdentity[];
+    connectedProfile: ApiIdentity | null;
+    profileProxy: null;
+    rater: string | null;
+  }) => Promise<void>;
   onProfileRepModify: (params: {
     targetProfiles: readonly ApiIdentity[];
     connectedProfile: ApiIdentity | null;
@@ -63,6 +69,45 @@ const createTestSetup = () => {
 };
 
 describe("ReactQueryWrapper context", () => {
+  it("refreshes NIC lists and shared credit once for a multi-recipient batch", async () => {
+    const { client, ctx } = createTestSetup();
+    const keys = ["alice", "bob"].map((handle) => [
+      QueryKey.PROFILE_RATER_CIC_STATE,
+      { handle, rater: "viewer" },
+    ]);
+    keys.forEach((key) =>
+      client.setQueryData(key, { cic_ratings_left_to_give_by_rater: 80 })
+    );
+    await act(async () => {
+      await ctx.onProfileCICModify({
+        targetProfiles: ["alice", "bob"].map(
+          (handle) => ({ handle, wallets: [] }) as unknown as ApiIdentity
+        ),
+        connectedProfile: { handle: "viewer" } as ApiIdentity,
+        profileProxy: null,
+        rater: "viewer",
+      });
+    });
+    keys.forEach((key) =>
+      expect(client.getQueryState(key)?.isInvalidated).toBe(true)
+    );
+    expect(client.resetQueries).toHaveBeenCalledTimes(1);
+    expect(client.resetQueries).toHaveBeenCalledWith({
+      predicate: expect.any(Function),
+      queryKey: [
+        QueryKey.PROFILE_RATING_LIST,
+        { matter: "NIC", direction: "given" },
+      ],
+    });
+    const sharedCreditRefreshes = jest
+      .mocked(client.invalidateQueries)
+      .mock.calls.filter(
+        ([filters]) =>
+          filters?.queryKey?.[0] === QueryKey.PROFILE_RATER_CIC_STATE
+      );
+    expect(sharedCreditRefreshes).toHaveLength(1);
+  });
+
   it("invalidates shared REP credit across recipients, including a target without a handle", async () => {
     const { client, ctx } = createTestSetup();
     const key = [

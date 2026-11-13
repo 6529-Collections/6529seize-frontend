@@ -748,6 +748,46 @@ describe("MobileWrapperDialog", () => {
       expect(onClose).not.toHaveBeenCalled();
     });
 
+    it("keeps busy headers in place while blocking Back, Close, Escape and drag", async () => {
+      mockedUseIsTouchDevice.mockReturnValue(true);
+      const user = userEvent.setup();
+      const onClose = jest.fn();
+      const onBack = jest.fn();
+      const onEscape = jest.fn();
+      const props = {
+        ...defaultProps,
+        isOpen: true,
+        title: "Adjust REP",
+        onClose,
+        onBack,
+        onEscape,
+      };
+      const { rerender } = render(<MobileWrapperDialog {...props} />);
+      const header = screen.getByTestId("mobile-dialog-header");
+      const handle = header.firstElementChild;
+      const back = screen.getByRole("button", { name: "Back" });
+      const close = screen.getByRole("button", { name: "Close" });
+      expect(handle).toHaveAttribute("aria-hidden", "true");
+      rerender(<MobileWrapperDialog {...props} busy />);
+      expect(header.firstElementChild).toBe(handle);
+      expect(back).toBeDisabled();
+      expect(close).toBeDisabled();
+      await user.click(back);
+      await user.click(close);
+      await user.keyboard("{Escape}");
+      fireTouch(header, "touchstart", 20);
+      fireTouch(header, "touchmove", 100);
+      fireTouch(header, "touchend");
+      expect(onBack).not.toHaveBeenCalled();
+      expect(onEscape).not.toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+      rerender(<MobileWrapperDialog {...props} />);
+      expect(back).toBeEnabled();
+      expect(close).toBeEnabled();
+      await user.click(back);
+      expect(onBack).toHaveBeenCalledTimes(1);
+    });
+
     it("dismisses a responsive tablet modal after a mobile swipe", async () => {
       const onClose = jest.fn();
       render(

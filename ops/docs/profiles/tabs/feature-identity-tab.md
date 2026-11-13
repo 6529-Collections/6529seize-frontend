@@ -113,34 +113,52 @@ show the profile-creation welcome.
   - `Received`: incoming rep to the viewed profile
   - `Given`: outgoing rep from the viewed profile
 - `Total Rep` and contributor counts update with the active direction.
+- The summary count is unique identities. A receiver with REP in several
+  categories counts once overall and once in each applicable category. Category
+  counts therefore need not add up to the summary count.
 - Avatars beside the REP and NIC summary totals open those profiles.
   Select the rater/receiver count and chevron to open the full list.
 - Direction-specific contributor labels:
   - `Received`: `rater` / `raters`
   - `Given`: `receiver` / `receivers`
-- Your existing contribution uses `You assigned:` with the same grouped number
+- When signed in and viewing another profile, your existing contribution uses `You assigned:` with the same grouped number
   format as Total REP, without a plus sign. Negative totals retain their minus
-  sign. On mobile, this summary and `Grant Rep` stay on one line together.
+  sign. On mobile and medium screens, this summary stays beside `Grant Rep`
+  as a group at the right of the category heading. When space is tight, the
+  summary moves below the button and stays right-aligned.
 - Category headers show the name, total, up to three top-contributor avatars and
-  rater/receiver count. Long names truncate. The whole tag is one button that
-  opens the contributor panel. Tags have no separate edit
+  rater/receiver count. Long names truncate. The tag opens the contributor
+  panel, with separate desktop profile links on its avatars. Tags have no separate edit
   pencil; editing is available inside the panel when permitted.
-- On desktop, hovering a category avatar enlarges it and shows the profile name
-  and REP contribution. Clicking it opens the category list along with the rest
-  of the tag. Avatars beside the summary totals still link to profiles.
+- When signed in and viewing another profile, a nonzero personal amount is visible on each category tag, after a
+  subtle dot separator: `You assigned:` in Received and `Assigned to you:` in
+  Given. Your own profile omits these personal labels in both directions; each
+  category total appears once. In your own Given view it is the total you
+  assigned across that category’s receivers. Values use grouped integers, with a
+  minus sign for negative amounts.
+  Narrow tags place this on a second line with vertical padding and a gap below
+  the title. Wider full-row tags place it beside the category name and total,
+  with contributor avatars and count kept at the right. Tags grow to fit the
+  personal amount comfortably.
+- Category avatars are 24px. On desktop, hovering an avatar enlarges it and
+  shows the profile name and REP contribution; clicking it opens that profile.
+  The rest of the tag opens the contributor list. On touch devices, tapping
+  anywhere on the tag, including its avatars, opens the list; profiles are
+  linked inside that list. Avatars beside the summary totals still link to profiles.
 - Select a category to open its list. Desktop Received and Given categories
   use the same compact tags, arranged side by side and wrapping as needed.
   The open tag keeps its size and position. A short filled bridge joins it to a
   full-width contributor panel directly below its row. Tags and panels use
-  subtle fills without border rings. The count appears only in the category tag.
+  subtle fills. Tags have a faint border that strengthens slightly on hover;
+  the joined panel has no outline. The count appears only in the category tag.
   Mobile and the native app use a draggable bottom sheet. One category opens at
   a time. Select the same category again, press Escape, or close the sheet.
 - On mobile, the sheet fits above the keyboard and scrolls the focused amount
   into view after the keyboard settles.
 - Lists show linked profiles and amounts, highest first. Long lists scroll;
   `Load more` retrieves additional contributors. The quiet `Open category ↗`
-  action opens the global category view. It sits at the top right on desktop
-  and aligns left beneath the category title in the mobile sheet.
+  action opens the global category view. It sits on the left of the footer
+  when there are no unsaved changes, on desktop and mobile.
 - Category list starts at 5 items.
 - `+N more` reveals 10 additional already-loaded categories at a time.
 - When the visible list reaches the end of the categories already loaded in the
@@ -168,10 +186,11 @@ show the profile-creation welcome.
 
 ### Grant Rep Dialog
 
-- On desktop, Grant Rep, Rate NIC and the REP/NIC rater and receiver lists keep
-  their top edge at about 14% of the viewport height while content grows
-  downward. Long content scrolls inside the dialog and leaves space below it.
-  Other dialogs keep their existing positioning. Mobile keeps the bottom sheet.
+- On desktop, Grant Rep and Rate NIC keep their top edge at about 14% of the
+  viewport height while content grows downward. The rater and receiver lists
+  for REP keep that positioning. NIC rater and receiver lists start about 10%
+  down and grow to at most 80% of the viewport height. Long content scrolls
+  inside. Mobile keeps the bottom sheet.
 - Category search accepts 3-100 characters.
 - Results appear after a short debounce as compact category pills, including the
   typed category and matching categories returned by the existing search.
@@ -208,13 +227,22 @@ show the profile-creation welcome.
   given REP in that category, including a negative contribution. Use `Grant Rep`
   to add REP where you have no contribution. Authorized proxies use their
   grantor's contribution and allowance.
-- On desktop, opening an existing contribution selects its amount so typing
-  replaces it. Mobile opens with the sheet title focused and does not open the
+- On desktop, opening an existing contribution focuses its amount without
+  selecting the digits. Mobile opens with the sheet title focused and does not open the
   keyboard automatically.
 - Type the desired total, including negative integers. Enter zero to remove a
   rating. Other people's received contributions are read-only.
-- A changed field reveals `Your REP`, the old and new values, `Cancel` and `Save`.
-  Enter saves. Escape or Cancel discards the draft; Escape again closes the list.
+- Editable amounts use the Grant REP input's plus/minus symbols. Numbers are
+  grouped while unfocused; focusing shows plain digits without selecting them. Read-only amounts
+  are plain numbers.
+  A changed field shows its signed adjustment beside the input. Increases use
+  emerald and decreases use rose, including the proposed total in the footer.
+  The footer compares the current and proposed category totals, with `Cancel` and `Save`.
+  With no changes, it shows `Open category` and the available REP allowance
+  for an eligible editor. Enter saves. Escape or Cancel discards the draft;
+  Escape again closes the list. On desktop, saving keeps the same category open
+  and updates its amounts immediately. Category tags keep their order while a
+  panel or sheet is open; closing it restores the current ranking by total.
 - In your own `Given` category, edit one or more receiver amounts. The footer
   compares the current and proposed category totals with an arrow, alongside
   `Cancel` and `Save`; neither amount is crossed out. On desktop, the receiver
@@ -223,8 +251,14 @@ show the profile-creation welcome.
   returning released credit before spending it elsewhere.
 - Fields wait for the allowance to load. On failure, use `Try again`. Save is
   unavailable for invalid amounts or a combined allocation beyond the allowance.
-- The category stays open after saving. Totals, counts and activity refresh.
-  Failed edits remain for retry; successful writes are kept if a later write fails.
+- After a fully successful save, the mobile and native category sheet closes,
+  dismissing the keyboard and returning focus to the category tag. Updated totals
+  and the success message confirm the change. The desktop expandable stays open.
+  During saving, the sheet header and drag handle stay in place; Back, Close,
+  Escape and dragging are temporarily disabled so the sheet does not jump.
+  Totals, counts and activity refresh before completion. If saving fails or only
+  some updates succeed, the sheet stays open with failed edits available to retry;
+  confirmed writes are kept.
 
 ### Localization fallback debt
 
@@ -257,14 +291,17 @@ show the profile-creation welcome.
   label, and the avatars, count and chevron appear below the total.
 - `Received` shows the viewed profile's incoming NIC, status and raters.
   Select the rater count and chevron to inspect the full list.
-  Rater and receiver counts stay in the profile summary rather than repeating
-  above the REP and NIC dialog lists.
+  NIC lists also show the count above their rows; REP keeps counts in the
+  profile summary.
 - `Given` shows outgoing NIC and receivers. It does not assign an identity
   status to an outgoing total. On mobile, Received/Given sits beside the NIC
   heading, and the selected total appears below it in the content. A dash appears while the
   selected total is loading or unavailable.
   Select the receiver count and chevron to inspect or manage the full list.
 - `Rate NIC` is available only in `Received` when the viewer can rate the target.
+  On mobile, it sits on the right of the raters summary row. Your existing NIC
+  rating stays beside the button when there is room, or below it and right-aligned
+  when space is tight.
 - The NIC editor loads the current total and allowance before enabling Save.
   If loading fails, select `Retry`. A background refresh keeps an entered draft.
 - Enter the desired total, then select `Save`, or `Cancel` to leave without saving.
@@ -273,41 +310,45 @@ show the profile-creation welcome.
 ## All Receivers for REP and NIC
 
 1. Open your own profile, choose REP or NIC, and select `Given`.
-2. Select the receiver count and chevron in the summary. On desktop and mobile,
-   this opens the full receiver list. Each avatar opens that receiver's profile.
-   Recipients default to `Highest total first`, with adjustment
-   controls on the right. Owners can use `Sort by` to choose
-   `Most recently adjusted`. Changing order returns to the start of that list; `Load more`
-   continues in the selected order. Back preserves the choice while
-   the dialog stays open; reopening management defaults to highest total first.
-   Overview category ordering stays unchanged, by rating magnitude.
-3. Select `Adjust` beside a recipient. Mobile rows show the rating amount and
-   REP/NIC below the person's name, with Adjust on the right. For REP, choose
-   the category first:
-   a recipient total can combine several separate category ratings. A list
-   opened from a category skips that selection. The list, category choice, and
-   editor share one dialog: a sheet on mobile and a top-aligned dialog on desktop.
-4. Enter the new total. To remove an existing rating, enter zero.
-5. Select `Save`. Successful updates return to the first page of the same
-   receiver list, with refreshed values; removed ratings disappear. Use
-   `Load more` to view additional recipients. A failed save keeps the draft
-   and loaded pages so you can retry. Back returns one step without submitting;
-   returning to the list restores its scroll position and loaded pages. Cancel
-   and Close discard the unsaved draft and exit the entire management flow.
-   Navigation is unavailable while a save is in progress. Cancel and Save sit
-   side by side on the right,
-   with Cancel on the left. Standalone profile rating dialogs keep their own
-   entry points.
+2. Select the receiver count and chevron in the summary to open the full list.
+   Recipients default to `Highest total first`. Owners and visitors can use `Sort by` in Received and Given to
+   choose `Most recently adjusted`. `Load more` continues in the selected
+   order, 25 people at a time. Reopening defaults to highest total first.
+3. In REP, each row shows the receiver's linked handle, total and `Adjust`.
+   Categories are not expanded under every receiver. Select `Adjust`, choose
+   the existing category, then enter the desired total. A successful Save closes
+   the entire management dialog or mobile bottom sheet and returns focus to the
+   receiver-count button. Reopening shows the refreshed first page. Back returns one step and preserves the loaded list
+   and scroll position; Cancel closes management without saving. New REP
+   categories stay with `Grant Rep`. The expandable category tags remain the
+   main way to adjust multiple receiver amounts together.
+4. In NIC, edit the amount directly beside each person. A fixed footer shows
+   available credit, or the current and proposed totals with `Cancel` and a
+   green `Save` after an edit. Save applies all changed rows and stays in the
+   refreshed list. Cancel resets drafts in place; Close exits. Escape resets
+   drafts, then closes. While saving, Close stays visible but disabled, keeping
+   the sheet header steady. Released credit is returned before other changes spend it.
 
-The lists include loading, empty and retry states, and `Load more` when more
-recipients exist. Received and Given lists fit their contents up to the same
-maximum height; longer lists scroll within the dialog. Visitors see the same
-public ratings without owner controls.
-Management is available to the connected owner outside proxy mode; existing
-proxy allocation entry points and permissions are unchanged.
+Enter signed whole-number totals; zero removes a rating. Save is unavailable
+for invalid numbers or changes beyond the allowance. Failed edits remain for
+retry. Lists have loading, empty, retry and `Load more` states. Visitors see
+public ratings with sorting but without adjustment controls. REP Received shows each
+rater and their total, without expanding that person's categories.
+
+Received and Given use the same subtle row background, circular avatar, linked handle
+and right-aligned amount styling. Read-only values are plain numbers; eligible
+editors get an amount input on the right in the category editor and NIC list.
+REP receiver management keeps its existing Adjust flow.
+
+Management is available to the connected owner outside proxy mode. Existing
+proxy allocation entry points and permissions are unchanged. Linked handles
+change color on hover without an underline. Mobile keeps the existing
+bottom sheets and keyboard support; the NIC footer stays visible above the
+safe area and software keyboard.
 
 ## Activity Log Behavior
 
+- Direction filters retain compact tabs on desktop and mobile.
 - Entries are compact rows separated by thin dividers.
 - NIC changes explicitly name NIC, including historical activity stored as CIC.
 - REP changes put the category before Rep and the recipient. The running total
