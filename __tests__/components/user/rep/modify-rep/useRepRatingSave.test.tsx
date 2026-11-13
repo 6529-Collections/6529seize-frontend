@@ -119,6 +119,21 @@ it("saves every category but refreshes each affected profile only once", async (
   );
 });
 
+it.each(["REP", "NIC"] as const)(
+  "does not authenticate a superseded %s submission",
+  async (matter) => {
+    const { result, switchProfile } = setup(matter);
+    const save = result.current.save;
+    switchProfile();
+    await act(async () => {
+      expect(await save(updates)).toBe(false);
+    });
+    expect(requestAuth).not.toHaveBeenCalled();
+    expect(post).not.toHaveBeenCalled();
+    expect(result.current.isSaving).toBe(false);
+  }
+);
+
 it("does not write when the principal changes while authentication is pending", async () => {
   let authenticate!: (value: { success: boolean }) => void;
   requestAuth.mockReturnValue(

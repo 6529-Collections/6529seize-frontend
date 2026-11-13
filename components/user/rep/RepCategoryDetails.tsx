@@ -290,6 +290,7 @@ export default function RepCategoryDetails({
       ? isWithinRatingAllowance(changes.map(creditDelta), heroAvailableRep)
       : changes.every(
           (row) =>
+            // Match standalone proxy grants: the server enforces live proxy credit.
             !!activeProfileProxy ||
             (Number(drafts[row.profile.id]) >= minMaxValues.min &&
               Number(drafts[row.profile.id]) <= minMaxValues.max)
@@ -317,8 +318,11 @@ export default function RepCategoryDetails({
   const updateDraft = (id: string, raw: string) => {
     let value = raw === "0-" || raw === "-0" ? "-" : raw;
     if (value.length > 1 && value.startsWith("0")) value = value.slice(1);
-    if (/^-?\d*$/.test(value))
+    if (/^-?\d*$/.test(value)) {
+      clearError();
+      setPrepareError(false);
       setDrafts((previous) => ({ ...previous, [id]: value }));
+    }
   };
   const submit = async () => {
     if (!canSave || submitting.current) return;

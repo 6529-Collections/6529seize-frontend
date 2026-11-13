@@ -160,6 +160,12 @@ export function useMobileDialogDrag({
     setImmediateDragOffset,
   ]);
 
+  useEffect(() => {
+    if (dismissible || dismissTimerRef.current === null) return;
+    // Cancelling this external timer must also undo its animated gesture offset.
+    resetDrag();
+  }, [dismissible, resetDrag]);
+
   useEffect(
     () => () => {
       cancelScheduledDragFrame();

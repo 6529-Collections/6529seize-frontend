@@ -87,7 +87,8 @@ export function useRatingSave(matter: Matter, rater: string | null = null) {
     updates: readonly Update[],
     onSaved?: (update: Update) => void
   ): Promise<boolean> => {
-    if (lock.current || updates.length === 0) return false;
+    if (!isCurrentSession() || lock.current || updates.length === 0)
+      return false;
     lock.current = true;
     setIsSaving(true);
     setError(null);

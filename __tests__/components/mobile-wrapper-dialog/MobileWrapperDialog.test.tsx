@@ -560,6 +560,41 @@ describe("MobileWrapperDialog", () => {
       await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
     });
 
+    it.each(["busy", "non-dismissible"])(
+      "cancels a pending drag dismissal when the dialog becomes %s",
+      async (mode) => {
+        const onClose = jest.fn();
+        const props = { ...defaultProps, isOpen: true, onClose };
+        const { rerender } = render(<MobileWrapperDialog {...props} />);
+        const header = screen.getByTestId("mobile-dialog-header");
+        fireTouch(header, "touchstart", 20);
+        fireTouch(header, "touchmove", 100);
+        fireTouch(header, "touchend");
+        rerender(
+          <MobileWrapperDialog
+            {...props}
+            busy={mode === "busy"}
+            dismissible={mode !== "non-dismissible"}
+          />
+        );
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 180));
+        });
+        expect(onClose).not.toHaveBeenCalled();
+        expect(
+          header.closest<HTMLElement>(".mobile-wrapper-dialog")?.style.transform
+        ).toBe("");
+        rerender(<MobileWrapperDialog {...props} />);
+        expect(
+          header.closest<HTMLElement>(".mobile-wrapper-dialog")?.style.transform
+        ).toBe("translate3d(0, 0px, 0)");
+        fireTouch(header, "touchstart", 20);
+        fireTouch(header, "touchmove", 100);
+        fireTouch(header, "touchend");
+        await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+      }
+    );
+
     it("keeps a custom header control operable without starting a drag", async () => {
       const onClose = jest.fn();
       render(

@@ -329,9 +329,10 @@ show the profile-creation welcome.
    drafts, then closes. While saving, Close stays visible but disabled, keeping
    the sheet header steady. Released credit is returned before other changes spend it.
 
-Enter signed whole-number totals; zero removes a rating. Save is unavailable
+Enter signed whole-number totals; zero removes a rating. Amount fields use the
+standard text keyboard so a minus sign remains accessible on mobile. Save is unavailable
 for invalid numbers or changes beyond the allowance. Failed edits remain for
-retry. Lists have loading, empty, retry and `Load more` states. Visitors see
+retry, and editing an amount clears the previous save or lookup error. Lists have loading, empty, retry and `Load more` states. Visitors see
 public ratings with sorting but without adjustment controls. REP Received shows each
 rater and their total, without expanding that person's categories.
 
@@ -341,7 +342,9 @@ editors get an amount input on the right in the category editor and NIC list.
 REP receiver management keeps its existing Adjust flow.
 
 Management is available to the connected owner outside proxy mode. Existing
-proxy allocation entry points and permissions are unchanged. Linked handles
+proxy allocation entry points and permissions are unchanged. Proxy adjustments
+retain the standalone forms’ server-authoritative credit checks; the backend
+applies the live proxy balance when saving. Linked handles
 change color on hover without an underline. Mobile keeps the existing
 bottom sheets and keyboard support; the NIC footer stays visible above the
 safe area and software keyboard.

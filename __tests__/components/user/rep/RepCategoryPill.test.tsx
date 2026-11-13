@@ -1,4 +1,5 @@
 import RepCategoryPill from "@/components/user/rep/RepCategoryPill";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { RepDirection } from "@/components/user/rep/UserPageRep.helpers";
 import { fireEvent, render, screen } from "@testing-library/react";
@@ -103,6 +104,24 @@ describe("RepCategoryPill", () => {
                   handle: "alice",
                   primary_address: "0x123",
                   pfp: null,
+                  banner1_color: null,
+                  banner2_color: null,
+                  cic: 0,
+                  rep: 20,
+                  tdh: 0,
+                  tdh_rate: 0,
+                  xtdh: 0,
+                  xtdh_rate: 0,
+                  level: 0,
+                  classification: ApiProfileClassification.Pseudonym,
+                  sub_classification: null,
+                  subscribed_actions: [],
+                  archived: false,
+                  active_main_stage_submission_ids: [],
+                  winner_main_stage_drop_ids: [],
+                  artist_of_prevote_cards: [],
+                  profile_wave_id: null,
+                  is_wave_creator: false,
                 },
                 contribution: 20,
               },
