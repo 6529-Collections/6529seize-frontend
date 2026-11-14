@@ -25,7 +25,9 @@ const POLL_INTERVAL_MS = 15_000;
 // between two polls are each shown, oldest first.
 const POLL_LIMIT = 5;
 // When more arrive between two polls, older pages are fetched back to the
-// last seen one, at most this many pages per profile and poll.
+// last seen one, at most this many pages per range and poll. What a poll
+// cannot reach is kept as a gap and fetched by the next polls: nothing is
+// skipped.
 const MAX_POLL_PAGES = 10;
 // Each profile's requests in one poll must finish by then, so one stalled
 // profile never stops polling for the others.
@@ -79,49 +81,135 @@ const fetchNotificationPage = (
     signal,
   });
 
-/** Older pages, until one reaches `lastSeenId` or the page budget runs out. */
-const fetchOlderPages = async (
+/** Unseen notifications between two seen ones: ids below `before`, above `after`. */
+interface NotificationGap {
+  readonly before: number;
+  readonly after: number;
+}
+
+/** Per profile: the newest notification seen, and the gaps still to fetch. */
+interface NotificationCursor {
+  readonly lastSeenId: number | undefined;
+  readonly gaps: readonly NotificationGap[];
+}
+
+interface FetchedRange {
+  readonly notifications: readonly ApiNotification[];
+  /** Where to continue when the page budget ran out first; else null. */
+  readonly resumeBefore: number | null;
+}
+
+const isUnread = (notification: ApiNotification): boolean =>
+  notification.read_at === null;
+
+/**
+ * Given a fetched page (newest first), fetch older pages until one reaches
+ * `after` or `pagesLeft` more pages have been fetched.
+ */
+const continueRange = async (
   jwt: string,
   signal: AbortSignal,
   page: readonly ApiNotification[],
-  lastSeenId: number,
+  after: number,
   pagesLeft: number
-): Promise<ApiNotification[]> => {
-  if (pagesLeft === 0 || page.length < POLL_LIMIT) return [];
+): Promise<FetchedRange> => {
+  if (page.length < POLL_LIMIT)
+    return { notifications: page, resumeBefore: null };
   const oldest = Math.min(...page.map((notification) => notification.id));
-  if (oldest <= lastSeenId) return [];
+  if (oldest <= after) return { notifications: page, resumeBefore: null };
+  if (pagesLeft === 0) return { notifications: page, resumeBefore: oldest };
   const next = (await fetchNotificationPage(jwt, signal, oldest)).notifications;
-  return [
-    ...next,
-    ...(await fetchOlderPages(jwt, signal, next, lastSeenId, pagesLeft - 1)),
-  ];
+  const rest = await continueRange(jwt, signal, next, after, pagesLeft - 1);
+  return {
+    notifications: [...page, ...rest.notifications],
+    resumeBefore: rest.resumeBefore,
+  };
 };
 
+interface ProfilePoll {
+  /** Notifications to show, oldest first. */
+  readonly show: readonly ApiNotification[];
+  readonly cursor: NotificationCursor;
+}
+
 /**
- * One profile's unread notifications. With a last seen id, older pages are
- * fetched back to it, so a burst between two polls is not skipped.
+ * One profile's poll. The first poll shows only the newest unread
+ * notification, as the desktop app always has. Later polls fetch newest
+ * first back to the last seen one, then the oldest open gap; a range the
+ * page budget could not finish becomes a gap for the next poll, so a burst
+ * of any size is shown in full, a bounded number of pages at a time.
  */
-const fetchUnreadNotifications = async (
+const pollProfile = async (
   account: ConnectedWalletAccount,
-  lastSeenId: number | undefined,
+  cursor: NotificationCursor | undefined,
   signal: AbortSignal
-): Promise<readonly ApiNotification[]> => {
-  if (!account.jwt) return [];
-  const first = await fetchNotificationPage(account.jwt, signal);
-  if (toUnreadCount(first.unread_count) === 0) return [];
-  const older =
-    lastSeenId === undefined
-      ? []
-      : await fetchOlderPages(
-          account.jwt,
-          signal,
-          first.notifications,
-          lastSeenId,
-          MAX_POLL_PAGES - 1
-        );
-  return [...first.notifications, ...older].filter(
-    (notification) => notification.read_at === null
+): Promise<ProfilePoll | null> => {
+  const { jwt } = account;
+  if (!jwt) return null;
+  const first = await fetchNotificationPage(jwt, signal);
+  const lastSeenId = cursor?.lastSeenId;
+  if (toUnreadCount(first.unread_count) === 0) {
+    return { show: [], cursor: { lastSeenId, gaps: [] } };
+  }
+  if (lastSeenId === undefined) {
+    const newest = first.notifications
+      .filter(isUnread)
+      .sort((left, right) => right.id - left.id)[0];
+    return {
+      show: newest ? [newest] : [],
+      cursor: { lastSeenId: newest?.id, gaps: [] },
+    };
+  }
+  const top = await continueRange(
+    jwt,
+    signal,
+    first.notifications,
+    lastSeenId,
+    MAX_POLL_PAGES - 1
   );
+  const [gap, ...laterGaps] = cursor?.gaps ?? [];
+  const older = gap
+    ? await continueRange(
+        jwt,
+        signal,
+        (await fetchNotificationPage(jwt, signal, gap.before)).notifications,
+        gap.after,
+        MAX_POLL_PAGES - 1
+      )
+    : null;
+
+  const shown = new Map<number, ApiNotification>();
+  for (const notification of top.notifications) {
+    if (notification.id > lastSeenId && isUnread(notification)) {
+      shown.set(notification.id, notification);
+    }
+  }
+  for (const notification of older?.notifications ?? []) {
+    if (
+      gap &&
+      notification.id > gap.after &&
+      notification.id < gap.before &&
+      isUnread(notification)
+    ) {
+      shown.set(notification.id, notification);
+    }
+  }
+  const newestId = Math.max(
+    lastSeenId,
+    ...top.notifications.map((notification) => notification.id)
+  );
+  const gaps: NotificationGap[] = [];
+  if (gap && older?.resumeBefore != null) {
+    gaps.push({ before: older.resumeBefore, after: gap.after });
+  }
+  gaps.push(...laterGaps);
+  if (top.resumeBefore !== null) {
+    gaps.push({ before: top.resumeBefore, after: lastSeenId });
+  }
+  return {
+    show: [...shown.values()].sort((left, right) => left.id - right.id),
+    cursor: { lastSeenId: newestId, gaps },
+  };
 };
 
 /**
@@ -147,23 +235,6 @@ const withDeadline = <T,>(
     clearTimeout(timer);
     poll.removeEventListener("abort", abort);
   });
-};
-
-/**
- * Which unread notifications to show for one profile, oldest first. The
- * first poll for a profile shows only its newest unread notification, as the
- * desktop app always has; later polls show every one newer than the newest
- * already seen. Only the newest seen id per profile is remembered.
- */
-const selectNewNotifications = (
-  unread: readonly ApiNotification[],
-  lastSeenId: number | undefined
-): ApiNotification[] => {
-  const newestFirst = [...unread].sort((left, right) => right.id - left.id);
-  if (lastSeenId === undefined) return newestFirst.slice(0, 1);
-  return newestFirst
-    .filter((notification) => notification.id > lastSeenId)
-    .reverse();
 };
 
 const toNotificationIcon = (url: string | null | undefined): string => {
@@ -225,7 +296,7 @@ export default function DesktopNotificationsBridge() {
     locale,
     emoji: { findNativeEmoji, findCustomEmoji },
   });
-  const lastSeenIds = useRef(new Map<string, number>());
+  const cursors = useRef(new Map<string, NotificationCursor>());
   // The running poll; aborted on unmount so its results are discarded.
   const pollController = useRef<AbortController | null>(null);
   // The latest notification click; an earlier one still switching profiles
@@ -404,9 +475,9 @@ export default function DesktopNotificationsBridge() {
         accounts.map((account) =>
           withDeadline(
             (signal) =>
-              fetchUnreadNotifications(
+              pollProfile(
                 account,
-                lastSeenIds.current.get(account.address.toLowerCase()),
+                cursors.current.get(account.address.toLowerCase()),
                 signal
               ),
             controller.signal
@@ -424,16 +495,11 @@ export default function DesktopNotificationsBridge() {
         // A failed or timed-out profile does not hold up the others.
         if (!account || result.status !== "fulfilled") return;
         const key = account.address.toLowerCase();
-        if (!signedIn.has(key)) return;
-        const fresh = selectNewNotifications(
-          result.value,
-          lastSeenIds.current.get(key)
-        );
-        for (const notification of fresh) {
+        if (!signedIn.has(key) || !result.value) return;
+        for (const notification of result.value.show) {
           showNotification(account, notification);
         }
-        const newestId = fresh.at(-1)?.id;
-        if (newestId !== undefined) lastSeenIds.current.set(key, newestId);
+        cursors.current.set(key, result.value.cursor);
       });
     } finally {
       if (pollController.current === controller) pollController.current = null;

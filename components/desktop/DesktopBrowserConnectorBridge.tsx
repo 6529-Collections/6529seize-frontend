@@ -22,12 +22,22 @@ import {
  * nothing and does nothing on the web.
  */
 export default function DesktopBrowserConnectorBridge() {
-  const { seizeAcceptConnection } = useSeizeConnectContext();
+  const { seizeAcceptConnection, isSigningOutAll } = useSeizeConnectContext();
   const acceptConnection = useRef(seizeAcceptConnection);
+  // Sign-out-all runs so far, and whether one is running: a sign-in that
+  // started before one must not save its session afterwards.
+  const signOutAll = useRef({ running: false, count: 0 });
 
   useEffect(() => {
     acceptConnection.current = seizeAcceptConnection;
   }, [seizeAcceptConnection]);
+
+  useEffect(() => {
+    const { count } = signOutAll.current;
+    signOutAll.current = isSigningOutAll
+      ? { running: true, count: count + 1 }
+      : { running: false, count };
+  }, [isSigningOutAll]);
 
   useEffect(() => {
     const api = getDesktopShellApi();
@@ -45,6 +55,16 @@ export default function DesktopBrowserConnectorBridge() {
       if (!active) return;
       const result = parseBrowserConnectorResult(payload);
       if (!result || !takeBrowserConnectorRequest(result.requestId)) return;
+      const signOutsAtStart = signOutAll.current.count;
+      // False once a sign-out-all started after this sign-in began.
+      const shouldPersist = () =>
+        active &&
+        !signOutAll.current.running &&
+        signOutAll.current.count === signOutsAtStart;
+      if (!shouldPersist()) {
+        setBrowserConnectorStatus("failed");
+        return;
+      }
       setBrowserConnectorStatus("signing-in");
       try {
         if (!canStoreAnotherWalletAccount(result.address)) {
@@ -63,11 +83,14 @@ export default function DesktopBrowserConnectorBridge() {
           setBrowserConnectorStatus("failed");
           return;
         }
-        if (!(await persistSessionResponse(session))) {
+        if (!(await persistSessionResponse(session, { shouldPersist }))) {
           setBrowserConnectorStatus("failed");
           return;
         }
-        if (stopIfInactive()) return;
+        if (stopIfInactive() || !shouldPersist()) {
+          setBrowserConnectorStatus("failed");
+          return;
+        }
         acceptConnection.current(session.address);
         setBrowserConnectorStatus("signed-in");
       } catch {
