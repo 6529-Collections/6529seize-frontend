@@ -217,7 +217,8 @@ export interface DesktopUpdateInfo {
 
 export interface DesktopUpdater {
   readonly checkUpdates: () => void;
-  readonly downloadUpdate: () => void;
+  /** The Tauri host returns its IPC promise; the older app returns nothing. */
+  readonly downloadUpdate: () => Promise<void> | undefined;
   readonly installUpdate: () => void;
   readonly onUpdateAvailable: (
     callback: DesktopShellListener<[DesktopUpdateInfo?]>
