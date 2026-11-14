@@ -86,6 +86,25 @@ export const getValidatorPageServerEnv = (): ValidatorPageServerEnv => ({
 });
 
 /**
+ * Where 6529 Desktop's signed release list is stored, served at
+ * `/desktop/releases.json`. Unset bucket: no list is published yet, and the
+ * site answers 404 without reading anything.
+ */
+type DesktopReleasesServerEnv = {
+  readonly releasesBucket: string | undefined;
+  readonly releasesRegion: string | undefined;
+};
+
+export const getDesktopReleasesServerEnv = (): DesktopReleasesServerEnv => ({
+  releasesBucket: getOptionalServerValue(
+    process.env["DESKTOP_RELEASES_BUCKET"]
+  ),
+  releasesRegion: getOptionalServerValue(
+    process.env["DESKTOP_RELEASES_REGION"]
+  ),
+});
+
+/**
  * Static AWS credentials from the standard variables, for local development
  * only. Deployed servers set none of them and use their instance role.
  */

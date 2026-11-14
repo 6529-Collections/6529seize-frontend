@@ -19,7 +19,13 @@ export function getReleaseObjectKey(version: string, fileName: string): string {
   return `releases/${version}/${fileName}`;
 }
 
-function getBucketLocation(): { bucket: string; region: string } {
+/** A private bucket the servers' role may read. */
+export type BucketLocation = {
+  readonly bucket: string;
+  readonly region: string;
+};
+
+function getBucketLocation(): BucketLocation {
   const env = getValidatorPageServerEnv();
   return {
     bucket: env.releasesBucket ?? DEFAULT_RELEASES_BUCKET,
@@ -37,15 +43,16 @@ export type BucketObject =
   | { readonly state: "missing" }
   | { readonly state: "error"; readonly reason: string };
 
-/** Presigns a short-lived GET for one object in the releases bucket. */
-export async function presignReleaseObject(
+type PresignOptions = {
+  readonly expiresInSeconds: number;
+  readonly responseParams?: Readonly<Record<string, string>> | undefined;
+};
+
+async function presignObject(
+  { bucket, region }: BucketLocation,
   key: string,
-  options: {
-    readonly expiresInSeconds: number;
-    readonly responseParams?: Readonly<Record<string, string>> | undefined;
-  }
+  options: PresignOptions
 ): Promise<string> {
-  const { bucket, region } = getBucketLocation();
   return presignS3GetUrl({
     bucket,
     region,
@@ -56,13 +63,24 @@ export async function presignReleaseObject(
   });
 }
 
+/** Presigns a short-lived GET for one object in the releases bucket. */
+export function presignReleaseObject(
+  key: string,
+  options: PresignOptions
+): Promise<string> {
+  return presignObject(getBucketLocation(), key, options);
+}
+
 /**
- * Reads one small object. A missing key is `missing`, not an error: the role
- * can list the bucket, so S3 answers 404 for it.
+ * Reads one small object from a private bucket. A missing key is `missing`,
+ * not an error: the role can list the bucket, so S3 answers 404 for it.
  */
-export async function readReleaseObject(key: string): Promise<BucketObject> {
+export async function readBucketObject(
+  location: BucketLocation,
+  key: string
+): Promise<BucketObject> {
   try {
-    const url = await presignReleaseObject(key, { expiresInSeconds: 60 });
+    const url = await presignObject(location, key, { expiresInSeconds: 60 });
     const response = await fetch(url, {
       cache: "no-store",
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
@@ -91,4 +109,9 @@ export async function readReleaseObject(key: string): Promise<BucketObject> {
       reason: error instanceof Error ? error.message : "unknown error",
     };
   }
+}
+
+/** Reads one small object from the validator's releases bucket. */
+export function readReleaseObject(key: string): Promise<BucketObject> {
+  return readBucketObject(getBucketLocation(), key);
 }
