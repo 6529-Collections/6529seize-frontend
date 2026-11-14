@@ -88,7 +88,7 @@ page search. Public navigation never adds a Validator link.
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
   `/network/wave-score`, `/rep/categories`, `/network/health`,
   `/network/definitions`, `/network/levels`, `/network/health/network-tdh`,
-  `/network/nerd`, `/network/prenodes`, and
+  `/network/nerd`, and
   `/network/tdh/historic-boosts`.
 - Open `Drop Forge`:
   use the standalone row after `About` when the current wallet can access the

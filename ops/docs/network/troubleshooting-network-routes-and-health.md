@@ -13,7 +13,7 @@ metrics.
 - Metrics and references: `/network/health`, `/network/health/network-tdh`,
   `/network/tdh`, `/network/tdh/historic-boosts`, `/network/definitions`,
   `/network/levels`, `/network/xtdh`
-- Saved Prenodes route: `/network/prenodes`
+- Retired Prenodes link: `/network/prenodes` redirects to `/validator`
 - Related live dashboard: `/xtdh`
 
 ## Entry Points
@@ -50,9 +50,8 @@ metrics.
   refresh the route. There is no inline retry button on this page.
 - `/network/health/network-tdh` shows only heading content:
   TDH history data is empty or unavailable. Refresh or retry later.
-- `/network/prenodes` shows a deprecation notice:
-  this is the expected page. Use `Explore 6529 Desktop` to open
-  `/about/6529-apps`; the page no longer requests a Prenodes registry.
+- A saved `/network/prenodes` link opens `/validator`:
+  this is expected. Prenodes were shut down; the 6529 validator replaces them.
 - `/xtdh` shows `Unable to load xTDH stats`:
   use `Retry`. If it keeps failing, refresh the route.
 
@@ -82,5 +81,4 @@ metrics.
 - [Network Activity Feed](feature-network-activity-feed.md)
 - [Health Dashboard](feature-health-dashboard.md)
 - [Network Stats](feature-network-stats.md)
-- [Prenodes Deprecation](feature-prenodes-status.md)
 - [xTDH Network Overview](feature-xtdh-network-overview.md)
