@@ -25,13 +25,10 @@
  */
 
 export {
-  WALLET_FORWARDING_METHODS,
-  WALLET_FORWARDING_VERSION,
   WALLET_REQUEST_TTL_MS,
   type WalletForwardingMethod,
   type WalletRequest,
   type WalletRequestInput,
-  type WalletRequestProblem,
 } from "./shared";
 export { parseWalletRequest } from "./request";
 export { fitsWalletRequestFragment } from "./size";

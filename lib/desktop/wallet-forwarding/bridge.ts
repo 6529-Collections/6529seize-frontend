@@ -64,7 +64,7 @@ export function parseWalletBridgeResponse(
  * whether a request is open, with the short code the browser page also
  * shows. The request id itself never reaches the app page.
  */
-export type WalletBridgeStatus =
+type WalletBridgeStatus =
   | { readonly pending: false }
   | {
       readonly pending: true;

@@ -14,6 +14,7 @@ import {
   setBrowserConnectorStatus,
   takeBrowserConnectorRequest,
 } from "@/services/desktop/browserConnectorSignIn";
+import { markBrowserWalletProfile } from "@/services/desktop/desktopBrowserWallet";
 
 /**
  * Inside 6529 Desktop: receives the browser connector's return link
@@ -89,6 +90,8 @@ export default function DesktopBrowserConnectorBridge() {
         }
         acceptConnection.current(session.address);
         setBrowserConnectorStatus("signed-in");
+        // Offer wallet forwarding to this profile; never fails the sign-in.
+        markBrowserWalletProfile(session.address).catch(() => undefined);
       } catch {
         setBrowserConnectorStatus("failed");
       }

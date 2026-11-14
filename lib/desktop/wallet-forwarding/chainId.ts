@@ -10,7 +10,7 @@ const MAX_CHAIN_ID = BigInt(Number.MAX_SAFE_INTEGER);
  * string, in 1..2^53-1. Strings are read with BigInt, so no value is
  * rounded before the bound is checked.
  */
-export function readChainId(value: unknown): number | null {
+function readChainId(value: unknown): number | null {
   let parsed: bigint | null = null;
   if (typeof value === "number") {
     parsed = Number.isSafeInteger(value) ? BigInt(value) : null;

@@ -1,0 +1,176 @@
+import { serializeTypedData, toHex } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { mainnet, sepolia } from "viem/chains";
+import { desktopBrowserWalletConnector } from "@/wagmiConfig/desktopBrowserWalletConnector";
+
+// Public development key (Hardhat/Anvil account 0); never funded.
+const wallet = privateKeyToAccount(
+  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+);
+const stranger = privateKeyToAccount(
+  "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+);
+
+const typedData = {
+  domain: { name: "6529", version: "1", chainId: 1 },
+  types: {
+    EIP712Domain: [
+      { name: "name", type: "string" },
+      { name: "version", type: "string" },
+      { name: "chainId", type: "uint256" },
+    ],
+    Note: [{ name: "text", type: "string" }],
+  },
+  primaryType: "Note",
+  message: { text: "hello" },
+} as const;
+
+function setup(address: string | null = wallet.address) {
+  const emit = jest.fn();
+  const runRequest = jest.fn();
+  const canForward = jest.fn(() => true);
+  const connector = desktopBrowserWalletConnector({
+    getAddress: () => address,
+    canForward,
+    runRequest,
+  })({
+    chains: [mainnet, sepolia],
+    emitter: { emit },
+  } as never);
+  return { connector, emit, runRequest, canForward };
+}
+
+const request = async (
+  connector: ReturnType<typeof setup>["connector"],
+  method: string,
+  params?: unknown
+) => {
+  const provider = (await connector.getProvider()) as {
+    request: (args: { method: string; params?: unknown }) => Promise<unknown>;
+  };
+  return provider.request({ method, params });
+};
+
+describe("desktopBrowserWalletConnector", () => {
+  it("reports the signed-in address and answers chain questions itself", async () => {
+    const { connector, runRequest } = setup();
+    await expect(connector.connect({})).resolves.toEqual({
+      accounts: [wallet.address],
+      chainId: 1,
+    });
+    await expect(connector.getAccounts()).resolves.toEqual([wallet.address]);
+    await expect(connector.isAuthorized()).resolves.toBe(true);
+    await expect(request(connector, "eth_chainId")).resolves.toBe("0x1");
+    await expect(request(connector, "eth_accounts")).resolves.toEqual([
+      wallet.address,
+    ]);
+    expect(runRequest).not.toHaveBeenCalled();
+  });
+
+  it("switches only between configured chains, locally", async () => {
+    const { connector, emit, runRequest } = setup();
+    await expect(
+      connector.switchChain?.({ chainId: sepolia.id })
+    ).resolves.toBe(sepolia);
+    expect(emit).toHaveBeenCalledWith("change", { chainId: sepolia.id });
+    await expect(connector.getChainId()).resolves.toBe(sepolia.id);
+    await expect(connector.switchChain?.({ chainId: 10 })).rejects.toThrow();
+    expect(runRequest).not.toHaveBeenCalled();
+  });
+
+  it("is not authorized without a browser-wallet profile", async () => {
+    const { connector } = setup(null);
+    await expect(connector.isAuthorized()).resolves.toBe(false);
+    await expect(connector.connect({})).rejects.toMatchObject({ code: 4100 });
+    await expect(
+      request(connector, "personal_sign", [toHex("hi"), wallet.address])
+    ).rejects.toMatchObject({ code: 4100 });
+  });
+
+  it.each([
+    "eth_sendTransaction",
+    "eth_sign",
+    "wallet_sendCalls",
+    "eth_signTypedData_v3",
+    "wallet_addEthereumChain",
+  ])("does not forward %s", async (method) => {
+    const { connector, runRequest } = setup();
+    await expect(request(connector, method, [])).rejects.toMatchObject({
+      code: 4200,
+    });
+    expect(runRequest).not.toHaveBeenCalled();
+  });
+
+  it("forwards a message and returns the signature only if it is the account's", async () => {
+    const { connector, runRequest } = setup();
+    const message = toHex("6529 Action");
+    const signature = await wallet.signMessage({ message: { raw: message } });
+    runRequest.mockResolvedValue({ ok: true, value: signature });
+    await expect(
+      request(connector, "personal_sign", [message, wallet.address])
+    ).resolves.toBe(signature);
+    expect(runRequest).toHaveBeenCalledWith({
+      method: "personal_sign",
+      params: [message, wallet.address],
+      address: wallet.address,
+      chainId: 1,
+    });
+
+    runRequest.mockResolvedValue({
+      ok: true,
+      value: await stranger.signMessage({ message: { raw: message } }),
+    });
+    await expect(
+      request(connector, "personal_sign", [message, wallet.address])
+    ).rejects.toMatchObject({ code: -32603 });
+  });
+
+  it("checks a typed-data signature against the exact request", async () => {
+    const { connector, runRequest } = setup();
+    const params = [wallet.address, serializeTypedData(typedData as never)];
+    const { EIP712Domain: _domain, ...types } = typedData.types;
+    const signature = await wallet.signTypedData({ ...typedData, types });
+    runRequest.mockResolvedValue({ ok: true, value: signature });
+    await expect(
+      request(connector, "eth_signTypedData_v4", params)
+    ).resolves.toBe(signature);
+
+    const other = await wallet.signTypedData({
+      ...typedData,
+      types,
+      message: { text: "other" },
+    });
+    runRequest.mockResolvedValue({ ok: true, value: other });
+    await expect(
+      request(connector, "eth_signTypedData_v4", params)
+    ).rejects.toMatchObject({ code: -32603 });
+  });
+
+  it("refuses in the app what the browser page would refuse", async () => {
+    const { connector, runRequest, canForward } = setup();
+    canForward.mockReturnValue(false);
+    await expect(
+      request(connector, "personal_sign", [toHex("free text"), wallet.address])
+    ).rejects.toMatchObject({ code: 4200 });
+    expect(runRequest).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["rejected", 4001],
+    ["cancelled", 4001],
+    ["not-signed-in", 4100],
+    ["wrong-account", 4100],
+    ["refused", 4200],
+    ["unsupported", 4200],
+    ["invalid", 4200],
+    ["expired", -32603],
+    ["busy", -32603],
+    ["failed", -32603],
+  ])("maps a %s answer to EIP-1193 code %d", async (code, expected) => {
+    const { connector, runRequest } = setup();
+    runRequest.mockResolvedValue({ ok: false, code });
+    await expect(
+      request(connector, "personal_sign", [toHex("hi"), wallet.address])
+    ).rejects.toMatchObject({ code: expected });
+  });
+});

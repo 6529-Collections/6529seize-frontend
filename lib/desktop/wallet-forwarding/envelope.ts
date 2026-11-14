@@ -35,7 +35,7 @@ export interface WalletRequestEnvelope {
   readonly request: WalletRequestInput;
 }
 
-export type WalletEnvelopeProblem =
+type WalletEnvelopeProblem =
   | "missing"
   | "malformed"
   | "wrong-origin"

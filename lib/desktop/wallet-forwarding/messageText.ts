@@ -56,7 +56,7 @@ function isShowableText(text: string): boolean {
     );
 }
 
-export function hexToBytes(hex: string): Uint8Array {
+function hexToBytes(hex: string): Uint8Array {
   const bytes = new Uint8Array((hex.length - 2) / 2);
   for (let i = 0; i < bytes.length; i += 1) {
     bytes[i] = Number.parseInt(hex.slice(2 + i * 2, 4 + i * 2), 16);
