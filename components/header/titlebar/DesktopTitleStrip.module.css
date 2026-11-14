@@ -16,7 +16,8 @@
   background: var(--desktop-titlebar-background, #000);
   /* Inside the height: the Windows caption buttons stop above it. */
   border-bottom: 1px solid rgba(55, 55, 62, 0.95);
-  color: #9a9a9a;
+  /* 11:1 on black for text and icons (WCAG 1.4.3, 1.4.11). */
+  color: #c4c4c4;
   font-size: 12px;
   -webkit-app-region: drag;
   user-select: none;
@@ -31,8 +32,9 @@
   display: flex;
 }
 
+/* Dimmed while the window is inactive, still 6:1 on black. */
 :root[data-desktop-focused="false"] .strip {
-  color: rgb(154 154 154 / 0.6);
+  color: #8f8f8f;
 }
 
 .button {

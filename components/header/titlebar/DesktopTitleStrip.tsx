@@ -26,12 +26,19 @@ const NO_NAVIGATION: NavigationState = {
   canGoBack: false,
   canGoForward: false,
 };
-let navigationState = NO_NAVIGATION;
 
-// The app window's history, from the shell; re-read on each change it reports.
-function subscribeNavigation(onChange: () => void): () => void {
+/**
+ * The app window's history, from the shell: one shared subscription to its
+ * change events, fanned out to every mounted strip, re-read on each change.
+ * Reset when the last strip unmounts, so a remount never shows stale state.
+ */
+let navigationState = NO_NAVIGATION;
+const navigationListeners = new Set<() => void>();
+let stopNavigation: (() => void) | null = null;
+
+function startNavigation(): (() => void) | null {
   const api = getDesktopShellApi();
-  if (!api) return () => undefined;
+  if (!api) return null;
   let active = true;
   const refresh = () => {
     api
@@ -47,7 +54,7 @@ function subscribeNavigation(onChange: () => void): () => void {
             next.canGoForward !== navigationState.canGoForward)
         ) {
           navigationState = next;
-          onChange();
+          navigationListeners.forEach((listener) => listener());
         }
         return undefined;
       })
@@ -58,6 +65,19 @@ function subscribeNavigation(onChange: () => void): () => void {
   return () => {
     active = false;
     api.offNavigationStateChange(refresh);
+  };
+}
+
+function subscribeNavigation(onChange: () => void): () => void {
+  navigationListeners.add(onChange);
+  stopNavigation ??= startNavigation();
+  return () => {
+    navigationListeners.delete(onChange);
+    if (navigationListeners.size === 0) {
+      stopNavigation?.();
+      stopNavigation = null;
+      navigationState = NO_NAVIGATION;
+    }
   };
 }
 
@@ -134,6 +154,7 @@ export default function DesktopTitleStrip() {
   const infoLabel = updateAvailable
     ? t(locale, "desktop.titleStrip.appInfoUpdate")
     : t(locale, "desktop.titleStrip.appInfo");
+  const updater = getDesktopUpdater();
   const backLabel = t(locale, "desktop.titleStrip.back");
   const forwardLabel = t(locale, "desktop.titleStrip.forward");
 
@@ -179,6 +200,9 @@ export default function DesktopTitleStrip() {
         </button>
         {info.version && (
           <span className={styles["version"]}>
+            <span className="tw-sr-only">
+              {t(locale, "desktop.appInfo.version")}{" "}
+            </span>
             {environmentLabel
               ? `${info.version} ${environmentLabel}`
               : info.version}
@@ -200,11 +224,11 @@ export default function DesktopTitleStrip() {
           </dt>
           <dd className="tw-m-0 tw-text-iron-50">{info.environment ?? "-"}</dd>
         </dl>
-        {getDesktopUpdater() && (
+        {updater && (
           <button
             type="button"
             className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            onClick={() => getDesktopUpdater()?.checkUpdates()}
+            onClick={() => updater.checkUpdates()}
           >
             {t(locale, "desktop.appInfo.checkUpdates")}
           </button>

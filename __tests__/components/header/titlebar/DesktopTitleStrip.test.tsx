@@ -124,10 +124,15 @@ describe("DesktopTitleStrip", () => {
     await user.click(back);
     expect(bridges.api.goBack).toHaveBeenCalledTimes(1);
 
+    const readsBefore = bridges.api.getNavigationState.mock.calls.length;
     bridges.navigation.canGoForward = true;
     await act(async () => {
       for (const listener of bridges.navListeners) listener({});
     });
+    // The strip re-reads the history on each change event.
+    expect(bridges.api.getNavigationState.mock.calls.length).toBe(
+      readsBefore + 1
+    );
     expect(forward).toBeEnabled();
     await user.click(forward);
     expect(bridges.api.goForward).toHaveBeenCalledTimes(1);
@@ -167,13 +172,26 @@ describe("DesktopTitleStrip", () => {
     expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(1);
   });
 
-  it("stops listening when unmounted", () => {
+  it("shares one history subscription and starts fresh after unmount", async () => {
     installDesktopShell();
-    const { unmount } = render(<DesktopTitleStrip />);
+    const first = render(<DesktopTitleStrip />);
+    const second = render(<DesktopTitleStrip />);
+    await screen.findAllByText("1.2.3 local");
 
-    unmount();
-
+    expect(bridges.navListeners.size).toBe(1);
+    first.unmount();
+    expect(bridges.navListeners.size).toBe(1);
+    second.unmount();
     expect(bridges.navListeners.size).toBe(0);
     expect(bridges.updateListeners.size).toBe(0);
+  });
+
+  it("labels the version for screen readers", async () => {
+    installDesktopShell();
+    render(<DesktopTitleStrip />);
+
+    expect(await screen.findByText("1.2.3 local")).toHaveTextContent(
+      "Version 1.2.3 local"
+    );
   });
 });
