@@ -55,8 +55,12 @@ Each server reads the bundle once a minute. Only a served pair is kept to
 fall back on: a 404 is never stretched over a later failure (no bundle, then
 an S3 error or a refused bundle, answers 503). Deleting the bundle withdraws
 the list: S3 reads are strongly consistent, so a missing object is a definite
-answer, not a failure, and both routes answer 404 within a minute (plus the
-404's one-minute edge cache) instead of serving the deleted list for an hour.
+answer, not a failure, so servers answer 404 within a minute instead of
+serving the deleted list for an hour. Clients can still receive the deleted
+list from caches: a 200 already stored by CloudFront or an HTTP cache stays
+fresh for up to five minutes. Worst case, a client sees the deleted list for
+up to six minutes after the deletion (one-minute server snapshot plus the
+200's five-minute `max-age`).
 
 There is no redirect (the app refuses redirects) and no password gate.
 Production serves both paths to everyone; on staging they sit behind the
