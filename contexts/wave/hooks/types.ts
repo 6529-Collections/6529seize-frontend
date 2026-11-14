@@ -29,6 +29,13 @@ export interface WaveHistoryGap {
   readonly olderThan: number;
 }
 
+/**
+ * Which edge a history gap fills from: "older" pages back from the gap's
+ * newest edge (a reader arriving from newer drops); "newer" pages forward from
+ * its oldest edge (a reader arriving from older drops, e.g. after a jump).
+ */
+export type WaveHistoryGapDirection = "older" | "newer";
+
 export type WaveMessagesUpdate = Partial<WaveMessages> & {
   key: string;
   /** Atomically settle this pending send with the single full drop in drops. */
