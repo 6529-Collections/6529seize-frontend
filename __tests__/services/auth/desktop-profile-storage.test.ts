@@ -7,6 +7,7 @@ import {
   restartDesktopProfileRestore,
   retryDesktopProfileSave,
 } from "@/services/auth/desktop-profile-storage";
+import { parseRestoredDesktopProfileState } from "@/services/auth/desktop-profile-state";
 import type { DesktopProfileState } from "@/types/desktop-shell";
 import { fakeJwt } from "@/__tests__/helpers/fakeJwt";
 
@@ -93,13 +94,20 @@ describe("desktop profile storage", () => {
     expect(nativeAuth.saveProfiles).not.toHaveBeenCalled();
   });
 
-  it("restores only once even if asked again", async () => {
-    await Promise.all([
-      initializeDesktopProfiles(EMPTY, jest.fn()),
-      initializeDesktopProfiles(EMPTY, jest.fn()),
+  it("restores only once even if asked again, giving every caller the result", async () => {
+    const restore = jest.fn(() => SAVED);
+    const second = jest.fn();
+
+    const results = await Promise.all([
+      initializeDesktopProfiles(EMPTY, restore),
+      initializeDesktopProfiles(EMPTY, second),
     ]);
 
     expect(nativeAuth.restoreProfiles).toHaveBeenCalledTimes(1);
+    expect(restore).toHaveBeenCalledTimes(1);
+    expect(second).not.toHaveBeenCalled();
+    // The caller still mounted compares this with its own page state.
+    expect(results).toEqual([SAVED, SAVED]);
   });
 
   it("saves every change without sending refresh tokens", async () => {
@@ -114,18 +122,28 @@ describe("desktop profile storage", () => {
   it("saves a checksummed address lower-cased, with the active profile kept", async () => {
     await initializeDesktopProfiles(EMPTY, jest.fn());
     const checksummed = "0xAbCdEf0123456789aBcDeF0123456789AbCdEf01";
+    const token = fakeJwt({ sub: checksummed });
 
     persistDesktopProfileAccounts(
-      [{ ...pageAccount, address: checksummed }],
+      [{ ...pageAccount, address: checksummed, jwt: token }],
       checksummed
     );
     await flush();
 
-    expect(nativeAuth.saveProfiles).toHaveBeenCalledWith({
+    const saved = {
       ...SAVED,
-      accounts: [{ ...SAVED.accounts[0], address: checksummed.toLowerCase() }],
+      accounts: [
+        {
+          ...SAVED.accounts[0],
+          address: checksummed.toLowerCase(),
+          jwt: token,
+        },
+      ],
       activeAddress: checksummed.toLowerCase(),
-    });
+    };
+    expect(nativeAuth.saveProfiles).toHaveBeenCalledWith(saved);
+    // What is saved can be restored.
+    expect(parseRestoredDesktopProfileState(saved)).toEqual(saved);
   });
 
   it("never sends the shell an active profile that is not listed", async () => {

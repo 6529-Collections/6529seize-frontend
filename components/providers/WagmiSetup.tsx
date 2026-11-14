@@ -8,7 +8,10 @@ import {
   useMemo,
   useSyncExternalStore,
 } from "react";
-import { DesktopProfileRecoveryContext } from "@/contexts/DesktopProfileRecoveryContext";
+import {
+  DesktopProfileRecoveryContext,
+  DesktopProfileRestoringContext,
+} from "@/contexts/DesktopProfileRecoveryContext";
 import { mainnet, sepolia } from "viem/chains";
 import DeferredWagmiProvider from "./DeferredWagmiProvider";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
@@ -538,6 +541,9 @@ export default function WagmiSetup({
   // Keep this instance local: wallet state must never cross server requests.
   // 6529 Desktop must not reconnect a wallet while running signed out.
   const recoveringDesktopProfiles = useContext(DesktopProfileRecoveryContext);
+  // While the shell restores the saved profiles, stay on the wallet-free
+  // config: the real one is hydrated (and may reconnect) once that settles.
+  const restoringDesktopProfiles = useContext(DesktopProfileRestoringContext);
   const publicWagmiConfig = useMemo(
     () => createPublicWagmiConfig(chains),
     [chains]
@@ -729,8 +735,16 @@ export default function WagmiSetup({
     <AppKitBootstrapContext.Provider value={appKitBootstrapValue}>
       {/* The temporary config must not compete for Wagmi's reconnect lock. */}
       <DeferredWagmiProvider
-        config={currentAdapter?.wagmiConfig ?? publicWagmiConfig}
-        reconnectOnMount={currentAdapter !== null && !recoveringDesktopProfiles}
+        config={
+          restoringDesktopProfiles
+            ? publicWagmiConfig
+            : (currentAdapter?.wagmiConfig ?? publicWagmiConfig)
+        }
+        reconnectOnMount={
+          currentAdapter !== null &&
+          !recoveringDesktopProfiles &&
+          !restoringDesktopProfiles
+        }
       >
         {children}
         {appWalletPasswordModal.modal}

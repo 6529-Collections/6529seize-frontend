@@ -22,7 +22,7 @@ interface SavableAccount {
   readonly authSessionVersion?: "v2" | null | undefined;
 }
 
-let initialization: Promise<void> | null = null;
+let initialization: Promise<DesktopProfileState | undefined> | null = null;
 let initialized = false;
 let unsavedState: DesktopProfileState | null = null;
 let saveAttempt: Promise<void> | null = null;
@@ -107,13 +107,18 @@ export async function restartDesktopProfileRestore(): Promise<void> {
  * a first-run merge. `restore` validates the untrusted result and writes it
  * into page storage before any save is allowed, so start-up never echoes the
  * state back to the shell; if it throws, the restore counts as failed.
+ *
+ * The request is shared: a gate whose effect re-runs (React Strict Mode) or
+ * remounts while it is pending gets the same result. It resolves to the state
+ * `restore` wrote, so the caller that is still mounted compares it with its
+ * own page state.
  */
 export function initializeDesktopProfiles(
   current: DesktopProfileState,
-  restore: (state: unknown) => void
-): Promise<void> {
+  restore: (state: unknown) => DesktopProfileState | undefined
+): Promise<DesktopProfileState | undefined> {
   const nativeAuth = getDesktopNativeAuth();
-  if (!nativeAuth) return Promise.resolve();
+  if (!nativeAuth) return Promise.resolve(undefined);
   initialization ??= restoreDesktopProfiles(nativeAuth, current, restore);
   return initialization;
 }
@@ -121,11 +126,12 @@ export function initializeDesktopProfiles(
 async function restoreDesktopProfiles(
   nativeAuth: DesktopNativeAuth,
   current: DesktopProfileState,
-  restore: (state: unknown) => void
-): Promise<void> {
+  restore: (state: unknown) => DesktopProfileState | undefined
+): Promise<DesktopProfileState | undefined> {
   try {
-    restore(await nativeAuth.restoreProfiles(current));
+    const written = restore(await nativeAuth.restoreProfiles(current));
     initialized = true;
+    return written;
   } catch (error: unknown) {
     initialization = null;
     throw error;

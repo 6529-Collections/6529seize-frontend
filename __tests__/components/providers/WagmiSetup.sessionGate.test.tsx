@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
 import WagmiSetup from "@/components/providers/WagmiSetup";
+import { DesktopProfileRestoringContext } from "@/contexts/DesktopProfileRecoveryContext";
 import {
   hasPersistedWalletSession,
   subscribeToWalletSessionChanges,
@@ -288,6 +289,39 @@ describe("WagmiSetup wallet stack session gate", () => {
       expect(createAppKitAdapter).toHaveBeenCalledWith(
         expect.objectContaining({ isCapacitor: false })
       );
+    } finally {
+      userAgent.mockRestore();
+    }
+  });
+
+  it("waits on the wallet-free config while desktop profiles are restoring", async () => {
+    const userAgent = jest
+      .spyOn(navigator, "userAgent", "get")
+      .mockReturnValue(
+        "Mozilla/5.0 (Windows NT 10.0) 6529-core Electron/41.0.0"
+      );
+    const tree = (restoring: boolean) => (
+      <DesktopProfileRestoringContext.Provider value={restoring}>
+        <WagmiSetup>
+          <ConnectProbe />
+        </WagmiSetup>
+      </DesktopProfileRestoringContext.Provider>
+    );
+    try {
+      const { rerender } = render(tree(true));
+      await waitFor(() =>
+        expect(screen.getByLabelText("Wallet stack status")).toHaveTextContent(
+          "ready"
+        )
+      );
+      // The wallet stack is loaded, but nothing can reconnect yet.
+      expectWalletFreeProvider();
+
+      rerender(tree(false));
+
+      const provider = screen.getByTestId("wagmi-provider");
+      expect(provider).toHaveAttribute("data-config", "wallet");
+      expect(provider).toHaveAttribute("data-reconnect", "true");
     } finally {
       userAgent.mockRestore();
     }
