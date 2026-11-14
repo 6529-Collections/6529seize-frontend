@@ -3,12 +3,64 @@
 import { useCallback, useRef } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { DropSize } from "@/helpers/waves/drop.helpers";
-import { fetchWaveMessages } from "../utils/wave-messages-utils";
+import {
+  fetchNewestWaveMessages,
+  fetchWaveMessages,
+} from "../utils/wave-messages-utils";
 import { reconcileWaveSnapshot } from "../utils/wave-resume";
-import type { WaveDataStoreUpdater, WaveHistoryGap } from "./types";
+import type {
+  WaveDataStoreUpdater,
+  WaveHistoryGap,
+  WaveHistoryGapDirection,
+} from "./types";
 import type { WaveAbortTrigger } from "./useWaveAbortController";
 
 const GAP_PAGE_LIMIT = 50;
+
+const fetchGapPage = async (
+  waveId: string,
+  gap: WaveHistoryGap,
+  direction: WaveHistoryGapDirection,
+  signal: AbortSignal
+): Promise<ApiDrop[] | null> =>
+  direction === "newer"
+    ? (
+        await fetchNewestWaveMessages(
+          waveId,
+          gap.newerThan,
+          GAP_PAGE_LIMIT,
+          signal
+        )
+      ).drops
+    : fetchWaveMessages(waveId, gap.olderThan, signal, undefined, {
+        limit: GAP_PAGE_LIMIT,
+      });
+
+/**
+ * Returns what is left of a gap after one page, undefined when the page does
+ * not belong to the gap, or null when the page exhausted it. Successful empty
+ * pages exhaust the interval; request failures never reach this.
+ */
+const getRemainingHistoryGap = (
+  gap: WaveHistoryGap,
+  serialNos: readonly number[],
+  direction: WaveHistoryGapDirection
+): WaveHistoryGap | null | undefined => {
+  if (serialNos.length === 0) return null;
+  const isFullPage = serialNos.length === GAP_PAGE_LIMIT;
+  if (direction === "newer") {
+    const newest = Math.max(...serialNos);
+    if (newest <= gap.newerThan) return undefined;
+    return isFullPage && newest < gap.olderThan
+      ? { ...gap, newerThan: newest }
+      : null;
+  }
+  const oldest = Math.min(...serialNos);
+  if (oldest >= gap.olderThan) return undefined;
+  return isFullPage && oldest > gap.newerThan
+    ? { ...gap, olderThan: oldest }
+    : null;
+};
 
 export function useWaveHistoryGap({
   getData,
@@ -35,8 +87,12 @@ export function useWaveHistoryGap({
     >()
   );
   const fetchHistoryGap = useCallback(
-    (waveId: string, gap: WaveHistoryGap) => {
-      const key = `${waveId}-gap-${gap.newerThan}-${gap.olderThan}`;
+    (
+      waveId: string,
+      gap: WaveHistoryGap,
+      direction: WaveHistoryGapDirection = "older"
+    ) => {
+      const key = `${waveId}-gap-${gap.newerThan}-${gap.olderThan}-${direction}`;
       const pending = inFlight.current.get(key);
       if (pending && !pending.controller.signal.aborted) return pending.promise;
       const before = getData(waveId);
@@ -44,12 +100,11 @@ export function useWaveHistoryGap({
       const controller = createController(key);
       const promise = (async () => {
         try {
-          const drops = await fetchWaveMessages(
+          const drops = await fetchGapPage(
             waveId,
-            gap.olderThan,
-            controller.signal,
-            undefined,
-            { limit: GAP_PAGE_LIMIT }
+            gap,
+            direction,
+            controller.signal
           );
           if (controller.signal.aborted || drops === null) return null;
           const current = getData(waveId);
@@ -61,16 +116,19 @@ export function useWaveHistoryGap({
             )
           )
             return null;
-          // Successful empty pages exhaust the interval; request failures return null above.
-          const oldest = Math.min(...drops.map((drop) => drop.serial_no));
-          if (drops.length > 0 && oldest >= gap.olderThan) return null;
+          const remaining = getRemainingHistoryGap(
+            gap,
+            drops.map((drop) => drop.serial_no),
+            direction
+          );
+          if (remaining === undefined) return null;
           const historyGaps = current.historyGaps.filter(
             (item) =>
               item.olderThan !== gap.olderThan ||
               item.newerThan !== gap.newerThan
           );
-          if (drops.length === GAP_PAGE_LIMIT && oldest > gap.newerThan) {
-            historyGaps.push({ ...gap, olderThan: oldest });
+          if (remaining) {
+            historyGaps.push(remaining);
           }
           const gapDrops = drops.filter(
             (drop) =>
