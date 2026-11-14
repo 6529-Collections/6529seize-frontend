@@ -12,7 +12,7 @@ import {
   buildWalletRequestFragment,
   walletRequestCode,
   type WalletRequestEnvelope,
-} from "@/lib/desktop/walletForwarding";
+} from "@/lib/desktop/wallet-forwarding";
 
 // Public development keys (Hardhat/Anvil accounts 0 and 1); never funded.
 const shell = privateKeyToAccount(

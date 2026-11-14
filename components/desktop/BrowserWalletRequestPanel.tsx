@@ -21,7 +21,7 @@ import {
   type ParsedWalletRequestFragment,
   walletRequestCode,
   type WalletResult,
-} from "@/lib/desktop/walletForwarding";
+} from "@/lib/desktop/wallet-forwarding";
 import {
   describeWalletRequest,
   type WalletRequestDescription,

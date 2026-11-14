@@ -14,7 +14,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import {
   parseWalletRequest,
   type WalletRequest,
-} from "@/lib/desktop/walletForwarding";
+} from "@/lib/desktop/wallet-forwarding";
 import { describeWalletRequest } from "@/lib/desktop/walletRequestDescribe";
 import { buildCompetitionSignatureMessage } from "@/services/wallet-signatures/competition-signature";
 import {

@@ -40,7 +40,7 @@ import {
 import {
   readWalletMessageText,
   type WalletRequest,
-} from "@/lib/desktop/walletForwarding";
+} from "@/lib/desktop/wallet-forwarding";
 import {
   readWalletMessageFormat,
   type WalletMessageFormat,
