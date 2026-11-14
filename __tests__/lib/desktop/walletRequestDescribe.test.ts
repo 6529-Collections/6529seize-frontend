@@ -304,6 +304,88 @@ describe("describeWalletRequest: refusals", () => {
     });
   });
 
+  describe("signed-messages grant: every signed field is checked", () => {
+    const keyWithNewPrefix = (key: string) =>
+      `0x${"ef".repeat(4)}${key.slice(10)}`;
+    it.each([
+      [
+        "scopes",
+        (m: Record<string, any>) => (m.scopes = "post,edit,delete,react,vote"),
+        "statement-mismatch",
+      ],
+      [
+        "expiry",
+        (m: Record<string, any>) =>
+          (m.expiresAt = String(Number(m.expiresAt) + 86_400)),
+        "statement-mismatch",
+      ],
+      [
+        "device key",
+        (m: Record<string, any>) =>
+          (m.deviceKey = keyWithNewPrefix(m.deviceKey)),
+        "statement-mismatch",
+      ],
+      [
+        "encrypted-messages key",
+        (m: Record<string, any>) =>
+          (m.mlsDeviceKey = keyWithNewPrefix(m.mlsDeviceKey)),
+        "statement-mismatch",
+      ],
+      [
+        "encrypted-messages key removed",
+        (m: Record<string, any>) => (m.mlsDeviceKey = `0x${"00".repeat(32)}`),
+        "statement-mismatch",
+      ],
+      [
+        "suites",
+        (m: Record<string, any>) => (m.ciphersuites = [3, 3]),
+        "statement-mismatch",
+      ],
+      [
+        "issued time beyond the grant lifetime",
+        (m: Record<string, any>) => (m.issuedAt = "1"),
+        "statement-mismatch",
+      ],
+      [
+        "issued time after expiry",
+        (m: Record<string, any>) =>
+          (m.issuedAt = String(Number(m.expiresAt) + 60)),
+        "statement-mismatch",
+      ],
+      [
+        "wallet",
+        (m: Record<string, any>) => (m.wallet = OTHER),
+        "wrong-wallet",
+      ],
+      [
+        "origin",
+        (m: Record<string, any>) => (m.origin = "6529.io"),
+        "wrong-origin",
+      ],
+    ])("refuses a changed %s", async (_label, change, refusal) => {
+      const request = await tamper(appGrant(), (json) => change(json.message));
+      expect(describeWalletRequest(request, ORIGIN)).toEqual({
+        ok: false,
+        refusal,
+      });
+    });
+
+    it("shows an issued time within the lifetime as signed, in the details", async () => {
+      const request = await tamper(appGrant(), (json) => {
+        json.message.issuedAt = String(Number(json.message.issuedAt) - 60);
+      });
+      const result = describeWalletRequest(request, ORIGIN);
+      expect(result.ok).toBe(true);
+      if (!result.ok || result.value.kind !== "typedData") return;
+      const issued = result.value.details.find((d) => d.label === "issuedAt");
+      expect(issued?.value).toBe(
+        String(
+          Number((appGrant().message as { issuedAt: bigint }).issuedAt) - 60
+        )
+      );
+    });
+  });
+
   it("refuses Memes submissions for another wallet or origin", async () => {
     expect(
       describeWalletRequest(await typedRequest(memes(OTHER)), ORIGIN)

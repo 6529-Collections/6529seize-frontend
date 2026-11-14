@@ -276,7 +276,7 @@ const needsNetwork = (request: Request, chainId: number | undefined) =>
   chainId !== request.chainId;
 
 /** Ask the wallet for exactly what the request describes. */
-async function signRequest(
+function signRequest(
   request: Request,
   signMessage: ReturnType<typeof useSignMessage>["signMessageAsync"],
   signTypedData: ReturnType<typeof useSignTypedData>["signTypedDataAsync"]

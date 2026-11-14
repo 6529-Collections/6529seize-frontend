@@ -158,7 +158,7 @@ function flatten(value: Json, prefix = ""): WalletRequestDetail[] {
     const label = prefix ? `${prefix}.${key}` : key;
     if (isRecord(item)) return flatten(item, label);
     const text = Array.isArray(item)
-      ? item.map((entry) => String(entry)).join(", ")
+      ? item.map(String).join(", ")
       : String(item);
     return [{ label, value: text }];
   });

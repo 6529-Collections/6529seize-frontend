@@ -78,10 +78,12 @@ async function fragmentFor(
   signer = shell
 ): Promise<string> {
   const bytes = new TextEncoder().encode(JSON.stringify(value));
-  return buildWalletRequestFragment(
+  const fragment = buildWalletRequestFragment(
     bytes,
     await signer.signMessage({ message: { raw: bytes } })
   );
+  if (fragment === null) throw new Error("fragment too large");
+  return fragment;
 }
 
 const returnedData = () => {
