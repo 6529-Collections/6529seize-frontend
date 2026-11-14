@@ -6,10 +6,9 @@ import {
   type SignedListSnapshot,
 } from "@/lib/validator-page/feedResponse";
 import {
-  FEED_OBJECT_KEY,
-  FEED_SIGNATURE_OBJECT_KEY,
   readBucketObject,
   type BucketLocation,
+  type BucketObject,
 } from "@/lib/validator-page/releasesBucket";
 
 /**
@@ -17,11 +16,30 @@ import {
  * `/desktop/releases.json.sig` the way the validator's feed is. The site does
  * not check the signature (the app does, with its built-in key), but it never
  * serves a list without one.
+ *
+ * The publisher uploads the list and its signature together as ONE object,
+ * `feed/releases.bundle.json`:
+ *
+ *     {"version":1,"list":"<base64>","signature":"<base64>"}
+ *
+ * `list` and `signature` are standard padded base64 of the exact bytes the
+ * two routes serve. One PUT replaces both at once, so every read is a pair
+ * the publisher wrote together.
  */
+export const DESKTOP_BUNDLE_OBJECT_KEY = "feed/releases.bundle.json";
+
 const DEFAULT_REGION = "us-east-1";
+const BUNDLE_VERSION = 1;
+// What 6529 Desktop accepts; anything larger is refused rather than served.
+const MAX_LIST_BYTES = 56 * 1024;
+const MAX_SIGNATURE_BYTES = 1024;
+const BUNDLE_KEYS = ["list", "signature", "version"];
+// The standard alphabet with padding; the length and the round trip in
+// decodePart make it strict and canonical.
+const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
 const SNAPSHOT_TTL_MS = 60 * 1000;
-// After a bucket error the last good pair stays in use this long, and the
-// bucket is asked again after ERROR_RETRY_MS.
+// After a bucket error or a malformed bundle the last good pair stays in use
+// this long, and the bucket is asked again after ERROR_RETRY_MS.
 const STALE_IF_ERROR_MS = 60 * 60 * 1000;
 const ERROR_RETRY_MS = 10 * 1000;
 
@@ -41,18 +59,78 @@ function failed(reason: string): SignedListSnapshot {
   return { state: "error", feed: null, signature: null };
 }
 
+/** Strict, canonical base64 of 1 to `maxBytes` bytes; null otherwise. */
+function decodePart(value: unknown, maxBytes: number): Buffer | null {
+  if (
+    typeof value !== "string" ||
+    value.length === 0 ||
+    value.length > Math.ceil(maxBytes / 3) * 4 ||
+    value.length % 4 !== 0 ||
+    !BASE64.test(value)
+  ) {
+    return null;
+  }
+  const bytes = Buffer.from(value, "base64");
+  return bytes.byteLength <= maxBytes && bytes.toString("base64") === value
+    ? bytes
+    : null;
+}
+
+type Bundle = { readonly list: Buffer; readonly signature: Buffer };
+
+/** The bundle's two parts, or why it is refused. */
+function parseBundle(body: Uint8Array): Bundle | string {
+  let json: unknown;
+  try {
+    json = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(body));
+  } catch {
+    return "the bundle is not JSON";
+  }
+  if (
+    typeof json !== "object" ||
+    json === null ||
+    Array.isArray(json) ||
+    Object.keys(json).sort().join() !== BUNDLE_KEYS.join()
+  ) {
+    return "the bundle does not hold exactly version, list and signature";
+  }
+  const record = json as Record<string, unknown>;
+  if (record["version"] !== BUNDLE_VERSION) {
+    return "the bundle's version is not 1";
+  }
+  const list = decodePart(record["list"], MAX_LIST_BYTES);
+  const signature = decodePart(record["signature"], MAX_SIGNATURE_BYTES);
+  if (!list || !signature) {
+    return "the bundle's list or signature is not valid base64 of an accepted size";
+  }
+  return { list, signature };
+}
+
 /**
  * Names the pair by its content, so every server answers the same name for
  * the same list and signature. The list's length goes first, so moving bytes
- * between the two objects changes the name.
+ * between the two parts changes the name.
  */
-function pairIdOf(list: Uint8Array, signature: Uint8Array): string {
+function pairIdOf({ list, signature }: Bundle): string {
   return createHash("sha256")
     .update(`${list.byteLength}\n`)
     .update(list)
     .update(signature)
     .digest("hex")
     .slice(0, 32);
+}
+
+function part(
+  bytes: Buffer,
+  etag: string,
+  lastModified: string | null
+): Extract<BucketObject, { state: "found" }> {
+  return {
+    state: "found",
+    body: new Uint8Array(bytes),
+    etag,
+    lastModified,
+  };
 }
 
 function getLocation(): BucketLocation | null {
@@ -72,27 +150,23 @@ async function readPair(
   if (!location) {
     return MISSING;
   }
-  const [list, signature] = await Promise.all([
-    readBucketObject(location, FEED_OBJECT_KEY),
-    readBucketObject(location, FEED_SIGNATURE_OBJECT_KEY),
-  ]);
-  if (list.state === "error") {
-    return failed(list.reason);
+  const stored = await readBucketObject(location, DESKTOP_BUNDLE_OBJECT_KEY);
+  if (stored.state === "error") {
+    return failed(stored.reason);
   }
-  if (signature.state === "error") {
-    return failed(signature.reason);
-  }
-  if (list.state === "missing") {
+  if (stored.state === "missing") {
     return MISSING;
   }
-  if (signature.state === "missing") {
-    return failed("the list has no signature");
+  const bundle = parseBundle(stored.body);
+  if (typeof bundle === "string") {
+    return failed(bundle);
   }
+  const pairId = pairIdOf(bundle);
   return {
     state: "ok",
-    feed: list,
-    signature,
-    pairId: pairIdOf(list.body, signature.body),
+    feed: part(bundle.list, `"${pairId}-list"`, stored.lastModified),
+    signature: part(bundle.signature, `"${pairId}-sig"`, stored.lastModified),
+    pairId,
   };
 }
 
@@ -107,10 +181,7 @@ let current: Entry | null = null;
 let lastGood: Entry | null = null;
 let pending: Promise<SignedListSnapshot> | null = null;
 
-/**
- * The list and its signature, read together so they always match, and
- * reused for a minute.
- */
+/** The pair, from one read of the bundle, reused for a minute. */
 async function getSnapshot(): Promise<SignedListSnapshot> {
   const location = getLocation();
   const source = location ? `${location.region}/${location.bucket}` : "";
