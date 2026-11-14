@@ -134,6 +134,19 @@ describe("HeaderSearchButton", () => {
     expect(await screen.findByTestId("modal")).toBeInTheDocument();
   });
 
+  it("opens site search, not the wave search, on a site-search request in a wave", async () => {
+    useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
+    const wave = { id: "wave-1", name: "Design Wave" } as any;
+    render(<HeaderSearchButton wave={wave} />);
+
+    act(() => {
+      requestSiteSearch();
+    });
+
+    expect(await screen.findByTestId("modal")).toBeInTheDocument();
+    expect(screen.queryByTestId("wave-search-modal")).not.toBeInTheDocument();
+  });
+
   it("uses a stronger icon stroke when app mode is true", () => {
     useDeviceInfoMock.mockReturnValue({ isApp: true } as any);
     render(<HeaderSearchButton wave={null} />);

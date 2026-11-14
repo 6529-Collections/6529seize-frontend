@@ -28,6 +28,9 @@ interface PendingRequest {
 }
 
 let pending: PendingRequest | null = null;
+// The latest start; a cancel or a newer start invalidates an earlier one
+// that is still waiting for the shell's info.
+let operation = 0;
 let status: BrowserConnectorStatus = "idle";
 const listeners = new Set<() => void>();
 
@@ -64,6 +67,7 @@ export function resetFinishedBrowserConnectorStatus(): void {
 
 /** Stop waiting for the browser (the user cancelled). */
 export function cancelBrowserConnectorSignIn(): void {
+  operation += 1;
   clearPending();
   setBrowserConnectorStatus("idle");
 }
@@ -78,7 +82,13 @@ export async function startBrowserConnectorSignIn(): Promise<void> {
   if (!api) {
     throw new Error("The browser connector is available only in 6529 Desktop");
   }
+  operation += 1;
+  const current = operation;
   const info = await api.getInfo();
+  // Cancelled, or replaced by a newer start, while the shell answered.
+  // Everything below runs without another await, so this one check covers
+  // creating the request and opening the browser.
+  if (current !== operation) return;
   const scheme = normalizeDesktopScheme(info.scheme);
   if (!scheme) {
     throw new Error("6529 Desktop did not report its link scheme");
@@ -127,6 +137,7 @@ export function takeBrowserConnectorRequest(requestId: string): boolean {
 
 /** @api Resets the module state between tests. */
 export function __resetBrowserConnectorForTests(): void {
+  operation += 1;
   clearPending();
   status = "idle";
   listeners.clear();

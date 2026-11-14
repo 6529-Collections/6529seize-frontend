@@ -3960,12 +3960,14 @@ export const EN_US_ROOT_MESSAGES = {
   "desktop.appInfo.environment": "Environment",
   "desktop.appInfo.checkUpdates": "Check for updates",
   "desktopConnect.title": "Connect a wallet",
-  "desktopConnect.walletConnect": "Scan with a mobile wallet",
+  "desktopConnect.intro":
+    "6529 Desktop cannot use browser extensions directly. Choose how to connect:",
+  "desktopConnect.walletConnect": "Scan with a phone wallet",
   "desktopConnect.walletConnectDescription":
-    "Use WalletConnect with the wallet app on your phone.",
+    "WalletConnect: scan a QR code with the wallet app on your phone.",
   "desktopConnect.browserWallet": "Use a browser wallet",
   "desktopConnect.browserWalletDescription":
-    "Sign in with a wallet extension in your web browser.",
+    "MetaMask, Rabby and other browser extensions. Opens your web browser.",
   "desktopConnect.status.waiting":
     "Finish signing in in your browser. This waits for two minutes.",
   "desktopConnect.status.signingIn": "Signing in…",
