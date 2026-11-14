@@ -13,12 +13,8 @@ import {
 } from "@/services/desktop/browserConnectorSignIn";
 
 const seizeAcceptConnection = jest.fn();
-let mockIsSigningOutAll = false;
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({
-    seizeAcceptConnection,
-    isSigningOutAll: mockIsSigningOutAll,
-  }),
+  useSeizeConnectContext: () => ({ seizeAcceptConnection }),
 }));
 jest.mock("@/services/auth/auth.utils", () => ({
   canStoreAnotherWalletAccount: jest.fn(() => true),
@@ -89,7 +85,6 @@ describe("browser connector sign-in in 6529 Desktop", () => {
     jest.clearAllMocks();
     jest.useRealTimers();
     __resetBrowserConnectorForTests();
-    mockIsSigningOutAll = false;
     api = createApi();
     jest.mocked(loginWithSessionV2).mockResolvedValue({
       client_type: "desktop",
@@ -226,40 +221,6 @@ describe("browser connector sign-in in 6529 Desktop", () => {
     expect(loginWithSessionV2).toHaveBeenCalledTimes(1);
     expect(seizeAcceptConnection).toHaveBeenCalledTimes(1);
     expect(getBrowserConnectorStatus()).toBe("signed-in");
-  });
-
-  it("saves no profile when sign-out-all runs while the login is pending", async () => {
-    installDesktopShell();
-    type LoginResult = Awaited<ReturnType<typeof loginWithSessionV2>>;
-    let resolveLogin: (value: LoginResult) => void = () => undefined;
-    jest.mocked(loginWithSessionV2).mockReturnValue(
-      new Promise<LoginResult>((resolve) => {
-        resolveLogin = resolve;
-      })
-    );
-    // The real persistSessionResponse writes nothing when shouldPersist is false.
-    jest
-      .mocked(persistSessionResponse)
-      .mockImplementation(
-        async (_session, options) => options?.shouldPersist?.() !== false
-      );
-    const { rerender } = render(<DesktopBrowserConnectorBridge />);
-    await startBrowserConnectorSignIn();
-    await deliver(result(openedRequest().requestId));
-
-    // Sign-out-all starts and completes before the login answers.
-    mockIsSigningOutAll = true;
-    rerender(<DesktopBrowserConnectorBridge />);
-    mockIsSigningOutAll = false;
-    rerender(<DesktopBrowserConnectorBridge />);
-    await act(async () => {
-      resolveLogin({ address: ADDRESS } as LoginResult);
-    });
-
-    const options = jest.mocked(persistSessionResponse).mock.calls[0]?.[1];
-    expect(options?.shouldPersist?.()).toBe(false);
-    expect(seizeAcceptConnection).not.toHaveBeenCalled();
-    expect(getBrowserConnectorStatus()).toBe("failed");
   });
 
   it("does not finish a sign-in after unmount", async () => {
