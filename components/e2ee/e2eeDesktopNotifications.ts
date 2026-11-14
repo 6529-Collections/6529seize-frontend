@@ -1,5 +1,6 @@
 import type { E2eeConversation } from "@/lib/e2ee/types";
-import { detectE2eePlatform } from "./e2eePlatform";
+import { getDesktopNotifications } from "@/helpers/desktop-shell";
+import type { DesktopNotifications } from "@/types/desktop-shell";
 
 /**
  * Local desktop notifications for encrypted chats (6529 Desktop only). Like
@@ -8,39 +9,16 @@ import { detectE2eePlatform } from "./e2eePlatform";
  * nothing about the chat leaves it; a click opens the chat.
  */
 
-interface DesktopNotificationTarget {
-  readonly targetAddress?: string | null;
-  readonly targetProfileId?: string | null;
-  readonly targetProfileHandle?: string | null;
-}
-
-/** The native notification bridge 6529 Desktop's preload exposes. */
-interface DesktopNotificationsBridge {
-  showNotification(
-    id: number,
-    pfp: string,
-    title: string,
-    body: string,
-    redirectPath: string,
-    target?: DesktopNotificationTarget
-  ): void;
-}
-
-/** The desktop app's notification bridge, or null in a browser or phone app. */
-export function getDesktopNotificationsBridge(): DesktopNotificationsBridge | null {
-  if (detectE2eePlatform() !== "desktop") {
-    return null;
-  }
-  const candidate = (globalThis as { notifications?: unknown }).notifications;
-  if (
-    typeof candidate === "object" &&
-    candidate !== null &&
-    typeof (candidate as Partial<DesktopNotificationsBridge>)
-      .showNotification === "function"
-  ) {
-    return candidate as DesktopNotificationsBridge;
-  }
-  return null;
+/**
+ * The desktop app's notification bridge, or null in a browser or phone app,
+ * or when the desktop app exposes no notifications. Read through the
+ * desktop-shell helper like every other desktop bridge.
+ */
+export function getDesktopNotificationsBridge(): DesktopNotifications | null {
+  const notifications = getDesktopNotifications();
+  return typeof notifications?.showNotification === "function"
+    ? notifications
+    : null;
 }
 
 /** The newest incoming notification cursor per chat that was notified or seen. */
