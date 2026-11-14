@@ -2,8 +2,11 @@
 
 import {
   ArrowLeftIcon,
+  ArrowPathIcon,
   ArrowRightIcon,
+  CheckIcon,
   InformationCircleIcon,
+  LinkIcon,
 } from "@heroicons/react/24/outline";
 import {
   type KeyboardEvent,
@@ -12,6 +15,8 @@ import {
   useSyncExternalStore,
 } from "react";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { publicEnv } from "@/config/env";
+import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import { getDesktopShellApi, getDesktopUpdater } from "@/helpers/desktop-shell";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -20,7 +25,21 @@ import styles from "./DesktopTitleStrip.module.css";
 interface AppInfo {
   readonly version: string | null;
   readonly environment: string | null;
+  /** The host drew the version before first paint (`--desktop-app-version`). */
+  readonly drawnByHost: boolean;
 }
+
+type CopyStatus = "idle" | "copied" | "failed";
+
+/** The page's public address (the app itself runs on a local server). */
+const getPublicLink = (): string => {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("reload");
+  return new URL(
+    `${url.pathname}${url.search}${url.hash}`,
+    publicEnv.BASE_ENDPOINT
+  ).href;
+};
 
 interface NavigationState {
   readonly canGoBack: boolean;
@@ -45,18 +64,24 @@ function startNavigation(): (() => void) | null {
   const api = getDesktopShellApi();
   if (!api) return null;
   let active = true;
+  // Reads can overlap and finish out of order; only a newer one commits.
+  let lastRead = 0;
+  let committedRead = 0;
   const refresh = () => {
+    lastRead += 1;
+    const read = lastRead;
     api
       .getNavigationState()
       .then((state) => {
+        if (!active || read <= committedRead) return undefined;
+        committedRead = read;
         const next = {
           canGoBack: state.canGoBack === true,
           canGoForward: state.canGoForward === true,
         };
         if (
-          active &&
-          (next.canGoBack !== navigationState.canGoBack ||
-            next.canGoForward !== navigationState.canGoForward)
+          next.canGoBack !== navigationState.canGoBack ||
+          next.canGoForward !== navigationState.canGoForward
         ) {
           navigationState = next;
           navigationListeners.forEach((listener) => listener());
@@ -133,10 +158,13 @@ const readText = (value: unknown): string | null =>
  */
 export default function DesktopTitleStrip() {
   const locale = useBrowserLocale();
+  const { globalRefresh } = useGlobalRefresh();
   const [info, setInfo] = useState<AppInfo>({
     version: null,
     environment: null,
+    drawnByHost: false,
   });
+  const [copyStatus, setCopyStatus] = useState<CopyStatus>("idle");
   const navigation = useSyncExternalStore(
     subscribeNavigation,
     getNavigation,
@@ -157,6 +185,10 @@ export default function DesktopTitleStrip() {
         setInfo({
           version: readText(appInfo["app_version"]),
           environment: readText(appInfo.environment),
+          drawnByHost:
+            getComputedStyle(document.documentElement)
+              .getPropertyValue("--desktop-app-version")
+              .trim() !== "",
         });
       })
       .catch(() => undefined);
@@ -178,6 +210,25 @@ export default function DesktopTitleStrip() {
     };
   }, []);
 
+  // The copy result shows briefly, then the button reads "Copy link" again.
+  useEffect(() => {
+    if (copyStatus === "idle") return undefined;
+    const timer = setTimeout(() => setCopyStatus("idle"), 2_000);
+    return () => clearTimeout(timer);
+  }, [copyStatus]);
+
+  const copyLink = () => {
+    const clipboard = globalThis.navigator?.clipboard;
+    if (!clipboard) {
+      setCopyStatus("failed");
+      return;
+    }
+    clipboard.writeText(getPublicLink()).then(
+      () => setCopyStatus("copied"),
+      () => setCopyStatus("failed")
+    );
+  };
+
   const environmentLabel =
     info.environment && info.environment !== "production"
       ? info.environment
@@ -188,9 +239,25 @@ export default function DesktopTitleStrip() {
   const updater = getDesktopUpdater();
   const backLabel = t(locale, "desktop.titleStrip.back");
   const forwardLabel = t(locale, "desktop.titleStrip.forward");
+  const refreshLabel = t(locale, "desktop.titleStrip.refresh");
+  const copyLabels: Record<CopyStatus, string> = {
+    idle: t(locale, "desktop.titleStrip.copyLink"),
+    copied: t(locale, "desktop.titleStrip.linkCopied"),
+    failed: t(locale, "desktop.titleStrip.copyFailed"),
+  };
+  const versionText =
+    info.version && environmentLabel
+      ? `${info.version} ${environmentLabel}`
+      : info.version;
 
-  // Toolbar items in order: back, forward, app info (always available).
-  const enabled = [navigation.canGoBack, navigation.canGoForward, true];
+  // Toolbar items in order: back, forward, refresh, copy link, app info.
+  const enabled = [
+    navigation.canGoBack,
+    navigation.canGoForward,
+    true,
+    true,
+    true,
+  ];
   // One tab stop: the last focused item, or the first available one if that
   // item has become unavailable.
   const tabStop = enabled[activeItem] ? activeItem : enabled.indexOf(true);
@@ -252,9 +319,33 @@ export default function DesktopTitleStrip() {
         <button
           type="button"
           className={styles["button"]}
+          aria-label={refreshLabel}
+          title={refreshLabel}
+          {...itemProps(2)}
+          onClick={globalRefresh}
+        >
+          <ArrowPathIcon aria-hidden="true" width={16} height={16} />
+        </button>
+        <button
+          type="button"
+          className={styles["button"]}
+          aria-label={copyLabels[copyStatus]}
+          title={copyLabels[copyStatus]}
+          {...itemProps(3)}
+          onClick={copyLink}
+        >
+          {copyStatus === "copied" ? (
+            <CheckIcon aria-hidden="true" width={16} height={16} />
+          ) : (
+            <LinkIcon aria-hidden="true" width={16} height={16} />
+          )}
+        </button>
+        <button
+          type="button"
+          className={styles["button"]}
           aria-label={infoLabel}
           title={infoLabel}
-          {...itemProps(2)}
+          {...itemProps(4)}
           onClick={() => setShowInfo(true)}
         >
           <InformationCircleIcon aria-hidden="true" width={16} height={16} />
@@ -262,17 +353,22 @@ export default function DesktopTitleStrip() {
             <span className={styles["updateDot"]} aria-hidden="true" />
           )}
         </button>
-        {info.version && (
-          <span className={styles["version"]}>
-            <span className="tw-sr-only">
-              {t(locale, "desktop.appInfo.version")}{" "}
-            </span>
-            {environmentLabel
-              ? `${info.version} ${environmentLabel}`
-              : info.version}
+        {/* Always in the strip: the host can draw the version into it before
+            first paint; otherwise the reported version fades in. */}
+        <span className={styles["version"]}>
+          <span className="tw-sr-only">
+            {t(locale, "desktop.appInfo.version")}{" "}
           </span>
-        )}
+          {versionText && !info.drawnByHost ? (
+            <span className={styles["versionText"]}>{versionText}</span>
+          ) : (
+            <span className={styles["hostVersion"]} />
+          )}
+        </span>
       </div>
+      <output aria-live="polite" className="tw-sr-only">
+        {copyStatus === "idle" ? "" : copyLabels[copyStatus]}
+      </output>
       <MobileWrapperDialog
         isOpen={showInfo}
         title={t(locale, "desktop.appInfo.title")}

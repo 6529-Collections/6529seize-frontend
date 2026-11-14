@@ -1,8 +1,13 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DesktopTitleStrip from "@/components/header/titlebar/DesktopTitleStrip";
+
+const globalRefresh = jest.fn();
+jest.mock("@/contexts/RefreshContext", () => ({
+  useGlobalRefresh: () => ({ globalRefresh, refreshKey: 0 }),
+}));
 
 type Listener = (event: unknown, payload?: unknown) => void;
 
@@ -122,9 +127,9 @@ describe("DesktopTitleStrip", () => {
       "aria-disabled",
       "true"
     );
-    // One tab stop, on the only available item.
+    // One tab stop, on the first available item.
     expect(tabStops()).toEqual([
-      screen.getByRole("button", { name: "App info" }),
+      screen.getByRole("button", { name: "Refresh" }),
     ]);
     expect(bridges.api.getInfo).not.toHaveBeenCalled();
     expect(bridges.api.getNavigationState).not.toHaveBeenCalled();
@@ -195,6 +200,8 @@ describe("DesktopTitleStrip", () => {
       return {
         back: screen.getByRole("button", { name: "Back" }),
         forward: screen.getByRole("button", { name: "Forward" }),
+        refresh: screen.getByRole("button", { name: "Refresh" }),
+        copy: screen.getByRole("button", { name: "Copy link" }),
         info: screen.getByRole("button", { name: "App info" }),
       };
     };
@@ -221,11 +228,15 @@ describe("DesktopTitleStrip", () => {
 
     it("moves with Left/Right (wrapping) and Home/End", async () => {
       const user = userEvent.setup();
-      const { back, forward, info } = await renderReady();
+      const { back, forward, refresh, copy, info } = await renderReady();
       back.focus();
 
       await user.keyboard("{ArrowRight}");
       expect(forward).toHaveFocus();
+      await user.keyboard("{ArrowRight}");
+      expect(refresh).toHaveFocus();
+      await user.keyboard("{ArrowRight}");
+      expect(copy).toHaveFocus();
       await user.keyboard("{ArrowRight}");
       expect(info).toHaveFocus();
       await user.keyboard("{ArrowRight}");
@@ -240,14 +251,14 @@ describe("DesktopTitleStrip", () => {
 
     it("skips unavailable buttons but keeps them discoverable", async () => {
       const user = userEvent.setup();
-      const { back, forward, info } = await renderReady({
+      const { back, forward, refresh } = await renderReady({
         canGoBack: true,
         canGoForward: false,
       });
       back.focus();
 
       await user.keyboard("{ArrowRight}");
-      expect(info).toHaveFocus();
+      expect(refresh).toHaveFocus();
       await user.keyboard("{ArrowLeft}");
       expect(back).toHaveFocus();
       // Still in the accessibility tree, announced as unavailable.
@@ -256,7 +267,7 @@ describe("DesktopTitleStrip", () => {
     });
 
     it("moves the tab stop off a button that becomes unavailable", async () => {
-      const { back, info } = await renderReady({
+      const { back, refresh } = await renderReady({
         canGoBack: true,
         canGoForward: false,
       });
@@ -267,7 +278,7 @@ describe("DesktopTitleStrip", () => {
         for (const listener of bridges.navListeners) listener({});
       });
 
-      expect(tabStops()).toEqual([info]);
+      expect(tabStops()).toEqual([refresh]);
     });
 
     it("leaves arrow keys alone inside the app-info dialog", async () => {
@@ -332,8 +343,145 @@ describe("DesktopTitleStrip", () => {
     installDesktopShell();
     render(<DesktopTitleStrip />);
 
-    expect(await screen.findByText("1.2.3 local")).toHaveTextContent(
-      "Version 1.2.3 local"
+    const version = await screen.findByText("1.2.3 local");
+    expect(version.parentElement).toHaveTextContent("Version 1.2.3 local");
+  });
+
+  it("fades the reported version in when the host did not draw it", async () => {
+    installDesktopShell();
+    render(<DesktopTitleStrip />);
+
+    expect(await screen.findByText("1.2.3 local")).toHaveClass("versionText");
+    expect(css).toMatch(
+      /prefers-reduced-motion: no-preference[^@]*\.versionText\s*\{\s*animation:/
     );
+  });
+
+  it("keeps the version the host drew before first paint", async () => {
+    // jsdom does not compute custom properties; the host sets this one.
+    const realGetComputedStyle = window.getComputedStyle;
+    const computed = jest
+      .spyOn(window, "getComputedStyle")
+      .mockImplementation((element, pseudo) => {
+        const style = realGetComputedStyle(element, pseudo);
+        if (element !== document.documentElement) return style;
+        return {
+          ...style,
+          getPropertyValue: (name: string) =>
+            name === "--desktop-app-version"
+              ? '"1.2.3 local"'
+              : style.getPropertyValue(name),
+        } as CSSStyleDeclaration;
+      });
+    try {
+      installDesktopShell();
+      const { container } = render(<DesktopTitleStrip />);
+      await waitFor(() => expect(bridges.api.getInfo).toHaveBeenCalled());
+      await act(async () => undefined);
+
+      // No second copy appears (or fades in) once the app reports it.
+      expect(screen.queryByText("1.2.3 local")).not.toBeInTheDocument();
+      expect(container.querySelector(".hostVersion")).not.toBeNull();
+      expect(css).toMatch(
+        /\.hostVersion::after\s*\{\s*content:\s*var\(--desktop-app-version, ""\);/
+      );
+    } finally {
+      computed.mockRestore();
+    }
+  });
+
+  it("ignores an older history read that finishes after a newer one", async () => {
+    installDesktopShell();
+    const reads: Array<(state: unknown) => void> = [];
+    bridges.api.getNavigationState.mockImplementation(
+      () => new Promise((resolve) => reads.push(resolve)) as never
+    );
+    render(<DesktopTitleStrip />);
+    // A change event starts a second read while the first is pending.
+    act(() => {
+      for (const listener of bridges.navListeners) listener({});
+    });
+    expect(reads).toHaveLength(2);
+
+    await act(async () => {
+      reads[1]?.({ canGoBack: false, canGoForward: true });
+    });
+    await act(async () => {
+      reads[0]?.({ canGoBack: true, canGoForward: false });
+    });
+
+    expect(screen.getByRole("button", { name: "Back" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
+    expect(screen.getByRole("button", { name: "Forward" })).not.toHaveAttribute(
+      "aria-disabled"
+    );
+  });
+
+  it("refreshes the page content", async () => {
+    const user = userEvent.setup();
+    installDesktopShell();
+    render(<DesktopTitleStrip />);
+
+    await user.click(screen.getByRole("button", { name: "Refresh" }));
+
+    expect(globalRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  describe("copy link", () => {
+    const writeText = jest.fn();
+    // After userEvent.setup(), which installs its own clipboard.
+    const setupWithClipboard = () => {
+      const user = userEvent.setup();
+      Object.defineProperty(navigator, "clipboard", {
+        configurable: true,
+        value: { writeText },
+      });
+      return user;
+    };
+
+    beforeEach(() => {
+      writeText.mockReset();
+      window.history.replaceState({}, "", "/waves/abc?reload=true&tab=1#drop");
+    });
+
+    afterEach(() => {
+      Reflect.deleteProperty(navigator, "clipboard");
+      window.history.replaceState({}, "", "/");
+    });
+
+    it("copies the page's public link, not the local server's", async () => {
+      const user = setupWithClipboard();
+      writeText.mockResolvedValue(undefined);
+      installDesktopShell();
+      render(<DesktopTitleStrip />);
+
+      await user.click(screen.getByRole("button", { name: "Copy link" }));
+
+      expect(writeText).toHaveBeenCalledWith(
+        "https://test.6529.io/waves/abc?tab=1#drop"
+      );
+      expect(
+        await screen.findByRole("button", { name: "Link copied" })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("status")).toHaveTextContent("Link copied");
+    });
+
+    it("says when the link could not be copied", async () => {
+      const user = setupWithClipboard();
+      writeText.mockRejectedValue(new Error("denied"));
+      installDesktopShell();
+      render(<DesktopTitleStrip />);
+
+      await user.click(screen.getByRole("button", { name: "Copy link" }));
+
+      expect(
+        await screen.findByRole("button", { name: "Could not copy the link" })
+      ).toBeInTheDocument();
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "Could not copy the link"
+      );
+    });
   });
 });

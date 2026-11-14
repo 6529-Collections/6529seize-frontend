@@ -83,3 +83,28 @@
 .version {
   white-space: nowrap;
 }
+
+/* The host can draw the version before first paint: it sets
+   --desktop-app-version (a CSS string such as "1.4.0" or "1.4.0 staging")
+   with the other title bar variables, so the text never pops in. */
+.hostVersion::after {
+  content: var(--desktop-app-version, "");
+}
+
+/* A host that does not set it: the version the app reports a moment later
+   fades in instead of appearing at once. */
+@media (prefers-reduced-motion: no-preference) {
+  .versionText {
+    animation: version-in 160ms ease-out;
+  }
+}
+
+@keyframes version-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
