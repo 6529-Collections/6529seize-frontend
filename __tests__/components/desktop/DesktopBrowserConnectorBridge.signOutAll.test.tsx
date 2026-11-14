@@ -1,4 +1,5 @@
-import { act, render } from "@testing-library/react";
+import { act, render, renderHook } from "@testing-library/react";
+import { useSignOutAllTransaction } from "@/components/auth/useSignOutAllTransaction";
 import DesktopBrowserConnectorBridge from "@/components/desktop/DesktopBrowserConnectorBridge";
 import { setAuthJwt } from "@/services/auth/auth.utils";
 import { loginWithSessionV2 } from "@/services/auth/session-v2.utils";
@@ -22,6 +23,10 @@ jest.mock("@/services/auth/auth.utils", () => ({
   ...jest.requireActual("@/services/auth/auth.utils"),
   canStoreAnotherWalletAccount: jest.fn(() => true),
   setAuthJwt: jest.fn(() => true),
+}));
+jest.mock("@/components/auth/seizeConnectErrors", () => ({
+  ...jest.requireActual("@/components/auth/seizeConnectErrors"),
+  clearAllAuthenticatedProfiles: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock("@/services/auth/session-v2.utils", () => ({
   ...jest.requireActual("@/services/auth/session-v2.utils"),
@@ -52,6 +57,10 @@ const session: LoginResult = {
 
 const deliverReturnedLink = async () => {
   await startBrowserConnectorSignIn();
+  await deliverLinkForLastRequest();
+};
+
+const deliverLinkForLastRequest = async () => {
   const url = new URL(api.openExternal.mock.calls.at(-1)?.[0] as string);
   await act(async () => {
     for (const listener of listeners) {
@@ -118,5 +127,29 @@ describe("browser connector sign-in and sign-out-all", () => {
     expect(setAuthJwt).not.toHaveBeenCalled();
     expect(seizeAcceptConnection).not.toHaveBeenCalled();
     expect(getBrowserConnectorStatus()).toBe("failed");
+  });
+
+  it("drops a request still waiting for its link when sign-out-all runs", async () => {
+    jest.mocked(loginWithSessionV2).mockResolvedValue(session);
+    render(<DesktopBrowserConnectorBridge />);
+    const { result } = renderHook(() =>
+      useSignOutAllTransaction({
+        disconnect: jest.fn().mockResolvedValue(undefined),
+        isMountedRef: { current: true },
+        refreshStoredConnectedAccounts: jest.fn(),
+        setDisconnected: jest.fn(),
+      })
+    );
+    await startBrowserConnectorSignIn();
+
+    await act(async () => {
+      await result.current.seizeDisconnectAndLogoutAll();
+    });
+    // The browser returns the link only after the sign-out finished.
+    await deliverLinkForLastRequest();
+
+    expect(loginWithSessionV2).not.toHaveBeenCalled();
+    expect(setAuthJwt).not.toHaveBeenCalled();
+    expect(seizeAcceptConnection).not.toHaveBeenCalled();
   });
 });

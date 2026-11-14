@@ -141,6 +141,36 @@ describe("DesktopConnectDialog", () => {
     });
   });
 
+  it("is usable again right after closing during a start that has not settled", async () => {
+    const user = userEvent.setup();
+    let finishStart: () => void = () => undefined;
+    jest.mocked(startBrowserConnectorSignIn).mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        finishStart = resolve;
+      })
+    );
+    render(<DesktopConnectDialog />);
+    open();
+    await user.click(
+      screen.getByRole("button", { name: /Use a browser wallet/ })
+    );
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    open();
+    const walletConnect = screen.getByRole("button", {
+      name: /Scan with a phone wallet/,
+    });
+    expect(walletConnect).toBeEnabled();
+    await user.click(walletConnect);
+    expect(openWalletConnect).toHaveBeenCalledTimes(1);
+
+    // The old start settling later changes nothing.
+    await act(async () => {
+      finishStart();
+    });
+    expect(screen.queryByText(/Could not open your browser/)).toBeNull();
+  });
+
   it("hands WalletConnect back to the connect flow and closes", async () => {
     const user = userEvent.setup();
     render(<DesktopConnectDialog />);
