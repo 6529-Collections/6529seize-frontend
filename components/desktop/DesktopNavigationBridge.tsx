@@ -59,7 +59,7 @@ export default function DesktopNavigationBridge() {
       if (!(event.target instanceof Element)) return;
       const link = event.target.closest("a");
       if (!link) return;
-      const action = getDesktopLinkAction(link, event, window.location.origin);
+      const action = getDesktopLinkAction(link, event, window.location.href);
       if (!action) return;
       event.preventDefault();
       if (action.kind === "navigate") {

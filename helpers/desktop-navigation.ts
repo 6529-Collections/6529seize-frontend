@@ -3,6 +3,19 @@
  * so they can be tested on their own.
  */
 
+/**
+ * The path, query and hash of a URL already checked to be same-origin, or
+ * null when the normalized path could be read as another host: a leading
+ * `//` (as `/a/..//evil.example` normalizes) is protocol-relative to the
+ * router and to `location.assign`.
+ */
+function toSameOriginPath(url: URL): string | null {
+  if (url.pathname.startsWith("//") || url.pathname.includes("\\")) {
+    return null;
+  }
+  return `${url.pathname}${url.search}${url.hash}`;
+}
+
 interface DesktopNavigationTarget {
   /** Same-origin path, query and hash; safe to hand to the router. */
   readonly url: string;
@@ -39,7 +52,8 @@ export function getDesktopNavigationTarget(
   if (target.origin !== origin) return null;
   const replace = target.pathname === currentPathname;
   if (replace) target.searchParams.set("reload", "true");
-  return { url: `${target.pathname}${target.search}${target.hash}`, replace };
+  const url = toSameOriginPath(target);
+  return url === null ? null : { url, replace };
 }
 
 /** Full page load in this window (kept separate so tests can observe it). */
@@ -72,12 +86,13 @@ interface LinkElement {
  * page in the system browser. Anything else is left alone. The URL parser
  * resolves backslashes and `//host` before the origin check, so a crafted
  * `/\evil.example` counts as another site and only ever reaches the system
- * browser.
+ * browser. Relative links resolve against the document URL, as the browser
+ * would (`?page=2` keeps the current path).
  */
 export function getDesktopLinkAction(
   link: LinkElement,
   click: LinkClick,
-  origin: string
+  documentUrl: string
 ): DesktopLinkAction | null {
   if (click.defaultPrevented || link.hasAttribute("download")) return null;
   // Only the primary and middle buttons follow links.
@@ -93,13 +108,16 @@ export function getDesktopLinkAction(
   const href = link.getAttribute("href")?.trim();
   if (!href || href.startsWith("#")) return null;
   let url: URL;
+  let origin: string;
   try {
-    url = new URL(href, origin);
+    origin = new URL(documentUrl).origin;
+    url = new URL(href, documentUrl);
   } catch {
     return null;
   }
   if (url.origin === origin) {
-    return { kind: "navigate", url: `${url.pathname}${url.search}${url.hash}` };
+    const path = toSameOriginPath(url);
+    return path === null ? null : { kind: "navigate", url: path };
   }
   if (url.protocol === "https:" || url.protocol === "http:") {
     return { kind: "external", url: url.href };

@@ -152,6 +152,7 @@ describe("DesktopNotificationsBridge", () => {
       endpoint: "notifications",
       params: { limit: "5" },
       headers: { Authorization: "Bearer jwt-alice" },
+      signal: expect.any(AbortSignal),
     });
     expect(bridges.notifications.showNotification).toHaveBeenCalledWith(
       7,
@@ -192,6 +193,113 @@ describe("DesktopNotificationsBridge", () => {
       (call) => call[0]
     );
     expect(shownIds).toEqual([7, 9, 10]);
+  });
+
+  it("pages back to the last seen notification when more than a page arrive", async () => {
+    installDesktopShell();
+    jest.useFakeTimers();
+    render(<DesktopNotificationsBridge />);
+    await waitFor(() =>
+      expect(bridges.notifications.showNotification).toHaveBeenCalledTimes(1)
+    );
+
+    // 14 new ones (8..20) arrive before the next poll; pages of five.
+    const pages = new Map<string | undefined, number[]>([
+      [undefined, [20, 19, 18, 17, 16]],
+      ["16", [15, 14, 13, 12, 11]],
+      ["11", [10, 9, 8, 7, 6]],
+    ]);
+    jest.mocked(commonApiFetch).mockImplementation((request) => {
+      const before = (request.params as Record<string, string>)["id_less_than"];
+      return Promise.resolve(followNotification(...(pages.get(before) ?? [])));
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(15_000);
+    });
+    await act(async () => undefined);
+
+    const shownIds = bridges.notifications.showNotification.mock.calls.map(
+      (call) => call[0]
+    );
+    expect(shownIds).toEqual([
+      7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+    ]);
+    // Stopped at the page that reached the last seen id.
+    expect(commonApiFetch).toHaveBeenCalledTimes(4);
+  });
+
+  it("shows nothing from a poll that finishes after unmount", async () => {
+    installDesktopShell();
+    let resolveFetch: (value: unknown) => void = () => undefined;
+    jest.mocked(commonApiFetch).mockReturnValue(
+      new Promise((resolve) => {
+        resolveFetch = resolve;
+      })
+    );
+    const { unmount } = render(<DesktopNotificationsBridge />);
+    await waitFor(() => expect(commonApiFetch).toHaveBeenCalled());
+
+    unmount();
+    await act(async () => {
+      resolveFetch(followNotification(7));
+    });
+
+    expect(bridges.notifications.showNotification).not.toHaveBeenCalled();
+  });
+
+  it("shows nothing for a profile that signed out while its poll ran", async () => {
+    installDesktopShell();
+    jest
+      .mocked(getConnectedWalletAccounts)
+      .mockReturnValueOnce([account(ADDRESS_A, "alice")])
+      .mockReturnValue([]);
+
+    render(<DesktopNotificationsBridge />);
+    await waitFor(() => expect(commonApiFetch).toHaveBeenCalled());
+    await act(async () => undefined);
+
+    expect(bridges.notifications.showNotification).not.toHaveBeenCalled();
+  });
+
+  it("keeps polling other profiles when one profile's request stalls", async () => {
+    installDesktopShell();
+    jest.useFakeTimers();
+    jest
+      .mocked(getConnectedWalletAccounts)
+      .mockReturnValue([
+        account(ADDRESS_A, "alice"),
+        account(ADDRESS_B, "bob"),
+      ]);
+    jest
+      .mocked(commonApiFetch)
+      .mockImplementation((request) =>
+        (request.headers as Record<string, string>)["Authorization"] ===
+        "Bearer jwt-alice"
+          ? new Promise(() => undefined)
+          : Promise.resolve(followNotification(8))
+      );
+
+    render(<DesktopNotificationsBridge />);
+    await act(async () => undefined);
+    expect(bridges.notifications.showNotification).not.toHaveBeenCalled();
+
+    await act(async () => {
+      jest.advanceTimersByTime(10_000);
+    });
+    await act(async () => undefined);
+
+    expect(bridges.notifications.showNotification).toHaveBeenCalledTimes(1);
+    expect(
+      bridges.notifications.showNotification.mock.calls[0]?.[5]
+    ).toMatchObject({ targetAddress: ADDRESS_B });
+    // The stalled request was aborted, and the next poll runs.
+    const firstSignal = jest.mocked(commonApiFetch).mock.calls[0]?.[0]
+      .signal as AbortSignal;
+    expect(firstSignal.aborted).toBe(true);
+    await act(async () => {
+      jest.advanceTimersByTime(5_000);
+    });
+    expect(commonApiFetch).toHaveBeenCalledTimes(4);
   });
 
   it("keeps notifying other profiles when one profile's request fails", async () => {
@@ -297,6 +405,30 @@ describe("DesktopNotificationsBridge", () => {
     rerender(<DesktopNotificationsBridge />);
 
     await waitFor(() => expect(push).toHaveBeenCalledWith("/waves?wave=1"));
+  });
+
+  it("does not let an earlier click's profile switch override a later click", async () => {
+    installDesktopShell();
+    const { rerender } = render(<DesktopNotificationsBridge />);
+    const click = (payload: Record<string, unknown>) =>
+      act(() => {
+        for (const listener of bridges.listeners) listener({}, payload);
+      });
+
+    // The first click waits for a switch to bob.
+    click({ path: "/first", targetAddress: ADDRESS_B });
+    // The second targets the active profile and opens at once.
+    click({ path: "/second", targetAddress: ADDRESS_A });
+    await waitFor(() => expect(push).toHaveBeenCalledWith("/second"));
+
+    // The first switch completes later; its page must not open.
+    seizeContext = { ...seizeContext, address: ADDRESS_B };
+    rerender(<DesktopNotificationsBridge />);
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 120));
+    });
+
+    expect(push).toHaveBeenCalledTimes(1);
   });
 
   it("ignores clicks that target another site or an unknown profile", async () => {

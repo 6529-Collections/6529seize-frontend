@@ -24,6 +24,12 @@ const POLL_INTERVAL_MS = 15_000;
 // Newest notifications fetched per profile and poll; several that arrive
 // between two polls are each shown, oldest first.
 const POLL_LIMIT = 5;
+// When more arrive between two polls, older pages are fetched back to the
+// last seen one, at most this many pages per profile and poll.
+const MAX_POLL_PAGES = 10;
+// Each profile's requests in one poll must finish by then, so one stalled
+// profile never stops polling for the others.
+const POLL_REQUEST_TIMEOUT_MS = 10_000;
 const PROFILE_SWITCH_TIMEOUT_MS = 3_000;
 const PROFILE_SWITCH_POLL_MS = 50;
 
@@ -58,19 +64,89 @@ const parseNotificationTarget = (value: unknown): NotificationTarget | null => {
   };
 };
 
+const fetchNotificationPage = (
+  jwt: string,
+  signal: AbortSignal,
+  idLessThan?: number
+): Promise<ApiNotificationsResponse> =>
+  commonApiFetch<ApiNotificationsResponse>({
+    endpoint: "notifications",
+    params:
+      idLessThan === undefined
+        ? { limit: String(POLL_LIMIT) }
+        : { limit: String(POLL_LIMIT), id_less_than: String(idLessThan) },
+    headers: { Authorization: `Bearer ${jwt}` },
+    signal,
+  });
+
+/** Older pages, until one reaches `lastSeenId` or the page budget runs out. */
+const fetchOlderPages = async (
+  jwt: string,
+  signal: AbortSignal,
+  page: readonly ApiNotification[],
+  lastSeenId: number,
+  pagesLeft: number
+): Promise<ApiNotification[]> => {
+  if (pagesLeft === 0 || page.length < POLL_LIMIT) return [];
+  const oldest = Math.min(...page.map((notification) => notification.id));
+  if (oldest <= lastSeenId) return [];
+  const next = (await fetchNotificationPage(jwt, signal, oldest)).notifications;
+  return [
+    ...next,
+    ...(await fetchOlderPages(jwt, signal, next, lastSeenId, pagesLeft - 1)),
+  ];
+};
+
+/**
+ * One profile's unread notifications. With a last seen id, older pages are
+ * fetched back to it, so a burst between two polls is not skipped.
+ */
 const fetchUnreadNotifications = async (
-  account: ConnectedWalletAccount
+  account: ConnectedWalletAccount,
+  lastSeenId: number | undefined,
+  signal: AbortSignal
 ): Promise<readonly ApiNotification[]> => {
   if (!account.jwt) return [];
-  const response = await commonApiFetch<ApiNotificationsResponse>({
-    endpoint: "notifications",
-    params: { limit: String(POLL_LIMIT) },
-    headers: { Authorization: `Bearer ${account.jwt}` },
-  });
-  if (toUnreadCount(response.unread_count) === 0) return [];
-  return response.notifications.filter(
+  const first = await fetchNotificationPage(account.jwt, signal);
+  if (toUnreadCount(first.unread_count) === 0) return [];
+  const older =
+    lastSeenId === undefined
+      ? []
+      : await fetchOlderPages(
+          account.jwt,
+          signal,
+          first.notifications,
+          lastSeenId,
+          MAX_POLL_PAGES - 1
+        );
+  return [...first.notifications, ...older].filter(
     (notification) => notification.read_at === null
   );
+};
+
+/**
+ * Runs `request` with its own abort signal, aborted when `poll` is (the
+ * bridge unmounted) or at the deadline. Rejects at the deadline even if the
+ * request ignores the signal.
+ */
+const withDeadline = <T,>(
+  request: (signal: AbortSignal) => Promise<T>,
+  poll: AbortSignal
+): Promise<T> => {
+  const controller = new AbortController();
+  const abort = () => controller.abort();
+  poll.addEventListener("abort", abort);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_resolve, reject) => {
+    timer = setTimeout(() => {
+      abort();
+      reject(new Error("Desktop notification poll timed out"));
+    }, POLL_REQUEST_TIMEOUT_MS);
+  });
+  return Promise.race([request(controller.signal), deadline]).finally(() => {
+    clearTimeout(timer);
+    poll.removeEventListener("abort", abort);
+  });
 };
 
 /**
@@ -150,7 +226,11 @@ export default function DesktopNotificationsBridge() {
     emoji: { findNativeEmoji, findCustomEmoji },
   });
   const lastSeenIds = useRef(new Map<string, number>());
-  const polling = useRef(false);
+  // The running poll; aborted on unmount so its results are discarded.
+  const pollController = useRef<AbortController | null>(null);
+  // The latest notification click; an earlier one still switching profiles
+  // must not navigate over it.
+  const navigationRequest = useRef(0);
 
   useEffect(() => {
     latest.current = {
@@ -232,15 +312,27 @@ export default function DesktopNotificationsBridge() {
     [seizeSwitchConnectedAccount]
   );
 
+  useEffect(
+    () => () => {
+      // Unmounted: a click still switching profiles must not navigate.
+      navigationRequest.current += 1;
+    },
+    []
+  );
+
   useEffect(() => {
     const api = getDesktopShellApi();
     if (!api) return undefined;
     const onNotificationNavigate = (_event: unknown, value: unknown) => {
       const target = parseNotificationTarget(value);
       if (!target) return;
+      navigationRequest.current += 1;
+      const request = navigationRequest.current;
       switchToTargetProfile(target)
         .then((switched) => {
-          if (!switched) return undefined;
+          if (!switched || request !== navigationRequest.current) {
+            return undefined;
+          }
           if (isCurrentLocation(target.path)) {
             const url = new URL(target.path, window.location.origin);
             url.searchParams.set("reload", "true");
@@ -299,18 +391,40 @@ export default function DesktopNotificationsBridge() {
   );
 
   const poll = useCallback(async () => {
-    if (!getDesktopNotifications() || polling.current) return;
-    polling.current = true;
+    const running = pollController.current;
+    // One poll at a time; an aborted one no longer counts.
+    if (!getDesktopNotifications() || (running && !running.signal.aborted)) {
+      return;
+    }
+    const controller = new AbortController();
+    pollController.current = controller;
     try {
       const accounts = getConnectedWalletAccounts();
       const results = await Promise.allSettled(
-        accounts.map(fetchUnreadNotifications)
+        accounts.map((account) =>
+          withDeadline(
+            (signal) =>
+              fetchUnreadNotifications(
+                account,
+                lastSeenIds.current.get(account.address.toLowerCase()),
+                signal
+              ),
+            controller.signal
+          )
+        )
+      );
+      // Unmounted meanwhile: show nothing.
+      if (controller.signal.aborted) return;
+      // Only profiles still signed in (one may have signed out meanwhile).
+      const signedIn = new Set(
+        getConnectedWalletAccounts().map((item) => item.address.toLowerCase())
       );
       results.forEach((result, index) => {
         const account = accounts[index];
-        // A failed profile does not hold up the others.
+        // A failed or timed-out profile does not hold up the others.
         if (!account || result.status !== "fulfilled") return;
         const key = account.address.toLowerCase();
+        if (!signedIn.has(key)) return;
         const fresh = selectNewNotifications(
           result.value,
           lastSeenIds.current.get(key)
@@ -322,7 +436,7 @@ export default function DesktopNotificationsBridge() {
         if (newestId !== undefined) lastSeenIds.current.set(key, newestId);
       });
     } finally {
-      polling.current = false;
+      if (pollController.current === controller) pollController.current = null;
     }
   }, [showNotification]);
 
@@ -334,6 +448,7 @@ export default function DesktopNotificationsBridge() {
     }, POLL_INTERVAL_MS);
     return () => {
       clearInterval(interval);
+      pollController.current?.abort();
     };
   }, [poll]);
 

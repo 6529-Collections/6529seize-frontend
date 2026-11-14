@@ -1,7 +1,10 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
-import { useContext, useEffect } from "react";
+import { StrictMode, useContext, useEffect } from "react";
 import DesktopProfileStorageGate from "@/components/desktop/DesktopProfileStorageGate";
-import { DesktopProfileRecoveryContext } from "@/contexts/DesktopProfileRecoveryContext";
+import {
+  DesktopProfileRecoveryContext,
+  DesktopProfileRestoringContext,
+} from "@/contexts/DesktopProfileRecoveryContext";
 import {
   getPageDesktopProfileState,
   restoreDesktopProfileState,
@@ -136,6 +139,64 @@ describe("DesktopProfileStorageGate", () => {
     await waitFor(() => expect(mounts).toBe(2));
     expect(restoreDesktopProfileState).toHaveBeenCalledWith(SAVED);
     expect(nativeAuth.profilesReady).toHaveBeenCalled();
+  });
+
+  it("remounts the app under Strict Mode when the restore finishes after the effect re-ran", async () => {
+    installDesktopShell();
+    let resolveRestore: (state: DesktopProfileState) => void = () => undefined;
+    nativeAuth.restoreProfiles.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRestore = resolve;
+      })
+    );
+
+    render(
+      <StrictMode>
+        <DesktopProfileStorageGate>
+          <Child />
+        </DesktopProfileStorageGate>
+      </StrictMode>
+    );
+    // Strict Mode runs the effects twice; the restore request is shared.
+    expect(nativeAuth.restoreProfiles).toHaveBeenCalledTimes(1);
+    const mountsBeforeRestore = mounts;
+
+    await act(async () => {
+      resolveRestore(SAVED);
+    });
+
+    await waitFor(() => expect(mounts).toBeGreaterThan(mountsBeforeRestore));
+    expect(restoreDesktopProfileState).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("app")).toBeInTheDocument();
+  });
+
+  it("tells the wallet stack while the restore is pending", async () => {
+    installDesktopShell();
+    let resolveRestore: (state: DesktopProfileState) => void = () => undefined;
+    nativeAuth.restoreProfiles.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRestore = resolve;
+      })
+    );
+    function RestoringProbe() {
+      return (
+        <p>
+          {useContext(DesktopProfileRestoringContext) ? "restoring" : "settled"}
+        </p>
+      );
+    }
+
+    render(
+      <DesktopProfileStorageGate>
+        <RestoringProbe />
+      </DesktopProfileStorageGate>
+    );
+
+    expect(await screen.findByText("restoring")).toBeInTheDocument();
+    await act(async () => {
+      resolveRestore(EMPTY);
+    });
+    expect(await screen.findByText("settled")).toBeInTheDocument();
   });
 
   it("runs signed out and offers a restart when the restore fails", async () => {
