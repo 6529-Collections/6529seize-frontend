@@ -62,6 +62,7 @@ import { useSignOutAllTransaction } from "./useSignOutAllTransaction";
 import CapacitorConnectFlow from "./CapacitorConnectFlow";
 import type { CapacitorConnectDialogView } from "./CapacitorConnectDialog";
 import {
+  defaultConnectModalView,
   openFreshUserConnection,
   openUserConnectionSurfaceForRuntime,
   useDisconnectExternalWalletBeforeSelection,
@@ -255,10 +256,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     activeConnectorType === APP_WALLET_CONNECTOR_TYPE;
 
   const openConnectModal = useCallback(
-    async (
-      source: string,
-      view: "Connect" | "AllWallets" = "Connect"
-    ): Promise<void> => {
+    async (source: string, view = defaultConnectModalView()): Promise<void> => {
       if (isSigningOutAllRef.current) {
         return;
       }

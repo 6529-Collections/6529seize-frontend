@@ -164,7 +164,13 @@ describe("connect entry points in 6529 Desktop", () => {
       await getDesktopConnectDialogOpener()?.();
     });
 
-    await waitFor(() => expect(mockOpen).toHaveBeenCalled());
+    // Straight to the WalletConnect QR code, not a list of extension-like
+    // wallets the desktop window cannot use.
+    await waitFor(() =>
+      expect(mockOpen).toHaveBeenCalledWith({
+        view: "ConnectingWalletConnectBasic",
+      })
+    );
   });
 
   it("keeps opening the wallet list directly on the web", async () => {
@@ -174,7 +180,9 @@ describe("connect entry points in 6529 Desktop", () => {
       context?.seizeConnect();
     });
 
-    await waitFor(() => expect(mockOpen).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(mockOpen).toHaveBeenCalledWith({ view: "Connect" })
+    );
     expect(getDesktopConnectDialogOpener()).toBeNull();
   });
 });

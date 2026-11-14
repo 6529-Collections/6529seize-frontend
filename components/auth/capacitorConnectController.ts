@@ -15,6 +15,20 @@ import {
 import { CONNECT_AFTER_DISCONNECT_DELAY_MS } from "./seizeConnectWalletState";
 import type { CapacitorConnectDialogView } from "./CapacitorConnectDialog";
 
+type ConnectModalView =
+  | "Connect"
+  | "AllWallets"
+  | "ConnectingWalletConnectBasic";
+
+/**
+ * The wallet modal's first view. 6529 Desktop has no browser extensions, so
+ * its WalletConnect choice opens straight on the WalletConnect QR code ("Scan
+ * this QR Code with your phone") instead of a wallet list whose entries look
+ * like browser extensions. Elsewhere the modal opens as before.
+ */
+export const defaultConnectModalView = (): ConnectModalView =>
+  isDesktopShell() ? "ConnectingWalletConnectBasic" : "Connect";
+
 /**
  * The one way a connect entry point opens a wallet connection. In 6529
  * Desktop every entry point shows the desktop connect choice first
