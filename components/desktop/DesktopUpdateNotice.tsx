@@ -116,8 +116,29 @@ export default function DesktopUpdateNotice() {
 
   const startDownload = () => {
     rememberFocus();
+    const version = "version" in state ? state.version : null;
+    const fail = () => setState({ kind: "failed", version });
     setState({ kind: "downloading", percent: null });
-    getDesktopUpdater()?.downloadUpdate();
+    const updater = getDesktopUpdater();
+    if (!updater) {
+      fail();
+      return;
+    }
+    try {
+      // Typed void; a host may still return its IPC promise. A throw or a
+      // rejection leaves the notice in "failed" (errors the host reports
+      // later arrive through onUpdateError).
+      const result: unknown = updater.downloadUpdate();
+      if (
+        typeof result === "object" &&
+        result !== null &&
+        typeof (result as { readonly then?: unknown }).then === "function"
+      ) {
+        Promise.resolve(result).catch(fail);
+      }
+    } catch {
+      fail();
+    }
   };
 
   let message: string;
