@@ -1837,10 +1837,6 @@
         "production": "/network/nerd"
       }
     },
-    "/network/prenodes": {
-      "classification": "crawlable",
-      "family": "network"
-    },
     "/network/tdh": {
       "classification": "crawlable",
       "family": "network"

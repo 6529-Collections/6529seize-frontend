@@ -202,6 +202,13 @@ export function sharedConfig(
           destination: "/stream",
           permanent: true,
         },
+        // Prenodes were retired and their servers shut down; the 6529
+        // Desktop app now calculates TDH.
+        {
+          source: "/network/prenodes",
+          destination: "/about/6529-apps",
+          permanent: true,
+        },
       ]);
     },
     logging: {

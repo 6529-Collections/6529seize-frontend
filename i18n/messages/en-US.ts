@@ -3352,11 +3352,6 @@ export const EN_US_ROOT_MESSAGES = {
   ...NOTIFICATIONS_INBOX_MESSAGES,
   ...MEME_COLLABORATION_MESSAGES,
   ...VOTING_CREDIT_RETURN_MESSAGES,
-  "network.prenodes.title": "Prenodes",
-  "network.prenodes.pageTitle": "Prenodes | Network",
-  "network.prenodes.deprecation":
-    "6529 Prenodes have been deprecated. Use the 6529 Desktop app to calculate TDH.",
-  "network.prenodes.desktopLink": "Explore 6529 Desktop",
   "tokenList.thumbnail.loading": "Loading thumbnail",
   "tokenList.thumbnail.failed": "Failed to load thumbnail",
   "tokenList.thumbnail.error": "Load Error",

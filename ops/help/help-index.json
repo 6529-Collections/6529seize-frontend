@@ -8191,21 +8191,17 @@
     {
       "id": "network.prenodes",
       "kind": "route",
-      "title": "Prenodes deprecation",
+      "title": "Prenodes (retired)",
       "aliases": ["prenodes", "prenode", "prenodes status", "node status"],
-      "keywords": ["network", "prenodes", "status", "node"],
+      "keywords": ["network", "prenodes", "retired", "desktop", "tdh"],
       "facts": [
-        "6529 Prenodes have been deprecated. Use the 6529 Desktop app to calculate TDH.",
-        "The existing /network/prenodes URL remains available with a deprecation notice and a link to /about/6529-apps.",
-        "Prenodes is no longer listed in About navigation. The page no longer displays or requests the registry."
+        "6529 Prenodes have been retired and shut down. Use the 6529 Desktop app to calculate TDH.",
+        "Old /network/prenodes links redirect permanently to /about/6529-apps, where 6529 Desktop can be downloaded."
       ],
-      "canonical_path": "/network/prenodes",
+      "canonical_path": "/about/6529-apps",
       "related_paths": ["/network"],
       "tags": ["network", "prenodes"],
-      "source_refs": [
-        "app/network/prenodes/page.tsx",
-        "ops/docs/network/feature-prenodes-status.md"
-      ]
+      "source_refs": ["config/nextConfig.ts"]
     },
     {
       "id": "network.tdh-historic-boosts",
