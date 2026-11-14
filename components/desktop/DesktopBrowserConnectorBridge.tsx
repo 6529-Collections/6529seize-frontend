@@ -31,9 +31,18 @@ export default function DesktopBrowserConnectorBridge() {
 
   useEffect(() => {
     const api = getDesktopShellApi();
-    if (!api) return undefined;
+    if (typeof api?.onWalletConnection !== "function") return undefined;
+    // An older host has no offWalletConnection, so its listener is never
+    // removed: after unmount it must not consume a request or sign in.
+    let active = true;
+    const stopIfInactive = (): boolean => {
+      if (active) return false;
+      setBrowserConnectorStatus("failed");
+      return true;
+    };
 
     const signIn = async (payload: unknown) => {
+      if (!active) return;
       const result = parseBrowserConnectorResult(payload);
       if (!result || !takeBrowserConnectorRequest(result.requestId)) return;
       setBrowserConnectorStatus("signing-in");
@@ -48,6 +57,7 @@ export default function DesktopBrowserConnectorBridge() {
           signerAddress: result.address,
           role: null,
         });
+        if (stopIfInactive()) return;
         // The session must be for the wallet that signed (both lower-cased).
         if (session.address.toLowerCase() !== result.address.toLowerCase()) {
           setBrowserConnectorStatus("failed");
@@ -57,6 +67,7 @@ export default function DesktopBrowserConnectorBridge() {
           setBrowserConnectorStatus("failed");
           return;
         }
+        if (stopIfInactive()) return;
         acceptConnection.current(session.address);
         setBrowserConnectorStatus("signed-in");
       } catch {
@@ -69,6 +80,7 @@ export default function DesktopBrowserConnectorBridge() {
     };
     api.onWalletConnection(onWalletConnection);
     return () => {
+      active = false;
       api.offWalletConnection?.(onWalletConnection);
     };
   }, []);

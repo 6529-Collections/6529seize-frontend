@@ -139,6 +139,53 @@ describe("BrowserConnectorPage", () => {
     ).toHaveAttribute("href", link);
   });
 
+  it.each([
+    ["while the challenge loads", "nonce"],
+    ["while the wallet signs", "signature"],
+  ])(
+    "shows the expired state if the request runs out %s",
+    async (_name, step) => {
+      const user = userEvent.setup();
+      account = { isConnected: true, address: ADDRESS };
+      const expiresAt = Date.now() + 60_000;
+      search = new URLSearchParams({
+        scheme: "localcore6529",
+        request: REQUEST_ID,
+        expires: String(expiresAt),
+      });
+      const now = jest.spyOn(Date, "now");
+      const expire = () => now.mockReturnValue(expiresAt + 1);
+      if (step === "nonce") {
+        jest.mocked(getSessionNonce).mockImplementationOnce(async () => {
+          expire();
+          return {
+            signable_message: "Sign in to 6529 Desktop",
+            server_signature: "0xserver",
+          } as never;
+        });
+      } else {
+        signMessageAsync.mockImplementationOnce(async () => {
+          expire();
+          return `0x${"b".repeat(130)}`;
+        });
+      }
+      try {
+        render(<BrowserConnectorPage />);
+        await user.click(
+          await screen.findByRole("button", {
+            name: "Sign and return to 6529 Desktop",
+          })
+        );
+
+        expect(await screen.findByText(/has expired/)).toBeInTheDocument();
+        expect(assign).not.toHaveBeenCalled();
+        if (step === "nonce") expect(signMessageAsync).not.toHaveBeenCalled();
+      } finally {
+        now.mockRestore();
+      }
+    }
+  );
+
   it("lets the user retry after a rejected signature", async () => {
     const user = userEvent.setup();
     account = { isConnected: true, address: ADDRESS };
