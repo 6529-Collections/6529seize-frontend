@@ -218,15 +218,16 @@ export default function DesktopTitleStrip() {
   }, [copyStatus]);
 
   const copyLink = () => {
-    const clipboard = globalThis.navigator?.clipboard;
+    // Missing outside a secure context, whatever the DOM types say.
+    const clipboard = navigator.clipboard as Clipboard | undefined;
     if (!clipboard) {
       setCopyStatus("failed");
       return;
     }
-    clipboard.writeText(getPublicLink()).then(
-      () => setCopyStatus("copied"),
-      () => setCopyStatus("failed")
-    );
+    clipboard
+      .writeText(getPublicLink())
+      .then(() => setCopyStatus("copied"))
+      .catch(() => setCopyStatus("failed"));
   };
 
   const environmentLabel =
