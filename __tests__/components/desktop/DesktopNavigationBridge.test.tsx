@@ -28,6 +28,13 @@ const createApi = () => {
       listeners.delete(listener)
     ),
     navigationReady: jest.fn().mockResolvedValue(undefined),
+    searchListeners: new Set<() => void>(),
+    onOpenSearch: jest.fn(function (this: void, listener: () => void) {
+      api.searchListeners.add(listener);
+    }),
+    offOpenSearch: jest.fn((listener: () => void) => {
+      api.searchListeners.delete(listener);
+    }),
   };
 };
 
@@ -83,6 +90,20 @@ describe("DesktopNavigationBridge", () => {
   afterEach(() => {
     Reflect.deleteProperty(window, "api");
     Reflect.deleteProperty(window, "nativeAuth");
+  });
+
+  it("opens the site search on the app's Ctrl/Cmd+F", () => {
+    installDesktopShell();
+    const onSearch = jest.fn();
+    window.addEventListener("6529:open-site-search", onSearch);
+    const { unmount } = render(<DesktopNavigationBridge />);
+
+    for (const listener of api.searchListeners) listener();
+    unmount();
+    window.removeEventListener("6529:open-site-search", onSearch);
+
+    expect(onSearch).toHaveBeenCalledTimes(1);
+    expect(api.searchListeners.size).toBe(0);
   });
 
   it("does nothing in a browser", () => {

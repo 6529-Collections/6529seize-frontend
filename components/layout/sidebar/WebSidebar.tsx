@@ -3,6 +3,7 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useSiteSearchRequest } from "@/hooks/useSiteSearchRequest";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
@@ -79,6 +80,10 @@ function WebSidebar({
     },
     { event: "keydown" }
   );
+
+  useSiteSearchRequest(() => {
+    if (showDesktopSearch) setIsSearchOpen(true);
+  });
 
   // Close sidebar on route change when on mobile
   const prevPathnameRef = useRef(pathname);

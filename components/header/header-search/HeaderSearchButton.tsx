@@ -15,6 +15,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import { useSiteSearchRequest } from "@/hooks/useSiteSearchRequest";
 import { t } from "@/i18n/messages";
 
 import LazyHeaderSearchModal, {
@@ -76,6 +77,8 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
     handleSearchShortcut,
     { event: "keydown" }
   );
+
+  useSiteSearchRequest(openContextSearch);
 
   const handleWaveResultSelect = (serialNo: number) => {
     if (!wave) return;

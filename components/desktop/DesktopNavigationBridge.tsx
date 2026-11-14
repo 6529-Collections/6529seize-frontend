@@ -8,6 +8,7 @@ import {
   loadDesktopUrlInPlace,
 } from "@/helpers/desktop-navigation";
 import { getDesktopShellApi } from "@/helpers/desktop-shell";
+import { requestSiteSearch } from "@/hooks/useSiteSearchRequest";
 
 /**
  * Inside 6529 Desktop: follows deep links the shell delivers
@@ -47,6 +48,19 @@ export default function DesktopNavigationBridge() {
       api.offNavigate(handleNavigate);
     };
   }, [router]);
+
+  // The app's Ctrl/Cmd+F opens the site search.
+  useEffect(() => {
+    const api = getDesktopShellApi();
+    if (!api) return undefined;
+    const onOpenSearch = () => {
+      requestSiteSearch();
+    };
+    api.onOpenSearch(onOpenSearch);
+    return () => {
+      api.offOpenSearch(onOpenSearch);
+    };
+  }, []);
 
   useEffect(() => {
     const api = getDesktopShellApi();
