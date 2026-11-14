@@ -82,7 +82,9 @@ function WebSidebar({
   );
 
   useSiteSearchRequest(() => {
-    if (showDesktopSearch) setIsSearchOpen(true);
+    if (!showDesktopSearch) return false;
+    setIsSearchOpen(true);
+    return true;
   });
 
   // Close sidebar on route change when on mobile
