@@ -25,6 +25,8 @@ import {
 } from "@/components/drop-forge/drop-forge-media-type.helpers";
 import DropForgeMediaTypePill from "@/components/drop-forge/DropForgeMediaTypePill";
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
+import { DropForgeSavedPlanPill } from "@/components/drop-forge/DropForgeAutoLaunchPill";
+import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import DropForgeStatusPill from "@/components/drop-forge/DropForgeStatusPill";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import Pagination from "@/components/pagination/Pagination";
@@ -322,6 +324,7 @@ function CraftClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
 }
 
 function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
+  const { contract } = useDropForgeMintingConfig();
   const { claim: manifoldClaim, isFetching: isManifoldClaimFetching } =
     useDropForgeManifoldClaim(claim.claim_id);
   const [researchAirdropCompleted, setResearchAirdropCompleted] =
@@ -358,7 +361,7 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
       };
     }
 
-    getMemesMintingClaimActions(claim.claim_id)
+    getMemesMintingClaimActions(claim.claim_id, contract)
       .then((response) => {
         if (cancelled) {
           return;
@@ -407,7 +410,7 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
     return () => {
       cancelled = true;
     };
-  }, [claim.claim_id, manifoldClaim?.instanceId]);
+  }, [claim.claim_id, contract, manifoldClaim?.instanceId]);
 
   return (
     <Link
@@ -427,6 +430,9 @@ function LaunchClaimCard({ claim }: Readonly<{ claim: MintingClaim }>) {
         />
       </div>
       <ClaimCardContent claim={claim} showLaunchFields />
+      <div className="tw-mt-2 empty:tw-hidden">
+        <DropForgeSavedPlanPill claimId={claim.claim_id} />
+      </div>
     </Link>
   );
 }

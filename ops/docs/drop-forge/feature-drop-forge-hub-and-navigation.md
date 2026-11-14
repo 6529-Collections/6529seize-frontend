@@ -49,7 +49,7 @@ remains distribution-admin-only.
   visual minimum does not delay fresh list data or affect periodic refreshes.
 - The chain follows existing Drop Forge configuration: Sepolia uses the
   testnet creator, other supported wallet contexts use the mainnet creator.
-  Sepolia launch action tracking is still unsupported by the backend.
+  Launch tracking uses the chain configured for that environment, including Sepolia.
 
 ### Localization Fallback Debt
 
@@ -65,6 +65,14 @@ remains distribution-admin-only.
   announcements on the authenticated admin surface in every supported locale.
   Existing Craft/Launch and shared transaction-dialog fallback debt is outside
   this admin-copy migration; transaction authority is unchanged.
+
+### Launch Automation and collapsed admin list
+
+Contract Admins and Launch Automation start collapsed and open independently.
+Expand Contract Admins to load the owner and admin list. The contract link and
+admin controls share a row when space allows. Collapsing stops the admin reads.
+Launch Automation is visible to every authorized Drop Forge user and is documented in
+[Launch Automation and Wallet Funding](feature-launch-automation-settings.md).
 
 ## Location in the Site
 

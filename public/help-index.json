@@ -1579,6 +1579,7 @@
         "The guide links to the current in-app mint at /the-memes/mint and the official standalone mint page at https://thememes.6529.io/.",
         "Users can choose regular minting or subscription minting; a subscription does not create eligibility and can mint only in a phase the destination wallet already qualifies for.",
         "The current mint flow can move through Phase 0, Phase 1, Phase 2, and a public phase for a card.",
+        "Standard Memes phase windows follow Europe/Athens local time, including daylight saving: Phase 0 17:40–18:20, Phase 1 18:30–18:50, Phase 2 19:00–19:20, and Public 19:20–17:00 the next day. The card shows its active phase and eligibility.",
         "The live mint page is the source of truth for the current card, active phase, exact mint price and platform fee, remaining supply, and wallet eligibility.",
         "The guide links to /meme-calendar and @6529collections for current timing because mint dates can change.",
         "The February 2023 allowlist explanation is preserved only as dated historical context, not as the eligibility policy for the current card."
@@ -5728,7 +5729,10 @@
         "Drop Forge is the area for claim/drop workflows from craft to launch.",
         "The hub links to Craft and Launch sections, with list and detail pages for each.",
         "The creator owner and approved on-chain admins have Drop Forge landing and Launch access alongside configured claims admins. Craft remains restricted to distribution admins.",
-        "The Contract Admins card lists the creator owner first and all approved on-chain admins for every wallet with landing access. The creator contract links to Etherscan for the active chain. Each row puts its Owner/Admin badge above the available mainnet ENS name and full wallet address, wrapping on narrow screens. The header's Add Admin button expands an inline wallet or ENS input above the list; Cancel closes and clears it. Refresh shows a spinner while reloading. Add and Revoke controls are shown only to the owner and configured claims admins. The contract itself only permits the owner to approve or revoke admins; configured non-owner calls still fail. These transactions do not change environment admin lists or transfer ownership.",
+        "The Contract Admins card lists the creator owner first and all approved on-chain admins for every wallet with landing access. Expand Contract Admins on the hub to see the list and controls. It starts collapsed and opens independently of Launch Automation. The creator contract links to Etherscan for the active chain. Each row puts its Owner/Admin badge above the available mainnet ENS name and full wallet address, wrapping on narrow screens. The header's Add Admin button expands an inline wallet or ENS input above the list; Cancel closes and clears it. Refresh shows a spinner while reloading. Add and Revoke controls are shown only to the owner and configured claims admins. The contract itself only permits the owner to approve or revoke admins; configured non-owner calls still fail. These transactions do not change environment admin lists or transfer ownership.",
+        "Launch Automation is on the Drop Forge hub. Automatic launch, EMMA preparation, and Automatic artist payment start Off. With EMMA preparation Off, EMMA shows the original subscription downloads and Finalize Distribution. With it On, EMMA shows Process and Finalize. Automatic launch can use a finalized distribution from either mode.",
+        "The creator owner and configured claims administrators can change all Launch Automation controls. Configured distribution administrators can also change EMMA preparation. Other controls stay visible and read-only for Drop Forge users without edit access.",
+        "In Launch Automation, saving a positive Maximum ETH per payout enables Automatic artist payment. Disable keeps the saved limit for Enable. Submitted transactions continue to be tracked when Automatic launch is Off.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."
       ],
       "canonical_path": "/drop-forge",
@@ -5736,7 +5740,8 @@
       "tags": ["drop-forge", "claims"],
       "source_refs": [
         "ops/docs/drop-forge/README.md",
-        "ops/docs/drop-forge/flow-drop-forge-craft-to-launch.md"
+        "ops/docs/drop-forge/flow-drop-forge-craft-to-launch.md",
+        "ops/docs/drop-forge/feature-launch-automation-settings.md"
       ]
     },
     {
@@ -7099,6 +7104,7 @@
         "@contributors",
         "@admins",
         "@devs6529",
+        "@dropforgeops",
         "mentioned waves",
         "mention shortcut",
         "personal mention alias",
@@ -7123,6 +7129,7 @@
         "When Wave Chat access is Public, joined Wave followers with Broadcast mentions enabled are the bounded @contributors audience because there is no finite Chat-access group; muted followers and the author are excluded.",
         "The Broadcast mentions notification preference controls both @all and @contributors, while All messages continues to notify a joined profile about every message.",
         "The @devs6529 mention targets configured 6529 developer profiles that can view the Wave.",
+        "The @dropforgeops shortcut alerts configured Drop Forge operators who can view the Wave. Automated reports from the staging profile @drops6529 carry a post signature in Drop Forge Ops. The profile can also be mentioned directly.",
         "Any profile with Chat access can invoke @admins or @devs6529 by typing the complete token directly or selecting it from suggestions; the backend filters recipients by Wave access.",
         "Broadcast suggestions are unavailable to non-admins; if a non-admin types @all or @contributors directly in a new message, the token is posted as ordinary text without broadcast metadata or notifications.",
         "A non-admin can retain @contributors while editing an existing message that already contained it, but the edit does not rebroadcast the mention and they cannot add it as a broadcast mention to a message that did not already contain it.",
@@ -7568,7 +7575,7 @@
         "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
         "On phone layouts, notification choices open as a subview inside the same About sheet, which shrinks to fit the two options. Selecting an option, Back, the phone’s Back action, or Escape returns to About and restores focus to the bell. Close or tapping outside dismisses the whole sheet. Returning to About restores its full height, content, and scroll position.",
         "Desktop and tablet sidebars use an anchored notification menu with arrow-key navigation and Escape to return to the bell.",
-        "The notification menu has a Broadcast mentions option with an @ icon; it controls notifications for both @all and @contributors.",
+        "The notification menu has a Broadcast mentions option with an @ icon; it controls notifications for both @all and @contributors and preserves other group preferences such as @dropforgeops.",
         "The notification menu has an All messages option for every-message notifications.",
         "The speaker control mutes waves before or after joining.",
         "When a wave is muted, the red speaker-muted Muted control unmutes it.",
@@ -9199,6 +9206,7 @@
         "Drop Forge craft claims live under /drop-forge/craft.",
         "Craft claim detail pages use /drop-forge/craft/{id}.",
         "Craft claims are distinct from launch claims.",
+        "The Craft Launch button requires Automatic launch to be on. After Launch is accepted, Craft shows Initializing… and then Claim initialized. Update Claim appears after publishing new metadata for an initialized claim.",
         "A winning submission only creates a craft claim after successful media inspection and validation of the computed details. Zero-byte files, empty SHA-256 digests, non-positive image/video dimensions, or video without positive duration and codecs cannot become valid computed media details. The binary media limit is 250 MB (250,000,000 bytes). Editable draft fields may still be incomplete; HTML details are format-only, and GLB does not require video-only details.",
         "GLB binary contents are checked server-side during inspection and before animation publication; renaming another file to .glb does not make it valid. This does not guarantee scene rendering or availability of external resources. Correct invalid or oversized media before retrying publication."
       ],
@@ -9224,7 +9232,10 @@
       "facts": [
         "Drop Forge launch claims live under /drop-forge/launch.",
         "Launch claim detail pages use /drop-forge/launch/{id}.",
-        "Configured claims admins, creator owner, and approved on-chain admins can use Launch completion tracking. The mainnet API checks on-chain-only access fresh for each request and fails closed on RPC errors. Sepolia action tracking remains unsupported.",
+        "Configured claims admins, creator owner, and approved on-chain admins can use Launch completion tracking on the configured contract. The API verifies creator permissions on the relevant chain.",
+        "The Auto Launch pill identifies a saved automation plan in Craft, the Launch list, and Launch detail.",
+        "Phase 2 and Public subscriber airdrops run in separate transactions during the Phase 2 transition. New Auto Launch plans use manual Launch subscription rank and give Phase 2 the first allocation. The last eligible wallet can receive a partial allocation. Each row is marked Completed when the full group is delivered.",
+        "Drop Forge Ops reports partial subscriber airdrops and sold-out skips. Readiness checks at 17:30, 18:28, 18:58, and 19:22 Athens time also cover manual launches and verify sellouts on-chain.",
         "The signing wallet pays operation gas. Admin approval does not redirect mint revenue. Pay Artist is a direct ETH transfer from the signing wallet's balance plus gas, not a withdrawal from the mint-income wallet or contract.",
         "If the authorized wallet is disconnected, a launch on-chain action opens wallet connection and continues after connection succeeds when its transaction details are unchanged; refreshed details cancel the pending action so the user can review and retry.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."

@@ -77,7 +77,12 @@ function DropForgeLaunchClaimActionsSection({
 
 type LaunchClaimContentProps = Omit<
   DropForgeLaunchClaimPageViewProps,
-  "pageTitle" | "craftHref" | "loading" | "error" | "rootsError"
+  | "pageTitle"
+  | "craftHref"
+  | "loading"
+  | "error"
+  | "rootsError"
+  | "showAutoLaunch"
 >;
 
 function getLaunchPhasePanelProps(
@@ -139,12 +144,7 @@ function getLaunchPhasePanelProps(
 }
 
 export default function DropForgeLaunchClaimContent(
-  props: Readonly<
-    Omit<
-      DropForgeLaunchClaimPageViewProps,
-      "pageTitle" | "craftHref" | "loading" | "error" | "rootsError"
-    >
-  >
+  props: Readonly<LaunchClaimContentProps>
 ) {
   const {
     claim,

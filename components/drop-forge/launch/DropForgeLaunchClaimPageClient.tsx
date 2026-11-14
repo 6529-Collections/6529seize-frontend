@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { getMemesMintingClaimActions } from "@/services/api/memes-minting-claims-api";
+import { useDropForgeManualWrite } from "@/hooks/useDropForgeManualWrite";
+import DropForgeAutomationStatus from "@/components/drop-forge/launch/DropForgeAutomationStatus";
+import { useCallback, useState } from "react";
 import {
   useSendTransaction,
   useWaitForTransactionReceipt,
@@ -18,6 +21,7 @@ import {
   DropForgeLaunchClaimPermissionFallbackView,
 } from "@/components/drop-forge/launch/DropForgeLaunchClaimPageClient.view";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
+import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useLaunchClaimDataEffects } from "@/components/drop-forge/launch/useLaunchClaimDataEffects";
 import { useLaunchClaimModalActions } from "@/components/drop-forge/launch/useLaunchClaimModalActions";
@@ -65,6 +69,21 @@ export default function DropForgeLaunchClaimPageClient({
     refetch: refetchOnChainClaim,
   } = useDropForgeManifoldClaim(claimId);
   const launchClaimState = useLaunchClaimState(claimId);
+  const { setMintingClaimActions } = launchClaimState;
+  const refreshManualView = useCallback(() => {
+    void refetchOnChainClaim().catch(() => undefined);
+    if (canManageClaimActions) {
+      void getMemesMintingClaimActions(claimId, forgeMintingContract)
+        .then(setMintingClaimActions)
+        .catch(() => undefined);
+    }
+  }, [
+    refetchOnChainClaim,
+    canManageClaimActions,
+    forgeMintingContract,
+    claimId,
+    setMintingClaimActions,
+  ]);
   const {
     claim,
     rootsLoading,
@@ -104,6 +123,7 @@ export default function DropForgeLaunchClaimPageClient({
     safeClaimExternalUrl,
   } = useLaunchClaimDataEffects({
     claimId,
+    forgeMintingContract,
     requestAuth,
     setToast,
     hasWallet,
@@ -115,7 +135,14 @@ export default function DropForgeLaunchClaimPageClient({
     state: launchClaimState,
   });
 
+  const { data: automationSettings } = useDropForgeSettings();
+  const automaticLaunchEnabled =
+    automationSettings?.automation_enabled === true &&
+    automationSettings.contract.toLowerCase() ===
+      forgeMintingContract.toLowerCase();
+
   const {
+    coordinateManualWrites,
     artistAirdropSummary,
     teamAirdropSummary,
     subscriptionAirdropSections,
@@ -147,6 +174,7 @@ export default function DropForgeLaunchClaimPageClient({
     payArtistAddressError,
   } = useLaunchClaimViewModel({
     claimId,
+    automaticLaunchEnabled,
     state: launchClaimState,
     manifoldClaim,
     primaryStatus,
@@ -192,6 +220,28 @@ export default function DropForgeLaunchClaimPageClient({
     payArtistResolvedAddressTrimmed,
     payArtistAddressValid,
   ]);
+  const coordinateWrites = coordinateManualWrites || automaticLaunchEnabled;
+  const executeManual = useDropForgeManualWrite(
+    forgeMintingContract,
+    claimId,
+    claimWrite.data,
+    claimWrite.error,
+    {
+      fingerprint: connectedActionContextFingerprint,
+      coordinate: coordinateWrites,
+    }
+  );
+  const executePayment = useDropForgeManualWrite(
+    forgeMintingContract,
+    claimId,
+    payArtistWrite.data,
+    payArtistWrite.error,
+    {
+      fingerprint: connectedActionContextFingerprint,
+      storageSuffix: "payment",
+      coordinate: coordinateWrites,
+    }
+  );
   const runConnectedAction = useConnectedAction({
     contextFingerprint: connectedActionContextFingerprint,
     onContextChanged: () =>
@@ -230,6 +280,7 @@ export default function DropForgeLaunchClaimPageClient({
     setOnChainClaimSpinnerVisible,
     showErrorToast,
     runConnectedAction,
+    executeManual,
     state: launchClaimState,
   });
 
@@ -268,6 +319,8 @@ export default function DropForgeLaunchClaimPageClient({
     payArtistResolvedAddressTrimmed,
     payArtistAddressValid,
     runConnectedAction,
+    executeManual,
+    executePayment,
   });
 
   if (shouldShowPermissionFallback) {
@@ -283,9 +336,16 @@ export default function DropForgeLaunchClaimPageClient({
 
   return (
     <>
+      {coordinateManualWrites && (
+        <DropForgeAutomationStatus
+          claimId={claimId}
+          onConfirmedWork={refreshManualView}
+        />
+      )}
       <DropForgeLaunchClaimPageView
         pageTitle={pageTitle}
         craftHref={`/drop-forge/craft/${claimId}`}
+        showAutoLaunch={coordinateManualWrites}
         loading={loading}
         error={error}
         rootsError={rootsError}
@@ -377,6 +437,7 @@ export default function DropForgeLaunchClaimPageClient({
         state={activeTxModal}
         chain={forgeMintingChain}
         onClose={closeActiveTxModal}
+        showAirdropSummary={coordinateWrites}
       />
     </>
   );

@@ -11,6 +11,7 @@ import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePe
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import DropForgeContractAdmins from "@/components/drop-forge/contract-admins/DropForgeContractAdmins";
+import LaunchAutomationSettings from "@/components/drop-forge/automation/LaunchAutomationSettings";
 
 export default function DropForgePageClient() {
   const {
@@ -101,7 +102,8 @@ export default function DropForgePageClient() {
           </p>
         </Link>
       </div>
-      <DropForgeContractAdmins />
+      <LaunchAutomationSettings />
+      <DropForgeContractAdmins collapsible />
     </div>
   );
 }

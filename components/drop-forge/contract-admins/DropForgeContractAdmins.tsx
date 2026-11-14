@@ -3,6 +3,7 @@
 import {
   ArrowPathIcon,
   ChevronUpIcon,
+  ChevronRightIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { useRef, useState } from "react";
@@ -21,6 +22,11 @@ import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { getAddressEtherscanLink } from "@/helpers/Helpers";
 import { CREATOR_ADMIN_ABI } from "./creator-admin-abi";
+import {
+  dropForgeSectionClassName,
+  dropForgeDisclosureClassName,
+  dropForgeIconButtonClassName,
+} from "../drop-forge-section-styles";
 import ContractAdminRow from "./ContractAdminRow";
 import {
   getAdminAddressError,
@@ -34,7 +40,42 @@ import {
 
 const MIN_REFRESH_DURATION_MS = 1500;
 
-export default function DropForgeContractAdmins() {
+export default function DropForgeContractAdmins({
+  collapsible = false,
+}: Readonly<{ collapsible?: boolean }>) {
+  const locale = useBrowserLocale();
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <section
+      aria-labelledby={collapsible ? undefined : "contract-admins-heading"}
+      className={dropForgeSectionClassName}
+    >
+      {collapsible ? (
+        <details
+          className="tw-group"
+          onToggle={(event) => setExpanded(event.currentTarget.open)}
+        >
+          <summary className={dropForgeDisclosureClassName}>
+            <ChevronRightIcon
+              aria-hidden="true"
+              className="tw-size-5 tw-shrink-0 tw-text-iron-400 group-open:tw-rotate-90 motion-safe:tw-transition-transform"
+            />
+            <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+              {t(locale, "dropForge.admins.heading")}
+            </h2>
+          </summary>
+          {expanded && <ContractAdminsContent />}
+        </details>
+      ) : (
+        <ContractAdminsContent showHeading />
+      )}
+    </section>
+  );
+}
+
+function ContractAdminsContent({
+  showHeading = false,
+}: Readonly<{ showHeading?: boolean }>) {
   const locale = useBrowserLocale();
   const { contract, chain } = useDropForgeMintingConfig();
   const { address: activeWallet } = useSeizeConnectContext();
@@ -140,18 +181,28 @@ export default function DropForgeContractAdmins() {
   };
 
   return (
-    <section
-      aria-labelledby="contract-admins-heading"
-      className="tailwind-scope tw-mt-6 tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-6"
-    >
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+    <div className={showHeading ? undefined : "tw-mt-4"}>
+      {showHeading && (
         <h2
           id="contract-admins-heading"
-          className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50"
+          className="tw-mb-3 tw-text-xl tw-font-semibold tw-text-iron-50"
         >
           {t(locale, "dropForge.admins.heading")}
         </h2>
-        <div className="tw-flex tw-items-center tw-gap-2">
+      )}
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+        <p className="tw-m-0 tw-min-w-0 tw-break-all tw-text-sm tw-text-iron-400">
+          {chain.name} ·{" "}
+          <a
+            href={getAddressEtherscanLink(chain.id, contract)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tw-text-iron-400 tw-underline tw-decoration-iron-600 tw-underline-offset-2 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-200"
+          >
+            {contract}
+          </a>
+        </p>
+        <div className="tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-2">
           {canManageContractAdmins && (
             <Button
               ref={addButtonRef}
@@ -176,7 +227,7 @@ export default function DropForgeContractAdmins() {
             <Button
               variant="secondary"
               size="md"
-              className="tw-w-10 !tw-px-0"
+              className={dropForgeIconButtonClassName}
               aria-label={t(locale, "dropForge.admins.refresh")}
               loading={refreshing}
               hideChildrenWhenLoading
@@ -188,17 +239,6 @@ export default function DropForgeContractAdmins() {
           </CustomTooltip>
         </div>
       </div>
-      <p className="tw-mt-2 tw-break-all tw-text-sm tw-text-iron-400">
-        {chain.name} ·{" "}
-        <a
-          href={getAddressEtherscanLink(chain.id, contract)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="tw-text-iron-400 tw-underline tw-decoration-iron-600 tw-underline-offset-2 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-200"
-        >
-          {contract}
-        </a>
-      </p>
       {listStatus}
       {canManageContractAdmins && addExpanded && (
         <form
@@ -328,7 +368,7 @@ export default function DropForgeContractAdmins() {
           }}
         />
       )}
-    </section>
+    </div>
   );
 }
 
