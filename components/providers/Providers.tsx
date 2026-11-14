@@ -23,6 +23,7 @@ import QuickDirectMessagesGate from "@/components/messages/quick-dms/QuickDirect
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
 import NewVersionToast from "@/components/utils/NewVersionToast";
+import DesktopUpdateNotice from "@/components/desktop/DesktopUpdateNotice";
 import { ActiveGroupProvider } from "@/contexts/ActiveGroupContext";
 import { EditingDropProvider } from "@/contexts/EditingDropContext";
 import { EmojiProvider } from "@/contexts/EmojiContext";
@@ -146,6 +147,7 @@ export default function Providers({
                                   </LayoutProvider>
                                 </E2eeProvider>
                                 {enableVersionCheck && <NewVersionToast />}
+                                {enableVersionCheck && <DesktopUpdateNotice />}
                               </AppWebSocketProvider>
                             </CookieConsentProvider>
                           </NotificationsProvider>
