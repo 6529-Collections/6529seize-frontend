@@ -1,11 +1,17 @@
-import { getDesktopProfileMigrationState } from "@/services/auth/desktop-profile-state";
+import {
+  getDesktopProfileMigrationState,
+  parseRestoredDesktopProfileState,
+} from "@/services/auth/desktop-profile-state";
+import { fakeJwt } from "@/__tests__/helpers/fakeJwt";
 
 const address = (digit: string) => `0x${digit.repeat(40)}`;
+// A token issued for the account's own address.
+const tokenFor = (digit: string) => fakeJwt({ sub: address(digit) });
 
 const account = (digit: string, extra: Record<string, unknown> = {}) => ({
   address: address(digit),
   role: null,
-  jwt: `jwt-${digit}`,
+  jwt: tokenFor(digit),
   profileId: `id-${digit}`,
   profileHandle: `handle-${digit}`,
   authSessionVersion: "v2",
@@ -38,7 +44,7 @@ describe("getDesktopProfileMigrationState", () => {
         {
           address: address("a"),
           role: null,
-          jwt: "jwt-A",
+          jwt: tokenFor("A"),
           profileId: "id-A",
           profileHandle: "handle-A",
           authSessionVersion: "v2",
@@ -66,7 +72,7 @@ describe("getDesktopProfileMigrationState", () => {
       address("1"),
       address("3"),
     ]);
-    expect(state.accounts[0]?.jwt).toBe("jwt-1");
+    expect(state.accounts[0]?.jwt).toBe(tokenFor("1"));
     expect(state.accounts[1]?.authSessionVersion).toBeNull();
   });
 
@@ -81,6 +87,26 @@ describe("getDesktopProfileMigrationState", () => {
       address("6")
     );
     expect(state.activeAddress).toBe(address("6"));
+  });
+
+  it("keeps an account signed out when its token was not issued for it", () => {
+    const state = getDesktopProfileMigrationState({
+      accounts: [
+        account("1", { jwt: tokenFor("2") }),
+        account("3", { jwt: "not-a-jwt" }),
+        account("4"),
+      ],
+      activeAddress: address("1"),
+    });
+
+    expect(state.accounts.map((saved) => [saved.address, saved.jwt])).toEqual([
+      [address("1"), null],
+      [address("3"), null],
+      [address("4"), tokenFor("4")],
+    ]);
+    expect(state.activeAddress).toBe(address("1"));
+    // The strict restore check accepts the migrated snapshot.
+    expect(parseRestoredDesktopProfileState(state)).toEqual(state);
   });
 
   it("clears an active address that is not in the list", () => {
