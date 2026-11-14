@@ -1,5 +1,4 @@
 import {
-  getAddress,
   getTypesForEIP712Domain,
   serializeTypedData as serializeTypes,
   toHex,
@@ -10,7 +9,9 @@ import {
   buildWalletResultDeepLink,
   encodeWalletRequestEnvelope,
   isWalletRequestSignedBy,
+  parseWalletBridgeCapabilities,
   parseWalletBridgeResponse,
+  parseWalletBridgeStart,
   parseWalletRequest,
   parseWalletRequestFragment,
   parseWalletResult,
@@ -32,7 +33,6 @@ const other = privateKeyToAccount(OTHER_KEY);
 const ADDRESS = "0x1111111111111111111111111111111111111111";
 const CHECKSUMMED = "0x1111111111111111111111111111111111111111";
 const OTHER_ADDRESS = "0x2222222222222222222222222222222222222222";
-const CONTRACT = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
 const CHAINS = [1] as const;
 const NOW = 1_800_000_000_000;
 const ORIGIN = "http://localhost:6529";
@@ -90,6 +90,8 @@ describe("parseWalletRequest: common rules", () => {
   it("refuses methods that are not forwarded", () => {
     for (const method of [
       "eth_sign",
+      "eth_sendTransaction",
+      "wallet_sendTransaction",
       "eth_signTypedData",
       "eth_signTypedData_v3",
       "wallet_sendCalls",
@@ -311,81 +313,6 @@ describe("parseWalletRequest: eth_signTypedData_v4", () => {
   });
 });
 
-describe("parseWalletRequest: eth_sendTransaction", () => {
-  const tx = (overrides: Record<string, unknown> = {}) => [
-    {
-      from: ADDRESS,
-      to: CONTRACT,
-      value: "0x0",
-      data: "0xA9059CBB",
-      ...overrides,
-    },
-  ];
-
-  it("normalizes a contract call and keeps fee fields", () => {
-    expect(
-      parse(
-        input(
-          "eth_sendTransaction",
-          tx({
-            gas: "0x5208",
-            maxFeePerGas: "0x3B9ACA00",
-            chainId: "0x1",
-            type: "0x2",
-          })
-        )
-      )
-    ).toEqual({
-      ok: true,
-      value: {
-        method: "eth_sendTransaction",
-        address: CHECKSUMMED,
-        chainId: 1,
-        transaction: {
-          to: getAddress(CONTRACT),
-          value: "0x0",
-          data: "0xa9059cbb",
-          gas: "0x5208",
-          maxFeePerGas: "0x3b9aca00",
-          type: "0x2",
-        },
-      },
-    });
-  });
-
-  it("defaults missing call data to empty", () => {
-    const result = parse(
-      input("eth_sendTransaction", [{ from: ADDRESS, to: CONTRACT }])
-    );
-    expect(
-      result.ok && result.value.method === "eth_sendTransaction"
-        ? result.value.transaction
-        : null
-    ).toEqual({ to: getAddress(CONTRACT), data: "0x" });
-  });
-
-  it.each([
-    ["another sender", tx({ from: OTHER_ADDRESS }), "wrong-address"],
-    ["no sender", tx({ from: undefined }), "wrong-address"],
-    ["contract creation", tx({ to: null }), "contract-creation"],
-    ["no recipient", tx({ to: undefined }), "contract-creation"],
-    ["account delegation", tx({ authorizationList: [] }), "account-delegation"],
-    ["another chain", tx({ chainId: 11155111 }), "wrong-chain"],
-    ["bad chain", tx({ chainId: "x" }), "invalid-params"],
-    ["unknown field", tx({ blobs: [] }), "invalid-params"],
-    ["bad recipient", tx({ to: "0x12" }), "invalid-params"],
-    ["bad data", tx({ data: "0xabc" }), "invalid-params"],
-    ["bad value", tx({ value: "100" }), "invalid-params"],
-    ["leading zero quantity", tx({ value: "0x01" }), "invalid-params"],
-    ["unknown type", tx({ type: "0x4" }), "invalid-params"],
-    ["big data", tx({ data: `0x${"00".repeat(12 * 1024 + 1)}` }), "too-large"],
-    ["two transactions", [...tx(), ...tx()], "invalid-params"],
-    ["not an object", ["0x"], "invalid-params"],
-  ])("refuses %s", (_label, params, problem) => {
-    expect(problemOf(input("eth_sendTransaction", params))).toBe(problem);
-  });
-});
-
 describe("readWalletMessageText", () => {
   it("returns readable text", () => {
     expect(readWalletMessageText(toHex("Line 1\nLine 2\tend"))).toBe(
@@ -577,7 +504,7 @@ describe("wallet results", () => {
     const data = JSON.parse(
       decodeURIComponent(link.slice("stagingcore6529://wallet?data=".length))
     );
-    expect(parseWalletResult(data, "personal_sign")).toEqual({
+    expect(parseWalletResult(data)).toEqual({
       v: 1,
       id: ID,
       ok: true,
@@ -585,19 +512,14 @@ describe("wallet results", () => {
     });
   });
 
-  it("matches the value to the method", () => {
+  it("accepts a 65-byte signature only", () => {
     const ok = (value: string) => ({ v: 1, id: ID, ok: true, value });
     expect(
-      parseWalletResult(
-        ok(SIGNATURE.toUpperCase().replace("0X", "0x")),
-        "eth_signTypedData_v4"
-      )
+      parseWalletResult(ok(SIGNATURE.toUpperCase().replace("0X", "0x")))
     ).toEqual(ok(SIGNATURE));
-    expect(parseWalletResult(ok(TX_HASH), "eth_sendTransaction")).toEqual(
-      ok(TX_HASH)
-    );
-    expect(parseWalletResult(ok(TX_HASH), "personal_sign")).toBeNull();
-    expect(parseWalletResult(ok(SIGNATURE), "eth_sendTransaction")).toBeNull();
+    for (const value of [TX_HASH, `${SIGNATURE}00`, "0x", 42]) {
+      expect(parseWalletResult(ok(value as string))).toBeNull();
+    }
   });
 
   it("accepts known failure codes only", () => {
@@ -608,15 +530,15 @@ describe("wallet results", () => {
       "wrong-chain",
       "refused",
     ]) {
-      expect(
-        parseWalletResult({ v: 1, id: ID, ok: false, code }, "personal_sign")
-      ).toEqual({ v: 1, id: ID, ok: false, code });
+      expect(parseWalletResult({ v: 1, id: ID, ok: false, code })).toEqual({
+        v: 1,
+        id: ID,
+        ok: false,
+        code,
+      });
     }
     expect(
-      parseWalletResult(
-        { v: 1, id: ID, ok: false, code: "busy" },
-        "personal_sign"
-      )
+      parseWalletResult({ v: 1, id: ID, ok: false, code: "busy" })
     ).toBeNull();
   });
 
@@ -633,7 +555,7 @@ describe("wallet results", () => {
       { v: 1, id: ID, ok: "yes", value: SIGNATURE },
       { v: 1, id: ID, ok: true, value: SIGNATURE, pad: "x".repeat(2000) },
     ]) {
-      expect(parseWalletResult(value, "personal_sign")).toBeNull();
+      expect(parseWalletResult(value)).toBeNull();
     }
   });
 });
@@ -641,11 +563,11 @@ describe("wallet results", () => {
 describe("parseWalletBridgeResponse", () => {
   it("passes a valid value and known failures", () => {
     expect(
-      parseWalletBridgeResponse(
-        { ok: true, value: TX_HASH },
-        "eth_sendTransaction"
-      )
-    ).toEqual({ ok: true, value: TX_HASH });
+      parseWalletBridgeResponse({
+        ok: true,
+        value: SIGNATURE.toUpperCase().replace("0X", "0x"),
+      })
+    ).toEqual({ ok: true, value: SIGNATURE });
     for (const code of [
       "cancelled",
       "expired",
@@ -653,9 +575,7 @@ describe("parseWalletBridgeResponse", () => {
       "not-signed-in",
       "rejected",
     ]) {
-      expect(
-        parseWalletBridgeResponse({ ok: false, code }, "personal_sign")
-      ).toEqual({
+      expect(parseWalletBridgeResponse({ ok: false, code })).toEqual({
         ok: false,
         code,
       });
@@ -670,10 +590,73 @@ describe("parseWalletBridgeResponse", () => {
       { ok: false, code: "pwned" },
       { ok: false },
     ]) {
-      expect(parseWalletBridgeResponse(value, "personal_sign")).toEqual({
+      expect(parseWalletBridgeResponse(value)).toEqual({
         ok: false,
         code: "failed",
       });
+    }
+  });
+});
+
+describe("parseWalletBridgeStart", () => {
+  it("passes an open request with its code and expiry", () => {
+    expect(
+      parseWalletBridgeStart(
+        { ok: true, requestCode: "A1B-2C3", expiresAt: NOW + 120_000 },
+        NOW
+      )
+    ).toEqual({ ok: true, requestCode: "A1B-2C3", expiresAt: NOW + 120_000 });
+  });
+
+  it("passes known failures and turns anything else into a failure", () => {
+    expect(parseWalletBridgeStart({ ok: false, code: "busy" }, NOW)).toEqual({
+      ok: false,
+      code: "busy",
+    });
+    for (const value of [
+      undefined,
+      { ok: false, code: "pwned" },
+      { ok: true, requestCode: "a1b-2c3", expiresAt: NOW + 1000 },
+      { ok: true, requestCode: "A1B2C3", expiresAt: NOW + 1000 },
+      { ok: true, requestCode: "A1B-2C3", expiresAt: NOW },
+      { ok: true, requestCode: "A1B-2C3", expiresAt: NOW + 10 * 60_000 },
+      { ok: true, requestCode: "A1B-2C3", expiresAt: "soon" },
+      { ok: true, requestCode: "A1B-2C3", id: ID },
+    ]) {
+      expect(parseWalletBridgeStart(value, NOW)).toEqual({
+        ok: false,
+        code: "failed",
+      });
+    }
+  });
+});
+
+describe("parseWalletBridgeCapabilities", () => {
+  it("returns the offered methods this website forwards, in its order", () => {
+    expect(
+      parseWalletBridgeCapabilities({
+        version: 1,
+        methods: [
+          "eth_sendTransaction",
+          "eth_signTypedData_v4",
+          "personal_sign",
+        ],
+      })
+    ).toEqual(["personal_sign", "eth_signTypedData_v4"]);
+    expect(
+      parseWalletBridgeCapabilities({ version: 1, methods: ["personal_sign"] })
+    ).toEqual(["personal_sign"]);
+  });
+
+  it("returns nothing for another version or a malformed answer", () => {
+    for (const value of [
+      undefined,
+      null,
+      { version: 2, methods: ["personal_sign"] },
+      { version: 1, methods: "personal_sign" },
+      { version: 1, methods: ["eth_sendTransaction"] },
+    ]) {
+      expect(parseWalletBridgeCapabilities(value)).toEqual([]);
     }
   });
 });

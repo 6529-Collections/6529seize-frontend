@@ -15,6 +15,9 @@
  * 3. The shell consumes that link itself (once, before expiry) and answers
  *    the app page with a `WalletBridgeResponse`.
  *
+ * Version 1 forwards signatures only: `personal_sign` and
+ * `eth_signTypedData_v4`. Nothing that sends a transaction is forwarded.
+ *
  * This module holds only types and pure helpers for those three hops. Every
  * value that crosses a hop is untrusted and is validated here.
  */
@@ -34,10 +37,9 @@ export const WALLET_FORWARDING_VERSION = 1;
 export const WALLET_REQUEST_TTL_MS = 120_000;
 
 /** The wallet methods that may be forwarded; everything else is refused. */
-const WALLET_FORWARDING_METHODS = [
+export const WALLET_FORWARDING_METHODS = [
   "personal_sign",
   "eth_signTypedData_v4",
-  "eth_sendTransaction",
 ] as const;
 
 export type WalletForwardingMethod = (typeof WALLET_FORWARDING_METHODS)[number];
@@ -54,7 +56,6 @@ type DesktopScheme = (typeof DESKTOP_SCHEMES)[number];
 // Size caps. The shell applies the same ones before it opens the browser.
 const MAX_MESSAGE_BYTES = 8 * 1024;
 const MAX_TYPED_DATA_CHARS = 16 * 1024;
-const MAX_CALL_DATA_BYTES = 12 * 1024;
 const MAX_ENVELOPE_CHARS = 32 * 1024;
 const MAX_RESULT_CHARS = 1024;
 const MAX_TYPED_DATA_TYPES = 32;
@@ -63,38 +64,12 @@ const MAX_TYPED_DATA_FIELDS = 64;
 /** 32 random bytes, base64url without padding. */
 const REQUEST_ID = /^[A-Za-z0-9_-]{43}$/;
 const HEX_DIGITS = /^0x[0-9a-fA-F]*$/;
-const QUANTITY = /^0x(?:0|[1-9a-fA-F][0-9a-fA-F]{0,63})$/;
 const SIGNATURE = /^0x[0-9a-fA-F]{130}$/;
-const TX_HASH = /^0x[0-9a-fA-F]{64}$/;
+const REQUEST_CODE = /^[0-9A-F]{3}-[0-9A-F]{3}$/;
 const TYPE_NAME = /^[A-Za-z_$][A-Za-z0-9_$]{0,63}$/;
 const ARRAY_SUFFIX = /\[\d{0,4}\]$/;
 const MAX_ARRAY_DEPTH = 4;
 const ORIGIN = /^http:\/\/localhost:\d{1,5}$/;
-
-/** Transaction fields the page may pass through; anything else is refused. */
-const TRANSACTION_FIELDS = new Set([
-  "from",
-  "to",
-  "value",
-  "data",
-  "gas",
-  "gasPrice",
-  "maxFeePerGas",
-  "maxPriorityFeePerGas",
-  "nonce",
-  "chainId",
-  "type",
-]);
-const TRANSACTION_QUANTITIES = [
-  "value",
-  "gas",
-  "gasPrice",
-  "maxFeePerGas",
-  "maxPriorityFeePerGas",
-  "nonce",
-] as const;
-
-type TransactionQuantity = (typeof TRANSACTION_QUANTITIES)[number];
 
 interface TypedDataField {
   readonly name: string;
@@ -106,15 +81,6 @@ interface WalletTypedData {
   readonly types: Readonly<Record<string, readonly TypedDataField[]>>;
   readonly primaryType: string;
   readonly message: Readonly<Record<string, unknown>>;
-}
-
-interface WalletTransaction extends Partial<
-  Readonly<Record<TransactionQuantity, Hex>>
-> {
-  readonly to: Address;
-  readonly data: Hex;
-  /** EIP-1559 (`0x2`) or legacy (`0x0`); absent lets the wallet choose. */
-  readonly type?: "0x0" | "0x2";
 }
 
 interface WalletRequestBase {
@@ -133,10 +99,6 @@ export type WalletRequest =
   | (WalletRequestBase & {
       readonly method: "eth_signTypedData_v4";
       readonly typedData: WalletTypedData;
-    })
-  | (WalletRequestBase & {
-      readonly method: "eth_sendTransaction";
-      readonly transaction: WalletTransaction;
     });
 
 /** What the app page hands to the shell (and the envelope carries). */
@@ -152,9 +114,7 @@ export type WalletRequestProblem =
   | "invalid-params"
   | "wrong-address"
   | "wrong-chain"
-  | "too-large"
-  | "contract-creation"
-  | "account-delegation";
+  | "too-large";
 
 const INVALID_PARAMS = "invalid-params";
 const WRONG_ADDRESS = "wrong-address";
@@ -311,63 +271,6 @@ function checkChainId(
   return parsed === chainId ? null : WRONG_CHAIN;
 }
 
-/** The numeric transaction fields, lower-cased; null if any is malformed. */
-function readQuantities(
-  tx: Record<string, unknown>
-): Partial<Record<TransactionQuantity, Hex>> | null {
-  const quantities: Partial<Record<TransactionQuantity, Hex>> = {};
-  for (const key of TRANSACTION_QUANTITIES) {
-    const value = tx[key];
-    if (value === undefined) continue;
-    if (typeof value !== "string" || !QUANTITY.test(value)) return null;
-    quantities[key] = value.toLowerCase() as Hex;
-  }
-  return quantities;
-}
-
-function parseTransaction(
-  params: readonly unknown[],
-  base: WalletRequestBase
-): Parsed<WalletRequest, WalletRequestProblem> {
-  const [tx] = params;
-  if (params.length !== 1 || !isRecord(tx)) return fail(INVALID_PARAMS);
-  if ("authorizationList" in tx) return fail("account-delegation");
-  if (Object.keys(tx).some((key) => !TRANSACTION_FIELDS.has(key))) {
-    return fail(INVALID_PARAMS);
-  }
-  if (!sameAddress(tx["from"], base.address)) return fail(WRONG_ADDRESS);
-  const { to } = tx;
-  if (to === undefined || to === null) return fail("contract-creation");
-  if (typeof to !== "string" || !isAddress(to, { strict: false })) {
-    return fail(INVALID_PARAMS);
-  }
-  const chainProblem = checkChainId(tx["chainId"], base.chainId);
-  if (chainProblem) return fail(chainProblem);
-  const data = tx["data"] ?? "0x";
-  if (!isHexBytes(data)) {
-    return fail(INVALID_PARAMS);
-  }
-  if ((data.length - 2) / 2 > MAX_CALL_DATA_BYTES) return fail(TOO_LARGE);
-  const quantities = readQuantities(tx);
-  const type = tx["type"];
-  if (!quantities || (type !== undefined && type !== "0x0" && type !== "0x2")) {
-    return fail(INVALID_PARAMS);
-  }
-  return {
-    ok: true,
-    value: {
-      ...base,
-      method: "eth_sendTransaction",
-      transaction: {
-        ...quantities,
-        to: getAddress(to),
-        data: data.toLowerCase() as Hex,
-        ...(type === undefined ? {} : { type }),
-      },
-    },
-  };
-}
-
 /**
  * Validate a wallet request from the app page (EIP-1193 `method` and
  * `params`), bound to the signed-in `address` and the app's `chainId`.
@@ -402,8 +305,6 @@ export function parseWalletRequest(
       return parsePersonalSign(params, base);
     case "eth_signTypedData_v4":
       return parseTypedData(params, base);
-    case "eth_sendTransaction":
-      return parseTransaction(params, base);
   }
 }
 
@@ -628,7 +529,7 @@ export function walletRequestCode(id: string): string {
   return `${digest.slice(0, 3)}-${digest.slice(3)}`;
 }
 
-/** Why the browser page did not return a signature or transaction hash. */
+/** Why the browser page did not return a signature. */
 const WALLET_RESULT_FAILURES = [
   "rejected",
   "failed",
@@ -654,9 +555,9 @@ export type WalletResult =
       readonly code: WalletResultFailure;
     };
 
-const isValueFor = (method: WalletForwardingMethod, value: unknown) =>
-  typeof value === "string" &&
-  (method === "eth_sendTransaction" ? TX_HASH : SIGNATURE).test(value);
+/** A 65-byte signature, as an externally owned account's wallet returns. */
+const isSignature = (value: unknown): value is Hex =>
+  typeof value === "string" && SIGNATURE.test(value);
 
 export function buildWalletResultDeepLink(
   scheme: DesktopScheme,
@@ -666,13 +567,10 @@ export function buildWalletResultDeepLink(
 }
 
 /**
- * Validate a returned result for a request made with `method`. The shell
- * applies the same rules and also matches the id to its live request.
+ * Validate a returned result. The shell applies the same rules and also
+ * matches the id to its live request.
  */
-export function parseWalletResult(
-  value: unknown,
-  method: WalletForwardingMethod
-): WalletResult | null {
+export function parseWalletResult(value: unknown): WalletResult | null {
   if (!isRecord(value)) return null;
   try {
     if (JSON.stringify(value).length > MAX_RESULT_CHARS) return null;
@@ -689,8 +587,8 @@ export function parseWalletResult(
   }
   if (ok === true) {
     const result = value["value"];
-    return isValueFor(method, result)
-      ? { v, id, ok, value: (result as string).toLowerCase() as Hex }
+    return isSignature(result)
+      ? { v, id, ok, value: result.toLowerCase() as Hex }
       : null;
   }
   const code = value["code"];
@@ -717,25 +615,78 @@ const WALLET_BRIDGE_FAILURES = [
 
 type WalletBridgeFailure = (typeof WALLET_BRIDGE_FAILURES)[number];
 
-/** The shell's answer to `window.desktopWallet.request(...)`. */
+const isBridgeFailure = (value: unknown): value is WalletBridgeFailure =>
+  typeof value === "string" &&
+  (WALLET_BRIDGE_FAILURES as readonly string[]).includes(value);
+
+/**
+ * The shell's answer to `window.desktopWallet.begin(...)`: the request is
+ * open and the browser was asked to show it, or why not. `requestCode` is
+ * the short code the browser page also shows; the request id itself never
+ * reaches the app page.
+ */
+export type WalletBridgeStart =
+  | {
+      readonly ok: true;
+      readonly requestCode: string;
+      readonly expiresAt: number;
+    }
+  | { readonly ok: false; readonly code: WalletBridgeFailure };
+
+/** Validate the shell's start answer; anything unexpected is a failure. */
+export function parseWalletBridgeStart(
+  value: unknown,
+  now: number
+): WalletBridgeStart {
+  if (isRecord(value) && value["ok"] === true) {
+    const { requestCode, expiresAt } = value;
+    return typeof requestCode === "string" &&
+      REQUEST_CODE.test(requestCode) &&
+      typeof expiresAt === "number" &&
+      Number.isSafeInteger(expiresAt) &&
+      expiresAt > now &&
+      expiresAt <= now + WALLET_REQUEST_TTL_MS + 60_000
+      ? { ok: true, requestCode, expiresAt }
+      : { ok: false, code: "failed" };
+  }
+  const code = isRecord(value) ? value["code"] : undefined;
+  return { ok: false, code: isBridgeFailure(code) ? code : "failed" };
+}
+
+/** The shell's answer to `window.desktopWallet.wait()`. */
 export type WalletBridgeResponse =
   | { readonly ok: true; readonly value: Hex }
   | { readonly ok: false; readonly code: WalletBridgeFailure };
 
 /** Validate the shell's answer; anything unexpected counts as a failure. */
 export function parseWalletBridgeResponse(
-  value: unknown,
-  method: WalletForwardingMethod
+  value: unknown
 ): WalletBridgeResponse {
   if (isRecord(value) && value["ok"] === true) {
     const result = value["value"];
-    return isValueFor(method, result)
-      ? { ok: true, value: (result as string).toLowerCase() as Hex }
+    return isSignature(result)
+      ? { ok: true, value: result.toLowerCase() as Hex }
       : { ok: false, code: "failed" };
   }
   const code = isRecord(value) ? value["code"] : undefined;
-  return typeof code === "string" &&
-    (WALLET_BRIDGE_FAILURES as readonly string[]).includes(code)
-    ? { ok: false, code: code as WalletBridgeFailure }
-    : { ok: false, code: "failed" };
+  return { ok: false, code: isBridgeFailure(code) ? code : "failed" };
+}
+
+/**
+ * The methods the shell forwards, from `window.desktopWallet.capabilities()`
+ * (`{ version: 1, methods: [...] }`). Empty when the shell speaks another
+ * version or names no method this website forwards.
+ */
+export function parseWalletBridgeCapabilities(
+  value: unknown
+): readonly WalletForwardingMethod[] {
+  if (
+    !isRecord(value) ||
+    value["version"] !== WALLET_FORWARDING_VERSION ||
+    !Array.isArray(value["methods"])
+  ) {
+    return [];
+  }
+  const offered: readonly unknown[] = value["methods"];
+  return WALLET_FORWARDING_METHODS.filter((method) => offered.includes(method));
 }
