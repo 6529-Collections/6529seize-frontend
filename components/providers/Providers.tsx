@@ -51,6 +51,7 @@ import WagmiSetup from "./WagmiSetup";
 import DocumentLanguage from "./DocumentLanguage";
 import AndroidBackNavigation from "@/components/navigation/AndroidBackNavigation";
 import DesktopNavigationBridge from "@/components/desktop/DesktopNavigationBridge";
+import DesktopNotificationsBridge from "@/components/desktop/DesktopNotificationsBridge";
 
 export default function Providers({
   children,
@@ -82,6 +83,7 @@ export default function Providers({
               <NavigationHistoryProvider>
                 <AndroidBackNavigation />
                 <DesktopNavigationBridge />
+                <DesktopNotificationsBridge />
                 <LocaleMessagesGate>{children}</LocaleMessagesGate>
               </NavigationHistoryProvider>
             </WaveInformationProvider>
